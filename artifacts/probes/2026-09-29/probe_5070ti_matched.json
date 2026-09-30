@@ -1,0 +1,333 @@
+{
+  "probe_version": 1,
+  "runtime": {
+    "hostname": "5070ti",
+    "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43",
+    "python": "3.12.14 (main, Sep  2 2026, 23:27:36) [GCC 15.3.0]",
+    "python_executable": "/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python",
+    "torch": "2.13.0+cu132",
+    "transformers": "5.17.0",
+    "torch_cuda": "13.2",
+    "nvidia_driver": "595.91.07",
+    "gpu_name": "NVIDIA GeForce RTX 5070 Ti",
+    "gpu_capability": [
+      12,
+      0
+    ],
+    "gpu_total_memory_gb": 15.467529296875
+  },
+  "structural": {
+    "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+    "model_revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+    "tokenizer_revision": null,
+    "dtype": "torch.float16",
+    "parameter_tensors": 290,
+    "parameter_elements": 494032768,
+    "schema_sha256": "152e9d82e61d6610a414466026ac60a13e718924dfdf0416809686adcf4188e1",
+    "alias_groups": [
+      [
+        "lm_head.weight",
+        "model.embed_tokens.weight"
+      ]
+    ],
+    "canonical_weight_sample_sha256": {
+      "model.embed_tokens.weight": "c9a6483adee0208d81e3455c9c47c76fcf17aa7360fd1704f50dc56879962811",
+      "model.layers.12.self_attn.q_proj.weight": "e22540d54abaa2b8fc1c077ef899ec6659a15571d65daa40cb10246362b3f3f3",
+      "model.norm.weight": "1dd25d7720c68bc10838374200238c26626a624119cac0b45bff44bc43c354fe"
+    },
+    "noise_targets": [
+      "model.layers.0.self_attn.q_proj.weight",
+      "model.layers.12.mlp.up_proj.weight",
+      "model.layers.23.mlp.down_proj.weight"
+    ]
+  },
+  "workload": {
+    "sha256": "cad822bc1e65a9ec37d948e5415cff22c70f96500e2043e6299bbdd5cea0b8d5",
+    "example_count": 16,
+    "system_prompt": "You are a calculator. Answer with only with number",
+    "max_new_tokens": 16,
+    "do_sample": false,
+    "reward_type": "exact_integer_match"
+  },
+  "timing_seconds": {
+    "model_load": 3.36159902899999,
+    "base_eval": 1.897752123999453,
+    "canonical_snapshot": 0.3440568579999308,
+    "candidate_eval": 0.7114985979997073,
+    "restore": 0.07325194599980023
+  },
+  "memory_before_perturb": {
+    "allocated_gb": 0.9591474533081055,
+    "reserved_gb": 1.00390625,
+    "free_gb": 10.92913818359375,
+    "total_gb": 15.467529296875
+  },
+  "base_evaluation": {
+    "mean_reward": 0.25,
+    "records": [
+      {
+        "question": "What is 17 + 24?",
+        "expected": 41,
+        "output_text": "41",
+        "prediction": 41,
+        "reward": 1.0
+      },
+      {
+        "question": "What is 6 * 8?",
+        "expected": 48,
+        "output_text": "48",
+        "prediction": 48,
+        "reward": 1.0
+      },
+      {
+        "question": "What is 91 - 37?",
+        "expected": 54,
+        "output_text": "54",
+        "prediction": 54,
+        "reward": 1.0
+      },
+      {
+        "question": "What is 12 * 13?",
+        "expected": 156,
+        "output_text": "156",
+        "prediction": 156,
+        "reward": 1.0
+      },
+      {
+        "question": "What is 137 * 46?",
+        "expected": 6302,
+        "output_text": "6292",
+        "prediction": 6292,
+        "reward": 0.0
+      },
+      {
+        "question": "What is 375 + 918 - 427?",
+        "expected": 866,
+        "output_text": "664",
+        "prediction": 664,
+        "reward": 0.0
+      },
+      {
+        "question": "What is 23 * 17 + 48?",
+        "expected": 439,
+        "output_text": "509",
+        "prediction": 509,
+        "reward": 0.0
+      },
+      {
+        "question": "What is (144 / 12) * 37?",
+        "expected": 444,
+        "output_text": "589",
+        "prediction": 589,
+        "reward": 0.0
+      },
+      {
+        "question": "What is 218 * 37?",
+        "expected": 8066,
+        "output_text": "7906",
+        "prediction": 7906,
+        "reward": 0.0
+      },
+      {
+        "question": "What is 84 * 19 - 76?",
+        "expected": 1520,
+        "output_text": "1302",
+        "prediction": 1302,
+        "reward": 0.0
+      },
+      {
+        "question": "What is 312 * 27 - 145?",
+        "expected": 8279,
+        "output_text": "8095",
+        "prediction": 8095,
+        "reward": 0.0
+      },
+      {
+        "question": "What is (73 + 29) * 18?",
+        "expected": 1836,
+        "output_text": "(73 + 29) * 18 = 10",
+        "prediction": 10,
+        "reward": 0.0
+      },
+      {
+        "question": "A shop has 48 boxes with 36 pens in each box. It sells 725 pens. How many pens remain?",
+        "expected": 1003,
+        "output_text": "To find out how many pens remain, we need to subtract the number of pens",
+        "prediction": null,
+        "reward": 0.0
+      },
+      {
+        "question": "A school buys 36 packs of notebooks with 24 notebooks per pack. It distributes 579 notebooks. How many remain?",
+        "expected": 285,
+        "output_text": "To determine how many notebooks remain, we need to follow these steps:\n\n1.",
+        "prediction": 1,
+        "reward": 0.0
+      },
+      {
+        "question": "A train travels 72 km per hour for 5 hours, then another 148 km. What is the total distance?",
+        "expected": 508,
+        "output_text": "To find the total distance traveled by the train, we need to calculate the distance",
+        "prediction": null,
+        "reward": 0.0
+      },
+      {
+        "question": "A factory makes 125 items per hour for 18 hours. 347 items are defective. How many usable items remain?",
+        "expected": 1903,
+        "output_text": "To find the number of usable items remaining, we need to follow these steps:",
+        "prediction": null,
+        "reward": 0.0
+      }
+    ]
+  },
+  "noise": {
+    "seed": 0,
+    "sigma": 0.001,
+    "visited_parameter_tensors": 290,
+    "stream_sample_sha256": "6839fde5475fc81cb0050a19cdc381caf0fc9eaa1af325fb83cf4137fc6c20b0",
+    "target_full_sha256": {
+      "model.layers.0.self_attn.q_proj.weight": "fe5b495f666afef6e1e3328b4edbbd1a02a286b71ab4d59927574b4503291d08",
+      "model.layers.12.mlp.up_proj.weight": "59eacaa10724a804623afb9f434dc024246b3edf04249fe677d4eaa05a401b38",
+      "model.layers.23.mlp.down_proj.weight": "f2102c25ca528b16e9889ed9b91ef430d3bff008f414bd5b7c2f7c13acc647c5"
+    },
+    "elapsed_seconds": 0.02718637099951593,
+    "peak_allocated_gb": 1.2145490646362305
+  },
+  "perturbation": {
+    "sampled_weights_changed": true,
+    "perturbed_weight_sample_sha256": {
+      "model.embed_tokens.weight": "04bf6213588c462e95092d8e5cd248f507148c86c5f9d2866e4d569e73db5677",
+      "model.layers.12.self_attn.q_proj.weight": "44ef8476b4b3af92dcd6291395c59afe020d5b52fa21b43950138cf235bef018",
+      "model.norm.weight": "29ff7c59abe247ed6afc351c53f3e4eb760f551b8a450cc0a5bd765d40e64300"
+    }
+  },
+  "candidate_evaluation": {
+    "seed": 0,
+    "sigma": 0.001,
+    "mean_reward": 0.25,
+    "records": [
+      {
+        "question": "What is 17 + 24?",
+        "expected": 41,
+        "output_text": "41",
+        "prediction": 41,
+        "reward": 1.0
+      },
+      {
+        "question": "What is 6 * 8?",
+        "expected": 48,
+        "output_text": "48",
+        "prediction": 48,
+        "reward": 1.0
+      },
+      {
+        "question": "What is 91 - 37?",
+        "expected": 54,
+        "output_text": "54",
+        "prediction": 54,
+        "reward": 1.0
+      },
+      {
+        "question": "What is 12 * 13?",
+        "expected": 156,
+        "output_text": "156",
+        "prediction": 156,
+        "reward": 1.0
+      },
+      {
+        "question": "What is 137 * 46?",
+        "expected": 6302,
+        "output_text": "6592",
+        "prediction": 6592,
+        "reward": 0.0
+      },
+      {
+        "question": "What is 375 + 918 - 427?",
+        "expected": 866,
+        "output_text": "1064",
+        "prediction": 1064,
+        "reward": 0.0
+      },
+      {
+        "question": "What is 23 * 17 + 48?",
+        "expected": 439,
+        "output_text": "950",
+        "prediction": 950,
+        "reward": 0.0
+      },
+      {
+        "question": "What is (144 / 12) * 37?",
+        "expected": 444,
+        "output_text": "504",
+        "prediction": 504,
+        "reward": 0.0
+      },
+      {
+        "question": "What is 218 * 37?",
+        "expected": 8066,
+        "output_text": "8406",
+        "prediction": 8406,
+        "reward": 0.0
+      },
+      {
+        "question": "What is 84 * 19 - 76?",
+        "expected": 1520,
+        "output_text": "1302",
+        "prediction": 1302,
+        "reward": 0.0
+      },
+      {
+        "question": "What is 312 * 27 - 145?",
+        "expected": 8279,
+        "output_text": "8095",
+        "prediction": 8095,
+        "reward": 0.0
+      },
+      {
+        "question": "What is (73 + 29) * 18?",
+        "expected": 1836,
+        "output_text": "504",
+        "prediction": 504,
+        "reward": 0.0
+      },
+      {
+        "question": "A shop has 48 boxes with 36 pens in each box. It sells 725 pens. How many pens remain?",
+        "expected": 1003,
+        "output_text": "To find out how many pens remain, we first need to calculate the total number",
+        "prediction": null,
+        "reward": 0.0
+      },
+      {
+        "question": "A school buys 36 packs of notebooks with 24 notebooks per pack. It distributes 579 notebooks. How many remain?",
+        "expected": 285,
+        "output_text": "To determine how many notebooks remain, we can follow these steps:\n\n1. Calculate",
+        "prediction": 1,
+        "reward": 0.0
+      },
+      {
+        "question": "A train travels 72 km per hour for 5 hours, then another 148 km. What is the total distance?",
+        "expected": 508,
+        "output_text": "To find the total distance traveled by the train, we need to calculate the distance",
+        "prediction": null,
+        "reward": 0.0
+      },
+      {
+        "question": "A factory makes 125 items per hour for 18 hours. 347 items are defective. How many usable items remain?",
+        "expected": 1903,
+        "output_text": "To find the number of usable items remaining, we need to follow these steps:",
+        "prediction": null,
+        "reward": 0.0
+      }
+    ]
+  },
+  "restore": {
+    "max_diff": 0.0,
+    "worst_parameter": null,
+    "exact": true,
+    "sample_hashes_match_canonical": true,
+    "restored_weight_sample_sha256": {
+      "model.embed_tokens.weight": "c9a6483adee0208d81e3455c9c47c76fcf17aa7360fd1704f50dc56879962811",
+      "model.layers.12.self_attn.q_proj.weight": "e22540d54abaa2b8fc1c077ef899ec6659a15571d65daa40cb10246362b3f3f3",
+      "model.norm.weight": "1dd25d7720c68bc10838374200238c26626a624119cac0b45bff44bc43c354fe"
+    }
+  }
+}
