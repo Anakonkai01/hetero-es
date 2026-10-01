@@ -10,11 +10,10 @@ Contributions are organized as C1 (admission: who may/should work), C2 (executio
 
 ## Context documents — read before architecture-level changes
 
-- `HETEROES_LLM_MASTER(1).md` — what the system *should be*: scope, architecture, numerical contract, C1–C4, roadmap, claim boundaries (mostly Vietnamese). Never put transient status here.
-- `HETEROES_LLM_STATUS(1).md` — what is *actually true now*: verified evidence, failures, blockers, artifacts, exact next action. Roadmap dates in MASTER are targets, not evidence.
-- `HeteroES-LLM — Claude Code Handoff.md` — working-style rules and the current engineering sequence.
-- `ES_Milestone1_2_modified.ipynb` — historical numerical prototype (functions like `build_parameter_schema`, `find_parameter_aliases`, `apply_perturbation`, `es_update_direction`, `restore_canonical_parameters`, `run_es_generation`). Its saved outputs are mixed/stale; it is **not** a clean Run-All artifact. Do not grow it into the framework; port logic into `src/heteroes/` with tests.
-- (The four files above are currently untracked in the main checkout, not committed.)
+- `HETEROES_LLM_MASTER.md` — what the system *should be*: scope, architecture, numerical contract, C1–C4, roadmap, claim boundaries (mostly Vietnamese). Never put transient status here.
+- `HETEROES_LLM_STATUS.md` — what is *actually true now*: verified evidence, failures, blockers, artifacts, exact next action. Roadmap dates in MASTER are targets, not evidence.
+- `HANDOFF.md` — working-style rules and the current engineering sequence.
+- `notebooks/ES_Milestone1_2_modified.ipynb` — historical numerical prototype (functions like `build_parameter_schema`, `find_parameter_aliases`, `apply_perturbation`, `es_update_direction`, `restore_canonical_parameters`, `run_es_generation`). Its saved outputs are mixed/stale; it is **not** a clean Run-All artifact. Do not grow it into the framework; port logic into `src/heteroes/` with tests.
 - `docs/architecture.md` — big picture: one ES generation end to end, components, identity layers, state ownership, alternatives.
 - `docs/numerical-contract.md` — exact numerical rules (schema, NoiseEngine v1 byte recipe, golden vectors, perturb/restore/update, the cross-machine gate) and open decisions O1–O6. Rules are tagged [E]vidence / [D]ecided / [P]roposed / [OPEN].
 - `docs/adr/` — architecture decision records (ADR-001: CPU PCG64 noise engine).
