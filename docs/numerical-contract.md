@@ -172,7 +172,7 @@ Because the engine takes `schema_hash` as a plain string input, these vectors ca
 
 - **[D][E]** Canonical restore = copy θ back from a full snapshot, then verify. Arithmetic undo (`−σ·ε`) is never a correctness oracle.
 - **[E]** Probes: CPU snapshot (~0.3 s on the 5070 Ti, ~0.8 s on the 1660S), restore + verify 0.07 s / 0.28 s, max diff 0.0 on both.
-- **[P] Use a bitwise oracle.** The current checks use `(param − source).abs().max()`. That check is blind to NaN (a NaN difference never beats `max_diff`, so a NaN-corrupted tensor can report `0.0`) and to `+0.0` vs `−0.0`. Proposed: compare the raw bits per tensor (e.g. compare the FP16 tensors reinterpreted as int16), which is exact and NaN-safe.
+- **[D — O3 decided 2026-10-01] Use a bitwise oracle.** The current checks use `(param − source).abs().max()`. That check is blind to NaN (a NaN difference never beats `max_diff`, so a NaN-corrupted tensor can report `0.0`) and to `+0.0` vs `−0.0`. Decided: pass/fail is determined by comparing the raw bits per tensor (e.g. compare the FP16 tensors reinterpreted as int16), which is exact and NaN-safe. An abs-max difference MAY additionally be reported as a diagnostic when the bitwise check fails, but it never decides pass/fail.
 - **[D]** Verification MUST be memory-safe on the 6 GB 1660S: per tensor, and per chunk for the embedding tensor if needed — without weakening the oracle.
 - A restore failure MUST mark the worker unusable for further candidates (quarantine, C3).
 
@@ -231,7 +231,7 @@ For one candidate (same revision, schema, seed, σ, workload) on the 5070 Ti and
 |---|---|---|---|
 | O1 | Schema hash for production | (a) include aliases + `schema_version` (hash changes from the probe); (b) keep the probe-compatible hash and validate aliases separately | **DECIDED 2026-10-01: (a)** — MASTER requires aliases in schema identity; portability is re-proven at the gate anyway |
 | O2 | Perturbation arithmetic | (a) GPU FP16 `add_`; (b) CPU FP32 then cast; (c) GPU explicit FP32 separate ops then cast | (c), verified by the gate; fall back to (b) if hashes differ |
-| O3 | Restore oracle | abs-max diff (current) vs bitwise | Bitwise |
+| O3 | Restore oracle | abs-max diff (current) vs bitwise | **DECIDED 2026-10-01: bitwise** (abs-max only as optional diagnostic) |
 | O4 | ε used in the update | canonical FP16 ε upcast to FP32 vs realized difference | Canonical ε |
 | O5 | Candidate seed rule | (a) explicit seed list stored in the manifest; (b) derive from (experiment, generation, candidate index) | Decide at manifest freeze (step 8); keep fixed `[0..3]` for the frozen regression |
 | O6 | NumPy pin | exact version on both machines (which one?) | Pin one exact version (2.5.3 was probed on the 5070 Ti) on both machines, and confirm Python 3.14 on the 1660S has a wheel for it |
