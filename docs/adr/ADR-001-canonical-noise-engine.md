@@ -22,7 +22,17 @@ Structure, base weights, base predictions and exact restore all matched. Candida
 
 Additional observation from the same JSON: the 5070 Ti produced the **same** CUDA noise hash (`6839fde5…`) under both torch 2.10/cu128 and torch 2.13/cu132, while the 1660S produced `bd7d3670…`. In this data the divergence follows the machine/GPU, not the software version. (Two data points; not a general law.)
 
-Conclusion: seed-based CUDA RNG is not a portable candidate identity for these workers.
+Scope of the probe evidence: one seed (0), one run per machine, two GPUs (one per architecture). It does not repeat runs across processes on the same machine, and it does not identify *why* the noise differs. The statement is therefore: *with the notebook recipe, seed 0, on these two machines, CUDA noise differs, and this repeated across two software environments.*
+
+External corroboration (checked 2026-10-01 via web search; summaries of the pages, cite the originals directly in the report):
+
+- The PyTorch reproducibility notes state: "Completely reproducible results are not guaranteed across PyTorch releases, individual commits, or different platforms. Furthermore, results may not be reproducible between CPU and GPU executions, even when using identical seeds." — [docs.pytorch.org/docs/2.14/notes/randomness.html](https://docs.pytorch.org/docs/2.14/notes/randomness.html)
+- A PyTorch forum thread reports `torch.rand` on RTX 3090, A100 and H100 matching only up to roughly index 125,952 and diverging for larger tensors; a PyTorch developer replies that cross-setup reproducibility is not guaranteed and suggests serializing the values instead. — [discuss.pytorch.org/t/219976](https://discuss.pytorch.org/t/why-is-torch-rand-different-on-different-devices-for-big-indices/219976)
+- Another thread: a PyTorch developer explains that PRNG implementations may differ per device and software stack, and that reproducibility means re-running the same script on the same system. — [discuss.pytorch.org/t/154054](https://discuss.pytorch.org/t/even-with-the-same-seed-different-random-numbers-are-generated-by-different-devices/154054)
+
+The cause of the divergence (e.g. dependence on kernel launch configuration or SM count) was **not** confirmed by any source found; it remains a hypothesis (inference).
+
+Conclusion: seed-based CUDA RNG is not a portable candidate identity for these workers. The decision does not rely on proving that CUDA RNG can never be portable: the burden of proof lies with the option that the framework itself does not guarantee, while the CPU recipe below already has full-model evidence.
 
 ## Decision
 
