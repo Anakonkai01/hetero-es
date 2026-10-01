@@ -58,11 +58,11 @@ Deliberately **not** in the schema: model id/revision (model identity, §1), wei
 
 A tied tensor is **one** entry: perturbed once, restored once, updated once.
 
-### 2.4 Hash [P]
+### 2.4 Hash [D — O1 decided 2026-10-01: option (a)]
 
 `schema_hash = SHA-256( canonical_json(schema_document) )` where `canonical_json` = `json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("utf-8")` — the same serialization the probes used.
 
-> **Consequence to accept or reject:** adding `aliases` and `schema_version` changes the hash. The probe hash `152e9d82…88e1` (which had no alias information) will **not** equal the production hash, and therefore the production noise bytes for seed 0 will differ from the probe's bytes (the schema hash is part of the noise address). This is expected; the cross-machine regression (§9) re-verifies portability with the production hash. See decision O1 in §11.
+> **Decided (O1 = a):** the production schema hash includes `aliases` and `schema_version`. The probe hash `152e9d82…88e1` (which had no alias information) will **not** equal the production hash, and therefore the production noise bytes for seed 0 will differ from the probe's bytes (the schema hash is part of the noise address). Consequences: (1) the golden vectors in §4.4 belong to the **probe** schema hash and remain valid only as evidence for the generation recipe; production golden vectors must be regenerated from the production hash; (2) the cross-machine regression (§9) must be re-run with the production hash. See decision O1 in §11.
 
 ### 2.5 API sketch [P] — design only, no code yet
 
@@ -229,7 +229,7 @@ For one candidate (same revision, schema, seed, σ, workload) on the 5070 Ti and
 
 | # | Question | Options | Draft recommendation |
 |---|---|---|---|
-| O1 | Schema hash for production | (a) include aliases + `schema_version` (hash changes from the probe); (b) keep the probe-compatible hash and validate aliases separately | (a) — MASTER requires aliases in schema identity; portability is re-proven at the gate anyway |
+| O1 | Schema hash for production | (a) include aliases + `schema_version` (hash changes from the probe); (b) keep the probe-compatible hash and validate aliases separately | **DECIDED 2026-10-01: (a)** — MASTER requires aliases in schema identity; portability is re-proven at the gate anyway |
 | O2 | Perturbation arithmetic | (a) GPU FP16 `add_`; (b) CPU FP32 then cast; (c) GPU explicit FP32 separate ops then cast | (c), verified by the gate; fall back to (b) if hashes differ |
 | O3 | Restore oracle | abs-max diff (current) vs bitwise | Bitwise |
 | O4 | ε used in the update | canonical FP16 ε upcast to FP32 vs realized difference | Canonical ε |
