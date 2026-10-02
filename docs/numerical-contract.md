@@ -64,7 +64,9 @@ A tied tensor is **one** entry: perturbed once, restored once, updated once.
 
 > **Decided (O1 = a):** the production schema hash includes `aliases` and `schema_version`. The probe hash `152e9d82…88e1` (which had no alias information) will **not** equal the production hash, and therefore the production noise bytes for seed 0 will differ from the probe's bytes (the schema hash is part of the noise address). Consequences: (1) the golden vectors in §4.4 belong to the **probe** schema hash and remain valid only as evidence for the generation recipe; production golden vectors must be regenerated from the production hash; (2) the cross-machine regression (§9) must be re-run with the production hash. See decision O1 in §11.
 
-### 2.5 API sketch [P] — design only, no code yet
+> **Implementation status (2026-10-02):** `find_alias_groups`, `SchemaEntry`, `ParameterSchema` (`to_dict`, `hash`) and `build_parameter_schema` exist in `src/heteroes/model/schema.py`, with tests in `tests/model/test_schema.py` (covers S1–S6, S9). Not implemented yet: `to_json` / `from_json`, `verify_model_matches`, `resolve_tensors`, `SchemaEntry.__post_init__` validation (S7 is covered only by the non-floating check in `build_parameter_schema`; S8 not covered). Measured on the Qwen2.5-0.5B layout: 290 entries, 494,032,768 elements, one alias group; hashing the entries in the probe's format reproduces the probe hash `152e9d82…88e1`; production hash (aliases + `schema_version`) is `0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec`.
+
+### 2.5 API sketch [P] — partly implemented, see status note above
 
 | Function | Input → Output | Notes |
 |---|---|---|
@@ -221,7 +223,7 @@ For one candidate (same revision, schema, seed, σ, workload) on the 5070 Ti and
 
 - Evidence covers two x86_64 Linux machines (same kernel/glibc), NumPy 2.5.3 and 2.5.2, one model revision. It is **not** a universal guarantee.
 - **NumPy policy (verified in the NumPy 2.5.3 docstrings):** `PCG64` guarantees that a fixed seed always produces the same integer stream; `Generator` — which provides `standard_normal` — has **no** version-compatibility guarantee ("as better algorithms evolve the bit stream may change"). The exact NumPy version MUST be pinned and recorded; the golden-vector test (§4.4) detects drift.
-- The `ai` environment has NumPy 2.4.5, which has never been tested against the golden vectors. Do not use it for canonical noise until it passes them.
+- The `ai` environment has NumPy 2.4.5. On 2026-10-02 the five golden vectors of §4.4 were reproduced under it (a scratch script, no model needed), so 2.4.5 is now a third NumPy version (with 2.5.2 and 2.5.3) known to give the same bytes for those five chunks. This is NOT a full-model check (2,105 chunks); do not claim more than that.
 - Canonical bytes assume little-endian storage (true for both machines).
 - Even with identical weights, GPU inference may produce different outputs on different architectures; this is measured separately (§9).
 

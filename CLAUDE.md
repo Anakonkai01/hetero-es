@@ -36,7 +36,9 @@ The user is an experienced software engineer new to ES, numerical reproducibilit
 
 Only after that gate: minimal worker/coordinator HTTP, one remote candidate, frozen two-node generation, SQLite ledger, fake-worker fault tests, C1/C2, sync experiments. **No FastAPI/scheduling/DB/Docker work before the cross-machine same-candidate regression passes.** Docs planned for this phase: `docs/architecture.md`, `docs/numerical-contract.md`, `docs/adr/ADR-001-canonical-noise-engine.md` — only these, not the full docs tree.
 
-Planned modules: `src/heteroes/model/schema.py`, `src/heteroes/noise/contracts.py`, `src/heteroes/noise/engine.py`; tests mirror packages under `tests/{es,model,noise}/`.
+Modules: `src/heteroes/model/schema.py` (ParameterSchema — implemented, see `docs/numerical-contract.md` §2 status note), `src/heteroes/noise/contracts.py` and `src/heteroes/noise/engine.py` (planned); tests mirror packages under `tests/{es,model,noise}/`.
+
+Decided so far (2026-10-01): O1 — production schema hash includes aliases and `schema_version`; O3 — restore oracle is bitwise. Still open: O2, O4, O5, O6 (see contract §11). Code-level TODOs live in `src/` (`grep -rn TODO src/`).
 
 ## Numerical contract (non-negotiable invariants)
 
@@ -60,6 +62,7 @@ Baseline facts: model `Qwen/Qwen2.5-0.5B-Instruct`, pinned revision `7ae557604ad
 pip install -e .
 pytest                                   # testpaths = tests
 pytest tests/noise/test_engine.py::test_name   # single test
+HETEROES_QWEN_PATH=<dir of any Qwen2.5-0.5B checkpoint> pytest tests/model   # also runs the real-layout test S9 (otherwise skipped)
 ```
 
 - Large weights (`*.safetensors`, `*.pt`, …) and `artifacts/**/checkpoints/` are gitignored; keep hashes/config/commands instead. Probe/regression JSON evidence goes under `artifacts/` and must not be overwritten.
