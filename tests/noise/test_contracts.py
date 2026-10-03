@@ -5,12 +5,12 @@ import pytest
 from heteroes.noise.contracts import (
     DEFAULT_CHUNK_ELEMENTS,
     ENGINE_VERSION,
-    NoiseAddress,
+    ChunkNoiseAddress,
 )
 
 
 def make_address():
-    return NoiseAddress(
+    return ChunkNoiseAddress(
         candidate_seed=0,
         schema_hash="h" * 64,
         parameter_index=0,
@@ -30,7 +30,7 @@ def test_default_chunk_elements_is_2_pow_18():
 
 
 def test_n_m_address_has_exactly_the_five_contract_fields():
-    names = [f.name for f in dataclasses.fields(NoiseAddress)]
+    names = [f.name for f in dataclasses.fields(ChunkNoiseAddress)]
 
     assert names == [
         "candidate_seed",
@@ -47,7 +47,7 @@ def test_n_m_address_has_exactly_the_five_contract_fields():
 def test_n_m_address_rejects_operational_metadata(operational_field):
     # Noise identity must not depend on worker/attempt/lease/retry/reward.
     with pytest.raises(TypeError):
-        NoiseAddress(0, "h" * 64, 0, 0, DEFAULT_CHUNK_ELEMENTS, **{operational_field: 1})
+        ChunkNoiseAddress(0, "h" * 64, 0, 0, DEFAULT_CHUNK_ELEMENTS, **{operational_field: 1})
 
 
 def test_address_is_frozen():
@@ -59,4 +59,4 @@ def test_address_is_frozen():
 
 def test_address_requires_chunk_elements_explicitly():
     with pytest.raises(TypeError):
-        NoiseAddress(0, "h" * 64, 0, 0)
+        ChunkNoiseAddress(0, "h" * 64, 0, 0)

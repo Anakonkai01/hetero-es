@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 
 from heteroes.noise import engine
-from heteroes.noise.contracts import DEFAULT_CHUNK_ELEMENTS, NoiseAddress
+from heteroes.noise.contracts import DEFAULT_CHUNK_ELEMENTS, ChunkNoiseAddress
 from heteroes.noise.engine import (
     chunk_length,
     derive_chunk_seed,
@@ -39,7 +39,7 @@ PROBE_FULL_JSON = (
 
 
 def address(seed=0, schema=PROBE_SCHEMA_HASH, param=0, chunk=0, chunk_elements=C):
-    return NoiseAddress(seed, schema, param, chunk, chunk_elements)
+    return ChunkNoiseAddress(seed, schema, param, chunk, chunk_elements)
 
 
 # ---------------------------------------------------------------------------
