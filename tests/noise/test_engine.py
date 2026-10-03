@@ -38,6 +38,23 @@ GOLDEN = [
     (289, 0, 896, "3ed137fd746d5f0655e81731e39e80df6857404c5644dad5dd40b6a6767a25ae"),
 ]
 
+# Schema hash of the PRODUCTION schema (aliases + schema_version), see test_schema.py (S9).
+PRODUCTION_SCHEMA_HASH = "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec"
+
+# Same chunks as GOLDEN, but addressed with the production schema hash (candidate_seed=0).
+#
+# REGRESSION GUARD, NOT INDEPENDENT EVIDENCE: these digests were produced by this very
+# engine on 2026-10-03 (5070 Ti host, NumPy 2.4.5). They only prove that the bytes have not
+# changed since then. They become cross-machine evidence only once the same test passes on
+# the 1660S. Not yet checked there.
+GOLDEN_PRODUCTION = [
+    (0, 0, 262144, "ebe2addd4ba90dfaebfad1582712b1660bd271f99e637c0e554caacf5fbcf87c"),
+    (0, 519, 81920, "0d1468c0d034367ccd85e3ac80b5d94d7bf37aaf3a11edb718a35cfc5195466c"),
+    (1, 0, 262144, "cd47f0154a3e8a8f2092469da29261479d115bc7db4a7794c8d59518f9a77186"),
+    (2, 0, 896, "391a1e33d57bfe7283b4783df050ea51a751a0b61fb9d9050f5941fb40326c3f"),
+    (289, 0, 896, "d87d01f6c48aebc7222f9bc18d1cee5981765f37363589140744b69ef6944653"),
+]
+
 PROBE_FULL_JSON = (
     Path(__file__).resolve().parents[2]
     / "artifacts" / "probes" / "2026-09-29" / "noiseengine_5070ti_full.json"
@@ -125,6 +142,25 @@ def test_n_g_golden_vectors_from_physical_probe(param, chunk, n, digest):
     noise = generate_chunk_noise(address(param=param, chunk=chunk), n)
 
     assert hashlib.sha256(noise.tobytes()).hexdigest() == digest
+
+
+@pytest.mark.parametrize("param, chunk, n, digest", GOLDEN_PRODUCTION)
+def test_n_g_production_golden_vectors_regression_guard(param, chunk, n, digest):
+    noise = generate_chunk_noise(
+        address(schema=PRODUCTION_SCHEMA_HASH, param=param, chunk=chunk), n
+    )
+
+    assert hashlib.sha256(noise.tobytes()).hexdigest() == digest
+
+
+def test_production_golden_differs_from_probe_golden():
+    # The schema hash is part of the address, so production noise is a different byte stream
+    # from the probe's. If these tables ever became equal, the schema hash would be ignored.
+    probe = {(param, chunk): digest for param, chunk, _, digest in GOLDEN}
+    production = {(param, chunk): digest for param, chunk, _, digest in GOLDEN_PRODUCTION}
+
+    assert probe.keys() == production.keys()
+    assert all(probe[key] != production[key] for key in probe)
 
 
 def test_generated_chunk_is_float16_array_of_length_n():
