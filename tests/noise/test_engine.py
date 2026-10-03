@@ -8,11 +8,17 @@ import numpy as np
 import pytest
 
 from heteroes.noise import engine
-from heteroes.noise.contracts import DEFAULT_CHUNK_ELEMENTS, ChunkNoiseAddress
+from heteroes.noise.contracts import (
+    DEFAULT_CHUNK_ELEMENTS,
+    ChunkNoiseAddress,
+    ParameterNoiseAddress,
+)
 from heteroes.noise.engine import (
     chunk_length,
     derive_chunk_seed,
-    generate_chunk,
+    generate_chunk_noise,
+    generate_parameter_noise,
+    iter_parameter_noise_chunks,
     num_chunks,
 )
 
@@ -111,18 +117,18 @@ def test_seed_is_deterministic():
 
 
 # ---------------------------------------------------------------------------
-# generate_chunk
+# generate_chunk_noise
 # ---------------------------------------------------------------------------
 
 @pytest.mark.parametrize("param, chunk, n, digest", GOLDEN)
 def test_n_g_golden_vectors_from_physical_probe(param, chunk, n, digest):
-    noise = generate_chunk(address(param=param, chunk=chunk), n)
+    noise = generate_chunk_noise(address(param=param, chunk=chunk), n)
 
     assert hashlib.sha256(noise.tobytes()).hexdigest() == digest
 
 
 def test_generated_chunk_is_float16_array_of_length_n():
-    noise = generate_chunk(address(), 1000)
+    noise = generate_chunk_noise(address(), 1000)
 
     assert isinstance(noise, np.ndarray)
     assert noise.dtype == np.float16
@@ -131,19 +137,19 @@ def test_generated_chunk_is_float16_array_of_length_n():
 
 def test_n_o_generation_order_does_not_change_the_bytes():
     keys = [(p, c) for p in range(3) for c in range(4)]
-    in_order = {k: generate_chunk(address(param=k[0], chunk=k[1]), 64).tobytes() for k in keys}
+    in_order = {k: generate_chunk_noise(address(param=k[0], chunk=k[1]), 64).tobytes() for k in keys}
 
     shuffled = keys[:]
     random.Random(0).shuffle(shuffled)
-    out_of_order = {k: generate_chunk(address(param=k[0], chunk=k[1]), 64).tobytes() for k in shuffled}
+    out_of_order = {k: generate_chunk_noise(address(param=k[0], chunk=k[1]), 64).tobytes() for k in shuffled}
 
     assert in_order == out_of_order
 
 
 def test_shorter_chunk_is_a_prefix_of_the_full_chunk():
     # The last (short) chunk uses the FIRST n values of its own stream.
-    short = generate_chunk(address(chunk=3), 10)
-    longer = generate_chunk(address(chunk=3), 20)
+    short = generate_chunk_noise(address(chunk=3), 10)
+    longer = generate_chunk_noise(address(chunk=3), 20)
 
     assert np.array_equal(short, longer[:10])
 
@@ -159,15 +165,15 @@ def test_shorter_chunk_is_a_prefix_of_the_full_chunk():
     ],
 )
 def test_n_d_changing_any_address_part_changes_the_noise(field, value):
-    base = generate_chunk(address(), 256)
-    other = generate_chunk(dataclasses.replace(address(), **{field: value}), 256)
+    base = generate_chunk_noise(address(), 256)
+    other = generate_chunk_noise(dataclasses.replace(address(), **{field: value}), 256)
 
     assert not np.array_equal(base, other)
 
 
 def test_noise_looks_standard_normal():
     # Sanity check of the distribution, not a statistical proof.
-    noise = generate_chunk(address(), C).astype(np.float32)
+    noise = generate_chunk_noise(address(), C).astype(np.float32)
 
     assert abs(float(noise.mean())) < 0.02
     assert abs(float(noise.std()) - 1.0) < 0.02
@@ -176,12 +182,12 @@ def test_noise_looks_standard_normal():
 @pytest.mark.parametrize("bad_n", [0, -1, C + 1])
 def test_generate_rejects_n_outside_1_to_chunk_elements(bad_n):
     with pytest.raises(ValueError):
-        generate_chunk(address(), bad_n)
+        generate_chunk_noise(address(), bad_n)
 
 
 def test_generate_accepts_the_boundary_values_of_n():
-    assert generate_chunk(address(), 1).shape == (1,)
-    assert generate_chunk(address(), C).shape == (C,)
+    assert generate_chunk_noise(address(), 1).shape == (1,)
+    assert generate_chunk_noise(address(), C).shape == (C,)
 
 
 # ---------------------------------------------------------------------------
@@ -236,3 +242,120 @@ def test_geometry_matches_probe_chunk_counts_for_all_qwen_tensors():
 
     assert all(num_chunks(t["numel"], C) == t["total_chunks"] for t in results)
     assert sum(num_chunks(t["numel"], C) for t in results) == 2105
+
+
+# ---------------------------------------------------------------------------
+# whole-parameter noise: iter_parameter_noise_chunks, generate_parameter_noise
+# ---------------------------------------------------------------------------
+
+def parameter_address(seed=0, schema=PROBE_SCHEMA_HASH, param=0, chunk_elements=C):
+    return ParameterNoiseAddress(seed, schema, param, chunk_elements)
+
+
+def test_iter_yields_chunks_in_order_with_start_positions():
+    # numel=10, C=4 -> chunks of 4, 4, 2 starting at 0, 4, 8
+    items = list(iter_parameter_noise_chunks(parameter_address(chunk_elements=4), 10))
+
+    assert [(index, start, len(noise)) for index, start, noise in items] == [
+        (0, 0, 4),
+        (1, 4, 4),
+        (2, 8, 2),
+    ]
+
+
+def test_iter_chunks_are_exactly_what_generate_chunk_noise_returns():
+    address_ = parameter_address(seed=3, param=5, chunk_elements=4)
+
+    for index, _, noise in iter_parameter_noise_chunks(address_, 10):
+        expected = generate_chunk_noise(address_.chunk(index), len(noise))
+
+        assert noise.dtype == np.float16
+        assert np.array_equal(noise, expected)
+
+
+def test_iter_is_lazy(monkeypatch):
+    # Only one chunk may be generated per step (this is what keeps memory low).
+    calls = []
+    real = engine.generate_chunk_noise
+    monkeypatch.setattr(engine, "generate_chunk_noise", lambda *a, **k: calls.append(1) or real(*a, **k))
+
+    stream = iter_parameter_noise_chunks(parameter_address(chunk_elements=4), 10)
+    assert calls == []
+    next(stream)
+    assert len(calls) == 1
+    next(stream)
+    assert len(calls) == 2
+
+
+def test_generate_parameter_noise_dtype_and_shape():
+    noise = generate_parameter_noise(parameter_address(chunk_elements=4), 10)
+
+    assert isinstance(noise, np.ndarray)
+    assert noise.dtype == np.float16
+    assert noise.shape == (10,)
+
+
+@pytest.mark.parametrize(
+    "numel, chunk_elements",
+    [(10, 4), (8, 4), (3, 4), (5, 1), (1, 4), (1, 1), (600, 256)],
+)
+def test_generate_parameter_noise_equals_concatenated_chunks(numel, chunk_elements):
+    # Independent oracle: build each chunk directly and concatenate.
+    address_ = parameter_address(seed=2, param=7, chunk_elements=chunk_elements)
+    pieces = [
+        generate_chunk_noise(address_.chunk(j), chunk_length(numel, j, chunk_elements))
+        for j in range(num_chunks(numel, chunk_elements))
+    ]
+
+    assert np.array_equal(generate_parameter_noise(address_, numel), np.concatenate(pieces))
+
+
+def test_generate_parameter_noise_of_a_small_real_tensor_matches_golden():
+    # Qwen parameter 2 (a bias, 896 elements) is a single chunk: same bytes as the probe golden.
+    noise = generate_parameter_noise(parameter_address(param=2), 896)
+    golden = next(digest for param, chunk, n, digest in GOLDEN if (param, chunk, n) == (2, 0, 896))
+
+    assert hashlib.sha256(noise.tobytes()).hexdigest() == golden
+
+
+def test_existing_elements_do_not_depend_on_numel_when_chunking_is_the_same():
+    # numel only decides how many values the last chunk takes (a prefix of its own stream).
+    address_ = parameter_address(chunk_elements=4)
+    shorter = generate_parameter_noise(address_, 10)
+    longer = generate_parameter_noise(address_, 11)
+
+    assert np.array_equal(shorter, longer[:10])
+
+
+def test_different_chunk_elements_give_different_parameter_noise():
+    a = generate_parameter_noise(parameter_address(chunk_elements=4), 10)
+    b = generate_parameter_noise(parameter_address(chunk_elements=5), 10)
+
+    assert not np.array_equal(a, b)
+
+
+@pytest.mark.parametrize("bad_numel", [0, -1])
+def test_parameter_noise_rejects_non_positive_numel(bad_numel):
+    with pytest.raises(ValueError):
+        generate_parameter_noise(parameter_address(chunk_elements=4), bad_numel)
+    with pytest.raises(ValueError):
+        list(iter_parameter_noise_chunks(parameter_address(chunk_elements=4), bad_numel))
+
+
+def test_real_embedding_first_and_last_chunk_match_probe_golden():
+    # Streams all 520 chunks of the real embedding (136,134,656 elements) without ever
+    # holding more than one chunk in memory, and checks the two golden chunks.
+    numel = 136_134_656
+    golden = {chunk: digest for param, chunk, n, digest in GOLDEN if param == 0}
+    seen = 0
+    covered = 0
+
+    for index, start, noise in iter_parameter_noise_chunks(parameter_address(param=0), numel):
+        assert start == covered
+        covered += len(noise)
+        seen += 1
+        if index in golden:
+            assert hashlib.sha256(noise.tobytes()).hexdigest() == golden[index]
+
+    assert seen == 520
+    assert covered == numel

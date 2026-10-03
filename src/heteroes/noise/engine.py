@@ -1,4 +1,6 @@
 from heteroes.noise.contracts import ChunkNoiseAddress, ParameterNoiseAddress, ENGINE_VERSION
+
+from collections.abc import Iterator
 import numpy as np 
 import hashlib
 import math
@@ -22,10 +24,10 @@ def derive_chunk_seed(chunk_noise_address: ChunkNoiseAddress) -> int:
     
     return seed
     
-def generate_chunk(chunk_noise_address: ChunkNoiseAddress, n: int) -> np.ndarray :
+def generate_chunk_noise(chunk_noise_address: ChunkNoiseAddress, n: int) -> np.ndarray :
     """
     generate a chunk noise 
-    - input: ChunkNoiseAddress, n (number of elements of this chunk)
+    - input: ChunkNoiseAddress, n (chunk_length ,number of elements of this chunk)
     - output: numpy array float 16, len = n
     """
 
@@ -68,7 +70,23 @@ def chunk_length(numel: int, chunk_index: int, chunk_elements: int) -> int:
     return min(chunk_elements, numel - chunk_index * chunk_elements) 
 
 
-def tensor_noise_generator(parameter_noise_address: ParameterNoiseAddress, numel: int):
+def iter_parameter_noise_chunks(parameter_noise_address: ParameterNoiseAddress, numel: int) -> Iterator[tuple[int, int, np.ndarray]]:
+    """
+    create iterator for generate parameter noise, return chunk noise one by one
+    to avoid create all at one which could lead to out of memory 
+    """
+    number_of_chunks = num_chunks(numel, parameter_noise_address.chunk_elements)    
+
+    for chunk_index in range(number_of_chunks): 
+        start_index_pos_of_tensor = chunk_index * parameter_noise_address.chunk_elements
+        len_of_chunk = chunk_length(numel, chunk_index, parameter_noise_address.chunk_elements)
+        chunk_noise_address = parameter_noise_address.chunk(chunk_index)
+        chunk_noise = generate_chunk_noise(chunk_noise_address=chunk_noise_address, n = len_of_chunk)
+
+        yield (chunk_index, start_index_pos_of_tensor, chunk_noise)
+
+    
+def generate_parameter_noise(parameter_noise_address: ParameterNoiseAddress, numel: int) -> np.ndarray: 
     """
     generate full noise of a tensor:
         - generate noise per chunk then combine it and return
@@ -78,9 +96,18 @@ def tensor_noise_generator(parameter_noise_address: ParameterNoiseAddress, numel
     return:
         - a flat array (float16, length = numel)
     """
-    # TODO: in progress. Plan: chunks = num_chunks(numel, C); for each j, n = chunk_length(...),
-    # generate_chunk(parameter_noise_address.chunk(j), n), then concatenate.
-    raise NotImplementedError
 
+    # do not use list then append then concate because it will create new and then copy -> overhead compute and memory
+    # using np.empty not (np.zeros or np.ones because this use calloc/memset -> allocate then write value), because only allocation, no write value
+    parameter_noise = np.empty(numel, dtype=np.float16)
 
+    # reuse logic in iter_parameter_noise_chunks
+    for _, start_index_pos_of_tensor, chunk_noise in iter_parameter_noise_chunks(parameter_noise_address, numel):
+        parameter_noise[start_index_pos_of_tensor: start_index_pos_of_tensor + len(chunk_noise)] = chunk_noise
+    
+    return parameter_noise
+
+    
+
+    
     

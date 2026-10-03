@@ -60,3 +60,63 @@ def test_address_is_frozen():
 def test_address_requires_chunk_elements_explicitly():
     with pytest.raises(TypeError):
         ChunkNoiseAddress(0, "h" * 64, 0, 0)
+
+
+# ---------------------------------------------------------------------------
+# ParameterNoiseAddress
+# ---------------------------------------------------------------------------
+
+from heteroes.noise.contracts import ParameterNoiseAddress  # noqa: E402
+
+
+def make_parameter_address():
+    return ParameterNoiseAddress(
+        candidate_seed=11, schema_hash="hh", parameter_index=22, chunk_elements=33
+    )
+
+
+def test_parameter_address_has_exactly_four_fields_and_no_chunk_index():
+    names = [f.name for f in dataclasses.fields(ParameterNoiseAddress)]
+
+    assert names == ["candidate_seed", "schema_hash", "parameter_index", "chunk_elements"]
+
+
+@pytest.mark.parametrize("extra_field", ["worker_id", "attempt_id", "chunk_index", "numel"])
+def test_parameter_address_rejects_extra_fields(extra_field):
+    # chunk_index belongs to the chunk address; numel is not part of noise identity.
+    with pytest.raises(TypeError):
+        ParameterNoiseAddress(0, "h", 0, 4, **{extra_field: 1})
+
+
+def test_parameter_address_is_frozen_and_hashable():
+    address = make_parameter_address()
+
+    with pytest.raises(dataclasses.FrozenInstanceError):
+        address.chunk_elements = 5
+    assert {address: 1}[make_parameter_address()] == 1
+
+
+def test_parameter_address_requires_chunk_elements_explicitly():
+    with pytest.raises(TypeError):
+        ParameterNoiseAddress(0, "h", 0)
+
+
+def test_chunk_copies_every_field_and_adds_chunk_index():
+    # distinct values so that a swapped field would be noticed
+    chunk = make_parameter_address().chunk(44)
+
+    assert isinstance(chunk, ChunkNoiseAddress)
+    assert chunk == ChunkNoiseAddress(
+        candidate_seed=11, schema_hash="hh", parameter_index=22, chunk_index=44, chunk_elements=33
+    )
+
+
+def test_chunk_zero_is_valid():
+    # Regression: an early version rejected chunk_index 0 (chunks are numbered from 0).
+    assert make_parameter_address().chunk(0).chunk_index == 0
+
+
+@pytest.mark.parametrize("bad_index", [-1, -100])
+def test_chunk_rejects_negative_index(bad_index):
+    with pytest.raises(ValueError):
+        make_parameter_address().chunk(bad_index)
