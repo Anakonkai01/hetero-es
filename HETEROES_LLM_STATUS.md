@@ -8,14 +8,25 @@
 
 ## 0. NEXT SESSION — START HERE
 
-### 0.0 Progress update — 02/10/2026 (first production code)
+### 0.0 Progress update — 03/10/2026 (CanonicalNoiseEngine v1 implemented)
+
+State at commit `21b14e1`, pushed to `origin` (`git@github.com:Anakonkai01/hetero-es.git`, branch `feat/canonical-noise-engine`).
+
+- **Implemented:** `src/heteroes/noise/contracts.py` (`ENGINE_VERSION`, `DEFAULT_CHUNK_ELEMENTS`, `ChunkNoiseAddress`, `ParameterNoiseAddress`) and `src/heteroes/noise/engine.py` (`derive_chunk_seed`, `generate_chunk_noise`, `num_chunks`, `chunk_length`, `iter_parameter_noise_chunks`, `generate_parameter_noise`). `pytest tests`: 116 passed, 1 skipped (the real-Qwen-layout test S9, which needs `HETEROES_QWEN_PATH`). Tests were mutation-checked by hand on scratch copies (about 40 deliberate faults, all caught); this is not automated in CI.
+- **Verified on the 5070 Ti host only (NumPy 2.4.5, Python 3.12):** with the probe schema hash as input the new engine reproduces the full probe result: 2,105 chunks, 494,032,768 elements, global hash `816c15300c45ca9e85468b7787bc4ce313a87d1e74e6429e48eb9e6d357dafda` (the value both physical machines recorded on 29/09). That check was a scratch script and is not in the repo yet (candidate for a slow test). The 5 probe golden vectors and the real-embedding stream (520 chunks) are in the test suite.
+- **Production golden vectors** (5 chunks addressed with the production schema hash `0b21250e…`) are in `tests/noise/test_engine.py`. They were produced by this engine itself, so they are a **regression guard only, not independent or cross-machine evidence**.
+- **Pending (postponed, the 1660S was not available):** run `pytest tests/noise` on the 1660S at the commit above (venv NumPy 2.5.2, Python 3.14), and save the commit hash, `hostname`, Python/NumPy versions and pytest output under a new dated folder in `artifacts/regression/`. Until then nothing about the production hash is verified on a second machine. Also worth repeating there: the full 2,105-chunk reproduction.
+- **Not done:** perturb / restore on a real model (O2 perturbation arithmetic still open; O3 bitwise restore already decided), FP32 ES update (O4 open), seed rule (O5 open), NumPy pin (O6 open, check the 1660S wheel), `SchemaEntry.__post_init__`, `to_json` / `from_json`, `verify_model_matches`, cross-machine same-candidate regression. Code-level TODOs: `grep -rn TODO src/`.
+- **Next action:** perturb + restore on a real Qwen model on the 5070 Ti (bitwise restore, chunked so it fits the 6 GB worker; decide O2 by experiment), then the 1660S run above.
+
+### 0.1 Earlier progress — 02/10/2026 (ParameterSchema; superseded by the section above)
 
 - `docs/architecture.md`, `docs/numerical-contract.md`, `docs/adr/ADR-001` are merged on `feat/canonical-noise-engine` (drafts; the owner has not reviewed every rule). Decisions taken: **O1** schema hash includes aliases + `schema_version`; **O3** restore oracle is bitwise. Open: O2 (perturbation arithmetic, settled by the cross-machine gate), O4 (epsilon used in update), O5 (seed rule), O6 (pin one NumPy version, check the 1660S wheel).
 - **Implemented:** `src/heteroes/model/schema.py` — `find_alias_groups`, `SchemaEntry`, `ParameterSchema`, `build_parameter_schema`; 27 tests in `tests/model/test_schema.py` (S9 real-layout test runs only with `HETEROES_QWEN_PATH`). 12 deliberate mutations of the code are all caught by the tests.
 - **Verified on real Qwen layout (local checkpoint, 5070 Ti host only):** 290 entries, 494,032,768 elements, one alias group (`model.embed_tokens.weight` + `lm_head.weight`); the probe-format schema hash `152e9d82…` is reproduced; production schema hash is `0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec`. Not yet run on the 1660S.
 - **New evidence/fixes to earlier claims:** the five golden vectors reproduce under NumPy 2.4.5 (env `ai`); PyTorch docs state that reproducibility is not guaranteed across platforms and a forum thread reports `torch.rand` diverging across 3090/A100/H100 for large tensors (sources in ADR-001). The CUDA-RNG probe is one seed / one run per machine, so its scope is limited (see ADR-001).
 - **Not done:** `__post_init__` validation, `to_json`/`from_json`, `verify_model_matches`; production `CanonicalNoiseEngine`; golden vectors for the production hash; everything after step 2 of the implementation order (§11). Code-level TODOs: `grep -rn TODO src/`.
-- **Next action:** `src/heteroes/noise/contracts.py` + `engine.py` (CanonicalNoiseEngine) with the golden-vector test, using the production schema hash.
+- **Next action (done on 03/10, see 0.0):** `src/heteroes/noise/contracts.py` + `engine.py` (CanonicalNoiseEngine) with the golden-vector test, using the production schema hash.
 
 The project has moved beyond Colab-only work. **Both physical GPU machines are on Ubuntu 26, remotely manageable over Tailscale + OpenSSH, and both can run the modified Qwen2.5-0.5B-Instruct FP16 single-GPU ES reference end-to-end.** The major numerical discovery is that native CUDA RNG is **not portable enough for seed-only cross-worker replay**: the RTX 5070 Ti and GTX 1660 Super produced different noise bytes and different perturbed candidate predictions even after Torch/CUDA/Transformers were matched. A new CPU-based **Canonical NoiseEngine v1** was then probed over the full 494,032,768-parameter model and produced **identical noise bytes on both machines**.
 
