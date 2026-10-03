@@ -43,10 +43,12 @@ PRODUCTION_SCHEMA_HASH = "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d7
 
 # Same chunks as GOLDEN, but addressed with the production schema hash (candidate_seed=0).
 #
-# REGRESSION GUARD, NOT INDEPENDENT EVIDENCE: these digests were produced by this very
-# engine on 2026-10-03 (5070 Ti host, NumPy 2.4.5). They only prove that the bytes have not
-# changed since then. They become cross-machine evidence only once the same test passes on
-# the 1660S. Not yet checked there.
+# These digests were produced by this very engine on 2026-10-03 (5070 Ti host, NumPy 2.4.5), so
+# on their own they only prove that the bytes have not changed since then (regression guard).
+# They are also cross-machine evidence because the same test (117 tests) passed on the
+# GTX 1660 SUPER at commit 7b73e03 (NumPy 2.5.2, Python 3.14); the standalone script also
+# reproduced them on Colab and Kaggle T4 (NumPy 2.1.3). See
+# artifacts/regression/2026-10-03-o2-perturbation/.
 GOLDEN_PRODUCTION = [
     (0, 0, 262144, "ebe2addd4ba90dfaebfad1582712b1660bd271f99e637c0e554caacf5fbcf87c"),
     (0, 519, 81920, "0d1468c0d034367ccd85e3ac80b5d94d7bf37aaf3a11edb718a35cfc5195466c"),
