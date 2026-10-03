@@ -1,0 +1,73 @@
+
+=== 1. ENVIRONMENT
+  gpu               : NVIDIA GeForce RTX 5070 Ti
+  compute_capability: 12.0
+  torch             : 2.10.0+cu128
+  cuda              : 12.8
+  numpy             : 2.4.5
+  python            : 3.12.13
+  machine           : x86_64
+  sigma_float32     : 0.0010000000474974513
+  transformers      : 5.5.0
+
+=== 2. NOISE ENGINE (copy) vs recorded golden vectors
+  golden probe     : PASS  (5 chunks)
+  golden production: PASS  (5 chunks)
+
+=== 3. MODEL LAYOUT
+  tensors=290 elements=494,032,768 aliases={'model.embed_tokens.weight': ['lm_head.weight']}
+  tensors_290             : PASS
+  elements_494032768      : PASS
+  alias_group             : PASS
+  probe_schema_hash       : PASS
+  production_schema_hash  : PASS
+
+=== 4. FULL-MODEL NOISE vs probe global hash (2105 chunks)
+  816c15300c45ca9e…  vs probe 816c15300c45ca9e…  -> PASS  (4s)
+
+=== 5. PERTURBATION  theta' = theta + sigma*eps   (sigma = 0.0010000000474974513)
+  tensor 1/290  6s
+  tensor 51/290  9s
+  tensor 101/290  11s
+  tensor 151/290  13s
+  tensor 201/290  15s
+  tensor 251/290  17s
+  done: 494,032,768 elements in 19s
+
+  Methods with the same whole-model hash are bit-identical on every element:
+   class 1  hash ce33fa3262716a57…
+        A   gpu fp16 add_(eps, alpha=sigma)
+        A2  gpu fp16 add_ (second run)
+        C   gpu torch.add(fp32, alpha) then half
+        K   gpu add_ per 262144-chunk
+        I   numpy emulated FMA (f64 -> f32 -> f16)
+   class 2  hash 8aa3eb9af895cb4a…
+        B   gpu fp32: mul, then add, then half   <- proposed (c)
+        B2  gpu fp32 mul+add (second run)
+        L   gpu fp32 mul+add per chunk
+        F   numpy fp32 mul, then add, then half
+        G   torch-cpu fp32 mul, then add, then half
+   class 3  hash 5f66dbeb14ae46a5…
+        E   gpu all steps in fp16 (t + e*sigma)
+   class 4  hash f92b509e4e8fa133…
+        H   torch-cpu fp16 add_(alpha)
+   class 5  hash d1f6ca0ca4eb2270…
+        J   numpy exact f64 -> f16 (single rounding)
+
+  Elements that differ (bitwise), out of 494,032,768:
+   (c) gpu unfused  vs  numpy unfused        :            0
+   (c) gpu unfused  vs  torch-cpu unfused    :            0
+   (c) whole tensor vs  per-chunk            :            0
+   (c) run 1         vs  run 2               :            0
+   add_ (fused)      vs  (c) unfused         :          167
+   add_ (fused)      vs  emulated FMA        :            0
+   gpu add_          vs  cpu add_            :   48,765,355
+   (c)               vs  all-fp16 steps      :   31,966,125
+   (c)               vs  exact single rounding:       41,560
+
+  add_ vs (c): sign-of-zero-only = 91, real value differences = 76, max = 1 ULP
+  elements left unchanged by the perturbation (all): 2,000,710/494,032,768 = 0.40%
+  elements left unchanged by the perturbation (1-D): 21,044/71,552 = 29.41%
+
+=== RESULT_JSON (paste this line too)
+{"ab": {"max_ulp": 1, "sign_of_zero_only": 91, "value_diff": 76}, "checks": {"alias_group": true, "elements_494032768": true, "golden_probe": true, "golden_production": true, "noise_global_hash_matches_probe": true, "probe_schema_hash": true, "production_schema_hash": true, "tensors_290": true}, "class_of": {"A": "ce33fa3262716a57", "A2": "ce33fa3262716a57", "B": "8aa3eb9af895cb4a", "B2": "8aa3eb9af895cb4a", "C": "ce33fa3262716a57", "E": "5f66dbeb14ae46a5", "F": "8aa3eb9af895cb4a", "G": "8aa3eb9af895cb4a", "H": "f92b509e4e8fa133", "I": "ce33fa3262716a57", "J": "d1f6ca0ca4eb2270", "K": "ce33fa3262716a57", "L": "8aa3eb9af895cb4a"}, "diffs": {"A-B": 167, "A-H": 48765355, "A-I": 0, "B-B2": 0, "B-E": 31966125, "B-F": 0, "B-G": 0, "B-L": 0}, "env": {"compute_capability": "12.0", "cuda": "12.8", "gpu": "NVIDIA GeForce RTX 5070 Ti", "machine": "x86_64", "numpy": "2.4.5", "python": "3.12.13", "sigma_float32": 0.0010000000474974513, "torch": "2.10.0+cu128", "transformers": "5.5.0"}, "methods": {"5f66dbeb14ae46a5": ["E"], "8aa3eb9af895cb4a": ["B", "B2", "L", "F", "G"], "ce33fa3262716a57": ["A", "A2", "C", "K", "I"], "d1f6ca0ca4eb2270": ["J"], "f92b509e4e8fa133": ["H"]}, "quick": false}
