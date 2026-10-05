@@ -12,6 +12,7 @@ Contributions are organized as C1 (admission: who may/should work), C2 (executio
 
 - `HETEROES_LLM_MASTER.md` — what the system *should be*: scope, architecture, numerical contract, C1–C4, roadmap, claim boundaries (mostly Vietnamese). Never put transient status here.
 - `HETEROES_LLM_STATUS.md` — what is *actually true now*: verified evidence, failures, blockers, artifacts, exact next action. Roadmap dates in MASTER are targets, not evidence.
+- `TODO.md` — short list of code-level clean-up items (not status, not roadmap). Delete an item when it is done; code-level `TODO(...)` comments in `src/` are listed there by group.
 - `HANDOFF.md` — working-style rules and the engineering sequence (bootstrap-era document; its "current state" sections are outdated, see its header note).
 - `notebooks/ES_Milestone1_2_modified.ipynb` — historical numerical prototype (functions like `build_parameter_schema`, `find_parameter_aliases`, `apply_perturbation`, `es_update_direction`, `restore_canonical_parameters`, `run_es_generation`). Its saved outputs are mixed/stale; it is **not** a clean Run-All artifact. Do not grow it into the framework; port logic into `src/heteroes/` with tests.
 - `docs/architecture.md` — big picture: one ES generation end to end, components, identity layers, state ownership, alternatives.

@@ -454,6 +454,8 @@ HETEROES_LLM_STATUS.md
   current machines/environments, verified experiments/results, artifacts, blockers, next action
 ```
 
+`TODO.md` (repo root, added 05/10/2026 by the project owner) is a short list of code-level clean-up items only. It is not a context file: no status, no evidence, no roadmap.
+
 Do **not** create a new long-term handoff document after every chat. Update these two files and rely on Git history for revisions. Old `Master Proposal v3`, `Implementation Roadmap v3`, `Learning Guide v3`, prior Chat Handoff and Progress Summary are archive/read-only.
 
 For a future chat, upload/provide these two files first. If code-level work resumes, also provide the latest relevant code/probe file(s), especially the production `NoiseEngine` once created.
