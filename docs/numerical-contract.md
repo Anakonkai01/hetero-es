@@ -96,6 +96,9 @@ The noise engine takes an integer `candidate_seed`. How seeds are chosen is not 
 
 - Observation **[E]**: the notebook reused seeds `[0, 1, 2, 3]` every generation. `milestone2_history.json` shows three generations with identical rewards, z-scores and `update_max_diff = 0.00030517578125`: with the same seeds and a model whose predictions did not change, every generation applied the **same** update direction again. That is acceptable for a frozen regression benchmark but not as a training policy.
 - Whatever rule is chosen, the seed MUST be recorded in the candidate descriptor/manifest, and MUST NOT depend on worker, attempt, lease or retry.
+- **[D — decided 2026-10-05] What one ES update accepts.** The seeds of one update MUST be real integers (`int` or a NumPy integer; `bool`, `float`, `str`, `None` raise `TypeError`) and pairwise distinct (a duplicate raises `ValueError`); both checks happen before the first write. Reason [E, checked 2026-10-05]: the engine writes the seed into the address text, so `1`, `np.int64(1)` and `"1"` give the same noise, while `1.0` and `True` give different noise; a duplicate check on raw values (for example with a `set`) would therefore be wrong in both directions. Two candidates with the same seed have the same ε: that direction would be counted twice, the reward statistics would not describe independent samples, and it could hide a retry that was counted twice (C3).
+- **[OPEN — O5]** Where the seeds come from (explicit list in the manifest, or derived from experiment, generation and candidate index) is **deferred to step 8** (manifest freeze). The noise address does not contain the generation, so reusing a seed in the next generation gives the same ε again; the update function does not check this.
+- **[Note for later]** The engine accepts any integer, also negative or very large. JSON read by JavaScript (the product layer) keeps integers exactly only up to 2^53. If seeds can exceed that, they must be restricted or written as strings in the manifest. Not decided; revisit at step 8.
 
 ## 4. CanonicalNoiseEngine v1
 
@@ -191,7 +194,7 @@ Because the engine takes `schema_hash` as a plain string input, these vectors ca
 ## 7. Reward standardization
 
 - **[D][E]** Rewards MUST be finite; NaN/Inf → reject the generation input, never coerce to 0. Infrastructure failures are not rewards.
-- **[E]** Notebook formula: `μ = mean(R)`, `s = std(R, population)`; if `s < η` → all `z = 0` (no-op update, logged); else `z = (R − μ) / (s + η)`, with `η = 1e-8`.
+- **[E]** Notebook formula: `μ = mean(R)`, `s = std(R, population)`; if `s < η` → all `z = 0` (no-op update, logged); else `z = (R − μ) / (s + η)`, with `η = 1e-9` (**[D]** decided by the owner 2026-10-05; the notebook used `1e-8`).
 - **[P]** Record `η` in the config. Note it is used twice: as the "equal rewards" threshold and as the division guard.
 - **[P]** Implementation (`src/heteroes/es/update.py`, tests `tests/es/test_standardize.py`): the input is any 1-D sequence of real numbers (list, tuple, NumPy array; ints allowed). It is converted to float64 first, the mean and the population standard deviation (`ddof = 0`) are computed in float64, and the coefficients are rounded **once** to float32. The returned float32 array is the exact set of coefficients every machine uses. Record `ddof = 0` and `η` next to the coefficients in the manifest.
 
@@ -218,10 +221,11 @@ EGGROLL is different in kind (read directly from the paper): Algorithm 1 and Eq.
 
 **What follows for this contract**
 
-- Common practice, same as here: z-score with `eta = 1e-8`, population standard deviation, FP32 accumulation, one cast to the model dtype at the end. `es-at-scale` also generates the noise in the model dtype and upcasts it to FP32, which is what option O4 proposes (section 8).
+- Common practice, same as here: z-score, population standard deviation, FP32 accumulation, one cast to the model dtype at the end. `es-at-scale` also generates the noise in the model dtype and upcasts it to FP32, which is what option O4 proposes (section 8).
 - Deliberate differences:
   1. Non-finite rewards are rejected. Only Agentic-ESOpt checks; `es-at-scale` turns a timeout into `0.0`, which MASTER already says not to copy.
   2. An explicit `s < eta` rule instead of relying on the epsilon (see the measurement above).
+  2b. `eta = 1e-9` (owner's decision, 2026-10-05) where the projects above use `1e-8`. The measurement above was made with `1e-8`; it was not repeated with `1e-9`.
   3. The multiply and the add are separate operations. All three projects use the fused `add_(..., alpha=...)`; they do not need the same bits on different machines, this project does (same lesson as O2 in section 5).
   4. Placement of `alpha/N`: they fold it into the coefficient of each candidate; section 8 accumulates `sum z_i * eps_i` first, then divides by `N`, then multiplies by `alpha`. The mathematics is the same, the rounding is not. This is a contract choice, not a defect of either.
 - Not adopted here, kept as future options: per-question normalization and antithetic sign shaping (EGGROLL), rank transform (Agentic-ESOpt). MASTER says not to change the recipe silently.
@@ -242,12 +246,16 @@ for each schema entry k (canonical order):
 ```
 
 - **[D]** Accumulation MUST be FP32. **[E]** The notebook accumulates in FP16 (`torch.zeros_like(param)` on an FP16 model); this is known debt.
-- **[P]** `ε_i` in the update is the canonical FP16 noise upcast to FP32 — the same bytes the worker used. (The realized perturbation `fp16(θ + σε) − θ` differs slightly from `σε` because of rounding; the update uses the canonical ε, not the realized difference.)
+- **[D — O4 decided 2026-10-05: option A]** `ε_i` in the update is the canonical FP16 noise upcast to FP32 — the same bytes the worker used. (The realized perturbation `fp16(θ + σε) − θ` differs slightly from `σε` because of rounding; the update uses the canonical ε, not the realized difference.)
+  - **Two roundings sit between the ideal noise and the realized perturbation** (cast of ε to FP16 in the engine; storing θ' in FP16 in perturb). The FP16 → FP32 upcast itself adds no error.
+  - **Measured 2026-10-05 [E]** (scratch scripts, not in the repo; Qwen2.5-0.5B at the pinned revision, all 494,032,768 elements, seeds 0 to 3, σ = float32(1e-3), NumPy 2.4.5, original unmodified weights, CPU): (i) cast of ε to FP16: ‖ε₁₆ − ε₃₂‖ / ‖ε₃₂‖ = 2.08e-4; mean ≈ 0, variance 1.0000, kurtosis ≈ 3.000, no value flushed to 0; the update direction Σ zᵢεᵢ (4 candidates, z from rewards [0.1, 0.4, 0.2, 0.9]) has relative L2 error 2.08e-4 and cosine 0.99999998. (ii) rounding of θ': ‖d − ε₁₆‖ / ‖ε₁₆‖ = 0.0054 with d = (θ' − θ)/σ; 0.405% of the elements do not change at all; no changed element changes sign; ‖d‖ / ‖ε‖ = 1.0000.
+  - **Limits of that measurement:** one σ, four seeds, unmodified weights, one NumPy version, no reward or learning run; the maximum element-wise relative error of the FP16 cast was 0.747 (its cause was not investigated; inference: very small |ε| values, where FP16 loses relative precision).
+  - **Accepted trade-off:** the update moves along ε, not along what the worker actually measured. The rounding error of θ' cannot be removed by any choice of ε. Making it visible (monitoring) is future work, see `TODO.md`, group `monitoring`.
 - **[D]** Candidate order is canonical because floating-point addition is not associative: summing in arrival order would make the update depend on network timing.
 - **[D]** Diagnostics: requested update norm, actually applied update (after the FP16 cast), fraction of coordinates that changed, tied-tensor behaviour. **[E]** `milestone2_history.json` reports `update_max_diff = 0.00030517578125` with the worst parameter `model.embed_tokens.weight`.
 - Memory note: the largest FP32 `direction` (embedding) is 136,134,656 × 4 B ≈ 545 MB if built for the whole tensor. Every operation is elementwise and the candidate loop is the innermost one, so accumulating one chunk at a time gives the same bits and needs only about one chunk (1 MiB) of FP32 memory.
 
-> **Implementation status (2026-10-05): NOT finished.** The specification tests exist (`tests/es/test_standardize.py`, `tests/es/test_update.py`; independent NumPy oracle, FP32-versus-FP16 and candidate-order cases chosen so that the data can tell them apart: on 200,000 elements and 8 candidates, FP16 accumulation differed in 111,076 elements and a different candidate order in 41). `src/heteroes/es/update.py` is an unfinished draft. Decisions proposed but not approved: O4 (canonical epsilon), rejecting duplicate seeds, the report fields (`noop`, `coefficients`, `requested_l2`, `applied_l2`, `changed`, `numel`).
+> **Implementation status (2026-10-05, evening): implemented, checked on the 5070 Ti only.** `src/heteroes/es/update.py` (`standardize_rewards`, `apply_es_update_`, `UpdateReport`) passes the specification tests (`pytest tests` with the real model: 325 passed; the real-model test compares CPU with GPU bit for bit and keeps the extra GPU memory below 256 MiB). A hand-made mutation check (27 faults) caught everything except two equivalent mutants. Not run on the 1660S. The specification tests exist (`tests/es/test_standardize.py`, `tests/es/test_update.py`; independent NumPy oracle, FP32-versus-FP16 and candidate-order cases chosen so that the data can tell them apart: on 200,000 elements and 8 candidates, FP16 accumulation differed in 111,076 elements and a different candidate order in 41). O4 (canonical epsilon) and the seed checks (integers only, no duplicates, section 3) are decided. Proposed but not approved: the report fields (`noop`, `coefficients`, `requested_l2`, `applied_l2`, `changed`, `numel`).
 
 ## 9. Cross-machine same-candidate regression (the gate)
 
@@ -280,8 +288,8 @@ For one candidate (same revision, schema, seed, σ, workload) on the 5070 Ti and
 | O1 | Schema hash for production | (a) include aliases + `schema_version` (hash changes from the probe); (b) keep the probe-compatible hash and validate aliases separately | **DECIDED 2026-10-01: (a)** — MASTER requires aliases in schema identity; portability is re-proven at the gate anyway |
 | O2 | Perturbation arithmetic | (a) GPU FP16 `add_`; (b) CPU FP32 then cast; (c) GPU explicit FP32 separate ops then cast | **DECIDED 2026-10-03: (c)**, evidence in §5 (bit-identical on 4 environments incl. the 1660S). (a) kept as a noted alternative (also identical across the 4 environments) |
 | O3 | Restore oracle | abs-max diff (current) vs bitwise | **DECIDED 2026-10-01: bitwise** (abs-max only as optional diagnostic) |
-| O4 | ε used in the update | canonical FP16 ε upcast to FP32 vs realized difference | Canonical ε (proposed; the step-5 tests assume it; not yet formally approved) |
-| O5 | Candidate seed rule | (a) explicit seed list stored in the manifest; (b) derive from (experiment, generation, candidate index) | Decide at manifest freeze (step 8); keep fixed `[0..3]` for the frozen regression |
+| O4 | ε used in the update | canonical FP16 ε upcast to FP32 vs realized difference | **DECIDED 2026-10-05: canonical ε** (option A); measurements and accepted trade-off in §8 |
+| O5 | Candidate seed rule | (a) explicit seed list stored in the manifest; (b) derive from (experiment, generation, candidate index) | **Deferred to step 8 (owner, 2026-10-05)**; keep fixed `[0..3]` for the frozen regression. What one update accepts (integers, no duplicates) is decided, see section 3 |
 | O6 | NumPy pin | exact version on both machines (which one?) | Pin one exact version (2.5.3 was probed on the 5070 Ti) on both machines, and confirm Python 3.14 on the 1660S has a wheel for it |
 
 ## Appendix A — Known deviations of the probes/notebook from this contract

@@ -25,23 +25,46 @@ Small, concrete clean-up items. Not a roadmap (see `HETEROES_LLM_MASTER.md`) and
       differing entry.
 - [ ] `perturb.py`: unused `import math` since the checks moved to `checks.py`; trailing whitespace.
 
-## update-wip  (`src/heteroes/es/update.py`, unfinished, step 5)
-The tests `tests/es/test_standardize.py` and `tests/es/test_update.py` are the specification and are red until
-this is done. Formula: `docs/numerical-contract.md` section 8. Problems of the current draft:
-- [ ] Syntax error: `ParameterNoiseAddress(candidate_seed=` is cut off, and the loop over chunks and candidates
-      is missing.
-- [ ] `DEFAULT_ETA = 1e-9` must be `1e-8` (contract section 7); `DEFAULT_CHUNK_ELEMENTS` is redefined instead of
-      imported from `heteroes.noise.contracts`; `resolve_tensors` should come from `heteroes.model.schema`;
-      remove unused imports.
-- [ ] No-op test is inverted: `if np.all(z_rewards != 0)` returns "noop" for real signal. It must be
-      `if not z_rewards.any()`.
-- [ ] `UpdateReport` only has `noop`; the tests expect `noop`, `coefficients`, `requested_l2`, `applied_l2`,
-      `changed`, `numel`.
-- [ ] `standardize_rewards`: reject non-finite rewards, empty input and anything that is not 1-D
-      (`ValueError`); `eta` must be positive and finite (the draft only rejects infinity).
-- [ ] `apply_es_update_`: validate everything before the first write: schema, every tensor, lengths of seeds and
-      rewards, duplicate seeds, finite `alpha`, `eta`; then accumulate in FP32 per chunk, candidate loop innermost,
-      multiply and add as separate operations, cast to FP16 once, wrap the writes in `torch.no_grad()`.
+## update-polish  (`src/heteroes/es/update.py`; step 5 itself is done, 05/10 evening)
+- [ ] Docstrings for `UpdateReport`, `standardize_rewards` and `apply_es_update_`. State what `apply_es_update_` does NOT
+      guarantee: a runtime failure while writing (for example CUDA out of memory) leaves the model half updated, so the
+      caller must restore from the snapshot (same limit as `perturb_model_`).
+- [ ] Comments and style: the comment `# agentic esopt update style`, trailing whitespace, the `# compare` stub, the
+      messages of the errors (typos like "lenght"), type hints (`candidate_seeds: Sequence[int]`).
+- [ ] The fields of `UpdateReport` are not formally approved (they come from what `test_update.py` expects).
+- [ ] Not run on the 1660S (CPU and GPU agree on the 5070 Ti only).
+
+## dedupe  (idea raised 05/10, nothing decided; touching verified code needs approval)
+- [ ] Chunk geometry (`start = chunk_index * chunk_elements`, `chunk_length`) is computed in `engine.iter_parameter_noise_chunks`
+      and would be computed again in `update.py`. Options: (1) use `num_chunks` / `chunk_length` in update and keep one
+      multiplication; (2) add a small helper to the engine that yields `(chunk_index, start, n)` and use it in both places
+      (refactor of verified code, `tests/noise/test_engine.py` would guard it).
+- [ ] The prelude `resolve_tensors` + `_check_param` for every tensor is repeated in `take_snapshot`,
+      `diff_from_snapshot`, `restore_from_snapshot_`, `perturb_model_` and `apply_es_update_`: candidate for one helper.
+- [ ] `schema.hash` + `ParameterNoiseAddress(...)` is built in `perturb_model_` and in update (only twice: leave for now).
+
+## monitoring  (future; not needed for the step 5-9 gate)
+Rounding errors that decision O4 = A accepts (contract section 8). Today they are measured once by scratch
+scripts that are not in the repo; the goal is to make them visible later for debugging, monitoring and comparison
+with other methods (for example the realized difference as the update direction).
+- [ ] Put the two measurements of section 8 into a reusable script or function under `scripts/` (with a test on a toy
+      model), so they can be re-run for other sigma, other seeds and ES-modified weights.
+- [ ] Add optional diagnostics to the update report: cosine and relative L2 error between the canonical epsilon and
+      the realized perturbation `(theta' - theta) / sigma`, and the fraction of unchanged elements after perturb.
+      The extra pass costs time and memory (the realized perturbation needs theta before and after), so it must be opt-in.
+- [ ] Log these numbers per generation in the run artifacts (manifest / events) once those exist.
+- [ ] Open question: does the rounding of theta' bias learning (effect on reward or on the aggregated update direction)?
+      Not measured. Needs a real ES run before any claim.
+- [ ] Investigate the maximum element-wise relative error 0.747 of the FP16 cast of epsilon (suspected: very small |epsilon|).
+- [ ] Compare with option B (realized difference as the direction) only if monitoring shows the error growing, for
+      example at small sigma or after many generations.
+
+## seeds  (decide at step 8, manifest freeze)
+- [ ] O5: where candidate seeds come from (explicit list vs derived from experiment, generation, candidate index).
+- [ ] Seed range: the engine accepts any integer; JSON read by JavaScript keeps integers exactly only up to 2^53.
+      Restrict the range or write seeds as strings in the manifest (also a question for the engine contract).
+- [ ] `engine.derive_chunk_seed` itself does not check the seed type (`"1"` gives the same noise as `1`).
+      Today only `apply_es_update_` checks; consider checking in `ChunkNoiseAddress` too.
 
 ## schema-polish  (`src/heteroes/model/schema.py`)
 - [ ] The two existing `TODO(...)` comments in the source: `schema-validation` (`__post_init__`) and
