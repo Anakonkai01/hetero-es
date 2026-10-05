@@ -64,7 +64,7 @@ A tied tensor is **one** entry: perturbed once, restored once, updated once.
 
 > **Decided (O1 = a):** the production schema hash includes `aliases` and `schema_version`. The probe hash `152e9d82…88e1` (which had no alias information) will **not** equal the production hash, and therefore the production noise bytes for seed 0 will differ from the probe's bytes (the schema hash is part of the noise address). Consequences: (1) the golden vectors in §4.4 belong to the **probe** schema hash and remain valid only as evidence for the generation recipe; production golden vectors must be regenerated from the production hash; (2) the cross-machine regression (§9) must be re-run with the production hash. See decision O1 in §11.
 
-> **Implementation status (2026-10-02):** `find_alias_groups`, `SchemaEntry`, `ParameterSchema` (`to_dict`, `hash`) and `build_parameter_schema` exist in `src/heteroes/model/schema.py`, with tests in `tests/model/test_schema.py` (covers S1–S6, S9). Not implemented yet: `to_json` / `from_json`, `verify_model_matches`, `resolve_tensors`, `SchemaEntry.__post_init__` validation (S7 is covered only by the non-floating check in `build_parameter_schema`; S8 not covered). Measured on the Qwen2.5-0.5B layout: 290 entries, 494,032,768 elements, one alias group; hashing the entries in the probe's format reproduces the probe hash `152e9d82…88e1`; production hash (aliases + `schema_version`) is `0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec`.
+> **Implementation status (2026-10-02; S9 also passed on the 1660S on 2026-10-03):** `find_alias_groups`, `SchemaEntry`, `ParameterSchema` (`to_dict`, `hash`) and `build_parameter_schema` exist in `src/heteroes/model/schema.py`, with tests in `tests/model/test_schema.py` (covers S1–S6, S9). Not implemented yet: `to_json` / `from_json`, `verify_model_matches`, `resolve_tensors`, `SchemaEntry.__post_init__` validation (S7 is covered only by the non-floating check in `build_parameter_schema`; S8 not covered). Measured on the Qwen2.5-0.5B layout: 290 entries, 494,032,768 elements, one alias group; hashing the entries in the probe's format reproduces the probe hash `152e9d82…88e1`; production hash (aliases + `schema_version`) is `0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec`.
 
 ### 2.5 API sketch [P] — partly implemented, see status note above
 
@@ -147,7 +147,9 @@ From the full probe (candidate_seed 0, **probe** schema hash `152e9d82e61d6610a4
 | 2 | model.layers.0.self_attn.q_proj.bias | 0 | 896 | `56d3f8f512beadbebf9cbf0b1e6fda5143f7940375fc4af99a3437943af12602` |
 | 289 | model.norm.weight | 0 | 896 | `3ed137fd746d5f0655e81731e39e80df6857404c5644dad5dd40b6a6767a25ae` |
 
-Because the engine takes `schema_hash` as a plain string input, these vectors can be unit-tested **without loading the model**, and they tie the production engine directly to the physical evidence. Proposed test: the engine, given the probe schema hash string, must reproduce every row above. A NumPy upgrade that changes `standard_normal` then fails loudly in CI instead of silently changing candidates (see ADR-001 on NumPy's compatibility policy).
+These are the **probe** vectors (probe schema hash). Production-schema-hash vectors for the same five chunks are in `tests/noise/test_engine.py` (`GOLDEN_PRODUCTION`); they were produced by this engine and then reproduced independently by the standalone script on the 1660S, Colab and Kaggle, so they are cross-machine evidence for the production hash too (see the comment above that table).
+
+Because the engine takes `schema_hash` as a plain string input, these vectors can be unit-tested **without loading the model**, and they tie the production engine directly to the physical evidence. Implemented as tests N-G in `tests/noise/test_engine.py`. Original proposal: the engine, given the probe schema hash string, must reproduce every row above. A NumPy upgrade that changes `standard_normal` then fails loudly in CI instead of silently changing candidates (see ADR-001 on NumPy's compatibility policy).
 
 ### 4.5 Tests to write [P]
 
@@ -225,9 +227,9 @@ For one candidate (same revision, schema, seed, σ, workload) on the 5070 Ti and
 
 ## 10. Reproducibility limits
 
-- Evidence covers two x86_64 Linux machines (same kernel/glibc), NumPy 2.5.3 and 2.5.2, one model revision. It is **not** a universal guarantee.
+- Evidence covers four x86_64 Linux environments (RTX 5070 Ti, GTX 1660 SUPER, Colab T4, Kaggle T4), NumPy 2.1.3, 2.4.5, 2.5.2 and 2.5.3, Python 3.12 to 3.14, one model revision (full-model noise hash and perturbed-weight hash identical in all four; `artifacts/regression/2026-10-03-o2-perturbation/`). The original 29/09 probe covered the two physical machines only. It is **not** a universal guarantee (no ARM, no other OS, one seed, one σ for perturbation).
 - **NumPy policy (verified in the NumPy 2.5.3 docstrings):** `PCG64` guarantees that a fixed seed always produces the same integer stream; `Generator` — which provides `standard_normal` — has **no** version-compatibility guarantee ("as better algorithms evolve the bit stream may change"). The exact NumPy version MUST be pinned and recorded; the golden-vector test (§4.4) detects drift.
-- The `ai` environment has NumPy 2.4.5. On 2026-10-02 the five golden vectors of §4.4 were reproduced under it (a scratch script, no model needed), so 2.4.5 is now a third NumPy version (with 2.5.2 and 2.5.3) known to give the same bytes for those five chunks. This is NOT a full-model check (2,105 chunks); do not claim more than that.
+- The `ai` environment has NumPy 2.4.5. On 2026-10-02 the five golden vectors of §4.4 were reproduced under it (scratch script). On 2026-10-03 the full-model noise hash (2,105 chunks) was reproduced under 2.4.5 (5070 Ti) and 2.1.3 (Colab, Kaggle) by `scripts/o2_cross_gpu_check.py`, in addition to 2.5.2 and 2.5.3 from the 29/09 probe. **O6 (which single version to pin) is still open**; `pyproject.toml` does not pin NumPy yet.
 - Canonical bytes assume little-endian storage (true for both machines).
 - Even with identical weights, GPU inference may produce different outputs on different architectures; this is measured separately (§9).
 

@@ -89,7 +89,7 @@ Network: ordinary IP (LAN or Tailscale). SSH is for setup, debugging and adminis
 | Product layer | Users, workspaces, roles (Admin/Researcher/Viewer), experiment metadata, non-preemptive experiment queue, dashboards, artifact browser | B | No (B starts from mock contracts) |
 | Coordinator | Runs one experiment: admission (C1), candidate dispatch (C2), lease/result validation (C3), ES update, publishing model versions (C4) | A | No |
 | Worker | Holds a model replica at an assigned version; perturb → evaluate → restore; reports reward + diagnostics. Has no optimizer of its own | A | No (logic exists only in the notebook and probes) |
-| Numerical Core (`src/heteroes/`) | Library: ParameterSchema, CanonicalNoiseEngine, perturb/restore, reward standardization, ES update | A | Package skeleton only |
+| Numerical Core (`src/heteroes/`) | Library: ParameterSchema, CanonicalNoiseEngine, perturb/restore, reward standardization, ES update | A | ParameterSchema and CanonicalNoiseEngine v1 implemented and tested (03/10); perturb, restore, standardization, update not yet |
 | Ledger | Durable record of candidates, attempts, leases, commits/rejections (planned: SQLite/WAL) | A | No |
 | Artifact store | Checkpoints, manifests, events, regression evidence | A writes, B reads | Probe evidence only (`artifacts/probes/`) |
 
@@ -234,21 +234,21 @@ Four things make this system different from a typical web backend:
 
 **Bottom line:** the coordinator–worker shape is common and not a contribution. The value is in the **contracts** inside it: portable noise across GPUs, exactly-once candidate commits, and measured admission and synchronization decisions.
 
-## 11. Current implementation boundary (2026-09-30)
+## 11. Current implementation boundary (updated 2026-10-05)
 
-**Verified** (evidence in STATUS and `artifacts/probes/2026-09-29/`):
+**Verified** (evidence in STATUS, `artifacts/probes/2026-09-29/` and `artifacts/regression/2026-10-03-o2-perturbation/`):
 
 - Single-GPU ES reference (notebook) runs end-to-end on both GPUs in FP16.
 - Exact snapshot restore (max diff 0.0) on both.
 - Native CUDA RNG gives different noise across the two GPUs → rejected as the canonical noise source.
-- NoiseEngine v1 probe: identical noise bytes over the full model on both machines.
+- NoiseEngine v1: identical noise bytes over the full model on the 5070 Ti, the 1660S, a Colab T4 and a Kaggle T4; package module with 117 tests.
+- Perturbation arithmetic (O2 = option c, FP32 multiply then add, then cast): identical perturbed-weight hash on the same four environments (computed by a script; no package function yet).
+
+**Done in order:** 1. ParameterSchema, 2. CanonicalNoiseEngine module, 3. unit / contract tests.
 
 **Next, in order:**
 
-1. ParameterSchema
-2. CanonicalNoiseEngine module
-3. Unit / contract tests
-4. Route every perturb / reconstruct / update path through the one engine
+4. Route every perturb / reconstruct / update path through the one engine (perturb function first, then bitwise restore)
 5. FP32 update accumulation + known notebook bugs
 6. Local regression
 7. Cross-machine same-candidate regression (5070 Ti vs 1660 S)

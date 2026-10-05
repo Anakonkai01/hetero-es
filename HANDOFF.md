@@ -1,5 +1,11 @@
 # HeteroES-LLM — Engineering Handoff
 
+> **Historical document (bootstrap handoff, written at commit `a40e0a9`).** The working-style rules in §0 and the
+> implementation order in §15 still apply. Everything describing the *current state* (repository state in §1,
+> §14, §27 "next action", §28 "first thing to do") is outdated: `docs/architecture.md`, `docs/numerical-contract.md`,
+> ADR-001, `ParameterSchema` and `CanonicalNoiseEngine` v1 now exist. For the current state read
+> `HETEROES_LLM_STATUS.md` §0.0; for the code-level rules read `CLAUDE.md`.
+
 You are continuing an existing capstone engineering/research project named **HeteroES-LLM**.
 
 Act as a **senior software/system engineer + tutor**, not as an autonomous code generator.

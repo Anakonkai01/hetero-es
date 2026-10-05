@@ -1,6 +1,6 @@
 # HeteroES-LLM — Status
 
-**Last updated:** 30/09/2026, notebook + prior-art source audit  
+**Last updated:** 05/10/2026 (documentation sync; latest evidence 03/10/2026, commit `50a8bd4`). Section 0.0 is the newest; sections 1–13 were written on 30/09 and are older background — where they disagree with 0.0, 0.0 wins.  
 **Canonical design/specification:** `HETEROES_LLM_MASTER.md`  
 **Purpose:** current implementation truth, verified evidence, blockers, artifacts, and the exact next action.
 
@@ -10,7 +10,7 @@
 
 ### 0.0 Progress update — 03/10/2026 (CanonicalNoiseEngine v1 implemented)
 
-State at commit `21b14e1`, pushed to `origin` (`git@github.com:Anakonkai01/hetero-es.git`, branch `feat/canonical-noise-engine`).
+State at commit `50a8bd4`, pushed to `origin` (`git@github.com:Anakonkai01/hetero-es.git`, branch `feat/canonical-noise-engine`). The engine itself was complete at `21b14e1`; later commits added the cross-GPU script (`7b73e03`), the evidence (`b34788f`) and the O2 decision (`50a8bd4`).
 
 - **Implemented:** `src/heteroes/noise/contracts.py` (`ENGINE_VERSION`, `DEFAULT_CHUNK_ELEMENTS`, `ChunkNoiseAddress`, `ParameterNoiseAddress`) and `src/heteroes/noise/engine.py` (`derive_chunk_seed`, `generate_chunk_noise`, `num_chunks`, `chunk_length`, `iter_parameter_noise_chunks`, `generate_parameter_noise`). `pytest tests`: 116 passed, 1 skipped (the real-Qwen-layout test S9, which needs `HETEROES_QWEN_PATH`). Tests were mutation-checked by hand on scratch copies (about 40 deliberate faults, all caught); this is not automated in CI.
 - **Verified on the 5070 Ti host only (NumPy 2.4.5, Python 3.12):** with the probe schema hash as input the new engine reproduces the full probe result: 2,105 chunks, 494,032,768 elements, global hash `816c15300c45ca9e85468b7787bc4ce313a87d1e74e6429e48eb9e6d357dafda` (the value both physical machines recorded on 29/09). That check was a scratch script and is not in the repo yet (candidate for a slow test). The 5 probe golden vectors and the real-embedding stream (520 chunks) are in the test suite.
@@ -18,14 +18,14 @@ State at commit `21b14e1`, pushed to `origin` (`git@github.com:Anakonkai01/heter
 - **Done later on 03/10/2026 (evening): cross-machine check, including the 1660S.** Evidence and README in `artifacts/regression/2026-10-03-o2-perturbation/`; script `scripts/o2_cross_gpu_check.py`, commit `7b73e03`. `pytest tests` passes (117 tests) on the 5070 Ti and on the GTX 1660 SUPER (Python 3.14.4, NumPy 2.5.2, torch 2.13). The script (a copy of the engine plus the perturbation study) also passed all checks on a Colab T4 and a Kaggle T4 (NumPy 2.1.3). In all four environments: 10 golden vectors, layout and schema hashes, the full-model noise hash `816c15300c45ca9e…` (2,105 chunks) and the production schema hash match. So the production golden vectors are now cross-machine evidence (engine and recipe), no longer only a regression guard.
 - **O2 decided (option c):** `fp16( fp32(θ) + fp32(σ)·fp32(ε) )` with each step a separate operation. The perturbed weights of all 494,032,768 elements have the identical whole-model hash (`8aa3eb9af895cb4a…`) for GPU, CPU (NumPy and torch), whole tensor or per chunk, in the four environments (RTX 5070 Ti, GTX 1660 SUPER, Colab T4, Kaggle T4). Alternative (a), `add_(alpha)`, was also identical across the four environments (`ce33fa32…`) and is kept as a noted alternative; it differs from (c) in 167 elements, and its CPU version differs from its GPU version in about 9.6 to 9.9% of the elements. All-FP16 steps and CPU `add_` are not portable (cause unknown). Details and limits in `docs/numerical-contract.md` section 5. **Limits:** one seed, one σ, four x86_64 Linux environments, computed by a script (no perturb function in the package yet). Warning (inference, not verified): fusing the multiply and the add into one kernel, or `torch.compile`, could change the bits.
 - **Cross-machine gate status:** noise bytes and perturbed-weight hashes are covered on the 1660S (and the three other environments); restore, the 16 predictions and the reward are NOT done yet.
-- **Not done:** perturb / restore on a real model (O2 perturbation arithmetic still open; O3 bitwise restore already decided), FP32 ES update (O4 open), seed rule (O5 open), NumPy pin (O6 open, check the 1660S wheel), `SchemaEntry.__post_init__`, `to_json` / `from_json`, `verify_model_matches`, cross-machine same-candidate regression. Code-level TODOs: `grep -rn TODO src/`.
+- **Not done:** perturb / restore functions in the package (the arithmetic is decided, O2 = c, and the bitwise oracle is decided, O3; neither has a package function yet), FP32 ES update (O4 open), seed rule (O5 open), NumPy pin (O6 open, check the 1660S wheel), `SchemaEntry.__post_init__`, `to_json` / `from_json`, `verify_model_matches`, cross-machine same-candidate regression. Code-level TODOs: `grep -rn TODO src/`.
 - **Next action:** write the perturb function in the package using option (c) (test: bit-identical to the NumPy method; test that it does not use `add_(alpha)`), then bitwise restore from a snapshot (chunked so it fits the 6 GB worker), then the same-candidate regression (predictions, reward, restore) on both GPUs.
 
 ### 0.1 Earlier progress — 02/10/2026 (ParameterSchema; superseded by the section above)
 
 - `docs/architecture.md`, `docs/numerical-contract.md`, `docs/adr/ADR-001` are merged on `feat/canonical-noise-engine` (drafts; the owner has not reviewed every rule). Decisions taken: **O1** schema hash includes aliases + `schema_version`; **O3** restore oracle is bitwise. Open: O2 (perturbation arithmetic, settled by the cross-machine gate), O4 (epsilon used in update), O5 (seed rule), O6 (pin one NumPy version, check the 1660S wheel).
 - **Implemented:** `src/heteroes/model/schema.py` — `find_alias_groups`, `SchemaEntry`, `ParameterSchema`, `build_parameter_schema`; 27 tests in `tests/model/test_schema.py` (S9 real-layout test runs only with `HETEROES_QWEN_PATH`). 12 deliberate mutations of the code are all caught by the tests.
-- **Verified on real Qwen layout (local checkpoint, 5070 Ti host only):** 290 entries, 494,032,768 elements, one alias group (`model.embed_tokens.weight` + `lm_head.weight`); the probe-format schema hash `152e9d82…` is reproduced; production schema hash is `0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec`. Not yet run on the 1660S.
+- **Verified on real Qwen layout (local checkpoint, 5070 Ti host only):** 290 entries, 494,032,768 elements, one alias group (`model.embed_tokens.weight` + `lm_head.weight`); the probe-format schema hash `152e9d82…` is reproduced; production schema hash is `0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec`. (Update 03/10: S9 also passed on the 1660S, see `artifacts/regression/2026-10-03-o2-perturbation/1660s_pytest.txt`.)
 - **New evidence/fixes to earlier claims:** the five golden vectors reproduce under NumPy 2.4.5 (env `ai`); PyTorch docs state that reproducibility is not guaranteed across platforms and a forum thread reports `torch.rand` diverging across 3090/A100/H100 for large tensors (sources in ADR-001). The CUDA-RNG probe is one seed / one run per machine, so its scope is limited (see ADR-001).
 - **Not done:** `__post_init__` validation, `to_json`/`from_json`, `verify_model_matches`; production `CanonicalNoiseEngine`; golden vectors for the production hash; everything after step 2 of the implementation order (§11). Code-level TODOs: `grep -rn TODO src/`.
 - **Next action (done on 03/10, see 0.0):** `src/heteroes/noise/contracts.py` + `engine.py` (CanonicalNoiseEngine) with the golden-vector test, using the production schema hash.
@@ -289,6 +289,8 @@ This is currently the strongest C4 numerical evidence in the project.
 
 ### 6.1 What code actually exists now
 
+> **Update 03/10/2026:** the package now exists for the first two layers — `ParameterSchema` and `CanonicalNoiseEngine` v1 with 117 tests (see 0.0). Perturb, restore, ES update and everything distributed below are still not implemented. The paragraph below is the 30/09 state.
+
 As of 30/09/2026, the **actual HeteroES implementation is still primarily the modified notebook/reference plus probe scripts**. There is not yet a production `src/heteroes/...` package, worker/coordinator service, durable ledger, scheduler runtime, or integrated production `CanonicalNoiseEngine`. Do not infer implementation from MASTER roadmap text.
 
 The uploaded/current notebook is `ES_Milestone1_2_modified.ipynb` (the conversation upload may carry a duplicate suffix). It remains useful as the numerical prototype, but its saved outputs are **not a clean single-session Run-All artifact**:
@@ -358,8 +360,8 @@ Also preserve the earlier unmatched-runtime comparison if still present; rename 
 
 Despite the strong physical/numerical progress, the following are **not implemented/verified yet**:
 
-- [ ] production `CanonicalNoiseEngine` module integrated into ES reference.
-- [ ] cross-machine same-candidate regression using production engine.
+- [ ] production `CanonicalNoiseEngine` module integrated into ES reference (module done and verified on 4 environments on 03/10; perturb/restore/update do not use it yet).
+- [ ] cross-machine same-candidate regression using production engine (noise bytes and perturbed-weight hashes done on 03/10; predictions, reward, restore not done).
 - [ ] remote HeteroES worker service / health / capability endpoint.
 - [ ] frozen two-node generation.
 - [ ] SQLite/WAL durable ledger.
@@ -403,7 +405,9 @@ B should start with mock contracts/wireframes and must understand candidate vs a
 | Canonical restore | **Pass, exact** on both |
 | CUDA-native seed replay | **Fail for cross-worker identity**; do not use as canonical C4 replay |
 | Canonical NoiseEngine v1 probe | **Full-model PASS for identical noise bytes** across the two physical machines |
-| Production NoiseEngine integration | **NEXT** |
+| Production NoiseEngine module | **Done 03/10** — package module + tests; full-model noise hash and production golden vectors identical on 5070 Ti, 1660S, Colab T4, Kaggle T4 |
+| Perturbation arithmetic (O2) | **Decided 03/10: option (c)** — whole-model perturbed-weight hash identical on the same 4 environments (computed by script) |
+| Perturb / restore / FP32 update in the package | **NEXT** |
 | Two-node generation | Not yet |
 | C3 ledger/failure semantics | Not yet |
 | C1/C2 experiments | Not yet |

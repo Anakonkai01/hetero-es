@@ -12,7 +12,7 @@ Contributions are organized as C1 (admission: who may/should work), C2 (executio
 
 - `HETEROES_LLM_MASTER.md` — what the system *should be*: scope, architecture, numerical contract, C1–C4, roadmap, claim boundaries (mostly Vietnamese). Never put transient status here.
 - `HETEROES_LLM_STATUS.md` — what is *actually true now*: verified evidence, failures, blockers, artifacts, exact next action. Roadmap dates in MASTER are targets, not evidence.
-- `HANDOFF.md` — working-style rules and the current engineering sequence.
+- `HANDOFF.md` — working-style rules and the engineering sequence (bootstrap-era document; its "current state" sections are outdated, see its header note).
 - `notebooks/ES_Milestone1_2_modified.ipynb` — historical numerical prototype (functions like `build_parameter_schema`, `find_parameter_aliases`, `apply_perturbation`, `es_update_direction`, `restore_canonical_parameters`, `run_es_generation`). Its saved outputs are mixed/stale; it is **not** a clean Run-All artifact. Do not grow it into the framework; port logic into `src/heteroes/` with tests.
 - `docs/architecture.md` — big picture: one ES generation end to end, components, identity layers, state ownership, alternatives.
 - `docs/numerical-contract.md` — exact numerical rules (schema, NoiseEngine v1 byte recipe, golden vectors, perturb/restore/update, the cross-machine gate) and open decisions O1–O6. Rules are tagged [E]vidence / [D]ecided / [P]roposed / [OPEN].
@@ -36,14 +36,15 @@ The user is an experienced software engineer new to ES, numerical reproducibilit
 
 Only after that gate: minimal worker/coordinator HTTP, one remote candidate, frozen two-node generation, SQLite ledger, fake-worker fault tests, C1/C2, sync experiments. **No FastAPI/scheduling/DB/Docker work before the cross-machine same-candidate regression passes.** Docs planned for this phase: `docs/architecture.md`, `docs/numerical-contract.md`, `docs/adr/ADR-001-canonical-noise-engine.md` — only these, not the full docs tree.
 
-Modules: `src/heteroes/model/schema.py` (ParameterSchema — implemented, see `docs/numerical-contract.md` §2 status note), `src/heteroes/noise/contracts.py` and `src/heteroes/noise/engine.py` (planned); tests mirror packages under `tests/{es,model,noise}/`.
+Modules (implemented): `src/heteroes/model/schema.py` (ParameterSchema, see `docs/numerical-contract.md` §2 status note), `src/heteroes/noise/contracts.py` (`ChunkNoiseAddress`, `ParameterNoiseAddress`) and `src/heteroes/noise/engine.py` (CanonicalNoiseEngine v1). Not yet written: perturb, restore, ES update (`src/heteroes/es/` is empty). Tests mirror packages under `tests/{es,model,noise}/`. `scripts/o2_cross_gpu_check.py` is a self-contained cross-GPU check (it contains a *copy* of the engine so it can run on Colab/Kaggle; the package engine is the only production implementation).
 
-Decided so far (2026-10-01): O1 — production schema hash includes aliases and `schema_version`; O3 — restore oracle is bitwise. Still open: O2, O4, O5, O6 (see contract §11). Code-level TODOs live in `src/` (`grep -rn TODO src/`).
+Decided so far: O1 (2026-10-01) — production schema hash includes aliases and `schema_version`; O3 (2026-10-01) — restore oracle is bitwise; O2 (2026-10-03) — perturbation arithmetic is option (c), see below. Still open: O4, O5, O6 (see contract §11). Code-level TODOs live in `src/` (`grep -rn TODO src/`).
 
 ## Numerical contract (non-negotiable invariants)
 
 - **Native CUDA RNG is not canonical.** `torch.randn_like(..., device="cuda")` with the same seed produced different noise on the two GPUs even with matched torch/CUDA/transformers. Never use it for cross-worker candidate identity.
-- **CanonicalNoiseEngine v1** (`numpy_pcg64_normal_f32_to_f16_v1`): logical chunk identity (schema hash, engine version, candidate seed, parameter index, chunk index, fixed `chunk_elements`) → SHA-256 → first 128 bits little-endian → NumPy `PCG64` → standard normal in FP32 → cast/apply as FP16. `chunk_elements = 262144`. Verified byte-identical over the full model on both machines (NumPy 2.5.3 vs 2.5.2); still pin and record the exact NumPy version — NumPy's `Generator` (which provides `standard_normal`) explicitly has no cross-version stream guarantee. Golden chunk hashes for regression tests are in `docs/numerical-contract.md` §4.4.
+- **CanonicalNoiseEngine v1** (`numpy_pcg64_normal_f32_to_f16_v1`): logical chunk identity (schema hash, engine version, candidate seed, parameter index, chunk index, fixed `chunk_elements`) → SHA-256 → first 128 bits little-endian → NumPy `PCG64` → standard normal in FP32 → cast/apply as FP16. `chunk_elements = 262144`. Verified byte-identical over the full model (2,105 chunks) in four environments — RTX 5070 Ti, GTX 1660 SUPER, Colab T4, Kaggle T4 — with NumPy 2.1.3, 2.4.5, 2.5.2, 2.5.3 (`artifacts/regression/2026-10-03-o2-perturbation/`); still pin and record the exact NumPy version — NumPy's `Generator` (which provides `standard_normal`) explicitly has no cross-version stream guarantee. Golden chunk hashes (probe schema hash and production schema hash) are in `tests/noise/test_engine.py` and `docs/numerical-contract.md` §4.4.
+- **Perturbation arithmetic (O2 = c):** `fp16( fp32(θ) + fp32(σ)·fp32(ε) )`, with the multiply and the add as **separate** eager PyTorch operations (`t = ε.float() * σ`, then `(θ.float() + t).half()`). Do not use `add_(eps, alpha=sigma)`, all-FP16 arithmetic, a fused kernel or `torch.compile` for canonical perturbation — those either were measured non-portable or would need re-verification with `scripts/o2_cross_gpu_check.py`. σ is recorded as its exact float32 value.
 - **One implementation only**: worker perturbation, coordinator reconstruction, ES update, replay/debug, and regression all call the same engine.
 - Noise identity must NOT depend on operational metadata (worker_id, attempt_id, lease, retry number, reward, workload, arrival time). A retry on another worker reconstructs the same noise. Chunk identity is independent of execution order.
 - **ParameterSchema** defines canonical order/name/shape/dtype/numel and alias (tied-weight) mapping; the alias map is part of the schema hash. Discover aliases with `named_parameters(remove_duplicate=False)`; a group has aliases when `len(names) > 1` (the notebook's `> 2` was a bug; Qwen has exactly 1 tied group: `model.embed_tokens.weight` + `lm_head.weight`). Tied params get one perturbation entry. `id(param)`/`data_ptr()` may be used only as in-process keys — never serialized or hashed. Schema hash ≠ model weights identity.
@@ -63,7 +64,10 @@ pip install -e .
 pytest                                   # testpaths = tests
 pytest tests/noise/test_engine.py::test_name   # single test
 HETEROES_QWEN_PATH=<dir of any Qwen2.5-0.5B checkpoint> pytest tests/model   # also runs the real-layout test S9 (otherwise skipped)
+# HETEROES_QWEN_PATH=Qwen/Qwen2.5-0.5B-Instruct also works (HF cache). Expected: 117 passed (116 + 1 skipped without it)
 ```
+
+- The 1660S copy lives at `~/projects/heteroes/hetero-es` (venv `~/projects/heteroes/.venv`, Python 3.14.4, NumPy 2.5.2, torch 2.13). SSH there only when the user asks for a specific action.
 
 - Large weights (`*.safetensors`, `*.pt`, …) and `artifacts/**/checkpoints/` are gitignored; keep hashes/config/commands instead. Probe/regression JSON evidence goes under `artifacts/` and must not be overwritten.
 - SSH is for setup/debug only; the runtime will use its own service protocol.
