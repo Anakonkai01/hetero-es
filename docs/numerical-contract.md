@@ -176,6 +176,8 @@ Because the engine takes `schema_hash` as a plain string input, these vectors ca
   - **Limits:** one seed (0); one σ (1e-3) in the four-environment comparison (σ = 0.01 was run on the 5070 Ti only, with the same class structure but more elements differing between (a) and (c)); all four environments are x86_64 Linux; the compute method was exercised by a script, the repo has no perturb function yet.
 - Every parameter entry is perturbed exactly once (tied tensors once, §2.3).
 
+> **Implementation status (2026-10-05):** `perturb_parameter_` and `perturb_model_` in `src/heteroes/es/perturb.py`. On the real model (original checkpoint, seed 0, sigma = float32(1e-3), production schema hash) the package reproduces the whole-model hash `8aa3eb9af895cb4a…` of the four environments, on the 5070 Ti GPU and with the GPU hidden (CPU only). Not run on the 1660S yet. All checks (schema, dtype, contiguity, sigma) happen before the first write; a failure while writing (for example out of memory) still leaves the model half perturbed, which is what restore (§6) is for.
+
 ## 6. Restore
 
 - **[D][E]** Canonical restore = copy θ back from a full snapshot, then verify. Arithmetic undo (`−σ·ε`) is never a correctness oracle.
@@ -184,11 +186,47 @@ Because the engine takes `schema_hash` as a plain string input, these vectors ca
 - **[D]** Verification MUST be memory-safe on the 6 GB 1660S: per tensor, and per chunk for the embedding tensor if needed — without weakening the oracle.
 - A restore failure MUST mark the worker unusable for further candidates (quarantine, C3).
 
+> **Implementation status (2026-10-05):** `take_snapshot`, `diff_from_snapshot`, `restore_from_snapshot_` and `RestoreError` in `src/heteroes/es/snapshot.py`. The snapshot is a CPU copy; the oracle compares raw bits through an int16 view, slab by slab (default 2^24 elements), so NaN and the sign of zero cannot hide a difference and no full-size temporary is created on the device. On the real model, perturb followed by restore gives back identical weights (SHA-256 equal) with less than 256 MiB of extra GPU memory (bound asserted; the actual peak was not recorded). Not run on the 1660S yet. A slab size below 1 is rejected, because an empty range would make the oracle answer "identical".
+
 ## 7. Reward standardization
 
 - **[D][E]** Rewards MUST be finite; NaN/Inf → reject the generation input, never coerce to 0. Infrastructure failures are not rewards.
 - **[E]** Notebook formula: `μ = mean(R)`, `s = std(R, population)`; if `s < η` → all `z = 0` (no-op update, logged); else `z = (R − μ) / (s + η)`, with `η = 1e-8`.
 - **[P]** Record `η` in the config. Note it is used twice: as the "equal rewards" threshold and as the division guard.
+- **[P]** Implementation (`src/heteroes/es/update.py`, tests `tests/es/test_standardize.py`): the input is any 1-D sequence of real numbers (list, tuple, NumPy array; ints allowed). It is converted to float64 first, the mean and the population standard deviation (`ddof = 0`) are computed in float64, and the coefficients are rounded **once** to float32. The returned float32 array is the exact set of coefficients every machine uses. Record `ddof = 0` and `η` next to the coefficients in the manifest.
+
+### 7.1 How other ES code handles rewards (looked up 2026-10-05)
+
+Purpose: to see which choices of this contract are common practice and which are deliberate differences.
+
+**How reliable this is.** The code of the four projects below was read through a page summarizer (WebFetch), **not checked word for word against the raw files**. The EGGROLL paper was read directly from the PDF text. `es-at-scale` was read at `main`, while STATUS audited commit `574a9d1`; they may differ. Re-open the exact file before quoting any line in the report.
+
+| | es-at-scale | understanding-es | Agentic-ESOpt | EGGROLL (HyperscaleES) |
+|---|---|---|---|---|
+| Formula | `(r - mean) / (std + 1e-8)` | `(r - mean) / (std + eps)` | z-score `(r - mean) / (std + eps)`, eps default `1e-8`; also `centered_rank`, or off | `(r - mean) / sqrt(var + 1e-5)` |
+| ddof | NumPy default (0) | parameter `ddof` | parameter `ddof` | `jnp.var` default (0) |
+| Reward dtype | Python float, stats in NumPy float64 | `np.float64` array | `torch.float32` | not seen in the parts read |
+| NaN / Inf | not checked; a timeout becomes `0.0` | not checked (a missing candidate raises `RuntimeError`) | checked, `ValueError` | not seen |
+| Equal rewards | no special case | no special case | returns zeros when `n <= ddof` | not seen |
+| Update accumulation | FP32; noise generated in the model dtype, then `.to(float32)`; cast to the model dtype once | FP32; noise generated directly in FP32 | FP32; cast once | cast to `param.dtype` at the end |
+| Adding one candidate | `term = noise.float() * coeff; acc.add_(term)` | `total_delta.add_(noise, alpha=scale*weight)` | same as understanding-es | not read |
+| Candidate order | order of the seed list | sequential `zip(seeds, weights, strict=True)` | sequential | not read |
+
+EGGROLL is different in kind (read directly from the paper): Algorithm 1 and Eq. (6) use the **raw** fitness, `M <- M + (alpha/N) * sum_i E_i * f(M + sigma*E_i)`, with `1/sigma` absorbed into the learning rate. For the LLM experiments it normalizes the score **per question** with a global variance and averages over the questions (the paper compares this to the group relative advantage of GRPO). For the int8 model (appendix H.2) the coefficient is `sign(s+ - s-)` of an antithetic pair, so only `{-1, 0, 1}` is possible. The `HyperscaleES` code (through the summarizer) puts `1e-5` **inside** the square root of the variance and multiplies the update by `sqrt(N)`.
+
+**Measured (2026-10-05, scratch script, not in the repo).** The common formula `(r - mean) / (std + 1e-8)` applied to 20,000 random cases in which *all rewards are identical*: in float64 some coefficients are not zero in 6,269 cases, but the largest `|z|` is 4.4e-8 (harmless); in float32 some coefficients are not zero in 8,898 cases and the largest `|z|` is 0.96 (a false signal). Cause: the mean of identical numbers can be off by one rounding unit, and dividing by `std + eps` with `std = 0` turns that into a coefficient of order 1 in float32. This is a test of the *formula*, not a run of those projects' code; whether their code is exposed depends on their reward values (rewards that are exact in binary, such as `k/16`, are not affected). It is the reason this contract computes the statistics in float64 and uses an explicit threshold `s < eta` that returns all zeros.
+
+**What follows for this contract**
+
+- Common practice, same as here: z-score with `eta = 1e-8`, population standard deviation, FP32 accumulation, one cast to the model dtype at the end. `es-at-scale` also generates the noise in the model dtype and upcasts it to FP32, which is what option O4 proposes (section 8).
+- Deliberate differences:
+  1. Non-finite rewards are rejected. Only Agentic-ESOpt checks; `es-at-scale` turns a timeout into `0.0`, which MASTER already says not to copy.
+  2. An explicit `s < eta` rule instead of relying on the epsilon (see the measurement above).
+  3. The multiply and the add are separate operations. All three projects use the fused `add_(..., alpha=...)`; they do not need the same bits on different machines, this project does (same lesson as O2 in section 5).
+  4. Placement of `alpha/N`: they fold it into the coefficient of each candidate; section 8 accumulates `sum z_i * eps_i` first, then divides by `N`, then multiplies by `alpha`. The mathematics is the same, the rounding is not. This is a contract choice, not a defect of either.
+- Not adopted here, kept as future options: per-question normalization and antithetic sign shaping (EGGROLL), rank transform (Agentic-ESOpt). MASTER says not to change the recipe silently.
+
+Sources: EGGROLL paper https://arxiv.org/pdf/2511.16652 and page https://eshyperscale.github.io/ ; code https://github.com/ESHyperscale/HyperscaleES , https://github.com/VsonicV/es-at-scale , https://github.com/yunpengba7/understanding-es , https://github.com/zz1358m/Agentic-ESOpt .
 
 ## 8. ES update
 
@@ -207,7 +245,9 @@ for each schema entry k (canonical order):
 - **[P]** `ε_i` in the update is the canonical FP16 noise upcast to FP32 — the same bytes the worker used. (The realized perturbation `fp16(θ + σε) − θ` differs slightly from `σε` because of rounding; the update uses the canonical ε, not the realized difference.)
 - **[D]** Candidate order is canonical because floating-point addition is not associative: summing in arrival order would make the update depend on network timing.
 - **[D]** Diagnostics: requested update norm, actually applied update (after the FP16 cast), fraction of coordinates that changed, tied-tensor behaviour. **[E]** `milestone2_history.json` reports `update_max_diff = 0.00030517578125` with the worst parameter `model.embed_tokens.weight`.
-- Memory note: the largest FP32 `direction` (embedding) is 136,134,656 × 4 B ≈ 545 MB.
+- Memory note: the largest FP32 `direction` (embedding) is 136,134,656 × 4 B ≈ 545 MB if built for the whole tensor. Every operation is elementwise and the candidate loop is the innermost one, so accumulating one chunk at a time gives the same bits and needs only about one chunk (1 MiB) of FP32 memory.
+
+> **Implementation status (2026-10-05): NOT finished.** The specification tests exist (`tests/es/test_standardize.py`, `tests/es/test_update.py`; independent NumPy oracle, FP32-versus-FP16 and candidate-order cases chosen so that the data can tell them apart: on 200,000 elements and 8 candidates, FP16 accumulation differed in 111,076 elements and a different candidate order in 41). `src/heteroes/es/update.py` is an unfinished draft. Decisions proposed but not approved: O4 (canonical epsilon), rejecting duplicate seeds, the report fields (`noop`, `coefficients`, `requested_l2`, `applied_l2`, `changed`, `numel`).
 
 ## 9. Cross-machine same-candidate regression (the gate)
 
@@ -240,7 +280,7 @@ For one candidate (same revision, schema, seed, σ, workload) on the 5070 Ti and
 | O1 | Schema hash for production | (a) include aliases + `schema_version` (hash changes from the probe); (b) keep the probe-compatible hash and validate aliases separately | **DECIDED 2026-10-01: (a)** — MASTER requires aliases in schema identity; portability is re-proven at the gate anyway |
 | O2 | Perturbation arithmetic | (a) GPU FP16 `add_`; (b) CPU FP32 then cast; (c) GPU explicit FP32 separate ops then cast | **DECIDED 2026-10-03: (c)**, evidence in §5 (bit-identical on 4 environments incl. the 1660S). (a) kept as a noted alternative (also identical across the 4 environments) |
 | O3 | Restore oracle | abs-max diff (current) vs bitwise | **DECIDED 2026-10-01: bitwise** (abs-max only as optional diagnostic) |
-| O4 | ε used in the update | canonical FP16 ε upcast to FP32 vs realized difference | Canonical ε |
+| O4 | ε used in the update | canonical FP16 ε upcast to FP32 vs realized difference | Canonical ε (proposed; the step-5 tests assume it; not yet formally approved) |
 | O5 | Candidate seed rule | (a) explicit seed list stored in the manifest; (b) derive from (experiment, generation, candidate index) | Decide at manifest freeze (step 8); keep fixed `[0..3]` for the frozen regression |
 | O6 | NumPy pin | exact version on both machines (which one?) | Pin one exact version (2.5.3 was probed on the 5070 Ti) on both machines, and confirm Python 3.14 on the 1660S has a wheel for it |
 

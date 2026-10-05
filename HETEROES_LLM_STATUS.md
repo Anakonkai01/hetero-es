@@ -1,6 +1,6 @@
 # HeteroES-LLM — Status
 
-**Last updated:** 05/10/2026 (documentation sync; latest evidence 03/10/2026, commit `50a8bd4`). Section 0.0 is the newest; sections 1–13 were written on 30/09 and are older background — where they disagree with 0.0, 0.0 wins.  
+**Last updated:** 05/10/2026 (end of the 05/10 session, branch `feat/perturb-restore-update`, see 0.0). Section 0.0 is the newest; sections 1–13 were written on 30/09 and are older background — where they disagree with 0.0, 0.0 wins.  
 **Canonical design/specification:** `HETEROES_LLM_MASTER.md`  
 **Purpose:** current implementation truth, verified evidence, blockers, artifacts, and the exact next action.
 
@@ -8,7 +8,19 @@
 
 ## 0. NEXT SESSION — START HERE
 
-### 0.0 Progress update — 03/10/2026 (CanonicalNoiseEngine v1 implemented)
+### 0.0 Progress update — 05/10/2026 (perturb and bitwise restore implemented; step 5 in progress)
+
+Branch `feat/perturb-restore-update`, built on `main` at `2bd2073`. Pushed up to `ec73c87`; the commits made at the end of the 05/10 session are local until the owner pushes (check `git status -sb`).
+
+- **Implemented and committed:** `src/heteroes/es/perturb.py` (`perturb_parameter_`, `perturb_model_`: contract O2 = (c), every check done before the first write), `src/heteroes/es/snapshot.py` (`take_snapshot`, `diff_from_snapshot`, `restore_from_snapshot_`, `RestoreError`; bitwise comparison through an int16 view, in slabs of `slab_elements`), `src/heteroes/es/checks.py` (shared input checks), and `resolve_tensors` plus `SchemaMismatchError` in `src/heteroes/model/schema.py`. Tests: `tests/es/test_perturb.py`, `test_perturb_model.py`, `test_snapshot.py` and `tests/model/test_resolve_tensors.py`.
+- **Measured (5070 Ti only; torch 2.10, NumPy 2.4.5, Python 3.12):** `pytest tests` without the two step-5 test files gives 258 passed and 3 skipped. With the real model (`HETEROES_QWEN_PINNED_PATH` and `HETEROES_QWEN_PATH` pointing at the Hugging Face snapshot of `Qwen/Qwen2.5-0.5B-Instruct@7ae55760…`) it gives 261 passed. On the real model the package's `perturb_model_` (seed 0, sigma = float32(1e-3)) gives a whole-model hash that starts with `8aa3eb9af895cb4a`, the same as the four environments of 03/10, on the GPU and also with the GPU hidden (CPU only). Perturb followed by restore gives back the original bits (SHA-256 of all weights equal). The extra GPU memory during restore stays below 256 MiB (that bound is asserted in a test; the actual peak was not recorded).
+- **Mutation checks (by hand on scratch copies, not automated):** perturb 15 deliberate faults, `perturb_model_`/`resolve_tensors` 16, snapshot 14. All were caught except equivalent mutants, i.e. faults that cannot change any result: the `float(np.float32(sigma))` line (PyTorch already rounds a Python scalar to float32; the line is kept on purpose), a `zip` without `strict=True`, and a sigma pre-check that passes `0.0` (sigma is the same for every tensor, so the first write already fails). Three gaps in my own tests were found this way and closed.
+- **Not verified:** none of this package code has run on the 1660S yet (restore on 6 GB is untested); the real-model hash covers seed 0 and sigma = 1e-3 only; predictions and reward are not part of any package test yet.
+- **Step 5 (reward standardization + FP32 ES update) is in progress and NOT finished.** The specification tests were written first and committed as work in progress: `tests/es/test_standardize.py` and `tests/es/test_update.py`. `src/heteroes/es/update.py` is unfinished and currently has a syntax error, so **`pytest tests` stops at collection** until it is finished. Meanwhile run `pytest tests --ignore=tests/es/test_standardize.py --ignore=tests/es/test_update.py`. The known problems of the unfinished file are listed in `TODO.md` (group `update-wip`).
+- **Decisions (proposed, not formally approved):** O4 = canonical FP16 epsilon upcast to FP32 (the step-5 tests assume it); duplicate candidate seeds are rejected (tentative, O5 is still open); `standardize_rewards` computes in float64 and returns float32, with default eta = 1e-8. A comparison with how other ES code handles rewards is in `docs/numerical-contract.md` section 7.1 (read through a page summarizer, not checked word for word).
+- **Next action:** (1) finish `update.py` against the written tests (formula in `docs/numerical-contract.md` section 8); (2) mutation-check it on a scratch copy of `src`; (3) step 6: one candidate end to end on the 5070 Ti (load the pinned model, snapshot, perturb with the package, run the 16 prompts, restore, bitwise check, JSON artifact); (4) step 7: the same on the 1660S at the same commit (SSH only when the owner asks for a specific action) and compare noise, perturbed hash, 16 predictions, reward and restore; (5) update this section.
+
+### 0.1 Earlier progress — 03/10/2026 (CanonicalNoiseEngine v1 implemented; superseded by the section above)
 
 State at commit `50a8bd4`, pushed to `origin` (`git@github.com:Anakonkai01/hetero-es.git`, branch `feat/canonical-noise-engine`). The engine itself was complete at `21b14e1`; later commits added the cross-GPU script (`7b73e03`), the evidence (`b34788f`) and the O2 decision (`50a8bd4`).
 
@@ -21,7 +33,7 @@ State at commit `50a8bd4`, pushed to `origin` (`git@github.com:Anakonkai01/heter
 - **Not done:** perturb / restore functions in the package (the arithmetic is decided, O2 = c, and the bitwise oracle is decided, O3; neither has a package function yet), FP32 ES update (O4 open), seed rule (O5 open), NumPy pin (O6 open, check the 1660S wheel), `SchemaEntry.__post_init__`, `to_json` / `from_json`, `verify_model_matches`, cross-machine same-candidate regression. Code-level TODOs: `grep -rn TODO src/`.
 - **Next action:** write the perturb function in the package using option (c) (test: bit-identical to the NumPy method; test that it does not use `add_(alpha)`), then bitwise restore from a snapshot (chunked so it fits the 6 GB worker), then the same-candidate regression (predictions, reward, restore) on both GPUs.
 
-### 0.1 Earlier progress — 02/10/2026 (ParameterSchema; superseded by the section above)
+### 0.2 Earlier progress — 02/10/2026 (ParameterSchema; superseded by the sections above)
 
 - `docs/architecture.md`, `docs/numerical-contract.md`, `docs/adr/ADR-001` are merged on `feat/canonical-noise-engine` (drafts; the owner has not reviewed every rule). Decisions taken: **O1** schema hash includes aliases + `schema_version`; **O3** restore oracle is bitwise. Open: O2 (perturbation arithmetic, settled by the cross-machine gate), O4 (epsilon used in update), O5 (seed rule), O6 (pin one NumPy version, check the 1660S wheel).
 - **Implemented:** `src/heteroes/model/schema.py` — `find_alias_groups`, `SchemaEntry`, `ParameterSchema`, `build_parameter_schema`; 27 tests in `tests/model/test_schema.py` (S9 real-layout test runs only with `HETEROES_QWEN_PATH`). 12 deliberate mutations of the code are all caught by the tests.

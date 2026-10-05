@@ -31,15 +31,17 @@ The user is an experienced software engineer new to ES, numerical reproducibilit
 - Don't dump large code blocks to paste blindly. Map concepts to familiar SE ideas (schema ≈ contract, CandidateDescriptor ≈ immutable job DTO, lease ≈ temporary job ownership, NoiseEngine ≈ pure deterministic function, cross-machine regression ≈ contract test across implementations).
 - Don't invent ES behavior, prior-art behavior, or numerical guarantees; check source or label as inference.
 
+What has worked in practice (steps 4a–4c, 05/10): the AI writes the tests first (independent oracle written by hand from the contract, plus a test that the test data can tell the right answer from the known wrong one); the owner writes the code from hints; then the AI runs the tests and a **mutation check on a scratch copy of `src`** (never on the repo): deliberately break the code and confirm a test turns red; a mutant that stays green is either an equivalent mutant (say so) or a gap in the tests (add a test). The owner chooses names (adapt the tests to them) and has the final say on decisions: state the trade-off once, then follow. Commits are made by the AI only when the owner asks, and without a Co-Authored-By line.
+
 ## Implementation order — do not reorder casually
 
 1. ParameterSchema / numerical contract → 2. production CanonicalNoiseEngine → 3. unit/contract tests → 4. route all perturb/reconstruct/update paths through the one engine → 5. FP32 update accumulation + notebook numerical debt → 6. local regression → 7. cross-machine same-candidate regression (5070 Ti vs 1660S) → 8. freeze candidate/noise manifest v1 → 9. commit + evidence + STATUS update.
 
 Only after that gate: minimal worker/coordinator HTTP, one remote candidate, frozen two-node generation, SQLite ledger, fake-worker fault tests, C1/C2, sync experiments. **No FastAPI/scheduling/DB/Docker work before the cross-machine same-candidate regression passes.** Docs planned for this phase: `docs/architecture.md`, `docs/numerical-contract.md`, `docs/adr/ADR-001-canonical-noise-engine.md` — only these, not the full docs tree.
 
-Modules (implemented): `src/heteroes/model/schema.py` (ParameterSchema, see `docs/numerical-contract.md` §2 status note), `src/heteroes/noise/contracts.py` (`ChunkNoiseAddress`, `ParameterNoiseAddress`) and `src/heteroes/noise/engine.py` (CanonicalNoiseEngine v1). Not yet written: perturb, restore, ES update (`src/heteroes/es/` is empty). Tests mirror packages under `tests/{es,model,noise}/`. `scripts/o2_cross_gpu_check.py` is a self-contained cross-GPU check (it contains a *copy* of the engine so it can run on Colab/Kaggle; the package engine is the only production implementation).
+Modules (implemented): `src/heteroes/model/schema.py` (ParameterSchema, `resolve_tensors`, `SchemaMismatchError`; see `docs/numerical-contract.md` §2 status note), `src/heteroes/noise/contracts.py` (`ChunkNoiseAddress`, `ParameterNoiseAddress`), `src/heteroes/noise/engine.py` (CanonicalNoiseEngine v1), `src/heteroes/es/perturb.py` (`perturb_parameter_`, `perturb_model_`), `src/heteroes/es/snapshot.py` (`take_snapshot`, `diff_from_snapshot`, `restore_from_snapshot_`, `RestoreError`), `src/heteroes/es/checks.py` (shared input checks). **In progress (05/10): `src/heteroes/es/update.py`** (`standardize_rewards`, `apply_es_update_`): unfinished, has a syntax error, and its specification tests `tests/es/test_standardize.py` and `tests/es/test_update.py` are red, so plain `pytest tests` stops at collection until it is finished (see STATUS 0.0 and `TODO.md`, group `update-wip`). Tests mirror packages under `tests/{es,model,noise}/`. `scripts/o2_cross_gpu_check.py` is a self-contained cross-GPU check (it contains a *copy* of the engine so it can run on Colab/Kaggle; the package engine is the only production implementation).
 
-Decided so far: O1 (2026-10-01) — production schema hash includes aliases and `schema_version`; O3 (2026-10-01) — restore oracle is bitwise; O2 (2026-10-03) — perturbation arithmetic is option (c), see below. Still open: O4, O5, O6 (see contract §11). Code-level TODOs live in `src/` (`grep -rn TODO src/`).
+Decided so far: O1 (2026-10-01) — production schema hash includes aliases and `schema_version`; O3 (2026-10-01) — restore oracle is bitwise; O2 (2026-10-03) — perturbation arithmetic is option (c), see below. Still open: O4 (proposed: canonical epsilon upcast to FP32; the step-5 tests assume it, not formally approved), O5, O6 (see contract §11). Code-level TODOs live in `src/` (`grep -rn TODO src/`).
 
 ## Numerical contract (non-negotiable invariants)
 
@@ -65,7 +67,14 @@ pip install -e .
 pytest                                   # testpaths = tests
 pytest tests/noise/test_engine.py::test_name   # single test
 HETEROES_QWEN_PATH=<dir of any Qwen2.5-0.5B checkpoint> pytest tests/model   # also runs the real-layout test S9 (otherwise skipped)
-# HETEROES_QWEN_PATH=Qwen/Qwen2.5-0.5B-Instruct also works (HF cache). Expected: 117 passed (116 + 1 skipped without it)
+
+# Real-model tests need the ORIGINAL pinned checkpoint (an ES-modified one gives different hashes). On the 5070 Ti box it is in the HF cache:
+SNAP=~/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775
+HETEROES_QWEN_PINNED_PATH=$SNAP HETEROES_QWEN_PATH=$SNAP pytest tests      # about 15 s on the GPU
+
+# While step 5 is unfinished (05/10): skip its two unfinished test files, otherwise collection fails
+pytest tests --ignore=tests/es/test_standardize.py --ignore=tests/es/test_update.py
+# expected then: 258 passed + 3 skipped without the env vars, 261 passed with them (5070 Ti, 05/10)
 ```
 
 - The 1660S copy lives at `~/projects/heteroes/hetero-es` (venv `~/projects/heteroes/.venv`, Python 3.14.4, NumPy 2.5.2, torch 2.13). SSH there only when the user asks for a specific action.
