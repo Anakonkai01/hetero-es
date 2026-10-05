@@ -1,5 +1,5 @@
 from heteroes.model.schema import ParameterSchema, resolve_tensors
-from heteroes.es.perturb import _check_param
+from heteroes.es.checks import _check_param
 from heteroes.model.schema import SchemaMismatchError
 
 from dataclasses import dataclass

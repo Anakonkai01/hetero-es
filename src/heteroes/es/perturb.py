@@ -1,30 +1,10 @@
 from heteroes.noise.contracts import ParameterNoiseAddress, DEFAULT_CHUNK_ELEMENTS
 from heteroes.noise.engine import iter_parameter_noise_chunks
 from heteroes.model.schema import ParameterSchema, resolve_tensors
-
+from heteroes.es.checks import _check_param_sigma, SUPPORT_DTYPE
 import math
 import torch 
-import numpy as np 
-
-SUPPORT_DTYPE = torch.float16
-
-
-
-def _check_param(param: torch.Tensor) -> None: 
-    if not param.is_contiguous(): 
-        # torch.reshape would silently write into a copy and leave param unchanged
-        raise ValueError("param must be contiguous")
-    if param.dtype != SUPPORT_DTYPE: 
-        raise TypeError(f"param must be {SUPPORT_DTYPE}, got {param.dtype}")
-
-def _check_sigma(sigma: float) -> None: 
-    if not math.isfinite(sigma): 
-        raise ValueError("sigma must not be Nan/Inf")
-    
-def _check_param_sigma(param: torch.Tensor, sigma: float) -> None: 
-    _check_param(param)
-    _check_sigma(sigma)
-    
+import numpy as np     
     
 # for param float 16 only
 # perturb inplace, (not copy to new tensor)
