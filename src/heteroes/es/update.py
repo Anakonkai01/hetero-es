@@ -1,32 +1,51 @@
-from heteroes.es.perturb import perturb_model_, resolve_tensors
-from heteroes.es.snapshot import take_snapshot, diff_from_snapshot, restore_from_snapshot_
-from heteroes.model.schema import ParameterSchema
-from heteroes.es.checks import _check_param, _check_sigma
-from heteroes.noise.engine import iter_parameter_noise_chunks
-from heteroes.noise.contracts import ParameterNoiseAddress
+from heteroes.model.schema import ParameterSchema, resolve_tensors
+from heteroes.es.checks import _check_param
+from heteroes.noise.engine import num_chunks, generate_chunk_noise, chunk_length
+from heteroes.noise.contracts import ParameterNoiseAddress, DEFAULT_CHUNK_ELEMENTS
 
 from dataclasses import dataclass
 import math
 import torch 
 import torch.nn as nn 
 import numpy as np
+import numbers
 
 
 DEFAULT_ETA = 1e-9
-DEFAULT_CHUNK_ELEMENTS = 2**18
 
 
 @dataclass(frozen=True)
 class UpdateReport: 
-    noop: bool
+    noop: bool # no operations 
+    coefficients: tuple[float, ...]
+    requested_l2: float
+    applied_l2: float
+    changed: int
+    numel: int
+    
+    
 
 
 def standardize_rewards(rewards, eta=DEFAULT_ETA) -> np.ndarray: 
+    if not (math.isfinite(eta) and eta > 0): 
+        raise ValueError("eta must finite and > 0") 
+    
     # calculate in float64 then cast to float32 
-    rewards = np.array(rewards, dtype=np.float64)
+    rewards = np.asarray(rewards, dtype=np.float64)
+    if rewards.ndim != 1: 
+        raise ValueError("rewards must be 1d-array")
+    if not rewards.size > 0: 
+        raise ValueError("rewards size must > 0")
+    if not np.isfinite(rewards).all(): 
+        raise ValueError("rewards has value being Nan/Inf") 
+
     # z = (r - mean(r)) / (std(r) + eta)
     mean_r = rewards.mean(dtype=np.float64)
     std_r = rewards.std(ddof=0, dtype=np.float64)
+    
+    # no signal
+    if std_r < eta: 
+        return np.zeros(rewards.size, dtype=np.float32)
 
     z = (rewards - mean_r) / (std_r + np.float64(eta))
     
@@ -36,34 +55,102 @@ def standardize_rewards(rewards, eta=DEFAULT_ETA) -> np.ndarray:
 
 # agentic esopt update style
 def apply_es_update_(model: nn.Module, schema: ParameterSchema, candidate_seeds: list[int], rewards, alpha: float, chunk_elements: int=DEFAULT_CHUNK_ELEMENTS, eta=DEFAULT_ETA) -> UpdateReport: 
-    # check 
     # resolve tensor
     tensors = resolve_tensors(model, schema)
     # check param 
     for tensor in tensors: 
         _check_param(tensor)
-    # check eta 
-    if math.isinf(eta): 
-        raise ValueError("Eta being Nan/Inf")
-
+    total_numel = sum(t.numel() for t in tensors) 
+    
+    # z already check eta and rewards
     z_rewards = standardize_rewards(rewards, eta)
     
-    # TODO: need more info for this case
-    if np.all(z_rewards != 0):
-        return UpdateReport(
-            noop=True
-        )
+    # check alpha 
+    if not math.isfinite(alpha): 
+        raise ValueError("alpha must not be Nan/Inf")
+    
+    # check chunks 
+    if not chunk_elements >= 1: 
+        raise ValueError("chunk_elements must be >=1") 
 
+    # check len candidate 
+    if len(candidate_seeds) != len(z_rewards):
+        raise ValueError("length candidate_seeds != lenght rewards")
+    
+    # check seed 
+    for seed in candidate_seeds: 
+        # check if seed is int or np.int 
+        if not (isinstance(seed, numbers.Integral) and not isinstance(seed, bool)): 
+            raise TypeError("seed must be in int or np.int")
+    
+    # check duplicated seed 
+    if len(set(candidate_seeds)) != len(candidate_seeds): 
+        raise ValueError("seed being duplicated") 
+       
+    # check zero array, mean no signal
+    if not z_rewards.any():
+        return UpdateReport(
+            noop=True,
+            coefficients=(0.0,) * len(z_rewards),
+            requested_l2=0.0,
+            applied_l2=0.0,
+            changed=0,
+            numel=total_numel
+        ) 
+    
+    schema_hash = schema.hash
+    changed = 0
+    requested_l2 = 0.0 
+    applied_l2 = 0.0 
     with torch.no_grad(): 
         for entry, tensor in zip(schema.entries, tensors): 
             numel = tensor.numel()
-            parameter_noise_address = ParameterNoiseAddress(
-                candidate_seed=
-            )
+            n_chunks = num_chunks(numel=numel, chunk_elements=chunk_elements)
+            for chunk_index in range(n_chunks): 
+                start = chunk_index * chunk_elements
+                n = chunk_length(numel, chunk_index, chunk_elements)
+                chunk = tensor.view(-1)[start: start + n]
+                acc = torch.zeros(n, dtype=torch.float32, device=tensor.device)
+                
+                
+                for seed, zi in zip(candidate_seeds, z_rewards, strict=True): 
+                    param_noise_addr = ParameterNoiseAddress(
+                        candidate_seed=seed,
+                        schema_hash=schema_hash,
+                        parameter_index=entry.index,
+                        chunk_elements=chunk_elements, 
+                    )
+
+                    eps = generate_chunk_noise(param_noise_addr.chunk(chunk_index), n)
+                    eps = torch.from_numpy(eps).to(device=tensor.device, dtype=torch.float32)
+
+                    term = eps * float(zi)
+                    acc = acc + term 
+                
+                direction = acc / len(candidate_seeds)
+                update = direction * float(np.float32(alpha))
+                new = (chunk.to(torch.float32) + update).to(torch.float16)
+                # compare 
+                
+                changed += int((new.view(torch.int16) != chunk.view(torch.int16)).sum())
+                requested_l2 += float((update.double() ** 2).sum())
+                applied_l2 += float(((new.double() - chunk.double())**2).sum())
+                 
+                chunk.copy_(new)
 
 
+    requested_l2 = math.sqrt(requested_l2)
+    applied_l2 = math.sqrt(applied_l2)
+    coefficients = tuple(float(v) for v in z_rewards)
 
-    
+    return UpdateReport(
+        noop=False,
+        coefficients=coefficients,
+        requested_l2=requested_l2,
+        applied_l2=applied_l2,
+        changed=changed,
+        numel=total_numel,
+    )
         
     
         

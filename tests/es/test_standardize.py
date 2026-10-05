@@ -81,7 +81,7 @@ def test_equal_rewards_give_all_zero_coefficients(rewards):
 
 
 def test_a_spread_below_eta_counts_as_equal_and_above_eta_does_not():
-    assert not standardize_rewards([1.0, 1.0 + 1e-9]).any()  # std 5e-10 < 1e-8
+    assert not standardize_rewards([1.0, 1.0 + 1e-9]).any()  # std 5e-10 < 1e-9
     assert standardize_rewards([1.0, 1.0 + 1e-3]).any()
 
 

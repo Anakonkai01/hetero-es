@@ -14,7 +14,7 @@ from heteroes.noise.contracts import DEFAULT_CHUNK_ELEMENTS, ParameterNoiseAddre
 from heteroes.noise.engine import generate_parameter_noise
 
 DEVICES = ["cpu"] + (["cuda"] if torch.cuda.is_available() else [])
-ETA = 1e-8
+ETA = 1e-9
 
 
 class HalfToy(nn.Module):
@@ -271,6 +271,108 @@ def test_bad_arguments_are_rejected_and_the_model_untouched(kwargs):
         apply_es_update_(model, schema, arguments.pop("seeds"), arguments.pop("rewards"), **arguments)
 
     assert same_bits(model, before)
+
+
+@pytest.mark.parametrize(
+    "bad_seed",
+    [
+        pytest.param(1.0, id="float"),
+        pytest.param(True, id="bool"),
+        pytest.param("1", id="str"),
+        pytest.param(None, id="None"),
+    ],
+)
+def test_a_seed_that_is_not_a_real_integer_is_rejected_and_the_model_untouched(bad_seed):
+    # The engine turns the seed into text, so 1 and "1" give the SAME noise, while 1 and 1.0 or True give
+    # different noise. A set-based duplicate check would be wrong in both directions, so the type is checked first.
+    # Wrong type -> TypeError (like a wrong dtype); duplicate value -> ValueError.
+    model = make_model()
+    schema = build_parameter_schema(model)
+    before = snapshot_bits(model)
+
+    with pytest.raises(TypeError):
+        apply_es_update_(model, schema, [0, bad_seed, 2, 3], REWARDS, alpha=0.05)
+
+    assert same_bits(model, before)
+
+
+def test_a_string_seed_is_not_silently_a_duplicate_of_the_same_integer():
+    # [1, "1"] would produce identical noise for two candidates; it must be refused, not applied.
+    model = make_model()
+    schema = build_parameter_schema(model)
+    before = snapshot_bits(model)
+
+    with pytest.raises(TypeError):
+        apply_es_update_(model, schema, [1, "1", 2, 3], REWARDS, alpha=0.05)
+
+    assert same_bits(model, before)
+
+
+def test_numpy_integer_seeds_give_the_same_result_as_python_integers():
+    # The engine prints np.int64(1) exactly like 1, so they are the same candidate.
+    plain, numpy_seeds = make_model(), make_model()
+    schema = build_parameter_schema(plain)
+
+    apply_es_update_(plain, schema, SEEDS, REWARDS, alpha=0.05, chunk_elements=8)
+    apply_es_update_(numpy_seeds, schema, [np.int64(s) for s in SEEDS], REWARDS, alpha=0.05, chunk_elements=8)
+
+    assert all(torch.equal(a, b) for a, b in zip(plain.parameters(), numpy_seeds.parameters()))
+
+
+def test_a_numpy_integer_is_a_duplicate_of_the_same_python_integer():
+    model = make_model()
+    schema = build_parameter_schema(model)
+    before = snapshot_bits(model)
+
+    with pytest.raises(ValueError):
+        apply_es_update_(model, schema, [1, np.int64(1), 2, 3], REWARDS, alpha=0.05)
+
+    assert same_bits(model, before)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        pytest.param(dict(chunk_elements=0), id="chunk_elements zero"),
+        pytest.param(dict(chunk_elements=-8), id="chunk_elements negative"),
+        pytest.param(dict(seeds=[0, 1, 2]), id="fewer seeds than rewards"),
+        pytest.param(dict(rewards=[0.5, 0.5, 0.5]), id="fewer rewards than seeds"),
+    ],
+)
+def test_bad_arguments_are_rejected_even_when_the_rewards_are_equal(kwargs):
+    # Equal rewards would otherwise hide the mistake behind a silent "no-op" answer.
+    model = make_model()
+    schema = build_parameter_schema(model)
+    before = snapshot_bits(model)
+    arguments = dict(seeds=SEEDS, rewards=[0.5] * 4, alpha=0.05, chunk_elements=8)
+    arguments.update(kwargs)
+
+    with pytest.raises(ValueError):
+        apply_es_update_(model, schema, arguments.pop("seeds"), arguments.pop("rewards"), **arguments)
+
+    assert same_bits(model, before)
+
+
+def test_changed_is_counted_by_raw_bits_so_a_flip_of_the_sign_of_zero_counts():
+    # Contract O3: bits decide, not numeric comparison (+0.0 == -0.0 as numbers).
+    # alpha = 0.0 makes every update element a zero whose sign is the sign of the direction, and
+    # -0.0 + (+0.0) = +0.0 while -0.0 + (-0.0) = -0.0. So exactly the elements with a positive direction
+    # change their bits (from -0.0 to +0.0) although no number changes.
+    class Zeros(nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.w = nn.Parameter(torch.full((1000,), -0.0, dtype=torch.float16))
+
+    model = Zeros()
+    schema = build_parameter_schema(model)
+    assert (model.w.detach().view(torch.int16) == -32768).all()  # premise: all are -0.0
+
+    report = apply_es_update_(model, schema, [0, 1], [0.0, 1.0], alpha=0.0, chunk_elements=64)
+
+    flipped = int((model.w.detach().view(torch.int16) != -32768).sum())
+    assert 0 < flipped < 1000  # premise: the data has both signs of direction
+    assert report.changed == flipped
+    assert bool((model.w.detach() == 0).all())  # as numbers nothing changed
 
 
 def test_a_model_that_does_not_match_the_schema_is_rejected_and_untouched():
