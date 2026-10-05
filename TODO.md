@@ -40,6 +40,15 @@ Small, concrete clean-up items. Not a roadmap (see `HETEROES_LLM_MASTER.md`) and
 - [ ] `candidate.py`: `model_weights_sha256` reads every tensor through the CPU (3 times per candidate): 0.6 s each on the 5070 Ti and 4.2 s each on the 1660S (about 12 s of a 40 s run there).
 - [ ] Docstrings are short; the `evaluate_model` batch-size assumption (one prompt at a time, no padding) is only a comment.
 
+## learning  (after the first experiment of 06/10; see `artifacts/experiments/2026-10-06-learning-pilot/README.md`)
+- [ ] The replication of alpha 1e-3 did not meet S2 (7 of 10): run more seed families (same criteria, written before) before saying that the control confirms the direction.
+- [ ] Save the final weights (or a checkpoint) of a run, so that the model that learned can be inspected and evaluated later.
+- [ ] sigma = 1e-3 looks strong (candidates are 0.06 to 0.11 below their parent, only 0 to 3 of 8 beat it): try a smaller sigma with the same criteria; also alpha between 1e-3 and 3e-3 and a larger N.
+- [ ] A held-out set of another distribution (3-term sums, parentheses) and the frozen 16-question workload before and after: does the gain transfer, or hurt?
+- [ ] A baseline of random directions (not only the anti-step) and, later, a comparison with another method.
+- [ ] The CPU noise generation (about 2 minutes of the 2.2 minutes per generation) is the cost: parallelize the chunks or generate on demand; the noise is independent per chunk, so this is possible without changing a byte.
+- [ ] Put the experiment into the package with tests if it is to be reused (today: experiment scripts in the artifact folder, not tested).
+
 ## dedupe  (idea raised 05/10, nothing decided; touching verified code needs approval)
 - [ ] Chunk geometry (`start = chunk_index * chunk_elements`, `chunk_length`) is computed in `engine.iter_parameter_noise_chunks`
       and would be computed again in `update.py`. Options: (1) use `num_chunks` / `chunk_length` in update and keep one

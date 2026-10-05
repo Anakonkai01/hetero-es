@@ -1,0 +1,4 @@
+start: train 0.7292  held-out 0.6667
+gen 0: cand rewards mean 0.635 std 0.092 [0.438..0.771] | train parent 0.729 -> +0.781 / -0.406 | held parent 0.667 -> +0.802 / -0.438 | applied/requested L2 1.00 changed 0.996 | 124s
+gen 1: cand rewards mean 0.697 std 0.043 [0.625..0.750] | train parent 0.781 -> +0.719 / -0.625 | held parent 0.802 -> +0.677 / -0.646 | applied/requested L2 1.00 changed 0.996 | 137s
+done in 266s -> pilot_alpha3e-3.json

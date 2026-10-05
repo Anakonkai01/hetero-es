@@ -1,0 +1,12 @@
+start: train 0.7292  held-out 0.6667
+gen 0: cand rewards mean 0.635 std 0.092 [0.438..0.771] | train parent 0.729 -> +0.781 / -0.406 | held parent 0.667 -> +0.802 / -0.438 | applied/requested L2 1.00 changed 0.996 | 137s
+gen 1: cand rewards mean 0.697 std 0.043 [0.625..0.750] | train parent 0.781 -> +0.719 / -0.625 | held parent 0.802 -> +0.677 / -0.646 | applied/requested L2 1.00 changed 0.996 | 151s
+gen 2: cand rewards mean 0.581 std 0.100 [0.469..0.740] | train parent 0.719 -> +0.823 / -0.333 | held parent 0.677 -> +0.740 / -0.385 | applied/requested L2 1.00 changed 0.996 | 151s
+gen 3: cand rewards mean 0.734 std 0.039 [0.656..0.792] | train parent 0.823 -> +0.792 / -0.625 | held parent 0.740 -> +0.719 / -0.573 | applied/requested L2 1.00 changed 0.996 | 137s
+gen 4: cand rewards mean 0.648 std 0.062 [0.542..0.729] | train parent 0.792 -> +0.802 / -0.500 | held parent 0.719 -> +0.750 / -0.573 | applied/requested L2 1.00 changed 0.996 | 124s
+gen 5: cand rewards mean 0.684 std 0.039 [0.625..0.750] | train parent 0.802 -> +0.708 / -0.500 | held parent 0.750 -> +0.740 / -0.552 | applied/requested L2 1.00 changed 0.996 | 124s
+gen 6: cand rewards mean 0.659 std 0.062 [0.542..0.729] | train parent 0.708 -> +0.729 / -0.500 | held parent 0.740 -> +0.698 / -0.531 | applied/requested L2 1.00 changed 0.996 | 124s
+gen 7: cand rewards mean 0.639 std 0.037 [0.594..0.708] | train parent 0.729 -> +0.656 / -0.615 | held parent 0.698 -> +0.688 / -0.562 | applied/requested L2 1.00 changed 0.996 | 124s
+gen 8: cand rewards mean 0.453 std 0.192 [0.000..0.604] | train parent 0.656 -> +0.583 / -0.000 | held parent 0.688 -> +0.531 / -0.000 | applied/requested L2 1.00 changed 0.996 | 173s
+gen 9: cand rewards mean 0.449 std 0.058 [0.365..0.573] | train parent 0.583 -> +0.510 / -0.448 | held parent 0.531 -> +0.469 / -0.396 | applied/requested L2 1.00 changed 0.996 | 139s
+done in 1389s -> run_alpha3e-3.json
