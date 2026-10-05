@@ -244,7 +244,7 @@ Four things make this system different from a typical web backend:
 - NoiseEngine v1: identical noise bytes over the full model on the 5070 Ti, the 1660S, a Colab T4 and a Kaggle T4; package module with 117 tests.
 - Perturbation arithmetic (O2 = option c, FP32 multiply then add, then cast): identical perturbed-weight hash on the same four environments (computed by a script; no package function yet).
 
-**Done in order:** 1. ParameterSchema, 2. CanonicalNoiseEngine module, 3. unit / contract tests, 4. perturb and bitwise restore as package functions (05/10; checked on the 5070 Ti only; step 5, reward standardization and the FP32 update, was implemented on 05/10 evening; step 6, one candidate end to end, was run on the 5070 Ti on 05/10 night; both are checked on the 5070 Ti only).
+**Done in order:** 1. ParameterSchema, 2. CanonicalNoiseEngine module, 3. unit / contract tests, 4. perturb and bitwise restore as package functions (05/10; checked on the 5070 Ti only; step 5, reward standardization and the FP32 update, was implemented on 05/10 evening; step 6, one candidate end to end, was run on the 5070 Ti on 05/10 night, and step 7, the same candidate on the 1660 SUPER, on 06/10: the weights and the 16 outputs are identical on both; step 8, the manifest v1 (recipe and candidate descriptor), was frozen on 06/10; step 9 is left).
 
 **Next, in order:**
 

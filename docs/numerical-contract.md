@@ -90,15 +90,15 @@ A tied tensor is **one** entry: perturbed once, restored once, updated once.
 | S8 | `verify_model_matches` raises on a modified model | Silent mismatch |
 | S9 (slow, needs model) | Qwen at pinned revision → 290 entries, 494,032,768 elements, one alias group with the names above | Regression vs probe evidence |
 
-## 3. Candidate seed namespace [OPEN]
+## 3. Candidate seed namespace [D — O5 decided 2026-10-06]
 
-The noise engine takes an integer `candidate_seed`. How seeds are chosen is not decided yet (decision O5).
+The noise engine takes an integer `candidate_seed`. Decision O5 (2026-10-06): **seeds are explicit data**, written in every candidate descriptor (section 12); the coordinator chooses them, the workers never derive them.
 
 - Observation **[E]**: the notebook reused seeds `[0, 1, 2, 3]` every generation. `milestone2_history.json` shows three generations with identical rewards, z-scores and `update_max_diff = 0.00030517578125`: with the same seeds and a model whose predictions did not change, every generation applied the **same** update direction again. That is acceptable for a frozen regression benchmark but not as a training policy.
 - Whatever rule is chosen, the seed MUST be recorded in the candidate descriptor/manifest, and MUST NOT depend on worker, attempt, lease or retry.
 - **[D — decided 2026-10-05] What one ES update accepts.** The seeds of one update MUST be real integers (`int` or a NumPy integer; `bool`, `float`, `str`, `None` raise `TypeError`) and pairwise distinct (a duplicate raises `ValueError`); both checks happen before the first write. Reason [E, checked 2026-10-05]: the engine writes the seed into the address text, so `1`, `np.int64(1)` and `"1"` give the same noise, while `1.0` and `True` give different noise; a duplicate check on raw values (for example with a `set`) would therefore be wrong in both directions. Two candidates with the same seed have the same ε: that direction would be counted twice, the reward statistics would not describe independent samples, and it could hide a retry that was counted twice (C3).
-- **[OPEN — O5]** Where the seeds come from (explicit list in the manifest, or derived from experiment, generation and candidate index) is **deferred to step 8** (manifest freeze). The noise address does not contain the generation, so reusing a seed in the next generation gives the same ε again; the update function does not check this.
-- **[Note for later]** The engine accepts any integer, also negative or very large. JSON read by JavaScript (the product layer) keeps integers exactly only up to 2^53. If seeds can exceed that, they must be restricted or written as strings in the manifest. Not decided; revisit at step 8.
+- **[D — O5 decided 2026-10-06]** Seeds are explicit: every candidate descriptor carries its seed, so a worker never needs a rule to know it. The noise address does not contain the generation, so reusing a seed in the next generation gives the same ε again; the update function does not check this. The frozen regression keeps the fixed list `[0..3]` (the 2026-10-05 and 2026-10-06 evidence used seed 0). For real runs the coordinator SHOULD use `heteroes.manifest.derive_seed(experiment_id, generation, index)`: 52 bits of SHA-256 of `heteroes-seed-v1|experiment|generation|index`, repeatable, different for every generation. That function is a way of CHOOSING seeds, not part of the contract between machines (it is not in the recipe hash). Measured 2026-10-06: 128,000 derived seeds (2000 generations of 64) were all distinct, the largest was below 2^52.
+- **[D — decided 2026-10-06] Seed range.** In a descriptor a seed is a plain integer with `0 <= seed < 2^53`, because JSON read by JavaScript (the product layer) keeps integers exactly only below 2^53. The engine itself still accepts any integer (so the golden vectors do not change); the limit is a rule of the manifest, not of the noise.
 
 ## 4. CanonicalNoiseEngine v1
 
@@ -259,7 +259,7 @@ for each schema entry k (canonical order):
 
 ## 9. Cross-machine same-candidate regression (the gate)
 
-> **Implementation status (2026-10-05, night):** step 6 (one candidate on the 5070 Ti with the code of the package) is done: `scripts/run_one_candidate.py` and the evidence in `artifacts/regression/2026-10-05-one-candidate/`. It covers the checks of the table below on one machine: noise and perturbed-weight hashes (the whole-model hash), restore bit for bit, the 16 predictions (as text) and the reward. Still missing: the same run on the 1660S and the comparison of the two records (step 7). The record also stores the hash of the model's generation config, which must be equal on both machines.
+> **Implementation status (2026-10-05, night):** step 6 (one candidate on the 5070 Ti with the code of the package) is done: `scripts/run_one_candidate.py` and the evidence in `artifacts/regression/2026-10-05-one-candidate/`. It covers the checks of the table below on one machine: noise and perturbed-weight hashes (the whole-model hash), restore bit for bit, the 16 predictions (as text) and the reward. **Step 7 (2026-10-06) is also done for one candidate:** the same script at the same commit on the GTX 1660 SUPER, evidence in `artifacts/regression/2026-10-06-cross-machine-one-candidate/`. Identity (hashes of schema, workload, engine, the three weight hashes, seed, sigma, model and tokenizer revision) is equal; the outputs of the 16 questions of the base model, the candidate and the restored model are equal text for text; rewards equal; restore exact on both. The generation config is compared by its SET values (the raw hash differs because transformers 5.17 adds keys with value None and its own version); that rule is pending the owner's approval. Limits: one candidate, one seed, one sigma, 16 prompts, two machines.
 
 For one candidate (same revision, schema, seed, σ, workload) on the 5070 Ti and the 1660S:
 
@@ -278,8 +278,9 @@ For one candidate (same revision, schema, seed, σ, workload) on the 5070 Ti and
 ## 10. Reproducibility limits
 
 - Evidence covers four x86_64 Linux environments (RTX 5070 Ti, GTX 1660 SUPER, Colab T4, Kaggle T4), NumPy 2.1.3, 2.4.5, 2.5.2 and 2.5.3, Python 3.12 to 3.14, one model revision (full-model noise hash and perturbed-weight hash identical in all four; `artifacts/regression/2026-10-03-o2-perturbation/`). The original 29/09 probe covered the two physical machines only. It is **not** a universal guarantee (no ARM, no other OS, one seed, one σ for perturbation).
-- **NumPy policy (verified in the NumPy 2.5.3 docstrings):** `PCG64` guarantees that a fixed seed always produces the same integer stream; `Generator` — which provides `standard_normal` — has **no** version-compatibility guarantee ("as better algorithms evolve the bit stream may change"). The exact NumPy version MUST be pinned and recorded; the golden-vector test (§4.4) detects drift.
-- The `ai` environment has NumPy 2.4.5. On 2026-10-02 the five golden vectors of §4.4 were reproduced under it (scratch script). On 2026-10-03 the full-model noise hash (2,105 chunks) was reproduced under 2.4.5 (5070 Ti) and 2.1.3 (Colab, Kaggle) by `scripts/o2_cross_gpu_check.py`, in addition to 2.5.2 and 2.5.3 from the 29/09 probe. **O6 (which single version to pin) is still open**; `pyproject.toml` does not pin NumPy yet.
+- **NumPy policy (verified in the NumPy 2.5.3 docstrings):** `PCG64` guarantees that a fixed seed always produces the same integer stream; `Generator` — which provides `standard_normal` — has **no** version-compatibility guarantee ("as better algorithms evolve the bit stream may change"). The NumPy version MUST be recorded (in the environment report of every worker) and the noise behaviour MUST be checked by the self-test of the noise fingerprint (O6, below); the version is not pinned.
+- The `ai` environment has NumPy 2.4.5. On 2026-10-02 the five golden vectors of §4.4 were reproduced under it (scratch script). On 2026-10-03 the full-model noise hash (2,105 chunks) was reproduced under 2.4.5 (5070 Ti) and 2.1.3 (Colab, Kaggle) by `scripts/o2_cross_gpu_check.py`, in addition to 2.5.2 and 2.5.3 from the 29/09 probe. **O6 was decided on 2026-10-06: the contract pins the BEHAVIOUR of the noise, not a NumPy version** (see below and section 12).
+- **[D — O6 decided 2026-10-06] Pin the behaviour, not the version.** The recipe (section 12) holds a *noise fingerprint*: the hash of the expected digests of five real chunks (`heteroes.noise.selftest`, 13 ms to compute on the 5070 Ti). A worker computes it with its own NumPy before it receives candidates (`noise_selftest()`); a different value means that this NumPy does not generate the canonical bytes and the worker must not be used. The NumPy version is recorded in the environment report of each worker for diagnosis, but it is NOT part of the recipe hash: measured on 2026-10-06, the 5070 Ti (NumPy 2.4.5) and the 1660S (NumPy 2.5.2) generate identical noise, so a version string in the hash would only have split two compatible machines (the two recipe hashes differ if the version is added). Versions that gave identical noise bytes so far: 2.1.3, 2.4.5, 2.5.2, 2.5.3. Limit [inference]: five chunks are a sample; a change of the algorithm of `standard_normal` would almost certainly show in them, and the full-model hash (2,105 chunks) remains the stronger check when the evidence has to be extended.
 - Canonical bytes assume little-endian storage (true for both machines).
 - Even with identical weights, GPU inference may produce different outputs on different architectures; this is measured separately (§9).
 
@@ -291,8 +292,34 @@ For one candidate (same revision, schema, seed, σ, workload) on the 5070 Ti and
 | O2 | Perturbation arithmetic | (a) GPU FP16 `add_`; (b) CPU FP32 then cast; (c) GPU explicit FP32 separate ops then cast | **DECIDED 2026-10-03: (c)**, evidence in §5 (bit-identical on 4 environments incl. the 1660S). (a) kept as a noted alternative (also identical across the 4 environments) |
 | O3 | Restore oracle | abs-max diff (current) vs bitwise | **DECIDED 2026-10-01: bitwise** (abs-max only as optional diagnostic) |
 | O4 | ε used in the update | canonical FP16 ε upcast to FP32 vs realized difference | **DECIDED 2026-10-05: canonical ε** (option A); measurements and accepted trade-off in §8 |
-| O5 | Candidate seed rule | (a) explicit seed list stored in the manifest; (b) derive from (experiment, generation, candidate index) | **Deferred to step 8 (owner, 2026-10-05)**; keep fixed `[0..3]` for the frozen regression. What one update accepts (integers, no duplicates) is decided, see section 3 |
-| O6 | NumPy pin | exact version on both machines (which one?) | Pin one exact version (2.5.3 was probed on the 5070 Ti) on both machines, and confirm Python 3.14 on the 1660S has a wheel for it |
+| O5 | Candidate seed rule | (a) explicit seed list stored in the manifest; (b) derive from (experiment, generation, candidate index) | **DECIDED 2026-10-06:** seeds are explicit in the descriptor (range `0 <= seed < 2^53`); the coordinator chooses them, preferably with `derive_seed`; the frozen regression keeps `[0..3]`. See section 3 |
+| O6 | NumPy pin | exact version on both machines (which one?) | **DECIDED 2026-10-06: no version pin; the noise behaviour is pinned** by a fingerprint of five golden chunks checked by a self-test (section 10). The version is only reported |
+
+## 12. Manifest v1 [D — decided 2026-10-06]
+
+What one logical candidate is, written down so that two machines can check that they run the same one. Two layers.
+
+**Recipe** (`heteroes.manifest.Recipe`; the same for every candidate of an experiment; frozen; its `hash` is what machines compare):
+
+| Part | Fields |
+|---|---|
+| model | model id, model revision, tokenizer revision, dtype (`torch.float16` only in v1), schema hash |
+| noise | engine version (only `numpy_pcg64_normal_f32_to_f16_v1` in v1), `chunk_elements`, noise fingerprint (section 10) |
+| perturbation | `sigma` and `sigma_float32` (the exact float32 value, derived from `sigma`, never an independent input) |
+| update | the labels of the update numerics of sections 7 and 8 (canonical FP16 epsilon upcast to FP32, FP32 accumulation, population standard deviation computed in float64 with all-zero coefficients below eta, candidates in the listed order) and `reward_eta` |
+| workload | workload hash, hash of the SET values of the generation config |
+
+The hash is the SHA-256 of the canonical JSON of that document (`heteroes.canonical`: keys sorted, no spaces, ASCII, no NaN; the same serialization as the schema hash). Not in the recipe on purpose: the NumPy, torch and transformers versions, and `alpha` (a parameter of each generation, not a constant of the numerics; it belongs to the record of a generation), and everything operational.
+
+**Generation config rule [D]:** the manifest hashes the set values of the checkpoint's generation config: the keys whose value is not `None`, without `transformers_version`. Reason [E]: transformers 5.17 (1660S) adds four keys with value `None` and stores its own version, so the raw hash of the dict differs from that of 5.5.0 (5070 Ti) although every set value is equal (evidence of 2026-10-06).
+
+**Candidate descriptor** (`heteroes.manifest.CandidateDescriptor`; small): `recipe_hash`, `parent_weights_sha256` (the whole-model fingerprint of the weights the candidate must be applied to, the model version), `experiment_id` (letters, digits, `_`, `.`, `-`), `generation`, `index` (position in the canonical order of the generation), `seed` (section 3). `candidate_id` is `experiment/g<generation>/c<index>`: the logical job, the same for every attempt and every worker. A field such as worker, attempt, lease, retry, reward or time is refused (`TypeError`): noise must not depend on operational metadata, and those belong to the ledger. Computing `parent_weights_sha256` takes one pass over the whole model (0.6 s on the 5070 Ti, 4.2 s on the 1660S), so it is to be checked once per generation, not per candidate.
+
+**Versioning:** any change of a field, of a label or of the serialization is a new manifest version, not an edit of v1.
+
+**Evidence [E]:** the recipes rebuilt from the records of the 5070 Ti and the 1660S (`artifacts/regression/2026-10-05-one-candidate/`, `artifacts/regression/2026-10-06-cross-machine-one-candidate/`) have the same hash, `1604737ea1d7203062d641381172899356a261748f754a8f3264019ac1b3f5b1` (pinned in `tests/test_manifest.py`; that pinned value was produced by this code, it is a regression guard, not independent evidence). Those records have format 1; `scripts/run_one_candidate.py` now writes format 2, which also holds the recipe, its hash, the descriptor and the result of the noise self-test.
+
+**Not done / open:** the record of a whole generation (the list of descriptors, the coefficients, the update parameters such as `alpha`) comes with the ledger; the self-test is not yet part of a worker admission (C1); the format-2 script has not been run on the 1660S yet.
 
 ## Appendix A — Known deviations of the probes/notebook from this contract
 

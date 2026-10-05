@@ -32,16 +32,13 @@ Small, concrete clean-up items. Not a roadmap (see `HETEROES_LLM_MASTER.md`) and
 - [ ] Comments and style: the comment `# agentic esopt update style`, trailing whitespace, the `# compare` stub, the
       messages of the errors (typos like "lenght"), type hints (`candidate_seeds: Sequence[int]`).
 - [ ] The fields of `UpdateReport` are not formally approved (they come from what `test_update.py` expects).
-- [ ] Not run on the 1660S (CPU and GPU agree on the 5070 Ti only).
 
 ## step6-polish  (`src/heteroes/eval/`, `scripts/run_one_candidate.py`; step 6 itself is done)
-- [ ] A small comparison script for two JSON records (needed by step 7): equal hashes, equal predictions, a readable list of differences.
-- [ ] `run_one_candidate.py` records only a yes/no `git_dirty`; recording the list of paths that differ would explain a dirty tree
+- [ ] Clean up the 1660S: `/tmp/heteroes_step7.bundle`, `/tmp/step7/`, `/tmp/step7_pytest.log`, `/tmp/step7_run.log`, the extra local branch `feat/perturb-restore-update` and the detached HEAD (go back to a branch); change the password and use an SSH key.
+- [ ] `run_one_candidate.py` records only a yes/no `git_dirty` (the format-2 script still does); recording the list of paths that differ would explain a dirty tree
       (the 2026-10-05 evidence is dirty because of one unrelated untracked notebook).
-- [ ] `candidate.py`: `model_weights_sha256` reads every tensor through the CPU (3 times per candidate, about 0.6 s each on the 5070 Ti); measure it on the 1660S.
-- [ ] `canonical_json_hash` in `workload.py` repeats the serialization of the schema hash (see `schema-polish`): keep ONE.
+- [ ] `candidate.py`: `model_weights_sha256` reads every tensor through the CPU (3 times per candidate): 0.6 s each on the 5070 Ti and 4.2 s each on the 1660S (about 12 s of a 40 s run there).
 - [ ] Docstrings are short; the `evaluate_model` batch-size assumption (one prompt at a time, no padding) is only a comment.
-- [ ] Not run on the 1660S.
 
 ## dedupe  (idea raised 05/10, nothing decided; touching verified code needs approval)
 - [ ] Chunk geometry (`start = chunk_index * chunk_elements`, `chunk_length`) is computed in `engine.iter_parameter_noise_chunks`
@@ -68,16 +65,20 @@ with other methods (for example the realized difference as the update direction)
 - [ ] Compare with option B (realized difference as the direction) only if monitoring shows the error growing, for
       example at small sigma or after many generations.
 
-## seeds  (decide at step 8, manifest freeze)
-- [ ] O5: where candidate seeds come from (explicit list vs derived from experiment, generation, candidate index).
-- [ ] Seed range: the engine accepts any integer; JSON read by JavaScript keeps integers exactly only up to 2^53.
-      Restrict the range or write seeds as strings in the manifest (also a question for the engine contract).
-- [ ] `engine.derive_chunk_seed` itself does not check the seed type (`"1"` gives the same noise as `1`).
-      Today only `apply_es_update_` checks; consider checking in `ChunkNoiseAddress` too.
+## manifest-next  (after step 8; O5 and O6 are decided, see contract sections 3, 10, 12)
+- [ ] `engine.derive_chunk_seed` itself does not check the seed type (`"1"` gives the same noise as `1`). Today `apply_es_update_` and
+      `CandidateDescriptor` check; consider checking in `ChunkNoiseAddress` too (the engine accepts any integer on purpose: golden vectors).
+- [ ] The record of a whole generation (list of descriptors, coefficients, `alpha`, parent weights): with the ledger. `alpha` is deliberately NOT in the recipe.
+- [ ] The noise self-test is not part of a worker admission yet (C1): a worker whose fingerprint differs must not receive candidates.
+- [ ] Run the format-2 `run_one_candidate.py` on both machines and store the records (needs a new SSH authorization); the 2026-10-05/06
+      evidence has format 1 (its recipe hash was checked offline).
+- [ ] `derive_seed` is the coordinator's way of choosing seeds; it is not used by any runtime code yet.
+- [ ] Parent weights fingerprint (`parent_weights_sha256`) costs one pass over the model (0.6 s on the 5070 Ti, 4.2 s on the 1660S): check it once per generation.
+- [ ] Optional: an inference canary (hash of the 16 base outputs) as a separate admission check, NOT in the recipe (it would change with the inference library).
 
 ## schema-polish  (`src/heteroes/model/schema.py`)
 - [ ] The two existing `TODO(...)` comments in the source: `schema-validation` (`__post_init__`) and
-      `schema-polish` (`canonical_json_bytes`, docstrings, hints).
+      `schema-polish` (docstrings, hints). The `canonical_json_bytes` part is done: `heteroes/canonical.py` (06/10); the comment in `schema.py` still mentions it.
 
 ## notebooks
 - [ ] `notebooks/floating_point_testing.ipynb` (untracked): the NumPy cell starts from the float64
