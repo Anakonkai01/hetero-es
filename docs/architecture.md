@@ -254,7 +254,7 @@ Four things make this system different from a typical web backend:
 7. Cross-machine same-candidate regression (5070 Ti vs 1660 S)
 8. Freeze candidate / noise manifest v1
 
-**Gate:** no networking, coordinator or ledger work until step 7 passes on both machines.
+**Gate:** no networking, coordinator or ledger work until step 7 passes on both machines. It passed on 2026-10-06 for one candidate (steps 1 to 9 are done); the work after the gate has not started.
 
 **Later:** worker/coordinator HTTP → one remote candidate → frozen two-node generation → SQLite ledger + leases → fault tests → C1/C2 experiments → full sync vs replay measurement.
 

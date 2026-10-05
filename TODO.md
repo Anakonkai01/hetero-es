@@ -70,8 +70,8 @@ with other methods (for example the realized difference as the update direction)
       `CandidateDescriptor` check; consider checking in `ChunkNoiseAddress` too (the engine accepts any integer on purpose: golden vectors).
 - [ ] The record of a whole generation (list of descriptors, coefficients, `alpha`, parent weights): with the ledger. `alpha` is deliberately NOT in the recipe.
 - [ ] The noise self-test is not part of a worker admission yet (C1): a worker whose fingerprint differs must not receive candidates.
-- [ ] Run the format-2 `run_one_candidate.py` on both machines and store the records (needs a new SSH authorization); the 2026-10-05/06
-      evidence has format 1 (its recipe hash was checked offline).
+- [ ] Run the format-2 `run_one_candidate.py` on the 1660S too and store the record (needs a new SSH authorization). Done on the 5070 Ti
+      (`artifacts/regression/2026-10-06-manifest-v1-5070ti/`); the earlier evidence has format 1 (its recipe hash was checked offline and agrees).
 - [ ] `derive_seed` is the coordinator's way of choosing seeds; it is not used by any runtime code yet.
 - [ ] Parent weights fingerprint (`parent_weights_sha256`) costs one pass over the model (0.6 s on the 5070 Ti, 4.2 s on the 1660S): check it once per generation.
 - [ ] Optional: an inference canary (hash of the 16 base outputs) as a separate admission check, NOT in the recipe (it would change with the inference library).
