@@ -6,6 +6,7 @@ Run ONE ES candidate end to end on this machine and write a JSON record of it (s
         --seed 0 --sigma 1e-3 --repeat 2 --output artifacts/regression/<date>-one-candidate/5070ti.json
 
 The same file is run on the other machine at the same commit (step 7) and the two records are compared.
+The record holds the recipe and its hash (manifest v1, heteroes/manifest.py), the candidate descriptor and the result of the noise self-test.
 It refuses to overwrite an existing output file (evidence is never overwritten) and refuses a model
 directory whose name is not the pinned revision.
 """
@@ -18,7 +19,8 @@ import sys
 from pathlib import Path
 
 PINNED_REVISION = "7ae557604adf67be50417f59c2c2f167def9a775"
-FORMAT_VERSION = 1
+FORMAT_VERSION = 2
+MODEL_ID = "Qwen/Qwen2.5-0.5B-Instruct"
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -85,6 +87,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--model-path", required=True, help="snapshot directory named after the pinned revision")
     parser.add_argument("--output", required=True, help="JSON file to create (must not exist)")
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--experiment-id", default="regression", help="name of the experiment in the candidate descriptor")
     parser.add_argument("--sigma", type=float, default=1e-3)
     parser.add_argument("--chunk-elements", type=int, default=None, help="default: the contract value")
     parser.add_argument("--repeat", type=int, default=2, help="how many times the same candidate is run in this process")
@@ -102,13 +105,31 @@ def main(argv: list[str]) -> int:
     if args.repeat < 1:
         fail("--repeat must be at least 1")
 
+    import time
+
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
+    from heteroes.canonical import canonical_json_hash
+    from heteroes.es.update import DEFAULT_ETA
     from heteroes.eval.candidate import run_candidate
-    from heteroes.eval.workload import canonical_json_hash
+    from heteroes.eval.workload import workload_hash
+    from heteroes.manifest import CandidateDescriptor, Recipe, generation_config_sha256
     from heteroes.model.schema import build_parameter_schema
-    from heteroes.noise.contracts import DEFAULT_CHUNK_ELEMENTS
+    from heteroes.noise.contracts import DEFAULT_CHUNK_ELEMENTS, ENGINE_VERSION
+    from heteroes.noise.selftest import EXPECTED_NOISE_FINGERPRINT, compute_noise_fingerprint
+
+    # This machine must generate the canonical noise bytes, or nothing it computes can be trusted (about 15 ms).
+    start = time.perf_counter()
+    computed_fingerprint = compute_noise_fingerprint()
+    selftest = {
+        "passed": computed_fingerprint == EXPECTED_NOISE_FINGERPRINT,
+        "computed_fingerprint": computed_fingerprint,
+        "expected_fingerprint": EXPECTED_NOISE_FINGERPRINT,
+        "elapsed_seconds": time.perf_counter() - start,
+    }
+    if not selftest["passed"]:
+        fail("the noise self-test failed: this NumPy does not generate the canonical noise bytes")
 
     device = args.device or ("cuda" if torch.cuda.is_available() else "cpu")
     chunk_elements = args.chunk_elements or DEFAULT_CHUNK_ELEMENTS
@@ -118,10 +139,34 @@ def main(argv: list[str]) -> int:
     schema = build_parameter_schema(model)
     generation_config = model.generation_config.to_dict()
 
+    recipe = Recipe(
+        model_id=MODEL_ID,
+        model_revision=revision,
+        tokenizer_revision=revision,   # the tokenizer files come from the same snapshot directory
+        dtype=str(next(model.parameters()).dtype),
+        schema_hash=schema.hash,
+        engine_version=ENGINE_VERSION,
+        chunk_elements=chunk_elements,
+        noise_fingerprint=EXPECTED_NOISE_FINGERPRINT,
+        sigma=args.sigma,
+        reward_eta=DEFAULT_ETA,
+        workload_hash=workload_hash(),
+        generation_config_sha256=generation_config_sha256(generation_config),
+    )
+
     runs = []
     for index in range(args.repeat):
         print(f"candidate run {index + 1} of {args.repeat} (seed {args.seed}, sigma {args.sigma}) ...", flush=True)
         runs.append(run_candidate(model, tokenizer, schema, args.seed, args.sigma, chunk_elements))
+
+    descriptor = CandidateDescriptor(
+        recipe_hash=recipe.hash,
+        parent_weights_sha256=runs[0]["weights_sha256"]["original"],
+        experiment_id=args.experiment_id,
+        generation=0,
+        index=0,
+        seed=args.seed,
+    )
 
     record = {
         "format_version": FORMAT_VERSION,
@@ -133,8 +178,13 @@ def main(argv: list[str]) -> int:
             "tokenizer_revision": revision,   # the tokenizer files come from the same snapshot directory
             "dtype": str(next(model.parameters()).dtype),
             "generation_config": generation_config,
-            "generation_config_sha256": canonical_json_hash(generation_config),
+            "generation_config_sha256": generation_config_sha256(generation_config),   # the SET values (see manifest.py)
+            "generation_config_raw_sha256": canonical_json_hash(generation_config),    # differs between library versions
         },
+        "noise_selftest": selftest,
+        "recipe": recipe.to_dict(),
+        "recipe_hash": recipe.hash,
+        "descriptor": descriptor.to_dict(),
         "runs": runs,
         "repeat_identical": runs_identical(runs),
     }

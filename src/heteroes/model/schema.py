@@ -3,8 +3,8 @@ from dataclasses import dataclass, asdict
 
 import torch
 import torch.nn as nn 
-import json 
-import hashlib
+
+from heteroes.canonical import canonical_json_hash
 
 
 SCHEMA_VERSION = "heteroes.parameter_schema.v1"
@@ -80,20 +80,8 @@ class ParameterSchema:
     
     @property
     def hash(self) -> str:
-        # sort key 
-        # seperator 
-        # ensure_ascii 
-        raw_dict = self.to_dict()
-
-        to_json = json.dumps(
-            raw_dict,
-            sort_keys=True,
-            separators=(",", ":"),
-            ensure_ascii=True,
-        ).encode("utf-8")
-
-        hashed = hashlib.sha256(to_json).hexdigest()
-        return hashed
+        # the layout fingerprint: the shared canonical serialization of the schema document, hashed
+        return canonical_json_hash(self.to_dict())
 
 
 def build_parameter_schema(model: nn.Module) -> ParameterSchema: 

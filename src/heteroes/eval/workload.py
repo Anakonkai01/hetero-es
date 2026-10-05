@@ -1,7 +1,7 @@
-import hashlib
-import json
 import re
 from dataclasses import dataclass
+
+from heteroes.canonical import canonical_json_hash
 
 
 # The 16-prompt arithmetic workload of the probe of 2026-09-29 (artifacts/probes/2026-09-29), moved here so
@@ -65,12 +65,6 @@ def workload_dict() -> dict:
         "reward_type": REWARD_TYPE,
         "examples": [{"question": e.question, "answer": e.answer} for e in EXAMPLES],
     }
-
-
-def canonical_json_hash(obj) -> str:
-    # same serialization as the schema hash: sorted keys, no spaces, ASCII only
-    raw = json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("utf-8")
-    return hashlib.sha256(raw).hexdigest()
 
 
 def workload_hash() -> str:

@@ -424,14 +424,29 @@ def test_the_script_writes_a_complete_json_record(tmp_path):
 
     assert completed.returncode == 0, completed.stderr[-2000:]
     record = json.loads(output.read_text(encoding="utf-8"))
-    assert set(record) == {"format_version", "environment", "code", "model", "runs", "repeat_identical"}
-    assert record["format_version"] == 1
+    assert set(record) == {"format_version", "environment", "code", "model", "noise_selftest", "recipe", "recipe_hash",
+                           "descriptor", "runs", "repeat_identical"}
+    assert record["format_version"] == 2
     assert len(record["runs"]) == 2
     assert record["repeat_identical"] is True
     assert set(record["code"]) == {"git_commit", "git_dirty"}
     assert record["model"]["revision"] == record["model"]["tokenizer_revision"] == "7ae557604adf67be50417f59c2c2f167def9a775"
     assert record["model"]["dtype"] == "torch.float16"
     assert len(record["model"]["generation_config_sha256"]) == 64
+    assert record["model"]["generation_config_sha256"] != record["model"]["generation_config_raw_sha256"]  # set values vs the raw dict
+    # the manifest: the recipe, its hash, the descriptor and the self-test
+    from heteroes.manifest import CandidateDescriptor, Recipe, effective_generation_config
+    from heteroes.noise.selftest import EXPECTED_NOISE_FINGERPRINT
+    recipe = Recipe.from_dict(record["recipe"])
+    assert recipe.hash == record["recipe_hash"]
+    assert recipe.sigma == 2e-3 and recipe.schema_hash == record["runs"][0]["schema_hash"]
+    assert recipe.generation_config_sha256 == record["model"]["generation_config_sha256"]
+    assert recipe.noise_fingerprint == EXPECTED_NOISE_FINGERPRINT
+    descriptor = CandidateDescriptor.from_dict(record["descriptor"])
+    assert descriptor.recipe_hash == recipe.hash and descriptor.seed == 1 and descriptor.experiment_id == "regression"
+    assert descriptor.parent_weights_sha256 == record["runs"][0]["weights_sha256"]["original"]
+    assert record["noise_selftest"]["passed"] is True
+    assert record["noise_selftest"]["computed_fingerprint"] == EXPECTED_NOISE_FINGERPRINT
     assert {"torch", "numpy", "transformers", "python", "gpu_name", "hostname"} <= set(record["environment"])
     for run in record["runs"]:
         assert (run["seed"], run["sigma"]) == (1, 2e-3)       # the options really reach the candidate
