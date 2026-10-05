@@ -1,6 +1,7 @@
 from collections import defaultdict
 from dataclasses import dataclass, asdict
 
+import torch
 import torch.nn as nn 
 import json 
 import hashlib
@@ -135,6 +136,55 @@ def build_parameter_schema(model: nn.Module) -> ParameterSchema:
 
     return param_schema
     
+# check exception schema mismatch 
+class SchemaMismatchError(Exception): 
+    pass
 
+def resolve_tensors(model: nn.Module, schema: ParameterSchema) -> list[torch.Tensor]: 
+    current_model_schema = build_parameter_schema(model)
+       
+    # fast check, using hash
+    if current_model_schema.hash != schema.hash: 
+        mismatch_info = [] 
         
+        # check version schema
+        if current_model_schema.schema_version != schema.schema_version: 
+            mismatch_info.append(
+                f"Version mismatch: expected {schema.schema_version}, "
+                f"got: {current_model_schema.schema_version}"
+            )
+        # check len entry
+        if len(current_model_schema.entries) != len(schema.entries): 
+            mismatch_info.append(
+                f"Length entries mismatch: expected {len(schema.entries)}, "
+                f"got: {len(current_model_schema.entries)}"
+            )
+        # detail check 
+        else: 
+            for expected, actual in zip(schema.entries, current_model_schema.entries, strict=True): 
+                if expected != actual:
+                    mismatch_info.append(
+                        f"Mismatch at index {expected.index} (canonical: '{expected.canonical_name}'):\n"
+                        f"  Expected: name='{expected.canonical_name}', shape={expected.shape}, dtype={expected.dtype}, aliases={expected.aliases}\n"
+                        f"  Actual: name='{actual.canonical_name}', shape={actual.shape}, dtype={actual.dtype}, aliases={actual.aliases}"
+                    )
 
+        # join to string 
+        detail_msg = "\n".join(mismatch_info)
+        # raise SchemaMismatchError
+        raise SchemaMismatchError(
+            f"Model parameter schema does not match expected schema.\n"
+            f"Expected Hash: {schema.hash}\n"
+            f"Actual Hash: {current_model_schema.hash}\n"
+            f"Details:\n{detail_msg}"
+        )
+        
+    # pass all check -> return list of tensor 
+    resolved_tensor: list[torch.Tensor] = []
+
+    param_dict = dict(model.named_parameters(remove_duplicate=True))
+    for entry in schema.entries:
+        tensor = param_dict[entry.canonical_name]
+        resolved_tensor.append(tensor)
+
+    return resolved_tensor
