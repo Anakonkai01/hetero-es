@@ -1,0 +1,48 @@
+A = artifacts/regression/2026-10-05-one-candidate/5070ti.json
+B = artifacts/regression/2026-10-06-cross-machine-one-candidate/1660s.json
+
+ENVIRONMENT (information)
+  hostname         5070ti                             heteroes-worker-1660s
+  gpu_name         NVIDIA GeForce RTX 5070 Ti         NVIDIA GeForce GTX 1660 SUPER
+  gpu_capability   [12, 0]                            [7, 5]
+  python           3.12.13                            3.14.4
+  torch            2.10.0+cu128                       2.13.0+cu132
+  torch_cuda       12.8                               13.2
+  numpy            2.4.5                              2.5.2
+  transformers     5.5.0                              5.17.0
+  nvidia_driver    595.91.07                          595.91.07
+
+raw generation config sha256 differs (A 05744820d4b6cd42... | B 8fb3597a7c1f7337...): see the line 'generation config' below, which compares the set values only
+
+code: A 30275cd5c5186849f7168eba9b3f2c9a892664aa (dirty True), B 30275cd5c5186849f7168eba9b3f2c9a892664aa (dirty False)
+
+MUST BE EQUAL
+  EQUAL     model revision: 7ae557604adf67be50417f59c2c2f167def9a775
+  EQUAL     tokenizer revision: 7ae557604adf67be50417f59c2c2f167def9a775
+  EQUAL     model dtype: torch.float16
+  EQUAL     generation config (set values, no library version): {'do_sample': True, 'temperature': 0.7, 'top_k': 20, 'top_p': 0.8, 'repetition_penalty': 1.1, 'pad_token_id': 151643, 'bos_token_id': 151643, 'eos_token_id': [151645, 151643]}
+  EQUAL     schema_hash: 0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec
+  EQUAL     workload_hash: cad822bc1e65a9ec37d948e5415cff22c70f96500e2043e6299bbdd5cea0b8d5
+  EQUAL     engine_version: numpy_pcg64_normal_f32_to_f16_v1
+  EQUAL     chunk_elements: 262144
+  EQUAL     seed: 0
+  EQUAL     sigma: 0.001
+  EQUAL     sigma_float32: 0.0010000000474974513
+  EQUAL     weights sha256 original: c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7
+  EQUAL     weights sha256 perturbed: 8aa3eb9af895cb4a1c7afddc1a6417fd312aa5c8593195f62b5dc0c45126176d
+  EQUAL     weights sha256 restored: c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7
+
+HOLDS ON EACH MACHINE
+  YES A: restore gives back the original weights (every run)
+  YES A: restored outputs equal base outputs (every run)
+  YES A: the runs of this file are identical (2 runs)
+  YES B: restore gives back the original weights (every run)
+  YES B: restored outputs equal base outputs (every run)
+  YES B: the runs of this file are identical (2 runs)
+
+MEASURED (a difference is listed, not hidden)
+  base: reward A 0.25 | B 0.25; 0 of 16 output texts differ
+  candidate: reward A 0.3125 | B 0.3125; 0 of 16 output texts differ
+  restored: reward A 0.25 | B 0.25; 0 of 16 output texts differ
+
+RESULT: every MUST BE EQUAL line is equal
