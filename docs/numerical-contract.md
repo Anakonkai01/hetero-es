@@ -259,6 +259,8 @@ for each schema entry k (canonical order):
 
 ## 9. Cross-machine same-candidate regression (the gate)
 
+> **Implementation status (2026-10-05, night):** step 6 (one candidate on the 5070 Ti with the code of the package) is done: `scripts/run_one_candidate.py` and the evidence in `artifacts/regression/2026-10-05-one-candidate/`. It covers the checks of the table below on one machine: noise and perturbed-weight hashes (the whole-model hash), restore bit for bit, the 16 predictions (as text) and the reward. Still missing: the same run on the 1660S and the comparison of the two records (step 7). The record also stores the hash of the model's generation config, which must be equal on both machines.
+
 For one candidate (same revision, schema, seed, σ, workload) on the 5070 Ti and the 1660S:
 
 | Check | Required |

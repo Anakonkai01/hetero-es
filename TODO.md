@@ -34,6 +34,15 @@ Small, concrete clean-up items. Not a roadmap (see `HETEROES_LLM_MASTER.md`) and
 - [ ] The fields of `UpdateReport` are not formally approved (they come from what `test_update.py` expects).
 - [ ] Not run on the 1660S (CPU and GPU agree on the 5070 Ti only).
 
+## step6-polish  (`src/heteroes/eval/`, `scripts/run_one_candidate.py`; step 6 itself is done)
+- [ ] A small comparison script for two JSON records (needed by step 7): equal hashes, equal predictions, a readable list of differences.
+- [ ] `run_one_candidate.py` records only a yes/no `git_dirty`; recording the list of paths that differ would explain a dirty tree
+      (the 2026-10-05 evidence is dirty because of one unrelated untracked notebook).
+- [ ] `candidate.py`: `model_weights_sha256` reads every tensor through the CPU (3 times per candidate, about 0.6 s each on the 5070 Ti); measure it on the 1660S.
+- [ ] `canonical_json_hash` in `workload.py` repeats the serialization of the schema hash (see `schema-polish`): keep ONE.
+- [ ] Docstrings are short; the `evaluate_model` batch-size assumption (one prompt at a time, no padding) is only a comment.
+- [ ] Not run on the 1660S.
+
 ## dedupe  (idea raised 05/10, nothing decided; touching verified code needs approval)
 - [ ] Chunk geometry (`start = chunk_index * chunk_elements`, `chunk_length`) is computed in `engine.iter_parameter_noise_chunks`
       and would be computed again in `update.py`. Options: (1) use `num_chunks` / `chunk_length` in update and keep one
