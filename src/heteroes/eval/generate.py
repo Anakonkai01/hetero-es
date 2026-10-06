@@ -61,19 +61,52 @@ def generate_answer(model, tokenizer, question: str) -> str:
     return answer.strip()
 
 
-def evaluate_model(model, tokenizer) -> EvalResult:
+def generate_answers(model, tokenizer, questions: list[str]) -> list[str]:
     """
-    Run the 16 questions of the workload and score them.
+    Ask several questions in ONE generate() call (left padding) and return the answers in the same order.
+
+    This is the "chunk" of MASTER: the prompt set stays whole, only the number of prompts per call changes. Padding can change
+    the numbers the model computes, so a chunk size is usable only if its answers are the same as one prompt at a time
+    (`heteroes.profile` checks that); this function does not promise it.
+    """
+    device = next(model.parameters()).device
+    texts = [tokenizer.apply_chat_template(
+        [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": question}],
+        tokenize=False, add_generation_prompt=True) for question in questions]
+    previous_side = tokenizer.padding_side
+    tokenizer.padding_side = "left"
+    try:
+        inputs = tokenizer(texts, return_tensors="pt", padding=True)
+    finally:
+        tokenizer.padding_side = previous_side
+    inputs = {key: value.to(device) for key, value in inputs.items()}
+    with torch.no_grad():
+        output_ids = model.generate(**inputs, max_new_tokens=MAX_NEW_TOKENS, do_sample=DO_SAMPLE)
+    prompt_length = inputs["input_ids"].shape[1]
+    return [text.strip() for text in tokenizer.batch_decode(output_ids[:, prompt_length:], skip_special_tokens=True)]
+
+
+def evaluate_model(model, tokenizer, chunk: int = 1) -> EvalResult:
+    """
+    Run the 16 questions of the workload and score them. `chunk` prompts go into one generate() call (1 = one at a time, the
+    reference behaviour; the questions and their order never change, only how they are grouped).
 
     A failure while generating (for example CUDA out of memory) is raised, never turned into a reward of 0:
     an infrastructure failure is not a wrong answer. An answer without any integer is a wrong answer.
     """
+    if isinstance(chunk, bool) or not isinstance(chunk, int) or chunk < 1:
+        raise ValueError(f"chunk must be an integer of at least 1, got {chunk!r}")
     records = []
-    for example in EXAMPLES:
-        # looked up in this module at call time, so that tests can replace it
-        output_text = generate_answer(model, tokenizer, example.question)
-        prediction = extract_integer(output_text)
-        reward = exact_match_reward(prediction, example.answer)
-        records.append(EvalRecord(example.question, example.answer, output_text, prediction, reward))
+    for start in range(0, len(EXAMPLES), chunk):
+        group = EXAMPLES[start:start + chunk]
+        # looked up in this module at call time, so that tests can replace them
+        if chunk == 1:
+            texts = [generate_answer(model, tokenizer, group[0].question)]
+        else:
+            texts = generate_answers(model, tokenizer, [example.question for example in group])
+        for example, output_text in zip(group, texts):
+            prediction = extract_integer(output_text)
+            reward = exact_match_reward(prediction, example.answer)
+            records.append(EvalRecord(example.question, example.answer, output_text, prediction, reward))
 
     return EvalResult(sum(r.reward for r in records) / len(records), tuple(records))

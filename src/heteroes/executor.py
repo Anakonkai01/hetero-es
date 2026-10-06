@@ -25,8 +25,11 @@ from heteroes.worker import CandidateFailed
 
 
 class CandidateExecutor:
-    def __init__(self, model, tokenizer, schema: ParameterSchema, recipe: Recipe, clock=time.perf_counter):
+    def __init__(self, model, tokenizer, schema: ParameterSchema, recipe: Recipe, clock=time.perf_counter, chunk: int = 1):
+        if isinstance(chunk, bool) or not isinstance(chunk, int) or chunk < 1:
+            raise ValueError(f"chunk must be an integer of at least 1, got {chunk!r}")
         self.model = model
+        self.chunk = chunk                      # prompts per generate() call: an execution choice of this worker, not part of the recipe
         self.tokenizer = tokenizer
         self.schema = schema
         self.recipe = recipe
@@ -65,7 +68,7 @@ class CandidateExecutor:
             perturb_model_(self.model, self.schema, descriptor.seed, self.recipe.sigma, self.recipe.chunk_elements)
             now = self._clock()
             timing["perturb"], mark = now - mark, now
-            reward = float(evaluate_model(self.model, self.tokenizer).mean_reward)
+            reward = float(evaluate_model(self.model, self.tokenizer, chunk=self.chunk).mean_reward)
             now = self._clock()
             timing["rollout"], mark = now - mark, now
         except BaseException as caught:                       # whatever it is, the model must come back first

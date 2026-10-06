@@ -66,7 +66,7 @@ class Fixture:
         self.clock_value = 0.0
         self.oom_next = False
 
-        def fake_evaluate(model, tokenizer):
+        def fake_evaluate(model, tokenizer, chunk=1):
             if self.oom_next:
                 self.oom_next = False
                 raise torch.cuda.OutOfMemoryError("CUDA out of memory")
@@ -185,7 +185,7 @@ def test_a_job_for_another_recipe_or_other_weights_is_refused_and_nothing_runs(f
 # ---------------------------------------------------------------------------
 
 def test_running_out_of_memory_while_evaluating_is_an_oom_failure_and_the_model_is_restored(fx, monkeypatch):
-    def oom(model, tokenizer):
+    def oom(model, tokenizer, chunk=1):
         raise torch.cuda.OutOfMemoryError("CUDA out of memory")
 
     monkeypatch.setattr(executor_module, "evaluate_model", oom)
@@ -239,7 +239,7 @@ def test_a_restore_that_fails_is_a_restore_mismatch_even_though_the_evaluation_w
 
 
 def test_a_restore_that_fails_after_another_failure_is_still_a_restore_mismatch(fx, monkeypatch):
-    def oom(model, tokenizer):
+    def oom(model, tokenizer, chunk=1):
         raise torch.cuda.OutOfMemoryError("CUDA out of memory")
 
     def broken_restore(model, schema, snapshot):
@@ -256,7 +256,7 @@ def test_a_restore_that_fails_after_another_failure_is_still_a_restore_mismatch(
 
 
 def test_an_unexpected_exception_is_not_swallowed_and_the_model_is_restored_first(fx, monkeypatch):
-    def bug(model, tokenizer):
+    def bug(model, tokenizer, chunk=1):
         raise ValueError("a bug in the evaluator")
 
     monkeypatch.setattr(executor_module, "evaluate_model", bug)
@@ -273,7 +273,7 @@ def test_the_timing_of_a_failed_candidate_is_not_reported_as_if_it_had_finished(
     executor(fx.descriptor(7))
     assert executor.last_timing is not None
 
-    def oom(model, tokenizer):
+    def oom(model, tokenizer, chunk=1):
         raise torch.cuda.OutOfMemoryError("x")
 
     monkeypatch.setattr(executor_module, "evaluate_model", oom)
@@ -328,8 +328,33 @@ def test_resetting_the_parent_takes_the_hash_it_is_given_only_if_it_is_the_truth
 def test_the_reward_is_a_plain_float_even_if_the_evaluation_gives_a_numpy_number(fx, monkeypatch):
     import numpy as np
 
-    monkeypatch.setattr(executor_module, "evaluate_model", lambda model, tokenizer: EvalResult(np.float32(0.25), ()))
+    monkeypatch.setattr(executor_module, "evaluate_model", lambda model, tokenizer, chunk=1: EvalResult(np.float32(0.25), ()))
 
     reward = fx.executor()(fx.descriptor(7))
 
     assert type(reward) is float and reward == 0.25
+
+
+# ---------------------------------------------------------------------------
+# the number of prompts per generate() call (the "chunk" of MASTER) is the worker's own choice
+# ---------------------------------------------------------------------------
+
+def test_the_prompt_chunk_of_the_executor_reaches_the_evaluation(fx, monkeypatch):
+    received = []
+
+    def spy(model, tokenizer, chunk=1):
+        received.append(chunk)
+        return EvalResult(mean_reward=0.5, records=())
+
+    monkeypatch.setattr(executor_module, "evaluate_model", spy)
+
+    CandidateExecutor(fx.model, None, fx.schema, fx.recipe)(fx.descriptor(7))
+    CandidateExecutor(fx.model, None, fx.schema, fx.recipe, chunk=8)(fx.descriptor(7))
+
+    assert received == [1, 8]                                           # the default is one prompt at a time
+
+
+@pytest.mark.parametrize("bad", [0, -1, 1.0, True, "4", None])
+def test_a_bad_prompt_chunk_is_refused_at_construction(fx, bad):
+    with pytest.raises(ValueError):
+        CandidateExecutor(fx.model, None, fx.schema, fx.recipe, chunk=bad)

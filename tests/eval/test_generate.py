@@ -230,3 +230,54 @@ def test_a_perturbed_model_gives_different_outputs_from_the_base_model(qwen):
 
     assert [r.output_text for r in perturbed.records] != [r.output_text for r in base.records]
     assert evaluate_model(model, tokenizer) == base  # and after restore it is the base model again
+
+
+# ---------------------------------------------------------------------------
+# chunk: how the 16 questions are grouped into generate() calls (no model needed)
+# ---------------------------------------------------------------------------
+
+def fake_batches(monkeypatch, texts):
+    groups = []
+
+    def fake(model, tokenizer, questions):
+        groups.append(list(questions))
+        return [texts[EXAMPLES_QUESTIONS.index(q)] for q in questions]
+
+    monkeypatch.setattr(generate_module, "generate_answers", fake)
+    return groups
+
+
+EXAMPLES_QUESTIONS = [e.question for e in EXAMPLES]
+
+
+@pytest.mark.parametrize("chunk,sizes", [(2, [2] * 8), (4, [4] * 4), (5, [5, 5, 5, 1]), (16, [16]), (100, [16])])
+def test_a_chunk_groups_the_same_questions_in_the_same_order(monkeypatch, chunk, sizes):
+    texts = correct_texts()
+    texts[3] = "wrong 1"
+    groups = fake_batches(monkeypatch, texts)
+
+    result = evaluate_model(None, None, chunk=chunk)
+
+    assert [len(g) for g in groups] == sizes
+    assert [q for g in groups for q in g] == EXAMPLES_QUESTIONS            # nothing dropped, nothing reordered
+    assert [r.question for r in result.records] == EXAMPLES_QUESTIONS
+    assert [r.reward for r in result.records] == [0.0 if i == 3 else 1.0 for i in range(16)]
+    assert result.mean_reward == 15 / 16
+
+
+def test_chunk_one_is_the_one_prompt_at_a_time_reference_path(monkeypatch):
+    calls = fake_answers(monkeypatch, correct_texts())
+    monkeypatch.setattr(generate_module, "generate_answers", lambda *a: pytest.fail("the batch path must not be used"))
+
+    evaluate_model("M", "T", chunk=1)
+
+    assert len(calls) == 16
+
+
+@pytest.mark.parametrize("bad", [0, -2, 1.0, True, "2", None])
+def test_a_bad_chunk_is_refused_before_anything_runs(monkeypatch, bad):
+    calls = fake_answers(monkeypatch, correct_texts())
+
+    with pytest.raises(ValueError):
+        evaluate_model(None, None, chunk=bad)
+    assert calls == []
