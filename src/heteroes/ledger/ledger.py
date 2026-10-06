@@ -1,3 +1,4 @@
+import dataclasses
 import math
 import secrets
 import sqlite3
@@ -7,8 +8,33 @@ from enum import Enum
 
 from heteroes.manifest import CandidateDescriptor
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 DEFAULT_MAX_ATTEMPTS = 3
+
+
+class CandidateState(Enum):
+    PENDING = "PENDING"
+    LEASED = "LEASED"
+    RUNNING = "RUNNING"
+    COMMITTED = "COMMITTED"
+
+
+class FailureKind(Enum):
+    """Why an attempt failed. An infrastructure failure is never a reward of 0."""
+    OUT_OF_MEMORY = "OUT_OF_MEMORY"
+    VERIFIER_ERROR = "VERIFIER_ERROR"
+    RESTORE_MISMATCH = "RESTORE_MISMATCH"
+    OTHER = "OTHER"
+
+
+class SubmitOutcome(Enum):
+    COMMITTED = "COMMITTED"
+    ALREADY_COMMITTED = "ALREADY_COMMITTED"      # the same result was committed before: nothing was written
+
+
+def _sql_list(enum) -> str:
+    return ", ".join(f"'{member.value}'" for member in enum)
+
 
 _SCHEMA = f"""
 BEGIN;
@@ -25,7 +51,7 @@ CREATE TABLE candidate (
     generation INTEGER NOT NULL,
     candidate_index INTEGER NOT NULL,
     seed INTEGER NOT NULL,
-    state TEXT NOT NULL CHECK (state IN ('PENDING', 'LEASED', 'RUNNING', 'COMMITTED')),
+    state TEXT NOT NULL CHECK (state IN ({_sql_list(CandidateState)})),
     FOREIGN KEY (experiment_id, generation) REFERENCES generation (experiment_id, generation),
     UNIQUE (experiment_id, generation, candidate_index),
     UNIQUE (experiment_id, generation, seed)
@@ -37,20 +63,38 @@ CREATE TABLE attempt (
     lease_token TEXT NOT NULL UNIQUE,
     leased_at REAL NOT NULL,
     deadline REAL NOT NULL,
+    ended_at REAL,
+    failure_kind TEXT CHECK (failure_kind IN ({_sql_list(FailureKind)})),
     PRIMARY KEY (candidate_id, attempt_number),
-    CHECK (deadline > leased_at)
+    CHECK (deadline > leased_at),
+    CHECK (failure_kind IS NULL OR ended_at IS NOT NULL)
+);
+CREATE TABLE result (
+    candidate_id TEXT NOT NULL PRIMARY KEY REFERENCES candidate (candidate_id),
+    attempt_number INTEGER NOT NULL,
+    reward REAL NOT NULL,
+    committed_at REAL NOT NULL,
+    FOREIGN KEY (candidate_id, attempt_number) REFERENCES attempt (candidate_id, attempt_number)
 );
 PRAGMA user_version = {SCHEMA_VERSION};
 COMMIT;
 """
 
-# one row per candidate, with how many attempts it has had and the deadline of the latest one
+# one row per candidate, with its attempts so far, the deadline of the latest one and its result, if committed
 _SELECT_CANDIDATES = """
 SELECT c.experiment_id, c.generation, g.recipe_hash, g.parent_weights_sha256, c.candidate_index, c.seed, c.state,
        (SELECT COUNT(*) FROM attempt AS a WHERE a.candidate_id = c.candidate_id),
        (SELECT a.deadline FROM attempt AS a WHERE a.candidate_id = c.candidate_id
-        ORDER BY a.attempt_number DESC LIMIT 1)
+        ORDER BY a.attempt_number DESC LIMIT 1),
+       r.attempt_number, r.reward, r.committed_at
 FROM candidate AS c JOIN generation AS g USING (experiment_id, generation)
+LEFT JOIN result AS r ON r.candidate_id = c.candidate_id
+"""
+
+_SELECT_DESCRIPTOR = """
+SELECT c.experiment_id, c.generation, g.recipe_hash, g.parent_weights_sha256, c.candidate_index, c.seed
+FROM candidate AS c JOIN generation AS g USING (experiment_id, generation)
+WHERE c.candidate_id = ?
 """
 
 
@@ -66,22 +110,35 @@ class RetriesExhaustedError(LedgerError):
     """The candidate has used all its attempts and its last lease is over."""
 
 
-class CandidateState(Enum):
-    PENDING = "PENDING"
-    LEASED = "LEASED"
-    RUNNING = "RUNNING"
-    COMMITTED = "COMMITTED"
+class StaleAttemptError(LedgerError):
+    """The attempt is not the one that may deliver: an older attempt, a wrong token, or an attempt already closed."""
+
+
+class ResultMismatchError(LedgerError):
+    """The worker says it ran another job than the one the ledger gave (another seed, recipe or parent weights)."""
+
+
+class ConflictingResultError(LedgerError):
+    """The same attempt already delivered something else (another reward, or another kind of failure)."""
+
+
+@dataclass(frozen=True)
+class CandidateResult:
+    attempt_number: int      # the attempt that delivered it
+    reward: float
+    committed_at: float
 
 
 @dataclass(frozen=True)
 class CandidateRecord:
     """
-    A candidate as the ledger knows it: the immutable job (descriptor), where it is in its life (state) and
-    how many attempts it has had. A LEASED candidate whose lease is over is reported as PENDING.
+    A candidate as the ledger knows it: the immutable job (descriptor), where it is in its life (state), how many
+    attempts it has had and its result, if committed. A LEASED candidate whose lease is over is reported as PENDING.
     """
     descriptor: CandidateDescriptor
     state: CandidateState
     attempts: int
+    result: CandidateResult | None
 
 
 @dataclass(frozen=True)
@@ -137,16 +194,37 @@ def _check_lease_arguments(worker_id, duration) -> None:
         raise LedgerError(f"duration must be finite and positive, got {duration}")
 
 
-def _record(row, now: float) -> CandidateRecord:
-    experiment_id, generation, recipe_hash, parent_weights_sha256, index, seed, state, attempts, deadline = row
-    descriptor = CandidateDescriptor(
+def _check_attempt_identity(descriptor, attempt_number, token) -> None:
+    if not isinstance(descriptor, CandidateDescriptor):
+        raise TypeError(f"descriptor must be a CandidateDescriptor, got {type(descriptor).__name__}")
+    if isinstance(attempt_number, bool) or not isinstance(attempt_number, int):
+        raise TypeError(f"attempt_number must be an integer, got {type(attempt_number).__name__}")
+    if not isinstance(token, str):
+        raise TypeError(f"token must be a string, got {type(token).__name__}")
+
+
+def _check_reward(reward) -> None:
+    if isinstance(reward, bool) or not isinstance(reward, (int, float)):
+        raise TypeError(f"reward must be a number, got {type(reward).__name__}")
+    if not math.isfinite(reward):
+        raise LedgerError(f"reward must be finite, got {reward} (an infrastructure failure is not a reward: report it)")
+
+
+def _descriptor(row) -> CandidateDescriptor:
+    experiment_id, generation, recipe_hash, parent_weights_sha256, index, seed = row
+    return CandidateDescriptor(
         recipe_hash=recipe_hash, parent_weights_sha256=parent_weights_sha256,
         experiment_id=experiment_id, generation=generation, index=index, seed=seed,
     )
+
+
+def _record(row, now: float) -> CandidateRecord:
+    state, attempts, deadline, result_attempt, reward, committed_at = row[6:]
     state = CandidateState(state)
     if state is CandidateState.LEASED and now >= deadline:    # lazy recovery: nobody wrote it, but it is over
         state = CandidateState.PENDING
-    return CandidateRecord(descriptor=descriptor, state=state, attempts=attempts)
+    result = None if result_attempt is None else CandidateResult(result_attempt, reward, committed_at)
+    return CandidateRecord(descriptor=_descriptor(row[:6]), state=state, attempts=attempts, result=result)
 
 
 class Ledger:
@@ -266,3 +344,86 @@ class Ledger:
             self._db.execute("UPDATE candidate SET state = ? WHERE candidate_id = ?",
                              (CandidateState.LEASED.value, candidate_id))
         return lease
+
+    def _latest_attempt(self, descriptor: CandidateDescriptor, attempt_number: int, token: str):
+        """
+        Inside a transaction: check that the worker's report is about the job the ledger gave and about the latest
+        attempt of it, with that attempt's token. Returns the stored state of the candidate and the failure kind
+        already reported for the attempt (or None).
+        """
+        candidate_id = descriptor.candidate_id
+        row = self._db.execute("SELECT state FROM candidate WHERE candidate_id = ?", (candidate_id,)).fetchone()
+        if row is None:
+            raise LedgerError(f"unknown candidate {candidate_id}")
+
+        stored = _descriptor(self._db.execute(_SELECT_DESCRIPTOR, (candidate_id,)).fetchone())
+        if stored != descriptor:
+            differing = [f.name for f in dataclasses.fields(stored) if getattr(stored, f.name) != getattr(descriptor, f.name)]
+            raise ResultMismatchError(f"the report for {candidate_id} is about another job: {', '.join(differing)} differ")
+
+        last = self._db.execute(
+            "SELECT attempt_number, lease_token, failure_kind FROM attempt WHERE candidate_id = ? "
+            "ORDER BY attempt_number DESC LIMIT 1", (candidate_id,)).fetchone()
+        if last is None or (last[0], last[1]) != (attempt_number, token):
+            raise StaleAttemptError(f"attempt {attempt_number} of {candidate_id} is not the latest attempt with that token")
+        return CandidateState(row[0]), last[2]
+
+    def submit_result(self, descriptor: CandidateDescriptor, attempt_number: int, token: str, reward: float) -> SubmitOutcome:
+        """
+        Commit the reward of a candidate: the worker returns the job it ran (descriptor), its attempt number, its
+        token and the reward. At most one result is ever committed for a candidate.
+
+        The latest attempt may deliver even after its deadline, as long as nobody was given the candidate in the
+        meantime (the lease is the right to be the only one, until it is replaced). The same result sent again is
+        acknowledged (ALREADY_COMMITTED) and nothing is written; another reward for an attempt that already
+        delivered raises ConflictingResultError. Raises StaleAttemptError for an old attempt, a wrong token or an
+        attempt that was closed, ResultMismatchError for another job.
+        """
+        _check_attempt_identity(descriptor, attempt_number, token)
+        _check_reward(reward)
+        now = self._clock()
+        with self._db:
+            self._db.execute("BEGIN IMMEDIATE")
+            state, _ = self._latest_attempt(descriptor, attempt_number, token)
+            candidate_id = descriptor.candidate_id
+            if state is CandidateState.COMMITTED:
+                committed = self._db.execute("SELECT reward FROM result WHERE candidate_id = ?", (candidate_id,)).fetchone()[0]
+                if committed == reward:
+                    return SubmitOutcome.ALREADY_COMMITTED
+                raise ConflictingResultError(f"{candidate_id} was committed with reward {committed}, not {reward}")
+            if state is not CandidateState.LEASED:
+                raise StaleAttemptError(f"candidate {candidate_id} is {state.value}: attempt {attempt_number} is closed")
+
+            self._db.execute("INSERT INTO result (candidate_id, attempt_number, reward, committed_at) VALUES (?, ?, ?, ?)",
+                             (candidate_id, attempt_number, reward, now))
+            self._db.execute("UPDATE attempt SET ended_at = ? WHERE candidate_id = ? AND attempt_number = ?",
+                             (now, candidate_id, attempt_number))
+            self._db.execute("UPDATE candidate SET state = ? WHERE candidate_id = ?",
+                             (CandidateState.COMMITTED.value, candidate_id))
+        return SubmitOutcome.COMMITTED
+
+    def report_failure(self, descriptor: CandidateDescriptor, attempt_number: int, token: str, kind: FailureKind) -> None:
+        """
+        The worker could not deliver (out of memory, verifier error, restore mismatch...). The attempt is closed with
+        the kind of failure, the candidate is PENDING again at once (no waiting for the deadline) and the attempt
+        stays counted in the retry budget. Never a reward. Reporting the same failure again changes nothing.
+        """
+        _check_attempt_identity(descriptor, attempt_number, token)
+        if not isinstance(kind, FailureKind):
+            raise TypeError(f"kind must be a FailureKind, got {type(kind).__name__}")
+        now = self._clock()
+        with self._db:
+            self._db.execute("BEGIN IMMEDIATE")
+            state, reported = self._latest_attempt(descriptor, attempt_number, token)
+            candidate_id = descriptor.candidate_id
+            if reported is not None:
+                if reported == kind.value:
+                    return
+                raise ConflictingResultError(f"attempt {attempt_number} of {candidate_id} already failed with {reported}, not {kind.value}")
+            if state is not CandidateState.LEASED:
+                raise StaleAttemptError(f"candidate {candidate_id} is {state.value}: attempt {attempt_number} is closed")
+
+            self._db.execute("UPDATE attempt SET ended_at = ?, failure_kind = ? WHERE candidate_id = ? AND attempt_number = ?",
+                             (now, kind.value, candidate_id, attempt_number))
+            self._db.execute("UPDATE candidate SET state = ? WHERE candidate_id = ?",
+                             (CandidateState.PENDING.value, candidate_id))
