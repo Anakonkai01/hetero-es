@@ -125,7 +125,7 @@ def test_a_record_for_a_few_candidates_is_small():
     rewards = tuple(k / 96 for k in (60, 62, 70, 64, 66, 58, 69, 61))
     record = make_record(seeds=seeds, rewards=rewards, coefficients=coefficients_of(rewards))
 
-    assert len(canonical_json_bytes(record.to_dict())) < 1024      # measured 690 bytes for N = 8: the whole model is 1 GB
+    assert len(canonical_json_bytes(record.to_dict())) < 1024      # measured 744 bytes for N = 8 (artifacts/experiments/2026-10-06-coefficient-residue)
 
 
 # ---------------------------------------------------------------------------

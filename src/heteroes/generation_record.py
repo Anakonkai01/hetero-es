@@ -46,7 +46,8 @@ class GenerationRecord:
 
     The coefficients are computed ONCE, by the coordinator, and travel: nobody recomputes them from the rewards. (Where a
     reward equals the mean, the coefficient is 0.0 or a residue of about 1e-16 depending on the order in which the sum was
-    made: measured in about 0.3% of the sets of rewards k/96, harmless for the weights, but not the same bytes.)
+    made: measured in 0.3 to 0.4% of the sets of rewards k/96, harmless for the weights, but not the same bytes; see
+    artifacts/experiments/2026-10-06-coefficient-residue.)
     The rewards stay in the record so that the coefficients can be audited (`verify_coefficients`).
     """
     experiment_id: str
