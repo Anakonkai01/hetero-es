@@ -30,7 +30,8 @@ def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--model-path", required=True)
     parser.add_argument("--out-dir", required=True, help="directory to create for ledger, events and summary (must not exist)")
-    parser.add_argument("--weights-dir", default="/tmp/heteroes-published", help="where the weights of each generation are published")
+    parser.add_argument("--weights-dir", default=str(Path.home() / ".cache" / "heteroes" / "published"),
+                        help="where the weights of each generation are published (about 1 GB each: use a real disk, /tmp may be RAM)")
     parser.add_argument("--experiment-id", default="g3")
     parser.add_argument("--candidates", type=int, default=8)
     parser.add_argument("--generations", type=int, default=1)

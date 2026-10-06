@@ -34,7 +34,8 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--coordinator-url", required=True)
     parser.add_argument("--worker-id", required=True)
     parser.add_argument("--log", required=True, help="JSONL file for the events of this worker (must not exist)")
-    parser.add_argument("--cache-dir", default="/tmp/heteroes-worker-cache", help="where downloaded weights are kept")
+    parser.add_argument("--cache-dir", default=str(Path.home() / ".cache" / "heteroes" / "worker-cache"),
+                        help="where downloaded weights are kept (about 1 GB; use a real disk, /tmp may be RAM)")
     parser.add_argument("--device", choices=["cuda", "cpu"], default=None)
     parser.add_argument("--token-env", default="HETEROES_TOKEN")
     parser.add_argument("--poll-seconds", type=float, default=1.0)
