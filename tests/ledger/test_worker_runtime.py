@@ -370,6 +370,15 @@ def test_a_download_is_checked_against_its_name_and_kept_in_the_cache(coordinato
     assert [p.name for p in cache.iterdir()] == [f"{coordinator.parent}.bin"]
 
 
+def test_a_cache_directory_whose_parents_do_not_exist_yet_is_created(coordinator, tmp_path):
+    cache = tmp_path / "not" / "there" / "yet" / "cache"
+    client = HttpClient(coordinator.server.url, timeout=5.0)
+
+    path = download_weights(client, coordinator.parent, cache)
+
+    assert path == cache / f"{coordinator.parent}.bin" and path.is_file()
+
+
 def test_a_file_already_in_the_cache_is_not_downloaded_again_if_it_is_intact(coordinator, tmp_path):
     cache = tmp_path / "cache"
     client = HttpClient(coordinator.server.url, timeout=5.0)

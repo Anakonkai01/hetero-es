@@ -310,3 +310,16 @@ def test_the_worker_sends_only_json_to_the_coordinator(api):
 
     assert len(sent) == 7                                                   # 3 x (lease, result) and the last lease
     assert all(json.loads(json.dumps(payload)) == payload for payload in sent)
+
+
+@pytest.mark.parametrize("direction", ["request", "reply"])
+def test_the_local_transport_refuses_a_number_json_cannot_carry_in_either_direction(direction):
+    class Echo:
+        def handle(self, operation, request):
+            return {"ok": True, "value": float("nan")} if direction == "reply" else {"ok": True}
+
+    transport = local_transport(Echo())
+    payload = {"value": float("nan")} if direction == "request" else {"value": 1.0}
+
+    with pytest.raises(ValueError):
+        transport("lease", payload)
