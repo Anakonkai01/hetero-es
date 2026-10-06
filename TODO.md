@@ -26,6 +26,7 @@ Small, concrete clean-up items. Not a roadmap (see `HETEROES_LLM_MASTER.md`) and
 - [ ] `perturb.py`: unused `import math` since the checks moved to `checks.py`; trailing whitespace.
 
 ## update-polish  (`src/heteroes/es/update.py`; step 5 itself is done, 05/10 evening)
+- [ ] `apply_coefficients_` / `_check_coefficients` (06/10) have only short comments and long signature lines, in the style of the rest of the file; the docstring of `apply_coefficients_` should also say what it does NOT guarantee (a runtime failure while writing leaves the model half updated; restore from the snapshot), as for `apply_es_update_` below.
 - [ ] Docstrings for `UpdateReport`, `standardize_rewards` and `apply_es_update_`. State what `apply_es_update_` does NOT
       guarantee: a runtime failure while writing (for example CUDA out of memory) leaves the model half updated, so the
       caller must restore from the snapshot (same limit as `perturb_model_`).
@@ -77,7 +78,6 @@ with other methods (for example the realized difference as the update direction)
 ## manifest-next  (after step 8; O5 and O6 are decided, see contract sections 3, 10, 12)
 - [ ] `engine.derive_chunk_seed` itself does not check the seed type (`"1"` gives the same noise as `1`). Today `apply_es_update_` and
       `CandidateDescriptor` check; consider checking in `ChunkNoiseAddress` too (the engine accepts any integer on purpose: golden vectors).
-- [ ] The record of a whole generation (list of descriptors, coefficients, `alpha`, parent weights): with the ledger. `alpha` is deliberately NOT in the recipe.
 - [ ] The noise self-test is not part of a worker admission yet (C1): a worker whose fingerprint differs must not receive candidates.
 - [ ] Run the format-2 `run_one_candidate.py` on the 1660S too and store the record (needs a new SSH authorization). Done on the 5070 Ti
       (`artifacts/regression/2026-10-06-manifest-v1-5070ti/`); the earlier evidence has format 1 (its recipe hash was checked offline and agrees).
@@ -85,10 +85,33 @@ with other methods (for example the realized difference as the update direction)
 - [ ] Parent weights fingerprint (`parent_weights_sha256`) costs one pass over the model (0.6 s on the 5070 Ti, 4.2 s on the 1660S): check it once per generation.
 - [ ] Optional: an inference canary (hash of the 16 base outputs) as a separate admission check, NOT in the recipe (it would change with the inference library).
 
-## ledger-next  (`src/heteroes/ledger/`; G2a to G2d, 06-07/10/2026)
+## ledger-next  (`src/heteroes/ledger/`, `src/heteroes/generation_record.py`; G2a to G2f, 06/10/2026; design in ADR-002)
 - [ ] Worker ids are free strings: there is no worker registry yet. Quarantine blocks exactly that name, so a worker that renames
       itself escapes it. Acceptable while workers are trusted (no attacker in scope); revisit with C1 admission (worker identity,
       capability profile), where a registry is needed anyway.
+- [ ] Threads: `BEGIN IMMEDIATE` (the write lock before reading) has no test, removing it changes no test (it needs two threads). A sqlite3
+      connection belongs to the thread that made it. With the first HTTP server: one connection per thread, and a test with real threads.
+- [ ] The restart procedure of the coordinator (SUPPORTING in MASTER): compare the hash of the weights with `parent` and `child` of the stored
+      update record, restore from the parent checkpoint if needed, redo the (deterministic) update, `mark_applied`. Only the data (the record,
+      `mark_applied`) exists; checkpoint staging and publication do not.
+- [ ] The chain `parent_weights_sha256` of generation g+1 = `child_weights_sha256` of generation g is not enforced by `open_generation` (all the
+      tests use one parent for every generation, so enforcing it means changing fixtures). Decide with the owner.
+- [ ] `CandidateState.RUNNING` exists but nothing produces it (a worker telling "I started" and heartbeats come with the HTTP protocol).
+- [ ] No schema migration (a file of another version is refused; the version is 5). `max_attempts` is a policy of the process, not stored: two
+      processes with different values disagree about FAILED.
+- [ ] The ledger and the new tests were never run on the 1660S (Python 3.14). It needs `pip install hypothesis simpy` there, or those tests are skipped.
+- [ ] `generation_record.py` imports private helpers of `manifest.py` (`_HEX64`, `_NAME`, `_check_int`, `_check_keys`, `_check_text`): make
+      them public or move them to a shared module (touches the frozen manifest, with its tests as a guard).
+- [ ] The ledger tests import torch because the model of the contract (`tests/ledger/harness.py`) and `GenerationRecord.from_results` use
+      `standardize_rewards`, which lives in `es/update.py`. Moving it to a module without torch would keep the ledger free of torch.
+- [ ] `GenerationResults` has no `experiment_id` / `generation` fields, so `GenerationRecord.from_results` takes them as arguments.
+- [ ] `ledger/ledger.py` is one file of about 700 lines: leases, results, generation state, quarantine and the update record could be
+      split when the HTTP code arrives.
+- [ ] The tests of the ledger take about 27 s by default (the exhaustive worlds are about 25 s of it); the deep mode takes 88 s. Mark them or shrink
+      the worlds if the suite gets in the way.
+- [ ] The mutation checks of G2a to G2f were made by hand with scripts in the scratchpad of the session (lists of faults), which are not in the repo
+      and are lost when the scratchpad is cleaned; only the counts are recorded (STATUS 0.0). Keep the lists if they are to be reused.
+- [ ] ADR-002 is a draft by Claude pending the owner's review; the worker protocol table in it is a proposal [P], not implemented.
 
 ## schema-polish  (`src/heteroes/model/schema.py`)
 - [ ] The two existing `TODO(...)` comments in the source: `schema-validation` (`__post_init__`) and

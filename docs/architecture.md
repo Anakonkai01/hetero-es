@@ -41,13 +41,13 @@ sequenceDiagram
     W->>W: 5. run the prompt set, score it, get reward R_i
     W->>W: 6. restore theta_t exactly and verify
     W->>C: 7. reward R_i (a few bytes)
-    C->>C: 8. standardize rewards into z_i
+    C->>C: 8. standardize rewards into z_i, once; write the update record (seeds, rewards, z, alpha) into the ledger
     C->>C: 9. regenerate eps_i = NoiseEngine(s_i) for every candidate
     C->>C: 10. theta_t+1 = theta_t + (alpha/N) * sum(z_i * eps_i), in FP32
-    C->>C: 11. publish model version t+1
+    C->>C: 11. mark the update applied (child weights hash); publish model version t+1
 ```
 
-Steps 8–11 run on the coordinator or on a designated "update executor" machine (currently planned: the 5070 Ti).
+Steps 8–11 run on the coordinator or on a designated "update executor" machine (currently planned: the 5070 Ti). The record written in step 8 comes BEFORE the weights change, so that a crash between step 10 and step 11 cannot make the update happen twice (ADR-002, numerical contract §13); the same record is also the small message (hundreds of bytes) that a worker in *replay* mode would apply instead of downloading the new weights.
 
 ### Why numerical reproducibility is a correctness problem here
 
@@ -88,9 +88,9 @@ Network: ordinary IP (LAN or Tailscale). SSH is for setup, debugging and adminis
 |---|---|---|---|
 | Product layer | Users, workspaces, roles (Admin/Researcher/Viewer), experiment metadata, non-preemptive experiment queue, dashboards, artifact browser | B | No (B starts from mock contracts) |
 | Coordinator | Runs one experiment: admission (C1), candidate dispatch (C2), lease/result validation (C3), ES update, publishing model versions (C4) | A | No |
-| Worker | Holds a model replica at an assigned version; perturb → evaluate → restore; reports reward + diagnostics. Has no optimizer of its own | A | No (logic exists only in the notebook and probes) |
-| Numerical Core (`src/heteroes/`) | Library: ParameterSchema, CanonicalNoiseEngine, perturb/restore, reward standardization, ES update | A | ParameterSchema and CanonicalNoiseEngine v1 implemented and tested (03/10); perturb, restore, standardization, update not yet |
-| Ledger | Durable record of candidates, attempts, leases, commits/rejections (planned: SQLite/WAL) | A | No |
+| Worker | Holds a model replica at an assigned version; perturb → evaluate → restore; reports reward + diagnostics. Has no optimizer of its own | A | Only the logic of one candidate (`eval/candidate.py`, `scripts/run_one_candidate.py`); no service, no protocol yet |
+| Numerical Core (`src/heteroes/`) | Library: ParameterSchema, CanonicalNoiseEngine, perturb/restore, reward standardization, ES update, manifest, generation record | A | Implemented and tested (schema, noise engine, perturb, snapshot/restore, standardization, update from rewards or from given coefficients, manifest v1, generation record v1); checked on both machines for one candidate (06/10) |
+| Ledger (`src/heteroes/ledger/`) | Durable record of generations, candidates, attempts, leases, commits/rejections, failures, quarantine and the update record (SQLite, WAL) | A | Implemented and tested for one coordinator process, with fake workers (06/10, ADR-002); no HTTP, not run on the 1660S |
 | Artifact store | Checkpoints, manifests, events, regression evidence | A writes, B reads | Probe evidence only (`artifacts/probes/`) |
 
 Two boundaries worth remembering:
@@ -142,7 +142,7 @@ v1 recipe (`numpy_pcg64_normal_f32_to_f16_v1`): SHA-256 of the address → seed 
 
 - **Perturb:** θ_t + σ·ε in the model dtype (FP16 for the current physical baseline).
 - **Restore:** copy θ_t back from a snapshot and verify it is bit-identical. Not "subtract the noise again" — in floating point, (x + a) − a is not guaranteed to equal x.
-- **Update:** accumulate Σ z_i·ε_i in FP32, cast to FP16 once, and check what was actually applied. Equal rewards → logged no-op. NaN/Inf reward → reject, never replace with 0.
+- **Update:** accumulate Σ z_i·ε_i in FP32, cast to FP16 once, and check what was actually applied. Equal rewards → logged no-op. NaN/Inf reward → reject, never replace with 0. The coefficients z_i are computed once by the coordinator and then travel in the generation record; `apply_coefficients_` applies given coefficients, `apply_es_update_` is the standardization followed by it (when a reward equals the mean, its coefficient is `0.0` or a residue of about `1e-16` depending on the order of the sums, so nobody recomputes it; numerical contract §7, §13).
 
 ## 6. Identity layers
 
@@ -154,11 +154,12 @@ Several kinds of "identity" exist; mixing them up is the most common source of c
 | Schema | What is the layout of the parameter space? | Names, order, shapes, dtypes, alias map | Weight values, memory addresses |
 | Noise | Which exact Gaussian numbers for this chunk? | Schema hash, engine version, seed, parameter index, chunk index, chunk size | Worker, attempt, lease, retry, reward, workload, time |
 | Candidate | Which logical ES candidate? | Parent model version, seed, noise recipe, σ, workload, generation config | Which worker ran it, how many retries |
-| Attempt | Which execution try of a candidate? | Candidate + a new attempt id + lease | — (a new one on every retry) |
+| Attempt | Which execution try of a candidate? | Candidate + a new attempt number + lease (random token) | — (a new one on every retry) |
+| Update | Which update turns the parent weights of a generation into the child weights? | Recipe hash, parent weights hash, seeds, rewards, coefficients, alpha (the generation record; its hash) | The child weights (an outcome, recorded apart) |
 
 Note that σ is part of the **candidate**, not the **noise**: the same noise with a different σ is a different perturbed model.
 
-**Candidate vs attempt** (the key C3 idea): a candidate is the logical job, like an order id; an attempt is one try at executing it. A retry keeps the same candidate (same seed, same noise, same workload) but gets a new attempt id and a new lease, possibly on another worker. The coordinator commits **at most one** result per candidate — duplicates and stale attempts are rejected.
+**Candidate vs attempt** (the key C3 idea): a candidate is the logical job, like an order id; an attempt is one try at executing it. A retry keeps the same candidate (same seed, same noise, same workload) but gets a new attempt id and a new lease, possibly on another worker. The coordinator commits **at most one** result per candidate — duplicates and stale attempts are rejected. In the ledger the lease carries a random token that a result must bring back; the latest attempt may still deliver after its deadline as long as nobody was given the candidate in the meantime (ADR-002).
 
 ## 7. State ownership
 
@@ -167,7 +168,8 @@ Rule of thumb: whoever owns a piece of state is the only one allowed to change i
 | State | Owner | Notes |
 |---|---|---|
 | Canonical model version | Coordinator / update executor | The only writer of weights. Workers never publish weights |
-| Generation, candidate, attempt, lease, commit/reject | Coordinator + ledger | Correctness state. Never owned by the product layer |
+| Generation, candidate, attempt, lease, commit/reject, failure, quarantine | Coordinator + ledger | Correctness state. Never owned by the product layer |
+| Update record of a generation (inputs) and its outcome (child hash) | Coordinator + ledger | Written before the weights change, marked applied after; at most one per generation |
 | Worker capability / admission profile | Coordinator (measured on the worker) | |
 | Worker model replica | Worker, at a version assigned by the coordinator | |
 | Temporary perturbed weights | Worker | Exist only between perturb and restore; must return to θ_t exactly |
@@ -234,29 +236,22 @@ Four things make this system different from a typical web backend:
 
 **Bottom line:** the coordinator–worker shape is common and not a contribution. The value is in the **contracts** inside it: portable noise across GPUs, exactly-once candidate commits, and measured admission and synchronization decisions.
 
-## 11. Current implementation boundary (updated 2026-10-05)
+## 11. Current implementation boundary (updated 2026-10-06)
 
-**Verified** (evidence in STATUS, `artifacts/probes/2026-09-29/` and `artifacts/regression/2026-10-03-o2-perturbation/`):
+**Verified** (evidence in STATUS 0.0 and `artifacts/`):
 
 - Single-GPU ES reference (notebook) runs end-to-end on both GPUs in FP16.
 - Exact snapshot restore (max diff 0.0) on both.
 - Native CUDA RNG gives different noise across the two GPUs → rejected as the canonical noise source.
-- NoiseEngine v1: identical noise bytes over the full model on the 5070 Ti, the 1660S, a Colab T4 and a Kaggle T4; package module with 117 tests.
-- Perturbation arithmetic (O2 = option c, FP32 multiply then add, then cast): identical perturbed-weight hash on the same four environments (computed by a script; no package function yet).
+- NoiseEngine v1: identical noise bytes over the full model on the 5070 Ti, the 1660S, a Colab T4 and a Kaggle T4.
+- Perturbation arithmetic (O2 = option c): identical perturbed-weight hash on the same four environments.
+- **The numerical gate (steps 1 to 9) is closed for one candidate** (06/10): the same candidate (seed 0, sigma 1e-3) gives identical weights and identical outputs on the 5070 Ti and the 1660 SUPER; manifest v1 frozen.
+- A first short learning experiment on one GPU (06/10): a signal, not a proof (`artifacts/experiments/2026-10-06-learning-pilot/`).
+- **The ledger (06/10, steps G2a to G2f), on the 5070 Ti only, for one coordinator process:** generations, candidates, attempts, leases with lazy expiry, results (idempotent, conflicting ones refused), typed failures, retry budget, quarantine of a worker whose restore failed, generation state computed (OPEN / COMPLETE / FAILED), results in index order for the update, and the write-ahead update record. Tests: unit tests, a model of the contract that predicts every action, the six scenarios of MASTER §22.4 on simulated time, random schedules, every order of small alphabets, two dispatch policies on unequal fake workers. Why and how: ADR-002.
 
-**Done in order:** 1. ParameterSchema, 2. CanonicalNoiseEngine module, 3. unit / contract tests, 4. perturb and bitwise restore as package functions (05/10; checked on the 5070 Ti only; step 5, reward standardization and the FP32 update, was implemented on 05/10 evening; step 6, one candidate end to end, was run on the 5070 Ti on 05/10 night, and step 7, the same candidate on the 1660 SUPER, on 06/10: the weights and the 16 outputs are identical on both; step 8, the manifest v1 (recipe and candidate descriptor), was frozen on 06/10; step 9 is left).
+**Not verified / not done:** the ledger on the 1660S (Python 3.14) and with several threads; any network protocol (the table in ADR-002 is a proposal); the restart procedure of the coordinator; the chain parent → child between generations is not enforced; no real remote worker yet.
 
-**Next, in order:**
-
-4. Route every perturb / reconstruct / update path through the one engine (perturb function first, then bitwise restore)
-5. FP32 update accumulation + known notebook bugs
-6. Local regression
-7. Cross-machine same-candidate regression (5070 Ti vs 1660 S)
-8. Freeze candidate / noise manifest v1
-
-**Gate:** no networking, coordinator or ledger work until step 7 passes on both machines. It passed on 2026-10-06 for one candidate (steps 1 to 9 are done); the work after the gate has not started.
-
-**Later:** worker/coordinator HTTP → one remote candidate → frozen two-node generation → SQLite ledger + leases → fault tests → C1/C2 experiments → full sync vs replay measurement.
+**Next, in order:** worker/coordinator HTTP → one remote candidate → frozen two-node generation (fake workers of the tests can stand in for GPUs when testing the coordinator) → fault tests on the network → C1 admission and C2 policies → full sync vs replay measurement.
 
 ## Glossary
 
@@ -266,6 +261,11 @@ Four things make this system different from a typical web backend:
 | Candidate | One logical perturbation θ_t + σ·ε_i of the parent model |
 | Attempt | One execution try of a candidate on a worker |
 | Lease | Time-limited ownership of an attempt by a worker; expires if the worker goes silent |
+| Token | Random proof that an attempt holds its lease; a result must bring it back, so an old attempt cannot commit |
+| Ledger | The coordinator's durable record (SQLite) of what was given to whom and what was accepted |
+| Quarantine | A worker whose restore failed is put aside: no new leases, no new results, until a human releases it |
+| Generation record | The inputs of one update (seeds, rewards, coefficients, alpha, recipe and parent hashes); written before the weights change |
+| Coefficients | The numbers z_i that weight each candidate's noise in the update; computed once by the coordinator and shipped with the record |
 | Seed | Integer that, with the schema and engine version, fully determines a candidate's noise |
 | σ (sigma) | Noise scale: how far candidates move away from the parent |
 | Chunk | Fixed-size slice of a parameter tensor; the unit of noise generation |

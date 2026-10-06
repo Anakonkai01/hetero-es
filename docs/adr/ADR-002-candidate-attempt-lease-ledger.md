@@ -1,7 +1,7 @@
 # ADR-002 — Candidate, attempt and lease: a durable ledger that keeps one result per candidate and one update per generation
 
-- **Status:** Implemented and tested for one coordinator process (2026-10-06/07, steps G2a to G2f). This written ADR is a **draft by Claude, pending owner review**. The worker-facing protocol in section "Decision 9" is a **proposal, not implemented**.
-- **Date:** 2026-10-07
+- **Status:** Implemented and tested for one coordinator process (2026-10-06, steps G2a to G2f). This written ADR is a **draft by Claude, pending owner review**. The worker-facing protocol in section "Decision 9" is a **proposal, not implemented**.
+- **Date:** 2026-10-06
 - **Deciders:** A (Systems/Core owner)
 - **Related:** [numerical-contract.md §3, §12, §13](../numerical-contract.md), [architecture.md §6 to §7](../architecture.md), MASTER §10 (the seven invariants), `src/heteroes/ledger/`, `src/heteroes/generation_record.py`
 
@@ -37,7 +37,7 @@ The ledger is the coordinator's memory of what was given to whom and what was ac
 
 ### Why the coefficients travel
 
-`standardize_rewards` computes in float64 and casts to float32. When a reward **equals the mean** (common when rewards are k/96), `reward - mean` is 0 in exact arithmetic but, depending on the order in which the sum was made, the coefficient is `0.0` or a residue of about `1e-16`. Measured on this machine with random sets of rewards k/96: **0.3% of the sets** (59 of 20,000 for N = 8; 131 of 40,000 in a second run) gave different float32 coefficients for a different summation order; **every one** of the 131 classified cases was of this kind (zero against a residue below 1e-9), none a real float32 difference. On a synthetic update of 2 million elements (NumPy only, not the real `apply_es_update_`) no FP16 weight changed. So the weights are practically unaffected, but the **bytes of the coefficient vector are not**: if two machines each recomputed the coefficients and compared them or their hash, about 0.3% of the generations would raise a false alarm. Hence one computation, by the coordinator, and the vector travels with the record; the rewards stay in it only so that the coefficients can be audited (`verify_coefficients`, exact by default, with a tolerance for an audit on another machine). Not measured: two real machines (NumPy 2.4.5 and 2.5.2) giving different coefficients; the experiment above used shuffled orders on one machine.
+`standardize_rewards` computes in float64 and casts to float32. When a reward **equals the mean** (common when rewards are k/96), `reward - mean` is 0 in exact arithmetic but, depending on the order in which the sum was made, the coefficient is `0.0` or a residue of about `1e-16`. Measured on this machine with random sets of rewards k/96 (`artifacts/experiments/2026-10-06-coefficient-residue/`): **0.3 to 0.4% of the sets** (80 of 20,000 for N = 8; 60 for N = 16; 68 for N = 64) gave different float32 coefficients for a different summation order; **every one** of those cases was of this kind (zero against a residue below 1e-9), none a real float32 difference. On a synthetic update of 2 million elements (NumPy only, not the real `apply_es_update_`) no FP16 weight changed. (An earlier scratch script gave slightly different counts, 59 of 20,000 for N = 8; the saved script is the reference.) So the weights are practically unaffected, but the **bytes of the coefficient vector are not**: if two machines each recomputed the coefficients and compared them or their hash, about 0.3% of the generations would raise a false alarm. Hence one computation, by the coordinator, and the vector travels with the record; the rewards stay in it only so that the coefficients can be audited (`verify_coefficients`, exact by default, with a tolerance for an audit on another machine). Not measured: two real machines (NumPy 2.4.5 and 2.5.2) giving different coefficients; the experiment above used shuffled orders on one machine.
 
 ## Alternatives considered
 
@@ -67,7 +67,7 @@ All numbers are from the 5070 Ti box (Python 3.12, NumPy 2.4.5). The ledger has 
 
 - Tests: the whole suite gives 978 passed and 14 skipped in about 30 s (the skips are the real-model tests, which need `HETEROES_QWEN_PATH`). They include: unit tests per function, a model of the contract that predicts every ledger action (the exact error class or outcome) and checks the tables directly, six scenarios of MASTER §22.4 plus a quarantine one on simulated time (SimPy), random schedules (Hypothesis; 3,000 examples per test with `HETEROES_HYPOTHESIS=fuzz`, no failure), every order of small alphabets (32,706 sequences by default; 113,866 in 88 s with `HETEROES_EXHAUSTIVE=deep`; no failure), and two dispatch policies on unequal workers (greedy, wave).
 - Mutation checks by hand on scratch copies (deliberate faults in the code; not automated in CI): see STATUS for the counts per step. Every fault was caught except equivalent ones (a pragma that Python already makes redundant; `BEGIN IMMEDIATE`, see below). Several gaps in the tests themselves were found this way and closed.
-- Measured: a record of 8 candidates is 690 bytes (1.9 KB for 32, 7 KB for 128) against a 0.99 GB FP16 model.
+- Measured (`artifacts/experiments/2026-10-06-coefficient-residue/`): a record of 8 candidates is 744 bytes (1,883 for 32; 6,747 for 128) against a 0.99 GB FP16 model.
 
 **Not verified:**
 

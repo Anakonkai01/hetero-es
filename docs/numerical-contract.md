@@ -1,7 +1,8 @@
 # HeteroES-LLM — Numerical Contract
 
 > **Status:** draft v0.1, 2026-09-30 — written by Claude for review, **not yet approved**. Several rules are proposals and are marked as such.
-> **Audience:** the project team. Required reading before touching `src/heteroes/{model,noise,es}`.
+> **Audience:** the project team. Required reading before touching `src/heteroes/{model,noise,es}`, `generation_record.py` and `ledger/`.
+> **Updated 2026-10-06:** the update can be applied from given coefficients (section 8), a question of who computes them was decided (O7, section 11), and the record of a generation is section 13.
 > **Related:** [architecture.md](architecture.md) (big picture), [ADR-001](adr/ADR-001-canonical-noise-engine.md) (why the NoiseEngine is CPU PCG64). Design source of truth: `HETEROES_LLM_MASTER.md` §6; evidence: `HETEROES_LLM_STATUS.md` §4–5 and `artifacts/probes/2026-09-29/`.
 
 ## 0. How to read this document
@@ -197,6 +198,7 @@ Because the engine takes `schema_hash` as a plain string input, these vectors ca
 - **[E]** Notebook formula: `μ = mean(R)`, `s = std(R, population)`; if `s < η` → all `z = 0` (no-op update, logged); else `z = (R − μ) / (s + η)`, with `η = 1e-9` (**[D]** decided by the owner 2026-10-05; the notebook used `1e-8`).
 - **[P]** Record `η` in the config. Note it is used twice: as the "equal rewards" threshold and as the division guard.
 - **[P]** Implementation (`src/heteroes/es/update.py`, tests `tests/es/test_standardize.py`): the input is any 1-D sequence of real numbers (list, tuple, NumPy array; ints allowed). It is converted to float64 first, the mean and the population standard deviation (`ddof = 0`) are computed in float64, and the coefficients are rounded **once** to float32. The returned float32 array is the exact set of coefficients every machine uses. Record `ddof = 0` and `η` next to the coefficients in the manifest.
+- **[D — O7, 2026-10-06] The coefficients are computed ONCE, by the coordinator, and then travel (section 13); no other machine recomputes them from the rewards.** [E] Reason: when a reward equals the mean, its coefficient is `0.0` or a residue of about 1e-16 depending on the order of the float64 sums. With rewards k/96 another order of the sums changed the float32 coefficients in 0.3 to 0.4% of 20,000 random sets (N = 8, 16, 64), every time of this kind and only this kind; a synthetic 2-million-element update did not change any FP16 weight (`artifacts/experiments/2026-10-06-coefficient-residue/`). The weights are practically unaffected, but the bytes of the coefficient vector are not, so recomputing and comparing would raise a false alarm in about 1 generation in 300.
 
 ### 7.1 How other ES code handles rewards (looked up 2026-10-05)
 
@@ -252,8 +254,11 @@ for each schema entry k (canonical order):
   - **Limits of that measurement:** one σ, four seeds, unmodified weights, one NumPy version, no reward or learning run; the maximum element-wise relative error of the FP16 cast was 0.747 (its cause was not investigated; inference: very small |ε| values, where FP16 loses relative precision).
   - **Accepted trade-off:** the update moves along ε, not along what the worker actually measured. The rounding error of θ' cannot be removed by any choice of ε. Making it visible (monitoring) is future work, see `TODO.md`, group `monitoring`.
 - **[D]** Candidate order is canonical because floating-point addition is not associative: summing in arrival order would make the update depend on network timing.
+- **[D — 2026-10-06] Two entry points, one body.** `apply_coefficients_(model, schema, seeds, coefficients, alpha, chunk_elements)` applies GIVEN coefficients (what a worker does when it replays a generation record); `apply_es_update_` is `standardize_rewards` followed by it. The coefficients must be exactly float32 values (a value that would be rounded in silence is refused), finite, a vector as long as the seeds; all zero means no-op. The checks of the other arguments (alpha, chunk size, seeds, model) run before the no-op answer, as before. Test: applying the coefficients of the rewards gives the same bits as applying the rewards (CPU and GPU, several chunk sizes, a large tensor).
 - **[D]** Diagnostics: requested update norm, actually applied update (after the FP16 cast), fraction of coordinates that changed, tied-tensor behaviour. **[E]** `milestone2_history.json` reports `update_max_diff = 0.00030517578125` with the worst parameter `model.embed_tokens.weight`.
 - Memory note: the largest FP32 `direction` (embedding) is 136,134,656 × 4 B ≈ 545 MB if built for the whole tensor. Every operation is elementwise and the candidate loop is the innermost one, so accumulating one chunk at a time gives the same bits and needs only about one chunk (1 MiB) of FP32 memory.
+
+> **Update 2026-10-06:** `apply_coefficients_` was split out of `apply_es_update_` (the loop over chunks is the same code, line for line); `pytest tests` with the real model gives 992 passed, among them the real-model CPU-equals-GPU check of the update; mutation check of the new function by hand: 10 faults, 8 caught, the 2 others equivalent. Still not run on the 1660S.
 
 > **Implementation status (2026-10-05, evening): implemented, checked on the 5070 Ti only.** `src/heteroes/es/update.py` (`standardize_rewards`, `apply_es_update_`, `UpdateReport`) passes the specification tests (`pytest tests` with the real model: 325 passed; the real-model test compares CPU with GPU bit for bit and keeps the extra GPU memory below 256 MiB). A hand-made mutation check (27 faults) caught everything except two equivalent mutants. Not run on the 1660S. The specification tests exist (`tests/es/test_standardize.py`, `tests/es/test_update.py`; independent NumPy oracle, FP32-versus-FP16 and candidate-order cases chosen so that the data can tell them apart: on 200,000 elements and 8 candidates, FP16 accumulation differed in 111,076 elements and a different candidate order in 41). O4 (canonical epsilon) and the seed checks (integers only, no duplicates, section 3) are decided. Proposed but not approved: the report fields (`noop`, `coefficients`, `requested_l2`, `applied_l2`, `changed`, `numel`).
 
@@ -294,6 +299,7 @@ For one candidate (same revision, schema, seed, σ, workload) on the 5070 Ti and
 | O4 | ε used in the update | canonical FP16 ε upcast to FP32 vs realized difference | **DECIDED 2026-10-05: canonical ε** (option A); measurements and accepted trade-off in §8 |
 | O5 | Candidate seed rule | (a) explicit seed list stored in the manifest; (b) derive from (experiment, generation, candidate index) | **DECIDED 2026-10-06:** seeds are explicit in the descriptor (range `0 <= seed < 2^53`); the coordinator chooses them, preferably with `derive_seed`; the frozen regression keeps `[0..3]`. See section 3 |
 | O6 | NumPy pin | exact version on both machines (which one?) | **DECIDED 2026-10-06: no version pin; the noise behaviour is pinned** by a fingerprint of five golden chunks checked by a self-test (section 10). The version is only reported |
+| O7 | Who computes the update coefficients | (a) every machine recomputes them from the rewards; (b) the coordinator computes them once and they travel | **DECIDED 2026-10-06: (b)**, evidence in section 7 and section 13 |
 
 ## 12. Manifest v1 [D — decided 2026-10-06]
 
@@ -319,7 +325,42 @@ The hash is the SHA-256 of the canonical JSON of that document (`heteroes.canoni
 
 **Evidence [E]:** the recipes rebuilt from the records of the 5070 Ti and the 1660S (`artifacts/regression/2026-10-05-one-candidate/`, `artifacts/regression/2026-10-06-cross-machine-one-candidate/`) have the same hash, `1604737ea1d7203062d641381172899356a261748f754a8f3264019ac1b3f5b1` (pinned in `tests/test_manifest.py`; that pinned value was produced by this code, it is a regression guard, not independent evidence). Those records have format 1; `scripts/run_one_candidate.py` now writes format 2, which also holds the recipe, its hash, the descriptor and the result of the noise self-test.
 
-**Not done / open:** the record of a whole generation (the list of descriptors, the coefficients, the update parameters such as `alpha`) comes with the ledger; the self-test is not yet part of a worker admission (C1); the format-2 script has not been run on the 1660S yet.
+**Not done / open:** the self-test is not yet part of a worker admission (C1); the format-2 script has not been run on the 1660S yet. (The record of a whole generation, listed here before, is done: section 13.)
+
+## 13. Generation record v1 [D — decided 2026-10-06]
+
+What turns the parent weights of a generation into its child weights, as a message: the third layer after the recipe and the candidate descriptor (section 12). `heteroes.generation_record.GenerationRecord`; it does not need the ledger or torch to be read or checked.
+
+| Field | Meaning |
+|---|---|
+| `experiment_id`, `generation` | which generation (same rules as the descriptor) |
+| `recipe_hash` | the numerics (section 12); binds eta, chunk size, engine, schema |
+| `parent_weights_sha256` | the weights the update must be applied to (the model version) |
+| `seeds` | the seeds in canonical (index) order: integers, `0 <= seed < 2^53`, all different |
+| `rewards` | the rewards that were committed, in the same order: finite numbers, stored as floats |
+| `coefficients` | the coefficients z of the update, in the same order: **exactly float32 values**, finite |
+| `alpha` | the step; finite, fits a float32 (may be zero or negative); `alpha_float32` is derived, never given |
+
+The document also holds `record_version` (1). Its hash is the SHA-256 of the canonical JSON of the document (`heteroes.canonical`). A change of a field, of a label or of the serialization is a new record version. About 744 bytes for 8 candidates, 1,883 for 32, 6,747 for 128 (the FP16 model is 0.99 GB; `artifacts/experiments/2026-10-06-coefficient-residue/`).
+
+**Inputs only [D].** `child_weights_sha256` (the hash of the weights that come out) is NOT in the record: it is an outcome, written apart (`Ledger.mark_applied`); putting it inside would change the hash of the record after the fact.
+
+**The coefficients travel [D — O7].** The coordinator computes them once with `standardize_rewards(rewards, eta)` (`GenerationRecord.from_results` does it); a worker applies them with `apply_coefficients_` and never recomputes them. The rewards stay in the record only so that the coefficients can be audited: `verify_coefficients(eta)` is exact (right for the coordinator that has just made them); `verify_coefficients(eta, atol=...)` is for an audit on another machine, where a coefficient that is `0.0` here may be a residue of 1e-16 there (section 7). All coefficients zero means no signal: the update is a no-op (`record.noop`).
+
+**Write-ahead [D].** The coordinator writes the record into the ledger BEFORE it touches the weights, and marks the outcome after:
+
+```text
+generation COMPLETE  ->  record_update(record)        # only if every candidate is committed, and only if the record says exactly
+                                                      # what was committed (seeds, rewards, recipe, parent); one per generation
+                     ->  apply the update to the weights (apply_coefficients_)
+                     ->  mark_applied(record_hash, child_weights_sha256)
+```
+
+Recording the same record again is acknowledged; another record for the same generation is a `ConflictingUpdateError` (after a restart the stored one is the one to apply). Marking the same child again is acknowledged; **another child for the same record is an alarm** (the update is deterministic: the same parent and record must give the same child). If the coordinator stops after the weights changed but before `mark_applied`, the record is in the ledger and the update can be redone from the parent checkpoint. The ledger cannot know the alpha and the coefficients are right (they are the coordinator's decision) and trusts the child hash it is given.
+
+**Chain [P].** The `parent_weights_sha256` of generation g+1 should be the child of generation g; a worker checks its own weights hash against `parent` before it applies a record, and against `child` after. The ledger does not enforce the chain at `open_generation` yet (`TODO.md`, group `ledger-next`).
+
+**Not done / not verified [E]:** the restart procedure (compare the weights hash with parent and child, restore, redo); two real machines computing the same coefficients (not needed once they travel, and not measured); the effect of a coefficient residue on the real model (only a synthetic NumPy test); applying a record on the 1660S.
 
 ## Appendix A — Known deviations of the probes/notebook from this contract
 
