@@ -117,7 +117,7 @@ class WorkerSide:
         self.dir = coordinator.models_dir.parent / f"cache-{name}"
         self.dir.mkdir(exist_ok=True)
 
-        def fake_evaluate(model, tokenizer):
+        def fake_evaluate(model, tokenizer, chunk=1):
             self.evaluated.append(model_weights_sha256(model, self.schema))
             if evaluate is not None:
                 evaluate()

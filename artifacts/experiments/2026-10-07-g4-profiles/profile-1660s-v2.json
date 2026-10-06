@@ -1,0 +1,341 @@
+{
+  "format": 1,
+  "worker_id": "worker-1660s",
+  "measured_at_unix": 1791321452.6622171,
+  "measured_at_utc": "2026-10-06T21:17:32Z",
+  "key": {
+    "gpu_name": "NVIDIA GeForce GTX 1660 SUPER",
+    "gpu_capability": [
+      7,
+      5
+    ],
+    "gpu_total_memory_bytes": 6027083776,
+    "nvidia_driver": "595.91.07",
+    "torch": "2.13.0+cu132",
+    "torch_cuda": "13.2",
+    "numpy": "2.5.2",
+    "transformers": "5.17.0",
+    "python": "3.14.4",
+    "device": "cuda",
+    "recipe_hash": "1604737ea1d7203062d641381172899356a261748f754a8f3264019ac1b3f5b1",
+    "schema_hash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+    "workload_hash": "cad822bc1e65a9ec37d948e5415cff22c70f96500e2043e6299bbdd5cea0b8d5"
+  },
+  "key_hash": "b9b81d76b8b013be97238243c1de9cfed95c092455b1030872b80f8c504e60c1",
+  "environment": {
+    "hostname": "heteroes-worker-1660s",
+    "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43",
+    "python": "3.14.4",
+    "torch": "2.13.0+cu132",
+    "torch_cuda": "13.2",
+    "numpy": "2.5.2",
+    "transformers": "5.17.0",
+    "device": "cuda",
+    "gpu_name": "NVIDIA GeForce GTX 1660 SUPER",
+    "gpu_capability": [
+      7,
+      5
+    ],
+    "gpu_total_memory_bytes": 6027083776,
+    "nvidia_driver": "595.91.07"
+  },
+  "code": {
+    "git_commit": "c466a54d58b0b60c575c36d4cdf8374a49245958",
+    "git_dirty": false
+  },
+  "recipe_hash": "1604737ea1d7203062d641381172899356a261748f754a8f3264019ac1b3f5b1",
+  "parent_weights_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+  "sigma": 0.001,
+  "checks": {
+    "noise_selftest": true,
+    "restore_exact": true,
+    "chunk1_reproduces_reference": true
+  },
+  "noise_selftest_seconds": 0.0229853840000942,
+  "chunk_probes": [
+    {
+      "chunk": 1,
+      "ran": true,
+      "identical": true,
+      "seconds": 7.60268273163635,
+      "peak_bytes": 1007814656,
+      "error": null,
+      "differing": []
+    },
+    {
+      "chunk": 2,
+      "ran": true,
+      "identical": false,
+      "seconds": 9.422243848333203,
+      "peak_bytes": 1010781184,
+      "error": null,
+      "differing": [
+        [
+          0,
+          5
+        ],
+        [
+          1,
+          8
+        ],
+        [
+          1,
+          10
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          7,
+          12
+        ],
+        [
+          11,
+          15
+        ],
+        [
+          15,
+          7
+        ],
+        [
+          18,
+          12
+        ],
+        [
+          23,
+          6
+        ],
+        [
+          27,
+          6
+        ],
+        [
+          27,
+          11
+        ],
+        [
+          30,
+          5
+        ],
+        [
+          31,
+          9
+        ]
+      ]
+    },
+    {
+      "chunk": 4,
+      "ran": true,
+      "identical": false,
+      "seconds": 6.114482978515188,
+      "peak_bytes": 1016714240,
+      "error": null,
+      "differing": [
+        [
+          1,
+          8
+        ],
+        [
+          1,
+          10
+        ],
+        [
+          7,
+          12
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          9,
+          8
+        ],
+        [
+          14,
+          12
+        ],
+        [
+          25,
+          12
+        ],
+        [
+          27,
+          11
+        ],
+        [
+          29,
+          10
+        ],
+        [
+          31,
+          9
+        ]
+      ]
+    },
+    {
+      "chunk": 8,
+      "ran": true,
+      "identical": false,
+      "seconds": 4.084537532302999,
+      "peak_bytes": 1028875776,
+      "error": null,
+      "differing": [
+        [
+          1,
+          10
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          11,
+          15
+        ],
+        [
+          14,
+          12
+        ],
+        [
+          23,
+          6
+        ],
+        [
+          27,
+          7
+        ],
+        [
+          27,
+          11
+        ],
+        [
+          31,
+          9
+        ]
+      ]
+    },
+    {
+      "chunk": 16,
+      "ran": true,
+      "identical": false,
+      "seconds": 3.3070794782423754,
+      "peak_bytes": 1052310528,
+      "error": null,
+      "differing": [
+        [
+          1,
+          8
+        ],
+        [
+          2,
+          8
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          11,
+          15
+        ],
+        [
+          14,
+          12
+        ],
+        [
+          22,
+          5
+        ],
+        [
+          27,
+          11
+        ],
+        [
+          31,
+          9
+        ]
+      ]
+    }
+  ],
+  "safe_chunk": 1,
+  "candidate_times": {
+    "1": {
+      "chunk": 1,
+      "raw": [
+        {
+          "perturb": 9.200556334999419,
+          "rollout": 8.105077259000609,
+          "restore": 0.4939099269995495,
+          "total": 17.799543520999578
+        },
+        {
+          "perturb": 9.194971761000488,
+          "rollout": 7.270464702000027,
+          "restore": 0.49415159599993785,
+          "total": 16.959588059000453
+        },
+        {
+          "perturb": 9.203439794999213,
+          "rollout": 5.220750701000725,
+          "restore": 0.49327236899989657,
+          "total": 14.917462864999834
+        },
+        {
+          "perturb": 9.203639679999469,
+          "rollout": 7.895960126001228,
+          "restore": 0.49330110299888474,
+          "total": 17.59290090899958
+        },
+        {
+          "perturb": 9.18168826299916,
+          "rollout": 7.2303037340006995,
+          "restore": 0.4931608930000948,
+          "total": 16.905152889999954
+        }
+      ],
+      "samples": 5,
+      "total_median": 16.959588059000453,
+      "total_min": 14.917462864999834,
+      "total_max": 17.799543520999578,
+      "phases_median": {
+        "perturb": 9.200556334999419,
+        "rollout": 7.270464702000027,
+        "restore": 0.49330110299888474
+      },
+      "peak_bytes": 1071950848
+    }
+  },
+  "candidate_seconds_at_safe_chunk": 16.959588059000453,
+  "candidate_seconds_at_chunk_1": 16.959588059000453,
+  "peak_bytes_candidate": 1071950848,
+  "sync": {
+    "url": "http://10.10.10.1:8765",
+    "rtt_median_seconds": 0.0007244829994306201,
+    "rtt_max_seconds": 0.003700466000736924,
+    "weights_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "transfer_seconds": 8.493337136000264,
+    "load_seconds": 4.066022831999362,
+    "rehash_seconds": 9.310525410000992,
+    "total_seconds": 21.869885378000617,
+    "same_as_parent": true,
+    "weights_bytes": 988065536,
+    "throughput_mb_per_second": 116.33419469620937
+  },
+  "update": null,
+  "args": {
+    "model_path": "/home/anakonkai/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775",
+    "worker_id": "worker-1660s",
+    "out": "artifacts/experiments/2026-10-07-g4-profiles/profile-1660s-v2.json",
+    "chunks": "1,2,4,8,16",
+    "candidates": 5,
+    "probe_candidates": 32,
+    "sigma": 0.001,
+    "sync_url": "http://10.10.10.1:8765",
+    "sync_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "sync_dir": "/home/anakonkai/.cache/heteroes/profile-sync",
+    "measure_update": false,
+    "device": null
+  }
+}

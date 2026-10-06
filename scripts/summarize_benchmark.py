@@ -44,9 +44,14 @@ def summarize_run(path: Path) -> dict:
         "chunks": summary["args"].get("policy"), "workers": {},
     })
     wait_total = sum(g["wait_seconds"] for g in generations)
+    result["first_generation_owner"] = {}                 # candidate index -> the worker that evaluated it, generation 0
     for log in sorted(path.glob("worker-*.jsonl")):
         events = read_jsonl(log)
         steps = [e for e in events if e["event"] == "step" and e["kind"] in ("COMMITTED", "ALREADY_COMMITTED")]
+        for e in steps:
+            parts = e["candidate_id"].split("/")                      # <experiment>/g<generation>/c<index>
+            if parts[-2] == "g0":
+                result["first_generation_owner"][int(parts[-1][1:])] = log.stem.removeprefix("worker-")
         busy = sum(e["timing"]["total"] for e in steps if e.get("timing"))
         step_seconds = sum(e["step_seconds"] for e in steps)
         syncs = [e for e in events if e["event"] == "sync"]
@@ -79,6 +84,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("directory")
     parser.add_argument("--prediction", default=None)
     parser.add_argument("--out", default=None)
+    parser.add_argument("--n", type=int, default=None, help="only the runs with this number of candidates (the prediction file is for one N)")
     args = parser.parse_args(argv)
     directory = Path(args.directory)
     prediction = None if args.prediction is None else json.loads(Path(args.prediction).read_text(encoding="utf-8"))
@@ -86,7 +92,7 @@ def main(argv: list[str]) -> int:
     runs = {}
     for path in sorted(directory.iterdir()):
         match = RUN.fullmatch(path.name)
-        if match and path.is_dir() and (path / "run.json").exists():
+        if match and path.is_dir() and (path / "run.json").exists() and (args.n is None or int(match.group(1)) == args.n):
             runs[path.name] = (int(match.group(1)), match.group(2), int(match.group(3)), summarize_run(path))
 
     report = {"directory": str(directory), "runs": {name: run[3] for name, run in runs.items()}, "conditions": {}, "consistent": {}}
@@ -97,6 +103,14 @@ def main(argv: list[str]) -> int:
         by_condition = {}
         for condition, run in good:
             by_condition.setdefault(condition, []).append(run)
+        reference_run = next((run for condition, run in good if condition == "B0"), None)
+        for condition, run in good:
+            if reference_run is not None and run is not reference_run:
+                # generation 0 has the same parent in every run: a different reward there is a difference in how the candidate was
+                # evaluated (which GPU, which chunk), never an effect of an earlier update
+                differing = [i for i, (a, b) in enumerate(zip(run["rewards"][0], reference_run["rewards"][0])) if a != b]
+                run["first_generation_mismatches"] = [{"candidate": i, "worker": run["first_generation_owner"].get(i), "reward": run["rewards"][0][i],
+                                                       "reward_B0": reference_run["rewards"][0][i]} for i in differing]
         baseline = statistics.mean(run["T_mean"] for run in by_condition["B0"]) if "B0" in by_condition else None
         for condition, items in sorted(by_condition.items()):
             times = [run["T_mean"] for run in items]
@@ -121,6 +135,8 @@ def main(argv: list[str]) -> int:
     for key, value in report["consistent"].items():
         print(key, value)
     for name, (n, condition, repeat, run) in runs.items():
+        if run.get("first_generation_mismatches"):
+            print(f"{name}: generation 0 differs from B0 at", [(m["candidate"], m["worker"]) for m in run["first_generation_mismatches"]])
         if run["outcome"] != "ok":
             print("NOT OK:", name, run["outcome"])
     if args.out:
