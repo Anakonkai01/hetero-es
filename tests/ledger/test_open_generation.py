@@ -4,18 +4,8 @@ from dataclasses import FrozenInstanceError
 import pytest
 
 from heteroes.ledger import CandidateRecord, CandidateState, Ledger, LedgerError
-from heteroes.manifest import MAX_SEED, CandidateDescriptor
-
-RECIPE = "a" * 64
-PARENT = "b" * 64
-
-
-def make(index, seed, **changes):
-    values = dict(recipe_hash=RECIPE, parent_weights_sha256=PARENT, experiment_id="exp", generation=0,
-                  index=index, seed=seed)
-    values.update(changes)
-    return CandidateDescriptor(**values)
-
+from heteroes.manifest import MAX_SEED
+from ledger_helpers import PARENT, RECIPE, make
 
 def batch(n=4, **changes):
     return [make(i, 1000 + 7 * i, **changes) for i in range(n)]
@@ -262,7 +252,7 @@ def test_a_new_file_records_its_schema_version(tmp_path):
 
     raw = sqlite3.connect(path)
     try:
-        assert raw.execute("PRAGMA user_version").fetchone()[0] == 1
+        assert raw.execute("PRAGMA user_version").fetchone()[0] == 2
     finally:
         raw.close()
 

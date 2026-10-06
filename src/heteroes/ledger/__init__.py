@@ -1,3 +1,14 @@
-from heteroes.ledger.ledger import CandidateRecord, CandidateState, Ledger, LedgerError
+from heteroes.ledger.ledger import (
+    AlreadyLeasedError,
+    CandidateRecord,
+    CandidateState,
+    Lease,
+    Ledger,
+    LedgerError,
+    RetriesExhaustedError,
+)
 
-__all__ = ["CandidateRecord", "CandidateState", "Ledger", "LedgerError"]
+__all__ = [
+    "AlreadyLeasedError", "CandidateRecord", "CandidateState", "Lease", "Ledger", "LedgerError",
+    "RetriesExhaustedError",
+]
