@@ -89,8 +89,6 @@ with other methods (for example the realized difference as the update direction)
 - [ ] Worker ids are free strings: there is no worker registry yet. Quarantine blocks exactly that name, so a worker that renames
       itself escapes it. Acceptable while workers are trusted (no attacker in scope); revisit with C1 admission (worker identity,
       capability profile), where a registry is needed anyway.
-- [ ] Threads: `BEGIN IMMEDIATE` (the write lock before reading) has no test, removing it changes no test (it needs two threads). A sqlite3
-      connection belongs to the thread that made it. With the first HTTP server: one connection per thread, and a test with real threads.
 - [ ] The restart procedure of the coordinator (SUPPORTING in MASTER): compare the hash of the weights with `parent` and `child` of the stored
       update record, restore from the parent checkpoint if needed, redo the (deterministic) update, `mark_applied`. Only the data (the record,
       `mark_applied`) exists; checkpoint staging and publication do not.
@@ -99,7 +97,6 @@ with other methods (for example the realized difference as the update direction)
 - [ ] `CandidateState.RUNNING` exists but nothing produces it (a worker telling "I started" and heartbeats come with the HTTP protocol).
 - [ ] No schema migration (a file of another version is refused; the version is 5). `max_attempts` is a policy of the process, not stored: two
       processes with different values disagree about FAILED.
-- [ ] The ledger and the new tests were never run on the 1660S (Python 3.14). It needs `pip install hypothesis simpy` there, or those tests are skipped.
 - [ ] `generation_record.py` imports private helpers of `manifest.py` (`_HEX64`, `_NAME`, `_check_int`, `_check_keys`, `_check_text`): make
       them public or move them to a shared module (touches the frozen manifest, with its tests as a guard).
 - [ ] The ledger tests import torch because the model of the contract (`tests/ledger/harness.py`) and `GenerationRecord.from_results` use
@@ -112,6 +109,21 @@ with other methods (for example the realized difference as the update direction)
 - [ ] The mutation checks of G2a to G2f were made by hand with scripts in the scratchpad of the session (lists of faults), which are not in the repo
       and are lost when the scratchpad is cleaned; only the counts are recorded (STATUS 0.0). Keep the lists if they are to be reused.
 - [ ] ADR-002 is a draft by Claude pending the owner's review; the worker protocol table in it is a proposal [P], not implemented.
+
+## g3-next  (HTTP worker and coordinator; G3, 06/10/2026)
+- [ ] Failures on the physical machines are not exercised: kill a worker in the middle of a candidate, cut the cable during a download,
+      let a lease expire on the 1660S (the behaviour is tested with fake workers and in the simulations only). This is the C3 campaign (E6).
+- [ ] The restart procedure of the coordinator is still not written (see `ledger-next`).
+- [ ] Nothing produces `CandidateState.RUNNING`; the worker sends no heartbeat, a long candidate on a slow worker is only protected by the lease length.
+- [ ] The token is sent in clear over HTTP (acceptable on a private cable or Tailscale; do not expose the port). No TLS, no per-worker identity.
+- [ ] The network set-up of the two machines (`eno1` addresses `10.10.10.1/24` and `10.10.10.2/24`, the ufw rule for 8765/tcp on `eno1`) was made
+      by hand and is not in the repository; write it in a short runbook if the demo must be repeated.
+- [ ] Published weights (about 1 GB per generation) are never deleted by the coordinator (8 GB in `~/.cache/heteroes` after the G3 runs).
+- [ ] The first physical runs give no speedup (the coordinator's update is about 46 s per generation for 8 candidates; the 1660S is about 4 times
+      slower per candidate): profile the update and the synchronization before any claim (C2, C4). One run per configuration only.
+- [ ] `tests/test_e2e_local.py` takes about 5 minutes and three processes on the GPU: it runs only with `HETEROES_E2E=1`.
+- [ ] The mutation check of G3 (70 random operator mutants of `coordinator`, `worker`, `worker_runtime`, `worker_api`, `http_transport`, `executor`,
+      `dispatch`: 61 caught, 7 equivalent, 2 gaps closed by three new test cases) was a sample made with a script in the scratchpad, not in the repo.
 
 ## schema-polish  (`src/heteroes/model/schema.py`)
 - [ ] The two existing `TODO(...)` comments in the source: `schema-validation` (`__post_init__`) and

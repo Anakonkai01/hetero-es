@@ -73,7 +73,8 @@ HETEROES_QWEN_PATH=<dir of any Qwen2.5-0.5B checkpoint> pytest tests/model   # a
 # Real-model tests need the ORIGINAL pinned checkpoint (an ES-modified one gives different hashes). On the 5070 Ti box it is in the HF cache:
 SNAP=~/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775
 HETEROES_QWEN_PINNED_PATH=$SNAP HETEROES_QWEN_PATH=$SNAP pytest tests      # about 50 s on the GPU (measured 05/10 evening)
-# expected (5070 Ti, 06/10): 992 passed with the env vars (about 140 s); 978 passed and 14 skipped without them (about 30 s). (On the 1660S 404 passed before step 8, 471 s; the ledger was never run there.)
+# expected (5070 Ti, 06/10 evening): 1368 passed and 2 skipped with the env vars (about 155 s; the 2 skipped need HETEROES_E2E=1, about 5 more minutes);
+# 1352 passed and 18 skipped without them (about 50 s). (On the 1660S 1365 passed with the real model in about 10 minutes, measured just before the last three test cases.)
 # The ledger tests that use Hypothesis and SimPy need the test extra:  pip install -e .[test]   (without it they are skipped, not red)
 # HETEROES_HYPOTHESIS=fuzz pytest tests/ledger/test_random_schedules.py    # 3000 random schedules per test instead of 150
 # HETEROES_EXHAUSTIVE=deep pytest tests/ledger/test_exhaustive.py          # every order of 5 actions (113,866 sequences, about 90 s) instead of 4
