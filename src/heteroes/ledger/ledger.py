@@ -1,8 +1,10 @@
 import dataclasses
+import functools
 import math
 import re
 import secrets
 import sqlite3
+import threading
 import time
 from dataclasses import dataclass
 from enum import Enum
@@ -326,6 +328,15 @@ def _record(row, now: float) -> CandidateRecord:
     return CandidateRecord(descriptor=_descriptor(row[:6]), state=state, attempts=attempts, result=result)
 
 
+def _locked(method):
+    """One thread at a time inside a public method: the connection is shared, and a transaction must not be interleaved."""
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        with self._lock:
+            return method(self, *args, **kwargs)
+    return wrapper
+
+
 class Ledger:
     """
     The coordinator's durable book: which candidates a generation consists of, and what became of each.
@@ -334,13 +345,18 @@ class Ledger:
     `clock` returns the current time in seconds. Deadlines are stored in the file and compared after a restart,
     so the default is the wall clock (`time.time`), not a monotonic clock (that one starts again at every boot).
     `max_attempts` is how many attempts (leases) one candidate may have; it is a policy of this process, not stored.
+
+    Threads: one Ledger object may be shared by any number of threads (every public method takes one lock). Several
+    Ledger objects on the same file are also safe: a writer takes the database write lock BEFORE it reads (BEGIN
+    IMMEDIATE), so two writers cannot both pass the same check, and the loser gets the ledger's own refusal.
     """
 
     def __init__(self, path, clock=time.time, max_attempts: int = DEFAULT_MAX_ATTEMPTS):
         _check_max_attempts(max_attempts)
         self._clock = clock
         self._max_attempts = max_attempts
-        self._db = sqlite3.connect(path)
+        self._lock = threading.RLock()
+        self._db = sqlite3.connect(path, check_same_thread=False)    # shared between threads, one at a time (`_locked`)
         try:
             self._db.execute("PRAGMA foreign_keys = ON")      # off by default in SQLite, and per connection
             self._db.execute("PRAGMA journal_mode = WAL")     # a file ledger; ":memory:" ignores it
@@ -353,6 +369,7 @@ class Ledger:
             self._db.close()
             raise
 
+    @_locked
     def close(self) -> None:
         self._db.close()
 
@@ -362,6 +379,7 @@ class Ledger:
     def __exit__(self, *exc_info) -> None:
         self.close()
 
+    @_locked
     def open_generation(self, descriptors) -> None:
         """
         Record, before anything runs, the exact set of candidates of one generation, all PENDING.
@@ -407,10 +425,12 @@ class Ledger:
             state = GenerationState.OPEN
         return GenerationStatus(state=state, committed=committed, total=len(records), exhausted=exhausted)
 
+    @_locked
     def list_candidates(self, experiment_id: str, generation: int) -> list[CandidateRecord]:
         """The candidates of a generation in canonical order (by index)."""
         return self._load_generation(experiment_id, generation, self._clock())
 
+    @_locked
     def get_generation_status(self, experiment_id: str, generation: int) -> GenerationStatus:
         """
         COMPLETE when every candidate is committed; FAILED when a candidate has used all its attempts and the last one
@@ -431,6 +451,7 @@ class Ledger:
             raise GenerationNotCompleteError(f"generation {name} is open: {status.committed} of {status.total} committed")
         return records
 
+    @_locked
     def get_generation_results(self, experiment_id: str, generation: int) -> GenerationResults:
         """
         The seeds and rewards of a COMPLETE generation, in canonical (index) order: the input of the ES update.
@@ -444,6 +465,7 @@ class Ledger:
             rewards=tuple(record.result.reward for record in records),
         )
 
+    @_locked
     def get_candidate(self, candidate_id: str) -> CandidateRecord:
         now = self._clock()
         row = self._db.execute(_SELECT_CANDIDATES + "WHERE c.candidate_id = ?", (candidate_id,)).fetchone()
@@ -451,6 +473,7 @@ class Ledger:
             raise LedgerError(f"unknown candidate {candidate_id}")
         return _record(row, now)
 
+    @_locked
     def lease(self, candidate_id: str, worker_id: str, duration: float) -> Lease:
         """
         Give `worker_id` the right to run the candidate for `duration` seconds: a new attempt, with its own token.
@@ -520,6 +543,7 @@ class Ledger:
             raise StaleAttemptError(f"attempt {attempt_number} of {candidate_id} is not the latest attempt with that token")
         return CandidateState(row[0]), last[2], last[3]
 
+    @_locked
     def submit_result(self, descriptor: CandidateDescriptor, attempt_number: int, token: str, reward: float) -> SubmitOutcome:
         """
         Commit the reward of a candidate: the worker returns the job it ran (descriptor), its attempt number, its
@@ -555,6 +579,7 @@ class Ledger:
                              (CandidateState.COMMITTED.value, candidate_id))
         return SubmitOutcome.COMMITTED
 
+    @_locked
     def report_failure(self, descriptor: CandidateDescriptor, attempt_number: int, token: str, kind: FailureKind) -> None:
         """
         The worker could not deliver (out of memory, verifier error, restore mismatch...). The attempt is closed with
@@ -589,11 +614,13 @@ class Ledger:
         if self._db.execute("SELECT 1 FROM quarantine WHERE worker_id = ?", (worker_id,)).fetchone() is not None:
             raise WorkerQuarantinedError(f"worker {worker_id} is quarantined (a restore failed)")
 
+    @_locked
     def list_quarantined(self) -> list[QuarantineRecord]:
         rows = self._db.execute("SELECT worker_id, quarantined_at, candidate_id, attempt_number FROM quarantine "
                                 "ORDER BY quarantined_at, worker_id").fetchall()
         return [QuarantineRecord(*row) for row in rows]
 
+    @_locked
     def release_worker(self, worker_id: str) -> None:
         """Take a worker out of quarantine. A human does this, after dealing with the worker; nothing calls it by itself."""
         if not isinstance(worker_id, str):
@@ -609,6 +636,7 @@ class Ledger:
         if found is None:
             raise LedgerError(f"unknown generation {experiment_id}/g{generation}")
 
+    @_locked
     def record_update(self, record: GenerationRecord) -> UpdateOutcome:
         """
         Write down, BEFORE the weights are touched, the update of a COMPLETE generation. The record must say exactly what
@@ -647,6 +675,7 @@ class Ledger:
                 (record.experiment_id, record.generation, record.to_json(), record.hash, now))
         return UpdateOutcome.RECORDED
 
+    @_locked
     def get_update(self, experiment_id: str, generation: int) -> StoredUpdate | None:
         """The update written down for a generation (None if there is none yet); a record that no longer matches its hash is an error."""
         self._require_generation(experiment_id, generation)
@@ -664,6 +693,7 @@ class Ledger:
             raise LedgerError(f"the stored update of {name} is corrupt: it does not match its hash")
         return StoredUpdate(record=record, record_hash=row[1], recorded_at=row[2], child_weights_sha256=row[3], applied_at=row[4])
 
+    @_locked
     def mark_applied(self, experiment_id: str, generation: int, record_hash: str, child_weights_sha256: str) -> UpdateOutcome:
         """
         Say that the recorded update was applied and gave these weights. The update is deterministic, so a second call with
