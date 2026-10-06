@@ -210,3 +210,17 @@ def test_a_chunk_that_was_not_timed_or_a_missing_sync_is_an_error_not_a_guess():
             worker_model_from_profile(data, chunk, remote=False)
     with pytest.raises(ValueError, match="synchronization"):
         worker_model_from_profile(data, 1, remote=True)
+
+
+def test_the_fixed_part_of_the_update_is_added_once_whatever_n():
+    for n in (2, 8):
+        result = predict_generation_seconds(B3, [WorkerModel("a", 4.0)], n, update_per_candidate=5.0, publish_seconds=0.5, update_fixed_seconds=10.0)
+        assert result["update_seconds"] == 10.0 + 5.0 * n and result["total_seconds"] == 4.0 * n + 10.0 + 5.0 * n + 0.5
+
+
+def test_the_fixed_update_cost_reaches_the_decision_and_does_not_change_the_gain():
+    plain, fixed = decision(SLOW), decision(SLOW, update_fixed_seconds=10.0)
+
+    assert fixed.without["total_seconds"] == pytest.approx(plain.without["total_seconds"] + 10.0)
+    assert fixed.predicted_delta_seconds == pytest.approx(plain.predicted_delta_seconds)           # the same gain on a longer generation
+    assert fixed.delta_threshold > plain.delta_threshold                                         # so the 5 percent bar is higher

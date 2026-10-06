@@ -100,9 +100,10 @@ def predict_candidates_seconds(policy: str, workers: list[WorkerModel], candidat
 
 
 def predict_generation_seconds(policy: str, workers: list[WorkerModel], candidates: int, update_per_candidate: float,
-                               publish_seconds: float) -> dict:
+                               publish_seconds: float, update_fixed_seconds: float = 0.0) -> dict:
+    """`update_fixed_seconds`: the part of the update that does not grow with N (hashing the new weights and so on); 0 if unknown."""
     parts = predict_candidates_seconds(policy, workers, candidates)
-    update = update_per_candidate * candidates
+    update = update_fixed_seconds + update_per_candidate * candidates
     return {"policy": policy, "workers": [worker.worker_id for worker in workers], "candidates_seconds": parts["seconds"],
             "jobs": parts["jobs"], "update_seconds": update, "publish_seconds": publish_seconds,
             "total_seconds": parts["seconds"] + update + publish_seconds}
@@ -125,7 +126,8 @@ class Decision:
 
 
 def decide(candidate: WorkerModel, members: list[WorkerModel], gate_reasons: list[Reason], policy: str, candidates: int,
-           update_per_candidate: float, publish_seconds: float, delta_fraction: float = 0.05, limited: bool = False) -> Decision:
+           update_per_candidate: float, publish_seconds: float, delta_fraction: float = 0.05, limited: bool = False,
+           update_fixed_seconds: float = 0.0) -> Decision:
     """
     May `candidate` join `members`? Not if the hard gate failed. Otherwise yes iff the predicted time with it is shorter than
     without it by more than `delta_fraction` of the time without it (a margin against noise, so that a gain inside the
@@ -133,8 +135,8 @@ def decide(candidate: WorkerModel, members: list[WorkerModel], gate_reasons: lis
     """
     if gate_reasons:
         return Decision(candidate.worker_id, AdmissionState.INELIGIBLE, tuple(gate_reasons), None, None, None, None)
-    without = predict_generation_seconds(policy, members, candidates, update_per_candidate, publish_seconds)
-    joined = predict_generation_seconds(policy, members + [candidate], candidates, update_per_candidate, publish_seconds)
+    without = predict_generation_seconds(policy, members, candidates, update_per_candidate, publish_seconds, update_fixed_seconds)
+    joined = predict_generation_seconds(policy, members + [candidate], candidates, update_per_candidate, publish_seconds, update_fixed_seconds)
     delta = without["total_seconds"] - joined["total_seconds"]
     threshold = delta_fraction * without["total_seconds"]
     if delta > threshold:

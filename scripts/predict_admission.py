@@ -22,6 +22,8 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--candidate", required=True)
     parser.add_argument("--candidates", type=int, required=True, help="candidates per generation (N)")
     parser.add_argument("--delta-fraction", type=float, default=0.05)
+    parser.add_argument("--update-fixed-seconds", type=float, default=0.0,
+                        help="the part of the update that does not depend on N (default 0: the profile measures one candidate only)")
     parser.add_argument("--out", required=True)
     args = parser.parse_args(argv)
     if Path(args.out).exists():
@@ -45,7 +47,7 @@ def main(argv: list[str]) -> int:
     variants = {"common_chunk_1": (1, 1), "per_worker_chunk": (reference["safe_chunk"], candidate["safe_chunk"])}
     out = {"written_at_unix": time.time(), "written_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "code": code_info(),
            "inputs": {"reference": args.reference, "candidate": args.candidate, "candidates": args.candidates,
-                      "update_per_candidate_seconds": update, "publish_seconds": publish, "delta_fraction": args.delta_fraction},
+                      "update_per_candidate_seconds": update, "update_fixed_seconds": args.update_fixed_seconds, "publish_seconds": publish, "delta_fraction": args.delta_fraction},
            "capability_gate": [reason.value for reason in reasons], "variants": {}}
     for name, (ref_chunk, cand_chunk) in variants.items():
         fast = worker_model_from_profile(reference, ref_chunk, remote=False)
@@ -53,13 +55,14 @@ def main(argv: list[str]) -> int:
         entry = {"chunks": {reference["worker_id"]: ref_chunk, candidate["worker_id"]: cand_chunk}, "predictions": {}}
         for policy in ("B3_GREEDY_DYNAMIC", "B2_STATIC_PROPORTIONAL"):
             entry["predictions"][policy] = {
-                "alone": predict_generation_seconds(policy, [fast], args.candidates, update, publish),
-                "both": predict_generation_seconds(policy, [fast, slow], args.candidates, update, publish)}
+                "alone": predict_generation_seconds(policy, [fast], args.candidates, update, publish, args.update_fixed_seconds),
+                "both": predict_generation_seconds(policy, [fast, slow], args.candidates, update, publish, args.update_fixed_seconds)}
             alone, both = entry["predictions"][policy]["alone"]["total_seconds"], entry["predictions"][policy]["both"]["total_seconds"]
             entry["predictions"][policy]["predicted_cluster_benefit"] = alone / both
             entry["predictions"][policy]["predicted_delta_seconds"] = alone - both
         entry["decision_b3"] = decide(slow, [fast], reasons, "B3_GREEDY_DYNAMIC", args.candidates, update, publish,
-                                      args.delta_fraction, limited=cand_chunk < ref_chunk).to_dict()
+                                      args.delta_fraction, limited=cand_chunk < ref_chunk,
+                                      update_fixed_seconds=args.update_fixed_seconds).to_dict()
         out["variants"][name] = entry
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     with open(args.out, "x", encoding="utf-8") as file:
