@@ -538,3 +538,56 @@ def test_a_connection_that_is_reset_during_a_download_is_a_transport_error_and_l
     finally:
         server.shutdown()
         server.server_close()
+
+
+def test_a_worker_gives_up_when_the_coordinator_stays_away_for_too_long(tmp_path, monkeypatch):
+    coordinator = Coordinator(tmp_path)
+    coordinator.open_generation(0, coordinator.parent)
+    side = WorkerSide(coordinator, monkeypatch, max_unreachable_seconds=0.3, backoff_seconds=0.02)
+    side.client = HttpClient(coordinator.server.url, timeout=0.5, retries=0)
+    coordinator.close()                                                      # nobody is there any more
+
+    side.start()
+
+    assert side.join(seconds=10) == "unreachable"
+    errors = [e for e in side.events if e["event"] == "transport_error"]
+    assert len(errors) >= 2 and side.events[-1]["event"] == "exit" and side.events[-1]["reason"] == "unreachable"
+
+
+def test_a_coordinator_that_comes_back_in_time_resets_the_clock_of_a_worker_that_was_about_to_give_up(tmp_path, monkeypatch):
+    coordinator = Coordinator(tmp_path, n=6, lease_seconds=0.5)
+    coordinator.open_generation(0, coordinator.parent)
+    side = WorkerSide(coordinator, monkeypatch, max_unreachable_seconds=1.5, backoff_seconds=0.02)
+    side.client = HttpClient(coordinator.server.url, timeout=0.5, retries=0)
+    port, api, job = coordinator.server.port, coordinator.server.api, coordinator.server.job
+    side.start()
+    try:
+        for _ in range(3):                                                    # three outages, together longer than the limit
+            assert wait_for(lambda: side.thread.is_alive())
+            coordinator.server.stop()
+            time.sleep(0.8)
+            coordinator.server = CoordinatorServer(api, job=job, models_dir=coordinator.models_dir, port=port)
+            coordinator.server.start()
+            time.sleep(0.4)                                                   # long enough for the worker to talk to it again
+
+        assert side.thread.is_alive()
+        assert coordinator.wait_complete()
+        coordinator.finish()
+        assert side.join() == "finished"
+    finally:
+        side.stop.set()
+        coordinator.close()
+
+
+def test_a_worker_that_is_asked_to_stop_does_not_have_to_wait_for_the_limit(tmp_path, monkeypatch):
+    coordinator = Coordinator(tmp_path)
+    coordinator.open_generation(0, coordinator.parent)
+    side = WorkerSide(coordinator, monkeypatch, max_unreachable_seconds=60.0, backoff_seconds=0.02)
+    side.client = HttpClient(coordinator.server.url, timeout=0.5, retries=0)
+    coordinator.close()
+    side.start()
+    time.sleep(0.2)
+
+    side.stop.set()
+
+    assert side.join(seconds=5) == "stopped"

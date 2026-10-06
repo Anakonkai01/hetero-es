@@ -6,8 +6,9 @@ The life of a worker process (the part of the worker that is not a GPU and not t
            model is touched), load them and take them as the new parent; take a turn (`Worker.step`); write down what happened
 
 `WorkerRuntime.run` returns why it stopped: "finished" (the coordinator says the experiment is over), "quarantined" (a restore
-failed on this worker: it must be looked at by a human) or "stopped" (asked to). A network error is not a reason to die: the
-worker waits and asks again. A recipe that changes under a running worker, or a weights file that is not what its name says
+failed on this worker: it must be looked at by a human), "unreachable" (the coordinator has not answered for
+`max_unreachable_seconds`, if that limit is set) or "stopped" (asked to). One network error is not a reason to die: the worker
+waits and asks again. A recipe that changes under a running worker, or a weights file that is not what its name says
 after every attempt, ARE reasons to stop: the worker raises. Every event is a plain dict (JSON) handed to `log`.
 """
 import hashlib
@@ -76,7 +77,7 @@ def download_weights(client: HttpClient, sha256: str, directory, chunk_bytes: in
 class WorkerRuntime:
     def __init__(self, worker_id: str, client: HttpClient, executor: CandidateExecutor, cache_dir, log=lambda event: None,
                  poll_seconds: float = 0.5, backoff_seconds: float = 2.0, download_attempts: int = 2,
-                 sleep=time.sleep, wall_clock=time.time, timer=time.perf_counter):
+                 max_unreachable_seconds: float | None = None, sleep=time.sleep, wall_clock=time.time, timer=time.perf_counter):
         self.worker_id = worker_id
         self.client = client
         self.executor = executor
@@ -85,6 +86,7 @@ class WorkerRuntime:
         self._poll = poll_seconds
         self._backoff = backoff_seconds
         self._download_attempts = download_attempts
+        self._max_unreachable = max_unreachable_seconds
         self._sleep = sleep
         self._wall_clock = wall_clock
         self._timer = timer
@@ -145,6 +147,7 @@ class WorkerRuntime:
         return reason
 
     def _loop(self, stop) -> str:
+        unreachable_since = None
         while stop is None or not stop.is_set():
             try:
                 job = self._fetch_job()
@@ -161,8 +164,13 @@ class WorkerRuntime:
                 seconds = self._timer() - start
             except TransportError as error:
                 self.log("transport_error", error=str(error))
+                now = self._timer()
+                unreachable_since = now if unreachable_since is None else unreachable_since
+                if self._max_unreachable is not None and now - unreachable_since >= self._max_unreachable:
+                    return "unreachable"
                 self._sleep(self._backoff)
                 continue
+            unreachable_since = None
             timing = self.executor.last_timing if step.kind in (StepKind.COMMITTED, StepKind.ALREADY_COMMITTED) else None
             self.log("step", kind=step.kind.value, candidate_id=step.candidate_id, code=step.code,
                      failure=None if step.failure is None else step.failure.value,
