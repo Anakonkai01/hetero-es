@@ -37,7 +37,7 @@ class SubmitOutcome(Enum):
 class GenerationState(Enum):
     OPEN = "OPEN"              # there is still work, or a lease that may still deliver
     COMPLETE = "COMPLETE"      # every candidate is committed: the update can be computed
-    FAILED = "FAILED"          # a candidate can never commit any more (no attempts left, last one over)
+    FAILED = "FAILED"          # a candidate has no attempts left and its last lease is over; its last attempt may still deliver late
 
 
 class UpdateOutcome(Enum):
@@ -160,7 +160,7 @@ class ConflictingResultError(LedgerError):
 
 
 class GenerationFailedError(LedgerError):
-    """A candidate of the generation has no attempts left, so the generation can never be complete."""
+    """A candidate of the generation has no attempts left: no more leases are given (its last attempt may still deliver late)."""
 
 
 class GenerationNotCompleteError(LedgerError):
@@ -191,7 +191,7 @@ class GenerationStatus:
     state: GenerationState
     committed: int
     total: int
-    exhausted: tuple[str, ...]     # ids of the candidates that can no longer commit, in index order
+    exhausted: tuple[str, ...]     # ids of the candidates with no attempts left and no valid lease, in index order
 
 
 @dataclass(frozen=True)
@@ -414,8 +414,9 @@ class Ledger:
     def get_generation_status(self, experiment_id: str, generation: int) -> GenerationStatus:
         """
         COMPLETE when every candidate is committed; FAILED when a candidate has used all its attempts and the last one
-        is over (it can never commit); OPEN otherwise. Computed from the candidates at every call, never stored: raising
-        `max_attempts` and restarting turns a FAILED generation into an OPEN one.
+        is over (no new lease is given; that last attempt may still deliver late, which makes the generation COMPLETE);
+        OPEN otherwise. Computed from the candidates at every call, never stored: raising `max_attempts` and restarting
+        turns a FAILED generation into an OPEN one.
         """
         return self._status_of(self._load_generation(experiment_id, generation, self._clock()))
 
