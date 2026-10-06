@@ -38,38 +38,43 @@ class ChunkProbe:
 def probe_chunks(conditions, evaluate, chunks, is_oom, clock, reset_peak=lambda: None, peak_bytes=lambda: None) -> list[ChunkProbe]:
     """
     `conditions`: zero-argument context managers, each one puts the model in a state (the parent weights, a perturbed candidate)
-    and puts it back on exit. `evaluate(chunk)` returns the list of answer texts for the whole prompt set. The reference of a
-    condition is chunk 1. A chunk 1 that does not run is not a chunk probe but a broken worker: the error is raised.
+    and puts it back on exit; the state is entered ONCE and every chunk is evaluated inside it (a perturbation costs much more
+    than an evaluation, so many conditions become affordable). `evaluate(chunk)` returns the answer texts for the whole prompt
+    set. The reference of a condition is chunk 1, evaluated first in the same state. A chunk 1 that does not run is a broken worker:
+    the error is raised. A chunk that runs out of memory once is dropped from the following conditions.
     """
     chunks = sorted(set(chunks))
     if not chunks or chunks[0] != 1:
         raise ValueError("the chunks to probe must include 1, the reference")
-    references = []
-    for condition in conditions:
+    seconds = {chunk: 0.0 for chunk in chunks}
+    peaks = {chunk: 0 for chunk in chunks}
+    differing = {chunk: [] for chunk in chunks}
+    errors: dict[int, str] = {}
+    for number, condition in enumerate(conditions):
         with condition():
-            references.append(evaluate(1))
-    probes = []
-    for chunk in chunks:
-        total, peak, differing, error = 0.0, 0, [], None
-        for number, condition in enumerate(conditions):
-            try:
-                with condition():
+            reference = evaluate(1)
+            for chunk in chunks:
+                if chunk in errors:
+                    continue
+                try:
                     reset_peak()
                     start = clock()
                     texts = evaluate(chunk)
-                    total += clock() - start
-                    used = peak_bytes()
-                    peak = max(peak, used or 0)
-            except BaseException as caught:
-                if not is_oom(caught) or chunk == 1:
-                    raise
-                error = f"{type(caught).__name__}: {caught}"
-                break
-            differing += [(number, question) for question, (a, b) in enumerate(zip(texts, references[number])) if a != b]
-        if error is not None:
-            probes.append(ChunkProbe(chunk, False, None, None, None, error))
+                    seconds[chunk] += clock() - start
+                    peaks[chunk] = max(peaks[chunk], peak_bytes() or 0)
+                except BaseException as caught:
+                    if not is_oom(caught) or chunk == 1:
+                        raise
+                    errors[chunk] = f"{type(caught).__name__}: {caught}"
+                    continue
+                differing[chunk] += [(number, question) for question, (a, b) in enumerate(zip(texts, reference)) if a != b]
+    probes = []
+    for chunk in chunks:
+        if chunk in errors:
+            probes.append(ChunkProbe(chunk, False, None, None, None, errors[chunk]))
         else:
-            probes.append(ChunkProbe(chunk, True, not differing, total / len(conditions), peak or None, None, tuple(differing)))
+            probes.append(ChunkProbe(chunk, True, not differing[chunk], seconds[chunk] / len(conditions), peaks[chunk] or None,
+                                     None, tuple(differing[chunk])))
     return probes
 
 

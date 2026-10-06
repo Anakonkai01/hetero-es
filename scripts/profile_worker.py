@@ -3,13 +3,13 @@
 Measure the profile of THIS machine's GPU for the pinned model and the 16-prompt workload (C1, MASTER section 8) and write it as JSON.
 
     python scripts/profile_worker.py --model-path <snapshot dir> --worker-id worker-5070ti --out artifacts/experiments/<dir>/profile-5070ti.json
-        [--chunks 1,2,4,8,16] [--candidates 5] [--sigma 1e-3]
+        [--chunks 1,2,4,8,16] [--candidates 5] [--probe-candidates 32] [--sigma 1e-3]
         [--sync-url http://10.10.10.1:8765 --sync-sha256 <hash printed by scripts/serve_weights.py>]   # the link and the sync of a remote worker
         [--measure-update]                                                                           # the coordinator's update cost (run it on the coordinator's host)
 
 What it checks and records:
   * the noise self-test, and that the restore after a perturbation is bit-exact (`checks`);
-  * for each number of prompts per generate() call (chunk), on the parent weights and on two perturbed candidates: did it fit in
+  * for each number of prompts per generate() call (chunk), on the parent weights and on --probe-candidates perturbed candidates: did it fit in
     memory, were the answers the same TEXT as one prompt at a time, how long did the whole prompt set take (`chunk_probes`);
     the safe chunk is the largest exact one; chunk 1 must also give the answers recorded by the probe of 2026-09-29;
   * the duration of real candidates (perturb + rollout + restore) at chunk 1 and at the safe chunk (`candidate_times`);
@@ -26,7 +26,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PROBE_FILE = REPO_ROOT / "artifacts" / "probes" / "2026-09-29" / "probe_5070ti.json"
-PROFILE_SEEDS = (7001, 7002)            # the perturbed candidates on which the chunks are compared
+PROFILE_SEED_BASE = 7001                 # the perturbed candidates on which the chunks are compared: seeds 7001, 7002, ...
 
 
 def fail(message: str, code: int = 2) -> None:
@@ -41,6 +41,9 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--out", required=True)
     parser.add_argument("--chunks", default="1,2,4,8,16")
     parser.add_argument("--candidates", type=int, default=5, help="real candidates to time at each chunk")
+    parser.add_argument("--probe-candidates", type=int, default=32,
+                        help="perturbed candidates on which every chunk is compared with chunk 1 (a rare difference needs many: with a "
+                             "4 percent rate, 2 candidates see it 8 percent of the time, 32 see it 73 percent)")
     parser.add_argument("--sigma", type=float, default=1e-3)
     parser.add_argument("--sync-url", default=None)
     parser.add_argument("--sync-sha256", default=None)
@@ -116,7 +119,7 @@ def main(argv: list[str]) -> int:
     def is_oom(error: BaseException) -> bool:
         return isinstance(error, torch.cuda.OutOfMemoryError)
 
-    probes = probe_chunks([parent] + [perturbed(seed) for seed in PROFILE_SEEDS], texts_at, chunks, is_oom, time.perf_counter,
+    probes = probe_chunks([parent] + [perturbed(PROFILE_SEED_BASE + index) for index in range(args.probe_candidates)], texts_at, chunks, is_oom, time.perf_counter,
                           reset_peak=(torch.cuda.reset_peak_memory_stats if cuda else (lambda: None)),
                           peak_bytes=(torch.cuda.max_memory_allocated if cuda else (lambda: None)))
     if cuda:

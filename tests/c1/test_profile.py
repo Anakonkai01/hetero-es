@@ -107,6 +107,7 @@ def test_out_of_memory_marks_the_chunk_as_not_run_and_the_model_is_put_back():
     probes = run(env, chunks=(1, 2, 4, 8))
 
     assert [(p.chunk, p.ran, p.identical, p.seconds) for p in probes][2:] == [(4, False, None, None), (8, False, None, None)]
+    assert [(state, chunk) for state, chunk in env.log if chunk >= 4] == [(0, 4), (0, 8)]      # tried once, then dropped from condition 1
     assert "FakeOOM" in probes[2].error
     assert env.state == "parent"                     # the condition's cleanup ran
     assert safe_chunk(probes) == 2
@@ -139,12 +140,16 @@ def test_the_reference_chunk_one_must_be_among_the_chunks():
         run(Env(lambda c, k: REFERENCE), chunks=())
 
 
-def test_chunks_are_probed_once_each_in_increasing_order_whatever_the_input_order():
-    env = Env(lambda c, k: REFERENCE, conditions=1)
+def test_each_condition_is_entered_once_and_every_chunk_is_evaluated_inside_it_in_increasing_order():
+    entered = []
+    env = Env(lambda c, k: REFERENCE, conditions=2)
+    inner = env.conditions
+    env.conditions = [(lambda number=number, make=make: (entered.append(number), make())[1]) for number, make in enumerate(inner)]
 
     run(env, chunks=(4, 1, 2, 2))
 
-    assert env.log == [(0, 1), (0, 1), (0, 2), (0, 4)]      # the reference run, then chunk 1, 2, 4 (once)
+    assert entered == [0, 1]                                              # a perturbation is paid once per condition
+    assert env.log == [(0, 1), (0, 1), (0, 2), (0, 4), (1, 1), (1, 1), (1, 2), (1, 4)]    # reference, then chunks 1, 2, 4 (once)
 
 
 def test_the_time_is_the_mean_over_the_conditions_of_one_evaluation():
@@ -155,7 +160,7 @@ def test_the_time_is_the_mean_over_the_conditions_of_one_evaluation():
 
 def test_the_peak_memory_is_the_largest_over_the_conditions_and_reset_before_each_measurement():
     env = Env(lambda c, k: REFERENCE, conditions=2)
-    resets, peaks = [], iter([100, 300, 200, 50])
+    resets, peaks = [], iter([100, 200, 300, 50])           # condition 0: chunk 1, chunk 2; condition 1: chunk 1, chunk 2
 
     probes = run(env, chunks=(1, 2), reset_peak=lambda: resets.append(1), peak_bytes=lambda: next(peaks))
 
