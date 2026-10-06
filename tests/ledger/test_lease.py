@@ -13,11 +13,7 @@ from heteroes.ledger import (
     LedgerError,
     RetriesExhaustedError,
 )
-from ledger_helpers import FakeClock, make
-
-def batch(n=3, **changes):
-    return [make(i, 1000 + 7 * i, **changes) for i in range(n)]
-
+from ledger_helpers import FakeClock, batch, make
 
 @pytest.fixture
 def clock():
@@ -231,7 +227,7 @@ def test_the_budget_is_a_parameter():
 
         with pytest.raises(RetriesExhaustedError):
             ledger.lease("exp/g0/c0", "worker-b", 10.0)
-        assert ledger.lease("exp/g0/c1", "worker-b", 10.0).attempt_number == 1      # each candidate has its own budget
+        assert attempts_of(ledger, "exp/g0/c1") == 0                                # each candidate has its own budget
 
     clock = FakeClock()
     with Ledger(":memory:", clock=clock, max_attempts=5) as ledger:

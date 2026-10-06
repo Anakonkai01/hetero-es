@@ -252,7 +252,7 @@ def test_a_new_file_records_its_schema_version(tmp_path):
 
     raw = sqlite3.connect(path)
     try:
-        assert raw.execute("PRAGMA user_version").fetchone()[0] == 3
+        assert raw.execute("PRAGMA user_version").fetchone()[0] == 4
     finally:
         raw.close()
 

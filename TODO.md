@@ -85,6 +85,11 @@ with other methods (for example the realized difference as the update direction)
 - [ ] Parent weights fingerprint (`parent_weights_sha256`) costs one pass over the model (0.6 s on the 5070 Ti, 4.2 s on the 1660S): check it once per generation.
 - [ ] Optional: an inference canary (hash of the 16 base outputs) as a separate admission check, NOT in the recipe (it would change with the inference library).
 
+## ledger-next  (`src/heteroes/ledger/`; G2a to G2d, 06-07/10/2026)
+- [ ] Worker ids are free strings: there is no worker registry yet. Quarantine blocks exactly that name, so a worker that renames
+      itself escapes it. Acceptable while workers are trusted (no attacker in scope); revisit with C1 admission (worker identity,
+      capability profile), where a registry is needed anyway.
+
 ## schema-polish  (`src/heteroes/model/schema.py`)
 - [ ] The two existing `TODO(...)` comments in the source: `schema-validation` (`__post_init__`) and
       `schema-polish` (docstrings, hints). The `canonical_json_bytes` part is done: `heteroes/canonical.py` (06/10); the comment in `schema.py` still mentions it.

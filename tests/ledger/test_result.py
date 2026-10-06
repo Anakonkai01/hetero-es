@@ -15,15 +15,7 @@ from heteroes.ledger import (
     StaleAttemptError,
     SubmitOutcome,
 )
-from ledger_helpers import FakeClock, make
-
-
-def descriptor_of(index):
-    return make(index, 1000 + 7 * index)
-
-
-def batch(n=3):
-    return [descriptor_of(i) for i in range(n)]
+from ledger_helpers import FakeClock, batch, descriptor_of, fail, lease, make, record, submit
 
 
 @pytest.fixture
@@ -36,27 +28,6 @@ def ledger(clock):
     with Ledger(":memory:", clock=clock) as opened:
         opened.open_generation(batch(3))
         yield opened
-
-
-def lease(ledger, index=0, worker="worker-a", duration=30.0):
-    return ledger.lease(f"exp/g0/c{index}", worker, duration)
-
-
-def submit(ledger, lease_, reward=0.5, index=None, descriptor=None):
-    """Submit the way a worker does: the job it ran, the attempt, the token, the reward."""
-    if descriptor is None:
-        descriptor = descriptor_of(int(lease_.candidate_id.rsplit("/c", 1)[1]) if index is None else index)
-    return ledger.submit_result(descriptor, lease_.attempt_number, lease_.token, reward)
-
-
-def fail(ledger, lease_, kind=FailureKind.OTHER, descriptor=None):
-    if descriptor is None:
-        descriptor = descriptor_of(int(lease_.candidate_id.rsplit("/c", 1)[1]))
-    return ledger.report_failure(descriptor, lease_.attempt_number, lease_.token, kind)
-
-
-def record(ledger, index=0):
-    return ledger.get_candidate(f"exp/g0/c{index}")
 
 
 # ---------------------------------------------------------------------------
@@ -503,7 +474,7 @@ def test_a_failure_survives_closing_and_reopening_the_file(tmp_path, clock):
     path = tmp_path / "ledger.db"
     with Ledger(path, clock=clock) as ledger:
         ledger.open_generation(batch(1))
-        fail(ledger, lease(ledger), FailureKind.RESTORE_MISMATCH)
+        fail(ledger, lease(ledger), FailureKind.VERIFIER_ERROR)
 
     with Ledger(path, clock=clock) as again:
         assert record(again).state is CandidateState.PENDING and record(again).attempts == 1

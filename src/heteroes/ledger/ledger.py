@@ -8,7 +8,7 @@ from enum import Enum
 
 from heteroes.manifest import CandidateDescriptor
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 DEFAULT_MAX_ATTEMPTS = 3
 
 
@@ -30,6 +30,12 @@ class FailureKind(Enum):
 class SubmitOutcome(Enum):
     COMMITTED = "COMMITTED"
     ALREADY_COMMITTED = "ALREADY_COMMITTED"      # the same result was committed before: nothing was written
+
+
+class GenerationState(Enum):
+    OPEN = "OPEN"              # there is still work, or a lease that may still deliver
+    COMPLETE = "COMPLETE"      # every candidate is committed: the update can be computed
+    FAILED = "FAILED"          # a candidate can never commit any more (no attempts left, last one over)
 
 
 def _sql_list(enum) -> str:
@@ -74,6 +80,13 @@ CREATE TABLE result (
     attempt_number INTEGER NOT NULL,
     reward REAL NOT NULL,
     committed_at REAL NOT NULL,
+    FOREIGN KEY (candidate_id, attempt_number) REFERENCES attempt (candidate_id, attempt_number)
+);
+CREATE TABLE quarantine (
+    worker_id TEXT NOT NULL PRIMARY KEY,
+    quarantined_at REAL NOT NULL,
+    candidate_id TEXT NOT NULL,
+    attempt_number INTEGER NOT NULL,
     FOREIGN KEY (candidate_id, attempt_number) REFERENCES attempt (candidate_id, attempt_number)
 );
 PRAGMA user_version = {SCHEMA_VERSION};
@@ -122,11 +135,48 @@ class ConflictingResultError(LedgerError):
     """The same attempt already delivered something else (another reward, or another kind of failure)."""
 
 
+class GenerationFailedError(LedgerError):
+    """A candidate of the generation has no attempts left, so the generation can never be complete."""
+
+
+class GenerationNotCompleteError(LedgerError):
+    """The generation is still open: some candidates have no committed result yet."""
+
+
+class WorkerQuarantinedError(LedgerError):
+    """The worker failed to restore its weights: it gets no work and its new results are not accepted."""
+
+
 @dataclass(frozen=True)
 class CandidateResult:
     attempt_number: int      # the attempt that delivered it
     reward: float
     committed_at: float
+
+
+@dataclass(frozen=True)
+class GenerationStatus:
+    state: GenerationState
+    committed: int
+    total: int
+    exhausted: tuple[str, ...]     # ids of the candidates that can no longer commit, in index order
+
+
+@dataclass(frozen=True)
+class GenerationResults:
+    """What the update needs from a complete generation: position i of `seeds` and `rewards` is candidate i."""
+    recipe_hash: str
+    parent_weights_sha256: str
+    seeds: tuple[int, ...]
+    rewards: tuple[float, ...]
+
+
+@dataclass(frozen=True)
+class QuarantineRecord:
+    worker_id: str
+    quarantined_at: float
+    candidate_id: str       # the candidate whose failed restore put the worker aside
+    attempt_number: int
 
 
 @dataclass(frozen=True)
@@ -287,9 +337,7 @@ class Ledger:
                  for d in ordered],
             )
 
-    def list_candidates(self, experiment_id: str, generation: int) -> list[CandidateRecord]:
-        """The candidates of a generation in canonical order (by index)."""
-        now = self._clock()
+    def _load_generation(self, experiment_id: str, generation: int, now: float) -> list[CandidateRecord]:
         rows = self._db.execute(
             _SELECT_CANDIDATES + "WHERE c.experiment_id = ? AND c.generation = ? ORDER BY c.candidate_index",
             (experiment_id, generation),
@@ -297,6 +345,50 @@ class Ledger:
         if not rows:    # a generation is opened with at least one candidate, so no rows means it does not exist
             raise LedgerError(f"unknown generation {experiment_id}/g{generation}")
         return [_record(row, now) for row in rows]
+
+    def _status_of(self, records: list[CandidateRecord]) -> GenerationStatus:
+        committed = sum(record.state is CandidateState.COMMITTED for record in records)
+        exhausted = tuple(record.descriptor.candidate_id for record in records
+                          if record.state is CandidateState.PENDING and record.attempts >= self._max_attempts)
+        if committed == len(records):
+            state = GenerationState.COMPLETE
+        elif exhausted:
+            state = GenerationState.FAILED
+        else:
+            state = GenerationState.OPEN
+        return GenerationStatus(state=state, committed=committed, total=len(records), exhausted=exhausted)
+
+    def list_candidates(self, experiment_id: str, generation: int) -> list[CandidateRecord]:
+        """The candidates of a generation in canonical order (by index)."""
+        return self._load_generation(experiment_id, generation, self._clock())
+
+    def get_generation_status(self, experiment_id: str, generation: int) -> GenerationStatus:
+        """
+        COMPLETE when every candidate is committed; FAILED when a candidate has used all its attempts and the last one
+        is over (it can never commit); OPEN otherwise. Computed from the candidates at every call, never stored: raising
+        `max_attempts` and restarting turns a FAILED generation into an OPEN one.
+        """
+        return self._status_of(self._load_generation(experiment_id, generation, self._clock()))
+
+    def get_generation_results(self, experiment_id: str, generation: int) -> GenerationResults:
+        """
+        The seeds and rewards of a COMPLETE generation, in canonical (index) order: the input of the ES update.
+        Never a part of them: an open or failed generation raises GenerationNotCompleteError / GenerationFailedError.
+        """
+        records = self._load_generation(experiment_id, generation, self._clock())
+        status = self._status_of(records)
+        name = f"{experiment_id}/g{generation}"
+        if status.state is GenerationState.FAILED:
+            raise GenerationFailedError(f"generation {name} failed: {', '.join(status.exhausted)} used all "
+                                        f"{self._max_attempts} attempts")
+        if status.state is GenerationState.OPEN:
+            raise GenerationNotCompleteError(f"generation {name} is open: {status.committed} of {status.total} committed")
+        first = records[0].descriptor
+        return GenerationResults(
+            recipe_hash=first.recipe_hash, parent_weights_sha256=first.parent_weights_sha256,
+            seeds=tuple(record.descriptor.seed for record in records),
+            rewards=tuple(record.result.reward for record in records),
+        )
 
     def get_candidate(self, candidate_id: str) -> CandidateRecord:
         now = self._clock()
@@ -318,7 +410,9 @@ class Ledger:
         now = self._clock()
         with self._db:
             self._db.execute("BEGIN IMMEDIATE")     # take the write lock before reading, so two writers cannot both pass
-            row = self._db.execute("SELECT state FROM candidate WHERE candidate_id = ?", (candidate_id,)).fetchone()
+            self._refuse_if_quarantined(worker_id)
+            row = self._db.execute(
+                "SELECT state, experiment_id, generation FROM candidate WHERE candidate_id = ?", (candidate_id,)).fetchone()
             if row is None:
                 raise LedgerError(f"unknown candidate {candidate_id}")
             state = CandidateState(row[0])
@@ -333,6 +427,10 @@ class Ledger:
                 raise AlreadyLeasedError(f"candidate {candidate_id} is leased until {last[1]}")
             if attempts >= self._max_attempts:
                 raise RetriesExhaustedError(f"candidate {candidate_id} has used its {self._max_attempts} attempts")
+            generation_status = self._status_of(self._load_generation(row[1], row[2], now))
+            if generation_status.state is GenerationState.FAILED:      # no point in spending GPU time on it
+                raise GenerationFailedError(f"generation {row[1]}/g{row[2]} failed: "
+                                            f"{', '.join(generation_status.exhausted)} used all {self._max_attempts} attempts")
 
             lease = Lease(candidate_id=candidate_id, attempt_number=attempts + 1, worker_id=worker_id,
                           token=secrets.token_hex(16), deadline=now + duration)
@@ -348,8 +446,8 @@ class Ledger:
     def _latest_attempt(self, descriptor: CandidateDescriptor, attempt_number: int, token: str):
         """
         Inside a transaction: check that the worker's report is about the job the ledger gave and about the latest
-        attempt of it, with that attempt's token. Returns the stored state of the candidate and the failure kind
-        already reported for the attempt (or None).
+        attempt of it, with that attempt's token. Returns the stored state of the candidate, the failure kind already
+        reported for the attempt (or None) and the worker that held it.
         """
         candidate_id = descriptor.candidate_id
         row = self._db.execute("SELECT state FROM candidate WHERE candidate_id = ?", (candidate_id,)).fetchone()
@@ -362,11 +460,11 @@ class Ledger:
             raise ResultMismatchError(f"the report for {candidate_id} is about another job: {', '.join(differing)} differ")
 
         last = self._db.execute(
-            "SELECT attempt_number, lease_token, failure_kind FROM attempt WHERE candidate_id = ? "
+            "SELECT attempt_number, lease_token, failure_kind, worker_id FROM attempt WHERE candidate_id = ? "
             "ORDER BY attempt_number DESC LIMIT 1", (candidate_id,)).fetchone()
         if last is None or (last[0], last[1]) != (attempt_number, token):
             raise StaleAttemptError(f"attempt {attempt_number} of {candidate_id} is not the latest attempt with that token")
-        return CandidateState(row[0]), last[2]
+        return CandidateState(row[0]), last[2], last[3]
 
     def submit_result(self, descriptor: CandidateDescriptor, attempt_number: int, token: str, reward: float) -> SubmitOutcome:
         """
@@ -384,7 +482,7 @@ class Ledger:
         now = self._clock()
         with self._db:
             self._db.execute("BEGIN IMMEDIATE")
-            state, _ = self._latest_attempt(descriptor, attempt_number, token)
+            state, _, worker_id = self._latest_attempt(descriptor, attempt_number, token)
             candidate_id = descriptor.candidate_id
             if state is CandidateState.COMMITTED:
                 committed = self._db.execute("SELECT reward FROM result WHERE candidate_id = ?", (candidate_id,)).fetchone()[0]
@@ -393,6 +491,7 @@ class Ledger:
                 raise ConflictingResultError(f"{candidate_id} was committed with reward {committed}, not {reward}")
             if state is not CandidateState.LEASED:
                 raise StaleAttemptError(f"candidate {candidate_id} is {state.value}: attempt {attempt_number} is closed")
+            self._refuse_if_quarantined(worker_id)     # its weights are in doubt: the lease runs out and another worker retries
 
             self._db.execute("INSERT INTO result (candidate_id, attempt_number, reward, committed_at) VALUES (?, ?, ?, ?)",
                              (candidate_id, attempt_number, reward, now))
@@ -414,7 +513,7 @@ class Ledger:
         now = self._clock()
         with self._db:
             self._db.execute("BEGIN IMMEDIATE")
-            state, reported = self._latest_attempt(descriptor, attempt_number, token)
+            state, reported, worker_id = self._latest_attempt(descriptor, attempt_number, token)
             candidate_id = descriptor.candidate_id
             if reported is not None:
                 if reported == kind.value:
@@ -427,3 +526,25 @@ class Ledger:
                              (now, kind.value, candidate_id, attempt_number))
             self._db.execute("UPDATE candidate SET state = ? WHERE candidate_id = ?",
                              (CandidateState.PENDING.value, candidate_id))
+            if kind is FailureKind.RESTORE_MISMATCH:   # its weights are not the canonical ones any more: put it aside
+                self._db.execute(
+                    "INSERT OR IGNORE INTO quarantine (worker_id, quarantined_at, candidate_id, attempt_number) "
+                    "VALUES (?, ?, ?, ?)", (worker_id, now, candidate_id, attempt_number))
+
+    def _refuse_if_quarantined(self, worker_id: str) -> None:
+        if self._db.execute("SELECT 1 FROM quarantine WHERE worker_id = ?", (worker_id,)).fetchone() is not None:
+            raise WorkerQuarantinedError(f"worker {worker_id} is quarantined (a restore failed)")
+
+    def list_quarantined(self) -> list[QuarantineRecord]:
+        rows = self._db.execute("SELECT worker_id, quarantined_at, candidate_id, attempt_number FROM quarantine "
+                                "ORDER BY quarantined_at, worker_id").fetchall()
+        return [QuarantineRecord(*row) for row in rows]
+
+    def release_worker(self, worker_id: str) -> None:
+        """Take a worker out of quarantine. A human does this, after dealing with the worker; nothing calls it by itself."""
+        if not isinstance(worker_id, str):
+            raise TypeError(f"worker_id must be a string, got {type(worker_id).__name__}")
+        with self._db:
+            released = self._db.execute("DELETE FROM quarantine WHERE worker_id = ?", (worker_id,)).rowcount
+            if released == 0:
+                raise LedgerError(f"worker {worker_id} is not quarantined")
