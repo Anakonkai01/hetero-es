@@ -1,0 +1,12 @@
+{"event": "worker_start", "t": 1791293589.435167, "worker_id": "worker-1660s", "environment": {"hostname": "heteroes-worker-1660s", "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43", "python": "3.14.4", "torch": "2.13.0+cu132", "torch_cuda": "13.2", "numpy": "2.5.2", "transformers": "5.17.0", "device": "cuda", "gpu_name": "NVIDIA GeForce GTX 1660 SUPER", "gpu_capability": [7, 5], "gpu_total_memory_bytes": 6027083776, "nvidia_driver": "595.91.07"}, "code": {"git_commit": "7dcf07d6475c295f9b216ef99ffe9c01baa91b48", "git_dirty": true}, "args": {"model_path": "/home/anakonkai/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775", "coordinator_url": "http://10.10.10.1:8765", "worker_id": "worker-1660s", "log": "/tmp/g3/w3.jsonl", "cache_dir": "/home/anakonkai/.cache/heteroes/worker-cache", "device": null, "token_env": "HETEROES_TOKEN", "poll_seconds": 0.5, "give_up_after_seconds": 120.0, "startup_timeout_seconds": 600.0}, "noise_selftest_seconds": 0.022360999999818887}
+{"event": "model_loaded", "t": 1791293593.3818214, "worker_id": "worker-1660s", "seconds": 3.0846375299997817}
+{"event": "waiting_for_coordinator", "t": 1791293653.4296114, "error": "GET http://10.10.10.1:8765/v1/health: <urlopen error timed out>"}
+{"event": "waiting_for_coordinator", "t": 1791293713.9746966, "error": "GET http://10.10.10.1:8765/v1/health: <urlopen error timed out>"}
+{"event": "waiting_for_coordinator", "t": 1791293774.517629, "error": "GET http://10.10.10.1:8765/v1/health: <urlopen error timed out>"}
+{"event": "waiting_for_coordinator", "t": 1791293835.0786204, "error": "GET http://10.10.10.1:8765/v1/health: <urlopen error timed out>"}
+{"event": "waiting_for_coordinator", "t": 1791293895.6397612, "error": "GET http://10.10.10.1:8765/v1/health: <urlopen error timed out>"}
+{"event": "waiting_for_coordinator", "t": 1791293956.2008903, "error": "GET http://10.10.10.1:8765/v1/health: <urlopen error timed out>"}
+{"event": "waiting_for_coordinator", "t": 1791294016.7060678, "error": "GET http://10.10.10.1:8765/v1/health: <urlopen error timed out>"}
+{"event": "waiting_for_coordinator", "t": 1791294077.245652, "error": "GET http://10.10.10.1:8765/v1/health: <urlopen error timed out>"}
+{"event": "waiting_for_coordinator", "t": 1791294137.7816558, "error": "GET http://10.10.10.1:8765/v1/health: <urlopen error timed out>"}
+{"event": "waiting_for_coordinator", "t": 1791294198.3256688, "error": "GET http://10.10.10.1:8765/v1/health: <urlopen error timed out>"}

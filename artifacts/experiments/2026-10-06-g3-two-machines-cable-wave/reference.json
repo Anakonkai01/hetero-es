@@ -1,0 +1,154 @@
+{
+  "recipe_hash": "1604737ea1d7203062d641381172899356a261748f754a8f3264019ac1b3f5b1",
+  "args": {
+    "model_path": "/home/pc5070ti/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775",
+    "output": "artifacts/experiments/2026-10-06-g3-two-machines-cable-wave/reference.json",
+    "experiment_id": "g3-two-machines-cable-wave",
+    "candidates": 8,
+    "generations": 3,
+    "alpha": 0.001,
+    "sigma": 0.001,
+    "chunk_elements": null,
+    "device": null
+  },
+  "initial_weights_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+  "final_weights_sha256": "a8faa8a1dfbc8159c52a1457b22d4cbef19386352711c261021bc9fdb60c1e44",
+  "generations": [
+    {
+      "generation": 0,
+      "parent_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+      "child_sha256": "699729af49821b98ec028390f70678374cb4afa7a664b8f3b498af52b68ce162",
+      "rewards": [
+        0.1875,
+        0.1875,
+        0.1875,
+        0.1875,
+        0.125,
+        0.3125,
+        0.1875,
+        0.3125
+      ],
+      "seeds": [
+        667507669232539,
+        4458412358281362,
+        3789510645806565,
+        2499115593103388,
+        4258737391062854,
+        3656193042071036,
+        1741684129957366,
+        1529432228226799
+      ],
+      "noop": false,
+      "changed": 488398743,
+      "candidate_seconds": [
+        4.895622231000743,
+        4.610463664001145,
+        4.5398315169950365,
+        4.539201491003041,
+        4.547637648996897,
+        4.528647756000282,
+        4.609963757000514,
+        4.414595848000317
+      ],
+      "update_seconds": 31.96804963899922
+    },
+    {
+      "generation": 1,
+      "parent_sha256": "699729af49821b98ec028390f70678374cb4afa7a664b8f3b498af52b68ce162",
+      "child_sha256": "451ee22bb212f677ea610f61e8da20db1a173e383e3d00351adadc3b4cc6093d",
+      "rewards": [
+        0.25,
+        0.1875,
+        0.1875,
+        0.25,
+        0.1875,
+        0.25,
+        0.25,
+        0.25
+      ],
+      "seeds": [
+        2683396333340438,
+        2436065986265251,
+        3951752533993565,
+        683434595611599,
+        3599029159800246,
+        2273739530732829,
+        2182307642496262,
+        387248527129778
+      ],
+      "noop": false,
+      "changed": 488387840,
+      "candidate_seconds": [
+        4.320669330001692,
+        4.54256396600249,
+        4.412039017995994,
+        4.542004729999462,
+        4.543947491998551,
+        4.510123528001714,
+        4.535526681996998,
+        4.49761556199519
+      ],
+      "update_seconds": 31.942596635999507
+    },
+    {
+      "generation": 2,
+      "parent_sha256": "451ee22bb212f677ea610f61e8da20db1a173e383e3d00351adadc3b4cc6093d",
+      "child_sha256": "a8faa8a1dfbc8159c52a1457b22d4cbef19386352711c261021bc9fdb60c1e44",
+      "rewards": [
+        0.1875,
+        0.25,
+        0.25,
+        0.3125,
+        0.3125,
+        0.1875,
+        0.1875,
+        0.3125
+      ],
+      "seeds": [
+        130185968915385,
+        2851527945889734,
+        2950889058472031,
+        470229511488422,
+        1707166721993126,
+        3306719309796506,
+        3517767132218223,
+        3881934101939658
+      ],
+      "noop": false,
+      "changed": 488386052,
+      "candidate_seconds": [
+        4.541275871000835,
+        4.8108693410031265,
+        4.4722012860002,
+        4.38140425200254,
+        4.195372180001868,
+        4.538849862001371,
+        4.463456915997085,
+        4.481082311998762
+      ],
+      "update_seconds": 31.953298566004378
+    }
+  ],
+  "total_seconds": 210.26687812805176,
+  "environment": {
+    "hostname": "5070ti",
+    "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43",
+    "python": "3.12.13",
+    "torch": "2.10.0+cu128",
+    "torch_cuda": "12.8",
+    "numpy": "2.4.5",
+    "transformers": "5.5.0",
+    "device": "cuda",
+    "gpu_name": "NVIDIA GeForce RTX 5070 Ti",
+    "gpu_capability": [
+      12,
+      0
+    ],
+    "gpu_total_memory_bytes": 16608133120,
+    "nvidia_driver": "595.91.07"
+  },
+  "code": {
+    "git_commit": "7dcf07d6475c295f9b216ef99ffe9c01baa91b48",
+    "git_dirty": true
+  }
+}
