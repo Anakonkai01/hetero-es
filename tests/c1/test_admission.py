@@ -186,3 +186,27 @@ def test_the_decision_is_plain_data_for_the_prediction_file():
 
     assert data["worker_id"] == "slow" and data["state"] == "ELIGIBLE_BUT_NOT_BENEFICIAL" and data["reasons"] == ["NOT_BENEFICIAL"]
     assert data["prediction_with"]["jobs"] == {"fast": 7, "slow": 1}
+
+
+# ---------------------------------------------------------------------------
+# from a profile to the numbers of the prediction
+# ---------------------------------------------------------------------------
+
+def test_a_worker_model_takes_the_median_at_the_asked_chunk_and_the_sync_only_if_remote():
+    from heteroes.admission import worker_model_from_profile
+    data = {"worker_id": "w", "candidate_times": {"1": {"total_median": 4.5}, "16": {"total_median": 3.9}},
+            "sync": {"total_seconds": 21.0}}
+
+    assert worker_model_from_profile(data, 1, remote=False) == WorkerModel("w", 4.5, 0.0)
+    assert worker_model_from_profile(data, 16, remote=True) == WorkerModel("w", 3.9, 21.0)
+
+
+def test_a_chunk_that_was_not_timed_or_a_missing_sync_is_an_error_not_a_guess():
+    from heteroes.admission import worker_model_from_profile
+    data = {"worker_id": "w", "candidate_times": {"1": {"total_median": 4.5}, "8": {"failed": "OUT_OF_MEMORY"}}, "sync": None}
+
+    for chunk in (2, 8):
+        with pytest.raises(ValueError, match="not timed"):
+            worker_model_from_profile(data, chunk, remote=False)
+    with pytest.raises(ValueError, match="synchronization"):
+        worker_model_from_profile(data, 1, remote=True)

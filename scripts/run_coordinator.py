@@ -38,7 +38,10 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--alpha", type=float, default=1e-3)
     parser.add_argument("--sigma", type=float, default=1e-3)
     parser.add_argument("--chunk-elements", type=int, default=None, help="default: the contract value")
-    parser.add_argument("--policy", choices=["greedy", "wave"], default="greedy", help="greedy = B3, wave = B1 (static waves)")
+    parser.add_argument("--policy", choices=["greedy", "wave", "proportional"], default="greedy",
+                        help="greedy = B3, wave = B1 (static waves), proportional = B2 (needs one --quota per worker)")
+    parser.add_argument("--quota", action="append", default=[], metavar="WORKER=N", help="B2: the candidates of that worker; they must add up to --candidates")
+    parser.add_argument("--admit", default=None, help="comma-separated worker ids that get work (default: every worker); the others are refused work")
     parser.add_argument("--wave-size", type=int, default=2, help="candidates per wave for --policy wave: the number of workers")
     parser.add_argument("--lease-seconds", type=float, default=600.0, help="how long a worker may hold a candidate (the slowest worker needs several minutes for a candidate)")
     parser.add_argument("--max-attempts", type=int, default=3)
@@ -51,6 +54,16 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--device", choices=["cuda", "cpu"], default=None)
     args = parser.parse_args(argv)
 
+    quotas = {}
+    for item in args.quota:
+        name, _, number = item.partition("=")
+        if not name or not number.isdigit() or name in quotas:
+            fail(f"bad --quota {item!r}: use WORKER=N, once per worker")
+        quotas[name] = int(number)
+    if args.policy == "proportional" and sum(quotas.values()) != args.candidates:
+        fail(f"the quotas add up to {sum(quotas.values())}, not to --candidates {args.candidates}")
+    if args.policy != "proportional" and quotas:
+        fail("--quota is only for --policy proportional")
     out_dir = Path(args.out_dir)
     if out_dir.exists():
         fail(f"{out_dir} already exists; evidence is never overwritten")
@@ -60,7 +73,7 @@ def main(argv: list[str]) -> int:
     import torch
 
     from heteroes.coordinator import Coordinator
-    from heteroes.dispatch import Greedy, StaticWave
+    from heteroes.dispatch import AdmittedOnly, Greedy, StaticProportional, StaticWave
     from heteroes.ledger import Ledger
     from heteroes.model.loading import build_recipe, check_noise_selftest, load_pinned_model
     from heteroes.noise.contracts import DEFAULT_CHUNK_ELEMENTS
@@ -85,7 +98,9 @@ def main(argv: list[str]) -> int:
 
     emit({"event": "coordinator_start", "t": time.time(), "environment": environment_info(device), "code": code_info(),
           "args": vars(args), "recipe_hash": recipe.hash, "recipe": recipe.to_dict(), "noise_selftest_seconds": selftest_seconds})
-    policy = Greedy if args.policy == "greedy" else (lambda: StaticWave(args.wave_size))
+    base = {"greedy": Greedy, "wave": lambda: StaticWave(args.wave_size), "proportional": lambda: StaticProportional(quotas)}[args.policy]
+    admitted = None if args.admit is None else args.admit.split(",")
+    policy = base if admitted is None else (lambda: AdmittedOnly(base(), admitted))
     coordinator = Coordinator(
         loaded.model, loaded.schema, recipe, ledger, args.weights_dir, args.experiment_id, args.candidates, args.alpha,
         policy_factory=policy, lease_seconds=args.lease_seconds, host=args.host, port=args.port,

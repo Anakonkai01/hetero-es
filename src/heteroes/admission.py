@@ -142,3 +142,19 @@ def decide(candidate: WorkerModel, members: list[WorkerModel], gate_reasons: lis
     else:
         state, reasons = AdmissionState.ELIGIBLE_BUT_NOT_BENEFICIAL, (Reason.NOT_BENEFICIAL,)
     return Decision(candidate.worker_id, state, reasons, without, joined, delta, threshold)
+
+
+def worker_model_from_profile(profile: dict, chunk: int, remote: bool) -> WorkerModel:
+    """
+    The numbers the prediction needs, taken from a profile: the median candidate time at `chunk` (which must have been timed:
+    chunk 1 and the safe chunk are) and, for a remote worker, the whole synchronization (transfer + load + rehash).
+    """
+    times = profile["candidate_times"].get(str(chunk))
+    if times is None or "total_median" not in times:
+        raise ValueError(f"{profile['worker_id']}: candidates were not timed at chunk {chunk}")
+    sync = 0.0
+    if remote:
+        if profile.get("sync") is None:
+            raise ValueError(f"{profile['worker_id']}: a remote worker needs a measured synchronization")
+        sync = profile["sync"]["total_seconds"]
+    return WorkerModel(profile["worker_id"], times["total_median"], sync)

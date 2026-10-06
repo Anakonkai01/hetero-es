@@ -38,6 +38,7 @@ def main(argv: list[str]) -> int:
                         help="where downloaded weights are kept (about 1 GB; use a real disk, /tmp may be RAM)")
     parser.add_argument("--device", choices=["cuda", "cpu"], default=None)
     parser.add_argument("--token-env", default="HETEROES_TOKEN")
+    parser.add_argument("--chunk", type=int, default=1, help="prompts per generate() call; use the safe chunk of this worker's profile (default 1)")
     parser.add_argument("--poll-seconds", type=float, default=1.0)
     parser.add_argument("--give-up-after-seconds", type=float, default=120.0, help="exit (code 5) if the coordinator has not answered for this long")
     parser.add_argument("--startup-timeout-seconds", type=float, default=600.0, help="how long to wait for the coordinator to have a job")
@@ -91,7 +92,7 @@ def main(argv: list[str]) -> int:
     recipe = build_recipe(loaded, sigma=declared["perturbation"]["sigma"], chunk_elements=declared["noise"]["chunk_elements"],
                           reward_eta=declared["update"]["reward_eta"])
     executor_started = time.perf_counter()
-    executor = CandidateExecutor(loaded.model, loaded.tokenizer, loaded.schema, recipe)
+    executor = CandidateExecutor(loaded.model, loaded.tokenizer, loaded.schema, recipe, chunk=args.chunk)
     emit({"event": "executor_ready", "t": time.time(), "worker_id": args.worker_id, "recipe_hash": recipe.hash,
           "parent_weights_sha256": executor.parent_sha256, "snapshot_and_hash_seconds": time.perf_counter() - executor_started})
 
