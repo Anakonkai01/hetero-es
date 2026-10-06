@@ -19,7 +19,7 @@ from heteroes.manifest import CandidateDescriptor
 Transport = Callable[[str, dict], dict]
 
 # the coordinator could not read the request, or the reply could not be read: a bug, never a normal refusal
-_PROTOCOL_ERRORS = {"bad_request", "bad_response", "unknown_operation"}
+_PROTOCOL_ERRORS = {"bad_request", "bad_response", "unknown_operation", "unauthorized", "internal_error"}
 
 
 class WorkerAPIError(Exception):
