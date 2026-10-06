@@ -4,6 +4,7 @@ from heteroes.ledger.ledger import (
     CandidateResult,
     CandidateState,
     ConflictingResultError,
+    ConflictingUpdateError,
     FailureKind,
     GenerationFailedError,
     GenerationNotCompleteError,
@@ -14,16 +15,19 @@ from heteroes.ledger.ledger import (
     Ledger,
     LedgerError,
     QuarantineRecord,
+    RecordMismatchError,
     ResultMismatchError,
     RetriesExhaustedError,
     StaleAttemptError,
+    StoredUpdate,
     SubmitOutcome,
+    UpdateOutcome,
     WorkerQuarantinedError,
 )
 
 __all__ = [
-    "AlreadyLeasedError", "CandidateRecord", "CandidateResult", "CandidateState", "ConflictingResultError",
+    "AlreadyLeasedError", "CandidateRecord", "CandidateResult", "CandidateState", "ConflictingResultError", "ConflictingUpdateError",
     "FailureKind", "GenerationFailedError", "GenerationNotCompleteError", "GenerationResults", "GenerationState",
-    "GenerationStatus", "Lease", "Ledger", "LedgerError", "QuarantineRecord", "ResultMismatchError",
-    "RetriesExhaustedError", "StaleAttemptError", "SubmitOutcome", "WorkerQuarantinedError",
+    "GenerationStatus", "Lease", "Ledger", "LedgerError", "QuarantineRecord", "RecordMismatchError", "ResultMismatchError",
+    "RetriesExhaustedError", "StaleAttemptError", "StoredUpdate", "SubmitOutcome", "UpdateOutcome", "WorkerQuarantinedError",
 ]

@@ -1,14 +1,16 @@
 import dataclasses
 import math
+import re
 import secrets
 import sqlite3
 import time
 from dataclasses import dataclass
 from enum import Enum
 
+from heteroes.generation_record import GenerationRecord
 from heteroes.manifest import CandidateDescriptor
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 DEFAULT_MAX_ATTEMPTS = 3
 
 
@@ -36,6 +38,16 @@ class GenerationState(Enum):
     OPEN = "OPEN"              # there is still work, or a lease that may still deliver
     COMPLETE = "COMPLETE"      # every candidate is committed: the update can be computed
     FAILED = "FAILED"          # a candidate can never commit any more (no attempts left, last one over)
+
+
+class UpdateOutcome(Enum):
+    RECORDED = "RECORDED"
+    ALREADY_RECORDED = "ALREADY_RECORDED"      # the same record was stored before: nothing was written
+    APPLIED = "APPLIED"
+    ALREADY_APPLIED = "ALREADY_APPLIED"        # the same child was marked before: nothing was written
+
+
+_HEX64 = re.compile(r"[0-9a-f]{64}")
 
 
 def _sql_list(enum) -> str:
@@ -88,6 +100,18 @@ CREATE TABLE quarantine (
     candidate_id TEXT NOT NULL,
     attempt_number INTEGER NOT NULL,
     FOREIGN KEY (candidate_id, attempt_number) REFERENCES attempt (candidate_id, attempt_number)
+);
+CREATE TABLE generation_update (
+    experiment_id TEXT NOT NULL,
+    generation INTEGER NOT NULL,
+    record_json TEXT NOT NULL,
+    record_hash TEXT NOT NULL UNIQUE,
+    recorded_at REAL NOT NULL,
+    child_weights_sha256 TEXT,
+    applied_at REAL,
+    PRIMARY KEY (experiment_id, generation),
+    FOREIGN KEY (experiment_id, generation) REFERENCES generation (experiment_id, generation),
+    CHECK ((child_weights_sha256 IS NULL) = (applied_at IS NULL))
 );
 PRAGMA user_version = {SCHEMA_VERSION};
 COMMIT;
@@ -147,6 +171,14 @@ class WorkerQuarantinedError(LedgerError):
     """The worker failed to restore its weights: it gets no work and its new results are not accepted."""
 
 
+class RecordMismatchError(LedgerError):
+    """The update record does not say what the ledger has committed for the generation."""
+
+
+class ConflictingUpdateError(LedgerError):
+    """The generation already has another update recorded, or the update already has another child."""
+
+
 @dataclass(frozen=True)
 class CandidateResult:
     attempt_number: int      # the attempt that delivered it
@@ -169,6 +201,16 @@ class GenerationResults:
     parent_weights_sha256: str
     seeds: tuple[int, ...]
     rewards: tuple[float, ...]
+
+
+@dataclass(frozen=True)
+class StoredUpdate:
+    """The update of a generation as the ledger holds it: the record (the inputs) and, once applied, the outcome."""
+    record: GenerationRecord
+    record_hash: str
+    recorded_at: float
+    child_weights_sha256: str | None
+    applied_at: float | None
 
 
 @dataclass(frozen=True)
@@ -258,6 +300,13 @@ def _check_reward(reward) -> None:
         raise TypeError(f"reward must be a number, got {type(reward).__name__}")
     if not math.isfinite(reward):
         raise LedgerError(f"reward must be finite, got {reward} (an infrastructure failure is not a reward: report it)")
+
+
+def _check_hash(name: str, value) -> None:
+    if not isinstance(value, str):
+        raise TypeError(f"{name} must be a string, got {type(value).__name__}")
+    if not _HEX64.fullmatch(value):
+        raise ValueError(f"{name} must be 64 lowercase hex digits, got {value!r}")
 
 
 def _descriptor(row) -> CandidateDescriptor:
@@ -370,12 +419,8 @@ class Ledger:
         """
         return self._status_of(self._load_generation(experiment_id, generation, self._clock()))
 
-    def get_generation_results(self, experiment_id: str, generation: int) -> GenerationResults:
-        """
-        The seeds and rewards of a COMPLETE generation, in canonical (index) order: the input of the ES update.
-        Never a part of them: an open or failed generation raises GenerationNotCompleteError / GenerationFailedError.
-        """
-        records = self._load_generation(experiment_id, generation, self._clock())
+    def _complete_records(self, experiment_id: str, generation: int, now: float) -> list[CandidateRecord]:
+        records = self._load_generation(experiment_id, generation, now)
         status = self._status_of(records)
         name = f"{experiment_id}/g{generation}"
         if status.state is GenerationState.FAILED:
@@ -383,6 +428,14 @@ class Ledger:
                                         f"{self._max_attempts} attempts")
         if status.state is GenerationState.OPEN:
             raise GenerationNotCompleteError(f"generation {name} is open: {status.committed} of {status.total} committed")
+        return records
+
+    def get_generation_results(self, experiment_id: str, generation: int) -> GenerationResults:
+        """
+        The seeds and rewards of a COMPLETE generation, in canonical (index) order: the input of the ES update.
+        Never a part of them: an open or failed generation raises GenerationNotCompleteError / GenerationFailedError.
+        """
+        records = self._complete_records(experiment_id, generation, self._clock())
         first = records[0].descriptor
         return GenerationResults(
             recipe_hash=first.recipe_hash, parent_weights_sha256=first.parent_weights_sha256,
@@ -548,3 +601,94 @@ class Ledger:
             released = self._db.execute("DELETE FROM quarantine WHERE worker_id = ?", (worker_id,)).rowcount
             if released == 0:
                 raise LedgerError(f"worker {worker_id} is not quarantined")
+
+    def _require_generation(self, experiment_id: str, generation: int) -> None:
+        found = self._db.execute("SELECT 1 FROM generation WHERE experiment_id = ? AND generation = ?",
+                                 (experiment_id, generation)).fetchone()
+        if found is None:
+            raise LedgerError(f"unknown generation {experiment_id}/g{generation}")
+
+    def record_update(self, record: GenerationRecord) -> UpdateOutcome:
+        """
+        Write down, BEFORE the weights are touched, the update of a COMPLETE generation. The record must say exactly what
+        was committed (seeds in index order, rewards, recipe, parent weights); the alpha and the coefficients are the
+        coordinator's to decide. At most one record per generation: the same one again is acknowledged (a restart finds
+        its own record), another one raises ConflictingUpdateError (after a restart, apply the one that is stored).
+        """
+        if not isinstance(record, GenerationRecord):
+            raise TypeError(f"record must be a GenerationRecord, got {type(record).__name__}")
+        now = self._clock()
+        name = f"{record.experiment_id}/g{record.generation}"
+        with self._db:
+            self._db.execute("BEGIN IMMEDIATE")
+            records = self._complete_records(record.experiment_id, record.generation, now)
+            first = records[0].descriptor
+            says = {
+                "recipe_hash": (record.recipe_hash, first.recipe_hash),
+                "parent_weights_sha256": (record.parent_weights_sha256, first.parent_weights_sha256),
+                "seeds": (record.seeds, tuple(r.descriptor.seed for r in records)),
+                "rewards": (record.rewards, tuple(r.result.reward for r in records)),
+            }
+            differing = [field for field, (given, committed) in says.items() if given != committed]
+            if differing:
+                raise RecordMismatchError(f"the record of {name} does not say what was committed: {', '.join(differing)} differ")
+
+            row = self._db.execute("SELECT record_hash FROM generation_update WHERE experiment_id = ? AND generation = ?",
+                                   (record.experiment_id, record.generation)).fetchone()
+            if row is not None:
+                if row[0] == record.hash:
+                    return UpdateOutcome.ALREADY_RECORDED
+                raise ConflictingUpdateError(f"{name} already has another update recorded ({row[0][:12]}...), "
+                                             f"not {record.hash[:12]}...: apply the one that is stored")
+            self._db.execute(
+                "INSERT INTO generation_update (experiment_id, generation, record_json, record_hash, recorded_at) "
+                "VALUES (?, ?, ?, ?, ?)",
+                (record.experiment_id, record.generation, record.to_json(), record.hash, now))
+        return UpdateOutcome.RECORDED
+
+    def get_update(self, experiment_id: str, generation: int) -> StoredUpdate | None:
+        """The update written down for a generation (None if there is none yet); a record that no longer matches its hash is an error."""
+        self._require_generation(experiment_id, generation)
+        row = self._db.execute(
+            "SELECT record_json, record_hash, recorded_at, child_weights_sha256, applied_at FROM generation_update "
+            "WHERE experiment_id = ? AND generation = ?", (experiment_id, generation)).fetchone()
+        if row is None:
+            return None
+        name = f"{experiment_id}/g{generation}"
+        try:
+            record = GenerationRecord.from_json(row[0])
+        except (ValueError, TypeError, KeyError) as error:
+            raise LedgerError(f"the stored update of {name} is corrupt: {error}") from error
+        if record.hash != row[1] or (record.experiment_id, record.generation) != (experiment_id, generation):
+            raise LedgerError(f"the stored update of {name} is corrupt: it does not match its hash")
+        return StoredUpdate(record=record, record_hash=row[1], recorded_at=row[2], child_weights_sha256=row[3], applied_at=row[4])
+
+    def mark_applied(self, experiment_id: str, generation: int, record_hash: str, child_weights_sha256: str) -> UpdateOutcome:
+        """
+        Say that the recorded update was applied and gave these weights. The update is deterministic, so a second call with
+        another child is not a new fact but an alarm: ConflictingUpdateError. The same child again is acknowledged.
+        """
+        _check_hash("record_hash", record_hash)
+        _check_hash("child_weights_sha256", child_weights_sha256)
+        now = self._clock()
+        name = f"{experiment_id}/g{generation}"
+        with self._db:
+            self._db.execute("BEGIN IMMEDIATE")
+            self._require_generation(experiment_id, generation)
+            row = self._db.execute(
+                "SELECT record_hash, child_weights_sha256 FROM generation_update WHERE experiment_id = ? AND generation = ?",
+                (experiment_id, generation)).fetchone()
+            if row is None:
+                raise LedgerError(f"no update recorded for {name}")
+            if row[0] != record_hash:
+                raise ConflictingUpdateError(f"the update recorded for {name} is another record ({row[0][:12]}...), "
+                                             f"not {record_hash[:12]}...")
+            if row[1] is not None:
+                if row[1] == child_weights_sha256:
+                    return UpdateOutcome.ALREADY_APPLIED
+                raise ConflictingUpdateError(f"the update of {name} already gave child {row[1][:12]}..., not "
+                                             f"{child_weights_sha256[:12]}...: the update is deterministic")
+            self._db.execute(
+                "UPDATE generation_update SET child_weights_sha256 = ?, applied_at = ? WHERE experiment_id = ? AND generation = ?",
+                (child_weights_sha256, now, experiment_id, generation))
+        return UpdateOutcome.APPLIED

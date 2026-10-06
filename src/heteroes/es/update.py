@@ -53,6 +53,36 @@ def standardize_rewards(rewards, eta=DEFAULT_ETA) -> np.ndarray:
 
 
 
+def _check_coefficients(coefficients) -> np.ndarray:
+    # the coefficients of a generation record: a vector of finite numbers that are exactly float32 values
+    array = np.asarray(coefficients)
+    if array.dtype.kind not in "iuf":
+        raise TypeError(f"coefficients must be real numbers, got {array.dtype}")
+    if array.ndim != 1:
+        raise ValueError("coefficients must be a 1-d vector")
+    if array.size == 0:
+        raise ValueError("coefficients must not be empty")
+    array = array.astype(np.float64)
+    if not np.isfinite(array).all():
+        raise ValueError("coefficients has a value that is Nan/Inf")
+    with np.errstate(over="ignore"):
+        as_float32 = array.astype(np.float32)
+    if not np.array_equal(as_float32.astype(np.float64), array):
+        raise ValueError("every coefficient must be exactly a float32 value (it would be rounded in silence)")
+    return as_float32
+
+
+def apply_coefficients_(model: nn.Module, schema: ParameterSchema, candidate_seeds: list[int], coefficients, alpha: float, chunk_elements: int=DEFAULT_CHUNK_ELEMENTS) -> UpdateReport:
+    """
+    The update of one ES generation with the coefficients GIVEN (no standardization here): what a worker applies when it
+    replays a generation record. `apply_es_update_` is this with the coefficients computed from the rewards.
+    """
+    tensors = resolve_tensors(model, schema)
+    for tensor in tensors:
+        _check_param(tensor)
+    return _apply_coefficients(schema, tensors, candidate_seeds, _check_coefficients(coefficients), alpha, chunk_elements)
+
+
 # agentic esopt update style
 def apply_es_update_(model: nn.Module, schema: ParameterSchema, candidate_seeds: list[int], rewards, alpha: float, chunk_elements: int=DEFAULT_CHUNK_ELEMENTS, eta=DEFAULT_ETA) -> UpdateReport: 
     # resolve tensor
@@ -60,10 +90,14 @@ def apply_es_update_(model: nn.Module, schema: ParameterSchema, candidate_seeds:
     # check param 
     for tensor in tensors: 
         _check_param(tensor)
-    total_numel = sum(t.numel() for t in tensors) 
     
     # z already check eta and rewards
     z_rewards = standardize_rewards(rewards, eta)
+    return _apply_coefficients(schema, tensors, candidate_seeds, z_rewards, alpha, chunk_elements)
+
+
+def _apply_coefficients(schema: ParameterSchema, tensors, candidate_seeds, z_rewards, alpha: float, chunk_elements: int) -> UpdateReport:
+    total_numel = sum(t.numel() for t in tensors) 
     
     # check alpha 
     if not math.isfinite(alpha): 

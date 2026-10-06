@@ -15,6 +15,7 @@ from heteroes.ledger import (
     CandidateResult,
     CandidateState,
     ConflictingResultError,
+    ConflictingUpdateError,
     FailureKind,
     GenerationFailedError,
     GenerationNotCompleteError,
@@ -24,14 +25,21 @@ from heteroes.ledger import (
     LedgerError,
     QuarantineRecord,
     ResultMismatchError,
+    RecordMismatchError,
     RetriesExhaustedError,
     StaleAttemptError,
+    StoredUpdate,
     SubmitOutcome,
+    UpdateOutcome,
     WorkerQuarantinedError,
 )
+from heteroes.es.update import standardize_rewards
+from heteroes.generation_record import GenerationRecord
 from ledger_helpers import PARENT, RECIPE, FakeClock, batch, descriptor_of, make
 
 LEASE_SECONDS = 30.0
+ETA = 1e-9
+CHILDREN = {"c": "c" * 64, "d": "d" * 64}
 
 
 def oracle_reward(seed: int) -> float:
@@ -61,6 +69,7 @@ class LedgerHarness:
         self.attempts = {i: [] for i in range(candidates)}              # the model: what was granted, and what became of it
         self.quarantine = {}                                            # worker -> (time, candidate_id, attempt_number)
         self.leases = []                                                # (candidate index, Lease), in the order granted
+        self.update = None                                              # the recorded update: record, recorded_at, child, applied_at
         self.seen = Counter() if seen is None else seen                 # which predicted outcomes were reached
 
     def close(self):
@@ -90,7 +99,8 @@ class LedgerHarness:
 
     def apply(self, action):
         """One action: ("lease", worker, i) | ("advance", seconds) | ("submit", worker, i, mode[, which]) |
-        ("fail", worker, i, kind[, which]) | ("release", worker). Candidate numbers wrap around."""
+        ("fail", worker, i, kind[, which]) | ("release", worker) | ("record", alpha[, wrong]) | ("apply", child[, which]).
+        Candidate numbers wrap around."""
         name, *arguments = action
         getattr(self, f"_do_{name}")(*arguments)
         self.check()
@@ -207,6 +217,65 @@ class LedgerHarness:
         else:
             self._expect(LedgerError, self.ledger.release_worker, worker)
 
+    def _model_record(self, alpha, wrong=None):
+        """
+        The record of the generation as the model knows it (a candidate that is not committed yet counts as reward 0).
+        `wrong` makes it say something the ledger did not commit: "seeds", "rewards", "recipe" or "parent".
+        """
+        rewards = tuple(self.attempts[i][-1].reward if self._state(i) is CandidateState.COMMITTED else 0.0
+                        for i in range(self.n))
+        seeds = tuple(descriptor_of(i).seed for i in range(self.n))
+        recipe, parent = RECIPE, PARENT
+        if wrong == "seeds":
+            seeds = (seeds[1], seeds[0]) + seeds[2:] if self.n > 1 else (seeds[0] + 1,)
+        elif wrong == "rewards":
+            rewards = (rewards[0] + 0.5,) + rewards[1:]
+        elif wrong == "recipe":
+            recipe = "e" * 64
+        elif wrong == "parent":
+            parent = "f" * 64
+        coefficients = tuple(float(z) for z in standardize_rewards(rewards, ETA))
+        return GenerationRecord("exp", 0, recipe, parent, seeds, rewards, coefficients, alpha)
+
+    def _do_record(self, alpha, wrong=None):
+        state = self._generation_state()
+        record = self._model_record(alpha, wrong)
+        if state is GenerationState.FAILED:
+            expected = GenerationFailedError
+        elif state is GenerationState.OPEN:
+            expected = GenerationNotCompleteError
+        elif wrong is not None:
+            expected = RecordMismatchError                               # it does not say what was committed
+        elif self.update is None:
+            expected = UpdateOutcome.RECORDED
+        elif self.update["record"].hash == record.hash:
+            expected = UpdateOutcome.ALREADY_RECORDED
+        else:
+            expected = ConflictingUpdateError
+        outcome = self._expect(expected, self.ledger.record_update, record)
+        if outcome is UpdateOutcome.RECORDED:
+            self.update = {"record": record, "recorded_at": self.clock.now, "child": None, "applied_at": None}
+
+    def _do_apply(self, child, which="right"):
+        child_hash = CHILDREN[child]
+        if which == "wrong" or self.update is None:
+            record_hash = "a" * 64                                       # nobody recorded a record with this hash
+        else:
+            record_hash = self.update["record"].hash
+        if self.update is None:
+            expected = LedgerError
+        elif which == "wrong":
+            expected = ConflictingUpdateError
+        elif self.update["child"] is None:
+            expected = UpdateOutcome.APPLIED
+        elif self.update["child"] == child_hash:
+            expected = UpdateOutcome.ALREADY_APPLIED
+        else:
+            expected = ConflictingUpdateError
+        outcome = self._expect(expected, self.ledger.mark_applied, "exp", 0, record_hash, child_hash)
+        if outcome is UpdateOutcome.APPLIED:
+            self.update["child"], self.update["applied_at"] = child_hash, self.clock.now
+
     # ---- the checks -----------------------------------------------------------------------------------------------
 
     def check(self):
@@ -239,6 +308,14 @@ class LedgerHarness:
             else:
                 raise AssertionError("the results of a generation that is not complete were handed out")
 
+        stored = ledger.get_update("exp", 0)
+        if self.update is None:
+            assert stored is None
+        else:
+            record = self.update["record"]
+            assert stored == StoredUpdate(record, record.hash, self.update["recorded_at"], self.update["child"],
+                                          self.update["applied_at"])
+
         expected_quarantine = sorted(
             (QuarantineRecord(worker, *cause) for worker, cause in self.quarantine.items()),
             key=lambda q: (q.quarantined_at, q.worker_id))
@@ -268,6 +345,10 @@ def check_tables(ledger, max_attempts):
     assert count("SELECT COUNT(*) FROM (SELECT 1 FROM attempt GROUP BY candidate_id HAVING COUNT(*) > ?)", max_attempts) == 0
     # a failed attempt has an end time; an attempt cannot both fail and carry a result
     assert count("SELECT COUNT(*) FROM attempt WHERE failure_kind IS NOT NULL AND ended_at IS NULL") == 0
+    # an update is written down only for a generation whose candidates are all committed, at most once, and a child only with a time
+    assert count("SELECT COUNT(*) FROM generation_update u WHERE EXISTS (SELECT 1 FROM candidate c WHERE "
+                 "c.experiment_id = u.experiment_id AND c.generation = u.generation AND c.state != 'COMMITTED')") == 0
+    assert count("SELECT COUNT(*) FROM generation_update WHERE (child_weights_sha256 IS NULL) != (applied_at IS NULL)") == 0
     # no attempt started by a worker while it was in quarantine (the quarantine table holds only the current ones)
     assert count("SELECT COUNT(*) FROM quarantine q JOIN attempt a ON a.worker_id = q.worker_id "
                  "WHERE a.leased_at > q.quarantined_at") == 0

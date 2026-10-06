@@ -24,7 +24,10 @@ submit = st.tuples(st.just("submit"), WORKERS, CANDIDATE,
 fail = st.tuples(st.just("fail"), WORKERS, CANDIDATE, st.sampled_from(list(FailureKind)), WHICH)
 release = st.tuples(st.just("release"), WORKERS)
 
-ACTIONS = st.one_of(lease, lease, lease, advance, advance, submit, submit, fail, release)
+record = st.tuples(st.just("record"), st.sampled_from([1e-3, 2e-3]), st.sampled_from([None, None, None, "seeds", "rewards", "recipe", "parent"]))
+apply = st.tuples(st.just("apply"), st.sampled_from(["c", "d"]), st.sampled_from(["right", "right", "wrong"]))
+
+ACTIONS = st.one_of(lease, lease, lease, advance, advance, submit, submit, fail, release, record, apply)
 
 
 @given(config=st.tuples(st.integers(1, 4), st.integers(1, 3)), actions=st.lists(ACTIONS, max_size=40))

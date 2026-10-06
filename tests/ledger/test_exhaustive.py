@@ -42,8 +42,20 @@ TWO_WORKERS = dict(
     alphabet=[("lease", "A", 0), ("lease", "B", 2), ("fail", "A", 0, RESTORE), ("fail", "B", 2, RESTORE),
               ("advance", 31.0), ("release", "A")],
 )
+# the update of a generation: written down only when complete, once, and applied once with one child
+UPDATE = dict(
+    candidates=1, max_attempts=2, length=5,
+    alphabet=[("lease", "A", 0), ("submit", "A", 0, "good"), ("record", 1e-3), ("record", 2e-3), ("apply", "c"), ("apply", "d")],
+)
+# a record that does not say what was committed is refused, before and after the generation is complete
+WRONG_RECORDS = dict(
+    candidates=1, max_attempts=2, length=4,
+    alphabet=[("lease", "A", 0), ("submit", "A", 0, "good"), ("record", 1e-3, "seeds"), ("record", 1e-3, "rewards"),
+              ("record", 1e-3, "recipe"), ("record", 1e-3, "parent"), ("record", 1e-3), ("apply", "c")],
+)
 CONFIGS = {"one candidate": ONE_CANDIDATE, "two candidates": TWO_CANDIDATES,
-           "one worker, two attempts": ONE_WORKER_TWO_ATTEMPTS, "two workers": TWO_WORKERS}
+           "one worker, two attempts": ONE_WORKER_TWO_ATTEMPTS, "two workers": TWO_WORKERS, "update": UPDATE,
+           "wrong records": WRONG_RECORDS}
 
 
 @functools.cache
@@ -69,8 +81,10 @@ def test_every_order_of_actions_keeps_the_model_and_the_ledger_in_step(name):
 
 
 def test_between_them_the_sequences_reach_every_kind_of_outcome():
-    reached = set(explored("one candidate")[1]) | set(explored("two candidates")[1])
+    reached = set().union(*(set(explored(name)[1]) for name in CONFIGS))
     expected = {"granted", "AlreadyLeasedError", "RetriesExhaustedError", "GenerationFailedError", "WorkerQuarantinedError",
                 "SubmitOutcome.COMMITTED", "SubmitOutcome.ALREADY_COMMITTED", "ConflictingResultError", "StaleAttemptError",
-                "failure accepted", "released"}
+                "failure accepted", "released", "GenerationNotCompleteError", "UpdateOutcome.RECORDED",
+                "UpdateOutcome.ALREADY_RECORDED", "ConflictingUpdateError", "UpdateOutcome.APPLIED", "UpdateOutcome.ALREADY_APPLIED",
+                "RecordMismatchError"}
     assert expected <= reached, expected - reached
