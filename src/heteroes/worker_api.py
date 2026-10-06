@@ -14,10 +14,11 @@ ledger refuses, plus "bad_request" (a request that is not shaped as above; nothi
 The coordinator, not the worker, decides which candidate a worker gets and for how long.
 """
 import math
+import threading
 
+from heteroes.dispatch import Greedy
 from heteroes.ledger import (
     AlreadyLeasedError,
-    CandidateState,
     ConflictingResultError,
     ConflictingUpdateError,
     FailureKind,
@@ -108,13 +109,19 @@ def _decode_failure(request):
 
 
 class WorkerAPI:
-    """Serves the workers of ONE generation. `lease_seconds` is the coordinator's choice, not the worker's."""
+    """
+    Serves the workers of ONE generation. `lease_seconds` is the coordinator's choice, not the worker's, and so is the
+    candidate: `policy` (default: greedy, B3; see `heteroes.dispatch`) picks it. Requests are served one at a time (a lock),
+    so that "pick a candidate, then lease it" cannot be interleaved with another worker's request.
+    """
 
-    def __init__(self, ledger, experiment_id: str, generation: int, lease_seconds: float):
+    def __init__(self, ledger, experiment_id: str, generation: int, lease_seconds: float, policy=None):
         self._ledger = ledger
         self._experiment_id = experiment_id
         self._generation = generation
         self._lease_seconds = lease_seconds
+        self._policy = Greedy() if policy is None else policy
+        self._lock = threading.Lock()
         self._operations = {
             "lease": (_decode_lease, self._lease),
             "submit_result": (_decode_result, self._submit_result),
@@ -130,22 +137,25 @@ class WorkerAPI:
             decoded = decode(request)
         except (TypeError, ValueError) as error:
             return _error("bad_request", f"{type(error).__name__}: {error}")
-        try:
-            return {"ok": True, **act(decoded)}
-        except LedgerError as error:
-            return _error(_code_of(error), str(error))
+        with self._lock:
+            try:
+                return {"ok": True, **act(decoded)}
+            except LedgerError as error:
+                return _error(_code_of(error), str(error))
 
     def _lease(self, worker_id: str) -> dict:
         if any(entry.worker_id == worker_id for entry in self._ledger.list_quarantined()):
             raise WorkerQuarantinedError(f"worker {worker_id} is quarantined (a restore failed)")
         state = self._ledger.get_generation_status(self._experiment_id, self._generation).state
         if state is GenerationState.OPEN:
-            for record in self._ledger.list_candidates(self._experiment_id, self._generation):
-                if record.state is CandidateState.PENDING:
-                    lease = self._ledger.lease(record.descriptor.candidate_id, worker_id, self._lease_seconds)
-                    return {"generation_state": state.value, "work": {
-                        "descriptor": record.descriptor.to_dict(), "attempt_number": lease.attempt_number,
-                        "token": lease.token, "deadline": lease.deadline}}
+            chosen = self._policy.pick(self._ledger.list_candidates(self._experiment_id, self._generation), worker_id)
+            if chosen is not None:
+                candidate_id = chosen.descriptor.candidate_id
+                lease = self._ledger.lease(candidate_id, worker_id, self._lease_seconds)
+                self._policy.leased(candidate_id, worker_id)
+                return {"generation_state": state.value, "work": {
+                    "descriptor": chosen.descriptor.to_dict(), "attempt_number": lease.attempt_number,
+                    "token": lease.token, "deadline": lease.deadline}}
         return {"generation_state": state.value, "work": None}
 
     def _submit_result(self, decoded) -> dict:
