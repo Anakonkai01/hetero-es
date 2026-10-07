@@ -42,8 +42,11 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--chunk-elements", type=int, default=None, help="default: the contract value")
     parser.add_argument("--eval-dtype", choices=["float16", "float32"], default="float16",
                         help="precision of the forward pass of the evaluation, part of the recipe: every worker takes it from the job (default float16; see numerical contract section 15)")
-    parser.add_argument("--policy", choices=["greedy", "wave", "proportional"], default="greedy",
-                        help="greedy = B3, wave = B1 (static waves), proportional = B2 (needs one --quota per worker)")
+    parser.add_argument("--policy", choices=["greedy", "wave", "proportional", "tail"], default="greedy",
+                        help="greedy = B3, wave = B1 (static waves), proportional = B2 (needs one --quota per worker), tail = B4 (greedy that keeps a slow "
+                             "worker away from the end of a generation; learns the speeds, see --speed-prior)")
+    parser.add_argument("--speed-prior", action="append", default=[], metavar="WORKER=SECONDS", help="B4: the seconds a candidate takes on that worker, as a starting value (from a profile)")
+    parser.add_argument("--tail-margin", type=float, default=1.0, help="B4: a worker waits when the others finish sooner than margin x its own duration")
     parser.add_argument("--quota", action="append", default=[], metavar="WORKER=N", help="B2: the candidates of that worker; they must add up to --candidates")
     parser.add_argument("--admit", default=None, help="comma-separated worker ids that get work (default: every worker); the others are refused work")
     parser.add_argument("--wave-size", type=int, default=2, help="candidates per wave for --policy wave: the number of workers")
@@ -72,6 +75,18 @@ def main(argv: list[str]) -> int:
         fail(f"the quotas add up to {sum(quotas.values())}, not to --candidates {args.candidates}")
     if args.policy != "proportional" and quotas:
         fail("--quota is only for --policy proportional")
+    priors = {}
+    for item in args.speed_prior:
+        name, _, number = item.partition("=")
+        try:
+            value = float(number)
+        except ValueError:
+            value = -1.0
+        if not name or not value > 0 or name in priors:
+            fail(f"bad --speed-prior {item!r}: use WORKER=SECONDS (positive), once per worker")
+        priors[name] = value
+    if args.policy != "tail" and (priors or args.tail_margin != 1.0):
+        fail("--speed-prior and --tail-margin are only for --policy tail")
     out_dir = Path(args.out_dir)
     if args.resume and not (out_dir / "ledger.sqlite").is_file():
         fail(f"--resume needs {out_dir / 'ledger.sqlite'}: there is nothing to continue")
@@ -90,7 +105,7 @@ def main(argv: list[str]) -> int:
     import torch
 
     from heteroes.coordinator import Coordinator
-    from heteroes.dispatch import AdmittedOnly, Greedy, StaticProportional, StaticWave
+    from heteroes.dispatch import AdmittedOnly, Greedy, GreedyTail, SpeedBook, StaticProportional, StaticWave
     from heteroes.ledger import Ledger
     from heteroes.model.loading import build_recipe, check_noise_selftest, load_pinned_model
     from heteroes.noise.contracts import DEFAULT_CHUNK_ELEMENTS
@@ -115,13 +130,15 @@ def main(argv: list[str]) -> int:
 
     emit({"event": "coordinator_start", "t": time.time(), "environment": environment_info(device), "code": code_info(),
           "args": vars(args), "recipe_hash": recipe.hash, "recipe": recipe.to_dict(), "noise_selftest_seconds": selftest_seconds})
-    base = {"greedy": Greedy, "wave": lambda: StaticWave(args.wave_size), "proportional": lambda: StaticProportional(quotas)}[args.policy]
+    book = SpeedBook(prior=priors)                       # shared by the policies of every generation: a new generation does not start knowing nothing
+    base = {"greedy": Greedy, "wave": lambda: StaticWave(args.wave_size), "proportional": lambda: StaticProportional(quotas),
+            "tail": lambda: GreedyTail(book, margin=args.tail_margin)}[args.policy]
     admitted = None if args.admit is None else args.admit.split(",")
     policy = base if admitted is None else (lambda: AdmittedOnly(base(), admitted))
     coordinator = Coordinator(
         loaded.model, loaded.schema, recipe, ledger, args.weights_dir, args.experiment_id, args.candidates, args.alpha,
         policy_factory=policy, lease_seconds=args.lease_seconds, host=args.host, port=args.port,
-        token=token, failed_grace_seconds=args.failed_grace_seconds, timeout_seconds=args.timeout_seconds,
+        token=token, allow_unauthenticated=args.allow_unauthenticated, failed_grace_seconds=args.failed_grace_seconds, timeout_seconds=args.timeout_seconds,
         **({} if args.stall_seconds is None else {"stall_seconds": args.stall_seconds or None}), log=emit)
     coordinator.start()
     emit({"event": "listening", "t": time.time(), "url": coordinator.url, "initial_weights_sha256": coordinator.parent_sha256})

@@ -1,0 +1,72 @@
+{
+  "parent weights": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 0": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 1": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 2": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 3": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  }
+}

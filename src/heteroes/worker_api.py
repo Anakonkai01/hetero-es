@@ -39,6 +39,7 @@ from heteroes.ledger import (
     ResultMismatchError,
     RetriesExhaustedError,
     StaleAttemptError,
+    SubmitOutcome,
     WorkerQuarantinedError,
 )
 from heteroes.manifest import CandidateDescriptor
@@ -214,7 +215,10 @@ class WorkerAPI:
 
     def _submit_result(self, decoded) -> dict:
         descriptor, attempt_number, token, reward = decoded
-        return {"outcome": self._ledger.submit_result(descriptor, attempt_number, token, reward).value}
+        outcome = self._ledger.submit_result(descriptor, attempt_number, token, reward)
+        if outcome is SubmitOutcome.COMMITTED and hasattr(self._policy, "committed"):
+            self._policy.committed(descriptor.candidate_id)             # a policy may learn from the duration (GreedyTail)
+        return {"outcome": outcome.value}
 
     def _report_failure(self, decoded) -> dict:
         descriptor, attempt_number, token, kind = decoded

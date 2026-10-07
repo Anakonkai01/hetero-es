@@ -411,3 +411,11 @@ def test_recovery_refuses_to_continue_when_the_stored_record_gives_another_child
     second = world.coordinator()
     with pytest.raises(CoordinatorError, match="gives"):
         second.recover()
+
+
+def test_a_coordinator_off_loopback_needs_a_token_or_an_explicit_opt_out(world):
+    with pytest.raises(ValueError, match="token"):
+        world.coordinator(host="0.0.0.0")
+    open_one = world.coordinator(host="0.0.0.0", allow_unauthenticated=True)
+    assert open_one.server.host == "0.0.0.0"
+    world.coordinator(host="0.0.0.0", token="x")

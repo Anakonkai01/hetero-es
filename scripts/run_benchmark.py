@@ -14,6 +14,7 @@ Conditions (MASTER policy ids; a worker is "fast" = the 5070 Ti, "slow" = the 16
   B0  the fast worker alone, one prompt per generate() call            B1  waves of two, both workers, chunk 1
   Any condition can end in xK (B0x2, B3x2): K worker processes share the fast GPU (default 1).
   B2  quotas by measured speed (largest remainder), both, chunk 1      B3  greedy, both, chunk 1
+  B4  greedy that keeps the slow worker away from the end of a generation (starts from the profiles' speeds, then learns)
   H0  the integrated system: the admission of `--prediction` (variant per_worker_chunk) decides who works, each worker uses
       the safe chunk of its profile, dynamic dispatch. If the admission leaves only the fast worker, H0 is "the fast worker alone with
       its safe chunk": it is NOT B0 (the chunk differs) and it is not a new scheduler.
@@ -43,6 +44,14 @@ def parse_condition(condition: str) -> tuple[str, int]:
     return match.group(1), k
 
 
+def seconds_at(profile: dict, chunk: int) -> float:
+    """The median candidate time of a profile at `chunk` if it was timed there, else at chunk 1 (what the profiles of G4/G5 have)."""
+    times = profile.get("candidate_times", {}).get(str(chunk))
+    if times is not None and times.get("total_median"):
+        return times["total_median"]
+    return profile["candidate_seconds_at_chunk_1"]
+
+
 def fast_worker_ids(k: int) -> list[str]:
     return [FAST] + [f"{FAST}-{i}" for i in range(2, k + 1)]
 
@@ -53,8 +62,8 @@ def plan(condition: str, candidates: int, reference: dict, candidate: dict, pred
 
     base, k = parse_condition(condition)
     fast = fast_worker_ids(k)
-    fast1 = reference["candidate_seconds_at_chunk_1"]
-    slow1 = candidate["candidate_seconds_at_chunk_1"]
+    fast1 = seconds_at(reference, chunk)
+    slow1 = seconds_at(candidate, chunk)
     alone = {worker: chunk for worker in fast}
     both = {**alone, SLOW: chunk}
     if base == "B0":
@@ -68,6 +77,9 @@ def plan(condition: str, candidates: int, reference: dict, candidate: dict, pred
                 "quotas": quotas}
     if base == "B3":
         return {"workers": both, "policy": "greedy", "args": []}
+    if base == "B4":
+        return {"workers": both, "policy": "tail", "args": [a for w, seconds in sorted({**{f: fast1 for f in fast}, SLOW: slow1}.items())
+                                                            for a in ("--speed-prior", f"{w}={seconds}")]}
     if base == "H0":
         if k != 1:
             raise ValueError("H0 is defined for one process on the fast GPU")

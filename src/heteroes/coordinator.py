@@ -55,7 +55,7 @@ class Coordinator:
     def __init__(self, model, schema: ParameterSchema, recipe: Recipe, ledger: Ledger, models_dir, experiment_id: str,
                  candidates: int, alpha: float, policy_factory=Greedy, lease_seconds: float = 120.0, host: str = "127.0.0.1",
                  port: int = 0, token: str | None = None, poll_seconds: float = 0.2, failed_grace_seconds: float = 5.0,
-                 timeout_seconds: float | None = None, stall_seconds=_DEFAULT, keep_published: int | None = 3, log=lambda event: None, timer=time.perf_counter,
+                 timeout_seconds: float | None = None, stall_seconds=_DEFAULT, keep_published: int | None = 3, allow_unauthenticated: bool = False, log=lambda event: None, timer=time.perf_counter,
                  monotonic=time.monotonic, sleep=time.sleep):
         self.model = model
         self.schema = schema
@@ -79,7 +79,8 @@ class Coordinator:
         self._sleep = sleep
         self.parent_sha256 = model_weights_sha256(model, schema)
         self._parent_published = False
-        self.server = CoordinatorServer(_NoGeneration(), job=None, models_dir=models_dir, host=host, port=port, token=token)
+        self.server = CoordinatorServer(_NoGeneration(), job=None, models_dir=models_dir, host=host, port=port, token=token,
+                                        allow_unauthenticated=allow_unauthenticated)
 
     @property
     def url(self) -> str:
