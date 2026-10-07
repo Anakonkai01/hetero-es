@@ -432,6 +432,8 @@ It is a different noise from engine v1: results are not comparable bit for bit. 
 
 **A named workload [D].** `Recipe.workload_name` is `arith16` (the 16 prompts of the contract, left out of the document, hash unchanged) or `cot_l3_q32` (`heteroes/eval/cot_workload.py`: generated word problems, 32 questions, step-by-step reasoning, up to 256 new tokens, reward = exact integer after the last `Answer:` line, else the last integer; its own `workload_hash` over the system prompt, the budget, the sampling flag, the reward type and every question with its answer). It is a different recipe.
 
+**The chunk of the prompts is an execution choice [E for the long workload, 07/10/2026].** The number of prompts per `generate()` call is not in the recipe. With the FP32 forward pass, chunks 16, 32 and 64 gave the same answers for the long workload (64 questions) on the parent and on 24 perturbed candidates of the CUDA engine, on both GPUs and between them (0 of 1,600 answers differ in each comparison, `artifacts/experiments/2026-10-07-g7-restore-tradeoff/chunkprobe-*.json`); a bigger chunk makes a candidate 1.6 to 3.3 times faster (`rollout-scaling-*.json`). It is a checked level, not a guarantee (about 0.2 percent per answer at 95 percent confidence): repeat the probe for another model, workload or software version.
+
 **Restore by arithmetic is not used.** Coming back by `-sigma` is not exact: after 24 candidates 25 percent of the FP16 elements differ from the original (relative L2 1.4e-4, growing like the square root of
 the number of candidates); the snapshot restore costs 0.14 s on the 5070 Ti, which is 3 percent of a candidate of the long workload.
 
