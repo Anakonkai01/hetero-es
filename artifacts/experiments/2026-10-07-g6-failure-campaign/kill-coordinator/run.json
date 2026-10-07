@@ -1,0 +1,10 @@
+{
+  "name": "kill-coordinator",
+  "outcome": "ok",
+  "wall_seconds": 72.97955083847046,
+  "notes": [
+    "coordinator killed with 12 results committed",
+    "coordinator started again with --resume"
+  ],
+  "final_weights_sha256": "3577eadc3f22686a4a4f7fc1672fe9be255709676fdd701592b780616957e049"
+}

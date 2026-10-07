@@ -1,0 +1,16 @@
+# G6: failures on the two real machines (07/10/2026)
+
+`scripts/failure_campaign.py` (the C3/E6 campaign that G3 listed as not done): a coordinator and a worker on the 5070 Ti, a worker on the 1660S over the direct cable, N = 8 candidates, 3 generations, FP32 evaluation with 16 prompts
+per call, lease 20 s (heartbeat every 6.7 s), the same experiment id for every scenario. The reference is the same experiment with the 5070 Ti alone: final weights `3577eadc3f22...` (`reference/`). Each scenario disturbs the running system in one
+way and passes if the experiment still ends with those exact weights. Run once each; the point in time of every disturbance is found by the script from the coordinator's ledger (read-only), not set by a timer. Raw logs, ledgers and events of every run are kept.
+
+| scenario | what was done | what the evidence shows | final weights = reference |
+|---|---|---|---|
+| `kill-worker` | `kill -9` of the 1660S worker 2 s after the ledger showed it holding a candidate; a new process with the same worker id started 1 s later | candidate `campaign/g2/c7`: attempt 1 by the 1660S (never closed), the lease ran out, attempt 2 by the 5070 Ti, committed; 24 results; the new 1660S process synchronized (`worker-1660s-restart1.jsonl`) and finished with the experiment | yes |
+| `pause-worker` | `SIGSTOP` of the 1660S worker while it held a candidate, for 35 s (the lease is 20 s), then `SIGCONT` | `campaign/g0/c7`: attempt 1 by the 1660S (stopped), attempt 2 by the 5070 Ti; after `SIGCONT` the late result of the 1660S was REFUSED as stale (one `REFUSED` step in its log) and it carried on to the end | yes |
+| `cut-link` | packets from the 1660S dropped (iptables on the 5070 Ti, `INPUT -s 10.10.10.2 -p tcp --dport 8765 -j DROP`, removed by the script) for 8 s right after generation 0 was published, so during the download of the new weights | no failed attempt and no transport error in the logs: the transfer simply stalled and TCP resumed it when the packets came back. **It did not exercise the resumable download** (that needs a cut longer than the client's 60 s read timeout: see `../2026-10-07-g6-failure-campaign-long-cut/`) | yes |
+| `kill-coordinator` | `kill -9` of the coordinator with 12 results committed (generation 0 complete, 4 of 8 candidates of generation 1); started again with `--resume` 5 s later | the new process wrote `coordinator_start`, `recovered` (`resume_generation`, generation 1), `generation_resumed`, then generations 1 and 2; both workers logged transport errors (2 and 4) and kept going; the ledger holds 24 results, no candidate with two | yes |
+
+What it does NOT show: one run per scenario (a single kill point each: for example the coordinator was not killed between the write-ahead record and the update, or between the mark and the publication, on the real machines; the tests of
+`tests/ledger/test_coordinator_recovery.py` do that with two coordinator objects on the same files); the kill of a process in the middle of a SQLite transaction; a power cut; more than two workers; and the FP16 evaluation (where a
+reward from the 1660S can legitimately differ from the 5070 Ti's: the comparison with the reference is meaningful because the FP32 evaluation gives the same answers on both GPUs).
