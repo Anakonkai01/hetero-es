@@ -51,3 +51,15 @@ The perturbation itself already does that. That is why the criteria below includ
 - Limits stated in advance: one model, one workload family, one hardware pair, N = 24, 64 training questions (one question = 1.6 points), 128 held-out questions per set
   (one question = 0.8 points, a standard error of about 4 points at accuracy 0.5), 100 generations, two seed families. Held-out questions come from the same generator
   (other seed) as the training ones. No comparison with another algorithm. A positive result is evidence for THIS setting only.
+
+## Addendum 1 (written 2026-10-08 03:18, after run A was analysed, before run B is analysed and before run C): what run A showed and what is added
+Run A (alpha 1e-3, 100 generations) by the rules above: S1 true (H3 42 -> 112 of 128), S3 true (train 19 -> 60 of 64), **S2 false** (parent+ better than parent- in 44 of 100
+generations, worse in 22, 34 ties because the training accuracy sat at 59-61 of 64 from generation ~30 on: the criterion cannot reach 70 when a third of the
+generations are ties), **S4 false** (H2 116 -> 99 of 128, 17 questions lower; H1 77 -> 97 was higher), S5 true. Verdict by the rule written in advance: **no evidence of learning in this
+experiment**. That verdict stands as written; the criteria are not changed. Run B is judged by the same rules.
+
+Added after seeing run A (so these are POST HOC / EXPLORATORY and are labelled so in every table):
+- split of S2 by phase (generations 0-9, 10-29, 30-99) and the exploratory random-walk control `random_walk_control.py` (from checkpoint 50: 50 steps with the coefficients shuffled);
+- **Run C (exploratory): the same as run A with alpha = 5e-4** (rms step 1.0e-4 per weight instead of 2.0e-4), experiment id `lrtC`, **60 generations**. Question: does a smaller
+  step keep the gain on H3 with less damage on H2 and a steadier training accuracy? Reported with the same tables and the same S1-S5 computed at generation 60 (the S1 to S4
+  thresholds are the ones above; S2 needs 70 percent of 60 generations). Because the alpha was chosen after seeing run A it can only be called exploratory, whatever the result.
