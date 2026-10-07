@@ -9,6 +9,9 @@ happens in between. A failure is raised as `CandidateFailed` with its kind and i
 OUT_OF_MEMORY; a restore that does not give the parent back bit for bit is RESTORE_MISMATCH and wins over any other failure
 (the weights are in doubt, so this worker must be put aside); any other exception is a bug and is raised as it is, after the
 restore. The parent snapshot is taken once and is valid for every candidate of a generation.
+
+The precision of the forward pass is the recipe's `eval_dtype`: FP16 evaluates the live model; FP32 evaluates a float32 copy that takes the
+perturbed weights just before the evaluation (`heteroes.eval.precision`). The weights that are perturbed, restored and hashed stay FP16.
 """
 import time
 

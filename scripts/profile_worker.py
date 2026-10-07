@@ -137,6 +137,9 @@ def main(argv: list[str]) -> int:
     recorded = json.loads(PROBE_FILE.read_text(encoding="utf-8"))["base_evaluation"]["records"]
     checks["chunk1_reproduces_reference"] = texts_at(1) == [record["output_text"].strip() for record in recorded]
     chosen = safe_chunk(probes)
+    evaluation = None                                              # the FP32 copy of the probes is freed: each executor below makes its own, and two would double the measured peak
+    if cuda:
+        torch.cuda.empty_cache()
 
     def time_candidates(chunk: int) -> dict:
         executor = CandidateExecutor(model, tokenizer, schema, recipe, chunk=chunk)

@@ -47,7 +47,7 @@ Small, concrete clean-up items. Not a roadmap (see `HETEROES_LLM_MASTER.md`) and
 - [ ] sigma = 1e-3 looks strong (candidates are 0.06 to 0.11 below their parent, only 0 to 3 of 8 beat it): try a smaller sigma with the same criteria; also alpha between 1e-3 and 3e-3 and a larger N.
 - [ ] A held-out set of another distribution (3-term sums, parentheses) and the frozen 16-question workload before and after: does the gain transfer, or hurt?
 - [ ] A baseline of random directions (not only the anti-step) and, later, a comparison with another method.
-- [ ] The CPU noise generation (about 2 minutes of the 2.2 minutes per generation) is the cost: parallelize the chunks or generate on demand; the noise is independent per chunk, so this is possible without changing a byte.
+- [x] (done in G6, 07/10) The CPU noise generation is parallel: perturb 3.7 s -> 0.75 s, update of 8 candidates 44.9 s -> 2.4 s on the 5070 Ti, same bits (contract section 14). The learning experiments can be re-run much faster.
 - [ ] Put the experiment into the package with tests if it is to be reused (today: experiment scripts in the artifact folder, not tested).
 
 ## dedupe  (idea raised 05/10, nothing decided; touching verified code needs approval)
@@ -85,45 +85,34 @@ with other methods (for example the realized difference as the update direction)
 - [ ] Parent weights fingerprint (`parent_weights_sha256`) costs one pass over the model (0.6 s on the 5070 Ti, 4.2 s on the 1660S): check it once per generation.
 - [ ] Optional: an inference canary (hash of the 16 base outputs) as a separate admission check, NOT in the recipe (it would change with the inference library).
 
-## ledger-next  (`src/heteroes/ledger/`, `src/heteroes/generation_record.py`; G2a to G2f, 06/10/2026; design in ADR-002)
+## ledger-next  (`src/heteroes/ledger/`, `src/heteroes/generation_record.py`; G2a to G2f, 06/10/2026; design in ADR-002 and its amendments of G6)
 - [ ] Worker ids are free strings: there is no worker registry yet. Quarantine blocks exactly that name, so a worker that renames
       itself escapes it. Acceptable while workers are trusted (no attacker in scope); revisit with C1 admission (worker identity,
       capability profile), where a registry is needed anyway.
-- [ ] The restart procedure of the coordinator (SUPPORTING in MASTER): compare the hash of the weights with `parent` and `child` of the stored
-      update record, restore from the parent checkpoint if needed, redo the (deterministic) update, `mark_applied`. Only the data (the record,
-      `mark_applied`) exists; checkpoint staging and publication do not.
-- [ ] The chain `parent_weights_sha256` of generation g+1 = `child_weights_sha256` of generation g is not enforced by `open_generation` (all the
-      tests use one parent for every generation, so enforcing it means changing fixtures). Decide with the owner.
-- [ ] `CandidateState.RUNNING` exists but nothing produces it (a worker telling "I started" and heartbeats come with the HTTP protocol).
+- [ ] `CandidateState.RUNNING` exists (it is in the table's `CHECK`) but nothing produces it and `lease`, `submit_result` and `report_failure` treat it as "not leasable / closed": a heartbeat did not need it (G6), so either handle it like LEASED or remove it.
 - [ ] No schema migration (a file of another version is refused; the version is 5). `max_attempts` is a policy of the process, not stored: two
       processes with different values disagree about FAILED.
+- [ ] An expired lease is not written down (`ended_at` and `failure_kind` stay NULL), so the ledger cannot say afterwards that an attempt timed out; `release_worker` deletes the quarantine row, so the history of a quarantine is lost (the events log has it).
 - [ ] `generation_record.py` imports private helpers of `manifest.py` (`_HEX64`, `_NAME`, `_check_int`, `_check_keys`, `_check_text`): make
       them public or move them to a shared module (touches the frozen manifest, with its tests as a guard).
 - [ ] The ledger tests import torch because the model of the contract (`tests/ledger/harness.py`) and `GenerationRecord.from_results` use
       `standardize_rewards`, which lives in `es/update.py`. Moving it to a module without torch would keep the ledger free of torch.
 - [ ] `GenerationResults` has no `experiment_id` / `generation` fields, so `GenerationRecord.from_results` takes them as arguments.
-- [ ] `ledger/ledger.py` is one file of about 700 lines: leases, results, generation state, quarantine and the update record could be
-      split when the HTTP code arrives.
-- [ ] The tests of the ledger take about 27 s by default (the exhaustive worlds are about 25 s of it); the deep mode takes 88 s. Mark them or shrink
-      the worlds if the suite gets in the way.
-- [ ] The mutation checks of G2a to G2f were made by hand with scripts in the scratchpad of the session (lists of faults), which are not in the repo
-      and are lost when the scratchpad is cleaned; only the counts are recorded (STATUS 0.0). Keep the lists if they are to be reused.
-- [ ] ADR-002 is a draft by Claude pending the owner's review; the worker protocol table in it is a proposal [P], not implemented.
+- [ ] `ledger/ledger.py` is one file of about 900 lines: leases, results, generation state, quarantine and the update record could be split.
+- [ ] The tests of the ledger take about 27 s by default (the exhaustive worlds are about 25 s of it); the deep mode takes 88 s. The model of the contract (`harness.py`) knows the charged attempts and the late quarantine of G6 but not `extend_lease` and the chain (those have their own tests in `test_hardening.py`).
+- [ ] The mutation checks were made by hand with scripts in the scratchpad of the session (lists of faults), which are not in the repo
+      and are lost when the scratchpad is cleaned; only the counts are recorded (STATUS 0.0, 0.000). A reusable runner would need an agreed list of faults per module.
+- [ ] ADR-002 is a draft by Claude pending the owner's review; its amendments of G6 (the owner has not reviewed them either).
 
-## g3-next  (HTTP worker and coordinator; G3, 06/10/2026)
-- [ ] Failures on the physical machines are not exercised: kill a worker in the middle of a candidate, cut the cable during a download,
-      let a lease expire on the 1660S (the behaviour is tested with fake workers and in the simulations only). This is the C3 campaign (E6).
-- [ ] The restart procedure of the coordinator is still not written (see `ledger-next`).
-- [ ] Nothing produces `CandidateState.RUNNING`; the worker sends no heartbeat, a long candidate on a slow worker is only protected by the lease length.
+## g3-next  (HTTP worker and coordinator; G3, 06/10/2026; reviewed after the audit of 07/10)
+- [x] (G6) Restart procedure of the coordinator, heartbeat, repeatable lease requests, an outbox for undelivered rewards, resumable downloads, a socket timeout and a connection limit, a token required off loopback, pruning of the published weights, aborted vs finished: see ADR-002 amendments and `scripts/failure_campaign.py`.
 - [ ] The token is sent in clear over HTTP (acceptable on a private cable or Tailscale; do not expose the port). No TLS, no per-worker identity.
 - [ ] The network set-up of the two machines (`eno1` addresses `10.10.10.1/24` and `10.10.10.2/24`, the ufw rule for 8765/tcp on `eno1`) was made
-      by hand and is not in the repository; write it in a short runbook if the demo must be repeated.
-- [ ] Published weights (about 1 GB per generation) are never deleted by the coordinator (8 GB in `~/.cache/heteroes` after the G3 runs).
-- [ ] The first physical runs give no speedup (the coordinator's update is about 46 s per generation for 8 candidates; the 1660S is about 4 times
-      slower per candidate): profile the update and the synchronization before any claim (C2, C4). One run per configuration only.
+      by hand and is not in the repository; write it in a short runbook (or a checked script) if the demo must be repeated.
+- [ ] A worker that never gets its candidate to the coordinator through a coordinator restart inside one lease keeps the reward in its outbox only while its process lives; a worker that dies loses it (the lease then runs out and another worker redoes it).
 - [ ] `tests/test_e2e_local.py` takes about 5 minutes and three processes on the GPU: it runs only with `HETEROES_E2E=1`.
-- [ ] The mutation check of G3 (70 random operator mutants of `coordinator`, `worker`, `worker_runtime`, `worker_api`, `http_transport`, `executor`,
-      `dispatch`: 61 caught, 7 equivalent, 2 gaps closed by three new test cases) was a sample made with a script in the scratchpad, not in the repo.
+- [ ] The mutation check of G3 and of G6 (see STATUS 0.000 for the counts) was made with scripts in the scratchpad, not in the repo.
+- [ ] A load that fails halfway (`load_weights_`, disk error) leaves the model half loaded; the worker raises and dies, which is the safe outcome, but no test kills a worker there.
 
 ## schema-polish  (`src/heteroes/model/schema.py`)
 - [ ] The two existing `TODO(...)` comments in the source: `schema-validation` (`__post_init__`) and
@@ -133,14 +122,11 @@ with other methods (for example the realized difference as the update direction)
 - [ ] `notebooks/floating_point_testing.ipynb` (untracked): the NumPy cell starts from the float64
       `theta`, the torch cells from `theta_float16`. Use `theta_float16` in both before relying on it.
 
-## c1-next  (G4/G5, 07/10/2026)
-- [ ] Decide what to do about the cross-GPU difference of a reward (1 candidate in 24 differed by one question between the 5070 Ti and the 1660S at chunk 1 in a reference run, 1 more in a G4 run, none in 264 evaluations of G5; see
-      `artifacts/experiments/2026-10-07-g4-admission-b2/README.md`): hardware noise accepted and reported, one GPU model per experiment, or find the layer that differs.
-      The G3 README says "bit-identical" for 24 candidates; that sentence needs the caveat.
-- [ ] `chunk > 1` is not exact in FP16 with left padding on either GPU (every chunk above 1 changed some answer text over 33 states). A different batching that keeps
-      the numbers (same padded length for every call, or sorting by length) is not tried; until then the per-worker chunk of C1 is 1 everywhere and sizing has nothing to size.
-- [ ] The prediction has one fixed update term calibrated on the G4 runs (10.2 s, two points) and a candidate time that is the median of 5; it ignores the polling delay,
-      the variation between candidates and the CPU shared by the coordinator and the local worker. Over-prediction of 13 to 19 percent in G4.
-- [ ] `profile_worker.py` blocks the SSH session when started with `ssh ... &` without `setsid nohup ... < /dev/null`: always use the latter (see how `run_benchmark.py` does it).
-- [ ] B2 has no stealing and no re-assignment if its worker dies (a baseline; a failed candidate returns to the same worker). A B2 run with a dead worker waits for the retry budget.
+## c1-next  (G4/G5, 07/10/2026; updated after G6)
+- [ ] Decide the evaluation precision (numerical contract section 15): the FP32 forward pass removed every padded-batch difference and (see STATUS 0.000 for the two-GPU result) is 5 times faster at chunk 16 than the FP16 reference path; it needs the owner's decision because it changes every reward (a new recipe hash) and costs 2 GB of GPU memory more.
+- [ ] The prediction of the admission is fitted on the profile (`fit_affine`, residuals in the profile) and not on the benchmark runs; it still ignores the polling delay of the workers (up to 1 s per generation), the variation between candidates and the CPU shared by the coordinator and the local worker.
+- [ ] `profile_worker.py` blocks the SSH session when started with `ssh ... &` without `setsid nohup ... < /dev/null`: always use the latter (the cluster runner does).
+- [ ] B1 and B2 do not steal and do not reassign: with a dead worker they now stop on the stall rule of the coordinator instead of waiting for ever (a baseline, on purpose).
 - [ ] The 1660S profile and the synchronization were measured over the direct cable only (no Tailscale/Wi-Fi comparison).
+- [ ] A workload whose rollout is long (more prompts, longer answers, a task that needs reasoning) would let a slow GPU matter more: today the 16 prompts of the smoke workload take 0.16 to 0.8 s on the fast GPU, so the CPU noise and the update dominate.
+- [ ] The cross-GPU sweep is 120 candidates per setting: it estimates a rate of about 1 percent only roughly; the benchmark runs themselves can serve as a larger sample (every candidate evaluated on the 1660S is compared with the reference).

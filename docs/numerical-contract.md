@@ -300,6 +300,7 @@ For one candidate (same revision, schema, seed, σ, workload) on the 5070 Ti and
 | O5 | Candidate seed rule | (a) explicit seed list stored in the manifest; (b) derive from (experiment, generation, candidate index) | **DECIDED 2026-10-06:** seeds are explicit in the descriptor (range `0 <= seed < 2^53`); the coordinator chooses them, preferably with `derive_seed`; the frozen regression keeps `[0..3]`. See section 3 |
 | O6 | NumPy pin | exact version on both machines (which one?) | **DECIDED 2026-10-06: no version pin; the noise behaviour is pinned** by a fingerprint of five golden chunks checked by a self-test (section 10). The version is only reported |
 | O7 | Who computes the update coefficients | (a) every machine recomputes them from the rewards; (b) the coordinator computes them once and they travel | **DECIDED 2026-10-06: (b)**, evidence in section 7 and section 13 |
+| O8 | Precision of the forward pass of the evaluation | (a) FP16 (all evidence until G5); (b) FP32 from the FP16 weights (an option of the recipe since G6) | **OPEN.** The option exists and is tested; the evidence is in section 15 and the STATUS. Draft recommendation: (b) for the experiments of the report (exact batching, 5 times faster evaluation), with the cost of 2 GB of GPU memory per worker and a recipe whose results are not bit-comparable with the FP16 evidence |
 
 ## 12. Manifest v1 [D — decided 2026-10-06]
 
@@ -373,6 +374,31 @@ Generating the noise was 77 percent of a generation (audit of 07/10: 3.7 s per c
 - **Evidence [E]** (real model, 5070 Ti, `scripts` of the session; `tests/noise/test_parallel.py`, `tests/es/test_parallel_equivalence.py`): the whole-model hash of the perturbed weights is `8aa3eb9af895cb4a...` (the value of the numerical gate) with 1, 8, 12 and 16 threads and every piece size tested; the weights hash after an 8-candidate update is `41668382d4230d93...` with 1, 8 and 16 threads. Time: perturb 3.69 s -> 0.75 s, update of 8 candidates 44.9 s -> 2.4 s (16 threads). Not measured on a machine with other CPU architecture than the two of the project.
 - **Publication [D].** A weights file named `<sha256>.bin` is kept only if its content IS that hash: `Publication.commit()` hashes an existing file of that name and replaces it if it is damaged (a file cut by a crash and still named after the hash would otherwise be served for ever). The file is not fsynced: whoever reads it checks the hash.
 - **Taking a downloaded file as the model [D].** A worker hashes the bytes while they arrive (the transfer, not the CPU, is the limit even for a 2012 Xeon: 116 MB/s against 275 MB/s of SHA-256); after the copy to the GPU it COMPARES the model's snapshot with the file instead of hashing the model again (`CandidateExecutor.reset_parent(sha, verified_file=path)`): the same guarantee (the model is those bytes, so it has that hash) at the speed of memory. A SHA-256 of the whole weights costs 3.6 s on the 1660S's CPU, and the old synchronization did it four times.
+
+## 15. Precision of the forward pass of the evaluation [D as an option, 2026-10-07; whether it becomes the default is OPEN, see section 11]
+
+**What was found [E].** The greedy answer to a prompt is an argmax over scores computed in FP16, so it flips whenever the two best scores are closer than the rounding noise of the computation. Two things change that noise without changing the model: a prompt in a batch with others (left padding changes the shapes and the order of the sums), and another GPU (another kernel). On the 5070 Ti, with the stack of the 1660S (torch 2.13+cu132, transformers 5.17; the same counts were obtained with torch 2.10 and transformers 5.5, so it is not the software stack):
+
+| 33 states (the parent and 32 candidates) x 16 prompts | prompts whose answer differs from "one prompt per call" |
+|---|---|
+| FP16, a batch of 16 prompts | 16 of 528 |
+| FP16, batches of 2 | 9 of 528 |
+| FP16, scores of the output projection in FP32 only | 17 of 528 and 8 of 528: the noise is in the layers, not in the last matrix |
+| **FP32 forward pass from the same FP16 weights**, a batch of 16 | **0 of 528** |
+| FP32, batches of 2 | 0 of 528 |
+| FP16 or FP32, a batch of one with padding enabled (no padding actually added) | 0 |
+
+The margin between the two best scores at the flip is 0 to 0.09 on scores of magnitude 16 to 32 (the spacing of FP16 there is 0.0156 and 0.0312): exact ties and one-unit differences, as expected from numerical noise, never a large margin (`scripts/cross_gpu_sweep.py ladder`, `src/heteroes/eval/diagnostics.py`, `artifacts/experiments/2026-10-07-g6-cross-gpu/`). In G4 the same effect made "every chunk above 1 inexact".
+
+**The option [D].** `Recipe.eval_dtype` (`"float16"`, the default, or `"float32"`). It is part of the recipe only when it is not the default: the document of an FP16 recipe and its hash are exactly those of manifest v1 (`1604737e...`), an FP32 recipe has an `eval_dtype` key in `workload` and another hash, so a worker with the other precision is refused at admission like any other difference. Only the FORWARD PASS of the evaluation changes: the weights, the noise, the perturbation, the restore, the update, the hashes and the synchronization stay FP16 / FP32 as in sections 4 to 8. `heteroes.eval.precision.EvalModel("float32")` keeps a float32 copy of the model (about 2 GB more on the GPU) and refreshes it from the live FP16 weights before each evaluation (FP16 to FP32 is exact, so nothing is lost; the tie between the embedding and the output projection is kept).
+
+**Cost [E, 5070 Ti, the 16 prompts of the workload, one evaluation]:** FP16 one prompt per call 0.79 s (the reference path of G3 to G5); FP16 in one batch 0.13 s but not exact; FP32 one prompt per call 0.99 s; **FP32 in one batch of 16 0.16 s**. A candidate (perturbation, evaluation, restore) takes 1.02 s in FP32 with chunk 16 against 1.61 s in FP16 with chunk 1. The probe of `profile_worker.py` with `--eval-dtype float32` found chunks 1, 2, 4, 8 and 16 identical to chunk 1 on the parent and on 32 perturbed candidates: the safe chunk is 16.
+
+**What it does to the rewards [E]:** on the same GPU, the FP32 evaluation changed the answer text of 37 of 1,920 prompts (1.9 percent) over 120 candidates and the reward of 1 of the 120 candidates (`compare-5070ti-fp16-vs-fp32.json`). It is a new recipe, not a refinement: results of FP16 and FP32 runs are not comparable bit for bit.
+
+**Between two GPUs:** see the STATUS (the sweep of 120 candidates on the 5070 Ti and on the 1660S, FP16 and FP32).
+
+**Not decided [OPEN]:** whether FP32 becomes the default of the experiments. For: exact batching (a 5 times faster evaluation), and (if the sweep says so) the same answers on both GPUs. Against: 2 GB of GPU memory more per worker (the 1660S has 6 GB), a recipe change that makes the earlier evidence (all FP16) not directly comparable, and the claim is a checked level (1584 padded-batch comparisons without a difference), not a guarantee.
 
 ## Appendix A — Known deviations of the probes/notebook from this contract
 
