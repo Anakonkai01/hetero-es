@@ -1,0 +1,35 @@
+{
+  "experiment_id": "lrtC",
+  "outcome": "ok",
+  "wall_seconds": 8970.301097154617,
+  "restarts": {
+    "coordinator": 0,
+    "worker-5070ti": 0,
+    "worker-5070ti-2": 0
+  },
+  "checkpoints": {
+    "0": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "5": "0ff16d241a94886458466fa59021d4c67e2a00475e23e1add0d2d08005bb80e1",
+    "10": "f625f271f1ae2f53be75cd22225bd0ab2b22dc5aae64d015622589d82962105e",
+    "15": "e3b280c703e464239257fa83694476039834b6f1c160416dccc5ec3b39c28850",
+    "20": "0e683325325a9ae3f1d019611670c56474e829a813fe33e3c17024a698f6973a",
+    "25": "4eb743bcb38f98ddf22a412f4a402c633156a8f45063334ec3459398cfaa5875",
+    "30": "06bf62e946bee7ae42b78b5f192a9007d8b33e3f81e95ab3c019f16b7bb35b37",
+    "35": "cc56768df75aac7b8fa6eb345ff05851cede2aa6aec33288645c749a9c979fab",
+    "40": "6d03e9e19b4173089796105ee5d2d7aeeeeaed2997b9de19f15bd5461f434125",
+    "45": "805ad0db84cdb10db1fc19e8d07211dbd9d29378311de0f695e274b327092600",
+    "50": "1f7fa49473022767fb3eed071fae16e47f7af008a6e22cd1d5ef523f473bc031",
+    "55": "1b6cb9c20c4e3e8c3abcaac3f872058f34f002275280fe8cafcb664dbb2a7526",
+    "60": "71037ad6cd0befd36e94e12f2bd737b3cd7e50ac18489fe4af1dc4deda52d37b"
+  },
+  "pending_unlinked": [],
+  "ckpt_dir": "/home/pc5070ti/.cache/heteroes/learn-ckpt/lrtC",
+  "spec": {
+    "workers": {
+      "worker-5070ti": 64,
+      "worker-5070ti-2": 64
+    },
+    "policy": "greedy",
+    "args": []
+  }
+}
