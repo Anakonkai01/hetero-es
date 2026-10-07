@@ -1,0 +1,12 @@
+{
+ "note": "DERIVED, not a profile: the median candidate time of arm A of restore_tradeoff.py (long workload, FP32, chunk 16) on this GPU; used only as the starting speed of the tail-aware policy and the quotas (the policy learns the real speeds)",
+ "worker_id": "worker-1660s",
+ "safe_chunk": 16,
+ "candidate_seconds_at_chunk_1": 32.993729373998576,
+ "candidate_seconds_at_safe_chunk": 32.993729373998576,
+ "candidate_times": {
+  "16": {
+   "total_median": 32.993729373998576
+  }
+ }
+}
