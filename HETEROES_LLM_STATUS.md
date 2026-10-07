@@ -1,12 +1,69 @@
 # HeteroES-LLM — Status
 
-**Last updated:** 07/10/2026 (G4 done and G5 under way, see 0.00; before it: 06/10/2026, evening, G3 done on the two physical machines, see 0.0; before it: the ledger, steps G2a to G2f, done for one coordinator process; before it: a first short learning experiment after the gate, step 9 done, the numerical gate closed for one candidate, decisions O4, eta and seed checks of 05/10; branch `feat/worker-protocol-g3`, see 0.0). Section 0.0 is the newest; sections 1–13 were written on 30/09 and are older background — where they disagree with 0.0, 0.0 wins.  
+**Last updated:** 07/10/2026, later (G6: the audit of G2 to G5 and its fixes, see 0.000; earlier that day: G4 done and G5 done, see 0.00; before it: 06/10/2026, evening, G3 done on the two physical machines, see 0.0; before it: the ledger, steps G2a to G2f, done for one coordinator process; before it: a first short learning experiment after the gate, step 9 done, the numerical gate closed for one candidate, decisions O4, eta and seed checks of 05/10; branch `feat/worker-protocol-g3`, see 0.0). Sections 0.000, 0.00 and 0.0 are the newest, newest first (where two disagree, the earlier one in the file wins); sections 1–13 were written on 30/09 and are older background.  
 **Canonical design/specification:** `HETEROES_LLM_MASTER.md`  
 **Purpose:** current implementation truth, verified evidence, blockers, artifacts, and the exact next action.
 
 > **Document rule:** `MASTER` decides what the system/design should be. `STATUS` decides what is actually done now. For a new chat, read `HETEROES_LLM_MASTER.md` and then this file; older proposal/roadmap/chat-handoff files are archive only.
 
 ## 0. NEXT SESSION — START HERE
+
+### 0.000 Progress update — 07/10/2026, later (G6: an audit of G2 to G5 and what it led to; branch `feat/audit-hardening-g6`, from `feat/benchmark-g5`)
+
+Branch `feat/audit-hardening-g6` (from `feat/benchmark-g5` at `75a328e`). Nothing was pushed. The owner asked for "a deep audit of every G phase, its bottlenecks and weaknesses, and a complete plan of improvements", then gave the AI full authority to carry it out and to review afterwards;
+the AI wrote tests and code, worked on the branch (not on scratch copies as before), and made the commits at the end (no `Co-Authored-By`, the owner's rule; the sudo password the owner gave was used from the command line only and is in no file). **The owner has not reviewed any of this yet.**
+
+**What the audit found** (three read-only audits of G2, G3 and G4/G5; each point is a fact checked in the code or in the artifacts, and the fix is in the commit list below):
+
+| finding | where | what was done |
+|---|---|---|
+| The G5 headline included generation 0, where the remote worker does not synchronize; steady state at N = 24: B3 221.6 s against B0 221.3 s (ClusterBenefit 0.999, not 1.035); at N = 8 B3 was 1.058, which reverses the prediction "not beneficial". Three repeats, no interval. | `summarize_benchmark.py`, G5 README | steady-state first, Student-t intervals over runs (`benchmark_stats.py`). **The G5 claim "B3 is 3.5 percent faster at N = 24" does not hold; the README of G5 is evidence and was not edited.** |
+| The admission key check could not fire (the expected key was built from the candidate's own profile). | `predict_admission.py` | `expected_key_from_reference`; reason `SOFTWARE_MISMATCH`. |
+| "Bit-identical on both machines" and "0 differences in 264 evaluations" were weaker than they sounded (only 17 to 53 distinct states, other torch and transformers on the two machines). | G3/G4/G5 READMEs | the cross-GPU study below. |
+| The CPU noise was 77 percent of a generation (3.7 s per candidate, and the same again inside the update). | `noise/engine.py`, `es/update.py` | ordered thread pool, bits unchanged. |
+| No restart of the coordinator, a worker that died on an unexpected exception held its lease for 600 s, a B1/B2 generation with a dead worker waited for ever, a restore mismatch reported late escaped the quarantine, a database lock was a 500, lease replies lost, rewards lost with a transport error, a race at every generation boundary (a lease for the NEW parent given to a worker that had read the OLD job), weights published and never deleted, an HTTP server without timeouts, a token that failed silently. | `ledger.py`, `coordinator.py`, `worker*.py`, `http_transport.py`, `dispatch.py` | ADR-002 "Amendments" lists the ten changes, each with tests written first. |
+
+**Speed.** On the real model (5070 Ti, 8 candidates; every weights hash identical to the serial code): perturbation 3.69 s -> 0.75 s; update 44.9 s -> 2.4 s with 16 threads (the widening of the noise to FP32 was done on the CPU, single-threaded: moving it to the device was worth as much as the threads). N = 24, the fast GPU alone, the same FP16 evaluation as G5: **221 s -> 48.9 s per generation**; with two worker processes on the GPU 35.7 s (`artifacts/experiments/2026-10-07-g6-local-scaling/`). The 1660S: perturbation 9.2 s -> 3.7 s, candidate 17.1 s -> 11.4 s; full synchronization 21.9 s -> about 10 s (the weights are hashed once, while they arrive, instead of four times at 3.6 s each on its 2012 Xeon; the loaded model is compared with the file; `artifacts/experiments/2026-10-07-g6-profiles/`). Replaying the update on the 1660S (C4) would cost 3.7 s per candidate against a 10 s synchronization: it loses from N = 3, so it was not built.
+
+**The cross-GPU study (`artifacts/experiments/2026-10-07-g6-cross-gpu/`, both machines on torch 2.13.0+cu132 and transformers 5.17.0).** The "chunk above 1 is inexact" and "the same candidate scores differently on the other GPU" findings of G4/G5 have one cause: the FP16 forward pass rounds differently with padding and on another kernel, and the greedy answer flips at exact ties of the scores (margins 0 to 0.09 on scores of 16 to 32). Same counts with the old and the new software stack. 120 candidates x 16 prompts on both GPUs: **FP16: 33 candidates (27.5 percent) have a different answer text on the other GPU (36 of 1,920 prompts), 1 candidate a different reward** (seed 43, 0.25 against 0.1875); **FP32 forward pass from the same FP16 weights: 0 of 1,920 prompts differ, 0 rewards**. In FP32 every padded-batch comparison also agrees (0 of 1,584, against 25 of 1,056 in FP16), so batching becomes exact: the safe chunk is 16 and the evaluation of the 16 prompts takes 0.16 s instead of 0.79 s (5 times faster). It is an OPTION of the recipe (`Recipe.eval_dtype`, absent = FP16, so every v1 hash is unchanged; contract section 15). **The default stays FP16 until the owner decides (O8).** The price is about 2 GB of GPU memory per worker and results that are not bit-comparable with all the earlier FP16 evidence.
+
+**Benchmark on the two machines after G6** (both on torch 2.13.0+cu132 and transformers 5.17.0, the direct cable, N = 24 candidates, 4 generations per run, steady state = generations 1 to 3, 95 percent Student-t intervals over runs; raw logs, summaries and READMEs in `artifacts/experiments/2026-10-07-g6-benchmark-fp32/`, `-fp16/`, `-fp32-n96/`, `2026-10-07-g6-local-scaling*/`):
+
+| evaluation | condition | T of a generation (s) | speed-up over the baseline | repeats |
+|---|---|---|---|---|
+| FP32, chunk 16 | B0 (5070 Ti, 1 process) | 35.9 +- 0.2 | | 5 |
+| FP32, chunk 16 | **B0x2 (5070 Ti, 2 processes), baseline** | **29.5 +- 0.2** | 1.000 | 5 |
+| FP32, chunk 16 | B3x2 (+ the 1660S, greedy) | 29.6 +- 0.4 | 0.995 +- 0.016 | 5 |
+| FP32, chunk 16 | B4x2 (+ the 1660S, tail-aware) | 28.8 +- 0.6 | **1.024 +- 0.023** | 5 |
+| FP16, chunk 1 (as G5) | B0 (baseline) | 48.3 +- 0.7 | 1.000 | 3 |
+| FP16, chunk 1 | B3 (+ the 1660S, greedy) | 51.3 +- 1.4 | **0.941 +- 0.030** | 3 |
+| FP16, chunk 1 | B4 (+ the 1660S, tail-aware) | 45.5 +- 1.8 | **1.060 +- 0.046** | 3 |
+
+What the evidence supports (and what it does not), against the claims of MASTER:
+
+- **C2 (execution policy).** With a GPU 5 to 10 times slower in the pool, plain greedy dispatch (B3) makes the cluster SLOWER than the fast GPU alone (FP16: 0.941 +- 0.030), because the generation waits for the slow worker at its end; the tail-aware policy (B4, `GreedyTail`) gets +6 percent in FP16 and +2.4 percent over the best single machine in FP32. That is the one scheduling result with an interval that excludes "no effect". It is a gain of a few percent, not a multiple: a GPU that needs 4.9 s per candidate where the other needs 1.0 s is 20 percent of its capacity at best, and its fixed synchronization of 10 s per generation (8.5 s of it the gigabit link) eats most of that at N = 24. The G5 statement that B3 was 3.5 percent faster than B0 at N = 24 was an artefact of generation 0.
+- **C1 (admission).** The profile now measures the cost of the update at several N with residuals, the gate compares the candidate with the reference worker (hardware may differ, software and recipe may not), and an FP32 profile with the safe chunk 16 exists for both GPUs. The old prediction experiment (H0, admission against forced admission) was not repeated: with the evidence above the admission question for this pair is "admit it with the tail-aware policy or not at all", and its benefit is 0 to 6 percent.
+- **C4 (canonical state, synchronization against replay).** Full synchronization is 10 s on the 1660S (transfer-bound); replay costs 3.7 s of CPU noise per candidate on that CPU, so it loses from N = 3 (arithmetic from the profile, not a run). A compressed delta (an idea, not measured) is in `TODO.md`.
+- **C3 (correctness under failure).** The campaign that G3 listed as not done was run on the two real machines (below): killing a worker while it holds a candidate, stopping it past its lease, cutting the link (8 s; 80 s; 3 s into a download), killing the coordinator in the middle of a generation and starting it again with `--resume`: every run ended with the weights of the undisturbed run, with one result per candidate. One run per scenario.
+- **Reproducibility.** FP32: all 20 runs of the benchmark (and the 6 local ones per setting) ended with identical rewards and weights hashes whoever evaluated which candidate; FP16: 2 of the 6 runs that used the 1660S ended with other weights, because candidate 13 of generation 2 scored 0.3125 on the 1660S and 0.25 on the 5070 Ti.
+- **Against G5:** the same N = 24 generation took 221 s; it takes 29 to 36 s now (7 times faster), 48 s with the unchanged FP16 evaluation.
+
+
+**Failures on the two real machines** (`scripts/failure_campaign.py`; evidence in `artifacts/experiments/2026-10-07-g6-failure-campaign/` and the four `-cut-link` variants beside it, each README says what it does and does not show; N = 8, 3 generations, FP32 chunk 16, lease 20 s; every scenario passes if the experiment ends with the exact final weights of the undisturbed run, `3577eadc...`):
+
+- `kill-worker`: `kill -9` of the 1660S worker 2 s after the ledger showed it holding candidate `g2/c7`; the lease ran out, the 5070 Ti took it (attempt 2), a new 1660S process with the same worker id rejoined and synchronized. **Passed.**
+- `pause-worker`: `SIGSTOP` for 35 s (lease 20 s) then `SIGCONT`: the candidate was retaken by the 5070 Ti, the late result of the 1660S was REFUSED as stale, the worker carried on. **Passed.**
+- `cut-link` (8 s): packets from the 1660S dropped during a download; TCP stalled and resumed, no error. **Passed**, but this did not exercise the resumable download. Cut for 80 s (twice, once 3 s into a download): the worker timed out, the experiment ran on with the 5070 Ti alone, the worker rejoined and synchronized to the current weights. **Passed.** With N = 32, a 15 s cut 3 s into a download and an HTTP timeout of 8 s: **the download broke off, kept 325,058,560 bytes, and resumed from that byte** (the next sync event: `resumed_from_bytes` 325058560, `downloaded_bytes` 663006976, hash checked). **Passed.**
+- `kill-coordinator`: `kill -9` with 12 results committed (generation 0 complete, 4 of 8 of generation 1), started again with `--resume` 5 s later: `recovered` (`resume_generation`), `generation_resumed`, generations 1 and 2 done, both workers had logged transport errors and kept going. **Passed.**
+
+Limits: one run per scenario; the coordinator was not killed between the write-ahead record and the update, or between the mark and the publication, on the real machines (the tests do that with two coordinator objects on the same files); no kill in the middle of a SQLite transaction; no power cut.
+
+
+**Tests and mutation checks** [[TESTS]]
+
+**Not done / not verified.** The audit of the MASTER claims (C1, C2, C4) against the new numbers is in the "what the evidence supports" lines above; no learning experiment was run on the distributed runtime; the owner has not reviewed ADR-002 and its amendments; the network set-up is still by hand; one hardware pair, one workload of 16 prompts (the rollout is 0.16 s: the CPU noise and the update, not the GPU, set the speed, so a slow GPU can add little); the FP32 result is a checked level (rule of three: at most 0.16 percent of prompts), not a guarantee.
+
+**Next action.** (1) The owner decides O8 (FP32 as the default of the experiments) and reviews the branch (start with `git log --oneline feat/benchmark-g5..HEAD`, ADR-002 "Amendments", contract sections 13 to 15, `artifacts/experiments/2026-10-07-g6-*/README.md`), then pushes. (2) A workload whose rollout is long enough for the slow GPU to matter, and learning experiments on the runtime. (3) The report: the evidence of G6 replaces the speed claims of G5.
 
 ### 0.00 Progress update — 07/10/2026 (G4 and G5 done, each in its own branch; C1 profiles, admission, B2, and two findings that change what G3 claimed)
 
