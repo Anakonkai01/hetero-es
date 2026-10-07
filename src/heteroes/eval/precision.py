@@ -12,11 +12,20 @@ import copy
 
 import torch
 
-from heteroes.manifest import EVAL_DTYPES
+from heteroes.manifest import DEFAULT_EVAL_DTYPE, EVAL_DTYPES
+
+
+# Prompts per generate() call that are exact for each precision (cross-GPU evidence of G6): with an FP32 forward pass a padded batch of
+# 16 gave the same answers as one prompt at a time in every test; with FP16 only one prompt at a time is exact.
+DEFAULT_CHUNK = {"float16": 1, "float32": 16}
+
+
+def default_chunk(eval_dtype: str) -> int:
+    return DEFAULT_CHUNK[eval_dtype]
 
 
 class EvalModel:
-    def __init__(self, model, eval_dtype: str = "float16"):
+    def __init__(self, model, eval_dtype: str = DEFAULT_EVAL_DTYPE):
         if eval_dtype not in EVAL_DTYPES:
             raise ValueError(f"eval_dtype must be one of {EVAL_DTYPES}, got {eval_dtype!r}")
         self._live = model

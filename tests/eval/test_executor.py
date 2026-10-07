@@ -43,7 +43,7 @@ class HalfToy(nn.Module):
 def make_recipe(schema, sigma=SIGMA, chunk=CHUNK):
     return Recipe(model_id="toy", model_revision="1" * 40, tokenizer_revision="1" * 40, dtype="torch.float16",
                   schema_hash=schema.hash, engine_version=ENGINE_VERSION, chunk_elements=chunk, noise_fingerprint="2" * 64,
-                  sigma=sigma, reward_eta=1e-9, workload_hash="3" * 64, generation_config_sha256="4" * 64)
+                  sigma=sigma, reward_eta=1e-9, workload_hash="3" * 64, generation_config_sha256="4" * 64, eval_dtype="float16")
 
 
 def descriptor_for(recipe, parent, seed, index=0, generation=0):
@@ -351,10 +351,26 @@ def test_the_prompt_chunk_of_the_executor_reaches_the_evaluation(fx, monkeypatch
     CandidateExecutor(fx.model, None, fx.schema, fx.recipe)(fx.descriptor(7))
     CandidateExecutor(fx.model, None, fx.schema, fx.recipe, chunk=8)(fx.descriptor(7))
 
-    assert received == [1, 8]                                           # the default is one prompt at a time
+    assert received == [1, 8]                                           # for an FP16 recipe the default is one prompt at a time
 
 
-@pytest.mark.parametrize("bad", [0, -1, 1.0, True, "4", None])
+def test_without_a_chunk_the_executor_takes_the_exact_size_of_the_precision_of_the_recipe(fx, monkeypatch):
+    received = []
+
+    def spy(model, tokenizer, chunk=1):
+        received.append(chunk)
+        return EvalResult(mean_reward=0.5, records=())
+
+    monkeypatch.setattr(executor_module, "evaluate_model", spy)
+    fx.recipe = fp32 = Recipe(**{**fx.recipe.__dict__, "eval_dtype": "float32"})       # the descriptor carries the hash of this recipe
+
+    CandidateExecutor(fx.model, None, fx.schema, fp32)(fx.descriptor(7))
+    CandidateExecutor(fx.model, None, fx.schema, fp32, chunk=4)(fx.descriptor(7))      # an explicit choice still wins
+
+    assert received == [16, 4]
+
+
+@pytest.mark.parametrize("bad", [0, -1, 1.0, True, "4"])
 def test_a_bad_prompt_chunk_is_refused_at_construction(fx, bad):
     with pytest.raises(ValueError):
         CandidateExecutor(fx.model, None, fx.schema, fx.recipe, chunk=bad)

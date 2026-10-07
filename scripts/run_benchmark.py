@@ -155,8 +155,8 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--profile-reference", required=True)
     parser.add_argument("--profile-candidate", required=True)
     parser.add_argument("--prediction", default=None)
-    parser.add_argument("--chunk", type=int, default=1, help="prompts per generate() call for every worker of the B conditions (1 = the reference path; "
-                                                              "more is exact only with --eval-dtype float32, see the cross-GPU evidence)")
+    parser.add_argument("--chunk", type=int, default=None, help="prompts per generate() call for every worker of the B conditions "
+                                                                "(default: the exact size of --eval-dtype, 16 for float32 and 1 for float16; see the cross-GPU evidence)")
     parser.add_argument("--first-repeat", type=int, default=1, help="number the repeats from this (to add repeats later)")
     add_cluster_arguments(parser)
     parser.add_argument("--run-timeout", type=float, default=3600.0)
@@ -169,6 +169,10 @@ def main(argv: list[str]) -> int:
     out = Path(args.out_dir)
     out.mkdir(parents=True, exist_ok=True)
     conditions = args.conditions.split(",")
+    from heteroes.eval.precision import default_chunk
+
+    if args.chunk is None:
+        args.chunk = default_chunk(args.eval_dtype)
     specs = {name: plan(name, args.candidates, reference, candidate, prediction, args.chunk) for name in conditions}
     (out / f"plan-n{args.candidates}.json").write_text(json.dumps({"args": vars(args), "specs": specs}, indent=2) + "\n", encoding="utf-8")
     failed = 0

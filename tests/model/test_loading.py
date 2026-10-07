@@ -55,12 +55,22 @@ def test_a_machine_that_does_not_generate_the_canonical_noise_is_refused(monkeyp
 def test_the_recipe_of_the_real_model_is_the_recipe_of_the_recorded_evidence():
     loaded = load_pinned_model(PINNED_PATH, "cuda")
 
-    recipe = build_recipe(loaded, sigma=1e-3)
+    recipe = build_recipe(loaded, sigma=1e-3, eval_dtype="float16")        # the recorded evidence is the FP16 evaluation
 
     assert recipe.hash == EVIDENCE_RECIPE_HASH
     assert loaded.revision == PINNED_REVISION and recipe.model_revision == PINNED_REVISION == recipe.tokenizer_revision
     assert next(loaded.model.parameters()).dtype == torch.float16 and next(loaded.model.parameters()).device.type == "cuda"
     assert loaded.schema.hash == recipe.schema_hash
+
+
+@needs_model
+def test_the_default_recipe_of_the_real_model_evaluates_in_fp32():
+    loaded = load_pinned_model(PINNED_PATH, "cuda")
+
+    recipe = build_recipe(loaded, sigma=1e-3)
+
+    assert recipe.eval_dtype == "float32" and recipe.hash != EVIDENCE_RECIPE_HASH
+    assert recipe.hash == build_recipe(loaded, sigma=1e-3, eval_dtype="float32").hash
 
 
 @needs_model

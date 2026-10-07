@@ -49,7 +49,7 @@ class HalfToy(nn.Module):
 def make_recipe(schema):
     return Recipe(model_id="toy", model_revision="1" * 40, tokenizer_revision="1" * 40, dtype="torch.float16",
                   schema_hash=schema.hash, engine_version=ENGINE_VERSION, chunk_elements=CHUNK, noise_fingerprint="2" * 64,
-                  sigma=SIGMA, reward_eta=1e-9, workload_hash="3" * 64, generation_config_sha256="4" * 64)
+                  sigma=SIGMA, reward_eta=1e-9, workload_hash="3" * 64, generation_config_sha256="4" * 64, eval_dtype="float16")
 
 
 def wait_for(condition, seconds=30):

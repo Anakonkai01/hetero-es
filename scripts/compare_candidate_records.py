@@ -48,6 +48,7 @@ def recipe_hash_of(record: dict) -> str:
             sigma=run["sigma"],
             reward_eta=1e-9,
             workload_hash=run["workload_hash"],
+            eval_dtype="float16",          # a record of format 1 was made with the FP16 evaluation
             generation_config_sha256=generation_config_sha256(record["model"]["generation_config"]),
         ).hash
     except (ValueError, TypeError) as error:

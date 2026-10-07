@@ -40,7 +40,7 @@ def add_cluster_arguments(parser) -> None:
     parser.add_argument("--host", default=DEFAULTS["host"], help="the coordinator's address as the workers see it")
     parser.add_argument("--port", type=int, default=DEFAULTS["port"])
     parser.add_argument("--experiment-id", default="bench")
-    parser.add_argument("--eval-dtype", choices=["float16", "float32"], default="float16", help="precision of the forward pass of the evaluation (the recipe's; the workers read it from the job)")
+    parser.add_argument("--eval-dtype", choices=["float16", "float32"], default="float32", help="precision of the forward pass of the evaluation (the recipe's; the workers read it from the job)")
     parser.add_argument("--generation-timeout", type=float, default=1200.0)
 
 

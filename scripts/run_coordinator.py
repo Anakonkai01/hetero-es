@@ -40,8 +40,8 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--alpha", type=float, default=1e-3)
     parser.add_argument("--sigma", type=float, default=1e-3)
     parser.add_argument("--chunk-elements", type=int, default=None, help="default: the contract value")
-    parser.add_argument("--eval-dtype", choices=["float16", "float32"], default="float16",
-                        help="precision of the forward pass of the evaluation, part of the recipe: every worker takes it from the job (default float16; see numerical contract section 15)")
+    parser.add_argument("--eval-dtype", choices=["float16", "float32"], default="float32",
+                        help="precision of the forward pass of the evaluation, part of the recipe: every worker takes it from the job (default float32, decision O8; see numerical contract section 15)")
     parser.add_argument("--policy", choices=["greedy", "wave", "proportional", "tail"], default="greedy",
                         help="greedy = B3, wave = B1 (static waves), proportional = B2 (needs one --quota per worker), tail = B4 (greedy that keeps a slow "
                              "worker away from the end of a generation; learns the speeds, see --speed-prior)")

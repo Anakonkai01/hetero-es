@@ -37,6 +37,7 @@ def make_recipe(**changes):
         dtype="torch.float16", schema_hash=SCHEMA, engine_version=ENGINE_VERSION, chunk_elements=262144,
         noise_fingerprint=EXPECTED_NOISE_FINGERPRINT, sigma=0.001, reward_eta=1e-9, workload_hash=WORKLOAD,
         generation_config_sha256=generation_config_sha256(GENERATION_CONFIG),
+        eval_dtype="float16",      # the v1 evidence is FP16; the default of a new recipe is FP32 (O8), tested at the end of this file
     )
     values.update(changes)
     return Recipe(**values)
@@ -345,3 +346,38 @@ def test_a_document_that_says_float16_explicitly_is_refused_because_the_default_
     document["workload"]["eval_dtype"] = "float16"                  # not what to_dict writes: it would not round-trip
     with pytest.raises(ValueError, match="round-trip"):
         Recipe.from_dict(document)
+
+
+# ---------------------------------------------------------------------------
+# O8 (decided 2026-10-07): a new recipe evaluates in FP32; a document without the key is still FP16
+# ---------------------------------------------------------------------------
+
+FP32_EVIDENCE_RECIPE_HASH = "efc1ff67c1bfa8c243ba93ce4a46dfcea74e5afc4b2daffa50498510d53dbc86"   # the recipe_hash of the FP32 benchmark runs of G6
+
+
+def make_recipe_with_default_precision():
+    values = dict(
+        model_id="Qwen/Qwen2.5-0.5B-Instruct", model_revision=REVISION, tokenizer_revision=REVISION,
+        dtype="torch.float16", schema_hash=SCHEMA, engine_version=ENGINE_VERSION, chunk_elements=262144,
+        noise_fingerprint=EXPECTED_NOISE_FINGERPRINT, sigma=0.001, reward_eta=1e-9, workload_hash=WORKLOAD,
+        generation_config_sha256=generation_config_sha256(GENERATION_CONFIG),
+    )
+    return Recipe(**values)                                         # no eval_dtype: the default
+
+
+def test_a_recipe_that_does_not_say_the_precision_evaluates_in_fp32():
+    recipe = make_recipe_with_default_precision()
+    assert recipe.eval_dtype == "float32"
+    assert recipe.to_dict()["workload"]["eval_dtype"] == "float32"
+
+
+def test_the_default_recipe_has_the_hash_of_the_fp32_runs_of_g6_and_the_fp16_hash_is_untouched():
+    assert make_recipe_with_default_precision().hash == FP32_EVIDENCE_RECIPE_HASH      # evidence of the real runs, not made by this code
+    assert make_recipe(eval_dtype="float16").hash == PINNED_RECIPE_HASH
+
+
+def test_a_document_without_the_key_is_read_as_fp16_whatever_the_default_is():
+    document = make_recipe(eval_dtype="float16").to_dict()
+    assert "eval_dtype" not in document["workload"]
+    recipe = Recipe.from_dict(document)
+    assert recipe.eval_dtype == "float16" and recipe.hash == PINNED_RECIPE_HASH

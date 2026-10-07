@@ -9,7 +9,7 @@ from pathlib import Path
 
 from heteroes.es.update import DEFAULT_ETA
 from heteroes.eval.workload import workload_hash
-from heteroes.manifest import Recipe, generation_config_sha256
+from heteroes.manifest import DEFAULT_EVAL_DTYPE, Recipe, generation_config_sha256
 from heteroes.model.schema import ParameterSchema, build_parameter_schema
 from heteroes.noise.contracts import DEFAULT_CHUNK_ELEMENTS, ENGINE_VERSION
 from heteroes.noise.selftest import EXPECTED_NOISE_FINGERPRINT, compute_noise_fingerprint
@@ -53,7 +53,7 @@ def load_pinned_model(model_path, device: str) -> LoadedModel:
 
 
 def build_recipe(loaded: LoadedModel, sigma: float, chunk_elements: int = DEFAULT_CHUNK_ELEMENTS, reward_eta: float = DEFAULT_ETA,
-                 eval_dtype: str = "float16") -> Recipe:
+                 eval_dtype: str = DEFAULT_EVAL_DTYPE) -> Recipe:
     return Recipe(
         model_id=MODEL_ID,
         model_revision=loaded.revision,

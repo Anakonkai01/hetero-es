@@ -11,10 +11,12 @@ from heteroes.noise.contracts import ENGINE_VERSION
 MANIFEST_VERSION = 1
 SUPPORTED_DTYPE = "torch.float16"
 # The precision in which the forward pass of the EVALUATION runs (the weights, the noise and the update stay FP16 / FP32 as the contract
-# says). FP16 is the default and is left out of the recipe document, so that the hash of every recipe made before G6 is unchanged;
-# FP32 is written in `workload` and makes another recipe (numerical contract section 15).
+# says). FP32 is the default of new recipes (decision O8, 2026-10-07, numerical contract section 15). A recipe document WITHOUT the
+# key means FP16 (LEGACY_EVAL_DTYPE) and FP16 is still left out of the document, so that the hash of every recipe made before G6 is
+# unchanged; FP32 is written in `workload` (that is the same document as in G6, so its hash did not change either).
 EVAL_DTYPES = ("float16", "float32")
-DEFAULT_EVAL_DTYPE = "float16"
+LEGACY_EVAL_DTYPE = "float16"
+DEFAULT_EVAL_DTYPE = "float32"
 
 # Seeds travel as JSON. JavaScript reads integers exactly only below 2**53, so v1 does not allow more.
 MAX_SEED = 2**53  # exclusive
@@ -139,7 +141,7 @@ class Recipe:
             "perturbation": {"sigma": self.sigma, "sigma_float32": float(np.float32(self.sigma))},
             "update": {**UPDATE_RECIPE, "reward_eta": self.reward_eta},
             "workload": {"hash": self.workload_hash, "generation_config_sha256": self.generation_config_sha256,
-                         **({} if self.eval_dtype == DEFAULT_EVAL_DTYPE else {"eval_dtype": self.eval_dtype})},
+                         **({} if self.eval_dtype == LEGACY_EVAL_DTYPE else {"eval_dtype": self.eval_dtype})},
         }
 
     @property
@@ -172,7 +174,7 @@ class Recipe:
             reward_eta=data["update"]["reward_eta"],
             workload_hash=data["workload"]["hash"],
             generation_config_sha256=data["workload"]["generation_config_sha256"],
-            eval_dtype=data["workload"].get("eval_dtype", DEFAULT_EVAL_DTYPE),
+            eval_dtype=data["workload"].get("eval_dtype", LEGACY_EVAL_DTYPE),
         )
         if recipe.to_dict() != data:
             raise ValueError("recipe does not round-trip (a derived value, such as sigma_float32, disagrees)")

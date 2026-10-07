@@ -90,3 +90,11 @@ def test_on_the_gpu_the_shadow_lives_on_the_same_device_and_follows_the_live_wei
     evaluation.refresh()
     for a, b in zip(live.parameters(), evaluation.model.parameters()):
         assert torch.equal(a.float(), b)
+
+
+def test_the_default_evaluation_is_fp32_and_each_precision_has_its_exact_chunk():
+    from heteroes.eval.precision import default_chunk
+
+    model = nn.Linear(2, 2).half()
+    assert EvalModel(model).eval_dtype == "float32"
+    assert default_chunk("float32") == 16 and default_chunk("float16") == 1

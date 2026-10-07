@@ -45,7 +45,7 @@ def main(argv: list[str]) -> int:
                         help="perturbed candidates on which every chunk is compared with chunk 1 (a rare difference needs many: with a "
                              "4 percent rate, 2 candidates see it 8 percent of the time, 32 see it 73 percent)")
     parser.add_argument("--sigma", type=float, default=1e-3)
-    parser.add_argument("--eval-dtype", choices=["float16", "float32"], default="float16",
+    parser.add_argument("--eval-dtype", choices=["float16", "float32"], default="float32",
                         help="precision of the forward pass of the evaluation (part of the recipe): the chunks are compared and the candidates timed with it")
     parser.add_argument("--sync-url", default=None)
     parser.add_argument("--sync-sha256", default=None)

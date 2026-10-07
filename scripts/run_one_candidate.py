@@ -152,6 +152,7 @@ def main(argv: list[str]) -> int:
         reward_eta=DEFAULT_ETA,
         workload_hash=workload_hash(),
         generation_config_sha256=generation_config_sha256(generation_config),
+        eval_dtype="float16",      # this script evaluates the live FP16 model (the regression of steps 6 to 9)
     )
 
     runs = []

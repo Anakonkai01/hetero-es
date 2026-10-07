@@ -34,7 +34,7 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from cluster_runner import FAST, SLOW, Cluster, add_cluster_arguments  # noqa: E402
+from cluster_runner import FAST, REPO, SLOW, Cluster, add_cluster_arguments  # noqa: E402
 
 SCENARIOS = ["kill-worker", "pause-worker", "cut-link", "kill-coordinator"]
 
@@ -218,7 +218,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--generations", type=int, default=3)
     parser.add_argument("--scenarios", default=",".join(SCENARIOS))
     parser.add_argument("--reference-final", default=None, help="the final weights hash of the undisturbed run (default: run it first)")
-    parser.add_argument("--chunk", type=int, default=1, help="prompts per generate() call of every worker (more than 1 only with --eval-dtype float32)")
+    parser.add_argument("--chunk", type=int, default=None, help="prompts per generate() call of every worker (default: 16 for --eval-dtype float32, 1 for float16)")
     parser.add_argument("--cut-seconds", type=float, default=8.0)
     parser.add_argument("--cut-delay", type=float, default=0.0, help="cut-link: seconds after the publication of generation 0 before the packets are dropped (3 s puts the cut in the middle of the download)")
     parser.add_argument("--restart-after", type=float, default=5.0)
@@ -227,6 +227,10 @@ def main(argv: list[str]) -> int:
     add_cluster_arguments(parser)
     parser.set_defaults(experiment_id="campaign", lease_seconds=20.0)
     args = parser.parse_args(argv)
+    if args.chunk is None:
+        sys.path.insert(0, str(REPO / "src"))
+        from heteroes.eval.precision import default_chunk
+        args.chunk = default_chunk(args.eval_dtype)
     unknown = [name for name in args.scenarios.split(",") if name not in SCENARIOS]
     if unknown:
         parser.error(f"unknown scenarios {unknown}; known: {SCENARIOS}")

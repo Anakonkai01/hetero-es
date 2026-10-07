@@ -21,7 +21,7 @@ from heteroes.es.perturb import perturb_model_
 from heteroes.es.snapshot import RestoreError, restore_from_snapshot_, take_snapshot
 from heteroes.eval.candidate import tensors_sha256
 from heteroes.eval.generate import evaluate_model
-from heteroes.eval.precision import EvalModel
+from heteroes.eval.precision import EvalModel, default_chunk
 from heteroes.ledger import FailureKind
 from heteroes.manifest import CandidateDescriptor, Recipe
 from heteroes.model.schema import ParameterSchema
@@ -29,7 +29,9 @@ from heteroes.worker import CandidateFailed
 
 
 class CandidateExecutor:
-    def __init__(self, model, tokenizer, schema: ParameterSchema, recipe: Recipe, clock=time.perf_counter, chunk: int = 1):
+    def __init__(self, model, tokenizer, schema: ParameterSchema, recipe: Recipe, clock=time.perf_counter, chunk: int | None = None):
+        if chunk is None:
+            chunk = default_chunk(recipe.eval_dtype)     # the exact size for the recipe's precision (FP32: 16, FP16: 1)
         if isinstance(chunk, bool) or not isinstance(chunk, int) or chunk < 1:
             raise ValueError(f"chunk must be an integer of at least 1, got {chunk!r}")
         self.model = model
