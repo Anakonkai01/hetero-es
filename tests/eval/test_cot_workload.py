@@ -169,3 +169,22 @@ def test_every_name_of_the_manifest_has_a_workload_and_nothing_else_does():
 def test_an_unknown_workload_is_refused(name):
     with pytest.raises(ValueError):
         get_workload(name)
+
+
+# ---- the 64-question workload (G7: a bigger batch is faster per question, and more questions make the reward less noisy) ----------------
+
+def test_the_64_question_workload_is_level_3_with_64_questions_and_its_own_hash(monkeypatch):
+    workload = get_workload("cot_l3_q64")
+    assert workload.hash() == workload_hash_of(3, 64) and workload.hash() != get_workload("cot_l3_q32").hash()
+    calls = fake_generate(monkeypatch, lambda q: "Answer: 1")
+    workload.evaluate(None, None, 64)
+    assert calls == [([q for q, _ in make_questions(64, 3)], 64)]
+
+
+def test_the_first_32_questions_of_the_64_are_the_32_of_the_other_workload():
+    # the questions come from one random stream: a longer workload extends a shorter one, so the data of the experiments with 32 questions stay comparable
+    assert make_questions(64, 3)[:32] == make_questions(32, 3)
+
+
+def test_the_hash_of_the_64_question_workload_is_pinned():
+    assert workload_hash_of(3, 64) == "9049518d5d51ccfffe2687cc2fa4b731f03590b7e2a2a78de71c5952aa4adc35"

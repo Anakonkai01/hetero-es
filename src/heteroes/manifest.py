@@ -20,7 +20,7 @@ DEFAULT_EVAL_DTYPE = "float32"
 
 # The workload the candidates are evaluated on. The 16-prompt workload of the contract is the default and is left out of the document (so the hash of every
 # earlier recipe is unchanged); another one is named in `workload.name` (G7: `heteroes/eval/workloads.py` holds what each name means).
-WORKLOAD_NAMES = ("arith16", "cot_l3_q32")
+WORKLOAD_NAMES = ("arith16", "cot_l3_q32", "cot_l3_q64")
 DEFAULT_WORKLOAD_NAME = "arith16"
 
 # Seeds travel as JSON. JavaScript reads integers exactly only below 2**53, so v1 does not allow more.
