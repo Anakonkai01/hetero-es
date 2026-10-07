@@ -162,9 +162,9 @@ class WorkerRuntime:
                 if attempt == self._download_attempts:
                     raise
         transferred = self._timer()
-        load_weights_(self.executor.model, self.executor.schema, path, target)
+        load_weights_(self.executor.model, self.executor.schema, path, target, already_verified=True)      # download_weights hashed every byte
         loaded = self._timer()
-        self.executor.reset_parent(target)                         # hashes the model itself: the end-to-end check
+        self.executor.reset_parent(target, verified_file=path)     # the model IS the file whose hash was checked: compared, not hashed again
         done = self._timer()
         for old in self.cache_dir.iterdir():
             if (_WEIGHTS_FILE.fullmatch(old.name) and old != path) or (old.name.startswith(".partial-") and old.name != f".partial-{target}"):

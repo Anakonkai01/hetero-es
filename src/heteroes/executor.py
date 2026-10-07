@@ -16,7 +16,7 @@ import torch
 
 from heteroes.es.perturb import perturb_model_
 from heteroes.es.snapshot import RestoreError, restore_from_snapshot_, take_snapshot
-from heteroes.eval.candidate import model_weights_sha256
+from heteroes.eval.candidate import tensors_sha256
 from heteroes.eval.generate import evaluate_model
 from heteroes.ledger import FailureKind
 from heteroes.manifest import CandidateDescriptor, Recipe
@@ -39,15 +39,32 @@ class CandidateExecutor:
         self._snapshot = None
         self.reset_parent()
 
-    def reset_parent(self, expected_sha256: str | None = None) -> str:
+    def reset_parent(self, expected_sha256: str | None = None, verified_file=None) -> str:
         """
         The weights of the model were replaced (full synchronization): take them as the new parent. The hash is computed from
         the model itself; `expected_sha256`, if given, must be it (else ValueError and nothing changes).
+
+        With `verified_file` (a weights file whose SHA-256 the caller has already checked to be `expected_sha256`, as the download
+        does while the bytes arrive) the model is COMPARED with that file instead of hashed: the same guarantee (the model is those
+        bytes, so it has that hash), at the speed of memory instead of the speed of SHA-256 (3.6 s per GB on the 1660S's CPU).
         """
-        actual = model_weights_sha256(self.model, self.schema)
-        if expected_sha256 is not None and actual != expected_sha256:
-            raise ValueError(f"the model has the hash {actual}, not the expected {expected_sha256}")
-        self._snapshot = take_snapshot(self.model, self.schema)
+        if verified_file is not None and expected_sha256 is None:
+            raise ValueError("verified_file needs the expected_sha256 that the file was checked against")
+        # One copy of the model to the CPU serves both purposes: it IS the snapshot, and the bits to hash or to compare.
+        snapshot = take_snapshot(self.model, self.schema)
+        if verified_file is not None:
+            from heteroes.model.weights_io import tensors_match_file
+            from pathlib import Path
+            if Path(verified_file).stat().st_size != 2 * sum(tensor.numel() for tensor in snapshot.tensors):
+                raise ValueError(f"{verified_file}: the size of the file is not the size of the model")
+            if not tensors_match_file(snapshot.tensors, verified_file):
+                raise ValueError(f"the model differs from the verified file {Path(verified_file).name}")
+            actual = expected_sha256
+        else:
+            actual = tensors_sha256(snapshot.tensors)
+            if expected_sha256 is not None and actual != expected_sha256:
+                raise ValueError(f"the model has the hash {actual}, not the expected {expected_sha256}")
+        self._snapshot = snapshot
         self.parent_sha256 = actual
         return actual
 

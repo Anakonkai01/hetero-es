@@ -28,7 +28,7 @@ from heteroes.generation_record import GenerationRecord
 from heteroes.ledger import GenerationState, Ledger
 from heteroes.manifest import CandidateDescriptor, Recipe, derive_seed
 from heteroes.model.schema import ParameterSchema
-from heteroes.model.weights_io import WeightsFileError, load_weights_, publish_weights, sha256_of_file
+from heteroes.model.weights_io import WeightsFileError, load_weights_, prepare_publication, publish_weights
 from heteroes.http_transport import CoordinatorServer
 from heteroes.worker_api import WorkerAPI
 
@@ -227,17 +227,20 @@ class Coordinator:
         recorded = self._timer()
         self.log("update_recorded", generation=generation, record_hash=record.hash)
 
-        report = apply_coefficients_(self.model, self.schema, list(record.seeds), record.coefficients, record.alpha,
-                                     self.recipe.chunk_elements)
-        child = model_weights_sha256(self.model, self.schema)
-        self.ledger.mark_applied(self.experiment_id, generation, record.hash, child)
-        applied = self._timer()
-        self.log("update_applied", generation=generation, child_sha256=child, noop=report.noop, changed=report.changed,
-                 applied_l2=report.applied_l2)
-
-        published = publish_weights(self.model, self.schema, self.models_dir)
-        if published != child:
-            raise CoordinatorError(f"the published weights have the hash {published}, not {child}")
+        report = self._apply_record(record)
+        # The weights are written and hashed ONCE, into a file that is not visible yet; the ledger is told the child, and only then
+        # the file gets its name (a crash in between is recovered: the child is recomputed from the parent and the record).
+        publication = prepare_publication(self.model, self.schema, self.models_dir)
+        child = publication.sha256
+        try:
+            self.ledger.mark_applied(self.experiment_id, generation, record.hash, child)
+            applied = self._timer()
+            self.log("update_applied", generation=generation, child_sha256=child, noop=report.noop, changed=report.changed,
+                     applied_l2=report.applied_l2)
+            publication.commit()
+        except BaseException:
+            publication.discard()
+            raise
         self.parent_sha256 = child
         done = self._timer()
         self.log("weights_published", generation=generation, child_sha256=child)

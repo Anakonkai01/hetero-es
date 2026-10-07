@@ -277,3 +277,67 @@ def test_a_file_that_shrinks_after_it_was_checked_is_noticed_while_copying(model
 
     with pytest.raises(WeightsFileError, match="ended early"):
         load_weights_(HalfToy(1), build_parameter_schema(HalfToy(1)), tmp_path / "w.bin", sha)
+
+
+# ---------------------------------------------------------------------------
+# G6: publishing in two steps (write and hash once, commit after the ledger has been told), and a load that trusts a hash already checked
+# ---------------------------------------------------------------------------
+
+from heteroes.model.weights_io import prepare_publication  # noqa: E402
+
+
+def test_a_prepared_publication_has_the_hash_but_no_visible_file_until_it_is_committed(model, schema, tmp_path):
+    publication = prepare_publication(model, schema, tmp_path / "pub")
+
+    assert publication.sha256 == model_weights_sha256(model, schema)
+    assert list((tmp_path / "pub").glob("*.bin")) == []                      # nothing a worker could be served yet
+    path = publication.commit()
+    assert path == tmp_path / "pub" / f"{publication.sha256}.bin" and path.read_bytes() == expected_bytes(model)
+    assert [p.name for p in (tmp_path / "pub").iterdir()] == [path.name]      # and no temporary file is left
+
+
+def test_a_prepared_publication_can_be_discarded_and_leaves_nothing(model, schema, tmp_path):
+    publication = prepare_publication(model, schema, tmp_path / "pub")
+    publication.discard()
+    assert list((tmp_path / "pub").iterdir()) == []
+
+
+def test_committing_replaces_a_damaged_file_of_the_same_name_and_keeps_an_intact_one(model, schema, tmp_path):
+    publication = prepare_publication(model, schema, tmp_path)
+    (tmp_path / f"{publication.sha256}.bin").write_bytes(b"damaged by a crash")      # named after the hash, content is not it
+    path = publication.commit()
+    assert sha256_of_file(path) == publication.sha256
+
+    again = prepare_publication(model, schema, tmp_path)
+    before = path.stat().st_mtime_ns
+    assert again.commit() == path and path.stat().st_mtime_ns == before               # an intact file is kept as it is
+    assert [p.name for p in tmp_path.iterdir()] == [path.name]
+
+
+def test_publish_weights_replaces_a_damaged_file_too(model, schema, tmp_path):
+    sha = model_weights_sha256(model, schema)
+    (tmp_path / f"{sha}.bin").write_bytes(b"x" * (2 * sum(p.numel() for p in model.parameters())))     # right size, wrong content
+    assert publish_weights(model, schema, tmp_path) == sha
+    assert sha256_of_file(tmp_path / f"{sha}.bin") == sha
+
+
+def test_a_load_that_trusts_a_hash_already_checked_skips_the_hash_but_not_the_size(model, schema, tmp_path):
+    other = HalfToy(7)
+    path = tmp_path / "w.bin"
+    sha = write_weights(other, schema, path)
+    target = HalfToy(0)
+
+    load_weights_(target, schema, path, sha, already_verified=True)
+    assert model_weights_sha256(target, schema) == sha
+
+    wrong = HalfToy(9)
+    # the caller vouches for the hash: a file with other content but the right size IS loaded (that is what "already verified" means) ...
+    load_weights_(wrong, schema, path, "0" * 64, already_verified=True)
+    assert model_weights_sha256(wrong, schema) == sha
+    # ... and the default still checks it
+    with pytest.raises(WeightsFileError, match="wrong hash"):
+        load_weights_(HalfToy(9), schema, path, "0" * 64)
+    # the size is always checked
+    path.write_bytes(path.read_bytes()[:-2])
+    with pytest.raises(WeightsFileError, match="wrong size"):
+        load_weights_(HalfToy(9), schema, path, sha, already_verified=True)

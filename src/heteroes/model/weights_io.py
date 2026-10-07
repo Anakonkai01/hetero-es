@@ -52,7 +52,7 @@ def write_weights(model, schema: ParameterSchema, path, slab_elements: int = DEF
                 for tensor in tensors:
                     flat = tensor.detach().reshape(-1)
                     for start in range(0, flat.numel(), slab_elements):
-                        data = flat[start:start + slab_elements].view(torch.int16).cpu().numpy().tobytes()
+                        data = flat[start:start + slab_elements].view(torch.int16).cpu().numpy()    # a buffer: no extra copy to bytes
                         digest.update(data)
                         file.write(data)
         except BaseException:
@@ -60,14 +60,6 @@ def write_weights(model, schema: ParameterSchema, path, slab_elements: int = DEF
             path.unlink()                      # never leave half a file that looks like the weights
             raise
     return digest.hexdigest()
-
-
-def _fsync_file(path) -> None:
-    fd = os.open(path, os.O_RDONLY)
-    try:
-        os.fsync(fd)
-    finally:
-        os.close(fd)
 
 
 def _fsync_directory(directory) -> None:
@@ -83,29 +75,63 @@ def _fsync_directory(directory) -> None:
         os.close(fd)
 
 
-def publish_weights(model, schema: ParameterSchema, directory, slab_elements: int = DEFAULT_SLAB_ELEMENTS) -> str:
-    """Write the weights as `<directory>/<sha256>.bin` (atomically) and return the hash; the same weights twice are one file."""
+class Publication:
+    """
+    Weights written to a temporary file, hashed while they were written, and not yet visible under their name. `commit()` makes them
+    visible (atomically); `discard()` forgets them. Writing and hashing happen once, here, so that the caller can know the hash
+    (and record it) BEFORE the file becomes available to the workers.
+
+    The file is not fsynced: a file damaged by a power cut is caught by the hash check of whoever reads it (`load_weights_`,
+    `Coordinator.recover`, and `commit` itself for a file that is already there) and is then recomputed or fetched again.
+    """
+
+    def __init__(self, directory: Path, temporary: Path, sha256: str):
+        self.directory, self.temporary, self.sha256 = directory, temporary, sha256
+
+    @property
+    def path(self) -> Path:
+        return self.directory / f"{self.sha256}.bin"
+
+    def commit(self) -> Path:
+        final = self.path
+        # A file that is already there is kept only if it really is these weights: a file damaged by a crash or a full disk and
+        # still named after the hash would otherwise be served to the workers for ever.
+        if final.exists() and final.stat().st_size == self.temporary.stat().st_size and sha256_of_file(final) == self.sha256:
+            self.temporary.unlink()
+        else:
+            os.replace(self.temporary, final)
+            _fsync_directory(self.directory)
+        return final
+
+    def discard(self) -> None:
+        self.temporary.unlink(missing_ok=True)
+
+
+def prepare_publication(model, schema: ParameterSchema, directory, slab_elements: int = DEFAULT_SLAB_ELEMENTS) -> Publication:
+    """Write the weights to a temporary file in `directory` (created if needed) and return the `Publication` (hash known, not yet visible)."""
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
     temporary = directory / f".tmp-{os.getpid()}-{uuid.uuid4().hex}"
     sha = write_weights(model, schema, temporary, slab_elements)
-    final = directory / f"{sha}.bin"
-    # A file that is already there is kept only if it really is these weights: a file damaged by a crash or a full disk and
-    # still named after the hash would otherwise be served to the workers for ever.
-    if final.exists() and final.stat().st_size == temporary.stat().st_size and sha256_of_file(final) == sha:
-        temporary.unlink()
-    else:
-        _fsync_file(temporary)
-        os.replace(temporary, final)
-        _fsync_directory(directory)
-    return sha
+    return Publication(directory, temporary, sha)
 
 
-def load_weights_(model, schema: ParameterSchema, path, expected_sha256: str, slab_elements: int = DEFAULT_SLAB_ELEMENTS) -> None:
+def publish_weights(model, schema: ParameterSchema, directory, slab_elements: int = DEFAULT_SLAB_ELEMENTS) -> str:
+    """Write the weights as `<directory>/<sha256>.bin` (atomically) and return the hash; the same weights twice are one file."""
+    publication = prepare_publication(model, schema, directory, slab_elements)
+    publication.commit()
+    return publication.sha256
+
+
+def load_weights_(model, schema: ParameterSchema, path, expected_sha256: str, slab_elements: int = DEFAULT_SLAB_ELEMENTS,
+                  already_verified: bool = False) -> None:
     """
     Copy the weights in `path` into the model, in place. The size and the SHA-256 of the whole file are checked FIRST: a
     file that is not `expected_sha256` raises WeightsFileError and the model is not touched. (A failure of the disk while
     copying would leave the model half loaded: the caller must then treat the model as unreliable.)
+
+    `already_verified=True` skips the hash of the file (about a second per GB, and a second read of it): for a caller that has just
+    checked it, such as a download that hashed every byte as it arrived. The size is always checked.
     """
     if not isinstance(expected_sha256, str):
         raise TypeError(f"expected_sha256 must be a string, got {type(expected_sha256).__name__}")
@@ -117,9 +143,10 @@ def load_weights_(model, schema: ParameterSchema, path, expected_sha256: str, sl
     size = path.stat().st_size
     if size != expected_size:
         raise WeightsFileError(f"{path.name} has {size} bytes, the model needs {expected_size}: wrong size")
-    actual = sha256_of_file(path)
-    if actual != expected_sha256:
-        raise WeightsFileError(f"{path.name} has the hash {actual}, expected {expected_sha256}: wrong hash")
+    if not already_verified:
+        actual = sha256_of_file(path)
+        if actual != expected_sha256:
+            raise WeightsFileError(f"{path.name} has the hash {actual}, expected {expected_sha256}: wrong hash")
 
     with open(path, "rb") as file, torch.no_grad():
         for tensor in tensors:
@@ -130,3 +157,25 @@ def load_weights_(model, schema: ParameterSchema, path, expected_sha256: str, sl
                 if file.readinto(buffer) != 2 * count:
                     raise WeightsFileError(f"{path.name} ended early")        # the file changed after it was checked
                 flat[start:start + count].copy_(torch.frombuffer(buffer, dtype=torch.int16).view(torch.float16))
+
+
+def tensors_match_file(tensors, path, slab_elements: int = DEFAULT_SLAB_ELEMENTS) -> bool:
+    """
+    Are these tensors (canonical order, FP16) bit for bit the weights file at `path`? Compared, not hashed: at the speed of memory, so a
+    worker that has just checked the hash of a downloaded file can check that its model IS that file without a second hash.
+    A file of another size is simply "no".
+    """
+    import numpy as np
+
+    path = Path(path)
+    if path.stat().st_size != 2 * sum(tensor.numel() for tensor in tensors):
+        return False
+    with open(path, "rb") as file:
+        for tensor in tensors:
+            flat = tensor.detach().reshape(-1).view(torch.int16).cpu().numpy()
+            for start in range(0, flat.size, slab_elements):
+                part = flat[start:start + slab_elements]
+                expected = np.frombuffer(file.read(2 * part.size), dtype=np.int16)
+                if expected.size != part.size or not np.array_equal(expected, part):
+                    return False
+    return True

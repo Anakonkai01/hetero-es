@@ -358,3 +358,61 @@ def test_the_prompt_chunk_of_the_executor_reaches_the_evaluation(fx, monkeypatch
 def test_a_bad_prompt_chunk_is_refused_at_construction(fx, bad):
     with pytest.raises(ValueError):
         CandidateExecutor(fx.model, None, fx.schema, fx.recipe, chunk=bad)
+
+
+# ---------------------------------------------------------------------------
+# G6: taking a new parent from a file whose hash was already checked: compare, do not hash again
+# ---------------------------------------------------------------------------
+
+def _swap_in(fx, seed=5):
+    with torch.no_grad():
+        for parameter, other in zip(fx.model.parameters(), HalfToy(seed).parameters()):
+            parameter.copy_(other)
+
+
+def test_a_new_parent_can_be_taken_from_a_verified_file_without_hashing_the_model(fx, tmp_path, monkeypatch):
+    from heteroes.model.weights_io import write_weights
+    executor = fx.executor()
+    _swap_in(fx)
+    path = tmp_path / "w.bin"
+    sha = write_weights(fx.model, fx.schema, path)                      # the file the "download" verified, and the model loaded from it
+    hashed = []
+    real = executor_module.tensors_sha256
+    monkeypatch.setattr(executor_module, "tensors_sha256", lambda tensors: hashed.append(1) or real(tensors))
+
+    assert executor.reset_parent(sha, verified_file=path) == sha
+
+    assert executor.parent_sha256 == sha and hashed == []                # no hash was computed: the file was compared instead
+    fx.parent = sha
+    fx.seen.clear()
+    executor(fx.descriptor(7))
+    assert current(fx) == sha and fx.seen == [fx.expected_perturbed(7)]
+
+
+def test_a_model_that_differs_from_the_verified_file_is_refused_and_nothing_changes(fx, tmp_path):
+    from heteroes.model.weights_io import write_weights
+    executor = fx.executor()
+    old = executor.parent_sha256
+    _swap_in(fx)
+    path = tmp_path / "w.bin"
+    sha = write_weights(fx.model, fx.schema, path)
+    with torch.no_grad():                                               # one bit of the loaded model differs from the file
+        fx.model.fc.bias.view(torch.int16)[0] ^= 1
+
+    with pytest.raises(ValueError, match="differs from"):
+        executor.reset_parent(sha, verified_file=path)
+    assert executor.parent_sha256 == old                                # nothing was taken over
+
+
+def test_a_verified_file_of_the_wrong_size_is_refused(fx, tmp_path):
+    executor = fx.executor()
+    path = tmp_path / "w.bin"
+    path.write_bytes(b"\0" * 10)
+    with pytest.raises(ValueError, match="size"):
+        executor.reset_parent("a" * 64, verified_file=path)
+
+
+def test_a_verified_file_needs_the_hash_it_claims(fx, tmp_path):
+    executor = fx.executor()
+    with pytest.raises(ValueError, match="expected_sha256"):
+        executor.reset_parent(None, verified_file=tmp_path / "w.bin")

@@ -13,6 +13,14 @@ from heteroes.model.schema import ParameterSchema, resolve_tensors
 from heteroes.noise.contracts import DEFAULT_CHUNK_ELEMENTS, ENGINE_VERSION
 
 
+def tensors_sha256(tensors) -> str:
+    """The `model_weights_sha256` of tensors that are already in canonical order (for example the tensors of a snapshot)."""
+    digest = hashlib.sha256()
+    for tensor in tensors:
+        digest.update(tensor.detach().reshape(-1).view(torch.int16).cpu().numpy())      # a buffer: no extra copy to bytes
+    return digest.hexdigest()
+
+
 def model_weights_sha256(model, schema: ParameterSchema) -> str:
     """
     SHA-256 of the raw bits of every tensor, in canonical (schema) order.
@@ -22,7 +30,7 @@ def model_weights_sha256(model, schema: ParameterSchema) -> str:
     """
     digest = hashlib.sha256()
     for tensor in resolve_tensors(model, schema):
-        digest.update(tensor.detach().reshape(-1).view(torch.int16).cpu().numpy().tobytes())
+        digest.update(tensor.detach().reshape(-1).view(torch.int16).cpu().numpy())      # a buffer: no extra copy to bytes
     return digest.hexdigest()
 
 

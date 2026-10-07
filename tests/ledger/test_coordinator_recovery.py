@@ -167,23 +167,26 @@ def test_a_crash_between_the_record_and_the_update_is_finished_from_the_stored_r
 def test_a_crash_after_the_mark_but_before_the_publication_republishes_the_child(world, monkeypatch):
     first = world.coordinator()
     halt, _ = world.workers(first)
-    real = coordinator_module.publish_weights
-    calls = []
+    real = coordinator_module.prepare_publication
 
-    def publish(*args, **kwargs):
-        calls.append(1)
-        if len(calls) == 2:                                                   # the first call publishes the parent, the second the child
-            raise RuntimeError("disk full")
-        return real(*args, **kwargs)
+    def prepare(*args, **kwargs):
+        publication = real(*args, **kwargs)
 
-    monkeypatch.setattr(coordinator_module, "publish_weights", publish)
+        def die():
+            raise RuntimeError("disk full")                                    # the ledger was told the child; the file never got its name
+
+        publication.commit = die
+        return publication
+
+    monkeypatch.setattr(coordinator_module, "prepare_publication", prepare)
     with pytest.raises(RuntimeError, match="disk full"):
         first.run_generation(0)
     halt()
-    monkeypatch.setattr(coordinator_module, "publish_weights", real)
+    monkeypatch.setattr(coordinator_module, "prepare_publication", real)
     child = world.oracle(1)
     assert first.ledger.get_update("exp", 0).child_weights_sha256 == child       # premise: marked applied
     assert not (world.models_dir / f"{child}.bin").exists()                      # premise: never published
+    assert [p.name for p in world.models_dir.iterdir() if p.name.startswith(".tmp")] == []     # and no temporary file is left behind
     world.kill(first)
 
     second = world.coordinator()
