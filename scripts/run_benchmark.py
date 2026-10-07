@@ -12,6 +12,7 @@ so every candidate has the same seed in every run: the rewards and weights hashe
 
 Conditions (MASTER policy ids; a worker is "fast" = the 5070 Ti, "slow" = the 1660S):
   B0  the fast worker alone, one prompt per generate() call            B1  waves of two, both workers, chunk 1
+  Any condition can end in xK (B0x2, B3x2): K worker processes share the fast GPU (default 1).
   B2  quotas by measured speed (largest remainder), both, chunk 1      B3  greedy, both, chunk 1
   H0  the integrated system: the admission of `--prediction` (variant per_worker_chunk) decides who works, each worker uses
       the safe chunk of its profile, dynamic dispatch. If the admission leaves only the fast worker, H0 is "the fast worker alone with
@@ -19,6 +20,7 @@ Conditions (MASTER policy ids; a worker is "fast" = the 5070 Ti, "slow" = the 16
 """
 import argparse
 import json
+import re
 import subprocess
 import sys
 import time
@@ -30,24 +32,45 @@ from cluster_runner import FAST, SLOW, Cluster, add_cluster_arguments, wait_heal
 REPO = Path(__file__).resolve().parents[1]
 
 
+def parse_condition(condition: str) -> tuple[str, int]:
+    """"B3" -> ("B3", 1); "B0x2" -> ("B0", 2): the number after x is how many worker PROCESSES share the fast GPU (a 5070 Ti is idle most of a candidate: its CPU noise and its GPU rollout overlap across processes)."""
+    match = re.fullmatch(r"([A-Z]\d)(?:x(\d+))?", condition)
+    if match is None:
+        raise ValueError(f"unknown condition {condition!r}")
+    k = int(match.group(2) or 1)
+    if k < 1:
+        raise ValueError(f"unknown condition {condition!r}")
+    return match.group(1), k
+
+
+def fast_worker_ids(k: int) -> list[str]:
+    return [FAST] + [f"{FAST}-{i}" for i in range(2, k + 1)]
+
+
 def plan(condition: str, candidates: int, reference: dict, candidate: dict, prediction: dict | None) -> dict:
     """Who works, with which chunk, under which policy: pure, so that it can be tested."""
     from heteroes.dispatch import proportional_quotas
 
+    base, k = parse_condition(condition)
+    fast = fast_worker_ids(k)
     fast1 = reference["candidate_seconds_at_chunk_1"]
     slow1 = candidate["candidate_seconds_at_chunk_1"]
-    both = {FAST: 1, SLOW: 1}
-    if condition == "B0":
-        return {"workers": {FAST: 1}, "policy": "greedy", "args": []}
-    if condition == "B1":
-        return {"workers": both, "policy": "wave", "args": ["--wave-size", "2"]}
-    if condition == "B2":
-        quotas = proportional_quotas(candidates, {FAST: 1.0 / fast1, SLOW: 1.0 / slow1})
+    alone = {worker: 1 for worker in fast}
+    both = {**alone, SLOW: 1}
+    if base == "B0":
+        return {"workers": alone, "policy": "greedy", "args": []}
+    if base == "B1":
+        return {"workers": both, "policy": "wave", "args": ["--wave-size", str(len(both))]}
+    if base == "B2":
+        speeds = {**{worker: 1.0 / fast1 for worker in fast}, SLOW: 1.0 / slow1}
+        quotas = proportional_quotas(candidates, speeds)
         return {"workers": both, "policy": "proportional", "args": [a for w, q in sorted(quotas.items()) for a in ("--quota", f"{w}={q}")],
                 "quotas": quotas}
-    if condition == "B3":
+    if base == "B3":
         return {"workers": both, "policy": "greedy", "args": []}
-    if condition == "H0":
+    if base == "H0":
+        if k != 1:
+            raise ValueError("H0 is defined for one process on the fast GPU")
         if prediction is None:
             raise ValueError("H0 needs --prediction")
         state = prediction["variants"]["per_worker_chunk"]["decision_b3"]["state"]

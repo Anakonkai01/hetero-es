@@ -22,7 +22,7 @@ from pathlib import Path
 
 from heteroes.benchmark_stats import mean_ci, ratio_ci
 
-RUN = re.compile(r"n(\d+)-([A-Z0-9]+)-r(\d+)")
+RUN = re.compile(r"n(\d+)-([A-Za-z0-9]+)-r(\d+)")
 
 
 def read_jsonl(path: Path) -> list[dict]:
@@ -89,6 +89,8 @@ def main(argv: list[str]) -> int:
     parser.add_argument("directory")
     parser.add_argument("--prediction", default=None)
     parser.add_argument("--out", default=None)
+    parser.add_argument("--baseline", default="B0", help="the condition ClusterBenefit and DeltaT are measured against (default B0, the fast worker alone; "
+                                                        "use B0x2 to ask what the slow worker adds to two processes on the fast GPU)")
     parser.add_argument("--n", type=int, default=None, help="only the runs with this number of candidates (the prediction file is for one N)")
     args = parser.parse_args(argv)
     directory = Path(args.directory)
@@ -108,7 +110,7 @@ def main(argv: list[str]) -> int:
         by_condition = {}
         for condition, run in good:
             by_condition.setdefault(condition, []).append(run)
-        reference_run = next((run for condition, run in good if condition == "B0"), None)
+        reference_run = next((run for condition, run in good if condition == args.baseline), None)
         for condition, run in good:
             if reference_run is not None and run is not reference_run:
                 # generation 0 has the same parent in every run: a different reward there is a difference in how the candidate was
@@ -116,9 +118,9 @@ def main(argv: list[str]) -> int:
                 differing = [i for i, (a, b) in enumerate(zip(run["rewards"][0], reference_run["rewards"][0])) if a != b]
                 run["first_generation_mismatches"] = [{"candidate": i, "worker": run["first_generation_owner"].get(i), "reward": run["rewards"][0][i],
                                                        "reward_B0": reference_run["rewards"][0][i]} for i in differing]
-        baseline = statistics.mean(run["T_mean"] for run in by_condition["B0"]) if "B0" in by_condition else None
+        baseline = statistics.mean(run["T_mean"] for run in by_condition[args.baseline]) if args.baseline in by_condition else None
         steady = {c: [run["T_mean_after_first"] for run in items if run["T_mean_after_first"] is not None] for c, items in by_condition.items()}
-        steady_baseline = steady.get("B0") or None
+        steady_baseline = steady.get(args.baseline) or None
         for condition, items in sorted(by_condition.items()):
             times = [run["T_mean"] for run in items]
             mean = statistics.mean(times)

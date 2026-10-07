@@ -80,3 +80,36 @@ def test_a_failed_attempt_is_renamed_never_deleted_and_the_numbers_do_not_collid
     assert first.name == "n8-B0-r1.failed-attempt1" and (first / "proof.txt").read_text() == "evidence" and not run.exists()
     run.mkdir()
     assert rb.set_aside(run).name == "n8-B0-r1.failed-attempt2"
+
+
+# ---- G6: several worker processes on the fast GPU
+
+def test_a_condition_may_ask_for_several_processes_on_the_fast_gpu():
+    assert rb.parse_condition("B3") == ("B3", 1) and rb.parse_condition("B0x2") == ("B0", 2) and rb.parse_condition("B3x12") == ("B3", 12)
+    for bad in ("B", "b0", "B0x", "B0x0", "B0x-1", "B0y2", "BB0", "B0x2x3"):
+        with pytest.raises(ValueError):
+            rb.parse_condition(bad)
+    assert rb.fast_worker_ids(1) == [rb.FAST] and rb.fast_worker_ids(3) == [rb.FAST, f"{rb.FAST}-2", f"{rb.FAST}-3"]
+
+
+def test_b0x2_is_two_processes_on_the_fast_gpu_and_nothing_else():
+    assert plan("B0x2") == {"workers": {rb.FAST: 1, f"{rb.FAST}-2": 1}, "policy": "greedy", "args": []}
+
+
+def test_b3x2_adds_the_slow_worker_to_the_two_fast_processes():
+    result = plan("B3x2")
+    assert result["workers"] == {rb.FAST: 1, f"{rb.FAST}-2": 1, rb.SLOW: 1} and result["policy"] == "greedy"
+
+
+def test_b1x2_waves_are_as_wide_as_the_number_of_workers():
+    assert plan("B1x2")["args"] == ["--wave-size", "3"]
+
+
+def test_b2x2_quotas_split_the_fast_share_between_the_two_processes_and_add_up():
+    result = plan("B2x2", n=18)                                               # speeds 1/4, 1/4 and 1/16: shares 8, 8 and 2
+    assert result["quotas"] == {rb.FAST: 8, f"{rb.FAST}-2": 8, rb.SLOW: 2} and sum(result["quotas"].values()) == 18
+
+
+def test_h0_is_for_one_process_only():
+    with pytest.raises(ValueError, match="one process"):
+        plan("H0x2")

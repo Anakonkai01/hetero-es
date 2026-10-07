@@ -72,3 +72,15 @@ def test_the_policy_has_its_own_key(tmp_path):
     summary = sb.summarize_run(run)
     assert summary["policy"] == "proportional"
     assert "chunks" not in summary
+
+
+def test_the_baseline_can_be_another_condition_and_names_with_x_are_read(tmp_path, capsys):
+    for k in (1, 2, 3):
+        write_run(tmp_path, f"n8-B0x2-r{k}", [50.0] * 4)
+        write_run(tmp_path, f"n8-B3x2-r{k}", [45.0] * 4)
+    out = tmp_path / "summary.json"
+    sb.main([str(tmp_path), "--baseline", "B0x2", "--out", str(out)])
+    capsys.readouterr()
+    conditions = json.loads(out.read_text())["conditions"]
+    assert conditions["n8-B3x2"]["cluster_benefit_steady"] == pytest.approx(50.0 / 45.0)
+    assert conditions["n8-B0x2"]["cluster_benefit_steady"] == pytest.approx(1.0)

@@ -85,14 +85,15 @@ class Cluster:
     def start_worker(self, worker: str, chunk: int) -> subprocess.Popen:
         """Start a worker. Starting the remote worker a second time (after it was killed) keeps the first one's log: other directory, other file."""
         a = self.args
-        number = sum(1 for r in self.remotes if r["worker"] == worker) if worker != FAST else 0
+        local = worker.startswith(FAST)
+        number = 0 if local else sum(1 for r in self.remotes if r["worker"] == worker)
         tag = "" if number == 0 else f"-restart{number}"
         log = self.run_dir / f"{worker}{tag}.out"
         remote_dir = f"/tmp/bench-{self.name}{tag}"
         pidfile = f"{remote_dir}/worker.pid"
-        if worker == FAST:
+        if local:
             cmd = [self.python, str(REPO / "scripts/run_worker.py"), "--model-path", LOCAL_MODEL, "--coordinator-url", self.url, "--worker-id", worker,
-                   "--log", str(self.run_dir / f"{worker}.jsonl"), "--cache-dir", str(self.local_cache), "--chunk", str(chunk)]
+                   "--log", str(self.run_dir / f"{worker}.jsonl"), "--cache-dir", str(self.local_cache / worker), "--chunk", str(chunk)]
         else:
             noise = "" if a.noise_threads is None else f"HETEROES_NOISE_THREADS={a.noise_threads} "
             remote = (f"rm -rf {remote_dir}; mkdir -p {remote_dir}; echo $$ > {pidfile}; cd {a.remote_repo} && {noise}exec {a.remote_python} "
