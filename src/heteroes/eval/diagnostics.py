@@ -76,3 +76,31 @@ def generate_with_trace(model, tokenizer, questions: list[str], pad: bool | None
         margins = margins_from_scores(output.scores, row)
         results.append({"text": tokenizer.decode(ids[:end], skip_special_tokens=True).strip(), "ids": ids[:end], "margins": margins[:end]})
     return results
+
+
+class fp32_lm_head:
+    """
+    A context manager for an experiment: while it is active the output projection of the model computes its scores in FLOAT32
+    (the hidden states and the weights are cast up for that one matrix product), so the greedy decision is taken on scores
+    that do not tie at the spacing of FP16. It changes nothing in the weights. Used to find out whether the answers that flip between
+    two GPUs (or between padded and unpadded calls) are exact ties of FP16 scores; it is not the production evaluation.
+    """
+
+    def __init__(self, model):
+        self._head = model.lm_head
+        self._forward = None
+
+    def __enter__(self):
+        head = self._head
+        self._forward = head.forward
+        weight = head.weight.detach().float()          # a float32 copy for as long as the context lasts (the weights must not change meanwhile)
+
+        def forward(hidden):
+            return torch.nn.functional.linear(hidden.float(), weight)
+
+        head.forward = forward
+        return self
+
+    def __exit__(self, *exc_info):
+        self._head.forward = self._forward
+        return False

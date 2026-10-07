@@ -49,7 +49,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--stall-seconds", type=float, default=None, help="give up when nothing is committed for this long (default: five leases, at least a minute; 0 = never)")
     parser.add_argument("--resume", action="store_true", help="continue the experiment in an existing --out-dir (see above)")
     parser.add_argument("--allow-unauthenticated", action="store_true", help="listen on a non-loopback address without a token (a network that is private by other means)")
-    parser.add_argument("--noise-threads", type=int, default=None, help="threads for noise generation (default: min(8, CPUs); 1 = serial)")
+    parser.add_argument("--noise-threads", type=int, default=None, help="threads for noise generation (default: min(16, CPUs); 1 = serial)")
     parser.add_argument("--max-attempts", type=int, default=3)
     parser.add_argument("--failed-grace-seconds", type=float, default=60.0)
     parser.add_argument("--timeout-seconds", type=float, default=None, help="give up on a generation after this long (default: wait)")

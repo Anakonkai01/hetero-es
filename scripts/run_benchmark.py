@@ -19,22 +19,15 @@ Conditions (MASTER policy ids; a worker is "fast" = the 5070 Ti, "slow" = the 16
 """
 import argparse
 import json
-import os
-import shutil
-import signal
 import subprocess
 import sys
 import time
-import urllib.request
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from cluster_runner import FAST, SLOW, Cluster, add_cluster_arguments, wait_health  # noqa: E402,F401
+
 REPO = Path(__file__).resolve().parents[1]
-FAST, SLOW = "worker-5070ti", "worker-1660s"
-MODEL = "7ae557604adf67be50417f59c2c2f167def9a775"
-LOCAL_MODEL = str(Path.home() / ".cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots" / MODEL)
-# the defaults are the two machines of the project (a direct cable between them); every one can be changed on the command line
-DEFAULTS = {"remote": "anakonkai@10.10.10.2", "remote_repo": "~/projects/heteroes/hetero-es",
-            "remote_python": "~/projects/heteroes/.venv/bin/python", "host": "10.10.10.1", "port": 8765}
 
 
 def plan(condition: str, candidates: int, reference: dict, candidate: dict, prediction: dict | None) -> dict:
@@ -65,18 +58,6 @@ def plan(condition: str, candidates: int, reference: dict, candidate: dict, pred
     raise ValueError(f"unknown condition {condition!r}")
 
 
-def wait_health(url: str, seconds: float) -> None:
-    end = time.time() + seconds
-    while time.time() < end:
-        try:
-            with urllib.request.urlopen(url + "/v1/health", timeout=2) as reply:
-                if reply.status == 200:
-                    return
-        except OSError:
-            time.sleep(1)
-    raise TimeoutError(f"no answer from {url}")
-
-
 def existing_run_state(run_dir: Path) -> str:
     """"ok" (a finished run to keep), "failed" (a run that ended badly or never finished: it is set aside and redone) or "new"."""
     if not run_dir.exists():
@@ -103,69 +84,27 @@ def set_aside(run_dir: Path) -> Path:
 
 def run_one(name: str, spec: dict, args, run_dir: Path) -> dict:
     run_dir.mkdir(parents=True)
-    env = {**os.environ, "PYTHONUNBUFFERED": "1", "PYTHONPATH": str(REPO / "src")}
-    if args.noise_threads is not None:
-        env["HETEROES_NOISE_THREADS"] = str(args.noise_threads)
-    local_python = args.local_python or sys.executable
-    HOST, PORT = args.host, args.port
-    REMOTE, REMOTE_REPO, REMOTE_PYTHON = args.remote, args.remote_repo, args.remote_python
-    url = f"http://{HOST}:{PORT}"
-    processes = {}
+    cluster = Cluster(args, name, run_dir)
     started = time.time()
-    # this run's own scratch space (published weights, worker cache): only it is deleted afterwards, never a shared cache directory
-    scratch = Path(args.scratch_dir) / name
-    PUBLISHED, LOCAL_CACHE = scratch / "published", scratch / "worker-cache"
-    shutil.rmtree(scratch, ignore_errors=True)
-    scratch.mkdir(parents=True)
-    remote_dir = f"/tmp/bench-{name}"
-    pidfile = f"{remote_dir}/worker.pid"
     try:
-        coordinator_cmd = [local_python, str(REPO / "scripts/run_coordinator.py"), "--model-path", LOCAL_MODEL, "--out-dir", str(run_dir / "coordinator"),
-                           "--weights-dir", str(PUBLISHED), "--experiment-id", args.experiment_id, "--candidates", str(args.candidates),
-                           "--generations", str(args.generations), "--alpha", "1e-3", "--sigma", "1e-3", "--policy", spec["policy"],
-                           "--host", HOST, "--port", str(PORT), "--linger-seconds", "10", "--lease-seconds", str(args.lease_seconds),
-                           "--allow-unauthenticated", "--timeout-seconds", str(args.generation_timeout)] + spec["args"]
-        processes["coordinator"] = subprocess.Popen(coordinator_cmd, stdout=open(run_dir / "coordinator.out", "w"), stderr=subprocess.STDOUT, env=env)
-        wait_health(url, 300)
+        coordinator = cluster.start_coordinator(spec["policy"], spec["args"], args.candidates, args.generations)
         for worker, chunk in spec["workers"].items():
-            if worker == FAST:
-                cmd = [local_python, str(REPO / "scripts/run_worker.py"), "--model-path", LOCAL_MODEL, "--coordinator-url", url, "--worker-id", worker,
-                       "--log", str(run_dir / f"{worker}.jsonl"), "--cache-dir", str(LOCAL_CACHE), "--chunk", str(chunk)]
-            else:
-                # `exec` replaces the shell, so the pid in the file is the worker's: it can be killed by pid, never by a name pattern
-                noise = "" if args.noise_threads is None else f"HETEROES_NOISE_THREADS={args.noise_threads} "
-                remote = (f"rm -rf {remote_dir}; mkdir -p {remote_dir}; echo $$ > {pidfile}; cd {REMOTE_REPO} && {noise}exec {REMOTE_PYTHON} scripts/run_worker.py "
-                          f"--model-path ~/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/{MODEL} --coordinator-url {url} "
-                          f"--worker-id {worker} --log {remote_dir}/{worker}.jsonl --cache-dir {remote_dir}/cache --chunk {chunk}")
-                cmd = ["ssh", "-o", "ServerAliveInterval=15", REMOTE, remote]
-            processes[worker] = subprocess.Popen(cmd, stdout=open(run_dir / f"{worker}.out", "w"), stderr=subprocess.STDOUT, env=env)
+            cluster.start_worker(worker, chunk)
         deadline = time.time() + args.run_timeout
-        while processes["coordinator"].poll() is None:
+        while coordinator.poll() is None:
             if time.time() > deadline:
                 raise TimeoutError(f"{name} did not finish in {args.run_timeout} s")
             time.sleep(2)
         for worker in spec["workers"]:
             try:
-                processes[worker].wait(timeout=120)
+                cluster.processes[worker].wait(timeout=120)
             except subprocess.TimeoutExpired:
                 pass
-        outcome = "ok" if processes["coordinator"].returncode == 0 else f"coordinator exit {processes['coordinator'].returncode}"
+        outcome = "ok" if coordinator.returncode == 0 else f"coordinator exit {coordinator.returncode}"
     except BaseException as error:                    # noqa: BLE001 - the run must say how it ended
         outcome = f"{type(error).__name__}: {error}"
     finally:
-        for process in processes.values():
-            if process.poll() is None:
-                process.terminate()
-        for process in processes.values():
-            try:
-                process.wait(timeout=20)
-            except subprocess.TimeoutExpired:
-                process.kill()
-        if SLOW in spec["workers"]:
-            subprocess.run(["ssh", REMOTE, f"test -f {pidfile} && kill $(cat {pidfile}) 2>/dev/null; true"], timeout=60)
-            subprocess.run(["scp", "-q", f"{REMOTE}:{remote_dir}/{SLOW}.jsonl", str(run_dir / f"{SLOW}.jsonl")], timeout=120)
-            subprocess.run(["ssh", REMOTE, f"rm -rf {remote_dir}"], timeout=60)
-        shutil.rmtree(scratch, ignore_errors=True)
+        cluster.collect_and_clean(spec["workers"])
     record = {"name": name, "outcome": outcome, "wall_seconds": time.time() - started, "spec": spec}
     (run_dir / "run.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
     return record
@@ -181,20 +120,9 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--profile-reference", required=True)
     parser.add_argument("--profile-candidate", required=True)
     parser.add_argument("--prediction", default=None)
-    parser.add_argument("--experiment-id", default="bench")
     parser.add_argument("--first-repeat", type=int, default=1, help="number the repeats from this (to add repeats later)")
-    parser.add_argument("--lease-seconds", type=float, default=60.0)
-    parser.add_argument("--noise-threads", type=int, default=None, help="HETEROES_NOISE_THREADS for every process (default: the library default)")
-    parser.add_argument("--local-python", default=None, help="the interpreter of the coordinator and the local worker (default: this one)")
-    parser.add_argument("--scratch-dir", default=str(Path.home() / ".cache" / "heteroes" / "bench-scratch"),
-                        help="where each run keeps its published weights and worker cache (about 1 GB per generation; deleted after the run)")
-    parser.add_argument("--remote", default=DEFAULTS["remote"])
-    parser.add_argument("--remote-repo", default=DEFAULTS["remote_repo"])
-    parser.add_argument("--remote-python", default=DEFAULTS["remote_python"])
-    parser.add_argument("--host", default=DEFAULTS["host"], help="the coordinator's address as the workers see it")
-    parser.add_argument("--port", type=int, default=DEFAULTS["port"])
+    add_cluster_arguments(parser)
     parser.add_argument("--run-timeout", type=float, default=3600.0)
-    parser.add_argument("--generation-timeout", type=float, default=1200.0)
     args = parser.parse_args(argv)
     sys.path.insert(0, str(REPO / "src"))
 

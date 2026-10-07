@@ -17,6 +17,7 @@ and how close the decision was there on each GPU: a flip at a margin below the F
 large margin would be a bug. The output file of every mode must not exist (evidence is never overwritten).
 """
 import argparse
+import copy
 import json
 import statistics
 import sys
@@ -47,7 +48,11 @@ def load(model_path, device):
 
 
 def cmd_run(args) -> int:
+    import contextlib
+
     import torch
+
+    from heteroes.eval.diagnostics import fp32_lm_head
 
     from heteroes.eval.diagnostics import generate_with_trace
     from heteroes.eval.generate import generate_answer
@@ -63,17 +68,20 @@ def cmd_run(args) -> int:
     # the trace path must give the texts of the production path, or the sweep would measure something else
     production = [generate_answer(model, tokenizer, question) for question in questions]
     traced = [generate_with_trace(model, tokenizer, [question])[0]["text"] for question in questions]
-    if production != traced:
+    if production != traced and not (args.fp32_logits or args.fp32_model):
         fail("the traced answers differ from generate_answer on the base weights: the sweep would not measure the workload", 3)
     seeds = parse_seeds(args.seeds)
     with open(args.out, "x", encoding="utf-8") as file:
         file.write(json.dumps({"kind": "header", "worker_id": args.worker_id, "environment": environment_info(device), "code": code_info(),
-                               "sigma": args.sigma, "seeds": [seeds[0], seeds[-1] + 1], "t": time.time()}) + "\n")
+                               "sigma": args.sigma, "fp32_logits": args.fp32_logits, "fp32_model": args.fp32_model, "seeds": [seeds[0], seeds[-1] + 1], "t": time.time()}) + "\n")
         started = time.perf_counter()
         for done, seed in enumerate(seeds, 1):
             perturb(model, schema, seed, args.sigma)
             try:
-                traces = [generate_with_trace(model, tokenizer, [question])[0] for question in questions]
+                evaluated = copy.deepcopy(model).float() if args.fp32_model else model       # EXPERIMENT: the forward pass in float32
+                with (fp32_lm_head(evaluated) if args.fp32_logits else contextlib.nullcontext()):
+                    traces = [generate_with_trace(evaluated, tokenizer, [question])[0] for question in questions]
+                del evaluated
             finally:
                 restore(model, schema, snapshot)
             rewards = [exact_match_reward(extract_integer(trace["text"]), example.answer) for trace, example in zip(traces, EXAMPLES)]
@@ -139,7 +147,9 @@ def cmd_compare(args) -> int:
 def cmd_ladder(args) -> int:
     import torch
 
-    from heteroes.eval.diagnostics import generate_with_trace, summarize_pair
+    import contextlib
+
+    from heteroes.eval.diagnostics import fp32_lm_head, generate_with_trace, summarize_pair
     from heteroes.eval.workload import EXAMPLES
 
     if Path(args.out).exists():
@@ -150,31 +160,36 @@ def cmd_ladder(args) -> int:
     questions = [example.question for example in EXAMPLES]
 
     def variants():
-        single = [generate_with_trace(model, tokenizer, [q])[0] for q in questions]
+        single = [generate_with_trace(current['model'], tokenizer, [q])[0] for q in questions]
         yield "single_prompt (reference)", single
-        yield "batch_of_one_with_padding_enabled", [generate_with_trace(model, tokenizer, [q], pad=True)[0] for q in questions]
-        yield "batch_of_all_16_left_padded", generate_with_trace(model, tokenizer, questions)
+        yield "batch_of_one_with_padding_enabled", [generate_with_trace(current['model'], tokenizer, [q], pad=True)[0] for q in questions]
+        yield "batch_of_all_16_left_padded", generate_with_trace(current['model'], tokenizer, questions)
         pairs = []
         for start in range(0, len(questions), 2):
-            pairs += generate_with_trace(model, tokenizer, questions[start:start + 2])
+            pairs += generate_with_trace(current['model'], tokenizer, questions[start:start + 2])
         yield "batches_of_two_left_padded", pairs
 
+    current = {'model': model}
     report = {}
     for label, seed in [("parent weights", None)] + [(f"seed {s}", s) for s in parse_seeds(args.seeds)]:
         if seed is not None:
             perturb(model, schema, seed, args.sigma)
         try:
             reference, entry = None, {}
-            for name, traces in variants():
-                if reference is None:
-                    reference = traces
-                    continue
-                pairs = [summarize_pair(r, t) for r, t in zip(reference, traces)]
-                entry[name] = {"prompts_with_a_different_answer": sum(p["differs"] for p in pairs),
-                               "margins_at_the_flip": [min(m for m in (p["margin_a"], p["margin_b"]) if m is not None)
-                                                       for p in pairs if p["differs"] and (p["margin_a"] is not None or p["margin_b"] is not None)]}
+            if args.fp32_model:
+                current['model'] = copy.deepcopy(model).float()       # EXPERIMENT: the whole forward pass in float32, from the FP16 weights
+            with (fp32_lm_head(current['model']) if args.fp32_logits else contextlib.nullcontext()):
+                for name, traces in variants():
+                    if reference is None:
+                        reference = traces
+                        continue
+                    pairs = [summarize_pair(r, t) for r, t in zip(reference, traces)]
+                    entry[name] = {"prompts_with_a_different_answer": sum(p["differs"] for p in pairs),
+                                   "margins_at_the_flip": [min(m for m in (p["margin_a"], p["margin_b"]) if m is not None)
+                                                           for p in pairs if p["differs"] and (p["margin_a"] is not None or p["margin_b"] is not None)]}
             report[label] = entry
         finally:
+            current['model'] = model
             if seed is not None:
                 restore(model, schema, snapshot)
         print(label, {name: value["prompts_with_a_different_answer"] for name, value in entry.items()}, flush=True)
@@ -192,6 +207,8 @@ def main(argv: list[str]) -> int:
     run.add_argument("--sigma", type=float, default=1e-3)
     run.add_argument("--out", required=True)
     run.add_argument("--device", choices=["cuda", "cpu"], default=None)
+    run.add_argument("--fp32-logits", action="store_true", help="EXPERIMENT: compute the output scores in float32 (not the production evaluation)")
+    run.add_argument("--fp32-model", action="store_true", help="EXPERIMENT: run the whole forward pass in float32 from the FP16 weights (not the production evaluation)")
     compare = sub.add_parser("compare")
     compare.add_argument("a")
     compare.add_argument("b")
@@ -202,6 +219,8 @@ def main(argv: list[str]) -> int:
     ladder.add_argument("--sigma", type=float, default=1e-3)
     ladder.add_argument("--out", required=True)
     ladder.add_argument("--device", choices=["cuda", "cpu"], default=None)
+    ladder.add_argument("--fp32-logits", action="store_true", help="EXPERIMENT: compute the output scores in float32 (not the production evaluation)")
+    ladder.add_argument("--fp32-model", action="store_true", help="EXPERIMENT: run the whole forward pass in float32 from the FP16 weights (not the production evaluation)")
     args = parser.parse_args(argv)
     return {"run": cmd_run, "compare": cmd_compare, "ladder": cmd_ladder}[args.mode](args)
 

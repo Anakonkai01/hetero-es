@@ -20,7 +20,7 @@ from typing import TypeVar
 
 ENV_THREADS = "HETEROES_NOISE_THREADS"
 # a coordinator and a local worker share one CPU, so do not take all of it by default
-MAX_DEFAULT_THREADS = 8
+MAX_DEFAULT_THREADS = 16
 
 T = TypeVar("T")
 R = TypeVar("R")
@@ -30,7 +30,7 @@ _pools_lock = threading.Lock()
 
 
 def noise_threads() -> int:
-    """Number of threads for noise generation: HETEROES_NOISE_THREADS if set (>= 1), else min(8, CPUs)."""
+    """Number of threads for noise generation: HETEROES_NOISE_THREADS if set (>= 1), else min(16, CPUs)."""
     raw = os.environ.get(ENV_THREADS)
     if raw is None:
         return max(1, min(MAX_DEFAULT_THREADS, os.cpu_count() or 1))

@@ -66,3 +66,35 @@ def test_the_update_reports_the_same_chunk_statistics_as_summing_them_one_by_one
     assert report.changed == changed
     assert report.numel == sum(p.numel() for p in model.parameters())
     assert report.applied_l2 > 0 and report.requested_l2 > 0
+
+
+@pytest.mark.parametrize("device", DEVICES)
+@pytest.mark.parametrize("batch", [1, 7, 64, 1000, 10**9])
+def test_the_size_of_the_pieces_sent_to_the_device_does_not_change_a_bit(device, batch, monkeypatch):
+    import heteroes.es.perturb as perturb_module
+
+    def perturbed_bits(batch_elements):
+        monkeypatch.setattr(perturb_module, "BATCH_ELEMENTS", batch_elements)
+        model = Toy().to(device)
+        perturb_model_(model, build_parameter_schema(model), candidate_seed=5, sigma=1e-3, chunk_elements=16)    # many chunks per tensor
+        return _bits(model)
+
+    assert perturbed_bits(batch) == perturbed_bits(2**22)
+
+
+@pytest.mark.parametrize("device", DEVICES)
+@pytest.mark.parametrize("batch", [1, 16, 100, 10**9])
+@pytest.mark.parametrize("chunk_elements", [7, 64])
+def test_the_size_of_the_pieces_of_the_update_does_not_change_a_bit(device, batch, chunk_elements, monkeypatch):
+    import heteroes.es.perturb as perturb_module
+
+    def updated(batch_elements):
+        monkeypatch.setattr(perturb_module, "BATCH_ELEMENTS", batch_elements)
+        model = Toy().to(device)
+        schema = build_parameter_schema(model)
+        seeds = [3, 9, 21, 4, 17]
+        z = np.array([1.2, -0.7, 0.3, -1.1, 0.25], dtype=np.float32)
+        report = apply_coefficients_(model, schema, seeds, z, alpha=1e-1, chunk_elements=chunk_elements)
+        return _bits(model), report.changed
+
+    assert updated(batch) == updated(2**22)

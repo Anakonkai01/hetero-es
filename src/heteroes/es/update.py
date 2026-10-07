@@ -2,6 +2,7 @@ from heteroes.model.schema import ParameterSchema, resolve_tensors
 from heteroes.es.checks import _check_param
 from heteroes.noise.engine import num_chunks, generate_chunk_noise, chunk_length
 from heteroes.noise.contracts import ParameterNoiseAddress, DEFAULT_CHUNK_ELEMENTS
+from heteroes.es import perturb as _perturb
 from heteroes.noise.parallel import ordered_map
 
 from dataclasses import dataclass
@@ -135,41 +136,49 @@ def _apply_coefficients(schema: ParameterSchema, tensors, candidate_seeds, z_rew
     
     schema_hash = schema.hash
     n_seeds = len(candidate_seeds)
+    # The update is elementwise, so consecutive chunks of a tensor can be processed as ONE piece of up to BATCH_ELEMENTS elements:
+    # the bits do not depend on the piece size, and one launch per operation per piece instead of per chunk of 2**18 elements saves
+    # most of the Python and kernel-launch overhead. The noise itself is still generated chunk by chunk (its identity is the chunk).
+    group_chunks = max(1, _perturb.BATCH_ELEMENTS // chunk_elements)
 
-    # Every (tensor, chunk, candidate) noise block, in the exact order the sum needs them. They are
-    # generated on a thread pool but come back in this order, so the sum over candidates (the only
-    # floating-point order that matters) is the same as with one thread.
+    # Every (tensor, group of chunks, candidate, chunk) noise block, in the order the consumer needs them. They are generated on a
+    # thread pool but come back in this order, so the sum over candidates (the only floating-point order that matters, element by
+    # element: candidate 0 first) is the same as with one thread and one chunk at a time.
     def tasks():
         for entry, tensor in zip(schema.entries, tensors):
             numel = tensor.numel()
-            for chunk_index in range(num_chunks(numel=numel, chunk_elements=chunk_elements)):
-                n = chunk_length(numel, chunk_index, chunk_elements)
+            n_chunks = num_chunks(numel=numel, chunk_elements=chunk_elements)
+            for first in range(0, n_chunks, group_chunks):
                 for seed in candidate_seeds:
-                    address = ParameterNoiseAddress(
-                        candidate_seed=seed,
-                        schema_hash=schema_hash,
-                        parameter_index=entry.index,
-                        chunk_elements=chunk_elements,
-                    ).chunk(chunk_index)
-                    yield address, n
+                    for chunk_index in range(first, min(first + group_chunks, n_chunks)):
+                        address = ParameterNoiseAddress(
+                            candidate_seed=seed,
+                            schema_hash=schema_hash,
+                            parameter_index=entry.index,
+                            chunk_elements=chunk_elements,
+                        ).chunk(chunk_index)
+                        yield address, chunk_length(numel, chunk_index, chunk_elements)
 
     noise_stream = ordered_map(lambda task: generate_chunk_noise(*task), tasks())
 
-    # The three statistics of a chunk stay on the device and are read once at the end (one sync
-    # instead of three per chunk); they are then added in chunk order exactly as before.
+    # The three statistics of a piece stay on the device and are read once at the end (one sync instead of three per chunk).
     changed_parts, requested_parts, applied_parts = [], [], []
     with torch.no_grad(): 
         for entry, tensor in zip(schema.entries, tensors): 
             numel = tensor.numel()
             n_chunks = num_chunks(numel=numel, chunk_elements=chunk_elements)
-            for chunk_index in range(n_chunks): 
-                start = chunk_index * chunk_elements
-                n = chunk_length(numel, chunk_index, chunk_elements)
+            for first in range(0, n_chunks, group_chunks):
+                last = min(first + group_chunks, n_chunks)
+                start = first * chunk_elements
+                n = min(numel, last * chunk_elements) - start
                 chunk = tensor.view(-1)[start: start + n]
                 acc = torch.zeros(n, dtype=torch.float32, device=tensor.device)
                 
                 for zi in z_rewards:
-                    eps = torch.from_numpy(next(noise_stream)).to(device=tensor.device, dtype=torch.float32)
+                    parts = [next(noise_stream) for _ in range(last - first)]
+                    eps = parts[0] if len(parts) == 1 else np.concatenate(parts)
+                    # fp16 to the device first, then widen there: widening on the CPU first costs a single-threaded cast of every element
+                    eps = torch.from_numpy(eps).to(device=tensor.device).to(torch.float32)
 
                     term = eps * float(zi)
                     acc = acc + term 

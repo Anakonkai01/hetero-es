@@ -6,6 +6,11 @@ import math
 import torch 
 import numpy as np     
     
+# The noise of consecutive chunks is joined into pieces of about this many elements before it goes to the device: the arithmetic is
+# elementwise, so the bits do not depend on the piece size (checked by the tests and by the hash of the real model), but one launch of
+# each operation per piece instead of per chunk of 2**18 elements saves most of the Python and launch overhead.
+BATCH_ELEMENTS = 2**22
+
 # for param float 16 only
 # perturb inplace, (not copy to new tensor)
 def perturb_parameter_(param: torch.Tensor, param_noise_address: ParameterNoiseAddress, sigma: float) -> None: 
@@ -32,14 +37,29 @@ def perturb_parameter_(param: torch.Tensor, param_noise_address: ParameterNoiseA
     with torch.no_grad(): 
         flat_param = param.view(-1) # not copy to new tensor 
         numel = flat_param.numel()
-        for _, start, noise_numpy_f16 in iter_parameter_noise_chunks(param_noise_address, numel): 
-            param_chunk = flat_param[start : start + noise_numpy_f16.size]
+        pending, pending_elements, first = [], 0, 0
+
+        def apply_pending():
+            nonlocal pending, pending_elements
+            noise_numpy_f16 = pending[0] if len(pending) == 1 else np.concatenate(pending)
+            param_chunk = flat_param[first : first + noise_numpy_f16.size]
             eps = torch.from_numpy(noise_numpy_f16).to(param.device)
 
             scaled = eps.to(torch.float32) * sigma_float_32
             perturbed = param_chunk.to(torch.float32) + scaled
             perturbed = perturbed.to(SUPPORT_DTYPE) # cast to orginal dtype 
             param_chunk.copy_(perturbed)
+            pending, pending_elements = [], 0
+
+        for _, start, noise_numpy_f16 in iter_parameter_noise_chunks(param_noise_address, numel):
+            if not pending:
+                first = start
+            pending.append(noise_numpy_f16)
+            pending_elements += noise_numpy_f16.size
+            if pending_elements >= BATCH_ELEMENTS:
+                apply_pending()
+        if pending:
+            apply_pending()
 
 # perturb whole model (inplace ) 
 def perturb_model_(model: torch.nn.Module, schema: ParameterSchema, candidate_seed: int, sigma: float, chunk_elements: int = DEFAULT_CHUNK_ELEMENTS) -> None: 
