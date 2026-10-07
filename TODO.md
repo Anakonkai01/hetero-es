@@ -132,3 +132,15 @@ with other methods (for example the realized difference as the update direction)
 ## notebooks
 - [ ] `notebooks/floating_point_testing.ipynb` (untracked): the NumPy cell starts from the float64
       `theta`, the torch cells from `theta_float16`. Use `theta_float16` in both before relying on it.
+
+## c1-next  (G4/G5, 07/10/2026)
+- [ ] Decide what to do about the cross-GPU difference of a reward (1 candidate in 24 differed by one question between the 5070 Ti and the 1660S at chunk 1 in a reference run, 1 more in a G4 run, none in 264 evaluations of G5; see
+      `artifacts/experiments/2026-10-07-g4-admission-b2/README.md`): hardware noise accepted and reported, one GPU model per experiment, or find the layer that differs.
+      The G3 README says "bit-identical" for 24 candidates; that sentence needs the caveat.
+- [ ] `chunk > 1` is not exact in FP16 with left padding on either GPU (every chunk above 1 changed some answer text over 33 states). A different batching that keeps
+      the numbers (same padded length for every call, or sorting by length) is not tried; until then the per-worker chunk of C1 is 1 everywhere and sizing has nothing to size.
+- [ ] The prediction has one fixed update term calibrated on the G4 runs (10.2 s, two points) and a candidate time that is the median of 5; it ignores the polling delay,
+      the variation between candidates and the CPU shared by the coordinator and the local worker. Over-prediction of 13 to 19 percent in G4.
+- [ ] `profile_worker.py` blocks the SSH session when started with `ssh ... &` without `setsid nohup ... < /dev/null`: always use the latter (see how `run_benchmark.py` does it).
+- [ ] B2 has no stealing and no re-assignment if its worker dies (a baseline; a failed candidate returns to the same worker). A B2 run with a dead worker waits for the retry budget.
+- [ ] The 1660S profile and the synchronization were measured over the direct cable only (no Tailscale/Wi-Fi comparison).

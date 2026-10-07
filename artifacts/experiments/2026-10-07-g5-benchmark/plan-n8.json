@@ -1,0 +1,61 @@
+{
+  "args": {
+    "out_dir": "artifacts/experiments/2026-10-07-g5-benchmark",
+    "candidates": 8,
+    "generations": 3,
+    "repeats": 3,
+    "conditions": "B0,B1,B2,B3",
+    "profile_reference": "artifacts/experiments/2026-10-07-g4-profiles/profile-5070ti-v2b.json",
+    "profile_candidate": "artifacts/experiments/2026-10-07-g4-profiles/profile-1660s-v2.json",
+    "prediction": null,
+    "experiment_id": "g5",
+    "first_repeat": 1,
+    "run_timeout": 3600.0,
+    "generation_timeout": 1200.0
+  },
+  "specs": {
+    "B0": {
+      "workers": {
+        "worker-5070ti": 1
+      },
+      "policy": "greedy",
+      "args": []
+    },
+    "B1": {
+      "workers": {
+        "worker-5070ti": 1,
+        "worker-1660s": 1
+      },
+      "policy": "wave",
+      "args": [
+        "--wave-size",
+        "2"
+      ]
+    },
+    "B2": {
+      "workers": {
+        "worker-5070ti": 1,
+        "worker-1660s": 1
+      },
+      "policy": "proportional",
+      "args": [
+        "--quota",
+        "worker-1660s=2",
+        "--quota",
+        "worker-5070ti=6"
+      ],
+      "quotas": {
+        "worker-5070ti": 6,
+        "worker-1660s": 2
+      }
+    },
+    "B3": {
+      "workers": {
+        "worker-5070ti": 1,
+        "worker-1660s": 1
+      },
+      "policy": "greedy",
+      "args": []
+    }
+  }
+}

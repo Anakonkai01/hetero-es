@@ -1,0 +1,16 @@
+{
+  "name": "n24-B1-r2",
+  "outcome": "ok",
+  "wall_seconds": 1053.2046263217926,
+  "spec": {
+    "workers": {
+      "worker-5070ti": 1,
+      "worker-1660s": 1
+    },
+    "policy": "wave",
+    "args": [
+      "--wave-size",
+      "2"
+    ]
+  }
+}

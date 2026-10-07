@@ -45,8 +45,8 @@ idle 13 to 19 s while the others work; the 5070 Ti is idle 32 s in the N=24 runs
 2. **A 1660S evaluation can differ from a 5070 Ti evaluation at chunk 1.** The N=24 B2 run diverges from B0 in generation 1: candidate 2, evaluated by the 1660S, scored
    0.3125 against 0.25 (the parent weights were identical). The single-process reference, run on each machine alone with the same seeds
    (`references/`), confirms that it is the hardware and not the distributed code: **generation 0, candidate 21: 5070 Ti 0.25, 1660S 0.1875**, all other 23 rewards equal.
-   So the claim of G3 ("every reward bit-identical across the two machines") held for 24 candidates and does not hold in general: about 1 candidate in 24 differs by one
-   question (0.0625). It matters for the claims: a result depends on which GPU evaluated which candidate, and B3 assigns by timing, so two B3 runs of the same experiment
+   So the claim of G3 ("every reward bit-identical across the two machines") held for 24 candidates and does not hold in general: a candidate can differ by one
+   question (0.0625): 1 of 24 in the reference, and none in 264 evaluations by the 1660S in the later G5 runs (`../2026-10-07-g5-benchmark/`), so the rate is small and not established. It matters for the claims: a result depends on which GPU evaluated which candidate, and B3 assigns by timing, so two B3 runs of the same experiment
    can end with different weights. B3 and B0 gave identical hashes at N=24 and N=8 only because the 1660S did not evaluate a differing candidate in those runs.
    The check "identical rewards and hashes" of `summarize_benchmark.py` fails at N=24 for this reason (3 distinct outcomes: B0 = B3, B2, H0); the N=8 runs all agree.
 
@@ -54,4 +54,4 @@ idle 13 to 19 s while the others work; the 5070 Ti is idle 32 s in the N=24 runs
 
 One run per condition, no variance; two values of N; the predictions come from one set of measurements and one run order; the 1660S profile and the benchmark share
 a machine and a cable, not tested apart; the cause of the cross-GPU difference (different kernels in FP16 attention or matmul on sm_75 and sm_120) is not isolated;
-how often it happens is known only as 1 candidate in 24 (generation 0 of the references).
+how often it happens is known only as 1 candidate in 24 (generation 0 of the references), 1 in about 10 comparable evaluations of the B2 run and none in the 264 of G5.

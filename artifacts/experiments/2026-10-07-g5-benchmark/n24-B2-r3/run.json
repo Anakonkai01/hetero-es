@@ -1,0 +1,22 @@
+{
+  "name": "n24-B2-r3",
+  "outcome": "ok",
+  "wall_seconds": 684.9657678604126,
+  "spec": {
+    "workers": {
+      "worker-5070ti": 1,
+      "worker-1660s": 1
+    },
+    "policy": "proportional",
+    "args": [
+      "--quota",
+      "worker-1660s=5",
+      "--quota",
+      "worker-5070ti=19"
+    ],
+    "quotas": {
+      "worker-5070ti": 19,
+      "worker-1660s": 5
+    }
+  }
+}
