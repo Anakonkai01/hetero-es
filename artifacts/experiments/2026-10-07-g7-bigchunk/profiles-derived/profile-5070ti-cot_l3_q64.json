@@ -1,0 +1,12 @@
+{
+ "note": "DERIVED, not a profile: rollout seconds per question at chunk 64 (rollout_scaling.py, 64 unperturbed questions) x 64 questions + the perturb and restore of the CUDA engine; only the starting speed of the tail-aware policy (it learns the real speeds)",
+ "worker_id": "worker-5070ti",
+ "safe_chunk": 64,
+ "candidate_seconds_at_chunk_1": 4.528053429003631,
+ "candidate_seconds_at_safe_chunk": 4.528053429003631,
+ "candidate_times": {
+  "64": {
+   "total_median": 4.528053429003631
+  }
+ }
+}

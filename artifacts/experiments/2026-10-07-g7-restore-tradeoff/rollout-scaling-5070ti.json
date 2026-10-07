@@ -1,0 +1,42 @@
+{
+ "gpu": "NVIDIA GeForce RTX 5070 Ti",
+ "questions": 64,
+ "chunks": {
+  "8": {
+   "seconds": 16.597614131002047,
+   "seconds_per_question": 0.259337720796907,
+   "tokens": 14158,
+   "tokens_per_second": 853.0141674733127,
+   "accuracy": 0.296875,
+   "answers_equal_to_chunk16": null,
+   "texts_sha256": "b50c51ce8e4d8491"
+  },
+  "16": {
+   "seconds": 9.12872839999909,
+   "seconds_per_question": 0.1426363812499858,
+   "tokens": 14158,
+   "tokens_per_second": 1550.9279474238067,
+   "accuracy": 0.296875,
+   "answers_equal_to_chunk16": 64,
+   "texts_sha256": "b50c51ce8e4d8491"
+  },
+  "32": {
+   "seconds": 5.557571837998694,
+   "seconds_per_question": 0.08683705996872959,
+   "tokens": 14158,
+   "tokens_per_second": 2547.515428086371,
+   "accuracy": 0.296875,
+   "answers_equal_to_chunk16": 64,
+   "texts_sha256": "b50c51ce8e4d8491"
+  },
+  "64": {
+   "seconds": 4.29805342900363,
+   "seconds_per_question": 0.06715708482818172,
+   "tokens": 14158,
+   "tokens_per_second": 3294.0493257856247,
+   "accuracy": 0.296875,
+   "answers_equal_to_chunk16": 64,
+   "texts_sha256": "b50c51ce8e4d8491"
+  }
+ }
+}

@@ -1,0 +1,33 @@
+{
+ "gpu": "NVIDIA GeForce GTX 1660 SUPER",
+ "questions": 64,
+ "chunks": {
+  "16": {
+   "seconds": 59.582269714002905,
+   "seconds_per_question": 0.9309729642812954,
+   "tokens": 14158,
+   "tokens_per_second": 237.6210249787214,
+   "accuracy": 0.296875,
+   "answers_equal_to_chunk16": 64,
+   "texts_sha256": "b50c51ce8e4d8491"
+  },
+  "32": {
+   "seconds": 31.267194230000314,
+   "seconds_per_question": 0.4885499098437549,
+   "tokens": 14158,
+   "tokens_per_second": 452.8068587112192,
+   "accuracy": 0.296875,
+   "answers_equal_to_chunk16": 64,
+   "texts_sha256": "b50c51ce8e4d8491"
+  },
+  "64": {
+   "seconds": 18.12567544400372,
+   "seconds_per_question": 0.2832136788125581,
+   "tokens": 14158,
+   "tokens_per_second": 781.1019260351871,
+   "accuracy": 0.296875,
+   "answers_equal_to_chunk16": 64,
+   "texts_sha256": "b50c51ce8e4d8491"
+  }
+ }
+}

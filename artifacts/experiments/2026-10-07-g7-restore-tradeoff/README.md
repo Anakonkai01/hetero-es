@@ -106,6 +106,21 @@ and the update are gone). The 1660S needs 30 s for a candidate that the 5070 Ti 
 10 s synchronization is spread over them: tail-aware dispatch (B4) gains 9 to 14 percent from N = 24 up and never loses to the 5070 Ti alone, while greedy (B3) loses at N = 8
 and, with the CUDA engine, also at N = 24 (0.983). The gain of the 1660S does not grow with the CUDA engine (it shrinks a little, because the fast machine got faster).
 
+## 6. What limits the rollout, and is a bigger chunk exact? (`rollout_scaling.py`, `rollout-scaling-*.json`; `chunk_probe_cot.py`, `compare_chunk_probe.py`, `chunkprobe-*.json`)
+
+The same 64 questions answered with different numbers of prompts per `generate()` call (the chunk), FP32 forward pass, the unperturbed model. Seconds per question:
+
+| chunk | 5070 Ti | 1660S |
+|---|---|---|
+| 16 | 0.142 | 0.929 |
+| 32 | 0.087 (1.6 times faster) | 0.489 (1.9) |
+| 64 | 0.067 (2.1) | 0.283 (3.3) |
+
+The time per question is almost inversely proportional to the chunk: the decode loop is limited by the latency of each step (8.6 ms at chunk 16 on the 5070 Ti against about 2 ms for the memory traffic of the FP32 weights, an estimate; 56 ms per step on the 1660S, whose old CPU launches the kernels), not by the arithmetic.
+The text of the answers is the same at every chunk and on both GPUs (one SHA-256, `b50c51ce...`). The check on perturbed candidates (`chunkprobe-*.json`: the parent and candidates 0 to 23 of the CUDA engine, 64 questions each):
+chunks 32 and 64 against chunk 16 on the 5070 Ti, 0 of 1,600 answers differ; chunk 64 against chunk 32 on the 1660S, 0 of 1,600; the two GPUs against each other at chunk 32 and chunk 64, 0 of 1,600 each; the 1660S at chunks 32 and 64 against the 5070 Ti at chunk 16, 0 of 1,600 each.
+The benchmark that uses it is in `../2026-10-07-g7-bigchunk/`.
+
 ## What this does NOT show
 
 - One workload, one model (Qwen2.5-0.5B), one pair of GPUs, 24 candidates per arm, one run per arm; no confidence intervals.
