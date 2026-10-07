@@ -420,7 +420,7 @@ def test_a_failure_while_recording_writes_nothing(tmp_path, clock):
     raw.commit()
 
     with Ledger(path, clock=clock) as ledger:
-        with pytest.raises(sqlite3.Error, match="injected failure"):
+        with pytest.raises(LedgerError, match="injected failure"):   # the ledger's own error; the SQLite error is its cause
             ledger.record_update(record)
         assert stored(ledger) is None
 

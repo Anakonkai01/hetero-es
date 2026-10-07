@@ -372,6 +372,8 @@ def test_the_token_is_passed_to_the_server(tmp_path):
     env = Env(tmp_path, token="s3cret")
     try:
         assert HttpClient(env.coordinator.url, token="s3cret").get_json("/v1/health")["ok"] is True
-        assert HttpClient(env.coordinator.url).get_json("/v1/health")["error"]["code"] == "unauthorized"
+        from heteroes.http_transport import UnauthorizedError
+        with pytest.raises(UnauthorizedError):                                    # G6: a refusal of the token is an error, not a JSON reply to ignore
+            HttpClient(env.coordinator.url).get_json("/v1/health")
     finally:
         env.close()

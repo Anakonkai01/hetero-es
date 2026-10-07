@@ -284,7 +284,7 @@ def test_a_failure_in_the_middle_of_opening_a_generation_writes_nothing(tmp_path
     raw.commit()
 
     with Ledger(path) as ledger:
-        with pytest.raises(sqlite3.Error, match="injected failure"):
+        with pytest.raises(LedgerError, match="injected failure"):   # the ledger's own error; the SQLite error is its cause
             ledger.open_generation(batch(4))                 # candidates 0 and 1 were already inserted by then
         assert_nothing_written(ledger)
 

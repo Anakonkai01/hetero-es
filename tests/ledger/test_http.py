@@ -17,7 +17,7 @@ import urllib.parse
 import pytest
 
 from heteroes.generation_record import GenerationRecord
-from heteroes.http_transport import CoordinatorServer, HttpClient, TransportError
+from heteroes.http_transport import CoordinatorServer, HttpClient, TransportError, UnauthorizedError
 from heteroes.ledger import FailureKind, GenerationState, Ledger, UpdateOutcome
 from heteroes.manifest import derive_seed
 from heteroes.worker import CandidateFailed, Step, StepKind, Worker, WorkerAPIError, WorkerClient
@@ -270,9 +270,8 @@ def test_the_client_sends_its_token(guarded):
     good, bad = HttpClient(guarded.url, token="s3cret"), HttpClient(guarded.url, token="nope")
 
     assert good.get_json("/v1/health") == {"ok": True, "status": "up"}
-    with pytest.raises(WorkerAPIError) as caught:
+    with pytest.raises(UnauthorizedError):                                        # G6: not a reply to read but an error to stop on
         WorkerClient("worker-a", bad).lease()
-    assert caught.value.code == "unauthorized"
 
 
 # ---------------------------------------------------------------------------
@@ -486,12 +485,12 @@ def test_a_result_whose_answer_was_lost_is_sent_again_and_acknowledged_not_count
 def test_a_lease_whose_answer_was_lost_is_not_sent_again(api, ledger):
     flaky = Flaky(api, drop=1)
     try:
-        client = WorkerClient("worker-a", HttpClient(flaky.url, timeout=2.0, retries=3, backoff=0.0))
+        client = HttpClient(flaky.url, timeout=2.0, retries=3, backoff=0.0)
 
         with pytest.raises(TransportError):
-            client.lease()
+            client("lease", {"worker_id": "worker-a"})       # no request id: the coordinator could not tell a repeat from a new request
 
-        assert flaky.seen["lease"] == 1                      # asking again would take a second candidate
+        assert flaky.seen["lease"] == 1                      # asking again would take a second candidate (with an id it is safe: test_http_hardening)
         assert ledger.get_candidate("exp/g0/c0").attempts == 1
     finally:
         flaky.stop()

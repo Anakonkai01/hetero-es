@@ -66,3 +66,18 @@ def test_a_value_json_cannot_carry_is_a_type_error_and_the_log_stays_valid(tmp_p
     log.close()
 
     assert (tmp_path / "events.jsonl").read_text().splitlines() == ['{"event": "ok"}']
+
+
+def test_a_log_can_be_continued_with_append_and_is_never_overwritten_without_it(tmp_path):
+    from heteroes.runtime_info import JsonlLog
+    path = tmp_path / "events.jsonl"
+    log = JsonlLog(path)
+    log({"n": 1})
+    log.close()
+    import pytest
+    with pytest.raises(FileExistsError):
+        JsonlLog(path)
+    again = JsonlLog(path, append=True)
+    again({"n": 2})
+    again.close()
+    assert path.read_text().splitlines() == ['{"n": 1}', '{"n": 2}']

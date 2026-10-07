@@ -14,6 +14,7 @@ from heteroes.manifest import CandidateDescriptor
 
 SCHEMA_VERSION = 5
 DEFAULT_MAX_ATTEMPTS = 3
+DEFAULT_BUSY_TIMEOUT_SECONDS = 30.0
 
 
 class CandidateState(Enum):
@@ -125,7 +126,12 @@ SELECT c.experiment_id, c.generation, g.recipe_hash, g.parent_weights_sha256, c.
        (SELECT COUNT(*) FROM attempt AS a WHERE a.candidate_id = c.candidate_id),
        (SELECT a.deadline FROM attempt AS a WHERE a.candidate_id = c.candidate_id
         ORDER BY a.attempt_number DESC LIMIT 1),
-       r.attempt_number, r.reward, r.committed_at
+       r.attempt_number, r.reward, r.committed_at,
+       (SELECT COUNT(*) FROM attempt AS a WHERE a.candidate_id = c.candidate_id
+        AND COALESCE(a.failure_kind, '') != 'RESTORE_MISMATCH'
+        AND a.worker_id NOT IN (SELECT worker_id FROM quarantine)),
+       (SELECT CASE WHEN a.failure_kind IS NULL THEN NULL ELSE a.worker_id END FROM attempt AS a
+        WHERE a.candidate_id = c.candidate_id ORDER BY a.attempt_number DESC LIMIT 1)
 FROM candidate AS c JOIN generation AS g USING (experiment_id, generation)
 LEFT JOIN result AS r ON r.candidate_id = c.candidate_id
 """
@@ -139,6 +145,10 @@ WHERE c.candidate_id = ?
 
 class LedgerError(Exception):
     """The ledger refuses something: a broken rule, an unknown name, a file it does not understand."""
+
+
+class LedgerBusyError(LedgerError):
+    """The database stayed locked by another connection for longer than the busy timeout: nothing was changed, try again."""
 
 
 class AlreadyLeasedError(LedgerError):
@@ -216,6 +226,15 @@ class StoredUpdate:
 
 
 @dataclass(frozen=True)
+class GenerationInfo:
+    """A generation of an experiment as the ledger holds it (what a restarted coordinator needs to find its place)."""
+    experiment_id: str
+    generation: int
+    recipe_hash: str
+    parent_weights_sha256: str
+
+
+@dataclass(frozen=True)
 class QuarantineRecord:
     worker_id: str
     quarantined_at: float
@@ -233,6 +252,12 @@ class CandidateRecord:
     state: CandidateState
     attempts: int
     result: CandidateResult | None
+    # the attempts that count against `max_attempts`: those lost to a worker fault (a restore mismatch, a worker that was
+    # quarantined) are not the candidate's fault and are not charged, so one bad worker cannot fail a generation by itself
+    charged_attempts: int = 0
+    # the worker whose latest attempt ended in a reported failure (None if the latest attempt did not fail): a policy can give the
+    # retry to somebody else
+    last_failed_worker: str | None = None
 
 
 @dataclass(frozen=True)
@@ -275,6 +300,13 @@ def _check_max_attempts(max_attempts) -> None:
         raise TypeError(f"max_attempts must be an integer, got {type(max_attempts).__name__}")
     if max_attempts < 1:
         raise LedgerError(f"max_attempts must be at least 1, got {max_attempts}")
+
+
+def _check_busy_timeout(seconds) -> None:
+    if isinstance(seconds, bool) or not isinstance(seconds, (int, float)):
+        raise TypeError(f"busy_timeout_seconds must be a number, got {type(seconds).__name__}")
+    if not (math.isfinite(seconds) and seconds >= 0):
+        raise LedgerError(f"busy_timeout_seconds must be finite and not negative, got {seconds}")
 
 
 def _check_lease_arguments(worker_id, duration) -> None:
@@ -320,12 +352,13 @@ def _descriptor(row) -> CandidateDescriptor:
 
 
 def _record(row, now: float) -> CandidateRecord:
-    state, attempts, deadline, result_attempt, reward, committed_at = row[6:]
+    state, attempts, deadline, result_attempt, reward, committed_at, charged, failed_worker = row[6:]
     state = CandidateState(state)
     if state is CandidateState.LEASED and now >= deadline:    # lazy recovery: nobody wrote it, but it is over
         state = CandidateState.PENDING
     result = None if result_attempt is None else CandidateResult(result_attempt, reward, committed_at)
-    return CandidateRecord(descriptor=_descriptor(row[:6]), state=state, attempts=attempts, result=result)
+    return CandidateRecord(descriptor=_descriptor(row[:6]), state=state, attempts=attempts, result=result, charged_attempts=charged,
+                           last_failed_worker=failed_worker)
 
 
 def _locked(method):
@@ -333,7 +366,18 @@ def _locked(method):
     @functools.wraps(method)
     def wrapper(self, *args, **kwargs):
         with self._lock:
-            return method(self, *args, **kwargs)
+            try:
+                return method(self, *args, **kwargs)
+            except sqlite3.OperationalError as error:
+                # "database is locked" after the busy timeout, a full disk, a file that is not a database: the callers (the worker
+                # API) catch LedgerError, so a raw sqlite3 error must not escape as a 500 of the coordinator
+                if "locked" in str(error) or "busy" in str(error):
+                    raise LedgerBusyError(f"the database is busy: {error}") from error
+                raise LedgerError(f"database error: {error}") from error
+            except sqlite3.ProgrammingError:
+                raise                                   # a closed connection, a misused API: a bug of the program, never dressed up
+            except sqlite3.DatabaseError as error:
+                raise LedgerError(f"database error: {error}") from error
     return wrapper
 
 
@@ -351,15 +395,22 @@ class Ledger:
     IMMEDIATE), so two writers cannot both pass the same check, and the loser gets the ledger's own refusal.
     """
 
-    def __init__(self, path, clock=time.time, max_attempts: int = DEFAULT_MAX_ATTEMPTS):
+    def __init__(self, path, clock=time.time, max_attempts: int = DEFAULT_MAX_ATTEMPTS, busy_timeout_seconds: float = DEFAULT_BUSY_TIMEOUT_SECONDS,
+                 enforce_chain: bool = False):
         _check_max_attempts(max_attempts)
+        _check_busy_timeout(busy_timeout_seconds)
         self._clock = clock
         self._max_attempts = max_attempts
+        self._enforce_chain = bool(enforce_chain)
         self._lock = threading.RLock()
-        self._db = sqlite3.connect(path, check_same_thread=False)    # shared between threads, one at a time (`_locked`)
+        # `timeout` is SQLite's busy timeout: how long a writer waits for another connection's write lock before giving up
+        self._db = sqlite3.connect(path, timeout=busy_timeout_seconds, check_same_thread=False)    # shared between threads, one at a time (`_locked`)
         try:
             self._db.execute("PRAGMA foreign_keys = ON")      # off by default in SQLite, and per connection
-            self._db.execute("PRAGMA journal_mode = WAL")     # a file ledger; ":memory:" ignores it
+            mode = self._db.execute("PRAGMA journal_mode = WAL").fetchone()[0]    # a file ledger; ":memory:" answers "memory"
+            if str(path) != ":memory:" and mode.lower() != "wal":
+                raise LedgerError(f"the ledger file cannot use the write-ahead log (journal mode is {mode!r})")
+            self._db.execute("PRAGMA synchronous = FULL")     # WAL's default (NORMAL) may lose the last commits in a power cut; the update record must not be lost
             version = self._db.execute("PRAGMA user_version").fetchone()[0]
             if version == 0:
                 self._db.executescript(_SCHEMA)
@@ -388,6 +439,9 @@ class Ledger:
         ordered = _check_descriptors(descriptors)
         first = ordered[0]
         with self._db:    # one transaction: it commits when the block ends and rolls back if anything raises inside
+            if self._enforce_chain:
+                self._db.execute("BEGIN IMMEDIATE")
+                self._check_chain(first)
             try:
                 self._db.execute(
                     "INSERT INTO generation (experiment_id, generation, recipe_hash, parent_weights_sha256) "
@@ -404,6 +458,24 @@ class Ledger:
                  for d in ordered],
             )
 
+    def _check_chain(self, first: CandidateDescriptor) -> None:
+        """Generation g > 0 must start from the weights that the update of generation g - 1 gave (checked inside the transaction)."""
+        if first.generation == 0:
+            return
+        name = f"{first.experiment_id}/g{first.generation}"
+        previous = first.generation - 1
+        row = self._db.execute(
+            "SELECT g.parent_weights_sha256, u.child_weights_sha256 FROM generation AS g LEFT JOIN generation_update AS u "
+            "USING (experiment_id, generation) WHERE g.experiment_id = ? AND g.generation = ?",
+            (first.experiment_id, previous)).fetchone()
+        if row is None:
+            raise LedgerError(f"{name} cannot be opened: the experiment has no previous generation g{previous}")
+        if row[1] is None:
+            raise LedgerError(f"{name} cannot be opened: the update of g{previous} was not applied (recorded and marked)")
+        if row[1] != first.parent_weights_sha256:
+            raise LedgerError(f"{name} cannot be opened: its parent weights {first.parent_weights_sha256[:12]}... are not the child "
+                              f"{row[1][:12]}... of g{previous}")
+
     def _load_generation(self, experiment_id: str, generation: int, now: float) -> list[CandidateRecord]:
         rows = self._db.execute(
             _SELECT_CANDIDATES + "WHERE c.experiment_id = ? AND c.generation = ? ORDER BY c.candidate_index",
@@ -416,7 +488,7 @@ class Ledger:
     def _status_of(self, records: list[CandidateRecord]) -> GenerationStatus:
         committed = sum(record.state is CandidateState.COMMITTED for record in records)
         exhausted = tuple(record.descriptor.candidate_id for record in records
-                          if record.state is CandidateState.PENDING and record.attempts >= self._max_attempts)
+                          if record.state is CandidateState.PENDING and record.charged_attempts >= self._max_attempts)
         if committed == len(records):
             state = GenerationState.COMPLETE
         elif exhausted:
@@ -466,6 +538,13 @@ class Ledger:
         )
 
     @_locked
+    def list_generations(self, experiment_id: str) -> list[GenerationInfo]:
+        """The generations opened for an experiment, by number (an unknown experiment has none)."""
+        rows = self._db.execute("SELECT experiment_id, generation, recipe_hash, parent_weights_sha256 FROM generation "
+                                "WHERE experiment_id = ? ORDER BY generation", (experiment_id,)).fetchall()
+        return [GenerationInfo(*row) for row in rows]
+
+    @_locked
     def get_candidate(self, candidate_id: str) -> CandidateRecord:
         now = self._clock()
         row = self._db.execute(_SELECT_CANDIDATES + "WHERE c.candidate_id = ?", (candidate_id,)).fetchone()
@@ -484,9 +563,11 @@ class Ledger:
         RetriesExhaustedError when the candidate has had `max_attempts` attempts and the last one is over.
         """
         _check_lease_arguments(worker_id, duration)
-        now = self._clock()
         with self._db:
             self._db.execute("BEGIN IMMEDIATE")     # take the write lock before reading, so two writers cannot both pass
+            now = self._clock()                     # read INSIDE the lock: a wait for the lock must not leave `now` stale
+            if not now + duration > now:
+                raise LedgerError(f"duration {duration} is too short to register at time {now}")
             self._refuse_if_quarantined(worker_id)
             row = self._db.execute(
                 "SELECT state, experiment_id, generation FROM candidate WHERE candidate_id = ?", (candidate_id,)).fetchone()
@@ -502,7 +583,7 @@ class Ledger:
             attempts = 0 if last is None else last[0]
             if state is CandidateState.LEASED and now < last[1]:
                 raise AlreadyLeasedError(f"candidate {candidate_id} is leased until {last[1]}")
-            if attempts >= self._max_attempts:
+            if self._charged_attempts(candidate_id) >= self._max_attempts:
                 raise RetriesExhaustedError(f"candidate {candidate_id} has used its {self._max_attempts} attempts")
             generation_status = self._status_of(self._load_generation(row[1], row[2], now))
             if generation_status.state is GenerationState.FAILED:      # no point in spending GPU time on it
@@ -519,6 +600,12 @@ class Ledger:
             self._db.execute("UPDATE candidate SET state = ? WHERE candidate_id = ?",
                              (CandidateState.LEASED.value, candidate_id))
         return lease
+
+    def _charged_attempts(self, candidate_id: str) -> int:
+        """The attempts that count against the retry budget (see `CandidateRecord.charged_attempts`)."""
+        return self._db.execute(
+            "SELECT COUNT(*) FROM attempt AS a WHERE a.candidate_id = ? AND COALESCE(a.failure_kind, '') != 'RESTORE_MISMATCH' "
+            "AND a.worker_id NOT IN (SELECT worker_id FROM quarantine)", (candidate_id,)).fetchone()[0]
 
     def _latest_attempt(self, descriptor: CandidateDescriptor, attempt_number: int, token: str):
         """
@@ -557,9 +644,9 @@ class Ledger:
         """
         _check_attempt_identity(descriptor, attempt_number, token)
         _check_reward(reward)
-        now = self._clock()
         with self._db:
             self._db.execute("BEGIN IMMEDIATE")
+            now = self._clock()
             state, _, worker_id = self._latest_attempt(descriptor, attempt_number, token)
             candidate_id = descriptor.candidate_id
             if state is CandidateState.COMMITTED:
@@ -589,26 +676,63 @@ class Ledger:
         _check_attempt_identity(descriptor, attempt_number, token)
         if not isinstance(kind, FailureKind):
             raise TypeError(f"kind must be a FailureKind, got {type(kind).__name__}")
-        now = self._clock()
+        refused = None
         with self._db:
             self._db.execute("BEGIN IMMEDIATE")
+            now = self._clock()
+            candidate_id = descriptor.candidate_id
+            try:
+                state, reported, worker_id = self._latest_attempt(descriptor, attempt_number, token)
+                if reported is not None:
+                    if reported == kind.value:
+                        return
+                    raise ConflictingResultError(f"attempt {attempt_number} of {candidate_id} already failed with {reported}, not {kind.value}")
+                if state is not CandidateState.LEASED:
+                    raise StaleAttemptError(f"candidate {candidate_id} is {state.value}: attempt {attempt_number} is closed")
+            except (StaleAttemptError, ConflictingResultError) as error:
+                refused = error
+            if refused is None:
+                self._db.execute("UPDATE attempt SET ended_at = ?, failure_kind = ? WHERE candidate_id = ? AND attempt_number = ?",
+                                 (now, kind.value, candidate_id, attempt_number))
+                self._db.execute("UPDATE candidate SET state = ? WHERE candidate_id = ?",
+                                 (CandidateState.PENDING.value, candidate_id))
+            if kind is FailureKind.RESTORE_MISMATCH:
+                # Its weights are not the canonical ones any more: put it aside. This is true even when the report itself is
+                # refused as late (the lease was replaced meanwhile): the worker that holds the token knows its own weights.
+                holder = self._db.execute("SELECT worker_id FROM attempt WHERE candidate_id = ? AND attempt_number = ? AND lease_token = ?",
+                                          (candidate_id, attempt_number, token)).fetchone()
+                if holder is not None:
+                    self._db.execute(
+                        "INSERT OR IGNORE INTO quarantine (worker_id, quarantined_at, candidate_id, attempt_number) "
+                        "VALUES (?, ?, ?, ?)", (holder[0], now, candidate_id, attempt_number))
+        if refused is not None:        # raised after the block, so that the quarantine above is committed and not rolled back
+            raise refused
+
+    @_locked
+    def extend_lease(self, descriptor: CandidateDescriptor, attempt_number: int, token: str, duration: float) -> Lease:
+        """
+        Heartbeat: the worker that holds the latest attempt says that it is still working, and the deadline moves to
+        `now + duration` (never earlier than it was). Like a late delivery it is allowed after the deadline as long as nobody
+        took the candidate over (the lease is the right to be the only one until it is replaced). Raises StaleAttemptError
+        for an old attempt, a wrong token or an attempt that is closed (committed or failed), WorkerQuarantinedError for a
+        worker that was put aside. With short leases and a heartbeat a dead worker is noticed in seconds, not minutes.
+        """
+        _check_attempt_identity(descriptor, attempt_number, token)
+        _check_lease_arguments("-", duration)
+        with self._db:
+            self._db.execute("BEGIN IMMEDIATE")
+            now = self._clock()
             state, reported, worker_id = self._latest_attempt(descriptor, attempt_number, token)
             candidate_id = descriptor.candidate_id
-            if reported is not None:
-                if reported == kind.value:
-                    return
-                raise ConflictingResultError(f"attempt {attempt_number} of {candidate_id} already failed with {reported}, not {kind.value}")
-            if state is not CandidateState.LEASED:
+            if state is not CandidateState.LEASED or reported is not None:
                 raise StaleAttemptError(f"candidate {candidate_id} is {state.value}: attempt {attempt_number} is closed")
-
-            self._db.execute("UPDATE attempt SET ended_at = ?, failure_kind = ? WHERE candidate_id = ? AND attempt_number = ?",
-                             (now, kind.value, candidate_id, attempt_number))
-            self._db.execute("UPDATE candidate SET state = ? WHERE candidate_id = ?",
-                             (CandidateState.PENDING.value, candidate_id))
-            if kind is FailureKind.RESTORE_MISMATCH:   # its weights are not the canonical ones any more: put it aside
-                self._db.execute(
-                    "INSERT OR IGNORE INTO quarantine (worker_id, quarantined_at, candidate_id, attempt_number) "
-                    "VALUES (?, ?, ?, ?)", (worker_id, now, candidate_id, attempt_number))
+            self._refuse_if_quarantined(worker_id)
+            deadline = self._db.execute("SELECT deadline FROM attempt WHERE candidate_id = ? AND attempt_number = ?",
+                                        (candidate_id, attempt_number)).fetchone()[0]
+            deadline = max(deadline, now + duration)
+            self._db.execute("UPDATE attempt SET deadline = ? WHERE candidate_id = ? AND attempt_number = ?",
+                             (deadline, candidate_id, attempt_number))
+        return Lease(candidate_id=candidate_id, attempt_number=attempt_number, worker_id=worker_id, token=token, deadline=deadline)
 
     def _refuse_if_quarantined(self, worker_id: str) -> None:
         if self._db.execute("SELECT 1 FROM quarantine WHERE worker_id = ?", (worker_id,)).fetchone() is not None:
@@ -646,10 +770,10 @@ class Ledger:
         """
         if not isinstance(record, GenerationRecord):
             raise TypeError(f"record must be a GenerationRecord, got {type(record).__name__}")
-        now = self._clock()
         name = f"{record.experiment_id}/g{record.generation}"
         with self._db:
             self._db.execute("BEGIN IMMEDIATE")
+            now = self._clock()
             records = self._complete_records(record.experiment_id, record.generation, now)
             first = records[0].descriptor
             says = {
@@ -701,10 +825,10 @@ class Ledger:
         """
         _check_hash("record_hash", record_hash)
         _check_hash("child_weights_sha256", child_weights_sha256)
-        now = self._clock()
         name = f"{experiment_id}/g{generation}"
         with self._db:
             self._db.execute("BEGIN IMMEDIATE")
+            now = self._clock()
             self._require_generation(experiment_id, generation)
             row = self._db.execute(
                 "SELECT record_hash, child_weights_sha256 FROM generation_update WHERE experiment_id = ? AND generation = ?",

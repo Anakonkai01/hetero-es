@@ -62,6 +62,27 @@ def write_weights(model, schema: ParameterSchema, path, slab_elements: int = DEF
     return digest.hexdigest()
 
 
+def _fsync_file(path) -> None:
+    fd = os.open(path, os.O_RDONLY)
+    try:
+        os.fsync(fd)
+    finally:
+        os.close(fd)
+
+
+def _fsync_directory(directory) -> None:
+    try:
+        fd = os.open(directory, os.O_RDONLY)
+    except OSError:                       # a platform that cannot open a directory: the rename is still atomic
+        return
+    try:
+        os.fsync(fd)
+    except OSError:
+        pass
+    finally:
+        os.close(fd)
+
+
 def publish_weights(model, schema: ParameterSchema, directory, slab_elements: int = DEFAULT_SLAB_ELEMENTS) -> str:
     """Write the weights as `<directory>/<sha256>.bin` (atomically) and return the hash; the same weights twice are one file."""
     directory = Path(directory)
@@ -69,10 +90,14 @@ def publish_weights(model, schema: ParameterSchema, directory, slab_elements: in
     temporary = directory / f".tmp-{os.getpid()}-{uuid.uuid4().hex}"
     sha = write_weights(model, schema, temporary, slab_elements)
     final = directory / f"{sha}.bin"
-    if final.exists():
+    # A file that is already there is kept only if it really is these weights: a file damaged by a crash or a full disk and
+    # still named after the hash would otherwise be served to the workers for ever.
+    if final.exists() and final.stat().st_size == temporary.stat().st_size and sha256_of_file(final) == sha:
         temporary.unlink()
     else:
+        _fsync_file(temporary)
         os.replace(temporary, final)
+        _fsync_directory(directory)
     return sha
 
 

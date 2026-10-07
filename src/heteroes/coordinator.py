@@ -9,8 +9,15 @@ For each generation it
     -> publishes the child weights under their SHA-256, so that the workers can synchronize (full sync)
 
 `FAILED` is not the end of a generation (ADR-002 decision 7): after `failed_grace_seconds` without news the coordinator gives up
-with a `CoordinatorError`; a late result inside the grace period completes the generation. A failure between the record and the
-mark leaves the record in the ledger; the restart procedure that would redo the update from it is NOT written yet.
+with a `CoordinatorError`; a late result inside the grace period completes the generation. A generation in which nothing is
+committed for `stall_seconds` (default five leases, at least a minute) is an error too: a dead worker under a policy that never
+hands its candidate to another (B1, B2) would otherwise be waited for forever.
+
+Restart (`recover`): the ledger and the published weights are enough to find the place again. The last generation of the
+experiment is one of: not finished (resume it with the weights of its parent), recorded but not applied (apply the STORED record:
+the update is deterministic), applied (the child is the current weights; if its file is missing or damaged, recompute it from the
+parent and check that it is the hash the ledger marked). `run` calls it first, so a restarted coordinator continues where the
+dead one stopped and ends with the weights an uninterrupted run would have.
 """
 import time
 
@@ -21,13 +28,18 @@ from heteroes.generation_record import GenerationRecord
 from heteroes.ledger import GenerationState, Ledger
 from heteroes.manifest import CandidateDescriptor, Recipe, derive_seed
 from heteroes.model.schema import ParameterSchema
-from heteroes.model.weights_io import publish_weights
+from heteroes.model.weights_io import WeightsFileError, load_weights_, publish_weights, sha256_of_file
 from heteroes.http_transport import CoordinatorServer
 from heteroes.worker_api import WorkerAPI
 
 
 class CoordinatorError(Exception):
-    """A generation could not be completed."""
+    """A generation could not be completed, or the experiment cannot be taken up again."""
+
+
+_DEFAULT = object()
+MIN_STALL_SECONDS = 60.0
+STALL_LEASES = 5
 
 
 class _NoGeneration:
@@ -43,7 +55,7 @@ class Coordinator:
     def __init__(self, model, schema: ParameterSchema, recipe: Recipe, ledger: Ledger, models_dir, experiment_id: str,
                  candidates: int, alpha: float, policy_factory=Greedy, lease_seconds: float = 120.0, host: str = "127.0.0.1",
                  port: int = 0, token: str | None = None, poll_seconds: float = 0.2, failed_grace_seconds: float = 5.0,
-                 timeout_seconds: float | None = None, log=lambda event: None, timer=time.perf_counter,
+                 timeout_seconds: float | None = None, stall_seconds=_DEFAULT, log=lambda event: None, timer=time.perf_counter,
                  monotonic=time.monotonic, sleep=time.sleep):
         self.model = model
         self.schema = schema
@@ -58,6 +70,7 @@ class Coordinator:
         self._poll = poll_seconds
         self._grace = failed_grace_seconds
         self._timeout = timeout_seconds
+        self._stall = max(MIN_STALL_SECONDS, STALL_LEASES * lease_seconds) if stall_seconds is _DEFAULT else stall_seconds
         self._log = log
         self._timer = timer
         self._monotonic = monotonic
@@ -86,6 +99,7 @@ class Coordinator:
 
     def _wait_until_complete(self, generation: int) -> None:
         started, failed_since = self._monotonic(), None
+        progress, progress_at = None, started
         while True:
             status = self.ledger.get_generation_status(self.experiment_id, generation)
             now = self._monotonic()
@@ -98,10 +112,84 @@ class Coordinator:
                                            f"{', '.join(status.exhausted)} used all attempts")
             else:
                 failed_since = None
+            if (status.state, status.committed) != progress:
+                progress, progress_at = (status.state, status.committed), now
+            elif self._stall is not None and now - progress_at >= self._stall:
+                raise CoordinatorError(f"generation {self.experiment_id}/g{generation}: no progress for {self._stall} s "
+                                       f"({status.committed} of {status.total} committed): are the workers alive?")
             if self._timeout is not None and now - started >= self._timeout:
                 raise TimeoutError(f"generation {self.experiment_id}/g{generation}: {status.committed} of {status.total} "
                                    f"committed after {self._timeout} s")
             self._sleep(self._poll)
+
+    # ---- restart ----------------------------------------------------------------------------------------------------
+
+    def _weights_file(self, sha256: str):
+        from pathlib import Path
+        return Path(self.models_dir) / f"{sha256}.bin"
+
+    def _load_published(self, sha256: str) -> None:
+        """Put the published weights with this hash into the model, or say why that cannot be done."""
+        path = self._weights_file(sha256)
+        try:
+            load_weights_(self.model, self.schema, path, sha256)
+        except (OSError, WeightsFileError) as error:
+            raise CoordinatorError(f"cannot recover: the published weights {sha256[:12]} are not usable ({error})") from error
+        self.parent_sha256 = sha256
+
+    def _apply_record(self, record):
+        return apply_coefficients_(self.model, self.schema, list(record.seeds), record.coefficients, record.alpha,
+                                   self.recipe.chunk_elements)
+
+    def recover(self) -> int:
+        """
+        Find the place of this experiment in the ledger and the published weights, put the model there and return the number
+        of the next generation to run (the unfinished generation itself, if there is one). 0 for a new experiment.
+        """
+        generations = self.ledger.list_generations(self.experiment_id)
+        if not generations:
+            return 0
+        last = generations[-1]
+        if last.recipe_hash != self.recipe.hash:
+            raise CoordinatorError(f"the ledger holds generation {last.generation} of another recipe "
+                                   f"({last.recipe_hash[:12]}, this is {self.recipe.hash[:12]})")
+        number = last.generation
+        stored = self.ledger.get_update(self.experiment_id, number)
+
+        if stored is None:                                           # not finished: its candidates are in the ledger, resume it
+            if self.parent_sha256 != last.parent_weights_sha256:
+                self._load_published(last.parent_weights_sha256)
+            self.log("recovered", generation=number, action="resume_generation", parent_sha256=self.parent_sha256)
+            self._parent_published = self._weights_file(self.parent_sha256).is_file()
+            return number
+
+        child = stored.child_weights_sha256
+        if child is not None and self.parent_sha256 == child:        # nothing to do: already there
+            return number + 1
+        if child is not None:
+            try:
+                self._load_published(child)
+                self.log("recovered", generation=number, action="load_child", child_sha256=child)
+                self._parent_published = True
+                return number + 1
+            except CoordinatorError:
+                pass                                                 # missing or damaged: recompute it from the parent below
+        if self.parent_sha256 != last.parent_weights_sha256:
+            self._load_published(last.parent_weights_sha256)
+        report = self._apply_record(stored.record)                   # the stored record, never recomputed (decision O7)
+        recomputed = model_weights_sha256(self.model, self.schema)
+        if child is not None and recomputed != child:
+            raise CoordinatorError(f"cannot recover: applying the stored record of g{number} gives {recomputed[:12]}, "
+                                   f"the ledger marked {child[:12]}")
+        if child is None:
+            self.ledger.mark_applied(self.experiment_id, number, stored.record_hash, recomputed)
+        published = publish_weights(self.model, self.schema, self.models_dir)
+        if published != recomputed:
+            raise CoordinatorError(f"the published weights have the hash {published}, not {recomputed}")
+        self.parent_sha256 = recomputed
+        self._parent_published = True
+        self.log("recovered", generation=number, action="reapply_record", child_sha256=recomputed, noop=report.noop)
+        return number + 1
 
     def run_generation(self, generation: int) -> dict:
         begin = self._timer()
@@ -113,7 +201,16 @@ class Coordinator:
                                            experiment_id=self.experiment_id, generation=generation, index=index,
                                            seed=derive_seed(self.experiment_id, generation, index))
                        for index in range(self.candidates)]
-        self.ledger.open_generation(descriptors)
+        known = [g for g in self.ledger.list_generations(self.experiment_id) if g.generation == generation]
+        if known and self.ledger.get_update(self.experiment_id, generation) is not None:
+            known = []                                                # already run: open_generation says so ("already open")
+        if known:                                                     # a restart: this generation was opened by the coordinator that died
+            if known[0].parent_weights_sha256 != parent or known[0].recipe_hash != self.recipe.hash:
+                raise CoordinatorError(f"generation {self.experiment_id}/g{generation} is in the ledger with other parent weights or "
+                                       f"another recipe: call recover() first")
+            self.log("generation_resumed", generation=generation, parent_sha256=parent)
+        else:
+            self.ledger.open_generation(descriptors)
         policy = self._policy_factory()
         api = WorkerAPI(self.ledger, self.experiment_id, generation, self._lease_seconds, policy)
         self.server.set_generation(api, self._job(generation, policy))
@@ -157,15 +254,19 @@ class Coordinator:
         self.log("generation_done", **summary)
         return summary
 
-    def finish(self) -> None:
+    def finish(self, aborted: bool = False) -> None:
+        """Tell the workers that the experiment is over: FINISHED if it ran to its end, ABORTED if it stopped on an error."""
         job = self.server.job
-        self.server.set_generation(self.server.api, {"state": "FINISHED"} if job is None else dict(job, state="FINISHED"))
+        state = "ABORTED" if aborted else "FINISHED"
+        self.server.set_generation(self.server.api, {"state": state} if job is None else dict(job, state=state))
 
     def run(self, generations: int) -> list[dict]:
         summaries = []
         try:
-            for generation in range(generations):
+            for generation in range(self.recover(), generations):
                 summaries.append(self.run_generation(generation))
-        finally:
-            self.finish()
+        except BaseException:
+            self.finish(aborted=True)             # a failed run must not look like a success to the workers
+            raise
+        self.finish()
         return summaries

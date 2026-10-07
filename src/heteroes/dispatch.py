@@ -5,7 +5,8 @@ A policy has two methods: `pick(records, worker_id)` returns the candidate (one 
 ledger shows as PENDING are the only valid choice) or None for "nothing for this worker now"; `leased(candidate_id,
 worker_id)` is called after the ledger gave that lease. The policies are two of the baselines of MASTER (B0 to B3, H0):
 
-  Greedy      B3  the first candidate that is waiting goes to whoever asks (completion-driven dispatch);
+  Greedy      B3  the first candidate that is waiting goes to whoever asks (completion-driven dispatch); a candidate whose latest
+                  attempt FAILED on a worker is not handed straight back to that worker while another worker is around (G6);
   StaticWave  B1  candidates are cut into waves of `wave_size` (the number of workers); a worker takes at most one candidate of
                   a wave, and the next wave begins only when every candidate of the current wave is committed;
   StaticProportional  B2  the candidates are shared out BEFORE the run, a quota per worker (`proportional_quotas`: in proportion
@@ -43,8 +44,37 @@ def proportional_quotas(candidates: int, speeds: dict[str, float]) -> dict[str, 
 
 
 class Greedy:
+    """
+    B3. A candidate whose latest attempt failed on worker W (an out-of-memory, a verifier error: a fault that may be W's) goes to
+    another worker if there is one: W is told to wait, up to `patience` times for that candidate and failure (the other worker may
+    be gone, and waiting for ever is worse than a second try on W). A worker that is alone, or that nothing else is waiting for,
+    gets the candidate back at once. Candidates that did not fail on W are given to W as before.
+    """
+
+    def __init__(self, patience: int = 20):
+        if isinstance(patience, bool) or not isinstance(patience, int) or patience < 1:
+            raise ValueError(f"patience must be an integer of at least 1, got {patience!r}")
+        self._patience = patience
+        self._seen: set[str] = set()                                  # the workers that have asked for work
+        self._refusals: dict[tuple[str, str, int], int] = {}          # (candidate, worker, attempts so far) -> times it was told to wait
+
     def pick(self, records: list[CandidateRecord], worker_id: str) -> CandidateRecord | None:
-        return next((record for record in records if record.state is CandidateState.PENDING), None)
+        self._seen.add(worker_id)
+        pending = [record for record in records if record.state is CandidateState.PENDING]
+        if not pending:
+            return None
+        if self._seen == {worker_id}:
+            return pending[0]                                         # nobody else could take a failed candidate: the plain rule
+        for record in pending:
+            if record.last_failed_worker != worker_id:
+                return record
+        record = pending[0]                                           # every waiting candidate failed on this very worker
+        key = (record.descriptor.candidate_id, worker_id, record.attempts)
+        waited = self._refusals.get(key, 0)
+        if waited >= self._patience:
+            return record
+        self._refusals[key] = waited + 1
+        return None
 
     def leased(self, candidate_id: str, worker_id: str) -> None:
         pass
@@ -111,6 +141,16 @@ class StaticProportional:
 
 class AdmittedOnly:
     def __init__(self, inner, admitted):
+        if isinstance(admitted, (str, bytes)) or not hasattr(admitted, "__iter__"):
+            raise TypeError(f"admitted must be a collection of worker ids, got {type(admitted).__name__}")
+        admitted = list(admitted)
+        for worker_id in admitted:
+            if not isinstance(worker_id, str):
+                raise TypeError(f"a worker id must be a string, got {type(worker_id).__name__}")
+            if not worker_id:
+                raise ValueError("a worker id must not be empty")
+        if not admitted:
+            raise ValueError("no worker is admitted: every generation would wait for ever")
         self._inner = inner
         self._admitted = frozenset(admitted)
 

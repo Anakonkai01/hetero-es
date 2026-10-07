@@ -44,10 +44,13 @@ def environment_info(device: str) -> dict:
 
 
 class JsonlLog:
-    """One JSON object per line, flushed at once, safe to call from several threads. Never overwrites a file (evidence is not overwritten)."""
+    """
+    One JSON object per line, flushed at once, safe to call from several threads. Never overwrites a file (evidence is not
+    overwritten); `append=True` continues an existing log (a coordinator that was restarted writes after what the first one wrote).
+    """
 
-    def __init__(self, path):
-        self._file = open(path, "x", encoding="utf-8")
+    def __init__(self, path, append: bool = False):
+        self._file = open(path, "a" if append else "x", encoding="utf-8")
         self._lock = threading.Lock()
 
     def __call__(self, event: dict) -> None:

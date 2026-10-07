@@ -285,7 +285,7 @@ def test_a_failure_while_quarantining_leaves_the_attempt_open(tmp_path, clock):
     raw.commit()
 
     with Ledger(path, clock=clock) as ledger:
-        with pytest.raises(sqlite3.Error, match="injected failure"):
+        with pytest.raises(LedgerError, match="injected failure"):   # the ledger's own error; the SQLite error is its cause
             fail(ledger, held, RESTORE)
         assert record(ledger).state is CandidateState.LEASED         # the failure itself was rolled back too
         row = raw.execute("SELECT failure_kind, ended_at FROM attempt").fetchone()

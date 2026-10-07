@@ -85,9 +85,13 @@ class LedgerHarness:
             return CandidateState.LEASED
         return CandidateState.PENDING                                   # never leased, failed, or the lease is over
 
+    def _charged(self, i):
+        """The attempts that count against the budget: not those lost to a worker fault (a restore mismatch, a quarantined worker)."""
+        return sum(1 for a in self.attempts[i] if a.failure is not FailureKind.RESTORE_MISMATCH and a.worker not in self.quarantine)
+
     def _exhausted(self):
         return tuple(f"exp/g0/c{i}" for i in range(self.n)
-                     if self._state(i) is CandidateState.PENDING and len(self.attempts[i]) >= self.max_attempts)
+                     if self._state(i) is CandidateState.PENDING and self._charged(i) >= self.max_attempts)
 
     def _generation_state(self):
         committed = sum(self._state(i) is CandidateState.COMMITTED for i in range(self.n))
@@ -138,7 +142,7 @@ class LedgerHarness:
             expected = LedgerError                                       # not leasable: neither of the two special cases
         elif self._state(i) is CandidateState.LEASED:
             expected = AlreadyLeasedError
-        elif len(attempts) >= self.max_attempts:
+        elif self._charged(i) >= self.max_attempts:
             expected = RetriesExhaustedError
         elif self._exhausted():
             expected = GenerationFailedError                             # another candidate can no longer commit
@@ -208,6 +212,8 @@ class LedgerHarness:
                     self.quarantine.setdefault(lease.worker_id, (self.clock.now, f"exp/g0/c{i}", lease.attempt_number))
         else:
             self._expect(expected, self.ledger.report_failure, descriptor_of(i), lease.attempt_number, lease.token, kind)
+            if kind is FailureKind.RESTORE_MISMATCH:                     # refused as late, yet the worker knows that its weights are in doubt
+                self.quarantine.setdefault(lease.worker_id, (self.clock.now, f"exp/g0/c{i}", lease.attempt_number))
 
     def _do_release(self, worker):
         if worker in self.quarantine:
@@ -342,7 +348,9 @@ def check_tables(ledger, max_attempts):
                  "WHERE (c.state = 'COMMITTED') != (r.candidate_id IS NOT NULL)") == 0
     # attempts are numbered 1..k, and k stays within the budget
     assert count("SELECT COUNT(*) FROM (SELECT 1 FROM attempt GROUP BY candidate_id HAVING MAX(attempt_number) != COUNT(*))") == 0
-    assert count("SELECT COUNT(*) FROM (SELECT 1 FROM attempt GROUP BY candidate_id HAVING COUNT(*) > ?)", max_attempts) == 0
+    # the CHARGED attempts (not lost to a worker fault) stay within the budget
+    assert count("SELECT COUNT(*) FROM (SELECT 1 FROM attempt a WHERE COALESCE(a.failure_kind, '') != 'RESTORE_MISMATCH' "
+                 "AND a.worker_id NOT IN (SELECT worker_id FROM quarantine) GROUP BY a.candidate_id HAVING COUNT(*) > ?)", max_attempts) == 0
     # a failed attempt has an end time; an attempt cannot both fail and carry a result
     assert count("SELECT COUNT(*) FROM attempt WHERE failure_kind IS NOT NULL AND ended_at IS NULL") == 0
     # an update is written down only for a generation whose candidates are all committed, at most once, and a child only with a time

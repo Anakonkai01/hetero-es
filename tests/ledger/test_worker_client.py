@@ -134,7 +134,9 @@ def test_the_client_sends_exactly_the_protocol_fields_and_only_json(api):
 
     assert [operation for operation, _ in recorder.sent] == ["lease", "submit_result", "lease", "report_failure"]
     lease_payload, submit_payload, _, failure_payload = (payload for _, payload in recorder.sent)
-    assert lease_payload == {"worker_id": "worker-a"}
+    assert set(lease_payload) == {"worker_id", "request_id"} and lease_payload["worker_id"] == "worker-a"
+    assert isinstance(lease_payload["request_id"], str) and lease_payload["request_id"]
+    assert recorder.sent[0][1]["request_id"] != recorder.sent[2][1]["request_id"]      # a new id for every request
     assert set(submit_payload) == {"descriptor", "attempt_number", "token", "reward"}
     assert submit_payload["descriptor"] == descriptor_of(0).to_dict() and submit_payload["reward"] == 0.5
     assert set(failure_payload) == {"descriptor", "attempt_number", "token", "kind"}

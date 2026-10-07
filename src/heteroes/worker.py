@@ -6,9 +6,17 @@ replies back into Python values. `local_transport(api)` stays in this process bu
 network would; an HTTP transport will be another such function. `Worker.step()` is one turn: ask for work, run it with
 `evaluate(descriptor) -> reward` (the only part that needs a GPU), then deliver the reward or report why it could not.
 A failure is reported with its kind and never turned into a reward.
+
+Three things make a turn survive what goes wrong around it. A lease request carries a fresh `request_id`, so the client may repeat it
+after a lost reply and gets the same lease back. While `evaluate` runs, a heartbeat thread (if `heartbeat_seconds` is set) tells the
+coordinator that the lease is still wanted, so leases can be short. A reward that could not be delivered because of a transient error
+(the network) is kept in an outbox and is delivered FIRST at the next turn; an exception that is not a typed failure releases the
+candidate at once (reported as OTHER) before it propagates.
 """
 import json
 import math
+import threading
+import uuid
 from dataclasses import dataclass
 from enum import Enum
 from typing import Callable
@@ -94,8 +102,11 @@ class WorkerClient:
             raise WorkerAPIError("bad_response", f"a refusal without a code and a message: {reply!r}")
         raise WorkerAPIError(error["code"], error["message"])
 
-    def lease(self) -> LeaseReply:
-        reply = self._call("lease", {"worker_id": self.worker_id})
+    def lease(self, generation: int | None = None) -> LeaseReply:
+        payload = {"worker_id": self.worker_id, "request_id": uuid.uuid4().hex}
+        if generation is not None:
+            payload["generation"] = generation          # the generation of the job this worker is working on (see WorkerAPI)
+        reply = self._call("lease", payload)
         try:
             work = reply["work"]
             return LeaseReply(None if work is None else _assignment(work), GenerationState(reply["generation_state"]))
@@ -110,6 +121,16 @@ class WorkerClient:
             return SubmitOutcome(reply["outcome"])
         except (KeyError, TypeError, ValueError) as error:
             raise WorkerAPIError("bad_response", f"a result reply that cannot be read: {error!r}") from error
+
+    def heartbeat(self, assignment: Assignment) -> float:
+        """Tell the coordinator that the lease is still wanted; returns the new deadline (the coordinator's clock)."""
+        reply = self._call("heartbeat", {
+            "descriptor": assignment.descriptor.to_dict(), "attempt_number": assignment.attempt_number,
+            "token": assignment.token})
+        deadline = reply.get("deadline")
+        if isinstance(deadline, bool) or not isinstance(deadline, (int, float)):
+            raise WorkerAPIError("bad_response", f"a heartbeat reply without a deadline: {reply!r}")
+        return float(deadline)
 
     def report_failure(self, assignment: Assignment, kind: FailureKind) -> None:
         self._call("report_failure", {
@@ -136,14 +157,32 @@ class Step:
 
 
 class Worker:
-    def __init__(self, worker_id: str, transport: Transport, evaluate: Callable[[CandidateDescriptor], float]):
+    def __init__(self, worker_id: str, transport: Transport, evaluate: Callable[[CandidateDescriptor], float],
+                 transient_errors: tuple = (), heartbeat_seconds: float | None = None):
         self.worker_id = worker_id
         self.client = WorkerClient(worker_id, transport)
         self._evaluate = evaluate
+        self._transient = tuple(transient_errors)       # what a lost network looks like: a reward that meets it waits in the outbox
+        self._pending: tuple[Assignment, float] | None = None
+        self._heartbeat_seconds = None
+        self.heartbeat_seconds = heartbeat_seconds
 
-    def step(self) -> Step:
+    @property
+    def heartbeat_seconds(self) -> float | None:
+        return self._heartbeat_seconds
+
+    @heartbeat_seconds.setter
+    def heartbeat_seconds(self, seconds: float | None) -> None:
+        if seconds is not None and not (isinstance(seconds, (int, float)) and not isinstance(seconds, bool) and seconds > 0
+                                        and math.isfinite(seconds)):
+            raise ValueError(f"heartbeat_seconds must be a positive finite number or None, got {seconds!r}")
+        self._heartbeat_seconds = seconds
+
+    def step(self, generation: int | None = None) -> Step:
+        if self._pending is not None:
+            return self._deliver_pending()
         try:
-            reply = self.client.lease()
+            reply = self.client.lease(generation)
         except WorkerAPIError as error:
             if error.code == "worker_quarantined":
                 return Step(StepKind.QUARANTINED, code=error.code)
@@ -153,18 +192,37 @@ class Worker:
             return Step(StepKind.NO_WORK, generation_state=reply.generation_state)
 
         try:
-            reward = self._evaluate(work.descriptor)
+            with _Heartbeat(self.client, work, self._heartbeat_seconds):
+                reward = self._evaluate(work.descriptor)
         except CandidateFailed as failed:
             return self._report(work, failed.kind)
+        except Exception:
+            # not a typed failure: a bug, or something the executor could not classify. Free the candidate NOW (the lease would
+            # otherwise hold it for its whole length) and let the exception reach the caller; a failure to say so changes nothing.
+            try:
+                self.client.report_failure(work, FailureKind.OTHER)
+            except Exception:
+                pass
+            raise
         if isinstance(reward, bool) or not isinstance(reward, (int, float)) or not math.isfinite(reward):
             return self._report(work, FailureKind.VERIFIER_ERROR)    # never sent as a reward
+        return self._deliver(work, reward)
 
+    def _deliver(self, work: Assignment, reward: float) -> Step:
         try:
             outcome = self.client.submit_result(work, reward)
+        except self._transient:
+            self._pending = (work, reward)                           # the work was done: keep it, try again before anything else
+            raise
         except WorkerAPIError as error:
             return self._refused(work, error)
         kind = StepKind.COMMITTED if outcome is SubmitOutcome.COMMITTED else StepKind.ALREADY_COMMITTED
         return Step(kind, work.candidate_id)
+
+    def _deliver_pending(self) -> Step:
+        work, reward = self._pending
+        self._pending = None                                         # _deliver puts it back if the network is still down
+        return self._deliver(work, reward)
 
     def _report(self, work: Assignment, kind: FailureKind) -> Step:
         try:
@@ -178,3 +236,31 @@ class Worker:
             raise error
         kind = StepKind.QUARANTINED if error.code == "worker_quarantined" else StepKind.REFUSED
         return Step(kind, work.candidate_id, code=error.code, failure=failure)
+
+
+class _Heartbeat:
+    """A context manager: while the block runs, a thread sends a heartbeat every `seconds` (nothing if `seconds` is None)."""
+
+    def __init__(self, client: WorkerClient, assignment: Assignment, seconds: float | None):
+        self._client, self._assignment, self._seconds = client, assignment, seconds
+        self._stop = threading.Event()
+        self._thread: threading.Thread | None = None
+
+    def _run(self) -> None:
+        while not self._stop.wait(self._seconds):
+            try:
+                self._client.heartbeat(self._assignment)
+            except Exception:
+                pass            # a lost heartbeat is not a reason to stop the candidate: the next one may get through
+
+    def __enter__(self):
+        if self._seconds is not None:
+            self._thread = threading.Thread(target=self._run, name="heteroes-heartbeat", daemon=True)
+            self._thread.start()
+        return self
+
+    def __exit__(self, *exc_info):
+        self._stop.set()
+        if self._thread is not None:
+            self._thread.join(timeout=5)
+        return False

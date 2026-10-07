@@ -10,7 +10,7 @@ The worker takes sigma, the chunk size and eta from the coordinator's job, build
 workload and noise engine, and works only if the recipe hash is the job's (otherwise it prints what differs and exits with 3).
 When the parent weights of a generation are not the ones in its model it downloads them (hash checked first) and loads them.
 Exit codes: 0 finished or stopped, 3 not admitted, 4 put in quarantine (a restore failed: look at this machine), 5 the coordinator
-stopped answering, 2 bad usage.
+stopped answering, 6 the coordinator aborted the experiment, 7 the coordinator refused the token, 2 bad usage.
 The shared secret, if the coordinator uses one, is read from the environment variable named by --token-env (default HETEROES_TOKEN).
 """
 import argparse
@@ -41,16 +41,21 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--chunk", type=int, default=1, help="prompts per generate() call; use the safe chunk of this worker's profile (default 1)")
     parser.add_argument("--poll-seconds", type=float, default=1.0)
     parser.add_argument("--give-up-after-seconds", type=float, default=120.0, help="exit (code 5) if the coordinator has not answered for this long")
+    parser.add_argument("--noise-threads", type=int, default=None, help="threads for noise generation (default: min(8, CPUs); 1 = serial)")
     parser.add_argument("--startup-timeout-seconds", type=float, default=600.0, help="how long to wait for the coordinator to have a job")
     args = parser.parse_args(argv)
 
     if Path(args.log).exists():
         fail(f"{args.log} already exists; evidence is never overwritten")
+    if args.noise_threads is not None:
+        if args.noise_threads < 1:
+            fail("--noise-threads must be at least 1")
+        os.environ["HETEROES_NOISE_THREADS"] = str(args.noise_threads)
 
     import torch
 
     from heteroes.executor import CandidateExecutor
-    from heteroes.http_transport import HttpClient, TransportError
+    from heteroes.http_transport import HttpClient, TransportError, UnauthorizedError
     from heteroes.model.loading import build_recipe, check_noise_selftest, load_pinned_model
     from heteroes.runtime_info import JsonlLog, code_info, environment_info
     from heteroes.worker_runtime import AdmissionError, WorkerRuntime
@@ -81,6 +86,9 @@ def main(argv: list[str]) -> int:
         try:
             if client.get_json("/v1/health").get("ok") is True:
                 job = client.get_json("/v1/job")["job"]
+        except UnauthorizedError as error:
+            emit({"event": "unauthorized", "t": time.time(), "error": str(error)})
+            fail(f"the coordinator refused the token (set {args.token_env} to the coordinator's): {error}", 7)
         except TransportError as error:
             emit({"event": "waiting_for_coordinator", "t": time.time(), "error": str(error)})
         if job is None:
@@ -104,13 +112,17 @@ def main(argv: list[str]) -> int:
     try:
         runtime.admit()
         reason = runtime.run(stop)
+    except UnauthorizedError as error:
+        log.close()
+        print(f"the coordinator refused the token: {error}", file=sys.stderr)
+        return 7
     except AdmissionError as error:
         emit({"event": "not_admitted", "t": time.time(), "worker_id": args.worker_id, "error": str(error)})
         log.close()
         print(f"not admitted: {error}", file=sys.stderr)
         return 3
     log.close()
-    return {"quarantined": 4, "unreachable": 5}.get(reason, 0)
+    return {"quarantined": 4, "unreachable": 5, "aborted": 6}.get(reason, 0)
 
 
 if __name__ == "__main__":

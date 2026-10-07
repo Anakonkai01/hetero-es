@@ -15,16 +15,27 @@ HTTP status: 200 for an ok reply, 400 bad request, 401 wrong or missing token, 4
 refusal of the ledger (the body has the code), 413 for a body that is too large, 500 for a bug of the coordinator (kept in
 `internal_errors`; the server keeps serving). The body of every reply is the same JSON as without HTTP.
 
-The client does not give up at the first network error for what is idempotent (a result, a failure report: the ledger
-acknowledges a repeat) but never repeats a lease: a lease whose answer was lost would give the worker a second candidate.
+    POST /v1/heartbeats {"descriptor", "attempt_number", "token"}     -> WorkerAPI "heartbeat" (keeps a lease alive)
+
+The client does not give up at the first network error for what is idempotent (a result, a failure report, a heartbeat: the
+ledger acknowledges a repeat) and for a lease that carries a `request_id` (the coordinator gives the same lease back for a repeated
+id); a lease without an id is never repeated, because a lost answer would give the worker a second candidate.
 The token is an optional shared secret (header `Authorization: Bearer ...`), not an identity: workers are trusted, the
-network is a private one (LAN or Tailscale), and the lease token of every attempt is what a result has to bring back.
+network is a private one (LAN or Tailscale), and the lease token of every attempt is what a result has to bring back. A wrong or
+missing token is an `UnauthorizedError` (a kind of `TransportError`) that the worker can stop on at once. The server refuses to
+listen on a non-loopback address without a token unless `allow_unauthenticated=True` is given: the token travels in clear text, so
+the network must still be private, but a forgotten token must not mean an open coordinator.
+
+A client that stalls is disconnected after `request_timeout` seconds and at most `max_connections` connections are served at once
+(the others are closed at once and retry): a stalled or hostile peer cannot pin the server's threads for ever. The weights file
+is served with `Accept-Ranges: bytes` and `Range: bytes=N-` is honoured (206), so that a broken download can continue.
 """
 import hmac
 import http.client
 import http.server
 import json
 import re
+import socket
 import threading
 import time
 import traceback
@@ -35,9 +46,13 @@ from pathlib import Path
 MAX_BODY_BYTES = 1 << 20
 CHUNK_BYTES = 1 << 20
 _HEX64 = re.compile(r"[0-9a-f]{64}")
-_ROUTES = {"/v1/leases": "lease", "/v1/results": "submit_result", "/v1/failures": "report_failure"}
+_ROUTES = {"/v1/leases": "lease", "/v1/results": "submit_result", "/v1/failures": "report_failure", "/v1/heartbeats": "heartbeat"}
 _ROUTE_OF = {operation: route for route, operation in _ROUTES.items()}
-_IDEMPOTENT = {"submit_result", "report_failure"}
+_IDEMPOTENT = {"submit_result", "report_failure", "heartbeat"}
+_RANGE = re.compile(r"bytes=(\d+)-")
+_LOOPBACK = ("localhost", "::1")
+DEFAULT_REQUEST_TIMEOUT = 60.0
+DEFAULT_MAX_CONNECTIONS = 64
 _ANSWERED = object()      # `_read_json` has already sent the error (None is a valid JSON body)
 
 
@@ -47,6 +62,14 @@ class TransportError(ConnectionError):
     def __init__(self, message: str, status: int | None = None):
         super().__init__(message)
         self.status = status
+
+
+class UnauthorizedError(TransportError):
+    """The coordinator refused the token (missing or wrong): retrying cannot help, the worker should stop and say so."""
+
+
+def _is_loopback(host: str) -> bool:
+    return host in _LOOPBACK or host.startswith("127.")
 
 
 def _status_of(reply: dict) -> int:
@@ -155,16 +178,58 @@ class _Handler(http.server.BaseHTTPRequestHandler):
         if path is None or not path.is_file():
             self._error(404, "unknown_operation", "no such model")
             return
-        self.send_response(200)
+        size = path.stat().st_size
+        start, status = 0, 200
+        match = _RANGE.fullmatch(self.headers.get("Range", "").strip())
+        if match and int(match.group(1)) > 0:               # only "bytes=N-" is supported; any other form gets the whole file
+            start = int(match.group(1))
+            if start >= size:
+                self.send_response(416)
+                self.send_header("Content-Range", f"bytes */{size}")
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+                return
+            status = 206
+        self.send_response(status)
         self.send_header("Content-Type", "application/octet-stream")
-        self.send_header("Content-Length", str(path.stat().st_size))
+        self.send_header("Accept-Ranges", "bytes")
+        self.send_header("Content-Length", str(size - start))
+        if status == 206:
+            self.send_header("Content-Range", f"bytes {start}-{size - 1}/{size}")
         self.end_headers()
         try:
             with open(path, "rb") as file:
+                file.seek(start)
                 while chunk := file.read(CHUNK_BYTES):
                     self.wfile.write(chunk)
-        except (BrokenPipeError, ConnectionResetError):
-            pass                                     # the worker went away: its business
+        except (BrokenPipeError, ConnectionResetError, TimeoutError, socket.timeout):
+            pass                                     # the worker went away or stalled: its business
+
+
+class _BoundedServer(http.server.ThreadingHTTPServer):
+    """One thread per connection, at most `max_connections` at once: the others are closed without an answer (the client retries)."""
+
+    daemon_threads = True
+    request_queue_size = 64
+
+    def process_request(self, request, client_address):
+        owner = self.coordinator
+        if not owner._slots.acquire(blocking=False):
+            owner.refused_connections += 1
+            self.shutdown_request(request)
+            return
+        with owner._count_lock:
+            owner.open_connections += 1
+        super().process_request(request, client_address)
+
+    def process_request_thread(self, request, client_address):
+        owner = self.coordinator
+        try:
+            super().process_request_thread(request, client_address)
+        finally:
+            with owner._count_lock:
+                owner.open_connections -= 1
+            owner._slots.release()
 
 
 class CoordinatorServer:
@@ -174,15 +239,27 @@ class CoordinatorServer:
     """
 
     def __init__(self, api, job: dict | None = None, models_dir=None, host: str = "127.0.0.1", port: int = 0,
-                 token: str | None = None):
+                 token: str | None = None, request_timeout: float = DEFAULT_REQUEST_TIMEOUT,
+                 max_connections: int = DEFAULT_MAX_CONNECTIONS, allow_unauthenticated: bool = False):
+        if isinstance(request_timeout, bool) or not isinstance(request_timeout, (int, float)) or not request_timeout > 0:
+            raise ValueError(f"request_timeout must be a positive number, got {request_timeout!r}")
+        if isinstance(max_connections, bool) or not isinstance(max_connections, int) or max_connections < 1:
+            raise ValueError(f"max_connections must be an integer of at least 1, got {max_connections!r}")
+        if token is None and not _is_loopback(host) and not allow_unauthenticated:
+            raise ValueError(f"refusing to listen on {host} without a token: set one, or pass allow_unauthenticated=True "
+                             f"for a network that is private by other means")
         self._lock = threading.Lock()
         self._api, self._job = api, job
         self.models_dir = None if models_dir is None else Path(models_dir)
         self.token = token
+        self.request_timeout, self.max_connections = request_timeout, max_connections
         self.internal_errors: list[str] = []
-        self._httpd = http.server.ThreadingHTTPServer((host, port), _Handler)
-        self._httpd.daemon_threads = True
-        self._httpd.request_queue_size = 64
+        self.open_connections = 0
+        self.refused_connections = 0
+        self._count_lock = threading.Lock()
+        self._slots = threading.BoundedSemaphore(max_connections)
+        handler = type("Handler", (_Handler,), {"timeout": request_timeout})     # the socket timeout of every connection
+        self._httpd = _BoundedServer((host, port), handler)
         self._httpd.coordinator = self
         self.host, self.port = self._httpd.server_address[0], self._httpd.server_address[1]
         self._thread: threading.Thread | None = None
@@ -245,6 +322,8 @@ class HttpClient:
 
     def _json(self, request):
         status, body = self._exchange(request)
+        if status == 401:
+            raise UnauthorizedError(f"{request.get_method()} {request.full_url}: HTTP 401, the token is missing or wrong", 401)
         try:
             return json.loads(body)
         except ValueError as error:
@@ -254,10 +333,13 @@ class HttpClient:
         if operation not in _ROUTE_OF:
             raise ValueError(f"unknown operation {operation!r}")
         request = self._request("POST", _ROUTE_OF[operation], json.dumps(payload, allow_nan=False).encode("utf-8"))
-        tries = 1 + (self._retries if operation in _IDEMPOTENT else 0)
+        repeatable = operation in _IDEMPOTENT or (operation == "lease" and "request_id" in payload)
+        tries = 1 + (self._retries if repeatable else 0)
         for attempt in range(tries):
             try:
                 return self._json(request)
+            except UnauthorizedError:
+                raise
             except TransportError:
                 if attempt == tries - 1:
                     raise
@@ -266,11 +348,19 @@ class HttpClient:
     def get_json(self, path: str):
         return self._json(self._request("GET", path))
 
-    def open_stream(self, path: str):
-        """The body of a GET as a file-like object (a context manager), for what is too large to read at once."""
+    def open_stream(self, path: str, start: int = 0):
+        """
+        The body of a GET as a file-like object (a context manager), for what is too large to read at once. With `start` > 0 it asks
+        for `Range: bytes=start-`; the answer's `status` is 206 if the server honoured it and 200 if it sent the whole file.
+        """
+        request = self._request("GET", path)
+        if start > 0:
+            request.add_header("Range", f"bytes={start}-")
         try:
-            return self._opener.open(self._request("GET", path), timeout=self._timeout)
+            return self._opener.open(request, timeout=self._timeout)
         except urllib.error.HTTPError as error:
+            if error.code == 401:
+                raise UnauthorizedError(f"GET {path}: HTTP 401, the token is missing or wrong", 401) from error
             raise TransportError(f"GET {path}: HTTP {error.code}", error.code) from error
         except (urllib.error.URLError, OSError, http.client.HTTPException) as error:
             raise TransportError(f"GET {path}: {error}") from error

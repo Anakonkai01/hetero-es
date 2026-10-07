@@ -543,7 +543,9 @@ def test_a_connection_that_is_reset_during_a_download_is_a_transport_error_and_l
     try:
         with pytest.raises(TransportError, match="broke off"):
             download_weights(HttpClient(url, timeout=2.0, retries=0), "c" * 64, tmp_path / "cache")
-        assert list((tmp_path / "cache").iterdir()) == []
+        kept = list((tmp_path / "cache").iterdir())                            # G6: what arrived is kept, to be continued (Range)
+        assert [p.name for p in kept] == [f".partial-{'c' * 64}"] and kept[0].stat().st_size <= 1000
+        assert not (tmp_path / "cache" / f"{'c' * 64}.bin").exists()           # but nothing that looks like finished weights
     finally:
         server.shutdown()
         server.server_close()
@@ -600,3 +602,87 @@ def test_a_worker_that_is_asked_to_stop_does_not_have_to_wait_for_the_limit(tmp_
     side.stop.set()
 
     assert side.join(seconds=5) == "stopped"
+
+
+# ---------------------------------------------------------------------------
+# G6: what the runtime does about an aborted experiment, a wrong token, heartbeats, an outbox and a broken download
+# ---------------------------------------------------------------------------
+
+def test_a_worker_is_told_when_the_experiment_was_aborted_and_that_is_not_finished(coordinator, monkeypatch):
+    side = WorkerSide(coordinator, monkeypatch).start()
+    assert coordinator.wait_complete()
+    coordinator.server.set_generation(coordinator.server.api, dict(coordinator.server.job, state="ABORTED"))
+
+    assert side.join() == "aborted"
+
+
+def test_a_wrong_token_stops_the_worker_at_once_and_says_so(tmp_path, monkeypatch):
+    coordinator = Coordinator(tmp_path)
+    coordinator.open_generation(0, coordinator.parent)
+    coordinator.server.stop()
+    coordinator.server = CoordinatorServer(coordinator.server.api, job=coordinator.server.job, models_dir=coordinator.models_dir,
+                                           token="right")
+    coordinator.server.start()
+    try:
+        side = WorkerSide(coordinator, monkeypatch)
+        side.client = HttpClient(coordinator.server.url, token="wrong", timeout=2.0, retries=1, backoff=0.0)
+        side.start()
+        from heteroes.http_transport import UnauthorizedError
+        assert isinstance(side.join(10), UnauthorizedError)                    # no silent loop, no waiting for a timeout
+        assert any(e["event"] == "unauthorized" for e in side.events)
+    finally:
+        coordinator.close()
+
+
+def test_the_heartbeat_interval_follows_the_lease_length_of_the_job(tmp_path, monkeypatch):
+    coordinator = Coordinator(tmp_path, lease_seconds=30.0)
+    coordinator.open_generation(0, coordinator.parent)
+    coordinator.server.set_generation(coordinator.server.api, dict(coordinator.server.job, lease_seconds=30.0))
+    side = WorkerSide(coordinator, monkeypatch)
+    runtime = side.runtime()
+    seen = []
+    real_step = runtime._worker.step
+    runtime._worker.step = lambda generation=None: (seen.append(runtime._worker.heartbeat_seconds), real_step(generation))[1]
+    side.stop.set()                                                            # one turn is enough: stop is checked before the loop starts...
+    side.stop.clear()
+    stopper = threading.Timer(0.5, side.stop.set)
+    stopper.start()
+    try:
+        runtime.run(side.stop)
+    finally:
+        stopper.cancel()
+        coordinator.close()
+    assert seen and all(value == pytest.approx(10.0) for value in seen)
+
+
+def test_a_reward_whose_delivery_failed_is_delivered_when_the_coordinator_is_back(tmp_path, monkeypatch):
+    coordinator = Coordinator(tmp_path, n=2, lease_seconds=60.0)
+    coordinator.open_generation(0, coordinator.parent)
+    side = WorkerSide(coordinator, monkeypatch)
+    side.client = HttpClient(coordinator.server.url, timeout=1.0, retries=0, backoff=0.0)
+    side.runtime_args["backoff_seconds"] = 0.01
+    real = side.client.__call__
+    down = {"on": True, "submits": 0}
+
+    class Cut(HttpClient):
+        def __call__(self, operation, payload):
+            if operation == "submit_result":
+                down["submits"] += 1
+                if down["on"]:
+                    from heteroes.http_transport import TransportError as TE
+                    raise TE("cable pulled")
+            return super().__call__(operation, payload)
+
+    side.client = Cut(coordinator.server.url, timeout=1.0, retries=0, backoff=0.0)
+    side.start()
+    try:
+        assert wait_for(lambda: down["submits"] >= 2)                           # it tried more than once, with the same reward waiting
+        assert coordinator.ledger.get_generation_status("exp", 0).committed == 0
+        down["on"] = False
+        assert coordinator.wait_complete()                                      # both rewards arrive: none was lost with the lease
+        coordinator.finish()
+        assert side.join() == "finished"
+        assert len(side.evaluated) == 2                                         # the delivered reward was not recomputed
+    finally:
+        side.stop.set()
+        coordinator.close()

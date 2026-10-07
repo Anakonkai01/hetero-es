@@ -7,7 +7,10 @@ Run the coordinator of an experiment: it serves the workers over HTTP, runs the 
         --policy greedy --host 0.0.0.0 --port 8765
 
 Everything it writes goes under --out-dir, which must not exist (evidence is never overwritten): `ledger.sqlite`, `events.jsonl`
-(one line per event, with timings) and `summary.json` (written at the end). The weights of every generation are published as
+(one line per event, with timings) and `summary.json` (written at the end). With --resume the directory must exist and is
+continued: the ledger and the published weights say where the dead coordinator stopped (an unfinished generation is resumed, a
+recorded update is applied from the stored record), the events are appended and the summary of the new run goes to the first free
+`summary-resumeN.json`. Ctrl-C and SIGTERM end the run in an orderly way (the summary is written, the workers are told ABORTED). The weights of every generation are published as
 `<sha256>.bin` in --weights-dir (about 1 GB each: keep it OUT of the repository). A shared secret for the workers can be given in the
 environment variable named by --token-env (default HETEROES_TOKEN); it is never a command-line argument, which other users can read.
 """
@@ -16,7 +19,6 @@ import json
 import os
 import signal
 import sys
-import threading
 import time
 from pathlib import Path
 
@@ -43,7 +45,11 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--quota", action="append", default=[], metavar="WORKER=N", help="B2: the candidates of that worker; they must add up to --candidates")
     parser.add_argument("--admit", default=None, help="comma-separated worker ids that get work (default: every worker); the others are refused work")
     parser.add_argument("--wave-size", type=int, default=2, help="candidates per wave for --policy wave: the number of workers")
-    parser.add_argument("--lease-seconds", type=float, default=600.0, help="how long a worker may hold a candidate (the slowest worker needs several minutes for a candidate)")
+    parser.add_argument("--lease-seconds", type=float, default=60.0, help="how long a lease lasts without a heartbeat: the workers renew it every third of this while they work, so it can be short and a dead worker is noticed in about this time")
+    parser.add_argument("--stall-seconds", type=float, default=None, help="give up when nothing is committed for this long (default: five leases, at least a minute; 0 = never)")
+    parser.add_argument("--resume", action="store_true", help="continue the experiment in an existing --out-dir (see above)")
+    parser.add_argument("--allow-unauthenticated", action="store_true", help="listen on a non-loopback address without a token (a network that is private by other means)")
+    parser.add_argument("--noise-threads", type=int, default=None, help="threads for noise generation (default: min(8, CPUs); 1 = serial)")
     parser.add_argument("--max-attempts", type=int, default=3)
     parser.add_argument("--failed-grace-seconds", type=float, default=60.0)
     parser.add_argument("--timeout-seconds", type=float, default=None, help="give up on a generation after this long (default: wait)")
@@ -65,8 +71,17 @@ def main(argv: list[str]) -> int:
     if args.policy != "proportional" and quotas:
         fail("--quota is only for --policy proportional")
     out_dir = Path(args.out_dir)
-    if out_dir.exists():
-        fail(f"{out_dir} already exists; evidence is never overwritten")
+    if args.resume and not (out_dir / "ledger.sqlite").is_file():
+        fail(f"--resume needs {out_dir / 'ledger.sqlite'}: there is nothing to continue")
+    if out_dir.exists() and not args.resume:
+        fail(f"{out_dir} already exists; evidence is never overwritten (use --resume to continue it)")
+    token = os.environ.get(args.token_env) or None
+    if token is None and args.host not in ("127.0.0.1", "localhost", "::1") and not args.host.startswith("127.") and not args.allow_unauthenticated:
+        fail(f"--host {args.host} without a token: set {args.token_env}, or pass --allow-unauthenticated for a private network")
+    if args.noise_threads is not None:
+        if args.noise_threads < 1:
+            fail("--noise-threads must be at least 1")
+        os.environ["HETEROES_NOISE_THREADS"] = str(args.noise_threads)
     if args.candidates < 2 or args.generations < 1:
         fail("--candidates must be at least 2 and --generations at least 1")
 
@@ -85,12 +100,12 @@ def main(argv: list[str]) -> int:
         fail(str(error))
 
     device = args.device or ("cuda" if torch.cuda.is_available() else "cpu")
-    out_dir.mkdir(parents=True)
-    log = JsonlLog(out_dir / "events.jsonl")
+    out_dir.mkdir(parents=True, exist_ok=args.resume)
+    log = JsonlLog(out_dir / "events.jsonl", append=args.resume)
     started = time.time()
     loaded = load_pinned_model(args.model_path, device)
     recipe = build_recipe(loaded, sigma=args.sigma, chunk_elements=args.chunk_elements or DEFAULT_CHUNK_ELEMENTS)
-    ledger = Ledger(out_dir / "ledger.sqlite", max_attempts=args.max_attempts)
+    ledger = Ledger(out_dir / "ledger.sqlite", max_attempts=args.max_attempts, enforce_chain=True)
 
     def emit(event: dict) -> None:
         log(event)
@@ -104,19 +119,21 @@ def main(argv: list[str]) -> int:
     coordinator = Coordinator(
         loaded.model, loaded.schema, recipe, ledger, args.weights_dir, args.experiment_id, args.candidates, args.alpha,
         policy_factory=policy, lease_seconds=args.lease_seconds, host=args.host, port=args.port,
-        token=os.environ.get(args.token_env) or None, failed_grace_seconds=args.failed_grace_seconds,
-        timeout_seconds=args.timeout_seconds, log=emit)
+        token=token, failed_grace_seconds=args.failed_grace_seconds, timeout_seconds=args.timeout_seconds,
+        **({} if args.stall_seconds is None else {"stall_seconds": args.stall_seconds or None}), log=emit)
     coordinator.start()
     emit({"event": "listening", "t": time.time(), "url": coordinator.url, "initial_weights_sha256": coordinator.parent_sha256})
 
-    stop = threading.Event()
+    def interrupt(signum, frame):
+        raise KeyboardInterrupt(signal.Signals(signum).name)      # ends the run in an orderly way: the summary is written, the workers are told
+
     for name in (signal.SIGINT, signal.SIGTERM):
-        signal.signal(name, lambda *_: (stop.set(), os._exit(130)))
+        signal.signal(name, interrupt)
 
     outcome, summaries = "ok", []
     try:
         summaries = coordinator.run(args.generations)
-    except BaseException as error:                    # noqa: BLE001 - the summary must say how it ended
+    except BaseException as error:                    # noqa: BLE001 - the summary must say how it ended (a Ctrl-C included)
         outcome = f"{type(error).__name__}: {error}"
         emit({"event": "coordinator_error", "t": time.time(), "error": outcome})
     finally:
@@ -126,9 +143,14 @@ def main(argv: list[str]) -> int:
                "initial_weights_sha256": summaries[0]["parent_sha256"] if summaries else None,
                "final_weights_sha256": coordinator.parent_sha256, "generations": summaries,
                "internal_errors": coordinator.server.internal_errors, "environment": environment_info(device), "code": code_info()}
-    (out_dir / "summary.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+    target = out_dir / "summary.json"
+    for attempt in range(1, 1000):
+        if not target.exists():
+            break
+        target = out_dir / f"summary-resume{attempt}.json"           # a summary is evidence: never overwritten
+    target.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     log.close()
-    print(f"wrote {out_dir / 'summary.json'}: {outcome}", flush=True)
+    print(f"wrote {target}: {outcome}", flush=True)
     return 0 if outcome == "ok" else 1
 
 

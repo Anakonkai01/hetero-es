@@ -390,8 +390,9 @@ def test_a_failure_while_leasing_writes_nothing(tmp_path, clock):
     raw.commit()
 
     with Ledger(path, clock=clock) as ledger:
-        with pytest.raises(sqlite3.Error, match="injected failure"):
+        with pytest.raises(LedgerError, match="injected failure") as raised:     # the ledger's own error, the SQLite error is its cause
             ledger.lease("exp/g0/c0", "worker-a", 30.0)
+        assert isinstance(raised.value.__cause__, sqlite3.Error)
         assert attempts_of(ledger, "exp/g0/c0") == 0         # the attempt row that had been written is gone
         assert state_of(ledger, "exp/g0/c0") is CandidateState.PENDING
 

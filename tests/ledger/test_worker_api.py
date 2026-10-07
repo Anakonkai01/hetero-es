@@ -166,8 +166,8 @@ def test_a_complete_generation_has_no_work(api):
 
 def test_a_failed_generation_has_no_work_even_though_candidates_are_waiting(api, ledger):
     held = take(api)                                  # candidate 0 stays held, so the next free one is candidate 1
-    for _ in range(3):                                # candidate 1 uses all its attempts
-        work = take(api, "worker-b")
+    for i in range(3):                                # candidate 1 uses all its attempts (on three workers: Greedy gives a failed candidate to another)
+        work = take(api, f"worker-b{i}")
         assert index_of(work) == 1
         fail(api, work)
     assert ledger.get_candidate("exp/g0/c2").attempts == 0      # premise: there is a candidate nobody has tried
@@ -347,6 +347,7 @@ def _all_subclasses(cls):
 def test_the_codes_of_the_errors_a_worker_can_meet_are_fixed():
     assert {cls.__name__: code for cls, code in ERROR_CODES.items()} == {
         "LedgerError": "rejected",
+        "LedgerBusyError": "busy",
         "AlreadyLeasedError": "already_leased",
         "RetriesExhaustedError": "retries_exhausted",
         "StaleAttemptError": "stale_attempt",

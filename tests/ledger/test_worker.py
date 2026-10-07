@@ -105,8 +105,8 @@ def test_with_every_candidate_held_by_others_there_is_no_work_but_the_generation
 
 def test_a_failed_generation_gives_no_work_and_says_why(api):
     held = api.handle("lease", {"worker_id": "worker-z"})["work"]
-    for _ in range(3):
-        work = api.handle("lease", {"worker_id": "worker-b"})["work"]
+    for i in range(3):                                # a different worker each time: Greedy (G6) does not hand a failed candidate back at once
+        work = api.handle("lease", {"worker_id": f"worker-b{i}"})["work"]
         api.handle("report_failure", {"descriptor": work["descriptor"], "attempt_number": work["attempt_number"],
                                       "token": work["token"], "kind": "OTHER"})
     worker, evaluate = make_worker(api)
@@ -153,7 +153,7 @@ def test_a_reward_that_is_not_a_finite_number_is_reported_as_a_verifier_error_no
     assert record.result is None and record.state.name == "PENDING" and failure_kind_of(ledger) == "VERIFIER_ERROR"
 
 
-def test_an_unexpected_exception_is_not_swallowed_and_the_lease_is_left_to_run_out(api, ledger, clock):
+def test_an_unexpected_exception_is_not_swallowed_and_the_candidate_is_released_at_once(api, ledger, clock):
     def boom(descriptor):
         raise RuntimeError("bug in the evaluator")
 
@@ -163,9 +163,8 @@ def test_an_unexpected_exception_is_not_swallowed_and_the_lease_is_left_to_run_o
         worker.step()
 
     record = ledger.get_candidate("exp/g0/c0")
-    assert record.state.name == "LEASED" and record.result is None and failure_kind_of(ledger) is None
-    clock.advance(LEASE_SECONDS)
-    assert ledger.get_candidate("exp/g0/c0").state.name == "PENDING"       # it is recovered by the clock, as designed
+    # G6: it used to stay LEASED until the lease ran out; now it is reported as OTHER and is free for another worker at once
+    assert record.state.name == "PENDING" and record.result is None and failure_kind_of(ledger) == "OTHER"
 
 
 def test_a_failed_restore_is_reported_and_the_next_turn_finds_the_worker_in_quarantine(api, ledger):

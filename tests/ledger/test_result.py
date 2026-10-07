@@ -505,7 +505,7 @@ def test_a_failure_while_committing_writes_nothing(tmp_path, clock):
     raw.commit()
 
     with Ledger(path, clock=clock) as ledger:
-        with pytest.raises(sqlite3.Error, match="injected failure"):
+        with pytest.raises(LedgerError, match="injected failure"):   # the ledger's own error; the SQLite error is its cause
             submit(ledger, held, 0.5)
         assert record(ledger).result is None and record(ledger).state is CandidateState.LEASED
         assert attempt_row(path, "exp/g0/c0", 1)["ended_at"] is None
@@ -527,7 +527,7 @@ def test_a_failure_while_reporting_a_failure_writes_nothing(tmp_path, clock):
     raw.commit()
 
     with Ledger(path, clock=clock) as ledger:
-        with pytest.raises(sqlite3.Error, match="injected failure"):
+        with pytest.raises(LedgerError, match="injected failure"):   # the ledger's own error; the SQLite error is its cause
             fail(ledger, held)
         row = attempt_row(path, "exp/g0/c0", 1)
         assert row["failure_kind"] is None and row["ended_at"] is None

@@ -5,7 +5,8 @@ The life of a worker process (the part of the worker that is not a GPU and not t
     loop:  look at the job; if its parent weights are not the ones in the model, download them (the hash is checked BEFORE the
            model is touched), load them and take them as the new parent; take a turn (`Worker.step`); write down what happened
 
-`WorkerRuntime.run` returns why it stopped: "finished" (the coordinator says the experiment is over), "quarantined" (a restore
+`WorkerRuntime.run` returns why it stopped: "finished" (the coordinator says the experiment is over), "aborted" (the coordinator
+stopped on an error: the experiment did not run to its end), "quarantined" (a restore
 failed on this worker: it must be looked at by a human), "unreachable" (the coordinator has not answered for
 `max_unreachable_seconds`, if that limit is set) or "stopped" (asked to). One network error is not a reason to die: the worker
 waits and asks again. A recipe that changes under a running worker, or a weights file that is not what its name says
@@ -20,7 +21,7 @@ import uuid
 from pathlib import Path
 
 from heteroes.executor import CandidateExecutor
-from heteroes.http_transport import HttpClient, TransportError
+from heteroes.http_transport import HttpClient, TransportError, UnauthorizedError
 from heteroes.model.weights_io import WeightsFileError, load_weights_, sha256_of_file
 from heteroes.worker import StepKind, Worker
 
@@ -45,31 +46,64 @@ def recipe_differences(job_recipe: dict, own_recipe: dict) -> list[str]:
             for key in sorted(set(ours) | set(theirs)) if ours.get(key) != theirs.get(key)]
 
 
+def _hash_prefix(path: Path, digest, chunk_bytes: int) -> None:
+    with open(path, "rb") as file:
+        while chunk := file.read(chunk_bytes):
+            digest.update(chunk)
+
+
 def download_weights(client: HttpClient, sha256: str, directory, chunk_bytes: int = 1 << 20) -> Path:
     """
     The weights file of that version in `directory`, downloaded if it is not there already and intact. The bytes are hashed
-    while they arrive and the file gets its name only if the hash is the name: a wrong or half transfer leaves nothing.
+    while they arrive and the file gets its name only if the hash is the name: a wrong transfer leaves nothing.
+
+    A transfer that breaks off (a cable pulled, a coordinator that restarted) leaves `.partial-<sha256>`, and the next call asks the
+    server for the rest (`Range: bytes=N-`) after hashing what is already there; a server that answers with the whole file (status
+    200) makes it start again from zero. What arrives is checked as a whole at the end, so a damaged partial file can only cost a
+    second transfer (the hash is wrong: the partial file is deleted and `WeightsFileError` is raised), never a wrong model.
     """
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
     final = directory / f"{sha256}.bin"
     if final.is_file() and sha256_of_file(final) == sha256:
         return final                                            # a corrupted or cut file is simply replaced below
-    temporary = directory / f".download-{uuid.uuid4().hex}"
-    digest = hashlib.sha256()
+    partial = directory / f".partial-{sha256}"
+    digest, offset = hashlib.sha256(), 0
+    if partial.is_file():
+        offset = partial.stat().st_size
+        _hash_prefix(partial, digest, chunk_bytes)
+    path = f"/v1/models/{sha256}"
     try:
-        with client.open_stream(f"/v1/models/{sha256}") as response, open(temporary, "wb") as file:
-            try:
-                while chunk := response.read(chunk_bytes):
-                    digest.update(chunk)
-                    file.write(chunk)
-            except (http.client.HTTPException, OSError) as error:
-                raise TransportError(f"the download of {sha256[:12]} broke off: {error}") from error
+        try:
+            stream = client.open_stream(path, start=offset) if offset else client.open_stream(path)
+        except TransportError as error:
+            if error.status != 416:
+                raise
+            # the partial file is as long as the file or longer: either it is complete, or it is not a prefix of it
+            if digest.hexdigest() == sha256 and offset:
+                os.replace(partial, final)
+                return final
+            partial.unlink(missing_ok=True)
+            digest, offset = hashlib.sha256(), 0
+            stream = client.open_stream(path)
+        with stream as response:
+            if offset and getattr(response, "status", None) != 206:
+                digest, offset = hashlib.sha256(), 0           # the server sent everything from the start: so do we
+            with open(partial, "ab" if offset else "wb") as file:
+                try:
+                    while chunk := response.read(chunk_bytes):
+                        digest.update(chunk)
+                        file.write(chunk)
+                except (http.client.HTTPException, OSError) as error:
+                    raise TransportError(f"the download of {sha256[:12]} broke off: {error}") from error
         if digest.hexdigest() != sha256:
+            partial.unlink(missing_ok=True)
             raise WeightsFileError(f"what arrived for {sha256[:12]} has the hash {digest.hexdigest()[:12]}: wrong hash")
-        os.replace(temporary, final)
+        os.replace(partial, final)
+    except (TransportError, KeyboardInterrupt):
+        raise                                                   # the partial file stays: the next call continues it
     except BaseException:
-        temporary.unlink(missing_ok=True)
+        partial.unlink(missing_ok=True)
         raise
     return final
 
@@ -90,7 +124,7 @@ class WorkerRuntime:
         self._sleep = sleep
         self._wall_clock = wall_clock
         self._timer = timer
-        self._worker = Worker(worker_id, client, executor)
+        self._worker = Worker(worker_id, client, executor, transient_errors=(TransportError,))
 
     def log(self, event: str, **fields) -> None:
         self._log({"event": event, "t": self._wall_clock(), "worker_id": self.worker_id, **fields})
@@ -133,8 +167,9 @@ class WorkerRuntime:
         self.executor.reset_parent(target)                         # hashes the model itself: the end-to-end check
         done = self._timer()
         for old in self.cache_dir.iterdir():
-            if _WEIGHTS_FILE.fullmatch(old.name) and old != path:
+            if (_WEIGHTS_FILE.fullmatch(old.name) and old != path) or (old.name.startswith(".partial-") and old.name != f".partial-{target}"):
                 old.unlink()
+        (self.cache_dir / f".partial-{target}").unlink(missing_ok=True)
         event = {"from_sha256": previous, "to_sha256": target, "bytes": path.stat().st_size,
                  "transfer_seconds": transferred - start, "load_seconds": loaded - transferred, "rehash_seconds": done - loaded}
         self.log("sync", **event)
@@ -156,12 +191,20 @@ class WorkerRuntime:
                     continue
                 if job.get("state") == "FINISHED":
                     return "finished"
+                if job.get("state") == "ABORTED":
+                    return "aborted"
                 self._check_recipe(job)
                 if job["parent_weights_sha256"] != self.executor.parent_sha256:
                     self.sync(job)
+                lease_seconds = job.get("lease_seconds")
+                if isinstance(lease_seconds, (int, float)) and not isinstance(lease_seconds, bool) and lease_seconds > 0:
+                    self._worker.heartbeat_seconds = lease_seconds / 3        # three chances to renew before a lease runs out
                 start = self._timer()
-                step = self._worker.step()
+                step = self._worker.step(job.get("generation"))
                 seconds = self._timer() - start
+            except UnauthorizedError as error:
+                self.log("unauthorized", error=str(error))
+                raise                                                # a wrong token does not get better by waiting: stop and say so
             except TransportError as error:
                 self.log("transport_error", error=str(error))
                 now = self._timer()
