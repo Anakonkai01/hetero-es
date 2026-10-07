@@ -445,11 +445,11 @@ def test_a_transfer_whose_hash_is_wrong_is_tried_again_and_then_the_worker_gives
     real = runtime_module.download_weights
     calls = []
 
-    def bad_then_good(client, sha, directory):
+    def bad_then_good(client, sha, directory, **kwargs):
         calls.append(sha)
         if len(calls) == 1:
             raise WeightsFileError("what arrived is not the file: wrong hash")
-        return real(client, sha, directory)
+        return real(client, sha, directory, **kwargs)
 
     monkeypatch.setattr(runtime_module, "download_weights", bad_then_good)
     runtime = side.runtime()
@@ -460,7 +460,7 @@ def test_a_transfer_whose_hash_is_wrong_is_tried_again_and_then_the_worker_gives
     other = HalfToy(6)
     other_sha = publish_weights(other, build_parameter_schema(other), coordinator.models_dir)
     before = model_weights_sha256(side.model, side.schema)
-    monkeypatch.setattr(runtime_module, "download_weights", lambda *a: (calls.append(1), (_ for _ in ()).throw(WeightsFileError("wrong hash")))[1])
+    monkeypatch.setattr(runtime_module, "download_weights", lambda *a, **k: (calls.append(1), (_ for _ in ()).throw(WeightsFileError("wrong hash")))[1])
 
     with pytest.raises(WeightsFileError):
         runtime.sync(coordinator.job(2, other_sha))

@@ -28,6 +28,9 @@ DEFAULTS = {"remote": "anakonkai@10.10.10.2", "remote_repo": "~/projects/heteroe
 def add_cluster_arguments(parser) -> None:
     parser.add_argument("--lease-seconds", type=float, default=60.0)
     parser.add_argument("--noise-threads", type=int, default=None, help="HETEROES_NOISE_THREADS for every process (default: the library default)")
+    parser.add_argument("--coordinator-noise-threads", type=int, default=None,
+                        help="HETEROES_NOISE_THREADS for the coordinator only (its update runs while the workers are idle: it can use every CPU thread)")
+    parser.add_argument("--worker-http-timeout", type=float, default=None, help="--http-timeout-seconds of every worker (default: the worker's own, 60 s)")
     parser.add_argument("--local-python", default=None, help="the interpreter of the coordinator and the local worker (default: this one)")
     parser.add_argument("--scratch-dir", default=str(Path.home() / ".cache" / "heteroes" / "bench-scratch"),
                         help="where each run keeps its published weights and worker cache (about 1 GB per generation; deleted after the run)")
@@ -78,7 +81,8 @@ class Cluster:
                "--generations", str(generations), "--alpha", "1e-3", "--sigma", "1e-3", "--policy", policy,
                "--host", a.host, "--port", str(a.port), "--linger-seconds", "10", "--lease-seconds", str(a.lease_seconds),
                "--allow-unauthenticated", "--timeout-seconds", str(a.generation_timeout), "--eval-dtype", a.eval_dtype] + policy_args + (["--resume"] if resume else [])
-        process = subprocess.Popen(cmd, stdout=open(self.run_dir / f"{label}.out", "a"), stderr=subprocess.STDOUT, env=self.env)
+        env = self.env if a.coordinator_noise_threads is None else {**self.env, "HETEROES_NOISE_THREADS": str(a.coordinator_noise_threads)}
+        process = subprocess.Popen(cmd, stdout=open(self.run_dir / f"{label}.out", "a"), stderr=subprocess.STDOUT, env=env)
         self.processes[label] = process
         wait_health(self.url, 300)
         return process
@@ -92,14 +96,16 @@ class Cluster:
         log = self.run_dir / f"{worker}{tag}.out"
         remote_dir = f"/tmp/bench-{self.name}{tag}"
         pidfile = f"{remote_dir}/worker.pid"
+        extra = [] if a.worker_http_timeout is None else ["--http-timeout-seconds", str(a.worker_http_timeout)]
         if local:
             cmd = [self.python, str(REPO / "scripts/run_worker.py"), "--model-path", LOCAL_MODEL, "--coordinator-url", self.url, "--worker-id", worker,
-                   "--log", str(self.run_dir / f"{worker}.jsonl"), "--cache-dir", str(self.local_cache / worker), "--chunk", str(chunk)]
+                   "--log", str(self.run_dir / f"{worker}.jsonl"), "--cache-dir", str(self.local_cache / worker), "--chunk", str(chunk)] + extra
         else:
             noise = "" if a.noise_threads is None else f"HETEROES_NOISE_THREADS={a.noise_threads} "
             remote = (f"rm -rf {remote_dir}; mkdir -p {remote_dir}; echo $$ > {pidfile}; cd {a.remote_repo} && {noise}exec {a.remote_python} "
                       f"scripts/run_worker.py --model-path ~/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/{MODEL} "
-                      f"--coordinator-url {self.url} --worker-id {worker} --log {remote_dir}/{worker}.jsonl --cache-dir {remote_dir}/cache --chunk {chunk}")
+                      f"--coordinator-url {self.url} --worker-id {worker} --log {remote_dir}/{worker}.jsonl --cache-dir {remote_dir}/cache --chunk {chunk} "
+                      + " ".join(extra))
             cmd = ["ssh", "-o", "ServerAliveInterval=15", a.remote, remote]
             self.remotes.append({"worker": worker, "dir": remote_dir, "pidfile": pidfile, "log": f"{worker}{tag}.jsonl"})
         process = subprocess.Popen(cmd, stdout=open(log, "a"), stderr=subprocess.STDOUT, env=self.env)

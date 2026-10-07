@@ -364,3 +364,21 @@ def test_a_partial_file_that_is_already_the_whole_file_is_finished_without_downl
 
     assert path.read_bytes() == DATA and client.streams == [len(DATA)]       # one request (answered 416): nothing was transferred again
     assert sorted(p.name for p in cache.iterdir()) == [f"{SHA}.bin"]
+
+
+def test_download_reports_from_which_byte_it_resumed(with_file, tmp_path):
+    cache = tmp_path / "cache"
+    client = CuttingClient(HttpClient(with_file.url), cut=3000)
+    with pytest.raises(TransportError):
+        download_weights(client, SHA, cache, chunk_bytes=512)
+    stats = {}
+    download_weights(client, SHA, cache, chunk_bytes=512, stats=stats)
+    assert stats == {"resumed_from_bytes": 3000, "downloaded_bytes": len(DATA) - 3000}
+
+    fresh = {}
+    download_weights(CuttingClient(HttpClient(with_file.url), cut=10**9), SHA, tmp_path / "other", stats=fresh)
+    assert fresh == {"resumed_from_bytes": 0, "downloaded_bytes": len(DATA)}
+
+    cached = {}
+    download_weights(client, SHA, tmp_path / "other", stats=cached)                  # already there and intact: nothing is transferred
+    assert cached == {"resumed_from_bytes": 0, "downloaded_bytes": 0}

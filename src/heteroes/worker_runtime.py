@@ -52,7 +52,7 @@ def _hash_prefix(path: Path, digest, chunk_bytes: int) -> None:
             digest.update(chunk)
 
 
-def download_weights(client: HttpClient, sha256: str, directory, chunk_bytes: int = 1 << 20) -> Path:
+def download_weights(client: HttpClient, sha256: str, directory, chunk_bytes: int = 1 << 20, stats: dict | None = None) -> Path:
     """
     The weights file of that version in `directory`, downloaded if it is not there already and intact. The bytes are hashed
     while they arrive and the file gets its name only if the hash is the name: a wrong transfer leaves nothing.
@@ -61,7 +61,10 @@ def download_weights(client: HttpClient, sha256: str, directory, chunk_bytes: in
     server for the rest (`Range: bytes=N-`) after hashing what is already there; a server that answers with the whole file (status
     200) makes it start again from zero. What arrives is checked as a whole at the end, so a damaged partial file can only cost a
     second transfer (the hash is wrong: the partial file is deleted and `WeightsFileError` is raised), never a wrong model.
+    If `stats` is given it is filled with `resumed_from_bytes` (what was already there and kept) and `downloaded_bytes` (what was transferred now).
     """
+    if stats is not None:
+        stats.update({"resumed_from_bytes": 0, "downloaded_bytes": 0})
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
     final = directory / f"{sha256}.bin"
@@ -82,6 +85,8 @@ def download_weights(client: HttpClient, sha256: str, directory, chunk_bytes: in
             # the partial file is as long as the file or longer: either it is complete, or it is not a prefix of it
             if digest.hexdigest() == sha256 and offset:
                 os.replace(partial, final)
+                if stats is not None:
+                    stats["resumed_from_bytes"] = offset
                 return final
             partial.unlink(missing_ok=True)
             digest, offset = hashlib.sha256(), 0
@@ -89,11 +94,15 @@ def download_weights(client: HttpClient, sha256: str, directory, chunk_bytes: in
         with stream as response:
             if offset and getattr(response, "status", None) != 206:
                 digest, offset = hashlib.sha256(), 0           # the server sent everything from the start: so do we
+            if stats is not None:
+                stats["resumed_from_bytes"] = offset
             with open(partial, "ab" if offset else "wb") as file:
                 try:
                     while chunk := response.read(chunk_bytes):
                         digest.update(chunk)
                         file.write(chunk)
+                        if stats is not None:
+                            stats["downloaded_bytes"] += len(chunk)
                 except (http.client.HTTPException, OSError) as error:
                     raise TransportError(f"the download of {sha256[:12]} broke off: {error}") from error
         if digest.hexdigest() != sha256:
@@ -156,7 +165,8 @@ class WorkerRuntime:
         for attempt in range(1, self._download_attempts + 1):
             start = self._timer()
             try:
-                path = download_weights(self.client, target, self.cache_dir)
+                stats = {}
+                path = download_weights(self.client, target, self.cache_dir, stats=stats)
                 break
             except WeightsFileError:
                 if attempt == self._download_attempts:
@@ -171,7 +181,8 @@ class WorkerRuntime:
                 old.unlink()
         (self.cache_dir / f".partial-{target}").unlink(missing_ok=True)
         event = {"from_sha256": previous, "to_sha256": target, "bytes": path.stat().st_size,
-                 "transfer_seconds": transferred - start, "load_seconds": loaded - transferred, "rehash_seconds": done - loaded}
+                 "transfer_seconds": transferred - start, "load_seconds": loaded - transferred, "rehash_seconds": done - loaded,
+                 **stats}                                          # resumed_from_bytes, downloaded_bytes
         self.log("sync", **event)
         return event
 

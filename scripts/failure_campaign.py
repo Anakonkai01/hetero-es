@@ -140,6 +140,7 @@ def run_scenario(name: str, args, out: Path, password: str | None) -> dict:
                 raise RuntimeError("cut-link needs the sudo password in the environment variable named by --sudo-password-env")
             wait_until(lambda: any(e.get("event") == "weights_published" and e.get("generation") == 0 for e in events_of(run_dir / "coordinator" / "events.jsonl")),
                        900, "generation 0 to be published")
+            time.sleep(args.cut_delay)                          # the download of the new weights (about 9 s) has begun when the packets are dropped
             sudo_run(drop_rule, password)
             dropped = True
             notes.append(f"packets from {args.remote} dropped for {args.cut_seconds:.0f} s")
@@ -219,6 +220,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--reference-final", default=None, help="the final weights hash of the undisturbed run (default: run it first)")
     parser.add_argument("--chunk", type=int, default=1, help="prompts per generate() call of every worker (more than 1 only with --eval-dtype float32)")
     parser.add_argument("--cut-seconds", type=float, default=8.0)
+    parser.add_argument("--cut-delay", type=float, default=0.0, help="cut-link: seconds after the publication of generation 0 before the packets are dropped (3 s puts the cut in the middle of the download)")
     parser.add_argument("--restart-after", type=float, default=5.0)
     parser.add_argument("--run-timeout", type=float, default=1800.0)
     parser.add_argument("--sudo-password-env", default="HETEROES_SUDO_PASSWORD")

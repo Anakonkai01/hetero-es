@@ -42,6 +42,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--poll-seconds", type=float, default=0.25, help="how long to wait before asking again when there is no work (a generation boundary costs about half of this per worker)")
     parser.add_argument("--give-up-after-seconds", type=float, default=120.0, help="exit (code 5) if the coordinator has not answered for this long")
     parser.add_argument("--noise-threads", type=int, default=None, help="threads for noise generation (default: min(16, CPUs); 1 = serial)")
+    parser.add_argument("--http-timeout-seconds", type=float, default=60.0, help="how long a request to the coordinator may stay silent before it counts as a network error (also the read timeout of the weights download)")
     parser.add_argument("--startup-timeout-seconds", type=float, default=600.0, help="how long to wait for the coordinator to have a job")
     args = parser.parse_args(argv)
 
@@ -79,7 +80,7 @@ def main(argv: list[str]) -> int:
     loaded = load_pinned_model(args.model_path, device)
     emit({"event": "model_loaded", "t": time.time(), "worker_id": args.worker_id, "seconds": time.perf_counter() - load_started})
 
-    client = HttpClient(args.coordinator_url, token=os.environ.get(args.token_env) or None, timeout=60.0)
+    client = HttpClient(args.coordinator_url, token=os.environ.get(args.token_env) or None, timeout=args.http_timeout_seconds)
     deadline = time.time() + args.startup_timeout_seconds
     job = None
     while job is None:
