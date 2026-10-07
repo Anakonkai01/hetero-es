@@ -22,8 +22,9 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--candidate", required=True)
     parser.add_argument("--candidates", type=int, required=True, help="candidates per generation (N)")
     parser.add_argument("--delta-fraction", type=float, default=0.05)
-    parser.add_argument("--update-fixed-seconds", type=float, default=0.0,
-                        help="the part of the update that does not depend on N (default 0: the profile measures one candidate only)")
+    parser.add_argument("--update-fixed-seconds", type=float, default=None,
+                        help="the part of the update that does not depend on N (default: the intercept of the fit in the reference profile, "
+                             "0 for an old profile that measured one candidate only)")
     parser.add_argument("--ignore-software", action="store_true",
                         help="do not require the candidate to run the same torch/NumPy/transformers as the reference (only to reproduce G4/G5)")
     parser.add_argument("--out", required=True)
@@ -41,6 +42,8 @@ def main(argv: list[str]) -> int:
         print("error: the reference profile has no update measurement (--measure-update)", file=sys.stderr)
         return 2
     update, publish = reference["update"]["seconds_per_candidate_median"], reference["update"]["publish_seconds"]
+    if args.update_fixed_seconds is None:
+        args.update_fixed_seconds = max(0.0, reference["update"].get("fixed_seconds", 0.0))     # a negative intercept is not a time: it is clipped, and the fit is in the profile
     ref_key = reference["key"]
     expected = expected_key_from_reference(ref_key, require_same_software=not args.ignore_software)
     reasons = capability_gate(candidate, expected)

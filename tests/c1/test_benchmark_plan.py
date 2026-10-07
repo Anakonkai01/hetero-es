@@ -55,3 +55,28 @@ def test_h0_without_a_prediction_and_an_unknown_condition_are_refused():
         rb.plan("H0", 8, REFERENCE, CANDIDATE, None)
     with pytest.raises(ValueError):
         rb.plan("B9", 8, REFERENCE, CANDIDATE, None)
+
+
+# ---- G6: a failed run is set aside, not skipped; a finished one is kept
+
+def test_a_run_directory_is_new_ok_or_failed(tmp_path):
+    assert rb.existing_run_state(tmp_path / "n8-B0-r1") == "new"
+    run = tmp_path / "n8-B0-r1"
+    run.mkdir()
+    assert rb.existing_run_state(run) == "failed"                             # a directory without a record: it never finished
+    (run / "run.json").write_text('{"outcome": "TimeoutError: x"}')
+    assert rb.existing_run_state(run) == "failed"
+    (run / "run.json").write_text("not json")
+    assert rb.existing_run_state(run) == "failed"
+    (run / "run.json").write_text('{"outcome": "ok"}')
+    assert rb.existing_run_state(run) == "ok"
+
+
+def test_a_failed_attempt_is_renamed_never_deleted_and_the_numbers_do_not_collide(tmp_path):
+    run = tmp_path / "n8-B0-r1"
+    run.mkdir()
+    (run / "proof.txt").write_text("evidence")
+    first = rb.set_aside(run)
+    assert first.name == "n8-B0-r1.failed-attempt1" and (first / "proof.txt").read_text() == "evidence" and not run.exists()
+    run.mkdir()
+    assert rb.set_aside(run).name == "n8-B0-r1.failed-attempt2"

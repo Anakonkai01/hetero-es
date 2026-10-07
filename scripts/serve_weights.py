@@ -10,6 +10,7 @@ until it is stopped (SIGINT or SIGTERM).
 """
 import argparse
 import json
+import os
 import signal
 import sys
 import threading
@@ -22,6 +23,8 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--weights-dir", default=str(Path.home() / ".cache" / "heteroes" / "published"))
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8766)
+    parser.add_argument("--token-env", default="HETEROES_TOKEN")
+    parser.add_argument("--allow-unauthenticated", action="store_true", help="listen on a non-loopback address without a token (a private network)")
     args = parser.parse_args(argv)
 
     from heteroes.http_transport import CoordinatorServer
@@ -30,7 +33,8 @@ def main(argv: list[str]) -> int:
 
     loaded = load_pinned_model(args.model_path, "cpu")
     sha256 = publish_weights(loaded.model, loaded.schema, args.weights_dir)
-    server = CoordinatorServer(None, job=None, models_dir=args.weights_dir, host=args.host, port=args.port)
+    server = CoordinatorServer(None, job=None, models_dir=args.weights_dir, host=args.host, port=args.port,
+                               token=os.environ.get(args.token_env) or None, allow_unauthenticated=args.allow_unauthenticated)
     server.start()
     print(json.dumps({"url": server.url, "weights_sha256": sha256}), flush=True)
     stop = threading.Event()

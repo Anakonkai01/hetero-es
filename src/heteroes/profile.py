@@ -111,3 +111,25 @@ def key_hash(key: dict) -> str:
 @contextlib.contextmanager
 def nothing():
     yield
+
+
+def fit_affine(sizes, seconds) -> dict:
+    """
+    Least-squares line `seconds = fixed + per_candidate * N` through the points (N, seconds), with the residuals. The update of a
+    generation costs a part that grows with the number of candidates and a part that does not; a fit through two points has no
+    residuals and cannot say how good it is (the G4 prediction fitted two points), so the profile measures several sizes.
+    """
+    sizes = [float(size) for size in sizes]
+    seconds = [float(value) for value in seconds]
+    if len(sizes) != len(seconds):
+        raise ValueError("sizes and seconds must have the same length")
+    if len(set(sizes)) < 2:
+        raise ValueError("a line needs at least two different sizes")
+    mean_x, mean_y = statistics.fmean(sizes), statistics.fmean(seconds)
+    sxx = sum((x - mean_x) ** 2 for x in sizes)
+    sxy = sum((x - mean_x) * (y - mean_y) for x, y in zip(sizes, seconds))
+    slope = sxy / sxx
+    intercept = mean_y - slope * mean_x
+    residuals = [y - (intercept + slope * x) for x, y in zip(sizes, seconds)]
+    return {"fixed_seconds": intercept, "per_candidate_seconds": slope, "residuals": residuals,
+            "max_abs_residual": max(abs(r) for r in residuals), "sizes": sizes, "seconds": seconds}

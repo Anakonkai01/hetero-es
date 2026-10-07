@@ -5,7 +5,7 @@ Measure the profile of THIS machine's GPU for the pinned model and the 16-prompt
     python scripts/profile_worker.py --model-path <snapshot dir> --worker-id worker-5070ti --out artifacts/experiments/<dir>/profile-5070ti.json
         [--chunks 1,2,4,8,16] [--candidates 5] [--probe-candidates 32] [--sigma 1e-3]
         [--sync-url http://10.10.10.1:8765 --sync-sha256 <hash printed by scripts/serve_weights.py>]   # the link and the sync of a remote worker
-        [--measure-update]                                                                           # the coordinator's update cost (run it on the coordinator's host)
+        [--measure-update [--update-sizes 1,2,4,8]]   # the coordinator's update cost at several numbers of candidates, fitted as fixed + per candidate x N (run it on the coordinator's host)
 
 What it checks and records:
   * the noise self-test, and that the restore after a perturbation is bit-exact (`checks`);
@@ -49,6 +49,8 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--sync-sha256", default=None)
     parser.add_argument("--sync-dir", default=str(Path.home() / ".cache" / "heteroes" / "profile-sync"))
     parser.add_argument("--measure-update", action="store_true")
+    parser.add_argument("--update-sizes", default="1,2,4,8", help="numbers of candidates at which the update is timed (at least two different)")
+    parser.add_argument("--update-repeats", type=int, default=2, help="timings per size (the fit uses their median)")
     parser.add_argument("--device", choices=["cuda", "cpu"], default=None)
     args = parser.parse_args(argv)
     if Path(args.out).exists():
@@ -69,7 +71,8 @@ def main(argv: list[str]) -> int:
     from heteroes.manifest import CandidateDescriptor
     from heteroes.model.loading import build_recipe, check_noise_selftest, load_pinned_model
     from heteroes.model.weights_io import load_weights_, publish_weights
-    from heteroes.profile import PROFILE_FORMAT, key_hash, probe_chunks, profile_key, safe_chunk, summarize_times
+    from heteroes.noise.parallel import noise_threads
+    from heteroes.profile import PROFILE_FORMAT, fit_affine, key_hash, probe_chunks, profile_key, safe_chunk, summarize_times
     from heteroes.runtime_info import code_info, environment_info
     from heteroes.worker import CandidateFailed
     from heteroes.worker_runtime import download_weights
@@ -178,18 +181,31 @@ def main(argv: list[str]) -> int:
 
     update = None
     if args.measure_update:
-        timings = []
-        for seed in (11, 12, 13):
-            start = time.perf_counter()
-            apply_coefficients_(model, schema, [seed], [1.0], 1e-3, recipe.chunk_elements)
-            timings.append(time.perf_counter() - start)
-            restore_from_snapshot_(model, schema, snapshot)
+        sizes = sorted({int(value) for value in args.update_sizes.split(",")})
+        if len(sizes) < 2:
+            fail("--update-sizes needs at least two different sizes")
+        raw, medians = {}, []
+        for size in sizes:
+            seeds = [11 + index for index in range(size)]
+            coefficients = [1.0 if index % 2 == 0 else -0.5 for index in range(size)]       # not all equal: an update that does something
+            raw[str(size)] = []
+            for _ in range(args.update_repeats):
+                start = time.perf_counter()
+                apply_coefficients_(model, schema, seeds, coefficients, 1e-3, recipe.chunk_elements)
+                if cuda:
+                    torch.cuda.synchronize()
+                raw[str(size)].append(time.perf_counter() - start)
+                restore_from_snapshot_(model, schema, snapshot)
+            medians.append(statistics.median(raw[str(size)]))
+        fit = fit_affine(sizes, medians)
+        timings = raw[str(sizes[0])]
         directory = Path(args.sync_dir)
         start = time.perf_counter()
         published = publish_weights(model, schema, directory)
         publish_seconds = time.perf_counter() - start
         (directory / f"{published}.bin").unlink()
-        update = {"seconds_per_candidate_median": statistics.median(timings), "raw": timings, "publish_seconds": publish_seconds}
+        update = {"seconds_per_candidate_median": fit["per_candidate_seconds"], "fixed_seconds": fit["fixed_seconds"], "fit": fit, "raw": raw,
+                  "publish_seconds": publish_seconds, "noise_threads": noise_threads()}
 
     environment = environment_info(device)
     key = profile_key(environment, recipe.hash, schema.hash, workload_hash(), device)

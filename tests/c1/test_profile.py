@@ -226,3 +226,41 @@ def test_the_key_changes_with_every_thing_a_profile_depends_on():
 
 def test_the_key_does_not_change_with_the_name_of_the_host_or_the_time():
     assert key_hash(key(environment={**ENVIRONMENT, "hostname": "other box", "platform": "other"})) == key_hash(key())
+
+
+# ---------------------------------------------------------------------------
+# G6: the cost of the update as an affine function of the number of candidates, with its residuals
+# ---------------------------------------------------------------------------
+
+from heteroes.profile import fit_affine  # noqa: E402
+
+
+def test_an_exact_line_is_recovered_with_zero_residuals():
+    # seconds = 2 + 3 N: the points 1, 2, 4, 8 -> 5, 8, 14, 26
+    fit = fit_affine([1, 2, 4, 8], [5.0, 8.0, 14.0, 26.0])
+    assert fit["fixed_seconds"] == pytest.approx(2.0) and fit["per_candidate_seconds"] == pytest.approx(3.0)
+    assert fit["residuals"] == pytest.approx([0.0, 0.0, 0.0, 0.0], abs=1e-9)
+    assert fit["max_abs_residual"] == pytest.approx(0.0, abs=1e-9)
+
+
+def test_least_squares_by_hand_on_three_noisy_points():
+    # points (1, 1), (2, 3), (3, 2): mean x 2, mean y 2, Sxy = (-1)(-1) + 0 + (1)(0) = 1, Sxx = 2 -> slope 0.5, intercept 1.0
+    # residuals y - (1 + 0.5 x): 1 - 1.5 = -0.5, 3 - 2 = 1.0, 2 - 2.5 = -0.5
+    fit = fit_affine([1, 2, 3], [1.0, 3.0, 2.0])
+    assert fit["per_candidate_seconds"] == pytest.approx(0.5) and fit["fixed_seconds"] == pytest.approx(1.0)
+    assert fit["residuals"] == pytest.approx([-0.5, 1.0, -0.5])
+    assert fit["max_abs_residual"] == pytest.approx(1.0)
+
+
+def test_a_fit_needs_two_different_sizes_and_matching_lengths():
+    with pytest.raises(ValueError):
+        fit_affine([4], [1.0])
+    with pytest.raises(ValueError):
+        fit_affine([4, 4], [1.0, 2.0])
+    with pytest.raises(ValueError):
+        fit_affine([1, 2], [1.0])
+
+
+def test_a_negative_intercept_is_reported_as_it_is_and_not_hidden():
+    fit = fit_affine([1, 2, 3], [0.5, 2.0, 3.5])          # slope 1.5, intercept -1.0: nonsense physically, but it is what the data say
+    assert fit["fixed_seconds"] == pytest.approx(-1.0)
