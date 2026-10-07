@@ -39,7 +39,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--device", choices=["cuda", "cpu"], default=None)
     parser.add_argument("--token-env", default="HETEROES_TOKEN")
     parser.add_argument("--chunk", type=int, default=1, help="prompts per generate() call; use the safe chunk of this worker's profile (default 1)")
-    parser.add_argument("--poll-seconds", type=float, default=1.0)
+    parser.add_argument("--poll-seconds", type=float, default=0.25, help="how long to wait before asking again when there is no work (a generation boundary costs about half of this per worker)")
     parser.add_argument("--give-up-after-seconds", type=float, default=120.0, help="exit (code 5) if the coordinator has not answered for this long")
     parser.add_argument("--noise-threads", type=int, default=None, help="threads for noise generation (default: min(16, CPUs); 1 = serial)")
     parser.add_argument("--startup-timeout-seconds", type=float, default=600.0, help="how long to wait for the coordinator to have a job")
