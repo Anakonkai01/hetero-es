@@ -2,6 +2,7 @@ from heteroes.model.schema import ParameterSchema, resolve_tensors
 from heteroes.es.checks import _check_param
 from heteroes.noise.engine import num_chunks, generate_chunk_noise, chunk_length
 from heteroes.noise.contracts import ParameterNoiseAddress, DEFAULT_CHUNK_ELEMENTS
+from heteroes.noise.parallel import ordered_map
 
 from dataclasses import dataclass
 import math
@@ -133,9 +134,30 @@ def _apply_coefficients(schema: ParameterSchema, tensors, candidate_seeds, z_rew
         ) 
     
     schema_hash = schema.hash
-    changed = 0
-    requested_l2 = 0.0 
-    applied_l2 = 0.0 
+    n_seeds = len(candidate_seeds)
+
+    # Every (tensor, chunk, candidate) noise block, in the exact order the sum needs them. They are
+    # generated on a thread pool but come back in this order, so the sum over candidates (the only
+    # floating-point order that matters) is the same as with one thread.
+    def tasks():
+        for entry, tensor in zip(schema.entries, tensors):
+            numel = tensor.numel()
+            for chunk_index in range(num_chunks(numel=numel, chunk_elements=chunk_elements)):
+                n = chunk_length(numel, chunk_index, chunk_elements)
+                for seed in candidate_seeds:
+                    address = ParameterNoiseAddress(
+                        candidate_seed=seed,
+                        schema_hash=schema_hash,
+                        parameter_index=entry.index,
+                        chunk_elements=chunk_elements,
+                    ).chunk(chunk_index)
+                    yield address, n
+
+    noise_stream = ordered_map(lambda task: generate_chunk_noise(*task), tasks())
+
+    # The three statistics of a chunk stay on the device and are read once at the end (one sync
+    # instead of three per chunk); they are then added in chunk order exactly as before.
+    changed_parts, requested_parts, applied_parts = [], [], []
     with torch.no_grad(): 
         for entry, tensor in zip(schema.entries, tensors): 
             numel = tensor.numel()
@@ -146,31 +168,33 @@ def _apply_coefficients(schema: ParameterSchema, tensors, candidate_seeds, z_rew
                 chunk = tensor.view(-1)[start: start + n]
                 acc = torch.zeros(n, dtype=torch.float32, device=tensor.device)
                 
-                
-                for seed, zi in zip(candidate_seeds, z_rewards, strict=True): 
-                    param_noise_addr = ParameterNoiseAddress(
-                        candidate_seed=seed,
-                        schema_hash=schema_hash,
-                        parameter_index=entry.index,
-                        chunk_elements=chunk_elements, 
-                    )
-
-                    eps = generate_chunk_noise(param_noise_addr.chunk(chunk_index), n)
-                    eps = torch.from_numpy(eps).to(device=tensor.device, dtype=torch.float32)
+                for zi in z_rewards:
+                    eps = torch.from_numpy(next(noise_stream)).to(device=tensor.device, dtype=torch.float32)
 
                     term = eps * float(zi)
                     acc = acc + term 
                 
-                direction = acc / len(candidate_seeds)
+                direction = acc / n_seeds
                 update = direction * float(np.float32(alpha))
                 new = (chunk.to(torch.float32) + update).to(torch.float16)
                 # compare 
                 
-                changed += int((new.view(torch.int16) != chunk.view(torch.int16)).sum())
-                requested_l2 += float((update.double() ** 2).sum())
-                applied_l2 += float(((new.double() - chunk.double())**2).sum())
+                changed_parts.append((new.view(torch.int16) != chunk.view(torch.int16)).sum())
+                requested_parts.append((update.double() ** 2).sum())
+                applied_parts.append(((new.double() - chunk.double())**2).sum())
                  
                 chunk.copy_(new)
+
+        changed = 0
+        requested_l2 = 0.0
+        applied_l2 = 0.0
+        if changed_parts:
+            for value in torch.stack(changed_parts).tolist():
+                changed += int(value)
+            for value in torch.stack(requested_parts).tolist():
+                requested_l2 += float(value)
+            for value in torch.stack(applied_parts).tolist():
+                applied_l2 += float(value)
 
 
     requested_l2 = math.sqrt(requested_l2)

@@ -1,4 +1,5 @@
 from heteroes.noise.contracts import ChunkNoiseAddress, ParameterNoiseAddress, ENGINE_VERSION
+from heteroes.noise.parallel import ordered_map
 
 from collections.abc import Iterator
 import numpy as np 
@@ -74,16 +75,19 @@ def iter_parameter_noise_chunks(parameter_noise_address: ParameterNoiseAddress, 
     """
     create iterator for generate parameter noise, return chunk noise one by one
     to avoid create all at one which could lead to out of memory 
-    """
-    number_of_chunks = num_chunks(numel, parameter_noise_address.chunk_elements)    
 
-    for chunk_index in range(number_of_chunks): 
+    The chunks are generated on a thread pool a few chunks ahead (see noise/parallel.py) but are
+    ALWAYS yielded in chunk order, and each chunk is the same bytes as when generated alone.
+    """
+    number_of_chunks = num_chunks(numel, parameter_noise_address.chunk_elements)
+
+    def make(chunk_index: int) -> tuple[int, int, np.ndarray]:
         start_index_pos_of_tensor = chunk_index * parameter_noise_address.chunk_elements
         len_of_chunk = chunk_length(numel, chunk_index, parameter_noise_address.chunk_elements)
         chunk_noise_address = parameter_noise_address.chunk(chunk_index)
-        chunk_noise = generate_chunk_noise(chunk_noise_address=chunk_noise_address, n = len_of_chunk)
+        return (chunk_index, start_index_pos_of_tensor, generate_chunk_noise(chunk_noise_address=chunk_noise_address, n=len_of_chunk))
 
-        yield (chunk_index, start_index_pos_of_tensor, chunk_noise)
+    yield from ordered_map(make, range(number_of_chunks))
 
     
 def generate_parameter_noise(parameter_noise_address: ParameterNoiseAddress, numel: int) -> np.ndarray: 

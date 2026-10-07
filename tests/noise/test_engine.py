@@ -312,7 +312,9 @@ def test_iter_chunks_are_exactly_what_generate_chunk_noise_returns():
 
 
 def test_iter_is_lazy(monkeypatch):
-    # Only one chunk may be generated per step (this is what keeps memory low).
+    # With one noise thread only one chunk is generated per step (this is what keeps memory low).
+    # With several threads the stream runs a bounded window ahead: tests/noise/test_parallel.py.
+    monkeypatch.setenv("HETEROES_NOISE_THREADS", "1")
     calls = []
     real = engine.generate_chunk_noise
     monkeypatch.setattr(engine, "generate_chunk_noise", lambda *a, **k: calls.append(1) or real(*a, **k))
