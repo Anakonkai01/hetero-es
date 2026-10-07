@@ -152,7 +152,8 @@ def main(argv: list[str]) -> int:
     if chosen != 1:
         candidate_times[str(chosen)] = time_candidates(chosen)
     reference_times = candidate_times[str(chosen)]
-    parent_sha256 = CandidateExecutor(model, tokenizer, schema, recipe).parent_sha256
+    sync_executor = CandidateExecutor(model, tokenizer, schema, recipe)         # made before the timing, as in a running worker
+    parent_sha256 = sync_executor.parent_sha256
 
     sync = None
     if args.sync_url:
@@ -168,8 +169,7 @@ def main(argv: list[str]) -> int:
         transferred = time.perf_counter()
         load_weights_(model, schema, path, args.sync_sha256, already_verified=True)      # what WorkerRuntime.sync does
         loaded_at = time.perf_counter()
-        executor = CandidateExecutor(model, tokenizer, schema, recipe)
-        executor.reset_parent(args.sync_sha256, verified_file=path)
+        sync_executor.reset_parent(args.sync_sha256, verified_file=path)
         done = time.perf_counter()
         size_on_disk = path.stat().st_size
         path.unlink()
