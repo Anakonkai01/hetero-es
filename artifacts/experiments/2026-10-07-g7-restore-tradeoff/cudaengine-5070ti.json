@@ -1,0 +1,26 @@
+{
+ "gpu": "NVIDIA GeForce RTX 5070 Ti",
+ "sm_count": 70,
+ "torch": "2.13.0+cu132",
+ "cuda": "13.2",
+ "engine": "torch_cuda_philox_chunked_f32_to_f16_v1",
+ "fingerprint": "9492a49ab70efe98e2b710e9a9e927f54be658489eae4b549c0cbf7340b9ffaf",
+ "schema_hash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+ "sha256": {
+  "original": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+  "perturbed_seed0": "6a5722da07a5a3f3674f50b6d8f8de04a694d49def1e3ec93514f711950df371",
+  "restored_after_seed0": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+  "perturbed_seed1": "b6ff5f8b01249c25cafc7388c1a1d28971a3b8f373028c767c6945ec9840733a",
+  "restored_after_seed1": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+  "perturbed_seed2": "cba9ef2c8c2bb00bf9f20a50c3f0901831f9c77e3e6367ca4a5044ceac35cf84",
+  "restored_after_seed2": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+  "updated": "3f64d741683d75d7f456ea6c96ab40026950f5423310d04ebec1a11400051449"
+ },
+ "seconds": {
+  "cuda_perturb_seed0": 0.09155202200054191,
+  "cuda_perturb_seed1": 0.08017891499912366,
+  "cuda_perturb_seed2": 0.07986573499874794,
+  "cuda_update_8_candidates": 0.6371382840006845,
+  "cpu_canonical_perturb_seed0": 0.7295743239992589
+ }
+}

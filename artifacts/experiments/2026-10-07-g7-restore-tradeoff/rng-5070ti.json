@@ -1,0 +1,37 @@
+{
+ "gpu": "NVIDIA GeForce RTX 5070 Ti",
+ "capability": "12.0",
+ "sm_count": 70,
+ "max_threads_per_sm": 1536,
+ "torch": "2.13.0+cu132",
+ "cuda": "13.2",
+ "wave_elements": 430080,
+ "one_call_fp32": {
+  "1000": "caa8634105a36193",
+  "4096": "d3925a173d26e15e",
+  "16384": "01530e8f7bb91cc1",
+  "22528": "449983149e794903",
+  "22529": "5752b49e8bbcceb3",
+  "32768": "321b2de4a6baa749",
+  "65536": "0fe1a0a247a08c03",
+  "90112": "411e14dd58e0ff42",
+  "107520": "9e28c2fd75172abd",
+  "131072": "540bde39e81e331a",
+  "430080": "67400ff202cb3157",
+  "1048576": "f2b9e21b6f343aa8",
+  "4194304": "231878bee218b72d",
+  "16777216": "3a288b121332f50a"
+ },
+ "one_call_fp16_4M": "21cfe98bfa8d6dd9",
+ "chunked_fp32": {
+  "8192": "dbad006a809004ba",
+  "16384": "32bff642ac7f3161",
+  "22528": "ed71a977ee4eb1e7",
+  "32768": "dec2ef0c386730b6",
+  "65536": "68c90c302178de4f"
+ },
+ "chunked_65536_whole_model_seconds": 0.04858710699772928,
+ "chunked_65536_calls": 7538,
+ "chunked_16384_whole_model_seconds": 0.19283688900031848,
+ "chunked_16384_calls": 30153
+}

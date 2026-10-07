@@ -1,0 +1,46 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7044.07it/s]
+D 0 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 2.551, 'back': 0.137, 'total': 2.7} reward 0.65625 differ 0
+D 1 {'perturb': 0.011, 'refresh': 0.004, 'rollout': 4.417, 'back': 0.136, 'total': 4.569} reward 0.71875 differ 0
+D 2 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 3.417, 'back': 0.136, 'total': 3.566} reward 0.90625 differ 0
+D 3 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 3.166, 'back': 0.136, 'total': 3.315} reward 0.84375 differ 0
+D 4 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 1.496, 'back': 0.136, 'total': 1.646} reward 0.65625 differ 0
+D 5 {'perturb': 0.012, 'refresh': 0.004, 'rollout': 3.814, 'back': 0.136, 'total': 3.966} reward 0.8125 differ 0
+D 6 {'perturb': 0.011, 'refresh': 0.004, 'rollout': 3.38, 'back': 0.136, 'total': 3.531} reward 0.78125 differ 0
+D 7 {'perturb': 0.011, 'refresh': 0.004, 'rollout': 3.79, 'back': 0.136, 'total': 3.942} reward 0.90625 differ 0
+D 8 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 3.35, 'back': 0.136, 'total': 3.499} reward 0.84375 differ 0
+D 9 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 2.92, 'back': 0.136, 'total': 3.069} reward 0.65625 differ 0
+D 10 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 4.428, 'back': 0.138, 'total': 4.579} reward 0.28125 differ 0
+D 11 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 4.423, 'back': 0.14, 'total': 4.576} reward 0.75 differ 0
+D 12 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 3.994, 'back': 0.138, 'total': 4.145} reward 0.90625 differ 0
+D 13 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 4.187, 'back': 0.136, 'total': 4.336} reward 0.71875 differ 0
+D 14 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 4.426, 'back': 0.136, 'total': 4.576} reward 0.65625 differ 0
+D 15 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 3.873, 'back': 0.137, 'total': 4.023} reward 0.78125 differ 0
+D 16 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 3.992, 'back': 0.136, 'total': 4.142} reward 0.78125 differ 0
+D 17 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 3.71, 'back': 0.137, 'total': 3.861} reward 0.75 differ 0
+D 18 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 4.432, 'back': 0.136, 'total': 4.581} reward 0.40625 differ 0
+D 19 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 3.381, 'back': 0.136, 'total': 3.53} reward 0.65625 differ 0
+D 20 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 4.3, 'back': 0.136, 'total': 4.449} reward 0.75 differ 0
+D 21 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 3.775, 'back': 0.136, 'total': 3.924} reward 0.78125 differ 0
+D 22 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 4.179, 'back': 0.136, 'total': 4.328} reward 0.6875 differ 0
+D 23 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 2.457, 'back': 0.136, 'total': 2.606} reward 0.09375 differ 0
+{
+ "D": {
+  "median_seconds": {
+   "perturb": 0.009003185499750543,
+   "refresh": 0.0042989904977730475,
+   "rollout": 3.8020357205004984,
+   "back": 0.13612879600077576,
+   "total": 3.953634655501446
+  },
+  "final_drift": {
+   "elements_differing": 0,
+   "fraction_differing": 0.0,
+   "max_abs_diff": 0.0,
+   "relative_l2": 0.0
+  },
+  "base": [
+   0.28125,
+   0.28125
+  ]
+ }
+}
