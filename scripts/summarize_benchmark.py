@@ -7,7 +7,10 @@ Summarize the runs of `scripts/run_benchmark.py` (the numbers of G4/G5 come from
 Per run: the time of a generation (the coordinator's `total_seconds`: candidates + update + publication) with its three parts, who
 ran how many candidates, how long each worker was busy (rollout etc.), synchronizing or idle, and the coordination overhead.
 Per condition: the mean and the spread of T over the repeats, ClusterBenefit = T(B0) / T(condition) and DeltaT = T(B0) - T(condition)
-(MASTER section 8; B0 is the fastest worker alone). The runs of one N must have given exactly the same rewards and weights hashes
+(MASTER section 8; B0 is the fastest worker alone). The headline is the STEADY-STATE T: generation 0 is left out because the remote
+worker does not synchronize in it (it already holds the parent), so including it flatters a cluster; the figures with generation 0 are
+kept as `T_mean` for comparison with G4/G5. The unit of replication is a run, and the intervals are 95 % Student-t intervals over
+runs (`heteroes.benchmark_stats`), so with 3 runs they are wide on purpose. The runs of one N must have given exactly the same rewards and weights hashes
 (the candidates and their seeds are the same, whoever evaluates them): `consistent` says whether they did.
 """
 import argparse
@@ -16,6 +19,8 @@ import re
 import statistics
 import sys
 from pathlib import Path
+
+from heteroes.benchmark_stats import mean_ci, ratio_ci
 
 RUN = re.compile(r"n(\d+)-([A-Z0-9]+)-r(\d+)")
 
@@ -41,7 +46,7 @@ def summarize_run(path: Path) -> dict:
         "publish_mean": statistics.mean(g["publish_seconds"] for g in generations),
         "rewards": [g["rewards"] for g in generations], "weights": [g["child_sha256"] for g in generations],
         "final_sha256": summary["final_weights_sha256"], "internal_errors": summary["internal_errors"],
-        "chunks": summary["args"].get("policy"), "workers": {},
+        "policy": summary["args"].get("policy"), "workers": {},
     })
     wait_total = sum(g["wait_seconds"] for g in generations)
     result["first_generation_owner"] = {}                 # candidate index -> the worker that evaluated it, generation 0
@@ -112,6 +117,8 @@ def main(argv: list[str]) -> int:
                 run["first_generation_mismatches"] = [{"candidate": i, "worker": run["first_generation_owner"].get(i), "reward": run["rewards"][0][i],
                                                        "reward_B0": reference_run["rewards"][0][i]} for i in differing]
         baseline = statistics.mean(run["T_mean"] for run in by_condition["B0"]) if "B0" in by_condition else None
+        steady = {c: [run["T_mean_after_first"] for run in items if run["T_mean_after_first"] is not None] for c, items in by_condition.items()}
+        steady_baseline = steady.get("B0") or None
         for condition, items in sorted(by_condition.items()):
             times = [run["T_mean"] for run in items]
             mean = statistics.mean(times)
@@ -123,15 +130,24 @@ def main(argv: list[str]) -> int:
                      "publish_mean": statistics.mean(run["publish_mean"] for run in items), "workers": sorted(workers),
                      "cluster_benefit_vs_B0": None if baseline is None else baseline / mean,
                      "delta_T_vs_B0": None if baseline is None else baseline - mean, "predicted_T": predicted(prediction, condition, workers)}
+            steady_values = steady[condition]
+            if steady_values:
+                entry["T_steady"], entry["T_steady_ci95"] = mean_ci(steady_values)
+                entry["T_steady_runs"] = steady_values
+                if steady_baseline:
+                    entry["cluster_benefit_steady"], entry["cluster_benefit_steady_ci95"] = ratio_ci(steady_baseline, steady_values)
+                    entry["delta_T_steady_vs_B0"] = statistics.mean(steady_baseline) - entry["T_steady"]
             if entry["predicted_T"] is not None:
                 entry["prediction_error_percent"] = 100 * (entry["predicted_T"] - mean) / mean
             report["conditions"][f"n{n}-{condition}"] = entry
 
-    print(f"{'condition':<10}{'rep':>4}{'T mean':>9}{'min':>8}{'max':>8}{'wait':>8}{'update':>8}{'CB':>7}{'dT':>8}{'pred':>8}{'err%':>7}")
+    cell = lambda value, fmt: "-" if value is None else format(value, fmt)
+    print(f"{'condition':<10}{'rep':>4}{'T steady':>10}{'+-95%':>7}{'CB steady':>10}{'+-95%':>7}{'T all':>8}{'CB all':>8}{'wait':>7}{'update':>8}{'pred':>8}{'err%':>7}")
     for name, e in report["conditions"].items():
-        cell = lambda value, fmt: "-" if value is None else format(value, fmt)
-        print(f"{name:<10}{e['repeats']:>4}{e['T_mean']:>9.1f}{e['T_min']:>8.1f}{e['T_max']:>8.1f}{e['wait_mean']:>8.1f}{e['update_mean']:>8.1f}"
-              f"{cell(e['cluster_benefit_vs_B0'], '.3f'):>7}{cell(e['delta_T_vs_B0'], '.1f'):>8}{cell(e['predicted_T'], '.1f'):>8}{cell(e.get('prediction_error_percent'), '.1f'):>7}")
+        print(f"{name:<10}{e['repeats']:>4}{cell(e.get('T_steady'), '.1f'):>10}{cell(e.get('T_steady_ci95'), '.1f'):>7}"
+              f"{cell(e.get('cluster_benefit_steady'), '.3f'):>10}{cell(e.get('cluster_benefit_steady_ci95'), '.3f'):>7}"
+              f"{e['T_mean']:>8.1f}{cell(e['cluster_benefit_vs_B0'], '.3f'):>8}{e['wait_mean']:>7.1f}{e['update_mean']:>8.1f}"
+              f"{cell(e['predicted_T'], '.1f'):>8}{cell(e.get('prediction_error_percent'), '.1f'):>7}")
     for key, value in report["consistent"].items():
         print(key, value)
     for name, (n, condition, repeat, run) in runs.items():

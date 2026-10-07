@@ -9,6 +9,7 @@ from heteroes.admission import (
     Reason,
     WorkerModel,
     capability_gate,
+    expected_key_from_reference,
     decide,
     predict_candidates_seconds,
     predict_generation_seconds,
@@ -48,6 +49,54 @@ def test_each_failure_has_its_own_reason_code(changes, reason):
         assert capability_gate(profile(**changes), KEY) == [Reason.PROFILE_KEY_MISMATCH]
     else:
         assert reason in capability_gate(profile(**changes), expected_key)
+
+
+def test_only_the_fields_named_in_the_expected_key_are_compared():
+    # hardware fields (gpu name, memory...) may differ between machines: they are not in the expected key
+    key = {**KEY, "gpu_name": "A", "torch": "2.10", "numpy": "2.4", "transformers": "5.5"}      # NumPy differs: it is not compared
+    expected = {"device": "cuda", "recipe_hash": "r"}
+    assert capability_gate(profile(key=key), expected) == []
+
+
+def test_a_different_software_stack_has_its_own_reason_and_is_not_a_silent_pass():
+    # the 5070 Ti and the 1660S of G5 ran other torch and transformers: that must be visible, and decided, not hidden
+    key = {**KEY, "torch": "2.13", "transformers": "5.17"}
+    expected = {"device": "cuda", "recipe_hash": "r", "torch": "2.10", "transformers": "5.5"}
+    assert capability_gate(profile(key=key), expected) == [Reason.SOFTWARE_MISMATCH]
+    # one field is enough
+    assert capability_gate(profile(key={**key, "torch": "2.10"}), expected) == [Reason.SOFTWARE_MISMATCH]
+    # equal software passes
+    assert capability_gate(profile(key={**KEY, "torch": "2.10", "transformers": "5.5"}), expected) == []
+
+
+def test_software_and_identity_mismatches_are_reported_separately():
+    key = {**KEY, "torch": "2.13", "recipe_hash": "other"}
+    expected = {"device": "cuda", "recipe_hash": "r", "torch": "2.10"}
+    assert set(capability_gate(profile(key=key), expected)) == {Reason.SOFTWARE_MISMATCH, Reason.PROFILE_KEY_MISMATCH}
+
+
+def test_a_field_missing_from_the_profile_key_is_a_mismatch():
+    assert capability_gate(profile(), {**KEY, "schema_hash": "s"}) == [Reason.PROFILE_KEY_MISMATCH]
+
+
+REFERENCE_KEY = {"gpu_name": "ref", "torch": "2.10", "torch_cuda": "12.8", "numpy": "2.4.5", "transformers": "5.5", "python": "3.12",
+                 "device": "cuda", "recipe_hash": "r", "schema_hash": "s", "workload_hash": "w"}
+
+
+def test_expected_key_comes_from_the_reference_not_from_the_candidate():
+    expected = expected_key_from_reference(REFERENCE_KEY)
+    assert expected == {"recipe_hash": "r", "schema_hash": "s", "workload_hash": "w", "device": "cuda",
+                        "torch": "2.10", "torch_cuda": "12.8", "transformers": "5.5"}
+    # the old G4/G5 construction (candidate key + three overrides) could not see a software difference: this one does
+    candidate_key = {**REFERENCE_KEY, "torch": "2.13", "transformers": "5.17", "gpu_name": "other", "gpu_total_memory_bytes": 1000}
+    assert capability_gate(profile(key=candidate_key), expected) == [Reason.SOFTWARE_MISMATCH]
+    # other hardware alone is fine
+    assert capability_gate(profile(key={**REFERENCE_KEY, "gpu_name": "other GPU", "gpu_total_memory_bytes": 1000}), expected) == []
+
+
+def test_software_can_be_left_out_of_the_expected_key_on_request():
+    expected = expected_key_from_reference(REFERENCE_KEY, require_same_software=False)
+    assert set(expected) == {"recipe_hash", "schema_hash", "workload_hash", "device"}
 
 
 def test_the_memory_margin_is_exactly_the_fraction_of_the_gpu():

@@ -31,7 +31,8 @@ class AdmissionState(Enum):
 class Reason(Enum):
     OK = "OK"
     NOT_A_GPU = "NOT_A_GPU"
-    PROFILE_KEY_MISMATCH = "PROFILE_KEY_MISMATCH"       # the profile was measured for other hardware, software, model or recipe
+    PROFILE_KEY_MISMATCH = "PROFILE_KEY_MISMATCH"       # the profile was measured for another model, workload, recipe or device
+    SOFTWARE_MISMATCH = "SOFTWARE_MISMATCH"             # torch, CUDA build or transformers differ from the reference worker's
     DTYPE_MISMATCH = "DTYPE_MISMATCH"
     MEMORY_MARGIN = "MEMORY_MARGIN"                     # the measured peak leaves less than the required margin of the GPU
     NOISE_SELFTEST_FAILED = "NOISE_SELFTEST_FAILED"
@@ -41,13 +42,41 @@ class Reason(Enum):
     CHUNK_LIMITED = "CHUNK_LIMITED"                     # works with a smaller chunk than the reference worker
 
 
+# the software whose version can change a floating-point result of the model. NumPy is not here on purpose: it only makes the noise,
+# and the noise is pinned by its own fingerprint and a self-test on every worker (decision O6), not by a version number.
+SOFTWARE_FIELDS = ("torch", "torch_cuda", "transformers")
+
+
+def expected_key_from_reference(reference_key: dict, require_same_software: bool = True) -> dict:
+    """
+    What a candidate worker's profile key must equal: the reference worker's model, schema, workload and recipe, a GPU, and (unless
+    told otherwise) the same software versions. It is built from the REFERENCE, never from the candidate: a key built from the
+    candidate's own profile can never disagree with it (the G4/G5 script did that, so its key check could not fire).
+    """
+    names = ["recipe_hash", "schema_hash", "workload_hash"]
+    expected = {name: reference_key[name] for name in names}
+    expected["device"] = "cuda"
+    if require_same_software:
+        for name in SOFTWARE_FIELDS:
+            expected[name] = reference_key[name]
+    return expected
+
+
 def capability_gate(profile: dict, expected_key: dict, min_free_fraction: float = 0.10) -> list[Reason]:
     """The reasons why this profile cannot admit its worker; an empty list means that the hard gate is passed."""
     reasons = []
     if profile["key"]["device"] != "cuda":
         reasons.append(Reason.NOT_A_GPU)
-    if profile["key"] != expected_key:
+    # Only the fields NAMED in expected_key are compared (the hardware may differ between machines; the model, workload, recipe
+    # and the software that decides the numbers may not). A software difference has its own reason: until the stacks are aligned
+    # it is the main suspect of a reward that differs between two GPUs (G4/G5).
+    key = profile["key"]
+    software = [name for name in SOFTWARE_FIELDS if name in expected_key and key.get(name) != expected_key[name]]
+    identity = [name for name, value in expected_key.items() if name not in SOFTWARE_FIELDS and (name not in key or key[name] != value)]
+    if identity:
         reasons.append(Reason.PROFILE_KEY_MISMATCH)
+    if software:
+        reasons.append(Reason.SOFTWARE_MISMATCH)
     checks = profile["checks"]
     if not checks["noise_selftest"]:
         reasons.append(Reason.NOISE_SELFTEST_FAILED)

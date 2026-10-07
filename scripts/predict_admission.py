@@ -24,13 +24,15 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--delta-fraction", type=float, default=0.05)
     parser.add_argument("--update-fixed-seconds", type=float, default=0.0,
                         help="the part of the update that does not depend on N (default 0: the profile measures one candidate only)")
+    parser.add_argument("--ignore-software", action="store_true",
+                        help="do not require the candidate to run the same torch/NumPy/transformers as the reference (only to reproduce G4/G5)")
     parser.add_argument("--out", required=True)
     args = parser.parse_args(argv)
     if Path(args.out).exists():
         print(f"error: {args.out} already exists; a prediction is never overwritten", file=sys.stderr)
         return 2
 
-    from heteroes.admission import capability_gate, decide, predict_generation_seconds, worker_model_from_profile
+    from heteroes.admission import capability_gate, decide, expected_key_from_reference, predict_generation_seconds, worker_model_from_profile
     from heteroes.runtime_info import code_info
 
     reference = json.loads(Path(args.reference).read_text(encoding="utf-8"))
@@ -40,8 +42,7 @@ def main(argv: list[str]) -> int:
         return 2
     update, publish = reference["update"]["seconds_per_candidate_median"], reference["update"]["publish_seconds"]
     ref_key = reference["key"]
-    expected = {**candidate["key"], "recipe_hash": ref_key["recipe_hash"], "schema_hash": ref_key["schema_hash"],
-                "workload_hash": ref_key["workload_hash"], "device": "cuda"}
+    expected = expected_key_from_reference(ref_key, require_same_software=not args.ignore_software)
     reasons = capability_gate(candidate, expected)
 
     variants = {"common_chunk_1": (1, 1), "per_worker_chunk": (reference["safe_chunk"], candidate["safe_chunk"])}
