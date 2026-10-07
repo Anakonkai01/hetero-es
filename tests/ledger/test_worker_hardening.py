@@ -348,7 +348,7 @@ def test_the_heartbeat_stops_when_the_candidate_is_done():
     count = calls.count("heartbeat")
     time.sleep(0.4)
     assert calls.count("heartbeat") == count                              # no thread is left beating
-    assert threading.active_count() < 20
+    assert [t for t in threading.enumerate() if t.name == "heteroes-heartbeat"] == []       # and no heartbeat thread is alive
 
 
 def test_a_heartbeat_that_fails_does_not_stop_the_candidate():
