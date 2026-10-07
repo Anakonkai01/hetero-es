@@ -166,10 +166,10 @@ def main(argv: list[str]) -> int:
         start = time.perf_counter()
         path = download_weights(client, args.sync_sha256, directory)
         transferred = time.perf_counter()
-        load_weights_(model, schema, path, args.sync_sha256)
+        load_weights_(model, schema, path, args.sync_sha256, already_verified=True)      # what WorkerRuntime.sync does
         loaded_at = time.perf_counter()
         executor = CandidateExecutor(model, tokenizer, schema, recipe)
-        executor.reset_parent(args.sync_sha256)
+        executor.reset_parent(args.sync_sha256, verified_file=path)
         done = time.perf_counter()
         size_on_disk = path.stat().st_size
         path.unlink()
