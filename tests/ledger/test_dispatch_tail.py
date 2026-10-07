@@ -188,3 +188,25 @@ def test_a_worker_seen_exactly_one_window_ago_is_still_waited_for():
         ask(api, "fast")
     clock.advance(20.0)                                           # exactly the window: the fast worker is still counted as alive
     assert ask(api, "slow") is None
+
+
+def test_the_fastest_of_several_other_workers_is_the_one_that_counts():
+    # others: 1 s and 3 s; slow worker 10 s; p = 10 waiting, m = 2: (ceil(10 / 2) + 1) * 1 = 6 < 10 -> the slow worker waits
+    # (with the slowest of the others it would be 6 * 3 = 18 >= 10 and the slow worker would take the candidate)
+    clock, book, ledger, api, policy = make(n=12)
+    book.observe("medium", 3.0)
+    policy._seen["medium"] = clock()
+    for _ in range(2):
+        ask(api, "fast")
+    assert ask(api, "slow") is None
+
+
+def test_greedy_tail_keeps_the_rule_that_a_failed_candidate_is_not_handed_straight_back():
+    clock, book, ledger, api, policy = make(n=3, slow=1.0)        # both workers equally fast: only the failure rule can decide
+    book.observe("other", 1.0)
+    assert index_of(ask(api, "other")) == 0                       # the other worker is around (it asked)
+    work = ask(api, "fast")                                       # candidate 1
+    assert index_of(work) == 1
+    fail(api, work, "OUT_OF_MEMORY")
+    retry = ask(api, "fast")
+    assert index_of(retry) == 2                                   # not candidate 1 again: it failed on this very worker and another one is around

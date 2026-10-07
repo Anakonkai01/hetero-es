@@ -107,7 +107,7 @@ def run_scenario(name: str, args, out: Path, password: str | None) -> dict:
     ledger_path = run_dir / "coordinator" / "ledger.sqlite"
     started = time.time()
     notes: list[str] = []
-    both = {FAST: 1, SLOW: 1}
+    both = {FAST: args.chunk, SLOW: args.chunk}
     peer, port = args.remote.split("@")[-1], str(args.port)
     drop_rule = ["iptables", "-I", "INPUT", "1", "-s", peer, "-p", "tcp", "--dport", port, "-j", "DROP"]
     undrop_rule = ["iptables", "-D", "INPUT", "-s", peer, "-p", "tcp", "--dport", port, "-j", "DROP"]
@@ -123,7 +123,7 @@ def run_scenario(name: str, args, out: Path, password: str | None) -> dict:
             cluster.signal_remote_worker("KILL")
             notes.append("remote worker killed while it held a candidate")
             time.sleep(1.0)
-            cluster.start_worker(SLOW, 1)                       # a new process with the same worker id: it must rejoin
+            cluster.start_worker(SLOW, args.chunk)              # a new process with the same worker id: it must rejoin
             notes.append("remote worker started again")
 
         elif name == "pause-worker":
@@ -189,7 +189,7 @@ def run_reference(args, out: Path) -> str:
     cluster = Cluster(args, "campaign-reference", run_dir)
     try:
         coordinator = cluster.start_coordinator("greedy", [], args.candidates, args.generations)
-        cluster.start_worker(FAST, 1)
+        cluster.start_worker(FAST, args.chunk)
         deadline = time.time() + args.run_timeout
         while coordinator.poll() is None and time.time() < deadline:
             time.sleep(2)
@@ -217,6 +217,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--generations", type=int, default=3)
     parser.add_argument("--scenarios", default=",".join(SCENARIOS))
     parser.add_argument("--reference-final", default=None, help="the final weights hash of the undisturbed run (default: run it first)")
+    parser.add_argument("--chunk", type=int, default=1, help="prompts per generate() call of every worker (more than 1 only with --eval-dtype float32)")
     parser.add_argument("--cut-seconds", type=float, default=8.0)
     parser.add_argument("--restart-after", type=float, default=5.0)
     parser.add_argument("--run-timeout", type=float, default=1800.0)
