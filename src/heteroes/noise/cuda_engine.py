@@ -25,11 +25,11 @@ import hashlib
 
 import torch
 
-CUDA_ENGINE_VERSION = "torch_cuda_philox_chunked_f32_to_f16_v1"
-# 22,528 = 88 blocks of 256 threads: the largest call that two GPUs with different numbers of SMs (the RTX 5070 Ti and the GTX 1660 SUPER)
-# still serve with the same thread mapping, measured in `artifacts/experiments/2026-10-07-g7-restore-tradeoff/rng-*.json`: the numbers
-# are equal up to 22,528 elements per call and different from 22,529 on. A bigger call is fewer launches, which is what costs time.
-CUDA_CALL_ELEMENTS = 22_528
+from heteroes.noise.contracts import CUDA_CALL_ELEMENTS, CUDA_ENGINE_VERSION, EXPECTED_CUDA_NOISE_FINGERPRINT
+
+# CUDA_ENGINE_VERSION, CUDA_CALL_ELEMENTS (22,528 = 88 blocks of 256 threads: the largest call that two GPUs with different numbers of SMs still serve
+# with the same thread mapping, measured in `artifacts/experiments/2026-10-07-g7-restore-tradeoff/rng-*.json`: equal up to 22,528 elements per call and
+# different from 22,529 on; a bigger call is fewer launches, which is what costs time) and the expected fingerprint live in `contracts.py`.
 # the noise is applied to the weights in pieces of this many elements (a multiple of the call size)
 PIECE_CALLS = 128
 PIECE_ELEMENTS = CUDA_CALL_ELEMENTS * PIECE_CALLS
@@ -133,12 +133,6 @@ def compute_noise_fingerprint(device="cuda") -> str:
         noise = generate_tensor_noise(_FINGERPRINT_SCHEMA, seed, index, numel, device)
         digest.update(noise.cpu().view(torch.int16).numpy().tobytes())
     return digest.hexdigest()
-
-
-# The fingerprint of this engine, equal on the RTX 5070 Ti (sm_120) and the GTX 1660 SUPER (sm_75), both torch 2.13.0+cu132
-# (artifacts/experiments/2026-10-07-g7-restore-tradeoff/cudaengine-*.json). A worker or a coordinator whose GPU makes other numbers must not
-# take part: its noise is not the noise of the others.
-EXPECTED_CUDA_NOISE_FINGERPRINT = "9492a49ab70efe98e2b710e9a9e927f54be658489eae4b549c0cbf7340b9ffaf"
 
 
 def check_cuda_noise_selftest(device="cuda") -> None:

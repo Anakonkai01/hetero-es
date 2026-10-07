@@ -57,7 +57,8 @@ def main(argv: list[str]) -> int:
 
     from heteroes.executor import CandidateExecutor
     from heteroes.http_transport import HttpClient, TransportError, UnauthorizedError
-    from heteroes.model.loading import build_recipe, check_noise_selftest, load_pinned_model
+    from heteroes.model.loading import build_recipe, check_noise_selftest, check_recipe_selftest, load_pinned_model
+    from heteroes.noise.contracts import CUDA_ENGINE_VERSION
     from heteroes.runtime_info import JsonlLog, code_info, environment_info
     from heteroes.worker_runtime import AdmissionError, WorkerRuntime
 
@@ -98,12 +99,19 @@ def main(argv: list[str]) -> int:
             time.sleep(args.poll_seconds)
 
     declared = job["recipe"]
-    recipe = build_recipe(loaded, sigma=declared["perturbation"]["sigma"], chunk_elements=declared["noise"]["chunk_elements"],
-                          reward_eta=declared["update"]["reward_eta"], eval_dtype=declared["workload"].get("eval_dtype", "float16"))
+    cuda_engine = declared["noise"]["engine_version"] == CUDA_ENGINE_VERSION
+    recipe = build_recipe(loaded, sigma=declared["perturbation"]["sigma"], chunk_elements=None if cuda_engine else declared["noise"]["chunk_elements"],
+                          reward_eta=declared["update"]["reward_eta"], eval_dtype=declared["workload"].get("eval_dtype", "float16"),
+                          noise_engine="cuda" if cuda_engine else "cpu", workload=declared["workload"].get("name", "arith16"))
+    try:
+        engine_selftest_seconds = check_recipe_selftest(recipe, device)
+    except RuntimeError as error:
+        fail(str(error), 3)
     executor_started = time.perf_counter()
     executor = CandidateExecutor(loaded.model, loaded.tokenizer, loaded.schema, recipe, chunk=args.chunk)
     emit({"event": "executor_ready", "t": time.time(), "worker_id": args.worker_id, "recipe_hash": recipe.hash,
-          "parent_weights_sha256": executor.parent_sha256, "snapshot_and_hash_seconds": time.perf_counter() - executor_started})
+          "parent_weights_sha256": executor.parent_sha256, "snapshot_and_hash_seconds": time.perf_counter() - executor_started,
+          "engine_selftest_seconds": engine_selftest_seconds, "noise_engine": recipe.engine_version, "workload": recipe.workload_name})
 
     runtime = WorkerRuntime(args.worker_id, client, executor, args.cache_dir, log=emit, poll_seconds=args.poll_seconds,
                             max_unreachable_seconds=args.give_up_after_seconds)

@@ -377,3 +377,39 @@ def test_the_token_is_passed_to_the_server(tmp_path):
             HttpClient(env.coordinator.url).get_json("/v1/health")
     finally:
         env.close()
+
+
+# ---------------------------------------------------------------------------
+# G7: the engine of the update is the engine of the recipe
+# ---------------------------------------------------------------------------
+
+def test_a_cuda_engine_recipe_applies_the_update_with_the_cuda_engine(tmp_path, monkeypatch):
+    from heteroes.es.update import apply_coefficients_
+    from heteroes.noise.contracts import CUDA_CALL_ELEMENTS, CUDA_ENGINE_VERSION, EXPECTED_CUDA_NOISE_FINGERPRINT
+
+    def cuda_recipe(schema):
+        base = make_recipe_cpu(schema)
+        return Recipe(**{**base.__dict__, "engine_version": CUDA_ENGINE_VERSION, "chunk_elements": CUDA_CALL_ELEMENTS,
+                         "noise_fingerprint": EXPECTED_CUDA_NOISE_FINGERPRINT})
+
+    calls = []
+
+    def cuda_apply(model, schema, seeds, coefficients, alpha):          # the toy model is on the CPU: the CPU engine stands in for the arithmetic
+        calls.append((list(seeds), alpha))
+        return apply_coefficients_(model, schema, seeds, coefficients, alpha, CHUNK)
+
+    def cpu_apply(*args, **kwargs):
+        raise AssertionError("the CPU engine must not be used by a CUDA engine recipe")
+
+    make_recipe_cpu = make_recipe
+    monkeypatch.setitem(globals(), "make_recipe", cuda_recipe)
+    monkeypatch.setattr(coordinator_module, "apply_coefficients_cuda_", cuda_apply)
+    monkeypatch.setattr(coordinator_module, "apply_coefficients_", cpu_apply)
+    env = Env(tmp_path)
+    try:
+        env.start_workers()
+        env.coordinator.run_generation(0)
+    finally:
+        env.close()
+
+    assert len(calls) == 1 and len(calls[0][0]) == 4 and calls[0][1] == ALPHA

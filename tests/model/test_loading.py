@@ -101,3 +101,81 @@ def test_every_choice_of_the_experiment_goes_into_the_recipe_without_a_real_mode
                 build_recipe(loaded, 1e-3, reward_eta=1e-8).hash}) == 4
     other_config = LoadedModel(toy, None, loaded.schema, "1" * 40, {"max_new_tokens": 6}, "cpu")
     assert build_recipe(other_config, 1e-3).hash != base.hash                          # the generation config is part of it
+
+
+# ---------------------------------------------------------------------------
+# G7: the noise engine and the workload are choices of the experiment, and each engine has its own self-test
+# ---------------------------------------------------------------------------
+
+def toy_loaded():
+    import torch.nn as nn
+
+    from heteroes.model.loading import LoadedModel
+    from heteroes.model.schema import build_parameter_schema
+
+    toy = nn.Linear(3, 3).half()
+    return LoadedModel(toy, None, build_parameter_schema(toy), "1" * 40, {"max_new_tokens": 5}, "cpu")
+
+
+def test_the_cuda_noise_engine_is_a_choice_of_the_recipe_with_its_own_call_size_and_fingerprint():
+    from heteroes.noise.contracts import CUDA_CALL_ELEMENTS, CUDA_ENGINE_VERSION, EXPECTED_CUDA_NOISE_FINGERPRINT
+
+    loaded = toy_loaded()
+    cpu = build_recipe(loaded, sigma=1e-3)
+    cuda = build_recipe(loaded, sigma=1e-3, noise_engine="cuda")
+
+    assert (cuda.engine_version, cuda.chunk_elements, cuda.noise_fingerprint) == (CUDA_ENGINE_VERSION, CUDA_CALL_ELEMENTS, EXPECTED_CUDA_NOISE_FINGERPRINT)
+    assert cuda.hash != cpu.hash and cpu.engine_version != cuda.engine_version
+
+
+def test_the_cuda_noise_engine_has_no_chunk_size_to_choose():
+    with pytest.raises(ValueError, match="call size"):
+        build_recipe(toy_loaded(), sigma=1e-3, chunk_elements=1024, noise_engine="cuda")
+
+
+def test_an_unknown_noise_engine_is_refused():
+    with pytest.raises(ValueError, match="noise engine"):
+        build_recipe(toy_loaded(), sigma=1e-3, noise_engine="metal")
+
+
+def test_a_named_workload_goes_into_the_recipe_with_its_own_hash():
+    from heteroes.eval.workloads import get_workload
+
+    loaded = toy_loaded()
+    default = build_recipe(loaded, sigma=1e-3)
+    long = build_recipe(loaded, sigma=1e-3, workload="cot_l3_q32")
+
+    assert default.workload_name == "arith16" and long.workload_name == "cot_l3_q32"
+    assert default.workload_hash == get_workload("arith16").hash() and long.workload_hash == get_workload("cot_l3_q32").hash()
+    assert default.workload_hash != long.workload_hash and default.hash != long.hash
+
+
+def test_an_unknown_workload_is_refused():
+    with pytest.raises(ValueError, match="workload"):
+        build_recipe(toy_loaded(), sigma=1e-3, workload="nope")
+
+
+def test_the_self_test_that_runs_is_the_one_of_the_engine_of_the_recipe(monkeypatch):
+    import heteroes.model.loading as loading
+
+    ran = []
+    monkeypatch.setattr(loading, "check_noise_selftest", lambda: ran.append("cpu") or 0.5)
+    monkeypatch.setattr(loading, "check_cuda_noise_selftest", lambda device="cuda": ran.append(f"cuda:{device}"))
+    loaded = toy_loaded()
+
+    assert loading.check_recipe_selftest(build_recipe(loaded, sigma=1e-3), "cuda") >= 0.0
+    assert ran == ["cpu"]
+    ran.clear()
+    assert loading.check_recipe_selftest(build_recipe(loaded, sigma=1e-3, noise_engine="cuda"), "cuda:0") >= 0.0
+    assert ran == ["cuda:cuda:0"]
+
+
+def test_a_failing_cuda_self_test_is_an_error_for_a_cuda_recipe(monkeypatch):
+    import heteroes.model.loading as loading
+
+    def failing(device="cuda"):
+        raise RuntimeError("the CUDA noise self-test failed")
+
+    monkeypatch.setattr(loading, "check_cuda_noise_selftest", failing)
+    with pytest.raises(RuntimeError, match="self-test"):
+        loading.check_recipe_selftest(build_recipe(toy_loaded(), sigma=1e-3, noise_engine="cuda"), "cuda")

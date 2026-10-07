@@ -17,14 +17,17 @@ import time
 
 import torch
 
+from heteroes.es.cuda_ops import perturb_model_cuda_
 from heteroes.es.perturb import perturb_model_
 from heteroes.es.snapshot import RestoreError, restore_from_snapshot_, take_snapshot
 from heteroes.eval.candidate import tensors_sha256
 from heteroes.eval.generate import evaluate_model
 from heteroes.eval.precision import EvalModel, default_chunk
+from heteroes.eval.workloads import get_workload
 from heteroes.ledger import FailureKind
 from heteroes.manifest import CandidateDescriptor, Recipe
 from heteroes.model.schema import ParameterSchema
+from heteroes.noise.contracts import CUDA_ENGINE_VERSION
 from heteroes.worker import CandidateFailed
 
 
@@ -89,11 +92,18 @@ class CandidateExecutor:
         reward = None
         start = mark = self._clock()
         try:
-            perturb_model_(self.model, self.schema, descriptor.seed, self.recipe.sigma, self.recipe.chunk_elements)
+            if self.recipe.engine_version == CUDA_ENGINE_VERSION:
+                perturb_model_cuda_(self.model, self.schema, descriptor.seed, self.recipe.sigma)
+            else:
+                perturb_model_(self.model, self.schema, descriptor.seed, self.recipe.sigma, self.recipe.chunk_elements)
             now = self._clock()
             timing["perturb"], mark = now - mark, now
             self._eval.refresh()                                # an FP32 copy takes the perturbed weights (nothing to do in FP16)
-            reward = float(evaluate_model(self._eval.model, self.tokenizer, chunk=self.chunk).mean_reward)
+            if self.recipe.workload_name == "arith16":
+                result = evaluate_model(self._eval.model, self.tokenizer, chunk=self.chunk)       # looked up here so that tests can replace it
+            else:
+                result = get_workload(self.recipe.workload_name).evaluate(self._eval.model, self.tokenizer, self.chunk)
+            reward = float(result.mean_reward)
             now = self._clock()
             timing["rollout"], mark = now - mark, now
         except BaseException as caught:                       # whatever it is, the model must come back first

@@ -478,3 +478,70 @@ def test_an_fp16_recipe_still_hands_the_live_model_to_the_evaluation(fx, monkeyp
                                                                                               EvalResult(mean_reward=0.5, records=()))[1])
     fx.executor()(fx.descriptor(7))
     assert given == [fx.model]
+
+
+# ---------------------------------------------------------------------------
+# G7: the noise engine and the workload are chosen by the recipe
+# ---------------------------------------------------------------------------
+
+def with_recipe(fx, **changes):
+    fx.recipe = Recipe(**{**fx.recipe.__dict__, **changes})
+
+
+def cuda_engine_changes():
+    from heteroes.noise.contracts import CUDA_CALL_ELEMENTS, CUDA_ENGINE_VERSION, EXPECTED_CUDA_NOISE_FINGERPRINT
+    return dict(engine_version=CUDA_ENGINE_VERSION, chunk_elements=CUDA_CALL_ELEMENTS, noise_fingerprint=EXPECTED_CUDA_NOISE_FINGERPRINT)
+
+
+def test_a_cuda_engine_recipe_perturbs_with_the_cuda_engine_and_not_with_the_cpu_engine(fx, monkeypatch):
+    with_recipe(fx, **cuda_engine_changes())
+    calls = []
+
+    def cuda_perturb(model, schema, seed, sigma):                        # the toy model is on the CPU: the CPU engine stands in for the arithmetic
+        calls.append((seed, sigma))
+        perturb_model_(model, schema, seed, sigma, CHUNK)
+
+    def cpu_perturb(*args, **kwargs):
+        raise AssertionError("the CPU engine must not be used by a CUDA engine recipe")
+
+    monkeypatch.setattr(executor_module, "perturb_model_cuda_", cuda_perturb)
+    monkeypatch.setattr(executor_module, "perturb_model_", cpu_perturb)
+
+    fx.executor()(fx.descriptor(7))
+
+    assert calls == [(7, fx.recipe.sigma)]
+    assert current(fx) == fx.parent                                     # and the restore is the same snapshot restore
+
+
+def test_a_cpu_engine_recipe_does_not_touch_the_cuda_engine(fx, monkeypatch):
+    def cuda_perturb(*args, **kwargs):
+        raise AssertionError("the CUDA engine must not be used by a CPU engine recipe")
+
+    monkeypatch.setattr(executor_module, "perturb_model_cuda_", cuda_perturb)
+    fx.executor()(fx.descriptor(7))                                     # no error: the CPU engine did it
+
+
+def test_the_workload_of_the_recipe_is_the_one_that_is_evaluated(fx, monkeypatch):
+    with_recipe(fx, workload_name="cot_l3_q32")
+    asked = []
+
+    class Workload:
+        @staticmethod
+        def evaluate(model, tokenizer, chunk):
+            asked.append((model, tokenizer, chunk))
+            return EvalResult(mean_reward=0.375, records=())
+
+    monkeypatch.setattr(executor_module, "get_workload", lambda name: Workload if name == "cot_l3_q32" else None)
+    executor = CandidateExecutor(fx.model, "the tokenizer", fx.schema, fx.recipe, chunk=4)
+
+    assert executor(fx.descriptor(7)) == 0.375
+    assert len(asked) == 1 and asked[0][1:] == ("the tokenizer", 4)
+
+
+def test_the_16_prompt_workload_still_goes_through_evaluate_model(fx, monkeypatch):
+    def not_this(name):
+        raise AssertionError("the default workload is evaluated by evaluate_model")
+
+    monkeypatch.setattr(executor_module, "get_workload", not_this)
+    fx.executor()(fx.descriptor(7))
+    assert len(fx.seen) == 1

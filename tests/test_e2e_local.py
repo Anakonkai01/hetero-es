@@ -36,8 +36,8 @@ def run(args, **kwargs):
     return subprocess.Popen([sys.executable, *map(str, args)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, **kwargs)
 
 
-@pytest.mark.parametrize("policy", ["greedy", "wave"])
-def test_two_worker_processes_give_the_bits_of_the_single_process_reference(policy):
+@pytest.mark.parametrize("policy,engine,workload", [("greedy", "cpu", "arith16"), ("wave", "cpu", "arith16"), ("greedy", "cuda", "cot_l3_q32")])
+def test_two_worker_processes_give_the_bits_of_the_single_process_reference(policy, engine, workload):
     base = Path.home() / ".cache" / "heteroes" / "e2e-test"        # a real disk: the weights are 1 GB per generation and /tmp may be RAM
     base.mkdir(parents=True, exist_ok=True)
     tmp_path = Path(tempfile.mkdtemp(dir=base))
@@ -46,7 +46,7 @@ def test_two_worker_processes_give_the_bits_of_the_single_process_reference(poli
     coordinator = run([SCRIPTS / "run_coordinator.py", *common, "--out-dir", tmp_path / "coordinator", "--weights-dir", tmp_path / "published",
                        "--experiment-id", "e2e", "--candidates", CANDIDATES, "--generations", GENERATIONS, "--alpha", "1e-3",
                        "--sigma", "1e-3", "--policy", policy, "--wave-size", "2", "--port", port, "--timeout-seconds", "600",
-                       "--linger-seconds", "10"])
+                       "--linger-seconds", "10", "--noise-engine", engine, "--workload", workload])
     workers = [run([SCRIPTS / "run_worker.py", *common, "--coordinator-url", f"http://127.0.0.1:{port}", "--worker-id", f"worker-{name}",
                     "--log", tmp_path / f"worker-{name}.jsonl", "--cache-dir", tmp_path / f"cache-{name}", "--poll-seconds", "0.5",
                     "--give-up-after-seconds", "60"]) for name in "ab"]
@@ -62,7 +62,8 @@ def test_two_worker_processes_give_the_bits_of_the_single_process_reference(poli
 
     reference = subprocess.run([sys.executable, SCRIPTS / "reference_generations.py", *common, "--output", tmp_path / "reference.json",
                                 "--experiment-id", "e2e", "--candidates", str(CANDIDATES), "--generations", str(GENERATIONS),
-                                "--alpha", "1e-3", "--sigma", "1e-3"], capture_output=True, text=True)
+                                "--alpha", "1e-3", "--sigma", "1e-3", "--noise-engine", engine, "--workload", workload],
+                               capture_output=True, text=True)
     assert reference.returncode == 0, reference.stderr[-2000:]
     comparison = subprocess.run([sys.executable, SCRIPTS / "compare_generation_runs.py", tmp_path / "coordinator" / "summary.json",
                                  tmp_path / "reference.json"], capture_output=True, text=True)

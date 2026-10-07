@@ -381,3 +381,65 @@ def test_a_document_without_the_key_is_read_as_fp16_whatever_the_default_is():
     assert "eval_dtype" not in document["workload"]
     recipe = Recipe.from_dict(document)
     assert recipe.eval_dtype == "float16" and recipe.hash == PINNED_RECIPE_HASH
+
+
+# ---------------------------------------------------------------------------
+# G7: the CUDA noise engine and a named workload are choices of the recipe (the CPU engine and the 16-prompt workload leave the document as it was)
+# ---------------------------------------------------------------------------
+
+from heteroes.noise.contracts import CUDA_CALL_ELEMENTS, CUDA_ENGINE_VERSION, EXPECTED_CUDA_NOISE_FINGERPRINT  # noqa: E402
+
+
+def make_cuda_recipe(**changes):
+    values = dict(engine_version=CUDA_ENGINE_VERSION, chunk_elements=CUDA_CALL_ELEMENTS, noise_fingerprint=EXPECTED_CUDA_NOISE_FINGERPRINT)
+    values.update(changes)
+    return make_recipe(**values)
+
+
+def test_a_cuda_engine_recipe_is_another_recipe_that_says_so_in_the_noise_part_of_the_document():
+    recipe = make_cuda_recipe()
+    noise = recipe.to_dict()["noise"]
+    assert noise == {"engine_version": CUDA_ENGINE_VERSION, "chunk_elements": CUDA_CALL_ELEMENTS, "fingerprint": EXPECTED_CUDA_NOISE_FINGERPRINT}
+    assert recipe.hash != PINNED_RECIPE_HASH and recipe.hash != make_cuda_recipe(sigma=0.002).hash
+
+
+def test_a_cuda_engine_recipe_round_trips_through_json():
+    recipe = make_cuda_recipe(eval_dtype="float32")
+    again = Recipe.from_dict(json.loads(json.dumps(recipe.to_dict())))
+    assert again == recipe and again.hash == recipe.hash and again.engine_version == CUDA_ENGINE_VERSION
+
+
+@pytest.mark.parametrize("changes", [dict(chunk_elements=262144), dict(chunk_elements=CUDA_CALL_ELEMENTS + 1), dict(noise_fingerprint="1" * 64)])
+def test_a_cuda_engine_recipe_must_carry_the_call_size_and_the_fingerprint_of_the_engine(changes):
+    with pytest.raises(ValueError):
+        make_cuda_recipe(**changes)
+
+
+def test_the_cpu_engine_recipe_is_untouched_by_the_second_engine():
+    assert make_recipe(eval_dtype="float16").hash == PINNED_RECIPE_HASH
+
+
+def test_the_16_prompt_workload_is_not_named_in_the_document_and_keeps_the_hash():
+    assert make_recipe().workload_name == "arith16"
+    assert "name" not in make_recipe().to_dict()["workload"]
+    assert make_recipe(eval_dtype="float16", workload_name="arith16").hash == PINNED_RECIPE_HASH
+
+
+def test_another_workload_is_named_in_the_document_and_makes_another_recipe():
+    recipe = make_recipe(workload_name="cot_l3_q32")
+    assert recipe.to_dict()["workload"]["name"] == "cot_l3_q32"
+    assert recipe.hash != make_recipe().hash
+    assert Recipe.from_dict(json.loads(json.dumps(recipe.to_dict()))) == recipe
+
+
+@pytest.mark.parametrize("bad", ["", "cot", None, 3, "ARITH16"])
+def test_an_unknown_workload_name_is_refused(bad):
+    with pytest.raises((ValueError, TypeError)):
+        make_recipe(workload_name=bad)
+
+
+def test_a_document_that_names_the_default_workload_is_refused_because_the_default_is_written_by_leaving_it_out():
+    document = make_recipe().to_dict()
+    document["workload"]["name"] = "arith16"
+    with pytest.raises(ValueError, match="round-trip"):
+        Recipe.from_dict(document)

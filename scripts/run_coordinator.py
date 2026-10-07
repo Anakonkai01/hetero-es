@@ -40,6 +40,10 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--alpha", type=float, default=1e-3)
     parser.add_argument("--sigma", type=float, default=1e-3)
     parser.add_argument("--chunk-elements", type=int, default=None, help="default: the contract value")
+    parser.add_argument("--noise-engine", choices=["cpu", "cuda"], default="cpu",
+                        help="the noise engine of the recipe: cpu = the canonical engine (any machine), cuda = the GPU engine of numerical contract section 16 (needs a CUDA GPU on the coordinator and on every worker)")
+    parser.add_argument("--workload", choices=["arith16", "cot_l3_q32"], default="arith16",
+                        help="the workload of the recipe: arith16 = the 16 prompts of the contract, cot_l3_q32 = the long arithmetic workload with reasoning (G7)")
     parser.add_argument("--eval-dtype", choices=["float16", "float32"], default="float32",
                         help="precision of the forward pass of the evaluation, part of the recipe: every worker takes it from the job (default float32, decision O8; see numerical contract section 15)")
     parser.add_argument("--policy", choices=["greedy", "wave", "proportional", "tail"], default="greedy",
@@ -107,7 +111,7 @@ def main(argv: list[str]) -> int:
     from heteroes.coordinator import Coordinator
     from heteroes.dispatch import AdmittedOnly, Greedy, GreedyTail, SpeedBook, StaticProportional, StaticWave
     from heteroes.ledger import Ledger
-    from heteroes.model.loading import build_recipe, check_noise_selftest, load_pinned_model
+    from heteroes.model.loading import build_recipe, check_noise_selftest, check_recipe_selftest, load_pinned_model
     from heteroes.noise.contracts import DEFAULT_CHUNK_ELEMENTS
     from heteroes.runtime_info import JsonlLog, code_info, environment_info
 
@@ -121,7 +125,14 @@ def main(argv: list[str]) -> int:
     log = JsonlLog(out_dir / "events.jsonl", append=args.resume)
     started = time.time()
     loaded = load_pinned_model(args.model_path, device)
-    recipe = build_recipe(loaded, sigma=args.sigma, chunk_elements=args.chunk_elements or DEFAULT_CHUNK_ELEMENTS, eval_dtype=args.eval_dtype)
+    if args.noise_engine == "cuda" and args.chunk_elements:
+        fail("--chunk-elements is the chunk of the CPU noise engine: the CUDA engine has a fixed call size")
+    recipe = build_recipe(loaded, sigma=args.sigma, chunk_elements=args.chunk_elements or (DEFAULT_CHUNK_ELEMENTS if args.noise_engine == "cpu" else None),
+                          eval_dtype=args.eval_dtype, noise_engine=args.noise_engine, workload=args.workload)
+    try:
+        engine_selftest_seconds = check_recipe_selftest(recipe, device)
+    except RuntimeError as error:
+        fail(str(error))
     ledger = Ledger(out_dir / "ledger.sqlite", max_attempts=args.max_attempts, enforce_chain=True)
 
     def emit(event: dict) -> None:
@@ -129,7 +140,7 @@ def main(argv: list[str]) -> int:
         print(json.dumps({key: value for key, value in event.items() if key not in ("rewards", "coefficients")}), flush=True)
 
     emit({"event": "coordinator_start", "t": time.time(), "environment": environment_info(device), "code": code_info(),
-          "args": vars(args), "recipe_hash": recipe.hash, "recipe": recipe.to_dict(), "noise_selftest_seconds": selftest_seconds})
+          "args": vars(args), "recipe_hash": recipe.hash, "recipe": recipe.to_dict(), "noise_selftest_seconds": selftest_seconds, "engine_selftest_seconds": engine_selftest_seconds})
     book = SpeedBook(prior=priors)                       # shared by the policies of every generation: a new generation does not start knowing nothing
     base = {"greedy": Greedy, "wave": lambda: StaticWave(args.wave_size), "proportional": lambda: StaticProportional(quotas),
             "tail": lambda: GreedyTail(book, margin=args.tail_margin)}[args.policy]

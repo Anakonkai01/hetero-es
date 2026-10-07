@@ -41,6 +41,8 @@ def add_cluster_arguments(parser) -> None:
     parser.add_argument("--port", type=int, default=DEFAULTS["port"])
     parser.add_argument("--experiment-id", default="bench")
     parser.add_argument("--eval-dtype", choices=["float16", "float32"], default="float32", help="precision of the forward pass of the evaluation (the recipe's; the workers read it from the job)")
+    parser.add_argument("--noise-engine", choices=["cpu", "cuda"], default="cpu", help="the noise engine of the recipe (the workers read it from the job)")
+    parser.add_argument("--workload", choices=["arith16", "cot_l3_q32"], default="arith16", help="the workload of the recipe (the workers read it from the job)")
     parser.add_argument("--generation-timeout", type=float, default=1200.0)
 
 
@@ -80,7 +82,8 @@ class Cluster:
                "--weights-dir", str(self.published), "--experiment-id", a.experiment_id, "--candidates", str(candidates),
                "--generations", str(generations), "--alpha", "1e-3", "--sigma", "1e-3", "--policy", policy,
                "--host", a.host, "--port", str(a.port), "--linger-seconds", "10", "--lease-seconds", str(a.lease_seconds),
-               "--allow-unauthenticated", "--timeout-seconds", str(a.generation_timeout), "--eval-dtype", a.eval_dtype] + policy_args + (["--resume"] if resume else [])
+               "--allow-unauthenticated", "--timeout-seconds", str(a.generation_timeout), "--eval-dtype", a.eval_dtype,
+               "--noise-engine", a.noise_engine, "--workload", a.workload] + policy_args + (["--resume"] if resume else [])
         env = self.env if a.coordinator_noise_threads is None else {**self.env, "HETEROES_NOISE_THREADS": str(a.coordinator_noise_threads)}
         process = subprocess.Popen(cmd, stdout=open(self.run_dir / f"{label}.out", "a"), stderr=subprocess.STDOUT, env=env)
         self.processes[label] = process

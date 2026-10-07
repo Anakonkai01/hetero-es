@@ -29,6 +29,8 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--alpha", type=float, default=1e-3)
     parser.add_argument("--sigma", type=float, default=1e-3)
     parser.add_argument("--chunk-elements", type=int, default=None)
+    parser.add_argument("--noise-engine", choices=["cpu", "cuda"], default="cpu")
+    parser.add_argument("--workload", choices=["arith16", "cot_l3_q32"], default="arith16")
     parser.add_argument("--device", choices=["cuda", "cpu"], default=None)
     args = parser.parse_args(argv)
 
@@ -39,11 +41,12 @@ def main(argv: list[str]) -> int:
 
     import torch
 
-    from heteroes.es.update import DEFAULT_ETA, apply_es_update_
+    from heteroes.es.cuda_ops import apply_coefficients_cuda_
+    from heteroes.es.update import DEFAULT_ETA, apply_es_update_, standardize_rewards
     from heteroes.executor import CandidateExecutor
     from heteroes.eval.candidate import model_weights_sha256
     from heteroes.manifest import CandidateDescriptor, derive_seed
-    from heteroes.model.loading import build_recipe, check_noise_selftest, load_pinned_model
+    from heteroes.model.loading import build_recipe, check_noise_selftest, check_recipe_selftest, load_pinned_model
     from heteroes.noise.contracts import DEFAULT_CHUNK_ELEMENTS
     from heteroes.runtime_info import code_info, environment_info
 
@@ -51,7 +54,8 @@ def main(argv: list[str]) -> int:
     device = args.device or ("cuda" if torch.cuda.is_available() else "cpu")
     chunk = args.chunk_elements or DEFAULT_CHUNK_ELEMENTS
     loaded = load_pinned_model(args.model_path, device)
-    recipe = build_recipe(loaded, sigma=args.sigma, chunk_elements=chunk)
+    recipe = build_recipe(loaded, sigma=args.sigma, chunk_elements=chunk if args.noise_engine == "cpu" else None, noise_engine=args.noise_engine, workload=args.workload)
+    check_recipe_selftest(recipe, device)
     executor = CandidateExecutor(loaded.model, loaded.tokenizer, loaded.schema, recipe)
     started = time.time()
     generations = []
@@ -67,7 +71,10 @@ def main(argv: list[str]) -> int:
             rewards.append(executor(descriptor))
             candidate_seconds.append(time.perf_counter() - begin)
         begin = time.perf_counter()
-        report = apply_es_update_(loaded.model, loaded.schema, seeds, rewards, args.alpha, chunk, DEFAULT_ETA)
+        if args.noise_engine == "cuda":                   # the update of the CUDA engine: standardize, then apply the coefficients (as the coordinator does)
+            report = apply_coefficients_cuda_(loaded.model, loaded.schema, seeds, standardize_rewards(rewards, DEFAULT_ETA), args.alpha)
+        else:
+            report = apply_es_update_(loaded.model, loaded.schema, seeds, rewards, args.alpha, chunk, DEFAULT_ETA)
         update_seconds = time.perf_counter() - begin
         child = model_weights_sha256(loaded.model, loaded.schema)
         generations.append({"generation": generation, "parent_sha256": parent, "child_sha256": child, "rewards": rewards,

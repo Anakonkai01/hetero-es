@@ -22,7 +22,9 @@ dead one stopped and ends with the weights an uninterrupted run would have.
 import time
 
 from heteroes.dispatch import Greedy
+from heteroes.es.cuda_ops import apply_coefficients_cuda_
 from heteroes.es.update import apply_coefficients_
+from heteroes.noise.contracts import CUDA_ENGINE_VERSION
 from heteroes.eval.candidate import model_weights_sha256
 from heteroes.generation_record import GenerationRecord
 from heteroes.ledger import GenerationState, Ledger
@@ -154,6 +156,8 @@ class Coordinator:
         self.parent_sha256 = sha256
 
     def _apply_record(self, record):
+        if self.recipe.engine_version == CUDA_ENGINE_VERSION:                  # the engine that made the noise of the candidates makes that of the update
+            return apply_coefficients_cuda_(self.model, self.schema, list(record.seeds), record.coefficients, record.alpha)
         return apply_coefficients_(self.model, self.schema, list(record.seeds), record.coefficients, record.alpha,
                                    self.recipe.chunk_elements)
 
