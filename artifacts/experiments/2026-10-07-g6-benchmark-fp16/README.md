@@ -16,8 +16,9 @@ with heartbeat. **Three repeats** of B0 (the 5070 Ti alone, one process), B3 (gr
   synchronization per generation. G5 had measured B3 as 3.5 percent faster than B0 at N = 24; that came from generation 0 (see STATUS 0.000) and does not hold.
 - The tail-aware policy (B4, `GreedyTail`: a slow worker does not take a candidate when the faster ones would finish it sooner) turns it into a 6 percent GAIN (1.060 +- 0.046). The same policy is 2.4 percent better than two processes on the 5070 Ti with the FP32 evaluation
   (`../2026-10-07-g6-benchmark-fp32/`). With a slow GPU in the pool, WHO gets the last candidates matters more than anything else the cluster does.
-- **The runs did not all end with the same weights.** Of the 9 runs, 7 ended with the final weights `c4cd67ea...` (the three B0 runs, four of the six runs that used the 1660S) and 2 (B3 repeat 1, B4 repeat 2) with `12d24fe8...`. In those two a candidate evaluated by the
-  1660S gave another reward than it would have given on the 5070 Ti (one question of 16 differs; generation 0 was the same in all runs, the divergence came later), the update differed, and every following generation with it. This is the FP16 finding of
+- **The runs did not all end with the same weights.** Of the 9 runs, 7 ended with the final weights `c4cd67ea...` (the three B0 runs, four of the six runs that used the 1660S) and 2 (B3 repeat 1, B4 repeat 2) with `12d24fe8...`. In those two the same candidate (generation 2, candidate 13, the same parent weights
+  in all runs) was evaluated by the 1660S and scored 0.3125, while on the 5070 Ti it scored 0.25 (one question of 16; checked in the rewards of the summaries and the logs of the workers: `first_generation_mismatches` is empty, generations 0 and 1 were
+  identical), the update differed, and every following generation with it. This is the FP16 finding of
   `../2026-10-07-g6-cross-gpu/` seen at run level: the result of an FP16 run that uses both GPUs depends on which GPU evaluated which candidate. With the FP32 evaluation all 20 runs of the larger benchmark ended with identical weights.
 - A generation is 48 s here (FP16, one prompt per call) against 36 s with the FP32 evaluation and chunk 16 on the same single process (`../2026-10-07-g6-benchmark-fp32/`), and 221 s in G5.
 
