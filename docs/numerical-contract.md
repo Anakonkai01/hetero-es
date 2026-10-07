@@ -400,7 +400,7 @@ The margin between the two best scores at the flip is 0 to 0.09 on scores of mag
 
 **Decided 2026-10-07 (O8): FP32 is the default of the experiments.** For: exact batching (a 5 times faster evaluation) and the same answers on both GPUs (0 of 1,920). Against, and accepted: 2 GB of GPU memory more per worker (the 1660S has 6 GB; the FP32 benchmark ran on it), a recipe change that makes the earlier evidence (all FP16) not directly comparable, and the claim is a checked level (1584 padded-batch comparisons without a difference), not a guarantee. The FP16 option stays for comparison with that evidence.
 
-## 16. The CUDA noise engine [E for two GPUs (07/10/2026, G7); NOT in the recipe yet, so not part of manifest v1]
+## 16. The CUDA noise engine [E for two GPUs (07/10/2026, G7); an option of the recipe since the same day, the CPU engine stays the default]
 
 **The problem it answers.** The canonical engine (sections 3 and 4) makes the noise on the CPU: 0.7 s per candidate on the 5070 Ti, 3.7 s on the 1660S and 0.3 s per candidate again in the
 coordinator's update. The native GPU noise (`torch.Generator` on a CUDA device) is fast but depends on the GPU for a big tensor (below).
@@ -426,7 +426,11 @@ or invisible (one writes past a buffer with the right values).
 **What it relies on [OPEN risks].** That curand keeps giving the same bits on these two architectures (nobody guarantees it) and that PyTorch keeps its thread mapping: both change with the torch or
 CUDA version, so the fingerprint must be checked at admission and the torch version recorded; a GPU with fewer than 88 blocks (for example a GTX 1650, 56) is refused at the call size of 22,528;
 only two GPUs and one software stack were compared. The native noise of the machines is NOT portable beyond the call size (arms C of the experiment give different drift on the two GPUs).
-It is a different noise from engine v1: results are not comparable bit for bit, and it would be a new `engine_version` of the recipe (not done).
+It is a different noise from engine v1: results are not comparable bit for bit. **It is an option of the recipe** (`noise.engine_version` = `torch_cuda_philox_chunked_f32_to_f16_v1`, `noise.chunk_elements` = 22,528 and `noise.fingerprint` = the engine's, all three checked by `Recipe`; the document of a CPU recipe and its hash are unchanged, so manifest v1 is extended, not changed). The executor perturbs with it, the coordinator applies the update with it, every worker and the coordinator run `check_cuda_noise_selftest` before taking part, and a recipe may also name a workload (`workload.name`, see below).
+
+**In a real distributed run [E]** (`artifacts/experiments/2026-10-07-g7-cluster-benchmark/`): coordinator, 2 workers on the 5070 Ti and one on the 1660S, 24 candidates, 4 generations, 3 runs per cell: all 9 runs with the CUDA engine ended with the same rewards and the same weights hash although the 1660S evaluated 9 to 13 candidates of each run; against the single-process reference the end-to-end test is bit-equal (`tests/test_e2e_local.py`). A generation is 7.4 to 10.2 percent shorter than with the CPU engine in the same condition.
+
+**A named workload [D].** `Recipe.workload_name` is `arith16` (the 16 prompts of the contract, left out of the document, hash unchanged) or `cot_l3_q32` (`heteroes/eval/cot_workload.py`: generated word problems, 32 questions, step-by-step reasoning, up to 256 new tokens, reward = exact integer after the last `Answer:` line, else the last integer; its own `workload_hash` over the system prompt, the budget, the sampling flag, the reward type and every question with its answer). It is a different recipe.
 
 **Restore by arithmetic is not used.** Coming back by `-sigma` is not exact: after 24 candidates 25 percent of the FP16 elements differ from the original (relative L2 1.4e-4, growing like the square root of
 the number of candidates); the snapshot restore costs 0.14 s on the 5070 Ti, which is 3 percent of a candidate of the long workload.
