@@ -1,0 +1,12 @@
+[00:45:37] worker worker-1660s exited with 255: restart 1
+[00:45:39] worker worker-1660s exited with 255: restart 2
+[00:45:43] worker worker-1660s exited with 255: restart 3
+[00:45:45] worker worker-1660s exited with 255: restart 4
+[00:45:49] worker worker-1660s exited with 255: restart 5
+scp: /tmp/bench-lrtA/worker-1660s.jsonl: No such file or directory
+scp: /tmp/bench-lrtA-restart1/worker-1660s.jsonl: No such file or directory
+scp: /tmp/bench-lrtA-restart2/worker-1660s.jsonl: No such file or directory
+scp: /tmp/bench-lrtA-restart3/worker-1660s.jsonl: No such file or directory
+scp: /tmp/bench-lrtA-restart4/worker-1660s.jsonl: No such file or directory
+scp: /tmp/bench-lrtA-restart5/worker-1660s.jsonl: No such file or directory
+{"experiment_id": "lrtA", "outcome": "ok", "wall_seconds": 9333.010699033737, "restarts": {"coordinator": 0, "worker-5070ti": 0, "worker-5070ti-2": 0, "worker-1660s": 5}, "pending_unlinked": [], "ckpt_dir": "/home/pc5070ti/.cache/heteroes/learn-ckpt/lrtA"}

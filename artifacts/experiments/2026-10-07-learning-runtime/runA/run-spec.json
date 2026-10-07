@@ -1,0 +1,50 @@
+{
+  "args": {
+    "out_dir": "artifacts/experiments/2026-10-07-learning-runtime/runA",
+    "generations": 100,
+    "candidates": 24,
+    "condition": "B4x2",
+    "ckpt_dir": null,
+    "ckpt_every": 5,
+    "stop_at": "2026-10-08 07:45",
+    "max_coordinator_restarts": 3,
+    "max_worker_restarts": 5,
+    "run_timeout": 21600.0,
+    "lease_seconds": 60.0,
+    "noise_threads": null,
+    "coordinator_noise_threads": 28,
+    "worker_http_timeout": null,
+    "local_python": "/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python",
+    "scratch_dir": "/home/pc5070ti/.cache/heteroes/learn-scratch",
+    "remote": "anakonkai@10.10.10.2",
+    "remote_repo": "~/projects/heteroes/hetero-es",
+    "remote_python": "~/projects/heteroes/.venv/bin/python",
+    "host": "10.10.10.1",
+    "port": 8765,
+    "experiment_id": "lrtA",
+    "alpha": 0.001,
+    "sigma": 0.001,
+    "eval_dtype": "float32",
+    "noise_engine": "cuda",
+    "workload": "cot_l3_q64",
+    "generation_timeout": 1200.0
+  },
+  "spec": {
+    "workers": {
+      "worker-5070ti": 64,
+      "worker-5070ti-2": 64,
+      "worker-1660s": 64
+    },
+    "policy": "tail",
+    "args": [
+      "--speed-prior",
+      "worker-1660s=19.19567544400372",
+      "--speed-prior",
+      "worker-5070ti=4.528053429003631",
+      "--speed-prior",
+      "worker-5070ti-2=4.528053429003631"
+    ]
+  },
+  "ckpt_dir": "/home/pc5070ti/.cache/heteroes/learn-ckpt/lrtA",
+  "started": 1791386723.2039495
+}
