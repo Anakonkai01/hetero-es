@@ -28,7 +28,7 @@ from heteroes.generation_record import GenerationRecord
 from heteroes.ledger import GenerationState, Ledger
 from heteroes.manifest import CandidateDescriptor, Recipe, derive_seed
 from heteroes.model.schema import ParameterSchema
-from heteroes.model.weights_io import WeightsFileError, load_weights_, prepare_publication, publish_weights
+from heteroes.model.weights_io import WeightsFileError, load_weights_, prepare_publication, prune_published, publish_weights
 from heteroes.http_transport import CoordinatorServer
 from heteroes.worker_api import WorkerAPI
 
@@ -55,7 +55,7 @@ class Coordinator:
     def __init__(self, model, schema: ParameterSchema, recipe: Recipe, ledger: Ledger, models_dir, experiment_id: str,
                  candidates: int, alpha: float, policy_factory=Greedy, lease_seconds: float = 120.0, host: str = "127.0.0.1",
                  port: int = 0, token: str | None = None, poll_seconds: float = 0.2, failed_grace_seconds: float = 5.0,
-                 timeout_seconds: float | None = None, stall_seconds=_DEFAULT, log=lambda event: None, timer=time.perf_counter,
+                 timeout_seconds: float | None = None, stall_seconds=_DEFAULT, keep_published: int | None = 3, log=lambda event: None, timer=time.perf_counter,
                  monotonic=time.monotonic, sleep=time.sleep):
         self.model = model
         self.schema = schema
@@ -71,6 +71,8 @@ class Coordinator:
         self._grace = failed_grace_seconds
         self._timeout = timeout_seconds
         self._stall = max(MIN_STALL_SECONDS, STALL_LEASES * lease_seconds) if stall_seconds is _DEFAULT else stall_seconds
+        self._keep_published = keep_published       # how many versions of the weights stay in models_dir (the current one and its ancestors); None: all
+        self._recent: list[str] = []                # the hashes published or loaded, newest last
         self._log = log
         self._timer = timer
         self._monotonic = monotonic
@@ -123,6 +125,19 @@ class Coordinator:
             self._sleep(self._poll)
 
     # ---- restart ----------------------------------------------------------------------------------------------------
+
+    def _prune(self, *hashes: str) -> None:
+        """Remember these versions as the newest and delete the published files of the older ones (about 1 GB each)."""
+        if self._keep_published is None:
+            return
+        for sha256 in hashes:
+            if sha256 in self._recent:
+                self._recent.remove(sha256)
+            self._recent.append(sha256)
+        self._recent = self._recent[-self._keep_published:]
+        removed = prune_published(self.models_dir, self._recent)
+        if removed:
+            self.log("weights_pruned", removed=[name[:-4] for name in removed], kept=list(self._recent))
 
     def _weights_file(self, sha256: str):
         from pathlib import Path
@@ -242,6 +257,7 @@ class Coordinator:
             publication.discard()
             raise
         self.parent_sha256 = child
+        self._prune(parent, child)
         done = self._timer()
         self.log("weights_published", generation=generation, child_sha256=child)
 

@@ -80,6 +80,21 @@ def test_closing_the_generator_early_stops_new_work():
     assert settled < 100
 
 
+def test_closing_cancels_the_work_that_was_queued_but_not_started():
+    count = []
+
+    def work(i):
+        count.append(i)
+        time.sleep(0.05)
+        return i
+
+    it = parallel.ordered_map(work, range(10_000), threads=2, window=60)     # 60 queued, 2 at a time: 1.5 s of work if nothing is cancelled
+    next(it)
+    it.close()
+    time.sleep(2.0)
+    assert len(count) < 15                                                    # the two that were running, a few more, never the 60 queued
+
+
 def test_empty_input():
     assert list(parallel.ordered_map(lambda i: i, [], threads=4)) == []
 

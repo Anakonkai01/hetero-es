@@ -37,6 +37,7 @@ def add_cluster_arguments(parser) -> None:
     parser.add_argument("--host", default=DEFAULTS["host"], help="the coordinator's address as the workers see it")
     parser.add_argument("--port", type=int, default=DEFAULTS["port"])
     parser.add_argument("--experiment-id", default="bench")
+    parser.add_argument("--eval-dtype", choices=["float16", "float32"], default="float16", help="precision of the forward pass of the evaluation (the recipe's; the workers read it from the job)")
     parser.add_argument("--generation-timeout", type=float, default=1200.0)
 
 
@@ -76,7 +77,7 @@ class Cluster:
                "--weights-dir", str(self.published), "--experiment-id", a.experiment_id, "--candidates", str(candidates),
                "--generations", str(generations), "--alpha", "1e-3", "--sigma", "1e-3", "--policy", policy,
                "--host", a.host, "--port", str(a.port), "--linger-seconds", "10", "--lease-seconds", str(a.lease_seconds),
-               "--allow-unauthenticated", "--timeout-seconds", str(a.generation_timeout)] + policy_args + (["--resume"] if resume else [])
+               "--allow-unauthenticated", "--timeout-seconds", str(a.generation_timeout), "--eval-dtype", a.eval_dtype] + policy_args + (["--resume"] if resume else [])
         process = subprocess.Popen(cmd, stdout=open(self.run_dir / f"{label}.out", "a"), stderr=subprocess.STDOUT, env=self.env)
         self.processes[label] = process
         wait_health(self.url, 300)

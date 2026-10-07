@@ -40,6 +40,8 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--alpha", type=float, default=1e-3)
     parser.add_argument("--sigma", type=float, default=1e-3)
     parser.add_argument("--chunk-elements", type=int, default=None, help="default: the contract value")
+    parser.add_argument("--eval-dtype", choices=["float16", "float32"], default="float16",
+                        help="precision of the forward pass of the evaluation, part of the recipe: every worker takes it from the job (default float16; see numerical contract section 15)")
     parser.add_argument("--policy", choices=["greedy", "wave", "proportional"], default="greedy",
                         help="greedy = B3, wave = B1 (static waves), proportional = B2 (needs one --quota per worker)")
     parser.add_argument("--quota", action="append", default=[], metavar="WORKER=N", help="B2: the candidates of that worker; they must add up to --candidates")
@@ -104,7 +106,7 @@ def main(argv: list[str]) -> int:
     log = JsonlLog(out_dir / "events.jsonl", append=args.resume)
     started = time.time()
     loaded = load_pinned_model(args.model_path, device)
-    recipe = build_recipe(loaded, sigma=args.sigma, chunk_elements=args.chunk_elements or DEFAULT_CHUNK_ELEMENTS)
+    recipe = build_recipe(loaded, sigma=args.sigma, chunk_elements=args.chunk_elements or DEFAULT_CHUNK_ELEMENTS, eval_dtype=args.eval_dtype)
     ledger = Ledger(out_dir / "ledger.sqlite", max_attempts=args.max_attempts, enforce_chain=True)
 
     def emit(event: dict) -> None:

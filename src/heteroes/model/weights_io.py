@@ -179,3 +179,24 @@ def tensors_match_file(tensors, path, slab_elements: int = DEFAULT_SLAB_ELEMENTS
                 if expected.size != part.size or not np.array_equal(expected, part):
                     return False
     return True
+
+
+def prune_published(directory, keep) -> list[str]:
+    """
+    Delete the published weights files (`<64 hex digits>.bin`) of `directory` whose hash is not in `keep`; return their names.
+    Nothing else is touched: other files, directories and the temporary files of a write in progress stay. A weights file is about
+    1 GB, one per generation, and the coordinator used to keep them all.
+    """
+    keep = list(keep)
+    for sha256 in keep:
+        if not isinstance(sha256, str) or not _HEX64.fullmatch(sha256):
+            raise ValueError(f"keep must hold 64 lowercase hex digits, got {sha256!r}")
+    directory = Path(directory)
+    if not directory.is_dir():
+        return []
+    removed = []
+    for path in sorted(directory.iterdir()):
+        if path.is_file() and re.fullmatch(r"[0-9a-f]{64}\.bin", path.name) and path.name[:-4] not in keep:
+            path.unlink()
+            removed.append(path.name)
+    return removed

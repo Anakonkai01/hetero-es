@@ -310,3 +310,38 @@ def test_derive_seed_refuses_bad_arguments(bad):
 
 def test_a_derived_seed_makes_a_valid_descriptor():
     assert make_descriptor(seed=derive_seed("regression", 0, 0)).seed == 2012071010219947
+
+
+# ---------------------------------------------------------------------------
+# G6: the precision of the forward pass of the evaluation is part of the recipe (optional: absent means FP16 and keeps the v1 hash)
+# ---------------------------------------------------------------------------
+
+def test_an_fp16_evaluation_leaves_the_v1_document_and_hash_exactly_as_they_were():
+    assert make_recipe().eval_dtype == "float16"
+    assert "eval_dtype" not in make_recipe().to_dict()["workload"]
+    assert make_recipe(eval_dtype="float16").hash == PINNED_RECIPE_HASH
+
+
+def test_an_fp32_evaluation_is_another_recipe_with_its_own_hash_and_a_label_in_the_workload():
+    recipe = make_recipe(eval_dtype="float32")
+    assert recipe.to_dict()["workload"]["eval_dtype"] == "float32"
+    assert recipe.hash != PINNED_RECIPE_HASH and recipe.hash != make_recipe(eval_dtype="float16").hash
+
+
+def test_an_fp32_recipe_round_trips_through_json():
+    recipe = make_recipe(eval_dtype="float32")
+    again = Recipe.from_dict(json.loads(json.dumps(recipe.to_dict())))
+    assert again == recipe and again.hash == recipe.hash and again.eval_dtype == "float32"
+
+
+@pytest.mark.parametrize("bad", ["bfloat16", "float64", "fp32", "", None, 32])
+def test_an_unknown_evaluation_precision_is_refused(bad):
+    with pytest.raises((ValueError, TypeError)):
+        make_recipe(eval_dtype=bad)
+
+
+def test_a_document_that_says_float16_explicitly_is_refused_because_the_default_is_written_by_leaving_it_out():
+    document = make_recipe().to_dict()
+    document["workload"]["eval_dtype"] = "float16"                  # not what to_dict writes: it would not round-trip
+    with pytest.raises(ValueError, match="round-trip"):
+        Recipe.from_dict(document)

@@ -98,3 +98,18 @@ def test_the_size_of_the_pieces_of_the_update_does_not_change_a_bit(device, batc
         return _bits(model), report.changed
 
     assert updated(batch) == updated(2**22)
+
+
+@pytest.mark.parametrize("device", DEVICES)
+def test_the_noise_goes_to_the_device_in_pieces_of_about_the_batch_size_not_all_at_once(device, monkeypatch):
+    # an equivalent change in bits but not in memory: a whole 136M-element embedding in one piece would need gigabytes on the 6 GB card
+    import heteroes.es.perturb as perturb_module
+
+    pieces = []
+    real = perturb_module.np.concatenate
+    monkeypatch.setattr(perturb_module, "BATCH_ELEMENTS", 64)
+    monkeypatch.setattr(perturb_module.np, "concatenate", lambda arrays, *a, **k: (pieces.append(sum(x.size for x in arrays)), real(arrays, *a, **k))[1])
+    model = Toy().to(device)
+    perturb_model_(model, build_parameter_schema(model), candidate_seed=5, sigma=1e-3, chunk_elements=16)
+    assert pieces and max(pieces) <= 64 + 15                  # a piece is closed as soon as it holds at least 64 elements: at most 64 + one chunk
+    assert len(pieces) >= 20                                  # 37*53 + 53*11 weights are many pieces, not one

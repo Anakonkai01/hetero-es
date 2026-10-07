@@ -416,3 +416,49 @@ def test_a_verified_file_needs_the_hash_it_claims(fx, tmp_path):
     executor = fx.executor()
     with pytest.raises(ValueError, match="expected_sha256"):
         executor.reset_parent(None, verified_file=tmp_path / "w.bin")
+
+
+# ---------------------------------------------------------------------------
+# G6: an FP32 forward pass (recipe.eval_dtype = float32): the candidate is evaluated on a float32 copy of the perturbed weights
+# ---------------------------------------------------------------------------
+
+def test_an_fp32_recipe_evaluates_a_float32_copy_of_the_perturbed_weights_and_the_fp16_model_comes_back(fx, monkeypatch):
+    import dataclasses
+    seen = []
+
+    def evaluate(model, tokenizer, chunk=1):
+        seen.append([p.detach().clone() for p in model.parameters()])      # what the evaluation was given
+        return EvalResult(mean_reward=0.5, records=())
+
+    monkeypatch.setattr(executor_module, "evaluate_model", evaluate)
+    fx.recipe = dataclasses.replace(fx.recipe, eval_dtype="float32")
+    executor = fx.executor()
+
+    executor(fx.descriptor(7))
+
+    clone = copy.deepcopy(fx.model)
+    perturb_model_(clone, build_parameter_schema(clone), 7, SIGMA, CHUNK)
+    (given,) = seen
+    assert all(p.dtype == torch.float32 for p in given)                    # the evaluation saw float32 ...
+    assert all(torch.equal(g, c.float()) for g, c in zip(given, clone.parameters()))   # ... holding exactly the perturbed FP16 weights widened
+    assert current(fx) == fx.parent                                        # and the live FP16 model was restored bit for bit
+
+
+def test_the_fp32_copy_is_refreshed_for_every_candidate(fx, monkeypatch):
+    import dataclasses
+    seen = []
+    monkeypatch.setattr(executor_module, "evaluate_model", lambda model, tokenizer, chunk=1: (seen.append(model.fc.bias.detach().clone()),
+                                                                                              EvalResult(mean_reward=0.5, records=()))[1])
+    fx.recipe = dataclasses.replace(fx.recipe, eval_dtype="float32")
+    executor = fx.executor()
+    executor(fx.descriptor(7))
+    executor(fx.descriptor(8))
+    assert len(seen) == 2 and not torch.equal(seen[0], seen[1])            # the second candidate did not see the first one's weights
+
+
+def test_an_fp16_recipe_still_hands_the_live_model_to_the_evaluation(fx, monkeypatch):
+    given = []
+    monkeypatch.setattr(executor_module, "evaluate_model", lambda model, tokenizer, chunk=1: (given.append(model),
+                                                                                              EvalResult(mean_reward=0.5, records=()))[1])
+    fx.executor()(fx.descriptor(7))
+    assert given == [fx.model]

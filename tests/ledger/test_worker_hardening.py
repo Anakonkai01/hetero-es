@@ -159,11 +159,15 @@ def test_a_bad_request_id_is_a_bad_request(api, bad):
     assert code_of(call(api, "lease", {"worker_id": "worker-a", "request_id": bad})) == "bad_request"
 
 
-def test_the_memory_of_request_ids_is_bounded(api, ledger):
+def test_the_memory_of_request_ids_is_bounded(clock):
     from heteroes.worker_api import MAX_REMEMBERED_REQUESTS
-    for i in range(MAX_REMEMBERED_REQUESTS + 5):
-        api.handle("lease", {"worker_id": "worker-a", "request_id": f"r{i}"})
-    assert len(api._remembered) <= MAX_REMEMBERED_REQUESTS
+    with Ledger(":memory:", clock=clock) as big:
+        big.open_generation(batch(MAX_REMEMBERED_REQUESTS + 5))                 # more candidates than ids that are remembered
+        bounded = WorkerAPI(big, "exp", 0, lease_seconds=LEASE_SECONDS)
+        for i in range(MAX_REMEMBERED_REQUESTS + 5):
+            assert bounded.handle("lease", {"worker_id": "worker-a", "request_id": f"r{i}"})["work"] is not None
+        assert len(bounded._remembered) == MAX_REMEMBERED_REQUESTS               # the oldest were forgotten, the newest are kept
+        assert ("worker-a", f"r{MAX_REMEMBERED_REQUESTS + 4}") in bounded._remembered and ("worker-a", "r0") not in bounded._remembered
 
 
 # ---------------------------------------------------------------------------

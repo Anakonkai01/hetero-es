@@ -45,6 +45,8 @@ def main(argv: list[str]) -> int:
                         help="perturbed candidates on which every chunk is compared with chunk 1 (a rare difference needs many: with a "
                              "4 percent rate, 2 candidates see it 8 percent of the time, 32 see it 73 percent)")
     parser.add_argument("--sigma", type=float, default=1e-3)
+    parser.add_argument("--eval-dtype", choices=["float16", "float32"], default="float16",
+                        help="precision of the forward pass of the evaluation (part of the recipe): the chunks are compared and the candidates timed with it")
     parser.add_argument("--sync-url", default=None)
     parser.add_argument("--sync-sha256", default=None)
     parser.add_argument("--sync-dir", default=str(Path.home() / ".cache" / "heteroes" / "profile-sync"))
@@ -87,16 +89,20 @@ def main(argv: list[str]) -> int:
 
     loaded = load_pinned_model(args.model_path, device)
     model, tokenizer, schema = loaded.model, loaded.tokenizer, loaded.schema
-    recipe = build_recipe(loaded, sigma=args.sigma)
+    recipe = build_recipe(loaded, sigma=args.sigma, eval_dtype=args.eval_dtype)
+    from heteroes.eval.precision import EvalModel
+    evaluation = EvalModel(model, args.eval_dtype)
+    evaluation.refresh()
     snapshot = take_snapshot(model, schema)
     questions = [example.question for example in EXAMPLES]
 
     def texts_at(chunk: int) -> list[str]:
+        evaluation.refresh()                                       # an FP32 copy takes the weights of the state the model is in
         if chunk == 1:
-            return [generate_answer(model, tokenizer, question) for question in questions]
+            return [generate_answer(evaluation.model, tokenizer, question) for question in questions]
         out = []
         for start in range(0, len(questions), chunk):
-            out += generate_answers(model, tokenizer, questions[start:start + chunk])
+            out += generate_answers(evaluation.model, tokenizer, questions[start:start + chunk])
         return out
 
     state = {"restore_ok": True}
@@ -143,7 +149,7 @@ def main(argv: list[str]) -> int:
             try:
                 executor(descriptor)
             except CandidateFailed as failed:
-                return {"failed": failed.kind.value}
+                fail(f"a candidate failed at chunk {chunk} while it was timed: {failed.kind.value} ({failed}); a profile with a failed candidate is not written", 3)
             samples.append(executor.last_timing)
         return {"chunk": chunk, "raw": samples, **summarize_times(samples),
                 "peak_bytes": torch.cuda.max_memory_allocated() if cuda else None}

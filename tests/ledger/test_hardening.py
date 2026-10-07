@@ -210,6 +210,16 @@ def test_a_candidate_failure_is_still_charged_and_still_exhausts_the_budget(cloc
         assert ledger.get_generation_status("exp", 0).state is GenerationState.FAILED
 
 
+def test_the_lease_itself_does_not_count_the_attempts_of_a_quarantined_worker(clock):
+    with Ledger(":memory:", clock=clock, max_attempts=1) as ledger:
+        ledger.open_generation(batch(2))
+        lease(ledger, 0, "worker-a", 30.0)                          # worker-a holds candidate 0 ...
+        fail(ledger, lease(ledger, 1, "worker-a", 30.0), RESTORE)   # ... and is quarantined for a restore mismatch on candidate 1
+        clock.advance(31.0)                                         # worker-a's lease on candidate 0 is over
+        again = lease(ledger, 0, "worker-b", 30.0)                  # it has had 1 attempt, but that one was not the candidate's fault
+        assert again.attempt_number == 2
+
+
 def test_an_expired_lease_of_a_healthy_worker_is_charged(clock):
     with Ledger(":memory:", clock=clock, max_attempts=2) as ledger:
         ledger.open_generation(batch(2))

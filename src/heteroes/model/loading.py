@@ -52,7 +52,8 @@ def load_pinned_model(model_path, device: str) -> LoadedModel:
     return LoadedModel(model, tokenizer, build_parameter_schema(model), revision, model.generation_config.to_dict(), device)
 
 
-def build_recipe(loaded: LoadedModel, sigma: float, chunk_elements: int = DEFAULT_CHUNK_ELEMENTS, reward_eta: float = DEFAULT_ETA) -> Recipe:
+def build_recipe(loaded: LoadedModel, sigma: float, chunk_elements: int = DEFAULT_CHUNK_ELEMENTS, reward_eta: float = DEFAULT_ETA,
+                 eval_dtype: str = "float16") -> Recipe:
     return Recipe(
         model_id=MODEL_ID,
         model_revision=loaded.revision,
@@ -66,4 +67,5 @@ def build_recipe(loaded: LoadedModel, sigma: float, chunk_elements: int = DEFAUL
         reward_eta=reward_eta,
         workload_hash=workload_hash(),
         generation_config_sha256=generation_config_sha256(loaded.generation_config),
+        eval_dtype=eval_dtype,
     )

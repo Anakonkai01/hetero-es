@@ -18,6 +18,7 @@ from heteroes.es.perturb import perturb_model_
 from heteroes.es.snapshot import RestoreError, restore_from_snapshot_, take_snapshot
 from heteroes.eval.candidate import tensors_sha256
 from heteroes.eval.generate import evaluate_model
+from heteroes.eval.precision import EvalModel
 from heteroes.ledger import FailureKind
 from heteroes.manifest import CandidateDescriptor, Recipe
 from heteroes.model.schema import ParameterSchema
@@ -33,6 +34,7 @@ class CandidateExecutor:
         self.tokenizer = tokenizer
         self.schema = schema
         self.recipe = recipe
+        self._eval = EvalModel(model, recipe.eval_dtype)     # the model the answers are made on: the live one, or an FP32 copy of it
         self._clock = clock
         self.last_timing: dict[str, float] | None = None
         self.parent_sha256 = ""
@@ -85,7 +87,8 @@ class CandidateExecutor:
             perturb_model_(self.model, self.schema, descriptor.seed, self.recipe.sigma, self.recipe.chunk_elements)
             now = self._clock()
             timing["perturb"], mark = now - mark, now
-            reward = float(evaluate_model(self.model, self.tokenizer, chunk=self.chunk).mean_reward)
+            self._eval.refresh()                                # an FP32 copy takes the perturbed weights (nothing to do in FP16)
+            reward = float(evaluate_model(self._eval.model, self.tokenizer, chunk=self.chunk).mean_reward)
             now = self._clock()
             timing["rollout"], mark = now - mark, now
         except BaseException as caught:                       # whatever it is, the model must come back first

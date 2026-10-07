@@ -341,3 +341,42 @@ def test_a_load_that_trusts_a_hash_already_checked_skips_the_hash_but_not_the_si
     path.write_bytes(path.read_bytes()[:-2])
     with pytest.raises(WeightsFileError, match="wrong size"):
         load_weights_(HalfToy(9), schema, path, sha, already_verified=True)
+
+
+# ---------------------------------------------------------------------------
+# G6: the published directory does not grow for ever
+# ---------------------------------------------------------------------------
+
+from heteroes.model.weights_io import prune_published  # noqa: E402
+
+
+def _files(directory):
+    return sorted(p.name for p in directory.iterdir())
+
+
+def test_prune_keeps_only_the_named_versions_and_removes_the_other_weights_files(tmp_path):
+    names = [f"{c * 64}.bin" for c in "abcd"]
+    for name in names:
+        (tmp_path / name).write_bytes(b"x")
+    removed = prune_published(tmp_path, keep=["a" * 64, "c" * 64])
+    assert _files(tmp_path) == [names[0], names[2]]
+    assert sorted(removed) == [names[1], names[3]]
+
+
+def test_prune_leaves_everything_that_is_not_a_published_weights_file(tmp_path):
+    (tmp_path / f"{'a' * 64}.bin").write_bytes(b"x")
+    (tmp_path / "notes.txt").write_text("keep me")
+    (tmp_path / f".tmp-1-abc").write_bytes(b"in use by a publication")              # a temporary file may belong to a write in progress
+    (tmp_path / "short.bin").write_bytes(b"x")                                      # not named after a SHA-256
+    (tmp_path / "sub").mkdir()
+    prune_published(tmp_path, keep=[])
+    assert _files(tmp_path) == [".tmp-1-abc", "notes.txt", "short.bin", "sub"]
+
+
+def test_prune_of_a_directory_that_does_not_exist_is_a_no_op(tmp_path):
+    assert prune_published(tmp_path / "nothing", keep=["a" * 64]) == []
+
+
+def test_prune_refuses_a_keep_list_that_is_not_hashes(tmp_path):
+    with pytest.raises(ValueError):
+        prune_published(tmp_path, keep=["not a hash"])

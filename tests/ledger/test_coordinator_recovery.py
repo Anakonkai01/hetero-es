@@ -310,7 +310,7 @@ def test_recovery_refuses_weights_that_are_not_the_recorded_child(world):
 # ---------------------------------------------------------------------------
 
 def test_a_generation_with_no_progress_for_too_long_is_an_error_and_the_model_is_untouched(world):
-    coordinator = world.coordinator(stall_seconds=0.3)
+    coordinator = world.coordinator(stall_seconds=0.3, timeout_seconds=15)       # the timeout only keeps a broken stall rule from hanging the suite
     before = final_hash(coordinator)
     started = time.time()
     with pytest.raises(CoordinatorError, match="no progress"):
@@ -320,7 +320,7 @@ def test_a_generation_with_no_progress_for_too_long_is_an_error_and_the_model_is
 
 
 def test_progress_resets_the_stall_timer(world):
-    coordinator = world.coordinator(stall_seconds=0.6)
+    coordinator = world.coordinator(stall_seconds=0.6, timeout_seconds=30)
 
     def slow(descriptor):
         time.sleep(0.3)                                                       # each candidate takes half the stall time, the total is longer
@@ -345,7 +345,7 @@ def test_the_default_stall_time_is_a_multiple_of_the_lease(world):
 # ---------------------------------------------------------------------------
 
 def test_a_run_that_fails_tells_the_workers_it_was_aborted_not_finished(world):
-    coordinator = world.coordinator(stall_seconds=0.2)
+    coordinator = world.coordinator(stall_seconds=0.2, timeout_seconds=15)
     with pytest.raises(CoordinatorError, match="no progress"):
         coordinator.run(1)                                                    # nobody works: it stalls
     assert HttpClient(coordinator.url).get_json("/v1/job")["job"]["state"] == "ABORTED"
@@ -357,3 +357,57 @@ def test_a_run_that_ends_well_tells_the_workers_it_is_finished(world):
     coordinator.run(1)
     halt()
     assert HttpClient(coordinator.url).get_json("/v1/job")["job"]["state"] == "FINISHED"
+
+
+# ---------------------------------------------------------------------------
+# the published directory does not grow for ever
+# ---------------------------------------------------------------------------
+
+def test_only_the_newest_versions_of_the_weights_stay_in_the_published_directory(world):
+    coordinator = world.coordinator(keep_published=3)
+    halt, _ = world.workers(coordinator)
+    coordinator.run(5)
+    halt()
+    files = sorted(p.name[:-4] for p in world.models_dir.glob("*.bin"))
+    assert len(files) == 3
+    assert world.oracle(5) in files and world.oracle(4) in files and world.oracle(3) in files        # the current weights and two ancestors
+    assert world.oracle(0) not in files and world.oracle(1) not in files
+    assert any(e["event"] == "weights_pruned" for e in coordinator.events)
+
+
+def test_pruning_can_be_turned_off(world):
+    coordinator = world.coordinator(keep_published=None)
+    halt, _ = world.workers(coordinator)
+    coordinator.run(3)
+    halt()
+    assert len(list(world.models_dir.glob("*.bin"))) == 4                                           # the initial weights and three children
+
+
+def test_a_restarted_coordinator_can_still_recover_after_pruning(world):
+    first = world.coordinator(keep_published=2)
+    halt, _ = world.workers(first)
+    first.run(3)
+    halt()
+    world.kill(first)
+    second = world.coordinator(keep_published=2)
+    assert second.recover() == 3
+    assert final_hash(second) == world.oracle(3)
+
+
+def test_recovery_refuses_to_continue_when_the_stored_record_gives_another_child_than_the_ledger_marked(world):
+    first = world.coordinator()
+    halt, _ = world.workers(first)
+    first.run_generation(0)
+    halt()
+    world.kill(first)
+    child = world.oracle(1)
+    (world.models_dir / f"{child}.bin").unlink()                             # the child file is gone: it must be recomputed ...
+    import sqlite3
+    db = sqlite3.connect(world.ledger_path)
+    db.execute("UPDATE generation_update SET child_weights_sha256 = ?", ("f" * 64,))     # ... and the ledger says another child (a corrupted ledger)
+    db.commit()
+    db.close()
+
+    second = world.coordinator()
+    with pytest.raises(CoordinatorError, match="gives"):
+        second.recover()

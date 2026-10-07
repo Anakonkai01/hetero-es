@@ -98,7 +98,7 @@ def main(argv: list[str]) -> int:
 
     declared = job["recipe"]
     recipe = build_recipe(loaded, sigma=declared["perturbation"]["sigma"], chunk_elements=declared["noise"]["chunk_elements"],
-                          reward_eta=declared["update"]["reward_eta"])
+                          reward_eta=declared["update"]["reward_eta"], eval_dtype=declared["workload"].get("eval_dtype", "float16"))
     executor_started = time.perf_counter()
     executor = CandidateExecutor(loaded.model, loaded.tokenizer, loaded.schema, recipe, chunk=args.chunk)
     emit({"event": "executor_ready", "t": time.time(), "worker_id": args.worker_id, "recipe_hash": recipe.hash,

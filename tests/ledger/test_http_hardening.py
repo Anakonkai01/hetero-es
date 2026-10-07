@@ -352,3 +352,15 @@ def test_a_lease_without_a_request_id_is_still_never_retried(api, tmp_path):
             client("lease", {"worker_id": "worker-a"})
     finally:
         server.stop()
+
+
+def test_a_partial_file_that_is_already_the_whole_file_is_finished_without_downloading_it_again(with_file, tmp_path):
+    cache = tmp_path / "cache"
+    cache.mkdir()
+    (cache / f".partial-{SHA}").write_bytes(DATA)                            # everything arrived, the process died before the rename
+    client = CuttingClient(HttpClient(with_file.url), cut=10**9)
+
+    path = download_weights(client, SHA, cache)
+
+    assert path.read_bytes() == DATA and client.streams == [len(DATA)]       # one request (answered 416): nothing was transferred again
+    assert sorted(p.name for p in cache.iterdir()) == [f"{SHA}.bin"]

@@ -47,7 +47,7 @@ def fast_worker_ids(k: int) -> list[str]:
     return [FAST] + [f"{FAST}-{i}" for i in range(2, k + 1)]
 
 
-def plan(condition: str, candidates: int, reference: dict, candidate: dict, prediction: dict | None) -> dict:
+def plan(condition: str, candidates: int, reference: dict, candidate: dict, prediction: dict | None, chunk: int = 1) -> dict:
     """Who works, with which chunk, under which policy: pure, so that it can be tested."""
     from heteroes.dispatch import proportional_quotas
 
@@ -55,8 +55,8 @@ def plan(condition: str, candidates: int, reference: dict, candidate: dict, pred
     fast = fast_worker_ids(k)
     fast1 = reference["candidate_seconds_at_chunk_1"]
     slow1 = candidate["candidate_seconds_at_chunk_1"]
-    alone = {worker: 1 for worker in fast}
-    both = {**alone, SLOW: 1}
+    alone = {worker: chunk for worker in fast}
+    both = {**alone, SLOW: chunk}
     if base == "B0":
         return {"workers": alone, "policy": "greedy", "args": []}
     if base == "B1":
@@ -143,6 +143,8 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--profile-reference", required=True)
     parser.add_argument("--profile-candidate", required=True)
     parser.add_argument("--prediction", default=None)
+    parser.add_argument("--chunk", type=int, default=1, help="prompts per generate() call for every worker of the B conditions (1 = the reference path; "
+                                                              "more is exact only with --eval-dtype float32, see the cross-GPU evidence)")
     parser.add_argument("--first-repeat", type=int, default=1, help="number the repeats from this (to add repeats later)")
     add_cluster_arguments(parser)
     parser.add_argument("--run-timeout", type=float, default=3600.0)
@@ -155,7 +157,7 @@ def main(argv: list[str]) -> int:
     out = Path(args.out_dir)
     out.mkdir(parents=True, exist_ok=True)
     conditions = args.conditions.split(",")
-    specs = {name: plan(name, args.candidates, reference, candidate, prediction) for name in conditions}
+    specs = {name: plan(name, args.candidates, reference, candidate, prediction, args.chunk) for name in conditions}
     (out / f"plan-n{args.candidates}.json").write_text(json.dumps({"args": vars(args), "specs": specs}, indent=2) + "\n", encoding="utf-8")
     failed = 0
     for repeat in range(args.first_repeat, args.first_repeat + args.repeats):

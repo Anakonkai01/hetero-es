@@ -10,6 +10,11 @@ from heteroes.noise.contracts import ENGINE_VERSION
 
 MANIFEST_VERSION = 1
 SUPPORTED_DTYPE = "torch.float16"
+# The precision in which the forward pass of the EVALUATION runs (the weights, the noise and the update stay FP16 / FP32 as the contract
+# says). FP16 is the default and is left out of the recipe document, so that the hash of every recipe made before G6 is unchanged;
+# FP32 is written in `workload` and makes another recipe (numerical contract section 15).
+EVAL_DTYPES = ("float16", "float32")
+DEFAULT_EVAL_DTYPE = "float16"
 
 # Seeds travel as JSON. JavaScript reads integers exactly only below 2**53, so v1 does not allow more.
 MAX_SEED = 2**53  # exclusive
@@ -91,6 +96,7 @@ class Recipe:
     reward_eta: float
     workload_hash: str
     generation_config_sha256: str
+    eval_dtype: str = DEFAULT_EVAL_DTYPE
 
     def __post_init__(self):
         _check_text("model_id", self.model_id)
@@ -109,6 +115,9 @@ class Recipe:
         _check_positive_finite("reward_eta", self.reward_eta)
         _check_text("workload_hash", self.workload_hash, _HEX64)
         _check_text("generation_config_sha256", self.generation_config_sha256, _HEX64)
+        _check_text("eval_dtype", self.eval_dtype)
+        if self.eval_dtype not in EVAL_DTYPES:
+            raise ValueError(f"eval_dtype must be one of {EVAL_DTYPES}, got {self.eval_dtype!r}")
 
     def to_dict(self) -> dict:
         return {
@@ -129,7 +138,8 @@ class Recipe:
             # so that it can never disagree with sigma
             "perturbation": {"sigma": self.sigma, "sigma_float32": float(np.float32(self.sigma))},
             "update": {**UPDATE_RECIPE, "reward_eta": self.reward_eta},
-            "workload": {"hash": self.workload_hash, "generation_config_sha256": self.generation_config_sha256},
+            "workload": {"hash": self.workload_hash, "generation_config_sha256": self.generation_config_sha256,
+                         **({} if self.eval_dtype == DEFAULT_EVAL_DTYPE else {"eval_dtype": self.eval_dtype})},
         }
 
     @property
@@ -145,7 +155,7 @@ class Recipe:
         _check_keys("recipe.noise", data["noise"], {"engine_version", "chunk_elements", "fingerprint"})
         _check_keys("recipe.perturbation", data["perturbation"], {"sigma", "sigma_float32"})
         _check_keys("recipe.update", data["update"], {*UPDATE_RECIPE, "reward_eta"})
-        _check_keys("recipe.workload", data["workload"], {"hash", "generation_config_sha256"})
+        _check_keys("recipe.workload", data["workload"], {"hash", "generation_config_sha256"} | ({"eval_dtype"} & set(data["workload"])))
         for key, value in UPDATE_RECIPE.items():
             if data["update"][key] != value:
                 raise ValueError(f"recipe.update.{key} is {data['update'][key]!r}, manifest v1 says {value!r}")
@@ -162,6 +172,7 @@ class Recipe:
             reward_eta=data["update"]["reward_eta"],
             workload_hash=data["workload"]["hash"],
             generation_config_sha256=data["workload"]["generation_config_sha256"],
+            eval_dtype=data["workload"].get("eval_dtype", DEFAULT_EVAL_DTYPE),
         )
         if recipe.to_dict() != data:
             raise ValueError("recipe does not round-trip (a derived value, such as sigma_float32, disagrees)")
