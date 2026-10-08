@@ -1,0 +1,32 @@
+{
+  "experiment_id": "lrtD2",
+  "outcome": "ok",
+  "wall_seconds": 1081.2771060466766,
+  "restarts": {
+    "coordinator": 0,
+    "worker-5070ti": 0,
+    "worker-5070ti-2": 0
+  },
+  "checkpoints": {
+    "0": "d3b2859a64c06e98bb09f18dd4d20b532b1db1adfc20b8595bf7fefae9e4e326",
+    "5": "a73e5c43e2c401bed15338d4b911e38daaaaaf9716bc117b21e6b2b52f4b13f9",
+    "10": "d05feff8ec5268b71bb6a7a67b12c4f72e60ae4b6cba0b0834bc220f531958ca",
+    "15": "077e7b2a94740291d781b246cbdbf2337ddd70062a5397d146b5319cb1164981",
+    "20": "cc7c9e20976fc3fb11e9b1405a61ada1eeebd4b53ee3268fd5a29906fb9e9274"
+  },
+  "pending_unlinked": [],
+  "ckpt_dir": "/home/pc5070ti/.cache/heteroes/learn-ckpt/lrtD2",
+  "spec": {
+    "workers": {
+      "worker-5070ti": 128,
+      "worker-5070ti-2": 128
+    },
+    "policy": "greedy",
+    "args": [
+      "--init-weights",
+      "/home/pc5070ti/.cache/heteroes/learn-ckpt/lrtD1/g020-d3b2859a64c06e98bb09f18dd4d20b532b1db1adfc20b8595bf7fefae9e4e326.bin",
+      "--init-weights-sha256",
+      "d3b2859a64c06e98bb09f18dd4d20b532b1db1adfc20b8595bf7fefae9e4e326"
+    ]
+  }
+}

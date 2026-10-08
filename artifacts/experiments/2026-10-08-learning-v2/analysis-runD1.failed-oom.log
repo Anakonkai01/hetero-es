@@ -1,0 +1,89 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 6751.56it/s]
+[W1008 10:32:41.050044542 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 117440512 bytes (free: 118816768, total: 16611278848).
+[W1008 10:32:42.870529889 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 125829120 bytes (free: 120913920, total: 16611278848).
+[W1008 10:32:44.073259674 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 134217728 bytes (free: 99942400, total: 16611278848).
+[W1008 10:32:44.851056506 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 216006656 bytes (free: 217382912, total: 16611278848).
+[W1008 10:32:59.486556105 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 186646528 bytes (free: 183828480, total: 16611278848).
+[W1008 10:33:00.847968284 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 195035136 bytes (free: 78970880, total: 16611278848).
+[W1008 10:33:01.005215728 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 195035136 bytes (free: 72679424, total: 16611278848).
+[W1008 10:33:01.124022615 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 197132288 bytes (free: 64290816, total: 16611278848).
+[W1008 10:33:01.365297582 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 199229440 bytes (free: 62193664, total: 16611278848).
+[W1008 10:33:01.491145465 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 199229440 bytes (free: 167051264, total: 16611278848).
+[W1008 10:33:01.493947936 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 199229440 bytes (free: 169148416, total: 16611278848).
+Traceback (most recent call last):
+  File "/home/pc5070ti/projects/hetero-es/artifacts/experiments/2026-10-08-learning-v2/analyze_run.py", line 120, in <module>
+    sys.exit(main(sys.argv[1:]))
+             ^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/projects/hetero-es/artifacts/experiments/2026-10-08-learning-v2/analyze_run.py", line 75, in main
+    result["checkpoints"][start] = measure(ALL)
+                                   ^^^^^^^^^^^^
+  File "/home/pc5070ti/projects/hetero-es/artifacts/experiments/2026-10-08-learning-v2/analyze_run.py", line 65, in measure
+    out[name] = l2.summarize(l2.evaluate_questions(ev.model, tokenizer, heldout[name], chunk=len(heldout[name])))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/projects/hetero-es/artifacts/experiments/2026-10-07-learning-runtime/learnlib.py", line 41, in evaluate_questions
+    texts, tokens = generate(model, tokenizer, [question for question, _ in qa], chunk)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/projects/hetero-es/src/heteroes/eval/cot_workload.py", line 90, in generate
+    ids = model.generate(**inputs, max_new_tokens=MAX_NEW_TOKENS, do_sample=DO_SAMPLE)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/transformers/generation/utils.py", line 2802, in generate
+    result = decoding_method(
+             ^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/transformers/generation/utils.py", line 3030, in _sample
+    outputs = model_forward(**model_inputs, return_dict=True)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/transformers/utils/generic.py", line 939, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/transformers/models/qwen2/modeling_qwen2.py", line 452, in forward
+    outputs: BaseModelOutputWithPast = self.model(
+                                       ^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/transformers/utils/generic.py", line 1068, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/transformers/utils/output_capturing.py", line 286, in wrapper
+    outputs = func(self, *args, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/transformers/models/qwen2/modeling_qwen2.py", line 388, in forward
+    hidden_states = decoder_layer(
+                    ^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/transformers/modeling_layers.py", line 109, in __call__
+    return super().__call__(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/transformers/models/qwen2/modeling_qwen2.py", line 282, in forward
+    hidden_states, _ = self.self_attn(
+                       ^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/transformers/models/qwen2/modeling_qwen2.py", line 220, in forward
+    attn_output, attn_weights = attention_interface(
+                                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py", line 158, in sdpa_attention_forward
+    attn_output = torch.nn.functional.scaled_dot_product_attention(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 190.00 MiB. GPU 0 has a total capacity of 15.47 GiB of which 161.31 MiB is free. Process 1141337 has 1.26 GiB memory in use. Including non-PyTorch memory, this process has 5.83 GiB memory in use. Process 1141988 has 3.98 GiB memory in use. Process 1141989 has 3.98 GiB memory in use. Of the allocated memory 4.74 GiB is allocated by PyTorch, and 780.97 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
