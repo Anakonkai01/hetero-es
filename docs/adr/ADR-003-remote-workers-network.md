@@ -10,7 +10,7 @@ Today the workers are on one cable (10.10.10.x) or reach the coordinator through
 Facts (measured on 08/10, not assumed):
 * The worker protocol is **pull**: a worker only needs an outgoing connection to the coordinator (`/v1/job`, `/v1/leases`, `/v1/results`, `/v1/heartbeats`, `/v1/models/<sha>`, `/v1/updates/<sha>`). Nothing has to be opened at the worker's home.
 * The coordinator speaks plain HTTP; the token travels in clear text (`http_transport.py` says: acceptable only on a private network). A worker is **trusted**: it can return any reward.
-* Tailscale between the 5070 Ti (wifi) and the 3060 (wifi, same home) became a *direct* path after a few minutes; first seconds went through a relay (DERP, 140 to 200 ms). The measured download of the 1 GB weights over it: about 2.5 to 3.5 MB/s (20 to 28 Mbit/s): one full synchronization takes 5 to 7 minutes, against 10 s on the cable.
+* Tailscale between the 5070 Ti (wifi) and the 3060 (wifi, same home) became a *direct* path after a few minutes; first seconds went through a relay (DERP, 140 to 200 ms). The measured full synchronization of the 3060 over it (`scripts/measure_sync.py`, median of 3, round trip 9 ms): transfer 283 s at 3.49 MB/s (28 Mbit/s), load 0.9 s, check 0.5 s, 285 s in all, against 10 s on the cable (`artifacts/experiments/2026-10-08-third-machine-3060/sync-3060-through-tailscale-wifi.json`, copied by the night script).
 * A replay of one generation on the 3060 costs about 5 s (update 0.186 s per candidate x 24 + 0.3 + check 0.5); the record is 1.4 KB. `scripts/predict_cluster.py` and the policy `auto` use exactly these numbers.
 * The firewall of the 5070 Ti (`ufw`) allows 8765 only from the 1660S on the cable and everything on `tailscale0`.
 
