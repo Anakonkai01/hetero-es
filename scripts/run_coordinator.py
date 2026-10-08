@@ -35,6 +35,9 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--weights-dir", default=str(Path.home() / ".cache" / "heteroes" / "published"),
                         help="where the weights of each generation are published (about 1 GB each: use a real disk, /tmp may be RAM)")
     parser.add_argument("--experiment-id", default="g3")
+    parser.add_argument("--init-weights", default=None, help="start from these weights (a published `<sha256>.bin` file, for example a checkpoint of an earlier experiment) instead of the pinned checkpoint: "
+                                                              "a new experiment that continues a model (needs --init-weights-sha256; not with --resume). The workers synchronize to them with the first job")
+    parser.add_argument("--init-weights-sha256", default=None, help="the SHA-256 the --init-weights file must have (checked before the model is touched)")
     parser.add_argument("--candidates", type=int, default=8)
     parser.add_argument("--generations", type=int, default=1)
     parser.add_argument("--alpha", type=float, default=1e-3)
@@ -103,6 +106,10 @@ def main(argv: list[str]) -> int:
         if args.noise_threads < 1:
             fail("--noise-threads must be at least 1")
         os.environ["HETEROES_NOISE_THREADS"] = str(args.noise_threads)
+    if (args.init_weights is None) != (args.init_weights_sha256 is None):
+        fail("--init-weights and --init-weights-sha256 go together")
+    if args.init_weights is not None and args.resume:
+        fail("--init-weights starts an experiment, --resume continues one: not both")
     if args.candidates < 2 or args.generations < 1:
         fail("--candidates must be at least 2 and --generations at least 1")
 
@@ -125,6 +132,12 @@ def main(argv: list[str]) -> int:
     log = JsonlLog(out_dir / "events.jsonl", append=args.resume)
     started = time.time()
     loaded = load_pinned_model(args.model_path, device)
+    if args.init_weights is not None:
+        from heteroes.model.weights_io import WeightsFileError, load_weights_
+        try:
+            load_weights_(loaded.model, loaded.schema, args.init_weights, args.init_weights_sha256)
+        except (WeightsFileError, OSError, ValueError) as error:
+            fail(f"cannot start from {args.init_weights}: {error}")
     if args.noise_engine == "cuda" and args.chunk_elements:
         fail("--chunk-elements is the chunk of the CPU noise engine: the CUDA engine has a fixed call size")
     recipe = build_recipe(loaded, sigma=args.sigma, chunk_elements=args.chunk_elements or (DEFAULT_CHUNK_ELEMENTS if args.noise_engine == "cpu" else None),
