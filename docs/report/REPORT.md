@@ -67,7 +67,15 @@ Cả 12 lần chạy cho cùng phần thưởng và cùng hash trọng số cu�
 
 **Điều đã học trên đường đi** (STATUS, mục G5–G7): kết luận "B3 nhanh hơn 3,5%" của G5 là hiệu ứng của thế hệ 0; với GPU chậm, B3 tham lam ở N = 24 cho 0,941 ± 0,030 so với GPU nhanh một mình trong cấu hình FP16, còn B4 cho 1,060 ± 0,046. Một thế hệ N = 24 từ 221 s (G5) xuống 29–36 s (G6, FP32) và khoảng 90 s với workload dài hơn (G7); các con số này thuộc workload khác nhau và không so trực tiếp được.
 
-**C1 (admission).** Profile worker, chunk an toàn và cổng kiểm tra phiên bản phần mềm đã làm. Thí nghiệm dự đoán lợi ích (admission so với ép nhận) **chưa được lặp lại** sau G6: với cặp này, câu hỏi thực tế là "nhận worker kèm chính sách tránh đuôi, hay không nhận", với lợi ích 0–6%.
+**C1 (admission).** Profile worker, chunk an toàn và cổng kiểm tra phiên bản phần mềm đã làm; `profile_worker.py` (08/10) profile được cả bốn workload và cả hai engine nhiễu. Thí nghiệm dự đoán so với ép nhận được lặp lại ngày 08/10 trên engine CUDA, workload 128 câu, N = 24, chunk 64, hai lần chạy mỗi điều kiện (`artifacts/experiments/2026-10-08-c1-v2/README.md`):
+
+| Điều kiện | T dự đoán (s) | T đo (s) | Lợi ích dự đoán | Lợi ích đo |
+|---|---|---|---|---|
+| B0: 5070 Ti một mình | 194,9 | 151,5 ± 2,1 | 1,000 | 1,000 |
+| B3: thêm 1660S, tham lam (ép nhận) | 188,7 | 135,1 ± 1,3 | 1,033 | **1,122 ± 0,019** |
+| B2: thêm 1660S, quota theo tốc độ | 162,8 | 128,7 ± 4,7 | 1,197 | 1,178 ± 0,046 |
+
+**Quyết định cho B3 sai:** dự đoán lợi 3,3% (dưới ngưỡng 5% nên "không nhận"), đo được +12,2%. Thứ tự B2 > B3 > B0 đúng. Thời gian tuyệt đối bị dự đoán cao hơn 26–40%, vì thời gian mỗi ứng viên trong profile cao hơn lúc chạy thật (5070 Ti 8,0 so với 6,9 s; 1660S 35,3 so với 28,1 s); vì sao profile đo cao thì chưa tách được. Phân tích sau khi thấy dữ liệu (đánh dấu là post hoc): thay thời gian đo thật vào thì cùng chương trình dự đoán ADMITTED, +9,6%. Cả 6 lần chạy cho cùng phần thưởng và cùng hash trọng số cuối. Hai lần lặp, một cặp GPU, một N. Hiện admission là công cụ đo chạy tay, chưa nằm trong luồng gia nhập của worker.
 
 ## 5. Đúng đắn khi có lỗi (C3)
 
@@ -137,7 +145,7 @@ Theo luật viết trước, nhãn là "không có bằng chứng cải thiện 
 - **Hiệu năng:** tăng tốc 1,19 lần nhờ máy thứ hai, trần 1,23; với N = 24, 3 lần chạy mỗi ô. Chưa thử N = 48 hoặc 96, chưa có chunk riêng cho từng worker, chưa tối ưu vòng giải mã (KV cache tĩnh, CUDA graphs, vLLM).
 - **Học:** chưa có bằng chứng ES cải thiện độ chính xác tính toán trên tập held-out sau khi loại ảnh hưởng của giới hạn token (xem mục 7 và 8: mức tăng chủ yếu là đổi cách trả lời). Không so sánh với GRPO hay thuật toán khác.
 - **Replay** là script đo, chưa tích hợp vào worker; chưa đo đồng bộ delta nén.
-- **Admission (C1):** thí nghiệm dự đoán so với ép nhận chưa lặp lại sau G6.
+- **Admission (C1):** thí nghiệm đã lặp lại ngày 08/10 (mục 4) nhưng chỉ hai lần chạy mỗi điều kiện, một N, và quyết định cho B3 sai; admission chưa nằm trong luồng gia nhập tự động của worker.
 - **Mất log:** log worker của máy 1660S bị mất ở hai lần chạy học vì máy sập trước khi sao chép; tỷ lệ ứng viên máy đó làm (375/2400, 304/2400) là suy ra từ tổng, không phải đo.
 - **Review:** hơn 50 commit từ G6 trở đi do AI viết (test trước, kiểm tra đột biến trên bản sao), chủ dự án chưa review. Bộ test: 1994 passed, 4 skipped trên 5070 Ti.
 - **Phần Product (B)** không được báo cáo ở đây.
