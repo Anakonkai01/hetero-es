@@ -1,0 +1,192 @@
+{
+ "start_checkpoint": 20,
+ "steps": 20,
+ "walks": {
+  "0": {
+   "0": {
+    "train": {
+     "n": 128,
+     "correct": 119,
+     "accuracy": 0.9296875,
+     "answer_line_rate": 0.0390625,
+     "accuracy_with_line": 1.0,
+     "mean_chars": 99.5390625,
+     "tokens": 4972
+    },
+    "H1": {
+     "n": 256,
+     "correct": 210,
+     "accuracy": 0.8203125,
+     "answer_line_rate": 0.015625,
+     "accuracy_with_line": 1.0,
+     "mean_chars": 99.12109375,
+     "tokens": 9940
+    }
+   },
+   "10": {
+    "train": {
+     "n": 128,
+     "correct": 118,
+     "accuracy": 0.921875,
+     "answer_line_rate": 0.0,
+     "accuracy_with_line": null,
+     "mean_chars": 105.765625,
+     "tokens": 4934
+    },
+    "H1": {
+     "n": 256,
+     "correct": 210,
+     "accuracy": 0.8203125,
+     "answer_line_rate": 0.0,
+     "accuracy_with_line": null,
+     "mean_chars": 105.9296875,
+     "tokens": 9936
+    }
+   },
+   "20": {
+    "train": {
+     "n": 128,
+     "correct": 112,
+     "accuracy": 0.875,
+     "answer_line_rate": 0.015625,
+     "accuracy_with_line": 1.0,
+     "mean_chars": 94.703125,
+     "tokens": 4510
+    },
+    "H1": {
+     "n": 256,
+     "correct": 203,
+     "accuracy": 0.79296875,
+     "answer_line_rate": 0.00390625,
+     "accuracy_with_line": 1.0,
+     "mean_chars": 94.43359375,
+     "tokens": 9052
+    }
+   }
+  },
+  "1": {
+   "0": {
+    "train": {
+     "n": 128,
+     "correct": 119,
+     "accuracy": 0.9296875,
+     "answer_line_rate": 0.0390625,
+     "accuracy_with_line": 1.0,
+     "mean_chars": 99.5390625,
+     "tokens": 4972
+    },
+    "H1": {
+     "n": 256,
+     "correct": 210,
+     "accuracy": 0.8203125,
+     "answer_line_rate": 0.015625,
+     "accuracy_with_line": 1.0,
+     "mean_chars": 99.12109375,
+     "tokens": 9940
+    }
+   },
+   "10": {
+    "train": {
+     "n": 128,
+     "correct": 116,
+     "accuracy": 0.90625,
+     "answer_line_rate": 0.0,
+     "accuracy_with_line": null,
+     "mean_chars": 91.8046875,
+     "tokens": 5166
+    },
+    "H1": {
+     "n": 256,
+     "correct": 207,
+     "accuracy": 0.80859375,
+     "answer_line_rate": 0.0,
+     "accuracy_with_line": null,
+     "mean_chars": 90.19140625,
+     "tokens": 10158
+    }
+   },
+   "20": {
+    "train": {
+     "n": 128,
+     "correct": 99,
+     "accuracy": 0.7734375,
+     "answer_line_rate": 0.0390625,
+     "accuracy_with_line": 0.8,
+     "mean_chars": 119.640625,
+     "tokens": 6785
+    },
+    "H1": {
+     "n": 256,
+     "correct": 188,
+     "accuracy": 0.734375,
+     "answer_line_rate": 0.03125,
+     "accuracy_with_line": 0.5,
+     "mean_chars": 120.17578125,
+     "tokens": 14027
+    }
+   }
+  },
+  "2": {
+   "0": {
+    "train": {
+     "n": 128,
+     "correct": 119,
+     "accuracy": 0.9296875,
+     "answer_line_rate": 0.0390625,
+     "accuracy_with_line": 1.0,
+     "mean_chars": 99.5390625,
+     "tokens": 4972
+    },
+    "H1": {
+     "n": 256,
+     "correct": 210,
+     "accuracy": 0.8203125,
+     "answer_line_rate": 0.015625,
+     "accuracy_with_line": 1.0,
+     "mean_chars": 99.12109375,
+     "tokens": 9940
+    }
+   },
+   "10": {
+    "train": {
+     "n": 128,
+     "correct": 115,
+     "accuracy": 0.8984375,
+     "answer_line_rate": 0.0234375,
+     "accuracy_with_line": 1.0,
+     "mean_chars": 108.1015625,
+     "tokens": 5176
+    },
+    "H1": {
+     "n": 256,
+     "correct": 203,
+     "accuracy": 0.79296875,
+     "answer_line_rate": 0.0078125,
+     "accuracy_with_line": 1.0,
+     "mean_chars": 108.703125,
+     "tokens": 10283
+    }
+   },
+   "20": {
+    "train": {
+     "n": 128,
+     "correct": 107,
+     "accuracy": 0.8359375,
+     "answer_line_rate": 0.015625,
+     "accuracy_with_line": 1.0,
+     "mean_chars": 141.7578125,
+     "tokens": 6607
+    },
+    "H1": {
+     "n": 256,
+     "correct": 192,
+     "accuracy": 0.75,
+     "answer_line_rate": 0.00390625,
+     "accuracy_with_line": 1.0,
+     "mean_chars": 151.23828125,
+     "tokens": 13935
+    }
+   }
+  }
+ }
+}

@@ -43,3 +43,8 @@ The **selected checkpoint** is the one with the best accuracy on V1 among the ch
 - One run, one model (Qwen2.5-0.5B), one hardware (the 5070 Ti), one family (two-digit operations), 40 generations, 128 training questions, N = 32. H1 and V1 have 256 questions (one question = 0.4 points); H2 and H3 128.
 - P1 uses a validation set to choose among at most 9 checkpoints; the choice cannot leak H1 into the selection, but the selected checkpoint is still the best of several on V1 (a small optimistic bias on V1, none on H1).
 - sigma and alpha were not tuned for this task; D2 changes both. A positive result is for THIS setting only.
+
+## Addendum 1 (written 2026-10-08 11:25, after the analysis of D1 and D2): the label, not the criteria
+The criteria P1 to P4 are unchanged and were applied as written (`summary-D.txt`). One fact about the rule: the label for "P1, P2, P3 true but P4 false" does not exist in `learnlib2.verdict`: it falls to the last
+label, "no evidence of improvement on held-out arithmetic in this experiment", which describes run D1 badly (H1 improved by 22 points; the damage is on the other families). The report quotes the four criteria one by one and
+this label only as what the rule printed. Also written after seeing D1 (so POST HOC): `artifacts/experiments/2026-10-08-direct-answer-probe/` (the base model asked for only the final integer scores 77.0 percent on H1).

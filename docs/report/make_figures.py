@@ -132,7 +132,31 @@ def fig_walks():
     save(fig, "fig4-random-walk-control")
 
 
+def fig_learning_v2():
+    d1 = json.loads((EXP / "2026-10-08-learning-v2/analysis-runD1.json").read_text())["checkpoints"]
+    d2 = json.loads((EXP / "2026-10-08-learning-v2/analysis-runD2.json").read_text())["checkpoints"]
+    direct = json.loads((EXP / "2026-10-08-direct-answer-probe/direct-lrtD1.json").read_text())["results"]["0"]["direct_prompt"]["accuracy"] * 100
+    g1 = sorted(int(g) for g in d1)
+    g2 = sorted(int(g) for g in d2)
+    fig, axes = plt.subplots(1, 3, figsize=(12.4, 3.7))
+    panels = [("H1", "(a) H1: new questions of the training family"), ("H2", "(b) H2: other family (three operands)"), ("H3", "(c) H3: other family (word problems)")]
+    for ax, (key, title) in zip(axes, panels):
+        ax.plot(g1, [100 * d1[str(g)][key]["accuracy"] for g in g1], color=BLUE, linewidth=1.8, label="run D1 (sigma 1e-3)")
+        ax.plot([20 + g for g in g2], [100 * d2[str(g)][key]["accuracy"] for g in g2], color=ORANGE, linewidth=1.8, label="run D2 (from generation 20, sigma 5e-4)")
+        ax.axhline(100 * d1["0"][key]["accuracy"], color=MUTED, linestyle="--", linewidth=1.1)
+        ax.text(0.98, 100 * d1["0"][key]["accuracy"], "base model", ha="right", va="bottom", fontsize=8.5, color=MUTED, transform=ax.get_yaxis_transform())
+        ax.set_ylim(*{"H1": (58, 90), "H2": (80, 98), "H3": (10, 88)}[key])
+        ax.set_xlabel("generation")
+        ax.set_title(title, fontsize=9.5, loc="left")
+    axes[0].axhline(direct, color=MUTED, linestyle=":", linewidth=1.3)
+    axes[0].text(0.98, direct, "base model asked for only the integer", ha="right", va="bottom", fontsize=8.5, color=MUTED, transform=axes[0].get_yaxis_transform())
+    axes[0].set_ylabel("accuracy, % (512-token limit)")
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, frameon=False, fontsize=8.5, loc="lower center", ncol=2, bbox_to_anchor=(0.5, -0.1))
+    save(fig, "fig5-learning-v2")
+
+
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
-    for f in (fig_benchmark, fig_replay, fig_learning, fig_walks):
+    for f in (fig_benchmark, fig_replay, fig_learning, fig_walks, fig_learning_v2):
         f()

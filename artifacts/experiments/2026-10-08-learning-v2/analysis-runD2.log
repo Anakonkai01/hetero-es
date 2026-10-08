@@ -1,0 +1,31 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7320.96it/s]
+[10:51:29] checkpoint 0: train=93.0% H1=82.0% V1=86.3% H2=85.9% H3=64.8%
+[10:51:58] g0: parent 119 plus 120 minus 119 of 128 diff +0.008
+[10:52:09] g1: parent 120 plus 121 minus 119 of 128 diff +0.016
+[10:52:21] g2: parent 121 plus 121 minus 120 of 128 diff +0.008
+[10:52:32] g3: parent 121 plus 121 minus 120 of 128 diff +0.008
+[10:53:14] g4: parent 121 plus 121 minus 121 of 128 diff +0.000
+[10:53:14] replay 0->5: MATCH
+[10:53:40] checkpoint 5: train=94.5% H1=82.8% V1=88.3% H2=85.9% H3=32.0%
+[10:53:56] g5: parent 121 plus 121 minus 121 of 128 diff +0.000
+[10:54:03] g6: parent 121 plus 121 minus 121 of 128 diff +0.000
+[10:54:10] g7: parent 121 plus 121 minus 120 of 128 diff +0.008
+[10:54:17] g8: parent 121 plus 121 minus 121 of 128 diff +0.000
+[10:54:38] g9: parent 121 plus 121 minus 121 of 128 diff +0.000
+[10:54:38] replay 5->10: MATCH
+[10:54:55] checkpoint 10: train=94.5% H1=83.6% V1=86.3% H2=87.5% H3=32.8%
+[10:55:11] g10: parent 121 plus 121 minus 121 of 128 diff +0.000
+[10:55:18] g11: parent 121 plus 121 minus 121 of 128 diff +0.000
+[10:55:24] g12: parent 121 plus 121 minus 121 of 128 diff +0.000
+[10:55:31] g13: parent 121 plus 121 minus 121 of 128 diff +0.000
+[10:55:49] g14: parent 121 plus 121 minus 121 of 128 diff +0.000
+[10:55:50] replay 10->15: MATCH
+[10:56:03] checkpoint 15: train=94.5% H1=82.0% V1=87.5% H2=88.3% H3=14.8%
+[10:56:18] g15: parent 121 plus 121 minus 121 of 128 diff +0.000
+[10:56:25] g16: parent 121 plus 121 minus 121 of 128 diff +0.000
+[10:56:32] g17: parent 121 plus 121 minus 121 of 128 diff +0.000
+[10:56:39] g18: parent 121 plus 121 minus 121 of 128 diff +0.000
+[10:56:59] g19: parent 121 plus 121 minus 121 of 128 diff +0.000
+[10:57:00] replay 15->20: MATCH
+[10:57:15] checkpoint 20: train=94.5% H1=82.0% V1=86.7% H2=87.5% H3=22.7%
+[10:57:15] wrote artifacts/experiments/2026-10-08-learning-v2/analysis-runD2.json
