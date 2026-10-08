@@ -157,11 +157,15 @@ with other methods (for example the realized difference as the update direction)
 - [ ] (learning) D1 and D2 are single runs: replicate D1 with another experiment id (the first experiment's runs differed a lot) before quoting its numbers; D2 changed sigma and alpha together.
 - [ ] (learning) Held-out evaluation also at 512 tokens for level 3 hides nothing, but the coordinator still scores training questions with the 256-token limit; a workload with a larger `max_new_tokens` would be a new workload name and recipe hash.
 
-## to-90  (the way to above 90 percent, from STATUS "RESUME HERE" of 08/10; the owner decides the order)
+## to-90  (release name: **v0.5.0**, agreed 08/10: feature-complete, NOT reviewed by the owner; then v0.9.0-rc1 after the owner's fixes, v1.0.0 after the big review; tag and `pyproject.toml` version only at the end of the day, nothing pushed) (the way to above 90 percent, from STATUS "RESUME HERE" of 08/10; the owner decides the order)
 - [ ] Report: claims audit against MASTER section 12 (each EQ: evidence or `NOT_RUN`), `THIRD_PARTY`, ownership / AI-use statement (needs the owner), every number re-checked against its file (`docs/report/REPORT.md`).
 - [ ] C1: make `scripts/profile_worker.py` profile the CUDA engine and the long / level-1 workload on both machines, then repeat the admission prediction against forced admission.
 - [ ] Replay as an option of the worker (profile-based rule, optional early start when the record is written, hash check every k generations), two-machine run with both modes and equal final hashes.
-- [ ] Learning: replicate D1 with another experiment id; mixed-level training; or keep the limits in the report.
+- [x] ~~Learning: replicate D1 / mixed-level training~~ DROPPED by the owner on 08/10: the project claims a correct, reproducible, fault-tolerant RUNTIME, not that ES learns (the ES papers did that); the report keeps its honest limits and cites prior art. Moved to `after-v1`.
 - [ ] GRPO supporting baseline, time-boxed, or `DEFERRED` with the reason.
 - [ ] Failure campaign: each scenario 3 times; coordinator kill between the write-ahead record and the update on the real machines.
 - [ ] After the 1660S is stable: bundle sync, full tests there, one two-machine benchmark; N = 48 and 96, a chunk per worker.
+
+## after-v1  (said by the owner on 08/10; not before the review)
+- [ ] Reproduce a few experiments of the ES papers (ES-at-Scale, Understanding ES, Agentic ESOpt) on this runtime, to add evidence about the SYSTEM (it runs the algorithm correctly at their settings), not to prove that ES works. Use the right baselines: the base model scores 81.2 percent on the level-3 held-out set at 512 tokens (32.8 at 256), and 77.0 percent on level 1 when asked only for the integer (`artifacts/experiments/2026-10-08-uncut-probe`, `-direct-answer-probe`); a gain over the wrong baseline is mostly answering style.
+- [ ] Check the papers' numbers quoted in `docs/report/REPORT.md` section 10 against the papers themselves (the AI copied them from MASTER section 3 and has not reopened the papers).
