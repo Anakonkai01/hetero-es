@@ -1,2 +1,14 @@
 Thu Oct  8 11:01:18 PM +07 2026 waiting for the failure campaign
 Thu Oct  8 11:01:18 PM +07 2026 stage 2: long-workload worker scenarios
+Thu Oct  8 11:33:25 PM +07 2026 stage 3: synchronization of the 3060
+Thu Oct  8 11:33:26 PM +07 2026 stage 4: predictions
+worker-5070ti {'B3': (194.9, 1.0), 'B2': (194.9, 1.0)}
+worker-5070ti+worker-1660s {'B3': (188.7, 1.033), 'B2': (162.8, 1.197)}
+worker-5070ti+worker-3060 {'B3': (152.3, 1.28), 'B2': (152.3, 1.28)}
+worker-5070ti+worker-1660s+worker-3060 {'B3': (131.6, 1.481), 'B2': (131.6, 1.481)}
+worker-5070ti {'B3': (194.9, 1.0), 'B2': (194.9, 1.0)}
+worker-5070ti+worker-1660s {'B3': (188.7, 1.033), 'B2': (162.8, 1.197)}
+worker-5070ti+worker-3060 {'B3': (194.9, 1.0), 'B2': (431.6, 0.452)}
+worker-5070ti+worker-1660s+worker-3060 {'B3': (188.7, 1.033), 'B2': (410.9, 0.474)}
+Thu Oct  8 11:33:26 PM +07 2026 stage 5: three machines
+Fri Oct  9 12:44:53 AM +07 2026 done
