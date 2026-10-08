@@ -156,3 +156,12 @@ with other methods (for example the realized difference as the update direction)
 - [ ] (learning, after the second experiment of 08/10) Run D1 moved the model to answering directly (the base asked for only the integer scores 77.0 percent on H1) and damaged the word problems (H3 81 -> 64): train on a MIX of families (levels 1, 2 and 3 in one workload) so that answering directly cannot pay on all of them, and report each family; or give the model the direct mode in the prompt so that the training can only add arithmetic.
 - [ ] (learning) D1 and D2 are single runs: replicate D1 with another experiment id (the first experiment's runs differed a lot) before quoting its numbers; D2 changed sigma and alpha together.
 - [ ] (learning) Held-out evaluation also at 512 tokens for level 3 hides nothing, but the coordinator still scores training questions with the 256-token limit; a workload with a larger `max_new_tokens` would be a new workload name and recipe hash.
+
+## to-90  (the way to above 90 percent, from STATUS "RESUME HERE" of 08/10; the owner decides the order)
+- [ ] Report: claims audit against MASTER section 12 (each EQ: evidence or `NOT_RUN`), `THIRD_PARTY`, ownership / AI-use statement (needs the owner), every number re-checked against its file (`docs/report/REPORT.md`).
+- [ ] C1: make `scripts/profile_worker.py` profile the CUDA engine and the long / level-1 workload on both machines, then repeat the admission prediction against forced admission.
+- [ ] Replay as an option of the worker (profile-based rule, optional early start when the record is written, hash check every k generations), two-machine run with both modes and equal final hashes.
+- [ ] Learning: replicate D1 with another experiment id; mixed-level training; or keep the limits in the report.
+- [ ] GRPO supporting baseline, time-boxed, or `DEFERRED` with the reason.
+- [ ] Failure campaign: each scenario 3 times; coordinator kill between the write-ahead record and the update on the real machines.
+- [ ] After the 1660S is stable: bundle sync, full tests there, one two-machine benchmark; N = 48 and 96, a chunk per worker.
