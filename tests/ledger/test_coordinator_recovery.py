@@ -419,3 +419,18 @@ def test_a_coordinator_off_loopback_needs_a_token_or_an_explicit_opt_out(world):
     open_one = world.coordinator(host="0.0.0.0", allow_unauthenticated=True)
     assert open_one.server.host == "0.0.0.0"
     world.coordinator(host="0.0.0.0", token="x")
+
+
+def test_after_a_restart_the_updates_of_the_past_are_served_again(world):
+    first = world.coordinator()
+    halt, _ = world.workers(first)
+    summary = first.run_generation(0)
+    halt()
+    world.kill(first)
+
+    second = world.coordinator()
+    assert second.server.updates == {}
+    second.recover()
+
+    assert set(second.server.updates) == {summary["parent_sha256"]}
+    assert second.server.updates[summary["parent_sha256"]]["child_weights_sha256"] == summary["child_sha256"]

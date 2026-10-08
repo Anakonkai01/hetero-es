@@ -23,6 +23,9 @@ from pathlib import Path
 from heteroes.executor import CandidateExecutor
 from heteroes.http_transport import HttpClient, TransportError, UnauthorizedError
 from heteroes.model.weights_io import WeightsFileError, load_weights_, sha256_of_file
+from heteroes.noise.contracts import ENGINE_VERSION
+from heteroes.profile_setup import noise_ops
+from heteroes.replay import ReplayFailed, ReplayPolicy, fetch_chain, replay_chain
 from heteroes.worker import StepKind, Worker
 
 _WEIGHTS_FILE = re.compile(r"[0-9a-f]{64}\.bin")
@@ -120,7 +123,8 @@ def download_weights(client: HttpClient, sha256: str, directory, chunk_bytes: in
 class WorkerRuntime:
     def __init__(self, worker_id: str, client: HttpClient, executor: CandidateExecutor, cache_dir, log=lambda event: None,
                  poll_seconds: float = 0.5, backoff_seconds: float = 2.0, download_attempts: int = 2,
-                 max_unreachable_seconds: float | None = None, sleep=time.sleep, wall_clock=time.time, timer=time.perf_counter):
+                 max_unreachable_seconds: float | None = None, sleep=time.sleep, wall_clock=time.time, timer=time.perf_counter,
+                 replay: ReplayPolicy | None = None):
         self.worker_id = worker_id
         self.client = client
         self.executor = executor
@@ -134,6 +138,8 @@ class WorkerRuntime:
         self._wall_clock = wall_clock
         self._timer = timer
         self._worker = Worker(worker_id, client, executor, transient_errors=(TransportError,))
+        self.replay = ReplayPolicy() if replay is None else replay       # never, unless the worker is started with a policy
+        self._catch_ups_since_check = 0                                  # replays whose result was trusted, not hashed, since the last check
 
     def log(self, event: str, **fields) -> None:
         self._log({"event": event, "t": self._wall_clock(), "worker_id": self.worker_id, **fields})
@@ -183,8 +189,38 @@ class WorkerRuntime:
         event = {"from_sha256": previous, "to_sha256": target, "bytes": path.stat().st_size,
                  "transfer_seconds": transferred - start, "load_seconds": loaded - transferred, "rehash_seconds": done - loaded,
                  **stats}                                          # resumed_from_bytes, downloaded_bytes
+        self._catch_ups_since_check = 0                            # the weights are the coordinator's, checked byte by byte
         self.log("sync", **event)
         return event
+
+    def bring_up_to_date(self, job: dict) -> dict:
+        """
+        Make the model's weights the job's parent weights: by replaying the coordinator's updates if the policy says it is faster and the
+        records are there, else (or if anything about the replay is wrong) by the full synchronization. Returns the event it logged.
+        """
+        target, previous = job["parent_weights_sha256"], self.executor.parent_sha256
+        if self.replay.mode == "never":
+            return self.sync(job)
+        try:
+            chain = fetch_chain(self.client, previous, target, self.executor.recipe.hash)
+            replay, why = self.replay.decide(len(chain), job.get("candidates") or 0)
+            if not replay:
+                self.log("replay_declined", from_sha256=previous, to_sha256=target, steps=len(chain), why=why)
+                return self.sync(job)
+            recipe = self.executor.recipe
+            _, apply_update = noise_ops(recipe.engine_version, recipe.chunk_elements if recipe.engine_version == ENGINE_VERSION else None)
+            verify = self._catch_ups_since_check + 1 >= self.replay.verify_every
+            summary = replay_chain(self.executor, chain, apply_update, verify)
+            self._catch_ups_since_check = 0 if verify else self._catch_ups_since_check + 1
+            event = {"from_sha256": previous, "to_sha256": target, "why": why, **summary}
+            self.log("replay", **event)
+            return event
+        except (ReplayFailed, TransportError) as error:
+            if isinstance(error, UnauthorizedError):
+                raise
+            self.log("replay_failed", from_sha256=previous, to_sha256=target, error=str(error))
+            self._catch_ups_since_check = 0
+            return self.sync(job)             # overwrites every weight, so whatever the replay left in the model does not matter
 
     def run(self, stop=None) -> str:
         self.log("start")
@@ -206,7 +242,7 @@ class WorkerRuntime:
                     return "aborted"
                 self._check_recipe(job)
                 if job["parent_weights_sha256"] != self.executor.parent_sha256:
-                    self.sync(job)
+                    self.bring_up_to_date(job)
                 lease_seconds = job.get("lease_seconds")
                 if isinstance(lease_seconds, (int, float)) and not isinstance(lease_seconds, bool) and lease_seconds > 0:
                     self._worker.heartbeat_seconds = lease_seconds / 3        # three chances to renew before a lease runs out

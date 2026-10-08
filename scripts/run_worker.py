@@ -44,7 +44,15 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--noise-threads", type=int, default=None, help="threads for noise generation (default: min(16, CPUs); 1 = serial)")
     parser.add_argument("--http-timeout-seconds", type=float, default=60.0, help="how long a request to the coordinator may stay silent before it counts as a network error (also the read timeout of the weights download)")
     parser.add_argument("--startup-timeout-seconds", type=float, default=600.0, help="how long to wait for the coordinator to have a job")
+    parser.add_argument("--replay", choices=["never", "always", "auto"], default="never",
+                        help="how to catch up when the job's weights are not mine: never = download them (the default); always = apply the coordinator's update records; "
+                             "auto = whichever is faster by --profile (the profile of THIS worker with --measure-update and --sync-url)")
+    parser.add_argument("--profile", default=None, help="this worker's profile JSON (scripts/profile_worker.py); needed by --replay auto")
+    parser.add_argument("--replay-verify-every", type=int, default=1,
+                        help="hash the whole weights after every k-th replay (1 = every time: the safe default; a larger k trusts the coordinator's hash in between)")
     args = parser.parse_args(argv)
+    if args.replay == "auto" and args.profile is None:
+        fail("--replay auto needs --profile")
 
     if Path(args.log).exists():
         fail(f"{args.log} already exists; evidence is never overwritten")
@@ -113,8 +121,12 @@ def main(argv: list[str]) -> int:
           "parent_weights_sha256": executor.parent_sha256, "snapshot_and_hash_seconds": time.perf_counter() - executor_started,
           "engine_selftest_seconds": engine_selftest_seconds, "noise_engine": recipe.engine_version, "workload": recipe.workload_name})
 
+    from heteroes.replay import ReplayPolicy
+    policy = (ReplayPolicy.from_profile(json.loads(Path(args.profile).read_text(encoding="utf-8")), mode=args.replay, verify_every=args.replay_verify_every)
+              if args.profile else ReplayPolicy(mode=args.replay, verify_every=args.replay_verify_every))
+    emit({"event": "replay_policy", "t": time.time(), "worker_id": args.worker_id, "policy": policy.__dict__})
     runtime = WorkerRuntime(args.worker_id, client, executor, args.cache_dir, log=emit, poll_seconds=args.poll_seconds,
-                            max_unreachable_seconds=args.give_up_after_seconds)
+                            max_unreachable_seconds=args.give_up_after_seconds, replay=policy)
     stop = threading.Event()
     for name in (signal.SIGINT, signal.SIGTERM):
         signal.signal(name, lambda *_: stop.set())

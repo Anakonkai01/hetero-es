@@ -222,8 +222,12 @@ def main(argv: list[str]) -> int:
         published = publish_weights(model, schema, directory)
         publish_seconds = time.perf_counter() - start
         (directory / f"{published}.bin").unlink()
+        from heteroes.eval.candidate import model_weights_sha256
+        start = time.perf_counter()
+        model_weights_sha256(model, schema)
+        hash_seconds = time.perf_counter() - start                                  # what a replay pays to check the weights it made
         update = {"seconds_per_candidate_median": fit["per_candidate_seconds"], "fixed_seconds": fit["fixed_seconds"], "fit": fit, "raw": raw,
-                  "publish_seconds": publish_seconds, "noise_threads": noise_threads()}
+                  "publish_seconds": publish_seconds, "hash_seconds": hash_seconds, "noise_threads": noise_threads()}
 
     environment = environment_info(device)
     key = profile_key(environment, recipe.hash, schema.hash, get_workload(args.workload).hash(), device)

@@ -10,6 +10,8 @@ transport of a `heteroes.worker.WorkerClient`, plus what a worker needs besides 
     GET  /v1/health                                               -> {"ok": true, "status": "up"}
     GET  /v1/job                                                  -> {"ok": true, "job": {...}}   what this generation is (recipe, parent weights)
     GET  /v1/models/{sha256}                                      -> the weights file published under that hash (data plane)
+    GET  /v1/updates/{sha256}                                     -> {"ok": true, "update": {...}}  the update that turned the weights with that hash
+                                                                     into their child (a few hundred bytes: the record, its hash, the child's hash); 404 if none
 
 HTTP status: 200 for an ok reply, 400 bad request, 401 wrong or missing token, 404 and 405 for what does not exist, 409 for a
 refusal of the ledger (the body has the code), 413 for a body that is too large, 500 for a bug of the coordinator (kept in
@@ -141,6 +143,8 @@ class _Handler(http.server.BaseHTTPRequestHandler):
             self._reply(200, {"ok": True, "job": self.coordinator.job})
         elif path.startswith("/v1/models/"):
             self._serve_model(path[len("/v1/models/"):])
+        elif path.startswith("/v1/updates/"):
+            self._serve_update(path[len("/v1/updates/"):])
         elif path in _ROUTES:
             self._error(405, "bad_request", "use POST")
         else:
@@ -151,7 +155,7 @@ class _Handler(http.server.BaseHTTPRequestHandler):
             return
         path = self.path.split("?", 1)[0]
         if path not in _ROUTES:
-            known = path in ("/v1/health", "/v1/job") or path.startswith("/v1/models/")
+            known = path in ("/v1/health", "/v1/job") or path.startswith(("/v1/models/", "/v1/updates/"))
             self._error(405 if known else 404, "bad_request" if known else "unknown_operation",
                         "use GET" if known else f"no such route: {path}")
             return
@@ -171,6 +175,13 @@ class _Handler(http.server.BaseHTTPRequestHandler):
             self._error(405, "bad_request", f"method {self.command} is not allowed")
 
     do_PUT = do_DELETE = do_PATCH = _method_not_allowed
+
+    def _serve_update(self, name: str) -> None:
+        update = self.coordinator.updates.get(name) if _HEX64.fullmatch(name) else None
+        if update is None:
+            self._error(404, "unknown_operation", "no such update")
+            return
+        self._reply(200, {"ok": True, "update": update})
 
     def _serve_model(self, name: str) -> None:
         directory = self.coordinator.models_dir
@@ -254,6 +265,7 @@ class CoordinatorServer:
         self.token = token
         self.request_timeout, self.max_connections = request_timeout, max_connections
         self.internal_errors: list[str] = []
+        self.updates: dict[str, dict] = {}       # parent weights sha256 -> {"record_json", "record_hash", "child_weights_sha256"}: filled by whoever applies the updates
         self.open_connections = 0
         self.refused_connections = 0
         self._count_lock = threading.Lock()
@@ -347,6 +359,15 @@ class HttpClient:
 
     def get_json(self, path: str):
         return self._json(self._request("GET", path))
+
+    def get_update(self, parent_sha256: str) -> dict | None:
+        """The update that turned the weights with this hash into their child, or None if the coordinator has none (404)."""
+        reply = self.get_json(f"/v1/updates/{parent_sha256}")
+        if reply.get("ok") is True:
+            return reply["update"]
+        if reply.get("error", {}).get("code") == "unknown_operation":
+            return None
+        raise TransportError(f"the coordinator refused to give the update of {parent_sha256[:12]}: {reply!r}")
 
     def open_stream(self, path: str, start: int = 0):
         """

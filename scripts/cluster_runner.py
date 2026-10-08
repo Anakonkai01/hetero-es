@@ -34,6 +34,10 @@ def add_cluster_arguments(parser) -> None:
     parser.add_argument("--local-python", default=None, help="the interpreter of the coordinator and the local worker (default: this one)")
     parser.add_argument("--scratch-dir", default=str(Path.home() / ".cache" / "heteroes" / "bench-scratch"),
                         help="where each run keeps its published weights and worker cache (about 1 GB per generation; deleted after the run)")
+    parser.add_argument("--replay", choices=["never", "always", "auto"], default="never",
+                        help="how the REMOTE worker catches up with a new parent: download (never), apply the update records (always), or whichever its profile says is faster (auto)")
+    parser.add_argument("--replay-profile", default=None, help="the remote worker's profile JSON, as a path ON THE REMOTE MACHINE (needed by --replay auto)")
+    parser.add_argument("--replay-verify-every", type=int, default=1)
     parser.add_argument("--remote", default=DEFAULTS["remote"])
     parser.add_argument("--remote-repo", default=DEFAULTS["remote_repo"])
     parser.add_argument("--remote-python", default=DEFAULTS["remote_python"])
@@ -102,6 +106,8 @@ class Cluster:
         remote_dir = f"/tmp/bench-{self.name}{tag}"
         pidfile = f"{remote_dir}/worker.pid"
         extra = [] if a.worker_http_timeout is None else ["--http-timeout-seconds", str(a.worker_http_timeout)]
+        replay = ([] if a.replay == "never" else ["--replay", a.replay, "--replay-verify-every", str(a.replay_verify_every)]
+                  + ([] if a.replay_profile is None else ["--profile", a.replay_profile]))        # the remote worker only: the local one downloads from this machine's disk
         if local:
             cmd = [self.python, str(REPO / "scripts/run_worker.py"), "--model-path", LOCAL_MODEL, "--coordinator-url", self.url, "--worker-id", worker,
                    "--log", str(self.run_dir / f"{worker}.jsonl"), "--cache-dir", str(self.local_cache / worker), "--chunk", str(chunk)] + extra
@@ -110,7 +116,7 @@ class Cluster:
             remote = (f"rm -rf {remote_dir}; mkdir -p {remote_dir}; echo $$ > {pidfile}; cd {a.remote_repo} && {noise}exec {a.remote_python} "
                       f"scripts/run_worker.py --model-path ~/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/{MODEL} "
                       f"--coordinator-url {self.url} --worker-id {worker} --log {remote_dir}/{worker}.jsonl --cache-dir {remote_dir}/cache --chunk {chunk} "
-                      + " ".join(extra))
+                      + " ".join(extra + replay))
             cmd = ["ssh", "-o", "ServerAliveInterval=15", a.remote, remote]
             self.remotes.append({"worker": worker, "dir": remote_dir, "pidfile": pidfile, "log": f"{worker}{tag}.jsonl"})
         process = subprocess.Popen(cmd, stdout=open(log, "a"), stderr=subprocess.STDOUT, env=self.env)

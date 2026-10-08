@@ -413,3 +413,18 @@ def test_a_cuda_engine_recipe_applies_the_update_with_the_cuda_engine(tmp_path, 
         env.close()
 
     assert len(calls) == 1 and len(calls[0][0]) == 4 and calls[0][1] == ALPHA
+
+
+def test_the_update_of_each_generation_is_served_under_its_parent_hash(env):
+    env.start_workers()
+
+    first = env.coordinator.run_generation(0)
+    second = env.coordinator.run_generation(1)
+
+    served = env.coordinator.server.updates
+    assert set(served) == {first["parent_sha256"], second["parent_sha256"]}
+    for summary, generation in ((first, 0), (second, 1)):
+        stored = env.ledger.get_update("exp", generation)
+        assert served[summary["parent_sha256"]] == {"record_json": stored.record.to_json(), "record_hash": stored.record_hash,
+                                                    "child_weights_sha256": summary["child_sha256"]}
+

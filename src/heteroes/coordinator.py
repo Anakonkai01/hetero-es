@@ -142,6 +142,11 @@ class Coordinator:
         if removed:
             self.log("weights_pruned", removed=[name[:-4] for name in removed], kept=list(self._recent))
 
+    def _register_update(self, record, child_sha256: str) -> None:
+        """Serve the update (`GET /v1/updates/<parent>`): a worker that is one or a few generations behind can replay it instead of downloading the weights."""
+        self.server.updates[record.parent_weights_sha256] = {"record_json": record.to_json(), "record_hash": record.hash,
+                                                             "child_weights_sha256": child_sha256}
+
     def _weights_file(self, sha256: str):
         from pathlib import Path
         return Path(self.models_dir) / f"{sha256}.bin"
@@ -169,6 +174,10 @@ class Coordinator:
         generations = self.ledger.list_generations(self.experiment_id)
         if not generations:
             return 0
+        for old in generations:                                      # the updates of the past stay available to a worker that restarts behind
+            stored_old = self.ledger.get_update(self.experiment_id, old.generation)
+            if stored_old is not None and stored_old.child_weights_sha256 is not None:
+                self._register_update(stored_old.record, stored_old.child_weights_sha256)
         last = generations[-1]
         if last.recipe_hash != self.recipe.hash:
             raise CoordinatorError(f"the ledger holds generation {last.generation} of another recipe "
@@ -208,6 +217,7 @@ class Coordinator:
             raise CoordinatorError(f"the published weights have the hash {published}, not {recomputed}")
         self.parent_sha256 = recomputed
         self._parent_published = True
+        self._register_update(stored.record, recomputed)
         self.log("recovered", generation=number, action="reapply_record", child_sha256=recomputed, noop=report.noop)
         return number + 1
 
@@ -258,6 +268,7 @@ class Coordinator:
             self.log("update_applied", generation=generation, child_sha256=child, noop=report.noop, changed=report.changed,
                      applied_l2=report.applied_l2)
             publication.commit()
+            self._register_update(record, child)
         except BaseException:
             publication.discard()
             raise
