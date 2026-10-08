@@ -5,7 +5,7 @@ Measure the profile of THIS machine's GPU for the pinned model, ONE workload and
     python scripts/profile_worker.py --model-path <snapshot dir> --worker-id worker-5070ti --out artifacts/experiments/<dir>/profile-5070ti.json
         [--workload arith16|cot_l3_q32|cot_l3_q64|cot_l1_q128] [--noise-engine cpu|cuda]   # default: the 16 prompts and the CPU engine, as before 08/10
         [--chunks 1,2,4,8,16] [--candidates 5] [--probe-candidates 32] [--sigma 1e-3]
-        [--sync-url http://10.10.10.1:8765 --sync-sha256 <hash printed by scripts/serve_weights.py>]   # the link and the sync of a remote worker
+        [--sync-url http://10.10.10.1:8765 --sync-sha256 <hash printed by scripts/serve_weights.py>]   # (the server's token is read from HETEROES_TOKEN) the link and the sync of a remote worker
         [--measure-update [--update-sizes 1,2,4,8]]   # the coordinator's update cost at several numbers of candidates, fitted as fixed + per candidate x N (run it on the coordinator's host)
 
 What it checks and records:
@@ -22,6 +22,7 @@ The output file must not exist (evidence is never overwritten).
 import argparse
 import contextlib
 import json
+import os
 import statistics
 import sys
 import time
@@ -174,7 +175,7 @@ def main(argv: list[str]) -> int:
 
     sync = None
     if args.sync_url:
-        client = HttpClient(args.sync_url, timeout=60.0)
+        client = HttpClient(args.sync_url, token=os.environ.get("HETEROES_TOKEN") or None, timeout=60.0)     # the token of serve_weights.py, from the environment
         rtts = []
         for _ in range(20):
             start = time.perf_counter()
