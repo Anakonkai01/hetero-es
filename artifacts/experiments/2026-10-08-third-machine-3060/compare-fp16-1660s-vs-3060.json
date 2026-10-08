@@ -1,0 +1,480 @@
+{
+  "candidates_compared": 120,
+  "prompts_compared": 1920,
+  "candidates_with_a_different_answer": 36,
+  "candidates_with_a_different_reward": 1,
+  "prompts_with_a_different_answer": 40,
+  "rate_candidates_with_difference": 0.3,
+  "rate_prompts_with_difference": 0.020833333333333332,
+  "margin_at_flip": {
+    "median": 0.0,
+    "max": 0.04403495788574219
+  },
+  "median_of_the_smallest_margin_per_prompt": 0.2720174789428711,
+  "differences": [
+    {
+      "seed": 1,
+      "prompt": 9,
+      "differs": true,
+      "step": 2,
+      "margin_a": 0.0,
+      "margin_b": 0.015625,
+      "min_margin_before": 0.03125,
+      "reward_a": 0.25,
+      "reward_b": 0.25
+    },
+    {
+      "seed": 4,
+      "prompt": 9,
+      "differs": true,
+      "step": 0,
+      "margin_a": 0.012784957885742188,
+      "margin_b": 0.0014190673828125,
+      "min_margin_before": null,
+      "reward_a": 0.125,
+      "reward_b": 0.125
+    },
+    {
+      "seed": 6,
+      "prompt": 14,
+      "differs": true,
+      "step": 0,
+      "margin_a": 0.0,
+      "margin_b": 0.015625,
+      "min_margin_before": null,
+      "reward_a": 0.25,
+      "reward_b": 0.25
+    },
+    {
+      "seed": 7,
+      "prompt": 10,
+      "differs": true,
+      "step": 1,
+      "margin_a": 0.015625,
+      "margin_b": 0.015625,
+      "min_margin_before": 1.390625,
+      "reward_a": 0.25,
+      "reward_b": 0.25
+    },
+    {
+      "seed": 9,
+      "prompt": 14,
+      "differs": true,
+      "step": 0,
+      "margin_a": 0.015625,
+      "margin_b": 0.0,
+      "min_margin_before": null,
+      "reward_a": 0.25,
+      "reward_b": 0.25
+    },
+    {
+      "seed": 10,
+      "prompt": 14,
+      "differs": true,
+      "step": 0,
+      "margin_a": 0.015625,
+      "margin_b": 0.0,
+      "min_margin_before": null,
+      "reward_a": 0.1875,
+      "reward_b": 0.1875
+    },
+    {
+      "seed": 18,
+      "prompt": 4,
+      "differs": true,
+      "step": 0,
+      "margin_a": 0.04403495788574219,
+      "margin_b": 0.046875,
+      "min_margin_before": null,
+      "reward_a": 0.1875,
+      "reward_b": 0.1875
+    },
+    {
+      "seed": 18,
+      "prompt": 13,
+      "differs": true,
+      "step": 6,
+      "margin_a": 0.0,
+      "margin_b": 0.03125,
+      "min_margin_before": 1.203125,
+      "reward_a": 0.1875,
+      "reward_b": 0.1875
+    },
+    {
+      "seed": 22,
+      "prompt": 14,
+      "differs": true,
+      "step": 0,
+      "margin_a": 0.015625,
+      "margin_b": 0.0,
+      "min_margin_before": null,
+      "reward_a": 0.1875,
+      "reward_b": 0.1875
+    },
+    {
+      "seed": 23,
+      "prompt": 4,
+      "differs": true,
+      "step": 2,
+      "margin_a": 0.015625,
+      "margin_b": 0.0,
+      "min_margin_before": 0.09375,
+      "reward_a": 0.25,
+      "reward_b": 0.25
+    },
+    {
+      "seed": 24,
+      "prompt": 7,
+      "differs": true,
+      "step": 0,
+      "margin_a": 0.015625,
+      "margin_b": 0.0,
+      "min_margin_before": null,
+      "reward_a": 0.1875,
+      "reward_b": 0.1875
+    },
+    {
+      "seed": 25,
+      "prompt": 10,
+      "differs": true,
+      "step": 1,
+      "margin_a": 0.015625,
+      "margin_b": 0.0,
+      "min_margin_before": 0.21875,
+      "reward_a": 0.125,
+      "reward_b": 0.125
+    },
+    {
+      "seed": 26,
+      "prompt": 7,
+      "differs": true,
+      "step": 2,
+      "margin_a": 0.0298309326171875,
+      "margin_b": 0.0014190673828125,
+      "min_margin_before": 0.109375,
+      "reward_a": 0.25,
+      "reward_b": 0.25
+    },
+    {
+      "seed": 27,
+      "prompt": 15,
+      "differs": true,
+      "step": 1,
+      "margin_a": 0.015625,
+      "margin_b": 0.0,
+      "min_margin_before": 1.84375,
+      "reward_a": 0.1875,
+      "reward_b": 0.1875
+    },
+    {
+      "seed": 29,
+      "prompt": 9,
+      "differs": true,
+      "step": 3,
+      "margin_a": 0.0,
+      "margin_b": 0.014204025268554688,
+      "min_margin_before": 0.421875,
+      "reward_a": 0.125,
+      "reward_b": 0.125
+    },
+    {
+      "seed": 30,
+      "prompt": 5,
+      "differs": true,
+      "step": 0,
+      "margin_a": 0.0142059326171875,
+      "margin_b": 0.0,
+      "min_margin_before": null,
+      "reward_a": 0.25,
+      "reward_b": 0.25
+    },
+    {
+      "seed": 30,
+      "prompt": 6,
+      "differs": true,
+      "step": 2,
+      "margin_a": 0.011363983154296875,
+      "margin_b": 0.0056819915771484375,
+      "min_margin_before": 0.921875,
+      "reward_a": 0.25,
+      "reward_b": 0.25
+    },
+    {
+      "seed": 42,
+      "prompt": 4,
+      "differs": true,
+      "step": 3,
+      "margin_a": 0.02272796630859375,
+      "margin_b": 0.04119300842285156,
+      "min_margin_before": 1.078125,
+      "reward_a": 0.25,
+      "reward_b": 0.25
+    },
+    {
+      "seed": 42,
+      "prompt": 5,
+      "differs": true,
+      "step": 3,
+      "margin_a": 0.042613983154296875,
+      "margin_b": 0.0,
+      "min_margin_before": 0.0482940673828125,
+      "reward_a": 0.25,
+      "reward_b": 0.25
+    },
+    {
+      "seed": 43,
+      "prompt": 0,
+      "differs": true,
+      "step": 0,
+      "margin_a": 0.014204025268554688,
+      "margin_b": 0.05681800842285156,
+      "min_margin_before": null,
+      "reward_a": 0.1875,
+      "reward_b": 0.25
+    },
+    {
+      "seed": 45,
+      "prompt": 6,
+      "differs": true,
+      "step": 1,
+      "margin_a": 0.015625,
+      "margin_b": 0.015625,
+      "min_margin_before": 2.8096580505371094,
+      "reward_a": 0.1875,
+      "reward_b": 0.1875
+    },
+    {
+      "seed": 48,
+      "prompt": 14,
+      "differs": true,
+      "step": 9,
+      "margin_a": 0.008523941040039062,
+      "margin_b": 0.0056819915771484375,
+      "min_margin_before": 0.46875,
+      "reward_a": 0.1875,
+      "reward_b": 0.1875
+    },
+    {
+      "seed": 52,
+      "prompt": 7,
+      "differs": true,
+      "step": 2,
+      "margin_a": 0.012783050537109375,
+      "margin_b": 0.0014209747314453125,
+      "min_margin_before": 0.796875,
+      "reward_a": 0.1875,
+      "reward_b": 0.1875
+    },
+    {
+      "seed": 61,
+      "prompt": 15,
+      "differs": true,
+      "step": 7,
+      "margin_a": 0.0,
+      "margin_b": 0.015625,
+      "min_margin_before": 0.296875,
+      "reward_a": 0.25,
+      "reward_b": 0.25
+    },
+    {
+      "seed": 63,
+      "prompt": 13,
+      "differs": true,
+      "step": 6,
+      "margin_a": 0.03125,
+      "margin_b": 0.0,
+      "min_margin_before": 0.25,
+      "reward_a": 0.25,
+      "reward_b": 0.25
+    },
+    {
+      "seed": 63,
+      "prompt": 14,
+      "differs": true,
+      "step": 0,
+      "margin_a": 0.046875,
+      "margin_b": 0.0,
+      "min_margin_before": null,
+      "reward_a": 0.25,
+      "reward_b": 0.25
+    },
+    {
+      "seed": 68,
+      "prompt": 9,
+      "differs": true,
+      "step": 2,
+      "margin_a": 0.0,
+      "margin_b": 0.015625,
+      "min_margin_before": 0.234375,
+      "reward_a": 0.25,
+      "reward_b": 0.25
+    },
+    {
+      "seed": 69,
+      "prompt": 12,
+      "differs": true,
+      "step": 1,
+      "margin_a": 0.0142059326171875,
+      "margin_b": 0.0,
+      "min_margin_before": 0.140625,
+      "reward_a": 0.25,
+      "reward_b": 0.25
+    },
+    {
+      "seed": 70,
+      "prompt": 5,
+      "differs": true,
+      "step": 0,
+      "margin_a": 0.035511016845703125,
+      "margin_b": 0.03835296630859375,
+      "min_margin_before": null,
+      "reward_a": 0.25,
+      "reward_b": 0.25
+    },
+    {
+      "seed": 72,
+      "prompt": 13,
+      "differs": true,
+      "step": 8,
+      "margin_a": 0.0,
+      "margin_b": 0.015625,
+      "min_margin_before": 0.25,
+      "reward_a": 0.1875,
+      "reward_b": 0.1875
+    },
+    {
+      "seed": 78,
+      "prompt": 9,
+      "differs": true,
+      "step": 0,
+      "margin_a": 0.00710296630859375,
+      "margin_b": 0.02414703369140625,
+      "min_margin_before": null,
+      "reward_a": 0.25,
+      "reward_b": 0.25
+    },
+    {
+      "seed": 80,
+      "prompt": 6,
+      "differs": true,
+      "step": 0,
+      "margin_a": 0.0,
+      "margin_b": 0.015625,
+      "min_margin_before": null,
+      "reward_a": 0.1875,
+      "reward_b": 0.1875
+    },
+    {
+      "seed": 88,
+      "prompt": 12,
+      "differs": true,
+      "step": 1,
+      "margin_a": 0.0,
+      "margin_b": 0.015625,
+      "min_margin_before": 0.0,
+      "reward_a": 0.25,
+      "reward_b": 0.25
+    },
+    {
+      "seed": 93,
+      "prompt": 12,
+      "differs": true,
+      "step": 8,
+      "margin_a": 0.0,
+      "margin_b": 0.015625,
+      "min_margin_before": 0.375,
+      "reward_a": 0.25,
+      "reward_b": 0.25
+    },
+    {
+      "seed": 94,
+      "prompt": 10,
+      "differs": true,
+      "step": 2,
+      "margin_a": 0.0056819915771484375,
+      "margin_b": 0.009943008422851562,
+      "min_margin_before": 0.265625,
+      "reward_a": 0.25,
+      "reward_b": 0.25
+    },
+    {
+      "seed": 95,
+      "prompt": 14,
+      "differs": true,
+      "step": 11,
+      "margin_a": 0.015625,
+      "margin_b": 0.0,
+      "min_margin_before": 0.375,
+      "reward_a": 0.125,
+      "reward_b": 0.125
+    },
+    {
+      "seed": 99,
+      "prompt": 9,
+      "differs": true,
+      "step": 2,
+      "margin_a": 0.0,
+      "margin_b": 0.015625,
+      "min_margin_before": 0.546875,
+      "reward_a": 0.1875,
+      "reward_b": 0.1875
+    },
+    {
+      "seed": 102,
+      "prompt": 14,
+      "differs": true,
+      "step": 0,
+      "margin_a": 0.0,
+      "margin_b": 0.015625,
+      "min_margin_before": null,
+      "reward_a": 0.25,
+      "reward_b": 0.25
+    },
+    {
+      "seed": 114,
+      "prompt": 10,
+      "differs": true,
+      "step": 0,
+      "margin_a": 0.046875,
+      "margin_b": 0.03125,
+      "min_margin_before": null,
+      "reward_a": 0.25,
+      "reward_b": 0.25
+    },
+    {
+      "seed": 118,
+      "prompt": 12,
+      "differs": true,
+      "step": 9,
+      "margin_a": 0.015625,
+      "margin_b": 0.0,
+      "min_margin_before": 0.25,
+      "reward_a": 0.1875,
+      "reward_b": 0.1875
+    }
+  ],
+  "a": {
+    "worker_id": "worker-1660s",
+    "torch": "2.13.0+cu132",
+    "torch_cuda": "13.2",
+    "transformers": "5.17.0",
+    "numpy": "2.5.2",
+    "gpu_name": "NVIDIA GeForce GTX 1660 SUPER",
+    "gpu_capability": [
+      7,
+      5
+    ]
+  },
+  "b": {
+    "worker_id": "worker-3060",
+    "torch": "2.13.0+cu132",
+    "torch_cuda": "13.2",
+    "transformers": "5.17.0",
+    "numpy": "2.5.3",
+    "gpu_name": "NVIDIA GeForce RTX 3060",
+    "gpu_capability": [
+      8,
+      6
+    ]
+  }
+}

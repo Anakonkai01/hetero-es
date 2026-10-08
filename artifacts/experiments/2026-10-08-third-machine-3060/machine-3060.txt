@@ -1,0 +1,14 @@
+
+==============NVSMI LOG==============
+
+Timestamp                                              : Thu Oct  8 20:54:03 2026
+Driver Version                                         : 617.42 [Deprecated; will be removed in CUDA 14.0. Use KMD Version instead]
+CUDA Version                                           : 13.4 [Deprecated; will be removed in CUDA 14.0. Use CUDA UMD Version instead]
+KMD Version                                            : 617.42
+CUDA UMD Version                                       : 13.4
+
+Attached GPUs                                          : 1
+GPU 00000000:01:00.0
+    Product Name                                       : NVIDIA GeForce RTX 3060
+6.6.87.2-microsoft-standard-WSL2
+Description:	Ubuntu 26.04.1 LTS

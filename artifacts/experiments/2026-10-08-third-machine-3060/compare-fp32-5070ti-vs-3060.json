@@ -1,0 +1,39 @@
+{
+  "candidates_compared": 120,
+  "prompts_compared": 1920,
+  "candidates_with_a_different_answer": 0,
+  "candidates_with_a_different_reward": 0,
+  "prompts_with_a_different_answer": 0,
+  "rate_candidates_with_difference": 0.0,
+  "rate_prompts_with_difference": 0.0,
+  "margin_at_flip": {
+    "median": null,
+    "max": null
+  },
+  "median_of_the_smallest_margin_per_prompt": 0.27146148681640625,
+  "differences": [],
+  "a": {
+    "worker_id": "worker-5070ti",
+    "torch": "2.13.0+cu132",
+    "torch_cuda": "13.2",
+    "transformers": "5.17.0",
+    "numpy": "2.5.3",
+    "gpu_name": "NVIDIA GeForce RTX 5070 Ti",
+    "gpu_capability": [
+      12,
+      0
+    ]
+  },
+  "b": {
+    "worker_id": "worker-3060",
+    "torch": "2.13.0+cu132",
+    "torch_cuda": "13.2",
+    "transformers": "5.17.0",
+    "numpy": "2.5.3",
+    "gpu_name": "NVIDIA GeForce RTX 3060",
+    "gpu_capability": [
+      8,
+      6
+    ]
+  }
+}
