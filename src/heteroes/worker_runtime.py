@@ -202,7 +202,7 @@ class WorkerRuntime:
         if self.replay.mode == "never":
             return self.sync(job)
         try:
-            chain = fetch_chain(self.client, previous, target, self.executor.recipe.hash)
+            chain = fetch_chain(self.client, previous, target, self.executor.recipe.hash, max_steps=self.replay.max_chain)
             replay, why = self.replay.decide(len(chain), job.get("candidates") or 0)
             if not replay:
                 self.log("replay_declined", from_sha256=previous, to_sha256=target, steps=len(chain), why=why)

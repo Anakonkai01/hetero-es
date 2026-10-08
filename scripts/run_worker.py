@@ -50,6 +50,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--profile", default=None, help="this worker's profile JSON (scripts/profile_worker.py); needed by --replay auto")
     parser.add_argument("--replay-verify-every", type=int, default=1,
                         help="hash the whole weights after every k-th replay (1 = every time: the safe default; a larger k trusts the coordinator's hash in between)")
+    parser.add_argument("--replay-max-chain", type=int, default=8, help="the longest chain of update records a worker replays; further behind it synchronizes (raise it for a worker that joins late and replays from the base weights)")
     args = parser.parse_args(argv)
     if args.replay == "auto" and args.profile is None:
         fail("--replay auto needs --profile")
@@ -122,8 +123,8 @@ def main(argv: list[str]) -> int:
           "engine_selftest_seconds": engine_selftest_seconds, "noise_engine": recipe.engine_version, "workload": recipe.workload_name})
 
     from heteroes.replay import ReplayPolicy
-    policy = (ReplayPolicy.from_profile(json.loads(Path(args.profile).read_text(encoding="utf-8")), mode=args.replay, verify_every=args.replay_verify_every)
-              if args.profile else ReplayPolicy(mode=args.replay, verify_every=args.replay_verify_every))
+    policy = (ReplayPolicy.from_profile(json.loads(Path(args.profile).read_text(encoding="utf-8")), mode=args.replay, verify_every=args.replay_verify_every, max_chain=args.replay_max_chain)
+              if args.profile else ReplayPolicy(mode=args.replay, verify_every=args.replay_verify_every, max_chain=args.replay_max_chain))
     emit({"event": "replay_policy", "t": time.time(), "worker_id": args.worker_id, "policy": policy.__dict__})
     runtime = WorkerRuntime(args.worker_id, client, executor, args.cache_dir, log=emit, poll_seconds=args.poll_seconds,
                             max_unreachable_seconds=args.give_up_after_seconds, replay=policy)

@@ -244,3 +244,26 @@ def test_policy_from_a_profile():
     policy = ReplayPolicy.from_profile(profile)
     assert (policy.update_seconds_per_candidate, policy.update_fixed_seconds, policy.verify_seconds, policy.sync_seconds) == (0.07, 0.0, 3.0, 21.9)
     assert ReplayPolicy.from_profile({"update": None, "sync": None}).decide(1, 24)[0] is False
+
+
+def test_a_long_chain_is_replayed_when_the_policy_allows_it_and_synchronized_when_it_does_not(tmp_path):
+    chain = Chain(tmp_path, steps=4)
+    (tmp_path / "a").mkdir()
+    (tmp_path / "b").mkdir()
+    try:
+        refused = Side(chain, tmp_path / "a", ReplayPolicy("always", max_chain=3))
+        refused.runtime.bring_up_to_date(chain.job(4))
+        assert refused.kinds() == ["replay_failed", "sync"] and refused.executor.parent_sha256 == chain.hashes[4]
+
+        allowed = Side(chain, tmp_path / "b", ReplayPolicy("always", max_chain=4))
+        allowed.runtime.bring_up_to_date(chain.job(4))
+        assert allowed.kinds() == ["replay"] and allowed.events[0]["steps"] == 4
+        assert model_weights_sha256(allowed.model, allowed.schema) == chain.hashes[4] == allowed.executor.parent_sha256
+    finally:
+        chain.close()
+
+
+def test_max_chain_is_validated_and_comes_from_the_profile_call():
+    with pytest.raises(ValueError):
+        ReplayPolicy("always", max_chain=0)
+    assert ReplayPolicy.from_profile({"update": None, "sync": None}, max_chain=50).max_chain == 50

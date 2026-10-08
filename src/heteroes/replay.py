@@ -35,15 +35,18 @@ class ReplayPolicy:
     sync_seconds: float | None = None
     verify_seconds: float = DEFAULT_VERIFY_SECONDS
     verify_every: int = 1
+    max_chain: int = MAX_CHAIN              # a worker further behind than this many updates synchronizes; raise it for a late joiner that replays from the base weights
 
     def __post_init__(self):
         if self.mode not in MODES:
             raise ValueError(f"mode must be one of {MODES}, got {self.mode!r}")
         if isinstance(self.verify_every, bool) or not isinstance(self.verify_every, int) or self.verify_every < 1:
             raise ValueError(f"verify_every must be an integer of at least 1, got {self.verify_every!r}")
+        if isinstance(self.max_chain, bool) or not isinstance(self.max_chain, int) or self.max_chain < 1:
+            raise ValueError(f"max_chain must be an integer of at least 1, got {self.max_chain!r}")
 
     @classmethod
-    def from_profile(cls, profile: dict, mode: str = "auto", verify_every: int = 1) -> "ReplayPolicy":
+    def from_profile(cls, profile: dict, mode: str = "auto", verify_every: int = 1, max_chain: int = MAX_CHAIN) -> "ReplayPolicy":
         """The numbers of the worker's own profile (`scripts/profile_worker.py --measure-update --sync-url ...`)."""
         update, sync = profile.get("update"), profile.get("sync")
         return cls(mode=mode,
@@ -51,7 +54,7 @@ class ReplayPolicy:
                    update_fixed_seconds=0.0 if update is None else max(0.0, update.get("fixed_seconds", 0.0)),
                    sync_seconds=None if sync is None else sync["total_seconds"],
                    verify_seconds=DEFAULT_VERIFY_SECONDS if update is None else update.get("hash_seconds", DEFAULT_VERIFY_SECONDS),
-                   verify_every=verify_every)
+                   verify_every=verify_every, max_chain=max_chain)
 
     def estimate_replay_seconds(self, steps: int, candidates: int, verified: bool = True) -> float | None:
         if self.update_seconds_per_candidate is None:
