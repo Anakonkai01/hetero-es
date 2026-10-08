@@ -8,13 +8,17 @@ Mục tiêu: có một worker thứ ba chạy đúng, rồi đo ba máy so với
 - [AI] Viết sẵn kịch bản `scripts/setup_worker_machine.sh` kiểm tra điều kiện của máy mới (phiên bản Python/torch/transformers/NumPy, driver, GPU, model snapshot, đường tới coordinator) và in báo cáo PASS/FAIL. Chỉ đọc, không cài gì.
 - [AI] Chuẩn bị `git bundle` của nhánh hiện tại.
 
-## Giai đoạn 1 — Chuẩn bị máy [BẠN, mình hướng dẫn từng lệnh]
-Cho mình biết trước: hệ điều hành, phiên bản driver NVIDIA (`nvidia-smi`), máy nối mạng thế nào với 5070 Ti (cáp riêng, LAN hay Tailscale), có SSH không.
-1. Python ≥ 3.12 trong một môi trường ảo riêng.
-2. `torch 2.13.0+cu132`, `transformers 5.17.0`, cùng NumPy với máy tham chiếu (xem `environment` trong profile của 5070 Ti). Driver phải hỗ trợ CUDA 13.2. PASS: `scripts/setup_worker_machine.sh` báo khớp.
-3. Mô hình `Qwen/Qwen2.5-0.5B-Instruct` đúng revision `7ae557604adf67be50417f59c2c2f167def9a775` trong cache Hugging Face.
-4. Repo: `git fetch` từ bundle, `merge --ff-only`. PASS: `git log -1` trùng commit của 5070 Ti.
-5. Mạng: máy 3060 gọi được `http://<địa chỉ 5070 Ti>:8765/v1/health` (cần token). Nếu bị chặn, bạn quyết định có mở cổng không; mình không đổi tường lửa.
+## Giai đoạn 1 — Chuẩn bị máy Windows 11 [BẠN làm theo lệnh của mình]
+Máy chạy Windows 11 nên dùng **WSL2** (Ubuntu chạy bên trong Windows, dùng GPU qua driver Windows): cùng bản torch Linux mà hệ thống đã kiểm số học, không phải cài lại hệ điều hành. Đường dự phòng là Python thuần trên Windows, chỉ dùng nếu WSL2 không chạy được, và khi đó coi là nền tảng mới cần kiểm số học lại từ đầu.
+
+Việc chuẩn bị trên Windows (cần quyền quản trị, có thể phải khởi động lại một lần):
+0. Trong Windows: tắt chế độ ngủ và tắt ngủ đông khi cắm điện (nếu không máy sẽ ngắt giữa lúc chạy); cắm sạc nếu là laptop; đóng game và ứng dụng chiếm GPU.
+1. PowerShell quản trị: `wsl --install -d Ubuntu-24.04`, khởi động lại nếu được yêu cầu, tạo tài khoản Ubuntu. Ubuntu 24.04 có sẵn Python 3.12.
+2. Driver NVIDIA bản mới nhất ở phía Windows (KHÔNG cài driver trong WSL). PASS: trong Ubuntu `nvidia-smi` thấy RTX 3060 và dòng "CUDA Version" từ 13.2 trở lên. Nếu thấp hơn: dừng, báo mình (torch cu132 sẽ không chạy và cổng phần mềm sẽ từ chối).
+3. Trong Ubuntu: `python3 -m venv`, cài đúng `torch 2.13.0+cu132`, `transformers 5.17.0` và NumPy cùng bản với 5070 Ti (mình đưa lệnh chính xác, lấy từ trường `environment` của profile). PASS: `scripts/setup_worker_machine.sh` báo khớp mọi phiên bản.
+4. Mô hình `Qwen/Qwen2.5-0.5B-Instruct` đúng revision `7ae557604adf67be50417f59c2c2f167def9a775` trong cache Hugging Face của Ubuntu (khoảng 1 GB tải về).
+5. Repo: `git fetch` từ bundle, `merge --ff-only`. PASS: `git log -1` trùng commit của 5070 Ti.
+6. Mạng: WSL2 chỉ cần gọi RA được `http://<địa chỉ 5070 Ti>:8765/v1/health` (worker kéo việc, không cần mở cổng nào ở máy 3060). Địa chỉ này phụ thuộc cách hai máy nối nhau (cáp, cùng mạng nhà hay Tailscale): bạn cho mình biết khi có máy. Nếu cổng 8765 trên 5070 Ti không mở cho địa chỉ đó, bạn quyết định có mở không; mình không đổi tường lửa.
 
 ## Giai đoạn 2 — Kiểm tra số học [CẢ HAI]
 1. [BẠN] Chạy bộ test trên 3060 với mô hình thật. PASS: không có test đỏ (số test bỏ qua giống 1660S).
@@ -35,6 +39,7 @@ Cho mình biết trước: hệ điều hành, phiên bản driver NVIDIA (`nvid
 README của thư mục bằng chứng (nói rõ cái gì KHÔNG chứng minh: một lần mượn máy, ít lần lặp, mạng khác cáp), cập nhật EQ3 trong `CLAIMS_AUDIT.md` từ `NOT_RUN` thành MỘT PHẦN, STATUS, báo cáo, commit trên nhánh mới.
 
 ## Rủi ro đã biết
+- WSL2 không bật được (BIOS tắt ảo hoá, Windows bản Home cũ, không có quyền quản trị): thử Python thuần trên Windows, ghi rõ là nền tảng mới, chạy lại toàn bộ giai đoạn 2.
 - Driver không đủ mới cho CUDA 13.2 → có thể phải dùng bản torch khác, khi đó cổng phần mềm từ chối và không còn là so sánh công bằng (ghi nhận chứ không ép).
 - GPU Ampere cho kết quả số khác hai GPU kia → FAIL ở giai đoạn 2, là kết quả có giá trị.
 - Máy mượn có thể thu hồi giữa chừng: ghi kết quả từng phần ra file, không chờ cuối.
