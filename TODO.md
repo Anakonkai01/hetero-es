@@ -176,3 +176,7 @@ with other methods (for example the realized difference as the update direction)
 - [ ] Reach the coordinator from outside the home network: a private overlay (Tailscale) so that traffic is encrypted; the token travels in clear text over plain HTTP today (acceptable only on a private cable / LAN).
 - [ ] Slow uplinks make the 1 GB synchronization the cost: measure replay `auto` there (the real use of the replay option).
 - [ ] Trust: workers are trusted by design; a borrowed machine can return wrong rewards unseen. Idea: evaluate some candidates twice on two workers and compare. State it in the report.
+
+## admission-in-the-join-flow  (owner agreed 08/10, after v0.5.0; to be built together with E1 of `ideas-remote-workers`, same "a new machine joins" flow)
+- [ ] Today admission is a hand-run tool (`profile_worker.py` + `predict_admission.py`); `run_worker.py` checks only that the coordinator answers and that the recipe matches. Build the join flow: capability gate on the machine (versions, noise / CUDA self-tests, bit-exact restore, a reference candidate against golden hashes) + a QUICK profile (minutes: a short workload, a few candidates) + the benefit prediction, ending in ADMITTED / ADMITTED_LIMITED / ELIGIBLE_BUT_NOT_BENEFICIAL / INELIGIBLE with reasons.
+- [ ] Keep the FULL profile (8 probe candidates, chunk 1 as reference, the experiment's own workload; hours on a 1660S) as the mode for evidence only, and say in the report that v0.5.0 admission is this hand-run tool.
