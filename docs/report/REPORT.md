@@ -15,7 +15,7 @@ Kết quả chính, mỗi ý có bằng chứng ở mục tương ứng:
 2. **Chịu lỗi (mục 5).** Sổ cái SQLite, lease, loại kết quả muộn, khởi động lại coordinator; bốn nhóm lỗi đã chạy trên hai máy thật, mọi lần kết thúc với đúng trọng số của lần chạy không bị nhiễu (mỗi kịch bản chạy một lần).
 3. **Điều phối (mục 4).** Với GPU chậm hơn 4–7 lần, điều phối tham lam thuần túy có thể làm cụm **chậm hơn** GPU nhanh đứng riêng; chính sách tránh đuôi (B4) cho cụm nhanh hơn 1,19 lần (±0,012), gần trần lý thuyết 1,23.
 4. **C4 (mục 6).** Replay một thế hệ N = 24 mất 12,3 s trên 1660S, so với 9,8 s đồng bộ đầy đủ qua cáp gigabit; replay chỉ có lợi khi N dưới khoảng 19 hoặc khi băng thông dưới khoảng 720 Mbit/s.
-5. **Học (mục 7).** Ba lần chạy trên runtime thật **không** cho bằng chứng rằng ES cải thiện độ chính xác tính toán theo các tiêu chí đã đăng ký trước. Điểm tăng lớn ban đầu phần lớn là mô hình học trả lời ngắn lại cho kịp giới hạn 256 token, không phải tính giỏi hơn. Phần kiểm tra thứ hai không còn nhiễu đó nằm ở mục 8.
+5. **Học (mục 7 và 8).** Lần thứ nhất (ba run): không có bằng chứng học theo tiêu chí đã đăng ký, và điểm tăng lớn phần lớn là mô hình học trả lời ngắn lại cho kịp giới hạn 256 token. Lần thứ hai (không còn bị cắt token): điểm held-out trên họ huấn luyện tăng mạnh (62,1% → 84,0%) và hướng cập nhật có tác dụng so với đối chứng ngẫu nhiên, nhưng phần lớn mức tăng là chuyển sang trả lời thẳng (mô hình gốc được yêu cầu trả lời thẳng đã đạt 77,0%), và các họ khác bị thiệt hại.
 
 Các con số "nhanh hơn" khiêm tốn (vài chục phần trăm), và có một cặp phần cứng, một mô hình, N = 24. Xem mục 9 về giới hạn.
 
@@ -110,13 +110,32 @@ Từ checkpoint 50, đi 50 bước với hệ số bị xáo trộn (cùng nhi�
 
 ## 8. Thí nghiệm học lần hai (không còn bị cắt token)
 
-*(Điền sau khi các lần chạy D1 và D2 kết thúc.)* Thiết kế và tiêu chí viết trước: `artifacts/experiments/2026-10-08-learning-v2/PREREGISTRATION.md`: tập huấn luyện 128 câu level 1 (phép tính hai chữ số, trả lời khoảng 96 token nên không bị cắt; độ chính xác mô hình gốc 64,5% ở cả 256 và 512 token), N = 32, alpha 1,5e-3, 40 thế hệ, tập validation riêng để chọn checkpoint, đối chứng đi ngẫu nhiên là tiêu chí bắt buộc. D2 (thăm dò): sigma giảm một nửa từ thế hệ 20.
+**Thiết kế** (`artifacts/experiments/2026-10-08-learning-v2/`; tiêu chí viết trước trong `PREREGISTRATION.md`): tập huấn luyện 128 câu level 1 (phép tính hai chữ số; trả lời khoảng 96 token nên không bị cắt; độ chính xác mô hình gốc 64,5% ở cả 256 và 512 token), N = 32, sigma 1e-3, alpha 1,5e-3, 40 thế hệ, 5070 Ti một mình. Tập validation V1 (256 câu) chỉ để chọn checkpoint; tập kiểm tra H1 (256 câu cùng họ) và hai họ khác H2 (ba toán hạng) và H3 (bài toán lời văn), đều đánh giá với giới hạn 512 token; đối chứng đi ngẫu nhiên tích lũy là một phần của tiêu chí P2.
+
+![Thí nghiệm hai](figures/fig5-learning-v2.png)
+
+**Kết quả theo tiêu chí đã đăng ký (run D1):**
+
+| Tiêu chí | Số đo | Đạt |
+|---|---|---|
+| P1: H1 tăng ít nhất 6 điểm (checkpoint chọn theo V1) | 62,1% → 84,0% (+21,9) | có |
+| P2: hướng cập nhật quan trọng (≥ 60% các thế hệ không hòa, kiểm định dấu p ≤ 0,05, ba lần đi ngẫu nhiên đều kết thúc thấp hơn) | 22/26 thế hệ không hòa, p = 0,0003; ba lần đi ngẫu nhiên kết thúc ở 87,5%, 77,3%, 83,6% so với 94,5% của quỹ đạo thật | có |
+| P3: train tăng ít nhất 8 điểm | 65,6% → 93,0% (+27,3) | có |
+| P4: H2 và H3 không giảm quá 6 điểm | H2 85,7% so với 93,8% (−8,1); H3 64,3% so với 81,2% (−16,9) | **không** |
+
+Theo luật viết trước, nhãn là "không có bằng chứng cải thiện trên phép tính held-out" (nhánh cuối của luật). Nhãn này mô tả D1 kém: **điểm trên họ huấn luyện tăng rất mạnh, còn thất bại nằm ở thiệt hại cho các họ khác** (Phụ lục 1 của tiêu chí giải thích).
+
+**Cơ chế (phân tích sau khi thấy dữ liệu, không phải tiêu chí).** Độ dài trả lời trung bình của H1 giảm từ 247 xuống khoảng 95 ký tự: mô hình chuyển sang trả lời thẳng. Mô hình gốc, nếu được yêu cầu "chỉ trả lời số nguyên cuối cùng", đã đạt **77,0%** trên H1 (so với 62,1% với prompt suy luận của workload) (`artifacts/experiments/2026-10-08-direct-answer-probe/`). Checkpoint của D1 với prompt của workload đạt 82–84%, tức hơn mốc đúng khoảng 5–7 điểm (biên giới, khoảng 2 sai số chuẩn), và khi được yêu cầu chỉ trả lời số thì không hơn mô hình gốc (76,6% và 68,8%). **Kết luận có điều kiện:** ES chủ yếu dạy mô hình trả lời theo cách mà mô hình gốc vốn đã làm tốt nhất; còn có học thêm chút tính toán hay không thì run này không tách được.
+
+**D2 (thăm dò, một lần chạy, sigma và alpha đổi cùng lúc):** từ thế hệ 20 của D1, sigma 5e-4 và alpha 7,5e-4, 20 thế hệ. Phần thưởng trung bình của 32 ứng viên ngang cha (93,9% so với 94,4%; trong D1 các thế hệ 20–39 là 89,5% so với 93,7%): hiện tượng "bản sao tệ hơn cha" ở cuối các run lần đầu đã hết. Nhưng H1 không tốt hơn (82,0%, như D1) và H3 tụt thêm (22,7% so với 60,9%). Vậy trong thiết lập này, sigma nhỏ hơn không giúp độ chính xác held-out.
+
+**Điều rút ra cho báo cáo:** (i) hướng cập nhật của ES có tác dụng (đối chứng đi ngẫu nhiên, P2) và nó nhanh chóng tìm ra cách trả lời có điểm cao hơn; (ii) phần lớn mức tăng là chuyển chế độ trả lời, không phải học phép tính; (iii) việc chuyển chế độ gây thiệt hại cho các tác vụ cần suy luận trong văn bản. Một lần chạy, một họ câu hỏi: đây là bằng chứng về cơ chế, không phải kết luận chung về ES.
 
 ## 9. Giới hạn và những điều báo cáo này không chứng minh
 
 - **Phần cứng:** một cặp GPU, một mô hình (0,5B), một bộ phần mềm. "Không đồng nhất" ở đây là một ca nghiên cứu, không phải kết luận chung về mọi cụm.
 - **Hiệu năng:** tăng tốc 1,19 lần nhờ máy thứ hai, trần 1,23; với N = 24, 3 lần chạy mỗi ô. Chưa thử N = 48 hoặc 96, chưa có chunk riêng cho từng worker, chưa tối ưu vòng giải mã (KV cache tĩnh, CUDA graphs, vLLM).
-- **Học:** chưa có bằng chứng ES cải thiện độ chính xác tính toán trên tập held-out sau khi loại ảnh hưởng của giới hạn token (xem mục 7, và mục 8 khi hoàn thành). Không so sánh với GRPO hay thuật toán khác.
+- **Học:** chưa có bằng chứng ES cải thiện độ chính xác tính toán trên tập held-out sau khi loại ảnh hưởng của giới hạn token (xem mục 7 và 8: mức tăng chủ yếu là đổi cách trả lời). Không so sánh với GRPO hay thuật toán khác.
 - **Replay** là script đo, chưa tích hợp vào worker; chưa đo đồng bộ delta nén.
 - **Admission (C1):** thí nghiệm dự đoán so với ép nhận chưa lặp lại sau G6.
 - **Mất log:** log worker của máy 1660S bị mất ở hai lần chạy học vì máy sập trước khi sao chép; tỷ lệ ứng viên máy đó làm (375/2400, 304/2400) là suy ra từ tổng, không phải đo.
