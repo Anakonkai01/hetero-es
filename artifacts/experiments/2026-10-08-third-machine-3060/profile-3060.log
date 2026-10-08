@@ -1,0 +1,15 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  91%|█████████ | 263/290 [00:00<00:00, 2603.31it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 2644.56it/s]
+chunk probes done, safe chunk 64; partial result in /tmp/profile-3060-l1q128-cuda.json.partial
+candidate times done
+{
+ "worker_id": "worker-3060",
+ "safe_chunk": 64,
+ "checks": {
+  "noise_selftest": true,
+  "restore_exact": true,
+  "chunk1_reproduces_reference": true
+ },
+ "candidate_seconds_at_chunk_1": 191.68181423199985,
+ "candidate_seconds_at_safe_chunk": 20.65705745699961,
+ "peak_bytes_candidate": 3765661696
+}

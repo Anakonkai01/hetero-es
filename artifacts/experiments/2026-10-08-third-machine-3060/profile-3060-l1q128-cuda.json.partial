@@ -1,0 +1,100 @@
+{
+  "stage": "after_candidate_times",
+  "worker_id": "worker-3060",
+  "workload": "cot_l1_q128",
+  "noise_engine": "torch_cuda_philox_chunked_f32_to_f16_v1",
+  "checks": {
+    "noise_selftest": true,
+    "restore_exact": true,
+    "chunk1_reproduces_reference": true
+  },
+  "chunk_probes": [
+    {
+      "chunk": 1,
+      "ran": true,
+      "identical": true,
+      "seconds": 201.8027008598891,
+      "peak_bytes": 3022594560,
+      "error": null,
+      "differing": []
+    },
+    {
+      "chunk": 64,
+      "ran": true,
+      "identical": true,
+      "seconds": 16.878469348333308,
+      "peak_bytes": 3770314752,
+      "error": null,
+      "differing": []
+    }
+  ],
+  "safe_chunk": 64,
+  "candidate_times": {
+    "1": {
+      "chunk": 1,
+      "raw": [
+        {
+          "perturb": 0.2201362469995729,
+          "rollout": 126.36537678900004,
+          "restore": 0.1909419439998601,
+          "total": 126.77645497999947
+        },
+        {
+          "perturb": 0.2158595700002479,
+          "rollout": 340.8015654109995,
+          "restore": 0.1899650470004417,
+          "total": 341.2073900280002
+        },
+        {
+          "perturb": 0.21717650800019328,
+          "rollout": 191.27592243900017,
+          "restore": 0.18871528499948909,
+          "total": 191.68181423199985
+        }
+      ],
+      "samples": 3,
+      "total_median": 191.68181423199985,
+      "total_min": 126.77645497999947,
+      "total_max": 341.2073900280002,
+      "phases_median": {
+        "perturb": 0.21717650800019328,
+        "rollout": 191.27592243900017,
+        "restore": 0.1899650470004417
+      },
+      "peak_bytes": 3071544832
+    },
+    "64": {
+      "chunk": 64,
+      "raw": [
+        {
+          "perturb": 0.22810212900003535,
+          "rollout": 20.191292516999965,
+          "restore": 0.23766281099960906,
+          "total": 20.65705745699961
+        },
+        {
+          "perturb": 0.23572792099912476,
+          "rollout": 20.696422407000682,
+          "restore": 0.23744205799994234,
+          "total": 21.16959238599975
+        },
+        {
+          "perturb": 0.21901163900020038,
+          "rollout": 19.351872383999762,
+          "restore": 0.19001646200013056,
+          "total": 19.760900485000093
+        }
+      ],
+      "samples": 3,
+      "total_median": 20.65705745699961,
+      "total_min": 19.760900485000093,
+      "total_max": 21.16959238599975,
+      "phases_median": {
+        "perturb": 0.22810212900003535,
+        "rollout": 20.191292516999965,
+        "restore": 0.23744205799994234
+      },
+      "peak_bytes": 3765661696
+    }
+  }
+}
