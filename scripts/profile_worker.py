@@ -92,6 +92,12 @@ def main(argv: list[str]) -> int:
         fail("--noise-engine cuda needs a CUDA device")
     checks = {"noise_selftest": True, "restore_exact": True, "chunk1_reproduces_reference": False}
 
+    if args.sync_url:                                              # fail now, not after hours of measurement
+        try:
+            HttpClient(args.sync_url, token=os.environ.get("HETEROES_TOKEN") or None, timeout=10.0, retries=0).get_json("/v1/health")
+        except Exception as error:                                 # noqa: BLE001
+            fail(f"the sync server {args.sync_url} does not answer ({error}); is the port open between the machines (the benchmarks use 8765)?", 4)
+
     loaded = load_pinned_model(args.model_path, device)
     model, tokenizer, schema = loaded.model, loaded.tokenizer, loaded.schema
     recipe = build_recipe(loaded, sigma=args.sigma, eval_dtype=args.eval_dtype, noise_engine=args.noise_engine, workload=args.workload)
@@ -146,6 +152,11 @@ def main(argv: list[str]) -> int:
         reference_kind = "chunk1_twice_equal"                         # no recorded answers exist for this workload: the weaker check that the parent's text is repeatable
         checks["chunk1_reproduces_reference"] = texts_at(1) == texts_at(1)
     chosen = safe_chunk(probes)
+    partial = {"stage": "after_chunk_probes", "worker_id": args.worker_id, "workload": args.workload, "noise_engine": recipe.engine_version, "checks": checks,
+               "chunk_probes": [probe.to_dict() for probe in probes], "safe_chunk": chosen}
+    Path(args.out + ".partial").parent.mkdir(parents=True, exist_ok=True)
+    Path(args.out + ".partial").write_text(json.dumps(partial, indent=2) + "\n", encoding="utf-8")       # a later failure must not lose hours of probes
+    print(f"chunk probes done, safe chunk {chosen}; partial result in {args.out}.partial", file=sys.stderr, flush=True)
     evaluation = None                                              # the FP32 copy of the probes is freed: each executor below makes its own, and two would double the measured peak
     if cuda:
         torch.cuda.empty_cache()
@@ -170,6 +181,8 @@ def main(argv: list[str]) -> int:
     if chosen != 1:
         candidate_times[str(chosen)] = time_candidates(chosen)
     reference_times = candidate_times[str(chosen)]
+    Path(args.out + ".partial").write_text(json.dumps({**partial, "stage": "after_candidate_times", "candidate_times": candidate_times}, indent=2) + "\n", encoding="utf-8")
+    print("candidate times done", file=sys.stderr, flush=True)
     sync_executor = CandidateExecutor(model, tokenizer, schema, recipe)         # made before the timing, as in a running worker
     parent_sha256 = sync_executor.parent_sha256
 

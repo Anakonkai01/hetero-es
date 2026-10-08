@@ -1,0 +1,30 @@
+# Kiểm kê claim so với MASTER §12 (bản nháp của AI, 08/10/2026)
+
+Mỗi câu hỏi đánh giá (EQ) của MASTER §12 được ghi một trong bốn nhãn: **CÓ BẰNG CHỨNG** (có file đo, nêu giới hạn), **MỘT PHẦN** (có một phần, nêu phần thiếu), **KHÔNG CLAIM** (dự án chủ động không claim, kèm lý do), **NOT_RUN** (chưa chạy). Không điền số của bài báo khác vào cột số đo của nhóm. Những ô đang chờ kết quả của lần chạy hôm nay ghi **ĐANG CHỜ**: phải cập nhật trước khi đóng v0.5.0.
+
+Phạm vi: track A (Systems/Core). Chủ dự án chưa review bất kỳ dòng nào dưới đây.
+
+| EQ | Câu hỏi | Nhãn | Bằng chứng | Giới hạn phải nói cùng |
+|---|---|---|---|---|
+| EQ1 | ES update/reload đúng? | **CÓ BẰNG CHỨNG** | reference math và test (`tests/es/`), perturb/restore bit-exact trên 4 môi trường (`artifacts/regression/2026-10-03-o2-perturbation/`), engine CUDA bằng nhau trên hai GPU (`2026-10-07-g7-restore-tradeoff/`), replay 100/100 thế hệ khớp hash trên cả hai máy (`2026-10-08-c4-replay/`) | một cặp GPU, một bộ phần mềm; "bằng nhau" là mức đã kiểm (khoảng 0,2% mỗi câu ở tin cậy 95%), không phải bảo đảm |
+| EQ1 (phần "learning evidence") | ES có cải thiện mô hình? | **KHÔNG CLAIM** | quyết định của chủ dự án 08/10: dự án claim runtime, không claim thuật toán học được; kết quả học là của các bài ES-at-Scale, Understanding ES, Agentic ESOpt (trích dẫn, chưa đối chiếu lại bài gốc) | các lần chạy học của dự án (`2026-10-07-learning-runtime/`, `2026-10-08-learning-v2/`) chứng minh runtime chạy trọn thí nghiệm dài, KHÔNG chứng minh học: mức tăng phần lớn là chuyển sang trả lời thẳng (`2026-10-08-uncut-probe/`, `2026-10-08-direct-answer-probe/`) |
+| EQ2A | Admission dự đoán đúng lợi ích thêm worker? | **MỘT PHẦN** (ĐANG CHỜ lần lặp lại) | lần 1: `2026-10-07-g4-admission-b2/` (2 điểm, N = 8 và 24, một lần chạy mỗi điều kiện, dự đoán đúng hướng ở N = 24, sai dấu ở N = 8, lệch thời gian tuyệt đối 13–19%); lần 2 với profile CUDA và workload `cot_l1_q128`: `2026-10-08-c1-v2/` | một cặp GPU; ít điểm N; không có phương sai giữa các lần chạy |
+| EQ2 | Điều phối tích hợp hữu ích ở chế độ nào? | **CÓ BẰNG CHỨNG** | `2026-10-07-g7-bigchunk/` (B0, B0x2, B3x2, B4x2, 3 lần chạy mỗi ô, khoảng tin cậy trong `summary-*`), G5/G6 cho các chế độ khác | N = 24 duy nhất; chunk chung cho hai worker; N = 48/96 và chunk riêng cho từng worker: ĐANG CHỜ |
+| EQ4 | Worker lỗi có làm sai candidate/generation? | **MỘT PHẦN** (ĐANG CHỜ lần lặp lại) | `2026-10-07-g6-failure-campaign*/` (4 nhóm kịch bản, hai máy thật, mọi lần kết thúc đúng hash tham chiếu); test ledger (ngẫu nhiên, vét cạn) | mỗi kịch bản một lần; chưa kill coordinator giữa bản ghi và áp dụng trên máy thật |
+| EQ6 | Sync/replay đánh đổi network–compute–drift thế nào? | **CÓ BẰNG CHỨNG** cho đo; replay trong worker: ĐANG CHỜ | đo: `2026-10-08-c4-replay/` (1,76 s và 12,27 s mỗi cập nhật, đồng bộ 9,8 s, hòa vốn N ≈ 19 hoặc ≈ 720 Mbit/s: suy từ thành phần đo); trôi: 0 trên 100 thế hệ × 2 máy | cáp gigabit trực tiếp là một điểm mạng duy nhất; chưa đo đồng bộ delta nén |
+| EQ3 | Scaling khi thêm worker? | **NOT_RUN** | chỉ có hai máy; MASTER ghi SUPPORTING/STRETCH và cấm giả phần cứng | không claim gì về 3+ worker |
+| EQ5 | ES so với LoRA-GRPO thực dụng? | **NOT_RUN** (đề xuất ghi `DEFERRED`) | không có | không so sánh với GRPO hay thuật toán khác |
+
+## Các câu trong REPORT.md cần đối chiếu lại trước khi đóng v0.5.0
+
+1. Mọi con số trong mục 4 (bảng benchmark), mục 6 (replay), mục 7 và 8: mở từng file `summary-*`/README gốc và so từng số (bản nháp hiện tại do AI viết từ ghi chép, chưa có người đối chiếu).
+2. Mục 9 còn câu "Replay là script đo, chưa tích hợp vào worker" và "Admission chưa lặp lại sau G6": sai sau commit `3410214`; sửa theo kết quả hôm nay.
+3. Mục 9 ghi "1994 passed, 4 skipped": số hiện tại là 1999 passed, 5 skipped trên 5070 Ti (không có thí nghiệm) và 2023 passed, 4 skipped trên 1660S; cập nhật theo lần chạy cuối.
+4. Mục 10: trích dẫn bốn bài (mã arXiv, N, sigma, alpha...). AI chép từ MASTER §3, **chưa mở lại các bài**. Chủ dự án hoặc người review cần đối chiếu (đã ghi vào TODO `after-v1`).
+5. Câu "tăng tốc 1,19 lần, trần 1,23" áp dụng cho workload `cot_l3_q64` và chunk chung; không nói thành tăng tốc chung của hệ thống.
+6. Phần "Học" của tóm tắt (mục 0, ý 5): viết lại theo quyết định 08/10, nói rõ đây là kiểm tra runtime chứ không phải chứng minh học.
+
+## Các điều dự án KHÔNG claim
+
+- Thuật toán ES hoặc chính sách lập lịch mới; hiệu quả học của ES; khả năng mở rộng quá hai worker; lợi thế so với GRPO; an toàn trước worker độc hại (workers được tin cậy trong mạng riêng, MASTER §7).
+- Tính đúng của track B (sản phẩm): không có bằng chứng trong repo này.
