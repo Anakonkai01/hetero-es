@@ -44,7 +44,7 @@ def add_cluster_arguments(parser) -> None:
     parser.add_argument("--sigma", type=float, default=1e-3, help="the size of the perturbation (the recipe's sigma)")
     parser.add_argument("--eval-dtype", choices=["float16", "float32"], default="float32", help="precision of the forward pass of the evaluation (the recipe's; the workers read it from the job)")
     parser.add_argument("--noise-engine", choices=["cpu", "cuda"], default="cpu", help="the noise engine of the recipe (the workers read it from the job)")
-    parser.add_argument("--workload", choices=["arith16", "cot_l3_q32", "cot_l3_q64"], default="arith16", help="the workload of the recipe (the workers read it from the job)")
+    parser.add_argument("--workload", choices=["arith16", "cot_l3_q32", "cot_l3_q64", "cot_l1_q128"], default="arith16", help="the workload of the recipe (the workers read it from the job)")
     parser.add_argument("--generation-timeout", type=float, default=1200.0)
 
 

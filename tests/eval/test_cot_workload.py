@@ -188,3 +188,35 @@ def test_the_first_32_questions_of_the_64_are_the_32_of_the_other_workload():
 
 def test_the_hash_of_the_64_question_workload_is_pinned():
     assert workload_hash_of(3, 64) == "9049518d5d51ccfffe2687cc2fa4b731f03590b7e2a2a78de71c5952aa4adc35"
+
+
+# ---- the 128-question level-1 workload (08/10: the level-3 word problems were limited by the 256-token cut, see artifacts/experiments/2026-10-08-uncut-probe) ----
+
+def test_the_level_1_workload_has_128_questions_and_its_own_hash(monkeypatch):
+    workload = get_workload("cot_l1_q128")
+    assert workload.hash() == workload_hash_of(1, 128)
+    assert len({workload.hash(), get_workload("cot_l3_q64").hash(), get_workload("cot_l3_q32").hash(), get_workload("arith16").hash()}) == 4
+    calls = fake_generate(monkeypatch, lambda q: "Answer: 1")
+    workload.evaluate(None, None, 128)
+    assert calls == [([q for q, _ in make_questions(128, 1)], 128)]
+
+
+def test_the_level_1_questions_are_two_digit_operations_with_computed_answers():
+    questions = make_questions(128, 1)
+    assert len(questions) == 128 and len({q for q, _ in questions}) > 100            # a few repeats are possible: the generator draws with replacement
+    for question, answer in questions:
+        a, op, b = re.fullmatch(r"What is (\d+) ([+\-*]) (\d+)\?", question).groups()
+        assert 11 <= int(a) <= 99 and 11 <= int(b) <= 99 and answer == eval(f"{a}{op}{b}")
+
+
+def test_the_first_64_questions_of_the_128_are_the_64_of_a_smaller_level_1_set():
+    assert make_questions(128, 1)[:64] == make_questions(64, 1)
+
+
+def test_the_level_1_workload_is_a_name_of_the_manifest_and_a_recipe_can_name_it():
+    from heteroes.manifest import WORKLOAD_NAMES
+    assert "cot_l1_q128" in WORKLOAD_NAMES
+
+
+def test_every_workload_knows_its_own_name():
+    assert all(workload.name == name for name, workload in WORKLOADS.items())

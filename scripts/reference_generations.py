@@ -30,7 +30,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--sigma", type=float, default=1e-3)
     parser.add_argument("--chunk-elements", type=int, default=None)
     parser.add_argument("--noise-engine", choices=["cpu", "cuda"], default="cpu")
-    parser.add_argument("--workload", choices=["arith16", "cot_l3_q32", "cot_l3_q64"], default="arith16")
+    parser.add_argument("--workload", choices=["arith16", "cot_l3_q32", "cot_l3_q64", "cot_l1_q128"], default="arith16")
     parser.add_argument("--device", choices=["cuda", "cpu"], default=None)
     args = parser.parse_args(argv)
 
