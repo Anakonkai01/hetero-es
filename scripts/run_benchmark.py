@@ -28,7 +28,7 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from cluster_runner import FAST, SLOW, Cluster, add_cluster_arguments, wait_health  # noqa: E402,F401
+from cluster_runner import FAST, SLOW, THIRD, Cluster, add_cluster_arguments, wait_health  # noqa: E402,F401
 
 REPO = Path(__file__).resolve().parents[1]
 
@@ -56,7 +56,7 @@ def fast_worker_ids(k: int) -> list[str]:
     return [FAST] + [f"{FAST}-{i}" for i in range(2, k + 1)]
 
 
-def plan(condition: str, candidates: int, reference: dict, candidate: dict, prediction: dict | None, chunk: int = 1) -> dict:
+def plan(condition: str, candidates: int, reference: dict, candidate: dict, prediction: dict | None, chunk: int = 1, third: dict | None = None) -> dict:
     """Who works, with which chunk, under which policy: pure, so that it can be tested."""
     from heteroes.dispatch import proportional_quotas
 
@@ -80,6 +80,16 @@ def plan(condition: str, candidates: int, reference: dict, candidate: dict, pred
     if base == "B4":
         return {"workers": both, "policy": "tail", "args": [a for w, seconds in sorted({**{f: fast1 for f in fast}, SLOW: slow1}.items())
                                                             for a in ("--speed-prior", f"{w}={seconds}")]}
+    if base in ("T2", "T3", "Q3"):                      # 08/10: the third machine. T2 = fast + third, T3 = fast + 1660S + third (greedy), Q3 = the three with quotas by measured speed
+        if third is None:
+            raise ValueError(f"{base} needs --profile-third")
+        third_seconds = seconds_at(third, chunk)
+        workers = {**alone, THIRD: chunk} if base == "T2" else {**alone, SLOW: chunk, THIRD: chunk}
+        if base != "Q3":
+            return {"workers": workers, "policy": "greedy", "args": []}
+        speeds = {**{worker: 1.0 / fast1 for worker in fast}, SLOW: 1.0 / slow1, THIRD: 1.0 / third_seconds}
+        quotas = proportional_quotas(candidates, speeds)
+        return {"workers": workers, "policy": "proportional", "args": [a for w, q in sorted(quotas.items()) for a in ("--quota", f"{w}={q}")], "quotas": quotas}
     if base == "H0":
         if k != 1:
             raise ValueError("H0 is defined for one process on the fast GPU")
@@ -174,6 +184,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--conditions", required=True)
     parser.add_argument("--profile-reference", required=True)
     parser.add_argument("--profile-candidate", required=True)
+    parser.add_argument("--profile-third", default=None, help="the profile of the third machine (conditions T2, T3, Q3)")
     parser.add_argument("--prediction", default=None)
     parser.add_argument("--chunk", type=int, default=None, help="prompts per generate() call for every worker of the B conditions "
                                                                 "(default: the exact size of --eval-dtype, 16 for float32 and 1 for float16; see the cross-GPU evidence)")
@@ -185,6 +196,7 @@ def main(argv: list[str]) -> int:
 
     reference = json.loads(Path(args.profile_reference).read_text(encoding="utf-8"))
     candidate = json.loads(Path(args.profile_candidate).read_text(encoding="utf-8"))
+    third = None if args.profile_third is None else json.loads(Path(args.profile_third).read_text(encoding="utf-8"))
     prediction = None if args.prediction is None else json.loads(Path(args.prediction).read_text(encoding="utf-8"))
     out = Path(args.out_dir)
     out.mkdir(parents=True, exist_ok=True)
@@ -193,7 +205,7 @@ def main(argv: list[str]) -> int:
 
     if args.chunk is None:
         args.chunk = default_chunk(args.eval_dtype)
-    specs = {name: plan(name, args.candidates, reference, candidate, prediction, args.chunk) for name in conditions}
+    specs = {name: plan(name, args.candidates, reference, candidate, prediction, args.chunk, third) for name in conditions}
     (out / f"plan-n{args.candidates}.json").write_text(json.dumps({"args": vars(args), "specs": specs}, indent=2) + "\n", encoding="utf-8")
     failed = 0
     for repeat in range(args.first_repeat, args.first_repeat + args.repeats):

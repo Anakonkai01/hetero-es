@@ -168,3 +168,37 @@ def test_all_workers_ready_gives_nothing_to_report(tmp_path):
 def test_a_damaged_line_in_a_log_does_not_hide_the_ready_event(tmp_path):
     (tmp_path / f"{rb.FAST}.jsonl").write_text('{"event": "executor_ready"}\n{"event": "ste', encoding="utf-8")
     assert rb.workers_that_did_not_start(tmp_path, [rb.FAST]) == []
+
+
+THIRD_PROFILE = {"candidate_seconds_at_chunk_1": 8.0, "safe_chunk": 16}
+
+
+def three(condition, n=24):
+    return rb.plan(condition, n, REFERENCE, CANDIDATE, None, 1, THIRD_PROFILE)
+
+
+def test_t2_is_the_fast_worker_and_the_third_machine():
+    assert three("T2") == {"workers": {rb.FAST: 1, rb.THIRD: 1}, "policy": "greedy", "args": []}
+
+
+def test_t3_is_the_three_machines_greedy():
+    assert three("T3") == {"workers": {rb.FAST: 1, rb.SLOW: 1, rb.THIRD: 1}, "policy": "greedy", "args": []}
+
+
+def test_q3_gives_each_machine_a_quota_by_its_speed_and_the_quotas_add_up():
+    result = three("Q3", 28)
+
+    quotas = result["quotas"]
+    assert sum(quotas.values()) == 28 and set(quotas) == {rb.FAST, rb.SLOW, rb.THIRD}
+    assert quotas[rb.FAST] > quotas[rb.THIRD] > quotas[rb.SLOW]            # 4 s, 8 s and 16 s per candidate
+    assert result["policy"] == "proportional"
+
+
+def test_the_third_machine_conditions_need_its_profile():
+    with pytest.raises(ValueError, match="profile-third"):
+        rb.plan("T3", 24, REFERENCE, CANDIDATE, None, 1)
+
+
+def test_the_third_machine_runs_at_the_chunk_asked():
+    assert three("T3")["workers"][rb.THIRD] == 1
+    assert rb.plan("T2", 24, REFERENCE, CANDIDATE, None, 64, THIRD_PROFILE)["workers"] == {rb.FAST: 64, rb.THIRD: 64}
