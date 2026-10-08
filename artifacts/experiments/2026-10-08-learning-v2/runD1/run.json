@@ -1,0 +1,31 @@
+{
+  "experiment_id": "lrtD1",
+  "outcome": "ok",
+  "wall_seconds": 3755.5376348495483,
+  "restarts": {
+    "coordinator": 0,
+    "worker-5070ti": 0,
+    "worker-5070ti-2": 0
+  },
+  "checkpoints": {
+    "0": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "5": "4a85faf3e3918793accc206e4f3d0764117e92ef1a7f1366c3931a04b6a0b266",
+    "10": "76c2169f93150861781c237b887677ef9a88db9a3b6c45b4125090a5cb5660bd",
+    "15": "2aa3382f7dbb0c269a45210d255c24081491ef3c71eeb648f5cff72b563afa95",
+    "20": "d3b2859a64c06e98bb09f18dd4d20b532b1db1adfc20b8595bf7fefae9e4e326",
+    "25": "cca0cbd63dc66523347d804a9906bdada42955f696bb36f695c4667dc11ee23f",
+    "30": "a092a16ca91c7dddc49d8d804bdae8c0974d19a6cf2f2032bcdd6f27b6853de5",
+    "35": "e5c7a977e4a4beab21d9d77ebe96b540a63717e342af1db333164ef7eb5e82dc",
+    "40": "81c3c82098729cd853a3aa69c98fa6ef31590fa46b6870bce1f4932d773b71d5"
+  },
+  "pending_unlinked": [],
+  "ckpt_dir": "/home/pc5070ti/.cache/heteroes/learn-ckpt/lrtD1",
+  "spec": {
+    "workers": {
+      "worker-5070ti": 128,
+      "worker-5070ti-2": 128
+    },
+    "policy": "greedy",
+    "args": []
+  }
+}
