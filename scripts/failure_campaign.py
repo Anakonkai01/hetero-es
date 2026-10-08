@@ -36,7 +36,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from cluster_runner import FAST, REPO, SLOW, Cluster, add_cluster_arguments  # noqa: E402
 
-SCENARIOS = ["kill-worker", "pause-worker", "cut-link", "kill-coordinator"]
+SCENARIOS = ["kill-worker", "pause-worker", "cut-link", "kill-coordinator", "kill-coordinator-mid-update"]
+DEFAULT_SCENARIOS = SCENARIOS[:4]       # the four of G6; the fifth is asked for by name
 
 
 def open_leases(ledger_path: Path, worker: str) -> int:
@@ -62,6 +63,20 @@ def committed_count(ledger_path: Path) -> int:
         return connection.execute("SELECT COUNT(*) FROM result").fetchone()[0]
     except sqlite3.Error:
         return 0
+    finally:
+        connection.close()
+
+
+def update_recorded_not_applied(ledger_path: Path) -> bool:
+    """True while some generation has its update RECORDED (written ahead) and no child hash yet: the window between the record and the update, read-only."""
+    try:
+        connection = sqlite3.connect(f"file:{ledger_path}?mode=ro", uri=True, timeout=5)
+    except sqlite3.Error:
+        return False
+    try:
+        return connection.execute("SELECT COUNT(*) FROM generation_update WHERE child_weights_sha256 IS NULL").fetchone()[0] > 0
+    except sqlite3.Error:
+        return False
     finally:
         connection.close()
 
@@ -159,6 +174,15 @@ def run_scenario(name: str, args, out: Path, password: str | None) -> dict:
             coordinator = cluster.start_coordinator("greedy", [], args.candidates, args.generations, resume=True, label="coordinator-resumed")
             notes.append("coordinator started again with --resume")
 
+        elif name == "kill-coordinator-mid-update":
+            wait_until(lambda: update_recorded_not_applied(ledger_path), 900, "an update to be recorded and not yet applied", poll=0.02)
+            coordinator.send_signal(signal.SIGKILL)
+            coordinator.wait(timeout=30)
+            notes.append(f"coordinator killed between the write-ahead record and the applied update ({committed_count(ledger_path)} results committed)")
+            time.sleep(args.restart_after)
+            coordinator = cluster.start_coordinator("greedy", [], args.candidates, args.generations, resume=True, label="coordinator-resumed")
+            notes.append("coordinator started again with --resume")
+
         deadline = time.time() + args.run_timeout
         while coordinator.poll() is None:
             if time.time() > deadline:
@@ -216,7 +240,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--out-dir", required=True)
     parser.add_argument("--candidates", type=int, default=8)
     parser.add_argument("--generations", type=int, default=3)
-    parser.add_argument("--scenarios", default=",".join(SCENARIOS))
+    parser.add_argument("--scenarios", default=",".join(DEFAULT_SCENARIOS))
     parser.add_argument("--reference-final", default=None, help="the final weights hash of the undisturbed run (default: run it first)")
     parser.add_argument("--chunk", type=int, default=None, help="prompts per generate() call of every worker (default: 16 for --eval-dtype float32, 1 for float16)")
     parser.add_argument("--cut-seconds", type=float, default=8.0)

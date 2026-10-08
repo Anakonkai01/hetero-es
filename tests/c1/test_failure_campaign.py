@@ -56,3 +56,18 @@ def test_wait_until_times_out_with_a_message():
     with pytest.raises(TimeoutError, match="the thing"):
         fc.wait_until(lambda: False, 0.1, "the thing", poll=0.02)
     assert fc.wait_until(lambda: "yes", 1, "x") == "yes"
+
+
+def test_an_update_that_is_recorded_but_not_yet_applied_is_seen_in_the_ledger_file(tmp_path):
+    from test_update_record import complete, record_of      # the way to a complete generation with a record, as the update-record tests do it
+    path = tmp_path / "ledger.sqlite"
+    assert fc.update_recorded_not_applied(path) is False                 # no file yet
+    with Ledger(path, clock=FakeClock()) as ledger:
+        ledger.open_generation(batch(3))
+        complete(ledger)
+        assert fc.update_recorded_not_applied(path) is False             # complete, nothing recorded
+        record = record_of(ledger)
+        ledger.record_update(record)
+        assert fc.update_recorded_not_applied(path) is True              # the write-ahead record exists, the child does not: the window
+        ledger.mark_applied("exp", 0, record.hash, "c" * 64)
+        assert fc.update_recorded_not_applied(path) is False             # applied: the window is closed
