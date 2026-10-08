@@ -180,3 +180,10 @@ with other methods (for example the realized difference as the update direction)
 ## admission-in-the-join-flow  (owner agreed 08/10, after v0.5.0; to be built together with E1 of `ideas-remote-workers`, same "a new machine joins" flow)
 - [ ] Today admission is a hand-run tool (`profile_worker.py` + `predict_admission.py`); `run_worker.py` checks only that the coordinator answers and that the recipe matches. Build the join flow: capability gate on the machine (versions, noise / CUDA self-tests, bit-exact restore, a reference candidate against golden hashes) + a QUICK profile (minutes: a short workload, a few candidates) + the benefit prediction, ending in ADMITTED / ADMITTED_LIMITED / ELIGIBLE_BUT_NOT_BENEFICIAL / INELIGIBLE with reasons.
 - [ ] Keep the FULL profile (8 probe candidates, chunk 1 as reference, the experiment's own workload; hours on a 1660S) as the mode for evidence only, and say in the report that v0.5.0 admission is this hand-run tool.
+
+## remote-workers-from-ADR-003  (proposed in `docs/adr/ADR-003-remote-workers-network.md`, 08/10 night; the owner decides)
+- [ ] Replay as the way to join: `fetch_chain` stops at 8 steps; allow a long chain (a late worker replays from the base weights, downloaded from Hugging Face at the pinned revision) and a periodic checkpoint to bound it. Test with the second 3060 (another city).
+- [ ] Tailscale ACL with tags (coordinator, worker) written before any borrowed machine joins; expiring keys for borrowed nodes.
+- [ ] Refuse `--allow-unauthenticated` outside loopback or the direct cable in `cluster_runner.py` / `run_coordinator.py`; per-worker tokens.
+- [ ] (if the owner wants independence from a vendor) hub-and-spoke WireGuard with a cheap VPS as the hub, compared with Tailscale on the same pairs of machines. Do not write an own VPN.
+- [ ] Cross-check of 2 workers on a fraction of the candidates (trust in borrowed machines).
