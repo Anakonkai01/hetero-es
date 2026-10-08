@@ -143,3 +143,12 @@ def test_the_logs_are_collected_and_cleaned_on_the_machine_of_each_remote_worker
     copies = {c[2].split(":")[0]: c[2].split(":")[1] for c in calls if c[0] == "scp"}
     assert copies == {"me@x": "/tmp/bench-t-worker-3060/worker-3060.jsonl", cr.DEFAULTS["remote"]: "/tmp/bench-t/worker-1660s.jsonl"}
     assert {c[1] for c in calls if c[0] == "ssh"} == {"me@x", cr.DEFAULTS["remote"]}
+
+
+def test_environment_assignments_go_in_front_of_the_third_worker_only(tmp_path, monkeypatch):
+    seen, _ = third_commands(tmp_path, monkeypatch, ["--third", "me@x", "--third-env", "LD_LIBRARY_PATH=/usr/lib/wsl/lib:/d"])
+
+    assert "PYTHONPATH=src LD_LIBRARY_PATH=/usr/lib/wsl/lib:/d exec ~/heteroes-venv/bin/python" in seen[1][-1]
+    assert "LD_LIBRARY_PATH" not in seen[2][-1]
+    seen, _ = third_commands(tmp_path / "b", monkeypatch, ["--third", "me@x"]) if (tmp_path / "b").mkdir() is None else None
+    assert "LD_LIBRARY_PATH" not in seen[1][-1] and "PYTHONPATH=src exec" in seen[1][-1]

@@ -42,6 +42,7 @@ def add_cluster_arguments(parser) -> None:
     parser.add_argument("--third-repo", default="~/projects/heteroes/hetero-es")
     parser.add_argument("--third-python", default="~/heteroes-venv/bin/python")
     parser.add_argument("--third-model-path", default=f"~/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/{MODEL}")
+    parser.add_argument("--third-env", default="", help="environment assignments put in front of the third worker's command, e.g. 'LD_LIBRARY_PATH=/usr/lib/wsl/lib:/usr/lib/wsl/drivers/<nv_dispi dir>' (WSL2 where the Ubuntu NVIDIA 580 libraries shadow the Windows driver's)")
     parser.add_argument("--third-url", default=None, help="the coordinator's address as the THIRD worker sees it (default: --host)")
     parser.add_argument("--third-replay", choices=["never", "always", "auto"], default="never", help="how the third worker catches up (see --replay)")
     parser.add_argument("--third-replay-profile", default=None, help="the third worker's profile JSON, as a path on the third machine (for --third-replay auto)")
@@ -111,11 +112,11 @@ class Cluster:
             if not a.third:
                 raise ValueError("a worker on the third machine needs --third")
             return {"target": a.third, "repo": a.third_repo, "python": a.third_python, "model": a.third_model_path,
-                    "url": a.third_url or self.url, "pythonpath": True,
+                    "url": a.third_url or self.url, "pythonpath": True, "env": a.third_env,
                     "replay": a.third_replay, "replay_profile": a.third_replay_profile}
         return {"target": a.remote, "repo": a.remote_repo, "python": a.remote_python,
                 "model": f"~/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/{MODEL}",
-                "url": self.url, "pythonpath": False, "replay": a.replay, "replay_profile": a.replay_profile}
+                "url": self.url, "pythonpath": False, "env": "", "replay": a.replay, "replay_profile": a.replay_profile}
 
     def start_worker(self, worker: str, chunk: int) -> subprocess.Popen:
         """Start a worker. Starting the remote worker a second time (after it was killed) keeps the first one's log: other directory, other file."""
@@ -136,7 +137,7 @@ class Cluster:
             replay = ([] if r["replay"] == "never" else ["--replay", r["replay"], "--replay-verify-every", str(a.replay_verify_every)]
                       + ([] if r["replay_profile"] is None else ["--profile", r["replay_profile"]]))     # the local worker downloads from this machine's disk
             noise = "" if a.noise_threads is None else f"HETEROES_NOISE_THREADS={a.noise_threads} "
-            path = "PYTHONPATH=src " if r["pythonpath"] else ""
+            path = ("PYTHONPATH=src " if r["pythonpath"] else "") + (r["env"] + " " if r["env"] else "")
             remote = (f"rm -rf {remote_dir}; mkdir -p {remote_dir}; echo $$ > {pidfile}; cd {r['repo']} && {noise}{path}exec {r['python']} "
                       f"scripts/run_worker.py --model-path {r['model']} "
                       f"--coordinator-url {r['url']} --worker-id {worker} --log {remote_dir}/{worker}.jsonl --cache-dir {remote_dir}/cache --chunk {chunk} "
