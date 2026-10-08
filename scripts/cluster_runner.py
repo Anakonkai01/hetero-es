@@ -18,7 +18,7 @@ import urllib.request
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-FAST, SLOW = "worker-5070ti", "worker-1660s"
+FAST, SLOW, THIRD = "worker-5070ti", "worker-1660s", "worker-3060"
 MODEL = "7ae557604adf67be50417f59c2c2f167def9a775"
 LOCAL_MODEL = str(Path.home() / ".cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots" / MODEL)
 DEFAULTS = {"remote": "anakonkai@10.10.10.2", "remote_repo": "~/projects/heteroes/hetero-es",
@@ -38,6 +38,14 @@ def add_cluster_arguments(parser) -> None:
                         help="how the REMOTE worker catches up with a new parent: download (never), apply the update records (always), or whichever its profile says is faster (auto)")
     parser.add_argument("--replay-profile", default=None, help="the remote worker's profile JSON, as a path ON THE REMOTE MACHINE (needed by --replay auto)")
     parser.add_argument("--replay-verify-every", type=int, default=1)
+    parser.add_argument("--third", default=None, help="a THIRD worker machine as an ssh target (08/10: the 3060 in WSL2), started like the remote worker; none by default")
+    parser.add_argument("--third-repo", default="~/projects/heteroes/hetero-es")
+    parser.add_argument("--third-python", default="~/heteroes-venv/bin/python")
+    parser.add_argument("--third-model-path", default=f"~/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/{MODEL}")
+    parser.add_argument("--third-url", default=None, help="the coordinator's address as the THIRD worker sees it (default: --host)")
+    parser.add_argument("--third-replay", choices=["never", "always", "auto"], default="never", help="how the third worker catches up (see --replay)")
+    parser.add_argument("--third-replay-profile", default=None, help="the third worker's profile JSON, as a path on the third machine (for --third-replay auto)")
+    parser.add_argument("--bind-host", default=None, help="the address the coordinator listens on (default: --host); 0.0.0.0 to serve the cable and another network at once (the firewall decides who may connect)")
     parser.add_argument("--remote", default=DEFAULTS["remote"])
     parser.add_argument("--remote-repo", default=DEFAULTS["remote_repo"])
     parser.add_argument("--remote-python", default=DEFAULTS["remote_python"])
@@ -87,7 +95,7 @@ class Cluster:
         cmd = [self.python, str(REPO / "scripts/run_coordinator.py"), "--model-path", LOCAL_MODEL, "--out-dir", str(self.run_dir / "coordinator"),
                "--weights-dir", str(self.published), "--experiment-id", a.experiment_id, "--candidates", str(candidates),
                "--generations", str(generations), "--alpha", repr(a.alpha), "--sigma", repr(a.sigma), "--policy", policy,
-               "--host", a.host, "--port", str(a.port), "--linger-seconds", "10", "--lease-seconds", str(a.lease_seconds),
+               "--host", a.bind_host or a.host, "--port", str(a.port), "--linger-seconds", "10", "--lease-seconds", str(a.lease_seconds),
                "--allow-unauthenticated", "--timeout-seconds", str(a.generation_timeout), "--eval-dtype", a.eval_dtype,
                "--noise-engine", a.noise_engine, "--workload", a.workload] + policy_args + (["--resume"] if resume else [])
         env = self.env if a.coordinator_noise_threads is None else {**self.env, "HETEROES_NOISE_THREADS": str(a.coordinator_noise_threads)}
@@ -96,6 +104,19 @@ class Cluster:
         wait_health(self.url, 300)
         return process
 
+    def remote_settings(self, worker: str) -> dict:
+        """Where a non-local worker runs and how it reaches the coordinator: the 1660S (SLOW) or the third machine (THIRD)."""
+        a = self.args
+        if worker == THIRD:
+            if not a.third:
+                raise ValueError("a worker on the third machine needs --third")
+            return {"target": a.third, "repo": a.third_repo, "python": a.third_python, "model": a.third_model_path,
+                    "url": a.third_url or self.url, "pythonpath": True,
+                    "replay": a.third_replay, "replay_profile": a.third_replay_profile}
+        return {"target": a.remote, "repo": a.remote_repo, "python": a.remote_python,
+                "model": f"~/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/{MODEL}",
+                "url": self.url, "pythonpath": False, "replay": a.replay, "replay_profile": a.replay_profile}
+
     def start_worker(self, worker: str, chunk: int) -> subprocess.Popen:
         """Start a worker. Starting the remote worker a second time (after it was killed) keeps the first one's log: other directory, other file."""
         a = self.args
@@ -103,32 +124,35 @@ class Cluster:
         number = 0 if local else sum(1 for r in self.remotes if r["worker"] == worker)
         tag = "" if number == 0 else f"-restart{number}"
         log = self.run_dir / f"{worker}{tag}.out"
-        remote_dir = f"/tmp/bench-{self.name}{tag}"
+        suffix = "" if worker == SLOW else f"-{worker}"                      # the 1660S keeps the directory name of the earlier campaigns
+        remote_dir = f"/tmp/bench-{self.name}{tag}{suffix}"
         pidfile = f"{remote_dir}/worker.pid"
         extra = [] if a.worker_http_timeout is None else ["--http-timeout-seconds", str(a.worker_http_timeout)]
-        replay = ([] if a.replay == "never" else ["--replay", a.replay, "--replay-verify-every", str(a.replay_verify_every)]
-                  + ([] if a.replay_profile is None else ["--profile", a.replay_profile]))        # the remote worker only: the local one downloads from this machine's disk
         if local:
             cmd = [self.python, str(REPO / "scripts/run_worker.py"), "--model-path", LOCAL_MODEL, "--coordinator-url", self.url, "--worker-id", worker,
                    "--log", str(self.run_dir / f"{worker}.jsonl"), "--cache-dir", str(self.local_cache / worker), "--chunk", str(chunk)] + extra
         else:
+            r = self.remote_settings(worker)
+            replay = ([] if r["replay"] == "never" else ["--replay", r["replay"], "--replay-verify-every", str(a.replay_verify_every)]
+                      + ([] if r["replay_profile"] is None else ["--profile", r["replay_profile"]]))     # the local worker downloads from this machine's disk
             noise = "" if a.noise_threads is None else f"HETEROES_NOISE_THREADS={a.noise_threads} "
-            remote = (f"rm -rf {remote_dir}; mkdir -p {remote_dir}; echo $$ > {pidfile}; cd {a.remote_repo} && {noise}exec {a.remote_python} "
-                      f"scripts/run_worker.py --model-path ~/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/{MODEL} "
-                      f"--coordinator-url {self.url} --worker-id {worker} --log {remote_dir}/{worker}.jsonl --cache-dir {remote_dir}/cache --chunk {chunk} "
+            path = "PYTHONPATH=src " if r["pythonpath"] else ""
+            remote = (f"rm -rf {remote_dir}; mkdir -p {remote_dir}; echo $$ > {pidfile}; cd {r['repo']} && {noise}{path}exec {r['python']} "
+                      f"scripts/run_worker.py --model-path {r['model']} "
+                      f"--coordinator-url {r['url']} --worker-id {worker} --log {remote_dir}/{worker}.jsonl --cache-dir {remote_dir}/cache --chunk {chunk} "
                       + " ".join(extra + replay))
-            cmd = ["ssh", "-o", "ServerAliveInterval=15", a.remote, remote]
-            self.remotes.append({"worker": worker, "dir": remote_dir, "pidfile": pidfile, "log": f"{worker}{tag}.jsonl"})
+            cmd = ["ssh", "-o", "ServerAliveInterval=15", r["target"], remote]
+            self.remotes.append({"worker": worker, "dir": remote_dir, "pidfile": pidfile, "log": f"{worker}{tag}.jsonl", "target": r["target"]})
         process = subprocess.Popen(cmd, stdout=open(log, "a"), stderr=subprocess.STDOUT, env=self.env)
         self.processes[f"{worker}{tag}"] = process
         return process
 
     # ---- disturbing ------------------------------------------------------------------------------------------------------
 
-    def signal_remote_worker(self, name: str) -> None:
-        """Send a signal (KILL, STOP, CONT, TERM) to the latest remote worker by its pid."""
-        pidfile = self.remotes[-1]["pidfile"]
-        subprocess.run(["ssh", self.args.remote, f"test -f {pidfile} && kill -{name} $(cat {pidfile}) 2>/dev/null; true"], timeout=60)
+    def signal_remote_worker(self, name: str, worker: str | None = None) -> None:
+        """Send a signal (KILL, STOP, CONT, TERM) to the latest remote worker (of the given worker id, if any) by its pid."""
+        remote = [r for r in self.remotes if worker is None or r["worker"] == worker][-1]
+        subprocess.run(["ssh", remote["target"], f"test -f {remote['pidfile']} && kill -{name} $(cat {remote['pidfile']}) 2>/dev/null; true"], timeout=60)
 
     def signal_local(self, label: str, sig) -> None:
         process = self.processes[label]
@@ -148,8 +172,9 @@ class Cluster:
                 process.kill()
         a = self.args
         for remote in self.remotes:
-            subprocess.run(["ssh", a.remote, f"test -f {remote['pidfile']} && kill -CONT $(cat {remote['pidfile']}) 2>/dev/null; "
-                                             f"test -f {remote['pidfile']} && kill $(cat {remote['pidfile']}) 2>/dev/null; true"], timeout=60)
-            subprocess.run(["scp", "-q", f"{a.remote}:{remote['dir']}/{SLOW}.jsonl", str(self.run_dir / remote["log"])], timeout=120)
-            subprocess.run(["ssh", a.remote, f"rm -rf {remote['dir']}"], timeout=60)
+            target = remote.get("target", a.remote)
+            subprocess.run(["ssh", target, f"test -f {remote['pidfile']} && kill -CONT $(cat {remote['pidfile']}) 2>/dev/null; "
+                                           f"test -f {remote['pidfile']} && kill $(cat {remote['pidfile']}) 2>/dev/null; true"], timeout=60)
+            subprocess.run(["scp", "-q", f"{target}:{remote['dir']}/{remote['worker']}.jsonl", str(self.run_dir / remote["log"])], timeout=120)
+            subprocess.run(["ssh", target, f"rm -rf {remote['dir']}"], timeout=60)
         shutil.rmtree(self.scratch, ignore_errors=True)
