@@ -16,7 +16,7 @@ from ledger_helpers import FakeClock, batch, descriptor_of  # noqa: E402
 def test_a_scenario_passes_only_if_it_ended_ok_and_with_the_reference_weights():
     reference = "a" * 64
     good = {"name": "kill-worker", "outcome": "ok", "final_weights_sha256": reference}
-    assert fc.verdict(good, reference) == {"scenario": "kill-worker", "ended_ok": True, "same_final_weights_as_reference": True, "passed": True}
+    assert fc.verdict(good, reference) == {"scenario": "kill-worker", "ended_ok": True, "same_final_weights_as_reference": True, "exercised": True, "passed": True}
     assert fc.verdict({**good, "final_weights_sha256": "b" * 64}, reference)["passed"] is False
     assert fc.verdict({**good, "outcome": "TimeoutError: x"}, reference)["passed"] is False
     assert fc.verdict({**good, "final_weights_sha256": None}, reference)["passed"] is False
@@ -71,3 +71,12 @@ def test_an_update_that_is_recorded_but_not_yet_applied_is_seen_in_the_ledger_fi
         assert fc.update_recorded_not_applied(path) is True              # the write-ahead record exists, the child does not: the window
         ledger.mark_applied("exp", 0, record.hash, "c" * 64)
         assert fc.update_recorded_not_applied(path) is False             # applied: the window is closed
+
+
+def test_a_scenario_that_timed_out_waiting_for_its_own_condition_was_not_exercised():
+    reference = "a" * 64
+    waited = {"name": "kill-worker", "outcome": "TimeoutError: timed out after 600 s waiting for: the remote worker to hold a candidate", "final_weights_sha256": reference}
+    result = fc.verdict(waited, reference)
+    assert result["exercised"] is False and result["passed"] is False
+    late = {"name": "kill-worker", "outcome": "TimeoutError: kill-worker did not finish in 1800 s", "final_weights_sha256": None}
+    assert fc.verdict(late, reference)["exercised"] is True              # it was disturbed and then did not finish: a real failure

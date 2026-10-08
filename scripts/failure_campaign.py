@@ -232,7 +232,9 @@ def verdict(record: dict, reference: str) -> dict:
     """Pure: did the scenario end well and with the reference weights?"""
     ended = record["outcome"] == "ok"
     same = record["final_weights_sha256"] == reference
-    return {"scenario": record["name"], "ended_ok": ended, "same_final_weights_as_reference": same, "passed": ended and same}
+    # a scenario that timed out WAITING FOR ITS OWN CONDITION (for example "the remote worker holds a candidate") never disturbed anything: not exercised, which is neither a pass nor a failure of the system
+    exercised = not (record["outcome"].startswith("TimeoutError: timed out after") and "waiting for:" in record["outcome"])
+    return {"scenario": record["name"], "ended_ok": ended, "same_final_weights_as_reference": same, "exercised": exercised, "passed": ended and same}
 
 
 def main(argv: list[str]) -> int:

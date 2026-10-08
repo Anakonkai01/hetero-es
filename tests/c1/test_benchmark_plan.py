@@ -1,4 +1,5 @@
 """`scripts/run_benchmark.py: plan`: who works, with which chunk and policy, for each condition (pure function, no process is started)."""
+import json
 import sys
 from pathlib import Path
 
@@ -140,3 +141,30 @@ def test_b4_priors_follow_the_chunk_of_the_run():
     result = rb.plan("B4", 8, fast, slow, None, chunk=16)
     assert result["args"] == ["--speed-prior", f"{rb.SLOW}=6.0", "--speed-prior", f"{rb.FAST}=1.0"]
     assert result["workers"] == {rb.FAST: 16, rb.SLOW: 16}
+
+
+def write_log(run_dir, worker, events):
+    (run_dir / f"{worker}.jsonl").write_text("".join(json.dumps({"event": e}) + "\n" for e in events), encoding="utf-8")
+
+
+def test_a_worker_that_never_got_ready_is_reported(tmp_path):
+    write_log(tmp_path, rb.FAST, ["worker_start", "model_loaded", "executor_ready", "start"])
+    # the remote worker's log is not there at all (it did not start: wrong arguments, old code): the run must not count as ok
+    assert rb.workers_that_did_not_start(tmp_path, [rb.FAST, rb.SLOW]) == [rb.SLOW]
+
+
+def test_a_log_without_executor_ready_is_a_worker_that_did_not_start(tmp_path):
+    write_log(tmp_path, rb.FAST, ["worker_start", "executor_ready"])
+    write_log(tmp_path, rb.SLOW, ["worker_start", "model_loaded"])          # died while it prepared
+    assert rb.workers_that_did_not_start(tmp_path, [rb.FAST, rb.SLOW]) == [rb.SLOW]
+
+
+def test_all_workers_ready_gives_nothing_to_report(tmp_path):
+    for worker in (rb.FAST, rb.SLOW):
+        write_log(tmp_path, worker, ["worker_start", "executor_ready"])
+    assert rb.workers_that_did_not_start(tmp_path, [rb.FAST, rb.SLOW]) == []
+
+
+def test_a_damaged_line_in_a_log_does_not_hide_the_ready_event(tmp_path):
+    (tmp_path / f"{rb.FAST}.jsonl").write_text('{"event": "executor_ready"}\n{"event": "ste', encoding="utf-8")
+    assert rb.workers_that_did_not_start(tmp_path, [rb.FAST]) == []

@@ -117,6 +117,23 @@ def set_aside(run_dir: Path) -> Path:
     raise RuntimeError(f"too many failed attempts of {run_dir.name}")
 
 
+def workers_that_did_not_start(run_dir: Path, workers) -> list[str]:
+    """The workers of a run whose log is missing or never says `executor_ready`: they took no part, whatever the coordinator says (08/10: a remote worker with old code did not start and the run went on "ok" without it)."""
+    missing = []
+    for worker in workers:
+        path = run_dir / f"{worker}.jsonl"
+        ready = False
+        if path.is_file():
+            for line in path.read_text(encoding="utf-8").splitlines():
+                try:
+                    ready = ready or json.loads(line).get("event") == "executor_ready"
+                except ValueError:
+                    pass
+        if not ready:
+            missing.append(worker)
+    return missing
+
+
 def run_one(name: str, spec: dict, args, run_dir: Path) -> dict:
     run_dir.mkdir(parents=True)
     cluster = Cluster(args, name, run_dir)
@@ -140,6 +157,9 @@ def run_one(name: str, spec: dict, args, run_dir: Path) -> dict:
         outcome = f"{type(error).__name__}: {error}"
     finally:
         cluster.collect_and_clean(spec["workers"])
+    absent = workers_that_did_not_start(run_dir, spec["workers"])
+    if absent and outcome == "ok":
+        outcome = f"worker did not start: {', '.join(absent)}"           # a run without one of its workers is not the run that was asked for
     record = {"name": name, "outcome": outcome, "wall_seconds": time.time() - started, "spec": spec}
     (run_dir / "run.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
     return record
