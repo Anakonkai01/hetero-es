@@ -1,0 +1,238 @@
+{
+  "written_at_unix": 1791465960.9122546,
+  "written_at_utc": "2026-10-08T13:26:00Z",
+  "code": {
+    "git_commit": "b9eceffe0228576aef1c324b7702dcbbcee4ac27",
+    "git_dirty": true
+  },
+  "inputs": {
+    "reference": "/tmp/claude-1000/-home-pc5070ti-projects/8241f9fd-e7c8-4dac-afc4-90115da82841/scratchpad/posthoc-5070ti.json",
+    "candidate": "/tmp/claude-1000/-home-pc5070ti-projects/8241f9fd-e7c8-4dac-afc4-90115da82841/scratchpad/posthoc-1660s.json",
+    "candidates": 24,
+    "update_per_candidate_seconds": 0.07289479065726956,
+    "update_fixed_seconds": 0.038439117411262935,
+    "publish_seconds": 0.6064895809977315,
+    "delta_fraction": 0.05
+  },
+  "capability_gate": [],
+  "variants": {
+    "common_chunk_1": {
+      "chunks": {
+        "worker-5070ti": 1,
+        "worker-1660s": 1
+      },
+      "predictions": {
+        "B3_GREEDY_DYNAMIC": {
+          "alone": {
+            "policy": "B3_GREEDY_DYNAMIC",
+            "workers": [
+              "worker-5070ti"
+            ],
+            "candidates_seconds": 1510.7281449601287,
+            "jobs": {
+              "worker-5070ti": 24
+            },
+            "update_seconds": 1.7879140931857322,
+            "publish_seconds": 0.6064895809977315,
+            "total_seconds": 1513.1225486343121
+          },
+          "both": {
+            "policy": "B3_GREEDY_DYNAMIC",
+            "workers": [
+              "worker-5070ti",
+              "worker-1660s"
+            ],
+            "candidates_seconds": 1321.8871268401126,
+            "jobs": {
+              "worker-5070ti": 21,
+              "worker-1660s": 3
+            },
+            "update_seconds": 1.7879140931857322,
+            "publish_seconds": 0.6064895809977315,
+            "total_seconds": 1324.281530514296
+          },
+          "predicted_cluster_benefit": 1.142598846067632,
+          "predicted_delta_seconds": 188.8410181200161
+        },
+        "B2_STATIC_PROPORTIONAL": {
+          "alone": {
+            "policy": "B2_STATIC_PROPORTIONAL",
+            "workers": [
+              "worker-5070ti"
+            ],
+            "candidates_seconds": 1510.7281449601287,
+            "jobs": {
+              "worker-5070ti": 24
+            },
+            "update_seconds": 1.7879140931857322,
+            "publish_seconds": 0.6064895809977315,
+            "total_seconds": 1513.1225486343121
+          },
+          "both": {
+            "policy": "B2_STATIC_PROPORTIONAL",
+            "workers": [
+              "worker-5070ti",
+              "worker-1660s"
+            ],
+            "candidates_seconds": 1321.8871268401126,
+            "jobs": {
+              "worker-5070ti": 21,
+              "worker-1660s": 3
+            },
+            "update_seconds": 1.7879140931857322,
+            "publish_seconds": 0.6064895809977315,
+            "total_seconds": 1324.281530514296
+          },
+          "predicted_cluster_benefit": 1.142598846067632,
+          "predicted_delta_seconds": 188.8410181200161
+        }
+      },
+      "decision_b3": {
+        "worker_id": "worker-1660s",
+        "state": "ADMITTED",
+        "reasons": [
+          "OK"
+        ],
+        "prediction_without": {
+          "policy": "B3_GREEDY_DYNAMIC",
+          "workers": [
+            "worker-5070ti"
+          ],
+          "candidates_seconds": 1510.7281449601287,
+          "jobs": {
+            "worker-5070ti": 24
+          },
+          "update_seconds": 1.7879140931857322,
+          "publish_seconds": 0.6064895809977315,
+          "total_seconds": 1513.1225486343121
+        },
+        "prediction_with": {
+          "policy": "B3_GREEDY_DYNAMIC",
+          "workers": [
+            "worker-5070ti",
+            "worker-1660s"
+          ],
+          "candidates_seconds": 1321.8871268401126,
+          "jobs": {
+            "worker-5070ti": 21,
+            "worker-1660s": 3
+          },
+          "update_seconds": 1.7879140931857322,
+          "publish_seconds": 0.6064895809977315,
+          "total_seconds": 1324.281530514296
+        },
+        "predicted_delta_seconds": 188.8410181200161,
+        "delta_threshold_seconds": 75.6561274317156
+      }
+    },
+    "per_worker_chunk": {
+      "chunks": {
+        "worker-5070ti": 64,
+        "worker-1660s": 64
+      },
+      "predictions": {
+        "B3_GREEDY_DYNAMIC": {
+          "alone": {
+            "policy": "B3_GREEDY_DYNAMIC",
+            "workers": [
+              "worker-5070ti"
+            ],
+            "candidates_seconds": 166.79999999999998,
+            "jobs": {
+              "worker-5070ti": 24
+            },
+            "update_seconds": 1.7879140931857322,
+            "publish_seconds": 0.6064895809977315,
+            "total_seconds": 169.19440367418343
+          },
+          "both": {
+            "policy": "B3_GREEDY_DYNAMIC",
+            "workers": [
+              "worker-5070ti",
+              "worker-1660s"
+            ],
+            "candidates_seconds": 152.00916167999821,
+            "jobs": {
+              "worker-5070ti": 19,
+              "worker-1660s": 5
+            },
+            "update_seconds": 1.7879140931857322,
+            "publish_seconds": 0.6064895809977315,
+            "total_seconds": 154.40356535418167
+          },
+          "predicted_cluster_benefit": 1.0957933729449414,
+          "predicted_delta_seconds": 14.790838320001768
+        },
+        "B2_STATIC_PROPORTIONAL": {
+          "alone": {
+            "policy": "B2_STATIC_PROPORTIONAL",
+            "workers": [
+              "worker-5070ti"
+            ],
+            "candidates_seconds": 166.8,
+            "jobs": {
+              "worker-5070ti": 24
+            },
+            "update_seconds": 1.7879140931857322,
+            "publish_seconds": 0.6064895809977315,
+            "total_seconds": 169.19440367418346
+          },
+          "both": {
+            "policy": "B2_STATIC_PROPORTIONAL",
+            "workers": [
+              "worker-5070ti",
+              "worker-1660s"
+            ],
+            "candidates_seconds": 152.00916167999821,
+            "jobs": {
+              "worker-5070ti": 19,
+              "worker-1660s": 5
+            },
+            "update_seconds": 1.7879140931857322,
+            "publish_seconds": 0.6064895809977315,
+            "total_seconds": 154.40356535418167
+          },
+          "predicted_cluster_benefit": 1.0957933729449416,
+          "predicted_delta_seconds": 14.790838320001797
+        }
+      },
+      "decision_b3": {
+        "worker_id": "worker-1660s",
+        "state": "ADMITTED",
+        "reasons": [
+          "OK"
+        ],
+        "prediction_without": {
+          "policy": "B3_GREEDY_DYNAMIC",
+          "workers": [
+            "worker-5070ti"
+          ],
+          "candidates_seconds": 166.79999999999998,
+          "jobs": {
+            "worker-5070ti": 24
+          },
+          "update_seconds": 1.7879140931857322,
+          "publish_seconds": 0.6064895809977315,
+          "total_seconds": 169.19440367418343
+        },
+        "prediction_with": {
+          "policy": "B3_GREEDY_DYNAMIC",
+          "workers": [
+            "worker-5070ti",
+            "worker-1660s"
+          ],
+          "candidates_seconds": 152.00916167999821,
+          "jobs": {
+            "worker-5070ti": 19,
+            "worker-1660s": 5
+          },
+          "update_seconds": 1.7879140931857322,
+          "publish_seconds": 0.6064895809977315,
+          "total_seconds": 154.40356535418167
+        },
+        "predicted_delta_seconds": 14.790838320001768,
+        "delta_threshold_seconds": 8.459720183709171
+      }
+    }
+  }
+}

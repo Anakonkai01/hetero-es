@@ -1,0 +1,230 @@
+{
+  "format": 1,
+  "worker_id": "worker-1660s",
+  "measured_at_unix": 1791462527.8753045,
+  "measured_at_utc": "2026-10-08T12:28:47Z",
+  "key": {
+    "gpu_name": "NVIDIA GeForce GTX 1660 SUPER",
+    "gpu_capability": [
+      7,
+      5
+    ],
+    "gpu_total_memory_bytes": 6027083776,
+    "nvidia_driver": "595.91.07",
+    "torch": "2.13.0+cu132",
+    "torch_cuda": "13.2",
+    "numpy": "2.5.2",
+    "transformers": "5.17.0",
+    "python": "3.14.4",
+    "device": "cuda",
+    "recipe_hash": "252c7c8db62c326c6d589c7b8e039313937e88f52dc166caba84a82b2768f5bf",
+    "schema_hash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+    "workload_hash": "4ea60e526dd535856c6aee15aea8bfb22df99e9df394e8a04635a3f9890abb89"
+  },
+  "key_hash": "d36af2d68bd3e775a87f8d45f9da52f397aee5460f2dc3fc8fcbf377bbeaf3b9",
+  "environment": {
+    "hostname": "heteroes-worker-1660s",
+    "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43",
+    "python": "3.14.4",
+    "torch": "2.13.0+cu132",
+    "torch_cuda": "13.2",
+    "numpy": "2.5.2",
+    "transformers": "5.17.0",
+    "device": "cuda",
+    "gpu_name": "NVIDIA GeForce GTX 1660 SUPER",
+    "gpu_capability": [
+      7,
+      5
+    ],
+    "gpu_total_memory_bytes": 6027083776,
+    "nvidia_driver": "595.91.07"
+  },
+  "code": {
+    "git_commit": "184eefd408158c55a02340eb9657f01d32b914dd",
+    "git_dirty": true
+  },
+  "recipe_hash": "252c7c8db62c326c6d589c7b8e039313937e88f52dc166caba84a82b2768f5bf",
+  "parent_weights_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+  "sigma": 0.001,
+  "checks": {
+    "noise_selftest": true,
+    "restore_exact": true,
+    "chunk1_reproduces_reference": true
+  },
+  "reference_kind": "chunk1_twice_equal",
+  "workload": "cot_l1_q128",
+  "noise_engine": "torch_cuda_philox_chunked_f32_to_f16_v1",
+  "noise_selftest_seconds": 0.05242255700068199,
+  "chunk_probes": [
+    {
+      "chunk": 1,
+      "ran": true,
+      "identical": true,
+      "seconds": 480.3294961406678,
+      "peak_bytes": 3022594560,
+      "error": null,
+      "differing": []
+    },
+    {
+      "chunk": 64,
+      "ran": true,
+      "identical": true,
+      "seconds": 28.379791651778053,
+      "peak_bytes": 3770314752,
+      "error": null,
+      "differing": []
+    }
+  ],
+  "safe_chunk": 64,
+  "candidate_times": {
+    "1": {
+      "chunk": 1,
+      "raw": [
+        {
+          "perturb": 0.5939809549963684,
+          "rollout": 337.1280029230038,
+          "restore": 0.4918660789990099,
+          "total": 338.2138499569992
+        },
+        {
+          "perturb": 0.5952799320002669,
+          "rollout": 815.3058898460004,
+          "restore": 0.4903320480007096,
+          "total": 816.3915018260013
+        },
+        {
+          "perturb": 0.5929229100001976,
+          "rollout": 417.59900456899777,
+          "restore": 0.4910784469975624,
+          "total": 418.68300592599553
+        }
+      ],
+      "samples": 3,
+      "total_median": 418.68300592599553,
+      "total_min": 338.2138499569992,
+      "total_max": 816.3915018260013,
+      "phases_median": {
+        "perturb": 0.5939809549963684,
+        "rollout": 417.59900456899777,
+        "restore": 0.4910784469975624
+      },
+      "peak_bytes": 3071544832
+    },
+    "64": {
+      "chunk": 64,
+      "raw": [
+        {
+          "perturb": 0.5954146339936415,
+          "rollout": 34.167516501001955,
+          "restore": 0.49161487899982603,
+          "total": 35.25454601399542
+        },
+        {
+          "perturb": 0.5954774800047744,
+          "rollout": 34.8363033239948,
+          "restore": 0.4894600550032919,
+          "total": 35.921240859002864
+        },
+        {
+          "perturb": 0.5900570529993274,
+          "rollout": 33.01785939500405,
+          "restore": 0.49150035200000275,
+          "total": 34.09941680000338
+        }
+      ],
+      "samples": 3,
+      "total_median": 35.25454601399542,
+      "total_min": 34.09941680000338,
+      "total_max": 35.921240859002864,
+      "phases_median": {
+        "perturb": 0.5954146339936415,
+        "rollout": 34.167516501001955,
+        "restore": 0.49150035200000275
+      },
+      "peak_bytes": 3765661696
+    }
+  },
+  "candidate_seconds_at_safe_chunk": 35.25454601399542,
+  "candidate_seconds_at_chunk_1": 418.68300592599553,
+  "peak_bytes_candidate": 3765661696,
+  "sync": {
+    "url": "http://10.10.10.1:8765",
+    "rtt_median_seconds": 0.0007813324991730042,
+    "rtt_max_seconds": 0.002386970998486504,
+    "weights_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "transfer_seconds": 8.486184841000068,
+    "load_seconds": 0.5054198560028453,
+    "rehash_seconds": 1.017556982995302,
+    "total_seconds": 10.009161679998215,
+    "same_as_parent": true,
+    "weights_bytes": 988065536,
+    "throughput_mb_per_second": 116.43224305299952
+  },
+  "update": {
+    "seconds_per_candidate_median": 0.5284736995694719,
+    "fixed_seconds": 0.2791139427398497,
+    "fit": {
+      "fixed_seconds": 0.2791139427398497,
+      "per_candidate_seconds": 0.5284736995694719,
+      "residuals": [
+        -0.0023854628082555784,
+        2.7724620177638215e-05,
+        0.004132972984181471,
+        -0.0017752347961028647
+      ],
+      "max_abs_residual": 0.004132972984181471,
+      "sizes": [
+        1.0,
+        2.0,
+        4.0,
+        8.0
+      ],
+      "seconds": [
+        0.805202179501066,
+        1.336089066498971,
+        2.3971417140019184,
+        4.505128304499522
+      ]
+    },
+    "raw": {
+      "1": [
+        0.8042043680034112,
+        0.8061999909987208
+      ],
+      "2": [
+        1.3363230460017803,
+        1.3358550869961618
+      ],
+      "4": [
+        2.3945868040027563,
+        2.3996966240010806
+      ],
+      "8": [
+        4.504108007000468,
+        4.506148601998575
+      ]
+    },
+    "publish_seconds": 3.974141270002292,
+    "hash_seconds": 3.8497854200031725,
+    "noise_threads": 16
+  },
+  "args": {
+    "model_path": "/home/anakonkai/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775",
+    "worker_id": "worker-1660s",
+    "out": "/tmp/c1v2/profile-1660s-l1q128-cuda.json",
+    "chunks": "1,64",
+    "candidates": 3,
+    "probe_candidates": 8,
+    "sigma": 0.001,
+    "workload": "cot_l1_q128",
+    "noise_engine": "cuda",
+    "eval_dtype": "float32",
+    "sync_url": "http://10.10.10.1:8765",
+    "sync_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "sync_dir": "/home/anakonkai/.cache/heteroes/profile-sync",
+    "measure_update": true,
+    "update_sizes": "1,2,4,8",
+    "update_repeats": 2,
+    "device": null
+  }
+}
