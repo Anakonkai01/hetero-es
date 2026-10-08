@@ -1,5 +1,10 @@
 # Learning experiment on the distributed runtime, 2026-10-07/08 (night)
 
+> **ERRATUM of 2026-10-08 09:15 (read this first).** After the runs, the base model was evaluated with a token limit of 512 instead of 256 (`artifacts/experiments/2026-10-08-uncut-probe/README.md`): **its H3 accuracy is 81.2 percent, not 32.8.**
+> The runs mostly taught the model to finish before the 256-token cut; against the 512-token baseline the final H3 of run A is +6 points (8 questions, about the size of the noise), of run B -12 points and of run C +1 point.
+> Everything below describes what was measured at 256 tokens; where it says "learning", read "learned to answer within 256 tokens" unless the text says otherwise. The point 2 below said that "part" of the gain was shortening: it is most of it.
+> The verdicts by the preregistered criteria are unchanged ("no evidence of learning"); the bigger gain on H3 of the first reading must not be quoted as evidence that ES improved the arithmetic.
+
 **Written by the AI while the owner slept; the owner has not reviewed any of it.** Branch `feat/learning-experiment` (from `feat/audit-hardening-g6`), nothing pushed.
 The criteria were written BEFORE the main runs: `PREREGISTRATION.md` (and its Addendum 1, written after run A was analysed and before run C).
 
