@@ -84,7 +84,7 @@ def test_the_answer_is_the_integer_after_the_last_answer_line_else_the_last_inte
 def fake_generate(monkeypatch, replies):
     calls = []
 
-    def fake(model, tokenizer, questions, chunk):
+    def fake(model, tokenizer, questions, chunk, decode_engine="hf_generate"):
         calls.append((list(questions), chunk))
         return [replies(q) for q in questions], 7 * len(questions)
 
@@ -220,3 +220,118 @@ def test_the_level_1_workload_is_a_name_of_the_manifest_and_a_recipe_can_name_it
 
 def test_every_workload_knows_its_own_name():
     assert all(workload.name == name for name, workload in WORKLOADS.items())
+
+
+# ---- the decode engine (09/10) ---------------------------------------------------------------------------------------------------------
+
+def test_the_decode_engine_goes_from_the_registry_through_the_evaluation_to_the_generation(monkeypatch):
+    seen = []
+
+    def fake(model, tokenizer, questions, chunk, decode_engine="hf_generate"):
+        seen.append(decode_engine)
+        return ["Answer: 1"] * len(questions), 0
+
+    monkeypatch.setattr(cot, "generate", fake)
+    evaluate_cot(None, None, 4, level=1, count=4)
+    evaluate_cot(None, None, 4, level=1, count=4, decode_engine="hf_compact")
+    get_workload("cot_l1_q128").evaluate(None, None, 128, "hf_compact")
+    get_workload("cot_l3_q32").evaluate(None, None, 16)
+    assert seen == ["hf_generate", "hf_compact", "hf_compact", "hf_generate"]
+
+
+@pytest.mark.parametrize("bad", ["vllm", "", None, 3])
+def test_an_unknown_decode_engine_is_refused_by_the_evaluation(monkeypatch, bad):
+    fake_generate(monkeypatch, lambda q: "Answer: 1")
+    with pytest.raises(ValueError, match="decode_engine"):
+        evaluate_cot(None, None, 4, level=1, count=4, decode_engine=bad)
+
+
+# the real glue, on a tiny model: both engines must give the same texts and the same token count
+
+class FakeTokenizer:
+    pad_token_id = 0
+    padding_side = "right"
+
+    def apply_chat_template(self, messages, tokenize=False, add_generation_prompt=True):
+        return messages[-1]["content"]
+
+    def __call__(self, prompts, return_tensors="pt", padding=True):
+        import torch
+        rows = [[(ord(c) % 60) + 2 for c in prompt] for prompt in prompts]
+        width = max(len(r) for r in rows)
+        ids, mask = torch.zeros(len(rows), width, dtype=torch.long), torch.zeros(len(rows), width, dtype=torch.long)
+        for i, row in enumerate(rows):
+            start = width - len(row) if self.padding_side == "left" else 0
+            ids[i, start:start + len(row)] = torch.tensor(row)
+            mask[i, start:start + len(row)] = 1
+        return {"input_ids": ids, "attention_mask": mask}
+
+    def batch_decode(self, ids, skip_special_tokens=True):
+        return ["".join(chr(97 + int(t) % 26) for t in row if int(t) != self.pad_token_id) for row in ids]
+
+
+def test_both_decode_engines_give_the_same_texts_and_the_same_token_count_on_a_tiny_model(monkeypatch):
+    import torch
+    from transformers import Qwen2Config, Qwen2ForCausalLM
+    torch.manual_seed(4321)
+    model = Qwen2ForCausalLM(Qwen2Config(vocab_size=64, hidden_size=32, intermediate_size=64, num_hidden_layers=2, num_attention_heads=4, num_key_value_heads=2,
+                                         max_position_embeddings=512, tie_word_embeddings=False, initializer_range=0.4)).float().eval()
+    model.generation_config.pad_token_id = 0
+    model.generation_config.do_sample = False
+    monkeypatch.setattr(cot, "MAX_NEW_TOKENS", 24)
+    tokenizer = FakeTokenizer()
+    questions = [q for q, _ in make_questions(12, 1)] + ["What is 7 * 8 and the rest of a much longer question than the others?"]
+    tokenizer.padding_side = "left"
+    ids = tokenizer([cot_prompt for cot_prompt in questions])["input_ids"]
+    model.generation_config.eos_token_id = [99]
+    with torch.no_grad():
+        free = model.generate(input_ids=ids, attention_mask=tokenizer(questions)["attention_mask"], max_new_tokens=24, do_sample=False, pad_token_id=0)[:, ids.shape[1]:]
+    model.generation_config.eos_token_id = sorted({int(free[0, 3]), int(free[1, 6]), int(free[2, 9])})
+    tokenizer.padding_side = "right"                 # generate() sets it to left by itself and puts it back
+    for chunk in (4, 13):
+        plain = cot.generate(model, tokenizer, questions, chunk)
+        compact = cot.generate(model, tokenizer, questions, chunk, "hf_compact")
+        assert compact == plain
+        assert len(set(len(t) for t in plain[0])) > 2          # premise: the texts have different lengths (the rows ended at different steps)
+    assert tokenizer.padding_side == "right"
+
+
+def test_each_decode_engine_calls_only_its_own_decoder(monkeypatch):
+    import torch
+    from transformers import Qwen2Config, Qwen2ForCausalLM
+    import heteroes.eval.compact_decode as compact_module
+    torch.manual_seed(99)
+    model = Qwen2ForCausalLM(Qwen2Config(vocab_size=64, hidden_size=32, intermediate_size=64, num_hidden_layers=1, num_attention_heads=4, num_key_value_heads=2,
+                                         max_position_embeddings=128)).float().eval()
+    model.generation_config.pad_token_id = 0
+    model.generation_config.eos_token_id = [1]
+    monkeypatch.setattr(cot, "MAX_NEW_TOKENS", 4)
+    tokenizer = FakeTokenizer()
+    calls = {"library": 0, "compact": 0}
+    real_generate, real_compact = model.generate, compact_module.compact_generate_ids
+
+    def counted_generate(*args, **kwargs):
+        calls["library"] += 1
+        return real_generate(*args, **kwargs)
+
+    def counted_compact(*args, **kwargs):
+        calls["compact"] += 1
+        return real_compact(*args, **kwargs)
+
+    monkeypatch.setattr(model, "generate", counted_generate)
+    monkeypatch.setattr(compact_module, "compact_generate_ids", counted_compact)
+    cot.generate(model, tokenizer, ["What is 1 + 2?", "What is 3 * 4?"], 2, "hf_compact")
+    assert calls == {"library": 0, "compact": 1}
+    cot.generate(model, tokenizer, ["What is 1 + 2?", "What is 3 * 4?"], 2, "hf_generate")
+    assert calls == {"library": 1, "compact": 1}
+
+
+def test_the_compacting_decoder_refuses_an_unsupported_generation_config_before_decoding(monkeypatch):
+    import torch
+    from transformers import Qwen2Config, Qwen2ForCausalLM
+    from heteroes.eval.compact_decode import UnsupportedDecode
+    model = Qwen2ForCausalLM(Qwen2Config(vocab_size=64, hidden_size=32, intermediate_size=64, num_hidden_layers=1, num_attention_heads=4, num_key_value_heads=2)).float().eval()
+    model.generation_config.eos_token_id = [1]
+    model.generation_config.no_repeat_ngram_size = 2
+    with pytest.raises(UnsupportedDecode):
+        cot.generate(model, FakeTokenizer(), ["What is 1 + 2?"], 1, "hf_compact")

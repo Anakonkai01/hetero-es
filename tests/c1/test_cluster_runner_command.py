@@ -152,3 +152,13 @@ def test_environment_assignments_go_in_front_of_the_third_worker_only(tmp_path, 
     assert "LD_LIBRARY_PATH" not in seen[2][-1]
     seen, _ = third_commands(tmp_path / "b", monkeypatch, ["--third", "me@x"]) if (tmp_path / "b").mkdir() is None else None
     assert "LD_LIBRARY_PATH" not in seen[1][-1] and "PYTHONPATH=src exec" in seen[1][-1]
+
+
+def test_the_decode_engine_defaults_to_the_librarys_generate(tmp_path, monkeypatch):
+    cmd = command_for(tmp_path, monkeypatch, ["--scratch-dir", str(tmp_path / "s")])
+    assert value_after(cmd, "--decode-engine") == "hf_generate"
+
+
+def test_the_decode_engine_of_the_arguments_reaches_the_coordinator(tmp_path, monkeypatch):
+    cmd = command_for(tmp_path, monkeypatch, ["--scratch-dir", str(tmp_path / "s"), "--decode-engine", "hf_compact"])
+    assert value_after(cmd, "--decode-engine") == "hf_compact"

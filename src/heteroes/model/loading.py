@@ -64,7 +64,8 @@ def check_recipe_selftest(recipe: Recipe, device: str) -> float:
 
 
 def build_recipe(loaded: LoadedModel, sigma: float, chunk_elements: int | None = None, reward_eta: float = DEFAULT_ETA,
-                 eval_dtype: str = DEFAULT_EVAL_DTYPE, noise_engine: str = "cpu", workload: str = "arith16") -> Recipe:
+                 eval_dtype: str = DEFAULT_EVAL_DTYPE, noise_engine: str = "cpu", workload: str = "arith16",
+                 decode_engine: str = "hf_generate") -> Recipe:
     """
     The recipe of an experiment from the loaded model and the choices. `noise_engine` is "cpu" (the canonical engine, `chunk_elements` its chunk,
     default 2**18) or "cuda" (the GPU engine of section 16 of the numerical contract: its call size is part of the engine, there is nothing to choose).
@@ -93,4 +94,5 @@ def build_recipe(loaded: LoadedModel, sigma: float, chunk_elements: int | None =
         generation_config_sha256=generation_config_sha256(loaded.generation_config),
         eval_dtype=eval_dtype,
         workload_name=chosen.name,
+        decode_engine=decode_engine,
     )

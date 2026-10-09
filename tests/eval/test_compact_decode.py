@@ -79,16 +79,13 @@ def run_both(repetition_penalty=None):
 
 def test_same_ids_as_generate_when_the_rows_end_at_different_steps():
     reference, tokens, stats, _ = run_both()
-    width = reference.shape[1]
-    assert torch.equal(tokens[:, :width], reference)
-    assert bool((tokens[:, width:] == PAD).all())             # the library stops early when every row has ended: the rest is padding
+    assert torch.equal(tokens, reference)                      # the same width too: the library stops when every row has ended, and so does the decoder
 
 
 def test_same_ids_with_the_repetition_penalty_of_the_generation_config():
     plain_reference, plain_tokens, _, _ = run_both()
     reference, tokens, stats, _ = run_both(repetition_penalty=1.8)
-    width = reference.shape[1]
-    assert torch.equal(tokens[:, :width], reference)
+    assert torch.equal(tokens, reference)
 
 
 def test_the_penalty_really_changes_the_answers_in_this_setup():
@@ -109,7 +106,7 @@ def test_a_cache_that_cannot_select_rows_still_gives_the_same_ids(monkeypatch):
         raise NotImplementedError("no row selection in this cache")
     monkeypatch.setattr(DynamicCache, "batch_select_indices", refuse)
     reference, tokens, stats, _ = run_both()
-    assert torch.equal(tokens[:, : reference.shape[1]], reference)
+    assert torch.equal(tokens, reference)
     assert stats["compaction_supported"] is False and stats["compactions"] == 0
 
 
@@ -142,7 +139,7 @@ def test_a_single_row_equals_the_library_too():
     reference = library_new_tokens(model, ids, mask, eos)
     eos_ids, pad, processors = cd.decode_settings(model, NEW)
     tokens, stats = cd.compact_generate_ids(model, ids, mask, NEW, eos_ids, pad, processors)
-    assert torch.equal(tokens[:, : reference.shape[1]], reference)
+    assert torch.equal(tokens, reference)
     assert stats["steps"] == reference.shape[1]
 
 

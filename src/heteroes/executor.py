@@ -107,7 +107,7 @@ class CandidateExecutor:
             if self.recipe.workload_name == "arith16":
                 result = evaluate_model(self._eval.model, self.tokenizer, chunk=self.chunk)       # looked up here so that tests can replace it
             else:
-                result = get_workload(self.recipe.workload_name).evaluate(self._eval.model, self.tokenizer, self.chunk)
+                result = get_workload(self.recipe.workload_name).evaluate(self._eval.model, self.tokenizer, self.chunk, self.recipe.decode_engine)
             reward = float(result.mean_reward)
             now = self._clock()
             timing["rollout"], mark = now - mark, now

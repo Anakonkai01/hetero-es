@@ -22,6 +22,11 @@ DEFAULT_EVAL_DTYPE = "float32"
 # earlier recipe is unchanged); another one is named in `workload.name` (G7: `heteroes/eval/workloads.py` holds what each name means).
 WORKLOAD_NAMES = ("arith16", "cot_l3_q32", "cot_l3_q64", "cot_l1_q128")
 DEFAULT_WORKLOAD_NAME = "arith16"
+# How the answers are generated (09/10): the library's generate() or the compacting greedy decoder (`heteroes.eval.compact_decode`). Like the workload name, the default is left out of the
+# document, so that the hash of every recipe made before the choice existed is unchanged. Both give the same texts in every comparison made so far, but equal texts are not guaranteed
+# (numerical contract section 17), so every worker of an experiment must use the same one: it is in the recipe.
+DECODE_ENGINES = ("hf_generate", "hf_compact")
+DEFAULT_DECODE_ENGINE = "hf_generate"
 
 # Seeds travel as JSON. JavaScript reads integers exactly only below 2**53, so v1 does not allow more.
 MAX_SEED = 2**53  # exclusive
@@ -105,6 +110,7 @@ class Recipe:
     generation_config_sha256: str
     eval_dtype: str = DEFAULT_EVAL_DTYPE
     workload_name: str = DEFAULT_WORKLOAD_NAME
+    decode_engine: str = DEFAULT_DECODE_ENGINE
 
     def __post_init__(self):
         _check_text("model_id", self.model_id)
@@ -128,6 +134,10 @@ class Recipe:
             raise ValueError(f"eval_dtype must be one of {EVAL_DTYPES}, got {self.eval_dtype!r}")
         if not isinstance(self.workload_name, str) or self.workload_name not in WORKLOAD_NAMES:
             raise ValueError(f"workload_name must be one of {WORKLOAD_NAMES}, got {self.workload_name!r}")
+        if not isinstance(self.decode_engine, str) or self.decode_engine not in DECODE_ENGINES:
+            raise ValueError(f"decode_engine must be one of {DECODE_ENGINES}, got {self.decode_engine!r}")
+        if self.decode_engine != DEFAULT_DECODE_ENGINE and self.workload_name == "arith16":
+            raise ValueError(f"the decode engine {self.decode_engine!r} is for the long workloads; arith16 (the 16 prompts of the contract) has its own code")
         if self.engine_version == CUDA_ENGINE_VERSION:
             # the CUDA engine has no free parameter: its call size and its fingerprint are the engine (numerical contract section 16)
             if self.chunk_elements != CUDA_CALL_ELEMENTS:
@@ -156,7 +166,8 @@ class Recipe:
             "update": {**UPDATE_RECIPE, "reward_eta": self.reward_eta},
             "workload": {"hash": self.workload_hash, "generation_config_sha256": self.generation_config_sha256,
                          **({} if self.eval_dtype == LEGACY_EVAL_DTYPE else {"eval_dtype": self.eval_dtype}),
-                         **({} if self.workload_name == DEFAULT_WORKLOAD_NAME else {"name": self.workload_name})},
+                         **({} if self.workload_name == DEFAULT_WORKLOAD_NAME else {"name": self.workload_name}),
+                         **({} if self.decode_engine == DEFAULT_DECODE_ENGINE else {"decode_engine": self.decode_engine})},
         }
 
     @property
@@ -172,7 +183,7 @@ class Recipe:
         _check_keys("recipe.noise", data["noise"], {"engine_version", "chunk_elements", "fingerprint"})
         _check_keys("recipe.perturbation", data["perturbation"], {"sigma", "sigma_float32"})
         _check_keys("recipe.update", data["update"], {*UPDATE_RECIPE, "reward_eta"})
-        _check_keys("recipe.workload", data["workload"], {"hash", "generation_config_sha256"} | ({"eval_dtype", "name"} & set(data["workload"])))
+        _check_keys("recipe.workload", data["workload"], {"hash", "generation_config_sha256"} | ({"eval_dtype", "name", "decode_engine"} & set(data["workload"])))
         for key, value in UPDATE_RECIPE.items():
             if data["update"][key] != value:
                 raise ValueError(f"recipe.update.{key} is {data['update'][key]!r}, manifest v1 says {value!r}")
@@ -191,6 +202,7 @@ class Recipe:
             generation_config_sha256=data["workload"]["generation_config_sha256"],
             eval_dtype=data["workload"].get("eval_dtype", LEGACY_EVAL_DTYPE),
             workload_name=data["workload"].get("name", DEFAULT_WORKLOAD_NAME),
+            decode_engine=data["workload"].get("decode_engine", DEFAULT_DECODE_ENGINE),
         )
         if recipe.to_dict() != data:
             raise ValueError("recipe does not round-trip (a derived value, such as sigma_float32, disagrees)")

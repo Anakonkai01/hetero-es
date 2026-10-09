@@ -179,3 +179,16 @@ def test_a_failing_cuda_self_test_is_an_error_for_a_cuda_recipe(monkeypatch):
     monkeypatch.setattr(loading, "check_cuda_noise_selftest", failing)
     with pytest.raises(RuntimeError, match="self-test"):
         loading.check_recipe_selftest(build_recipe(toy_loaded(), sigma=1e-3, noise_engine="cuda"), "cuda")
+
+
+def test_the_decode_engine_is_a_choice_of_the_recipe_and_the_default_changes_nothing():
+    loaded = toy_loaded()
+    default = build_recipe(loaded, sigma=1e-3, workload="cot_l1_q128")
+    compact = build_recipe(loaded, sigma=1e-3, workload="cot_l1_q128", decode_engine="hf_compact")
+    assert default.decode_engine == "hf_generate" and compact.decode_engine == "hf_compact"
+    assert compact.hash != default.hash
+    assert build_recipe(loaded, sigma=1e-3, workload="cot_l1_q128", decode_engine="hf_generate").hash == default.hash
+    with pytest.raises(ValueError):
+        build_recipe(loaded, sigma=1e-3, workload="arith16", decode_engine="hf_compact")
+    with pytest.raises(ValueError):
+        build_recipe(loaded, sigma=1e-3, workload="cot_l1_q128", decode_engine="vllm")

@@ -18,14 +18,14 @@ from heteroes.eval.workload import workload_hash
 class Workload:
     name: str
     hash: Callable[[], str]
-    evaluate: Callable                       # (model, tokenizer, chunk) -> an object with `.mean_reward`
+    evaluate: Callable                       # (model, tokenizer, chunk[, decode_engine]) -> an object with `.mean_reward`; only the long workloads take a decode engine
 
 
 WORKLOADS = {
     "arith16": Workload("arith16", workload_hash, evaluate_model),
-    "cot_l3_q32": Workload("cot_l3_q32", lambda: workload_hash_of(3, 32), lambda model, tokenizer, chunk: evaluate_cot(model, tokenizer, chunk, level=3, count=32)),
-    "cot_l3_q64": Workload("cot_l3_q64", lambda: workload_hash_of(3, 64), lambda model, tokenizer, chunk: evaluate_cot(model, tokenizer, chunk, level=3, count=64)),
-    "cot_l1_q128": Workload("cot_l1_q128", lambda: workload_hash_of(1, 128), lambda model, tokenizer, chunk: evaluate_cot(model, tokenizer, chunk, level=1, count=128)),
+    "cot_l3_q32": Workload("cot_l3_q32", lambda: workload_hash_of(3, 32), lambda model, tokenizer, chunk, decode_engine="hf_generate": evaluate_cot(model, tokenizer, chunk, level=3, count=32, decode_engine=decode_engine)),
+    "cot_l3_q64": Workload("cot_l3_q64", lambda: workload_hash_of(3, 64), lambda model, tokenizer, chunk, decode_engine="hf_generate": evaluate_cot(model, tokenizer, chunk, level=3, count=64, decode_engine=decode_engine)),
+    "cot_l1_q128": Workload("cot_l1_q128", lambda: workload_hash_of(1, 128), lambda model, tokenizer, chunk, decode_engine="hf_generate": evaluate_cot(model, tokenizer, chunk, level=1, count=128, decode_engine=decode_engine)),
 }
 
 

@@ -26,17 +26,19 @@ def profile_questions(workload_name: str) -> list[str]:
     raise ValueError(f"unknown workload {workload_name!r}; known: {['arith16', *sorted(_COT)]}")
 
 
-def profile_texts(workload_name: str, model, tokenizer, chunk: int) -> list[str]:
-    """The answers of the workload's questions with `chunk` prompts per generate() call (chunk 1: one call per question)."""
+def profile_texts(workload_name: str, model, tokenizer, chunk: int, decode_engine: str = "hf_generate") -> list[str]:
+    """The answers of the workload's questions with `chunk` prompts per generate() call (chunk 1: one call per question), made by the decode engine (long workloads only)."""
     questions = profile_questions(workload_name)
     if workload_name == "arith16":
+        if decode_engine != "hf_generate":
+            raise ValueError(f"the decode engine {decode_engine!r} is for the long workloads; arith16 has its own code")
         if chunk == 1:
             return [generate_answer(model, tokenizer, question) for question in questions]
         out = []
         for start in range(0, len(questions), chunk):
             out += generate_answers(model, tokenizer, questions[start:start + chunk])
         return out
-    return cot_generate(model, tokenizer, questions, chunk)[0]
+    return cot_generate(model, tokenizer, questions, chunk, decode_engine)[0]
 
 
 def reference_check_applies(workload_name: str) -> bool:

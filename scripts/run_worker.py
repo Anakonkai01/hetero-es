@@ -111,7 +111,8 @@ def main(argv: list[str]) -> int:
     cuda_engine = declared["noise"]["engine_version"] == CUDA_ENGINE_VERSION
     recipe = build_recipe(loaded, sigma=declared["perturbation"]["sigma"], chunk_elements=None if cuda_engine else declared["noise"]["chunk_elements"],
                           reward_eta=declared["update"]["reward_eta"], eval_dtype=declared["workload"].get("eval_dtype", "float16"),
-                          noise_engine="cuda" if cuda_engine else "cpu", workload=declared["workload"].get("name", "arith16"))
+                          noise_engine="cuda" if cuda_engine else "cpu", workload=declared["workload"].get("name", "arith16"),
+                          decode_engine=declared["workload"].get("decode_engine", "hf_generate"))
     try:
         engine_selftest_seconds = check_recipe_selftest(recipe, device)
     except RuntimeError as error:

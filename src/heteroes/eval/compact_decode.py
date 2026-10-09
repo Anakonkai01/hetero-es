@@ -58,8 +58,8 @@ def position_ids_from_mask(attention_mask):
 
 def compact_generate_ids(model, input_ids, attention_mask, max_new_tokens: int, eos_ids, pad_id: int, processors):
     """
-    Greedy decoding of one batch of LEFT-padded prompts. Returns (tokens, stats): `tokens` is a (batch, max_new_tokens) tensor of the generated ids, the end token included and
-    `pad_id` after it, like the new part of `generate()`'s output; `stats` has "steps", "slot_steps" (the sum over the steps of the rows computed), "compactions" and
+    Greedy decoding of one batch of LEFT-padded prompts. Returns (tokens, stats): `tokens` is a (batch, steps) tensor of the generated ids, the end token included and
+    `pad_id` after it, exactly the new part of `generate()`'s output (it has as many columns as steps were run, at most `max_new_tokens`); `stats` has "steps", "slot_steps" (the sum over the steps of the rows computed), "compactions" and
     "compaction_supported".
     """
     device = input_ids.device
@@ -105,4 +105,4 @@ def compact_generate_ids(model, input_ids, attention_mask, max_new_tokens: int, 
             result = model(input_ids=next_tokens[:, None], attention_mask=mask, position_ids=last_position[:, None], past_key_values=cache, use_cache=True)
             cache = result.past_key_values
             scores = result.logits[:, -1].to(dtype=torch.float32)
-    return out, stats
+    return out[:, :stats["steps"]], stats

@@ -73,9 +73,23 @@ def extract_answer(text: str) -> int | None:
         return None
 
 
-def generate(model, tokenizer, questions: list[str], chunk: int) -> tuple[list[str], int]:
-    """Greedy answers, `chunk` prompts per generate() call (left padding). Returns the texts and the number of tokens generated in total."""
+def _check_decode_engine(decode_engine) -> None:
+    from heteroes.manifest import DECODE_ENGINES
+    if not isinstance(decode_engine, str) or decode_engine not in DECODE_ENGINES:
+        raise ValueError(f"decode_engine must be one of {DECODE_ENGINES}, got {decode_engine!r}")
+
+
+def generate(model, tokenizer, questions: list[str], chunk: int, decode_engine: str = "hf_generate") -> tuple[list[str], int]:
+    """
+    Greedy answers, `chunk` prompts per call (left padding). Returns the texts and the number of tokens generated in total.
+    `decode_engine`: "hf_generate" is the library's `generate()`; "hf_compact" is the compacting greedy decoder (`heteroes.eval.compact_decode`), which gives the same
+    answers without computing the ones that have already ended; it refuses a generation config it does not reproduce (`UnsupportedDecode`) before decoding anything.
+    """
+    _check_decode_engine(decode_engine)
     device = next(model.parameters()).device
+    if decode_engine == "hf_compact":
+        from heteroes.eval.compact_decode import compact_generate_ids, decode_settings
+        eos_ids, pad_id, processors = decode_settings(model, MAX_NEW_TOKENS, tokenizer.pad_token_id)
     texts_out, tokens = [], 0
     previous = tokenizer.padding_side
     tokenizer.padding_side = "left"
@@ -86,9 +100,12 @@ def generate(model, tokenizer, questions: list[str], chunk: int) -> tuple[list[s
                                                      tokenize=False, add_generation_prompt=True) for question in group]
             inputs = tokenizer(prompts, return_tensors="pt", padding=True)
             inputs = {key: value.to(device) for key, value in inputs.items()}
-            with torch.no_grad():
-                ids = model.generate(**inputs, max_new_tokens=MAX_NEW_TOKENS, do_sample=DO_SAMPLE)
-            new = ids[:, inputs["input_ids"].shape[1]:]
+            if decode_engine == "hf_compact":
+                new, _ = compact_generate_ids(model, inputs["input_ids"], inputs["attention_mask"], MAX_NEW_TOKENS, eos_ids, pad_id, processors)
+            else:
+                with torch.no_grad():
+                    ids = model.generate(**inputs, max_new_tokens=MAX_NEW_TOKENS, do_sample=DO_SAMPLE)
+                new = ids[:, inputs["input_ids"].shape[1]:]
             tokens += int((new != tokenizer.pad_token_id).sum())
             texts_out += [text.strip() for text in tokenizer.batch_decode(new, skip_special_tokens=True)]
     finally:
@@ -96,15 +113,16 @@ def generate(model, tokenizer, questions: list[str], chunk: int) -> tuple[list[s
     return texts_out, tokens
 
 
-def evaluate_cot(model, tokenizer, chunk: int, level: int = 3, count: int = 32) -> EvalResult:
+def evaluate_cot(model, tokenizer, chunk: int, level: int = 3, count: int = 32, decode_engine: str = "hf_generate") -> EvalResult:
     """
     Ask the questions and score them: the mean of the exact matches. A failure while generating (for example CUDA out of memory) is raised, never
     turned into a reward of 0 (an infrastructure failure is not a wrong answer); a reply without any integer is a wrong answer.
     """
     if isinstance(chunk, bool) or not isinstance(chunk, int) or chunk < 1:
         raise ValueError(f"chunk must be an integer of at least 1, got {chunk!r}")
+    _check_decode_engine(decode_engine)
     qa = make_questions(count, level)
-    texts, _ = generate(model, tokenizer, [question for question, _ in qa], chunk)
+    texts, _ = generate(model, tokenizer, [question for question, _ in qa], chunk, decode_engine)
     records = []
     for (question, answer), text in zip(qa, texts, strict=True):
         prediction = extract_answer(text)

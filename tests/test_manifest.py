@@ -443,3 +443,48 @@ def test_a_document_that_names_the_default_workload_is_refused_because_the_defau
     document["workload"]["name"] = "arith16"
     with pytest.raises(ValueError, match="round-trip"):
         Recipe.from_dict(document)
+
+
+# ---- decode engine (09/10): how the answers are generated, a choice of the recipe like the noise engine ----
+
+def make_cot_recipe(**changes):
+    return make_recipe(eval_dtype="float32", workload_name="cot_l1_q128", **changes)
+
+
+def test_the_default_decode_engine_is_the_librarys_generate_and_leaves_every_hash_unchanged():
+    assert manifest.DEFAULT_DECODE_ENGINE == "hf_generate"
+    assert make_recipe().decode_engine == "hf_generate"
+    assert "decode_engine" not in make_recipe().to_dict()["workload"]
+    assert make_recipe().hash == PINNED_RECIPE_HASH
+    assert make_recipe_with_default_precision().hash == FP32_EVIDENCE_RECIPE_HASH
+
+
+def test_the_compacting_decoder_is_part_of_the_recipe_and_changes_its_hash():
+    plain, compact = make_cot_recipe(), make_cot_recipe(decode_engine="hf_compact")
+    assert compact.to_dict()["workload"]["decode_engine"] == "hf_compact"
+    assert compact.hash != plain.hash
+    assert compact.hash == canonical_json_hash(compact.to_dict())
+
+
+def test_a_recipe_with_the_compacting_decoder_round_trips():
+    recipe = make_cot_recipe(decode_engine="hf_compact")
+    again = Recipe.from_dict(json.loads(json.dumps(recipe.to_dict())))
+    assert again == recipe and again.hash == recipe.hash and again.decode_engine == "hf_compact"
+
+
+@pytest.mark.parametrize("bad", ["vllm", "", "HF_COMPACT", None, 1, True])
+def test_an_unknown_decode_engine_is_refused(bad):
+    with pytest.raises((ValueError, TypeError)):
+        make_cot_recipe(decode_engine=bad)
+
+
+def test_the_default_decode_engine_written_into_the_document_is_refused_like_the_default_precision():
+    document = make_cot_recipe().to_dict()
+    document["workload"]["decode_engine"] = "hf_generate"           # not what to_dict writes: it would not round-trip
+    with pytest.raises(ValueError):
+        Recipe.from_dict(document)
+
+
+def test_the_compacting_decoder_is_for_the_long_workloads_only():
+    with pytest.raises(ValueError, match="arith16"):
+        make_recipe(decode_engine="hf_compact")                      # the 16-prompt workload of the contract has its own code and is not batched this way

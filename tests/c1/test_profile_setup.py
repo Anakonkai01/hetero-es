@@ -51,3 +51,18 @@ def test_unknown_engine_is_refused():
 def test_the_stored_reference_answers_exist_only_for_arith16():
     assert reference_check_applies("arith16") is True
     assert all(reference_check_applies(name) is False for name in WORKLOAD_NAMES if name != "arith16")
+
+
+def test_the_texts_of_a_profile_pass_the_decode_engine_to_the_long_workloads(monkeypatch):
+    from heteroes import profile_setup
+    seen = []
+    monkeypatch.setattr(profile_setup, "cot_generate", lambda model, tokenizer, questions, chunk, decode_engine="hf_generate": seen.append((chunk, decode_engine)) or (["t"], 0))
+    profile_setup.profile_texts("cot_l1_q128", None, None, 64)
+    profile_setup.profile_texts("cot_l1_q128", None, None, 64, "hf_compact")
+    assert seen == [(64, "hf_generate"), (64, "hf_compact")]
+
+
+def test_the_16_prompt_workload_has_no_other_decode_engine():
+    from heteroes import profile_setup
+    with pytest.raises(ValueError, match="arith16"):
+        profile_setup.profile_texts("arith16", None, None, 4, "hf_compact")

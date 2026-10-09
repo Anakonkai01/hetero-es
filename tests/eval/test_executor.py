@@ -527,15 +527,30 @@ def test_the_workload_of_the_recipe_is_the_one_that_is_evaluated(fx, monkeypatch
 
     class Workload:
         @staticmethod
-        def evaluate(model, tokenizer, chunk):
-            asked.append((model, tokenizer, chunk))
+        def evaluate(model, tokenizer, chunk, decode_engine="hf_generate"):
+            asked.append((model, tokenizer, chunk, decode_engine))
             return EvalResult(mean_reward=0.375, records=())
 
     monkeypatch.setattr(executor_module, "get_workload", lambda name: Workload if name == "cot_l3_q32" else None)
     executor = CandidateExecutor(fx.model, "the tokenizer", fx.schema, fx.recipe, chunk=4)
 
     assert executor(fx.descriptor(7)) == 0.375
-    assert len(asked) == 1 and asked[0][1:] == ("the tokenizer", 4)
+    assert len(asked) == 1 and asked[0][1:] == ("the tokenizer", 4, "hf_generate")
+
+
+def test_the_decode_engine_of_the_recipe_is_the_one_that_is_used(fx, monkeypatch):
+    with_recipe(fx, workload_name="cot_l3_q32", decode_engine="hf_compact")
+    asked = []
+
+    class Workload:
+        @staticmethod
+        def evaluate(model, tokenizer, chunk, decode_engine="hf_generate"):
+            asked.append(decode_engine)
+            return EvalResult(mean_reward=0.5, records=())
+
+    monkeypatch.setattr(executor_module, "get_workload", lambda name: Workload)
+    CandidateExecutor(fx.model, "the tokenizer", fx.schema, fx.recipe, chunk=4)(fx.descriptor(7))
+    assert asked == ["hf_compact"]
 
 
 def test_the_16_prompt_workload_still_goes_through_evaluate_model(fx, monkeypatch):

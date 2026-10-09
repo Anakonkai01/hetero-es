@@ -59,6 +59,8 @@ def add_cluster_arguments(parser) -> None:
     parser.add_argument("--eval-dtype", choices=["float16", "float32"], default="float32", help="precision of the forward pass of the evaluation (the recipe's; the workers read it from the job)")
     parser.add_argument("--noise-engine", choices=["cpu", "cuda"], default="cpu", help="the noise engine of the recipe (the workers read it from the job)")
     parser.add_argument("--workload", choices=["arith16", "cot_l3_q32", "cot_l3_q64", "cot_l1_q128"], default="arith16", help="the workload of the recipe (the workers read it from the job)")
+    parser.add_argument("--decode-engine", choices=["hf_generate", "hf_compact"], default="hf_generate",
+                        help="how the answers are generated, part of the recipe (the workers read it from the job): the library's generate() or the compacting greedy decoder (long workloads only)")
     parser.add_argument("--generation-timeout", type=float, default=1200.0)
 
 
@@ -103,7 +105,7 @@ class Cluster:
                "--generations", str(generations), "--alpha", repr(a.alpha), "--sigma", repr(a.sigma), "--policy", policy,
                "--host", a.bind_host or a.host, "--port", str(a.port), "--linger-seconds", "10", "--lease-seconds", str(a.lease_seconds),
                "--allow-unauthenticated", "--timeout-seconds", str(a.generation_timeout), "--eval-dtype", a.eval_dtype,
-               "--noise-engine", a.noise_engine, "--workload", a.workload] + policy_args + (["--resume"] if resume else [])
+               "--noise-engine", a.noise_engine, "--workload", a.workload, "--decode-engine", a.decode_engine] + policy_args + (["--resume"] if resume else [])
         env = self.env if a.coordinator_noise_threads is None else {**self.env, "HETEROES_NOISE_THREADS": str(a.coordinator_noise_threads)}
         process = subprocess.Popen(cmd, stdout=open(self.run_dir / f"{label}.out", "a"), stderr=subprocess.STDOUT, env=env)
         self.processes[label] = process
