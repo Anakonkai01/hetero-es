@@ -187,3 +187,9 @@ with other methods (for example the realized difference as the update direction)
 - [ ] Refuse `--allow-unauthenticated` outside loopback or the direct cable in `cluster_runner.py` / `run_coordinator.py`; per-worker tokens.
 - [ ] (if the owner wants independence from a vendor) hub-and-spoke WireGuard with a cheap VPS as the hub, compared with Tailscale on the same pairs of machines. Do not write an own VPN.
 - [ ] Cross-check of 2 workers on a fraction of the candidates (trust in borrowed machines).
+
+## scale-and-spread  (owner direction 09/10: many machines in many places, LAN to other cities; focus on NVIDIA GPUs, laptops included)
+- [ ] **MacBook / Apple Silicon: NOTED, NOT NOW** (owner, 09/10). No CUDA there; it would need a portable noise engine (integer counter-based generator, no transcendental functions) and a cross-device numerical decision. Keep NVIDIA only until the rest works.
+- [ ] Enrollment without Tailscale: "download, install, log in, the machine is a worker" (owner). Brainstorm of 09/10 in the chat; to become an ADR when the owner agrees. Constraints named: a future admin and users of track B (production), internet cafes with a few machines (probably no admin rights, outbound only, machines that reset).
+- [ ] Hardware coming: a second 3060 (another city), a 5070 Ti, a 4060 (Ada: a new architecture for the cross-GPU qualification), then internet cafes. Each new GPU model must pass the numerical qualification before it is admitted.
+- [ ] Scale by simulation: the real coordinator and ledger with hundreds of simulated workers (joining, leaving, slow), throughput of the coordinator, behaviour of the dispatch policies; say in the report that it is simulation.
