@@ -1,0 +1,63 @@
+{
+  "args": {
+    "out_dir": "artifacts/experiments/2026-10-09-scaling-n48-n96-2machines/n96",
+    "candidates": 96,
+    "generations": 3,
+    "repeats": 1,
+    "conditions": "B0,T2",
+    "profile_reference": "artifacts/experiments/2026-10-08-c1-v2/profile-5070ti-l1q128-cuda.json",
+    "profile_candidate": "artifacts/experiments/2026-10-08-c1-v2/profile-1660s-l1q128-cuda.json",
+    "profile_third": "artifacts/experiments/2026-10-08-third-machine-3060/profile-3060-l1q128-cuda.json",
+    "prediction": null,
+    "chunk": 64,
+    "first_repeat": 1,
+    "lease_seconds": 60.0,
+    "noise_threads": null,
+    "coordinator_noise_threads": 28,
+    "worker_http_timeout": null,
+    "local_python": "/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python",
+    "scratch_dir": "/home/pc5070ti/.cache/heteroes/bench-scratch",
+    "replay": "never",
+    "replay_profile": null,
+    "replay_verify_every": 1,
+    "third": "thao_nguyen@100.92.20.58",
+    "third_repo": "~/projects/heteroes/hetero-es",
+    "third_python": "~/heteroes-venv/bin/python",
+    "third_model_path": "~/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775",
+    "third_env": "LD_LIBRARY_PATH=/usr/lib/wsl/lib:/usr/lib/wsl/drivers/nv_dispi.inf_amd64_feedb8c0271ca811",
+    "third_url": "http://100.110.165.40:8765",
+    "third_replay": "auto",
+    "third_replay_profile": "/tmp/profile-3060-with-sync.json",
+    "bind_host": "0.0.0.0",
+    "remote": "anakonkai@10.10.10.2",
+    "remote_repo": "~/projects/heteroes/hetero-es",
+    "remote_python": "~/projects/heteroes/.venv/bin/python",
+    "host": "10.10.10.1",
+    "port": 8765,
+    "experiment_id": "c1v2",
+    "alpha": 0.001,
+    "sigma": 0.001,
+    "eval_dtype": "float32",
+    "noise_engine": "cuda",
+    "workload": "cot_l1_q128",
+    "generation_timeout": 1200.0,
+    "run_timeout": 6000.0
+  },
+  "specs": {
+    "B0": {
+      "workers": {
+        "worker-5070ti": 64
+      },
+      "policy": "greedy",
+      "args": []
+    },
+    "T2": {
+      "workers": {
+        "worker-5070ti": 64,
+        "worker-3060": 64
+      },
+      "policy": "greedy",
+      "args": []
+    }
+  }
+}

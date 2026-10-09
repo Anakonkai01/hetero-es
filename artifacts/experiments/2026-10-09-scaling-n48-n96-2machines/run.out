@@ -1,1 +1,12 @@
 === n48-B0-r1: {'worker-5070ti': 64} greedy
+    ok in 961 s
+=== n48-T2-r1: {'worker-5070ti': 64, 'worker-3060': 64} greedy
+    ok in 726 s
+=== n48-B0-r2: {'worker-5070ti': 64} greedy
+    ok in 959 s
+=== n48-T2-r2: {'worker-5070ti': 64, 'worker-3060': 64} greedy
+    ok in 728 s
+=== n96-B0-r1: {'worker-5070ti': 64} greedy
+    ok in 1907 s
+=== n96-T2-r1: {'worker-5070ti': 64, 'worker-3060': 64} greedy
+    ok in 1432 s
