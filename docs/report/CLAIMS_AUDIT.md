@@ -28,3 +28,17 @@ Phạm vi: track A (Systems/Core). Chủ dự án chưa review bất kỳ dòng 
 
 - Thuật toán ES hoặc chính sách lập lịch mới; hiệu quả học của ES; khả năng mở rộng quá hai worker; lợi thế so với GRPO; an toàn trước worker độc hại (workers được tin cậy trong mạng riêng, MASTER §7).
 - Tính đúng của track B (sản phẩm): không có bằng chứng trong repo này.
+
+## Cập nhật tối 09/10/2026 (bản nháp của AI, chưa ai review)
+
+Các bằng chứng mới của ngày 09/10, theo từng EQ. Các dòng ở bảng trên **không được sửa**; đọc phần này cùng với chúng.
+
+| EQ | Thêm gì | Giới hạn phải nói cùng |
+|---|---|---|
+| EQ4 | Chiến dịch thử lỗi với **máy ở xa thật** (3060 thứ hai, thành phố khác, Tailscale qua relay, độ trễ khoảng 94 ms, khoảng 21 Mbit/s): `2026-10-09-failure-campaign-remote-3060b/` (5 kịch bản, 5/5 đạt, **một lần lặp**); `2026-10-09-cutlink-download-3060b/` (cắt 15 giây lúc đang tải 988 MB). | cut-link khi replay bật không có file lớn để tải nên chứng minh ít; cú cắt 15 giây không làm đứt luồng TCP, nên "tải bị đứt thì tiếp tục hay làm lại" **chưa được thử**; ghi chú của một kịch bản in nhầm địa chỉ (đã sửa mã, tệp bằng chứng giữ nguyên). |
+| EQ3 | T2 với máy ở xa qua Tailscale và qua **Quick Tunnel công khai có token** (`2026-10-09-remote-3060b/`, `-remote-3060b-quicktunnel/`): 0 lỗi, trọng số cuối trùng B0. Gain 1,20 (Tailscale) và khoảng 1,2 với động cơ giải mã mới (`2026-10-09-t2-compact/`: 1,21 ± 0,33). | mỗi điều kiện 1–2 lần chạy, khoảng tin cậy rộng; không thể nói 1,20 khác 1,29; Cloudflare thấy lưu lượng; chưa thử tunnel đứt giữa chừng, nhiều worker, chạy dài. |
+| EQ2 | Nhiều candidate cùng lúc trên một GPU **không có lợi** ở chunk 64 (5070 Ti 0,97–0,98; 3060 0,75–0,85) (`2026-10-09-concurrency-probe/`). Chunk 128 không nhanh hơn rõ (`2026-10-09-chunk128/`). Greedy và tail-aware không khác nhau với 5070 Ti + 3060 (116,5 so với 116,3 s; `2026-10-09-dispatch-3060/`). | một workload, một cặp máy; lần dự đoán "tail rút được tới 10%" của AI **sai**. |
+| EQ2 (hiệu năng từng worker) | **Động cơ giải mã gọn** (`hf_compact`, `src/heteroes/eval/compact_decode.py`): nhanh hơn 1,6 lần mỗi generation trên 5070 Ti trong hệ thống thật, **cùng trọng số cuối** (`2026-10-09-decode-engine-b0/`); 1,1–2,4 lần trong thí nghiệm giải mã trên 3 họ model và 4 task (`2026-10-09-compact-decode/`). Đã là mặc định của thí nghiệm mới trên workload dài. | FP32 only; **không có đảm bảo bit-giống nhau**: có một cặp hoà (chênh 5,7e-6) làm `generate()` cũng đổi văn bản giữa chunk 128 và 64 (1 trên 768 ở GSM8K); chưa chạy trên 1660S (sụp bốn lần); profile tốc độ cũ mô tả động cơ cũ nên dự đoán admission cần đo lại. |
+| EQ1 / EQ2 | Vấn đề cặp hoà (near-ties): hợp đồng "cùng candidate thì cùng phần thưởng trên mọi worker" là **có thể xảy ra, không chắc chắn** khi câu trả lời dài (`docs/numerical-contract.md` mục 17). | tần suất đo được ở một task; ảnh hưởng lên phần thưởng phụ thuộc task và **chưa đo**; chủ dự án sẽ quyết định cách xử lý. |
+
+Việc cần đối chiếu thêm trước v0.5.0: (7) mọi con số của phần cập nhật này phải được mở lại từ `summary-*`/README gốc; (8) mục 17 của hợp đồng số học là bản nháp của AI.
