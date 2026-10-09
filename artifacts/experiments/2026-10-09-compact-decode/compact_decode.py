@@ -161,6 +161,7 @@ def main(argv):
                 records.append({"seed": seed, "chunk": chunk, "library_seconds": t_library, "compact_seconds": t_compact, "steps": steps, "slot_steps": slots,
                                 "different_questions": different, "texts_sha256": hashlib.sha256("\n".join(texts).encode("utf-8")).hexdigest()})
                 print(f"seed {seed} chunk {chunk}: library {t_library:.2f} s, compact {t_compact:.2f} s, steps {steps}, slots {slots}, different {len(different)}", flush=True)
+                Path(args.out + ".partial").write_text(json.dumps({"format": 1, "partial": True, "drop_fraction": args.drop_fraction, "records": records}, indent=1), encoding="utf-8")      # kept if the machine goes down
             warm = True
         finally:
             if seed is not None:
