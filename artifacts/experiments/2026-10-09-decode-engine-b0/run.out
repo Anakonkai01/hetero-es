@@ -1,0 +1,6 @@
+=== n24-B0-r1: {'worker-5070ti': 64} greedy
+    ok in 311 s
+=== n24-B0-r2: {'worker-5070ti': 64} greedy
+    ok in 313 s
+=== n24-B0-r1: {'worker-5070ti': 64} greedy
+    ok in 495 s
