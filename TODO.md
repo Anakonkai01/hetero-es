@@ -162,7 +162,7 @@ with other methods (for example the realized difference as the update direction)
 - [ ] C1: make `scripts/profile_worker.py` profile the CUDA engine and the long / level-1 workload on both machines, then repeat the admission prediction against forced admission.
 - [ ] Replay as an option of the worker (profile-based rule, optional early start when the record is written, hash check every k generations), two-machine run with both modes and equal final hashes.
 - [x] ~~Learning: replicate D1 / mixed-level training~~ DROPPED by the owner on 08/10: the project claims a correct, reproducible, fault-tolerant RUNTIME, not that ES learns (the ES papers did that); the report keeps its honest limits and cites prior art. Moved to `after-v1`.
-- [ ] GRPO supporting baseline, time-boxed, or `DEFERRED` with the reason.
+- [x] ~~GRPO supporting baseline~~ DROPPED by the owner on 09/10: not needed; out of scope for every release (EQ5 is not claimed, MASTER section 14 does not apply).
 - [ ] Failure campaign: each scenario 3 times; coordinator kill between the write-ahead record and the update on the real machines.
 - [ ] After the 1660S is stable: bundle sync, full tests there, one two-machine benchmark; N = 48 and 96, a chunk per worker.
 
