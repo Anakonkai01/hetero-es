@@ -1,0 +1,19 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:   0%|          | 1/290 [00:00<01:18,  3.68it/s]Loading weights:  35%|███▍      | 101/290 [00:00<00:00, 346.69it/s]Loading weights:  55%|█████▌    | 160/290 [00:00<00:00, 407.77it/s]Loading weights:  75%|███████▌  | 218/290 [00:00<00:00, 406.37it/s]Loading weights:  92%|█████████▏| 268/290 [00:00<00:00, 401.99it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 372.44it/s]
+seed None chunk 64: library 16.73 s, compact 10.61 s, steps 429, slots 12446, different 0
+seed None chunk 128: library 17.82 s, compact 9.80 s, steps 256, slots 12386, different 0
+seed 7001 chunk 64: library 18.72 s, compact 13.02 s, steps 457, slots 9111, different 0
+seed 7001 chunk 128: library 17.89 s, compact 9.34 s, steps 256, slots 9147, different 0
+seed 7002 chunk 64: library 14.46 s, compact 7.91 s, steps 357, slots 1280, different 0
+seed 7002 chunk 128: library 17.77 s, compact 5.62 s, steps 256, slots 1280, different 0
+seed 7003 chunk 64: library 21.11 s, compact 15.27 s, steps 508, slots 15646, different 0
+seed 7003 chunk 128: library 17.90 s, compact 9.53 s, steps 256, slots 15664, different 0
+seed 7004 chunk 64: library 1.41 s, compact 1.61 s, steps 18, slots 866, different 0
+seed 7004 chunk 128: library 1.12 s, compact 1.32 s, steps 9, slots 866, different 0
+seed 7005 chunk 64: library 20.80 s, compact 11.11 s, steps 512, slots 9905, different 0
+seed 7005 chunk 128: library 17.82 s, compact 9.55 s, steps 256, slots 9927, different 0
+seed 7006 chunk 64: library 21.40 s, compact 10.49 s, steps 512, slots 5185, different 0
+seed 7006 chunk 128: library 17.90 s, compact 6.20 s, steps 256, slots 5226, different 0
+seed 7007 chunk 64: library 20.84 s, compact 16.56 s, steps 512, slots 24605, different 0
+seed 7007 chunk 128: library 17.85 s, compact 13.91 s, steps 256, slots 24514, different 0
+seed 7008 chunk 64: library 18.75 s, compact 12.01 s, steps 460, slots 7255, different 0
+seed 7008 chunk 128: library 16.56 s, compact 8.55 s, steps 242, slots 7410, different 0

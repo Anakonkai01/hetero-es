@@ -1,0 +1,203 @@
+{
+ "format": 1,
+ "environment": {
+  "hostname": "5070ti",
+  "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+  "python": "3.12.14",
+  "torch": "2.13.0+cu132",
+  "torch_cuda": "13.2",
+  "numpy": "2.5.3",
+  "transformers": "5.17.0",
+  "device": "cuda",
+  "gpu_name": "NVIDIA GeForce RTX 5070 Ti",
+  "gpu_capability": [
+   12,
+   0
+  ],
+  "gpu_total_memory_bytes": 16611278848,
+  "nvidia_driver": "595.91.07"
+ },
+ "drop_fraction": 0.25,
+ "records": [
+  {
+   "seed": null,
+   "chunk": 64,
+   "library_seconds": 6.355231599000035,
+   "compact_seconds": 3.9776321110002755,
+   "steps": 429,
+   "slot_steps": 12901,
+   "different_questions": [],
+   "texts_sha256": "c3c0edba6afca763dbacfc021ce1078f73d7b274b2e0fd54e2d13d25563938ab"
+  },
+  {
+   "seed": null,
+   "chunk": 128,
+   "library_seconds": 7.2185300159999315,
+   "compact_seconds": 3.252283333999003,
+   "steps": 256,
+   "slot_steps": 13010,
+   "different_questions": [],
+   "texts_sha256": "c3c0edba6afca763dbacfc021ce1078f73d7b274b2e0fd54e2d13d25563938ab"
+  },
+  {
+   "seed": 7001,
+   "chunk": 64,
+   "library_seconds": 6.875533493999683,
+   "compact_seconds": 4.043725888999688,
+   "steps": 457,
+   "slot_steps": 9893,
+   "different_questions": [],
+   "texts_sha256": "42c35a88b672f91d32c6da3722025544b78df27208803428aacbe887a1684d69"
+  },
+  {
+   "seed": 7001,
+   "chunk": 128,
+   "library_seconds": 7.2199913450003805,
+   "compact_seconds": 2.853572656000324,
+   "steps": 256,
+   "slot_steps": 10105,
+   "different_questions": [],
+   "texts_sha256": "42c35a88b672f91d32c6da3722025544b78df27208803428aacbe887a1684d69"
+  },
+  {
+   "seed": 7002,
+   "chunk": 64,
+   "library_seconds": 5.22564759099987,
+   "compact_seconds": 3.0175968399998965,
+   "steps": 357,
+   "slot_steps": 1280,
+   "different_questions": [],
+   "texts_sha256": "72b3bdae76dc1ccd50202f6917efa136fa6e5aa2a7d4c9c371f914d7e03fa753"
+  },
+  {
+   "seed": 7002,
+   "chunk": 128,
+   "library_seconds": 7.215375693998794,
+   "compact_seconds": 2.260693131998778,
+   "steps": 256,
+   "slot_steps": 1280,
+   "different_questions": [],
+   "texts_sha256": "72b3bdae76dc1ccd50202f6917efa136fa6e5aa2a7d4c9c371f914d7e03fa753"
+  },
+  {
+   "seed": 7003,
+   "chunk": 64,
+   "library_seconds": 7.910653808999996,
+   "compact_seconds": 4.84758265399978,
+   "steps": 508,
+   "slot_steps": 16376,
+   "different_questions": [],
+   "texts_sha256": "d2f92f26b842476e7fc578447f3f33020ea61adbfa7d918330792be3d282dd6e"
+  },
+  {
+   "seed": 7003,
+   "chunk": 128,
+   "library_seconds": 7.221022890000313,
+   "compact_seconds": 3.7292607740000676,
+   "steps": 256,
+   "slot_steps": 16518,
+   "different_questions": [],
+   "texts_sha256": "d2f92f26b842476e7fc578447f3f33020ea61adbfa7d918330792be3d282dd6e"
+  },
+  {
+   "seed": 7004,
+   "chunk": 64,
+   "library_seconds": 0.3651500979995035,
+   "compact_seconds": 0.440746066000429,
+   "steps": 18,
+   "slot_steps": 866,
+   "different_questions": [],
+   "texts_sha256": "7227e9b6aa2bf98110a6d16dbd9d92748e8ca6d06e86a0b36e2e575a1442cba8"
+  },
+  {
+   "seed": 7004,
+   "chunk": 128,
+   "library_seconds": 0.3218828159988334,
+   "compact_seconds": 0.38737692100039567,
+   "steps": 9,
+   "slot_steps": 866,
+   "different_questions": [],
+   "texts_sha256": "7227e9b6aa2bf98110a6d16dbd9d92748e8ca6d06e86a0b36e2e575a1442cba8"
+  },
+  {
+   "seed": 7005,
+   "chunk": 64,
+   "library_seconds": 7.999111359000381,
+   "compact_seconds": 4.4584665070015035,
+   "steps": 512,
+   "slot_steps": 10737,
+   "different_questions": [],
+   "texts_sha256": "36bbdd8e5d16942ba2682779389c434dfd9b507854b39555abcc0a5d059a8ab4"
+  },
+  {
+   "seed": 7005,
+   "chunk": 128,
+   "library_seconds": 7.222746763000032,
+   "compact_seconds": 2.8346130209993134,
+   "steps": 256,
+   "slot_steps": 10279,
+   "different_questions": [],
+   "texts_sha256": "36bbdd8e5d16942ba2682779389c434dfd9b507854b39555abcc0a5d059a8ab4"
+  },
+  {
+   "seed": 7006,
+   "chunk": 64,
+   "library_seconds": 8.00103032700099,
+   "compact_seconds": 4.324964053999793,
+   "steps": 512,
+   "slot_steps": 5517,
+   "different_questions": [],
+   "texts_sha256": "81d72c7473fafe061df54a1804647d5b7e3ef13484a0c2a8cdf54bc471d95e22"
+  },
+  {
+   "seed": 7006,
+   "chunk": 128,
+   "library_seconds": 7.221197928000038,
+   "compact_seconds": 2.41092089400081,
+   "steps": 256,
+   "slot_steps": 5753,
+   "different_questions": [],
+   "texts_sha256": "81d72c7473fafe061df54a1804647d5b7e3ef13484a0c2a8cdf54bc471d95e22"
+  },
+  {
+   "seed": 7007,
+   "chunk": 64,
+   "library_seconds": 7.999438125998495,
+   "compact_seconds": 6.553578660999847,
+   "steps": 512,
+   "slot_steps": 26485,
+   "different_questions": [],
+   "texts_sha256": "137a7bac4f3584c213be4c36a665f6802896b52ac403c06735c1841e0906b2a8"
+  },
+  {
+   "seed": 7007,
+   "chunk": 128,
+   "library_seconds": 7.226032654998562,
+   "compact_seconds": 5.736239079998995,
+   "steps": 256,
+   "slot_steps": 26529,
+   "different_questions": [],
+   "texts_sha256": "137a7bac4f3584c213be4c36a665f6802896b52ac403c06735c1841e0906b2a8"
+  },
+  {
+   "seed": 7008,
+   "chunk": 64,
+   "library_seconds": 6.909043208999719,
+   "compact_seconds": 4.013274336000904,
+   "steps": 460,
+   "slot_steps": 8103,
+   "different_questions": [],
+   "texts_sha256": "d29f67c4054971490542b06c8ba33ed15ca8438c5ab54ef52b78d216a0567679"
+  },
+  {
+   "seed": 7008,
+   "chunk": 128,
+   "library_seconds": 6.665943879999759,
+   "compact_seconds": 2.463502955999502,
+   "steps": 242,
+   "slot_steps": 7634,
+   "different_questions": [],
+   "texts_sha256": "d29f67c4054971490542b06c8ba33ed15ca8438c5ab54ef52b78d216a0567679"
+  }
+ ]
+}
