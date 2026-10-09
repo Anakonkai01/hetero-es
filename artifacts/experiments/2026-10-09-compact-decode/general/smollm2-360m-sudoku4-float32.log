@@ -1,0 +1,15 @@
+[W1009 17:42:44.656461383 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 140509184 bytes (free: 46727168, total: 16611278848).
+seed None chunk 64: library 37.5 s, compact 18.5 s, slots 65536 -> 33599, mean answer 255 tokens, at limit 41, different 0, compaction on
+[W1009 17:43:37.290536332 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 176160768 bytes (free: 141099008, total: 16611278848).
+[W1009 17:43:41.364397587 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 203423744 bytes (free: 176750592, total: 16611278848).
+[W1009 17:43:44.908495281 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 224395264 bytes (free: 172556288, total: 16611278848).
+[W1009 17:43:48.286958076 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 243269632 bytes (free: 208207872, total: 16611278848).
+[W1009 17:43:51.515381300 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 260046848 bytes (free: 61407232, total: 16611278848).
+[W1009 17:43:54.528095280 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 274726912 bytes (free: 76087296, total: 16611278848).
+[W1009 17:43:57.253840838 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 287309824 bytes (free: 99155968, total: 16611278848).
+[W1009 17:43:59.534544704 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 297795584 bytes (free: 229179392, total: 16611278848).
+seed None chunk 128: library 36.1 s, compact 17.0 s, slots 65536 -> 33611, mean answer 255 tokens, at limit 41, different 0, compaction on
+seed 7001 chunk 64: library 37.5 s, compact 33.3 s, slots 65536 -> 58252, mean answer 442 tokens, at limit 101, different 0, compaction on
+seed 7001 chunk 128: library 36.1 s, compact 32.6 s, slots 65536 -> 59638, mean answer 442 tokens, at limit 101, different 0, compaction on
+seed 7002 chunk 64: library 37.5 s, compact 19.9 s, slots 65536 -> 36149, mean answer 274 tokens, at limit 44, different 0, compaction on
+seed 7002 chunk 128: library 36.1 s, compact 18.4 s, slots 65536 -> 36118, mean answer 274 tokens, at limit 44, different 0, compaction on

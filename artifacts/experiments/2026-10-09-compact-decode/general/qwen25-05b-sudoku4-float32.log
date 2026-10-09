@@ -1,0 +1,7 @@
+seed None chunk 64: library 25.6 s, compact 21.9 s, slots 65536 -> 57349, mean answer 440 tokens, at limit 64, different 0, compaction on
+[W1009 17:38:00.818391781 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 260046848 bytes (free: 220790784, total: 16611278848).
+seed None chunk 128: library 23.9 s, compact 20.2 s, slots 65536 -> 57443, mean answer 440 tokens, at limit 64, different 0, compaction on
+seed 7001 chunk 64: library 25.6 s, compact 25.5 s, slots 65536 -> 65501, mean answer 506 tokens, at limit 117, different 0, compaction on
+seed 7001 chunk 128: library 23.9 s, compact 23.8 s, slots 65536 -> 65536, mean answer 506 tokens, at limit 117, different 0, compaction on
+seed 7002 chunk 64: library 25.6 s, compact 24.1 s, slots 65536 -> 62393, mean answer 479 tokens, at limit 92, different 0, compaction on
+seed 7002 chunk 128: library 23.9 s, compact 22.5 s, slots 65536 -> 62627, mean answer 479 tokens, at limit 92, different 0, compaction on

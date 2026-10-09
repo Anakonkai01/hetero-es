@@ -1,0 +1,4 @@
+lengths 235 252 first different generated token index 165
+token chosen at chunk 128: ' do' score 23.851572036743164 | at chunk 64: ' perform' score 23.851577758789062
+difference of the two scores (one unpadded sequence, FP32): -5.7220458984375e-06
+top-3 of the unpadded sequence: [(' perform', 23.85158), (' do', 23.85157), (' calculate', 21.13601)]

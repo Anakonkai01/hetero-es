@@ -1,0 +1,6 @@
+seed None chunk 64: library 30.6 s, compact 18.0 s, slots 65536 -> 38100, mean answer 291 tokens, at limit 7, different 0, compaction on
+seed None chunk 128: library 28.5 s, compact 15.6 s, slots 65536 -> 38262, mean answer 291 tokens, at limit 7, different 0, compaction on
+seed 7001 chunk 64: library 30.6 s, compact 17.4 s, slots 65536 -> 36817, mean answer 282 tokens, at limit 7, different 0, compaction on
+seed 7001 chunk 128: library 28.5 s, compact 15.1 s, slots 65536 -> 37086, mean answer 282 tokens, at limit 7, different 0, compaction on
+seed 7002 chunk 64: library 30.6 s, compact 18.0 s, slots 65536 -> 37951, mean answer 289 tokens, at limit 5, different 0, compaction on
+seed 7002 chunk 128: library 28.5 s, compact 15.6 s, slots 65536 -> 38132, mean answer 289 tokens, at limit 5, different 1, compaction on
