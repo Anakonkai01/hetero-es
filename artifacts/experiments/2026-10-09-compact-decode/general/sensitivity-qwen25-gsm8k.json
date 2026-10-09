@@ -1,0 +1,40 @@
+{
+ "model": "/home/pc5070ti/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775",
+ "task": "gsm8k",
+ "dtype": "float32",
+ "records": [
+  {
+   "seed": null,
+   "pairs": {
+    "library64 vs compact64": 0,
+    "library64 vs library128": 0,
+    "library64 vs compact128": 0,
+    "compact64 vs library128": 0,
+    "compact64 vs compact128": 0,
+    "library128 vs compact128": 0
+   }
+  },
+  {
+   "seed": 7001,
+   "pairs": {
+    "library64 vs compact64": 0,
+    "library64 vs library128": 0,
+    "library64 vs compact128": 0,
+    "compact64 vs library128": 0,
+    "compact64 vs compact128": 0,
+    "library128 vs compact128": 0
+   }
+  },
+  {
+   "seed": 7002,
+   "pairs": {
+    "library64 vs compact64": 0,
+    "library64 vs library128": 1,
+    "library64 vs compact128": 0,
+    "compact64 vs library128": 1,
+    "compact64 vs compact128": 0,
+    "library128 vs compact128": 1
+   }
+  }
+ ]
+}

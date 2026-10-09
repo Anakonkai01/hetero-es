@@ -202,7 +202,7 @@ def main(argv):
         warm = tokenizer(prompts[:8], return_tensors="pt", padding=True).to("cuda")
         model.generate(**warm, max_new_tokens=16, do_sample=False, pad_token_id=pad)
         compact_generate(model, tokenizer, prompts[:8], processors, eos_ids, pad, 16, args.drop_fraction)
-    original = {name: p.detach().clone() for name, p in model.named_parameters()}
+    original = {name: p.detach().cpu().clone() for name, p in model.named_parameters()}      # on the CPU: a second copy of the weights on the GPU is memory a big cache needs
     records = []
     for index in range(args.candidates + 1):
         seed = None if index == 0 else 7000 + index

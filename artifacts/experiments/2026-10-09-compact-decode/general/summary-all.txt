@@ -1,0 +1,16 @@
+run                                            texts differing from generate()          speed-up by chunk  slots (generate -> compact)  mean answer  at limit
+qwen25-05b-countdown-float32                                          0 of 768        64: 1.31  128: 1.36             393216 -> 301389          382       284
+qwen25-05b-gsm8k-float16                                             28 of 768        64: 1.48  128: 1.75             393216 -> 224936          286        28
+qwen25-05b-gsm8k-float32                                              1 of 768        64: 1.72  128: 1.85             393216 -> 226348          288        38
+qwen25-05b-sudoku4-float32                                            0 of 768        64: 1.08  128: 1.08             393216 -> 370849          475       546
+qwen3-06b-countdown-float32-chunks16-32                               0 of 768         16: 1.54  32: 1.59             393216 -> 247062          315       254
+qwen3-06b-gsm8k-bfloat16-chunk64                                     39 of 384                   64: 2.47              172672 -> 65399          166         6
+qwen3-06b-gsm8k-float32-chunks16-32                                   0 of 768         16: 1.74  32: 2.28             275936 -> 128420          164         6
+qwen3-06b-sudoku4-float32                                             0 of 768        64: 1.09  128: 1.21               35328 -> 29248           38         0
+smollm2-360m-countdown-float32                                        0 of 768        64: 1.96  128: 2.07             393216 -> 216062          273       166
+smollm2-360m-gsm8k-float32                                            0 of 768        64: 2.24  128: 2.38             393216 -> 187131          236        64
+smollm2-360m-sudoku4-float32                                          0 of 768        64: 1.57  128: 1.59             393216 -> 257367          324       372
+
+batch-shape sensitivity (texts that differ, summed over the parent and the noisy candidates, 128 questions each):
+sensitivity-qwen25-countdown {'library64 vs compact64': 0, 'library64 vs library128': 0, 'library64 vs compact128': 0, 'compact64 vs library128': 0, 'compact64 vs compact128': 0, 'library128 vs compact128': 0} of 384
+sensitivity-qwen25-gsm8k {'library64 vs compact64': 0, 'library64 vs library128': 1, 'library64 vs compact128': 0, 'compact64 vs library128': 1, 'compact64 vs compact128': 0, 'library128 vs compact128': 1} of 384

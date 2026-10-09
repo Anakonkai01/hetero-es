@@ -1,0 +1,5 @@
+[W1009 18:01:59.157846241 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 232783872 bytes (free: 107544576, total: 16611278848).
+[W1009 18:02:04.663980944 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 270532608 bytes (free: 111738880, total: 16611278848).
+None {'library64 vs compact64': 0, 'library64 vs library128': 0, 'library64 vs compact128': 0, 'compact64 vs library128': 0, 'compact64 vs compact128': 0, 'library128 vs compact128': 0}
+7001 {'library64 vs compact64': 0, 'library64 vs library128': 0, 'library64 vs compact128': 0, 'compact64 vs library128': 0, 'compact64 vs compact128': 0, 'library128 vs compact128': 0}
+7002 {'library64 vs compact64': 0, 'library64 vs library128': 0, 'library64 vs compact128': 0, 'compact64 vs library128': 0, 'compact64 vs compact128': 0, 'library128 vs compact128': 0}
