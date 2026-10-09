@@ -437,6 +437,31 @@ It is a different noise from engine v1: results are not comparable bit for bit. 
 **Restore by arithmetic is not used.** Coming back by `-sigma` is not exact: after 24 candidates 25 percent of the FP16 elements differ from the original (relative L2 1.4e-4, growing like the square root of
 the number of candidates); the snapshot restore costs 0.14 s on the 5070 Ti, which is 3 percent of a candidate of the long workload.
 
+## 17. How the answers are generated: the decode engine, and what equal texts are worth [E for FP32 on three GPUs; an option of the recipe since 09/10/2026, `hf_generate` stays the default]
+
+**The choice.** `Recipe.decode_engine` is `hf_generate` (the library's `generate()`, the default, left out of the recipe document so that no earlier hash changes) or `hf_compact` (`heteroes/eval/compact_decode.py`:
+a greedy decoding loop that removes the answers that have ended from the batch). It is for the long workloads only (`arith16` has its own code and refuses it). It is in the recipe because the two
+can give different texts in a rare tie (below), so every worker of an experiment must use the same one. The constants of `hf_compact` (the fraction of ended rows that triggers a removal, 0.1) are part of the engine: a change of
+one is a new engine name.
+
+**What `hf_compact` reproduces and what it refuses.** Left-padded prompts, the position ids from the attention mask, the logits processors of the model's generation config in greedy mode (only the repetition
+penalty is supported: any other raises `UnsupportedDecode` before anything is decoded), all the end tokens, padding after the end of an answer, the same width of output as `generate()`. A key/value cache that cannot select rows makes it
+go on without removing any (correct, not faster; `stats["compaction_supported"]`).
+
+**Evidence** (`artifacts/experiments/2026-10-09-compact-decode/`, `-rollout-waste/`, `-decode-profile/`; all FP32, greedy, 128 questions, parent and noisy candidates; the AI's own scripts, not reviewed by the owner):
+* On the project's workload (Qwen2.5-0.5B, `cot_l1_q128`) the 5070 Ti, the first 3060 and a second 3060 in another city gave the SAME texts as `generate()` in all 18 comparisons each (parent and 8 candidates, chunks 64 and 128), and the three machines gave the same texts as each other.
+* Other models and tasks (SmolLM2-360M, Qwen2.5-0.5B, Qwen3-0.6B; GSM8K, countdown, 4x4 sudoku; 9 pairs of 768 comparisons each): 0 differing texts in 8 pairs; one pair (Qwen2.5-0.5B on GSM8K) had 1 differing text of 768 (below). Qwen3-0.6B was run at chunks 16 and 32 on GSM8K and countdown because its key/value cache is 9 times bigger and 64 and 128 ran out of memory.
+* Speed: 1.1 to 2.4 times faster than `generate()`, more when the answers are shorter than the limit and unequal in length; the saving is the wasted token slots (at chunk 64, 56 percent of the slots held an answer that had ended). Reading the "ended" flags back to the host less often changed nothing.
+* Half precision: FP16 gave 28 differing texts of 768 and BF16 39 of 384 (Qwen2.5 and Qwen3 on GSM8K): the contract's choice of FP32 (section 15) is kept; `hf_compact` is meant for FP32.
+
+**What equal texts are worth: NOT a guarantee.** Greedy decoding is bit-stable only up to the rounding noise of the arithmetic. On Qwen2.5-0.5B, GSM8K, candidate 7002, question 15, `generate()` itself gives two different texts at chunk 128 and at chunk 64 (and `hf_compact`
+agrees with chunk 64): at generated token 165 the two best tokens ` do` and ` perform` have scores 23.851572 and 23.851578, 5.7e-6 apart (`general/diagnose_flip2.out`). Such a tie is broken differently by any
+change of the batch shape or of the GPU. Measured rate: 1 text in 768 on GSM8K (about 290 tokens per answer), none on the project's short workload and on the other tasks. A flipped token changes everything after it, so the effect on a REWARD depends on the task and
+cannot be inferred from the text; it has to be measured per task. Consequence: with long answers "the same candidate gives the same reward on every worker" is probable, not certain, and two runs of one experiment can end with different weight hashes (replay is not
+affected: it uses the recorded rewards). Ideas, not tried and left to the owner (`TODO.md`, `near-ties`): a margin guard in the decoding loop, a reward-level tolerance per task.
+
+**Open:** not run on the GTX 1660 SUPER (it was down), nor on other architectures (Ada, Blackwell other than the 5070 Ti); vLLM would remove the same waste but its equality of texts across GPUs, the in-place perturbation of the weights and the installation on WSL2/Turing/Blackwell are unchecked.
+
 ## Appendix A — Known deviations of the probes/notebook from this contract
 
 | Where | Deviation | Contract section |
