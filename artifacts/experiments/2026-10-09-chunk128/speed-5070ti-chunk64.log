@@ -1,0 +1,15 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:   0%|          | 1/290 [00:00<03:47,  1.27it/s]Loading weights:  26%|██▌       | 76/290 [00:00<00:01, 110.27it/s]Loading weights:  38%|███▊      | 109/290 [00:01<00:01, 142.89it/s]Loading weights:  48%|████▊     | 140/290 [00:01<00:00, 161.51it/s]Loading weights:  58%|█████▊    | 167/290 [00:01<00:00, 169.40it/s]Loading weights:  66%|██████▌   | 192/290 [00:01<00:00, 181.42it/s]Loading weights:  74%|███████▍  | 216/290 [00:01<00:00, 179.68it/s]Loading weights:  84%|████████▍ | 243/290 [00:01<00:00, 167.07it/s]Loading weights:  93%|█████████▎| 269/290 [00:01<00:00, 181.58it/s]Loading weights: 100%|██████████| 290/290 [00:01<00:00, 152.27it/s]
+chunk probes done, safe chunk 64; partial result in artifacts/experiments/2026-10-09-chunk128/speed-5070ti-chunk64.json.partial
+candidate times done
+{
+ "worker_id": "worker-5070ti",
+ "safe_chunk": 64,
+ "checks": {
+  "noise_selftest": true,
+  "restore_exact": true,
+  "chunk1_reproduces_reference": true
+ },
+ "candidate_seconds_at_chunk_1": 80.47527577400001,
+ "candidate_seconds_at_safe_chunk": 8.012610657000096,
+ "peak_bytes_candidate": 3793448960
+}

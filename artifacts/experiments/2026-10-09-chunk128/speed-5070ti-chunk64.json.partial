@@ -1,0 +1,124 @@
+{
+  "stage": "after_candidate_times",
+  "worker_id": "worker-5070ti",
+  "workload": "cot_l1_q128",
+  "noise_engine": "torch_cuda_philox_chunked_f32_to_f16_v1",
+  "checks": {
+    "noise_selftest": true,
+    "restore_exact": true,
+    "chunk1_reproduces_reference": true
+  },
+  "chunk_probes": [
+    {
+      "chunk": 1,
+      "ran": true,
+      "identical": true,
+      "seconds": 81.33861822749998,
+      "peak_bytes": 3047628800,
+      "error": null,
+      "differing": []
+    },
+    {
+      "chunk": 64,
+      "ran": true,
+      "identical": true,
+      "seconds": 6.6187785109999595,
+      "peak_bytes": 3794469376,
+      "error": null,
+      "differing": []
+    }
+  ],
+  "safe_chunk": 64,
+  "candidate_times": {
+    "1": {
+      "chunk": 1,
+      "raw": [
+        {
+          "perturb": 0.08197294299998248,
+          "rollout": 50.44682594300002,
+          "restore": 0.13803595199999563,
+          "total": 50.666834838
+        },
+        {
+          "perturb": 0.08152943000004598,
+          "rollout": 121.70935885300003,
+          "restore": 0.13775086600003306,
+          "total": 121.9286391490001
+        },
+        {
+          "perturb": 0.08235224999998536,
+          "rollout": 62.28890728600004,
+          "restore": 0.1371544769999673,
+          "total": 62.50841401299999
+        },
+        {
+          "perturb": 0.08145769199995812,
+          "rollout": 80.25657613399994,
+          "restore": 0.13724194800010991,
+          "total": 80.47527577400001
+        },
+        {
+          "perturb": 0.0815991380000014,
+          "rollout": 125.63899318900008,
+          "restore": 0.1370294659998308,
+          "total": 125.85762179299991
+        }
+      ],
+      "samples": 5,
+      "total_median": 80.47527577400001,
+      "total_min": 50.666834838,
+      "total_max": 125.85762179299991,
+      "phases_median": {
+        "perturb": 0.0815991380000014,
+        "rollout": 80.25657613399994,
+        "restore": 0.13724194800010991
+      },
+      "peak_bytes": 3101822464
+    },
+    "64": {
+      "chunk": 64,
+      "raw": [
+        {
+          "perturb": 0.08180003000006764,
+          "rollout": 7.7925056079998285,
+          "restore": 0.13830501900019954,
+          "total": 8.012610657000096
+        },
+        {
+          "perturb": 0.08154040700014775,
+          "rollout": 8.006280623999828,
+          "restore": 0.13812182600008782,
+          "total": 8.225942857000064
+        },
+        {
+          "perturb": 0.08156847899999775,
+          "rollout": 7.48834160399997,
+          "restore": 0.13758085899985417,
+          "total": 7.707490941999822
+        },
+        {
+          "perturb": 0.08144438099998297,
+          "rollout": 6.615927119000162,
+          "restore": 0.14085717299985845,
+          "total": 6.838228673000003
+        },
+        {
+          "perturb": 0.08186385600015456,
+          "rollout": 8.01219799799992,
+          "restore": 0.13864694299991243,
+          "total": 8.232708796999987
+        }
+      ],
+      "samples": 5,
+      "total_median": 8.012610657000096,
+      "total_min": 6.838228673000003,
+      "total_max": 8.232708796999987,
+      "phases_median": {
+        "perturb": 0.08156847899999775,
+        "rollout": 7.7925056079998285,
+        "restore": 0.13830501900019954
+      },
+      "peak_bytes": 3793448960
+    }
+  }
+}

@@ -1,0 +1,195 @@
+{
+  "format": 1,
+  "worker_id": "worker-5070ti",
+  "measured_at_unix": 1791530222.7930279,
+  "measured_at_utc": "2026-10-09T07:17:02Z",
+  "key": {
+    "gpu_name": "NVIDIA GeForce RTX 5070 Ti",
+    "gpu_capability": [
+      12,
+      0
+    ],
+    "gpu_total_memory_bytes": 16611278848,
+    "nvidia_driver": "595.91.07",
+    "torch": "2.13.0+cu132",
+    "torch_cuda": "13.2",
+    "numpy": "2.5.3",
+    "transformers": "5.17.0",
+    "python": "3.12.14",
+    "device": "cuda",
+    "recipe_hash": "252c7c8db62c326c6d589c7b8e039313937e88f52dc166caba84a82b2768f5bf",
+    "schema_hash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+    "workload_hash": "4ea60e526dd535856c6aee15aea8bfb22df99e9df394e8a04635a3f9890abb89"
+  },
+  "key_hash": "9f1b4fdb03bf9d57201278467a5e867580d42c54ea5e55e10f0459c336550e66",
+  "environment": {
+    "hostname": "5070ti",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "python": "3.12.14",
+    "torch": "2.13.0+cu132",
+    "torch_cuda": "13.2",
+    "numpy": "2.5.3",
+    "transformers": "5.17.0",
+    "device": "cuda",
+    "gpu_name": "NVIDIA GeForce RTX 5070 Ti",
+    "gpu_capability": [
+      12,
+      0
+    ],
+    "gpu_total_memory_bytes": 16611278848,
+    "nvidia_driver": "595.91.07"
+  },
+  "code": {
+    "git_commit": "44d1ca289e89e3c5504a76d42d979c6b3d82f6ee",
+    "git_dirty": true
+  },
+  "recipe_hash": "252c7c8db62c326c6d589c7b8e039313937e88f52dc166caba84a82b2768f5bf",
+  "parent_weights_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+  "sigma": 0.001,
+  "checks": {
+    "noise_selftest": true,
+    "restore_exact": true,
+    "chunk1_reproduces_reference": true
+  },
+  "reference_kind": "chunk1_twice_equal",
+  "workload": "cot_l1_q128",
+  "noise_engine": "torch_cuda_philox_chunked_f32_to_f16_v1",
+  "noise_selftest_seconds": 0.04121087300001136,
+  "chunk_probes": [
+    {
+      "chunk": 1,
+      "ran": true,
+      "identical": true,
+      "seconds": 81.33861822749998,
+      "peak_bytes": 3047628800,
+      "error": null,
+      "differing": []
+    },
+    {
+      "chunk": 64,
+      "ran": true,
+      "identical": true,
+      "seconds": 6.6187785109999595,
+      "peak_bytes": 3794469376,
+      "error": null,
+      "differing": []
+    }
+  ],
+  "safe_chunk": 64,
+  "candidate_times": {
+    "1": {
+      "chunk": 1,
+      "raw": [
+        {
+          "perturb": 0.08197294299998248,
+          "rollout": 50.44682594300002,
+          "restore": 0.13803595199999563,
+          "total": 50.666834838
+        },
+        {
+          "perturb": 0.08152943000004598,
+          "rollout": 121.70935885300003,
+          "restore": 0.13775086600003306,
+          "total": 121.9286391490001
+        },
+        {
+          "perturb": 0.08235224999998536,
+          "rollout": 62.28890728600004,
+          "restore": 0.1371544769999673,
+          "total": 62.50841401299999
+        },
+        {
+          "perturb": 0.08145769199995812,
+          "rollout": 80.25657613399994,
+          "restore": 0.13724194800010991,
+          "total": 80.47527577400001
+        },
+        {
+          "perturb": 0.0815991380000014,
+          "rollout": 125.63899318900008,
+          "restore": 0.1370294659998308,
+          "total": 125.85762179299991
+        }
+      ],
+      "samples": 5,
+      "total_median": 80.47527577400001,
+      "total_min": 50.666834838,
+      "total_max": 125.85762179299991,
+      "phases_median": {
+        "perturb": 0.0815991380000014,
+        "rollout": 80.25657613399994,
+        "restore": 0.13724194800010991
+      },
+      "peak_bytes": 3101822464
+    },
+    "64": {
+      "chunk": 64,
+      "raw": [
+        {
+          "perturb": 0.08180003000006764,
+          "rollout": 7.7925056079998285,
+          "restore": 0.13830501900019954,
+          "total": 8.012610657000096
+        },
+        {
+          "perturb": 0.08154040700014775,
+          "rollout": 8.006280623999828,
+          "restore": 0.13812182600008782,
+          "total": 8.225942857000064
+        },
+        {
+          "perturb": 0.08156847899999775,
+          "rollout": 7.48834160399997,
+          "restore": 0.13758085899985417,
+          "total": 7.707490941999822
+        },
+        {
+          "perturb": 0.08144438099998297,
+          "rollout": 6.615927119000162,
+          "restore": 0.14085717299985845,
+          "total": 6.838228673000003
+        },
+        {
+          "perturb": 0.08186385600015456,
+          "rollout": 8.01219799799992,
+          "restore": 0.13864694299991243,
+          "total": 8.232708796999987
+        }
+      ],
+      "samples": 5,
+      "total_median": 8.012610657000096,
+      "total_min": 6.838228673000003,
+      "total_max": 8.232708796999987,
+      "phases_median": {
+        "perturb": 0.08156847899999775,
+        "rollout": 7.7925056079998285,
+        "restore": 0.13830501900019954
+      },
+      "peak_bytes": 3793448960
+    }
+  },
+  "candidate_seconds_at_safe_chunk": 8.012610657000096,
+  "candidate_seconds_at_chunk_1": 80.47527577400001,
+  "peak_bytes_candidate": 3793448960,
+  "sync": null,
+  "update": null,
+  "args": {
+    "model_path": "/home/pc5070ti/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775",
+    "worker_id": "worker-5070ti",
+    "out": "artifacts/experiments/2026-10-09-chunk128/speed-5070ti-chunk64.json",
+    "chunks": "1,64",
+    "candidates": 5,
+    "probe_candidates": 1,
+    "sigma": 0.001,
+    "workload": "cot_l1_q128",
+    "noise_engine": "cuda",
+    "eval_dtype": "float32",
+    "sync_url": null,
+    "sync_sha256": null,
+    "sync_dir": "/home/pc5070ti/.cache/heteroes/profile-sync",
+    "measure_update": false,
+    "update_sizes": "1,2,4,8",
+    "update_repeats": 2,
+    "device": null
+  }
+}

@@ -1,0 +1,3 @@
+10 hash fields in artifacts/experiments/2026-10-07-g7-restore-tradeoff/cudaengine-5070ti.json
+artifacts/experiments/2026-10-08-third-machine-3060/cudaengine-3060.json: equal (10 fields)
+artifacts/experiments/2026-10-09-chunk128/cudaengine-3060b.json: equal (10 fields)
