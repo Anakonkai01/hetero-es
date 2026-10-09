@@ -1,0 +1,6 @@
+chunk 64: calls=2 steps per call=[256, 173] prompt_len=[43, 43] time per call=[3.99, 2.35]
+  answer tokens: mean=94.1 median=81.0 max=256 min=5; answers hitting 256: 1
+  slots used 12041 of 27456 => useful fraction 0.44; ms per step: [15.6, 13.6]
+chunk 128: calls=1 steps per call=[256] prompt_len=[43] time per call=[7.21]
+  answer tokens: mean=94.1 median=81.0 max=256 min=5; answers hitting 256: 1
+  slots used 12041 of 32768 => useful fraction 0.37; ms per step: [28.2]
