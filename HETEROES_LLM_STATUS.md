@@ -12,6 +12,8 @@
 
 Branch `feat/to-90-c1-profile` (from `feat/replay-and-learning-v2`), about 30 commits above it, nothing pushed, no tag, `pyproject.toml` still 0.0.1 (the name agreed for the end of this work is **v0.5.0**: feature-complete, NOT reviewed; the tag is yours to ask for).
 
+**Tests at the end (09/10, `artifacts/experiments/2026-10-09-final-tests`):** 5070 Ti 2087 passed, 4 skipped; 3060 2085 passed, 4 skipped, 2 failed (the FP16 records of 29/09, known); 1660S not run (down).
+
 **Done since the midday of 08/10 (each has an evidence folder with a README that says what it does NOT show):**
 1. `profile_worker.py` profiles any workload and either noise engine (`profile_setup.py`); fails fast and keeps partial results.
 2. **C1 repeated** (`2026-10-08-c1-v2`): forced admission of the 1660S gave +12 percent against a predicted +3.3 (a WRONG decision, published as such); B2 quotas right (+17.8 against +19.7); absolute times over-predicted 26 to 40 percent (the profile's candidate times are 15 to 25 percent above the real ones; cause not isolated); equal weights in all 6 runs.
