@@ -1,0 +1,4 @@
+ K procs  s/condition   gain  same texts as K=1 GPU
+ 1     1         6.26   1.00               True NVIDIA GeForce RTX 5070 Ti
+ 2     2        12.88   0.97               True NVIDIA GeForce RTX 5070 Ti
+ 3     3        19.20   0.98               True NVIDIA GeForce RTX 5070 Ti

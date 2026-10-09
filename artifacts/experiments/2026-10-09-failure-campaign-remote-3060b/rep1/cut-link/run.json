@@ -1,0 +1,10 @@
+{
+  "name": "cut-link",
+  "outcome": "ok",
+  "wall_seconds": 171.09547400474548,
+  "notes": [
+    "packets from anakonkai@10.10.10.2 dropped for 8 s",
+    "packets accepted again"
+  ],
+  "final_weights_sha256": "a2123e795488fd6dd82465e83f5825b0c44c933b1760ad26711052f8a9c3a1c8"
+}

@@ -14,6 +14,7 @@ Conditions (MASTER policy ids; a worker is "fast" = the 5070 Ti, "slow" = the 16
   B0  the fast worker alone, one prompt per generate() call            B1  waves of two, both workers, chunk 1
   Any condition can end in xK (B0x2, B3x2): K worker processes share the fast GPU (default 1).
   B2  quotas by measured speed (largest remainder), both, chunk 1      B3  greedy, both, chunk 1
+  U2  like T2 (5070 Ti + the third machine) but with the tail-aware policy of B4
   B4  greedy that keeps the slow worker away from the end of a generation (starts from the profiles' speeds, then learns)
   H0  the integrated system: the admission of `--prediction` (variant per_worker_chunk) decides who works, each worker uses
       the safe chunk of its profile, dynamic dispatch. If the admission leaves only the fast worker, H0 is "the fast worker alone with
@@ -90,6 +91,11 @@ def plan(condition: str, candidates: int, reference: dict, candidate: dict, pred
         speeds = {**{worker: 1.0 / fast1 for worker in fast}, SLOW: 1.0 / slow1, THIRD: 1.0 / third_seconds}
         quotas = proportional_quotas(candidates, speeds)
         return {"workers": workers, "policy": "proportional", "args": [a for w, q in sorted(quotas.items()) for a in ("--quota", f"{w}={q}")], "quotas": quotas}
+    if base == "U2":                                    # 09/10: T2 with the tail-aware policy (B4 rule), speed priors from the two profiles
+        if third is None:
+            raise ValueError("U2 needs --profile-third")
+        priors = {**{f: fast1 for f in fast}, THIRD: seconds_at(third, chunk)}
+        return {"workers": {**alone, THIRD: chunk}, "policy": "tail", "args": [a for w, seconds in sorted(priors.items()) for a in ("--speed-prior", f"{w}={seconds}")]}
     if base == "H0":
         if k != 1:
             raise ValueError("H0 is defined for one process on the fast GPU")

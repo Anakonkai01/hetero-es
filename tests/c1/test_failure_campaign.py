@@ -80,3 +80,14 @@ def test_a_scenario_that_timed_out_waiting_for_its_own_condition_was_not_exercis
     assert result["exercised"] is False and result["passed"] is False
     late = {"name": "kill-worker", "outcome": "TimeoutError: kill-worker did not finish in 1800 s", "final_weights_sha256": None}
     assert fc.verdict(late, reference)["exercised"] is True              # it was disturbed and then did not finish: a real failure
+
+
+def test_the_disturbed_remote_worker_is_the_1660s_by_default_and_the_third_machine_on_request():
+    import argparse
+    base = dict(remote="anakonkai@10.10.10.2", third="quang@100.99.227.8")
+    worker, peer = fc.remote_worker(argparse.Namespace(remote_worker="slow", **base))
+    assert (worker, peer) == (fc.SLOW, "10.10.10.2")
+    worker, peer = fc.remote_worker(argparse.Namespace(remote_worker="third", **base))
+    assert (worker, peer) == (fc.THIRD, "100.99.227.8")
+    with pytest.raises(ValueError):
+        fc.remote_worker(argparse.Namespace(remote_worker="third", remote="x@y", third=None))

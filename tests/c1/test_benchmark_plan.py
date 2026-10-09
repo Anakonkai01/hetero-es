@@ -202,3 +202,19 @@ def test_the_third_machine_conditions_need_its_profile():
 def test_the_third_machine_runs_at_the_chunk_asked():
     assert three("T3")["workers"][rb.THIRD] == 1
     assert rb.plan("T2", 24, REFERENCE, CANDIDATE, None, 64, THIRD_PROFILE)["workers"] == {rb.FAST: 64, rb.THIRD: 64}
+
+
+def test_u2_is_t2_with_the_tail_policy_and_priors_from_the_two_profiles():
+    result = three("U2")
+    assert result["workers"] == {rb.FAST: 1, rb.THIRD: 1} and result["policy"] == "tail"
+    priors = dict(zip(result["args"][1::2], result["args"][0::2]))
+    assert result["args"][0::2] == ["--speed-prior"] * 2
+    assert sorted(a.split("=")[0] for a in result["args"][1::2]) == sorted([rb.FAST, rb.THIRD])
+    seconds = {a.split("=")[0]: float(a.split("=")[1]) for a in result["args"][1::2]}
+    assert seconds[rb.FAST] == 4.0                       # REFERENCE: 4 s per candidate at chunk 1
+    assert seconds[rb.THIRD] == rb.seconds_at(THIRD_PROFILE, 1) and seconds[rb.THIRD] > seconds[rb.FAST]
+
+
+def test_u2_needs_the_profile_of_the_third_machine():
+    with pytest.raises(ValueError, match="profile-third"):
+        rb.plan("U2", 24, REFERENCE, CANDIDATE, None, 1)

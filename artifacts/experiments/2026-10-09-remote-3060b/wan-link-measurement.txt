@@ -1,0 +1,11 @@
+# WAN link 5070 Ti <-> second 3060 (Tailscale relay), measured 2026-10-09T15:24:55+07:00
+## ping 100.99.227.8 (20 packets)
+--- 100.99.227.8 ping statistics ---
+20 packets transmitted, 20 received, 0% packet loss, time 5712ms
+rtt min/avg/max/mdev = 84.774/94.336/174.882/19.403 ms
+## download 3060->5070 Ti: 60 MB over ssh
+23.30 s
+## upload 5070 Ti->3060: 60 MB over ssh
+22.57 s
+download: 60 MB in 23.3 s = 20.6 Mbit/s; a 988 MB weights file would take 6.4 min (ssh, one TCP stream, includes encryption; not a pure link test)
+upload: 60 MB in 22.57 s = 21.3 Mbit/s; a 988 MB weights file would take 6.2 min (ssh, one TCP stream, includes encryption; not a pure link test)

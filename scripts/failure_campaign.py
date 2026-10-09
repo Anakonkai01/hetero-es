@@ -34,10 +34,19 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from cluster_runner import FAST, REPO, SLOW, Cluster, add_cluster_arguments  # noqa: E402
+from cluster_runner import FAST, REPO, SLOW, THIRD, Cluster, add_cluster_arguments  # noqa: E402
 
 SCENARIOS = ["kill-worker", "pause-worker", "cut-link", "kill-coordinator", "kill-coordinator-mid-update"]
 DEFAULT_SCENARIOS = SCENARIOS[:4]       # the four of G6; the fifth is asked for by name
+
+
+def remote_worker(args) -> tuple[str, str]:
+    """(the id of the worker that is disturbed, the address its packets come from): the 1660S by default, the third machine with --remote-worker third."""
+    if args.remote_worker == "third":
+        if not args.third:
+            raise ValueError("--remote-worker third needs --third")
+        return THIRD, args.third.split("@")[-1]
+    return SLOW, args.remote.split("@")[-1]
 
 
 def open_leases(ledger_path: Path, worker: str) -> int:
@@ -122,8 +131,9 @@ def run_scenario(name: str, args, out: Path, password: str | None) -> dict:
     ledger_path = run_dir / "coordinator" / "ledger.sqlite"
     started = time.time()
     notes: list[str] = []
-    both = {FAST: args.chunk, SLOW: args.chunk}
-    peer, port = args.remote.split("@")[-1], str(args.port)
+    remote_id, peer = remote_worker(args)
+    both = {FAST: args.chunk, remote_id: args.chunk}
+    port = str(args.port)
     drop_rule = ["iptables", "-I", "INPUT", "1", "-s", peer, "-p", "tcp", "--dport", port, "-j", "DROP"]
     undrop_rule = ["iptables", "-D", "INPUT", "-s", peer, "-p", "tcp", "--dport", port, "-j", "DROP"]
     dropped = False
@@ -133,16 +143,16 @@ def run_scenario(name: str, args, out: Path, password: str | None) -> dict:
             cluster.start_worker(worker, chunk)
 
         if name == "kill-worker":
-            wait_until(lambda: open_leases(ledger_path, SLOW) > 0, 600, "the remote worker to hold a candidate")
+            wait_until(lambda: open_leases(ledger_path, remote_id) > 0, 600, "the remote worker to hold a candidate")
             time.sleep(2.0)
             cluster.signal_remote_worker("KILL")
             notes.append("remote worker killed while it held a candidate")
             time.sleep(1.0)
-            cluster.start_worker(SLOW, args.chunk)              # a new process with the same worker id: it must rejoin
+            cluster.start_worker(remote_id, args.chunk)              # a new process with the same worker id: it must rejoin
             notes.append("remote worker started again")
 
         elif name == "pause-worker":
-            wait_until(lambda: open_leases(ledger_path, SLOW) > 0, 600, "the remote worker to hold a candidate")
+            wait_until(lambda: open_leases(ledger_path, remote_id) > 0, 600, "the remote worker to hold a candidate")
             time.sleep(1.0)
             cluster.signal_remote_worker("STOP")
             notes.append(f"remote worker stopped for {args.lease_seconds + 15:.0f} s (the lease is {args.lease_seconds:.0f} s)")
@@ -158,7 +168,7 @@ def run_scenario(name: str, args, out: Path, password: str | None) -> dict:
             time.sleep(args.cut_delay)                          # the download of the new weights (about 9 s) has begun when the packets are dropped
             sudo_run(drop_rule, password)
             dropped = True
-            notes.append(f"packets from {args.remote} dropped for {args.cut_seconds:.0f} s")
+            notes.append(f"packets from {peer} dropped for {args.cut_seconds:.0f} s")
             time.sleep(args.cut_seconds)
             sudo_run(undrop_rule, password)
             dropped = False
@@ -245,6 +255,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--scenarios", default=",".join(DEFAULT_SCENARIOS))
     parser.add_argument("--reference-final", default=None, help="the final weights hash of the undisturbed run (default: run it first)")
     parser.add_argument("--chunk", type=int, default=None, help="prompts per generate() call of every worker (default: 16 for --eval-dtype float32, 1 for float16)")
+    parser.add_argument("--remote-worker", choices=["slow", "third"], default="slow", help="which remote machine is disturbed: slow = the 1660S (--remote), third = --third (a borrowed 3060 over the Internet)")
     parser.add_argument("--cut-seconds", type=float, default=8.0)
     parser.add_argument("--cut-delay", type=float, default=0.0, help="cut-link: seconds after the publication of generation 0 before the packets are dropped (3 s puts the cut in the middle of the download)")
     parser.add_argument("--restart-after", type=float, default=5.0)
