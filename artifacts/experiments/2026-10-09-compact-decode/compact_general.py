@@ -63,7 +63,7 @@ def questions_for(task, count, seed, gsm8k_file):
     raise ValueError(f"unknown task {task}")
 
 
-def compact_generate(model, tokenizer, prompts, processors, eos_ids, pad, max_new_tokens, drop_fraction):
+def compact_generate(model, tokenizer, prompts, processors, eos_ids, pad, max_new_tokens, drop_fraction, check_every=1):
     """Greedy answers with finished rows dropped from the batch. Returns (texts, counters)."""
     import torch
 
@@ -95,9 +95,14 @@ def compact_generate(model, tokenizer, prompts, processors, eos_ids, pad, max_ne
             next_tokens = torch.where(finished, torch.full_like(next_tokens, pad), next_tokens)
             out[rows, step] = next_tokens
             finished = finished | torch.isin(next_tokens, eos_t)
-            if step == max_new_tokens - 1 or bool(finished.all()):
+            if step == max_new_tokens - 1:
                 break
-            if counters["compaction_supported"] and finished.any() and (int(finished.sum()) >= max(1, drop_fraction * rows.shape[0])):
+            finished_count = 0
+            if (step + 1) % check_every == 0:                             # the ONE read of the flags back to the host (check_every = 1: at every step)
+                finished_count = int(finished.sum())
+                if finished_count == rows.shape[0]:
+                    break
+            if counters["compaction_supported"] and finished_count > 0 and (finished_count >= max(1, drop_fraction * rows.shape[0])):
                 keep = torch.nonzero(~finished).squeeze(1)
                 try:
                     cache.batch_select_indices(keep)

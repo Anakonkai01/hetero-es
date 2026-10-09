@@ -1,0 +1,16 @@
+arith chunk 64 check_every 1: min 4.869 s of 3, same texts as k=1: True
+arith chunk 64 check_every 4: min 4.858 s of 3, same texts as k=1: True
+arith chunk 64 check_every 8: min 4.874 s of 3, same texts as k=1: True
+arith chunk 64 check_every 16: min 4.911 s of 3, same texts as k=1: True
+arith chunk 128 check_every 1: min 3.750 s of 3, same texts as k=1: True
+arith chunk 128 check_every 4: min 3.723 s of 3, same texts as k=1: True
+arith chunk 128 check_every 8: min 3.765 s of 3, same texts as k=1: True
+arith chunk 128 check_every 16: min 3.809 s of 3, same texts as k=1: True
+gsm8k chunk 64 check_every 1: min 17.979 s of 3, same texts as k=1: True
+gsm8k chunk 64 check_every 4: min 18.022 s of 3, same texts as k=1: True
+gsm8k chunk 64 check_every 8: min 18.035 s of 3, same texts as k=1: True
+gsm8k chunk 64 check_every 16: min 18.118 s of 3, same texts as k=1: True
+gsm8k chunk 128 check_every 1: min 15.608 s of 3, same texts as k=1: True
+gsm8k chunk 128 check_every 4: min 15.604 s of 3, same texts as k=1: True
+gsm8k chunk 128 check_every 8: min 15.696 s of 3, same texts as k=1: True
+gsm8k chunk 128 check_every 16: min 15.797 s of 3, same texts as k=1: True
