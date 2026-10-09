@@ -14,6 +14,7 @@ import signal
 import subprocess
 import sys
 import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -68,6 +69,10 @@ def wait_health(url: str, seconds: float) -> None:
             with urllib.request.urlopen(url + "/v1/health", timeout=2) as reply:
                 if reply.status == 200:
                     return
+        except urllib.error.HTTPError as error:
+            if error.code == 401:                      # the coordinator answers and wants a token: it is up (the health check carries none)
+                return
+            time.sleep(1)
         except OSError:
             time.sleep(1)
     raise TimeoutError(f"no answer from {url}")
