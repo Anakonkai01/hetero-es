@@ -50,7 +50,7 @@ def main(argv: list[str]) -> int:
                              "4 percent rate, 2 candidates see it 8 percent of the time, 32 see it 73 percent)")
     parser.add_argument("--sigma", type=float, default=1e-3)
     parser.add_argument("--workload", default="arith16", help="the workload of the recipe (heteroes.manifest.WORKLOAD_NAMES)")
-    parser.add_argument("--decode-engine", choices=["hf_generate", "hf_compact"], default="hf_generate", help="how the answers are generated (long workloads only); part of the recipe, so of the profile key")
+    parser.add_argument("--decode-engine", choices=["hf_generate", "hf_compact"], default=None, help="how the answers are generated; default: the compacting decoder on a long workload, generate() on arith16; part of the recipe, so of the profile key")
     parser.add_argument("--noise-engine", choices=["cpu", "cuda"], default="cpu", help="the engine of the recipe; cuda needs --device cuda")
     parser.add_argument("--eval-dtype", choices=["float16", "float32"], default="float32",
                         help="precision of the forward pass of the evaluation (part of the recipe): the chunks are compared and the candidates timed with it")
@@ -114,7 +114,7 @@ def main(argv: list[str]) -> int:
 
     def texts_at(chunk: int) -> list[str]:
         evaluation.refresh()                                       # an FP32 copy takes the weights of the state the model is in
-        return profile_texts(args.workload, evaluation.model, tokenizer, chunk, args.decode_engine)
+        return profile_texts(args.workload, evaluation.model, tokenizer, chunk, recipe.decode_engine)
 
     state = {"restore_ok": True}
 

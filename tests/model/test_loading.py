@@ -181,14 +181,25 @@ def test_a_failing_cuda_self_test_is_an_error_for_a_cuda_recipe(monkeypatch):
         loading.check_recipe_selftest(build_recipe(toy_loaded(), sigma=1e-3, noise_engine="cuda"), "cuda")
 
 
-def test_the_decode_engine_is_a_choice_of_the_recipe_and_the_default_changes_nothing():
+def test_the_decode_engine_is_a_choice_of_the_recipe_and_the_long_workloads_default_to_the_compacting_decoder():
     loaded = toy_loaded()
     default = build_recipe(loaded, sigma=1e-3, workload="cot_l1_q128")
     compact = build_recipe(loaded, sigma=1e-3, workload="cot_l1_q128", decode_engine="hf_compact")
-    assert default.decode_engine == "hf_generate" and compact.decode_engine == "hf_compact"
-    assert compact.hash != default.hash
-    assert build_recipe(loaded, sigma=1e-3, workload="cot_l1_q128", decode_engine="hf_generate").hash == default.hash
+    plain = build_recipe(loaded, sigma=1e-3, workload="cot_l1_q128", decode_engine="hf_generate")
+    assert default.decode_engine == "hf_compact" and default.hash == compact.hash       # new experiments on a long workload use the compacting decoder unless told otherwise
+    assert plain.decode_engine == "hf_generate" and plain.hash != default.hash
+    assert build_recipe(loaded, sigma=1e-3).decode_engine == "hf_generate"             # the 16-prompt workload cannot use it
     with pytest.raises(ValueError):
         build_recipe(loaded, sigma=1e-3, workload="arith16", decode_engine="hf_compact")
     with pytest.raises(ValueError):
         build_recipe(loaded, sigma=1e-3, workload="cot_l1_q128", decode_engine="vllm")
+
+
+def test_the_default_decode_engine_is_a_function_of_the_workload_and_does_not_touch_stored_documents():
+    from heteroes import manifest
+    assert manifest.default_decode_engine("arith16") == "hf_generate"
+    assert all(manifest.default_decode_engine(name) == "hf_compact" for name in manifest.WORKLOAD_NAMES if name != "arith16")
+    # a stored recipe document without the key still means the library's generate(), whatever the default of new recipes is
+    document = build_recipe(toy_loaded(), sigma=1e-3, workload="cot_l1_q128", decode_engine="hf_generate").to_dict()
+    assert "decode_engine" not in document["workload"]
+    assert manifest.Recipe.from_dict(document).decode_engine == "hf_generate"

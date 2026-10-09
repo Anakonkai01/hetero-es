@@ -9,7 +9,7 @@ from pathlib import Path
 
 from heteroes.es.update import DEFAULT_ETA
 from heteroes.eval.workloads import get_workload
-from heteroes.manifest import DEFAULT_EVAL_DTYPE, Recipe, generation_config_sha256
+from heteroes.manifest import DEFAULT_EVAL_DTYPE, Recipe, default_decode_engine, generation_config_sha256
 from heteroes.model.schema import ParameterSchema, build_parameter_schema
 from heteroes.noise.contracts import (CUDA_CALL_ELEMENTS, CUDA_ENGINE_VERSION, DEFAULT_CHUNK_ELEMENTS, ENGINE_VERSION,
                                       EXPECTED_CUDA_NOISE_FINGERPRINT)
@@ -65,7 +65,7 @@ def check_recipe_selftest(recipe: Recipe, device: str) -> float:
 
 def build_recipe(loaded: LoadedModel, sigma: float, chunk_elements: int | None = None, reward_eta: float = DEFAULT_ETA,
                  eval_dtype: str = DEFAULT_EVAL_DTYPE, noise_engine: str = "cpu", workload: str = "arith16",
-                 decode_engine: str = "hf_generate") -> Recipe:
+                 decode_engine: str | None = None) -> Recipe:
     """
     The recipe of an experiment from the loaded model and the choices. `noise_engine` is "cpu" (the canonical engine, `chunk_elements` its chunk,
     default 2**18) or "cuda" (the GPU engine of section 16 of the numerical contract: its call size is part of the engine, there is nothing to choose).
@@ -79,6 +79,8 @@ def build_recipe(loaded: LoadedModel, sigma: float, chunk_elements: int | None =
     else:
         raise ValueError(f"unknown noise engine {noise_engine!r}: 'cpu' or 'cuda'")
     chosen = get_workload(workload)
+    if decode_engine is None:
+        decode_engine = default_decode_engine(chosen.name)        # None: the default of a new experiment (the compacting decoder on the long workloads)
     return Recipe(
         model_id=MODEL_ID,
         model_revision=loaded.revision,

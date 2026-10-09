@@ -51,7 +51,7 @@ def run(args) -> int:
 
     def texts() -> list[str]:
         evaluation.refresh()
-        return profile_texts(args.workload, evaluation.model, tokenizer, args.chunk, args.decode_engine)
+        return profile_texts(args.workload, evaluation.model, tokenizer, args.chunk, recipe.decode_engine)
 
     conditions = []
     for index in range(args.candidates + 1):                      # index 0 is the parent
@@ -107,7 +107,7 @@ def main(argv: list[str]) -> int:
     r.add_argument("--noise-engine", choices=["cpu", "cuda"], default="cuda")
     r.add_argument("--eval-dtype", choices=["float16", "float32"], default="float32")
     r.add_argument("--chunk", type=int, default=128)
-    r.add_argument("--decode-engine", choices=["hf_generate", "hf_compact"], default="hf_generate")
+    r.add_argument("--decode-engine", choices=["hf_generate", "hf_compact"], default=None, help="default: the compacting decoder on a long workload")
     r.add_argument("--candidates", type=int, default=8)
     r.add_argument("--sigma", type=float, default=1e-3)
     r.add_argument("--out", required=True)

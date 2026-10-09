@@ -437,10 +437,10 @@ It is a different noise from engine v1: results are not comparable bit for bit. 
 **Restore by arithmetic is not used.** Coming back by `-sigma` is not exact: after 24 candidates 25 percent of the FP16 elements differ from the original (relative L2 1.4e-4, growing like the square root of
 the number of candidates); the snapshot restore costs 0.14 s on the 5070 Ti, which is 3 percent of a candidate of the long workload.
 
-## 17. How the answers are generated: the decode engine, and what equal texts are worth [E for FP32 on three GPUs; an option of the recipe since 09/10/2026, `hf_generate` stays the default]
+## 17. How the answers are generated: the decode engine, and what equal texts are worth [E for FP32 on three GPUs; an option of the recipe since 09/10/2026, `hf_compact` is the default of new experiments on the long workloads since 09/10]
 
-**The choice.** `Recipe.decode_engine` is `hf_generate` (the library's `generate()`, the default, left out of the recipe document so that no earlier hash changes) or `hf_compact` (`heteroes/eval/compact_decode.py`:
-a greedy decoding loop that removes the answers that have ended from the batch). It is for the long workloads only (`arith16` has its own code and refuses it). It is in the recipe because the two
+**The choice.** `Recipe.decode_engine` is `hf_generate` (the library's `generate()`; what a recipe DOCUMENT without the key means, so no earlier hash or document changes meaning) or `hf_compact` (`heteroes/eval/compact_decode.py`:
+a greedy decoding loop that removes the answers that have ended from the batch). It is for the long workloads only (`arith16` has its own code and refuses it). **Since 09/10 a NEW experiment on a long workload uses `hf_compact` unless told otherwise** (the owner's decision; `default_decode_engine` in `manifest.py`, applied by `build_recipe` and the `--decode-engine` options, which default to "choose from the workload"); `arith16` keeps `hf_generate`. The speed profiles measured before this change (`profile_worker.py` on `hf_generate`, for example `2026-10-08-c1-v2/`) describe the OLD engine: a candidate takes about 40 percent less time with `hf_compact`, so the admission and cluster predictions need profiles measured again. It is in the recipe because the two
 can give different texts in a rare tie (below), so every worker of an experiment must use the same one. The constants of `hf_compact` (the fraction of ended rows that triggers a removal, 0.1) are part of the engine: a change of
 one is a new engine name.
 
