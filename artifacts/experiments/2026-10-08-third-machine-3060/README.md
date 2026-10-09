@@ -1,6 +1,6 @@
 # Third machine: RTX 3060 12 GB (Windows 11 + WSL2 Ubuntu 26.04), borrowed on 08/10/2026
 
-Written by the AI, **not reviewed by the owner**. Status: IN PROGRESS (the profile and the three-machine runs are not done yet; this README is updated when they are).
+Written by the AI, **not reviewed by the owner**. Status: the numerical checks, the profile, the measured synchronization and the two-machine runs with the 3060 are done; the run with all three machines is not (the 1660S went down), see `../2026-10-09-three-machines/README.md`.
 
 ## The machine
 RTX 3060 (Ampere, sm_86), driver 615.78 (Windows side, CUDA 13.4), WSL2 kernel 6.6.87, Ubuntu 26.04.1, Python 3.14.4 (the same as the 1660S), 31 GB RAM. Reached over SSH through Tailscale (`desktop-qp0nta7`). `machine-3060.txt`, `pip-freeze-3060.txt`.
@@ -19,6 +19,11 @@ Software: `torch 2.13.0+cu132`, `transformers 5.17.0`, `numpy 2.5.3` (as the 507
 | FP16 | 1660S | 36 (30%) | 1 | 40 (2.1%) |
 
 So the 3060 agrees bit for bit on the noise engine and on every FP32 answer of this sweep, and disagrees at FP16 at about the rate that the two other GPUs disagree with each other (33 of 120 candidates in G6).
+
+## Later results (details in `../2026-10-09-three-machines/README.md`)
+* **Profile** (`profile-3060-l1q128-cuda.json`, same rigor as the other two: 8 probe candidates, chunks 1 and 64, 3 timed candidates, update cost): safe chunk 64 (all probes identical to chunk 1), 20.7 s per candidate at chunk 64 (5070 Ti 8.0, 1660S 35.3 in their profiles), update 0.186 s per candidate.
+* **Synchronization over the wifi through Tailscale** (`sync-3060-through-tailscale-wifi.json`): 285 s for the 1 GB (3.49 MB/s, round trip 9 ms), against 10 s for the 1660S on the cable.
+* **With the 5070 Ti, N = 24:** by replay the 3060 catches up in 6 s and the cluster is 1.29 times faster than the 5070 Ti alone (predicted 1.28); by download it contributes almost nothing; same final weights as the single-machine run in all valid runs.
 
 ## What this does NOT show (yet)
 Only 120 candidates and one 16-prompt workload were swept on the 3060; the long workload `cot_l1_q128` at chunk 64 has not been compared across the three machines until the three-machine benchmark has run; no timing result yet; WSL2 (a Linux kernel in a Windows host) is one platform, native Windows was not tried; the software of the 3060 is not byte-identical to the others (NumPy patch version, Python minor version equal to the 1660S only).
