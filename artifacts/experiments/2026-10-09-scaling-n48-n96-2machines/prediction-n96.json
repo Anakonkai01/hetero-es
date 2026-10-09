@@ -1,0 +1,92 @@
+{
+  "written_at_unix": 1791510869.8468554,
+  "written_at_utc": "2026-10-09T01:54:29Z",
+  "code": {
+    "git_commit": "31d85c1c1653f3487185f745aca964b2a32fa3a6",
+    "git_dirty": true
+  },
+  "inputs": {
+    "workers": [
+      "artifacts/experiments/2026-10-08-c1-v2/profile-5070ti-l1q128-cuda.json",
+      "artifacts/experiments/2026-10-08-third-machine-3060/profile-3060-l1q128-cuda-with-sync.json:replay"
+    ],
+    "sync_for": [],
+    "candidates": 96,
+    "chunk": 64,
+    "delta_fraction": 0.05
+  },
+  "catch_up_seconds": {
+    "worker-5070ti": 0.0,
+    "worker-3060": 18.691091623705532
+  },
+  "predictions": {
+    "worker-5070ti": {
+      "B3_GREEDY_DYNAMIC": {
+        "policy": "B3_GREEDY_DYNAMIC",
+        "workers": [
+          "worker-5070ti"
+        ],
+        "candidates_seconds": 769.953797376249,
+        "jobs": {
+          "worker-5070ti": 96
+        },
+        "update_seconds": 7.036339020509141,
+        "publish_seconds": 0.6064895809977315,
+        "total_seconds": 777.5966259777558,
+        "cluster_benefit_against_local_alone": 1.0,
+        "admit_by_the_threshold": false
+      },
+      "B2_STATIC_PROPORTIONAL": {
+        "policy": "B2_STATIC_PROPORTIONAL",
+        "workers": [
+          "worker-5070ti"
+        ],
+        "candidates_seconds": 769.953797376249,
+        "jobs": {
+          "worker-5070ti": 96
+        },
+        "update_seconds": 7.036339020509141,
+        "publish_seconds": 0.6064895809977315,
+        "total_seconds": 777.5966259777558,
+        "cluster_benefit_against_local_alone": 1.0,
+        "admit_by_the_threshold": false
+      }
+    },
+    "worker-5070ti+worker-3060": {
+      "B3_GREEDY_DYNAMIC": {
+        "policy": "B3_GREEDY_DYNAMIC",
+        "workers": [
+          "worker-5070ti",
+          "worker-3060"
+        ],
+        "candidates_seconds": 561.4246439201816,
+        "jobs": {
+          "worker-5070ti": 70,
+          "worker-3060": 26
+        },
+        "update_seconds": 7.036339020509141,
+        "publish_seconds": 0.6064895809977315,
+        "total_seconds": 569.0674725216884,
+        "cluster_benefit_against_local_alone": 1.3664401209438657,
+        "admit_by_the_threshold": true
+      },
+      "B2_STATIC_PROPORTIONAL": {
+        "policy": "B2_STATIC_PROPORTIONAL",
+        "workers": [
+          "worker-5070ti",
+          "worker-3060"
+        ],
+        "candidates_seconds": 576.431642962695,
+        "jobs": {
+          "worker-5070ti": 69,
+          "worker-3060": 27
+        },
+        "update_seconds": 7.036339020509141,
+        "publish_seconds": 0.6064895809977315,
+        "total_seconds": 584.0744715642019,
+        "cluster_benefit_against_local_alone": 1.3313313007762262,
+        "admit_by_the_threshold": true
+      }
+    }
+  }
+}
