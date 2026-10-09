@@ -144,6 +144,7 @@ Theo luật viết trước, nhãn là "không có bằng chứng cải thiện 
 ## 9. Giới hạn và những điều báo cáo này không chứng minh
 
 - **Phần cứng:** một cặp GPU, một mô hình (0,5B), một bộ phần mềm. "Không đồng nhất" ở đây là một ca nghiên cứu, không phải kết luận chung về mọi cụm.
+- **Số học giữa các thiết bị là kết quả đo, không phải bảo đảm:** tài liệu cuBLAS chỉ bảo đảm kết quả giống từng bit cho cùng bản toolkit, cùng kiến trúc GPU và cùng số SM, và không nói gì về kích thước batch hay hình dạng ma trận; tài liệu và diễn đàn PyTorch cũng không bảo đảm giữa các batch size khác nhau. Việc ba GPU khác kiến trúc cho cùng kết quả ở chunk 64, FP32 là điều đã đo trên workload này; mỗi loại GPU mới và mỗi chunk mới phải qua phép kiểm riêng.
 - **Hiệu năng:** tăng tốc 1,19 lần nhờ máy thứ hai, trần 1,23; với N = 24, 3 lần chạy mỗi ô. Chưa thử N = 48 hoặc 96, chưa có chunk riêng cho từng worker, chưa tối ưu vòng giải mã (KV cache tĩnh, CUDA graphs, vLLM).
 - **Học:** chưa có bằng chứng ES cải thiện độ chính xác tính toán trên tập held-out sau khi loại ảnh hưởng của giới hạn token (xem mục 7 và 8: mức tăng chủ yếu là đổi cách trả lời). Không so sánh với GRPO hay thuật toán khác.
 - **Replay:** đã tích hợp vào worker (08/10) và chạy thật trên hai máy; replay chỉ thắng trên đường chậm; chưa đo đồng bộ delta nén; `--replay-verify-every` lớn hơn 1 mới kiểm bằng mô hình nhỏ.
