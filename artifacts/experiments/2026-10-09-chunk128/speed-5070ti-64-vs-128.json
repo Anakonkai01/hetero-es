@@ -1,0 +1,204 @@
+{
+  "format": 1,
+  "worker_id": "worker-5070ti",
+  "measured_at_unix": 1791526787.412426,
+  "measured_at_utc": "2026-10-09T06:19:47Z",
+  "key": {
+    "gpu_name": "NVIDIA GeForce RTX 5070 Ti",
+    "gpu_capability": [
+      12,
+      0
+    ],
+    "gpu_total_memory_bytes": 16611278848,
+    "nvidia_driver": "595.91.07",
+    "torch": "2.13.0+cu132",
+    "torch_cuda": "13.2",
+    "numpy": "2.5.3",
+    "transformers": "5.17.0",
+    "python": "3.12.14",
+    "device": "cuda",
+    "recipe_hash": "252c7c8db62c326c6d589c7b8e039313937e88f52dc166caba84a82b2768f5bf",
+    "schema_hash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+    "workload_hash": "4ea60e526dd535856c6aee15aea8bfb22df99e9df394e8a04635a3f9890abb89"
+  },
+  "key_hash": "9f1b4fdb03bf9d57201278467a5e867580d42c54ea5e55e10f0459c336550e66",
+  "environment": {
+    "hostname": "5070ti",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "python": "3.12.14",
+    "torch": "2.13.0+cu132",
+    "torch_cuda": "13.2",
+    "numpy": "2.5.3",
+    "transformers": "5.17.0",
+    "device": "cuda",
+    "gpu_name": "NVIDIA GeForce RTX 5070 Ti",
+    "gpu_capability": [
+      12,
+      0
+    ],
+    "gpu_total_memory_bytes": 16611278848,
+    "nvidia_driver": "595.91.07"
+  },
+  "code": {
+    "git_commit": "56cd019301b7ba7ef0df8e62501eaea50451e25f",
+    "git_dirty": true
+  },
+  "recipe_hash": "252c7c8db62c326c6d589c7b8e039313937e88f52dc166caba84a82b2768f5bf",
+  "parent_weights_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+  "sigma": 0.001,
+  "checks": {
+    "noise_selftest": true,
+    "restore_exact": true,
+    "chunk1_reproduces_reference": true
+  },
+  "reference_kind": "chunk1_twice_equal",
+  "workload": "cot_l1_q128",
+  "noise_engine": "torch_cuda_philox_chunked_f32_to_f16_v1",
+  "noise_selftest_seconds": 0.015014344000519486,
+  "chunk_probes": [
+    {
+      "chunk": 1,
+      "ran": true,
+      "identical": true,
+      "seconds": 81.67421888549961,
+      "peak_bytes": 3047628800,
+      "error": null,
+      "differing": []
+    },
+    {
+      "chunk": 64,
+      "ran": true,
+      "identical": true,
+      "seconds": 6.611913975000334,
+      "peak_bytes": 3794469376,
+      "error": null,
+      "differing": []
+    },
+    {
+      "chunk": 128,
+      "ran": true,
+      "identical": true,
+      "seconds": 7.220045987000049,
+      "peak_bytes": 4546240512,
+      "error": null,
+      "differing": []
+    }
+  ],
+  "safe_chunk": 128,
+  "candidate_times": {
+    "1": {
+      "chunk": 1,
+      "raw": [
+        {
+          "perturb": 0.08100911799920141,
+          "rollout": 50.87060920100066,
+          "restore": 0.13768456099933246,
+          "total": 51.089302879999195
+        },
+        {
+          "perturb": 0.08118472899968765,
+          "rollout": 122.44016355599979,
+          "restore": 0.13761054600036005,
+          "total": 122.65895883099984
+        },
+        {
+          "perturb": 0.08160139400024491,
+          "rollout": 62.70567987100003,
+          "restore": 0.13836909299971012,
+          "total": 62.925650357999984
+        },
+        {
+          "perturb": 0.0809249659996567,
+          "rollout": 80.92951817100038,
+          "restore": 0.13729478499953984,
+          "total": 81.14773792199958
+        },
+        {
+          "perturb": 0.08104843799992523,
+          "rollout": 126.34216490200015,
+          "restore": 0.13730644800034497,
+          "total": 126.56051978800042
+        }
+      ],
+      "samples": 5,
+      "total_median": 81.14773792199958,
+      "total_min": 51.089302879999195,
+      "total_max": 126.56051978800042,
+      "phases_median": {
+        "perturb": 0.08104843799992523,
+        "rollout": 80.92951817100038,
+        "restore": 0.13761054600036005
+      },
+      "peak_bytes": 3101822464
+    },
+    "128": {
+      "chunk": 128,
+      "raw": [
+        {
+          "perturb": 0.08174982299988187,
+          "rollout": 7.2180954739997105,
+          "restore": 0.13729424700068193,
+          "total": 7.437139544000274
+        },
+        {
+          "perturb": 0.08261034899987862,
+          "rollout": 7.224186745999759,
+          "restore": 0.13930083800005377,
+          "total": 7.446097932999692
+        },
+        {
+          "perturb": 0.08094020299995464,
+          "rollout": 7.225418630999229,
+          "restore": 0.13709226200080593,
+          "total": 7.44345109599999
+        },
+        {
+          "perturb": 0.08062428000084765,
+          "rollout": 7.226417552999919,
+          "restore": 0.1377983630000017,
+          "total": 7.444840196000769
+        },
+        {
+          "perturb": 0.08123928700024408,
+          "rollout": 7.224787985000148,
+          "restore": 0.1371661180000956,
+          "total": 7.443193390000488
+        }
+      ],
+      "samples": 5,
+      "total_median": 7.44345109599999,
+      "total_min": 7.437139544000274,
+      "total_max": 7.446097932999692,
+      "phases_median": {
+        "perturb": 0.08123928700024408,
+        "rollout": 7.224787985000148,
+        "restore": 0.13729424700068193
+      },
+      "peak_bytes": 4543815680
+    }
+  },
+  "candidate_seconds_at_safe_chunk": 7.44345109599999,
+  "candidate_seconds_at_chunk_1": 81.14773792199958,
+  "peak_bytes_candidate": 4543815680,
+  "sync": null,
+  "update": null,
+  "args": {
+    "model_path": "/home/pc5070ti/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775",
+    "worker_id": "worker-5070ti",
+    "out": "artifacts/experiments/2026-10-09-chunk128/speed-5070ti-64-vs-128.json",
+    "chunks": "1,64,128",
+    "candidates": 5,
+    "probe_candidates": 1,
+    "sigma": 0.001,
+    "workload": "cot_l1_q128",
+    "noise_engine": "cuda",
+    "eval_dtype": "float32",
+    "sync_url": null,
+    "sync_sha256": null,
+    "sync_dir": "/home/pc5070ti/.cache/heteroes/profile-sync",
+    "measure_update": false,
+    "update_sizes": "1,2,4,8",
+    "update_repeats": 2,
+    "device": null
+  }
+}

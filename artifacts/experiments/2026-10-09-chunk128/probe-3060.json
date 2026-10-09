@@ -1,0 +1,156 @@
+{
+  "format": 1,
+  "worker_id": "worker-3060",
+  "measured_at_unix": 1791525674.553789,
+  "measured_at_utc": "2026-10-09T06:01:14Z",
+  "key": {
+    "gpu_name": "NVIDIA GeForce RTX 3060",
+    "gpu_capability": [
+      8,
+      6
+    ],
+    "gpu_total_memory_bytes": 12884377600,
+    "nvidia_driver": null,
+    "torch": "2.13.0+cu132",
+    "torch_cuda": "13.2",
+    "numpy": "2.5.3",
+    "transformers": "5.17.0",
+    "python": "3.14.4",
+    "device": "cuda",
+    "recipe_hash": "252c7c8db62c326c6d589c7b8e039313937e88f52dc166caba84a82b2768f5bf",
+    "schema_hash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+    "workload_hash": "4ea60e526dd535856c6aee15aea8bfb22df99e9df394e8a04635a3f9890abb89"
+  },
+  "key_hash": "8176ebe3ed2f052cd40401d27af1dbfa27e10ca18b5fb9b0a56d4c8224db3e7a",
+  "environment": {
+    "hostname": "DESKTOP-QP0NTA7",
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "python": "3.14.4",
+    "torch": "2.13.0+cu132",
+    "torch_cuda": "13.2",
+    "numpy": "2.5.3",
+    "transformers": "5.17.0",
+    "device": "cuda",
+    "gpu_name": "NVIDIA GeForce RTX 3060",
+    "gpu_capability": [
+      8,
+      6
+    ],
+    "gpu_total_memory_bytes": 12884377600,
+    "nvidia_driver": null
+  },
+  "code": {
+    "git_commit": "56cd019301b7ba7ef0df8e62501eaea50451e25f",
+    "git_dirty": false
+  },
+  "recipe_hash": "252c7c8db62c326c6d589c7b8e039313937e88f52dc166caba84a82b2768f5bf",
+  "parent_weights_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+  "sigma": 0.001,
+  "checks": {
+    "noise_selftest": true,
+    "restore_exact": true,
+    "chunk1_reproduces_reference": true
+  },
+  "reference_kind": "chunk1_twice_equal",
+  "workload": "cot_l1_q128",
+  "noise_engine": "torch_cuda_philox_chunked_f32_to_f16_v1",
+  "noise_selftest_seconds": 0.03697084700252162,
+  "chunk_probes": [
+    {
+      "chunk": 1,
+      "ran": true,
+      "identical": true,
+      "seconds": 203.09565793911074,
+      "peak_bytes": 3022594560,
+      "error": null,
+      "differing": []
+    },
+    {
+      "chunk": 64,
+      "ran": true,
+      "identical": true,
+      "seconds": 16.99620902811229,
+      "peak_bytes": 3770314752,
+      "error": null,
+      "differing": []
+    },
+    {
+      "chunk": 128,
+      "ran": true,
+      "identical": true,
+      "seconds": 15.847805536000427,
+      "peak_bytes": 4522057728,
+      "error": null,
+      "differing": []
+    }
+  ],
+  "safe_chunk": 128,
+  "candidate_times": {
+    "1": {
+      "chunk": 1,
+      "raw": [
+        {
+          "perturb": 0.2137108770039049,
+          "rollout": 134.04915382400213,
+          "restore": 0.23848222099331906,
+          "total": 134.50134692199936
+        }
+      ],
+      "samples": 1,
+      "total_median": 134.50134692199936,
+      "total_min": 134.50134692199936,
+      "total_max": 134.50134692199936,
+      "phases_median": {
+        "perturb": 0.2137108770039049,
+        "rollout": 134.04915382400213,
+        "restore": 0.23848222099331906
+      },
+      "peak_bytes": 3071544832
+    },
+    "128": {
+      "chunk": 128,
+      "raw": [
+        {
+          "perturb": 0.2867126960045425,
+          "rollout": 18.0567643760005,
+          "restore": 0.2367304309955216,
+          "total": 18.580207503000565
+        }
+      ],
+      "samples": 1,
+      "total_median": 18.580207503000565,
+      "total_min": 18.580207503000565,
+      "total_max": 18.580207503000565,
+      "phases_median": {
+        "perturb": 0.2867126960045425,
+        "rollout": 18.0567643760005,
+        "restore": 0.2367304309955216
+      },
+      "peak_bytes": 4514684928
+    }
+  },
+  "candidate_seconds_at_safe_chunk": 18.580207503000565,
+  "candidate_seconds_at_chunk_1": 134.50134692199936,
+  "peak_bytes_candidate": 4514684928,
+  "sync": null,
+  "update": null,
+  "args": {
+    "model_path": "/home/thao_nguyen/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775",
+    "worker_id": "worker-3060",
+    "out": "/tmp/c128/probe-3060.json",
+    "chunks": "1,64,128",
+    "candidates": 1,
+    "probe_candidates": 8,
+    "sigma": 0.001,
+    "workload": "cot_l1_q128",
+    "noise_engine": "cuda",
+    "eval_dtype": "float32",
+    "sync_url": null,
+    "sync_sha256": null,
+    "sync_dir": "/home/thao_nguyen/.cache/heteroes/profile-sync",
+    "measure_update": false,
+    "update_sizes": "1,2,4,8",
+    "update_repeats": 2,
+    "device": null
+  }
+}
