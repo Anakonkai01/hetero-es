@@ -1,1 +1,27 @@
 === n24-B0-r1: {'worker-5070ti': 64} greedy
+    ok in 497 s
+=== n24-B3-r1: {'worker-5070ti': 64, 'worker-1660s': 64} greedy
+    ok in 444 s
+=== n24-T2-r1: {'worker-5070ti': 64, 'worker-3060': 64} greedy
+    ok in 388 s
+=== n24-T3-r1: {'worker-5070ti': 64, 'worker-1660s': 64, 'worker-3060': 64} greedy
+ssh: connect to host 10.10.10.2 port 22: No route to host
+scp: Connection closed
+ssh: connect to host 10.10.10.2 port 22: No route to host
+    worker did not start: worker-1660s in 390 s
+=== n24-B0-r2: {'worker-5070ti': 64} greedy
+    ok in 499 s
+=== n24-B3-r2: {'worker-5070ti': 64, 'worker-1660s': 64} greedy
+ssh: connect to host 10.10.10.2 port 22: No route to host
+scp: Connection closed
+ssh: connect to host 10.10.10.2 port 22: No route to host
+    worker did not start: worker-1660s in 506 s
+=== n24-T2-r2: {'worker-5070ti': 64, 'worker-3060': 64} greedy
+    ok in 402 s
+=== n24-T3-r2: {'worker-5070ti': 64, 'worker-1660s': 64, 'worker-3060': 64} greedy
+ssh: connect to host 10.10.10.2 port 22: No route to host
+scp: Connection closed
+ssh: connect to host 10.10.10.2 port 22: No route to host
+    worker did not start: worker-1660s in 392 s
+=== n24-T2-r1: {'worker-5070ti': 64, 'worker-3060': 64} greedy
+    ok in 574 s

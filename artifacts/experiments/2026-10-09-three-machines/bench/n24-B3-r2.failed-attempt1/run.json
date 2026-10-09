@@ -1,0 +1,13 @@
+{
+  "name": "n24-B3-r2",
+  "outcome": "worker did not start: worker-1660s",
+  "wall_seconds": 506.40225172042847,
+  "spec": {
+    "workers": {
+      "worker-5070ti": 64,
+      "worker-1660s": 64
+    },
+    "policy": "greedy",
+    "args": []
+  }
+}

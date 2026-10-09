@@ -1,0 +1,14 @@
+skip n24-B0-r1: it ran
+skip n24-B3-r1: it ran
+skip n24-T2-r1: it ran
+n24-T3-r1: a failed attempt exists, set aside as n24-T3-r1.failed-attempt2
+=== n24-T3-r1: {'worker-5070ti': 64, 'worker-1660s': 64, 'worker-3060': 64} greedy
+ssh: connect to host 10.10.10.2 port 22: No route to host
+scp: Connection closed
+ssh: connect to host 10.10.10.2 port 22: No route to host
+    worker did not start: worker-1660s in 401 s
+skip n24-B0-r2: it ran
+n24-B3-r2: a failed attempt exists, set aside as n24-B3-r2.failed-attempt2
+=== n24-B3-r2: {'worker-5070ti': 64, 'worker-1660s': 64} greedy
+Terminated                 PYTHONPATH=src $PY scripts/run_benchmark.py --out-dir $D/bench --repeats 2 --conditions B0,B3,T2,T3 $COMMON --third-replay auto --third-replay-profile /tmp/profile-3060-with-sync.json
+skip n24-T2-r1: it ran
