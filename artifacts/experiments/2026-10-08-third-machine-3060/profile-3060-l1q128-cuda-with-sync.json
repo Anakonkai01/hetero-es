@@ -1,0 +1,256 @@
+{
+  "format": 1,
+  "worker_id": "worker-3060",
+  "measured_at_unix": 1791472603.271771,
+  "measured_at_utc": "2026-10-08T15:16:43Z",
+  "key": {
+    "gpu_name": "NVIDIA GeForce RTX 3060",
+    "gpu_capability": [
+      8,
+      6
+    ],
+    "gpu_total_memory_bytes": 12884377600,
+    "nvidia_driver": null,
+    "torch": "2.13.0+cu132",
+    "torch_cuda": "13.2",
+    "numpy": "2.5.3",
+    "transformers": "5.17.0",
+    "python": "3.14.4",
+    "device": "cuda",
+    "recipe_hash": "252c7c8db62c326c6d589c7b8e039313937e88f52dc166caba84a82b2768f5bf",
+    "schema_hash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+    "workload_hash": "4ea60e526dd535856c6aee15aea8bfb22df99e9df394e8a04635a3f9890abb89"
+  },
+  "key_hash": "8176ebe3ed2f052cd40401d27af1dbfa27e10ca18b5fb9b0a56d4c8224db3e7a",
+  "environment": {
+    "hostname": "DESKTOP-QP0NTA7",
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "python": "3.14.4",
+    "torch": "2.13.0+cu132",
+    "torch_cuda": "13.2",
+    "numpy": "2.5.3",
+    "transformers": "5.17.0",
+    "device": "cuda",
+    "gpu_name": "NVIDIA GeForce RTX 3060",
+    "gpu_capability": [
+      8,
+      6
+    ],
+    "gpu_total_memory_bytes": 12884377600,
+    "nvidia_driver": null
+  },
+  "code": {
+    "git_commit": "d1cd21b1a980a5bc86833f0dac18c700399aabb6",
+    "git_dirty": false
+  },
+  "recipe_hash": "252c7c8db62c326c6d589c7b8e039313937e88f52dc166caba84a82b2768f5bf",
+  "parent_weights_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+  "sigma": 0.001,
+  "checks": {
+    "noise_selftest": true,
+    "restore_exact": true,
+    "chunk1_reproduces_reference": true
+  },
+  "reference_kind": "chunk1_twice_equal",
+  "workload": "cot_l1_q128",
+  "noise_engine": "torch_cuda_philox_chunked_f32_to_f16_v1",
+  "noise_selftest_seconds": 0.026305506999960926,
+  "chunk_probes": [
+    {
+      "chunk": 1,
+      "ran": true,
+      "identical": true,
+      "seconds": 201.8027008598891,
+      "peak_bytes": 3022594560,
+      "error": null,
+      "differing": []
+    },
+    {
+      "chunk": 64,
+      "ran": true,
+      "identical": true,
+      "seconds": 16.878469348333308,
+      "peak_bytes": 3770314752,
+      "error": null,
+      "differing": []
+    }
+  ],
+  "safe_chunk": 64,
+  "candidate_times": {
+    "1": {
+      "chunk": 1,
+      "raw": [
+        {
+          "perturb": 0.2201362469995729,
+          "rollout": 126.36537678900004,
+          "restore": 0.1909419439998601,
+          "total": 126.77645497999947
+        },
+        {
+          "perturb": 0.2158595700002479,
+          "rollout": 340.8015654109995,
+          "restore": 0.1899650470004417,
+          "total": 341.2073900280002
+        },
+        {
+          "perturb": 0.21717650800019328,
+          "rollout": 191.27592243900017,
+          "restore": 0.18871528499948909,
+          "total": 191.68181423199985
+        }
+      ],
+      "samples": 3,
+      "total_median": 191.68181423199985,
+      "total_min": 126.77645497999947,
+      "total_max": 341.2073900280002,
+      "phases_median": {
+        "perturb": 0.21717650800019328,
+        "rollout": 191.27592243900017,
+        "restore": 0.1899650470004417
+      },
+      "peak_bytes": 3071544832
+    },
+    "64": {
+      "chunk": 64,
+      "raw": [
+        {
+          "perturb": 0.22810212900003535,
+          "rollout": 20.191292516999965,
+          "restore": 0.23766281099960906,
+          "total": 20.65705745699961
+        },
+        {
+          "perturb": 0.23572792099912476,
+          "rollout": 20.696422407000682,
+          "restore": 0.23744205799994234,
+          "total": 21.16959238599975
+        },
+        {
+          "perturb": 0.21901163900020038,
+          "rollout": 19.351872383999762,
+          "restore": 0.19001646200013056,
+          "total": 19.760900485000093
+        }
+      ],
+      "samples": 3,
+      "total_median": 20.65705745699961,
+      "total_min": 19.760900485000093,
+      "total_max": 21.16959238599975,
+      "phases_median": {
+        "perturb": 0.22810212900003535,
+        "rollout": 20.191292516999965,
+        "restore": 0.23744205799994234
+      },
+      "peak_bytes": 3765661696
+    }
+  },
+  "candidate_seconds_at_safe_chunk": 20.65705745699961,
+  "candidate_seconds_at_chunk_1": 191.68181423199985,
+  "peak_bytes_candidate": 3765661696,
+  "sync": {
+    "url": "http://100.110.165.40:8766",
+    "rtt_median_seconds": 0.0092243260005489,
+    "rtt_max_seconds": 0.09688345200083859,
+    "weights_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "transfer_seconds": 282.9353895200002,
+    "load_seconds": 0.9276006479994976,
+    "rehash_seconds": 0.4998707779996039,
+    "total_seconds": 284.58904879200054,
+    "weights_bytes": 988065536,
+    "throughput_mb_per_second": 3.4921949413124067,
+    "repeats": [
+      {
+        "transfer_seconds": 282.9353895200002,
+        "load_seconds": 0.9276006479994976,
+        "rehash_seconds": 0.7260586240008706,
+        "total_seconds": 284.58904879200054,
+        "weights_bytes": 988065536,
+        "throughput_mb_per_second": 3.4921949413124067
+      },
+      {
+        "transfer_seconds": 278.59778579500016,
+        "load_seconds": 0.5531275360008294,
+        "rehash_seconds": 0.4549697049988026,
+        "total_seconds": 279.6058830359998,
+        "weights_bytes": 988065536,
+        "throughput_mb_per_second": 3.546566363334436
+      },
+      {
+        "transfer_seconds": 382.7393952429993,
+        "load_seconds": 79.06978355799947,
+        "rehash_seconds": 0.4998707779996039,
+        "total_seconds": 462.3090495789984,
+        "weights_bytes": 988065536,
+        "throughput_mb_per_second": 2.5815621498087022
+      }
+    ]
+  },
+  "update": {
+    "seconds_per_candidate_median": 0.1861356245347491,
+    "fixed_seconds": 0.29915438236967806,
+    "fit": {
+      "fixed_seconds": 0.29915438236967806,
+      "per_candidate_seconds": 0.1861356245347491,
+      "residuals": [
+        -0.0008912589045512176,
+        -0.0006747399390563125,
+        0.0025718129915492938,
+        -0.0010058141479416527
+      ],
+      "max_abs_residual": 0.0025718129915492938,
+      "sizes": [
+        1.0,
+        2.0,
+        4.0,
+        8.0
+      ],
+      "seconds": [
+        0.4843987479998759,
+        0.6707508915001199,
+        1.046268693500224,
+        1.7872335644997293
+      ]
+    },
+    "raw": {
+      "1": [
+        0.48491315899991605,
+        0.4838843369998358
+      ],
+      "2": [
+        0.6704533510001056,
+        0.6710484320001342
+      ],
+      "4": [
+        1.045713221999904,
+        1.0468241650005439
+      ],
+      "8": [
+        1.793175269999665,
+        1.7812918589997935
+      ]
+    },
+    "publish_seconds": 0.9028991479999604,
+    "hash_seconds": 0.522917285999938,
+    "noise_threads": 16
+  },
+  "args": {
+    "model_path": "/home/thao_nguyen/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775",
+    "worker_id": "worker-3060",
+    "out": "/tmp/profile-3060-l1q128-cuda.json",
+    "chunks": "1,64",
+    "candidates": 3,
+    "probe_candidates": 8,
+    "sigma": 0.001,
+    "workload": "cot_l1_q128",
+    "noise_engine": "cuda",
+    "eval_dtype": "float32",
+    "sync_url": null,
+    "sync_sha256": null,
+    "sync_dir": "/home/thao_nguyen/.cache/heteroes/profile-sync",
+    "measure_update": true,
+    "update_sizes": "1,2,4,8",
+    "update_repeats": 2,
+    "device": null
+  },
+  "derived": "profile-3060-l1q128-cuda.json with the sync block of sync-3060-through-tailscale-wifi.json (scripts/measure_sync.py), added by hand: the profile run had no sync server"
+}
