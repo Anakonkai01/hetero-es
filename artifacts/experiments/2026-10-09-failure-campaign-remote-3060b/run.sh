@@ -10,10 +10,10 @@ ENVV="LD_LIBRARY_PATH=/usr/lib/wsl/lib:/usr/lib/wsl/drivers/nv_dispi.inf_amd64_f
 campaign() {
   PYTHONPATH=src $PY scripts/failure_campaign.py --out-dir $D/rep$1 --candidates 8 --generations 3 --chunk 64 --eval-dtype float32 --noise-engine cuda --workload cot_l1_q128 \
     --scenarios kill-worker,pause-worker,cut-link,kill-coordinator,kill-coordinator-mid-update --coordinator-noise-threads 28 --lease-seconds 60 --run-timeout 1800 --local-python $PY \
-    --remote-worker third --bind-host 0.0.0.0 --third quang@100.99.227.8 --third-url http://100.110.165.40:8765 --third-env "$ENVV" --third-replay always
+    --remote-worker third --bind-host 0.0.0.0 --third worker-user-b@100.64.0.2 --third-url http://100.110.165.40:8765 --third-env "$ENVV" --third-replay always
 }
 campaign 1
-ssh quang@100.99.227.8 "cd ~/projects/heteroes/hetero-es && rm -f /tmp/c128/profile-3060b.json* && $ENVV PYTHONPATH=src ~/heteroes-venv/bin/python scripts/profile_worker.py --model-path \$HOME/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775 --worker-id worker-3060b --workload cot_l1_q128 --noise-engine cuda --chunks 1,64,128 --probe-candidates 8 --candidates 3 --out /tmp/c128/profile-3060b.json" > $D/profile-3060b.log 2>&1
-scp -q quang@100.99.227.8:/tmp/c128/profile-3060b.json $D/ 
+ssh worker-user-b@100.64.0.2 "cd ~/projects/heteroes/hetero-es && rm -f /tmp/c128/profile-3060b.json* && $ENVV PYTHONPATH=src ~/heteroes-venv/bin/python scripts/profile_worker.py --model-path \$HOME/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775 --worker-id worker-3060b --workload cot_l1_q128 --noise-engine cuda --chunks 1,64,128 --probe-candidates 8 --candidates 3 --out /tmp/c128/profile-3060b.json" > $D/profile-3060b.log 2>&1
+scp -q worker-user-b@100.64.0.2:/tmp/c128/profile-3060b.json $D/ 
 campaign 2
 campaign 3

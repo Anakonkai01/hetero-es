@@ -16,8 +16,8 @@ while pgrep -f "failure-campaign-x3/[r]un.sh" > /dev/null; do sleep 30; done
 echo "$(date) stage 2: long-workload worker scenarios"
 bash artifacts/experiments/2026-10-08-failure-campaign-long-workers/run.sh > artifacts/experiments/2026-10-08-failure-campaign-long-workers/run.out 2>&1
 echo "$(date) stage 3: synchronization of the 3060"
-for i in $(seq 1 120); do ssh -n thao_nguyen@100.92.20.58 'test -f /tmp/sync-3060-tailscale.json' && break; sleep 30; done
-scp -q thao_nguyen@100.92.20.58:/tmp/sync-3060-tailscale.json $M/sync-3060-through-tailscale-wifi.json || echo "NO SYNC FILE"
+for i in $(seq 1 120); do ssh -n worker-user-a@100.64.0.1 'test -f /tmp/sync-3060-tailscale.json' && break; sleep 30; done
+scp -q worker-user-a@100.64.0.1:/tmp/sync-3060-tailscale.json $M/sync-3060-through-tailscale-wifi.json || echo "NO SYNC FILE"
 pkill -f "scripts/[s]erve_weights" || true
 $PY - <<'PYEOF'
 import json
@@ -28,7 +28,7 @@ profile["sync"] = sync
 profile["derived"] = "profile-3060-l1q128-cuda.json with the sync block of sync-3060-through-tailscale-wifi.json (scripts/measure_sync.py), added by hand: the profile run had no sync server"
 json.dump(profile, open(f"{M}/profile-3060-l1q128-cuda-with-sync.json", "w"), indent=2)
 PYEOF
-scp -q $M/profile-3060-l1q128-cuda-with-sync.json thao_nguyen@100.92.20.58:/tmp/profile-3060-with-sync.json
+scp -q $M/profile-3060-l1q128-cuda-with-sync.json worker-user-a@100.64.0.1:/tmp/profile-3060-with-sync.json
 echo "$(date) stage 4: predictions"
 PYTHONPATH=src $PY scripts/predict_cluster.py --candidates 24 --chunk 64 --out $T/prediction-3060-by-replay.json \
   --worker $C/profile-5070ti-l1q128-cuda.json --worker $C/profile-1660s-l1q128-cuda.json --worker $M/profile-3060-l1q128-cuda-with-sync.json:replay

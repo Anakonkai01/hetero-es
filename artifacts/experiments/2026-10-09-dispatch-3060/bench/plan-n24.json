@@ -20,7 +20,7 @@
     "replay": "never",
     "replay_profile": null,
     "replay_verify_every": 1,
-    "third": "thao_nguyen@100.92.20.58",
+    "third": "worker-user-a@100.64.0.1",
     "third_repo": "~/projects/heteroes/hetero-es",
     "third_python": "~/heteroes-venv/bin/python",
     "third_model_path": "~/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775",

@@ -1,6 +1,6 @@
 # WAN link 5070 Ti <-> second 3060 (Tailscale relay), measured 2026-10-09T15:24:55+07:00
-## ping 100.99.227.8 (20 packets)
---- 100.99.227.8 ping statistics ---
+## ping 100.64.0.2 (20 packets)
+--- 100.64.0.2 ping statistics ---
 20 packets transmitted, 20 received, 0% packet loss, time 5712ms
 rtt min/avg/max/mdev = 84.774/94.336/174.882/19.403 ms
 ## download 3060->5070 Ti: 60 MB over ssh

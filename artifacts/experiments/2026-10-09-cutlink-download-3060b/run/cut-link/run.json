@@ -3,7 +3,7 @@
   "outcome": "ok",
   "wall_seconds": 299.3072211742401,
   "notes": [
-    "packets from 100.99.227.8 dropped for 15 s",
+    "packets from 100.64.0.2 dropped for 15 s",
     "packets accepted again"
   ],
   "final_weights_sha256": "a2123e795488fd6dd82465e83f5825b0c44c933b1760ad26711052f8a9c3a1c8"

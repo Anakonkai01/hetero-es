@@ -7,5 +7,5 @@ D=artifacts/experiments/2026-10-09-cutlink-download-3060b
 PY=$HOME/miniforge3/envs/heteroes-match/bin/python
 PYTHONPATH=src $PY scripts/failure_campaign.py --out-dir $D/run --candidates 8 --generations 3 --chunk 64 --eval-dtype float32 --noise-engine cuda --workload cot_l1_q128 \
   --scenarios cut-link --cut-delay 3 --cut-seconds 15 --reference-final a2123e795488fd6dd82465e83f5825b0c44c933b1760ad26711052f8a9c3a1c8 --coordinator-noise-threads 28 --lease-seconds 60 --run-timeout 2400 --local-python $PY \
-  --remote-worker third --bind-host 0.0.0.0 --third quang@100.99.227.8 --third-url http://100.110.165.40:8765 \
+  --remote-worker third --bind-host 0.0.0.0 --third worker-user-b@100.64.0.2 --third-url http://100.110.165.40:8765 \
   --third-env "LD_LIBRARY_PATH=/usr/lib/wsl/lib:/usr/lib/wsl/drivers/nv_dispi.inf_amd64_feedb8c0271ca811" --third-replay never

@@ -1,1 +1,1 @@
-tunnel: https://floors-reflected-karl-routine.trycloudflare.com
+tunnel: https://example-redacted.trycloudflare.com

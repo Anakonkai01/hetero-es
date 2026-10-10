@@ -234,7 +234,7 @@
     "noise_threads": 16
   },
   "args": {
-    "model_path": "/home/thao_nguyen/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775",
+    "model_path": "/home/worker-user-a/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775",
     "worker_id": "worker-3060",
     "out": "/tmp/profile-3060-l1q128-cuda.json",
     "chunks": "1,64",
@@ -246,7 +246,7 @@
     "eval_dtype": "float32",
     "sync_url": null,
     "sync_sha256": null,
-    "sync_dir": "/home/thao_nguyen/.cache/heteroes/profile-sync",
+    "sync_dir": "/home/worker-user-a/.cache/heteroes/profile-sync",
     "measure_update": true,
     "update_sizes": "1,2,4,8",
     "update_repeats": 2,

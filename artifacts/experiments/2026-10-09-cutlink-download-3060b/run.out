@@ -1,3 +1,3 @@
 reference final weights a2123e795488fd6dd82465e83f5825b0c44c933b1760ad26711052f8a9c3a1c8
 === cut-link
-    ok ['packets from 100.99.227.8 dropped for 15 s', 'packets accepted again'] {'scenario': 'cut-link', 'ended_ok': True, 'same_final_weights_as_reference': True, 'exercised': True, 'passed': True}
+    ok ['packets from 100.64.0.2 dropped for 15 s', 'packets accepted again'] {'scenario': 'cut-link', 'ended_ok': True, 'same_final_weights_as_reference': True, 'exercised': True, 'passed': True}
