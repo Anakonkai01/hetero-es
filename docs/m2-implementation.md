@@ -58,7 +58,7 @@ route; compute remains private Tailscale. Named tunnels/installers remain M3.
 
 ## Verification
 
-- Track A: **2,160 passed, 21 skipped**. Track B: **71 passed**.
+- Track A: **2,161 passed, 21 skipped**. Track B: **71 passed**.
 - Frontend production build/lint and **22 mock behavior groups** pass. Mock
   evidence is separate from the real runtime campaign.
 - Scratch mutations disabling worker identity and assignment epoch checks both
@@ -85,6 +85,10 @@ route; compute remains private Tailscale. Named tunnels/installers remain M3.
   `096b09ec03ab4d8b9ca189596593db3a` was also exported/fully verified for cloud
   import; its SHA remains
   `987541249378460c668ff9865cbcc5823331eddae4bdfbebd87a532977b96c38`.
+
+After the hardware campaign, optional backup-policy corruption/write failures
+and large monitoring projections were regression tested on CPU. These refinements
+were not another GPU campaign; the real cloud acceptance remains required.
 
 The first three-GPU start `a431cce322444bd2b397b73d0c4df67c` was cancelled after
 worker argument and command-transaction bugs. Both were corrected and regression
