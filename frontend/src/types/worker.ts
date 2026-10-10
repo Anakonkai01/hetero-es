@@ -4,6 +4,8 @@ export type AdmissionStatus =
   | "ADMITTED_LIMITED"
   | "ADMITTED";
 
+export type WorkerStatus = "ONLINE" | "OFFLINE";
+
 export interface WorkerProfile {
   gpuName: string;
   vramTotalMb: number;
@@ -15,8 +17,13 @@ export interface WorkerProfile {
 
 export interface Worker {
   workerId: string;
+  ownerUserId?: string;
+  temperatureC?: number;
+  utilizationPercent?: number;
+  activeExperimentName?: string;
+  allocatedTo?: string;
 
-  status: string;
+  status: WorkerStatus;
   admissionStatus: AdmissionStatus;
   admissionReason?: string;
 

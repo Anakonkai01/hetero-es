@@ -1,15 +1,14 @@
 export type ArtifactType =
   | "CONFIG"
-  | "MODEL_MANIFEST"
-  | "DATA_MANIFEST"
-  | "ENVIRONMENT_MANIFEST"
-  | "HARDWARE_MANIFEST"
-  | "EVENTS"
-  | "CANDIDATES"
-  | "WORKERS"
-  | "GENERATIONS"
   | "CHECKPOINT"
-  | "EVALUATION_OUTPUT";
+  | "MANIFEST"
+  | "EVALUATION_RESULTS";
+
+export type ArtifactStatus =
+  | "READY"
+  | "PENDING"
+  | "MISSING"
+  | "NO_DOWNLOAD_URL";
 
 export interface Artifact {
   artifactId: string;
@@ -21,7 +20,9 @@ export interface Artifact {
 
   path: string;
 
-  createdAt: string;
+  status: ArtifactStatus;
+
+  createdAt?: string;
 
   sizeBytes?: number;
 }

@@ -3,8 +3,17 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
+import { AppStateProvider } from "./AppStateProvider";
+import { SessionProvider } from "./SessionProvider";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 interface AppProvidersProps {
   children: ReactNode;
@@ -13,7 +22,7 @@ interface AppProvidersProps {
 export function AppProviders({ children }: AppProvidersProps) {
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
+      <SessionProvider><AppStateProvider>{children}</AppStateProvider></SessionProvider>
     </QueryClientProvider>
   );
 }

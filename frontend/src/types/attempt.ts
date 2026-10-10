@@ -1,3 +1,5 @@
+export type AttemptStatus = "RUNNING" | "SUCCEEDED" | "FAILED";
+
 export interface Attempt {
   experimentId: string;
   generationId: string;
@@ -9,7 +11,7 @@ export interface Attempt {
 
   leaseToken: string;
 
-  status: string;
+  status: AttemptStatus;
 
   startedAt?: string;
   completedAt?: string;

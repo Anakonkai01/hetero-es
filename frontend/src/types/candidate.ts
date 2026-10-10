@@ -9,7 +9,7 @@ export interface Candidate {
   generationId: string;
   candidateId: string;
 
-  attemptId: string;
+  attemptId?: string;
 
   modelVersion: string;
 
@@ -26,4 +26,6 @@ export interface Candidate {
   workerId?: string;
 
   status: CandidateStatus;
+
+  reward?: number;
 }

@@ -1,0 +1,133 @@
+import type { Generation } from "../../types/generation";
+import { EmptyState } from "../common/EmptyState";
+
+const LEFT = 48;
+const WIDTH = 576;
+const TOP = 12;
+const HEIGHT = 212;
+
+function linePath(points: [number, number][]): string {
+  if (points.length === 1) {
+    const [x, y] = points[0];
+    return `M${x.toFixed(1)} ${y.toFixed(1)} L${x.toFixed(1)} ${y.toFixed(1)}`;
+  }
+
+  return points
+    .map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`)
+    .join(" ");
+}
+
+export function RewardChart({ generations }: { generations: Generation[] }) {
+  const maxReward = Math.max(0.6, ...generations.flatMap((g) => [g.rewardMean ?? 0, g.rewardBest ?? 0]));
+  const count = generations.length || 1;
+  const x = (index: number) => LEFT + ((index + 0.5) * WIDTH) / count;
+  const y = (value: number) => TOP + (1 - value / maxReward) * HEIGHT;
+
+  const pointsOf = (key: "rewardMean" | "rewardBest") =>
+    generations.flatMap((generation, index): [number, number][] => {
+      const value = generation[key];
+      return value === undefined ? [] : [[x(index), y(value)]];
+    });
+
+  const meanPoints = pointsOf("rewardMean");
+
+  if (meanPoints.length === 0) {
+    return (
+      <EmptyState
+        title="No reward data yet"
+        message="Reward appears once the first generation has an accepted candidate."
+      />
+    );
+  }
+
+  const gridLines = [12, 82.7, 153.3];
+
+  return (
+    <>
+      <div className="hint" style={{ marginBottom: 6 }}>
+        Vertical axis: reward (score, scale 0 – {maxReward.toFixed(2)}). Horizontal axis:
+        generations in order of creation.
+      </div>
+
+      <svg
+        viewBox="0 0 640 240"
+        width="100%"
+        role="img"
+        aria-label="Chart of mean and best reward per generation"
+        style={{ display: "block" }}
+      >
+        <defs>
+          <marker id="mA" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5">
+            <circle cx="5" cy="5" r="4" fill="#0F766E" />
+          </marker>
+          <marker id="mB" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5">
+            <rect x="1" y="1" width="8" height="8" fill="#1A1D1C" />
+          </marker>
+        </defs>
+
+        {gridLines.map((line) => (
+          <line key={line} x1="48" y1={line} x2="624" y2={line} stroke="#EFEFEA" />
+        ))}
+        <line x1="48" y1="224" x2="624" y2="224" stroke="#B5B9B5" />
+
+        {[
+          [maxReward.toFixed(2), 16],
+          [(maxReward * 2 / 3).toFixed(2), 86.7],
+          [(maxReward / 3).toFixed(2), 157.3],
+          ["0", 228],
+        ].map(([label, ty]) => (
+          <text key={label} x="40" y={ty} textAnchor="end" fontSize="11" fill="#5F6663">
+            {label}
+          </text>
+        ))}
+
+        <path
+          d={linePath(pointsOf("rewardBest"))}
+          fill="none"
+          stroke="#1A1D1C"
+          strokeWidth="1.75"
+          strokeDasharray="6 4"
+          markerStart="url(#mB)"
+          markerMid="url(#mB)"
+          markerEnd="url(#mB)"
+        />
+        <path
+          d={linePath(meanPoints)}
+          fill="none"
+          stroke="#0F766E"
+          strokeWidth="2.5"
+          markerStart="url(#mA)"
+          markerMid="url(#mA)"
+          markerEnd="url(#mA)"
+        />
+      </svg>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${count},minmax(0,1fr))`,
+          padding: "0 2.5% 0 7.5%",
+          textAlign: "center",
+          fontSize: 12,
+          color: "var(--mut)",
+        }}
+      >
+        {generations.map((generation, index) => (
+          <span className="mono" key={generation.generationId}>
+            #{index + 1}
+          </span>
+        ))}
+      </div>
+
+      <div className="legendl">
+        <span>
+          <b style={{ color: "#0F766E" }}>●━</b> Mean reward of the generation
+        </span>
+        <span>
+          <b style={{ color: "#1A1D1C" }}>■╌</b> Best reward of the generation
+        </span>
+        <span>Generations without a reward are not drawn.</span>
+      </div>
+    </>
+  );
+}

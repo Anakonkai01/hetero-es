@@ -1,0 +1,427 @@
+import { ExperimentResults } from "../components/experiments/ExperimentResults";
+import { useState } from "react";
+import { Link, useParams } from "react-router";
+import { isNotFoundError, isServerError } from "../api/client";
+import { useAppState } from "../app/appState";
+import { EmptyState } from "../components/common/EmptyState";
+import { ErrorState } from "../components/common/ErrorState";
+import { ObjectNotFound } from "../components/common/ObjectNotFound";
+import { QueryState } from "../components/common/QueryState";
+import { EventRows } from "../components/events/EventRows";
+import { CancelDialog } from "../components/experiments/CancelDialog";
+import { RewardChart } from "../components/experiments/RewardChart";
+import { ExperimentControls } from "../components/experiments/ExperimentControls";
+import { Badge } from "../components/ui/Badge";
+import { Breadcrumbs } from "../components/ui/Breadcrumbs";
+import { CopyButton } from "../components/ui/CopyButton";
+import { KeyValue } from "../components/ui/KeyValue";
+import { PageHeader, PageHeaderMeta } from "../components/ui/PageHeader";
+import { ProgressBar } from "../components/ui/ProgressBar";
+import { useArtifacts } from "../hooks/useArtifacts";
+import { useEvents } from "../hooks/useEvents";
+import { useExperiment } from "../hooks/useExperiment";
+import { useGenerations } from "../hooks/useGenerations";
+import {
+  formatOptionalDateTime,
+  formatDateTime,
+  formatReward,
+  shortId,
+} from "../lib/format";
+import {
+  ARTIFACT_STATUS,
+  ARTIFACT_TYPE_LABEL,
+  EXPERIMENT_STATUS,
+} from "../lib/labels";
+import { useBackState } from "../lib/navigation";
+
+type Tab = "overview" | "generations" | "config" | "events" | "artifacts";
+
+const tabs: { id: Tab; label: string }[] = [
+  { id: "overview", label: "Overview" },
+  { id: "generations", label: "Generations" },
+  { id: "config", label: "Configuration" },
+  { id: "events", label: "Logs" },
+  { id: "artifacts", label: "Results & saved model" },
+];
+
+export function ExperimentDetailPage() {
+  const { experimentId = "" } = useParams();
+  const { retryRegion } = useAppState();
+  const back = useBackState();
+  const [tab, setTab] = useState<Tab>("overview");
+  const [cancelOpen, setCancelOpen] = useState(false);
+
+  const experimentQuery = useExperiment(experimentId);
+  const generationsQuery = useGenerations(experimentId);
+  const eventsQuery = useEvents();
+  const artifactsQuery = useArtifacts();
+
+  if (isNotFoundError(experimentQuery.error)) {
+    return <ObjectNotFound backTo="/experiments" backLabel="Back to Experiments" />;
+  }
+
+  const experiment = experimentQuery.data;
+  const generations = generationsQuery.data ?? [];
+  const events = (eventsQuery.data ?? []).filter(
+    (e) => e.experimentId === experimentId,
+  );
+  const artifacts = (artifactsQuery.data ?? []).filter(
+    (a) => a.experimentId === experimentId,
+  );
+  const currentGeneration = generations.find(
+    (g) => g.generationId === experiment?.currentGenerationId,
+  );
+  const eventsFailed =
+    eventsQuery.isError && isServerError(eventsQuery.error);
+
+  return (
+    <QueryState
+      isPending={experimentQuery.isPending}
+      isError={experimentQuery.isError}
+      hasData={Boolean(experiment)}
+      title="Could not load the experiment"
+    >
+      {experiment && (
+        <>
+          <Breadcrumbs
+            crumbs={[
+              { label: "Experiments", to: "/experiments" },
+              { label: experiment.name, title: experiment.experimentId },
+            ]}
+          />
+
+          <PageHeader
+            title={experiment.name}
+            meta={
+              <>
+                <PageHeaderMeta>
+                  <Badge info={EXPERIMENT_STATUS[experiment.status]} />
+                  <span className="mono" title={experiment.experimentId}>
+                    {experiment.experimentId}
+                  </span>
+                  <CopyButton
+                    value={experiment.experimentId}
+                    subject="experiment"
+                  />
+                  <span>
+                    {experiment.modelName} ·{" "}
+                    <span className="mono">{experiment.modelVersion}</span>
+                  </span>
+                </PageHeaderMeta>
+                {experiment.cancelRequested &&
+                  experiment.status === "RUNNING" && (
+                    <p style={{ margin: "6px 0 0" }}>
+                      <Badge tone="warn" label="Cancel request received" />{" "}
+                      <span className="hint">
+                        The official status stays{" "}
+                        {EXPERIMENT_STATUS[experiment.status].label} until the
+                        coordinator confirms.
+                      </span>
+                    </p>
+                  )}
+              </>
+            }
+            actions={
+              <>
+                {back && (
+                  <Link className="btn" to={back.backTo}>
+                    ← Back to {back.backLabel}
+                  </Link>
+                )}
+                {!experiment.maxGenerations && ["RUNNING", "QUEUED"].includes(experiment.status) &&
+                  !experiment.cancelRequested && (
+                    <button
+                      type="button"
+                      className="btn dng"
+                      onClick={() => setCancelOpen(true)}
+                    >
+                      Request cancel
+                    </button>
+                  )}
+              </>
+            }
+          />
+
+          <ExperimentResults experiment={experiment} />
+          <ExperimentControls key={`${experiment.experimentId}:${experiment.status}`} experiment={experiment} />
+
+          <div role="tablist" className="tabs" aria-label="Experiment sections">
+            {tabs.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                className={tab === item.id ? "tab on" : "tab"}
+                aria-selected={tab === item.id}
+                onClick={() => setTab(item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+
+          {tab === "overview" && (
+            <>
+              <section className="card" aria-label="Summary">
+                <div className="cb" style={{ paddingTop: 20 }}>
+                  <dl className="kv">
+                    <KeyValue label="Scheduling policy" mono>
+                      {experiment.schedulerPolicy}
+                    </KeyValue>
+                    <KeyValue label="Sync mode" mono>
+                      {experiment.syncMode}
+                    </KeyValue>
+                    <KeyValue label="Created">
+                      {formatDateTime(experiment.createdAt)}
+                    </KeyValue>
+                    <KeyValue label="Started">
+                      {formatOptionalDateTime(experiment.startedAt, "Not available yet")}
+                    </KeyValue>
+                    <KeyValue label="Ended">
+                      {formatOptionalDateTime(experiment.completedAt, "Not ended")}
+                    </KeyValue>
+                    <KeyValue label="Current generation">
+                      {currentGeneration ? (
+                        <Link
+                          className="link mono"
+                          to={`/experiments/${experimentId}/generations/${currentGeneration.generationId}`}
+                        >
+                          {shortId(currentGeneration.generationId)}
+                        </Link>
+                      ) : (
+                        <span className="mut">Not available yet</span>
+                      )}
+                    </KeyValue>
+                  </dl>
+                </div>
+              </section>
+
+              <section className="card" aria-label="Current generation progress">
+                <div className="ch">
+                  <h2>Current generation progress</h2>
+                  <small>
+                    Counts only candidates of the running generation, not the
+                    whole experiment.
+                  </small>
+                </div>
+                <div className="cb">
+                  {currentGeneration ? (
+                    <div className="prog">
+                      <span>
+                        <b
+                          style={{
+                            color: "var(--ink)",
+                            fontSize: 20,
+                            fontWeight: 500,
+                          }}
+                        >
+                          {currentGeneration.committedCandidateCount} /{" "}
+                          {currentGeneration.candidateCount}
+                        </b>{" "}
+                        candidates COMMITTED
+                      </span>
+                      <ProgressBar
+                        large
+                        done={currentGeneration.committedCandidateCount}
+                        total={currentGeneration.candidateCount}
+                      />
+                      <span>
+                        {experiment.maxGenerations ? `Completed generations: ${experiment.completedGenerations ?? 0} / ${experiment.maxGenerations}` : "Legacy fixture: no generation limit recorded."}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="mut">No generation is running.</span>
+                  )}
+                </div>
+              </section>
+
+              <section className="card" aria-label="Reward by generation">
+                <div className="ch">
+                  <h2>Reward by generation</h2>
+                  <small>
+                    Reward is a task score for {experiment.task}, not
+                    accuracy or a percentage.
+                  </small>
+                </div>
+                <div className="cb">
+                  <RewardChart generations={generations} />
+                </div>
+              </section>
+            </>
+          )}
+
+          {tab === "generations" && (
+            <section className="card" aria-label="Generations">
+              {generations.length === 0 ? (
+                <EmptyState
+                  title="No generations yet"
+                  message="The first generation appears after the coordinator confirms the experiment has started."
+                />
+              ) : (
+                <div className="scroll">
+                  <div className="tw" role="table" aria-label="Generations">
+                    <div
+                      className="rowh cols-gen"
+                      role="row"
+                      style={{ marginTop: 8 }}
+                    >
+                      <div className="c" role="columnheader">Generation</div>
+                      <div className="c" role="columnheader">Status</div>
+                      <div className="c" role="columnheader">Model version</div>
+                      <div className="c" role="columnheader">Candidates COMMITTED</div>
+                      <div className="c" role="columnheader">Mean reward</div>
+                      <div className="c" role="columnheader">Best reward</div>
+                      <div className="c" role="columnheader">Started</div>
+                    </div>
+                    {generations.map((generation) => (
+                      <div
+                        className="row cols-gen"
+                        role="row"
+                        key={generation.generationId}
+                      >
+                        <div className="c" role="cell">
+                          <Link
+                            className="link mono"
+                            title={generation.generationId}
+                            to={`/experiments/${experimentId}/generations/${generation.generationId}`}
+                          >
+                            {shortId(generation.generationId)}
+                          </Link>
+                        </div>
+                        <div className="c" role="cell">
+                          <Badge info={EXPERIMENT_STATUS[generation.status]} />
+                        </div>
+                        <div className="c mono" role="cell">
+                          {generation.modelVersion}
+                        </div>
+                        <div className="c" role="cell">
+                          <div className="prog">
+                            <span>
+                              {generation.committedCandidateCount} /{" "}
+                              {generation.candidateCount}
+                            </span>
+                            <ProgressBar
+                              done={generation.committedCandidateCount}
+                              total={generation.candidateCount}
+                            />
+                          </div>
+                        </div>
+                        <div className="c mono" role="cell">
+                          {formatReward(generation.rewardMean)}
+                        </div>
+                        <div className="c mono" role="cell">
+                          {formatReward(generation.rewardBest)}
+                        </div>
+                        <div className="c mut" role="cell">
+                          {formatDateTime(generation.startedAt)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+          )}
+
+          {tab === "config" && (
+            <section className="card" aria-label="Configuration">
+              <div className="ch">
+                <h2>Experiment configuration</h2>
+                <small>Read-only. Training configuration is fixed after submission.</small>
+              </div>
+              <div className="cb">
+                <dl className="kv">
+                  <KeyValue label="Model">{experiment.modelName}</KeyValue>
+                  <KeyValue label="Task">{experiment.task}</KeyValue>
+                  <KeyValue label="Maximum generations">{experiment.maxGenerations ?? "Legacy fixture"}</KeyValue>
+                  <KeyValue label="Dataset IDs">{experiment.datasetIds?.join(", ") ?? "Legacy fixture"}</KeyValue>
+                  <KeyValue label="Candidates per generation" mono>
+                    {experiment.candidatesPerGeneration}
+                  </KeyValue>
+                  <KeyValue label="Scheduling policy" mono>
+                    {experiment.schedulerPolicy}
+                  </KeyValue>
+                  <KeyValue label="Sync mode" mono>
+                    {experiment.syncMode}
+                  </KeyValue>
+                  <KeyValue label="Base seed" mono>
+                    {experiment.baseSeed}
+                  </KeyValue>
+                  <KeyValue label="Config hash" mono>
+                    {experiment.configHash}
+                  </KeyValue>
+                </dl>
+              </div>
+            </section>
+          )}
+
+          {tab === "events" && (
+            <section className="card" aria-label="Experiment events">
+              <div className="ch">
+                <h2>Events for this experiment</h2>
+
+              </div>
+              {experiment.maxGenerations && <div className="cb demo-form"><p>Local simulated runtime · {experiment.status}</p><p>{experiment.completedGenerations ?? 0} generations committed · Model {experiment.modelVersion}</p>{experiment.checkpointSavedAt && <p>Generation state saved at {formatDateTime(experiment.checkpointSavedAt)}</p>}{experiment.cancelRequested && <p>Cancellation requested; waiting for confirmation.</p>}</div>}
+              {eventsFailed ? (
+                <ErrorState
+                  title="Could not load events"
+                  message="The other tabs of this experiment are still readable."
+                  onRetry={retryRegion}
+                  retryLabel="Retry this region"
+                />
+              ) : events.length === 0 ? (
+                <EmptyState title="No events for this experiment yet" />
+              ) : (
+                <EventRows events={events} label="Experiment events" />
+              )}
+            </section>
+          )}
+
+          {tab === "artifacts" && (
+            <section className="card" aria-label="Experiment artifacts">
+              <div className="ch">
+                <h2>Saved files</h2>
+
+              </div>
+              {artifacts.length === 0 ? (
+                <EmptyState title="No saved model files yet" />
+              ) : (
+                <div className="scroll">
+                  <div className="tw s" role="table" aria-label="Experiment artifacts">
+                    {artifacts.map((artifact) => (
+                      <div
+                        className="row"
+                        role="row"
+                        key={artifact.artifactId}
+                        style={{
+                          gridTemplateColumns: "minmax(200px,2fr) 140px 160px",
+                        }}
+                      >
+                        <div className="c" role="cell">
+                          {artifact.name}
+                        </div>
+                        <div className="c" role="cell">
+                          {ARTIFACT_TYPE_LABEL[artifact.type]}
+                        </div>
+                        <div className="c" role="cell">
+                          <Badge info={ARTIFACT_STATUS[artifact.status]} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+          )}
+
+          {cancelOpen && (
+            <CancelDialog
+              experiment={experiment}
+              onClose={() => setCancelOpen(false)}
+            />
+          )}
+        </>
+      )}
+    </QueryState>
+  );
+}

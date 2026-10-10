@@ -1,10 +1,12 @@
+export type GenerationStatus = "RUNNING" | "COMPLETED";
+
 export interface Generation {
   experimentId: string;
   generationId: string;
 
   modelVersion: string;
 
-  status: string;
+  status: GenerationStatus;
 
   candidateCount: number;
   committedCandidateCount: number;

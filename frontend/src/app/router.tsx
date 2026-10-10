@@ -1,29 +1,46 @@
+import { useSession } from "./session";
+import { ProfilePage } from "../pages/ProfilePage";
+import { MyWorkersPage } from "../pages/MyWorkersPage";
+import { WorkspaceListPage } from "../pages/WorkspaceListPage";
 import { Navigate, Route, Routes } from "react-router";
+import { ExperimentCreatePage } from "../pages/ExperimentCreatePage";
 import { ExperimentDetailPage } from "../pages/ExperimentDetailPage";
 import { AppLayout } from "../components/layout/AppLayout";
-import { ArtifactsPage } from "../pages/ArtifactsPage";
-import { DashboardPage } from "../pages/DashboardPage";
-import { EventsPage } from "../pages/EventsPage";
 import { ExperimentsPage } from "../pages/ExperimentsPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
-import { WorkersPage } from "../pages/WorkersPage";
 import { WorkerDetailPage } from "../pages/WorkerDetailPage";
 import { CandidateDetailPage } from "../pages/CandidateDetailPage";
 import { GenerationDetailPage } from "../pages/GenerationDetailPage";
+import { LoginPage } from "../pages/LoginPage";
+import { WorkspaceDetailRoute } from "../pages/WorkspaceDetailRoute";
+import { ModelsPage } from "../pages/ModelsPage";
+import { RequireSession } from "../components/layout/RequireSession";
 
 export function AppRouter() {
   return (
     <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route element={<RequireSession />}>
       <Route element={<AppLayout />}>
-        <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route index element={<Navigate to="/workspace" replace />} />
+        <Route path="/workspace" element={<WorkspaceListPage />} />
+        <Route path="/workspace/current" element={<ActiveWorkspaceRedirect />} />
+        <Route path="/workspace/:workspaceId" element={<WorkspaceDetailRoute />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/models" element={<ModelsPage />} />
+        <Route path="/scheduling" element={<Navigate to="/experiments" replace />} />
 
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/workers" element={<WorkersPage />} />
+        <Route path="/dashboard" element={<Navigate to="/experiments" replace />} />
+        <Route path="/workers" element={<MyWorkersPage />} />
         <Route
           path="/workers/:workerId"
           element={<WorkerDetailPage />}
         />
         <Route path="/experiments" element={<ExperimentsPage />} />
+        <Route
+          path="/experiments/new"
+          element={<ExperimentCreatePage />}
+        />
         <Route
           path="/experiments/:experimentId"
           element={<ExperimentDetailPage />}
@@ -36,11 +53,14 @@ export function AppRouter() {
           path="/experiments/:experimentId/generations/:generationId"
           element={<GenerationDetailPage />}
         />
-        <Route path="/events" element={<EventsPage />} />
-        <Route path="/artifacts" element={<ArtifactsPage />} />
+        <Route path="/events" element={<Navigate to="/experiments" replace />} />
+        <Route path="/artifacts" element={<Navigate to="/experiments" replace />} />
 
         <Route path="*" element={<NotFoundPage />} />
+      </Route>
       </Route>
     </Routes>
   );
 }
+
+function ActiveWorkspaceRedirect() { const { workspace } = useSession(); return <Navigate to={workspace ? `/workspace/${workspace.workspaceId}` : "/workspace"} replace />; }
