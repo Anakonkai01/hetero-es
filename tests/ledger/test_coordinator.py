@@ -131,6 +131,25 @@ def env(tmp_path):
 # one generation
 # ---------------------------------------------------------------------------
 
+def test_recovery_hooks_run_between_publications_without_changing_numerics(tmp_path):
+    order=[];env=None
+    def start(generation):
+        if generation:
+            assert env.ledger.get_update('exp',generation-1).applied_at is not None
+        order.append(('start',generation))
+    def complete(summary):
+        child=summary['child_sha256']
+        assert sha256_of_file(env.models_dir/f'{child}.bin')==child
+        assert env.ledger.get_update('exp',summary['generation']).applied_at is not None
+        order.append(('complete',summary['generation']))
+    env=Env(tmp_path,generation_started=start,generation_completed=complete)
+    try:
+        recipe_hash=env.recipe.hash;env.start_workers();summaries=env.coordinator.run(2)
+        assert order==[('start',0),('complete',0),('start',1),('complete',1)]
+        assert summaries[-1]['child_sha256']==env.oracle_child([s['rewards'] for s in summaries])
+        assert env.recipe.hash==recipe_hash
+    finally:env.close()
+
 def test_a_generation_is_run_recorded_applied_and_published(env):
     parent = model_weights_sha256(env.model, env.schema)
     env.start_workers()

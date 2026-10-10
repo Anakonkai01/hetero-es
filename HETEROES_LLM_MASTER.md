@@ -45,6 +45,21 @@ M1–M6 plan is recorded in Track B's `docs/lab-roadmap.md`; Track A's M1 bounda
 LAN/named-tunnel deployment, disjoint-resource parallel jobs and additional text
 models/datasets are later gated milestones, not completed capabilities.
 
+**M2 design revision accepted on 2026-10-10:** keep the ES ledger on the GPU
+coordinator and place management/queue metadata on one CPU backend using SQLite.
+Outbound typed device agents have boot-scoped explicit contribution and separate
+approval. Reserve the explicit coordinator and all selected workers atomically;
+heartbeat loss never releases an assignment or authorizes a replacement.
+Credentials bind actual worker identities and attempt ownership. Capture consistent
+generation-boundary recovery points with required canonical weights and pinned
+identity; publish verified private S3-compatible cloud manifests last. Prefer R2
+with an 8 GB project quota, K=1/N=3 recovery retention and hourly metadata backups.
+The target management deployment is an eligible AWS Free Plan CPU EC2, fixed free
+DuckDNS hostname and Caddy HTTPS; compute remains private Tailscale. No paid plan
+upgrade or cloud candidate ledger migration is included. M2's actual cloud gates
+and implementation truth are in STATUS and B's `docs/m2-implementation.md`;
+native installers, parallel scheduling and model/data expansion remain M3–M5.
+
 | Hạng mục | Canonical decision |
 |---|---|
 | Cách phát triển | Repo HeteroES riêng; nhóm thiết kế/implement tầng thực thi và ES reference nhỏ; không fork toàn bộ framework làm mặc định |

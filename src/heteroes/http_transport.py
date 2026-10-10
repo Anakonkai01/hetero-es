@@ -78,7 +78,7 @@ def _status_of(reply: dict) -> int:
     if reply.get("ok") is True:
         return 200
     code = reply.get("error", {}).get("code")
-    return 400 if code == "bad_request" else 409
+    return 403 if code == 'forbidden' else 400 if code == "bad_request" else 409
 
 
 class _Handler(http.server.BaseHTTPRequestHandler):
@@ -106,6 +106,16 @@ class _Handler(http.server.BaseHTTPRequestHandler):
         self._error(code, "bad_request" if code < 500 else "internal_error", message or "error")
 
     def _authorized(self) -> bool:
+        self.authenticated_worker_id = None
+        if self.coordinator.device_tokens is not None:
+            header = self.headers.get('Authorization', '')
+            if header.startswith('Bearer '):
+                for worker_id, secret in self.coordinator.device_tokens.items():
+                    if hmac.compare_digest(header[7:].encode(), secret.encode()):
+                        self.authenticated_worker_id = worker_id
+                        return True
+            self._error(401, 'unauthorized', 'Device credential is missing or revoked')
+            return False
         token = self.coordinator.token
         if token is None:
             return True
@@ -163,7 +173,10 @@ class _Handler(http.server.BaseHTTPRequestHandler):
         if request is _ANSWERED:
             return
         try:
-            reply = self.coordinator.api.handle(_ROUTES[path], request)
+            if self.authenticated_worker_id is None:
+                reply = self.coordinator.api.handle(_ROUTES[path], request)
+            else:
+                reply = self.coordinator.api.handle(_ROUTES[path], request, authenticated_worker_id=self.authenticated_worker_id)
         except Exception as error:                   # a bug of the coordinator: say so, keep the server alive
             self.coordinator.internal_errors.append(f"{type(error).__name__}: {error}\n{traceback.format_exc()}")
             self._error(500, "internal_error", f"{type(error).__name__}: {error}")
@@ -251,18 +264,22 @@ class CoordinatorServer:
 
     def __init__(self, api, job: dict | None = None, models_dir=None, host: str = "127.0.0.1", port: int = 0,
                  token: str | None = None, request_timeout: float = DEFAULT_REQUEST_TIMEOUT,
-                 max_connections: int = DEFAULT_MAX_CONNECTIONS, allow_unauthenticated: bool = False):
+                 max_connections: int = DEFAULT_MAX_CONNECTIONS, allow_unauthenticated: bool = False,
+                 device_tokens: dict[str, str] | None = None):
         if isinstance(request_timeout, bool) or not isinstance(request_timeout, (int, float)) or not request_timeout > 0:
             raise ValueError(f"request_timeout must be a positive number, got {request_timeout!r}")
         if isinstance(max_connections, bool) or not isinstance(max_connections, int) or max_connections < 1:
             raise ValueError(f"max_connections must be an integer of at least 1, got {max_connections!r}")
-        if token is None and not _is_loopback(host) and not allow_unauthenticated:
+        if token is None and device_tokens is None and not _is_loopback(host) and not allow_unauthenticated:
             raise ValueError(f"refusing to listen on {host} without a token: set one, or pass allow_unauthenticated=True "
                              f"for a network that is private by other means")
         self._lock = threading.Lock()
         self._api, self._job = api, job
         self.models_dir = None if models_dir is None else Path(models_dir)
         self.token = token
+        if device_tokens is not None and (not device_tokens or any(not isinstance(v,str) or not v for v in device_tokens.values()) or len(set(device_tokens.values()))!=len(device_tokens)):
+            raise ValueError('Device credentials must be nonempty and distinct')
+        self.device_tokens = device_tokens
         self.request_timeout, self.max_connections = request_timeout, max_connections
         self.internal_errors: list[str] = []
         self.updates: dict[str, dict] = {}       # parent weights sha256 -> {"record_json", "record_hash", "child_weights_sha256"}: filled by whoever applies the updates

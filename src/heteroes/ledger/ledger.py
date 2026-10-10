@@ -607,6 +607,12 @@ class Ledger:
             "SELECT COUNT(*) FROM attempt AS a WHERE a.candidate_id = ? AND COALESCE(a.failure_kind, '') != 'RESTORE_MISMATCH' "
             "AND a.worker_id NOT IN (SELECT worker_id FROM quarantine)", (candidate_id,)).fetchone()[0]
 
+    @_locked
+    def attempt_worker(self, descriptor: CandidateDescriptor, attempt_number: int, token: str) -> str:
+        """Resolve authenticated attempt ownership without changing its lease."""
+        _check_attempt_identity(descriptor, attempt_number, token)
+        return self._latest_attempt(descriptor, attempt_number, token)[2]
+
     def _latest_attempt(self, descriptor: CandidateDescriptor, attempt_number: int, token: str):
         """
         Inside a transaction: check that the worker's report is about the job the ledger gave and about the latest

@@ -1,12 +1,77 @@
 # HeteroES-LLM — Status
 
-**Last updated:** 10/10/2026 — M1 lab operations completed and verified locally; see the first update below. The 09/10 decoder, profiling and research evidence and earlier milestones remain in the following blocks. Newest verified updates appear first; sections 1–13 were written on 30/09 and are older background.
+**Last updated:** 10/10/2026 — M2 local agents/control/recovery verified; actual R2/EC2 acceptance pending owner cloud accounts. The 09/10 decoder, profiling and research evidence and earlier milestones remain in the following blocks. Newest verified updates appear first; sections 1–13 were written on 30/09 and are older background.
 **Canonical design/specification:** `HETEROES_LLM_MASTER.md`  
 **Purpose:** current implementation truth, verified evidence, blockers, artifacts, and the exact next action.
 
 > **Document rule:** `MASTER` decides what the system/design should be. `STATUS` decides what is actually done now. For a new chat, read `HETEROES_LLM_MASTER.md` and then this file; older proposal/roadmap/chat-handoff files are archive only.
 
 ## 0. NEXT SESSION — START HERE
+
+### UPDATE 10/10/2026 — M2 local implementation verified; cloud acceptance pending
+
+Branches: A `feat/m2-agent-runtime` from `a084418`; B `feat/m2-cloud-control`
+from `a3e39db`. Accepted decisions and remaining gates are in B's
+`docs/lab-roadmap.md`, `docs/m2-implementation.md` and `docs/m2-cloud-operator.md`.
+No push, merge, tag, driver upgrade or replacement of friends' environments/repos.
+The original research worktree, M1 evidence and full 33.6 GB local backup remain.
+
+Delivered: CPU-only management mode, outbound UUID device agents, one-use pairing,
+compatibility self-test/approval/revocation, boot OFF with explicit owner ON,
+atomic coordinator-plus-workers reservations, epoch/identity-bound typed commands
+and worker attempts. Only confirmed selected-process death releases resources;
+offline/unknown state holds ownership without automatic failover. Generation
+hooks capture consistent local ledger/required weights/config/pinned identity,
+without changing Recipe v1 or ES math. Restore uses verified new-directory
+publication and holds dispatch without old PIDs. R2/S3-compatible scoped uploads,
+full-byte verification, immutable CAS publication, manifest-last commit,
+quota/retention/cleanup, metadata backups and CPU deployment tooling are implemented.
+Their real provider gates have **not** passed; SDK stubs are separate evidence.
+
+Verified: A **2,160 passed, 21 skipped**; B **71 passed**; frontend build/lint and
+22 explicit mock groups. Identity/epoch scratch mutations were caught. Real
+staging browser showed all three devices, approval, coordinator selection and
+K=1/N=3. M1 migration preserved 16 original experiment bodies/FIFO and revoked
+sessions; a later local CPU metadata restore preserved all 19 experiments,
+FIFO/reservations with a held queue, cold API login and cached artifact download.
+
+Three-GPU `d09d6ea8ac904cc7be92fa833637abde`, N=12/G=3, pinned Qwen,
+`arith16`/`hf_generate` FP32 evaluation with canonical CPU noise: accepted commits
+5070 Ti **20**, Quang 3060 **6**, Thao 3060 **10**. All generations published and
+all workers stopped. Its checkpoint exactly matches a one-GPU baseline with the
+same run ID and numerical configuration:
+`9947f34c5b6e08667a4283d23d7021dcbb685fb536d10c2e4d85cda420aba7af`.
+A five-file final point restored locally with this SHA and no PID reuse.
+
+Real API outage run `60346847f48f4d77a2e51c8885bff178`: observed API unavailable
+for 40.055 seconds; generations 1/2 completed during that outage. Compute
+continued, terminal metadata/events synchronized after restart, all reservations
+released after confirmed shutdown. Final SHA:
+`c9efdbdb812a40137daa4abaffd1e3c618c09628c4366812d7fe4cf3a5bd8bc0`.
+The failed first start was safely cancelled; its entire duration is charged.
+M2 GPU usage **0.416201/0.5 hours**, including a 0.01-hour diagnostic/self-test
+allowance; cumulative M1+M2 **1.021832/2 hours**. M2 remaining **0.083799 hours**.
+
+Selected M1 sample `096b09ec03ab4d8b9ca189596593db3a` exported/fully verified
+for historical R2 import. Its final SHA remains
+`987541249378460c668ff9865cbcc5823331eddae4bdfbebd87a532977b96c38`.
+Sanitized evidence: `artifacts/experiments/2026-10-10-m2-agent-cloud/`.
+Raw logs, screenshots, device tokens, weights and private configs stay outside Git.
+
+Current operation: M1 runtime maintenance released and prior dispatch setting
+restored; main private UI remains on 5173 with its original local credentials.
+All isolated M2 agents are OFF/stopped, queue held; CPU review UI remains on 5175.
+Thao's SSH user is `thao_nguyen`, address `100.92.20.58`; its isolated source and
+existing compatible environment passed actual self-test and candidate execution.
+The optional 1660S stays unavailable/unvalidated.
+
+**Blocker/next:** the owner confirmed no cloud accounts yet. Preflight reports
+no AWS profile/R2 config and zero provisioned resources. Prepare the private AWS
+Free Plan/R2/DuckDNS accounts using B's cloud operator guide, test actual R2
+upload/download/restore, then perform an idle EC2 HTTPS cutover and short
+cloud-backed acceptance within the remaining M2 budget. **Do not mark M2 complete
+or treat M3 as started before those gates pass.** Original research follow-ups
+remain open and unaffected.
 
 ### UPDATE 10/10/2026 — M1 lab operations completed (local implementation; awaiting owner review)
 

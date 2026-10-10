@@ -157,7 +157,7 @@ class WorkerAPI:
             "heartbeat": (_decode_heartbeat, self._heartbeat),
         }
 
-    def handle(self, operation, request) -> dict:
+    def handle(self, operation, request, authenticated_worker_id=None) -> dict:
         entry = self._operations.get(operation) if isinstance(operation, str) else None
         if entry is None:
             return _error("unknown_operation", f"unknown operation {operation!r}")
@@ -168,6 +168,10 @@ class WorkerAPI:
             return _error("bad_request", f"{type(error).__name__}: {error}")
         with self._lock:
             try:
+                if authenticated_worker_id is not None:
+                    owner = decoded[0] if operation == 'lease' else self._ledger.attempt_worker(*decoded[:3])
+                    if owner != authenticated_worker_id:
+                        return _error('forbidden', 'Credential does not own this worker or attempt')
                 return {"ok": True, **act(decoded)}
             except LedgerError as error:
                 return _error(_code_of(error), str(error))

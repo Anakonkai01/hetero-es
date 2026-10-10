@@ -51,7 +51,9 @@ STALL_LEASES = 5
 class _NoGeneration:
     """What the workers meet before the first generation is open: no work yet, and nothing to deliver to."""
 
-    def handle(self, operation, request):
+    def handle(self, operation, request, authenticated_worker_id=None):
+        if authenticated_worker_id is not None and operation=='lease' and request.get('worker_id')!=authenticated_worker_id:
+            return {'ok':False,'error':{'code':'forbidden','message':'Worker identity mismatch'}}
         if operation == "lease":
             return {"ok": True, "generation_state": "OPEN", "work": None}
         return {"ok": False, "error": {"code": "rejected", "message": "no generation is open"}}
@@ -62,7 +64,8 @@ class Coordinator:
                  candidates: int, alpha: float, policy_factory=Greedy, lease_seconds: float = 120.0, host: str = "127.0.0.1",
                  port: int = 0, token: str | None = None, poll_seconds: float = 0.2, failed_grace_seconds: float = 5.0,
                  timeout_seconds: float | None = None, stall_seconds=_DEFAULT, keep_published: int | None = 3, allow_unauthenticated: bool = False, log=lambda event: None, timer=time.perf_counter,
-                 monotonic=time.monotonic, sleep=time.sleep, cancel_requested=lambda: False):
+                 monotonic=time.monotonic, sleep=time.sleep, cancel_requested=lambda: False,
+                 device_tokens=None, generation_completed=None, generation_started=None):
         self.model = model
         self.schema = schema
         self.recipe = recipe
@@ -84,10 +87,12 @@ class Coordinator:
         self._monotonic = monotonic
         self._sleep = sleep
         self._cancel_requested = cancel_requested
+        self._generation_completed = generation_completed
+        self._generation_started = generation_started
         self.parent_sha256 = model_weights_sha256(model, schema)
         self._parent_published = False
         self.server = CoordinatorServer(_NoGeneration(), job=None, models_dir=models_dir, host=host, port=port, token=token,
-                                        allow_unauthenticated=allow_unauthenticated)
+                                        allow_unauthenticated=allow_unauthenticated, device_tokens=device_tokens)
 
     @property
     def url(self) -> str:
@@ -313,7 +318,10 @@ class Coordinator:
         try:
             for generation in range(self.recover(), generations):
                 self._check_cancel()
+                if self._generation_started is not None:self._generation_started(generation)
                 summaries.append(self.run_generation(generation))
+                if self._generation_completed is not None:
+                    self._generation_completed(summaries[-1])
             self._check_cancel()
         except RunCancelled:
             self.finish(cancelled=True)
