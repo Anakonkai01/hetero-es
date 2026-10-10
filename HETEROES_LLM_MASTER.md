@@ -37,6 +37,14 @@ The central product thesis is: a small lab should be able to **share a small poo
 
 ## 0. Canonical design decisions
 
+**Product extension accepted on 2026-10-10:** the owner's lab roadmap adds
+independent workspaces, account approval and private operational backup/restore
+in M1, while retaining one active run and all numerical contracts. The accepted
+M1–M6 plan is recorded in Track B's `docs/lab-roadmap.md`; Track A's M1 boundary is
+`docs/lab-operations.md`. GPU-independent control, Windows/Linux packaging,
+LAN/named-tunnel deployment, disjoint-resource parallel jobs and additional text
+models/datasets are later gated milestones, not completed capabilities.
+
 | Hạng mục | Canonical decision |
 |---|---|
 | Cách phát triển | Repo HeteroES riêng; nhóm thiết kế/implement tầng thực thi và ES reference nhỏ; không fork toàn bộ framework làm mặc định |

@@ -8,6 +8,33 @@
 
 ## 0. NEXT SESSION — START HERE
 
+### UPDATE 10/10/2026 — M1 lab operations in progress
+
+New authorized implementation branches: A `feat/lab-operations-control`, based
+on `51e1b2a`; B `feat/lab-operations-product`, based on `7532750`. Previous
+integration branches are preserved. The accepted complete M1–M6 roadmap is saved
+in B's `docs/lab-roadmap.md`, with progress in `docs/m1-implementation.md`.
+
+Track A now supports durable idle maintenance and runtime-owned snapshots;
+see `docs/lab-operations.md`. Full CPU suite: 2,141 passed, 21 skipped.
+Maintenance restart, unconfirmed shutdown, archive contents and symlink refusal
+are tested. A scratch mutation bypassing the maintenance launch guard is caught.
+No numerical algorithm, recipe or worker evaluation code changed for M1.
+
+Track B migration was checked against a separate copy of the existing database:
+14 experiment IDs/bodies/snapshots, FIFO sequence, existing password hashes and
+sessions preserved. Original database was untouched during this check. Product
+identity/membership/backup tests and frontend checks are in progress; do not
+interpret this update as complete M1 browser or hardware acceptance.
+
+GPU usage was recalculated from all 12 existing runtime runs: conservative
+0.558 GPU-hours used of the original 2 GPU-hour budget before M1 hardware checks.
+The previous nine-run 0.177 figure below is historical. No budget reset.
+
+Next: finish and verify the real M1 interface, safe live migration, idle backup
+round trip and hardware/browser acceptance. Preserve all previous evidence,
+private credentials and the original research worktree.
+
 ### UPDATE 10/10/2026 — Track B integration (written by the AI; awaiting owner review)
 
 Track A work is isolated in sibling worktree `hetero-es-integration`, branch

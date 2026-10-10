@@ -88,6 +88,8 @@ class Manager:
         validate(body, self.workers)
         root = self.directory(body["runId"])
         with self.lock:
+            if read_json(self.root/'maintenance.json'):
+                raise RuntimeError('Runtime is held for maintenance')
             old = read_json(root / "config.json")
             if old:
                 if any(old.get(key) != value for key, value in body.items()):
@@ -104,6 +106,37 @@ class Manager:
                                               "host": self.config["workerHost"], "port": self.config["workerPort"]})
             self.save(root, status="STARTING", recoveryCount=0, startedAt=time.time(), workerStates={})
             return self.state(root)
+
+    def acquire_maintenance(self):
+        from .backup import assert_idle
+        import uuid
+        with self.lock:
+            assert_idle(self)
+            old=read_json(self.root/'maintenance.json')
+            if old:
+                return old
+            hold={'maintenanceId':uuid.uuid4().hex,'createdAt':time.time()}
+            write_json(self.root/'maintenance.json',hold)
+            return hold
+
+    def check_maintenance(self,maintenance_id):
+        hold=read_json(self.root/'maintenance.json')
+        if not hold or not hmac.compare_digest(hold['maintenanceId'],maintenance_id):
+            raise RuntimeError('A matching maintenance hold is required')
+
+    def release_maintenance(self,maintenance_id):
+        with self.lock:
+            self.check_maintenance(maintenance_id)
+            (self.root/'maintenance.json').unlink()
+            return {'released':True}
+
+    def create_backup(self,maintenance_id):
+        from .backup import create_backup
+        return create_backup(self,maintenance_id)
+
+    def backup_path(self,backup_id):
+        from .backup import backup_path
+        return backup_path(self,backup_id)
 
     def remote(self, worker, request):
         python, source = worker["python"], worker["source"]
@@ -385,6 +418,28 @@ def main():
                 self.reply(401, {"message": "unauthorized"}); return
             parts = self.path.strip("/").split("/")
             try:
+                if self.command=='GET' and parts==['maintenance']:
+                    return self.reply(200,{'hold':read_json(manager.root/'maintenance.json')})
+                if self.command=='POST' and parts in (['maintenance','acquire'],['maintenance','release'],['backups']):
+                    length=int(self.headers.get('Content-Length',0))
+                    if length>16384:
+                        raise ValueError('invalid request length')
+                    body=json.loads(self.rfile.read(length)) if length else {}
+                    if parts==['maintenance','acquire']:
+                        return self.reply(200,manager.acquire_maintenance())
+                    if parts==['maintenance','release']:
+                        return self.reply(200,manager.release_maintenance(body['maintenanceId']))
+                    return self.reply(201,manager.create_backup(body['maintenanceId']))
+                if self.command=='GET' and len(parts)==2 and parts[0]=='backups':
+                    path=manager.backup_path(parts[1])
+                    self.send_response(200)
+                    self.send_header('Content-Length',str(path.stat().st_size))
+                    self.send_header('Content-Type','application/x-tar')
+                    self.end_headers()
+                    with open(path,'rb') as stream:
+                        while block:=stream.read(1024*1024):
+                            self.wfile.write(block)
+                    return
                 if self.command == "GET" and parts == ["capabilities"]:
                     return self.reply(200, {**capabilities(manager.workers),
                                            "quarantinedWorkerIds": list(read_json(manager.root / "quarantine.json", {}))})
