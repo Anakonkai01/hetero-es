@@ -32,6 +32,15 @@ def sha256(path):
         return hashlib.file_digest(stream, 'sha256').hexdigest()
 
 
+def source_identity(root):
+    """Identify exact runtime bytes even on an isolated GPU without Git metadata."""
+    root=Path(root)
+    files={str(path.relative_to(root)):sha256(path) for path in sorted(root.rglob('*.py'))}
+    if not files:raise ValueError('Runtime sources unavailable')
+    encoded=json.dumps(files,sort_keys=True,separators=(',',':')).encode()
+    return {'sourceTreeSha256':hashlib.sha256(encoded).hexdigest(),'sourceFiles':files}
+
+
 def safe_name(name):
     if name in ('config.json', 'ledger.sqlite', 'identity.json'):
         return True

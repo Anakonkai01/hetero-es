@@ -73,11 +73,11 @@ def main(directory):
             if policy is None:
                 return
             try:
-                from .recovery import capture_point
+                from .recovery import capture_point,source_identity
                 generation_policy=read_json(root/f'generation-policy-{summary["generation"]}.json')
                 if generation_policy is None:generation_policy=read_json(root/'backup-policy.json',active_policy)
                 point=capture_point(root,summary,recipe.to_dict(),generation_policy,final=final,
-                                    identity={'code':code_info(),'environment':environment_info('cuda')})
+                                    identity={'code':{**code_info(),**source_identity(Path(__file__).resolve().parents[1])},'environment':environment_info('cuda')})
                 if point:
                     emit({'event':'recovery_point_created','generation':summary['generation'],'pointId':point.name,'final':final})
             except Exception as error:

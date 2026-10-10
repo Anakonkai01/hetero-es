@@ -28,12 +28,16 @@ full-byte verification, immutable CAS publication, manifest-last commit,
 quota/retention/cleanup, metadata backups and CPU deployment tooling are implemented.
 Their real provider gates have **not** passed; SDK stubs are separate evidence.
 
-Verified: A **2,161 passed, 21 skipped**; B **71 passed**; frontend build/lint and
+Verified: A **2,162 passed, 21 skipped**; B **72 passed**; frontend build/lint and
 22 explicit mock groups. Identity/epoch scratch mutations were caught. Real
 staging browser showed all three devices, approval, coordinator selection and
 K=1/N=3. M1 migration preserved 16 original experiment bodies/FIFO and revoked
 sessions; a later local CPU metadata restore preserved all 19 experiments,
 FIFO/reservations with a held queue, cold API login and cached artifact download.
+CPU refinements also verify exact runtime source fingerprints without Git and
+scoped poll/stop access for revoked coordinators until existing workers drain.
+Legacy M1 recovery exports retain their original provenance; these later source
+fingerprints are not retroactive evidence for earlier hardware runs.
 
 Three-GPU `d09d6ea8ac904cc7be92fa833637abde`, N=12/G=3, pinned Qwen,
 `arith16`/`hf_generate` FP32 evaluation with canonical CPU noise: accepted commits

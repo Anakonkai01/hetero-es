@@ -73,3 +73,14 @@ def test_optional_policy_corruption_and_write_failure_do_not_interrupt_compute(t
     monkeypatch.setattr(runner,'write_json',denied)
     assert runner.apply_backup_policy(tmp_path,1,current,logs.append)==requested
     assert any(e['event']=='backup_policy_error' for e in logs)
+
+
+def test_source_identity_pins_runtime_bytes_without_a_git_checkout(tmp_path):
+    from heteroes.product.recovery import source_identity
+    source=tmp_path/'runtime.py';source.write_bytes(b'first numerical implementation')
+    first=source_identity(tmp_path)
+    assert first['sourceFiles']['runtime.py']==hashlib.sha256(source.read_bytes()).hexdigest()
+    (tmp_path/'unrelated.log').write_text('not code')
+    assert source_identity(tmp_path)==first
+    source.write_bytes(b'changed numerical implementation')
+    assert source_identity(tmp_path)['sourceTreeSha256']!=first['sourceTreeSha256']
