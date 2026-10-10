@@ -399,8 +399,11 @@ def install_device_routes(app, store, user, runtime):
         with store.db() as db:
             row=db.execute('SELECT * FROM devices WHERE token_digest=?',(digest(authorization[7:]),)).fetchone()
             if not row:raise HTTPException(401,'Device revoked or unknown')
-            if (row['status'] in ('REVOKED','QUARANTINED') or store.profile(row['owner'])['accountStatus']!='ACTIVE') and request.url.path!='/api/v1/device/poll':
-                raise HTTPException(401,'Device revoked or unknown')
+            if row['status'] in ('REVOKED','QUARANTINED') or store.profile(row['owner'])['accountStatus']!='ACTIVE':
+                drain=request.url.path=='/api/v1/device/poll'
+                if request.url.path=='/api/v1/device/worker-command':
+                    drain=bool(db.execute('SELECT 1 FROM assignments WHERE coordinator=? AND released=0',(row['id'],)).fetchone())
+                if not drain:raise HTTPException(401,'Device revoked or unknown')
             return dict(row)
 
     @app.post('/api/v1/devices/pairing-codes')
@@ -479,5 +482,7 @@ def install_device_routes(app, store, user, runtime):
 
     @app.post('/api/v1/device/worker-command')
     def worker(body:WorkerCommand,current=Depends(device_auth)):
+        if (current['status'] in ('REVOKED','QUARANTINED') or store.profile(current['owner'])['accountStatus']!='ACTIVE') and body.action not in ('poll','stop'):
+            raise HTTPException(401,'Revoked coordinators may only confirm or stop their existing workers')
         return runtime.worker_command(current,body)
     return device_auth

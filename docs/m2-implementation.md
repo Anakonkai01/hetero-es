@@ -26,6 +26,8 @@ identity. Offline heartbeat is a display status, never release or failover autho
 Cancellation drains; every selected process must be confirmed dead before release.
 Unknown process identities keep ownership held. Persistent quarantine, revocation,
 boot resets, duplicate agents, late commands and stale reports have CPU tests.
+Revoked coordinators retain only scoped poll/stop access for their unreleased
+assignments so cancellation can finish draining workers; this access ends at release.
 
 The coordinator captures a consistent SQLite backup at published-generation
 boundaries with the required parent/child weights, frozen config and pinned
@@ -33,6 +35,9 @@ recipe/code/environment identity. K/N defaults are 1/3; changes take effect at
 the next generation, and a final point is always captured. Recipe v1 and numerical
 semantics are unchanged. Restore verifies full hashes, sizes, ledger integrity
 and canonical lineage; it publishes into a new held directory without old PIDs.
+New points fingerprint every runtime Python source file, including isolated
+coordinators without Git metadata. Exported legacy M1 points preserve their original
+recorded provenance; they do not claim this later source fingerprint retroactively.
 
 The S3-compatible R2 adapter issues scoped, expiring multipart/single upload and
 download rights. Master credentials stay on the CPU host. Uploads go to temporary
@@ -58,7 +63,7 @@ route; compute remains private Tailscale. Named tunnels/installers remain M3.
 
 ## Verification
 
-- Track A: **2,161 passed, 21 skipped**. Track B: **71 passed**.
+- Track A: **2,162 passed, 21 skipped**. Track B: **72 passed**.
 - Frontend production build/lint and **22 mock behavior groups** pass. Mock
   evidence is separate from the real runtime campaign.
 - Scratch mutations disabling worker identity and assignment epoch checks both
@@ -86,8 +91,9 @@ route; compute remains private Tailscale. Named tunnels/installers remain M3.
   import; its SHA remains
   `987541249378460c668ff9865cbcc5823331eddae4bdfbebd87a532977b96c38`.
 
-After the hardware campaign, optional backup-policy corruption/write failures
-and large monitoring projections were regression tested on CPU. These refinements
+After the hardware campaign, optional backup-policy corruption/write failures,
+large monitoring projections, exact source fingerprints and revoked-coordinator
+draining were regression tested on CPU. These refinements
 were not another GPU campaign; the real cloud acceptance remains required.
 
 The first three-GPU start `a431cce322444bd2b397b73d0c4df67c` was cancelled after

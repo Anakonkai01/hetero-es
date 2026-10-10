@@ -122,6 +122,25 @@ def test_pairing_expiry_alias_collision_and_revocation(lab):
     assert r.devices()[0]['approvalStatus']=='REVOKED'
 
 
+def test_revoked_coordinator_can_finish_drain_but_cannot_start_workers(lab):
+    c,s,r,a=lab;d,h=pair(lab);w,wh=pair(lab,'worker',False)
+    enable(lab,d,h);enable(lab,w,wh)
+    rid=queued(lab,d,workerIds=[w['workerId']]);s.dispatch_once();assignment=r.runs()[0]
+    assert c.patch('/api/v1/platform/devices/'+d['deviceId'],headers=a,json={'approved':False}).status_code==200
+    command={'assignmentId':assignment['assignmentId'],'epoch':1,'workerId':w['workerId'],'recoveryIndex':0}
+    assert c.post('/api/v1/device/worker-command',headers=h,json={**command,'action':'start'}).status_code==401
+    process={'assignmentId':assignment['assignmentId'],'epoch':1,'workerAlive':False,'coordinatorAlive':False}
+    boot(c,wh,'boot-1',processes=[process])
+    poll=c.post('/api/v1/device/worker-command',headers=h,json={**command,'action':'poll'})
+    assert poll.status_code==200 and poll.json()['alive'] is False
+    report={'sequence':1,'assignmentId':assignment['assignmentId'],'epoch':1,
+        'snapshot':{'state':{'status':'CANCELLED'},'generations':[],'candidates':[],'attempts':[],'events':[],'artifacts':[]}}
+    boot(c,h,'boot-1',processes=[process],reports=[report]);s.dispatch_once()
+    assert s.get(rid)['status']=='CANCELLED' and not r.reservations()
+    # Drain authority ends with the released assignment.
+    assert c.post('/api/v1/device/worker-command',headers=h,json={**command,'action':'poll'}).status_code==401
+
+
 def test_reports_deduplicate_and_reject_worker_fabricated_snapshot(lab):
     c,s,r,a=lab;d,h=pair(lab);worker,wh=pair(lab,'second',coordinator=False)
     enable(lab,d,h);enable(lab,worker,wh)
