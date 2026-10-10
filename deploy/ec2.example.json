@@ -1,0 +1,12 @@
+{
+  "region": "ap-southeast-1",
+  "instanceType": "t3.small",
+  "imageId": "RESOLVE_CANONICAL_UBUNTU_24_04_AMI",
+  "subnetId": "EXISTING_DEFAULT_PUBLIC_SUBNET",
+  "securityGroupId": "DEDICATED_GROUP_PORTS_80_443_AND_ADMIN_ONLY_22",
+  "keyName": "EXISTING_USER_OWNED_SSH_KEY",
+  "clientToken": "SET_A_STABLE_UUID_FOR_IDEMPOTENT_CREATION",
+  "pricingReviewed": false,
+  "billingAlertsConfigured": false,
+  "rootVolumeGiB": 20
+}

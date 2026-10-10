@@ -1,0 +1,10 @@
+{
+  "serverUrl": "https://YOUR_SUBDOMAIN.duckdns.org",
+  "workerId": "3060-thao",
+  "displayName": "Thao RTX 3060",
+  "stateDirectory": "/home/OWNER/.local/share/heteroes-m2/agent",
+  "modelPath": "/home/OWNER/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775",
+  "computeUrl": "http://100.92.20.58:8769",
+  "workerHost": "100.92.20.58",
+  "workerPort": 8769
+}

@@ -48,6 +48,12 @@ class Store:
             db.commit()
             migrate(db)
         os.chmod(path, 0o600)
+        with self.db() as db:
+            mode=db.execute('SELECT value FROM settings WHERE key=?',('controlMode',)).fetchone()
+            if mode and mode[0]=='agent-v2' and not getattr(runtime,'agent_mode',False):
+                raise RuntimeError('This database requires agent mode; legacy dispatch would be unsafe')
+        if hasattr(runtime, 'attach_store'):
+            runtime.attach_store(self)
         try:
             self.ensure_workers(runtime.capabilities()['workerIds'])
         except Exception:
@@ -107,7 +113,12 @@ class Store:
     def cancel_selected(self,db,worker_id):
         for row in db.execute('SELECT body FROM experiments').fetchall():
             b=json.loads(row[0])
-            if worker_id not in b['workerIds'] or b['status'] in TERMINAL | {'DRAFT'}:
+            coordinator = b.get('coordinatorDeviceId')
+            coordinator_alias = None
+            if coordinator and getattr(self.runtime, 'agent_mode', False):
+                row = db.execute('SELECT worker_id FROM devices WHERE id=?', (coordinator,)).fetchone()
+                coordinator_alias = row[0] if row else None
+            if worker_id not in set(b['workerIds']) | {coordinator_alias} or b['status'] in TERMINAL | {'DRAFT'}:
                 continue
             b['cancelRequested']=True
             if b['status']=='QUEUED':
@@ -144,6 +155,13 @@ class Store:
         ids = {r[0] for r in db.execute('SELECT worker_id FROM worker_assignments WHERE workspace_id=?',(body['workspaceId'],))}
         if not set(body['workerIds']) <= ids-self.disabled_workers(db):
             return 'Selected GPU assignment changed before launch'
+        if getattr(self.runtime, 'agent_mode', False):
+            co = db.execute('SELECT worker_id,status,owner FROM devices WHERE id=?', (body.get('coordinatorDeviceId'),)).fetchone()
+            if not co or co['status']!='APPROVED' or co['worker_id'] not in ids-self.disabled_workers(db):
+                return 'Coordinator approval or workspace assignment changed'
+            chosen = db.execute('SELECT owner,status FROM devices WHERE worker_id IN ('+','.join('?' for _ in body['workerIds'])+')',body['workerIds']).fetchall()
+            if len(chosen)!=len(body['workerIds']) or any(d['status']!='APPROVED' or self.profile(d['owner'])['accountStatus']!='ACTIVE' for d in [co,*chosen]):
+                return 'Device owner or approval was revoked'
         return None
 
     def get(self, run_id):
@@ -199,6 +217,11 @@ class Store:
                         db.execute('DELETE FROM queue WHERE run_id=?',(row[0],))
                         self.audit(db,'system','QUEUE_ACCESS_REVOKED',row[0],active['workspaceId'])
                         return
+                    if hasattr(self.runtime, 'waiting_reason') and (waiting := self.runtime.waiting_reason(active)):
+                        active['waitingReason'] = waiting
+                        self.save(db, active)
+                        return
+                    active.pop('waitingReason', None)
                     active.update(status="STARTING", startedAt=now())
                     self.save(db, active)
         if active is None:
@@ -208,6 +231,8 @@ class Store:
         # changes to an existing run and accepts retries of this exact payload.
         config = {"runId": run_id, "workerIds": active["workerIds"], "workload": active["task"],
                   **{key: active[key] for key in ("candidatesPerGeneration", "maxGenerations", "alpha", "sigma", "decodeEngine", "schedulerPolicy", "syncMode")}}
+        if getattr(self.runtime, 'agent_mode', False):
+            config.update(coordinatorDeviceId=active['coordinatorDeviceId'], backupPolicy=active.get('backupPolicy', {'interval':1,'retain':3}))
         try:
             self.runtime.submit(config)
         except RuntimeRejected as error:
@@ -225,13 +250,21 @@ class Store:
             body = self.get(run_id)
             state = snapshot["state"]
             body["status"] = state["status"]
+            if "cloudSync" in snapshot:
+                previous=body.get('cloudSync',{})
+                incoming=snapshot['cloudSync']
+                body['cloudSync']={**incoming}
+                if previous.get('lastCloudGeneration',-1)>incoming.get('lastCloudGeneration',-1):
+                    body['cloudSync'].update({k:previous[k] for k in ('lastCloudGeneration','pointId') if k in previous})
             generations = snapshot["generations"]
             complete = [item for item in generations if item["status"] == "COMPLETED"]
-            body["completedGenerations"] = len(complete)
-            if generations:
-                body["currentGenerationId"] = generations[-1]["generationId"]
-                body["committedCandidateCount"] = generations[-1]["committedCandidateCount"]
-                body["modelVersion"] = generations[-1]["modelVersion"]
+            body["completedGenerations"] = snapshot.get('completedGenerationCount',len(complete))
+            body['monitoringPartial']=bool(snapshot.get('monitoringPartial'))
+            latest=snapshot.get('latestGeneration') or (generations[-1] if generations else None)
+            if latest:
+                body["currentGenerationId"] = latest["generationId"]
+                body["committedCandidateCount"] = latest["committedCandidateCount"]
+                body["modelVersion"] = latest["modelVersion"]
             if state.get("failureReason"):
                 body["failureReason"] = state["failureReason"]
             if state.get("finalWeightsSha256"):

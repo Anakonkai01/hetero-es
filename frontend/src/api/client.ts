@@ -72,6 +72,13 @@ export function isServerError(error: unknown): boolean {
 }
 
 export async function downloadArtifact(id: string, name: string) {
+  if (!IS_MOCK && name.endsWith('.bin')) {
+    const health=await apiGet<{cloudStorageConfigured?:boolean}>('/api/v1/health');
+    if (health.cloudStorageConfigured) {
+      const ticket=await apiPost<{downloadUrl:string}>(`/api/v1/artifacts/${encodeURIComponent(id)}/download-ticket`);
+      const link=document.createElement('a');link.href=`${API_BASE_URL}${ticket.downloadUrl}`;link.download=name;link.click();return;
+    }
+  }
   return downloadFile(`/api/v1/artifacts/${encodeURIComponent(id)}/download`,name);
 }
 

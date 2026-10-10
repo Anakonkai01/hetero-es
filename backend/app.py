@@ -22,6 +22,12 @@ class Login(BaseModel):
     password: str = Field(max_length=200)
 
 
+class BackupPolicy(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    interval:int=Field(ge=1,le=1000,strict=True)
+    retain:int=Field(ge=1,le=1000,strict=True)
+
+
 class Configuration(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
     name: str = Field(min_length=3, max_length=160)
@@ -37,6 +43,8 @@ class Configuration(BaseModel):
     sigma: float = Field(default=.001, gt=0, le=1)
     decodeEngine: str = "hf_generate"
     datasetIds: list[str] = Field(default_factory=list)
+    coordinatorDeviceId: str | None = None
+    backupPolicy: dict | None = None
 
 
 def create_app(path, passwords, runtime, dispatch=True):
@@ -47,8 +55,14 @@ def create_app(path, passwords, runtime, dispatch=True):
         thread = threading.Thread(target=store.dispatch, args=(stop,), daemon=True)
         if dispatch:
             thread.start()
+        metadata_thread=None
+        if getattr(runtime,'storage_backend',None) is not None:
+            from .cloud_metadata import backup_loop
+            metadata_thread=threading.Thread(target=backup_loop,args=(store,app.state.storage,stop),daemon=True)
+            metadata_thread.start()
         yield
         stop.set()
+        if metadata_thread:metadata_thread.join(timeout=2)
         if dispatch:
             thread.join(timeout=2)
     app = FastAPI(title="HeteroES product API", lifespan=lifespan)
@@ -103,6 +117,18 @@ def create_app(path, passwords, runtime, dispatch=True):
         current = scoped(current,current['workspaceId'])
         cap = capabilities()
         body = config.model_dump()
+        if getattr(runtime, 'agent_mode', False):
+            co = next((d for d in runtime.devices() if d['deviceId']==body['coordinatorDeviceId']),None)
+            if not co or co['approvalStatus']!='APPROVED' or co['workspaceId']!=current['workspaceId'] or not co['selfTest']['coordinator']:
+                raise HTTPException(422, 'Select an approved coordinator in this workspace')
+            policy=body.get('backupPolicy') or {'interval':1,'retain':3}
+            if set(policy)!={'interval','retain'} or any(type(v) is not int or not 1<=v<=1000 for v in policy.values()):
+                raise HTTPException(422, 'Backup interval and retention must be integers from 1 to 1000')
+            body['backupPolicy']=policy
+        else:
+            if body['coordinatorDeviceId'] is not None or body['backupPolicy'] is not None:
+                raise HTTPException(422, 'Agent settings require agent deployment mode')
+            body.pop('coordinatorDeviceId'); body.pop('backupPolicy')
         if body["modelName"] != cap["modelId"] or body["modelArtifactId"] != "qwen-pinned":
             raise HTTPException(422, "Only the pinned Qwen model is supported")
         if body["schedulerPolicy"] not in cap["schedulerPolicies"] or body["syncMode"] not in cap["syncModes"]:
@@ -120,7 +146,7 @@ def create_app(path, passwords, runtime, dispatch=True):
 
     @app.get("/api/v1/health")
     def health():
-        return {"ok": True, "dataSource": "real", "runtimeIssue": store.last_error}
+        return {"ok": True, "dataSource": "real", "runtimeIssue": store.last_error, "agentMode":bool(getattr(runtime,"agent_mode",False)), "cloudStorageConfigured":bool(getattr(runtime,"storage_backend",None))}
 
     @app.post("/api/v1/auth/login")
     def sign_in(body: Login):
@@ -155,6 +181,7 @@ def create_app(path, passwords, runtime, dispatch=True):
         cap=capabilities()
         assigned=set(store.assignments(current['workspaceId'],include_disabled=True))
         return {**cap,'workerIds':store.assignments(current['workspaceId']),
+                'coordinatorDevices':[{'deviceId':d['deviceId'],'workerId':d['workerId']} for d in runtime.devices() if d['workspaceId']==current['workspaceId'] and d['approvalStatus']=='APPROVED' and d['selfTest']['coordinator']] if getattr(runtime,'agent_mode',False) else [],
                 'quarantinedWorkerIds':[w for w in cap.get('quarantinedWorkerIds',[]) if w in assigned]}
 
     @app.get("/api/v1/resources")
@@ -186,7 +213,7 @@ def create_app(path, passwords, runtime, dispatch=True):
         permitted = {body["experimentId"] for body in visible(current)}
         assigned = set(store.assignments(current['workspaceId'],include_disabled=True))
         enabled=set(store.assignments(current['workspaceId']))
-        return [{**value,'contributionEnabled':value['workerId'] in enabled, "allocatedTo": value.get("allocatedTo") if value.get("allocatedTo") in permitted else
+        return [{**value,'contributionEnabled':value['workerId'] in enabled and value.get('contributionEnabled',True), "allocatedTo": value.get("allocatedTo") if value.get("allocatedTo") in permitted else
                  "Workspace pool busy" if value.get("allocatedTo") else None} for value in values if value['workerId'] in assigned]
 
     @app.get('/api/v1/my-workers')
@@ -356,7 +383,37 @@ def create_app(path, passwords, runtime, dispatch=True):
     def empty(current=Depends(scoped)):
         return []
 
+    if getattr(runtime,'agent_mode',False):
+        @app.patch('/api/v1/experiments/{run_id}/backup-policy')
+        def backup_policy(run_id:str,policy:BackupPolicy,current=Depends(scoped)):
+            with store.db() as db:
+                body=authorized(run_id,current)
+                if body['status'] in TERMINAL:raise HTTPException(409,'Experiment is already finished')
+                body['requestedBackupPolicy']=policy.model_dump()
+                store.save(db,body)
+                assignment=db.execute('SELECT id,coordinator,epoch FROM assignments WHERE run_id=?',(run_id,)).fetchone()
+                if assignment:
+                    runtime._enqueue(db,assignment['coordinator'],'UPDATE_BACKUP_POLICY',{'assignmentId':assignment['id'],'epoch':assignment['epoch'],'policy':policy.model_dump()},'backup-policy:'+secrets.token_hex(16))
+                store.audit(db,current['userId'],'BACKUP_POLICY_REQUESTED',run_id,body['workspaceId'])
+            return {'policy':policy.model_dump(),'appliesBeforeNextGeneration':True}
+
+        @app.get('/api/v1/experiments/{run_id}/monitoring-events')
+        def monitoring_events(run_id:str,afterSequence:int=0,current=Depends(scoped)):
+            authorized(run_id,current)
+            with store.db() as db:
+                return [{'sequence':r['sequence'],'eventId':r['event_id'],'event':json.loads(r['body'])} for r in db.execute(
+                    'SELECT e.* FROM monitoring_events e JOIN assignments a ON a.id=e.assignment_id WHERE a.run_id=? AND e.sequence>? ORDER BY e.sequence LIMIT 2000',(run_id,max(0,afterSequence)))]
+
     install_lab_routes(app,store,user,scoped,runtime)
+    if getattr(runtime, 'agent_mode', False):
+        from .devices import install_device_routes
+        device_auth=install_device_routes(app,store,user,runtime)
+        if runtime.storage_backend is not None:
+            from .cloud_storage import CloudStorage, install_storage_routes
+            storage=CloudStorage(store,runtime.storage_backend)
+            app.state.storage=storage
+            runtime.storage=storage
+            install_storage_routes(app,store,storage,device_auth,user,scoped,authorized)
 
     @app.api_route("/api/v1/{unsupported:path}", methods=["POST", "PATCH", "DELETE"])
     def unavailable(unsupported: str, current=Depends(scoped)):
@@ -368,5 +425,13 @@ def app_from_environment():
     root = Path(os.environ.get("HETEROES_PRIVATE_CONFIG", str(Path.home() / ".config/heteroes-integration")))
     credentials = json.loads((root / "credentials.json").read_text())
     config = json.loads((root / "config.json").read_text())
-    runtime = Runtime("http://127.0.0.1:" + str(config.get("controlPort", 8766)), credentials["runtime_token"])
+    if config.get('deploymentMode') == 'agent':
+        from .devices import AgentRuntime
+        storage_backend=None
+        if config.get('storageFile'):
+            from .cloud_storage import S3Backend
+            storage_backend=S3Backend(json.loads(Path(config['storageFile']).read_text()))
+        runtime = AgentRuntime(storage_backend)
+    else:
+        runtime = Runtime("http://127.0.0.1:" + str(config.get("controlPort", 8766)), credentials["runtime_token"])
     return create_app(Path(config["productStateDirectory"]) / "product.sqlite", credentials["users"], runtime)

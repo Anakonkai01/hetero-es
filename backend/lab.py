@@ -256,7 +256,7 @@ def install_lab_routes(app, store, user, scoped, runtime):
                 b=json.loads(r[0])
                 if b['workspaceId']==current['workspaceId'] and b['experimentId'] in positions and (current['workspaceRole']=='ADMIN' or b['ownerUserId']==current['userId']):
                     result.append({'experimentId':b['experimentId'],'position':positions[b['experimentId']],
-                                   'reason':'Maintenance hold' if held else 'Waiting for runtime release' if b['status']=='QUEUED' else b['status']})
+                                   'reason':'Maintenance hold' if held else b.get('waitingReason','Waiting for runtime release') if b['status']=='QUEUED' else b['status']})
             return result
 
     @app.get('/api/v1/platform/audit')
@@ -276,6 +276,10 @@ def install_lab_routes(app, store, user, scoped, runtime):
     def contribution(worker_id:str,body:Contribution,current=Depends(active)):
         with store.operation_lock:
             with store.db() as db:
+                if getattr(runtime,'agent_mode',False) and body.ownerUserId:
+                    enrolled=db.execute('SELECT owner FROM devices WHERE worker_id=?',(worker_id,)).fetchone()
+                    if enrolled and enrolled[0]!=body.ownerUserId:
+                        raise HTTPException(409,'Revoke and re-enroll the device before changing its owner')
                 current=active(current)
                 row=db.execute('SELECT * FROM worker_assignments WHERE worker_id=?',(worker_id,)).fetchone()
                 if not row or (not current.get('platformAdmin') and row['owner']!=current['userId']):
@@ -323,7 +327,11 @@ def install_lab_routes(app, store, user, scoped, runtime):
         with store.db() as db:
             held=json.loads(db.execute('SELECT value FROM settings WHERE key="dispatchHold"').fetchone()[0])
             queue_count=db.execute('SELECT count(*) FROM queue').fetchone()[0]
+            metadata=db.execute('SELECT value FROM settings WHERE key="metadataBackupStatus"').fetchone()
         result={'dispatchHeld':held,'queueCount':queue_count,'runtimeIssue':store.last_error,
+                'agentMode':bool(getattr(runtime,'agent_mode',False)),
+                'cloudStorageConfigured':getattr(runtime,'storage_backend',None) is not None,
+                'metadataBackup':json.loads(metadata[0]) if metadata else None,
                 'productService':'ONLINE','runtimeService':'UNAVAILABLE','workers':[],'reservations':[]}
         try:
             cap=runtime.capabilities()
@@ -354,6 +362,8 @@ def install_lab_routes(app, store, user, scoped, runtime):
 
     @app.post('/api/v1/platform/backups',status_code=201)
     def backup(current=Depends(platform)):
+        if getattr(runtime,'agent_mode',False):
+            raise HTTPException(409,'Use experiment recovery points and product metadata backups in agent mode')
         with store.operation_lock:
             platform(current)
             return create_bundle(store,current['userId'])

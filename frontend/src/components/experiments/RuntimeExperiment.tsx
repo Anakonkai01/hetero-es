@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
-import { apiGet, downloadArtifact } from "../../api/client";
+import { apiGet, apiPatch, downloadArtifact } from "../../api/client";
 import { archiveExperiment, requestExperimentCancel, submitExperiment, updateExperiment } from "../../api/experiments";
 import { useSession, useScopeKey } from "../../app/session";
 import { useAccessMutation } from "../../hooks/useAccess";
@@ -11,7 +11,7 @@ import { useArtifacts } from "../../hooks/useArtifacts";
 import type { CreateExperimentRequest, Experiment } from "../../types/experiment";
 import { RewardChart } from "./RewardChart";
 
-interface Capabilities { modelId: string; modelRevision: string; workloads: string[]; schedulerPolicies: string[]; syncModes: string[]; workerIds: string[] }
+interface Capabilities { agentMode?:boolean;coordinatorDevices?:{deviceId:string;workerId:string}[]; modelId: string; modelRevision: string; workloads: string[]; schedulerPolicies: string[]; syncModes: string[]; workerIds: string[] }
 export function RuntimeConfiguration({ initial, onSave, pending }: { initial?: Experiment; onSave: (value: CreateExperimentRequest) => Promise<unknown>; pending: boolean }) {
   const scope = useScopeKey(); const workers = useWorkers();
   const cap = useQuery({ queryKey: ["capabilities", ...scope], queryFn: () => apiGet<Capabilities>("/api/v1/capabilities"), enabled: scope.every(Boolean) });
@@ -23,6 +23,9 @@ export function RuntimeConfiguration({ initial, onSave, pending }: { initial?: E
   const [sigma, setSigma] = useState(initial?.sigma ?? .001);
   const [decoder, setDecoder] = useState(initial?.decodeEngine ?? "hf_generate");
   const [selected, setSelected] = useState<string[]>(initial?.workerIds ?? []);
+  const [coordinator,setCoordinator]=useState(initial?.coordinatorDeviceId??"");
+  const [interval,setInterval]=useState(initial?.backupPolicy?.interval??1);
+  const [retain,setRetain]=useState(initial?.backupPolicy?.retain??3);
   const [error, setError] = useState("");
   const available = workers.data ?? [];
   return <form className="cb demo-form" onSubmit={(event) => {
@@ -30,6 +33,7 @@ export function RuntimeConfiguration({ initial, onSave, pending }: { initial?: E
     if (!cap.data || !selected.length) { setError("Select at least one configured worker."); return; }
     void onSave({ name, modelName: cap.data.modelId, modelArtifactId: "qwen-pinned", task,
       maxGenerations: generations, candidatesPerGeneration: candidates, alpha, sigma, decodeEngine: decoder,
+      ...(cap.data.agentMode?{coordinatorDeviceId:coordinator,backupPolicy:{interval,retain}}:{}),
       workerIds: selected, schedulerPolicy: "greedy", syncMode: "synchronous" }).catch((e: Error) => setError(e.message));
   }}>
     <p>Shared GPU pool · FIFO · one active experiment. Runs stop after 30 minutes.</p>
@@ -46,8 +50,9 @@ export function RuntimeConfiguration({ initial, onSave, pending }: { initial?: E
     <label className="fg">Sigma<input className="inp" type="number" min={.0000001} max={1} step="any" required value={sigma} onChange={(e) => setSigma(Number(e.target.value))} /></label>
     <label className="fg">Scheduling<select className="sel" value="greedy" disabled><option>greedy</option><option disabled>capacity-weighted (not configured)</option><option disabled>round-robin (not configured)</option></select></label>
     <label className="fg">Synchronization<select className="sel" value="synchronous" disabled><option>synchronous</option><option disabled>asynchronous (unsupported)</option></select></label>
-    <fieldset><legend>Configured workers</legend>{workers.isError && <p role="alert">Worker status unavailable</p>}{available.map((worker) => <label className="demo-check" key={worker.workerId}><input type="checkbox" disabled={worker.contributionEnabled===false&&!selected.includes(worker.workerId)} checked={selected.includes(worker.workerId)} onChange={() => setSelected((ids) => ids.includes(worker.workerId) ? ids.filter((id) => id !== worker.workerId) : [...ids, worker.workerId])} />{worker.profile.gpuName} · {worker.workerId} · {worker.status}{worker.contributionEnabled===false?' · Contribution off':''}</label>)}{selected.filter(id=>!available.some(w=>w.workerId===id)).map(id=><label className="demo-check" key={id}><input type="checkbox" checked onChange={()=>setSelected(ids=>ids.filter(value=>value!==id))} />{id} · No longer available in this workspace; uncheck to remove</label>)}</fieldset>
-    <p className="hint">Selected workers are started automatically. An unavailable selected worker is reported; the run may continue with the other selected workers.</p>
+    {cap.data?.agentMode && <><label className="fg">Coordinator<select aria-label="Coordinator" className="sel" required value={coordinator} onChange={e=>setCoordinator(e.target.value)}><option value="">Select coordinator</option>{cap.data.coordinatorDevices?.map(d=><option key={d.deviceId} value={d.deviceId}>{d.workerId}</option>)}</select></label><label className="fg">Backup every K generations<input className="inp" type="number" min={1} max={1000} required value={interval} onChange={e=>setInterval(Number(e.target.value))}/></label><label className="fg">Keep N recovery points<input className="inp" type="number" min={1} max={1000} required value={retain} onChange={e=>setRetain(Number(e.target.value))}/></label></>}
+    <fieldset><legend>Configured workers</legend>{workers.isError && <p role="alert">Worker status unavailable</p>}{available.map((worker) => <label className="demo-check" key={worker.workerId}><input type="checkbox" disabled={!cap.data?.agentMode&&worker.contributionEnabled===false&&!selected.includes(worker.workerId)} checked={selected.includes(worker.workerId)} onChange={() => setSelected((ids) => ids.includes(worker.workerId) ? ids.filter((id) => id !== worker.workerId) : [...ids, worker.workerId])} />{worker.profile.gpuName} · {worker.workerId} · {worker.status}{worker.contributionEnabled===false?' · Contribution off':''}</label>)}{selected.filter(id=>!available.some(w=>w.workerId===id)).map(id=><label className="demo-check" key={id}><input type="checkbox" checked onChange={()=>setSelected(ids=>ids.filter(value=>value!==id))} />{id} · No longer available in this workspace; uncheck to remove</label>)}</fieldset>
+    <p className="hint">{cap.data?.agentMode?'Jobs wait in the queue while selected devices are offline or contribution is OFF. Closing the browser does not cancel the job.':'Selected workers are started automatically. An unavailable selected worker is reported; the run may continue with the other selected workers.'}</p>
     <label className="fg">Upload dataset<input type="file" disabled /></label><span className="hint">Built-in workloads only; dataset upload is unsupported.</span>
     <button type="button" className="btn" disabled title="Only the pinned model is supported">Upload model</button>
     {error && <p className="note err" role="alert">{error}</p>}
@@ -60,12 +65,18 @@ export function RuntimeControls({ experiment: e }: { experiment: Experiment }) {
   const submit = useAccessMutation(submitExperiment); const cancel = useAccessMutation(requestExperimentCancel);
   const archive = useAccessMutation(archiveExperiment); const edit = useAccessMutation(updateExperiment);
   const [editing, setEditing] = useState(false);
+  const policy=useAccessMutation((value:{interval:number;retain:number})=>apiPatch(`/api/v1/experiments/${e.experimentId}/backup-policy`,value));
+  const [backupInterval,setBackupInterval]=useState(e.requestedBackupPolicy?.interval??e.backupPolicy?.interval??1);
+  const [backupRetain,setBackupRetain]=useState(e.requestedBackupPolicy?.retain??e.backupPolicy?.retain??3);
   const permitted = e.ownerUserId === session?.user.userId || workspace?.role === "ADMIN";
   const terminal = ["COMPLETED", "CANCELLED", "FAILED", "DRAFT"].includes(e.status);
   const error = submit.error ?? cancel.error ?? archive.error ?? edit.error;
   const busy = submit.isPending || cancel.isPending || archive.isPending || edit.isPending;
   return <section className="card"><div className="ch"><h2>Experiment management</h2></div><div className="cb demo-form">
     <p>Selected workers: {e.workerIds?.join(", ")}</p>
+    {e.waitingReason && <p className="note">{e.waitingReason}</p>}
+    {e.cloudSync && <p>Cloud sync: {e.cloudSync.status} · Last cloud generation: {e.cloudSync.lastCloudGeneration??'None'} {e.cloudSync.errorType}</p>}
+    {e.monitoringPartial && <p>Dashboard details show recent history. Full canonical history is retained in recovery points.</p>}
     {e.failureReason && <p className="note err" role="alert">{e.failureReason}</p>}
     {error && <p className="note err" role="alert">{error.message}</p>}
     {permitted && <div className="acts">
@@ -76,6 +87,7 @@ export function RuntimeControls({ experiment: e }: { experiment: Experiment }) {
       {terminal && <button className="btn dng" disabled={busy} onClick={() => { if (window.confirm("Archive this experiment and retain its evidence?")) void archive.mutateAsync(e.experimentId).then(() => navigate("/experiments")).catch(() => {}); }}>Archive</button>}
     </div>}
     {e.cancelRequested && !terminal && <p className="note">Stopping new leases; waiting for current candidates to restore and all selected workers to stop. The last completed checkpoint is retained.</p>}
+    {permitted && e.coordinatorDeviceId && !['COMPLETED','CANCELLED','FAILED'].includes(e.status) && <form onSubmit={event=>{event.preventDefault();policy.mutate({interval:backupInterval,retain:backupRetain});}}><label className="fg">Backup interval<input className="inp" type="number" required min={1} max={1000} value={backupInterval} onChange={event=>setBackupInterval(Number(event.target.value))}/></label><label className="fg">Recovery points to retain<input className="inp" type="number" required min={1} max={1000} value={backupRetain} onChange={event=>setBackupRetain(Number(event.target.value))}/></label><button className="btn" disabled={policy.isPending}>Apply backup policy at next generation</button>{policy.error && <p role="alert">{policy.error.message}</p>}</form>}
     {editing && e.status === "DRAFT" && <RuntimeConfiguration initial={e} pending={edit.isPending} onSave={async (configuration) => { await edit.mutateAsync({ experimentId: e.experimentId, configuration }); setEditing(false); }} />}
   </div></section>;
 }

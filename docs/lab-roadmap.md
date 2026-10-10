@@ -1,7 +1,7 @@
 # Lab product roadmap
 
-Status: accepted by the owner; M1 implemented and verified locally. M2–M6 remain
-planned. Recorded on
+Status: accepted by the owner; M1 implemented and verified locally. M2 is in
+implementation; M3–M6 remain planned. Revised on
 2026-10-10 from the planning conversation. This file records decisions and
 acceptance gates, not claims that future milestones have been implemented.
 
@@ -12,8 +12,9 @@ acceptance gates, not claims that future milestones have been implemented.
 - Track B: this repository, integration baseline `7532750`.
 - M1 branches: A `feat/lab-operations-control`; B
   `feat/lab-operations-product`. Preserve the previous integration branches.
-- Local development and commits are authorized. Do not push, merge, tag, change
-  GPU drivers, replace existing Python environments, or publish a public service.
+- Local development, isolated device deployments and M2 cloud deployment within
+  the agreed free-tier limits are authorized. Do not push, merge, tag, change
+  GPU drivers or replace existing Python environments.
 - Keep credentials outside Git. Preserve run IDs, canonical recipes, ledgers,
   checkpoint evidence, and the existing GPU budget. Approximately 0.177 of the
   previously authorized 2 GPU-hours had been consumed at planning time; calculate
@@ -35,9 +36,10 @@ worker packaging. The eventual worker application uses Electron/React and an
 isolated Python runtime. Nontechnical owners should install, sign in and run a
 self-test without SSH, Tailscale or WSL commands.
 
-Start network deployment with LAN and a stable named Cloudflare Tunnel. A VPS is
-an optional later migration, not an initial prerequisite. Public deployment is
-outside M1. Domain and tunnel configuration must be settled before M3 publishing.
+M2 adds a CPU-only AWS control server, R2 storage and a fixed free HTTPS address
+(DuckDNS unless the owner supplies another address). Keep Tailscale for compute
+traffic initially. A Cloudflare compute tunnel and desktop installers are later
+work; the owner's cloud proposal is background, not a requirement to reproduce.
 
 Contribution defaults to OFF, requires explicit activation and does not resume
 automatically after restarting the app. Closing its window keeps the tray
@@ -112,13 +114,72 @@ Acceptance gate:
 
 ## M2 — GPU-independent control and worker identity
 
-Separate control services from GPU execution. Introduce authenticated worker
-identity and outbound management transport. A normal CPU host can operate the
-lab, and workers connect without inbound SSH. Retain safe cancellation, replay,
-admission and persistent quarantine.
+Accepted revision, 2026-10-10: website remains available and accepts queued jobs
+when GPUs are off. Cloud and local use the same product. Keep SQLite and one
+backend process, with one global active experiment until M4. Preserve accounts,
+workspace isolation, numerical recipes, ledger ownership and M1 history.
 
-Gate: authenticated worker lifecycle, disconnect/reconnect and stale identity
-handling on a server without a GPU; numerical and failure regressions pass.
+Implementation branches: A `feat/m2-agent-runtime` from `a084418`; B
+`feat/m2-cloud-control` from `a3e39db`.
+
+1. CPU server owns users/workspaces, device registry, durable assignments,
+   queue, cached monitoring and artifact permissions. It never loads CUDA,
+   canonical weights or a live candidate ledger.
+2. CLI GPU agents connect outbound over HTTPS. Pairing codes expire after ten
+   minutes and are single-use. Devices have UUIDs, owner identity, revocable
+   credentials, self-test evidence and separate administrator approval.
+   Preserve legacy worker aliases; add Thao's 3060 under a distinct alias.
+3. Contribution resets OFF on each agent boot. Explicit owner activation is
+   bound to that boot. Adopt owned surviving processes without relaunching;
+   recovering a dead coordinator requires activation. Commands are typed and
+   idempotent; never accept arbitrary shell commands or paths from the browser.
+4. Select a coordinator explicitly from approved capable devices. Reserve the
+   coordinator and every selected worker atomically. A heartbeat timeout only
+   changes connectivity; it never releases ownership or launches a replacement.
+   Release requires confirmed process shutdown on every selected device.
+   Assignment/epoch checks fence stale reports and commands. Do not automatically
+   fail over while a previous coordinator may still compute.
+5. Compute credentials bind each authenticated device to its worker alias and
+   assignment. Existing computation continues through control-server outages;
+   durable local events are replayed with deduplication when connectivity returns.
+   Queued jobs wait for selected devices; no silent device substitution.
+6. Recovery points include consistent SQLite backups, required immutable
+   weights, configuration, recipe/revisions and checksums, captured at completed
+   generation barriers. Defaults: interval K=1 and retain N=3; configurable.
+   Always retain a final point. Operational backup policy does not change Recipe
+   v1 numerical identity. Upload asynchronously and publish a manifest last.
+7. Use private Cloudflare R2 through a minimal S3-compatible backend. Master
+   storage keys stay on the CPU server; agents get limited upload URLs. Verify
+   content, size and manifest before READY; ETags are not SHA-256. Downloads
+   require workspace authorization. No public bucket or secret-bearing logs.
+8. Stay within free storage: 8 GB project quota including reserved uploads and
+   multipart data, warnings plus hard upload rejection. Check account-wide usage
+   and request limits. Quota/network errors leave computation running and keep
+   consistent local points with visible pending/error sync state. Retention must
+   preserve referenced objects and previous valid points until a new point is
+   verified. Product database backups: hourly, up to 24 within quota.
+9. Import M1 metadata and one selected sample checkpoint; keep the complete
+   33.6 GB M1 backup locally. Restore to a fresh directory, verify hashes, hold
+   dispatch and retain lineage. No imported PID reuse or automatic reassignment.
+10. AWS: verify actual Free Plan, credits, expiry and instance eligibility before
+    provisioning. Prefer eligible x86 `t3.small`, Singapore; use `t3.micro` if
+    necessary. Do not upgrade to Paid Plan. CPU credits use standard mode.
+    Single API/static website with automatic HTTPS; no NAT gateway, ALB or RDS.
+    Keep API internals private. Cloud admin password is separate and at least
+    12 characters; local admin stays as configured by the owner.
+
+Sequence: M2a local CPU control/agents and fault tests; M2b verified storage and
+restore; M2c real AWS deployment and idle cutover. Prepare code and deployment
+configuration before asking for missing cloud authentication. Hold the legacy
+dispatcher before any agent GPU campaign or cutover. Rollback retains the latest
+M2 database with dispatch held, rather than downgrading new history to M1.
+
+Gate: CPU/device/auth/outage/stale-command tests; relevant runtime/backend and
+frontend checks; real R2 upload/download/restore; actual cloud browser access;
+5070 Ti plus Quang's and Thao's 3060 each commit candidates. Use at most another
+0.5 GPU-hours within the original 2-hour budget, recalculated before execution.
+M2 remains incomplete without the cloud and three-device evidence. Record progress
+and blockers in [m2-implementation.md](m2-implementation.md).
 
 ## M3 — Installable Windows/Linux product and networking
 

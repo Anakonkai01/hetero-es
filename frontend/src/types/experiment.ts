@@ -17,11 +17,17 @@ export type SchedulerPolicy = "capacity-weighted" | "round-robin" | "greedy";
 export type SyncMode = "synchronous" | "asynchronous";
 
 export interface Experiment {
+  monitoringPartial?: boolean;
   experimentId: string;
   name: string;
   workspaceId?: string;
   ownerUserId?: string;
   workerIds?: string[];
+  coordinatorDeviceId?: string;
+  backupPolicy?: {interval:number;retain:number};
+  requestedBackupPolicy?: {interval:number;retain:number};
+  waitingReason?: string;
+  cloudSync?: {status:string;lastCloudGeneration?:number;errorType?:string};
   modelArtifactId?: string;
   archivedAt?: string;
   maxGenerations?: number;
@@ -65,6 +71,11 @@ export interface CreateExperimentRequest {
   schedulerPolicy: SchedulerPolicy;
   syncMode: SyncMode;
   workerIds?: string[];
+  coordinatorDeviceId?: string;
+  backupPolicy?: {interval:number;retain:number};
+  requestedBackupPolicy?: {interval:number;retain:number};
+  waitingReason?: string;
+  cloudSync?: {status:string;lastCloudGeneration?:number;errorType?:string};
   modelArtifactId?: string;
   task?: string;
   maxGenerations?: number;

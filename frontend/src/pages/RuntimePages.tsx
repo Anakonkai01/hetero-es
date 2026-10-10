@@ -7,6 +7,7 @@ import { QueryState } from "../components/common/QueryState";
 import { WorkerMetrics } from "../components/workspace/WorkerMetrics";
 import { LabMembership } from './LabMembership';
 import { LabProfile } from './LabProfile';
+import { LabDevices } from './LabDevices';
 import { LabContributions } from './LabContributions';
 
 export function RuntimeWorkspacePage() {
@@ -26,7 +27,7 @@ function RuntimeWorkerCards() {
 
 export function RuntimeWorkersPage() {
   const {workspace}=useSession();
-  return <><PageHeader title="Workers" description="Live probes of configured GPUs in the selected workspace." actions={<button className="btn" disabled title="Add hosts in the private runtime configuration">Register worker</button>} /><LabContributions />{workspace ? <RuntimeWorkerCards /> : <p>Join a workspace to view its live GPU inventory.</p>}</>;
+  return <><PageHeader title="Workers" description="Live probes of configured GPUs in the selected workspace." actions={<button className="btn" disabled title="Add hosts in the private runtime configuration">Register worker</button>} /><LabDevices /><LabContributions />{workspace ? <RuntimeWorkerCards /> : <p>Join a workspace to view its live GPU inventory.</p>}</>;
 }
 
 export function RuntimeModelsPage() {
