@@ -26,8 +26,12 @@ def assert_idle(manager):
         state=manager.state(root)
         if state.get('status') not in ('COMPLETED','CANCELLED','FAILED'):
             raise RuntimeError('Runtime ownership is not idle')
-        if alive(read_json(root/'process.json')):
+        record=read_json(root/'process.json')
+        child=manager.processes.get(root.name)
+        if alive(record) or (child is not None and child.poll() is None):
             raise RuntimeError('A coordinator is still alive')
+        if record and not record.get('birth') and child is None:
+            raise RuntimeError('Coordinator shutdown cannot be confirmed')
         if any(not v.get('notStarted') and (v.get('alive') or not v.get('confirmed'))
                for v in state.get('workerStates',{}).values()):
             raise RuntimeError('Worker shutdown is unconfirmed')

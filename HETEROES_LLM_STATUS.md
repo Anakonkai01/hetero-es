@@ -1,6 +1,6 @@
 # HeteroES-LLM — Status
 
-**Last updated:** 10/10/2026 — Track B product integration and required two-GPU acceptance; see the first update below. The 09/10 decoder, profiling and research evidence and earlier milestones remain in the following blocks. Newest verified updates appear first; sections 1–13 were written on 30/09 and are older background.
+**Last updated:** 10/10/2026 — M1 lab operations completed and verified locally; see the first update below. The 09/10 decoder, profiling and research evidence and earlier milestones remain in the following blocks. Newest verified updates appear first; sections 1–13 were written on 30/09 and are older background.
 **Canonical design/specification:** `HETEROES_LLM_MASTER.md`  
 **Purpose:** current implementation truth, verified evidence, blockers, artifacts, and the exact next action.
 
@@ -8,32 +8,56 @@
 
 ## 0. NEXT SESSION — START HERE
 
-### UPDATE 10/10/2026 — M1 lab operations in progress
+### UPDATE 10/10/2026 — M1 lab operations completed (local implementation; awaiting owner review)
 
-New authorized implementation branches: A `feat/lab-operations-control`, based
-on `51e1b2a`; B `feat/lab-operations-product`, based on `7532750`. Previous
-integration branches are preserved. The accepted complete M1–M6 roadmap is saved
-in B's `docs/lab-roadmap.md`, with progress in `docs/m1-implementation.md`.
+Implementation branches: A `feat/lab-operations-control`, based on `51e1b2a`;
+B `feat/lab-operations-product`, based on `7532750`. Previous integration branches
+and the original research worktree are preserved. The complete accepted M1–M6
+roadmap is in B's `docs/lab-roadmap.md`; M1 completion is recorded in
+`docs/m1-implementation.md`. M2–M6 remain planned. Local commits only; no push,
+merge, tag, driver upgrade or replacement of existing Python environments.
 
-Track A now supports durable idle maintenance and runtime-owned snapshots;
-see `docs/lab-operations.md`. Full CPU suite: 2,141 passed, 21 skipped.
-Maintenance restart, unconfirmed shutdown, archive contents and symlink refusal
-are tested. A scratch mutation bypassing the maintenance launch guard is caught.
-No numerical algorithm, recipe or worker evaluation code changed for M1.
+Track A supports durable idle maintenance, runtime-owned verified snapshots,
+unknown-coordinator/shutdown rejection and retirement of completed transfer
+archives. No numerical algorithm, recipe or worker evaluation code changed.
+Track B delivers account registration/approval/suspension, explicit platform
+permissions, workspace creation/invitations/roles, scoped experiment and child
+route access, GPU contribution assignment, queue visibility, operations/audit,
+consistent idle backup and safe new-directory restore. Static host configuration,
+manual startup and one global active run remain the deployment boundary.
 
-Track B migration was checked against a separate copy of the existing database:
-14 experiment IDs/bodies/snapshots, FIFO sequence, existing password hashes and
-sessions preserved. Original database was untouched during this check. Product
-identity/membership/backup tests and frontend checks are in progress; do not
-interpret this update as complete M1 browser or hardware acceptance.
+**Verified:** A full CPU suite 2,143 passed, 21 skipped; B backend 45 passed;
+frontend build/lint and 22 explicit mock behavior groups passed. Workspace and
+maintenance scratch mutations were caught. Migration on a copy and then the live
+database preserved all 14 original experiments, FIFO, password hashes and sessions.
+Real browser registration, approval, workspace creation, invitations, owner
+isolation, contribution reassignment, cancellation and session revocation passed.
+The acceptance account is suspended and its history retained; its 3060 assignment
+was returned to `lab`.
 
-GPU usage was recalculated from all 12 existing runtime runs: conservative
-0.558 GPU-hours used of the original 2 GPU-hour budget before M1 hardware checks.
-The previous nine-run 0.177 figure below is historical. No budget reset.
+Required two-GPU run `096b09ec03ab4d8b9ca189596593db3a` completed N=8/G=3 on
+5070 Ti and Quang's 3060: 17 + 7 accepted results, three published generations,
+confirmed worker shutdown. Final downloaded checkpoint SHA-256:
+`987541249378460c668ff9865cbcc5823331eddae4bdfbebd87a532977b96c38`.
 
-Next: finish and verify the real M1 interface, safe live migration, idle backup
-round trip and hardware/browser acceptance. Preserve all previous evidence,
-private credentials and the original research worktree.
+A real 33,597,880,320-byte idle backup restored into a new deployment: historical
+tables, 16 experiments and 13 checkpoint references retained, sessions revoked,
+queue held, fresh runtime credentials and independent process/worker paths, no
+old PID records. Separate-port cold boot passed preserved-password login and
+actual checkpoint download with the same checksum; no GPU jobs launched.
+Auxiliary services were stopped afterwards. Original services remain available
+at the private UI on port 5173. Backup, restored data and raw evidence stay outside
+Git. Final transfer cleanup and checksum-held dispatch refinements were CPU-tested
+following the full-size acceptance campaign.
+
+Evidence: `artifacts/experiments/2026-10-10-m1-lab-operations/`.
+Operation contract: `docs/lab-operations.md`; product operator guide:
+B `docs/lab-operations.md`. The optional 1660S is still unavailable/unvalidated.
+Conservative cumulative GPU usage across 14 runs: 0.605631 of the original
+2 GPU-hours consumed; 1.394369 remain. Previous lower figures below are historical.
+
+Next: owner review of M1 and use the saved roadmap for subsequent M2 work.
+Original research follow-ups and evidence remain open and unchanged.
 
 ### UPDATE 10/10/2026 — Track B integration (written by the AI; awaiting owner review)
 

@@ -61,3 +61,22 @@ def test_runtime_snapshot_rejects_symlink_sources(manager,tmp_path):
     hold=manager.acquire_maintenance()
     with pytest.raises(ValueError,match='symlink'):
         manager.create_backup(hold['maintenanceId'])
+
+
+def test_retiring_transfer_archive_keeps_original_run_evidence(manager):
+    manager.submit(config())
+    root=manager.directory('a'*32);manager.save(root,status='COMPLETED')
+    (root/'evidence.txt').write_text('original evidence')
+    hold=manager.acquire_maintenance();backup=manager.create_backup(hold['maintenanceId'])
+    path=manager.backup_path(backup['backupId'])
+    manager.discard_backup(backup['backupId'])
+    assert not path.exists()
+    assert (root/'evidence.txt').read_text()=='original evidence'
+
+
+def test_unknown_coordinator_identity_blocks_maintenance(manager):
+    manager.submit(config());root=manager.directory('a'*32)
+    manager.save(root,status='COMPLETED')
+    write_json(root/'process.json',{'pid':99999999,'birth':None})
+    with pytest.raises(RuntimeError,match='cannot be confirmed'):
+        manager.acquire_maintenance()

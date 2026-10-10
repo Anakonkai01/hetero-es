@@ -138,6 +138,12 @@ class Manager:
         from .backup import backup_path
         return backup_path(self,backup_id)
 
+    def discard_backup(self,backup_id):
+        # This retires a completed transfer archive only, never run evidence.
+        with self.lock:
+            self.backup_path(backup_id).unlink()
+            return {'discarded':True}
+
     def remote(self, worker, request):
         python, source = worker["python"], worker["source"]
         request = {**request, "directory": worker["stateDirectory"] + "/" + request.get("runId", "probe")}
@@ -440,6 +446,8 @@ def main():
                         while block:=stream.read(1024*1024):
                             self.wfile.write(block)
                     return
+                if self.command=='DELETE' and len(parts)==2 and parts[0]=='backups':
+                    return self.reply(200,manager.discard_backup(parts[1]))
                 if self.command == "GET" and parts == ["capabilities"]:
                     return self.reply(200, {**capabilities(manager.workers),
                                            "quarantinedWorkerIds": list(read_json(manager.root / "quarantine.json", {}))})
@@ -485,6 +493,7 @@ def main():
                 self.reply(409, {"message": str(error)})
         do_GET = dispatch
         do_POST = dispatch
+        do_DELETE = dispatch
     ThreadingHTTPServer(("127.0.0.1", config.get("controlPort", 8766)), Handler).serve_forever()
 
 
