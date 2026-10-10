@@ -39,6 +39,10 @@ class CoordinatorError(Exception):
     """A generation could not be completed, or the experiment cannot be taken up again."""
 
 
+class RunCancelled(CoordinatorError):
+    """A managed run stopped at a safe boundary, preserving recorded updates."""
+
+
 _DEFAULT = object()
 MIN_STALL_SECONDS = 60.0
 STALL_LEASES = 5
@@ -58,7 +62,7 @@ class Coordinator:
                  candidates: int, alpha: float, policy_factory=Greedy, lease_seconds: float = 120.0, host: str = "127.0.0.1",
                  port: int = 0, token: str | None = None, poll_seconds: float = 0.2, failed_grace_seconds: float = 5.0,
                  timeout_seconds: float | None = None, stall_seconds=_DEFAULT, keep_published: int | None = 3, allow_unauthenticated: bool = False, log=lambda event: None, timer=time.perf_counter,
-                 monotonic=time.monotonic, sleep=time.sleep):
+                 monotonic=time.monotonic, sleep=time.sleep, cancel_requested=lambda: False):
         self.model = model
         self.schema = schema
         self.recipe = recipe
@@ -79,6 +83,7 @@ class Coordinator:
         self._timer = timer
         self._monotonic = monotonic
         self._sleep = sleep
+        self._cancel_requested = cancel_requested
         self.parent_sha256 = model_weights_sha256(model, schema)
         self._parent_published = False
         self.server = CoordinatorServer(_NoGeneration(), job=None, models_dir=models_dir, host=host, port=port, token=token,
@@ -106,6 +111,7 @@ class Coordinator:
         started, failed_since = self._monotonic(), None
         progress, progress_at = None, started
         while True:
+            self._check_cancel()
             status = self.ledger.get_generation_status(self.experiment_id, generation)
             now = self._monotonic()
             if status.state is GenerationState.COMPLETE:
@@ -126,6 +132,10 @@ class Coordinator:
                 raise TimeoutError(f"generation {self.experiment_id}/g{generation}: {status.committed} of {status.total} "
                                    f"committed after {self._timeout} s")
             self._sleep(self._poll)
+
+    def _check_cancel(self):
+        if self._cancel_requested():
+            raise RunCancelled("run cancelled before recording the next update")
 
     # ---- restart ----------------------------------------------------------------------------------------------------
 
@@ -242,17 +252,20 @@ class Coordinator:
         else:
             self.ledger.open_generation(descriptors)
         policy = self._policy_factory()
-        api = WorkerAPI(self.ledger, self.experiment_id, generation, self._lease_seconds, policy)
+        api = WorkerAPI(self.ledger, self.experiment_id, generation, self._lease_seconds, policy,
+                        cancel_requested=self._cancel_requested)
         self.server.set_generation(api, self._job(generation, policy))
         self.log("generation_open", generation=generation, parent_sha256=parent, candidates=self.candidates)
 
         self._wait_until_complete(generation)
+        self._check_cancel()
         waited = self._timer()
         results = self.ledger.get_generation_results(self.experiment_id, generation)
         self.log("generation_complete", generation=generation, rewards=list(results.rewards))
 
         record = GenerationRecord.from_results(self.experiment_id, generation, results, alpha=self.alpha,
                                                eta=self.recipe.reward_eta)
+        self._check_cancel()                                                # last cooperative boundary before write-ahead commit
         self.ledger.record_update(record)                                    # BEFORE the weights are touched
         recorded = self._timer()
         self.log("update_recorded", generation=generation, record_hash=record.hash)
@@ -289,17 +302,22 @@ class Coordinator:
         self.log("generation_done", **summary)
         return summary
 
-    def finish(self, aborted: bool = False) -> None:
+    def finish(self, aborted: bool = False, cancelled: bool = False) -> None:
         """Tell the workers that the experiment is over: FINISHED if it ran to its end, ABORTED if it stopped on an error."""
         job = self.server.job
-        state = "ABORTED" if aborted else "FINISHED"
+        state = "CANCELLED" if cancelled else "ABORTED" if aborted else "FINISHED"
         self.server.set_generation(self.server.api, {"state": state} if job is None else dict(job, state=state))
 
     def run(self, generations: int) -> list[dict]:
         summaries = []
         try:
             for generation in range(self.recover(), generations):
+                self._check_cancel()
                 summaries.append(self.run_generation(generation))
+            self._check_cancel()
+        except RunCancelled:
+            self.finish(cancelled=True)
+            raise
         except BaseException:
             self.finish(aborted=True)             # a failed run must not look like a success to the workers
             raise

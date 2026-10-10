@@ -240,6 +240,8 @@ class WorkerRuntime:
                     return "finished"
                 if job.get("state") == "ABORTED":
                     return "aborted"
+                if job.get("state") == "CANCELLED":
+                    return "cancelled"
                 self._check_recipe(job)
                 if job["parent_weights_sha256"] != self.executor.parent_sha256:
                     self.bring_up_to_date(job)

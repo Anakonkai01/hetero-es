@@ -140,12 +140,14 @@ class WorkerAPI:
     so that "pick a candidate, then lease it" cannot be interleaved with another worker's request.
     """
 
-    def __init__(self, ledger, experiment_id: str, generation: int, lease_seconds: float, policy=None):
+    def __init__(self, ledger, experiment_id: str, generation: int, lease_seconds: float, policy=None,
+                 cancel_requested=lambda: False):
         self._ledger = ledger
         self._experiment_id = experiment_id
         self._generation = generation
         self._lease_seconds = lease_seconds
         self._policy = Greedy() if policy is None else policy
+        self._cancel_requested = cancel_requested
         self._lock = threading.Lock()
         self._remembered: OrderedDict = OrderedDict()      # (worker_id, request_id) -> the work that was given, for repeated requests
         self._operations = {
@@ -171,6 +173,8 @@ class WorkerAPI:
                 return _error(_code_of(error), str(error))
 
     def _lease(self, decoded) -> dict:
+        if self._cancel_requested():
+            return {"generation_state": GenerationState.OPEN.value, "work": None}
         worker_id, request_id, generation = decoded
         if any(entry.worker_id == worker_id for entry in self._ledger.list_quarantined()):
             raise WorkerQuarantinedError(f"worker {worker_id} is quarantined (a restore failed)")

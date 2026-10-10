@@ -1,12 +1,62 @@
 # HeteroES-LLM — Status
 
-**Last updated:** 09/10/2026 evening (compacting decoder, a real remote worker, studies of chunk and parallelism, see the first block of section 0); earlier, 08/10/2026 (C4 replay, the token-cut erratum and a second learning experiment, see 0.00000000; the first learning experiment, see 0.0000000; earlier, 07/10 evening: G7: CUDA noise engine and the restore trade-off, see 0.00000; earlier that day: O8, FP32 evaluation by default, see 0.0000; earlier that day: G6: the audit of G2 to G5 and its fixes, see 0.000; earlier that day: G4 done and G5 done, see 0.00; before it: 06/10/2026, evening, G3 done on the two physical machines, see 0.0; before it: the ledger, steps G2a to G2f, done for one coordinator process; before it: a first short learning experiment after the gate, step 9 done, the numerical gate closed for one candidate, decisions O4, eta and seed checks of 05/10; branch `feat/worker-protocol-g3`, see 0.0). Sections 0.00000, 0.0000, 0.000, 0.00 and 0.0 are the newest, newest first (where two disagree, the earlier one in the file wins); sections 1–13 were written on 30/09 and are older background.  
+**Last updated:** 10/10/2026 — Track B product integration and required two-GPU acceptance; see the first update below. The 09/10 decoder, profiling and research evidence and earlier milestones remain in the following blocks. Newest verified updates appear first; sections 1–13 were written on 30/09 and are older background.
 **Canonical design/specification:** `HETEROES_LLM_MASTER.md`  
 **Purpose:** current implementation truth, verified evidence, blockers, artifacts, and the exact next action.
 
 > **Document rule:** `MASTER` decides what the system/design should be. `STATUS` decides what is actually done now. For a new chat, read `HETEROES_LLM_MASTER.md` and then this file; older proposal/roadmap/chat-handoff files are archive only.
 
 ## 0. NEXT SESSION — START HERE
+
+### UPDATE 10/10/2026 — Track B integration (written by the AI; awaiting owner review)
+
+Track A work is isolated in sibling worktree `hetero-es-integration`, branch
+`feat/track-b-runtime-integration`, based on `bb0ce420c21e10b3b9b13e3e494ce41453030420`.
+The original `hetero-es` worktree and its existing untracked notebook are preserved.
+Track B is cloned separately in `Hetero-ES-LLM`, branch
+`feat/track-a-runtime-integration`, based on the friend's `claude-design-ui` commit
+`bcdb71bb773f0239e91c73f915e97f3be96e69a6`. Local commits only; no push, merge or tag.
+
+**Delivered:** real login and owner/admin authorization, workspace and worker
+inventory, immutable experiment submission, durable FIFO with one active run,
+automatic selected-worker startup via owned local processes/SSH, actual ledger
+observations and authenticated artifacts. Optional cancellation hooks preserve
+the existing numerical engine and CLI behavior. Cancellation stops new leases,
+lets active candidates restore, finishes already-recorded updates and retains
+the last completed checkpoint. Unknown shutdown holds the pool. One coordinator
+crash is automatically recovered; a second fails the run. A persistent restore
+mismatch quarantine survives runs and service restarts. Unsupported controls
+are visible and disabled; the explicit mock demo is retained.
+
+**Verified:** full suite 2,138 passed, 21 skipped without opt-in model flags;
+backend 15 passed; frontend build/lint and 22 mock behavior groups passed. Real
+browser create/start/cancel, checkpoint retention, role isolation and artifact
+download passed. Injected coordinator SIGKILL after one complete generation
+recovered once and finished all three; FIFO and queued cancellation passed.
+Required real run `c982ec016aaa43b592457ef9bfba9423`: Qwen pin, `arith16`,
+`hf_generate`, FP32 evaluation, CPU noise, N=8/G=3, alpha=sigma=0.001;
+17 committed results on 5070 Ti and 7 on Quang's 3060; three published updates,
+verified intermediate replay on both workers and confirmed shutdown.
+Downloaded final SHA-256:
+`050aaf5f0abe4b8840bd671e2836a51149c2070cd8e22a4b890f8d32a7bbf3ae`.
+Evidence: `artifacts/experiments/2026-10-10-track-b-integration/`.
+
+**Operation:** manually run `./start-integration.sh` / `./stop-integration.sh`
+from Track B. UI uses the configured private network; API/control are loopback.
+Private configuration and credentials: `~/.config/heteroes-integration/`;
+logs/ledgers/weights: `~/.local/share/heteroes-integration/`, outside git.
+Quang's WSL CUDA/PTX library collision is handled by process-local selection of
+the matching mounted Windows libraries. No driver, global environment or
+existing virtualenv changes. The optional 1660S remains SSH-unreachable and
+unvalidated. Conservative GPU usage bound across nine runs: 0.177 GPU-hours.
+
+**Limits / next action:** owner review of both local branches. This is a
+single-backend-process private deployment; dynamic grants/member management,
+uploads, pause/resume and asynchronous execution are unsupported. No new claim
+of learning, scheduler speedup or measured performance admission. Original
+research follow-ups below remain open. Setup and evidence detail are in
+Track B's `docs/runtime-integration.md` and `docs/integration-validation.md`;
+Track A's control contract is `docs/product-control.md`.
 
 ### UPDATE 09/10/2026 EVENING — read this before the block below (written by the AI; nothing is reviewed)
 
