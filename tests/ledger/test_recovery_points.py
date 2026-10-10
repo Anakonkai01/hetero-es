@@ -60,3 +60,16 @@ def test_ledger_ahead_of_selected_weights_is_rejected(tmp_path):
     manifest['files']['ledger.sqlite']['sizeBytes']=(point/'ledger.sqlite').stat().st_size
     (point/'manifest.json').write_text(json.dumps(manifest))
     with pytest.raises(ValueError,match='ahead'):restore_point(point,tmp_path/'bad')
+
+
+def test_optional_policy_corruption_and_write_failure_do_not_interrupt_compute(tmp_path,monkeypatch):
+    from heteroes.product import runner
+    current={'interval':1,'retain':3};logs=[]
+    (tmp_path/'backup-policy.json').write_text('broken JSON')
+    assert runner.apply_backup_policy(tmp_path,0,current,logs.append)==current
+    requested={'interval':2,'retain':7}
+    (tmp_path/'backup-policy.json').write_text(json.dumps(requested))
+    def denied(*args):raise PermissionError('Optional policy history is read-only')
+    monkeypatch.setattr(runner,'write_json',denied)
+    assert runner.apply_backup_policy(tmp_path,1,current,logs.append)==requested
+    assert any(e['event']=='backup_policy_error' for e in logs)

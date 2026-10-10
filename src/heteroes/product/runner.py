@@ -9,6 +9,24 @@ import time
 from .files import read_json, write_json
 
 
+def apply_backup_policy(root,generation,current,emit):
+    """Optional policy persistence cannot stop otherwise valid computation."""
+    def log(event):
+        try:emit(event)
+        except Exception:pass
+    try:
+        policy=read_json(root/'backup-policy.json',current)
+        if not isinstance(policy,dict) or set(policy)!={'interval','retain'} or any(type(v) is not int or not 1<=v<=1000 for v in policy.values()):
+            raise ValueError('Invalid operational backup policy')
+    except Exception as error:
+        log({'event':'backup_policy_error','generation':generation,'errorType':type(error).__name__})
+        return current
+    try:write_json(root/f'generation-policy-{generation}.json',policy)
+    except Exception as error:log({'event':'backup_policy_error','generation':generation,'errorType':type(error).__name__})
+    log({'event':'backup_policy_applied','generation':generation,'policy':policy})
+    return policy
+
+
 def main(directory):
     from heteroes.coordinator import Coordinator, RunCancelled, _NoGeneration
     from heteroes.dispatch import AdmittedOnly, Greedy
@@ -47,9 +65,7 @@ def main(directory):
         active_policy=policy
         def generation_started(generation):
             nonlocal active_policy
-            active_policy=read_json(root/'backup-policy.json',policy)
-            write_json(root/f'generation-policy-{generation}.json',active_policy)
-            emit({'event':'backup_policy_applied','generation':generation,'policy':active_policy})
+            active_policy=apply_backup_policy(root,generation,active_policy,emit)
 
         def recovery_point(summary, final=False):
             nonlocal last_summary
@@ -58,7 +74,8 @@ def main(directory):
                 return
             try:
                 from .recovery import capture_point
-                generation_policy=read_json(root/f'generation-policy-{summary["generation"]}.json',active_policy)
+                generation_policy=read_json(root/f'generation-policy-{summary["generation"]}.json')
+                if generation_policy is None:generation_policy=read_json(root/'backup-policy.json',active_policy)
                 point=capture_point(root,summary,recipe.to_dict(),generation_policy,final=final,
                                     identity={'code':code_info(),'environment':environment_info('cuda')})
                 if point:

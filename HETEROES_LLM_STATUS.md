@@ -28,7 +28,7 @@ full-byte verification, immutable CAS publication, manifest-last commit,
 quota/retention/cleanup, metadata backups and CPU deployment tooling are implemented.
 Their real provider gates have **not** passed; SDK stubs are separate evidence.
 
-Verified: A **2,160 passed, 21 skipped**; B **71 passed**; frontend build/lint and
+Verified: A **2,161 passed, 21 skipped**; B **71 passed**; frontend build/lint and
 22 explicit mock groups. Identity/epoch scratch mutations were caught. Real
 staging browser showed all three devices, approval, coordinator selection and
 K=1/N=3. M1 migration preserved 16 original experiment bodies/FIFO and revoked
