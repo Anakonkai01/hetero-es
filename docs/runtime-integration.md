@@ -9,6 +9,12 @@ Track B is pinned to `claude-design-ui` at
 The existing UI design and explicit MSW demo remain available. Normal startup
 uses real authentication, worker probes, ledger projections and checkpoints.
 
+M1 extends this baseline with account approval, independent workspaces and
+operational backup/restore on `feat/lab-operations-product` (Track B) and
+`feat/lab-operations-control` (Track A). Current operator instructions are in
+[lab-operations.md](lab-operations.md); the accepted later roadmap is
+[lab-roadmap.md](lab-roadmap.md).
+
 ```mermaid
 flowchart LR
     UI[React UI] -->|same origin /api proxy| B[FastAPI product API]
@@ -73,9 +79,11 @@ configured.
 
 ## Supported behavior
 
-- Workspace: **HeteroES Lab**, with Admin and Participant accounts. Admin sees
-  and can cancel all runs. Participant can see only their own runs, child
-  objects, events and downloads. Shared inventory and pool occupancy are visible.
+- The existing **HeteroES Lab** and accounts are preserved. M1 adds approved
+  registration and independently administered workspaces. Workspace admins see
+  and can cancel runs within their workspace; participants see their own runs,
+  child objects, events and downloads. Platform administration is a separate
+  persisted privilege. Inventory is scoped to enabled workspace assignments.
 - Create/edit a draft, then submit its immutable configuration to a persistent
   FIFO queue. Exactly one active run owns the pool. A restart retains queue,
   sessions and run identity; accepted runtime submissions are idempotent.
@@ -108,8 +116,9 @@ configured.
   an explicit private quarantine-registry update are required before reuse.
 
 Pause/resume, changing workers during execution, arbitrary model/dataset upload,
-asynchronous execution, dynamic pool grants and member administration remain
-visible but disabled with explanations. Validation/test scores are not invented.
+asynchronous execution and dynamic pool grants remain unsupported. M1 provides
+real member administration and configured GPU contribution. Validation/test
+scores are not invented.
 
 ## Verification
 

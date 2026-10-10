@@ -11,6 +11,8 @@ import { PlusIcon } from "../components/ui/Icons";
 import { PageHeader } from "../components/ui/PageHeader";
 import { useExperiments } from "../hooks/useExperiments";
 import type { ExperimentStatus } from "../types/experiment";
+import { IS_MOCK } from '../lib/dataSource';
+import { LabQueue } from './LabQueue';
 
 type StatusFilter = "all" | ExperimentStatus;
 type SortOrder = "new" | "old";
@@ -75,6 +77,7 @@ export function ExperimentsPage() {
       />
 
       <div className="acts"><button className="btn" onClick={() => setView("grid")}>Grid</button><button className="btn" onClick={() => setView("list")}>List</button></div>
+      {!IS_MOCK && <LabQueue />}
       {archive.error && <div className="note err" role="alert">{archive.error.message}</div>}
       <section className="card" aria-label="Experiment list">
         <div className="filters" style={{ paddingTop: 16 }}>

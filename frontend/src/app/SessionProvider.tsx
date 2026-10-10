@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getSession, login, logout } from "../api/access";
 import { ApiError, setActiveWorkspace, setDemoToken } from "../api/client";
@@ -9,11 +9,18 @@ const WORKSPACE_KEY = "heteroes.demo-workspace";
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
+  const authorizationSignature=useRef('');
   const [workspaceId, setWorkspaceId] = useState(sessionStorage.getItem(WORKSPACE_KEY) ?? "");
   const query = useQuery({
     queryKey: ["session"],
     queryFn: async () => {
       const session = await getSession();
+      const signature=JSON.stringify([session.user.userId,session.user.accountStatus,session.user.platformAdmin,session.workspaces.map(w=>[w.workspaceId,w.role])]);
+      if (authorizationSignature.current && authorizationSignature.current!==signature) {
+        await queryClient.cancelQueries({predicate:q=>q.queryKey[0]!=='session'});
+        queryClient.removeQueries({predicate:q=>q.queryKey[0]!=='session'});
+      }
+      authorizationSignature.current=signature;
       const selected = sessionStorage.getItem(WORKSPACE_KEY);
       setActiveWorkspace(session.workspaces.find((item) => item.workspaceId === selected)?.workspaceId ?? session.workspaces[0]?.workspaceId ?? "");
       return session;

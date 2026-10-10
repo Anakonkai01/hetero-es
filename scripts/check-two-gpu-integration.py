@@ -11,7 +11,7 @@ import urllib.request
 private = Path(os.environ.get("HETEROES_PRIVATE_CONFIG", str(Path.home() / ".config/heteroes-integration")))
 config = json.loads((private / "config.json").read_text())
 credentials = json.loads((private / "credentials.json").read_text())
-base = "http://127.0.0.1:8000/api/v1"
+base = f"http://127.0.0.1:{config.get('backendPort',8000)}/api/v1"
 token = None
 
 

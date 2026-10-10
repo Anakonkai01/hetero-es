@@ -15,11 +15,15 @@ import { LoginPage } from "../pages/LoginPage";
 import { WorkspaceDetailRoute } from "../pages/WorkspaceDetailRoute";
 import { ModelsPage } from "../pages/ModelsPage";
 import { RequireSession } from "../components/layout/RequireSession";
+import { RegisterPage } from '../pages/RegisterPage';
+import { LabOperationsPage } from '../pages/LabOperationsPage';
+import { IS_MOCK } from '../lib/dataSource';
 
 export function AppRouter() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      {!IS_MOCK && <Route path="/register" element={<RegisterPage />} />}
       <Route element={<RequireSession />}>
       <Route element={<AppLayout />}>
         <Route index element={<Navigate to="/workspace" replace />} />
@@ -27,6 +31,7 @@ export function AppRouter() {
         <Route path="/workspace/current" element={<ActiveWorkspaceRedirect />} />
         <Route path="/workspace/:workspaceId" element={<WorkspaceDetailRoute />} />
         <Route path="/profile" element={<ProfilePage />} />
+        {!IS_MOCK && <Route path="/operations" element={<LabOperationsPage />} />}
         <Route path="/models" element={<ModelsPage />} />
         <Route path="/scheduling" element={<Navigate to="/experiments" replace />} />
 

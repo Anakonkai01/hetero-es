@@ -6,8 +6,8 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: process.env.HETEROES_UI_HOST ?? '127.0.0.1',
-    port: 5173,
+    port: Number(process.env.HETEROES_UI_PORT ?? 5173),
     strictPort: true,
-    proxy: { '/api': 'http://127.0.0.1:8000' },
+    proxy: { '/api': `http://127.0.0.1:${process.env.HETEROES_BACKEND_PORT ?? 8000}` },
   },
 })

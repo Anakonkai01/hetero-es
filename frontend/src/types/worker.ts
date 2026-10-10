@@ -23,6 +23,7 @@ export interface Worker {
   utilizationPercent?: number;
   activeExperimentName?: string;
   allocatedTo?: string;
+  contributionEnabled?: boolean;
 
   status: WorkerStatus;
   admissionStatus: AdmissionStatus;

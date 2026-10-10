@@ -16,7 +16,7 @@ import urllib.request
 PRIVATE = Path(os.environ.get("HETEROES_PRIVATE_CONFIG", str(Path.home() / ".config/heteroes-integration")))
 config = json.loads((PRIVATE / "config.json").read_text())
 credentials = json.loads((PRIVATE / "credentials.json").read_text())
-base = "http://127.0.0.1:8000/api/v1"
+base = f"http://127.0.0.1:{config.get('backendPort',8000)}/api/v1"
 output = Path(config["productStateDirectory"]) / "recovery-evidence.json"
 
 

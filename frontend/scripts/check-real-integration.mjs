@@ -8,7 +8,7 @@ import { chromium } from "playwright";
 const privateRoot = process.env.HETEROES_PRIVATE_CONFIG ?? path.join(os.homedir(), ".config/heteroes-integration");
 const config = JSON.parse(await readFile(path.join(privateRoot, "config.json"), "utf8"));
 const credentials = JSON.parse(await readFile(path.join(privateRoot, "credentials.json"), "utf8"));
-const url = process.env.HETEROES_UI_URL ?? `http://${config.uiHost}:5173`;
+const url = process.env.HETEROES_UI_URL ?? `http://${config.uiHost}:${config.uiPort??5173}`;
 const output = path.join(config.productStateDirectory, "browser-evidence");
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch({ headless: true });

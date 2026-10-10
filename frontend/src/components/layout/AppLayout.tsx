@@ -104,7 +104,7 @@ export function AppLayout() {
         </div>
 
         <nav className="navl" aria-label="Main sections">
-          {navigationItems.map((item) => (
+          {navigationItems.filter((item) => IS_MOCK || item.path === '/workspace' || item.path === '/profile' || (session?.user.accountStatus === 'ACTIVE' && (workspace || item.path === '/workers'))).map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
@@ -114,6 +114,7 @@ export function AppLayout() {
               {item.label}
             </NavLink>
           ))}
+          {!IS_MOCK && session?.user.platformAdmin && session.user.accountStatus === 'ACTIVE' && <NavLink className={({ isActive }) => isActive ? 'nav on' : 'nav'} to="/operations"><ListIcon />Operations</NavLink>}
         </nav>
 
         <div className="demo">
@@ -181,7 +182,7 @@ export function AppLayout() {
             </div>
           )}
 
-          {scenario === "loading" ? <LoadingState /> : <Outlet key={`${session?.user.userId}:${workspace?.workspaceId}`} />}
+          {!IS_MOCK && session?.user.accountStatus !== 'ACTIVE' && !['/workspace','/profile'].includes(pathname) ? <p role="status">Your account is {session?.user.accountStatus}. Visit your profile or wait for administrator approval.</p> : scenario === "loading" ? <LoadingState /> : <Outlet key={`${session?.user.userId}:${workspace?.workspaceId}`} />}
         </main>
       </div>
 

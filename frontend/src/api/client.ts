@@ -72,11 +72,20 @@ export function isServerError(error: unknown): boolean {
 }
 
 export async function downloadArtifact(id: string, name: string) {
-  const response = await fetch(`${API_BASE_URL}/api/v1/artifacts/${encodeURIComponent(id)}/download`, {
+  return downloadFile(`/api/v1/artifacts/${encodeURIComponent(id)}/download`,name);
+}
+
+export async function downloadFile(path: string, name: string) {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
     headers: { Authorization: `Bearer ${demoToken}`, "X-Workspace-Id": workspaceId },
   });
-  if (!response.ok) throw new ApiError(response.status, "Artifact download failed");
+  if (!response.ok) throw new ApiError(response.status, "Download failed");
   const url = URL.createObjectURL(await response.blob());
   const link = document.createElement("a"); link.href = url; link.download = name; link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+export async function downloadBackup(id: string) {
+  const ticket=await apiPost<{downloadUrl:string}>(`/api/v1/platform/backups/${encodeURIComponent(id)}/download-ticket`);
+  const link=document.createElement('a');link.href=`${API_BASE_URL}${ticket.downloadUrl}`;link.download=`heteroes-lab-${id}.tar`;link.click();
 }

@@ -87,10 +87,12 @@ def start(config):
     runtime = Path(config["runtimePath"])
     root = Path(config["processDirectory"])
     root.mkdir(parents=True, exist_ok=True, mode=0o700)
-    env = dict(os.environ, HETEROES_PRIVATE_CONFIG=str(PRIVATE), HETEROES_UI_HOST=config["uiHost"], VITE_DATA_SOURCE="real")
+    backend_port=config.get('backendPort',8000);ui_port=config.get('uiPort',5173)
+    env = dict(os.environ, HETEROES_PRIVATE_CONFIG=str(PRIVATE), HETEROES_UI_HOST=config["uiHost"],
+               HETEROES_UI_PORT=str(ui_port),HETEROES_BACKEND_PORT=str(backend_port),VITE_DATA_SOURCE="real")
     services = [("runtime", [config["python"], "-m", "heteroes.product.gateway", str(PRIVATE / "config.json")], runtime, {**env, "PYTHONPATH": str(runtime / "src")}, config["controlPort"], "127.0.0.1"),
-                ("backend", [str(REPO / ".venv-backend/bin/python"), "-m", "uvicorn", "backend.app:app_from_environment", "--factory", "--host", "127.0.0.1", "--port", "8000"], REPO, env, 8000, "127.0.0.1"),
-                ("frontend", ["npm", "run", "dev"], REPO / "frontend", env, 5173, config["uiHost"])]
+                ("backend", [str(REPO / ".venv-backend/bin/python"), "-m", "uvicorn", "backend.app:app_from_environment", "--factory", "--host", "127.0.0.1", "--port", str(backend_port)], REPO, env, backend_port, "127.0.0.1"),
+                ("frontend", ["npm", "run", "dev"], REPO / "frontend", env, ui_port, config["uiHost"])]
     for name, command, cwd, environment, port, host in services:
         path = root / (name + ".json")
         if alive(read(path)):
@@ -112,7 +114,7 @@ def start(config):
             time.sleep(.3)
         else:
             raise RuntimeError(f"{name} startup timed out")
-    print(f"UI: http://{config['uiHost']}:5173")
+    print(f"UI: http://{config['uiHost']}:{ui_port}")
     print(f"Account credentials are in {PRIVATE / 'credentials.json'}; they are never printed by this command.")
 
 

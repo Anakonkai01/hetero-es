@@ -5,6 +5,8 @@ export interface User {
   username: string;
   displayName: string;
   canCreateWorkspace: boolean;
+  accountStatus?: "PENDING" | "ACTIVE" | "REJECTED" | "SUSPENDED";
+  platformAdmin?: boolean;
   email?: string;
   bio?: string;
 }

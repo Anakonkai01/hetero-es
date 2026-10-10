@@ -12,6 +12,7 @@ import uuid
 
 from argon2 import PasswordHasher
 from .runtime import RuntimeRejected
+from .migrations import migrate
 
 ACTIVE = {"STARTING", "RUNNING", "CANCELLING", "RECOVERING", "DRAINING"}
 TERMINAL = {"COMPLETED", "CANCELLED", "FAILED"}
@@ -26,6 +27,7 @@ class Store:
         self.path, self.runtime = str(path), runtime
         Path(path).parent.mkdir(parents=True, exist_ok=True, mode=0o700)
         self.lock = threading.RLock()
+        self.operation_lock = threading.RLock()
         self.hasher = PasswordHasher()
         self.last_error = None
         with self.db() as db:
@@ -39,8 +41,17 @@ class Store:
             """)
             for name, password in passwords.items():
                 profile = {"userId": name, "username": name, "displayName": name.title(), "canCreateWorkspace": False}
-                db.execute("INSERT OR IGNORE INTO users VALUES (?,?,?)", (name, self.hasher.hash(password), json.dumps(profile)))
+                # Bootstrap secrets seed an empty installation only. A renamed
+                # or removed account must not be recreated on every restart.
+                if db.execute('PRAGMA user_version').fetchone()[0] == 0:
+                    db.execute("INSERT OR IGNORE INTO users VALUES (?,?,?)", (name, self.hasher.hash(password), json.dumps(profile)))
+            db.commit()
+            migrate(db)
         os.chmod(path, 0o600)
+        try:
+            self.ensure_workers(runtime.capabilities()['workerIds'])
+        except Exception:
+            self.last_error = 'WorkerConfigurationUnavailable'
 
     @contextmanager
     def db(self):
@@ -56,8 +67,84 @@ class Store:
             finally:
                 connection.close()
 
-    def audit(self, db, actor, action, target):
-        db.execute("INSERT INTO audit(actor,action,target,created) VALUES (?,?,?,?)", (actor, action, target, now()))
+    def audit(self, db, actor, action, target, workspace_id=None):
+        db.execute("INSERT INTO audit(actor,action,target,created,workspace_id) VALUES (?,?,?,?,?)", (actor, action, target, now(), workspace_id))
+
+    def ensure_workers(self, ids):
+        with self.db() as db:
+            initialized=bool(db.execute('SELECT value FROM settings WHERE key="workersInitialized"').fetchone())
+            creator = db.execute('SELECT creator FROM workspaces WHERE id="lab"').fetchone()[0]
+            disabled=self.disabled_workers(db)
+            for wid in ids:
+                if not db.execute('SELECT 1 FROM worker_assignments WHERE worker_id=?',(wid,)).fetchone():
+                    db.execute('INSERT INTO worker_assignments VALUES (?,?,?)',(wid,creator,None if initialized else 'lab'))
+                    if initialized:disabled.add(wid)
+            db.execute('INSERT OR REPLACE INTO settings VALUES (?,?)',('disabledWorkers',json.dumps(sorted(disabled))))
+            db.execute('INSERT OR IGNORE INTO settings VALUES (?,?)',('workersInitialized','true'))
+        if self.last_error=='WorkerConfigurationUnavailable':
+            self.last_error=None
+
+    def profile(self, user_id):
+        with self.db() as db:
+            row = db.execute('SELECT profile FROM users WHERE id=?',(user_id,)).fetchone()
+            return json.loads(row[0]) if row else None
+
+    def workspaces(self, user_id):
+        with self.db() as db:
+            return [{'workspaceId':r['id'],'name':r['name'],'description':r['description'],
+                     'creatorUserId':r['creator'],'role':r['role']} for r in db.execute(
+                'SELECT w.*,m.role FROM workspaces w JOIN memberships m ON m.workspace_id=w.id WHERE m.user_id=? ORDER BY w.rowid',(user_id,))]
+
+    def assignments(self, workspace_id,include_disabled=False):
+        with self.db() as db:
+            disabled=self.disabled_workers(db)
+            return [r[0] for r in db.execute('SELECT worker_id FROM worker_assignments WHERE workspace_id=?',(workspace_id,)) if include_disabled or r[0] not in disabled]
+
+    def disabled_workers(self,db):
+        row=db.execute('SELECT value FROM settings WHERE key="disabledWorkers"').fetchone()
+        return set(json.loads(row[0])) if row else set()
+
+    def cancel_selected(self,db,worker_id):
+        for row in db.execute('SELECT body FROM experiments').fetchall():
+            b=json.loads(row[0])
+            if worker_id not in b['workerIds'] or b['status'] in TERMINAL | {'DRAFT'}:
+                continue
+            b['cancelRequested']=True
+            if b['status']=='QUEUED':
+                b.update(status='CANCELLED',completedAt=now(),failureReason='GPU contribution was disabled')
+                db.execute('DELETE FROM queue WHERE run_id=?',(b['experimentId'],))
+            else:
+                b['status']='CANCELLING'
+            self.save(db,b)
+            self.audit(db,'system','GPU_CONTRIBUTION_DISABLED',b['experimentId'],b['workspaceId'])
+
+    def cancel_owned(self, db, owner, workspace_id=None):
+        for row in db.execute('SELECT body FROM experiments WHERE owner=?',(owner,)).fetchall():
+            body = json.loads(row[0])
+            if workspace_id and body['workspaceId'] != workspace_id:
+                continue
+            if body['status'] in TERMINAL | {'DRAFT'}:
+                continue
+            body['cancelRequested'] = True
+            if body['status']=='QUEUED':
+                body.update(status='CANCELLED',completedAt=now(),failureReason='Resource access revoked')
+                db.execute('DELETE FROM queue WHERE run_id=?',(body['experimentId'],))
+            else:
+                body['status']='CANCELLING'
+            self.save(db,body)
+            self.audit(db,'system','ACCESS_REVOKED',body['experimentId'],body['workspaceId'])
+
+    def eligibility(self, db, body):
+        row = db.execute('SELECT profile FROM users WHERE id=?',(body['ownerUserId'],)).fetchone()
+        if not row or json.loads(row[0])['accountStatus']!='ACTIVE':
+            return 'Owner account is not active'
+        if not db.execute('SELECT 1 FROM memberships WHERE workspace_id=? AND user_id=?',
+                          (body['workspaceId'],body['ownerUserId'])).fetchone():
+            return 'Workspace membership was revoked'
+        ids = {r[0] for r in db.execute('SELECT worker_id FROM worker_assignments WHERE workspace_id=?',(body['workspaceId'],))}
+        if not set(body['workerIds']) <= ids-self.disabled_workers(db):
+            return 'Selected GPU assignment changed before launch'
+        return None
 
     def get(self, run_id):
         with self.db() as db:
@@ -71,15 +158,15 @@ class Store:
     def save(self, db, body):
         db.execute("UPDATE experiments SET body=? WHERE id=?", (json.dumps(body, allow_nan=False), body["experimentId"]))
 
-    def create(self, owner, config):
+    def create(self, owner, config, workspace_id='lab'):
         run_id = uuid.uuid4().hex
         digest = hashlib.sha256(json.dumps(config, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
-        body = {**config, "experimentId": run_id, "workspaceId": "lab", "ownerUserId": owner, "status": "DRAFT",
+        body = {**config, "experimentId": run_id, "workspaceId": workspace_id, "ownerUserId": owner, "status": "DRAFT",
                 "cancelRequested": False, "modelVersion": "7ae557604adf67be50417f59c2c2f167def9a775",
                 "configHash": digest, "createdAt": now(), "completedGenerations": 0}
         with self.db() as db:
             db.execute("INSERT INTO experiments VALUES (?,?,?,NULL)", (run_id, owner, json.dumps(body)))
-            self.audit(db, owner, "CREATE", run_id)
+            self.audit(db, owner, "CREATE", run_id, workspace_id)
         return body
 
     def snapshot(self, run_id):
@@ -88,9 +175,15 @@ class Store:
             return json.loads(row[0]) if row and row[0] else {"generations": [], "candidates": [], "attempts": [], "events": [], "artifacts": []}
 
     def dispatch_once(self):
+        with self.operation_lock:
+            self._dispatch_once()
+
+    def _dispatch_once(self):
         # Only one dispatcher in the supported one-process deployment. Durable state
         # is claimed before the RPC; retry uses the same run ID and frozen config.
         with self.db() as db:
+            if json.loads(db.execute('SELECT value FROM settings WHERE key="dispatchHold"').fetchone()[0]):
+                return
             active = next((body for body in self.list() if body["status"] in ACTIVE), None)
             if active is None:
                 row = db.execute("SELECT run_id FROM queue JOIN experiments ON experiments.id=queue.run_id ORDER BY sequence LIMIT 1").fetchone()
@@ -98,6 +191,13 @@ class Store:
                     active = self.get(row[0])
                     if active["status"] != "QUEUED":
                         db.execute("DELETE FROM queue WHERE run_id=?", (row[0],))
+                        return
+                    reason = self.eligibility(db,active)
+                    if reason:
+                        active.update(status='CANCELLED',cancelRequested=True,completedAt=now(),failureReason=reason)
+                        self.save(db,active)
+                        db.execute('DELETE FROM queue WHERE run_id=?',(row[0],))
+                        self.audit(db,'system','QUEUE_ACCESS_REVOKED',row[0],active['workspaceId'])
                         return
                     active.update(status="STARTING", startedAt=now())
                     self.save(db, active)

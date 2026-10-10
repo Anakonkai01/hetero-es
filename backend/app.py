@@ -14,6 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from .store import ACTIVE, TERMINAL, Store, now
 from .runtime import Runtime
+from .lab import install_lab_routes
 
 
 class Login(BaseModel):
@@ -67,34 +68,39 @@ def create_app(path, passwords, runtime, dispatch=True):
         return json.loads(row[0])
 
     def scoped(current=Depends(user), x_workspace_id: str = Header(default="")):
-        if x_workspace_id != "lab":
-            raise HTTPException(403, "Select the HeteroES Lab workspace")
-        return current
-
-    def workspace(current):
-        return {"workspaceId": "lab", "name": "HeteroES Lab", "role": "ADMIN" if current["userId"] == "admin" else "PARTICIPANT",
-                "creatorUserId": "admin", "description": "Private shared GPU pool · FIFO · one active experiment"}
+        profile = store.profile(current['userId'])
+        if not profile or profile['accountStatus'] != 'ACTIVE':
+            raise HTTPException(403, 'Your account must be active to access lab resources')
+        membership = next((w for w in store.workspaces(current['userId']) if w['workspaceId']==x_workspace_id),None)
+        if not membership:
+            raise HTTPException(403, 'Select a workspace you belong to')
+        return {**profile,'workspaceId':x_workspace_id,'workspaceRole':membership['role']}
 
     def session(current):
-        return {"user": current, "workspaces": [workspace(current)]}
+        return {"user": current, "workspaces": store.workspaces(current['userId']) if current['accountStatus']=='ACTIVE' else []}
 
     def visible(current):
         return [body for body in store.list() if not body.get("archivedAt") and
-                (current["userId"] == "admin" or body["ownerUserId"] == current["userId"])]
+                body['workspaceId']==current['workspaceId'] and
+                (current['workspaceRole']=='ADMIN' or body["ownerUserId"] == current["userId"])]
 
     def authorized(run_id, current):
         body = store.get(run_id)
-        if not body or body.get("archivedAt") or (current["userId"] != "admin" and body["ownerUserId"] != current["userId"]):
+        current = scoped(current,current['workspaceId'])
+        if not body or body.get("archivedAt") or body['workspaceId']!=current['workspaceId'] or (current['workspaceRole'] != 'ADMIN' and body["ownerUserId"] != current["userId"]):
             raise HTTPException(404, "Experiment not found")
         return body
 
     def capabilities():
         try:
-            return runtime.capabilities()
+            value=runtime.capabilities()
+            store.ensure_workers(value['workerIds'])
+            return value
         except Exception:
             raise HTTPException(503, "Runtime control service unavailable") from None
 
-    def validate(config):
+    def validate(config, current):
+        current = scoped(current,current['workspaceId'])
         cap = capabilities()
         body = config.model_dump()
         if body["modelName"] != cap["modelId"] or body["modelArtifactId"] != "qwen-pinned":
@@ -107,6 +113,9 @@ def create_app(path, passwords, runtime, dispatch=True):
             raise HTTPException(422, "Select configured workers without duplicates")
         if set(body["workerIds"]) & set(cap.get("quarantinedWorkerIds", [])):
             raise HTTPException(422, "Selected worker is quarantined after a restore mismatch")
+        store.ensure_workers(cap['workerIds'])
+        if not set(body['workerIds']) <= set(store.assignments(current['workspaceId'])):
+            raise HTTPException(422, 'Select GPUs assigned to this workspace')
         return body
 
     @app.get("/api/v1/health")
@@ -116,7 +125,7 @@ def create_app(path, passwords, runtime, dispatch=True):
     @app.post("/api/v1/auth/login")
     def sign_in(body: Login):
         with store.db() as db:
-            row = db.execute("SELECT hash,profile FROM users WHERE id=?", (body.username,)).fetchone()
+            row = db.execute("SELECT id,hash,profile FROM users WHERE json_extract(profile,'$.username')=?", (body.username,)).fetchone()
             try:
                 store.hasher.verify(row["hash"] if row else store.hasher.hash("unknown-user"), body.password)
             except VerificationError:
@@ -124,7 +133,7 @@ def create_app(path, passwords, runtime, dispatch=True):
             if not row:
                 raise HTTPException(401, "Invalid username or password")
             token = secrets.token_urlsafe(32)
-            db.execute("INSERT INTO sessions VALUES (?,?,?)", (hashlib.sha256(token.encode()).hexdigest(), body.username, time.time()+43200))
+            db.execute("INSERT INTO sessions VALUES (?,?,?)", (hashlib.sha256(token.encode()).hexdigest(), row['id'], time.time()+43200))
             return {**session(json.loads(row["profile"])), "accessToken": token}
 
     @app.get("/api/v1/auth/session")
@@ -139,30 +148,35 @@ def create_app(path, passwords, runtime, dispatch=True):
 
     @app.get("/api/v1/workspaces")
     def workspaces(current=Depends(user)):
-        return [workspace(current)]
+        return session(current)['workspaces']
 
     @app.get("/api/v1/capabilities")
     def get_capabilities(current=Depends(scoped)):
-        return capabilities()
+        cap=capabilities()
+        assigned=set(store.assignments(current['workspaceId'],include_disabled=True))
+        return {**cap,'workerIds':store.assignments(current['workspaceId']),
+                'quarantinedWorkerIds':[w for w in cap.get('quarantinedWorkerIds',[]) if w in assigned]}
 
     @app.get("/api/v1/resources")
     def resources(current=Depends(scoped)):
         with store.db() as db:
-            members = [{"user": json.loads(row[0]), "role": "ADMIN" if json.loads(row[0])["userId"] == "admin" else "PARTICIPANT"} for row in db.execute("SELECT profile FROM users")]
-        busy = list({worker for run in store.list() if run["status"] in ACTIVE for worker in run["workerIds"]})
-        return {"submissions": [], "invitations": [], "pools": [{"poolId": "shared", "workspaceId": "lab",
-                "name": "Shared GPU pool", "workerIds": capabilities()["workerIds"], "drainingWorkerIds": []}],
+            members = [{"user": {k:v for k,v in json.loads(row['profile']).items() if k not in ('platformAdmin','accountStatus')}, "role": row['role']}
+                for row in db.execute('SELECT u.profile,m.role FROM memberships m JOIN users u ON u.id=m.user_id WHERE workspace_id=?',(current['workspaceId'],))]
+        assigned = set(store.assignments(current['workspaceId'],include_disabled=True))
+        enabled=set(store.assignments(current['workspaceId']))
+        busy = list({worker for run in store.list() if run["status"] in ACTIVE for worker in run["workerIds"]} & assigned)
+        return {"submissions": [], "invitations": [], "pools": [{"poolId": "shared", "workspaceId": current['workspaceId'],
+                "name": "Workspace GPU pool", "workerIds": sorted(enabled), "drainingWorkerIds": sorted(set(busy)-enabled)}],
                 "grants": [], "requests": [], "members": members, "busyWorkerIds": busy, "reservedWorkerIds": busy}
 
     @app.get("/api/v1/models")
     def models(current=Depends(scoped)):
         cap = capabilities()
-        return [{"modelArtifactId": "qwen-pinned", "workspaceId": "lab", "ownerUserId": "admin", "name": cap["modelId"],
+        return [{"modelArtifactId": "qwen-pinned", "workspaceId": current['workspaceId'], "ownerUserId": "runtime", "name": cap["modelId"],
                  "reference": cap["modelId"], "revision": cap["modelRevision"], "source": "REFERENCE", "status": "REGISTERED"}]
 
     @app.get("/api/v1/workers")
     @app.get("/api/v1/worker-registry")
-    @app.get("/api/v1/my-workers")
     def workers(current=Depends(scoped)):
         try:
             values = runtime.workers()
@@ -170,8 +184,24 @@ def create_app(path, passwords, runtime, dispatch=True):
             raise HTTPException(503, "Worker registry unavailable") from None
         # Shared GPU ownership is visible; another participant's experiment details are private.
         permitted = {body["experimentId"] for body in visible(current)}
-        return [{**value, "allocatedTo": value.get("allocatedTo") if value.get("allocatedTo") in permitted else
-                 "Shared pool busy" if value.get("allocatedTo") else None} for value in values]
+        assigned = set(store.assignments(current['workspaceId'],include_disabled=True))
+        enabled=set(store.assignments(current['workspaceId']))
+        return [{**value,'contributionEnabled':value['workerId'] in enabled, "allocatedTo": value.get("allocatedTo") if value.get("allocatedTo") in permitted else
+                 "Workspace pool busy" if value.get("allocatedTo") else None} for value in values if value['workerId'] in assigned]
+
+    @app.get('/api/v1/my-workers')
+    def owned_workers(current=Depends(user)):
+        if current['accountStatus']!='ACTIVE':
+            raise HTTPException(403,'Your account must be active to access GPU inventory')
+        with store.db() as db:
+            owned={r['worker_id']:r['workspace_id'] for r in db.execute('SELECT * FROM worker_assignments WHERE owner=?',(current['userId'],))}
+        try:
+            values=runtime.workers()
+        except Exception:
+            raise HTTPException(503,'Worker registry unavailable') from None
+        return [{**value,'workspaceId':owned[value['workerId']],
+                 'allocatedTo':'Owned GPU busy' if value.get('allocatedTo') else None}
+                for value in values if value['workerId'] in owned]
 
     @app.get("/api/v1/workers/{worker_id}")
     def worker(worker_id: str, current=Depends(scoped)):
@@ -186,7 +216,8 @@ def create_app(path, passwords, runtime, dispatch=True):
 
     @app.post("/api/v1/experiments")
     def create(body: Configuration, current=Depends(scoped)):
-        return store.create(current["userId"], validate(body))
+        with store.lock:
+            return store.create(current["userId"], validate(body,current),current['workspaceId'])
 
     @app.get("/api/v1/experiments/{run_id}")
     def experiment(run_id: str, current=Depends(scoped)):
@@ -199,13 +230,13 @@ def create_app(path, passwords, runtime, dispatch=True):
             if old["status"] != "DRAFT":
                 raise HTTPException(409, "Submitted configuration is immutable")
             try:
-                body = validate(Configuration(**request))
+                body = validate(Configuration(**request),current)
             except ValueError:
                 raise HTTPException(422, "Invalid configuration") from None
             digest = hashlib.sha256(json.dumps(body, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
             old.update(**body, configHash=digest)
             store.save(db, old)
-            store.audit(db, current["userId"], "EDIT", run_id)
+            store.audit(db, current["userId"], "EDIT", run_id,current['workspaceId'])
             return old
 
     @app.post("/api/v1/experiments/{run_id}/submit")
@@ -213,10 +244,14 @@ def create_app(path, passwords, runtime, dispatch=True):
         with store.db() as db:
             body = authorized(run_id, current)
             if body["status"] == "DRAFT":
+                if json.loads(db.execute('SELECT value FROM settings WHERE key="dispatchHold"').fetchone()[0]):
+                    raise HTTPException(409,'Submissions are held for maintenance or restored deployment review')
+                if reason := store.eligibility(db,body):
+                    raise HTTPException(409,reason)
                 body["status"] = "QUEUED"
                 db.execute("INSERT INTO queue(run_id) VALUES (?)", (run_id,))
                 store.save(db, body)
-                store.audit(db, current["userId"], "SUBMIT", run_id)
+                store.audit(db, current["userId"], "SUBMIT", run_id,current['workspaceId'])
             elif body["status"] in TERMINAL:
                 raise HTTPException(409, "Experiment already finished")
             return body
@@ -234,7 +269,7 @@ def create_app(path, passwords, runtime, dispatch=True):
             else:
                 body["status"] = "CANCELLING"
             store.save(db, body)
-            store.audit(db, current["userId"], "CANCEL", run_id)
+            store.audit(db, current["userId"], "CANCEL", run_id,current['workspaceId'])
             return body
 
     @app.delete("/api/v1/experiments/{run_id}", status_code=204)
@@ -245,7 +280,7 @@ def create_app(path, passwords, runtime, dispatch=True):
                 raise HTTPException(409, "Cancel and wait for the experiment to finish before archiving")
             body["archivedAt"] = now()
             store.save(db, body)
-            store.audit(db, current["userId"], "ARCHIVE", run_id)
+            store.audit(db, current["userId"], "ARCHIVE", run_id,current['workspaceId'])
         return Response(status_code=204)
 
     @app.get("/api/v1/experiments/{run_id}/generations")
@@ -311,16 +346,17 @@ def create_app(path, passwords, runtime, dispatch=True):
     @app.get("/api/v1/audit")
     def audit(current=Depends(scoped)):
         with store.db() as db:
-            return [{"auditId": str(row["sequence"]), "workspaceId": "lab", "actorUserId": row["actor"],
+            return [{"auditId": str(row["sequence"]), "workspaceId": row['workspace_id'], "actorUserId": row["actor"],
                     "action": row["action"], "targetId": row["target"], "createdAt": row["created"]}
-                    for row in db.execute("SELECT * FROM audit ORDER BY sequence DESC LIMIT 100")
-                    if current["userId"] == "admin" or row["actor"] == current["userId"]]
+                    for row in db.execute("SELECT * FROM audit WHERE workspace_id=? ORDER BY sequence DESC LIMIT 100",(current['workspaceId'],))
+                    if current['workspaceRole']=='ADMIN' or row["actor"] == current["userId"]]
 
     @app.get("/api/v1/datasets")
     @app.get("/api/v1/my-resource-submissions")
-    @app.get("/api/v1/my-invitations")
     def empty(current=Depends(scoped)):
         return []
+
+    install_lab_routes(app,store,user,scoped,runtime)
 
     @app.api_route("/api/v1/{unsupported:path}", methods=["POST", "PATCH", "DELETE"])
     def unavailable(unsupported: str, current=Depends(scoped)):
