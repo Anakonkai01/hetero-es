@@ -14,7 +14,9 @@ import { useWorkers } from "../hooks/useWorkers";
 type Panel = "resources" | "members" | "activity";
 type Dialog = "invite" | "apply" | "request" | null;
 
-export function WorkspacePage() {
+export function WorkspacePage() { return IS_MOCK ? <MockWorkspacePage /> : <RuntimeWorkspacePage />; }
+
+function MockWorkspacePage() {
   const { session, workspace, refreshSession } = useSession(); const { flash } = useAppState(); const navigate = useNavigate();
   const resources = useResources(); const workers = useWorkers(); const owned = useMyWorkers(); const submissions = useMyResourceSubmissions(); const audit = useAudit();
   const submit = useAccessMutation(api.submitResource); const invite = useAccessMutation(api.inviteMember);
@@ -108,3 +110,5 @@ export function WorkspacePage() {
     {confirmation && <Modal title={confirmation.title} onClose={() => setConfirmation(null)}><div className="modal-form"><p>{confirmation.detail}</p>{error && <p className="note err" role="alert">{error}</p>}<div className="modal-footer"><button className="btn" onClick={() => setConfirmation(null)}>Cancel</button><button className="btn dng" disabled={working} onClick={() => void run(confirmation.action, "Request accepted.", () => setConfirmation(null))}>Confirm</button></div></div></Modal>}
   </>;
 }
+import { IS_MOCK } from "../lib/dataSource";
+import { RuntimeWorkspacePage } from "./RuntimePages";

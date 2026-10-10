@@ -1,0 +1,174 @@
+from pathlib import Path
+
+from fastapi.testclient import TestClient
+import pytest
+
+from backend.app import create_app
+from backend.store import Store
+from backend.runtime import RuntimeRejected
+
+
+class Runtime:
+    def __init__(self):
+        self.runs = {}
+        self.submissions = []
+    def capabilities(self):
+        return {"modelId": "Qwen/Qwen2.5-0.5B-Instruct", "modelRevision": "7ae557604adf67be50417f59c2c2f167def9a775",
+                "workerIds": ["5070ti", "3060"], "workloads": ["arith16"], "schedulerPolicies": ["greedy"],
+                "syncModes": ["synchronous"]}
+    def workers(self):
+        return []
+    def submit(self, config):
+        if config["runId"] in self.runs:
+            return
+        self.submissions.append(config)
+        self.runs[config["runId"]] = {"state": {"status": "RUNNING"}, "generations": [], "candidates": [],
+                                      "attempts": [], "events": [], "artifacts": []}
+    def snapshot(self, run_id):
+        return self.runs[run_id]
+    def cancel(self, run_id):
+        self.runs[run_id]["state"]["status"] = "CANCELLED"
+
+
+@pytest.fixture
+def setup(tmp_path):
+    runtime = Runtime()
+    app = create_app(tmp_path / "product.sqlite", {"admin": "test-admin-pass", "participant": "test-user-pass"}, runtime, dispatch=False)
+    with TestClient(app) as client:
+        yield client, app.state.store, runtime
+
+
+def login(client, name):
+    result = client.post("/api/v1/auth/login", json={"username": name, "password": "test-admin-pass" if name == "admin" else "test-user-pass"})
+    assert result.status_code == 200
+    return {"Authorization": "Bearer " + result.json()["accessToken"], "X-Workspace-Id": "lab"}
+
+
+def draft(client, headers, **changes):
+    body = dict(name="Test run", modelName="Qwen/Qwen2.5-0.5B-Instruct", modelArtifactId="qwen-pinned",
+                schedulerPolicy="greedy", syncMode="synchronous", workerIds=["5070ti"], task="arith16",
+                maxGenerations=3, candidatesPerGeneration=8, alpha=.001, sigma=.001, decodeEngine="hf_generate")
+    result = client.post("/api/v1/experiments", json={**body, **changes}, headers=headers)
+    return result
+
+
+def test_real_session_revocation_and_workspace_enforcement(setup):
+    client, _, _ = setup
+    assert client.get("/api/v1/experiments").status_code == 401
+    assert client.post("/api/v1/auth/login", json={"username": "admin", "password": "wrong"}).status_code == 401
+    headers = login(client, "admin")
+    assert client.get("/api/v1/experiments", headers={**headers, "X-Workspace-Id": "another"}).status_code == 403
+    assert client.post("/api/v1/auth/logout", headers=headers).status_code == 204
+    assert client.get("/api/v1/auth/session", headers=headers).status_code == 401
+
+
+def test_participant_cannot_read_or_cancel_admin_run(setup):
+    client, _, _ = setup
+    admin, participant = login(client, "admin"), login(client, "participant")
+    run_id = draft(client, admin).json()["experimentId"]
+    assert client.get("/api/v1/experiments", headers=participant).json() == []
+    for suffix in ("", "/generations"):
+        assert client.get("/api/v1/experiments/" + run_id + suffix, headers=participant).status_code == 404
+    assert client.post(f"/api/v1/experiments/{run_id}/cancel", headers=participant).status_code == 404
+    own = draft(client, participant).json()["experimentId"]
+    assert client.get(f"/api/v1/experiments/{own}", headers=admin).status_code == 200
+
+
+def test_fifo_one_active_restart_and_idempotent_submit(setup):
+    client, store, runtime = setup
+    headers = login(client, "admin")
+    ids = [draft(client, headers, name=f"Run {i}").json()["experimentId"] for i in range(2)]
+    for run_id in ids:
+        assert client.post(f"/api/v1/experiments/{run_id}/submit", headers=headers).status_code == 200
+    client.post(f"/api/v1/experiments/{ids[0]}/submit", headers=headers)
+    store.dispatch_once()
+    store.dispatch_once()
+    assert [item["runId"] for item in runtime.submissions] == ids[:1]
+    runtime.runs[ids[0]]["state"]["status"] = "COMPLETED"
+    store.dispatch_once()
+    store.dispatch_once()
+    assert [item["runId"] for item in runtime.submissions] == ids
+    assert store.get(ids[0])["status"] == "COMPLETED"
+
+
+def test_queued_cancel_never_contacts_runtime(setup):
+    client, store, runtime = setup
+    headers = login(client, "participant")
+    run_id = draft(client, headers).json()["experimentId"]
+    client.post(f"/api/v1/experiments/{run_id}/submit", headers=headers)
+    assert client.post(f"/api/v1/experiments/{run_id}/cancel", headers=headers).json()["status"] == "CANCELLED"
+    store.dispatch_once()
+    assert runtime.submissions == []
+
+
+@pytest.mark.parametrize("changes", [{"schedulerPolicy": "capacity-weighted"}, {"syncMode": "asynchronous"},
+    {"workerIds": ["unknown"]}, {"candidatesPerGeneration": 1}, {"sigma": 0}, {"datasetIds": ["fake"]}])
+def test_invalid_or_unsupported_config_rejected(setup, changes):
+    client, _, _ = setup
+    assert draft(client, login(client, "admin"), **changes).status_code == 422
+
+
+def test_config_is_immutable_after_submission(setup):
+    client, _, _ = setup
+    headers = login(client, "admin")
+    run = draft(client, headers).json()
+    client.post(f"/api/v1/experiments/{run['experimentId']}/submit", headers=headers)
+    assert client.patch(f"/api/v1/experiments/{run['experimentId']}", json={"name": "changed"}, headers=headers).status_code == 409
+
+
+def test_credentials_are_hashed_and_no_lease_secrets_in_product(setup):
+    client, store, _ = setup
+    headers = login(client, "admin")
+    assert "test-admin-pass" not in Path(store.path).read_bytes().decode("latin1")
+    response = draft(client, headers)
+    assert "lease_token" not in response.text
+    assert "runtime_token" not in response.text
+
+
+def test_restart_after_lost_start_response_uses_same_run_and_queue(setup):
+    client, store, runtime = setup
+    headers = login(client, "admin")
+    run_id = draft(client, headers).json()["experimentId"]
+    client.post(f"/api/v1/experiments/{run_id}/submit", headers=headers)
+    original = runtime.submit
+    def lost(config):
+        original(config)
+        raise TimeoutError("response lost after runtime accepted")
+    runtime.submit = lost
+    with pytest.raises(TimeoutError):
+        store.dispatch_once()
+    assert store.get(run_id)["status"] == "STARTING"
+    runtime.submit = original
+    restarted = Store(store.path, {}, runtime)
+    restarted.dispatch_once()
+    assert restarted.get(run_id)["status"] == "RUNNING"
+    assert len(runtime.submissions) == 1
+    assert login(client, "admin")  # existing hashes and sessions survive restart
+
+
+def test_child_objects_and_downloads_share_experiment_authorization(setup):
+    client, store, runtime = setup
+    admin, participant = login(client, "admin"), login(client, "participant")
+    run_id = draft(client, admin).json()["experimentId"]
+    client.post(f"/api/v1/experiments/{run_id}/submit", headers=admin)
+    store.dispatch_once()
+    for route in (f"/generations/{run_id}.g0/candidates", f"/candidates/{run_id}.g0.c0",
+                  f"/attempts/{run_id}.g0.c0.a1", f"/artifacts/{run_id}.config.json/download"):
+        assert client.get("/api/v1" + route, headers=participant).status_code == 404
+    assert client.get("/api/v1/events", headers=participant).json() == []
+    assert client.get("/api/v1/artifacts", headers=participant).json() == []
+
+
+def test_rejected_start_fails_truthfully_and_releases_queue_claim(setup):
+    client, store, runtime = setup
+    headers = login(client, "admin")
+    run_id = draft(client, headers).json()["experimentId"]
+    client.post(f"/api/v1/experiments/{run_id}/submit", headers=headers)
+    def rejected(_):
+        raise RuntimeRejected("Worker quarantined")
+    runtime.submit = rejected
+    store.dispatch_once()
+    assert store.get(run_id)["status"] == "FAILED"
+    assert store.get(run_id)["failureReason"] == "Worker quarantined"
+    with store.db() as db:
+        assert db.execute("SELECT count(*) FROM queue").fetchone()[0] == 0

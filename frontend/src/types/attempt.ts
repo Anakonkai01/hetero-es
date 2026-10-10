@@ -9,7 +9,7 @@ export interface Attempt {
   workerId: string;
   modelVersion: string;
 
-  leaseToken: string;
+  leaseToken?: string;
 
   status: AttemptStatus;
 

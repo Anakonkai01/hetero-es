@@ -14,6 +14,11 @@ export interface BadgeInfo {
 }
 
 export const EXPERIMENT_STATUS: Record<ExperimentStatus, BadgeInfo> = {
+  STARTING: { tone: "info", label: "STARTING" },
+  CANCELLING: { tone: "warn", label: "CANCELLING" },
+  RECOVERING: { tone: "warn", label: "RECOVERING" },
+  DRAINING: { tone: "warn", label: "DRAINING", title: "Waiting for confirmed worker shutdown" },
+  FAILED: { tone: "err", label: "FAILED" },
   PAUSING: { tone: "warn", label: "PAUSING" },
   PAUSED: { tone: "neutral", label: "PAUSED" },
   DRAFT: { tone: "neutral", label: "DRAFT", title: "Saved configuration; not submitted to the Coordinator" },
@@ -60,6 +65,7 @@ export const EVENT_SEVERITY: Record<EventSeverity, BadgeInfo> = {
 };
 
 export const ADMISSION_STATUS: Record<AdmissionStatus, BadgeInfo> = {
+  PENDING_VERIFICATION: { tone: "info", label: "Pending verification", title: "GPU probe succeeded; runtime recipe admission has not yet been checked" },
   ADMITTED: { tone: "ok", label: "Full", title: "Admitted with full participation" },
   ADMITTED_LIMITED: { tone: "warn", label: "Limited", title: "Admitted with limits" },
   ELIGIBLE_BUT_NOT_BENEFICIAL: {
@@ -124,6 +130,7 @@ export const ARTIFACT_TYPE_LABEL: Record<ArtifactType, string> = {
 };
 
 export const POLICY_HINT = {
+  greedy: "Assigns the next available candidate to an admitted worker requesting work.",
   "capacity-weighted": "Splits candidates by the estimated capacity of each admitted worker.",
   "round-robin": "Hands candidates to admitted workers in turn, ignoring capacity.",
 } as const;

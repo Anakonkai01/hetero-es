@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getSession, login, logout } from "../api/access";
 import { ApiError, setActiveWorkspace, setDemoToken } from "../api/client";
 import { SessionContext } from "./session";
+import { IS_MOCK } from "../lib/dataSource";
 
 const WORKSPACE_KEY = "heteroes.demo-workspace";
 
@@ -37,7 +38,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     const result = await login(input);
     await queryClient.cancelQueries();
     queryClient.clear();
-    setDemoToken(result.demoToken);
+    const token = IS_MOCK ? result.demoToken : result.accessToken;
+    if (!token) throw new Error("The server did not return a session token.");
+    setDemoToken(token);
     const id = result.workspaces[0]?.workspaceId ?? "";
     setActiveWorkspace(id);
     sessionStorage.setItem(WORKSPACE_KEY, id);

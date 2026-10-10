@@ -4,7 +4,9 @@ import { updateProfile, acceptInvitation } from "../api/access";
 import { useAccessMutation, useMyWorkers, useMyInvitations } from "../hooks/useAccess";
 import { PageHeader } from "../components/ui/PageHeader";
 
-export function ProfilePage() {
+export function ProfilePage() { return IS_MOCK ? <MockProfilePage /> : <RuntimeProfilePage />; }
+
+function MockProfilePage() {
   const { session, refreshSession } = useSession();
   const user = session!.user;
   const workers = useMyWorkers();
@@ -36,3 +38,5 @@ export function ProfilePage() {
       {session!.workspaces.map((w) => <div key={w.workspaceId}>{w.name} · Role: {w.role}</div>)}
     </div></section></>;
 }
+import { IS_MOCK } from "../lib/dataSource";
+import { RuntimeProfilePage } from "./RuntimePages";

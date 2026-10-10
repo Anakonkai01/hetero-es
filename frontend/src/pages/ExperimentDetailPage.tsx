@@ -1,4 +1,5 @@
 import { ExperimentResults } from "../components/experiments/ExperimentResults";
+import { IS_MOCK } from "../lib/dataSource";
 import { useState } from "react";
 import { Link, useParams } from "react-router";
 import { isNotFoundError, isServerError } from "../api/client";
@@ -235,7 +236,7 @@ export function ExperimentDetailPage() {
                 </div>
               </section>
 
-              <section className="card" aria-label="Reward by generation">
+              {IS_MOCK && <section className="card" aria-label="Reward by generation">
                 <div className="ch">
                   <h2>Reward by generation</h2>
                   <small>
@@ -246,7 +247,7 @@ export function ExperimentDetailPage() {
                 <div className="cb">
                   <RewardChart generations={generations} />
                 </div>
-              </section>
+              </section>}
             </>
           )}
 
@@ -334,7 +335,7 @@ export function ExperimentDetailPage() {
                   <KeyValue label="Model">{experiment.modelName}</KeyValue>
                   <KeyValue label="Task">{experiment.task}</KeyValue>
                   <KeyValue label="Maximum generations">{experiment.maxGenerations ?? "Legacy fixture"}</KeyValue>
-                  <KeyValue label="Dataset IDs">{experiment.datasetIds?.join(", ") ?? "Legacy fixture"}</KeyValue>
+                  <KeyValue label={IS_MOCK ? "Dataset IDs" : "Built-in workload"}>{IS_MOCK ? experiment.datasetIds?.join(", ") ?? "Legacy fixture" : experiment.task}</KeyValue>
                   <KeyValue label="Candidates per generation" mono>
                     {experiment.candidatesPerGeneration}
                   </KeyValue>
@@ -345,7 +346,7 @@ export function ExperimentDetailPage() {
                     {experiment.syncMode}
                   </KeyValue>
                   <KeyValue label="Base seed" mono>
-                    {experiment.baseSeed}
+                    {experiment.baseSeed ?? "Derived from run ID, generation and candidate index"}
                   </KeyValue>
                   <KeyValue label="Config hash" mono>
                     {experiment.configHash}
@@ -361,7 +362,7 @@ export function ExperimentDetailPage() {
                 <h2>Events for this experiment</h2>
 
               </div>
-              {experiment.maxGenerations && <div className="cb demo-form"><p>Local simulated runtime · {experiment.status}</p><p>{experiment.completedGenerations ?? 0} generations committed · Model {experiment.modelVersion}</p>{experiment.checkpointSavedAt && <p>Generation state saved at {formatDateTime(experiment.checkpointSavedAt)}</p>}{experiment.cancelRequested && <p>Cancellation requested; waiting for confirmation.</p>}</div>}
+              {experiment.maxGenerations && <div className="cb demo-form"><p>{IS_MOCK ? "Local simulated runtime" : "Canonical runtime"} · {experiment.status}</p><p>{experiment.completedGenerations ?? 0} generations committed · Model {experiment.modelVersion}</p>{experiment.checkpointSavedAt && <p>Generation state saved at {formatDateTime(experiment.checkpointSavedAt)}</p>}{experiment.cancelRequested && <p>Cancellation requested; waiting for confirmation.</p>}</div>}
               {eventsFailed ? (
                 <ErrorState
                   title="Could not load events"

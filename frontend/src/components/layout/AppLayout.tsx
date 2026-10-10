@@ -14,6 +14,7 @@ import {
 } from "../ui/Icons";
 import { useStatusToasts } from "./useStatusToasts";
 import { useSession } from "../../app/session";
+import { IS_MOCK } from "../../lib/dataSource";
 
 const navigationItems = [
   { label: "Workspace", path: "/workspace", icon: <DashboardIcon /> },
@@ -116,7 +117,7 @@ export function AppLayout() {
         </nav>
 
         <div className="demo">
-          Local MSW demo. Authentication, GPU states and runtime confirmations are simulated. Sample figures are not benchmarks.
+          {IS_MOCK ? "Local MSW demo. Authentication, GPU states and runtime confirmations are simulated. Sample figures are not benchmarks." : "Private runtime · shared GPU pool · one active experiment."}
         </div>
       </aside>
 
@@ -126,9 +127,9 @@ export function AppLayout() {
 
           <span
             className={stale ? "conn bad" : "conn"}
-            title="Connection to the mock API. It does not reflect the state of individual workers."
+            title="Data source connection; individual worker connectivity is reported separately."
           >
-            {stale ? "Mock API disconnected" : "Local demo API"}
+            {stale ? "Data source disconnected" : IS_MOCK ? "Local demo API" : "Runtime API"}
           </span>
 
           <span className="mut" style={{ fontSize: "12.5px" }}>
@@ -147,7 +148,7 @@ export function AppLayout() {
             {refreshing ? "Refreshing…" : "Refresh"}
           </button>
 
-          {import.meta.env.DEV && (
+          {IS_MOCK && import.meta.env.DEV && (
             <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <label htmlFor="simsel">Simulate state</label>
               <select

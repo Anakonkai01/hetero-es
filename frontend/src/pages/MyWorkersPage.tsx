@@ -10,7 +10,9 @@ import { WorkerRegistration } from "../components/workspace/WorkerRegistration";
 import { WorkerMetrics } from "../components/workspace/WorkerMetrics";
 import type { Worker } from "../types/worker";
 
-export function MyWorkersPage() {
+export function MyWorkersPage() { return IS_MOCK ? <MockMyWorkersPage /> : <RuntimeWorkersPage />; }
+
+function MockMyWorkersPage() {
   const { session, workspace } = useSession(); const query = useMyWorkers(); const requests = useMyResourceSubmissions();
   const connection = useAccessMutation(connectMyWorker); const submit = useAccessMutation(submitResource);
   const [registering, setRegistering] = useState(false); const [selection, setSelection] = useState<Worker | null>(null);
@@ -37,3 +39,5 @@ export function MyWorkersPage() {
     {disconnecting && <Modal title="Disconnect Worker" onClose={() => setDisconnecting(null)}><div className="modal-form"><p>Workspace connection will be removed. Active allocations and tasks must be stopped first.</p>{connection.error && <p className="note err" role="alert">{connection.error.message}</p>}<div className="modal-footer"><button className="btn" onClick={() => setDisconnecting(null)}>Cancel</button><button className="btn dng" disabled={connection.isPending} onClick={() => void connection.mutateAsync({ ...disconnecting, action: "DISCONNECT" }).then(() => setDisconnecting(null)).catch(() => {})}>Disconnect</button></div></div></Modal>}
   </>;
 }
+import { IS_MOCK } from "../lib/dataSource";
+import { RuntimeWorkersPage } from "./RuntimePages";

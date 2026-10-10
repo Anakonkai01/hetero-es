@@ -1,4 +1,5 @@
 export type AdmissionStatus =
+  | "PENDING_VERIFICATION"
   | "INELIGIBLE"
   | "ELIGIBLE_BUT_NOT_BENEFICIAL"
   | "ADMITTED_LIMITED"

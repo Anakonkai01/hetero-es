@@ -1,4 +1,4 @@
-export type GenerationStatus = "RUNNING" | "COMPLETED";
+export type GenerationStatus = "RUNNING" | "COMPLETED" | "CANCELLED" | "FAILED";
 
 export interface Generation {
   experimentId: string;

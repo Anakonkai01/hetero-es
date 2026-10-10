@@ -1,6 +1,8 @@
 import type { Experiment } from "../../types/experiment";
 
-export function ExperimentResults({ experiment: e }: { experiment: Experiment }) {
+export function ExperimentResults(props: { experiment: Experiment }) { return IS_MOCK ? <MockExperimentResults {...props} /> : <RuntimeResults {...props} />; }
+
+function MockExperimentResults({ experiment: e }: { experiment: Experiment }) {
   if (!e.maxGenerations) return null;
   const completed = e.completedGenerations ?? 0;
   const points = Array.from({ length: completed + 1 }, (_, i) => ({ x: 30 + i / Math.max(1, e.maxGenerations!) * 540, y: 160 - Math.min(0.9, 0.4 + i * 0.025) * 140 }));
@@ -15,3 +17,5 @@ export function ExperimentResults({ experiment: e }: { experiment: Experiment })
     {e.checkpointSavedAt && <><span>Saved model state: {e.modelVersion} · {e.checkpointSavedAt}</span><button className="btn" onClick={exportState}>Download demo run state (JSON)</button><span className="hint">Real Coordinator integration must supply a checkpoint download, such as safetensors and model configuration. This JSON contains no weights.</span></>}
   </div></section>;
 }
+import { IS_MOCK } from "../../lib/dataSource";
+import { RuntimeResults } from "./RuntimeExperiment";

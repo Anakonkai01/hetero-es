@@ -24,7 +24,8 @@ export interface Session {
 
 export interface LoginResponse extends Session {
   /** A demo credential only. A real backend must implement its own session contract. */
-  demoToken: string;
+  demoToken?: string;
+  accessToken?: string;
 }
 
 export interface WorkspaceMember {

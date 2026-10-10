@@ -54,7 +54,7 @@ export function workerTelemetry<T extends { workerId: string; status: string; pr
 export function simulatedCandidates(e: Experiment): Candidate[] {
   return simulatedGenerations(e).flatMap((g, generationIndex) => Array.from({ length: g.candidateCount }, (_, i) => ({
     experimentId: e.experimentId, generationId: g.generationId, candidateId: `${g.generationId}-c${i + 1}`,
-    modelVersion: g.modelVersion, seed: e.baseSeed + generationIndex * g.candidateCount + i,
+    modelVersion: g.modelVersion, seed: (e.baseSeed ?? 0) + generationIndex * g.candidateCount + i,
     noiseRecipeHash: "demo-noise", batchIds: e.datasetIds?.slice(0, 1) ?? [], generationConfigHash: e.configHash,
     status: i < g.committedCandidateCount ? "COMMITTED" : i < g.committedCandidateCount + (e.workerIds?.length ?? 0) ? "RUNNING" : "PENDING",
     workerId: e.workerIds?.[i % (e.workerIds.length || 1)],

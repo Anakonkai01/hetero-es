@@ -7,7 +7,9 @@ import { useWorkers } from "../../hooks/useWorkers";
 import type { Experiment } from "../../types/experiment";
 import { ExperimentConfiguration } from "./ExperimentConfiguration";
 
-export function ExperimentControls({ experiment: e }: { experiment: Experiment }) {
+export function ExperimentControls(props: { experiment: Experiment }) { return IS_MOCK ? <MockExperimentControls {...props} /> : <RuntimeControls {...props} />; }
+
+function MockExperimentControls({ experiment: e }: { experiment: Experiment }) {
   const { session } = useSession(); const navigate = useNavigate();
   const submit = useAccessMutation(submitExperiment); const archive = useAccessMutation(archiveExperiment);
   const update = useAccessMutation(updateExperiment); const control = useAccessMutation(controlExperiment); const cancel = useAccessMutation(requestExperimentCancel);
@@ -34,3 +36,5 @@ export function ExperimentControls({ experiment: e }: { experiment: Experiment }
     {editing && own && e.status === "DRAFT" && <ExperimentConfiguration initial={e} pending={update.isPending} onSave={async (configuration) => { await update.mutateAsync({ experimentId: e.experimentId, configuration }); setEditing(false); }} />}
   </div></section>;
 }
+import { IS_MOCK } from "../../lib/dataSource";
+import { RuntimeControls } from "./RuntimeExperiment";

@@ -2,6 +2,7 @@ import type { AdmissionStatus, Worker } from "../../types/worker";
 import { minutesAgo } from "./helpers";
 
 const admissionReasons: Record<AdmissionStatus, string> = {
+  PENDING_VERIFICATION: "Runtime recipe verification has not completed.",
   ADMITTED:
     "Meets the model’s VRAM requirement (at least 6 GB) and adding this worker raises the cluster’s total throughput. It receives the maximum chunk size.",
   ADMITTED_LIMITED:

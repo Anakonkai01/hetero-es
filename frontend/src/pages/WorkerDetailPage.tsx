@@ -81,7 +81,7 @@ export function WorkerDetailPage() {
                 <dl className="kv">
                   <KeyValue label="GPU">{worker.profile.gpuName}</KeyValue>
                   <KeyValue label="Total VRAM">
-                    {formatGb(worker.profile.vramTotalMb)}
+                    {IS_MOCK || worker.status === "ONLINE" ? formatGb(worker.profile.vramTotalMb) : NOT_AVAILABLE}
                   </KeyValue>
                   <KeyValue label="Free VRAM">
                     {worker.profile.vramFreeMb === undefined
@@ -134,19 +134,19 @@ export function WorkerDetailPage() {
             <section className="card" aria-label="Admission">
               <div className="ch">
                 <h2>Admission</h2>
-                <small>Reason supplied by the coordinator (demo)</small>
+                <small>{IS_MOCK ? "Reason supplied by the coordinator (demo)" : "Runtime recipe admission status"}</small>
               </div>
               <div className="cb">
                 <Badge info={ADMISSION_STATUS[worker.admissionStatus]} />
                 <p style={{ margin: "10px 0 0" }}>{worker.admissionReason}</p>
               </div>
-              <div
+              {IS_MOCK && <div
                 className="ch"
                 style={{ borderTop: "1px solid var(--line2)" }}
               >
                 <h2 style={{ fontSize: 13 }}>The four admission outcomes</h2>
-              </div>
-              <div className="leg">
+              </div>}
+              {IS_MOCK && <div className="leg">
                 {ADMISSION_LEGEND.map((item) => (
                   <div
                     key={item.status}
@@ -158,7 +158,7 @@ export function WorkerDetailPage() {
                     <span className="t">{item.text}</span>
                   </div>
                 ))}
-              </div>
+              </div>}
             </section>
           </div>
 
@@ -183,3 +183,4 @@ export function WorkerDetailPage() {
     </QueryState>
   );
 }
+import { IS_MOCK } from "../lib/dataSource";

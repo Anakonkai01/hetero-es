@@ -16,6 +16,7 @@ type StatusFilter = "all" | ExperimentStatus;
 type SortOrder = "new" | "old";
 
 const statusOptions: ExperimentStatus[] = [
+  "STARTING", "CANCELLING", "RECOVERING", "DRAINING", "FAILED",
   "DRAFT",
   "PAUSING",
   "PAUSED",
@@ -137,7 +138,7 @@ export function ExperimentsPage() {
             </button>
           </EmptyState>
         ) : (
-          view === "list" ? <ExperimentTable experiments={rows} /> : <div className="resource-grid cb">{rows.map((e) => <section className="card" key={e.experimentId}><div className="ch"><h2>{e.name}</h2><Badge info={EXPERIMENT_STATUS[e.status]} /></div><div className="cb demo-form"><span>{e.modelName}</span><span>{e.task} · {e.workerIds?.length ?? 0} Workers</span><span>{e.completedGenerations ?? 0}/{e.maxGenerations ?? "—"} generations completed</span><div className="acts"><Link className="btn" to={`/experiments/${e.experimentId}`}>{e.status === "DRAFT" ? "Open / edit draft" : "Open dashboard"}</Link>{!["RUNNING", "QUEUED", "PAUSING", "PAUSED"].includes(e.status) && <button className="btn dng" disabled={archive.isPending} onClick={() => { if (window.confirm("Archive this experiment?")) void archive.mutateAsync(e.experimentId).catch(() => {}); }}>Delete / archive</button>}</div></div></section>)}</div>
+          view === "list" ? <ExperimentTable experiments={rows} /> : <div className="resource-grid cb">{rows.map((e) => <section className="card" key={e.experimentId}><div className="ch"><h2>{e.name}</h2><Badge info={EXPERIMENT_STATUS[e.status]} /></div><div className="cb demo-form"><span>{e.modelName}</span><span>{e.task} · {e.workerIds?.length ?? 0} Workers</span><span>{e.completedGenerations ?? 0}/{e.maxGenerations ?? "—"} generations completed</span><div className="acts"><Link className="btn" to={`/experiments/${e.experimentId}`}>{e.status === "DRAFT" ? "Open / edit draft" : "Open dashboard"}</Link>{!["RUNNING", "QUEUED", "PAUSING", "PAUSED", "STARTING", "CANCELLING", "RECOVERING", "DRAINING"].includes(e.status) && <button className="btn dng" disabled={archive.isPending} onClick={() => { if (window.confirm("Archive this experiment?")) void archive.mutateAsync(e.experimentId).catch(() => {}); }}>Delete / archive</button>}</div></div></section>)}</div>
         )}
       </section>
 

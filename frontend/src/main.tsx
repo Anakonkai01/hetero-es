@@ -5,9 +5,15 @@ import { AppProviders } from "./app/providers";
 
 import { AppRouter } from "./app/router";
 import "./index.css";
+import { IS_MOCK } from "./lib/dataSource";
 
 async function enableMocking() {
-  if (!import.meta.env.DEV) {
+  if (!IS_MOCK) {
+    if ("serviceWorker" in navigator) {
+      for (const registration of await navigator.serviceWorker.getRegistrations()) {
+        if (registration.active?.scriptURL.endsWith("/mockServiceWorker.js")) await registration.unregister();
+      }
+    }
     return;
   }
 

@@ -1,4 +1,9 @@
 export type ExperimentStatus =
+  | "STARTING"
+  | "CANCELLING"
+  | "RECOVERING"
+  | "DRAINING"
+  | "FAILED"
   | "PAUSING"
   | "PAUSED"
   | "DRAFT"
@@ -7,7 +12,7 @@ export type ExperimentStatus =
   | "COMPLETED"
   | "CANCELLED";
 
-export type SchedulerPolicy = "capacity-weighted" | "round-robin";
+export type SchedulerPolicy = "capacity-weighted" | "round-robin" | "greedy";
 
 export type SyncMode = "synchronous" | "asynchronous";
 
@@ -27,6 +32,11 @@ export interface Experiment {
   validationScore?: number;
   testScore?: number;
   checkpointSavedAt?: string;
+  committedCandidateCount?: number;
+  failureReason?: string;
+  alpha?: number;
+  sigma?: number;
+  decodeEngine?: string;
 
   status: ExperimentStatus;
   cancelRequested: boolean;
@@ -39,7 +49,7 @@ export interface Experiment {
   syncMode: SyncMode;
 
   candidatesPerGeneration: number;
-  baseSeed: number;
+  baseSeed?: number;
   configHash: string;
 
   currentGenerationId?: string;
@@ -60,4 +70,7 @@ export interface CreateExperimentRequest {
   maxGenerations?: number;
   candidatesPerGeneration?: number;
   datasetIds?: string[];
+  alpha?: number;
+  sigma?: number;
+  decodeEngine?: string;
 }

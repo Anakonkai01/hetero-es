@@ -7,7 +7,9 @@ import { QueryState } from "../components/common/QueryState";
 import { PageHeader } from "../components/ui/PageHeader";
 import { useAccessMutation, useModels } from "../hooks/useAccess";
 
-export function ModelsPage() {
+export function ModelsPage() { return IS_MOCK ? <MockModelsPage /> : <RuntimeModelsPage />; }
+
+function MockModelsPage() {
   const query = useModels();
   const { session } = useSession();
   const { flash } = useAppState();
@@ -54,3 +56,5 @@ export function ModelsPage() {
     </QueryState>
   </>;
 }
+import { IS_MOCK } from "../lib/dataSource";
+import { RuntimeModelsPage } from "./RuntimePages";

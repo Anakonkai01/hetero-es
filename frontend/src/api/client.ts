@@ -1,12 +1,14 @@
+import { IS_MOCK } from "../lib/dataSource";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
+const TOKEN_KEY = IS_MOCK ? "heteroes.demo-token" : "heteroes.access-token";
 
-let demoToken = sessionStorage.getItem("heteroes.demo-token") ?? "";
+let demoToken = sessionStorage.getItem(TOKEN_KEY) ?? "";
 let workspaceId = "";
 
 export function setDemoToken(token: string) {
   demoToken = token;
-  if (token) sessionStorage.setItem("heteroes.demo-token", token);
-  else sessionStorage.removeItem("heteroes.demo-token");
+  if (token) sessionStorage.setItem(TOKEN_KEY, token);
+  else sessionStorage.removeItem(TOKEN_KEY);
 }
 
 export function setActiveWorkspace(id: string) {
@@ -67,4 +69,14 @@ export function apiDelete<T = void>(path: string): Promise<T> {
 /** True when the data source answered with a server error (as opposed to being unreachable). */
 export function isServerError(error: unknown): boolean {
   return error instanceof ApiError && error.status >= 500;
+}
+
+export async function downloadArtifact(id: string, name: string) {
+  const response = await fetch(`${API_BASE_URL}/api/v1/artifacts/${encodeURIComponent(id)}/download`, {
+    headers: { Authorization: `Bearer ${demoToken}`, "X-Workspace-Id": workspaceId },
+  });
+  if (!response.ok) throw new ApiError(response.status, "Artifact download failed");
+  const url = URL.createObjectURL(await response.blob());
+  const link = document.createElement("a"); link.href = url; link.download = name; link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

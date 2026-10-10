@@ -13,7 +13,7 @@ export interface Candidate {
 
   modelVersion: string;
 
-  seed: number;
+  seed: number | string;
   noiseRecipeHash: string;
 
   batchIds: string[];

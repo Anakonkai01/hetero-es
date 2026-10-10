@@ -6,6 +6,7 @@ import { useAccessMutation } from "../hooks/useAccess";
 import { PageHeader } from "../components/ui/PageHeader";
 import { Modal } from "../components/ui/Modal";
 import { DashboardIcon, PlusIcon } from "../components/ui/Icons";
+import { IS_MOCK } from "../lib/dataSource";
 
 export function WorkspaceListPage() {
   const { session, selectWorkspace, refreshSession } = useSession();
@@ -14,7 +15,7 @@ export function WorkspaceListPage() {
   const create = useAccessMutation((input: { name: string; description: string }) => apiPost("/api/v1/workspaces", input));
   const workspaces = session?.workspaces ?? [];
   return <>
-    <PageHeader title="Workspaces" description="Shared compute resources and memberships." actions={<button className="btn accent" onClick={() => { create.reset(); setCreating(true); }}><PlusIcon />Create workspace</button>} />
+    <PageHeader title="Workspaces" description="Shared compute resources and memberships." actions={<button className="btn accent" disabled={!IS_MOCK} title={IS_MOCK ? undefined : "This deployment uses the configured HeteroES Lab workspace"} onClick={() => { create.reset(); setCreating(true); }}><PlusIcon />Create workspace</button>} />
     <div className="workspace-summary-strip"><span><b>{workspaces.length}</b> workspaces</span><span><b>{workspaces.filter((w) => w.role === "ADMIN").length}</b> administered</span><div className="view-toggle"><button aria-pressed={view === "grid"} className={view === "grid" ? "selected" : ""} onClick={() => setView("grid")}>Grid</button><button aria-pressed={view === "list"} className={view === "list" ? "selected" : ""} onClick={() => setView("list")}>List</button></div></div>
     <div className={`workspace-collection ${view}`}>{workspaces.map((w) => <Link className={`workspace-tile ${w.role === "ADMIN" ? "admin" : "participant"}`} key={w.workspaceId} to={`/workspace/${w.workspaceId}`} onClick={() => selectWorkspace(w.workspaceId)}>
       <div className="workspace-tile-top"><span className="workspace-emblem"><DashboardIcon /></span><span className={`role-pill ${w.role.toLowerCase()}`}>Role: {w.role === "ADMIN" ? "Admin" : "Participant"}</span></div>

@@ -8,7 +8,9 @@ import { TASK_FIELDS, type DatasetSplit, type DatasetTask } from "../../types/da
 import type { CreateExperimentRequest, Experiment } from "../../types/experiment";
 
 const splits: DatasetSplit[] = ["train", "validation", "test"];
-export function ExperimentConfiguration({ initial, onSave, pending }: { initial?: Experiment; onSave: (config: CreateExperimentRequest) => Promise<unknown>; pending: boolean }) {
+export function ExperimentConfiguration(props: Parameters<typeof MockExperimentConfiguration>[0]) { return IS_MOCK ? <MockExperimentConfiguration {...props} /> : <RuntimeConfiguration {...props} />; }
+
+function MockExperimentConfiguration({ initial, onSave, pending }: { initial?: Experiment; onSave: (config: CreateExperimentRequest) => Promise<unknown>; pending: boolean }) {
   const { session, workspace } = useSession();
   const models = useModels(); const resources = useResources(); const workers = useWorkers(); const datasets = useDatasets();
   const upload = useAccessMutation(uploadDataset);
@@ -59,3 +61,5 @@ export function ExperimentConfiguration({ initial, onSave, pending }: { initial?
     <button className="btn pri" disabled={pending || reading || upload.isPending || !workspace}>Save draft</button>
   </form>;
 }
+import { IS_MOCK } from "../../lib/dataSource";
+import { RuntimeConfiguration } from "./RuntimeExperiment";

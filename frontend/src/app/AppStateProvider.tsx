@@ -10,6 +10,7 @@ import {
 import { setScenario as setMockScenario } from "../mocks/scenario";
 import type { Scenario } from "../mocks/scenario";
 import { AppStateContext, type AppState } from "./appState";
+import { IS_MOCK } from "../lib/dataSource";
 
 const TOAST_MS = 2600;
 const MIN_REFRESH_MS = 800;
@@ -79,7 +80,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const retryRegion = useCallback(() => {
     setScenario("normal");
-    flash("Region reloaded (simulated)");
+    flash(IS_MOCK ? "Region reloaded (simulated)" : "Refreshing runtime data");
   }, [flash, setScenario]);
 
   const value = useMemo<AppState>(
