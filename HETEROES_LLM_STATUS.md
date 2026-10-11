@@ -1,12 +1,49 @@
 # HeteroES-LLM — Status
 
-**Last updated:** 11/10/2026 — M3a private Worker installers/shared UX prepared; native Windows GPU acceptance pending. M2 local agents/control/recovery verified; actual R2/EC2 acceptance pending owner cloud accounts. The 09/10 decoder, profiling and research evidence and earlier milestones remain in the following blocks. Newest verified updates appear first; sections 1–13 were written on 30/09 and are older background.
+**Last updated:** 11/10/2026 — M3a native Windows qualification, distributed replay/baseline and owner-OFF trial verified on Thao's RTX 3060; remaining installation/UI/outage gates pending. M2 local agents/control/recovery verified; actual R2/EC2 acceptance pending owner cloud accounts. The 09/10 decoder, profiling and research evidence and earlier milestones remain in the following blocks. Newest verified updates appear first; sections 1–13 were written on 30/09 and are older background.
 **Canonical design/specification:** `HETEROES_LLM_MASTER.md`  
 **Purpose:** current implementation truth, verified evidence, blockers, artifacts, and the exact next action.
 
 > **Document rule:** `MASTER` decides what the system/design should be. `STATUS` decides what is actually done now. For a new chat, read `HETEROES_LLM_MASTER.md` and then this file; older proposal/roadmap/chat-handoff files are archive only.
 
 ## 0. NEXT SESSION — START HERE
+
+### UPDATE 11/10/2026 — First native Windows hardware trial passed
+
+Owner installed the private desktop Worker, passed qualification, approved the
+device and enabled contribution, then explicitly requested this test. Device
+`desktop-5a5bc7e5fcaf` / `thao_nguyen_3060`: Windows 11 build 26200, RTX 3060,
+driver 617.42, isolated Python 3.12.15, torch 2.13.0+cu132. Enrollment evidence
+matches the candidate reference, exact restore and 16-text seed-0 prediction
+probe. All 57 runtime Python file bytes match Track A after path normalization.
+
+`95b347701aea49bdbd5b4978d1982a78`: G=2/N=4, arith16/hf_generate FP32, canonical
+CPU noise, alpha=sigma=0.001. The Linux 5070 Ti coordinated; the Windows Worker
+committed all 8 rewards. Windows replayed generation 0 with full hash verification.
+A separate one-GPU Linux baseline with the same experiment ID matches all 8
+candidate seeds/rewards, both generation-record hashes, both child hashes and
+the actual final checkpoint bytes:
+`04934b82565441a60ea7f9e8389b35885cf7066c77d226de3701f625d29e1bb8`.
+Both runs COMPLETED and all selected processes were confirmed stopped.
+
+`8047b923e2d1427895045b384d130247`: requested owner OFF during a live native
+candidate lease. The G=2/N=32 cancellation trial ended CANCELLED, committed 5
+results, published no update, confirmed Windows process death and released all
+reservations. Windows contribution was restored to the owner's original ON.
+Temporary local coordinator agent is OFF/stopped; dispatch is held, queue and
+reservations zero. Legacy WSL agents and Quang's machine were not used.
+
+Evidence: `artifacts/experiments/2026-10-11-m3-native-windows/` and B's matching
+dated folder. Distributed reservation wall time 80.2404 s (two GPUs), baseline
+36.0302 s (one GPU), cancellation 50.6084 s (two GPUs); qualification charged its
+owner-reported full 120 s upper bound. New hardware trial upper bound 0.116036
+GPU-hours; M3a including the prior unintended run 0.123133/0.25. Cumulative upper
+bound **1.144965/2.0 GPU-hours**, M2 cloud reserve unchanged at 0.083799.
+
+Remaining: clean-image install without existing development tools, native
+single-instance/tray/restart-OFF/Quit observations, worker network/coordinator
+outages. These smoke results do not close every M3a gate or establish broad
+Windows portability or post-training quality. Cloud remains deferred.
 
 ### UPDATE 11/10/2026 — M3a native Worker and shared UX
 
