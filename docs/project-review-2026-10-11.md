@@ -70,14 +70,53 @@ honestly reports learning/negative results. More features alone do not increase
 the credibility of the submission. Both students must understand and demonstrate
 their components, numerical/control boundaries and AI-assisted provenance.
 
-## Deadline judgement and recommended execution gates
+## Three-week velocity review and corrected deadline judgement
+
+The owner's follow-up requested the actual last three weeks rather than an
+assessment based only on remaining gates. Git history and dated artifacts were
+inspected for 21 September–11 October. At inspection, reachable history contained
+226 Track A and 30 Track B commits in this interval, including documentation,
+evidence and merge history. These are activity counts, not productivity/quality
+or completion percentages. The stronger evidence is the following progression.
+
+| Period | Delivered progression / evidence |
+| --- | --- |
+| 21–26 September | Track B cluster/experiment/generation/candidate UI and coordinator data architecture, still primarily prototype work (`0ffbdea`, `9c643ba`, `56013a3`) |
+| 27 September–3 October | Physical compatibility probes preserved on 30 September; Track A package bootstrapped 30 September (`a40e0a9`), schema on 2 October (`070270e`), canonical noise and cross-GPU perturbation on 3 October (`b034d75`, `b34788f`); Track B detail/UI expansion |
+| 5–6 October | Complete perturb/evaluate/update pipeline, typed manifest, transactional candidate/attempt ledger and real HTTP workers; physical two-machine generation equal to reference (`d4928d4`, `b8fce14`, `b90a842`) |
+| 7–9 October | Admission/static/dynamic benchmarks with repeats, rollout/update profiling, physical fault campaigns, long learning runs and their negative-result analysis, hash-exact replay, third-device/WAN comparisons, compact decoder integration and measured 1.60x generation improvement (`75a328e`, `9bc52c2`, `9f7fb91`, `69bc300`, `723e320`) |
+| 10–11 October | Product integration, accounts/workspaces, safe operations, CPU control/outbound Agent and recovery, Windows native GPU trial, Linux Worker qualification/CPU Server, physical ownership/pause logic, comprehensive UI and persistent detailed monitoring (`51e1b2a`, `4cc90ec`, `a499a2e`, `bc8b8ab`, `0fb8e16`, `28a3c31`) |
+
+The package/runtime advanced from bootstrap to a substantial hardware-tested
+system in roughly twelve calendar days; the latest two days delivered several
+large product layers. Forty remaining days are therefore meaningful runway.
+The previous blanket "high risk for the entire expanded wishlist" description
+overweighted unclosed acceptance gates and underweighted demonstrated delivery
+velocity. It also grouped owner-deferred cloud work into a hypothetical complete
+scope. That was too conservative as an assessment of the actual local submission.
+
+**Corrected assessment:** deadline risk for a strong local IT capstone is **low
+to moderate**, conditional on sustained availability, timely owner/student review,
+and keeping the final report/demo week. Completing the remaining authorized local
+M3–M6 scope is credible; its wider hardware/platform acceptance is **moderate
+risk**, rather than automatically high merely because several gates are pending.
+Cloud remains deferred and should not increase the current local delivery risk.
+There is no measured probability or assurance of a grade.
+
+Residual risks have different causes: borrowed multi-GPU/native Windows access
+cannot be scheduled by writing more code; a positive broadly generalizing
+fine-tuning result cannot be promised from development velocity; owner claim audit,
+learning/defense and fresh-install walkthrough require human participation.
+Negative learning results can still support a valid IT systems submission when
+honestly evaluated. Extrapolating the busiest days linearly would also be wrong:
+integration, review and repeated experiments can take longer than their coding.
+
+## Recommended execution gates
 
 **20 November is feasible for a bounded, well-evaluated local capstone.** It is
-not a reliable promise of complete M1–M6, broad Windows/Linux hardware parity,
-cloud acceptance, multiple models and replicated fine-tuning gains. Those require
-separate gates and external hardware. The current deadline risk is moderate for
-the bounded submission and high for the entire expanded wishlist. This is a
-qualitative engineering judgement, not a measured probability or grading forecast.
+not a promise of broad hardware parity or replicated fine-tuning gains. Those
+require their own evidence. The recommendations below protect integration and
+delivery time while using the demonstrated rapid implementation pace.
 
 | Dates | Recommended outcome / decision gate |
 | --- | --- |

@@ -164,9 +164,9 @@ The capstone deadline is 20 November; recommended acceptance and evidence gates
 preserve the 8 November core freeze and 15 November result freeze.
 
 New private local archive:
-`~/.local/share/heteroes-session-archives/2026-10-11-monitoring-close/`.
+`~/.local/share/heteroes-session-archives/2026-10-11-monitoring-close-r2/`.
 Independent encrypted copy:
-`/mnt/Archive-2tb/heteroes-local/archives/2026-10-11-monitoring-close-independent.tar.gz.gpg`.
+`/mnt/Archive-2tb/heteroes-local/archives/2026-10-11-monitoring-close-r2-independent.tar.gz.gpg`.
 Use their receipts to verify creation/restoration. Public state/snapshot evidence
 is in `docs/evidence/2026-10-11-monitoring-close/`; the final ciphertext receipt
 is beside the encrypted file and copied into the private local archive. The final
