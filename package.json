@@ -1,0 +1,22 @@
+{
+  "name": "heteroes-product",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "packages/product-ui",
+    "desktop/worker"
+  ],
+  "scripts": {
+    "build:web": "npm run build --workspace frontend",
+    "build:worker": "npm run build --workspace @heteroes/worker",
+    "test:worker": "npm test --workspace @heteroes/worker"
+  },
+  "allowScripts": {
+    "electron@41.10.7": true,
+    "msw@2.15.0": true,
+    "electron-winstaller@5.4.0": true
+  },
+  "overrides": {
+    "global-agent": "4.1.3"
+  }
+}

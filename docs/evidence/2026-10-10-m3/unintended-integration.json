@@ -1,0 +1,18 @@
+{
+  "runId": "45d72973ddf243fdb8d9a46d2e9a670f",
+  "status": "CANCELLED",
+  "completedGenerations": 1,
+  "workerIds": [
+    "5070ti"
+  ],
+  "startedAt": "2026-10-10T17:06:56.154750+00:00",
+  "cause": "Accidentally invoked legacy test:integration script; immediately interrupted and observed cooperative cancellation.",
+  "workerSeconds": 19.677525281906128,
+  "workerGpuHours": 0.005465979244973924,
+  "conservativeGpuHours": 0.007097731166415744,
+  "updatedCumulativeGpuHours": 1.0289297311664158,
+  "finalWeightsSha256": "f333670e950c3f131c201912f535008479a0dce69bf60b939db4d173b6d4002a",
+  "reservationsAfter": 0,
+  "queuedAfter": 0,
+  "ownedWorkersConfirmedStopped": true
+}

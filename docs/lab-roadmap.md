@@ -1,7 +1,8 @@
 # Lab product roadmap
 
 Status: accepted by the owner; M1 implemented and verified locally. M2 is in
-implementation; M3–M6 remain planned. Revised on
+local verification; cloud acceptance is deferred. M3a implementation is authorized
+independently of cloud availability; M3b–M6 remain planned. Revised on
 2026-10-10 from the planning conversation. This file records decisions and
 acceptance gates, not claims that future milestones have been implemented.
 
@@ -21,7 +22,8 @@ acceptance gates, not claims that future milestones have been implemented.
   actual usage before starting another GPU campaign.
 - English repository documentation; Vietnamese user communication. Real services
   remain the default. MSW must be explicitly selected for demonstrations.
-- There is no delivery deadline. Advance only after each milestone's gate passes.
+- There is no delivery deadline. Acceptance gates remain required. The owner authorized independent M3a local
+  development while M2 cloud acceptance is deferred.
 
 ## Product and deployment decisions
 
@@ -181,7 +183,16 @@ frontend checks; real R2 upload/download/restore; actual cloud browser access;
 M2 remains incomplete without the cloud and three-device evidence. Record progress
 and blockers in [m2-implementation.md](m2-implementation.md).
 
-## M3 — Installable Windows/Linux product and networking
+## M3a — Native Worker and shared product UX
+
+Owner accepted 2026-10-10: worker-first Windows 11 x64 native and Linux x64
+installers, existing local CPU server, Tailscale graphical setup, shared Vi/En UI,
+light/dark/system and three accents. No Lab Server installer or cloud prerequisite
+for this slice. Native numerical admission and fresh hardware usability remain
+required before claiming acceptance. See [M3a implementation](m3-local-worker-ux.md)
+and [worker trial guide](worker-desktop-guide.md).
+
+## M3b — Installable Lab Server and public networking
 
 Package server and worker applications with isolated dependencies, login,
 contribution controls, tray behavior and compatibility self-test. Support local

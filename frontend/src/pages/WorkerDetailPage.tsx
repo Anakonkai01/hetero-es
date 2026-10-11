@@ -1,3 +1,4 @@
+import {useProduct} from '@heteroes/product-ui';
 import { Link, useParams } from "react-router";
 import { isNotFoundError, isServerError } from "../api/client";
 import { useAppState } from "../app/appState";
@@ -18,6 +19,7 @@ import { NOT_AVAILABLE, formatClock, formatGb } from "../lib/format";
 import { ADMISSION_LEGEND, ADMISSION_STATUS } from "../lib/labels";
 
 export function WorkerDetailPage() {
+  const {t}=useProduct();
   const { workerId = "" } = useParams();
   const { retryRegion } = useAppState();
   const workerQuery = useWorker(workerId);
@@ -38,7 +40,7 @@ export function WorkerDetailPage() {
       isPending={workerQuery.isPending}
       isError={workerQuery.isError}
       hasData={Boolean(worker)}
-      title="Could not load the worker"
+      title={t("Could not load the worker")}
     >
       {worker && (
         <>
@@ -67,38 +69,37 @@ export function WorkerDetailPage() {
             }
             actions={
               <Link className="btn" to="/workers">
-                ← Back to Workers
-              </Link>
+                {t("← Back to Workers")}</Link>
             }
           />
 
           <div className="two">
-            <section className="card" aria-label="GPU profile">
+            <section className="card" aria-label={t("GPU profile")}>
               <div className="ch">
-                <h2>GPU profile</h2>
+                <h2>{t("GPU profile")}</h2>
               </div>
               <div className="cb">
                 <dl className="kv">
-                  <KeyValue label="GPU">{worker.profile.gpuName}</KeyValue>
-                  <KeyValue label="Total VRAM">
+                  <KeyValue label={t("GPU")}>{worker.profile.gpuName}</KeyValue>
+                  <KeyValue label={t("Total VRAM")}>
                     {IS_MOCK || worker.status === "ONLINE" ? formatGb(worker.profile.vramTotalMb) : NOT_AVAILABLE}
                   </KeyValue>
-                  <KeyValue label="Free VRAM">
+                  <KeyValue label={t("Free VRAM")}>
                     {worker.profile.vramFreeMb === undefined
                       ? NOT_AVAILABLE
                       : formatGb(worker.profile.vramFreeMb, 1)}
                   </KeyValue>
-                  <KeyValue label="Throughput">
+                  <KeyValue label={t("Throughput")}>
                     {worker.profile.throughputTokensPerSecond === undefined
                       ? NOT_AVAILABLE
                       : `${worker.profile.throughputTokensPerSecond.toLocaleString("en-US")} tokens/s`}
                   </KeyValue>
-                  <KeyValue label="Safe chunk size">
+                  <KeyValue label={t("Safe chunk size")}>
                     {worker.profile.safeChunkSize === undefined
                       ? NOT_AVAILABLE
                       : `${worker.profile.safeChunkSize} candidates / round`}
                   </KeyValue>
-                  <KeyValue label="Last heartbeat (GMT+7)" mono>
+                  <KeyValue label={t("Last heartbeat (GMT+7)")} mono>
                     {formatClock(worker.lastHeartbeatAt)}
                   </KeyValue>
                 </dl>
@@ -106,7 +107,7 @@ export function WorkerDetailPage() {
                 {worker.profile.vramFreeMb !== undefined && (
                   <div className="prog" style={{ marginTop: 16 }}>
                     <span>
-                      VRAM in use:{" "}
+                      {t("VRAM in use:")}{" "}
                       {(
                         (worker.profile.vramTotalMb -
                           worker.profile.vramFreeMb) /
@@ -125,16 +126,14 @@ export function WorkerDetailPage() {
                 )}
 
                 <p className="hint" style={{ marginBottom: 0 }}>
-                  A stale heartbeat alone is not treated as the worker being
-                  down; there is no official rule yet.
-                </p>
+                  {t("A stale heartbeat alone is not treated as the worker being down; there is no official rule yet.")}</p>
               </div>
             </section>
 
-            <section className="card" aria-label="Admission">
+            <section className="card" aria-label={t("Admission")}>
               <div className="ch">
-                <h2>Admission</h2>
-                <small>{IS_MOCK ? "Reason supplied by the coordinator (demo)" : "Runtime recipe admission status"}</small>
+                <h2>{t("Admission")}</h2>
+                <small>{IS_MOCK ? t("Reason supplied by the coordinator (demo)") : t("Runtime recipe admission status")}</small>
               </div>
               <div className="cb">
                 <Badge info={ADMISSION_STATUS[worker.admissionStatus]} />
@@ -144,7 +143,7 @@ export function WorkerDetailPage() {
                 className="ch"
                 style={{ borderTop: "1px solid var(--line2)" }}
               >
-                <h2 style={{ fontSize: 13 }}>The four admission outcomes</h2>
+                <h2 style={{ fontSize: 13 }}>{t("The four admission outcomes")}</h2>
               </div>}
               {IS_MOCK && <div className="leg">
                 {ADMISSION_LEGEND.map((item) => (
@@ -162,20 +161,20 @@ export function WorkerDetailPage() {
             </section>
           </div>
 
-          <section className="card" aria-label="Worker events">
+          <section className="card" aria-label={t("Worker events")}>
             <div className="ch">
-              <h2>Events related to this worker</h2>
+              <h2>{t("Events related to this worker")}</h2>
             </div>
             {eventsFailed ? (
               <ErrorState
-                title="Could not load events"
+                title={t("Could not load events")}
                 onRetry={retryRegion}
                 retryLabel="Retry this region"
               />
             ) : events.length === 0 ? (
-              <EmptyState title="No related events" />
+              <EmptyState title={t("No related events")} />
             ) : (
-              <EventRows events={events} label="Worker events" />
+              <EventRows events={events} label={t("Worker events")} />
             )}
           </section>
         </>

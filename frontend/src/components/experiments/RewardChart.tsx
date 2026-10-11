@@ -1,3 +1,4 @@
+import {useProduct} from '@heteroes/product-ui';
 import type { Generation } from "../../types/generation";
 import { EmptyState } from "../common/EmptyState";
 
@@ -18,6 +19,7 @@ function linePath(points: [number, number][]): string {
 }
 
 export function RewardChart({ generations }: { generations: Generation[] }) {
+  const {t}=useProduct();
   const maxReward = Math.max(0.6, ...generations.flatMap((g) => [g.rewardMean ?? 0, g.rewardBest ?? 0]));
   const count = generations.length || 1;
   const x = (index: number) => LEFT + ((index + 0.5) * WIDTH) / count;
@@ -34,7 +36,7 @@ export function RewardChart({ generations }: { generations: Generation[] }) {
   if (meanPoints.length === 0) {
     return (
       <EmptyState
-        title="No reward data yet"
+        title={t("No reward data yet")}
         message="Reward appears once the first generation has an accepted candidate."
       />
     );
@@ -45,15 +47,13 @@ export function RewardChart({ generations }: { generations: Generation[] }) {
   return (
     <>
       <div className="hint" style={{ marginBottom: 6 }}>
-        Vertical axis: reward (score, scale 0 – {maxReward.toFixed(2)}). Horizontal axis:
-        generations in order of creation.
-      </div>
+        {t("Vertical axis: reward (score, scale 0 –")}{maxReward.toFixed(2)}{t("). Horizontal axis: generations in order of creation.")}</div>
 
       <svg
         viewBox="0 0 640 240"
         width="100%"
         role="img"
-        aria-label="Chart of mean and best reward per generation"
+        aria-label={t("Chart of mean and best reward per generation")}
         style={{ display: "block" }}
       >
         <defs>
@@ -121,12 +121,10 @@ export function RewardChart({ generations }: { generations: Generation[] }) {
 
       <div className="legendl">
         <span>
-          <b style={{ color: "#0F766E" }}>●━</b> Mean reward of the generation
-        </span>
+          <b style={{ color: "#0F766E" }}>●━</b> {t("Mean reward of the generation")}</span>
         <span>
-          <b style={{ color: "#1A1D1C" }}>■╌</b> Best reward of the generation
-        </span>
-        <span>Generations without a reward are not drawn.</span>
+          <b style={{ color: "#1A1D1C" }}>■╌</b> {t("Best reward of the generation")}</span>
+        <span>{t("Generations without a reward are not drawn.")}</span>
       </div>
     </>
   );

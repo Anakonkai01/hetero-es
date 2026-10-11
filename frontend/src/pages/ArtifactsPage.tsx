@@ -1,3 +1,4 @@
+import {useProduct} from '@heteroes/product-ui';
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { useAppState } from "../app/appState";
@@ -21,6 +22,7 @@ type TypeFilter = "all" | ArtifactType;
 const typeOptions = Object.keys(ARTIFACT_TYPE_LABEL) as ArtifactType[];
 
 export function ArtifactsPage() {
+  const {t}=useProduct();
   const { flash } = useAppState();
   const artifactsQuery = useArtifacts();
   const experimentsQuery = useExperiments();
@@ -63,18 +65,18 @@ export function ArtifactsPage() {
       isPending={artifactsQuery.isPending}
       isError={artifactsQuery.isError}
       hasData={Boolean(artifactsQuery.data)}
-      title="Could not load artifacts"
+      title={t("Could not load artifacts")}
     >
       <PageHeader
-        title="Artifacts"
-        description="Files tied to experiments: configs, checkpoints, manifests and evaluation results."
+        title={t("Artifacts")}
+        description={t("Files tied to experiments: configs, checkpoints, manifests and evaluation results.")}
       />
 
       <div className="split">
-        <section className="card a" aria-label="Artifact list">
+        <section className="card a" aria-label={t("Artifact list")}>
           <div className="filters" style={{ paddingTop: 16 }}>
             <div className="fg">
-              <label htmlFor="f-ar-e">Experiment</label>
+              <label htmlFor="f-ar-e">{t("Experiment")}</label>
               <select
                 id="f-ar-e"
                 className="sel"
@@ -86,7 +88,7 @@ export function ArtifactsPage() {
                   })
                 }
               >
-                <option value="all">All</option>
+                <option value="all">{t("All")}</option>
                 {experiments.map((experiment) => (
                   <option
                     key={experiment.experimentId}
@@ -98,14 +100,14 @@ export function ArtifactsPage() {
               </select>
             </div>
             <div className="fg">
-              <label htmlFor="f-ar-t">File type</label>
+              <label htmlFor="f-ar-t">{t("File type")}</label>
               <select
                 id="f-ar-t"
                 className="sel"
                 value={type}
                 onChange={(event) => setType(event.target.value as TypeFilter)}
               >
-                <option value="all">All</option>
+                <option value="all">{t("All")}</option>
                 {typeOptions.map((option) => (
                   <option key={option} value={option}>
                     {ARTIFACT_TYPE_LABEL[option]}
@@ -117,25 +119,24 @@ export function ArtifactsPage() {
 
           {artifacts.length === 0 ? (
             <EmptyState
-              title="No artifacts yet"
+              title={t("No artifacts yet")}
               message="Files appear once an experiment produces configs, checkpoints or results."
             />
           ) : rows.length === 0 ? (
-            <EmptyState title="No artifacts match the filters">
+            <EmptyState title={t("No artifacts match the filters")}>
               <button type="button" className="btn" onClick={clearFilters}>
-                Clear filters
-              </button>
+                {t("Clear filters")}</button>
             </EmptyState>
           ) : (
             <div className="scroll">
-              <div className="tw" role="table" aria-label="Artifacts">
+              <div className="tw" role="table" aria-label={t("Artifacts")}>
                 <div className="rowh cols-art" role="row">
-                  <div className="c" role="columnheader">File name</div>
-                  <div className="c" role="columnheader">Type</div>
-                  <div className="c" role="columnheader">Experiment</div>
-                  <div className="c" role="columnheader">Created</div>
-                  <div className="c" role="columnheader">Size</div>
-                  <div className="c" role="columnheader">Status</div>
+                  <div className="c" role="columnheader">{t("File name")}</div>
+                  <div className="c" role="columnheader">{t("Type")}</div>
+                  <div className="c" role="columnheader">{t("Experiment")}</div>
+                  <div className="c" role="columnheader">{t("Created")}</div>
+                  <div className="c" role="columnheader">{t("Size")}</div>
+                  <div className="c" role="columnheader">{t("Status")}</div>
                 </div>
                 {rows.map((artifact) => {
                   const isSelected = artifact.artifactId === selectedId;
@@ -189,13 +190,13 @@ export function ArtifactsPage() {
           )}
         </section>
 
-        <section className="card b" aria-label="Artifact metadata">
+        <section className="card b" aria-label={t("Artifact metadata")}>
           <div className="ch">
-            <h2>File details</h2>
+            <h2>{t("File details")}</h2>
           </div>
           {!selected ? (
             <div className="empty">
-              <span>Select a file to see its metadata and download it.</span>
+              <span>{t("Select a file to see its metadata and download it.")}</span>
             </div>
           ) : (
             <div
@@ -216,19 +217,19 @@ export function ArtifactsPage() {
 
               <dl className="kv" style={{ gridTemplateColumns: "1fr 1fr" }}>
                 <div>
-                  <dt>Type</dt>
+                  <dt>{t("Type")}</dt>
                   <dd>{ARTIFACT_TYPE_LABEL[selected.type]}</dd>
                 </div>
                 <div>
-                  <dt>Size</dt>
+                  <dt>{t("Size")}</dt>
                   <dd className="mono">{formatBytes(selected.sizeBytes)}</dd>
                 </div>
                 <div>
-                  <dt>Created</dt>
+                  <dt>{t("Created")}</dt>
                   <dd>{formatDateTime(selected.createdAt)}</dd>
                 </div>
                 <div>
-                  <dt>Experiment</dt>
+                  <dt>{t("Experiment")}</dt>
                   <dd>
                     <Link
                       className="link"
@@ -242,7 +243,7 @@ export function ArtifactsPage() {
               </dl>
 
               <div>
-                <div className="hint">Storage location (internal)</div>
+                <div className="hint">{t("Storage location (internal)")}</div>
                 <div className="mono" style={{ overflowWrap: "anywhere" }}>
                   {selected.path}
                 </div>
@@ -259,8 +260,7 @@ export function ArtifactsPage() {
                   disabled={selected.status !== "READY"}
                   onClick={() => flash(`Simulated download: ${selected.name}`)}
                 >
-                  Download (demo)
-                </button>
+                  {t("Download (demo)")}</button>
               </div>
             </div>
           )}

@@ -8,13 +8,16 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test:integration": "node scripts/check-real-integration.mjs"
+    "test:integration": "node scripts/check-real-integration.mjs --observe-only",
+    "test:mock": "node scripts/check-local-demo.mjs",
+    "test:gpu": "node scripts/check-real-integration.mjs --gpu"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.103.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-router": "^8.4.0"
+    "react-router": "^8.4.0",
+    "@heteroes/product-ui": "0.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

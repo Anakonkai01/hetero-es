@@ -1,3 +1,4 @@
+import {useProduct} from '@heteroes/product-ui';
 import { useState } from "react";
 import { EmptyState } from "../components/common/EmptyState";
 import { QueryState } from "../components/common/QueryState";
@@ -13,6 +14,7 @@ type AdmissionFilter = "all" | AdmissionStatus;
 const admissionOptions = Object.keys(ADMISSION_STATUS) as AdmissionStatus[];
 
 export function WorkersPage() {
+  const {t}=useProduct();
   const query = useWorkers();
   const [search, setSearch] = useState("");
   const [activity, setActivity] = useState<ActivityFilter>("all");
@@ -42,28 +44,28 @@ export function WorkersPage() {
       isPending={query.isPending}
       isError={query.isError}
       hasData={Boolean(query.data)}
-      title="Could not load workers"
+      title={t("Could not load workers")}
     >
       <PageHeader
-        title="Workers"
-        description="Activity (online) and admission are separate: an online worker may still be kept out of the computation."
+        title={t("Workers")}
+        description={t("Activity (online) and admission are separate: an online worker may still be kept out of the computation.")}
       />
 
-      <section className="card" aria-label="Worker list">
+      <section className="card" aria-label={t("Worker list")}>
         <div className="filters" style={{ paddingTop: 16 }}>
           <div className="fg">
-            <label htmlFor="f-wk-q">Search worker or GPU</label>
+            <label htmlFor="f-wk-q">{t("Search worker or GPU")}</label>
             <input
               id="f-wk-q"
               className="inp"
               type="search"
-              placeholder="e.g. 5070, wk-1660"
+              placeholder={t("e.g. 5070, wk-1660")}
               value={search}
               onChange={(event) => setSearch(event.target.value)}
             />
           </div>
           <div className="fg">
-            <label htmlFor="f-wk-s">Activity</label>
+            <label htmlFor="f-wk-s">{t("Activity")}</label>
             <select
               id="f-wk-s"
               className="sel"
@@ -72,13 +74,13 @@ export function WorkersPage() {
                 setActivity(event.target.value as ActivityFilter)
               }
             >
-              <option value="all">All</option>
-              <option value="online">Online</option>
-              <option value="offline">Not online</option>
+              <option value="all">{t("All")}</option>
+              <option value="online">{t("Online")}</option>
+              <option value="offline">{t("Not online")}</option>
             </select>
           </div>
           <div className="fg">
-            <label htmlFor="f-wk-a">Admission</label>
+            <label htmlFor="f-wk-a">{t("Admission")}</label>
             <select
               id="f-wk-a"
               className="sel"
@@ -87,7 +89,7 @@ export function WorkersPage() {
                 setAdmission(event.target.value as AdmissionFilter)
               }
             >
-              <option value="all">All</option>
+              <option value="all">{t("All")}</option>
               {admissionOptions.map((option) => (
                 <option key={option} value={option}>
                   {ADMISSION_STATUS[option].label}
@@ -99,14 +101,13 @@ export function WorkersPage() {
 
         {workers.length === 0 ? (
           <EmptyState
-            title="No workers registered"
+            title={t("No workers registered")}
             message="Start a worker process on a GPU machine and it will show up here."
           />
         ) : rows.length === 0 ? (
-          <EmptyState title="No workers match the filters">
+          <EmptyState title={t("No workers match the filters")}>
             <button type="button" className="btn" onClick={clearFilters}>
-              Clear filters
-            </button>
+              {t("Clear filters")}</button>
           </EmptyState>
         ) : (
           <WorkerTable workers={rows} />

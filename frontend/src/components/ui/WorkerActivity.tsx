@@ -1,14 +1,16 @@
+import {useProduct} from '@heteroes/product-ui';
 import type { WorkerStatus } from "../../types/worker";
 import { Badge } from "./Badge";
 
 export function WorkerActivityBadge({ status }: { status: WorkerStatus }) {
+  const {t}=useProduct();
   return status === "ONLINE" ? (
     <Badge
       tone="ok"
-      label="Online"
-      title="The worker is sending heartbeats to the coordinator"
+      label={t("Online")}
+      title={t("The worker is sending heartbeats to the coordinator")}
     />
   ) : (
-    <Badge tone="neutral" label="Not online" />
+    <Badge tone="neutral" label={t("Not online")} />
   );
 }

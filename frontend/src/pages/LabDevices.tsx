@@ -1,32 +1,29 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiGet, apiPost, apiPatch } from '../api/client';
-import { useSession } from '../app/session';
-
-export interface Device {
-  deviceId:string;workerId:string;displayName:string;ownerUserId:string;approvalStatus:string;
-  bootId:string|null;lastSeen:number;connectionStatus:string;contributionEnabled:boolean;
-  workspaceId:string|null;selfTest:{gpuName:string;vramTotalMb:number;coordinator:boolean;passed:boolean};
-}
-
-export function LabDevices({ administration=false }: {administration?:boolean}) {
-  const {session}=useSession();const cache=useQueryClient();
-  const capabilities=useQuery({queryKey:['device-capabilities'],queryFn:()=>apiGet<{agentMode?:boolean}>('/api/v1/health')});
-  const enabled=Boolean(capabilities.data?.agentMode);
-  const devices=useQuery({queryKey:['devices',session?.user.userId,administration],queryFn:()=>apiGet<Device[]>(administration?'/api/v1/platform/devices':'/api/v1/devices'),enabled,refetchInterval:3000});
-  const [code,setCode]=useState('');const [workspace,setWorkspace]=useState('lab');
-  const action=useMutation({mutationFn:(a:{path:string;body?:unknown;patch?:boolean})=>a.patch?apiPatch(a.path,a.body):apiPost(a.path,a.body),onSuccess:()=>cache.invalidateQueries()});
-  if (!enabled) return null;
-  return <section className="card"><div className="ch"><h2>{administration?'Device approval':'My devices'}</h2></div><div className="cb demo-form">
-    {action.error && <p className="note err" role="alert">{action.error.message}</p>}
-    {devices.error && <p role="alert">{devices.error.message}</p>}
-    {!administration && <><button className="btn" onClick={()=>void apiPost<{code:string}>('/api/v1/devices/pairing-codes').then(r=>setCode(r.code)).catch(e=>setCode(e.message))}>Create pairing code</button>{code && <p className="mono">{code}</p>}<p className="hint">Pairing codes expire after ten minutes. Run enrollment in the device agent, then request administrator approval.</p></>}
-    {administration && <label className="fg">Approval workspace<select className="sel" value={workspace} onChange={e=>setWorkspace(e.target.value)}>{session?.workspaces.map(w=><option value={w.workspaceId} key={w.workspaceId}>{w.name}</option>)}</select></label>}
-    {devices.data?.map(d=><div className="request-card" key={d.deviceId} data-device={d.workerId}><div><b>{d.displayName} · {d.selfTest.gpuName}</b><small>{d.workerId} · {d.approvalStatus} · {d.connectionStatus} · Contribution {d.contributionEnabled?'ON':'OFF'}</small><small>Last seen: {d.lastSeen?new Date(d.lastSeen*1000).toLocaleString():'Never'} · {d.selfTest.coordinator?'Coordinator capable':'Worker'} · {d.workspaceId??'Unassigned'}</small></div><div className="acts">
-      {administration && d.approvalStatus==='PENDING' && <button className="btn accent" disabled={action.isPending||!d.selfTest.passed} onClick={()=>action.mutate({path:'/api/v1/platform/devices/'+d.deviceId,patch:true,body:{approved:true,workspaceId:workspace}})}>Approve device</button>}
-      {administration && d.approvalStatus==='APPROVED' && <button className="btn dng" disabled={action.isPending} onClick={()=>{if(window.confirm('Revoke this device and request safe cancellation?'))action.mutate({path:'/api/v1/platform/devices/'+d.deviceId,patch:true,body:{approved:false}});}}>Revoke device</button>}
-      {d.ownerUserId===session?.user.userId && d.approvalStatus==='APPROVED' && <button className="btn" disabled={action.isPending||!d.bootId||d.connectionStatus!=='ONLINE'} onClick={()=>action.mutate({path:'/api/v1/devices/'+d.deviceId+'/contribution',body:{enabled:!d.contributionEnabled,bootId:d.bootId}})}>Turn {d.contributionEnabled?'OFF':'ON'}</button>}
-    </div></div>)}
-    <p className="hint">Contribution starts OFF after each agent restart. Offline devices keep their reservations until owned processes are confirmed stopped.</p>
-  </div></section>;
+import {useProduct,Status} from '@heteroes/product-ui';
+import {useEffect,useState} from 'react';
+import {useQuery,useMutation,useQueryClient} from '@tanstack/react-query';
+import {apiGet,apiPost,apiPatch} from '../api/client';import {useSession} from '../app/session';
+export interface Device {deviceId:string;workerId:string;displayName:string;ownerUserId:string;approvalStatus:string;bootId:string|null;lastSeen:number;connectionStatus:string;contributionEnabled:boolean;workspaceId:string|null;selfTest:{gpuName:string;vramTotalMb:number;coordinator:boolean;passed:boolean};}
+export function LabDevices({administration=false}:{administration?:boolean}){
+ const {t,preferences}=useProduct();const {session}=useSession();const cache=useQueryClient();
+ const capabilities=useQuery({queryKey:['device-capabilities'],queryFn:()=>apiGet<{agentMode?:boolean}>('/api/v1/health')});const enabled=Boolean(capabilities.data?.agentMode);
+ const installer=useQuery({queryKey:['worker-installers'],queryFn:async()=>{const r=await fetch('/downloads/manifest.json');if(!r.ok)throw Error('BUILD_UNAVAILABLE');return r.json() as Promise<{version:string;installers:{platform:string;name:string;url:string}[]}>;},enabled,retry:false});
+ const devices=useQuery({queryKey:['devices',session?.user.userId,administration],queryFn:()=>apiGet<Device[]>(administration?'/api/v1/platform/devices':'/api/v1/devices'),enabled,refetchInterval:3000});
+ const [code,setCode]=useState('');const [expires,setExpires]=useState(0);const [now,setNow]=useState(()=>Date.now());const [copied,setCopied]=useState(false);const [pairError,setPairError]=useState('');const [workspace,setWorkspace]=useState('lab');
+ useEffect(()=>{const timer=setInterval(()=>setNow(Date.now()),1000);return()=>clearInterval(timer);},[]);
+ const pairing=useMutation({mutationFn:()=>apiPost<{code:string;expiresInSeconds:number}>('/api/v1/devices/pairing-codes',{}),onSuccess:r=>{setCode(r.code);setExpires(Date.now()+r.expiresInSeconds*1000);setCopied(false);setPairError('');}});
+ const action=useMutation({mutationFn:(a:{path:string;body:unknown;patch?:boolean})=>a.patch?apiPatch(a.path,a.body):apiPost(a.path,a.body),onSuccess:()=>cache.invalidateQueries()});
+ if(!enabled)return null;
+ const seconds=Math.max(0,Math.ceil((expires-now)/1000));
+ return <section className="card"><div className="ch"><h2>{t(administration?'Device approval':'My devices')}</h2></div><div className="cb">
+ {(action.error||devices.error||pairing.error)&&<p className="note err" role="alert">{(action.error??devices.error??pairing.error)?.message}</p>}
+ {!administration&&<div className="pairing-panel"><div><b>{t('Add a GPU computer')}</b>{installer.data&&<div className="acts">{installer.data.installers.map(item=><a className="btn" key={item.platform} href={item.url} download={item.name}>{t(item.platform==='windows'?'Download Windows app':item.platform==='linux-appimage'?'Download AppImage':'Download Linux app')}</a>)}</div>}<p>{t('Install HeteroES Worker, sign in, run the compatibility check and pair your device. An administrator approves it here.')}</p><p>{t('The desktop app creates its own one-use pairing code. This code is for an existing device agent.')}</p></div><div><button className="btn" disabled={pairing.isPending} onClick={()=>pairing.mutate()}>{t('Create pairing code')}</button>{code&&<><p className="pairing-code">{seconds?code:t('Pairing code expired')}</p><p>{t('Expires in')} {Math.floor(seconds/60)}:{String(seconds%60).padStart(2,'0')}</p><button className="btn" disabled={!seconds} onClick={()=>{void navigator.clipboard.writeText(code).then(()=>setCopied(true)).catch(()=>setPairError(t('Select and copy the code manually.')));}}>{t(copied?'Copied':'Copy code')}</button>{pairError&&<p role="alert">{pairError}</p>}</>}</div></div>}
+ {administration&&<label className="fg">{t('Approval workspace')}<select className="sel" value={workspace} onChange={e=>setWorkspace(e.target.value)}>{session?.workspaces.map(w=><option value={w.workspaceId} key={w.workspaceId}>{w.name}</option>)}</select></label>}
+ {devices.isPending&&<p role="status">{t('Loading…')}</p>}
+ {devices.data?.length===0&&<p className="note">{t('No devices paired yet.')}</p>}
+ <div className="device-cards">{devices.data?.map(d=><article className="device-card" key={d.deviceId} data-device={d.workerId}><div className="device-heading"><h3>{d.displayName}</h3></div><p>{d.selfTest.gpuName} · {(d.selfTest.vramTotalMb/1024).toFixed(1)} {t("GiB")}</p><p className="device-identity">{d.workerId} · {t(d.selfTest.coordinator?'Coordinator capable':'Worker')}</p><div className="device-statuses"><Status value={d.approvalStatus}/><Status value={d.connectionStatus}/><Status value={d.contributionEnabled?'ON':'OFF'}/></div><p className="hint">{t('Last seen:')} {d.lastSeen?new Date(d.lastSeen*1000).toLocaleString(preferences.language==='vi'?'vi-VN':'en-US'):t('Never')} · {d.workspaceId??t('Unassigned')}</p><div className="acts">
+ {administration&&d.approvalStatus==='PENDING'&&<button className="btn accent" disabled={action.isPending||!d.selfTest.passed||!workspace} onClick={()=>action.mutate({path:'/api/v1/platform/devices/'+d.deviceId,patch:true,body:{approved:true,workspaceId:workspace}})}>{t('Approve device')}</button>}
+ {administration&&d.approvalStatus==='APPROVED'&&<button className="btn dng" disabled={action.isPending} onClick={()=>{if(window.confirm(t('Revoke this device and request safe cancellation?')))action.mutate({path:'/api/v1/platform/devices/'+d.deviceId,patch:true,body:{approved:false}});}}>{t('Revoke device')}</button>}
+ {d.ownerUserId===session?.user.userId&&d.approvalStatus==='APPROVED'&&<button className="btn" disabled={action.isPending||!d.bootId||d.connectionStatus!=='ONLINE'} onClick={()=>action.mutate({path:'/api/v1/devices/'+d.deviceId+'/contribution',body:{enabled:!d.contributionEnabled,bootId:d.bootId}})}>{t(d.contributionEnabled?'Turn OFF':'Turn ON')}</button>}
+ </div></article>)}</div><p className="hint">{t('Contribution starts OFF after each agent restart. Offline devices keep their reservations until owned processes are confirmed stopped.')}</p>
+ </div></section>;
 }

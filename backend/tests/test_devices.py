@@ -220,3 +220,23 @@ def test_backup_policy_change_does_not_mutate_frozen_assignment(lab):
     s.dispatch_once()
     assert len(r.runs())==1
     assert any(cmd['kind']=='UPDATE_BACKUP_POLICY' for cmd in r.commands(d['deviceId']))
+
+
+def test_native_windows_admission_requires_exact_reference_and_worker_only():
+    from backend.devices import SelfTest
+    from pydantic import ValidationError
+    import pathlib
+    reference=json.loads((pathlib.Path(__file__).parents[2]/'desktop/worker/resources/reference.json').read_text())
+    proof={k:reference[k] for k in ('recipeHash','parentSha256','perturbedSha256','restoredSha256','reward')}
+    proof.update(passed=True,repeatIdentical=True,predictionProbePassed=True,probeOutputsSha256=reference['predictionProbe']['outputsSha256'])
+    data={'passed':True,'coordinator':False,'gpuName':'CPU test fixture','vramTotalMb':12000,
+          'noiseVersion':'numpy_pcg64_normal_f32_to_f16_v1','platform':'windows','runtimeProfile':'desktop-v1','compatibility':proof}
+    assert not SelfTest(**data).coordinator
+    for changes in ({'coordinator':True},{'runtimeProfile':'legacy'},{'passed':False},
+                    {'compatibility':{**proof,'repeatIdentical':False}},
+                    {'compatibility':{**proof,'reward':.25}},
+                    {'compatibility':{**proof,'predictionProbePassed':False}},
+                    {'compatibility':{**proof,'probeOutputsSha256':'e'*64}},
+                    {'compatibility':{**proof,'recipeHash':'e'*64}},
+                    {'compatibility':{**proof,'restoredSha256':'f'*64}}):
+        with pytest.raises(ValidationError):SelfTest(**{**data,**changes})

@@ -146,7 +146,7 @@ def create_app(path, passwords, runtime, dispatch=True):
 
     @app.get("/api/v1/health")
     def health():
-        return {"ok": True, "dataSource": "real", "runtimeIssue": store.last_error, "agentMode":bool(getattr(runtime,"agent_mode",False)), "cloudStorageConfigured":bool(getattr(runtime,"storage_backend",None))}
+        return {"ok": True, "dataSource": "real", "runtimeIssue": store.last_error, "agentMode":bool(getattr(runtime,"agent_mode",False)), "cloudStorageConfigured":bool(getattr(runtime,"storage_backend",None)), **({"uiUrl":os.environ["HETEROES_UI_URL"]} if os.environ.get("HETEROES_UI_URL") else {})}
 
     @app.post("/api/v1/auth/login")
     def sign_in(body: Login):

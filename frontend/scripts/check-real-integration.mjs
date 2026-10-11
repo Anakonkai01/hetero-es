@@ -5,6 +5,9 @@ import os from "node:os";
 import path from "node:path";
 import { chromium } from "playwright";
 
+const gpuAcceptance=process.argv.includes('--gpu');
+if(gpuAcceptance&&process.env.HETEROES_GPU_ACCEPTANCE!=='1')throw Error('Set HETEROES_GPU_ACCEPTANCE=1 only for an explicitly authorized GPU campaign.');
+
 const privateRoot = process.env.HETEROES_PRIVATE_CONFIG ?? path.join(os.homedir(), ".config/heteroes-integration");
 const config = JSON.parse(await readFile(path.join(privateRoot, "config.json"), "utf8"));
 const credentials = JSON.parse(await readFile(path.join(privateRoot, "credentials.json"), "utf8"));
@@ -68,7 +71,7 @@ try {
   await page.getByRole("heading", { name: "Workers", exact: true }).waitFor();
   assert.equal(await page.getByRole("button", { name: "Register worker" }).isDisabled(), true);
   await page.screenshot({ path: path.join(output, "worker-inventory.png"), fullPage: true });
-  if (process.argv.includes("--observe-only")) {
+  if (!gpuAcceptance) {
     assert.deepEqual(errors, []);
     await writeFile(path.join(output, "observation.json"), JSON.stringify({ completedRunId: completed.experimentId,
       authenticatedSummaryDownload: true, exactCandidateSeed: true, browserErrors: errors }, null, 2));

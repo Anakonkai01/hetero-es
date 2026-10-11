@@ -80,3 +80,9 @@ build/
 *.ckpt
 
 wandb/
+
+# Private desktop build outputs
+desktop/worker/release/
+
+# Generated private installer links/manifest
+/frontend/public/downloads/

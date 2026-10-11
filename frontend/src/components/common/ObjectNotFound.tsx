@@ -1,3 +1,4 @@
+import {useProduct} from '@heteroes/product-ui';
 import { Link } from "react-router";
 
 interface ObjectNotFoundProps {
@@ -6,21 +7,19 @@ interface ObjectNotFoundProps {
 }
 
 export function ObjectNotFound({ backTo, backLabel }: ObjectNotFoundProps) {
+  const {t}=useProduct();
   return (
     <div className="card">
       <div className="empty">
-        <b>Object not found</b>
+        <b>{t("Object not found")}</b>
         <span>
-          This object does not exist or has been removed from the data
-          source.
-        </span>
+          {t("This object does not exist or has been removed from the data source.")}</span>
         <span className="acts">
           <Link className="btn pri" to={backTo}>
             {backLabel}
           </Link>
           <Link className="btn" to="/dashboard">
-            Back to Dashboard
-          </Link>
+            {t("Back to Dashboard")}</Link>
         </span>
       </div>
     </div>

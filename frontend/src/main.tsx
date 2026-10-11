@@ -6,6 +6,8 @@ import { AppProviders } from "./app/providers";
 import { AppRouter } from "./app/router";
 import "./index.css";
 import { IS_MOCK } from "./lib/dataSource";
+import {ProductProvider} from '@heteroes/product-ui';
+import '@heteroes/product-ui/theme.css';
 
 async function enableMocking() {
   if (!IS_MOCK) {
@@ -27,11 +29,11 @@ async function enableMocking() {
 enableMocking().then(() => {
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
-      <AppProviders>
+      <ProductProvider><AppProviders>
         <BrowserRouter>
           <AppRouter />
         </BrowserRouter>
-      </AppProviders>
+      </AppProviders></ProductProvider>
     </StrictMode>,
   );
 });

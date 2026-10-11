@@ -1,3 +1,4 @@
+import {useProduct} from '@heteroes/product-ui';
 import { Link, useParams } from "react-router";
 import { isNotFoundError } from "../api/client";
 import { ObjectNotFound } from "../components/common/ObjectNotFound";
@@ -29,10 +30,11 @@ const legendOrder: CandidateStatus[] = [
 ];
 
 function AttemptCell({ attemptId }: { attemptId?: string }) {
+  const {t}=useProduct();
   const { data: attempt } = useAttempt(attemptId);
 
   if (!attemptId) {
-    return <span className="mut">Not started</span>;
+    return <span className="mut">{t("Not started")}</span>;
   }
 
   return (
@@ -50,6 +52,7 @@ function CandidateRow({
   candidate: Candidate;
   experimentId: string;
 }) {
+  const {t}=useProduct();
   return (
     <div className="row cols-cand" role="row">
       <div className="c" role="cell">
@@ -70,7 +73,7 @@ function CandidateRow({
             {candidate.workerId}
           </Link>
         ) : (
-          <span className="mut">Not assigned</span>
+          <span className="mut">{t("Not assigned")}</span>
         )}
       </div>
       <div className="c" role="cell">
@@ -84,6 +87,7 @@ function CandidateRow({
 }
 
 export function GenerationDetailPage() {
+  const {t}=useProduct();
   const { experimentId = "", generationId = "" } = useParams();
 
   const experimentQuery = useExperiment(experimentId);
@@ -107,7 +111,7 @@ export function GenerationDetailPage() {
       isPending={generationQuery.isPending}
       isError={generationQuery.isError}
       hasData={Boolean(generation)}
-      title="Could not load the generation"
+      title={t("Could not load the generation")}
     >
       {generation && (
         <>
@@ -129,7 +133,7 @@ export function GenerationDetailPage() {
           <PageHeader
             title={
               <>
-                Generation{" "}
+                {t("Generation")}{" "}
                 <span className="mono" style={{ fontSize: 20 }}>
                   {shortId(generationId)}
                 </span>
@@ -144,18 +148,17 @@ export function GenerationDetailPage() {
             }
             actions={
               <Link className="btn" to={backToExperiment}>
-                ← Back to experiment
-              </Link>
+                {t("← Back to experiment")}</Link>
             }
           />
 
           <section className="card">
             <div className="cb" style={{ paddingTop: 20 }}>
               <dl className="kv">
-                <KeyValue label="Model version" mono>
+                <KeyValue label={t("Model version")} mono>
                   {generation.modelVersion}
                 </KeyValue>
-                <KeyValue label="Candidates COMMITTED">
+                <KeyValue label={t("Candidates COMMITTED")}>
                   <div className="prog">
                     <span>
                       {generation.committedCandidateCount} /{" "}
@@ -167,35 +170,35 @@ export function GenerationDetailPage() {
                     />
                   </div>
                 </KeyValue>
-                <KeyValue label="Mean reward" mono>
+                <KeyValue label={t("Mean reward")} mono>
                   {formatReward(generation.rewardMean)}
                 </KeyValue>
-                <KeyValue label="Best reward" mono>
+                <KeyValue label={t("Best reward")} mono>
                   {formatReward(generation.rewardBest)}
                 </KeyValue>
-                <KeyValue label="Started">
+                <KeyValue label={t("Started")}>
                   {formatOptionalDateTime(generation.startedAt, "Not available yet")}
                 </KeyValue>
-                <KeyValue label="Ended">
+                <KeyValue label={t("Ended")}>
                   {formatOptionalDateTime(generation.completedAt, "Not ended")}
                 </KeyValue>
               </dl>
             </div>
           </section>
 
-          <section className="card" aria-label="Candidates">
+          <section className="card" aria-label={t("Candidates")}>
             <div className="ch">
-              <h2>Candidates in this generation</h2>
-              <small>Detailed timing, network and sync data: not available yet.</small>
+              <h2>{t("Candidates in this generation")}</h2>
+              <small>{t("Detailed timing, network and sync data: not available yet.")}</small>
             </div>
             <div className="scroll">
-              <div className="tw s" role="table" aria-label="Candidates">
+              <div className="tw s" role="table" aria-label={t("Candidates")}>
                 <div className="rowh cols-cand" role="row">
-                  <div className="c" role="columnheader">Candidate</div>
-                  <div className="c" role="columnheader">Status</div>
-                  <div className="c" role="columnheader">Assigned worker</div>
-                  <div className="c" role="columnheader">Attempt</div>
-                  <div className="c" role="columnheader">Reward</div>
+                  <div className="c" role="columnheader">{t("Candidate")}</div>
+                  <div className="c" role="columnheader">{t("Status")}</div>
+                  <div className="c" role="columnheader">{t("Assigned worker")}</div>
+                  <div className="c" role="columnheader">{t("Attempt")}</div>
+                  <div className="c" role="columnheader">{t("Reward")}</div>
                 </div>
                 {candidates.map((candidate) => (
                   <CandidateRow
@@ -209,7 +212,7 @@ export function GenerationDetailPage() {
           </section>
 
           <details className="card">
-            <summary>What the candidate statuses mean</summary>
+            <summary>{t("What the candidate statuses mean")}</summary>
             <div className="leg">
               {legendOrder.map((status) => (
                 <div key={status}>

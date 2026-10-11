@@ -1,3 +1,4 @@
+import {useProduct} from '@heteroes/product-ui';
 import { Link } from "react-router";
 import { formatClock, formatGb, shortGpuName } from "../../lib/format";
 import { ADMISSION_STATUS } from "../../lib/labels";
@@ -12,6 +13,7 @@ interface WorkerTableProps {
 }
 
 export function WorkerTable({ workers, compact }: WorkerTableProps) {
+  const {t}=useProduct();
   const columns = compact ? "cols-dwk" : "cols-wk";
 
   return (
@@ -19,16 +21,16 @@ export function WorkerTable({ workers, compact }: WorkerTableProps) {
       <div
         className={compact ? "tw s" : "tw"}
         role="table"
-        aria-label={compact ? "Worker summary" : "Workers"}
+        aria-label={compact ? t("Worker summary") : t("Workers")}
       >
         <div className={`rowh ${columns}`} role="row">
-          <div className="c" role="columnheader">Worker</div>
-          <div className="c" role="columnheader">GPU</div>
-          <div className="c" role="columnheader">VRAM</div>
-          <div className="c" role="columnheader">Activity</div>
-          <div className="c" role="columnheader">Admission</div>
+          <div className="c" role="columnheader">{t("Worker")}</div>
+          <div className="c" role="columnheader">{t("GPU")}</div>
+          <div className="c" role="columnheader">{t("VRAM")}</div>
+          <div className="c" role="columnheader">{t("Activity")}</div>
+          <div className="c" role="columnheader">{t("Admission")}</div>
           {!compact && (
-            <div className="c" role="columnheader">Heartbeat</div>
+            <div className="c" role="columnheader">{t("Heartbeat")}</div>
           )}
         </div>
 

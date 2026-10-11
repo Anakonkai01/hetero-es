@@ -1,3 +1,4 @@
+import {useProduct} from '@heteroes/product-ui';
 import { useState } from "react";
 import { Link } from "react-router";
 import { useAppState } from "../app/appState";
@@ -20,6 +21,7 @@ const RECENT_EXPERIMENT_LIMIT = 4;
 const RECENT_EVENT_LIMIT = 5;
 
 export function DashboardPage() {
+  const {t}=useProduct();
   const { retryRegion } = useAppState();
   const experimentsQuery = useExperiments();
   const workersQuery = useWorkers();
@@ -56,34 +58,34 @@ export function DashboardPage() {
       isPending={experimentsQuery.isPending || workersQuery.isPending}
       isError={experimentsQuery.isError || workersQuery.isError}
       hasData={Boolean(experimentsQuery.data && workersQuery.data)}
-      title="Could not load the dashboard"
+      title={t("Could not load the dashboard")}
     >
       <PageHeader
-        title="Dashboard"
-        description="Cluster and experiment status as of the latest update."
+        title={t("Dashboard")}
+        description={t("Cluster and experiment status as of the latest update.")}
       />
 
       <div className="stats">
         <Stat
-          label="Running experiments"
+          label={t("Running experiments")}
           value={experiments.filter((e) => e.status === "RUNNING").length}
           unit={`of ${experiments.length}`}
           note="Across all recorded experiments"
         />
         <Stat
-          label="Active workers (online)"
+          label={t("Active workers (online)")}
           value={online}
           unit={`of ${workers.length}`}
           note="Online does not mean admitted"
         />
         <Stat
-          label="Admitted workers"
+          label={t("Admitted workers")}
           value={admitted}
           unit={`of ${workers.length}`}
           note="Full or limited admission"
         />
         <Stat
-          label="Errors / warnings (last 24 h)"
+          label={t("Errors / warnings (last 24 h)")}
           value={errorCount}
           unit={`errors · ${warningCount} warnings`}
           note="Times in GMT+7"
@@ -92,19 +94,17 @@ export function DashboardPage() {
 
       <section className="card" aria-labelledby="h-dexp">
         <div className="ch">
-          <h2 id="h-dexp">Running and recent experiments</h2>
+          <h2 id="h-dexp">{t("Running and recent experiments")}</h2>
           <Link className="link" to="/experiments">
-            View all experiments →
-          </Link>
+            {t("View all experiments →")}</Link>
         </div>
         {experiments.length === 0 ? (
           <EmptyState
-            title="No experiments yet"
+            title={t("No experiments yet")}
             message="Create your first experiment to start tracking progress here."
           >
             <Link className="btn pri" to="/experiments/new">
-              Create experiment
-            </Link>
+              {t("Create experiment")}</Link>
           </EmptyState>
         ) : (
           <ExperimentTable
@@ -118,13 +118,12 @@ export function DashboardPage() {
       <div className="two">
         <section className="card" aria-labelledby="h-dwk">
           <div className="ch">
-            <h2 id="h-dwk">Workers</h2>
+            <h2 id="h-dwk">{t("Workers")}</h2>
             <Link className="link" to="/workers">
-              Open list →
-            </Link>
+              {t("Open list →")}</Link>
           </div>
           {workers.length === 0 ? (
-            <EmptyState title="No workers registered" />
+            <EmptyState title={t("No workers registered")} />
           ) : (
             <WorkerTable workers={workers} compact />
           )}
@@ -132,27 +131,26 @@ export function DashboardPage() {
 
         <section className="card" aria-labelledby="h-dev">
           <div className="ch">
-            <h2 id="h-dev">Recent events</h2>
+            <h2 id="h-dev">{t("Recent events")}</h2>
             <Link className="link" to="/events">
-              Open log →
-            </Link>
+              {t("Open log →")}</Link>
           </div>
           {eventsFailed ? (
             <ErrorState
-              title="Could not load events"
+              title={t("Could not load events")}
               message="The other regions are still readable."
               onRetry={retryRegion}
               retryLabel="Retry this region"
             />
           ) : events.length === 0 ? (
             <EmptyState
-              title="No events yet"
+              title={t("No events yet")}
               message="Events appear once experiments or workers are active."
             />
           ) : (
             <EventRows
               events={events.slice(0, RECENT_EVENT_LIMIT)}
-              label="Recent events"
+              label={t("Recent events")}
             />
           )}
         </section>

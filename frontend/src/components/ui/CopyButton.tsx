@@ -1,3 +1,4 @@
+import {useProduct} from '@heteroes/product-ui';
 import { useAppState } from "../../app/appState";
 import { CopyIcon } from "./Icons";
 
@@ -7,6 +8,7 @@ interface CopyButtonProps {
 }
 
 export function CopyButton({ value, subject }: CopyButtonProps) {
+  const {t}=useProduct();
   const { flash } = useAppState();
 
   async function copy() {
@@ -23,7 +25,7 @@ export function CopyButton({ value, subject }: CopyButtonProps) {
       type="button"
       className="ico"
       aria-label={`Copy full ${subject} ID`}
-      title="Copy ID"
+      title={t("Copy ID")}
       onClick={copy}
     >
       <CopyIcon />

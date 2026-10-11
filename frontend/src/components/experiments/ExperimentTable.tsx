@@ -1,3 +1,4 @@
+import {useProduct} from '@heteroes/product-ui';
 import { Link } from "react-router";
 import { formatDateTime, shortId } from "../../lib/format";
 import { EXPERIMENT_STATUS } from "../../lib/labels";
@@ -18,6 +19,7 @@ export function ExperimentTable({
   compact,
   backState,
 }: ExperimentTableProps) {
+  const {t}=useProduct();
   const columns = compact ? "cols-dexp" : "cols-exp";
 
   return (
@@ -25,22 +27,22 @@ export function ExperimentTable({
       <div
         className={compact ? "tw s" : "tw"}
         role="table"
-        aria-label={compact ? "Recent experiments" : "Experiments"}
+        aria-label={compact ? t("Recent experiments") : t("Experiments")}
       >
         <div className={`rowh ${columns}`} role="row">
           <div className="c" role="columnheader">
-            {compact ? "Experiment" : "Name"}
+            {compact ? t("Experiment") : t("Name")}
           </div>
-          <div className="c" role="columnheader">Status</div>
-          <div className="c" role="columnheader">Model</div>
+          <div className="c" role="columnheader">{t("Status")}</div>
+          <div className="c" role="columnheader">{t("Model")}</div>
           {!compact && (
-            <div className="c" role="columnheader">Scheduling policy</div>
+            <div className="c" role="columnheader">{t("Scheduling policy")}</div>
           )}
           <div className="c" role="columnheader">
-            {compact ? "Current generation progress" : "Current generation"}
+            {compact ? t("Current generation progress") : t("Current generation")}
           </div>
           {!compact && (
-            <div className="c" role="columnheader">Created</div>
+            <div className="c" role="columnheader">{t("Created")}</div>
           )}
         </div>
 
@@ -71,7 +73,7 @@ export function ExperimentTable({
               {!compact &&
                 experiment.cancelRequested &&
                 experiment.status === "RUNNING" && (
-                  <div className="hint">Cancel requested</div>
+                  <div className="hint">{t("Cancel requested")}</div>
                 )}
             </div>
 

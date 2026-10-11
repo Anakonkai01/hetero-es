@@ -1,3 +1,4 @@
+import {useProduct} from '@heteroes/product-ui';
 import { Link, useParams } from "react-router";
 import { isNotFoundError, isServerError } from "../api/client";
 import { useAppState } from "../app/appState";
@@ -19,6 +20,7 @@ import { NOT_AVAILABLE, formatClock, formatDateTime, shortId } from "../lib/form
 import { ATTEMPT_STATUS, CANDIDATE_STATUS } from "../lib/labels";
 
 export function CandidateDetailPage() {
+  const {t}=useProduct();
   const { experimentId = "", generationId = "", candidateId = "" } =
     useParams();
   const { retryRegion } = useAppState();
@@ -49,7 +51,7 @@ export function CandidateDetailPage() {
       isPending={candidateQuery.isPending}
       isError={candidateQuery.isError}
       hasData={Boolean(candidate)}
-      title="Could not load the candidate"
+      title={t("Could not load the candidate")}
     >
       {candidate && status && (
         <>
@@ -76,7 +78,7 @@ export function CandidateDetailPage() {
           <PageHeader
             title={
               <>
-                Candidate{" "}
+                {t("Candidate")}{" "}
                 <span className="mono" style={{ fontSize: 20 }}>
                   {shortId(candidateId)}
                 </span>
@@ -91,24 +93,20 @@ export function CandidateDetailPage() {
             }
             actions={
               <Link className="btn" to={backToGeneration}>
-                ← Back to generation
-              </Link>
+                {t("← Back to generation")}</Link>
             }
           />
 
           <div className="note">
-            <b>{candidate.status}:</b> {status.title}. A worker finishing its
-            computation does not mean the result was accepted; only COMMITTED
-            means accepted by the system.
-          </div>
+            <b>{candidate.status}:</b> {status.title}{t(". A worker finishing its computation does not mean the result was accepted; only COMMITTED means accepted by the system.")}</div>
 
           <section className="card">
             <div className="cb" style={{ paddingTop: 20 }}>
               <dl className="kv">
-                <KeyValue label="Model version" mono>
+                <KeyValue label={t("Model version")} mono>
                   {candidate.modelVersion}
                 </KeyValue>
-                <KeyValue label="Assigned worker">
+                <KeyValue label={t("Assigned worker")}>
                   {candidate.workerId ? (
                     <Link
                       className="link mono"
@@ -117,13 +115,13 @@ export function CandidateDetailPage() {
                       {candidate.workerId}
                     </Link>
                   ) : (
-                    <span className="mut">Not assigned</span>
+                    <span className="mut">{t("Not assigned")}</span>
                   )}
                 </KeyValue>
-                <KeyValue label="Reward" mono>
+                <KeyValue label={t("Reward")} mono>
                   {candidate.reward?.toFixed(3) ?? NOT_AVAILABLE}
                 </KeyValue>
-                <KeyValue label="Generation">
+                <KeyValue label={t("Generation")}>
                   <Link className="link mono" to={backToGeneration}>
                     {shortId(generationId)}
                   </Link>
@@ -132,17 +130,17 @@ export function CandidateDetailPage() {
             </div>
 
             <details style={{ borderTop: "1px solid var(--line2)" }}>
-              <summary>Technical details</summary>
+              <summary>{t("Technical details")}</summary>
               <div className="cb" style={{ paddingTop: 0 }}>
                 <dl className="kv">
-                  <KeyValue label="Seed" mono>{candidate.seed}</KeyValue>
-                  <KeyValue label="Batch IDs" mono>
+                  <KeyValue label={t("Seed")} mono>{candidate.seed}</KeyValue>
+                  <KeyValue label={t("Batch IDs")} mono>
                     {candidate.batchIds.join(", ")}
                   </KeyValue>
-                  <KeyValue label="Config hash" mono>
+                  <KeyValue label={t("Config hash")} mono>
                     {candidate.generationConfigHash}
                   </KeyValue>
-                  <KeyValue label="Lease deadline (GMT+7)" mono>
+                  <KeyValue label={t("Lease deadline (GMT+7)")} mono>
                     {candidate.leaseDeadline
                       ? formatDateTime(candidate.leaseDeadline)
                       : NOT_AVAILABLE}
@@ -152,37 +150,35 @@ export function CandidateDetailPage() {
             </details>
           </section>
 
-          <section className="card" aria-label="Attempt">
+          <section className="card" aria-label={t("Attempt")}>
             <div className="ch">
-              <h2>Attempt</h2>
+              <h2>{t("Attempt")}</h2>
               <small>
-                An attempt is one execution of the candidate on a worker.
-                Showing the latest attempt the system provides.
-              </small>
+                {t("An attempt is one execution of the candidate on a worker. Showing the latest attempt the system provides.")}</small>
             </div>
 
             {attemptFailed ? (
               <ErrorState
-                title="Could not load the attempt"
+                title={t("Could not load the attempt")}
                 message="The candidate information above is still readable."
                 onRetry={retryRegion}
               />
             ) : !candidate.attemptId ? (
               <EmptyState
-                title="Not started"
+                title={t("Not started")}
                 message="This candidate has no attempt yet."
               />
             ) : attempt ? (
               <>
                 <div className="scroll">
-                  <div className="tw s" role="table" aria-label="Attempt">
+                  <div className="tw s" role="table" aria-label={t("Attempt")}>
                     <div className="rowh cols-att" role="row">
-                      <div className="c" role="columnheader">Attempt</div>
-                      <div className="c" role="columnheader">Worker</div>
-                      <div className="c" role="columnheader">Status</div>
-                      <div className="c" role="columnheader">Started</div>
-                      <div className="c" role="columnheader">Ended</div>
-                      <div className="c" role="columnheader">Error kind</div>
+                      <div className="c" role="columnheader">{t("Attempt")}</div>
+                      <div className="c" role="columnheader">{t("Worker")}</div>
+                      <div className="c" role="columnheader">{t("Status")}</div>
+                      <div className="c" role="columnheader">{t("Started")}</div>
+                      <div className="c" role="columnheader">{t("Ended")}</div>
+                      <div className="c" role="columnheader">{t("Error kind")}</div>
                     </div>
                     <div
                       className={
@@ -210,7 +206,7 @@ export function CandidateDetailPage() {
                         {formatClock(attempt.startedAt)}
                       </div>
                       <div className="c mono" role="cell">
-                        {attempt.completedAt ? formatClock(attempt.completedAt) : "—"}
+                        {attempt.completedAt ? formatClock(attempt.completedAt) : t("—")}
                       </div>
                       <div className="c mono" role="cell">
                         {attempt.errorType ?? "—"}
@@ -222,27 +218,24 @@ export function CandidateDetailPage() {
                 {attempt.status === "FAILED" && (
                   <div className="cb" style={{ paddingTop: 12 }}>
                     <div className="note err">
-                      <b>The attempt failed.</b> The candidate remains{" "}
-                      {candidate.status} and is waiting to be reassigned. Only
-                      one attempt is provided by the system; there is no
-                      multi-attempt history yet.
-                    </div>
+                      <b>{t("The attempt failed.")}</b> {t("The candidate remains")}{" "}
+                      {candidate.status} {t("and is waiting to be reassigned. Only one attempt is provided by the system; there is no multi-attempt history yet.")}</div>
                   </div>
                 )}
               </>
             ) : (
-              <EmptyState title="Loading the attempt…" />
+              <EmptyState title={t("Loading the attempt…")} />
             )}
           </section>
 
-          <section className="card" aria-label="Related events">
+          <section className="card" aria-label={t("Related events")}>
             <div className="ch">
-              <h2>Related events</h2>
+              <h2>{t("Related events")}</h2>
             </div>
             {events.length === 0 ? (
-              <EmptyState title="No related events" />
+              <EmptyState title={t("No related events")} />
             ) : (
-              <EventRows events={events} label="Related events" />
+              <EventRows events={events} label={t("Related events")} />
             )}
           </section>
         </>

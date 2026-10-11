@@ -1,3 +1,4 @@
+import {useProduct} from '@heteroes/product-ui';
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { isServerError } from "../api/client";
@@ -26,6 +27,7 @@ interface RelatedLink {
 }
 
 export function EventsPage() {
+  const {t}=useProduct();
   const { retryRegion } = useAppState();
   const eventsQuery = useEvents();
   const experimentsQuery = useExperiments();
@@ -130,45 +132,45 @@ export function EventsPage() {
       isPending={eventsQuery.isPending}
       isError={eventsQuery.isError && !failed}
       hasData={Boolean(eventsQuery.data)}
-      title="Could not load events"
+      title={t("Could not load events")}
     >
       <PageHeader
-        title="Events"
-        description="Execution log. When data refreshes automatically, your reading position is preserved."
+        title={t("Events")}
+        description={t("Execution log. When data refreshes automatically, your reading position is preserved.")}
       />
 
       <div className="split">
-        <section className="card a" aria-label="Event log">
+        <section className="card a" aria-label={t("Event log")}>
           <div className="filters" style={{ paddingTop: 16 }}>
             <div className="fg">
-              <label htmlFor="f-ev-l">Level</label>
+              <label htmlFor="f-ev-l">{t("Level")}</label>
               <select
                 id="f-ev-l"
                 className="sel"
                 value={level}
                 onChange={(event) => setLevel(event.target.value as LevelFilter)}
               >
-                <option value="all">All</option>
-                <option value="ERROR">ERROR</option>
-                <option value="WARNING">WARNING</option>
-                <option value="INFO">INFO</option>
+                <option value="all">{t("All")}</option>
+                <option value="ERROR">{t("ERROR")}</option>
+                <option value="WARNING">{t("WARNING")}</option>
+                <option value="INFO">{t("INFO")}</option>
               </select>
             </div>
             <div className="fg">
-              <label htmlFor="f-ev-r">Time</label>
+              <label htmlFor="f-ev-r">{t("Time")}</label>
               <select
                 id="f-ev-r"
                 className="sel"
                 value={rangeMinutes}
                 onChange={(event) => setRangeMinutes(event.target.value)}
               >
-                <option value="all">All time</option>
-                <option value="60">Last hour</option>
-                <option value="1440">Last 24 hours</option>
+                <option value="all">{t("All time")}</option>
+                <option value="60">{t("Last hour")}</option>
+                <option value="1440">{t("Last 24 hours")}</option>
               </select>
             </div>
             <div className="fg">
-              <label htmlFor="f-ev-e">Related object</label>
+              <label htmlFor="f-ev-e">{t("Related object")}</label>
               <select
                 id="f-ev-e"
                 className="sel"
@@ -180,7 +182,7 @@ export function EventsPage() {
                   })
                 }
               >
-                <option value="all">Any object</option>
+                <option value="all">{t("Any object")}</option>
                 {experiments.map((experiment) => (
                   <option
                     key={experiment.experimentId}
@@ -189,36 +191,35 @@ export function EventsPage() {
                     {experiment.name}
                   </option>
                 ))}
-                <option value={WORKERS_ONLY}>Workers only</option>
+                <option value={WORKERS_ONLY}>{t("Workers only")}</option>
               </select>
             </div>
           </div>
 
           {failed ? (
             <ErrorState
-              title="Could not load the event log"
+              title={t("Could not load the event log")}
               onRetry={retryRegion}
               retryLabel="Retry this region"
             />
           ) : events.length === 0 ? (
             <EmptyState
-              title="No events yet"
+              title={t("No events yet")}
               message="The log fills in once experiments or workers are active."
             />
           ) : rows.length === 0 ? (
-            <EmptyState title="No events match the filters">
+            <EmptyState title={t("No events match the filters")}>
               <button type="button" className="btn" onClick={clearFilters}>
-                Clear filters
-              </button>
+                {t("Clear filters")}</button>
             </EmptyState>
           ) : (
             <div className="scroll">
-              <div className="tw s" role="table" aria-label="Events">
+              <div className="tw s" role="table" aria-label={t("Events")}>
                 <div className="rowh cols-ev" role="row">
-                  <div className="c" role="columnheader">Time</div>
-                  <div className="c" role="columnheader">Level</div>
-                  <div className="c" role="columnheader">Type</div>
-                  <div className="c" role="columnheader">Message</div>
+                  <div className="c" role="columnheader">{t("Time")}</div>
+                  <div className="c" role="columnheader">{t("Level")}</div>
+                  <div className="c" role="columnheader">{t("Type")}</div>
+                  <div className="c" role="columnheader">{t("Message")}</div>
                 </div>
                 {rows.map((event) => {
                   const isSelected = event.eventId === selectedId;
@@ -257,16 +258,14 @@ export function EventsPage() {
           )}
         </section>
 
-        <section className="card b" aria-label="Event details">
+        <section className="card b" aria-label={t("Event details")}>
           <div className="ch">
-            <h2>Event details</h2>
+            <h2>{t("Event details")}</h2>
           </div>
           {!selected ? (
             <div className="empty">
               <span>
-                Select an event in the list to see its details and related
-                objects.
-              </span>
+                {t("Select an event in the list to see its details and related objects.")}</span>
             </div>
           ) : (
             <div
@@ -284,16 +283,14 @@ export function EventsPage() {
                 <Badge info={EVENT_SEVERITY[selected.severity]} />
                 <span className="mono">{selected.eventType}</span>
                 <span className="mono mut">
-                  {formatFullDateTime(selected.timestamp)} GMT+7
-                </span>
+                  {formatFullDateTime(selected.timestamp)} {t("GMT+7")}</span>
               </div>
 
               <div>{selected.message}</div>
 
               <div>
                 <div className="hint" style={{ marginBottom: 4 }}>
-                  Related objects
-                </div>
+                  {t("Related objects")}</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                   {linksOf(selected).map((link) => (
                     <div key={link.kind}>
@@ -311,7 +308,7 @@ export function EventsPage() {
               </div>
 
               <details style={{ margin: "0 -20px" }}>
-                <summary>Technical details</summary>
+                <summary>{t("Technical details")}</summary>
                 <div style={{ padding: "0 20px" }}>
                   <pre className="mono">
                     {JSON.stringify(

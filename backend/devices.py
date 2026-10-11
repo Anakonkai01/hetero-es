@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 import ipaddress
 
 from fastapi import Depends, Header, HTTPException, Request
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from .runtime import RuntimeRejected
 
 TERMINAL = {'COMPLETED', 'CANCELLED', 'FAILED'}
@@ -37,6 +37,27 @@ class SelfTest(Strict):
     vramTotalMb: int = Field(ge=1, le=1000000)
     noiseVersion: Literal['numpy_pcg64_normal_f32_to_f16_v1']
     environment: dict = Field(default_factory=dict)
+    platform: Literal['linux','windows'] = 'linux'
+    runtimeProfile: str = Field(default='legacy', max_length=100)
+    compatibility: dict = Field(default_factory=dict)
+
+    @model_validator(mode='after')
+    def native_admission(self):
+        if self.platform == 'windows':
+            if not self.passed or self.coordinator or self.runtimeProfile != 'desktop-v1' or self.compatibility.get('passed') is not True or self.compatibility.get('repeatIdentical') is not True:
+                raise ValueError('Native Windows requires the qualified worker-only desktop profile')
+            for key in ('recipeHash','parentSha256','perturbedSha256','restoredSha256'):
+                import re
+                if not re.fullmatch(r'[a-f0-9]{64}',str(self.compatibility.get(key,''))):
+                    raise ValueError('Missing native compatibility evidence')
+            if self.compatibility['parentSha256'] != self.compatibility['restoredSha256']:
+                raise ValueError('Native candidate restore mismatch')
+            if self.compatibility.get('predictionProbePassed') is not True or self.compatibility.get('probeOutputsSha256') != '5601ce2d20cc290f9dd8d84ff3988b15a4191fb02411a2e72805af66bf5e31b4':
+                raise ValueError('Native Windows requires the Linux prediction probe')
+            reference = {'recipeHash': 'efc1ff67c1bfa8c243ba93ce4a46dfcea74e5afc4b2daffa50498510d53dbc86', 'parentSha256': 'c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7', 'perturbedSha256': 'd3e35e5984684a4f76c7ec2eeba10ff8afe0483721582c52013a06e5819a9c2c', 'restoredSha256': 'c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7', 'reward': 0.1875}
+            if any(self.compatibility.get(k) != value for k,value in reference.items()):
+                raise ValueError('Native profile does not match the qualified Linux reference')
+        return self
 
 
 class Enrollment(Strict):

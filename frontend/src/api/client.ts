@@ -36,10 +36,10 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, { ...init, headers });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => null) as { message?: string } | null;
+    const error = await response.json().catch(() => null) as { message?: string;detail?:unknown } | null;
     throw new ApiError(
       response.status,
-      error?.message ?? `API request failed: ${response.status} ${response.statusText}`,
+      error?.message ?? (typeof error?.detail==='string'?error.detail:undefined) ?? `API request failed: ${response.status} ${response.statusText}`,
     );
   }
 

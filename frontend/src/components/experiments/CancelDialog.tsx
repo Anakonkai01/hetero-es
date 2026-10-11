@@ -1,5 +1,7 @@
+import {useProduct} from '@heteroes/product-ui';
 import { useRequestCancel } from "../../hooks/useExperimentMutations";
 import type { Experiment } from "../../types/experiment";
+import {Modal} from '../ui/Modal';
 
 interface CancelDialogProps {
   experiment: Experiment;
@@ -7,19 +9,14 @@ interface CancelDialogProps {
 }
 
 export function CancelDialog({ experiment, onClose }: CancelDialogProps) {
+  const {t}=useProduct();
   const cancel = useRequestCancel();
   const sending = cancel.isPending;
   const accepted = cancel.isSuccess;
 
   return (
-    <div className="ovl">
-      <div
-        className="dlg"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="dlg-t"
-      >
-        <h2 id="dlg-t">Request to cancel this experiment?</h2>
+    <Modal title={t('Request to cancel this experiment?')} onClose={onClose}>
+      <div className="modal-form">
 
         <div>
           <b>{experiment.name}</b>
@@ -28,30 +25,25 @@ export function CancelDialog({ experiment, onClose }: CancelDialogProps) {
 
         {!sending && !accepted && (
           <div className="note warn">
-            Sending a request does not cancel immediately. The experiment
-            keeps its current runtime status until the coordinator confirms.
-          </div>
+            {t("Sending a request does not cancel immediately. The experiment keeps its current runtime status until the coordinator confirms.")}</div>
         )}
         {sending && (
           <div className="note" role="status">
-            Sending cancel request…
-          </div>
+            {t("Sending cancel request…")}</div>
         )}
         {cancel.isError && (
           <div className="note err" role="alert">
-            <b>The request could not be sent.</b> {cancel.error.message}
+            <b>{t("The request could not be sent.")}</b> {cancel.error.message}
           </div>
         )}
         {accepted && (
           <div className="note" role="status">
-            <b>Cancel request received.</b> The official status will update
-            once the coordinator confirms (simulated after a few seconds).
-          </div>
+            <b>{t("Cancel request received.")}</b> {t("The official status will update once the coordinator confirms (simulated after a few seconds).")}</div>
         )}
 
         <div className="acts" style={{ justifyContent: "flex-end" }}>
           <button type="button" className="btn" onClick={onClose}>
-            {accepted ? "Close" : "Keep running"}
+            {accepted ? t("Close") : t("Keep running")}
           </button>
           {!accepted && (
             <button
@@ -60,11 +52,10 @@ export function CancelDialog({ experiment, onClose }: CancelDialogProps) {
               disabled={sending}
               onClick={() => cancel.mutate(experiment.experimentId)}
             >
-              Send cancel request
-            </button>
+              {t("Send cancel request")}</button>
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

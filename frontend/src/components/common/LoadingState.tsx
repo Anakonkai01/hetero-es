@@ -1,13 +1,15 @@
+import {useProduct} from '@heteroes/product-ui';
 function Skeleton({ height, width }: { height: number; width?: number }) {
   return <div className="skel" style={{ height, width }} />;
 }
 
 /** Page-level skeleton shown while the first data is loading. */
 export function LoadingState() {
+  const {t}=useProduct();
   return (
     <div
       aria-busy="true"
-      aria-label="Loading"
+      aria-label={t("Loading")}
       style={{ display: "flex", flexDirection: "column", gap: 18 }}
     >
       <Skeleton height={30} width={280} />
