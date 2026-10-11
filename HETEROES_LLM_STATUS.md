@@ -1,12 +1,36 @@
 # HeteroES-LLM — Status
 
-**Last updated:** 11/10/2026 — M3a native Windows qualification, distributed replay/baseline and owner-OFF trial verified on Thao's RTX 3060; remaining installation/UI/outage gates pending. M2 local agents/control/recovery verified; actual R2/EC2 acceptance pending owner cloud accounts. The 09/10 decoder, profiling and research evidence and earlier milestones remain in the following blocks. Newest verified updates appear first; sections 1–13 were written on 30/09 and are older background.
+**Last updated:** 11/10/2026 — Local generation-boundary pause/resume and host telemetry implemented; CPU suite 2,052 passed, 100 skipped. Web/Worker/Server UI redesigned in Track B. Hardware pause/resume, new Windows UI and cloud acceptance remain pending. Earlier Windows numerical acceptance and research evidence remain preserved below.
 **Canonical design/specification:** `HETEROES_LLM_MASTER.md`  
 **Purpose:** current implementation truth, verified evidence, blockers, artifacts, and the exact next action.
 
 > **Document rule:** `MASTER` decides what the system/design should be. `STATUS` decides what is actually done now. For a new chat, read `HETEROES_LLM_MASTER.md` and then this file; older proposal/roadmap/chat-handoff files are archive only.
 
 ## 0. NEXT SESSION — START HERE
+
+### UPDATE 11/10/2026 — Local pause/resume and hardware monitoring
+
+The local continuation adds generation-boundary pause/resume, verified checkpoint
+lineage, fresh assignment epochs and fencing of commands for released assignments.
+Large weights, worker caches and recovery points can use a UUID-guarded secondary
+disk while process metadata and live SQLite stay on ext4. Numerical v1 identities
+remain unchanged. CPU pause/resume matches uninterrupted deterministic weights;
+real GPU pause/resume and simultaneous multi-GPU acceptance remain pending.
+
+The Agent now samples GPU/host/disk/network telemetry without importing Torch or
+creating a CUDA context. GPU watts/temperature/VRAM/fan/clocks, CPU/RAM/swap/load,
+disk capacity, host I/O rates and API latency are available to the Web/Worker UI.
+GPU energy is a sampled estimate for this GPU, including unrelated GPU activity;
+it excludes CPU and whole-computer power. Missing sensors remain unavailable.
+Samples are cached for ten seconds; energy excludes gaps over thirty seconds.
+The Agent negotiates telemetry support before adding it to a poll, preserving
+compatibility with older strict control APIs. Local history holds sixty samples.
+
+Validation: `CUDA_VISIBLE_DEVICES='' PYTHONPATH=src ... python -m pytest -q`:
+**2,052 passed, 100 skipped** (77.28 seconds). This is CPU acceptance, not new GPU
+training acceptance. Track B `docs/ui-monitoring-guide.md` and
+`docs/evidence/2026-10-11-ui/README.md` describe the running redesigned product,
+actual measurements, packaged apps and remaining platform gates. Cloud deferred.
 
 ### UPDATE 11/10/2026 — Local completion implementation resumed
 

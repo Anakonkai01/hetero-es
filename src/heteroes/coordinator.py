@@ -43,6 +43,10 @@ class RunCancelled(CoordinatorError):
     """A managed run stopped at a safe boundary, preserving recorded updates."""
 
 
+class RunPaused(CoordinatorError):
+    """A completed generation was published before opening any further work."""
+
+
 _DEFAULT = object()
 MIN_STALL_SECONDS = 60.0
 STALL_LEASES = 5
@@ -65,7 +69,8 @@ class Coordinator:
                  port: int = 0, token: str | None = None, poll_seconds: float = 0.2, failed_grace_seconds: float = 5.0,
                  timeout_seconds: float | None = None, stall_seconds=_DEFAULT, keep_published: int | None = 3, allow_unauthenticated: bool = False, log=lambda event: None, timer=time.perf_counter,
                  monotonic=time.monotonic, sleep=time.sleep, cancel_requested=lambda: False,
-                 device_tokens=None, generation_completed=None, generation_started=None):
+                 device_tokens=None, generation_completed=None, generation_started=None,
+                 pause_requested=lambda: False):
         self.model = model
         self.schema = schema
         self.recipe = recipe
@@ -87,6 +92,7 @@ class Coordinator:
         self._monotonic = monotonic
         self._sleep = sleep
         self._cancel_requested = cancel_requested
+        self._pause_requested = pause_requested
         self._generation_completed = generation_completed
         self._generation_started = generation_started
         self.parent_sha256 = model_weights_sha256(model, schema)
@@ -318,6 +324,8 @@ class Coordinator:
         try:
             for generation in range(self.recover(), generations):
                 self._check_cancel()
+                if generation > 0 and self._pause_requested():
+                    raise RunPaused('paused after a published generation')
                 if self._generation_started is not None:self._generation_started(generation)
                 summaries.append(self.run_generation(generation))
                 if self._generation_completed is not None:
@@ -325,6 +333,9 @@ class Coordinator:
             self._check_cancel()
         except RunCancelled:
             self.finish(cancelled=True)
+            raise
+        except RunPaused:
+            self.finish()  # Workers restore and exit normally at this barrier.
             raise
         except BaseException:
             self.finish(aborted=True)             # a failed run must not look like a success to the workers

@@ -124,11 +124,12 @@ class WorkerRuntime:
     def __init__(self, worker_id: str, client: HttpClient, executor: CandidateExecutor, cache_dir, log=lambda event: None,
                  poll_seconds: float = 0.5, backoff_seconds: float = 2.0, download_attempts: int = 2,
                  max_unreachable_seconds: float | None = None, sleep=time.sleep, wall_clock=time.time, timer=time.perf_counter,
-                 replay: ReplayPolicy | None = None):
+                 replay: ReplayPolicy | None = None, cache_guard=lambda: None):
         self.worker_id = worker_id
         self.client = client
         self.executor = executor
         self.cache_dir = Path(cache_dir)
+        self._cache_guard = cache_guard
         self._log = log
         self._poll = poll_seconds
         self._backoff = backoff_seconds
@@ -169,6 +170,7 @@ class WorkerRuntime:
         """Make the model's weights the job's parent weights (full synchronization). Returns the event it logged."""
         target, previous = job["parent_weights_sha256"], self.executor.parent_sha256
         for attempt in range(1, self._download_attempts + 1):
+            self._cache_guard()
             start = self._timer()
             try:
                 stats = {}

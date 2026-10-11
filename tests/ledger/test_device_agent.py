@@ -113,3 +113,48 @@ def test_desktop_quit_fences_late_enable_for_current_boot(tmp_path):
     with pytest.raises(RuntimeError,match='shutdown'):
         a.handle({'commandId':'late-enable','kind':'SET_CONTRIBUTION','bootId':a.boot_id,'enabled':True})
     assert not a.enabled
+
+
+def test_released_assignment_never_launches_a_delayed_worker(tmp_path,monkeypatch):
+    a=agent(tmp_path);a.enabled=True
+    with a.db() as db:db.execute('INSERT INTO released VALUES (?)',('b'*32,))
+    launched=[];monkeypatch.setattr(a,'_worker',lambda *args:launched.append(args))
+    a.handle({'commandId':'old-start','kind':'START_WORKER','assignmentId':'b'*32,'epoch':1})
+    assert launched==[]
+    with a.db() as db:assert db.execute('SELECT 1 FROM processed WHERE id="old-start"').fetchone()
+
+
+def test_resume_validates_checkpoint_preserves_ledger_and_rejects_old_epoch(tmp_path):
+    import hashlib,sqlite3
+    from heteroes.product.recovery import capture_point
+    a=agent(tmp_path);a.enabled=True
+    cfg={'runId':'b'*32,'workerIds':['test'],'workload':'arith16','decodeEngine':'hf_generate',
+         'maxGenerations':3,'candidatesPerGeneration':4,'alpha':.001,'sigma':.001,
+         'schedulerPolicy':'greedy','syncMode':'synchronous','backupPolicy':{'interval':1,'retain':3}}
+    old={'assignmentId':'c'*32,'epoch':1,'config':cfg,'computeGrants':{'test':'old-private'}}
+    a.manager.accept(old);root=a.manager.directory(cfg['runId'])
+    (root/'weights').mkdir();payload=b'toy pause weights';sha=hashlib.sha256(payload).hexdigest()
+    (root/'weights'/f'{sha}.bin').write_bytes(payload)
+    with sqlite3.connect(root/'ledger.sqlite') as db:
+        db.execute('CREATE TABLE generation_update(generation INTEGER,child_weights_sha256 TEXT,parent_weights_sha256 TEXT,applied_at REAL)')
+        db.execute('INSERT INTO generation_update VALUES (0,?,?,1)',(sha,sha))
+    summary={'generation':0,'child_sha256':sha,'parent_sha256':sha}
+    point=capture_point(root,summary,{},cfg['backupPolicy'],final=True)
+    paused={'pointId':point.name,'generation':0,'childWeightsSha256':sha,'parentWeightsSha256':sha,'verified':True}
+    write_json(root/'pause-point.json',paused);(root/'pause.flag').touch()
+    a.manager.save(root,status='PAUSED',workerStates={'test':{'alive':False,'confirmed':True}})
+    ledger_before=(root/'ledger.sqlite').read_bytes()
+    resumed={**old,'assignmentId':'d'*32,'epoch':2,'resumeFrom':paused,'computeGrants':{'test':'new-private'}}
+    # Corrupt the independently retained checkpoint, then retry after restoring
+    # it. A failed preflight leaves the old paused epoch intact.
+    file=point/'weights'/f'{sha}.bin';file.write_bytes(b'corrupted')
+    with pytest.raises(ValueError,match='checksum'):a.manager.accept(resumed)
+    assert a.manager.state(root)['status']=='PAUSED'
+    file.write_bytes(payload)
+    a.manager.accept(resumed)
+    assert a.manager.state(root)['status']=='STARTING'
+    assert not (root/'pause.flag').exists()
+    assert read_json(root/'assignment.json')['epoch']==2
+    assert read_json(root/'device-grants.json')=={'test':'new-private'}
+    assert (root/'ledger.sqlite').read_bytes()==ledger_before
+    with pytest.raises(ValueError,match='epoch'):a.manager.accept(old)

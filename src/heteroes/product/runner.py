@@ -7,6 +7,7 @@ import sys
 import time
 
 from .files import read_json, write_json
+from .storage import data_root
 
 
 def apply_backup_policy(root,generation,current,emit):
@@ -28,7 +29,7 @@ def apply_backup_policy(root,generation,current,emit):
 
 
 def main(directory):
-    from heteroes.coordinator import Coordinator, RunCancelled, _NoGeneration
+    from heteroes.coordinator import Coordinator, RunCancelled, RunPaused, _NoGeneration
     from heteroes.dispatch import AdmittedOnly, Greedy
     from heteroes.ledger import Ledger
     from heteroes.model.loading import build_recipe, check_noise_selftest, check_recipe_selftest, load_pinned_model
@@ -52,6 +53,7 @@ def main(directory):
     last_summary = None
     outcome = "FAILED"
     failure = None
+    paused_checkpoint = None
     try:
         state("STARTING")
         check_noise_selftest()
@@ -65,6 +67,7 @@ def main(directory):
         active_policy=policy
         def generation_started(generation):
             nonlocal active_policy
+            data_root(root)  # Check the selected volume before opening work.
             active_policy=apply_backup_policy(root,generation,active_policy,emit)
 
         def recovery_point(summary, final=False):
@@ -83,14 +86,15 @@ def main(directory):
             except Exception as error:
                 # Storage failure never turns a valid numerical update into failure.
                 emit({'event':'recovery_point_error','generation':summary['generation'],'errorType':type(error).__name__})
-        coordinator = Coordinator(loaded.model, loaded.schema, recipe, ledger, root / "weights", config["runId"],
+        coordinator = Coordinator(loaded.model, loaded.schema, recipe, ledger, data_root(root) / "weights", config["runId"],
             config["candidatesPerGeneration"], config["alpha"],
             policy_factory=lambda: AdmittedOnly(Greedy(), config["workerIds"]), host=config["host"], port=config["port"],
             token=os.environ["HETEROES_TOKEN"], timeout_seconds=1800, stall_seconds=300,
             failed_grace_seconds=60, lease_seconds=60, log=emit, cancel_requested=cancel,
             device_tokens=read_json(root/'device-grants.json') if config.get('deviceCredentials') else None,
             generation_completed=recovery_point if policy else None,
-            generation_started=generation_started if policy else None)
+            generation_started=generation_started if policy else None,
+            pause_requested=lambda:(root/'pause.flag').exists())
         coordinator.start()
         next_generation = coordinator.recover()  # finish any recorded update even when cancellation is pending
         if policy and next_generation>0:
@@ -112,6 +116,24 @@ def main(directory):
         state("RUNNING", recipeHash=recipe.hash)
         coordinator.run(config["maxGenerations"])
         outcome = "COMPLETED"
+    except RunPaused:
+        try:
+            if not policy or last_summary is None:
+                raise ValueError('Pause requires a completed recovery checkpoint')
+            from .recovery import capture_point, verify_point, source_identity
+            point=capture_point(root,last_summary,recipe.to_dict(),active_policy,final=True,
+                identity={'code':{**code_info(),**source_identity(Path(__file__).resolve().parents[1])},
+                          'environment':environment_info('cuda')})
+            manifest=verify_point(point)
+            paused_checkpoint={key:manifest[key] for key in ('pointId','generation','childWeightsSha256','parentWeightsSha256')}
+            paused_checkpoint['verified']=True
+            write_json(root/'pause-point.json',paused_checkpoint)
+            emit({'event':'generation_boundary_pause',**paused_checkpoint})
+            outcome='PAUSED'
+        except Exception as error:
+            failure=f'Pause checkpoint failed: {type(error).__name__}'
+            emit({'event':'pause_checkpoint_error','errorType':type(error).__name__})
+            if coordinator:coordinator.finish(aborted=True)
     except RunCancelled:
         outcome = "CANCELLED"
         if coordinator:
@@ -122,10 +144,11 @@ def main(directory):
         if coordinator:
             coordinator.finish(aborted=True)
     finally:
-        if coordinator and policy and last_summary is not None:
+        if coordinator and policy and last_summary is not None and outcome!='PAUSED':
             recovery_point(last_summary,final=True)
         summary = {"status": outcome, "failureReason": failure,
                    "final_weights_sha256": coordinator.parent_sha256 if coordinator else None}
+        if paused_checkpoint is not None:summary['pauseCheckpoint']=paused_checkpoint
         write_json(root / f"summary-{time.time_ns()}.json", summary)
         state(outcome, **{key: value for key, value in summary.items() if key != "status"})
         if coordinator:
@@ -136,7 +159,7 @@ def main(directory):
         if ledger:
             ledger.close()
         log.close()
-    return 0 if outcome in ("COMPLETED", "CANCELLED") else 1
+    return 0 if outcome in ("COMPLETED", "CANCELLED", "PAUSED") else 1
 
 
 if __name__ == "__main__":

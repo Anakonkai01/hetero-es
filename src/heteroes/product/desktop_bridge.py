@@ -22,7 +22,9 @@ class Bridge:
             processes = []; drained = False
         return {'bootId': agent.boot_id, 'enabled': agent.enabled,
                 'connection': read_json(agent.root / 'connection.json', {'status': 'CONNECTING'}),
-                'processes': processes, 'drained': drained}
+                'processes': processes, 'drained': drained,
+                'telemetry': read_json(agent.root / 'telemetry.json', None),
+                'telemetryHistory': list(agent.telemetry.history)}
 
     def off(self):
         with self.agent.desktop_lock:

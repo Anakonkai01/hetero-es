@@ -16,8 +16,10 @@ import time
 
 from .files import events, read_json, write_json
 from .remote import alive, identity
+from .storage import data_root, checked_directory
 
 TERMINAL = {"COMPLETED", "CANCELLED", "FAILED"}
+QUIESCENT = TERMINAL | {'PAUSED'}
 ROOT = Path(__file__).resolve().parents[3]
 MODEL = "Qwen/Qwen2.5-0.5B-Instruct"
 REVISION = "7ae557604adf67be50417f59c2c2f167def9a775"
@@ -98,10 +100,18 @@ class Manager:
             quarantined = read_json(self.root / "quarantine.json", {})
             if set(body["workerIds"]) & set(quarantined):
                 raise ValueError("Selected worker is quarantined after a restore mismatch; administrator investigation required")
-            pending = [path for path in self.root.iterdir() if path.is_dir() and self.state(path).get("status") not in TERMINAL]
+            pending = [path for path in self.root.iterdir() if path.is_dir() and self.state(path).get("status") not in QUIESCENT]
             if pending:
                 raise RuntimeError("another run still owns the GPU pool")
             root.mkdir(mode=0o700)
+            if self.config.get('largeDataDirectory'):
+                try:
+                    large=checked_directory(self.config['largeDataDirectory'],self.config.get('storageVolumeUUID'))/'coordinators'/body['runId']
+                    large.mkdir(parents=True,exist_ok=False,mode=0o700)
+                    write_json(root/'large-data.json',{'directory':str(large),'volumeUUID':self.config.get('storageVolumeUUID')})
+                except BaseException:
+                    root.rmdir()
+                    raise
             write_json(root / "config.json", {**body, "modelPath": self.config["modelPath"],
                                               "host": self.config["workerHost"], "port": self.config["workerPort"]})
             self.save(root, status="STARTING", recoveryCount=0, startedAt=time.time(), workerStates={})
@@ -181,7 +191,7 @@ class Manager:
         values = [dict(value) for value in self.cache]
         for path in self.root.iterdir():
             state = self.state(path) if path.is_dir() else {}
-            if state.get("status") in TERMINAL:
+            if state.get("status") in QUIESCENT:
                 continue
             selected = read_json(path / "config.json", {}).get("workerIds", [])
             for value in values:
@@ -292,7 +302,7 @@ class Manager:
             elif time.time() - state["preparingAt"] > 300:
                 (root / "cancel.flag").touch()
                 self.save(root, failureReason="No selected worker passed preparation")
-        if runner.get("status") in TERMINAL:
+        if runner.get("status") in QUIESCENT:
             if not stopped:
                 stopped = self.poll_workers(root, stop=True)
             if stopped:
@@ -300,9 +310,11 @@ class Manager:
                 if not running:
                     self.save(root, status="FAILED" if state.get("failureReason") else runner["status"],
                               completedAt=time.time(), finalWeightsSha256=runner.get("final_weights_sha256"),
+                              pauseCheckpoint=runner.get('pauseCheckpoint'),
                               failureReason=state.get("failureReason") or runner.get("failureReason"))
                     return
-            self.save(root, status="CANCELLING" if runner["status"] == "CANCELLED" else "DRAINING")
+            self.save(root, status="CANCELLING" if runner["status"] == "CANCELLED" else
+                      'PAUSING' if runner['status']=='PAUSED' else "DRAINING")
             return
         if not running:
             if not self.poll_workers(root, stop=True):
@@ -318,12 +330,13 @@ class Manager:
             self.launch(root)
         else:
             self.save(root, status="CANCELLING" if (root / "cancel.flag").exists() else
+                      'PAUSING' if (root/'pause.flag').exists() else
                       "RUNNING" if runner.get("status") == "RUNNING" else "STARTING")
 
     def loop(self):
         while not self.stop.wait(1):
             for root in self.root.iterdir():
-                if not root.is_dir() or self.state(root).get("status") in TERMINAL:
+                if not root.is_dir() or self.state(root).get("status") in QUIESCENT:
                     continue
                 try:
                     with self.lock:
@@ -343,12 +356,13 @@ class Manager:
         workload = recipe.get("workload", {})
         db_path = root / "ledger.sqlite"
         checkpoint = result["state"].get("finalWeightsSha256")
+        weights = data_root(root)/'weights'
         if db_path.exists():
             with sqlite3.connect(f"file:{db_path}?mode=ro", uri=True) as db:
                 db.row_factory = sqlite3.Row
                 db.execute("BEGIN")  # consistent projection, never mutate the runtime ledger
                 for gen in db.execute("SELECT g.*, u.child_weights_sha256, u.applied_at FROM generation g LEFT JOIN generation_update u USING(experiment_id,generation) ORDER BY g.generation"):
-                    if gen["applied_at"] and (root / "weights" / (gen["child_weights_sha256"] + ".bin")).is_file():
+                    if gen["applied_at"] and (weights / (gen["child_weights_sha256"] + ".bin")).is_file():
                         checkpoint = gen["child_weights_sha256"]
                     number = gen["generation"]
                     generation_id = f"{run_id}.g{number}"
@@ -390,7 +404,7 @@ class Manager:
         allowed = [root / "config.json", root / "events.jsonl", root / "lifecycle.jsonl", *root.glob("summary-*.json")]
         result["checkpointSha256"] = checkpoint
         if checkpoint:
-            allowed.append(root / "weights" / (checkpoint + ".bin"))
+            allowed.append(weights / (checkpoint + ".bin"))
         for path in allowed:
             if path.is_file():
                 name = path.name
@@ -472,7 +486,7 @@ def main():
                     if not entry:
                         raise FileNotFoundError()
                     root = manager.directory(run_id)
-                    path = root / "weights" / artifact if artifact.endswith(".bin") else root / artifact
+                    path = data_root(root) / "weights" / artifact if artifact.endswith(".bin") else root / artifact
                     self.send_response(200)
                     self.send_header("Content-Length", str(path.stat().st_size))
                     self.send_header("Content-Type", "application/octet-stream")

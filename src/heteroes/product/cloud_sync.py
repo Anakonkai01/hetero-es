@@ -7,6 +7,7 @@ import time
 import urllib.request
 from .files import read_json,write_json
 from .recovery import verify_point
+from .storage import data_root
 
 
 class CloudSync:
@@ -57,7 +58,7 @@ class CloudSync:
                     if error.code!=404:remaining.append(point_id)
                 except Exception:remaining.append(point_id)
             write_json(root/'cloud-cleanup.json',remaining)
-            points=[p for p in (root/'recovery-points').glob('*') if p.is_dir() and (p/'manifest.json').exists()]
+            points=[p for p in (data_root(root)/'recovery-points').glob('*') if p.is_dir() and (p/'manifest.json').exists()]
             points.sort(key=lambda p:(read_json(p/'manifest.json')['generation'],p.stat().st_mtime),reverse=True)
             for point in points:
                 status=read_json(point/'cloud-state.json',{})

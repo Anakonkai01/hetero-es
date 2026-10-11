@@ -10,6 +10,7 @@ import sqlite3
 import sys
 import uuid
 from .files import write_json
+from .storage import data_root
 
 HEX = re.compile(r'[0-9a-f]{64}')
 
@@ -59,7 +60,8 @@ def capture_point(root, summary, recipe, policy, final=False, identity=None):
     generation=summary['generation']
     if not final and (generation+1)%policy['interval']:
         return None
-    destination=root/'recovery-points'/uuid.uuid4().hex
+    large=data_root(root)
+    destination=large/'recovery-points'/uuid.uuid4().hex
     temporary=destination.with_name(destination.name+'.pending')
     temporary.mkdir(parents=True,mode=0o700)
     files={}
@@ -78,7 +80,7 @@ def capture_point(root, summary, recipe, policy, final=False, identity=None):
         (temporary/'weights').mkdir(mode=0o700)
         for value in {summary['parent_sha256'],summary['child_sha256']}:
             if not HEX.fullmatch(value):raise ValueError('Invalid published hash')
-            source=root/'weights'/f'{value}.bin'
+            source=large/'weights'/f'{value}.bin'
             if source.is_symlink() or not source.is_file():raise ValueError('Published weights are missing or unsafe')
             os.link(source,temporary/'weights'/source.name)
             files['weights/'+source.name]={'sha256':value,'sizeBytes':source.stat().st_size}

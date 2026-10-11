@@ -17,9 +17,10 @@ import urllib.error
 import urllib.request
 import uuid
 from .files import events,read_json,write_json
-from .gateway import Manager,TERMINAL,ROOT,validate
+from .gateway import Manager,TERMINAL,QUIESCENT,ROOT,validate
 from .remote import alive,identity,worker_environment,handle as remote_handle
 from .platform_process import acquire_instance_lock, ProcessIdentityUnknown, spawn_options
+from .storage import data_root,worker_cache
 
 
 def request(url, path, token, body, method=None):
@@ -94,7 +95,7 @@ class AgentManager(Manager):
         if run:
             run_id,recovery=run.rsplit('-r',1);recovery=int(recovery)
         else:
-            pending=[r for r in self.root.iterdir() if r.is_dir() and self.state(r).get('status') not in TERMINAL]
+            pending=[r for r in self.root.iterdir() if r.is_dir() and self.state(r).get('status') not in QUIESCENT]
             if len(pending)!=1:raise RuntimeError('No unique active assignment')
             run_id=pending[0].name;recovery=self.state(pending[0]).get('recoveryCount',0)
         ar=read_json(self.directory(run_id)/'assignment.json')
@@ -112,6 +113,28 @@ class AgentManager(Manager):
         validate(cfg,self.workers)
         self.submit(cfg)
         root=self.directory(cfg['runId'])
+        previous=read_json(root/'assignment.json')
+        if previous and (previous['assignmentId'],previous['epoch'])!=(command['assignmentId'],command['epoch']):
+            if command['epoch']!=previous['epoch']+1 or previous['config']!=cfg:
+                raise ValueError('Resume must preserve configuration and advance one epoch')
+            if self.state(root).get('status')!='PAUSED' or owned_state(read_json(root/'process.json'),(root/'launch-intent.json').exists()) is not False:
+                raise RuntimeError('Resume requires confirmed paused coordinator shutdown')
+            if any(not value.get('notStarted') and (value.get('alive') or not value.get('confirmed'))
+                   for value in self.state(root).get('workerStates',{}).values()):
+                raise RuntimeError('Resume requires confirmed worker shutdown')
+            from .recovery import verify_point
+            paused=read_json(root/'pause-point.json')
+            if not paused or paused!=command.get('resumeFrom'):
+                raise ValueError('Resume checkpoint lineage mismatch')
+            manifest=verify_point(data_root(root)/'recovery-points'/paused['pointId'])
+            if manifest['childWeightsSha256']!=paused['childWeightsSha256'] or manifest['generation']!=paused['generation']:
+                raise ValueError('Resume checkpoint bytes changed')
+            # Keep canonical ledger/weights and append-only evidence. Only local
+            # process/handshake state belongs to the new assignment epoch.
+            for name in ('runner.json','process.json','start.flag','workers-stopped.flag','pause.flag','cancel.flag','launch-intent.json'):
+                (root/name).unlink(missing_ok=True)
+            self.save(root,status='STARTING',recoveryCount=0,workersLaunched=False,workerStates={},failureReason=None)
+            self.log(root,'resume_assignment',epoch=command['epoch'],assignmentId=command['assignmentId'])
         write_json(root/'assignment.json',command)
         write_json(root/'device-grants.json',command['computeGrants'])
         write_json(root/'backup-policy.json',command.get('effectiveBackupPolicy',cfg.get('backupPolicy',{'interval':1,'retain':3})))
@@ -127,7 +150,7 @@ class AgentManager(Manager):
         self.workers={w:{'id':w} for w in ar['config']['workerIds']}
         # Dead-process recovery must wait for this boot's owner opt-in. A living
         # child can still be adopted/observed and reach normal shutdown while OFF.
-        if not self.agent.enabled and not alive(read_json(root/'process.json')) and read_json(root/'runner.json',{}).get('status') not in TERMINAL:
+        if not self.agent.enabled and not alive(read_json(root/'process.json')) and read_json(root/'runner.json',{}).get('status') not in QUIESCENT:
             return
         if owned_state(read_json(root/'process.json'), (root/'launch-intent.json').exists()) is None:
             self.save(root,status='RECOVERING',failureReason='Coordinator process identity is unknown')
@@ -145,6 +168,11 @@ class Agent:
         self.desktop_lock=threading.RLock()
         self.boot_id=uuid.uuid4().hex;self.enabled=False;self.stopping=False;self.shutdown_requested=False
         write_json(self.root/'boot.json',{'bootId':self.boot_id,'enabled':False})
+        from .telemetry import TelemetrySampler
+        self.last_rtt_ms=None
+        self.telemetry_supported=False
+        self.telemetry=TelemetrySampler(self.root, self.config.get('largeDataDirectory'),
+                                        self.config.get('selfTest',{}).get('gpuUUID'))
         self.manager=AgentManager(self)
         self.db_path=self.root/'outbox.sqlite'
         with self.db() as db:
@@ -186,8 +214,10 @@ class Agent:
             argv=[sys.executable,str(ROOT/'scripts/run_worker.py'),'--coordinator-url',command['coordinatorUrl'],
                 '--worker-id',self.config['workerId'],'--model-path',self.config['modelPath'],
                 '--log',str(directory/'events.jsonl'),'--replay','always','--replay-verify-every','1',
-                '--cache-dir',str(directory/'cache'),'--give-up-after-seconds','120','--chunk','16',
+                '--cache-dir',str(worker_cache(directory,self.config)),'--give-up-after-seconds','120','--chunk','16',
                 '--stop-file',str(directory/'stop-request.json')]
+            if self.config.get('largeDataDirectory') and self.config.get('storageVolumeUUID'):
+                argv.extend(['--storage-volume-uuid',self.config['storageVolumeUUID']])
             if (directory/'launch-intent.json').exists() and not (directory/'process.json').exists():
                 raise RuntimeError('Worker launch ownership is unknown')
             write_json(directory/'launch-intent.json',{'started':True})
@@ -200,12 +230,16 @@ class Agent:
 
     def handle(self,command):
         kind=command.get('kind')
-        if kind not in {'SET_CONTRIBUTION','COORDINATE','START_WORKER','STOP_WORKER','CANCEL_ASSIGNMENT','UPDATE_BACKUP_POLICY'}:
+        if kind not in {'SET_CONTRIBUTION','COORDINATE','START_WORKER','STOP_WORKER','CANCEL_ASSIGNMENT','UPDATE_BACKUP_POLICY','PAUSE_ASSIGNMENT'}:
             raise ValueError('Unsupported device command')
         cid=command.get('commandId')
         if not isinstance(cid,str) or not cid:raise ValueError('Missing command identity')
         with self.db() as db:
             if db.execute('SELECT 1 FROM processed WHERE id=?',(cid,)).fetchone():return
+            if kind in ('COORDINATE','START_WORKER','PAUSE_ASSIGNMENT','UPDATE_BACKUP_POLICY') and db.execute(
+                    'SELECT 1 FROM released WHERE assignment_id=?',(command.get('assignmentId'),)).fetchone():
+                db.execute('INSERT OR IGNORE INTO processed VALUES (?)',(cid,))
+                return
         if kind=='SET_CONTRIBUTION':
             if command['bootId']==self.boot_id:
                 if command['enabled'] and self.shutdown_requested:raise RuntimeError('Desktop shutdown is pending')
@@ -222,12 +256,14 @@ class Agent:
             if not self.enabled:raise RuntimeError('Contribution is OFF for this boot')
             if command['coordinatorDeviceId']!=self.config['deviceId']:raise ValueError('Coordinator identity mismatch')
             self.manager.accept(command)
-        elif kind=='UPDATE_BACKUP_POLICY':
+        elif kind in ('UPDATE_BACKUP_POLICY','PAUSE_ASSIGNMENT'):
             self.worker_directory(command)
             matched=False
             for root in self.manager.root.iterdir():
                 ar=read_json(root/'assignment.json') if root.is_dir() else None
                 if ar and (ar['assignmentId'],ar['epoch'])==(command['assignmentId'],command['epoch']):
+                    if kind=='PAUSE_ASSIGNMENT':
+                        (root/'pause.flag').touch(mode=0o600);matched=True;continue
                     policy=command['policy']
                     if set(policy)!={'interval','retain'} or any(type(v) is not int or not 1<=v<=1000 for v in policy.values()):raise ValueError('Invalid backup policy')
                     write_json(root/'backup-policy.json',policy);matched=True
@@ -254,7 +290,7 @@ class Agent:
 
     def cancel_all(self):
         for root in self.manager.root.iterdir():
-            if root.is_dir() and read_json(root/'config.json') and self.manager.state(root).get('status') not in TERMINAL:
+            if root.is_dir() and read_json(root/'config.json') and self.manager.state(root).get('status') not in QUIESCENT:
                 self.manager.cancel(root.name)
         for directory in (self.root/'workers').glob('*/r*'):
             ar=read_json(directory/'assignment.json')
@@ -319,9 +355,14 @@ class Agent:
             while len(json.dumps(event_batch).encode())>512_000:
                 event_batch=event_batch[:max(0,len(event_batch)//2)]
             acknowledgements=[r[0] for r in db.execute('SELECT id FROM processed ORDER BY rowid DESC LIMIT 100')]
-        response=self.call('/api/v1/device/poll',{'bootId':self.boot_id,'contribution':self.enabled,
+        telemetry={**self.telemetry.sample(),'transport':{'latencyMs':self.last_rtt_ms,'pendingReports':len(reports),'pendingEvents':len(event_batch)}}
+        write_json(self.root/'telemetry.json',telemetry)
+        poll_started=time.monotonic()
+        response=self.call('/api/v1/device/poll',{**({'telemetry':telemetry} if self.telemetry_supported else {}),'bootId':self.boot_id,'contribution':self.enabled,
             'processes':processes[:10],'reports':reports,'events':event_batch,'acknowledgements':acknowledgements,
             **({'selfTest':self.config['selfTest']} if self.config.get('selfTest') else {})})
+        self.last_rtt_ms=(time.monotonic()-poll_started)*1000
+        self.telemetry_supported=response.get('telemetrySupported') is True
         # The first poll of a new boot always returns OFF. A user-authenticated
         # activation or typed command for the current boot is needed before launch.
         if response['approvalStatus']=='REVOKED' or (self.enabled and not response['desiredContribution']):

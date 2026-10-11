@@ -37,6 +37,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--log", required=True, help="JSONL file for the events of this worker (must not exist)")
     parser.add_argument("--cache-dir", default=str(Path.home() / ".cache" / "heteroes" / "worker-cache"),
                         help="where downloaded weights are kept (about 1 GB; use a real disk, /tmp may be RAM)")
+    parser.add_argument('--storage-volume-uuid',help='Refuse cache writes when the selected Linux volume is unavailable')
     parser.add_argument("--device", choices=["cuda", "cpu"], default=None)
     parser.add_argument("--token-env", default="HETEROES_TOKEN")
     parser.add_argument("--chunk", type=int, default=None, help="prompts per generate() call; use the safe chunk of this worker's profile (default: 16 for an FP32 recipe, 1 for FP16)")
@@ -141,11 +142,13 @@ def main(argv: list[str]) -> int:
           "engine_selftest_seconds": engine_selftest_seconds, "noise_engine": recipe.engine_version, "workload": recipe.workload_name})
 
     from heteroes.replay import ReplayPolicy
+    from heteroes.product.storage import checked_directory
     policy = (ReplayPolicy.from_profile(json.loads(Path(args.profile).read_text(encoding="utf-8")), mode=args.replay, verify_every=args.replay_verify_every, max_chain=args.replay_max_chain)
               if args.profile else ReplayPolicy(mode=args.replay, verify_every=args.replay_verify_every, max_chain=args.replay_max_chain))
     emit({"event": "replay_policy", "t": time.time(), "worker_id": args.worker_id, "policy": policy.__dict__})
     runtime = WorkerRuntime(args.worker_id, client, executor, args.cache_dir, log=emit, poll_seconds=args.poll_seconds,
-                            max_unreachable_seconds=args.give_up_after_seconds, replay=policy)
+                            max_unreachable_seconds=args.give_up_after_seconds, replay=policy,
+                            cache_guard=lambda:checked_directory(args.cache_dir,args.storage_volume_uuid) if args.storage_volume_uuid else None)
     try:
         runtime.admit()
         reason = runtime.run(stop)
