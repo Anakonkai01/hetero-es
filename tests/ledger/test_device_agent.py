@@ -158,3 +158,21 @@ def test_resume_validates_checkpoint_preserves_ledger_and_rejects_old_epoch(tmp_
     assert read_json(root/'device-grants.json')=={'test':'new-private'}
     assert (root/'ledger.sqlite').read_bytes()==ledger_before
     with pytest.raises(ValueError,match='epoch'):a.manager.accept(old)
+
+
+def test_detail_capability_negotiates_before_sending_extended_observations(tmp_path,monkeypatch):
+    a=agent(tmp_path);sent=[]
+    monkeypatch.setattr(a,'observe',lambda:[])
+    row={'sampledAt':1,'sessionStartedAt':1,'source':'host-observation','disks':[],
+         'host':{'platform':'linux','cores':[{'id':'cpu0'}]},'power':{'hostId':'local'}}
+    monkeypatch.setattr(a.telemetry,'sample',lambda:row)
+    def reply(path,body):
+        sent.append(body)
+        return {'approvalStatus':'APPROVED','desiredContribution':False,'commands':[],'acceptedReports':[],
+                'acceptedEvents':[],'telemetrySupported':True,'detailedTelemetrySupported':len(sent)>=2}
+    monkeypatch.setattr(a,'call',reply)
+    a.cycle();a.cycle();a.cycle()
+    assert 'telemetry' not in sent[0]
+    assert 'power' not in sent[1]['telemetry'] and 'cores' not in sent[1]['telemetry']['host']
+    assert sent[2]['telemetry']['power']=={'hostId':'local'}
+    assert not a.enabled

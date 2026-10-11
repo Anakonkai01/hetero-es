@@ -1,12 +1,47 @@
 # HeteroES-LLM — Status
 
-**Last updated:** 11/10/2026 — Local generation-boundary pause/resume and host telemetry implemented; CPU suite 2,052 passed, 100 skipped. Web/Worker/Server UI redesigned in Track B. Hardware pause/resume, new Windows UI and cloud acceptance remain pending. Earlier Windows numerical acceptance and research evidence remain preserved below.
+**Last updated:** 11/10/2026 — Local pause/resume, detailed resource monitoring and persistent CPU/GPU energy implemented; CPU suite 2,060 passed, 100 skipped and 24 targeted monitoring/Agent checks. Web/Worker/Server UI redesigned in Track B. Hardware pause/resume, new Windows UI and cloud acceptance remain pending. Earlier Windows numerical acceptance and research evidence remain preserved below.
 **Canonical design/specification:** `HETEROES_LLM_MASTER.md`  
 **Purpose:** current implementation truth, verified evidence, blockers, artifacts, and the exact next action.
 
 > **Document rule:** `MASTER` decides what the system/design should be. `STATUS` decides what is actually done now. For a new chat, read `HETEROES_LLM_MASTER.md` and then this file; older proposal/roadmap/chat-handoff files are archive only.
 
 ## 0. NEXT SESSION — START HERE
+
+### UPDATE 11/10/2026 — Resource detail and persistent energy
+
+Owner requested Task Manager/GNOME/btop/nvitop/W&B/server monitoring patterns.
+Web, Worker and CPU Lab Server now share Overview/Detail with larger, scoped
+metric cards and Standard/Large text preferences. Linux detail collects per-
+logical-CPU utilization/frequency, physical sensor labels, RAM categories, whole
+block I/O, per-interface counters and top 20 processes (names only, never command
+arguments/environment). Optional NVIDIA details include memory controller load,
+memory clock, PCIe link, performance state and compute-process VRAM. Optional
+query failures preserve the primary GPU readings.
+
+`EnergyLedger` persists component totals in the same OS user's private
+`~/.local/share/heteroes-power/energy.sqlite`, deduplicating aliases by hardware
+identity/boot/monotonic sample order. Session/day/month/lifetime include coverage;
+there is no historical backfill or extrapolation of outages. CPU package RAPL
+includes nested core energy, which is displayed but excluded from sums. GPU energy
+integrates observed driver power. Whole-machine AC remains unavailable until a
+real PSU/UPS/wall-meter input is supplied; CPU + GPU is only a measured component
+subtotal. This host has no separate DRAM counter or whole-machine meter.
+
+A fixed read-only RAPL publisher is installed as `heteroes-rapl.service` on this
+Linux host. Root reads only fixed sysfs energy counters; Worker/Server stay
+unprivileged. Samples cache for three seconds; existing control polls remain ten
+seconds. Detailed telemetry has its own capability bit, preserving old strict
+Server compatibility. No changes to numerical identities, dispatch or admission.
+Windows keeps fixed CIM CPU/RAM and NVIDIA metrics; Linux host detail/CPU-power
+sensor parity and native acceptance of the new UI are pending.
+
+Validation: final full CPU suite **2,060 passed, 100 skipped** (73.81 seconds);
+**24 targeted monitoring/Agent tests** cover, among others,
+wall-meter scope/freshness, process privacy/PID reuse, rolling negotiation and
+short CPU sensor outages without invented energy.
+Track B design/provenance/evidence: `docs/resource-monitoring-design.md` and
+`docs/evidence/2026-10-11-monitoring/README.md`. No new GPU workload or cloud use.
 
 ### UPDATE 11/10/2026 — Local pause/resume and hardware monitoring
 
@@ -20,9 +55,9 @@ real GPU pause/resume and simultaneous multi-GPU acceptance remain pending.
 The Agent now samples GPU/host/disk/network telemetry without importing Torch or
 creating a CUDA context. GPU watts/temperature/VRAM/fan/clocks, CPU/RAM/swap/load,
 disk capacity, host I/O rates and API latency are available to the Web/Worker UI.
-GPU energy is a sampled estimate for this GPU, including unrelated GPU activity;
+At that earlier revision, GPU energy was a session-only sampled estimate, including unrelated GPU activity;
 it excludes CPU and whole-computer power. Missing sensors remain unavailable.
-Samples are cached for ten seconds; energy excludes gaps over thirty seconds.
+At that earlier revision, samples cached for ten seconds; see the latest resource update for current behavior.
 The Agent negotiates telemetry support before adding it to a poll, preserving
 compatibility with older strict control APIs. Local history holds sixty samples.
 

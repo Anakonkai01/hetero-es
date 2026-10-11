@@ -27,12 +27,40 @@ def gpu_observation(uuid=None):
             continue
         keys = ['utilizationPercent', 'temperatureC', 'vramTotalMb', 'vramUsedMb',
                 'powerDrawW', 'powerLimitW', 'fanPercent', 'clockMhz']
-        return {'uuid': parts[0], 'name': parts[1], **dict(zip(keys, map(number, parts[2:]))) }
+        row = {'uuid': parts[0], 'name': parts[1], **dict(zip(keys, map(number, parts[2:]))) }
+        # Optional queries must not discard the primary metrics on older drivers.
+        try:
+            extra = subprocess.run(['nvidia-smi', '--query-gpu=uuid,utilization.memory,clocks.current.memory,pstate,pcie.link.gen.gpucurrent,pcie.link.width.current', '--format=csv,noheader,nounits'], capture_output=True, text=True, timeout=3, check=True)
+            for extra_line in extra.stdout.splitlines():
+                values = [p.strip() for p in extra_line.split(',')]
+                if len(values) == 6 and values[0] == row['uuid']:
+                    row.update(memoryUtilizationPercent=number(values[1]), memoryClockMhz=number(values[2]),
+                               performanceState=values[3][:30], pcieGeneration=number(values[4]), pcieWidth=number(values[5]))
+            apps = subprocess.run(['nvidia-smi', '--query-compute-apps=gpu_uuid,pid,process_name,used_gpu_memory', '--format=csv,noheader,nounits'], capture_output=True, text=True, timeout=3, check=True)
+            processes = []
+            for line in apps.stdout.splitlines():
+                values = [p.strip() for p in line.split(',')]
+                if len(values) == 4 and values[0] == row['uuid'] and values[1].isdigit():
+                    processes.append({'pid': int(values[1]), 'name': values[2].replace('\\', '/').rsplit('/', 1)[-1][:100], 'vramMb': number(values[3])})
+            row['processes'] = processes[:64]
+        except (OSError, subprocess.SubprocessError):
+            pass
+        return row
     return None
 
 
+def legacy_observation(row):
+    """Keep rolling updates compatible with strict pre-detail Servers."""
+    host_keys = {'cpuCount','platform','cpuPercent','ramTotalBytes','ramUsedBytes','swapTotalBytes','swapUsedBytes','loadAverage','networkRxBytesPerSecond','networkTxBytesPerSecond','diskReadBytesPerSecond','diskWriteBytesPerSecond'}
+    gpu_keys = {'uuid','name','utilizationPercent','temperatureC','vramTotalMb','vramUsedMb','powerDrawW','powerLimitW','fanPercent','clockMhz','energyWh','energySampledSeconds'}
+    result = {key:value for key,value in row.items() if key != 'power'}
+    for key, allowed in [('host', host_keys), ('gpu', gpu_keys)]:
+        if key in result: result[key] = {name:value for name,value in result[key].items() if name in allowed}
+    return result
+
+
 class TelemetrySampler:
-    def __init__(self, state_directory, storage_directory=None, gpu_uuid=None):
+    def __init__(self, state_directory, storage_directory=None, gpu_uuid=None, energy_directory=None):
         self.state_directory = Path(state_directory)
         self.storage_directory = Path(storage_directory) if storage_directory else None
         self.gpu_uuid = gpu_uuid
@@ -42,6 +70,10 @@ class TelemetrySampler:
         self.energy_wh = 0.0
         self.sampled_seconds = 0.0
         self.started_at = time.time()
+        from .host_detail import HostDetail
+        from .power import PowerSampler
+        self.detail = HostDetail()
+        self.power = PowerSampler(energy_directory or self.state_directory / 'energy', gpu_uuid)
         from collections import deque
         self.history = deque(maxlen=60)
         self.last = None
@@ -64,6 +96,7 @@ class TelemetrySampler:
                           swapTotalBytes=memory.get('SwapTotal'),
                           swapUsedBytes=memory.get('SwapTotal', 0) - memory.get('SwapFree', 0))
             result['loadAverage'] = list(os.getloadavg())
+            result.update(self.detail.sample())
             rx = tx = read = written = 0
             for line in Path('/proc/net/dev').read_text().splitlines()[2:]:
                 name, data = line.split(':', 1)
@@ -93,7 +126,7 @@ class TelemetrySampler:
 
     def sample(self):
         now, tick = time.time(), time.monotonic()
-        if self.last_tick is not None and tick - self.last_tick < 10:
+        if self.last_tick is not None and tick - self.last_tick < 3:
             return self.last
         row = {'sampledAt': now, 'sessionStartedAt': self.started_at, 'source': 'host-observation', 'disks': []}
         errors = []
@@ -132,8 +165,16 @@ class TelemetrySampler:
             except OSError:
                 errors.append('DISK_METRICS_UNAVAILABLE')
         row['errors'] = errors
+        try:
+            row['power'] = self.power.sample(row.get('gpu'), now, tick)
+        except (OSError, ValueError, KeyError):
+            row['errors'].append('POWER_ACCOUNTING_UNAVAILABLE')
+        row['errors'] = list(dict.fromkeys(row['errors']))[:5]
         gpu, host = row.get('gpu', {}), row.get('host', {})
+        power = row.get('power', {})
         self.history.append({'at': now, 'gpuPowerW': gpu.get('powerDrawW'),
+                             'cpuPowerW': sum(c['powerW'] for c in power.get('components', []) if c['kind'] == 'cpu-package' and c['powerW'] is not None) if any(c['kind'] == 'cpu-package' and c['powerW'] is not None for c in power.get('components', [])) else None,
+                             'componentPowerW': power.get('componentSubtotalW'), 'wholeMachineW': power.get('wholeMachineW'),
                              'temperatureC': gpu.get('temperatureC'), 'gpuPercent': gpu.get('utilizationPercent'),
                              'cpuPercent': host.get('cpuPercent'), 'vramUsedMb': gpu.get('vramUsedMb'),
                              'ramUsedBytes': host.get('ramUsedBytes')})

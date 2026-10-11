@@ -1,0 +1,24 @@
+[Unit]
+Description=HeteroES read-only CPU energy sensor publisher
+After=local-fs.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 -I /usr/local/lib/heteroes/rapl-publisher.py
+Restart=on-failure
+RestartSec=3
+RuntimeDirectory=heteroes-power
+RuntimeDirectoryMode=0755
+UMask=0022
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+ReadWritePaths=/run/heteroes-power
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target

@@ -171,8 +171,10 @@ class Agent:
         from .telemetry import TelemetrySampler
         self.last_rtt_ms=None
         self.telemetry_supported=False
+        self.detailed_telemetry_supported=False
         self.telemetry=TelemetrySampler(self.root, self.config.get('largeDataDirectory'),
-                                        self.config.get('selfTest',{}).get('gpuUUID'))
+                                        self.config.get('selfTest',{}).get('gpuUUID'),
+                                        Path.home()/'.local/share/heteroes-power')
         self.manager=AgentManager(self)
         self.db_path=self.root/'outbox.sqlite'
         with self.db() as db:
@@ -357,12 +359,17 @@ class Agent:
             acknowledgements=[r[0] for r in db.execute('SELECT id FROM processed ORDER BY rowid DESC LIMIT 100')]
         telemetry={**self.telemetry.sample(),'transport':{'latencyMs':self.last_rtt_ms,'pendingReports':len(reports),'pendingEvents':len(event_batch)}}
         write_json(self.root/'telemetry.json',telemetry)
+        wire_telemetry=telemetry
+        if not self.detailed_telemetry_supported:
+            from .telemetry import legacy_observation
+            wire_telemetry=legacy_observation(telemetry)
         poll_started=time.monotonic()
-        response=self.call('/api/v1/device/poll',{**({'telemetry':telemetry} if self.telemetry_supported else {}),'bootId':self.boot_id,'contribution':self.enabled,
+        response=self.call('/api/v1/device/poll',{**({'telemetry':wire_telemetry} if self.telemetry_supported else {}),'bootId':self.boot_id,'contribution':self.enabled,
             'processes':processes[:10],'reports':reports,'events':event_batch,'acknowledgements':acknowledgements,
             **({'selfTest':self.config['selfTest']} if self.config.get('selfTest') else {})})
         self.last_rtt_ms=(time.monotonic()-poll_started)*1000
         self.telemetry_supported=response.get('telemetrySupported') is True
+        self.detailed_telemetry_supported=response.get('detailedTelemetrySupported') is True
         # The first poll of a new boot always returns OFF. A user-authenticated
         # activation or typed command for the current boot is needed before launch.
         if response['approvalStatus']=='REVOKED' or (self.enabled and not response['desiredContribution']):
