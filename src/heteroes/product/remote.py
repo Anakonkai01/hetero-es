@@ -13,16 +13,7 @@ import subprocess
 import sys
 
 from .files import events, read_json, write_json
-
-
-def identity(pid):
-    try:
-        tail = Path(f"/proc/{pid}/stat").read_text().rsplit(")", 1)[1].split()
-        if tail[0] == "Z":
-            return None
-        return tail[19]  # field 22, process birth time
-    except (FileNotFoundError, ProcessLookupError):
-        return None
+from .platform_process import identity, spawn_options
 
 
 def alive(record):
@@ -58,9 +49,14 @@ def worker_environment(source, token, wsl=Path("/usr/lib/wsl")):
 def handle(request):
     action = request["action"]
     if action == "probe":
-        executable = shutil.which("nvidia-smi") or "/usr/lib/wsl/lib/nvidia-smi"
+        executable = shutil.which("nvidia-smi")
+        if not executable:
+            candidates = [Path(os.environ.get("SystemRoot", "C:/Windows")) / "System32/nvidia-smi.exe",
+                          Path(os.environ.get("ProgramFiles", "C:/Program Files")) / "NVIDIA Corporation/NVSMI/nvidia-smi.exe"] if sys.platform == "win32" else [Path("/usr/lib/wsl/lib/nvidia-smi")]
+            executable = next((str(p) for p in candidates if p.is_file()), None)
+        if not executable: raise RuntimeError("nvidia-smi unavailable")
         completed = subprocess.run([executable, "--query-gpu=name,memory.total,memory.free,temperature.gpu,utilization.gpu",
-                                    "--format=csv,noheader,nounits"], capture_output=True, text=True, timeout=10)
+                                    "--format=csv,noheader,nounits"], capture_output=True, text=True, timeout=10, **({"creationflags": subprocess.CREATE_NO_WINDOW} if sys.platform == "win32" else {}))
         if completed.returncode:
             raise RuntimeError("nvidia-smi unavailable")
         name, total, free, temperature, utilization = completed.stdout.splitlines()[0].split(",")
@@ -73,11 +69,14 @@ def handle(request):
             root.mkdir(parents=True, exist_ok=True, mode=0o700)
             env = worker_environment(request["source"], request["token"])
             with open(root / "stdout.log", "ab") as output:
-                process = subprocess.Popen(request["argv"], env=env, stdout=output, stderr=output, start_new_session=True)
+                process = subprocess.Popen(request["argv"], env=env, stdout=output, stderr=output, **spawn_options())
             record = {"pid": process.pid, "birth": identity(process.pid)}
             write_json(root / "process.json", record)
     elif action == "stop" and alive(record):
-        os.kill(record["pid"], signal.SIGTERM)  # worker stops after candidate restore/result
+        if sys.platform == 'win32':
+            write_json(root / 'stop-request.json', record)
+        else:
+            os.kill(record["pid"], signal.SIGTERM)  # worker stops after candidate restore/result
     elif action not in ("poll", "stop"):
         raise ValueError("unknown lifecycle action")
     logs = events(root / "events.jsonl")

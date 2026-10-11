@@ -1,12 +1,47 @@
 # HeteroES-LLM — Status
 
-**Last updated:** 10/10/2026 — M2 local agents/control/recovery verified; actual R2/EC2 acceptance pending owner cloud accounts. The 09/10 decoder, profiling and research evidence and earlier milestones remain in the following blocks. Newest verified updates appear first; sections 1–13 were written on 30/09 and are older background.
+**Last updated:** 11/10/2026 — M3a private Worker installers/shared UX prepared; native Windows GPU acceptance pending. M2 local agents/control/recovery verified; actual R2/EC2 acceptance pending owner cloud accounts. The 09/10 decoder, profiling and research evidence and earlier milestones remain in the following blocks. Newest verified updates appear first; sections 1–13 were written on 30/09 and are older background.
 **Canonical design/specification:** `HETEROES_LLM_MASTER.md`  
 **Purpose:** current implementation truth, verified evidence, blockers, artifacts, and the exact next action.
 
 > **Document rule:** `MASTER` decides what the system/design should be. `STATUS` decides what is actually done now. For a new chat, read `HETEROES_LLM_MASTER.md` and then this file; older proposal/roadmap/chat-handoff files are archive only.
 
 ## 0. NEXT SESSION — START HERE
+
+### UPDATE 11/10/2026 — M3a native Worker and shared UX
+
+Isolated worktrees: A `hetero-es-m3-runtime` / `feat/m3-native-worker`; B
+`Hetero-ES-LLM-m3` / `feat/m3-worker-desktop-ux`. Original M1/M2 repositories
+remain unchanged. Cloud is deferred; M2 real R2/EC2 acceptance remains incomplete.
+
+Implemented: portable process birth/unknown handling, kernel instance lock,
+Windows cooperative process-bound stop marker, worker-only desktop bridge and
+shutdown fence; fixed-candidate numerical admission plus 16-text Linux prediction probe without a second ES engine.
+B adds native Windows per-user NSIS and Linux AppImage, isolated runtime setup,
+secure credential storage, tray controls and shared Vi/En/light/dark/system UX.
+
+A CPU suite: **2041 passed, 100 skipped** with CUDA hidden. Scratch mutation
+caught a missing process-birth stop guard. B: 73 backend tests, 11 desktop tests,
+22 independent mock behavior groups; real-server responsive/i18n/theme and actual
+Electron/packaged Linux checks. Fresh isolated Linux Python 3.12.15 imports the
+pinned compute stack. Wine tested Windows Python/process lock, not a native GPU.
+See B `docs/m3-local-worker-ux.md`, `docs/worker-desktop-guide.md`, and new evidence
+folders in A/B. Native Windows fresh install, GPU candidate twice, distributed
+run and failure handling still require the owner trial on 11/10.
+
+M3 preview: `http://100.110.165.40:5181`; local CPU backend 8002 updated to M3
+routes while held, with pre-cutover SQLite backup outside Git and all 19 prior
+experiment bodies preserved. M1 UI 5173 remains original. Returned 3060 machines
+were not contacted or selected for overnight work.
+
+An unintended legacy integration-test invocation submitted one local-5070-Ti
+M1 generation: run `45d72973ddf243fdb8d9a46d2e9a670f`, now CANCELLED and confirmed
+stopped, zero reservations/queue and empty CUDA process query. Preserve its
+evidence; it is not native Windows acceptance. Conservative added budget
+0.007097731 GPU-hours; cumulative **1.028929731**, original limit 2.0, M2 reserved
+0.083799. Default integration test is now observe-only; GPU execution requires
+explicit flag and environment opt-in.
+
 
 ### UPDATE 10/10/2026 — M2 local implementation verified; cloud acceptance pending
 

@@ -1,0 +1,21 @@
+Scratch mutation: ignore process birth in stop marker.
+Expected test failure; production files unchanged.
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____________________ test_stop_marker_binds_exact_process _____________________
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-94/test_stop_marker_binds_exact_p0')
+
+    def test_stop_marker_binds_exact_process(tmp_path):
+        path = tmp_path / 'stop.json'
+        pid = os.getpid(); birth = identity(pid)
+        assert not stop_matches(path, pid, birth)
+        path.write_text(json.dumps({'pid': pid, 'birth': 'old'}))
+>       assert not stop_matches(path, pid, birth)
+E       AssertionError: assert not True
+E        +  where True = stop_matches(PosixPath('/tmp/pytest-of-pc5070ti/pytest-94/test_stop_marker_binds_exact_p0/stop.json'), 1386291, '4116506')
+
+tests/test_platform_process.py:33: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_platform_process.py::test_stop_marker_binds_exact_process
+1 failed in 0.07s

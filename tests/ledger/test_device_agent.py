@@ -90,3 +90,26 @@ def test_large_monitoring_projection_preserves_completion_and_latest_metrics():
     assert result['latestGeneration']==generations[-1]
     assert result['state']=={'status':'COMPLETED','finalWeightsSha256':'final-hash'}
     assert result['monitoringPartial']
+
+
+def test_worker_only_observation_does_not_invent_unknown_coordinator(tmp_path,monkeypatch):
+    a=agent(tmp_path)
+    command={'assignmentId':'b'*32,'epoch':1,'recoveryIndex':0}
+    directory=a.worker_directory(command)
+    write_json(directory/'assignment.json',command)
+    monkeypatch.setattr(a,'_worker',lambda *_:{'alive':False,'ready':False,'events':[]})
+    state=a.observe()[0]
+    assert state['coordinatorAlive'] is False and state['workerAlive'] is False
+
+
+def test_desktop_profile_cannot_coordinate(tmp_path):
+    a=agent(tmp_path);a.config['workerOnly']=True;a.enabled=True
+    with pytest.raises(ValueError,match='worker-only'):
+        a.handle({'commandId':'coordinate','kind':'COORDINATE'})
+
+
+def test_desktop_quit_fences_late_enable_for_current_boot(tmp_path):
+    a=agent(tmp_path);a.shutdown_requested=True
+    with pytest.raises(RuntimeError,match='shutdown'):
+        a.handle({'commandId':'late-enable','kind':'SET_CONTRIBUTION','bootId':a.boot_id,'enabled':True})
+    assert not a.enabled

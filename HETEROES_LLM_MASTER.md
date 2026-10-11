@@ -1468,3 +1468,22 @@ Notebook `ES_Milestone1_2_modified.ipynb` hiện được coi là **numerical pr
 Quy tắc refactor: giữ notebook như historical/reference evidence, chuyển correctness-critical logic sang modules/tests; không tiếp tục mở rộng notebook thành coordinator/worker framework.
 
 
+
+
+## Product amendment — accepted 10/10/2026: M3a while cloud is deferred
+
+Cloud account provisioning does not block independent local Worker/UX work. M3a
+is worker-first Windows 11 x64 native and Linux x64 with Electron/React, isolated
+checksum-pinned runtime/model setup, Tailscale GUI and the existing local CPU
+control plane. Windows is worker-only; the Linux coordinator retains candidate
+ledger and numerical ownership. Native admission requires repeatability and the
+fixed Linux reference contract before a short real distributed hardware trial.
+
+Share presentation tokens/fonts/components across web and desktop. Provide Vi/En,
+light/dark/system and teal/blue/violet per-device preferences without losing form
+state. Contribution starts OFF each boot, close-to-tray preserves the agent,
+OFF/Quit drain only owned children, and unknown process identity preserves
+reservations. Do not broaden M3a to cloud, server installers, parallel scheduling,
+new models/datasets or numerical changes. M2 cloud and M3a hardware gates remain
+independent and must be supported by actual evidence. Current truth is in STATUS
+and Track B's `docs/m3-local-worker-ux.md` / `docs/worker-desktop-guide.md`.

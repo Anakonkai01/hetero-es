@@ -12,12 +12,14 @@ import signal
 import sqlite3
 import sys
 import time
+import threading
 import urllib.error
 import urllib.request
 import uuid
 from .files import events,read_json,write_json
 from .gateway import Manager,TERMINAL,ROOT,validate
 from .remote import alive,identity,worker_environment,handle as remote_handle
+from .platform_process import acquire_instance_lock, ProcessIdentityUnknown, spawn_options
 
 
 def request(url, path, token, body, method=None):
@@ -31,7 +33,8 @@ def request(url, path, token, body, method=None):
 def owned_state(record,intent=False):
     if record is None:return None if intent else False
     if record.get('birth') is None or type(record.get('pid')) is not int:return None
-    return alive(record)
+    try:return alive(record)
+    except ProcessIdentityUnknown:return None
 
 
 def bounded_snapshot(snapshot,max_bytes=1_250_000):
@@ -66,7 +69,7 @@ class AgentManager(Manager):
         import subprocess
         env=worker_environment(str(ROOT/'src'),self.token)
         with open(root/'coordinator.log','ab') as output:
-            process=subprocess.Popen([sys.executable,'-m','heteroes.product.runner',str(root)],env=env,cwd=ROOT,stdout=output,stderr=output,start_new_session=True)
+            process=subprocess.Popen([sys.executable,'-m','heteroes.product.runner',str(root)],env=env,cwd=ROOT,stdout=output,stderr=output,**spawn_options())
         self.processes[root.name]=process
         write_json(root/'process.json',{'pid':process.pid,'birth':identity(process.pid)})
 
@@ -133,15 +136,14 @@ class AgentManager(Manager):
 
 
 class Agent:
-    def __init__(self,path,lock=False):
-        self.path=Path(path);self.config=read_json(path)
+    def __init__(self,path,lock=False,config_override=None):
+        self.path=Path(path);self.config={**read_json(path),**(config_override or {})}
         self.root=Path(self.config['stateDirectory']);self.root.mkdir(parents=True,exist_ok=True,mode=0o700)
         self.instance_lock=None
         if lock:
-            import fcntl
-            self.instance_lock=open(self.root/'agent.lock','w')
-            fcntl.flock(self.instance_lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
-        self.boot_id=uuid.uuid4().hex;self.enabled=False;self.stopping=False
+            self.instance_lock=acquire_instance_lock(self.root/'agent.lock')
+        self.desktop_lock=threading.RLock()
+        self.boot_id=uuid.uuid4().hex;self.enabled=False;self.stopping=False;self.shutdown_requested=False
         write_json(self.root/'boot.json',{'bootId':self.boot_id,'enabled':False})
         self.manager=AgentManager(self)
         self.db_path=self.root/'outbox.sqlite'
@@ -184,7 +186,8 @@ class Agent:
             argv=[sys.executable,str(ROOT/'scripts/run_worker.py'),'--coordinator-url',command['coordinatorUrl'],
                 '--worker-id',self.config['workerId'],'--model-path',self.config['modelPath'],
                 '--log',str(directory/'events.jsonl'),'--replay','always','--replay-verify-every','1',
-                '--cache-dir',str(directory/'cache'),'--give-up-after-seconds','120','--chunk','16']
+                '--cache-dir',str(directory/'cache'),'--give-up-after-seconds','120','--chunk','16',
+                '--stop-file',str(directory/'stop-request.json')]
             if (directory/'launch-intent.json').exists() and not (directory/'process.json').exists():
                 raise RuntimeError('Worker launch ownership is unknown')
             write_json(directory/'launch-intent.json',{'started':True})
@@ -205,10 +208,13 @@ class Agent:
             if db.execute('SELECT 1 FROM processed WHERE id=?',(cid,)).fetchone():return
         if kind=='SET_CONTRIBUTION':
             if command['bootId']==self.boot_id:
+                if command['enabled'] and self.shutdown_requested:raise RuntimeError('Desktop shutdown is pending')
                 self.enabled=bool(command['enabled'])
                 write_json(self.root/'boot.json',{'bootId':self.boot_id,'enabled':self.enabled})
                 if not self.enabled:self.cancel_all()
         elif kind=='COORDINATE':
+            if self.config.get('workerOnly'):
+                raise ValueError('This device profile is worker-only')
             self.worker_directory(command)
             if self.cancelled(command):
                 with self.db() as db:db.execute('INSERT OR IGNORE INTO processed VALUES (?)',(cid,))
@@ -297,7 +303,7 @@ class Agent:
             old=combined.get(key)
             if old and ar['recoveryIndex']<old['recoveryIndex']:continue
             if not old or ar['recoveryIndex']>=old['recoveryIndex']:
-                combined[key]={**(old or {'assignmentId':key,'epoch':ar['epoch'],'coordinatorAlive':None}),
+                combined[key]={**(old or {'assignmentId':key,'epoch':ar['epoch'],'coordinatorAlive':False}),
                     'workerAlive':p['alive'],'ready':p['ready'],'recoveryIndex':ar['recoveryIndex'],'events':p['events'][-200:]}
         for path in (self.root/'cancelled-assignments').glob('*.json'):
             marker=read_json(path);key=marker['assignmentId']
@@ -330,23 +336,21 @@ class Agent:
         return response
 
     def run(self):
-        import fcntl
         if self.instance_lock is None:
-            self.instance_lock=open(self.root/'agent.lock','w')
-            fcntl.flock(self.instance_lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+            self.instance_lock=acquire_instance_lock(self.root/'agent.lock')
         self.manager.thread.start()
         from .cloud_sync import CloudSync
         self.cloud_sync=CloudSync(self);self.cloud_sync.thread.start()
         while not self.stopping:
             try:
-                self.cycle()
+                with self.desktop_lock:self.cycle()
                 write_json(self.root/'connection.json',{'status':'ONLINE','t':time.time()})
             except Exception as error:
                 write_json(self.root/'connection.json',{'status':'OFFLINE','errorType':type(error).__name__,'t':time.time()})
             for _ in range(100):
                 if self.stopping:break
                 time.sleep(.1)
-        self.cloud_sync.stop.set()
+        self.cloud_sync.stop.set();self.cloud_sync.thread.join(timeout=2)
         self.manager.stop.set();self.manager.thread.join(timeout=2)
 
 

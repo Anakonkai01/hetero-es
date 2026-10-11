@@ -31,6 +31,7 @@ def fail(message: str, code: int = 2) -> None:
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--model-path", required=True)
+    parser.add_argument('--stop-file', help='Owned process-bound cooperative stop marker')
     parser.add_argument("--coordinator-url", required=True)
     parser.add_argument("--worker-id", required=True)
     parser.add_argument("--log", required=True, help="JSONL file for the events of this worker (must not exist)")
@@ -52,6 +53,19 @@ def main(argv: list[str]) -> int:
                         help="hash the whole weights after every k-th replay (1 = every time: the safe default; a larger k trusts the coordinator's hash in between)")
     parser.add_argument("--replay-max-chain", type=int, default=8, help="the longest chain of update records a worker replays; further behind it synchronizes (raise it for a worker that joins late and replays from the base weights)")
     args = parser.parse_args(argv)
+    stop = threading.Event()
+    if args.stop_file:
+        from heteroes.product.platform_process import identity, stop_matches
+        own_birth = identity(os.getpid())
+        if stop_matches(args.stop_file, birth=own_birth):
+            return 0
+        def watch_stop():
+            while not stop.wait(.2):
+                if stop_matches(args.stop_file, birth=own_birth):
+                    stop.set()
+        threading.Thread(target=watch_stop, daemon=True).start()
+    for name in (signal.SIGINT, signal.SIGTERM):
+        signal.signal(name, lambda *_: stop.set())
     if args.replay == "auto" and args.profile is None:
         fail("--replay auto needs --profile")
 
@@ -94,6 +108,9 @@ def main(argv: list[str]) -> int:
     deadline = time.time() + args.startup_timeout_seconds
     job = None
     while job is None:
+        if stop.is_set():
+            log.close()
+            return 0
         try:
             if client.get_json("/v1/health").get("ok") is True:
                 job = client.get_json("/v1/job")["job"]
@@ -129,9 +146,6 @@ def main(argv: list[str]) -> int:
     emit({"event": "replay_policy", "t": time.time(), "worker_id": args.worker_id, "policy": policy.__dict__})
     runtime = WorkerRuntime(args.worker_id, client, executor, args.cache_dir, log=emit, poll_seconds=args.poll_seconds,
                             max_unreachable_seconds=args.give_up_after_seconds, replay=policy)
-    stop = threading.Event()
-    for name in (signal.SIGINT, signal.SIGTERM):
-        signal.signal(name, lambda *_: stop.set())
     try:
         runtime.admit()
         reason = runtime.run(stop)

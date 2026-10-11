@@ -5,7 +5,7 @@ from pathlib import Path
 
 def read_json(path, default=None):
     try:
-        return json.loads(Path(path).read_text())
+        return json.loads(Path(path).read_text(encoding='utf-8'))
     except FileNotFoundError:
         return default
 
@@ -24,7 +24,7 @@ def write_json(path, value):
 
 def events(path):
     try:
-        lines = Path(path).read_text().splitlines()
+        lines = Path(path).read_text(encoding='utf-8').splitlines()
     except FileNotFoundError:
         return []
     result = []
