@@ -1,7 +1,8 @@
 # M3a: native Worker and shared product UX
 
-Accepted 2026-10-10; implementation prepared locally on 2026-10-10/11. This is a
-private installer trial, not completed native Windows hardware acceptance.
+Accepted 2026-10-10; implementation prepared locally on 2026-10-10/11. The first
+native Windows qualification/replay/baseline/OFF trial passed on 2026-10-11;
+remaining clean-install, desktop lifecycle and outage gates are incomplete.
 Cloud acceptance remains pending independently; no cloud accounts are required.
 
 ## Decisions and delivered behavior
@@ -35,6 +36,13 @@ single-use, ten minutes, with copy/countdown and separate administrator approval
 
 ## Verification and limits
 
+The owner-installed RTX 3060 Windows 11 Worker passed qualification and committed
+all 8 candidates in a two-generation run coordinated by Linux. A one-GPU Linux
+baseline with the same experiment ID matches every seed/reward, both generation
+records and actual final checkpoint bytes. A separate live-lease owner-OFF trial
+ended CANCELLED with confirmed shutdown and zero reservations. See
+[native hardware evidence](evidence/2026-10-11-m3-native-windows/README.md).
+
 - Track A CPU suite: **2041 passed, 100 skipped**, CUDA hidden. Scratch mutation
   ignoring birth identity is caught by the stop regression.
 - Backend: **73 passed**. Desktop downloader/lifecycle/archive: **11 passed**.
@@ -56,9 +64,10 @@ single-use, ten minutes, with copy/countdown and separate administrator approval
 
 Evidence and SHA-256: [evidence folder](evidence/2026-10-10-m3/README.md),
 [installers](evidence/2026-10-10-m3/installers.json),
-[owner guide](worker-desktop-guide.md). Hardware gates remain: fresh native
-Windows install without Python/repo/WSL, repeated GPU candidate/reference match,
-actual Windows-worker/Linux-coordinator run and outage/restart/stop trials.
+[owner guide](worker-desktop-guide.md). Remaining hardware gates: fresh native
+Windows install without existing Python/repo/WSL, desktop lifecycle and outage
+trials. Repeated candidate/reference, distributed replay/baseline and owner OFF
+passed on Thao's RTX 3060; that is one qualified combination.
 Do not claim post-training quality or broad Windows numerical portability.
 
 ## Current local deployment
@@ -92,6 +101,10 @@ owned worker death confirmed, zero queue/reservations and empty CUDA process que
 It is not M3 native acceptance. The default script now observes only; GPU actions
 require an explicit flag plus environment opt-in.
 
-Conservative additional usage: 0.007097731 GPU-hours, cumulative **1.028929731**
+Conservative additional usage at that point: 0.007097731 GPU-hours, cumulative **1.028929731**
 of the original 2.0. Deduct this from M3a's 0.25-hour first campaign allowance;
-preserve M2's remaining 0.083799 for cloud. The owner hardware trial is next.
+preserve M2's remaining 0.083799 for cloud. After the 11/10 hardware trial,
+cumulative usage has an upper bound of **1.144965 GPU-hours**. M3a is at
+0.123133/0.25 including qualification's full two-minute upper bound and the prior
+unintended run. Dispatch is held, temporary coordinator OFF/stopped, Windows
+Worker online/ON as requested, no queued job or reservation.

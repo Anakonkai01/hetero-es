@@ -1,7 +1,9 @@
 # Worker desktop: private M3a trial
 
-The Worker is a private installer candidate. Native Windows GPU compatibility and
-an actual Windows–Linux distributed run still require hardware acceptance. The
+The Worker is a private installer candidate. Native GPU qualification and a
+Windows–Linux replay/baseline/OFF trial passed on Thao's RTX 3060 on 2026-10-11.
+Clean-image installation, other GPU combinations and remaining lifecycle/outage
+checks are unverified. The
 existing M1 deployment is separate; this build connects to the local M2 lab.
 
 ## Owner workflow
@@ -48,6 +50,11 @@ be diagnosed separately rather than changing the numerical contract.
 
 ## First hardware acceptance (2026-10-11)
 
+Completed evidence: [native hardware trial](evidence/2026-10-11-m3-native-windows/README.md).
+The trial passed qualification, distributed replay with all rewards/update hashes
+and checkpoint bytes equal to a Linux baseline, and owner OFF during a live lease.
+The following list covers the full gate; unobserved lifecycle/outage steps remain.
+
 Use one native Windows GPU with its owner's agreement. Record OS, driver, GPU,
 installer SHA-256 and self-test diagnostics. Check a second application instance,
 restart-OFF, close-to-tray, one-use pairing, admin approval and owner-only ON.
@@ -56,6 +63,18 @@ experiment with the existing Linux coordinator and compare reward/update/final
 hashes to the canonical baseline. Keep GPU time within the M3a 0.25-hour campaign
 cap and the original 2-hour cumulative budget. The prior cumulative usage was
 1.028929731 GPU-hours after the recorded unintended local run; preserve the separate 0.083799-hour M2 cloud allowance.
+
+After the first hardware trial the cumulative upper bound is 1.144965 GPU-hours;
+M3a's charged upper bound is 0.123133 of its 0.25-hour cap. Qualification timing
+was reported by the owner as under two minutes and charged the full two minutes.
+
+The operator can reproduce the small campaign with
+`scripts/check-native-windows.py`: default `--phase status` is read-only; phases
+`run`, `baseline` and `cancel` require both `--gpu` and
+`HETEROES_GPU_ACCEPTANCE=1`. Existing private configuration and isolated campaign
+state are prerequisites. The script refuses to overwrite completed trial
+evidence or exceed the campaign budget. The cancellation workload is intentionally
+larger so OFF can be requested during a live lease; it is not a learning run.
 
 Test OFF and Quit during a candidate, a network outage, a coordinator outage and
 an app restart. Confirm cooperative restore/submission, no duplicate process,
