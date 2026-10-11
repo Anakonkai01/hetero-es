@@ -45,6 +45,23 @@ and CPU work independently; retain multi-machine gates as pending.
 Evidence: [foundation checks](evidence/2026-10-11-local-foundation/README.md).
 Literature decisions: [ES papers and Recipe v2](es-literature-local-recipe.md).
 
+## System-disk cleanup
+
+On 2026-10-11 the root filesystem had approximately 4.9 GiB free. Removed
+34 verified duplicate weights from the completed M1 restore trial (31.29 GiB)
+and 54 duplicate Worker download-cache files (2.60 GiB). Canonical run weights,
+the full integration backup and the old trial's metadata remain available.
+The old trial must be restored from its backup before being used for recovery.
+
+Relocated all 69 retained historical learning checkpoints (63.49 GiB logical,
+65 unique objects) from `~/.cache/heteroes/learn-ckpt` to
+`/mnt/Archive-2tb/heteroes-local/artifacts/historical-learning-20261008/learn-ckpt`.
+Source and destination hashes were verified before removing the root copies.
+The original directory is now a symlink, so historical paths still resolve when
+Archive-2tb is mounted. Root now has approximately 102 GiB free (78% used).
+Receipts are in the foundation evidence directory; unrelated caches and active
+Python environments were left in place.
+
 ## Recovery key
 
 Encrypted secondary archives use a random key in

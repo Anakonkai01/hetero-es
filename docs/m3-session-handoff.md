@@ -112,6 +112,14 @@ overwriting evidence. GPU phases require both `--gpu` and
 
 ## Local archive and recovery precautions
 
+Post-closeout storage update (2026-10-11): verified duplicate restore-trial weights
+and Worker download caches were removed; retained historical learning checkpoints
+were verified and relocated to Archive-2tb with their original paths preserved
+by a symlink. Root now has about 102 GiB free. The old M1 restore trial's metadata
+remains, but its duplicate weights were removed: restore it again from the intact
+full backup before treating that trial as a complete recovery. See
+`docs/local-lab-progress.md` and the dated disk cleanup receipts for current state.
+
 Session archive: `~/.local/share/heteroes-session-archives/2026-10-11-m3-close/`,
 private directory (0700), copied credentials/config and database files (0600).
 It contains both source Git bundles, three independently copied installer files,

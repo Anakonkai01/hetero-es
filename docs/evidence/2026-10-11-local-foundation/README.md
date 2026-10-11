@@ -29,5 +29,11 @@ No cloud deployment or learning result is claimed.
 
 Private files and credentials are excluded. Installer checksums identify the
 actual qualified build; it contained the implementation before its Git commit.
-Disk cleanup receipts, when present, record verified duplicate removal and the
-relocation of retained historical checkpoint bytes without changing their hashes.
+- `disk-duplicate-cleanup.json`: removed 34 verified duplicate restore-trial
+  weights, retaining canonical weights and the full backup (31.29 GiB released).
+- `disk-download-cleanup.json`: removed 54 verified duplicate cached downloads
+  (2.60 GiB released), retaining their Archive-2tb copies.
+- `disk-learning-relocation.json`: all 69 historical checkpoints (63.49 GiB
+  logical) verified and relocated to Archive-2tb; root copies removed and old
+  paths preserved through a directory symlink. Root free space reached about
+  102 GiB, with usage at 78%.
