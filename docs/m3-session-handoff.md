@@ -159,6 +159,10 @@ resume/status inspection must not silently become a training run.
 
 ## Current archive and recovery
 
+Before expanding scope, read [the progress/deadline assessment](project-review-2026-10-11.md).
+The capstone deadline is 20 November; recommended acceptance and evidence gates
+preserve the 8 November core freeze and 15 November result freeze.
+
 New private local archive:
 `~/.local/share/heteroes-session-archives/2026-10-11-monitoring-close/`.
 Independent encrypted copy:

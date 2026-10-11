@@ -10,7 +10,8 @@ Status: accepted by the owner; M1 implemented and verified locally. M2 local
 agent/control/recovery is verified; cloud acceptance is deferred. M3a native
 Worker/shared UX is implemented, with the first Windows RTX 3060 hardware trial
 passed; packaged Linux GPU and remaining lifecycle/outage gates are pending.
-M3b–M6 remain planned. Decisions revised on 2026-10-10; progress updated
+M3b/M4 are implemented with partial local acceptance; M5 and remaining M6
+are pending. Decisions revised on 2026-10-10; progress updated
 2026-10-11. Resume from the [session handoff](m3-session-handoff.md).
 This file records decisions and
 acceptance gates, not claims that future milestones have been implemented.
@@ -31,7 +32,9 @@ acceptance gates, not claims that future milestones have been implemented.
   actual usage before starting another GPU campaign.
 - English repository documentation; Vietnamese user communication. Real services
   remain the default. MSW must be explicitly selected for demonstrations.
-- There is no delivery deadline. Acceptance gates remain required. The owner authorized independent M3a local
+- The capstone deadline is 20 November 2026; core/runtime freeze is 8 November
+  and result freeze is 15 November. See the [current assessment](project-review-2026-10-11.md).
+  Acceptance gates remain required. The owner authorized independent M3a local
   development while M2 cloud acceptance is deferred.
 
 ## Product and deployment decisions
