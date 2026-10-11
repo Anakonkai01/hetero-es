@@ -1,9 +1,12 @@
 # Lab product roadmap
 
-Status: accepted by the owner; M1 implemented and verified locally. M2 is in
-local verification; cloud acceptance is deferred. M3a implementation is authorized
-independently of cloud availability; M3b–M6 remain planned. Revised on
-2026-10-10 from the planning conversation. This file records decisions and
+Status: accepted by the owner; M1 implemented and verified locally. M2 local
+agent/control/recovery is verified; cloud acceptance is deferred. M3a native
+Worker/shared UX is implemented, with the first Windows RTX 3060 hardware trial
+passed; packaged Linux GPU and remaining lifecycle/outage gates are pending.
+M3b–M6 remain planned. Decisions revised on 2026-10-10; progress updated
+2026-10-11. Resume from the [session handoff](m3-session-handoff.md).
+This file records decisions and
 acceptance gates, not claims that future milestones have been implemented.
 
 ## Baseline and working rules

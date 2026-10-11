@@ -2,6 +2,10 @@
 
 Reliable ES-based LLM post-training on heterogeneous consumer GPU clusters.
 
+For the current M3 worktrees, verified Windows trial, private local archive,
+service state and next Linux installer test, start with the
+[2026-10-11 session handoff](docs/m3-session-handoff.md).
+
 The UI now connects to the separate Track A runtime through a FastAPI backend.
 See [runtime setup and supported controls](docs/runtime-integration.md) and
 [validation evidence](docs/integration-validation.md).

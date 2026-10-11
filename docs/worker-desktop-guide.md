@@ -6,6 +6,9 @@ Clean-image installation, other GPU combinations and remaining lifecycle/outage
 checks are unverified. The
 existing M1 deployment is separate; this build connects to the local M2 lab.
 
+Packaged Linux GPU qualification/execution still requires a real-hardware trial.
+See the [session handoff](m3-session-handoff.md) for the next test and saved state.
+
 ## Owner workflow
 
 1. On Windows 11 x64, install the private `HeteroES Worker Setup 0.1.0.exe`

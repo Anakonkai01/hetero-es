@@ -3,6 +3,9 @@
 Accepted 2026-10-10; implementation prepared locally on 2026-10-10/11. The first
 native Windows qualification/replay/baseline/OFF trial passed on 2026-10-11;
 remaining clean-install, desktop lifecycle and outage gates are incomplete.
+The packaged Linux Worker still needs its own real-GPU acceptance campaign;
+Linux coordinator/baseline results do not satisfy that gate. See the
+[session handoff](m3-session-handoff.md) for the next action and local archive.
 Cloud acceptance remains pending independently; no cloud accounts are required.
 
 ## Decisions and delivered behavior
@@ -68,6 +71,7 @@ Evidence and SHA-256: [evidence folder](evidence/2026-10-10-m3/README.md),
 Windows install without existing Python/repo/WSL, desktop lifecycle and outage
 trials. Repeated candidate/reference, distributed replay/baseline and owner OFF
 passed on Thao's RTX 3060; that is one qualified combination.
+Packaged Linux qualification/candidate/replay/OFF on a real GPU is also pending.
 Do not claim post-training quality or broad Windows numerical portability.
 
 ## Current local deployment
@@ -84,10 +88,14 @@ validation and the UI address for the desktop's Open lab website action. A
 consistent pre-cutover SQLite backup is outside Git; all 19 existing experiment
 bodies were preserved. Dispatch remains held, no queue or reservations. Worker
 installers are downloadable privately through the Workers page. Returned 3060
-machines were not contacted or selected during this work.
+machines were not contacted or selected during the overnight implementation.
+Thao's native Windows RTX 3060 was subsequently selected for the owner's explicit
+11/10 hardware test; Quang and the legacy WSL workers were not used.
 
-After the host reboot on 11/10, only the M3 CPU API and preview were restarted;
-M1 services and compute agents remain stopped. The real-server browser checks
+After the host reboot on 11/10, the M3 CPU API and preview were restarted.
+The temporary local coordinator used for the hardware trial is now OFF/stopped;
+the native Windows Worker remains ONLINE/ON, with dispatch held and no work.
+M1 services and legacy compute agents remain stopped. The real-server browser checks
 passed again; the three installer checksums and HTTP range downloads were
 verified. `scripts/start-m3-preview.py` provides an idempotent manual restart,
 requiring the existing dispatch hold. See `post-reboot.json` in the evidence.
