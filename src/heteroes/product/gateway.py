@@ -31,7 +31,7 @@ def capabilities(workers):
     return {"controlApiVersion": 1, "modelId": MODEL, "modelRevision": REVISION,
             "workloads": ["arith16", "cot_l3_q32", "cot_l3_q64", "cot_l1_q128"],
             "schedulerPolicies": ["greedy"], "syncModes": ["synchronous"],
-            "workerIds": list(workers), "maxRunSeconds": 1800,
+            "workerIds": list(workers), "maxRunSeconds": None,
             "unsupported": ["pause", "resume", "change-workers", "model-upload", "dataset-upload", "asynchronous"]}
 
 
@@ -292,9 +292,6 @@ class Manager:
             elif time.time() - state["preparingAt"] > 300:
                 (root / "cancel.flag").touch()
                 self.save(root, failureReason="No selected worker passed preparation")
-        if time.time() - state["startedAt"] > 1800:
-            (root / "cancel.flag").touch()
-            self.save(root, failureReason="30 minute run budget reached")
         if runner.get("status") in TERMINAL:
             if not stopped:
                 stopped = self.poll_workers(root, stop=True)

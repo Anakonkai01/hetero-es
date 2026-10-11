@@ -72,6 +72,7 @@ def qualify(model_path, reference, device='cuda', emit=lambda value: None):
     gpu = handle({'action': 'probe'}) if device == 'cuda' else {'gpuName': 'CPU reference', 'vramTotalMb': 1}
     return {'passed': True, 'coordinator': sys.platform != 'win32' and gpu['vramTotalMb'] >= 11000,
         'gpuName': gpu['gpuName'], 'vramTotalMb': gpu['vramTotalMb'],
+        **({'gpuUUID': gpu['gpuUUID']} if 'gpuUUID' in gpu else {}),
         'noiseVersion': 'numpy_pcg64_normal_f32_to_f16_v1', 'platform': 'windows' if sys.platform == 'win32' else 'linux',
         'runtimeProfile': 'desktop-v1', 'compatibility': compatibility,
         'environment': {**environment_info(device), **source_identity(Path(__file__).resolve().parents[1])}}

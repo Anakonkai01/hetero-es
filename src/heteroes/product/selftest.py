@@ -12,7 +12,7 @@ def main():
     check_recipe_selftest(recipe,'cuda')
     gpu=handle({'action':'probe'})
     print(json.dumps({'passed':True,'coordinator':gpu['vramTotalMb']>=11000,'gpuName':gpu['gpuName'],
-        'vramTotalMb':gpu['vramTotalMb'],'noiseVersion':'numpy_pcg64_normal_f32_to_f16_v1',
+        'vramTotalMb':gpu['vramTotalMb'],'gpuUUID':gpu['gpuUUID'],'noiseVersion':'numpy_pcg64_normal_f32_to_f16_v1',
         'environment':environment_info('cuda')}))
 
 if __name__=='__main__':main()

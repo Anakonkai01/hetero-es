@@ -55,13 +55,14 @@ def handle(request):
                           Path(os.environ.get("ProgramFiles", "C:/Program Files")) / "NVIDIA Corporation/NVSMI/nvidia-smi.exe"] if sys.platform == "win32" else [Path("/usr/lib/wsl/lib/nvidia-smi")]
             executable = next((str(p) for p in candidates if p.is_file()), None)
         if not executable: raise RuntimeError("nvidia-smi unavailable")
-        completed = subprocess.run([executable, "--query-gpu=name,memory.total,memory.free,temperature.gpu,utilization.gpu",
+        completed = subprocess.run([executable, "--query-gpu=name,memory.total,memory.free,temperature.gpu,utilization.gpu,uuid",
                                     "--format=csv,noheader,nounits"], capture_output=True, text=True, timeout=10, **({"creationflags": subprocess.CREATE_NO_WINDOW} if sys.platform == "win32" else {}))
         if completed.returncode:
             raise RuntimeError("nvidia-smi unavailable")
-        name, total, free, temperature, utilization = completed.stdout.splitlines()[0].split(",")
+        name, total, free, temperature, utilization, gpu_uuid = completed.stdout.splitlines()[0].split(",")
         return {"gpuName": name.strip(), "vramTotalMb": int(total), "vramFreeMb": int(free),
-                "temperatureC": int(temperature), "utilizationPercent": int(utilization)}
+                "temperatureC": int(temperature), "utilizationPercent": int(utilization),
+                "gpuUUID": gpu_uuid.strip()}
     root = Path(request["directory"]).expanduser()
     record = read_json(root / "process.json")
     if action == "start":

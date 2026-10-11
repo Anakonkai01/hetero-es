@@ -8,6 +8,20 @@
 
 ## 0. NEXT SESSION — START HERE
 
+### UPDATE 11/10/2026 — Local completion implementation resumed
+
+Owner authorized M3a–M6 local implementation and removed GPU-hour caps and the
+30-minute total-run budget. Technical stall/network/shutdown timeouts, candidate
+attempt limits and GPU opt-in remain. Both active M3 checkouts now use branch
+`feat/local-lab-completion`; see Track B `docs/local-lab-progress.md` for status.
+Storage is Archive-2tb UUID `10443D1F443D094C` under
+`/mnt/Archive-2tb/heteroes-local`; never use `/mnt/sekai` for HeteroES.
+Live SQLite/executable runtimes/private credentials remain on ext4. The owner
+authorized persistent sudo credentials stored outside Git in
+`~/.config/heteroes-private/sudo-credentials.json` (0700 directory, 0600 file).
+Retrieve privately and use subprocess stdin; never include values in evidence.
+Cloud remains deferred. This update records authorization, not completed gates.
+
 ### SESSION CLOSE 11/10/2026 — Resume product work from the M3 handoff
 
 Owner requested documentation, local commits and preservation for the next chat.

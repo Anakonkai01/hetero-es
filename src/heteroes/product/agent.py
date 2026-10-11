@@ -320,7 +320,8 @@ class Agent:
                 event_batch=event_batch[:max(0,len(event_batch)//2)]
             acknowledgements=[r[0] for r in db.execute('SELECT id FROM processed ORDER BY rowid DESC LIMIT 100')]
         response=self.call('/api/v1/device/poll',{'bootId':self.boot_id,'contribution':self.enabled,
-            'processes':processes[:10],'reports':reports,'events':event_batch,'acknowledgements':acknowledgements})
+            'processes':processes[:10],'reports':reports,'events':event_batch,'acknowledgements':acknowledgements,
+            **({'selfTest':self.config['selfTest']} if self.config.get('selfTest') else {})})
         # The first poll of a new boot always returns OFF. A user-authenticated
         # activation or typed command for the current boot is needed before launch.
         if response['approvalStatus']=='REVOKED' or (self.enabled and not response['desiredContribution']):
@@ -371,7 +372,7 @@ def main():
         test=json.loads(result.stdout.splitlines()[-1])
         paired=request(config['serverUrl'],'/api/v1/device/enroll','',{'code':code,'workerId':config['workerId'],
             'displayName':config.get('displayName',config['workerId']),'computeUrl':config['computeUrl'],'selfTest':test})
-        config.update(deviceId=paired['deviceId'],deviceToken=paired['deviceToken']);write_json(args.config,config)
+        config.update(deviceId=paired['deviceId'],deviceToken=paired['deviceToken'],selfTest=test);write_json(args.config,config)
         print('Enrolled; administrator approval required. Contribution is OFF.')
     elif args.action=='run':
         agent=Agent(args.config,lock=True)

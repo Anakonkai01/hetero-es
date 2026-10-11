@@ -67,6 +67,18 @@ def test_offline_preflight_never_claims_unstarted_worker(manager, monkeypatch):
     assert any("remote" in line and "worker_unavailable" in line for line in (root / "lifecycle.jsonl").read_text().splitlines())
 
 
+def test_long_healthy_run_is_not_cancelled_by_historical_budget(manager, monkeypatch):
+    root = prepare(manager, monkeypatch)
+    manager.save(root, startedAt=gateway.time.time() - 3600, workersLaunched=True,
+                 workerStates={"local": {"alive": True, "ready": True, "confirmed": True}})
+    write_json(root / "runner.json", {"status": "RUNNING"})
+    monkeypatch.setattr(manager, "remote", lambda *_: {"alive": True, "ready": True, "events": []})
+    manager.tick(root)
+    assert manager.state(root)["status"] == "RUNNING"
+    assert not (root / "cancel.flag").exists()
+    assert gateway.capabilities(manager.workers)["maxRunSeconds"] is None
+
+
 def test_uncertain_shutdown_blocks_pool_release(manager, monkeypatch):
     root = prepare(manager, monkeypatch)
     manager.save(root, workersLaunched=True, workerStates={"local": {"alive": True, "ready": True, "confirmed": True}})
