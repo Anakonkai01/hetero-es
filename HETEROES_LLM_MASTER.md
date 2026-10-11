@@ -60,6 +60,23 @@ upgrade or cloud candidate ledger migration is included. M2's actual cloud gates
 and implementation truth are in STATUS and B's `docs/m2-implementation.md`;
 native installers, parallel scheduling and model/data expansion remain M3–M5.
 
+**Local product/monitoring revision accepted on 2026-10-11:** the owner deferred
+cloud acceptance and authorized local M3–M6 implementation without GPU-hour or
+total-run caps. Explicit contribution, physical-GPU reservation, numerical
+identity, technical stall/network/shutdown timeouts and usage evidence remain.
+Local checkpoint storage publishes immutable objects and verified manifests last;
+generation-boundary pause/resume retains numerical lineage with fresh operational
+epochs. See STATUS for implemented vs hardware-accepted capabilities.
+
+Web, Worker and CPU Server share Overview/Detail, Vi/En, both themes and readable
+text preferences. Monitoring is observational and optional: host measurements do
+not authorize compute or prove process death. CPU package, independent DRAM and
+physical GPU readings may form a measured component subtotal; nested domains must
+not be added twice. Whole-machine AC is a separate actual sensor scope. Persist
+component energy with coverage, hardware identities and explicit missing intervals;
+never invent historical or per-job energy. Credentials and recovery keys stay
+outside Git. Track B's monitoring design records platform limits and provenance.
+
 | Hạng mục | Canonical decision |
 |---|---|
 | Cách phát triển | Repo HeteroES riêng; nhóm thiết kế/implement tầng thực thi và ES reference nhỏ; không fork toàn bộ framework làm mặc định |
@@ -945,6 +962,11 @@ Chỉ viết tests cho behavior/invariant có rủi ro hoặc acceptance criteri
 PR Done: issue/outcome rõ, relevant tests/lint pass, source attribution, contract cập nhật khi behavior đổi, reviewer hiểu và chạy được command. Không merge dựa trên câu “agent bảo pass” khi thiếu output.
 
 ### 22.15 Compute, energy, and security boundary
+
+**Current owner override (11/10/2026):** GPU-hour and total-run caps are removed.
+The table below is historical planning guidance, not a current hard limit. Keep
+usage records, explicit GPU opt-in and technical timeout/failure conditions.
+Cloud stays deferred; full local access does not authorize a cloud deployment.
 
 | Tier | Mục tiêu | Budget mặc định |
 |---|---|---|

@@ -8,6 +8,32 @@
 
 ## 0. NEXT SESSION — START HERE
 
+### SESSION CLOSE 11/10/2026 — Current continuation state
+
+Both active M3 checkouts use `feat/local-lab-completion`. Implementation/evidence
+commits before this close: A `9ff2b9c`, B `28a3c31`. Final documentation commits
+are recorded in the new archive's `git-bundles.json`; use `git log -1` in each
+checkout. No push/merge/tag. Web/API and the single owned monitoring Agent remain
+running; contribution local OFF, dispatch held, zero reservations and no local
+GPU compute. All 21 historical experiment bodies/snapshots and owner preferences
+are retained. RAPL publisher is active; electricity SQLite is on ext4.
+
+Read Track B `docs/m3-session-handoff.md` for current paths, restart/ownership
+checks, recovery instructions, acceptance vs pending gates and next actions.
+The new private local archive is
+`~/.local/share/heteroes-session-archives/2026-10-11-monitoring-close/`;
+an independent encrypted copy is on Archive-2tb. Read their verification receipts
+rather than assuming an archive exists. The old M3 close archives remain intact.
+Credentials are copied only into private/encrypted storage; the recovery key
+remains separately outside Git and outside its encrypted archive.
+
+Current priorities: owner review of the richer UI; complete local Linux portable
+Worker candidate/replay/lifecycle/outage and real GPU pause/resume gates. Windows
+monitoring parity/native UI, multi-GPU scheduling hardware, M5 and remaining M6
+are pending. Quang unavailable and Thao short windows; do not depend on prolonged
+remote access. Cloud deferred. Historical budget totals are usage records only;
+no current GPU-hour or total-run cap. Session closure itself starts no workload.
+
 ### UPDATE 11/10/2026 — Resource detail and persistent energy
 
 Owner requested Task Manager/GNOME/btop/nvitop/W&B/server monitoring patterns.
@@ -81,7 +107,7 @@ authorized persistent sudo credentials stored outside Git in
 Retrieve privately and use subprocess stdin; never include values in evidence.
 Cloud remains deferred. This update records authorization, not completed gates.
 
-### SESSION CLOSE 11/10/2026 — Resume product work from the M3 handoff
+### HISTORICAL SESSION CLOSE 11/10/2026 — Earlier M3 state
 
 Owner requested documentation, local commits and preservation for the next chat.
 Full operational handoff: B
