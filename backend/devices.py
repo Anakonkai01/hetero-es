@@ -40,6 +40,19 @@ class SelfTest(Strict):
     platform: Literal['linux','windows'] = 'linux'
     runtimeProfile: str = Field(default='legacy', max_length=100)
     compatibility: dict = Field(default_factory=dict)
+    gpuUUID: str | None = None
+
+    @field_validator('gpuUUID')
+    @classmethod
+    def physical_gpu(cls, value):
+        if value is None:
+            return value
+        if not value.startswith('GPU-'):
+            raise ValueError('Use the NVIDIA physical GPU UUID')
+        try:
+            return 'GPU-' + str(uuid.UUID(value[4:]))
+        except (ValueError, AttributeError):
+            raise ValueError('Invalid physical GPU UUID') from None
 
     @model_validator(mode='after')
     def native_admission(self):
@@ -122,6 +135,7 @@ class Poll(Strict):
     reports: list[Report] = Field(default_factory=list, max_length=20)
     events:list[MonitoringEvent]=Field(default_factory=list,max_length=500)
     acknowledgements: list[str] = Field(default_factory=list, max_length=100)
+    selfTest: SelfTest | None = None
 
 
 class WorkerCommand(Strict):
@@ -149,10 +163,18 @@ class AgentRuntime:
                 CREATE TABLE IF NOT EXISTS devices (id TEXT PRIMARY KEY,worker_id TEXT UNIQUE NOT NULL,owner TEXT NOT NULL,name TEXT NOT NULL,token_digest TEXT NOT NULL,status TEXT NOT NULL,compute_url TEXT NOT NULL,self_test TEXT NOT NULL,boot_id TEXT,seen REAL NOT NULL DEFAULT 0,enabled INTEGER NOT NULL DEFAULT 0,desired INTEGER NOT NULL DEFAULT 0,processes TEXT NOT NULL DEFAULT '[]');
                 CREATE TABLE IF NOT EXISTS assignments (id TEXT PRIMARY KEY,run_id TEXT UNIQUE NOT NULL,coordinator TEXT NOT NULL,epoch INTEGER NOT NULL,body TEXT NOT NULL,snapshot TEXT NOT NULL,released INTEGER NOT NULL DEFAULT 0);
                 CREATE TABLE IF NOT EXISTS device_reservations (device_id TEXT PRIMARY KEY,assignment_id TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS physical_reservations (resource_id TEXT PRIMARY KEY,assignment_id TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS device_commands (id TEXT PRIMARY KEY,device_id TEXT NOT NULL,dedupe TEXT NOT NULL UNIQUE,body TEXT NOT NULL,ack INTEGER NOT NULL DEFAULT 0,created REAL NOT NULL);
                 CREATE TABLE IF NOT EXISTS monitoring_events(sequence INTEGER PRIMARY KEY AUTOINCREMENT,event_id TEXT UNIQUE NOT NULL,assignment_id TEXT NOT NULL,body TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS device_reports (device_id TEXT NOT NULL,assignment_id TEXT NOT NULL,sequence INTEGER NOT NULL,PRIMARY KEY(device_id,assignment_id,sequence));
             ''')
+            for row in db.execute('SELECT r.assignment_id,d.self_test FROM device_reservations r JOIN devices d ON d.id=r.device_id').fetchall():
+                resource = json.loads(row['self_test']).get('gpuUUID')
+                if resource:
+                    old = db.execute('SELECT assignment_id FROM physical_reservations WHERE resource_id=?',(resource,)).fetchone()
+                    if old and old[0] != row['assignment_id']:
+                        raise RuntimeError('Conflicting physical GPU ownership; keep dispatch held')
+                    db.execute('INSERT OR IGNORE INTO physical_reservations VALUES (?,?)',(resource,row['assignment_id']))
 
     def devices(self, db=None):
         if self.store is None:
@@ -162,38 +184,55 @@ class AgentRuntime:
                 return self.devices(connection)
         result=[]
         for row in db.execute('SELECT * FROM devices ORDER BY rowid'):
+            profile=json.loads(row['self_test'])
             reservation=db.execute('SELECT a.run_id FROM device_reservations r JOIN assignments a ON a.id=r.assignment_id WHERE r.device_id=?',(row['id'],)).fetchone()
+            if not reservation and profile.get('gpuUUID'):
+                reservation=db.execute('SELECT a.run_id FROM physical_reservations r JOIN assignments a ON a.id=r.assignment_id WHERE r.resource_id=?',(profile['gpuUUID'],)).fetchone()
             allocation=db.execute('SELECT workspace_id FROM worker_assignments WHERE worker_id=?',(row['worker_id'],)).fetchone()
             result.append({'deviceId':row['id'],'workerId':row['worker_id'],'ownerUserId':row['owner'],
                           'displayName':row['name'],'approvalStatus':row['status'],'bootId':row['boot_id'],
                           'lastSeen':row['seen'],'connectionStatus':'ONLINE' if time.time()-row['seen']<30 else 'OFFLINE',
                           'contributionEnabled':bool(row['enabled'] and row['desired']),
                           'workspaceId':allocation[0] if allocation else None,'computeUrl':row['compute_url'],
-                          'selfTest':json.loads(row['self_test']), 'allocatedTo':reservation[0] if reservation else None})
+                          'selfTest':profile, 'allocatedTo':reservation[0] if reservation else None,
+                          'physicalResourceId':profile.get('gpuUUID')})
         return result
 
     def capabilities(self):
-        return {'controlApiVersion':2,'agentMode':True,'modelId':MODEL,'modelRevision':REVISION,
+        return {'controlApiVersion':2,'agentMode':True,'physicalGpuIdentity':True,'parallelJobs':True,'modelId':MODEL,'modelRevision':REVISION,
                 'workerIds':[d['workerId'] for d in self.devices() if d['approvalStatus']=='APPROVED'],
                 'workloads':['arith16','cot_l3_q32','cot_l3_q64','cot_l1_q128'],
                 'schedulerPolicies':['greedy'],'syncModes':['synchronous'],'quarantinedWorkerIds':[d['workerId'] for d in self.devices() if d['approvalStatus']=='QUARANTINED'],
-                'maxRunSeconds':1800,'unsupported':['pause','resume','change-workers','model-upload','dataset-upload','asynchronous']}
+                'maxRunSeconds':None,'unsupported':['pause','resume','change-workers','model-upload','dataset-upload','asynchronous']}
 
     def workers(self):
         return [{**d,'status':d['connectionStatus'],'host':d['computeUrl'],'profile':d['selfTest'],
                  'admissionStatus':'APPROVED' if d['approvalStatus']=='APPROVED' else 'PENDING_VERIFICATION'} for d in self.devices()]
 
-    def waiting_reason(self, body):
-        devices=self.devices();by_id={d['deviceId']:d for d in devices};by_worker={d['workerId']:d for d in devices}
+    def waiting_reason(self, body, db=None):
+        if db is None:
+            with self.store.db() as connection:
+                return self.waiting_reason(body, connection)
+        devices=self.devices(db);by_id={d['deviceId']:d for d in devices};by_worker={d['workerId']:d for d in devices}
         coordinator=by_id.get(body.get('coordinatorDeviceId'))
         if not coordinator or not coordinator['selfTest'].get('coordinator'):
             return 'Select an approved coordinator device'
         chosen=[coordinator]+[by_worker.get(w) for w in body['workerIds']]
         for d in chosen:
             if not d or d['approvalStatus']!='APPROVED':return 'Selected device needs approval'
+            if not d['physicalResourceId']:return 'Refresh selected device self-test to identify its physical GPU'
             if d['connectionStatus']!='ONLINE':return 'Waiting for selected device to reconnect'
             if not d['contributionEnabled']:return 'Waiting for owner to turn contribution ON'
             if d['allocatedTo'] and d['allocatedTo']!=body['experimentId']:return 'Waiting for confirmed GPU release'
+            reservation=db.execute('SELECT a.run_id FROM physical_reservations r JOIN assignments a ON a.id=r.assignment_id WHERE resource_id=?',(d['physicalResourceId'],)).fetchone()
+            if reservation and reservation[0]!=body['experimentId']:return 'Waiting for confirmed physical GPU release'
+        # An old assignment lacking a UUID may be the same GPU as a new alias.
+        for reserved in db.execute('SELECT d.self_test FROM device_reservations r JOIN devices d ON d.id=r.device_id'):
+            if not json.loads(reserved[0]).get('gpuUUID'):
+                return 'Waiting for legacy ownership release before physical GPU scheduling'
+        workers=[by_worker[w]['physicalResourceId'] for w in body['workerIds']]
+        if len(set(workers))!=len(workers):
+            return 'Selected worker aliases refer to the same physical GPU'
         return None
 
     def _enqueue(self, db, device_id, kind, body, dedupe):
@@ -217,12 +256,13 @@ class AgentRuntime:
 
     def submit(self, config):
         with self.store.db() as db:
+            db.execute('BEGIN IMMEDIATE')
             old=db.execute('SELECT body FROM assignments WHERE run_id=?',(config['runId'],)).fetchone()
             if old:
                 if json.loads(old[0])['config']!=config:raise RuntimeRejected('Frozen assignment cannot change')
                 return
             body=self.store.get(config['runId'])
-            if reason:=self.waiting_reason(body):raise ConnectionError(reason)
+            if reason:=self.waiting_reason(body, db):raise ConnectionError(reason)
             devices=self.devices(db);by_id={d['deviceId']:d for d in devices};by_worker={d['workerId']:d for d in devices}
             co=by_id[config['coordinatorDeviceId']]
             chosen={d['deviceId']:d for d in [co]+[by_worker[w] for w in config['workerIds']]}
@@ -235,6 +275,8 @@ class AgentRuntime:
             snap={'state':{'status':'STARTING'},'generations':[],'candidates':[],'attempts':[],'events':[],'artifacts':[]}
             db.execute('INSERT INTO assignments VALUES (?,?,?,?,?,?,0)',(aid,config['runId'],co['deviceId'],1,json.dumps(assignment),json.dumps(snap)))
             for did in chosen:db.execute('INSERT INTO device_reservations VALUES (?,?)',(did,aid))
+            for resource in {d['physicalResourceId'] for d in chosen.values()}:
+                db.execute('INSERT INTO physical_reservations VALUES (?,?)',(resource,aid))
             self._enqueue(db,co['deviceId'],'COORDINATE',{**assignment,'effectiveBackupPolicy':body.get('requestedBackupPolicy') or config['backupPolicy']},'coordinate:'+aid)
             self.store.audit(db,'system','ASSIGNMENT_CREATED',aid,body['workspaceId'])
 
@@ -277,10 +319,20 @@ class AgentRuntime:
             if did in ar['workerDevices'].values() and p.get('workerAlive') is not False:return
         db.execute('UPDATE assignments SET released=1 WHERE id=?',(ar['assignmentId'],))
         db.execute('DELETE FROM device_reservations WHERE assignment_id=?',(ar['assignmentId'],))
+        db.execute('DELETE FROM physical_reservations WHERE assignment_id=?',(ar['assignmentId'],))
 
     def poll(self, device, body):
         with self.store.db() as db:
             old=db.execute('SELECT * FROM devices WHERE id=?',(device['id'],)).fetchone()
+            if body.selfTest is not None:
+                previous=json.loads(old['self_test'])
+                updated=body.selfTest.model_dump()
+                reserved=db.execute('SELECT 1 FROM device_reservations WHERE device_id=?',(device['id'],)).fetchone()
+                if reserved and updated.get('gpuUUID')!=previous.get('gpuUUID'):
+                    raise HTTPException(409,'Physical GPU identity cannot change during ownership')
+                if not updated['passed']:
+                    raise HTTPException(422,'Self-test refresh must pass qualification')
+                db.execute('UPDATE devices SET self_test=? WHERE id=?',(json.dumps(updated),device['id']))
             changed=old['boot_id']!=body.bootId
             desired=0 if changed else old['desired']
             # ON must be requested through owner auth and observed on this same boot.

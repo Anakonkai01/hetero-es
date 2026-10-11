@@ -1,5 +1,12 @@
 # Session handoff — 2026-10-11
 
+**Execution resumed:** see [local completion progress](local-lab-progress.md).
+The owner authorized M3a–M6 local implementation, removed GPU-hour/total-run
+budget caps and authorized persistent private sudo credentials. Retrieve the
+private file referenced in that progress document when an authorized task needs
+sudo; never copy its contents into source control or evidence. Historical budget
+figures below remain usage records, not current limits. Cloud stays deferred.
+
 Read this first when resuming product work. The owner requested session closure,
 documentation, local commits and preservation of state. No GPU campaign was run
 during closeout. Documentation is English; communicate with the owner in Vietnamese.

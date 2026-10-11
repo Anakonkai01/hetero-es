@@ -69,6 +69,9 @@ const combined: Record<string, string> = { ...base, ...{
         "Clear filters": "Xóa bộ lọc",
         "Close dialog": "Đóng hộp thoại",
         "Cloud sync:": "Đồng bộ cloud:",
+        "Checkpoint sync:": "Đồng bộ checkpoint:",
+        "· Last synced generation:": "· Thế hệ đã đồng bộ gần nhất:",
+        "Recovery points are created between generations. Metadata backups run hourly when recovery storage is configured. Storage:": "Điểm phục hồi được tạo giữa các thế hệ. Sao lưu metadata mỗi giờ khi đã cấu hình lưu trữ phục hồi. Lưu trữ:",
         "Cluster and experiment status as of the latest update.": "Trạng thái tài nguyên và thí nghiệm từ lần cập nhật gần nhất.",
         "Completed generations:": "Thế hệ hoàn tất:",
         "Config hash": "Hash cấu hình",
@@ -277,6 +280,8 @@ const combined: Record<string, string> = { ...base, ...{
         "Preset": "Cấu hình mẫu",
         "Primary navigation": "Điều hướng chính",
         "Private runtime · shared GPU pool · one active experiment.": "Runtime riêng · GPU dùng chung · một thí nghiệm đang chạy.",
+        "Private runtime · shared GPU pool.": "Runtime riêng · GPU dùng chung.",
+        "Shared GPU pool · persistent queue": "GPU dùng chung · hàng đợi bền vững",
         "Product:": "Sản phẩm:",
         "Profile saved.": "Đã lưu hồ sơ.",
         "Public demo password for all three:": "Mật khẩu demo cho cả ba:",
@@ -612,4 +617,4 @@ const localized: Record<string, string> = { ...full, ...{
         "Restore into a new deployment using the operator guide.": "Phục hồi vào triển khai mới theo hướng dẫn vận hành."
     } };
 
-export const translations:Record<string,string>={...localized,'Download Windows app':'Tải ứng dụng Windows','Download Linux app':'Tải ứng dụng Linux','Download AppImage':'Tải AppImage','The check repeats a GPU candidate and verifies 16 answer texts against Linux.':'Kiểm tra chạy candidate hai lần và đối chiếu 16 câu trả lời với Linux.'};
+export const translations:Record<string,string>={...localized,"Your local lab":"Lab của bạn","Start a lab on this computer":"Tạo lab trên máy này","Share one lab address with GPU contributors on LAN or Tailscale.":"Chia sẻ một địa chỉ lab cho các máy GPU qua LAN hoặc Tailscale.","Install Server":"Cài đặt Server","Create your lab":"Tạo lab","Start Server":"Khởi động Server","Stop Server":"Dừng Server","Open lab":"Mở lab","Install the private Server runtime. This computer does not need a GPU.":"Cài môi trường riêng cho Server. Máy này không cần GPU.","This address works only on this computer. Select LAN or Tailscale to connect other computers.":"Địa chỉ này chỉ dùng trên máy hiện tại. Chọn LAN hoặc Tailscale để kết nối máy khác.","Lab address":"Địa chỉ lab","Port":"Cổng","Administrator username":"Tên quản trị viên","Administrator password":"Mật khẩu quản trị viên","Choose a disk for checkpoints and models.":"Chọn ổ đĩa lưu checkpoint và model.","No storage selected":"Chưa chọn nơi lưu","Choose storage":"Chọn nơi lưu","New labs start with the queue held. Sign in and enable dispatch in Operations after pairing workers.":"Lab mới giữ hàng đợi. Sau khi ghép Worker, đăng nhập và bật điều phối trong Vận hành.","Start my lab when I sign in to this computer":"Tự khởi động lab khi đăng nhập máy này","Closing this window keeps the Server in the tray. Quit stops the Server; workers keep outage evidence locally.":"Đóng cửa sổ giữ Server ở khay hệ thống. Thoát sẽ dừng Server; Worker lưu bằng chứng gián đoạn tại máy.","Server could not start. Check that the address and port are available.":"Server chưa khởi động được. Kiểm tra địa chỉ và cổng có sẵn.","Server did not become ready. Retry or review the local diagnostics.":"Server chưa sẵn sàng. Thử lại hoặc xem chẩn đoán local.","The selected network address is offline. Reconnect LAN or Tailscale.":"Địa chỉ mạng đã chọn đang offline. Kết nối lại LAN hoặc Tailscale.","Setup failed. Check your network and selected storage, then retry.":"Cài đặt thất bại. Kiểm tra mạng và nơi lưu rồi thử lại.","Server is still shutting down. Keep this app open and retry.":"Server đang dừng. Giữ ứng dụng mở rồi thử lại.","The action failed. Check the selected storage and network.":"Thao tác thất bại. Kiểm tra nơi lưu và mạng.",'Download Windows app':'Tải ứng dụng Windows','Download Linux app':'Tải ứng dụng Linux','Download AppImage':'Tải AppImage','The check repeats a GPU candidate and verifies 16 answer texts against Linux.':'Kiểm tra chạy candidate hai lần và đối chiếu 16 câu trả lời với Linux.'};

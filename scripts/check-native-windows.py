@@ -91,8 +91,6 @@ def run(cancel_test=False):
     evidence_name = 'cancel.json' if cancel_test else 'distributed.json'
     if (STATE / evidence_name).exists():
         raise RuntimeError('Existing acceptance evidence is never overwritten')
-    if budget() + (160 if cancel_test else 400) > 900:
-        raise RuntimeError('Insufficient remaining M3a campaign budget')
     coordinator = contribution(coordinator, True)
     if operations['dispatchHeld']:
         call('/platform/maintenance/resume', {'workerConfigurationConfirmed': True})
@@ -160,8 +158,6 @@ def baseline():
     idle()
     if (STATE / 'baseline.json').exists():
         raise RuntimeError('Existing baseline evidence is never overwritten')
-    if budget() + 150 > 900:
-        raise RuntimeError('Insufficient baseline budget')
     sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'hetero-es-m3-runtime/src'))
     from heteroes.product.gateway import Manager
     config = json.loads((PRIVATE / 'coordinator-config.json').read_text())

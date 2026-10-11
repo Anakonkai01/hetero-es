@@ -1,6 +1,7 @@
 """CPU-only protocol contracts; no runtime or CUDA import is allowed here."""
 import json
 import time
+import uuid
 import pytest
 from fastapi.testclient import TestClient
 from backend.app import create_app
@@ -21,7 +22,8 @@ def pair(lab, alias='test-gpu', coordinator=True):
     code = client.post('/api/v1/devices/pairing-codes',headers=admin).json()['code']
     data = {'code':code,'workerId':alias,'displayName':alias,
             'selfTest':{'passed':True,'coordinator':coordinator,'gpuName':'Fake CPU test GPU',
-                        'vramTotalMb':12000,'noiseVersion':'numpy_pcg64_normal_f32_to_f16_v1'},
+                        'vramTotalMb':12000,'noiseVersion':'numpy_pcg64_normal_f32_to_f16_v1',
+                        'gpuUUID':'GPU-'+str(uuid.uuid5(uuid.NAMESPACE_DNS,alias))},
             'computeUrl':'http://100.64.0.1:8769'}
     response = client.post('/api/v1/device/enroll',json=data)
     assert response.status_code == 201, response.text

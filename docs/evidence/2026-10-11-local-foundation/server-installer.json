@@ -1,0 +1,9 @@
+{
+  "installer": "/mnt/Archive-2tb/heteroes-local/downloads/server-builds/20261011/HeteroES-Lab-Server-0.1.0-20261011-Linux.tar.gz",
+  "sizeBytes": 124717185,
+  "sha256": "d293d7f5fe6179387b6bb62bbcd96aa3d5277770526ef3e6607d91d0ea07e5d7",
+  "linuxHardwareAcceptancePending": false,
+  "windowsHardwareAcceptancePending": true,
+  "linuxPackagedCpuProofPassed": true,
+  "ordinaryOwnerDesktopWalkthrough": false
+}

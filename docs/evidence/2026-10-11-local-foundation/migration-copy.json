@@ -1,0 +1,13 @@
+{
+  "copiedLiveDatabaseViaOnlineBackup": true,
+  "experiments": 21,
+  "frozenHistorySha256Before": "7e3652b396c77705871caf806e62e71a56850f008b3f962e015161ed4c0dd576",
+  "frozenHistorySha256After": "7e3652b396c77705871caf806e62e71a56850f008b3f962e015161ed4c0dd576",
+  "integrityCheck": "ok",
+  "queueCount": 0,
+  "deviceReservations": 0,
+  "dispatchHeld": true,
+  "liveDatabaseReplaced": false,
+  "privateSigningKeyOutsideGit": true,
+  "selectedStorageVolumeVerified": true
+}

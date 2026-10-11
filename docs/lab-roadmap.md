@@ -1,5 +1,11 @@
 # Lab product roadmap
 
+**2026-10-11 execution revision:** the owner authorized implementation through M6
+locally, removed GPU-hour and total-run budget caps, and selected Archive-2tb for
+large data and independent encrypted archives. Technical timeouts and GPU opt-in
+remain. Historical limits below are superseded. See
+[current implementation progress](local-lab-progress.md) for decisions and gates.
+
 Status: accepted by the owner; M1 implemented and verified locally. M2 local
 agent/control/recovery is verified; cloud acceptance is deferred. M3a native
 Worker/shared UX is implemented, with the first Windows RTX 3060 hardware trial

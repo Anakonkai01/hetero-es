@@ -74,7 +74,7 @@ export function RuntimeControls({ experiment: e }: { experiment: Experiment }) {
   return <section className="card"><div className="ch"><h2>{t("Experiment management")}</h2></div><div className="cb demo-form">
     <p>{t("Selected workers:")}{e.workerIds?.join(", ")}</p>
     {e.waitingReason && <p className="note">{e.waitingReason}</p>}
-    {e.cloudSync && <p>{t("Cloud sync:")}{e.cloudSync.status} {t("· Last cloud generation:")}{e.cloudSync.lastCloudGeneration??'None'} {e.cloudSync.errorType}</p>}
+    {e.cloudSync && <p>{t("Checkpoint sync:")}{e.cloudSync.status} {t("· Last synced generation:")}{e.cloudSync.lastCloudGeneration??'None'} {e.cloudSync.errorType}</p>}
     {e.monitoringPartial && <p>{t("Dashboard details show recent history. Full canonical history is retained in recovery points.")}</p>}
     {e.failureReason && <p className="note err" role="alert">{e.failureReason}</p>}
     {error && <p className="note err" role="alert">{error.message}</p>}

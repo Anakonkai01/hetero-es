@@ -9,7 +9,8 @@ import time
 
 from argon2.exceptions import VerificationError
 from fastapi import Depends, FastAPI, Header, HTTPException, Response
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
 
 from .store import ACTIVE, TERMINAL, Store, now
@@ -47,7 +48,7 @@ class Configuration(BaseModel):
     backupPolicy: dict | None = None
 
 
-def create_app(path, passwords, runtime, dispatch=True):
+def create_app(path, passwords, runtime, dispatch=True, web_directory=None, downloads_directory=None):
     store = Store(path, passwords, runtime)
     stop = threading.Event()
     @asynccontextmanager
@@ -146,7 +147,14 @@ def create_app(path, passwords, runtime, dispatch=True):
 
     @app.get("/api/v1/health")
     def health():
-        return {"ok": True, "dataSource": "real", "runtimeIssue": store.last_error, "agentMode":bool(getattr(runtime,"agent_mode",False)), "cloudStorageConfigured":bool(getattr(runtime,"storage_backend",None)), **({"uiUrl":os.environ["HETEROES_UI_URL"]} if os.environ.get("HETEROES_UI_URL") else {})}
+        backend=getattr(runtime,'storage_backend',None)
+        return {"ok": True, "dataSource": "real", "runtimeIssue": store.last_error,
+                "agentMode":bool(getattr(runtime,"agent_mode",False)),
+                "cloudStorageConfigured":backend is not None and getattr(backend,'mode','cloud')=='cloud',
+                "recoveryStorageConfigured":backend is not None,
+                "recoveryStorageMode":getattr(backend,'mode','cloud') if backend else None,
+                "serverInstanceId":getattr(runtime,'server_instance_id',None),
+                **({"uiUrl":os.environ["HETEROES_UI_URL"]} if os.environ.get("HETEROES_UI_URL") else {})}
 
     @app.post("/api/v1/auth/login")
     def sign_in(body: Login):
@@ -410,14 +418,37 @@ def create_app(path, passwords, runtime, dispatch=True):
         device_auth=install_device_routes(app,store,user,runtime)
         if runtime.storage_backend is not None:
             from .cloud_storage import CloudStorage, install_storage_routes
-            storage=CloudStorage(store,runtime.storage_backend)
+            storage=CloudStorage(store,runtime.storage_backend,
+                quota_bytes=getattr(runtime.storage_backend,'quota_bytes',8_000_000_000))
             app.state.storage=storage
             runtime.storage=storage
             install_storage_routes(app,store,storage,device_auth,user,scoped,authorized)
+            if hasattr(runtime.storage_backend,'install_routes'):
+                runtime.storage_backend.install_routes(app)
 
     @app.api_route("/api/v1/{unsupported:path}", methods=["POST", "PATCH", "DELETE"])
     def unavailable(unsupported: str, current=Depends(scoped)):
         raise HTTPException(501, "This operation is unavailable in the current runtime integration")
+    if web_directory is not None:
+        web = Path(web_directory).resolve(strict=True)
+        if not (web / 'index.html').is_file():
+            raise ValueError('Built web application is missing')
+        app.mount('/assets', StaticFiles(directory=web / 'assets'), name='web-assets')
+        if downloads_directory is not None:
+            app.mount('/downloads',StaticFiles(directory=downloads_directory),name='worker-downloads')
+        else:
+            @app.get('/downloads/manifest.json',include_in_schema=False)
+            def no_installers():
+                return {'version':'0.1.0','privateTrial':True,'installers':[]}
+
+        @app.get('/{route:path}', include_in_schema=False)
+        def web_page(route: str):
+            if route == 'api' or route.startswith(('api/', 'assets/', 'downloads/')):
+                raise HTTPException(404, 'Unknown endpoint')
+            candidate = web / route
+            if candidate.is_file() and candidate.resolve().is_relative_to(web):
+                return FileResponse(candidate)
+            return FileResponse(web / 'index.html', headers={'Cache-Control':'no-cache'})
     return app
 
 
@@ -428,10 +459,17 @@ def app_from_environment():
     if config.get('deploymentMode') == 'agent':
         from .devices import AgentRuntime
         storage_backend=None
-        if config.get('storageFile'):
+        if config.get('storageMode') == 'local':
+            from .local_storage import LocalBackend
+            storage_backend=LocalBackend(config['storageDirectory'],root/'storage-signing.key',config['apiUrl'],config.get('storageVolumeUUID'))
+            storage_backend.quota_bytes=config.get('storageQuotaBytes',200_000_000_000)
+        elif config.get('storageFile'):
             from .cloud_storage import S3Backend
             storage_backend=S3Backend(json.loads(Path(config['storageFile']).read_text()))
         runtime = AgentRuntime(storage_backend)
     else:
         runtime = Runtime("http://127.0.0.1:" + str(config.get("controlPort", 8766)), credentials["runtime_token"])
-    return create_app(Path(config["productStateDirectory"]) / "product.sqlite", credentials["users"], runtime)
+    runtime.server_instance_id=config.get('serverInstanceId')
+    return create_app(Path(config["productStateDirectory"]) / "product.sqlite", credentials["users"], runtime,
+                      web_directory=os.environ.get('HETEROES_WEB_DIRECTORY'),
+                      downloads_directory=os.environ.get('HETEROES_DOWNLOADS_DIRECTORY'))

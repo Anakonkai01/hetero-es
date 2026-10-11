@@ -1,0 +1,18 @@
+{
+  "actualPackagedApp": true,
+  "freshIsolatedRuntime": true,
+  "cpuOnlyDependencies": true,
+  "sameOriginWebAndApi": true,
+  "bootstrapPasswordOnlyArgon2": true,
+  "queueInitiallyHeld": true,
+  "manualStart": true,
+  "closeToTray": true,
+  "confirmedStop": true,
+  "restartRetainsLabAndStaysStopped": true,
+  "parentPipeStopsOrphanApi": true,
+  "displayEnvironment": "Xvfb",
+  "ordinaryOwnerDesktopWalkthrough": false,
+  "windowsHardwareAcceptance": false,
+  "runtimeSha256": "228afbc90a9e54f791a1f38eea995cf01e8ae06067f4e6a29d88716c34929f59",
+  "version": "0.1.0"
+}

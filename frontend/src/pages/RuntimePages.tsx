@@ -16,7 +16,7 @@ import {apiGet} from '../api/client';
 export function RuntimeWorkspacePage() {
   const {t}=useProduct();
   const { workspace } = useSession(); const resources = useResources(); const workers = useWorkers(); const audit = useAudit();
-  return <><div className={`workspace-hero ${workspace?.role === "ADMIN" ? "admin" : "participant"}`}><div className="workspace-hero-heading"><div><h1>{workspace?.name}</h1><p>{t("Shared GPU pool · persistent FIFO queue · one active experiment")}</p></div><span className="role-pill">{workspace?.role}</span></div><div className="workspace-hero-footer"><Link className="btn accent" to="/experiments/new">{t("Create experiment")}</Link><Link className="btn" to="/experiments">{t("Experiments")}</Link></div></div>
+  return <><div className={`workspace-hero ${workspace?.role === "ADMIN" ? "admin" : "participant"}`}><div className="workspace-hero-heading"><div><h1>{workspace?.name}</h1><p>{t("Shared GPU pool · persistent queue")}</p></div><span className="role-pill">{workspace?.role}</span></div><div className="workspace-hero-footer"><Link className="btn accent" to="/experiments/new">{t("Create experiment")}</Link><Link className="btn" to="/experiments">{t("Experiments")}</Link></div></div>
     <QueryState isPending={resources.isPending || workers.isPending} isError={resources.isError || workers.isError} hasData={Boolean(resources.data && workers.data)} title={t("Workspace resources unavailable")}>
       <RuntimeWorkerCards />
       <LabMembership />

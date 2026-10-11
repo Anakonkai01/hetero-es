@@ -33,7 +33,7 @@ class Service {
     async startAgent() { this.autoStart = true; if (this.bridge)
         return; if (!this.device)
         throw Error('DEVICE_NOT_PAIRED'); const token = await this.vault.read('device-token'); if (!token)
-        throw Error('DEVICE_CREDENTIAL_UNAVAILABLE'); const p = this.setup.paths(); const config = path.join(this.root, 'agent-config.json'); const workerId = this.device.workerId; await fsp.writeFile(config, JSON.stringify({ serverUrl: this.settings.serverUrl, deviceId: this.device.deviceId, workerId, stateDirectory: path.join(this.root, 'agent-state'), modelPath: p.model, computeUrl: 'http://127.0.0.1:8765', workerHost: '127.0.0.1', workerPort: 8765, workerOnly: true }), { mode: 0o600 }); this.bridge = this.makeBridge(p.python, p.source, config, token); try {
+        throw Error('DEVICE_CREDENTIAL_UNAVAILABLE'); const p = this.setup.paths(); const config = path.join(this.root, 'agent-config.json'); const workerId = this.device.workerId; await fsp.writeFile(config, JSON.stringify({ serverUrl: this.settings.serverUrl, deviceId: this.device.deviceId, workerId, stateDirectory: path.join(this.root, 'agent-state'), modelPath: p.model, computeUrl: 'http://127.0.0.1:8765', workerHost: '127.0.0.1', workerPort: 8765, workerOnly: true, selfTest: this.selfTest ? { ...this.selfTest, coordinator: false } : undefined }), { mode: 0o600 }); this.bridge = this.makeBridge(p.python, p.source, config, token); try {
         await this.bridge.ready;
     }
     catch (error) {
@@ -97,6 +97,6 @@ class Service {
         const state = await this.bridge.call('status');
         if (!state.drained || state.enabled)
             throw Error('STOP_WORK_FIRST');
-    } this.selfTest = await this.setup.selfTest(); this.settings.selfTest = this.selfTest; await this.save(); return this.selfTest; }
+    } if (this.bridge) await this.quit(); this.selfTest = await this.setup.selfTest(); this.settings.selfTest = this.selfTest; await this.save(); if (this.device) await this.startAgent(); return this.selfTest; }
 }
 module.exports = { Service, serverAddress };

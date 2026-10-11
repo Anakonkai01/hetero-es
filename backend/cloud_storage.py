@@ -107,6 +107,8 @@ class CloudStorage:
         self.pending=set()
 
     def _requests(self,a=0,b=0):
+        if getattr(self.backend,'cloud_free_tier',True) is False:
+            return
         # Conservative project caps below the free request allowances. Direct
         # upload part requests are reserved before their URLs leave the server.
         month=time.strftime('%Y-%m',time.gmtime())
@@ -142,6 +144,7 @@ class CloudStorage:
         with self.store.db() as db:
             reserved=2*db.execute('SELECT coalesce(sum(size),0) FROM cloud_objects WHERE status!="READY"').fetchone()[0]
         return {'quotaBytes':self.quota,'observedBytes':observed,'reservedBytes':reserved,
+                'storageMode':getattr(self.backend,'mode','cloud'),
                 'warning':observed+reserved>=self.quota*.8}
 
     def begin(self,m):

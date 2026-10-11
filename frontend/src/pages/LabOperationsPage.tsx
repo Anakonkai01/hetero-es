@@ -9,7 +9,7 @@ import type { User } from '../types/access';
 import type { Worker } from '../types/worker';
 
 interface Operations {
-  agentMode?:boolean;cloudStorageConfigured?:boolean;
+  agentMode?:boolean;cloudStorageConfigured?:boolean;recoveryStorageConfigured?:boolean;
   metadataBackup?:{status:string;createdAt:number;errorType?:string}|null;
   dispatchHeld:boolean;queueCount:number;runtimeIssue:string|null;productService:string;runtimeService:string;
   runtimeMaintenance?:boolean;quarantinedWorkerIds?:string[];workers:Worker[];
@@ -54,7 +54,7 @@ export function LabOperationsPage() {
       </>}
     </div></section>
     <section className="card"><div className="ch"><h2>{t("Backup and restore")}</h2></div><div className="cb demo-form">
-      <p>{ops.data?.agentMode ? `${t('Recovery points are created between generations. Metadata backups run hourly when cloud storage is configured. Cloud storage:')} ${ops.data.cloudStorageConfigured?t("configured"):t("awaiting configuration")}. ${t('Restore into a new deployment using the operator guide.')}` : t("Backups require confirmed idle runtime ownership and briefly hold dispatch. Restore into a new deployment directory using the operator guide.")}</p>
+      <p>{ops.data?.agentMode ? `${t('Recovery points are created between generations. Metadata backups run hourly when recovery storage is configured. Storage:')} ${(ops.data.recoveryStorageConfigured??ops.data.cloudStorageConfigured)?t("configured"):t("awaiting configuration")}. ${t('Restore into a new deployment using the operator guide.')}` : t("Backups require confirmed idle runtime ownership and briefly hold dispatch. Restore into a new deployment directory using the operator guide.")}</p>
       {ops.data?.agentMode&&ops.data.metadataBackup&&<p>{t("Last metadata backup:")}{ops.data.metadataBackup.status} · {new Date(ops.data.metadataBackup.createdAt*1000).toLocaleString()} {ops.data.metadataBackup.errorType}</p>}
       <button className="btn pri" disabled={ops.data?.agentMode||action.isPending||!ops.data||ops.data.dispatchHeld||ops.data.reservations.length>0} onClick={()=>action.mutate({path:'/api/v1/platform/backups'})}>{action.isPending?t("Operation in progress…"):t("Create idle backup")}</button>
       {backups.error && <p role="alert">{backups.error.message}</p>}{backups.data?.map(b=><div key={b.backupId}><span className="mono">{b.backupId}</span> · {(b.sizeBytes/1024/1024).toFixed(1)} {t("MB")}<button className="btn" onClick={()=>void downloadBackup(b.backupId).catch(e=>setDownloadError(e instanceof Error?e.message:'Download failed'))}>{t("Download backup")}</button></div>)}

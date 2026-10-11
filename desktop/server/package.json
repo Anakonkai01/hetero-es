@@ -1,0 +1,17 @@
+{
+  "name":"@heteroes/server","version":"0.1.0","private":true,
+  "description":"HeteroES CPU Lab Server","author":"HeteroES Lab",
+  "main":"electron/main.cjs",
+  "scripts":{"build":"tsc --noEmit && vite build","start":"electron .","test":"node --test tests/*.test.cjs"},
+  "dependencies":{"@heteroes/product-ui":"0.1.0","react":"^19.2.8","react-dom":"^19.2.8","tar":"^7.5.7"},
+  "devDependencies":{"@types/react":"^19.2.18","@types/react-dom":"^19.2.7","@vitejs/plugin-react":"^6.1.1","electron":"41.10.7","electron-builder":"26.15.3","typescript":"~6.0.2","vite":"^8.3.0"},
+  "build":{
+    "appId":"org.heteroes.server","productName":"HeteroES Lab Server",
+    "directories":{"output":"release"},"files":["dist/**","electron/**","package.json"],
+    "extraResources":[{"from":"resources","to":"server"}],
+    "linux":{"target":["AppImage"],"category":"Science","executableName":"heteroes-server","icon":"../worker/resources/icon.png"},
+    "win":{"target":["nsis"],"requestedExecutionLevel":"asInvoker","icon":"../worker/resources/icon.ico"},
+    "nsis":{"oneClick":true,"perMachine":false,"deleteAppDataOnUninstall":false,"allowElevation":false},
+    "publish":null,"electronVersion":"41.10.7"
+  }
+}

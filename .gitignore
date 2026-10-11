@@ -83,6 +83,8 @@ wandb/
 
 # Private desktop build outputs
 desktop/worker/release/
+desktop/server/release/
+desktop/server/electron/shared/
 
 # Generated private installer links/manifest
 /frontend/public/downloads/

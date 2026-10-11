@@ -197,6 +197,50 @@ class Store:
             self._dispatch_once()
 
     def _dispatch_once(self):
+        if getattr(self.runtime, 'agent_mode', False):
+            return self._dispatch_parallel()
+        return self._dispatch_legacy_once()
+
+    def _dispatch_parallel(self):
+        """Monitor every assignment and dispatch FIFO among eligible GPU sets."""
+        with self.db() as db:
+            if json.loads(db.execute('SELECT value FROM settings WHERE key="dispatchHold"').fetchone()[0]):
+                return
+        errors = []
+        for active in [body for body in self.list() if body['status'] in ACTIVE]:
+            try:
+                self._dispatch_run(active)
+            except Exception as error:
+                errors.append(type(error).__name__)
+        with self.db() as db:
+            queued = [row[0] for row in db.execute('SELECT run_id FROM queue ORDER BY sequence')]
+        for run_id in queued:
+            with self.db() as db:
+                active = self.get(run_id)
+                if not active or active['status'] != 'QUEUED':
+                    continue
+                if reason := self.eligibility(db, active):
+                    active.update(status='CANCELLED', cancelRequested=True, completedAt=now(), failureReason=reason)
+                    self.save(db, active)
+                    db.execute('DELETE FROM queue WHERE run_id=?', (run_id,))
+                    self.audit(db, 'system', 'QUEUE_ACCESS_REVOKED', run_id, active['workspaceId'])
+                    continue
+                if waiting := self.runtime.waiting_reason(active):
+                    active['waitingReason'] = waiting
+                    self.save(db, active)
+                    continue
+                active.pop('waitingReason', None)
+                active.update(status='STARTING', startedAt=now())
+                self.save(db, active)
+            # Reserve before considering the next job; retry this frozen run on
+            # lost responses, and keep unrelated jobs progressing through errors.
+            try:
+                self._dispatch_run(active)
+            except Exception as error:
+                errors.append(type(error).__name__)
+        self.last_error = errors[0] if errors else None
+
+    def _dispatch_legacy_once(self):
         # Only one dispatcher in the supported one-process deployment. Durable state
         # is claimed before the RPC; retry uses the same run ID and frozen config.
         with self.db() as db:
@@ -226,6 +270,10 @@ class Store:
                     self.save(db, active)
         if active is None:
             return
+        self._dispatch_run(active)
+        self.last_error = None
+
+    def _dispatch_run(self, active):
         run_id = active["experimentId"]
         # Submission can succeed while its response is lost. The runtime rejects
         # changes to an existing run and accepts retries of this exact payload.
@@ -276,8 +324,6 @@ class Store:
                 db.execute("DELETE FROM queue WHERE run_id=?", (run_id,))
             self.save(db, body)
             db.execute("UPDATE experiments SET snapshot=? WHERE id=?", (json.dumps(snapshot, allow_nan=False), run_id))
-        self.last_error = None
-        # The next tick claims the next queued run inside the same lock as cancel.
 
     def dispatch(self, stop):
         while not stop.wait(1):

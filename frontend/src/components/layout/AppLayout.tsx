@@ -126,7 +126,7 @@ export function AppLayout() {
         <PreferencesControl/>
 
         <div className="demo">
-          {IS_MOCK ? t("Local MSW demo. Authentication, GPU states and runtime confirmations are simulated. Sample figures are not benchmarks.") : t("Private runtime · shared GPU pool · one active experiment.")}
+          {IS_MOCK ? t("Local MSW demo. Authentication, GPU states and runtime confirmations are simulated. Sample figures are not benchmarks.") : t("Private runtime · shared GPU pool.")}
         </div>
       </aside>
 
