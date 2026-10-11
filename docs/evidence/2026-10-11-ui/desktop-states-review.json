@@ -1,0 +1,476 @@
+[
+  {
+    "name": "worker",
+    "state": "off",
+    "theme": "light",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": []
+  },
+  {
+    "name": "worker",
+    "state": "off",
+    "theme": "dark",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": []
+  },
+  {
+    "name": "worker",
+    "state": "active",
+    "theme": "light",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": []
+  },
+  {
+    "name": "worker",
+    "state": "active",
+    "theme": "dark",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": []
+  },
+  {
+    "name": "worker",
+    "state": "draining",
+    "theme": "light",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": [],
+    "enableBlocked": true
+  },
+  {
+    "name": "worker",
+    "state": "draining",
+    "theme": "dark",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": [],
+    "enableBlocked": true
+  },
+  {
+    "name": "worker",
+    "state": "unknown",
+    "theme": "light",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": [],
+    "enableBlocked": true
+  },
+  {
+    "name": "worker",
+    "state": "unknown",
+    "theme": "dark",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": [],
+    "enableBlocked": true
+  },
+  {
+    "name": "worker",
+    "state": "approval",
+    "theme": "light",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": [],
+    "enableBlocked": true
+  },
+  {
+    "name": "worker",
+    "state": "approval",
+    "theme": "dark",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": [],
+    "enableBlocked": true
+  },
+  {
+    "name": "worker",
+    "state": "stale",
+    "theme": "light",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": []
+  },
+  {
+    "name": "worker",
+    "state": "stale",
+    "theme": "dark",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": []
+  },
+  {
+    "name": "worker",
+    "state": "missing",
+    "theme": "light",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": []
+  },
+  {
+    "name": "worker",
+    "state": "missing",
+    "theme": "dark",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": []
+  },
+  {
+    "name": "worker",
+    "state": "signin",
+    "theme": "light",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": []
+  },
+  {
+    "name": "worker",
+    "state": "signin",
+    "theme": "dark",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": []
+  },
+  {
+    "name": "worker",
+    "state": "install",
+    "theme": "light",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": []
+  },
+  {
+    "name": "worker",
+    "state": "install",
+    "theme": "dark",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": []
+  },
+  {
+    "name": "worker",
+    "state": "pair",
+    "theme": "light",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": []
+  },
+  {
+    "name": "worker",
+    "state": "pair",
+    "theme": "dark",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": []
+  },
+  {
+    "name": "server",
+    "state": "setup",
+    "theme": "light",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": []
+  },
+  {
+    "name": "server",
+    "state": "setup",
+    "theme": "dark",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": []
+  },
+  {
+    "name": "server",
+    "state": "online",
+    "theme": "light",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": []
+  },
+  {
+    "name": "server",
+    "state": "online",
+    "theme": "dark",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": []
+  },
+  {
+    "name": "server",
+    "state": "error",
+    "theme": "light",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": []
+  },
+  {
+    "name": "server",
+    "state": "error",
+    "theme": "dark",
+    "fixture": true,
+    "hardwareAcceptance": false,
+    "checks": [
+      {
+        "width": 1100,
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "overflow": false
+      }
+    ],
+    "browserErrors": []
+  }
+]

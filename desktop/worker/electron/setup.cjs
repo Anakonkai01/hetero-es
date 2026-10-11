@@ -34,12 +34,12 @@ class Setup {
         this.progress = { stage: 'NOT_INSTALLED' }; this.running = false;
         const storageFile = path.join(root, 'storage.json');
         this.storage = fs.existsSync(storageFile) ? JSON.parse(fs.readFileSync(storageFile, 'utf8')) : {};
-        if (Object.keys(this.storage).some(key => !['downloads', 'models', 'volumeUUID'].includes(key)))
+        if (Object.keys(this.storage).some(key => !['downloads', 'models', 'artifacts', 'volumeUUID'].includes(key)))
             throw Error('INVALID_STORAGE_DIRECTORY');
         if (this.storage.volumeUUID !== undefined &&
             (process.platform !== 'linux' || typeof this.storage.volumeUUID !== 'string' || !/^[a-fA-F0-9-]+$/.test(this.storage.volumeUUID)))
             throw Error('INVALID_STORAGE_VOLUME');
-        for (const value of [this.storage.downloads, this.storage.models].filter(value => value !== undefined)) {
+        for (const value of [this.storage.downloads, this.storage.models, this.storage.artifacts].filter(value => value !== undefined)) {
             if (typeof value !== 'string' || !path.isAbsolute(value) || value === '/mnt/sekai' || value.startsWith('/mnt/sekai/'))
                 throw Error('INVALID_STORAGE_DIRECTORY');
         }
@@ -48,7 +48,7 @@ class Setup {
         if (!this.storage.volumeUUID) return;
         try {
             const expected = fs.realpathSync('/dev/disk/by-uuid/' + this.storage.volumeUUID);
-            for (const directory of [this.storage.downloads, this.storage.models].filter(Boolean)) {
+            for (const directory of [this.storage.downloads, this.storage.models, this.storage.artifacts].filter(Boolean)) {
                 let ancestor = directory;
                 while (!fs.existsSync(ancestor)) ancestor = path.dirname(ancestor);
                 const source = execFileSync('findmnt', ['-rn', '-T', ancestor, '-o', 'SOURCE'], { encoding: 'utf8', timeout: 5000 }).trim();

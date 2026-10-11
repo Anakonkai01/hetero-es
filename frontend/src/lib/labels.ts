@@ -65,6 +65,7 @@ export const EVENT_SEVERITY: Record<EventSeverity, BadgeInfo> = {
 };
 
 export const ADMISSION_STATUS: Record<AdmissionStatus, BadgeInfo> = {
+  APPROVED: {tone:"ok",label:"Approved",title:"Device approved by an administrator"},
   PENDING_VERIFICATION: { tone: "info", label: "Pending verification", title: "GPU probe succeeded; runtime recipe admission has not yet been checked" },
   ADMITTED: { tone: "ok", label: "Full", title: "Admitted with full participation" },
   ADMITTED_LIMITED: { tone: "warn", label: "Limited", title: "Admitted with limits" },

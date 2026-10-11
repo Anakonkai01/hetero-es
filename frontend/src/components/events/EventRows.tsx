@@ -3,6 +3,7 @@ import { formatClock } from "../../lib/format";
 import { EVENT_SEVERITY } from "../../lib/labels";
 import type { SystemEvent } from "../../types/event";
 import { Badge } from "../ui/Badge";
+import {useProduct} from '@heteroes/product-ui';
 
 interface EventRowsProps {
   events: SystemEvent[];
@@ -11,6 +12,7 @@ interface EventRowsProps {
 
 /** Compact event list (time, level, message) used inside other pages. */
 export function EventRows({ events, label }: EventRowsProps) {
+  const {t}=useProduct();
   return (
     <div className="scroll">
       <div className="tw s" role="table" aria-label={label}>
@@ -28,7 +30,7 @@ export function EventRows({ events, label }: EventRowsProps) {
                 style={{ whiteSpace: "normal", color: "var(--ink)" }}
                 to={`/events?selected=${event.eventId}`}
               >
-                {event.message}
+                {t(event.message)}
               </Link>
             </div>
           </div>

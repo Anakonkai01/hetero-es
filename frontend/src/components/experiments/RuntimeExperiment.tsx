@@ -1,8 +1,8 @@
 import {useProduct,StepHeader} from '@heteroes/product-ui';
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router";
-import { apiGet, apiPatch, downloadArtifact } from "../../api/client";
+import { Link, useNavigate } from "react-router";
+import { apiGet, apiPatch, apiPost, downloadArtifact } from "../../api/client";
 import { archiveExperiment, requestExperimentCancel, submitExperiment, updateExperiment } from "../../api/experiments";
 import { useSession, useScopeKey } from "../../app/session";
 import { useAccessMutation } from "../../hooks/useAccess";
@@ -10,6 +10,10 @@ import { useWorkers } from "../../hooks/useWorkers";
 import { useGenerations } from "../../hooks/useGenerations";
 import { useArtifacts } from "../../hooks/useArtifacts";
 import type { CreateExperimentRequest, Experiment } from "../../types/experiment";
+import {useCandidates} from "../../hooks/useCandidates";
+import {Badge} from "../ui/Badge";
+import {CANDIDATE_STATUS} from "../../lib/labels";
+import {formatBytes,shortId} from "../../lib/format";
 import { RewardChart } from "./RewardChart";
 
 interface Capabilities { agentMode?:boolean;coordinatorDevices?:{deviceId:string;workerId:string}[]; modelId: string; modelRevision: string; workloads: string[]; schedulerPolicies: string[]; syncModes: string[]; workerIds: string[] }
@@ -62,6 +66,8 @@ export function RuntimeControls({ experiment: e }: { experiment: Experiment }) {
   const {t}=useProduct();
   const { session, workspace } = useSession(); const navigate = useNavigate();
   const submit = useAccessMutation(submitExperiment); const cancel = useAccessMutation(requestExperimentCancel);
+  const pause = useAccessMutation((id:string)=>apiPost(`/api/v1/experiments/${id}/pause`));
+  const resume = useAccessMutation((id:string)=>apiPost(`/api/v1/experiments/${id}/resume`));
   const archive = useAccessMutation(archiveExperiment); const edit = useAccessMutation(updateExperiment);
   const [editing, setEditing] = useState(false);
   const policy=useAccessMutation((value:{interval:number;retain:number})=>apiPatch(`/api/v1/experiments/${e.experimentId}/backup-policy`,value));
@@ -69,41 +75,46 @@ export function RuntimeControls({ experiment: e }: { experiment: Experiment }) {
   const [backupRetain,setBackupRetain]=useState(e.requestedBackupPolicy?.retain??e.backupPolicy?.retain??3);
   const permitted = e.ownerUserId === session?.user.userId || workspace?.role === "ADMIN";
   const terminal = ["COMPLETED", "CANCELLED", "FAILED", "DRAFT"].includes(e.status);
-  const error = submit.error ?? cancel.error ?? archive.error ?? edit.error;
-  const busy = submit.isPending || cancel.isPending || archive.isPending || edit.isPending;
-  return <section className="card"><div className="ch"><h2>{t("Experiment management")}</h2></div><div className="cb demo-form">
-    <p>{t("Selected workers:")}{e.workerIds?.join(", ")}</p>
+  const error = submit.error ?? cancel.error ?? archive.error ?? edit.error ?? pause.error ?? resume.error;
+  const busy = submit.isPending || cancel.isPending || archive.isPending || edit.isPending || pause.isPending || resume.isPending;
+  return <section className="card experiment-management"><div className="ch"><h2>{t("Experiment management")}</h2></div><div className="cb demo-form">
+    <p>{t("Selected workers:")} {e.workerIds?.join(", ")}</p>
     {e.waitingReason && <p className="note">{e.waitingReason}</p>}
-    {e.cloudSync && <p>{t("Checkpoint sync:")}{e.cloudSync.status} {t("· Last synced generation:")}{e.cloudSync.lastCloudGeneration??'None'} {e.cloudSync.errorType}</p>}
+
     {e.monitoringPartial && <p>{t("Dashboard details show recent history. Full canonical history is retained in recovery points.")}</p>}
     {e.failureReason && <p className="note err" role="alert">{e.failureReason}</p>}
     {error && <p className="note err" role="alert">{error.message}</p>}
     {permitted && <div className="acts">
       {e.status === "DRAFT" && <><button className="btn" disabled={busy} onClick={() => setEditing(!editing)}>{t("Edit configuration")}</button><button className="btn pri" disabled={busy} onClick={() => void submit.mutateAsync(e.experimentId).catch(() => {})}>{t("Start experiment")}</button></>}
       {!terminal && !e.cancelRequested && <button className="btn dng" disabled={busy} onClick={() => void cancel.mutateAsync(e.experimentId).catch(() => {})}>{t("Cancel experiment")}</button>}
-      <button className="btn" disabled title={t("Pause and resume require checkpoint lifecycle support beyond cancellation")}>{t("Pause / resume")}</button>
-      <button className="btn" disabled title={t("Worker selection is immutable after submission")}>{t("Change workers during run")}</button>
+      {e.coordinatorDeviceId && ['STARTING','RUNNING'].includes(e.status) && !e.cancelRequested && <button className="btn" disabled={busy} onClick={()=>void pause.mutateAsync(e.experimentId).catch(()=>{})}>{t('Pause after generation')}</button>}
+      {e.coordinatorDeviceId && e.status==='PAUSED' && !e.cancelRequested && <button className="btn pri" disabled={busy} onClick={()=>void resume.mutateAsync(e.experimentId).catch(()=>{})}>{t('Resume experiment')}</button>}
+
       {terminal && <button className="btn dng" disabled={busy} onClick={() => { if (window.confirm("Archive this experiment and retain its evidence?")) void archive.mutateAsync(e.experimentId).then(() => navigate("/experiments")).catch(() => {}); }}>{t("Archive")}</button>}
     </div>}
     {e.cancelRequested && !terminal && <p className="note">{t("Stopping new leases; waiting for current candidates to restore and all selected workers to stop. The last completed checkpoint is retained.")}</p>}
-    {permitted && e.coordinatorDeviceId && !['COMPLETED','CANCELLED','FAILED'].includes(e.status) && <form onSubmit={event=>{event.preventDefault();policy.mutate({interval:backupInterval,retain:backupRetain});}}><label className="fg">{t("Backup interval")}<input className="inp" type="number" required min={1} max={1000} value={backupInterval} onChange={event=>setBackupInterval(Number(event.target.value))}/></label><label className="fg">{t("Recovery points to retain")}<input className="inp" type="number" required min={1} max={1000} value={backupRetain} onChange={event=>setBackupRetain(Number(event.target.value))}/></label><button className="btn" disabled={policy.isPending}>{t("Apply backup policy at next generation")}</button>{policy.error && <p role="alert">{policy.error.message}</p>}</form>}
+    {e.status==='PAUSING' && !e.cancelRequested && <p className="note">{t('Finishing this generation, verifying its checkpoint and waiting for all selected processes to stop before releasing GPUs.')}</p>}
+    {e.status==='PAUSED' && <p className="note">{t('Checkpoint verified and GPUs released. Resume queues the same experiment with its frozen configuration and new assignment credentials.')}</p>}
+    {permitted && e.coordinatorDeviceId && !['COMPLETED','CANCELLED','FAILED'].includes(e.status) && <details className="advanced-panel"><summary>{t('Backup policy')}</summary><div><form onSubmit={event=>{event.preventDefault();policy.mutate({interval:backupInterval,retain:backupRetain});}}><label className="fg">{t("Backup interval")}<input className="inp" type="number" required min={1} max={1000} value={backupInterval} onChange={event=>setBackupInterval(Number(event.target.value))}/></label><label className="fg">{t("Recovery points to retain")}<input className="inp" type="number" required min={1} max={1000} value={backupRetain} onChange={event=>setBackupRetain(Number(event.target.value))}/></label><button className="btn" disabled={policy.isPending}>{t("Apply backup policy at next generation")}</button>{policy.error && <p role="alert">{policy.error.message}</p>}</form></div></details>}
     {editing && e.status === "DRAFT" && <RuntimeConfiguration initial={e} pending={edit.isPending} onSave={async (configuration) => { await edit.mutateAsync({ experimentId: e.experimentId, configuration }); setEditing(false); }} />}
   </div></section>;
 }
 
-export function RuntimeResults({ experiment: e }: { experiment: Experiment }) {
-  const {t}=useProduct();
-  const generations = useGenerations(e.experimentId); const artifacts = useArtifacts();
-  const [error, setError] = useState(""); const [downloading, setDownloading] = useState("");
-  return <section className="card"><div className="ch"><h2>{t("Runtime results")}</h2><small>{t("Measured candidate rewards from the runtime ledger")}</small></div><div className="cb demo-form">
-    <p>{t("Completed generations:")}{e.completedGenerations ?? 0}/{e.maxGenerations} {t("· Committed candidates in the current generation:")}{e.committedCandidateCount ?? 0}/{e.candidatesPerGeneration}</p>
-    <RewardChart generations={generations.data ?? []} />
-    <p className="hint">{t("Validation and test scores are unavailable: this run evaluates candidate rewards on the selected built-in workload.")}</p>
-    {error && <p role="alert" className="note err">{error}</p>}
-    {artifacts.data?.filter((a) => a.experimentId === e.experimentId).map((artifact) => <div className="demo-item" key={artifact.artifactId}><span>{artifact.name} · {artifact.sizeBytes?.toLocaleString()} {t("bytes")}</span><button className="btn" disabled={Boolean(downloading)} onClick={() => {
-      setError(""); setDownloading(artifact.artifactId);
-      void downloadArtifact(artifact.artifactId, artifact.name).catch((e: Error) => setError(e.message)).finally(() => setDownloading(""));
-    }}>{t(downloading === artifact.artifactId ? "Downloading…" : "Download")}</button></div>)}
-    <p className="hint">{t("A checkpoint download contains canonical raw FP16 weights. Load it with Track A's schema and verified hash; it is not a standalone Hugging Face model directory.")}</p>
-  </div></section>;
+export function RuntimeResults({experiment:e}:{experiment:Experiment}) {
+ const {t}=useProduct();const generations=useGenerations(e.experimentId),artifacts=useArtifacts();
+ const [selection,setSelection]=useState('');const [error,setError]=useState('');const [downloading,setDownloading]=useState('');
+ const gs=generations.data??[];const selected=gs.find(g=>g.generationId===selection)??gs.find(g=>g.generationId===e.currentGenerationId)??gs.at(-1);
+ const candidates=useCandidates(selected?.generationId);
+ const mean=gs.filter(g=>g.rewardMean!==undefined).at(-1)?.rewardMean;
+ const bests=gs.flatMap(g=>g.rewardBest===undefined?[]:[g.rewardBest]);
+ return <section className="card"><div className="ch"><h2>{t('Experiment progress')}</h2><small>{t('Accepted runtime results')}</small></div><div className="cb">
+ <dl className="detail-summary"><div><dt>{t('Completed generations')}</dt><dd>{e.completedGenerations??0} <small>/ {e.maxGenerations??'—'}</small></dd></div><div><dt>{t('Current accepted candidates')}</dt><dd>{selected?.committedCandidateCount??e.committedCandidateCount??0} <small>/ {selected?.candidateCount??e.candidatesPerGeneration}</small></dd></div><div><dt>{t('Latest mean reward')}</dt><dd>{mean?.toFixed(4)??'—'}</dd></div><div><dt>{t('Best candidate reward')}</dt><dd>{bests.length?Math.max(...bests).toFixed(4):'—'}</dd></div></dl>
+ {generations.isError&&<p className="note err" role="alert">{t('Generation history unavailable')}</p>}<div className="chart-wrap"><div className="section-title"><h2>{t('Reward by generation')}</h2><span className="hint">{e.task}</span></div><RewardChart generations={gs}/></div><p className="info-caption">{t('Validation and test scores are unavailable: this run evaluates candidate rewards on the selected built-in workload.')}</p>
+ <section className="experiment-inspector"><div className="generation-picker"><div><h3>{t('Generation & candidate inspector')}</h3><p>{t('Inspect seeds, allocation and accepted rewards for each generation.')}</p></div><label className="fg"><span className="sr-only">{t('Select generation')}</span><select className="sel" value={selected?.generationId??''} onChange={event=>setSelection(event.target.value)} disabled={!gs.length}>{!gs.length&&<option value="">{t('No generations yet')}</option>}{gs.map((g,i)=><option key={g.generationId} value={g.generationId}>{t('Generation')} {i} · {t(g.status)}</option>)}</select></label></div>
+ {selected&&<p className="info-caption"><Link to={`/experiments/${e.experimentId}/generations/${selected.generationId}`}>{t('Open generation')} →</Link> · <span className="mono">{selected.generationId}</span></p>}
+ {candidates.isError?<p className="note err" role="alert">{t('Candidate history unavailable')}</p>:candidates.isPending&&selected?<p role="status">{t('Loading candidates…')}</p>:candidates.data?.length?<div className="scroll"><table className="inspector-table"><thead><tr>{['Candidate','Seed','Status','Assigned worker','Reward'].map(label=><th key={label} scope="col">{t(label)}</th>)}</tr></thead><tbody>{candidates.data.map(c=><tr key={c.candidateId}><td><Link className="mono" to={`/experiments/${e.experimentId}/generations/${c.generationId}/candidates/${c.candidateId}`}>{shortId(c.candidateId)}</Link></td><td className="seed">{c.seed}</td><td><Badge info={CANDIDATE_STATUS[c.status]}/></td><td>{c.workerId?<Link className="mono" to={`/workers/${c.workerId}`}>{c.workerId}</Link>:t('Not assigned')}</td><td className="seed">{c.reward?.toFixed(4)??'—'}</td></tr>)}</tbody></table></div>:<p className="note">{t('Candidates appear after the coordinator opens a generation.')}</p>}
+ <p className="info-caption">{t('Candidate seeds are derived from the experiment, generation and candidate index. Retries reuse the same seed.')}</p></section><div className="recovery-strip"><span>{t('Checkpoint sync')}: <b>{t(e.cloudSync?.status??'Not reported')}</b></span><small>{t('Last synced generation')}: {e.cloudSync?.lastCloudGeneration??'—'}</small><Link className="link" to={`/artifacts?experiment=${e.experimentId}`}>{t('View artifacts')} →</Link></div>
+ {error&&<p role="alert" className="note err">{error}</p>}{artifacts.isError&&<p className="note err" role="alert">{t('Artifact list unavailable')}</p>}
+ {artifacts.data?.filter(a=>a.experimentId===e.experimentId).map(a=><div className="demo-item" key={a.artifactId}><span>{a.name}<small className="hint"> · {formatBytes(a.sizeBytes)} · {t(a.status)}</small></span><button className="btn" disabled={!!downloading||a.status!=='READY'} onClick={()=>{setError('');setDownloading(a.artifactId);void downloadArtifact(a.artifactId,a.name).catch((err:Error)=>setError(err.message)).finally(()=>setDownloading(''));}}>{t(downloading===a.artifactId?'Downloading…':'Download')}</button></div>)}<p className="info-caption">{t("A checkpoint download contains canonical raw FP16 weights. Load it with Track A's schema and verified hash; it is not a standalone Hugging Face model directory.")}</p>
+ </div></section>;
 }

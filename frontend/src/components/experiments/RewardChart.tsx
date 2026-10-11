@@ -58,17 +58,17 @@ export function RewardChart({ generations }: { generations: Generation[] }) {
       >
         <defs>
           <marker id="mA" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5">
-            <circle cx="5" cy="5" r="4" fill="#0F766E" />
+            <circle cx="5" cy="5" r="4" fill="var(--acc)" />
           </marker>
           <marker id="mB" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5">
-            <rect x="1" y="1" width="8" height="8" fill="#1A1D1C" />
+            <rect x="1" y="1" width="8" height="8" fill="var(--chart-secondary)" />
           </marker>
         </defs>
 
         {gridLines.map((line) => (
-          <line key={line} x1="48" y1={line} x2="624" y2={line} stroke="#EFEFEA" />
+          <line key={line} x1="48" y1={line} x2="624" y2={line} stroke="var(--line2)" />
         ))}
-        <line x1="48" y1="224" x2="624" y2="224" stroke="#B5B9B5" />
+        <line x1="48" y1="224" x2="624" y2="224" stroke="var(--line)" />
 
         {[
           [maxReward.toFixed(2), 16],
@@ -76,7 +76,7 @@ export function RewardChart({ generations }: { generations: Generation[] }) {
           [(maxReward / 3).toFixed(2), 157.3],
           ["0", 228],
         ].map(([label, ty]) => (
-          <text key={label} x="40" y={ty} textAnchor="end" fontSize="11" fill="#5F6663">
+          <text key={label} x="40" y={ty} textAnchor="end" fontSize="11" fill="var(--mut)">
             {label}
           </text>
         ))}
@@ -84,7 +84,7 @@ export function RewardChart({ generations }: { generations: Generation[] }) {
         <path
           d={linePath(pointsOf("rewardBest"))}
           fill="none"
-          stroke="#1A1D1C"
+          stroke="var(--chart-secondary)"
           strokeWidth="1.75"
           strokeDasharray="6 4"
           markerStart="url(#mB)"
@@ -94,7 +94,7 @@ export function RewardChart({ generations }: { generations: Generation[] }) {
         <path
           d={linePath(meanPoints)}
           fill="none"
-          stroke="#0F766E"
+          stroke="var(--acc)"
           strokeWidth="2.5"
           markerStart="url(#mA)"
           markerMid="url(#mA)"
@@ -114,16 +114,16 @@ export function RewardChart({ generations }: { generations: Generation[] }) {
       >
         {generations.map((generation, index) => (
           <span className="mono" key={generation.generationId}>
-            #{index + 1}
+            #{index}
           </span>
         ))}
       </div>
 
       <div className="legendl">
         <span>
-          <b style={{ color: "#0F766E" }}>●━</b> {t("Mean reward of the generation")}</span>
+          <b style={{ color: "var(--acc)" }}>●━</b> {t("Mean reward of the generation")}</span>
         <span>
-          <b style={{ color: "#1A1D1C" }}>■╌</b> {t("Best reward of the generation")}</span>
+          <b style={{ color: "var(--chart-secondary)" }}>■╌</b> {t("Best reward of the generation")}</span>
         <span>{t("Generations without a reward are not drawn.")}</span>
       </div>
     </>

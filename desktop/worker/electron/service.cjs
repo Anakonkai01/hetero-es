@@ -33,7 +33,7 @@ class Service {
     async startAgent() { this.autoStart = true; if (this.bridge)
         return; if (!this.device)
         throw Error('DEVICE_NOT_PAIRED'); const token = await this.vault.read('device-token'); if (!token)
-        throw Error('DEVICE_CREDENTIAL_UNAVAILABLE'); const p = this.setup.paths(); const config = path.join(this.root, 'agent-config.json'); const workerId = this.device.workerId; await fsp.writeFile(config, JSON.stringify({ serverUrl: this.settings.serverUrl, deviceId: this.device.deviceId, workerId, stateDirectory: path.join(this.root, 'agent-state'), modelPath: p.model, computeUrl: 'http://127.0.0.1:8765', workerHost: '127.0.0.1', workerPort: 8765, workerOnly: true, selfTest: this.selfTest ? { ...this.selfTest, coordinator: false } : undefined }), { mode: 0o600 }); this.bridge = this.makeBridge(p.python, p.source, config, token); try {
+        throw Error('DEVICE_CREDENTIAL_UNAVAILABLE'); const p = this.setup.paths(); const config = path.join(this.root, 'agent-config.json'); const workerId = this.device.workerId; await fsp.writeFile(config, JSON.stringify({ serverUrl: this.settings.serverUrl, deviceId: this.device.deviceId, workerId, stateDirectory: path.join(this.root, 'agent-state'), modelPath: p.model, computeUrl: 'http://127.0.0.1:8765', workerHost: '127.0.0.1', workerPort: 8765, workerOnly: true, largeDataDirectory: this.setup.storage?.artifacts, storageVolumeUUID: this.setup.storage?.volumeUUID, selfTest: this.selfTest ? { ...this.selfTest, coordinator: false } : undefined }), { mode: 0o600 }); this.bridge = this.makeBridge(p.python, p.source, config, token); try {
         await this.bridge.ready;
     }
     catch (error) {
@@ -76,7 +76,7 @@ class Service {
             }
             catch { }
         const p = this.lastState;
-        return { serverUrl: this.settings.serverUrl ?? '', signedIn: !!this.userToken, session: this.session, device: this.device, selfTest: this.selfTest, setup: this.setup.status(), connection: p?.connection?.status ?? this.connection, agent: p ? { bootId: p.bootId, enabled: !!p.enabled, drained: p.drained, error: p.error, assignments: (p.processes ?? []).map(r => ({ assignmentId: r.assignmentId, workerAlive: r.workerAlive, coordinatorAlive: r.coordinatorAlive, ready: r.ready })) } : null };
+        return { serverUrl: this.settings.serverUrl ?? '', signedIn: !!this.userToken, session: this.session, device: this.device, selfTest: this.selfTest, setup: this.setup.status(), telemetry: p?.telemetry ?? null, telemetryHistory:p?.telemetryHistory??[], connection: p?.connection?.status ?? this.connection, agent: p ? { bootId: p.bootId, enabled: !!p.enabled, drained: p.drained, error: p.error, assignments: (p.processes ?? []).map(r => ({ assignmentId: r.assignmentId, epoch:r.epoch, workerAlive: r.workerAlive, coordinatorAlive: r.coordinatorAlive, ready: r.ready })) } : null };
     }
     async quit() { this.autoStart = false; if (this.setup.running)
         throw Error('SETUP_IN_PROGRESS'); if (!this.bridge)

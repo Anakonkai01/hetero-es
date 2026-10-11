@@ -14,7 +14,7 @@ from argon2 import PasswordHasher
 from .runtime import RuntimeRejected
 from .migrations import migrate
 
-ACTIVE = {"STARTING", "RUNNING", "CANCELLING", "RECOVERING", "DRAINING"}
+ACTIVE = {"STARTING", "RUNNING", "CANCELLING", "RECOVERING", "DRAINING", "PAUSING"}
 TERMINAL = {"COMPLETED", "CANCELLED", "FAILED"}
 
 
@@ -118,10 +118,10 @@ class Store:
             if coordinator and getattr(self.runtime, 'agent_mode', False):
                 row = db.execute('SELECT worker_id FROM devices WHERE id=?', (coordinator,)).fetchone()
                 coordinator_alias = row[0] if row else None
-            if worker_id not in set(b['workerIds']) | {coordinator_alias} or b['status'] in TERMINAL | {'DRAFT'}:
+            if worker_id not in set(b['workerIds']) | {coordinator_alias} or b['status'] in TERMINAL | {'DRAFT','PAUSED'}:
                 continue
             b['cancelRequested']=True
-            if b['status']=='QUEUED':
+            if b['status'] in ('QUEUED','PAUSED'):
                 b.update(status='CANCELLED',completedAt=now(),failureReason='GPU contribution was disabled')
                 db.execute('DELETE FROM queue WHERE run_id=?',(b['experimentId'],))
             else:
@@ -137,7 +137,7 @@ class Store:
             if body['status'] in TERMINAL | {'DRAFT'}:
                 continue
             body['cancelRequested'] = True
-            if body['status']=='QUEUED':
+            if body['status'] in ('QUEUED','PAUSED'):
                 body.update(status='CANCELLED',completedAt=now(),failureReason='Resource access revoked')
                 db.execute('DELETE FROM queue WHERE run_id=?',(body['experimentId'],))
             else:
@@ -293,11 +293,22 @@ class Store:
         current = self.get(run_id)
         if current.get("cancelRequested"):
             self.runtime.cancel(run_id)
+        elif current.get('pauseRequested'):
+            self.runtime.pause(run_id)
         snapshot = self.runtime.snapshot(run_id)
         with self.db() as db:
             body = self.get(run_id)
             state = snapshot["state"]
             body["status"] = state["status"]
+            if body.get('cancelRequested') and body['status']=='PAUSED':
+                body['status']='CANCELLED'
+            if body.get('pauseRequested') and not body.get('cancelRequested') and body['status'] in ('STARTING','RUNNING'):
+                body['status']='PAUSING'
+            if state.get('pauseCheckpoint'):
+                body['pauseCheckpoint']=state['pauseCheckpoint']
+            if body['status']=='PAUSED':
+                body['pausedAt']=now()
+                db.execute('DELETE FROM queue WHERE run_id=?',(run_id,))
             if "cloudSync" in snapshot:
                 previous=body.get('cloudSync',{})
                 incoming=snapshot['cloudSync']

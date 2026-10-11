@@ -1,0 +1,341 @@
+{
+  "readOnly": true,
+  "gpuCompute": false,
+  "checks": [
+    {
+      "theme": "light",
+      "route": "/",
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "/register",
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "/login",
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "/register",
+      "mobile": true,
+      "anonymousFormVisible": true,
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "/login",
+      "mobile": true,
+      "anonymousFormVisible": true,
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "/dashboard",
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "/workspace",
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "/workers",
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "/workers/5070ti",
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "/experiments",
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "/experiments/new",
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "/models",
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "/events",
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "/artifacts",
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "/profile",
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "/operations",
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "experiment",
+      "seedVisible": true,
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "candidate",
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "generation",
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "/",
+      "mobile": true,
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "/dashboard",
+      "mobile": true,
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "/workers",
+      "mobile": true,
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "/workers/5070ti",
+      "mobile": true,
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "/experiments",
+      "mobile": true,
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "/experiments/new",
+      "mobile": true,
+      "overflow": false
+    },
+    {
+      "theme": "light",
+      "route": "/experiments/36c61c1effb2433ab69e5c7c9f60d2d6",
+      "mobile": true,
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "/",
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "/register",
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "/login",
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "/register",
+      "mobile": true,
+      "anonymousFormVisible": true,
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "/login",
+      "mobile": true,
+      "anonymousFormVisible": true,
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "/dashboard",
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "/workspace",
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "/workers",
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "/workers/5070ti",
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "/experiments",
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "/experiments/new",
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "/models",
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "/events",
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "/artifacts",
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "/profile",
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "/operations",
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "experiment",
+      "seedVisible": true,
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "candidate",
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "generation",
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "/",
+      "mobile": true,
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "/dashboard",
+      "mobile": true,
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "/workers",
+      "mobile": true,
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "/workers/5070ti",
+      "mobile": true,
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "/experiments",
+      "mobile": true,
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "/experiments/new",
+      "mobile": true,
+      "overflow": false
+    },
+    {
+      "theme": "dark",
+      "route": "/experiments/36c61c1effb2433ab69e5c7c9f60d2d6",
+      "mobile": true,
+      "overflow": false
+    }
+  ],
+  "browserErrors": [],
+  "apiErrors": [
+    {
+      "path": "/api/v1/auth/session",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/auth/session",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/auth/session",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/auth/session",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/auth/session",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/auth/session",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/auth/session",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/auth/session",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/auth/session",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/auth/session",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/auth/session",
+      "status": 401
+    },
+    {
+      "path": "/api/v1/auth/session",
+      "status": 401
+    }
+  ]
+}

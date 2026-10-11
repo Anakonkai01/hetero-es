@@ -1,32 +1,44 @@
+import {lazy,Suspense} from 'react';
+import {LoadingState} from '../components/common/LoadingState';
 import { useSession } from "./session";
-import { ProfilePage } from "../pages/ProfilePage";
-import { MyWorkersPage } from "../pages/MyWorkersPage";
-import { WorkspaceListPage } from "../pages/WorkspaceListPage";
+
 import { Navigate, Route, Routes } from "react-router";
-import { ExperimentCreatePage } from "../pages/ExperimentCreatePage";
-import { ExperimentDetailPage } from "../pages/ExperimentDetailPage";
+
 import { AppLayout } from "../components/layout/AppLayout";
-import { ExperimentsPage } from "../pages/ExperimentsPage";
-import { NotFoundPage } from "../pages/NotFoundPage";
-import { WorkerDetailPage } from "../pages/WorkerDetailPage";
-import { CandidateDetailPage } from "../pages/CandidateDetailPage";
-import { GenerationDetailPage } from "../pages/GenerationDetailPage";
-import { LoginPage } from "../pages/LoginPage";
-import { WorkspaceDetailRoute } from "../pages/WorkspaceDetailRoute";
-import { ModelsPage } from "../pages/ModelsPage";
+
 import { RequireSession } from "../components/layout/RequireSession";
-import { RegisterPage } from '../pages/RegisterPage';
-import { LabOperationsPage } from '../pages/LabOperationsPage';
+
 import { IS_MOCK } from '../lib/dataSource';
+
+import {HomePage} from '../pages/HomePage';
+
+const ProfilePage=lazy(()=>import('../pages/ProfilePage').then(module=>({default:module.ProfilePage})));
+const MyWorkersPage=lazy(()=>import('../pages/MyWorkersPage').then(module=>({default:module.MyWorkersPage})));
+const WorkspaceListPage=lazy(()=>import('../pages/WorkspaceListPage').then(module=>({default:module.WorkspaceListPage})));
+const ExperimentCreatePage=lazy(()=>import('../pages/ExperimentCreatePage').then(module=>({default:module.ExperimentCreatePage})));
+const ExperimentDetailPage=lazy(()=>import('../pages/ExperimentDetailPage').then(module=>({default:module.ExperimentDetailPage})));
+const ExperimentsPage=lazy(()=>import('../pages/ExperimentsPage').then(module=>({default:module.ExperimentsPage})));
+const NotFoundPage=lazy(()=>import('../pages/NotFoundPage').then(module=>({default:module.NotFoundPage})));
+const WorkerDetailPage=lazy(()=>import('../pages/WorkerDetailPage').then(module=>({default:module.WorkerDetailPage})));
+const CandidateDetailPage=lazy(()=>import('../pages/CandidateDetailPage').then(module=>({default:module.CandidateDetailPage})));
+const GenerationDetailPage=lazy(()=>import('../pages/GenerationDetailPage').then(module=>({default:module.GenerationDetailPage})));
+const LoginPage=lazy(()=>import('../pages/LoginPage').then(module=>({default:module.LoginPage})));
+const WorkspaceDetailRoute=lazy(()=>import('../pages/WorkspaceDetailRoute').then(module=>({default:module.WorkspaceDetailRoute})));
+const ModelsPage=lazy(()=>import('../pages/ModelsPage').then(module=>({default:module.ModelsPage})));
+const RegisterPage=lazy(()=>import('../pages/RegisterPage').then(module=>({default:module.RegisterPage})));
+const LabOperationsPage=lazy(()=>import('../pages/LabOperationsPage').then(module=>({default:module.LabOperationsPage})));
+const DashboardPage=lazy(()=>import('../pages/DashboardPage').then(module=>({default:module.DashboardPage})));
+const EventsPage=lazy(()=>import('../pages/EventsPage').then(module=>({default:module.EventsPage})));
+const ArtifactsPage=lazy(()=>import('../pages/ArtifactsPage').then(module=>({default:module.ArtifactsPage})));
 
 export function AppRouter() {
   return (
-    <Routes>
+    <Suspense fallback={<LoadingState/>}><Routes>
+      <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<LoginPage />} />
       {!IS_MOCK && <Route path="/register" element={<RegisterPage />} />}
       <Route element={<RequireSession />}>
       <Route element={<AppLayout />}>
-        <Route index element={<Navigate to="/workspace" replace />} />
         <Route path="/workspace" element={<WorkspaceListPage />} />
         <Route path="/workspace/current" element={<ActiveWorkspaceRedirect />} />
         <Route path="/workspace/:workspaceId" element={<WorkspaceDetailRoute />} />
@@ -35,7 +47,7 @@ export function AppRouter() {
         <Route path="/models" element={<ModelsPage />} />
         <Route path="/scheduling" element={<Navigate to="/experiments" replace />} />
 
-        <Route path="/dashboard" element={<Navigate to="/experiments" replace />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/workers" element={<MyWorkersPage />} />
         <Route
           path="/workers/:workerId"
@@ -58,13 +70,13 @@ export function AppRouter() {
           path="/experiments/:experimentId/generations/:generationId"
           element={<GenerationDetailPage />}
         />
-        <Route path="/events" element={<Navigate to="/experiments" replace />} />
-        <Route path="/artifacts" element={<Navigate to="/experiments" replace />} />
+        <Route path="/events" element={<EventsPage />} />
+        <Route path="/artifacts" element={<ArtifactsPage />} />
 
         <Route path="*" element={<NotFoundPage />} />
       </Route>
       </Route>
-    </Routes>
+    </Routes></Suspense>
   );
 }
 

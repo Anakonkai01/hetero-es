@@ -346,7 +346,7 @@ def install_storage_routes(app,store,storage,device_auth,user,scoped,authorized)
     def device_status(point_id:str,current=Depends(device_auth)):
         run_id=point_run(point_id)
         with store.db() as db:
-            row=db.execute('SELECT coordinator FROM assignments WHERE run_id=?',(run_id,)).fetchone()
+            row=db.execute('SELECT coordinator FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1',(run_id,)).fetchone()
             if not row or row[0]!=current['id']:raise HTTPException(403,'Coordinator identity required')
         return next(p for p in storage.points(run_id) if p['pointId']==point_id)
 

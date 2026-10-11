@@ -64,6 +64,7 @@ function CandidateRow({
           {shortId(candidate.candidateId)}
         </Link>
       </div>
+      <div className="c mono" role="cell">{candidate.seed}</div>
       <div className="c" role="cell">
         <Badge info={CANDIDATE_STATUS[candidate.status]} />
       </div>
@@ -195,6 +196,7 @@ export function GenerationDetailPage() {
               <div className="tw s" role="table" aria-label={t("Candidates")}>
                 <div className="rowh cols-cand" role="row">
                   <div className="c" role="columnheader">{t("Candidate")}</div>
+                  <div className="c" role="columnheader">{t("Seed")}</div>
                   <div className="c" role="columnheader">{t("Status")}</div>
                   <div className="c" role="columnheader">{t("Assigned worker")}</div>
                   <div className="c" role="columnheader">{t("Attempt")}</div>

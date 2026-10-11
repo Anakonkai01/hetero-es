@@ -1,4 +1,4 @@
-import {useProduct} from '@heteroes/product-ui';
+import {useProduct,ResourceTelemetry} from '@heteroes/product-ui';
 import { Link, useParams } from "react-router";
 import { isNotFoundError, isServerError } from "../api/client";
 import { useAppState } from "../app/appState";
@@ -73,6 +73,7 @@ export function WorkerDetailPage() {
             }
           />
 
+          <section className="card"><div className="cb"><ResourceTelemetry observation={worker.telemetry} history={worker.telemetryHistory} online={worker.status==='ONLINE'}/></div></section>
           <div className="two">
             <section className="card" aria-label={t("GPU profile")}>
               <div className="ch">
@@ -82,14 +83,14 @@ export function WorkerDetailPage() {
                 <dl className="kv">
                   <KeyValue label={t("GPU")}>{worker.profile.gpuName}</KeyValue>
                   <KeyValue label={t("Total VRAM")}>
-                    {IS_MOCK || worker.status === "ONLINE" ? formatGb(worker.profile.vramTotalMb) : NOT_AVAILABLE}
+                    {formatGb(worker.profile.vramTotalMb)}
                   </KeyValue>
-                  <KeyValue label={t("Free VRAM")}>
+                  {IS_MOCK&&<KeyValue label={t("Free VRAM")}>
                     {worker.profile.vramFreeMb === undefined
                       ? NOT_AVAILABLE
                       : formatGb(worker.profile.vramFreeMb, 1)}
-                  </KeyValue>
-                  <KeyValue label={t("Throughput")}>
+                  </KeyValue>}
+                  <KeyValue label={t(IS_MOCK?"Throughput":"Qualification throughput")}>
                     {worker.profile.throughputTokensPerSecond === undefined
                       ? NOT_AVAILABLE
                       : `${worker.profile.throughputTokensPerSecond.toLocaleString("en-US")} tokens/s`}
@@ -104,7 +105,7 @@ export function WorkerDetailPage() {
                   </KeyValue>
                 </dl>
 
-                {worker.profile.vramFreeMb !== undefined && (
+                {IS_MOCK&&worker.profile.vramFreeMb !== undefined && (
                   <div className="prog" style={{ marginTop: 16 }}>
                     <span>
                       {t("VRAM in use:")}{" "}
@@ -126,7 +127,7 @@ export function WorkerDetailPage() {
                 )}
 
                 <p className="hint" style={{ marginBottom: 0 }}>
-                  {t("A stale heartbeat alone is not treated as the worker being down; there is no official rule yet.")}</p>
+                  {t(IS_MOCK?"A stale heartbeat alone is not treated as the worker being down; there is no official rule yet.":"GPU capacity and qualification results describe the registered device. Current usage appears in resource monitoring.")}</p>
               </div>
             </section>
 

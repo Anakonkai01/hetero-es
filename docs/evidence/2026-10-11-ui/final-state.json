@@ -1,0 +1,16 @@
+{
+  "dispatchHeld": true,
+  "reservations": 0,
+  "integrity": "ok",
+  "historicalExperiments": 21,
+  "localContributionEnabled": false,
+  "localGpuUuid": "GPU-64187d93-f2bb-d43f-6c63-2547df16a9a4",
+  "localGpuPowerW": 12.8,
+  "localGpuTemperatureC": 37.0,
+  "telemetryFreshAtCheck": true,
+  "observedDiskCount": 2,
+  "retainedLocalHistorySamples": 83,
+  "workerRuntimeSha256": "3d36b63ebe019574c4eb32cda29fa2a88d0107f2f347425a264b6ba7fd55fe16",
+  "serverRuntimeSha256": "2f8af04d929e758deb1ba88b18ecdc9834c227103143186fad0efeb96fbc79e1",
+  "runtimeCommit": "0fb8e16"
+}

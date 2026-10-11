@@ -142,7 +142,6 @@ export function ExperimentDetailPage() {
             }
           />
 
-          <ExperimentResults experiment={experiment} />
           <ExperimentControls key={`${experiment.experimentId}:${experiment.status}`} experiment={experiment} />
 
           <div role="tablist" className="tabs" aria-label={t("Experiment sections")}>
@@ -155,13 +154,14 @@ export function ExperimentDetailPage() {
                 aria-selected={tab === item.id}
                 onClick={() => setTab(item.id)}
               >
-                {item.label}
+                {t(item.label)}
               </button>
             ))}
           </div>
 
           {tab === "overview" && (
             <>
+              <ExperimentResults experiment={experiment} />
               <section className="card" aria-label={t("Summary")}>
                 <div className="cb" style={{ paddingTop: 20 }}>
                   <dl className="kv">

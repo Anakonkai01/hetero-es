@@ -1,0 +1,11 @@
+{
+  "experimentRowsPreserved": 21,
+  "immutableRowsUnchanged": true,
+  "dispatchHeld": true,
+  "reservations": 0,
+  "integrityCheck": "ok",
+  "migrationCopyPassed": true,
+  "liveCutover": true,
+  "dispatchStillHeld": true,
+  "liveIntegrityCheck": "ok"
+}

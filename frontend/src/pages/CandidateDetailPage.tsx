@@ -118,6 +118,7 @@ export function CandidateDetailPage() {
                     <span className="mut">{t("Not assigned")}</span>
                   )}
                 </KeyValue>
+                <KeyValue label={t("Seed")} mono>{candidate.seed}</KeyValue>
                 <KeyValue label={t("Reward")} mono>
                   {candidate.reward?.toFixed(3) ?? NOT_AVAILABLE}
                 </KeyValue>

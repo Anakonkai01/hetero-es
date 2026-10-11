@@ -1,9 +1,11 @@
+import type {ResourceObservation,ResourceHistoryPoint} from '@heteroes/product-ui';
 export type AdmissionStatus =
   | "PENDING_VERIFICATION"
   | "INELIGIBLE"
   | "ELIGIBLE_BUT_NOT_BENEFICIAL"
   | "ADMITTED_LIMITED"
-  | "ADMITTED";
+  | "ADMITTED"
+  | "APPROVED";
 
 export type WorkerStatus = "ONLINE" | "OFFLINE";
 
@@ -17,6 +19,11 @@ export interface WorkerProfile {
 }
 
 export interface Worker {
+  telemetry?:ResourceObservation|null;
+  telemetryHistory?:ResourceHistoryPoint[];
+  displayName?:string;
+  physicalResourceId?:string;
+  approvalStatus?:string;
   workerId: string;
   ownerUserId?: string;
   temperatureC?: number;

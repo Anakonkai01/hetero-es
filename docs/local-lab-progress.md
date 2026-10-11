@@ -31,7 +31,7 @@ Existing numerical v1 identities and historical evidence remain immutable.
 | 0: secondary-disk preservation | Implemented | Passed: independent encrypted archive, 140 files restored and hashes verified |
 | M3a: packaged Linux GPU Worker | Qualification implemented/verified | Actual portable app, fresh isolated Python, real libsecret, 5070 Ti numerical reference passed; candidate/replay/baseline/lifecycle/outage gates pending |
 | M3b: local Server/storage | Filesystem backend and CPU Server app implemented | Signed transfers/CAS/manifest-last and actual packaged Linux CPU install/bootstrap/same-origin/manual start/tray/stop/restart passed; Windows and owner walkthrough pending |
-| M4: disjoint scheduling/pause | Physical reservation and eligible FIFO implemented | Atomic alias fencing and independent progress verified on CPU; pause/resume and multi-GPU hardware pending |
+| M4: disjoint scheduling/pause | Physical reservation, eligible FIFO and checkpoint-boundary pause/resume implemented | UUID alias fencing, epoch/drain barriers and identical pause/resume weights verified on CPU; real GPU pause/resume and multi-GPU hardware pending |
 | M5: model/data/Recipe v2 | Pending | Pinned files, frozen splits/batches, evaluation, local learning trials/export |
 | M6: fault/recovery/usability | Pending | Fault campaigns, migration/rollback, fresh-machine and owner walkthrough |
 
@@ -44,6 +44,28 @@ and CPU work independently; retain multi-machine gates as pending.
 
 Evidence: [foundation checks](evidence/2026-10-11-local-foundation/README.md).
 Literature decisions: [ES papers and Recipe v2](es-literature-local-recipe.md).
+
+## Latest owner priority: Web and desktop UI
+
+Comprehensive UI redesign implemented: public home/auth, dashboard/navigation,
+light/dark/system themes, actual hardware/energy/history measurements, experiment
+generation/candidate/seed inspection and Worker/Server layouts. New local Linux
+portable and Windows NSIS downloads are on the homepage. See the
+[UI guide](ui-monitoring-guide.md) and [acceptance evidence](evidence/2026-10-11-ui/README.md).
+Track A continuation is commit `0fb8e16`; inspect Track B HEAD for its UI commit.
+No push was performed. The old session archives do not include these new commits.
+
+M4 pause/resume is now implemented in both tracks, with a verified generation
+checkpoint barrier, drain/epoch fencing and unchanged deterministic CPU baseline.
+Hardware pause/resume and simultaneous multi-GPU acceptance are still pending.
+Large data placement is UUID-guarded; live state stays on ext4. CPU runtime suite:
+2,052 passed/100 skipped; backend: 96 passed. These are not GPU learning claims.
+
+The live preview preserves 21 historical experiments, held dispatch and device
+owner choices. Its existing recovery storage configuration is unchanged/none.
+One isolated local 5070 Ti Agent supplies real telemetry while contribution is
+OFF. Do not start a second Agent for that same enrolled device. Cloud deferred;
+M5 and the remaining M6 hardware/usability gates remain uncompleted.
 
 ## System-disk cleanup
 

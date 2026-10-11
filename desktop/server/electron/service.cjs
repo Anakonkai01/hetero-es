@@ -20,6 +20,7 @@ class Service {
   constructor(root,resources,options={}) {
     this.root=root;this.resources=resources;this.options=options;
     this.setup=options.setup??new Setup(root,resources);
+    this.cpuPrevious=null;
     this.deployment=path.join(root,'lab');this.child=null;this.stopping=false;this.error=null;
   }
   config() {
@@ -28,7 +29,17 @@ class Service {
   }
   async status() {
     const config=this.config();
-    return {setup:this.setup.status(),initialized:!!config,running:!!this.child&&!this.stopping,
+    const cpus=os.cpus();const total=cpus.reduce((sum,c)=>sum+Object.values(c.times).reduce((a,b)=>a+b,0),0);
+    const idle=cpus.reduce((sum,c)=>sum+c.times.idle,0);let cpuPercent=null;
+    if(this.cpuPrevious&&total>this.cpuPrevious.total)cpuPercent=Math.max(0,Math.min(100,100*(1-(idle-this.cpuPrevious.idle)/(total-this.cpuPrevious.total))));
+    this.cpuPrevious={total,idle};
+    const disks=[];for(const [label,directory] of [['state',this.root],['artifacts',config?.storageDirectory]]){
+      if(!directory)continue;try{const d=fs.statfsSync(directory);disks.push({label,totalBytes:d.blocks*d.bsize,freeBytes:d.bavail*d.bsize,usedBytes:(d.blocks-d.bfree)*d.bsize});}catch{}
+    }
+    let availableMemory=os.freemem();
+    if(process.platform==='linux')try{const m=fs.readFileSync('/proc/meminfo','utf8').match(/^MemAvailable:\s+(\d+)/m);if(m)availableMemory=Number(m[1])*1024;}catch{}
+    const hostTelemetry={sampledAt:Date.now()/1000,cpuCount:cpus.length,cpuPercent,ramTotalBytes:os.totalmem(),ramUsedBytes:os.totalmem()-availableMemory,disks};
+    return {hostTelemetry,setup:this.setup.status(),initialized:!!config,running:!!this.child&&!this.stopping,
       error:this.error,addresses:addresses(),apiUrl:config?.apiUrl??null,
       storageDirectory:config?.storageDirectory??null};
   }

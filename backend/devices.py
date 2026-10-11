@@ -13,6 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from .runtime import RuntimeRejected
 
 TERMINAL = {'COMPLETED', 'CANCELLED', 'FAILED'}
+QUIESCENT = TERMINAL | {'PAUSED'}
 MODEL = 'Qwen/Qwen2.5-0.5B-Instruct'
 REVISION = '7ae557604adf67be50417f59c2c2f167def9a775'
 
@@ -128,7 +129,57 @@ class MonitoringEvent(Strict):
     event:dict
 
 
+class GPUObservation(Strict):
+    uuid: str = Field(max_length=100)
+    name: str = Field(max_length=200)
+    utilizationPercent: float | None = Field(default=None,ge=0,le=100)
+    temperatureC: float | None = Field(default=None,ge=0,le=200)
+    vramTotalMb: float | None = Field(default=None,ge=0,le=1000000)
+    vramUsedMb: float | None = Field(default=None,ge=0,le=1000000)
+    powerDrawW: float | None = Field(default=None,ge=0,le=10000)
+    powerLimitW: float | None = Field(default=None,ge=0,le=10000)
+    fanPercent: float | None = Field(default=None,ge=0,le=100)
+    clockMhz: float | None = Field(default=None,ge=0,le=100000)
+    energyWh: float | None = Field(default=None,ge=0)
+    energySampledSeconds: float = Field(default=0,ge=0)
+
+class HostObservation(Strict):
+    cpuCount: int | None = Field(default=None,ge=1,le=100000)
+    platform: str = Field(max_length=30)
+    cpuPercent: float | None = Field(default=None,ge=0,le=100)
+    ramTotalBytes: int | None = Field(default=None,ge=0)
+    ramUsedBytes: int | None = Field(default=None,ge=0)
+    swapTotalBytes: int | None = Field(default=None,ge=0)
+    swapUsedBytes: int | None = Field(default=None,ge=0)
+    networkRxBytesPerSecond: float | None = Field(default=None,ge=0)
+    networkTxBytesPerSecond: float | None = Field(default=None,ge=0)
+    diskReadBytesPerSecond: float | None = Field(default=None,ge=0)
+    diskWriteBytesPerSecond: float | None = Field(default=None,ge=0)
+    loadAverage: list[float] = Field(default_factory=list,max_length=3)
+
+class DiskObservation(Strict):
+    label: Literal['state','artifacts']
+    totalBytes: int = Field(ge=0)
+    usedBytes: int = Field(ge=0)
+    freeBytes: int = Field(ge=0)
+
+class TransportObservation(Strict):
+    latencyMs: float | None = Field(default=None,ge=0)
+    pendingReports: int = Field(default=0,ge=0)
+    pendingEvents: int = Field(default=0,ge=0)
+
+class Telemetry(Strict):
+    transport: TransportObservation | None = None
+    sampledAt: float = Field(ge=0)
+    sessionStartedAt: float = Field(ge=0)
+    source: Literal['host-observation']
+    host: HostObservation | None = None
+    gpu: GPUObservation | None = None
+    disks: list[DiskObservation] = Field(default_factory=list,max_length=2)
+    errors: list[str] = Field(default_factory=list,max_length=5)
+
 class Poll(Strict):
+    telemetry: Telemetry | None = None
     bootId: str = Field(min_length=1, max_length=100)
     contribution: bool = False
     processes: list[ProcessReport] = Field(default_factory=list, max_length=10)
@@ -166,8 +217,27 @@ class AgentRuntime:
                 CREATE TABLE IF NOT EXISTS physical_reservations (resource_id TEXT PRIMARY KEY,assignment_id TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS device_commands (id TEXT PRIMARY KEY,device_id TEXT NOT NULL,dedupe TEXT NOT NULL UNIQUE,body TEXT NOT NULL,ack INTEGER NOT NULL DEFAULT 0,created REAL NOT NULL);
                 CREATE TABLE IF NOT EXISTS monitoring_events(sequence INTEGER PRIMARY KEY AUTOINCREMENT,event_id TEXT UNIQUE NOT NULL,assignment_id TEXT NOT NULL,body TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS device_telemetry_history(device_id TEXT NOT NULL,boot_id TEXT NOT NULL,sampled_at REAL NOT NULL,received_at REAL NOT NULL,body TEXT NOT NULL,PRIMARY KEY(device_id,boot_id,sampled_at));
                 CREATE TABLE IF NOT EXISTS device_reports (device_id TEXT NOT NULL,assignment_id TEXT NOT NULL,sequence INTEGER NOT NULL,PRIMARY KEY(device_id,assignment_id,sequence));
             ''')
+            if 'telemetry' not in {r[1] for r in db.execute('PRAGMA table_info(devices)')}:
+                db.execute("ALTER TABLE devices ADD COLUMN telemetry TEXT")
+            # Retain every assignment epoch. The old unique run_id constraint
+            # cannot represent a paused run reacquiring resources with fresh
+            # commands, credentials and process identities.
+            schema=db.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='assignments'").fetchone()[0]
+            if 'run_id TEXT UNIQUE' in schema:
+                db.executescript('''
+                    BEGIN IMMEDIATE;
+                    ALTER TABLE assignments RENAME TO assignments_v2;
+                    CREATE TABLE assignments(id TEXT PRIMARY KEY,run_id TEXT NOT NULL,coordinator TEXT NOT NULL,
+                        epoch INTEGER NOT NULL,body TEXT NOT NULL,snapshot TEXT NOT NULL,released INTEGER NOT NULL DEFAULT 0);
+                    INSERT INTO assignments SELECT * FROM assignments_v2;
+                    DROP TABLE assignments_v2;
+                    COMMIT;
+                ''')
+            db.execute('CREATE UNIQUE INDEX IF NOT EXISTS active_assignment_per_run ON assignments(run_id) WHERE released=0')
+            db.execute('CREATE UNIQUE INDEX IF NOT EXISTS assignment_epoch ON assignments(run_id,epoch)')
             for row in db.execute('SELECT r.assignment_id,d.self_test FROM device_reservations r JOIN devices d ON d.id=r.device_id').fetchall():
                 resource = json.loads(row['self_test']).get('gpuUUID')
                 if resource:
@@ -195,7 +265,9 @@ class AgentRuntime:
                           'contributionEnabled':bool(row['enabled'] and row['desired']),
                           'workspaceId':allocation[0] if allocation else None,'computeUrl':row['compute_url'],
                           'selfTest':profile, 'allocatedTo':reservation[0] if reservation else None,
-                          'physicalResourceId':profile.get('gpuUUID')})
+                          'physicalResourceId':profile.get('gpuUUID'),
+                          'telemetry':json.loads(row['telemetry']) if row['telemetry'] else None,
+                          'telemetryHistory':[json.loads(h[0]) for h in db.execute('SELECT body FROM device_telemetry_history WHERE device_id=? ORDER BY received_at DESC LIMIT 60',(row['id'],)).fetchall()][::-1]})
         return result
 
     def capabilities(self):
@@ -203,10 +275,13 @@ class AgentRuntime:
                 'workerIds':[d['workerId'] for d in self.devices() if d['approvalStatus']=='APPROVED'],
                 'workloads':['arith16','cot_l3_q32','cot_l3_q64','cot_l1_q128'],
                 'schedulerPolicies':['greedy'],'syncModes':['synchronous'],'quarantinedWorkerIds':[d['workerId'] for d in self.devices() if d['approvalStatus']=='QUARANTINED'],
-                'maxRunSeconds':None,'unsupported':['pause','resume','change-workers','model-upload','dataset-upload','asynchronous']}
+                'maxRunSeconds':None,'telemetry':True,'pauseResume':True,'unsupported':['change-workers','model-upload','dataset-upload','asynchronous']}
 
     def workers(self):
-        return [{**d,'status':d['connectionStatus'],'host':d['computeUrl'],'profile':d['selfTest'],
+        return [{**d,'status':d['connectionStatus'],'host':d['computeUrl'],'profile':{**d['selfTest'],
+                 **({'vramFreeMb':max(0,d['telemetry']['gpu']['vramTotalMb']-d['telemetry']['gpu']['vramUsedMb'])} if d.get('telemetry') and d['telemetry'].get('gpu') and d['telemetry']['gpu'].get('vramTotalMb') is not None and d['telemetry']['gpu'].get('vramUsedMb') is not None else {})},
+                 'temperatureC':(d.get('telemetry') or {}).get('gpu',{}).get('temperatureC') if (d.get('telemetry') or {}).get('gpu') else None,
+                 'utilizationPercent':(d.get('telemetry') or {}).get('gpu',{}).get('utilizationPercent') if (d.get('telemetry') or {}).get('gpu') else None,
                  'admissionStatus':'APPROVED' if d['approvalStatus']=='APPROVED' else 'PENDING_VERIFICATION'} for d in self.devices()]
 
     def waiting_reason(self, body, db=None):
@@ -243,7 +318,15 @@ class AgentRuntime:
 
     def commands(self, device_id):
         with self.store.db() as db:
-            return [json.loads(r[0]) for r in db.execute('SELECT body FROM device_commands WHERE device_id=? AND ack=0 ORDER BY created',(device_id,))]
+            result=[]
+            for row in db.execute('SELECT body FROM device_commands WHERE device_id=? AND ack=0 ORDER BY created',(device_id,)):
+                command=json.loads(row[0])
+                if command['kind'] in ('COORDINATE','START_WORKER','PAUSE_ASSIGNMENT','UPDATE_BACKUP_POLICY'):
+                    assignment=db.execute('SELECT released FROM assignments WHERE id=? AND epoch=?',
+                        (command['assignmentId'],command['epoch'])).fetchone()
+                    if not assignment or assignment['released']:continue
+                result.append(command)
+            return result
 
     def reservations(self):
         with self.store.db() as db:
@@ -257,11 +340,13 @@ class AgentRuntime:
     def submit(self, config):
         with self.store.db() as db:
             db.execute('BEGIN IMMEDIATE')
-            old=db.execute('SELECT body FROM assignments WHERE run_id=?',(config['runId'],)).fetchone()
-            if old:
-                if json.loads(old[0])['config']!=config:raise RuntimeRejected('Frozen assignment cannot change')
-                return
+            old=db.execute('SELECT * FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1',(config['runId'],)).fetchone()
             body=self.store.get(config['runId'])
+            if old:
+                if json.loads(old['body'])['config']!=config:raise RuntimeRejected('Frozen assignment cannot change')
+                if not body.get('resumeRequested'):return
+                if not old['released'] or json.loads(old['snapshot'])['state']['status']!='PAUSED':
+                    raise RuntimeRejected('Resume requires a released paused assignment')
             if reason:=self.waiting_reason(body, db):raise ConnectionError(reason)
             devices=self.devices(db);by_id={d['deviceId']:d for d in devices};by_worker={d['workerId']:d for d in devices}
             co=by_id[config['coordinatorDeviceId']]
@@ -270,23 +355,30 @@ class AgentRuntime:
             # Secrets are random per device/run, stored only in the private product DB.
             grants={d['workerId']:secrets.token_urlsafe(32) for d in chosen.values() if d['workerId'] in config['workerIds']}
             assignment={'assignmentId':aid,'runId':config['runId'],'coordinatorDeviceId':co['deviceId'],
-                        'epoch':1,'deviceIds':list(chosen),'config':config,'computeUrl':co['computeUrl'],
+                        'epoch':old['epoch']+1 if old else 1,'deviceIds':list(chosen),'config':config,'computeUrl':co['computeUrl'],
                         'workerDevices':{w:by_worker[w]['deviceId'] for w in config['workerIds']},'computeGrants':grants}
             snap={'state':{'status':'STARTING'},'generations':[],'candidates':[],'attempts':[],'events':[],'artifacts':[]}
-            db.execute('INSERT INTO assignments VALUES (?,?,?,?,?,?,0)',(aid,config['runId'],co['deviceId'],1,json.dumps(assignment),json.dumps(snap)))
+            if old:
+                prior=json.loads(old['snapshot'])
+                assignment['resumeFrom']=prior['state']['pauseCheckpoint']
+                snap={**prior,'state':{'status':'STARTING'}}
+            db.execute('INSERT INTO assignments VALUES (?,?,?,?,?,?,0)',(aid,config['runId'],co['deviceId'],assignment['epoch'],json.dumps(assignment),json.dumps(snap)))
             for did in chosen:db.execute('INSERT INTO device_reservations VALUES (?,?)',(did,aid))
             for resource in {d['physicalResourceId'] for d in chosen.values()}:
                 db.execute('INSERT INTO physical_reservations VALUES (?,?)',(resource,aid))
             self._enqueue(db,co['deviceId'],'COORDINATE',{**assignment,'effectiveBackupPolicy':body.get('requestedBackupPolicy') or config['backupPolicy']},'coordinate:'+aid)
+            body['resumeRequested']=False
+            body['pauseRequested']=False
+            self.store.save(db,body)
             self.store.audit(db,'system','ASSIGNMENT_CREATED',aid,body['workspaceId'])
 
     def snapshot(self, run_id):
         with self.store.db() as db:
-            row=db.execute('SELECT snapshot,released FROM assignments WHERE run_id=?',(run_id,)).fetchone()
+            row=db.execute('SELECT snapshot,released FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1',(run_id,)).fetchone()
             if not row:raise FileNotFoundError(run_id)
             snap=json.loads(row[0])
-            if not row[1] and snap['state']['status'] in TERMINAL:
-                snap['state']={**snap['state'],'status':'DRAINING'}
+            if not row[1] and snap['state']['status'] in QUIESCENT:
+                snap['state']={**snap['state'],'status':'PAUSING' if snap['state']['status']=='PAUSED' else 'DRAINING'}
             return snap
 
     def runs(self):
@@ -301,15 +393,22 @@ class AgentRuntime:
             with self.store.db() as connection:
                 return self.cancel(run_id, connection)
         if True:
-            row=db.execute('SELECT id,body,released FROM assignments WHERE run_id=?',(run_id,)).fetchone()
+            row=db.execute('SELECT id,body,released FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1',(run_id,)).fetchone()
             if not row or row['released']:return
             ar=json.loads(row['body'])
             for did in ar['deviceIds']:
                 self._enqueue(db,did,'CANCEL_ASSIGNMENT',{'assignmentId':ar['assignmentId'],'epoch':ar['epoch']},'cancel:'+ar['assignmentId']+':'+did)
 
+    def pause(self,run_id):
+        with self.store.db() as db:
+            row=db.execute('SELECT * FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1',(run_id,)).fetchone()
+            if not row or row['released']:return
+            self._enqueue(db,row['coordinator'],'PAUSE_ASSIGNMENT',
+                {'assignmentId':row['id'],'epoch':row['epoch']},'pause:'+row['id'])
+
     def _release_confirmed(self, db, row, ar):
         snap=json.loads(row['snapshot'])
-        if row['released'] or snap['state'].get('status') not in TERMINAL:return
+        if row['released'] or snap['state'].get('status') not in QUIESCENT:return
         for did in ar['deviceIds']:
             d=db.execute('SELECT processes,seen FROM devices WHERE id=?',(did,)).fetchone()
             reports=[p for p in json.loads(d[0]) if p['assignmentId']==ar['assignmentId'] and p['epoch']==ar['epoch']]
@@ -333,6 +432,23 @@ class AgentRuntime:
                 if not updated['passed']:
                     raise HTTPException(422,'Self-test refresh must pass qualification')
                 db.execute('UPDATE devices SET self_test=? WHERE id=?',(json.dumps(updated),device['id']))
+            if body.telemetry is not None:
+                observation=body.telemetry.model_dump(exclude_none=True)
+                profile=json.loads(old['self_test'])
+                if observation.get('gpu') and profile.get('gpuUUID') and observation['gpu']['uuid']!=profile['gpuUUID']:
+                    raise HTTPException(422,'Telemetry GPU differs from qualified physical GPU')
+                observation['receivedAt']=time.time()
+                db.execute('UPDATE devices SET telemetry=? WHERE id=?',(json.dumps(observation),device['id']))
+                gpu=observation.get('gpu',{});host=observation.get('host',{})
+                point={'at':observation['receivedAt'],'gpuPowerW':gpu.get('powerDrawW'),
+                       'temperatureC':gpu.get('temperatureC'),'gpuPercent':gpu.get('utilizationPercent'),
+                       'cpuPercent':host.get('cpuPercent'),'vramUsedMb':gpu.get('vramUsedMb'),
+                       'ramUsedBytes':host.get('ramUsedBytes')}
+                db.execute('INSERT OR IGNORE INTO device_telemetry_history VALUES (?,?,?,?,?)',
+                    (device['id'],body.bootId,observation['sampledAt'],observation['receivedAt'],json.dumps(point)))
+                db.execute('DELETE FROM device_telemetry_history WHERE device_id=? AND rowid NOT IN (SELECT rowid FROM device_telemetry_history WHERE device_id=? ORDER BY received_at DESC LIMIT 180)',(device['id'],device['id']))
+            elif old['boot_id']!=body.bootId:
+                db.execute('UPDATE devices SET telemetry=NULL WHERE id=?',(device['id'],))
             changed=old['boot_id']!=body.bootId
             desired=0 if changed else old['desired']
             # ON must be requested through owner auth and observed on this same boot.
@@ -369,7 +485,12 @@ class AgentRuntime:
                 row=db.execute('SELECT * FROM assignments WHERE id=?',(report.assignmentId,)).fetchone()
                 if not row or row['coordinator']!=device['id'] or row['epoch']!=report.epoch:continue
                 if len(json.dumps(report.snapshot))>2_000_000:raise HTTPException(413,'Snapshot is too large')
-                if report.snapshot.get('state',{}).get('status') not in TERMINAL|{'STARTING','RUNNING','CANCELLING','RECOVERING','DRAINING'}:raise HTTPException(422,'Invalid runtime status')
+                if report.snapshot.get('state',{}).get('status') not in QUIESCENT|{'STARTING','RUNNING','CANCELLING','RECOVERING','DRAINING','PAUSING'}:raise HTTPException(422,'Invalid runtime status')
+                if report.snapshot['state']['status']=='PAUSED':
+                    point=report.snapshot['state'].get('pauseCheckpoint',{})
+                    import re
+                    if point.get('verified') is not True or type(point.get('generation')) is not int or point['generation']<0 or not re.fullmatch('[a-f0-9]{32}',str(point.get('pointId',''))) or any(not re.fullmatch('[a-f0-9]{64}',str(point.get(k,''))) for k in ('childWeightsSha256','parentWeightsSha256')):
+                        raise HTTPException(422,'Pause requires a verified completed checkpoint')
                 if any(not isinstance(report.snapshot.get(k),list) for k in ('generations','candidates','attempts','events','artifacts')):raise HTTPException(422,'Invalid runtime snapshot')
                 accepted.append({'assignmentId':report.assignmentId,'sequence':report.sequence})
                 already=db.execute('SELECT 1 FROM device_reports WHERE device_id=? AND assignment_id=? AND sequence=?',(device['id'],report.assignmentId,report.sequence)).fetchone()
@@ -382,7 +503,8 @@ class AgentRuntime:
                     # A completed assignment can still finish artifact/event sync.
                     # Its terminal state and numerical lineage remain immutable.
                     cached=self.store.snapshot(row['run_id'])
-                    if cached and 'artifactContents' in report.snapshot:
+                    latest=db.execute('SELECT id FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1',(row['run_id'],)).fetchone()[0]
+                    if latest==row['id'] and cached and 'artifactContents' in report.snapshot:
                         cached['artifactContents']=report.snapshot['artifactContents']
                         db.execute('UPDATE experiments SET snapshot=? WHERE id=?',(json.dumps(cached,allow_nan=False),row['run_id']))
             for row in db.execute('SELECT * FROM assignments WHERE released=0').fetchall():
@@ -395,7 +517,7 @@ class AgentRuntime:
             # Previously accepted assignments must remain recoverable even after OFF;
             # the agent adopts living processes but gates every new launch locally.
             return {'deviceId':device['id'],'approvalStatus':old['status'],'desiredContribution':bool(desired and allowed),
-                    'commands':commands[:100], 'acceptedReports':accepted,'acceptedEvents':accepted_events,'heartbeatSeconds':10,
+                    'commands':commands[:100], 'acceptedReports':accepted,'acceptedEvents':accepted_events,'heartbeatSeconds':10,'telemetrySupported':True,
                     'releasedAssignments':[row['id'] for row in db.execute('SELECT id,body FROM assignments WHERE released=1') if device['id'] in json.loads(row['body'])['deviceIds']]}
 
     def worker_command(self, device, body):

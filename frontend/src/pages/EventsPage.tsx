@@ -247,7 +247,7 @@ export function EventsPage() {
                           aria-pressed={isSelected}
                           onClick={() => updateParams({ selected: event.eventId })}
                         >
-                          {event.message}
+                          {t(event.message)}
                         </button>
                       </div>
                     </div>
@@ -286,7 +286,7 @@ export function EventsPage() {
                   {formatFullDateTime(selected.timestamp)} {t("GMT+7")}</span>
               </div>
 
-              <div>{selected.message}</div>
+              <div>{t(selected.message)}</div>
 
               <div>
                 <div className="hint" style={{ marginBottom: 4 }}>

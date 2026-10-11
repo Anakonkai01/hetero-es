@@ -8,6 +8,7 @@ import "./index.css";
 import { IS_MOCK } from "./lib/dataSource";
 import {ProductProvider} from '@heteroes/product-ui';
 import '@heteroes/product-ui/theme.css';
+import './product.css';
 
 async function enableMocking() {
   if (!IS_MOCK) {

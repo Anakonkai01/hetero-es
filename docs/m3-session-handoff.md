@@ -1,5 +1,16 @@
 # Session handoff — 2026-10-11
 
+**Latest continuation:** the owner prioritized comprehensive Web/Worker/Server
+UI improvements. Read [UI monitoring and live process guide](ui-monitoring-guide.md)
+and [UI acceptance evidence](evidence/2026-10-11-ui/README.md) before the historical
+closeout below. Both active checkouts are on `feat/local-lab-completion`; Track A
+HEAD is `0fb8e16`, and Track B HEAD contains the UI/pause/telemetry continuation.
+Homepage preview: `http://100.110.165.40:5181/`; new app build `ui-20261011-r2`.
+Dispatch is held, local contribution OFF and reservations zero. One isolated
+local monitoring Agent is running; do not launch another Agent for its identity.
+Archive-2tb was remounted after a reboot; verify its UUID before future writes.
+The closeout bundles below retain the older session, not these new commits.
+
 **Execution resumed:** see [local completion progress](local-lab-progress.md).
 The owner authorized M3a–M6 local implementation, removed GPU-hour/total-run
 budget caps and authorized persistent private sudo credentials. Retrieve the

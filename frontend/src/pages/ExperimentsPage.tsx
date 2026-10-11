@@ -1,8 +1,8 @@
 import {useProduct} from '@heteroes/product-ui';
 import { archiveExperiment } from "../api/experiments";
 import { useAccessMutation } from "../hooks/useAccess";
-import { Badge } from "../components/ui/Badge";
-import { EXPERIMENT_STATUS } from "../lib/labels";
+import {RunCard} from "../components/experiments/RunCard";
+
 import { useState } from "react";
 import { Link } from "react-router";
 import { EmptyState } from "../components/common/EmptyState";
@@ -77,7 +77,7 @@ export function ExperimentsPage() {
         }
       />
 
-      <div className="acts"><button className="btn" onClick={() => setView("grid")}>{t("Grid")}</button><button className="btn" onClick={() => setView("list")}>{t("List")}</button></div>
+      <div className="section-title"><span className="hint">{experiments.length} {t("recorded experiments")}</span><div className="view-toggle"><button aria-pressed={view==="grid"} className={view==="grid"?"selected":""} onClick={() => setView("grid")}>{t("Grid")}</button><button aria-pressed={view==="list"} className={view==="list"?"selected":""} onClick={() => setView("list")}>{t("List")}</button></div></div>
       {!IS_MOCK && <LabQueue />}
       {archive.error && <div className="note err" role="alert">{archive.error.message}</div>}
       <section className="card" aria-label={t("Experiment list")}>
@@ -140,12 +140,12 @@ export function ExperimentsPage() {
               {t("Clear filters")}</button>
           </EmptyState>
         ) : (
-          view === "list" ? <ExperimentTable experiments={rows} /> : <div className="resource-grid cb">{rows.map((e) => <section className="card" key={e.experimentId}><div className="ch"><h2>{e.name}</h2><Badge info={EXPERIMENT_STATUS[e.status]} /></div><div className="cb demo-form"><span>{e.modelName}</span><span>{e.task} · {e.workerIds?.length ?? 0} {t("Workers")}</span><span>{e.completedGenerations ?? 0}/{e.maxGenerations ?? "—"} {t("generations completed")}</span><div className="acts"><Link className="btn" to={`/experiments/${e.experimentId}`}>{e.status === "DRAFT" ? "Open / edit draft" : "Open dashboard"}</Link>{!["RUNNING", "QUEUED", "PAUSING", "PAUSED", "STARTING", "CANCELLING", "RECOVERING", "DRAINING"].includes(e.status) && <button className="btn dng" disabled={archive.isPending} onClick={() => { if (window.confirm("Archive this experiment?")) void archive.mutateAsync(e.experimentId).catch(() => {}); }}>{t("Delete / archive")}</button>}</div></div></section>)}</div>
+          view === "list" ? <ExperimentTable experiments={rows} /> : <div className="resource-grid cb">{rows.map((e) => <div key={e.experimentId}><RunCard experiment={e}/>{!["RUNNING", "QUEUED", "PAUSING", "PAUSED", "STARTING", "CANCELLING", "RECOVERING", "DRAINING"].includes(e.status)&&<button className="link archive-link" disabled={archive.isPending} onClick={()=>{if(window.confirm(t("Archive this experiment?")))void archive.mutateAsync(e.experimentId).catch(()=>{});}}>{t("Archive")}</button>}</div>)}</div>
         )}
       </section>
 
       <p className="hint" style={{ margin: 0 }}>
-        {t("Times in GMT+7. Showing")}{rows.length} {t("experiments.")}</p>
+        {t("Times in GMT+7. Showing")} {rows.length} {t("experiments.")}</p>
     </QueryState>
   );
 }

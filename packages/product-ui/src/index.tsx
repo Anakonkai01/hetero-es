@@ -40,15 +40,15 @@ export function ProductProvider({ children }: {
 export function useProduct() { return useContext(Context); }
 export function PreferencesControl() {
     const { preferences, setPreferences, t } = useProduct();
-    return <div className="preferences" aria-label={t('Appearance and language')}>
+    return <details className="preference-menu"><summary aria-label={t('Appearance and language')}><span aria-hidden="true">◐</span> {t('Appearance and language')}</summary><div className="preferences" aria-label={t('Appearance and language')}>
     <label><span>{t('Language')}</span><select aria-label={t('Language')} value={preferences.language} onChange={event => setPreferences({ language: event.target.value as Language })}><option value="vi">Tiếng Việt</option><option value="en">English</option></select></label>
     <label><span>{t('Theme')}</span><select aria-label={t('Theme')} value={preferences.theme} onChange={event => setPreferences({ theme: event.target.value as Theme })}><option value="system">{t('System')}</option><option value="light">{t('Light')}</option><option value="dark">{t('Dark')}</option></select></label>
     <label><span>{t('Accent')}</span><select aria-label={t('Accent')} value={preferences.accent} onChange={event => setPreferences({ accent: event.target.value as Accent })}><option value="teal">{t('Teal')}</option><option value="blue">{t('Blue')}</option><option value="violet">{t('Violet')}</option></select></label>
-  </div>;
+  </div></details>;
 }
 export function Status({ value }: {
     value: string;
-}) { const { t } = useProduct(); return <span className={`product-status status-${value.toLowerCase()}`}>{t(value)}</span>; }
+}) { const { t } = useProduct(); return <span className={`product-status status-${value.toLowerCase().replace(/[^a-z0-9_-]/g,'-')}`}>{t(value)}</span>; }
 export function StepHeader({ steps, current }: {
     steps: string[];
     current: number;
@@ -57,3 +57,19 @@ export function Alert({ children, tone = 'info' }: {
     children: ReactNode;
     tone?: 'info' | 'error' | 'warning';
 }) { return <div className={`product-alert ${tone}`} role={tone === 'error' ? 'alert' : 'status'}>{children}</div>; }
+
+export function ProductMark() {
+    return <svg viewBox="0 0 32 32" width="32" height="32" fill="none" aria-hidden="true"><rect width="32" height="32" rx="9" fill="currentColor"/><path d="M9 22v-6m7 6V10m7 12V7" stroke="var(--on-acc)" strokeWidth="3" strokeLinecap="round"/></svg>;
+}
+
+export function CopyValue({value,label='Copy'}:{value:string;label?:string}) {
+    const {t}=useProduct();const [result,setResult]=useState('');
+    return <div className="copy-value"><code>{value}</code><button type="button" className="secondary" onClick={()=>void navigator.clipboard.writeText(value).then(()=>setResult('Copied')).catch(()=>setResult('Select and copy manually'))}>{t(result||label)}</button><span className="sr-only" role="status">{t(result)}</span></div>;
+}
+export {ResourceTelemetry,readableBytes,type ResourceObservation,type ResourceHistoryPoint} from './telemetry';
+
+export function useObservationTime(){
+ const [now,setNow]=useState(()=>Date.now()/1000);
+ useEffect(()=>{const timer=setInterval(()=>setNow(Date.now()/1000),5000);return()=>clearInterval(timer);},[]);
+ return now;
+}

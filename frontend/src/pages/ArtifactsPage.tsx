@@ -1,3 +1,5 @@
+import {downloadArtifact} from "../api/client";
+import {IS_MOCK} from "../lib/dataSource";
 import {useProduct} from '@heteroes/product-ui';
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router";
@@ -24,6 +26,8 @@ const typeOptions = Object.keys(ARTIFACT_TYPE_LABEL) as ArtifactType[];
 export function ArtifactsPage() {
   const {t}=useProduct();
   const { flash } = useAppState();
+  const [downloadError,setDownloadError]=useState("");
+  const [downloading,setDownloading]=useState(false);
   const artifactsQuery = useArtifacts();
   const experimentsQuery = useExperiments();
   const [params, setParams] = useSearchParams();
@@ -72,6 +76,7 @@ export function ArtifactsPage() {
         description={t("Files tied to experiments: configs, checkpoints, manifests and evaluation results.")}
       />
 
+      {downloadError&&<div className="note err" role="alert">{downloadError}</div>}
       <div className="split">
         <section className="card a" aria-label={t("Artifact list")}>
           <div className="filters" style={{ paddingTop: 16 }}>
@@ -257,10 +262,10 @@ export function ArtifactsPage() {
                 <button
                   type="button"
                   className="btn pri"
-                  disabled={selected.status !== "READY"}
-                  onClick={() => flash(`Simulated download: ${selected.name}`)}
+                  disabled={selected.status !== "READY"||downloading}
+                  onClick={() => {if(IS_MOCK){flash(`Simulated download: ${selected.name}`);return;}setDownloadError("");setDownloading(true);void downloadArtifact(selected.artifactId,selected.name).catch((e:Error)=>setDownloadError(e.message)).finally(()=>setDownloading(false));}}
                 >
-                  {t("Download (demo)")}</button>
+                  {t(downloading?"Downloading…":IS_MOCK?"Download (demo)":"Download")}</button>
               </div>
             </div>
           )}

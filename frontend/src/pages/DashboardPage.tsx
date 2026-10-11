@@ -1,160 +1,40 @@
-import {useProduct} from '@heteroes/product-ui';
-import { useState } from "react";
-import { Link } from "react-router";
-import { useAppState } from "../app/appState";
-import { isServerError } from "../api/client";
-import { EmptyState } from "../components/common/EmptyState";
-import { ErrorState } from "../components/common/ErrorState";
-import { QueryState } from "../components/common/QueryState";
-import { EventRows } from "../components/events/EventRows";
-import { ExperimentTable } from "../components/experiments/ExperimentTable";
-import { PageHeader } from "../components/ui/PageHeader";
-import { Stat } from "../components/ui/Stat";
-import { WorkerTable } from "../components/workers/WorkerTable";
-import { useEvents } from "../hooks/useEvents";
-import { useExperiments } from "../hooks/useExperiments";
-import { useWorkers } from "../hooks/useWorkers";
-import { fromDashboard } from "../lib/navigation";
+import {Link} from 'react-router';
+import {useQuery} from '@tanstack/react-query';
+import {useProduct,Status,useObservationTime} from '@heteroes/product-ui';
+import {useSession} from '../app/session';
+import {apiGet} from '../api/client';
+import {useExperiments} from '../hooks/useExperiments';
+import {useWorkers} from '../hooks/useWorkers';
+import {useEvents} from '../hooks/useEvents';
+import {PageHeader} from '../components/ui/PageHeader';
+import {Stat} from '../components/ui/Stat';
+import {RunCard} from '../components/experiments/RunCard';
+import {EventRows} from '../components/events/EventRows';
+import {QueryState} from '../components/common/QueryState';
+import {EmptyState} from '../components/common/EmptyState';
+import {LabQueue} from './LabQueue';
+import {IS_MOCK} from '../lib/dataSource';
 
-const DAY_MS = 24 * 60 * 60 * 1000;
-const RECENT_EXPERIMENT_LIMIT = 4;
-const RECENT_EVENT_LIMIT = 5;
-
-export function DashboardPage() {
-  const {t}=useProduct();
-  const { retryRegion } = useAppState();
-  const experimentsQuery = useExperiments();
-  const workersQuery = useWorkers();
-  const eventsQuery = useEvents();
-  const [now] = useState(() => Date.now());
-
-  const experiments = experimentsQuery.data ?? [];
-  const workers = workersQuery.data ?? [];
-  const events = eventsQuery.data ?? [];
-
-  const lastDay = events.filter(
-    (event) => now - new Date(event.timestamp).getTime() <= DAY_MS,
-  );
-  const errorCount = lastDay.filter((e) => e.severity === "ERROR").length;
-  const warningCount = lastDay.filter((e) => e.severity === "WARNING").length;
-
-  const active = (status: string) => status === "RUNNING" || status === "QUEUED";
-  const recentExperiments = experiments
-    .filter((e) => active(e.status))
-    .concat(experiments.filter((e) => !active(e.status)))
-    .slice(0, RECENT_EXPERIMENT_LIMIT);
-
-  const online = workers.filter((w) => w.status === "ONLINE").length;
-  const admitted = workers.filter(
-    (w) =>
-      w.admissionStatus === "ADMITTED" ||
-      w.admissionStatus === "ADMITTED_LIMITED",
-  ).length;
-
-  const eventsFailed = eventsQuery.isError && isServerError(eventsQuery.error);
-
-  return (
-    <QueryState
-      isPending={experimentsQuery.isPending || workersQuery.isPending}
-      isError={experimentsQuery.isError || workersQuery.isError}
-      hasData={Boolean(experimentsQuery.data && workersQuery.data)}
-      title={t("Could not load the dashboard")}
-    >
-      <PageHeader
-        title={t("Dashboard")}
-        description={t("Cluster and experiment status as of the latest update.")}
-      />
-
-      <div className="stats">
-        <Stat
-          label={t("Running experiments")}
-          value={experiments.filter((e) => e.status === "RUNNING").length}
-          unit={`of ${experiments.length}`}
-          note="Across all recorded experiments"
-        />
-        <Stat
-          label={t("Active workers (online)")}
-          value={online}
-          unit={`of ${workers.length}`}
-          note="Online does not mean admitted"
-        />
-        <Stat
-          label={t("Admitted workers")}
-          value={admitted}
-          unit={`of ${workers.length}`}
-          note="Full or limited admission"
-        />
-        <Stat
-          label={t("Errors / warnings (last 24 h)")}
-          value={errorCount}
-          unit={`errors · ${warningCount} warnings`}
-          note="Times in GMT+7"
-        />
-      </div>
-
-      <section className="card" aria-labelledby="h-dexp">
-        <div className="ch">
-          <h2 id="h-dexp">{t("Running and recent experiments")}</h2>
-          <Link className="link" to="/experiments">
-            {t("View all experiments →")}</Link>
-        </div>
-        {experiments.length === 0 ? (
-          <EmptyState
-            title={t("No experiments yet")}
-            message="Create your first experiment to start tracking progress here."
-          >
-            <Link className="btn pri" to="/experiments/new">
-              {t("Create experiment")}</Link>
-          </EmptyState>
-        ) : (
-          <ExperimentTable
-            experiments={recentExperiments}
-            compact
-            backState={fromDashboard}
-          />
-        )}
-      </section>
-
-      <div className="two">
-        <section className="card" aria-labelledby="h-dwk">
-          <div className="ch">
-            <h2 id="h-dwk">{t("Workers")}</h2>
-            <Link className="link" to="/workers">
-              {t("Open list →")}</Link>
-          </div>
-          {workers.length === 0 ? (
-            <EmptyState title={t("No workers registered")} />
-          ) : (
-            <WorkerTable workers={workers} compact />
-          )}
-        </section>
-
-        <section className="card" aria-labelledby="h-dev">
-          <div className="ch">
-            <h2 id="h-dev">{t("Recent events")}</h2>
-            <Link className="link" to="/events">
-              {t("Open log →")}</Link>
-          </div>
-          {eventsFailed ? (
-            <ErrorState
-              title={t("Could not load events")}
-              message="The other regions are still readable."
-              onRetry={retryRegion}
-              retryLabel="Retry this region"
-            />
-          ) : events.length === 0 ? (
-            <EmptyState
-              title={t("No events yet")}
-              message="Events appear once experiments or workers are active."
-            />
-          ) : (
-            <EventRows
-              events={events.slice(0, RECENT_EVENT_LIMIT)}
-              label={t("Recent events")}
-            />
-          )}
-        </section>
-      </div>
-    </QueryState>
-  );
+const activeStates=['RUNNING','STARTING','RECOVERING','PAUSING','CANCELLING','DRAINING'];
+export function DashboardPage(){
+ const now=useObservationTime();const {t}=useProduct();const {workspace,session}=useSession();const runs=useExperiments(),workers=useWorkers(),events=useEvents();
+ const operations=useQuery({queryKey:['platform-operations',session?.user.userId],queryFn:()=>apiGet<{dispatchHeld:boolean;queueCount:number;runtimeIssue:string|null;reservations:unknown[]}>('/api/v1/platform/operations'),enabled:!IS_MOCK&&!!session?.user.platformAdmin,refetchInterval:5000,retry:1});
+ const experiments=runs.data??[];const devices=workers.data??[];
+ const running=experiments.filter(e=>activeStates.includes(e.status));const queued=experiments.filter(e=>e.status==='QUEUED');
+ const unique=new Map(devices.filter(w=>w.status==='ONLINE').map(w=>[w.physicalResourceId??w.workerId,w]));
+ const power=[...unique.values()].filter(w=>w.telemetry?.gpu?.powerDrawW!==undefined&&now-(w.telemetry.receivedAt??w.telemetry.sampledAt)<30);
+ const watts=power.reduce((sum,w)=>sum+(w.telemetry?.gpu?.powerDrawW??0),0);
+ const recent=[...experiments].sort((a,b)=>Number(activeStates.includes(b.status))-Number(activeStates.includes(a.status))||b.createdAt.localeCompare(a.createdAt)).slice(0,4);
+ const distribution=[{name:'Active',value:running.length,color:'var(--acc)'},{name:'Queued',value:queued.length,color:'var(--warning)'},{name:'Completed',value:experiments.filter(e=>e.status==='COMPLETED').length,color:'var(--chart-secondary)'},{name:'Other states',value:experiments.filter(e=>!activeStates.includes(e.status)&&!['QUEUED','COMPLETED'].includes(e.status)).length,color:'var(--mut)'}];
+ return <><PageHeader title={t('Dashboard')} description={`${workspace?.name??t('Your lab')} · ${t('Resources, experiments and system activity in one place.')}`} actions={<Link className="btn pri" to="/experiments/new">+ {t('Create experiment')}</Link>}/>
+ {!workspace?<EmptyState title={t('Select a workspace')} message="Choose a workspace to view its experiments and resources."><Link className="btn pri" to="/workspace">{t('Workspaces')}</Link></EmptyState>:<QueryState isPending={runs.isPending||workers.isPending} isError={runs.isError||workers.isError} hasData={!!runs.data&&!!workers.data} title={t('Could not load the dashboard')}>
+ <div className="dashboard-welcome"><div><h2>{t('Your research at a glance.')}</h2><p>{t('Contribution, connection and allocation are shown separately for each GPU.')}</p></div>{operations.data&&<Status value={operations.data.dispatchHeld?'Dispatch held':'Dispatch enabled'}/>}</div>
+ {operations.data?.dispatchHeld&&<div className="note warn">{t('Dispatch is held. Queued experiments will wait until an administrator enables it.')} <Link to="/operations">{t('Lab operations')} →</Link></div>}
+ {operations.data?.runtimeIssue&&<div className="note err" role="alert">{operations.data.runtimeIssue}</div>}
+ <div className="stats"><Stat label={t('Active experiments')} value={running.length} note={`${queued.length} ${t('in queue')}`}/><Stat label={t('Online GPU devices')} value={unique.size} unit={`/ ${devices.length}`} note={t('Physical UUIDs are deduplicated when available')}/><Stat label={t('Contribution enabled')} value={devices.filter(w=>w.status==='ONLINE'&&w.contributionEnabled).length} note={t('Owner-approved devices that are online')}/><Stat label={t('Observed GPU power')} value={power.length?watts.toFixed(0):'—'} unit="W" note={`${power.length} ${t('GPUs reporting fresh power samples')}`}/></div>
+ <div className="dashboard-grid"><div className="dashboard-stack"><div className="section-title"><div><h2>{t('Recent experiments')}</h2><p>{t('Active runs appear first.')}</p></div><Link className="link" to="/experiments">{t('View all')} →</Link></div>{recent.length?<div className="resource-grid">{recent.map(e=><RunCard key={e.experimentId} experiment={e}/>)}</div>:<section className="card"><EmptyState title={t('No experiments yet')} message="Create your first experiment to start tracking progress here."><Link className="btn pri" to="/experiments/new">{t('Create experiment')}</Link></EmptyState></section>}
+ {!IS_MOCK&&<LabQueue showEmpty/>}<section className="card"><div className="ch"><h2>{t('Recent events')}</h2><Link className="link" to="/events">{t('Open log')} →</Link></div>{events.isError?<div className="cb note err" role="alert">{t('Activity unavailable')}</div>:events.isPending?<div className="cb" role="status">{t('Loading…')}</div>:events.data?.length?<EventRows events={[...events.data].sort((a,b)=>Date.parse(b.timestamp)-Date.parse(a.timestamp)).slice(0,5)} label={t('Recent events')}/>:<EmptyState title={t('No events yet')}/>}</section></div>
+ <div className="dashboard-stack"><section className="card"><div className="ch"><h2>{t('GPU fleet')}</h2><Link className="link" to="/workers">{t('Manage')} →</Link></div>{devices.length?devices.map(w=><article className="device-mini" key={w.workerId}><div className="device-mini-heading"><Link to={`/workers/${w.workerId}`}>{w.displayName??w.profile.gpuName}</Link><Status value={w.status}/></div><p>{w.profile.gpuName} · {(w.profile.vramTotalMb/1024).toFixed(1)} GiB</p><div className="acts"><Status value={w.contributionEnabled?'ON':'OFF'}/><Status value={w.allocatedTo?'Allocated':'Idle'}/></div><p>{w.allocatedTo?<Link to={`/experiments/${w.allocatedTo}`}>{t('Open allocated experiment')} →</Link>:t('No active allocation')}</p></article>):<EmptyState title={t('No workers registered')}/>}</section>
+ <section className="card"><div className="ch"><h2>{t('Experiment states')}</h2></div><div className="cb"><div className="status-distribution" aria-hidden="true">{distribution.filter(d=>d.value).map(d=><span key={d.name} style={{flex:d.value,background:d.color}}/>)}</div><div className="status-legend">{distribution.map(d=><span key={d.name}><i style={{background:d.color}}/>{t(d.name)}<b>{d.value}</b></span>)}</div></div></section></div></div>
+ </QueryState>}</>;
 }

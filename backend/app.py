@@ -298,7 +298,7 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
             if body["status"] in TERMINAL:
                 return body
             body["cancelRequested"] = True
-            if body["status"] in ("DRAFT", "QUEUED"):
+            if body["status"] in ("DRAFT", "QUEUED", "PAUSED"):
                 body.update(status="CANCELLED", completedAt=now())
                 db.execute("DELETE FROM queue WHERE run_id=?", (run_id,))
             else:
@@ -392,6 +392,37 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
         return []
 
     if getattr(runtime,'agent_mode',False):
+        @app.post('/api/v1/experiments/{run_id}/pause')
+        def pause(run_id:str,current=Depends(scoped)):
+            with store.db() as db:
+                db.execute('BEGIN IMMEDIATE')
+                body=authorized(run_id,current)
+                if body['status']=='PAUSED':return body
+                if body.get('cancelRequested') or body['status'] not in ('STARTING','RUNNING','PAUSING'):
+                    raise HTTPException(409,'Pause requires a running experiment')
+                body.update(pauseRequested=True,status='PAUSING')
+                store.save(db,body)
+                store.audit(db,current['userId'],'PAUSE_REQUESTED',run_id,body['workspaceId'])
+            runtime.pause(run_id)
+            return body
+
+        @app.post('/api/v1/experiments/{run_id}/resume')
+        def resume(run_id:str,current=Depends(scoped)):
+            with store.db() as db:
+                db.execute('BEGIN IMMEDIATE')
+                body=authorized(run_id,current)
+                if body.get('resumeRequested') and body['status'] in ('QUEUED','STARTING'):return body
+                row=db.execute('SELECT released,snapshot FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1',(run_id,)).fetchone()
+                if body['status']!='PAUSED' or not row or not row['released'] or json.loads(row['snapshot'])['state']['status']!='PAUSED':
+                    raise HTTPException(409,'Wait for the completed checkpoint and confirmed resource release')
+                if reason:=store.eligibility(db,body):raise HTTPException(409,reason)
+                body.update(status='QUEUED',resumeRequested=True,pauseRequested=False,cancelRequested=False)
+                body.pop('waitingReason',None)
+                store.save(db,body)
+                db.execute('INSERT OR IGNORE INTO queue(run_id) VALUES (?)',(run_id,))
+                store.audit(db,current['userId'],'RESUME_REQUESTED',run_id,body['workspaceId'])
+            return body
+
         @app.patch('/api/v1/experiments/{run_id}/backup-policy')
         def backup_policy(run_id:str,policy:BackupPolicy,current=Depends(scoped)):
             with store.db() as db:
@@ -399,8 +430,8 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
                 if body['status'] in TERMINAL:raise HTTPException(409,'Experiment is already finished')
                 body['requestedBackupPolicy']=policy.model_dump()
                 store.save(db,body)
-                assignment=db.execute('SELECT id,coordinator,epoch FROM assignments WHERE run_id=?',(run_id,)).fetchone()
-                if assignment:
+                assignment=db.execute('SELECT id,coordinator,epoch,released FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1',(run_id,)).fetchone()
+                if assignment and not assignment['released']:
                     runtime._enqueue(db,assignment['coordinator'],'UPDATE_BACKUP_POLICY',{'assignmentId':assignment['id'],'epoch':assignment['epoch'],'policy':policy.model_dump()},'backup-policy:'+secrets.token_hex(16))
                 store.audit(db,current['userId'],'BACKUP_POLICY_REQUESTED',run_id,body['workspaceId'])
             return {'policy':policy.model_dump(),'appliesBeforeNextGeneration':True}

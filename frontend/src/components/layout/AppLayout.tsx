@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router";
 import { useAppState } from "../../app/appState";
 import type { Scenario } from "../../mocks/scenario";
 import { formatClock } from "../../lib/format";
@@ -21,11 +21,13 @@ import {apiGet} from '../../api/client';
 import {PreferencesControl,useProduct} from '@heteroes/product-ui';
 
 const navigationItems = [
+  { label: "Dashboard", path: "/dashboard", icon: <DashboardIcon /> },
   { label: "Workspace", path: "/workspace", icon: <DashboardIcon /> },
   { label: "Workers", path: "/workers", icon: <ChipIcon /> },
-  { label: "Profile", path: "/profile", icon: <ListIcon /> },
   { label: "Models", path: "/models", icon: <FileIcon /> },
   { label: "Experiments", path: "/experiments", icon: <FlaskIcon /> },
+  { label: "Artifacts", path: "/artifacts", icon: <FileIcon /> },
+  { label: "Events", path: "/events", icon: <ListIcon /> },
 ];
 
 const scenarioOptions: { value: Scenario; label: string }[] = [
@@ -54,10 +56,11 @@ function contextName(pathname: string): string {
 
   if (section === "events") return "Events";
   if (section === "artifacts") return "Artifacts";
-  if (section === "dashboard") return "Overview";
+  if (section === "dashboard") return "Dashboard";
   if (section === "workspace") return "Workspace";
   if (section === "profile") return "Profile";
   if (section === "models") return "Models";
+  if (section === "operations") return "Lab operations";
   if (section === "scheduling") return "Worker usage";
 
   return "HeteroES";
@@ -91,13 +94,13 @@ export function AppLayout() {
       <aside className="side" aria-label={t("Primary navigation")}>
         <div className="brand">
           <div className="logo">
-            <LogoMark />
+            <Link to="/" aria-label={t("Home")}><LogoMark /></Link>
             <b>
               {t("Hetero")}<i>{t("ES")}</i>
             </b>
           </div>
           <span>
-            {t("LLM post-training with Evolution Strategies on a heterogeneous GPU cluster.")}</span>
+            {t("Distributed research lab")}</span>
         </div>
 
         <div className="demo-form" style={{ padding: "0 10px" }}>
@@ -105,8 +108,7 @@ export function AppLayout() {
             {!session?.workspaces.length && <option value="">{t("No workspace")}</option>}
             {session?.workspaces.map((item) => <option value={item.workspaceId} key={item.workspaceId}>{item.name}</option>)}
           </select></label>
-          <span className="hint">{session?.user.displayName}</span>
-          <button type="button" className="btn" onClick={() => void signOut().catch((error: unknown) => flash(error instanceof Error ? error.message : "Could not sign out."))}>{t("Sign out")}</button>
+
         </div>
 
         <nav className="navl" aria-label={t("Main sections")}>
@@ -123,7 +125,7 @@ export function AppLayout() {
           ))}
           {!IS_MOCK && session?.user.platformAdmin && session.user.accountStatus === 'ACTIVE' && <NavLink className={({ isActive }) => isActive ? 'nav on' : 'nav'} to="/operations"><ListIcon />{t("Operations")}</NavLink>}
         </nav>
-        <PreferencesControl/>
+        <div className="side-account"><Link to="/profile" className="account-link"><span className="account-avatar">{session?.user.displayName?.slice(0,1).toUpperCase()??'H'}</span><span><b>{session?.user.displayName}</b><small>{t(session?.user.platformAdmin?'Platform administrator':'Member')}</small></span></Link><button type="button" className="link" onClick={() => void signOut().catch((error: unknown) => flash(error instanceof Error ? error.message : "Could not sign out."))}>{t("Sign out")}</button></div>
 
         <div className="demo">
           {IS_MOCK ? t("Local MSW demo. Authentication, GPU states and runtime confirmations are simulated. Sample figures are not benchmarks.") : t("Private runtime · shared GPU pool.")}
@@ -133,7 +135,7 @@ export function AppLayout() {
       <div className="main">
         <header className="top">
           <button className="btn mobile-toggle" aria-label={t('Navigation')} aria-expanded={menu} onClick={()=>setMenu(!menu)}>☰</button>
-          <span className="ctx">{t(contextName(pathname))}</span>
+          <span className="ctx"><span>{workspace?.name??"HeteroES"}</span><span aria-hidden="true"> / </span><b>{t(contextName(pathname))}</b></span>
 
           <span
             className={stale ? "conn bad" : "conn"}
@@ -158,6 +160,7 @@ export function AppLayout() {
             {refreshing ? t("Refreshing…") : t("Refresh")}
           </button>
 
+          <PreferencesControl/>
           {IS_MOCK && import.meta.env.DEV && (
             <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <label htmlFor="simsel">{t("Simulate state")}</label>
