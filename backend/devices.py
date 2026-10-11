@@ -11,6 +11,7 @@ import ipaddress
 from fastapi import Depends, Header, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from .runtime import RuntimeRejected
+from .monitor_models import Core, Interface, BlockDevice, HostProcess, GPUProcess, Sensor, Power
 
 TERMINAL = {'COMPLETED', 'CANCELLED', 'FAILED'}
 QUIESCENT = TERMINAL | {'PAUSED'}
@@ -140,10 +141,28 @@ class GPUObservation(Strict):
     powerLimitW: float | None = Field(default=None,ge=0,le=10000)
     fanPercent: float | None = Field(default=None,ge=0,le=100)
     clockMhz: float | None = Field(default=None,ge=0,le=100000)
+    memoryUtilizationPercent: float | None = Field(default=None,ge=0,le=100)
+    memoryClockMhz: float | None = Field(default=None,ge=0,le=100000)
+    performanceState: str | None = Field(default=None,max_length=30)
+    pcieGeneration: float | None = Field(default=None,ge=0,le=100)
+    pcieWidth: float | None = Field(default=None,ge=0,le=100)
+    processes: list[GPUProcess] = Field(default_factory=list,max_length=64)
     energyWh: float | None = Field(default=None,ge=0)
     energySampledSeconds: float = Field(default=0,ge=0)
 
 class HostObservation(Strict):
+    uptimeSeconds: float | None = Field(default=None,ge=0)
+    cpuModel: str | None = Field(default=None,max_length=200)
+    cores: list[Core] = Field(default_factory=list,max_length=512)
+    networkInterfaces: list[Interface] = Field(default_factory=list,max_length=32)
+    blockDevices: list[BlockDevice] = Field(default_factory=list,max_length=32)
+    processes: list[HostProcess] = Field(default_factory=list,max_length=20)
+    sensors: list[Sensor] = Field(default_factory=list,max_length=128)
+    processCount: int | None = Field(default=None,ge=0)
+    ramAvailableBytes: int | None = Field(default=None,ge=0)
+    ramCachedBytes: int | None = Field(default=None,ge=0)
+    ramBuffersBytes: int | None = Field(default=None,ge=0)
+    ramDirtyBytes: int | None = Field(default=None,ge=0)
     cpuCount: int | None = Field(default=None,ge=1,le=100000)
     platform: str = Field(max_length=30)
     cpuPercent: float | None = Field(default=None,ge=0,le=100)
@@ -169,6 +188,7 @@ class TransportObservation(Strict):
     pendingEvents: int = Field(default=0,ge=0)
 
 class Telemetry(Strict):
+    power: Power | None = None
     transport: TransportObservation | None = None
     sampledAt: float = Field(ge=0)
     sessionStartedAt: float = Field(ge=0)
@@ -440,7 +460,11 @@ class AgentRuntime:
                 observation['receivedAt']=time.time()
                 db.execute('UPDATE devices SET telemetry=? WHERE id=?',(json.dumps(observation),device['id']))
                 gpu=observation.get('gpu',{});host=observation.get('host',{})
-                point={'at':observation['receivedAt'],'gpuPowerW':gpu.get('powerDrawW'),
+                power=observation.get('power') or {}
+                packages=[c['powerW'] for c in power.get('components',[]) if c['kind']=='cpu-package' and c.get('powerW') is not None]
+                point={'at':observation['receivedAt'],'cpuPowerW':sum(packages) if packages else None,
+                       'componentPowerW':power.get('componentSubtotalW'),'wholeMachineW':power.get('wholeMachineW'),
+                       'gpuPowerW':gpu.get('powerDrawW'),
                        'temperatureC':gpu.get('temperatureC'),'gpuPercent':gpu.get('utilizationPercent'),
                        'cpuPercent':host.get('cpuPercent'),'vramUsedMb':gpu.get('vramUsedMb'),
                        'ramUsedBytes':host.get('ramUsedBytes')}
@@ -517,7 +541,7 @@ class AgentRuntime:
             # Previously accepted assignments must remain recoverable even after OFF;
             # the agent adopts living processes but gates every new launch locally.
             return {'deviceId':device['id'],'approvalStatus':old['status'],'desiredContribution':bool(desired and allowed),
-                    'commands':commands[:100], 'acceptedReports':accepted,'acceptedEvents':accepted_events,'heartbeatSeconds':10,'telemetrySupported':True,
+                    'commands':commands[:100], 'acceptedReports':accepted,'acceptedEvents':accepted_events,'heartbeatSeconds':10,'telemetrySupported':True,'detailedTelemetrySupported':True,
                     'releasedAssignments':[row['id'] for row in db.execute('SELECT id,body FROM assignments WHERE released=1') if device['id'] in json.loads(row['body'])['deviceIds']]}
 
     def worker_command(self, device, body):

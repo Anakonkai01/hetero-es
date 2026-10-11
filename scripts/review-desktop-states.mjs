@@ -4,7 +4,7 @@ import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 
-const output=path.join(os.homedir(),'.local/share/heteroes-ui-review');
+const output=process.env.HETEROES_UI_EVIDENCE??path.join(os.homedir(),'.local/share/heteroes-ui-review');
 await mkdir(output,{recursive:true,mode:0o700});
 const now=Date.now()/1000;
 const sample=JSON.parse(await readFile(path.join(output,'telemetry-sample.json'),'utf8'));
@@ -26,8 +26,8 @@ const states=[
  ['worker','install',{...base,device:undefined,selfTest:undefined,setup:{...setup,installed:false}},false],
  ['worker','pair',{...base,device:undefined},false],
  ['server','setup',{setup,initialized:false,running:false,addresses:['127.0.0.1','100.64.0.1'],apiUrl:null,storageDirectory:null,autostart:false},false],
- ['server','online',{setup,initialized:true,running:true,addresses:['127.0.0.1'],apiUrl:'http://lab.invalid:8000',storageDirectory:'/mnt/artifact-disk/heteroes-artifacts',autostart:false,hostTelemetry:{sampledAt:now,...observation.host,disks:observation.disks}},false],
- ['server','error',{setup,initialized:true,running:false,error:'LAB_ADDRESS_UNAVAILABLE',addresses:['127.0.0.1'],apiUrl:'http://lab.invalid:8000',storageDirectory:'/mnt/artifact-disk/heteroes-artifacts',autostart:false,hostTelemetry:{sampledAt:now,...observation.host,disks:observation.disks}},false],
+ ['server','online',{setup,initialized:true,running:true,addresses:['127.0.0.1'],apiUrl:'http://lab.invalid:8000',storageDirectory:'/mnt/artifact-disk/heteroes-artifacts',autostart:false,resourceTelemetry:observation,telemetryHistory:history},false],
+ ['server','error',{setup,initialized:true,running:false,error:'LAB_ADDRESS_UNAVAILABLE',addresses:['127.0.0.1'],apiUrl:'http://lab.invalid:8000',storageDirectory:'/mnt/artifact-disk/heteroes-artifacts',autostart:false,resourceTelemetry:observation,telemetryHistory:history},false],
 ];
 const browser=await chromium.launch({headless:true});const results=[];
 try{
@@ -50,7 +50,33 @@ try{
    });
    await page.goto('http://desktop.invalid/index.html');await page.waitForTimeout(250);
    const disabled=mustBlock?await page.locator('.contribution button').isDisabled():undefined;
-   const checks=[{width:1100,overflow:await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)}];
+   const checks=[];
+   for(const view of ['overview','detail']){
+    const monitor=page.locator('.resource-telemetry');
+    if(await monitor.count())await monitor.getByRole('button',{name:view==='overview'?'Tổng quan':'Chi tiết',exact:true}).click();
+    for(const textSize of ['standard','large']){
+     await page.evaluate(size=>document.documentElement.dataset.textSize=size,textSize);
+     for(const width of [1100,390]){
+      await page.setViewportSize({width,height:900});
+      await page.waitForTimeout(50);
+      const layout=await page.evaluate(()=>{
+       const overlaps=[];
+       for(const card of document.querySelectorAll('.telemetry-metric')){
+        const a=card.querySelector('dt').getBoundingClientRect(),b=card.querySelector('dd').getBoundingClientRect();
+        if(a.bottom>b.top+.5)overlaps.push(card.querySelector('dt').textContent);
+       }
+       return {overflow:document.documentElement.scrollWidth>innerWidth,metricOverlaps:overlaps};
+      });
+      checks.push({view,textSize,width,...layout});
+     }
+    }
+    if(await monitor.count()){
+     for(const label of ['Phiên','Hôm nay','Tháng này','Toàn bộ lịch sử'])await monitor.getByRole('button',{name:label,exact:true}).click();
+     await page.setViewportSize({width:1100,height:900});
+     await page.screenshot({path:path.join(output,`fixture-${name}-${stateName}-${theme}-${view}.png`),fullPage:true});
+    }
+   }
+   await page.setViewportSize({width:1100,height:900});
    await page.screenshot({path:path.join(output,`fixture-${name}-${stateName}-${theme}.png`),fullPage:true});
    await page.setViewportSize({width:390,height:844});checks.push({width:390,overflow:await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)});
    results.push({name,state:stateName,theme,fixture:true,hardwareAcceptance:false,checks,browserErrors:errors,enableBlocked:disabled});
@@ -58,6 +84,6 @@ try{
   }
  }
  await writeFile(path.join(output,'desktop-states-review.json'),JSON.stringify(results,null,2),{mode:0o600});
- console.log(JSON.stringify({states:results.length,browserErrors:results.flatMap(r=>r.browserErrors),overflow:results.filter(r=>r.checks.some(c=>c.overflow)),blockedChecksPassed:results.filter(r=>r.enableBlocked===false).length===0}));
- if(results.some(r=>r.browserErrors.length||r.checks.some(c=>c.overflow)||r.enableBlocked===false))process.exitCode=1;
+ console.log(JSON.stringify({states:results.length,browserErrors:results.flatMap(r=>r.browserErrors),overflow:results.filter(r=>r.checks.some(c=>c.overflow||c.metricOverlaps?.length)),blockedChecksPassed:results.filter(r=>r.enableBlocked===false).length===0}));
+ if(results.some(r=>r.browserErrors.length||r.checks.some(c=>c.overflow||c.metricOverlaps?.length)||r.enableBlocked===false))process.exitCode=1;
 }finally{await browser.close();}

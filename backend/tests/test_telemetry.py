@@ -52,3 +52,22 @@ def test_history_is_bounded_and_identical_samples_are_deduplicated(lab):
     with r.store.db() as db:
         assert db.execute('select count(*) from device_telemetry_history where device_id=?',(d['deviceId'],)).fetchone()[0]==180
     assert len(r.workers()[0]['telemetryHistory'])==60
+
+
+def test_detail_round_trip_bounds_and_power_history(lab):
+    c,_,r,admin=lab;_,auth=pair(lab)
+    row=observation()
+    energy=dict(sessionWh=.1,todayWh=.2,monthWh=.2,lifetimeWh=.2,sessionSampledSeconds=10,sampledSeconds=20,todaySampledSeconds=20,monthSampledSeconds=20,since=time.time()-20,day='2026-10-11',month='2026-10',timezone='ICT')
+    row['host'].update(cores=[{'id':'cpu0','utilizationPercent':50}],processes=[{'pid':1,'name':'python','state':'S','cpuPercent':125,'ramBytes':1024,'threads':3}],sensors=[{'id':'hwmon0/temp1','group':'coretemp','label':'Package id 0','kind':'temperature','value':42,'unit':'°C'}])
+    row['power']={'hostId':'a'*32,'components':[{'id':'cpu:host:package0','label':'package-0','kind':'cpu-package','powerW':20,'includedInSubtotal':True,'method':'rapl-counter','energy':energy}], 'componentSubtotalW':75,'wholeMachineW':None,'wholeMachineUnavailableReason':'NO_WHOLE_MACHINE_METER'}
+    assert boot(c,auth,'boot-1',telemetry=row)['detailedTelemetrySupported']
+    worker=r.workers()[0]
+    assert worker['telemetry']['host']['processes'][0]['cpuPercent']==125
+    assert worker['telemetry']['power']['components'][0]['energy']['lifetimeWh']==.2
+    assert worker['telemetryHistory'][-1]['cpuPowerW']==20
+    assert not worker['contributionEnabled']
+    row['host']['processes'][0]['arguments']='secret'
+    assert c.post('/api/v1/device/poll',headers=auth,json={'bootId':'boot-1','telemetry':row}).status_code==422
+    del row['host']['processes'][0]['arguments']
+    row['host']['cores']*=513
+    assert c.post('/api/v1/device/poll',headers=auth,json={'bootId':'boot-1','telemetry':row}).status_code==422

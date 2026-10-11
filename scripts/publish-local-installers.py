@@ -21,6 +21,7 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--packages',type=Path,required=True)
     parser.add_argument('--build',required=True)
+    parser.add_argument('--receipt',type=Path)
     parser.add_argument('--volume-uuid',default='10443D1F443D094C')
     args=parser.parse_args()
     if not re.fullmatch(r'[a-zA-Z0-9_-]+',args.build):
@@ -28,6 +29,8 @@ def main():
     if subprocess.check_output(['findmnt','-n','-o','UUID','-T',str(args.packages)],text=True).strip()!=args.volume_uuid:
         raise RuntimeError('The selected installer disk is not mounted')
     repo=Path(__file__).resolve().parents[1]
+    receipt=args.receipt or repo/'docs/evidence/2026-10-11-ui/installers.json'
+    if receipt.exists() and args.receipt:raise RuntimeError('Existing receipt is never overwritten')
     links=repo/'frontend/public/downloads';links.mkdir(parents=True,exist_ok=True)
     manifest={'version':'0.1.0','build':args.build,'privateTrial':True,
               'nativeWindowsGpuVerified':False,'installers':[],'serverInstallers':[]}
@@ -65,7 +68,7 @@ def main():
         shutil.copyfile(target,args.packages/f'previous-manifest-{time.time_ns()}.json')
     encoded=json.dumps(manifest,indent=2)+'\n'
     pending=links/'manifest.pending';pending.write_text(encoded);pending.replace(target)
-    receipt=repo/'docs/evidence/2026-10-11-ui/installers.json';receipt.write_text(encoded)
+    receipt.parent.mkdir(parents=True,exist_ok=True);receipt.write_text(encoded)
     print(json.dumps({'build':args.build,'downloads':len(manifest['installers'])+len(manifest['serverInstallers']),'cloudPublish':False}))
 
 

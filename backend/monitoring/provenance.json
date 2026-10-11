@@ -1,0 +1,9 @@
+{
+  "source": "hetero-es-m3-runtime/src/heteroes/product",
+  "files": {
+    "energy.py": "1a123229705c0907c00a94b36848278694d07649e92b7f8e5574671496b93b1c",
+    "host_detail.py": "026c836ee79099c15357d8eee7a914715b349e669c69160cfed60f4b203b7312",
+    "power.py": "2349fe65728a1731570a8d0b6e2a86b0fdea0e39a1d461d457b303f15dad53d0",
+    "telemetry.py": "81a30d7e1d7dbe3d3110480eb60251f9c840b2b438f9293538ef43ae964120ca"
+  }
+}

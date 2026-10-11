@@ -2,7 +2,7 @@
 const {_electron:electron}=require('playwright');
 const fs=require('node:fs/promises');const path=require('node:path');const os=require('node:os');
 (async()=>{
- const output=path.join(os.homedir(),'.local/share/heteroes-ui-review');await fs.mkdir(output,{recursive:true,mode:0o700});const evidence=[];
+ const output=process.env.HETEROES_UI_EVIDENCE??path.join(os.homedir(),'.local/share/heteroes-ui-review');await fs.mkdir(output,{recursive:true,mode:0o700});const evidence=[];
  const packaged=process.env.HETEROES_PACKAGED_UI_DIRECTORY;
  for(const name of ['worker','server']){
   const isolated=await fs.mkdtemp(path.join(os.tmpdir(),'heteroes-ui-'+name+'-'));await fs.mkdir(path.join(isolated,'config'));await fs.mkdir(path.join(isolated,'data'));

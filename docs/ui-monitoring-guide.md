@@ -35,29 +35,19 @@ teal/blue/violet accents. Cloud remains deferred.
 
 ## Measurements and limits
 
-The Agent samples without importing Torch or opening a CUDA context. GPU readings
-use `nvidia-smi`, matched to the qualified physical UUID. Unsupported readings
-remain unavailable. Linux host readings use `/proc`; Windows CPU/RAM use a fixed
-CIM query. Capacity readings cover the state and configured artifact filesystems.
-Linux network rates include all non-loopback interfaces, so tunnels can count
-the same traffic more than once; disk rates include whole physical block devices.
-Windows host network/disk I/O rates and CPU temperature/power are not implemented.
+The current implementation and reference-tool decisions are documented in
+[resource monitoring decisions](resource-monitoring-design.md). Overview/Detail
+are shared by Web, Worker and Lab Server. Detail includes Linux per-logical-CPU
+load/clocks, temperatures/fans/voltages, memory categories, physical disk I/O,
+per-interface network counters, top 20 processes and optional NVIDIA detail.
+Metric labels are larger, layout classes are scoped, and Large text is available.
 
-Samples are cached for ten seconds. Web observations are marked old after thirty
-seconds or when the device is offline. API history keeps at most 180 points per
-device and returns the most recent 60; the desktop Agent keeps 60 in memory.
-The chart allows GPU power/temperature/utilization and CPU utilization selection,
-uses real timestamps and does not draw across gaps over thirty seconds.
-
-GPU energy is an estimate integrating successive watts samples over intervals
-of at most thirty seconds. It resets with the Agent session and reports sampled
-coverage. It includes unrelated activity on this physical GPU and excludes CPU
-and whole-computer power. It is not experiment energy accounting or billing.
-
-Telemetry is capability-negotiated: the first poll uses the original protocol,
-and observation fields are sent only after the Server advertises support. A
-missing GPU sensor does not hide available host or disk measurements. Device
-tokens remain private; telemetry cannot change contribution or GPU admission.
+CPU package and GPU power are distinct from the measured component subtotal and
+whole-machine AC. Persistent component energy supports Session/Today/This month/
+Lifetime with observed coverage. Overlapping CPU domains and aliased devices are
+not summed twice. Whole-machine AC remains unavailable until a real compatible
+meter input exists. See the linked design for platform limits and the fixed,
+read-only Linux RAPL publisher. No historical electricity data was backfilled.
 
 ## Running local preview
 
@@ -75,7 +65,7 @@ One local Agent supplies real 5070 Ti readings while contribution is OFF:
 - Configuration/PID birth record/log: `~/.config/heteroes-private/ui-local-agent`.
 - State: `~/.local/share/heteroes-ui-local-agent`, isolated from historical Agent
   process reports. It reuses the enrolled local `5070ti` identity, not a new alias.
-- Source: Track A `/home/pc5070ti/projects/hetero-es-m3-runtime`, commit `0fb8e16`.
+- Source: Track A `/home/pc5070ti/projects/hetero-es-m3-runtime`, commit `9ff2b9c`.
 - Python: existing `~/miniforge3/envs/heteroes-match/bin/python`.
 - Never run this Agent alongside another Agent owning the same device. To stop
   it, verify the saved PID's `/proc/<pid>/stat` start-time identity before signaling
@@ -91,17 +81,18 @@ confirming the prior tracked Agent is stopped. Credentials stay outside Git.
 
 ## Builds and evidence
 
-The homepage serves build `ui-20261011-r2`: Linux portable archives and Windows
+The homepage serves build `monitor-20261011-r2`: Linux portable archives and Windows
 per-user NSIS installers for Worker and Lab Server. Full HTTP sizes/hashes match
-the [installer receipt](evidence/2026-10-11-ui/installers.json). Files are on
-Archive-2tb under `heteroes-local/downloads/ui-20261011/{worker,server}`; generated
+the [installer receipt](evidence/2026-10-11-monitoring/installers.json). Files are on
+Archive-2tb under `heteroes-local/downloads/monitor-20261011/{worker,server}`; generated
 public symlinks and manifest are ignored by Git. Older accepted installers remain.
 
-Build Web and both desktop workspaces, refresh source bundles with
+Build Web and both desktop workspaces, refresh the stdlib collector vendor copy with
+`scripts/refresh-monitoring.py --track-a <Track A>`, then refresh source bundles with
 `scripts/refresh-worker-runtime.py --track-a <Track A>` and
 `scripts/refresh-server-runtime.py`, then package into staging directories with
 Electron Builder. Source refresh preserves Python/wheel/model pins. Use
-`scripts/publish-local-installers.py --packages <staging root> --build <new name>`
+`scripts/publish-local-installers.py --packages <staging root> --build <new name> --receipt docs/evidence/<new evidence>/installers.json`
 to prepare dated local downloads; it verifies the storage UUID and refuses
 replacement of immutable bundles. Restoring this deployment also requires
 recreating public links and `manifest.json` from the installer receipt.

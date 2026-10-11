@@ -1,11 +1,25 @@
 # Session handoff — 2026-10-11
 
-**Latest continuation:** the owner prioritized comprehensive Web/Worker/Server
+**Latest resource monitoring revision:** Track A `9ff2b9c`; Track B HEAD is the
+monitoring/energy/UI continuation. Read [monitoring design](resource-monitoring-design.md)
+and [monitoring acceptance](evidence/2026-10-11-monitoring/README.md).
+Overview/Detail, larger text, Linux host detail and persistent component energy
+are implemented. Intel RAPL publisher is active; the shared private ledger is
+`~/.local/share/heteroes-power/energy.sqlite`. Whole-machine AC remains unavailable
+without a real meter input. The current installers are `monitor-20261011-r2`;
+older accepted installers and the intermediate r1 remain preserved. The actual
+Linux CPU Server was freshly installed and its real CPU-power/Detail view verified.
+Windows installers were built; new native UI/sensor acceptance is still pending.
+Queue held, 21 historical experiment bodies/snapshots unchanged, reservations zero,
+local contribution OFF, no GPU compute, and one owned monitoring Agent running.
+Do not start a second Agent for the same identity. Cloud stays deferred.
+
+**Earlier UI continuation:** the owner prioritized comprehensive Web/Worker/Server
 UI improvements. Read [UI monitoring and live process guide](ui-monitoring-guide.md)
 and [UI acceptance evidence](evidence/2026-10-11-ui/README.md) before the historical
 closeout below. Both active checkouts are on `feat/local-lab-completion`; Track A
-HEAD is `0fb8e16`, and Track B HEAD contains the UI/pause/telemetry continuation.
-Homepage preview: `http://100.110.165.40:5181/`; new app build `ui-20261011-r2`.
+HEAD at that earlier UI revision was `0fb8e16`, and Track B HEAD contains the UI/pause/telemetry continuation.
+Homepage preview: `http://100.110.165.40:5181/`; the earlier UI build was `ui-20261011-r2`.
 Dispatch is held, local contribution OFF and reservations zero. One isolated
 local monitoring Agent is running; do not launch another Agent for its identity.
 Archive-2tb was remounted after a reboot; verify its UUID before future writes.

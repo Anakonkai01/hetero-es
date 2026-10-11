@@ -35,6 +35,12 @@ async function freePort(){const server=net.createServer();await new Promise((res
   const credentials=await fs.readFile(path.join(observed.userData,'lab/credentials.json'),'utf8');assert.deepEqual(JSON.parse(credentials),{users:{}});assert.ok(!credentials.includes(password));
   assert.equal((await invoke(page,'status')).running,false);
   const started=await invoke(page,'start');assert.equal(started.running,true);
+  const monitorDeadline=Date.now()+15000;let monitor;
+  while(Date.now()<monitorDeadline){monitor=await invoke(page,'status');if(monitor.resourceTelemetry?.power&&monitor.resourceTelemetry?.host?.cores?.length&&monitor.telemetryHistory?.length>=2)break;await new Promise(resolve=>setTimeout(resolve,500));}
+  assert.ok(monitor.resourceTelemetry.host.cores.length>0);assert.ok(monitor.resourceTelemetry.power.components.some(c=>c.kind==='cpu-package'&&c.powerW!=null));assert.ok(monitor.telemetryHistory.length>=2);
+  await page.getByRole('button',{name:'Chi tiết',exact:true}).click();assert.ok(await page.locator('.telemetry-cores>div').count()>0);
+  const layout=await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth);assert.equal(layout,true);
+  await page.screenshot({path:path.join(output,'installed-server-detail.png'),fullPage:true});
   const url=initialized.apiUrl;
   const health=await (await fetch(url+'/api/v1/health')).json();assert.equal(health.ok,true);assert.equal(health.recoveryStorageMode,'local');
   const index=await fetch(url+'/');assert.equal(index.status,200);assert.match(await index.text(),/id="root"/);
@@ -64,6 +70,7 @@ async function freePort(){const server=net.createServer();await new Promise((res
     bootstrapPasswordOnlyArgon2:true,queueInitiallyHeld:true,manualStart:true,closeToTray:true,confirmedStop:true,
     restartRetainsLabAndStaysStopped:true,parentPipeStopsOrphanApi:true,
     displayEnvironment:'Xvfb',ordinaryOwnerDesktopWalkthrough:false,windowsHardwareAcceptance:false,
+    realHostDetailAndCpuPower:true,persistentEnergyComponents:true,detailRendererNoOverflow:true,
     runtimeSha256:profile.runtimeSha256,version:observed.version};
   await fs.writeFile(evidence,JSON.stringify(record,null,2)+'\n',{flag:'wx',mode:0o600});
   console.log('PASS packaged Linux CPU Server install/bootstrap/same-origin/lifecycle.');

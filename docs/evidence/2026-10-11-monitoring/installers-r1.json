@@ -1,0 +1,38 @@
+{
+  "version": "0.1.0",
+  "build": "monitor-20261011-r1",
+  "privateTrial": true,
+  "nativeWindowsGpuVerified": false,
+  "installers": [
+    {
+      "platform": "windows",
+      "name": "HeteroES Worker-0.1.0-monitor-20261011-r1-Windows.exe",
+      "url": "/downloads/HeteroES Worker-0.1.0-monitor-20261011-r1-Windows.exe",
+      "sha256": "682d1715684ba94d215bc0a76bd5cb7a0c1796af21b6fa1eb847d213724cf97b",
+      "sizeBytes": 102893172
+    },
+    {
+      "platform": "linux",
+      "name": "HeteroES Worker-0.1.0-monitor-20261011-r1-Linux.tar.gz",
+      "url": "/downloads/HeteroES Worker-0.1.0-monitor-20261011-r1-Linux.tar.gz",
+      "sha256": "105fbd4b3fb88081cd08c278c6e4b97b25d5aff5ed98949184e0c0d3edf183b8",
+      "sizeBytes": 123794036
+    }
+  ],
+  "serverInstallers": [
+    {
+      "platform": "windows",
+      "name": "HeteroES Lab Server-0.1.0-monitor-20261011-r1-Windows.exe",
+      "url": "/downloads/HeteroES Lab Server-0.1.0-monitor-20261011-r1-Windows.exe",
+      "sha256": "31ea52bd6df31b2054619ccfae167aa586db804651a46260e8f2a5201af705ae",
+      "sizeBytes": 103900944
+    },
+    {
+      "platform": "linux",
+      "name": "HeteroES Lab Server-0.1.0-monitor-20261011-r1-Linux.tar.gz",
+      "url": "/downloads/HeteroES Lab Server-0.1.0-monitor-20261011-r1-Linux.tar.gz",
+      "sha256": "e721e7bd451918252019903b5ab3a3d7e690eb7028801367d331eaa98e8257ee",
+      "sizeBytes": 124802789
+    }
+  ]
+}

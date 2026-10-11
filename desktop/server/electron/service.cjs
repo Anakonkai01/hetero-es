@@ -20,15 +20,39 @@ class Service {
   constructor(root,resources,options={}) {
     this.root=root;this.resources=resources;this.options=options;
     this.setup=options.setup??new Setup(root,resources);
-    this.cpuPrevious=null;
+    this.cpuPrevious=null;this.monitor=null;this.resourceTelemetry=null;this.telemetryHistory=[];this.monitorClosed=false;this.monitorRetryAt=0;
     this.deployment=path.join(root,'lab');this.child=null;this.stopping=false;this.error=null;
   }
   config() {
     const file=path.join(this.deployment,'config.json');
     return fs.existsSync(file)?JSON.parse(fs.readFileSync(file,'utf8')):null;
   }
+  ensureMonitor(config) {
+    const fingerprint=config?.storageDirectory??'';
+    if(this.monitor&&this.monitorFingerprint!==fingerprint){this.monitor.stdin.end();this.monitor=null;this.monitorRetryAt=0;}
+    if(this.monitorClosed||this.monitor||Date.now()<this.monitorRetryAt||!this.setup.status().installed)return;
+    this.monitorFingerprint=fingerprint;
+    const p=this.setup.paths();if(!p.python||!fs.existsSync(p.python)||!fs.existsSync(path.join(p.source,'backend','monitor.py')))return;
+    const args=['-m','backend.monitor','--state',path.join(this.root,'monitor')];
+    if(config?.storageDirectory)args.push('--storage',config.storageDirectory);
+    const child=(this.options.monitorSpawn??spawn)(p.python,args,{cwd:p.root,env:this.environment(),windowsHide:true,stdio:['pipe','pipe','ignore']});
+    this.monitor=child;let buffer='';
+    child.stdin.on('error',()=>{});
+    child.stdout.on('data',chunk=>{
+      buffer+=chunk.toString();if(buffer.length>1024*1024){buffer='';return;}
+      let newline;while((newline=buffer.indexOf('\n'))>=0){
+        const line=buffer.slice(0,newline);buffer=buffer.slice(newline+1);
+        try{const row=JSON.parse(line);if(Number.isFinite(row.observation?.sampledAt)&&Array.isArray(row.observation.disks)){
+          this.resourceTelemetry=row.observation;this.telemetryHistory=Array.isArray(row.history)?row.history.slice(-60):[];
+        }}catch{}
+      }
+    });
+    const ended=()=>{if(this.monitor===child){this.monitor=null;this.monitorRetryAt=Date.now()+10000;}};
+    child.on('error',ended);child.on('exit',ended);
+  }
+  closeMonitor(){this.monitorClosed=true;if(this.monitor){this.monitor.stdin.end();this.monitor=null;}}
   async status() {
-    const config=this.config();
+    const config=this.config();this.ensureMonitor(config);
     const cpus=os.cpus();const total=cpus.reduce((sum,c)=>sum+Object.values(c.times).reduce((a,b)=>a+b,0),0);
     const idle=cpus.reduce((sum,c)=>sum+c.times.idle,0);let cpuPercent=null;
     if(this.cpuPrevious&&total>this.cpuPrevious.total)cpuPercent=Math.max(0,Math.min(100,100*(1-(idle-this.cpuPrevious.idle)/(total-this.cpuPrevious.total))));
@@ -39,7 +63,8 @@ class Service {
     let availableMemory=os.freemem();
     if(process.platform==='linux')try{const m=fs.readFileSync('/proc/meminfo','utf8').match(/^MemAvailable:\s+(\d+)/m);if(m)availableMemory=Number(m[1])*1024;}catch{}
     const hostTelemetry={sampledAt:Date.now()/1000,cpuCount:cpus.length,cpuPercent,ramTotalBytes:os.totalmem(),ramUsedBytes:os.totalmem()-availableMemory,disks};
-    return {hostTelemetry,setup:this.setup.status(),initialized:!!config,running:!!this.child&&!this.stopping,
+    const fallback={sampledAt:hostTelemetry.sampledAt,sessionStartedAt:hostTelemetry.sampledAt,disks,host:{...hostTelemetry,platform:process.platform},errors:['DETAIL_MONITOR_UNAVAILABLE']};delete fallback.host.sampledAt;delete fallback.host.disks;
+    return {resourceTelemetry:this.resourceTelemetry??fallback,telemetryHistory:this.telemetryHistory,hostTelemetry,setup:this.setup.status(),initialized:!!config,running:!!this.child&&!this.stopping,
       error:this.error,addresses:addresses(),apiUrl:config?.apiUrl??null,
       storageDirectory:config?.storageDirectory??null};
   }

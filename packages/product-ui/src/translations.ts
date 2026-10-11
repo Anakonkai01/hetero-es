@@ -664,3 +664,38 @@ Object.assign(translations, {
  'transport error':'Lỗi kết nối dịch vụ tính toán', 'worker launched':'Đã khởi động worker',
  'checkpoint saved':'Đã lưu checkpoint', 'managed cancel':'Đã yêu cầu hủy thí nghiệm',
 });
+Object.assign(translations,{
+ 'Overview':'Tổng quan','Detail':'Chi tiết','Monitoring view':'Chế độ giám sát','logical CPUs':'CPU logic','Logical CPUs':'CPU logic',
+ 'Utilization & memory':'Mức sử dụng & bộ nhớ','GPU temperature':'Nhiệt độ GPU','CPU package temperature':'Nhiệt độ CPU package',
+ 'Power & energy':'Công suất & điện năng','CPU package power':'Công suất CPU package','Measured component subtotal':'Tổng các thành phần đo được','Whole machine (AC)':'Toàn máy (điện AC)',
+ 'Subtotal covers available CPU packages, separate DRAM sensors and this GPU. It excludes unmeasured motherboard, fans, disks and PSU losses.':'Tổng gồm CPU package, cảm biến DRAM riêng nếu có và GPU này. Chưa gồm các phần chưa đo được: bo mạch, quạt, ổ đĩa và hao hụt nguồn.',
+ 'Whole-machine power needs a supported PSU, UPS or wall meter. No whole-machine sensor is connected.':'Đo toàn máy cần nguồn PSU, UPS có cảm biến phù hợp hoặc thiết bị đo tại ổ cắm. Hiện chưa kết nối cảm biến toàn máy.',
+ 'Cumulative energy':'Điện năng tích lũy','Energy period':'Khoảng tích lũy','Session':'Phiên','Today':'Hôm nay','This month':'Tháng này','Lifetime':'Toàn bộ lịch sử','Component':'Thành phần','Power':'Công suất','Energy':'Điện năng','Observed coverage':'Thời gian đã đo',
+ 'CPU package':'CPU package','Overlapping domain · excluded from subtotal':'Miền nằm trong CPU package · không cộng vào tổng',
+ 'rapl-counter':'Bộ đếm phần cứng RAPL','sampled-gpu':'Tích phân mẫu công suất GPU','external-meter':'Thiết bị đo ngoài','unavailable':'Chưa đọc được',
+ 'Persistent energy requires an updated Worker or Server runtime.':'Cần runtime Worker hoặc Server mới để lưu điện năng tích lũy.',
+ 'Energy is recorded locally and survives restarts. Session starts when this monitor starts; day/month use the host timezone. Gaps are not extrapolated. These are host measurements, not per-job billing.':'Điện năng lưu tại máy và giữ lại sau khởi động lại. Phiên tính từ lúc bộ giám sát khởi động; ngày/tháng theo múi giờ máy. Không suy diễn khoảng mất dữ liệu. Số đo thuộc máy, không phải chi phí riêng của job.',
+ 'Recent history':'Lịch sử gần đây','Storage & activity':'Lưu trữ & hoạt động','CPU detail':'CPU chi tiết','Memory detail':'Bộ nhớ chi tiết','GPU detail':'GPU chi tiết','Sensor unavailable':'Chưa đọc được cảm biến','Uptime':'Thời gian máy hoạt động','Load average (1 / 5 / 15 min)':'Tải trung bình (1 / 5 / 15 phút)','Processes':'Tiến trình',
+ 'Host CPU is averaged across logical CPUs. Core temperatures are physical sensor labels, not thread IDs.':'Tải CPU toàn máy là trung bình các CPU logic. Nhiệt độ lõi dùng nhãn cảm biến vật lý, không phải số thứ tự luồng.',
+ 'Available RAM':'RAM khả dụng','Cached RAM':'RAM cache','Buffers':'Bộ đệm','Dirty pages':'Trang nhớ chờ ghi',
+ 'RAM used excludes available memory. Cache and buffers overlap other memory categories; do not add them to used RAM.':'RAM đã dùng tính sau khi trừ bộ nhớ khả dụng. Cache và bộ đệm có phần giao với các nhóm khác; không cộng chúng vào RAM đã dùng.',
+ 'Memory clock':'Xung bộ nhớ','Memory controller activity':'Hoạt động bộ điều khiển nhớ','Performance state':'Trạng thái hiệu năng','PCIe generation / width':'Thế hệ / số lane PCIe',
+ 'Memory controller activity differs from allocated VRAM. GPU compute processes may exclude graphics and inaccessible processes.':'Hoạt động bộ điều khiển nhớ khác với lượng VRAM đã cấp phát. Danh sách tiến trình tính toán GPU có thể chưa gồm tiến trình đồ họa hoặc tiến trình không đủ quyền đọc.',
+ 'Process':'Tiến trình','No GPU compute processes reported':'Không có tiến trình tính toán GPU được báo cáo','Physical disk I/O':'I/O ổ đĩa vật lý','Busy':'Bận','Read / s':'Đọc / giây','Write / s':'Ghi / giây','Read total':'Tổng đã đọc','Written total':'Tổng đã ghi','In flight':'I/O đang chờ',
+ 'Cumulative disk and network counters reset with the OS or device. Disk busy measures time with I/O in progress.':'Bộ đếm ổ đĩa và mạng bắt đầu lại theo hệ điều hành hoặc thiết bị. Mức bận đĩa phản ánh thời gian có I/O đang xử lý.',
+ 'Network interfaces':'Giao diện mạng','Interface':'Giao diện','Link speed':'Tốc độ liên kết','Receive / s':'Nhận / giây','Send / s':'Gửi / giây','Received total':'Tổng đã nhận','Sent total':'Tổng đã gửi','Threads':'Luồng','Hardware sensors':'Cảm biến phần cứng','Source':'Nguồn','Sensor':'Cảm biến','Reading':'Số đo','Control connection':'Kết nối điều khiển',
+ 'Connection, contribution and allocation are independent. Telemetry does not prove process termination.':'Kết nối, đóng góp và phân bổ là các trạng thái riêng. Dữ liệu giám sát không chứng minh tiến trình đã dừng.',
+ 'Filter processes':'Lọc tên hoặc PID','Sort processes':'Sắp xếp tiến trình','CPU first':'CPU cao trước','RAM first':'RAM cao trước','No matching process observations':'Không có tiến trình quan sát phù hợp',
+ 'Top 20 observed processes. Process CPU uses one logical CPU = 100% and may exceed 100%. Names only; arguments and environment are not collected.':'20 tiến trình nổi bật đã quan sát. CPU của tiến trình tính 100% cho mỗi CPU logic, nên có thể vượt 100%. Chỉ thu tên; không thu tham số lệnh hay biến môi trường.',
+ 'Unavailable observations':'Dữ liệu chưa đọc được','Measured trends appear as new observations arrive.':'Biểu đồ hiện dần khi có số đo mới.','Recent measured samples · gaps over 30 seconds break the line':'Các mẫu gần đây · khoảng trống trên 30 giây ngắt đường biểu đồ',
+ 'Text size':'Cỡ chữ','Standard':'Tiêu chuẩn','Large':'Lớn','CPU service':'Dịch vụ CPU','Resource measurements describe this computer. GPU monitoring does not start GPU computation.':'Số đo mô tả máy này. Giám sát GPU không khởi chạy tính toán GPU.',
+ 'Fleet power & energy':'Điện năng & công suất cụm máy','Resource detail':'Chi tiết tài nguyên','hosts with fresh wall meters':'máy có số đo toàn máy mới',
+ 'Available component measurements in this workspace. CPU packages and GPUs are deduplicated by hardware identity. Missing sensors and offline time are excluded; energy is not per-job billing.':'Số đo thành phần hiện có trong workspace này. CPU package và GPU được chống đếm trùng theo định danh phần cứng. Không tính cảm biến thiếu và thời gian mất kết nối; đây không phải điện năng riêng của job.',
+ 'HOST_METRICS_UNAVAILABLE':'Chưa đọc được tài nguyên máy','GPU_METRICS_UNAVAILABLE':'Chưa đọc được GPU','DISK_METRICS_UNAVAILABLE':'Chưa đọc được ổ đĩa','POWER_ACCOUNTING_UNAVAILABLE':'Chưa đọc được bộ lưu điện năng','DETAIL_MONITOR_UNAVAILABLE':'Bộ giám sát chi tiết chưa sẵn sàng'
+});
+
+Object.assign(translations,{'Fresh package sensors':'Cảm biến package mới','Available components only':'Chỉ gồm thành phần đo được','Recorded observations':'Theo các mẫu đã lưu'});
+
+Object.assign(translations,{'Recording since':'Bắt đầu ghi từ','CPU power sensor unavailable on this host. Hardware sensor support depends on the OS, device and read permissions.':'Chưa đọc được cảm biến công suất CPU trên máy này. Khả năng đọc cảm biến phụ thuộc hệ điều hành, phần cứng và quyền đọc.'});
+
+Object.assign(translations,{'Component readings & coverage':'Số đo thành phần & thời gian đã đo'});

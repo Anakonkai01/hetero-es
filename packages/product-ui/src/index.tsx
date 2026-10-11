@@ -7,8 +7,9 @@ type Preferences = {
     language: Language;
     theme: Theme;
     accent: Accent;
+    textSize: 'standard' | 'large';
 };
-const defaults: Preferences = { language: 'vi', theme: 'system', accent: 'teal' };
+const defaults: Preferences = { language: 'vi', theme: 'system', accent: 'teal', textSize: 'standard' };
 const Context = createContext<{
     preferences: Preferences;
     setPreferences: (value: Partial<Preferences>) => void;
@@ -20,7 +21,7 @@ export function ProductProvider({ children }: {
     const [preferences, set] = useState<Preferences>(() => {
         try {
             const value = JSON.parse(localStorage.getItem('heteroes.preferences') ?? '{}');
-            return { language: ['vi', 'en'].includes(value.language) ? value.language : 'vi', theme: ['system', 'light', 'dark'].includes(value.theme) ? value.theme : 'system', accent: ['teal', 'blue', 'violet'].includes(value.accent) ? value.accent : 'teal' };
+            return { language: ['vi', 'en'].includes(value.language) ? value.language : 'vi', theme: ['system', 'light', 'dark'].includes(value.theme) ? value.theme : 'system', accent: ['teal', 'blue', 'violet'].includes(value.accent) ? value.accent : 'teal', textSize: value.textSize === 'large' ? 'large' : 'standard' };
         }
         catch {
             return defaults;
@@ -28,7 +29,7 @@ export function ProductProvider({ children }: {
     });
     useEffect(() => {
         const media = matchMedia('(prefers-color-scheme: dark)');
-        const apply = () => { document.documentElement.dataset.theme = preferences.theme === 'system' ? (media.matches ? 'dark' : 'light') : preferences.theme; document.documentElement.dataset.accent = preferences.accent; document.documentElement.lang = preferences.language; };
+        const apply = () => { document.documentElement.dataset.theme = preferences.theme === 'system' ? (media.matches ? 'dark' : 'light') : preferences.theme; document.documentElement.dataset.accent = preferences.accent; document.documentElement.lang = preferences.language; document.documentElement.dataset.textSize = preferences.textSize; };
         apply();
         media.addEventListener('change', apply);
         localStorage.setItem('heteroes.preferences', JSON.stringify(preferences));
@@ -44,6 +45,7 @@ export function PreferencesControl() {
     <label><span>{t('Language')}</span><select aria-label={t('Language')} value={preferences.language} onChange={event => setPreferences({ language: event.target.value as Language })}><option value="vi">Tiếng Việt</option><option value="en">English</option></select></label>
     <label><span>{t('Theme')}</span><select aria-label={t('Theme')} value={preferences.theme} onChange={event => setPreferences({ theme: event.target.value as Theme })}><option value="system">{t('System')}</option><option value="light">{t('Light')}</option><option value="dark">{t('Dark')}</option></select></label>
     <label><span>{t('Accent')}</span><select aria-label={t('Accent')} value={preferences.accent} onChange={event => setPreferences({ accent: event.target.value as Accent })}><option value="teal">{t('Teal')}</option><option value="blue">{t('Blue')}</option><option value="violet">{t('Violet')}</option></select></label>
+    <label><span>{t('Text size')}</span><select aria-label={t('Text size')} value={preferences.textSize} onChange={event => setPreferences({textSize:event.target.value as Preferences['textSize']})}><option value="standard">{t('Standard')}</option><option value="large">{t('Large')}</option></select></label>
   </div></details>;
 }
 export function Status({ value }: {
@@ -73,3 +75,5 @@ export function useObservationTime(){
  useEffect(()=>{const timer=setInterval(()=>setNow(Date.now()/1000),5000);return()=>clearInterval(timer);},[]);
  return now;
 }
+
+export {fleetResources} from './fleet';

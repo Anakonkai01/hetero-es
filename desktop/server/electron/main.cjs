@@ -8,7 +8,7 @@ if(!app.isPackaged&&process.env.HETEROES_SERVER_TEST_DATA)app.setPath('userData'
 const owns=app.requestSingleInstanceLock();if(!owns)app.quit();
 let window,tray,service,exiting=false,busy=false;
 const show=()=>{window?.show();window?.focus();};
-async function quit(){if(busy)throw Error('ACTION_IN_PROGRESS');await service.stop();exiting=true;app.quit();return {stopped:true};}
+async function quit(){if(busy)throw Error('ACTION_IN_PROGRESS');await service.stop();service.closeMonitor();exiting=true;app.quit();return {stopped:true};}
 app.on('second-instance',show);
 app.on('window-all-closed',()=>{});
 app.on('before-quit',event=>{if(!exiting){event.preventDefault();quit().catch(show);}});

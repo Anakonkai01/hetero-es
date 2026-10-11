@@ -24,6 +24,34 @@ Existing numerical v1 identities and historical evidence remain immutable.
   GRPO training is outside this implementation. Learning claims require held-out
   metrics, multiple seeds and exported-model reload checks.
 
+## Latest resource monitoring continuation
+
+The owner requested fuller power/energy readings and Task Manager/GNOME/btop/
+nvitop/W&B/distributed monitoring patterns. Track A `9ff2b9c` adds bounded Linux
+host detail, optional GPU detail and private persistent component energy. Track B
+shares Overview/Detail across Web/Worker/Server, increases labels/text, adds a
+Large text preference and deduplicated fleet power/energy. See
+[design and source references](resource-monitoring-design.md) and
+[verified evidence](evidence/2026-10-11-monitoring/README.md).
+
+Final CPU checks: A 2,060 passed/100 skipped; B 99 passed; monitoring/Agent 24;
+Worker Node 12, Server Node 1, fleet aggregation 2. Web lint/three builds passed.
+UI checks cover 52 live page layouts, 48 dedicated monitor layouts and 26 desktop
+fixture/theme cases with both views, text sizes and widths. Published Linux apps
+were extracted/opened in Electron/Xvfb; fresh CPU Server also verifies real CPU
+power/detail, bootstrap, same-origin web, tray/stop/restart and parent lifetime.
+The current local downloads are `monitor-20261011-r2`. Windows installers were
+built; new native UI and hardware sensor parity remain pending. No GPU campaign.
+
+One OFF monitoring Agent now runs current Track A source. Its private PID/birth
+record/config/log remain `~/.config/heteroes-private/ui-local-agent`. The read-only
+RAPL publisher is enabled as `heteroes-rapl.service`; normal Agents remain
+unprivileged. Energy SQLite stays on ext4 and persists across Agent restarts.
+Whole-machine AC requires a real meter; no meter is configured, no fake estimate
+or historical backfill is shown. All 21 original experiment bodies/snapshots and
+owner contribution flags were compared to the private pre-cutover SQLite backup.
+The live API retains `storageMode: none`, dispatch held and zero reservations.
+
 ## Milestones and acceptance evidence
 
 | Milestone | Implementation | Acceptance |
