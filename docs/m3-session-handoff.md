@@ -163,8 +163,11 @@ New private local archive:
 `~/.local/share/heteroes-session-archives/2026-10-11-monitoring-close/`.
 Independent encrypted copy:
 `/mnt/Archive-2tb/heteroes-local/archives/2026-10-11-monitoring-close-independent.tar.gz.gpg`.
-Use their receipts to verify creation/restoration; the public close receipt is
-in `docs/evidence/2026-10-11-monitoring-close/`. Contents include both final Git
+Use their receipts to verify creation/restoration. Public state/snapshot evidence
+is in `docs/evidence/2026-10-11-monitoring-close/`; the final ciphertext receipt
+is beside the encrypted file and copied into the private local archive. The final
+Git heads are recorded in that local archive's `git-bundles.json`.
+Contents include both final Git
 bundles, consistent current SQLite backups (including energy/outbox), private
 configuration, four current installers, service files and source/evidence guides.
 Private files are 0600 under 0700 directories. The recovery key is not included

@@ -4,8 +4,10 @@ Current operational entrypoint: [session handoff](m3-session-handoff.md). Both M
 branches are `feat/local-lab-completion`; implementation/evidence heads A `9ff2b9c`,
 B `28a3c31` precede documentation-only close commits recorded in the new bundle
 manifest. Local and independently encrypted monitoring-close archives supplement
-older immutable recovery payloads. Verification receipts are under
-`docs/evidence/2026-10-11-monitoring-close/`; check them before assuming completion.
+older immutable recovery payloads. Public snapshot evidence is under
+`docs/evidence/2026-10-11-monitoring-close/`; final encrypted restore receipts are
+beside the archive and in its private local directory. Check these before assuming
+completion.
 Services remain running, queue held, contribution local OFF, zero reservations
 and no local GPU compute. Full local access/GPU budget override persists; cloud
 is deferred. Nothing pushed. Resume the newest handoff rather than older budget,

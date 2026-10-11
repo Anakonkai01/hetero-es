@@ -1,0 +1,122 @@
+{
+  "capturedUtc": "2026-10-11T15:35:17.904144+00:00",
+  "codeHeads": {
+    "trackA": "9ff2b9c",
+    "trackB": "28a3c31"
+  },
+  "documentationHeadsBeforeReceipt": {
+    "trackA": "636b5c5",
+    "trackB": "51fd9bb"
+  },
+  "liveState": {
+    "experimentCount": 21,
+    "experimentContentSha256": "80f3a3b882be86d6cf4403b614d5dce6de73ae0d1869ccc31285f7fa1f17165a",
+    "dispatchHold": true,
+    "deviceReservations": 0,
+    "physicalReservations": 0,
+    "unreleasedAssignments": 0,
+    "localContribution": {
+      "enabled": false,
+      "desired": false
+    },
+    "deviceOwnerFlagsSha256": "583c53bb073354febc6d51dbc950e1735d02c7af25a1659893892cf70912da5e"
+  },
+  "ownedProcesses": {
+    "backend": {
+      "pid": 1400586,
+      "birthVerified": true,
+      "alive": true
+    },
+    "web": {
+      "pid": 18172,
+      "birthVerified": true,
+      "alive": true
+    },
+    "monitoringAgent": {
+      "pid": 1555203,
+      "birthVerified": true,
+      "alive": true
+    }
+  },
+  "gpuComputeProcessCount": 0,
+  "raplPublisherActive": true,
+  "sqliteSnapshotCount": 9,
+  "snapshotMethod": "SQLite online backup; each database transactionally consistent, not a cross-database atomic snapshot",
+  "databases": [
+    {
+      "source": ".config/heteroes-m2/state/product.sqlite",
+      "snapshot": "sqlite/.config/heteroes-m2/state/product.sqlite",
+      "startedUtc": "2026-10-11T15:35:17.077885+00:00",
+      "sha256": "d161d1fe666aabc518df0a4416fe80f44c3889e038833cca5422e9e1a0ba5a7a",
+      "sizeBytes": 3092480,
+      "integrityCheck": "ok"
+    },
+    {
+      "source": ".local/share/heteroes-ui-local-agent/outbox.sqlite",
+      "snapshot": "sqlite/.local/share/heteroes-ui-local-agent/outbox.sqlite",
+      "startedUtc": "2026-10-11T15:35:17.112659+00:00",
+      "sha256": "dc17a27560802563c62fcd47c68c6e3361ec1fb2638f33f35e26ca8bd39a61f5",
+      "sizeBytes": 45056,
+      "integrityCheck": "ok"
+    },
+    {
+      "source": ".local/share/heteroes-power/energy.sqlite",
+      "snapshot": "sqlite/.local/share/heteroes-power/energy.sqlite",
+      "startedUtc": "2026-10-11T15:35:17.128493+00:00",
+      "sha256": "f6b2fa0a9849cc94fa1881e2793b67b7a9e156ac204aa2bf5003b21649c8d296",
+      "sizeBytes": 28672,
+      "integrityCheck": "ok"
+    },
+    {
+      "source": ".local/share/heteroes-m3-campaign/agent/outbox.sqlite",
+      "snapshot": "sqlite/.local/share/heteroes-m3-campaign/agent/outbox.sqlite",
+      "startedUtc": "2026-10-11T15:35:17.144025+00:00",
+      "sha256": "fc1f7e0cbd6c02fc17815a1822746e6d00e3ca52e7e89b2fd6e3ec9b4afb851c",
+      "sizeBytes": 131072,
+      "integrityCheck": "ok"
+    },
+    {
+      "source": ".local/share/heteroes-m3-campaign/agent/runs/8047b923e2d1427895045b384d130247/ledger.sqlite",
+      "snapshot": "sqlite/.local/share/heteroes-m3-campaign/agent/runs/8047b923e2d1427895045b384d130247/ledger.sqlite",
+      "startedUtc": "2026-10-11T15:35:17.154821+00:00",
+      "sha256": "77ed35df4f40995e66a19b228ea0e5292bde34f50e17e9eeb7a39f0e1984fb4c",
+      "sizeBytes": 69632,
+      "integrityCheck": "ok"
+    },
+    {
+      "source": ".local/share/heteroes-m3-campaign/agent/runs/95b347701aea49bdbd5b4978d1982a78/ledger.sqlite",
+      "snapshot": "sqlite/.local/share/heteroes-m3-campaign/agent/runs/95b347701aea49bdbd5b4978d1982a78/ledger.sqlite",
+      "startedUtc": "2026-10-11T15:35:17.162714+00:00",
+      "sha256": "d5c36b3e492d01ca864d9811afbe446e63384dbb482c08c4b6e9aac81e4e7b38",
+      "sizeBytes": 69632,
+      "integrityCheck": "ok"
+    },
+    {
+      "source": ".local/share/heteroes-m3-campaign/agent/runs/95b347701aea49bdbd5b4978d1982a78/recovery-points/2cdcf9c995014161be2e32fd5ead6d34/ledger.sqlite",
+      "snapshot": "sqlite/.local/share/heteroes-m3-campaign/agent/runs/95b347701aea49bdbd5b4978d1982a78/recovery-points/2cdcf9c995014161be2e32fd5ead6d34/ledger.sqlite",
+      "startedUtc": "2026-10-11T15:35:17.171295+00:00",
+      "sha256": "d5c36b3e492d01ca864d9811afbe446e63384dbb482c08c4b6e9aac81e4e7b38",
+      "sizeBytes": 69632,
+      "integrityCheck": "ok"
+    },
+    {
+      "source": ".local/share/heteroes-m3-campaign/agent/runs/95b347701aea49bdbd5b4978d1982a78/recovery-points/bfe31818434b49cda1db66cbfb86760e/ledger.sqlite",
+      "snapshot": "sqlite/.local/share/heteroes-m3-campaign/agent/runs/95b347701aea49bdbd5b4978d1982a78/recovery-points/bfe31818434b49cda1db66cbfb86760e/ledger.sqlite",
+      "startedUtc": "2026-10-11T15:35:17.177732+00:00",
+      "sha256": "d5c36b3e492d01ca864d9811afbe446e63384dbb482c08c4b6e9aac81e4e7b38",
+      "sizeBytes": 69632,
+      "integrityCheck": "ok"
+    },
+    {
+      "source": ".local/share/heteroes-m3-campaign/baseline/runs/95b347701aea49bdbd5b4978d1982a78/ledger.sqlite",
+      "snapshot": "sqlite/.local/share/heteroes-m3-campaign/baseline/runs/95b347701aea49bdbd5b4978d1982a78/ledger.sqlite",
+      "startedUtc": "2026-10-11T15:35:17.184254+00:00",
+      "sha256": "c0748574da5ec9b5f6bfe63e30b9a92c5a293f4be5749f0676866b824c3398e3",
+      "sizeBytes": 69632,
+      "integrityCheck": "ok"
+    }
+  ],
+  "installerBuild": "monitor-20261011-r2",
+  "installerCount": 4,
+  "installerCopyHashesVerified": true
+}
