@@ -8,6 +8,45 @@
 
 ## 0. NEXT SESSION — START HERE
 
+### SESSION CLOSE 11/10/2026 — Resume product work from the M3 handoff
+
+Owner requested documentation, local commits and preservation for the next chat.
+Full operational handoff: B
+`/home/pc5070ti/projects/Hetero-ES-LLM-m3/docs/m3-session-handoff.md`.
+Read MASTER for design, this STATUS for verified truth, then that handoff for
+paths, restart commands, evidence, credentials locations and the next test.
+
+Active A: `hetero-es-m3-runtime` / `feat/m3-native-worker` (implementation/evidence
+`9ef0d91`, `a499a2e`); active B: `Hetero-ES-LLM-m3` /
+`feat/m3-worker-desktop-ux` (`58023a2`, `a102f86`). Use `git log -1` for the final
+closeout commits. Original M2 checkouts remain clean; research checkout untouched.
+Local commits only, no push/merge/tag. Cloud remains deferred.
+
+Closeout observation: CPU web 5181/API 8002 running; dispatch held, queue zero,
+reservations zero and no local CUDA process. Native Windows Thao Worker is
+ONLINE/ON by owner choice; temporary coordinator OFF/stopped, legacy agents
+OFF/OFFLINE. Product metadata contains 21 experiments. M1 services were not
+restarted after the host reboot. No GPU campaign was run during closeout.
+
+Private same-disk archive:
+`~/.local/share/heteroes-session-archives/2026-10-11-m3-close/`. Includes consistent
+SQLite snapshots (integrity checked), private configuration, installer copies,
+campaign state and both source bundles with final revisions in `git-bundles.json`.
+Large stopped-campaign files are hardlinked, so this is not an independent disk
+backup. Credentials remain outside Git. See B's dated session-close state JSON.
+
+Next: **test the packaged Linux Worker on a real GPU**, with working desktop
+keyring, explicit physical-GPU ownership/topology, qualification, candidate/replay
+comparison, safe OFF/Quit and restart OFF. Linux CPU setup and coordinator/baseline
+GPU results do not close the Linux desktop gate. Windows is temporarily usable
+on the tested RTX 3060; clean-image install/lifecycle/outage gates remain pending.
+Do not double-reserve the physical 5070 Ti through coordinator and desktop aliases.
+
+Budget upper bounds unchanged: cumulative **1.144965250143793/2.0 GPU-hours**;
+M3a **0.1231332501437929/0.25**, M2 cloud reserve **0.083799**. Preserve every run,
+the prior unintended run and immutable evidence. Earlier updates below are dated
+history; this block and the latest hardware block take precedence for current state.
+
 ### UPDATE 11/10/2026 — First native Windows hardware trial passed
 
 Owner installed the private desktop Worker, passed qualification, approved the
