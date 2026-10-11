@@ -13,8 +13,11 @@
 Track B `docs/project-review-2026-10-11.md` consolidates the entire core/product
 progress, known negative and learning results, remaining acceptance and a proposed
 40-day delivery schedule to the canonical 20/11 deadline (core freeze 08/11,
-result freeze 15/11). A bounded local IT capstone is feasible; complete expanded
-M1–M6/platform/cloud/model breadth has high schedule risk. Earlier 88–90% estimates
+result freeze 15/11). The subsequent three-week Git/artifact velocity review
+corrects the initial conservative risk label: local capstone delivery has low-to-
+moderate deadline risk at the demonstrated pace; broader local hardware/platform
+acceptance has moderate risk. Cloud is deferred, while positive generalizing
+learning gains remain scientifically uncertain. Earlier 88–90% estimates
 describe a smaller research scope and must not be used for the current project.
 Prioritize actual packaged/GPU acceptance, a reproducible M5 pilot and audited
 report/demo evidence; do not equate passing tests with learning or owner approval.
@@ -32,7 +35,7 @@ are retained. RAPL publisher is active; electricity SQLite is on ext4.
 Read Track B `docs/m3-session-handoff.md` for current paths, restart/ownership
 checks, recovery instructions, acceptance vs pending gates and next actions.
 The new private local archive is
-`~/.local/share/heteroes-session-archives/2026-10-11-monitoring-close/`;
+`~/.local/share/heteroes-session-archives/2026-10-11-monitoring-close-r2/`;
 an independent encrypted copy is on Archive-2tb. Read their verification receipts
 rather than assuming an archive exists. The old M3 close archives remain intact.
 Credentials are copied only into private/encrypted storage; the recovery key
