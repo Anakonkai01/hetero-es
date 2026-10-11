@@ -8,6 +8,17 @@
 
 ## 0. NEXT SESSION — START HERE
 
+### Project and deadline assessment — 11/10/2026
+
+Track B `docs/project-review-2026-10-11.md` consolidates the entire core/product
+progress, known negative and learning results, remaining acceptance and a proposed
+40-day delivery schedule to the canonical 20/11 deadline (core freeze 08/11,
+result freeze 15/11). A bounded local IT capstone is feasible; complete expanded
+M1–M6/platform/cloud/model breadth has high schedule risk. Earlier 88–90% estimates
+describe a smaller research scope and must not be used for the current project.
+Prioritize actual packaged/GPU acceptance, a reproducible M5 pilot and audited
+report/demo evidence; do not equate passing tests with learning or owner approval.
+
 ### SESSION CLOSE 11/10/2026 — Current continuation state
 
 Both active M3 checkouts use `feat/local-lab-completion`. Implementation/evidence
