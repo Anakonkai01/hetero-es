@@ -1,192 +1,185 @@
-# Session handoff — 2026-10-11
+# Session handoff — 2026-10-11 monitoring close
 
-**Latest resource monitoring revision:** Track A `9ff2b9c`; Track B HEAD is the
-monitoring/energy/UI continuation. Read [monitoring design](resource-monitoring-design.md)
-and [monitoring acceptance](evidence/2026-10-11-monitoring/README.md).
-Overview/Detail, larger text, Linux host detail and persistent component energy
-are implemented. Intel RAPL publisher is active; the shared private ledger is
-`~/.local/share/heteroes-power/energy.sqlite`. Whole-machine AC remains unavailable
-without a real meter input. The current installers are `monitor-20261011-r2`;
-older accepted installers and the intermediate r1 remain preserved. The actual
-Linux CPU Server was freshly installed and its real CPU-power/Detail view verified.
-Windows installers were built; new native UI/sensor acceptance is still pending.
-Queue held, 21 historical experiment bodies/snapshots unchanged, reservations zero,
-local contribution OFF, no GPU compute, and one owned monitoring Agent running.
-Do not start a second Agent for the same identity. Cloud stays deferred.
+This is the current operational entrypoint. Documentation is English; communicate
+with the owner in Vietnamese. Both active M3 checkouts use
+`feat/local-lab-completion`. Implementation/evidence commits are A `9ff2b9c` and
+B `28a3c31`; documentation-only close commits follow them. Exact final heads are
+in the new private archive's `git-bundles.json`. Nothing has been pushed/merged/tagged.
 
-**Earlier UI continuation:** the owner prioritized comprehensive Web/Worker/Server
-UI improvements. Read [UI monitoring and live process guide](ui-monitoring-guide.md)
-and [UI acceptance evidence](evidence/2026-10-11-ui/README.md) before the historical
-closeout below. Both active checkouts are on `feat/local-lab-completion`; Track A
-HEAD at that earlier UI revision was `0fb8e16`, and Track B HEAD contains the UI/pause/telemetry continuation.
-Homepage preview: `http://100.110.165.40:5181/`; the earlier UI build was `ui-20261011-r2`.
-Dispatch is held, local contribution OFF and reservations zero. One isolated
-local monitoring Agent is running; do not launch another Agent for its identity.
-Archive-2tb was remounted after a reboot; verify its UUID before future writes.
-The closeout bundles below retain the older session, not these new commits.
+## Read first
 
-**Execution resumed:** see [local completion progress](local-lab-progress.md).
-The owner authorized M3a–M6 local implementation, removed GPU-hour/total-run
-budget caps and authorized persistent private sudo credentials. Retrieve the
-private file referenced in that progress document when an authorized task needs
-sudo; never copy its contents into source control or evidence. Historical budget
-figures below remain usage records, not current limits. Cloud stays deferred.
+1. Track A `HETEROES_LLM_MASTER.md` (design) and `HETEROES_LLM_STATUS.md` (truth).
+2. [Local completion progress](local-lab-progress.md),
+   [resource monitoring design](resource-monitoring-design.md),
+   [UI/live process guide](ui-monitoring-guide.md).
+3. [Latest monitoring acceptance](evidence/2026-10-11-monitoring/README.md),
+   [earlier UI acceptance](evidence/2026-10-11-ui/README.md),
+   [foundation/hardware qualification](evidence/2026-10-11-local-foundation/README.md).
+4. [ES literature and frozen Recipe v2 decisions](es-literature-local-recipe.md).
+   This is a specification for pending experiments, not replicated learning gains.
 
-Read this first when resuming product work. The owner requested session closure,
-documentation, local commits and preservation of state. No GPU campaign was run
-during closeout. Documentation is English; communicate with the owner in Vietnamese.
+| Track | Checkout | Current branch |
+| --- | --- | --- |
+| A, numerical runtime | `/home/pc5070ti/projects/hetero-es-m3-runtime` | `feat/local-lab-completion` |
+| B, product | `/home/pc5070ti/projects/Hetero-ES-LLM-m3` | `feat/local-lab-completion` |
 
-## Active source and reading order
+Original M2/research checkouts are not the active product source. Preserve their
+state. Older dated handoffs/archives are historical; do not reinstate their
+branch names, hard GPU budgets or outdated implementation claims.
 
-| Track | Active checkout | Branch | Implementation/evidence commits before closeout |
-| --- | --- | --- | --- |
-| A, numerical runtime | `/home/pc5070ti/projects/hetero-es-m3-runtime` | `feat/m3-native-worker` | `9ef0d91`, `a499a2e` |
-| B, product | `/home/pc5070ti/projects/Hetero-ES-LLM-m3` | `feat/m3-worker-desktop-ux` | `58023a2`, `a102f86` |
+## Owner instructions and next work
 
-Run `git log -1 --oneline` in each checkout for its final closeout commit. Local
-archive `manifest.json` and `git-bundles.json` record the final source revisions.
-No push, merge, tag or public installer release was performed.
+Owner authorized local M3a–M6 implementation and persistent private sudo access.
+GPU-hour and total-run caps are removed. Explicit owner contribution, physical
+GPU ownership, numerical contracts and technical failure/shutdown timeouts remain.
+Cloud is deferred. Do not push, merge, tag, replace drivers or modify existing
+Python/Conda environments as part of this continuation.
 
-1. A: `HETEROES_LLM_MASTER.md` (canonical design), then
-   `HETEROES_LLM_STATUS.md` (current verified truth, latest blocks first).
-2. B: [accepted roadmap](lab-roadmap.md), [M3 implementation](m3-local-worker-ux.md)
-   and [Worker owner guide](worker-desktop-guide.md).
-3. [Windows hardware evidence](evidence/2026-10-11-m3-native-windows/README.md),
-   [packaging/UX evidence](evidence/2026-10-10-m3/README.md) and
-   [closeout state](evidence/2026-10-11-m3-session-close/state.json).
+The latest priority is comprehensive Web/Worker/Server UI and resource monitoring:
+Overview/Detail, readable fonts, CPU/RAM/disks/network/processes/sensors, GPU
+metrics, persistent energy and generation/candidate/seed information. That
+revision is implemented and locally verified. Next review the actual UI with the
+owner, then finish the local Linux portable Worker leased-candidate/replay/
+reference/lifecycle/outage trial and real GPU pause/resume. Use fresh dated
+receipts, preserve numerical v1, and stop the current monitoring Agent before
+reusing its enrolled identity. UUID alias fencing does not make one card two GPUs.
 
-Original M2 checkouts `hetero-es-integration` / `feat/m2-agent-runtime` and
-`Hetero-ES-LLM` / `feat/m2-cloud-control` were left clean. Research checkout
-`hetero-es` was untouched. The older `/home/pc5070ti/projects/handoff.md` describes
-the 06/10 research phase; its new pointer leads here. Preserve its historical body.
-Earlier per-step approval text is historical: the owner subsequently authorized
-implementation and this closeout. Continue within that scope; do not expand it to
-pushes, cloud charges, driver changes or replacing friends' environments.
+Quang was unavailable today and Thao only has short windows. Do not depend on a
+long remote campaign. Windows sensor parity/new native UI, real disjoint multi-
+GPU acceptance, M5 model/data/evaluation/export and remaining M6 fault/usability
+are pending. No learning gain or new hardware gate is inferred from CPU/UI tests.
 
-## Delivered and verified
+## Delivered and accepted
 
-M1 lab operations and M2 local agent/control/recovery are implemented. Actual
-R2/EC2/HTTPS cloud acceptance is pending; the owner has no cloud accounts and
-explicitly deferred cloud work. M3a implements a native Worker desktop and shared
-Vi/En, light/dark/system, responsive web/desktop UX. M3b Server installers,
-M4 parallel scheduling, M5 model/dataset expansion and M6 remain planned.
+- M3b CPU Server/local checkpoint storage and M4 physical reservations, eligible
+  FIFO and verified generation-boundary pause/resume are implemented. CPU pause/
+  resume matches uninterrupted weights. Live preview storage remains **none**;
+  a fresh Server creates local recovery storage during setup.
+- Shared Vi/En, light/dark/system and Standard/Large UI includes home/auth,
+  dashboard, workers, generation/candidate/seed/attempts and artifacts. Host Detail
+  is Linux `/proc`/hwmon; Windows currently has basic fixed CIM CPU/RAM and NVIDIA
+  observations, with fuller Windows sensors pending.
+- CPU package RAPL and GPU driver power are measured; nested CPU core domains are
+  excluded from totals. No whole-machine meter or separate DRAM counter is present
+  on this host. Whole-machine AC is unavailable, not an invented CPU+GPU total.
+- Energy SQLite survives monitor restart, deduplicates component identities and
+  supports Session/Today/This month/Lifetime with coverage. Gaps are not filled,
+  past unobserved energy is not reconstructed, and host energy is not job billing.
+- Final checks: A **2,060 passed/100 skipped**, monitoring/Agent **24**;
+  B backend **99**, Worker Node **12**, Server Node **1**, fleet **2**;
+  Web lint/all three builds; **52** live page layouts, **48** monitor layouts,
+  **26** desktop fixture/theme cases. Actual published Linux apps opened in
+  Electron/Xvfb; fresh CPU Server verified real CPU power/detail, bootstrap,
+  same-origin Web/API, tray/stop/restart and parent lifetime.
+- Current installers **monitor-20261011-r2**: Worker and Server Linux portable
+  archives and Windows per-user NSIS. All four HTTP sizes/hashes verified in
+  [the receipt](evidence/2026-10-11-monitoring/installers.json). Windows execution
+  of this revision and ordinary desktop walkthroughs remain pending.
 
-Private Windows per-user NSIS, Linux AppImage and portable Linux archive are built.
-The Worker installs isolated pinned Python/wheels/model, qualifies numerically,
-pairs, awaits approval and needs explicit owner ON. Every new boot starts OFF.
-Closing keeps the tray process; OFF/Quit cooperate with shutdown. Credentials use
-safeStorage; Linux requires a working desktop keyring and rejects plaintext storage.
+Historical acceptance remains intact: Thao's native Windows RTX 3060 qualification
+and G2/N4 distributed run `95b347701aea49bdbd5b4978d1982a78` matched the separate
+Linux baseline (all seeds/rewards, both child hashes and actual final weights).
+Final SHA256 `04934b82565441a60ea7f9e8389b35885cf7066c77d226de3701f625d29e1bb8`.
+Cancellation run `8047b923e2d1427895045b384d130247` confirmed OFF/drain/release.
+See [historical Windows evidence](evidence/2026-10-11-m3-native-windows/README.md).
+These qualify the tested older build, not the new UI or all Windows hardware.
+Local Linux numerical qualification passed in the foundation trial; leased
+candidate/replay/lifecycle/outage acceptance for its portable app is still pending.
 
-Native Windows qualification and GPU trial passed on **Thao's RTX 3060**, Windows
-11 build 26200, driver 617.42; Python 3.12.15, torch 2.13.0+cu132, NumPy 2.5.3,
-transformers 5.17.0. Worker `desktop-5a5bc7e5fcaf`, device
-`2281352a495f42d989567cfcb3cd5b3c`, display `thao_nguyen_3060`.
+## Live services, private state and storage
 
-| Run | Result and scope |
+At this close: web/API and one monitoring Agent remain running. Dispatch **held**,
+**21** historical experiments preserved, **0** reservations, local contribution
+**OFF**, and no local GPU compute. Preserve other owners' contribution choices.
+
+| Item | Location |
 | --- | --- |
-| `95b347701aea49bdbd5b4978d1982a78` | COMPLETED G2/N4; Linux 5070 Ti coordinator, Windows committed all 8 candidates and verified replay. Separate one-GPU Linux baseline with the same experiment ID matched every seed/reward, both generation records/child hashes and actual final checkpoint bytes. |
-| `8047b923e2d1427895045b384d130247` | CANCELLED G2/N32; owner OFF during a live lease, 5 results, zero applied updates, confirmed shutdown and all reservations released. Windows owner's ON preference restored afterward. |
-| `45d72973ddf243fdb8d9a46d2e9a670f` | Earlier unintended legacy M1 integration-test run, local 5070 Ti only; CANCELLED, fully stopped. Keep its evidence and budget charge. |
+| Web / CPU API | `http://100.110.165.40:5181/` / port `8002` |
+| Product configuration, credentials and PID/birth records | `~/.config/heteroes-m2/` |
+| Product SQLite | `~/.config/heteroes-m2/state/product.sqlite` |
+| Owned monitoring Agent config/PID/log | `~/.config/heteroes-private/ui-local-agent/` |
+| Monitoring Agent state/outbox | `~/.local/share/heteroes-ui-local-agent/` |
+| Persistent energy | `~/.local/share/heteroes-power/energy.sqlite` |
+| Read-only CPU publisher | `heteroes-rapl.service`, `/run/heteroes-power/rapl.json` |
+| Latest review logs/private pre-cutover backup | `~/.local/share/heteroes-monitoring-review/` |
+| Historical campaign/config | `~/.local/share/heteroes-m3-campaign/`, `~/.config/heteroes-m3-campaign/` |
+| Original Agent config (not the running monitor) | `~/.config/heteroes-m2-agent/` |
+| Sudo credentials/storage signing config | `~/.config/heteroes-private/` |
 
-Final distributed/baseline checkpoint SHA-256:
-`04934b82565441a60ea7f9e8389b35885cf7066c77d226de3701f625d29e1bb8`.
-Windows runtime file bytes match A; normalize separators when comparing the
-source manifest, rather than comparing OS-dependent raw tree hashes.
-This proves one tested Windows combination, not all hardware or LLM learning gains.
+Read passwords/tokens privately when needed; never print them or include them in
+Git, command arguments or public evidence. The sudo credential file is already
+authorized for later sessions. Use subprocess stdin. The archive recovery key
+`~/.config/heteroes-private/archive-recovery.key` is separate from the ciphertext.
 
-Existing validation: A **2041 passed / 100 skipped** with CUDA hidden and a caught
-birth-identity mutation; B **73 backend / 11 desktop / 22 mock behavior groups**,
-build/lint, real responsive browser and actual packaged Linux CPU/setup checks.
-Linux coordinator/baseline GPU results do **not** qualify the Linux desktop installer.
+Archive-2tb UUID **10443D1F443D094C**, mounted `/mnt/Archive-2tb`; project files are
+under `heteroes-local/`. Verify UUID before any write; a missing mount must never
+fall back to root. Never use `/mnt/sekai`. Live SQLite, credentials and executable
+runtimes stay on ext4. Root had about **100 GiB** free at close; check current free
+space before installing new runtimes/models. Historical learning checkpoints
+moved to Archive-2tb and retain their original path through a directory symlink.
+Earlier duplicate M1 restore-trial weights were removed after hash verification;
+restore that stopped trial from the preserved older backup before using it again.
 
-## Current services and private state
+## Resume commands and ownership
 
-At closeout, dispatch is **held**, queue **0**, reservations **0**, local CUDA
-process query empty. Native Windows Worker is **ONLINE/ON**; preserve the owner's
-choice. Legacy `5070ti`, `3060` (Quang) and `3060-thao` (WSL) are OFF/OFFLINE.
-The temporary campaign coordinator is OFF/stopped. No friends' machine was
-contacted by SSH during this closeout.
+From B, inspect rather than restart services that are already alive:
 
-- Web: `http://100.110.165.40:5181`; CPU API: `http://100.110.165.40:8002`.
-- API source is B M3; its Python environment remains original B `.venv-backend`.
-- Product config/credentials/process records/logs: `~/.config/heteroes-m2/`.
-  Metadata: `~/.config/heteroes-m2/state/product.sqlite` (**21 experiments**).
-- Local coordinator token/config: `~/.config/heteroes-m3-campaign/`;
-  original M2 agent config: `~/.config/heteroes-m2-agent/`, unchanged.
-- Raw trials, ledgers, checkpoint files and outbox:
-  `~/.local/share/heteroes-m3-campaign/` (about 6.5 GiB).
-- Original M1 config: `~/.config/heteroes-integration/`; old M1 services on
-  5173/8000/8765/8766 were not restarted after the host reboot.
-- Local admin password was set to the owner's requested value. Retrieve it from
-  the private credential file; never put passwords/tokens into Git or tool output.
-  Existing remote access credentials remain private; do not rewrite them.
+```bash
+git status --short
+git log -1 --oneline
+findmnt -n -o UUID,TARGET -T /mnt/Archive-2tb
+curl -fsS http://100.110.165.40:8002/api/v1/health
+systemctl is-active heteroes-rapl.service
+```
 
-Services are manually started, not guaranteed across a reboot. To restore only
-the held CPU preview, from B M3:
+After reboot, once mount/held queue/ownership are checked:
 
 ```bash
 python3 scripts/start-m3-preview.py
-python3 scripts/check-native-windows.py --phase status
 ```
 
-The second command authenticates and reads status; it does not start compute.
-The first checks agent mode, dispatch hold and tracked PID birth before starting.
-Do not invoke the GPU phases to rediscover already completed trials: they refuse
-overwriting evidence. GPU phases require both `--gpu` and
-`HETEROES_GPU_ACCEPTANCE=1`; legacy `test:integration` defaults to observe-only.
+This helper restores only CPU API/Web and refuses untracked listeners. The root
+RAPL service is enabled separately; its fixed reviewed installation commands are
+in the monitoring design. Worker and Server monitors remain unprivileged.
 
-## Local archive and recovery precautions
+The single monitoring Agent uses the existing `5070ti` device. Read its saved PID
+and `/proc/<pid>/stat` birth field (post-final-`)` fields index 19; zombie is not
+alive). **If it is alive, do not start another.** If stopped, confirm held dispatch,
+zero reservations and local enabled/desired OFF before running:
 
-Post-closeout storage update (2026-10-11): verified duplicate restore-trial weights
-and Worker download caches were removed; retained historical learning checkpoints
-were verified and relocated to Archive-2tb with their original paths preserved
-by a symlink. Root now has about 102 GiB free. The old M1 restore trial's metadata
-remains, but its duplicate weights were removed: restore it again from the intact
-full backup before treating that trial as a complete recovery. See
-`docs/local-lab-progress.md` and the dated disk cleanup receipts for current state.
+```bash
+PYTHONPATH=/home/pc5070ti/projects/hetero-es-m3-runtime/src CUDA_VISIBLE_DEVICES='' PYTHONNOUSERSITE=1 /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python -m heteroes.product.agent run --config /home/pc5070ti/.config/heteroes-private/ui-local-agent/config.json
+```
 
-Session archive: `~/.local/share/heteroes-session-archives/2026-10-11-m3-close/`,
-private directory (0700), copied credentials/config and database files (0600).
-It contains both source Git bundles, three independently copied installer files,
-consistent SQLite online-backup snapshots with `integrity_check=ok`, campaign
-logs/config/evidence and a SHA-256 manifest. Final bundle revisions/verification
-are in `git-bundles.json`. Database snapshots include product metadata, campaign
-ledgers and the agent outbox; live WAL files were not copied as backups.
+Run in foreground or record the new PID/birth securely if launching as a managed
+background process. New boots start OFF. Do not replay old campaign Agent state
+or launch this Agent beside a portable Worker owning the same enrolled identity.
+GPU qualification/trial commands require their explicit GPU opt-in; session
+resume/status inspection must not silently become a training run.
 
-Large stopped-campaign files are **hardlinked** into this same-disk archive to
-avoid duplicating several GiB. They preserve filenames against source deletion,
-but share file contents. Never modify checkpoint files in place. This archive
-does not protect against disk failure and is not an off-machine/cloud backup.
-The previous integration backup remains intact. About 11 GiB was free before
-closeout; check `df -h` before downloading another isolated runtime/model.
+## Current archive and recovery
 
-Keep live credential files in place. Restoring metadata requires a planned idle
-maintenance window, stopping the owning API and validating a copy before swapping
-the database; do not replace a live SQLite file. Git bundles can reconstruct new
-checkouts without GitHub. Installer downloads remain private Tailscale links on
-the Workers page; build-time `nativeWindowsGpuVerified:false` in older immutable
-evidence is historical and superseded by the dated hardware trial, not edited.
+New private local archive:
+`~/.local/share/heteroes-session-archives/2026-10-11-monitoring-close/`.
+Independent encrypted copy:
+`/mnt/Archive-2tb/heteroes-local/archives/2026-10-11-monitoring-close-independent.tar.gz.gpg`.
+Use their receipts to verify creation/restoration; the public close receipt is
+in `docs/evidence/2026-10-11-monitoring-close/`. Contents include both final Git
+bundles, consistent current SQLite backups (including energy/outbox), private
+configuration, four current installers, service files and source/evidence guides.
+Private files are 0600 under 0700 directories. The recovery key is not included
+in its encrypted archive and must be retained separately for disaster recovery.
 
-## Budget and next action
+Preserve the original `2026-10-11-m3-close` local archive and independent encrypted
+Archive-2tb copy: they contain older campaign/checkpoint recovery payloads. The new
+archive supplements those payloads; it does not replace or rewrite old acceptance.
+No remote/off-machine backup is claimed. Installer public links/manifest are
+ignored by Git: recreate them from the archived installer receipt after restoring
+files to their recorded paths, then verify full HTTP hashes.
 
-GPU-hours are conservative upper bounds: cumulative **1.144965250143793 / 2.0**;
-M3a **0.1231332501437929 / 0.25**, remaining lower bound **0.1268667498562071**.
-M2 cloud reserve **0.083799** is unchanged. Windows qualification was charged the
-owner-reported full 120-second upper bound. Read `budget.json` in the hardware
-evidence before any new campaign; do not reset counters.
-
-**Next: validate the packaged Linux Worker on a real GPU**, not another core-only
-Linux baseline. The owner explicitly identified this as the next required test.
-Start by checking desktop/keyring, available disk, GPU ownership and topology.
-Use the portable archive on this host if FUSE 2 remains unavailable; AppImage needs
-a separate supported environment. Fresh isolated setup → numerical qualification
-→ pairing/approval → owner ON → real candidates/replay/reference comparison →
-OFF/Quit and restart-OFF observations. Record immutable dated evidence and usage.
-
-Avoid enrolling a Linux desktop alias for the physical 5070 Ti while also allowing
-its existing coordinator identity to reserve that same GPU: identity-level
-reservations alone do not establish distinct physical resources. Choose an
-explicit test topology and check leases/processes before compute. No Linux GPU
-campaign was started by this closeout. Remaining Windows gates include clean-image
-installation, single-instance/tray/Quit/restart-OFF and network/coordinator outage
-observations. Cloud remains deferred until the owner changes that decision.
+Git bundles are tested by fresh bare clone/fsck and final branch/head comparison.
+SQLite snapshots use the online backup API plus `integrity_check`, not copied
+live WAL files. Restoring live databases requires an idle maintenance window and
+stopping their owning processes; validate a restored copy before replacing files.
+Archived process/boot records are evidence, not instructions to reuse old PIDs or
+force contribution ON. Preserve credential permissions and stored signing keys.

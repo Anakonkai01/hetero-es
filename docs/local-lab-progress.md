@@ -1,3 +1,16 @@
+## Session close — 2026-10-11
+
+Current operational entrypoint: [session handoff](m3-session-handoff.md). Both M3
+branches are `feat/local-lab-completion`; implementation/evidence heads A `9ff2b9c`,
+B `28a3c31` precede documentation-only close commits recorded in the new bundle
+manifest. Local and independently encrypted monitoring-close archives supplement
+older immutable recovery payloads. Verification receipts are under
+`docs/evidence/2026-10-11-monitoring-close/`; check them before assuming completion.
+Services remain running, queue held, contribution local OFF, zero reservations
+and no local GPU compute. Full local access/GPU budget override persists; cloud
+is deferred. Nothing pushed. Resume the newest handoff rather than older budget,
+branch or pending-feature paragraphs below.
+
 # Local lab completion — 2026-10-11
 
 Owner authorization: implement M3a through M6 locally; cloud is deferred. Both
@@ -73,7 +86,7 @@ and CPU work independently; retain multi-machine gates as pending.
 Evidence: [foundation checks](evidence/2026-10-11-local-foundation/README.md).
 Literature decisions: [ES papers and Recipe v2](es-literature-local-recipe.md).
 
-## Latest owner priority: Web and desktop UI
+## Earlier UI continuation (superseded by the monitoring update above)
 
 Comprehensive UI redesign implemented: public home/auth, dashboard/navigation,
 light/dark/system themes, actual hardware/energy/history measurements, experiment
@@ -81,7 +94,8 @@ generation/candidate/seed inspection and Worker/Server layouts. New local Linux
 portable and Windows NSIS downloads are on the homepage. See the
 [UI guide](ui-monitoring-guide.md) and [acceptance evidence](evidence/2026-10-11-ui/README.md).
 Track A continuation is commit `0fb8e16`; inspect Track B HEAD for its UI commit.
-No push was performed. The old session archives do not include these new commits.
+No push was performed. The original M3 archives remain historical; the monitoring-close
+archive described in the current handoff captures the later final heads.
 
 M4 pause/resume is now implemented in both tracks, with a verified generation
 checkpoint barrier, drain/epoch fencing and unchanged deterministic CPU baseline.
