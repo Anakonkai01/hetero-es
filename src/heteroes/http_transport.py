@@ -33,6 +33,7 @@ A client that stalls is disconnected after `request_timeout` seconds and at most
 is served with `Accept-Ranges: bytes` and `Range: bytes=N-` is honoured (206), so that a broken download can continue.
 """
 import hmac
+import ipaddress
 import http.client
 import http.server
 import json
@@ -44,6 +45,7 @@ import traceback
 import urllib.error
 import urllib.request
 from pathlib import Path
+from urllib.parse import urlsplit
 
 MAX_BODY_BYTES = 1 << 20
 CHUNK_BYTES = 1 << 20
@@ -326,19 +328,39 @@ class CoordinatorServer:
 class HttpClient:
     """A transport for `WorkerClient` (call it with `(operation, payload)`), and the other things a worker asks of the coordinator."""
 
-    def __init__(self, base_url: str, token: str | None = None, timeout: float = 30.0, retries: int = 3, backoff: float = 0.5):
+    def __init__(self, base_url: str, token: str | None = None, timeout: float = 30.0, retries: int = 3, backoff: float = 0.5, *, bulk_url: str | None = None):
         self._base = base_url.rstrip("/")
+        self._bulk = (bulk_url or base_url).rstrip('/')
+        def private_origin(url):
+            if any(c.isspace() or ord(c)<32 or ord(c)==127 for c in url):return False
+            parsed=urlsplit(url)
+            try:
+                address=ipaddress.ip_address(parsed.hostname or '')
+                port=parsed.port
+            except ValueError:
+                return False
+            return (parsed.scheme in ('http','https') and not parsed.username and not parsed.password
+                    and not parsed.query and not parsed.fragment and parsed.path in ('','/')
+                    and (port is None or 1 <= port <= 65535)
+                    and not (address.is_unspecified or address.is_multicast or (address.is_reserved and not address.is_loopback))
+                    and (address.is_private or address in ipaddress.ip_network('100.64.0.0/10')))
+        # Legacy localhost callers are private, too. No bulk bytes may silently
+        # fall back to a public tunnel when a worker lacks LAN/Tailscale access.
+        if bulk_url is None and not private_origin(base_url) and urlsplit(base_url).hostname != 'localhost':
+            raise ValueError('Public compute requires a private bulk_url')
+        if bulk_url is not None and not private_origin(bulk_url):
+            raise ValueError('bulk_url must be a numeric private/Tailscale origin')
         self._token = token
         self._timeout = timeout
         self._retries = retries
         self._backoff = backoff
         self._opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))    # a private network, never a proxy
 
-    def _request(self, method: str, path: str, data: bytes | None = None):
+    def _request(self, method: str, path: str, data: bytes | None = None, *, bulk=False):
         headers = {"Content-Type": "application/json"} if data is not None else {}
         if self._token is not None:
             headers["Authorization"] = f"Bearer {self._token}"
-        return urllib.request.Request(self._base + path, data=data, headers=headers, method=method)
+        return urllib.request.Request((self._bulk if bulk else self._base) + path, data=data, headers=headers, method=method)
 
     def _exchange(self, request) -> tuple[int, bytes]:
         try:
@@ -391,7 +413,9 @@ class HttpClient:
         The body of a GET as a file-like object (a context manager), for what is too large to read at once. With `start` > 0 it asks
         for `Range: bytes=start-`; the answer's `status` is 206 if the server honoured it and 200 if it sent the whole file.
         """
-        request = self._request("GET", path)
+        if not re.fullmatch(r'/v1/models/[a-f0-9]{64}', path):
+            raise ValueError('Only content-addressed weights use the bulk transport')
+        request = self._request("GET", path, bulk=True)
         if start > 0:
             request.add_header("Range", f"bytes={start}-")
         try:
