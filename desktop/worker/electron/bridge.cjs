@@ -18,7 +18,7 @@ class Bridge {
         clearTimeout(request.timeout);
         request.reject(Error('AGENT_UNAVAILABLE'));
     } this.pending.clear(); }; this.child.stdin.on('error', failed); this.child.on('error', failed); this.child.on('exit', failed); this.ready = this.call('init', { config, deviceToken: token }); }
-    call(action, extra = {}) { if (!['init', 'status', 'off', 'quit'].includes(action))
+    call(action, extra = {}) { if (!['init', 'status', 'off', 'quit', 'check_connection'].includes(action))
         return Promise.reject(Error('INVALID_BRIDGE_ACTION')); return new Promise((resolve, reject) => { const id = crypto.randomUUID(); const timeout = setTimeout(() => { this.pending.delete(id); reject(Error('AGENT_TIMEOUT')); }, 30000); this.pending.set(id, { resolve, reject, timeout }); this.child.stdin.write(JSON.stringify({ id, action, ...extra }) + '\n', error => { if (error) {
         clearTimeout(timeout);
         this.pending.delete(id);

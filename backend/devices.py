@@ -116,6 +116,10 @@ class DeviceEndpointUpdate(EndpointUpdate):
     bootId: str = Field(min_length=1, max_length=100)
 
 
+class DeviceConfigurationUpdate(EndpointUpdate):
+    selfTest: SelfTest
+
+
 class QualificationUpdate(Strict):
     bootId: str
     selfTest: SelfTest
@@ -713,7 +717,7 @@ def install_device_routes(app, store, user, runtime):
         active(current)
         return [d for d in runtime.devices() if d['ownerUserId']==current['userId']]
 
-    def update_endpoints(device_id, body, owner, boot_id=None):
+    def update_endpoints(device_id, body, owner, boot_id=None, self_test=None):
         with store.db() as db:
             db.execute('BEGIN IMMEDIATE')
             d=db.execute('SELECT * FROM devices WHERE id=? AND owner=?',(device_id,owner)).fetchone()
@@ -726,6 +730,13 @@ def install_device_routes(app, store, user, runtime):
             if (d['enabled'] or d['desired'] or reserved or physical or
                     any(p.get('coordinatorAlive') is not False or p.get('workerAlive') is not False for p in processes)):
                 raise HTTPException(409,'Turn contribution OFF and confirm all processes drained before changing endpoints')
+            if self_test is not None:
+                old=json.loads(d['self_test'])
+                if (not self_test.passed or self_test.gpuUUID!=old.get('gpuUUID') or
+                        self_test.platform!=old.get('platform','linux') or
+                        (self_test.coordinator and (self_test.platform!='linux' or self_test.vramTotalMb<11000))):
+                    raise HTTPException(422,'Role change requires a qualified Linux coordinator and the same physical GPU')
+                db.execute('UPDATE devices SET self_test=? WHERE id=?',(json.dumps(self_test.model_dump()),device_id))
             db.execute('UPDATE devices SET compute_url=?,bulk_url=? WHERE id=?',(body.computeUrl,body.bulkUrl,device_id))
             store.audit(db,owner,'DEVICE_ENDPOINTS_CHANGED',device_id)
         return next(d for d in runtime.devices() if d['deviceId']==device_id)
@@ -733,6 +744,10 @@ def install_device_routes(app, store, user, runtime):
     @app.patch('/api/v1/devices/{device_id}/endpoints')
     def owned_endpoints(device_id:str,body:EndpointUpdate,current=Depends(user)):
         return update_endpoints(device_id,body,active(current)['userId'])
+
+    @app.patch('/api/v1/devices/{device_id}/configuration')
+    def owned_configuration(device_id:str,body:DeviceConfigurationUpdate,current=Depends(user)):
+        return update_endpoints(device_id,body,active(current)['userId'],self_test=body.selfTest)
 
     @app.patch('/api/v1/device/endpoints')
     def device_endpoints(body:DeviceEndpointUpdate,current=Depends(device_auth)):

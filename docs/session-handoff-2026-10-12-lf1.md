@@ -1,5 +1,9 @@
 # Session handoff — 2026-10-12 evening: local-first lab goes live (branch `feat/local-first-lf1`)
 
+> Continuation: see `session-handoff-2026-10-12-codex.md` for subsequent local
+> changes and checks. The live-deployment and owner-rule details below remain the
+> starting reference; its backlog and test counts describe the earlier checkpoint.
+
 For any engineer or AI agent (Claude, Codex, or a person). Documentation is English; talk to the owner in
 **Vietnamese**, from the basics, in short answers (they are a student who did not write these documents and is
 new to distributed systems). Read this file first, then `AGENTS.md`. Older handoffs

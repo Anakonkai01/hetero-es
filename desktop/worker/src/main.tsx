@@ -17,6 +17,8 @@ type SetupState = {
     };
 };
 type State = {
+    compute: { pending?: boolean; network: string; coordinator: boolean; host: string; eligible: boolean;
+        addresses: { host: string; name: string; network: string }[] };
     telemetry?:ResourceObservation|null;
     telemetryHistory?:ResourceHistoryPoint[];
     serverUrl: string;
@@ -53,6 +55,43 @@ type State = {
         }[];
     };
 };
+type ConnectionCheck = { step: string; status: string; code: string };
+type ConnectionReport = { checks: ConnectionCheck[]; assignments: { assignmentId: string; replayOnly?: boolean; checks: ConnectionCheck[] }[] };
+const connectionMessages: Record<string, string> = {
+    LAB_REACHABLE: 'Lab server is reachable.', CONTROL_REACHABLE: 'Coordinator accepted the compute credential.',
+    BULK_REACHABLE: 'A 64-byte weights range was received.', NO_ASSIGNMENT: 'Not tested yet: no current worker assignment.',
+    REPLAY_ONLY: 'Public route: replay only. Full weights need the private network.',
+    NO_PUBLISHED_WEIGHTS: 'Not tested yet: no weights are published for this job.',
+    COORDINATOR_UNREACHABLE: 'Coordinator did not answer on the private or public route.',
+    CONTROL_REQUIRED: 'Check coordinator control before checking weights.', BULK_CHECK_FAILED: 'Could not read a bounded weights range on the private route.',
+    LAB_UNREACHABLE: 'Lab server did not answer.', AGENT_CHECK_FAILED: 'Could not obtain connection checks from the local agent.', PROBE_LIMIT: 'Not tested yet: another retained assignment was checked first.',
+};
+
+function ComputeSettings({ state, busy, act }: { state: State; busy: string; act: (action: string, args?: Record<string, unknown>) => Promise<void> }) {
+    const { t } = useProduct();
+    const [network, setNetwork] = useState(state.compute.network);
+    const [coordinator, setCoordinator] = useState(state.compute.coordinator);
+    const choices = state.compute.addresses.filter(a => network === 'internet' || a.network === network);
+    const [host, setHost] = useState(state.compute.host);
+    const selectedHost = choices.some(a => a.host === host) ? host : (choices[0]?.host ?? '');
+    const locked = !!busy || state.setup.running || (!state.compute.pending && (!!state.agent?.enabled || state.agent?.drained === false)) || (!!state.device && !state.signedIn);
+    return <section className="panel"><h2>{t('Network and compute role')}</h2>
+        {state.compute.pending && <Alert tone="warning">{t('The last server reply was lost. Sign in and save the chosen role again to confirm it. The agent stays stopped.')}</Alert>}
+        <form onSubmit={e => { e.preventDefault(); void act('configureCompute', { network, coordinator, host: selectedHost }); }}>
+            <label>{t('Network')}<select aria-label={t('Network')} disabled={locked} value={network} onChange={e => setNetwork(e.target.value)}>
+                <option value="lan">{t('Same LAN')}</option><option value="overlay">{t('Tailscale / WireGuard')}</option><option value="internet">{t('Internet over HTTPS')}</option>
+            </select></label>
+            <p className="hint">{t(network === 'internet' ? 'Public route: replay only. Full weights need the private network.' : 'Keep the selected private address fixed. Remote workers must be able to reach it.')}</p>
+            {state.compute.eligible && <label className="role-toggle"><input type="checkbox" checked={coordinator} disabled={locked} onChange={e => setCoordinator(e.target.checked)}/>{t('Allow this computer to coordinate experiments')}</label>}
+            {!state.compute.eligible && <p className="hint">{t('Coordinator requires a qualified Linux GPU with at least 11000 MB VRAM.')}</p>}
+            {coordinator && <label>{t('Coordinator private address')}<select aria-label={t('Coordinator private address')} value={selectedHost} disabled={locked} required onChange={e => setHost(e.target.value)}>
+                {!choices.length && <option value="">{t('No private address found')}</option>}{choices.map(a => <option key={a.host} value={a.host}>{a.host} · {a.name}</option>)}
+            </select></label>}
+            <button disabled={locked || (coordinator && (!state.compute.eligible || !selectedHost))}>{t('Save network and role')}</button>
+            <p className="hint">{t('Stop contribution and wait for all processes to drain before changing the role.')}</p>
+        </form>
+    </section>;
+}
 declare global {
     interface Window {
         worker: {
@@ -65,6 +104,8 @@ declare global {
     }
 }
 const explanations: Record<string, string> = { LAB_HTTP_401: 'Incorrect username or password. Sign in again.', LAB_HTTP_403: 'This action requires the device owner or administrator.', LAB_HTTP_409: 'The device or assignment is not ready. Refresh and try again.', SELF_TEST_REQUIRED: 'Run the GPU compatibility check before pairing.', SECURE_STORAGE_REQUIRED: 'Secure credential storage is unavailable. Unlock your system keyring and restart.', INSUFFICIENT_DISK_SPACE: 'Free some disk space and retry. Partial downloads are kept.', CUDA_UNAVAILABLE: 'CUDA_UNAVAILABLE', WINDOWS_RUNTIME_MISSING: 'WINDOWS_RUNTIME_MISSING', COMPATIBILITY_FAILED: 'The numerical check failed. Keep contribution OFF and export diagnostics.', AGENT_UNAVAILABLE: 'A process state is unknown; resources remain reserved.', RUNTIME_PROCESS_FAILED: 'Runtime setup or GPU check failed. Export diagnostics and retry.', ACTION_IN_PROGRESS: 'Wait for the current action to finish.', DRAIN_NOT_CONFIRMED: 'Waiting for owned processes to stop.', SETUP_IN_PROGRESS: 'Wait for runtime setup or the compatibility check to finish.' };
+Object.assign(explanations, { LAB_UPDATE_REQUIRED: 'This lab needs a server update before changing a paired device role.', STOP_WORK_FIRST: 'Stop contribution and wait for all processes to drain.', INVALID_COMPUTE_ADDRESS: 'Select an available private address on this computer.', COORDINATOR_NOT_QUALIFIED: 'Coordinator requires a qualified Linux GPU with at least 11000 MB VRAM.' });
+
 function App() {
     const { t } = useProduct();
     const [state, setState] = useState<State>();
@@ -74,6 +115,7 @@ function App() {
     const [displayName, setDisplayName] = useState('');
     const [error, setError] = useState('');
     const [busy, setBusy] = useState('');
+    const [connectionReport, setConnectionReport] = useState<ConnectionReport>();
     const polling = useRef(false);
     const quitting = useRef(false);
     async function refresh() { if (polling.current || quitting.current)
@@ -102,6 +144,8 @@ function App() {
         }
         if (action === 'login')
             setPassword('');
+        if (action === 'checkConnection') setConnectionReport(row.result as ConnectionReport);
+        if (action === 'configureCompute' || action === 'connect') setConnectionReport(undefined);
         if (action === 'quit') {
             if ((row.result as {
                 drained: boolean;
@@ -136,6 +180,12 @@ function App() {
  {step === 2 && <><p>{t('Download an isolated Python runtime, dependencies and the pinned model. No system Python is needed.')}</p><p className="hint">{t('Setup checks disk space and SHA-256. Interrupted downloads resume when you retry.')}</p>{state.setup.profileAvailable === false ? <Alert tone="warning">{t('This development build has no runtime profile. Use the packaged installer.')}</Alert> : <button disabled={!!busy || state.setup.running} onClick={() => void act(state.setup.installed ? 'selftest' : 'install')}>{t(state.setup.installed ? 'Run compatibility check' : 'Install isolated runtime')}</button>}<p className="hint">{t('The check repeats a GPU candidate and verifies 16 answer texts against Linux.')}</p></>}
  {step === 3 && <form onSubmit={e => { e.preventDefault(); void act('pair', { displayName }); }}><label>{t('Device name')}<input maxLength={100} required value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder={t('My GPU computer')}/></label><button disabled={!!busy}>{t('Pair device')}</button><p className="hint">{t('Pairing uses a one-use code from your lab account. An administrator must approve the device.')}</p></form>}
  </section><aside className="panel guide"><span className="guide-icon">↗</span><h2>{t('A few steps. One shared lab.')}</h2><p>{t('Connect, verify your GPU, then choose when to contribute.')}</p><ul><li>{t('A restart always starts with contribution OFF.')}</li><li>{t('Close this window to keep running in the tray.')}</li><li>{t('Stop safely before shutting down this computer.')}</li></ul></aside></div>}
+ {state && <ComputeSettings key={`${state.compute.network}/${state.compute.coordinator}/${state.compute.host}`} state={state} busy={busy} act={act}/>}
+ {state?.serverUrl && <section className="panel"><div className="panel-heading"><h2>{t('Connection checks')}</h2><button className="secondary" disabled={!!busy} onClick={() => void act('checkConnection')}>{t('Check connection')}</button></div>
+ <p className="hint">{t('This check reads network status and a small weights range. It does not start GPU work.')}</p>
+ {connectionReport && <ul className="connection-checks" aria-live="polite">{[...connectionReport.checks, ...connectionReport.assignments.flatMap(a => a.checks)].map((check, i) => <li key={i}><Status value={check.status}/><div><b>{t(check.step === 'lab' ? 'Lab server' : check.step === 'coordinator' ? 'Coordinator control' : 'Full weights route')}</b><p>{t(connectionMessages[check.code] ?? explanations[check.code] ?? 'Lab server did not answer.')} {check.status === 'FAIL' && <code>{check.code}</code>}</p></div></li>)}</ul>}
+ </section>}
+
  {state?.device && <><section className="panel contribution"><div><p className="eyebrow">{state.device.displayName}</p><h2>{t(contribution === 'ON' ? 'Ready to contribute' : contribution === 'DRAINING' ? 'Waiting for owned processes to stop.' : contribution === 'UNKNOWN' ? 'A process state is unknown; resources remain reserved.' : 'Contribution is OFF')}</h2><p>{t(unknown ? 'Process ownership is unknown. Check diagnostics before shutting down.' : !approval ? 'Waiting for administrator approval.' : active ? 'Your worker is evaluating a candidate.' : 'No GPU work is running.')}</p></div><Status value={contribution}/><button disabled={!!busy || (!agent?.enabled && (!approval || !state.signedIn || !!unknown || contribution === 'DRAINING'))} onClick={() => void act('contribution', { enabled: !agent?.enabled })}>{t(agent?.enabled ? 'Stop safely' : 'Enable contribution')}</button></section>
  {!state.signedIn && <section className="panel"><h2>{t('Sign in')}</h2><form onSubmit={e => { e.preventDefault(); void act('login', { username, password }); }}><label>{t('Username')}<input required value={username} onChange={e => setUsername(e.target.value)}/></label><label>{t('Password')}<input type="password" required value={password} onChange={e => setPassword(e.target.value)}/></label><button disabled={!!busy}>{t('Sign in')}</button></form></section>}
  <div className="desktop-grid"><div className="desktop-stack"><section className="panel"><div className="panel-heading"><h2>{t('Device overview')}</h2><Status value={state.selfTest?.passed?'Ready':'Not yet tested'}/></div><h3 className="gpu-name">{state.selfTest?.gpuName??t('Unknown')}</h3><dl className="desktop-details"><div><dt>{t('VRAM capacity')}</dt><dd>{state.selfTest?((state.selfTest.vramTotalMb)/1024).toFixed(1)+' GiB':'—'}</dd></div><div><dt>{t('Contribution')}</dt><dd><Status value={contribution}/></dd></div><div><dt>{t('Approval')}</dt><dd><Status value={state.device.approvalStatus}/></dd></div><div><dt>{t('Runtime')}</dt><dd>{t(state.setup.installed?'Installed':'Not installed')}</dd></div></dl><details className="desktop-detail"><summary>{t('Device identity')}</summary><p><span className="hint">{t('Worker ID')}</span><code>{state.device.workerId}</code></p><p><span className="hint">{t('Physical GPU UUID')}</span><code>{state.selfTest?.gpuUUID??'—'}</code></p></details><button className="secondary" disabled={!!busy||!!agent?.enabled||agent?.drained===false} onClick={()=>void act('selftest')}>{t('Run compatibility check')}</button></section>

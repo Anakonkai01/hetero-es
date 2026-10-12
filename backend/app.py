@@ -193,6 +193,7 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
         backend=getattr(runtime,'storage_backend',None)
         return {"ok": True, "dataSource": "real", "runtimeIssue": store.last_error,
                 "agentMode":bool(getattr(runtime,"agent_mode",False)),
+                'deviceConfiguration':bool(getattr(runtime,"agent_mode",False)),
                 'recipeVersions':[1,2] if getattr(runtime,'agent_mode',False) else [1],
                 "cloudStorageConfigured":backend is not None and getattr(backend,'mode','cloud')=='cloud',
                 "recoveryStorageConfigured":backend is not None,

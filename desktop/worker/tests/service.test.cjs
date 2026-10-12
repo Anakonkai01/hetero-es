@@ -34,3 +34,32 @@ test('requests identify themselves as HeteroES so a public edge does not block t
  assert.ok(seen.length>=2);
  for(const options of seen)assert.match(options.headers?.['User-Agent']??'',/^HeteroES-Worker\/\d/);
 });
+
+test('connection check preserves login, pairing and agent state; unassigned compute is explicitly untested', async t => {
+ const {service,state}=await fixture(t);
+ service.settings.serverUrl='https://lab.example.org'; service.userToken='owner-session';
+ service.session={user:{displayName:'Owner'}};
+ service.fetch=async()=>new Response(JSON.stringify({ok:true,agentMode:true}));
+ const report=await service.checkConnection();
+ assert.equal(report.checks[0].status,'PASS');
+ assert.deepEqual(report.checks.slice(1),[
+  {step:'coordinator',status:'SKIP',code:'NO_ASSIGNMENT'},
+  {step:'bulk',status:'SKIP',code:'NO_ASSIGNMENT'}]);
+ assert.equal(service.userToken,'owner-session');assert.equal(service.session.user.displayName,'Owner');
+ assert.equal(state.enabled,false);assert.equal(service.bridge,null);
+ assert.ok(!JSON.stringify(report).includes('owner-session'));
+});
+
+test('connection failures report only safe codes, and compute reports come from the credential-owning bridge', async t => {
+ const {service,bridge}=await fixture(t);
+ service.settings.serverUrl='https://lab.example.org';
+ service.fetch=async()=>{throw Error('https://host/?token=private-secret');};
+ let report=await service.checkConnection();
+ assert.equal(report.checks[0].status,'FAIL');assert.ok(!JSON.stringify(report).includes('private-secret'));
+ service.fetch=async()=>new Response(JSON.stringify({ok:true,agentMode:true}));
+ service.bridge=bridge;
+ bridge.call=async action=>{assert.equal(action,'check_connection');return {assignments:[{assignmentId:'a'.repeat(32),route:'public',replayOnly:true,checks:[{step:'coordinator',status:'PASS',code:'CONTROL_REACHABLE'},{step:'bulk',status:'SKIP',code:'REPLAY_ONLY'}]}]};};
+ report=await service.checkConnection();
+ assert.equal(report.assignments[0].replayOnly,true);
+ assert.equal(report.checks.length,1);
+});

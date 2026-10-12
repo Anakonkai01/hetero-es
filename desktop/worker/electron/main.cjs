@@ -43,10 +43,10 @@ app.whenReady().then(async () => {
     ipcMain.handle('worker:command', async (event, action, args) => {
         if (event.sender !== window.webContents || event.senderFrame !== window.webContents.mainFrame)
             return { ok: false, error: 'IPC_DENIED' };
-        const actions = ['status', 'connect', 'login', 'install', 'selftest', 'pair', 'contribution', 'logout', 'quit', 'external', 'diagnostics'];
+        const actions = ['status', 'connect', 'checkConnection', 'configureCompute', 'login', 'install', 'selftest', 'pair', 'contribution', 'logout', 'quit', 'external', 'diagnostics'];
         if (!actions.includes(action) || !args || typeof args !== 'object' || Array.isArray(args))
             return { ok: false, error: 'INVALID_COMMAND' };
-        const allowed = { connect: ['url'], login: ['username', 'password'], pair: ['displayName'], contribution: ['enabled'], external: ['target'] };
+        const allowed = { connect: ['url'], configureCompute: ['network', 'coordinator', 'host'], login: ['username', 'password'], pair: ['displayName'], contribution: ['enabled'], external: ['target'] };
         if (Object.keys(args).some(key => !(allowed[action] ?? []).includes(key)))
             return { ok: false, error: 'INVALID_ARGUMENT' };
         if (action !== 'status' && busy)
@@ -67,6 +67,8 @@ app.whenReady().then(async () => {
                     throw Error('INVALID_ARGUMENT');
                 result = await service.login(args.username, args.password);
             }
+            if (action === 'configureCompute') result = await service.configureCompute(args);
+            if (action === 'checkConnection') result = await service.checkConnection();
             if (action === 'install')
                 result = await service.setup.install();
             if (action === 'selftest')
