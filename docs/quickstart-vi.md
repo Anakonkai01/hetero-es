@@ -21,7 +21,8 @@ Bạn muốn làm gì?
 7. **Bật ON** chỉ khi bạn muốn chia sẻ GPU. Mỗi lần mở lại app, trạng thái luôn về OFF.
 8. Trước khi tắt máy hoặc trả máy: bấm **Stop safely**, chờ app báo đã dừng, rồi **Quit safely**.
 
-**Muốn máy bạn thật sự chạy việc từ xa?** Hiện tại cần thêm Tailscale (mạng riêng ảo miễn phí): cài Tailscale, đăng nhập, rồi nhờ quản trị viên mời bạn vào mạng. Đăng ký, ghép cặp và duyệt không cần Tailscale; việc chạy phép tính thì cần.
+**Máy bạn ở mạng khác với lab thì sao?** Không cần Tailscale. Nếu app không thấy đường mạng riêng của lab, nó tự dùng link công khai và chỉ **bắt kịp bằng replay** (tải vài trăm byte mỗi bước thay vì cả 1 GB trọng số). Đã chạy thử thật trên GPU: job 4 thế hệ hoàn thành, không tải trọng số đầy đủ lần nào.
+Giới hạn: máy bạn chỉ được tụt tối đa 64 bước so với lab. Nếu tụt quá, hoặc cần tải đầy đủ trọng số, worker sẽ dừng và báo *needs_private_route*. Lúc đó cài Tailscale (hoặc vào cùng mạng với lab) rồi bật lại.
 
 ---
 
