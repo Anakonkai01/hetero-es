@@ -8,7 +8,7 @@ import threading
 import time
 
 from argon2.exceptions import VerificationError
-from fastapi import Depends, FastAPI, Header, HTTPException, Response
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
@@ -16,6 +16,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from .store import ACTIVE, TERMINAL, Store, now
 from .runtime import Runtime
 from .lab import install_lab_routes
+from .throttle import Throttle, client_address
 
 
 class Login(BaseModel):
@@ -75,11 +76,16 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
         if metadata_thread:metadata_thread.join(timeout=2)
         if dispatch:
             thread.join(timeout=2)
-    app = FastAPI(title="HeteroES product API", lifespan=lifespan)
+    # The interactive documentation lists every route: keep it for development, not for a served lab.
+    private_docs = {} if web_directory is None else {'docs_url': None, 'redoc_url': None, 'openapi_url': None}
+    app = FastAPI(title="HeteroES product API", lifespan=lifespan, **private_docs)
+    app.state.login_failures = Throttle(5, 600)                 # per caller address and username
+    app.state.login_failures_by_address = Throttle(30, 600)     # per caller address, any username
+    app.state.registrations = Throttle(10, 3600)
     app.state.store = store
     @app.exception_handler(HTTPException)
     async def handle_http(_request, error):
-        return JSONResponse({"message": str(error.detail)}, status_code=error.status_code)
+        return JSONResponse({"message": str(error.detail)}, status_code=error.status_code, headers=error.headers)
 
     def user(authorization: str = Header(default="")):
         if not authorization.startswith("Bearer "):
@@ -195,8 +201,7 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
                 **({"uiUrl":ui_url} if ui_url else {}),
                 **({'privateLabUrl':config.get('bulkApiUrl',config['apiUrl'])} if config.get('apiUrl') else {})}
 
-    @app.post("/api/v1/auth/login")
-    def sign_in(body: Login):
+    def authenticate(body: Login):
         with store.db() as db:
             row = db.execute("SELECT id,hash,profile FROM users WHERE json_extract(profile,'$.username')=?", (body.username,)).fetchone()
             try:
@@ -208,6 +213,24 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
             token = secrets.token_urlsafe(32)
             db.execute("INSERT INTO sessions VALUES (?,?,?)", (hashlib.sha256(token.encode()).hexdigest(), row['id'], time.time()+43200))
             return {**session(json.loads(row["profile"])), "accessToken": token}
+
+    @app.post("/api/v1/auth/login")
+    def sign_in(body: Login, request: Request):
+        address = client_address(request.client.host if request.client else None, request.headers)
+        user_key = (address, body.username.lower())
+        state = app.state
+        wait = max(state.login_failures.retry_after(user_key), state.login_failures_by_address.retry_after(address))
+        if wait:
+            raise HTTPException(429, f"Too many attempts. Try again in {wait} seconds.", headers={"Retry-After": str(wait)})
+        try:
+            result = authenticate(body)
+        except HTTPException as error:
+            if error.status_code == 401:
+                state.login_failures.record(user_key)
+                state.login_failures_by_address.record(address)
+            raise
+        state.login_failures.clear(user_key)
+        return result
 
     @app.get("/api/v1/auth/session")
     def get_session(current=Depends(user)):

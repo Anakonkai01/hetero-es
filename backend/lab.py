@@ -8,12 +8,13 @@ import uuid
 from typing import Literal
 
 from argon2.exceptions import VerificationError
-from fastapi import Cookie, Depends, Header, HTTPException, Response
+from fastapi import Cookie, Depends, Header, HTTPException, Request, Response
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from .store import ACTIVE, now
 from .backup import begin_maintenance,end_maintenance,create_bundle,bundle_path
+from .throttle import client_address
 
 
 class Strict(BaseModel):
@@ -85,7 +86,12 @@ def install_lab_routes(app, store, user, scoped, runtime):
         return fresh
 
     @app.post('/api/v1/auth/register',status_code=201)
-    def register(body:Registration):
+    def register(body:Registration,request:Request):
+        address=client_address(request.client.host if request.client else None,request.headers)
+        wait=app.state.registrations.retry_after(address)
+        if wait:
+            raise HTTPException(429,f'Too many registrations from this address. Try again in {wait} seconds.',headers={'Retry-After':str(wait)})
+        app.state.registrations.record(address)
         profile={'userId':uuid.uuid4().hex,'username':body.username,'displayName':body.displayName,
                  'accountStatus':'PENDING','platformAdmin':False,'canCreateWorkspace':False}
         with store.db() as db:
