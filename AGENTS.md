@@ -10,4 +10,4 @@ or tags; no `Co-Authored-By` or other generated-by trailer; talk to the owner in
 
 Do not touch Recipe v1 numerics (`noise/`, `es/`, `generation_record.py`, `ledger/`) without a separate decision from the owner.
 Tests: `CUDA_VISIBLE_DEVICES='' PYTHONPATH=src /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python -m pytest -q`
-(2,096 passed, 100 skipped on 2026-10-12). Mutation check: `../Hetero-ES-LLM-m3/scripts/mutation-check.py`.
+(latest CPU continuation: 2,115 passed, 100 skipped on 2026-10-12). Mutation check: `../Hetero-ES-LLM-m3/scripts/mutation-check.py`.

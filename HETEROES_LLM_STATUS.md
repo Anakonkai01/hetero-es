@@ -1,3 +1,10 @@
+> **2026-10-12 Codex continuation:** r5 prepared locally, public lab remains r4.
+> CPU checks: runtime 2,115 pass / 100 skip; product backend 221 pass; Worker 25,
+> Server 1. No new GPU or second-machine run. Read product
+> `../Hetero-ES-LLM-m3/docs/session-handoff-2026-10-12-codex.md` for current changes,
+> evidence, installer limits and the real-desktop acceptance handoff. Older blocks
+> below describe their dated checkpoints.
+
 # HeteroES-LLM — Status
 
 **Last updated:** 12/10/2026 — Architecture audit/review; implementation paused. Core CPU checks: 2,074 passed, 100 skipped. Product backend: 109 passed, one provenance test failed. Earlier standalone GPU boundary resume/v2 export and Quick Tunnel CPU evidence have limited scope; new native packages, offline provisioning and lifecycle partition acceptance remain pending.

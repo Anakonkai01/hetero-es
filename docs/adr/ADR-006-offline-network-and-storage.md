@@ -128,3 +128,22 @@ wrong credentials and actual wire byte counts, are in product
 `docs/evidence/2026-10-12-lf1-codex/`. This is not a cross-network/GPU acceptance.
 The Lab Server graphical network-choice flow and an extended CLI doctor remain
 [PENDING].
+
+## 2026-10-12 continuation — responsive local upload IO
+
+[CODE] Local upload opening/preflight, bounded chunk writes/hash, fsync/publication
+and cleanup run in the API thread pool. Cleanup serializes with any disk operation
+still running after request cancellation. Signed length, immutability and
+manifest-last publication rules remain in force.
+
+[MEASURED — CPU fixtures] An unrelated async health request succeeds while a
+synthetically slow open/write/fsync is waiting. Incomplete/oversized/disconnected
+uploads clean up their partial file; cancellation does not close a descriptor still
+owned by the disk thread. Six mutation faults are detected. This is responsiveness
+under controlled disk delay, not a large-object throughput or crash/power-loss test.
+
+[MEASURED] Both r5 Linux desktop installers passed with private profiles on the
+system filesystem. The first Server profile was mistakenly put on this machine's
+Archive mount (directory mode 0777) and was refused. Private state/runtimes remain
+on the system filesystem; Archive is for selected bulk data. See product evidence
+`docs/evidence/2026-10-12-lf1-codex/` and `docs/r5-hardware-acceptance.md`.
