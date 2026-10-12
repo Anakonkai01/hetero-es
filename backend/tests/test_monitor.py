@@ -1,21 +1,12 @@
-import hashlib
 import json
 import os
-from pathlib import Path
 import select
 import subprocess
 import sys
 import pytest
 
 
-def test_vendored_collector_provenance_matches_files():
-    root=Path(__file__).parents[1]/'monitoring'
-    provenance=json.loads((root/'provenance.json').read_text())
-    assert set(provenance['files'])=={'energy.py','host_detail.py','power.py','telemetry.py'}
-    for file,digest in provenance['files'].items():
-        assert hashlib.sha256((root/file).read_bytes()).hexdigest()==digest
-
-
+# Provenance of the vendored modules is checked in test_provenance.py.
 @pytest.mark.skipif(sys.platform!='linux',reason='Linux host detail contract')
 def test_private_monitor_reports_real_detail_and_exits_on_parent_eof(tmp_path):
     env=dict(os.environ,CUDA_VISIBLE_DEVICES='',PYTHONNOUSERSITE='1')
