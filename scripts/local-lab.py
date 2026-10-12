@@ -17,7 +17,9 @@ from urllib.parse import urlsplit
 REPO=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(REPO))
 from backend.deployment import caddyfile, idle, save_private
-from backend.addresses import endpoint
+from backend.addresses import endpoint, is_private
+
+REGISTRATION_SECONDS=45
 
 
 def birth(pid):
@@ -95,6 +97,38 @@ def quick(root,name,port,cloudflared,environment):
     raise RuntimeError(f'{name} did not obtain a Quick URL; inspect its private log')
 
 
+def tunnel_names(config):
+    return ['named-tunnel'] if config.get('namedTunnelConfig') else ['web-quick','compute-quick']
+
+
+def named(root,name,config_file,cloudflared,environment):
+    """Run an owner-created Cloudflare tunnel (fixed host names) and wait until it has registered."""
+    record=spawn(root,name,[cloudflared,'--no-autoupdate','tunnel','--config',str(config_file),'run'],environment)
+    deadline=time.monotonic()+REGISTRATION_SECONDS
+    while time.monotonic()<deadline:
+        log=(root/(name+'.log')).read_text(errors='replace')
+        if alive(record) and 'Registered tunnel connection' in log:
+            return record
+        if not alive(record):
+            break
+        time.sleep(.2)
+    raise RuntimeError(f'{name} did not register with Cloudflare; inspect its private log')
+
+
+def check_named(config):
+    if not config.get('namedTunnelConfig'):
+        return
+    if not Path(config['namedTunnelConfig']).is_file():
+        raise ValueError('namedTunnelConfig does not point to a file')
+    urls=[config.get('publicWebUrl'),config.get('publicComputeUrl')]
+    for value in urls:
+        if not isinstance(value,str) or not value.startswith('https://') or is_private(value):
+            raise ValueError('A named tunnel needs fixed HTTPS publicWebUrl and publicComputeUrl')
+        endpoint(value)
+    if urls[0]==urls[1]:
+        raise ValueError('Web and compute need different host names')
+
+
 def defaults(config,args):
     result=dict(config)
     if args.api_url:
@@ -136,25 +170,28 @@ def main():
     with os.fdopen(lock,'w') as stream:
         fcntl.flock(stream,fcntl.LOCK_EX|fcntl.LOCK_NB)
         config=load(args.private/'config.json')
-        names=['web-quick','compute-quick','public-entry','cpu-server']
+        tunnels=tunnel_names(config);servers=['public-entry','cpu-server'];names=tunnels+servers
         if args.action=='status':
             print(json.dumps({'services':{n:{'alive':alive(load(root/(n+'-process.json')))} for n in names},
                 'webUrl':config.get('publicWebUrl'),'computeUrl':config.get('publicComputeUrl'),
                 'privateBulkUrl':config.get('privateComputeUrl'),'serverInstanceId':config.get('serverInstanceId')},indent=2))
             return
         config=defaults(config,args)
+        check_named(config)
         if config.get('deploymentMode')!='agent':
             raise RuntimeError('Local deployment requires agent mode')
         idle(config)
         if args.action in ('stop','rotate','restart'):
-            selected=names[:2] if args.action=='rotate' else names[2:] if args.action=='restart' else names
+            if args.action=='rotate' and config.get('namedTunnelConfig'):
+                raise RuntimeError('A named tunnel has fixed addresses; there is nothing to rotate')
+            selected=tunnels if args.action=='rotate' else servers if args.action=='restart' else names
             for name in selected:
                 stop(root,name)
-            if args.action!='restart':
+            if args.action!='restart' and not config.get('namedTunnelConfig'):
                 config.pop('publicWebUrl',None);config.pop('publicComputeUrl',None)
             save_private(args.private/'config.json',config)
             if args.action=='stop':
-                print('Owned CPU service and Quick Tunnels stopped.');return
+                print('Owned CPU service and tunnels stopped.');return
         if not (args.web/'index.html').is_file():
             raise RuntimeError('Build the production frontend first')
         # Preserve the old private config as a migration receipt, exactly once.
@@ -171,9 +208,13 @@ def main():
         if args.downloads.is_dir():command.extend(['--downloads',str(args.downloads)])
         spawn(root,'cpu-server',command,environment,address.hostname,address.port or 80)
         spawn(root,'public-entry',[args.caddy,'run','--config',str(entry)],environment,'127.0.0.1',config.get('webEntryPort',8080))
-        (root/'quick-config.yml').write_text('{}\n');(root/'quick-config.yml').chmod(0o600)
-        config['publicWebUrl']=quick(root,'web-quick',config.get('webEntryPort',8080),args.cloudflared,environment)
-        config['publicComputeUrl']=quick(root,'compute-quick',config.get('computeEntryPort',8081),args.cloudflared,environment)
+        if config.get('namedTunnelConfig'):
+            # Fixed host names come from the owner's tunnel configuration.
+            named(root,'named-tunnel',config['namedTunnelConfig'],args.cloudflared,environment)
+        else:
+            (root/'quick-config.yml').write_text('{}\n');(root/'quick-config.yml').chmod(0o600)
+            config['publicWebUrl']=quick(root,'web-quick',config.get('webEntryPort',8080),args.cloudflared,environment)
+            config['publicComputeUrl']=quick(root,'compute-quick',config.get('computeEntryPort',8081),args.cloudflared,environment)
         save_private(args.private/'config.json',config)
         print(json.dumps({'webUrl':config['publicWebUrl'],'computeUrl':config['publicComputeUrl'],
             'privateBulkUrl':config['privateComputeUrl'],'dispatchHeld':True,'computeStarted':False},indent=2))
