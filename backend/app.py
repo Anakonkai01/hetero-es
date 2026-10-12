@@ -524,7 +524,9 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
                             for item in manifest.get(group,[]):
                                 item['url']=bulk+'/downloads/'+Path(item['name']).name
                 return manifest
-            app.mount('/downloads',StaticFiles(directory=downloads_directory),name='worker-downloads')
+            # The publisher links installers from another disk; Starlette refuses such symlinks by default.
+            # Path traversal is still rejected: the check then compares the link's own location.
+            app.mount('/downloads',StaticFiles(directory=downloads_directory,follow_symlink=True),name='worker-downloads')
         else:
             @app.get('/downloads/manifest.json',include_in_schema=False)
             def no_installers():

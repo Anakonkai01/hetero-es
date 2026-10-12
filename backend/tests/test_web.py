@@ -46,3 +46,22 @@ def test_installer_links_use_the_public_origin_when_public_downloads_are_enabled
     assert 'privateTransferRequired' not in manifest
     assert manifest['installers'][0]['url']=='/downloads/a.exe'
     assert manifest['serverInstallers'][0]['url']=='/downloads/s.exe'
+
+
+def test_installers_published_as_symlinks_into_another_disk_are_served_with_ranges(tmp_path):
+    web = tmp_path/'web'; (web/'assets').mkdir(parents=True); (web/'index.html').write_text('<html>Lab UI</html>')
+    other_disk = tmp_path/'archive'; other_disk.mkdir()
+    (other_disk/'Worker Setup.exe').write_bytes(b'MZ-installer-bytes-0123456789')
+    (tmp_path/'secret.txt').write_text('not an installer')
+    downloads = tmp_path/'downloads'; downloads.mkdir()
+    (downloads/'Worker Setup.exe').symlink_to(other_disk/'Worker Setup.exe')
+    (downloads/'manifest.json').write_text('{"installers":[],"serverInstallers":[]}')
+    app = create_app(tmp_path/'state.sqlite', {'admin':'test-admin-pass'}, Runtime(), dispatch=False,
+                     web_directory=web, downloads_directory=downloads)
+    with TestClient(app) as client:
+        whole = client.get('/downloads/Worker%20Setup.exe')
+        assert whole.status_code == 200 and whole.content == b'MZ-installer-bytes-0123456789'
+        part = client.get('/downloads/Worker%20Setup.exe', headers={'Range': 'bytes=3-9'})
+        assert part.status_code == 206 and part.content == b'installer'[:7]
+        for escape in ('/downloads/../secret.txt', '/downloads/%2e%2e/secret.txt', '/downloads/..%2fsecret.txt'):
+            assert 'not an installer' not in client.get(escape).text
