@@ -15,6 +15,10 @@ authorized unattended local work while away, plus independent backlog work after
 the first item. No push/tag, GPU work, second-machine access or persistent system
 configuration changes were authorized here.
 
+Public onboarding feedback and the latest user walkthrough checkpoint are tracked
+in `r5-user-feedback-2026-10-12.md`. Registration was reported complete; password
+UX, administrator notifications and the approval screen need follow-up.
+
 ## First checkpoint: E1 and Worker E2
 
 - Qualified Linux desktop coordinator selection, local LAN/overlay address choice,
