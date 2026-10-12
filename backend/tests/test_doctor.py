@@ -85,30 +85,25 @@ def test_damaged_or_newer_database_fails(lab):
     assert levels(lab)['database'][0] == FAIL
 
 
-def test_internal_corruption_that_still_opens_is_caught_by_the_integrity_check(lab, tmp_path):
+def test_internal_corruption_that_still_opens_is_caught_by_the_integrity_check(lab):
+    # Damage the page of the `username` index: queries on other tables still work, but
+    # PRAGMA integrity_check no longer says "ok". The page is found by name, so this is deterministic.
     database = lab / 'state' / 'product.sqlite'
     with sqlite3.connect(database) as db:
         db.execute('PRAGMA wal_checkpoint(TRUNCATE)')
-    data = database.read_bytes()
-    size = int.from_bytes(data[16:18], 'big') or 65536
-    for page in range(2, len(data) // size + 1):
-        broken = bytearray(data)
-        broken[(page - 1) * size + 8:page * size] = b'\xff' * (size - 8)
-        candidate = tmp_path / 'candidate.sqlite'
-        candidate.write_bytes(bytes(broken))
+        root = db.execute("SELECT rootpage FROM sqlite_master WHERE name='username'").fetchone()[0]
+        size = db.execute('PRAGMA page_size').fetchone()[0]
+    data = bytearray(database.read_bytes())
+    start = (root - 1) * size + 8
+    data[start:start + 32] = b'\xff' * 32
+    database.write_bytes(bytes(data))
+    with sqlite3.connect(database) as db:
+        assert db.execute("SELECT value FROM settings WHERE key='dispatchHold'").fetchone() is not None
         try:
-            with sqlite3.connect(candidate) as db:
-                still_readable = db.execute("SELECT value FROM settings WHERE key='dispatchHold'").fetchone() is not None
-                damaged = db.execute('PRAGMA integrity_check').fetchone()[0] != 'ok'
-        except sqlite3.Error:
-            continue
-        if still_readable and damaged:
-            database.write_bytes(bytes(broken))
-            break
-    else:
-        pytest.fail('no page could be damaged while the database stays readable')
-    result = levels(lab)['database']
-    assert result[0] == FAIL
+            assert db.execute('PRAGMA integrity_check').fetchone()[0] != 'ok'
+        except sqlite3.DatabaseError:
+            pass
+    assert levels(lab)['database'][0] == FAIL
 
 
 def test_storage_directory_is_required_and_free_space_is_judged(lab, tmp_path, monkeypatch):
