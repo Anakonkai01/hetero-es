@@ -1,0 +1,8 @@
+[
+  {
+    "name": "omit protocol header",
+    "file": "src/heteroes/product/agent.py",
+    "old": "if path=='/api/v1/device/poll' else {}",
+    "new": "if False else {}"
+  }
+]

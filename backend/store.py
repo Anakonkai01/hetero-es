@@ -202,10 +202,7 @@ class Store:
         return self._dispatch_legacy_once()
 
     def _dispatch_parallel(self):
-        """Monitor every assignment and dispatch FIFO among eligible GPU sets."""
-        with self.db() as db:
-            if json.loads(db.execute('SELECT value FROM settings WHERE key="dispatchHold"').fetchone()[0]):
-                return
+        """Always reconcile admitted work; hold only admission of new queued work."""
         errors = []
         for active in [body for body in self.list() if body['status'] in ACTIVE]:
             try:
@@ -216,6 +213,10 @@ class Store:
             queued = [row[0] for row in db.execute('SELECT run_id FROM queue ORDER BY sequence')]
         for run_id in queued:
             with self.db() as db:
+                # Recheck under the same lock as the queued-to-STARTING claim.
+                # An operator can hold admission while reconciliation is running.
+                if json.loads(db.execute('SELECT value FROM settings WHERE key="dispatchHold"').fetchone()[0]):
+                    break
                 active = self.get(run_id)
                 if not active or active['status'] != 'QUEUED':
                     continue

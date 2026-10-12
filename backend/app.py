@@ -466,10 +466,11 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
                 if body['status']=='PAUSED':return body
                 if body.get('cancelRequested') or body['status'] not in ('STARTING','RUNNING','PAUSING'):
                     raise HTTPException(409,'Pause requires a running experiment')
+                runtime.require_command(db,body['coordinatorDeviceId'],'PAUSE_ASSIGNMENT')
+                runtime.pause(run_id,db=db)
                 body.update(pauseRequested=True,status='PAUSING')
                 store.save(db,body)
                 store.audit(db,current['userId'],'PAUSE_REQUESTED',run_id,body['workspaceId'])
-            runtime.pause(run_id)
             return body
 
         @app.post('/api/v1/experiments/{run_id}/resume')
@@ -494,11 +495,12 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
             with store.db() as db:
                 body=authorized(run_id,current)
                 if body['status'] in TERMINAL:raise HTTPException(409,'Experiment is already finished')
-                body['requestedBackupPolicy']=policy.model_dump()
-                store.save(db,body)
                 assignment=db.execute('SELECT id,coordinator,epoch,released FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1',(run_id,)).fetchone()
                 if assignment and not assignment['released']:
+                    runtime.require_command(db,assignment['coordinator'],'UPDATE_BACKUP_POLICY')
                     runtime._enqueue(db,assignment['coordinator'],'UPDATE_BACKUP_POLICY',{'assignmentId':assignment['id'],'epoch':assignment['epoch'],'policy':policy.model_dump()},'backup-policy:'+secrets.token_hex(16))
+                body['requestedBackupPolicy']=policy.model_dump()
+                store.save(db,body)
                 store.audit(db,current['userId'],'BACKUP_POLICY_REQUESTED',run_id,body['workspaceId'])
             return {'policy':policy.model_dump(),'appliesBeforeNextGeneration':True}
 

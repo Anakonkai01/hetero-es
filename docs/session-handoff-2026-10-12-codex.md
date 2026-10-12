@@ -18,7 +18,7 @@ configuration changes were authorized here.
 - Read-only desktop connection diagnostics. Lab health, assignment-scoped
   coordinator grant and bounded 64-byte private weights range. Public fallback is
   replay-only; unassigned or unpublished weights is explicitly untested.
-- Source runtimes refreshed for the desktop apps. No public publication/restart.
+- Worker source runtime refreshed; Lab Server archive refresh is part of the final build. No public publication/restart.
 
 Checks: runtime **2114 passed, 100 skipped** (CPU), backend **193 passed**, Worker
 Node **25 passed**. Mutation faults detected: Worker **10/10**, backend **6/6**,
@@ -37,3 +37,13 @@ the new backend deployed first (`deviceConfiguration` capability in health).
 Next independent backlog work: split admission hold from ongoing reconcile; agent
 command-capability header. Then build and check installers in isolated CPU profiles.
 The identity/epoch, restore and ledger features remain separate, larger tasks.
+
+## Second checkpoint: control continuation
+
+Admission hold now leaves existing-run reconciliation, cancellation, pause and
+release projection running. Every queued claim rechecks the hold under the store
+lock. Agent polls advertise command kinds in an HTTP header; the body is unchanged.
+The server sends only supported commands and retains unsupported pending commands.
+Core lifecycle support is needed for admission. Pause and live policy changes on
+old agents return 409 before mutating the run. See ADR-005 and ADR-007 updates.
+Control mutation checks: 7/7 backend faults and 1/1 agent-header fault detected.

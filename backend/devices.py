@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import secrets
+import re
 import time
 import uuid
 from typing import Literal
@@ -21,6 +22,17 @@ TERMINAL = {'COMPLETED', 'CANCELLED', 'FAILED'}
 QUIESCENT = TERMINAL | {'PAUSED'}
 MODEL = 'Qwen/Qwen2.5-0.5B-Instruct'
 REVISION = '7ae557604adf67be50417f59c2c2f167def9a775'
+CORE_COMMAND_KINDS = frozenset({'SET_CONTRIBUTION','COORDINATE','START_WORKER','STOP_WORKER','CANCEL_ASSIGNMENT'})
+COMMAND_KINDS = CORE_COMMAND_KINDS | {'PAUSE_ASSIGNMENT','UPDATE_BACKUP_POLICY'}
+
+
+def command_capabilities(value):
+    """Missing header means the conservative agent-v2 floor; empty means none."""
+    if value is None:return CORE_COMMAND_KINDS
+    parts=value.split(',') if value else []
+    if len(value)>2048 or len(parts)>32 or any(not re.fullmatch('[A-Z][A-Z0-9_]{0,63}',p.strip()) for p in parts):
+        raise HTTPException(422,'Invalid agent command capabilities')
+    return frozenset(p.strip() for p in parts) & COMMAND_KINDS
 
 
 def re_checkpoint(name):
@@ -370,6 +382,9 @@ class AgentRuntime:
         chosen=[coordinator]+[by_worker.get(w) for w in body['workerIds']]
         for d in chosen:
             if not d or d['approvalStatus']!='APPROVED':return 'Selected device needs approval'
+            capabilities=db.execute('SELECT value FROM settings WHERE key=?',('agentCommands:'+d['deviceId'],)).fetchone()
+            supported=set(json.loads(capabilities[0])) if capabilities else CORE_COMMAND_KINDS
+            if not CORE_COMMAND_KINDS <= supported:return 'Update selected device agent to support core lifecycle commands'
             if body.get('recipeVersion')==2:
                 profile=d['selfTest']
                 if profile.get('platform')=='windows' or 2 not in profile.get('recipeVersions',[]):return 'Recipe v2 qualification required'
@@ -395,11 +410,17 @@ class AgentRuntime:
         db.execute('INSERT OR IGNORE INTO device_commands VALUES (?,?,?,?,0,?)',
                    (cid,device_id,dedupe,json.dumps(message,allow_nan=False),time.time()))
 
-    def commands(self, device_id):
+    def require_command(self, db, device_id, kind):
+        row=db.execute('SELECT value FROM settings WHERE key=?',('agentCommands:'+device_id,)).fetchone()
+        capabilities=json.loads(row[0]) if row else CORE_COMMAND_KINDS
+        if kind not in capabilities:raise HTTPException(409,'Update the device agent to support '+kind)
+
+    def commands(self, device_id, command_kinds=None):
         with self.store.db() as db:
             result=[]
             for row in db.execute('SELECT body FROM device_commands WHERE device_id=? AND ack=0 ORDER BY created',(device_id,)):
                 command=json.loads(row[0])
+                if command_kinds is not None and command['kind'] not in command_kinds:continue
                 if command['kind'] in ('COORDINATE','START_WORKER','PAUSE_ASSIGNMENT','UPDATE_BACKUP_POLICY'):
                     assignment=db.execute('SELECT released FROM assignments WHERE id=? AND epoch=?',
                         (command['assignmentId'],command['epoch'])).fetchone()
@@ -479,12 +500,14 @@ class AgentRuntime:
             for did in ar['deviceIds']:
                 self._enqueue(db,did,'CANCEL_ASSIGNMENT',{'assignmentId':ar['assignmentId'],'epoch':ar['epoch']},'cancel:'+ar['assignmentId']+':'+did)
 
-    def pause(self,run_id):
-        with self.store.db() as db:
-            row=db.execute('SELECT * FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1',(run_id,)).fetchone()
-            if not row or row['released']:return
-            self._enqueue(db,row['coordinator'],'PAUSE_ASSIGNMENT',
-                {'assignmentId':row['id'],'epoch':row['epoch']},'pause:'+row['id'])
+    def pause(self,run_id,db=None):
+        if db is None:
+            with self.store.db() as connection:return self.pause(run_id,db=connection)
+        row=db.execute('SELECT * FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1',(run_id,)).fetchone()
+        if not row or row['released']:return
+        self.require_command(db,row['coordinator'],'PAUSE_ASSIGNMENT')
+        self._enqueue(db,row['coordinator'],'PAUSE_ASSIGNMENT',
+            {'assignmentId':row['id'],'epoch':row['epoch']},'pause:'+row['id'])
 
     def _release_confirmed(self, db, row, ar):
         snap=json.loads(row['snapshot'])
@@ -500,8 +523,9 @@ class AgentRuntime:
         db.execute('DELETE FROM device_reservations WHERE assignment_id=?',(ar['assignmentId'],))
         db.execute('DELETE FROM physical_reservations WHERE assignment_id=?',(ar['assignmentId'],))
 
-    def poll(self, device, body):
+    def poll(self, device, body, command_kinds=CORE_COMMAND_KINDS):
         with self.store.db() as db:
+            db.execute('INSERT OR REPLACE INTO settings VALUES (?,?)',('agentCommands:'+device['id'],json.dumps(sorted(command_kinds))))
             old=db.execute('SELECT * FROM devices WHERE id=?',(device['id'],)).fetchone()
             if body.selfTest is not None:
                 previous=json.loads(old['self_test'])
@@ -595,7 +619,7 @@ class AgentRuntime:
                 self._release_confirmed(db,row,json.loads(row['body']))
             old=db.execute('SELECT * FROM devices WHERE id=?',(device['id'],)).fetchone()
             allowed=old['status']=='APPROVED' and self.store.profile(old['owner'])['accountStatus']=='ACTIVE'
-            commands=self.commands(device['id'])
+            commands=self.commands(device['id'],command_kinds=command_kinds)
             if not allowed:
                 commands=[c for c in commands if c['kind'] in ('CANCEL_ASSIGNMENT','STOP_WORKER')]
             # Previously accepted assignments must remain recoverable even after OFF;
@@ -811,8 +835,8 @@ def install_device_routes(app, store, user, runtime):
         return {'deviceId':device_id,'enabled':body.enabled,'pending':True}
 
     @app.post('/api/v1/device/poll')
-    def poll(body:Poll,current=Depends(device_auth)):
-        return runtime.poll(current,body)
+    def poll(body:Poll,current=Depends(device_auth),capabilities:str|None=Header(default=None,alias='X-HeteroES-Agent-Commands')):
+        return runtime.poll(current,body,command_kinds=command_capabilities(capabilities))
 
     @app.post('/api/v1/device/worker-command')
     def worker(body:WorkerCommand,current=Depends(device_auth)):

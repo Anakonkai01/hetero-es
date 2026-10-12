@@ -44,3 +44,12 @@ Commands: `node --test desktop/worker/tests/*.test.cjs`; the CPU commands in
 `AGENTS.md`; `CUDA_VISIBLE_DEVICES='' xvfb-run -a node scripts/check-worker-ui.cjs <fresh-output>`.
 Mutation commands use `scripts/mutation-check.py` on scratch copies, with `NODE_PATH`
 for Node tests and `PYTHONPATH=src` / `CUDA_VISIBLE_DEVICES=''` for Track A.
+
+## Subsequent control checks
+
+`control-mutants.json` / `control-mutation.txt`: seven admission/reconcile and
+protocol faults, all detected. `agent-header-mutants.json` /
+`agent-header-mutation.txt`: omission of the agent header, detected. The protocol
+fixtures cover absent/empty/malformed headers, pending unsupported commands,
+unsupported optional operations and admission after an agent upgrade. No live
+agent or public lab was changed for these tests.

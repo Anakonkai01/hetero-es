@@ -28,7 +28,8 @@ def pair(lab, alias='test-gpu', coordinator=True):
     response = client.post('/api/v1/device/enroll',json=data)
     assert response.status_code == 201, response.text
     d=response.json()
-    auth={'Authorization':'Bearer '+d['deviceToken']}
+    auth={'Authorization':'Bearer '+d['deviceToken'],
+          'X-HeteroES-Agent-Commands':'SET_CONTRIBUTION,COORDINATE,START_WORKER,STOP_WORKER,CANCEL_ASSIGNMENT,PAUSE_ASSIGNMENT,UPDATE_BACKUP_POLICY'}
     assert client.post('/api/v1/device/enroll',json=data).status_code == 409
     assert client.patch('/api/v1/platform/devices/'+d['deviceId'],json={'approved':True,'workspaceId':'lab'},headers=admin).status_code == 200
     boot(client,auth,'boot-1')
