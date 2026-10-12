@@ -11,6 +11,7 @@ from argon2.exceptions import VerificationError
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.concurrency import run_in_threadpool
 from pydantic import BaseModel, ConfigDict, Field
 
 from .store import ACTIVE, TERMINAL, Store, now
@@ -56,7 +57,7 @@ class Configuration(BaseModel):
     validationInterval: int = Field(default=1,ge=1,le=1000,strict=True)
 
 
-def create_app(path, passwords, runtime, dispatch=True, web_directory=None, downloads_directory=None):
+def create_app(path, passwords, runtime, dispatch=True, web_directory=None, downloads_directory=None, writer_lock=None):
     store = Store(path, passwords, runtime)
     from .study_registry import Registry
     registry=Registry(store)
@@ -64,18 +65,23 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
     @asynccontextmanager
     async def lifespan(_):
         thread = threading.Thread(target=store.dispatch, args=(stop,), daemon=True)
-        if dispatch:
-            thread.start()
+        dispatcher_started=False
         metadata_thread=None
-        if getattr(runtime,'storage_backend',None) is not None:
-            from .cloud_metadata import backup_loop
-            metadata_thread=threading.Thread(target=backup_loop,args=(store,app.state.storage,stop),daemon=True)
-            metadata_thread.start()
-        yield
-        stop.set()
-        if metadata_thread:metadata_thread.join(timeout=2)
-        if dispatch:
-            thread.join(timeout=2)
+        try:
+            if dispatch:
+                thread.start();dispatcher_started=True
+            if getattr(runtime,'storage_backend',None) is not None:
+                from .cloud_metadata import backup_loop
+                metadata_thread=threading.Thread(target=backup_loop,args=(store,app.state.storage,stop),daemon=True)
+                metadata_thread.start()
+            yield
+        finally:
+            stop.set()
+            # A second writer cannot take over while an old background writer
+            # still owns work. Join off-loop and release only after both stop.
+            if metadata_thread and metadata_thread.ident is not None:await run_in_threadpool(metadata_thread.join)
+            if dispatcher_started:await run_in_threadpool(thread.join)
+            if writer_lock is not None:writer_lock.close()
     # The interactive documentation lists every route: keep it for development, not for a served lab.
     private_docs = {} if web_directory is None else {'docs_url': None, 'redoc_url': None, 'openapi_url': None}
     app = FastAPI(title="HeteroES product API", lifespan=lifespan, **private_docs)
@@ -573,6 +579,15 @@ def app_from_environment():
     root = Path(os.environ.get("HETEROES_PRIVATE_CONFIG", str(Path.home() / ".config/heteroes-integration")))
     credentials = json.loads((root / "credentials.json").read_text())
     config = json.loads((root / "config.json").read_text())
+    from .writer_lock import acquire_writer
+    writer=acquire_writer(Path(config['productStateDirectory'])/'product.sqlite')
+    try:return _app_from_config(root,credentials,config,writer)
+    except BaseException:
+        writer.close()
+        raise
+
+
+def _app_from_config(root,credentials,config,writer):
     if config.get('deploymentMode') == 'agent':
         from .devices import AgentRuntime
         storage_backend=None
@@ -589,4 +604,4 @@ def app_from_environment():
     runtime.server_instance_id=config.get('serverInstanceId')
     return create_app(Path(config["productStateDirectory"]) / "product.sqlite", credentials["users"], runtime,
                       web_directory=os.environ.get('HETEROES_WEB_DIRECTORY'),
-                      downloads_directory=os.environ.get('HETEROES_DOWNLOADS_DIRECTORY'))
+                      downloads_directory=os.environ.get('HETEROES_DOWNLOADS_DIRECTORY'),writer_lock=writer)

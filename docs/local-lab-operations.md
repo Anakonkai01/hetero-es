@@ -35,3 +35,17 @@ The tunnel is `heteroes-lab-local` (configuration `local-deployment/named-config
 `~/.cloudflared/`). `lab.heteroes.site` serves the Web/API and installers; `compute.heteroes.site` serves only the
 coordinator's control routes (never weights). Cloudflare's Browser Integrity Check rejects Python's default
 User-Agent on these names, so every HeteroES client sends its own.
+
+## Subsequent source changes, not yet deployed
+
+The production app factory now takes an exclusive kernel lock on the canonical
+management database path (`product.sqlite.writer.lock`). Another config folder
+pointing to that same database cannot bypass it. Startup failures release the
+lock; normal shutdown waits for dispatcher and metadata writer threads to finish
+before releasing it. Direct `create_app`/`Store` constructors remain test/library
+entry points, not an alternative production launch path.
+
+Admission hold leaves current-run reconciliation active. Local upload disk work
+runs off the API event loop, with cleanup serialized against a still-running disk
+operation. These changes are present in the r5 source/package, not in the running
+r4 service. See `session-handoff-2026-10-12-codex.md` and `r5-hardware-acceptance.md`.

@@ -10,9 +10,12 @@ import secrets
 import shutil
 import tempfile
 import time
+import threading
+from anyio import CancelScope
 
 from fastapi import HTTPException, Request
 from fastapi.responses import FileResponse
+from starlette.concurrency import run_in_threadpool
 
 KEY = re.compile(r'(?:uploads/[a-f0-9]{64}/[a-f0-9]{32}|objects/[a-f0-9]{64}|'
                  r'manifests/[a-f0-9]{32}\.json|metadata/[a-f0-9]{32}/(?:product\.sqlite|manifest\.json))')
@@ -21,6 +24,48 @@ KEY = re.compile(r'(?:uploads/[a-f0-9]{64}/[a-f0-9]{32}|objects/[a-f0-9]{64}|'
 def digest(path):
     with path.open('rb') as stream:
         return hashlib.file_digest(stream, 'sha256').hexdigest()
+
+
+class _Upload:
+    """One bounded streaming upload; each method runs off the API event loop."""
+    def __init__(self):
+        self.lock=threading.RLock();self.closed=False
+        self.partial=None;self.stream=None;self.fd=None
+        self.total=0;self.hasher=hashlib.sha256()
+
+    def open(self, target, size):
+        with self.lock:
+            if self.closed:raise RuntimeError('Upload already closed')
+            target.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+            self.fd, partial = tempfile.mkstemp(prefix='.pending-', dir=target.parent)
+            self.partial=Path(partial);self.target=target;self.size=size
+            self.stream=os.fdopen(self.fd,'wb');self.fd=None
+
+    def write(self, chunk):
+        with self.lock:
+            self.total += len(chunk)
+            if self.total > self.size:raise HTTPException(413,'Upload exceeds signed size')
+            self.hasher.update(chunk);self.stream.write(chunk)
+
+    def finish(self):
+        with self.lock:
+            self.stream.flush();os.fsync(self.stream.fileno());self.stream.close()
+            if self.total != self.size:raise HTTPException(400,'Incomplete upload')
+            try:os.link(self.partial,self.target)
+            except FileExistsError:
+                if digest(self.target) != self.hasher.hexdigest():raise HTTPException(409,'Upload is immutable')
+            return {'sizeBytes':self.total}
+
+    def close(self):
+        # Raw asyncio cancellation can leave a thread operation running. Wait
+        # for its ownership before closing, even outside an AnyIO cancel scope.
+        with self.lock:
+            self.closed=True
+            try:
+                if self.stream is not None:self.stream.close()
+                elif self.fd is not None:os.close(self.fd);self.fd=None
+            finally:
+                if self.partial is not None:self.partial.unlink(missing_ok=True)
 
 
 class LocalBackend:
@@ -168,37 +213,27 @@ class LocalBackend:
     def download_url(self, key):
         return self._url('GET', key, None, 60)
 
+    def _open_upload(self, session, token, content_length):
+        with session.lock:
+            if session.closed:raise RuntimeError('Upload already closed')
+            grant=self.grant(token,'PUT')
+            if content_length != str(grant['size']):raise HTTPException(400,'Signed upload length required')
+            if shutil.disk_usage(self.root).free < grant['size'] + 64*1024**2:
+                raise HTTPException(507,'Local storage is full')
+            session.open(self.path(grant['key']),grant['size'])
+
     def install_routes(self, app):
         @app.put('/api/v1/local-storage/{token}')
         async def upload(token: str, request: Request):
-            grant = self.grant(token, 'PUT')
-            if request.headers.get('content-length') != str(grant['size']):
-                raise HTTPException(400, 'Signed upload length required')
-            if shutil.disk_usage(self.root).free < grant['size'] + 64*1024**2:
-                raise HTTPException(507, 'Local storage is full')
-            target = self.path(grant['key'])
-            target.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-            fd, partial = tempfile.mkstemp(prefix='.pending-', dir=target.parent)
-            partial = Path(partial)
-            total = 0; hasher = hashlib.sha256()
+            session = _Upload()
             try:
-                with os.fdopen(fd, 'wb') as stream:
-                    async for chunk in request.stream():
-                        total += len(chunk)
-                        if total > grant['size']:
-                            raise HTTPException(413, 'Upload exceeds signed size')
-                        hasher.update(chunk); stream.write(chunk)
-                    stream.flush(); os.fsync(stream.fileno())
-                if total != grant['size']:
-                    raise HTTPException(400, 'Incomplete upload')
-                try:
-                    os.link(partial, target)
-                except FileExistsError:
-                    if digest(target) != hasher.hexdigest():
-                        raise HTTPException(409, 'Upload is immutable')
-                return {'sizeBytes':total}
+                await run_in_threadpool(self._open_upload, session, token, request.headers.get('content-length'))
+                async for chunk in request.stream():
+                    await run_in_threadpool(session.write, chunk)
+                return await run_in_threadpool(session.finish)
             finally:
-                partial.unlink(missing_ok=True)
+                with CancelScope(shield=True):
+                    await run_in_threadpool(session.close)
 
         @app.get('/api/v1/local-storage/{token}')
         def download(token: str):

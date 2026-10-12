@@ -1,0 +1,7 @@
+control ok    | 4 passed, 1 warning in 2.73s
+killed       shared rather than exclusive writer lock | 3 failed, 1 passed, 1 warning in 2.72s
+killed       lock config folder rather than actual database | 1 failed, 3 passed, 1 warning in 2.73s
+killed       release while dispatcher thread can still write | 1 failed, 3 passed, 1 warning in 2.50s
+killed       keep lock after completed shutdown | 2 failed, 2 passed, 1 warning in 2.67s
+
+4 of 4 mutants killed.
