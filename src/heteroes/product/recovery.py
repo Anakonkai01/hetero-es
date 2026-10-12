@@ -1,6 +1,7 @@
 """Small per-generation recovery points. Never copies live WAL or process identity."""
 import hashlib
 import ctypes
+import errno
 import json
 import os
 from pathlib import Path, PurePosixPath
@@ -16,14 +17,38 @@ HEX = re.compile(r'[0-9a-f]{64}')
 
 
 def publish_new_directory(staging,destination):
-    """Atomically refuse to replace even an empty competing destination."""
+    """Refuse replacement; use a final manifest marker on filesystems without renameat2."""
+    staging=Path(staging);destination=Path(destination)
     if sys.platform.startswith('linux'):
         rename=ctypes.CDLL(None,use_errno=True).renameat2
         rename.argtypes=[ctypes.c_int,ctypes.c_char_p,ctypes.c_int,ctypes.c_char_p,ctypes.c_uint]
         rename.restype=ctypes.c_int
         if rename(-100,os.fsencode(staging),-100,os.fsencode(destination),1)!=0:
             error=ctypes.get_errno()
-            raise OSError(error,os.strerror(error),str(destination))
+            if error not in (errno.EINVAL,errno.ENOSYS,errno.EOPNOTSUPP):
+                raise OSError(error,os.strerror(error),str(destination))
+            marker=next((name for name in ('manifest.json','heteroes-export.json','dispatch-held.flag') if (staging/name).is_file()),None)
+            if marker is None:raise OSError(error,'Filesystem requires a final publication marker',str(destination))
+            # NTFS supports exclusive mkdir and file links, but not Linux's
+            # RENAME_NOREPLACE flag. Readers accept only directories with the
+            # final marker. Failure before it leaves no published checkpoint.
+            destination.mkdir(mode=0o700,exist_ok=False)
+            try:
+                paths=sorted(staging.rglob('*'),key=lambda p:(p.relative_to(staging).as_posix()==marker,len(p.parts),str(p)))
+                for source in paths:
+                    if source.is_symlink():raise ValueError('Publication source contains a symlink')
+                    target=destination/source.relative_to(staging)
+                    if source.is_dir():target.mkdir(mode=0o700)
+                    else:
+                        try:os.link(source,target)
+                        except OSError as link_error:
+                            if link_error.errno not in (errno.EXDEV,errno.EOPNOTSUPP,errno.EPERM):raise
+                            with source.open('rb') as incoming,target.open('xb') as out:
+                                shutil.copyfileobj(incoming,out);out.flush();os.fsync(out.fileno())
+                shutil.rmtree(staging)
+            except BaseException:
+                shutil.rmtree(destination,ignore_errors=True)
+                raise
     else:
         staging.rename(destination)
 

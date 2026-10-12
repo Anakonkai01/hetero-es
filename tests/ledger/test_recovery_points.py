@@ -51,6 +51,26 @@ def test_restore_publication_refuses_an_empty_competing_destination(tmp_path):
     assert not list(destination.iterdir()) and (staging/'verified').exists()
 
 
+def test_ntfs_unsupported_rename_publishes_manifest_last_and_refuses_existing(tmp_path,monkeypatch):
+    import ctypes,errno
+    from types import SimpleNamespace
+    def unsupported(*args):ctypes.set_errno(errno.EINVAL);return -1
+    monkeypatch.setattr(ctypes,'CDLL',lambda *args,**kwargs:SimpleNamespace(renameat2=unsupported))
+    staging=tmp_path/'staging';staging.mkdir();(staging/'weights').mkdir()
+    (staging/'weights'/'model.bin').write_bytes(b'verified');(staging/'manifest.json').write_text('published')
+    destination=tmp_path/'destination'
+    import heteroes.product.recovery as recovery
+    original=recovery.os.link;observed=[]
+    def link(source,target):observed.append(Path(source).name);return original(source,target)
+    monkeypatch.setattr(recovery.os,'link',link)
+    publish_new_directory(staging,destination)
+    assert observed[-1]=='manifest.json'
+    assert (destination/'weights'/'model.bin').read_bytes()==b'verified' and not staging.exists()
+    staging.mkdir();(staging/'manifest.json').write_text('second')
+    with pytest.raises(FileExistsError):publish_new_directory(staging,destination)
+    assert (destination/'manifest.json').read_text()=='published'
+
+
 def test_ledger_ahead_of_selected_weights_is_rejected(tmp_path):
     root,sha=sample(tmp_path)
     point=capture_point(root,{'generation':0,'child_sha256':sha,'parent_sha256':sha},{},{'interval':1,'retain':3})
