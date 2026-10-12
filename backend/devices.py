@@ -1,6 +1,8 @@
 """CPU-only device control. Connectivity is never evidence of process death."""
 import hashlib
 import json
+import os
+from pathlib import Path
 import secrets
 import time
 import uuid
@@ -335,6 +337,17 @@ class AgentRuntime:
                 'schedulerPolicies':['greedy'],'syncModes':['synchronous'],'quarantinedWorkerIds':[d['workerId'] for d in self.devices() if d['approvalStatus']=='QUARANTINED'],
                 'maxRunSeconds':None,'telemetry':True,'pauseResume':True,'unsupported':['change-workers','model-upload','dataset-upload','asynchronous']}
 
+    def public_compute_url(self):
+        """The lab's public compute address, read per command so a new Quick URL is used at once.
+        Only a public HTTPS host name is passed on; anything else is ignored."""
+        root=os.environ.get('HETEROES_PRIVATE_CONFIG')
+        if not root:return None
+        try:
+            value=json.loads((Path(root)/'config.json').read_text()).get('publicComputeUrl')
+            return endpoint(value) if value and not is_private(value) else None
+        except (OSError,ValueError,TypeError):
+            return None
+
     def workers(self):
         return [{**d,'status':d['connectionStatus'],'host':d['computeUrl'],'profile':{**d['selfTest'],
                  **({'vramFreeMb':max(0,d['telemetry']['gpu']['vramTotalMb']-d['telemetry']['gpu']['vramUsedMb'])} if d.get('telemetry') and d['telemetry'].get('gpu') and d['telemetry']['gpu'].get('vramTotalMb') is not None and d['telemetry']['gpu'].get('vramUsedMb') is not None else {})},
@@ -600,7 +613,8 @@ class AgentRuntime:
                     'workerId':body.workerId,'recoveryIndex':body.recoveryIndex,'coordinatorUrl':ar['computeUrl'],
                     'bulkUrl':ar.get('bulkUrl',ar['computeUrl']),
                     **({'studyConfig':ar['config']} if ar['config'].get('recipeVersion')==2 else {}),
-                    'computeToken':ar['computeGrants'][body.workerId]},f'worker:{row["id"]}:{did}:{body.recoveryIndex}')
+                    'computeToken':ar['computeGrants'][body.workerId],
+                    **({'publicComputeUrl':self.public_compute_url()} if self.public_compute_url() else {})},f'worker:{row["id"]}:{did}:{body.recoveryIndex}')
             elif body.action=='stop':
                 self._enqueue(db,did,'STOP_WORKER',{'assignmentId':row['id'],'epoch':row['epoch'],'recoveryIndex':body.recoveryIndex},f'stop:{row["id"]}:{did}:{body.recoveryIndex}')
             if body.action in ('start','stop') and (time.time()-target['seen']>=30 or not reports):

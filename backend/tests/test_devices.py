@@ -181,6 +181,45 @@ def test_start_is_durable_before_first_worker_ack(lab):
     assert any(cmd['kind']=='START_WORKER' for cmd in r.commands(w['deviceId']))
 
 
+def start_command_for(lab, monkeypatch, tmp_path, config):
+    """The START_WORKER command the Lab Server queues for a worker, with `config` as the private config."""
+    c,s,r,a=lab
+    if config is not None:
+        (tmp_path/'private').mkdir()
+        (tmp_path/'private'/'config.json').write_text(json.dumps(config))
+        monkeypatch.setenv('HETEROES_PRIVATE_CONFIG',str(tmp_path/'private'))
+    else:
+        monkeypatch.delenv('HETEROES_PRIVATE_CONFIG',raising=False)
+    d,h=pair(lab);w,wh=pair(lab,'worker-only',False)
+    enable(lab,d,h);enable(lab,w,wh);queued(lab,d,workerIds=[w['workerId']]);s.dispatch_once()
+    ar=r.runs()[0]
+    assert c.post('/api/v1/device/worker-command',headers=h,json={'assignmentId':ar['assignmentId'],'epoch':ar['epoch'],'workerId':w['workerId'],'action':'start','recoveryIndex':0}).status_code==200
+    return next(cmd for cmd in r.commands(w['deviceId']) if cmd['kind']=='START_WORKER')
+
+
+def test_start_worker_carries_the_labs_public_compute_address(lab, monkeypatch, tmp_path):
+    command=start_command_for(lab,monkeypatch,tmp_path,{'publicComputeUrl':'https://compute.example.org'})
+    assert command['publicComputeUrl']=='https://compute.example.org'
+    assert command['coordinatorUrl']=='http://100.64.0.1:8769' and command['computeToken']
+
+
+@pytest.mark.parametrize('config',[None,{},{'publicComputeUrl':None},{'publicComputeUrl':'http://compute.example.org'},
+                                   {'publicComputeUrl':'https://192.168.1.2:8081'},{'publicComputeUrl':'not a url'}])
+def test_start_worker_omits_a_missing_or_unusable_public_address(lab, monkeypatch, tmp_path, config):
+    assert 'publicComputeUrl' not in start_command_for(lab,monkeypatch,tmp_path,config)
+
+
+def test_the_public_compute_address_is_read_again_each_time(lab, monkeypatch, tmp_path):
+    runtime=lab[2]
+    (tmp_path/'private').mkdir()
+    monkeypatch.setenv('HETEROES_PRIVATE_CONFIG',str(tmp_path/'private'))
+    for name in ('first','second'):
+        (tmp_path/'private'/'config.json').write_text(json.dumps({'publicComputeUrl':f'https://{name}.example.org'}))
+        assert runtime.public_compute_url()==f'https://{name}.example.org'
+    (tmp_path/'private'/'config.json').write_text('{broken')
+    assert runtime.public_compute_url() is None
+
+
 def test_restore_mismatch_quarantine_survives_restart(lab):
     c,s,r,a=lab;d,h=pair(lab);enable(lab,d,h);rid=queued(lab,d);s.dispatch_once();ar=r.runs()[0]
     boot(c,h,'boot-1',contribution=True,processes=[{'assignmentId':ar['assignmentId'],'epoch':ar['epoch'],'workerAlive':False,'events':[{'failure':'RESTORE_MISMATCH'}]}])
