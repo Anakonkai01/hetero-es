@@ -60,6 +60,10 @@ DEFAULT_MAX_CONNECTIONS = 64
 _ANSWERED = object()      # `_read_json` has already sent the error (None is a valid JSON body)
 
 
+class BulkUnavailableError(Exception):
+    """This client has no private route for large files: it can fetch update records, never whole weights."""
+
+
 class TransportError(ConnectionError):
     """The coordinator could not be reached, did not answer in time, or did not answer with JSON."""
 
@@ -328,7 +332,8 @@ class CoordinatorServer:
 class HttpClient:
     """A transport for `WorkerClient` (call it with `(operation, payload)`), and the other things a worker asks of the coordinator."""
 
-    def __init__(self, base_url: str, token: str | None = None, timeout: float = 30.0, retries: int = 3, backoff: float = 0.5, *, bulk_url: str | None = None):
+    def __init__(self, base_url: str, token: str | None = None, timeout: float = 30.0, retries: int = 3, backoff: float = 0.5, *, bulk_url: str | None = None,
+                 allow_no_bulk: bool = False):
         self._base = base_url.rstrip("/")
         self._bulk = (bulk_url or base_url).rstrip('/')
         def private_origin(url):
@@ -347,7 +352,10 @@ class HttpClient:
         # Legacy localhost callers are private, too. No bulk bytes may silently
         # fall back to a public tunnel when a worker lacks LAN/Tailscale access.
         if bulk_url is None and not private_origin(base_url) and urlsplit(base_url).hostname != 'localhost':
-            raise ValueError('Public compute requires a private bulk_url')
+            if not allow_no_bulk:
+                raise ValueError('Public compute requires a private bulk_url')
+            # Replay-only: control and update records use the public origin; weights are never fetched.
+            self._bulk = None
         if bulk_url is not None and not private_origin(bulk_url):
             raise ValueError('bulk_url must be a numeric private/Tailscale origin')
         self._token = token
@@ -357,6 +365,8 @@ class HttpClient:
         self._opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))    # a private network, never a proxy
 
     def _request(self, method: str, path: str, data: bytes | None = None, *, bulk=False):
+        if bulk and self._bulk is None:
+            raise BulkUnavailableError("full model transfer needs a private route; this client can only fetch update records")
         headers = {"Content-Type": "application/json"} if data is not None else {}
         if self._token is not None:
             headers["Authorization"] = f"Bearer {self._token}"

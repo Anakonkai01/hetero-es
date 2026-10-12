@@ -21,7 +21,7 @@ from heteroes.es.perturb import perturb_model_
 from heteroes.eval.candidate import model_weights_sha256
 from heteroes.eval.generate import EvalResult
 from heteroes.executor import CandidateExecutor
-from heteroes.http_transport import CoordinatorServer, HttpClient, TransportError
+from heteroes.http_transport import BulkUnavailableError, CoordinatorServer, HttpClient, TransportError
 from heteroes.ledger import FailureKind, GenerationState, Ledger
 from heteroes.manifest import CandidateDescriptor, Recipe, derive_seed
 from heteroes.model.schema import build_parameter_schema
@@ -686,3 +686,20 @@ def test_a_reward_whose_delivery_failed_is_delivered_when_the_coordinator_is_bac
     finally:
         side.stop.set()
         coordinator.close()
+
+
+def test_a_replay_only_worker_that_needs_a_full_download_stops_at_once_and_keeps_its_model(coordinator, monkeypatch):
+    side = WorkerSide(coordinator, monkeypatch)
+    def no_bulk(path, start=0):
+        raise BulkUnavailableError("full model transfer needs a private route")
+    monkeypatch.setattr(side.client, "open_stream", no_bulk)
+    side.start()
+    assert coordinator.wait_complete()                       # generation 0 needs no download
+    before = side.executor.parent_sha256
+    child_model = HalfToy(5)
+    child = publish_weights(child_model, build_parameter_schema(child_model), coordinator.models_dir)
+    coordinator.open_generation(1, child)
+    assert side.join() == "needs_private_route"
+    assert side.executor.parent_sha256 == before and model_weights_sha256(side.model, side.schema) == before
+    assert "sync" not in side.kinds() and "bulk_unavailable" in side.kinds()
+    assert list(side.dir.iterdir()) == []                      # nothing half-downloaded

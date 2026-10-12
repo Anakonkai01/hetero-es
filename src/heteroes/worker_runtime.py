@@ -21,7 +21,7 @@ import uuid
 from pathlib import Path
 
 from heteroes.executor import CandidateExecutor
-from heteroes.http_transport import HttpClient, TransportError, UnauthorizedError
+from heteroes.http_transport import BulkUnavailableError, HttpClient, TransportError, UnauthorizedError
 from heteroes.model.weights_io import WeightsFileError, load_weights_, sha256_of_file
 from heteroes.noise.contracts import ENGINE_VERSION
 from heteroes.profile_setup import noise_ops
@@ -258,6 +258,9 @@ class WorkerRuntime:
             except UnauthorizedError as error:
                 self.log("unauthorized", error=str(error))
                 raise                                                # a wrong token does not get better by waiting: stop and say so
+            except BulkUnavailableError as error:
+                self.log("bulk_unavailable", error=str(error))      # replay-only worker too far behind: waiting will not help
+                return "needs_private_route"
             except TransportError as error:
                 self.log("transport_error", error=str(error))
                 now = self._timer()

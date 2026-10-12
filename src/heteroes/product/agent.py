@@ -31,6 +31,16 @@ def request(url, path, token, body, method=None):
         return json.load(response)
 
 
+def reachable(url,token,timeout=4):
+    """True if a coordinator answers /v1/health with this grant. No proxy, like the worker's own client."""
+    try:
+        req=urllib.request.Request(url.rstrip('/')+'/v1/health',headers={'Authorization':'Bearer '+token})
+        with urllib.request.build_opener(urllib.request.ProxyHandler({})).open(req,timeout=timeout) as response:
+            return response.status==200 and json.load(response).get('ok') is True
+    except Exception:
+        return False
+
+
 class InvalidCommand(ValueError):
     """Unknown kind or malformed identity: retrying can never succeed, so it is acknowledged."""
 
@@ -226,13 +236,17 @@ class Agent:
             if command.get('studyConfig'):
                 from heteroes.study.prepare import prepare
                 study=prepare(self,command,command['studyConfig'],directory)
-            argv=[sys.executable,str(ROOT/'scripts/run_worker.py'),'--coordinator-url',command['coordinatorUrl'],
+            route=self.choose_route(command)
+            argv=[sys.executable,str(ROOT/'scripts/run_worker.py'),'--coordinator-url',route['coordinatorUrl'],
                 '--worker-id',self.config['workerId'],'--model-path',study.get('modelPath',self.config['modelPath']),
                 '--log',str(directory/'events.jsonl'),'--replay','always','--replay-verify-every','1',
                 '--cache-dir',str(worker_cache(directory,self.config)),'--give-up-after-seconds','120','--chunk','16',
                 '--stop-file',str(directory/'stop-request.json')]
-            if command.get('bulkUrl'):
-                argv.extend(['--bulk-url',command['bulkUrl']])
+            if route['bulkUrl']:
+                argv.extend(['--bulk-url',route['bulkUrl']])
+            if route['replayOnly']:
+                # Other network: update records only. 64 steps is about five minutes of catching up on a 3060.
+                argv.extend(['--no-bulk','--replay-max-chain','64'])
             if study:
                 argv.extend(['--dataset',study['datasetPath'],'--model-manifest',study['modelManifestPath']])
             if self.config.get('largeDataDirectory') and self.config.get('storageVolumeUUID'):
@@ -246,6 +260,16 @@ class Agent:
         result=remote_handle({'action':action,'directory':str(directory)})
         result['alive']=owned_state(read_json(directory/'process.json'),(directory/'launch-intent.json').exists())
         return result
+
+    def choose_route(self,command):
+        """The private route when it answers (replay and full download); else the lab's public one, which
+        carries replay but never whole weights. A lab with no public address keeps the command as it was."""
+        private,bulk,public,token=command['coordinatorUrl'],command.get('bulkUrl'),command.get('publicComputeUrl'),command['computeToken']
+        if not public or reachable(private,token):
+            return {'coordinatorUrl':private,'bulkUrl':bulk,'replayOnly':False}
+        if reachable(public,token):
+            return {'coordinatorUrl':public,'bulkUrl':None,'replayOnly':True}
+        raise RuntimeError('The coordinator is not reachable on any route yet')
 
     def handle(self,command):
         kind=command.get('kind')

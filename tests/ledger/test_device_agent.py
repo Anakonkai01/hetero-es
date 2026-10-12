@@ -265,3 +265,96 @@ def test_command_failure_reaches_the_server_as_a_throttled_assignment_event(tmp_
     assert len(rows)==1 and rows[0][:2]==('c'*32,3)
     event=__import__('json').loads(rows[0][2])
     assert event['event']=='agent_command_failed' and event['errorType']=='OSError' and event['attempts']==1
+
+
+PRIVATE = 'http://100.64.0.1:8765'
+PUBLIC = 'https://compute.example.org'
+
+
+def start_command(**extra):
+    return {'commandId': 'start', 'kind': 'START_WORKER', 'assignmentId': 'c' * 32, 'epoch': 1, 'runId': 'd' * 32,
+            'workerId': 'test', 'recoveryIndex': 0, 'coordinatorUrl': PRIVATE, 'bulkUrl': PRIVATE,
+            'computeToken': 'grant', **extra}
+
+
+def test_the_private_route_is_used_when_it_answers(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    monkeypatch.setattr('heteroes.product.agent.reachable', lambda url, token: url == PRIVATE)
+    route = a.choose_route(start_command(publicComputeUrl=PUBLIC))
+    assert route == {'coordinatorUrl': PRIVATE, 'bulkUrl': PRIVATE, 'replayOnly': False}
+
+
+def test_without_the_private_route_a_worker_uses_the_public_one_for_replay_only(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    probed = []
+    monkeypatch.setattr('heteroes.product.agent.reachable', lambda url, token: probed.append((url, token)) or url == PUBLIC)
+    route = a.choose_route(start_command(publicComputeUrl=PUBLIC))
+    assert route == {'coordinatorUrl': PUBLIC, 'bulkUrl': None, 'replayOnly': True}
+    assert probed == [(PRIVATE, 'grant'), (PUBLIC, 'grant')]
+
+
+def test_a_worker_that_reaches_neither_route_waits_instead_of_failing(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    monkeypatch.setattr('heteroes.product.agent.reachable', lambda url, token: False)
+    with pytest.raises(RuntimeError, match='coordinator'):
+        a.choose_route(start_command(publicComputeUrl=PUBLIC))
+
+
+def test_without_a_public_address_the_command_is_used_as_it_always_was(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    monkeypatch.setattr('heteroes.product.agent.reachable', lambda *args: pytest.fail('no probe is needed'))
+    assert a.choose_route(start_command()) == {'coordinatorUrl': PRIVATE, 'bulkUrl': PRIVATE, 'replayOnly': False}
+
+
+def launch_arguments(a, monkeypatch, command):
+    captured = []
+    monkeypatch.setattr('heteroes.product.agent.remote_handle', lambda request: captured.append(request) or {'alive': True, 'ready': False, 'events': []})
+    a.enabled = True
+    a.handle(command)
+    return captured[0]['argv']
+
+
+def test_a_replay_only_worker_is_started_without_bulk_and_with_a_longer_chain(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    monkeypatch.setattr('heteroes.product.agent.reachable', lambda url, token: url == PUBLIC)
+    argv = launch_arguments(a, monkeypatch, start_command(publicComputeUrl=PUBLIC))
+    assert argv[argv.index('--coordinator-url') + 1] == PUBLIC
+    assert '--no-bulk' in argv and '--bulk-url' not in argv
+    assert argv[argv.index('--replay-max-chain') + 1] == '64'
+
+
+def test_a_worker_on_the_private_route_keeps_its_bulk_and_the_default_chain(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    monkeypatch.setattr('heteroes.product.agent.reachable', lambda url, token: True)
+    argv = launch_arguments(a, monkeypatch, start_command(publicComputeUrl=PUBLIC))
+    assert argv[argv.index('--bulk-url') + 1] == PRIVATE
+    assert '--no-bulk' not in argv and '--replay-max-chain' not in argv
+
+
+def test_reachable_accepts_only_a_coordinator_that_says_it_is_up(tmp_path):
+    import json, threading
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+    from heteroes.product.agent import reachable
+    class Handler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            token = self.headers.get('Authorization')
+            good = token == 'Bearer grant' and self.path == '/v1/health'
+            if token == 'Bearer portal':      # a captive portal: 200 and an HTML page
+                body, status = b'<html>please sign in</html>', 200
+            elif token == 'Bearer down':      # a server that answers 200 but says it is not up
+                body, status = json.dumps({'ok': False}).encode(), 200
+            else:
+                body, status = json.dumps({'ok': True, 'status': 'up'} if good else {'ok': False}).encode(), 200 if good else 401
+            self.send_response(status)
+            self.send_header('Content-Length', str(len(body)));self.end_headers();self.wfile.write(body)
+        def log_message(self, *args):pass
+    server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    try:
+        url = f'http://127.0.0.1:{server.server_port}'
+        assert reachable(url, 'grant') is True
+        assert reachable(url, 'wrong') is False
+        assert reachable(url, 'portal') is False and reachable(url, 'down') is False
+    finally:
+        server.shutdown();server.server_close()
+    assert reachable(url, 'grant') is False       # nothing listens any more

@@ -28,12 +28,19 @@ def fail(message: str, code: int = 2) -> None:
     sys.exit(code)
 
 
+def make_client(args):
+    from heteroes.http_transport import HttpClient
+    return HttpClient(args.coordinator_url, token=os.environ.get(args.token_env) or None, timeout=args.http_timeout_seconds,
+                      bulk_url=args.bulk_url, allow_no_bulk=args.no_bulk)
+
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--model-path", required=True)
     parser.add_argument('--stop-file', help='Owned process-bound cooperative stop marker')
     parser.add_argument("--coordinator-url", required=True)
     parser.add_argument('--bulk-url', help='Private LAN/Tailscale origin for full weights transfer')
+    parser.add_argument('--no-bulk', action='store_true', help='public coordinator with no private route: catch up by replaying update records only; never download whole weights')
     parser.add_argument('--dataset',type=Path,help='Verified private dataset object for Recipe v2')
     parser.add_argument('--model-manifest',type=Path,help='Pinned safetensors file manifest for Recipe v2')
     parser.add_argument("--worker-id", required=True)
@@ -72,6 +79,8 @@ def main(argv: list[str]) -> int:
         signal.signal(name, lambda *_: stop.set())
     if args.replay == "auto" and args.profile is None:
         fail("--replay auto needs --profile")
+    if args.no_bulk and (args.bulk_url or args.replay == "never"):
+        fail("--no-bulk excludes --bulk-url and needs --replay always or auto")
 
     if Path(args.log).exists():
         fail(f"{args.log} already exists; evidence is never overwritten")
@@ -112,7 +121,7 @@ def main(argv: list[str]) -> int:
         loaded = load_pinned_model(args.model_path, device)
     emit({"event": "model_loaded", "t": time.time(), "worker_id": args.worker_id, "seconds": time.perf_counter() - load_started})
 
-    client = HttpClient(args.coordinator_url, token=os.environ.get(args.token_env) or None, timeout=args.http_timeout_seconds, bulk_url=args.bulk_url)
+    client = make_client(args)
     deadline = time.time() + args.startup_timeout_seconds
     job = None
     while job is None:
