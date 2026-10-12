@@ -17,6 +17,7 @@ def main():
     assert (repo/'frontend/dist/index.html').is_file(),'Build the Web UI first'
     sources=[(p,str(p.relative_to(repo))) for p in sorted((repo/'backend').rglob('*.py')) if 'tests' not in p.relative_to(repo/'backend').parts]
     sources += [(repo/'backend/monitoring/provenance.json','backend/monitoring/provenance.json')]
+    sources += [(repo/'backend/study/provenance.json','backend/study/provenance.json')]
     sources += [(p,'web/'+p.relative_to(repo/'frontend/dist').as_posix())
                 for p in sorted((repo/'frontend/dist').rglob('*')) if p.is_file()
                 and 'downloads' not in p.relative_to(repo/'frontend/dist').parts]

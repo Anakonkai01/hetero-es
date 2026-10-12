@@ -20,7 +20,7 @@ def main():
         stage=Path(temporary)
         for name in ('backend','deploy','scripts','docs'):
             shutil.copytree(root/name,stage/name,ignore=shutil.ignore_patterns('__pycache__','tests','*.pyc','*.sqlite','*.log'))
-        shutil.copytree(root/'frontend/dist',stage/'frontend/dist')
+        shutil.copytree(root/'frontend/dist',stage/'frontend/dist',ignore=shutil.ignore_patterns('downloads'))
         files={str(path.relative_to(stage)):hashlib.sha256(path.read_bytes()).hexdigest() for path in stage.rglob('*') if path.is_file()}
         revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()
         dirty=bool(subprocess.check_output(['git','status','--porcelain'],cwd=root,text=True).strip())
