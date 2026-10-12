@@ -5,6 +5,7 @@ import threading
 import time
 from .agent import Agent
 from .files import read_json, write_json
+from .connection import check_worker
 
 
 class Bridge:
@@ -34,6 +35,25 @@ class Bridge:
 
     def call(self, action):
         if action == 'status': return self.status()
+        if action == 'check_connection':
+            # Copy frozen assignment data while locked; network probes must not
+            # hold the lifecycle lock that OFF and cancellation need.
+            with self.agent.desktop_lock:
+                with self.agent.db() as db:
+                    released = {r[0] for r in db.execute('SELECT assignment_id FROM released')}
+                commands = {}
+                for path in (self.agent.root / 'workers').glob('*/r*/assignment.json'):
+                    command = read_json(path)
+                    if not command or command['assignmentId'] in released: continue
+                    previous = commands.get(command['assignmentId'])
+                    if previous is None or (command['epoch'], command.get('recoveryIndex', 0)) > (previous['epoch'], previous.get('recoveryIndex', 0)):
+                        commands[command['assignmentId']] = command
+            # A device has one physical reservation. Bound abnormal retained
+            # assignments too, so this fixed bridge request finishes within its
+            # 30-second deadline and does not keep Quit waiting on many probes.
+            return {'assignments': [{'assignmentId': key, **(check_worker(command) if index == 0 else
+                {'checks': [{'step': 'coordinator', 'status': 'SKIP', 'code': 'PROBE_LIMIT'}]})}
+                for index, (key, command) in enumerate(sorted(commands.items()))]}
         if action == 'off':
             self.off(); return self.status()
         if action == 'quit':

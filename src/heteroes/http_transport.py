@@ -55,7 +55,7 @@ _HEX64 = re.compile(r"[0-9a-f]{64}")
 _ROUTES = {"/v1/leases": "lease", "/v1/results": "submit_result", "/v1/failures": "report_failure", "/v1/heartbeats": "heartbeat"}
 _ROUTE_OF = {operation: route for route, operation in _ROUTES.items()}
 _IDEMPOTENT = {"submit_result", "report_failure", "heartbeat"}
-_RANGE = re.compile(r"bytes=(\d+)-")
+_RANGE = re.compile(r"bytes=(\d+)-(\d*)")
 _LOOPBACK = ("localhost", "::1")
 DEFAULT_REQUEST_TIMEOUT = 60.0
 DEFAULT_MAX_CONNECTIONS = 64
@@ -211,11 +211,12 @@ class _Handler(http.server.BaseHTTPRequestHandler):
             self._error(404, "unknown_operation", "no such model")
             return
         size = path.stat().st_size
-        start, status = 0, 200
+        start, end, status = 0, size - 1, 200
         match = _RANGE.fullmatch(self.headers.get("Range", "").strip())
-        if match and int(match.group(1)) > 0:               # only "bytes=N-" is supported; any other form gets the whole file
+        if match:
             start = int(match.group(1))
-            if start >= size:
+            end = min(int(match.group(2)), size - 1) if match.group(2) else size - 1
+            if start >= size or end < start:
                 self.send_response(416)
                 self.send_header("Content-Range", f"bytes */{size}")
                 self.send_header("Content-Length", "0")
@@ -225,15 +226,17 @@ class _Handler(http.server.BaseHTTPRequestHandler):
         self.send_response(status)
         self.send_header("Content-Type", "application/octet-stream")
         self.send_header("Accept-Ranges", "bytes")
-        self.send_header("Content-Length", str(size - start))
+        self.send_header("Content-Length", str(end - start + 1))
         if status == 206:
-            self.send_header("Content-Range", f"bytes {start}-{size - 1}/{size}")
+            self.send_header("Content-Range", f"bytes {start}-{end}/{size}")
         self.end_headers()
         try:
             with open(path, "rb") as file:
                 file.seek(start)
-                while chunk := file.read(CHUNK_BYTES):
+                remaining = end - start + 1
+                while remaining and (chunk := file.read(min(CHUNK_BYTES, remaining))):
                     self.wfile.write(chunk)
+                    remaining -= len(chunk)
         except (BrokenPipeError, ConnectionResetError, TimeoutError, socket.timeout):
             pass                                     # the worker went away or stalled: its business
 

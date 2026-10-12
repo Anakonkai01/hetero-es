@@ -108,3 +108,23 @@ A damaged bundle file is rejected. Repeat on Windows only for the worker profile
 ## Still open
 
 Which non-Tailscale bulk route to qualify first. It does not block a LAN-only lab.
+
+## 2026-10-12 continuation — Worker connection checks
+
+[CODE] The Worker app offers LAN, overlay and HTTPS choices. These choose the
+coordinator's bind/advertised private address and describe the network; actual
+worker routing still probes private control first, then public replay-only.
+It does not install or configure a network adapter or tunnel.
+
+[CODE] Read-only diagnostics check Lab Server health without resetting the login,
+then use the Python bridge's assignment-scoped compute grant for coordinator
+health. A private route fetches `bytes=0-63` of the current published weights;
+HTTP transport now supports bounded ranges as well as resumable open-ended
+ranges. Public fallback never requests weights. No assignment or unpublished
+weights is SKIP, not PASS. Redirects cannot forward the compute grant.
+
+[MEASURED — CPU fixtures only] Real loopback HTTP and Electron checks, including
+wrong credentials and actual wire byte counts, are in product
+`docs/evidence/2026-10-12-lf1-codex/`. This is not a cross-network/GPU acceptance.
+The Lab Server graphical network-choice flow and an extended CLI doctor remain
+[PENDING].

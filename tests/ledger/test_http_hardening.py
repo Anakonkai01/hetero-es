@@ -210,7 +210,33 @@ def test_a_range_at_the_end_of_the_file_is_not_satisfiable(with_file):
     assert raw_get(with_file, {"Range": f"bytes={len(DATA) + 5}-"})[0] == 416
 
 
-@pytest.mark.parametrize("header", ["bytes=-100", "bytes=0-99", "bytes=1-2,5-6", "items=3-", "bytes=abc-", "garbage"])
+@pytest.mark.parametrize('start,end', [(0,63),(5,5),(1000,1200),(10200,99999)])
+def test_bounded_range_returns_only_the_requested_slice(with_file, start, end):
+    status, headers, body = raw_get(with_file, {'Range':f'bytes={start}-{end}'})
+    last = min(end, len(DATA)-1)
+    assert status == 206
+    assert body == DATA[start:last+1]
+    assert headers['Content-Range'] == f'bytes {start}-{last}/{len(DATA)}'
+    assert int(headers['Content-Length']) == last-start+1
+
+
+def test_reversed_bounded_range_is_not_satisfiable(with_file):
+    assert raw_get(with_file, {'Range':'bytes=100-10'})[0] == 416
+
+
+def test_bounded_range_never_sends_hidden_bytes_beyond_content_length(with_file):
+    # HTTPConnection.read() trusts Content-Length and can hide an oversized
+    # response. Inspect the wire until EOF to measure what was actually sent.
+    with socket.create_connection((with_file.host, with_file.port), timeout=5) as connection:
+        connection.sendall(f'GET /v1/models/{SHA} HTTP/1.1\r\nHost: local\r\nRange: bytes=0-63\r\nConnection: close\r\n\r\n'.encode())
+        chunks=[]
+        while chunk := connection.recv(65536):chunks.append(chunk)
+    headers, body = b''.join(chunks).split(b'\r\n\r\n',1)
+    assert b'Content-Length: 64' in headers
+    assert body == DATA[:64]
+
+
+@pytest.mark.parametrize("header", ["bytes=-100", "bytes=1-2,5-6", "items=3-", "bytes=abc-", "garbage"])
 def test_a_range_the_server_does_not_support_gets_the_whole_file(with_file, header):
     status, _, body = raw_get(with_file, {"Range": header})
     assert status == 200 and body == DATA                         # the client sees 200 and starts again from zero: always correct

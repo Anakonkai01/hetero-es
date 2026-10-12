@@ -47,12 +47,12 @@ accepted by a test or run.
    |---|---|---|---|
    | **Lab Server** (CPU) | target, desktop app exists, clean install seen under Xvfb | target "if time"; installer exists, native acceptance [PENDING] | [CODE] `desktop/server` |
    | **Worker** (GPU) | target; app exists | target; `.exe` exists (unsigned), Recipe v1 trial on an RTX 3060 on 2026-10-11 [MEASURED] | [CODE] `desktop/worker` |
-   | **Coordinator** (GPU, ≥ 11 GB VRAM) | target: a **toggle inside the Linux app** | **not supported** (numerical qualification is Recipe v1 worker-only) | [CODE] gap: the app enrolls every device with `workerOnly: true` and `coordinator: false`; a coordinator is a manual command-line setup |
+   | **Coordinator** (GPU, ≥ 11 GB VRAM) | target: a **toggle inside the Linux app** | **not supported** (numerical qualification is Recipe v1 worker-only) | [CODE] Linux app role selection and private-address binding; CPU/UI acceptance below, GPU acceptance [PENDING] |
 
    Three further parts of the same requirement [PROPOSED, tickets E1–E3]:
    - **E1** the coordinator toggle: shown only when the device self-test says
      coordinator-capable; it fills the listening address from the network the user
-     chose (today the agent listens on `127.0.0.1`, which remote workers cannot reach).
+     chose (worker-only mode stays on loopback; coordinator mode binds the selected local private address).
    - **E2** a network choice in the Lab Server and Worker apps with a
      "check connection" step (see ADR-006).
    - **E3** one page of instructions per role.
@@ -87,3 +87,20 @@ artifact access, and restore onto a fresh path. [PENDING — ticket LF-2]
 
 First OS matrix beyond Linux; whether to ship a CPU container recipe after the
 headless path is accepted. Neither changes the ownership rules in ADR-005.
+
+## 2026-10-12 continuation — E1 and the Worker part of E2
+
+[CODE] The Worker app lists local LAN/overlay IPv4 addresses and offers a coordinator
+role only for a passed Linux self-test that reports coordinator capability and
+at least 11000 MB VRAM. Enrollment and the agent configuration use the same
+advertised role and endpoint. Paired-device changes require an owner session,
+OFF, no reservations, and confirmed process drain; the backend updates role and
+endpoints in one transaction. An uncertain server reply leaves the app stopped
+with a durable pending record until the owner confirms the chosen configuration.
+
+[MEASURED — CPU fixtures only] Service, backend, mutation and Electron UI checks
+are in product `docs/evidence/2026-10-12-lf1-codex/`. No GPU qualification or
+coordinator job was run for this flow. Native Windows stays worker-only.
+Public-compute ingress wiring for a new coordinator and Lab Server network-choice
+UI remain [PENDING]. Selecting a private address does not create an overlay,
+firewall rule or tunnel.
