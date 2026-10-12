@@ -1,7 +1,8 @@
 # Session handoff — 2026-10-11 monitoring close
 
-> **Superseded operational entrypoint, 2026-10-12:** read the
-> [Claude architecture-review handoff](local-first-claude-handoff.md) first.
+> **Superseded, 2026-10-12 evening:** the current entrypoint is
+> [session-handoff-2026-10-12-lf1.md](session-handoff-2026-10-12-lf1.md). Before that, read the
+> [Claude architecture-review handoff](local-first-claude-handoff.md).
 > Current source, monitoring Agent state, storage activation and next actions
 > differ from this dated close. Do not restart its helpers or resume GPU/code work
 > automatically while architecture review is pending. Keep its archives/history.
