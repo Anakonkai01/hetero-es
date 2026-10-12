@@ -57,6 +57,9 @@ by a test or run.
    first and uses the lab's `publicComputeUrl` otherwise. [CODE] [MEASURED: one RTX 5070 Ti,
    4 generations, 3 verified replays, 0 downloads; a second machine and the stop path on a GPU
    are [PENDING]]. On the same network both replay and full download stay available.
+   A fixed domain behind Cloudflare answers `403 error code: 1010` to urllib's default
+   `Python-urllib` signature (a trycloudflare.com link does not), so every client sends its own
+   `User-Agent` (`HeteroES-Worker/1`); [CODE] [MEASURED: the same run on `compute.heteroes.site`].
 5. **Storage.** Local filesystem content-addressed storage is the default; an
    S3-compatible adapter is optional [CODE]. Objects are immutable by hash, a point is
    READY only after its final manifest, grants are scoped and short-lived. An upload
