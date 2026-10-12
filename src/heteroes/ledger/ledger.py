@@ -416,6 +416,7 @@ class Ledger:
                 self._db.executescript(_SCHEMA)
             elif version != SCHEMA_VERSION:
                 raise LedgerError(f"unknown ledger schema version {version} (this code knows {SCHEMA_VERSION})")
+            self._db.execute('CREATE TABLE IF NOT EXISTS generation_context(experiment_id TEXT NOT NULL,generation INTEGER NOT NULL,body TEXT NOT NULL,PRIMARY KEY(experiment_id,generation))')
         except BaseException:
             self._db.close()
             raise
@@ -429,6 +430,21 @@ class Ledger:
 
     def __exit__(self, *exc_info) -> None:
         self.close()
+
+    @_locked
+    def freeze_generation_context(self,experiment_id,generation,context):
+        """Commit deterministic v2 batch/sigma inputs before any lease exists."""
+        import json
+        from heteroes.canonical import canonical_json_bytes,canonical_json_hash
+        if context.get('generation')!=generation or canonical_json_hash({k:v for k,v in context.items() if k!='contextHash'})!=context.get('contextHash'):
+            raise LedgerError('Invalid generation context hash')
+        body=canonical_json_bytes(context).decode()
+        with self._db:
+            self._db.execute('BEGIN IMMEDIATE')
+            prior=self._db.execute('SELECT body FROM generation_context WHERE experiment_id=? AND generation=?',(experiment_id,generation)).fetchone()
+            if prior and prior[0]!=body:raise LedgerError('Frozen generation batch/sigma changed')
+            self._db.execute('INSERT OR IGNORE INTO generation_context VALUES (?,?,?)',(experiment_id,generation,body))
+        return json.loads(body)
 
     @_locked
     def open_generation(self, descriptors) -> None:

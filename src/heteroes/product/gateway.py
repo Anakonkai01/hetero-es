@@ -48,7 +48,7 @@ def validate(config, workers):
         value = config.get(key)
         if type(value) not in (int, float) or not 0 < value <= 1:
             raise ValueError(f"{key} must be finite and between 0 and 1")
-    if config.get("workload") not in capabilities(workers)["workloads"]:
+    if config.get("workload") not in capabilities(workers)["workloads"] and not (config.get('recipeVersion')==2 and config.get('workload')=='text_math_v2'):
         raise ValueError("unsupported workload")
     if config.get("decodeEngine") not in ("hf_generate", "hf_compact"):
         raise ValueError("unsupported decoder")
@@ -353,7 +353,8 @@ class Manager:
         for path in root.glob("worker-*.json"):
             result["events"].extend(read_json(path, []))
         recipe = next((item["recipe"] for item in result["events"] if item.get("event") == "managed_start"), {})
-        workload = recipe.get("workload", {})
+        workload = recipe.get("workload", recipe.get('numerical',{}).get('workload',{}))
+        contexts={}
         db_path = root / "ledger.sqlite"
         checkpoint = result["state"].get("finalWeightsSha256")
         weights = data_root(root)/'weights'
@@ -361,6 +362,8 @@ class Manager:
             with sqlite3.connect(f"file:{db_path}?mode=ro", uri=True) as db:
                 db.row_factory = sqlite3.Row
                 db.execute("BEGIN")  # consistent projection, never mutate the runtime ledger
+                if db.execute("SELECT 1 FROM sqlite_master WHERE name='generation_context'").fetchone():
+                    contexts={r['generation']:json.loads(r['body']) for r in db.execute('SELECT generation,body FROM generation_context')}
                 for gen in db.execute("SELECT g.*, u.child_weights_sha256, u.applied_at FROM generation g LEFT JOIN generation_update u USING(experiment_id,generation) ORDER BY g.generation"):
                     if gen["applied_at"] and (weights / (gen["child_weights_sha256"] + ".bin")).is_file():
                         checkpoint = gen["child_weights_sha256"]
@@ -376,6 +379,7 @@ class Manager:
                                              if item.get("event") == "generation_open" and item.get("generation") == number), None)
                     if rewards:
                         row.update(rewardMean=sum(rewards)/len(rewards), rewardBest=max(rewards))
+                    if number in contexts:row['generationContext']=contexts[number]
                     result["generations"].append(row)
                 for c in db.execute("SELECT c.*,g.recipe_hash,g.parent_weights_sha256,r.reward FROM candidate c JOIN generation g USING(experiment_id,generation) LEFT JOIN result r USING(candidate_id)"):
                     attempts = list(db.execute("SELECT attempt_number,worker_id,leased_at,deadline,ended_at,failure_kind FROM attempt WHERE candidate_id=? ORDER BY attempt_number", (c["candidate_id"],)))
@@ -387,6 +391,9 @@ class Manager:
                             "batchIds": [workload["hash"]] if workload.get("hash") else [], "status": c["state"]}
                     if c["reward"] is not None:
                         item["reward"] = c["reward"]
+                    if c['generation'] in contexts:
+                        item['batchIds']=[contexts[c['generation']]['batchHash']]
+                        item['effectiveSigma']=contexts[c['generation']]['sigmaFloat32']
                     for a in attempts:
                         aid = cid + f".a{a['attempt_number']}"
                         success = db.execute("SELECT committed_at FROM result WHERE candidate_id=? AND attempt_number=?", (c["candidate_id"], a["attempt_number"])).fetchone()
@@ -401,7 +408,8 @@ class Manager:
         for event in result["events"]:
             if event.get("candidate_id"):
                 event["uiCandidateId"] = event["candidate_id"].replace("/", ".")
-        allowed = [root / "config.json", root / "events.jsonl", root / "lifecycle.jsonl", *root.glob("summary-*.json")]
+        allowed = [root / "config.json", root / "events.jsonl", root / "lifecycle.jsonl", *root.glob("summary-*.json"),*root.glob('validation-*.json'),*root.glob('study-*.json')]
+        result['studyMetrics']=read_json(root/'study-metrics.json')
         result["checkpointSha256"] = checkpoint
         if checkpoint:
             allowed.append(weights / (checkpoint + ".bin"))

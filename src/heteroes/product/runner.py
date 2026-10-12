@@ -54,12 +54,23 @@ def main(directory):
     outcome = "FAILED"
     failure = None
     paused_checkpoint = None
+    tracker=None
     try:
         state("STARTING")
         check_noise_selftest()
-        loaded = load_pinned_model(config["modelPath"], "cuda")
-        recipe = build_recipe(loaded, sigma=config["sigma"], eval_dtype="float32", noise_engine="cpu",
-                              workload=config["workload"], decode_engine=config["decodeEngine"])
+        dataset=None
+        if config.get('recipeVersion')==2:
+            from heteroes.study.models import load
+            from heteroes.study.data import verify
+            from heteroes.study.recipe import build
+            loaded=load(config['modelPath'],config['modelManifest'],'cuda')
+            dataset=verify(read_json(Path(config['datasetPath'])))
+            recipe=build(loaded,config['modelManifest'],dataset,sigma=config['sigma'],minimum=config['sigmaMinimum'],
+                generations=config['maxGenerations'],schedule=config['sigmaSchedule'],batch_size=config['batchSize'],batch_seed=config['batchSeed'],max_tokens=config['maxNewTokens'])
+        else:
+            loaded = load_pinned_model(config["modelPath"], "cuda")
+            recipe = build_recipe(loaded, sigma=config["sigma"], eval_dtype="float32", noise_engine="cpu",
+                                  workload=config["workload"], decode_engine=config["decodeEngine"])
         check_recipe_selftest(recipe, "cuda")
         ledger = Ledger(root / "ledger.sqlite", max_attempts=3, enforce_chain=True)
         policy=config.get('backupPolicy')
@@ -73,6 +84,8 @@ def main(directory):
         def recovery_point(summary, final=False):
             nonlocal last_summary
             last_summary=summary
+            if tracker is not None and not final:
+                tracker.observe(summary['generation'],summary['child_sha256'])
             if policy is None:
                 return
             try:
@@ -92,29 +105,42 @@ def main(directory):
             token=os.environ["HETEROES_TOKEN"], timeout_seconds=1800, stall_seconds=300,
             failed_grace_seconds=60, lease_seconds=60, log=emit, cancel_requested=cancel,
             device_tokens=read_json(root/'device-grants.json') if config.get('deviceCredentials') else None,
-            generation_completed=recovery_point if policy else None,
+            generation_completed=recovery_point if policy or dataset is not None else None,
             generation_started=generation_started if policy else None,
-            pause_requested=lambda:(root/'pause.flag').exists())
+            pause_requested=lambda:(root/'pause.flag').exists(),dataset=dataset)
         coordinator.start()
         next_generation = coordinator.recover()  # finish any recorded update even when cancellation is pending
+        if dataset is not None:
+            from heteroes.study.tracker import Tracker
+            tracker=Tracker(root,loaded,recipe,dataset,config.get('validationInterval',1))
+            if next_generation==0 and tracker.best is None:
+                from heteroes.model.weights_io import publish_weights
+                initial=publish_weights(loaded.model,loaded.schema,data_root(root)/'weights')
+                tracker.observe(-1,initial)
+            elif next_generation>0:
+                tracker.observe(next_generation-1,coordinator.parent_sha256)
         if policy and next_generation>0:
             previous=ledger.get_update(config['runId'],next_generation-1)
             parent=next(g.parent_weights_sha256 for g in ledger.list_generations(config['runId']) if g.generation==next_generation-1)
             if previous and previous.applied_at:
                 last_summary={'generation':next_generation-1,'child_sha256':previous.child_weights_sha256,'parent_sha256':parent}
-        coordinator.server.set_generation(_NoGeneration(), coordinator._job(next_generation, Greedy(), "PREPARING"))
         emit({"event": "managed_start", "recipe": recipe.to_dict(), "recipe_hash": recipe.hash,
               "code": code_info(), "environment": environment_info("cuda")})
-        state("PREPARING", recipeHash=recipe.hash)
-        deadline = time.monotonic() + 600
-        while not (root / "start.flag").exists():
-            if cancel():
-                raise RunCancelled("cancelled during preparation")
-            if time.monotonic() > deadline:
-                raise TimeoutError("worker preparation timed out")
-            time.sleep(.25)
+        if next_generation<config['maxGenerations']:
+            coordinator.server.set_generation(_NoGeneration(), coordinator._job(next_generation, Greedy(), "PREPARING"))
+            state("PREPARING", recipeHash=recipe.hash)
+            deadline = time.monotonic() + 600
+            while not (root / "start.flag").exists():
+                if cancel():
+                    raise RunCancelled("cancelled during preparation")
+                if time.monotonic() > deadline:
+                    raise TimeoutError("worker preparation timed out")
+                time.sleep(.25)
         state("RUNNING", recipeHash=recipe.hash)
-        coordinator.run(config["maxGenerations"])
+        if next_generation<config['maxGenerations']:
+            coordinator.run(config["maxGenerations"])
+        else:
+            coordinator.finish()
         outcome = "COMPLETED"
     except RunPaused:
         try:
@@ -156,6 +182,13 @@ def main(directory):
             while not (root / "workers-stopped.flag").exists() and time.monotonic() < deadline:
                 time.sleep(.25)
             coordinator.stop()
+            if tracker is not None and outcome=='COMPLETED' and (root/'workers-stopped.flag').exists():
+                try:
+                    receipt=tracker.export()
+                    emit({'event':'study_export_verified','weightsSha256':receipt['weightsSha256'],'testAccuracy':receipt['test']['accuracy']})
+                except Exception as error:
+                    write_json(root/'study-export-error.json',{'errorType':type(error).__name__,'exportVerified':False})
+                    emit({'event':'study_export_error','errorType':type(error).__name__})
         if ledger:
             ledger.close()
         log.close()

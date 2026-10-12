@@ -32,7 +32,7 @@ from heteroes.worker import CandidateFailed
 
 
 class CandidateExecutor:
-    def __init__(self, model, tokenizer, schema: ParameterSchema, recipe: Recipe, clock=time.perf_counter, chunk: int | None = None):
+    def __init__(self, model, tokenizer, schema: ParameterSchema, recipe: Recipe, clock=time.perf_counter, chunk: int | None = None, dataset=None):
         if chunk is None:
             chunk = default_chunk(recipe.eval_dtype)     # the exact size for the recipe's precision (FP32: 16, FP16: 1)
         if isinstance(chunk, bool) or not isinstance(chunk, int) or chunk < 1:
@@ -42,12 +42,22 @@ class CandidateExecutor:
         self.tokenizer = tokenizer
         self.schema = schema
         self.recipe = recipe
+        self.dataset=dataset
+        self.effective_sigma=recipe.sigma
+        self.batch_rows=None
         self._eval = EvalModel(model, recipe.eval_dtype)     # the model the answers are made on: the live one, or an FP32 copy of it
         self._clock = clock
         self.last_timing: dict[str, float] | None = None
         self.parent_sha256 = ""
         self._snapshot = None
         self.reset_parent()
+
+    def set_generation(self,generation,context):
+        expected=self.recipe.context(self.dataset,generation)
+        if context!=expected:raise ValueError('Generation batch/sigma context mismatch')
+        self.effective_sigma=expected['sigmaFloat32']
+        self.batch_rows=[self.dataset['splits']['train'][i] for i in expected['batchIndices']]
+        self.generation=generation
 
     def reset_parent(self, expected_sha256: str | None = None, verified_file=None, trust: bool = False) -> str:
         """
@@ -91,6 +101,8 @@ class CandidateExecutor:
         if descriptor.parent_weights_sha256 != self.parent_sha256:
             raise CandidateFailed(FailureKind.OTHER, f"the job is for other parent weights ({descriptor.parent_weights_sha256[:12]}), "
                                                      f"this worker has {self.parent_sha256[:12]}")
+        if self.dataset is not None and (self.batch_rows is None or descriptor.generation!=self.generation):
+            raise CandidateFailed(FailureKind.OTHER,'Generation inputs were not verified')
 
         timing: dict[str, float] = {}
         error: BaseException | None = None
@@ -98,13 +110,18 @@ class CandidateExecutor:
         start = mark = self._clock()
         try:
             if self.recipe.engine_version == CUDA_ENGINE_VERSION:
-                perturb_model_cuda_(self.model, self.schema, descriptor.seed, self.recipe.sigma)
+                perturb_model_cuda_(self.model, self.schema, descriptor.seed, self.effective_sigma)
             else:
-                perturb_model_(self.model, self.schema, descriptor.seed, self.recipe.sigma, self.recipe.chunk_elements)
+                perturb_model_(self.model, self.schema, descriptor.seed, self.effective_sigma, self.recipe.chunk_elements)
             now = self._clock()
             timing["perturb"], mark = now - mark, now
             self._eval.refresh()                                # an FP32 copy takes the perturbed weights (nothing to do in FP16)
-            if self.recipe.workload_name == "arith16":
+            if self.dataset is not None:
+                from heteroes.study.evaluation import evaluate
+                raw=evaluate(self._eval.model,self.tokenizer,self.batch_rows,self.recipe.evaluation,self.chunk)
+                from types import SimpleNamespace
+                result=SimpleNamespace(mean_reward=raw['accuracy'])
+            elif self.recipe.workload_name == "arith16":
                 result = evaluate_model(self._eval.model, self.tokenizer, chunk=self.chunk)       # looked up here so that tests can replace it
             else:
                 result = get_workload(self.recipe.workload_name).evaluate(self._eval.model, self.tokenizer, self.chunk, self.recipe.decode_engine)

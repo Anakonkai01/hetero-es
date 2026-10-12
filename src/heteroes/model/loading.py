@@ -28,6 +28,7 @@ class LoadedModel:
     revision: str
     generation_config: dict
     device: str
+    model_id: str = MODEL_ID
 
 
 def check_noise_selftest() -> float:
@@ -82,7 +83,7 @@ def build_recipe(loaded: LoadedModel, sigma: float, chunk_elements: int | None =
     if decode_engine is None:
         decode_engine = default_decode_engine(chosen.name)        # None: the default of a new experiment (the compacting decoder on the long workloads)
     return Recipe(
-        model_id=MODEL_ID,
+        model_id=loaded.model_id,
         model_revision=loaded.revision,
         tokenizer_revision=loaded.revision,        # the tokenizer files come from the same snapshot directory
         dtype=str(next(loaded.model.parameters()).dtype),

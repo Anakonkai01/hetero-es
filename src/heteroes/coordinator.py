@@ -70,10 +70,11 @@ class Coordinator:
                  timeout_seconds: float | None = None, stall_seconds=_DEFAULT, keep_published: int | None = 3, allow_unauthenticated: bool = False, log=lambda event: None, timer=time.perf_counter,
                  monotonic=time.monotonic, sleep=time.sleep, cancel_requested=lambda: False,
                  device_tokens=None, generation_completed=None, generation_started=None,
-                 pause_requested=lambda: False):
+                 pause_requested=lambda: False, dataset=None):
         self.model = model
         self.schema = schema
         self.recipe = recipe
+        self.dataset=dataset
         self.ledger = ledger
         self.models_dir = models_dir
         self.experiment_id = experiment_id
@@ -116,7 +117,8 @@ class Coordinator:
     def _job(self, generation: int, policy, state: str = "RUNNING") -> dict:
         return {"experiment_id": self.experiment_id, "generation": generation, "recipe": self.recipe.to_dict(),
                 "recipe_hash": self.recipe.hash, "parent_weights_sha256": self.parent_sha256, "candidates": self.candidates,
-                "policy": type(policy).__name__, "lease_seconds": self._lease_seconds, "state": state}
+                "policy": type(policy).__name__, "lease_seconds": self._lease_seconds, "state": state,
+                **({'generationContext':self.recipe.context(self.dataset,generation)} if self.dataset is not None else {})}
 
     def _wait_until_complete(self, generation: int) -> None:
         started, failed_since = self._monotonic(), None
@@ -244,6 +246,10 @@ class Coordinator:
 
     def run_generation(self, generation: int) -> dict:
         begin = self._timer()
+        if self.dataset is not None:
+            context=self.recipe.context(self.dataset,generation)
+            self.ledger.freeze_generation_context(self.experiment_id,generation,context)
+            self.log('generation_inputs_frozen',**context)
         if not self._parent_published:
             publish_weights(self.model, self.schema, self.models_dir)       # a worker with other weights can synchronize to them
             self._parent_published = True

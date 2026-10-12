@@ -156,6 +156,8 @@ class WorkerRuntime:
         if job["recipe_hash"] != own.hash:
             differences = recipe_differences(job.get("recipe", {}), own.to_dict())
             raise AdmissionError("this worker's recipe is not the job's: " + "; ".join(differences or ["(the hash differs)"]))
+        if getattr(self.executor,'dataset',None) is not None:
+            self.executor.set_generation(job['generation'],job.get('generationContext'))
 
     def admit(self) -> dict | None:
         """The job, if there is one, after checking that the coordinator is up and that the recipes agree."""

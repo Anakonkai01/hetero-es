@@ -33,6 +33,9 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--model-path", required=True)
     parser.add_argument('--stop-file', help='Owned process-bound cooperative stop marker')
     parser.add_argument("--coordinator-url", required=True)
+    parser.add_argument('--bulk-url', help='Private LAN/Tailscale origin for full weights transfer')
+    parser.add_argument('--dataset',type=Path,help='Verified private dataset object for Recipe v2')
+    parser.add_argument('--model-manifest',type=Path,help='Pinned safetensors file manifest for Recipe v2')
     parser.add_argument("--worker-id", required=True)
     parser.add_argument("--log", required=True, help="JSONL file for the events of this worker (must not exist)")
     parser.add_argument("--cache-dir", default=str(Path.home() / ".cache" / "heteroes" / "worker-cache"),
@@ -100,12 +103,16 @@ def main(argv: list[str]) -> int:
             print(json.dumps(event), flush=True)
 
     emit({"event": "worker_start", "t": time.time(), "worker_id": args.worker_id, "environment": environment_info(device),
-          "code": code_info(), "args": vars(args), "noise_selftest_seconds": selftest_seconds})
+          "code": code_info(), "args": {k:str(v) if isinstance(v,Path) else v for k,v in vars(args).items()}, "noise_selftest_seconds": selftest_seconds})
     load_started = time.perf_counter()
-    loaded = load_pinned_model(args.model_path, device)
+    if args.model_manifest:
+        from heteroes.study.models import load
+        loaded=load(args.model_path,json.loads(args.model_manifest.read_text()),device)
+    else:
+        loaded = load_pinned_model(args.model_path, device)
     emit({"event": "model_loaded", "t": time.time(), "worker_id": args.worker_id, "seconds": time.perf_counter() - load_started})
 
-    client = HttpClient(args.coordinator_url, token=os.environ.get(args.token_env) or None, timeout=args.http_timeout_seconds)
+    client = HttpClient(args.coordinator_url, token=os.environ.get(args.token_env) or None, timeout=args.http_timeout_seconds, bulk_url=args.bulk_url)
     deadline = time.time() + args.startup_timeout_seconds
     job = None
     while job is None:
@@ -126,17 +133,28 @@ def main(argv: list[str]) -> int:
             time.sleep(args.poll_seconds)
 
     declared = job["recipe"]
-    cuda_engine = declared["noise"]["engine_version"] == CUDA_ENGINE_VERSION
-    recipe = build_recipe(loaded, sigma=declared["perturbation"]["sigma"], chunk_elements=None if cuda_engine else declared["noise"]["chunk_elements"],
-                          reward_eta=declared["update"]["reward_eta"], eval_dtype=declared["workload"].get("eval_dtype", "float16"),
-                          noise_engine="cuda" if cuda_engine else "cpu", workload=declared["workload"].get("name", "arith16"),
-                          decode_engine=declared["workload"].get("decode_engine", "hf_generate"))
+    dataset=None
+    if declared.get('manifest_version')==2:
+        if not args.dataset or not args.model_manifest:fail('Recipe v2 requires pinned model and private dataset files',3)
+        from heteroes.study.recipe import RecipeV2,build
+        from heteroes.study.data import verify
+        expected=RecipeV2.from_dict(declared)
+        dataset=verify(json.loads(args.dataset.read_text()))
+        recipe=build(loaded,json.loads(args.model_manifest.read_text()),dataset,sigma=expected.schedule['initial'],minimum=expected.schedule['minimum'],
+            generations=expected.schedule['generations'],schedule=expected.schedule['kind'],batch_size=expected.batch_size,batch_seed=expected.batch_seed,max_tokens=expected.evaluation['maxNewTokens'])
+        if recipe.hash!=expected.hash:fail('Local model/data/decoder differs from declared Recipe v2',3)
+    else:
+        cuda_engine = declared["noise"]["engine_version"] == CUDA_ENGINE_VERSION
+        recipe = build_recipe(loaded, sigma=declared["perturbation"]["sigma"], chunk_elements=None if cuda_engine else declared["noise"]["chunk_elements"],
+                              reward_eta=declared["update"]["reward_eta"], eval_dtype=declared["workload"].get("eval_dtype", "float16"),
+                              noise_engine="cuda" if cuda_engine else "cpu", workload=declared["workload"].get("name", "arith16"),
+                              decode_engine=declared["workload"].get("decode_engine", "hf_generate"))
     try:
         engine_selftest_seconds = check_recipe_selftest(recipe, device)
     except RuntimeError as error:
         fail(str(error), 3)
     executor_started = time.perf_counter()
-    executor = CandidateExecutor(loaded.model, loaded.tokenizer, loaded.schema, recipe, chunk=args.chunk)
+    executor = CandidateExecutor(loaded.model, loaded.tokenizer, loaded.schema, recipe, chunk=args.chunk,dataset=dataset)
     emit({"event": "executor_ready", "t": time.time(), "worker_id": args.worker_id, "recipe_hash": recipe.hash,
           "parent_weights_sha256": executor.parent_sha256, "snapshot_and_hash_seconds": time.perf_counter() - executor_started,
           "engine_selftest_seconds": engine_selftest_seconds, "noise_engine": recipe.engine_version, "workload": recipe.workload_name})

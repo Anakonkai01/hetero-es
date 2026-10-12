@@ -62,7 +62,8 @@ def bounded_snapshot(snapshot,max_bytes=1_250_000):
 class AgentManager(Manager):
     def __init__(self,agent):
         self.agent=agent
-        cfg={**agent.config,'python':sys.executable,'workerUrl':agent.config['computeUrl'],'stateDirectory':str(agent.root/'runs'),'workers':[]}
+        bind=f"http://{agent.config.get('workerHost','127.0.0.1')}:{agent.config.get('workerPort',8765)}"
+        cfg={**agent.config,'python':sys.executable,'workerUrl':bind,'stateDirectory':str(agent.root/'runs'),'workers':[]}
         super().__init__(cfg,secrets.token_urlsafe(32))
         self._launch=self.spawn
 
@@ -141,6 +142,9 @@ class AgentManager(Manager):
         # Operational settings are local/private, outside canonical Recipe v1.
         local=read_json(root/'config.json')
         local.update(backupPolicy=cfg.get('backupPolicy',{'interval':1,'retain':3}),deviceCredentials=True)
+        if cfg.get('recipeVersion')==2:
+            from heteroes.study.prepare import prepare
+            local.update(prepare(self.agent,command,cfg,root))
         write_json(root/'config.json',local)
 
     def tick(self,root):
@@ -213,11 +217,19 @@ class Agent:
             if original is None:
                 # Persist ownership before launch so a lost ack is idempotent.
                 write_json(directory/'assignment.json',command)
+            study={}
+            if command.get('studyConfig'):
+                from heteroes.study.prepare import prepare
+                study=prepare(self,command,command['studyConfig'],directory)
             argv=[sys.executable,str(ROOT/'scripts/run_worker.py'),'--coordinator-url',command['coordinatorUrl'],
-                '--worker-id',self.config['workerId'],'--model-path',self.config['modelPath'],
+                '--worker-id',self.config['workerId'],'--model-path',study.get('modelPath',self.config['modelPath']),
                 '--log',str(directory/'events.jsonl'),'--replay','always','--replay-verify-every','1',
                 '--cache-dir',str(worker_cache(directory,self.config)),'--give-up-after-seconds','120','--chunk','16',
                 '--stop-file',str(directory/'stop-request.json')]
+            if command.get('bulkUrl'):
+                argv.extend(['--bulk-url',command['bulkUrl']])
+            if study:
+                argv.extend(['--dataset',study['datasetPath'],'--model-manifest',study['modelManifestPath']])
             if self.config.get('largeDataDirectory') and self.config.get('storageVolumeUUID'):
                 argv.extend(['--storage-volume-uuid',self.config['storageVolumeUUID']])
             if (directory/'launch-intent.json').exists() and not (directory/'process.json').exists():
@@ -419,7 +431,8 @@ def main():
         if result.returncode:raise SystemExit('Device self-test failed; inspect the local GPU environment')
         test=json.loads(result.stdout.splitlines()[-1])
         paired=request(config['serverUrl'],'/api/v1/device/enroll','',{'code':code,'workerId':config['workerId'],
-            'displayName':config.get('displayName',config['workerId']),'computeUrl':config['computeUrl'],'selfTest':test})
+            'displayName':config.get('displayName',config['workerId']),'computeUrl':config['computeUrl'],
+            **({'bulkUrl':config['bulkUrl']} if config.get('bulkUrl') else {}),'selfTest':test})
         config.update(deviceId=paired['deviceId'],deviceToken=paired['deviceToken'],selfTest=test);write_json(args.config,config)
         print('Enrolled; administrator approval required. Contribution is OFF.')
     elif args.action=='run':
