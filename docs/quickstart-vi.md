@@ -12,7 +12,7 @@ Bạn muốn làm gì?
 
 **Cần có:** Windows 11 (64-bit) hoặc Linux (64-bit); card NVIDIA có driver mới; khoảng 10 GB trống; mạng Internet cho lần cài đầu (tải khoảng 3–4 GB).
 
-1. **Đăng ký tài khoản.** Mở link lab mà người mời gửi, bấm *Register an account*. Mật khẩu từ 12 ký tự trở lên. Tài khoản ở trạng thái chờ cho đến khi quản trị viên duyệt.
+1. **Đăng ký tài khoản.** Mở link lab (hiện là **https://lab.heteroes.site**), bấm *Register an account*. Mật khẩu từ 12 ký tự trở lên. Tài khoản ở trạng thái chờ cho đến khi quản trị viên duyệt.
 2. **Đăng nhập và tải bộ cài** ở trang *Workers* (Windows: file `.exe`; Linux: file `.tar.gz`, giải nén rồi mở `heteroes-worker`).
 3. **Cài đặt.** Windows hiện cảnh báo "Windows protected your PC" vì bộ cài chưa ký: bấm *More info* rồi *Run anyway*. Nếu báo thiếu DLL, cài *Microsoft Visual C++ x64 runtime* (app có sẵn đường dẫn).
 4. **Nhập địa chỉ lab** (cùng link ở bước 1) rồi đăng nhập bằng tài khoản của bạn.
