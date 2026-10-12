@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-> **Current state (2026-10-12 evening):** read `AGENTS.md` and the product handoff `../Hetero-ES-LLM-m3/docs/session-handoff-2026-10-12-lf1.md` first. The working-style notes below were written earlier; the later owner rules in `AGENTS.md` win.
+> **Current state (2026-10-12 session close):** read `AGENTS.md` and `../Hetero-ES-LLM-m3/docs/session-handoff-2026-10-12-close.md` first. Public r5 is live; the owner reported Windows onboarding/lifecycle blockers and requested stop for rest. No repair or new installer was completed. The working-style notes below were written earlier; the later owner rules in `AGENTS.md` win.
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 

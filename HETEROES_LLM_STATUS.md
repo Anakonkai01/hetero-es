@@ -1,4 +1,10 @@
-> **2026-10-12 Codex continuation:** r5 prepared locally, public lab remains r4.
+> **2026-10-12 session close:** public lab/backend and downloads now serve r5.
+> The owner reported Windows onboarding, connection, exit/sign-out and network
+> control problems, then requested stop and rest. No repair or replacement
+> installer was completed. Read
+> `../Hetero-ES-LLM-m3/docs/session-handoff-2026-10-12-close.md` first.
+>
+> Earlier Codex CPU validation:
 > CPU checks: runtime 2,115 pass / 100 skip; product backend 221 pass; Worker 25,
 > Server 1. No new GPU or second-machine run. Read product
 > `../Hetero-ES-LLM-m3/docs/session-handoff-2026-10-12-codex.md` for current changes,
@@ -7,7 +13,7 @@
 
 # HeteroES-LLM — Status
 
-**Last updated:** 12/10/2026 — Architecture audit/review; implementation paused. Core CPU checks: 2,074 passed, 100 skipped. Product backend: 109 passed, one provenance test failed. Earlier standalone GPU boundary resume/v2 export and Quick Tunnel CPU evidence have limited scope; new native packages, offline provisioning and lifecycle partition acceptance remain pending.
+**Last updated:** 12/10/2026 session close — owner-requested stop. Public r5 is live; real Windows onboarding/lifecycle has reported unresolved blockers. Earlier CPU validation: runtime 2,115 passed/100 skipped; backend 221; Worker 25; Server 1. No new GPU or two-machine acceptance. The close handoff linked above is the current checkpoint; older sections below are dated history.
 **Canonical design/specification:** `HETEROES_LLM_MASTER.md`  
 **Purpose:** current implementation truth, verified evidence, blockers, artifacts, and the exact next action.
 
