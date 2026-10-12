@@ -13,6 +13,7 @@ recorded for follow-up; no UI or authentication policy changes have been made.
 | Download discoverability | After registration, the user could not find the download page and had to navigate through GPU machines and devices to download Worker. | Provide an obvious download entry in the signed-in navigation and a direct next step after registration. Having a public URL alone does not resolve discoverability. |
 | Post-registration navigation | Registration sends the user directly into a workspace area, with no obvious homepage or onboarding route. | Give the new user a clear path to the homepage, Worker installation and account approval status. |
 | Overall presentation | The signed-in experience feels sparse and unprofessional. | Review the complete onboarding sequence and navigation together with the password and approval interfaces, rather than treating these as isolated cosmetic changes. |
+| Worker onboarding clarity | After downloading and opening the Windows Worker, the user found the screen confusing and could not understand why sign-in appeared alongside other sections. | Make the current step visually dominant, explain that Worker uses the website's lab account, and progressively disclose network, role and connection diagnostics at the appropriate step. |
 
 These are user-reported observations, not findings from an independent browser
 inspection of the administrator account. Source inspection confirms the
@@ -24,3 +25,8 @@ the public homepage and download URLs do exist.
 The walkthrough continues with downloading the public r5 Worker and testing the
 real desktop installation, starting with Windows at the owner's request. Account creation alone does not establish account
 approval, device approval, GPU compatibility or successful contribution.
+
+The user subsequently reported downloading and opening the Windows app. The
+current walkthrough is at connection/sign-in; runtime installation, compatibility
+and pairing have not been reported complete. Opening the app is user-reported,
+not an independently observed full Windows acceptance result.
