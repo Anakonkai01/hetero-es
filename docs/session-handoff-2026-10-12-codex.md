@@ -1,5 +1,14 @@
 # Session continuation — 2026-10-12, Codex
 
+> Later deployment: the owner requested a website download flow for other
+> computers. On 2026-10-12 the idle public lab was backed up and restarted through
+> `scripts/local-lab.py`, and the four reviewed r5 installers were published.
+> `https://lab.heteroes.site/#downloads` now offers r5; the live backend reports
+> `deviceConfiguration: true`. All four full public downloads matched their
+> prepared sizes and SHA-256 hashes. See `evidence/2026-10-12-r5-public/`.
+> No GPU job, Windows execution or second-machine acceptance was performed.
+> The earlier checkpoints below describe the state before this deployment.
+
 Read the original `session-handoff-2026-10-12-lf1.md` for owner rules, decisions,
 live deployment and recovery material. This file records the continuation. Owner
 authorized unattended local work while away, plus independent backlog work after

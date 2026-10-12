@@ -2,6 +2,10 @@
 
 Đây là bản thử nghiệm riêng, chưa phát hành chính thức. Bộ cài **chưa được ký số**, nên Windows sẽ hỏi lại một lần.
 
+Bản đang cung cấp: **lf1-20261012-r5**. Tải trực tiếp tại
+**https://lab.heteroes.site/#downloads**; chọn **Worker** để tham gia lab này,
+hoặc **Lab Server** nếu muốn dựng lab riêng. Không cần chép file từ máy chủ.
+
 Bạn muốn làm gì?
 - **A. Cho lab mượn GPU của bạn** (Worker): đọc phần A.
 - **B. Tự dựng một lab riêng** (Lab Server): đọc phần B.
@@ -13,7 +17,7 @@ Bạn muốn làm gì?
 **Cần có:** Windows 11 (64-bit) hoặc Linux (64-bit); card NVIDIA có driver mới; khoảng 10 GB trống; mạng Internet cho lần cài đầu (tải khoảng 3–4 GB).
 
 1. **Đăng ký tài khoản.** Mở link lab (hiện là **https://lab.heteroes.site**), bấm *Register an account*. Mật khẩu từ 12 ký tự trở lên. Tài khoản ở trạng thái chờ cho đến khi quản trị viên duyệt.
-2. **Đăng nhập và tải bộ cài** ở trang *Workers* (Windows: file `.exe`; Linux: file `.tar.gz`, giải nén rồi mở `heteroes-worker`).
+2. **Tải bộ cài** ngay ở trang chủ, mục *Desktop apps*, hoặc trang *Workers* sau khi đăng nhập (Windows: file `.exe`; Linux: file `.tar.gz`, giải nén rồi mở `heteroes-worker`).
 3. **Cài đặt.** Windows hiện cảnh báo "Windows protected your PC" vì bộ cài chưa ký: bấm *More info* rồi *Run anyway*. Nếu báo thiếu DLL, cài *Microsoft Visual C++ x64 runtime* (app có sẵn đường dẫn).
 4. **Nhập địa chỉ lab** (cùng link ở bước 1) rồi đăng nhập bằng tài khoản của bạn.
 5. Bấm **Install isolated runtime** (tải Python, thư viện, model; chỉ lần đầu). Rồi bấm **Run compatibility check**: máy chạy thử một phép tính GPU và so với kết quả chuẩn. Nếu lỗi, giữ OFF và gửi báo cáo cho quản trị viên.
@@ -38,7 +42,7 @@ Giới hạn: máy bạn chỉ được tụt tối đa 64 bước so với lab.
 6. Mời người khác tham gia: họ đăng ký trên trang lab của bạn, bạn duyệt tài khoản và thiết bị trong *Operations*.
 
 **Giới hạn hiện tại:**
-- **Coordinator** (máy điều phối chạy job) hiện chỉ có trên Linux, card từ 11 GB VRAM, và được dựng thủ công bằng dòng lệnh. Chưa có nút trong app.
+- **Coordinator** (máy điều phối chạy job) chỉ có trên Linux, phải đạt kiểm tra tương thích và có ít nhất 11000 MB VRAM. Worker r5 có nút *Allow this computer to coordinate experiments*. Địa chỉ riêng của máy này phải tới được từ các Worker. Nếu dựng lab riêng để phục vụ máy khác mạng, người vận hành vẫn phải thiết lập tuyến HTTPS công khai; app chưa tự làm bước này.
 - Mạng thường không mã hóa (HTTP). Trên mạng chung (trường, ký túc xá) hãy dùng Tailscale hoặc WireGuard.
 - Không cần Internet sau khi cài xong. Lần cài đầu cần tải thư viện, hoặc chép sẵn bộ cache.
 

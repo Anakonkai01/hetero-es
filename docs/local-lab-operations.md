@@ -36,7 +36,7 @@ The tunnel is `heteroes-lab-local` (configuration `local-deployment/named-config
 coordinator's control routes (never weights). Cloudflare's Browser Integrity Check rejects Python's default
 User-Agent on these names, so every HeteroES client sends its own.
 
-## Subsequent source changes, not yet deployed
+## r5 backend deployed on 2026-10-12
 
 The production app factory now takes an exclusive kernel lock on the canonical
 management database path (`product.sqlite.writer.lock`). Another config folder
@@ -47,5 +47,7 @@ entry points, not an alternative production launch path.
 
 Admission hold leaves current-run reconciliation active. Local upload disk work
 runs off the API event loop, with cleanup serialized against a still-running disk
-operation. These changes are present in the r5 source/package, not in the running
-r4 service. See `session-handoff-2026-10-12-codex.md` and `r5-hardware-acceptance.md`.
+operation. These changes are now running in the public lab after a managed idle
+restart. The four r5 installers are published and their full public downloads
+verified. See `evidence/2026-10-12-r5-public/`,
+`session-handoff-2026-10-12-codex.md` and `r5-hardware-acceptance.md`.

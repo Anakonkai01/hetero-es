@@ -2,15 +2,16 @@
 
 Build: `lf1-20261012-r5`. Four installers and verified hashes are listed in
 `evidence/2026-10-12-lf1-codex/installers-r5-prepared.json`. They are prepared on
-Archive-2tb, not published on the current site. The current site still serves r4.
+Archive-2tb and published at `https://lab.heteroes.site/#downloads` on 2026-10-12.
+The live backend was updated through its managed idle restart. Public full-download
+hash verification is recorded in `evidence/2026-10-12-r5-public/`.
 Windows installers are unsigned. Do not treat a successful build as Windows acceptance.
 
 ## Which lab to use
 
-For the coordinator toggle and role changes, use the new r5 Lab Server in a fresh
-test lab, or deploy the matching backend to the existing lab through its managed
-restart. Do not mix the new paired-role flow with the old r4 backend: it reports
-that the Lab Server needs an update. A fresh lab starts with admission held.
+For the coordinator toggle and role changes, use the updated public lab or the
+new r5 Lab Server in a fresh test lab. Other labs still running r4 need a managed
+backend update first. A fresh lab starts with admission held.
 
 Use a normal system profile for the apps. On Linux keep private configuration,
 SQLite and Python runtimes on the system filesystem; the Archive disk in this

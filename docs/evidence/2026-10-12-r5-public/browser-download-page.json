@@ -1,0 +1,27 @@
+{
+  "url": "https://lab.heteroes.site/#downloads",
+  "downloadCount": 4,
+  "downloads": [
+    {
+      "label": "Windows ↓",
+      "filename": "HeteroES Worker-0.1.0-lf1-20261012-r5-Windows.exe",
+      "url": "https://lab.heteroes.site/downloads/HeteroES%20Worker-0.1.0-lf1-20261012-r5-Windows.exe"
+    },
+    {
+      "label": "Linux ↓",
+      "filename": "HeteroES Worker-0.1.0-lf1-20261012-r5-Linux.tar.gz",
+      "url": "https://lab.heteroes.site/downloads/HeteroES%20Worker-0.1.0-lf1-20261012-r5-Linux.tar.gz"
+    },
+    {
+      "label": "Windows ↓",
+      "filename": "HeteroES Lab Server-0.1.0-lf1-20261012-r5-Windows.exe",
+      "url": "https://lab.heteroes.site/downloads/HeteroES%20Lab%20Server-0.1.0-lf1-20261012-r5-Windows.exe"
+    },
+    {
+      "label": "Linux ↓",
+      "filename": "HeteroES Lab Server-0.1.0-lf1-20261012-r5-Linux.tar.gz",
+      "url": "https://lab.heteroes.site/downloads/HeteroES%20Lab%20Server-0.1.0-lf1-20261012-r5-Linux.tar.gz"
+    }
+  ],
+  "pageErrors": []
+}
