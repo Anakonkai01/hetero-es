@@ -8,6 +8,27 @@
 
 ## 0. NEXT SESSION — START HERE
 
+### UPDATE 12/10/2026 EVENING — implementation resumed on `feat/local-first-lf1`
+
+The owner closed the architecture review with decisions D1 to D8 (see ADR-004 to ADR-007,
+decided items marked DECIDED) and asked for a real, working lab that night. Both repositories
+are on branch `feat/local-first-lf1` (A head `409816d`, B head `b1f3b0f`); the old dirty trees
+were committed in logical groups first; nothing is pushed. Checks run by the AI on this date:
+A 2,094 passed/100 skipped; B backend 164 passed.
+
+Done in this runtime repository: agent command isolation (a bad command no longer blocks CANCEL),
+and the replay-only worker for another network (`HttpClient(allow_no_bulk)`, `run_worker.py
+--no-bulk`, route choice in the device agent, `needs_private_route` stop). Real GPU proof on one
+RTX 5070 Ti through the lab's public address: 4 generations, 16 candidates committed by the worker,
+3 verified replays, 0 whole-weights downloads (B `docs/evidence/2026-10-12-lf1/public-replay.json`).
+Not proven: a second machine, a worker too far behind on a GPU, Windows execution.
+
+The live lab (CPU Web/API on this workstation) now runs the new code behind Quick Tunnel URLs with
+installers public and the queue OPEN; see the B evidence README for the full list. Pending:
+the owner's Cloudflare login for the fixed names `lab.heteroes.site` / `compute.heteroes.site`,
+the coordinator toggle in the Linux app, connection check in the apps, Windows native tests.
+The "no further implementation" notice below describes the review pause and is superseded.
+
 ### UPDATE 12/10/2026 — Architecture review, no further implementation
 
 The owner requested an audit and proposals before further coding, and then a

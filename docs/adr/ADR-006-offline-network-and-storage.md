@@ -48,8 +48,15 @@ by a test or run.
    the public side and need a private route [CODE] `deployment.py`,
    `devices.py:106-110`. That rule exists because of Quick Tunnel limits. Keep it as
    the default, but make "this ingress can carry bulk" a declared capability of the
-   ingress, not a law of the architecture. [PROPOSED] Replay shrinks traffic but a
-   full-sync fallback still needs the bulk route.
+   ingress, not a law of the architecture. Replay shrinks traffic but a full-sync
+   fallback still needs the bulk route.
+   **Implemented and measured for one device (2026-10-12).** A worker with no private route
+   runs *replay only* over the public address: its client refuses whole weights
+   (`BulkUnavailableError`), it may follow up to 64 update records, and it stops with
+   `needs_private_route` if it ever needs a download. The device agent probes the private route
+   first and uses the lab's `publicComputeUrl` otherwise. [CODE] [MEASURED: one RTX 5070 Ti,
+   4 generations, 3 verified replays, 0 downloads; a second machine and the stop path on a GPU
+   are [PENDING]]. On the same network both replay and full download stay available.
 5. **Storage.** Local filesystem content-addressed storage is the default; an
    S3-compatible adapter is optional [CODE]. Objects are immutable by hash, a point is
    READY only after its final manifest, grants are scoped and short-lived. An upload
