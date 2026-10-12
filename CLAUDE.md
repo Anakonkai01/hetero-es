@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+> **Current state (2026-10-12 evening):** read `AGENTS.md` and the product handoff `../Hetero-ES-LLM-m3/docs/session-handoff-2026-10-12-lf1.md` first. The working-style notes below were written earlier; the later owner rules in `AGENTS.md` win.
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## What this project is
