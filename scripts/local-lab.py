@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
-"""Manage one CPU production Web/API and two owned tokenless Quick Tunnels."""
+"""Manage one CPU production Web/API and its public tunnel (two Quick Tunnels, or one named tunnel).
+
+    start | stop | restart | rotate | status    operator actions; a restart holds the queue while the services are down
+                                                and reopens it afterwards if the lab was idle and open
+    boot                                        start whatever is not running (for a boot service); a lab that had a run
+                                                or a GPU reservation when it went down stays held for an administrator
+"""
 import argparse
+from contextlib import contextmanager
 import fcntl
 import json
 import os
@@ -8,6 +15,7 @@ from pathlib import Path
 import re
 import signal
 import socket
+import sqlite3
 import subprocess
 import sys
 import time
@@ -129,6 +137,41 @@ def check_named(config):
         raise ValueError('Web and compute need different host names')
 
 
+EXECUTING={'STARTING','RUNNING','CANCELLING','RECOVERING','DRAINING','PAUSING'}
+
+
+def lab_state(db_path):
+    """{'held': dispatch hold, 'busy': a run is executing or a GPU is reserved}. Reads the product database only."""
+    with sqlite3.connect(Path(db_path).as_uri()+'?mode=ro',uri=True,timeout=20) as db:
+        held=json.loads(db.execute("SELECT value FROM settings WHERE key='dispatchHold'").fetchone()[0]) is True
+        reserved=sum(db.execute(f'SELECT count(*) FROM {table}').fetchone()[0] for table in ('device_reservations','physical_reservations'))
+        running=any(json.loads(row[0]).get('status') in EXECUTING for row in db.execute('SELECT body FROM experiments'))
+    return {'held':held,'busy':bool(reserved) or running}
+
+
+def set_hold(db_path,value):
+    with sqlite3.connect(db_path,timeout=20) as db:
+        db.execute("INSERT OR REPLACE INTO settings VALUES ('dispatchHold',?)",(json.dumps(bool(value)),))
+
+
+@contextmanager
+def held_while_idle(db_path,allow_busy=False):
+    """Hold the queue for the length of the block so nothing can launch while services are down.
+    An open, idle queue is reopened afterwards; a queue that was held stays held; a busy lab refuses
+    (a boot may proceed, and then stays held until an administrator confirms in Operations)."""
+    plan=lab_state(db_path)
+    if plan['busy'] and not allow_busy:
+        raise RuntimeError('A run or a GPU reservation is active; wait until the lab is idle')
+    reopen=not plan['held'] and not plan['busy']
+    if not plan['held']:
+        set_hold(db_path,True)
+    try:
+        yield {**plan,'reopen':reopen}
+    finally:
+        if reopen:
+            set_hold(db_path,False)
+
+
 def defaults(config,args):
     result=dict(config)
     if args.api_url:
@@ -154,7 +197,7 @@ def defaults(config,args):
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action',choices=['start','stop','status','rotate','restart'])
+    parser.add_argument('action',choices=['start','stop','status','rotate','restart','boot'])
     parser.add_argument('--private',type=Path,default=Path.home()/'.config/heteroes-m2')
     parser.add_argument('--python',default=sys.executable)
     parser.add_argument('--caddy',default=str(Path.home()/'.local/share/heteroes-tools/caddy'))
@@ -180,50 +223,61 @@ def main():
         check_named(config)
         if config.get('deploymentMode')!='agent':
             raise RuntimeError('Local deployment requires agent mode')
-        idle(config)
-        if args.action in ('stop','rotate','restart'):
-            if args.action=='rotate' and config.get('namedTunnelConfig'):
-                raise RuntimeError('A named tunnel has fixed addresses; there is nothing to rotate')
-            selected=tunnels if args.action=='rotate' else servers if args.action=='restart' else names
-            for name in selected:
-                stop(root,name)
-            if args.action!='restart' and not config.get('namedTunnelConfig'):
-                config.pop('publicWebUrl',None);config.pop('publicComputeUrl',None)
-            save_private(args.private/'config.json',config)
-            if args.action=='stop':
-                print('Owned CPU service and tunnels stopped.');return
-        if not (args.web/'index.html').is_file():
-            raise RuntimeError('Build the production frontend first')
-        # Preserve the old private config as a migration receipt, exactly once.
-        backup=root/'config-before-production.json'
-        if not backup.exists():
-            save_private(backup,load(args.private/'config.json'))
+        database=Path(config['productStateDirectory'])/'product.sqlite'
+        with held_while_idle(database,allow_busy=args.action=='boot') as plan:
+            return operate(args,root,config,plan)
+
+
+def operate(args,root,config,plan):
+    tunnels=tunnel_names(config);servers=['public-entry','cpu-server'];names=tunnels+servers
+    if args.action!='boot':
+        idle(config)          # a boot may find reservations from before the shutdown; the queue then stays held
+    if args.action in ('stop','rotate','restart'):
+        if args.action=='rotate' and config.get('namedTunnelConfig'):
+            raise RuntimeError('A named tunnel has fixed addresses; there is nothing to rotate')
+        selected=tunnels if args.action=='rotate' else servers if args.action=='restart' else names
+        for name in selected:
+            stop(root,name)
+        if args.action!='restart' and not config.get('namedTunnelConfig'):
+            config.pop('publicWebUrl',None);config.pop('publicComputeUrl',None)
         save_private(args.private/'config.json',config)
-        entry=root/'Caddyfile'
-        entry.write_text(caddyfile(config));entry.chmod(0o600)
-        subprocess.run([args.caddy,'validate','--config',str(entry)],check=True,capture_output=True)
-        environment={**os.environ,'CUDA_VISIBLE_DEVICES':'','PYTHONNOUSERSITE':'1'}
-        address=urlsplit(config['apiUrl'])
-        command=[args.python,'-m','backend.server','--private',str(args.private),'--web',str(args.web),'--headless']
-        if args.downloads.is_dir():command.extend(['--downloads',str(args.downloads)])
-        spawn(root,'cpu-server',command,environment,address.hostname,address.port or 80)
-        spawn(root,'public-entry',[args.caddy,'run','--config',str(entry)],environment,'127.0.0.1',config.get('webEntryPort',8080))
-        if config.get('namedTunnelConfig'):
-            # Fixed host names come from the owner's tunnel configuration.
-            named(root,'named-tunnel',config['namedTunnelConfig'],args.cloudflared,environment)
-        else:
-            (root/'quick-config.yml').write_text('{}\n');(root/'quick-config.yml').chmod(0o600)
-            config['publicWebUrl']=quick(root,'web-quick',config.get('webEntryPort',8080),args.cloudflared,environment)
-            config['publicComputeUrl']=quick(root,'compute-quick',config.get('computeEntryPort',8081),args.cloudflared,environment)
-        save_private(args.private/'config.json',config)
-        print(json.dumps({'webUrl':config['publicWebUrl'],'computeUrl':config['publicComputeUrl'],
-            'privateBulkUrl':config['privateComputeUrl'],'dispatchHeld':True,'computeStarted':False},indent=2))
+        if args.action=='stop':
+            print('Owned CPU service and tunnels stopped.');return
+    if not (args.web/'index.html').is_file():
+        raise RuntimeError('Build the production frontend first')
+    # Preserve the old private config as a migration receipt, exactly once.
+    backup=root/'config-before-production.json'
+    if not backup.exists():
+        save_private(backup,load(args.private/'config.json'))
+    save_private(args.private/'config.json',config)
+    entry=root/'Caddyfile'
+    entry.write_text(caddyfile(config));entry.chmod(0o600)
+    subprocess.run([args.caddy,'validate','--config',str(entry)],check=True,capture_output=True)
+    environment={**os.environ,'CUDA_VISIBLE_DEVICES':'','PYTHONNOUSERSITE':'1'}
+    address=urlsplit(config['apiUrl'])
+    command=[args.python,'-m','backend.server','--private',str(args.private),'--web',str(args.web),'--headless']
+    if args.downloads.is_dir():command.extend(['--downloads',str(args.downloads)])
+    spawn(root,'cpu-server',command,environment,address.hostname,address.port or 80)
+    spawn(root,'public-entry',[args.caddy,'run','--config',str(entry)],environment,'127.0.0.1',config.get('webEntryPort',8080))
+    if config.get('namedTunnelConfig'):
+        # Fixed host names come from the owner's tunnel configuration.
+        named(root,'named-tunnel',config['namedTunnelConfig'],args.cloudflared,environment)
+    else:
+        (root/'quick-config.yml').write_text('{}\n');(root/'quick-config.yml').chmod(0o600)
+        config['publicWebUrl']=quick(root,'web-quick',config.get('webEntryPort',8080),args.cloudflared,environment)
+        config['publicComputeUrl']=quick(root,'compute-quick',config.get('computeEntryPort',8081),args.cloudflared,environment)
+    save_private(args.private/'config.json',config)
+    print(json.dumps({'webUrl':config['publicWebUrl'],'computeUrl':config['publicComputeUrl'],
+        'privateBulkUrl':config['privateComputeUrl'],'computeStarted':False,
+        'queue':'reopens when this action ends' if plan['reopen'] else
+                ('held: a run or GPU reservation was live, an administrator must confirm in Operations' if plan['busy'] else 'held')},indent=2))
 
 
 if __name__=='__main__':
     try:
         main()
     except Exception as error:
-        # Do not expose credential/config contents in validation exceptions.
-        print(f'Local deployment failed ({type(error).__name__}). Check private logs/configuration.',file=sys.stderr)
+        # Validation errors may quote configuration, so only this script's own RuntimeErrors are shown.
+        detail=f': {error}' if type(error) is RuntimeError else ''
+        print(f'Local deployment failed ({type(error).__name__}{detail}). Check private logs/configuration.',file=sys.stderr)
         raise SystemExit(1)

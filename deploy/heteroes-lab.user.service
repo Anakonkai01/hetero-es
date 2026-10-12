@@ -1,0 +1,23 @@
+# systemd USER unit for the owner's workstation layout: starts the lab (Web/API, public entry and the
+# Cloudflare tunnel) after a boot or login and stops it gracefully. Install:
+#   mkdir -p ~/.config/systemd/user && cp deploy/heteroes-lab.user.service ~/.config/systemd/user/heteroes-lab.service
+#   systemctl --user daemon-reload && systemctl --user enable --now heteroes-lab
+# To start before anyone logs in (once): sudo loginctl enable-linger $USER
+# `boot` starts what is not running, never launches a job, and leaves the queue held if a run or a GPU
+# reservation was live when the machine went down. Adjust the two paths for another layout.
+[Unit]
+Description=HeteroES lab: Web/API, public entry and Cloudflare tunnel
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Environment=CUDA_VISIBLE_DEVICES=
+ExecStart=/usr/bin/python3 -I %h/projects/Hetero-ES-LLM-m3/scripts/local-lab.py boot --python %h/projects/Hetero-ES-LLM/.venv-backend/bin/python
+ExecStop=-/usr/bin/python3 -I %h/projects/Hetero-ES-LLM-m3/scripts/local-lab.py stop --python %h/projects/Hetero-ES-LLM/.venv-backend/bin/python
+TimeoutStartSec=180
+TimeoutStopSec=120
+
+[Install]
+WantedBy=default.target

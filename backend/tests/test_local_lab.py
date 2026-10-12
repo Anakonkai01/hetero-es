@@ -66,3 +66,87 @@ def test_named_tunnel_needs_fixed_https_addresses_and_a_config_file(lab_script, 
         with pytest.raises(ValueError):
             lab_script.check_named(broken)
     lab_script.check_named({})  # no named tunnel configured: nothing to check
+
+
+# --- holding the queue while the services restart ---------------------------------------------
+
+@pytest.fixture
+def lab_db(tmp_path):
+    from backend.server import initialize
+    root = tmp_path / 'lab'
+    initialize(root, {'username': 'admin', 'password': 'test-password-long', 'host': '127.0.0.1', 'port': 8002,
+                      'storageDirectory': str(tmp_path / 'objects')})
+    return root / 'state' / 'product.sqlite'
+
+
+def add_run(db_path, status):
+    import sqlite3
+    with sqlite3.connect(db_path) as db:
+        db.execute('INSERT INTO experiments VALUES (?,?,?,NULL)', (status + '-run', 'admin', json.dumps({'status': status})))
+
+
+def add_reservation(db_path):
+    import sqlite3
+    with sqlite3.connect(db_path) as db:
+        db.execute("INSERT INTO physical_reservations VALUES ('GPU-1', ?)", ('a' * 32,))
+
+
+def test_lab_state_reports_the_hold_and_whether_a_run_or_reservation_is_live(lab_script, lab_db):
+    assert lab_script.lab_state(lab_db) == {'held': True, 'busy': False}
+    lab_script.set_hold(lab_db, False)
+    assert lab_script.lab_state(lab_db) == {'held': False, 'busy': False}
+    for status in ('COMPLETED', 'FAILED', 'CANCELLED', 'DRAFT', 'QUEUED', 'PAUSED'):
+        add_run(lab_db, status)
+    assert lab_script.lab_state(lab_db)['busy'] is False          # nothing is executing
+    add_run(lab_db, 'RUNNING')
+    assert lab_script.lab_state(lab_db)['busy'] is True
+
+
+@pytest.mark.parametrize('status', ['STARTING', 'RUNNING', 'CANCELLING', 'RECOVERING', 'DRAINING', 'PAUSING'])
+def test_every_executing_status_counts_as_busy(lab_script, lab_db, status):
+    add_run(lab_db, status)
+    assert lab_script.lab_state(lab_db)['busy'] is True
+
+
+def test_a_physical_reservation_counts_as_busy(lab_script, lab_db):
+    add_reservation(lab_db)
+    assert lab_script.lab_state(lab_db)['busy'] is True
+
+
+def test_an_open_idle_queue_is_held_during_the_action_and_reopened_after(lab_script, lab_db):
+    lab_script.set_hold(lab_db, False)
+    with lab_script.held_while_idle(lab_db) as plan:
+        assert lab_script.lab_state(lab_db)['held'] is True
+        assert plan['reopen'] is True
+    assert lab_script.lab_state(lab_db)['held'] is False
+
+
+def test_an_already_held_queue_stays_held(lab_script, lab_db):
+    with lab_script.held_while_idle(lab_db) as plan:
+        assert plan['reopen'] is False
+    assert lab_script.lab_state(lab_db)['held'] is True
+
+
+def test_a_failing_action_still_restores_the_queue(lab_script, lab_db):
+    lab_script.set_hold(lab_db, False)
+    with pytest.raises(RuntimeError, match='boom'):
+        with lab_script.held_while_idle(lab_db):
+            raise RuntimeError('boom')
+    assert lab_script.lab_state(lab_db)['held'] is False
+
+
+def test_a_busy_lab_refuses_a_restart_and_stays_as_it_was(lab_script, lab_db):
+    lab_script.set_hold(lab_db, False)
+    add_run(lab_db, 'RUNNING')
+    with pytest.raises(RuntimeError, match='active'):
+        with lab_script.held_while_idle(lab_db):
+            pytest.fail('the action must not run')
+    assert lab_script.lab_state(lab_db)['held'] is False
+
+
+def test_booting_a_busy_lab_leaves_the_queue_held_for_an_administrator(lab_script, lab_db):
+    lab_script.set_hold(lab_db, False)
+    add_reservation(lab_db)
+    with lab_script.held_while_idle(lab_db, allow_busy=True) as plan:
+        assert plan['reopen'] is False and plan['busy'] is True
+    assert lab_script.lab_state(lab_db)['held'] is True
