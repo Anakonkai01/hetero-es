@@ -1,5 +1,10 @@
 # M2 implementation record
 
+> **Historical record:** measured M2 behavior below is retained. As of 2026-10-12,
+> cloud is optional/deferred and is not a local release prerequisite. This record
+> does not prove a full offline install, all lifecycle partitions or simultaneous
+> disjoint jobs. See the current [audit/proposal](local-first-architecture.md).
+
 Status: local implementation verified; cloud acceptance pending, 2026-10-10. The accepted scope and gates are in
 [lab-roadmap.md](lab-roadmap.md). Local implementation is not cloud acceptance.
 

@@ -1,3 +1,25 @@
+## Architecture review update — 2026-10-12
+
+Current entrypoint: [Claude review handoff](local-first-claude-handoff.md).
+Code changes from the earlier continuation are preserved uncommitted; coding,
+installer builds, service cutover, GPU campaigns and cloud work are paused.
+The [proposal](local-first-architecture.md) and ADR-004..007 are PROPOSED choices.
+The owner, rather than the audit author, approves architecture decisions.
+
+Audit CPU results: runtime 2,074 passed/100 skipped; backend 109 passed/one failed
+(vendored Windows collector provenance expectation). Earlier `20261012-r2`
+same-host GPU harness accepted boundary resume and v2 export/reload within its
+scope; the Quick receipt accepted CPU transport/auth/private Range only. Neither
+is a fresh native package, remote GPU, multi-job or learning-gain acceptance.
+No new installer replaces `monitor-20261011-r2`. See the
+[audit receipt](evidence/2026-10-12-local-first/audit.json) for source hashes.
+
+Operating snapshot: 21 historical experiments, held dispatch, zero reservations,
+local contribution OFF and no GPU workload. Web/API and Quick Tunnels remain
+running; monitoring Agent is stopped. Private local storage configuration is
+prepared, but live backend reports no active recovery storage. No restart/cutover
+was made during review. Earlier paragraphs below are dated history.
+
 ## Session close — 2026-10-11
 
 Current operational entrypoint: [session handoff](m3-session-handoff.md). Both M3

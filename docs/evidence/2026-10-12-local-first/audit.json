@@ -1,0 +1,145 @@
+{
+  "formatVersion": 1,
+  "capturedAtUtc": "2026-10-12T07:23:35.794028+00:00",
+  "reviewMode": "Read-only audit plus documentation. No runtime code fixes, service cutover, installer rebuild, cloud operation or GPU campaign in this review. Detailed ADRs PROPOSED; owner retains decision authority.",
+  "tracks": [
+    {
+      "track": "A",
+      "checkout": "hetero-es-m3-runtime",
+      "branch": "feat/local-lab-completion",
+      "head": "d5bbedb4ff53cddbc2f4c9c63cc51051af44f711",
+      "dirtyStatusAtCapture": [
+        "M scripts/run_worker.py",
+        " M src/heteroes/coordinator.py",
+        " M src/heteroes/executor.py",
+        " M src/heteroes/http_transport.py",
+        " M src/heteroes/ledger/ledger.py",
+        " M src/heteroes/model/loading.py",
+        " M src/heteroes/product/agent.py",
+        " M src/heteroes/product/gateway.py",
+        " M src/heteroes/product/qualification.py",
+        " M src/heteroes/product/recovery.py",
+        " M src/heteroes/product/runner.py",
+        " M src/heteroes/product/telemetry.py",
+        " M src/heteroes/worker_runtime.py",
+        " M tests/ledger/test_recovery_points.py",
+        "?? docs/adr/ADR-004-local-first-deployment.md",
+        "?? docs/adr/ADR-005-state-and-lifecycle-authority.md",
+        "?? docs/adr/ADR-006-offline-network-and-storage.md",
+        "?? docs/adr/ADR-007-identities-versions-and-recovery.md",
+        "?? scripts/check-local-study.py",
+        "?? scripts/study-manifest.py",
+        "?? src/heteroes/product/windows_detail.py",
+        "?? src/heteroes/study/",
+        "?? tests/study/",
+        "?? tests/test_dual_transport.py"
+      ],
+      "sourceFileCount": 187,
+      "sourceAggregateSha256": "56863c7349a46d8bd9b39e969a2c47d16a3726e3559701aae0065c249aa5290c"
+    },
+    {
+      "track": "B",
+      "checkout": "Hetero-ES-LLM-m3",
+      "branch": "feat/local-lab-completion",
+      "head": "023967c41f4df26047adc8498976d8dda2caaf20",
+      "dirtyStatusAtCapture": [
+        "M backend/app.py",
+        " M backend/devices.py",
+        " M backend/local_storage.py",
+        " M backend/monitoring/provenance.json",
+        " M backend/monitoring/telemetry.py",
+        " M backend/server.py",
+        " M backend/store.py",
+        " M backend/tests/test_local_storage.py",
+        " M deploy/heteroes.service",
+        " M deploy/install-cpu-server.sh",
+        " M desktop/worker/electron/service.cjs",
+        " M desktop/worker/tests/service.test.cjs",
+        " M frontend/src/components/common/InstallerDownloads.tsx",
+        " M frontend/src/components/experiments/RuntimeExperiment.tsx",
+        " M frontend/src/pages/LabDevices.tsx",
+        " M frontend/src/pages/RuntimePages.tsx",
+        " M frontend/src/types/experiment.ts",
+        " M scripts/build-m2-release.py",
+        " M scripts/refresh-monitoring.py",
+        " M scripts/refresh-server-runtime.py",
+        "?? backend/addresses.py",
+        "?? backend/deployment.py",
+        "?? backend/monitoring/windows_detail.py",
+        "?? backend/study/",
+        "?? backend/study_registry.py",
+        "?? backend/tests/test_deployment.py",
+        "?? backend/tests/test_endpoints.py",
+        "?? backend/tests/test_study.py",
+        "?? deploy/config.local.example.json",
+        "?? docs/evidence/2026-10-12-local-portability/",
+        "?? docs/local-cloud-portability.md",
+        "?? docs/local-first-architecture.md",
+        "?? frontend/src/components/experiments/StudyAssets.tsx",
+        "?? scripts/check-live-quick.py",
+        "?? scripts/local-lab.py",
+        "?? scripts/verify-release.py"
+      ],
+      "sourceFileCount": 258,
+      "sourceAggregateSha256": "21ec606f93f6738b182f833aa127d89d06f9b6a66fa13349f4abd5a3a040511a"
+    }
+  ],
+  "sourceManifest": {
+    "path": "source-files.json",
+    "sha256": "1d7f6b60d3dca61e6a7fc99791c9045f262337cbc642d56435c38a95f6cbd7b4"
+  },
+  "checks": [
+    {
+      "track": "A",
+      "command": "CUDA_VISIBLE_DEVICES='' PYTHONPATH=src /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python -m pytest -q",
+      "passed": 2074,
+      "skipped": 100,
+      "failed": 0,
+      "exitCode": 0,
+      "wallSeconds": 74.32
+    },
+    {
+      "track": "B",
+      "command": "CUDA_VISIBLE_DEVICES='' ../Hetero-ES-LLM/.venv-backend/bin/python -m pytest backend/tests -q",
+      "passed": 109,
+      "failed": 1,
+      "exitCode": 1,
+      "wallSeconds": 12.15,
+      "failure": "backend/tests/test_monitor.py::test_vendored_collector_provenance_matches_files",
+      "reason": "Expected four vendored module names; new windows_detail.py collector adds a fifth. Failure intentionally left for post-review code work.",
+      "warnings": [
+        "Starlette/httpx deprecation warning"
+      ]
+    }
+  ],
+  "checkEvidenceLimit": "Observed terminal results from the architecture review; raw pytest stdout is not retained in this receipt. Skips and CPU fixtures do not certify GPU/native packaging.",
+  "reusedMeasuredEvidence": [
+    {
+      "path": "core-gpu-r2-summary.json",
+      "sha256": "3f836e3955530c7d40e43667c3cef14ab0e6957eea2f7afa71d5bbaa75ab0f02"
+    },
+    {
+      "path": "../2026-10-12-local-portability/quick-live-r1.json",
+      "sha256": "747733cd524f542aae813b0a174ecea83c9e6037e05139efdf633e810a0d5b57",
+      "gpuWork": false
+    }
+  ],
+  "operatingSnapshot": {
+    "historicalExperiments": 21,
+    "physicalReservations": 0,
+    "dispatchHeld": true,
+    "localContribution": [
+      {
+        "workerId": "5070ti",
+        "enabled": false,
+        "desired": false
+      }
+    ],
+    "nvidiaComputePids": [],
+    "preparedStorageMode": "local",
+    "liveRecoveryStorageMode": null,
+    "storageCutoverPerformed": false
+  },
+  "cloudActionsPerformed": [],
+  "releaseStatus": "Uncommitted source, no new installers, no commit/push/merge/tag in this audit. Historical installer monitor-20261011-r2 remains current; latest source not packaged."
+}

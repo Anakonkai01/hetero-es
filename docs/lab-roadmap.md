@@ -1,5 +1,11 @@
 # Lab product roadmap
 
+> **2026-10-12 review supersession:** implementation is paused for the owner's
+> local-first architecture review. Historical AWS/R2 deployment gates do not block
+> the proposed standalone lab path. Detailed replacement priorities are PROPOSED
+> in [local-first architecture](local-first-architecture.md); resume from the
+> [Claude handoff](local-first-claude-handoff.md), not historical execution orders.
+
 **2026-10-11 execution revision:** the owner authorized implementation through M6
 locally, removed GPU-hour and total-run budget caps, and selected Archive-2tb for
 large data and independent encrypted archives. Technical timeouts and GPU opt-in

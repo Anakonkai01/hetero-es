@@ -1,5 +1,11 @@
 # Session handoff — 2026-10-11 monitoring close
 
+> **Superseded operational entrypoint, 2026-10-12:** read the
+> [Claude architecture-review handoff](local-first-claude-handoff.md) first.
+> Current source, monitoring Agent state, storage activation and next actions
+> differ from this dated close. Do not restart its helpers or resume GPU/code work
+> automatically while architecture review is pending. Keep its archives/history.
+
 This is the current operational entrypoint. Documentation is English; communicate
 with the owner in Vietnamese. Both active M3 checkouts use
 `feat/local-lab-completion`. Implementation/evidence commits are A `9ff2b9c` and
