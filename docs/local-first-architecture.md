@@ -1,5 +1,13 @@
 # Local-first architecture proposal and repository audit
 
+> **Update 2026-10-12 evening — implementation resumed.** After the review the owner decided
+> D1 to D8 (recorded as DECIDED inside ADR-004 to ADR-007) and asked for a working product that
+> night. Work is on branch `feat/local-first-lf1` of both repositories (nothing pushed): the
+> doctor, public installer downloads, the replay-only worker on the public route, login and
+> registration throttling, the named-tunnel manager, and build lf1-20261012-r3 with its evidence in
+> [evidence/2026-10-12-lf1](evidence/2026-10-12-lf1/README.md). The review text below is kept as
+> written; where it says "pending" or "not implemented", check that evidence folder first.
+
 Date: 2026-10-12. Status: architecture review; no new implementation in this
 review step. The owner supplied local-first/self-hosted/cloud-optional as the
 desired direction and requested an audit and proposal before further coding.
