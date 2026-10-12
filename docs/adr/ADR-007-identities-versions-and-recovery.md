@@ -113,3 +113,22 @@ tickets 3.3–3.5]
 
 Exact manifest fields of the lab export; secret retention policy for disaster
 recovery.
+
+## 2026-10-12 continuation — agent command capabilities
+
+[CODE] Each device poll sends `X-HeteroES-Agent-Commands`; the strict JSON Poll
+body is unchanged. The server intersects the declared kinds with its own known
+set before returning commands. Unknown/future commands stay pending and cannot
+block delivery of understood cancel/stop commands. No header means the
+conservative core floor (contribution, coordinate, worker start/stop, cancel);
+an explicitly empty header understands none. Malformed/oversized headers are
+rejected before updating the boot or accepting reports.
+
+[CODE] The last advertised capabilities live in the existing management settings
+table, under a device-scoped key. New admission needs all core lifecycle commands.
+Pause and live backup-policy changes require the corresponding capability and
+return 409 without changing the run when it is absent. Headerless old agents must
+upgrade to use those optional features. An old server ignores the new header.
+
+[MEASURED — CPU tests] Agent header test and backend protocol/admission tests, with
+mutation checks, are in product `docs/evidence/2026-10-12-lf1-codex/`.

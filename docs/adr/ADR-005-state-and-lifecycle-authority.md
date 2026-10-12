@@ -71,3 +71,17 @@ is never recorded as reward zero. [CODE] `test_pause_resume.py`
 
 If a portal is ever built, labs push read-only snapshots out. Commands from a portal
 into a lab are a separate design and are not part of this ADR.
+
+## 2026-10-12 continuation — admission hold split
+
+[CODE] In agent mode `dispatchHold` now stops only new queued-to-STARTING claims.
+The dispatcher always reconciles admitted runs, forwards durable cancel/pause and
+updates completion/resource-release projections. The hold is rechecked under the
+same database lock as each queued claim, including a hold that arrives during
+reconciliation. Errors from one admitted run do not hide another run or disappear
+merely because admission is held. Legacy dispatch remains frozen.
+
+[MEASURED — CPU fixtures] Held completion/drain, lost cancel forwarding, pause,
+a hold during reconciliation and independent-run error isolation are tested in
+product `backend/tests/test_admission_hold.py`; mutation receipts are in
+`docs/evidence/2026-10-12-lf1-codex/`.

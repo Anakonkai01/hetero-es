@@ -23,10 +23,14 @@ from .remote import alive,identity,worker_environment,handle as remote_handle
 from .platform_process import acquire_instance_lock, ProcessIdentityUnknown, spawn_options
 from .storage import data_root,worker_cache
 
+COMMAND_KINDS = frozenset({'SET_CONTRIBUTION','COORDINATE','START_WORKER','STOP_WORKER',
+    'CANCEL_ASSIGNMENT','UPDATE_BACKUP_POLICY','PAUSE_ASSIGNMENT'})
+
 
 def request(url, path, token, body, method=None):
     req=urllib.request.Request(url.rstrip('/')+path,data=None if body is None else json.dumps(body,allow_nan=False).encode(),method=method,
-        headers={'Authorization':'Bearer '+token,'Content-Type':'application/json','User-Agent':USER_AGENT})
+        headers={'Authorization':'Bearer '+token,'Content-Type':'application/json','User-Agent':USER_AGENT,
+            **({'X-HeteroES-Agent-Commands':','.join(sorted(COMMAND_KINDS))} if path=='/api/v1/device/poll' else {})})
     # Never expose exception URLs, token-bearing bodies or server tracebacks.
     with urllib.request.urlopen(req,timeout=15) as response:
         return json.load(response)
@@ -274,7 +278,7 @@ class Agent:
 
     def handle(self,command):
         kind=command.get('kind')
-        if kind not in {'SET_CONTRIBUTION','COORDINATE','START_WORKER','STOP_WORKER','CANCEL_ASSIGNMENT','UPDATE_BACKUP_POLICY','PAUSE_ASSIGNMENT'}:
+        if kind not in COMMAND_KINDS:
             raise InvalidCommand('Unsupported device command')
         cid=command.get('commandId')
         if not isinstance(cid,str) or not cid:raise InvalidCommand('Missing command identity')
