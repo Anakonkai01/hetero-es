@@ -10,11 +10,17 @@ recorded for follow-up; no UI or authentication policy changes have been made.
 | Password field | The registration password control feels unpolished. | Improve the field's visual treatment, visibility control and clear validation feedback. |
 | Administrator awareness | New registrations have no visible notification; the administrator must open management to discover them. | Surface pending registration requests in the administrator's normal navigation, with a clear route to review. |
 | Approval screen | The approval interface looks unattractive. | Improve layout, request information, action clarity and confirmation after approval. |
+| Download discoverability | After registration, the user could not find the download page and had to navigate through GPU machines and devices to download Worker. | Provide an obvious download entry in the signed-in navigation and a direct next step after registration. Having a public URL alone does not resolve discoverability. |
+| Post-registration navigation | Registration sends the user directly into a workspace area, with no obvious homepage or onboarding route. | Give the new user a clear path to the homepage, Worker installation and account approval status. |
+| Overall presentation | The signed-in experience feels sparse and unprofessional. | Review the complete onboarding sequence and navigation together with the password and approval interfaces, rather than treating these as isolated cosmetic changes. |
 
 These are user-reported observations, not findings from an independent browser
 inspection of the administrator account. Source inspection confirms the
 registration form currently uses `minLength={12}` and a plain password input.
+Source inspection also confirms registration redirects a signed-in user to
+`/workspace`. The missing homepage/download entry describes the user's experience;
+the public homepage and download URLs do exist.
 
 The walkthrough continues with downloading the public r5 Worker and testing the
-real desktop installation. Account creation alone does not establish account
+real desktop installation, starting with Windows at the owner's request. Account creation alone does not establish account
 approval, device approval, GPU compatibility or successful contribution.
