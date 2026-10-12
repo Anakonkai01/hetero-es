@@ -1,3 +1,4 @@
+import type {StudyDataset,StudyModel} from './StudyAssets';
 import {useProduct,StepHeader} from '@heteroes/product-ui';
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -26,26 +27,46 @@ export function RuntimeConfiguration({ initial, onSave, pending }: { initial?: E
   const [alpha,setAlpha]=useState(initial?.alpha??.001);const [sigma,setSigma]=useState(initial?.sigma??.001);
   const [decoder,setDecoder]=useState(initial?.decodeEngine??"hf_generate");const [selected,setSelected]=useState<string[]>(initial?.workerIds??[]);
   const [coordinator,setCoordinator]=useState(initial?.coordinatorDeviceId??"");const [interval,setInterval]=useState(initial?.backupPolicy?.interval??1);const [retain,setRetain]=useState(initial?.backupPolicy?.retain??3);const [error,setError]=useState("");
+  const [version,setVersion]=useState(initial?.recipeVersion??1);
+  const [modelId,setModelId]=useState(initial?.modelArtifactId??'');const [datasetId,setDatasetId]=useState(initial?.datasetIds?.[0]??'');
+  const [batchSize,setBatchSize]=useState(initial?.batchSize??32);const [batchSeed,setBatchSeed]=useState(initial?.batchSeed??11);
+  const [schedule,setSchedule]=useState(initial?.sigmaSchedule??'constant');const [minimum,setMinimum]=useState(initial?.sigmaMinimum??.00025);
+  const [maxTokens,setMaxTokens]=useState(initial?.maxNewTokens??512);
+  const modelList=useQuery({queryKey:['study-models',...scope],queryFn:()=>apiGet<StudyModel[]>('/api/v1/models'),enabled:scope.every(Boolean)});
+  const dataList=useQuery({queryKey:['study-datasets',...scope],queryFn:()=>apiGet<StudyDataset[]>('/api/v1/datasets'),enabled:scope.every(Boolean)});
+  const customModel=modelList.data?.find(m=>m.modelArtifactId===modelId);
   const available=workers.data??[];
   return <form className="cb demo-form" onSubmit={event=>{
     event.preventDefault();setError("");
     if(step===0){if(name.trim().length<3){setError(t('Enter an experiment name.'));return;}setStep(1);return;}
     if(!cap.data||!selected.length||(cap.data.agentMode&&!coordinator)){setError(t('Select workers and a coordinator.'));return;}
     if(step===1){setStep(2);return;}
-    void onSave({name,modelName:cap.data.modelId,modelArtifactId:"qwen-pinned",task,maxGenerations:generations,candidatesPerGeneration:candidates,alpha,sigma,decodeEngine:decoder,...(cap.data.agentMode?{coordinatorDeviceId:coordinator,backupPolicy:{interval,retain}}:{}),workerIds:selected,schedulerPolicy:"greedy",syncMode:"synchronous"}).catch((e:Error)=>setError(e.message));
+    if(version===2&&(!customModel?.manifest||!datasetId)){setError(t('Select a pinned model and frozen dataset.'));return;}
+    void onSave({name,modelName:version===2?customModel!.reference:cap.data.modelId,modelArtifactId:version===2?modelId:"qwen-pinned",task:version===2?'text_math_v2':task,
+      ...(version===2?{recipeVersion:2,datasetIds:[datasetId],batchSize,batchSeed,sigmaSchedule:schedule,sigmaMinimum:minimum,maxNewTokens:maxTokens,validationInterval:1}:{}),maxGenerations:generations,candidatesPerGeneration:candidates,alpha,sigma,decodeEngine:decoder,...(cap.data.agentMode?{coordinatorDeviceId:coordinator,backupPolicy:{interval,retain}}:{}),workerIds:selected,schedulerPolicy:"greedy",syncMode:"synchronous"}).catch((e:Error)=>setError(e.message));
   }}>
     <StepHeader steps={['Setup','Resources','Review']} current={step}/>
     {cap.isError&&<p className="note err" role="alert">{t('Runtime capabilities unavailable. Check the control service.')}</p>}
     {step===0&&<section className="setup-section"><h2>{t('Set up your experiment')}</h2><p className="hint">{t('Choose a workload and experiment size. Technical settings are optional.')}</p><div className="setup-grid">
       <label className="fg">{t('Experiment name')}<input autoFocus className="inp" required minLength={3} maxLength={160} value={name} onChange={e=>setName(e.target.value)}/></label>
-      <label className="fg">{t('Workload')}<select className="sel" value={task} onChange={e=>{setTask(e.target.value);if(e.target.value==='arith16')setDecoder('hf_generate');}}>{cap.data?.workloads.map(value=><option key={value}>{value}</option>)}</select></label>
+      <label className="fg">{t('Experiment recipe')}<select className="sel" value={version} onChange={e=>{setVersion(Number(e.target.value));setDecoder('hf_generate');}}><option value={1}>{t('Built-in workload · Recipe v1')}</option>{cap.data?.agentMode&&<option value={2}>{t('Math dataset · Recipe v2')}</option>}</select></label>
+      {version===1&&<label className="fg">{t('Workload')}<select className="sel" value={task} onChange={e=>{setTask(e.target.value);if(e.target.value==='arith16')setDecoder('hf_generate');}}>{cap.data?.workloads.map(value=><option key={value}>{value}</option>)}</select></label>}
       <label className="fg">{t('Maximum generations')}<input className="inp" type="number" required min={1} max={1000} value={generations} onChange={e=>setGenerations(Number(e.target.value))}/></label>
       <label className="fg">{t('Candidates per generation')}<input className="inp" type="number" required min={2} max={256} value={candidates} onChange={e=>setCandidates(Number(e.target.value))}/></label>
-    </div><p className="hint">{cap.data?.modelId} · {t('Pinned runtime model')}</p>
+    </div>{version===2&&<div className="setup-grid">
+      <label className="fg">{t('Pinned model')}<select className="sel" required value={modelId} onChange={e=>setModelId(e.target.value)}><option value="">{t('Select model')}</option>{modelList.data?.filter(m=>m.manifest&&['REGISTERED','READY'].includes(m.status)).map(m=><option key={m.modelArtifactId} value={m.modelArtifactId}>{m.name} · {m.revision}</option>)}</select></label>
+      <label className="fg">{t('Frozen dataset')}<select className="sel" required value={datasetId} onChange={e=>setDatasetId(e.target.value)}><option value="">{t('Select dataset')}</option>{dataList.data?.map(d=><option key={d.datasetId} value={d.datasetId}>{d.name} · {d.counts.train}/{d.counts.validation}/{d.counts.test}</option>)}</select></label>
+      <label className="fg">{t('Batch size')}<input className="inp" type="number" required min={1} max={1024} value={batchSize} onChange={e=>setBatchSize(Number(e.target.value))}/></label>
+      <label className="fg">{t('Batch seed')}<input className="inp" type="number" required min={0} value={batchSeed} onChange={e=>setBatchSeed(Number(e.target.value))}/></label>
+      <label className="fg">{t('Sigma schedule')}<select className="sel" value={schedule} onChange={e=>setSchedule(e.target.value)}><option value="constant">constant</option><option value="cosine">cosine</option></select></label>
+      <label className="fg">{t('Minimum sigma')}<input className="inp" type="number" required min={1e-7} max={sigma} step="any" value={minimum} onChange={e=>setMinimum(Number(e.target.value))}/></label>
+      <label className="fg">{t('Maximum output tokens')}<input className="inp" type="number" required min={1} max={2048} value={maxTokens} onChange={e=>setMaxTokens(Number(e.target.value))}/></label>
+      <Link className="link" to="/models">{t('Import models and datasets')}</Link>
+    </div>}<p className="hint">{cap.data?.modelId} · {t('Pinned runtime model')}</p>
     <details className="advanced-panel"><summary>{t('Advanced settings')}</summary><div className="setup-grid">
       <label className="fg">{t("Alpha")}<input className="inp" type="number" required min={.0000001} max={1} step="any" value={alpha} onChange={e=>setAlpha(Number(e.target.value))}/></label>
       <label className="fg">{t("Sigma")}<input className="inp" type="number" required min={.0000001} max={1} step="any" value={sigma} onChange={e=>setSigma(Number(e.target.value))}/></label>
-      <label className="fg">{t('Decoder')}<select className="sel" value={decoder} onChange={e=>setDecoder(e.target.value)}><option>{t("hf_generate")}</option>{task!=='arith16'&&<option>{t("hf_compact")}</option>}</select></label>
+      <label className="fg">{t('Decoder')}<select className="sel" value={decoder} onChange={e=>setDecoder(e.target.value)}><option>{t("hf_generate")}</option>{version===1&&task!=='arith16'&&<option>{t("hf_compact")}</option>}</select></label>
       <p className="hint">{t('FP32 evaluation · canonical CPU noise · exact worker restore.')}</p>
       <p className="hint">{t('Pinned revision:')} {cap.data?.modelRevision}</p>
     </div></details></section>}
@@ -109,7 +130,7 @@ export function RuntimeResults({experiment:e}:{experiment:Experiment}) {
  const bests=gs.flatMap(g=>g.rewardBest===undefined?[]:[g.rewardBest]);
  return <section className="card"><div className="ch"><h2>{t('Experiment progress')}</h2><small>{t('Accepted runtime results')}</small></div><div className="cb">
  <dl className="detail-summary"><div><dt>{t('Completed generations')}</dt><dd>{e.completedGenerations??0} <small>/ {e.maxGenerations??'—'}</small></dd></div><div><dt>{t('Current accepted candidates')}</dt><dd>{selected?.committedCandidateCount??e.committedCandidateCount??0} <small>/ {selected?.candidateCount??e.candidatesPerGeneration}</small></dd></div><div><dt>{t('Latest mean reward')}</dt><dd>{mean?.toFixed(4)??'—'}</dd></div><div><dt>{t('Best candidate reward')}</dt><dd>{bests.length?Math.max(...bests).toFixed(4):'—'}</dd></div></dl>
- {generations.isError&&<p className="note err" role="alert">{t('Generation history unavailable')}</p>}<div className="chart-wrap"><div className="section-title"><h2>{t('Reward by generation')}</h2><span className="hint">{e.task}</span></div><RewardChart generations={gs}/></div><p className="info-caption">{t('Validation and test scores are unavailable: this run evaluates candidate rewards on the selected built-in workload.')}</p>
+ {generations.isError&&<p className="note err" role="alert">{t('Generation history unavailable')}</p>}<div className="chart-wrap"><div className="section-title"><h2>{t('Reward by generation')}</h2><span className="hint">{e.task}</span></div><RewardChart generations={gs}/></div><p className="info-caption">{e.recipeVersion===2?`${t('Best validation accuracy')}: ${e.validationScore??'—'} · ${t('Test accuracy')}: ${e.studyMetrics?.testLocked?t('Locked'):e.testScore??'—'} · ${t('Export reload')}: ${e.studyMetrics?.independentReloadPassed?t('Verified'):t('Pending')}`:t('Validation and test scores are unavailable: this run evaluates candidate rewards on the selected built-in workload.')}</p>
  <section className="experiment-inspector"><div className="generation-picker"><div><h3>{t('Generation & candidate inspector')}</h3><p>{t('Inspect seeds, allocation and accepted rewards for each generation.')}</p></div><label className="fg"><span className="sr-only">{t('Select generation')}</span><select className="sel" value={selected?.generationId??''} onChange={event=>setSelection(event.target.value)} disabled={!gs.length}>{!gs.length&&<option value="">{t('No generations yet')}</option>}{gs.map((g,i)=><option key={g.generationId} value={g.generationId}>{t('Generation')} {i} · {t(g.status)}</option>)}</select></label></div>
  {selected&&<p className="info-caption"><Link to={`/experiments/${e.experimentId}/generations/${selected.generationId}`}>{t('Open generation')} →</Link> · <span className="mono">{selected.generationId}</span></p>}
  {candidates.isError?<p className="note err" role="alert">{t('Candidate history unavailable')}</p>:candidates.isPending&&selected?<p role="status">{t('Loading candidates…')}</p>:candidates.data?.length?<div className="scroll"><table className="inspector-table"><thead><tr>{['Candidate','Seed','Status','Assigned worker','Reward'].map(label=><th key={label} scope="col">{t(label)}</th>)}</tr></thead><tbody>{candidates.data.map(c=><tr key={c.candidateId}><td><Link className="mono" to={`/experiments/${e.experimentId}/generations/${c.generationId}/candidates/${c.candidateId}`}>{shortId(c.candidateId)}</Link></td><td className="seed">{c.seed}</td><td><Badge info={CANDIDATE_STATUS[c.status]}/></td><td>{c.workerId?<Link className="mono" to={`/workers/${c.workerId}`}>{c.workerId}</Link>:t('Not assigned')}</td><td className="seed">{c.reward?.toFixed(4)??'—'}</td></tr>)}</tbody></table></div>:<p className="note">{t('Candidates appear after the coordinator opens a generation.')}</p>}

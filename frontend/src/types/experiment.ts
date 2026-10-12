@@ -17,6 +17,14 @@ export type SchedulerPolicy = "capacity-weighted" | "round-robin" | "greedy";
 export type SyncMode = "synchronous" | "asynchronous";
 
 export interface Experiment {
+  recipeVersion?: number;
+  batchSize?:number;
+  batchSeed?:number;
+  sigmaSchedule?:string;
+  sigmaMinimum?:number;
+  maxNewTokens?:number;
+  validationInterval?:number;
+  studyMetrics?:{testLocked:boolean;independentReloadPassed?:boolean};
   monitoringPartial?: boolean;
   experimentId: string;
   name: string;
@@ -66,6 +74,13 @@ export interface Experiment {
 }
 
 export interface CreateExperimentRequest {
+  recipeVersion?: number;
+  batchSize?:number;
+  batchSeed?:number;
+  sigmaSchedule?:string;
+  sigmaMinimum?:number;
+  maxNewTokens?:number;
+  validationInterval?:number;
   name: string;
   modelName: string;
   schedulerPolicy: SchedulerPolicy;

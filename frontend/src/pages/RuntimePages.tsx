@@ -1,3 +1,4 @@
+import {StudyAssets} from '../components/experiments/StudyAssets';
 import {useState} from 'react';
 import {useProduct,Status,ResourceTelemetry} from '@heteroes/product-ui';
 import { Link } from "react-router";
@@ -41,7 +42,7 @@ export function RuntimeWorkersPage() {
 
 export function RuntimeModelsPage() {
  const {t}=useProduct();const models=useModels();
- return <><PageHeader title={t('Models')} description={t('Pinned model references used by the current runtime.')}/><QueryState isPending={models.isPending} isError={models.isError} hasData={Boolean(models.data)} title={t('Model capabilities unavailable')}><div className="resource-grid">{models.data?.map(model=><section className="card model-card" key={model.modelArtifactId}><Status value="Pinned"/><h2>{model.name}</h2><p className="hint">{model.reference??model.name}</p><dl className="model-identity"><dt>{t('Pinned revision')}</dt><dd className="mono">{model.revision}</dd></dl><p className="info-caption">{t('Workers use this fixed model revision for reproducible evaluations.')}</p><div className="acts"><Link className="btn pri" to="/experiments/new">{t('Create experiment')} →</Link></div></section>)}</div><div className="note">{t('The current runtime supports the pinned model. Model import will appear here when supported by the backend.')}</div></QueryState></>;
+ return <><PageHeader title={t('Models')} description={t('Pinned model references used by the current runtime.')}/><QueryState isPending={models.isPending} isError={models.isError} hasData={Boolean(models.data)} title={t('Model capabilities unavailable')}><div className="resource-grid">{models.data?.map(model=><section className="card model-card" key={model.modelArtifactId}><Status value="Pinned"/><h2>{model.name}</h2><p className="hint">{model.reference??model.name}</p><dl className="model-identity"><dt>{t('Pinned revision')}</dt><dd className="mono">{model.revision}</dd></dl><p className="info-caption">{t('Workers use this fixed model revision for reproducible evaluations.')}</p><div className="acts"><Link className="btn pri" to="/experiments/new">{t('Create experiment')} →</Link></div></section>)}</div><StudyAssets/></QueryState></>;
 }
 
 export function RuntimeProfilePage() {
