@@ -35,6 +35,12 @@ def caddyfile(config):
     ports=[config.get('webEntryPort',8080),config.get('computeEntryPort',8081)]
     if any(type(p) is not int or not 1024<=p<=65535 for p in ports) or len(set(ports))!=2:
         raise ValueError('Select distinct unprivileged entry ports')
+    public_downloads=config.get('publicDownloads',False)
+    if type(public_downloads) is not bool:
+        raise ValueError('publicDownloads must be true or false')
+    # Installers are the only bulk path an operator may open to the public entry;
+    # model weights, storage capabilities and backups always need a private route.
+    bulk=('/downloads/* ' if not public_downloads else '')+'/api/v1/datasets/import /api/v1/local-storage/* /api/v1/cloud-downloads/* /api/v1/artifacts/*/download-ticket /api/v1/platform/backups/*/download /api/v1/platform/backups/*/download-ticket'
     # Caddy's admin endpoint is disabled. Separate loopback listeners prevent
     # a forged Host header from selecting the private bulk entrypoint.
     return '''{
@@ -52,7 +58,7 @@ http://:%d {
     handle @manifest {
         reverse_proxy %s
     }
-    @bulk path /downloads/* /api/v1/datasets/import /api/v1/local-storage/* /api/v1/cloud-downloads/* /api/v1/artifacts/*/download-ticket /api/v1/platform/backups/*/download /api/v1/platform/backups/*/download-ticket
+    @bulk path %s
     handle @bulk {
         respond "Private LAN/Tailscale transfer required" 403
     }
@@ -73,4 +79,4 @@ http://:%d {
         respond "Private LAN/Tailscale transfer required" 403
     }
 }
-''' % (ports[0],api,api,ports[1],compute)
+''' % (ports[0],api,bulk,api,ports[1],compute)

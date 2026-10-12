@@ -516,7 +516,8 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
                 private_root=os.environ.get('HETEROES_PRIVATE_CONFIG')
                 if private_root:
                     config=json.loads((Path(private_root)/'config.json').read_text())
-                    if config.get('publicWebUrl'):
+                    # publicDownloads: the operator serves installers on the public origin too.
+                    if config.get('publicWebUrl') and not config.get('publicDownloads'):
                         bulk=config.get('bulkApiUrl',config.get('apiUrl'))
                         manifest['privateTransferRequired']=True
                         for group in ('installers','serverInstallers'):

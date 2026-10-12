@@ -14,5 +14,6 @@
   "storageMode": "local",
   "storageDirectory": "/var/lib/heteroes/objects",
   "storageVolumeUUID": null,
-  "storageQuotaBytes": 200000000000
+  "storageQuotaBytes": 200000000000,
+  "publicDownloads": false
 }

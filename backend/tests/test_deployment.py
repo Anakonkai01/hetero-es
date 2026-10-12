@@ -20,6 +20,18 @@ def test_entrypoints_do_not_select_private_bulk_by_host_header():
         caddyfile({'apiUrl':'http://100.64.0.1:8002','privateComputeUrl':'http://100.64.0.1:8765','webEntryPort':8081})
 
 
+def test_public_downloads_are_opt_in_and_open_only_the_installers():
+    base={'apiUrl':'http://100.64.0.1:8002','privateComputeUrl':'http://100.64.0.1:8765'}
+    def bulk_line(text):return text.split('@bulk path')[1].split('\n')[0]
+    assert '/downloads/*' in bulk_line(caddyfile(base))
+    opened=bulk_line(caddyfile({**base,'publicDownloads':True}))
+    assert '/downloads/*' not in opened
+    for kept in ('/api/v1/local-storage/*','/api/v1/cloud-downloads/*','/api/v1/platform/backups/*/download',
+                 '/api/v1/datasets/import','/api/v1/artifacts/*/download-ticket'):
+        assert kept in opened
+    with pytest.raises(ValueError):caddyfile({**base,'publicDownloads':'yes'})
+
+
 def test_private_config_and_idle_guard(tmp_path):
     root=tmp_path/'private'
     initialize(root,{'username':'admin','password':'test-password-long','host':'127.0.0.1','port':8002,'storageDirectory':str(tmp_path/'objects')})
@@ -35,7 +47,8 @@ def test_private_config_and_idle_guard(tmp_path):
         idle(config)
 
 
-def test_real_proxy_accepts_tunnel_host_and_denies_bulk_even_with_forged_host(tmp_path):
+@pytest.mark.parametrize('public_downloads',[False,True])
+def test_real_proxy_accepts_tunnel_host_and_denies_bulk_even_with_forged_host(tmp_path,public_downloads):
     from pathlib import Path
     from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
     import threading
@@ -51,7 +64,7 @@ def test_real_proxy_accepts_tunnel_host_and_denies_bulk_even_with_forged_host(tm
     def port():
         with socket.socket() as sock:sock.bind(('127.0.0.1',0));return sock.getsockname()[1]
     web,compute=port(),port()
-    config={'apiUrl':f'http://127.0.0.1:{upstream.server_port}','privateComputeUrl':f'http://127.0.0.1:{upstream.server_port}','webEntryPort':web,'computeEntryPort':compute}
+    config={'apiUrl':f'http://127.0.0.1:{upstream.server_port}','privateComputeUrl':f'http://127.0.0.1:{upstream.server_port}','webEntryPort':web,'computeEntryPort':compute,'publicDownloads':public_downloads}
     file=tmp_path/'Caddyfile';file.write_text(caddyfile(config))
     process=subprocess.Popen([str(binary),'run','--config',str(file)],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
     opener=urllib.request.build_opener(urllib.request.ProxyHandler({}))
@@ -65,9 +78,14 @@ def test_real_proxy_accepts_tunnel_host_and_denies_bulk_even_with_forged_host(tm
             except OSError:
                 if time.monotonic()>deadline:raise
                 time.sleep(.1)
-        for p,path in [(web,'/api/v1/local-storage/object'),(web,'/downloads/worker.exe'),(compute,'/v1/models/'+'a'*64)]:
+        denied=[(web,'/api/v1/local-storage/object'),(compute,'/v1/models/'+'a'*64)]
+        if not public_downloads:denied.append((web,'/downloads/worker.exe'))
+        for p,path in denied:
             with pytest.raises(urllib.error.HTTPError) as error:
                 opener.open(urllib.request.Request(f'http://127.0.0.1:{p}'+path,headers={'Host':'127.0.0.1'}),timeout=2)
             assert error.value.code==403
+        if public_downloads:
+            # The installer path now reaches the Web/API origin; nothing else was opened.
+            assert opener.open(urllib.request.Request(f'http://127.0.0.1:{web}/downloads/worker.exe',headers={'Host':'x.example.org'}),timeout=2).status==200
     finally:
         process.terminate();process.wait(timeout=10);upstream.shutdown();upstream.server_close()
