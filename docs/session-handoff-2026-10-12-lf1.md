@@ -1,8 +1,10 @@
 # Session handoff — 2026-10-12 evening: local-first lab goes live (branch `feat/local-first-lf1`)
 
-> Continuation: see `session-handoff-2026-10-12-codex.md` for subsequent local
-> changes and checks. The live-deployment and owner-rule details below remain the
-> starting reference; its backlog and test counts describe the earlier checkpoint.
+> Latest checkpoint: read `session-handoff-2026-10-12-close.md` first. Public r5
+> is now deployed, the owner reported Windows onboarding/lifecycle blockers, and
+> requested stop for rest. `session-handoff-2026-10-12-codex.md` records the earlier
+> implementation. Owner rules below still apply; status/backlog/counts here are
+> historical and must not override the close checkpoint.
 
 For any engineer or AI agent (Claude, Codex, or a person). Documentation is English; talk to the owner in
 **Vietnamese**, from the basics, in short answers (they are a student who did not write these documents and is

@@ -1,6 +1,6 @@
 # AGENTS.md — HeteroES product repository (Web/API, apps, lab operations)
 
-Any AI agent or engineer starting here: read **`docs/session-handoff-2026-10-12-lf1.md`** first, then **`docs/session-handoff-2026-10-12-codex.md`** for the later local r5 continuation (state of the live lab,
+Any AI agent or engineer starting here: read **`docs/session-handoff-2026-10-12-close.md`** first (public r5, reported Windows blockers, owner-requested stop), then **`docs/session-handoff-2026-10-12-lf1.md`** and **`docs/session-handoff-2026-10-12-codex.md`** for owner rules and the earlier r5 continuation (state of the live lab,
 owner rules, decisions, backlog, first ten minutes). Then the ADRs in the runtime repository
 (`../hetero-es-m3-runtime/docs/adr/ADR-004..007`) and `docs/evidence/2026-10-12-lf1/README.md`.
 

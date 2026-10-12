@@ -14,6 +14,10 @@ recorded for follow-up; no UI or authentication policy changes have been made.
 | Post-registration navigation | Registration sends the user directly into a workspace area, with no obvious homepage or onboarding route. | Give the new user a clear path to the homepage, Worker installation and account approval status. |
 | Overall presentation | The signed-in experience feels sparse and unprofessional. | Review the complete onboarding sequence and navigation together with the password and approval interfaces, rather than treating these as isolated cosmetic changes. |
 | Worker onboarding clarity | After downloading and opening the Windows Worker, the user found the screen confusing and could not understand why sign-in appeared alongside other sections. | Make the current step visually dominant, explain that Worker uses the website's lab account, and progressively disclose network, role and connection diagnostics at the appropriate step. |
+| Worker exit / tray | The user reports that tray actions only reopen the app and that the in-app exit action does not close it. | Reproduce native Windows tray and in-app shutdown from an unpaired profile; expose errors rather than silently reopening the window. Preserve confirmed drain for owned compute processes. |
+| Worker sign-out | The user reports being unable to sign out. | Reproduce sign-out, inspect command/busy state and show an actionable result. Successful app sign-in has not been independently established. |
+| Worker network / role controls | The user reports being unable to select network or role. | Diagnose locked controls and onboarding state. Explain that Windows supports the Worker role; coordinator selection requires qualified Linux hardware. |
+| Worker lab connection | The user later clarified that they could not get through entering the lab address, before runtime installation or pairing. | Start the next reproduction at a clean Windows launch and lab connection; do not assume a download, GPU job or paired agent caused the problem. |
 
 These are user-reported observations, not findings from an independent browser
 inspection of the administrator account. Source inspection confirms the
@@ -30,3 +34,10 @@ The user subsequently reported downloading and opening the Windows app. The
 current walkthrough is at connection/sign-in; runtime installation, compatibility
 and pairing have not been reported complete. Opening the app is user-reported,
 not an independently observed full Windows acceptance result.
+
+The owner then explicitly stopped testing and requested session close and rest.
+Do not continue debugging or ask for further test evidence until they resume.
+No Worker source changes or replacement installer were made in response to these
+reports. The investigation is recorded in
+`evidence/2026-10-12-worker-lifecycle/README.md` and the latest checkpoint in
+`session-handoff-2026-10-12-close.md`.

@@ -1,5 +1,9 @@
 # Session continuation — 2026-10-12, Codex
 
+> Latest checkpoint: read `session-handoff-2026-10-12-close.md` first. The owner
+> reported Windows onboarding, connection and exit problems and requested stop.
+> No repair or replacement installer was completed; public r5 remains running.
+
 > Later deployment: the owner requested a website download flow for other
 > computers. On 2026-10-12 the idle public lab was backed up and restarted through
 > `scripts/local-lab.py`, and the four reviewed r5 installers were published.
