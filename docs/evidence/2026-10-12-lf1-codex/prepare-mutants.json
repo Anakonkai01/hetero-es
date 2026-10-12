@@ -1,0 +1,14 @@
+[
+  {
+    "name": "publish while asked only to prepare",
+    "file": "scripts/publish-local-installers.py",
+    "old": "    if not args.prepare_only:\n        for key,kind",
+    "new": "    if True:\n        for key,kind"
+  },
+  {
+    "name": "publish changed reviewed installer",
+    "file": "scripts/publish-local-installers.py",
+    "old": " or sha(file)!=entry.get('sha256')",
+    "new": ""
+  }
+]
