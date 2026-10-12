@@ -4,6 +4,8 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const net = require('node:net');
 const { Setup } = require('./setup.cjs');
+// Say who we are: a public edge such as Cloudflare blocks anonymous client signatures.
+const AGENT = { 'User-Agent': 'HeteroES-Worker/0.1' };
 const { Bridge } = require('./bridge.cjs');
 function serverAddress(value) { const url = new URL(value); if (url.username || url.password || url.search || url.hash || !['', '/'].includes(url.pathname))
     throw Error('INVALID_LAB_ADDRESS'); const host = url.hostname.replace(/^\[|\]$/g, ''); const privateAddress = host === 'localhost' || net.isIP(host) && (host === '::1' || /^10\.|^192\.168\.|^127\.|^172\.(1[6-9]|2\d|3[01])\.|^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./.test(host)); if (url.protocol !== 'https:' && !(url.protocol === 'http:' && privateAddress))
@@ -12,7 +14,7 @@ class Service {
     constructor(root, resources, vault, options = {}) { this.root = root; this.vault = vault; this.fetch = options.fetch ?? fetch; this.setup = options.setup ?? new Setup(root, resources); this.makeBridge = options.makeBridge ?? ((...args) => new Bridge(...args)); this.settingsPath = path.join(root, 'settings.json'); this.settings = fs.existsSync(this.settingsPath) ? JSON.parse(fs.readFileSync(this.settingsPath, 'utf8')) : {}; this.userToken = ''; this.session = null; this.bridge = null; this.selfTest = this.settings.selfTest ?? null; this.device = this.settings.device ?? null; this.lastState = null; this.connection = 'OFFLINE'; this.autoStart = true; }
     async save() { await fsp.mkdir(this.root, { recursive: true, mode: 0o700 }); await fsp.writeFile(this.settingsPath, JSON.stringify(this.settings, null, 2), { mode: 0o600 }); }
     async api(route, body, token = this.userToken, method) { const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), 15000); try {
-        const response = await this.fetch(this.settings.serverUrl + route, { method: method ?? (body === undefined ? 'GET' : 'POST'), headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) }, body: body === undefined ? undefined : JSON.stringify(body), signal: controller.signal });
+        const response = await this.fetch(this.settings.serverUrl + route, { method: method ?? (body === undefined ? 'GET' : 'POST'), headers: { ...AGENT, 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) }, body: body === undefined ? undefined : JSON.stringify(body), signal: controller.signal });
         if (!response.ok)
             throw Error('LAB_HTTP_' + response.status);
         this.connection = 'ONLINE';
@@ -30,7 +32,7 @@ class Service {
         const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),15000);
         let health;
         try {
-            const response=await this.fetch(target+'/api/v1/health',{signal:controller.signal});
+            const response=await this.fetch(target+'/api/v1/health',{headers:AGENT,signal:controller.signal});
             if(!response.ok)throw Error('LAB_HTTP_'+response.status);
             health=await response.json();
         } finally {clearTimeout(timer);}

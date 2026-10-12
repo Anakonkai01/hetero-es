@@ -24,3 +24,13 @@ test('URL rotation preserves enrolled identity only for the same server while dr
  assert.equal(service.device.deviceId,'dev');assert.equal(service.settings.serverUrl,'https://new.trycloudflare.com');
  assert.equal(service.userToken,'');assert.equal(state.enabled,false);
 });
+
+test('requests identify themselves as HeteroES so a public edge does not block them', async (t) => {
+ const {service}=await fixture(t);const seen=[];
+ service.fetch=async(url,options)=>{seen.push(options);return new Response(JSON.stringify({agentMode:true,serverInstanceId:'x'}));};
+ service.settings.serverUrl='https://lab.example.org';
+ await service.api('/api/v1/health');
+ await service.connect('https://lab.example.org');
+ assert.ok(seen.length>=2);
+ for(const options of seen)assert.match(options.headers?.['User-Agent']??'',/^HeteroES-Worker\/\d/);
+});
