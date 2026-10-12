@@ -1,0 +1,18 @@
+{
+  "deploymentMode": "agent",
+  "serverInstanceId": "retain-the-id-from-the-private-export",
+  "productStateDirectory": "/var/lib/heteroes",
+  "apiUrl": "http://100.64.0.10:8002",
+  "bulkApiUrl": "http://100.64.0.10:8002",
+  "serverHost": "100.64.0.10",
+  "serverPort": 8002,
+  "publicWebUrl": null,
+  "publicComputeUrl": null,
+  "privateComputeUrl": "http://100.64.0.20:8765",
+  "webEntryPort": 8080,
+  "computeEntryPort": 8081,
+  "storageMode": "local",
+  "storageDirectory": "/var/lib/heteroes/objects",
+  "storageVolumeUUID": null,
+  "storageQuotaBytes": 200000000000
+}

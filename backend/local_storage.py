@@ -27,7 +27,7 @@ class LocalBackend:
     cloud_free_tier = False
     mode = 'local'
 
-    def __init__(self, root, key_file, base_url, expected_uuid=None):
+    def __init__(self, root, key_file, base_url, expected_uuid=None, metadata_root=None):
         from .devices import Enrollment
         # Same private LAN/Tailscale validation as the compute endpoint.
         self.base_url = Enrollment.private_compute(base_url)
@@ -40,6 +40,11 @@ class LocalBackend:
         if self.root == Path('/mnt/sekai') or Path('/mnt/sekai') in self.root.parents:
             raise ValueError('Sekai is not authorized for HeteroES storage')
         self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
+        self.metadata_root=Path(metadata_root).resolve() if metadata_root is not None else None
+        if self.metadata_root is not None:
+            self.metadata_root.mkdir(parents=True,exist_ok=True,mode=0o700)
+            if os.name!='nt' and self.metadata_root.stat().st_mode & 0o077:
+                raise ValueError('Metadata storage directory must be private')
         key_file = Path(key_file)
         if key_file.is_symlink():
             raise ValueError('Storage signing key cannot be a symlink')
@@ -71,19 +76,21 @@ class LocalBackend:
         self.check_volume()
         if not isinstance(key, str) or not KEY.fullmatch(key):
             raise ValueError('Unsafe storage key')
-        path = self.root / key
-        if path.resolve() != path or self.root not in path.parents:
+        root=self.metadata_root if self.metadata_root is not None and key.startswith('metadata/') else self.root
+        path = root / key
+        if path.resolve() != path or root not in path.parents:
             raise ValueError('Storage symlinks are forbidden')
         return path
 
     def inventory(self):
         self.check_volume()
         total = 0
-        for path in self.root.rglob('*'):
-            if path.is_symlink():
-                raise ValueError('Storage contains a symlink')
-            if path.is_file():
-                total += path.stat().st_size
+        for root in [self.root]+([self.metadata_root] if self.metadata_root is not None and not self.metadata_root.is_relative_to(self.root) else []):
+            for path in root.rglob('*'):
+                if path.is_symlink():
+                    raise ValueError('Storage contains a symlink')
+                if path.is_file():
+                    total += path.stat().st_size
         return total
 
     def get(self, key):

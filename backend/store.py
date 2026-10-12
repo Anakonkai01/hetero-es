@@ -281,6 +281,9 @@ class Store:
                   **{key: active[key] for key in ("candidatesPerGeneration", "maxGenerations", "alpha", "sigma", "decodeEngine", "schedulerPolicy", "syncMode")}}
         if getattr(self.runtime, 'agent_mode', False):
             config.update(coordinatorDeviceId=active['coordinatorDeviceId'], backupPolicy=active.get('backupPolicy', {'interval':1,'retain':3}))
+            if active.get('recipeVersion')==2:
+                config.update({key:active[key] for key in ('recipeVersion','modelManifest','modelSource','datasetObjectSha256','datasetIdentity',
+                    'batchSize','batchSeed','sigmaSchedule','sigmaMinimum','maxNewTokens','validationInterval')})
         try:
             self.runtime.submit(config)
         except RuntimeRejected as error:
@@ -319,6 +322,11 @@ class Store:
             complete = [item for item in generations if item["status"] == "COMPLETED"]
             body["completedGenerations"] = snapshot.get('completedGenerationCount',len(complete))
             body['monitoringPartial']=bool(snapshot.get('monitoringPartial'))
+            if snapshot.get('studyMetrics'):
+                body['studyMetrics']=snapshot['studyMetrics']
+                best=snapshot['studyMetrics'].get('best') or {}
+                if 'validationAccuracy' in best:body['validationScore']=best['validationAccuracy']
+                if 'testAccuracy' in snapshot['studyMetrics']:body['testScore']=snapshot['studyMetrics']['testAccuracy']
             latest=snapshot.get('latestGeneration') or (generations[-1] if generations else None)
             if latest:
                 body["currentGenerationId"] = latest["generationId"]

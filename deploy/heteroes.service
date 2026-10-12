@@ -8,6 +8,8 @@ User=heteroes
 Group=heteroes
 WorkingDirectory=/opt/heteroes
 Environment=HETEROES_PRIVATE_CONFIG=/etc/heteroes
+Environment=HETEROES_WEB_DIRECTORY=/opt/heteroes/frontend/dist
+Environment=CUDA_VISIBLE_DEVICES=
 ExecStart=/opt/heteroes/.venv/bin/uvicorn backend.app:app_from_environment --factory --host 127.0.0.1 --port 8000 --workers 1 --proxy-headers --forwarded-allow-ips 127.0.0.1
 Restart=on-failure
 RestartSec=5

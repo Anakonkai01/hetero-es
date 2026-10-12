@@ -46,10 +46,19 @@ class Configuration(BaseModel):
     datasetIds: list[str] = Field(default_factory=list)
     coordinatorDeviceId: str | None = None
     backupPolicy: dict | None = None
+    recipeVersion: int = Field(default=1,ge=1,le=2,strict=True)
+    batchSize: int = Field(default=32,ge=1,le=1024,strict=True)
+    batchSeed: int = Field(default=11,ge=0,lt=2**53,strict=True)
+    sigmaSchedule: str = 'constant'
+    sigmaMinimum: float = Field(default=.00025,gt=0,le=1)
+    maxNewTokens: int = Field(default=512,ge=1,le=2048,strict=True)
+    validationInterval: int = Field(default=1,ge=1,le=1000,strict=True)
 
 
 def create_app(path, passwords, runtime, dispatch=True, web_directory=None, downloads_directory=None):
     store = Store(path, passwords, runtime)
+    from .study_registry import Registry
+    registry=Registry(store)
     stop = threading.Event()
     @asynccontextmanager
     async def lifespan(_):
@@ -130,12 +139,30 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
             if body['coordinatorDeviceId'] is not None or body['backupPolicy'] is not None:
                 raise HTTPException(422, 'Agent settings require agent deployment mode')
             body.pop('coordinatorDeviceId'); body.pop('backupPolicy')
-        if body["modelName"] != cap["modelId"] or body["modelArtifactId"] != "qwen-pinned":
-            raise HTTPException(422, "Only the pinned Qwen model is supported")
+        if body['recipeVersion']==2:
+            if not getattr(runtime,'agent_mode',False):raise HTTPException(422,'Recipe v2 requires device agents')
+            model=registry.get(body['modelArtifactId'],current['workspaceId'],'model')
+            if model['status'] not in ('READY','REGISTERED') or model['reference']!=body['modelName']:raise HTTPException(422,'Model is unavailable or its name differs')
+            if len(body['datasetIds'])!=1:raise HTTPException(422,'Select one frozen dataset')
+            data=registry.get(body['datasetIds'][0],current['workspaceId'],'dataset')
+            if body['batchSize']>data['counts']['train'] or body['sigmaSchedule'] not in ('constant','cosine') or body['sigmaMinimum']>body['sigma']:
+                raise HTTPException(422,'Invalid batch size or sigma schedule')
+            if body['task']!='text_math_v2' or body['decodeEngine']!='hf_generate':raise HTTPException(422,'Recipe v2 uses exact math and the HF decoder')
+            selected=[d for d in runtime.devices() if d['deviceId']==body['coordinatorDeviceId'] or d['workerId'] in body['workerIds']]
+            for d in selected:
+                profile=d['selfTest']
+                if profile.get('platform')=='windows' or 2 not in profile.get('recipeVersions',[]):raise HTTPException(422,'Selected device requires Recipe v2 qualification; Windows remains v1 worker-only')
+                if model['manifestHash'] not in profile.get('qualifiedModelHashes',[]):raise HTTPException(422,'Qualify every selected device for this pinned model')
+            body.update(modelManifest=model['manifest'],modelSource=model['source'],datasetObjectSha256=data['objectSha256'],datasetIdentity=data['identity'])
+        else:
+            if body["modelName"] != cap["modelId"] or body["modelArtifactId"] != "qwen-pinned":
+                raise HTTPException(422, "Only the pinned Qwen model is supported for Recipe v1")
+            if body["task"] not in cap["workloads"] or body["decodeEngine"] not in ("hf_generate", "hf_compact") or body["datasetIds"]:
+                raise HTTPException(422, "Select a built-in workload and decoder for Recipe v1")
+            for key in ('recipeVersion','batchSize','batchSeed','sigmaSchedule','sigmaMinimum','maxNewTokens','validationInterval'):
+                body.pop(key)
         if body["schedulerPolicy"] not in cap["schedulerPolicies"] or body["syncMode"] not in cap["syncModes"]:
             raise HTTPException(422, "Unsupported scheduling policy or synchronization mode")
-        if body["task"] not in cap["workloads"] or body["decodeEngine"] not in ("hf_generate", "hf_compact") or body["datasetIds"]:
-            raise HTTPException(422, "Select a built-in workload and decoder; dataset uploads are unavailable")
         if len(set(body["workerIds"])) != len(body["workerIds"]) or not set(body["workerIds"]) <= set(cap["workerIds"]):
             raise HTTPException(422, "Select configured workers without duplicates")
         if set(body["workerIds"]) & set(cap.get("quarantinedWorkerIds", [])):
@@ -147,14 +174,26 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
 
     @app.get("/api/v1/health")
     def health():
+        ui_url=os.environ.get('HETEROES_UI_URL')
+        config={}
+        private_root=os.environ.get('HETEROES_PRIVATE_CONFIG')
+        if private_root:
+            # Quick URLs can rotate while this CPU service retains its identity.
+            try:
+                config=json.loads((Path(private_root)/'config.json').read_text())
+                ui_url=config.get('publicWebUrl') or ui_url
+            except (OSError,ValueError):
+                pass
         backend=getattr(runtime,'storage_backend',None)
         return {"ok": True, "dataSource": "real", "runtimeIssue": store.last_error,
                 "agentMode":bool(getattr(runtime,"agent_mode",False)),
+                'recipeVersions':[1,2] if getattr(runtime,'agent_mode',False) else [1],
                 "cloudStorageConfigured":backend is not None and getattr(backend,'mode','cloud')=='cloud',
                 "recoveryStorageConfigured":backend is not None,
                 "recoveryStorageMode":getattr(backend,'mode','cloud') if backend else None,
                 "serverInstanceId":getattr(runtime,'server_instance_id',None),
-                **({"uiUrl":os.environ["HETEROES_UI_URL"]} if os.environ.get("HETEROES_UI_URL") else {})}
+                **({"uiUrl":ui_url} if ui_url else {}),
+                **({'privateLabUrl':config.get('bulkApiUrl',config['apiUrl'])} if config.get('apiUrl') else {})}
 
     @app.post("/api/v1/auth/login")
     def sign_in(body: Login):
@@ -208,7 +247,7 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
     def models(current=Depends(scoped)):
         cap = capabilities()
         return [{"modelArtifactId": "qwen-pinned", "workspaceId": current['workspaceId'], "ownerUserId": "runtime", "name": cap["modelId"],
-                 "reference": cap["modelId"], "revision": cap["modelRevision"], "source": "REFERENCE", "status": "REGISTERED"}]
+                 "reference": cap["modelId"], "revision": cap["modelRevision"], "source": "REFERENCE", "status": "REGISTERED"}]+registry.list(current['workspaceId'],'model')
 
     @app.get("/api/v1/workers")
     @app.get("/api/v1/worker-registry")
@@ -387,6 +426,9 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
                     if current['workspaceRole']=='ADMIN' or row["actor"] == current["userId"]]
 
     @app.get("/api/v1/datasets")
+    def datasets(current=Depends(scoped)):
+        return registry.list(current['workspaceId'],'dataset')
+
     @app.get("/api/v1/my-resource-submissions")
     def empty(current=Depends(scoped)):
         return []
@@ -447,6 +489,8 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
     if getattr(runtime, 'agent_mode', False):
         from .devices import install_device_routes
         device_auth=install_device_routes(app,store,user,runtime)
+        from .study_registry import install_routes as study_routes
+        study_routes(app,registry,runtime,scoped,device_auth)
         if runtime.storage_backend is not None:
             from .cloud_storage import CloudStorage, install_storage_routes
             storage=CloudStorage(store,runtime.storage_backend,
@@ -466,6 +510,19 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
             raise ValueError('Built web application is missing')
         app.mount('/assets', StaticFiles(directory=web / 'assets'), name='web-assets')
         if downloads_directory is not None:
+            @app.get('/downloads/manifest.json',include_in_schema=False)
+            def installer_manifest():
+                manifest=json.loads((Path(downloads_directory)/'manifest.json').read_text())
+                private_root=os.environ.get('HETEROES_PRIVATE_CONFIG')
+                if private_root:
+                    config=json.loads((Path(private_root)/'config.json').read_text())
+                    if config.get('publicWebUrl'):
+                        bulk=config.get('bulkApiUrl',config.get('apiUrl'))
+                        manifest['privateTransferRequired']=True
+                        for group in ('installers','serverInstallers'):
+                            for item in manifest.get(group,[]):
+                                item['url']=bulk+'/downloads/'+Path(item['name']).name
+                return manifest
             app.mount('/downloads',StaticFiles(directory=downloads_directory),name='worker-downloads')
         else:
             @app.get('/downloads/manifest.json',include_in_schema=False)
@@ -492,7 +549,7 @@ def app_from_environment():
         storage_backend=None
         if config.get('storageMode') == 'local':
             from .local_storage import LocalBackend
-            storage_backend=LocalBackend(config['storageDirectory'],root/'storage-signing.key',config['apiUrl'],config.get('storageVolumeUUID'))
+            storage_backend=LocalBackend(config['storageDirectory'],root/'storage-signing.key',config.get('bulkApiUrl',config['apiUrl']),config.get('storageVolumeUUID'),config.get('metadataStorageDirectory'))
             storage_backend.quota_bytes=config.get('storageQuotaBytes',200_000_000_000)
         elif config.get('storageFile'):
             from .cloud_storage import S3Backend

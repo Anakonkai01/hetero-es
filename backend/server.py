@@ -40,7 +40,7 @@ def initialize(root, values):
     # A failed or interrupted previous installation is never silently overwritten.
     root.mkdir(mode=0o700, parents=False, exist_ok=False)
     try:
-        backend = LocalBackend(storage, root/'storage-signing.key', url, data.storageVolumeUUID)
+        backend = LocalBackend(storage, root/'storage-signing.key', url, data.storageVolumeUUID,root/'metadata-objects')
         store = Store(root/'state/product.sqlite', {data.username:data.password}, AgentRuntime(backend))
         with store.db() as db:
             db.execute('INSERT OR REPLACE INTO settings VALUES (?,?)', ('dispatchHold','true'))
@@ -49,6 +49,7 @@ def initialize(root, values):
                   'productStateDirectory':str(root/'state'), 'apiUrl':url,
                   'serverHost':str(address), 'serverPort':data.port,
                   'storageDirectory':str(storage), 'storageVolumeUUID':data.storageVolumeUUID,
+                  'metadataStorageDirectory':str(root/'metadata-objects'),
                   'storageQuotaBytes':200_000_000_000}
         # The DB contains only an Argon2 password hash. There is no reusable
         # administrator password in a credentials file, process argument or log.
@@ -67,6 +68,7 @@ def main():
     parser.add_argument('--initialize', action='store_true')
     parser.add_argument('--web', type=Path)
     parser.add_argument('--downloads',type=Path)
+    parser.add_argument('--headless',action='store_true',help='Run without a desktop parent pipe')
     args = parser.parse_args()
     os.environ['CUDA_VISIBLE_DEVICES'] = ''
     if args.initialize:
@@ -83,7 +85,7 @@ def main():
     os.environ['HETEROES_WEB_DIRECTORY'] = str(args.web)
     if args.downloads:
         os.environ['HETEROES_DOWNLOADS_DIRECTORY']=str(args.downloads)
-    os.environ['HETEROES_UI_URL'] = config['apiUrl']
+    os.environ['HETEROES_UI_URL'] = config.get('publicWebUrl') or config['apiUrl']
 
     def parent_pipe():
         # The desktop owns this process. Closing its pipe on exit/crash stops
@@ -92,9 +94,12 @@ def main():
         os.kill(os.getpid(), signal.SIGTERM)
 
     import uvicorn
-    threading.Thread(target=parent_pipe,daemon=True).start()
+    if not args.headless:
+        threading.Thread(target=parent_pipe,daemon=True).start()
+    from urllib.parse import urlsplit
+    address=urlsplit(config['apiUrl'])
     uvicorn.run('backend.app:app_from_environment',factory=True,
-                host=config['serverHost'],port=config['serverPort'],access_log=False)
+                host=config.get('serverHost',address.hostname),port=config.get('serverPort',address.port or 80),access_log=False)
     return 0
 
 

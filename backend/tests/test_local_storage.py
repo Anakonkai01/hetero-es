@@ -14,6 +14,15 @@ from backend.store import Store
 from test_cloud_storage import manifest
 
 
+def test_private_metadata_can_stay_on_system_disk_while_bulk_uses_selected_storage(tmp_path):
+    backend=LocalBackend(tmp_path/'bulk',tmp_path/'private/key','http://127.0.0.1:8002',metadata_root=tmp_path/'private-metadata')
+    key='metadata/'+'a'*32+'/product.sqlite'
+    backend.put(key,b'private snapshot')
+    assert (tmp_path/'private-metadata'/key).read_bytes()==b'private snapshot'
+    assert not (tmp_path/'bulk'/key).exists()
+    assert backend.inventory()==len(b'private snapshot')
+
+
 @pytest.fixture
 def local(tmp_path):
     backend = LocalBackend(tmp_path/'objects', tmp_path/'private/storage.key', 'http://127.0.0.1:8002')

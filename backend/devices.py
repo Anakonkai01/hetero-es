@@ -12,6 +12,8 @@ from fastapi import Depends, Header, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from .runtime import RuntimeRejected
 from .monitor_models import Core, Interface, BlockDevice, HostProcess, GPUProcess, Sensor, Power
+from .addresses import endpoint, is_private
+from .study.data import sha as study_hash
 
 TERMINAL = {'COMPLETED', 'CANCELLED', 'FAILED'}
 QUIESCENT = TERMINAL | {'PAUSED'}
@@ -43,6 +45,8 @@ class SelfTest(Strict):
     runtimeProfile: str = Field(default='legacy', max_length=100)
     compatibility: dict = Field(default_factory=dict)
     gpuUUID: str | None = None
+    recipeVersions: list[Literal[1,2]] = Field(default_factory=lambda:[1],max_length=2)
+    qualifiedModelHashes: list[str] = Field(default_factory=list,max_length=20)
 
     @field_validator('gpuUUID')
     @classmethod
@@ -58,7 +62,17 @@ class SelfTest(Strict):
 
     @model_validator(mode='after')
     def native_admission(self):
+        import re
+        if any(not re.fullmatch('[a-f0-9]{64}',h) for h in self.qualifiedModelHashes):raise ValueError('Invalid model qualification hash')
+        if 2 in self.recipeVersions:
+            evidence=self.compatibility.get('recipeV2',{})
+            if not self.passed or evidence.get('passed') is not True or evidence.get('repeatIdentical') is not True:
+                raise ValueError('Recipe v2 requires repeated numerical compatibility evidence')
+            if any(not re.fullmatch('[a-f0-9]{64}',str(evidence.get(k,''))) for k in ('modelManifestHash','recipeHash','parentSha256','restoredSha256','perturbedSha256','outputsHash')) or evidence['parentSha256']!=evidence['restoredSha256']:
+                raise ValueError('Recipe v2 compatibility identity or exact restore mismatch')
+            if evidence['modelManifestHash'] not in self.qualifiedModelHashes:raise ValueError('Recipe v2 model qualification missing')
         if self.platform == 'windows':
+            if self.recipeVersions != [1] or self.qualifiedModelHashes:raise ValueError('Windows remains the qualified v1 worker-only profile')
             if not self.passed or self.coordinator or self.runtimeProfile != 'desktop-v1' or self.compatibility.get('passed') is not True or self.compatibility.get('repeatIdentical') is not True:
                 raise ValueError('Native Windows requires the qualified worker-only desktop profile')
             for key in ('recipeHash','parentSha256','perturbedSha256','restoredSha256'):
@@ -75,25 +89,46 @@ class SelfTest(Strict):
         return self
 
 
-class Enrollment(Strict):
-    code: str = Field(max_length=200)
-    workerId: str = Field(min_length=1, max_length=64, pattern=r'^[a-zA-Z0-9][a-zA-Z0-9_-]*$')
-    displayName: str = Field(min_length=1, max_length=100)
+class EndpointUpdate(Strict):
     computeUrl: str
-    selfTest: SelfTest
+    bulkUrl: str | None = None
 
     @field_validator('computeUrl')
     @classmethod
-    def private_compute(cls, value):
-        # M2 has one private Tailscale/LAN compute path. No credentials, query or path.
-        parsed = urlparse(value)
-        try:
-            address = ipaddress.ip_address(parsed.hostname or '')
-        except ValueError:
-            raise ValueError('Use a numeric private/Tailscale compute address') from None
-        if parsed.scheme not in ('http', 'https') or parsed.username or parsed.password or parsed.query or parsed.fragment or parsed.path not in ('', '/') or not (address.is_private or address in ipaddress.ip_network('100.64.0.0/10')):
-            raise ValueError('Use a private compute endpoint without credentials')
-        return value.rstrip('/')
+    def control(cls, value):
+        return endpoint(value)
+
+    @field_validator('bulkUrl')
+    @classmethod
+    def bulk(cls, value):
+        return endpoint(value, private=True) if value is not None else None
+
+    @model_validator(mode='after')
+    def private_bulk_required(self):
+        if self.bulkUrl is None and not is_private(self.computeUrl):
+            raise ValueError('Public compute requires a private bulkUrl')
+        return self
+
+
+class DeviceEndpointUpdate(EndpointUpdate):
+    bootId: str = Field(min_length=1, max_length=100)
+
+
+class QualificationUpdate(Strict):
+    bootId: str
+    selfTest: SelfTest
+
+
+class Enrollment(EndpointUpdate):
+    code: str = Field(max_length=200)
+    workerId: str = Field(min_length=1, max_length=64, pattern=r'^[a-zA-Z0-9][a-zA-Z0-9_-]*$')
+    displayName: str = Field(min_length=1, max_length=100)
+    selfTest: SelfTest
+
+    @staticmethod
+    def private_compute(value):
+        # Kept strict for Server bootstrap and LocalBackend signed URLs.
+        return endpoint(value, private=True)
 
 
 class Approval(Strict):
@@ -242,6 +277,8 @@ class AgentRuntime:
             ''')
             if 'telemetry' not in {r[1] for r in db.execute('PRAGMA table_info(devices)')}:
                 db.execute("ALTER TABLE devices ADD COLUMN telemetry TEXT")
+            if 'bulk_url' not in {r[1] for r in db.execute('PRAGMA table_info(devices)')}:
+                db.execute('ALTER TABLE devices ADD COLUMN bulk_url TEXT')
             # Retain every assignment epoch. The old unique run_id constraint
             # cannot represent a paused run reacquiring resources with fresh
             # commands, credentials and process identities.
@@ -284,6 +321,7 @@ class AgentRuntime:
                           'lastSeen':row['seen'],'connectionStatus':'ONLINE' if time.time()-row['seen']<30 else 'OFFLINE',
                           'contributionEnabled':bool(row['enabled'] and row['desired']),
                           'workspaceId':allocation[0] if allocation else None,'computeUrl':row['compute_url'],
+                          'bulkUrl':row['bulk_url'] or row['compute_url'],
                           'selfTest':profile, 'allocatedTo':reservation[0] if reservation else None,
                           'physicalResourceId':profile.get('gpuUUID'),
                           'telemetry':json.loads(row['telemetry']) if row['telemetry'] else None,
@@ -291,7 +329,7 @@ class AgentRuntime:
         return result
 
     def capabilities(self):
-        return {'controlApiVersion':2,'agentMode':True,'physicalGpuIdentity':True,'parallelJobs':True,'modelId':MODEL,'modelRevision':REVISION,
+        return {'controlApiVersion':2,'recipeVersions':[1,2],'agentMode':True,'physicalGpuIdentity':True,'parallelJobs':True,'modelId':MODEL,'modelRevision':REVISION,
                 'workerIds':[d['workerId'] for d in self.devices() if d['approvalStatus']=='APPROVED'],
                 'workloads':['arith16','cot_l3_q32','cot_l3_q64','cot_l1_q128'],
                 'schedulerPolicies':['greedy'],'syncModes':['synchronous'],'quarantinedWorkerIds':[d['workerId'] for d in self.devices() if d['approvalStatus']=='QUARANTINED'],
@@ -315,6 +353,10 @@ class AgentRuntime:
         chosen=[coordinator]+[by_worker.get(w) for w in body['workerIds']]
         for d in chosen:
             if not d or d['approvalStatus']!='APPROVED':return 'Selected device needs approval'
+            if body.get('recipeVersion')==2:
+                profile=d['selfTest']
+                if profile.get('platform')=='windows' or 2 not in profile.get('recipeVersions',[]):return 'Recipe v2 qualification required'
+                if study_hash(body['modelManifest']) not in profile.get('qualifiedModelHashes',[]):return 'Pinned model qualification required'
             if not d['physicalResourceId']:return 'Refresh selected device self-test to identify its physical GPU'
             if d['connectionStatus']!='ONLINE':return 'Waiting for selected device to reconnect'
             if not d['contributionEnabled']:return 'Waiting for owner to turn contribution ON'
@@ -376,6 +418,7 @@ class AgentRuntime:
             grants={d['workerId']:secrets.token_urlsafe(32) for d in chosen.values() if d['workerId'] in config['workerIds']}
             assignment={'assignmentId':aid,'runId':config['runId'],'coordinatorDeviceId':co['deviceId'],
                         'epoch':old['epoch']+1 if old else 1,'deviceIds':list(chosen),'config':config,'computeUrl':co['computeUrl'],
+                        'bulkUrl':co['bulkUrl'],
                         'workerDevices':{w:by_worker[w]['deviceId'] for w in config['workerIds']},'computeGrants':grants}
             snap={'state':{'status':'STARTING'},'generations':[],'candidates':[],'attempts':[],'events':[],'artifacts':[]}
             if old:
@@ -555,6 +598,8 @@ class AgentRuntime:
             if body.action=='start':
                 self._enqueue(db,did,'START_WORKER',{'assignmentId':row['id'],'epoch':row['epoch'],'runId':row['run_id'],
                     'workerId':body.workerId,'recoveryIndex':body.recoveryIndex,'coordinatorUrl':ar['computeUrl'],
+                    'bulkUrl':ar.get('bulkUrl',ar['computeUrl']),
+                    **({'studyConfig':ar['config']} if ar['config'].get('recipeVersion')==2 else {}),
                     'computeToken':ar['computeGrants'][body.workerId]},f'worker:{row["id"]}:{did}:{body.recoveryIndex}')
             elif body.action=='stop':
                 self._enqueue(db,did,'STOP_WORKER',{'assignmentId':row['id'],'epoch':row['epoch'],'recoveryIndex':body.recoveryIndex},f'stop:{row["id"]}:{did}:{body.recoveryIndex}')
@@ -642,8 +687,8 @@ def install_device_routes(app, store, user, runtime):
             legacy=db.execute('SELECT owner FROM worker_assignments WHERE worker_id=?',(body.workerId,)).fetchone()
             if legacy and legacy[0]!=code['owner']:raise HTTPException(403,'Worker alias belongs to another owner')
             did=uuid.uuid4().hex;token=secrets.token_urlsafe(32)
-            db.execute('INSERT INTO devices(id,worker_id,owner,name,token_digest,status,compute_url,self_test) VALUES (?,?,?,?,?,?,?,?)',
-                       (did,body.workerId,code['owner'],body.displayName,digest(token),'PENDING',body.computeUrl,json.dumps(body.selfTest.model_dump())))
+            db.execute('INSERT INTO devices(id,worker_id,owner,name,token_digest,status,compute_url,bulk_url,self_test) VALUES (?,?,?,?,?,?,?,?,?)',
+                       (did,body.workerId,code['owner'],body.displayName,digest(token),'PENDING',body.computeUrl,body.bulkUrl,json.dumps(body.selfTest.model_dump())))
             db.execute('UPDATE pairing_codes SET used=1 WHERE digest=?',(digest(body.code),))
             db.execute('INSERT OR IGNORE INTO worker_assignments VALUES (?,?,NULL)',(body.workerId,code['owner']))
             store.audit(db,code['owner'],'DEVICE_ENROLLED',did)
@@ -653,6 +698,47 @@ def install_device_routes(app, store, user, runtime):
     def own_devices(current=Depends(user)):
         active(current)
         return [d for d in runtime.devices() if d['ownerUserId']==current['userId']]
+
+    def update_endpoints(device_id, body, owner, boot_id=None):
+        with store.db() as db:
+            db.execute('BEGIN IMMEDIATE')
+            d=db.execute('SELECT * FROM devices WHERE id=? AND owner=?',(device_id,owner)).fetchone()
+            if not d:raise HTTPException(404,'Owned device not found')
+            if boot_id is not None and d['boot_id']!=boot_id:raise HTTPException(409,'Current boot required')
+            resource=json.loads(d['self_test']).get('gpuUUID')
+            reserved=db.execute('SELECT 1 FROM device_reservations WHERE device_id=?',(device_id,)).fetchone()
+            physical=db.execute('SELECT 1 FROM physical_reservations WHERE resource_id=?',(resource,)).fetchone()
+            processes=json.loads(d['processes'])
+            if (d['enabled'] or d['desired'] or reserved or physical or
+                    any(p.get('coordinatorAlive') is not False or p.get('workerAlive') is not False for p in processes)):
+                raise HTTPException(409,'Turn contribution OFF and confirm all processes drained before changing endpoints')
+            db.execute('UPDATE devices SET compute_url=?,bulk_url=? WHERE id=?',(body.computeUrl,body.bulkUrl,device_id))
+            store.audit(db,owner,'DEVICE_ENDPOINTS_CHANGED',device_id)
+        return next(d for d in runtime.devices() if d['deviceId']==device_id)
+
+    @app.patch('/api/v1/devices/{device_id}/endpoints')
+    def owned_endpoints(device_id:str,body:EndpointUpdate,current=Depends(user)):
+        return update_endpoints(device_id,body,active(current)['userId'])
+
+    @app.patch('/api/v1/device/endpoints')
+    def device_endpoints(body:DeviceEndpointUpdate,current=Depends(device_auth)):
+        return update_endpoints(current['id'],body,current['owner'],body.bootId)
+
+    @app.patch('/api/v1/device/qualification')
+    def qualification(body:QualificationUpdate,current=Depends(device_auth)):
+        with store.db() as db:
+            db.execute('BEGIN IMMEDIATE')
+            d=db.execute('SELECT * FROM devices WHERE id=?',(current['id'],)).fetchone()
+            old=json.loads(d['self_test'])
+            if (d['boot_id']!=body.bootId or d['enabled'] or d['desired'] or
+                    db.execute('SELECT 1 FROM device_reservations WHERE device_id=?',(d['id'],)).fetchone() or
+                    db.execute('SELECT 1 FROM physical_reservations WHERE resource_id=?',(old.get('gpuUUID'),)).fetchone()):
+                raise HTTPException(409,'Current boot, OFF and confirmed drain required')
+            if not body.selfTest.passed or body.selfTest.gpuUUID!=old.get('gpuUUID') or body.selfTest.platform!=old.get('platform','linux'):
+                raise HTTPException(422,'Qualification cannot replace physical identity or platform')
+            db.execute('UPDATE devices SET self_test=? WHERE id=?',(json.dumps(body.selfTest.model_dump()),d['id']))
+            store.audit(db,d['owner'],'DEVICE_QUALIFICATION_UPDATED',d['id'])
+        return {'updated':True}
 
     @app.get('/api/v1/platform/devices')
     def devices(current=Depends(admin)):
