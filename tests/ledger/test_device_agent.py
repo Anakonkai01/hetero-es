@@ -358,3 +358,29 @@ def test_reachable_accepts_only_a_coordinator_that_says_it_is_up(tmp_path):
     finally:
         server.shutdown();server.server_close()
     assert reachable(url, 'grant') is False       # nothing listens any more
+
+
+def test_agent_requests_carry_the_heteroes_user_agent(tmp_path):
+    import json, threading
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+    from heteroes.http_transport import USER_AGENT
+    from heteroes.product.agent import reachable, request
+    seen = []
+    class Handler(BaseHTTPRequestHandler):
+        def do_GET(self):self.answer()
+        def do_POST(self):
+            self.rfile.read(int(self.headers.get('Content-Length', 0)));self.answer()
+        def answer(self):
+            seen.append(self.headers.get('User-Agent'))
+            body = json.dumps({'ok': True, 'status': 'up'}).encode()
+            self.send_response(200);self.send_header('Content-Length', str(len(body)));self.end_headers();self.wfile.write(body)
+        def log_message(self, *args):pass
+    server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    try:
+        url = f'http://127.0.0.1:{server.server_port}'
+        request(url, '/api/v1/device/poll', 'token', {'a': 1})
+        assert reachable(url, 'grant') is True
+    finally:
+        server.shutdown();server.server_close()
+    assert seen == [USER_AGENT, USER_AGENT]

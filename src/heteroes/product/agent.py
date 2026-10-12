@@ -16,6 +16,7 @@ import threading
 import urllib.error
 import urllib.request
 import uuid
+from heteroes.http_transport import USER_AGENT
 from .files import events,read_json,write_json
 from .gateway import Manager,TERMINAL,QUIESCENT,ROOT,validate
 from .remote import alive,identity,worker_environment,handle as remote_handle
@@ -25,7 +26,7 @@ from .storage import data_root,worker_cache
 
 def request(url, path, token, body, method=None):
     req=urllib.request.Request(url.rstrip('/')+path,data=None if body is None else json.dumps(body,allow_nan=False).encode(),method=method,
-        headers={'Authorization':'Bearer '+token,'Content-Type':'application/json'})
+        headers={'Authorization':'Bearer '+token,'Content-Type':'application/json','User-Agent':USER_AGENT})
     # Never expose exception URLs, token-bearing bodies or server tracebacks.
     with urllib.request.urlopen(req,timeout=15) as response:
         return json.load(response)
@@ -34,7 +35,7 @@ def request(url, path, token, body, method=None):
 def reachable(url,token,timeout=4):
     """True if a coordinator answers /v1/health with this grant. No proxy, like the worker's own client."""
     try:
-        req=urllib.request.Request(url.rstrip('/')+'/v1/health',headers={'Authorization':'Bearer '+token})
+        req=urllib.request.Request(url.rstrip('/')+'/v1/health',headers={'Authorization':'Bearer '+token,'User-Agent':USER_AGENT})
         with urllib.request.build_opener(urllib.request.ProxyHandler({})).open(req,timeout=timeout) as response:
             return response.status==200 and json.load(response).get('ok') is True
     except Exception:

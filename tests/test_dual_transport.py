@@ -86,3 +86,14 @@ def test_run_worker_builds_a_replay_only_client_from_its_flag():
     args.no_bulk = False
     with pytest.raises(ValueError, match='bulk'):
         module.make_client(args)
+
+
+def test_worker_requests_do_not_use_the_default_python_user_agent():
+    # A public edge such as Cloudflare rejects "Python-urllib" with error 1010.
+    from heteroes.http_transport import USER_AGENT
+    client = HttpClient('https://control.example.org', token='grant', allow_no_bulk=True)
+    request = client._request('GET', '/v1/job')
+    assert request.get_header('User-agent') == USER_AGENT
+    assert USER_AGENT.startswith('HeteroES') and 'urllib' not in USER_AGENT.lower() and 'python' not in USER_AGENT.lower()
+    private = HttpClient('http://100.64.0.1:8765', token='grant')
+    assert private._request('GET', '/v1/models/' + 'a' * 64, bulk=True).get_header('User-agent') == USER_AGENT

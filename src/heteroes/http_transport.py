@@ -47,6 +47,8 @@ import urllib.request
 from pathlib import Path
 from urllib.parse import urlsplit
 
+# A public edge such as Cloudflare rejects urllib's default "Python-urllib" signature (error 1010): say who we are.
+USER_AGENT = "HeteroES-Worker/1 (+https://heteroes.site)"
 MAX_BODY_BYTES = 1 << 20
 CHUNK_BYTES = 1 << 20
 _HEX64 = re.compile(r"[0-9a-f]{64}")
@@ -367,7 +369,9 @@ class HttpClient:
     def _request(self, method: str, path: str, data: bytes | None = None, *, bulk=False):
         if bulk and self._bulk is None:
             raise BulkUnavailableError("full model transfer needs a private route; this client can only fetch update records")
-        headers = {"Content-Type": "application/json"} if data is not None else {}
+        headers = {"User-Agent": USER_AGENT}
+        if data is not None:
+            headers["Content-Type"] = "application/json"
         if self._token is not None:
             headers["Authorization"] = f"Bearer {self._token}"
         return urllib.request.Request((self._bulk if bulk else self._base) + path, data=data, headers=headers, method=method)
