@@ -116,12 +116,10 @@ class TelemetrySampler:
                         if current >= previous: result[key] = (current - previous) / (tick - before)
             self.io_previous = tick, counters
         elif platform.system() == 'Windows':
-            # Fixed query, no caller-supplied command text. Works without psutil.
-            script = "$o=Get-CimInstance Win32_OperatingSystem;$c=Get-CimInstance Win32_PerfFormattedData_PerfOS_Processor -Filter \"Name='_Total'\";@{cpuPercent=$c.PercentProcessorTime;ramTotalBytes=([double]$o.TotalVisibleMemorySize*1024);ramUsedBytes=([double]($o.TotalVisibleMemorySize-$o.FreePhysicalMemory)*1024)}|ConvertTo-Json -Compress"
-            response = subprocess.run(['powershell.exe', '-NoProfile', '-NonInteractive', '-Command', script],
-                                      capture_output=True, text=True, timeout=4, check=True,
-                                      creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
-            result.update(json.loads(response.stdout))
+            if not hasattr(self,'windows_detail'):
+                from .windows_detail import WindowsDetail
+                self.windows_detail=WindowsDetail()
+            result.update(self.windows_detail.sample())
         return result
 
     def sample(self):
