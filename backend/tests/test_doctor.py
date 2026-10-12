@@ -107,8 +107,9 @@ def test_internal_corruption_that_still_opens_is_caught_by_the_integrity_check(l
 
 
 def test_storage_directory_is_required_and_free_space_is_judged(lab, tmp_path, monkeypatch):
-    assert levels(lab)['storage'][0] == PASS
     import shutil
+    monkeypatch.setattr('backend.doctor.shutil.disk_usage', lambda path: shutil._ntuple_diskusage(500 * 10**9, 100 * 10**9, 400 * 10**9))
+    assert levels(lab)['storage'][0] == PASS
     monkeypatch.setattr('backend.doctor.shutil.disk_usage', lambda path: shutil._ntuple_diskusage(100 * 10**9, 99 * 10**9, 1 * 10**9))
     assert levels(lab)['storage'][0] == WARN and 'free' in levels(lab)['storage'][1]
     monkeypatch.undo()
