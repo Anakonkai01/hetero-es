@@ -1,5 +1,11 @@
 # HeteroES-LLM — Architecture
 
+> **Historical draft:** the 2026-09-30 feature tables below are not a current audit.
+> CPU management, per-device identity and selectable coordinators now exist in
+> the local product source. Read the 2026-10-12
+> [local-first audit/proposal](../../Hetero-ES-LLM-m3/docs/local-first-architecture.md)
+> and ADR-004..007 (PROPOSED). The owner retains design decision authority.
+
 > **Status:** draft v0.1, 2026-09-30 — written by Claude for review, not yet approved.
 > **Audience:** the project team (A — Systems/Core, B — Product/Application).
 > **Scope:** the big picture only. Exact numerical rules live in [numerical-contract.md](numerical-contract.md).

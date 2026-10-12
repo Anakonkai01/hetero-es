@@ -1,12 +1,46 @@
 # HeteroES-LLM — Status
 
-**Last updated:** 11/10/2026 — Local pause/resume, detailed resource monitoring and persistent CPU/GPU energy implemented; CPU suite 2,060 passed, 100 skipped and 24 targeted monitoring/Agent checks. Web/Worker/Server UI redesigned in Track B. Hardware pause/resume, new Windows UI and cloud acceptance remain pending. Earlier Windows numerical acceptance and research evidence remain preserved below.
+**Last updated:** 12/10/2026 — Architecture audit/review; implementation paused. Core CPU checks: 2,074 passed, 100 skipped. Product backend: 109 passed, one provenance test failed. Earlier standalone GPU boundary resume/v2 export and Quick Tunnel CPU evidence have limited scope; new native packages, offline provisioning and lifecycle partition acceptance remain pending.
 **Canonical design/specification:** `HETEROES_LLM_MASTER.md`  
 **Purpose:** current implementation truth, verified evidence, blockers, artifacts, and the exact next action.
 
 > **Document rule:** `MASTER` decides what the system/design should be. `STATUS` decides what is actually done now. For a new chat, read `HETEROES_LLM_MASTER.md` and then this file; older proposal/roadmap/chat-handoff files are archive only.
 
 ## 0. NEXT SESSION — START HERE
+
+### UPDATE 12/10/2026 — Architecture review, no further implementation
+
+The owner requested an audit and proposals before further coding, and then a
+detailed handoff for Claude. Read Track B's
+[architecture proposal](../Hetero-ES-LLM-m3/docs/local-first-architecture.md) and
+[standalone Claude handoff](../Hetero-ES-LLM-m3/docs/local-first-claude-handoff.md).
+Four new ADRs are PROPOSED; no detailed architecture choice has been approved.
+Both active worktrees use `feat/local-lab-completion`: A HEAD `d5bbedb`, B HEAD
+`023967c`, plus substantial uncommitted implementation from before the pause.
+The audit source manifest identifies that source; remote GitHub HEAD is insufficient.
+
+Fresh CPU checks observed in the review: A 2,074 passed/100 skipped (74.32 s);
+B 109 passed/one failed (12.15 s). The failing vendored collector provenance test
+expects four modules while the added Windows collector makes five. It is documented,
+not fixed during architecture review. No GPU campaign was started in this review.
+The earlier `20261012-r2` direct-core 5070 Ti trial verified v1 boundary pause/resume
+against the baseline and v2 contexts/export with independent HF reload. It does
+not accept the desktop packages, Windows v2, other models or simultaneous jobs.
+The live Quick receipt proves CPU TLS/auth/private Range behavior, not GPU training.
+
+Read-only operating snapshot: 21 historical experiments, dispatch held, zero
+physical reservations, local contribution OFF, no NVIDIA compute processes.
+CPU Web/API and temporary Quick Tunnels remain running; monitoring Agent is stopped.
+Private config has `storageMode: local` prepared, but live health reports
+`recoveryStorageMode: null`: storage has NOT been activated on the running backend.
+Do not restart/cut over services, enroll or enable devices, build installers, fix
+source, run GPUs or provision cloud as part of this review. Existing published
+installers remain `monitor-20261011-r2`, not the latest uncommitted source.
+
+Next action: review audit, alternatives and ADRs; obtain the owner's architectural
+decisions before dependent implementation. The proposed first slice is a proven
+standalone LAN/offline lab; local offline installation and lifecycle partition/
+restore gates remain open. Historical priorities below are superseded for now.
 
 ### Project and deadline assessment — 11/10/2026
 

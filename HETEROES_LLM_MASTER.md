@@ -37,6 +37,19 @@ The central product thesis is: a small lab should be able to **share a small poo
 
 ## 0. Canonical design decisions
 
+**Architecture review requested on 2026-10-12:** the owner supplied local-first,
+self-hostable, cloud-optional and provider-neutral as the desired direction.
+Historical AWS/R2/Named Tunnel acceptance is not a prerequisite for the proposed
+standalone lab release. Keep numerical correctness, the GPU-local training ledger,
+explicit contribution and physical resource ownership intact. The existing CPU
+management layer is audited before proposing changes. Implementation is paused
+for this review. [ADR-004](docs/adr/ADR-004-local-first-deployment.md),
+[ADR-005](docs/adr/ADR-005-state-and-lifecycle-authority.md),
+[ADR-006](docs/adr/ADR-006-offline-network-and-storage.md) and
+[ADR-007](docs/adr/ADR-007-identities-versions-and-recovery.md) are **PROPOSED**,
+not accepted technical decisions. The owner decides after the architecture review;
+older accepted revisions below remain historical context where superseded.
+
 **Product extension accepted on 2026-10-10:** the owner's lab roadmap adds
 independent workspaces, account approval and private operational backup/restore
 in M1, while retaining one active run and all numerical contracts. The accepted
