@@ -176,3 +176,92 @@ def test_detail_capability_negotiates_before_sending_extended_observations(tmp_p
     assert 'power' not in sent[1]['telemetry'] and 'cores' not in sent[1]['telemetry']['host']
     assert sent[2]['telemetry']['power']=={'hostId':'local'}
     assert not a.enabled
+
+
+def poll_with(a,monkeypatch,commands):
+    """Make the agent's next polls return `commands`; the list of request bodies is returned."""
+    sent=[]
+    monkeypatch.setattr(a,'observe',lambda:[])
+    def reply(path,body):
+        sent.append(body)
+        return {'approvalStatus':'APPROVED','desiredContribution':False,'commands':commands,'acceptedReports':[],
+                'acceptedEvents':[],'telemetrySupported':False,'detailedTelemetrySupported':False}
+    monkeypatch.setattr(a,'call',reply)
+    return sent
+
+
+def test_unknown_command_kind_is_acknowledged_and_does_not_block_a_following_cancel(tmp_path,monkeypatch):
+    a=agent(tmp_path)
+    cancel={'commandId':'cancel','kind':'CANCEL_ASSIGNMENT','assignmentId':'b'*32,'epoch':1}
+    sent=poll_with(a,monkeypatch,[{'commandId':'future','kind':'KIND_FROM_A_NEWER_SERVER'},cancel])
+    a.cycle();a.cycle()
+    assert (a.root/'cancelled-assignments'/('b'*32+'.json')).exists()
+    assert {'future','cancel'}<=set(sent[1]['acknowledgements'])
+
+
+def test_malformed_identities_are_acknowledged_not_retried_forever(tmp_path,monkeypatch):
+    a=agent(tmp_path);a.enabled=True
+    bad={'commandId':'bad','kind':'START_WORKER','runId':'../escape','assignmentId':'a'*32,'epoch':1}
+    sent=poll_with(a,monkeypatch,[bad])
+    a.cycle();a.cycle()
+    assert 'bad' in sent[1]['acknowledgements']
+
+
+def test_state_dependent_failure_is_retried_but_later_commands_still_run(tmp_path,monkeypatch):
+    a=agent(tmp_path);a.enabled=True
+    def broken(command,action):raise OSError('disk full')
+    monkeypatch.setattr(a,'_worker',broken)
+    start={'commandId':'start','kind':'START_WORKER','assignmentId':'c'*32,'epoch':1,'runId':'d'*32}
+    cancel={'commandId':'cancel','kind':'CANCEL_ASSIGNMENT','assignmentId':'b'*32,'epoch':1}
+    sent=poll_with(a,monkeypatch,[start,cancel])
+    a.cycle();a.cycle()
+    assert (a.root/'cancelled-assignments'/('b'*32+'.json')).exists()
+    assert 'cancel' in sent[1]['acknowledgements'] and 'start' not in sent[1]['acknowledgements']
+    with a.db() as db:
+        assert db.execute('SELECT attempts FROM command_failures WHERE id="start"').fetchone()[0]==2
+
+
+def test_failed_safety_command_is_never_acknowledged(tmp_path,monkeypatch):
+    a=agent(tmp_path)
+    cancel={'commandId':'cancel','kind':'CANCEL_ASSIGNMENT','assignmentId':'b'*32,'epoch':1}
+    write_json(a.manager.root/('e'*32)/'assignment.json',{'assignmentId':'b'*32,'epoch':1})
+    def broken(run_id):raise OSError('read-only file system')
+    monkeypatch.setattr(a.manager,'cancel',broken)
+    sent=poll_with(a,monkeypatch,[cancel])
+    a.cycle();a.cycle()
+    assert 'cancel' not in sent[1]['acknowledgements']
+
+
+def test_reporting_a_failure_cannot_itself_break_the_cycle(tmp_path,monkeypatch):
+    a=agent(tmp_path);a.enabled=True
+    # SQLite would store a text epoch; the server rejects an event whose epoch is not an
+    # integer, and with it every later poll of this device.
+    odd={'commandId':'odd','kind':'START_WORKER','assignmentId':'c'*32,'epoch':'abc','runId':'d'*32}
+    sent=poll_with(a,monkeypatch,[odd])
+    a.cycle();a.cycle()
+    assert 'odd' in sent[1]['acknowledgements']
+    with a.db() as db:assert db.execute('SELECT count(*) FROM event_outbox').fetchone()[0]==0
+
+
+def test_deferred_command_is_waiting_not_failing(tmp_path,monkeypatch):
+    a=agent(tmp_path);a.shutdown_requested=True
+    enable={'commandId':'late','kind':'SET_CONTRIBUTION','bootId':a.boot_id,'enabled':True}
+    sent=poll_with(a,monkeypatch,[enable])
+    a.cycle();a.cycle()
+    assert 'late' not in sent[1]['acknowledgements']
+    with a.db() as db:
+        assert db.execute('SELECT count(*) FROM command_failures').fetchone()[0]==0
+        assert db.execute('SELECT count(*) FROM event_outbox').fetchone()[0]==0
+
+
+def test_command_failure_reaches_the_server_as_a_throttled_assignment_event(tmp_path,monkeypatch):
+    a=agent(tmp_path);a.enabled=True
+    def broken(command,action):raise OSError('disk full')
+    monkeypatch.setattr(a,'_worker',broken)
+    start={'commandId':'start','kind':'START_WORKER','assignmentId':'c'*32,'epoch':3,'runId':'d'*32}
+    poll_with(a,monkeypatch,[start])
+    for _ in range(3):a.cycle()
+    with a.db() as db:rows=db.execute('SELECT assignment_id,epoch,body FROM event_outbox').fetchall()
+    assert len(rows)==1 and rows[0][:2]==('c'*32,3)
+    event=__import__('json').loads(rows[0][2])
+    assert event['event']=='agent_command_failed' and event['errorType']=='OSError' and event['attempts']==1

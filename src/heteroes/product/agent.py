@@ -31,6 +31,10 @@ def request(url, path, token, body, method=None):
         return json.load(response)
 
 
+class InvalidCommand(ValueError):
+    """Unknown kind or malformed identity: retrying can never succeed, so it is acknowledged."""
+
+
 def owned_state(record,intent=False):
     if record is None:return None if intent else False
     if record.get('birth') is None or type(record.get('pid')) is not int:return None
@@ -186,7 +190,8 @@ class Agent:
                 CREATE TABLE IF NOT EXISTS released(assignment_id TEXT PRIMARY KEY);
                 CREATE TABLE IF NOT EXISTS event_outbox(id TEXT PRIMARY KEY,assignment_id TEXT NOT NULL,epoch INTEGER NOT NULL,body TEXT NOT NULL,ack INTEGER NOT NULL DEFAULT 0);
                 CREATE TABLE IF NOT EXISTS sequence(assignment_id TEXT PRIMARY KEY,value INTEGER NOT NULL);
-                CREATE TABLE IF NOT EXISTS outbox(assignment_id TEXT PRIMARY KEY,sequence INTEGER NOT NULL,body TEXT NOT NULL);''')
+                CREATE TABLE IF NOT EXISTS outbox(assignment_id TEXT PRIMARY KEY,sequence INTEGER NOT NULL,body TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS command_failures(id TEXT PRIMARY KEY,kind TEXT NOT NULL,error_type TEXT NOT NULL,attempts INTEGER NOT NULL,last_at REAL NOT NULL);''')
         with self.db() as db:
             if 'ack' not in {r[1] for r in db.execute('PRAGMA table_info(event_outbox)')}:db.execute('ALTER TABLE event_outbox ADD COLUMN ack INTEGER NOT NULL DEFAULT 0')
         os.chmod(self.db_path,0o600)
@@ -201,10 +206,10 @@ class Agent:
     def worker_directory(self,command):
         run_id=command.get('runId')
         if not re.fullmatch('[a-f0-9]{32}',command.get('assignmentId','')) or type(command.get('epoch')) is not int or command['epoch']<1:
-            raise ValueError('Invalid assignment identity')
-        if run_id is not None and not re.fullmatch('[a-f0-9]{32}',run_id):raise ValueError('Invalid run identity')
+            raise InvalidCommand('Invalid assignment identity')
+        if run_id is not None and not re.fullmatch('[a-f0-9]{32}',run_id):raise InvalidCommand('Invalid run identity')
         recovery=command.get('recoveryIndex',0)
-        if type(recovery) is not int or recovery not in (0,1):raise ValueError('Invalid recovery attempt')
+        if type(recovery) is not int or recovery not in (0,1):raise InvalidCommand('Invalid recovery attempt')
         return self.root/'workers'/command['assignmentId']/f'r{recovery}'
 
     def _worker(self,command,action):
@@ -245,9 +250,9 @@ class Agent:
     def handle(self,command):
         kind=command.get('kind')
         if kind not in {'SET_CONTRIBUTION','COORDINATE','START_WORKER','STOP_WORKER','CANCEL_ASSIGNMENT','UPDATE_BACKUP_POLICY','PAUSE_ASSIGNMENT'}:
-            raise ValueError('Unsupported device command')
+            raise InvalidCommand('Unsupported device command')
         cid=command.get('commandId')
-        if not isinstance(cid,str) or not cid:raise ValueError('Missing command identity')
+        if not isinstance(cid,str) or not cid:raise InvalidCommand('Missing command identity')
         with self.db() as db:
             if db.execute('SELECT 1 FROM processed WHERE id=?',(cid,)).fetchone():return
             if kind in ('COORDINATE','START_WORKER','PAUSE_ASSIGNMENT','UPDATE_BACKUP_POLICY') and db.execute(
@@ -297,6 +302,37 @@ class Agent:
                 ar=read_json(directory/'assignment.json')
                 if ar and ar['epoch']==command['epoch']:self._worker(ar,'stop')
         with self.db() as db:db.execute('INSERT OR IGNORE INTO processed VALUES (?)',(cid,))
+
+    def run_commands(self,commands):
+        """One command never blocks the others. A command that can never succeed (unknown kind,
+        malformed identity) is acknowledged; any other failure stays unacknowledged and is retried."""
+        for command in commands:
+            try:self.handle(command)
+            except RuntimeError:pass  # OFF/deferred commands remain unacknowledged
+            except InvalidCommand as error:
+                self.record_failure(command,error)
+                cid=command.get('commandId') if isinstance(command,dict) else None
+                if isinstance(cid,str) and cid:
+                    with self.db() as db:db.execute('INSERT OR IGNORE INTO processed VALUES (?)',(cid,))
+            except Exception as error:
+                self.record_failure(command,error)
+
+    def record_failure(self,command,error):
+        """Count the failure; tell the server about an assignment's command at attempts 1, 10, 100, 1000."""
+        command=command if isinstance(command,dict) else {}
+        cid=command.get('commandId')
+        if not isinstance(cid,str) or not cid:return
+        kind=str(command.get('kind'))[:60];name=type(error).__name__
+        with self.db() as db:
+            db.execute('INSERT OR IGNORE INTO command_failures VALUES (?,?,?,0,0)',(cid,kind,name))
+            db.execute('UPDATE command_failures SET attempts=attempts+1,error_type=?,last_at=? WHERE id=?',(name,time.time(),cid))
+            attempts=db.execute('SELECT attempts FROM command_failures WHERE id=?',(cid,)).fetchone()[0]
+            assignment=command.get('assignmentId');epoch=command.get('epoch')
+            if attempts in (1,10,100,1000) and isinstance(assignment,str) and re.fullmatch('[a-f0-9]{32}',assignment) and type(epoch) is int and epoch>=1:
+                encoded=json.dumps({'event':'agent_command_failed','commandId':cid,'kind':kind,'errorType':name,'attempts':attempts,'t':round(time.time(),3)},
+                                   sort_keys=True,separators=(',',':'),allow_nan=False)
+                db.execute('INSERT OR IGNORE INTO event_outbox(id,assignment_id,epoch,body) VALUES (?,?,?,?)',
+                           (hashlib.sha256((assignment+encoded).encode()).hexdigest(),assignment,epoch,encoded))
 
     def cancelled(self,command):
         marker=read_json(self.root/'cancelled-assignments'/f'{command["assignmentId"]}.json')
@@ -386,9 +422,7 @@ class Agent:
         # activation or typed command for the current boot is needed before launch.
         if response['approvalStatus']=='REVOKED' or (self.enabled and not response['desiredContribution']):
             self.enabled=False;self.cancel_all()
-        for command in response['commands']:
-            try:self.handle(command)
-            except RuntimeError:pass  # OFF/deferred commands remain unacknowledged
+        self.run_commands(response['commands'])
         with self.db() as db:
             for eid in response.get('acceptedEvents',[]):db.execute('UPDATE event_outbox SET ack=1 WHERE id=?',(eid,))
             for aid in response.get('releasedAssignments',[]):db.execute('INSERT OR IGNORE INTO released VALUES (?)',(aid,))
