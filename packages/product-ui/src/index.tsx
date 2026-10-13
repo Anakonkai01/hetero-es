@@ -1,42 +1,51 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { translations } from './translations';
-export type Language = 'vi' | 'en';
-export type Theme = 'system' | 'light' | 'dark';
-export type Accent = 'teal' | 'blue' | 'violet';
-type Preferences = {
-    language: Language;
-    theme: Theme;
-    accent: Accent;
-    textSize: 'standard' | 'large';
-};
-const defaults: Preferences = { language: 'vi', theme: 'system', accent: 'teal', textSize: 'standard' };
+import { MissingTranslations, readPreferences, type Accent, type Language, type Preferences, type Theme } from './preferences';
+export type { Accent, Language, Theme };
+const STORAGE_KEY = 'heteroes.preferences';
+const defaults: Preferences = readPreferences(null, []);
 const Context = createContext<{
     preferences: Preferences;
     setPreferences: (value: Partial<Preferences>) => void;
     t: (value: string) => string;
 }>({ preferences: defaults, setPreferences: () => { }, t: value => value });
+const browserLanguages = () => typeof navigator === 'undefined' ? [] : navigator.languages?.length ? navigator.languages : [navigator.language];
+declare global {
+    // Set by tests and probes before the page loads to collect untranslated Vietnamese strings.
+    var __HETEROES_I18N_AUDIT__: boolean | undefined;
+    var __heteroesMissingI18n: (() => string[]) | undefined;
+}
 export function ProductProvider({ children }: {
     children: ReactNode;
 }) {
-    const [preferences, set] = useState<Preferences>(() => {
-        try {
-            const value = JSON.parse(localStorage.getItem('heteroes.preferences') ?? '{}');
-            return { language: ['vi', 'en'].includes(value.language) ? value.language : 'vi', theme: ['system', 'light', 'dark'].includes(value.theme) ? value.theme : 'system', accent: ['teal', 'blue', 'violet'].includes(value.accent) ? value.accent : 'teal', textSize: value.textSize === 'large' ? 'large' : 'standard' };
-        }
-        catch {
-            return defaults;
-        }
-    });
+    // What the person chose is stored; what the browser suggests is not, so a new browser language is followed until a choice is made.
+    const [stored, setStored] = useState<string | null>(() => { try { return localStorage.getItem(STORAGE_KEY); } catch { return null; } });
+    const preferences = useMemo(() => readPreferences(stored, browserLanguages()), [stored]);
+    const missing = useMemo(() => new MissingTranslations(Boolean(globalThis.__HETEROES_I18N_AUDIT__)), []);
+    useEffect(() => { globalThis.__heteroesMissingI18n = () => missing.list(); }, [missing]);
     useEffect(() => {
         const media = matchMedia('(prefers-color-scheme: dark)');
         const apply = () => { document.documentElement.dataset.theme = preferences.theme === 'system' ? (media.matches ? 'dark' : 'light') : preferences.theme; document.documentElement.dataset.accent = preferences.accent; document.documentElement.lang = preferences.language; document.documentElement.dataset.textSize = preferences.textSize; };
         apply();
         media.addEventListener('change', apply);
-        localStorage.setItem('heteroes.preferences', JSON.stringify(preferences));
         return () => media.removeEventListener('change', apply);
     }, [preferences]);
-    const t = (value: string) => preferences.language === 'vi' ? (translations[value] ?? value) : value;
-    return <Context.Provider value={{ preferences, setPreferences: value => set(old => ({ ...old, ...value })), t }}>{children}</Context.Provider>;
+    const t = (value: string) => {
+        if (preferences.language !== 'vi')
+            return value;
+        const translated = translations[value];
+        if (translated === undefined)
+            missing.note(value);
+        return translated ?? value;
+    };
+    const setPreferences = (value: Partial<Preferences>) => {
+        let previous: Record<string, unknown> = {};
+        try { previous = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}') ?? {}; } catch { /* start from nothing */ }
+        const next = JSON.stringify({ ...previous, ...value });
+        try { localStorage.setItem(STORAGE_KEY, next); } catch { /* storage may be blocked: the choice then lasts for this visit only */ }
+        setStored(next);
+    };
+    return <Context.Provider value={{ preferences, setPreferences, t }}>{children}</Context.Provider>;
 }
 export function useProduct() { return useContext(Context); }
 export function PreferencesControl() {
@@ -45,7 +54,7 @@ export function PreferencesControl() {
     <label><span>{t('Language')}</span><select aria-label={t('Language')} value={preferences.language} onChange={event => setPreferences({ language: event.target.value as Language })}><option value="vi">Tiếng Việt</option><option value="en">English</option></select></label>
     <label><span>{t('Theme')}</span><select aria-label={t('Theme')} value={preferences.theme} onChange={event => setPreferences({ theme: event.target.value as Theme })}><option value="system">{t('System')}</option><option value="light">{t('Light')}</option><option value="dark">{t('Dark')}</option></select></label>
     <label><span>{t('Accent')}</span><select aria-label={t('Accent')} value={preferences.accent} onChange={event => setPreferences({ accent: event.target.value as Accent })}><option value="teal">{t('Teal')}</option><option value="blue">{t('Blue')}</option><option value="violet">{t('Violet')}</option></select></label>
-    <label><span>{t('Text size')}</span><select aria-label={t('Text size')} value={preferences.textSize} onChange={event => setPreferences({textSize:event.target.value as Preferences['textSize']})}><option value="standard">{t('Standard')}</option><option value="large">{t('Large')}</option></select></label>
+    <label><span>{t('Text size')}</span><select aria-label={t('Text size')} value={preferences.textSize} onChange={event => setPreferences({ textSize: event.target.value as Preferences['textSize'] })}><option value="standard">{t('Standard')}</option><option value="large">{t('Large')}</option></select></label>
   </div></details>;
 }
 export function Status({ value }: {

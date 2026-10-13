@@ -758,3 +758,24 @@ Object.assign(translations, {
  'No accounts are waiting for approval.':'Không có tài khoản nào đang chờ duyệt.','Requested an account':'Đã xin tạo tài khoản','was approved.':'đã được duyệt.','was declined.':'đã bị từ chối.','All accounts':'Tất cả tài khoản','More':'Thêm',
  'Use at least 8 characters.':'Dùng ít nhất 8 ký tự.','At least 8 characters. Avoid common passwords.':'Ít nhất 8 ký tự. Tránh mật khẩu phổ biến.',
 });
+
+Object.assign(translations, {
+ 'Installing…':'Đang cài đặt…','Checkpoint storage':'Nơi lưu checkpoint','Quit':'Thoát',
+ 'Connect to the lab LAN or Tailscale to download installers and large files.':'Kết nối LAN của lab hoặc Tailscale để tải bộ cài và tệp lớn.',
+ 'bytes ·':'byte ·','bytes':'byte','VRAM (GiB)':'VRAM (GiB)','Your lab':'Lab của bạn','LAN & Tailscale':'LAN & Tailscale','Distributed experiment workflow':'Quy trình thí nghiệm phân tán',
+ 'Could not sign in.':'Không đăng nhập được.','Pinned revision':'Phiên bản đã ghim','EVOLUTION STRATEGIES · DISTRIBUTED COMPUTE':'EVOLUTION STRATEGIES · TÍNH TOÁN PHÂN TÁN',
+ 'Select a pinned model and frozen dataset.':'Chọn model đã ghim và dataset đã đóng băng.','Experiment recipe':'Công thức thí nghiệm','Built-in workload · Recipe v1':'Tác vụ có sẵn · Recipe v1','Math dataset · Recipe v2':'Dataset toán · Recipe v2',
+ 'Pinned model':'Model đã ghim','Select model':'Chọn model','Frozen dataset':'Dataset đã đóng băng','Batch size':'Kích thước batch','Batch seed':'Seed của batch','Sigma schedule':'Lịch sigma','Minimum sigma':'Sigma tối thiểu',
+ 'Maximum output tokens':'Số token đầu ra tối đa','Import models and datasets':'Nhập model và dataset','Alpha':'Alpha','Sigma':'Sigma','Best validation accuracy':'Độ chính xác validation tốt nhất','Test accuracy':'Độ chính xác test',
+ 'Locked':'Đã khóa','Export reload':'Nạp lại bản xuất','Verified':'Đã xác minh','Pending':'Đang chờ','Checkpoint sync':'Đồng bộ checkpoint',
+ 'Saved and verified.':'Đã lưu và xác minh.','Models and math datasets':'Model và dataset toán','Connect to the lab LAN or Tailscale to import datasets and model files.':'Kết nối LAN của lab hoặc Tailscale để nhập dataset và tệp model.',
+ 'Open private lab':'Mở lab riêng','Import math dataset':'Nhập dataset toán','Dataset name':'Tên dataset','Dataset splits':'Cách chia dataset','One file · seeded 80/10/10':'Một tệp · chia 80/10/10 theo seed',
+ 'Train, validation and test files':'Tệp train, validation và test','Prompt field':'Trường câu hỏi','Answer field':'Trường đáp án','Answer format':'Định dạng đáp án','Exact number':'Số chính xác',
+ 'Dataset file exceeds 3 MB.':'Tệp dataset vượt quá 3 MB.','Cannot read file.':'Không đọc được tệp.',
+ 'Split seed: 42. Duplicate prompts are rejected. Test examples stay out of training and checkpoint selection.':'Seed chia: 42. Câu hỏi trùng bị từ chối. Mẫu test không dùng để huấn luyện hay chọn checkpoint.',
+ 'Import dataset':'Nhập dataset','Register pinned model':'Đăng ký model đã ghim','Select a pinned file manifest.':'Hãy chọn tệp manifest đã ghim.','Missing pinned model file: ':'Thiếu tệp model đã ghim: ','Model upload failed: ':'Tải model lên thất bại: ',
+ 'Pinned file manifest':'Manifest tệp đã ghim','Invalid model manifest.':'Manifest model không hợp lệ.','Model source':'Nguồn model','Pinned Hugging Face reference':'Tham chiếu Hugging Face đã ghim','Upload safetensors and tokenizer files':'Tải lên tệp safetensors và tokenizer',
+ 'The manifest pins commit revisions and every file checksum. Every selected GPU must qualify for the model before training.':'Manifest ghim phiên bản commit và checksum của từng tệp. Mỗi GPU được chọn phải đạt kiểm tra tương thích với model trước khi huấn luyện.',
+ 'Register model':'Đăng ký model','Frozen datasets':'Dataset đã đóng băng',
+ 'Connection addresses':'Địa chỉ kết nối','Compute control URL':'URL điều khiển tính toán','Private file transfer URL':'URL truyền tệp riêng','Turn contribution OFF and wait for all jobs to stop before changing addresses.':'Hãy tắt đóng góp và chờ mọi tác vụ dừng trước khi đổi địa chỉ.','Save addresses':'Lưu địa chỉ',
+});
