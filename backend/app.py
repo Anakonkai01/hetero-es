@@ -18,6 +18,7 @@ from .store import ACTIVE, TERMINAL, Store, now
 from .runtime import Runtime
 from .lab import install_lab_routes
 from .live import LiveStreams
+from .templates import install_template_routes
 from .timeline import build_timeline
 from .throttle import Throttle, client_address
 
@@ -533,6 +534,7 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
                     'SELECT e.* FROM monitoring_events e JOIN assignments a ON a.id=e.assignment_id WHERE a.run_id=? AND e.sequence>? ORDER BY e.sequence LIMIT 2000',(run_id,max(0,afterSequence)))]
 
     install_lab_routes(app,store,user,scoped,runtime)
+    install_template_routes(app,store,scoped)
     if getattr(runtime, 'agent_mode', False):
         from .devices import install_device_routes
         device_auth=install_device_routes(app,store,user,runtime)
