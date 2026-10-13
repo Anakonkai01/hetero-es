@@ -89,3 +89,10 @@ def test_real_proxy_accepts_tunnel_host_and_denies_bulk_even_with_forged_host(tm
             assert opener.open(urllib.request.Request(f'http://127.0.0.1:{web}/downloads/worker.exe',headers={'Host':'x.example.org'}),timeout=2).status==200
     finally:
         process.terminate();process.wait(timeout=10);upstream.shutdown();upstream.server_close()
+
+
+def test_live_streams_are_never_buffered_by_the_public_entry():
+    text=caddyfile({'apiUrl':'http://100.64.0.1:8002','privateComputeUrl':'http://100.64.0.1:8765'})
+    web=text.split('http://:8081')[0]
+    assert 'flush_interval -1' in web, 'the Web/API entry must pass server-sent events through immediately'
+    assert 'flush_interval' not in text.split('http://:8081')[1], 'the compute entry carries no streams'

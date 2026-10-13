@@ -63,7 +63,10 @@ http://:%d {
         respond "Private LAN/Tailscale transfer required" 403
     }
     handle {
-        reverse_proxy %s
+        # Server-sent events (the live run view) must reach the browser as they are produced.
+        reverse_proxy %s {
+            flush_interval -1
+        }
     }
 }
 http://:%d {
