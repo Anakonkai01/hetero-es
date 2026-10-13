@@ -32,6 +32,7 @@ class Notifications:
         with store.db() as db:
             db.execute('CREATE TABLE IF NOT EXISTS notifications (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, kind TEXT NOT NULL, params TEXT NOT NULL, target TEXT NOT NULL, created TEXT NOT NULL, read_at TEXT, dedupe TEXT NOT NULL UNIQUE)')
             db.execute('CREATE INDEX IF NOT EXISTS notifications_user ON notifications(user_id, id)')
+        self.start_following()
 
     def _add(self, db, user_id, kind, params, target, dedupe):
         db.execute('INSERT OR IGNORE INTO notifications(user_id,kind,params,target,created,dedupe) VALUES (?,?,?,?,?,?)', (user_id, kind, json.dumps(params, sort_keys=True), target, _stamp(), dedupe))
@@ -39,17 +40,22 @@ class Notifications:
     def _administrators(self, db):
         return [row['id'] for row in db.execute('SELECT id, profile FROM users') if (lambda p: p.get('platformAdmin') and p.get('accountStatus') == 'ACTIVE')(json.loads(row['profile']))]
 
+    def start_following(self):
+        """Fix the starting point the first time this lab runs with notifications, so history is never dug up; later starts keep it."""
+        with self.store.db() as db:
+            if db.execute("SELECT 1 FROM settings WHERE key='notificationCursor'").fetchone() is None:
+                latest = db.execute('SELECT COALESCE(MAX(sequence),0) FROM audit').fetchone()[0]
+                db.execute("INSERT OR REPLACE INTO settings VALUES ('notificationCursor',?)", (json.dumps(latest),))
+                db.execute("INSERT OR REPLACE INTO settings VALUES ('notificationSince',?)", (json.dumps(datetime.now(timezone.utc).timestamp()),))
+
     def catch_up(self):
-        """Create the notifications for everything that happened since the last look. The very first look only sets the starting point."""
+        """Create the notifications for everything that happened since the last look."""
         store = self.store
         with store.db() as db:
             cursor = db.execute("SELECT value FROM settings WHERE key='notificationCursor'").fetchone()
             horizon = db.execute("SELECT value FROM settings WHERE key='notificationSince'").fetchone()
             if cursor is None:
-                latest = db.execute('SELECT COALESCE(MAX(sequence),0) FROM audit').fetchone()[0]
-                db.execute("INSERT OR REPLACE INTO settings VALUES ('notificationCursor',?)", (json.dumps(latest),))
-                db.execute("INSERT OR REPLACE INTO settings VALUES ('notificationSince',?)", (json.dumps(datetime.now(timezone.utc).timestamp()),))
-                return
+                return self.start_following()
             last = json.loads(cursor[0])
             since = json.loads(horizon[0]) if horizon else 0
             admins = self._administrators(db)

@@ -41,7 +41,11 @@ try{
  await admin.waitForURL('**/workspace');
  await admin.getByText('1 account is waiting for approval.').waitFor({timeout:20000});results.adminBannerShown=true;
  await admin.getByRole('status',{name:'1 accounts waiting for approval'}).waitFor();results.adminBadgeShown=true;
- await admin.getByRole('link',{name:'Review requests'}).click();await admin.waitForURL('**/operations');
+ // The bell tells the administrator too, in plain words, and the count goes down when it is read.
+ const bell=admin.locator('.bell > summary');await bell.waitFor();await admin.waitForFunction(()=>document.querySelector('.bell-badge')?.textContent==='1',null,{timeout:20000});results.bellBadge=true;
+ await bell.click();await admin.getByText('New account request: New Friend (@new-friend)').waitFor();results.bellExplainsRequest=true;
+ await admin.getByRole('link',{name:/New account request/}).click();await admin.waitForURL('**/operations');
+ await admin.waitForFunction(()=>!document.querySelector('.bell-badge'),null,{timeout:20000});results.bellClearsWhenRead=true;
  const card=admin.locator('[data-account="new-friend"]').first();await card.getByText('New Friend').waitFor();
  await admin.screenshot({path:path.join(output,'approval.png'),fullPage:true});
  await card.getByRole('button',{name:'Approve'}).click();
@@ -49,6 +53,7 @@ try{
  await admin.getByText('No accounts are waiting for approval.').waitFor();
  assert.equal(await admin.getByText('account is waiting for approval.').count(),0);results.bannerClearsAfterApproval=true;
  await friend.reload();await friend.getByText('Your account is approved.').waitFor({timeout:20000});results.friendSeesApproval=true;
+ await friend.locator('.bell > summary').click();await friend.getByText('Your account was approved').waitFor({timeout:20000});results.friendBellSaysApproved=true;
  for(const width of [375,768,1280]){for(const page of [friend,admin]){await page.setViewportSize({width,height:900});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,`overflow at ${width}`);}}results.noHorizontalOverflow=true;
  assert.deepEqual(errors,[]);
  await fs.writeFile(receipt,JSON.stringify({fixtureLab:true,realLab:false,gpuWork:false,...results,browserErrors:errors},null,2)+'\n',{flag:'wx'});console.log('PASS web onboarding contract (fixture lab, Chromium).');

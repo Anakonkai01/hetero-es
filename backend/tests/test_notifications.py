@@ -22,23 +22,37 @@ def finish(store, run_id, status='COMPLETED'):
         db.execute('UPDATE experiments SET body=? WHERE id=?', (json.dumps({**body, 'status': status, 'completedAt': now()}), run_id))
 
 
-def test_a_first_look_starts_empty_and_history_does_not_flood_the_bell(setup):
+def test_history_from_before_notifications_existed_does_not_flood_the_bell(setup):
+    from backend.notifications import Notifications
     client, store, _ = setup
     admin = login(client, 'admin')
-    register(client, 'early')            # happened before anyone looked
+    register(client, 'early')
     old = draft(client, admin).json()['experimentId']
     finish(store, old)
+    with store.db() as db:               # a lab that has never had notifications
+        db.execute("DELETE FROM settings WHERE key IN ('notificationCursor','notificationSince')")
+    Notifications(store)                 # the server starting up fixes the starting point
     assert listing(client, admin) == {'items': [], 'unread': 0}
     assert listing(client, admin) == {'items': [], 'unread': 0}, 'a second look does not dig the history up either'
     with store.db() as db:
         assert json.loads(db.execute("SELECT value FROM settings WHERE key='notificationCursor'").fetchone()[0]) == db.execute('SELECT MAX(sequence) FROM audit').fetchone()[0]
     assert client.get('/api/v1/notifications').status_code == 401
+    register(client, 'late')
+    assert kinds(client, admin) == ['account.request'], 'what happens after start-up is announced'
+
+
+def test_a_restart_keeps_the_starting_point_so_nothing_is_missed(setup):
+    from backend.notifications import Notifications
+    client, store, _ = setup
+    admin = login(client, 'admin')
+    register(client, 'before-restart')
+    Notifications(store)                 # a second start-up must not move the starting point forward
+    assert kinds(client, admin) == ['account.request']
 
 
 def test_a_new_account_request_reaches_administrators_only_and_only_once(setup):
     client, store, _ = setup
     admin, participant = login(client, 'admin'), login(client, 'participant')
-    listing(client, admin)               # start following
     profile, _ = register(client, 'newcomer')
     items = listing(client, admin)['items']
     assert [i['kind'] for i in items] == ['account.request']

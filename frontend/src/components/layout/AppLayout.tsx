@@ -14,6 +14,7 @@ import {
   RefreshIcon,
 } from "../ui/Icons";
 import { useStatusToasts } from "./useStatusToasts";
+import { NotificationBell } from "./NotificationBell";
 import { useSession } from "../../app/session";
 import { IS_MOCK } from "../../lib/dataSource";
 import {useState} from 'react';
@@ -170,6 +171,7 @@ export function AppLayout() {
             {refreshing ? t("Refreshing…") : t("Refresh")}
           </button>
 
+          {!IS_MOCK && session && <NotificationBell />}
           <PreferencesControl/>
           {IS_MOCK && import.meta.env.DEV && (
             <span style={{ display: "flex", alignItems: "center", gap: 6 }}>

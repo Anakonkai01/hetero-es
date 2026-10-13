@@ -844,3 +844,11 @@ Object.assign(translations, {
 Object.assign(translations, { 'Compare experiments': 'So sánh thí nghiệm', 'Create experiment': 'Tạo thí nghiệm' });
 
 Object.assign(translations, { 'GPU fleet summary': 'Tóm tắt cụm GPU', 'online': 'online', 'offline': 'offline', 'in use by an experiment': 'đang dùng cho thí nghiệm', 'contributing': 'đang đóng góp', 'Never connected': 'Chưa từng kết nối', 'Offline': 'Offline', 'Personal information': 'Thông tin cá nhân' });
+
+Object.assign(translations, {
+ 'Notifications':'Thông báo','unread':'chưa đọc','Mark all as read':'Đánh dấu đã đọc hết','Could not load notifications.':'Không tải được thông báo.',
+ 'Nothing yet. You will be told when an experiment ends or something needs you.':'Chưa có gì. Bạn sẽ được báo khi một thí nghiệm kết thúc hoặc có việc cần bạn.','Also show browser notifications':'Hiện cả thông báo của trình duyệt',
+ 'New account request: {displayName} (@{username})':'Yêu cầu tài khoản mới: {displayName} (@{username})','A GPU computer is waiting for approval: {name}':'Một máy GPU đang chờ duyệt: {name}',
+ 'Your account was approved':'Tài khoản của bạn đã được duyệt','Your account request was declined':'Yêu cầu tài khoản của bạn bị từ chối','Your account was suspended':'Tài khoản của bạn bị tạm khóa',
+ 'Experiment finished: {name}':'Thí nghiệm đã xong: {name}','Experiment failed: {name}':'Thí nghiệm bị lỗi: {name}','Experiment cancelled: {name}':'Thí nghiệm đã hủy: {name}',
+});
