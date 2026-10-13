@@ -33,7 +33,7 @@ app.whenReady().then(async () => {
     log.info('starting', { version: app.getVersion(), platform: process.platform, packaged: app.isPackaged });
     service = new Service(root, resources, new Vault(root, safeStorage));
     lifecycle = new Lifecycle({ service, quitApp: () => app.quit(), show, notify, fail, log });
-    window = new BrowserWindow({ width: 1050, height: 820, minWidth: 360, minHeight: 520, show: false, backgroundColor: '#101a23', webPreferences: { preload: path.join(__dirname, 'preload.cjs'), sandbox: true, contextIsolation: true, nodeIntegration: false } });
+    window = new BrowserWindow({ width: 820, height: 780, minWidth: 360, minHeight: 520, show: false, backgroundColor: '#101a23', webPreferences: { preload: path.join(__dirname, 'preload.cjs'), sandbox: true, contextIsolation: true, nodeIntegration: false } });
     window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
     window.webContents.on('will-navigate', event => event.preventDefault());
     window.webContents.session.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));

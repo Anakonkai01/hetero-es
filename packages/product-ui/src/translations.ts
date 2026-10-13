@@ -852,3 +852,5 @@ Object.assign(translations, {
  'Your account was approved':'Tài khoản của bạn đã được duyệt','Your account request was declined':'Yêu cầu tài khoản của bạn bị từ chối','Your account was suspended':'Tài khoản của bạn bị tạm khóa',
  'Experiment finished: {name}':'Thí nghiệm đã xong: {name}','Experiment failed: {name}':'Thí nghiệm bị lỗi: {name}','Experiment cancelled: {name}':'Thí nghiệm đã hủy: {name}',
 });
+
+Object.assign(translations, { 'GPU station': 'Trạm GPU', 'Waiting for the lab to hand out work.': 'Đang chờ lab giao việc.', 'Your GPU is working': 'GPU của bạn đang làm việc', 'Do not shut this computer down yet.': 'Chưa tắt máy vội.', 'Sign in to start contributing.': 'Đăng nhập để bắt đầu đóng góp.', 'The local agent is not running yet.': 'Agent trên máy chưa chạy.', 'Evaluating candidates for the lab': 'Đang đánh giá candidate cho lab', 'GPU measurements': 'Số đo GPU', 'GPU load': 'Tải GPU', 'VRAM': 'VRAM', 'Temperature': 'Nhiệt độ', 'Advanced: network, role, assignments and diagnostics': 'Nâng cao: mạng, vai trò, phân công và chẩn đoán', 'Epoch': 'Epoch' });

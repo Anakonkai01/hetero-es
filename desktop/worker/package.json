@@ -9,7 +9,7 @@
     "dev": "vite --host 127.0.0.1 --port 5180",
     "build": "tsc --noEmit && vite build",
     "start": "electron .",
-    "test": "node --test tests/*.test.cjs",
+    "test": "node --test tests/*.test.cjs tests/*.test.mjs",
     "pack:linux": "npm run build && electron-builder --linux AppImage --x64 --publish never",
     "pack:windows": "npm run build && electron-builder --win nsis --x64 --publish never"
   },
