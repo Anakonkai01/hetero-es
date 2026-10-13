@@ -2,7 +2,8 @@
  * Electron contract for the first minutes of the Worker (CPU only, no GPU, no real lab, no credentials):
  * lab-address entry, error messages, connection state, sign-out / sign-in, Quit while a connection hangs, and
  * the diagnostics log. Run on Linux under a virtual display:
- *   xvfb-run -a node scripts/check-worker-onboarding.cjs <fresh evidence directory>
+ *   xvfb-run -a node scripts/check-worker-onboarding.cjs <fresh evidence directory> [--packaged <path of the built app executable>]
+ * With --packaged it drives the built Linux app (a real packaged artifact, isolated through XDG_CONFIG_HOME) instead of the sources.
  * It drives the Linux build of the same Electron code the Windows installer packages; it does NOT exercise
  * Windows-only behaviour (tray, NSIS, safeStorage).
  */
@@ -16,6 +17,7 @@ const net = require('node:net');
 
 const output = process.argv[2];
 if (!output) throw Error('Explicit fresh evidence directory required');
+const packaged = process.argv.includes('--packaged') ? path.resolve(process.argv[process.argv.indexOf('--packaged') + 1]) : null;
 const freePort = () => new Promise(resolve => { const s = net.createServer(); s.listen(0, '127.0.0.1', () => { const { port } = s.address(); s.close(() => resolve(port)); }); });
 const listen = server => new Promise(resolve => server.listen(0, '127.0.0.1', () => resolve(server.address().port)));
 
@@ -23,7 +25,8 @@ const listen = server => new Promise(resolve => server.listen(0, '127.0.0.1', ()
     await fs.mkdir(output, { recursive: true });
     const receipt = path.join(output, 'worker-onboarding.json');
     try { await fs.access(receipt); throw Error('Evidence already exists'); } catch (e) { if (e.code !== 'ENOENT') throw e; }
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), 'worker-onboarding-'));
+    const home = await fs.mkdtemp(path.join(os.tmpdir(), 'worker-onboarding-'));
+    let root = home;
     const seen = { lab: [], hang: 0 };
     const lab = http.createServer((req, res) => {
         seen.lab.push(`${req.method} ${req.url} ua=${req.headers['user-agent']}`);
@@ -36,7 +39,9 @@ const listen = server => new Promise(resolve => server.listen(0, '127.0.0.1', ()
     const results = {};
     let app;
     const launch = async () => {
-        app = await electron.launch({ args: [path.resolve('desktop/worker'), '--disable-gpu'], env: { ...process.env, CUDA_VISIBLE_DEVICES: '', HETEROES_WORKER_TEST_DATA: root }, timeout: 30000 });
+        const env = { ...process.env, CUDA_VISIBLE_DEVICES: '', ...(packaged ? { XDG_CONFIG_HOME: home } : { HETEROES_WORKER_TEST_DATA: root }) };
+        app = await electron.launch(packaged ? { executablePath: packaged, args: ['--disable-gpu', '--no-sandbox'], env, timeout: 30000 } : { args: [path.resolve('desktop/worker'), '--disable-gpu'], env, timeout: 30000 });
+        if (packaged) root = await app.evaluate(({ app }) => app.getPath('userData'));
         const page = await app.firstWindow();
         page.on('pageerror', error => { throw error; });
         await page.locator('.preference-menu summary').click();
@@ -52,6 +57,10 @@ const listen = server => new Promise(resolve => server.listen(0, '127.0.0.1', ()
         let page = await launch();
         await address(page).waitFor();
         assert.equal(await address(page).inputValue(), 'https://lab.heteroes.site', 'the lab address shipped with the app is offered');
+        const build = (await status(page)).result.build;
+        assert.ok(packaged ? /^lf1-\d{8}-r\d+$/.test(build) : build === 'dev', `build name: ${build}`);
+        await page.getByText(build, { exact: false }).first().waitFor();
+        results.build = build;
         assert.equal(await page.getByText('Network and compute role').isVisible(), false, 'network/role are tucked away while onboarding');
         results.defaultOffered = true;
 
@@ -127,11 +136,11 @@ const listen = server => new Promise(resolve => server.listen(0, '127.0.0.1', ()
         assert.ok(seen.lab.every(line => line.includes('ua=HeteroES-Worker/')), 'every request identifies itself');
         results.requestsIdentifyThemselves = true;
 
-        await fs.writeFile(receipt, JSON.stringify({ gpuWork: false, realLab: false, platformExercised: process.platform, windowsExercised: false, ...results, labRequests: seen.lab.length }, null, 2) + '\n', { flag: 'wx' });
+        await fs.writeFile(receipt, JSON.stringify({ gpuWork: false, realLab: false, packagedApp: Boolean(packaged), platformExercised: process.platform, windowsExercised: false, ...results, labRequests: seen.lab.length }, null, 2) + '\n', { flag: 'wx' });
         console.log('PASS Worker onboarding contract on', process.platform, '(not a Windows run).');
     } finally {
         if (app) await app.close().catch(() => { });
         await Promise.all([lab, hang].map(s => new Promise(resolve => { s.closeAllConnections?.(); s.close(resolve); })));
-        await fs.rm(root, { recursive: true, force: true });
+        await fs.rm(home, { recursive: true, force: true });
     }
 })().catch(error => { console.error(error.stack || error.message); process.exitCode = 1; });
