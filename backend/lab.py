@@ -15,6 +15,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from .store import ACTIVE, now
 from .backup import begin_maintenance,end_maintenance,create_bundle,bundle_path
 from .throttle import client_address
+from .passwords import password_problem
 
 
 class Strict(BaseModel):
@@ -23,7 +24,7 @@ class Strict(BaseModel):
 
 class Registration(Strict):
     username: str = Field(min_length=3,max_length=64,pattern=r'^[a-zA-Z0-9][a-zA-Z0-9_.-]*$')
-    password: str = Field(min_length=12,max_length=200)
+    password: str = Field(max_length=200)
     displayName: str = Field(min_length=1,max_length=100)
 
 
@@ -41,7 +42,7 @@ class AccountEdit(Strict):
 
 class PasswordEdit(Strict):
     currentPassword: str = Field(max_length=200)
-    newPassword: str = Field(min_length=12,max_length=200)
+    newPassword: str = Field(max_length=200)
 
 
 class WorkspaceCreate(Strict):
@@ -91,6 +92,9 @@ def install_lab_routes(app, store, user, scoped, runtime):
         wait=app.state.registrations.retry_after(address)
         if wait:
             raise HTTPException(429,f'Too many registrations from this address. Try again in {wait} seconds.',headers={'Retry-After':str(wait)})
+        problem=password_problem(body.password,body.username,body.displayName)
+        if problem:
+            raise HTTPException(422,problem)
         app.state.registrations.record(address)
         profile={'userId':uuid.uuid4().hex,'username':body.username,'displayName':body.displayName,
                  'accountStatus':'PENDING','platformAdmin':False,'canCreateWorkspace':False}
@@ -113,6 +117,10 @@ def install_lab_routes(app, store, user, scoped, runtime):
 
     @app.post('/api/v1/auth/password',status_code=204)
     def change_password(body:PasswordEdit,current=Depends(user),authorization:str=Header()):
+        profile=store.profile(current['userId'])
+        problem=password_problem(body.newPassword,profile['username'],profile.get('displayName',''))
+        if problem:
+            raise HTTPException(422,problem)
         with store.db() as db:
             password_hash=db.execute('SELECT hash FROM users WHERE id=?',(current['userId'],)).fetchone()[0]
             try:
