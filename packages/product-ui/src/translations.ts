@@ -727,3 +727,18 @@ Object.assign(translations,{'Fresh package sensors':'Cảm biến package mới'
 Object.assign(translations,{'Recording since':'Bắt đầu ghi từ','CPU power sensor unavailable on this host. Hardware sensor support depends on the OS, device and read permissions.':'Chưa đọc được cảm biến công suất CPU trên máy này. Khả năng đọc cảm biến phụ thuộc hệ điều hành, phần cứng và quyền đọc.'});
 
 Object.assign(translations,{'Component readings & coverage':'Số đo thành phần & thời gian đã đo'});
+
+Object.assign(translations, {
+ 'Connect':'Kết nối','Cancel':'Hủy','Connected to':'Đã kết nối tới','Change lab':'Đổi lab','Network, role and diagnostics':'Mạng, vai trò và chẩn đoán','Lab on a private network (Tailscale)':'Lab trong mạng riêng (Tailscale)',
+ 'Enter your lab address. If you downloaded this app from your lab\'s website, it is already filled in.':'Nhập địa chỉ lab. Nếu bạn tải ứng dụng từ website của lab, địa chỉ đã được điền sẵn.',
+ 'This is not a valid lab address. Example: lab.example.org':'Địa chỉ lab không hợp lệ. Ví dụ: lab.example.org',
+ 'Use an https:// address. Plain http:// is only allowed for private network addresses.':'Hãy dùng địa chỉ https://. http:// thường chỉ được dùng cho địa chỉ mạng riêng.',
+ 'The lab did not answer. Check the address and your internet connection.':'Lab không phản hồi. Kiểm tra địa chỉ và kết nối Internet.',
+ 'The lab took too long to answer. Check the address and try again.':'Lab phản hồi quá lâu. Kiểm tra địa chỉ rồi thử lại.',
+ 'This address answered, but it is not a HeteroES lab.':'Địa chỉ này có phản hồi nhưng không phải lab HeteroES.',
+ 'This lab does not accept desktop Workers yet. Ask its administrator to update it.':'Lab này chưa nhận Worker trên máy tính. Hãy nhờ quản trị viên cập nhật.',
+ 'The lab sent a reply this app does not understand. Update the app or ask the administrator.':'Lab trả về dữ liệu ứng dụng không hiểu. Hãy cập nhật ứng dụng hoặc hỏi quản trị viên.',
+ 'This computer is paired to another lab. Pair it again to use this one.':'Máy này đã ghép với lab khác. Hãy ghép lại để dùng lab này.',
+ 'Enter the lab address first.':'Hãy nhập địa chỉ lab trước.','Sign in first.':'Hãy đăng nhập trước.','Cancelled.':'Đã hủy.',
+ 'The lab server is not answering right now. Try again later or ask the lab administrator.':'Máy chủ lab đang không phản hồi. Hãy thử lại sau hoặc hỏi quản trị viên lab.',
+});

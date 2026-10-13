@@ -22,6 +22,8 @@ type State = {
     telemetry?:ResourceObservation|null;
     telemetryHistory?:ResourceHistoryPoint[];
     serverUrl: string;
+    defaultLabUrl?: string;
+    build?: string;
     signedIn: boolean;
     session?: {
         user: {
@@ -105,6 +107,14 @@ declare global {
 }
 const explanations: Record<string, string> = { LAB_HTTP_401: 'Incorrect username or password. Sign in again.', LAB_HTTP_403: 'This action requires the device owner or administrator.', LAB_HTTP_409: 'The device or assignment is not ready. Refresh and try again.', SELF_TEST_REQUIRED: 'Run the GPU compatibility check before pairing.', SECURE_STORAGE_REQUIRED: 'Secure credential storage is unavailable. Unlock your system keyring and restart.', INSUFFICIENT_DISK_SPACE: 'Free some disk space and retry. Partial downloads are kept.', CUDA_UNAVAILABLE: 'CUDA_UNAVAILABLE', WINDOWS_RUNTIME_MISSING: 'WINDOWS_RUNTIME_MISSING', COMPATIBILITY_FAILED: 'The numerical check failed. Keep contribution OFF and export diagnostics.', AGENT_UNAVAILABLE: 'A process state is unknown; resources remain reserved.', RUNTIME_PROCESS_FAILED: 'Runtime setup or GPU check failed. Export diagnostics and retry.', ACTION_IN_PROGRESS: 'Wait for the current action to finish.', DRAIN_NOT_CONFIRMED: 'Waiting for owned processes to stop.', SETUP_IN_PROGRESS: 'Wait for runtime setup or the compatibility check to finish.' };
 Object.assign(explanations, { LAB_UPDATE_REQUIRED: 'This lab needs a server update before changing a paired device role.', STOP_WORK_FIRST: 'Stop contribution and wait for all processes to drain.', INVALID_COMPUTE_ADDRESS: 'Select an available private address on this computer.', COORDINATOR_NOT_QUALIFIED: 'Coordinator requires a qualified Linux GPU with at least 11000 MB VRAM.' });
+Object.assign(explanations, {
+    INVALID_LAB_ADDRESS: 'This is not a valid lab address. Example: lab.example.org', HTTPS_OR_PRIVATE_NETWORK_REQUIRED: 'Use an https:// address. Plain http:// is only allowed for private network addresses.',
+    LAB_UNREACHABLE: 'The lab did not answer. Check the address and your internet connection.', LAB_TIMEOUT: 'The lab took too long to answer. Check the address and try again.',
+    NOT_A_LAB: 'This address answered, but it is not a HeteroES lab.', LAB_AGENT_MODE_REQUIRED: 'This lab does not accept desktop Workers yet. Ask its administrator to update it.',
+    LAB_BAD_RESPONSE: 'The lab sent a reply this app does not understand. Update the app or ask the administrator.', DIFFERENT_LAB_REQUIRES_NEW_PAIRING: 'This computer is paired to another lab. Pair it again to use this one.',
+    SELECT_LAB_FIRST: 'Enter the lab address first.', SIGN_IN_REQUIRED: 'Sign in first.', ACTION_CANCELLED: 'Cancelled.',
+});
+const explain = (code: string) => explanations[code] ?? (/^LAB_HTTP_5\d\d$/.test(code) ? 'The lab server is not answering right now. Try again later or ask the lab administrator.' : 'Could not complete the action. Check the connection and export diagnostics.');
 
 function App() {
     const { t } = useProduct();
@@ -116,6 +126,7 @@ function App() {
     const [error, setError] = useState('');
     const [busy, setBusy] = useState('');
     const [connectionReport, setConnectionReport] = useState<ConnectionReport>();
+    const [editLab, setEditLab] = useState(false);
     const polling = useRef(false);
     const quitting = useRef(false);
     async function refresh() { if (polling.current || quitting.current)
@@ -124,7 +135,7 @@ function App() {
         if (row.ok) {
             const s = row.result as State;
             setState(s);
-            setUrl(old => old || s.serverUrl);
+            setUrl(old => old || s.serverUrl || s.defaultLabUrl || '');
         }
         else
             setError(row.error ?? 'ACTION_FAILED');
@@ -146,6 +157,7 @@ function App() {
             setPassword('');
         if (action === 'checkConnection') setConnectionReport(row.result as ConnectionReport);
         if (action === 'configureCompute' || action === 'connect') setConnectionReport(undefined);
+        if (action === 'connect') setEditLab(false);
         if (action === 'quit') {
             if ((row.result as {
                 drained: boolean;
@@ -169,22 +181,25 @@ function App() {
     const unknown = agent?.error || agent?.assignments.some(a => a.workerAlive === null || a.coordinatorAlive === null);
     const contribution = unknown ? 'UNKNOWN' : agent?.enabled ? 'ON' : agent?.drained === false ? 'DRAINING' : 'OFF';
     const progress = state?.setup.progress;
-    return <div className="desktop-shell"><header className="desktop-header"><a className="brand" href="#main"><ProductMark/><span>HeteroES <small>Worker</small></span></a><PreferencesControl /></header><main id="main">
- <div className="intro"><div><p className="eyebrow">HETEROES / LAB COMPUTE</p><h1>{t(state?.device ? 'Your compute station.' : 'Prepare this computer')}</h1><p>{t('Your GPU stays OFF until you enable it.')}</p></div><Status value={state?.connection ?? 'CONNECTING'}/></div>
- {!state && <p role="status">{t('Loading…')}</p>}
- {error === 'WINDOWS_RUNTIME_MISSING' && <button className="secondary" onClick={() => void act('external', { target: 'windowsRuntime' })}>{t('Install Windows runtime')}</button>}{error && <Alert tone="error">{t(explanations[error] ?? 'Could not complete the action. Check the connection and export diagnostics.')} <code>{error}</code></Alert>}
- {!state?.device && <StepHeader steps={['Connect to a lab', 'Sign in', 'GPU and compatibility', 'Pair this device']} current={Math.min(step, 3)}/>}
- {state && !state.device && <div className="onboarding"><section className="panel"><h2>{t(step === 0 ? 'Connect to a lab' : step === 1 ? 'Sign in' : step === 2 ? 'GPU and compatibility' : 'Pair this device')}</h2>
- {step === 0 && <form onSubmit={e => { e.preventDefault(); void act('connect', { url }); }}><p>{t('Select your lab and sign in to begin.')}</p><label>{t('Lab server address')}<input type="url" required placeholder="http://100.x.x.x:8002" value={url} onChange={e => setUrl(e.target.value)}/></label><button disabled={!!busy}>{t('Check connection')}</button><p className="hint">{t('No terminal commands are required.')}</p><div className="secondary-actions"><button type="button" className="secondary" onClick={() => void act('external', { target: 'tailscale' })}>{t('Install or sign in to Tailscale')}</button><button type="button" className="secondary" onClick={() => void act('external', { target: 'help' })}>{t('Network help')}</button></div></form>}
- {step === 1 && <form onSubmit={e => { e.preventDefault(); void act('login', { username, password }); }}><p>{t('Use your own lab account.')}</p><label>{t('Username')}<input autoComplete="username" required value={username} onChange={e => setUsername(e.target.value)}/></label><label>{t('Password')}<input autoComplete="current-password" type="password" required value={password} onChange={e => setPassword(e.target.value)}/></label><button disabled={!!busy}>{t('Sign in')}</button><button className="secondary" type="button" onClick={() => void act('connect', { url })}>{t('Check connection')}</button></form>}
- {step === 2 && <><p>{t('Download an isolated Python runtime, dependencies and the pinned model. No system Python is needed.')}</p><p className="hint">{t('Setup checks disk space and SHA-256. Interrupted downloads resume when you retry.')}</p>{state.setup.profileAvailable === false ? <Alert tone="warning">{t('This development build has no runtime profile. Use the packaged installer.')}</Alert> : <button disabled={!!busy || state.setup.running} onClick={() => void act(state.setup.installed ? 'selftest' : 'install')}>{t(state.setup.installed ? 'Run compatibility check' : 'Install isolated runtime')}</button>}<p className="hint">{t('The check repeats a GPU candidate and verifies 16 answer texts against Linux.')}</p></>}
- {step === 3 && <form onSubmit={e => { e.preventDefault(); void act('pair', { displayName }); }}><label>{t('Device name')}<input maxLength={100} required value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder={t('My GPU computer')}/></label><button disabled={!!busy}>{t('Pair device')}</button><p className="hint">{t('Pairing uses a one-use code from your lab account. An administrator must approve the device.')}</p></form>}
- </section><aside className="panel guide"><span className="guide-icon">↗</span><h2>{t('A few steps. One shared lab.')}</h2><p>{t('Connect, verify your GPU, then choose when to contribute.')}</p><ul><li>{t('A restart always starts with contribution OFF.')}</li><li>{t('Close this window to keep running in the tray.')}</li><li>{t('Stop safely before shutting down this computer.')}</li></ul></aside></div>}
- {state && <ComputeSettings key={`${state.compute.network}/${state.compute.coordinator}/${state.compute.host}`} state={state} busy={busy} act={act}/>}
+    const advanced = <>
+  {state && <ComputeSettings key={`${state.compute.network}/${state.compute.coordinator}/${state.compute.host}`} state={state} busy={busy} act={act}/>}
  {state?.serverUrl && <section className="panel"><div className="panel-heading"><h2>{t('Connection checks')}</h2><button className="secondary" disabled={!!busy} onClick={() => void act('checkConnection')}>{t('Check connection')}</button></div>
  <p className="hint">{t('This check reads network status and a small weights range. It does not start GPU work.')}</p>
  {connectionReport && <ul className="connection-checks" aria-live="polite">{[...connectionReport.checks, ...connectionReport.assignments.flatMap(a => a.checks)].map((check, i) => <li key={i}><Status value={check.status}/><div><b>{t(check.step === 'lab' ? 'Lab server' : check.step === 'coordinator' ? 'Coordinator control' : 'Full weights route')}</b><p>{t(connectionMessages[check.code] ?? explanations[check.code] ?? 'Lab server did not answer.')} {check.status === 'FAIL' && <code>{check.code}</code>}</p></div></li>)}</ul>}
  </section>}
+    </>;
+    return <div className="desktop-shell"><header className="desktop-header"><a className="brand" href="#main"><ProductMark/><span>HeteroES <small>Worker</small></span></a><PreferencesControl /></header><main id="main">
+ <div className="intro"><div><p className="eyebrow">HETEROES / LAB COMPUTE</p><h1>{t(state?.device ? 'Your compute station.' : 'Prepare this computer')}</h1><p>{t('Your GPU stays OFF until you enable it.')}</p></div><Status value={state?.connection ?? 'CONNECTING'}/></div>
+ {!state && <p role="status">{t('Loading…')}</p>}
+ {error === 'WINDOWS_RUNTIME_MISSING' && <button className="secondary" onClick={() => void act('external', { target: 'windowsRuntime' })}>{t('Install Windows runtime')}</button>}{error && <Alert tone="error">{t(explain(error))} <code>{error}</code></Alert>}
+ {!state?.device && <StepHeader steps={['Connect to a lab', 'Sign in', 'GPU and compatibility', 'Pair this device']} current={Math.min(step, 3)}/>}
+ {state && !state.device && <div className="onboarding"><section className="panel"><h2>{t(step === 0 ? 'Connect to a lab' : step === 1 ? 'Sign in' : step === 2 ? 'GPU and compatibility' : 'Pair this device')}</h2>
+ {(step === 0 || (step === 1 && editLab)) && <form onSubmit={e => { e.preventDefault(); if (!url.trim()) { setError('INVALID_LAB_ADDRESS'); return; } void act('connect', { url }); }}><p>{t('Enter your lab address. If you downloaded this app from your lab\'s website, it is already filled in.')}</p><label>{t('Lab server address')}<input type="text" inputMode="url" autoCapitalize="off" autoCorrect="off" spellCheck={false} placeholder={state.defaultLabUrl || 'lab.example.org'} value={url} onChange={e => setUrl(e.target.value)}/></label><button disabled={!!busy}>{t('Connect')}</button>{editLab && <button type="button" className="secondary" disabled={!!busy} onClick={() => { setEditLab(false); setError(''); }}>{t('Cancel')}</button>}<details className="advanced-panel"><summary>{t('Lab on a private network (Tailscale)')}</summary><div className="secondary-actions"><button type="button" className="secondary" onClick={() => void act('external', { target: 'tailscale' })}>{t('Install or sign in to Tailscale')}</button><button type="button" className="secondary" onClick={() => void act('external', { target: 'help' })}>{t('Network help')}</button></div></details></form>}
+ {step === 1 && !editLab && <form onSubmit={e => { e.preventDefault(); void act('login', { username, password }); }}><p className="hint">{t('Connected to')} <code>{state.serverUrl}</code> <button type="button" className="secondary" disabled={!!busy} onClick={() => { setUrl(state.serverUrl); setEditLab(true); setError(''); }}>{t('Change lab')}</button></p><p>{t('Use your own lab account.')}</p><label>{t('Username')}<input autoComplete="username" required value={username} onChange={e => setUsername(e.target.value)}/></label><label>{t('Password')}<input autoComplete="current-password" type="password" required value={password} onChange={e => setPassword(e.target.value)}/></label><button disabled={!!busy}>{t('Sign in')}</button><button className="secondary" type="button" onClick={() => void act('connect', { url })}>{t('Check connection')}</button></form>}
+ {step === 2 && <><p>{t('Download an isolated Python runtime, dependencies and the pinned model. No system Python is needed.')}</p><p className="hint">{t('Setup checks disk space and SHA-256. Interrupted downloads resume when you retry.')}</p>{state.setup.profileAvailable === false ? <Alert tone="warning">{t('This development build has no runtime profile. Use the packaged installer.')}</Alert> : <button disabled={!!busy || state.setup.running} onClick={() => void act(state.setup.installed ? 'selftest' : 'install')}>{t(state.setup.installed ? 'Run compatibility check' : 'Install isolated runtime')}</button>}<p className="hint">{t('The check repeats a GPU candidate and verifies 16 answer texts against Linux.')}</p></>}
+ {step === 3 && <form onSubmit={e => { e.preventDefault(); void act('pair', { displayName }); }}><label>{t('Device name')}<input maxLength={100} required value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder={t('My GPU computer')}/></label><button disabled={!!busy}>{t('Pair device')}</button><p className="hint">{t('Pairing uses a one-use code from your lab account. An administrator must approve the device.')}</p></form>}
+ </section><aside className="panel guide"><span className="guide-icon">↗</span><h2>{t('A few steps. One shared lab.')}</h2><p>{t('Connect, verify your GPU, then choose when to contribute.')}</p><ul><li>{t('A restart always starts with contribution OFF.')}</li><li>{t('Close this window to keep running in the tray.')}</li><li>{t('Stop safely before shutting down this computer.')}</li></ul></aside></div>}
+ {state?.device ? advanced : <details className="advanced-panel"><summary>{t('Network, role and diagnostics')}</summary>{advanced}</details>}
 
  {state?.device && <><section className="panel contribution"><div><p className="eyebrow">{state.device.displayName}</p><h2>{t(contribution === 'ON' ? 'Ready to contribute' : contribution === 'DRAINING' ? 'Waiting for owned processes to stop.' : contribution === 'UNKNOWN' ? 'A process state is unknown; resources remain reserved.' : 'Contribution is OFF')}</h2><p>{t(unknown ? 'Process ownership is unknown. Check diagnostics before shutting down.' : !approval ? 'Waiting for administrator approval.' : active ? 'Your worker is evaluating a candidate.' : 'No GPU work is running.')}</p></div><Status value={contribution}/><button disabled={!!busy || (!agent?.enabled && (!approval || !state.signedIn || !!unknown || contribution === 'DRAINING'))} onClick={() => void act('contribution', { enabled: !agent?.enabled })}>{t(agent?.enabled ? 'Stop safely' : 'Enable contribution')}</button></section>
  {!state.signedIn && <section className="panel"><h2>{t('Sign in')}</h2><form onSubmit={e => { e.preventDefault(); void act('login', { username, password }); }}><label>{t('Username')}<input required value={username} onChange={e => setUsername(e.target.value)}/></label><label>{t('Password')}<input type="password" required value={password} onChange={e => setPassword(e.target.value)}/></label><button disabled={!!busy}>{t('Sign in')}</button></form></section>}
@@ -193,7 +208,7 @@ function App() {
  <section className="panel"><div className="panel-heading"><h2>{t('Lab connection')}</h2><Status value={state.connection}/></div><CopyValue value={state.serverUrl} label="Copy address"/><dl className="desktop-details"><div><dt>{t('Signed in as')}</dt><dd>{state.session?.user.displayName??t('Signed out')}</dd></div><div><dt>{t('Device name')}</dt><dd>{state.device.displayName}</dd></div></dl><p className="hint">{t('Closing this window keeps Worker in the tray. Use Stop safely before shutting down.')}</p></section></div><aside className="panel monitoring-panel"><ResourceTelemetry observation={state.telemetry} history={state.telemetryHistory} online={state.connection==='ONLINE'}/></aside></div></>}
 
  {(busy || state?.setup.running) && <section className="panel" role="status"><h3>{t('Progress')}</h3><p>{t(progress?.stage ?? busy)}</p>{progress?.file && <small>{progress.file}</small>}{progress?.total && <><progress max={progress.total} value={progress.received ?? 0}/><p>{Math.round((progress.received ?? 0) / progress.total * 100)}%</p></>}</section>}
- <footer className="desktop-footer"><p className="hint">HeteroES Worker · {t('Contribution is your choice.')}</p><button className="secondary" disabled={!!busy} onClick={() => void act('external', { target: 'lab' })}>{t('Open lab website')}</button><button className="secondary" disabled={!!busy} onClick={() => void act('diagnostics')}>{t('Export diagnostics')}</button>{state?.signedIn && <button className="secondary" disabled={!!busy} onClick={() => void act('logout')}>{t('Sign out')}</button>}<button className="secondary" disabled={!!busy} onClick={() => void act('quit')}>{t('Quit safely')}</button></footer>
+ <footer className="desktop-footer"><p className="hint">HeteroES Worker{state?.build ? ' · ' + state.build : ''} · {t('Contribution is your choice.')}</p><button className="secondary" disabled={!!busy} onClick={() => void act('external', { target: 'lab' })}>{t('Open lab website')}</button><button className="secondary" disabled={!!busy} onClick={() => void act('diagnostics')}>{t('Export diagnostics')}</button>{state?.signedIn && <button className="secondary" disabled={!!busy} onClick={() => void act('logout')}>{t('Sign out')}</button>}<button className="secondary" onClick={() => void act('quit')}>{t('Quit safely')}</button></footer>
  </main></div>;
 }
 createRoot(document.getElementById('root')!).render(<React.StrictMode><ProductProvider><App /></ProductProvider></React.StrictMode>);
