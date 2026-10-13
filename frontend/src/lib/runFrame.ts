@@ -124,6 +124,11 @@ export function frameAt(timeline: Timeline, atMs: number, options: { flightMs?: 
 
 export type PlayerState = { atMs: number; playing: boolean; speed: number };
 
+/** Where a replay begins: at the start, playing. Someone who watched the run live and saw it end stays on the finished picture instead of being thrown back. */
+export function replayStart(bounds: { startMs: number; endMs: number }, afterLive: boolean, speed: number): PlayerState {
+    return afterLive ? { atMs: bounds.endMs, playing: false, speed } : { atMs: bounds.startMs, playing: true, speed };
+}
+
 /** Moves the playhead by real elapsed time times the speed; it stops at the end and never goes before the start. */
 export function advance(state: PlayerState, elapsedMs: number, bounds: { startMs: number; endMs: number }): PlayerState {
     if (!state.playing) return state;

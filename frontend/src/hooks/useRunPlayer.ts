@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { advance, frameAt, runBounds, type Frame, type PlayerState, type Timeline } from "../lib/runFrame";
+import { advance, frameAt, replayStart, runBounds, type Frame, type PlayerState, type Timeline } from "../lib/runFrame";
 
 const FLIGHT_MS = 700;   // real time a packet takes to cross the diagram
 
@@ -12,7 +12,7 @@ export type Player = {
  * Drives what the Live screen shows. In live mode the playhead is the server's "now"; in replay it is moved by a
  * requestAnimationFrame loop. With reduced motion the screen is refreshed a few times a second instead of every frame.
  */
-export function useRunPlayer(timeline: Timeline | undefined, mode: "live" | "replay", clockOffsetMs: number, reducedMotion: boolean, options: { loop?: boolean; speed?: number } = {}): Player {
+export function useRunPlayer(timeline: Timeline | undefined, mode: "live" | "replay", clockOffsetMs: number, reducedMotion: boolean, options: { loop?: boolean; speed?: number; afterLive?: boolean } = {}): Player {
   const baseBounds = useMemo(() => (timeline ? runBounds(timeline) : undefined), [timeline]);
   const [state, setState] = useState<PlayerState>({ atMs: 0, playing: mode === "replay", speed: options.speed ?? 4 });
   const [clock, setClock] = useState(() => Date.now());   // the live playhead; refreshed by the animation loop, never read while rendering
@@ -25,8 +25,8 @@ export function useRunPlayer(timeline: Timeline | undefined, mode: "live" | "rep
   // Start a replay from the beginning once the run is known.
   const started = useRef(false);
   useEffect(() => {
-    if (mode === "replay" && baseBounds && !started.current) { started.current = true; setState(s => ({ ...s, atMs: baseBounds.startMs, playing: true })); }
-  }, [mode, baseBounds]);
+    if (mode === "replay" && baseBounds && !started.current) { started.current = true; setState(s => replayStart(baseBounds, Boolean(options.afterLive), s.speed)); }
+  }, [mode, baseBounds, options.afterLive]);
   // A looping replay (home page, dashboard) starts over a moment after it reaches the end.
   useEffect(() => {
     if (!options.loop || mode !== "replay" || !baseBounds || state.playing || state.atMs < baseBounds.endMs) return;

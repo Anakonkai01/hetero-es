@@ -14,7 +14,7 @@ try{
  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error'&&!/status of 401/.test(m.text()))errors.push(m.text());});
  const streams=[];page.on('request',r=>{if(r.url().includes('/stream'))streams.push(r.url());});
  await page.goto(base+'/login');await page.locator('input[autocomplete="username"]').fill('admin');await page.locator('input[autocomplete="current-password"]').fill('test-admin-pass');await page.locator('form button[type="submit"]').click();await page.waitForURL(u=>!u.pathname.startsWith('/login'));
- const open=async(name,page_=page,avoid='\u0000')=>{await page_.goto(base+'/experiments');await page_.getByText(name,{exact:false}).first().waitFor();await page_.locator('a',{hasText:name,hasNotText:avoid}).first().click();await page_.getByRole('tab',{name:'Live and replay'}).click();await page_.locator('.lv').waitFor();};
+ const open=async(name,page_=page,avoid='\u0000')=>{await page_.goto(base+'/experiments');await page_.locator('a',{hasText:name,hasNotText:avoid}).first().waitFor();await page_.locator('a',{hasText:name,hasNotText:avoid}).first().click();await page_.getByRole('tab',{name:'Live and replay'}).click();await page_.locator('.lv').waitFor();};
  const stat=async label=>(await page.locator('.lv-stats > div',{has:page.getByText(label,{exact:true})}).locator('b').innerText());
 
  // 1. A running run: the stream is used and the numbers move without any click.
@@ -34,6 +34,13 @@ try{
  assert.equal(await page.getByRole('button',{name:'Live'}).getAttribute('aria-pressed'),'false');
  const position=async()=>(await page.locator('.lv-time').innerText()).split('/')[0].trim();const frozen=await position();await page.waitForTimeout(1200);assert.equal(await position(),frozen,'paused means paused');results.pauseFreezes=true;
  await page.getByRole('button',{name:'Live'}).click();assert.equal(await page.getByRole('button',{name:'Live'}).getAttribute('aria-pressed'),'true');results.liveButtonReturns=true;
+
+ // 2b. The run ends while someone is watching: the view stays on the finished picture instead of rewinding to the start.
+ await page.getByRole('button',{name:'Live'}).waitFor({state:'detached',timeout:150000});
+ await page.getByRole('button',{name:'Play'}).waitFor();
+ const ends=async()=>{const [a,b]=(await page.locator('.lv-time').innerText()).split('/').map(x=>x.trim());return a===b;};
+ assert.ok(await ends(),'the finished run is shown at its end');await page.waitForTimeout(1500);assert.ok(await ends(),'and it stays there (no rewind, no autoplay)');results.endOfLiveRunStaysOnTheEnd=true;
+ await page.screenshot({path:path.join(output,'live-just-ended.png'),fullPage:true});
 
  // 3. A finished run replays: from the start, at speed, to the end; seeking works.
  await open('M2 three GPU agent acceptance v2',page,'simulation');

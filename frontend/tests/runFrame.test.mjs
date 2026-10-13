@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { frameAt, runBounds, advance, applyDelta } from '../src/lib/runFrame.ts';
+import { frameAt, runBounds, advance, applyDelta, replayStart } from '../src/lib/runFrame.ts';
 
 const real = JSON.parse(fs.readFileSync(new URL('./fixtures/run-fifo.timeline.json', import.meta.url), 'utf8'));
 const T0 = 1_000_000;
@@ -154,4 +154,11 @@ test('a streamed update replaces what changed and never goes backwards in time',
     assert.equal(applyDelta(older, newer).jobs.at(-1).status, 'SUCCEEDED');
     assert.equal(applyDelta(newer, older).nowMs, newer.nowMs, 'a late, older message is ignored');
     assert.equal(applyDelta(undefined, newer), newer);
+});
+
+test('a replay starts from the beginning, playing; after watching the run live it stays on the finished picture', () => {
+    const bounds = { startMs: 1000, endMs: 9000 };
+    assert.deepEqual(replayStart(bounds, false, 4), { atMs: 1000, playing: true, speed: 4 });
+    assert.deepEqual(replayStart(bounds, true, 4), { atMs: 9000, playing: false, speed: 4 });
+    assert.equal(replayStart(bounds, true, 16).speed, 16, 'the chosen speed is kept');
 });

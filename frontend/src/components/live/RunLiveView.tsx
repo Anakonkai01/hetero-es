@@ -35,10 +35,10 @@ function Ribbon({ phase, progress, committed, count }: { phase?: string; progres
 export type LiveVariant = "full" | "compact" | "hero";
 
 /** full: everything; compact: controls, numbers and diagram (dashboard); hero: only the looping diagram (home page). */
-export function RunLiveView({ timeline, mode, source, clockOffsetMs = 0, title, variant = "full" }: { timeline: Timeline; mode: "live" | "replay"; source?: TimelineSource; clockOffsetMs?: number; title?: string; variant?: LiveVariant }) {
+export function RunLiveView({ timeline, mode, source, clockOffsetMs = 0, title, variant = "full", afterLive = false }: { timeline: Timeline; mode: "live" | "replay"; source?: TimelineSource; clockOffsetMs?: number; title?: string; variant?: LiveVariant; afterLive?: boolean }) {
   const { t } = useProduct();
   const reduced = useReducedMotion();
-  const player = useRunPlayer(timeline, mode, clockOffsetMs, reduced, variant === "hero" ? { loop: true, speed: 4 } : variant === "compact" && mode === "replay" ? { loop: true, speed: 8 } : {});
+  const player = useRunPlayer(timeline, mode, clockOffsetMs, reduced, variant === "hero" ? { loop: true, speed: 4 } : variant === "compact" && mode === "replay" ? { loop: true, speed: 8 } : { afterLive });
   const { frame, bounds } = player;
   if (!frame || !bounds) return null;
   const generation = frame.generation;

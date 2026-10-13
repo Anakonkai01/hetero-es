@@ -40,3 +40,22 @@ test('every presentation scene label is translated', () => {
     for (const { label } of scenes) assert.ok(translations[label], label);
     assert.ok(translations['Replay of a real run']);
 });
+
+test('every readable text in the status tables (labels, tooltips, legends, hints) is translated', async () => {
+    const tables = await import('../src/lib/labels.ts');
+    const missing = [];
+    let checked = 0;
+    // `tone` and `status` are identifiers, not text; everything else in these tables is shown to people.
+    const walk = (path, value) => {
+        if (typeof value === 'string') {
+            if (!/[A-Za-z]{3}/.test(value)) return;
+            checked++;
+            if (!translations[value]) missing.push(`${path}: ${value}`);
+        } else if (value && typeof value === 'object') {
+            for (const [key, inner] of Object.entries(value)) if (key !== 'tone' && key !== 'status') walk(`${path}.${key}`, inner);
+        }
+    };
+    for (const [name, value] of Object.entries(tables)) walk(name, value);
+    assert.ok(checked > 60, `the walk really visited the tables (${checked} texts)`);
+    assert.deepEqual(missing, []);
+});
