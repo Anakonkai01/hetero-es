@@ -51,6 +51,7 @@ export function RewardChart({ generations }: { generations: Generation[] }) {
 
       <svg
         viewBox="0 0 640 240"
+        className="reward-chart"
         width="100%"
         role="img"
         aria-label={t("Chart of mean and best reward per generation")}

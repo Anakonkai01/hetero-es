@@ -4,7 +4,7 @@ import { useAccessMutation } from "../hooks/useAccess";
 import {RunCard} from "../components/experiments/RunCard";
 
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { EmptyState } from "../components/common/EmptyState";
 import { QueryState } from "../components/common/QueryState";
 import { ExperimentTable } from "../components/experiments/ExperimentTable";
@@ -37,6 +37,9 @@ export function ExperimentsPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<StatusFilter>("all");
   const [sort, setSort] = useState<SortOrder>("new");
+  const [picked, setPicked] = useState<string[]>([]);
+  const navigate = useNavigate();
+  const toggle = (id: string) => setPicked(current => current.includes(id) ? current.filter(item => item !== id) : current.length >= 5 ? current : [...current, id]);
 
   const experiments = query.data ?? [];
   const needle = search.trim().toLowerCase();
@@ -140,9 +143,11 @@ export function ExperimentsPage() {
               {t("Clear filters")}</button>
           </EmptyState>
         ) : (
-          view === "list" ? <ExperimentTable experiments={rows} /> : <div className="resource-grid cb">{rows.map((e) => <div key={e.experimentId}><RunCard experiment={e}/>{!["RUNNING", "QUEUED", "PAUSING", "PAUSED", "STARTING", "CANCELLING", "RECOVERING", "DRAINING"].includes(e.status)&&<button className="link archive-link" disabled={archive.isPending} onClick={()=>{if(window.confirm(t("Archive this experiment?")))void archive.mutateAsync(e.experimentId).catch(()=>{});}}>{t("Archive")}</button>}</div>)}</div>
+          view === "list" ? <ExperimentTable experiments={rows} picked={IS_MOCK ? undefined : picked} onPick={IS_MOCK ? undefined : toggle} /> : <div className="resource-grid cb">{rows.map((e) => <div key={e.experimentId}>{!IS_MOCK && <label className="compare-pick compare-pick-card"><input type="checkbox" checked={picked.includes(e.experimentId)} onChange={() => toggle(e.experimentId)} /> {t("Compare")}</label>}<RunCard experiment={e}/>{!["RUNNING", "QUEUED", "PAUSING", "PAUSED", "STARTING", "CANCELLING", "RECOVERING", "DRAINING"].includes(e.status)&&<button className="link archive-link" disabled={archive.isPending} onClick={()=>{if(window.confirm(t("Archive this experiment?")))void archive.mutateAsync(e.experimentId).catch(()=>{});}}>{t("Archive")}</button>}</div>)}</div>
         )}
       </section>
+
+      {picked.length > 0 && <div className="compare-bar" role="region" aria-label={t("Comparison")}><span>{picked.length} {t("selected")}{picked.length < 2 ? ` · ${t("pick one more")}` : ""}</span><button type="button" className="btn pri" disabled={picked.length < 2} onClick={() => navigate(`/experiments/compare?ids=${picked.join(",")}`)}>{t("Compare")}</button><button type="button" className="btn" onClick={() => setPicked([])}>{t("Clear")}</button></div>}
 
       <p className="hint" style={{ margin: 0 }}>
         {t("Times in GMT+7. Showing")} {rows.length} {t("experiments.")}</p>

@@ -27,3 +27,12 @@ body{font-size:16px}
 .attention-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}.attention-list li{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:10px;border:1px solid var(--line);border-left:3px solid var(--mut);background:var(--sf2)}
 .attention-warn{border-left-color:var(--warning)!important}.attention-err{border-left-color:var(--danger)!important}.attention-info{border-left-color:var(--acc)!important}
 .attention-ok{margin:0;color:var(--success);font-weight:500}.attention-ok span{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--success-bg);margin-right:6px}
+.run-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;margin:0 0 16px;position:relative}.run-actions .btn{min-height:38px}
+.export-menu{position:relative}.export-menu>summary{list-style:none;cursor:pointer}.export-menu[open]>div{position:absolute;z-index:5;top:42px;left:0;min-width:240px;display:grid;background:var(--sf);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:6px}
+.export-menu [role=menuitem]{background:transparent;color:var(--ink);justify-content:flex-start;border-radius:7px;padding:9px 12px;font-weight:400}.export-menu [role=menuitem]:hover{background:var(--sf2)}
+.template-name{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;flex-basis:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--sf)}.template-name .fg{margin:0;flex:1 1 240px}
+.template-picker{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}.template-picker .fg{margin:0;min-width:min(420px,100%)}
+.compare-pick{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:400;margin:0 8px 0 0}.compare-pick input{width:auto;min-height:0}.compare-pick-card{display:flex;margin:0 0 6px;color:var(--mut)}
+.compare-bar{position:sticky;bottom:12px;z-index:4;display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--acc);border-radius:12px;background:var(--sf);box-shadow:var(--shadow)}.compare-bar span{margin-right:auto;font-weight:500}
+.compare-legend{list-style:none;display:flex;flex-wrap:wrap;gap:6px 18px;margin:12px 0 0;padding:0;font-size:14px}.compare-legend i,.compare-dot{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.compare-win{font-weight:700;color:var(--success)}

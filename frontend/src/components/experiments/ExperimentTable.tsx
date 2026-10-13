@@ -12,12 +12,17 @@ interface ExperimentTableProps {
   /** The compact variant is used on the dashboard. */
   compact?: boolean;
   backState?: BackState;
+  /** Selection for comparing runs: the chosen ids and a toggle. */
+  picked?: string[];
+  onPick?: (id: string) => void;
 }
 
 export function ExperimentTable({
   experiments,
   compact,
   backState,
+  picked,
+  onPick,
 }: ExperimentTableProps) {
   const {t}=useProduct();
   const columns = compact ? "cols-dexp" : "cols-exp";
@@ -53,6 +58,7 @@ export function ExperimentTable({
             key={experiment.experimentId}
           >
             <div className="c" role="cell">
+              {onPick && <label className="compare-pick"><input type="checkbox" checked={picked?.includes(experiment.experimentId) ?? false} onChange={() => onPick(experiment.experimentId)} aria-label={`${t("Select for comparison")}: ${experiment.name}`} /></label>}
               <Link
                 className="link"
                 style={{

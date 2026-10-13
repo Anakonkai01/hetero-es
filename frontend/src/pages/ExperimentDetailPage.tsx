@@ -36,6 +36,7 @@ import {
 } from "../lib/labels";
 import { useBackState } from "../lib/navigation";
 import { ExperimentLive } from "../components/live/ExperimentLive";
+import { RunActions } from "../components/experiments/RunActions";
 
 type Tab = "overview" | "live" | "generations" | "config" | "events" | "artifacts";
 
@@ -102,7 +103,7 @@ export function ExperimentDetailPage() {
                 <PageHeaderMeta>
                   <Badge info={EXPERIMENT_STATUS[experiment.status]} />
                   <span className="mono" title={experiment.experimentId}>
-                    {experiment.experimentId}
+                    {shortId(experiment.experimentId)}
                   </span>
                   <CopyButton
                     value={experiment.experimentId}
@@ -110,7 +111,7 @@ export function ExperimentDetailPage() {
                   />
                   <span>
                     {experiment.modelName} ·{" "}
-                    <span className="mono">{experiment.modelVersion}</span>
+                    <span className="mono" title={experiment.modelVersion}>{shortId(experiment.modelVersion)}</span>
                   </span>
                 </PageHeaderMeta>
                 {experiment.cancelRequested &&
@@ -143,6 +144,8 @@ export function ExperimentDetailPage() {
               </>
             }
           />
+
+          <RunActions experiment={experiment} generations={generations} chart={() => document.querySelector<SVGSVGElement>("svg.reward-chart")} />
 
           <ExperimentControls key={`${experiment.experimentId}:${experiment.status}`} experiment={experiment} />
 

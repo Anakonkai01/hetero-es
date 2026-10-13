@@ -827,3 +827,16 @@ Object.assign(translations, {
  'No experiment has run yet':'Chưa có thí nghiệm nào chạy','Running now':'Đang chạy','Latest finished run, replayed':'Run gần nhất đã xong, phát lại','Open live view':'Mở màn hình trực tiếp',
  'A real run from this lab, replayed':'Một run thật của lab này, phát lại','3 different GPUs · 36 candidates · 3 generations':'3 GPU khác nhau · 36 candidate · 3 thế hệ',
 });
+
+Object.assign(translations, {
+ 'A copy of':'Bản sao của','Built-in':'Có sẵn','Chart (PNG)':'Biểu đồ (PNG)','Clear':'Bỏ chọn','Compare':'So sánh','Compare experiments':'So sánh thí nghiệm','Comparison':'So sánh',
+ 'Could not create the image.':'Không tạo được ảnh.','Delete template':'Xóa mẫu','Delete this template?':'Xóa mẫu này?','Duration':'Thời lượng','Empty form':'Biểu mẫu trống','Export':'Xuất',
+ 'Generations (CSV)':'Các thế hệ (CSV)','Generations done':'Thế hệ đã xong','Mean reward per generation for each selected run':'Reward trung bình mỗi thế hệ của từng run đã chọn',
+ 'Mean reward (solid) and best reward (dashed) per generation, side by side.':'Reward trung bình (nét liền) và reward tốt nhất (nét đứt) mỗi thế hệ, đặt cạnh nhau.',
+ 'One-page summary (Markdown)':'Tóm tắt một trang (Markdown)','Open the Overview tab to export its chart.':'Hãy mở tab Tổng quan để xuất biểu đồ.','Pick at least two experiments':'Hãy chọn ít nhất hai thí nghiệm',
+ 'pick one more':'chọn thêm một','Results':'Kết quả','Reward chart (PNG)':'Biểu đồ reward (PNG)','Run again like this':'Chạy lại như run này','Saved by your workspace':'Do không gian làm việc lưu',
+ 'Save settings as template':'Lưu cấu hình làm mẫu','selected':'đã chọn','Select for comparison':'Chọn để so sánh','Setting':'Cấu hình','Some experiments could not be loaded.':'Không tải được một số thí nghiệm.',
+ 'Start from':'Bắt đầu từ','Table (CSV)':'Bảng (CSV)','Template name':'Tên mẫu','Template saved.':'Đã lưu mẫu.','These experiments used the same settings.':'Các thí nghiệm này dùng cùng một cấu hình.','What was different':'Điểm khác nhau',
+ 'Quick smoke test (1 generation, 4 candidates)':'Chạy thử nhanh (1 thế hệ, 4 candidate)','Demo run (3 generations, 12 candidates)':'Run demo (3 thế hệ, 12 candidate)','GPU comparison (5 generations, 16 candidates)':'So sánh GPU (5 thế hệ, 16 candidate)',
+ 'Select experiments in the list and choose Compare.':'Hãy chọn thí nghiệm trong danh sách rồi bấm So sánh.','Best reward':'Reward tốt nhất','GPUs':'GPU','Experiment':'Thí nghiệm',
+});

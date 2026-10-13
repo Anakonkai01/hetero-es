@@ -29,6 +29,7 @@ const RegisterPage=lazy(()=>import('../pages/RegisterPage').then(module=>({defau
 const LabOperationsPage=lazy(()=>import('../pages/LabOperationsPage').then(module=>({default:module.LabOperationsPage})));
 const DashboardPage=lazy(()=>import('../pages/DashboardPage').then(module=>({default:module.DashboardPage})));
 const EventsPage=lazy(()=>import('../pages/EventsPage').then(module=>({default:module.EventsPage})));
+const ComparePage=lazy(()=>import('../pages/ComparePage').then(module=>({default:module.ComparePage})));
 const GetStartedPage=lazy(()=>import('../pages/GetStartedPage').then(module=>({default:module.GetStartedPage})));
 const ArtifactsPage=lazy(()=>import('../pages/ArtifactsPage').then(module=>({default:module.ArtifactsPage})));
 
@@ -56,6 +57,7 @@ export function AppRouter() {
           element={<WorkerDetailPage />}
         />
         <Route path="/experiments" element={<ExperimentsPage />} />
+        <Route path="/experiments/compare" element={<ComparePage />} />
         <Route
           path="/experiments/new"
           element={<ExperimentCreatePage />}

@@ -15,6 +15,7 @@ test('cards sit in one centred row when they fit and wrap into rows otherwise, n
             const A = layout.cards[a], B = layout.cards[b];
             const apart = A.x + A.w <= B.x || B.x + B.w <= A.x || A.y + A.h <= B.y || B.y + B.h <= A.y;
             assert.ok(apart, `cards ${a} and ${b} overlap for ${count} workers`);
+            if (A.y === B.y) assert.ok(B.x - (A.x + A.w) >= 8 || A.x - (B.x + B.w) >= 8, `cards ${a} and ${b} need a visible gap`);
         }
         assert.ok(layout.coordinator.y + layout.coordinator.h < layout.cards[0].y, 'the coordinator is above every card');
     }
