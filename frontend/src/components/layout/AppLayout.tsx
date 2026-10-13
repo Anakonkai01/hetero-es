@@ -49,6 +49,7 @@ function contextName(pathname: string): string {
 
   if (section === "experiments") {
     if (id === "new") return "Create experiment";
+    if (id === "compare") return "Compare experiments";
     if (grandchild) return "Candidate detail";
     if (child === "generations") return "Generation detail";
     return id ? "Experiment detail" : "Experiments";

@@ -19,6 +19,7 @@ from .runtime import Runtime
 from .lab import install_lab_routes
 from .live import LiveStreams
 from .templates import install_template_routes
+from .notifications import install_notification_routes
 from .timeline import build_timeline
 from .throttle import Throttle, client_address
 
@@ -535,6 +536,7 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
 
     install_lab_routes(app,store,user,scoped,runtime)
     install_template_routes(app,store,scoped)
+    install_notification_routes(app,store,user)
     if getattr(runtime, 'agent_mode', False):
         from .devices import install_device_routes
         device_auth=install_device_routes(app,store,user,runtime)

@@ -840,3 +840,7 @@ Object.assign(translations, {
  'Quick smoke test (1 generation, 4 candidates)':'Chạy thử nhanh (1 thế hệ, 4 candidate)','Demo run (3 generations, 12 candidates)':'Run demo (3 thế hệ, 12 candidate)','GPU comparison (5 generations, 16 candidates)':'So sánh GPU (5 thế hệ, 16 candidate)',
  'Select experiments in the list and choose Compare.':'Hãy chọn thí nghiệm trong danh sách rồi bấm So sánh.','Best reward':'Reward tốt nhất','GPUs':'GPU','Experiment':'Thí nghiệm',
 });
+
+Object.assign(translations, { 'Compare experiments': 'So sánh thí nghiệm', 'Create experiment': 'Tạo thí nghiệm' });
+
+Object.assign(translations, { 'GPU fleet summary': 'Tóm tắt cụm GPU', 'online': 'online', 'offline': 'offline', 'in use by an experiment': 'đang dùng cho thí nghiệm', 'contributing': 'đang đóng góp', 'Never connected': 'Chưa từng kết nối', 'Offline': 'Offline', 'Personal information': 'Thông tin cá nhân' });

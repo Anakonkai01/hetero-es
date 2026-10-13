@@ -24,7 +24,7 @@ export function WorkspaceListPage() {
     <div className={`workspace-collection ${view}`}>{workspaces.map((w) => <Link className={`workspace-tile ${w.role === "ADMIN" ? "admin" : "participant"}`} key={w.workspaceId} to={`/workspace/${w.workspaceId}`} onClick={() => selectWorkspace(w.workspaceId)}>
       <div className="workspace-tile-top"><span className="workspace-emblem"><DashboardIcon /></span><span className={`role-pill ${w.role.toLowerCase()}`}>{t("Role:")}{" "}{w.role === "ADMIN" ? "Admin" : "Participant"}</span></div>
       <div className="workspace-tile-body"><h2>{w.name}</h2><p>{w.description || "Shared compute workspace"}</p></div>
-      <div className="workspace-tile-bottom"><span>{t("Created by")}{w.creatorUserId === session?.user.userId ? session?.user.displayName : w.creatorUserId?.replace(/^user-/, "") ?? "—"}</span><span>{t("Open ↗")}</span></div>
+      <div className="workspace-tile-bottom"><span>{t("Created by")}{" "}{w.creatorUserId === session?.user.userId ? session?.user.displayName : w.creatorUserId?.replace(/^user-/, "") ?? "—"}</span><span>{t("Open ↗")}</span></div>
     </Link>)}</div>
     {!workspaces.length && <div className="empty"><b>{t("No workspaces")}</b></div>}
     {creating && <Modal title={t("Create workspace")} subtitle="Workspace details" onClose={() => setCreating(false)}><form className="modal-form" onSubmit={(e) => { e.preventDefault(); void create.mutateAsync({ name, description }).then(async () => { await refreshSession(); setCreating(false); setName(""); setDescription(""); }).catch(() => {}); }}>

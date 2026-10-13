@@ -98,21 +98,21 @@ export function RuntimeControls({ experiment: e }: { experiment: Experiment }) {
   const terminal = ["COMPLETED", "CANCELLED", "FAILED", "DRAFT"].includes(e.status);
   const error = submit.error ?? cancel.error ?? archive.error ?? edit.error ?? pause.error ?? resume.error;
   const busy = submit.isPending || cancel.isPending || archive.isPending || edit.isPending || pause.isPending || resume.isPending;
-  return <section className="card experiment-management"><div className="ch"><h2>{t("Experiment management")}</h2></div><div className="cb demo-form">
-    <p>{t("Selected workers:")} {e.workerIds?.join(", ")}</p>
+  return <section className="card experiment-management" aria-label={t("Experiment management")}><div className="cb demo-form">
+    <div className="mgmt-row"><div className="gpu-chips"><span className="hint">{t("GPUs")}</span>{e.workerIds?.map(id=><span className="chip" key={id}>{id}</span>)}</div>
     {e.waitingReason && <p className="note">{e.waitingReason}</p>}
 
     {e.monitoringPartial && <p>{t("Dashboard details show recent history. Full canonical history is retained in recovery points.")}</p>}
     {e.failureReason && <p className="note err" role="alert">{e.failureReason}</p>}
     {error && <p className="note err" role="alert">{error.message}</p>}
-    {permitted && <div className="acts">
+    {permitted && <div className="acts mgmt-actions">
       {e.status === "DRAFT" && <><button className="btn" disabled={busy} onClick={() => setEditing(!editing)}>{t("Edit configuration")}</button><button className="btn pri" disabled={busy} onClick={() => void submit.mutateAsync(e.experimentId).catch(() => {})}>{t("Start experiment")}</button></>}
       {!terminal && !e.cancelRequested && <button className="btn dng" disabled={busy} onClick={() => void cancel.mutateAsync(e.experimentId).catch(() => {})}>{t("Cancel experiment")}</button>}
       {e.coordinatorDeviceId && ['STARTING','RUNNING'].includes(e.status) && !e.cancelRequested && <button className="btn" disabled={busy} onClick={()=>void pause.mutateAsync(e.experimentId).catch(()=>{})}>{t('Pause after generation')}</button>}
       {e.coordinatorDeviceId && e.status==='PAUSED' && !e.cancelRequested && <button className="btn pri" disabled={busy} onClick={()=>void resume.mutateAsync(e.experimentId).catch(()=>{})}>{t('Resume experiment')}</button>}
 
       {terminal && <button className="btn dng" disabled={busy} onClick={() => { if (window.confirm("Archive this experiment and retain its evidence?")) void archive.mutateAsync(e.experimentId).then(() => navigate("/experiments")).catch(() => {}); }}>{t("Archive")}</button>}
-    </div>}
+    </div>}</div>
     {e.cancelRequested && !terminal && <p className="note">{t("Stopping new leases; waiting for current candidates to restore and all selected workers to stop. The last completed checkpoint is retained.")}</p>}
     {e.status==='PAUSING' && !e.cancelRequested && <p className="note">{t('Finishing this generation, verifying its checkpoint and waiting for all selected processes to stop before releasing GPUs.')}</p>}
     {e.status==='PAUSED' && <p className="note">{t('Checkpoint verified and GPUs released. Resume queues the same experiment with its frozen configuration and new assignment credentials.')}</p>}
