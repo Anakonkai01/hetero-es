@@ -802,3 +802,18 @@ Object.assign(translations, {
 Object.assign(translations, { 'Search': 'Tìm kiếm', 'files': 'tệp' });
 
 Object.assign(translations, { 'Evaluation results': 'Kết quả đánh giá', 'Checkpoint': 'Checkpoint', 'Config': 'Cấu hình', 'Manifest': 'Manifest' });
+
+Object.assign(translations, {
+ 'Evaluating {candidate}':'Đang đánh giá {candidate}','Connection lost':'Mất kết nối','Waiting for work':'Đang chờ việc','Not started':'Chưa khởi động',
+ 'Diagram: the coordinator and {count} GPUs, {busy} working':'Sơ đồ: coordinator và {count} GPU, {busy} đang làm việc','Coordinator':'Coordinator',
+ 'Generation {index} of {total}':'Thế hệ {index}/{total}','{done} of {total} candidates committed':'Đã chốt {done}/{total} candidate',
+ '{n} done':'{n} xong','{n} failed':'{n} lỗi','{s} s per candidate':'{s} giây mỗi candidate','No result yet':'Chưa có kết quả',
+ 'Playback controls':'Điều khiển phát','Restart':'Phát lại từ đầu','Pause':'Tạm dừng','Play':'Phát','Position in the run':'Vị trí trong run','Playback speed':'Tốc độ phát','Live':'Trực tiếp',
+ 'Refreshing every few seconds':'Đang cập nhật vài giây một lần','Phases of a generation':'Các pha của một thế hệ','Evaluate candidates in parallel':'Đánh giá candidate song song',
+ 'Update and publish the model':'Cập nhật và xuất bản model','Next generation':'Thế hệ kế tiếp','Experiment finished':'Thí nghiệm đã xong','Live view of the run':'Màn hình trực tiếp của run',
+ 'Generation':'Thế hệ','Candidates committed':'Candidate đã chốt','GPUs working':'GPU đang làm','Latest mean reward':'Reward trung bình mới nhất','Elapsed':'Đã chạy',
+ 'Timeline':'Dòng thời gian','Committed':'Đã chốt','Running':'Đang chạy','Failed attempt':'Lượt chạy lỗi','GPUs in this run':'Các GPU trong run này','GPU':'GPU','Now':'Hiện tại','Done':'Xong','Failed':'Lỗi',
+ 'Seconds per candidate':'Giây mỗi candidate','Last reward':'Reward gần nhất','Working':'Đang làm việc','Timeline: one lane per GPU, one block per attempt':'Dòng thời gian: mỗi GPU một làn, mỗi lượt chạy một khối','G{n}':'T{n}',
+});
+
+Object.assign(translations, { 'Loading the model': 'Đang nạp model', 'Live and replay': 'Trực tiếp & phát lại', 'Logs': 'Nhật ký', 'Results & saved model': 'Kết quả & model đã lưu', 'Experiment detail': 'Chi tiết thí nghiệm', 'Overview': 'Tổng quan', 'The experiment has completed': 'Thí nghiệm đã hoàn tất', 'The result has been accepted by the system': 'Hệ thống đã chấp nhận kết quả', 'Reward appears once the first generation has an accepted candidate.': 'Reward xuất hiện khi thế hệ đầu tiên có candidate được chấp nhận.', 'Could not load the live view': 'Không tải được màn hình trực tiếp', 'Nothing has run yet': 'Chưa có gì chạy', 'This experiment ended before any candidate ran.': 'Thí nghiệm này kết thúc trước khi có candidate nào chạy.', 'The live view starts as soon as the coordinator hands out the first candidate.': 'Màn hình trực tiếp bắt đầu ngay khi coordinator giao candidate đầu tiên.', 'The live view needs the real lab': 'Màn hình trực tiếp cần lab thật', 'The demo data does not record when each candidate ran.': 'Dữ liệu demo không ghi lại thời điểm chạy của từng candidate.', 'Experiment finished': 'Thí nghiệm đã xong' });

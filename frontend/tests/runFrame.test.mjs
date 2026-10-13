@@ -106,6 +106,17 @@ test('marks appear only shortly after they happen, and an unavailable worker sho
     assert.equal(worker(frameAt(synthetic({ jobs: [] }), T0 + 6500 + 5000), 'b').state, 'idle', 'the offline flag does not stay on forever');
 });
 
+test('a worker that has started but is not ready yet shows as loading the model, until it is ready or has work', () => {
+    const marks = [{ atMs: T0 + 100, type: 'worker_start', workerId: 'a', generation: null }, { atMs: T0 + 600, type: 'model_loaded', workerId: 'a', generation: null }, { atMs: T0 + 800, type: 'executor_ready', workerId: 'a', generation: null },
+        { atMs: T0 + 300, type: 'worker_start', workerId: 'b', generation: null }];
+    const synth = synthetic({ marks, jobs: [] });
+    assert.equal(worker(frameAt(synth, T0 + 50), 'a').state, 'idle', 'not started yet');
+    assert.equal(worker(frameAt(synth, T0 + 400), 'a').state, 'starting');
+    assert.equal(worker(frameAt(synth, T0 + 900), 'a').state, 'idle', 'ready, waiting for work');
+    assert.equal(worker(frameAt(synth, T0 + 5000), 'b').state, 'starting', 'b never became ready');
+    assert.equal(worker(frameAt(synthetic({ marks, jobs: [{ candidateId: 'x', attemptId: 'x.a1', generation: 0, workerId: 'b', startMs: T0 + 400, endMs: T0 + 900, status: 'SUCCEEDED', reward: 0.1 }] }), T0 + 500), 'b').state, 'busy', 'work wins over loading');
+});
+
 test('rewards of completed generations accumulate for the chart', () => {
     assert.deepEqual(frameAt(synthetic(), T0 + 5000).rewards, []);
     assert.deepEqual(frameAt(synthetic(), T0 + 11500).rewards, [{ generation: 0, mean: 0.3, best: 0.5 }]);

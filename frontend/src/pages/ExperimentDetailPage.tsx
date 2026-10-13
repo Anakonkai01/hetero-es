@@ -35,11 +35,13 @@ import {
   EXPERIMENT_STATUS,
 } from "../lib/labels";
 import { useBackState } from "../lib/navigation";
+import { ExperimentLive } from "../components/live/ExperimentLive";
 
-type Tab = "overview" | "generations" | "config" | "events" | "artifacts";
+type Tab = "overview" | "live" | "generations" | "config" | "events" | "artifacts";
 
 const tabs: { id: Tab; label: string }[] = [
   { id: "overview", label: "Overview" },
+  { id: "live", label: "Live and replay" },
   { id: "generations", label: "Generations" },
   { id: "config", label: "Configuration" },
   { id: "events", label: "Logs" },
@@ -244,6 +246,9 @@ export function ExperimentDetailPage() {
               </section>}
             </>
           )}
+
+          {tab === "live" && !IS_MOCK && <ExperimentLive experimentId={experiment.experimentId} status={experiment.status} />}
+          {tab === "live" && IS_MOCK && <EmptyState title={t("The live view needs the real lab")} message="The demo data does not record when each candidate ran." />}
 
           {tab === "generations" && (
             <section className="card" aria-label={t("Generations")}>

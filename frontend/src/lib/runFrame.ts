@@ -18,7 +18,7 @@ export type Timeline = {
 };
 
 export type WorkerFrame = {
-    id: string; state: 'unstarted' | 'idle' | 'busy' | 'offline';
+    id: string; state: 'unstarted' | 'starting' | 'idle' | 'busy' | 'offline';
     job?: { candidateId: string; generation: number | null; progress: number; startMs: number };
     done: number; failed: number; meanSeconds: number | null; lastReward: number | null;
 };
@@ -32,6 +32,12 @@ export type Frame = {
 const RUNNING_CAP = 0.95;     // a job with no end yet never looks finished
 const MARK_VISIBLE_MS = 4000; // how long a notable moment stays on screen
 const TERMINAL = new Set(['COMPLETED', 'CANCELLED', 'FAILED']);
+
+/** A worker process that has been launched but has not reported ready yet (it is loading the model). */
+export function isStarting(marks: TimelineMark[], workerId: string, atMs: number): boolean {
+    const mine = marks.filter(m => m.workerId === workerId && m.atMs <= atMs);
+    return mine.some(m => m.type === 'worker_start') && !mine.some(m => m.type === 'executor_ready');
+}
 
 export function runBounds(timeline: Timeline): { startMs: number; endMs: number } {
     const e = timeline.experiment;
@@ -64,6 +70,8 @@ export function frameAt(timeline: Timeline, atMs: number, options: { flightMs?: 
             frame.job = { candidateId: current.candidateId ?? '', generation: current.generation, progress: current.endMs !== null ? raw : Math.min(raw, RUNNING_CAP), startMs: current.startMs };
         } else if (!w.started) {
             frame.state = 'unstarted';
+        } else if (isStarting(timeline.marks, w.id, atMs)) {
+            frame.state = 'starting';
         } else if (timeline.marks.some(m => m.workerId === w.id && m.type === 'worker_unavailable' && m.atMs <= atMs && atMs - m.atMs < MARK_VISIBLE_MS)) {
             frame.state = 'offline';
         }

@@ -1,4 +1,5 @@
 import { IS_MOCK } from "../lib/dataSource";
+import { SseParser, type SseMessage } from "../lib/sse";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
 const TOKEN_KEY = IS_MOCK ? "heteroes.demo-token" : "heteroes.access-token";
 
@@ -95,4 +96,23 @@ export async function downloadFile(path: string, name: string) {
 export async function downloadBackup(id: string) {
   const ticket=await apiPost<{downloadUrl:string}>(`/api/v1/platform/backups/${encodeURIComponent(id)}/download-ticket`);
   const link=document.createElement('a');link.href=`${API_BASE_URL}${ticket.downloadUrl}`;link.download=`heteroes-lab-${id}.tar`;link.click();
+}
+
+/**
+ * Reads a server-sent event stream with the current sign-in. Resolves when the server ends the stream and rejects
+ * when it cannot be opened or breaks, so the caller can fall back to polling.
+ */
+export async function readStream(path: string, onMessage: (message: SseMessage) => void, signal: AbortSignal): Promise<void> {
+  const headers = new Headers({ Accept: "text/event-stream" });
+  if (demoToken) headers.set("Authorization", `Bearer ${demoToken}`);
+  if (workspaceId) headers.set("X-Workspace-Id", workspaceId);
+  const response = await fetch(`${API_BASE_URL}${path}`, { headers, signal });
+  if (!response.ok || !response.body) throw new ApiError(response.status, `Stream unavailable: ${response.status}`);
+  const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
+  const parser = new SseParser();
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) return;
+    for (const message of parser.push(value)) onMessage(message);
+  }
 }
