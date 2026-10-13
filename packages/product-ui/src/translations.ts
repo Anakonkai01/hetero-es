@@ -854,3 +854,31 @@ Object.assign(translations, {
 });
 
 Object.assign(translations, { 'GPU station': 'Trạm GPU', 'Waiting for the lab to hand out work.': 'Đang chờ lab giao việc.', 'Your GPU is working': 'GPU của bạn đang làm việc', 'Do not shut this computer down yet.': 'Chưa tắt máy vội.', 'Sign in to start contributing.': 'Đăng nhập để bắt đầu đóng góp.', 'The local agent is not running yet.': 'Agent trên máy chưa chạy.', 'Evaluating candidates for the lab': 'Đang đánh giá candidate cho lab', 'GPU measurements': 'Số đo GPU', 'GPU load': 'Tải GPU', 'VRAM': 'VRAM', 'Temperature': 'Nhiệt độ', 'Advanced: network, role, assignments and diagnostics': 'Nâng cao: mạng, vai trò, phân công và chẩn đoán', 'Epoch': 'Epoch' });
+
+Object.assign(translations, {
+ 'Picture of the current model and its random variations':'Hình minh họa model hiện tại và các biến thể ngẫu nhiên','model, moving':'model, đang dịch chuyển','the model':'model','Reward of the model after each generation':'Reward của model sau mỗi thế hệ','reward':'reward',
+ 'Start from the model you have':'Bắt đầu từ model đang có','Evolution Strategies improves a model without computing gradients. It starts from the current model, called θ.':'Evolution Strategies cải thiện model mà không cần tính gradient. Nó bắt đầu từ model hiện tại, gọi là θ.',
+ 'Nudge it at random, many times':'Lắc nhẹ ngẫu nhiên, nhiều lần','Each nudge is a new candidate: the model plus a random change. A seed number makes the change reproducible on any computer. This run made {n} candidates per generation.':'Mỗi lần lắc là một candidate mới: model cộng một thay đổi ngẫu nhiên. Một con số seed giúp tái tạo đúng thay đổi đó trên mọi máy. Run này tạo {n} candidate mỗi thế hệ.',
+ 'Each nudge is a new candidate: the model plus a random change.':'Mỗi lần lắc là một candidate mới: model cộng một thay đổi ngẫu nhiên.',
+ 'Test every nudge on a GPU':'Thử từng lần lắc trên GPU','Every candidate is scored independently, so {gpus} different GPUs shared the work. The best score in the first generation was {best}.':'Mỗi candidate được chấm độc lập nên {gpus} GPU khác nhau chia việc. Điểm tốt nhất của thế hệ đầu là {best}.',
+ 'Move towards what worked':'Dịch về phía những gì hiệu quả','Scores are turned into weights: better than average pulls the model towards that nudge, worse pushes it away. The model takes one small step along the weighted average.':'Điểm được đổi thành trọng số: hơn trung bình thì kéo model về phía lần lắc đó, kém hơn thì đẩy ra xa. Model đi một bước nhỏ theo trung bình có trọng số.',
+ 'Repeat, and keep the progress':'Lặp lại và giữ tiến độ','After each generation the new model is saved. This run did {generations} generations and {total} candidate evaluations in total.':'Sau mỗi thế hệ, model mới được lưu. Run này chạy {generations} thế hệ và tổng cộng {total} lượt đánh giá candidate.',
+ 'Training a model by trial and selection':'Huấn luyện model bằng thử và chọn lọc','The numbers below come from a real run in this lab, not from a simulation.':'Các con số dưới đây lấy từ một run thật của lab này, không phải mô phỏng.',
+ 'The example run is not available on this server.':'Máy chủ này không có run ví dụ.','Reward of each candidate':'Reward của từng candidate','Steps':'Các bước','Step':'Bước','Next':'Tiếp','See it live':'Xem trực tiếp','Back':'Quay lại',
+ 'candidate':'candidate','seed':'seed','generation':'thế hệ','checkpoint':'checkpoint','lease':'lease','replay':'phát lại trạng thái','coordinator':'coordinator','worker':'worker',
+ 'One randomly nudged copy of the model. It is tested on a GPU and gets a score.':'Một bản sao của model đã bị lắc ngẫu nhiên. Nó được thử trên GPU và nhận một điểm.',
+ 'A number that recreates exactly the same random nudge on any computer, so nothing but the number has to be sent.':'Một con số tái tạo đúng cùng một lần lắc ngẫu nhiên trên mọi máy, nên chỉ cần gửi con số đó.',
+ 'The score a candidate earns on the task. Higher is better; it is not an accuracy or a percentage.':'Điểm một candidate đạt được trên tác vụ. Càng cao càng tốt; đây không phải độ chính xác hay phần trăm.',
+ 'One round: nudge the model many ways, test every nudge, then update the model once.':'Một vòng: lắc model theo nhiều cách, thử từng cách, rồi cập nhật model một lần.',
+ "A saved copy of the model's weights after a generation, so a run can be recovered or reused.":'Bản lưu trọng số model sau một thế hệ, để run có thể khôi phục hoặc dùng lại.',
+ 'Permission for one GPU to evaluate one candidate within a deadline. If it is not finished in time, another GPU may take it.':'Quyền cho một GPU đánh giá một candidate trong thời hạn. Nếu chưa xong kịp, GPU khác có thể nhận.',
+ 'Rebuilding the new model from the recorded updates instead of downloading all its weights again.':'Dựng lại model mới từ các cập nhật đã ghi thay vì tải lại toàn bộ trọng số.',
+ 'The computer that hands out candidates, collects scores and updates the model.':'Máy giao candidate, thu điểm và cập nhật model.','A GPU computer that evaluates candidates for the lab.':'Máy GPU đánh giá candidate cho lab.',
+});
+
+Object.assign(translations, {
+ 'Presentation mode: larger text, no technical IDs':'Chế độ trình diễn: chữ lớn hơn, ẩn mã kỹ thuật','Present':'Trình diễn','Pages':'Trang','Actions':'Thao tác','Exit presentation':'Thoát trình diễn','Start presentation':'Bắt đầu trình diễn',
+ 'Light theme':'Giao diện sáng','Dark theme':'Giao diện tối','Quick search':'Tìm nhanh','Search pages, experiments, GPUs and actions':'Tìm trang, thí nghiệm, GPU và thao tác','Nothing matches':'Không có kết quả',
+ 'to move':'để di chuyển','to open':'để mở','to close':'để đóng','Presentation':'Trình diễn','Arrow keys change the scene':'Phím mũi tên đổi cảnh','Replay of a real run':'Phát lại một run thật','Live view':'Màn hình trực tiếp','Comparison':'So sánh',
+ 'GPUs':'GPU','Language':'Ngôn ngữ','How it works':'Cách hoạt động','Experiments':'Thí nghiệm','Create experiment':'Tạo thí nghiệm','Sign out':'Đăng xuất',
+});

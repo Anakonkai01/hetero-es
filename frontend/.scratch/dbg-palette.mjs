@@ -1,0 +1,11 @@
+import {chromium} from 'playwright';
+const [base]=process.argv.slice(2);const b=await chromium.launch();const p=await (await b.newContext({locale:'en-US'})).newPage();
+p.on('pageerror',e=>console.log('pageerror',e.message));
+await p.goto(base+'/login');await p.locator('input[autocomplete="username"]').fill('admin');await p.locator('input[autocomplete="current-password"]').fill('test-admin-pass');await p.locator('form button[type="submit"]').click();await p.waitForURL(u=>!u.pathname.startsWith('/login'));
+await p.goto(base+'/dashboard');await p.locator('.control-room').waitFor();
+const count=()=>p.locator('.palette').count();
+await p.keyboard.press('Control+k');await p.waitForTimeout(300);console.log('open1',await count());
+await p.keyboard.press('Escape');await p.waitForTimeout(300);console.log('after escape',await count(), 'active',await p.evaluate(()=>document.activeElement?.tagName+'.'+document.activeElement?.className));
+await p.keyboard.press('Control+k');await p.waitForTimeout(300);console.log('open2',await count());
+await p.keyboard.press('Control+k');await p.waitForTimeout(300);console.log('toggle closes',await count());
+await b.close();

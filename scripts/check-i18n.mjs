@@ -21,7 +21,7 @@ const sources = ['frontend/src', 'desktop/worker/src', 'desktop/server/src', 'pa
 const ATTRIBUTES = new Set(['placeholder', 'title', 'aria-label', 'alt', 'aria-description']);
 // Written the same in Vietnamese and English.
 // Brand eyebrows, option values that are identifiers, and sample data shown only in the demo build.
-const ALLOWED_PATTERNS = [/^HETEROES\b/, /^HeteroES( Lab Server| Worker)?$/];
+const ALLOWED_PATTERNS = [/^[·\s]*(Enter|Esc|Ctrl|⌘)[\s·+K]*$/, /^HETEROES\b/, /^HeteroES( Lab Server| Worker)?$/];
 const ALLOWED = new Set(['constant', 'cosine', 'hf_generate', 'hf_compact', 'GSM8K · ####', 'admin, an, binh · demo-local', 'Mbps', 'GMT+7', 'name@example.com', 'organization/model', 'windows', 'linux-appimage', 'Qwen2.5 0.5B Instruct', 'SmolLM2 135M Instruct', 'HeteroES', 'Hetero', 'ES', 'GPU', 'GPUs', 'CPU', 'VRAM', 'RAM', 'Worker', 'Lab Server', 'Tailscale', 'WireGuard', 'Windows', 'Linux', 'AppImage', 'Telegram', 'SSE', 'CSV', 'PNG', 'PDF', 'JSON', 'UUID', 'ID', 'Qwen', 'arith16', 'GiB', 'MB', 'GB', 'MiB', 'W', 'Wh', 'MHz', 'Tiếng Việt', 'English']);
 
 const files = [];

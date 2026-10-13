@@ -2,7 +2,7 @@ import {useProduct} from '@heteroes/product-ui';
 import { ExperimentResults } from "../components/experiments/ExperimentResults";
 import { IS_MOCK } from "../lib/dataSource";
 import { useState } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useParams, useSearchParams } from "react-router";
 import { isNotFoundError, isServerError } from "../api/client";
 import { useAppState } from "../app/appState";
 import { EmptyState } from "../components/common/EmptyState";
@@ -54,7 +54,8 @@ export function ExperimentDetailPage() {
   const { experimentId = "" } = useParams();
   const { retryRegion } = useAppState();
   const back = useBackState();
-  const [tab, setTab] = useState<Tab>("overview");
+  const requested = useSearchParams()[0].get("tab");
+  const [tab, setTab] = useState<Tab>(tabs.some(item => item.id === requested) ? requested as Tab : "overview");
   const [cancelOpen, setCancelOpen] = useState(false);
 
   const experimentQuery = useExperiment(experimentId);
@@ -102,16 +103,16 @@ export function ExperimentDetailPage() {
               <>
                 <PageHeaderMeta>
                   <Badge info={EXPERIMENT_STATUS[experiment.status]} />
-                  <span className="mono" title={experiment.experimentId}>
+                  <span className="mono tech" title={experiment.experimentId}>
                     {shortId(experiment.experimentId)}
                   </span>
-                  <CopyButton
+                  <span className="tech"><CopyButton
                     value={experiment.experimentId}
                     subject="experiment"
-                  />
+                  /></span>
                   <span>
-                    {experiment.modelName} ·{" "}
-                    <span className="mono" title={experiment.modelVersion}>{shortId(experiment.modelVersion)}</span>
+                    {experiment.modelName} <span className="tech">·{" "}
+                    <span className="mono" title={experiment.modelVersion}>{shortId(experiment.modelVersion)}</span></span>
                   </span>
                 </PageHeaderMeta>
                 {experiment.cancelRequested &&

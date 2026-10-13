@@ -15,6 +15,9 @@ import {
 } from "../ui/Icons";
 import { useStatusToasts } from "./useStatusToasts";
 import { NotificationBell } from "./NotificationBell";
+import { CommandPalette } from "./CommandPalette";
+import { PresentationBar } from "./PresentationBar";
+import { usePresentation } from "../../app/presentation";
 import { useSession } from "../../app/session";
 import { IS_MOCK } from "../../lib/dataSource";
 import {useState} from 'react';
@@ -78,6 +81,7 @@ export function AppLayout() {
   const [menu,setMenu]=useState(false);
   const health=useQuery({queryKey:['control-health'],queryFn:()=>apiGet<{ok:boolean}>('/api/v1/health'),enabled:!IS_MOCK,refetchInterval:5000,retry:1});
   const { session, workspace, selectWorkspace, signOut } = useSession();
+  const presentation = usePresentation();
   const administrator = !IS_MOCK && Boolean(session?.user.platformAdmin && session.user.accountStatus === 'ACTIVE');
   const accounts = useQuery({ queryKey: ['platform-users', session?.user.userId], queryFn: () => apiGet<User[]>('/api/v1/platform/users'), enabled: administrator, refetchInterval: 10000 });
   const waiting = accounts.data?.filter(user => user.accountStatus === 'PENDING').length ?? 0;
@@ -100,6 +104,8 @@ export function AppLayout() {
 
   return (
     <div className="app" data-nav-open={menu}>
+      <CommandPalette />
+      <PresentationBar />
       <a href="#main-content" className="skip-link">{t('Skip to content')}</a>
       <aside className="side" aria-label={t("Primary navigation")}>
         <div className="brand">
@@ -171,6 +177,7 @@ export function AppLayout() {
             {refreshing ? t("Refreshing…") : t("Refresh")}
           </button>
 
+          {!IS_MOCK && session && <button type="button" className="btn" aria-pressed={presentation.on} onClick={presentation.toggle} title={t("Presentation mode: larger text, no technical IDs")}>▶ {t("Present")}</button>}
           {!IS_MOCK && session && <NotificationBell />}
           <PreferencesControl/>
           {IS_MOCK && import.meta.env.DEV && (

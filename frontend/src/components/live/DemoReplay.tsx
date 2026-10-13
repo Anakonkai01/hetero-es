@@ -1,19 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
 import { useProduct } from "@heteroes/product-ui";
-import type { Timeline } from "../../lib/runFrame";
+import { useDemoTimeline } from "../../hooks/useDemoTimeline";
 import { RunLiveView } from "./RunLiveView";
 
 /** A real, finished run of this project's lab, replayed in a loop. Public: it holds no names, only GPU labels and timings. */
 export function DemoReplay({ fallback }: { fallback: React.ReactNode }) {
   const { t } = useProduct();
-  const demo = useQuery({
-    queryKey: ["demo-run"], retry: false, staleTime: Infinity,
-    queryFn: async () => {
-      const reply = await fetch("/demo/run.json");
-      if (!reply.ok) throw new Error("DEMO_UNAVAILABLE");
-      return reply.json() as Promise<Timeline>;
-    },
-  });
+  const demo = useDemoTimeline();
   if (!demo.data) return <>{fallback}</>;
   return (
     <div className="demo-replay">
