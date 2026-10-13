@@ -1,0 +1,743 @@
+{
+ "body": {
+  "alpha": 0.001,
+  "cancelRequested": false,
+  "candidatesPerGeneration": 2,
+  "committedCandidateCount": 2,
+  "completedAt": "2026-10-10T08:39:34.958924+00:00",
+  "completedGenerations": 1,
+  "configHash": "7ec750dbe606367bc69ebc049dbeac639871881b72ec1ed369983d8cb3860d08",
+  "createdAt": "2026-10-10T08:38:04.674698+00:00",
+  "currentGenerationId": "d21c66055d32485cb433f708c772eb07.g0",
+  "datasetIds": [],
+  "decodeEngine": "hf_generate",
+  "experimentId": "d21c66055d32485cb433f708c772eb07",
+  "maxGenerations": 1,
+  "modelArtifactId": "qwen-pinned",
+  "modelName": "Qwen/Qwen2.5-0.5B-Instruct",
+  "modelVersion": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+  "name": "FIFO and remote-worker fallback",
+  "schedulerPolicy": "greedy",
+  "sigma": 0.001,
+  "startedAt": "2026-10-10T08:39:16.089269+00:00",
+  "status": "COMPLETED",
+  "syncMode": "synchronous",
+  "task": "arith16",
+  "workerIds": [
+   "5070ti",
+   "3060"
+  ],
+  "workspaceId": "lab"
+ },
+ "snapshot": {
+  "artifacts": [
+   {
+    "artifactId": "d21c66055d32485cb433f708c772eb07.config.json",
+    "createdAt": "2026-10-10T08:39:16.106720+00:00",
+    "experimentId": "d21c66055d32485cb433f708c772eb07",
+    "name": "config.json",
+    "path": "config.json",
+    "sizeBytes": 492,
+    "status": "READY",
+    "type": "CONFIG"
+   },
+   {
+    "artifactId": "d21c66055d32485cb433f708c772eb07.events.jsonl",
+    "createdAt": "2026-10-10T08:39:32.527373+00:00",
+    "experimentId": "d21c66055d32485cb433f708c772eb07",
+    "name": "events.jsonl",
+    "path": "events.jsonl",
+    "sizeBytes": 3022,
+    "status": "READY",
+    "type": "EVALUATION_RESULTS"
+   },
+   {
+    "artifactId": "d21c66055d32485cb433f708c772eb07.lifecycle.jsonl",
+    "createdAt": "2026-10-10T08:39:25.187378+00:00",
+    "experimentId": "d21c66055d32485cb433f708c772eb07",
+    "name": "lifecycle.jsonl",
+    "path": "lifecycle.jsonl",
+    "sizeBytes": 156,
+    "status": "READY",
+    "type": "EVALUATION_RESULTS"
+   },
+   {
+    "artifactId": "d21c66055d32485cb433f708c772eb07.summary-1791621572527830984.json",
+    "createdAt": "2026-10-10T08:39:32.527886+00:00",
+    "experimentId": "d21c66055d32485cb433f708c772eb07",
+    "name": "summary-1791621572527830984.json",
+    "path": "summary-1791621572527830984.json",
+    "sizeBytes": 121,
+    "status": "READY",
+    "type": "EVALUATION_RESULTS"
+   },
+   {
+    "artifactId": "d21c66055d32485cb433f708c772eb07.c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7.bin",
+    "createdAt": "2026-10-10T08:39:25.942378+00:00",
+    "experimentId": "d21c66055d32485cb433f708c772eb07",
+    "name": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7.bin",
+    "path": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7.bin",
+    "sizeBytes": 988065536,
+    "status": "READY",
+    "type": "CHECKPOINT"
+   }
+  ],
+  "attempts": [
+   {
+    "attemptId": "d21c66055d32485cb433f708c772eb07.g0.c0.a1",
+    "candidateId": "d21c66055d32485cb433f708c772eb07.g0.c0",
+    "completedAt": "2026-10-10T08:39:28.770373+00:00",
+    "errorType": null,
+    "experimentId": "d21c66055d32485cb433f708c772eb07",
+    "generationId": "d21c66055d32485cb433f708c772eb07.g0",
+    "modelVersion": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "startedAt": "2026-10-10T08:39:26.822114+00:00",
+    "status": "SUCCEEDED",
+    "workerId": "5070ti"
+   },
+   {
+    "attemptId": "d21c66055d32485cb433f708c772eb07.g0.c1.a1",
+    "candidateId": "d21c66055d32485cb433f708c772eb07.g0.c1",
+    "completedAt": "2026-10-10T08:39:30.729921+00:00",
+    "errorType": null,
+    "experimentId": "d21c66055d32485cb433f708c772eb07",
+    "generationId": "d21c66055d32485cb433f708c772eb07.g0",
+    "modelVersion": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "startedAt": "2026-10-10T08:39:29.171243+00:00",
+    "status": "SUCCEEDED",
+    "workerId": "5070ti"
+   }
+  ],
+  "candidates": [
+   {
+    "attemptId": "d21c66055d32485cb433f708c772eb07.g0.c0.a1",
+    "batchIds": [
+     "cad822bc1e65a9ec37d948e5415cff22c70f96500e2043e6299bbdd5cea0b8d5"
+    ],
+    "candidateId": "d21c66055d32485cb433f708c772eb07.g0.c0",
+    "experimentId": "d21c66055d32485cb433f708c772eb07",
+    "generationConfigHash": "b55cff86f578c8340c5d24f380d97989b021618b79a30df0a802c0362b7a0346",
+    "generationId": "d21c66055d32485cb433f708c772eb07.g0",
+    "leaseDeadline": "2026-10-10T08:40:26.822114+00:00",
+    "modelVersion": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "noiseRecipeHash": "efc1ff67c1bfa8c243ba93ce4a46dfcea74e5afc4b2daffa50498510d53dbc86",
+    "reward": 0.25,
+    "seed": "427891014999430",
+    "status": "COMMITTED",
+    "workerId": "5070ti"
+   },
+   {
+    "attemptId": "d21c66055d32485cb433f708c772eb07.g0.c1.a1",
+    "batchIds": [
+     "cad822bc1e65a9ec37d948e5415cff22c70f96500e2043e6299bbdd5cea0b8d5"
+    ],
+    "candidateId": "d21c66055d32485cb433f708c772eb07.g0.c1",
+    "experimentId": "d21c66055d32485cb433f708c772eb07",
+    "generationConfigHash": "b55cff86f578c8340c5d24f380d97989b021618b79a30df0a802c0362b7a0346",
+    "generationId": "d21c66055d32485cb433f708c772eb07.g0",
+    "leaseDeadline": "2026-10-10T08:40:29.171243+00:00",
+    "modelVersion": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "noiseRecipeHash": "efc1ff67c1bfa8c243ba93ce4a46dfcea74e5afc4b2daffa50498510d53dbc86",
+    "reward": 0.25,
+    "seed": "3508395134837183",
+    "status": "COMMITTED",
+    "workerId": "5070ti"
+   }
+  ],
+  "events": [
+   {
+    "event": "worker_unavailable",
+    "t": 1791621565.1470997,
+    "worker_id": "3060"
+   },
+   {
+    "event": "worker_unavailable",
+    "t": 1791621565.1882632,
+    "worker_id": "3060"
+   },
+   {
+    "code": {
+     "git_commit": "bb0ce420c21e10b3b9b13e3e494ce41453030420",
+     "git_dirty": true
+    },
+    "environment": {
+     "device": "cuda",
+     "gpu_capability": [
+      12,
+      0
+     ],
+     "gpu_name": "NVIDIA GeForce RTX 5070 Ti",
+     "gpu_total_memory_bytes": 16608133120,
+     "hostname": "5070ti",
+     "numpy": "2.5.3",
+     "nvidia_driver": "595.91.07",
+     "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+     "python": "3.12.14",
+     "torch": "2.13.0+cu132",
+     "torch_cuda": "13.2",
+     "transformers": "5.17.0"
+    },
+    "event": "managed_start",
+    "recipe": {
+     "manifest_version": 1,
+     "model": {
+      "dtype": "torch.float16",
+      "id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+      "schema_hash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+      "tokenizer_revision": "7ae557604adf67be50417f59c2c2f167def9a775"
+     },
+     "noise": {
+      "chunk_elements": 262144,
+      "engine_version": "numpy_pcg64_normal_f32_to_f16_v1",
+      "fingerprint": "b94575345e870b1606cb4d6a0c4aa49b054cfbfc50571d809653d01bce9184d3"
+     },
+     "perturbation": {
+      "sigma": 0.001,
+      "sigma_float32": 0.0010000000474974513
+     },
+     "update": {
+      "accumulation_dtype": "float32",
+      "candidate_order": "listed_order",
+      "epsilon": "canonical_fp16_upcast_fp32",
+      "reward_eta": 1e-09,
+      "reward_standardization": "population_std_float64_zero_below_eta"
+     },
+     "workload": {
+      "eval_dtype": "float32",
+      "generation_config_sha256": "b55cff86f578c8340c5d24f380d97989b021618b79a30df0a802c0362b7a0346",
+      "hash": "cad822bc1e65a9ec37d948e5415cff22c70f96500e2043e6299bbdd5cea0b8d5"
+     }
+    },
+    "recipe_hash": "efc1ff67c1bfa8c243ba93ce4a46dfcea74e5afc4b2daffa50498510d53dbc86",
+    "t": 1791621559.789652
+   },
+   {
+    "candidates": 2,
+    "event": "generation_open",
+    "generation": 0,
+    "parent_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "t": 1791621566.576048
+   },
+   {
+    "event": "generation_complete",
+    "generation": 0,
+    "rewards": [
+     0.25,
+     0.25
+    ],
+    "t": 1791621570.913186
+   },
+   {
+    "event": "update_recorded",
+    "generation": 0,
+    "record_hash": "44a4af92afc9078ebb1103c20011562922b43bcff5fd2851fbefccce4d7ec8db",
+    "t": 1791621570.92166
+   },
+   {
+    "applied_l2": 0.0,
+    "changed": 0,
+    "child_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "event": "update_applied",
+    "generation": 0,
+    "noop": true,
+    "t": 1791621571.8964972
+   },
+   {
+    "child_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "event": "weights_published",
+    "generation": 0,
+    "t": 1791621572.527763
+   },
+   {
+    "applied_l2": 0.0,
+    "changed": 0,
+    "child_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "coefficients": [
+     0.0,
+     0.0
+    ],
+    "event": "generation_done",
+    "generation": 0,
+    "max_reward": 0.25,
+    "mean_reward": 0.25,
+    "noop": true,
+    "parent_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "publish_seconds": 0.6312679920010851,
+    "record_hash": "44a4af92afc9078ebb1103c20011562922b43bcff5fd2851fbefccce4d7ec8db",
+    "record_seconds": 0.008481099001073744,
+    "requested_l2": 0.0,
+    "rewards": [
+     0.25,
+     0.25
+    ],
+    "t": 1791621572.5277927,
+    "total_seconds": 7.222112396000739,
+    "update_seconds": 0.9748631129987189,
+    "wait_seconds": 5.607500191999861
+   },
+   {
+    "args": {
+     "cache_dir": "/home/pc5070ti/.local/share/heteroes-integration/workers/5070ti/d21c66055d32485cb433f708c772eb07-r0/cache",
+     "chunk": 16,
+     "coordinator_url": "http://100.110.165.40:8765",
+     "device": null,
+     "give_up_after_seconds": 120.0,
+     "http_timeout_seconds": 60.0,
+     "log": "/home/pc5070ti/.local/share/heteroes-integration/workers/5070ti/d21c66055d32485cb433f708c772eb07-r0/events.jsonl",
+     "model_path": "/home/pc5070ti/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775",
+     "noise_threads": null,
+     "poll_seconds": 0.25,
+     "profile": null,
+     "replay": "always",
+     "replay_max_chain": 8,
+     "replay_verify_every": 1,
+     "startup_timeout_seconds": 600.0,
+     "token_env": "HETEROES_TOKEN",
+     "worker_id": "5070ti"
+    },
+    "code": {
+     "git_commit": "bb0ce420c21e10b3b9b13e3e494ce41453030420",
+     "git_dirty": true
+    },
+    "environment": {
+     "device": "cuda",
+     "gpu_capability": [
+      12,
+      0
+     ],
+     "gpu_name": "NVIDIA GeForce RTX 5070 Ti",
+     "gpu_total_memory_bytes": 16608133120,
+     "hostname": "5070ti",
+     "numpy": "2.5.3",
+     "nvidia_driver": "595.91.07",
+     "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+     "python": "3.12.14",
+     "torch": "2.13.0+cu132",
+     "torch_cuda": "13.2",
+     "transformers": "5.17.0"
+    },
+    "event": "worker_start",
+    "noise_selftest_seconds": 0.007834626998374006,
+    "t": 1791621560.7338715,
+    "worker_id": "5070ti"
+   },
+   {
+    "event": "model_loaded",
+    "seconds": 1.0712349400000676,
+    "t": 1791621562.116338,
+    "worker_id": "5070ti"
+   },
+   {
+    "engine_selftest_seconds": 0.004992689000573591,
+    "event": "executor_ready",
+    "noise_engine": "numpy_pcg64_normal_f32_to_f16_v1",
+    "parent_weights_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "recipe_hash": "efc1ff67c1bfa8c243ba93ce4a46dfcea74e5afc4b2daffa50498510d53dbc86",
+    "snapshot_and_hash_seconds": 0.6463288079994527,
+    "t": 1791621562.7739532,
+    "worker_id": "5070ti",
+    "workload": "arith16"
+   },
+   {
+    "event": "replay_policy",
+    "policy": {
+     "max_chain": 8,
+     "mode": "always",
+     "sync_seconds": null,
+     "update_fixed_seconds": 0.0,
+     "update_seconds_per_candidate": null,
+     "verify_every": 1,
+     "verify_seconds": 3.6
+    },
+    "t": 1791621562.774046,
+    "worker_id": "5070ti"
+   },
+   {
+    "event": "start",
+    "t": 1791621562.7756333,
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": null,
+    "code": null,
+    "coordination_seconds": null,
+    "event": "step",
+    "failure": null,
+    "generation_state": "OPEN",
+    "kind": "NO_WORK",
+    "step_seconds": 0.0006424160001188284,
+    "t": 1791621562.7769842,
+    "timing": null,
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": null,
+    "code": null,
+    "coordination_seconds": null,
+    "event": "step",
+    "failure": null,
+    "generation_state": "OPEN",
+    "kind": "NO_WORK",
+    "step_seconds": 0.0009594160001142882,
+    "t": 1791621563.0295882,
+    "timing": null,
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": null,
+    "code": null,
+    "coordination_seconds": null,
+    "event": "step",
+    "failure": null,
+    "generation_state": "OPEN",
+    "kind": "NO_WORK",
+    "step_seconds": 0.0006824369993410073,
+    "t": 1791621563.281793,
+    "timing": null,
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": null,
+    "code": null,
+    "coordination_seconds": null,
+    "event": "step",
+    "failure": null,
+    "generation_state": "OPEN",
+    "kind": "NO_WORK",
+    "step_seconds": 0.0011337449996062787,
+    "t": 1791621563.5344772,
+    "timing": null,
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": null,
+    "code": null,
+    "coordination_seconds": null,
+    "event": "step",
+    "failure": null,
+    "generation_state": "OPEN",
+    "kind": "NO_WORK",
+    "step_seconds": 0.0006482059998234035,
+    "t": 1791621563.7862017,
+    "timing": null,
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": null,
+    "code": null,
+    "coordination_seconds": null,
+    "event": "step",
+    "failure": null,
+    "generation_state": "OPEN",
+    "kind": "NO_WORK",
+    "step_seconds": 0.0009212169989041286,
+    "t": 1791621564.038636,
+    "timing": null,
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": null,
+    "code": null,
+    "coordination_seconds": null,
+    "event": "step",
+    "failure": null,
+    "generation_state": "OPEN",
+    "kind": "NO_WORK",
+    "step_seconds": 0.0008802379998087417,
+    "t": 1791621564.2906842,
+    "timing": null,
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": null,
+    "code": null,
+    "coordination_seconds": null,
+    "event": "step",
+    "failure": null,
+    "generation_state": "OPEN",
+    "kind": "NO_WORK",
+    "step_seconds": 0.0008182399997167522,
+    "t": 1791621564.5430346,
+    "timing": null,
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": null,
+    "code": null,
+    "coordination_seconds": null,
+    "event": "step",
+    "failure": null,
+    "generation_state": "OPEN",
+    "kind": "NO_WORK",
+    "step_seconds": 0.0005851410005561775,
+    "t": 1791621564.7946348,
+    "timing": null,
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": null,
+    "code": null,
+    "coordination_seconds": null,
+    "event": "step",
+    "failure": null,
+    "generation_state": "OPEN",
+    "kind": "NO_WORK",
+    "step_seconds": 0.0007797460002620937,
+    "t": 1791621565.0467646,
+    "timing": null,
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": null,
+    "code": null,
+    "coordination_seconds": null,
+    "event": "step",
+    "failure": null,
+    "generation_state": "OPEN",
+    "kind": "NO_WORK",
+    "step_seconds": 0.0006544099996972363,
+    "t": 1791621565.298501,
+    "timing": null,
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": null,
+    "code": null,
+    "coordination_seconds": null,
+    "event": "step",
+    "failure": null,
+    "generation_state": "OPEN",
+    "kind": "NO_WORK",
+    "step_seconds": 0.0008699039990460733,
+    "t": 1791621565.550876,
+    "timing": null,
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": null,
+    "code": null,
+    "coordination_seconds": null,
+    "event": "step",
+    "failure": null,
+    "generation_state": "OPEN",
+    "kind": "NO_WORK",
+    "step_seconds": 0.0005057269991084468,
+    "t": 1791621565.8023434,
+    "timing": null,
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": null,
+    "code": null,
+    "coordination_seconds": null,
+    "event": "step",
+    "failure": null,
+    "generation_state": "OPEN",
+    "kind": "NO_WORK",
+    "step_seconds": 0.0008085859990387689,
+    "t": 1791621566.0546932,
+    "timing": null,
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": null,
+    "code": null,
+    "coordination_seconds": null,
+    "event": "step",
+    "failure": null,
+    "generation_state": "OPEN",
+    "kind": "NO_WORK",
+    "step_seconds": 0.0007922389995655976,
+    "t": 1791621566.3153355,
+    "timing": null,
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": null,
+    "code": null,
+    "coordination_seconds": null,
+    "event": "step",
+    "failure": null,
+    "generation_state": "OPEN",
+    "kind": "NO_WORK",
+    "step_seconds": 0.0005859100001543993,
+    "t": 1791621566.5700579,
+    "timing": null,
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": "d21c66055d32485cb433f708c772eb07/g0/c0",
+    "code": null,
+    "coordination_seconds": 0.8370821990010882,
+    "event": "step",
+    "failure": null,
+    "generation_state": null,
+    "kind": "COMMITTED",
+    "step_seconds": 2.347996227001204,
+    "t": 1791621569.1694086,
+    "timing": {
+     "perturb": 0.7518916049994004,
+     "restore": 0.14497136499994667,
+     "rollout": 0.6140510580007685,
+     "total": 1.5109140280001156
+    },
+    "uiCandidateId": "d21c66055d32485cb433f708c772eb07.g0.c0",
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": "d21c66055d32485cb433f708c772eb07/g0/c1",
+    "code": null,
+    "coordination_seconds": 0.550022646000798,
+    "event": "step",
+    "failure": null,
+    "generation_state": null,
+    "kind": "COMMITTED",
+    "step_seconds": 1.5674797960000433,
+    "t": 1791621570.7379072,
+    "timing": {
+     "perturb": 0.7103920070003369,
+     "restore": 0.14257969000027515,
+     "rollout": 0.16448545299863326,
+     "total": 1.0174571499992453
+    },
+    "uiCandidateId": "d21c66055d32485cb433f708c772eb07.g0.c1",
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": null,
+    "code": null,
+    "coordination_seconds": null,
+    "event": "step",
+    "failure": null,
+    "generation_state": "COMPLETE",
+    "kind": "NO_WORK",
+    "step_seconds": 0.0008362740009033587,
+    "t": 1791621570.7395036,
+    "timing": null,
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": null,
+    "code": null,
+    "coordination_seconds": null,
+    "event": "step",
+    "failure": null,
+    "generation_state": "COMPLETE",
+    "kind": "NO_WORK",
+    "step_seconds": 0.0009647110000514658,
+    "t": 1791621570.991694,
+    "timing": null,
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": null,
+    "code": null,
+    "coordination_seconds": null,
+    "event": "step",
+    "failure": null,
+    "generation_state": "COMPLETE",
+    "kind": "NO_WORK",
+    "step_seconds": 0.0009385320008732378,
+    "t": 1791621571.243882,
+    "timing": null,
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": null,
+    "code": null,
+    "coordination_seconds": null,
+    "event": "step",
+    "failure": null,
+    "generation_state": "COMPLETE",
+    "kind": "NO_WORK",
+    "step_seconds": 0.0008726289997866843,
+    "t": 1791621571.496253,
+    "timing": null,
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": null,
+    "code": null,
+    "coordination_seconds": null,
+    "event": "step",
+    "failure": null,
+    "generation_state": "COMPLETE",
+    "kind": "NO_WORK",
+    "step_seconds": 0.07428948400047375,
+    "t": 1791621571.897085,
+    "timing": null,
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": null,
+    "code": null,
+    "coordination_seconds": null,
+    "event": "step",
+    "failure": null,
+    "generation_state": "COMPLETE",
+    "kind": "NO_WORK",
+    "step_seconds": 0.0010077389997604769,
+    "t": 1791621572.1493192,
+    "timing": null,
+    "worker_id": "5070ti"
+   },
+   {
+    "candidate_id": null,
+    "code": null,
+    "coordination_seconds": null,
+    "event": "step",
+    "failure": null,
+    "generation_state": "COMPLETE",
+    "kind": "NO_WORK",
+    "step_seconds": 0.0010129879992746282,
+    "t": 1791621572.401674,
+    "timing": null,
+    "worker_id": "5070ti"
+   },
+   {
+    "event": "exit",
+    "reason": "finished",
+    "t": 1791621572.6525476,
+    "worker_id": "5070ti"
+   }
+  ],
+  "generations": [
+   {
+    "candidateCount": 2,
+    "committedCandidateCount": 2,
+    "completedAt": "2026-10-10T08:39:31.701692+00:00",
+    "experimentId": "d21c66055d32485cb433f708c772eb07",
+    "generationId": "d21c66055d32485cb433f708c772eb07.g0",
+    "modelVersion": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "rewardBest": 0.25,
+    "rewardMean": 0.25,
+    "startedAt": "2026-10-10T08:39:26.576048+00:00",
+    "status": "COMPLETED"
+   }
+  ],
+  "state": {
+   "completedAt": 1791621574.882854,
+   "finalWeightsSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+   "preparingAt": 1791621565.155901,
+   "recoveryCount": 0,
+   "startedAt": 1791621556.1099813,
+   "status": "COMPLETED",
+   "updatedAt": 1791621574.8828692,
+   "workerStates": {
+    "3060": {
+     "alive": false,
+     "confirmed": true,
+     "notStarted": true,
+     "ready": false
+    },
+    "5070ti": {
+     "alive": false,
+     "confirmed": true,
+     "ready": true
+    }
+   },
+   "workersLaunched": true
+  }
+ }
+}

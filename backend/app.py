@@ -17,6 +17,8 @@ from pydantic import BaseModel, ConfigDict, Field
 from .store import ACTIVE, TERMINAL, Store, now
 from .runtime import Runtime
 from .lab import install_lab_routes
+from .live import LiveStreams
+from .timeline import build_timeline
 from .throttle import Throttle, client_address
 
 
@@ -89,6 +91,7 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
     app.state.login_failures_by_address = Throttle(30, 600)     # per caller address, any username
     app.state.registrations = Throttle(10, 3600)
     app.state.store = store
+    app.state.live = LiveStreams()
     @app.exception_handler(HTTPException)
     async def handle_http(_request, error):
         return JSONResponse({"message": str(error.detail)}, status_code=error.status_code, headers=error.headers)
@@ -326,6 +329,18 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
     @app.get("/api/v1/experiments/{run_id}")
     def experiment(run_id: str, current=Depends(scoped)):
         return authorized(run_id, current)
+
+    @app.get("/api/v1/experiments/{run_id}/timeline")
+    def run_timeline(run_id: str, current=Depends(scoped)):
+        return build_timeline(authorized(run_id, current), store.snapshot(run_id))
+
+    @app.get("/api/v1/experiments/{run_id}/stream")
+    def run_stream(run_id: str, current=Depends(scoped)):
+        authorized(run_id, current)
+        if not app.state.live.acquire():
+            raise HTTPException(429, "Too many live views are open. Close one and try again.")
+        return StreamingResponse(app.state.live.frames(store, run_id), media_type="text/event-stream",
+                                 headers={"Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no"})
 
     @app.patch("/api/v1/experiments/{run_id}")
     def edit(run_id: str, request: dict, current=Depends(scoped)):
