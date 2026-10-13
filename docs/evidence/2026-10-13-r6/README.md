@@ -49,3 +49,14 @@ anything and says so; the user unit retries every 30 s. The disk itself still ha
 - Nothing here was applied to the **live lab**: the backend password rule, the web changes and the r6 installers still
   need a managed restart and publication (owner's go).
 - No GPU work, no runtime install, no pairing with a real lab, no two-machine run.
+
+## Addendum — published and live (2026-10-13, ~12:10, owner said "đưa luôn lên web")
+
+The state above ("prepared, not published") was true when written. Afterwards, on the owner's go: the web build and the
+8-character password rule were put live (`systemctl --user restart heteroes-lab`, queue idle and reopened), and r6 was
+published with `--prepared-receipt` (`installers-r6-published.json`; r5 files and links remain). All four installers were
+downloaded in full over `https://lab.heteroes.site` and match their SHA-256 and size (`public-download-verify.json`).
+The live registration endpoint rejects a 7-character and a common password with the new sentences (no account was created to test acceptance;
+that is covered by the backend tests). The Windows run is still the owner's.
+Also fixed: the web build copied `public/downloads` (installer links, ~3 GB) into every build; `publicDir` is now `frontend/static`.
+`/etc/fstab` still has no line for the Archive disk (only linger was enabled).
