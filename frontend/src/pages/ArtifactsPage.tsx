@@ -1,7 +1,7 @@
 import {downloadArtifact} from "../api/client";
 import {IS_MOCK} from "../lib/dataSource";
 import {useProduct} from '@heteroes/product-ui';
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { useAppState } from "../app/appState";
 import { EmptyState } from "../components/common/EmptyState";
@@ -11,6 +11,7 @@ import { PageHeader } from "../components/ui/PageHeader";
 import { useArtifacts } from "../hooks/useArtifacts";
 import { useExperiments } from "../hooks/useExperiments";
 import { formatBytes, formatDateTime } from "../lib/format";
+import { friendlyFileName } from "../lib/files";
 import {
   ARTIFACT_NOTE,
   ARTIFACT_STATUS,
@@ -32,6 +33,7 @@ export function ArtifactsPage() {
   const experimentsQuery = useExperiments();
   const [params, setParams] = useSearchParams();
   const [type, setType] = useState<TypeFilter>("all");
+  const [search, setSearch] = useState("");
 
   const experimentFilter = params.get("experiment") ?? "all";
   const selectedId = params.get("selected");
@@ -44,8 +46,19 @@ export function ArtifactsPage() {
   const rows = artifacts.filter(
     (a) =>
       (experimentFilter === "all" || a.experimentId === experimentFilter) &&
-      (type === "all" || a.type === type),
+      (type === "all" || a.type === type) &&
+      (!search.trim() || a.name.toLowerCase().includes(search.trim().toLowerCase())),
   );
+  // One block per experiment, newest first, instead of one endless table.
+  const groups = useMemo(() => {
+    const order = new Map(experiments.map((e, index) => [e.experimentId, { index, at: e.createdAt ?? "" }]));
+    const byRun = new Map<string, typeof rows>();
+    for (const artifact of rows) byRun.set(artifact.experimentId, [...(byRun.get(artifact.experimentId) ?? []), artifact]);
+    return [...byRun.entries()]
+      .sort(([a], [b]) => (order.get(b)?.at ?? "").localeCompare(order.get(a)?.at ?? "") || (order.get(b)?.index ?? 0) - (order.get(a)?.index ?? 0))
+      .map(([experimentId, files]) => ({ experimentId, files: [...files].sort((x, y) => (y.createdAt ?? "").localeCompare(x.createdAt ?? "")) }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [artifacts, experiments, experimentFilter, type, search]);
   const selected = artifacts.find((a) => a.artifactId === selectedId);
 
   function updateParams(changes: Record<string, string | null>) {
@@ -61,6 +74,7 @@ export function ArtifactsPage() {
 
   function clearFilters() {
     setType("all");
+    setSearch("");
     updateParams({ experiment: null });
   }
 
@@ -105,6 +119,10 @@ export function ArtifactsPage() {
               </select>
             </div>
             <div className="fg">
+              <label htmlFor="f-ar-q">{t("Search")}</label>
+              <input id="f-ar-q" className="inp" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder={t("File name")} />
+            </div>
+            <div className="fg">
               <label htmlFor="f-ar-t">{t("File type")}</label>
               <select
                 id="f-ar-t"
@@ -133,64 +151,35 @@ export function ArtifactsPage() {
                 {t("Clear filters")}</button>
             </EmptyState>
           ) : (
-            <div className="scroll">
-              <div className="tw" role="table" aria-label={t("Artifacts")}>
-                <div className="rowh cols-art" role="row">
-                  <div className="c" role="columnheader">{t("File name")}</div>
-                  <div className="c" role="columnheader">{t("Type")}</div>
-                  <div className="c" role="columnheader">{t("Experiment")}</div>
-                  <div className="c" role="columnheader">{t("Created")}</div>
-                  <div className="c" role="columnheader">{t("Size")}</div>
-                  <div className="c" role="columnheader">{t("Status")}</div>
-                </div>
-                {rows.map((artifact) => {
-                  const isSelected = artifact.artifactId === selectedId;
-                  const name = experimentName(artifact.experimentId);
-
-                  return (
-                    <div
-                      className={isSelected ? "row cols-art sel" : "row cols-art"}
-                      role="row"
-                      key={artifact.artifactId}
-                    >
-                      <div className="c" role="cell">
-                        <button
-                          type="button"
-                          className="link mono"
-                          aria-pressed={isSelected}
-                          onClick={() =>
-                            updateParams({ selected: artifact.artifactId })
-                          }
-                        >
-                          {artifact.name}
-                        </button>
-                      </div>
-                      <div className="c" role="cell">
-                        {ARTIFACT_TYPE_LABEL[artifact.type]}
-                      </div>
-                      <div className="c" role="cell">
-                        <Link
-                          className="link"
-                          to={`/experiments/${artifact.experimentId}`}
-                          state={fromArtifacts}
-                          title={name}
-                        >
-                          {name}
-                        </Link>
-                      </div>
-                      <div className="c mut" role="cell">
-                        {formatDateTime(artifact.createdAt)}
-                      </div>
-                      <div className="c mono" role="cell">
-                        {formatBytes(artifact.sizeBytes)}
-                      </div>
-                      <div className="c" role="cell">
-                        <Badge info={ARTIFACT_STATUS[artifact.status]} />
-                      </div>
+            <div className="artifact-groups">
+              {groups.map(({ experimentId, files }, index) => {
+                const total = files.reduce((sum, file) => sum + (file.sizeBytes ?? 0), 0);
+                return (
+                  <details className="artifact-group" key={experimentId} open={index < 2 || experimentFilter !== "all" || files.some((file) => file.artifactId === selectedId)}>
+                    <summary>
+                      <span className="artifact-group-name">{experimentName(experimentId)}</span>
+                      <span className="hint">{files.length} {t("files")} · {formatBytes(total)} · {formatDateTime(files[0]?.createdAt)}</span>
+                    </summary>
+                    <div role="table" aria-label={experimentName(experimentId)}>
+                      {files.map((artifact) => {
+                        const isSelected = artifact.artifactId === selectedId;
+                        return (
+                          <div className={isSelected ? "row cols-art sel" : "row cols-art"} role="row" key={artifact.artifactId}>
+                            <div className="c" role="cell">
+                              <button type="button" className="link mono" title={artifact.name} aria-pressed={isSelected} onClick={() => updateParams({ selected: artifact.artifactId })}>
+                                {friendlyFileName(artifact.name)}
+                              </button>
+                            </div>
+                            <div className="c" role="cell">{t(ARTIFACT_TYPE_LABEL[artifact.type])}</div>
+                            <div className="c mono" role="cell">{formatBytes(artifact.sizeBytes)}</div>
+                            <div className="c" role="cell"><Badge info={ARTIFACT_STATUS[artifact.status]} /></div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
-              </div>
+                  </details>
+                );
+              })}
             </div>
           )}
         </section>

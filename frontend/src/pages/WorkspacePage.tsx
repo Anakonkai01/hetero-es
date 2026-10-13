@@ -51,7 +51,7 @@ function MockWorkspacePage() {
   if (!workspace) return <div className="empty"><b>{t("Workspace unavailable")}</b><Link className="btn" to="/workspace">{t("Workspaces")}</Link></div>;
   return <>
     <div className={`workspace-hero ${admin ? "admin" : "participant"}`}>
-      <div className="workspace-hero-heading"><div><Link className="hero-back" to="/workspace">{t("← Workspaces")}</Link><h1>{workspace.name}</h1><p>{workspace.description || "Compute workspace"}</p></div><span className={`role-pill ${admin ? "admin" : "participant"}`}>{t("Role:")}{admin ? t("Admin") : t("Participant")}</span></div>
+      <div className="workspace-hero-heading"><div><Link className="hero-back" to="/workspace">{t("← Workspaces")}</Link><h1>{workspace.name}</h1><p>{workspace.description || "Compute workspace"}</p></div><span className={`role-pill ${admin ? "admin" : "participant"}`}>{t("Role:")}{" "}{admin ? t("Admin") : t("Participant")}</span></div>
       <div className="workspace-hero-footer"><span>{t("Created by")}<b>{displayUser(workspace.creatorUserId)}</b></span><span><b>{data?.members.length ?? 0}</b> {t("members")}</span><span><b>{inventory.length}</b> {t("Workers")}</span><span><b>{data?.busyWorkerIds.length ?? 0}</b> {t("active")}</span></div>
     </div>
     {!dialog && !confirmation && error && <div className="note err" role="alert">{error}</div>}

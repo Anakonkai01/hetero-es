@@ -56,9 +56,9 @@ export function LabOperationsPage() {
       </details>
     </div></section>
     <LabDevices administration /><section className="card"><div className="ch"><h2>{t("Services and reservations")}</h2></div><div className="cb demo-form">
-      {ops.error && <p role="alert">{ops.error.message}</p>}{ops.data && <><p>{t("Product:")}{ops.data.productService} {t("· Runtime:")}{ops.data.runtimeService}</p><p>{t("Queue:")}{ops.data.queueCount} {t("· Dispatch")}{ops.data.dispatchHeld?t("HELD"):t("enabled")} {t("· Runtime maintenance")}{ops.data.runtimeMaintenance?t("held"):t("off")}</p>
+      {ops.error && <p role="alert">{ops.error.message}</p>}{ops.data && <><p>{t("Product:")}{" "}{ops.data.productService} {t("· Runtime:")}{" "}{ops.data.runtimeService}</p><p>{t("Queue:")}{" "}{ops.data.queueCount} {t("· Dispatch")}{ops.data.dispatchHeld?t("HELD"):t("enabled")} {t("· Runtime maintenance")}{ops.data.runtimeMaintenance?t("held"):t("off")}</p>
         {ops.data.runtimeIssue && <p className="note warn">{ops.data.runtimeIssue}</p>}
-        <p>{t("Quarantine:")}{ops.data.quarantinedWorkerIds?.join(', ')||'None'}</p>
+        <p>{t("Quarantine:")}{" "}{ops.data.quarantinedWorkerIds?.join(', ')||'None'}</p>
         {ops.data.workers.map(w=><p key={w.workerId}>{w.workerId} · {w.status} · {w.admissionReason}</p>)}
         {ops.data.reservations.length===0 && <p>{t("No active reservations.")}</p>}{ops.data.reservations.map(r=><div key={r.runId}><b>{r.runId} · {r.status}</b><p>{r.failureReason}</p>{Object.entries(r.workerStates).map(([id,state])=><p key={id}>{id}: {t(state.confirmed?'confirmed':'shutdown unknown')} · {t(state.alive===true?'Alive':state.alive===false&&state.confirmed?'Confirmed stopped':'Unknown')}</p>)}</div>)}
         {ops.data.recentFailures?.map(r=><p key={r.runId}>{r.runId} · {r.status} · {r.failureReason}</p>)}
@@ -66,7 +66,7 @@ export function LabOperationsPage() {
     </div></section>
     <section className="card"><div className="ch"><h2>{t("Backup and restore")}</h2></div><div className="cb demo-form">
       <p>{ops.data?.agentMode ? `${t('Recovery points are created between generations. Metadata backups run hourly when recovery storage is configured. Storage:')} ${(ops.data.recoveryStorageConfigured??ops.data.cloudStorageConfigured)?t("configured"):t("awaiting configuration")}. ${t('Restore into a new deployment using the operator guide.')}` : t("Backups require confirmed idle runtime ownership and briefly hold dispatch. Restore into a new deployment directory using the operator guide.")}</p>
-      {ops.data?.agentMode&&ops.data.metadataBackup&&<p>{t("Last metadata backup:")}{ops.data.metadataBackup.status} · {new Date(ops.data.metadataBackup.createdAt*1000).toLocaleString()} {ops.data.metadataBackup.errorType}</p>}
+      {ops.data?.agentMode&&ops.data.metadataBackup&&<p>{t("Last metadata backup:")}{" "}{ops.data.metadataBackup.status} · {new Date(ops.data.metadataBackup.createdAt*1000).toLocaleString()} {ops.data.metadataBackup.errorType}</p>}
       <button className="btn pri" disabled={ops.data?.agentMode||action.isPending||!ops.data||ops.data.dispatchHeld||ops.data.reservations.length>0} onClick={()=>action.mutate({path:'/api/v1/platform/backups'})}>{action.isPending?t("Operation in progress…"):t("Create idle backup")}</button>
       {backups.error && <p role="alert">{backups.error.message}</p>}{backups.data?.map(b=><div key={b.backupId}><span className="mono">{b.backupId}</span> · {(b.sizeBytes/1024/1024).toFixed(1)} {t("MB")}<button className="btn" onClick={()=>void downloadBackup(b.backupId).catch(e=>setDownloadError(e instanceof Error?e.message:'Download failed'))}>{t("Download backup")}</button></div>)}
       {downloadError && <p role="alert">{downloadError}</p>}

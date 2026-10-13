@@ -798,3 +798,7 @@ Object.assign(translations, {
  'Worker {worker} asked for work; none was available':'Worker {worker} xin việc nhưng chưa có','What the coordinator and workers did, newest first. Routine details are hidden until you ask for them.':'Coordinator và các worker đã làm gì, mới nhất trước. Chi tiết thường lệ được ẩn cho đến khi bạn bật.',
  'Show routine details':'Hiện chi tiết thường lệ','Showing':'Đang hiện','of':'trong','Show more':'Hiện thêm',
 });
+
+Object.assign(translations, { 'Search': 'Tìm kiếm', 'files': 'tệp' });
+
+Object.assign(translations, { 'Evaluation results': 'Kết quả đánh giá', 'Checkpoint': 'Checkpoint', 'Config': 'Cấu hình', 'Manifest': 'Manifest' });

@@ -37,7 +37,7 @@ function MockProfilePage() {
     </div></section>
     <section className="card"><div className="ch"><h2>{t("Memberships and resources")}</h2></div><div className="cb demo-form">
       <p>{session!.workspaces.length} {t("workspaces ·")}{workers.data?.length ?? 0} {t("owned Workers")}</p>
-      {session!.workspaces.map((w) => <div key={w.workspaceId}>{w.name} {t("· Role:")}{w.role}</div>)}
+      {session!.workspaces.map((w) => <div key={w.workspaceId}>{w.name} {t("· Role:")}{" "}{w.role}</div>)}
     </div></section></>;
 }
 import { IS_MOCK } from "../lib/dataSource";

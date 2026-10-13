@@ -108,7 +108,7 @@ export function WorkerDetailPage() {
                 {IS_MOCK&&worker.profile.vramFreeMb !== undefined && (
                   <div className="prog" style={{ marginTop: 16 }}>
                     <span>
-                      {t("VRAM in use:")}{" "}
+                      {t("VRAM in use:")}{" "}{" "}
                       {(
                         (worker.profile.vramTotalMb -
                           worker.profile.vramFreeMb) /

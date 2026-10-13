@@ -23,7 +23,7 @@ function MockExperimentControls({ experiment: e }: { experiment: Experiment }) {
   const busy = submit.isPending || archive.isPending || update.isPending || control.isPending || cancel.isPending;
   const act = (action: "PAUSE" | "RESUME" | "CHANGE_WORKERS") => { void control.mutateAsync({ experimentId: e.experimentId, action, workerIds }).catch(() => {}); };
   return <section className="card"><div className="ch"><h2>{t("Experiment management")}</h2></div><div className="cb demo-form">
-    <p>{t("Workers:")}{e.workerIds?.join(", ") || "None"}</p>
+    <p>{t("Workers:")}{" "}{e.workerIds?.join(", ") || "None"}</p>
     {error && <div className="note err" role="alert">{error.message}</div>}
     {own && <div className="acts">
       {e.status === "DRAFT" && <><button className="btn" onClick={() => setEditing(!editing)}>{t("Edit configuration")}</button><button className="btn pri" disabled={busy} onClick={() => void submit.mutateAsync(e.experimentId).catch(() => {})}>{t("Start experiment")}</button></>}
@@ -33,7 +33,7 @@ function MockExperimentControls({ experiment: e }: { experiment: Experiment }) {
       {!["RUNNING", "QUEUED", "PAUSING", "PAUSED"].includes(e.status) && <button className="btn dng" disabled={busy} onClick={() => { if (window.confirm("Archive this experiment and retain its history?")) void archive.mutateAsync(e.experimentId).then(() => navigate("/experiments")).catch(() => {}); }}>{t("Delete / archive")}</button>}
     </div>}
     {e.status === "PAUSING" && <div className="note">{t("Finishing the current generation, then saving state. No next generation will start.")}</div>}
-    {e.checkpointSavedAt && <span className="hint">{t("Demo checkpoint state saved:")}{new Date(e.checkpointSavedAt).toLocaleString()}</span>}
+    {e.checkpointSavedAt && <span className="hint">{t("Demo checkpoint state saved:")}{" "}{new Date(e.checkpointSavedAt).toLocaleString()}</span>}
     {own && e.status === "PAUSED" && <fieldset><legend>{t("Change Workers for the next generation")}</legend>{workers.data?.filter((w) => granted.includes(w.workerId)).map((w) => <label className="demo-check" key={w.workerId}><input type="checkbox" checked={workerIds.includes(w.workerId)} onChange={() => setWorkerIds((ids) => ids.includes(w.workerId) ? ids.filter((id) => id !== w.workerId) : [...ids, w.workerId])} />{w.profile.gpuName} · {w.workerId}</label>)}<button className="btn" disabled={busy || !workerIds.length} onClick={() => act("CHANGE_WORKERS")}>{t("Save Workers")}</button></fieldset>}
     {editing && own && e.status === "DRAFT" && <ExperimentConfiguration initial={e} pending={update.isPending} onSave={async (configuration) => { await update.mutateAsync({ experimentId: e.experimentId, configuration }); setEditing(false); }} />}
   </div></section>;
