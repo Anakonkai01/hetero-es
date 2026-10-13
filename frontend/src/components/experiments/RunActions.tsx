@@ -37,7 +37,7 @@ export function RunActions({ experiment, generations, chart }: { experiment: Exp
       {!IS_MOCK && <button type="button" className="btn" onClick={() => { setNaming(true); setName(experiment.name); setError(""); setTimeout(() => input.current?.select(), 0); }}>{t("Save settings as template")}</button>}
       <details className="export-menu">
         <summary className="btn">{t("Export")} ▾</summary>
-        <div role="menu">
+        <div role="menu" onClick={event => { (event.currentTarget.closest("details") as HTMLDetailsElement).open = false; }}>
           <button type="button" role="menuitem" onClick={() => saveText(generationsCsv(experiment, generations), `${stem}-generations.csv`, "text/csv")}>{t("Generations (CSV)")}</button>
           <button type="button" role="menuitem" onClick={() => saveText(summaryMarkdown(experiment, generations), `${stem}-summary.md`, "text/markdown")}>{t("One-page summary (Markdown)")}</button>
           <button type="button" role="menuitem" onClick={() => void png()}>{t("Reward chart (PNG)")}</button>
