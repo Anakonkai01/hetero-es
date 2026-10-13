@@ -1,6 +1,6 @@
 {
  "base": "https://lab.heteroes.site",
- "checkedAt": "2026-10-13T19:39:59+0700",
+ "checkedAt": "2026-10-13T20:05:44+0700",
  "health": {
   "ok": true,
   "agentMode": true,
@@ -55,11 +55,11 @@
    "timeline",
    "end"
   ],
-  "seconds": 0.51
+  "seconds": 0.28
  },
  "notifications": {
-  "unread": 0,
-  "listed": 0
+  "unread": 1,
+  "listed": 1
  },
  "templates": 0,
  "allOk": true

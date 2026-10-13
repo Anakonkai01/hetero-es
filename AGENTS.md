@@ -1,6 +1,6 @@
 # AGENTS.md — HeteroES product repository (Web/API, apps, lab operations)
 
-Any AI agent or engineer starting here: read **`docs/session-handoff-2026-10-13.md`** first (r6 prepared but not published, what needs the owner), then **`docs/session-handoff-2026-10-12-close.md`** (public r5, the owner's Windows report), then **`docs/session-handoff-2026-10-12-lf1.md`** and **`docs/session-handoff-2026-10-12-codex.md`** for owner rules and the earlier r5 continuation (state of the live lab,
+Any AI agent or engineer starting here: read **`docs/session-handoff-2026-10-13-ui.md`** first (new web UI + Live view + r7 are LIVE; what is not shown; what needs the owner), then **`docs/session-handoff-2026-10-13.md`** (the r6 morning and the Windows question), then **`docs/session-handoff-2026-10-12-close.md`** (public r5, the owner's Windows report), then **`docs/session-handoff-2026-10-12-lf1.md`** and **`docs/session-handoff-2026-10-12-codex.md`** for owner rules and the earlier r5 continuation (state of the live lab,
 owner rules, decisions, backlog, first ten minutes). Then the ADRs in the runtime repository
 (`../hetero-es-m3-runtime/docs/adr/ADR-004..007`) and `docs/evidence/2026-10-12-lf1/README.md`.
 
@@ -13,5 +13,6 @@ Non-negotiable rules (full list in the handoff, section 2):
   `--gpu` and `HETEROES_GPU_ACCEPTANCE=1`.
 - Recipe v1 numerics are frozen; they live in the runtime repository, not here.
 
+Whole CPU check (fresh evidence directory each time): `scripts/check-all.sh docs/evidence/<date>-<name>/checks`.
 Quick checks: backend `CUDA_VISIBLE_DEVICES='' ../Hetero-ES-LLM/.venv-backend/bin/python -m pytest backend/tests -q`;
 apps `cd desktop/worker && node --test tests/*.test.cjs`; lab `python3 -I scripts/local-lab.py status`.
