@@ -150,3 +150,30 @@ def test_booting_a_busy_lab_leaves_the_queue_held_for_an_administrator(lab_scrip
     with lab_script.held_while_idle(lab_db, allow_busy=True) as plan:
         assert plan['reopen'] is False and plan['busy'] is True
     assert lab_script.lab_state(lab_db)['held'] is True
+
+
+def test_a_missing_storage_disk_is_named_instead_of_failing_later_in_a_private_log(lab_script, tmp_path):
+    config = {'storageDirectory': str(tmp_path / 'lab-storage'), 'storageVolumeUUID': '10443D1F443D094C'}
+    with pytest.raises(RuntimeError, match=r'10443D1F443D094C.*not mounted.*retry'):
+        lab_script.check_storage(config, probe=lambda directory: '')
+    with pytest.raises(RuntimeError, match='not mounted'):
+        lab_script.check_storage(config, probe=lambda directory: 'a22ef996-a5b5-47c8-b220-428e8813dfb3')
+    lab_script.check_storage(config, probe=lambda directory: '10443D1F443D094C')
+
+
+def test_storage_without_a_pinned_disk_is_not_probed(lab_script):
+    def probe(directory):
+        raise AssertionError('nothing to check')
+    lab_script.check_storage({}, probe=probe)
+    lab_script.check_storage({'storageDirectory': '/somewhere'}, probe=probe)
+
+
+def test_a_restart_checks_the_disk_before_it_stops_anything(lab_script, monkeypatch, tmp_path):
+    stopped = []
+    monkeypatch.setattr(lab_script, 'stop', lambda root, name: stopped.append(name))
+    monkeypatch.setattr(lab_script, 'mounted_uuid', lambda directory: '')
+    args = type('Args', (), {'action': 'restart', 'private': tmp_path})()
+    config = {'storageDirectory': str(tmp_path / 's'), 'storageVolumeUUID': 'DISK'}
+    with pytest.raises(RuntimeError, match='not mounted'):
+        lab_script.operate(args, tmp_path, config, {'reopen': False, 'busy': False})
+    assert stopped == []

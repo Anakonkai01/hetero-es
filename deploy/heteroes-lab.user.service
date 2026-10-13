@@ -9,6 +9,8 @@
 Description=HeteroES lab: Web/API, public entry and Cloudflare tunnel
 After=network-online.target
 Wants=network-online.target
+# Keep trying: a start that fails (for example while the storage disk is not mounted yet) is repeated every 30 s.
+StartLimitIntervalSec=0
 
 [Service]
 Type=oneshot
@@ -16,6 +18,8 @@ RemainAfterExit=yes
 Environment=CUDA_VISIBLE_DEVICES=
 ExecStart=/usr/bin/python3 -I %h/projects/Hetero-ES-LLM-m3/scripts/local-lab.py boot --python %h/projects/Hetero-ES-LLM/.venv-backend/bin/python
 ExecStop=-/usr/bin/python3 -I %h/projects/Hetero-ES-LLM-m3/scripts/local-lab.py stop --python %h/projects/Hetero-ES-LLM/.venv-backend/bin/python
+Restart=on-failure
+RestartSec=30
 TimeoutStartSec=180
 TimeoutStopSec=120
 

@@ -137,6 +137,22 @@ def check_named(config):
         raise ValueError('Web and compute need different host names')
 
 
+def mounted_uuid(directory):
+    """UUID of the filesystem that holds `directory` ('' when the path does not exist, e.g. the disk is not mounted)."""
+    found=subprocess.run(['findmnt','-n','-o','UUID','-T',str(directory)],capture_output=True,text=True)
+    return found.stdout.strip() if found.returncode==0 else ''
+
+
+def check_storage(config,probe=None):
+    """The storage disk must be mounted before anything is stopped or started: otherwise the Web/API dies a moment
+    later with a traceback only the private log shows (what happened after the reboot of 2026-10-13)."""
+    uuid,directory=config.get('storageVolumeUUID'),config.get('storageDirectory')
+    if not uuid or not directory:
+        return
+    if (probe or mounted_uuid)(directory)!=uuid:
+        raise RuntimeError(f'The storage disk (UUID {uuid}) is not mounted at {directory}; mount it and the lab will retry')
+
+
 EXECUTING={'STARTING','RUNNING','CANCELLING','RECOVERING','DRAINING','PAUSING'}
 
 
@@ -230,6 +246,8 @@ def main():
 
 def operate(args,root,config,plan):
     tunnels=tunnel_names(config);servers=['public-entry','cpu-server'];names=tunnels+servers
+    if args.action!='stop':
+        check_storage(config)
     if args.action!='boot':
         idle(config)          # a boot may find reservations from before the shutdown; the queue then stays held
     if args.action in ('stop','rotate','restart'):
