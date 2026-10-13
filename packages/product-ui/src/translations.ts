@@ -779,3 +779,22 @@ Object.assign(translations, {
  'Register model':'Đăng ký model','Frozen datasets':'Dataset đã đóng băng',
  'Connection addresses':'Địa chỉ kết nối','Compute control URL':'URL điều khiển tính toán','Private file transfer URL':'URL truyền tệp riêng','Turn contribution OFF and wait for all jobs to stop before changing addresses.':'Hãy tắt đóng góp và chờ mọi tác vụ dừng trước khi đổi địa chỉ.','Save addresses':'Lưu địa chỉ',
 });
+
+Object.assign(translations, { 'Hetero': 'Hetero', 'ES': 'ES', 'GPU': 'GPU', 'GiB': 'GiB', 'HeteroES': 'HeteroES', 'hf_generate': 'hf_generate', 'hf_compact': 'hf_compact' });
+
+Object.assign(translations, {
+ 'The coordinator started this experiment':'Coordinator đã bắt đầu thí nghiệm này','Generation {generation} opened with {candidates} candidates':'Thế hệ {generation} mở với {candidates} candidate',
+ 'All candidates of generation {generation} are scored':'Đã chấm xong mọi candidate của thế hệ {generation}','Update record for generation {generation} saved':'Đã ghi bản cập nhật của thế hệ {generation}',
+ 'Generation {generation} left the model unchanged':'Thế hệ {generation} không làm đổi model','Update applied to the model after generation {generation}':'Đã áp dụng cập nhật vào model sau thế hệ {generation}',
+ 'New model weights after generation {generation} are published':'Đã xuất bản trọng số mới sau thế hệ {generation}','Generation {generation} done in {seconds} s: mean reward {mean}, best {best}':'Thế hệ {generation} xong sau {seconds} giây: reward trung bình {mean}, tốt nhất {best}',
+ 'Old model weights cleaned up':'Đã dọn trọng số model cũ','Worker {worker} started':'Worker {worker} đã khởi động','Worker {worker} loaded the model in {seconds} s':'Worker {worker} đã nạp model trong {seconds} giây',
+ 'Worker {worker} is ready to evaluate candidates':'Worker {worker} sẵn sàng đánh giá candidate','Worker {worker} state-sync policy: {mode}':'Chính sách đồng bộ trạng thái của worker {worker}: {mode}',
+ 'Worker {worker} started taking work':'Worker {worker} bắt đầu nhận việc','Worker {worker} rebuilt the new weights by replaying the updates':'Worker {worker} dựng lại trọng số mới bằng cách phát lại các cập nhật',
+ 'Worker {worker} finished ({reason})':'Worker {worker} đã kết thúc ({reason})','The coordinator recovered after an interruption (recovery {count})':'Coordinator đã khôi phục sau gián đoạn (lần {count})',
+ 'Recovered at generation {generation}: {action}':'Đã khôi phục ở thế hệ {generation}: {action}','Generation {generation} resumed':'Thế hệ {generation} đã chạy tiếp','Could not reach worker {worker}':'Không kết nối được tới worker {worker}',
+ 'Worker {worker} is not answering':'Worker {worker} không phản hồi','Could not confirm whether worker {worker} started':'Chưa xác nhận được worker {worker} đã khởi động','The coordinator reported an error: {error}':'Coordinator báo lỗi: {error}',
+ 'Recovery point saved for generation {generation}':'Đã lưu điểm khôi phục cho thế hệ {generation}','Could not save a recovery point for generation {generation}':'Không lưu được điểm khôi phục cho thế hệ {generation}',
+ 'Backup policy: every {interval} generation(s), keep {retain}':'Chính sách sao lưu: mỗi {interval} thế hệ, giữ {retain} bản','Worker {worker} committed a candidate':'Worker {worker} đã chốt một candidate',
+ 'Worker {worker} asked for work; none was available':'Worker {worker} xin việc nhưng chưa có','What the coordinator and workers did, newest first. Routine details are hidden until you ask for them.':'Coordinator và các worker đã làm gì, mới nhất trước. Chi tiết thường lệ được ẩn cho đến khi bạn bật.',
+ 'Show routine details':'Hiện chi tiết thường lệ','Showing':'Đang hiện','of':'trong','Show more':'Hiện thêm',
+});

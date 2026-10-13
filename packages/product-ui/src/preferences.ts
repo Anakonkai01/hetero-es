@@ -35,3 +35,8 @@ export class MissingTranslations {
     }
     list() { return [...this.seen]; }
 }
+
+// The language of the page being rendered, readable by plain helpers (date formatting) that cannot use React context.
+let activeLanguageValue: Language = 'en';
+export function setActiveLanguage(language: Language) { activeLanguageValue = language; }
+export function activeLanguage(): Language { return activeLanguageValue; }

@@ -1,3 +1,5 @@
+import { activeLanguage, type Language } from "@heteroes/product-ui/preferences";
+
 const TIME_ZONE = "Asia/Ho_Chi_Minh";
 
 export const NOT_AVAILABLE = "Not available yet";
@@ -12,20 +14,22 @@ function partsOf(date: Date, options: Intl.DateTimeFormatOptions) {
   return Object.fromEntries(parts.map((part) => [part.type, part.value]));
 }
 
-/** Formats an ISO timestamp as "Oct 03 09:12" in GMT+7. */
-export function formatDateTime(iso?: string): string {
+/** Formats an ISO timestamp as "Oct 03 09:12" (English) or "03/10 09:12" (Vietnamese), in GMT+7. */
+export function formatDateTime(iso?: string, language: Language = activeLanguage()): string {
   if (!iso) {
     return "—";
   }
 
   const p = partsOf(new Date(iso), {
-    month: "short",
+    month: language === "vi" ? "2-digit" : "short",
     day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
   });
 
-  return `${p.month} ${p.day} ${p.hour}:${p.minute}`;
+  return language === "vi"
+    ? `${p.day}/${p.month} ${p.hour}:${p.minute}`
+    : `${p.month} ${p.day} ${p.hour}:${p.minute}`;
 }
 
 /** Formats a timestamp as "HH:MM:SS" in GMT+7. */
@@ -85,12 +89,14 @@ export function percent(done: number, total: number): number {
   return total > 0 ? (100 * done) / total : 0;
 }
 
-/** Formats an ISO timestamp as "Oct 03 15:38:12" in GMT+7. */
-export function formatFullDateTime(iso: string): string {
+/** Formats an ISO timestamp as "Oct 03 15:38:12" (English) or "03/10 15:38:12" (Vietnamese), in GMT+7. */
+export function formatFullDateTime(iso: string, language: Language = activeLanguage()): string {
   const p = partsOf(new Date(iso), {
-    month: "short",
+    month: language === "vi" ? "2-digit" : "short",
     day: "2-digit",
   });
 
-  return `${p.month} ${p.day} ${formatClock(iso)}`;
+  return language === "vi"
+    ? `${p.day}/${p.month} ${formatClock(iso)}`
+    : `${p.month} ${p.day} ${formatClock(iso)}`;
 }

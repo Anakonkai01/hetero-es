@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "test:unit": "node --test tests/*.test.mjs",
     "test:integration": "node scripts/check-real-integration.mjs --observe-only",
     "test:mock": "node scripts/check-local-demo.mjs",
     "test:gpu": "node scripts/check-real-integration.mjs --gpu"

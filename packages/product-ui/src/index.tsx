@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { translations } from './translations';
-import { MissingTranslations, readPreferences, type Accent, type Language, type Preferences, type Theme } from './preferences';
+import { MissingTranslations, readPreferences, setActiveLanguage, type Accent, type Language, type Preferences, type Theme } from './preferences';
+export { activeLanguage } from './preferences';
 export type { Accent, Language, Theme };
 const STORAGE_KEY = 'heteroes.preferences';
 const defaults: Preferences = readPreferences(null, []);
@@ -21,6 +22,8 @@ export function ProductProvider({ children }: {
     // What the person chose is stored; what the browser suggests is not, so a new browser language is followed until a choice is made.
     const [stored, setStored] = useState<string | null>(() => { try { return localStorage.getItem(STORAGE_KEY); } catch { return null; } });
     const preferences = useMemo(() => readPreferences(stored, browserLanguages()), [stored]);
+    // Set during render (not in an effect) so date helpers called by the children already see the new language.
+    setActiveLanguage(preferences.language);
     const missing = useMemo(() => new MissingTranslations(Boolean(globalThis.__HETEROES_I18N_AUDIT__)), []);
     useEffect(() => { globalThis.__heteroesMissingI18n = () => missing.list(); }, [missing]);
     useEffect(() => {
