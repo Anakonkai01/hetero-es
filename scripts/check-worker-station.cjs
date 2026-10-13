@@ -1,6 +1,6 @@
 /**
  * Electron contract for the paired Worker ("GPU station"): CPU only, synthetic pairing, no GPU, no real lab.
- *   xvfb-run -a node scripts/check-worker-station.cjs <fresh evidence directory>
+ *   xvfb-run -a node scripts/check-worker-station.cjs <fresh evidence directory> [--packaged <built app executable>]
  * It does NOT start the agent or a runtime, so "working" and the gauges with real values are covered by unit tests
  * (desktop/worker/tests/station.test.mjs), not by this run.
  */
@@ -13,25 +13,33 @@ const http = require('node:http');
 
 const output = process.argv[2];
 if (!output) throw Error('Explicit fresh evidence directory required');
+const packaged = process.argv.includes('--packaged') ? path.resolve(process.argv[process.argv.indexOf('--packaged') + 1]) : null;
 (async () => {
     await fs.mkdir(output, { recursive: true });
     const receipt = path.join(output, 'worker-station.json');
     try { await fs.access(receipt); throw Error('Evidence already exists'); } catch (e) { if (e.code !== 'ENOENT') throw e; }
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), 'worker-station-'));
+    const home = await fs.mkdtemp(path.join(os.tmpdir(), 'worker-station-'));
+    let root = home;
     const server = http.createServer((req, res) => {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(req.url === '/api/v1/auth/login' ? { accessToken: 'fixture', user: { displayName: 'Fixture' } } : req.url === '/api/v1/devices' ? [{ deviceId: 'synthetic', approvalStatus: 'APPROVED' }] : { ok: true, agentMode: true, serverInstanceId: 'fixture', deviceConfiguration: true }));
     });
     await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-    await fs.writeFile(path.join(root, 'settings.json'), JSON.stringify({
+    const writeSettings = settings => fs.writeFile(path.join(root, 'settings.json'), JSON.stringify(settings));
+    const settings = ({
         serverUrl: `http://127.0.0.1:${server.address().port}`, serverInstanceId: 'fixture',
         selfTest: { passed: true, coordinator: false, platform: 'windows', gpuName: 'NVIDIA GeForce RTX 3060', vramTotalMb: 12288 },
         device: { deviceId: 'synthetic', workerId: 'desktop-synthetic', displayName: 'My gaming PC', approvalStatus: 'APPROVED' },
-    }));
+    });
     const results = {};
     let app;
     try {
-        app = await electron.launch({ args: [path.resolve('desktop/worker'), '--disable-gpu'], env: { ...process.env, CUDA_VISIBLE_DEVICES: '', HETEROES_WORKER_TEST_DATA: root }, timeout: 30000 });
+        const env = { ...process.env, CUDA_VISIBLE_DEVICES: '', ...(packaged ? { XDG_CONFIG_HOME: home } : { HETEROES_WORKER_TEST_DATA: root }) };
+        if (!packaged) await writeSettings(settings);
+        else { /* the profile folder is only known once the app runs: write it, then restart once */
+            const first = await electron.launch({ executablePath: packaged, args: ['--disable-gpu', '--no-sandbox'], env, timeout: 30000 });
+            root = await first.evaluate(({ app }) => app.getPath('userData')); await first.close(); await writeSettings(settings); }
+        app = await electron.launch(packaged ? { executablePath: packaged, args: ['--disable-gpu', '--no-sandbox'], env, timeout: 30000 } : { args: [path.resolve('desktop/worker'), '--disable-gpu'], env, timeout: 30000 });
         const page = await app.firstWindow();
         page.on('pageerror', error => { throw error; });
         await page.locator('.preference-menu summary').click();
@@ -78,11 +86,11 @@ if (!output) throw Error('Explicit fresh evidence directory required');
         await page.getByRole('button', { name: 'Quit safely' }).click().catch(() => { });
         await Promise.race([closed, new Promise((_, reject) => setTimeout(() => reject(Error('Quit did not exit')), 10000))]);
         app = null;
-        await fs.writeFile(receipt, JSON.stringify({ gpuWork: false, realLab: false, agentStarted: false, platformExercised: process.platform, windowsExercised: false, ...results }, null, 2) + '\n', { flag: 'wx' });
+        await fs.writeFile(receipt, JSON.stringify({ gpuWork: false, realLab: false, agentStarted: false, packagedApp: Boolean(packaged), platformExercised: process.platform, windowsExercised: false, ...results }, null, 2) + '\n', { flag: 'wx' });
         console.log('PASS Worker station contract (CPU fixture; not a Windows run).');
     } finally {
         if (app) await app.close().catch(() => { });
         await new Promise(resolve => { server.closeAllConnections?.(); server.close(resolve); });
-        await fs.rm(root, { recursive: true, force: true });
+        await fs.rm(home, { recursive: true, force: true });
     }
 })().catch(error => { console.error(error.stack || error.message); process.exitCode = 1; });
