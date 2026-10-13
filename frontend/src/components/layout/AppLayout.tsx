@@ -17,7 +17,7 @@ import { useStatusToasts } from "./useStatusToasts";
 import { NotificationBell } from "./NotificationBell";
 import { CommandPalette } from "./CommandPalette";
 import { PresentationBar } from "./PresentationBar";
-import { usePresentation } from "../../app/presentation";
+import { usePresentation } from "../../app/presentationContext";
 import { useSession } from "../../app/session";
 import { IS_MOCK } from "../../lib/dataSource";
 import {useState} from 'react';

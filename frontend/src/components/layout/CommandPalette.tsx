@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useProduct } from "@heteroes/product-ui";
-import { usePresentation } from "../../app/presentation";
+import { usePresentation } from "../../app/presentationContext";
 import { useSession } from "../../app/session";
 import { useExperiments } from "../../hooks/useExperiments";
 import { useWorkers } from "../../hooks/useWorkers";
@@ -57,7 +57,6 @@ export function CommandPalette() {
 
   const results = useMemo(() => commandRank(commands, query).slice(0, 12), [commands, query]);
   useEffect(() => { if (open) input.current?.focus(); }, [open]);
-  useEffect(() => { setActive(0); }, [query]);
   if (!open) return null;
 
   const choose = (command?: Command) => { if (!command) return; close(); command.run(); };
@@ -72,7 +71,7 @@ export function CommandPalette() {
   return (
     <div className="palette-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) close(); }}>
       <div className="palette" role="dialog" aria-modal="true" aria-label={t("Quick search")} onKeyDown={keydown}>
-        <input ref={input} className="inp" role="combobox" aria-expanded="true" aria-controls="palette-list" aria-activedescendant={results[active] ? `palette-${results[active].id}` : undefined} aria-label={t("Search pages, experiments, GPUs and actions")} placeholder={t("Search pages, experiments, GPUs and actions")} value={query} onChange={event => setQuery(event.target.value)} autoComplete="off" />
+        <input ref={input} className="inp" role="combobox" aria-expanded="true" aria-controls="palette-list" aria-activedescendant={results[active] ? `palette-${results[active].id}` : undefined} aria-label={t("Search pages, experiments, GPUs and actions")} placeholder={t("Search pages, experiments, GPUs and actions")} value={query} onChange={event => { setQuery(event.target.value); setActive(0); }} autoComplete="off" />
         <ul id="palette-list" role="listbox">
           {results.length === 0 && <li className="palette-empty" role="presentation">{t("Nothing matches")}</li>}
           {results.map((command, index) => (

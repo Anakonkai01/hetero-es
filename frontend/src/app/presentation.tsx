@@ -1,7 +1,6 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { PresentationContext } from "./presentationContext";
 
-type Presentation = { on: boolean; set: (value: boolean) => void; toggle: () => void };
-const Context = createContext<Presentation>({ on: false, set: () => { }, toggle: () => { } });
 const KEY = "heteroes.present";
 
 const initial = () => {
@@ -18,7 +17,5 @@ export function PresentationProvider({ children }: { children: ReactNode }) {
   const set = useCallback((value: boolean) => setOn(value), []);
   const toggle = useCallback(() => setOn(value => !value), []);
   const value = useMemo(() => ({ on, set, toggle }), [on, set, toggle]);
-  return <Context.Provider value={value}>{children}</Context.Provider>;
+  return <PresentationContext.Provider value={value}>{children}</PresentationContext.Provider>;
 }
-
-export const usePresentation = () => useContext(Context);

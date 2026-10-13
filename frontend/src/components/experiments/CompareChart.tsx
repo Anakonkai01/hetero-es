@@ -1,7 +1,7 @@
 import { useProduct } from "@heteroes/product-ui";
 import type { Series } from "../../lib/compare";
+import { compareColor } from "../../lib/chartColors";
 
-const COLORS = ["var(--acc)", "var(--chart-secondary)", "#c2410c", "#7c3aed", "#0e7490"];
 const W = 640, H = 300, LEFT = 52, RIGHT = 16, TOP = 14, BOTTOM = 36;
 
 /** Mean reward per generation for several runs on one set of axes; the best reward is the dashed line of the same colour. */
@@ -17,7 +17,7 @@ export function CompareChart({ series, maxGeneration, maxReward, svgRef }: { ser
       {Array.from({ length: maxGeneration + 1 }, (_, g) => <text key={g} x={x(g)} y={H - 14} textAnchor="middle" fontSize="11" fill="var(--mut)">{g + 1}</text>)}
       <text x={(LEFT + W - RIGHT) / 2} y={H - 1} textAnchor="middle" fontSize="11" fill="var(--mut)">{t("Generation")}</text>
       {series.map((item, index) => {
-        const color = COLORS[index % COLORS.length];
+        const color = compareColor(index);
         return (
           <g key={item.id}>
             <path d={path(item.points.map(p => ({ generation: p.generation, value: p.best })))} fill="none" stroke={color} strokeWidth="1.5" strokeDasharray="5 4" opacity=".7" />
@@ -29,4 +29,3 @@ export function CompareChart({ series, maxGeneration, maxReward, svgRef }: { ser
     </svg>
   );
 }
-export const compareColor = (index: number) => COLORS[index % COLORS.length];

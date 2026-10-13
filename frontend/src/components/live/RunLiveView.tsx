@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { useProduct } from "@heteroes/product-ui";
+import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { useRunPlayer } from "../../hooks/useRunPlayer";
 import type { TimelineSource } from "../../hooks/useRunTimeline";
 import { describeEvent, fillTemplate } from "../../lib/eventText";
@@ -9,18 +9,6 @@ import { LiveDiagram } from "./LiveDiagram";
 import { PlayerBar } from "./PlayerBar";
 import { RunGantt } from "./RunGantt";
 import "./live.css";
-
-export function useReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(() => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches);
-  useEffect(() => {
-    if (typeof matchMedia !== "function") return;
-    const query = matchMedia("(prefers-reduced-motion: reduce)");
-    const change = () => setReduced(query.matches);
-    query.addEventListener("change", change);
-    return () => query.removeEventListener("change", change);
-  }, []);
-  return reduced;
-}
 
 const PHASES = ["Evaluate candidates in parallel", "Update and publish the model"] as const;
 

@@ -6,7 +6,8 @@ import { apiGet } from "../api/client";
 import { useScopeKey } from "../app/session";
 import { EmptyState } from "../components/common/EmptyState";
 import { LoadingState } from "../components/common/LoadingState";
-import { CompareChart, compareColor } from "../components/experiments/CompareChart";
+import { CompareChart } from "../components/experiments/CompareChart";
+import { compareColor } from "../lib/chartColors";
 import { Badge } from "../components/ui/Badge";
 import { PageHeader } from "../components/ui/PageHeader";
 import { saveBlob, saveText } from "../lib/chartExport";
@@ -32,8 +33,12 @@ export function ComparePage() {
   ]) });
   const pairs = ids.map((id, index) => ({ id, experiment: loaded[index * 2].data as Experiment | undefined, generations: (loaded[index * 2 + 1].data as Generation[] | undefined) ?? [], failed: loaded[index * 2].isError }));
   const ready = pairs.filter((p): p is typeof p & { experiment: Experiment } => Boolean(p.experiment));
-  const result = useMemo(() => compareRuns(ready.map(p => ({ experiment: p.experiment, generations: p.generations }))), [ready.map(p => `${p.experiment.experimentId}:${p.generations.length}:${p.experiment.status}`).join("|")]); // eslint-disable-line react-hooks/exhaustive-deps
-  const differences = useMemo(() => configDifferences(ready.map(p => p.experiment)), [ready.map(p => p.experiment.configHash).join("|")]); // eslint-disable-line react-hooks/exhaustive-deps
+  const resultKey = ready.map(p => `${p.experiment.experimentId}:${p.generations.length}:${p.experiment.status}:${p.generations.at(-1)?.rewardMean ?? ""}`).join("|");
+  const configKey = ready.map(p => p.experiment.configHash).join("|");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const result = useMemo(() => compareRuns(ready.map(p => ({ experiment: p.experiment, generations: p.generations }))), [resultKey]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const differences = useMemo(() => configDifferences(ready.map(p => p.experiment)), [configKey]);
 
   if (ids.length < 2) return <><PageHeader title={t("Compare experiments")} /><EmptyState title={t("Pick at least two experiments")} message="Select experiments in the list and choose Compare."><Link className="btn pri" to="/experiments">{t("Experiments")}</Link></EmptyState></>;
   if (loaded.some(query => query.isPending) && !ready.length) return <LoadingState />;

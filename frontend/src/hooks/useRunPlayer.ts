@@ -15,8 +15,11 @@ export type Player = {
 export function useRunPlayer(timeline: Timeline | undefined, mode: "live" | "replay", clockOffsetMs: number, reducedMotion: boolean, options: { loop?: boolean; speed?: number } = {}): Player {
   const baseBounds = useMemo(() => (timeline ? runBounds(timeline) : undefined), [timeline]);
   const [state, setState] = useState<PlayerState>({ atMs: 0, playing: mode === "replay", speed: options.speed ?? 4 });
-  const [tick, setTick] = useState(0);
+  const [clock, setClock] = useState(() => Date.now());   // the live playhead; refreshed by the animation loop, never read while rendering
   const [following, setFollowing] = useState(mode === "live");
+  const [seenMode, setSeenMode] = useState(mode);
+  // Only a change of mode (not every new message) puts the view back on "live".
+  if (seenMode !== mode) { setSeenMode(mode); setFollowing(mode === "live"); }
   const last = useRef<number>(0);
 
   // Start a replay from the beginning once the run is known.
@@ -30,8 +33,6 @@ export function useRunPlayer(timeline: Timeline | undefined, mode: "live" | "rep
     const timer = window.setTimeout(() => setState(s => ({ ...s, atMs: baseBounds.startMs, playing: true })), 2500);
     return () => clearTimeout(timer);
   }, [options.loop, mode, baseBounds, state.playing, state.atMs]);
-  // Only a change of mode (not every new message) puts the view back on "live".
-  useEffect(() => { setFollowing(mode === "live"); }, [mode]);
 
   useEffect(() => {
     if (!timeline) return;
@@ -42,7 +43,7 @@ export function useRunPlayer(timeline: Timeline | undefined, mode: "live" | "rep
       const elapsed = last.current ? now - last.current : 0;
       last.current = now;
       if (mode === "replay" || !following) setState(s => advance(s, elapsed, runBounds(timeline)));
-      setTick(n => n + 1);
+      setClock(Date.now());
       frame = requestAnimationFrame(loop);
     };
     const slow = reducedMotion ? window.setInterval(() => loop(performance.now()), 250) : undefined;
@@ -52,13 +53,11 @@ export function useRunPlayer(timeline: Timeline | undefined, mode: "live" | "rep
   }, [timeline, mode, following, state.playing, reducedMotion]);
 
   const live = mode === "live" && following;
-  const atMs = live ? Date.now() + clockOffsetMs : state.atMs;
+  const atMs = live ? clock + clockOffsetMs : state.atMs;
   // Following a live run, the end of the range is "now" (the last message may be a little older than the clock).
-  const bounds = baseBounds && (live ? { ...baseBounds, endMs: Math.max(baseBounds.endMs, atMs) } : baseBounds);
+  const bounds = useMemo(() => baseBounds && (live ? { ...baseBounds, endMs: Math.max(baseBounds.endMs, atMs) } : baseBounds), [baseBounds, live, atMs]);
   const frame = useMemo(() => (timeline ? frameAt(timeline, atMs, { flightMs: FLIGHT_MS * (live ? 1 : state.speed) }) : undefined),
-    // `tick` is the clock: the frame is recomputed every animation frame.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [timeline, atMs, live, state.speed, tick]);
+    [timeline, atMs, live, state.speed]);
 
   return {
     frame, bounds, state: live ? { ...state, atMs } : state, live,

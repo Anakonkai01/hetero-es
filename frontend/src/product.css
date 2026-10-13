@@ -64,3 +64,4 @@ body{font-size:16px}
 .presentation-bar{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:60;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;max-width:calc(100vw - 24px);padding:10px 14px;border-radius:14px;background:var(--sf);border:1px solid var(--acc);box-shadow:var(--shadow)}.presentation-bar .hint{margin:0 4px 0 0}
 :root[data-present="1"] body{zoom:1.15}:root[data-present="1"] .tech,:root[data-present="1"] .breadcrumbs,:root[data-present="1"] .side .demo,:root[data-present="1"] .top>.mut{display:none!important}
 @media print{.presentation-bar,.palette-backdrop,.side,.top{display:none!important}}
+.ops-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:6px}.ops-tiles>div{display:grid;gap:6px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--sf2);align-content:start}.ops-tiles b{font-size:22px;font-variant-numeric:tabular-nums}

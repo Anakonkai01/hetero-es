@@ -1,4 +1,4 @@
-import {useProduct} from '@heteroes/product-ui';
+import {useProduct,Status} from '@heteroes/product-ui';
 import { LabDevices } from './LabDevices';
 import { useState } from 'react';
 import { useMutation,useQuery,useQueryClient } from '@tanstack/react-query';
@@ -56,11 +56,18 @@ export function LabOperationsPage() {
       </details>
     </div></section>
     <LabDevices administration /><section className="card"><div className="ch"><h2>{t("Services and reservations")}</h2></div><div className="cb demo-form">
-      {ops.error && <p role="alert">{ops.error.message}</p>}{ops.data && <><p>{t("Product:")}{" "}{ops.data.productService} {t("· Runtime:")}{" "}{ops.data.runtimeService}</p><p>{t("Queue:")}{" "}{ops.data.queueCount} {t("· Dispatch")}{ops.data.dispatchHeld?t("HELD"):t("enabled")} {t("· Runtime maintenance")}{ops.data.runtimeMaintenance?t("held"):t("off")}</p>
+      {ops.error && <p role="alert">{ops.error.message}</p>}{ops.data && <>
+        <div className="ops-tiles">
+          <div><span className="hint">{t("Product service")}</span><Status value={ops.data.productService}/></div>
+          <div><span className="hint">{t("Runtime service")}</span><Status value={ops.data.runtimeService}/></div>
+          <div><span className="hint">{t("Queue")}</span><b>{ops.data.queueCount}</b></div>
+          <div><span className="hint">{t("Dispatch")}</span><Status value={ops.data.dispatchHeld?'Dispatch held':'Dispatch enabled'}/></div>
+          <div><span className="hint">{t("Runtime maintenance")}</span><Status value={ops.data.runtimeMaintenance?'ON':'OFF'}/></div>
+        </div>
         {ops.data.runtimeIssue && <p className="note warn">{ops.data.runtimeIssue}</p>}
-        <p>{t("Quarantine:")}{" "}{ops.data.quarantinedWorkerIds?.join(', ')||'None'}</p>
-        {ops.data.workers.map(w=><p key={w.workerId}>{w.workerId} · {w.status} · {w.admissionReason}</p>)}
-        {ops.data.reservations.length===0 && <p>{t("No active reservations.")}</p>}{ops.data.reservations.map(r=><div key={r.runId}><b>{r.runId} · {r.status}</b><p>{r.failureReason}</p>{Object.entries(r.workerStates).map(([id,state])=><p key={id}>{id}: {t(state.confirmed?'confirmed':'shutdown unknown')} · {t(state.alive===true?'Alive':state.alive===false&&state.confirmed?'Confirmed stopped':'Unknown')}</p>)}</div>)}
+        <p><span className="hint">{t("Quarantine")}: </span>{ops.data.quarantinedWorkerIds?.join(', ')||t('None')}</p>
+        {ops.data.workers.map(w=><p key={w.workerId}><b>{w.workerId}</b> · {t(w.status)} · {w.admissionReason}</p>)}
+        {ops.data.reservations.length===0 && <p className="hint">{t("No active reservations.")}</p>}{ops.data.reservations.map(r=><div key={r.runId}><b>{r.runId} · {r.status}</b><p>{r.failureReason}</p>{Object.entries(r.workerStates).map(([id,state])=><p key={id}>{id}: {t(state.confirmed?'confirmed':'shutdown unknown')} · {t(state.alive===true?'Alive':state.alive===false&&state.confirmed?'Confirmed stopped':'Unknown')}</p>)}</div>)}
         {ops.data.recentFailures?.map(r=><p key={r.runId}>{r.runId} · {r.status} · {r.failureReason}</p>)}
       </>}
     </div></section>

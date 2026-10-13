@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { Link } from "react-router";
 import { activeLanguage, useProduct } from "@heteroes/product-ui";
 import { browserNotificationsEnabled, useBrowserOptIn, useNotifications } from "../../hooks/useNotifications";
+import { useNow } from "../../hooks/useNow";
 import { fillTemplate } from "../../lib/eventText";
 import { describeNotification, relativeTime, type NotificationItem } from "../../lib/notificationText";
 
@@ -10,6 +11,7 @@ export function NotificationBell() {
   const { t } = useProduct();
   const menu = useRef<HTMLDetailsElement>(null);
   const optIn = useBrowserOptIn();
+  const now = useNow();
   const sentence = (item: NotificationItem) => { const d = describeNotification(item); return fillTemplate(t(d.title), d.params); };
   const { items, unread, loading, failed, read } = useNotifications(item => {
     if (!browserNotificationsEnabled()) return;
@@ -32,7 +34,7 @@ export function NotificationBell() {
               return (
                 <li key={item.id} className={`bell-item bell-${d.tone}${item.read ? " read" : ""}`}>
                   <Link to={item.target ?? "/dashboard"} onClick={() => { if (!item.read) read.mutate({ ids: [item.id] }); close(); }}>
-                    <span>{sentence(item)}</span><small>{relativeTime(item.created, Date.now(), activeLanguage())}</small>
+                    <span>{sentence(item)}</span><small>{relativeTime(item.created, now, activeLanguage())}</small>
                   </Link>
                 </li>
               );

@@ -882,3 +882,7 @@ Object.assign(translations, {
  'to move':'để di chuyển','to open':'để mở','to close':'để đóng','Presentation':'Trình diễn','Arrow keys change the scene':'Phím mũi tên đổi cảnh','Replay of a real run':'Phát lại một run thật','Live view':'Màn hình trực tiếp','Comparison':'So sánh',
  'GPUs':'GPU','Language':'Ngôn ngữ','How it works':'Cách hoạt động','Experiments':'Thí nghiệm','Create experiment':'Tạo thí nghiệm','Sign out':'Đăng xuất',
 });
+
+Object.assign(translations, { 'Generation detail': 'Chi tiết thế hệ', 'Candidate detail': 'Chi tiết candidate', 'The attempt finished successfully': 'Lượt chạy đã hoàn tất thành công', 'SUCCEEDED': 'Thành công', 'The attempt ended with an error': 'Lượt chạy kết thúc với lỗi', 'The attempt is running': 'Lượt chạy đang diễn ra', 'FAILED': 'Lỗi', 'RUNNING': 'Đang chạy' });
+
+Object.assign(translations, { 'Product service': 'Dịch vụ sản phẩm', 'Runtime service': 'Dịch vụ runtime', 'Queue': 'Hàng đợi', 'Dispatch': 'Điều phối', 'Runtime maintenance': 'Bảo trì runtime', 'Quarantine': 'Cách ly', 'None': 'Không có', 'ONLINE': 'Online', 'UNAVAILABLE': 'Không khả dụng', 'ON': 'Bật', 'OFF': 'Tắt' });

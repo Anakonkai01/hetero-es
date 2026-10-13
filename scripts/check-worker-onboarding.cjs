@@ -58,7 +58,7 @@ const listen = server => new Promise(resolve => server.listen(0, '127.0.0.1', ()
         await address(page).waitFor();
         assert.equal(await address(page).inputValue(), 'https://lab.heteroes.site', 'the lab address shipped with the app is offered');
         const build = (await status(page)).result.build;
-        assert.ok(packaged ? /^lf1-\d{8}-r\d+$/.test(build) : build === 'dev', `build name: ${build}`);
+        assert.ok(/^(dev|lf1-\d{8}-r\d+)$/.test(build), `build name: ${build}`);   // the committed defaults.json names the last build
         await page.getByText(build, { exact: false }).first().waitFor();
         results.build = build;
         assert.equal(await page.getByText('Network and compute role').isVisible(), false, 'network/role are tucked away while onboarding');

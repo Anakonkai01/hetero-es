@@ -28,7 +28,7 @@ export function useNotifications(announce: (item: NotificationItem) => void) {
   const query = useQuery({ queryKey: ["notifications", session?.user.userId], queryFn: () => apiGet<Listing>("/api/v1/notifications?limit=30"), enabled, refetchInterval: 10000, retry: 1 });
   const seen = useRef<Set<string> | undefined>(undefined);
   const announceRef = useRef(announce);
-  announceRef.current = announce;
+  useEffect(() => { announceRef.current = announce; });
   useEffect(() => {
     if (!query.data) return;
     for (const item of newUnread(seen.current, query.data.items)) announceRef.current(item);

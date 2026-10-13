@@ -15,14 +15,15 @@ export function useRunTimeline(runId: string, enabled = true): { timeline?: Time
   const [source, setSource] = useState<TimelineSource>("loading");
   const [clockOffsetMs, setOffset] = useState(0);
   const latest = useRef<Timeline | undefined>(undefined);
+  // Another run (or the view switched off): start again from nothing. Adjusting state while rendering is the supported way.
+  const [watched, setWatched] = useState(`${runId}:${enabled}`);
+  if (watched !== `${runId}:${enabled}`) { setWatched(`${runId}:${enabled}`); setTimeline(undefined); setSource("loading"); }
 
   useEffect(() => {
     if (!enabled || !runId) return;
     const stop = new AbortController();
     let timer: ReturnType<typeof setTimeout> | undefined;
     latest.current = undefined;
-    setTimeline(undefined);
-    setSource("loading");
 
     const accept = (incoming: Timeline) => {
       const next = applyDelta(latest.current, incoming);
