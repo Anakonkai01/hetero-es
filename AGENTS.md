@@ -1,6 +1,6 @@
 # AGENTS.md — HeteroES runtime repository (numerical core, ledger, workers, device agent)
 
-Start with **`../Hetero-ES-LLM-m3/docs/session-handoff-2026-10-13.md`** (r6 prepared, nothing published), then **`../Hetero-ES-LLM-m3/docs/session-handoff-2026-10-12-close.md`** (latest public r5 state, Windows blockers, owner-requested stop), then **`../Hetero-ES-LLM-m3/docs/session-handoff-2026-10-12-lf1.md`** (owner rules and decisions), then
+Start with **`../Hetero-ES-LLM-m3/docs/session-handoff-2026-10-13-ui.md`** (new web UI, Live view and r7 are live; what is not shown), then **`../Hetero-ES-LLM-m3/docs/session-handoff-2026-10-13.md`** (r6 morning, Windows question), then **`../Hetero-ES-LLM-m3/docs/session-handoff-2026-10-12-close.md`** (latest public r5 state, Windows blockers, owner-requested stop), then **`../Hetero-ES-LLM-m3/docs/session-handoff-2026-10-12-lf1.md`** (owner rules and decisions), then
 `CLAUDE.md` in this repository for the numerical contract, module map and test commands, then
 `HETEROES_LLM_STATUS.md` (first block = latest state) and `docs/adr/`.
 
