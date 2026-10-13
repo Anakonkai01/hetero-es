@@ -28,21 +28,32 @@ export function LabOperationsPage() {
   const backups=useQuery({queryKey:['platform-backups',session?.user.userId],queryFn:()=>apiGet<Backup[]>('/api/v1/platform/backups'),enabled:allowed});
   const audit=useQuery({queryKey:['platform-audit',session?.user.userId],queryFn:()=>apiGet<Audit[]>('/api/v1/platform/audit'),enabled:allowed,refetchInterval:5000});
   const [confirmed,setConfirmed]=useState(false);const [downloadError,setDownloadError]=useState('');
+  const [notice,setNotice]=useState('');
   const action=useMutation({mutationFn:(a:Action)=>a.method==='PATCH'?apiPatch(a.path,a.body):apiPost(a.path,a.body),onSuccess:async()=>{await cache.invalidateQueries();await refreshSession();}});
+  const pending=users.data?.filter(user=>user.accountStatus==='PENDING')??[];const others=users.data?.filter(user=>user.accountStatus!=='PENDING')??[];
   if (!allowed) return <p role="alert">{t("Platform administrator permission required.")}</p>;
-  function update(user:User,body:unknown) {action.mutate({path:`/api/v1/platform/users/${user.userId}`,method:'PATCH',body});}
+  function update(user:User,body:unknown,message='') {setNotice('');action.mutate({path:`/api/v1/platform/users/${user.userId}`,method:'PATCH',body},{onSuccess:()=>setNotice(message)});}
   return <><PageHeader title={t("Lab operations")} description={t("Accounts, service health and safe maintenance.")} />
     {action.error && <p className="note err" role="alert">{action.error.message}</p>}
-    <section className="card"><div className="ch"><h2>{t("Account approval")}</h2></div><div className="cb demo-form">
+    <section className="card approvals"><div className="ch"><h2>{t("Account approval")}</h2>{pending.length>0&&<span className="count-badge" aria-label={`${pending.length} ${t('accounts waiting for approval')}`}>{pending.length}</span>}</div><div className="cb demo-form">
       {users.error && <p role="alert">{users.error.message}</p>}{users.isPending && <p>{t("Loading accounts…")}</p>}
-      {users.data?.map(user=><div className="request-card" key={user.userId} data-account={user.username}><div><b>{user.displayName} · {user.username}</b><small>{t(user.accountStatus??'Unknown')} · {t(user.platformAdmin?'Platform administrator':'Member')} {t("· Workspace creation")}{t(user.canCreateWorkspace?'allowed':'restricted')}</small></div><div className="acts">
-        {user.accountStatus!=='ACTIVE' && <button className="btn accent" disabled={action.isPending} onClick={()=>update(user,{accountStatus:'ACTIVE'})}>{t("Approve")}</button>}
-        {user.accountStatus==='PENDING' && <button className="btn" disabled={action.isPending} onClick={()=>update(user,{accountStatus:'REJECTED'})}>{t("Reject")}</button>}
+      {notice && <p className="note ok" role="status">{notice}</p>}
+      {users.data && !pending.length && <p className="hint">{t("No accounts are waiting for approval.")}</p>}
+      {pending.map(user=><article className="approval-card" key={user.userId} data-account={user.username}><div><b>{user.displayName}</b><small>@{user.username} · {t("Requested an account")}</small></div><div className="acts">
+        <button className="btn accent" disabled={action.isPending} onClick={()=>update(user,{accountStatus:'ACTIVE'},`${user.displayName} ${t("was approved.")}`)}>{t("Approve")}</button>
+        <button className="btn" disabled={action.isPending} onClick={()=>update(user,{accountStatus:'REJECTED'},`${user.displayName} ${t("was declined.")}`)}>{t("Reject")}</button>
+      </div></article>)}
+      <details className="advanced-panel"><summary>{t("All accounts")} ({others.length})</summary>
+      {others.map(user=><div className="request-card" key={user.userId} data-account={user.username}><div><b>{user.displayName} · {user.username}</b><small>{t(user.accountStatus??'Unknown')} · {t(user.platformAdmin?'Platform administrator':'Member')} {t("· Workspace creation")}{t(user.canCreateWorkspace?'allowed':'restricted')}</small></div><div className="acts">
+        {user.accountStatus!=='ACTIVE' && <button className="btn accent" disabled={action.isPending} onClick={()=>update(user,{accountStatus:'ACTIVE'},`${user.displayName} ${t("was approved.")}`)}>{t("Approve")}</button>}
         {user.accountStatus==='ACTIVE' && user.userId!==session?.user.userId && <button className="btn dng" disabled={action.isPending} onClick={()=>{if(window.confirm(`Suspend ${user.username}? Queued jobs will be cancelled and active jobs will drain.`))update(user,{accountStatus:'SUSPENDED'});}}>{t("Suspend")}</button>}
-        <button className="btn" disabled={action.isPending} onClick={()=>update(user,{canCreateWorkspace:!user.canCreateWorkspace})}>{user.canCreateWorkspace?'Revoke workspace creation':'Allow workspace creation'}</button>
-        <button className="btn" disabled={action.isPending} onClick={()=>action.mutate({path:`/api/v1/platform/users/${user.userId}/revoke-sessions`})}>{t("Revoke sessions")}</button>
-        <button className="btn" disabled={action.isPending} onClick={()=>{if(window.confirm(`Change platform administrator permission for ${user.username}?`))update(user,{platformAdmin:!user.platformAdmin});}}>{user.platformAdmin?'Remove platform admin':'Grant platform admin'}</button>
+        <details className="more-actions"><summary className="btn">{t("More")}</summary><div className="acts">
+          <button className="btn" disabled={action.isPending} onClick={()=>update(user,{canCreateWorkspace:!user.canCreateWorkspace})}>{user.canCreateWorkspace?'Revoke workspace creation':'Allow workspace creation'}</button>
+          <button className="btn" disabled={action.isPending} onClick={()=>action.mutate({path:`/api/v1/platform/users/${user.userId}/revoke-sessions`})}>{t("Revoke sessions")}</button>
+          <button className="btn" disabled={action.isPending} onClick={()=>{if(window.confirm(`Change platform administrator permission for ${user.username}?`))update(user,{platformAdmin:!user.platformAdmin});}}>{user.platformAdmin?'Remove platform admin':'Grant platform admin'}</button>
+        </div></details>
       </div></div>)}
+      </details>
     </div></section>
     <LabDevices administration /><section className="card"><div className="ch"><h2>{t("Services and reservations")}</h2></div><div className="cb demo-form">
       {ops.error && <p role="alert">{ops.error.message}</p>}{ops.data && <><p>{t("Product:")}{ops.data.productService} {t("· Runtime:")}{ops.data.runtimeService}</p><p>{t("Queue:")}{ops.data.queueCount} {t("· Dispatch")}{ops.data.dispatchHeld?t("HELD"):t("enabled")} {t("· Runtime maintenance")}{ops.data.runtimeMaintenance?t("held"):t("off")}</p>

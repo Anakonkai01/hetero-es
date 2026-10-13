@@ -12,3 +12,10 @@
 .fleet-energy{margin:24px 0}.fleet-energy .stats{margin:0 0 18px}.fleet-period{display:flex;align-items:center;gap:12px;font-size:14px;flex-wrap:wrap}.fleet-period select{width:auto;min-height:40px}.fleet-energy .info-caption{font-size:13px}
 
 body{font-size:16px}
+
+.nav-badge{margin-left:auto;min-width:20px;padding:0 6px;border-radius:10px;background:var(--acc);color:var(--on-acc);font-size:12px;font-weight:600;line-height:20px;text-align:center}.nav{align-items:center}
+.approval-banner{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px;border-left:3px solid var(--warning)}.note.ok{background:var(--success-bg);color:var(--success)}
+.approval-card{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;padding:16px 18px;margin-bottom:12px;border:1px solid var(--line);border-left:3px solid var(--warning);border-radius:10px;background:var(--sf2)}.approval-card b{display:block;font-size:16px}.approval-card small{color:var(--mut)}.approval-card .btn{min-height:40px;padding:8px 20px}
+.more-actions{display:inline-block}.more-actions>summary{list-style:none;cursor:pointer}.more-actions[open] .acts{margin-top:8px}
+.get-started{list-style:none;margin:0;padding:0;display:grid;gap:16px;max-width:760px}.get-started .step-no{display:inline-grid;place-items:center;width:26px;height:26px;margin-right:10px;border-radius:50%;background:var(--acct);color:var(--acc);font-size:14px}
+.rule-ok{color:var(--success)}

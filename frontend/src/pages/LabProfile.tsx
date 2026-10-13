@@ -25,7 +25,7 @@ export function LabProfile() {
     </form></section>
     <section className="card"><div className="ch"><h2>{t("Security")}</h2></div><form className="cb demo-form" onSubmit={e=>{e.preventDefault();password.mutate();}}>
       <label className="fg">{t("Current password")}<input className="inp" type="password" autoComplete="current-password" required value={currentPassword} onChange={e=>setCurrent(e.target.value)} /></label>
-      <label className="fg">{t("New password")}<input className="inp" type="password" autoComplete="new-password" required minLength={12} maxLength={200} value={newPassword} onChange={e=>setNew(e.target.value)} /></label>
+      <label className="fg">{t("New password")}<input className="inp" type="password" autoComplete="new-password" required minLength={8} maxLength={200} value={newPassword} onChange={e=>setNew(e.target.value)} /></label>
       <p className="hint">{t("Changing your password signs out all other sessions.")}</p>{password.error && <p role="alert">{password.error.message}</p>}{password.isSuccess && <p role="status">{t("Password changed.")}</p>}
       <button className="btn pri" disabled={password.isPending}>{t("Change password")}</button><button type="button" className="btn" disabled={revoke.isPending} onClick={()=>revoke.mutate()}>{t("Sign out other sessions")}</button>
       {revoke.error && <p role="alert">{revoke.error.message}</p>}{revoke.isSuccess && <p role="status">{t("Other sessions revoked.")}</p>}

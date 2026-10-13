@@ -742,3 +742,19 @@ Object.assign(translations, {
  'Enter the lab address first.':'Hãy nhập địa chỉ lab trước.','Sign in first.':'Hãy đăng nhập trước.','Cancelled.':'Đã hủy.',
  'The lab server is not answering right now. Try again later or ask the lab administrator.':'Máy chủ lab đang không phản hồi. Hãy thử lại sau hoặc hỏi quản trị viên lab.',
 });
+
+Object.assign(translations, {
+ 'Get started':'Bắt đầu','Home':'Trang chủ','Three steps from a new account to a GPU that helps your lab.':'Ba bước từ tài khoản mới đến GPU đóng góp cho lab của bạn.',
+ 'Your account':'Tài khoản của bạn','PENDING':'Chờ duyệt','ACTIVE':'Đã duyệt','REJECTED':'Bị từ chối','SUSPENDED':'Bị tạm khóa',
+ 'Waiting for an administrator to approve your account. You can install the Worker app in the meantime.':'Đang chờ quản trị viên duyệt tài khoản. Trong lúc đó bạn vẫn có thể cài ứng dụng Worker.',
+ 'Your account is approved.':'Tài khoản của bạn đã được duyệt.','Your account request was declined. Ask the lab administrator.':'Yêu cầu tài khoản bị từ chối. Hãy hỏi quản trị viên lab.','Your account is suspended. Ask the lab administrator.':'Tài khoản đang bị tạm khóa. Hãy hỏi quản trị viên lab.',
+ 'Install the Worker app':'Cài ứng dụng Worker','The Worker connects your GPU computer to this lab. It works on Windows and Linux.':'Worker kết nối máy GPU của bạn với lab này. Chạy trên Windows và Linux.',
+ 'Download for':'Tải cho','Windows may warn that the app is from an unknown publisher because it is not signed yet. Choose More info, then Run anyway.':'Windows có thể cảnh báo "nhà phát hành không xác định" vì ứng dụng chưa được ký. Chọn More info, rồi Run anyway.',
+ 'When the app asks for the lab address, use this one (it is usually filled in already):':'Khi ứng dụng hỏi địa chỉ lab, dùng địa chỉ này (thường đã được điền sẵn):',
+ 'Copy address':'Sao chép địa chỉ','Pair your GPU':'Ghép GPU của bạn',
+ 'In the app, sign in with this same account, run the GPU check, then pair the device. An administrator approves it before it can receive work.':'Trong ứng dụng, đăng nhập bằng đúng tài khoản này, chạy kiểm tra GPU rồi ghép máy. Quản trị viên duyệt thì máy mới nhận việc.',
+ 'Your GPU stays off until you choose to contribute.':'GPU chỉ chạy khi bạn chủ động bật đóng góp.','My GPU computers':'Máy GPU của tôi','Home page':'Trang chủ',
+ 'accounts waiting for approval':'tài khoản đang chờ duyệt','account is waiting for approval.':'tài khoản đang chờ duyệt.','accounts are waiting for approval.':'tài khoản đang chờ duyệt.','Review requests':'Xem yêu cầu',
+ 'No accounts are waiting for approval.':'Không có tài khoản nào đang chờ duyệt.','Requested an account':'Đã xin tạo tài khoản','was approved.':'đã được duyệt.','was declined.':'đã bị từ chối.','All accounts':'Tất cả tài khoản','More':'Thêm',
+ 'Use at least 8 characters.':'Dùng ít nhất 8 ký tự.','At least 8 characters. Avoid common passwords.':'Ít nhất 8 ký tự. Tránh mật khẩu phổ biến.',
+});

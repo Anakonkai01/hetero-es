@@ -1,12 +1,9 @@
-import {useQuery} from '@tanstack/react-query';
 import {useProduct} from '@heteroes/product-ui';
-
-type Installer={platform:string;name:string;url:string};
-type Manifest={installers:Installer[];serverInstallers?:Installer[];privateTransferRequired?:boolean};
+import {useInstallerManifest} from '../../hooks/useInstallerManifest';
 
 export function InstallerDownloads(){
  const {t}=useProduct();
- const manifest=useQuery({queryKey:['worker-installers'],queryFn:async()=>{const reply=await fetch('/downloads/manifest.json');if(!reply.ok)throw Error('BUILD_UNAVAILABLE');return reply.json() as Promise<Manifest>;},retry:false});
+ const manifest=useInstallerManifest();
  const apps=[{name:'Worker',items:manifest.data?.installers??[],description:'Connect your GPU and choose when to contribute.'},{name:'Lab Server',items:manifest.data?.serverInstallers??[],description:'Host the dashboard, queue and checkpoint service on a CPU computer.'}];
  return <section className="landing-downloads" id="downloads"><div className="section-title"><div><span className="eyebrow">{t('Desktop apps')}</span><h2>{t('Bring your computers into the lab.')}</h2><p>{t('Use Worker on GPU computers and Lab Server on the computer hosting your lab.')}</p></div></div>
  {manifest.data?.privateTransferRequired&&<p className="note">{t('Connect to the lab LAN or Tailscale to download installers and large files.')}</p>}
