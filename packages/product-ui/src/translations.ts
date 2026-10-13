@@ -817,3 +817,13 @@ Object.assign(translations, {
 });
 
 Object.assign(translations, { 'Loading the model': 'Đang nạp model', 'Live and replay': 'Trực tiếp & phát lại', 'Logs': 'Nhật ký', 'Results & saved model': 'Kết quả & model đã lưu', 'Experiment detail': 'Chi tiết thí nghiệm', 'Overview': 'Tổng quan', 'The experiment has completed': 'Thí nghiệm đã hoàn tất', 'The result has been accepted by the system': 'Hệ thống đã chấp nhận kết quả', 'Reward appears once the first generation has an accepted candidate.': 'Reward xuất hiện khi thế hệ đầu tiên có candidate được chấp nhận.', 'Could not load the live view': 'Không tải được màn hình trực tiếp', 'Nothing has run yet': 'Chưa có gì chạy', 'This experiment ended before any candidate ran.': 'Thí nghiệm này kết thúc trước khi có candidate nào chạy.', 'The live view starts as soon as the coordinator hands out the first candidate.': 'Màn hình trực tiếp bắt đầu ngay khi coordinator giao candidate đầu tiên.', 'The live view needs the real lab': 'Màn hình trực tiếp cần lab thật', 'The demo data does not record when each candidate ran.': 'Dữ liệu demo không ghi lại thời điểm chạy của từng candidate.', 'Experiment finished': 'Thí nghiệm đã xong' });
+
+Object.assign(translations, {
+ 'Your account is {status}. An administrator has to approve it.':'Tài khoản của bạn đang ở trạng thái {status}. Quản trị viên cần duyệt.','What to do meanwhile':'Làm gì trong lúc chờ',
+ '{n} account is waiting for approval.':'{n} tài khoản đang chờ duyệt.','{n} accounts are waiting for approval.':'{n} tài khoản đang chờ duyệt.',
+ '{n} GPU computer(s) wait for approval.':'{n} máy GPU đang chờ duyệt.','{n} of your GPU computer(s) wait for administrator approval.':'{n} máy GPU của bạn đang chờ quản trị viên duyệt.','Review devices':'Xem thiết bị',
+ 'The queue is held: new experiments wait until an administrator reopens it.':'Hàng đợi đang được giữ: thí nghiệm mới sẽ chờ đến khi quản trị viên mở lại.',
+ 'Needs your attention':'Cần bạn xử lý','Nothing is waiting for you.':'Không có gì đang chờ bạn.','Control room':'Phòng điều khiển',
+ 'No experiment has run yet':'Chưa có thí nghiệm nào chạy','Running now':'Đang chạy','Latest finished run, replayed':'Run gần nhất đã xong, phát lại','Open live view':'Mở màn hình trực tiếp',
+ 'A real run from this lab, replayed':'Một run thật của lab này, phát lại','3 different GPUs · 36 candidates · 3 generations':'3 GPU khác nhau · 36 candidate · 3 thế hệ',
+});

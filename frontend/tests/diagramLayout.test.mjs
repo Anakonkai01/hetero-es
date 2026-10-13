@@ -24,6 +24,14 @@ test('cards sit in one centred row when they fit and wrap into rows otherwise, n
     assert.equal(one.cards[0].cx, one.width / 2, 'a single card is centred');
 });
 
+test('the narrow layout used on the home page keeps three cards in one row on a smaller canvas', () => {
+    const wide = layoutWorkers(3), narrow = layoutWorkers(3, true);
+    assert.ok(narrow.width < wide.width);
+    assert.equal(new Set(narrow.cards.map(c => c.y)).size, 1, 'three cards in one row');
+    for (const card of narrow.cards) assert.ok(card.x >= 0 && card.x + card.w <= narrow.width);
+    assert.ok(layoutWorkers(5, true).cards.at(-1).y > layoutWorkers(5, true).cards[0].y, 'more than three wrap');
+});
+
 test('no workers still gives a drawable canvas', () => {
     const layout = layoutWorkers(0);
     assert.deepEqual(layout.cards, []);

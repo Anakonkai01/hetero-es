@@ -3,11 +3,12 @@ export type Point = { x: number; y: number };
 export type Card = { x: number; y: number; w: number; h: number; cx: number; cy: number };
 export type DiagramLayout = { width: number; height: number; coordinator: Card; cards: Card[] };
 
-const WIDTH = 960;
-const CARD_W = 214, CARD_H = 156, GAP = 22;
-const COORD_W = 300, COORD_H = 86, COORD_Y = 14, ROW_TOP = 190;
+const CARD_H = 156;
+const COORD_W = 300, COORD_H = 86, COORD_Y = 14, ROW_TOP = 172;
 
-export function layoutWorkers(count: number): DiagramLayout {
+/** `narrow` is for small spaces (the home page): a smaller canvas so the text stays readable when it is scaled down to fit. */
+export function layoutWorkers(count: number, narrow = false): DiagramLayout {
+    const WIDTH = narrow ? 600 : 960, CARD_W = narrow ? 172 : 214, GAP = narrow ? 14 : 22;
     const perRow = Math.max(1, Math.floor((WIDTH - GAP) / (CARD_W + GAP)));
     const rows = Math.max(1, Math.ceil(count / perRow));
     const coordinator: Card = { x: (WIDTH - COORD_W) / 2, y: COORD_Y, w: COORD_W, h: COORD_H, cx: WIDTH / 2, cy: COORD_Y + COORD_H / 2 };

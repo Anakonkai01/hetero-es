@@ -12,9 +12,9 @@ export type Player = {
  * Drives what the Live screen shows. In live mode the playhead is the server's "now"; in replay it is moved by a
  * requestAnimationFrame loop. With reduced motion the screen is refreshed a few times a second instead of every frame.
  */
-export function useRunPlayer(timeline: Timeline | undefined, mode: "live" | "replay", clockOffsetMs: number, reducedMotion: boolean): Player {
+export function useRunPlayer(timeline: Timeline | undefined, mode: "live" | "replay", clockOffsetMs: number, reducedMotion: boolean, options: { loop?: boolean; speed?: number } = {}): Player {
   const baseBounds = useMemo(() => (timeline ? runBounds(timeline) : undefined), [timeline]);
-  const [state, setState] = useState<PlayerState>({ atMs: 0, playing: mode === "replay", speed: 4 });
+  const [state, setState] = useState<PlayerState>({ atMs: 0, playing: mode === "replay", speed: options.speed ?? 4 });
   const [tick, setTick] = useState(0);
   const [following, setFollowing] = useState(mode === "live");
   const last = useRef<number>(0);
@@ -24,6 +24,12 @@ export function useRunPlayer(timeline: Timeline | undefined, mode: "live" | "rep
   useEffect(() => {
     if (mode === "replay" && baseBounds && !started.current) { started.current = true; setState(s => ({ ...s, atMs: baseBounds.startMs, playing: true })); }
   }, [mode, baseBounds]);
+  // A looping replay (home page, dashboard) starts over a moment after it reaches the end.
+  useEffect(() => {
+    if (!options.loop || mode !== "replay" || !baseBounds || state.playing || state.atMs < baseBounds.endMs) return;
+    const timer = window.setTimeout(() => setState(s => ({ ...s, atMs: baseBounds.startMs, playing: true })), 2500);
+    return () => clearTimeout(timer);
+  }, [options.loop, mode, baseBounds, state.playing, state.atMs]);
   // Only a change of mode (not every new message) puts the view back on "live".
   useEffect(() => { setFollowing(mode === "live"); }, [mode]);
 

@@ -44,10 +44,13 @@ function Ribbon({ phase, progress, committed, count }: { phase?: string; progres
 }
 
 /** The whole "see the coordinator hand out work and the GPUs do it" screen, for a running run and for a replay. */
-export function RunLiveView({ timeline, mode, source, clockOffsetMs = 0, title }: { timeline: Timeline; mode: "live" | "replay"; source?: TimelineSource; clockOffsetMs?: number; title?: string }) {
+export type LiveVariant = "full" | "compact" | "hero";
+
+/** full: everything; compact: controls, numbers and diagram (dashboard); hero: only the looping diagram (home page). */
+export function RunLiveView({ timeline, mode, source, clockOffsetMs = 0, title, variant = "full" }: { timeline: Timeline; mode: "live" | "replay"; source?: TimelineSource; clockOffsetMs?: number; title?: string; variant?: LiveVariant }) {
   const { t } = useProduct();
   const reduced = useReducedMotion();
-  const player = useRunPlayer(timeline, mode, clockOffsetMs, reduced);
+  const player = useRunPlayer(timeline, mode, clockOffsetMs, reduced, variant === "hero" ? { loop: true, speed: 4 } : variant === "compact" && mode === "replay" ? { loop: true, speed: 8 } : {});
   const { frame, bounds } = player;
   if (!frame || !bounds) return null;
   const generation = frame.generation;
@@ -55,21 +58,21 @@ export function RunLiveView({ timeline, mode, source, clockOffsetMs = 0, title }
   const active = frame.workers.filter(w => w.state === "busy").length;
 
   return (
-    <section className="lv" aria-label={title ?? t("Live view of the run")}>
-      <PlayerBar player={player} mode={mode} source={source} />
+    <section className={`lv lv-${variant}`} aria-label={title ?? t("Live view of the run")}>
+      {variant !== "hero" && <PlayerBar player={player} mode={mode} source={source} />}
 
       <div className="lv-stats">
         <div><span className="hint">{t("Generation")}</span><b>{generation ? `${generation.index + 1}/${generation.total ?? "?"}` : "–"}</b></div>
         <div><span className="hint">{t("Candidates committed")}</span><b>{frame.totals.committed}/{frame.totals.total ?? "?"}</b></div>
-        <div><span className="hint">{t("GPUs working")}</span><b>{active}/{frame.workers.filter(w => w.state !== "unstarted").length}</b></div>
-        <div><span className="hint">{t("Latest mean reward")}</span><b>{latestReward ? latestReward.mean.toFixed(4) : "–"}</b></div>
+        {variant !== "hero" && <div><span className="hint">{t("GPUs working")}</span><b>{active}/{frame.workers.filter(w => w.state !== "unstarted").length}</b></div>}
+        {variant !== "hero" && <div><span className="hint">{t("Latest mean reward")}</span><b>{latestReward ? latestReward.mean.toFixed(4) : "–"}</b></div>}
         <div><span className="hint">{t("Elapsed")}</span><b>{formatDuration(frame.atMs - bounds.startMs)}</b></div>
       </div>
 
-      <Ribbon phase={generation?.phase} progress={generation?.phaseProgress ?? 0} committed={generation?.committed ?? null} count={generation?.count ?? null} />
+      {variant === "full" && <Ribbon phase={generation?.phase} progress={generation?.phaseProgress ?? 0} committed={generation?.committed ?? null} count={generation?.count ?? null} />}
 
       <div className="lv-stage">
-        <LiveDiagram frame={frame} reducedMotion={reduced} />
+        <LiveDiagram frame={frame} reducedMotion={reduced} narrow={variant === "hero"} />
         <ul className="lv-notices" aria-live="polite">
           {frame.marks.slice(-3).map(mark => {
             const d = describeEvent(mark.type, { worker_id: mark.workerId ?? undefined, error: mark.detail, generation: mark.generation ?? undefined }, mark.workerId ?? undefined);
@@ -78,6 +81,7 @@ export function RunLiveView({ timeline, mode, source, clockOffsetMs = 0, title }
         </ul>
       </div>
 
+      {variant === "full" && <>
       <h3 className="lv-h">{t("Timeline")}</h3>
       <RunGantt timeline={timeline} frame={frame} bounds={bounds} onSeek={player.seek} />
       <div className="lv-legend" aria-hidden="true">
@@ -104,6 +108,7 @@ export function RunLiveView({ timeline, mode, source, clockOffsetMs = 0, title }
           </tbody>
         </table>
       </div>
+      </>}
     </section>
   );
 }

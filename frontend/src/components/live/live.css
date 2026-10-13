@@ -53,3 +53,7 @@
 @media (max-width:700px){.lv-notices{position:static;max-width:none;padding:6px}.lv-time{min-width:0}}
 .lv-card-starting rect{stroke:var(--chart-secondary);stroke-dasharray:6 5}.lv-card-starting .lv-state{fill:var(--chart-secondary)}.lv-link-starting{stroke:var(--chart-secondary)}
 .lv-loading{fill:var(--chart-secondary);opacity:.7}.lv-mark-replay{fill:var(--chart-secondary)}
+.lv-hero .lv-stats{grid-template-columns:repeat(3,1fr)}.lv-hero .lv-stage,.lv-compact .lv-stage{border:0;background:transparent;padding:0}
+.lv-hero .lv-stats>div,.lv-compact .lv-stats>div{padding:8px 12px}.lv-hero .lv-stats b{font-size:17px}
+.lv-hero .lv-notices{display:none}
+.lv-hero .lv-stats{grid-template-columns:repeat(3,1fr)}

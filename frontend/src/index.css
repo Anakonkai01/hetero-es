@@ -73,7 +73,7 @@ body{margin:0;background:var(--sf2)}
 .cols-gen{grid-template-columns:minmax(130px,1.2fr) 120px 110px minmax(160px,1.3fr) 90px 90px 110px}
 .cols-cand{grid-template-columns:minmax(130px,1.2fr) 130px minmax(120px,1fr) minmax(170px,1.3fr) 80px}
 .cols-ev{grid-template-columns:112px 100px minmax(120px,0.8fr) minmax(220px,2fr)}
-.cols-dev{grid-template-columns:70px 100px minmax(200px,1fr)}
+.cols-dev{grid-template-columns:104px 100px minmax(200px,1fr)}
 .cols-art{grid-template-columns:minmax(170px,2fr) 110px 80px 130px}
 .cols-att{grid-template-columns:minmax(130px,1.2fr) minmax(120px,1fr) 120px 90px 90px minmax(120px,1fr)}
 .badge{display:inline-flex;align-items:center;gap:6px;padding:1px 10px 1px 8px;border-radius:999px;font-size:14px;font-weight:500;line-height:20px;white-space:nowrap}

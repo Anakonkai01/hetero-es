@@ -16,9 +16,9 @@ function stateText(worker: WorkerFrame, t: (key: string) => string): string {
 }
 
 /** Coordinator in the middle of the top, one card per GPU below it, and packets flying along the connectors. */
-export function LiveDiagram({ frame, reducedMotion }: { frame: Frame; reducedMotion: boolean }) {
+export function LiveDiagram({ frame, reducedMotion, narrow = false }: { frame: Frame; reducedMotion: boolean; narrow?: boolean }) {
   const { t } = useProduct();
-  const layout = useMemo(() => layoutWorkers(frame.workers.length), [frame.workers.length]);
+  const layout = useMemo(() => layoutWorkers(frame.workers.length, narrow), [frame.workers.length, narrow]);
   const { coordinator } = layout;
   const anchor = { x: coordinator.cx, y: coordinator.y + coordinator.h };
   const generation = frame.generation;
