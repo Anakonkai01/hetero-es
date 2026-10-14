@@ -82,6 +82,8 @@ app.whenReady().then(async () => {
         }
         if (action === 'logout')
             return service.logout();
+        if (action === 'forgetDevice')
+            return service.forgetDevice();
         if (action === 'external') {
             const url = args.target === 'lab' ? (service.settings.uiUrl ?? service.settings.serverUrl) : external[args.target];
             if (!url)
@@ -103,7 +105,7 @@ app.whenReady().then(async () => {
     ipcMain.handle('worker:command', async (event, action, args) => {
         if (event.sender !== window.webContents || event.senderFrame !== window.webContents.mainFrame)
             return { ok: false, error: 'IPC_DENIED' };
-        const actions = ['status', 'connect', 'checkConnection', 'configureCompute', 'login', 'install', 'selftest', 'pair', 'contribution', 'logout', 'quit', 'external', 'diagnostics'];
+        const actions = ['status', 'connect', 'checkConnection', 'configureCompute', 'login', 'install', 'selftest', 'pair', 'contribution', 'logout', 'forgetDevice', 'quit', 'external', 'diagnostics'];
         if (!actions.includes(action) || !args || typeof args !== 'object' || Array.isArray(args))
             return { ok: false, error: 'INVALID_COMMAND' };
         const allowed = { connect: ['url'], configureCompute: ['network', 'coordinator', 'host'], login: ['username', 'password'], pair: ['displayName'], contribution: ['enabled'], external: ['target'] };

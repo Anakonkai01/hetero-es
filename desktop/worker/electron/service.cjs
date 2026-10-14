@@ -173,7 +173,12 @@ class Service {
         if(!health.agentMode)throw Error('LAB_AGENT_MODE_REQUIRED');
         if(this.device && target!==this.settings.serverUrl){
             let expected=this.settings.serverInstanceId;
-            if(!expected){const previous=await this.api('/api/v1/health');expected=previous.serverInstanceId;}
+            if(!expected){
+                // An old pairing that never stored which lab it belongs to: ask the old address. If that address is gone
+                // (typically a Tailscale address with Tailscale off) say so instead of a bare timeout.
+                try{expected=(await this.api('/api/v1/health')).serverInstanceId;}
+                catch{throw Error('OLD_LAB_UNREACHABLE');}
+            }
             if(!expected || health.serverInstanceId!==expected)throw Error('DIFFERENT_LAB_REQUIRES_NEW_PAIRING');
         }
         if(this.bridge){
@@ -186,6 +191,28 @@ class Service {
         this.userToken='';this.session=null;await this.save();this.connection='ONLINE';
         if(this.device)await this.startAgent();
         return health;
+    }
+    // The way out of a pairing that cannot be used any more (the lab moved, its address needs Tailscale that is off,
+    // it is a different lab). Local only: it never contacts the lab. The device row on the lab stays; an administrator
+    // revokes or removes it there.
+    async forgetDevice() {
+        if (this.setup.running) throw Error('SETUP_IN_PROGRESS');
+        this.abortPending();
+        if (this.bridge) {
+            const state = await this.bridge.call('status');
+            if (state.enabled || !state.drained) throw Error('STOP_WORK_FIRST');
+            const result = await this.quit();
+            if (!result.drained) throw Error('DRAIN_NOT_CONFIRMED');
+        }
+        await this.vault.remove?.('device-token');
+        const state = path.join(this.root, 'agent-state');
+        if (fs.existsSync(state)) await fsp.rename(state, state + '.forgotten-' + new Date(this.now()).toISOString().replace(/[:.]/g, '-'));
+        for (const key of ['device', 'serverUrl', 'serverInstanceId', 'uiUrl', 'computePending']) delete this.settings[key];
+        this.device = null; this.userToken = ''; this.session = null; this.lastState = null;
+        this.agentFailure = null; this.loggedFailure = ''; this.retryAt = 0; this.connection = 'OFFLINE'; this.autoStart = true;
+        await this.save();
+        this.log.info('pairing forgotten', {});
+        return { ok: true };
     }
     async login(username, password) { if (!this.settings.serverUrl)
         throw Error('SELECT_LAB_FIRST'); const session = await this.api('/api/v1/auth/login', { username, password }, ''); this.userToken = session.accessToken; const { accessToken, ...publicSession } = session; this.session = publicSession; this.autoStart = true; return publicSession; }

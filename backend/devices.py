@@ -819,6 +819,23 @@ def install_device_routes(app, store, user, runtime):
             store.audit(db,current['userId'],'DEVICE_APPROVAL' if body.approved else 'DEVICE_REVOKED',device_id,body.workspaceId)
         return next(d for d in runtime.devices() if d['deviceId']==device_id)
 
+    @app.delete('/api/v1/platform/devices/{device_id}',status_code=204)
+    def remove_device(device_id:str,current=Depends(admin)):
+        # A revoked (or never approved) device stays listed forever otherwise. Approved devices must be revoked first, and a
+        # device that still holds a reservation or is under restore quarantine is never removed. The audit log keeps the history.
+        with store.db() as db:
+            d=db.execute('SELECT * FROM devices WHERE id=?',(device_id,)).fetchone()
+            if not d:raise HTTPException(404,'Device not found')
+            if d['status']=='QUARANTINED':raise HTTPException(409,'Restore mismatch quarantine requires investigation before removal')
+            if d['status'] not in ('REVOKED','PENDING'):raise HTTPException(409,'Revoke the device before removing it')
+            if db.execute('SELECT 1 FROM device_reservations WHERE device_id=?',(device_id,)).fetchone():raise HTTPException(409,'Device is reserved')
+            for table in ('device_commands','device_telemetry_history','device_reports'):
+                db.execute(f'DELETE FROM {table} WHERE device_id=?',(device_id,))
+            db.execute('DELETE FROM devices WHERE id=?',(device_id,))
+            if not db.execute('SELECT 1 FROM devices WHERE worker_id=?',(d['worker_id'],)).fetchone():
+                db.execute('DELETE FROM worker_assignments WHERE worker_id=?',(d['worker_id'],))
+            store.audit(db,current['userId'],'DEVICE_REMOVED',device_id)
+
     @app.post('/api/v1/devices/{device_id}/contribution')
     def contribution(device_id:str,body:Contribution,current=Depends(user)):
         p=active(current)

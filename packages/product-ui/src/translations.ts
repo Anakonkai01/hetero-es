@@ -604,6 +604,21 @@ const full: Record<string, string> = { ...combined, ...{
         "The lab refused the connection. It may be restarting, or a firewall is blocking it.": "Lab từ chối kết nối. Có thể lab đang khởi động lại, hoặc tường lửa đang chặn.",
         "The connection to the lab was cut. A firewall, antivirus or proxy may be inspecting it.": "Kết nối tới lab bị ngắt giữa chừng. Tường lửa, phần mềm diệt virus hoặc proxy có thể đang can thiệp.",
         "There is no network route to the lab. Check your internet or VPN connection.": "Không có đường mạng tới lab. Kiểm tra internet hoặc VPN.",
+        "The owner of this device is not a member of the selected workspace. Add them to the workspace first (Workspaces, then Members), then approve again.": "Chủ máy này chưa là thành viên của workspace đã chọn. Hãy thêm họ vào workspace trước (Workspaces, rồi Thành viên), sau đó duyệt lại.",
+        "Revoke this device first. Only revoked or waiting devices can be removed.": "Hãy thu hồi máy này trước. Chỉ máy đã thu hồi hoặc đang chờ duyệt mới xóa được.",
+        "This device is reserved by a running experiment. Try again when it has finished.": "Máy này đang được một thí nghiệm giữ. Hãy thử lại khi thí nghiệm kết thúc.",
+        "A revoked device cannot be approved again. Pair the computer again from the Worker app.": "Máy đã thu hồi không duyệt lại được. Hãy ghép máy lại từ app Worker.",
+        "Show revoked devices": "Hiện máy đã thu hồi",
+        "Remove this device from the list? Its history stays in the audit log.": "Xóa máy này khỏi danh sách? Lịch sử vẫn được giữ trong nhật ký kiểm toán.",
+        "Remove from list": "Xóa khỏi danh sách",
+        "Decline and remove": "Từ chối và xóa",
+        "This computer is paired to": "Máy này đang được ghép với",
+        "If that address no longer works, you can forget the pairing and pair again.": "Nếu địa chỉ đó không còn dùng được, bạn có thể quên lần ghép này và ghép lại.",
+        "Forget this pairing": "Quên lần ghép này",
+        "This removes the pairing from this computer only. The lab keeps the device until an administrator removes it. You will pair again.": "Thao tác này chỉ xóa việc ghép trên máy này. Lab vẫn giữ thiết bị cho đến khi quản trị viên gỡ nó. Bạn sẽ ghép máy lại.",
+        "Yes, forget this pairing": "Có, quên lần ghép này",
+        "Stop contribution first.": "Hãy dừng đóng góp trước.",
+        "The lab this computer was paired to cannot be reached (an address that needs Tailscale does not work while Tailscale is off). Turn Tailscale on, or press Forget this pairing and pair again.": "Không với tới lab mà máy này đã ghép (địa chỉ cần Tailscale sẽ không dùng được khi Tailscale tắt). Hãy bật Tailscale, hoặc bấm Quên lần ghép này rồi ghép lại.",
         "This computer does not trust the lab's security certificate. Antivirus or a proxy that inspects HTTPS is the usual cause.": "Máy này không tin chứng chỉ bảo mật của lab. Thường do phần mềm diệt virus hoặc proxy soi HTTPS."
     } };
 const localized: Record<string, string> = { ...full, ...{

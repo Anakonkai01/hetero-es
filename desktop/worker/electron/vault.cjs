@@ -7,6 +7,7 @@ class Vault {
         throw Error('INVALID_VAULT_KEY'); return path.join(this.root, 'device-token.enc'); }
     async write(key, value) { if (!this.available())
         throw Error('SECURE_STORAGE_REQUIRED'); await fs.mkdir(this.root, { recursive: true, mode: 0o700 }); await fs.writeFile(this.file(key), this.storage.encryptString(value), { mode: 0o600 }); }
+    async remove(key) { await fs.rm(this.file(key), { force: true }); }
     async read(key) { if (!this.available())
         throw Error('SECURE_STORAGE_REQUIRED'); try {
         return this.storage.decryptString(await fs.readFile(this.file(key)));
