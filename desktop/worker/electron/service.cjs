@@ -34,6 +34,20 @@ function readDefaults(resources) {
     } catch { return { labUrl: '', build: '' }; }
 }
 const SAFE_CODE = /^[A-Z][A-Z0-9_]+$/;
+// Why a request never got an answer. Node reports it as `TypeError: fetch failed` with the system code in `cause`.
+const NETWORK_CODES = {
+    LAB_DNS_FAILED: ['ENOTFOUND', 'EAI_AGAIN', 'EAI_FAIL'],
+    LAB_CONNECTION_REFUSED: ['ECONNREFUSED'],
+    LAB_CONNECTION_RESET: ['ECONNRESET', 'EPIPE', 'UND_ERR_SOCKET'],
+    LAB_TIMEOUT: ['ETIMEDOUT', 'UND_ERR_CONNECT_TIMEOUT', 'UND_ERR_HEADERS_TIMEOUT', 'UND_ERR_BODY_TIMEOUT'],
+    LAB_NETWORK_DOWN: ['EHOSTUNREACH', 'ENETUNREACH', 'ENETDOWN'],
+};
+function causeCode(error) { const code = error?.cause?.code ?? error?.code; return typeof code === 'string' ? code : ''; }
+function networkCode(error) {
+    const code = causeCode(error);
+    if (/^(CERT_|ERR_TLS_|UNABLE_TO_|SELF_SIGNED|DEPTH_ZERO|ERR_SSL)/.test(code) || code.endsWith('_CERT') || code.includes('CERT_')) return 'LAB_CERTIFICATE_REJECTED';
+    return Object.keys(NETWORK_CODES).find(key => NETWORK_CODES[key].includes(code)) ?? 'LAB_UNREACHABLE';
+}
 // After a failed start, the window's own polling waits this long before trying again; pressing Enable never waits.
 const RETRY_MS = 30000;
 class Service {
@@ -98,7 +112,7 @@ class Service {
     }
     async save() { await fsp.mkdir(this.root, { recursive: true, mode: 0o700 }); const temporary = this.settingsPath + '.tmp'; await fsp.writeFile(temporary, JSON.stringify(this.settings, null, 2), { mode: 0o600 }); await fsp.rename(temporary, this.settingsPath); }
     // One bounded network call. Reads and sign-in can be cancelled by Quit; writes that create credentials never are.
-    async guarded(work, cancellable) {
+    async guarded(work, cancellable, route = '') {
         const attempt = { controller: new AbortController(), cancelled: false };
         const timer = setTimeout(() => attempt.controller.abort(), 15000);
         if (cancellable) this.attempts.add(attempt);
@@ -106,9 +120,21 @@ class Service {
         catch (error) {
             if (attempt.cancelled) throw Error('ACTION_CANCELLED');
             if (error?.name === 'AbortError') throw Error('LAB_TIMEOUT');
-            throw SAFE_CODE.test(error?.message ?? '') ? error : Error('LAB_UNREACHABLE');
+            if (SAFE_CODE.test(error?.message ?? '')) throw error;
+            const code = networkCode(error);
+            this.logNetworkFailure(code, causeCode(error), route);
+            throw Error(code);
         }
         finally { clearTimeout(timer); this.attempts.delete(attempt); }
+    }
+    // One line per distinct cause and host: the window polls every 3 seconds. Host and route only, never a body or token.
+    logNetworkFailure(code, cause, route) {
+        let host = '';
+        try { host = new URL(this.settings.serverUrl).hostname; } catch { }
+        const key = [code, cause, host].join('|');
+        if (key === this.loggedNetwork) return;
+        this.loggedNetwork = key;
+        this.log.info('network error', { code, cause, host, route });
     }
     abortPending() { for (const attempt of this.attempts) { attempt.cancelled = true; attempt.controller.abort(); } }
     async api(route, body, token = this.userToken, method) {
@@ -119,7 +145,7 @@ class Service {
                 if (!response.ok) throw Error('LAB_HTTP_' + response.status);
                 if (response.status === 204) return null;
                 try { return await response.json(); } catch (error) { if (signal.aborted) throw error; throw Error('LAB_BAD_RESPONSE'); }
-            }, method === 'GET' || route === '/api/v1/auth/login');
+            }, method === 'GET' || route === '/api/v1/auth/login', route);
             this.connection = 'ONLINE';
             return data;
         }
@@ -139,7 +165,7 @@ class Service {
                 try{body=await response.json();}catch(error){if(signal.aborted)throw error;throw Error('NOT_A_LAB');}
                 if(!body||typeof body!=='object'||Array.isArray(body))throw Error('NOT_A_LAB');
                 return body;
-            },true);
+            },true,'/api/v1/health');
         } catch(error) {
             if(!this.settings.serverUrl||target===this.settings.serverUrl)this.connection='OFFLINE';
             throw error;
@@ -279,4 +305,4 @@ class Service {
             throw Error('STOP_WORK_FIRST');
     } if (this.bridge) await this.quit(); this.selfTest = await this.setup.selfTest(); this.settings.selfTest = this.selfTest; await this.save(); if (this.device) await this.startAgent(); return this.selfTest; }
 }
-module.exports = { Service, serverAddress };
+module.exports = { Service, serverAddress, networkCode };

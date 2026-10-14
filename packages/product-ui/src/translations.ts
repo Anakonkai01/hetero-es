@@ -599,7 +599,12 @@ const full: Record<string, string> = { ...combined, ...{
         "Install Windows runtime": "Cài thư viện Windows",
         "The local agent program could not be started. The runtime may be incomplete or blocked by antivirus software. Export diagnostics.": "Không khởi động được chương trình agent trên máy. Môi trường có thể thiếu file hoặc bị phần mềm diệt virus chặn. Hãy xuất chẩn đoán.",
         "The local agent stopped right after it started. Export diagnostics and send the log file.": "Agent trên máy dừng ngay sau khi khởi động. Hãy xuất chẩn đoán và gửi file log.",
-        "The local agent is not running. Press Enable contribution to try again.": "Agent trên máy chưa chạy. Bấm Bật đóng góp để thử lại."
+        "The local agent is not running. Press Enable contribution to try again.": "Agent trên máy chưa chạy. Bấm Bật đóng góp để thử lại.",
+        "This computer could not find the lab address. Check the spelling, your DNS or VPN settings.": "Máy này không tìm thấy địa chỉ lab. Kiểm tra chính tả, DNS hoặc VPN.",
+        "The lab refused the connection. It may be restarting, or a firewall is blocking it.": "Lab từ chối kết nối. Có thể lab đang khởi động lại, hoặc tường lửa đang chặn.",
+        "The connection to the lab was cut. A firewall, antivirus or proxy may be inspecting it.": "Kết nối tới lab bị ngắt giữa chừng. Tường lửa, phần mềm diệt virus hoặc proxy có thể đang can thiệp.",
+        "There is no network route to the lab. Check your internet or VPN connection.": "Không có đường mạng tới lab. Kiểm tra internet hoặc VPN.",
+        "This computer does not trust the lab's security certificate. Antivirus or a proxy that inspects HTTPS is the usual cause.": "Máy này không tin chứng chỉ bảo mật của lab. Thường do phần mềm diệt virus hoặc proxy soi HTTPS."
     } };
 const localized: Record<string, string> = { ...full, ...{
         "Remove member": "Gỡ thành viên",
