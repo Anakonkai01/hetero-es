@@ -34,8 +34,25 @@ function readDefaults(resources) {
     } catch { return { labUrl: '', build: '' }; }
 }
 const SAFE_CODE = /^[A-Z][A-Z0-9_]+$/;
+// After a failed start, the window's own polling waits this long before trying again; pressing Enable never waits.
+const RETRY_MS = 30000;
 class Service {
-    constructor(root, resources, vault, options = {}) { this.root = root; this.vault = vault; this.fetch = options.fetch ?? fetch; this.setup = options.setup ?? new Setup(root, resources); this.makeBridge = options.makeBridge ?? ((...args) => new Bridge(...args)); this.platform = options.platform ?? process.platform; this.interfaces = options.interfaces ?? os.networkInterfaces; this.settingsPath = path.join(root, 'settings.json'); this.settings = fs.existsSync(this.settingsPath) ? JSON.parse(fs.readFileSync(this.settingsPath, 'utf8')) : {}; this.userToken = ''; this.session = null; this.bridge = null; this.selfTest = this.settings.selfTest ?? null; this.device = this.settings.device ?? null; this.lastState = null; this.connection = 'OFFLINE'; this.autoStart = true; this.attempts = new Set(); this.defaults = readDefaults(resources); }
+    constructor(root, resources, vault, options = {}) { this.root = root; this.vault = vault; this.fetch = options.fetch ?? fetch; this.setup = options.setup ?? new Setup(root, resources); this.makeBridge = options.makeBridge ?? ((...args) => new Bridge(...args)); this.platform = options.platform ?? process.platform; this.interfaces = options.interfaces ?? os.networkInterfaces; this.settingsPath = path.join(root, 'settings.json'); this.settings = fs.existsSync(this.settingsPath) ? JSON.parse(fs.readFileSync(this.settingsPath, 'utf8')) : {}; this.userToken = ''; this.session = null; this.bridge = null; this.selfTest = this.settings.selfTest ?? null; this.device = this.settings.device ?? null; this.lastState = null; this.connection = 'OFFLINE'; this.autoStart = true; this.attempts = new Set(); this.defaults = readDefaults(resources); this.log = options.log ?? { info() { }, detail() { }, error() { } }; this.now = options.now ?? Date.now; this.agentFailure = null; this.loggedFailure = ''; this.retryAt = 0; }
+    // The agent is known to be gone (it never started or it ended). Say why in the log, once per distinct cause, and
+    // keep only the code for the window. The raw text of stderr never leaves the log file.
+    recordAgentFailure(error, bridge) {
+        const failure = bridge?.failure?.() ?? {};
+        const code = SAFE_CODE.test(error?.message ?? '') ? error.message : (failure.code ?? 'AGENT_EXITED');
+        this.agentFailure = { code };
+        this.retryAt = this.now() + RETRY_MS;
+        const key = [code, failure.exitCode, failure.spawnCode].join('|');
+        if (key === this.loggedFailure) return;
+        this.loggedFailure = key;
+        let lab = '';
+        try { lab = new URL(this.settings.serverUrl).hostname; } catch { }
+        this.log.info('agent failed', { code, exitCode: failure.exitCode ?? '', exitHex: Number.isInteger(failure.exitCode) ? '0x' + (failure.exitCode >>> 0).toString(16) : '', signal: failure.signal ?? '', spawnCode: failure.spawnCode ?? '', lab });
+        if (failure.stderrTail) this.log.detail('agent stderr', failure.stderrTail);
+    }
     computeProfile(value = this.settings.compute) {
         return computeConfig(value, this.selfTest, this.platform, addresses(this.interfaces()));
     }
@@ -160,8 +177,9 @@ class Service {
         }
         if (this.bridge) {
             try { report.assignments = (await this.bridge.call('check_connection')).assignments; }
-            catch { checks.push({ step: 'coordinator', status: 'FAIL', code: 'AGENT_CHECK_FAILED' }); }
+            catch (error) { checks.push({ step: 'coordinator', status: 'FAIL', code: SAFE_CODE.test(error.message) ? error.message : 'AGENT_CHECK_FAILED' }); }
         }
+        else if (this.device && this.agentFailure) checks.push({ step: 'coordinator', status: 'FAIL', code: this.agentFailure.code });
         if (!report.assignments.length) for (const step of ['coordinator', 'bulk'])
             if (!checks.some(c => c.step === step)) checks.push({ step, status: 'SKIP', code: 'NO_ASSIGNMENT' });
         return report;
@@ -185,9 +203,12 @@ class Service {
                 }
             }
         }
+        this.agentFailure = null; this.loggedFailure = '';
     }
     catch (error) {
         const failed = this.bridge;
+        // A child that never started or has already ended owns nothing: release it, so Enable can try again.
+        if (failed.exited?.()) { if (this.bridge === failed) this.bridge = null; this.recordAgentFailure(error, failed); throw error; }
         try { if ((await failed.call('quit')).drained && this.bridge === failed) this.bridge = null; }
         catch { /* Retain uncertain process ownership for the next safe Quit. */ }
         throw error;
@@ -199,7 +220,9 @@ class Service {
         throw Error('ALREADY_PAIRED'); const compute = this.computeProfile(); const code = await this.api('/api/v1/devices/pairing-codes', {}); const workerId = 'desktop-' + crypto.randomUUID().replaceAll('-', '').slice(0, 12); const device = await this.api('/api/v1/device/enroll', { code: code.code, workerId, displayName: displayName.trim() || 'GPU Worker', computeUrl: `http://${compute.host}:8765`, selfTest: this.advertisedProfile(compute) }, ''); await this.vault.write('device-token', device.deviceToken); const { deviceToken, ...publicDevice } = device; this.device = publicDevice; this.settings = { ...this.settings, device: publicDevice, selfTest: this.selfTest }; await this.save(); await this.startAgent(); return publicDevice; }
     async contribution(enabled) { if (!this.bridge) {
         if (!enabled) return { enabled: false, drained: true };
-        throw Error('AGENT_UNAVAILABLE');
+        // Paired but the agent is not running (it failed to start earlier): try again now and report the real code.
+        if (!this.device) throw Error('AGENT_UNAVAILABLE');
+        await this.startAgent();
     } if (!enabled)
         await this.bridge.call('off'); if (!this.userToken) {
         if (!enabled)
@@ -207,19 +230,22 @@ class Service {
         throw Error('SIGN_IN_REQUIRED');
     } const state = await this.bridge.call('status'); return this.api('/api/v1/devices/' + this.device.deviceId + '/contribution', { enabled, bootId: state.bootId }); }
     async status() {
-        if (this.autoStart && this.device && this.setup.status().installed && !this.bridge)
+        if (this.autoStart && this.device && this.setup.status().installed && !this.bridge && this.now() >= this.retryAt)
             try {
                 await this.startAgent();
             }
             catch {
                 this.lastState = { drained: false, enabled: false, error: this.settings.computePending ? 'COMPUTE_CHANGE_PENDING' : 'AGENT_UNAVAILABLE' };
             }
+        if (!this.bridge && this.agentFailure) this.lastState = { drained: true, enabled: false, startError: this.agentFailure.code };
         if (this.bridge)
             try {
                 this.lastState = await this.bridge.call('status');
             }
-            catch {
-                this.lastState = { drained: false, enabled: false, error: 'AGENT_UNAVAILABLE' };
+            catch (error) {
+                const dead = this.bridge;
+                if (dead.exited?.()) { this.bridge = null; this.recordAgentFailure(error, dead); this.lastState = { drained: true, enabled: false, startError: this.agentFailure.code }; }
+                else this.lastState = { drained: false, enabled: false, error: 'AGENT_UNAVAILABLE' };
             }
         if (this.userToken && this.device)
             try {
@@ -230,7 +256,7 @@ class Service {
             }
             catch { }
         const p = this.lastState;
-        return { compute: { pending: !!this.settings.computePending, ...(this.settings.compute ?? { network: 'lan', coordinator: false, host: '127.0.0.1' }), eligible: qualified(this.selfTest, this.platform), addresses: addresses(this.interfaces()) }, serverUrl: this.settings.serverUrl ?? '', defaultLabUrl: this.defaults.labUrl, build: this.defaults.build, signedIn: !!this.userToken, session: this.session, device: this.device, selfTest: this.selfTest, setup: this.setup.status(), telemetry: p?.telemetry ?? null, telemetryHistory:p?.telemetryHistory??[], connection: p?.connection?.status ?? this.connection, agent: p ? { bootId: p.bootId, enabled: !!p.enabled, drained: p.drained, error: p.error, assignments: (p.processes ?? []).map(r => ({ assignmentId: r.assignmentId, epoch:r.epoch, workerAlive: r.workerAlive, coordinatorAlive: r.coordinatorAlive, ready: r.ready })) } : null };
+        return { compute: { pending: !!this.settings.computePending, ...(this.settings.compute ?? { network: 'lan', coordinator: false, host: '127.0.0.1' }), eligible: qualified(this.selfTest, this.platform), addresses: addresses(this.interfaces()) }, serverUrl: this.settings.serverUrl ?? '', defaultLabUrl: this.defaults.labUrl, build: this.defaults.build, signedIn: !!this.userToken, session: this.session, device: this.device, selfTest: this.selfTest, setup: this.setup.status(), telemetry: p?.telemetry ?? null, telemetryHistory:p?.telemetryHistory??[], connection: p?.connection?.status ?? this.connection, agent: p ? { bootId: p.bootId, enabled: !!p.enabled, drained: p.drained, error: p.error, startError: p.startError, assignments: (p.processes ?? []).map(r => ({ assignmentId: r.assignmentId, epoch:r.epoch, workerAlive: r.workerAlive, coordinatorAlive: r.coordinatorAlive, ready: r.ready })) } : null };
     }
     async quit() { this.autoStart = false; if (this.setup.running)
         throw Error('SETUP_IN_PROGRESS'); this.abortPending(); if (!this.bridge)

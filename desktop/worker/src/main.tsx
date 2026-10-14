@@ -50,6 +50,7 @@ type State = {
         enabled: boolean;
         drained: boolean;
         error?: string;
+        startError?: string;
         assignments: {
             assignmentId: string;
             epoch?:number;
@@ -114,6 +115,8 @@ Object.assign(explanations, {
     LAB_UNREACHABLE: 'The lab did not answer. Check the address and your internet connection.', LAB_TIMEOUT: 'The lab took too long to answer. Check the address and try again.',
     NOT_A_LAB: 'This address answered, but it is not a HeteroES lab.', LAB_AGENT_MODE_REQUIRED: 'This lab does not accept desktop Workers yet. Ask its administrator to update it.',
     LAB_BAD_RESPONSE: 'The lab sent a reply this app does not understand. Update the app or ask the administrator.', DIFFERENT_LAB_REQUIRES_NEW_PAIRING: 'This computer is paired to another lab. Pair it again to use this one.',
+    AGENT_SPAWN_FAILED: 'The local agent program could not be started. The runtime may be incomplete or blocked by antivirus software. Export diagnostics.',
+    AGENT_EXITED: 'The local agent stopped right after it started. Export diagnostics and send the log file.',
     SELECT_LAB_FIRST: 'Enter the lab address first.', SIGN_IN_REQUIRED: 'Sign in first.', ACTION_CANCELLED: 'Cancelled.',
 });
 const explain = (code: string) => explanations[code] ?? (/^LAB_HTTP_5\d\d$/.test(code) ? 'The lab server is not answering right now. Try again later or ask the lab administrator.' : 'Could not complete the action. Check the connection and export diagnostics.');
@@ -195,7 +198,7 @@ function App() {
     return <div className="desktop-shell"><header className="desktop-header"><a className="brand" href="#main"><ProductMark/><span>HeteroES <small>Worker</small></span></a><PreferencesControl /></header><main id="main">
  {!state?.device && <div className="intro"><div><p className="eyebrow">HETEROES / LAB COMPUTE</p><h1>{t('Prepare this computer')}</h1><p>{t('Your GPU stays OFF until you enable it.')}</p></div><Status value={state?.connection ?? 'CONNECTING'}/></div>}
  {!state && <p role="status">{t('Loading…')}</p>}
- {error === 'WINDOWS_RUNTIME_MISSING' && <button className="secondary" onClick={() => void act('external', { target: 'windowsRuntime' })}>{t('Install Windows runtime')}</button>}{error && <Alert tone="error">{t(explain(error))} <code>{error}</code></Alert>}
+ {(error === 'WINDOWS_RUNTIME_MISSING' || agent?.startError === 'WINDOWS_RUNTIME_MISSING') && <button className="secondary" onClick={() => void act('external', { target: 'windowsRuntime' })}>{t('Install Windows runtime')}</button>}{agent?.startError && !error && <Alert tone="warning">{t('The local agent is not running. Press Enable contribution to try again.')} {t(explain(agent.startError))} <code>{agent.startError}</code></Alert>}{error && <Alert tone="error">{t(explain(error))} <code>{error}</code></Alert>}
  {!state?.device && <StepHeader steps={['Connect to a lab', 'Sign in', 'GPU and compatibility', 'Pair this device']} current={Math.min(step, 3)}/>}
  {state && !state.device && <div className="onboarding"><section className="panel"><h2>{t(step === 0 ? 'Connect to a lab' : step === 1 ? 'Sign in' : step === 2 ? 'GPU and compatibility' : 'Pair this device')}</h2>
  {(step === 0 || (step === 1 && editLab)) && <form onSubmit={e => { e.preventDefault(); if (!url.trim()) { setError('INVALID_LAB_ADDRESS'); return; } void act('connect', { url }); }}><p>{t('Enter your lab address. If you downloaded this app from your lab\'s website, it is already filled in.')}</p><label>{t('Lab server address')}<input type="text" inputMode="url" autoCapitalize="off" autoCorrect="off" spellCheck={false} placeholder={state.defaultLabUrl || 'lab.example.org'} value={url} onChange={e => setUrl(e.target.value)}/></label><button disabled={!!busy}>{t('Connect')}</button>{editLab && <button type="button" className="secondary" disabled={!!busy} onClick={() => { setEditLab(false); setError(''); }}>{t('Cancel')}</button>}<details className="advanced-panel"><summary>{t('Lab on a private network (Tailscale)')}</summary><div className="secondary-actions"><button type="button" className="secondary" onClick={() => void act('external', { target: 'tailscale' })}>{t('Install or sign in to Tailscale')}</button><button type="button" className="secondary" onClick={() => void act('external', { target: 'help' })}>{t('Network help')}</button></div></details></form>}

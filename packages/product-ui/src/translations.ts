@@ -596,7 +596,10 @@ const full: Record<string, string> = { ...combined, ...{
         "GPU_MISSING": "Không tìm thấy GPU NVIDIA. Kiểm tra driver bằng NVIDIA App rồi thử lại.",
         "CUDA_UNAVAILABLE": "PyTorch không sử dụng được CUDA. Kiểm tra driver và xuất chẩn đoán.",
         "WINDOWS_RUNTIME_MISSING": "Thiếu thư viện hệ thống Windows. Cài Microsoft Visual C++ Redistributable x64 rồi thử lại.",
-        "Install Windows runtime": "Cài thư viện Windows"
+        "Install Windows runtime": "Cài thư viện Windows",
+        "The local agent program could not be started. The runtime may be incomplete or blocked by antivirus software. Export diagnostics.": "Không khởi động được chương trình agent trên máy. Môi trường có thể thiếu file hoặc bị phần mềm diệt virus chặn. Hãy xuất chẩn đoán.",
+        "The local agent stopped right after it started. Export diagnostics and send the log file.": "Agent trên máy dừng ngay sau khi khởi động. Hãy xuất chẩn đoán và gửi file log.",
+        "The local agent is not running. Press Enable contribution to try again.": "Agent trên máy chưa chạy. Bấm Bật đóng góp để thử lại."
     } };
 const localized: Record<string, string> = { ...full, ...{
         "Remove member": "Gỡ thành viên",

@@ -31,7 +31,9 @@ app.whenReady().then(async () => {
         return;
     const root = app.getPath('userData'), resources = app.isPackaged ? path.join(process.resourcesPath, 'worker') : path.join(__dirname, '../resources');
     log.info('starting', { version: app.getVersion(), platform: process.platform, packaged: app.isPackaged });
-    service = new Service(root, resources, new Vault(root, safeStorage));
+    service = new Service(root, resources, new Vault(root, safeStorage), { log });
+    // Which lab this app talks to (host only) and whether a device is paired: the first thing support asks.
+    log.info('lab', { host: (() => { try { return new URL(service.settings.serverUrl).hostname; } catch { return ''; } })(), paired: !!service.device, build: service.defaults.build });
     lifecycle = new Lifecycle({ service, quitApp: () => app.quit(), show, notify, fail, log });
     window = new BrowserWindow({ width: 820, height: 780, minWidth: 360, minHeight: 520, show: false, backgroundColor: '#101a23', webPreferences: { preload: path.join(__dirname, 'preload.cjs'), sandbox: true, contextIsolation: true, nodeIntegration: false } });
     window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
@@ -89,7 +91,7 @@ app.whenReady().then(async () => {
         }
         if (action === 'diagnostics') {
             const state = await service.status();
-            const report = { version: app.getVersion(), build: state.build, platform: process.platform, setup: state.setup, connection: state.connection, selfTest: state.selfTest, agent: state.agent, log: log.tail(200).split('\n') };
+            const report = { version: app.getVersion(), build: state.build, platform: process.platform, setup: state.setup, connection: state.connection, selfTest: state.selfTest, agent: state.agent, lab: (() => { try { return new URL(state.serverUrl).hostname; } catch { return ''; } })(), log: log.tail(200).split('\n') };
             const destination = await dialog.showSaveDialog(window, { defaultPath: 'heteroes-diagnostics.json', filters: [{ name: 'JSON', extensions: ['json'] }] });
             if (!destination.canceled) {
                 await fs.writeFile(destination.filePath, JSON.stringify(report, null, 2), { mode: 0o600 });

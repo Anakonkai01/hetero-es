@@ -2,7 +2,7 @@
 export type StationAssignment = { assignmentId: string; epoch?: number; ready?: boolean; workerAlive?: boolean | null; coordinatorAlive?: boolean | null };
 export type StationInput = {
     signedIn: boolean; device: { approvalStatus: string }; connection: string; nowSeconds: number;
-    agent: { enabled: boolean; drained: boolean; error?: string; assignments: StationAssignment[] } | null | undefined;
+    agent: { enabled: boolean; drained: boolean; error?: string; startError?: string; assignments: StationAssignment[] } | null | undefined;
     telemetry: Telemetry | null | undefined;
 };
 export type Telemetry = { sampledAt: number; receivedAt?: number; gpu?: { utilizationPercent?: number | null; vramUsedMb?: number | null; vramTotalMb?: number | null; temperatureC?: number | null } | null };
