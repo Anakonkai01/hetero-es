@@ -71,8 +71,9 @@ const listen = server => new Promise(resolve => server.listen(0, '127.0.0.1', ()
         results.invalidAddressExplained = true;
 
         await connect(page, `127.0.0.1:${deadPort}`);
-        await alert(page).getByText('LAB_UNREACHABLE').waitFor();
-        assert.match(await alert(page).innerText(), /did not answer/);
+        // A closed port is "refused", not the general "did not answer": the app now names the system's reason.
+        await alert(page).getByText('LAB_CONNECTION_REFUSED').waitFor();
+        assert.match(await alert(page).innerText(), /refused the connection/);
         assert.equal((await status(page)).result.connection, 'OFFLINE');
         results.unreachableExplained = true;
 
@@ -129,7 +130,7 @@ const listen = server => new Promise(resolve => server.listen(0, '127.0.0.1', ()
         results.plainQuitExits = true;
 
         const log = await fs.readFile(path.join(root, 'logs', 'worker.log'), 'utf8');
-        assert.match(log, / action action=connect ok=false code=LAB_UNREACHABLE/);
+        assert.match(log, / action action=connect ok=false code=LAB_CONNECTION_REFUSED/);
         assert.match(log, / action action=login ok=true/);
         assert.ok(!/hunter2|fixture-session/.test(log), 'the log never holds the password or session');
         results.logHasActionsNoSecrets = true;
