@@ -27,6 +27,6 @@ The owner ran the Worker on a real Windows PC (RTX 3060, account "Thao") and got
 - Electron `net.fetch` error shape (checked on Linux): `Error: net::ERR_*` message, no `cause.code`. If Node `fetch` ever needs replacing by `net.fetch` (system proxy / certificate store), `networkCode()` must learn `net::ERR_NAME_NOT_RESOLVED`, `ERR_CONNECTION_REFUSED`, `ERR_CERT_*`, etc.
 
 ## Next steps
-1. Installer polish (the plan in `~/.claude/plans/`, "Part B"): brand assets (the web favicon is still the Vite logo, the Worker icon is a flat "H"), wizard installer (owner chose the step-by-step wizard, vi + en), no code signing yet (guide + SHA-256 on the download page), Windows file metadata.
+1. Installer polish (**`docs/plan-installer-polish.md`**, not started; the owner chose to do it next session): brand assets (the web favicon is still the Vite logo, the Worker icon is a flat "H"), wizard installer (owner chose the step-by-step wizard, vi + en), no code signing yet (guide + SHA-256 on the download page), Windows file metadata.
 2. Owner: confirm the 8-character password minimum; look at presentation mode.
 3. A second real GPU in a run (the 3060 is now online): rehearse the 20/11 demo with it, only with the owner's go and `--gpu` + `HETEROES_GPU_ACCEPTANCE=1`.
