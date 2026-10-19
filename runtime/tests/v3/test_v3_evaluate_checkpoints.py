@@ -77,3 +77,65 @@ def test_a_replay_that_does_not_reach_the_recorded_child_is_refused(assets, tmp_
     monkeypatch.setattr("heteroes.es.update.apply_coefficients_", lambda *args, **kwargs: None)
     with pytest.raises(ValueError, match="does not hash"):
         tool().evaluate(out, assets / "model", [0], "validation", "cpu", assets / "scorer.py", "distinct_characters")
+
+
+def test_a_checkpoint_is_scored_on_other_rows_with_another_scorer(assets, tmp_path):  # noqa: F811
+    out = tmp_path / "run"
+    run_local(config_for(assets, scorer=SCORER, generations=2), out, workers=1, timeout_seconds=30)
+    module = tool()
+    other = [
+        {"prompt": "Pick a letter.", "label": "A"},
+        {"prompt": "Pick again.", "label": "B"},
+        {"prompt": "Q", "label": "E"},
+    ]
+    letter = {
+        "kind": "declarative",
+        "name": "choice-letter",
+        "version": 1,
+        "codeSha256": None,
+        "config": {"answerField": "label"},
+    }
+    report = module.evaluate(out, assets / "model", [-1, 1], "validation", "cpu", rows=other, rows_scorer=letter)
+    base, trained = report["checkpoints"]
+    assert (base["split"], base["count"]) == ("external", 3) and len(trained["outputs"]) == 3
+    assert report["externalScorer"] == letter
+    model, tokenizer = load(assets / "model", file_manifest(assets / "model"))
+    raw = generate_rows(model.float(), tokenizer, other, {"systemPrompt": None, "maxNewTokens": 8}, 16)
+    assert base["outputs"] == [r["output"] for r in raw]  # the run's decoding, on the other rows
+    assert base["meanReward"] == score(letter, base["outputs"], other)[0]
+    with pytest.raises(ValueError, match="together"):
+        module.evaluate(out, assets / "model", [0], "validation", "cpu", rows=other)
+    with pytest.raises(ValueError, match="unknown declarative"):
+        module.evaluate(
+            out, assets / "model", [0], "validation", "cpu", rows=other, rows_scorer={**letter, "name": "nope"}
+        )
+    with pytest.raises(ValueError, match="only declarative"):
+        module.evaluate(
+            out,
+            assets / "model",
+            [0],
+            "validation",
+            "cpu",
+            rows=other,
+            rows_scorer={**letter, "kind": "python", "codeSha256": "0" * 64},
+        )
+    path = tmp_path / "rows.jsonl"
+    path.write_text("".join(json.dumps(r) + "\n" for r in other), encoding="utf-8")
+    (tmp_path / "scorer.json").write_text(json.dumps(letter), encoding="utf-8")
+    target = tmp_path / "report.json"
+    module.main(
+        [
+            str(out),
+            "--model-path",
+            str(assets / "model"),
+            "--generations",
+            "-1",
+            "--rows",
+            str(path),
+            "--rows-scorer",
+            str(tmp_path / "scorer.json"),
+            "--out",
+            str(target),
+        ]
+    )
+    assert json.loads(target.read_text())["checkpoints"][0]["meanReward"] == base["meanReward"]

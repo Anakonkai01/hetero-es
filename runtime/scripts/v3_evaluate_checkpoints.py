@@ -2,12 +2,15 @@
 Score checkpoints of a local Recipe v3 run (`heteroes run` / `run_local`) on one split of its dataset.
 
     python v3_evaluate_checkpoints.py RUN_DIR --model-path MODEL --generations -1,9,29 --split validation \
-        --out report.json [--device cuda] [--scorer-path reward.py --scorer-function name]
+        --out report.json [--device cuda] [--scorer-path reward.py --scorer-function name] \
+        [--rows other.jsonl --rows-scorer scorer.json]
 
 The coordinator keeps only its latest weights; any checkpoint is rebuilt here from the base model by replaying the
 recorded updates, and each rebuilt checkpoint must hash to the child the ledger recorded (generation -1 is the base
 model). Evaluation is the run's: greedy decoding, its prompt, token budget, precision and chunk, scored with its plan's
 scorer (a python scorer needs `--scorer-path`, the file whose SHA-256 the plan pins).
+`--rows` scores the checkpoints on OTHER rows (a JSONL file of rows with the run's prompt field), for example to look for
+forgetting on another task, with the declarative scorer spec in the `--rows-scorer` JSON file instead of the plan's.
 GPU use in this repository needs the owner's authorization and HETEROES_GPU_ACCEPTANCE=1.
 """
 
@@ -18,7 +21,17 @@ from pathlib import Path
 SPLITS = ("train", "validation", "test")
 
 
-def evaluate(run_dir, model_path, generations, split, device="cpu", scorer_path=None, scorer_function=None):
+def evaluate(
+    run_dir,
+    model_path,
+    generations,
+    split,
+    device="cpu",
+    scorer_path=None,
+    scorer_function=None,
+    rows=None,
+    rows_scorer=None,
+):
     from heteroes.es.update import apply_coefficients_
     from heteroes.eval.candidate import model_weights_sha256
     from heteroes.eval.precision import EvalModel
@@ -26,7 +39,7 @@ def evaluate(run_dir, model_path, generations, split, device="cpu", scorer_path=
     from heteroes.study.evaluation import generate_rows
     from heteroes.v3.model import load, trainable_schema
     from heteroes.v3.run import RecipeV3Run, load_python_scorer
-    from heteroes.v3.scoring import score
+    from heteroes.v3.scoring import score, validate_spec
 
     run_dir = Path(run_dir)
     recipe, plan, dataset = (json.loads((run_dir / f"{n}.json").read_text()) for n in ("recipe", "plan", "dataset"))
@@ -36,8 +49,14 @@ def evaluate(run_dir, model_path, generations, split, device="cpu", scorer_path=
     wanted = sorted(set(generations))
     if not wanted or wanted[0] < -1 or wanted[-1] >= plan["generations"]:
         raise ValueError("generations are -1 (the base model) to the plan's last generation")
+    if (rows is None) != (rows_scorer is None):
+        raise ValueError("other rows and their scorer are given together")
     function = None
-    if plan["scorer"]["kind"] == "python":
+    scorer = plan["scorer"]
+    if rows is not None:
+        validate_spec(rows_scorer)  # declarative only: no allow_python
+        scorer, split = rows_scorer, "external"
+    elif plan["scorer"]["kind"] == "python":
         if scorer_path is None or scorer_function is None:
             raise ValueError("a python scorer needs --scorer-path and --scorer-function")
         function, digest = load_python_scorer(scorer_path, scorer_function)
@@ -48,7 +67,7 @@ def evaluate(run_dir, model_path, generations, split, device="cpu", scorer_path=
     schema = trainable_schema(model, recipe["weightSpace"], adapter if adapter.exists() else None)
     if schema.hash != recipe["schemaHash"]:
         raise ValueError("the model does not have the run's trainable schema")
-    rows = dataset["splits"][split]
+    rows = dataset["splits"][split] if rows is None else rows
     evaluator = EvalModel(model, run.eval_dtype)
     checkpoints = []
 
@@ -56,7 +75,7 @@ def evaluate(run_dir, model_path, generations, split, device="cpu", scorer_path=
         evaluator.refresh()
         raw = generate_rows(evaluator.model, tokenizer, rows, run.evaluation, run.chunk or 16)
         outputs = [r["output"] for r in raw]
-        reward, scores = score(plan["scorer"], outputs, rows, function)
+        reward, scores = score(scorer, outputs, rows, function)
         counts = {}
         for value in scores:
             counts[repr(value)] = counts.get(repr(value), 0) + 1
@@ -90,7 +109,10 @@ def evaluate(run_dir, model_path, generations, split, device="cpu", scorer_path=
                 raise ValueError(f"replayed generation {generation} does not hash to the recorded child")
             if generation in wanted:
                 measure(generation, weights)
-    return {"runDir": str(run_dir), "recipeHash": run.hash, "planHash": run.plan_hash, "checkpoints": checkpoints}
+    report = {"runDir": str(run_dir), "recipeHash": run.hash, "planHash": run.plan_hash, "checkpoints": checkpoints}
+    if scorer is not plan["scorer"]:
+        report["externalScorer"] = scorer
+    return report
 
 
 def main(argv=None):
@@ -102,13 +124,28 @@ def main(argv=None):
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--scorer-path", type=Path)
     parser.add_argument("--scorer-function")
+    parser.add_argument("--rows", type=Path, help="JSONL rows to score instead of a split of the run's dataset")
+    parser.add_argument("--rows-scorer", type=Path, help="JSON declarative scorer spec for --rows")
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args(argv)
     if args.out.exists():
         raise SystemExit(f"{args.out} exists; choose a fresh path")
     generations = [int(g) for g in args.generations.split(",")]
+    rows = rows_scorer = None
+    if args.rows is not None:
+        rows = [json.loads(line) for line in args.rows.read_text(encoding="utf-8").splitlines() if line.strip()]
+    if args.rows_scorer is not None:
+        rows_scorer = json.loads(args.rows_scorer.read_text(encoding="utf-8"))
     report = evaluate(
-        args.run_dir, args.model_path, generations, args.split, args.device, args.scorer_path, args.scorer_function
+        args.run_dir,
+        args.model_path,
+        generations,
+        args.split,
+        args.device,
+        args.scorer_path,
+        args.scorer_function,
+        rows,
+        rows_scorer,
     )
     args.out.write_text(json.dumps(report, indent=1) + "\n", encoding="utf-8")
     for c in report["checkpoints"]:
