@@ -1,0 +1,22 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:   0%|          | 1/290 [00:00<00:35,  8.08it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 2282.17it/s]
+Traceback (most recent call last):
+  File "/home/pc5070ti/projects/heteroes/runtime/scripts/v3_gpu_acceptance.py", line 193, in <module>
+    main()
+  File "/home/pc5070ti/projects/heteroes/runtime/scripts/v3_gpu_acceptance.py", line 184, in main
+    run(args)
+  File "/home/pc5070ti/projects/heteroes/runtime/scripts/v3_gpu_acceptance.py", line 95, in run
+    summaries = run_local(
+                ^^^^^^^^^^
+  File "/home/pc5070ti/projects/heteroes/runtime/src/heteroes/v3/local.py", line 118, in run_local
+    ready = prepare(config, out_dir, device)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/projects/heteroes/runtime/src/heteroes/v3/local.py", line 74, in prepare
+    recipe, plan = build_documents(
+                   ^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/projects/heteroes/runtime/src/heteroes/v3/run.py", line 174, in build_documents
+    validate_plan(plan, recipe, allow_python=True)
+  File "/home/pc5070ti/projects/heteroes/runtime/src/heteroes/v3/documents.py", line 179, in validate_plan
+    validate_spec(plan["scorer"], allow_python=allow_python)
+  File "/home/pc5070ti/projects/heteroes/runtime/src/heteroes/v3/scoring.py", line 96, in validate_spec
+    raise ValueError(f"{name}@{version} takes the config keys {sorted(keys)}")
+ValueError: last-integer@1 takes the config keys []

@@ -1,0 +1,32 @@
+[
+  {
+    "name": "GPU owner gate bypass",
+    "file": "scripts/v3_gpu_acceptance.py",
+    "old": "if os.environ.get(\"HETEROES_GPU_ACCEPTANCE\") != \"1\":",
+    "new": "if False:"
+  },
+  {
+    "name": "GPU explicit flag bypass",
+    "file": "scripts/v3_gpu_acceptance.py",
+    "old": "if not flag:",
+    "new": "if False:"
+  },
+  {
+    "name": "cross GPU texts ignored",
+    "file": "scripts/v3_gpu_acceptance.py",
+    "old": "(\"sourceTreeSha256\", \"recipeHash\", \"planHash\", \"candidates\", \"children\")",
+    "new": "(\"sourceTreeSha256\", \"recipeHash\", \"planHash\", \"children\")"
+  },
+  {
+    "name": "cross GPU replay failures ignored",
+    "file": "scripts/v3_gpu_acceptance.py",
+    "old": "not receipt[\"replayPassed\"]",
+    "new": "False"
+  },
+  {
+    "name": "cross GPU audit failures ignored",
+    "file": "scripts/v3_gpu_acceptance.py",
+    "old": "or receipt[\"auditMismatches\"]",
+    "new": "or False"
+  }
+]
