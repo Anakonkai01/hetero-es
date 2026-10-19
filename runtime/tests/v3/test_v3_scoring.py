@@ -85,7 +85,10 @@ def test_the_configurable_scorers():
     choice = spec("choice-letter", {"answerField": "label"})
     assert score(choice, ["A or maybe C", "I pick B."], [{"label": "c"}, {"label": "B"}])[1] == [1.0, 1.0]
     assert score(choice, ["ABC", "Answer: D"], [{"label": "A"}, {"label": "B"}])[1] == [0.0, 0.0]
-    assert score(choice, ["The answer is E.", "F"], [{"label": "e"}, {"label": "E"}])[1] == [1.0, 0.0]  # five choices A-E
+    assert score(choice, ["The answer is E.", "F"], [{"label": "e"}, {"label": "E"}])[1] == [
+        1.0,
+        0.0,
+    ]  # five choices A-E
 
 
 @pytest.mark.parametrize(
