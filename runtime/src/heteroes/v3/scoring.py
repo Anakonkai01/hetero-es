@@ -58,7 +58,7 @@ def _exact_string(text, row, config):
     return 1.0 if norm(text) == norm(str(row[config["answerField"]])) else 0.0
 
 
-_CHOICE = re.compile(r"\b([A-D])\b")
+_CHOICE = re.compile(r"\b([A-E])\b")
 
 
 def _choice_letter(text, row, config):
