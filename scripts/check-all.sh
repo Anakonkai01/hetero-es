@@ -5,12 +5,14 @@
 #
 # Runs: backend tests, frontend/Worker/Server unit tests, type checks, lint, i18n check, then the browser and Electron
 # contracts against throwaway fixture labs (never the real lab, never a GPU). Set PYTHON to the backend interpreter
-# (default ../Hetero-ES-LLM/.venv-backend/bin/python). It needs Chromium (Playwright), Xvfb and Node 24.
+# (default .venv-backend/bin/python at the repository root). It needs Chromium (Playwright), Xvfb and Node 24.
 set -uo pipefail
+# A terminal inside VS Code exports ELECTRON_RUN_AS_NODE=1, which turns Electron into plain Node and breaks the app checks.
+unset ELECTRON_RUN_AS_NODE
 cd "$(dirname "$0")/.."
 OUT=${1:?usage: scripts/check-all.sh <fresh evidence directory>}
 [ ! -e "$OUT" ] || { echo "$OUT already exists; choose a new directory" >&2; exit 2; }
-PYTHON=${PYTHON:-../Hetero-ES-LLM/.venv-backend/bin/python}
+PYTHON=${PYTHON:-.venv-backend/bin/python}
 mkdir -p "$OUT"
 WORK=$(mktemp -d)
 trap 'rm -rf "$WORK"; [ -n "${LAB:-}" ] && kill "$LAB" 2>/dev/null; true' EXIT
