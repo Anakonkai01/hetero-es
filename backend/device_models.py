@@ -1,6 +1,6 @@
 """CPU-only device control. Connectivity is never evidence of process death."""
 
-from .constants import CORE_COMMAND_KINDS, COMMAND_KINDS
+from .constants import CORE_COMMAND_KINDS, COMMAND_KINDS, DESKTOP_V3_REFERENCE
 
 from .policies import FiniteStrict
 import hashlib
@@ -87,7 +87,9 @@ class SelfTest(FiniteStrict):
                 raise ValueError(f"Recipe v{version} compatibility identity or exact restore mismatch")
             if evidence["modelManifestHash"] not in self.qualifiedModelHashes:
                 raise ValueError(f"Recipe v{version} model qualification missing")
-        if self.platform == "windows":
+        if self.platform == "windows" and self.runtimeProfile == "desktop-v3":
+            self._native_windows_v3()
+        elif self.platform == "windows":
             if self.recipeVersions != [1] or self.qualifiedModelHashes:
                 raise ValueError("Windows remains the qualified v1 worker-only profile")
             if (
@@ -119,6 +121,32 @@ class SelfTest(FiniteStrict):
             if any(self.compatibility.get(k) != value for k, value in reference.items()):
                 raise ValueError("Native profile does not match the qualified Linux reference")
         return self
+
+    def _native_windows_v3(self):
+        """Worker-only Recipe v3 on native Windows: both reference cells, the pinned adapter, PEFT and model."""
+        reference = DESKTOP_V3_REFERENCE
+        compatibility = self.compatibility
+        if (
+            self.recipeVersions != [3]
+            or self.coordinator
+            or self.qualifiedModelHashes != [reference["modelManifestHash"]]
+            or compatibility.get("passed") is not True
+            or compatibility.get("repeatIdentical") is not True
+            or compatibility.get("initialAdapterSha256") != reference["initialAdapterSha256"]
+            or compatibility.get("peftVersion") != reference["peftVersion"]
+        ):
+            raise ValueError("Native Windows v3 requires the worker-only desktop-v3 reference profile")
+        for cell in ("recipeV3", "recipeV3Lora"):
+            evidence = compatibility.get(cell)
+            if (
+                not isinstance(evidence, dict)
+                or evidence.get("passed") is not True
+                or evidence.get("repeatIdentical") is not True
+                or evidence.get("parentSha256") != evidence.get("restoredSha256")
+                or evidence.get("modelManifestHash") != reference["modelManifestHash"]
+                or any(evidence.get(key) != value for key, value in reference[cell].items())
+            ):
+                raise ValueError("Native Windows v3 evidence does not match the shipped reference")
 
 
 class EndpointUpdate(FiniteStrict):

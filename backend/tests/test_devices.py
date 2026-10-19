@@ -458,6 +458,54 @@ def test_native_windows_admission_requires_exact_reference_and_worker_only():
             SelfTest(**{**data, **changes})
 
 
+def test_native_windows_v3_worker_admission_is_bound_to_the_shipped_reference():
+    import copy
+    import pathlib
+
+    from backend.devices import SelfTest
+    from backend.policies import v3_qualification
+    from pydantic import ValidationError
+
+    evidence = pathlib.Path(__file__).parents[2] / "docs/evidence/2026-10-19-v3-qualification-reference"
+    data = json.loads((evidence / "windows-3060-first.json").read_text())["result"]  # the real RTX 3060 result
+    admitted = SelfTest(**data)
+    assert (admitted.platform, admitted.coordinator, admitted.recipeVersions) == ("windows", False, [3])
+    model = data["qualifiedModelHashes"][0]
+    assert v3_qualification(admitted.model_dump(), model) is None
+    assert v3_qualification({**admitted.model_dump(), "qualifiedModelHashes": []}, model) == "model"
+
+    def changed(path, value):
+        body = copy.deepcopy(data)
+        *parents, key = path
+        target = body
+        for name in parents:
+            target = target[name]
+        target[key] = value
+        return body
+
+    for path, value in [
+        (("coordinator",), True),
+        (("runtimeProfile",), "desktop-v1"),
+        (("recipeVersions",), [1, 3]),
+        (("recipeVersions",), [1]),  # a v3 profile never stands in for the v1 Windows evidence
+        (("qualifiedModelHashes",), ["e" * 64]),
+        (("qualifiedModelHashes",), [data["qualifiedModelHashes"][0], "e" * 64]),
+        (("compatibility", "recipeV3Lora", "modelManifestHash"), "e" * 64),
+        (("compatibility", "recipeV3Lora", "passed"), False),
+        (("compatibility", "recipeV3Lora"), {}),
+        (("compatibility", "recipeV3Lora", "outputsHash"), "e" * 64),
+        (("compatibility", "recipeV3Lora", "restoredSha256"), "e" * 64),
+        (("compatibility", "recipeV3Lora", "repeatIdentical"), False),
+        (("compatibility", "recipeV3", "negativeProbeHash"), "e" * 64),
+        (("compatibility", "recipeV3", "recipeHash"), "e" * 64),
+        (("compatibility", "initialAdapterSha256"), "e" * 64),
+        (("compatibility", "peftVersion"), "0.21.1"),
+        (("compatibility", "repeatIdentical"), False),
+    ]:
+        with pytest.raises(ValidationError):
+            SelfTest(**changed(path, value))
+
+
 def test_turning_a_device_off_cancels_its_queued_and_running_jobs(setup):
     client, store, runtime = setup
     admin = login(client, "admin")

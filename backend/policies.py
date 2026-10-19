@@ -58,7 +58,8 @@ def v2_qualification(profile, model_hash):
 
 
 def v3_qualification(profile, model_hash):
-    if profile.get("platform") == "windows" or profile.get("recipeVersions") != [3]:
+    # A native Windows profile reaches [3] only through the reference-bound worker-only validation of SelfTest.
+    if profile.get("recipeVersions") != [3]:
         return "recipe"
     if model_hash not in profile.get("qualifiedModelHashes", []):
         return "model"
