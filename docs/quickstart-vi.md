@@ -2,7 +2,7 @@
 
 Đây là bản thử nghiệm riêng, chưa phát hành chính thức. Bộ cài **chưa được ký số**, nên Windows sẽ hỏi lại một lần.
 
-Bản đang cung cấp: **lf1-20261012-r5**. Tải trực tiếp tại
+Bản đang cung cấp: **lf1-20261014-r10**. Tải trực tiếp tại
 **https://lab.heteroes.site/#downloads**; chọn **Worker** để tham gia lab này,
 hoặc **Lab Server** nếu muốn dựng lab riêng. Không cần chép file từ máy chủ.
 
@@ -42,7 +42,7 @@ Giới hạn: máy bạn chỉ được tụt tối đa 64 bước so với lab.
 6. Mời người khác tham gia: họ đăng ký trên trang lab của bạn, bạn duyệt tài khoản và thiết bị trong *Operations*.
 
 **Giới hạn hiện tại:**
-- **Coordinator** (máy điều phối chạy job) chỉ có trên Linux, phải đạt kiểm tra tương thích và có ít nhất 11000 MB VRAM. Worker r5 có nút *Allow this computer to coordinate experiments*. Địa chỉ riêng của máy này phải tới được từ các Worker. Nếu dựng lab riêng để phục vụ máy khác mạng, người vận hành vẫn phải thiết lập tuyến HTTPS công khai; app chưa tự làm bước này.
+- **Coordinator** (máy điều phối chạy job) chỉ có trên Linux, phải đạt kiểm tra tương thích và có ít nhất 11000 MB VRAM. Worker r10 có nút *Allow this computer to coordinate experiments*. Địa chỉ riêng của máy này phải tới được từ các Worker. Nếu dựng lab riêng để phục vụ máy khác mạng, người vận hành vẫn phải thiết lập tuyến HTTPS công khai; app chưa tự làm bước này.
 - Mạng thường không mã hóa (HTTP). Trên mạng chung (trường, ký túc xá) hãy dùng Tailscale hoặc WireGuard.
 - Không cần Internet sau khi cài xong. Lần cài đầu cần tải thư viện, hoặc chép sẵn bộ cache.
 
@@ -55,3 +55,12 @@ Giới hạn: máy bạn chỉ được tụt tối đa 64 bước so với lab.
 | Worker báo OFFLINE | Kiểm tra link lab; thử mở link bằng trình duyệt |
 | Không vào được lab sau khi máy chủ khởi động lại | Địa chỉ máy chủ có thể đã đổi; đặt IP cố định |
 | Lỗi self-test | Cập nhật driver NVIDIA, giữ OFF và gửi báo cáo |
+
+## Đổi lab và ghép đôi lại trên r10
+
+Nếu địa chỉ lab cũ không còn dùng được, tắt đóng góp, chờ các tiến trình dừng rồi chọn **Forget this pairing** trong app.
+Thao tác này xóa ghép đôi trên máy bạn; lab vẫn giữ lịch sử thiết bị. Đăng nhập lab mới và ghép đôi lại. Quản trị viên có
+thể xóa thiết bị đang chờ hoặc đã thu hồi khỏi danh sách. Thiết bị đã thu hồi không tự được duyệt lại.
+
+Bản dọn dẹp mã nguồn ngày 19/10 chưa thay bộ cài đang phát hành. Windows hiện chỉ được chấp nhận làm Worker Recipe v1;
+Coordinator cần Linux đã qua kiểm tra. Trạng thái và giới hạn kiểm chứng mới nhất ở [HANDOFF.md](HANDOFF.md).

@@ -1,31 +1,59 @@
-# AGENTS.md — HeteroES (one repository: runtime, Web/API, apps, lab operations)
+# AGENTS.md — HeteroES
 
-Since 2026-10-19 the runtime repository (`hetero-es`) and the product repository (`Hetero-ES-LLM`) are one repository.
-The runtime (numerical core, ledger, workers, device agent) lives in `runtime/`; the product (FastAPI backend, web UI,
-Electron apps, lab operations) stays at the root. Both histories were kept: every old commit id still resolves, and the
-old branches are kept as `archive/runtime/*` and `archive/product/*`.
+One repository: numerical runtime in `runtime/`; CPU product, web/apps and operations at the root. Both original histories
+and `archive/runtime/*` / `archive/product/*` branches are retained. Read `docs/HANDOFF.md` first, then the relevant module
+and `runtime/docs/numerical-contract.md` for numerical work. Historical agent/session files under `docs/archive/` are dated
+records; this file contains the current common rules.
 
-**Cleanup in progress (branch `refactor/cleanup`): read `docs/refactor-handoff.md` first.** Then read **`docs/session-handoff-2026-10-14-windows.md`** (first real Windows Worker, r8-r10, what is not shown), then
-`docs/session-handoff-2026-10-13-ui.md`, `docs/session-handoff-2026-10-12-lf1.md` (owner rules and decisions),
-`runtime/CLAUDE.md` (numerical contract, module map), `runtime/HETEROES_LLM_STATUS.md` (first block) and
-`runtime/docs/adr/ADR-004..007`.
+## Working rules
 
-Non-negotiable rules:
-- Talk to the owner in Vietnamese, simply, short; documentation and code comments in English.
-- Never push or tag. No `Co-Authored-By` or other generated-by trailer in commits. Commit in logical groups on a
-  working branch (2026-10-19: `refactor/cleanup`); `main` is what the lab runs.
-- Tests first, then a mutation check on a scratch copy (`scripts/mutation-check.py`). Evidence READMEs state what they do NOT show.
-- Never print or commit secrets (credentials, tunnel credentials, device tokens, signing keys).
-- The lab on this workstation is live and public. It runs from a deployed clone of `main` in
-  `~/.local/share/heteroes-lab/app` (see `deploy/heteroes-lab.user.service`), never from this working tree. Change it
-  only through `scripts/local-lab.py`, never kill its processes by hand, run GPU work only with `--gpu` and
-  `HETEROES_GPU_ACCEPTANCE=1`.
-- Recipe v1 numerics (`runtime/src/heteroes/{noise,es,ledger}/`, `generation_record.py`) must not change behaviour
-  without a separate owner decision (2026-10-19: automatic formatting is allowed, with an AST-equality proof).
+- Talk to the owner in Vietnamese, simply and briefly. Code comments and general documentation are English; the approved
+  Vietnamese quickstart/plan keep their language.
+- Complete authorized work autonomously. Commit logical groups on a working branch. Never push or tag. Never add
+  `Co-Authored-By`, generated-by or session trailers.
+- Write meaningful tests before new behavior/helpers; use `scripts/mutation-check.py` on scratch copies. A surviving
+  mutant needs a test or a documented equivalence. Preserve intermediate receipts and state their limits.
+- Never print or commit passwords, credentials, device/session tokens, signing keys or tunnel secrets.
+- Existing evidence and `runtime/artifacts/` are immutable. Add a fresh dated evidence folder with a README containing
+  **What this does NOT show**. Do not format fixtures, resource profiles, generated files or archives.
+- Do not change device approval/contribution based on an old handoff. `3060-thao` is REVOKED in the latest live read.
 
-Whole CPU check (fresh evidence directory each time): `scripts/check-all.sh docs/evidence/<date>-<name>/checks`.
-Quick checks:
-- runtime: `cd runtime && CUDA_VISIBLE_DEVICES='' PYTHONPATH=src /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python -m pytest -q`
-  (2026-10-19 baseline: 2,115 passed, 100 skipped)
-- backend: `CUDA_VISIBLE_DEVICES='' .venv-backend/bin/python -m pytest backend/tests -q`
-- apps: `cd desktop/worker && node --test tests/*.test.cjs`; lab: `python3 -I ~/.local/share/heteroes-lab/app/scripts/local-lab.py status`.
+## Lab and hardware
+
+The live/public lab runs from `~/.local/share/heteroes-lab/app` at its deployed commit, with its own environment. The
+working tree and local `main` can advance without deploying it. Change lab state only through `scripts/local-lab.py`.
+Do not restart its unit directly, kill processes manually, use `pkill -f`, or start another controller against its database.
+No cleanup installer is published; installer polish/r11 is separate. Keep the existing Conda `ai` environment unchanged.
+SSH to another machine requires a specific owner request; historical SSH permission does not authorize new remote work.
+
+GPU computation requires the owner's authorization, an explicit `--gpu` where supported and
+`HETEROES_GPU_ACCEPTANCE=1`. CPU checks use `CUDA_VISIBLE_DEVICES=''`. Never use `/mnt/sekai`. Verify the selected Archive
+disk UUID before writing there. Private state/runtimes stay on the system filesystem; packaging checks use `.scratch/`.
+
+## Numerical contract
+
+Recipe v1 behavior is frozen. `runtime/src/heteroes/{noise,es,ledger}/` and `generation_record.py` may only be formatted
+with strict Python AST-equality proof unless the owner separately approves a behavior change. Follow the complete contract
+and ADR-001/002, plus the decided items in ADR-004–007; do not reopen the cleanup decisions in the handoff.
+
+Canonical CPU noise identity excludes worker/attempt/lease metadata. Perturbation uses separate FP32 multiply/add with
+FP16 publication; update accumulation is FP32 in canonical candidate order. Restore is exact, a mismatch quarantines the
+worker, and infrastructure failure is never coerced to reward zero. Retry/replay identity and numerical serialization
+must remain unchanged. Experimental scripts and claims have their own recorded evidence; do not claim GPU/Windows or
+learning acceptance from CPU or fixture checks.
+
+## Verification
+
+```bash
+scripts/check-all.sh docs/evidence/YYYY-MM-DD-name/checks
+CUDA_VISIBLE_DEVICES='' .venv-backend/bin/python -m pytest backend/tests -q
+(cd runtime && CUDA_VISIBLE_DEVICES='' PYTHONPATH=src "$HOME/miniforge3/envs/heteroes-match/bin/python" -m pytest -q)
+scripts/build-apps.sh --check .scratch/fresh-linux-check
+python3 -I "$HOME/.local/share/heteroes-lab/app/scripts/local-lab.py" status
+```
+
+The full check includes lint/format, i18n, source-package imports, web/desktop units and fixture browser/Electron checks.
+Ruff uses 120 columns; Prettier is pinned at the root. `scripts/check-python-ast.py --base <commit> --out <receipt.json>`
+proves a format-only Python change; the formatting commit is in `.git-blame-ignore-revs`. Local formatter guards preserve
+literal docstring whitespace. Clear `ELECTRON_RUN_AS_NODE` for ordinary Electron probes; the packaging checker sets it
+only for deliberate Node-mode module import checks.

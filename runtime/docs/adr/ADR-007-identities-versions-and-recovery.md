@@ -132,3 +132,7 @@ upgrade to use those optional features. An old server ignores the new header.
 
 [MEASURED — CPU tests] Agent header test and backend protocol/admission tests, with
 mutation checks, are in product `docs/evidence/2026-10-12-lf1-codex/`.
+
+## Repository cleanup — 2026-10-19
+
+Backend schema initialization is centralized in `migrations.py` with existing guards and version 1 retained. No identity/epoch/export feature is newly claimed. Current state: [canonical handoff](../../../docs/HANDOFF.md). Earlier code locations describe their dated checkpoints.

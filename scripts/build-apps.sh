@@ -7,9 +7,15 @@
 # Steps: build the Web UI into $OUT/web (the lab's own frontend/dist is not touched), refresh the packaged runtimes
 # from Track A (updates desktop/*/resources/{runtime.tar.gz,profile.json}: commit them), type-check and bundle each
 # app, package. Afterwards verify and publish:
-#   scripts/check-linux-server.cjs / scripts/check-linux-packaged.cjs --phase install   (see docs/session-handoff-2026-10-12-lf1.md)
+#   scripts/check-linux-server.cjs / scripts/check-linux-packaged.cjs --phase install   (see docs/HANDOFF.md)
 #   python3 scripts/publish-local-installers.py --packages $OUT --build $BUILD --receipt docs/evidence/<folder>/installers-<build>.json
 set -euo pipefail
+unset ELECTRON_RUN_AS_NODE
+# A source-copy validation build: Linux unpacked only, without touching pinned resources or public downloads.
+if [ "${1:-}" = "--check" ]; then
+  cd "$(dirname "$0")/.."
+  exec "${PYTHON:-.venv-backend/bin/python}" -I scripts/check-desktop-packaging.py --out "${2:?usage: build-apps.sh --check <fresh directory>}"
+fi
 : "${BUILD:?Set BUILD to a new name such as lf1-20261012-r5}"
 ROOT="${DOWNLOADS:-/mnt/Archive-2tb/heteroes-local/downloads}"
 OUT="$ROOT/$BUILD"

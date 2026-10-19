@@ -1,3 +1,8 @@
+> Current repository/product checkpoint: [../docs/HANDOFF.md](../docs/HANDOFF.md).
+> The 2026-10-19 cleanup is complete on the working branch; CPU checks, formatting proof and packaging receipts are there.
+> The live clone and r10 installers were not updated. Entries below are dated scientific/implementation history and do
+> not override the current handoff or root AGENTS.md. No new GPU or native Windows result is claimed by this cleanup.
+
 > **2026-10-12 session close:** public lab/backend and downloads now serve r5.
 > The owner reported Windows onboarding, connection, exit/sign-out and network
 > control problems, then requested stop and rest. No repair or replacement

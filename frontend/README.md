@@ -13,4 +13,4 @@ npm run test:unit --workspace frontend
 ```
 
 The supported integration check is `scripts/check-all.sh <fresh evidence directory>`. It starts isolated CPU fixture
-labs and exercises browser flows; it does not modify the public lab. See `docs/refactor-handoff.md` for cleanup status.
+labs and exercises browser flows; it does not modify the public lab. See `docs/HANDOFF.md` for cleanup status.

@@ -147,3 +147,7 @@ system filesystem. The first Server profile was mistakenly put on this machine's
 Archive mount (directory mode 0777) and was refused. Private state/runtimes remain
 on the system filesystem; Archive is for selected bulk data. See product evidence
 `docs/evidence/2026-10-12-lf1-codex/` and `docs/r5-hardware-acceptance.md`.
+
+## Repository cleanup — 2026-10-19
+
+Provider-specific S3/R2/EC2 code is removed. Recovery uses local storage; legacy cloud-prefixed table/wire names remain for compatibility. Current state: [canonical handoff](../../../docs/HANDOFF.md). Earlier code locations describe their dated checkpoints.

@@ -1,0 +1,17 @@
+{
+  "sourceCommit": "a3cf14ec86099fd17681279f34f065185873bc49",
+  "linuxOnly": true,
+  "published": false,
+  "apps": [
+    {
+      "app": "worker",
+      "unpacked": "/home/pc5070ti/projects/heteroes/.scratch/cleanup-linux/worker/linux-unpacked",
+      "sharedModulesImport": true
+    },
+    {
+      "app": "server",
+      "unpacked": "/home/pc5070ti/projects/heteroes/.scratch/cleanup-linux/server/linux-unpacked",
+      "sharedModulesImport": true
+    }
+  ]
+}

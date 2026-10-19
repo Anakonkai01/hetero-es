@@ -104,3 +104,7 @@ coordinator job was run for this flow. Native Windows stays worker-only.
 Public-compute ingress wiring for a new coordinator and Lab Server network-choice
 UI remain [PENDING]. Selecting a private address does not create an overlay,
 firewall rule or tunnel.
+
+## Repository cleanup — 2026-10-19
+
+The loopback/SSH gateway is removed. Agent supervision is shared by `product/run_supervisor.py`; only agent-v2 remains. Current state: [canonical handoff](../../../docs/HANDOFF.md). Earlier code locations describe their dated checkpoints.

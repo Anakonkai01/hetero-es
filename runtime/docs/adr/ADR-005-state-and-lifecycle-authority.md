@@ -85,3 +85,7 @@ merely because admission is held. Legacy dispatch remains frozen.
 a hold during reconciliation and independent-run error isolation are tested in
 product `backend/tests/test_admission_hold.py`; mutation receipts are in
 `docs/evidence/2026-10-12-lf1-codex/`.
+
+## Repository cleanup — 2026-10-19
+
+Admission hold/reconciliation behavior is preserved. Backend definitions now live in separate router, policy and agent modules. Current state: [canonical handoff](../../../docs/HANDOFF.md). Earlier code locations describe their dated checkpoints.

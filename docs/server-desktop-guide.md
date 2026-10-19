@@ -61,3 +61,5 @@ installer referenced by existing evidence. `scripts/check-linux-server.cjs`
 requires an actual executable, evidence output and isolated XDG directories.
 It verifies the fresh installation, CPU-only dependencies, bootstrap/login,
 same-origin routes, held queue, tray behavior, stop and restart.
+
+Current source/deployment status and verification limits: [HANDOFF.md](HANDOFF.md).

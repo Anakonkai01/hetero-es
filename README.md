@@ -1,33 +1,64 @@
-# Hetero-ES-LLM
+# HeteroES
 
-Reliable ES-based LLM post-training on heterogeneous consumer GPU clusters.
+An Evolution Strategies runtime for evaluating and post-training language models on heterogeneous consumer GPUs,
+with a CPU Lab Server, web interface and Electron Worker/Server apps. This repository contains both original Git histories.
+The project demonstrates runtime, ownership and replay behavior; passing infrastructure checks is not evidence of learning gains.
 
-Current checkout: one repository, with the numerical runtime in `runtime/` and the product at the root.
-Cleanup continues on `refactor/cleanup`; read [the current handoff](docs/refactor-handoff.md).
-The only supported control path is Lab Server → outbound device agent → coordinator/worker.
-The older integration guides linked below are historical; their loopback/SSH launch scripts have been removed.
+## Start here
 
-For the current M3 worktrees, verified Windows trial, private local archive,
-service state and next Linux installer test, start with the
-[2026-10-11 session handoff](docs/m3-session-handoff.md).
+- [Current state, decisions and handoff](docs/HANDOFF.md)
+- [Contributor and agent rules](AGENTS.md)
+- [Vietnamese quickstart for r10](docs/quickstart-vi.md)
+- [Live workstation operations](docs/local-lab-operations.md)
+- [Numerical contract](runtime/docs/numerical-contract.md) and [research claims audit](runtime/docs/report/CLAIMS_AUDIT.md)
+- [Recorded security/policy findings](docs/SECURITY-NOTES.md)
 
-The UI now connects to the separate Track A runtime through a FastAPI backend.
-See [runtime setup and supported controls](docs/runtime-integration.md) and
-[validation evidence](docs/integration-validation.md).
+## Repository layout
 
-The accepted next-stage plan is saved in [the M1–M6 roadmap](docs/lab-roadmap.md).
-See [M1 implementation status](docs/m1-implementation.md) and
-[the lab operator guide](docs/lab-operations.md) for registration/approval,
-independent workspaces, GPU contribution and idle backup/restore.
+| Path | Responsibility |
+| --- | --- |
+| `runtime/` | Numerical core, ledger, coordinator, device agent, qualification and scientific evidence |
+| `backend/` | CPU API, identity, queue, reservations, recovery storage and metadata backup |
+| `frontend/` | Web UI using the real API |
+| `desktop/worker`, `desktop/server`, `desktop/shared` | Electron apps and shared download/process utilities |
+| `packages/product-ui/` | Shared UI, themes and Vietnamese translations |
+| `scripts/`, `deploy/` | Development checks, packaging and local lab operations |
+| `docs/evidence/`, `docs/archive/` | Dated receipts and superseded documentation |
 
-For an initialized agent-mode lab, the CPU server uses an explicit private configuration directory:
+Backend telemetry and study contracts import the CPU-safe runtime modules directly. The Server packager selects their
+small dependency set; importing the Server does not load torch. Existing `cloud_*` SQLite names and recovery wire fields
+are retained for compatibility with stored data and r10 devices. Local recovery uses filesystem storage.
+
+## Development and checks
+
+Use Node 24, a Python 3.12 backend virtual environment, the qualified `heteroes-match` runtime environment, Playwright
+Chromium and Xvfb. From the repository root:
 
 ```bash
-CUDA_VISIBLE_DEVICES='' .venv-backend/bin/python -m backend.server \
-  --private /path/to/private-lab --web /path/to/built-web --headless
+python3 -m venv .venv-backend
+.venv-backend/bin/python -m pip install -r backend/requirements-dev.txt
+npm ci
+scripts/check-all.sh docs/evidence/YYYY-MM-DD-check/checks
 ```
 
-The live workstation lab runs from a separate deployed clone in `~/.local/share/heteroes-lab/app`.
-Use its `scripts/local-lab.py` for operations; see [the workstation guide](docs/local-lab-operations.md).
+The output directory must be fresh. The command runs runtime/backend tests, Python lint/format, Prettier, source-package
+imports, web/app unit tests, types, i18n, builds and fixture browser/Electron flows. It never starts a real GPU job.
+Override `RUNTIME_PYTHON`, `PYTHON` or `RUFF` if the qualified environments are installed elsewhere.
 
-Real mode is the default. Use `VITE_DATA_SOURCE=mock` for the explicit UI demo.
+```bash
+npm run build:web
+npm run build:worker
+scripts/build-apps.sh --check .scratch/my-fresh-linux-check
+```
+
+The packaging check builds both Linux apps unpacked in an isolated source copy and imports their shared modules from
+ASAR. It does not publish installers or replace the source checkout's resource profiles. Formatting-only changes can be
+hidden in blame with `git blame --ignore-revs-file .git-blame-ignore-revs <file>`.
+
+## Live lab
+
+The public lab runs from `~/.local/share/heteroes-lab/app`, a separate deployed clone with its own backend environment.
+It is independent of this working tree. Operate it through its `scripts/local-lab.py`; never start another controller
+against its database or kill its processes manually. The currently published build remains r10.
+
+Historical setup commands are under `docs/archive/`; use the current operator guide for the supported agent path.

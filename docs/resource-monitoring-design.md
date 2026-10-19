@@ -62,13 +62,13 @@ clock changes and gaps over 30 seconds are not extrapolated. This is not billing
 Workers and Server remain unprivileged. This host's RAPL files require root read
 permission, so a small fixed publisher reads counters every two seconds and
 writes `/run/heteroes-power/rapl.json`. It does not change power limits or drivers.
-Source in Track A: `scripts/rapl-publisher.py` and `scripts/heteroes-rapl.service`.
+Source: `runtime/scripts/rapl-publisher.py` and `runtime/scripts/heteroes-rapl.service`.
 An administrator can install those reviewed files using:
 
 ```bash
 sudo install -d -m 755 /usr/local/lib/heteroes
-sudo install -o root -g root -m 644 scripts/rapl-publisher.py /usr/local/lib/heteroes/rapl-publisher.py
-sudo install -o root -g root -m 644 scripts/heteroes-rapl.service /etc/systemd/system/heteroes-rapl.service
+sudo install -o root -g root -m 644 runtime/scripts/rapl-publisher.py /usr/local/lib/heteroes/rapl-publisher.py
+sudo install -o root -g root -m 644 runtime/scripts/heteroes-rapl.service /etc/systemd/system/heteroes-rapl.service
 sudo systemctl daemon-reload
 sudo systemctl enable --now heteroes-rapl.service
 ```
@@ -84,9 +84,11 @@ LibreHardwareMonitor WMI provider.
 Samples are cached for three seconds; Worker control polls remain ten seconds.
 Server's private CPU Python monitor produces JSON lines every three seconds and
 exits on parent stdin EOF. It uses only stdlib collectors, no Torch/CUDA. Server
-bundles vendor four reviewed collector modules with SHA256 provenance. Refresh
-with `scripts/refresh-monitoring.py --track-a <Track A>` before refreshing source
-bundles. Updating those collectors in Track A requires refreshing the vendor copy.
+bundles the CPU-safe modules selected by `backend/runtime_sources.py` directly from
+`runtime/src/heteroes/`. Worker and Server use this single source; no vendor-copy refresh
+is needed. `scripts/check-source-packages.py` verifies isolated archive imports without torch.
+Refresh a reviewed packaging source bundle with `scripts/refresh-server-runtime.py`; the
+Linux packaging check performs refreshes only inside its isolated source copy.
 
 The API retains 180 observations per device and returns 60; desktop recent history
 has 60 points. The chart shows actual timestamps and breaks gaps over 30 seconds.

@@ -3,7 +3,7 @@
 #
 #   scripts/check-all.sh docs/evidence/2026-10-13-ui/checks
 #
-# Runs: backend tests, frontend/Worker/Server unit tests, type checks, lint, i18n check, then the browser and Electron
+# Runs: runtime/backend tests, Python lint/format and Prettier, source archive imports, frontend/Worker/Server unit tests, type checks, lint, i18n check, then the browser and Electron
 # contracts against throwaway fixture labs (never the real lab, never a GPU). Set PYTHON to the backend interpreter
 # (default .venv-backend/bin/python at the repository root). It needs Chromium (Playwright), Xvfb and Node 24.
 set -uo pipefail
@@ -19,6 +19,15 @@ trap 'rm -rf "$WORK"; [ -n "${LAB:-}" ] && kill "$LAB" 2>/dev/null; true' EXIT
 failed=()
 step() { local name=$1; shift; printf '=== %s\n' "$name"; if "$@" > "$OUT/$name.log" 2>&1; then echo "PASS $name"; else echo "FAIL $name (see $OUT/$name.log)"; failed+=("$name"); fi; }
 
+RUFF=${RUFF:-.venv-backend/bin/ruff}
+RUNTIME_PYTHON=${RUNTIME_PYTHON:-$HOME/miniforge3/envs/heteroes-match/bin/python}
+export PYTHON
+runtime_tests() { (cd runtime && env CUDA_VISIBLE_DEVICES= PYTHONPATH=src "$RUNTIME_PYTHON" -m pytest -q); }
+step runtime-tests runtime_tests
+step python-lint "$RUFF" check --config pyproject.toml .
+step python-format "$RUFF" format --check --config pyproject.toml .
+step prettier node scripts/check-format.mjs
+step source-packages "$PYTHON" -I scripts/check-source-packages.py
 step backend-tests env CUDA_VISIBLE_DEVICES= "$PYTHON" -m pytest backend/tests -q
 step frontend-unit bash -c 'cd frontend && node --test tests/*.test.mjs'
 step worker-unit bash -c 'cd desktop/worker && node --test tests/*.test.cjs tests/*.test.mjs'

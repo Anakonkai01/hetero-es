@@ -1,53 +1,29 @@
-# Running the lab on a workstation: start, stop, reboot
+# Workstation lab operations
 
-The lab is three processes managed by `scripts/local-lab.py`: the CPU Web/API (`backend.server`), the
-public entry (Caddy, loopback ports 8080/8081) and the Cloudflare tunnel. Private configuration lives in
-`~/.config/heteroes-m2/` (`config.json`, `credentials.json`, `local-deployment/`).
-
-| Command | What it does |
-|---|---|
-| `python3 scripts/local-lab.py status` | Which of the three are alive, and the public names. Changes nothing. |
-| `python3 -m backend.doctor --private ~/.config/heteroes-m2` | Read-only checklist (address, database, storage, public names). |
-| `local-lab.py restart --python <backend venv python>` | Restarts the Web/API and the entry. **Holds the queue for the length of the restart and reopens it afterwards** if the lab was open and idle; refuses if a run or a GPU reservation is live. |
-| `local-lab.py stop` / `start` | Stops or starts all three (same hold handling). |
-| `local-lab.py boot` | Starts whatever is not running and never launches a job. If a run or reservation was live when the machine went down, the queue **stays held** until an administrator confirms in Operations. |
-
-## Surviving a reboot
-
-`deploy/heteroes-lab.user.service` is a systemd **user** unit that runs `boot` at login and a graceful `stop`
-at shutdown. Install and enable it:
+The live lab runs from `~/.local/share/heteroes-lab/app`, a deployed clone at `79876cb`, with its separate environment
+`~/.local/share/heteroes-lab/venv-backend`. Caddy and Cloudflare ingress expose the local CPU API/web and compute control.
+Private configuration is in `~/.config/heteroes-m2`; do not print it or copy it into evidence.
 
 ```bash
-mkdir -p ~/.config/systemd/user && cp deploy/heteroes-lab.user.service ~/.config/systemd/user/heteroes-lab.service
-systemctl --user daemon-reload && systemctl --user enable --now heteroes-lab
+python3 -I "$HOME/.local/share/heteroes-lab/app/scripts/local-lab.py" status
 ```
 
-A user unit starts when the user's systemd instance starts. To have the lab come up after a reboot **before
-anyone logs in**, run once with administrator rights: `sudo loginctl enable-linger $USER`.
+Use the deployed copy's `local-lab.py` for start/stop/restart/boot operations. It holds admission for maintenance, refuses
+unsafe restarts with live work/reservations, and requires review before dispatching after an interrupted deployment.
+A queue hold does not stop reconciliation of already admitted work. Device contribution is boot-scoped and starts OFF.
 
-Measured 2026-10-12 on this workstation: `systemctl --user stop heteroes-lab` then `start` gave a cold boot in
-about one second; the public Web answered 200 within a few seconds once the tunnel had registered. A real
-power cycle has not been tried.
+The systemd user unit supervises this deployed copy. Do not invoke a unit restart or kill its processes manually from an
+agent session. The owner performs unit-level operations when needed. The cleanup did not change the deployed clone,
+private configuration, device choices or published r10 installers. Moving local `main` is not deployment.
 
-## Fixed public names
+For a separate initialized development lab, use its own private directory/database/ports:
 
-The tunnel is `heteroes-lab-local` (configuration `local-deployment/named-config.yml`, credentials in
-`~/.cloudflared/`). `lab.heteroes.site` serves the Web/API and installers; `compute.heteroes.site` serves only the
-coordinator's control routes (never weights). Cloudflare's Browser Integrity Check rejects Python's default
-User-Agent on these names, so every HeteroES client sends its own.
+```bash
+CUDA_VISIBLE_DEVICES='' .venv-backend/bin/python -m backend.server \
+  --private /path/to/private-lab --web /path/to/built-web --headless
+```
 
-## r5 backend deployed on 2026-10-12
-
-The production app factory now takes an exclusive kernel lock on the canonical
-management database path (`product.sqlite.writer.lock`). Another config folder
-pointing to that same database cannot bypass it. Startup failures release the
-lock; normal shutdown waits for dispatcher and metadata writer threads to finish
-before releasing it. Direct `create_app`/`Store` constructors remain test/library
-entry points, not an alternative production launch path.
-
-Admission hold leaves current-run reconciliation active. Local upload disk work
-runs off the API event loop, with cleanup serialized against a still-running disk
-operation. These changes are now running in the public lab after a managed idle
-restart. The four r5 installers are published and their full public downloads
-verified. See `evidence/2026-10-12-r5-public/`,
-`session-handoff-2026-10-12-codex.md` and `r5-hardware-acceptance.md`.
+The factory requires explicit configuration and agent mode. Local recovery points publish a final verified manifest;
+metadata backup/restore uses `scripts/restore-metadata.py`, and generation recovery import/restore uses `scripts/recovery.py`.
+Restore into a fresh held deployment, retain unknown reservations and follow the owner/epoch limitations in ADR-007.
+See [HANDOFF.md](HANDOFF.md), [server-desktop-guide.md](server-desktop-guide.md) and [SECURITY-NOTES.md](SECURITY-NOTES.md).

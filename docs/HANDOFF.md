@@ -1,0 +1,61 @@
+# HeteroES — canonical handoff
+
+## Current checkpoint
+
+The approved one-repository cleanup (phases 0–6) is complete on `refactor/cleanup` and local `main`, fast-forwarded after
+the final checks. No push/tag, live deployment update, device change or installer publication occurred.
+The live clone remains `79876cb`; its published installers remain **lf1-20261014-r10**. A local `main` update does not
+deploy that clone. The old repositories remain in `~/projects/_old/`, and both Git histories/old commit ids are retained.
+
+Read [../AGENTS.md](../AGENTS.md) for common rules, [../README.md](../README.md) for layout/checks and
+[archive/refactor-plan-vi.md](archive/refactor-plan-vi.md) for the owner's approved plan. Historical session chains and
+runtime bootstrap guidance are in `archive/`; they are not additional current instructions.
+
+## Completed changes
+
+- One repository; runtime under `runtime/`, product at the root. Legacy control/SSH gateway, fake dispatch and old backup
+  bundle are removed. The agent's live supervision was extracted before deleting the gateway.
+- Web mock mode, unused routes, provider-specific cloud code, dead UI pieces and one-off M1–M3 tools are removed. The
+  packaged r10 runtime was scanned before retiring routes. CPU telemetry/study code now has one runtime source.
+- Local recovery is named `recovery_storage.py` / `metadata_backup.py`; restore tools use the same terminology. Existing
+  `cloud_*` tables and recovery wire/cookie names remain compatible with stored data and r10 devices. Health retains
+  `agentMode: true` and `deviceConfiguration: true` for shipped desktop clients.
+- Shared backend policies/settings/configuration and Electron workspace helpers replace duplication. APIRouters and
+  separate agent protocol/scheduling/command/poll modules keep responsibilities smaller. CREATE TABLE definitions are
+  centralized without introducing a schema/data migration. Dense UI views now have dedicated components/hooks.
+- Ruff/Prettier cover active source; raw evidence, archives, generated files and fixtures are excluded. All 287 existing
+  Python ASTs were equal across formatting, including frozen Recipe v1. Formatting commit: `a3cf14ec86099fd17681279f34f065185873bc49` (also in
+  `.git-blame-ignore-revs`). 310 unused translation keys were removed; the i18n checker now rejects unused keys too.
+- One current entry point and common agent rule file replace the session chain. Scientific MASTER/STATUS/contracts,
+  claims audit and raw runtime evidence remain. Existing numerical follow-ups are [RUNTIME-TODO.md](RUNTIME-TODO.md).
+
+## Verification and receipts
+
+The [completion receipts](evidence/2026-10-19-phase6/README.md) include the full 22-step CPU check and Linux unpacked builds in an
+isolated source copy, ASAR shared-module import probes, and read-only public/deployed lab checks. Backend: **283 passed**;
+runtime: **2,110 passed, 100 skipped**. Product browser/Electron probes use disposable fixtures and recorded runs.
+
+Earlier phase receipts:
+
+| Work | Receipt |
+| --- | --- |
+| Baseline, history-preserving merge and deployed-clone cutover | [2026-10-19-one-repo](evidence/2026-10-19-one-repo/README.md) |
+| Legacy control removal and safe agent supervision extraction | [2026-10-19-phase2-runtime-removal](evidence/2026-10-19-phase2-runtime-removal/README.md) |
+| Mock/cloud/dead-code cleanup and r10 route scan | [2026-10-19-phase3](evidence/2026-10-19-phase3/README.md) |
+| Shared sources, policies and desktop utilities | [2026-10-19-phase4](evidence/2026-10-19-phase4/README.md) |
+| Router/agent/UI splits, translation audit and mutation gap closure | [2026-10-19-phase5-structure](evidence/2026-10-19-phase5-structure/README.md) |
+| 287-file AST proof, formatting/lint and CPU checks | [2026-10-19-phase5-format](evidence/2026-10-19-phase5-format/README.md) |
+
+Mutation controls pass; final receipts kill 8 phase-2, 3 phase-3, 4 phase-4 and 4 phase-5 mutants. Phase 5 initially exposed
+an untested ON/OFF poll response; the new regression kills that mutant. Retired-only tests and replacement counts are
+explained in each phase README. The check command now includes runtime tests and Python/UI format/lint checks.
+
+## Live state and remaining scope
+
+The last read-only database check shows `5070ti` APPROVED and `3060-thao` **REVOKED**. Its audit records revocation on
+2026-10-14; older handoffs saying APPROVED are stale. Do not approve or enable it from historical notes. Lab operations:
+[local-lab-operations.md](local-lab-operations.md). User setup: [quickstart-vi.md](quickstart-vi.md).
+
+No new GPU job, native Windows acceptance, fresh multi-GPU run or deployment of cleanup code is claimed. Installer
+polish/r11, the next demo rehearsal, and identity/epoch/export features still pending in the ADRs are separate work.
+The two existing security/policy findings are listed in [SECURITY-NOTES.md](SECURITY-NOTES.md); neither was silently fixed.

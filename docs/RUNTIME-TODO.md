@@ -1,7 +1,8 @@
-# TODO — code-level debt
+# Runtime follow-ups outside the cleanup
 
-Small, concrete clean-up items. Not a roadmap (see `HETEROES_LLM_MASTER.md`) and not a status report
-(see `HETEROES_LLM_STATUS.md`). When an item is done, delete it.
+These existing numerical/research follow-ups require separate review; behavior changes remain subject to the numerical
+contract. The completed repository cleanup does not claim to complete these research tasks. Paths below are relative to
+`runtime/`. The sole current handoff is [HANDOFF.md](HANDOFF.md).
 
 ## snapshot-polish  (`src/heteroes/es/snapshot.py`)
 - [ ] Docstrings for `take_snapshot`, `diff_from_snapshot`, `restore_from_snapshot_`. State that after a

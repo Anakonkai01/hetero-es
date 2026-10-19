@@ -92,3 +92,6 @@ desktop/server/electron/shared/
 
 # Generated private installer links/manifest
 /frontend/public/downloads/
+
+# Disposable packaging/validation workspaces
+/.scratch/
