@@ -27,6 +27,7 @@ Căn cứ cho "không sao chép": ghi chép của phiên 07/10 (STATUS, "ES-at-s
 | numpy | 2.5.3 | BSD-3-Clause (và 0BSD, MIT, Zlib, CC0) | bộ sinh nhiễu CPU, `src/` |
 | transformers | 5.17.0 | Apache-2.0 | nạp mô hình, `generate` |
 | safetensors, tokenizers, huggingface-hub | 0.8.0, 0.23.2, 1.33.0 | Apache-2.0 | phụ thuộc của transformers |
+| peft | 0.21.2 | Apache-2.0 (metadata, đọc 19/10/2026) | không gian trọng số LoRA, `src/heteroes/model/lora.py`; chỉ cài trong `heteroes-match`, chưa có trong bản desktop |
 | pytest | 9.1.1 | MIT | test |
 | hypothesis | 6.168.5 | MPL-2.0 | test sổ cái (tuỳ chọn) |
 | simpy | 4.1.2 | MIT | test mô phỏng thời gian (tuỳ chọn) |
