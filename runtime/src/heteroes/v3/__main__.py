@@ -12,9 +12,13 @@ from pathlib import Path
 
 def _resolve(spec, base):
     spec = json.loads(json.dumps(spec))
-    for section, key in (("model", "path"), ("data", "path"), ("scorer", "path")):
-        if key in spec.get(section, {}) and not Path(spec[section][key]).is_absolute():
-            spec[section][key] = str(base / spec[section][key])
+    for section, key in (("model", "path"), ("data", "path"), ("scorer", "path"), ("coefficientRule", "path")):
+        value = spec.get(section)
+        if isinstance(value, dict) and key in value and not Path(value[key]).is_absolute():
+            value[key] = str(base / value[key])
+    for name, path in spec.get("data", {}).get("splits", {}).items():
+        if not Path(path).is_absolute():
+            spec["data"]["splits"][name] = str(base / path)
     return spec
 
 

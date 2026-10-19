@@ -51,3 +51,35 @@ def test_the_chunk_is_written_only_when_chosen_and_the_executor_follows_it(asset
     with pytest.raises(ValueError, match="recipe"):
         executor(chosen, 16)
     assert executor(legacy).chunk == 16 and executor(legacy, 2).chunk == 2  # a worker's choice, as before
+
+
+def test_a_local_run_may_read_three_given_splits(assets, tmp_path):  # noqa: F811
+    import json
+
+    rows = [json.loads(line) for line in (assets / "rows.jsonl").read_text().splitlines()]
+    paths = {}
+    for name, part in (("train", rows[:12]), ("validation", rows[12:16]), ("test", rows[16:])):
+        paths[name] = tmp_path / f"{name}.jsonl"
+        paths[name].write_text("".join(json.dumps(r) + "\n" for r in part))
+    config = config_for(assets)
+    config["data"] = {k: v for k, v in config["data"].items() if k != "path"} | {
+        "splits": {k: str(v) for k, v in paths.items()}
+    }
+    ready = prepare(config, tmp_path / "run")
+    assert ready["dataset"]["splitMode"] == "pre-split"
+    assert [len(ready["dataset"]["splits"][n]) for n in ("train", "validation", "test")] == [12, 4, len(rows) - 16]
+
+
+def test_the_command_line_resolves_split_and_rule_paths(tmp_path):
+    from heteroes.v3.__main__ import _resolve
+
+    spec = {
+        "data": {"splits": {"train": "a.jsonl", "validation": "/abs/b.jsonl", "test": "c.jsonl"}},
+        "coefficientRule": {"kind": "python", "path": "rule.py", "function": "f"},
+    }
+    resolved = _resolve(spec, tmp_path)
+    assert resolved["data"]["splits"] == {
+        "train": str(tmp_path / "a.jsonl"), "validation": "/abs/b.jsonl", "test": str(tmp_path / "c.jsonl"),
+    }  # fmt: skip
+    assert resolved["coefficientRule"]["path"] == str(tmp_path / "rule.py")
+    assert _resolve({"coefficientRule": "zscore@1"}, tmp_path) == {"coefficientRule": "zscore@1"}

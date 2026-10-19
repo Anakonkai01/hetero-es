@@ -74,8 +74,12 @@ def prepare(config, out_dir, device="cpu", initial_adapter=None):
     # a local model has no hub commit: its revision is derived from the hashes of its files (40 hex digits)
     revision = config["model"].get("revision") or canonical_json_hash(files)[:40]
     model, tokenizer = load(model_path, files, device)
-    rows = v3data.read_rows(config["data"]["path"], config["data"].get("promptField", "prompt"))
-    dataset = v3data.build(rows, split_seed=config["data"].get("splitSeed", 42))
+    field, seed = config["data"].get("promptField", "prompt"), config["data"].get("splitSeed", 42)
+    if "splits" in config["data"]:  # three files, kept as given (an official test split stays the test split)
+        given = {name: v3data.read_rows(path, field) for name, path in config["data"]["splits"].items()}
+        dataset = v3data.build([], split_seed=seed, splits=given)
+    else:
+        dataset = v3data.build(v3data.read_rows(config["data"]["path"], field), split_seed=seed)
     space = config.get("weightSpace") or {"kind": "full"}
     adapter_file = adapter_sha = None
     if initial_adapter is not None and space["kind"] != "lora":
