@@ -1,0 +1,7 @@
+control ok    | 1 passed, 6 deselected in 2.45s
+killed       builder-no-gpu-gate | 1 failed, 6 deselected in 2.26s
+killed       builder-seed-on-windows | 1 failed, 6 deselected in 2.50s
+killed       builder-ignores-seed | 1 failed, 6 deselected in 2.53s
+SURVIVED     builder-cpu-fixture-on-gpu | 1 passed, 6 deselected in 2.57s
+
+3 of 4 mutants killed.
