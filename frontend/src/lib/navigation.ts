@@ -6,11 +6,6 @@ export interface BackState {
   backLabel: string;
 }
 
-export const fromDashboard: BackState = {
-  backTo: "/dashboard",
-  backLabel: "Dashboard",
-};
-
 export const fromEvents: BackState = {
   backTo: "/events",
   backLabel: "Events",

@@ -1,4 +1,4 @@
-import { activeLanguage, type Language } from "@heteroes/product-ui/preferences";
+import { activeLanguage,type Language } from "@heteroes/product-ui/preferences";
 
 const TIME_ZONE = "Asia/Ho_Chi_Minh";
 
@@ -65,10 +65,6 @@ export function formatReward(value?: number): string {
 
 export function formatGb(megabytes: number, digits = 0): string {
   return `${(megabytes / 1024).toFixed(digits)} GB`;
-}
-
-export function shortGpuName(name: string): string {
-  return name.replace(/^NVIDIA GeForce /, "");
 }
 
 export function formatBytes(bytes?: number): string {

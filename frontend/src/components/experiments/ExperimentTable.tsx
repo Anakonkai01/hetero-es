@@ -1,6 +1,6 @@
-import {useProduct} from '@heteroes/product-ui';
+import { useProduct } from '@heteroes/product-ui';
 import { Link } from "react-router";
-import { formatDateTime, shortId } from "../../lib/format";
+import { formatDateTime,shortId } from "../../lib/format";
 import { EXPERIMENT_STATUS } from "../../lib/labels";
 import type { BackState } from "../../lib/navigation";
 import type { Experiment } from "../../types/experiment";

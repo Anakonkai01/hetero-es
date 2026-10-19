@@ -19,7 +19,6 @@ import sqlite3
 import subprocess
 import sys
 import time
-import urllib.request
 from urllib.parse import urlsplit
 
 REPO=Path(__file__).resolve().parents[1]

@@ -1,21 +1,21 @@
-import type {StudyDataset,StudyModel} from './StudyAssets';
-import {useProduct,StepHeader} from '@heteroes/product-ui';
-import { useState } from "react";
+import { StepHeader,useProduct } from '@heteroes/product-ui';
 import { useQuery } from "@tanstack/react-query";
-import { Link, useNavigate } from "react-router";
-import { apiGet, apiPatch, apiPost, downloadArtifact } from "../../api/client";
-import { archiveExperiment, requestExperimentCancel, submitExperiment, updateExperiment } from "../../api/experiments";
-import { useSession, useScopeKey } from "../../app/session";
+import { useState } from "react";
+import { Link,useNavigate } from "react-router";
+import { apiGet,apiPatch,apiPost,downloadArtifact } from "../../api/client";
+import { archiveExperiment,requestExperimentCancel,submitExperiment,updateExperiment } from "../../api/experiments";
+import { useScopeKey,useSession } from "../../app/session";
 import { useAccessMutation } from "../../hooks/useAccess";
-import { useWorkers } from "../../hooks/useWorkers";
-import { useGenerations } from "../../hooks/useGenerations";
 import { useArtifacts } from "../../hooks/useArtifacts";
-import type { CreateExperimentRequest, Experiment } from "../../types/experiment";
-import {useCandidates} from "../../hooks/useCandidates";
-import {Badge} from "../ui/Badge";
-import {CANDIDATE_STATUS} from "../../lib/labels";
-import {formatBytes,shortId} from "../../lib/format";
+import { useCandidates } from "../../hooks/useCandidates";
+import { useGenerations } from "../../hooks/useGenerations";
+import { useWorkers } from "../../hooks/useWorkers";
+import { formatBytes,shortId } from "../../lib/format";
+import { CANDIDATE_STATUS } from "../../lib/labels";
+import type { CreateExperimentRequest,Experiment } from "../../types/experiment";
+import { Badge } from "../ui/Badge";
 import { RewardChart } from "./RewardChart";
+import type { StudyDataset,StudyModel } from './StudyAssets';
 
 interface Capabilities { coordinatorDevices?:{deviceId:string;workerId:string}[]; modelId: string; modelRevision: string; workloads: string[]; schedulerPolicies: string[]; syncModes: string[]; workerIds: string[] }
 export function RuntimeConfiguration({ initial, onSave, pending }: { initial?: Experiment; onSave: (value: CreateExperimentRequest) => Promise<unknown>; pending: boolean }) {

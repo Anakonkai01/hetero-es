@@ -1,6 +1,6 @@
-import {useProduct} from '@heteroes/product-ui';
-import { useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router";
+import { useProduct } from '@heteroes/product-ui';
+import { useMemo,useState } from "react";
+import { Link,useSearchParams } from "react-router";
 import { isServerError } from "../api/client";
 import { useAppState } from "../app/appState";
 import { EmptyState } from "../components/common/EmptyState";
@@ -10,11 +10,11 @@ import { Badge } from "../components/ui/Badge";
 import { PageHeader } from "../components/ui/PageHeader";
 import { useEvents } from "../hooks/useEvents";
 import { useExperiments } from "../hooks/useExperiments";
-import { describeEvent, fillTemplate } from "../lib/eventText";
-import { formatDateTime, formatFullDateTime, shortId } from "../lib/format";
+import { describeEvent,fillTemplate } from "../lib/eventText";
+import { formatDateTime,formatFullDateTime,shortId } from "../lib/format";
 import { EVENT_SEVERITY } from "../lib/labels";
 import { fromEvents } from "../lib/navigation";
-import type { EventSeverity, SystemEvent } from "../types/event";
+import type { EventSeverity,SystemEvent } from "../types/event";
 
 type LevelFilter = "all" | EventSeverity;
 

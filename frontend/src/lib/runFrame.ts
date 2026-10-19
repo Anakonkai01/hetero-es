@@ -34,7 +34,7 @@ const MARK_VISIBLE_MS = 4000; // how long a notable moment stays on screen
 const TERMINAL = new Set(['COMPLETED', 'CANCELLED', 'FAILED']);
 
 /** A worker process that has been launched but has not reported ready yet (it is loading the model). */
-export function isStarting(marks: TimelineMark[], workerId: string, atMs: number): boolean {
+function isStarting(marks: TimelineMark[], workerId: string, atMs: number): boolean {
     const mine = marks.filter(m => m.workerId === workerId && m.atMs <= atMs);
     return mine.some(m => m.type === 'worker_start') && !mine.some(m => m.type === 'executor_ready');
 }

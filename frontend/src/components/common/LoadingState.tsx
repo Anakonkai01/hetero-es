@@ -1,4 +1,4 @@
-import {useProduct} from '@heteroes/product-ui';
+import { useProduct } from '@heteroes/product-ui';
 function Skeleton({ height, width }: { height: number; width?: number }) {
   return <div className="skel" style={{ height, width }} />;
 }

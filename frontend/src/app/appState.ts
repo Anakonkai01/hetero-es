@@ -1,17 +1,12 @@
-import { createContext, useContext } from "react";
-import type { Scenario } from "../mocks/scenario";
+import { createContext,useContext } from "react";
 
 export interface AppState {
-  /** Demo scenario chosen in the "Simulate state" selector. */
-  scenario: Scenario;
-  setScenario: (scenario: Scenario) => void;
-
   toast: string;
   flash: (message: string) => void;
 
   refreshing: boolean;
   refresh: () => void;
-  /** Resets a failed region (simulated by going back to the normal scenario). */
+  /** Refreshes a failed region. */
   retryRegion: () => void;
 
   /** Timestamp of the last successful data update. */

@@ -166,14 +166,3 @@ def test_platform_privilege_is_persisted_independently_of_username(setup):
     p,new_admin=register(client,'admin');activate(client,headers,p)
     assert client.get('/api/v1/platform/users',headers=new_admin).status_code==403
     assert client.get('/api/v1/experiments',headers={**new_admin,'X-Workspace-Id':'lab'}).status_code==403
-
-
-def test_personal_gpu_inventory_is_owner_scoped_and_masks_run_identifiers(setup):
-    client,_,runtime=setup
-    runtime.workers=lambda:[{'workerId':'5070ti','allocatedTo':'another-private-run'},
-                           {'workerId':'3060','allocatedTo':None}]
-    participant=login(client,'participant');admin=login(client,'admin')
-    assert client.get('/api/v1/my-workers',headers=participant).json()==[]
-    result=client.get('/api/v1/my-workers',headers=admin)
-    assert result.status_code==200 and len(result.json())==2
-    assert 'another-private-run' not in result.text

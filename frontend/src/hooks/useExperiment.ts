@@ -1,5 +1,5 @@
-import { useScopeKey } from "../app/session";
 import { useQuery } from "@tanstack/react-query";
+import { useScopeKey } from "../app/session";
 
 import { getExperiment } from "../api/experiments";
 import { EXPERIMENT_POLL_MS } from "./useExperiments";

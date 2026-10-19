@@ -1,4 +1,4 @@
-import {useProduct} from '@heteroes/product-ui';
+import { useProduct } from '@heteroes/product-ui';
 import { Fragment } from "react";
 import { Link } from "react-router";
 

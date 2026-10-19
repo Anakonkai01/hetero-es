@@ -52,3 +52,12 @@ def test_agent_factory_keeps_r10_health_and_installs_device_routes(deployment):
         assert health['deviceConfiguration'] is True
         assert health['recipeVersions'] == [1, 2]
         assert client.get('/api/v1/devices').status_code == 401
+
+
+def test_cloud_configuration_cannot_silently_disable_recovery(deployment):
+    path = deployment / 'config.json'
+    config = json.loads(path.read_text())
+    config.update(storageMode='cloud', storageFile='/retired-provider.json')
+    path.write_text(json.dumps(config))
+    with pytest.raises(ValueError, match='local'):
+        app_from_environment()

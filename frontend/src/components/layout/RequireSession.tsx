@@ -1,5 +1,5 @@
-import {useProduct} from '@heteroes/product-ui';
-import { Navigate, Outlet } from "react-router";
+import { useProduct } from '@heteroes/product-ui';
+import { Navigate,Outlet } from "react-router";
 import { useSession } from "../../app/session";
 import { LoadingState } from "../common/LoadingState";
 

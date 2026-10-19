@@ -1,4 +1,4 @@
-import {useQuery} from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
 export type Installer={platform:string;name:string;url:string};
 export type Manifest={installers:Installer[];serverInstallers?:Installer[];privateTransferRequired?:boolean};

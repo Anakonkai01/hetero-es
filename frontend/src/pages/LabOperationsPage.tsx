@@ -1,12 +1,12 @@
-import {useProduct,Status} from '@heteroes/product-ui';
-import { LabDevices } from './LabDevices';
-import { useState } from 'react';
+import { Status,useProduct } from '@heteroes/product-ui';
 import { useMutation,useQuery,useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { apiGet,apiPatch,apiPost } from '../api/client';
 import { useSession } from '../app/session';
 import { PageHeader } from '../components/ui/PageHeader';
 import type { User } from '../types/access';
 import type { Worker } from '../types/worker';
+import { LabDevices } from './LabDevices';
 
 interface Operations {
   cloudStorageConfigured?:boolean;recoveryStorageConfigured?:boolean;

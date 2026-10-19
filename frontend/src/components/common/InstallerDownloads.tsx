@@ -1,5 +1,5 @@
-import {useProduct} from '@heteroes/product-ui';
-import {useInstallerManifest} from '../../hooks/useInstallerManifest';
+import { useProduct } from '@heteroes/product-ui';
+import { useInstallerManifest } from '../../hooks/useInstallerManifest';
 
 export function InstallerDownloads(){
  const {t}=useProduct();

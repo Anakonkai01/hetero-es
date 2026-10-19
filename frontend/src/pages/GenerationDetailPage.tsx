@@ -1,5 +1,5 @@
-import {useProduct} from '@heteroes/product-ui';
-import { Link, useParams } from "react-router";
+import { useProduct } from '@heteroes/product-ui';
+import { Link,useParams } from "react-router";
 import { isNotFoundError } from "../api/client";
 import { ObjectNotFound } from "../components/common/ObjectNotFound";
 import { QueryState } from "../components/common/QueryState";
@@ -7,20 +7,20 @@ import { Badge } from "../components/ui/Badge";
 import { Breadcrumbs } from "../components/ui/Breadcrumbs";
 import { CopyButton } from "../components/ui/CopyButton";
 import { KeyValue } from "../components/ui/KeyValue";
-import { PageHeader, PageHeaderMeta } from "../components/ui/PageHeader";
+import { PageHeader,PageHeaderMeta } from "../components/ui/PageHeader";
 import { ProgressBar } from "../components/ui/ProgressBar";
 import { useAttempt } from "../hooks/useAttempt";
 import { useCandidates } from "../hooks/useCandidates";
 import { useExperiment } from "../hooks/useExperiment";
 import { useGeneration } from "../hooks/useGeneration";
-import { formatOptionalDateTime, formatReward, shortId } from "../lib/format";
+import { formatOptionalDateTime,formatReward,shortId } from "../lib/format";
 import {
-  ATTEMPT_STATUS,
-  CANDIDATE_LEGEND,
-  CANDIDATE_STATUS,
-  EXPERIMENT_STATUS,
+ATTEMPT_STATUS,
+CANDIDATE_LEGEND,
+CANDIDATE_STATUS,
+EXPERIMENT_STATUS,
 } from "../lib/labels";
-import type { Candidate, CandidateStatus } from "../types/candidate";
+import type { Candidate,CandidateStatus } from "../types/candidate";
 
 const legendOrder: CandidateStatus[] = [
   "PENDING",

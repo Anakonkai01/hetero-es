@@ -1,11 +1,11 @@
 import { useProduct } from "@heteroes/product-ui";
 import { useState } from "react";
 import { useRunTimeline } from "../../hooks/useRunTimeline";
+import { emptyLiveText } from "../../lib/liveEmpty";
 import { EmptyState } from "../common/EmptyState";
 import { ErrorState } from "../common/ErrorState";
 import { LoadingState } from "../common/LoadingState";
-import { emptyLiveText } from "../../lib/liveEmpty";
-import { RunLiveView, type LiveVariant } from "./RunLiveView";
+import { RunLiveView,type LiveVariant } from "./RunLiveView";
 
 const FINISHED = ["COMPLETED", "CANCELLED", "FAILED"];
 

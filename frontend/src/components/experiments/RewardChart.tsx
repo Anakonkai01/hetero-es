@@ -1,4 +1,4 @@
-import {useProduct} from '@heteroes/product-ui';
+import { useProduct } from '@heteroes/product-ui';
 import type { Generation } from "../../types/generation";
 import { EmptyState } from "../common/EmptyState";
 

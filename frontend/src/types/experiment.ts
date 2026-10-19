@@ -41,8 +41,6 @@ export interface Experiment {
   maxGenerations?: number;
   datasetIds?: string[];
   completedGenerations?: number;
-  mockCandidateProgress?: number;
-  mockTickAt?: number;
   validationScore?: number;
   testScore?: number;
   checkpointSavedAt?: string;

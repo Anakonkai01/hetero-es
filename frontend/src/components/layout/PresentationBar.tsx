@@ -1,6 +1,6 @@
-import { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router";
 import { useProduct } from "@heteroes/product-ui";
+import { useEffect } from "react";
+import { useLocation,useNavigate } from "react-router";
 import { usePresentation } from "../../app/presentationContext";
 import { useExperiments } from "../../hooks/useExperiments";
 import { presentationScenes } from "../../lib/presentationScenes";

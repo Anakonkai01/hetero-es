@@ -1,4 +1,4 @@
-# Refactor handoff (2026-10-19) — phase 2 complete
+# Refactor handoff (2026-10-19) — phase 3 complete
 
 The owner asked for one repository and a professional cleanup. Talk to the owner in Vietnamese, simply. Rules are in
 `../AGENTS.md`: never push or tag, no Co-Authored-By, tests first plus a mutation check, the lab is touched only through
@@ -45,8 +45,10 @@ The owner asked for one repository and a professional cleanup. Talk to the owner
 - `httpx` stays: Starlette's TestClient needs it. No runtime/profile tarball was changed in the working tree;
   source packaging was checked on a scratch copy. No installer was published and the live lab was not restarted.
 
-## Next: phase 3, then phases 4-6 (full plan in Vietnamese: `docs/refactor-plan-vi.md`)
-- **3. Mock mode, cloud and dead code.**
+## Next: phases 4-6 (full plan in Vietnamese: `docs/refactor-plan-vi.md`)
+- **3. Mock mode, cloud and dead code — completed.**
+  Receipts: `docs/evidence/2026-10-19-phase3/`. Backend 277 cases; 3/3 mutants killed.
+  Runtime wire/table names beginning with cloud remain solely for compatibility.
   - Mock mode: `frontend/src/mocks/`, Mock* pages, `lib/dataSource.ts` and every `IS_MOCK` branch, msw,
     `static/mockServiceWorker.js`, `test:mock`, `LOCAL_BACKEND_HANDOFF.md`.
   - Routes without a caller: `GET /workspaces`, `/worker-registry`, `/platform/storage`, `PATCH /device/endpoints`,

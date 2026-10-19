@@ -1,4 +1,4 @@
-import type {ResourceObservation,ResourceHistoryPoint} from '@heteroes/product-ui';
+import type { ResourceHistoryPoint,ResourceObservation } from '@heteroes/product-ui';
 export type AdmissionStatus =
   | "PENDING_VERIFICATION"
   | "INELIGIBLE"

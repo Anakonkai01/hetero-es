@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { PreferencesControl,ProductMark,useProduct } from "@heteroes/product-ui";
+import { useEffect,useMemo,useState } from "react";
 import { Link } from "react-router";
-import { PreferencesControl, ProductMark, useProduct } from "@heteroes/product-ui";
+import { useSession } from "../app/session";
 import { Term } from "../components/ui/Term";
 import { useDemoTimeline } from "../hooks/useDemoTimeline";
+import { explainFromTimeline,noiseCloud,type Explanation } from "../lib/esExplain";
 import { fillTemplate } from "../lib/eventText";
-import { explainFromTimeline, noiseCloud, type Explanation } from "../lib/esExplain";
-import { useSession } from "../app/session";
 
 const WORKER_COLORS = ["var(--acc)", "var(--chart-secondary)", "#c2410c", "#7c3aed"];
 const STEPS = 5;

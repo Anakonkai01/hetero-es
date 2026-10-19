@@ -188,8 +188,9 @@ def test_monitoring_events_deduplicate_independently_of_snapshot_sequence(lab):
     for _ in range(2):
         response=boot(c,h,'boot-1',contribution=True,events=[envelope])
         assert response['acceptedEvents']==[eid]
-    result=c.get('/api/v1/experiments/'+rid+'/monitoring-events',headers=a)
-    assert result.status_code==200 and len(result.json())==1
+    with s.db() as db:
+        rows=db.execute('SELECT event_id FROM monitoring_events WHERE assignment_id=?',(ar['assignmentId'],)).fetchall()
+    assert [row[0] for row in rows]==[eid]
 
 
 def test_backup_policy_change_does_not_mutate_frozen_assignment(lab):

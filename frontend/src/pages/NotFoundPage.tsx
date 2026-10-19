@@ -1,4 +1,4 @@
-import {useProduct} from '@heteroes/product-ui';
+import { useProduct } from '@heteroes/product-ui';
 import { Link } from "react-router";
 
 export function NotFoundPage() {

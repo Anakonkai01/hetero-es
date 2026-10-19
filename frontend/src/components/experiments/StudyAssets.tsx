@@ -1,8 +1,8 @@
-import {useState} from 'react';
-import {useQuery,useQueryClient} from '@tanstack/react-query';
-import {useProduct} from '@heteroes/product-ui';
-import {apiGet,apiPost} from '../../api/client';
-import {useScopeKey} from '../../app/session';
+import { useProduct } from '@heteroes/product-ui';
+import { useQuery,useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { apiGet,apiPost } from '../../api/client';
+import { useScopeKey } from '../../app/session';
 
 export interface StudyDataset {datasetId:string;name:string;counts:{train:number;validation:number;test:number};identity:{contentHash:string};splitSeed:number;splitMode:string}
 export interface StudyModel {modelArtifactId:string;name:string;reference:string;revision:string;status:string;manifest?:Record<string,unknown>}

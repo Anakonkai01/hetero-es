@@ -275,9 +275,9 @@ def install_lab_routes(app, store, user, scoped, runtime):
             queue_count=db.execute('SELECT count(*) FROM queue').fetchone()[0]
             metadata=db.execute('SELECT value FROM settings WHERE key="metadataBackupStatus"').fetchone()
         result={'dispatchHeld':held,'queueCount':queue_count,'runtimeIssue':store.last_error,
-                'cloudStorageConfigured':getattr(runtime,'storage_backend',None) is not None and getattr(runtime.storage_backend,'mode','cloud')=='cloud',
+                'cloudStorageConfigured':False,
                 'recoveryStorageConfigured':getattr(runtime,'storage_backend',None) is not None,
-                'recoveryStorageMode':getattr(runtime.storage_backend,'mode','cloud') if getattr(runtime,'storage_backend',None) is not None else None,
+                'recoveryStorageMode':getattr(runtime.storage_backend,'mode','local') if getattr(runtime,'storage_backend',None) is not None else None,
                 'metadataBackup':json.loads(metadata[0]) if metadata else None,
                 'productService':'ONLINE','runtimeService':'UNAVAILABLE','workers':[],'reservations':[]}
         try:

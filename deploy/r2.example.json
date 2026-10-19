@@ -1,8 +1,0 @@
-{
-  "endpointUrl": "https://ACCOUNT_ID.r2.cloudflarestorage.com",
-  "bucket": "heteroes-private",
-  "region": "auto",
-  "accessKeyId": "REPLACE_IN_PRIVATE_FILE",
-  "secretAccessKey": "REPLACE_IN_PRIVATE_FILE",
-  "exclusiveAccountConfirmed": false
-}

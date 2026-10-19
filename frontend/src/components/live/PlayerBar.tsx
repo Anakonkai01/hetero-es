@@ -1,7 +1,7 @@
 import { useProduct } from "@heteroes/product-ui";
-import { formatDuration } from "../../lib/diagramLayout";
 import type { Player } from "../../hooks/useRunPlayer";
 import type { TimelineSource } from "../../hooks/useRunTimeline";
+import { formatDuration } from "../../lib/diagramLayout";
 
 const SPEEDS = [1, 4, 16, 64];
 

@@ -1,6 +1,6 @@
 import { useProduct } from "@heteroes/product-ui";
-import type { Series } from "../../lib/compare";
 import { compareColor } from "../../lib/chartColors";
+import type { Series } from "../../lib/compare";
 
 const W = 640, H = 300, LEFT = 52, RIGHT = 16, TOP = 14, BOTTOM = 36;
 

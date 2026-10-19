@@ -8,10 +8,10 @@ from fastapi.testclient import TestClient
 import pytest
 
 from backend.local_storage import LocalBackend
-from backend.cloud_storage import CloudStorage
+from backend.recovery_storage import RecoveryStorage
 from backend.devices import AgentRuntime
 from backend.store import Store
-from test_cloud_storage import manifest
+from test_recovery_storage import manifest
 
 
 def test_private_metadata_can_stay_on_system_disk_while_bulk_uses_selected_storage(tmp_path):
@@ -28,7 +28,7 @@ def local(tmp_path):
     backend = LocalBackend(tmp_path/'objects', tmp_path/'private/storage.key', 'http://127.0.0.1:8002')
     runtime = AgentRuntime(backend)
     store = Store(tmp_path/'lab.sqlite', {'admin':'test-admin-pass'}, runtime)
-    storage = CloudStorage(store, backend, quota_bytes=1_000_000)
+    storage = RecoveryStorage(store, backend, quota_bytes=1_000_000)
     app = FastAPI(); backend.install_routes(app)
     with TestClient(app) as client:
         yield backend, storage, client
@@ -48,7 +48,6 @@ def test_real_upload_verify_download_and_no_cloud_request_caps(local):
     assert json.loads(b''.join(backend.get('manifests/'+m['pointId']+'.json'))) == m
     assert client.get(path(backend.download_url('objects/'+entry['sha256']))).content == b'weights'
     assert storage.usage()['storageMode'] == 'local'
-    storage._requests(a=1_000_000_000,b=1_000_000_000)
 
 
 def test_scoped_url_rejects_tampering_wrong_method_and_expiry(local, monkeypatch):

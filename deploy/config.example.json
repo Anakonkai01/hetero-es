@@ -1,5 +1,0 @@
-{
-  "deploymentMode": "agent",
-  "productStateDirectory": "/var/lib/heteroes",
-  "storageFile": "/etc/heteroes/r2.json"
-}

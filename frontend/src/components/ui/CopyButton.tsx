@@ -1,4 +1,4 @@
-import {useProduct} from '@heteroes/product-ui';
+import { useProduct } from '@heteroes/product-ui';
 import { useAppState } from "../../app/appState";
 import { CopyIcon } from "./Icons";
 

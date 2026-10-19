@@ -1,8 +1,8 @@
-import { Link } from "react-router";
 import { useProduct } from "@heteroes/product-ui";
+import { Link } from "react-router";
+import type { Experiment } from "../../types/experiment";
 import { EmptyState } from "../common/EmptyState";
 import { ExperimentLive } from "./ExperimentLive";
-import type { Experiment } from "../../types/experiment";
 
 const ACTIVE = ["RUNNING", "STARTING", "RECOVERING", "PAUSING", "CANCELLING", "DRAINING"];
 

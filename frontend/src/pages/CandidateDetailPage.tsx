@@ -1,6 +1,6 @@
-import {useProduct} from '@heteroes/product-ui';
-import { Link, useParams } from "react-router";
-import { isNotFoundError, isServerError } from "../api/client";
+import { useProduct } from '@heteroes/product-ui';
+import { Link,useParams } from "react-router";
+import { isNotFoundError,isServerError } from "../api/client";
 import { useAppState } from "../app/appState";
 import { EmptyState } from "../components/common/EmptyState";
 import { ErrorState } from "../components/common/ErrorState";
@@ -11,13 +11,13 @@ import { Badge } from "../components/ui/Badge";
 import { Breadcrumbs } from "../components/ui/Breadcrumbs";
 import { CopyButton } from "../components/ui/CopyButton";
 import { KeyValue } from "../components/ui/KeyValue";
-import { PageHeader, PageHeaderMeta } from "../components/ui/PageHeader";
+import { PageHeader,PageHeaderMeta } from "../components/ui/PageHeader";
 import { useAttempt } from "../hooks/useAttempt";
 import { useCandidate } from "../hooks/useCandidate";
 import { useEvents } from "../hooks/useEvents";
 import { useExperiment } from "../hooks/useExperiment";
-import { NOT_AVAILABLE, formatClock, formatDateTime, shortId } from "../lib/format";
-import { ATTEMPT_STATUS, CANDIDATE_STATUS } from "../lib/labels";
+import { NOT_AVAILABLE,formatClock,formatDateTime,shortId } from "../lib/format";
+import { ATTEMPT_STATUS,CANDIDATE_STATUS } from "../lib/labels";
 
 export function CandidateDetailPage() {
   const {t}=useProduct();

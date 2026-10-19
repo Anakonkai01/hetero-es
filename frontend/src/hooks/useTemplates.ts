@@ -1,7 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiDelete, apiGet, apiPost } from "../api/client";
+import { useMutation,useQuery,useQueryClient } from "@tanstack/react-query";
+import { apiDelete,apiGet,apiPost } from "../api/client";
 import { useScopeKey } from "../app/session";
-import type { Template, TemplateConfig } from "../lib/templates";
+import type { Template,TemplateConfig } from "../lib/templates";
 
 export function useTemplates() {
   const scope = useScopeKey();

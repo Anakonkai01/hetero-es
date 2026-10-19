@@ -1,7 +1,7 @@
 import { useProduct } from "@heteroes/product-ui";
 import { useSession } from "../../app/session";
-import { useTemplateMutations, useTemplates } from "../../hooks/useTemplates";
-import { BUILT_IN, type Template } from "../../lib/templates";
+import { useTemplateMutations,useTemplates } from "../../hooks/useTemplates";
+import { BUILT_IN,type Template } from "../../lib/templates";
 
 /** "Start from…": built-in sizes, settings saved by the workspace, or (when arriving from a run) a copy of that run. */
 export function TemplatePicker({ value, onChange, cloneName }: { value: string; onChange: (id: string, template?: Template) => void; cloneName?: string }) {

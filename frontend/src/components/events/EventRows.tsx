@@ -1,10 +1,10 @@
+import { useProduct } from '@heteroes/product-ui';
 import { Link } from "react-router";
+import { describeEvent,fillTemplate } from "../../lib/eventText";
+import { formatDateTime } from "../../lib/format";
 import { EVENT_SEVERITY } from "../../lib/labels";
 import type { SystemEvent } from "../../types/event";
 import { Badge } from "../ui/Badge";
-import {useProduct} from '@heteroes/product-ui';
-import { describeEvent, fillTemplate } from "../../lib/eventText";
-import { formatDateTime } from "../../lib/format";
 
 interface EventRowsProps {
   events: SystemEvent[];

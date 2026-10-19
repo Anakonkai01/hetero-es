@@ -1,7 +1,7 @@
 """Platform operations: administrator-only routes, new GPU defaults, and the no-replace restore publication."""
 import pytest
 
-from backend.cloud_metadata import publish_new_directory
+from backend.metadata_backup import publish_new_directory
 from labkit import login
 
 

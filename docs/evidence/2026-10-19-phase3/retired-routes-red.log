@@ -1,0 +1,136 @@
+FFFF.FF                                                                  [100%]
+=================================== FAILURES ===================================
+__________ test_retired_operations_are_absent[GET-/api/v1/workspaces] __________
+
+lab = (<starlette.testclient.TestClient object at 0x707b8724b290>, <backend.store.Store object at 0x707b872799d0>, <backend....t at 0x707b8724b1d0>, {'Authorization': 'Bearer UL99wgssJ-HqumKhx3XvucxsefXM0xdTeUFbL1e18z8', 'X-Workspace-Id': 'lab'})
+method = 'GET', path = '/api/v1/workspaces'
+
+    @pytest.mark.parametrize('method,path', [
+        ('GET','/api/v1/workspaces'), ('GET','/api/v1/worker-registry'),
+        ('GET','/api/v1/my-workers'), ('GET','/api/v1/my-resource-submissions'),
+        ('GET','/api/v1/experiments/unknown/monitoring-events'),
+        ('PATCH','/api/v1/device/endpoints'), ('POST','/api/v1/no-such-operation'),
+    ])
+    def test_retired_operations_are_absent(lab, method, path):
+        client,_,_,auth=lab
+>       assert client.request(method,path,headers=auth,json={}).status_code in (404,405)
+E       AssertionError: assert 200 in (404, 405)
+E        +  where 200 = <Response [200 OK]>.status_code
+E        +    where <Response [200 OK]> = request('GET', '/api/v1/workspaces', headers={'Authorization': 'Bearer UL99wgssJ-HqumKhx3XvucxsefXM0xdTeUFbL1e18z8', 'X-Workspace-Id': 'lab'}, json={})
+E        +      where request = <starlette.testclient.TestClient object at 0x707b8724b290>.request
+
+backend/tests/test_retired_routes.py:13: AssertionError
+_______ test_retired_operations_are_absent[GET-/api/v1/worker-registry] ________
+
+lab = (<starlette.testclient.TestClient object at 0x707b86e09a90>, <backend.store.Store object at 0x707b86eece60>, <backend....t at 0x707b8724b230>, {'Authorization': 'Bearer p7sqGH8e4EHLMKaPduCOgIQo_ElqNMocm08Jye9ZiP4', 'X-Workspace-Id': 'lab'})
+method = 'GET', path = '/api/v1/worker-registry'
+
+    @pytest.mark.parametrize('method,path', [
+        ('GET','/api/v1/workspaces'), ('GET','/api/v1/worker-registry'),
+        ('GET','/api/v1/my-workers'), ('GET','/api/v1/my-resource-submissions'),
+        ('GET','/api/v1/experiments/unknown/monitoring-events'),
+        ('PATCH','/api/v1/device/endpoints'), ('POST','/api/v1/no-such-operation'),
+    ])
+    def test_retired_operations_are_absent(lab, method, path):
+        client,_,_,auth=lab
+>       assert client.request(method,path,headers=auth,json={}).status_code in (404,405)
+E       AssertionError: assert 200 in (404, 405)
+E        +  where 200 = <Response [200 OK]>.status_code
+E        +    where <Response [200 OK]> = request('GET', '/api/v1/worker-registry', headers={'Authorization': 'Bearer p7sqGH8e4EHLMKaPduCOgIQo_ElqNMocm08Jye9ZiP4', 'X-Workspace-Id': 'lab'}, json={})
+E        +      where request = <starlette.testclient.TestClient object at 0x707b86e09a90>.request
+
+backend/tests/test_retired_routes.py:13: AssertionError
+__________ test_retired_operations_are_absent[GET-/api/v1/my-workers] __________
+
+lab = (<starlette.testclient.TestClient object at 0x707b86e57140>, <backend.store.Store object at 0x707b86e571a0>, <backend....t at 0x707b86e57c20>, {'Authorization': 'Bearer fE3au7Xv592k_DsE9Tp8Ragf74t9zZhBGPE3n9Doa30', 'X-Workspace-Id': 'lab'})
+method = 'GET', path = '/api/v1/my-workers'
+
+    @pytest.mark.parametrize('method,path', [
+        ('GET','/api/v1/workspaces'), ('GET','/api/v1/worker-registry'),
+        ('GET','/api/v1/my-workers'), ('GET','/api/v1/my-resource-submissions'),
+        ('GET','/api/v1/experiments/unknown/monitoring-events'),
+        ('PATCH','/api/v1/device/endpoints'), ('POST','/api/v1/no-such-operation'),
+    ])
+    def test_retired_operations_are_absent(lab, method, path):
+        client,_,_,auth=lab
+>       assert client.request(method,path,headers=auth,json={}).status_code in (404,405)
+E       AssertionError: assert 200 in (404, 405)
+E        +  where 200 = <Response [200 OK]>.status_code
+E        +    where <Response [200 OK]> = request('GET', '/api/v1/my-workers', headers={'Authorization': 'Bearer fE3au7Xv592k_DsE9Tp8Ragf74t9zZhBGPE3n9Doa30', 'X-Workspace-Id': 'lab'}, json={})
+E        +      where request = <starlette.testclient.TestClient object at 0x707b86e57140>.request
+
+backend/tests/test_retired_routes.py:13: AssertionError
+___ test_retired_operations_are_absent[GET-/api/v1/my-resource-submissions] ____
+
+lab = (<starlette.testclient.TestClient object at 0x707b86b877d0>, <backend.store.Store object at 0x707b86b87770>, <backend....t at 0x707b86b854f0>, {'Authorization': 'Bearer AQMMa_bjnWeP8Roq8OigDUupd38U3xlKG7lHOfCiwKk', 'X-Workspace-Id': 'lab'})
+method = 'GET', path = '/api/v1/my-resource-submissions'
+
+    @pytest.mark.parametrize('method,path', [
+        ('GET','/api/v1/workspaces'), ('GET','/api/v1/worker-registry'),
+        ('GET','/api/v1/my-workers'), ('GET','/api/v1/my-resource-submissions'),
+        ('GET','/api/v1/experiments/unknown/monitoring-events'),
+        ('PATCH','/api/v1/device/endpoints'), ('POST','/api/v1/no-such-operation'),
+    ])
+    def test_retired_operations_are_absent(lab, method, path):
+        client,_,_,auth=lab
+>       assert client.request(method,path,headers=auth,json={}).status_code in (404,405)
+E       AssertionError: assert 200 in (404, 405)
+E        +  where 200 = <Response [200 OK]>.status_code
+E        +    where <Response [200 OK]> = request('GET', '/api/v1/my-resource-submissions', headers={'Authorization': 'Bearer AQMMa_bjnWeP8Roq8OigDUupd38U3xlKG7lHOfCiwKk', 'X-Workspace-Id': 'lab'}, json={})
+E        +      where request = <starlette.testclient.TestClient object at 0x707b86b877d0>.request
+
+backend/tests/test_retired_routes.py:13: AssertionError
+______ test_retired_operations_are_absent[PATCH-/api/v1/device/endpoints] ______
+
+lab = (<starlette.testclient.TestClient object at 0x707b868caf60>, <backend.store.Store object at 0x707b869ef0e0>, <backend....t at 0x707b86abfb60>, {'Authorization': 'Bearer 7k9vg09HjlkfqjZbJ4ij2fgmATnmya0_xqXP0jvGDUQ', 'X-Workspace-Id': 'lab'})
+method = 'PATCH', path = '/api/v1/device/endpoints'
+
+    @pytest.mark.parametrize('method,path', [
+        ('GET','/api/v1/workspaces'), ('GET','/api/v1/worker-registry'),
+        ('GET','/api/v1/my-workers'), ('GET','/api/v1/my-resource-submissions'),
+        ('GET','/api/v1/experiments/unknown/monitoring-events'),
+        ('PATCH','/api/v1/device/endpoints'), ('POST','/api/v1/no-such-operation'),
+    ])
+    def test_retired_operations_are_absent(lab, method, path):
+        client,_,_,auth=lab
+>       assert client.request(method,path,headers=auth,json={}).status_code in (404,405)
+E       AssertionError: assert 401 in (404, 405)
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+E        +    where <Response [401 Unauthorized]> = request('PATCH', '/api/v1/device/endpoints', headers={'Authorization': 'Bearer 7k9vg09HjlkfqjZbJ4ij2fgmATnmya0_xqXP0jvGDUQ', 'X-Workspace-Id': 'lab'}, json={})
+E        +      where request = <starlette.testclient.TestClient object at 0x707b868caf60>.request
+
+backend/tests/test_retired_routes.py:13: AssertionError
+______ test_retired_operations_are_absent[POST-/api/v1/no-such-operation] ______
+
+lab = (<starlette.testclient.TestClient object at 0x707b86adeb70>, <backend.store.Store object at 0x707b86919790>, <backend....t at 0x707b86919520>, {'Authorization': 'Bearer L4r7TH4dPzBM6gNlVjvVP18tJawKU03ijeZmtpy3C00', 'X-Workspace-Id': 'lab'})
+method = 'POST', path = '/api/v1/no-such-operation'
+
+    @pytest.mark.parametrize('method,path', [
+        ('GET','/api/v1/workspaces'), ('GET','/api/v1/worker-registry'),
+        ('GET','/api/v1/my-workers'), ('GET','/api/v1/my-resource-submissions'),
+        ('GET','/api/v1/experiments/unknown/monitoring-events'),
+        ('PATCH','/api/v1/device/endpoints'), ('POST','/api/v1/no-such-operation'),
+    ])
+    def test_retired_operations_are_absent(lab, method, path):
+        client,_,_,auth=lab
+>       assert client.request(method,path,headers=auth,json={}).status_code in (404,405)
+E       AssertionError: assert 501 in (404, 405)
+E        +  where 501 = <Response [501 Not Implemented]>.status_code
+E        +    where <Response [501 Not Implemented]> = request('POST', '/api/v1/no-such-operation', headers={'Authorization': 'Bearer L4r7TH4dPzBM6gNlVjvVP18tJawKU03ijeZmtpy3C00', 'X-Workspace-Id': 'lab'}, json={})
+E        +      where request = <starlette.testclient.TestClient object at 0x707b86adeb70>.request
+
+backend/tests/test_retired_routes.py:13: AssertionError
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_retired_routes.py::test_retired_operations_are_absent[GET-/api/v1/workspaces]
+FAILED backend/tests/test_retired_routes.py::test_retired_operations_are_absent[GET-/api/v1/worker-registry]
+FAILED backend/tests/test_retired_routes.py::test_retired_operations_are_absent[GET-/api/v1/my-workers]
+FAILED backend/tests/test_retired_routes.py::test_retired_operations_are_absent[GET-/api/v1/my-resource-submissions]
+FAILED backend/tests/test_retired_routes.py::test_retired_operations_are_absent[PATCH-/api/v1/device/endpoints]
+FAILED backend/tests/test_retired_routes.py::test_retired_operations_are_absent[POST-/api/v1/no-such-operation]
+6 failed, 1 passed, 1 warning in 0.79s

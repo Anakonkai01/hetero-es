@@ -7,7 +7,6 @@ import os
 from pathlib import Path
 import sqlite3
 import threading
-import time
 import uuid
 
 from argon2 import PasswordHasher

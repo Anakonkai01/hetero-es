@@ -1,10 +1,10 @@
+import { activeLanguage,useProduct } from "@heteroes/product-ui";
 import { useRef } from "react";
 import { Link } from "react-router";
-import { activeLanguage, useProduct } from "@heteroes/product-ui";
-import { browserNotificationsEnabled, useBrowserOptIn, useNotifications } from "../../hooks/useNotifications";
+import { browserNotificationsEnabled,useBrowserOptIn,useNotifications } from "../../hooks/useNotifications";
 import { useNow } from "../../hooks/useNow";
 import { fillTemplate } from "../../lib/eventText";
-import { describeNotification, relativeTime, type NotificationItem } from "../../lib/notificationText";
+import { describeNotification,relativeTime,type NotificationItem } from "../../lib/notificationText";
 
 /** The bell in the top bar: unread count, the latest notifications, and an opt-in for browser notifications. */
 export function NotificationBell() {

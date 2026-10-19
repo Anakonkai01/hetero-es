@@ -1,7 +1,9 @@
-import {useProduct,Status,ResourceTelemetry,type ResourceObservation} from '@heteroes/product-ui';
-import {useEffect,useState} from 'react';
-import {useQuery,useMutation,useQueryClient} from '@tanstack/react-query';
-import {apiGet,apiPost,apiPatch,apiDelete} from '../api/client';import {visibleDevices,hiddenCount,canRemoveDevice,deviceErrorKey} from '../lib/deviceList';import {useSession} from '../app/session';
+import { ResourceTelemetry,Status,useProduct,type ResourceObservation } from '@heteroes/product-ui';
+import { useMutation,useQuery,useQueryClient } from '@tanstack/react-query';
+import { useEffect,useState } from 'react';
+import { apiDelete,apiGet,apiPatch,apiPost } from '../api/client';
+import { useSession } from '../app/session';
+import { canRemoveDevice,deviceErrorKey,hiddenCount,visibleDevices } from '../lib/deviceList';
 export interface Device {deviceId:string;workerId:string;displayName:string;ownerUserId:string;approvalStatus:string;bootId:string|null;lastSeen:number;connectionStatus:string;contributionEnabled:boolean;workspaceId:string|null;computeUrl:string;bulkUrl?:string;telemetry?:ResourceObservation|null;allocatedTo?:string;physicalResourceId?:string;selfTest:{gpuName:string;vramTotalMb:number;coordinator:boolean;passed:boolean};}
 
 function EndpointForm({device,save,pending}:{device:Device;save:(body:unknown)=>void;pending:boolean}){

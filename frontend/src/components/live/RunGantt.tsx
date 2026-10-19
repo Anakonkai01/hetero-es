@@ -1,8 +1,8 @@
-import { useRef } from "react";
 import { useProduct } from "@heteroes/product-ui";
-import { candidateLabel, formatDuration, niceTicks } from "../../lib/diagramLayout";
+import { useRef } from "react";
+import { candidateLabel,formatDuration,niceTicks } from "../../lib/diagramLayout";
 import { fillTemplate } from "../../lib/eventText";
-import type { Frame, Timeline } from "../../lib/runFrame";
+import type { Frame,Timeline } from "../../lib/runFrame";
 
 // Start-up moments are drawn as a thin "loading" strip, not as warnings.
 const SETUP = new Set(["worker_start", "model_loaded", "executor_ready"]);

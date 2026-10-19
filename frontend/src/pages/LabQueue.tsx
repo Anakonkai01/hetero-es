@@ -1,10 +1,10 @@
-import {useProduct} from '@heteroes/product-ui';
-import {Link} from 'react-router';
-import {useQuery} from '@tanstack/react-query';
-import {apiGet} from '../api/client';
-import {useScopeKey} from '../app/session';
-import {useExperiments} from '../hooks/useExperiments';
-import {EmptyState} from '../components/common/EmptyState';
+import { useProduct } from '@heteroes/product-ui';
+import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router';
+import { apiGet } from '../api/client';
+import { useScopeKey } from '../app/session';
+import { EmptyState } from '../components/common/EmptyState';
+import { useExperiments } from '../hooks/useExperiments';
 export function LabQueue({showEmpty=false}:{showEmpty?:boolean}){
  const {t}=useProduct();const scope=useScopeKey();const runs=useExperiments();
  const queue=useQuery({queryKey:['queue',...scope],queryFn:()=>apiGet<{experimentId:string;position:number;reason:string}[]>('/api/v1/queue'),enabled:scope.every(Boolean),refetchInterval:2500});

@@ -1,5 +1,5 @@
-import {useProduct} from '@heteroes/product-ui';
-import { useEffect, useId, useRef, type ReactNode } from "react";
+import { useProduct } from '@heteroes/product-ui';
+import { useEffect,useId,useRef,type ReactNode } from "react";
 
 export function Modal({ title, subtitle, onClose, children }: { title: string; subtitle?: string; onClose: () => void; children: ReactNode }) {
   const {t}=useProduct();

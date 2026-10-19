@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import { apiGet, readStream } from "../api/client";
-import { applyDelta, type Timeline } from "../lib/runFrame";
+import { useEffect,useRef,useState } from "react";
+import { apiGet,readStream } from "../api/client";
+import { applyDelta,type Timeline } from "../lib/runFrame";
 
 export type TimelineSource = "loading" | "stream" | "polling" | "done" | "error";
 const POLL_MS = 2500;

@@ -1,4 +1,4 @@
-import {useProduct} from '@heteroes/product-ui';
+import { useProduct } from '@heteroes/product-ui';
 import type { ReactNode } from "react";
 
 interface EmptyStateProps {

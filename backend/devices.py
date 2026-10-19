@@ -8,8 +8,6 @@ import re
 import time
 import uuid
 from typing import Literal
-from urllib.parse import urlparse
-import ipaddress
 
 from fastapi import Depends, Header, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -124,8 +122,6 @@ class EndpointUpdate(Strict):
         return self
 
 
-class DeviceEndpointUpdate(EndpointUpdate):
-    bootId: str = Field(min_length=1, max_length=100)
 
 
 class DeviceConfigurationUpdate(EndpointUpdate):
@@ -666,7 +662,7 @@ class AgentRuntime:
         if storage and re_checkpoint(name):
             for point in storage.points(run_id):
                 if point['status']=='READY' and any(v['sha256']==name[:-4] for v in storage.manifest(point['pointId'])['files'].values()):
-                    storage._requests(b=1)
+
                     return storage.backend.get('objects/'+name[:-4])
         raise HTTPException(409,'Artifact cloud sync is pending or the local source is unavailable')
 
@@ -755,9 +751,6 @@ def install_device_routes(app, store, user, runtime):
     def owned_configuration(device_id:str,body:DeviceConfigurationUpdate,current=Depends(user)):
         return update_endpoints(device_id,body,active(current)['userId'],self_test=body.selfTest)
 
-    @app.patch('/api/v1/device/endpoints')
-    def device_endpoints(body:DeviceEndpointUpdate,current=Depends(device_auth)):
-        return update_endpoints(current['id'],body,current['owner'],body.bootId)
 
     @app.patch('/api/v1/device/qualification')
     def qualification(body:QualificationUpdate,current=Depends(device_auth)):

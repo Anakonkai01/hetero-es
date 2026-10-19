@@ -1,5 +1,5 @@
-import {useProduct} from '@heteroes/product-ui';
-import type { BadgeInfo, Tone } from "../../lib/labels";
+import { useProduct } from '@heteroes/product-ui';
+import type { BadgeInfo,Tone } from "../../lib/labels";
 
 interface BadgeProps {
   info?: BadgeInfo;

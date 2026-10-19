@@ -1,113 +1,117 @@
-import { IS_MOCK } from "../lib/dataSource";
-import { SseParser, type SseMessage } from "../lib/sse";
+import { SseParser,type SseMessage } from "../lib/sse";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
-const TOKEN_KEY = IS_MOCK ? "heteroes.demo-token" : "heteroes.access-token";
-
-let demoToken = sessionStorage.getItem(TOKEN_KEY) ?? "";
+const TOKEN_KEY = "heteroes.access-token";
+let accessToken = sessionStorage.getItem(TOKEN_KEY) ?? "";
 let workspaceId = "";
-
-export function setDemoToken(token: string) {
-  demoToken = token;
-  if (token) sessionStorage.setItem(TOKEN_KEY, token);
-  else sessionStorage.removeItem(TOKEN_KEY);
+export function setAccessToken(token: string) {
+    accessToken = token;
+    if (token)
+        sessionStorage.setItem(TOKEN_KEY, token);
+    else
+        sessionStorage.removeItem(TOKEN_KEY);
 }
-
 export function setActiveWorkspace(id: string) {
-  workspaceId = id;
+    workspaceId = id;
 }
-
 export class ApiError extends Error {
-  status: number;
-
-  constructor(status: number, message: string) {
-    super(message);
-    this.name = "ApiError";
-    this.status = status;
-  }
+    status: number;
+    constructor(status: number, message: string) {
+        super(message);
+        this.name = "ApiError";
+        this.status = status;
+    }
 }
-
 export function isNotFoundError(error: unknown): boolean {
-  return error instanceof ApiError && error.status === 404;
+    return error instanceof ApiError && error.status === 404;
 }
-
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const headers = new Headers(init?.headers);
-  if (demoToken) headers.set("Authorization", `Bearer ${demoToken}`);
-  if (workspaceId) headers.set("X-Workspace-Id", workspaceId);
-  const response = await fetch(`${API_BASE_URL}${path}`, { ...init, headers });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => null) as { message?: string;detail?:unknown } | null;
-    throw new ApiError(
-      response.status,
-      error?.message ?? (typeof error?.detail==='string'?error.detail:undefined) ?? `API request failed: ${response.status} ${response.statusText}`,
-    );
-  }
-
-  return response.status === 204 ? undefined as T : response.json() as Promise<T>;
+    const headers = new Headers(init?.headers);
+    if (accessToken)
+        headers.set("Authorization", `Bearer ${accessToken}`);
+    if (workspaceId)
+        headers.set("X-Workspace-Id", workspaceId);
+    const response = await fetch(`${API_BASE_URL}${path}`, { ...init, headers });
+    if (!response.ok) {
+        const error = await response.json().catch(() => null) as {
+            message?: string;
+            detail?: unknown;
+        } | null;
+        throw new ApiError(response.status, error?.message ?? (typeof error?.detail === 'string' ? error.detail : undefined) ?? `API request failed: ${response.status} ${response.statusText}`);
+    }
+    return response.status === 204 ? undefined as T : response.json() as Promise<T>;
 }
-
 export function apiGet<T>(path: string): Promise<T> {
-  return request<T>(path);
+    return request<T>(path);
 }
-
 export function apiPost<T>(path: string, body?: unknown): Promise<T> {
-  return request<T>(path, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
+    return request<T>(path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: body === undefined ? undefined : JSON.stringify(body),
+    });
 }
-
 export function apiPatch<T>(path: string, body: unknown): Promise<T> {
-  return request<T>(path, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    return request<T>(path, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
 }
-
 export function apiDelete<T = void>(path: string): Promise<T> {
-  return request<T>(path, { method: "DELETE" });
+    return request<T>(path, { method: "DELETE" });
 }
-
 /** True when the data source answered with a server error (as opposed to being unreachable). */
 export function isServerError(error: unknown): boolean {
-  return error instanceof ApiError && error.status >= 500;
+    return error instanceof ApiError && error.status >= 500;
 }
-
 export async function downloadArtifact(id: string, name: string) {
-  if (!IS_MOCK && name.endsWith('.bin')) {
-    const health=await apiGet<{cloudStorageConfigured?:boolean;recoveryStorageConfigured?:boolean}>('/api/v1/health');
-    if (health.recoveryStorageConfigured??health.cloudStorageConfigured) {
-      const ticket=await apiPost<{downloadUrl:string}>(`/api/v1/artifacts/${encodeURIComponent(id)}/download-ticket`);
-      const link=document.createElement('a');link.href=`${API_BASE_URL}${ticket.downloadUrl}`;link.download=name;link.click();return;
+    if (name.endsWith('.bin')) {
+        const health = await apiGet<{
+            cloudStorageConfigured?: boolean;
+            recoveryStorageConfigured?: boolean;
+        }>('/api/v1/health');
+        if (health.recoveryStorageConfigured ?? health.cloudStorageConfigured) {
+            const ticket = await apiPost<{
+                downloadUrl: string;
+            }>(`/api/v1/artifacts/${encodeURIComponent(id)}/download-ticket`);
+            const link = document.createElement('a');
+            link.href = `${API_BASE_URL}${ticket.downloadUrl}`;
+            link.download = name;
+            link.click();
+            return;
+        }
     }
-  }
-  return downloadFile(`/api/v1/artifacts/${encodeURIComponent(id)}/download`,name);
+    return downloadFile(`/api/v1/artifacts/${encodeURIComponent(id)}/download`, name);
 }
-
-export async function downloadFile(path: string, name: string) {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: { Authorization: `Bearer ${demoToken}`, "X-Workspace-Id": workspaceId },
-  });
-  if (!response.ok) throw new ApiError(response.status, "Download failed");
-  const url = URL.createObjectURL(await response.blob());
-  const link = document.createElement("a"); link.href = url; link.download = name; link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+async function downloadFile(path: string, name: string) {
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+        headers: { Authorization: `Bearer ${accessToken}`, "X-Workspace-Id": workspaceId },
+    });
+    if (!response.ok)
+        throw new ApiError(response.status, "Download failed");
+    const url = URL.createObjectURL(await response.blob());
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = name;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
-
 /**
  * Reads a server-sent event stream with the current sign-in. Resolves when the server ends the stream and rejects
  * when it cannot be opened or breaks, so the caller can fall back to polling.
  */
 export async function readStream(path: string, onMessage: (message: SseMessage) => void, signal: AbortSignal): Promise<void> {
-  const headers = new Headers({ Accept: "text/event-stream" });
-  if (demoToken) headers.set("Authorization", `Bearer ${demoToken}`);
-  if (workspaceId) headers.set("X-Workspace-Id", workspaceId);
-  const response = await fetch(`${API_BASE_URL}${path}`, { headers, signal });
-  if (!response.ok || !response.body) throw new ApiError(response.status, `Stream unavailable: ${response.status}`);
-  const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
-  const parser = new SseParser();
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) return;
-    for (const message of parser.push(value)) onMessage(message);
-  }
+    const headers = new Headers({ Accept: "text/event-stream" });
+    if (accessToken)
+        headers.set("Authorization", `Bearer ${accessToken}`);
+    if (workspaceId)
+        headers.set("X-Workspace-Id", workspaceId);
+    const response = await fetch(`${API_BASE_URL}${path}`, { headers, signal });
+    if (!response.ok || !response.body)
+        throw new ApiError(response.status, `Stream unavailable: ${response.status}`);
+    const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
+    const parser = new SseParser();
+    for (;;) {
+        const { done, value } = await reader.read();
+        if (done)
+            return;
+        for (const message of parser.push(value))
+            onMessage(message);
+    }
 }

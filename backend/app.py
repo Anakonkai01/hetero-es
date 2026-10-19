@@ -74,7 +74,7 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
             if dispatch:
                 thread.start();dispatcher_started=True
             if getattr(runtime,'storage_backend',None) is not None:
-                from .cloud_metadata import backup_loop
+                from .metadata_backup import backup_loop
                 metadata_thread=threading.Thread(target=backup_loop,args=(store,app.state.storage,stop),daemon=True)
                 metadata_thread.start()
             yield
@@ -200,9 +200,9 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
                 "agentMode":True,
                 'deviceConfiguration':True,
                 'recipeVersions':[1,2],
-                "cloudStorageConfigured":backend is not None and getattr(backend,'mode','cloud')=='cloud',
+                "cloudStorageConfigured":False,
                 "recoveryStorageConfigured":backend is not None,
-                "recoveryStorageMode":getattr(backend,'mode','cloud') if backend else None,
+                "recoveryStorageMode":getattr(backend,'mode','local') if backend else None,
                 "serverInstanceId":getattr(runtime,'server_instance_id',None),
                 **({"uiUrl":ui_url} if ui_url else {}),
                 **({'privateLabUrl':config.get('bulkApiUrl',config['apiUrl'])} if config.get('apiUrl') else {})}
@@ -248,9 +248,6 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
             db.execute("DELETE FROM sessions WHERE digest=?", (hashlib.sha256(authorization[7:].encode()).hexdigest(),))
         return Response(status_code=204)
 
-    @app.get("/api/v1/workspaces")
-    def workspaces(current=Depends(user)):
-        return session(current)['workspaces']
 
     @app.get("/api/v1/capabilities")
     def get_capabilities(current=Depends(scoped)):
@@ -266,11 +263,8 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
             members = [{"user": {k:v for k,v in json.loads(row['profile']).items() if k not in ('platformAdmin','accountStatus')}, "role": row['role']}
                 for row in db.execute('SELECT u.profile,m.role FROM memberships m JOIN users u ON u.id=m.user_id WHERE workspace_id=?',(current['workspaceId'],))]
         assigned = set(store.assignments(current['workspaceId'],include_disabled=True))
-        enabled=set(store.assignments(current['workspaceId']))
         busy = list({worker for run in store.list() if run["status"] in ACTIVE for worker in run["workerIds"]} & assigned)
-        return {"submissions": [], "invitations": [], "pools": [{"poolId": "shared", "workspaceId": current['workspaceId'],
-                "name": "Workspace GPU pool", "workerIds": sorted(enabled), "drainingWorkerIds": sorted(set(busy)-enabled)}],
-                "grants": [], "requests": [], "members": members, "busyWorkerIds": busy, "reservedWorkerIds": busy}
+        return {"members": members, "busyWorkerIds": busy, "reservedWorkerIds": busy}
 
     @app.get("/api/v1/models")
     def models(current=Depends(scoped)):
@@ -279,7 +273,6 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
                  "reference": cap["modelId"], "revision": cap["modelRevision"], "source": "REFERENCE", "status": "REGISTERED"}]+registry.list(current['workspaceId'],'model')
 
     @app.get("/api/v1/workers")
-    @app.get("/api/v1/worker-registry")
     def workers(current=Depends(scoped)):
         try:
             values = runtime.workers()
@@ -292,19 +285,6 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
         return [{**value,'contributionEnabled':value['workerId'] in enabled and value.get('contributionEnabled',True), "allocatedTo": value.get("allocatedTo") if value.get("allocatedTo") in permitted else
                  "Workspace pool busy" if value.get("allocatedTo") else None} for value in values if value['workerId'] in assigned]
 
-    @app.get('/api/v1/my-workers')
-    def owned_workers(current=Depends(user)):
-        if current['accountStatus']!='ACTIVE':
-            raise HTTPException(403,'Your account must be active to access GPU inventory')
-        with store.db() as db:
-            owned={r['worker_id']:r['workspace_id'] for r in db.execute('SELECT * FROM worker_assignments WHERE owner=?',(current['userId'],))}
-        try:
-            values=runtime.workers()
-        except Exception:
-            raise HTTPException(503,'Worker registry unavailable') from None
-        return [{**value,'workspaceId':owned[value['workerId']],
-                 'allocatedTo':'Owned GPU busy' if value.get('allocatedTo') else None}
-                for value in values if value['workerId'] in owned]
 
     @app.get("/api/v1/workers/{worker_id}")
     def worker(worker_id: str, current=Depends(scoped)):
@@ -470,9 +450,6 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
     def datasets(current=Depends(scoped)):
         return registry.list(current['workspaceId'],'dataset')
 
-    @app.get("/api/v1/my-resource-submissions")
-    def empty(current=Depends(scoped)):
-        return []
 
     @app.post('/api/v1/experiments/{run_id}/pause')
     def pause(run_id:str,current=Depends(scoped)):
@@ -520,12 +497,6 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
             store.audit(db,current['userId'],'BACKUP_POLICY_REQUESTED',run_id,body['workspaceId'])
         return {'policy':policy.model_dump(),'appliesBeforeNextGeneration':True}
 
-    @app.get('/api/v1/experiments/{run_id}/monitoring-events')
-    def monitoring_events(run_id:str,afterSequence:int=0,current=Depends(scoped)):
-        authorized(run_id,current)
-        with store.db() as db:
-            return [{'sequence':r['sequence'],'eventId':r['event_id'],'event':json.loads(r['body'])} for r in db.execute(
-                'SELECT e.* FROM monitoring_events e JOIN assignments a ON a.id=e.assignment_id WHERE a.run_id=? AND e.sequence>? ORDER BY e.sequence LIMIT 2000',(run_id,max(0,afterSequence)))]
 
     install_lab_routes(app,store,user,scoped,runtime)
     install_template_routes(app,store,scoped)
@@ -535,8 +506,8 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
     from .study_registry import install_routes as study_routes
     study_routes(app,registry,runtime,scoped,device_auth)
     if runtime.storage_backend is not None:
-        from .cloud_storage import CloudStorage, install_storage_routes
-        storage=CloudStorage(store,runtime.storage_backend,
+        from .recovery_storage import RecoveryStorage, install_storage_routes
+        storage=RecoveryStorage(store,runtime.storage_backend,
             quota_bytes=getattr(runtime.storage_backend,'quota_bytes',8_000_000_000))
         app.state.storage=storage
         runtime.storage=storage
@@ -544,9 +515,6 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
         if hasattr(runtime.storage_backend,'install_routes'):
             runtime.storage_backend.install_routes(app)
 
-    @app.api_route("/api/v1/{unsupported:path}", methods=["POST", "PATCH", "DELETE"])
-    def unavailable(unsupported: str, current=Depends(scoped)):
-        raise HTTPException(501, "This operation is unavailable in the current runtime integration")
     if web_directory is not None:
         web = Path(web_directory).resolve(strict=True)
         if not (web / 'index.html').is_file():
@@ -604,15 +572,14 @@ def app_from_environment():
 def _app_from_config(root,credentials,config,writer):
     if config.get('deploymentMode') != 'agent':
         raise ValueError('Only agent deployment mode is supported')
+    if config.get('storageMode') not in (None, 'local') or config.get('storageFile'):
+        raise ValueError('Only local recovery storage is supported')
     from .devices import AgentRuntime
     storage_backend=None
     if config.get('storageMode') == 'local':
         from .local_storage import LocalBackend
         storage_backend=LocalBackend(config['storageDirectory'],root/'storage-signing.key',config.get('bulkApiUrl',config['apiUrl']),config.get('storageVolumeUUID'),config.get('metadataStorageDirectory'))
         storage_backend.quota_bytes=config.get('storageQuotaBytes',200_000_000_000)
-    elif config.get('storageFile'):
-        from .cloud_storage import S3Backend
-        storage_backend=S3Backend(json.loads(Path(config['storageFile']).read_text()))
     runtime = AgentRuntime(storage_backend)
     runtime.server_instance_id=config.get('serverInstanceId')
     return create_app(Path(config["productStateDirectory"]) / "product.sqlite", credentials["users"], runtime,

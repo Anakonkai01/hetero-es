@@ -44,12 +44,3 @@ def test_idle_address_change_preserves_identity_and_freezes_assignment(lab):
     # Turning OFF alone is not proof that the reserved processes have stopped.
     c.post('/api/v1/devices/'+d['deviceId']+'/contribution', headers=a, json={'enabled':False,'bootId':'boot-1'})
     assert c.patch('/api/v1/devices/'+d['deviceId']+'/endpoints', headers=a, json=endpoint).status_code == 409
-
-
-def test_token_endpoint_change_needs_current_boot_and_off(lab):
-    c, _, _, _ = lab
-    d, auth = pair(lab)
-    body = {'computeUrl':'https://new.trycloudflare.com', 'bulkUrl':'http://100.64.0.1:8765','bootId':'boot-1'}
-    assert c.patch('/api/v1/device/endpoints', json=body).status_code == 401
-    assert c.patch('/api/v1/device/endpoints', headers=auth, json={**body,'bootId':'old'}).status_code == 409
-    assert c.patch('/api/v1/device/endpoints', headers=auth, json=body).status_code == 200

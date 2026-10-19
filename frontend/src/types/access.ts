@@ -25,9 +25,7 @@ export interface Session {
 }
 
 export interface LoginResponse extends Session {
-  /** A demo credential only. A real backend must implement its own session contract. */
-  demoToken?: string;
-  accessToken?: string;
+  accessToken: string;
 }
 
 export interface WorkspaceMember {
@@ -35,37 +33,13 @@ export interface WorkspaceMember {
   role: WorkspaceRole;
 }
 
-export interface WorkerPool {
-  poolId: string;
-  workspaceId: string;
-  name: string;
-  workerIds: string[];
-  drainingWorkerIds: string[];
-}
 
-export type GrantStatus = "ACTIVE" | "RELEASING" | "RELEASED";
 
-export interface WorkerGrant {
-  grantId: string;
-  workspaceId: string;
-  poolId: string;
-  userId: string;
-  workerIds: string[];
-  status: GrantStatus;
-  requestedBy?: "ADMIN" | "PARTICIPANT";
-  createdAt: string;
-}
 
-export interface WorkerRequest {
-  requestId: string;
-  workspaceId: string;
-  poolId: string;
-  userId: string;
-  workerIds: string[];
-  reason: string;
-  status: "PENDING" | "APPROVED" | "REJECTED";
-  createdAt: string;
-}
+
+
+
+
 
 export interface ModelRegistration {
   modelArtifactId: string;
@@ -82,11 +56,6 @@ export interface ModelRegistration {
 }
 
 export interface ResourceOverview {
-  submissions: ResourceSubmission[];
-  invitations: WorkspaceInvitation[];
-  pools: WorkerPool[];
-  grants: WorkerGrant[];
-  requests: WorkerRequest[];
   members: WorkspaceMember[];
   busyWorkerIds: string[];
   reservedWorkerIds: string[];
@@ -101,10 +70,7 @@ export interface AuditEntry {
   createdAt: string;
 }
 
-export interface ResourceSubmission {
-  submissionId: string; workspaceId: string; workerId: string; ownerUserId: string;
-  gpuName: string; ownerName: string; status: "PENDING" | "APPROVED" | "REJECTED"; createdAt: string;
-}
+
 export interface WorkspaceInvitation {
   invitationId: string; workspaceId: string; workspaceName: string; email: string;
   status: "PENDING" | "ACCEPTED"; createdAt: string;

@@ -1,7 +1,7 @@
-import {useProduct} from '@heteroes/product-ui';
+import { useProduct } from '@heteroes/product-ui';
 import { useRequestCancel } from "../../hooks/useExperimentMutations";
 import type { Experiment } from "../../types/experiment";
-import {Modal} from '../ui/Modal';
+import { Modal } from '../ui/Modal';
 
 interface CancelDialogProps {
   experiment: Experiment;

@@ -69,7 +69,6 @@ class _Upload:
 
 
 class LocalBackend:
-    cloud_free_tier = False
     mode = 'local'
 
     def __init__(self, root, key_file, base_url, expected_uuid=None, metadata_root=None):

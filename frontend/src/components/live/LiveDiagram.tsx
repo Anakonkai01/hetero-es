@@ -1,8 +1,8 @@
-import { useMemo } from "react";
 import { useProduct } from "@heteroes/product-ui";
-import { candidateLabel, connector, layoutWorkers, packetPosition } from "../../lib/diagramLayout";
+import { useMemo } from "react";
+import { candidateLabel,connector,layoutWorkers,packetPosition } from "../../lib/diagramLayout";
 import { fillTemplate } from "../../lib/eventText";
-import type { Frame, WorkerFrame } from "../../lib/runFrame";
+import type { Frame,WorkerFrame } from "../../lib/runFrame";
 
 const RING_R = 24;
 const CIRC = 2 * Math.PI * RING_R;

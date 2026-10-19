@@ -1,11 +1,11 @@
-import {Link} from 'react-router';
-import {useQuery} from '@tanstack/react-query';
-import {PreferencesControl,ProductMark,useProduct} from '@heteroes/product-ui';
-import {useSession} from '../app/session';
-import {apiGet} from '../api/client';
-import {ChipIcon,FlaskIcon,FileIcon,DashboardIcon} from '../components/ui/Icons';
-import {InstallerDownloads} from '../components/common/InstallerDownloads';
-import {DemoReplay} from '../components/live/DemoReplay';
+import { PreferencesControl,ProductMark,useProduct } from '@heteroes/product-ui';
+import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router';
+import { apiGet } from '../api/client';
+import { useSession } from '../app/session';
+import { InstallerDownloads } from '../components/common/InstallerDownloads';
+import { DemoReplay } from '../components/live/DemoReplay';
+import { ChipIcon,DashboardIcon,FileIcon,FlaskIcon } from '../components/ui/Icons';
 
 export function HomePage(){
  const {t}=useProduct();const {session}=useSession();

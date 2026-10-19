@@ -8,7 +8,7 @@ import pytest
 from backend.devices import AgentRuntime
 from backend.store import Store
 
-spec=importlib.util.spec_from_file_location('restore_m2',Path(__file__).parents[2]/'scripts/restore-m2-metadata.py')
+spec=importlib.util.spec_from_file_location('restore_m2',Path(__file__).parents[2]/'scripts/restore-metadata.py')
 module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
 
 

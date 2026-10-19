@@ -1,8 +1,8 @@
-import type { ReactNode } from "react";
 import {
-  QueryClient,
-  QueryClientProvider,
+QueryClient,
+QueryClientProvider,
 } from "@tanstack/react-query";
+import type { ReactNode } from "react";
 import { AppStateProvider } from "./AppStateProvider";
 import { SessionProvider } from "./SessionProvider";
 import { PresentationProvider } from "./presentation";

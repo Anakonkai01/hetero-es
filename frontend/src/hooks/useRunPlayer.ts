@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { advance, frameAt, replayStart, runBounds, type Frame, type PlayerState, type Timeline } from "../lib/runFrame";
+import { useCallback,useEffect,useMemo,useRef,useState } from "react";
+import { advance,frameAt,replayStart,runBounds,type Frame,type PlayerState,type Timeline } from "../lib/runFrame";
 
 const FLIGHT_MS = 700;   // real time a packet takes to cross the diagram
 

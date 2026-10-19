@@ -1,6 +1,6 @@
-import {useProduct,ProductMark,PreferencesControl} from '@heteroes/product-ui';
-import { useState, type FormEvent } from 'react';
-import { Link, Navigate } from 'react-router';
+import { PreferencesControl,ProductMark,useProduct } from '@heteroes/product-ui';
+import { useState,type FormEvent } from 'react';
+import { Link,Navigate } from 'react-router';
 import { apiPost } from '../api/client';
 import { useSession } from '../app/session';
 

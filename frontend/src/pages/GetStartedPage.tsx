@@ -1,8 +1,8 @@
-import {Link} from 'react-router';
-import {CopyValue,useProduct} from '@heteroes/product-ui';
-import {useSession} from '../app/session';
-import {useInstallerManifest} from '../hooks/useInstallerManifest';
-import {PageHeader} from '../components/ui/PageHeader';
+import { CopyValue,useProduct } from '@heteroes/product-ui';
+import { Link } from 'react-router';
+import { useSession } from '../app/session';
+import { PageHeader } from '../components/ui/PageHeader';
+import { useInstallerManifest } from '../hooks/useInstallerManifest';
 
 const ACCOUNT_STATE:Record<string,{tone:string;text:string}>={
  PENDING:{tone:'warn',text:'Waiting for an administrator to approve your account. You can install the Worker app in the meantime.'},

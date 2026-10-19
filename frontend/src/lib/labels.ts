@@ -1,4 +1,4 @@
-import type { ArtifactStatus, ArtifactType } from "../types/artifact";
+import type { ArtifactStatus,ArtifactType } from "../types/artifact";
 import type { AttemptStatus } from "../types/attempt";
 import type { CandidateStatus } from "../types/candidate";
 import type { EventSeverity } from "../types/event";
