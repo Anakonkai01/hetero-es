@@ -31,46 +31,10 @@ class RecoveryStorage:
         self.pending = set()
 
     def validate_manifest(self, m):
-        if (
-            not isinstance(m, dict)
-            or m.get("formatVersion") != 1
-            or any((not isinstance(m.get(k), str) or not UUID.fullmatch(m[k]) for k in ("pointId", "runId")))
-        ):
-            raise ValueError("Invalid recovery identity")
-        if type(m.get("generation")) is not int or m["generation"] < 0 or type(m.get("final")) is not bool:
-            raise ValueError("Invalid generation")
+        from heteroes.recovery_manifest import validate_manifest
+
+        validate_manifest(m)
         backup_policy(m.get("backupPolicy", {}))
-        files = m.get("files")
-        if (
-            not isinstance(files, dict)
-            or not {"ledger.sqlite", "config.json", "identity.json"} <= files.keys()
-            or (not 4 <= len(files) <= 5)
-        ):
-            raise ValueError("Incomplete recovery manifest")
-        for name, meta in files.items():
-            if name not in ("ledger.sqlite", "config.json", "identity.json") and (
-                not re.fullmatch("weights/[a-f0-9]{64}\\.bin", name)
-            ):
-                raise ValueError("Unsafe recovery path")
-            if (
-                not isinstance(meta, dict)
-                or not isinstance(meta.get("sha256"), str)
-                or (not HEX.fullmatch(meta["sha256"]))
-                or (type(meta.get("sizeBytes")) is not int)
-                or (not 0 < meta["sizeBytes"] <= 5000000000)
-            ):
-                raise ValueError("Invalid recovery object")
-            if name.startswith("weights/") and name[8:-4] != meta["sha256"]:
-                raise ValueError("Weights name disagrees with checksum")
-        for key in ("childWeightsSha256", "parentWeightsSha256"):
-            if (
-                not isinstance(m.get(key), str)
-                or not HEX.fullmatch(m[key])
-                or "weights/" + m[key] + ".bin" not in files
-            ):
-                raise ValueError("Missing canonical weights")
-        if len(json.dumps(m)) > 32768:
-            raise ValueError("Manifest is too large")
 
     def usage(self):
         observed = self.backend.inventory()

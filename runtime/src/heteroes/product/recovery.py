@@ -5,7 +5,7 @@ import ctypes
 import errno
 import json
 import os
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 import re
 import shutil
 import sqlite3
@@ -13,6 +13,7 @@ import sys
 import uuid
 from .files import write_json
 from .storage import data_root
+from heteroes.recovery_manifest import safe_name, validate_manifest
 
 HEX = re.compile(r"[0-9a-f]{64}")
 
@@ -87,13 +88,6 @@ def source_identity(root):
     return {"sourceTreeSha256": hashlib.sha256(encoded).hexdigest(), "sourceFiles": files}
 
 
-def safe_name(name):
-    if name in ("config.json", "ledger.sqlite", "identity.json"):
-        return True
-    parts = PurePosixPath(name).parts
-    return len(parts) == 2 and parts[0] == "weights" and HEX.fullmatch(parts[1][:-4]) and parts[1].endswith(".bin")
-
-
 def capture_point(root, summary, recipe, policy, final=False, identity=None):
     """Called only after publication and before the next generation opens.
 
@@ -134,8 +128,23 @@ def capture_point(root, summary, recipe, policy, final=False, identity=None):
                 raise ValueError("Published weights are missing or unsafe")
             os.link(source, temporary / "weights" / source.name)
             files["weights/" + source.name] = {"sha256": value, "sizeBytes": source.stat().st_size}
+        version = 1
+        if recipe.get("formatVersion") == 3:
+            from heteroes.v3.recovery import capture_state, validate_state
+
+            version = 2
+            for name in capture_state(root, temporary, recipe, generation):
+                path = temporary / name
+                files[name] = {"sha256": sha256(path), "sizeBytes": path.stat().st_size}
+            validate_state(
+                json.loads((temporary / "v3-state.json").read_text()),
+                json.loads((temporary / "config.json").read_text()),
+                recipe,
+                generation,
+                files,
+            )
         manifest = {
-            "formatVersion": 1,
+            "formatVersion": version,
             "pointId": destination.name,
             "runId": json.loads((root / "config.json").read_text())["runId"],
             "generation": generation,
@@ -156,12 +165,11 @@ def capture_point(root, summary, recipe, policy, final=False, identity=None):
 def verify_point(point):
     point = Path(point)
     manifest = json.loads((point / "manifest.json").read_text())
-    if manifest.get("formatVersion") != 1 or not isinstance(manifest.get("files"), dict):
-        raise ValueError("Unsupported manifest")
+    validate_manifest(manifest)
     if not {"ledger.sqlite", "config.json", "identity.json"} <= manifest["files"].keys():
         raise ValueError("Incomplete manifest")
     for name, meta in manifest["files"].items():
-        if not safe_name(name):
+        if not safe_name(name, manifest["formatVersion"]):
             raise ValueError("Unsafe recovery path")
         path = point / name
         if any(p.is_symlink() for p in [point, path.parent, path]) or not path.is_file():
@@ -192,6 +200,21 @@ def verify_point(point):
             raise ValueError("Ledger is ahead of recovery weights")
     if json.loads((point / "config.json").read_text())["runId"] != manifest["runId"]:
         raise ValueError("Run identity mismatch")
+    config = json.loads((point / "config.json").read_text())
+    if config.get("recipeVersion") == 3:
+        if manifest["formatVersion"] != 2:
+            raise ValueError("Incomplete v3 recovery point")
+        from heteroes.v3.recovery import validate_state
+
+        validate_state(
+            json.loads((point / "v3-state.json").read_text()),
+            config,
+            json.loads((point / "identity.json").read_text())["recipe"],
+            manifest["generation"],
+            manifest["files"],
+        )
+    elif manifest["formatVersion"] == 2:
+        raise ValueError("V3 recovery requires a v3 config")
     return manifest
 
 
@@ -209,6 +232,10 @@ def restore_point(point, destination):
             target.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
             shutil.copyfile(point / name, target)
             os.chmod(target, 0o600)
+        if manifest["formatVersion"] == 2:
+            from heteroes.v3.recovery import restore_state
+
+            restore_state(point, temporary, destination)
         write_json(temporary / "recovery-lineage.json", manifest)
         write_json(temporary / "backup-policy.json", manifest["backupPolicy"])
         write_json(

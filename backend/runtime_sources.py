@@ -6,6 +6,7 @@ SHARED_MODULES = (
     "__init__.py",
     "catalog.py",
     "canonical.py",
+    "recovery_manifest.py",
     "v3/__init__.py",
     "v3/data.py",
     "v3/options.py",

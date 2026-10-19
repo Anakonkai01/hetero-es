@@ -158,3 +158,27 @@ def test_uploaded_object_completion_is_idempotent_and_temp_keys_do_not_change_re
     st.verify(m["pointId"])
     obj.put(entry["key"], b"changed-after-verify")
     assert obj.data["objects/" + entry["sha256"]] == b"weights"
+
+
+def test_v3_manifest_objects_roundtrip_and_reject_unlisted_paths(storage):
+    st, obj, _ = storage
+    m = manifest()
+    m["formatVersion"] = 2
+    meta = m["files"]["ledger.sqlite"]
+    m["files"].update(
+        {"v3-state.json": meta, "initial-adapter.bin": meta, "selection/" + meta["sha256"] + ".bin": meta}
+    )
+    upload(st, obj, m)
+    assert st.manifest(m["pointId"]) == m
+    bad = json.loads(json.dumps(m))
+    bad["files"]["selection/../config.json"] = meta
+    with pytest.raises(ValueError, match="[Uu]nsafe"):
+        st.validate_manifest(bad)
+    bad = json.loads(json.dumps(m))
+    del bad["files"]["v3-state.json"]
+    with pytest.raises(ValueError, match="[Ii]ncomplete"):
+        st.validate_manifest(bad)
+    bad = json.loads(json.dumps(m))
+    bad["files"]["selection/" + "f" * 64 + ".bin"] = bad["files"].pop("selection/" + meta["sha256"] + ".bin")
+    with pytest.raises(ValueError, match="checksum"):
+        st.validate_manifest(bad)

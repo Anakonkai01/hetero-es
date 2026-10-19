@@ -98,12 +98,17 @@ def wait_for(predicate, process, timeout=60):
     ],
 )
 def test_managed_runner_and_worker_cli_commit_texts(product_assets, tmp_path, space):
+    run_product(product_config(product_assets, tmp_path, weightSpace=space), tmp_path)
+
+
+def run_product(cfg, tmp_path):
     import socket
 
     with socket.socket() as sock:
         sock.bind(("127.0.0.1", 0))
         port = sock.getsockname()[1]
-    cfg = product_config(product_assets, tmp_path, weightSpace=space, port=port)
+    cfg = {**cfg, "port": port}
+    space = cfg["weightSpace"]
     write_json(tmp_path / "config.json", cfg)
     env = {**os.environ, "CUDA_VISIBLE_DEVICES": "", "HETEROES_TOKEN": "fixture-secret"}
     runner_log = (tmp_path / "runner-output.txt").open("w")
