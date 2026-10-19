@@ -87,3 +87,17 @@ validation and verified selected export, and backend/web v3 configuration. The b
 and desktop release remain unchanged. Continue with [handoff-v3-product-integration.md](handoff-v3-product-integration.md)
 for commits, CPU receipts, concrete limits and the remaining audit/r11/flag-day/GPU work. The existing recovery-point
 format also needs v3 state/selection coverage before the flag day. No GPU, Windows or learning acceptance is claimed.
+
+## Audit, recovery, GPU and SDK continuation (2026-10-19)
+
+Continue from [handoff-v3-audit-recovery.md](handoff-v3-audit-recovery.md), branch
+`feat/v3-audit-recovery`. Audit scheduling, complete v3 recovery and SDK polish are
+implemented; the last complete combined suite is e35811c (22/22, 2,273 runtime
+passed/100 skipped, 302 backend passed). Six Qwen Linux/WSL GPU cells pass exact
+comparison/replay. Native Windows full/subset match; independently initialized
+LoRA differs in initial adapter identity and is not cross-OS acceptance. r11 has
+only an unwired WIP verifier, actual-OS dependency reports and a concrete remaining
+plan. The owner authorized both GPUs/SSH and selected the 3060's Windows for the
+next installer checks. No push, merge, release, live approval or deployment occurred.
+The session ended at the owner's usage-budget request; read the detailed handoff
+before resuming or claiming r11 readiness.
