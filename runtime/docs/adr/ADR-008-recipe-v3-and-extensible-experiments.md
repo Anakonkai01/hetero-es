@@ -85,7 +85,11 @@ therefore only a rule that builds **T**:
 `parent_weights_sha256` becomes the hash of T's tensors (today T = all, so nothing changes for full). Publication and
 synchronization move only T: a LoRA or subset update ships megabytes, not 1 GB. LoRA runs are a different search
 distribution: the web and the SDK label them and never put them on one chart with full-parameter runs (decision 5).
-What changes is `model/schema.py` (a schema over a subset of named parameters) and loading — neither is frozen.
+What changes is `model/schema.py` and loading — neither is frozen. A subset schema has its own version
+(`heteroes.parameter_schema.v1.subset`, [CODE] since step 1) and keeps the full schema's entries unchanged, original
+index included; `resolve_tensors` accepts it only as an ordered selection of the model's entries, while a full schema
+must still match the model exactly (a model with an extra parameter is refused). A subset does not pin the parameters
+it leaves out: `model.files` does.
 
 ### 5. Antithetic sampling without touching frozen code [PROPOSED]
 

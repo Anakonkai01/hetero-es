@@ -8,6 +8,9 @@ from heteroes.canonical import canonical_json_hash
 
 
 SCHEMA_VERSION = "heteroes.parameter_schema.v1"
+# A trainable subset of a full schema (ADR-008 section 4): its entries are entries of the full schema, unchanged (original
+# index included) and in the same order. The version says so, so that a FULL schema still has to match the model exactly.
+SUBSET_SCHEMA_VERSION = "heteroes.parameter_schema.v1.subset"
 
 
 def find_alias_groups(model: nn.Module) -> list[list[str]]:
@@ -138,11 +141,47 @@ class SchemaMismatchError(Exception):
     pass
 
 
+def select_parameters(schema: ParameterSchema, include: list[str]) -> ParameterSchema:
+    """
+    The trainable schema of a subset weight space: the entries of a full schema whose canonical name or one of its aliases
+    matches one of the `include` patterns (`re.search`), unchanged and in schema order. A tied tensor is selected when any
+    of its names matches. Noise, perturbation, restore and update then touch only these tensors; the subset's own hash
+    addresses its noise.
+    """
+    import re
+
+    if schema.schema_version != SCHEMA_VERSION:
+        raise ValueError("a subset is selected from a full schema")
+    if not include or not all(isinstance(pattern, str) and pattern for pattern in include):
+        raise ValueError("a subset needs at least one nonempty pattern")
+    patterns = [re.compile(pattern) for pattern in include]
+    entries = tuple(
+        entry
+        for entry in schema.entries
+        if any(pattern.search(name) for pattern in patterns for name in (entry.canonical_name, *entry.aliases))
+    )
+    if not entries:
+        raise ValueError("the subset selects no parameter")
+    return ParameterSchema(schema_version=SUBSET_SCHEMA_VERSION, entries=entries)
+
+
+def _ordered_selection(entries, full_entries) -> bool:
+    remaining = iter(full_entries)
+    return bool(entries) and all(any(entry == candidate for candidate in remaining) for entry in entries)
+
+
 def resolve_tensors(model: nn.Module, schema: ParameterSchema) -> list[torch.Tensor]:
     current_model_schema = build_parameter_schema(model)
 
+    if schema.schema_version == SUBSET_SCHEMA_VERSION:
+        # a subset is checked entry by entry against the model's full schema (its hash differs by construction)
+        if not _ordered_selection(schema.entries, current_model_schema.entries):
+            raise SchemaMismatchError(
+                f"the subset schema {schema.hash} is not an ordered selection of this model's parameters "
+                f"(model schema {current_model_schema.hash})"
+            )
     # fast check, using hash
-    if current_model_schema.hash != schema.hash:
+    elif current_model_schema.hash != schema.hash:
         mismatch_info = []
 
         # check version schema
