@@ -45,3 +45,12 @@ distributed acceptance, flag-day deployment or learning benefit. This small arit
 dataset and two generations provide no research comparison between full and LoRA.
 A subsequent learning experiment requires its own preregistration, larger evaluation,
 independent seeds, resource budget and separate reporting for each weight space.
+
+## Pre-generation configuration correction
+
+The first launch on both GPUs stopped during plan validation: last-integer@1
+accepts an empty config, rather than answerField. No candidate was opened or
+reward observed. The corrected script uses an empty scorer config and integer
+answers (matching that scorer's contract). A failing CPU regression check was
+added before correction. The fixed protocol, sample size and acceptance criteria
+above remain unchanged; initial launch logs are retained separately.

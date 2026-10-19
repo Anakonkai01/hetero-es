@@ -53,3 +53,14 @@ def test_cross_gpu_comparison_rejects_text_or_identity_drift(probe):
     bad["candidates"][0]["texts"] = ["Answer: 8"]
     with pytest.raises(ValueError):
         probe.compare(receipt, bad)
+
+
+def test_probe_uses_valid_scorer_and_numeric_answers(probe):
+    from heteroes.v3.local import _scorer_spec
+    from heteroes.v3.scoring import validate_spec
+
+    for space in ("full", "subset", "lora"):
+        spec = probe.configuration(Path("model"), Path("rows.json"), space)
+        scorer, _ = _scorer_spec(spec)
+        validate_spec(scorer)
+    assert all(type(row["answer"]) is int for row in probe.qualification_rows())

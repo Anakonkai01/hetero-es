@@ -39,6 +39,39 @@ def compare(left, right):
     }
 
 
+def qualification_rows():
+    return [{"prompt": f"Compute {i} + {i + 2}. Reply with only the integer.", "answer": 2 * i + 2} for i in range(20)]
+
+
+def configuration(model_path, rows_file, space):
+    spaces = {
+        "full": {"kind": "full"},
+        "subset": {"kind": "subset", "include": [r"layers\.2[0-3]\.self_attn\.q_proj\.weight"]},
+        "lora": {"kind": "lora", "rank": 4, "alpha": 8, "targetModules": ["q_proj", "v_proj"], "adapterSeed": 7},
+    }
+    return {
+        "model": {
+            "path": str(model_path),
+            "id": "Qwen/Qwen2.5-0.5B-Instruct",
+            "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+        },
+        "data": {"path": str(rows_file), "batchSize": 4, "batchSeed": 11, "splitSeed": 42},
+        "weightSpace": spaces[space],
+        "sigma": {"kind": "constant", "initial": 0.001, "minimum": 0.001},
+        "antithetic": True,
+        "systemPrompt": None,
+        "maxNewTokens": 16,
+        "evalDtype": "float32",
+        "decoder": "hf_generate",
+        "noiseEngine": "cpu",
+        "population": 4,
+        "generations": 2,
+        "alpha": 0.001,
+        "coefficientRule": "zscore@1",
+        "scorer": {"kind": "declarative", "name": "last-integer", "config": {}},
+    }
+
+
 def run(args):
     require_gpu(args.gpu)
     import torch
@@ -58,37 +91,10 @@ def run(args):
         raise ValueError("CUDA is unavailable")
     torch.set_num_threads(1)
     args.out.mkdir(parents=True, mode=0o700)
-    rows = [
-        {"prompt": f"Compute {i} + {i + 2}. Reply with only the integer.", "answer": str(2 * i + 2)} for i in range(20)
-    ]
+    rows = qualification_rows()
     rows_file = args.out / "rows.json"
     rows_file.write_text(json.dumps(rows))
-    spaces = {
-        "full": {"kind": "full"},
-        "subset": {"kind": "subset", "include": [r"layers\.2[0-3]\.self_attn\.q_proj\.weight"]},
-        "lora": {"kind": "lora", "rank": 4, "alpha": 8, "targetModules": ["q_proj", "v_proj"], "adapterSeed": 7},
-    }
-    config = {
-        "model": {
-            "path": str(args.model_path),
-            "id": "Qwen/Qwen2.5-0.5B-Instruct",
-            "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
-        },
-        "data": {"path": str(rows_file), "batchSize": 4, "batchSeed": 11, "splitSeed": 42},
-        "weightSpace": spaces[args.space],
-        "sigma": {"kind": "constant", "initial": 0.001, "minimum": 0.001},
-        "antithetic": True,
-        "systemPrompt": None,
-        "maxNewTokens": 16,
-        "evalDtype": "float32",
-        "decoder": "hf_generate",
-        "noiseEngine": "cpu",
-        "population": 4,
-        "generations": 2,
-        "alpha": 0.001,
-        "coefficientRule": "zscore@1",
-        "scorer": {"kind": "declarative", "name": "last-integer", "config": {"answerField": "answer"}},
-    }
+    config = configuration(args.model_path, rows_file, args.space)
     (args.out / "spec.json").write_text(json.dumps(config, indent=2))
     started = time.time()
     run_dir = args.out / "run"
