@@ -108,12 +108,14 @@ def test_candidate_verifies_batch_and_generation_then_restores_exactly(monkeypat
 
     def evaluate(_model, _tokenizer, rows, settings, chunk):
         observed.append(rows)
-        return {"accuracy": 0.5}
+        return {"accuracy": 0.5, "rows": [{"output": f"text of {row['prompt']}"} for row in rows]}
 
     monkeypatch.setattr("heteroes.study.evaluation.evaluate", evaluate)
     assert executor(desc) == 0.5
     assert torch.equal(parent, model.weight)
     assert observed[0] == [data["splits"]["train"][i] for i in context["batchIndices"]]
+    # the texts behind the reward are those of the batch rows, in batch order
+    assert executor.last_completions == tuple(f"text of {row['prompt']}" for row in observed[0])
 
 
 def test_hypergeometric_pass_k_and_deterministic_majority():
@@ -124,3 +126,22 @@ def test_hypergeometric_pass_k_and_deterministic_majority():
     assert result["majorityAnswer"] == "1" and result["passAtK"]["1"] == 0.5
     with pytest.raises(ValueError):
         pass_at_k(32, 33, 1)
+
+
+def test_recipe_v2_identities_are_frozen():
+    # Frozen from the code of 2026-10-19 (no Recipe v2 run is recorded in the repository, unlike v1: see
+    # tests/test_golden_identities.py). The dataset split, the batch sampler, the sigma schedule and the recipe/context hashes
+    # are identity: a refactor must keep every value below.
+    recipe, data = recipe_data()
+    assert data["contentHash"] == "31b5bb9149ee5585b3e682980928d2f755db54c9e01c7bbe47da29bb33ba97d0"
+    assert data["splitHashes"] == {
+        "train": "e8b71d7fcc63a78403ad45a45a455c00c4abb800f14d5b2ac7754e8b556d1bbe",
+        "validation": "f2b687fdc36f580e96c0a19946013908ccbd0675bbcbf3ea004c0957481f3c29",
+        "test": "40f8d398698b4eadf1e57a919c3ef980ead8db8ab68e4ec139a89d7199bb2402",
+    }
+    assert recipe.hash == "6f95c61d0338d81b49febcc8a272c675980037aa5bf270f7b9183af3134d3fb2"
+    first, last = recipe.context(data, 0), recipe.context(data, 2)
+    assert (first["batchIndices"], first["sigmaFloat32"]) == ([8, 2, 4, 5, 3, 1, 0, 12], 0.0010000000474974513)
+    assert (last["batchIndices"], last["sigmaFloat32"]) == ([5, 15, 1, 12, 3, 4, 9, 6], 0.0002500000118743628)
+    assert first["contextHash"] == "4cb71cfeb338b9ab714bb8d3492597ac9cc5e8145bc31814d7dfe1cc961ea324"
+    assert last["contextHash"] == "b2a514df487b51e501a995cc9bd42bc343fcb57d2e009176fe0646927c58ce01"
