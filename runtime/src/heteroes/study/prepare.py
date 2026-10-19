@@ -7,6 +7,7 @@ from pathlib import Path
 import tempfile
 import urllib.request
 from urllib.parse import urlsplit
+from heteroes.catalog import PINNED_MODEL_ID, PINNED_REVISION
 from .data import verify as verify_data, sha
 from .models import verify as verify_model
 
@@ -75,11 +76,7 @@ def prepare(agent, assignment, config, directory):
     manifest = config["modelManifest"]
     # Operator paths are private configuration, never browser-supplied paths.
     model_path = agent.config.get("modelPaths", {}).get(sha(manifest))
-    if (
-        not model_path
-        and manifest["modelId"] == "Qwen/Qwen2.5-0.5B-Instruct"
-        and manifest["revision"] == "7ae557604adf67be50417f59c2c2f167def9a775"
-    ):
+    if not model_path and manifest["modelId"] == PINNED_MODEL_ID and manifest["revision"] == PINNED_REVISION:
         model_path = agent.config["modelPath"]
     if not model_path:
         model_path = cache / "models" / sha(manifest)

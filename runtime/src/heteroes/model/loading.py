@@ -21,9 +21,7 @@ from heteroes.noise.contracts import (
 )
 from heteroes.noise.cuda_engine import check_cuda_noise_selftest
 from heteroes.noise.selftest import EXPECTED_NOISE_FINGERPRINT, compute_noise_fingerprint
-
-PINNED_REVISION = "7ae557604adf67be50417f59c2c2f167def9a775"
-MODEL_ID = "Qwen/Qwen2.5-0.5B-Instruct"
+from heteroes.catalog import PINNED_MODEL_ID as MODEL_ID, PINNED_REVISION
 
 
 @dataclass

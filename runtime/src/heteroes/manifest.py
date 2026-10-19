@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from heteroes.canonical import canonical_json_hash
+from heteroes.catalog import DECODE_ENGINES, WORKLOAD_NAMES
 from heteroes.noise.contracts import (
     CUDA_CALL_ELEMENTS,
     CUDA_ENGINE_VERSION,
@@ -26,12 +27,10 @@ DEFAULT_EVAL_DTYPE = "float32"
 
 # The workload the candidates are evaluated on. The 16-prompt workload of the contract is the default and is left out of the document (so the hash of every
 # earlier recipe is unchanged); another one is named in `workload.name` (G7: `heteroes/eval/workloads.py` holds what each name means).
-WORKLOAD_NAMES = ("arith16", "cot_l3_q32", "cot_l3_q64", "cot_l1_q128")
 DEFAULT_WORKLOAD_NAME = "arith16"
 # How the answers are generated (09/10): the library's generate() or the compacting greedy decoder (`heteroes.eval.compact_decode`). Like the workload name, the default is left out of the
 # document, so that the hash of every recipe made before the choice existed is unchanged. Both give the same texts in every comparison made so far, but equal texts are not guaranteed
 # (numerical contract section 17), so every worker of an experiment must use the same one: it is in the recipe.
-DECODE_ENGINES = ("hf_generate", "hf_compact")
 DEFAULT_DECODE_ENGINE = "hf_generate"  # what a recipe DOCUMENT without the key means (and the default of the dataclass): the engine of every recipe made before the choice existed
 
 

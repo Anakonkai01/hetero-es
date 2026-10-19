@@ -42,6 +42,7 @@ from fastapi import Depends, Header, HTTPException, Request
 from .addresses import endpoint, is_private
 
 from .constants import MODEL, REVISION, QUIESCENT
+from heteroes.catalog import WORKLOAD_NAMES
 
 
 class AgentRuntime(AgentScheduling, AgentCommands, AgentPolling):
@@ -114,7 +115,7 @@ class AgentRuntime(AgentScheduling, AgentCommands, AgentPolling):
             "modelId": MODEL,
             "modelRevision": REVISION,
             "workerIds": [d["workerId"] for d in self.devices() if d["approvalStatus"] == "APPROVED"],
-            "workloads": ["arith16", "cot_l3_q32", "cot_l3_q64", "cot_l1_q128"],
+            "workloads": list(WORKLOAD_NAMES),
             "schedulerPolicies": ["greedy"],
             "syncModes": ["synchronous"],
             "quarantinedWorkerIds": [d["workerId"] for d in self.devices() if d["approvalStatus"] == "QUARANTINED"],

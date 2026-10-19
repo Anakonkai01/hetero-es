@@ -3,10 +3,11 @@
 import hashlib
 from pathlib import Path, PurePosixPath
 import re
+from heteroes.catalog import PINNED_MODEL_ID
 from .data import sha
 
 SUPPORTED_MODELS = (
-    "Qwen/Qwen2.5-0.5B-Instruct",
+    PINNED_MODEL_ID,
     "HuggingFaceTB/SmolLM2-360M-Instruct",
     "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
 )

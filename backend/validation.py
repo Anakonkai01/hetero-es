@@ -1,6 +1,7 @@
 from .policies import backup_policy as validated_backup_policy, v2_qualification
 
 from fastapi import HTTPException
+from heteroes.catalog import DECODE_ENGINES
 
 
 def validate_configuration(config, current, *, store, runtime, registry, scoped, capabilities):
@@ -56,11 +57,7 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
     else:
         if body["modelName"] != cap["modelId"] or body["modelArtifactId"] != "qwen-pinned":
             raise HTTPException(422, "Only the pinned Qwen model is supported for Recipe v1")
-        if (
-            body["task"] not in cap["workloads"]
-            or body["decodeEngine"] not in ("hf_generate", "hf_compact")
-            or body["datasetIds"]
-        ):
+        if body["task"] not in cap["workloads"] or body["decodeEngine"] not in DECODE_ENGINES or body["datasetIds"]:
             raise HTTPException(422, "Select a built-in workload and decoder for Recipe v1")
         for key in (
             "recipeVersion",

@@ -5,6 +5,7 @@ stale; the experiment wizard still validates everything when a run is created fr
 """
 
 from .migrations import initialize_templates_schema
+from heteroes.catalog import DECODE_ENGINES
 from datetime import datetime, timezone
 import json
 import uuid
@@ -25,7 +26,7 @@ CHOICES = {
     "schedulerPolicy": {"capacity-weighted", "round-robin", "greedy"},
     "syncMode": {"synchronous", "asynchronous"},
     "sigmaSchedule": {"constant", "cosine"},
-    "decodeEngine": {"hf_generate", "hf_compact"},
+    "decodeEngine": set(DECODE_ENGINES),
 }
 SHORT_TEXT = {"task"}
 

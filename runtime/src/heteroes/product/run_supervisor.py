@@ -9,6 +9,8 @@ import sqlite3
 import threading
 import time
 
+from heteroes.catalog import DECODE_ENGINES, WORKLOAD_NAMES
+
 from .files import events, read_json, write_json
 from .remote import alive
 from .storage import data_root, checked_directory
@@ -16,7 +18,7 @@ from .storage import data_root, checked_directory
 TERMINAL = {"COMPLETED", "CANCELLED", "FAILED"}
 QUIESCENT = TERMINAL | {"PAUSED"}
 ROOT = Path(__file__).resolve().parents[3]
-WORKLOADS = ("arith16", "cot_l3_q32", "cot_l3_q64", "cot_l1_q128")
+WORKLOADS = WORKLOAD_NAMES
 
 
 def iso(timestamp):
@@ -38,7 +40,7 @@ def validate(config, workers):
         config.get("recipeVersion") == 2 and config.get("workload") == "text_math_v2"
     ):
         raise ValueError("unsupported workload")
-    if config.get("decodeEngine") not in ("hf_generate", "hf_compact"):
+    if config.get("decodeEngine") not in DECODE_ENGINES:
         raise ValueError("unsupported decoder")
     selected = config.get("workerIds")
     if (
