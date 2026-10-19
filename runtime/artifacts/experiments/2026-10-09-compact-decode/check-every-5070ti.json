@@ -1,0 +1,197 @@
+{
+ "gpu": "NVIDIA GeForce RTX 5070 Ti",
+ "records": [
+  {
+   "task": "arith",
+   "chunk": 64,
+   "check_every": 1,
+   "seconds_min": 4.869441299000755,
+   "seconds_all": [
+    4.885582577000605,
+    4.884573407001881,
+    4.869441299000755
+   ],
+   "same_as_k1": true
+  },
+  {
+   "task": "arith",
+   "chunk": 64,
+   "check_every": 4,
+   "seconds_min": 4.857626163000532,
+   "seconds_all": [
+    4.857626163000532,
+    4.867166103002091,
+    4.874409218002256
+   ],
+   "same_as_k1": true
+  },
+  {
+   "task": "arith",
+   "chunk": 64,
+   "check_every": 8,
+   "seconds_min": 4.874366960000771,
+   "seconds_all": [
+    4.882044948997645,
+    4.874366960000771,
+    4.877765714998532
+   ],
+   "same_as_k1": true
+  },
+  {
+   "task": "arith",
+   "chunk": 64,
+   "check_every": 16,
+   "seconds_min": 4.91102293700169,
+   "seconds_all": [
+    4.91102293700169,
+    4.917051603002619,
+    4.9162670059995435
+   ],
+   "same_as_k1": true
+  },
+  {
+   "task": "arith",
+   "chunk": 128,
+   "check_every": 1,
+   "seconds_min": 3.750030646002415,
+   "seconds_all": [
+    3.750030646002415,
+    3.7503132530000585,
+    3.7543086690020573
+   ],
+   "same_as_k1": true
+  },
+  {
+   "task": "arith",
+   "chunk": 128,
+   "check_every": 4,
+   "seconds_min": 3.722819423001056,
+   "seconds_all": [
+    3.727933452999423,
+    3.7263343400009035,
+    3.722819423001056
+   ],
+   "same_as_k1": true
+  },
+  {
+   "task": "arith",
+   "chunk": 128,
+   "check_every": 8,
+   "seconds_min": 3.764635350999015,
+   "seconds_all": [
+    3.7648769360021106,
+    3.7673390739983006,
+    3.764635350999015
+   ],
+   "same_as_k1": true
+  },
+  {
+   "task": "arith",
+   "chunk": 128,
+   "check_every": 16,
+   "seconds_min": 3.80855166100082,
+   "seconds_all": [
+    3.8115627780025534,
+    3.8112400339996384,
+    3.80855166100082
+   ],
+   "same_as_k1": true
+  },
+  {
+   "task": "gsm8k",
+   "chunk": 64,
+   "check_every": 1,
+   "seconds_min": 17.979453600000852,
+   "seconds_all": [
+    17.979453600000852,
+    17.98045349200038,
+    17.98269068599984
+   ],
+   "same_as_k1": true
+  },
+  {
+   "task": "gsm8k",
+   "chunk": 64,
+   "check_every": 4,
+   "seconds_min": 18.021726966999267,
+   "seconds_all": [
+    18.02198296899951,
+    18.021726966999267,
+    18.025603088000935
+   ],
+   "same_as_k1": true
+  },
+  {
+   "task": "gsm8k",
+   "chunk": 64,
+   "check_every": 8,
+   "seconds_min": 18.035229275999882,
+   "seconds_all": [
+    18.036636400000134,
+    18.03555148599844,
+    18.035229275999882
+   ],
+   "same_as_k1": true
+  },
+  {
+   "task": "gsm8k",
+   "chunk": 64,
+   "check_every": 16,
+   "seconds_min": 18.118172324000625,
+   "seconds_all": [
+    18.119755483003246,
+    18.118172324000625,
+    18.121317004999582
+   ],
+   "same_as_k1": true
+  },
+  {
+   "task": "gsm8k",
+   "chunk": 128,
+   "check_every": 1,
+   "seconds_min": 15.607943928996974,
+   "seconds_all": [
+    15.607943928996974,
+    15.66435919399737,
+    15.618110472001717
+   ],
+   "same_as_k1": true
+  },
+  {
+   "task": "gsm8k",
+   "chunk": 128,
+   "check_every": 4,
+   "seconds_min": 15.603962428998784,
+   "seconds_all": [
+    15.663699656997778,
+    15.612072670999623,
+    15.603962428998784
+   ],
+   "same_as_k1": true
+  },
+  {
+   "task": "gsm8k",
+   "chunk": 128,
+   "check_every": 8,
+   "seconds_min": 15.696393715999875,
+   "seconds_all": [
+    15.703144649000023,
+    15.696393715999875,
+    15.70783120300257
+   ],
+   "same_as_k1": true
+  },
+  {
+   "task": "gsm8k",
+   "chunk": 128,
+   "check_every": 16,
+   "seconds_min": 15.79690425499939,
+   "seconds_all": [
+    15.805764712000382,
+    15.800743099996907,
+    15.79690425499939
+   ],
+   "same_as_k1": true
+  }
+ ]
+}

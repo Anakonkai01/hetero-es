@@ -1,0 +1,78 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7486.19it/s]
+[W1008 10:57:46.293066549 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 228589568 bytes (free: 41222144, total: 16611278848).
+[W1008 10:57:48.515006906 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 257949696 bytes (free: 20250624, total: 16611278848).
+[W1008 10:57:50.629682864 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 283115520 bytes (free: 78970880, total: 16611278848).
+[W1008 10:57:52.489176153 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 304087040 bytes (free: 250937344, total: 16611278848).
+[W1008 10:57:54.194239555 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 322961408 bytes (free: 148176896, total: 16611278848).
+[W1008 10:58:14.534748807 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 341835776 bytes (free: 131399680, total: 16611278848).
+[W1008 10:58:16.213876512 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 358612992 bytes (free: 85262336, total: 16611278848).
+[W1008 10:58:18.953063783 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 375390208 bytes (free: 91553792, total: 16611278848).
+[W1008 10:58:19.559515732 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 390070272 bytes (free: 297074688, total: 16611278848).
+[W1008 10:58:21.212535285 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 404750336 bytes (free: 85262336, total: 16611278848).
+[W1008 10:58:22.703125992 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 417333248 bytes (free: 202702848, total: 16611278848).
+[W1008 10:58:24.228328914 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 429916160 bytes (free: 290783232, total: 16611278848).
+[W1008 10:58:25.791452590 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 442499072 bytes (free: 221577216, total: 16611278848).
+[W1008 10:58:27.047160066 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 452984832 bytes (free: 435486720, total: 16611278848).
+[W1008 10:58:28.325005568 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 463470592 bytes (free: 320143360, total: 16611278848).
+[W1008 10:58:29.746998147 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 473956352 bytes (free: 206897152, total: 16611278848).
+[W1008 10:58:31.077288956 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 484442112 bytes (free: 99942400, total: 16611278848).
+[W1008 10:58:32.553693598 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 494927872 bytes (free: 427098112, total: 16611278848).
+[W1008 10:58:34.935388495 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 505413632 bytes (free: 330629120, total: 16611278848).
+[10:59:01] checkpoint 0: train=65.6% H1=62.1% V1=73.4% H2=93.8% H3=81.2%
+[11:00:18] g0: parent 84 plus 104 minus 73 of 128 diff +0.242
+[11:00:31] g1: parent 104 plus 113 minus 108 of 128 diff +0.039
+[11:00:45] g2: parent 113 plus 112 minus 111 of 128 diff +0.008
+[11:00:56] g3: parent 112 plus 114 minus 107 of 128 diff +0.055
+[11:01:46] g4: parent 114 plus 114 minus 112 of 128 diff +0.016
+[11:01:46] replay 0->5: MATCH
+[11:02:32] checkpoint 5: train=89.1% H1=81.6% V1=84.8% H2=92.2% H3=75.0%
+[11:03:00] g5: parent 114 plus 114 minus 109 of 128 diff +0.039
+[11:03:08] g6: parent 114 plus 114 minus 114 of 128 diff +0.000
+[11:03:18] g7: parent 114 plus 114 minus 116 of 128 diff -0.016
+[11:03:27] g8: parent 114 plus 117 minus 111 of 128 diff +0.047
+[11:03:54] g9: parent 117 plus 117 minus 113 of 128 diff +0.031
+[11:03:55] replay 5->10: MATCH
+[11:04:20] checkpoint 10: train=91.4% H1=85.5% V1=86.3% H2=91.4% H3=77.3%
+[11:04:39] g10: parent 117 plus 117 minus 117 of 128 diff +0.000
+[11:04:46] g11: parent 117 plus 117 minus 116 of 128 diff +0.008
+[11:04:54] g12: parent 117 plus 117 minus 117 of 128 diff +0.000
+[11:05:01] g13: parent 117 plus 118 minus 118 of 128 diff +0.000
+[11:05:27] g14: parent 118 plus 119 minus 114 of 128 diff +0.039
+[11:05:28] replay 10->15: MATCH
+[11:05:52] checkpoint 15: train=93.0% H1=84.0% V1=87.9% H2=86.7% H3=74.2%
+[11:06:09] g15: parent 119 plus 117 minus 118 of 128 diff -0.008
+[11:06:17] g16: parent 117 plus 119 minus 117 of 128 diff +0.016
+[11:06:25] g17: parent 119 plus 120 minus 115 of 128 diff +0.039
+[11:06:32] g18: parent 120 plus 120 minus 119 of 128 diff +0.008
+[11:06:51] g19: parent 120 plus 119 minus 119 of 128 diff +0.000
+[11:06:52] replay 15->20: MATCH
+[11:07:09] checkpoint 20: train=93.0% H1=82.0% V1=86.3% H2=85.9% H3=64.8%
+[11:07:25] g20: parent 119 plus 119 minus 119 of 128 diff +0.000
+[11:07:32] g21: parent 119 plus 120 minus 118 of 128 diff +0.016
+[11:07:40] g22: parent 120 plus 120 minus 117 of 128 diff +0.023
+[11:07:47] g23: parent 120 plus 120 minus 120 of 128 diff +0.000
+[11:08:07] g24: parent 120 plus 118 minus 119 of 128 diff -0.008
+[11:08:08] replay 20->25: MATCH
+[11:08:26] checkpoint 25: train=92.2% H1=82.4% V1=85.5% H2=85.2% H3=50.0%
+[11:08:45] g25: parent 118 plus 118 minus 117 of 128 diff +0.008
+[11:08:55] g26: parent 118 plus 121 minus 116 of 128 diff +0.039
+[11:09:03] g27: parent 121 plus 119 minus 119 of 128 diff +0.000
+[11:09:10] g28: parent 119 plus 121 minus 118 of 128 diff +0.023
+[11:09:32] g29: parent 121 plus 121 minus 119 of 128 diff +0.016
+[11:09:32] replay 25->30: MATCH
+[11:09:52] checkpoint 30: train=94.5% H1=82.4% V1=87.1% H2=87.5% H3=60.9%
+[11:10:10] g30: parent 121 plus 119 minus 121 of 128 diff -0.016
+[11:10:17] g31: parent 119 plus 121 minus 115 of 128 diff +0.047
+[11:10:23] g32: parent 121 plus 120 minus 120 of 128 diff +0.000
+[11:10:33] g33: parent 120 plus 120 minus 120 of 128 diff +0.000
+[11:10:55] g34: parent 120 plus 120 minus 120 of 128 diff +0.000
+[11:10:56] replay 30->35: MATCH
+[11:11:16] checkpoint 35: train=93.8% H1=82.0% V1=85.5% H2=85.9% H3=71.1%
+[11:11:31] g35: parent 120 plus 120 minus 120 of 128 diff +0.000
+[11:11:38] g36: parent 120 plus 120 minus 120 of 128 diff +0.000
+[11:11:46] g37: parent 120 plus 121 minus 119 of 128 diff +0.016
+[11:11:54] g38: parent 121 plus 122 minus 119 of 128 diff +0.023
+[11:12:14] g39: parent 122 plus 121 minus 121 of 128 diff +0.000
+[11:12:15] replay 35->40: MATCH
+[11:12:32] checkpoint 40: train=94.5% H1=82.4% V1=87.1% H2=83.6% H3=60.9%
+[11:12:32] wrote artifacts/experiments/2026-10-08-learning-v2/analysis-runD1.json

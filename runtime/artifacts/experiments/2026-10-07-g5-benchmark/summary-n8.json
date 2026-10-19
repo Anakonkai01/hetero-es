@@ -1,0 +1,1134 @@
+{
+  "directory": "artifacts/experiments/2026-10-07-g5-benchmark",
+  "runs": {
+    "n8-B0-r1": {
+      "run": "n8-B0-r1",
+      "outcome": "ok",
+      "generations": 3,
+      "generation_seconds": [
+        87.837708740999,
+        85.42030296300072,
+        84.98141895499975
+      ],
+      "T_mean": 86.0798102196665,
+      "T_mean_after_first": 85.20086095900024,
+      "wait_mean": 39.66599645733368,
+      "update_mean": 45.580851259999086,
+      "publish_mean": 0.6685376693336972,
+      "rewards": [
+        [
+          0.1875,
+          0.25,
+          0.1875,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ],
+        [
+          0.1875,
+          0.25,
+          0.25,
+          0.1875,
+          0.1875,
+          0.1875,
+          0.3125,
+          0.1875
+        ],
+        [
+          0.3125,
+          0.3125,
+          0.1875,
+          0.1875,
+          0.25,
+          0.25,
+          0.1875,
+          0.1875
+        ]
+      ],
+      "weights": [
+        "8d2559a01f457f279c2582e64a1bd8896e1f036f75637e29e8de24d309abe93d",
+        "aef59f8d45b52350543720877697fe3f4a1f9d10f9b61e46fb6c49b52ce42c91",
+        "3d4c91f7fbd1c183a12de032a0ff6083ae5fc268175af53f68ff761ff563ab2a"
+      ],
+      "final_sha256": "3d4c91f7fbd1c183a12de032a0ff6083ae5fc268175af53f68ff761ff563ab2a",
+      "internal_errors": [],
+      "chunks": "greedy",
+      "workers": {
+        "5070ti": {
+          "jobs": 24,
+          "busy_seconds": 109.26040267999997,
+          "sync_seconds": 3.883293599999888,
+          "syncs": 2,
+          "coordination_seconds": 0.8013896909960749,
+          "idle_seconds": 5.854293092001171,
+          "chunk": 1,
+          "gpu": "NVIDIA GeForce RTX 5070 Ti",
+          "failures": 0
+        }
+      },
+      "first_generation_owner": {
+        "0": "5070ti",
+        "1": "5070ti",
+        "2": "5070ti",
+        "3": "5070ti",
+        "4": "5070ti",
+        "5": "5070ti",
+        "6": "5070ti",
+        "7": "5070ti"
+      }
+    },
+    "n8-B0-r2": {
+      "run": "n8-B0-r2",
+      "outcome": "ok",
+      "generations": 3,
+      "generation_seconds": [
+        79.4487128210003,
+        85.68757356300011,
+        85.09605266399922
+      ],
+      "T_mean": 83.41077968266654,
+      "T_mean_after_first": 85.39181311349967,
+      "wait_mean": 39.68641755899989,
+      "update_mean": 43.041936128998714,
+      "publish_mean": 0.6751610626676362,
+      "rewards": [
+        [
+          0.1875,
+          0.25,
+          0.1875,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ],
+        [
+          0.1875,
+          0.25,
+          0.25,
+          0.1875,
+          0.1875,
+          0.1875,
+          0.3125,
+          0.1875
+        ],
+        [
+          0.3125,
+          0.3125,
+          0.1875,
+          0.1875,
+          0.25,
+          0.25,
+          0.1875,
+          0.1875
+        ]
+      ],
+      "weights": [
+        "8d2559a01f457f279c2582e64a1bd8896e1f036f75637e29e8de24d309abe93d",
+        "aef59f8d45b52350543720877697fe3f4a1f9d10f9b61e46fb6c49b52ce42c91",
+        "3d4c91f7fbd1c183a12de032a0ff6083ae5fc268175af53f68ff761ff563ab2a"
+      ],
+      "final_sha256": "3d4c91f7fbd1c183a12de032a0ff6083ae5fc268175af53f68ff761ff563ab2a",
+      "internal_errors": [],
+      "chunks": "greedy",
+      "workers": {
+        "5070ti": {
+          "jobs": 24,
+          "busy_seconds": 108.98582098800216,
+          "sync_seconds": 3.887470312000005,
+          "syncs": 2,
+          "coordination_seconds": 0.6381494909946923,
+          "idle_seconds": 6.185961376997511,
+          "chunk": 1,
+          "gpu": "NVIDIA GeForce RTX 5070 Ti",
+          "failures": 0
+        }
+      },
+      "first_generation_owner": {
+        "0": "5070ti",
+        "1": "5070ti",
+        "2": "5070ti",
+        "3": "5070ti",
+        "4": "5070ti",
+        "5": "5070ti",
+        "6": "5070ti",
+        "7": "5070ti"
+      },
+      "first_generation_mismatches": []
+    },
+    "n8-B0-r3": {
+      "run": "n8-B0-r3",
+      "outcome": "ok",
+      "generations": 3,
+      "generation_seconds": [
+        87.27951277199827,
+        86.99308298399956,
+        84.4871224010003
+      ],
+      "T_mean": 86.25323938566605,
+      "T_mean_after_first": 85.74010269249993,
+      "wait_mean": 39.78606067066661,
+      "update_mean": 45.78474630266707,
+      "publish_mean": 0.6772570593329874,
+      "rewards": [
+        [
+          0.1875,
+          0.25,
+          0.1875,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ],
+        [
+          0.1875,
+          0.25,
+          0.25,
+          0.1875,
+          0.1875,
+          0.1875,
+          0.3125,
+          0.1875
+        ],
+        [
+          0.3125,
+          0.3125,
+          0.1875,
+          0.1875,
+          0.25,
+          0.25,
+          0.1875,
+          0.1875
+        ]
+      ],
+      "weights": [
+        "8d2559a01f457f279c2582e64a1bd8896e1f036f75637e29e8de24d309abe93d",
+        "aef59f8d45b52350543720877697fe3f4a1f9d10f9b61e46fb6c49b52ce42c91",
+        "3d4c91f7fbd1c183a12de032a0ff6083ae5fc268175af53f68ff761ff563ab2a"
+      ],
+      "final_sha256": "3d4c91f7fbd1c183a12de032a0ff6083ae5fc268175af53f68ff761ff563ab2a",
+      "internal_errors": [],
+      "chunks": "greedy",
+      "workers": {
+        "5070ti": {
+          "jobs": 24,
+          "busy_seconds": 108.06150499800788,
+          "sync_seconds": 3.8863336440008425,
+          "syncs": 2,
+          "coordination_seconds": 1.955527923990303,
+          "idle_seconds": 7.4103433699910966,
+          "chunk": 1,
+          "gpu": "NVIDIA GeForce RTX 5070 Ti",
+          "failures": 0
+        }
+      },
+      "first_generation_owner": {
+        "0": "5070ti",
+        "1": "5070ti",
+        "2": "5070ti",
+        "3": "5070ti",
+        "4": "5070ti",
+        "5": "5070ti",
+        "6": "5070ti",
+        "7": "5070ti"
+      },
+      "first_generation_mismatches": []
+    },
+    "n8-B1-r1": {
+      "run": "n8-B1-r1",
+      "outcome": "ok",
+      "generations": 3,
+      "generation_seconds": [
+        129.2895806839988,
+        129.6931060099996,
+        127.69618707399968
+      ],
+      "T_mean": 128.89295792266603,
+      "T_mean_after_first": 128.69464654199965,
+      "wait_mean": 82.66421687733298,
+      "update_mean": 45.5372978509998,
+      "publish_mean": 0.6852761943331037,
+      "rewards": [
+        [
+          0.1875,
+          0.25,
+          0.1875,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ],
+        [
+          0.1875,
+          0.25,
+          0.25,
+          0.1875,
+          0.1875,
+          0.1875,
+          0.3125,
+          0.1875
+        ],
+        [
+          0.3125,
+          0.3125,
+          0.1875,
+          0.1875,
+          0.25,
+          0.25,
+          0.1875,
+          0.1875
+        ]
+      ],
+      "weights": [
+        "8d2559a01f457f279c2582e64a1bd8896e1f036f75637e29e8de24d309abe93d",
+        "aef59f8d45b52350543720877697fe3f4a1f9d10f9b61e46fb6c49b52ce42c91",
+        "3d4c91f7fbd1c183a12de032a0ff6083ae5fc268175af53f68ff761ff563ab2a"
+      ],
+      "final_sha256": "3d4c91f7fbd1c183a12de032a0ff6083ae5fc268175af53f68ff761ff563ab2a",
+      "internal_errors": [],
+      "chunks": "wave",
+      "workers": {
+        "1660s": {
+          "jobs": 12,
+          "busy_seconds": 200.7937592130038,
+          "sync_seconds": 34.95608861900109,
+          "syncs": 2,
+          "coordination_seconds": 0.2002637669975229,
+          "idle_seconds": 12.242802799994024,
+          "chunk": 1,
+          "gpu": "NVIDIA GeForce GTX 1660 SUPER",
+          "failures": 0
+        },
+        "5070ti": {
+          "jobs": 12,
+          "busy_seconds": 54.38980841600096,
+          "sync_seconds": 3.8908790060013416,
+          "syncs": 2,
+          "coordination_seconds": 0.5612347700025566,
+          "idle_seconds": 189.7119632099966,
+          "chunk": 1,
+          "gpu": "NVIDIA GeForce RTX 5070 Ti",
+          "failures": 0
+        }
+      },
+      "first_generation_owner": {
+        "1": "1660s",
+        "2": "1660s",
+        "4": "1660s",
+        "6": "1660s",
+        "0": "5070ti",
+        "3": "5070ti",
+        "5": "5070ti",
+        "7": "5070ti"
+      },
+      "first_generation_mismatches": []
+    },
+    "n8-B1-r2": {
+      "run": "n8-B1-r2",
+      "outcome": "ok",
+      "generations": 3,
+      "generation_seconds": [
+        127.81789569699868,
+        130.3837667709995,
+        127.67782305399851
+      ],
+      "T_mean": 128.6264951739989,
+      "T_mean_after_first": 129.030794912499,
+      "wait_mean": 82.86272378099966,
+      "update_mean": 45.08307396700062,
+      "publish_mean": 0.6756787136655475,
+      "rewards": [
+        [
+          0.1875,
+          0.25,
+          0.1875,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ],
+        [
+          0.1875,
+          0.25,
+          0.25,
+          0.1875,
+          0.1875,
+          0.1875,
+          0.3125,
+          0.1875
+        ],
+        [
+          0.3125,
+          0.3125,
+          0.1875,
+          0.1875,
+          0.25,
+          0.25,
+          0.1875,
+          0.1875
+        ]
+      ],
+      "weights": [
+        "8d2559a01f457f279c2582e64a1bd8896e1f036f75637e29e8de24d309abe93d",
+        "aef59f8d45b52350543720877697fe3f4a1f9d10f9b61e46fb6c49b52ce42c91",
+        "3d4c91f7fbd1c183a12de032a0ff6083ae5fc268175af53f68ff761ff563ab2a"
+      ],
+      "final_sha256": "3d4c91f7fbd1c183a12de032a0ff6083ae5fc268175af53f68ff761ff563ab2a",
+      "internal_errors": [],
+      "chunks": "wave",
+      "workers": {
+        "1660s": {
+          "jobs": 12,
+          "busy_seconds": 200.05388641000172,
+          "sync_seconds": 34.96668534999844,
+          "syncs": 2,
+          "coordination_seconds": 0.1750279709995084,
+          "idle_seconds": 13.56759958299881,
+          "chunk": 1,
+          "gpu": "NVIDIA GeForce GTX 1660 SUPER",
+          "failures": 0
+        },
+        "5070ti": {
+          "jobs": 12,
+          "busy_seconds": 53.74690421599735,
+          "sync_seconds": 3.9136174310006027,
+          "syncs": 2,
+          "coordination_seconds": 0.6826700150013494,
+          "idle_seconds": 190.92764969600103,
+          "chunk": 1,
+          "gpu": "NVIDIA GeForce RTX 5070 Ti",
+          "failures": 0
+        }
+      },
+      "first_generation_owner": {
+        "1": "1660s",
+        "2": "1660s",
+        "4": "1660s",
+        "6": "1660s",
+        "0": "5070ti",
+        "3": "5070ti",
+        "5": "5070ti",
+        "7": "5070ti"
+      },
+      "first_generation_mismatches": []
+    },
+    "n8-B1-r3": {
+      "run": "n8-B1-r3",
+      "outcome": "ok",
+      "generations": 3,
+      "generation_seconds": [
+        121.83539093699983,
+        129.91858574599974,
+        125.2888537430008
+      ],
+      "T_mean": 125.68094347533345,
+      "T_mean_after_first": 127.60371974450027,
+      "wait_mean": 82.26063985866676,
+      "update_mean": 42.75156239866616,
+      "publish_mean": 0.6624351393335625,
+      "rewards": [
+        [
+          0.1875,
+          0.25,
+          0.1875,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ],
+        [
+          0.1875,
+          0.25,
+          0.25,
+          0.1875,
+          0.1875,
+          0.1875,
+          0.3125,
+          0.1875
+        ],
+        [
+          0.3125,
+          0.3125,
+          0.1875,
+          0.1875,
+          0.25,
+          0.25,
+          0.1875,
+          0.1875
+        ]
+      ],
+      "weights": [
+        "8d2559a01f457f279c2582e64a1bd8896e1f036f75637e29e8de24d309abe93d",
+        "aef59f8d45b52350543720877697fe3f4a1f9d10f9b61e46fb6c49b52ce42c91",
+        "3d4c91f7fbd1c183a12de032a0ff6083ae5fc268175af53f68ff761ff563ab2a"
+      ],
+      "final_sha256": "3d4c91f7fbd1c183a12de032a0ff6083ae5fc268175af53f68ff761ff563ab2a",
+      "internal_errors": [],
+      "chunks": "wave",
+      "workers": {
+        "1660s": {
+          "jobs": 12,
+          "busy_seconds": 197.41797915600364,
+          "sync_seconds": 34.90266299399991,
+          "syncs": 2,
+          "coordination_seconds": 1.061345057993094,
+          "idle_seconds": 14.461277425996741,
+          "chunk": 1,
+          "gpu": "NVIDIA GeForce GTX 1660 SUPER",
+          "failures": 0
+        },
+        "5070ti": {
+          "jobs": 12,
+          "busy_seconds": 54.17272334099471,
+          "sync_seconds": 3.888724442002058,
+          "syncs": 2,
+          "coordination_seconds": 1.00175257200317,
+          "idle_seconds": 188.72047179300353,
+          "chunk": 1,
+          "gpu": "NVIDIA GeForce RTX 5070 Ti",
+          "failures": 0
+        }
+      },
+      "first_generation_owner": {
+        "1": "1660s",
+        "2": "1660s",
+        "4": "1660s",
+        "6": "1660s",
+        "0": "5070ti",
+        "3": "5070ti",
+        "5": "5070ti",
+        "7": "5070ti"
+      },
+      "first_generation_mismatches": []
+    },
+    "n8-B2-r1": {
+      "run": "n8-B2-r1",
+      "outcome": "ok",
+      "generations": 3,
+      "generation_seconds": [
+        87.52177070000107,
+        99.1966988309996,
+        88.61721990899969
+      ],
+      "T_mean": 91.77856314666678,
+      "T_mean_after_first": 93.90695936999964,
+      "wait_mean": 49.760560193666606,
+      "update_mean": 41.343970160334116,
+      "publish_mean": 0.6673214426664345,
+      "rewards": [
+        [
+          0.1875,
+          0.25,
+          0.1875,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ],
+        [
+          0.1875,
+          0.25,
+          0.25,
+          0.1875,
+          0.1875,
+          0.1875,
+          0.3125,
+          0.1875
+        ],
+        [
+          0.3125,
+          0.3125,
+          0.1875,
+          0.1875,
+          0.25,
+          0.25,
+          0.1875,
+          0.1875
+        ]
+      ],
+      "weights": [
+        "8d2559a01f457f279c2582e64a1bd8896e1f036f75637e29e8de24d309abe93d",
+        "aef59f8d45b52350543720877697fe3f4a1f9d10f9b61e46fb6c49b52ce42c91",
+        "3d4c91f7fbd1c183a12de032a0ff6083ae5fc268175af53f68ff761ff563ab2a"
+      ],
+      "final_sha256": "3d4c91f7fbd1c183a12de032a0ff6083ae5fc268175af53f68ff761ff563ab2a",
+      "internal_errors": [],
+      "chunks": "proportional",
+      "workers": {
+        "1660s": {
+          "jobs": 6,
+          "busy_seconds": 99.91754857400156,
+          "sync_seconds": 35.08313641099994,
+          "syncs": 2,
+          "coordination_seconds": 0.5436880169963842,
+          "idle_seconds": 14.28099559599832,
+          "chunk": 1,
+          "gpu": "NVIDIA GeForce GTX 1660 SUPER",
+          "failures": 0
+        },
+        "5070ti": {
+          "jobs": 18,
+          "busy_seconds": 80.20166610599517,
+          "sync_seconds": 3.902974027001619,
+          "syncs": 2,
+          "coordination_seconds": 0.304535510005735,
+          "idle_seconds": 65.17704044800303,
+          "chunk": 1,
+          "gpu": "NVIDIA GeForce RTX 5070 Ti",
+          "failures": 0
+        }
+      },
+      "first_generation_owner": {
+        "0": "1660s",
+        "1": "1660s",
+        "2": "5070ti",
+        "3": "5070ti",
+        "4": "5070ti",
+        "5": "5070ti",
+        "6": "5070ti",
+        "7": "5070ti"
+      },
+      "first_generation_mismatches": []
+    },
+    "n8-B2-r2": {
+      "run": "n8-B2-r2",
+      "outcome": "ok",
+      "generations": 3,
+      "generation_seconds": [
+        89.81017764300123,
+        89.20617857300022,
+        94.63885202800157
+      ],
+      "T_mean": 91.218402748001,
+      "T_mean_after_first": 91.92251530050089,
+      "wait_mean": 49.30381622866722,
+      "update_mean": 41.23864066899963,
+      "publish_mean": 0.6680219350006761,
+      "rewards": [
+        [
+          0.1875,
+          0.25,
+          0.1875,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ],
+        [
+          0.1875,
+          0.25,
+          0.25,
+          0.1875,
+          0.1875,
+          0.1875,
+          0.3125,
+          0.1875
+        ],
+        [
+          0.3125,
+          0.3125,
+          0.1875,
+          0.1875,
+          0.25,
+          0.25,
+          0.1875,
+          0.1875
+        ]
+      ],
+      "weights": [
+        "8d2559a01f457f279c2582e64a1bd8896e1f036f75637e29e8de24d309abe93d",
+        "aef59f8d45b52350543720877697fe3f4a1f9d10f9b61e46fb6c49b52ce42c91",
+        "3d4c91f7fbd1c183a12de032a0ff6083ae5fc268175af53f68ff761ff563ab2a"
+      ],
+      "final_sha256": "3d4c91f7fbd1c183a12de032a0ff6083ae5fc268175af53f68ff761ff563ab2a",
+      "internal_errors": [],
+      "chunks": "proportional",
+      "workers": {
+        "1660s": {
+          "jobs": 6,
+          "busy_seconds": 100.29466106299878,
+          "sync_seconds": 34.930247880000024,
+          "syncs": 2,
+          "coordination_seconds": 0.11527690100228938,
+          "idle_seconds": 12.686539743002868,
+          "chunk": 1,
+          "gpu": "NVIDIA GeForce GTX 1660 SUPER",
+          "failures": 0
+        },
+        "5070ti": {
+          "jobs": 18,
+          "busy_seconds": 80.32186866999655,
+          "sync_seconds": 3.9697606949994224,
+          "syncs": 2,
+          "coordination_seconds": 0.27885741000682174,
+          "idle_seconds": 63.61981932100571,
+          "chunk": 1,
+          "gpu": "NVIDIA GeForce RTX 5070 Ti",
+          "failures": 0
+        }
+      },
+      "first_generation_owner": {
+        "0": "1660s",
+        "1": "1660s",
+        "2": "5070ti",
+        "3": "5070ti",
+        "4": "5070ti",
+        "5": "5070ti",
+        "6": "5070ti",
+        "7": "5070ti"
+      },
+      "first_generation_mismatches": []
+    },
+    "n8-B2-r3": {
+      "run": "n8-B2-r3",
+      "outcome": "ok",
+      "generations": 3,
+      "generation_seconds": [
+        93.432759325,
+        99.20525975399869,
+        94.27724045499963
+      ],
+      "T_mean": 95.6384198446661,
+      "T_mean_after_first": 96.74125010449916,
+      "wait_mean": 49.570428333999494,
+      "update_mean": 45.37893089133346,
+      "publish_mean": 0.6830543903330787,
+      "rewards": [
+        [
+          0.1875,
+          0.25,
+          0.1875,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ],
+        [
+          0.1875,
+          0.25,
+          0.25,
+          0.1875,
+          0.1875,
+          0.1875,
+          0.3125,
+          0.1875
+        ],
+        [
+          0.3125,
+          0.3125,
+          0.1875,
+          0.1875,
+          0.25,
+          0.25,
+          0.1875,
+          0.1875
+        ]
+      ],
+      "weights": [
+        "8d2559a01f457f279c2582e64a1bd8896e1f036f75637e29e8de24d309abe93d",
+        "aef59f8d45b52350543720877697fe3f4a1f9d10f9b61e46fb6c49b52ce42c91",
+        "3d4c91f7fbd1c183a12de032a0ff6083ae5fc268175af53f68ff761ff563ab2a"
+      ],
+      "final_sha256": "3d4c91f7fbd1c183a12de032a0ff6083ae5fc268175af53f68ff761ff563ab2a",
+      "internal_errors": [],
+      "chunks": "proportional",
+      "workers": {
+        "1660s": {
+          "jobs": 6,
+          "busy_seconds": 100.20792200000142,
+          "sync_seconds": 34.96361595799863,
+          "syncs": 2,
+          "coordination_seconds": 1.0228525139991689,
+          "idle_seconds": 13.539747043998432,
+          "chunk": 1,
+          "gpu": "NVIDIA GeForce GTX 1660 SUPER",
+          "failures": 0
+        },
+        "5070ti": {
+          "jobs": 18,
+          "busy_seconds": 80.6094153610029,
+          "sync_seconds": 3.913617725000222,
+          "syncs": 2,
+          "coordination_seconds": 0.2648923759970785,
+          "idle_seconds": 64.18825191599535,
+          "chunk": 1,
+          "gpu": "NVIDIA GeForce RTX 5070 Ti",
+          "failures": 0
+        }
+      },
+      "first_generation_owner": {
+        "0": "1660s",
+        "1": "1660s",
+        "2": "5070ti",
+        "3": "5070ti",
+        "4": "5070ti",
+        "5": "5070ti",
+        "6": "5070ti",
+        "7": "5070ti"
+      },
+      "first_generation_mismatches": []
+    },
+    "n8-B3-r1": {
+      "run": "n8-B3-r1",
+      "outcome": "ok",
+      "generations": 3,
+      "generation_seconds": [
+        86.22762161900027,
+        81.24324959600017,
+        78.59238692800136
+      ],
+      "T_mean": 82.02108604766727,
+      "T_mean_after_first": 79.91781826200076,
+      "wait_mean": 40.140216218999434,
+      "update_mean": 41.20972899899971,
+      "publish_mean": 0.6655503556673162,
+      "rewards": [
+        [
+          0.1875,
+          0.25,
+          0.1875,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ],
+        [
+          0.1875,
+          0.25,
+          0.25,
+          0.1875,
+          0.1875,
+          0.1875,
+          0.3125,
+          0.1875
+        ],
+        [
+          0.3125,
+          0.3125,
+          0.1875,
+          0.1875,
+          0.25,
+          0.25,
+          0.1875,
+          0.1875
+        ]
+      ],
+      "weights": [
+        "8d2559a01f457f279c2582e64a1bd8896e1f036f75637e29e8de24d309abe93d",
+        "aef59f8d45b52350543720877697fe3f4a1f9d10f9b61e46fb6c49b52ce42c91",
+        "3d4c91f7fbd1c183a12de032a0ff6083ae5fc268175af53f68ff761ff563ab2a"
+      ],
+      "final_sha256": "3d4c91f7fbd1c183a12de032a0ff6083ae5fc268175af53f68ff761ff563ab2a",
+      "internal_errors": [],
+      "chunks": "greedy",
+      "workers": {
+        "1660s": {
+          "jobs": 4,
+          "busy_seconds": 71.41135417400073,
+          "sync_seconds": 34.97586586000034,
+          "syncs": 2,
+          "coordination_seconds": 0.8817140369974368,
+          "idle_seconds": 14.033428622997235,
+          "chunk": 1,
+          "gpu": "NVIDIA GeForce GTX 1660 SUPER",
+          "failures": 0
+        },
+        "5070ti": {
+          "jobs": 20,
+          "busy_seconds": 88.86781162599982,
+          "sync_seconds": 3.9023827460005123,
+          "syncs": 2,
+          "coordination_seconds": 0.6322143670022342,
+          "idle_seconds": 27.650454284997977,
+          "chunk": 1,
+          "gpu": "NVIDIA GeForce RTX 5070 Ti",
+          "failures": 0
+        }
+      },
+      "first_generation_owner": {
+        "2": "1660s",
+        "7": "1660s",
+        "0": "5070ti",
+        "1": "5070ti",
+        "3": "5070ti",
+        "4": "5070ti",
+        "5": "5070ti",
+        "6": "5070ti"
+      },
+      "first_generation_mismatches": []
+    },
+    "n8-B3-r2": {
+      "run": "n8-B3-r2",
+      "outcome": "ok",
+      "generations": 3,
+      "generation_seconds": [
+        94.38927751099982,
+        81.93581839699982,
+        79.3323271040008
+      ],
+      "T_mean": 85.21914100400015,
+      "T_mean_after_first": 80.63407275050031,
+      "wait_mean": 39.52216842166672,
+      "update_mean": 44.98009059833324,
+      "publish_mean": 0.7101251436670282,
+      "rewards": [
+        [
+          0.1875,
+          0.25,
+          0.1875,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ],
+        [
+          0.1875,
+          0.25,
+          0.25,
+          0.1875,
+          0.1875,
+          0.1875,
+          0.3125,
+          0.1875
+        ],
+        [
+          0.3125,
+          0.3125,
+          0.1875,
+          0.1875,
+          0.25,
+          0.25,
+          0.1875,
+          0.1875
+        ]
+      ],
+      "weights": [
+        "8d2559a01f457f279c2582e64a1bd8896e1f036f75637e29e8de24d309abe93d",
+        "aef59f8d45b52350543720877697fe3f4a1f9d10f9b61e46fb6c49b52ce42c91",
+        "3d4c91f7fbd1c183a12de032a0ff6083ae5fc268175af53f68ff761ff563ab2a"
+      ],
+      "final_sha256": "3d4c91f7fbd1c183a12de032a0ff6083ae5fc268175af53f68ff761ff563ab2a",
+      "internal_errors": [],
+      "chunks": "greedy",
+      "workers": {
+        "1660s": {
+          "jobs": 4,
+          "busy_seconds": 71.21621864699773,
+          "sync_seconds": 34.95459550900159,
+          "syncs": 2,
+          "coordination_seconds": 0.08974054900318151,
+          "idle_seconds": 12.395691109000836,
+          "chunk": 1,
+          "gpu": "NVIDIA GeForce GTX 1660 SUPER",
+          "failures": 0
+        },
+        "5070ti": {
+          "jobs": 20,
+          "busy_seconds": 89.67916355799935,
+          "sync_seconds": 3.899809804001052,
+          "syncs": 2,
+          "coordination_seconds": 0.59494328400433,
+          "idle_seconds": 24.987531902999763,
+          "chunk": 1,
+          "gpu": "NVIDIA GeForce RTX 5070 Ti",
+          "failures": 0
+        }
+      },
+      "first_generation_owner": {
+        "2": "1660s",
+        "7": "1660s",
+        "0": "5070ti",
+        "1": "5070ti",
+        "3": "5070ti",
+        "4": "5070ti",
+        "5": "5070ti",
+        "6": "5070ti"
+      },
+      "first_generation_mismatches": []
+    },
+    "n8-B3-r3": {
+      "run": "n8-B3-r3",
+      "outcome": "ok",
+      "generations": 3,
+      "generation_seconds": [
+        93.68223204800051,
+        81.23288891899938,
+        82.38393380399975
+      ],
+      "T_mean": 85.76635159033322,
+      "T_mean_after_first": 81.80841136149957,
+      "wait_mean": 39.953494265000096,
+      "update_mean": 45.14126454633333,
+      "publish_mean": 0.6635723006669044,
+      "rewards": [
+        [
+          0.1875,
+          0.25,
+          0.1875,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ],
+        [
+          0.1875,
+          0.25,
+          0.25,
+          0.1875,
+          0.1875,
+          0.1875,
+          0.3125,
+          0.1875
+        ],
+        [
+          0.3125,
+          0.3125,
+          0.1875,
+          0.1875,
+          0.25,
+          0.25,
+          0.1875,
+          0.1875
+        ]
+      ],
+      "weights": [
+        "8d2559a01f457f279c2582e64a1bd8896e1f036f75637e29e8de24d309abe93d",
+        "aef59f8d45b52350543720877697fe3f4a1f9d10f9b61e46fb6c49b52ce42c91",
+        "3d4c91f7fbd1c183a12de032a0ff6083ae5fc268175af53f68ff761ff563ab2a"
+      ],
+      "final_sha256": "3d4c91f7fbd1c183a12de032a0ff6083ae5fc268175af53f68ff761ff563ab2a",
+      "internal_errors": [],
+      "chunks": "greedy",
+      "workers": {
+        "1660s": {
+          "jobs": 4,
+          "busy_seconds": 71.88641660499889,
+          "sync_seconds": 34.99167250699975,
+          "syncs": 2,
+          "coordination_seconds": 0.07373704600286146,
+          "idle_seconds": 12.982393683001646,
+          "chunk": 1,
+          "gpu": "NVIDIA GeForce GTX 1660 SUPER",
+          "failures": 0
+        },
+        "5070ti": {
+          "jobs": 20,
+          "busy_seconds": 88.98256785600643,
+          "sync_seconds": 3.9010450360001414,
+          "syncs": 2,
+          "coordination_seconds": 0.287152923994654,
+          "idle_seconds": 26.976869902993712,
+          "chunk": 1,
+          "gpu": "NVIDIA GeForce RTX 5070 Ti",
+          "failures": 0
+        }
+      },
+      "first_generation_owner": {
+        "2": "1660s",
+        "7": "1660s",
+        "0": "5070ti",
+        "1": "5070ti",
+        "3": "5070ti",
+        "4": "5070ti",
+        "5": "5070ti",
+        "6": "5070ti"
+      },
+      "first_generation_mismatches": []
+    }
+  },
+  "conditions": {
+    "n8-B0": {
+      "repeats": 3,
+      "T_mean": 85.2479430959997,
+      "T_min": 83.41077968266654,
+      "T_max": 86.25323938566605,
+      "T_stdev": 1.5933915006589772,
+      "T_mean_after_first": 85.44425892166662,
+      "wait_mean": 39.71282489566673,
+      "update_mean": 44.802511230554956,
+      "publish_mean": 0.6736519304447736,
+      "workers": [
+        "5070ti"
+      ],
+      "cluster_benefit_vs_B0": 1.0,
+      "delta_T_vs_B0": 0.0,
+      "predicted_T": 80.99363718799869,
+      "prediction_error_percent": -4.990508572400558
+    },
+    "n8-B1": {
+      "repeats": 3,
+      "T_mean": 127.73346552399946,
+      "T_min": 125.68094347533345,
+      "T_max": 128.89295792266603,
+      "T_stdev": 1.7825222773648295,
+      "T_mean_after_first": 128.44305373299963,
+      "wait_mean": 82.59586017233313,
+      "update_mean": 44.45731140555553,
+      "publish_mean": 0.6744633491107379,
+      "workers": [
+        "1660s",
+        "5070ti"
+      ],
+      "cluster_benefit_vs_B0": 0.6673892604908831,
+      "delta_T_vs_B0": -42.485522427999754,
+      "predicted_T": null
+    },
+    "n8-B2": {
+      "repeats": 3,
+      "T_mean": 92.8784619131113,
+      "T_min": 91.218402748001,
+      "T_max": 95.6384198446661,
+      "T_stdev": 2.40654747636995,
+      "T_mean_after_first": 94.19024159166656,
+      "wait_mean": 49.54493491877778,
+      "update_mean": 42.653847240222404,
+      "publish_mean": 0.6727992560000631,
+      "workers": [
+        "1660s",
+        "5070ti"
+      ],
+      "cluster_benefit_vs_B0": 0.9178440441417945,
+      "delta_T_vs_B0": -7.630518817111593,
+      "predicted_T": 100.56930548400051,
+      "prediction_error_percent": 8.280545793366038
+    },
+    "n8-B3": {
+      "repeats": 3,
+      "T_mean": 84.33552621400021,
+      "T_min": 82.02108604766727,
+      "T_max": 85.76635159033322,
+      "T_stdev": 2.0229520061287145,
+      "T_mean_after_first": 80.78676745800021,
+      "wait_mean": 39.87195963522208,
+      "update_mean": 43.77702804788876,
+      "publish_mean": 0.6797492666670829,
+      "workers": [
+        "1660s",
+        "5070ti"
+      ],
+      "cluster_benefit_vs_B0": 1.0108188911952034,
+      "delta_T_vs_B0": 0.9124168819994907,
+      "predicted_T": 83.60971742500006,
+      "prediction_error_percent": -0.8606204544908218
+    }
+  },
+  "consistent": {
+    "n8": {
+      "runs_compared": 12,
+      "identical_rewards_and_hashes": true,
+      "distinct": 1
+    }
+  }
+}

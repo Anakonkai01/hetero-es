@@ -1,0 +1,169 @@
+{
+  "outcome": "ok",
+  "total_seconds": 290.82806754112244,
+  "recipe_hash": "1604737ea1d7203062d641381172899356a261748f754a8f3264019ac1b3f5b1",
+  "args": {
+    "model_path": "/home/pc5070ti/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775",
+    "out_dir": "artifacts/experiments/2026-10-07-g4-admission-b2/n8-B2-r1/coordinator",
+    "weights_dir": "/home/pc5070ti/.cache/heteroes/published",
+    "experiment_id": "g4",
+    "candidates": 8,
+    "generations": 3,
+    "alpha": 0.001,
+    "sigma": 0.001,
+    "chunk_elements": null,
+    "policy": "proportional",
+    "quota": [
+      "worker-1660s=2",
+      "worker-5070ti=6"
+    ],
+    "admit": null,
+    "wave_size": 2,
+    "lease_seconds": 900.0,
+    "max_attempts": 3,
+    "failed_grace_seconds": 60.0,
+    "timeout_seconds": 1200.0,
+    "linger_seconds": 10.0,
+    "host": "10.10.10.1",
+    "port": 8765,
+    "token_env": "HETEROES_TOKEN",
+    "device": null
+  },
+  "initial_weights_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+  "final_weights_sha256": "708af1bb5d9138b2531a51f6a0005bf42ec75133bd513b7d112fe70e81ed75b2",
+  "generations": [
+    {
+      "generation": 0,
+      "parent_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+      "child_sha256": "887d554c0e6251756a01d2ebb849695d2bdcc7ce4fda0f9cc01961d3859758bd",
+      "record_hash": "e43fb32cdf161887f0986ab5dbb8130a9d4a8052eb4696d3c3db5f9c1a9a37e6",
+      "rewards": [
+        0.25,
+        0.3125,
+        0.1875,
+        0.25,
+        0.1875,
+        0.1875,
+        0.25,
+        0.25
+      ],
+      "mean_reward": 0.234375,
+      "max_reward": 0.3125,
+      "coefficients": [
+        0.37796446681022644,
+        1.8898223638534546,
+        -1.133893370628357,
+        0.37796446681022644,
+        -1.133893370628357,
+        -1.133893370628357,
+        0.37796446681022644,
+        0.37796446681022644
+      ],
+      "noop": false,
+      "changed": 488390989,
+      "applied_l2": 7.858703437445919,
+      "requested_l2": 7.85822266457838,
+      "wait_seconds": 45.75408001200003,
+      "record_seconds": 0.0037469690000762057,
+      "update_seconds": 42.6292858769998,
+      "publish_seconds": 0.6754728880000584,
+      "total_seconds": 89.06258574599997
+    },
+    {
+      "generation": 1,
+      "parent_sha256": "887d554c0e6251756a01d2ebb849695d2bdcc7ce4fda0f9cc01961d3859758bd",
+      "child_sha256": "2a0bfe77abbf0d7140f06790631bf4a2d99e6902730c61abd58068f1c3ad5ba8",
+      "record_hash": "b331d0b8df783ee2e78b352ebe0a344fcf5de6c03e8ee55d4c3da42806ef1b6b",
+      "rewards": [
+        0.3125,
+        0.25,
+        0.1875,
+        0.25,
+        0.25,
+        0.25,
+        0.25,
+        0.25
+      ],
+      "mean_reward": 0.25,
+      "max_reward": 0.3125,
+      "coefficients": [
+        1.9999998807907104,
+        0.0,
+        -1.9999998807907104,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "noop": false,
+      "changed": 488395409,
+      "applied_l2": 7.859273493598925,
+      "requested_l2": 7.858773795916746,
+      "wait_seconds": 46.27526426099985,
+      "record_seconds": 0.005985188000067865,
+      "update_seconds": 45.731735126999865,
+      "publish_seconds": 0.6807233429999542,
+      "total_seconds": 92.69370791899973
+    },
+    {
+      "generation": 2,
+      "parent_sha256": "2a0bfe77abbf0d7140f06790631bf4a2d99e6902730c61abd58068f1c3ad5ba8",
+      "child_sha256": "708af1bb5d9138b2531a51f6a0005bf42ec75133bd513b7d112fe70e81ed75b2",
+      "record_hash": "55d526eef5e96c70823c9940206c14a8114be0f2a16d0e1864714d6685303c2e",
+      "rewards": [
+        0.25,
+        0.125,
+        0.1875,
+        0.25,
+        0.25,
+        0.25,
+        0.25,
+        0.25
+      ],
+      "mean_reward": 0.2265625,
+      "max_reward": 0.25,
+      "coefficients": [
+        0.5388159155845642,
+        -2.334868907928467,
+        -0.8980264663696289,
+        0.5388159155845642,
+        0.5388159155845642,
+        0.5388159155845642,
+        0.5388159155845642,
+        0.5388159155845642
+      ],
+      "noop": false,
+      "changed": 488382663,
+      "applied_l2": 7.858701479822316,
+      "requested_l2": 7.858212102117418,
+      "wait_seconds": 49.35428961499974,
+      "record_seconds": 0.2550460700003896,
+      "update_seconds": 45.811033698999836,
+      "publish_seconds": 0.6749880550000853,
+      "total_seconds": 96.09535743900005
+    }
+  ],
+  "internal_errors": [],
+  "environment": {
+    "hostname": "5070ti",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "python": "3.12.13",
+    "torch": "2.10.0+cu128",
+    "torch_cuda": "12.8",
+    "numpy": "2.4.5",
+    "transformers": "5.5.0",
+    "device": "cuda",
+    "gpu_name": "NVIDIA GeForce RTX 5070 Ti",
+    "gpu_capability": [
+      12,
+      0
+    ],
+    "gpu_total_memory_bytes": 16608133120,
+    "nvidia_driver": "595.91.07"
+  },
+  "code": {
+    "git_commit": "66a3390a7f7803a92b74d64ff83c2f8954785ae7",
+    "git_dirty": true
+  }
+}

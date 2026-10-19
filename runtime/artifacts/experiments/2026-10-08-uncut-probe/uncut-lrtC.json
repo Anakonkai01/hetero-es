@@ -1,0 +1,177 @@
+{
+ "ckpt_dir": "/home/pc5070ti/.cache/heteroes/learn-ckpt/lrtC",
+ "limits": [
+  256,
+  512
+ ],
+ "results": {
+  "0": {
+   "256": {
+    "train": {
+     "n": 64,
+     "correct": 19,
+     "accuracy": 0.296875,
+     "answer_line_rate": 0.25,
+     "accuracy_with_line": 0.4375,
+     "mean_chars": 706.171875,
+     "tokens": 14158
+    },
+    "H3": {
+     "n": 128,
+     "correct": 42,
+     "accuracy": 0.328125,
+     "answer_line_rate": 0.21875,
+     "accuracy_with_line": 0.4642857142857143,
+     "mean_chars": 731.7578125,
+     "tokens": 29019
+    }
+   },
+   "512": {
+    "train": {
+     "n": 64,
+     "correct": 52,
+     "accuracy": 0.8125,
+     "answer_line_rate": 0.75,
+     "accuracy_with_line": 0.7708333333333334,
+     "mean_chars": 850.46875,
+     "tokens": 17491
+    },
+    "H3": {
+     "n": 128,
+     "correct": 104,
+     "accuracy": 0.8125,
+     "answer_line_rate": 0.703125,
+     "accuracy_with_line": 0.7888888888888889,
+     "mean_chars": 873.5078125,
+     "tokens": 35479
+    }
+   }
+  },
+  "20": {
+   "256": {
+    "train": {
+     "n": 64,
+     "correct": 57,
+     "accuracy": 0.890625,
+     "answer_line_rate": 0.015625,
+     "accuracy_with_line": 1.0,
+     "mean_chars": 618.90625,
+     "tokens": 12037
+    },
+    "H3": {
+     "n": 128,
+     "correct": 101,
+     "accuracy": 0.7890625,
+     "answer_line_rate": 0.0,
+     "accuracy_with_line": null,
+     "mean_chars": 638.8671875,
+     "tokens": 24959
+    }
+   },
+   "512": {
+    "train": {
+     "n": 64,
+     "correct": 58,
+     "accuracy": 0.90625,
+     "answer_line_rate": 0.015625,
+     "accuracy_with_line": 1.0,
+     "mean_chars": 634.515625,
+     "tokens": 12326
+    },
+    "H3": {
+     "n": 128,
+     "correct": 104,
+     "accuracy": 0.8125,
+     "answer_line_rate": 0.0234375,
+     "accuracy_with_line": 1.0,
+     "mean_chars": 657.78125,
+     "tokens": 25715
+    }
+   }
+  },
+  "40": {
+   "256": {
+    "train": {
+     "n": 64,
+     "correct": 60,
+     "accuracy": 0.9375,
+     "answer_line_rate": 0.0,
+     "accuracy_with_line": null,
+     "mean_chars": 621.921875,
+     "tokens": 12557
+    },
+    "H3": {
+     "n": 128,
+     "correct": 109,
+     "accuracy": 0.8515625,
+     "answer_line_rate": 0.0,
+     "accuracy_with_line": null,
+     "mean_chars": 607.4140625,
+     "tokens": 24518
+    }
+   },
+   "512": {
+    "train": {
+     "n": 64,
+     "correct": 61,
+     "accuracy": 0.953125,
+     "answer_line_rate": 0.0,
+     "accuracy_with_line": null,
+     "mean_chars": 622.546875,
+     "tokens": 12598
+    },
+    "H3": {
+     "n": 128,
+     "correct": 110,
+     "accuracy": 0.859375,
+     "answer_line_rate": 0.0,
+     "accuracy_with_line": null,
+     "mean_chars": 607.9375,
+     "tokens": 24577
+    }
+   }
+  },
+  "60": {
+   "256": {
+    "train": {
+     "n": 64,
+     "correct": 59,
+     "accuracy": 0.921875,
+     "answer_line_rate": 0.0,
+     "accuracy_with_line": null,
+     "mean_chars": 610.890625,
+     "tokens": 12019
+    },
+    "H3": {
+     "n": 128,
+     "correct": 104,
+     "accuracy": 0.8125,
+     "answer_line_rate": 0.0,
+     "accuracy_with_line": null,
+     "mean_chars": 600.640625,
+     "tokens": 23563
+    }
+   },
+   "512": {
+    "train": {
+     "n": 64,
+     "correct": 59,
+     "accuracy": 0.921875,
+     "answer_line_rate": 0.0,
+     "accuracy_with_line": null,
+     "mean_chars": 610.890625,
+     "tokens": 12019
+    },
+    "H3": {
+     "n": 128,
+     "correct": 105,
+     "accuracy": 0.8203125,
+     "answer_line_rate": 0.0,
+     "accuracy_with_line": null,
+     "mean_chars": 600.6796875,
+     "tokens": 23567
+    }
+   }
+  }
+ }
+}

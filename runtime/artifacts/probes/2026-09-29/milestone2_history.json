@@ -1,0 +1,86 @@
+[
+  {
+    "generation": 0,
+    "reward_before": 0.25,
+    "candidate_rewards": [
+      0.25,
+      0.1875,
+      0.25,
+      0.25
+    ],
+    "reward_mean": 0.234375,
+    "reward_std": 0.027063293382525444,
+    "z_scores": [
+      0.5773500800132751,
+      -1.7320502996444702,
+      0.5773500800132751,
+      0.5773500800132751
+    ],
+    "has_signal": true,
+    "update_max_diff": 0.00030517578125,
+    "update_worst_parameter": "model.embed_tokens.weight",
+    "reward_after": 0.25,
+    "candidate_restore_diffs": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "generation": 1,
+    "reward_before": 0.25,
+    "candidate_rewards": [
+      0.25,
+      0.1875,
+      0.25,
+      0.25
+    ],
+    "reward_mean": 0.234375,
+    "reward_std": 0.027063293382525444,
+    "z_scores": [
+      0.5773500800132751,
+      -1.7320502996444702,
+      0.5773500800132751,
+      0.5773500800132751
+    ],
+    "has_signal": true,
+    "update_max_diff": 0.00030517578125,
+    "update_worst_parameter": "model.embed_tokens.weight",
+    "reward_after": 0.25,
+    "candidate_restore_diffs": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "generation": 2,
+    "reward_before": 0.25,
+    "candidate_rewards": [
+      0.25,
+      0.1875,
+      0.25,
+      0.25
+    ],
+    "reward_mean": 0.234375,
+    "reward_std": 0.027063293382525444,
+    "z_scores": [
+      0.5773500800132751,
+      -1.7320502996444702,
+      0.5773500800132751,
+      0.5773500800132751
+    ],
+    "has_signal": true,
+    "update_max_diff": 0.00030517578125,
+    "update_worst_parameter": "model.embed_tokens.weight",
+    "reward_after": 0.25,
+    "candidate_restore_diffs": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  }
+]

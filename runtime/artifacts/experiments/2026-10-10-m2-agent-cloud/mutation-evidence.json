@@ -1,0 +1,12 @@
+[
+  {
+    "test": "tests/ledger/test_device_transport.py",
+    "mutationCaught": true,
+    "exitCode": 1
+  },
+  {
+    "test": "backend/tests/test_devices.py::test_terminal_snapshot_needs_all_process_death_and_fresh_epoch",
+    "mutationCaught": true,
+    "exitCode": 1
+  }
+]

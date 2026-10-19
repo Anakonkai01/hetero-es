@@ -1,0 +1,11 @@
+library128  equal to library128: True   length 796
+library64   equal to library128: False   length 837
+library1    equal to library128: True   length 796
+compact128  equal to library128: False   length 837
+compact64   equal to library128: False   length 837
+first difference library128 / library64 at character 616: ..."140 \\times \\frac{5}{100}) \\]\n\nNow let's do the calculations:\n\n\\[ \\text"  /  ..."140 \\times \\frac{5}{100}) \\]\n\nNow let's perform the calculation:\n\n\\[ \\"
+   top-3 scores at that step (after the repetition penalty, teacher-forced, one sequence): [(' perform', 19.552616), (' calculate', 17.716806), (' compute', 17.038782)] margin 1.8358097076416016
+first difference library128 / compact128 at character 616: ..."140 \\times \\frac{5}{100}) \\]\n\nNow let's do the calculations:\n\n\\[ \\text"  /  ..."140 \\times \\frac{5}{100}) \\]\n\nNow let's perform the calculation:\n\n\\[ \\"
+   top-3 scores at that step (after the repetition penalty, teacher-forced, one sequence): [(' perform', 19.552616), (' calculate', 17.716806), (' compute', 17.038782)] margin 1.8358097076416016
+first difference library128 / compact64 at character 616: ..."140 \\times \\frac{5}{100}) \\]\n\nNow let's do the calculations:\n\n\\[ \\text"  /  ..."140 \\times \\frac{5}{100}) \\]\n\nNow let's perform the calculation:\n\n\\[ \\"
+   top-3 scores at that step (after the repetition penalty, teacher-forced, one sequence): [(' perform', 19.552616), (' calculate', 17.716806), (' compute', 17.038782)] margin 1.8358097076416016

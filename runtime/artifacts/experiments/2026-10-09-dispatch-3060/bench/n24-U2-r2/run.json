@@ -1,0 +1,18 @@
+{
+  "name": "n24-U2-r2",
+  "outcome": "ok",
+  "wall_seconds": 380.04145193099976,
+  "spec": {
+    "workers": {
+      "worker-5070ti": 64,
+      "worker-3060": 64
+    },
+    "policy": "tail",
+    "args": [
+      "--speed-prior",
+      "worker-3060=20.65705745699961",
+      "--speed-prior",
+      "worker-5070ti=8.020352056002594"
+    ]
+  }
+}

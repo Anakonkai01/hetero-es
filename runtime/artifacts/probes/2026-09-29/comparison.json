@@ -1,0 +1,42 @@
+{
+  "left": {
+    "file": "probe_5070ti.json",
+    "hostname": "5070ti",
+    "gpu": "NVIDIA GeForce RTX 5070 Ti",
+    "torch": "2.10.0+cu128",
+    "torch_cuda": "12.8",
+    "transformers": "5.5.0"
+  },
+  "right": {
+    "file": "probe_1660s.json",
+    "hostname": "heteroes-worker-1660s",
+    "gpu": "NVIDIA GeForce GTX 1660 SUPER",
+    "torch": "2.13.0+cu132",
+    "torch_cuda": "13.2",
+    "transformers": "5.17.0"
+  },
+  "checks": {
+    "same_model_id": true,
+    "same_model_revision": true,
+    "same_dtype": true,
+    "same_schema": true,
+    "same_parameter_count": true,
+    "same_weight_samples": true,
+    "same_workload": true,
+    "same_noise_stream_sample": false,
+    "same_noise_target_hashes": false,
+    "same_base_reward": true,
+    "same_candidate_reward": true,
+    "same_base_predictions": true,
+    "same_candidate_predictions": false,
+    "left_restore_exact": true,
+    "right_restore_exact": true
+  },
+  "summary": {
+    "structural_contract_match": true,
+    "both_restore_exact": true,
+    "behavior_match": false,
+    "replay_probe_pass": false,
+    "interpretation": "Replay probe does NOT match across these runtimes. Do not assume seed-only replay is safe yet."
+  }
+}

@@ -1,0 +1,49 @@
+model /home/pc5070ti/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775  dtype float32  chunk 64  steps 256  slot-steps 6311  compactions 20
+wall without profiler 2.269 s; wall under the profiler 3.640 s; total CUDA kernel time 3.620 s (99 percent of the wall)
+kernel launches (count of events with device time) 616228, per decoding step 2407
+
+TOP BY SELF CUDA TIME
+----------------------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                                  Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg    # of Calls  
+----------------------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                              aten::mm         5.16%     148.398ms         7.92%     227.797ms       9.174us        1.078s        59.58%        1.079s      43.452us         24832  
+void cutlass::Kernel2<cutlass_80_simt_sgemm_128x64_8x5_tn_align1>(c...         0.00%       0.000us         0.00%       0.000us       0.000us     314.100ms        17.37%     314.100ms      47.077us          6672  
+void cutlass::Kernel2<cutlass_80_simt_sgemm_64x64_8x5_tn_align1>(cu...         0.00%       0.000us         0.00%       0.000us       0.000us     237.783ms        13.15%     237.783ms      18.764us         12672  
+void gemmSN_TN_kernel<float, 128, 16, 2, 4, 2, 2, true, cublasGemvT...         0.00%       0.000us         0.00%       0.000us       0.000us     234.200ms        12.95%     234.200ms      19.247us         12168  
+                                                           aten::addmm         4.35%     125.017ms         6.36%     183.020ms       9.929us     183.837ms        10.16%     183.864ms       9.975us         18432  
+void magma_sgemmEx_kernel<float, float, float, true, false, 6, 4, 6...         0.00%       0.000us         0.00%       0.000us       0.000us     139.167ms         7.69%     139.167ms     678.866us           205  
+                                                             aten::mul         8.33%     239.612ms        13.40%     385.434ms       5.597us     126.402ms         6.99%     126.484ms       1.837us         68865  
+                                                           aten::copy_         1.21%      34.774ms         2.43%      70.007ms       5.031us     113.863ms         6.30%     113.867ms       8.184us         13914  
+void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_...         0.00%       0.000us         0.00%       0.000us       0.000us     106.683ms         5.90%     106.683ms       8.648us         12336  
+                                                             aten::bmm         5.56%     159.829ms         7.02%     202.087ms      16.110us      83.035ms         4.59%      83.314ms       6.642us         12544  
+void cutlass::Kernel2<cutlass_80_simt_sgemm_128x32_8x5_tn_align1>(c...         0.00%       0.000us         0.00%       0.000us       0.000us      73.664ms         4.07%      73.664ms      25.578us          2880  
+void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_...         0.00%       0.000us         0.00%       0.000us       0.000us      58.474ms         3.23%      58.474ms       1.204us         48586  
+void gemmSN_TN_kernel<float, 128, 16, 2, 4, 8, 9, false, cublasGemv...         0.00%       0.000us         0.00%       0.000us       0.000us      55.712ms         3.08%      55.712ms      29.969us          1859  
+void at::native::vectorized_elementwise_kernel<4, at::native::AUnar...         0.00%       0.000us         0.00%       0.000us       0.000us      54.999ms         3.04%      54.999ms       4.213us         13056  
+                                                             aten::cat         3.45%      99.308ms         5.31%     152.858ms       6.032us      54.675ms         3.02%      54.675ms       2.157us         25342  
+std::enable_if<!(false), void>::type internal::gemvx::kernel<int, i...         0.00%       0.000us         0.00%       0.000us       0.000us      45.903ms         2.54%      45.903ms       7.650us          6000  
+                                                             aten::add         4.32%     124.312ms         7.00%     201.292ms       5.386us      40.558ms         2.24%      40.571ms       1.086us         37375  
+void at::native::(anonymous namespace)::CatArrayBatchedCopy_vectori...         0.00%       0.000us         0.00%       0.000us       0.000us      32.885ms         1.82%      32.885ms       2.632us         12495  
+----------------------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 2.877s
+Self CUDA time total: 1.809s
+
+TOP BY SELF CPU TIME
+----------------------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                                  Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg    # of Calls  
+----------------------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                      cudaLaunchKernel        19.53%     561.864ms        20.34%     585.127ms       2.148us       0.000us         0.00%     104.961us       0.000us        272365  
+                                                 cudaStreamSynchronize         8.92%     256.608ms         8.92%     256.608ms     258.417us       0.000us         0.00%       0.000us       0.000us           993  
+                                                             aten::mul         8.33%     239.612ms        13.40%     385.434ms       5.597us     126.402ms         6.99%     126.484ms       1.837us         68865  
+                                                             aten::bmm         5.56%     159.829ms         7.02%     202.087ms      16.110us      83.035ms         4.59%      83.314ms       6.642us         12544  
+                                                              aten::mm         5.16%     148.398ms         7.92%     227.797ms       9.174us        1.078s        59.58%        1.079s      43.452us         24832  
+                                                           aten::addmm         4.35%     125.017ms         6.36%     183.020ms       9.929us     183.837ms        10.16%     183.864ms       9.975us         18432  
+                                                             aten::add         4.32%     124.312ms         7.00%     201.292ms       5.386us      40.558ms         2.24%      40.571ms       1.086us         37375  
+                                                             aten::cat         3.45%      99.308ms         5.31%     152.858ms       6.032us      54.675ms         3.02%      54.675ms       2.157us         25342  
+                                                          aten::matmul         2.68%      77.116ms        20.17%     580.305ms      15.526us       0.000us         0.00%        1.163s      31.109us         37376  
+                                                            aten::mean         2.10%      60.325ms         3.27%      94.044ms       7.497us      25.125ms         1.39%      25.158ms       2.006us         12544  
+                                                             aten::pow         2.03%      58.488ms         3.19%      91.708ms       7.311us      11.588ms         0.64%      11.590ms       0.924us         12544  
+                                                          aten::linear         1.77%      50.871ms        20.43%     587.693ms      13.584us       0.000us         0.00%        1.263s      29.190us         43264  
+----------------------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 2.877s
+Self CUDA time total: 1.809s

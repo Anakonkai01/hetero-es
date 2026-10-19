@@ -1,0 +1,22 @@
+{
+  "name": "n8-B2-r1",
+  "outcome": "ok",
+  "wall_seconds": 290.89141488075256,
+  "spec": {
+    "workers": {
+      "worker-5070ti": 1,
+      "worker-1660s": 1
+    },
+    "policy": "proportional",
+    "args": [
+      "--quota",
+      "worker-1660s=2",
+      "--quota",
+      "worker-5070ti=6"
+    ],
+    "quotas": {
+      "worker-5070ti": 6,
+      "worker-1660s": 2
+    }
+  }
+}

@@ -1,0 +1,14 @@
+== artifacts/regression/2026-10-06-manifest-v1-5070ti/5070ti_format2.json vs artifacts/regression/2026-10-05-one-candidate/5070ti.json
+  EQUAL     recipe hash (manifest v1): 1604737ea1d7203062d641381172899356a261748f754a8f3264019ac1b3f5b1
+  EQUAL     weights sha256 perturbed: 8aa3eb9af895cb4a1c7afddc1a6417fd312aa5c8593195f62b5dc0c45126176d
+  base: reward A 0.25 | B 0.25; 0 of 16 output texts differ
+  candidate: reward A 0.3125 | B 0.3125; 0 of 16 output texts differ
+  restored: reward A 0.25 | B 0.25; 0 of 16 output texts differ
+RESULT: every MUST BE EQUAL line is equal
+== artifacts/regression/2026-10-06-manifest-v1-5070ti/5070ti_format2.json vs artifacts/regression/2026-10-06-cross-machine-one-candidate/1660s.json
+  EQUAL     recipe hash (manifest v1): 1604737ea1d7203062d641381172899356a261748f754a8f3264019ac1b3f5b1
+  EQUAL     weights sha256 perturbed: 8aa3eb9af895cb4a1c7afddc1a6417fd312aa5c8593195f62b5dc0c45126176d
+  base: reward A 0.25 | B 0.25; 0 of 16 output texts differ
+  candidate: reward A 0.3125 | B 0.3125; 0 of 16 output texts differ
+  restored: reward A 0.25 | B 0.25; 0 of 16 output texts differ
+RESULT: every MUST BE EQUAL line is equal

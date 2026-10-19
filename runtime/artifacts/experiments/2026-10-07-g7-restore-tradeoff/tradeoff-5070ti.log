@@ -1,0 +1,132 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7411.38it/s]
+A 0 {'perturb': 0.717, 'refresh': 0.004, 'rollout': 2.124, 'back': 0.137, 'total': 2.982} reward 0.8125 differ 0
+A 1 {'perturb': 0.72, 'refresh': 0.004, 'rollout': 4.417, 'back': 0.136, 'total': 5.278} reward 0.78125 differ 0
+A 2 {'perturb': 0.736, 'refresh': 0.004, 'rollout': 3.829, 'back': 0.136, 'total': 4.706} reward 0.71875 differ 0
+A 3 {'perturb': 0.73, 'refresh': 0.004, 'rollout': 4.402, 'back': 0.136, 'total': 5.273} reward 0.34375 differ 0
+A 4 {'perturb': 0.736, 'refresh': 0.004, 'rollout': 4.398, 'back': 0.136, 'total': 5.274} reward 0.71875 differ 0
+A 5 {'perturb': 0.752, 'refresh': 0.004, 'rollout': 4.194, 'back': 0.137, 'total': 5.087} reward 0.84375 differ 0
+A 6 {'perturb': 0.73, 'refresh': 0.004, 'rollout': 4.412, 'back': 0.136, 'total': 5.283} reward 0.65625 differ 0
+A 7 {'perturb': 0.73, 'refresh': 0.004, 'rollout': 3.962, 'back': 0.136, 'total': 4.832} reward 0.5625 differ 0
+A 8 {'perturb': 0.727, 'refresh': 0.004, 'rollout': 4.407, 'back': 0.136, 'total': 5.274} reward 0.21875 differ 0
+A 9 {'perturb': 0.721, 'refresh': 0.004, 'rollout': 3.589, 'back': 0.136, 'total': 4.452} reward 0.875 differ 0
+A 10 {'perturb': 0.7, 'refresh': 0.004, 'rollout': 3.203, 'back': 0.137, 'total': 4.044} reward 0.84375 differ 0
+A 11 {'perturb': 0.724, 'refresh': 0.004, 'rollout': 4.125, 'back': 0.138, 'total': 4.992} reward 0.8125 differ 0
+A 12 {'perturb': 0.745, 'refresh': 0.004, 'rollout': 2.901, 'back': 0.137, 'total': 3.786} reward 0.65625 differ 0
+A 13 {'perturb': 0.723, 'refresh': 0.004, 'rollout': 4.125, 'back': 0.142, 'total': 4.994} reward 0.65625 differ 0
+A 14 {'perturb': 0.725, 'refresh': 0.004, 'rollout': 4.404, 'back': 0.137, 'total': 5.27} reward 0.5625 differ 0
+A 15 {'perturb': 0.741, 'refresh': 0.004, 'rollout': 2.855, 'back': 0.136, 'total': 3.737} reward 0.71875 differ 0
+A 16 {'perturb': 0.73, 'refresh': 0.004, 'rollout': 4.406, 'back': 0.137, 'total': 5.277} reward 0.40625 differ 0
+A 17 {'perturb': 0.736, 'refresh': 0.004, 'rollout': 4.42, 'back': 0.137, 'total': 5.297} reward 0.53125 differ 0
+A 18 {'perturb': 0.73, 'refresh': 0.004, 'rollout': 4.012, 'back': 0.137, 'total': 4.884} reward 0.875 differ 0
+A 19 {'perturb': 0.696, 'refresh': 0.004, 'rollout': 4.413, 'back': 0.138, 'total': 5.251} reward 0.6875 differ 0
+A 20 {'perturb': 0.74, 'refresh': 0.004, 'rollout': 4.397, 'back': 0.136, 'total': 5.277} reward 0.59375 differ 0
+A 21 {'perturb': 0.727, 'refresh': 0.004, 'rollout': 4.422, 'back': 0.136, 'total': 5.289} reward 0.65625 differ 0
+A 22 {'perturb': 0.721, 'refresh': 0.004, 'rollout': 3.511, 'back': 0.137, 'total': 4.373} reward 0.75 differ 0
+A 23 {'perturb': 0.709, 'refresh': 0.004, 'rollout': 4.397, 'back': 0.136, 'total': 5.247} reward 0.71875 differ 0
+B 0 {'perturb': 0.732, 'refresh': 0.004, 'rollout': 2.131, 'back': 0.716, 'total': 3.583} reward 0.8125 differ 26036020
+B 1 {'perturb': 0.712, 'refresh': 0.004, 'rollout': 4.406, 'back': 0.737, 'total': 5.86} reward 0.78125 differ 42725533
+B 2 {'perturb': 0.741, 'refresh': 0.004, 'rollout': 3.825, 'back': 0.746, 'total': 5.316} reward 0.71875 differ 54948168
+B 3 {'perturb': 0.693, 'refresh': 0.004, 'rollout': 4.388, 'back': 0.746, 'total': 5.831} reward 0.34375 differ 64456397
+B 4 {'perturb': 0.722, 'refresh': 0.004, 'rollout': 4.38, 'back': 0.708, 'total': 5.816} reward 0.75 differ 72142475
+B 5 {'perturb': 0.737, 'refresh': 0.004, 'rollout': 4.175, 'back': 0.737, 'total': 5.654} reward 0.84375 differ 78533248
+B 6 {'perturb': 0.722, 'refresh': 0.004, 'rollout': 4.398, 'back': 0.725, 'total': 5.849} reward 0.65625 differ 83956713
+B 7 {'perturb': 0.738, 'refresh': 0.004, 'rollout': 3.952, 'back': 0.742, 'total': 5.437} reward 0.5625 differ 88652358
+B 8 {'perturb': 0.719, 'refresh': 0.004, 'rollout': 4.332, 'back': 0.746, 'total': 5.801} reward 0.21875 differ 92764545
+B 9 {'perturb': 0.725, 'refresh': 0.004, 'rollout': 3.573, 'back': 0.746, 'total': 5.049} reward 0.875 differ 96413194
+B 10 {'perturb': 0.74, 'refresh': 0.004, 'rollout': 3.184, 'back': 0.749, 'total': 4.678} reward 0.84375 differ 99689784
+B 11 {'perturb': 0.737, 'refresh': 0.004, 'rollout': 4.11, 'back': 0.721, 'total': 5.572} reward 0.8125 differ 102646431
+B 12 {'perturb': 0.728, 'refresh': 0.004, 'rollout': 2.896, 'back': 0.718, 'total': 4.347} reward 0.65625 differ 105344420
+B 13 {'perturb': 0.736, 'refresh': 0.004, 'rollout': 4.112, 'back': 0.716, 'total': 5.569} reward 0.65625 differ 107814893
+B 14 {'perturb': 0.734, 'refresh': 0.004, 'rollout': 4.414, 'back': 0.727, 'total': 5.879} reward 0.53125 differ 110101797
+B 15 {'perturb': 0.731, 'refresh': 0.004, 'rollout': 2.833, 'back': 0.696, 'total': 4.264} reward 0.71875 differ 112215874
+B 16 {'perturb': 0.741, 'refresh': 0.004, 'rollout': 4.392, 'back': 0.713, 'total': 5.85} reward 0.40625 differ 114190852
+B 17 {'perturb': 0.73, 'refresh': 0.004, 'rollout': 4.39, 'back': 0.74, 'total': 5.864} reward 0.53125 differ 116032047
+B 18 {'perturb': 0.742, 'refresh': 0.004, 'rollout': 4.003, 'back': 0.731, 'total': 5.48} reward 0.875 differ 117762140
+B 19 {'perturb': 0.739, 'refresh': 0.004, 'rollout': 4.386, 'back': 0.732, 'total': 5.862} reward 0.6875 differ 119392313
+B 20 {'perturb': 0.751, 'refresh': 0.004, 'rollout': 4.389, 'back': 0.748, 'total': 5.893} reward 0.59375 differ 120931940
+B 21 {'perturb': 0.719, 'refresh': 0.004, 'rollout': 4.401, 'back': 0.72, 'total': 5.845} reward 0.65625 differ 122383428
+B 22 {'perturb': 0.689, 'refresh': 0.004, 'rollout': 3.496, 'back': 0.735, 'total': 4.924} reward 0.75 differ 123764948
+B 23 {'perturb': 0.732, 'refresh': 0.004, 'rollout': 4.385, 'back': 0.717, 'total': 5.838} reward 0.71875 differ 125083778
+C 0 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 2.541, 'back': 0.009, 'total': 2.563} reward 0.65625 differ 26047966
+C 1 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 4.399, 'back': 0.009, 'total': 4.421} reward 0.71875 differ 42735825
+C 2 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 3.393, 'back': 0.009, 'total': 3.415} reward 0.90625 differ 54953455
+C 3 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 3.158, 'back': 0.009, 'total': 3.18} reward 0.84375 differ 64460978
+C 4 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 1.5, 'back': 0.009, 'total': 1.522} reward 0.65625 differ 72148845
+C 5 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 3.805, 'back': 0.009, 'total': 3.827} reward 0.8125 differ 78539365
+C 6 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 3.412, 'back': 0.009, 'total': 3.434} reward 0.78125 differ 83961227
+C 7 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 3.785, 'back': 0.009, 'total': 3.807} reward 0.90625 differ 88653189
+C 8 {'perturb': 0.011, 'refresh': 0.004, 'rollout': 3.327, 'back': 0.009, 'total': 3.352} reward 0.875 differ 92764358
+C 9 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 2.915, 'back': 0.009, 'total': 2.937} reward 0.65625 differ 96411155
+C 10 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 4.403, 'back': 0.009, 'total': 4.425} reward 0.28125 differ 99686085
+C 11 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 4.413, 'back': 0.009, 'total': 4.435} reward 0.75 differ 102646242
+C 12 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 4.133, 'back': 0.009, 'total': 4.155} reward 0.90625 differ 105345223
+C 13 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 4.169, 'back': 0.009, 'total': 4.191} reward 0.71875 differ 107820656
+C 14 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 4.409, 'back': 0.009, 'total': 4.431} reward 0.65625 differ 110105384
+C 15 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 3.858, 'back': 0.009, 'total': 3.88} reward 0.78125 differ 112222008
+C 16 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 3.907, 'back': 0.009, 'total': 3.929} reward 0.78125 differ 114195520
+C 17 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 3.69, 'back': 0.009, 'total': 3.712} reward 0.8125 differ 116040505
+C 18 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 4.395, 'back': 0.009, 'total': 4.417} reward 0.40625 differ 117779018
+C 19 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 3.373, 'back': 0.009, 'total': 3.395} reward 0.65625 differ 119406699
+C 20 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 4.292, 'back': 0.009, 'total': 4.314} reward 0.78125 differ 120943722
+C 21 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 3.78, 'back': 0.009, 'total': 3.802} reward 0.78125 differ 122390840
+C 22 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 4.15, 'back': 0.009, 'total': 4.172} reward 0.6875 differ 123772529
+C 23 {'perturb': 0.009, 'refresh': 0.004, 'rollout': 2.457, 'back': 0.009, 'total': 2.48} reward 0.09375 differ 125080011
+{
+ "A": {
+  "median_seconds": {
+   "perturb": 0.7282768269978988,
+   "refresh": 0.004286062998289708,
+   "rollout": 4.295484837000913,
+   "back": 0.1365094164993934,
+   "total": 5.167116045498915
+  },
+  "final_drift": {
+   "elements_differing": 0,
+   "fraction_differing": 0.0,
+   "max_abs_diff": 0.0,
+   "relative_l2": 0.0
+  },
+  "base": [
+   0.28125,
+   0.28125
+  ]
+ },
+ "B": {
+  "median_seconds": {
+   "perturb": 0.7316237545001059,
+   "refresh": 0.004289148002499132,
+   "rollout": 4.253463674998784,
+   "back": 0.7314460680008779,
+   "total": 5.72780577750018
+  },
+  "final_drift": {
+   "elements_differing": 125083778,
+   "fraction_differing": 0.25318923379592506,
+   "max_abs_diff": 0.00390625,
+   "relative_l2": 0.0001362194919434862
+  },
+  "base": [
+   0.28125,
+   0.28125
+  ]
+ },
+ "C": {
+  "median_seconds": {
+   "perturb": 0.009017546501127072,
+   "refresh": 0.004298701000152505,
+   "rollout": 3.7950128600004973,
+   "back": 0.008826172997942194,
+   "total": 3.817105830499713
+  },
+  "final_drift": {
+   "elements_differing": 125080011,
+   "fraction_differing": 0.25318160879563356,
+   "max_abs_diff": 0.00390625,
+   "relative_l2": 0.00013583106094886658
+  },
+  "base": [
+   0.28125,
+   0.28125
+  ]
+ }
+}

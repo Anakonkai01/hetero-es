@@ -1,0 +1,16 @@
+{
+  "name": "n8-H0-r1",
+  "outcome": "ok",
+  "wall_seconds": 256.09829211235046,
+  "spec": {
+    "workers": {
+      "worker-5070ti": 16
+    },
+    "policy": "greedy",
+    "args": [
+      "--admit",
+      "worker-5070ti"
+    ],
+    "admission_state": "ELIGIBLE_BUT_NOT_BENEFICIAL"
+  }
+}

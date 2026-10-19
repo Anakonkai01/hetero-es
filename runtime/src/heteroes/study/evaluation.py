@@ -1,0 +1,66 @@
+"""Greedy accuracy and sampled pass@k are recorded separately, with raw outputs."""
+from collections import Counter
+import math
+import re
+from .data import answer,sha
+
+
+def extract(text):
+    matches=re.findall(r'Answer:\s*\$?\s*(-?\d[\d,]*(?:\.\d+)?)',text)
+    if not matches:matches=re.findall(r'-?\d[\d,]*(?:\.\d+)?',text)
+    if not matches:return None
+    try:return answer(matches[-1])
+    except ValueError:return None
+
+
+def pass_at_k(total,correct,k):
+    if any(type(v) is not int for v in (total,correct,k)) or not 0<=correct<=total or not 1<=k<=total:
+        raise ValueError('Invalid pass@k sample counts')
+    return 1.0 if total-correct<k else 1-math.comb(total-correct,k)/math.comb(total,k)
+
+
+def sampled_metrics(predictions,expected,ks=(1,16,32)):
+    if not predictions:raise ValueError('Sampled predictions are empty')
+    counts=Counter(p for p in predictions if p is not None)
+    # Stable lexicographic answer tie break, defined in the report.
+    majority=min(counts,key=lambda p:(-counts[p],p)) if counts else None
+    correct=sum(p==expected for p in predictions)
+    return {'samples':len(predictions),'correct':correct,'passAtK':{str(k):pass_at_k(len(predictions),correct,k) for k in ks},
+            'majorityAnswer':majority,'majorityCorrect':majority==expected}
+
+
+def generate_rows(model,tokenizer,rows,evaluation,chunk=16,*,sample=False,seed=11,temperature=.6):
+    import torch
+    if type(chunk) is not int or chunk<1:raise ValueError('Invalid decoding chunk')
+    device=next(model.parameters()).device
+    previous=tokenizer.padding_side;tokenizer.padding_side='left'
+    output=[]
+    try:
+        for offset in range(0,len(rows),chunk):
+            group=rows[offset:offset+chunk]
+            prompts=[tokenizer.apply_chat_template([{'role':'system','content':evaluation['systemPrompt']},{'role':'user','content':r['prompt']}],tokenize=False,add_generation_prompt=True) for r in group]
+            inputs={k:v.to(device) for k,v in tokenizer(prompts,return_tensors='pt',padding=True).items()}
+            devices=[device.index or 0] if device.type=='cuda' else []
+            with torch.random.fork_rng(devices=devices),torch.no_grad():
+                torch.manual_seed(seed+offset)
+                options={'temperature':temperature} if sample else {}
+                ids=model.generate(**inputs,max_new_tokens=evaluation['maxNewTokens'],do_sample=sample,**options)
+            new=ids[:,inputs['input_ids'].shape[1]:]
+            texts=tokenizer.batch_decode(new,skip_special_tokens=True)
+            eos=model.generation_config.eos_token_id
+            eos_ids={eos} if isinstance(eos,int) else set(eos or [])
+            for row,text,tokens in zip(group,texts,new,strict=True):
+                prediction=extract(text)
+                truncated=len(tokens)>=evaluation['maxNewTokens'] and not any(int(t) in eos_ids for t in tokens)
+                output.append({'prompt':row['prompt'],'expected':row['answer'],'output':text,'prediction':prediction,
+                    'correct':prediction==row['answer'],'parseError':prediction is None,'truncated':truncated})
+    finally:tokenizer.padding_side=previous
+    return output
+
+
+def evaluate(model,tokenizer,rows,evaluation,chunk=16):
+    if not rows:raise ValueError('Cannot evaluate an empty split')
+    raw=generate_rows(model,tokenizer,rows,evaluation,chunk)
+    return {'accuracy':sum(r['correct'] for r in raw)/len(raw),'rows':raw,'count':len(raw),
+            'parseErrors':sum(r['parseError'] for r in raw),'truncations':sum(r['truncated'] for r in raw),
+            'rowsHash':sha(rows),'decoder':'greedy','evaluation':evaluation}

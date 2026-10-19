@@ -1,0 +1,123 @@
+{
+  "milestone": "M1 lab operations",
+  "date": "2026-10-10",
+  "scope": "Local private Linux integration; M2\u2013M6 remain planned",
+  "branches": {
+    "runtime": "feat/lab-operations-control",
+    "product": "feat/lab-operations-product"
+  },
+  "checks": {
+    "runtimeFullCpu": {
+      "passed": 2143,
+      "skipped": 21
+    },
+    "productBackend": {
+      "passed": 45,
+      "knownDeprecationWarnings": 1
+    },
+    "frontendBuild": true,
+    "frontendLint": true,
+    "explicitMockBehaviorGroupsPassed": 22
+  },
+  "migration": {
+    "originalExperimentsPreserved": 14,
+    "rowsFifoSessionsPasswordHashesPreserved": true,
+    "preservedSha256": "efcc1b864abaf5819379940a7bac8c2420b803d607f8643d503add9064938490"
+  },
+  "scratchMutationChecks": [
+    {
+      "mutation": "workspace",
+      "caught": true
+    },
+    {
+      "mutation": "maintenance",
+      "caught": true
+    }
+  ],
+  "realBrowser": {
+    "userId": "7b4d5c8c0a414754b72473b2f1b41d18",
+    "workspaceId": "1e6d961e3eca448db59d6db1634ac435",
+    "runId": "57e1c1a47cb34fefa880d26de6ab65db",
+    "gpuRun": true,
+    "browserErrors": [],
+    "registrationApproval": true,
+    "workspaceCreation": true,
+    "invitationAcceptance": true,
+    "ownerIsolation": true,
+    "sessionRevocation": true
+  },
+  "twoGpuRun": {
+    "runId": "096b09ec03ab4d8b9ca189596593db3a",
+    "status": "COMPLETED",
+    "acceptedResultsByWorker": {
+      "3060": 7,
+      "5070ti": 17
+    },
+    "publishedGenerations": 3,
+    "checkpointSha256": "987541249378460c668ff9865cbcc5823331eddae4bdfbebd87a532977b96c38",
+    "workerStates": {
+      "5070ti": {
+        "alive": false,
+        "ready": true,
+        "confirmed": true
+      },
+      "3060": {
+        "alive": false,
+        "ready": true,
+        "confirmed": true
+      }
+    },
+    "wallSeconds": 60.636231660842896,
+    "requiredTwoGpuAcceptance": true
+  },
+  "backupRestore": {
+    "backupId": "fc5cb60488384b5f8927d22bb0d426ee",
+    "bundleSha256": "d5484af45c8f183b3c70085d84cc9657054efe8c5b0b99e49aada202952bc856",
+    "sizeBytes": 33597880320,
+    "experimentCount": 16,
+    "retainedCheckpointReferences": 13,
+    "historicalTablesPreserved": true,
+    "sessionsRevoked": true,
+    "queueHeld": true,
+    "newRuntimeToken": true,
+    "separateProcessAndWorkerDirectories": true,
+    "oldProcessRecordsAbsent": true,
+    "originalDeploymentRunning": true,
+    "wallSeconds": 2477.587188720703
+  },
+  "coldBoot": {
+    "realColdBoot": true,
+    "loginWithPreservedPassword": true,
+    "queueHeld": true,
+    "historicalRunId": "096b09ec03ab4d8b9ca189596593db3a",
+    "publishedGenerations": 3,
+    "checkpointDownloadSha256": "987541249378460c668ff9865cbcc5823331eddae4bdfbebd87a532977b96c38",
+    "historicalExperimentCount": 16,
+    "noHistoricalProcessRecords": true,
+    "noGpuJobsLaunched": true
+  },
+  "nativeBrowserBackupDownload": {
+    "authorized": true,
+    "streamedWithoutJavaScriptBlob": true,
+    "cancelledImmediatelyToAvoidDuplicateArchive": true
+  },
+  "cleanup": {
+    "restoredAuxiliaryServicesStopped": true,
+    "browserAcceptanceAccountSuspended": true,
+    "remote3060ReturnedToLab": true,
+    "originalDataPreserved": true
+  },
+  "gpuBudget": {
+    "originalHours": 2,
+    "conservativeConsumedHours": 0.6056311030520334,
+    "remainingHours": 1.3943688969479666,
+    "runtimeRunCount": 14
+  },
+  "limits": [
+    "Optional 1660S unavailable/unvalidated",
+    "Manual startup and static SSH worker configuration",
+    "One global active run",
+    "No push, merge, tag or public deployment",
+    "Transfer retirement and final-checksum hold refinements were CPU-tested after the full-size restore campaign"
+  ]
+}

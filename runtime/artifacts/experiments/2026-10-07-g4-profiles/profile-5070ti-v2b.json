@@ -1,0 +1,365 @@
+{
+  "format": 1,
+  "worker_id": "worker-5070ti",
+  "measured_at_unix": 1791321720.6295626,
+  "measured_at_utc": "2026-10-06T21:22:00Z",
+  "key": {
+    "gpu_name": "NVIDIA GeForce RTX 5070 Ti",
+    "gpu_capability": [
+      12,
+      0
+    ],
+    "gpu_total_memory_bytes": 16608133120,
+    "nvidia_driver": "595.91.07",
+    "torch": "2.10.0+cu128",
+    "torch_cuda": "12.8",
+    "numpy": "2.4.5",
+    "transformers": "5.5.0",
+    "python": "3.12.13",
+    "device": "cuda",
+    "recipe_hash": "1604737ea1d7203062d641381172899356a261748f754a8f3264019ac1b3f5b1",
+    "schema_hash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+    "workload_hash": "cad822bc1e65a9ec37d948e5415cff22c70f96500e2043e6299bbdd5cea0b8d5"
+  },
+  "key_hash": "21676dc60130090868c93d4ca8470161f4000205ff8ce9c3596808db3ee0040f",
+  "environment": {
+    "hostname": "5070ti",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "python": "3.12.13",
+    "torch": "2.10.0+cu128",
+    "torch_cuda": "12.8",
+    "numpy": "2.4.5",
+    "transformers": "5.5.0",
+    "device": "cuda",
+    "gpu_name": "NVIDIA GeForce RTX 5070 Ti",
+    "gpu_capability": [
+      12,
+      0
+    ],
+    "gpu_total_memory_bytes": 16608133120,
+    "nvidia_driver": "595.91.07"
+  },
+  "code": {
+    "git_commit": "c466a54d58b0b60c575c36d4cdf8374a49245958",
+    "git_dirty": true
+  },
+  "recipe_hash": "1604737ea1d7203062d641381172899356a261748f754a8f3264019ac1b3f5b1",
+  "parent_weights_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+  "sigma": 0.001,
+  "checks": {
+    "noise_selftest": true,
+    "restore_exact": true,
+    "chunk1_reproduces_reference": true
+  },
+  "noise_selftest_seconds": 0.00823147200026142,
+  "chunk_probes": [
+    {
+      "chunk": 1,
+      "ran": true,
+      "identical": true,
+      "seconds": 0.7668080712122018,
+      "peak_bytes": 1008863744,
+      "error": null,
+      "differing": []
+    },
+    {
+      "chunk": 2,
+      "ran": true,
+      "identical": false,
+      "seconds": 0.49735719272708095,
+      "peak_bytes": 1011830272,
+      "error": null,
+      "differing": [
+        [
+          2,
+          8
+        ],
+        [
+          7,
+          12
+        ],
+        [
+          9,
+          8
+        ],
+        [
+          11,
+          15
+        ],
+        [
+          14,
+          12
+        ],
+        [
+          22,
+          5
+        ],
+        [
+          23,
+          6
+        ],
+        [
+          24,
+          7
+        ],
+        [
+          27,
+          7
+        ],
+        [
+          29,
+          10
+        ],
+        [
+          31,
+          9
+        ]
+      ]
+    },
+    {
+      "chunk": 4,
+      "ran": true,
+      "identical": false,
+      "seconds": 0.30462988236357696,
+      "peak_bytes": 1017763328,
+      "error": null,
+      "differing": [
+        [
+          2,
+          12
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          7,
+          12
+        ],
+        [
+          9,
+          8
+        ],
+        [
+          19,
+          13
+        ],
+        [
+          23,
+          6
+        ],
+        [
+          24,
+          7
+        ],
+        [
+          27,
+          6
+        ],
+        [
+          27,
+          7
+        ],
+        [
+          29,
+          8
+        ]
+      ]
+    },
+    {
+      "chunk": 8,
+      "ran": true,
+      "identical": false,
+      "seconds": 0.1796160406666979,
+      "peak_bytes": 1029924864,
+      "error": null,
+      "differing": [
+        [
+          0,
+          5
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          16,
+          8
+        ],
+        [
+          19,
+          13
+        ],
+        [
+          23,
+          6
+        ],
+        [
+          24,
+          7
+        ],
+        [
+          27,
+          6
+        ],
+        [
+          27,
+          7
+        ],
+        [
+          29,
+          10
+        ],
+        [
+          30,
+          5
+        ],
+        [
+          31,
+          9
+        ]
+      ]
+    },
+    {
+      "chunk": 16,
+      "ran": true,
+      "identical": false,
+      "seconds": 0.12357019387877011,
+      "peak_bytes": 1053359616,
+      "error": null,
+      "differing": [
+        [
+          4,
+          5
+        ],
+        [
+          11,
+          9
+        ],
+        [
+          11,
+          15
+        ],
+        [
+          15,
+          7
+        ],
+        [
+          16,
+          12
+        ],
+        [
+          18,
+          4
+        ],
+        [
+          18,
+          12
+        ],
+        [
+          22,
+          5
+        ],
+        [
+          25,
+          12
+        ],
+        [
+          27,
+          7
+        ],
+        [
+          29,
+          10
+        ],
+        [
+          30,
+          5
+        ],
+        [
+          31,
+          9
+        ],
+        [
+          32,
+          12
+        ]
+      ]
+    }
+  ],
+  "safe_chunk": 1,
+  "candidate_times": {
+    "1": {
+      "chunk": 1,
+      "raw": [
+        {
+          "perturb": 3.6713034929998685,
+          "rollout": 0.8091337680016295,
+          "restore": 0.1366311029996723,
+          "total": 4.61706836400117
+        },
+        {
+          "perturb": 3.668456494999191,
+          "rollout": 0.7223210590000235,
+          "restore": 0.1358965960007481,
+          "total": 4.5266741499999625
+        },
+        {
+          "perturb": 3.6659489829999075,
+          "rollout": 0.502383323999311,
+          "restore": 0.13633970500086434,
+          "total": 4.304672012000083
+        },
+        {
+          "perturb": 3.6668977400004223,
+          "rollout": 0.7881357209989801,
+          "restore": 0.1386821329997474,
+          "total": 4.59371559399915
+        },
+        {
+          "perturb": 3.660736612000619,
+          "rollout": 0.7193070749999606,
+          "restore": 0.1358765240001958,
+          "total": 4.5159202110007755
+        }
+      ],
+      "samples": 5,
+      "total_median": 4.5266741499999625,
+      "total_min": 4.304672012000083,
+      "total_max": 4.61706836400117,
+      "phases_median": {
+        "perturb": 3.6668977400004223,
+        "rollout": 0.7223210590000235,
+        "restore": 0.13633970500086434
+      },
+      "peak_bytes": 1072999424
+    }
+  },
+  "candidate_seconds_at_safe_chunk": 4.5266741499999625,
+  "candidate_seconds_at_chunk_1": 4.5266741499999625,
+  "peak_bytes_candidate": 1072999424,
+  "sync": null,
+  "update": {
+    "seconds_per_candidate_median": 4.245271552999839,
+    "raw": [
+      4.245271552999839,
+      4.233024230999945,
+      4.248651488000178
+    ],
+    "publish_seconds": 0.6180715640002745
+  },
+  "args": {
+    "model_path": "/home/pc5070ti/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775",
+    "worker_id": "worker-5070ti",
+    "out": "artifacts/experiments/2026-10-07-g4-profiles/profile-5070ti-v2b.json",
+    "chunks": "1,2,4,8,16",
+    "candidates": 5,
+    "probe_candidates": 32,
+    "sigma": 0.001,
+    "sync_url": null,
+    "sync_sha256": null,
+    "sync_dir": "/home/pc5070ti/.cache/heteroes/profile-sync",
+    "measure_update": true,
+    "device": null
+  }
+}

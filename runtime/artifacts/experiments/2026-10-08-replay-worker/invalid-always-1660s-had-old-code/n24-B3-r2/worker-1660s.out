@@ -1,0 +1,10 @@
+usage: run_worker.py [-h] --model-path MODEL_PATH
+                     --coordinator-url COORDINATOR_URL --worker-id WORKER_ID
+                     --log LOG [--cache-dir CACHE_DIR] [--device {cuda,cpu}]
+                     [--token-env TOKEN_ENV] [--chunk CHUNK]
+                     [--poll-seconds POLL_SECONDS]
+                     [--give-up-after-seconds GIVE_UP_AFTER_SECONDS]
+                     [--noise-threads NOISE_THREADS]
+                     [--http-timeout-seconds HTTP_TIMEOUT_SECONDS]
+                     [--startup-timeout-seconds STARTUP_TIMEOUT_SECONDS]
+run_worker.py: error: unrecognized arguments: --replay always --replay-verify-every 1

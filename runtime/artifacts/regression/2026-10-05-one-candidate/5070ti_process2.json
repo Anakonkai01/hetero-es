@@ -1,0 +1,874 @@
+{
+  "format_version": 1,
+  "environment": {
+    "hostname": "5070ti",
+    "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43",
+    "python": "3.12.13",
+    "torch": "2.10.0+cu128",
+    "torch_cuda": "12.8",
+    "numpy": "2.4.5",
+    "transformers": "5.5.0",
+    "device": "cuda",
+    "gpu_name": "NVIDIA GeForce RTX 5070 Ti",
+    "gpu_capability": [
+      12,
+      0
+    ],
+    "gpu_total_memory_bytes": 16611278848,
+    "nvidia_driver": "595.91.07"
+  },
+  "code": {
+    "git_commit": "30275cd5c5186849f7168eba9b3f2c9a892664aa",
+    "git_dirty": true
+  },
+  "model": {
+    "path": "/home/pc5070ti/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775",
+    "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+    "tokenizer_revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+    "dtype": "torch.float16",
+    "generation_config": {
+      "max_length": null,
+      "max_new_tokens": null,
+      "min_length": null,
+      "min_new_tokens": null,
+      "early_stopping": null,
+      "max_time": null,
+      "stop_strings": null,
+      "do_sample": true,
+      "num_beams": null,
+      "use_cache": null,
+      "cache_implementation": null,
+      "cache_config": null,
+      "temperature": 0.7,
+      "top_k": 20,
+      "top_p": 0.8,
+      "min_p": null,
+      "top_h": null,
+      "typical_p": null,
+      "epsilon_cutoff": null,
+      "eta_cutoff": null,
+      "repetition_penalty": 1.1,
+      "encoder_repetition_penalty": null,
+      "length_penalty": null,
+      "no_repeat_ngram_size": null,
+      "bad_words_ids": null,
+      "renormalize_logits": null,
+      "forced_bos_token_id": null,
+      "forced_eos_token_id": null,
+      "remove_invalid_values": null,
+      "exponential_decay_length_penalty": null,
+      "suppress_tokens": null,
+      "begin_suppress_tokens": null,
+      "sequence_bias": null,
+      "token_healing": null,
+      "guidance_scale": null,
+      "watermarking_config": null,
+      "num_return_sequences": null,
+      "output_attentions": null,
+      "output_hidden_states": null,
+      "output_scores": null,
+      "output_logits": null,
+      "return_dict_in_generate": null,
+      "pad_token_id": 151643,
+      "bos_token_id": 151643,
+      "eos_token_id": [
+        151645,
+        151643
+      ],
+      "encoder_no_repeat_ngram_size": null,
+      "decoder_start_token_id": null,
+      "is_assistant": null,
+      "num_assistant_tokens": null,
+      "num_assistant_tokens_schedule": null,
+      "assistant_confidence_threshold": null,
+      "prompt_lookup_num_tokens": null,
+      "max_matching_ngram_size": null,
+      "assistant_early_exit": null,
+      "assistant_lookbehind": null,
+      "target_lookbehind": null,
+      "compile_config": null,
+      "disable_compile": null,
+      "continuous_batching_config": null,
+      "low_memory": null,
+      "penalty_alpha": null,
+      "dola_layers": null,
+      "diversity_penalty": null,
+      "num_beam_groups": null,
+      "constraints": null,
+      "force_words_ids": null,
+      "prefill_chunk_size": null,
+      "_from_model_config": null,
+      "transformers_version": "5.5.0"
+    },
+    "generation_config_sha256": "05744820d4b6cd4285ba6cc04c48f5a6a547151423389144554e2c558eb4a70e"
+  },
+  "runs": [
+    {
+      "seed": 0,
+      "sigma": 0.001,
+      "sigma_float32": 0.0010000000474974513,
+      "chunk_elements": 262144,
+      "schema_hash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+      "engine_version": "numpy_pcg64_normal_f32_to_f16_v1",
+      "workload_hash": "cad822bc1e65a9ec37d948e5415cff22c70f96500e2043e6299bbdd5cea0b8d5",
+      "weights_sha256": {
+        "original": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+        "perturbed": "8aa3eb9af895cb4a1c7afddc1a6417fd312aa5c8593195f62b5dc0c45126176d",
+        "restored": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7"
+      },
+      "restored_equals_original": true,
+      "evaluation": {
+        "base": {
+          "mean_reward": 0.25,
+          "records": [
+            {
+              "question": "What is 17 + 24?",
+              "expected": 41,
+              "output_text": "41",
+              "prediction": 41,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 6 * 8?",
+              "expected": 48,
+              "output_text": "48",
+              "prediction": 48,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 91 - 37?",
+              "expected": 54,
+              "output_text": "54",
+              "prediction": 54,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 12 * 13?",
+              "expected": 156,
+              "output_text": "156",
+              "prediction": 156,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 137 * 46?",
+              "expected": 6302,
+              "output_text": "6292",
+              "prediction": 6292,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 375 + 918 - 427?",
+              "expected": 866,
+              "output_text": "664",
+              "prediction": 664,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 23 * 17 + 48?",
+              "expected": 439,
+              "output_text": "509",
+              "prediction": 509,
+              "reward": 0.0
+            },
+            {
+              "question": "What is (144 / 12) * 37?",
+              "expected": 444,
+              "output_text": "589",
+              "prediction": 589,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 218 * 37?",
+              "expected": 8066,
+              "output_text": "7906",
+              "prediction": 7906,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 84 * 19 - 76?",
+              "expected": 1520,
+              "output_text": "1302",
+              "prediction": 1302,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 312 * 27 - 145?",
+              "expected": 8279,
+              "output_text": "8095",
+              "prediction": 8095,
+              "reward": 0.0
+            },
+            {
+              "question": "What is (73 + 29) * 18?",
+              "expected": 1836,
+              "output_text": "(73 + 29) * 18 = 10",
+              "prediction": 10,
+              "reward": 0.0
+            },
+            {
+              "question": "A shop has 48 boxes with 36 pens in each box. It sells 725 pens. How many pens remain?",
+              "expected": 1003,
+              "output_text": "To find out how many pens remain, we need to subtract the number of pens",
+              "prediction": null,
+              "reward": 0.0
+            },
+            {
+              "question": "A school buys 36 packs of notebooks with 24 notebooks per pack. It distributes 579 notebooks. How many remain?",
+              "expected": 285,
+              "output_text": "To determine how many notebooks remain, we need to follow these steps:\n\n1.",
+              "prediction": 1,
+              "reward": 0.0
+            },
+            {
+              "question": "A train travels 72 km per hour for 5 hours, then another 148 km. What is the total distance?",
+              "expected": 508,
+              "output_text": "To find the total distance traveled by the train, we need to calculate the distance",
+              "prediction": null,
+              "reward": 0.0
+            },
+            {
+              "question": "A factory makes 125 items per hour for 18 hours. 347 items are defective. How many usable items remain?",
+              "expected": 1903,
+              "output_text": "To find the number of usable items remaining, we need to follow these steps:",
+              "prediction": null,
+              "reward": 0.0
+            }
+          ]
+        },
+        "candidate": {
+          "mean_reward": 0.3125,
+          "records": [
+            {
+              "question": "What is 17 + 24?",
+              "expected": 41,
+              "output_text": "41",
+              "prediction": 41,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 6 * 8?",
+              "expected": 48,
+              "output_text": "48",
+              "prediction": 48,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 91 - 37?",
+              "expected": 54,
+              "output_text": "54",
+              "prediction": 54,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 12 * 13?",
+              "expected": 156,
+              "output_text": "156",
+              "prediction": 156,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 137 * 46?",
+              "expected": 6302,
+              "output_text": "6298",
+              "prediction": 6298,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 375 + 918 - 427?",
+              "expected": 866,
+              "output_text": "670",
+              "prediction": 670,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 23 * 17 + 48?",
+              "expected": 439,
+              "output_text": "509",
+              "prediction": 509,
+              "reward": 0.0
+            },
+            {
+              "question": "What is (144 / 12) * 37?",
+              "expected": 444,
+              "output_text": "580",
+              "prediction": 580,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 218 * 37?",
+              "expected": 8066,
+              "output_text": "8409",
+              "prediction": 8409,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 84 * 19 - 76?",
+              "expected": 1520,
+              "output_text": "1520",
+              "prediction": 1520,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 312 * 27 - 145?",
+              "expected": 8279,
+              "output_text": "8097",
+              "prediction": 8097,
+              "reward": 0.0
+            },
+            {
+              "question": "What is (73 + 29) * 18?",
+              "expected": 1836,
+              "output_text": "(73 + 29) * 18 = 10",
+              "prediction": 10,
+              "reward": 0.0
+            },
+            {
+              "question": "A shop has 48 boxes with 36 pens in each box. It sells 725 pens. How many pens remain?",
+              "expected": 1003,
+              "output_text": "To find out how many pens remain, you can subtract the number of pens sold",
+              "prediction": null,
+              "reward": 0.0
+            },
+            {
+              "question": "A school buys 36 packs of notebooks with 24 notebooks per pack. It distributes 579 notebooks. How many remain?",
+              "expected": 285,
+              "output_text": "To determine how many notebooks remain after distributing them, we can follow these steps:",
+              "prediction": null,
+              "reward": 0.0
+            },
+            {
+              "question": "A train travels 72 km per hour for 5 hours, then another 148 km. What is the total distance?",
+              "expected": 508,
+              "output_text": "To find the total distance traveled by the train, you need to add the distances",
+              "prediction": null,
+              "reward": 0.0
+            },
+            {
+              "question": "A factory makes 125 items per hour for 18 hours. 347 items are defective. How many usable items remain?",
+              "expected": 1903,
+              "output_text": "To find the number of usable items, we need to subtract the number of defective",
+              "prediction": null,
+              "reward": 0.0
+            }
+          ]
+        },
+        "restored": {
+          "mean_reward": 0.25,
+          "records": [
+            {
+              "question": "What is 17 + 24?",
+              "expected": 41,
+              "output_text": "41",
+              "prediction": 41,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 6 * 8?",
+              "expected": 48,
+              "output_text": "48",
+              "prediction": 48,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 91 - 37?",
+              "expected": 54,
+              "output_text": "54",
+              "prediction": 54,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 12 * 13?",
+              "expected": 156,
+              "output_text": "156",
+              "prediction": 156,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 137 * 46?",
+              "expected": 6302,
+              "output_text": "6292",
+              "prediction": 6292,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 375 + 918 - 427?",
+              "expected": 866,
+              "output_text": "664",
+              "prediction": 664,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 23 * 17 + 48?",
+              "expected": 439,
+              "output_text": "509",
+              "prediction": 509,
+              "reward": 0.0
+            },
+            {
+              "question": "What is (144 / 12) * 37?",
+              "expected": 444,
+              "output_text": "589",
+              "prediction": 589,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 218 * 37?",
+              "expected": 8066,
+              "output_text": "7906",
+              "prediction": 7906,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 84 * 19 - 76?",
+              "expected": 1520,
+              "output_text": "1302",
+              "prediction": 1302,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 312 * 27 - 145?",
+              "expected": 8279,
+              "output_text": "8095",
+              "prediction": 8095,
+              "reward": 0.0
+            },
+            {
+              "question": "What is (73 + 29) * 18?",
+              "expected": 1836,
+              "output_text": "(73 + 29) * 18 = 10",
+              "prediction": 10,
+              "reward": 0.0
+            },
+            {
+              "question": "A shop has 48 boxes with 36 pens in each box. It sells 725 pens. How many pens remain?",
+              "expected": 1003,
+              "output_text": "To find out how many pens remain, we need to subtract the number of pens",
+              "prediction": null,
+              "reward": 0.0
+            },
+            {
+              "question": "A school buys 36 packs of notebooks with 24 notebooks per pack. It distributes 579 notebooks. How many remain?",
+              "expected": 285,
+              "output_text": "To determine how many notebooks remain, we need to follow these steps:\n\n1.",
+              "prediction": 1,
+              "reward": 0.0
+            },
+            {
+              "question": "A train travels 72 km per hour for 5 hours, then another 148 km. What is the total distance?",
+              "expected": 508,
+              "output_text": "To find the total distance traveled by the train, we need to calculate the distance",
+              "prediction": null,
+              "reward": 0.0
+            },
+            {
+              "question": "A factory makes 125 items per hour for 18 hours. 347 items are defective. How many usable items remain?",
+              "expected": 1903,
+              "output_text": "To find the number of usable items remaining, we need to follow these steps:",
+              "prediction": null,
+              "reward": 0.0
+            }
+          ]
+        }
+      },
+      "timing_seconds": {
+        "hash_original": 0.5885759770008008,
+        "snapshot": 0.23927995800113422,
+        "evaluate_base": 1.0330889340002614,
+        "perturb": 3.707049944001483,
+        "hash_perturbed": 0.5873064089992113,
+        "evaluate_candidate": 0.7570441589996335,
+        "restore": 0.13699661499958893,
+        "hash_restored": 0.5849204539990751,
+        "evaluate_restored": 0.7592630300005112
+      },
+      "gpu_memory": {
+        "baseline_allocated_bytes": 996322304,
+        "peak_allocated_bytes": 1072999424
+      }
+    },
+    {
+      "seed": 0,
+      "sigma": 0.001,
+      "sigma_float32": 0.0010000000474974513,
+      "chunk_elements": 262144,
+      "schema_hash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+      "engine_version": "numpy_pcg64_normal_f32_to_f16_v1",
+      "workload_hash": "cad822bc1e65a9ec37d948e5415cff22c70f96500e2043e6299bbdd5cea0b8d5",
+      "weights_sha256": {
+        "original": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+        "perturbed": "8aa3eb9af895cb4a1c7afddc1a6417fd312aa5c8593195f62b5dc0c45126176d",
+        "restored": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7"
+      },
+      "restored_equals_original": true,
+      "evaluation": {
+        "base": {
+          "mean_reward": 0.25,
+          "records": [
+            {
+              "question": "What is 17 + 24?",
+              "expected": 41,
+              "output_text": "41",
+              "prediction": 41,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 6 * 8?",
+              "expected": 48,
+              "output_text": "48",
+              "prediction": 48,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 91 - 37?",
+              "expected": 54,
+              "output_text": "54",
+              "prediction": 54,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 12 * 13?",
+              "expected": 156,
+              "output_text": "156",
+              "prediction": 156,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 137 * 46?",
+              "expected": 6302,
+              "output_text": "6292",
+              "prediction": 6292,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 375 + 918 - 427?",
+              "expected": 866,
+              "output_text": "664",
+              "prediction": 664,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 23 * 17 + 48?",
+              "expected": 439,
+              "output_text": "509",
+              "prediction": 509,
+              "reward": 0.0
+            },
+            {
+              "question": "What is (144 / 12) * 37?",
+              "expected": 444,
+              "output_text": "589",
+              "prediction": 589,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 218 * 37?",
+              "expected": 8066,
+              "output_text": "7906",
+              "prediction": 7906,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 84 * 19 - 76?",
+              "expected": 1520,
+              "output_text": "1302",
+              "prediction": 1302,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 312 * 27 - 145?",
+              "expected": 8279,
+              "output_text": "8095",
+              "prediction": 8095,
+              "reward": 0.0
+            },
+            {
+              "question": "What is (73 + 29) * 18?",
+              "expected": 1836,
+              "output_text": "(73 + 29) * 18 = 10",
+              "prediction": 10,
+              "reward": 0.0
+            },
+            {
+              "question": "A shop has 48 boxes with 36 pens in each box. It sells 725 pens. How many pens remain?",
+              "expected": 1003,
+              "output_text": "To find out how many pens remain, we need to subtract the number of pens",
+              "prediction": null,
+              "reward": 0.0
+            },
+            {
+              "question": "A school buys 36 packs of notebooks with 24 notebooks per pack. It distributes 579 notebooks. How many remain?",
+              "expected": 285,
+              "output_text": "To determine how many notebooks remain, we need to follow these steps:\n\n1.",
+              "prediction": 1,
+              "reward": 0.0
+            },
+            {
+              "question": "A train travels 72 km per hour for 5 hours, then another 148 km. What is the total distance?",
+              "expected": 508,
+              "output_text": "To find the total distance traveled by the train, we need to calculate the distance",
+              "prediction": null,
+              "reward": 0.0
+            },
+            {
+              "question": "A factory makes 125 items per hour for 18 hours. 347 items are defective. How many usable items remain?",
+              "expected": 1903,
+              "output_text": "To find the number of usable items remaining, we need to follow these steps:",
+              "prediction": null,
+              "reward": 0.0
+            }
+          ]
+        },
+        "candidate": {
+          "mean_reward": 0.3125,
+          "records": [
+            {
+              "question": "What is 17 + 24?",
+              "expected": 41,
+              "output_text": "41",
+              "prediction": 41,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 6 * 8?",
+              "expected": 48,
+              "output_text": "48",
+              "prediction": 48,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 91 - 37?",
+              "expected": 54,
+              "output_text": "54",
+              "prediction": 54,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 12 * 13?",
+              "expected": 156,
+              "output_text": "156",
+              "prediction": 156,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 137 * 46?",
+              "expected": 6302,
+              "output_text": "6298",
+              "prediction": 6298,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 375 + 918 - 427?",
+              "expected": 866,
+              "output_text": "670",
+              "prediction": 670,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 23 * 17 + 48?",
+              "expected": 439,
+              "output_text": "509",
+              "prediction": 509,
+              "reward": 0.0
+            },
+            {
+              "question": "What is (144 / 12) * 37?",
+              "expected": 444,
+              "output_text": "580",
+              "prediction": 580,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 218 * 37?",
+              "expected": 8066,
+              "output_text": "8409",
+              "prediction": 8409,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 84 * 19 - 76?",
+              "expected": 1520,
+              "output_text": "1520",
+              "prediction": 1520,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 312 * 27 - 145?",
+              "expected": 8279,
+              "output_text": "8097",
+              "prediction": 8097,
+              "reward": 0.0
+            },
+            {
+              "question": "What is (73 + 29) * 18?",
+              "expected": 1836,
+              "output_text": "(73 + 29) * 18 = 10",
+              "prediction": 10,
+              "reward": 0.0
+            },
+            {
+              "question": "A shop has 48 boxes with 36 pens in each box. It sells 725 pens. How many pens remain?",
+              "expected": 1003,
+              "output_text": "To find out how many pens remain, you can subtract the number of pens sold",
+              "prediction": null,
+              "reward": 0.0
+            },
+            {
+              "question": "A school buys 36 packs of notebooks with 24 notebooks per pack. It distributes 579 notebooks. How many remain?",
+              "expected": 285,
+              "output_text": "To determine how many notebooks remain after distributing them, we can follow these steps:",
+              "prediction": null,
+              "reward": 0.0
+            },
+            {
+              "question": "A train travels 72 km per hour for 5 hours, then another 148 km. What is the total distance?",
+              "expected": 508,
+              "output_text": "To find the total distance traveled by the train, you need to add the distances",
+              "prediction": null,
+              "reward": 0.0
+            },
+            {
+              "question": "A factory makes 125 items per hour for 18 hours. 347 items are defective. How many usable items remain?",
+              "expected": 1903,
+              "output_text": "To find the number of usable items, we need to subtract the number of defective",
+              "prediction": null,
+              "reward": 0.0
+            }
+          ]
+        },
+        "restored": {
+          "mean_reward": 0.25,
+          "records": [
+            {
+              "question": "What is 17 + 24?",
+              "expected": 41,
+              "output_text": "41",
+              "prediction": 41,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 6 * 8?",
+              "expected": 48,
+              "output_text": "48",
+              "prediction": 48,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 91 - 37?",
+              "expected": 54,
+              "output_text": "54",
+              "prediction": 54,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 12 * 13?",
+              "expected": 156,
+              "output_text": "156",
+              "prediction": 156,
+              "reward": 1.0
+            },
+            {
+              "question": "What is 137 * 46?",
+              "expected": 6302,
+              "output_text": "6292",
+              "prediction": 6292,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 375 + 918 - 427?",
+              "expected": 866,
+              "output_text": "664",
+              "prediction": 664,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 23 * 17 + 48?",
+              "expected": 439,
+              "output_text": "509",
+              "prediction": 509,
+              "reward": 0.0
+            },
+            {
+              "question": "What is (144 / 12) * 37?",
+              "expected": 444,
+              "output_text": "589",
+              "prediction": 589,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 218 * 37?",
+              "expected": 8066,
+              "output_text": "7906",
+              "prediction": 7906,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 84 * 19 - 76?",
+              "expected": 1520,
+              "output_text": "1302",
+              "prediction": 1302,
+              "reward": 0.0
+            },
+            {
+              "question": "What is 312 * 27 - 145?",
+              "expected": 8279,
+              "output_text": "8095",
+              "prediction": 8095,
+              "reward": 0.0
+            },
+            {
+              "question": "What is (73 + 29) * 18?",
+              "expected": 1836,
+              "output_text": "(73 + 29) * 18 = 10",
+              "prediction": 10,
+              "reward": 0.0
+            },
+            {
+              "question": "A shop has 48 boxes with 36 pens in each box. It sells 725 pens. How many pens remain?",
+              "expected": 1003,
+              "output_text": "To find out how many pens remain, we need to subtract the number of pens",
+              "prediction": null,
+              "reward": 0.0
+            },
+            {
+              "question": "A school buys 36 packs of notebooks with 24 notebooks per pack. It distributes 579 notebooks. How many remain?",
+              "expected": 285,
+              "output_text": "To determine how many notebooks remain, we need to follow these steps:\n\n1.",
+              "prediction": 1,
+              "reward": 0.0
+            },
+            {
+              "question": "A train travels 72 km per hour for 5 hours, then another 148 km. What is the total distance?",
+              "expected": 508,
+              "output_text": "To find the total distance traveled by the train, we need to calculate the distance",
+              "prediction": null,
+              "reward": 0.0
+            },
+            {
+              "question": "A factory makes 125 items per hour for 18 hours. 347 items are defective. How many usable items remain?",
+              "expected": 1903,
+              "output_text": "To find the number of usable items remaining, we need to follow these steps:",
+              "prediction": null,
+              "reward": 0.0
+            }
+          ]
+        }
+      },
+      "timing_seconds": {
+        "hash_original": 0.5858302790002199,
+        "snapshot": 0.22674901800019143,
+        "evaluate_base": 0.757685661999858,
+        "perturb": 3.7037863339992327,
+        "hash_perturbed": 0.5859455359986896,
+        "evaluate_candidate": 0.7560117099983472,
+        "restore": 0.1358034500008216,
+        "hash_restored": 0.5837898190002306,
+        "evaluate_restored": 0.7589705780010263
+      },
+      "gpu_memory": {
+        "baseline_allocated_bytes": 1005890560,
+        "peak_allocated_bytes": 1072999424
+      }
+    }
+  ],
+  "repeat_identical": true
+}

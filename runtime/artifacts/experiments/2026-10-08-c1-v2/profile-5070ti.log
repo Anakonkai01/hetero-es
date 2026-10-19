@@ -1,0 +1,13 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 8082.80it/s]
+{
+ "worker_id": "worker-5070ti",
+ "safe_chunk": 64,
+ "checks": {
+  "noise_selftest": true,
+  "restore_exact": true,
+  "chunk1_reproduces_reference": true
+ },
+ "candidate_seconds_at_chunk_1": 62.94700604000536,
+ "candidate_seconds_at_safe_chunk": 8.020352056002594,
+ "peak_bytes_candidate": 3793448960
+}

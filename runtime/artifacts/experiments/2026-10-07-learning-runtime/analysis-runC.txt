@@ -1,0 +1,34 @@
+=== lrtC  (analysed 60 generations, checkpoints every 5)
+
+Checkpoints: accuracy % (correct/n); `line` = share of replies with an Answer: line; `cond` = accuracy among them (H3); chars = mean reply length (H3)
+ gen         train            H3            H1            H2  H3 line  H3 cond H3 chars
+   0  29.7 ( 19/ 64)  32.8 ( 42/128)  60.2 ( 77/128)  90.6 (116/128)     21.9     46.4      732
+   5  42.2 ( 27/ 64)  41.4 ( 53/128)  65.6 ( 84/128)  92.2 (118/128)      0.8    100.0      780
+  10  45.3 ( 29/ 64)  46.1 ( 59/128)  70.3 ( 90/128)  92.2 (118/128)      0.8    100.0      769
+  15  48.4 ( 31/ 64)  48.4 ( 62/128)  71.9 ( 92/128)  94.5 (121/128)      0.0      -        794
+  20  89.1 ( 57/ 64)  78.9 (101/128)  71.9 ( 92/128)  93.8 (120/128)      0.0      -        639
+  25  90.6 ( 58/ 64)  78.9 (101/128)  71.1 ( 91/128)  93.8 (120/128)      2.3    100.0      562
+  30  93.8 ( 60/ 64)  81.2 (104/128)  76.6 ( 98/128)  93.0 (119/128)      0.0      -        578
+  35  93.8 ( 60/ 64)  77.3 ( 99/128)  71.9 ( 92/128)  94.5 (121/128)      0.8    100.0      596
+  40  93.8 ( 60/ 64)  85.2 (109/128)  81.2 (104/128)  89.1 (114/128)      0.0      -        607
+  45  87.5 ( 56/ 64)  82.0 (105/128)  79.7 (102/128)  95.3 (122/128)      0.0      -        615
+  50  92.2 ( 59/ 64)  84.4 (108/128)  75.0 ( 96/128)  94.5 (121/128)      0.0      -        632
+  55  90.6 ( 58/ 64)  81.2 (104/128)  81.2 (104/128)  90.6 (116/128)      0.0      -        595
+  60  92.2 ( 59/ 64)  81.2 (104/128)  77.3 ( 99/128)  78.1 (100/128)      0.0      -        601
+
+Controls every 10th generation (accuracy %, plus = the real step, minus = -alpha, shuf = coefficients shuffled), parent = before the step
+ gen | train + train - train s |   H3 +   H3 -   H3 s | H3 line +  line -  line s
+   0 |    23.4    34.4    26.6 |   24.2   36.7   19.5 |       8.6    35.9    12.5
+  10 |    53.1    42.2    45.3 |   58.6   42.2   48.4 |       0.0     0.8     1.6
+  20 |    87.5    89.1    90.6 |   82.0   80.5   78.9 |       0.0     0.8     3.1
+  30 |    93.8    90.6    92.2 |   84.4   78.9   80.5 |       0.0     0.0     0.0
+  40 |    93.8    93.8    92.2 |   84.4   81.2   83.6 |       0.0     0.0     0.0
+  50 |    89.1    92.2    89.1 |   82.8   81.2   83.6 |       0.0     0.0     0.0
+
+S2 on the training questions: parent+ better than parent- in 30 of 60 generations (20 worse, 10 ties), mean difference +0.0112, one-sided sign test p = 0.1
+S2 on H3 at the generations with held-out controls: + better in 5, worse in 1 of 6
+Mean reward of the candidates (the population around the parent) every 10th generation: g0=0.658, g10=0.697, g20=0.749, g30=0.818, g40=0.794, g50=0.802
+Replay checks (rebuilt weights against the stored checkpoint hash): all MATCH (12 segments)
+
+VERDICT  S1=True S2=False S3=True S4=False S5=None  ->  no evidence of learning in this experiment   [INCOMPLETE: analysed 60 generations; the thresholds of S2 scale with the generations analysed]
+

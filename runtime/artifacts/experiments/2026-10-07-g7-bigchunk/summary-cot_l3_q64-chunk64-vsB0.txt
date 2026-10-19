@@ -1,0 +1,6 @@
+condition  rep  T steady  +-95% CB steady  +-95%   T all  CB all   wait  update    pred   err%
+n24-B0       3     107.6    0.6     1.000  0.008   108.7   1.000  106.3     2.4       -      -
+n24-B0x2     3     108.5    0.8     0.992  0.009   109.7   0.990  107.3     2.4       -      -
+n24-B3x2     3      90.6    1.0     1.188  0.015    91.6   1.186   89.2     2.4       -      -
+n24-B4x2     3      90.2    0.8     1.194  0.012    91.4   1.189   89.0     2.4       -      -
+n24 {'runs_compared': 12, 'identical_rewards_and_hashes': True, 'distinct': 1}

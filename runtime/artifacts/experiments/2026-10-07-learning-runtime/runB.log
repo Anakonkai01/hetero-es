@@ -1,0 +1,24 @@
+[02:41:22] worker worker-1660s exited with 255: restart 1
+[02:41:26] worker worker-1660s exited with 255: restart 2
+[02:41:28] worker worker-1660s exited with 255: restart 3
+[02:41:32] worker worker-1660s exited with 255: restart 4
+[02:41:34] worker worker-1660s exited with 255: restart 5
+ssh: connect to host 10.10.10.2 port 22: No route to host
+scp: Connection closed
+ssh: connect to host 10.10.10.2 port 22: No route to host
+ssh: connect to host 10.10.10.2 port 22: No route to host
+scp: Connection closed
+ssh: connect to host 10.10.10.2 port 22: No route to host
+ssh: connect to host 10.10.10.2 port 22: No route to host
+scp: Connection closed
+ssh: connect to host 10.10.10.2 port 22: No route to host
+ssh: connect to host 10.10.10.2 port 22: No route to host
+scp: Connection closed
+ssh: connect to host 10.10.10.2 port 22: No route to host
+ssh: connect to host 10.10.10.2 port 22: No route to host
+scp: Connection closed
+ssh: connect to host 10.10.10.2 port 22: No route to host
+ssh: connect to host 10.10.10.2 port 22: No route to host
+scp: Connection closed
+ssh: connect to host 10.10.10.2 port 22: No route to host
+{"experiment_id": "lrtB", "outcome": "ok", "wall_seconds": 10926.824332237244, "restarts": {"coordinator": 0, "worker-5070ti": 0, "worker-5070ti-2": 0, "worker-1660s": 5}, "pending_unlinked": [], "ckpt_dir": "/home/pc5070ti/.cache/heteroes/learn-ckpt/lrtB"}

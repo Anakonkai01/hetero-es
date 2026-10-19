@@ -1,0 +1,12 @@
+{
+  "scope": "local CPU metadata restore; not cloud acceptance",
+  "experimentCount": 19,
+  "experimentBodiesPreserved": true,
+  "fifoPreserved": true,
+  "reservationsPreserved": true,
+  "sessionsRevoked": true,
+  "dispatchHeld": true,
+  "coldApiLogin": true,
+  "cachedArtifactDownload": true,
+  "gpuLaunches": 0
+}

@@ -1,0 +1,102 @@
+{
+ "format": 1,
+ "model": "/home/pc5070ti/.cache/huggingface/hub/models--Qwen--Qwen3-0.6B/snapshots/c1899de289a04d12100db370d81485cdf75e47ca",
+ "task": "gsm8k",
+ "dtype": "bfloat16",
+ "max_new_tokens": 512,
+ "processors": [],
+ "eos_ids": [
+  151645,
+  151643
+ ],
+ "pad": 151643,
+ "gpu": "NVIDIA GeForce RTX 5070 Ti",
+ "torch": "2.13.0+cu132",
+ "drop_fraction": 0.1,
+ "records": [
+  {
+   "seed": null,
+   "chunk": 64,
+   "library_seconds": 31.635765351000373,
+   "compact_seconds": 13.447747436999634,
+   "library_slots": 51456,
+   "compact_slots": 20635,
+   "answer_tokens_mean": 157.4375,
+   "answer_tokens_max": 512,
+   "answers_at_limit": 1,
+   "compaction_supported": true,
+   "different_questions": [
+    1,
+    10,
+    11,
+    20,
+    31,
+    33,
+    34,
+    42,
+    50,
+    53,
+    54,
+    83,
+    88,
+    99,
+    112
+   ],
+   "texts_sha256": "679dcfae82f2332562dbdbcead2daccb420aa38278fac852291449d73e79a708"
+  },
+  {
+   "seed": 7001,
+   "chunk": 64,
+   "library_seconds": 34.74626265600091,
+   "compact_seconds": 15.593871301000036,
+   "library_slots": 55680,
+   "compact_slots": 24526,
+   "answer_tokens_mean": 187.25,
+   "answer_tokens_max": 512,
+   "answers_at_limit": 3,
+   "compaction_supported": true,
+   "different_questions": [
+    11,
+    12,
+    14,
+    33,
+    36,
+    81,
+    91,
+    92,
+    109,
+    114,
+    122,
+    126
+   ],
+   "texts_sha256": "b7353b3cee9eb5c9ad9347f9ee3b6de7f3f14f6de8f9f11a229502a3c24268ca"
+  },
+  {
+   "seed": 7002,
+   "chunk": 64,
+   "library_seconds": 43.48890170999948,
+   "compact_seconds": 15.511410904000513,
+   "library_slots": 65536,
+   "compact_slots": 20238,
+   "answer_tokens_mean": 153.234375,
+   "answer_tokens_max": 512,
+   "answers_at_limit": 2,
+   "compaction_supported": true,
+   "different_questions": [
+    11,
+    12,
+    14,
+    21,
+    28,
+    72,
+    78,
+    99,
+    100,
+    112,
+    114,
+    122
+   ],
+   "texts_sha256": "cd9dba7a90b92a7e7b78dabac888ba08d95c52acdfad2120f1f0d002f4a61733"
+  }
+ ]
+}

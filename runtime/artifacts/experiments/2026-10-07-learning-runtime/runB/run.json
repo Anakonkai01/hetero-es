@@ -1,0 +1,52 @@
+{
+  "experiment_id": "lrtB",
+  "outcome": "ok",
+  "wall_seconds": 10926.824332237244,
+  "restarts": {
+    "coordinator": 0,
+    "worker-5070ti": 0,
+    "worker-5070ti-2": 0,
+    "worker-1660s": 5
+  },
+  "checkpoints": {
+    "0": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "5": "a6b3e863d46a25074b2477b8d6dd0cf8c43e0535f8307d4934617e8d844179aa",
+    "10": "b243223f4e2299afb46543775d2ce98dc7601bbd604953d51f2ecc475bd11f40",
+    "15": "3e2e79fb5c0d594a30f41e70c2e3ed49bd1b65918e30af8332fd28b77bd5a46b",
+    "20": "171037e01969b3ddcb90f577bda40ca24adf5b85175c3ed2ee317b6804d3fb0d",
+    "25": "e84006b2df4c23b3c569fbb90ed35a116dacc7acf6812deec0da72695fc68264",
+    "30": "be1a2345486a3252c4149e52fcbc6e4867475b3553904a0ead8e4b5fdb444e5f",
+    "35": "409b977d76e1f330c3f57e6a36a6a43e9135ac5051054095902543b7de460d76",
+    "40": "8ba1d472df1c86e54312cce0a64df32127b698d14c41a1c9ae9a86b420fb5a4a",
+    "45": "2fe4072f291f926b618eaab60435b5bb84e646ca5ee5e655bab7ebc8ad17c0cd",
+    "50": "d6728afce2c44d6e13b9b73a6c9aa63098972d42f85058f1782308fbfdd6930d",
+    "55": "cdcd51d4c9196a73627b314eb8145d164c808c5efeee622a5c5325b2ded5a61e",
+    "60": "9ae6db27bd476c47ff4ff2611efacb06c3b5965824205ad9c9472eeb40669d05",
+    "65": "35b0973a6f6a346b5571c7d5a04925a8f9645db1d1b5da6b43a396273b779c28",
+    "70": "e6a8672a79d4f853f4c6985a345828125d22c4923aac8cf37931eeae266f5215",
+    "75": "314de9135082fe658d7de431d99e4f95a94b7d754c0370238ee2878b298b66b6",
+    "80": "6a4be647ef854c6b104c5e08bc21bd47ecab7b27c0447ef0c5d0e0f799f835b9",
+    "85": "6f376c2d15a9428f51ef275f2c968e47a96d4e4da8e4d701e288387542e79d1c",
+    "90": "d332f02f3c717554dcbd774f3476b7eabc72dc8164313a0ea6bedcee5146ea4e",
+    "95": "71fd82b357860122a5c2193e48cdd4e3b4b7b34709c08dc112cabec111a2cf77",
+    "100": "5aabc231cda279b1a4a3c358d4df02117235f87e93c1633e3dde7e733890889c"
+  },
+  "pending_unlinked": [],
+  "ckpt_dir": "/home/pc5070ti/.cache/heteroes/learn-ckpt/lrtB",
+  "spec": {
+    "workers": {
+      "worker-5070ti": 64,
+      "worker-5070ti-2": 64,
+      "worker-1660s": 64
+    },
+    "policy": "tail",
+    "args": [
+      "--speed-prior",
+      "worker-1660s=19.19567544400372",
+      "--speed-prior",
+      "worker-5070ti=4.528053429003631",
+      "--speed-prior",
+      "worker-5070ti-2=4.528053429003631"
+    ]
+  }
+}

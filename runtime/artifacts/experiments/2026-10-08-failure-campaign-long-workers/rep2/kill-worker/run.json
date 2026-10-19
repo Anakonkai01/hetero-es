@@ -1,0 +1,10 @@
+{
+  "name": "kill-worker",
+  "outcome": "ok",
+  "wall_seconds": 220.61083030700684,
+  "notes": [
+    "remote worker killed while it held a candidate",
+    "remote worker started again"
+  ],
+  "final_weights_sha256": "a2123e795488fd6dd82465e83f5825b0c44c933b1760ad26711052f8a9c3a1c8"
+}

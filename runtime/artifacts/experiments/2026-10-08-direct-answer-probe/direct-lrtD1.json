@@ -1,0 +1,65 @@
+{
+ "direct_prompt": "Reply with only the final integer, nothing else.",
+ "results": {
+  "0": {
+   "workload_prompt": {
+    "n": 256,
+    "correct": 159,
+    "accuracy": 0.62109375,
+    "answer_line_rate": 0.734375,
+    "accuracy_with_line": 0.574468085106383,
+    "mean_chars": 246.6953125,
+    "tokens": 25730
+   },
+   "direct_prompt": {
+    "n": 256,
+    "correct": 197,
+    "accuracy": 0.76953125,
+    "answer_line_rate": 0.0,
+    "accuracy_with_line": null,
+    "mean_chars": 2.953125,
+    "tokens": 1012
+   }
+  },
+  "15": {
+   "workload_prompt": {
+    "n": 256,
+    "correct": 215,
+    "accuracy": 0.83984375,
+    "answer_line_rate": 0.0,
+    "accuracy_with_line": null,
+    "mean_chars": 95.9453125,
+    "tokens": 9699
+   },
+   "direct_prompt": {
+    "n": 256,
+    "correct": 196,
+    "accuracy": 0.765625,
+    "answer_line_rate": 0.0,
+    "accuracy_with_line": null,
+    "mean_chars": 2.953125,
+    "tokens": 1012
+   }
+  },
+  "40": {
+   "workload_prompt": {
+    "n": 256,
+    "correct": 211,
+    "accuracy": 0.82421875,
+    "answer_line_rate": 0.19921875,
+    "accuracy_with_line": 0.9803921568627451,
+    "mean_chars": 88.06640625,
+    "tokens": 9986
+   },
+   "direct_prompt": {
+    "n": 256,
+    "correct": 176,
+    "accuracy": 0.6875,
+    "answer_line_rate": 0.0,
+    "accuracy_with_line": null,
+    "mean_chars": 2.953125,
+    "tokens": 1012
+   }
+  }
+ }
+}

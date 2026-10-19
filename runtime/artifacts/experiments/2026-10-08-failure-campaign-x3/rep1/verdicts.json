@@ -1,0 +1,35 @@
+{
+  "reference_final_weights_sha256": "3577eadc3f22686a4a4f7fc1672fe9be255709676fdd701592b780616957e049",
+  "verdicts": [
+    {
+      "scenario": "kill-worker",
+      "ended_ok": false,
+      "same_final_weights_as_reference": true,
+      "passed": false
+    },
+    {
+      "scenario": "pause-worker",
+      "ended_ok": false,
+      "same_final_weights_as_reference": true,
+      "passed": false
+    },
+    {
+      "scenario": "cut-link",
+      "ended_ok": true,
+      "same_final_weights_as_reference": true,
+      "passed": true
+    },
+    {
+      "scenario": "kill-coordinator",
+      "ended_ok": true,
+      "same_final_weights_as_reference": true,
+      "passed": true
+    },
+    {
+      "scenario": "kill-coordinator-mid-update",
+      "ended_ok": true,
+      "same_final_weights_as_reference": true,
+      "passed": true
+    }
+  ]
+}
