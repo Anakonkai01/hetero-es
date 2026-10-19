@@ -100,7 +100,9 @@ def prepare(config, out_dir, device="cpu"):
     }
 
 
-def run_local(config, out_dir, device="cpu", workers=1, experiment_id="local", log=None, timeout_seconds=None):
+def run_local(
+    config, out_dir, device="cpu", workers=1, experiment_id="local", log=None, timeout_seconds=None, audit_rate=0.05
+):
     """
     Run the experiment to its end; returns the generation summaries. Events go to `<out_dir>/events.jsonl` and `log`.
     `timeout_seconds` bounds each generation (None: no bound, only the coordinator's stall detection).
@@ -140,6 +142,8 @@ def run_local(config, out_dir, device="cpu", workers=1, experiment_id="local", l
         dataset=ready["dataset"],
         antithetic=run.antithetic,
         coefficient_rule=run.coefficient_rule,
+        audit_workers=[f"local-{index}" for index in range(workers)],
+        audit_rate=audit_rate,
         score=make_scorer(run, ready["dataset"], ready["python_scorer"]),
         poll_seconds=0.05,
         timeout_seconds=timeout_seconds,

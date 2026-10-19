@@ -169,11 +169,29 @@ class AgentPolling:
                 and (assignment["coordinator"], assignment["epoch"]) == (device["id"], event.epoch)
                 and event.eventId == expected
             ):
-                db.execute(
+                inserted = db.execute(
                     "INSERT OR IGNORE INTO monitoring_events(event_id,assignment_id,body) VALUES (?,?,?)",
                     (event.eventId, event.assignmentId, encoded),
-                )
+                ).rowcount
                 accepted_events.append(event.eventId)
+                if (
+                    inserted
+                    and event.event.get("event") == "audit_worker_quarantined"
+                    and event.event.get("reason") == "AUDIT_MISMATCH"
+                ):
+                    row = db.execute(
+                        "SELECT body,released FROM assignments WHERE id=?", (event.assignmentId,)
+                    ).fetchone()
+                    ar = json.loads(row["body"])
+                    target = ar.get("workerDevices", {}).get(event.event.get("worker_id"))
+                    if target and not row["released"] and ar["config"].get("recipeVersion") == 3:
+                        changed = db.execute(
+                            "UPDATE devices SET status='QUARANTINED',enabled=0,desired=0 WHERE id=? AND status='APPROVED'",
+                            (target,),
+                        ).rowcount
+                        if changed:
+                            self.store.cancel_selected(db, event.event["worker_id"])
+                            self.store.audit(db, "system", "DEVICE_AUDIT_MISMATCH", target)
         return accepted_events
 
     def _accept_reports(self, db, device, body, old):

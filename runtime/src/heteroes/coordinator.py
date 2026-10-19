@@ -21,6 +21,8 @@ dead one stopped and ends with the weights an uninterrupted run would have.
 """
 
 import time
+import math
+from pathlib import Path
 
 from heteroes.dispatch import Greedy
 from heteroes.es.cuda_ops import apply_coefficients_cuda_
@@ -115,6 +117,10 @@ class Coordinator:
         coefficient_rule: str | None = None,
         score=None,
         pinned_weights=(),
+        audit_rate=0.05,
+        audit_workers=None,
+        audit_timeout_seconds=120,
+        audit_fault_path=None,
     ):
         # Recipe v3 (ADR-008): `antithetic` gives pairs (seed, +1), (seed, -1); `coefficient_rule` makes version-2 records;
         # `score(generation, descriptor, completions) -> reward` scores the texts the workers submit, on this process
@@ -123,6 +129,23 @@ class Coordinator:
         self._antithetic = antithetic
         self._coefficient_rule = coefficient_rule
         self._score = score
+        self._audit_rate = audit_rate if recipe.to_dict().get("formatVersion") == 3 and score is not None else 0
+        self._audit_workers = audit_workers
+        self._audit_timeout = audit_timeout_seconds
+        self._audit_faults = (
+            Path(audit_fault_path) if audit_fault_path is not None else Path(models_dir).parent / "audit-faults.json"
+        )
+        if self._audit_rate:
+            from heteroes.v3.audit import selected_for_audit
+
+            selected_for_audit("validate", self._audit_rate)
+            if (
+                not isinstance(audit_timeout_seconds, (int, float))
+                or isinstance(audit_timeout_seconds, bool)
+                or not math.isfinite(audit_timeout_seconds)
+                or audit_timeout_seconds <= 0
+            ):
+                raise ValueError("audit timeout must be finite and positive")
         self._api = None
         self.model = model
         self.schema = schema
@@ -201,6 +224,8 @@ class Coordinator:
             self._check_cancel()
             if self._api is not None and self._api.scoring_error is not None:
                 raise ScoringFailed(f"generation {self.experiment_id}/g{generation}: {self._api.scoring_error}")
+            if getattr(self._api, "fatal_error", None):
+                raise CoordinatorError(self._api.fatal_error)
             status = self.ledger.get_generation_status(self.experiment_id, generation)
             now = self._monotonic()
             if status.state is GenerationState.COMPLETE:
@@ -391,12 +416,29 @@ class Coordinator:
             if self._score is None
             else (lambda descriptor, texts: self._score(generation, descriptor, texts)),
         )
+        if self._audit_rate:
+            from heteroes.v3.audit import AuditAPI
+
+            api = AuditAPI(
+                api,
+                self.ledger,
+                self.experiment_id,
+                generation,
+                rate=self._audit_rate,
+                workers=self._audit_workers,
+                lease_seconds=self._lease_seconds,
+                clock=time.time,
+                fault_path=self._audit_faults,
+                log=lambda event: self.log(**event),
+                cancel_requested=self._cancel_requested,
+            )
         self._api = api
         self.server.set_generation(api, self._job(generation, policy))
         self.log("generation_open", generation=generation, parent_sha256=parent, candidates=self.candidates)
 
         self._wait_until_complete(generation)
         self._check_cancel()
+        self._drain_audits(generation, api, policy)
         waited = self._timer()
         results = self.ledger.get_generation_results(self.experiment_id, generation)
         self.log("generation_complete", generation=generation, rewards=list(results.rewards))
@@ -463,11 +505,38 @@ class Coordinator:
         self.log("generation_done", **summary)
         return summary
 
+    def _drain_audits(self, generation, api, policy):
+        if not self._audit_rate:
+            return
+        deadline = self._monotonic() + self._audit_timeout
+        self.server.set_generation(api, self._job(generation, policy, "AUDITING"))
+        while api.pending:
+            self._check_cancel()
+            if api.fatal_error:
+                raise CoordinatorError(api.fatal_error)
+            if len(api.available_workers) < 2 or self._monotonic() >= deadline:
+                self.log(
+                    "audit_incomplete",
+                    generation=generation,
+                    pending=api.pending,
+                    reason="insufficient_workers" if len(api.available_workers) < 2 else "timeout",
+                )
+                break
+            self._sleep(self._poll)
+        if api.fatal_error:
+            raise CoordinatorError(api.fatal_error)
+
     def finish(self, aborted: bool = False, cancelled: bool = False) -> None:
         """Tell the workers that the experiment is over: FINISHED if it ran to its end, ABORTED if it stopped on an error."""
         job = self.server.job
         state = "CANCELLED" if cancelled else "ABORTED" if aborted else "FINISHED"
-        self.server.set_generation(self.server.api, {"state": state} if job is None else dict(job, state=state))
+        quarantined = {q.worker_id for q in self.ledger.list_quarantined()}
+        if self._api is not None and self._audit_rate:
+            quarantined |= self._api.quarantined_workers
+        self.server.set_generation(
+            self.server.api,
+            {"state": state} if job is None else dict(job, state=state, quarantined_workers=sorted(quarantined)),
+        )
 
     def run(self, generations: int) -> list[dict]:
         summaries = []

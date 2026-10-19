@@ -75,3 +75,11 @@ test('validation rewards have a readable timeline event', () => {
   const event = describeEvent('validation_completed', { generation: 2, meanReward: 0.75 });
   assert.equal(fillTemplate(event.template, event.params), 'Validation after generation 3: reward 0.7500');
 });
+
+test('audit mismatches and quarantine are visible without claiming a reward changed', () => {
+  const mismatch = describeEvent('audit_mismatch', { worker_id: 'other', candidate_id: 'r/g0/c0' });
+  assert.equal(mismatch.tone, 'warn');
+  assert.match(fillTemplate(mismatch.template, mismatch.params), /other.*r\/g0\/c0/);
+  const quarantine = describeEvent('audit_worker_quarantined', { worker_id: 'original' });
+  assert.equal(quarantine.tone, 'err');
+});

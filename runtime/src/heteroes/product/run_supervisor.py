@@ -304,6 +304,15 @@ class RunSupervisor(ABC):
                         r["generation"]: json.loads(r["body"])
                         for r in db.execute("SELECT generation,body FROM generation_context")
                     }
+                if db.execute("SELECT 1 FROM sqlite_master WHERE name='audit'").fetchone():
+                    total, mismatches = db.execute("SELECT count(*),coalesce(sum(matched=0),0) FROM audit").fetchone()
+                    result["auditSummary"] = {
+                        "completed": total,
+                        "mismatches": mismatches,
+                        "quarantinedWorkers": [
+                            dict(r) for r in db.execute("SELECT worker_id,reason FROM quarantine ORDER BY worker_id")
+                        ],
+                    }
                 for gen in db.execute(
                     "SELECT g.*, u.child_weights_sha256, u.applied_at FROM generation g LEFT JOIN generation_update u USING(experiment_id,generation) ORDER BY g.generation"
                 ):

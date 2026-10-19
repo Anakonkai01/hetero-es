@@ -23,6 +23,9 @@ MARKS = frozenset(
         "generation_resumed",
         "recovery_point_error",
         "managed_error",
+        "audit_mismatch",
+        "audit_worker_quarantined",
+        "audit_incomplete",
     }
 )
 SECONDS = (

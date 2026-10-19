@@ -163,3 +163,16 @@ def test_jobs_are_ordered_by_start_time_whatever_order_the_ledger_lists_them_in(
     snapshot["attempts"].reverse()
     starts = [j["startMs"] for j in build_timeline(body, snapshot)["jobs"]]
     assert starts == sorted(starts) and len(starts) == 3
+
+
+def test_audit_mismatch_and_quarantine_are_timeline_marks():
+    body = FIXTURE["body"]
+    snapshot = {
+        **FIXTURE["snapshot"],
+        "events": [
+            {"event": "audit_mismatch", "worker_id": "auditor", "candidate_id": "r/g0/c0", "t": 100},
+            {"event": "audit_worker_quarantined", "worker_id": "auditor", "t": 101},
+        ],
+    }
+    shown = build_timeline(body, snapshot)
+    assert {m["type"] for m in shown["marks"]} >= {"audit_mismatch", "audit_worker_quarantined"}

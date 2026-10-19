@@ -312,3 +312,60 @@ def test_editing_a_v3_draft_replaces_its_old_recipe_fields(v3_study):
     assert shown.get("recipeVersion", 1) == 1
     assert shown["modelVersion"] == cap["modelRevision"]
     assert not set(shown) & {"weightSpace", "scorer", "antithetic", "modelManifest", "datasetIdentity"}
+
+
+def test_only_current_v3_coordinator_can_quarantine_its_selected_worker(v3_study):
+    import hashlib
+    from test_devices import boot
+
+    c, admin, _ = v3_study
+    store = c.app.state.store
+    lab = (c, store, store.runtime, admin)
+    original, original_auth = pair(lab, "original")
+    auditor, auditor_auth = pair(lab, "auditor", coordinator=False)
+    outsider, _ = pair(lab, "outsider", coordinator=False)
+    model, data = assets(v3_study)
+    for device, auth in ((original, original_auth), (auditor, auditor_auth)):
+        profile = next(
+            d["selfTest"] for d in c.get("/api/v1/devices", headers=admin).json() if d["deviceId"] == device["deviceId"]
+        )
+        qualify_v3(c, auth, profile, model)
+        enable(lab, device, auth)
+    config = configuration(original, model, data)
+    config["workerIds"].append(auditor["workerId"])
+    run = c.post("/api/v1/experiments", headers=admin, json=config).json()
+    c.post(f"/api/v1/experiments/{run['experimentId']}/submit", headers=admin)
+    store.dispatch_once()
+    ar = store.runtime.runs()[0]
+
+    def report(auth, worker, epoch=1):
+        event = {"event": "audit_worker_quarantined", "worker_id": worker, "reason": "AUDIT_MISMATCH", "t": 100}
+        eid = hashlib.sha256(
+            (ar["assignmentId"] + json.dumps(event, sort_keys=True, separators=(",", ":"))).encode()
+        ).hexdigest()
+        boot(
+            c,
+            auth,
+            "boot-1",
+            contribution=True,
+            events=[{"eventId": eid, "assignmentId": ar["assignmentId"], "epoch": epoch, "event": event}],
+        )
+
+    def status(device):
+        return next(d["approvalStatus"] for d in store.runtime.devices() if d["deviceId"] == device["deviceId"])
+
+    report(auditor_auth, original["workerId"])
+    report(original_auth, auditor["workerId"], epoch=99)
+    report(original_auth, outsider["workerId"])
+    assert status(original) == status(auditor) == status(outsider) == "APPROVED"
+    report(original_auth, auditor["workerId"])
+    assert status(auditor) == "QUARANTINED"
+    report(original_auth, original["workerId"])
+    assert status(original) == "QUARANTINED"
+    assert status(outsider) == "APPROVED"
+
+    # Replayed monitoring events must not undo a later administrator decision.
+    with store.db() as db:
+        db.execute("UPDATE devices SET status='APPROVED' WHERE id=?", (auditor["deviceId"],))
+    report(original_auth, auditor["workerId"])
+    assert status(auditor) == "APPROVED"

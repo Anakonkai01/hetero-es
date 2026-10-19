@@ -367,6 +367,8 @@ class Store:
             complete = [item for item in generations if item["status"] == "COMPLETED"]
             body["completedGenerations"] = snapshot.get("completedGenerationCount", len(complete))
             body["monitoringPartial"] = bool(snapshot.get("monitoringPartial"))
+            if snapshot.get("auditSummary") is not None:
+                body["auditSummary"] = snapshot["auditSummary"]
             if snapshot.get("studyMetrics"):
                 body["studyMetrics"] = snapshot["studyMetrics"]
                 best = snapshot["studyMetrics"].get("best") or {}

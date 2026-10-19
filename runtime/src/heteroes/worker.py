@@ -57,6 +57,16 @@ class Assignment:
     token: str
     deadline: float  # in the coordinator's clock: for information, the worker's clock may differ
 
+    audit_id: str | None = None
+
+    def payload(self):
+        return {
+            "descriptor": self.descriptor.to_dict(),
+            "attempt_number": self.attempt_number,
+            "token": self.token,
+            **({"audit_id": self.audit_id} if self.audit_id is not None else {}),
+        }
+
     @property
     def candidate_id(self) -> str:
         return self.descriptor.candidate_id
@@ -86,7 +96,12 @@ def _assignment(work) -> Assignment:
         raise TypeError("token must be a string")
     if isinstance(deadline, bool) or not isinstance(deadline, (int, float)):
         raise TypeError("deadline must be a number")
-    return Assignment(descriptor, attempt_number, token, float(deadline))
+    audit_id = work.get("audit_id")
+    if audit_id is not None and (
+        not isinstance(audit_id, str) or len(audit_id) != 64 or any(c not in "0123456789abcdef" for c in audit_id)
+    ):
+        raise TypeError("audit_id must be a SHA-256 hex identity")
+    return Assignment(descriptor, attempt_number, token, float(deadline), audit_id)
 
 
 class WorkerClient:
@@ -122,9 +137,7 @@ class WorkerClient:
         reply = self._call(
             "submit_result",
             {
-                "descriptor": assignment.descriptor.to_dict(),
-                "attempt_number": assignment.attempt_number,
-                "token": assignment.token,
+                **assignment.payload(),
                 "reward": reward,
             },
         )
@@ -141,13 +154,13 @@ class WorkerClient:
         reply = self._call(
             "submit_result",
             {
-                "descriptor": assignment.descriptor.to_dict(),
-                "attempt_number": assignment.attempt_number,
-                "token": assignment.token,
+                **assignment.payload(),
                 "completions": texts,
                 "completions_sha256": completions_sha256(texts),
             },
         )
+        if assignment.audit_id is not None and self.worker_id in reply.get("quarantined_workers", []):
+            raise WorkerAPIError("worker_quarantined", "Repeated audit mismatches")
         try:
             return SubmitOutcome(reply["outcome"])
         except (KeyError, TypeError, ValueError) as error:
@@ -157,11 +170,7 @@ class WorkerClient:
         """Tell the coordinator that the lease is still wanted; returns the new deadline (the coordinator's clock)."""
         reply = self._call(
             "heartbeat",
-            {
-                "descriptor": assignment.descriptor.to_dict(),
-                "attempt_number": assignment.attempt_number,
-                "token": assignment.token,
-            },
+            assignment.payload(),
         )
         deadline = reply.get("deadline")
         if isinstance(deadline, bool) or not isinstance(deadline, (int, float)):
@@ -172,9 +181,7 @@ class WorkerClient:
         self._call(
             "report_failure",
             {
-                "descriptor": assignment.descriptor.to_dict(),
-                "attempt_number": assignment.attempt_number,
-                "token": assignment.token,
+                **assignment.payload(),
                 "kind": kind.value,
             },
         )
@@ -182,6 +189,7 @@ class WorkerClient:
 
 class StepKind(Enum):
     NO_WORK = "NO_WORK"  # nothing to run now; `generation_state` says whether to wait (OPEN) or stop
+    AUDITED = "AUDITED"
     COMMITTED = "COMMITTED"
     ALREADY_COMMITTED = "ALREADY_COMMITTED"
     FAILURE_REPORTED = "FAILURE_REPORTED"
@@ -278,7 +286,7 @@ class Worker:
         except WorkerAPIError as error:
             return self._refused(work, error)
         kind = StepKind.COMMITTED if outcome is SubmitOutcome.COMMITTED else StepKind.ALREADY_COMMITTED
-        return Step(kind, work.candidate_id)
+        return Step(StepKind.AUDITED if work.audit_id is not None else kind, work.candidate_id)
 
     def _deliver_pending(self) -> Step:
         work, reward = self._pending

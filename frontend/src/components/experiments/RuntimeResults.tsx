@@ -55,6 +55,13 @@ export function RuntimeResults({ experiment: e }: { experiment: Experiment }) {
             <dd>{bests.length ? Math.max(...bests).toFixed(4) : '—'}</dd>
           </div>
         </dl>
+        {e.auditSummary && (
+          <p className={e.auditSummary.mismatches ? 'note err' : 'note'}>
+            {t('Audits completed')}: {e.auditSummary.completed} · {t('Audit mismatches')}: {e.auditSummary.mismatches} ·{' '}
+            {t('Quarantined workers')}:{' '}
+            {e.auditSummary.quarantinedWorkers.map((worker) => worker.worker_id).join(', ') || '—'}
+          </p>
+        )}
         {generations.isError && (
           <p className="note err" role="alert">
             {t('Generation history unavailable')}

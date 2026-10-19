@@ -277,6 +277,8 @@ class WorkerRuntime:
                 if job is None:
                     self._sleep(self._poll)
                     continue
+                if self.worker_id in job.get("quarantined_workers", []):
+                    return "quarantined"
                 if job.get("state") == "FINISHED":
                     return "finished"
                 if job.get("state") == "ABORTED":
@@ -314,7 +316,9 @@ class WorkerRuntime:
                 continue
             unreachable_since = None
             timing = (
-                self.executor.last_timing if step.kind in (StepKind.COMMITTED, StepKind.ALREADY_COMMITTED) else None
+                self.executor.last_timing
+                if step.kind in (StepKind.COMMITTED, StepKind.ALREADY_COMMITTED, StepKind.AUDITED)
+                else None
             )
             self.log(
                 "step",

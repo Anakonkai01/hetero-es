@@ -203,3 +203,19 @@ def test_the_sdk_refuses_rewards_it_cannot_pin(assets):
         ESTrainer(args, reward_func=check_run, scorer={"name": "exact-string"})
     with pytest.raises(ValueError):
         reward("no-version")
+
+
+def test_every_candidate_can_be_audited_on_another_worker_before_updates(assets, tmp_path):
+    import sqlite3
+
+    out = tmp_path / "audited"
+    summaries = run_local(config_for(assets), out, workers=2, timeout_seconds=30, audit_rate=1.0)
+    with sqlite3.connect(out / "ledger.sqlite") as db:
+        rows = db.execute(
+            "SELECT u.worker_id,a.worker_id,u.matched FROM audit u JOIN result r USING(candidate_id) JOIN attempt a ON a.candidate_id=r.candidate_id AND a.attempt_number=r.attempt_number"
+        ).fetchall()
+        assert len(rows) == 8
+        assert all(auditor != original and matched == 1 for auditor, original, matched in rows)
+    assert not all(row["noop"] for row in summaries)
+    _, _, children = check_run(out, assets)
+    assert children == [row["child_sha256"] for row in summaries]

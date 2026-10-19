@@ -1,5 +1,15 @@
 /** Vietnamese strings used by active UI, data tables and backend statuses. */
 export const translations: Record<string, string> = {
+  'Audits completed': 'Audit đã hoàn tất',
+  'Audit mismatches': 'Audit có sai lệch',
+  'Quarantined workers': 'Worker bị cách ly',
+  'Audit on {worker} disagreed for {candidate}; committed reward is unchanged':
+    'Audit trên {worker} cho kết quả khác ở {candidate}; điểm đã ghi được giữ nguyên',
+  'Worker {worker} quarantined after repeated audit mismatches': 'Worker {worker} bị cách ly sau nhiều audit sai lệch',
+  'Worker {worker} reproduced the committed texts': 'Worker {worker} đã tạo lại đúng văn bản đã ghi',
+  'Generation {generation} has {pending} audits awaiting another available worker':
+    'Thế hệ {generation} còn {pending} audit chờ worker khác sẵn sàng',
+
   'Validation after generation {generation}: reward {reward}': 'Validation sau thế hệ {generation}: điểm {reward}',
   'Weight space': 'Không gian trọng số',
   'All parameters': 'Toàn bộ tham số',

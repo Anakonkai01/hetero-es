@@ -30,6 +30,22 @@ export function describeEvent(type: string, details: Details, workerId?: string)
     level: EventDescription['level'] = 'main',
   ): EventDescription => ({ template, params, level, tone });
   switch (type) {
+    case 'audit_mismatch':
+      return done(
+        'Audit on {worker} disagreed for {candidate}; committed reward is unchanged',
+        { worker, candidate: text(d.candidate_id) },
+        'warn',
+      );
+    case 'audit_worker_quarantined':
+      return done('Worker {worker} quarantined after repeated audit mismatches', { worker }, 'err');
+    case 'audit_completed':
+      return done('Worker {worker} reproduced the committed texts', { worker }, 'ok', 'detail');
+    case 'audit_incomplete':
+      return done(
+        'Generation {generation} has {pending} audits awaiting another available worker',
+        { generation: gen(d.generation), pending: typeof d.pending === 'number' ? d.pending : '?' },
+        'warn',
+      );
     case 'validation_completed':
       return done('Validation after generation {generation}: reward {reward}', {
         generation: gen(d.generation),
