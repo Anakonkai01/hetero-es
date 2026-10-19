@@ -68,5 +68,11 @@ spaces; Recipe v1+v2 merge into one new format with ONE identity break (v3, rele
 for antithetic signs and coefficient rules; numerics stay bit-identical and old runs must replay to their recorded hashes.
 Step 0 (branch `feat/extensibility-step0`, receipt [2026-10-19-extensibility-step0](evidence/2026-10-19-extensibility-step0/README.md))
 changes no identity: recorded recipe/record/workload hashes and coefficients are tests, product names live in
-`runtime/src/heteroes/catalog.py`, and `heteroes.executor.evaluate_task` is the single task seam. Next is the ADR-008 draft
-of the v3 format; no v3 code exists yet.
+`runtime/src/heteroes/catalog.py`, and `heteroes.executor.evaluate_task` is the single task seam.
+
+Then, without touching frozen modules or the worker protocol: the ADR-008 DRAFT
+(`runtime/docs/adr/ADR-008-recipe-v3-and-extensible-experiments.md`, open questions Q-A…Q-D), pure Recipe v3 documents,
+scorers and antithetic merge in `runtime/src/heteroes/v3/`, subset schemas in `model/schema.py` and LoRA in
+`model/lora.py` (PEFT 0.21.2 installed in `heteroes-match` only). Receipts: `evidence/2026-10-19-extensibility-step1`,
+`-subset`, `-lora`. Nothing in the product uses them yet. The ledger schema, generation record, worker protocol,
+executor/runner integration and the r11 desktop profile wait for the owner to accept ADR-008.
