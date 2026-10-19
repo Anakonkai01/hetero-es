@@ -1,4 +1,5 @@
 """CPU-only device control. Connectivity is never evidence of process death."""
+from .constants import CORE_COMMAND_KINDS, COMMAND_KINDS
 from .device_models import command_capabilities, re_checkpoint, digest, SelfTest, EndpointUpdate, DeviceConfigurationUpdate, QualificationUpdate, Enrollment, Approval, Contribution, ProcessReport, Report, MonitoringEvent, GPUObservation, HostObservation, DiskObservation, TransportObservation, Telemetry, Poll, WorkerCommand
 from .agent_scheduling import AgentScheduling
 from .agent_commands import AgentCommands
@@ -18,8 +19,6 @@ from fastapi import Depends, Header, HTTPException, Request
 from .addresses import endpoint, is_private
 
 from .constants import MODEL, REVISION, QUIESCENT
-CORE_COMMAND_KINDS = frozenset({'SET_CONTRIBUTION','COORDINATE','START_WORKER','STOP_WORKER','CANCEL_ASSIGNMENT'})
-COMMAND_KINDS = CORE_COMMAND_KINDS | {'PAUSE_ASSIGNMENT','UPDATE_BACKUP_POLICY'}
 
 
 

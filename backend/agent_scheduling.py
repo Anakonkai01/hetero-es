@@ -1,4 +1,5 @@
 """CPU-only device control. Connectivity is never evidence of process death."""
+from .constants import CORE_COMMAND_KINDS, COMMAND_KINDS
 from .policies import v2_qualification
 import json
 import secrets
@@ -10,8 +11,6 @@ from .errors import RuntimeRejected
 from heteroes.study.data import sha as study_hash
 
 from .constants import QUIESCENT
-CORE_COMMAND_KINDS = frozenset({'SET_CONTRIBUTION','COORDINATE','START_WORKER','STOP_WORKER','CANCEL_ASSIGNMENT'})
-COMMAND_KINDS = CORE_COMMAND_KINDS | {'PAUSE_ASSIGNMENT','UPDATE_BACKUP_POLICY'}
 
 
 

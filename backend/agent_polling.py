@@ -1,4 +1,5 @@
 """CPU-only device control. Connectivity is never evidence of process death."""
+from .constants import CORE_COMMAND_KINDS, COMMAND_KINDS
 import re
 import json
 import time
@@ -6,8 +7,6 @@ import time
 from fastapi import HTTPException
 
 from .constants import QUIESCENT
-CORE_COMMAND_KINDS = frozenset({'SET_CONTRIBUTION','COORDINATE','START_WORKER','STOP_WORKER','CANCEL_ASSIGNMENT'})
-COMMAND_KINDS = CORE_COMMAND_KINDS | {'PAUSE_ASSIGNMENT','UPDATE_BACKUP_POLICY'}
 
 
 from .device_models import digest

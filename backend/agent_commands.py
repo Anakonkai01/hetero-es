@@ -1,12 +1,11 @@
 """CPU-only device control. Connectivity is never evidence of process death."""
+from .constants import CORE_COMMAND_KINDS, COMMAND_KINDS
 import json
 import time
 import uuid
 
 from fastapi import HTTPException
 
-CORE_COMMAND_KINDS = frozenset({'SET_CONTRIBUTION','COORDINATE','START_WORKER','STOP_WORKER','CANCEL_ASSIGNMENT'})
-COMMAND_KINDS = CORE_COMMAND_KINDS | {'PAUSE_ASSIGNMENT','UPDATE_BACKUP_POLICY'}
 
 
 

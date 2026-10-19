@@ -1,4 +1,5 @@
 """CPU-only device control. Connectivity is never evidence of process death."""
+from .constants import CORE_COMMAND_KINDS, COMMAND_KINDS
 from .policies import FiniteStrict
 import hashlib
 import re
@@ -10,8 +11,6 @@ from pydantic import Field, field_validator, model_validator
 from .monitor_models import Core, Interface, BlockDevice, HostProcess, GPUProcess, Sensor, Power
 from .addresses import endpoint, is_private
 
-CORE_COMMAND_KINDS = frozenset({'SET_CONTRIBUTION','COORDINATE','START_WORKER','STOP_WORKER','CANCEL_ASSIGNMENT'})
-COMMAND_KINDS = CORE_COMMAND_KINDS | {'PAUSE_ASSIGNMENT','UPDATE_BACKUP_POLICY'}
 
 
 
