@@ -9,7 +9,9 @@ the dataset document, the ledger (texts included), the published weights and an 
 here: this coordinator is the researcher's own (ADR-008 decision 4).
 """
 
+import hashlib
 import json
+import shutil
 import threading
 import time
 from pathlib import Path
@@ -39,8 +41,12 @@ def _scorer_spec(config):
     return spec | {"config": scorer.get("config", {})}, None
 
 
-def prepare(config, out_dir, device="cpu"):
-    """Load the model and data, build and write the documents. Returns everything the run needs."""
+def prepare(config, out_dir, device="cpu", initial_adapter=None):
+    """
+    Load the model and data, build and write the documents. Returns everything the run needs. `initial_adapter` (a LoRA
+    run only) is a pinned adapter file copied into the run and loaded instead of one made from `adapterSeed`: the seed
+    gives other bytes on another operating system, the file does not.
+    """
     from heteroes.manifest import generation_config_sha256
     from heteroes.model.lora import create_initial_adapter
     from heteroes.model.lora import trainable_schema as adapter_schema
@@ -60,10 +66,18 @@ def prepare(config, out_dir, device="cpu"):
     dataset = v3data.build(rows, split_seed=config["data"].get("splitSeed", 42))
     space = config.get("weightSpace") or {"kind": "full"}
     adapter_file = adapter_sha = None
+    if initial_adapter is not None and space["kind"] != "lora":
+        raise ValueError("an initial adapter is only for a LoRA weight space")
     if space["kind"] == "lora":
         adapter_file = out / "initial-adapter.bin"
-        adapter_sha = create_initial_adapter(model, space, space.get("adapterSeed", 0), adapter_file)
-        schema = adapter_schema(model)
+        if initial_adapter is not None:
+            shutil.copyfile(initial_adapter, adapter_file)
+            with adapter_file.open("rb") as stream:
+                adapter_sha = hashlib.file_digest(stream, "sha256").hexdigest()
+            schema = trainable_schema(model, {**space, "initialAdapterSha256": adapter_sha}, adapter_file)
+        else:
+            adapter_sha = create_initial_adapter(model, space, space.get("adapterSeed", 0), adapter_file)
+            schema = adapter_schema(model)
     elif space["kind"] == "subset":
         from heteroes.model.schema import select_parameters
 

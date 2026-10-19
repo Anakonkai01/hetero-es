@@ -231,3 +231,35 @@ def test_installed_entrypoint_loads_without_numerical_dependencies():
     script = "import importlib.metadata, sys; entry=importlib.metadata.EntryPoint(name='heteroes',value=sys.argv[1],group='console_scripts').load(); assert 'torch' not in sys.modules; entry(['--help'])"
     result = subprocess.run([sys.executable, "-c", script, target], capture_output=True, text=True, timeout=15)
     assert result.returncode == 0 and "run" in result.stdout
+
+
+def test_a_pinned_initial_adapter_is_loaded_instead_of_made_from_a_seed(assets, tmp_path, monkeypatch):
+    # An adapter seed is not portable across operating systems (evidence/2026-10-19-v3-lora-cross-os): a pinned file is.
+    import heteroes.model.lora as lora
+    from heteroes.model.lora import create_initial_adapter
+    from heteroes.v3.local import prepare
+
+    space = {"kind": "lora", "rank": 2, "alpha": 4, "targetModules": ["q_proj", "v_proj"]}
+    donor, _ = load(assets / "model", file_manifest(assets / "model"))
+    pinned = tmp_path / "pinned.bin"
+    pinned_sha = create_initial_adapter(donor, space, 123, pinned)
+
+    def refuse(*args, **kwargs):
+        raise AssertionError("a pinned adapter must not be regenerated")
+
+    monkeypatch.setattr(lora, "create_initial_adapter", refuse)
+    config = config_for(assets, weightSpace={**space, "adapterSeed": 0})
+    ready = prepare(config, tmp_path / "run", initial_adapter=pinned)
+    assert ready["run"].recipe["weightSpace"]["initialAdapterSha256"] == pinned_sha
+    assert (tmp_path / "run" / "initial-adapter.bin").read_bytes() == pinned.read_bytes()
+    assert model_weights_sha256(ready["model"], ready["schema"]) == model_weights_sha256(
+        donor, lora.trainable_schema(donor)
+    )
+    worker, _, schema = ready["worker_model"]()
+    assert model_weights_sha256(worker, schema) == model_weights_sha256(ready["model"], ready["schema"])
+    with pytest.raises(ValueError, match="only for a LoRA"):
+        prepare(config_for(assets), tmp_path / "full", initial_adapter=pinned)
+    from heteroes.model.weights_io import WeightsFileError
+
+    with pytest.raises(WeightsFileError, match="wrong size"):  # the file does not fit another rank
+        prepare(config_for(assets, weightSpace={**space, "rank": 4}), tmp_path / "rank", initial_adapter=pinned)
