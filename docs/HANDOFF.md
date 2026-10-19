@@ -101,3 +101,11 @@ plan. The owner authorized both GPUs/SSH and selected the 3060's Windows for the
 next installer checks. No push, merge, release, live approval or deployment occurred.
 The session ended at the owner's usage-budget request; read the detailed handoff
 before resuming or claiming r11 readiness.
+
+## r11 candidate1 (2026-10-19, later the same day)
+
+Continue from [handoff-r11-candidate.md](handoff-r11-candidate.md), same branch. Section 5 steps 1–6 of the previous
+handoff are done: the cross-OS LoRA cause is identified and a native Windows worker passes on a transferred adapter; the
+desktop-v3 reference and profile are shipped in `desktop/worker/resources/`; the backend admits native Windows as a
+reference-bound v3 worker only; unsigned candidate1 installers exist in `.scratch/` only. Not done: Windows installer
+run (C: lacks space), owner install/uninstall acceptance, the stale Lab Server packaged check, and the flag day.
