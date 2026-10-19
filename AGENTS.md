@@ -5,7 +5,7 @@ The runtime (numerical core, ledger, workers, device agent) lives in `runtime/`;
 Electron apps, lab operations) stays at the root. Both histories were kept: every old commit id still resolves, and the
 old branches are kept as `archive/runtime/*` and `archive/product/*`.
 
-Read first: **`docs/session-handoff-2026-10-14-windows.md`** (first real Windows Worker, r8-r10, what is not shown), then
+**Cleanup in progress (branch `refactor/cleanup`): read `docs/refactor-handoff.md` first.** Then read **`docs/session-handoff-2026-10-14-windows.md`** (first real Windows Worker, r8-r10, what is not shown), then
 `docs/session-handoff-2026-10-13-ui.md`, `docs/session-handoff-2026-10-12-lf1.md` (owner rules and decisions),
 `runtime/CLAUDE.md` (numerical contract, module map), `runtime/HETEROES_LLM_STATUS.md` (first block) and
 `runtime/docs/adr/ADR-004..007`.
