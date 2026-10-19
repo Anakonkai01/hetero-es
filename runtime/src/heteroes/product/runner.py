@@ -202,10 +202,23 @@ def main(directory, *, device="cuda", timeout_seconds=1800):
         )
         coordinator.start()
         next_generation = coordinator.recover()  # finish any recorded update even when cancellation is pending
-        if dataset is not None and config.get("recipeVersion") != 3:
-            from heteroes.study.tracker import Tracker
+        if dataset is not None:
+            if config.get("recipeVersion") == 3:
+                from heteroes.v3.tracker import Tracker
 
-            tracker = Tracker(root, loaded, recipe, dataset, config.get("validationInterval", 1))
+                tracker = Tracker(
+                    root,
+                    loaded,
+                    recipe,
+                    dataset,
+                    config.get("validationInterval", 1),
+                    model_path=config["modelPath"],
+                    log=emit,
+                )
+            else:
+                from heteroes.study.tracker import Tracker
+
+                tracker = Tracker(root, loaded, recipe, dataset, config.get("validationInterval", 1))
             if next_generation == 0 and tracker.best is None:
                 from heteroes.model.weights_io import publish_weights
 
@@ -314,7 +327,9 @@ def main(directory, *, device="cuda", timeout_seconds=1800):
                         {
                             "event": "study_export_verified",
                             "weightsSha256": receipt["weightsSha256"],
-                            "testAccuracy": receipt["test"]["accuracy"],
+                            "testReward" if config.get("recipeVersion") == 3 else "testAccuracy": receipt["test"][
+                                "meanReward" if config.get("recipeVersion") == 3 else "accuracy"
+                            ],
                         }
                     )
                 except Exception as error:

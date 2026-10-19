@@ -339,6 +339,9 @@ class RunSupervisor(ABC):
                         row.update(rewardMean=sum(rewards) / len(rewards), rewardBest=max(rewards))
                     if number in contexts:
                         row["generationContext"] = contexts[number]
+                    validation = read_json(root / f"validation-{number}.json")
+                    if validation and "meanReward" in validation:
+                        row["validationReward"] = validation["meanReward"]
                     result["generations"].append(row)
                 for c in db.execute(
                     "SELECT c.*,g.recipe_hash,g.parent_weights_sha256,r.reward FROM candidate c JOIN generation g USING(experiment_id,generation) LEFT JOIN result r USING(candidate_id)"

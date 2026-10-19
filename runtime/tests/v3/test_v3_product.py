@@ -173,6 +173,11 @@ def test_managed_runner_and_worker_cli_commit_texts(product_assets, tmp_path, sp
                     assert candidate.result.reward == score(cfg["scorer"], texts, rows)[0]
                 update = ledger.get_update(cfg["runId"], generation)
                 assert update.applied_at and update.record.coefficient_rule == "zscore@1"
+        metrics = read_json(tmp_path / "study-metrics.json")
+        assert metrics["testLocked"] is False and metrics["independentReloadPassed"]
+        assert [item["generation"] for item in metrics["validation"]] == [-1, 0, 1]
+        assert read_json(tmp_path / "study-export.json")["planHash"] == canonical_json_hash(plan)
+        assert not (tmp_path / "study-export-error.json").exists()
         if space["kind"] == "lora":
             initial = tmp_path / "weights" / (recipe["weightSpace"]["initialAdapterSha256"] + ".bin")
             assert initial.exists()
