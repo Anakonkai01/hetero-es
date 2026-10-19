@@ -104,6 +104,9 @@ def main():
             os.chmod(point, 0o700)
             plan = call("/recovery-points/" + a.point_id + "/download-plan", {})
             m = plan["manifest"]
+            from heteroes.recovery_manifest import validate_manifest
+
+            validate_manifest(m)
             (point / "manifest.json").write_text(json.dumps(m))
             os.chmod(point / "manifest.json", 0o600)
             for name in m["files"]:
@@ -113,7 +116,7 @@ def main():
                     raise ValueError("Recovery manifest changed")
                 from heteroes.product.recovery import safe_name
 
-                if not safe_name(name):
+                if not safe_name(name, m["formatVersion"]):
                     raise ValueError("Unsafe recovery path")
                 target = point / name
                 target.parent.mkdir(parents=True, exist_ok=True, mode=0o700)

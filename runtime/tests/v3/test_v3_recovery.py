@@ -131,3 +131,63 @@ def test_real_runner_resumes_a_v3_point_on_a_replacement_installation(product_as
     assert actual == expected
     assert read_json(restored / "study-selection.json") == selected
     assert read_json(restored / "study-export.json")["independentReloadPassed"]
+
+
+def test_download_restore_cli_accepts_v3_objects(product_assets, tmp_path, monkeypatch):
+    import importlib.util
+    import io
+    import sys
+    import urllib.request
+
+    root = tmp_path / "source"
+    _, run, summary = completed_run(product_assets, root)
+    point = capture_point(root, summary, run.to_dict(), {"interval": 1, "retain": 3})
+    manifest = read_json(point / "manifest.json")
+    script = Path(__file__).resolve().parents[3] / "scripts/recovery.py"
+    spec = importlib.util.spec_from_file_location("recovery_cli", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    credentials = tmp_path / "private.json"
+    write_json(credentials, {"users": {"admin": "fixture-only"}})
+    destination = tmp_path / "downloaded"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            str(script),
+            "restore",
+            "--url",
+            "https://fixture.invalid",
+            "--runtime-root",
+            str(script.parent.parent / "runtime"),
+            "--point-id",
+            manifest["pointId"],
+            "--destination",
+            str(destination),
+            "--credentials-file",
+            str(credentials),
+        ],
+    )
+
+    def request(url, **kwargs):
+        url = url.full_url if isinstance(url, urllib.request.Request) else url
+        if url.endswith("/auth/login"):
+            payload = json.dumps({"accessToken": "fixture-only"}).encode()
+        elif url.endswith("/download-plan"):
+            payload = json.dumps(
+                {
+                    "manifest": manifest,
+                    "objects": {name: "https://fixture.invalid/files/" + name for name in manifest["files"]},
+                }
+            ).encode()
+        elif "/files/" in url:
+            payload = (point / url.split("/files/", 1)[1]).read_bytes()
+        elif url.endswith("/auth/logout"):
+            payload = b"{}"
+        else:
+            raise AssertionError("Unexpected fixture request")
+        return io.BytesIO(payload)
+
+    monkeypatch.setattr(urllib.request, "urlopen", request)
+    assert module.main() == 0
+    assert read_json(destination / "study-selection.json") == read_json(root / "study-selection.json")
