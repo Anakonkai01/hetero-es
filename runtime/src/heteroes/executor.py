@@ -15,6 +15,7 @@ perturbed weights just before the evaluation (`heteroes.eval.precision`). The we
 """
 
 import time
+from dataclasses import dataclass
 
 import torch
 
@@ -30,6 +31,33 @@ from heteroes.manifest import CandidateDescriptor, Recipe
 from heteroes.model.schema import ParameterSchema
 from heteroes.noise.contracts import CUDA_ENGINE_VERSION
 from heteroes.worker import CandidateFailed
+
+
+@dataclass(frozen=True)
+class TaskOutcome:
+    """What evaluating the task of a recipe gives: the reward of the candidate and the texts it was computed from, in row order."""
+
+    reward: float
+    completions: tuple[str, ...]
+
+
+def evaluate_task(recipe, model, tokenizer, chunk: int, rows=None) -> TaskOutcome:
+    """
+    The one place where the task of a recipe is evaluated: the imported dataset `rows` of a Recipe v2 (greedy accuracy), the
+    16 prompts of the contract (arith16) or a long built-in workload. The texts behind the reward are kept, so that they can be
+    reported with it. `evaluate_model` and `get_workload` are looked up in this module at call time, so that tests and the
+    desktop qualification can replace them.
+    """
+    if rows is not None:
+        from heteroes.study.evaluation import evaluate
+
+        raw = evaluate(model, tokenizer, rows, recipe.evaluation, chunk)
+        return TaskOutcome(float(raw["accuracy"]), tuple(row["output"] for row in raw["rows"]))
+    if recipe.workload_name == "arith16":
+        result = evaluate_model(model, tokenizer, chunk=chunk)
+    else:
+        result = get_workload(recipe.workload_name).evaluate(model, tokenizer, chunk, recipe.decode_engine)
+    return TaskOutcome(float(result.mean_reward), tuple(record.output_text for record in result.records))
 
 
 class CandidateExecutor:
@@ -60,6 +88,7 @@ class CandidateExecutor:
         )  # the model the answers are made on: the live one, or an FP32 copy of it
         self._clock = clock
         self.last_timing: dict[str, float] | None = None
+        self.last_completions: tuple[str, ...] | None = None  # the texts behind the last reward; None after a failure
         self.parent_sha256 = ""
         self._snapshot = None
         self.reset_parent()
@@ -111,6 +140,7 @@ class CandidateExecutor:
 
     def __call__(self, descriptor: CandidateDescriptor) -> float:
         self.last_timing = None
+        self.last_completions = None
         if descriptor.recipe_hash != self.recipe.hash:
             raise CandidateFailed(
                 FailureKind.OTHER,
@@ -140,22 +170,9 @@ class CandidateExecutor:
             now = self._clock()
             timing["perturb"], mark = now - mark, now
             self._eval.refresh()  # an FP32 copy takes the perturbed weights (nothing to do in FP16)
-            if self.dataset is not None:
-                from heteroes.study.evaluation import evaluate
-
-                raw = evaluate(self._eval.model, self.tokenizer, self.batch_rows, self.recipe.evaluation, self.chunk)
-                from types import SimpleNamespace
-
-                result = SimpleNamespace(mean_reward=raw["accuracy"])
-            elif self.recipe.workload_name == "arith16":
-                result = evaluate_model(
-                    self._eval.model, self.tokenizer, chunk=self.chunk
-                )  # looked up here so that tests can replace it
-            else:
-                result = get_workload(self.recipe.workload_name).evaluate(
-                    self._eval.model, self.tokenizer, self.chunk, self.recipe.decode_engine
-                )
-            reward = float(result.mean_reward)
+            # batch_rows is None without a dataset (set_generation needs one), and a dataset job without them is refused above
+            outcome = evaluate_task(self.recipe, self._eval.model, self.tokenizer, self.chunk, self.batch_rows)
+            reward, completions = outcome.reward, outcome.completions
             now = self._clock()
             timing["rollout"], mark = now - mark, now
         except BaseException as caught:  # whatever it is, the model must come back first
@@ -176,4 +193,5 @@ class CandidateExecutor:
                 raise CandidateFailed(FailureKind.OUT_OF_MEMORY, str(error)) from error
             raise error
         self.last_timing = timing
+        self.last_completions = completions
         return reward

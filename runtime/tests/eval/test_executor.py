@@ -18,7 +18,7 @@ import heteroes.executor as executor_module
 from heteroes.es.perturb import perturb_model_
 from heteroes.es.snapshot import RestoreError
 from heteroes.eval.candidate import model_weights_sha256
-from heteroes.eval.generate import EvalResult
+from heteroes.eval.generate import EvalRecord, EvalResult
 from heteroes.executor import CandidateExecutor
 from heteroes.ledger import FailureKind
 from heteroes.manifest import CandidateDescriptor, Recipe
@@ -621,3 +621,44 @@ def test_the_16_prompt_workload_still_goes_through_evaluate_model(fx, monkeypatc
     monkeypatch.setattr(executor_module, "get_workload", not_this)
     fx.executor()(fx.descriptor(7))
     assert len(fx.seen) == 1
+
+
+def test_the_texts_behind_the_reward_are_kept_in_question_order(fx, monkeypatch):
+    def evaluate(model, tokenizer, chunk=1):
+        texts = ("41", "48", "no number")
+        records = tuple(EvalRecord(f"q{i}", 0, text, None, 0.0) for i, text in enumerate(texts))
+        return EvalResult(mean_reward=0.25, records=records)
+
+    monkeypatch.setattr(executor_module, "evaluate_model", evaluate)
+    executor = fx.executor()
+    assert executor.last_completions is None
+    assert executor(fx.descriptor(7)) == 0.25
+    assert executor.last_completions == ("41", "48", "no number")
+
+
+def test_a_long_workload_keeps_its_texts_too(fx, monkeypatch):
+    with_recipe(fx, workload_name="cot_l3_q32")
+
+    class Workload:
+        @staticmethod
+        def evaluate(model, tokenizer, chunk, decode_engine="hf_generate"):
+            return EvalResult(mean_reward=0.5, records=(EvalRecord("q", 1, "Answer: 1", 1, 1.0),))
+
+    monkeypatch.setattr(executor_module, "get_workload", lambda name: Workload)
+    executor = CandidateExecutor(fx.model, "the tokenizer", fx.schema, fx.recipe, chunk=4)
+    executor(fx.descriptor(7))
+    assert executor.last_completions == ("Answer: 1",)
+
+
+def test_a_failed_candidate_leaves_no_texts_from_an_earlier_one(fx, monkeypatch):
+    executor = fx.executor()
+    executor(fx.descriptor(7))
+    assert executor.last_completions == ()  # the fixture's evaluation has no records
+
+    def oom(model, tokenizer, chunk=1):
+        raise torch.cuda.OutOfMemoryError("CUDA out of memory")
+
+    monkeypatch.setattr(executor_module, "evaluate_model", oom)
+    with pytest.raises(CandidateFailed):
+        executor(fx.descriptor(8))
+    assert executor.last_completions is None
