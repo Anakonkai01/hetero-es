@@ -1,0 +1,7 @@
+[
+ {"name": "ready-fixed-v1", "file": "electron/setup.cjs", "old": "return { profile: profile.profile, platform", "new": "return { profile: 'desktop-v1', platform"},
+ {"name": "ready-no-validation", "file": "electron/setup.cjs", "old": "  if (typeof profile.profile !== 'string' || !profile.profile) throw Error('PROFILE_INVALID');\n", "new": ""},
+ {"name": "service-v2-only", "file": "electron/service.cjs", "old": "filter((version) => version >= 2)", "new": "filter((version) => version === 2)"},
+ {"name": "service-ignores-lab", "file": "electron/service.cjs", "old": "if (evidenced.some((version) => health.recipeVersions?.includes(version))) {", "new": "if (true) {"},
+ {"name": "service-v1-sends", "file": "electron/service.cjs", "old": "filter((version) => version >= 2)", "new": "filter((version) => version >= 1)"}
+]
