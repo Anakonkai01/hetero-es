@@ -8,6 +8,7 @@ from fastapi import Depends, HTTPException, Response
 from fastapi.responses import StreamingResponse
 
 from .store import TERMINAL, now
+from .constants import REVISION
 from .timeline import build_timeline
 
 
@@ -56,7 +57,14 @@ def install_routes(app, store, runtime, scoped, visible, authorized, validate):
             except ValueError:
                 raise HTTPException(422, "Invalid configuration") from None
             digest = hashlib.sha256(json.dumps(body, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
-            old.update(**body, configHash=digest)
+            for key in set(Configuration.model_fields) | {
+                "modelManifest",
+                "modelSource",
+                "datasetObjectSha256",
+                "datasetIdentity",
+            }:
+                old.pop(key, None)
+            old.update(**body, configHash=digest, modelVersion=body.get("modelManifest", {}).get("revision", REVISION))
             store.save(db, old)
             store.audit(db, current["userId"], "EDIT", run_id, current["workspaceId"])
             return old

@@ -212,7 +212,7 @@ class Store:
             "ownerUserId": owner,
             "status": "DRAFT",
             "cancelRequested": False,
-            "modelVersion": REVISION,
+            "modelVersion": config.get("modelManifest", {}).get("revision", REVISION),
             "configHash": digest,
             "createdAt": now(),
             "completedGenerations": 0,

@@ -17,6 +17,7 @@ def assets(study):
     c, admin, storage = study
     model_manifest, _ = manifest()
     model_manifest["modelId"] = "research/custom-causal-lm"
+    model_manifest["revision"] = model_manifest["tokenizerRevision"] = "e" * 40
     response = c.post(
         "/api/v1/models/register",
         headers=admin,
@@ -126,6 +127,7 @@ def test_v3_config_and_worker_command_preserve_the_frozen_options(v3_study):
     result = c.post("/api/v1/experiments", headers=admin, json=body)
     assert result.status_code == 200, result.text
     run = result.json()
+    assert run["modelVersion"] == model["revision"]
     enable(lab, d, device_auth)
     assert c.post(f"/api/v1/experiments/{run['experimentId']}/submit", headers=admin).status_code == 200
     store.dispatch_once()
@@ -286,3 +288,27 @@ def test_v3_templates_validate_and_keep_nullable_prompt():
     assert clean_config(options) == options
     with pytest.raises(HTTPException):
         clean_config({**options, "weightSpace": {"kind": "subset", "include": ["["]}})
+
+
+def test_editing_a_v3_draft_replaces_its_old_recipe_fields(v3_study):
+    c, admin, _ = v3_study
+    store = c.app.state.store
+    d, device_auth = pair((c, store, store.runtime, admin))
+    model, data = assets(v3_study)
+    profile = c.get("/api/v1/devices", headers=admin).json()[0]["selfTest"]
+    qualify_v3(c, device_auth, profile, model)
+    config = configuration(d, model, data)
+    run = c.post("/api/v1/experiments", headers=admin, json=config).json()
+    cap = c.get("/api/v1/capabilities", headers=admin).json()
+    legacy = {
+        key: value
+        for key, value in config.items()
+        if key not in ("weightSpace", "scorer", "antithetic", "systemPrompt", "coefficientRule", "datasetIds")
+    }
+    legacy.update(recipeVersion=1, task="arith16", modelArtifactId="qwen-pinned", modelName=cap["modelId"])
+    result = c.patch(f"/api/v1/experiments/{run['experimentId']}", headers=admin, json=legacy)
+    assert result.status_code == 200, result.text
+    shown = result.json()
+    assert shown.get("recipeVersion", 1) == 1
+    assert shown["modelVersion"] == cap["modelRevision"]
+    assert not set(shown) & {"weightSpace", "scorer", "antithetic", "modelManifest", "datasetIdentity"}

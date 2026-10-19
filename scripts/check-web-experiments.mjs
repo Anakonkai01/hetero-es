@@ -246,6 +246,7 @@ try {
     await page.request.get(base + '/api/v1/experiments/' + page.url().split('/').at(-1), { headers })
   ).json();
   assert.equal(v3.recipeVersion, 3);
+  assert.equal(v3.modelVersion, manifest.revision);
   assert.equal(v3.weightSpace.kind, 'lora');
   assert.equal(v3.weightSpace.rank, 4);
   assert.equal(v3.scorer.config.answerField, 'label');
