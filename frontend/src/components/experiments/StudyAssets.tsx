@@ -10,18 +10,17 @@ type SourceFile={format:string;content:string};
 
 export function StudyAssets(){
  const {t}=useProduct();const cache=useQueryClient();const scope=useScopeKey();
- const health=useQuery({queryKey:['study-health'],queryFn:()=>apiGet<{agentMode:boolean;privateLabUrl?:string}>('/api/v1/health')});
+ const health=useQuery({queryKey:['study-health'],queryFn:()=>apiGet<{privateLabUrl?:string}>('/api/v1/health')});
  const data=useQuery({queryKey:['study-datasets',...scope],queryFn:()=>apiGet<StudyDataset[]>('/api/v1/datasets'),enabled:scope.every(Boolean)});
  const [name,setName]=useState('');const [mode,setMode]=useState('all');const [prompt,setPrompt]=useState('prompt');const [answer,setAnswer]=useState('answer');const [adapter,setAdapter]=useState('exact-number-v1');
  const [files,setFiles]=useState<Record<string,SourceFile>>({});const [manifest,setManifest]=useState<Record<string,unknown>|null>(null);
  const [modelName,setModelName]=useState('');const [source,setSource]=useState('REFERENCE');const [weightFiles,setWeightFiles]=useState<File[]>([]);
  const [busy,setBusy]=useState(false);const [message,setMessage]=useState('');
  const publicEntry=location.hostname.endsWith('.trycloudflare.com');
- if(!health.data?.agentMode)return null;
  const perform=async(task:()=>Promise<void>)=>{setBusy(true);setMessage('');try{await task();await cache.invalidateQueries();setMessage(t('Saved and verified.'));}catch(error){setMessage(error instanceof Error?error.message:String(error));}finally{setBusy(false);}};
  return <section className="card"><div className="ch"><h2>{t('Models and math datasets')}</h2></div><div className="cb demo-form">
  {message&&<p className="note" role="status">{message}</p>}
- {publicEntry?<p className="note">{t('Connect to the lab LAN or Tailscale to import datasets and model files.')} {health.data.privateLabUrl&&<a href={health.data.privateLabUrl} className="link">{t('Open private lab')}</a>}</p>:<>
+ {publicEntry?<p className="note">{t('Connect to the lab LAN or Tailscale to import datasets and model files.')} {health.data?.privateLabUrl&&<a href={health.data.privateLabUrl} className="link">{t('Open private lab')}</a>}</p>:<>
  <details className="advanced-panel"><summary>{t('Import math dataset')}</summary><form onSubmit={event=>{event.preventDefault();void perform(async()=>{await apiPost('/api/v1/datasets/import',{name,files,mapping:{prompt,answer},adapter,splitSeed:42});});}}>
  <label className="fg">{t('Dataset name')}<input className="inp" required maxLength={100} value={name} onChange={e=>setName(e.target.value)}/></label>
  <label className="fg">{t('Dataset splits')}<select className="sel" value={mode} onChange={e=>{setMode(e.target.value);setFiles({});}}><option value="all">{t('One file · seeded 80/10/10')}</option><option value="split">{t('Train, validation and test files')}</option></select></label>

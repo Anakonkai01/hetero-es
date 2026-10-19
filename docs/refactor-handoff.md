@@ -1,4 +1,4 @@
-# Refactor handoff (2026-10-19) — for the next agent (Codex)
+# Refactor handoff (2026-10-19) — phase 2 complete
 
 The owner asked for one repository and a professional cleanup. Talk to the owner in Vietnamese, simply. Rules are in
 `../AGENTS.md`: never push or tag, no Co-Authored-By, tests first plus a mutation check, the lab is touched only through
@@ -16,6 +16,12 @@ The owner asked for one repository and a professional cleanup. Talk to the owner
   `a930622` M1 backup bundle and `/contributions` routes removed (backend + web);
   `d200085` fixture lab `scripts/serve-test-lab.py` runs in agent mode with two paired devices.
   At d200085: backend 271 passed, runtime 2,115 passed / 100 skipped, `check-all.sh` ALL PASS.
+- This checkpoint completes phase 2: backend 274 passed; runtime 2,110 passed / 100 skipped;
+  8/8 scratch mutants killed. Full receipts and source/packaging checks are in
+  `docs/evidence/2026-10-19-phase2-runtime-removal/`. The live deployment and published r10 are unchanged.
+- Read-only live check at this checkpoint: all three services alive, database quick check `ok`, `5070ti` APPROVED.
+  **`3060-thao` is now REVOKED**, unlike the older handoff. No device state was changed during this cleanup;
+  do not approve or re-enable it based on the old document.
 - The owner's decisions (do not reopen them):
   - remove web mock mode;
   - remove the legacy control mode (D1);
@@ -24,25 +30,22 @@ The owner asked for one repository and a professional cleanup. Talk to the owner
   - ruff + prettier formatting for the WHOLE repository, Recipe v1 numerics included, with an AST-equality proof;
   - publish no new installer during the cleanup (r11 comes with the installer polish).
 
-## Next: finish phase 2 (remove the legacy runtime)
-1. Move `RuntimeRejected` out of `backend/runtime.py` (into, for example, `backend/errors.py`; it is used by `store.py`,
-   `devices.py`, `tests/test_api.py`), then delete `runtime.py`.
-2. Delete:
-   - `store._dispatch_legacy_once`;
-   - every `getattr(runtime,'agent_mode',...)` branch in `app.py`, `store.py` and `lab.py`; keep the agent side;
-   - the legacy branch of `app._app_from_config` and the default `~/.config/heteroes-integration`;
-   - the guard at `store.py` ~line 53, together with `test_devices.py::test_agent_database_cannot_be_opened_by_legacy_dispatcher`
-     and the `Runtime` class in `tests/test_api.py`;
-   - the import alias `AgentRuntime as Runtime` in `test_web.py` and `test_throttle.py`: import `AgentRuntime` directly.
-3. Web: drop the `agentMode` conditionals in `LabOperationsPage.tsx`, `LabDevices.tsx`, `StudyAssets.tsx` and
-   `RuntimeExperiment.tsx`, plus the `agentMode` fields that no longer decide anything.
-4. Delete `start-integration.sh`, `stop-integration.sh` and `scripts/manage-integration.py`.
-5. Runtime: delete `runtime/src/heteroes/product/gateway.py` (the loopback control server) and `product/backup.py`
-   (only gateway imports it), their tests, and `scripts/check-native-windows.py` (it imports gateway). First rebuild the
-   import graph: agent → runner → coordinator/dispatch must stay.
-6. Keep `httpx`: Starlette's TestClient needs it.
+## Phase 2 completed; details that matter for the next change
+- `RuntimeRejected` now lives in `backend/errors.py`. The legacy backend adapter, dispatcher, mode guards,
+  integration launch scripts and fake `tests/test_api.py::Runtime` are removed. The factory requires an explicit
+  `HETEROES_PRIVATE_CONFIG` and `deploymentMode: agent`; `backend.server` already supplies the directory.
+- The old handoff incorrectly implied gateway was independent of the agent. **AgentManager inherited Manager.**
+  Its live supervision/projection methods were extracted into `runtime/src/heteroes/product/run_supervisor.py`
+  before deleting `gateway.py` and `product/backup.py`. Agent launch/worker-command hooks remain in `agent.py`.
+  The retained methods have AST-equality receipts; the frozen numerical files are byte-identical.
+- Gateway tests that exercise live behavior were moved to `test_run_supervisor.py`, using a real `AgentManager`.
+  Only the five legacy backup tests were deleted. Backend removed one legacy guard test and added four factory cases.
+- The web no longer branches on `agentMode`. **Keep health's `agentMode: true` and `deviceConfiguration: true`:**
+  shipped r10 Worker/Server apps still check them. Unused mode fields in capabilities and operations were removed.
+- `httpx` stays: Starlette's TestClient needs it. No runtime/profile tarball was changed in the working tree;
+  source packaging was checked on a scratch copy. No installer was published and the live lab was not restarted.
 
-## Then phases 3-6 (full plan in Vietnamese: `docs/refactor-plan-vi.md`)
+## Next: phase 3, then phases 4-6 (full plan in Vietnamese: `docs/refactor-plan-vi.md`)
 - **3. Mock mode, cloud and dead code.**
   - Mock mode: `frontend/src/mocks/`, Mock* pages, `lib/dataSource.ts` and every `IS_MOCK` branch, msw,
     `static/mockServiceWorker.js`, `test:mock`, `LOCAL_BACKEND_HANDOFF.md`.

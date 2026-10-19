@@ -13,7 +13,7 @@ import ipaddress
 
 from fastapi import Depends, Header, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
-from .runtime import RuntimeRejected
+from .errors import RuntimeRejected
 from .monitor_models import Core, Interface, BlockDevice, HostProcess, GPUProcess, Sensor, Power
 from .addresses import endpoint, is_private
 from .study.data import sha as study_hash
@@ -272,7 +272,6 @@ class WorkerCommand(Strict):
 
 class AgentRuntime:
     """Adapter for the existing product dispatcher; no Track A imports on the server."""
-    agent_mode = True
 
     def __init__(self, storage_backend=None):
         self.store = None
@@ -347,7 +346,7 @@ class AgentRuntime:
         return result
 
     def capabilities(self):
-        return {'controlApiVersion':2,'recipeVersions':[1,2],'agentMode':True,'physicalGpuIdentity':True,'parallelJobs':True,'modelId':MODEL,'modelRevision':REVISION,
+        return {'controlApiVersion':2,'recipeVersions':[1,2],'physicalGpuIdentity':True,'parallelJobs':True,'modelId':MODEL,'modelRevision':REVISION,
                 'workerIds':[d['workerId'] for d in self.devices() if d['approvalStatus']=='APPROVED'],
                 'workloads':['arith16','cot_l3_q32','cot_l3_q64','cot_l1_q128'],
                 'schedulerPolicies':['greedy'],'syncModes':['synchronous'],'quarantinedWorkerIds':[d['workerId'] for d in self.devices() if d['approvalStatus']=='QUARANTINED'],

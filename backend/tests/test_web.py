@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 from backend.app import create_app
-from backend.devices import AgentRuntime as Runtime  # agent mode, as on the live lab
+from backend.devices import AgentRuntime
 
 
 def test_same_origin_web_keeps_api_auth_and_unknown_paths(tmp_path):
@@ -9,7 +9,7 @@ def test_same_origin_web_keeps_api_auth_and_unknown_paths(tmp_path):
     (web/'assets/app.js').write_text('window.lab=true;')
     (tmp_path/'outside.txt').write_text('private')
     (web/'secret.txt').symlink_to(tmp_path/'outside.txt')
-    app = create_app(tmp_path/'state.sqlite', {'admin':'test-admin-pass'}, Runtime(),
+    app = create_app(tmp_path/'state.sqlite', {'admin':'test-admin-pass'}, AgentRuntime(),
                      dispatch=False, web_directory=web)
     with TestClient(app) as client:
         assert 'Lab UI' in client.get('/workspaces/lab').text
@@ -29,7 +29,7 @@ def installer_app(tmp_path,monkeypatch,**extra):
     private=tmp_path/'private';private.mkdir()
     (private/'config.json').write_text(json.dumps({'apiUrl':'http://100.64.0.1:8002','bulkApiUrl':'http://100.64.0.1:8002','publicWebUrl':'https://lab.example.org',**extra}))
     monkeypatch.setenv('HETEROES_PRIVATE_CONFIG',str(private))
-    return create_app(tmp_path/'state.sqlite',{'admin':'test-admin-pass'},Runtime(),dispatch=False,web_directory=web,downloads_directory=downloads)
+    return create_app(tmp_path/'state.sqlite',{'admin':'test-admin-pass'},AgentRuntime(),dispatch=False,web_directory=web,downloads_directory=downloads)
 
 
 def test_installer_links_stay_private_behind_a_public_web_address_by_default(tmp_path,monkeypatch):
@@ -56,7 +56,7 @@ def test_installers_published_as_symlinks_into_another_disk_are_served_with_rang
     downloads = tmp_path/'downloads'; downloads.mkdir()
     (downloads/'Worker Setup.exe').symlink_to(other_disk/'Worker Setup.exe')
     (downloads/'manifest.json').write_text('{"installers":[],"serverInstallers":[]}')
-    app = create_app(tmp_path/'state.sqlite', {'admin':'test-admin-pass'}, Runtime(), dispatch=False,
+    app = create_app(tmp_path/'state.sqlite', {'admin':'test-admin-pass'}, AgentRuntime(), dispatch=False,
                      web_directory=web, downloads_directory=downloads)
     with TestClient(app) as client:
         whole = client.get('/downloads/Worker%20Setup.exe')

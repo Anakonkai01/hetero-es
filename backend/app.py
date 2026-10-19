@@ -15,7 +15,6 @@ from starlette.concurrency import run_in_threadpool
 from pydantic import BaseModel, ConfigDict, Field
 
 from .store import ACTIVE, TERMINAL, Store, now
-from .runtime import Runtime
 from .lab import install_lab_routes
 from .live import LiveStreams
 from .templates import install_template_routes
@@ -144,20 +143,14 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
         current = scoped(current,current['workspaceId'])
         cap = capabilities()
         body = config.model_dump()
-        if getattr(runtime, 'agent_mode', False):
-            co = next((d for d in runtime.devices() if d['deviceId']==body['coordinatorDeviceId']),None)
-            if not co or co['approvalStatus']!='APPROVED' or co['workspaceId']!=current['workspaceId'] or not co['selfTest']['coordinator']:
-                raise HTTPException(422, 'Select an approved coordinator in this workspace')
-            policy=body.get('backupPolicy') or {'interval':1,'retain':3}
-            if set(policy)!={'interval','retain'} or any(type(v) is not int or not 1<=v<=1000 for v in policy.values()):
-                raise HTTPException(422, 'Backup interval and retention must be integers from 1 to 1000')
-            body['backupPolicy']=policy
-        else:
-            if body['coordinatorDeviceId'] is not None or body['backupPolicy'] is not None:
-                raise HTTPException(422, 'Agent settings require agent deployment mode')
-            body.pop('coordinatorDeviceId'); body.pop('backupPolicy')
+        co = next((d for d in runtime.devices() if d['deviceId']==body['coordinatorDeviceId']),None)
+        if not co or co['approvalStatus']!='APPROVED' or co['workspaceId']!=current['workspaceId'] or not co['selfTest']['coordinator']:
+            raise HTTPException(422, 'Select an approved coordinator in this workspace')
+        policy=body.get('backupPolicy') or {'interval':1,'retain':3}
+        if set(policy)!={'interval','retain'} or any(type(v) is not int or not 1<=v<=1000 for v in policy.values()):
+            raise HTTPException(422, 'Backup interval and retention must be integers from 1 to 1000')
+        body['backupPolicy']=policy
         if body['recipeVersion']==2:
-            if not getattr(runtime,'agent_mode',False):raise HTTPException(422,'Recipe v2 requires device agents')
             model=registry.get(body['modelArtifactId'],current['workspaceId'],'model')
             if model['status'] not in ('READY','REGISTERED') or model['reference']!=body['modelName']:raise HTTPException(422,'Model is unavailable or its name differs')
             if len(body['datasetIds'])!=1:raise HTTPException(422,'Select one frozen dataset')
@@ -203,9 +196,10 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
                 pass
         backend=getattr(runtime,'storage_backend',None)
         return {"ok": True, "dataSource": "real", "runtimeIssue": store.last_error,
-                "agentMode":bool(getattr(runtime,"agent_mode",False)),
-                'deviceConfiguration':bool(getattr(runtime,"agent_mode",False)),
-                'recipeVersions':[1,2] if getattr(runtime,'agent_mode',False) else [1],
+                # Shipped r10 apps require these protocol capability fields.
+                "agentMode":True,
+                'deviceConfiguration':True,
+                'recipeVersions':[1,2],
                 "cloudStorageConfigured":backend is not None and getattr(backend,'mode','cloud')=='cloud',
                 "recoveryStorageConfigured":backend is not None,
                 "recoveryStorageMode":getattr(backend,'mode','cloud') if backend else None,
@@ -263,7 +257,7 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
         cap=capabilities()
         assigned=set(store.assignments(current['workspaceId'],include_disabled=True))
         return {**cap,'workerIds':store.assignments(current['workspaceId']),
-                'coordinatorDevices':[{'deviceId':d['deviceId'],'workerId':d['workerId']} for d in runtime.devices() if d['workspaceId']==current['workspaceId'] and d['approvalStatus']=='APPROVED' and d['selfTest']['coordinator']] if getattr(runtime,'agent_mode',False) else [],
+                'coordinatorDevices':[{'deviceId':d['deviceId'],'workerId':d['workerId']} for d in runtime.devices() if d['workspaceId']==current['workspaceId'] and d['approvalStatus']=='APPROVED' and d['selfTest']['coordinator']],
                 'quarantinedWorkerIds':[w for w in cap.get('quarantinedWorkerIds',[]) if w in assigned]}
 
     @app.get("/api/v1/resources")
@@ -480,77 +474,75 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
     def empty(current=Depends(scoped)):
         return []
 
-    if getattr(runtime,'agent_mode',False):
-        @app.post('/api/v1/experiments/{run_id}/pause')
-        def pause(run_id:str,current=Depends(scoped)):
-            with store.db() as db:
-                db.execute('BEGIN IMMEDIATE')
-                body=authorized(run_id,current)
-                if body['status']=='PAUSED':return body
-                if body.get('cancelRequested') or body['status'] not in ('STARTING','RUNNING','PAUSING'):
-                    raise HTTPException(409,'Pause requires a running experiment')
-                runtime.require_command(db,body['coordinatorDeviceId'],'PAUSE_ASSIGNMENT')
-                runtime.pause(run_id,db=db)
-                body.update(pauseRequested=True,status='PAUSING')
-                store.save(db,body)
-                store.audit(db,current['userId'],'PAUSE_REQUESTED',run_id,body['workspaceId'])
-            return body
+    @app.post('/api/v1/experiments/{run_id}/pause')
+    def pause(run_id:str,current=Depends(scoped)):
+        with store.db() as db:
+            db.execute('BEGIN IMMEDIATE')
+            body=authorized(run_id,current)
+            if body['status']=='PAUSED':return body
+            if body.get('cancelRequested') or body['status'] not in ('STARTING','RUNNING','PAUSING'):
+                raise HTTPException(409,'Pause requires a running experiment')
+            runtime.require_command(db,body['coordinatorDeviceId'],'PAUSE_ASSIGNMENT')
+            runtime.pause(run_id,db=db)
+            body.update(pauseRequested=True,status='PAUSING')
+            store.save(db,body)
+            store.audit(db,current['userId'],'PAUSE_REQUESTED',run_id,body['workspaceId'])
+        return body
 
-        @app.post('/api/v1/experiments/{run_id}/resume')
-        def resume(run_id:str,current=Depends(scoped)):
-            with store.db() as db:
-                db.execute('BEGIN IMMEDIATE')
-                body=authorized(run_id,current)
-                if body.get('resumeRequested') and body['status'] in ('QUEUED','STARTING'):return body
-                row=db.execute('SELECT released,snapshot FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1',(run_id,)).fetchone()
-                if body['status']!='PAUSED' or not row or not row['released'] or json.loads(row['snapshot'])['state']['status']!='PAUSED':
-                    raise HTTPException(409,'Wait for the completed checkpoint and confirmed resource release')
-                if reason:=store.eligibility(db,body):raise HTTPException(409,reason)
-                body.update(status='QUEUED',resumeRequested=True,pauseRequested=False,cancelRequested=False)
-                body.pop('waitingReason',None)
-                store.save(db,body)
-                db.execute('INSERT OR IGNORE INTO queue(run_id) VALUES (?)',(run_id,))
-                store.audit(db,current['userId'],'RESUME_REQUESTED',run_id,body['workspaceId'])
-            return body
+    @app.post('/api/v1/experiments/{run_id}/resume')
+    def resume(run_id:str,current=Depends(scoped)):
+        with store.db() as db:
+            db.execute('BEGIN IMMEDIATE')
+            body=authorized(run_id,current)
+            if body.get('resumeRequested') and body['status'] in ('QUEUED','STARTING'):return body
+            row=db.execute('SELECT released,snapshot FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1',(run_id,)).fetchone()
+            if body['status']!='PAUSED' or not row or not row['released'] or json.loads(row['snapshot'])['state']['status']!='PAUSED':
+                raise HTTPException(409,'Wait for the completed checkpoint and confirmed resource release')
+            if reason:=store.eligibility(db,body):raise HTTPException(409,reason)
+            body.update(status='QUEUED',resumeRequested=True,pauseRequested=False,cancelRequested=False)
+            body.pop('waitingReason',None)
+            store.save(db,body)
+            db.execute('INSERT OR IGNORE INTO queue(run_id) VALUES (?)',(run_id,))
+            store.audit(db,current['userId'],'RESUME_REQUESTED',run_id,body['workspaceId'])
+        return body
 
-        @app.patch('/api/v1/experiments/{run_id}/backup-policy')
-        def backup_policy(run_id:str,policy:BackupPolicy,current=Depends(scoped)):
-            with store.db() as db:
-                body=authorized(run_id,current)
-                if body['status'] in TERMINAL:raise HTTPException(409,'Experiment is already finished')
-                assignment=db.execute('SELECT id,coordinator,epoch,released FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1',(run_id,)).fetchone()
-                if assignment and not assignment['released']:
-                    runtime.require_command(db,assignment['coordinator'],'UPDATE_BACKUP_POLICY')
-                    runtime._enqueue(db,assignment['coordinator'],'UPDATE_BACKUP_POLICY',{'assignmentId':assignment['id'],'epoch':assignment['epoch'],'policy':policy.model_dump()},'backup-policy:'+secrets.token_hex(16))
-                body['requestedBackupPolicy']=policy.model_dump()
-                store.save(db,body)
-                store.audit(db,current['userId'],'BACKUP_POLICY_REQUESTED',run_id,body['workspaceId'])
-            return {'policy':policy.model_dump(),'appliesBeforeNextGeneration':True}
+    @app.patch('/api/v1/experiments/{run_id}/backup-policy')
+    def backup_policy(run_id:str,policy:BackupPolicy,current=Depends(scoped)):
+        with store.db() as db:
+            body=authorized(run_id,current)
+            if body['status'] in TERMINAL:raise HTTPException(409,'Experiment is already finished')
+            assignment=db.execute('SELECT id,coordinator,epoch,released FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1',(run_id,)).fetchone()
+            if assignment and not assignment['released']:
+                runtime.require_command(db,assignment['coordinator'],'UPDATE_BACKUP_POLICY')
+                runtime._enqueue(db,assignment['coordinator'],'UPDATE_BACKUP_POLICY',{'assignmentId':assignment['id'],'epoch':assignment['epoch'],'policy':policy.model_dump()},'backup-policy:'+secrets.token_hex(16))
+            body['requestedBackupPolicy']=policy.model_dump()
+            store.save(db,body)
+            store.audit(db,current['userId'],'BACKUP_POLICY_REQUESTED',run_id,body['workspaceId'])
+        return {'policy':policy.model_dump(),'appliesBeforeNextGeneration':True}
 
-        @app.get('/api/v1/experiments/{run_id}/monitoring-events')
-        def monitoring_events(run_id:str,afterSequence:int=0,current=Depends(scoped)):
-            authorized(run_id,current)
-            with store.db() as db:
-                return [{'sequence':r['sequence'],'eventId':r['event_id'],'event':json.loads(r['body'])} for r in db.execute(
-                    'SELECT e.* FROM monitoring_events e JOIN assignments a ON a.id=e.assignment_id WHERE a.run_id=? AND e.sequence>? ORDER BY e.sequence LIMIT 2000',(run_id,max(0,afterSequence)))]
+    @app.get('/api/v1/experiments/{run_id}/monitoring-events')
+    def monitoring_events(run_id:str,afterSequence:int=0,current=Depends(scoped)):
+        authorized(run_id,current)
+        with store.db() as db:
+            return [{'sequence':r['sequence'],'eventId':r['event_id'],'event':json.loads(r['body'])} for r in db.execute(
+                'SELECT e.* FROM monitoring_events e JOIN assignments a ON a.id=e.assignment_id WHERE a.run_id=? AND e.sequence>? ORDER BY e.sequence LIMIT 2000',(run_id,max(0,afterSequence)))]
 
     install_lab_routes(app,store,user,scoped,runtime)
     install_template_routes(app,store,scoped)
     install_notification_routes(app,store,user)
-    if getattr(runtime, 'agent_mode', False):
-        from .devices import install_device_routes
-        device_auth=install_device_routes(app,store,user,runtime)
-        from .study_registry import install_routes as study_routes
-        study_routes(app,registry,runtime,scoped,device_auth)
-        if runtime.storage_backend is not None:
-            from .cloud_storage import CloudStorage, install_storage_routes
-            storage=CloudStorage(store,runtime.storage_backend,
-                quota_bytes=getattr(runtime.storage_backend,'quota_bytes',8_000_000_000))
-            app.state.storage=storage
-            runtime.storage=storage
-            install_storage_routes(app,store,storage,device_auth,user,scoped,authorized)
-            if hasattr(runtime.storage_backend,'install_routes'):
-                runtime.storage_backend.install_routes(app)
+    from .devices import install_device_routes
+    device_auth=install_device_routes(app,store,user,runtime)
+    from .study_registry import install_routes as study_routes
+    study_routes(app,registry,runtime,scoped,device_auth)
+    if runtime.storage_backend is not None:
+        from .cloud_storage import CloudStorage, install_storage_routes
+        storage=CloudStorage(store,runtime.storage_backend,
+            quota_bytes=getattr(runtime.storage_backend,'quota_bytes',8_000_000_000))
+        app.state.storage=storage
+        runtime.storage=storage
+        install_storage_routes(app,store,storage,device_auth,user,scoped,authorized)
+        if hasattr(runtime.storage_backend,'install_routes'):
+            runtime.storage_backend.install_routes(app)
 
     @app.api_route("/api/v1/{unsupported:path}", methods=["POST", "PATCH", "DELETE"])
     def unavailable(unsupported: str, current=Depends(scoped)):
@@ -595,7 +587,10 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
 
 
 def app_from_environment():
-    root = Path(os.environ.get("HETEROES_PRIVATE_CONFIG", str(Path.home() / ".config/heteroes-integration")))
+    private_root = os.environ.get('HETEROES_PRIVATE_CONFIG')
+    if not private_root:
+        raise ValueError('Set HETEROES_PRIVATE_CONFIG to the lab configuration directory')
+    root = Path(private_root)
     credentials = json.loads((root / "credentials.json").read_text())
     config = json.loads((root / "config.json").read_text())
     from .writer_lock import acquire_writer
@@ -607,19 +602,18 @@ def app_from_environment():
 
 
 def _app_from_config(root,credentials,config,writer):
-    if config.get('deploymentMode') == 'agent':
-        from .devices import AgentRuntime
-        storage_backend=None
-        if config.get('storageMode') == 'local':
-            from .local_storage import LocalBackend
-            storage_backend=LocalBackend(config['storageDirectory'],root/'storage-signing.key',config.get('bulkApiUrl',config['apiUrl']),config.get('storageVolumeUUID'),config.get('metadataStorageDirectory'))
-            storage_backend.quota_bytes=config.get('storageQuotaBytes',200_000_000_000)
-        elif config.get('storageFile'):
-            from .cloud_storage import S3Backend
-            storage_backend=S3Backend(json.loads(Path(config['storageFile']).read_text()))
-        runtime = AgentRuntime(storage_backend)
-    else:
-        runtime = Runtime("http://127.0.0.1:" + str(config.get("controlPort", 8766)), credentials["runtime_token"])
+    if config.get('deploymentMode') != 'agent':
+        raise ValueError('Only agent deployment mode is supported')
+    from .devices import AgentRuntime
+    storage_backend=None
+    if config.get('storageMode') == 'local':
+        from .local_storage import LocalBackend
+        storage_backend=LocalBackend(config['storageDirectory'],root/'storage-signing.key',config.get('bulkApiUrl',config['apiUrl']),config.get('storageVolumeUUID'),config.get('metadataStorageDirectory'))
+        storage_backend.quota_bytes=config.get('storageQuotaBytes',200_000_000_000)
+    elif config.get('storageFile'):
+        from .cloud_storage import S3Backend
+        storage_backend=S3Backend(json.loads(Path(config['storageFile']).read_text()))
+    runtime = AgentRuntime(storage_backend)
     runtime.server_instance_id=config.get('serverInstanceId')
     return create_app(Path(config["productStateDirectory"]) / "product.sqlite", credentials["users"], runtime,
                       web_directory=os.environ.get('HETEROES_WEB_DIRECTORY'),

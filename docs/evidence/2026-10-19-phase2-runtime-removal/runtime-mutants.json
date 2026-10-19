@@ -1,0 +1,26 @@
+[
+  {
+    "name": "release workers before confirmed stop",
+    "file": "src/heteroes/product/run_supervisor.py",
+    "old": "            if stopped:\n",
+    "new": "            if True:\n"
+  },
+  {
+    "name": "admit quarantined worker",
+    "file": "src/heteroes/product/run_supervisor.py",
+    "old": "if set(body[\"workerIds\"]) & set(quarantined):",
+    "new": "if False:"
+  },
+  {
+    "name": "allow repeated coordinator recovery",
+    "file": "src/heteroes/product/run_supervisor.py",
+    "old": "if state.get(\"recoveryCount\", 0) >= 1:",
+    "new": "if state.get(\"recoveryCount\", 0) >= 99:"
+  },
+  {
+    "name": "ignore frozen submission changes",
+    "file": "src/heteroes/product/run_supervisor.py",
+    "old": "if any(old.get(key) != value for key, value in body.items()):",
+    "new": "if False:"
+  }
+]

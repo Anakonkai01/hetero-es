@@ -192,13 +192,6 @@ def test_monitoring_events_deduplicate_independently_of_snapshot_sequence(lab):
     assert result.status_code==200 and len(result.json())==1
 
 
-def test_agent_database_cannot_be_opened_by_legacy_dispatcher(lab):
-    from backend.store import Store
-    from test_api import Runtime
-    _,s,_,_=lab
-    with pytest.raises(RuntimeError,match='requires agent mode'):Store(s.path,{},Runtime())
-
-
 def test_backup_policy_change_does_not_mutate_frozen_assignment(lab):
     c,s,r,a=lab;d,h=pair(lab);enable(lab,d,h);rid=queued(lab,d);s.dispatch_once()
     original=s.get(rid);hash_before=original['configHash']

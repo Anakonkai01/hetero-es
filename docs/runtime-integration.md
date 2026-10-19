@@ -1,5 +1,9 @@
 # Track A runtime integration
 
+> Historical loopback/SSH integration. Phase 2 of the 2026-10-19 cleanup removed its launch scripts and
+> gateway. Do not follow the setup commands below. See [the current handoff](refactor-handoff.md) and
+> [the workstation lab guide](local-lab-operations.md) for the supported agent path.
+
 Track B is pinned to `claude-design-ui` at
 `bcdb71bb773f0239e91c73f915e97f3be96e69a6`. Its integration branch is
 `feat/track-a-runtime-integration`. Track A is in the separate sibling worktree

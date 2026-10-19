@@ -4,7 +4,7 @@ import pytest
 
 from backend.app import create_app
 from backend.throttle import Throttle, client_address
-from backend.devices import AgentRuntime as Runtime  # agent mode, as on the live lab
+from backend.devices import AgentRuntime
 
 
 class Clock:
@@ -70,7 +70,7 @@ def test_client_address_trusts_forwarding_headers_only_from_a_local_proxy(peer, 
 
 @pytest.fixture
 def lab(tmp_path):
-    app = create_app(tmp_path / 'state.sqlite', {'admin': 'test-admin-pass'}, Runtime(), dispatch=False)
+    app = create_app(tmp_path / 'state.sqlite', {'admin': 'test-admin-pass'}, AgentRuntime(), dispatch=False)
     clock = Clock()
     app.state.login_failures = Throttle(5, 600, clock)
     app.state.login_failures_by_address = Throttle(30, 600, clock)
@@ -120,7 +120,7 @@ def test_one_address_trying_many_usernames_is_stopped_as_a_whole(lab):
 
 
 def test_an_attacker_cannot_lock_the_owner_out_from_another_address(tmp_path):
-    app = create_app(tmp_path / 'state.sqlite', {'admin': 'test-admin-pass'}, Runtime(), dispatch=False)
+    app = create_app(tmp_path / 'state.sqlite', {'admin': 'test-admin-pass'}, AgentRuntime(), dispatch=False)
     with TestClient(app, client=('127.0.0.1', 50000)) as client:
         attacker = {'CF-Connecting-IP': '203.0.113.9'}
         owner = {'CF-Connecting-IP': '198.51.100.7'}
@@ -144,10 +144,10 @@ def test_registration_is_limited_per_address(lab):
 
 def test_interactive_api_documentation_is_not_public_when_the_web_app_is_served(tmp_path):
     web = tmp_path / 'web'; (web / 'assets').mkdir(parents=True); (web / 'index.html').write_text('<html>Lab UI</html>')
-    app = create_app(tmp_path / 'state.sqlite', {'admin': 'test-admin-pass'}, Runtime(), dispatch=False, web_directory=web)
+    app = create_app(tmp_path / 'state.sqlite', {'admin': 'test-admin-pass'}, AgentRuntime(), dispatch=False, web_directory=web)
     with TestClient(app) as client:
         for path in ('/docs', '/redoc', '/openapi.json'):
             assert 'swagger' not in client.get(path).text.lower() and '"openapi"' not in client.get(path).text
-    open_app = create_app(tmp_path / 'state2.sqlite', {'admin': 'test-admin-pass'}, Runtime(), dispatch=False)
+    open_app = create_app(tmp_path / 'state2.sqlite', {'admin': 'test-admin-pass'}, AgentRuntime(), dispatch=False)
     with TestClient(open_app) as client:
         assert client.get('/openapi.json').status_code == 200      # development keeps its documentation

@@ -1,0 +1,26 @@
+[
+  {
+    "name": "accept legacy configuration",
+    "file": "backend/app.py",
+    "old": "if config.get('deploymentMode') != 'agent':",
+    "new": "if False:"
+  },
+  {
+    "name": "break shipped r10 health capability",
+    "file": "backend/app.py",
+    "old": "\"agentMode\":True,",
+    "new": "\"agentMode\":False,"
+  },
+  {
+    "name": "skip admitted work reconciliation",
+    "file": "backend/store.py",
+    "old": "for active in [body for body in self.list() if body['status'] in ACTIVE]:",
+    "new": "for active in []:"
+  },
+  {
+    "name": "report rejected start as completed",
+    "file": "backend/store.py",
+    "old": "body.update(status=\"FAILED\", failureReason=str(error), completedAt=now())",
+    "new": "body.update(status=\"COMPLETED\", failureReason=str(error), completedAt=now())"
+  }
+]

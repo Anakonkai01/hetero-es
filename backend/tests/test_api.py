@@ -1,34 +1,10 @@
 from pathlib import Path
 
-from fastapi.testclient import TestClient
 import pytest
 
-from backend.app import create_app
 from backend.store import Store
-from backend.runtime import RuntimeRejected
+from backend.errors import RuntimeRejected
 from labkit import draft, login, submitted
-
-
-class Runtime:
-    def __init__(self):
-        self.runs = {}
-        self.submissions = []
-    def capabilities(self):
-        return {"modelId": "Qwen/Qwen2.5-0.5B-Instruct", "modelRevision": "7ae557604adf67be50417f59c2c2f167def9a775",
-                "workerIds": ["5070ti", "3060"], "workloads": ["arith16"], "schedulerPolicies": ["greedy"],
-                "syncModes": ["synchronous"]}
-    def workers(self):
-        return []
-    def submit(self, config):
-        if config["runId"] in self.runs:
-            return
-        self.submissions.append(config)
-        self.runs[config["runId"]] = {"state": {"status": "RUNNING"}, "generations": [], "candidates": [],
-                                      "attempts": [], "events": [], "artifacts": []}
-    def snapshot(self, run_id):
-        return self.runs[run_id]
-    def cancel(self, run_id):
-        self.runs[run_id]["state"]["status"] = "CANCELLED"
 
 
 def test_real_session_revocation_and_workspace_enforcement(setup):

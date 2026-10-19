@@ -10,14 +10,12 @@ function EndpointForm({device,save,pending}:{device:Device;save:(body:unknown)=>
 }
 export function LabDevices({administration=false}:{administration?:boolean}){
  const {t,preferences}=useProduct();const {session}=useSession();const cache=useQueryClient();
- const capabilities=useQuery({queryKey:['device-capabilities'],queryFn:()=>apiGet<{agentMode?:boolean}>('/api/v1/health')});const enabled=Boolean(capabilities.data?.agentMode);
- const installer=useQuery({queryKey:['worker-installers'],queryFn:async()=>{const r=await fetch('/downloads/manifest.json');if(!r.ok)throw Error('BUILD_UNAVAILABLE');return r.json() as Promise<{version:string;installers:{platform:string;name:string;url:string}[]}>;},enabled,retry:false});
- const devices=useQuery({queryKey:['devices',session?.user.userId,administration],queryFn:()=>apiGet<Device[]>(administration?'/api/v1/platform/devices':'/api/v1/devices'),enabled,refetchInterval:3000});
+ const installer=useQuery({queryKey:['worker-installers'],queryFn:async()=>{const r=await fetch('/downloads/manifest.json');if(!r.ok)throw Error('BUILD_UNAVAILABLE');return r.json() as Promise<{version:string;installers:{platform:string;name:string;url:string}[]}>;},retry:false});
+ const devices=useQuery({queryKey:['devices',session?.user.userId,administration],queryFn:()=>apiGet<Device[]>(administration?'/api/v1/platform/devices':'/api/v1/devices'),enabled:Boolean(session),refetchInterval:3000});
  const [code,setCode]=useState('');const [expires,setExpires]=useState(0);const [now,setNow]=useState(()=>Date.now());const [copied,setCopied]=useState(false);const [pairError,setPairError]=useState('');const [workspace,setWorkspace]=useState('lab');const [showRevoked,setShowRevoked]=useState(false);
  useEffect(()=>{const timer=setInterval(()=>setNow(Date.now()),1000);return()=>clearInterval(timer);},[]);
  const pairing=useMutation({mutationFn:()=>apiPost<{code:string;expiresInSeconds:number}>('/api/v1/devices/pairing-codes',{}),onSuccess:r=>{setCode(r.code);setExpires(Date.now()+r.expiresInSeconds*1000);setCopied(false);setPairError('');}});
  const action=useMutation({mutationFn:(a:{path:string;body?:unknown;patch?:boolean;remove?:boolean})=>a.remove?apiDelete(a.path):a.patch?apiPatch(a.path,a.body):apiPost(a.path,a.body),onSuccess:()=>cache.invalidateQueries()});
- if(!enabled)return null;
  const seconds=Math.max(0,Math.ceil((expires-now)/1000));
  return <section className="card"><div className="ch"><h2>{t(administration?'Device approval':'My devices')}</h2></div><div className="cb">
  {(action.error||devices.error||pairing.error)&&<p className="note err" role="alert">{(()=>{const message=(action.error??devices.error??pairing.error)?.message;const known=deviceErrorKey(message);return known?t(known):message;})()}</p>}

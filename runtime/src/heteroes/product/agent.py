@@ -18,7 +18,7 @@ import urllib.request
 import uuid
 from heteroes.http_transport import USER_AGENT
 from .files import events,read_json,write_json
-from .gateway import Manager,TERMINAL,QUIESCENT,ROOT,validate
+from .run_supervisor import RunSupervisor,TERMINAL,QUIESCENT,ROOT,validate
 from .remote import alive,identity,worker_environment,handle as remote_handle
 from .platform_process import acquire_instance_lock, ProcessIdentityUnknown, spawn_options
 from .storage import data_root,worker_cache
@@ -78,7 +78,7 @@ def bounded_snapshot(snapshot,max_bytes=1_250_000):
     return snapshot
 
 
-class AgentManager(Manager):
+class AgentManager(RunSupervisor):
     def __init__(self,agent):
         self.agent=agent
         bind=f"http://{agent.config.get('workerHost','127.0.0.1')}:{agent.config.get('workerPort',8765)}"

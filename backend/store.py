@@ -1,4 +1,4 @@
-"""SQLite product state. Runtime ledgers are reachable only through the control API."""
+"""SQLite product state. Runtime ledgers remain owned by device agents."""
 from contextlib import contextmanager
 from datetime import datetime, timezone
 import hashlib
@@ -11,7 +11,7 @@ import time
 import uuid
 
 from argon2 import PasswordHasher
-from .runtime import RuntimeRejected
+from .errors import RuntimeRejected
 from .migrations import migrate
 
 ACTIVE = {"STARTING", "RUNNING", "CANCELLING", "RECOVERING", "DRAINING", "PAUSING"}
@@ -48,12 +48,7 @@ class Store:
             db.commit()
             migrate(db)
         os.chmod(path, 0o600)
-        with self.db() as db:
-            mode=db.execute('SELECT value FROM settings WHERE key=?',('controlMode',)).fetchone()
-            if mode and mode[0]=='agent-v2' and not getattr(runtime,'agent_mode',False):
-                raise RuntimeError('This database requires agent mode; legacy dispatch would be unsafe')
-        if hasattr(runtime, 'attach_store'):
-            runtime.attach_store(self)
+        runtime.attach_store(self)
         try:
             self.ensure_workers(runtime.capabilities()['workerIds'])
         except Exception:
@@ -115,7 +110,7 @@ class Store:
             b=json.loads(row[0])
             coordinator = b.get('coordinatorDeviceId')
             coordinator_alias = None
-            if coordinator and getattr(self.runtime, 'agent_mode', False):
+            if coordinator:
                 row = db.execute('SELECT worker_id FROM devices WHERE id=?', (coordinator,)).fetchone()
                 coordinator_alias = row[0] if row else None
             if worker_id not in set(b['workerIds']) | {coordinator_alias} or b['status'] in TERMINAL | {'DRAFT','PAUSED'}:
@@ -155,13 +150,12 @@ class Store:
         ids = {r[0] for r in db.execute('SELECT worker_id FROM worker_assignments WHERE workspace_id=?',(body['workspaceId'],))}
         if not set(body['workerIds']) <= ids-self.disabled_workers(db):
             return 'Selected GPU assignment changed before launch'
-        if getattr(self.runtime, 'agent_mode', False):
-            co = db.execute('SELECT worker_id,status,owner FROM devices WHERE id=?', (body.get('coordinatorDeviceId'),)).fetchone()
-            if not co or co['status']!='APPROVED' or co['worker_id'] not in ids-self.disabled_workers(db):
-                return 'Coordinator approval or workspace assignment changed'
-            chosen = db.execute('SELECT owner,status FROM devices WHERE worker_id IN ('+','.join('?' for _ in body['workerIds'])+')',body['workerIds']).fetchall()
-            if len(chosen)!=len(body['workerIds']) or any(d['status']!='APPROVED' or self.profile(d['owner'])['accountStatus']!='ACTIVE' for d in [co,*chosen]):
-                return 'Device owner or approval was revoked'
+        co = db.execute('SELECT worker_id,status,owner FROM devices WHERE id=?', (body.get('coordinatorDeviceId'),)).fetchone()
+        if not co or co['status']!='APPROVED' or co['worker_id'] not in ids-self.disabled_workers(db):
+            return 'Coordinator approval or workspace assignment changed'
+        chosen = db.execute('SELECT owner,status FROM devices WHERE worker_id IN ('+','.join('?' for _ in body['workerIds'])+')',body['workerIds']).fetchall()
+        if len(chosen)!=len(body['workerIds']) or any(d['status']!='APPROVED' or self.profile(d['owner'])['accountStatus']!='ACTIVE' for d in [co,*chosen]):
+            return 'Device owner or approval was revoked'
         return None
 
     def get(self, run_id):
@@ -197,11 +191,6 @@ class Store:
             self._dispatch_once()
 
     def _dispatch_once(self):
-        if getattr(self.runtime, 'agent_mode', False):
-            return self._dispatch_parallel()
-        return self._dispatch_legacy_once()
-
-    def _dispatch_parallel(self):
         """Always reconcile admitted work; hold only admission of new queued work."""
         errors = []
         for active in [body for body in self.list() if body['status'] in ACTIVE]:
@@ -241,50 +230,16 @@ class Store:
                 errors.append(type(error).__name__)
         self.last_error = errors[0] if errors else None
 
-    def _dispatch_legacy_once(self):
-        # Only one dispatcher in the supported one-process deployment. Durable state
-        # is claimed before the RPC; retry uses the same run ID and frozen config.
-        with self.db() as db:
-            if json.loads(db.execute('SELECT value FROM settings WHERE key="dispatchHold"').fetchone()[0]):
-                return
-            active = next((body for body in self.list() if body["status"] in ACTIVE), None)
-            if active is None:
-                row = db.execute("SELECT run_id FROM queue JOIN experiments ON experiments.id=queue.run_id ORDER BY sequence LIMIT 1").fetchone()
-                if row:
-                    active = self.get(row[0])
-                    if active["status"] != "QUEUED":
-                        db.execute("DELETE FROM queue WHERE run_id=?", (row[0],))
-                        return
-                    reason = self.eligibility(db,active)
-                    if reason:
-                        active.update(status='CANCELLED',cancelRequested=True,completedAt=now(),failureReason=reason)
-                        self.save(db,active)
-                        db.execute('DELETE FROM queue WHERE run_id=?',(row[0],))
-                        self.audit(db,'system','QUEUE_ACCESS_REVOKED',row[0],active['workspaceId'])
-                        return
-                    if hasattr(self.runtime, 'waiting_reason') and (waiting := self.runtime.waiting_reason(active)):
-                        active['waitingReason'] = waiting
-                        self.save(db, active)
-                        return
-                    active.pop('waitingReason', None)
-                    active.update(status="STARTING", startedAt=now())
-                    self.save(db, active)
-        if active is None:
-            return
-        self._dispatch_run(active)
-        self.last_error = None
-
     def _dispatch_run(self, active):
         run_id = active["experimentId"]
         # Submission can succeed while its response is lost. The runtime rejects
         # changes to an existing run and accepts retries of this exact payload.
         config = {"runId": run_id, "workerIds": active["workerIds"], "workload": active["task"],
                   **{key: active[key] for key in ("candidatesPerGeneration", "maxGenerations", "alpha", "sigma", "decodeEngine", "schedulerPolicy", "syncMode")}}
-        if getattr(self.runtime, 'agent_mode', False):
-            config.update(coordinatorDeviceId=active['coordinatorDeviceId'], backupPolicy=active.get('backupPolicy', {'interval':1,'retain':3}))
-            if active.get('recipeVersion')==2:
-                config.update({key:active[key] for key in ('recipeVersion','modelManifest','modelSource','datasetObjectSha256','datasetIdentity',
-                    'batchSize','batchSeed','sigmaSchedule','sigmaMinimum','maxNewTokens','validationInterval')})
+        config.update(coordinatorDeviceId=active['coordinatorDeviceId'], backupPolicy=active.get('backupPolicy', {'interval':1,'retain':3}))
+        if active.get('recipeVersion')==2:
+            config.update({key:active[key] for key in ('recipeVersion','modelManifest','modelSource','datasetObjectSha256','datasetIdentity',
+                'batchSize','batchSeed','sigmaSchedule','sigmaMinimum','maxNewTokens','validationInterval')})
         try:
             self.runtime.submit(config)
         except RuntimeRejected as error:

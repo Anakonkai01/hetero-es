@@ -1,5 +1,9 @@
 # M1 lab operator guide
 
+> Historical M1 guide. The 2026-10-19 cleanup removed its loopback/SSH launch path and whole-lab backup
+> bundle. For agent-mode operations, use [the workstation guide](local-lab-operations.md) and
+> [the current handoff](refactor-handoff.md).
+
 Accepted roadmap: [lab-roadmap.md](lab-roadmap.md). Current validation and local
 branches: [m1-implementation.md](m1-implementation.md).
 

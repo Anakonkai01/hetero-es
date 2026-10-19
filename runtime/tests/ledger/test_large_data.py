@@ -4,7 +4,7 @@ from heteroes.product.files import write_json
 from heteroes.product.storage import checked_directory,data_root
 from heteroes.product.recovery import capture_point,verify_point
 from test_recovery_points import sample
-from test_product_gateway import manager,config
+from test_run_supervisor import manager,config
 
 
 def test_external_checkpoint_is_self_contained_with_ledger_in_original_root(tmp_path):

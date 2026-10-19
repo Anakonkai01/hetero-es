@@ -275,7 +275,6 @@ def install_lab_routes(app, store, user, scoped, runtime):
             queue_count=db.execute('SELECT count(*) FROM queue').fetchone()[0]
             metadata=db.execute('SELECT value FROM settings WHERE key="metadataBackupStatus"').fetchone()
         result={'dispatchHeld':held,'queueCount':queue_count,'runtimeIssue':store.last_error,
-                'agentMode':bool(getattr(runtime,'agent_mode',False)),
                 'cloudStorageConfigured':getattr(runtime,'storage_backend',None) is not None and getattr(runtime.storage_backend,'mode','cloud')=='cloud',
                 'recoveryStorageConfigured':getattr(runtime,'storage_backend',None) is not None,
                 'recoveryStorageMode':getattr(runtime.storage_backend,'mode','cloud') if getattr(runtime,'storage_backend',None) is not None else None,

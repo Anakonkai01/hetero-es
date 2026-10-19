@@ -9,7 +9,7 @@ import type { User } from '../types/access';
 import type { Worker } from '../types/worker';
 
 interface Operations {
-  agentMode?:boolean;cloudStorageConfigured?:boolean;recoveryStorageConfigured?:boolean;
+  cloudStorageConfigured?:boolean;recoveryStorageConfigured?:boolean;
   metadataBackup?:{status:string;createdAt:number;errorType?:string}|null;
   dispatchHeld:boolean;queueCount:number;runtimeIssue:string|null;productService:string;runtimeService:string;
   quarantinedWorkerIds?:string[];workers:Worker[];
@@ -69,8 +69,8 @@ export function LabOperationsPage() {
       </>}
     </div></section>
     <section className="card"><div className="ch"><h2>{t("Backup and restore")}</h2></div><div className="cb demo-form">
-      <p>{ops.data?.agentMode ? `${t('Recovery points are created between generations. Metadata backups run hourly when recovery storage is configured. Storage:')} ${(ops.data.recoveryStorageConfigured??ops.data.cloudStorageConfigured)?t("configured"):t("awaiting configuration")}. ${t('Restore into a new deployment using the operator guide.')}` : t("Backups require confirmed idle runtime ownership and briefly hold dispatch. Restore into a new deployment directory using the operator guide.")}</p>
-      {ops.data?.agentMode&&ops.data.metadataBackup&&<p>{t("Last metadata backup:")}{" "}{ops.data.metadataBackup.status} · {new Date(ops.data.metadataBackup.createdAt*1000).toLocaleString()} {ops.data.metadataBackup.errorType}</p>}
+      <p>{`${t('Recovery points are created between generations. Metadata backups run hourly when recovery storage is configured. Storage:')} ${(ops.data?.recoveryStorageConfigured??ops.data?.cloudStorageConfigured)?t("configured"):t("awaiting configuration")}. ${t('Restore into a new deployment using the operator guide.')}`}</p>
+      {ops.data?.metadataBackup&&<p>{t("Last metadata backup:")}{" "}{ops.data.metadataBackup.status} · {new Date(ops.data.metadataBackup.createdAt*1000).toLocaleString()} {ops.data.metadataBackup.errorType}</p>}
       {ops.data?.dispatchHeld && <><label className="fg"><span><input type="checkbox" checked={confirmed} onChange={e=>setConfirmed(e.target.checked)} /> {t("I have reviewed the worker configuration and confirmed this deployment may dispatch jobs.")}</span></label><button className="btn" disabled={!confirmed||action.isPending} onClick={()=>action.mutate({path:'/api/v1/platform/maintenance/resume',body:{workerConfigurationConfirmed:true}})}>{t("Resume reviewed deployment")}</button></>}
     </div></section>
     <section className="card"><div className="ch"><h2>{t("Platform activity")}</h2></div><div className="cb">{audit.error && <p role="alert">{audit.error.message}</p>}{audit.data?.slice(0,30).map(a=><p key={a.sequence}>{a.action} · {a.actor} · {a.target} · {new Date(a.created).toLocaleString()}</p>)}</div></section>
