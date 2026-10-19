@@ -15,6 +15,11 @@ export interface V3Settings {
   coefficientRule: string;
   scorer: DeclarativeScorer;
   systemPrompt: string | null;
+  alphaSchedule: string;
+  alphaMinimum: number | null;
+  momentumBeta: number | null;
+  momentumWindow: number;
+  evalChunk: number | null;
 }
 
 export type ExperimentStatus =

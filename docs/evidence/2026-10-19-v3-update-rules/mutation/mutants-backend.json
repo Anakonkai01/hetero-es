@@ -1,0 +1,44 @@
+[
+ {
+  "name": "store-drops-update-keys",
+  "file": "backend/store.py",
+  "old": "            config.update({key: active[key] for key in V3_UPDATE_KEYS if key in active})\n",
+  "new": ""
+ },
+ {
+  "name": "schedule-any",
+  "file": "runtime/src/heteroes/v3/options.py",
+  "old": "    if config.get(\"alphaSchedule\", \"constant\") not in ALPHA_SCHEDULES:",
+  "new": "    if False:"
+ },
+ {
+  "name": "minimum-above-alpha",
+  "file": "runtime/src/heteroes/v3/options.py",
+  "old": "if config.get(\"alphaMinimum\") is not None and config[\"alphaMinimum\"] > config[\"alpha\"]:",
+  "new": "if False:"
+ },
+ {
+  "name": "momentum-unchecked",
+  "file": "runtime/src/heteroes/v3/options.py",
+  "old": "    if config.get(\"momentumBeta\") is not None:\n",
+  "new": "    if False:\n"
+ },
+ {
+  "name": "chunk-unchecked",
+  "file": "runtime/src/heteroes/v3/options.py",
+  "old": "        and config[\"evalChunk\"] not in EXACT_CHUNKS[config.get(\"evalDtype\", \"float32\")]",
+  "new": "        and False"
+ },
+ {
+  "name": "template-no-rank",
+  "file": "backend/templates.py",
+  "old": "\"coefficientRule\": {\"zscore@1\", \"centered-rank@1\"},",
+  "new": "\"coefficientRule\": {\"zscore@1\"},"
+ },
+ {
+  "name": "template-no-null",
+  "file": "backend/templates.py",
+  "old": "        if key in NULLABLE and value is None:\n            pass\n        elif key in INTEGERS:",
+  "new": "        if key in INTEGERS:"
+ }
+]

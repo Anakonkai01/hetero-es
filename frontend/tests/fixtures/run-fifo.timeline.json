@@ -1,102 +1,102 @@
 {
- "experiment": {
-  "id": "d21c66055d32485cb433f708c772eb07",
-  "name": "FIFO and remote-worker fallback",
-  "status": "COMPLETED",
-  "createdMs": 1791621484674,
-  "startedMs": 1791621556109,
-  "completedMs": 1791621574882,
-  "maxGenerations": 1,
-  "candidatesPerGeneration": 2
- },
- "workers": [
-  {
-   "id": "3060",
-   "started": false,
-   "alive": false
+  "experiment": {
+    "id": "d21c66055d32485cb433f708c772eb07",
+    "name": "FIFO and remote-worker fallback",
+    "status": "COMPLETED",
+    "createdMs": 1791621484674,
+    "startedMs": 1791621556109,
+    "completedMs": 1791621574882,
+    "maxGenerations": 1,
+    "candidatesPerGeneration": 2
   },
-  {
-   "id": "5070ti",
-   "started": true,
-   "alive": false
-  }
- ],
- "generations": [
-  {
-   "index": 0,
-   "id": "d21c66055d32485cb433f708c772eb07.g0",
-   "status": "COMPLETED",
-   "openMs": 1791621566576,
-   "evaluatedMs": 1791621570913,
-   "doneMs": 1791621572527,
-   "candidateCount": 2,
-   "committedCount": 2,
-   "rewardMean": 0.25,
-   "rewardBest": 0.25,
-   "seconds": {
-    "wait": 5.607500191999861,
-    "update": 0.9748631129987189,
-    "publish": 0.6312679920010851,
-    "record": 0.008481099001073744,
-    "total": 7.222112396000739
-   }
-  }
- ],
- "jobs": [
-  {
-   "candidateId": "d21c66055d32485cb433f708c772eb07.g0.c0",
-   "attemptId": "d21c66055d32485cb433f708c772eb07.g0.c0.a1",
-   "generation": 0,
-   "workerId": "5070ti",
-   "seed": "427891014999430",
-   "startMs": 1791621566822,
-   "endMs": 1791621568770,
-   "status": "SUCCEEDED",
-   "reward": 0.25
-  },
-  {
-   "candidateId": "d21c66055d32485cb433f708c772eb07.g0.c1",
-   "attemptId": "d21c66055d32485cb433f708c772eb07.g0.c1.a1",
-   "generation": 0,
-   "workerId": "5070ti",
-   "seed": "3508395134837183",
-   "startMs": 1791621569171,
-   "endMs": 1791621570729,
-   "status": "SUCCEEDED",
-   "reward": 0.25
-  }
- ],
- "marks": [
-  {
-   "atMs": 1791621560733,
-   "type": "worker_start",
-   "workerId": "5070ti",
-   "generation": null
-  },
-  {
-   "atMs": 1791621562116,
-   "type": "model_loaded",
-   "workerId": "5070ti",
-   "generation": null
-  },
-  {
-   "atMs": 1791621562773,
-   "type": "executor_ready",
-   "workerId": "5070ti",
-   "generation": null
-  },
-  {
-   "atMs": 1791621565147,
-   "type": "worker_unavailable",
-   "workerId": "3060",
-   "generation": null
-  },
-  {
-   "atMs": 1791621565188,
-   "type": "worker_unavailable",
-   "workerId": "3060",
-   "generation": null
-  }
- ],
- "nowMs": 1791621600000
+  "workers": [
+    {
+      "id": "3060",
+      "started": false,
+      "alive": false
+    },
+    {
+      "id": "5070ti",
+      "started": true,
+      "alive": false
+    }
+  ],
+  "generations": [
+    {
+      "index": 0,
+      "id": "d21c66055d32485cb433f708c772eb07.g0",
+      "status": "COMPLETED",
+      "openMs": 1791621566576,
+      "evaluatedMs": 1791621570913,
+      "doneMs": 1791621572527,
+      "candidateCount": 2,
+      "committedCount": 2,
+      "rewardMean": 0.25,
+      "rewardBest": 0.25,
+      "seconds": {
+        "wait": 5.607500191999861,
+        "update": 0.9748631129987189,
+        "publish": 0.6312679920010851,
+        "record": 0.008481099001073744,
+        "total": 7.222112396000739
+      }
+    }
+  ],
+  "jobs": [
+    {
+      "candidateId": "d21c66055d32485cb433f708c772eb07.g0.c0",
+      "attemptId": "d21c66055d32485cb433f708c772eb07.g0.c0.a1",
+      "generation": 0,
+      "workerId": "5070ti",
+      "seed": "427891014999430",
+      "startMs": 1791621566822,
+      "endMs": 1791621568770,
+      "status": "SUCCEEDED",
+      "reward": 0.25
+    },
+    {
+      "candidateId": "d21c66055d32485cb433f708c772eb07.g0.c1",
+      "attemptId": "d21c66055d32485cb433f708c772eb07.g0.c1.a1",
+      "generation": 0,
+      "workerId": "5070ti",
+      "seed": "3508395134837183",
+      "startMs": 1791621569171,
+      "endMs": 1791621570729,
+      "status": "SUCCEEDED",
+      "reward": 0.25
+    }
+  ],
+  "marks": [
+    {
+      "atMs": 1791621560733,
+      "type": "worker_start",
+      "workerId": "5070ti",
+      "generation": null
+    },
+    {
+      "atMs": 1791621562116,
+      "type": "model_loaded",
+      "workerId": "5070ti",
+      "generation": null
+    },
+    {
+      "atMs": 1791621562773,
+      "type": "executor_ready",
+      "workerId": "5070ti",
+      "generation": null
+    },
+    {
+      "atMs": 1791621565147,
+      "type": "worker_unavailable",
+      "workerId": "3060",
+      "generation": null
+    },
+    {
+      "atMs": 1791621565188,
+      "type": "worker_unavailable",
+      "workerId": "3060",
+      "generation": null
+    }
+  ],
+  "nowMs": 1791621600000
 }

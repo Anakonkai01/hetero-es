@@ -86,6 +86,11 @@ const SETTINGS: (keyof Experiment)[] = [
   'sigmaSchedule',
   'sigmaMinimum',
   'maxNewTokens',
+  'alphaSchedule',
+  'alphaMinimum',
+  'momentumBeta',
+  'momentumWindow',
+  'evalChunk',
 ];
 
 const show = (value: unknown): string =>

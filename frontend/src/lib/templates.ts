@@ -23,6 +23,11 @@ const KEYS = [
   'sigmaSchedule',
   'sigmaMinimum',
   'maxNewTokens',
+  'alphaSchedule',
+  'alphaMinimum',
+  'momentumBeta',
+  'momentumWindow',
+  'evalChunk',
 ] as const;
 
 export type TemplateConfig = Partial<Pick<Experiment, (typeof KEYS)[number]>> & {

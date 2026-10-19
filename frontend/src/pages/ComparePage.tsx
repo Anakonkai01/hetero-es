@@ -40,6 +40,11 @@ const SETTING_LABELS: Record<string, string> = {
   scorer: 'Declarative scorer',
   coefficientRule: 'Coefficient rule',
   systemPrompt: 'System prompt',
+  alphaSchedule: 'Alpha schedule',
+  alphaMinimum: 'Minimum alpha',
+  momentumBeta: 'Momentum beta',
+  momentumWindow: 'Momentum window',
+  evalChunk: 'Prompts per generation call',
 };
 
 export function ComparePage() {

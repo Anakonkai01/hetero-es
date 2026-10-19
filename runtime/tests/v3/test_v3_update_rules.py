@@ -199,3 +199,20 @@ def test_the_sdk_offers_every_update_choice(assets, tmp_path, monkeypatch):  # n
     }
     with pytest.raises(ValueError, match="coefficient"):
         ESTrainer(args, reward_func=my_rule.distinct, coefficient_func=lambda r: r)
+
+
+def test_lab_settings_become_the_plan_options():
+    from heteroes.product.v3 import update_options
+
+    assert (
+        update_options({"alpha": 0.001, "alphaSchedule": "constant", "alphaMinimum": None, "momentumBeta": None}) == {}
+    )
+    assert update_options({"alpha": 0.001}) == {}  # a run saved before these settings existed
+    assert update_options({"alpha": 0.001, "alphaSchedule": "cosine", "momentumBeta": 0.875, "momentumWindow": 3}) == {
+        "alphaSchedule": {"kind": "cosine", "minimum": 0.001},
+        "momentum": {"beta": 0.875, "window": 3},
+    }
+    assert update_options({"alpha": 0.001, "alphaSchedule": "linear", "alphaMinimum": 0.0001})["alphaSchedule"] == {
+        "kind": "linear",
+        "minimum": 0.0001,
+    }

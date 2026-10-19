@@ -23,14 +23,24 @@ INTEGERS = {
     "batchSize": (1, 1024),
     "batchSeed": (0, 2**31),
     "maxNewTokens": (1, 2048),
+    "momentumWindow": (2, 8),
+    "evalChunk": (1, 64),
 }
-FLOATS = {"alpha": (1e-7, 1.0), "sigma": (1e-7, 1.0), "sigmaMinimum": (1e-7, 1.0)}
+FLOATS = {
+    "alpha": (1e-7, 1.0),
+    "sigma": (1e-7, 1.0),
+    "sigmaMinimum": (1e-7, 1.0),
+    "alphaMinimum": (1e-7, 1.0),
+    "momentumBeta": (1e-7, 0.9999999),
+}
+NULLABLE = {"alphaMinimum", "momentumBeta", "evalChunk"}  # null: no minimum alpha, no momentum, the default chunk
 CHOICES = {
     "schedulerPolicy": {"capacity-weighted", "round-robin", "greedy"},
     "syncMode": {"synchronous", "asynchronous"},
     "sigmaSchedule": {"constant", "cosine"},
     "decodeEngine": set(DECODE_ENGINES),
-    "coefficientRule": {"zscore@1"},
+    "coefficientRule": {"zscore@1", "centered-rank@1"},
+    "alphaSchedule": {"constant", "cosine", "linear"},
 }
 SHORT_TEXT = {"task"}
 
@@ -51,7 +61,9 @@ def clean_config(config):
         raise HTTPException(422, f"Settings that cannot be saved in a template: {', '.join(unknown)}")
     result = {}
     for key, value in config.items():
-        if key in INTEGERS:
+        if key in NULLABLE and value is None:
+            pass
+        elif key in INTEGERS:
             low, high = INTEGERS[key]
             if type(value) is not int or not low <= value <= high:
                 raise HTTPException(422, f"{key} must be a whole number from {low} to {high}")

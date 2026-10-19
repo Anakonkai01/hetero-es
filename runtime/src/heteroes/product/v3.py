@@ -7,6 +7,19 @@ from heteroes.product.files import read_json, write_json
 from heteroes.v3.scoring import validate_spec
 
 
+def update_options(config):
+    """The alpha schedule and momentum of a lab configuration, as `build_documents` reads them (absent: none)."""
+    options = {}
+    if config.get("alphaSchedule", "constant") != "constant" or config.get("alphaMinimum") is not None:
+        options["alphaSchedule"] = {
+            "kind": config.get("alphaSchedule", "constant"),
+            "minimum": config["alpha"] if config.get("alphaMinimum") is None else config["alphaMinimum"],
+        }
+    if config.get("momentumBeta") is not None:
+        options["momentum"] = {"beta": config["momentumBeta"], "window": config.get("momentumWindow", 4)}
+    return options
+
+
 def prepare_run(config, root, device, *, declared=None, client=None, cache=None):
     """Load verified inputs; on workers rebuild the declared recipe independently.
 
@@ -81,7 +94,8 @@ def prepare_run(config, root, device, *, declared=None, client=None, cache=None)
             "maxNewTokens": config["maxNewTokens"],
             "decoder": config["decodeEngine"],
         }
-        | ({"evalChunk": config["evalChunk"]} if config.get("evalChunk") is not None else {}),
+        | ({"evalChunk": config["evalChunk"]} if config.get("evalChunk") is not None else {})
+        | update_options(config),
         model_files=manifest["files"],
         revision=manifest["revision"],
         schema_hash=schema.hash,

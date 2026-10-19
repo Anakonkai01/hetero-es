@@ -96,8 +96,13 @@ test('a v3 template retains declarative settings without retaining artifact ids'
   const options = {
     weightSpace: { kind: 'lora', rank: 4, alpha: 8, targetModules: ['q_proj'] },
     antithetic: true,
-    coefficientRule: 'zscore@1',
+    coefficientRule: 'centered-rank@1',
     systemPrompt: null,
+    alphaSchedule: 'cosine',
+    alphaMinimum: 0.0001,
+    momentumBeta: 0.875,
+    momentumWindow: 3,
+    evalChunk: 64,
     scorer: {
       kind: 'declarative',
       name: 'choice-letter',

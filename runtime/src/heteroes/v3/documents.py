@@ -16,17 +16,13 @@ from heteroes.canonical import canonical_json_hash
 from heteroes.catalog import DECODE_ENGINES, WORKLOAD_NAMES
 from heteroes.manifest import EVAL_DTYPES, KNOWN_ENGINES, Recipe
 from heteroes.v3.scoring import validate_spec
-from heteroes.v3.coefficients import validate_update_rule
-from heteroes.v3.options import COEFFICIENT_RULES, validate_weight_space as _check_weight_space
+from heteroes.v3.options import ALPHA_SCHEDULES, COEFFICIENT_RULES, EXACT_CHUNKS, validate_update_rule
+from heteroes.v3.options import validate_weight_space as _check_weight_space
 
 FORMAT_VERSION = 3
 PLAN_VERSION = 1
 SAMPLER = "sha256-python-random-sample-v1"
-ALPHA_SCHEDULES = ("constant", "cosine", "linear")
 
-# Prompts per generate() call a recipe may declare: FP16 is exact one prompt at a time only; FP32 batches gave the same
-# texts as one prompt at a time in the cross-GPU probes (16, and 64 on 5070 Ti, 3060 and 1660S: RUNTIME-TODO chunk-128)
-EXACT_CHUNKS = {"float16": (1,), "float32": (16, 32, 64)}
 _HEX40, _HEX64 = re.compile("[0-9a-f]{40}"), re.compile("[0-9a-f]{64}")
 _RECIPE_KEYS = {"formatVersion", "model", "weightSpace", "schemaHash", "noise", "perturbation", "evaluation", "data"}
 

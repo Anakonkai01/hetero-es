@@ -43,6 +43,12 @@ class Configuration(BaseModel):
     antithetic: bool = Field(default=False, strict=True)
     scorer: dict | None = None
     coefficientRule: str = "zscore@1"
+    # the update formula of Recipe v3 (heteroes.v3.coefficients): alpha schedule, momentum, prompts per generate() call
+    alphaSchedule: str = "constant"
+    alphaMinimum: float | None = Field(default=None, gt=0, le=1)
+    momentumBeta: float | None = Field(default=None, gt=0, lt=1)
+    momentumWindow: int = Field(default=4, ge=2, le=8, strict=True)
+    evalChunk: int | None = Field(default=None, strict=True)
     systemPrompt: str | None = Field(default=None, max_length=4000)
     validationInterval: int = Field(default=1, ge=1, le=1000, strict=True)
 

@@ -68,6 +68,16 @@ def qualify_v3(c, device_auth, profile, model):
     assert result.status_code == 200, result.text
 
 
+UPDATE_OPTIONS = {
+    "coefficientRule": "centered-rank@1",
+    "alphaSchedule": "cosine",
+    "alphaMinimum": 0.0002,
+    "momentumBeta": 0.875,
+    "momentumWindow": 3,
+    "evalChunk": 64,
+}
+
+
 def configuration(d, model, data):
     return {
         "name": "V3 custom run",
@@ -120,7 +130,7 @@ def test_v3_config_and_worker_command_preserve_the_frozen_options(v3_study):
     lab = (c, store, store.runtime, admin)
     d, device_auth = pair(lab)
     model, data = assets(v3_study)
-    body = configuration(d, model, data)
+    body = {**configuration(d, model, data), **UPDATE_OPTIONS}
     assert c.post("/api/v1/experiments", headers=admin, json=body).status_code == 422
     profile = c.get("/api/v1/devices", headers=admin).json()[0]["selfTest"]
     qualify_v3(c, device_auth, profile, model)
@@ -134,7 +144,15 @@ def test_v3_config_and_worker_command_preserve_the_frozen_options(v3_study):
     ar = store.runtime.runs()[0]
     with store.db() as db:
         _, assignment = store.runtime._assignment(db, ar["assignmentId"])
-    for key in ("recipeVersion", "weightSpace", "antithetic", "scorer", "coefficientRule", "systemPrompt"):
+    for key in (
+        "recipeVersion",
+        "weightSpace",
+        "antithetic",
+        "scorer",
+        "coefficientRule",
+        "systemPrompt",
+        *UPDATE_OPTIONS,
+    ):
         assert assignment["config"][key] == body[key]
     assert assignment["config"]["datasetIdentity"] == data["identity"]
     result = c.post(
@@ -224,6 +242,12 @@ def test_v3_config_and_worker_command_preserve_the_frozen_options(v3_study):
                 "config": {"numbersField": "label", "targetField": "absent"},
             }
         },
+        {"coefficientRule": "python@1:" + "a" * 64},
+        {"alphaSchedule": "step"},
+        {"alphaSchedule": "cosine", "alphaMinimum": 0.5},
+        {"momentumBeta": 0.9},
+        {"momentumBeta": 0.5, "momentumWindow": 9},
+        {"evalChunk": 8},
     ],
 )
 def test_v3_invalid_options_never_become_a_draft(v3_study, change):
@@ -304,6 +328,10 @@ def test_v3_templates_validate_and_keep_nullable_prompt():
         "systemPrompt": None,
         "coefficientRule": "zscore@1",
         "validationInterval": 2,
+        **UPDATE_OPTIONS,
+        "alphaMinimum": None,
+        "momentumBeta": None,
+        "evalChunk": None,
         "scorer": {
             "kind": "declarative",
             "name": "choice-letter",

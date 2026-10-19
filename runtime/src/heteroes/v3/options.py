@@ -2,10 +2,40 @@
 
 import math
 import re
+import struct
 
 from heteroes.v3.scoring import validate_spec
 
 COEFFICIENT_RULES = {"zscore": {1}, "centered-rank": {1}}  # and python@1, on a self-hosted coordinator only
+ALPHA_SCHEDULES = ("constant", "cosine", "linear")
+# Prompts per generate() call a recipe may declare: FP16 is exact one prompt at a time only; FP32 batches gave the same
+# texts as one prompt at a time in the cross-GPU probes (16, and 64 on 5070 Ti, 3060 and 1660S: RUNTIME-TODO chunk-128)
+EXACT_CHUNKS = {"float16": (1,), "float32": (16, 32, 64)}
+MAX_WINDOW = 8
+
+
+def _is_float32(value):
+    return struct.unpack("<f", struct.pack("<f", value))[0] == value
+
+
+def validate_update_rule(rule):
+    """None (plain step) or {"kind": "momentum", "beta": float32 in (0, 1), "window": 2..MAX_WINDOW}."""
+    if rule is None:
+        return rule
+    if not isinstance(rule, dict) or set(rule) != {"kind", "beta", "window"} or rule["kind"] != "momentum":
+        raise ValueError('an update rule is {"kind": "momentum", "beta": ..., "window": ...}')
+    beta, window = rule["beta"], rule["window"]
+    if (
+        isinstance(beta, bool)
+        or not isinstance(beta, (int, float))
+        or not math.isfinite(beta)
+        or not 0 < beta < 1
+        or not _is_float32(beta)
+    ):
+        raise ValueError("momentum beta is a float32 value strictly between 0 and 1 (for example 0.875)")
+    if type(window) is not int or not 2 <= window <= MAX_WINDOW:
+        raise ValueError(f"the momentum window is a whole number from 2 to {MAX_WINDOW}")
+    return rule
 
 
 def validate_weight_space(space, *, initial_adapter=True):
@@ -52,6 +82,19 @@ def validate_options(config):
         f"{name}@{v}" for name, versions in COEFFICIENT_RULES.items() for v in versions
     }:
         raise ValueError("unsupported coefficient rule")
+    if config.get("alphaSchedule", "constant") not in ALPHA_SCHEDULES:
+        raise ValueError(f"alpha schedule is one of {ALPHA_SCHEDULES}")
+    if config.get("alphaMinimum") is not None and config["alphaMinimum"] > config["alpha"]:
+        raise ValueError("the minimum alpha exceeds alpha")
+    if config.get("momentumBeta") is not None:
+        validate_update_rule(
+            {"kind": "momentum", "beta": config["momentumBeta"], "window": config.get("momentumWindow", 4)}
+        )
+    if (
+        config.get("evalChunk") is not None
+        and config["evalChunk"] not in EXACT_CHUNKS[config.get("evalDtype", "float32")]
+    ):
+        raise ValueError("unsupported prompts per generate() call")
     if type(config["antithetic"]) is not bool or (config["antithetic"] and config["candidatesPerGeneration"] % 2):
         raise ValueError("antithetic sampling requires an even population")
     if config["decodeEngine"] != "hf_generate":

@@ -36,3 +36,12 @@ Owner decisions of 2026-10-19 night (plan `~/.claude/plans/c-agents-md-v-jaunty-
 - The managed lab (backend/web/product runner) does not offer them yet; python rules are never offered there.
 - Momentum with a python rule or antithetic pairs is covered by the unit tests of the joined inputs, not by a run.
 - Full `check-all` not run for this commit (v3, ledger and record suites: 1237+ passed earlier in this session).
+
+## Managed lab and web (second commit)
+
+Backend `Configuration` gains `alphaSchedule`, `alphaMinimum`, `momentumBeta`, `momentumWindow`, `evalChunk`
+(`backend/constants.py V3_UPDATE_KEYS`; runs saved before them still dispatch), validated by the numpy-free
+`heteroes.v3.options.validate_options`; `centered-rank@1` is accepted, python rules never. `product/v3.update_options`
+maps them into the documents. Web `V3Fields`: coefficient rule, alpha schedule/minimum, momentum β/window, prompts per
+call, and the `countdown` scorer fields; Vietnamese strings added. Backend 321 passed; frontend unit 78 passed, tsc,
+eslint, i18n, Prettier clean; backend mutation 7/7 killed (`mutation/result-backend.txt`). No browser walkthrough.

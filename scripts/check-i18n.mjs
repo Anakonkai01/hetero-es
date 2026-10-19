@@ -26,6 +26,7 @@ const ALLOWED_PATTERNS = [/^[·\s]*(Enter|Esc|Ctrl|⌘)[\s·+K]*$/, /^HETEROES\b
 const ALLOWED = new Set([
   'constant',
   'cosine',
+  'linear',
   'hf_generate',
   'hf_compact',
   'GSM8K · ####',

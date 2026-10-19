@@ -55,6 +55,11 @@ export function RuntimeConfiguration({
     scorer: initial?.scorer ?? DEFAULT_V3.scorer,
     coefficientRule: initial?.coefficientRule ?? 'zscore@1',
     systemPrompt: initial?.systemPrompt ?? null,
+    alphaSchedule: initial?.alphaSchedule ?? DEFAULT_V3.alphaSchedule,
+    alphaMinimum: initial?.alphaMinimum ?? DEFAULT_V3.alphaMinimum,
+    momentumBeta: initial?.momentumBeta ?? DEFAULT_V3.momentumBeta,
+    momentumWindow: initial?.momentumWindow ?? DEFAULT_V3.momentumWindow,
+    evalChunk: initial?.evalChunk ?? DEFAULT_V3.evalChunk,
   });
   const [validationInterval, setValidationInterval] = useState(initial?.validationInterval ?? 1);
   const [version, setVersion] = useState(initial?.recipeVersion ?? 1);

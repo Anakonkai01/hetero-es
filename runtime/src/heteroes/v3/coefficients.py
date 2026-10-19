@@ -26,9 +26,10 @@ import re
 
 import numpy as np
 
+from heteroes.v3.options import validate_update_rule  # noqa: F401  (re-exported: the record and tests use it here)
+
 RULES = ("zscore@1", "centered-rank@1")
 _PYTHON = re.compile(r"python@1:[0-9a-f]{64}")
-MAX_WINDOW = 8
 
 
 def python_rule(code_sha256):
@@ -85,26 +86,6 @@ def coefficients_for(rule, rewards, eta, function=None):
     if any(isinstance(c, (bool, np.bool_)) or not isinstance(c, (int, float, np.integer, np.floating)) for c in result):
         raise ValueError("a coefficient rule returns numbers")
     return _float32_exact([float(c) for c in result], "coefficients")
-
-
-def validate_update_rule(rule):
-    """None (plain step) or {"kind": "momentum", "beta": float32 in (0, 1), "window": 2..MAX_WINDOW}."""
-    if rule is None:
-        return rule
-    if not isinstance(rule, dict) or set(rule) != {"kind", "beta", "window"} or rule["kind"] != "momentum":
-        raise ValueError('an update rule is {"kind": "momentum", "beta": ..., "window": ...}')
-    beta, window = rule["beta"], rule["window"]
-    if (
-        isinstance(beta, bool)
-        or not isinstance(beta, (int, float))
-        or not math.isfinite(beta)
-        or not 0 < beta < 1
-        or float(np.float32(beta)) != beta
-    ):
-        raise ValueError("momentum beta is a float32 value strictly between 0 and 1 (for example 0.875)")
-    if type(window) is not int or not 2 <= window <= MAX_WINDOW:
-        raise ValueError(f"the momentum window is a whole number from 2 to {MAX_WINDOW}")
-    return rule
 
 
 def check_history(rule, generation, history):

@@ -1,6 +1,7 @@
 from .policies import backup_policy as validated_backup_policy, v2_qualification, v3_qualification
 
 from fastapi import HTTPException
+from .constants import V3_KEYS, V3_UPDATE_KEYS
 from heteroes.catalog import DECODE_ENGINES
 
 
@@ -92,7 +93,7 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
         ):
             body.pop(key)
     if body.get("recipeVersion") != 3:
-        for key in ("weightSpace", "antithetic", "scorer", "coefficientRule", "systemPrompt"):
+        for key in (*V3_KEYS, *V3_UPDATE_KEYS):
             body.pop(key, None)
     if body["schedulerPolicy"] not in cap["schedulerPolicies"] or body["syncMode"] not in cap["syncModes"]:
         raise HTTPException(422, "Unsupported scheduling policy or synchronization mode")

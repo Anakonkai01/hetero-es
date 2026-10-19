@@ -8,6 +8,12 @@ const SCORERS = [
   'answer-line-last-number',
   'last-integer',
   'answer-line-integer',
+  'countdown',
+];
+// coefficient rules a shared lab runs (a python rule needs a self-hosted coordinator)
+const RULES: [string, string][] = [
+  ['zscore@1', 'Z-score of the rewards'],
+  ['centered-rank@1', 'Centered ranks of the rewards'],
 ];
 export function V3Fields({ value, onChange }: { value: V3Settings; onChange: (value: V3Settings) => void }) {
   const { t } = useProduct();
@@ -100,7 +106,86 @@ export function V3Fields({ value, onChange }: { value: V3Settings; onChange: (va
           value={value.coefficientRule}
           onChange={(e) => set({ coefficientRule: e.target.value })}
         >
-          <option value="zscore@1">{value.coefficientRule}</option>
+          {RULES.map(([rule, label]) => (
+            <option key={rule} value={rule}>
+              {t(label)} · {rule}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="fg">
+        {t('Alpha schedule')}
+        <select className="sel" value={value.alphaSchedule} onChange={(e) => set({ alphaSchedule: e.target.value })}>
+          <option value="constant">constant</option>
+          <option value="cosine">cosine</option>
+          <option value="linear">linear</option>
+        </select>
+      </label>
+      {value.alphaSchedule !== 'constant' && (
+        <label className="fg">
+          {t('Minimum alpha')}
+          <input
+            className="inp"
+            type="number"
+            required
+            min={0.0000001}
+            max={1}
+            step="any"
+            value={value.alphaMinimum ?? ''}
+            onChange={(e) => set({ alphaMinimum: e.target.value === '' ? null : Number(e.target.value) })}
+          />
+        </label>
+      )}
+      <label className="fg">
+        {t('Momentum')}
+        <input
+          type="checkbox"
+          checked={value.momentumBeta !== null}
+          onChange={(e) => set({ momentumBeta: e.target.checked ? 0.875 : null })}
+        />
+      </label>
+      {value.momentumBeta !== null && (
+        <>
+          <label className="fg">
+            {t('Momentum beta')}
+            <select
+              className="sel"
+              value={value.momentumBeta}
+              onChange={(e) => set({ momentumBeta: Number(e.target.value) })}
+            >
+              {[0.5, 0.75, 0.875, 0.9375].map((beta) => (
+                <option key={beta} value={beta}>
+                  {beta}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="fg">
+            {t('Momentum window (generations)')}
+            <input
+              className="inp"
+              type="number"
+              required
+              min={2}
+              max={8}
+              value={value.momentumWindow}
+              onChange={(e) => set({ momentumWindow: Number(e.target.value) })}
+            />
+          </label>
+        </>
+      )}
+      <label className="fg">
+        {t('Prompts per generation call')}
+        <select
+          className="sel"
+          value={value.evalChunk ?? 16}
+          onChange={(e) => set({ evalChunk: Number(e.target.value) === 16 ? null : Number(e.target.value) })}
+        >
+          {[16, 32, 64].map((chunk) => (
+            <option key={chunk} value={chunk}>
+              {chunk}
+            </option>
+          ))}
         </select>
       </label>
       <label className="fg">
@@ -117,7 +202,9 @@ export function V3Fields({ value, onChange }: { value: V3Settings; onChange: (va
                   ? { answerField: 'answer', pattern: '(.*)' }
                   : name === 'choice-letter'
                     ? { answerField: 'answer' }
-                    : {};
+                    : name === 'countdown'
+                      ? { numbersField: 'nums', targetField: 'target' }
+                      : {};
             set({ scorer: { ...scorer, name, config } });
           }}
         >
@@ -138,6 +225,28 @@ export function V3Fields({ value, onChange }: { value: V3Settings; onChange: (va
             onChange={(e) => scorerConfig({ answerField: e.target.value })}
           />
         </label>
+      )}
+      {'numbersField' in scorer.config && (
+        <>
+          <label className="fg">
+            {t('Scorer numbers field')}
+            <input
+              className="inp"
+              required
+              value={String(scorer.config.numbersField)}
+              onChange={(e) => scorerConfig({ numbersField: e.target.value })}
+            />
+          </label>
+          <label className="fg">
+            {t('Scorer target field')}
+            <input
+              className="inp"
+              required
+              value={String(scorer.config.targetField)}
+              onChange={(e) => scorerConfig({ targetField: e.target.value })}
+            />
+          </label>
+        </>
       )}
       {'pattern' in scorer.config && (
         <label className="fg">
