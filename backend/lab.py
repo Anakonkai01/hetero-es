@@ -2,18 +2,14 @@
 import hashlib
 import json
 import sqlite3
-import secrets
-import time
 import uuid
 from typing import Literal
 
 from argon2.exceptions import VerificationError
-from fastapi import Cookie, Depends, Header, HTTPException, Request, Response
-from fastapi.responses import FileResponse
+from fastapi import Depends, Header, HTTPException, Request, Response
 from pydantic import BaseModel, ConfigDict, Field
 
 from .store import ACTIVE, now
-from .backup import begin_maintenance,end_maintenance,create_bundle,bundle_path
 from .throttle import client_address
 from .passwords import password_problem
 
@@ -56,12 +52,6 @@ class Invite(Strict):
 
 class MemberEdit(Strict):
     role: Literal['ADMIN','PARTICIPANT']
-
-
-class Contribution(Strict):
-    enabled: bool
-    workspaceId: str | None = None
-    ownerUserId: str | None = None
 
 
 class Resume(Strict):
@@ -278,64 +268,6 @@ def install_lab_routes(app, store, user, scoped, runtime):
         with store.db() as db:
             return [dict(r) for r in db.execute('SELECT * FROM audit WHERE workspace_id IS NULL ORDER BY sequence DESC LIMIT 200')]
 
-    @app.get('/api/v1/contributions')
-    def contributions(current=Depends(active)):
-        with store.db() as db:
-            disabled=store.disabled_workers(db)
-            return [{**dict(r),'enabled':r['worker_id'] not in disabled}
-                for r in db.execute('SELECT * FROM worker_assignments')
-                if current.get('platformAdmin') or r['owner']==current['userId']]
-
-    @app.post('/api/v1/contributions/{worker_id}')
-    def contribution(worker_id:str,body:Contribution,current=Depends(active)):
-        with store.operation_lock:
-            with store.db() as db:
-                if getattr(runtime,'agent_mode',False) and body.ownerUserId:
-                    enrolled=db.execute('SELECT owner FROM devices WHERE worker_id=?',(worker_id,)).fetchone()
-                    if enrolled and enrolled[0]!=body.ownerUserId:
-                        raise HTTPException(409,'Revoke and re-enroll the device before changing its owner')
-                current=active(current)
-                row=db.execute('SELECT * FROM worker_assignments WHERE worker_id=?',(worker_id,)).fetchone()
-                if not row or (not current.get('platformAdmin') and row['owner']!=current['userId']):
-                    raise HTTPException(404,'Owned GPU not found')
-                if body.ownerUserId and not current.get('platformAdmin'):
-                    raise HTTPException(403,'Only a platform administrator can assign GPU ownership')
-                owner=body.ownerUserId or row['owner']
-                if not store.profile(owner) or store.profile(owner)['accountStatus']!='ACTIVE':
-                    raise HTTPException(422,'Select an active GPU owner')
-                if not body.enabled:
-                    if body.ownerUserId and body.ownerUserId!=row['owner']:
-                        raise HTTPException(409,'Change ownership only after confirmed idle shutdown')
-                    disabled=store.disabled_workers(db);disabled.add(worker_id)
-                    db.execute('INSERT OR REPLACE INTO settings VALUES (?,?)',('disabledWorkers',json.dumps(sorted(disabled))))
-                    store.cancel_selected(db,worker_id)
-                    store.audit(db,current['userId'],'GPU_CONTRIBUTION_OFF',worker_id,row['workspace_id'])
-                    return {'workerId':worker_id,'enabled':False,'workspaceId':row['workspace_id'],'draining':any(
-                        b['status'] in ACTIVE and worker_id in b['workerIds'] for b in store.list())}
-                if not body.workspaceId:
-                    raise HTTPException(422,'Choose the contributing workspace')
-                if not db.execute('SELECT 1 FROM memberships WHERE workspace_id=? AND user_id=?',(body.workspaceId,owner)).fetchone():
-                    raise HTTPException(422,'The GPU owner must belong to the target workspace')
-            # A hold closes the gap between checking idle and committing assignment.
-            begin_maintenance(store,current['userId'])
-            try:
-                with store.db() as db:
-                    fresh=active(current)
-                    if (not fresh.get('platformAdmin') and row['owner']!=fresh['userId']) or (body.ownerUserId and not fresh.get('platformAdmin')):
-                        raise HTTPException(403,'GPU ownership permission changed')
-                    owner_profile=store.profile(owner)
-                    if owner_profile['accountStatus']!='ACTIVE' or not db.execute('SELECT 1 FROM memberships WHERE workspace_id=? AND user_id=?',(body.workspaceId,owner)).fetchone():
-                        raise HTTPException(409,'Target membership changed during maintenance')
-                    db.execute('UPDATE worker_assignments SET owner=?,workspace_id=? WHERE worker_id=?',(owner,body.workspaceId,worker_id))
-                    disabled=store.disabled_workers(db);disabled.discard(worker_id)
-                    db.execute('INSERT OR REPLACE INTO settings VALUES (?,?)',('disabledWorkers',json.dumps(sorted(disabled))))
-                    store.audit(db,current['userId'],'GPU_CONTRIBUTION_ON',worker_id,body.workspaceId)
-                end_maintenance(store,current['userId'])
-            except BaseException:
-                # Keep the deployment held until operator review after an uncertain RPC.
-                raise
-            return {'workerId':worker_id,'enabled':True,'workspaceId':body.workspaceId,'ownerUserId':owner}
-
     @app.get('/api/v1/platform/operations')
     def operations(current=Depends(platform)):
         with store.db() as db:
@@ -357,11 +289,9 @@ def install_lab_routes(app, store, user, scoped, runtime):
                           reservations=[{'runId':r['runId'],'status':r['status'],'workerStates':r.get('workerStates',{}),
                               'failureReason':r.get('failureReason')} for r in runs if r['status'] in ACTIVE],
                           recentFailures=[{'runId':r['runId'],'status':r['status'],'failureReason':r.get('failureReason')}
-                              for r in sorted(runs,key=lambda r:r.get('startedAt',0),reverse=True) if r.get('failureReason')][:20],
-                          runtimeMaintenance=bool(runtime.maintenance()))
+                              for r in sorted(runs,key=lambda r:r.get('startedAt',0),reverse=True) if r.get('failureReason')][:20])
         except Exception as error:
             result['runtimeIssue']=type(error).__name__
-        result['assignments']=contributions(current)
         return result
 
     @app.post('/api/v1/platform/maintenance/resume')
@@ -373,52 +303,8 @@ def install_lab_routes(app, store, user, scoped, runtime):
                 selected={wid for b in store.list() if b['status']=='QUEUED' for wid in b['workerIds']}
                 if not selected<=set(cap['workerIds']):
                     raise HTTPException(409,'Configure all imported queued worker IDs or cancel their queued experiments before resuming')
-            end_maintenance(store,current['userId'])
+                db.execute('UPDATE settings SET value="false" WHERE key="dispatchHold"')
+                # Holds left by the removed M1 maintenance (begin_maintenance) are cleared too.
+                db.execute('DELETE FROM settings WHERE key IN ("maintenanceId","agentMaintenance")')
+                store.audit(db,current['userId'],'MAINTENANCE_END','deployment')
         return {'dispatchHeld':False}
-
-    @app.post('/api/v1/platform/backups',status_code=201)
-    def backup(current=Depends(platform)):
-        if getattr(runtime,'agent_mode',False):
-            raise HTTPException(409,'Use experiment recovery points and product metadata backups in agent mode')
-        with store.operation_lock:
-            platform(current)
-            return create_bundle(store,current['userId'])
-
-    @app.get('/api/v1/platform/backups')
-    def backups(current=Depends(platform)):
-        from pathlib import Path
-        return [{'backupId':p.stem,'sizeBytes':p.stat().st_size} for p in sorted((Path(store.path).parent/'backups').glob('*.tar'))]
-
-    @app.get('/api/v1/platform/backups/{backup_id}/download')
-    def download_backup(backup_id:str,authorization:str=Header(default=''),
-                        ticket:str=Cookie(default='',alias='heteroes-backup-download')):
-        with store.db() as db:
-            if authorization:
-                current=platform(user(authorization))
-            else:
-                key='backupDownload:'+hashlib.sha256(ticket.encode()).hexdigest()
-                row=db.execute('SELECT value FROM settings WHERE key=?',(key,)).fetchone()
-                grant=json.loads(row[0]) if row else {}
-                session_row=db.execute('SELECT user_id FROM sessions WHERE digest=? AND expires>?',
-                    (grant.get('sessionDigest',''),time.time())).fetchone()
-                if grant.get('backupId')!=backup_id or grant.get('expires',0)<time.time() or not session_row:
-                    raise HTTPException(401,'Backup download authorization expired')
-                current=platform(store.profile(session_row['user_id']))
-                db.execute('DELETE FROM settings WHERE key=?',(key,))
-            store.audit(db,current['userId'],'BACKUP_DOWNLOAD',backup_id)
-        return FileResponse(bundle_path(store,backup_id),media_type='application/x-tar',filename='heteroes-lab-'+backup_id+'.tar')
-
-    @app.post('/api/v1/platform/backups/{backup_id}/download-ticket')
-    def download_ticket(backup_id:str,response:Response,current=Depends(platform),authorization:str=Header()):
-        bundle_path(store,backup_id)
-        ticket=secrets.token_urlsafe(32)
-        path=f'/api/v1/platform/backups/{backup_id}/download'
-        with store.db() as db:
-            platform(current)
-            db.execute('INSERT INTO settings VALUES (?,?)',('backupDownload:'+hashlib.sha256(ticket.encode()).hexdigest(),
-                json.dumps({'backupId':backup_id,'expires':time.time()+60,'sessionDigest':hashlib.sha256(authorization[7:].encode()).hexdigest()})))
-            store.audit(db,current['userId'],'BACKUP_DOWNLOAD_AUTHORIZE',backup_id)
-        # Scoped one-use cookie allows a native browser download stream instead
-        # of materializing a many-gigabyte backup in JavaScript memory.
-        response.set_cookie('heteroes-backup-download',ticket,max_age=60,httponly=True,samesite='strict',path=path)
-        return {'downloadUrl':path}

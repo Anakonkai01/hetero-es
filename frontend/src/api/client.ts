@@ -93,11 +93,6 @@ export async function downloadFile(path: string, name: string) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export async function downloadBackup(id: string) {
-  const ticket=await apiPost<{downloadUrl:string}>(`/api/v1/platform/backups/${encodeURIComponent(id)}/download-ticket`);
-  const link=document.createElement('a');link.href=`${API_BASE_URL}${ticket.downloadUrl}`;link.download=`heteroes-lab-${id}.tar`;link.click();
-}
-
 /**
  * Reads a server-sent event stream with the current sign-in. Resolves when the server ends the stream and rejects
  * when it cannot be opened or breaks, so the caller can fall back to polling.

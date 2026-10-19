@@ -10,10 +10,7 @@ import { QueryState } from "../components/common/QueryState";
 import { LabMembership } from './LabMembership';
 import { LabProfile } from './LabProfile';
 import { LabDevices } from './LabDevices';
-import { LabContributions } from './LabContributions';
-import {useQuery} from '@tanstack/react-query';
 import {formatDateTime} from '../lib/format';
-import {apiGet} from '../api/client';
 
 export function RuntimeWorkspacePage() {
   const {t}=useProduct();
@@ -42,10 +39,9 @@ function RuntimeWorkerCards() {
 export function RuntimeWorkersPage() {
   const {t}=useProduct();
   const {workspace}=useSession();
-  const health=useQuery({queryKey:['control-health'],queryFn:()=>apiGet<{agentMode?:boolean}>('/api/v1/health')});
   const [view,setView]=useState('fleet');
   return <><PageHeader title={t('Workers')} description={t('Live GPU resources, allocation and hardware measurements.')} actions={<button className="btn pri" onClick={()=>setView('devices')}>+ {t('Add a GPU computer')}</button>}/>
-  {health.data?.agentMode?<><div className="tabs" role="tablist" aria-label={t('GPU views')}><button className={view==='fleet'?'tab on':'tab'} role="tab" aria-selected={view==='fleet'} onClick={()=>setView('fleet')}>{t('Workspace GPU fleet')}</button><button className={view==='devices'?'tab on':'tab'} role="tab" aria-selected={view==='devices'} onClick={()=>setView('devices')}>{t('My devices & contribution')}</button></div>{view==='devices'?<LabDevices/>:workspace?<RuntimeWorkerCards/>:<p>{t('Join a workspace to view its live GPU inventory.')}</p>}</>:<><LabContributions/>{workspace&&<RuntimeWorkerCards/>}</>}
+  <><div className="tabs" role="tablist" aria-label={t('GPU views')}><button className={view==='fleet'?'tab on':'tab'} role="tab" aria-selected={view==='fleet'} onClick={()=>setView('fleet')}>{t('Workspace GPU fleet')}</button><button className={view==='devices'?'tab on':'tab'} role="tab" aria-selected={view==='devices'} onClick={()=>setView('devices')}>{t('My devices & contribution')}</button></div>{view==='devices'?<LabDevices/>:workspace?<RuntimeWorkerCards/>:<p>{t('Join a workspace to view its live GPU inventory.')}</p>}</>
   </>;
 }
 

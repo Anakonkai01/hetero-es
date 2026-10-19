@@ -655,23 +655,6 @@ class AgentRuntime:
             p=reports[0]
             return {'alive':p['workerAlive'],'ready':p['ready'],'events':p['events']}
 
-    def maintenance(self):
-        with self.store.db() as db:
-            row=db.execute('SELECT value FROM settings WHERE key="agentMaintenance"').fetchone()
-            return json.loads(row[0]) if row else None
-
-    def acquire_maintenance(self):
-        with self.store.db() as db:
-            if self.reservations():raise RuntimeError('Confirmed GPU release is required')
-            mid=uuid.uuid4().hex
-            db.execute('INSERT OR REPLACE INTO settings VALUES (?,?)',('agentMaintenance',json.dumps({'maintenanceId':mid})))
-            return {'maintenanceId':mid}
-
-    def release_maintenance(self, maintenance_id):
-        with self.store.db() as db:
-            if (self.maintenance() or {}).get('maintenanceId')!=maintenance_id:raise ValueError('Wrong maintenance identity')
-            db.execute('DELETE FROM settings WHERE key="agentMaintenance"')
-
     def artifact(self, run_id, name):
         import base64
         snapshot=self.store.snapshot(run_id)

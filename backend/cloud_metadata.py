@@ -1,9 +1,11 @@
 """Hourly consistent product metadata backup; cloud failure leaves a local copy."""
+import ctypes
 import hashlib
 import json
 import os
 from pathlib import Path
 import sqlite3
+import sys
 import time
 import uuid
 
@@ -55,3 +57,18 @@ def backup_loop(store,storage,stop):
         try:create_metadata_backup(store,storage)
         except Exception:pass
         last=time.time()
+
+
+def publish_new_directory(staging,destination):
+    if sys.platform.startswith('linux'):
+        # os.rename can replace an empty directory created between verification
+        # and publication. Linux RENAME_NOREPLACE closes that race atomically.
+        rename=ctypes.CDLL(None,use_errno=True).renameat2
+        rename.argtypes=[ctypes.c_int,ctypes.c_char_p,ctypes.c_int,ctypes.c_char_p,ctypes.c_uint]
+        rename.restype=ctypes.c_int
+        if rename(-100,os.fsencode(staging),-100,os.fsencode(destination),1)!=0:
+            error=ctypes.get_errno()
+            raise OSError(error,os.strerror(error),str(destination))
+    else:
+        # Windows rename already refuses an existing destination directory.
+        staging.rename(destination)

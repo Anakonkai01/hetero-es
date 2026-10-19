@@ -43,7 +43,7 @@ def restore(source,manifest,destination,admin_id='admin'):
         # publish_new_directory supplies Linux RENAME_NOREPLACE, closing overwrite races.
         import sys
         sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-        from backend.backup import publish_new_directory
+        from backend.cloud_metadata import publish_new_directory
         publish_new_directory(temporary,destination)
     except BaseException:
         shutil.rmtree(temporary,ignore_errors=True);raise
