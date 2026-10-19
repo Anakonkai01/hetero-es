@@ -76,6 +76,9 @@ build/
 *.pt
 *.pth
 *.bin
+# The pinned desktop-v3 qualification adapter is a reviewed, shipped resource and evidence.
+!desktop/worker/resources/reference-v3-adapter.bin
+!docs/evidence/2026-10-19-v3-qualification-reference/reference/reference-v3-adapter.bin
 *.safetensors
 *.ckpt
 
