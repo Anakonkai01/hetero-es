@@ -72,8 +72,8 @@ def inspect(path, model_id, revision):
     )
 
 
-def verify(path, manifest):
-    validate(manifest)
+def verify_files(path, files):
+    """The directory holds exactly `files` ({name: sha256}) among the files Transformers could load, with those hashes."""
     root = Path(path)
     # Reject alternate weight/config files that Transformers might choose even
     # though the expected files themselves are valid.
@@ -82,12 +82,17 @@ def verify(path, manifest):
         for p in root.rglob("*")
         if p.is_file() and p.suffix in (".json", ".safetensors", ".model", ".txt", ".tiktoken", ".jinja", ".bin", ".py")
     }
-    if actual != set(manifest["files"]):
+    if actual != set(files):
         raise ValueError("Model file set differs from pinned manifest")
-    for name, expected in manifest["files"].items():
+    for name, expected in files.items():
         with (root / name).open("rb") as stream:
             if hashlib.file_digest(stream, "sha256").hexdigest() != expected:
                 raise ValueError("Model file checksum mismatch")
+
+
+def verify(path, manifest):
+    validate(manifest)
+    verify_files(path, manifest["files"])
     return sha(manifest)
 
 

@@ -52,12 +52,15 @@ def generate_rows(model, tokenizer, rows, evaluation, chunk=16, *, sample=False,
     try:
         for offset in range(0, len(rows), chunk):
             group = rows[offset : offset + chunk]
+            # Recipe v3 may have no system prompt (null): then only the user turn is sent
+            system = (
+                []
+                if evaluation["systemPrompt"] is None
+                else [{"role": "system", "content": evaluation["systemPrompt"]}]
+            )
             prompts = [
                 tokenizer.apply_chat_template(
-                    [
-                        {"role": "system", "content": evaluation["systemPrompt"]},
-                        {"role": "user", "content": r["prompt"]},
-                    ],
+                    [*system, {"role": "user", "content": r["prompt"]}],
                     tokenize=False,
                     add_generation_prompt=True,
                 )
@@ -79,10 +82,10 @@ def generate_rows(model, tokenizer, rows, evaluation, chunk=16, *, sample=False,
                 output.append(
                     {
                         "prompt": row["prompt"],
-                        "expected": row["answer"],
+                        "expected": row.get("answer"),  # Recipe v3 rows may have no answer: scored on the coordinator
                         "output": text,
                         "prediction": prediction,
-                        "correct": prediction == row["answer"],
+                        "correct": row.get("answer") is not None and prediction == row["answer"],
                         "parseError": prediction is None,
                         "truncated": truncated,
                     }

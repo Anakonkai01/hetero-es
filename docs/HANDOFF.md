@@ -77,3 +77,4 @@ refused as history), record version 2, and protocol v3 (workers submit texts, th
 pairs). Receipts: `evidence/2026-10-19-extensibility-*`, `-v3-ledger-record`, `-v3-protocol`. Still to do: the product
 runner/agent/backend/web on v3, audit scheduling, SDK/CLI, the r11 desktop profile (PEFT, Windows v3 acceptance), GPU
 acceptance with the owner's authorization, and removing the v1/v2 run paths at the switch.
+Detailed state and plan of this workstream for the next agent: [handoff-v3-extensibility.md](handoff-v3-extensibility.md).

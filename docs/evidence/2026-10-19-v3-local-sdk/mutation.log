@@ -1,0 +1,15 @@
+control ok    | 61 passed in 6.01s
+killed       sampler seed shifted | 1 failed, 60 passed in 5.94s
+killed       prompt column not copied | 7 failed, 54 passed in 4.02s
+killed       NaN cells accepted | 1 failed, 60 passed in 5.91s
+killed       context without the scorer | 1 failed, 60 passed in 5.91s
+killed       batch of another dataset | 1 failed, 60 passed in 5.93s
+killed       scored against generation 0 | 1 failed, 60 passed in 6.06s
+killed       builtin data run | 1 failed, 60 passed in 5.89s
+killed       workers send rewards | 6 failed, 55 passed in 184.78s (0:03:04)
+killed       pairs dropped | 2 failed, 59 passed in 5.98s
+killed       worker ignores the pinned adapter | 1 failed, 60 passed in 5.62s
+killed       python code not pinned | 4 failed, 57 passed in 5.81s
+killed       decorator version ignored | 1 failed, 60 passed in 5.52s
+
+12 of 12 mutants killed.

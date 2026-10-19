@@ -22,7 +22,8 @@ from heteroes.model.schema import build_parameter_schema, select_parameters
 from heteroes.model.weights_io import load_weights_, write_weights
 
 ADAPTER_PATTERN = r"\.lora_[AB]\."
-SPACE_KEYS = {"kind", "rank", "alpha", "targetModules", "initialAdapterSha256"}
+# what the PEFT configuration needs; the recipe also pins `initialAdapterSha256`, which exists only once the adapter is made
+SPACE_KEYS = {"kind", "rank", "alpha", "targetModules"}
 
 
 def _config(space):
