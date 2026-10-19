@@ -1,0 +1,55 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+_______ test_the_command_line_runs_a_spec_with_relative_paths[heteroes] ________
+
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-301/tiny0')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-301/test_the_command_line_runs_a_s1')
+module = 'heteroes'
+
+    @pytest.mark.parametrize("module", ["heteroes.v3", "heteroes"])
+    def test_the_command_line_runs_a_spec_with_relative_paths(assets, tmp_path, module):
+        spec = config_for(assets, generations=1)
+        spec["data"]["path"] = "rows.jsonl"
+        (tmp_path / "rows.jsonl").write_text((assets / "rows.jsonl").read_text())
+        (tmp_path / "spec.json").write_text(json.dumps(spec))
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                module,
+                "run",
+                str(tmp_path / "spec.json"),
+                "--out",
+                str(tmp_path / "run"),
+                "--timeout-seconds",
+                "30",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=600,
+        )
+>       assert result.returncode == 0, result.stderr[-2000:]
+E       AssertionError: /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python: No module named heteroes.__main__; 'heteroes' is a package and cannot be directly executed
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python', '-m', 'heteroes', 'run', '/tmp/pyte...teroes-match/bin/python: No module named heteroes.__main__; 'heteroes' is a package and cannot be directly executed\n").returncode
+
+runtime/tests/v3/test_v3_local.py:161: AssertionError
+________ test_installed_entrypoint_loads_without_numerical_dependencies ________
+
+capsys = <_pytest.capture.CaptureFixture object at 0x7e35dca64d70>
+
+    def test_installed_entrypoint_loads_without_numerical_dependencies(capsys):
+        import importlib.metadata
+        import tomllib
+    
+        project = tomllib.loads((Path(__file__).resolve().parents[2] / "pyproject.toml").read_text())
+>       target = project["project"]["scripts"]["heteroes"]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'scripts'
+
+runtime/tests/v3/test_v3_local.py:231: KeyError
+=========================== short test summary info ============================
+FAILED runtime/tests/v3/test_v3_local.py::test_the_command_line_runs_a_spec_with_relative_paths[heteroes]
+FAILED runtime/tests/v3/test_v3_local.py::test_installed_entrypoint_loads_without_numerical_dependencies
+2 failed, 1 passed, 7 deselected in 3.91s

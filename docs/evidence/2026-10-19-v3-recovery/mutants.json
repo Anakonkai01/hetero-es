@@ -1,0 +1,32 @@
+[
+  {
+    "name": "forget selected weights",
+    "file": "src/heteroes/v3/recovery.py",
+    "old": "        os.link(source, target)",
+    "new": "        target.write_bytes(b\"lost checkpoint\")"
+  },
+  {
+    "name": "forget validation history",
+    "file": "src/heteroes/v3/recovery.py",
+    "old": "\"validation\": [read_json(p) for p in sorted(root.glob(\"validation-*.json\"))],",
+    "new": "\"validation\": [],"
+  },
+  {
+    "name": "ignore frozen validation plan",
+    "file": "src/heteroes/v3/recovery.py",
+    "old": "row.get(\"recipeHash\") != run.hash or row.get(\"planHash\") != run.plan_hash",
+    "new": "row.get(\"recipeHash\") != run.hash"
+  },
+  {
+    "name": "do not rebind dataset path",
+    "file": "src/heteroes/v3/recovery.py",
+    "old": "config[\"datasetPath\"] = str(Path(destination).resolve() / \"dataset.json\")",
+    "new": "pass"
+  },
+  {
+    "name": "forget audit faults",
+    "file": "src/heteroes/v3/recovery.py",
+    "old": "(\"audit-faults.json\", state[\"auditFaults\"]),",
+    "new": "(\"audit-faults.json\", {}),"
+  }
+]
