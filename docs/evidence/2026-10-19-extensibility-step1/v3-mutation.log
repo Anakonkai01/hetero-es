@@ -1,0 +1,28 @@
+control ok    | 33 passed in 0.71s
+killed       reward is the max, not the mean | 4 failed, 29 passed in 0.69s
+killed       cot rule compares to a string | 1 failed, 32 passed in 0.70s
+killed       non-finite scores accepted | 2 failed, 31 passed in 0.69s
+killed       boolean scores accepted | 1 failed, 32 passed in 0.69s
+killed       shared lab accepts python | 2 failed, 31 passed in 0.70s
+SURVIVED     regex takes the last group | 33 passed in 0.69s
+killed       choice takes the first letter | 1 failed, 32 passed in 0.72s
+SURVIVED     exact-string always casefolds | 33 passed in 0.69s
+killed       code identity ignores names | 2 errors in 0.74s
+killed       python scorer gets the real rows | 1 failed, 32 passed in 0.69s
+SURVIVED     only some scorer errors wrapped | 33 passed in 0.69s
+killed       pair merge not halved | 2 failed, 31 passed in 0.70s
+killed       pairs always merged | 2 failed, 31 passed in 0.70s
+killed       pair seeds not checked | 1 failed, 32 passed in 0.69s
+killed       minus first in a pair | 1 failed, 32 passed in 0.69s
+killed       non-float32 coefficients accepted | 1 failed, 32 passed in 0.70s
+killed       v1 scorers swapped | 1 failed, 32 passed in 0.70s
+killed       unpinned files accepted for new runs | 1 failed, 32 passed in 0.69s
+killed       builtin accepts its own prompt | 1 failed, 32 passed in 0.69s
+killed       cosine denominator | 1 failed, 32 passed in 0.68s
+killed       odd antithetic population | 1 failed, 32 passed in 0.69s
+killed       schedule length not bound | 1 failed, 32 passed in 0.69s
+killed       plan for any recipe | 1 failed, 32 passed in 0.71s
+killed       v2 minimum sigma lost | 1 failed, 32 passed in 0.71s
+killed       generation past the schedule | 1 failed, 32 passed in 0.69s
+
+22 of 25 mutants killed.

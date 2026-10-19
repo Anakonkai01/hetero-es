@@ -1,0 +1,730 @@
+{
+ "formatVersion": 1,
+ "mappings": [
+  {
+   "planFields": {
+    "coefficientRule": {
+     "eta": 1e-09,
+     "name": "zscore",
+     "version": 1
+    },
+    "scorer": {
+     "codeSha256": null,
+     "config": {},
+     "kind": "declarative",
+     "name": "last-integer",
+     "version": 1
+    }
+   },
+   "recipeV3": {
+    "data": {
+     "hash": "cad822bc1e65a9ec37d948e5415cff22c70f96500e2043e6299bbdd5cea0b8d5",
+     "kind": "builtin",
+     "name": "arith16"
+    },
+    "evaluation": {
+     "decoder": "hf_generate",
+     "evalDtype": "float16",
+     "generationConfigSha256": "b55cff86f578c8340c5d24f380d97989b021618b79a30df0a802c0362b7a0346",
+     "maxNewTokens": null,
+     "systemPrompt": null
+    },
+    "formatVersion": 3,
+    "model": {
+     "dtype": "torch.float16",
+     "files": null,
+     "id": "Qwen/Qwen2.5-0.5B-Instruct",
+     "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+     "tokenizerRevision": "7ae557604adf67be50417f59c2c2f167def9a775"
+    },
+    "noise": {
+     "chunkElements": 262144,
+     "engine": "numpy_pcg64_normal_f32_to_f16_v1",
+     "fingerprint": "b94575345e870b1606cb4d6a0c4aa49b054cfbfc50571d809653d01bce9184d3"
+    },
+    "perturbation": {
+     "antithetic": false,
+     "sigma": {
+      "generations": null,
+      "initial": 0.001,
+      "kind": "constant",
+      "minimum": 0.001
+     }
+    },
+    "schemaHash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+    "weightSpace": {
+     "kind": "full"
+    }
+   },
+   "sources": [
+    "runtime/artifacts/experiments/2026-10-06-g3-cable-attempt1-firewall-blocked/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-06-g3-local-two-process/greedy-b3/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-06-g3-local-two-process/wave-b1/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-06-g3-two-machines-8c3g/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-06-g3-two-machines-cable-wave/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-06-g3-two-machines-cable/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-06-g3-two-machines/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g4-admission-b2/n24-B0-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g4-admission-b2/n24-B2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g4-admission-b2/n24-B3-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g4-admission-b2/n24-H0-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g4-admission-b2/n8-B0-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g4-admission-b2/n8-B2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g4-admission-b2/n8-B3-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g4-admission-b2/n8-H0-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g5-benchmark/n24-B0-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g5-benchmark/n24-B0-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g5-benchmark/n24-B0-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g5-benchmark/n24-B1-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g5-benchmark/n24-B1-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g5-benchmark/n24-B1-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g5-benchmark/n24-B2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g5-benchmark/n24-B2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g5-benchmark/n24-B2-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g5-benchmark/n24-B3-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g5-benchmark/n24-B3-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g5-benchmark/n24-B3-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g5-benchmark/n8-B0-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g5-benchmark/n8-B0-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g5-benchmark/n8-B0-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g5-benchmark/n8-B1-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g5-benchmark/n8-B1-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g5-benchmark/n8-B1-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g5-benchmark/n8-B2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g5-benchmark/n8-B2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g5-benchmark/n8-B2-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g5-benchmark/n8-B3-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g5-benchmark/n8-B3-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g5-benchmark/n8-B3-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp16/n24-B0-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp16/n24-B0-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp16/n24-B0-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp16/n24-B3-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp16/n24-B3-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp16/n24-B3-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp16/n24-B4-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp16/n24-B4-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp16/n24-B4-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-local-scaling/n24-B0-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-local-scaling/n24-B0-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-local-scaling/n24-B0x2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-local-scaling/n24-B0x2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-local-scaling/n24-B0x3-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-local-scaling/n24-B0x3-r2/coordinator/events.jsonl",
+    "runtime/artifacts/regression/2026-10-06-manifest-v1-5070ti/5070ti_format2.json"
+   ],
+   "v1Hash": "1604737ea1d7203062d641381172899356a261748f754a8f3264019ac1b3f5b1",
+   "v3Hash": "5376dec517e867d96b987a2e25205eabe16a199a021424ff619bca4abbf3fc91",
+   "workload": "arith16"
+  },
+  {
+   "planFields": {
+    "coefficientRule": {
+     "eta": 1e-09,
+     "name": "zscore",
+     "version": 1
+    },
+    "scorer": {
+     "codeSha256": null,
+     "config": {},
+     "kind": "declarative",
+     "name": "answer-line-integer",
+     "version": 1
+    }
+   },
+   "recipeV3": {
+    "data": {
+     "hash": "a052f8495c906b9211e91e22581894cbd9e6fa625834f1985f2e8643b19bd0de",
+     "kind": "builtin",
+     "name": "cot_l3_q32"
+    },
+    "evaluation": {
+     "decoder": "hf_generate",
+     "evalDtype": "float32",
+     "generationConfigSha256": "b55cff86f578c8340c5d24f380d97989b021618b79a30df0a802c0362b7a0346",
+     "maxNewTokens": null,
+     "systemPrompt": null
+    },
+    "formatVersion": 3,
+    "model": {
+     "dtype": "torch.float16",
+     "files": null,
+     "id": "Qwen/Qwen2.5-0.5B-Instruct",
+     "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+     "tokenizerRevision": "7ae557604adf67be50417f59c2c2f167def9a775"
+    },
+    "noise": {
+     "chunkElements": 262144,
+     "engine": "numpy_pcg64_normal_f32_to_f16_v1",
+     "fingerprint": "b94575345e870b1606cb4d6a0c4aa49b054cfbfc50571d809653d01bce9184d3"
+    },
+    "perturbation": {
+     "antithetic": false,
+     "sigma": {
+      "generations": null,
+      "initial": 0.001,
+      "kind": "constant",
+      "minimum": 0.001
+     }
+    },
+    "schemaHash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+    "weightSpace": {
+     "kind": "full"
+    }
+   },
+   "sources": [
+    "runtime/artifacts/experiments/2026-10-07-g7-cluster-benchmark/cpu-engine/n24-B0x2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-cluster-benchmark/cpu-engine/n24-B0x2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-cluster-benchmark/cpu-engine/n24-B0x2-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-cluster-benchmark/cpu-engine/n24-B3x2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-cluster-benchmark/cpu-engine/n24-B3x2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-cluster-benchmark/cpu-engine/n24-B3x2-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-cluster-benchmark/cpu-engine/n24-B4x2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-cluster-benchmark/cpu-engine/n24-B4x2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-cluster-benchmark/cpu-engine/n24-B4x2-r3/coordinator/events.jsonl"
+   ],
+   "v1Hash": "186bebacccadfe333626f86e3dc5d374e3892dc5411ce2a628fe7ff2f39514b5",
+   "v3Hash": "1e2ae67cebf606b72453079c0ea4f87f7686a3cc359215cc20948200d7a42a75",
+   "workload": "cot_l3_q32"
+  },
+  {
+   "planFields": {
+    "coefficientRule": {
+     "eta": 1e-09,
+     "name": "zscore",
+     "version": 1
+    },
+    "scorer": {
+     "codeSha256": null,
+     "config": {},
+     "kind": "declarative",
+     "name": "answer-line-integer",
+     "version": 1
+    }
+   },
+   "recipeV3": {
+    "data": {
+     "hash": "4ea60e526dd535856c6aee15aea8bfb22df99e9df394e8a04635a3f9890abb89",
+     "kind": "builtin",
+     "name": "cot_l1_q128"
+    },
+    "evaluation": {
+     "decoder": "hf_generate",
+     "evalDtype": "float32",
+     "generationConfigSha256": "b55cff86f578c8340c5d24f380d97989b021618b79a30df0a802c0362b7a0346",
+     "maxNewTokens": null,
+     "systemPrompt": null
+    },
+    "formatVersion": 3,
+    "model": {
+     "dtype": "torch.float16",
+     "files": null,
+     "id": "Qwen/Qwen2.5-0.5B-Instruct",
+     "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+     "tokenizerRevision": "7ae557604adf67be50417f59c2c2f167def9a775"
+    },
+    "noise": {
+     "chunkElements": 22528,
+     "engine": "torch_cuda_philox_chunked_f32_to_f16_v1",
+     "fingerprint": "9492a49ab70efe98e2b710e9a9e927f54be658489eae4b549c0cbf7340b9ffaf"
+    },
+    "perturbation": {
+     "antithetic": false,
+     "sigma": {
+      "generations": null,
+      "initial": 0.001,
+      "kind": "constant",
+      "minimum": 0.001
+     }
+    },
+    "schemaHash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+    "weightSpace": {
+     "kind": "full"
+    }
+   },
+   "sources": [
+    "runtime/artifacts/experiments/2026-10-08-c1-v2/bench-n24/n24-B0-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-c1-v2/bench-n24/n24-B0-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-c1-v2/bench-n24/n24-B2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-c1-v2/bench-n24/n24-B2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-c1-v2/bench-n24/n24-B3-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-c1-v2/bench-n24/n24-B3-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-long-workers/rep1/kill-worker/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-long-workers/rep1/pause-worker/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-long-workers/rep1/reference/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-long-workers/rep2/kill-worker/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-long-workers/rep2/pause-worker/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-long-workers/rep2/reference/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-long-workers/rep3/kill-worker/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-long-workers/rep3/pause-worker/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-long-workers/rep3/reference/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-learning-v2/runD1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-replay-worker/always/n24-B3-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-replay-worker/always/n24-B3-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-replay-worker/auto/n24-B3-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-replay-worker/invalid-always-1660s-had-old-code/n24-B3-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-replay-worker/invalid-always-1660s-had-old-code/n24-B3-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-replay-worker/invalid-auto-1660s-had-old-code/n24-B3-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-replay-worker/never/n24-B3-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-replay-worker/never/n24-B3-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-concurrency-5070ti-ABORTED-restart-later/bench/n24-B0-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-cutlink-download-3060b/run/cut-link/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-decode-engine-b0/bench-generate/n24-B0-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-dispatch-3060/bench/n24-T2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-dispatch-3060/bench/n24-T2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-dispatch-3060/bench/n24-U2-r1.failed-attempt1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-dispatch-3060/bench/n24-U2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-dispatch-3060/bench/n24-U2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-failure-campaign-remote-3060b/rep1/cut-link/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-failure-campaign-remote-3060b/rep1/kill-coordinator-mid-update/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-failure-campaign-remote-3060b/rep1/kill-coordinator/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-failure-campaign-remote-3060b/rep1/kill-worker/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-failure-campaign-remote-3060b/rep1/pause-worker/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-failure-campaign-remote-3060b/rep1/reference/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-remote-3060b-quicktunnel/attempt1-health-check-401-stuck-bench/n24-T2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-remote-3060b-quicktunnel/bench/n24-T2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-remote-3060b/bench/n24-T2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-scaling-n48-n96-2machines/n48/n48-B0-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-scaling-n48-n96-2machines/n48/n48-B0-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-scaling-n48-n96-2machines/n48/n48-T2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-scaling-n48-n96-2machines/n48/n48-T2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-scaling-n48-n96-2machines/n96/n96-B0-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-scaling-n48-n96-2machines/n96/n96-T2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-three-machines/bench-3060-downloads/n24-T2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-three-machines/bench/n24-B0-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-three-machines/bench/n24-B0-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-three-machines/bench/n24-B3-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-three-machines/bench/n24-B3-r2.failed-attempt1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-three-machines/bench/n24-B3-r2.failed-attempt2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-three-machines/bench/n24-B3-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-three-machines/bench/n24-T2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-three-machines/bench/n24-T2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-three-machines/bench/n24-T3-r1.failed-attempt1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-three-machines/bench/n24-T3-r1.failed-attempt2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-three-machines/bench/n24-T3-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-three-machines/bench/n24-T3-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-three-machines/invalid-3060-worker-segfaulted-bench-downloads/n24-T2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-three-machines/invalid-3060-worker-segfaulted-bench/n24-B0-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-three-machines/invalid-3060-worker-segfaulted-bench/n24-B0-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-three-machines/invalid-3060-worker-segfaulted-bench/n24-B3-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-three-machines/invalid-3060-worker-segfaulted-bench/n24-B3-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-three-machines/invalid-3060-worker-segfaulted-bench/n24-T2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-three-machines/invalid-3060-worker-segfaulted-bench/n24-T2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-three-machines/invalid-3060-worker-segfaulted-bench/n24-T3-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-three-machines/invalid-3060-worker-segfaulted-bench/n24-T3-r2/coordinator/events.jsonl"
+   ],
+   "v1Hash": "252c7c8db62c326c6d589c7b8e039313937e88f52dc166caba84a82b2768f5bf",
+   "v3Hash": "2857bf59520be21d5bbb7151c22ee9e7dd6c734527fd3a41387e1c5c848a7789",
+   "workload": "cot_l1_q128"
+  },
+  {
+   "planFields": {
+    "coefficientRule": {
+     "eta": 1e-09,
+     "name": "zscore",
+     "version": 1
+    },
+    "scorer": {
+     "codeSha256": null,
+     "config": {},
+     "kind": "declarative",
+     "name": "answer-line-integer",
+     "version": 1
+    }
+   },
+   "recipeV3": {
+    "data": {
+     "hash": "9049518d5d51ccfffe2687cc2fa4b731f03590b7e2a2a78de71c5952aa4adc35",
+     "kind": "builtin",
+     "name": "cot_l3_q64"
+    },
+    "evaluation": {
+     "decoder": "hf_generate",
+     "evalDtype": "float32",
+     "generationConfigSha256": "b55cff86f578c8340c5d24f380d97989b021618b79a30df0a802c0362b7a0346",
+     "maxNewTokens": null,
+     "systemPrompt": null
+    },
+    "formatVersion": 3,
+    "model": {
+     "dtype": "torch.float16",
+     "files": null,
+     "id": "Qwen/Qwen2.5-0.5B-Instruct",
+     "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+     "tokenizerRevision": "7ae557604adf67be50417f59c2c2f167def9a775"
+    },
+    "noise": {
+     "chunkElements": 22528,
+     "engine": "torch_cuda_philox_chunked_f32_to_f16_v1",
+     "fingerprint": "9492a49ab70efe98e2b710e9a9e927f54be658489eae4b549c0cbf7340b9ffaf"
+    },
+    "perturbation": {
+     "antithetic": false,
+     "sigma": {
+      "generations": null,
+      "initial": 0.001,
+      "kind": "constant",
+      "minimum": 0.001
+     }
+    },
+    "schemaHash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+    "weightSpace": {
+     "kind": "full"
+    }
+   },
+   "sources": [
+    "runtime/artifacts/experiments/2026-10-07-g7-bigchunk/cot_l3_q64-chunk64/n24-B0-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-bigchunk/cot_l3_q64-chunk64/n24-B0-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-bigchunk/cot_l3_q64-chunk64/n24-B0-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-bigchunk/cot_l3_q64-chunk64/n24-B0x2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-bigchunk/cot_l3_q64-chunk64/n24-B0x2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-bigchunk/cot_l3_q64-chunk64/n24-B0x2-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-bigchunk/cot_l3_q64-chunk64/n24-B3x2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-bigchunk/cot_l3_q64-chunk64/n24-B3x2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-bigchunk/cot_l3_q64-chunk64/n24-B3x2-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-bigchunk/cot_l3_q64-chunk64/n24-B4x2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-bigchunk/cot_l3_q64-chunk64/n24-B4x2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-bigchunk/cot_l3_q64-chunk64/n24-B4x2-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-learning-runtime/runA/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-learning-runtime/runB/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-learning-runtime/runC/coordinator/events.jsonl"
+   ],
+   "v1Hash": "29ce8461e50acb035b92251d5d956ef71fa54af2f2602dd812c67ee7b5d66fa9",
+   "v3Hash": "6e48886209548fa69165e523673b9225d5c9fd96351704078082904b7925ecaa",
+   "workload": "cot_l3_q64"
+  },
+  {
+   "planFields": {
+    "coefficientRule": {
+     "eta": 1e-09,
+     "name": "zscore",
+     "version": 1
+    },
+    "scorer": {
+     "codeSha256": null,
+     "config": {},
+     "kind": "declarative",
+     "name": "answer-line-integer",
+     "version": 1
+    }
+   },
+   "recipeV3": {
+    "data": {
+     "hash": "4ea60e526dd535856c6aee15aea8bfb22df99e9df394e8a04635a3f9890abb89",
+     "kind": "builtin",
+     "name": "cot_l1_q128"
+    },
+    "evaluation": {
+     "decoder": "hf_compact",
+     "evalDtype": "float32",
+     "generationConfigSha256": "b55cff86f578c8340c5d24f380d97989b021618b79a30df0a802c0362b7a0346",
+     "maxNewTokens": null,
+     "systemPrompt": null
+    },
+    "formatVersion": 3,
+    "model": {
+     "dtype": "torch.float16",
+     "files": null,
+     "id": "Qwen/Qwen2.5-0.5B-Instruct",
+     "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+     "tokenizerRevision": "7ae557604adf67be50417f59c2c2f167def9a775"
+    },
+    "noise": {
+     "chunkElements": 22528,
+     "engine": "torch_cuda_philox_chunked_f32_to_f16_v1",
+     "fingerprint": "9492a49ab70efe98e2b710e9a9e927f54be658489eae4b549c0cbf7340b9ffaf"
+    },
+    "perturbation": {
+     "antithetic": false,
+     "sigma": {
+      "generations": null,
+      "initial": 0.001,
+      "kind": "constant",
+      "minimum": 0.001
+     }
+    },
+    "schemaHash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+    "weightSpace": {
+     "kind": "full"
+    }
+   },
+   "sources": [
+    "runtime/artifacts/experiments/2026-10-09-decode-engine-b0/bench-compact/n24-B0-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-decode-engine-b0/bench-compact/n24-B0-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-t2-compact/bench/n24-B0-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-t2-compact/bench/n24-B0-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-t2-compact/bench/n24-T2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-09-t2-compact/bench/n24-T2-r2/coordinator/events.jsonl"
+   ],
+   "v1Hash": "cb29ab53479eb9c12a50ae38d907aed42713ebe666019a19dd59ce67cfb39eef",
+   "v3Hash": "2f83d3c830a706a1f32c8606f2ae4b3c9542d887340ad50398efce47358aeaf0",
+   "workload": "cot_l1_q128"
+  },
+  {
+   "planFields": {
+    "coefficientRule": {
+     "eta": 1e-09,
+     "name": "zscore",
+     "version": 1
+    },
+    "scorer": {
+     "codeSha256": null,
+     "config": {},
+     "kind": "declarative",
+     "name": "answer-line-integer",
+     "version": 1
+    }
+   },
+   "recipeV3": {
+    "data": {
+     "hash": "4ea60e526dd535856c6aee15aea8bfb22df99e9df394e8a04635a3f9890abb89",
+     "kind": "builtin",
+     "name": "cot_l1_q128"
+    },
+    "evaluation": {
+     "decoder": "hf_generate",
+     "evalDtype": "float32",
+     "generationConfigSha256": "b55cff86f578c8340c5d24f380d97989b021618b79a30df0a802c0362b7a0346",
+     "maxNewTokens": null,
+     "systemPrompt": null
+    },
+    "formatVersion": 3,
+    "model": {
+     "dtype": "torch.float16",
+     "files": null,
+     "id": "Qwen/Qwen2.5-0.5B-Instruct",
+     "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+     "tokenizerRevision": "7ae557604adf67be50417f59c2c2f167def9a775"
+    },
+    "noise": {
+     "chunkElements": 22528,
+     "engine": "torch_cuda_philox_chunked_f32_to_f16_v1",
+     "fingerprint": "9492a49ab70efe98e2b710e9a9e927f54be658489eae4b549c0cbf7340b9ffaf"
+    },
+    "perturbation": {
+     "antithetic": false,
+     "sigma": {
+      "generations": null,
+      "initial": 0.0005,
+      "kind": "constant",
+      "minimum": 0.0005
+     }
+    },
+    "schemaHash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+    "weightSpace": {
+     "kind": "full"
+    }
+   },
+   "sources": [
+    "runtime/artifacts/experiments/2026-10-08-learning-v2/runD2/coordinator/events.jsonl"
+   ],
+   "v1Hash": "dea591bafed086dd07f190d8809a1eea738c328848cf2a3936e50cf269571c9e",
+   "v3Hash": "01da15cff57c06a282e76b532c53afc55e1eb8e80ee317dd43cf7e27c8a837e1",
+   "workload": "cot_l1_q128"
+  },
+  {
+   "planFields": {
+    "coefficientRule": {
+     "eta": 1e-09,
+     "name": "zscore",
+     "version": 1
+    },
+    "scorer": {
+     "codeSha256": null,
+     "config": {},
+     "kind": "declarative",
+     "name": "answer-line-integer",
+     "version": 1
+    }
+   },
+   "recipeV3": {
+    "data": {
+     "hash": "a052f8495c906b9211e91e22581894cbd9e6fa625834f1985f2e8643b19bd0de",
+     "kind": "builtin",
+     "name": "cot_l3_q32"
+    },
+    "evaluation": {
+     "decoder": "hf_generate",
+     "evalDtype": "float32",
+     "generationConfigSha256": "b55cff86f578c8340c5d24f380d97989b021618b79a30df0a802c0362b7a0346",
+     "maxNewTokens": null,
+     "systemPrompt": null
+    },
+    "formatVersion": 3,
+    "model": {
+     "dtype": "torch.float16",
+     "files": null,
+     "id": "Qwen/Qwen2.5-0.5B-Instruct",
+     "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+     "tokenizerRevision": "7ae557604adf67be50417f59c2c2f167def9a775"
+    },
+    "noise": {
+     "chunkElements": 22528,
+     "engine": "torch_cuda_philox_chunked_f32_to_f16_v1",
+     "fingerprint": "9492a49ab70efe98e2b710e9a9e927f54be658489eae4b549c0cbf7340b9ffaf"
+    },
+    "perturbation": {
+     "antithetic": false,
+     "sigma": {
+      "generations": null,
+      "initial": 0.001,
+      "kind": "constant",
+      "minimum": 0.001
+     }
+    },
+    "schemaHash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+    "weightSpace": {
+     "kind": "full"
+    }
+   },
+   "sources": [
+    "runtime/artifacts/experiments/2026-10-07-g7-bigchunk/cot_l3_q32-chunk32/n24-B0x2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-bigchunk/cot_l3_q32-chunk32/n24-B0x2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-bigchunk/cot_l3_q32-chunk32/n24-B0x2-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-bigchunk/cot_l3_q32-chunk32/n24-B3x2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-bigchunk/cot_l3_q32-chunk32/n24-B3x2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-bigchunk/cot_l3_q32-chunk32/n24-B3x2-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-bigchunk/cot_l3_q32-chunk32/n24-B4x2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-bigchunk/cot_l3_q32-chunk32/n24-B4x2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-bigchunk/cot_l3_q32-chunk32/n24-B4x2-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-cluster-benchmark/cuda-engine/n24-B0x2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-cluster-benchmark/cuda-engine/n24-B0x2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-cluster-benchmark/cuda-engine/n24-B0x2-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-cluster-benchmark/cuda-engine/n24-B3x2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-cluster-benchmark/cuda-engine/n24-B3x2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-cluster-benchmark/cuda-engine/n24-B3x2-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-cluster-benchmark/cuda-engine/n24-B4x2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-cluster-benchmark/cuda-engine/n24-B4x2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-cluster-benchmark/cuda-engine/n24-B4x2-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g7-cluster-smoke/n4-B3x2-r1/coordinator/events.jsonl"
+   ],
+   "v1Hash": "ee5612490c9f4ba55d07145a149cafbc00feb27eb35c3ebaf42d1186f3a816be",
+   "v3Hash": "c0cdffb25279e69d81135b0a2fe6efcf8bc9bbbcdd36d748ad2f196126631932",
+   "workload": "cot_l3_q32"
+  },
+  {
+   "planFields": {
+    "coefficientRule": {
+     "eta": 1e-09,
+     "name": "zscore",
+     "version": 1
+    },
+    "scorer": {
+     "codeSha256": null,
+     "config": {},
+     "kind": "declarative",
+     "name": "last-integer",
+     "version": 1
+    }
+   },
+   "recipeV3": {
+    "data": {
+     "hash": "cad822bc1e65a9ec37d948e5415cff22c70f96500e2043e6299bbdd5cea0b8d5",
+     "kind": "builtin",
+     "name": "arith16"
+    },
+    "evaluation": {
+     "decoder": "hf_generate",
+     "evalDtype": "float32",
+     "generationConfigSha256": "b55cff86f578c8340c5d24f380d97989b021618b79a30df0a802c0362b7a0346",
+     "maxNewTokens": null,
+     "systemPrompt": null
+    },
+    "formatVersion": 3,
+    "model": {
+     "dtype": "torch.float16",
+     "files": null,
+     "id": "Qwen/Qwen2.5-0.5B-Instruct",
+     "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+     "tokenizerRevision": "7ae557604adf67be50417f59c2c2f167def9a775"
+    },
+    "noise": {
+     "chunkElements": 262144,
+     "engine": "numpy_pcg64_normal_f32_to_f16_v1",
+     "fingerprint": "b94575345e870b1606cb4d6a0c4aa49b054cfbfc50571d809653d01bce9184d3"
+    },
+    "perturbation": {
+     "antithetic": false,
+     "sigma": {
+      "generations": null,
+      "initial": 0.001,
+      "kind": "constant",
+      "minimum": 0.001
+     }
+    },
+    "schemaHash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+    "weightSpace": {
+     "kind": "full"
+    }
+   },
+   "sources": [
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32-n96/n96-B0x2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32-n96/n96-B0x2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32-n96/n96-B3x2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32-n96/n96-B3x2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32-n96/n96-B4x2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32-n96/n96-B4x2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32/n24-B0-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32/n24-B0-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32/n24-B0-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32/n24-B0-r4/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32/n24-B0-r5/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32/n24-B0x2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32/n24-B0x2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32/n24-B0x2-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32/n24-B0x2-r4/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32/n24-B0x2-r5/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32/n24-B3x2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32/n24-B3x2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32/n24-B3x2-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32/n24-B3x2-r4/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32/n24-B3x2-r5/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32/n24-B4x2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32/n24-B4x2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32/n24-B4x2-r3/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32/n24-B4x2-r4/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-benchmark-fp32/n24-B4x2-r5/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-failure-campaign-cut-mid-download/cut-link/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-failure-campaign-long-cut/cut-link/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-failure-campaign-long-cut/reference/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-failure-campaign-resume-download/cut-link/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-failure-campaign-resume-download/reference/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-failure-campaign/cut-link/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-failure-campaign/kill-coordinator/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-failure-campaign/kill-worker/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-failure-campaign/pause-worker/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-failure-campaign/reference/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-local-scaling-fp32/n24-B0-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-local-scaling-fp32/n24-B0-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-local-scaling-fp32/n24-B0x2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-local-scaling-fp32/n24-B0x2-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-local-scaling-fp32/n24-B0x3-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-local-scaling-fp32/n24-B0x3-r2/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-07-g6-smoke/n8-B4x2-r1/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-x3/rep1/cut-link/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-x3/rep1/kill-coordinator-mid-update/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-x3/rep1/kill-coordinator/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-x3/rep1/kill-worker/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-x3/rep1/pause-worker/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-x3/rep1/reference/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-x3/rep2/cut-link/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-x3/rep2/kill-coordinator-mid-update/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-x3/rep2/kill-coordinator/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-x3/rep2/kill-worker/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-x3/rep2/pause-worker/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-x3/rep2/reference/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-x3/rep3/cut-link/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-x3/rep3/kill-coordinator-mid-update/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-x3/rep3/kill-coordinator/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-x3/rep3/kill-worker/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-x3/rep3/pause-worker/coordinator/events.jsonl",
+    "runtime/artifacts/experiments/2026-10-08-failure-campaign-x3/rep3/reference/coordinator/events.jsonl",
+    "runtime/artifacts/regression/2026-10-10-m3-native-profile/reference-initial.json",
+    "runtime/artifacts/regression/2026-10-10-m3-native-profile/reference.json"
+   ],
+   "v1Hash": "efc1ff67c1bfa8c243ba93ce4a46dfcea74e5afc4b2daffa50498510d53dbc86",
+   "v3Hash": "ded34b4ab3f497fce9a5135aeae99c5ef93b8ba537204553b19b2e0db7f13a60",
+   "workload": "arith16"
+  }
+ ]
+}

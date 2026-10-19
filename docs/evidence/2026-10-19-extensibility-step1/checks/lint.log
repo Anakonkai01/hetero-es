@@ -1,0 +1,8 @@
+
+/home/pc5070ti/projects/heteroes/frontend/src/pages/ComparePage.tsx
+  79:3  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+  82:5  warning  React Hook useMemo has a missing dependency: 'ready'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+✖ 2 problems (0 errors, 2 warnings)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+
