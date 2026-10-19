@@ -1,0 +1,4 @@
+3.12.15 (main, Oct  9 2026, 15:21:55) [MSC v.1944 64 bit (AMD64)]
+{'torch': '2.13.0+cu132', 'transformers': '5.17.0', 'numpy': '2.5.3', 'safetensors': '0.8.0'}
+{"DriveLetter":"D","FileSystem":"NTFS","FileSystemLabel":"HDD_2TB","UniqueId":"\\\\?\\Volume{ac23c91d-438a-4344-8929-39fdc433c858}\\","SizeRemaining":908276793344}
+C:\Users\Thao Nguyen\AppData\Roaming\@heteroes\worker\runtimes\c64f3012b965\models\7ae557604adf67be50417f59c2c2f167def9a775

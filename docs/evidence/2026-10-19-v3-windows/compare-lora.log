@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/home/pc5070ti/projects/heteroes/runtime/scripts/v3_gpu_acceptance.py", line 227, in <module>
+    main()
+  File "/home/pc5070ti/projects/heteroes/runtime/scripts/v3_gpu_acceptance.py", line 220, in main
+    result = compare(json.loads(args.left.read_text()), json.loads(args.right.read_text()))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/projects/heteroes/runtime/scripts/v3_gpu_acceptance.py", line 33, in compare
+    raise ValueError(f"Cross-GPU mismatch: {key}")
+ValueError: Cross-GPU mismatch: recipeHash
