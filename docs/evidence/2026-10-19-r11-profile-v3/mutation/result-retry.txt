@@ -1,0 +1,6 @@
+control ok    | 10 passed, 1 warning in 0.04s
+killed       no-retry | 1 failed, 9 passed, 1 warning in 0.06s
+killed       unbounded | 1 failed, 9 passed, 1 warning in 0.06s
+killed       swallow-final | 1 failed, 9 passed, 1 warning in 0.05s
+
+3 of 3 mutants killed.

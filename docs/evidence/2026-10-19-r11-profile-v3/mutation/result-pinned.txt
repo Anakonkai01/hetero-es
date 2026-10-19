@@ -1,0 +1,6 @@
+control ok    | 9 passed, 1 warning in 0.04s
+killed       no-pinned-fallback | 1 failed, 8 passed, 1 warning in 0.05s
+killed       missing-hash-accepted | 1 failed, 8 passed, 1 warning in 0.05s
+killed       pinned-by-filename | 1 failed, 8 passed, 1 warning in 0.05s
+
+3 of 3 mutants killed.

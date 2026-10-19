@@ -1,0 +1,5 @@
+[
+ {"name": "no-pinned-fallback", "file": "scripts/build-worker-profile.py", "old": " or pinned.get(url)\n", "new": "\n"},
+ {"name": "missing-hash-accepted", "file": "scripts/build-worker-profile.py", "old": "        if not sha:\n", "new": "        if False:\n"},
+ {"name": "pinned-by-filename", "file": "scripts/build-worker-profile.py", "old": "pinned = {wheel[\"url\"]: wheel[\"sha256\"]", "new": "pinned = {wheel[\"url\"].split(\"?\")[0]: wheel[\"sha256\"]"}
+]

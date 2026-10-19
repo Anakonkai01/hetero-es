@@ -1,0 +1,5 @@
+[
+ {"name": "no-retry", "file": "scripts/build-worker-profile.py", "old": "            if attempt == SIZE_ATTEMPTS:\n", "new": "            if True:\n"},
+ {"name": "unbounded", "file": "scripts/build-worker-profile.py", "old": "            if attempt == SIZE_ATTEMPTS:\n                raise\n", "new": "            if attempt == SIZE_ATTEMPTS + 1:\n                raise\n"},
+ {"name": "swallow-final", "file": "scripts/build-worker-profile.py", "old": "                raise\n            time.sleep", "new": "                return 0\n            time.sleep"}
+]

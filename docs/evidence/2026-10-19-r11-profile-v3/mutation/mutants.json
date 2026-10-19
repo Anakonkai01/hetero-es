@@ -1,0 +1,12 @@
+[
+ {"name": "no-exists-check", "file": "scripts/build-worker-profile.py", "old": "    if args.out.exists():\n        raise FileExistsError(args.out)\n", "new": ""},
+ {"name": "no-adapter-hash", "file": "scripts/build-worker-profile.py", "old": "    if file_sha256(reference_dir / adapter) != reference[\"adapter\"][\"sha256\"]:", "new": "    if False:"},
+ {"name": "no-reference-profile-check", "file": "scripts/build-worker-profile.py", "old": "    if reference.get(\"formatVersion\") != 3 or reference.get(\"profile\") != profile:", "new": "    if False:"},
+ {"name": "no-selection-check", "file": "scripts/build-worker-profile.py", "old": "    if (args.profile == \"desktop-v3\") != (args.reference_dir is not None):", "new": "    if False:"},
+ {"name": "no-cleanup", "file": "scripts/build-worker-profile.py", "old": "        shutil.rmtree(partial)\n", "new": "        pass\n"},
+ {"name": "no-linux-wheel-check", "file": "scripts/build-worker-profile.py", "old": "    if platform == \"windows\" and (\"manylinux\" in filename", "new": "    if False and (\"manylinux\" in filename"},
+ {"name": "profile-name-fixed", "file": "scripts/build-worker-profile.py", "old": "        \"profile\": args.profile,", "new": "        \"profile\": \"desktop-v1\","},
+ {"name": "no-adapter-copy", "file": "scripts/build-worker-profile.py", "old": "    shutil.copyfile(reference_dir / adapter, out / adapter)\n", "new": ""},
+ {"name": "unsorted-lock", "file": "scripts/build-worker-profile.py", "old": "\"\\n\".join(sorted(lines))", "new": "\"\\n\".join(reversed(sorted(lines)))"},
+ {"name": "mtime-kept", "file": "scripts/build-worker-profile.py", "old": "            info.mtime = 0\n", "new": ""}
+]
