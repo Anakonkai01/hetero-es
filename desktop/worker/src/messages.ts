@@ -18,7 +18,10 @@ export const explanations: Record<string, string> = {
   LAB_HTTP_409: 'The device or assignment is not ready. Refresh and try again.',
   SELF_TEST_REQUIRED: 'Run the GPU compatibility check before pairing.',
   SECURE_STORAGE_REQUIRED: 'Secure credential storage is unavailable. Unlock your system keyring and restart.',
-  INSUFFICIENT_DISK_SPACE: 'Free some disk space and retry. Partial downloads are kept.',
+  INSUFFICIENT_DISK_SPACE:
+    'Free some disk space, or choose another drive before installing, and retry. Partial downloads are kept.',
+  RUNTIME_ALREADY_INSTALLED: 'The runtime is already installed in its data folder; it cannot move now.',
+  INVALID_STORAGE_DIRECTORY: 'Choose an existing folder or drive.',
   CUDA_UNAVAILABLE: 'CUDA_UNAVAILABLE',
   WINDOWS_RUNTIME_MISSING: 'WINDOWS_RUNTIME_MISSING',
   COMPATIBILITY_FAILED: 'The numerical check failed. Keep contribution OFF and export diagnostics.',

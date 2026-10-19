@@ -325,6 +325,21 @@ function App() {
                   <p className="hint">
                     {t('Setup checks disk space and SHA-256. Interrupted downloads resume when you retry.')}
                   </p>
+                  {state.setup.dataFolder && (
+                    <p className="hint">
+                      {t('Data folder')}: <code>{state.setup.dataFolder}</code>
+                    </p>
+                  )}
+                  {!state.setup.installed && state.setup.profileAvailable !== false && (
+                    <button
+                      className="secondary"
+                      type="button"
+                      disabled={!!busy || state.setup.running}
+                      onClick={() => void act('chooseDataFolder')}
+                    >
+                      {t('Use another drive or folder')}
+                    </button>
+                  )}
                   {state.setup.profileAvailable === false ? (
                     <Alert tone="warning">
                       {t('This development build has no runtime profile. Use the packaged installer.')}

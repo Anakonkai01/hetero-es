@@ -64,3 +64,50 @@ test('the READY record names the installed profile, not a fixed one', () => {
   }
   assert.throws(() => readyRecord({ platform: 'linux' }, at), /PROFILE_INVALID/);
 });
+test('a chosen data folder holds runtime, model and downloads in its own subfolder', async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'worker-data-'));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const appData = path.join(root, 'appdata');
+  const drive = path.join(root, 'D');
+  await fs.mkdir(appData);
+  await fs.mkdir(drive);
+  await fs.writeFile(path.join(drive, 'keep.txt'), 'user file');
+  const setup = new Setup(appData, path.join(root, 'resources'));
+  assert.equal(setup.status().dataFolder, appData);
+  const chosen = await setup.chooseDataFolder(drive);
+  const data = path.join(drive, 'HeteroES-Worker-data');
+  assert.equal(chosen.dataFolder, data);
+  const storage = JSON.parse(await fs.readFile(path.join(appData, 'storage.json'), 'utf8'));
+  assert.deepEqual(storage, {
+    runtimes: path.join(data, 'runtimes'),
+    models: path.join(data, 'models'),
+    downloads: path.join(data, 'downloads'),
+    artifacts: path.join(data, 'artifacts'),
+  });
+  // the uninstaller removes exactly this folder, read from the marker
+  assert.equal(await fs.readFile(path.join(appData, 'data-folder.txt'), 'utf8'), data);
+  assert.equal(await fs.readFile(path.join(drive, 'keep.txt'), 'utf8'), 'user file');
+  const reopened = new Setup(appData, path.join(root, 'resources'));
+  assert.equal(reopened.status().dataFolder, data);
+  // paths() needs a profile; with one, the runtime lives under the chosen folder
+  await fs.mkdir(path.join(root, 'resources'));
+  await fs.writeFile(
+    path.join(root, 'resources', 'profile.json'),
+    JSON.stringify({ platforms: { linux: {}, windows: {} }, modelRevision: 'r', modelFiles: [] }),
+  );
+  assert.ok(reopened.paths().root.startsWith(path.join(data, 'runtimes') + path.sep));
+  assert.ok(reopened.paths().model.startsWith(path.join(data, 'models') + path.sep));
+  // an existing folder named relative to the working directory is still refused
+  await assert.rejects(setup.chooseDataFolder(path.relative(process.cwd(), drive)), /INVALID_STORAGE_DIRECTORY/);
+  await assert.rejects(setup.chooseDataFolder(path.join(root, 'missing')), /INVALID_STORAGE_DIRECTORY/);
+  setup.running = true;
+  await assert.rejects(setup.chooseDataFolder(drive), /SETUP_IN_PROGRESS/);
+});
+test('the data folder cannot move once a runtime is installed', async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'worker-data-'));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const setup = new Setup(root, path.join(root, 'resources'));
+  setup.status = () => ({ installed: true });
+  await assert.rejects(setup.chooseDataFolder(root), /RUNTIME_ALREADY_INSTALLED/);
+  await assert.rejects(fs.access(path.join(root, 'storage.json')));
+});

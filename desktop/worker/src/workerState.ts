@@ -3,6 +3,7 @@ type SetupState = {
   installed: boolean;
   running: boolean;
   profileAvailable?: boolean;
+  dataFolder?: string;
   progress: {
     stage: string;
     file?: string;

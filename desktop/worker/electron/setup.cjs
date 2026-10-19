@@ -5,6 +5,7 @@ const crypto = require('node:crypto');
 const { execFileSync } = require('node:child_process');
 const { verifiedDownload, digest } = require('@heteroes/desktop-shared/download.cjs');
 const { run, extract } = require('@heteroes/desktop-shared/runtime.cjs');
+const DATA_FOLDER_NAME = 'HeteroES-Worker-data';
 class Setup {
   constructor(root, resources, onProgress = () => {}) {
     this.root = root;
@@ -14,7 +15,11 @@ class Setup {
     this.running = false;
     const storageFile = path.join(root, 'storage.json');
     this.storage = fs.existsSync(storageFile) ? JSON.parse(fs.readFileSync(storageFile, 'utf8')) : {};
-    if (Object.keys(this.storage).some((key) => !['downloads', 'models', 'artifacts', 'volumeUUID'].includes(key)))
+    if (
+      Object.keys(this.storage).some(
+        (key) => !['downloads', 'models', 'artifacts', 'runtimes', 'volumeUUID'].includes(key),
+      )
+    )
       throw Error('INVALID_STORAGE_DIRECTORY');
     if (
       this.storage.volumeUUID !== undefined &&
@@ -23,9 +28,12 @@ class Setup {
         !/^[a-fA-F0-9-]+$/.test(this.storage.volumeUUID))
     )
       throw Error('INVALID_STORAGE_VOLUME');
-    for (const value of [this.storage.downloads, this.storage.models, this.storage.artifacts].filter(
-      (value) => value !== undefined,
-    )) {
+    for (const value of [
+      this.storage.downloads,
+      this.storage.models,
+      this.storage.artifacts,
+      this.storage.runtimes,
+    ].filter((value) => value !== undefined)) {
       if (
         typeof value !== 'string' ||
         !path.isAbsolute(value) ||
@@ -61,7 +69,7 @@ class Setup {
   paths() {
     const profile = this.profile();
     const hash = crypto.createHash('sha256').update(JSON.stringify(profile)).digest('hex').slice(0, 12);
-    const root = path.join(this.root, 'runtimes', hash);
+    const root = path.join(this.storage.runtimes ?? path.join(this.root, 'runtimes'), hash);
     return {
       root,
       python: path.join(root, 'python', process.platform === 'win32' ? 'python.exe' : 'bin/python3.12'),
@@ -71,6 +79,40 @@ class Setup {
       scripts: path.join(root, 'scripts'),
       complete: path.join(root, 'READY.json'),
     };
+  }
+  /** The folder holding runtime, model and downloads: the app data folder, or the one chosen on another drive. */
+  dataFolder() {
+    return this.storage.runtimes ? path.dirname(this.storage.runtimes) : this.root;
+  }
+  /**
+   * Put runtime, model, downloads and artifacts in DATA_FOLDER_NAME inside `parent` (for example D:\), before
+   * anything is installed. Only that subfolder is ever written or, on uninstall, removed; `parent` is left alone.
+   */
+  async chooseDataFolder(parent) {
+    if (this.running) throw Error('SETUP_IN_PROGRESS');
+    if (
+      typeof parent !== 'string' ||
+      !path.isAbsolute(parent) ||
+      !fs.existsSync(parent) ||
+      !fs.statSync(parent).isDirectory()
+    )
+      throw Error('INVALID_STORAGE_DIRECTORY');
+    if (this.status().installed) throw Error('RUNTIME_ALREADY_INSTALLED');
+    const data = path.join(parent, DATA_FOLDER_NAME);
+    await fsp.mkdir(data, { recursive: true, mode: 0o700 });
+    const storage = {
+      runtimes: path.join(data, 'runtimes'),
+      models: path.join(data, 'models'),
+      downloads: path.join(data, 'downloads'),
+      artifacts: path.join(data, 'artifacts'),
+    };
+    await fsp.mkdir(this.root, { recursive: true, mode: 0o700 });
+    const file = path.join(this.root, 'storage.json');
+    await fsp.writeFile(file + '.tmp', JSON.stringify(storage, null, 2), { mode: 0o600 });
+    await fsp.rename(file + '.tmp', file);
+    await fsp.writeFile(path.join(this.root, 'data-folder.txt'), data, { mode: 0o600 });
+    this.storage = storage;
+    return { dataFolder: data };
   }
   status() {
     try {
@@ -87,9 +129,16 @@ class Setup {
           }),
         running: this.running,
         progress: this.progress,
+        dataFolder: this.dataFolder(),
       };
     } catch {
-      return { installed: false, running: this.running, progress: this.progress, profileAvailable: false };
+      return {
+        installed: false,
+        running: this.running,
+        progress: this.progress,
+        profileAvailable: false,
+        dataFolder: this.dataFolder(),
+      };
     }
   }
   async install() {

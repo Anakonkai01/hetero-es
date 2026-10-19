@@ -144,6 +144,12 @@ app
       }
       if (action === 'logout') return service.logout();
       if (action === 'forgetDevice') return service.forgetDevice();
+      if (action === 'chooseDataFolder') {
+        // runtime, model and downloads on another drive (a small C: drive): picked here, never typed by the page
+        const picked = await dialog.showOpenDialog(window, { properties: ['openDirectory', 'createDirectory'] });
+        if (picked.canceled || !picked.filePaths[0]) return { chosen: false };
+        return { chosen: true, ...(await service.chooseDataFolder(picked.filePaths[0])) };
+      }
       if (action === 'external') {
         const url =
           args.target === 'lab' ? (service.settings.uiUrl ?? service.settings.serverUrl) : external[args.target];
@@ -196,6 +202,7 @@ app
         'contribution',
         'logout',
         'forgetDevice',
+        'chooseDataFolder',
         'quit',
         'external',
         'diagnostics',

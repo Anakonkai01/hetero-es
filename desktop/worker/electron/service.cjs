@@ -308,6 +308,11 @@ class Service {
   // The way out of a pairing that cannot be used any more (the lab moved, its address needs Tailscale that is off,
   // it is a different lab). Local only: it never contacts the lab. The device row on the lab stays; an administrator
   // revokes or removes it there.
+  async chooseDataFolder(parent) {
+    const chosen = await this.setup.chooseDataFolder(parent);
+    this.log.info('data folder chosen', {});
+    return chosen;
+  }
   async forgetDevice() {
     if (this.setup.running) throw Error('SETUP_IN_PROGRESS');
     this.abortPending();

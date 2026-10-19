@@ -567,8 +567,13 @@ export const translations: Record<string, string> = {
   'Run the GPU compatibility check before pairing.': 'Chạy kiểm tra tương thích GPU trước khi ghép máy.',
   'Secure credential storage is unavailable. Unlock your system keyring and restart.':
     'Không dùng được kho thông tin đăng nhập an toàn. Mở khóa keyring của hệ điều hành rồi khởi động lại ứng dụng.',
-  'Free some disk space and retry. Partial downloads are kept.':
-    'Giải phóng dung lượng rồi thử lại. Dữ liệu đang tải dở được giữ lại.',
+  'Free some disk space, or choose another drive before installing, and retry. Partial downloads are kept.':
+    'Giải phóng dung lượng, hoặc chọn ổ khác trước khi cài, rồi thử lại. Dữ liệu đang tải dở được giữ lại.',
+  'The runtime is already installed in its data folder; it cannot move now.':
+    'Runtime đã được cài trong thư mục dữ liệu của nó; không thể chuyển chỗ lúc này.',
+  'Choose an existing folder or drive.': 'Hãy chọn một thư mục hoặc ổ đĩa đã có.',
+  'Data folder': 'Thư mục dữ liệu',
+  'Use another drive or folder': 'Dùng ổ đĩa hoặc thư mục khác',
   'The numerical check failed. Keep contribution OFF and export diagnostics.':
     'Kiểm tra số học thất bại. Giữ đóng góp OFF và xuất thông tin chẩn đoán.',
   'Runtime setup or GPU check failed. Export diagnostics and retry.':

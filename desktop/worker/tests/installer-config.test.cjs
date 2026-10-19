@@ -30,3 +30,12 @@ test('the folder the script removes is the folder the app really uses', () => {
   assert.equal(worker.name, '@heteroes/worker');
   assert.equal(worker.name.replace(/\//g, '\\'), '@heteroes\\worker');
 });
+
+test("the uninstaller removes a chosen data folder only when it is the app's own subfolder", () => {
+  const script = fs.readFileSync(path.join(__dirname, '../build/installer.nsh'), 'utf8');
+  assert.match(script, /FileOpen \$0 "\$APPDATA\\@heteroes\\worker\\data-folder\.txt" r/);
+  assert.match(script, /StrCmp \$2 "\\HeteroES-Worker-data"/);
+  assert.match(script, /RMDir \/r "\$1"/);
+  // the marker is read before the app data folder (which holds it) is removed
+  assert.ok(script.indexOf('data-folder.txt') < script.indexOf('RMDir /r "$APPDATA\\@heteroes\\worker"'));
+});
