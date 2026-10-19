@@ -139,3 +139,32 @@ def test_unsafe_requests_leave_nothing_behind(builder, inputs, problem):
     )
     if problem == "exists":
         assert not any(out.iterdir())
+
+
+def test_a_missing_report_hash_comes_only_from_the_same_url_in_a_reviewed_profile(builder, inputs):
+    reports = Path(inputs["common"][3])
+    for platform in ("linux", "windows"):
+        body = json.loads((reports / f"{platform}.json").read_text())
+        body["install"][1]["download_info"]["archive_info"] = {}  # the PyTorch index gave no hash
+        (reports / f"{platform}.json").write_text(json.dumps(body))
+    selection = ["--profile", "desktop-v3", "--reference-dir", str(inputs["reference"])]
+    with pytest.raises(ValueError, match="no hash"):
+        builder.main([*inputs["common"], *selection, "--out", str(inputs["tmp"] / "unpinned")])
+    torch = {p: json.loads((reports / f"{p}.json").read_text())["install"][1] for p in ("linux", "windows")}
+    reviewed = {
+        "platforms": {
+            p: {"wheels": [{"url": row["download_info"]["url"], "sha256": "b" * 64}]} for p, row in torch.items()
+        }
+    }
+    pinned = inputs["tmp"] / "reviewed.json"
+    pinned.write_text(json.dumps(reviewed))
+    out = inputs["tmp"] / "pinned"
+    builder.main([*inputs["common"], *selection, "--pinned-profile", str(pinned), "--out", str(out)])
+    assert f"torch==2.13.0 --hash=sha256:{'b' * 64}" in (out / "requirements-linux.txt").read_text()
+    reviewed["platforms"]["windows"]["wheels"][0]["url"] += "?mirror"  # another URL is not the reviewed object
+    pinned.write_text(json.dumps(reviewed))
+    with pytest.raises(ValueError, match="no hash"):
+        builder.main(
+            [*inputs["common"], *selection, "--pinned-profile", str(pinned), "--out", str(inputs["tmp"] / "x")]
+        )
+    assert not (inputs["tmp"] / "x").exists() and not (inputs["tmp"] / "unpinned").exists()

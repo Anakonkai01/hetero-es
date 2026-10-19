@@ -81,7 +81,8 @@ def write_runtime(track_a, out):
                 archive.addfile(info, stream)
 
 
-def platform_entry(platform, target, release, report, reports, out):
+def platform_entry(platform, target, release, report, reports, out, pinned):
+    """`pinned` maps exact wheel URLs of a reviewed profile to their SHA-256, for report rows without a hash."""
     name = f"cpython-3.12.15+20261009-{target}-install_only_stripped.tar.gz"
     asset = next(a for a in release["assets"] if a["name"] == name)
     wheels = []
@@ -89,7 +90,9 @@ def platform_entry(platform, target, release, report, reports, out):
     for row in report["install"]:
         download = row["download_info"]
         url = download["url"]
-        sha = download["archive_info"]["hashes"]["sha256"]
+        sha = download.get("archive_info", {}).get("hashes", {}).get("sha256") or pinned.get(url)
+        if not sha:
+            raise ValueError("The report has no hash for " + url + " and no reviewed profile pins that URL")
         filename = urllib.parse.unquote(urllib.parse.urlparse(url).path.rsplit("/", 1)[1])
         if not filename.endswith(".whl") or urllib.parse.urlparse(url).scheme != "https":
             raise ValueError("Only HTTPS wheels accepted")
@@ -146,6 +149,11 @@ def main(argv=None):
     parser.add_argument("--reference-dir", type=pathlib.Path, help="desktop-v3 only")
     parser.add_argument("--out", type=pathlib.Path, required=True, help="a new directory")
     parser.add_argument(
+        "--pinned-profile",
+        type=pathlib.Path,
+        help="a reviewed profile.json whose hash is used for a report row without one, only for the identical URL",
+    )
+    parser.add_argument(
         "--model-snapshot",
         type=pathlib.Path,
         default=pathlib.Path.home()
@@ -162,10 +170,12 @@ def main(argv=None):
         write_reference(args.profile, args.track_a, args.reference_dir, partial)
         write_runtime(args.track_a, partial)
         release = fetch_release()
+        reviewed = json.loads(args.pinned_profile.read_text())["platforms"] if args.pinned_profile else {}
         platforms = {}
         for platform, target in [("windows", "x86_64-pc-windows-msvc"), ("linux", "x86_64-unknown-linux-gnu")]:
             report = json.loads((args.reports / f"{platform}.json").read_text())
-            platforms[platform] = platform_entry(platform, target, release, report, args.reports, partial)
+            pinned = {wheel["url"]: wheel["sha256"] for wheel in reviewed.get(platform, {}).get("wheels", [])}
+            platforms[platform] = platform_entry(platform, target, release, report, args.reports, partial, pinned)
         model_files = [
             {
                 "name": name,
