@@ -11,6 +11,7 @@ export interface Generation {
   candidateCount: number;
   committedCandidateCount: number;
 
+  validationReward?: number;
   rewardMean?: number;
   rewardBest?: number;
 

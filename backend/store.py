@@ -300,7 +300,7 @@ class Store:
             coordinatorDeviceId=active["coordinatorDeviceId"],
             backupPolicy=active.get("backupPolicy", {"interval": 1, "retain": 3}),
         )
-        if active.get("recipeVersion") == 2:
+        if active.get("recipeVersion") in (2, 3):
             config.update(
                 {
                     key: active[key]
@@ -318,6 +318,10 @@ class Store:
                         "validationInterval",
                     )
                 }
+            )
+        if active.get("recipeVersion") == 3:
+            config.update(
+                {key: active[key] for key in ("weightSpace", "antithetic", "scorer", "coefficientRule", "systemPrompt")}
             )
         try:
             self.runtime.submit(config)
@@ -368,6 +372,10 @@ class Store:
                 best = snapshot["studyMetrics"].get("best") or {}
                 if "validationAccuracy" in best:
                     body["validationScore"] = best["validationAccuracy"]
+                if "validationReward" in best:
+                    body["validationScore"] = best["validationReward"]
+                if "testReward" in snapshot["studyMetrics"]:
+                    body["testScore"] = snapshot["studyMetrics"]["testReward"]
                 if "testAccuracy" in snapshot["studyMetrics"]:
                     body["testScore"] = snapshot["studyMetrics"]["testAccuracy"]
             latest = snapshot.get("latestGeneration") or (generations[-1] if generations else None)

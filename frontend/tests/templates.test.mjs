@@ -91,3 +91,23 @@ test('the built-in templates stay inside what the backend accepts', () => {
   }
   assert.equal(new Set(BUILT_IN.map((t) => t.templateId)).size, BUILT_IN.length);
 });
+
+test('a v3 template retains declarative settings without retaining artifact ids', () => {
+  const options = {
+    weightSpace: { kind: 'lora', rank: 4, alpha: 8, targetModules: ['q_proj'] },
+    antithetic: true,
+    coefficientRule: 'zscore@1',
+    systemPrompt: null,
+    scorer: {
+      kind: 'declarative',
+      name: 'choice-letter',
+      version: 1,
+      codeSha256: null,
+      config: { answerField: 'label' },
+    },
+  };
+  const saved = templateConfigFromExperiment({ ...run, recipeVersion: 3, ...options });
+  for (const [key, value] of Object.entries(options)) assert.deepEqual(saved[key], value);
+  assert.equal(saved.modelArtifactId, undefined);
+  assert.equal(saved.datasetIds, undefined);
+});

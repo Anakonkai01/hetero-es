@@ -22,6 +22,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 import uvicorn  # noqa: E402
 from backend.app import create_app  # noqa: E402
 from backend.devices import AgentRuntime  # noqa: E402
+from backend.local_storage import LocalBackend  # noqa: E402
 
 USERS = {"admin": "test-admin-pass", "participant": "test-user-pass"}
 
@@ -178,7 +179,7 @@ def main():
         app = create_app(
             state / "product.sqlite",
             USERS,
-            AgentRuntime(),
+            AgentRuntime(LocalBackend(state / "objects", state / "storage-key", f"http://127.0.0.1:{args.port}")),
             dispatch=False,
             web_directory=args.web.resolve(),
             downloads_directory=downloads,

@@ -70,3 +70,8 @@ test('a recorded error text is carried as a parameter, not baked into the transl
   assert.ok(!d.template.includes('ValueError'));
   assert.equal(d.params.error, 'ValueError: bad engine');
 });
+
+test('validation rewards have a readable timeline event', () => {
+  const event = describeEvent('validation_completed', { generation: 2, meanReward: 0.75 });
+  assert.equal(fillTemplate(event.template, event.params), 'Validation after generation 3: reward 0.7500');
+});

@@ -5,6 +5,11 @@ from pathlib import Path
 SHARED_MODULES = (
     "__init__.py",
     "catalog.py",
+    "canonical.py",
+    "v3/__init__.py",
+    "v3/data.py",
+    "v3/options.py",
+    "v3/scoring.py",
     "product/__init__.py",
     "product/energy.py",
     "product/host_detail.py",

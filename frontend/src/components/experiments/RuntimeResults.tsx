@@ -68,12 +68,34 @@ export function RuntimeResults({ experiment: e }: { experiment: Experiment }) {
           <RewardChart generations={gs} />
         </div>
         <p className="info-caption">
-          {e.recipeVersion === 2
-            ? `${t('Best validation accuracy')}: ${e.validationScore ?? '—'} · ${t('Test accuracy')}: ${e.studyMetrics?.testLocked ? t('Locked') : (e.testScore ?? '—')} · ${t('Export reload')}: ${e.studyMetrics?.independentReloadPassed ? t('Verified') : t('Pending')}`
-            : t(
-                'Validation and test scores are unavailable: this run evaluates candidate rewards on the selected built-in workload.',
-              )}
+          {e.recipeVersion === 3
+            ? `${t('Best validation reward')}: ${e.validationScore ?? '—'} · ${t('Test reward')}: ${e.studyMetrics?.testLocked !== false ? t('Locked') : (e.testScore ?? '—')} · ${t('Weight space')}: ${e.weightSpace?.kind}`
+            : e.recipeVersion === 2
+              ? `${t('Best validation accuracy')}: ${e.validationScore ?? '—'} · ${t('Test accuracy')}: ${e.studyMetrics?.testLocked !== false ? t('Locked') : (e.testScore ?? '—')} · ${t('Export reload')}: ${e.studyMetrics?.independentReloadPassed ? t('Verified') : t('Pending')}`
+              : t(
+                  'Validation and test scores are unavailable: this run evaluates candidate rewards on the selected built-in workload.',
+                )}
         </p>
+        {e.recipeVersion === 3 && e.studyMetrics?.validation?.length ? (
+          <div className="scroll">
+            <table className="inspector-table">
+              <thead>
+                <tr>
+                  <th>{t('Generation')}</th>
+                  <th>{t('Validation reward')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {e.studyMetrics.validation.map((row) => (
+                  <tr key={row.generation}>
+                    <td>{row.generation < 0 ? t('Initial checkpoint') : row.generation}</td>
+                    <td>{row.meanReward.toFixed(4)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : null}
         <section className="experiment-inspector">
           <div className="generation-picker">
             <div>

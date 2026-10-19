@@ -5,6 +5,9 @@ import { Link } from 'react-router';
 import { apiGet } from '../../api/client';
 import { useScopeKey } from '../../app/session';
 import { useWorkers } from '../../hooks/useWorkers';
+import { V3Fields } from './V3Fields';
+import { DEFAULT_V3 } from '../../lib/v3Settings';
+import type { V3Settings } from '../../types/experiment';
 import type { CreateExperimentRequest, Experiment } from '../../types/experiment';
 import type { StudyDataset, StudyModel } from './StudyAssets';
 interface Capabilities {
@@ -46,6 +49,14 @@ export function RuntimeConfiguration({
   const [interval, setInterval] = useState(initial?.backupPolicy?.interval ?? 1);
   const [retain, setRetain] = useState(initial?.backupPolicy?.retain ?? 3);
   const [error, setError] = useState('');
+  const [v3, setV3] = useState<V3Settings>({
+    weightSpace: initial?.weightSpace ?? DEFAULT_V3.weightSpace,
+    antithetic: initial?.antithetic ?? false,
+    scorer: initial?.scorer ?? DEFAULT_V3.scorer,
+    coefficientRule: initial?.coefficientRule ?? 'zscore@1',
+    systemPrompt: initial?.systemPrompt ?? null,
+  });
+  const [validationInterval, setValidationInterval] = useState(initial?.validationInterval ?? 1);
   const [version, setVersion] = useState(initial?.recipeVersion ?? 1);
   const [modelId, setModelId] = useState(initial?.modelArtifactId ?? '');
   const [datasetId, setDatasetId] = useState(initial?.datasetIds?.[0] ?? '');
@@ -72,6 +83,10 @@ export function RuntimeConfiguration({
       onSubmit={(event) => {
         event.preventDefault();
         setError('');
+        if (version === 3 && v3.antithetic && candidates % 2) {
+          setError(t('Antithetic sampling needs an even number of candidates.'));
+          return;
+        }
         if (step === 0) {
           if (name.trim().length < 3) {
             setError(t('Enter an experiment name.'));
@@ -88,25 +103,26 @@ export function RuntimeConfiguration({
           setStep(2);
           return;
         }
-        if (version === 2 && (!customModel?.manifest || !datasetId)) {
+        if (version >= 2 && (!customModel?.manifest || !datasetId)) {
           setError(t('Select a pinned model and frozen dataset.'));
           return;
         }
         void onSave({
           name,
-          modelName: version === 2 ? customModel!.reference : cap.data.modelId,
-          modelArtifactId: version === 2 ? modelId : 'qwen-pinned',
-          task: version === 2 ? 'text_math_v2' : task,
-          ...(version === 2
+          modelName: version >= 2 ? customModel!.reference : cap.data.modelId,
+          modelArtifactId: version >= 2 ? modelId : 'qwen-pinned',
+          task: version === 3 ? 'text_v3' : version === 2 ? 'text_math_v2' : task,
+          ...(version >= 2
             ? {
-                recipeVersion: 2,
+                recipeVersion: version,
                 datasetIds: [datasetId],
                 batchSize,
                 batchSeed,
                 sigmaSchedule: schedule,
                 sigmaMinimum: minimum,
                 maxNewTokens: maxTokens,
-                validationInterval: 1,
+                validationInterval,
+                ...(version === 3 ? v3 : {}),
               }
             : {}),
           maxGenerations: generations,
@@ -157,6 +173,7 @@ export function RuntimeConfiguration({
               >
                 <option value={1}>{t('Built-in workload · Recipe v1')}</option>
                 <option value={2}>{t('Math dataset · Recipe v2')}</option>
+                <option value={3}>{t('Custom experiment · Recipe v3')}</option>
               </select>
             </label>
             {version === 1 && (
@@ -201,7 +218,7 @@ export function RuntimeConfiguration({
               />
             </label>
           </div>
-          {version === 2 && (
+          {version >= 2 && (
             <div className="setup-grid">
               <label className="fg">
                 {t('Pinned model')}
@@ -220,11 +237,13 @@ export function RuntimeConfiguration({
                 {t('Frozen dataset')}
                 <select className="sel" required value={datasetId} onChange={(e) => setDatasetId(e.target.value)}>
                   <option value="">{t('Select dataset')}</option>
-                  {dataList.data?.map((d) => (
-                    <option key={d.datasetId} value={d.datasetId}>
-                      {d.name} · {d.counts.train}/{d.counts.validation}/{d.counts.test}
-                    </option>
-                  ))}
+                  {dataList.data
+                    ?.filter((d) => (d.recipeVersion ?? 2) === version)
+                    .map((d) => (
+                      <option key={d.datasetId} value={d.datasetId}>
+                        {d.name} · {d.counts.train}/{d.counts.validation}/{d.counts.test}
+                      </option>
+                    ))}
                 </select>
               </label>
               <label className="fg">
@@ -287,8 +306,23 @@ export function RuntimeConfiguration({
               </Link>
             </div>
           )}
+          {version === 3 && <V3Fields value={v3} onChange={setV3} />}
+          {version >= 2 && (
+            <label className="fg">
+              {t('Validation interval')}
+              <input
+                className="inp"
+                type="number"
+                required
+                min={1}
+                max={1000}
+                value={validationInterval}
+                onChange={(e) => setValidationInterval(Number(e.target.value))}
+              />
+            </label>
+          )}
           <p className="hint">
-            {cap.data?.modelId} · {t('Pinned runtime model')}
+            {version >= 2 ? customModel?.reference : cap.data?.modelId} · {t('Pinned runtime model')}
           </p>
           <details className="advanced-panel">
             <summary>{t('Advanced settings')}</summary>
@@ -402,7 +436,7 @@ export function RuntimeConfiguration({
             </div>
             <div>
               <dt>{t('Workload')}</dt>
-              <dd>{task}</dd>
+              <dd>{version === 3 ? t('Custom experiment · Recipe v3') : version === 2 ? 'text_math_v2' : task}</dd>
             </div>
             <div>
               <dt>{t('Generations')}</dt>
@@ -423,7 +457,7 @@ export function RuntimeConfiguration({
             </div>
             <div>
               <dt>{t('Model')}</dt>
-              <dd>{cap.data?.modelId}</dd>
+              <dd>{version >= 2 ? customModel?.reference : cap.data?.modelId}</dd>
             </div>
           </dl>
           <details className="advanced-panel">

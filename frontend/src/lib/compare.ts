@@ -25,6 +25,7 @@ export function runDurationSeconds(experiment: Pick<Experiment, 'startedAt' | 'c
 }
 
 export function compareRuns(runs: RunInput[]): {
+  mixedWeightSpaces: boolean;
   series: Series[];
   rows: Row[];
   maxGeneration: number;
@@ -53,9 +54,11 @@ export function compareRuns(runs: RunInput[]): {
       candidatesPerGeneration: experiment.candidatesPerGeneration ?? null,
     };
   });
+  const mixedWeightSpaces = new Set(runs.map(({ experiment }) => experiment.weightSpace?.kind ?? 'full')).size > 1;
   const all = series.flatMap((s) => s.points);
   return {
-    series,
+    mixedWeightSpaces,
+    series: mixedWeightSpaces ? [] : series,
     rows,
     maxGeneration: all.length ? Math.max(...all.map((p) => p.generation)) : 0,
     maxReward: all.length ? Math.max(...all.map((p) => p.best)) : 0,
@@ -74,6 +77,11 @@ const SETTINGS: (keyof Experiment)[] = [
   'decodeEngine',
   'workerIds',
   'recipeVersion',
+  'weightSpace',
+  'antithetic',
+  'scorer',
+  'coefficientRule',
+  'systemPrompt',
   'batchSize',
   'sigmaSchedule',
   'sigmaMinimum',
@@ -81,7 +89,13 @@ const SETTINGS: (keyof Experiment)[] = [
 ];
 
 const show = (value: unknown): string =>
-  Array.isArray(value) ? value.join(', ') : value === undefined || value === null ? '—' : String(value);
+  Array.isArray(value)
+    ? value.join(', ')
+    : value === undefined || value === null
+      ? '—'
+      : typeof value === 'object'
+        ? JSON.stringify(value)
+        : String(value);
 
 /** The settings that are not the same in every run, in a stable (alphabetical) order. */
 export function configDifferences(experiments: Experiment[]): Difference[] {

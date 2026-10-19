@@ -1,0 +1,288 @@
+"""v3 assets, declarative configuration and qualification fences use no torch or NumPy."""
+
+import json
+
+import pytest
+
+from test_study import study as study_fixture, manifest
+from test_devices import pair, enable
+
+
+@pytest.fixture
+def v3_study(tmp_path):
+    yield from study_fixture.__wrapped__(tmp_path)
+
+
+def assets(study):
+    c, admin, storage = study
+    model_manifest, _ = manifest()
+    model_manifest["modelId"] = "research/custom-causal-lm"
+    response = c.post(
+        "/api/v1/models/register",
+        headers=admin,
+        json={
+            "recipeVersion": 3,
+            "name": "Custom model",
+            "manifest": model_manifest,
+        },
+    )
+    assert response.status_code == 201, response.text
+    model = response.json()
+    imported = c.post(
+        "/api/v1/datasets/import",
+        headers=admin,
+        json={
+            "recipeVersion": 3,
+            "name": "Arbitrary columns",
+            "mapping": {"prompt": "question"},
+            "files": {
+                "all": {
+                    "format": "json",
+                    "content": json.dumps(
+                        [{"question": f"Question {i}", "label": "A", "level": i, "optional": None} for i in range(20)]
+                    ),
+                }
+            },
+        },
+    )
+    assert imported.status_code == 201, imported.text
+    return model, imported.json()
+
+
+def qualify_v3(c, device_auth, profile, model):
+    profile.update(recipeVersions=[3], qualifiedModelHashes=[model["manifestHash"]])
+    profile["compatibility"]["recipeV3"] = {
+        "passed": True,
+        "repeatIdentical": True,
+        "modelManifestHash": model["manifestHash"],
+        "recipeHash": "a" * 64,
+        "parentSha256": "b" * 64,
+        "restoredSha256": "b" * 64,
+        "perturbedSha256": "c" * 64,
+        "outputsHash": "d" * 64,
+    }
+    result = c.patch(
+        "/api/v1/device/qualification", headers=device_auth, json={"bootId": "boot-1", "selfTest": profile}
+    )
+    assert result.status_code == 200, result.text
+
+
+def configuration(d, model, data):
+    return {
+        "name": "V3 custom run",
+        "recipeVersion": 3,
+        "modelName": model["reference"],
+        "modelArtifactId": model["id"],
+        "workerIds": [d["workerId"]],
+        "coordinatorDeviceId": d["deviceId"],
+        "datasetIds": [data["datasetId"]],
+        "task": "text_v3",
+        "batchSize": 4,
+        "antithetic": True,
+        "coefficientRule": "zscore@1",
+        "systemPrompt": None,
+        "weightSpace": {"kind": "subset", "include": [r"layers\.1\."]},
+        "scorer": {
+            "kind": "declarative",
+            "name": "choice-letter",
+            "version": 1,
+            "codeSha256": None,
+            "config": {"answerField": "label"},
+        },
+    }
+
+
+def test_v3_import_keeps_columns_and_rejects_leakage(v3_study):
+    from heteroes.v3.data import verify
+
+    c, admin, storage = v3_study
+    model, imported = assets(v3_study)
+    raw = json.loads(b"".join(storage.get("objects/" + imported["objectSha256"])))
+    verify(raw)
+    assert imported["recipeVersion"] == 3
+    assert set(raw["splits"]["train"][0]) == {"prompt", "question", "label", "level", "optional"}
+    response = c.post(
+        "/api/v1/datasets/import",
+        headers=admin,
+        json={
+            "recipeVersion": 3,
+            "name": "bad",
+            "files": {"all": {"format": "json", "content": json.dumps([{"prompt": "duplicate"}] * 20)}},
+        },
+    )
+    assert response.status_code == 422
+
+
+def test_v3_config_and_worker_command_preserve_the_frozen_options(v3_study):
+    c, admin, _ = v3_study
+    store = c.app.state.store
+    lab = (c, store, store.runtime, admin)
+    d, device_auth = pair(lab)
+    model, data = assets(v3_study)
+    body = configuration(d, model, data)
+    assert c.post("/api/v1/experiments", headers=admin, json=body).status_code == 422
+    profile = c.get("/api/v1/devices", headers=admin).json()[0]["selfTest"]
+    qualify_v3(c, device_auth, profile, model)
+    result = c.post("/api/v1/experiments", headers=admin, json=body)
+    assert result.status_code == 200, result.text
+    run = result.json()
+    enable(lab, d, device_auth)
+    assert c.post(f"/api/v1/experiments/{run['experimentId']}/submit", headers=admin).status_code == 200
+    store.dispatch_once()
+    ar = store.runtime.runs()[0]
+    with store.db() as db:
+        _, assignment = store.runtime._assignment(db, ar["assignmentId"])
+    for key in ("recipeVersion", "weightSpace", "antithetic", "scorer", "coefficientRule", "systemPrompt"):
+        assert assignment["config"][key] == body[key]
+    assert assignment["config"]["datasetIdentity"] == data["identity"]
+    result = c.post(
+        "/api/v1/device/worker-command",
+        headers=device_auth,
+        json={
+            "assignmentId": ar["assignmentId"],
+            "epoch": ar["epoch"],
+            "workerId": d["workerId"],
+            "action": "start",
+        },
+    )
+    assert result.status_code == 200, result.text
+    command = next(cmd for cmd in store.runtime.commands(d["deviceId"]) if cmd["kind"] == "START_WORKER")
+    assert command["studyConfig"] == assignment["config"]
+
+    query = {"assignmentId": ar["assignmentId"], "epoch": ar["epoch"], "sha256": data["objectSha256"]}
+    assert c.post("/api/v1/device/study-transfer", headers=device_auth, json=query).status_code == 200
+    assert c.post("/api/v1/device/study-transfer", headers=device_auth, json={**query, "epoch": 99}).status_code == 403
+    from test_devices import boot
+
+    metrics = {
+        "best": {"validationReward": 0.75},
+        "testLocked": False,
+        "testReward": 0.5,
+        "validation": [{"generation": 0, "meanReward": 0.75}],
+    }
+    boot(
+        c,
+        device_auth,
+        "boot-1",
+        contribution=True,
+        reports=[
+            {
+                "assignmentId": ar["assignmentId"],
+                "epoch": ar["epoch"],
+                "sequence": 1,
+                "snapshot": {
+                    "state": {"status": "RUNNING"},
+                    "generations": [],
+                    "candidates": [],
+                    "attempts": [],
+                    "events": [],
+                    "artifacts": [],
+                    "studyMetrics": metrics,
+                },
+            }
+        ],
+    )
+    store.dispatch_once()
+    shown = c.get(f"/api/v1/experiments/{run['experimentId']}", headers=admin).json()
+    assert shown["validationScore"] == 0.75 and shown["testScore"] == 0.5
+    assert shown["studyMetrics"]["validation"] == metrics["validation"]
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {
+            "scorer": {
+                "kind": "python",
+                "name": "code",
+                "version": 1,
+                "codeSha256": "a" * 64,
+                "config": {"answerField": "label"},
+            }
+        },
+        {"coefficientRule": "unknown@1"},
+        {"antithetic": True, "candidatesPerGeneration": 3},
+        {"weightSpace": {"kind": "subset", "include": ["["]}},
+        {"weightSpace": {"kind": "lora", "rank": True, "alpha": 4, "targetModules": ["q_proj"]}},
+        {
+            "scorer": {
+                "kind": "declarative",
+                "name": "choice-letter",
+                "version": 1,
+                "codeSha256": None,
+                "config": {"answerField": "absent"},
+            }
+        },
+    ],
+)
+def test_v3_invalid_options_never_become_a_draft(v3_study, change):
+    c, admin, _ = v3_study
+    store = c.app.state.store
+    d, device_auth = pair((c, store, store.runtime, admin))
+    model, data = assets(v3_study)
+    profile = c.get("/api/v1/devices", headers=admin).json()[0]["selfTest"]
+    qualify_v3(c, device_auth, profile, model)
+    response = c.post("/api/v1/experiments", headers=admin, json={**configuration(d, model, data), **change})
+    assert response.status_code == 422, response.text
+
+
+def test_v3_qualification_cannot_be_inferred_from_the_model_hash():
+    from backend.policies import v3_qualification
+    from backend.device_models import SelfTest
+    from pydantic import ValidationError
+
+    digest = "a" * 64
+    assert v3_qualification({"recipeVersions": [1], "qualifiedModelHashes": [digest]}, digest) == "recipe"
+    assert v3_qualification({"recipeVersions": [3], "qualifiedModelHashes": []}, digest) == "model"
+    assert v3_qualification({"recipeVersions": [3], "qualifiedModelHashes": [digest]}, digest) is None
+    with pytest.raises(ValidationError, match="compatibility"):
+        SelfTest(
+            passed=True,
+            coordinator=True,
+            gpuName="fixture",
+            vramTotalMb=1024,
+            noiseVersion="numpy_pcg64_normal_f32_to_f16_v1",
+            recipeVersions=[3],
+        )
+
+
+def test_queued_v3_work_stops_when_a_device_loses_v3_qualification(v3_study):
+    c, admin, _ = v3_study
+    store = c.app.state.store
+    d, device_auth = pair((c, store, store.runtime, admin))
+    model, data = assets(v3_study)
+    profile = c.get("/api/v1/devices", headers=admin).json()[0]["selfTest"]
+    qualify_v3(c, device_auth, profile, model)
+    run = c.post("/api/v1/experiments", headers=admin, json=configuration(d, model, data)).json()
+    profile["recipeVersions"] = [1]
+    assert (
+        c.patch(
+            "/api/v1/device/qualification", headers=device_auth, json={"bootId": "boot-1", "selfTest": profile}
+        ).status_code
+        == 200
+    )
+    assert store.runtime.waiting_reason(run) == "Recipe v3 qualification required"
+
+
+def test_v3_templates_validate_and_keep_nullable_prompt():
+    from backend.templates import clean_config
+    from fastapi import HTTPException
+
+    options = {
+        "recipeVersion": 3,
+        "weightSpace": {"kind": "full"},
+        "antithetic": False,
+        "systemPrompt": None,
+        "coefficientRule": "zscore@1",
+        "validationInterval": 2,
+        "scorer": {
+            "kind": "declarative",
+            "name": "choice-letter",
+            "version": 1,
+            "codeSha256": None,
+            "config": {"answerField": "label"},
+        },
+    }
+    assert clean_config(options) == options
+    with pytest.raises(HTTPException):
+        clean_config({**options, "weightSpace": {"kind": "subset", "include": ["["]}})

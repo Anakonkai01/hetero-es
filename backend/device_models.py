@@ -43,7 +43,7 @@ class SelfTest(FiniteStrict):
     runtimeProfile: str = Field(default="legacy", max_length=100)
     compatibility: dict = Field(default_factory=dict)
     gpuUUID: str | None = None
-    recipeVersions: list[Literal[1, 2]] = Field(default_factory=lambda: [1], max_length=2)
+    recipeVersions: list[Literal[1, 2, 3]] = Field(default_factory=lambda: [1], max_length=3)
     qualifiedModelHashes: list[str] = Field(default_factory=list, max_length=20)
 
     @field_validator("gpuUUID")
@@ -62,10 +62,14 @@ class SelfTest(FiniteStrict):
     def native_admission(self):
         if any(not re.fullmatch("[a-f0-9]{64}", h) for h in self.qualifiedModelHashes):
             raise ValueError("Invalid model qualification hash")
-        if 2 in self.recipeVersions:
-            evidence = self.compatibility.get("recipeV2", {})
+        if 3 in self.recipeVersions and self.recipeVersions != [3]:
+            raise ValueError("Recipe v3 devices advertise only v3")
+        for version in (2, 3):
+            if version not in self.recipeVersions:
+                continue
+            evidence = self.compatibility.get(f"recipeV{version}", {})
             if not self.passed or evidence.get("passed") is not True or evidence.get("repeatIdentical") is not True:
-                raise ValueError("Recipe v2 requires repeated numerical compatibility evidence")
+                raise ValueError(f"Recipe v{version} requires repeated numerical compatibility evidence")
             if (
                 any(
                     not re.fullmatch("[a-f0-9]{64}", str(evidence.get(k, "")))
@@ -80,9 +84,9 @@ class SelfTest(FiniteStrict):
                 )
                 or evidence["parentSha256"] != evidence["restoredSha256"]
             ):
-                raise ValueError("Recipe v2 compatibility identity or exact restore mismatch")
+                raise ValueError(f"Recipe v{version} compatibility identity or exact restore mismatch")
             if evidence["modelManifestHash"] not in self.qualifiedModelHashes:
-                raise ValueError("Recipe v2 model qualification missing")
+                raise ValueError(f"Recipe v{version} model qualification missing")
         if self.platform == "windows":
             if self.recipeVersions != [1] or self.qualifiedModelHashes:
                 raise ValueError("Windows remains the qualified v1 worker-only profile")

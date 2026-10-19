@@ -5,6 +5,8 @@ import { apiGet, apiPost } from '../../api/client';
 import { useScopeKey } from '../../app/session';
 
 export interface StudyDataset {
+  recipeVersion?: number;
+  columns?: string[];
   datasetId: string;
   name: string;
   counts: { train: number; validation: number; test: number };
@@ -35,6 +37,7 @@ export function StudyAssets() {
     queryFn: () => apiGet<StudyDataset[]>('/api/v1/datasets'),
     enabled: scope.every(Boolean),
   });
+  const [recipeVersion, setRecipeVersion] = useState(2);
   const [name, setName] = useState('');
   const [mode, setMode] = useState('all');
   const [prompt, setPrompt] = useState('prompt');
@@ -64,7 +67,7 @@ export function StudyAssets() {
   return (
     <section className="card">
       <div className="ch">
-        <h2>{t('Models and math datasets')}</h2>
+        <h2>{t('Models and datasets')}</h2>
       </div>
       <div className="cb demo-form">
         {message && (
@@ -72,6 +75,13 @@ export function StudyAssets() {
             {message}
           </p>
         )}
+        <label className="fg">
+          {t('Asset recipe')}
+          <select className="sel" value={recipeVersion} onChange={(e) => setRecipeVersion(Number(e.target.value))}>
+            <option value={2}>{t('Math dataset · Recipe v2')}</option>
+            <option value={3}>{t('Custom experiment · Recipe v3')}</option>
+          </select>
+        </label>
         {publicEntry ? (
           <p className="note">
             {t('Connect to the lab LAN or Tailscale to import datasets and model files.')}{' '}
@@ -84,7 +94,7 @@ export function StudyAssets() {
         ) : (
           <>
             <details className="advanced-panel">
-              <summary>{t('Import math dataset')}</summary>
+              <summary>{t('Import dataset')}</summary>
               <form
                 onSubmit={(event) => {
                   event.preventDefault();
@@ -92,7 +102,8 @@ export function StudyAssets() {
                     await apiPost('/api/v1/datasets/import', {
                       name,
                       files,
-                      mapping: { prompt, answer },
+                      recipeVersion,
+                      mapping: recipeVersion === 3 ? { prompt } : { prompt, answer },
                       adapter,
                       splitSeed: 42,
                     });
@@ -128,18 +139,22 @@ export function StudyAssets() {
                     {t('Prompt field')}
                     <input className="inp" required value={prompt} onChange={(e) => setPrompt(e.target.value)} />
                   </label>
-                  <label className="fg">
-                    {t('Answer field')}
-                    <input className="inp" required value={answer} onChange={(e) => setAnswer(e.target.value)} />
-                  </label>
+                  {recipeVersion === 2 && (
+                    <label className="fg">
+                      {t('Answer field')}
+                      <input className="inp" required value={answer} onChange={(e) => setAnswer(e.target.value)} />
+                    </label>
+                  )}
                 </div>
-                <label className="fg">
-                  {t('Answer format')}
-                  <select className="sel" value={adapter} onChange={(e) => setAdapter(e.target.value)}>
-                    <option value="exact-number-v1">{t('Exact number')}</option>
-                    <option value="gsm8k-v1">GSM8K · ####</option>
-                  </select>
-                </label>
+                {recipeVersion === 2 && (
+                  <label className="fg">
+                    {t('Answer format')}
+                    <select className="sel" value={adapter} onChange={(e) => setAdapter(e.target.value)}>
+                      <option value="exact-number-v1">{t('Exact number')}</option>
+                      <option value="gsm8k-v1">GSM8K · ####</option>
+                    </select>
+                  </label>
+                )}
                 {(mode === 'all' ? ['all'] : ['train', 'validation', 'test']).map((split) => (
                   <label className="fg" key={split}>
                     {split}
@@ -188,6 +203,7 @@ export function StudyAssets() {
                     const asset = await apiPost<{ id: string }>('/api/v1/models/register', {
                       name: modelName,
                       manifest,
+                      recipeVersion,
                       source,
                     });
                     if (source === 'UPLOAD') {

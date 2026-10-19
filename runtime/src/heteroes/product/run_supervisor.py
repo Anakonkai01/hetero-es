@@ -42,6 +42,10 @@ def validate(config, workers):
         raise ValueError("unsupported workload")
     if config.get("decodeEngine") not in DECODE_ENGINES:
         raise ValueError("unsupported decoder")
+    if config.get("recipeVersion") == 3:
+        from heteroes.v3.options import validate_options
+
+        validate_options(config)
     selected = config.get("workerIds")
     if (
         not isinstance(selected, list)

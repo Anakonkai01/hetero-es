@@ -1,4 +1,4 @@
-from .policies import backup_policy as validated_backup_policy, v2_qualification
+from .policies import backup_policy as validated_backup_policy, v2_qualification, v3_qualification
 
 from fastapi import HTTPException
 from heteroes.catalog import DECODE_ENGINES
@@ -20,7 +20,7 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
         body["backupPolicy"] = validated_backup_policy(body.get("backupPolicy") or {"interval": 1, "retain": 3})
     except ValueError as error:
         raise HTTPException(422, str(error)) from None
-    if body["recipeVersion"] == 2:
+    if body["recipeVersion"] in (2, 3):
         model = registry.get(body["modelArtifactId"], current["workspaceId"], "model")
         if model["status"] not in ("READY", "REGISTERED") or model["reference"] != body["modelName"]:
             raise HTTPException(422, "Model is unavailable or its name differs")
@@ -33,7 +33,27 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
             or body["sigmaMinimum"] > body["sigma"]
         ):
             raise HTTPException(422, "Invalid batch size or sigma schedule")
-        if body["task"] != "text_math_v2" or body["decodeEngine"] != "hf_generate":
+        version = body["recipeVersion"]
+        if version == 2:
+            from heteroes.study.models import validate as validate_model
+
+            try:
+                validate_model(model["manifest"])
+            except ValueError as error:
+                raise HTTPException(422, str(error)) from None
+        if data.get("recipeVersion", 2) != version:
+            raise HTTPException(422, "Dataset format differs from the selected recipe")
+        if version == 3:
+            from heteroes.v3.options import validate_options
+
+            try:
+                validate_options(body)
+                field = body["scorer"]["config"].get("answerField", "answer")
+                if field not in data.get("columns", []):
+                    raise ValueError("Scorer answer field must exist in every dataset row")
+            except (ValueError, TypeError, KeyError) as error:
+                raise HTTPException(422, str(error)) from None
+        if body["task"] != ("text_v3" if version == 3 else "text_math_v2") or body["decodeEngine"] != "hf_generate":
             raise HTTPException(422, "Recipe v2 uses exact math and the HF decoder")
         selected = [
             d
@@ -42,11 +62,12 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
         ]
         for d in selected:
             profile = d["selfTest"]
-            if v2_qualification(profile, model["manifestHash"]) == "recipe":
+            qualification = (v3_qualification if version == 3 else v2_qualification)(profile, model["manifestHash"])
+            if qualification == "recipe":
                 raise HTTPException(
-                    422, "Selected device requires Recipe v2 qualification; Windows remains v1 worker-only"
+                    422, f"Selected device requires Recipe v{version} qualification; Windows remains v1 worker-only"
                 )
-            if v2_qualification(profile, model["manifestHash"]) == "model":
+            if qualification == "model":
                 raise HTTPException(422, "Qualify every selected device for this pinned model")
         body.update(
             modelManifest=model["manifest"],
@@ -69,6 +90,9 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
             "validationInterval",
         ):
             body.pop(key)
+    if body.get("recipeVersion") != 3:
+        for key in ("weightSpace", "antithetic", "scorer", "coefficientRule", "systemPrompt"):
+            body.pop(key, None)
     if body["schedulerPolicy"] not in cap["schedulerPolicies"] or body["syncMode"] not in cap["syncModes"]:
         raise HTTPException(422, "Unsupported scheduling policy or synchronization mode")
     if len(set(body["workerIds"])) != len(body["workerIds"]) or not set(body["workerIds"]) <= set(cap["workerIds"]):

@@ -135,3 +135,19 @@ test('the Markdown summary states the setup and the results, and says what it do
   assert.ok(!md.includes('undefined') && !md.includes('NaN'));
   assert.ok(summaryMarkdown(experiment('1', { startedAt: undefined }), []).includes('No generation has a reward yet'));
 });
+
+test('LoRA and full parameter runs never share reward axes', () => {
+  const result = compareRuns([
+    { experiment: experiment('full', { weightSpace: { kind: 'full' } }), generations: [generation(0, 0.1, 0.2)] },
+    {
+      experiment: experiment('adapter', {
+        recipeVersion: 3,
+        weightSpace: { kind: 'lora', rank: 8, alpha: 16, targetModules: ['q_proj'] },
+      }),
+      generations: [generation(0, 0.2, 0.3)],
+    },
+  ]);
+  assert.equal(result.mixedWeightSpaces, true);
+  assert.deepEqual(result.series, []);
+  assert.equal(result.rows.length, 2);
+});

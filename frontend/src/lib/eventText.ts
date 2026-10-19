@@ -30,6 +30,11 @@ export function describeEvent(type: string, details: Details, workerId?: string)
     level: EventDescription['level'] = 'main',
   ): EventDescription => ({ template, params, level, tone });
   switch (type) {
+    case 'validation_completed':
+      return done('Validation after generation {generation}: reward {reward}', {
+        generation: gen(d.generation),
+        reward: num(d.meanReward, 4),
+      });
     case 'managed_start':
       return done('The coordinator started this experiment');
     case 'generation_open':

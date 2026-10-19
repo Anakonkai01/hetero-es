@@ -35,6 +35,11 @@ const SETTING_LABELS: Record<string, string> = {
   sigmaSchedule: 'Sigma schedule',
   sigmaMinimum: 'Minimum sigma',
   maxNewTokens: 'Maximum output tokens',
+  weightSpace: 'Weight space',
+  antithetic: 'Antithetic sampling',
+  scorer: 'Declarative scorer',
+  coefficientRule: 'Coefficient rule',
+  systemPrompt: 'System prompt',
 };
 
 export function ComparePage() {
@@ -69,20 +74,8 @@ export function ComparePage() {
     failed: loaded[index * 2].isError,
   }));
   const ready = pairs.filter((p): p is typeof p & { experiment: Experiment } => Boolean(p.experiment));
-  const resultKey = ready
-    .map(
-      (p) =>
-        `${p.experiment.experimentId}:${p.generations.length}:${p.experiment.status}:${p.generations.at(-1)?.rewardMean ?? ''}`,
-    )
-    .join('|');
-  const configKey = ready.map((p) => p.experiment.configHash).join('|');
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const result = useMemo(
-    () => compareRuns(ready.map((p) => ({ experiment: p.experiment, generations: p.generations }))),
-    [resultKey],
-  );
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const differences = useMemo(() => configDifferences(ready.map((p) => p.experiment)), [configKey]);
+  const result = compareRuns(ready.map((p) => ({ experiment: p.experiment, generations: p.generations })));
+  const differences = configDifferences(ready.map((p) => p.experiment));
 
   if (ids.length < 2)
     return (
@@ -155,7 +148,9 @@ export function ComparePage() {
       )}
       <section className="card">
         <div className="cb">
-          {result.series.some((s) => s.points.length) ? (
+          {result.mixedWeightSpaces ? (
+            <p className="note">{t('Runs with different weight spaces use separate reward charts.')}</p>
+          ) : result.series.some((s) => s.points.length) ? (
             <CompareChart
               series={result.series}
               maxGeneration={result.maxGeneration}

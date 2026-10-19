@@ -40,18 +40,37 @@ def _row(row, prompt_field):
 def read_rows(path, prompt_field="prompt"):
     """Rows of a JSON array, JSON Lines or CSV file; the prompt column is copied to `prompt`."""
     path = Path(path)
-    text = path.read_text(encoding="utf-8-sig")
-    if path.suffix == ".jsonl":
+    return parse(path.read_bytes(), path.suffix.removeprefix("."), prompt_field, max_bytes=None)
+
+
+def parse(content, format_name, prompt_field="prompt", *, max_bytes=3_000_000):
+    """Bounded in-memory import for the shared lab; all scalar columns are retained."""
+    payload = content.encode() if isinstance(content, str) else content
+    if not isinstance(payload, bytes) or (max_bytes is not None and len(payload) > max_bytes):
+        raise ValueError("dataset file exceeds 3 MB")
+    text = payload.decode("utf-8-sig")
+    if format_name == "jsonl":
         rows = [json.loads(line) for line in text.splitlines() if line.strip()]
-    elif path.suffix == ".json":
+    elif format_name == "json":
         rows = json.loads(text)
-    elif path.suffix == ".csv":
+    elif format_name == "csv":
         rows = list(csv.DictReader(io.StringIO(text)))
     else:
         raise ValueError("use a .json, .jsonl or .csv file")
     if not isinstance(rows, list) or not 1 <= len(rows) <= MAX_ROWS:
         raise ValueError(f"expected between 1 and {MAX_ROWS} rows")
     return [_row(row, prompt_field) for row in rows]
+
+
+def dataset(files, *, seed=42, mapping=None):
+    """Import one file or the three explicit splits using the same builder as the SDK."""
+    if not isinstance(files, dict) or set(files) not in ({"all"}, set(SPLITS)):
+        raise ValueError("provide one file or three named splits")
+    mapping = mapping or {"prompt": "prompt"}
+    if set(mapping) != {"prompt"} or not isinstance(mapping["prompt"], str) or not mapping["prompt"]:
+        raise ValueError("map the prompt field; the scorer selects its other columns")
+    parsed = {name: parse(file["content"], file["format"], mapping["prompt"]) for name, file in files.items()}
+    return build(parsed["all"], split_seed=seed) if "all" in parsed else build([], split_seed=seed, splits=parsed)
 
 
 def build(rows, *, split_seed=42, splits=None):

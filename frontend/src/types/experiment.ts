@@ -1,3 +1,22 @@
+export type WeightSpace =
+  | { kind: 'full' }
+  | { kind: 'subset'; include: string[] }
+  | { kind: 'lora'; rank: number; alpha: number; targetModules: string[] };
+export type DeclarativeScorer = {
+  kind: 'declarative';
+  name: string;
+  version: number;
+  codeSha256: null;
+  config: Record<string, unknown>;
+};
+export interface V3Settings {
+  weightSpace: WeightSpace;
+  antithetic: boolean;
+  coefficientRule: string;
+  scorer: DeclarativeScorer;
+  systemPrompt: string | null;
+}
+
 export type ExperimentStatus =
   | 'STARTING'
   | 'CANCELLING'
@@ -16,7 +35,7 @@ export type SchedulerPolicy = 'capacity-weighted' | 'round-robin' | 'greedy';
 
 export type SyncMode = 'synchronous' | 'asynchronous';
 
-export interface Experiment {
+export interface Experiment extends Partial<V3Settings> {
   recipeVersion?: number;
   batchSize?: number;
   batchSeed?: number;
@@ -24,7 +43,11 @@ export interface Experiment {
   sigmaMinimum?: number;
   maxNewTokens?: number;
   validationInterval?: number;
-  studyMetrics?: { testLocked: boolean; independentReloadPassed?: boolean };
+  studyMetrics?: {
+    testLocked: boolean;
+    independentReloadPassed?: boolean;
+    validation?: { generation: number; meanReward: number }[];
+  };
   monitoringPartial?: boolean;
   experimentId: string;
   name: string;
@@ -71,7 +94,7 @@ export interface Experiment {
   completedAt?: string;
 }
 
-export interface CreateExperimentRequest {
+export interface CreateExperimentRequest extends Partial<V3Settings> {
   recipeVersion?: number;
   batchSize?: number;
   batchSeed?: number;

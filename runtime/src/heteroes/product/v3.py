@@ -13,7 +13,9 @@ def prepare_run(config, root, device, *, declared=None, client=None, cache=None)
     The initial LoRA file is created once by the coordinator, then transferred by
     the existing authenticated private weights transport, with its content hash.
     """
-    validate_spec(config["scorer"], allow_python=False)
+    from heteroes.v3.options import validate_options
+
+    validate_options(config)
     from heteroes.manifest import generation_config_sha256
     from heteroes.model.loading import LoadedModel
     from heteroes.model.lora import create_initial_adapter

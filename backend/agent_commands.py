@@ -75,7 +75,7 @@ class AgentCommands:
                         "recoveryIndex": body.recoveryIndex,
                         "coordinatorUrl": ar["computeUrl"],
                         "bulkUrl": ar.get("bulkUrl", ar["computeUrl"]),
-                        **({"studyConfig": ar["config"]} if ar["config"].get("recipeVersion") == 2 else {}),
+                        **({"studyConfig": ar["config"]} if ar["config"].get("recipeVersion") in (2, 3) else {}),
                         "computeToken": ar["computeGrants"][body.workerId],
                         **({"publicComputeUrl": self.public_compute_url()} if self.public_compute_url() else {}),
                     },

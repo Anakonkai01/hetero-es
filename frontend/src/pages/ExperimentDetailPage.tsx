@@ -311,8 +311,20 @@ export function ExperimentDetailPage() {
                 <dl className="kv">
                   <KeyValue label={t('Model')}>{experiment.modelName}</KeyValue>
                   <KeyValue label={t('Task')}>{experiment.task}</KeyValue>
+                  {experiment.recipeVersion === 3 && (
+                    <>
+                      <KeyValue label={t('Weight space')}>{experiment.weightSpace?.kind}</KeyValue>
+                      <KeyValue label={t('Declarative scorer')}>
+                        {experiment.scorer?.name}@{experiment.scorer?.version}
+                      </KeyValue>
+                      <KeyValue label={t('Antithetic sampling')}>{t(experiment.antithetic ? 'ON' : 'OFF')}</KeyValue>
+                      <KeyValue label={t('Coefficient rule')}>{experiment.coefficientRule}</KeyValue>
+                    </>
+                  )}
                   <KeyValue label={t('Maximum generations')}>{experiment.maxGenerations ?? 'Legacy fixture'}</KeyValue>
-                  <KeyValue label={t('Built-in workload')}>{experiment.task}</KeyValue>
+                  {(experiment.recipeVersion ?? 1) === 1 && (
+                    <KeyValue label={t('Built-in workload')}>{experiment.task}</KeyValue>
+                  )}
                   <KeyValue label={t('Candidates per generation')} mono>
                     {experiment.candidatesPerGeneration}
                   </KeyValue>

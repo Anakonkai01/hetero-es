@@ -34,7 +34,7 @@ def install_routes(app, store, runtime, scoped, visible, capabilities, registry)
             # Shipped r10 apps require these protocol capability fields.
             "agentMode": True,
             "deviceConfiguration": True,
-            "recipeVersions": [1, 2],
+            "recipeVersions": [1, 2, 3],
             **storage_status(runtime),
             "serverInstanceId": getattr(runtime, "server_instance_id", None),
             **({"uiUrl": ui_url} if ui_url else {}),

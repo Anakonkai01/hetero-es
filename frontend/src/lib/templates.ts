@@ -12,6 +12,12 @@ const KEYS = [
   'syncMode',
   'workerIds',
   'recipeVersion',
+  'weightSpace',
+  'antithetic',
+  'scorer',
+  'coefficientRule',
+  'systemPrompt',
+  'validationInterval',
   'batchSize',
   'batchSeed',
   'sigmaSchedule',
@@ -36,7 +42,7 @@ export function templateConfigFromExperiment(experiment: Experiment): TemplateCo
   const config: Record<string, unknown> = {};
   for (const key of KEYS) {
     const value = experiment[key];
-    if (value !== undefined && value !== null) config[key] = Array.isArray(value) ? [...value] : value;
+    if (value !== undefined && (value !== null || key === 'systemPrompt')) config[key] = structuredClone(value);
   }
   if (experiment.backupPolicy)
     config.backupPolicy = { interval: experiment.backupPolicy.interval, retain: experiment.backupPolicy.retain };

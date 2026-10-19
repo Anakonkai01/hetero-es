@@ -13,13 +13,17 @@ SUPPORTED_MODELS = (
 )
 
 
-def validate(manifest):
+def validate(manifest, *, allow_any=False):
     if (
         set(manifest) != {"formatVersion", "modelId", "revision", "tokenizerRevision", "format", "files"}
         or manifest["formatVersion"] != 1
     ):
         raise ValueError("Invalid pinned model manifest")
-    if manifest["modelId"] not in SUPPORTED_MODELS:
+    if (
+        not isinstance(manifest["modelId"], str)
+        or not manifest["modelId"]
+        or (not allow_any and manifest["modelId"] not in SUPPORTED_MODELS)
+    ):
         raise ValueError("Unsupported text model family")
     if manifest["format"] != "safetensors":
         raise ValueError("Only safetensors checkpoints are accepted")

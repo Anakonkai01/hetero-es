@@ -8,19 +8,22 @@ from fastapi import Depends, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 from heteroes.study.data import dataset, canonical
 from heteroes.study.models import validate as validate_model
+from heteroes.v3 import data as v3data
 
 
 class ImportData(BaseModel):
     model_config = ConfigDict(extra="forbid")
+    recipeVersion: int = Field(default=2, ge=2, le=3, strict=True)
     name: str = Field(min_length=1, max_length=100)
     files: dict
-    mapping: dict = Field(default_factory=lambda: {"prompt": "prompt", "answer": "answer"})
+    mapping: dict | None = None
     adapter: str = "exact-number-v1"
     splitSeed: int = Field(default=42, ge=0, lt=2**53, strict=True)
 
 
 class RegisterModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
+    recipeVersion: int = Field(default=2, ge=2, le=3, strict=True)
     name: str = Field(min_length=1, max_length=100)
     manifest: dict
     source: str = "REFERENCE"
@@ -68,10 +71,16 @@ def install_routes(app, registry, runtime, scoped, device_auth):
     @app.post("/api/v1/datasets/import", status_code=201)
     def import_data(body: ImportData, current=Depends(scoped)):
         try:
-            value = dataset(body.files, seed=body.splitSeed, mapping=body.mapping, adapter=body.adapter)
+            value = (
+                v3data.dataset(body.files, seed=body.splitSeed, mapping=body.mapping)
+                if body.recipeVersion == 3
+                else dataset(body.files, seed=body.splitSeed, mapping=body.mapping, adapter=body.adapter)
+            )
         except (ValueError, KeyError, TypeError, UnicodeError):
             raise HTTPException(422, "Invalid dataset format, mapping, exact answers or splits") from None
         payload = canonical(value)
+        if len(payload) > 10_000_000:
+            raise HTTPException(422, "Dataset document exceeds 10 MB")
         digest = hashlib.sha256(payload).hexdigest()
         store_backend = backend()
         if hasattr(store_backend, "inventory") and store_backend.inventory() + len(payload) > getattr(
@@ -91,7 +100,9 @@ def install_routes(app, registry, runtime, scoped, device_auth):
             "counts": {k: len(v) for k, v in value["splits"].items()},
             "splitSeed": value["splitSeed"],
             "splitMode": value["splitMode"],
-            "adapter": value["adapter"],
+            "adapter": value.get("adapter"),
+            "recipeVersion": body.recipeVersion,
+            "columns": sorted(set.intersection(*(set(row) for rows in value["splits"].values() for row in rows))),
         }
         result["datasetId"] = result["id"]
         return registry.save(result, current["workspaceId"], current["userId"], "dataset")
@@ -99,7 +110,7 @@ def install_routes(app, registry, runtime, scoped, device_auth):
     @app.post("/api/v1/models/register", status_code=201)
     def register_model(body: RegisterModel, current=Depends(scoped)):
         try:
-            validate_model(body.manifest)
+            validate_model(body.manifest, allow_any=body.recipeVersion == 3)
         except (ValueError, TypeError, KeyError):
             raise HTTPException(422, "Use a supported text model with pinned safetensors files") from None
         if body.source not in ("REFERENCE", "UPLOAD"):
@@ -112,6 +123,7 @@ def install_routes(app, registry, runtime, scoped, device_auth):
             "workspaceId": current["workspaceId"],
             "ownerUserId": current["userId"],
             "reference": body.manifest["modelId"],
+            "recipeVersion": body.recipeVersion,
             "revision": body.manifest["revision"],
             "manifest": body.manifest,
             "source": body.source,

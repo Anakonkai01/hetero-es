@@ -57,6 +57,14 @@ def v2_qualification(profile, model_hash):
     return None
 
 
+def v3_qualification(profile, model_hash):
+    if profile.get("platform") == "windows" or profile.get("recipeVersions") != [3]:
+        return "recipe"
+    if model_hash not in profile.get("qualifiedModelHashes", []):
+        return "model"
+    return None
+
+
 def storage_status(runtime):
     backend = runtime.storage_backend
     return {

@@ -2,7 +2,7 @@
 
 from .constants import CORE_COMMAND_KINDS, COMMAND_KINDS
 
-from .policies import v2_qualification
+from .policies import v2_qualification, v3_qualification
 import json
 import secrets
 import time
@@ -36,11 +36,15 @@ class AgentScheduling:
             supported = set(json.loads(capabilities[0])) if capabilities else CORE_COMMAND_KINDS
             if not CORE_COMMAND_KINDS <= supported:
                 return "Update selected device agent to support core lifecycle commands"
-            if body.get("recipeVersion") == 2:
+            if body.get("recipeVersion") in (2, 3):
                 profile = d["selfTest"]
-                if v2_qualification(profile, study_hash(body["modelManifest"])) == "recipe":
-                    return "Recipe v2 qualification required"
-                if v2_qualification(profile, study_hash(body["modelManifest"])) == "model":
+                version = body["recipeVersion"]
+                qualification = (v3_qualification if version == 3 else v2_qualification)(
+                    profile, study_hash(body["modelManifest"])
+                )
+                if qualification == "recipe":
+                    return f"Recipe v{version} qualification required"
+                if qualification == "model":
                     return "Pinned model qualification required"
             if not d["physicalResourceId"]:
                 return "Refresh selected device self-test to identify its physical GPU"

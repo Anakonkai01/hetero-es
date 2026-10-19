@@ -130,3 +130,33 @@ def test_a_run_needs_an_imported_dataset_and_a_loaded_python_scorer():
     recipe, plan, dataset = documents(scorer=python)
     with pytest.raises(ValueError, match="loaded"):
         make_scorer(RecipeV3Run(recipe, plan), dataset)
+
+
+@pytest.mark.parametrize(
+    "format_name, content",
+    [
+        ("json", '[{"question":"Q", "label":"A", "level":2, "optional":null}]'),
+        ("jsonl", '{"question":"Q", "label":"A", "level":2, "optional":null}\n'),
+        ("csv", "question,label,level,optional\nQ,A,2,\n"),
+    ],
+)
+def test_shared_lab_parse_keeps_columns(format_name, content):
+    from heteroes.v3.data import parse
+
+    row = parse(content, format_name, "question")[0]
+    assert row["prompt"] == "Q" and row["question"] == "Q" and row["label"] == "A"
+    assert set(row) == {"prompt", "question", "label", "level", "optional"}
+
+
+def test_shared_lab_imports_bound_bytes_and_check_pre_split_leakage():
+    from heteroes.v3.data import parse, dataset
+
+    with pytest.raises(ValueError, match="3 MB"):
+        parse(" " * 3_000_001, "json")
+    with pytest.raises(ValueError, match="twice"):
+        dataset(
+            {
+                name: {"format": "json", "content": '[{"prompt":"duplicate"}]'}
+                for name in ("train", "validation", "test")
+            }
+        )

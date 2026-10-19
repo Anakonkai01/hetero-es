@@ -58,7 +58,7 @@ def test_agent_factory_keeps_r10_health_and_installs_device_routes(deployment):
         health = client.get("/api/v1/health").json()
         assert health["agentMode"] is True
         assert health["deviceConfiguration"] is True
-        assert health["recipeVersions"] == [1, 2]
+        assert health["recipeVersions"] == [1, 2, 3]
         assert client.get("/api/v1/devices").status_code == 401
 
 

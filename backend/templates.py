@@ -6,6 +6,8 @@ stale; the experiment wizard still validates everything when a run is created fr
 
 from .migrations import initialize_templates_schema
 from heteroes.catalog import DECODE_ENGINES
+from heteroes.v3.options import validate_weight_space
+from heteroes.v3.scoring import validate_spec
 from datetime import datetime, timezone
 import json
 import uuid
@@ -16,7 +18,8 @@ MAX_PER_WORKSPACE = 50
 INTEGERS = {
     "maxGenerations": (1, 1000),
     "candidatesPerGeneration": (2, 256),
-    "recipeVersion": (1, 2),
+    "recipeVersion": (1, 3),
+    "validationInterval": (1, 1000),
     "batchSize": (1, 1024),
     "batchSeed": (0, 2**31),
     "maxNewTokens": (1, 2048),
@@ -27,6 +30,7 @@ CHOICES = {
     "syncMode": {"synchronous", "asynchronous"},
     "sigmaSchedule": {"constant", "cosine"},
     "decodeEngine": set(DECODE_ENGINES),
+    "coefficientRule": {"zscore@1"},
 }
 SHORT_TEXT = {"task"}
 
@@ -35,7 +39,13 @@ def clean_config(config):
     """Validated settings, or HTTPException(422). Unknown keys are refused rather than silently dropped."""
     if not isinstance(config, dict) or not config:
         raise HTTPException(422, "A template needs at least one setting")
-    known = set(INTEGERS) | set(FLOATS) | set(CHOICES) | SHORT_TEXT | {"workerIds", "backupPolicy"}
+    known = (
+        set(INTEGERS)
+        | set(FLOATS)
+        | set(CHOICES)
+        | SHORT_TEXT
+        | {"workerIds", "backupPolicy", "weightSpace", "antithetic", "scorer", "systemPrompt"}
+    )
     unknown = sorted(set(config) - known)
     if unknown:
         raise HTTPException(422, f"Settings that cannot be saved in a template: {', '.join(unknown)}")
@@ -55,6 +65,20 @@ def clean_config(config):
         elif key in SHORT_TEXT:
             if not isinstance(value, str) or not 1 <= len(value) <= 64:
                 raise HTTPException(422, f"{key} must be a short text")
+        elif key in ("weightSpace", "scorer"):
+            try:
+                if key == "weightSpace":
+                    validate_weight_space(value, initial_adapter=False)
+                else:
+                    validate_spec(value, allow_python=False)
+            except (ValueError, TypeError) as error:
+                raise HTTPException(422, str(error)) from None
+        elif key == "antithetic":
+            if type(value) is not bool:
+                raise HTTPException(422, "Antithetic is true or false")
+        elif key == "systemPrompt":
+            if value is not None and (not isinstance(value, str) or not 1 <= len(value) <= 4000):
+                raise HTTPException(422, "System prompt is null or a text of at most 4000 characters")
         elif key == "workerIds":
             if (
                 not isinstance(value, list)

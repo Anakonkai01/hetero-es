@@ -33,12 +33,17 @@ class Configuration(BaseModel):
     datasetIds: list[str] = Field(default_factory=list)
     coordinatorDeviceId: str | None = None
     backupPolicy: dict | None = None
-    recipeVersion: int = Field(default=1, ge=1, le=2, strict=True)
+    recipeVersion: int = Field(default=1, ge=1, le=3, strict=True)
     batchSize: int = Field(default=32, ge=1, le=1024, strict=True)
     batchSeed: int = Field(default=11, ge=0, lt=2**53, strict=True)
     sigmaSchedule: str = "constant"
     sigmaMinimum: float = Field(default=0.00025, gt=0, le=1)
     maxNewTokens: int = Field(default=512, ge=1, le=2048, strict=True)
+    weightSpace: dict = Field(default_factory=lambda: {"kind": "full"})
+    antithetic: bool = Field(default=False, strict=True)
+    scorer: dict | None = None
+    coefficientRule: str = "zscore@1"
+    systemPrompt: str | None = Field(default=None, max_length=4000)
     validationInterval: int = Field(default=1, ge=1, le=1000, strict=True)
 
 

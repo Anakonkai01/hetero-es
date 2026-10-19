@@ -109,7 +109,7 @@ class AgentRuntime(AgentScheduling, AgentCommands, AgentPolling):
     def capabilities(self):
         return {
             "controlApiVersion": 2,
-            "recipeVersions": [1, 2],
+            "recipeVersions": [1, 2, 3],
             "physicalGpuIdentity": True,
             "parallelJobs": True,
             "modelId": MODEL,

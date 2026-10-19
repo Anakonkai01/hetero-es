@@ -16,11 +16,11 @@ from heteroes.canonical import canonical_json_hash
 from heteroes.catalog import DECODE_ENGINES, WORKLOAD_NAMES
 from heteroes.manifest import EVAL_DTYPES, KNOWN_ENGINES, Recipe
 from heteroes.v3.scoring import validate_spec
+from heteroes.v3.options import COEFFICIENT_RULES, validate_weight_space as _check_weight_space
 
 FORMAT_VERSION = 3
 PLAN_VERSION = 1
 SAMPLER = "sha256-python-random-sample-v1"
-COEFFICIENT_RULES = {"zscore": {1}}
 
 _HEX40, _HEX64 = re.compile("[0-9a-f]{40}"), re.compile("[0-9a-f]{64}")
 _RECIPE_KEYS = {"formatVersion", "model", "weightSpace", "schemaHash", "noise", "perturbation", "evaluation", "data"}
@@ -44,34 +44,6 @@ def _positive(where, value):
 def _count(where, value, low=1, high=None):
     if type(value) is not int or value < low or (high is not None and value > high):
         raise ValueError(f"{where} out of range")
-
-
-def _check_weight_space(space):
-    kind = space.get("kind") if isinstance(space, dict) else None
-    if kind == "full":
-        _keys("weightSpace", space, {"kind"})
-    elif kind == "subset":
-        _keys("weightSpace", space, {"kind", "include"})
-        if not isinstance(space["include"], list) or not space["include"]:
-            raise ValueError("a subset names at least one pattern")
-        for pattern in space["include"]:
-            if not isinstance(pattern, str) or not pattern:
-                raise ValueError("a subset pattern is a nonempty string")
-            try:
-                re.compile(pattern)
-            except re.error as error:
-                raise ValueError(f"invalid subset pattern: {error}") from None
-    elif kind == "lora":
-        _keys("weightSpace", space, {"kind", "rank", "alpha", "targetModules", "initialAdapterSha256"})
-        _count("lora rank", space["rank"], 1, 1024)
-        _positive("lora alpha", space["alpha"])
-        if not isinstance(space["targetModules"], list) or not space["targetModules"]:
-            raise ValueError("LoRA names its target modules")
-        if not all(isinstance(m, str) and m for m in space["targetModules"]):
-            raise ValueError("a target module is a nonempty name")
-        _hex("initialAdapterSha256", space["initialAdapterSha256"], _HEX64)
-    else:
-        raise ValueError(f"unknown weight space {kind!r}")
 
 
 def _check_sigma(sigma):

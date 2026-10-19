@@ -8,6 +8,7 @@ import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 const [base, output] = process.argv.slice(2);
 if (!base || !output) throw Error('usage: check-web-experiments.mjs <base url> <fresh evidence directory>');
 await fs.mkdir(output, { recursive: true });
@@ -146,6 +147,115 @@ try {
       ![...document.querySelectorAll('#template-picker option')].some((o) => o.textContent.includes('Three GPU 3x12')),
   );
   results.templateDeleted = true;
+
+  // Recipe v3: imported columns and a real draft through the browser against this disposable CPU lab.
+  // The compatibility declarations below are synthetic fixture data, never hardware acceptance.
+  const auth = await page.evaluate(() => sessionStorage.getItem('heteroes.access-token'));
+  const headers = { Authorization: `Bearer ${auth}`, 'X-Workspace-Id': 'lab' };
+  const post = async (url, data) => {
+    const response = await page.request.post(base + url, { headers, data });
+    assert.ok(response.ok(), `${url}: ${response.status()}`);
+    return response.json();
+  };
+  const manifest = {
+    formatVersion: 1,
+    modelId: 'fixture/custom-model',
+    revision: 'a'.repeat(40),
+    tokenizerRevision: 'a'.repeat(40),
+    format: 'safetensors',
+    files: { 'config.json': 'b'.repeat(64), 'model.safetensors': 'c'.repeat(64), 'tokenizer.json': 'd'.repeat(64) },
+  };
+  const canonical = (value) =>
+    JSON.stringify(
+      value && typeof value === 'object' && !Array.isArray(value)
+        ? Object.fromEntries(
+            Object.keys(value)
+              .sort()
+              .map((k) => [k, JSON.parse(canonical(value[k]))]),
+          )
+        : value,
+    );
+  const modelHash = createHash('sha256').update(canonical(manifest)).digest('hex');
+  const model = await post('/api/v1/models/register', { name: 'V3 fixture model', recipeVersion: 3, manifest });
+  const pairing = await post('/api/v1/devices/pairing-codes', {});
+  const enrolled = await post('/api/v1/device/enroll', {
+    code: pairing.code,
+    workerId: 'v3-fixture',
+    displayName: 'V3 fixture',
+    computeUrl: 'http://127.0.0.1:18769',
+    selfTest: {
+      passed: true,
+      coordinator: true,
+      gpuName: 'CPU fixture (no GPU computation)',
+      vramTotalMb: 1024,
+      noiseVersion: 'numpy_pcg64_normal_f32_to_f16_v1',
+      gpuUUID: 'GPU-00000000-0000-4000-8000-000000000003',
+      recipeVersions: [3],
+      qualifiedModelHashes: [modelHash],
+      compatibility: {
+        recipeV3: {
+          passed: true,
+          repeatIdentical: true,
+          modelManifestHash: modelHash,
+          recipeHash: 'a'.repeat(64),
+          parentSha256: 'b'.repeat(64),
+          restoredSha256: 'b'.repeat(64),
+          perturbedSha256: 'c'.repeat(64),
+          outputsHash: 'd'.repeat(64),
+        },
+      },
+    },
+  });
+  const approved = await page.request.patch(base + '/api/v1/platform/devices/' + enrolled.deviceId, {
+    headers,
+    data: { approved: true, workspaceId: 'lab' },
+  });
+  assert.ok(approved.ok());
+  await page.goto(base + '/models');
+  await page.getByLabel('Asset recipe').selectOption('3');
+  await page.getByText('Import dataset', { exact: true }).first().click();
+  await page.getByLabel('Dataset name').fill('V3 arbitrary columns');
+  await page.getByLabel('Prompt field').fill('question');
+  const rows = Array.from({ length: 20 }, (_, i) => ({ question: `Question ${i}`, label: 'A', level: i }));
+  await page
+    .locator('input[type="file"][accept=".json,.jsonl,.csv"]')
+    .setInputFiles({ name: 'v3.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(rows)) });
+  await page.getByRole('button', { name: 'Import dataset', exact: true }).click();
+  await page.getByText('Saved and verified.', { exact: true }).waitFor();
+  const datasets = await (await page.request.get(base + '/api/v1/datasets', { headers })).json();
+  const dataset = datasets.find((d) => d.name === 'V3 arbitrary columns');
+  assert.ok(dataset.columns.includes('label') && dataset.columns.includes('level'));
+  await page.goto(base + '/experiments/new');
+  await page.getByLabel('Experiment recipe').selectOption('3');
+  await page.getByLabel('Experiment name', { exact: true }).fill('V3 browser draft');
+  await page.getByLabel('Pinned model').selectOption(model.modelArtifactId);
+  await page.getByLabel('Frozen dataset').selectOption(dataset.datasetId);
+  await page.getByLabel('Batch size', { exact: true }).fill('4');
+  await page.getByLabel('Weight space').selectOption('lora');
+  await page.getByLabel('LoRA rank', { exact: true }).fill('4');
+  await page.getByLabel('Antithetic sampling', { exact: true }).check();
+  await page.getByLabel('Declarative scorer').selectOption('choice-letter');
+  await page.getByLabel('Scorer answer field').fill('label');
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.getByLabel('Coordinator').selectOption(enrolled.deviceId);
+  await page.getByLabel(/CPU fixture/).check();
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.getByRole('button', { name: 'Save draft', exact: true }).click();
+  await page.waitForURL((url) => /\/experiments\/[a-f0-9]{32}$/.test(url.pathname));
+  const v3 = await (
+    await page.request.get(base + '/api/v1/experiments/' + page.url().split('/').at(-1), { headers })
+  ).json();
+  assert.equal(v3.recipeVersion, 3);
+  assert.equal(v3.weightSpace.kind, 'lora');
+  assert.equal(v3.weightSpace.rank, 4);
+  assert.equal(v3.scorer.config.answerField, 'label');
+  assert.equal(v3.antithetic, true);
+  assert.equal(v3.systemPrompt, null);
+  await page.getByRole('tab', { name: 'Configuration', exact: true }).click();
+  await page.getByText('choice-letter@1', { exact: true }).waitFor();
+  await page.getByText('lora', { exact: true }).waitFor();
+  results.v3ImportAndBrowserDraft = true;
+  await page.screenshot({ path: path.join(output, 'v3-draft.png'), fullPage: true });
 
   for (const width of [375, 768, 1280]) {
     await page.setViewportSize({ width, height: 900 });
