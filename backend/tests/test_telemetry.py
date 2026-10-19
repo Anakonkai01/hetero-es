@@ -1,6 +1,6 @@
 import time
 import uuid
-from test_devices import lab,pair,boot
+from labkit import boot, pair
 
 
 def observation(alias='test-gpu'):

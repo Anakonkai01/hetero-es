@@ -1,7 +1,7 @@
 """Capabilities live in an HTTP header, preserving the strict old Poll body."""
 import json
 import pytest
-from test_devices import lab, pair, boot, enable, queued
+from labkit import boot, enable, pair, queued
 
 HEADER='X-HeteroES-Agent-Commands'
 CORE={'SET_CONTRIBUTION','COORDINATE','START_WORKER','STOP_WORKER','CANCEL_ASSIGNMENT'}

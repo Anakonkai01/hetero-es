@@ -3,7 +3,7 @@ import json
 import sqlite3
 
 from backend.store import Store
-from test_api import setup, login, draft
+from labkit import draft, login, pending_commands, submitted
 
 
 def register(client, name="alice"):
@@ -83,8 +83,8 @@ def test_invitation_acceptance_last_admin_and_membership_revocation(setup):
     assert store.get(ids[0])['cancelRequested'] is True
     assert store.get(ids[1])['status'] == 'CANCELLED'
     store.dispatch_once()
-    assert runtime.runs[ids[0]]['state']['status'] == 'CANCELLED'
-    assert len(runtime.submissions) == 1
+    assert submitted(runtime) == ids[:1]
+    assert {c['assignmentId'] for _, c in pending_commands(runtime, 'CANCEL_ASSIGNMENT')} == {r['assignmentId'] for r in runtime.runs()}
 
 
 def test_suspension_revokes_sessions_cancels_queue_and_preserves_evidence(setup):
@@ -139,12 +139,14 @@ def test_migration_preserves_legacy_bytes_queue_and_ids(tmp_path, setup):
 def test_dispatch_revalidates_assignment_before_launch(setup):
     client, store, runtime = setup
     admin = login(client, 'admin')
-    rid = draft(client, admin).json()['experimentId']
+    # The coordinator (3060) stays assigned: only the worker's assignment changes.
+    coordinator = next(d['deviceId'] for d in runtime.devices() if d['workerId'] == '3060')
+    rid = draft(client, admin, coordinatorDeviceId=coordinator, workerIds=['5070ti']).json()['experimentId']
     client.post(f'/api/v1/experiments/{rid}/submit', headers=admin)
     with store.db() as db:
         db.execute('UPDATE worker_assignments SET workspace_id=NULL WHERE worker_id="5070ti"')
     store.dispatch_once()
-    assert runtime.submissions == []
+    assert submitted(runtime) == []
     assert store.get(rid)['status'] == 'CANCELLED'
 
 

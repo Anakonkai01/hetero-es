@@ -4,7 +4,7 @@ import pytest
 
 from backend.app import create_app
 from backend.throttle import Throttle, client_address
-from test_api import Runtime
+from backend.devices import AgentRuntime as Runtime  # agent mode, as on the live lab
 
 
 class Clock:

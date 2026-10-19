@@ -1,6 +1,6 @@
 """Holding admission must not stall current ownership or lifecycle reports."""
 import json
-from test_devices import lab, pair, enable, queued, boot
+from labkit import boot, enable, pair, queued
 from test_pause_resume import paused_report, stopped
 
 

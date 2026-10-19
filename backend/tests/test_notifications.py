@@ -1,7 +1,7 @@
 """In-app notifications: a projection of what happened (accounts, devices, runs) for the people who must know."""
 import json
 
-from test_api import setup, login, draft  # noqa: F401  (fixture)
+from labkit import draft, enroll, login
 from test_lab import register, activate
 
 
@@ -144,14 +144,10 @@ def test_the_list_is_capped_and_unread_counts_everything_unread(setup):
 
 
 def test_a_device_waiting_for_approval_is_announced_to_administrators_while_it_is_still_waiting(setup):
-    client, store, _ = setup
+    client, store, runtime = setup
     admin, participant = login(client, 'admin'), login(client, 'participant')
-    listing(client, admin)
-    with store.db() as db:
-        db.execute('CREATE TABLE IF NOT EXISTS devices (id TEXT PRIMARY KEY, name TEXT, status TEXT)')
-        db.execute("INSERT INTO devices VALUES ('d1','Quang 3060','PENDING'),('d2','Old box','APPROVED')")
-        store.audit(db, 'someone', 'DEVICE_ENROLLED', 'd1')
-        store.audit(db, 'someone', 'DEVICE_ENROLLED', 'd2')
+    listing(client, admin)  # the two approved devices of the fixture were enrolled too: no request for them
+    enroll((client, store, runtime, admin), 'quang-3060', name='Quang 3060')
     items = listing(client, admin)['items']
     assert [(i['kind'], i['params']) for i in items] == [('device.request', {'name': 'Quang 3060'})]
     assert items[0]['target'] == '/operations'

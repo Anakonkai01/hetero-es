@@ -1,7 +1,7 @@
 """Role and route changes are one guarded CPU-only transaction."""
 import json
 import pytest
-from test_devices import lab, pair, boot, enable, queued
+from labkit import boot, enable, pair, queued
 
 
 def configuration(lab, device):

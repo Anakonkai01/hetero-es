@@ -2,7 +2,7 @@ import json
 import pytest
 from pydantic import ValidationError
 from backend.devices import Enrollment, EndpointUpdate
-from test_devices import lab, pair, enable, queued, boot
+from labkit import boot, enable, pair, queued
 
 
 def test_public_compute_requires_tls_and_private_bulk():

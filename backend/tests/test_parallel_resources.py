@@ -6,7 +6,7 @@ import time
 import pytest
 from backend.devices import AgentRuntime
 from backend.store import Store
-from test_devices import lab, pair, boot, enable, queued
+from labkit import boot, enable, pair, queued
 
 
 def same_gpu(lab, device, auth, source):

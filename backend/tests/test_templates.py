@@ -1,7 +1,7 @@
 """Saved experiment settings ("templates"): per workspace, validated, never carrying ids that can go stale."""
 import pytest
 
-from test_api import setup, login  # noqa: F401  (fixture)
+from labkit import login
 from test_lab import register, activate
 
 GOOD = {'task': 'arith16', 'maxGenerations': 3, 'candidatesPerGeneration': 12, 'alpha': 0.001, 'sigma': 0.001, 'decodeEngine': 'hf_generate',

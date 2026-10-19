@@ -3,7 +3,7 @@ import json
 import pytest
 from backend.devices import AgentRuntime
 from backend.store import Store
-from test_devices import lab, pair, enable, queued, boot
+from labkit import boot, enable, pair, queued
 
 
 def checkpoint():

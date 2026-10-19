@@ -2,7 +2,7 @@
 import pytest
 
 from backend.passwords import MIN_LENGTH, password_problem
-from test_api import setup, login  # noqa: F401  (fixture)
+from labkit import login
 
 
 def register(client, **fields):

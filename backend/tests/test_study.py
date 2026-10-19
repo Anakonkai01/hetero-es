@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 from backend.app import create_app
 from backend.devices import AgentRuntime
 from backend.local_storage import LocalBackend
-from test_api import login
+from labkit import login
 
 
 @pytest.fixture

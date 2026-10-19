@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 from backend.app import create_app
-from test_api import Runtime
+from backend.devices import AgentRuntime as Runtime  # agent mode, as on the live lab
 
 
 def test_same_origin_web_keeps_api_auth_and_unknown_paths(tmp_path):

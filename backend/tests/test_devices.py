@@ -3,60 +3,8 @@ import json
 import time
 import uuid
 import pytest
-from fastapi.testclient import TestClient
-from backend.app import create_app
 from backend.devices import AgentRuntime
-from test_api import login, draft
-
-
-@pytest.fixture
-def lab(tmp_path):
-    runtime = AgentRuntime()
-    app = create_app(tmp_path/'lab.sqlite', {'admin':'test-admin-pass'}, runtime, dispatch=False)
-    with TestClient(app) as client:
-        yield client, app.state.store, runtime, login(client, 'admin')
-
-
-def pair(lab, alias='test-gpu', coordinator=True):
-    client, store, runtime, admin = lab
-    code = client.post('/api/v1/devices/pairing-codes',headers=admin).json()['code']
-    data = {'code':code,'workerId':alias,'displayName':alias,
-            'selfTest':{'passed':True,'coordinator':coordinator,'gpuName':'Fake CPU test GPU',
-                        'vramTotalMb':12000,'noiseVersion':'numpy_pcg64_normal_f32_to_f16_v1',
-                        'gpuUUID':'GPU-'+str(uuid.uuid5(uuid.NAMESPACE_DNS,alias))},
-            'computeUrl':'http://100.64.0.1:8769'}
-    response = client.post('/api/v1/device/enroll',json=data)
-    assert response.status_code == 201, response.text
-    d=response.json()
-    auth={'Authorization':'Bearer '+d['deviceToken'],
-          'X-HeteroES-Agent-Commands':'SET_CONTRIBUTION,COORDINATE,START_WORKER,STOP_WORKER,CANCEL_ASSIGNMENT,PAUSE_ASSIGNMENT,UPDATE_BACKUP_POLICY'}
-    assert client.post('/api/v1/device/enroll',json=data).status_code == 409
-    assert client.patch('/api/v1/platform/devices/'+d['deviceId'],json={'approved':True,'workspaceId':'lab'},headers=admin).status_code == 200
-    boot(client,auth,'boot-1')
-    return d, auth
-
-
-def boot(client,auth,boot_id,**changes):
-    data={'bootId':boot_id,'contribution':False,'processes':[], 'reports':[],**changes}
-    response=client.post('/api/v1/device/poll',headers=auth,json=data)
-    assert response.status_code == 200,response.text
-    return response.json()
-
-
-def enable(lab,d,auth,boot_id='boot-1'):
-    client,_,_,admin=lab
-    r=client.post('/api/v1/devices/'+d['deviceId']+'/contribution',headers=admin,json={'enabled':True,'bootId':boot_id})
-    assert r.status_code==200,r.text
-    return boot(client,auth,boot_id,contribution=True)
-
-
-def queued(lab,d,**changes):
-    client,store,_,admin=lab
-    r=draft(client,admin,**{'workerIds':[d['workerId']],'coordinatorDeviceId':d['deviceId'],**changes})
-    assert r.status_code==200,r.text
-    rid=r.json()['experimentId']
-    assert client.post(f'/api/v1/experiments/{rid}/submit',headers=admin).status_code==200
-    return rid
+from labkit import boot, draft, enable, login, pair, pending_commands, queued, submitted  # noqa: F401  (fixtures lab and setup: conftest.py)
 
 
 def test_offline_queue_and_boot_activation_are_independent(lab):
@@ -282,3 +230,19 @@ def test_native_windows_admission_requires_exact_reference_and_worker_only():
                     {'compatibility':{**proof,'recipeHash':'e'*64}},
                     {'compatibility':{**proof,'restoredSha256':'f'*64}}):
         with pytest.raises(ValidationError):SelfTest(**{**data,**changes})
+
+
+def test_turning_a_device_off_cancels_its_queued_and_running_jobs(setup):
+    client, store, runtime = setup
+    admin = login(client, 'admin')
+    ids = [draft(client, admin, name=f'GPU job {i}').json()['experimentId'] for i in range(2)]
+    for rid in ids:
+        client.post(f'/api/v1/experiments/{rid}/submit', headers=admin)
+    store.dispatch_once()
+    assert submitted(runtime) == ids[:1]
+    device = next(d for d in runtime.devices() if d['workerId'] == '5070ti')
+    off = client.post(f"/api/v1/devices/{device['deviceId']}/contribution", json={'enabled': False, 'bootId': 'boot-1'}, headers=admin)
+    assert off.status_code == 200
+    assert store.get(ids[0])['cancelRequested'] and store.get(ids[1])['status'] == 'CANCELLED'
+    assert [(did, c['assignmentId']) for did, c in pending_commands(runtime, 'CANCEL_ASSIGNMENT')] == [
+        (device['deviceId'], runtime.runs()[0]['assignmentId'])]

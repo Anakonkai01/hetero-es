@@ -6,6 +6,7 @@ import pytest
 from backend.app import create_app
 from backend.store import Store
 from backend.runtime import RuntimeRejected
+from labkit import draft, login, submitted
 
 
 class Runtime:
@@ -30,28 +31,6 @@ class Runtime:
         self.runs[run_id]["state"]["status"] = "CANCELLED"
 
 
-@pytest.fixture
-def setup(tmp_path):
-    runtime = Runtime()
-    app = create_app(tmp_path / "product.sqlite", {"admin": "test-admin-pass", "participant": "test-user-pass"}, runtime, dispatch=False)
-    with TestClient(app) as client:
-        yield client, app.state.store, runtime
-
-
-def login(client, name):
-    result = client.post("/api/v1/auth/login", json={"username": name, "password": "test-admin-pass" if name == "admin" else "test-user-pass"})
-    assert result.status_code == 200
-    return {"Authorization": "Bearer " + result.json()["accessToken"], "X-Workspace-Id": "lab"}
-
-
-def draft(client, headers, **changes):
-    body = dict(name="Test run", modelName="Qwen/Qwen2.5-0.5B-Instruct", modelArtifactId="qwen-pinned",
-                schedulerPolicy="greedy", syncMode="synchronous", workerIds=["5070ti"], task="arith16",
-                maxGenerations=3, candidatesPerGeneration=8, alpha=.001, sigma=.001, decodeEngine="hf_generate")
-    result = client.post("/api/v1/experiments", json={**body, **changes}, headers=headers)
-    return result
-
-
 def test_real_session_revocation_and_workspace_enforcement(setup):
     client, _, _ = setup
     assert client.get("/api/v1/experiments").status_code == 401
@@ -74,7 +53,8 @@ def test_participant_cannot_read_or_cancel_admin_run(setup):
     assert client.get(f"/api/v1/experiments/{own}", headers=admin).status_code == 200
 
 
-def test_fifo_one_active_restart_and_idempotent_submit(setup):
+def test_runs_on_the_same_gpu_wait_in_order_and_submit_is_idempotent(setup):
+    # Release after completion is covered by test_admission_hold.py (it needs the agents' drain reports).
     client, store, runtime = setup
     headers = login(client, "admin")
     ids = [draft(client, headers, name=f"Run {i}").json()["experimentId"] for i in range(2)]
@@ -83,12 +63,9 @@ def test_fifo_one_active_restart_and_idempotent_submit(setup):
     client.post(f"/api/v1/experiments/{ids[0]}/submit", headers=headers)
     store.dispatch_once()
     store.dispatch_once()
-    assert [item["runId"] for item in runtime.submissions] == ids[:1]
-    runtime.runs[ids[0]]["state"]["status"] = "COMPLETED"
-    store.dispatch_once()
-    store.dispatch_once()
-    assert [item["runId"] for item in runtime.submissions] == ids
-    assert store.get(ids[0])["status"] == "COMPLETED"
+    assert submitted(runtime) == ids[:1]
+    assert store.get(ids[1])["status"] == "QUEUED"
+    assert "release" in store.get(ids[1])["waitingReason"]
 
 
 def test_queued_cancel_never_contacts_runtime(setup):
@@ -98,7 +75,7 @@ def test_queued_cancel_never_contacts_runtime(setup):
     client.post(f"/api/v1/experiments/{run_id}/submit", headers=headers)
     assert client.post(f"/api/v1/experiments/{run_id}/cancel", headers=headers).json()["status"] == "CANCELLED"
     store.dispatch_once()
-    assert runtime.submissions == []
+    assert submitted(runtime) == []
 
 
 @pytest.mark.parametrize("changes", [{"schedulerPolicy": "capacity-weighted"}, {"syncMode": "asynchronous"},
@@ -135,14 +112,15 @@ def test_restart_after_lost_start_response_uses_same_run_and_queue(setup):
         original(config)
         raise TimeoutError("response lost after runtime accepted")
     runtime.submit = lost
-    with pytest.raises(TimeoutError):
-        store.dispatch_once()
+    store.dispatch_once()  # the dispatcher keeps going and reports the error instead of raising it
+    assert store.last_error == "TimeoutError"
     assert store.get(run_id)["status"] == "STARTING"
     runtime.submit = original
     restarted = Store(store.path, {}, runtime)
     restarted.dispatch_once()
-    assert restarted.get(run_id)["status"] == "RUNNING"
-    assert len(runtime.submissions) == 1
+    assert restarted.last_error is None
+    assert restarted.get(run_id)["status"] == "STARTING"  # until the coordinator reports
+    assert submitted(runtime) == [run_id]  # the retry found the frozen assignment instead of making a second one
     assert login(client, "admin")  # existing hashes and sessions survive restart
 
 

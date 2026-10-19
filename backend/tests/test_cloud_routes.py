@@ -3,8 +3,8 @@ import pytest
 from fastapi.testclient import TestClient
 from backend.app import create_app
 from backend.devices import AgentRuntime
-from test_api import login
-from test_devices import pair,enable,queued,boot
+from labkit import login
+from labkit import boot, enable, pair, queued
 from test_cloud_storage import Objects,manifest
 
 

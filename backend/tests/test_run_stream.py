@@ -4,7 +4,7 @@ import json
 import time
 from pathlib import Path
 
-from test_api import setup, login, draft  # noqa: F401  (fixture)
+from labkit import draft, login
 
 FIXTURE = json.loads((Path(__file__).parent / 'fixtures' / 'run-fifo.json').read_text())
 
