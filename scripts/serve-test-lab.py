@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""A throwaway CPU-only lab for browser/Electron checks: temporary state, fake runtime, fake installers.
+"""A throwaway CPU-only lab for browser/Electron checks: temporary state, agent mode, fake installers.
 
     serve-test-lab.py --web <built frontend> --port 18080
 
-Accounts: admin / test-admin-pass (platform administrator), participant / test-user-pass. It never touches the real lab,
-its configuration or its installers. Stop it with Ctrl-C or SIGTERM; its state directory is deleted on exit.
+Accounts: admin / test-admin-pass (platform administrator), participant / test-user-pass. Like the live lab it runs in
+agent mode; two devices are paired the way a Worker pairs (code, enrollment, approval) and show as offline: '5070ti'
+(coordinator) and '3060' (worker). It never touches the real lab, its configuration or its installers. Stop it with Ctrl-C or SIGTERM; its state directory is deleted on exit.
 """
 import argparse
 import json
@@ -14,11 +15,35 @@ import sys
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path[:0] = [str(ROOT), str(ROOT / 'backend' / 'tests')]
+sys.path[:0] = [str(ROOT)]
 
+from fastapi.testclient import TestClient  # noqa: E402
 import uvicorn  # noqa: E402
 from backend.app import create_app  # noqa: E402
-from test_api import Runtime  # noqa: E402
+from backend.devices import AgentRuntime  # noqa: E402
+
+USERS = {'admin': 'test-admin-pass', 'participant': 'test-user-pass'}
+
+
+def pair_devices(app):
+    """Pair, enroll and approve two Linux devices through the lab's own routes (no lifespan: requests only)."""
+    import uuid
+    client = TestClient(app)
+    token = client.post('/api/v1/auth/login', json={'username': 'admin', 'password': USERS['admin']}).json()['accessToken']
+    admin = {'Authorization': 'Bearer ' + token, 'X-Workspace-Id': 'lab'}
+    for alias, gpu, vram, coordinator in (('5070ti', 'NVIDIA GeForce RTX 5070 Ti', 16303, True),
+                                          ('3060', 'NVIDIA GeForce RTX 3060', 12288, False)):
+        code = client.post('/api/v1/devices/pairing-codes', headers=admin).json()['code']
+        enrolled = client.post('/api/v1/device/enroll', json={
+            'code': code, 'workerId': alias, 'displayName': alias, 'computeUrl': 'http://100.64.0.1:8769',
+            'selfTest': {'passed': True, 'coordinator': coordinator, 'gpuName': gpu, 'vramTotalMb': vram,
+                         'noiseVersion': 'numpy_pcg64_normal_f32_to_f16_v1',
+                         'gpuUUID': 'GPU-' + str(uuid.uuid5(uuid.NAMESPACE_DNS, alias))}})
+        enrolled.raise_for_status()
+        approved = client.patch('/api/v1/platform/devices/' + enrolled.json()['deviceId'],
+                                json={'approved': True, 'workspaceId': 'lab'}, headers=admin)
+        approved.raise_for_status()
+    client.post('/api/v1/auth/logout', headers=admin)
 
 
 def load_run(store, recorded):
@@ -92,8 +117,9 @@ def main():
         for item in installers:
             (downloads / item['name']).write_bytes(b'not a real installer')
         (downloads / 'manifest.json').write_text(json.dumps({'version': '0.1.0', 'build': 'test', 'installers': installers, 'serverInstallers': []}))
-        app = create_app(state / 'product.sqlite', {'admin': 'test-admin-pass', 'participant': 'test-user-pass'}, Runtime(),
-                         dispatch=False, web_directory=args.web.resolve(), downloads_directory=downloads)
+        app = create_app(state / 'product.sqlite', USERS, AgentRuntime(), dispatch=False,
+                         web_directory=args.web.resolve(), downloads_directory=downloads)
+        pair_devices(app)
         for recorded in args.seed_run:
             load_run(app.state.store, json.loads(recorded.read_text()))
         if args.simulate_live:
