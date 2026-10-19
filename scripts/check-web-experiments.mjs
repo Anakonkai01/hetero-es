@@ -14,7 +14,8 @@ try{
  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error'&&!/status of (401|404)/.test(m.text()))errors.push(m.text());});
  await page.goto(base+'/login');await page.locator('input[autocomplete="username"]').fill('admin');await page.locator('input[autocomplete="current-password"]').fill('test-admin-pass');await page.locator('form button[type="submit"]').click();await page.waitForURL(u=>!u.pathname.startsWith('/login'));
 
- const choose=async text=>{const value=await page.locator('#template-picker option').evaluateAll((options,needle)=>options.find(o=>o.textContent.includes(needle))?.value,text);assert.ok(value,'template option '+text);await page.getByLabel('Start from').selectOption(value);};
+ // The picker loads its templates after the page opens: wait for the option instead of reading the list at once.
+ const choose=async text=>{await page.waitForFunction(needle=>[...document.querySelectorAll('#template-picker option')].some(o=>o.textContent.includes(needle)),text,{timeout:10000}).catch(()=>{});const value=await page.locator('#template-picker option').evaluateAll((options,needle)=>options.find(o=>o.textContent.includes(needle))?.value,text);assert.ok(value,'template option '+text);await page.getByLabel('Start from').selectOption(value);};
  // 1. Pick two runs and compare them.
  await page.goto(base+'/experiments');await page.locator('.run-card').first().waitFor();
  await page.getByText('Compare',{exact:true}).first().waitFor();
