@@ -59,3 +59,14 @@ The last read-only database check shows `5070ti` APPROVED and `3060-thao` **REVO
 No new GPU job, native Windows acceptance, fresh multi-GPU run or deployment of cleanup code is claimed. Installer
 polish/r11, the next demo rehearsal, and identity/epoch/export features still pending in the ADRs are separate work.
 The two existing security/policy findings are listed in [SECURITY-NOTES.md](SECURITY-NOTES.md); neither was silently fixed.
+
+## Extensibility work (started 2026-10-19)
+
+The owner approved an extensibility audit and eight design decisions: reward is scored on the coordinator from submitted
+texts; reward identity lives outside the recipe; the shared lab accepts only declarative rewards; full/subset/LoRA weight
+spaces; Recipe v1+v2 merge into one new format with ONE identity break (v3, released with desktop r11) that also makes room
+for antithetic signs and coefficient rules; numerics stay bit-identical and old runs must replay to their recorded hashes.
+Step 0 (branch `feat/extensibility-step0`, receipt [2026-10-19-extensibility-step0](evidence/2026-10-19-extensibility-step0/README.md))
+changes no identity: recorded recipe/record/workload hashes and coefficients are tests, product names live in
+`runtime/src/heteroes/catalog.py`, and `heteroes.executor.evaluate_task` is the single task seam. Next is the ADR-008 draft
+of the v3 format; no v3 code exists yet.
