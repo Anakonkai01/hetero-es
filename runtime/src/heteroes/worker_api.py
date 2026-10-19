@@ -7,6 +7,8 @@ the coordinator's private memory; workers never see it, only these messages.
 
     lease           {"worker_id"[, "request_id"][, "generation"]}          -> {"generation_state", "work": {...} | null}
     submit_result   {"descriptor", "attempt_number", "token", "reward"}    -> {"outcome": "COMMITTED" | "ALREADY_COMMITTED"}
+                    Recipe v3 (ADR-008): {"descriptor", "attempt_number", "token", "completions", "completions_sha256"}
+                    instead; the coordinator scores the texts (a WorkerAPI built with a scorer accepts only this form).
     report_failure  {"descriptor", "attempt_number", "token", "kind"}      -> {}
     heartbeat       {"descriptor", "attempt_number", "token"}              -> {"deadline"}   the lease is extended by the coordinator's lease length
 
@@ -63,6 +65,13 @@ ERROR_CODES = {
 }
 
 
+class ScoringFailedError(LedgerError):
+    """The coordinator could not score submitted texts (Recipe v3): the experiment's fault, not the worker's."""
+
+
+ERROR_CODES[ScoringFailedError] = "scorer_failed"
+
+
 def _code_of(error: LedgerError) -> str:
     return next(ERROR_CODES[cls] for cls in type(error).__mro__ if cls in ERROR_CODES)
 
@@ -110,8 +119,8 @@ def _decode_lease(request):
     return _text("worker_id", request["worker_id"]), request_id, generation
 
 
-def _decode_attempt(request, last: str):
-    _fields(request, {"descriptor", "attempt_number", "token", last})
+def _decode_attempt(request, *last: str):
+    _fields(request, {"descriptor", "attempt_number", "token", *last})
     return (
         CandidateDescriptor.from_dict(request["descriptor"]),
         _integer("attempt_number", request["attempt_number"]),
@@ -120,8 +129,25 @@ def _decode_attempt(request, last: str):
 
 
 def _decode_result(request):
+    if isinstance(request, dict) and "completions" in request:
+        descriptor, attempt_number, token = _decode_attempt(request, "completions", "completions_sha256")
+        completions = request["completions"]
+        if not isinstance(completions, list) or not completions or not all(isinstance(t, str) for t in completions):
+            raise TypeError("completions must be a nonempty list of texts")
+        if completions_sha256(completions) != request["completions_sha256"]:
+            raise ValueError("completions_sha256 is not the hash of the completions")
+        return descriptor, attempt_number, token, completions
     descriptor, attempt_number, token = _decode_attempt(request, "reward")
     return descriptor, attempt_number, token, _finite_number("reward", request["reward"])
+
+
+def completions_sha256(completions) -> str:
+    """The identity of a list of texts: SHA-256 of their canonical JSON (the same hash the ledger stores)."""
+    import hashlib
+
+    from heteroes.canonical import canonical_json_bytes
+
+    return hashlib.sha256(canonical_json_bytes(list(completions))).hexdigest()
 
 
 def _decode_heartbeat(request):
@@ -153,7 +179,12 @@ class WorkerAPI:
         lease_seconds: float,
         policy=None,
         cancel_requested=lambda: False,
+        scorer=None,
     ):
+        # Recipe v3: `scorer(descriptor, completions) -> reward` runs here, on the coordinator; it raises ScorerError when the
+        # experiment's scoring fails, which is never a reward and never the worker's fault (`scoring_error` keeps it)
+        self._scorer = scorer
+        self.scoring_error: str | None = None
         self._ledger = ledger
         self._experiment_id = experiment_id
         self._generation = generation
@@ -240,8 +271,25 @@ class WorkerAPI:
         return {"deadline": lease.deadline}
 
     def _submit_result(self, decoded) -> dict:
-        descriptor, attempt_number, token, reward = decoded
-        outcome = self._ledger.submit_result(descriptor, attempt_number, token, reward)
+        descriptor, attempt_number, token, payload = decoded
+        texts = isinstance(payload, list)
+        if texts != (self._scorer is not None):
+            raise LedgerError(
+                "this coordinator scores texts: submit completions" if self._scorer else "submit a reward, not texts"
+            )
+        if texts:
+            from heteroes.v3.scoring import ScorerError
+
+            # a stale or foreign report is refused before the experiment's scorer spends any time on it
+            self._ledger.attempt_worker(descriptor, attempt_number, token)
+            try:
+                reward = self._scorer(descriptor, payload)
+            except ScorerError as error:
+                self.scoring_error = str(error)
+                raise ScoringFailedError(str(error)) from error
+            outcome = self._ledger.submit_result(descriptor, attempt_number, token, reward, completions=payload)
+        else:
+            outcome = self._ledger.submit_result(descriptor, attempt_number, token, payload)
         if outcome is SubmitOutcome.COMMITTED and hasattr(self._policy, "committed"):
             self._policy.committed(descriptor.candidate_id)  # a policy may learn from the duration (GreedyTail)
         return {"outcome": outcome.value}

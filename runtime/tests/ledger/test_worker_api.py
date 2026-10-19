@@ -373,6 +373,7 @@ def test_the_codes_of_the_errors_a_worker_can_meet_are_fixed():
         "WorkerQuarantinedError": "worker_quarantined",
         "RecordMismatchError": "record_mismatch",
         "ConflictingUpdateError": "conflicting_update",
+        "ScoringFailedError": "scorer_failed",  # Recipe v3: the coordinator could not score submitted texts
     }
 
 
@@ -532,3 +533,68 @@ def test_a_bug_in_the_coordinator_is_not_dressed_up_as_a_bad_request(ledger):
 
     with pytest.raises(sqlite3.ProgrammingError):
         api.handle("lease", {"worker_id": "worker-a"})
+
+
+# ---------------------------------------------------------------------------
+# Recipe v3: texts submitted, scored by the coordinator (ADR-008 section 7)
+# ---------------------------------------------------------------------------
+
+
+def texts_request(work, texts=("a", "b"), **changes):
+    from heteroes.worker_api import completions_sha256
+
+    request = {
+        "descriptor": work["descriptor"],
+        "attempt_number": work["attempt_number"],
+        "token": work["token"],
+        "completions": list(texts),
+        "completions_sha256": completions_sha256(texts),
+    }
+    request.update(changes)
+    return request
+
+
+def test_texts_are_scored_and_stored_with_the_reward(ledger):
+    scored = []
+    api = WorkerAPI(ledger, "exp", 0, LEASE_SECONDS, scorer=lambda d, texts: scored.append(texts) or len(texts) / 4)
+    work = take(api)
+    assert call(api, "submit_result", texts_request(work))["outcome"] == "COMMITTED"
+    candidate = work["descriptor"]
+    cid = f"exp/g0/c{candidate['index']}"
+    assert scored == [["a", "b"]] and ledger.get_candidate(cid).result.reward == 0.5
+    assert ledger.get_completions(cid)[1] == ["a", "b"]
+
+
+def test_texts_with_a_wrong_hash_or_a_malformed_list_are_bad_requests(ledger):
+    api = WorkerAPI(ledger, "exp", 0, LEASE_SECONDS, scorer=lambda d, texts: 0.0)
+    work = take(api)
+    for request in (
+        texts_request(work, completions_sha256="0" * 64),
+        texts_request(work, completions=[]),
+        texts_request(work, completions=["ok", 1]),
+        {**texts_request(work), "reward": 0.5},
+    ):
+        assert code_of(call(api, "submit_result", request)) == "bad_request"
+
+
+def test_a_stale_report_is_refused_before_the_scorer_runs(ledger, clock):
+    calls = []
+    api = WorkerAPI(ledger, "exp", 0, LEASE_SECONDS, scorer=lambda d, texts: calls.append(1) or 0.0)
+    work = take(api)
+    clock.advance(LEASE_SECONDS + 1)
+    take(api, "worker-b")  # the candidate was given to somebody else
+    stale = texts_request(work)
+    assert code_of(call(api, "submit_result", stale)) == "stale_attempt" and calls == []
+
+
+def test_a_scorer_failure_is_reported_kept_and_commits_nothing(ledger):
+    from heteroes.v3.scoring import ScorerError
+
+    def broken(descriptor, texts):
+        raise ScorerError("no answer field")
+
+    api = WorkerAPI(ledger, "exp", 0, LEASE_SECONDS, scorer=broken)
+    work = take(api)
+    assert code_of(call(api, "submit_result", texts_request(work))) == "scorer_failed"
+    assert api.scoring_error == "no answer field"
+    assert all(record.result is None for record in ledger.list_candidates("exp", 0))

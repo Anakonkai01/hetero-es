@@ -70,6 +70,7 @@ class CandidateExecutor:
         clock=time.perf_counter,
         chunk: int | None = None,
         dataset=None,
+        return_completions: bool = False,
     ):
         if chunk is None:
             chunk = default_chunk(recipe.eval_dtype)  # the exact size for the recipe's precision (FP32: 16, FP16: 1)
@@ -81,6 +82,8 @@ class CandidateExecutor:
         self.schema = schema
         self.recipe = recipe
         self.dataset = dataset
+        # Recipe v3 (ADR-008 section 7): the call returns the texts, which the coordinator scores, instead of the reward
+        self.return_completions = return_completions
         self.effective_sigma = recipe.sigma
         self.batch_rows = None
         self._eval = EvalModel(
@@ -161,12 +164,12 @@ class CandidateExecutor:
         reward = None
         start = mark = self._clock()
         try:
+            # the second candidate of an antithetic pair is perturbed with -sigma (ADR-008 section 5); 1 * sigma is sigma exactly
+            scale = descriptor.sign * self.effective_sigma
             if self.recipe.engine_version == CUDA_ENGINE_VERSION:
-                perturb_model_cuda_(self.model, self.schema, descriptor.seed, self.effective_sigma)
+                perturb_model_cuda_(self.model, self.schema, descriptor.seed, scale)
             else:
-                perturb_model_(
-                    self.model, self.schema, descriptor.seed, self.effective_sigma, self.recipe.chunk_elements
-                )
+                perturb_model_(self.model, self.schema, descriptor.seed, scale, self.recipe.chunk_elements)
             now = self._clock()
             timing["perturb"], mark = now - mark, now
             self._eval.refresh()  # an FP32 copy takes the perturbed weights (nothing to do in FP16)
@@ -194,4 +197,4 @@ class CandidateExecutor:
             raise error
         self.last_timing = timing
         self.last_completions = completions
-        return reward
+        return completions if self.return_completions else reward

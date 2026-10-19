@@ -662,3 +662,21 @@ def test_a_failed_candidate_leaves_no_texts_from_an_earlier_one(fx, monkeypatch)
     with pytest.raises(CandidateFailed):
         executor(fx.descriptor(8))
     assert executor.last_completions is None
+
+
+def test_the_second_candidate_of_a_pair_is_perturbed_with_minus_sigma(fx):
+    executor = fx.executor()
+    executor(fx.descriptor(7, sign=-1))
+    assert fx.seen == [fx.expected_perturbed(7, sigma=-SIGMA)]
+    assert fx.expected_perturbed(7, sigma=-SIGMA) != fx.expected_perturbed(7)  # premise: the sign changes the weights
+    executor(fx.descriptor(7))
+    assert fx.seen[-1] == fx.expected_perturbed(7)  # sign +1: today's perturbation, bit for bit
+
+
+def test_a_v3_executor_returns_the_texts_instead_of_the_reward(fx, monkeypatch):
+    def evaluate(model, tokenizer, chunk=1):
+        return EvalResult(mean_reward=0.25, records=(EvalRecord("q", 1, "Answer: 1", 1, 1.0),))
+
+    monkeypatch.setattr(executor_module, "evaluate_model", evaluate)
+    executor = CandidateExecutor(fx.model, None, fx.schema, fx.recipe, return_completions=True)
+    assert executor(fx.descriptor(7)) == ("Answer: 1",)

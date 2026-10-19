@@ -133,6 +133,26 @@ class WorkerClient:
         except (KeyError, TypeError, ValueError) as error:
             raise WorkerAPIError("bad_response", f"a result reply that cannot be read: {error!r}") from error
 
+    def submit_completions(self, assignment: Assignment, completions) -> SubmitOutcome:
+        """Recipe v3: send the texts of the candidate; the coordinator scores them (ADR-008 section 7)."""
+        from heteroes.worker_api import completions_sha256
+
+        texts = list(completions)
+        reply = self._call(
+            "submit_result",
+            {
+                "descriptor": assignment.descriptor.to_dict(),
+                "attempt_number": assignment.attempt_number,
+                "token": assignment.token,
+                "completions": texts,
+                "completions_sha256": completions_sha256(texts),
+            },
+        )
+        try:
+            return SubmitOutcome(reply["outcome"])
+        except (KeyError, TypeError, ValueError) as error:
+            raise WorkerAPIError("bad_response", f"a result reply that cannot be read: {error!r}") from error
+
     def heartbeat(self, assignment: Assignment) -> float:
         """Tell the coordinator that the lease is still wanted; returns the new deadline (the coordinator's clock)."""
         reply = self._call(
@@ -183,7 +203,7 @@ class Worker:
         self,
         worker_id: str,
         transport: Transport,
-        evaluate: Callable[[CandidateDescriptor], float],
+        evaluate: Callable[[CandidateDescriptor], float | tuple[str, ...]],  # a reward, or the texts (Recipe v3)
         transient_errors: tuple = (),
         heartbeat_seconds: float | None = None,
     ):
@@ -238,13 +258,20 @@ class Worker:
             except Exception:
                 pass
             raise
+        if isinstance(reward, (list, tuple)):  # Recipe v3: the texts, scored by the coordinator (ADR-008 section 7)
+            if not reward or not all(isinstance(text, str) for text in reward):
+                return self._report(work, FailureKind.VERIFIER_ERROR)
+            return self._deliver(work, tuple(reward))
         if isinstance(reward, bool) or not isinstance(reward, (int, float)) or not math.isfinite(reward):
             return self._report(work, FailureKind.VERIFIER_ERROR)  # never sent as a reward
         return self._deliver(work, reward)
 
-    def _deliver(self, work: Assignment, reward: float) -> Step:
+    def _deliver(self, work: Assignment, reward) -> Step:
         try:
-            outcome = self.client.submit_result(work, reward)
+            if isinstance(reward, tuple):
+                outcome = self.client.submit_completions(work, reward)
+            else:
+                outcome = self.client.submit_result(work, reward)
         except self._transient:
             self._pending = (work, reward)  # the work was done: keep it, try again before anything else
             raise

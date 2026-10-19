@@ -30,6 +30,7 @@ from heteroes.eval.candidate import model_weights_sha256
 from heteroes.generation_record import GenerationRecord
 from heteroes.ledger import GenerationState, Ledger
 from heteroes.manifest import CandidateDescriptor, Recipe, derive_seed
+from heteroes.v3.antithetic import candidate_seeds
 from heteroes.model.schema import ParameterSchema
 from heteroes.model.weights_io import (
     WeightsFileError,
@@ -48,6 +49,10 @@ class CoordinatorError(Exception):
 
 class RunCancelled(CoordinatorError):
     """A managed run stopped at a safe boundary, preserving recorded updates."""
+
+
+class ScoringFailed(CoordinatorError):
+    """Recipe v3: the coordinator could not score submitted texts; the generation stops, it is never scored as 0."""
 
 
 class RunPaused(CoordinatorError):
@@ -106,7 +111,18 @@ class Coordinator:
         generation_started=None,
         pause_requested=lambda: False,
         dataset=None,
+        antithetic: bool = False,
+        coefficient_rule: str | None = None,
+        score=None,
     ):
+        # Recipe v3 (ADR-008): `antithetic` gives pairs (seed, +1), (seed, -1); `coefficient_rule` makes version-2 records;
+        # `score(generation, descriptor, completions) -> reward` scores the texts the workers submit, on this process
+        if antithetic and candidates % 2:
+            raise CoordinatorError("an antithetic population must be even")
+        self._antithetic = antithetic
+        self._coefficient_rule = coefficient_rule
+        self._score = score
+        self._api = None
         self.model = model
         self.schema = schema
         self.recipe = recipe
@@ -181,6 +197,8 @@ class Coordinator:
         progress, progress_at = None, started
         while True:
             self._check_cancel()
+            if self._api is not None and self._api.scoring_error is not None:
+                raise ScoringFailed(f"generation {self.experiment_id}/g{generation}: {self._api.scoring_error}")
             status = self.ledger.get_generation_status(self.experiment_id, generation)
             now = self._monotonic()
             if status.state is GenerationState.COMPLETE:
@@ -339,9 +357,13 @@ class Coordinator:
                 experiment_id=self.experiment_id,
                 generation=generation,
                 index=index,
-                seed=derive_seed(self.experiment_id, generation, index),
+                seed=seed,
+                sign=sign,
             )
-            for index in range(self.candidates)
+            # without antithetic pairs these are derive_seed(experiment, generation, index) with sign +1, as before
+            for index, (seed, sign) in enumerate(
+                candidate_seeds(self.experiment_id, generation, self.candidates, self._antithetic)
+            )
         ]
         known = [g for g in self.ledger.list_generations(self.experiment_id) if g.generation == generation]
         if known and self.ledger.get_update(self.experiment_id, generation) is not None:
@@ -363,7 +385,11 @@ class Coordinator:
             self._lease_seconds,
             policy,
             cancel_requested=self._cancel_requested,
+            scorer=None
+            if self._score is None
+            else (lambda descriptor, texts: self._score(generation, descriptor, texts)),
         )
+        self._api = api
         self.server.set_generation(api, self._job(generation, policy))
         self.log("generation_open", generation=generation, parent_sha256=parent, candidates=self.candidates)
 
@@ -374,7 +400,12 @@ class Coordinator:
         self.log("generation_complete", generation=generation, rewards=list(results.rewards))
 
         record = GenerationRecord.from_results(
-            self.experiment_id, generation, results, alpha=self.alpha, eta=self.recipe.reward_eta
+            self.experiment_id,
+            generation,
+            results,
+            alpha=self.alpha,
+            eta=self.recipe.reward_eta,
+            coefficient_rule=self._coefficient_rule,
         )
         self._check_cancel()  # last cooperative boundary before write-ahead commit
         self.ledger.record_update(record)  # BEFORE the weights are touched
