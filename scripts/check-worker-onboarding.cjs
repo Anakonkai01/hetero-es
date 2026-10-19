@@ -103,7 +103,7 @@ const listen = (server) =>
       'the lab address shipped with the app is offered',
     );
     const build = (await status(page)).result.build;
-    assert.ok(/^(dev|lf1-\d{8}-r\d+)$/.test(build), `build name: ${build}`); // the committed defaults.json names the last build
+    assert.ok(/^(dev|lf1-\d{8}-r\d+(-candidate\d+)?)$/.test(build), `build name: ${build}`); // the committed defaults.json names the last build
     await page.getByText(build, { exact: false }).first().waitFor();
     results.build = build;
     assert.equal(
