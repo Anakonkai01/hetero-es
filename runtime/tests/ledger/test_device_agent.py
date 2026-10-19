@@ -1,335 +1,490 @@
 import pytest
 from heteroes.product.agent import Agent
-from heteroes.product.files import write_json,read_json
+from heteroes.product.files import write_json, read_json
 
 
 def agent(tmp_path):
-    write_json(tmp_path/'config.json',{'serverUrl':'http://127.0.0.1:8002','deviceId':'a'*32,'workerId':'test',
-        'deviceToken':'private','stateDirectory':str(tmp_path/'state'),'modelPath':'/model',
-        'computeUrl':'http://127.0.0.1:8769','workerHost':'127.0.0.1','workerPort':8769})
-    return Agent(tmp_path/'config.json')
+    write_json(
+        tmp_path / "config.json",
+        {
+            "serverUrl": "http://127.0.0.1:8002",
+            "deviceId": "a" * 32,
+            "workerId": "test",
+            "deviceToken": "private",
+            "stateDirectory": str(tmp_path / "state"),
+            "modelPath": "/model",
+            "computeUrl": "http://127.0.0.1:8769",
+            "workerHost": "127.0.0.1",
+            "workerPort": 8769,
+        },
+    )
+    return Agent(tmp_path / "config.json")
 
 
 def test_boot_resets_off_and_stale_enable_is_rejected(tmp_path):
-    a=agent(tmp_path)
-    a.handle({'commandId':'1','kind':'SET_CONTRIBUTION','bootId':a.boot_id,'enabled':True})
+    a = agent(tmp_path)
+    a.handle({"commandId": "1", "kind": "SET_CONTRIBUTION", "bootId": a.boot_id, "enabled": True})
     assert a.enabled
-    a.handle({'commandId':'2','kind':'SET_CONTRIBUTION','bootId':'old','enabled':True})
-    b=Agent(tmp_path/'config.json')
-    assert not b.enabled and b.boot_id!=a.boot_id
+    a.handle({"commandId": "2", "kind": "SET_CONTRIBUTION", "bootId": "old", "enabled": True})
+    b = Agent(tmp_path / "config.json")
+    assert not b.enabled and b.boot_id != a.boot_id
 
 
 def test_shell_commands_and_bad_paths_never_execute(tmp_path):
-    a=agent(tmp_path)
-    for cmd in ({'commandId':'x','kind':'SHELL','argv':['touch','/tmp/unsafe']},
-                {'commandId':'x','kind':'START_WORKER','runId':'../escape','assignmentId':'a'*32,'epoch':1}):
-        with pytest.raises(ValueError):a.handle(cmd)
+    a = agent(tmp_path)
+    for cmd in (
+        {"commandId": "x", "kind": "SHELL", "argv": ["touch", "/tmp/unsafe"]},
+        {"commandId": "x", "kind": "START_WORKER", "runId": "../escape", "assignmentId": "a" * 32, "epoch": 1},
+    ):
+        with pytest.raises(ValueError):
+            a.handle(cmd)
 
 
-def test_coordinator_recovery_requires_explicit_on(tmp_path,monkeypatch):
-    a=agent(tmp_path)
-    root=a.manager.root/('b'*32);root.mkdir()
-    write_json(root/'config.json',{'runId':'b'*32})
-    write_json(root/'state.json',{'status':'RECOVERING'})
-    launched=[];monkeypatch.setattr(a.manager,'_launch',lambda r:launched.append(r))
+def test_coordinator_recovery_requires_explicit_on(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    root = a.manager.root / ("b" * 32)
+    root.mkdir()
+    write_json(root / "config.json", {"runId": "b" * 32})
+    write_json(root / "state.json", {"status": "RECOVERING"})
+    launched = []
+    monkeypatch.setattr(a.manager, "_launch", lambda r: launched.append(r))
     a.manager.launch(root)
-    assert launched==[]
-    a.enabled=True;a.manager.launch(root)
-    assert launched==[root]
+    assert launched == []
+    a.enabled = True
+    a.manager.launch(root)
+    assert launched == [root]
 
 
-def test_cancel_before_start_fences_delayed_worker_command(tmp_path,monkeypatch):
-    a=agent(tmp_path);a.enabled=True
-    cancel={'commandId':'cancel','kind':'CANCEL_ASSIGNMENT','assignmentId':'b'*32,'epoch':1}
+def test_cancel_before_start_fences_delayed_worker_command(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    a.enabled = True
+    cancel = {"commandId": "cancel", "kind": "CANCEL_ASSIGNMENT", "assignmentId": "b" * 32, "epoch": 1}
     a.handle(cancel)
-    started=[];monkeypatch.setattr(a,'_worker',lambda *args:started.append(args))
-    a.handle({'commandId':'late-start','kind':'START_WORKER','assignmentId':'b'*32,'epoch':1,'runId':'c'*32})
-    assert started==[]
-    assert a.observe()[0]['workerAlive'] is False
+    started = []
+    monkeypatch.setattr(a, "_worker", lambda *args: started.append(args))
+    a.handle(
+        {"commandId": "late-start", "kind": "START_WORKER", "assignmentId": "b" * 32, "epoch": 1, "runId": "c" * 32}
+    )
+    assert started == []
+    assert a.observe()[0]["workerAlive"] is False
 
 
 def test_unknown_pid_birth_is_not_confirmed_dead():
     from heteroes.product.agent import owned_state
-    assert owned_state({'pid':123,'birth':None}) is None
-    assert owned_state(None,intent=True) is None
+
+    assert owned_state({"pid": 123, "birth": None}) is None
+    assert owned_state(None, intent=True) is None
 
 
 def test_duplicate_agent_does_not_change_current_boot(tmp_path):
-    a=agent(tmp_path);a=Agent(tmp_path/'config.json',lock=True)
-    before=read_json(a.root/'boot.json')
-    with pytest.raises(BlockingIOError):Agent(tmp_path/'config.json',lock=True)
-    assert read_json(a.root/'boot.json')==before
+    a = agent(tmp_path)
+    a = Agent(tmp_path / "config.json", lock=True)
+    before = read_json(a.root / "boot.json")
+    with pytest.raises(BlockingIOError):
+        Agent(tmp_path / "config.json", lock=True)
+    assert read_json(a.root / "boot.json") == before
     a.instance_lock.close()
 
 
-def test_monitoring_ack_is_durable_and_not_requeued(tmp_path,monkeypatch):
-    a=agent(tmp_path);root=a.manager.root/('b'*32);root.mkdir()
-    write_json(root/'assignment.json',{'assignmentId':'c'*32,'epoch':1})
-    event={'event':'generation_done','generation':0,'t':1}
-    snap={'state':{'status':'COMPLETED'},'events':[event],'artifacts':[],'generations':[],'candidates':[],'attempts':[]}
-    monkeypatch.setattr(a.manager,'snapshot',lambda _:dict(snap))
-    def reply(_,body):
-        return {'approvalStatus':'APPROVED','desiredContribution':False,'commands':[],
-            'acceptedReports':[{'assignmentId':'c'*32,'sequence':body['reports'][0]['sequence']}],
-            'acceptedEvents':[e['eventId'] for e in body['events']]}
-    monkeypatch.setattr(a,'call',reply)
-    a.cycle();a.observe()
-    with a.db() as db:assert db.execute('SELECT count(*) FROM event_outbox WHERE ack=0').fetchone()[0]==0
+def test_monitoring_ack_is_durable_and_not_requeued(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    root = a.manager.root / ("b" * 32)
+    root.mkdir()
+    write_json(root / "assignment.json", {"assignmentId": "c" * 32, "epoch": 1})
+    event = {"event": "generation_done", "generation": 0, "t": 1}
+    snap = {
+        "state": {"status": "COMPLETED"},
+        "events": [event],
+        "artifacts": [],
+        "generations": [],
+        "candidates": [],
+        "attempts": [],
+    }
+    monkeypatch.setattr(a.manager, "snapshot", lambda _: dict(snap))
+
+    def reply(_, body):
+        return {
+            "approvalStatus": "APPROVED",
+            "desiredContribution": False,
+            "commands": [],
+            "acceptedReports": [{"assignmentId": "c" * 32, "sequence": body["reports"][0]["sequence"]}],
+            "acceptedEvents": [e["eventId"] for e in body["events"]],
+        }
+
+    monkeypatch.setattr(a, "call", reply)
+    a.cycle()
+    a.observe()
+    with a.db() as db:
+        assert db.execute("SELECT count(*) FROM event_outbox WHERE ack=0").fetchone()[0] == 0
 
 
 def test_large_monitoring_projection_preserves_completion_and_latest_metrics():
     import json
     from heteroes.product.agent import bounded_snapshot
-    generations=[{'generationId':str(i),'status':'COMPLETED','committedCandidateCount':256,'modelVersion':'hash'} for i in range(1000)]
-    snapshot={'state':{'status':'COMPLETED','finalWeightsSha256':'final-hash'},'generations':generations,
-        'events':[{'data':'x'*10000} for _ in range(1000)],'candidates':[{'data':'y'*1000} for _ in range(2000)],
-        'attempts':[{'data':'z'*1000} for _ in range(6000)],'artifactContents':{}}
-    result=bounded_snapshot(snapshot)
-    assert len(json.dumps(result).encode())<=1_250_000
-    assert result['completedGenerationCount']==1000
-    assert result['latestGeneration']==generations[-1]
-    assert result['state']=={'status':'COMPLETED','finalWeightsSha256':'final-hash'}
-    assert result['monitoringPartial']
+
+    generations = [
+        {"generationId": str(i), "status": "COMPLETED", "committedCandidateCount": 256, "modelVersion": "hash"}
+        for i in range(1000)
+    ]
+    snapshot = {
+        "state": {"status": "COMPLETED", "finalWeightsSha256": "final-hash"},
+        "generations": generations,
+        "events": [{"data": "x" * 10000} for _ in range(1000)],
+        "candidates": [{"data": "y" * 1000} for _ in range(2000)],
+        "attempts": [{"data": "z" * 1000} for _ in range(6000)],
+        "artifactContents": {},
+    }
+    result = bounded_snapshot(snapshot)
+    assert len(json.dumps(result).encode()) <= 1_250_000
+    assert result["completedGenerationCount"] == 1000
+    assert result["latestGeneration"] == generations[-1]
+    assert result["state"] == {"status": "COMPLETED", "finalWeightsSha256": "final-hash"}
+    assert result["monitoringPartial"]
 
 
-def test_worker_only_observation_does_not_invent_unknown_coordinator(tmp_path,monkeypatch):
-    a=agent(tmp_path)
-    command={'assignmentId':'b'*32,'epoch':1,'recoveryIndex':0}
-    directory=a.worker_directory(command)
-    write_json(directory/'assignment.json',command)
-    monkeypatch.setattr(a,'_worker',lambda *_:{'alive':False,'ready':False,'events':[]})
-    state=a.observe()[0]
-    assert state['coordinatorAlive'] is False and state['workerAlive'] is False
+def test_worker_only_observation_does_not_invent_unknown_coordinator(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    command = {"assignmentId": "b" * 32, "epoch": 1, "recoveryIndex": 0}
+    directory = a.worker_directory(command)
+    write_json(directory / "assignment.json", command)
+    monkeypatch.setattr(a, "_worker", lambda *_: {"alive": False, "ready": False, "events": []})
+    state = a.observe()[0]
+    assert state["coordinatorAlive"] is False and state["workerAlive"] is False
 
 
 def test_desktop_profile_cannot_coordinate(tmp_path):
-    a=agent(tmp_path);a.config['workerOnly']=True;a.enabled=True
-    with pytest.raises(ValueError,match='worker-only'):
-        a.handle({'commandId':'coordinate','kind':'COORDINATE'})
+    a = agent(tmp_path)
+    a.config["workerOnly"] = True
+    a.enabled = True
+    with pytest.raises(ValueError, match="worker-only"):
+        a.handle({"commandId": "coordinate", "kind": "COORDINATE"})
 
 
 def test_desktop_quit_fences_late_enable_for_current_boot(tmp_path):
-    a=agent(tmp_path);a.shutdown_requested=True
-    with pytest.raises(RuntimeError,match='shutdown'):
-        a.handle({'commandId':'late-enable','kind':'SET_CONTRIBUTION','bootId':a.boot_id,'enabled':True})
+    a = agent(tmp_path)
+    a.shutdown_requested = True
+    with pytest.raises(RuntimeError, match="shutdown"):
+        a.handle({"commandId": "late-enable", "kind": "SET_CONTRIBUTION", "bootId": a.boot_id, "enabled": True})
     assert not a.enabled
 
 
-def test_released_assignment_never_launches_a_delayed_worker(tmp_path,monkeypatch):
-    a=agent(tmp_path);a.enabled=True
-    with a.db() as db:db.execute('INSERT INTO released VALUES (?)',('b'*32,))
-    launched=[];monkeypatch.setattr(a,'_worker',lambda *args:launched.append(args))
-    a.handle({'commandId':'old-start','kind':'START_WORKER','assignmentId':'b'*32,'epoch':1})
-    assert launched==[]
-    with a.db() as db:assert db.execute('SELECT 1 FROM processed WHERE id="old-start"').fetchone()
+def test_released_assignment_never_launches_a_delayed_worker(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    a.enabled = True
+    with a.db() as db:
+        db.execute("INSERT INTO released VALUES (?)", ("b" * 32,))
+    launched = []
+    monkeypatch.setattr(a, "_worker", lambda *args: launched.append(args))
+    a.handle({"commandId": "old-start", "kind": "START_WORKER", "assignmentId": "b" * 32, "epoch": 1})
+    assert launched == []
+    with a.db() as db:
+        assert db.execute('SELECT 1 FROM processed WHERE id="old-start"').fetchone()
 
 
 def test_resume_validates_checkpoint_preserves_ledger_and_rejects_old_epoch(tmp_path):
     import hashlib
     import sqlite3
     from heteroes.product.recovery import capture_point
-    a=agent(tmp_path);a.enabled=True
-    cfg={'runId':'b'*32,'workerIds':['test'],'workload':'arith16','decodeEngine':'hf_generate',
-         'maxGenerations':3,'candidatesPerGeneration':4,'alpha':.001,'sigma':.001,
-         'schedulerPolicy':'greedy','syncMode':'synchronous','backupPolicy':{'interval':1,'retain':3}}
-    old={'assignmentId':'c'*32,'epoch':1,'config':cfg,'computeGrants':{'test':'old-private'}}
-    a.manager.accept(old);root=a.manager.directory(cfg['runId'])
-    (root/'weights').mkdir();payload=b'toy pause weights';sha=hashlib.sha256(payload).hexdigest()
-    (root/'weights'/f'{sha}.bin').write_bytes(payload)
-    with sqlite3.connect(root/'ledger.sqlite') as db:
-        db.execute('CREATE TABLE generation_update(generation INTEGER,child_weights_sha256 TEXT,parent_weights_sha256 TEXT,applied_at REAL)')
-        db.execute('INSERT INTO generation_update VALUES (0,?,?,1)',(sha,sha))
-    summary={'generation':0,'child_sha256':sha,'parent_sha256':sha}
-    point=capture_point(root,summary,{},cfg['backupPolicy'],final=True)
-    paused={'pointId':point.name,'generation':0,'childWeightsSha256':sha,'parentWeightsSha256':sha,'verified':True}
-    write_json(root/'pause-point.json',paused);(root/'pause.flag').touch()
-    a.manager.save(root,status='PAUSED',workerStates={'test':{'alive':False,'confirmed':True}})
-    ledger_before=(root/'ledger.sqlite').read_bytes()
-    resumed={**old,'assignmentId':'d'*32,'epoch':2,'resumeFrom':paused,'computeGrants':{'test':'new-private'}}
+
+    a = agent(tmp_path)
+    a.enabled = True
+    cfg = {
+        "runId": "b" * 32,
+        "workerIds": ["test"],
+        "workload": "arith16",
+        "decodeEngine": "hf_generate",
+        "maxGenerations": 3,
+        "candidatesPerGeneration": 4,
+        "alpha": 0.001,
+        "sigma": 0.001,
+        "schedulerPolicy": "greedy",
+        "syncMode": "synchronous",
+        "backupPolicy": {"interval": 1, "retain": 3},
+    }
+    old = {"assignmentId": "c" * 32, "epoch": 1, "config": cfg, "computeGrants": {"test": "old-private"}}
+    a.manager.accept(old)
+    root = a.manager.directory(cfg["runId"])
+    (root / "weights").mkdir()
+    payload = b"toy pause weights"
+    sha = hashlib.sha256(payload).hexdigest()
+    (root / "weights" / f"{sha}.bin").write_bytes(payload)
+    with sqlite3.connect(root / "ledger.sqlite") as db:
+        db.execute(
+            "CREATE TABLE generation_update(generation INTEGER,child_weights_sha256 TEXT,parent_weights_sha256 TEXT,applied_at REAL)"
+        )
+        db.execute("INSERT INTO generation_update VALUES (0,?,?,1)", (sha, sha))
+    summary = {"generation": 0, "child_sha256": sha, "parent_sha256": sha}
+    point = capture_point(root, summary, {}, cfg["backupPolicy"], final=True)
+    paused = {
+        "pointId": point.name,
+        "generation": 0,
+        "childWeightsSha256": sha,
+        "parentWeightsSha256": sha,
+        "verified": True,
+    }
+    write_json(root / "pause-point.json", paused)
+    (root / "pause.flag").touch()
+    a.manager.save(root, status="PAUSED", workerStates={"test": {"alive": False, "confirmed": True}})
+    ledger_before = (root / "ledger.sqlite").read_bytes()
+    resumed = {
+        **old,
+        "assignmentId": "d" * 32,
+        "epoch": 2,
+        "resumeFrom": paused,
+        "computeGrants": {"test": "new-private"},
+    }
     # Corrupt the independently retained checkpoint, then retry after restoring
     # it. A failed preflight leaves the old paused epoch intact.
-    file=point/'weights'/f'{sha}.bin';file.write_bytes(b'corrupted')
-    with pytest.raises(ValueError,match='checksum'):a.manager.accept(resumed)
-    assert a.manager.state(root)['status']=='PAUSED'
+    file = point / "weights" / f"{sha}.bin"
+    file.write_bytes(b"corrupted")
+    with pytest.raises(ValueError, match="checksum"):
+        a.manager.accept(resumed)
+    assert a.manager.state(root)["status"] == "PAUSED"
     file.write_bytes(payload)
     a.manager.accept(resumed)
-    assert a.manager.state(root)['status']=='STARTING'
-    assert not (root/'pause.flag').exists()
-    assert read_json(root/'assignment.json')['epoch']==2
-    assert read_json(root/'device-grants.json')=={'test':'new-private'}
-    assert (root/'ledger.sqlite').read_bytes()==ledger_before
-    with pytest.raises(ValueError,match='epoch'):a.manager.accept(old)
+    assert a.manager.state(root)["status"] == "STARTING"
+    assert not (root / "pause.flag").exists()
+    assert read_json(root / "assignment.json")["epoch"] == 2
+    assert read_json(root / "device-grants.json") == {"test": "new-private"}
+    assert (root / "ledger.sqlite").read_bytes() == ledger_before
+    with pytest.raises(ValueError, match="epoch"):
+        a.manager.accept(old)
 
 
-def test_detail_capability_negotiates_before_sending_extended_observations(tmp_path,monkeypatch):
-    a=agent(tmp_path);sent=[]
-    monkeypatch.setattr(a,'observe',lambda:[])
-    row={'sampledAt':1,'sessionStartedAt':1,'source':'host-observation','disks':[],
-         'host':{'platform':'linux','cores':[{'id':'cpu0'}]},'power':{'hostId':'local'}}
-    monkeypatch.setattr(a.telemetry,'sample',lambda:row)
-    def reply(path,body):
+def test_detail_capability_negotiates_before_sending_extended_observations(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    sent = []
+    monkeypatch.setattr(a, "observe", lambda: [])
+    row = {
+        "sampledAt": 1,
+        "sessionStartedAt": 1,
+        "source": "host-observation",
+        "disks": [],
+        "host": {"platform": "linux", "cores": [{"id": "cpu0"}]},
+        "power": {"hostId": "local"},
+    }
+    monkeypatch.setattr(a.telemetry, "sample", lambda: row)
+
+    def reply(path, body):
         sent.append(body)
-        return {'approvalStatus':'APPROVED','desiredContribution':False,'commands':[],'acceptedReports':[],
-                'acceptedEvents':[],'telemetrySupported':True,'detailedTelemetrySupported':len(sent)>=2}
-    monkeypatch.setattr(a,'call',reply)
-    a.cycle();a.cycle();a.cycle()
-    assert 'telemetry' not in sent[0]
-    assert 'power' not in sent[1]['telemetry'] and 'cores' not in sent[1]['telemetry']['host']
-    assert sent[2]['telemetry']['power']=={'hostId':'local'}
+        return {
+            "approvalStatus": "APPROVED",
+            "desiredContribution": False,
+            "commands": [],
+            "acceptedReports": [],
+            "acceptedEvents": [],
+            "telemetrySupported": True,
+            "detailedTelemetrySupported": len(sent) >= 2,
+        }
+
+    monkeypatch.setattr(a, "call", reply)
+    a.cycle()
+    a.cycle()
+    a.cycle()
+    assert "telemetry" not in sent[0]
+    assert "power" not in sent[1]["telemetry"] and "cores" not in sent[1]["telemetry"]["host"]
+    assert sent[2]["telemetry"]["power"] == {"hostId": "local"}
     assert not a.enabled
 
 
-def poll_with(a,monkeypatch,commands):
+def poll_with(a, monkeypatch, commands):
     """Make the agent's next polls return `commands`; the list of request bodies is returned."""
-    sent=[]
-    monkeypatch.setattr(a,'observe',lambda:[])
-    def reply(path,body):
+    sent = []
+    monkeypatch.setattr(a, "observe", lambda: [])
+
+    def reply(path, body):
         sent.append(body)
-        return {'approvalStatus':'APPROVED','desiredContribution':False,'commands':commands,'acceptedReports':[],
-                'acceptedEvents':[],'telemetrySupported':False,'detailedTelemetrySupported':False}
-    monkeypatch.setattr(a,'call',reply)
+        return {
+            "approvalStatus": "APPROVED",
+            "desiredContribution": False,
+            "commands": commands,
+            "acceptedReports": [],
+            "acceptedEvents": [],
+            "telemetrySupported": False,
+            "detailedTelemetrySupported": False,
+        }
+
+    monkeypatch.setattr(a, "call", reply)
     return sent
 
 
-def test_unknown_command_kind_is_acknowledged_and_does_not_block_a_following_cancel(tmp_path,monkeypatch):
-    a=agent(tmp_path)
-    cancel={'commandId':'cancel','kind':'CANCEL_ASSIGNMENT','assignmentId':'b'*32,'epoch':1}
-    sent=poll_with(a,monkeypatch,[{'commandId':'future','kind':'KIND_FROM_A_NEWER_SERVER'},cancel])
-    a.cycle();a.cycle()
-    assert (a.root/'cancelled-assignments'/('b'*32+'.json')).exists()
-    assert {'future','cancel'}<=set(sent[1]['acknowledgements'])
+def test_unknown_command_kind_is_acknowledged_and_does_not_block_a_following_cancel(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    cancel = {"commandId": "cancel", "kind": "CANCEL_ASSIGNMENT", "assignmentId": "b" * 32, "epoch": 1}
+    sent = poll_with(a, monkeypatch, [{"commandId": "future", "kind": "KIND_FROM_A_NEWER_SERVER"}, cancel])
+    a.cycle()
+    a.cycle()
+    assert (a.root / "cancelled-assignments" / ("b" * 32 + ".json")).exists()
+    assert {"future", "cancel"} <= set(sent[1]["acknowledgements"])
 
 
-def test_malformed_identities_are_acknowledged_not_retried_forever(tmp_path,monkeypatch):
-    a=agent(tmp_path);a.enabled=True
-    bad={'commandId':'bad','kind':'START_WORKER','runId':'../escape','assignmentId':'a'*32,'epoch':1}
-    sent=poll_with(a,monkeypatch,[bad])
-    a.cycle();a.cycle()
-    assert 'bad' in sent[1]['acknowledgements']
+def test_malformed_identities_are_acknowledged_not_retried_forever(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    a.enabled = True
+    bad = {"commandId": "bad", "kind": "START_WORKER", "runId": "../escape", "assignmentId": "a" * 32, "epoch": 1}
+    sent = poll_with(a, monkeypatch, [bad])
+    a.cycle()
+    a.cycle()
+    assert "bad" in sent[1]["acknowledgements"]
 
 
-def test_state_dependent_failure_is_retried_but_later_commands_still_run(tmp_path,monkeypatch):
-    a=agent(tmp_path);a.enabled=True
-    def broken(command,action):raise OSError('disk full')
-    monkeypatch.setattr(a,'_worker',broken)
-    start={'commandId':'start','kind':'START_WORKER','assignmentId':'c'*32,'epoch':1,'runId':'d'*32}
-    cancel={'commandId':'cancel','kind':'CANCEL_ASSIGNMENT','assignmentId':'b'*32,'epoch':1}
-    sent=poll_with(a,monkeypatch,[start,cancel])
-    a.cycle();a.cycle()
-    assert (a.root/'cancelled-assignments'/('b'*32+'.json')).exists()
-    assert 'cancel' in sent[1]['acknowledgements'] and 'start' not in sent[1]['acknowledgements']
+def test_state_dependent_failure_is_retried_but_later_commands_still_run(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    a.enabled = True
+
+    def broken(command, action):
+        raise OSError("disk full")
+
+    monkeypatch.setattr(a, "_worker", broken)
+    start = {"commandId": "start", "kind": "START_WORKER", "assignmentId": "c" * 32, "epoch": 1, "runId": "d" * 32}
+    cancel = {"commandId": "cancel", "kind": "CANCEL_ASSIGNMENT", "assignmentId": "b" * 32, "epoch": 1}
+    sent = poll_with(a, monkeypatch, [start, cancel])
+    a.cycle()
+    a.cycle()
+    assert (a.root / "cancelled-assignments" / ("b" * 32 + ".json")).exists()
+    assert "cancel" in sent[1]["acknowledgements"] and "start" not in sent[1]["acknowledgements"]
     with a.db() as db:
-        assert db.execute('SELECT attempts FROM command_failures WHERE id="start"').fetchone()[0]==2
+        assert db.execute('SELECT attempts FROM command_failures WHERE id="start"').fetchone()[0] == 2
 
 
-def test_failed_safety_command_is_never_acknowledged(tmp_path,monkeypatch):
-    a=agent(tmp_path)
-    cancel={'commandId':'cancel','kind':'CANCEL_ASSIGNMENT','assignmentId':'b'*32,'epoch':1}
-    write_json(a.manager.root/('e'*32)/'assignment.json',{'assignmentId':'b'*32,'epoch':1})
-    def broken(run_id):raise OSError('read-only file system')
-    monkeypatch.setattr(a.manager,'cancel',broken)
-    sent=poll_with(a,monkeypatch,[cancel])
-    a.cycle();a.cycle()
-    assert 'cancel' not in sent[1]['acknowledgements']
+def test_failed_safety_command_is_never_acknowledged(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    cancel = {"commandId": "cancel", "kind": "CANCEL_ASSIGNMENT", "assignmentId": "b" * 32, "epoch": 1}
+    write_json(a.manager.root / ("e" * 32) / "assignment.json", {"assignmentId": "b" * 32, "epoch": 1})
+
+    def broken(run_id):
+        raise OSError("read-only file system")
+
+    monkeypatch.setattr(a.manager, "cancel", broken)
+    sent = poll_with(a, monkeypatch, [cancel])
+    a.cycle()
+    a.cycle()
+    assert "cancel" not in sent[1]["acknowledgements"]
 
 
-def test_reporting_a_failure_cannot_itself_break_the_cycle(tmp_path,monkeypatch):
-    a=agent(tmp_path);a.enabled=True
+def test_reporting_a_failure_cannot_itself_break_the_cycle(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    a.enabled = True
     # SQLite would store a text epoch; the server rejects an event whose epoch is not an
     # integer, and with it every later poll of this device.
-    odd={'commandId':'odd','kind':'START_WORKER','assignmentId':'c'*32,'epoch':'abc','runId':'d'*32}
-    sent=poll_with(a,monkeypatch,[odd])
-    a.cycle();a.cycle()
-    assert 'odd' in sent[1]['acknowledgements']
-    with a.db() as db:assert db.execute('SELECT count(*) FROM event_outbox').fetchone()[0]==0
-
-
-def test_deferred_command_is_waiting_not_failing(tmp_path,monkeypatch):
-    a=agent(tmp_path);a.shutdown_requested=True
-    enable={'commandId':'late','kind':'SET_CONTRIBUTION','bootId':a.boot_id,'enabled':True}
-    sent=poll_with(a,monkeypatch,[enable])
-    a.cycle();a.cycle()
-    assert 'late' not in sent[1]['acknowledgements']
+    odd = {"commandId": "odd", "kind": "START_WORKER", "assignmentId": "c" * 32, "epoch": "abc", "runId": "d" * 32}
+    sent = poll_with(a, monkeypatch, [odd])
+    a.cycle()
+    a.cycle()
+    assert "odd" in sent[1]["acknowledgements"]
     with a.db() as db:
-        assert db.execute('SELECT count(*) FROM command_failures').fetchone()[0]==0
-        assert db.execute('SELECT count(*) FROM event_outbox').fetchone()[0]==0
+        assert db.execute("SELECT count(*) FROM event_outbox").fetchone()[0] == 0
 
 
-def test_command_failure_reaches_the_server_as_a_throttled_assignment_event(tmp_path,monkeypatch):
-    a=agent(tmp_path);a.enabled=True
-    def broken(command,action):raise OSError('disk full')
-    monkeypatch.setattr(a,'_worker',broken)
-    start={'commandId':'start','kind':'START_WORKER','assignmentId':'c'*32,'epoch':3,'runId':'d'*32}
-    poll_with(a,monkeypatch,[start])
-    for _ in range(3):a.cycle()
-    with a.db() as db:rows=db.execute('SELECT assignment_id,epoch,body FROM event_outbox').fetchall()
-    assert len(rows)==1 and rows[0][:2]==('c'*32,3)
-    event=__import__('json').loads(rows[0][2])
-    assert event['event']=='agent_command_failed' and event['errorType']=='OSError' and event['attempts']==1
+def test_deferred_command_is_waiting_not_failing(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    a.shutdown_requested = True
+    enable = {"commandId": "late", "kind": "SET_CONTRIBUTION", "bootId": a.boot_id, "enabled": True}
+    sent = poll_with(a, monkeypatch, [enable])
+    a.cycle()
+    a.cycle()
+    assert "late" not in sent[1]["acknowledgements"]
+    with a.db() as db:
+        assert db.execute("SELECT count(*) FROM command_failures").fetchone()[0] == 0
+        assert db.execute("SELECT count(*) FROM event_outbox").fetchone()[0] == 0
 
 
-PRIVATE = 'http://100.64.0.1:8765'
-PUBLIC = 'https://compute.example.org'
+def test_command_failure_reaches_the_server_as_a_throttled_assignment_event(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    a.enabled = True
+
+    def broken(command, action):
+        raise OSError("disk full")
+
+    monkeypatch.setattr(a, "_worker", broken)
+    start = {"commandId": "start", "kind": "START_WORKER", "assignmentId": "c" * 32, "epoch": 3, "runId": "d" * 32}
+    poll_with(a, monkeypatch, [start])
+    for _ in range(3):
+        a.cycle()
+    with a.db() as db:
+        rows = db.execute("SELECT assignment_id,epoch,body FROM event_outbox").fetchall()
+    assert len(rows) == 1 and rows[0][:2] == ("c" * 32, 3)
+    event = __import__("json").loads(rows[0][2])
+    assert event["event"] == "agent_command_failed" and event["errorType"] == "OSError" and event["attempts"] == 1
+
+
+PRIVATE = "http://100.64.0.1:8765"
+PUBLIC = "https://compute.example.org"
 
 
 def start_command(**extra):
-    return {'commandId': 'start', 'kind': 'START_WORKER', 'assignmentId': 'c' * 32, 'epoch': 1, 'runId': 'd' * 32,
-            'workerId': 'test', 'recoveryIndex': 0, 'coordinatorUrl': PRIVATE, 'bulkUrl': PRIVATE,
-            'computeToken': 'grant', **extra}
+    return {
+        "commandId": "start",
+        "kind": "START_WORKER",
+        "assignmentId": "c" * 32,
+        "epoch": 1,
+        "runId": "d" * 32,
+        "workerId": "test",
+        "recoveryIndex": 0,
+        "coordinatorUrl": PRIVATE,
+        "bulkUrl": PRIVATE,
+        "computeToken": "grant",
+        **extra,
+    }
 
 
 def test_the_private_route_is_used_when_it_answers(tmp_path, monkeypatch):
     a = agent(tmp_path)
-    monkeypatch.setattr('heteroes.product.agent.reachable', lambda url, token: url == PRIVATE)
+    monkeypatch.setattr("heteroes.product.agent.reachable", lambda url, token: url == PRIVATE)
     route = a.choose_route(start_command(publicComputeUrl=PUBLIC))
-    assert route == {'coordinatorUrl': PRIVATE, 'bulkUrl': PRIVATE, 'replayOnly': False}
+    assert route == {"coordinatorUrl": PRIVATE, "bulkUrl": PRIVATE, "replayOnly": False}
 
 
 def test_without_the_private_route_a_worker_uses_the_public_one_for_replay_only(tmp_path, monkeypatch):
     a = agent(tmp_path)
     probed = []
-    monkeypatch.setattr('heteroes.product.agent.reachable', lambda url, token: probed.append((url, token)) or url == PUBLIC)
+    monkeypatch.setattr(
+        "heteroes.product.agent.reachable", lambda url, token: probed.append((url, token)) or url == PUBLIC
+    )
     route = a.choose_route(start_command(publicComputeUrl=PUBLIC))
-    assert route == {'coordinatorUrl': PUBLIC, 'bulkUrl': None, 'replayOnly': True}
-    assert probed == [(PRIVATE, 'grant'), (PUBLIC, 'grant')]
+    assert route == {"coordinatorUrl": PUBLIC, "bulkUrl": None, "replayOnly": True}
+    assert probed == [(PRIVATE, "grant"), (PUBLIC, "grant")]
 
 
 def test_a_worker_that_reaches_neither_route_waits_instead_of_failing(tmp_path, monkeypatch):
     a = agent(tmp_path)
-    monkeypatch.setattr('heteroes.product.agent.reachable', lambda url, token: False)
-    with pytest.raises(RuntimeError, match='coordinator'):
+    monkeypatch.setattr("heteroes.product.agent.reachable", lambda url, token: False)
+    with pytest.raises(RuntimeError, match="coordinator"):
         a.choose_route(start_command(publicComputeUrl=PUBLIC))
 
 
 def test_without_a_public_address_the_command_is_used_as_it_always_was(tmp_path, monkeypatch):
     a = agent(tmp_path)
-    monkeypatch.setattr('heteroes.product.agent.reachable', lambda *args: pytest.fail('no probe is needed'))
-    assert a.choose_route(start_command()) == {'coordinatorUrl': PRIVATE, 'bulkUrl': PRIVATE, 'replayOnly': False}
+    monkeypatch.setattr("heteroes.product.agent.reachable", lambda *args: pytest.fail("no probe is needed"))
+    assert a.choose_route(start_command()) == {"coordinatorUrl": PRIVATE, "bulkUrl": PRIVATE, "replayOnly": False}
 
 
 def launch_arguments(a, monkeypatch, command):
     captured = []
-    monkeypatch.setattr('heteroes.product.agent.remote_handle', lambda request: captured.append(request) or {'alive': True, 'ready': False, 'events': []})
+    monkeypatch.setattr(
+        "heteroes.product.agent.remote_handle",
+        lambda request: captured.append(request) or {"alive": True, "ready": False, "events": []},
+    )
     a.enabled = True
     a.handle(command)
-    return captured[0]['argv']
+    return captured[0]["argv"]
 
 
 def test_a_replay_only_worker_is_started_without_bulk_and_with_a_longer_chain(tmp_path, monkeypatch):
     a = agent(tmp_path)
-    monkeypatch.setattr('heteroes.product.agent.reachable', lambda url, token: url == PUBLIC)
+    monkeypatch.setattr("heteroes.product.agent.reachable", lambda url, token: url == PUBLIC)
     argv = launch_arguments(a, monkeypatch, start_command(publicComputeUrl=PUBLIC))
-    assert argv[argv.index('--coordinator-url') + 1] == PUBLIC
-    assert '--no-bulk' in argv and '--bulk-url' not in argv
-    assert argv[argv.index('--replay-max-chain') + 1] == '64'
+    assert argv[argv.index("--coordinator-url") + 1] == PUBLIC
+    assert "--no-bulk" in argv and "--bulk-url" not in argv
+    assert argv[argv.index("--replay-max-chain") + 1] == "64"
 
 
 def test_a_worker_on_the_private_route_keeps_its_bulk_and_the_default_chain(tmp_path, monkeypatch):
     a = agent(tmp_path)
-    monkeypatch.setattr('heteroes.product.agent.reachable', lambda url, token: True)
+    monkeypatch.setattr("heteroes.product.agent.reachable", lambda url, token: True)
     argv = launch_arguments(a, monkeypatch, start_command(publicComputeUrl=PUBLIC))
-    assert argv[argv.index('--bulk-url') + 1] == PRIVATE
-    assert '--no-bulk' not in argv and '--replay-max-chain' not in argv
+    assert argv[argv.index("--bulk-url") + 1] == PRIVATE
+    assert "--no-bulk" not in argv and "--replay-max-chain" not in argv
 
 
 def test_reachable_accepts_only_a_coordinator_that_says_it_is_up(tmp_path):
@@ -337,29 +492,39 @@ def test_reachable_accepts_only_a_coordinator_that_says_it_is_up(tmp_path):
     import threading
     from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
     from heteroes.product.agent import reachable
+
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):
-            token = self.headers.get('Authorization')
-            good = token == 'Bearer grant' and self.path == '/v1/health'
-            if token == 'Bearer portal':      # a captive portal: 200 and an HTML page
-                body, status = b'<html>please sign in</html>', 200
-            elif token == 'Bearer down':      # a server that answers 200 but says it is not up
-                body, status = json.dumps({'ok': False}).encode(), 200
+            token = self.headers.get("Authorization")
+            good = token == "Bearer grant" and self.path == "/v1/health"
+            if token == "Bearer portal":  # a captive portal: 200 and an HTML page
+                body, status = b"<html>please sign in</html>", 200
+            elif token == "Bearer down":  # a server that answers 200 but says it is not up
+                body, status = json.dumps({"ok": False}).encode(), 200
             else:
-                body, status = json.dumps({'ok': True, 'status': 'up'} if good else {'ok': False}).encode(), 200 if good else 401
+                body, status = (
+                    json.dumps({"ok": True, "status": "up"} if good else {"ok": False}).encode(),
+                    200 if good else 401,
+                )
             self.send_response(status)
-            self.send_header('Content-Length', str(len(body)));self.end_headers();self.wfile.write(body)
-        def log_message(self, *args):pass
-    server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, *args):
+            pass
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
     threading.Thread(target=server.serve_forever, daemon=True).start()
     try:
-        url = f'http://127.0.0.1:{server.server_port}'
-        assert reachable(url, 'grant') is True
-        assert reachable(url, 'wrong') is False
-        assert reachable(url, 'portal') is False and reachable(url, 'down') is False
+        url = f"http://127.0.0.1:{server.server_port}"
+        assert reachable(url, "grant") is True
+        assert reachable(url, "wrong") is False
+        assert reachable(url, "portal") is False and reachable(url, "down") is False
     finally:
-        server.shutdown();server.server_close()
-    assert reachable(url, 'grant') is False       # nothing listens any more
+        server.shutdown()
+        server.server_close()
+    assert reachable(url, "grant") is False  # nothing listens any more
 
 
 def test_agent_requests_carry_the_heteroes_user_agent(tmp_path):
@@ -368,22 +533,35 @@ def test_agent_requests_carry_the_heteroes_user_agent(tmp_path):
     from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
     from heteroes.http_transport import USER_AGENT
     from heteroes.product.agent import reachable, request
+
     seen = []
+
     class Handler(BaseHTTPRequestHandler):
-        def do_GET(self):self.answer()
+        def do_GET(self):
+            self.answer()
+
         def do_POST(self):
-            self.rfile.read(int(self.headers.get('Content-Length', 0)));self.answer()
+            self.rfile.read(int(self.headers.get("Content-Length", 0)))
+            self.answer()
+
         def answer(self):
-            seen.append(self.headers.get('User-Agent'))
-            body = json.dumps({'ok': True, 'status': 'up'}).encode()
-            self.send_response(200);self.send_header('Content-Length', str(len(body)));self.end_headers();self.wfile.write(body)
-        def log_message(self, *args):pass
-    server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+            seen.append(self.headers.get("User-Agent"))
+            body = json.dumps({"ok": True, "status": "up"}).encode()
+            self.send_response(200)
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, *args):
+            pass
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
     threading.Thread(target=server.serve_forever, daemon=True).start()
     try:
-        url = f'http://127.0.0.1:{server.server_port}'
-        request(url, '/api/v1/device/poll', 'token', {'a': 1})
-        assert reachable(url, 'grant') is True
+        url = f"http://127.0.0.1:{server.server_port}"
+        request(url, "/api/v1/device/poll", "token", {"a": 1})
+        assert reachable(url, "grant") is True
     finally:
-        server.shutdown();server.server_close()
+        server.shutdown()
+        server.server_close()
     assert seen == [USER_AGENT, USER_AGENT]

@@ -13,6 +13,7 @@ coordinator that the lease is still wanted, so leases can be short. A reward tha
 (the network) is kept in an outbox and is delivered FIRST at the next turn; an exception that is not a typed failure releases the
 candidate at once (reported as OTHER) before it propagates.
 """
+
 import json
 import math
 import threading
@@ -50,10 +51,11 @@ class CandidateFailed(Exception):
 @dataclass(frozen=True)
 class Assignment:
     """What a lease gives a worker: the job, and the proof (attempt number and token) that it holds the lease."""
+
     descriptor: CandidateDescriptor
     attempt_number: int
     token: str
-    deadline: float          # in the coordinator's clock: for information, the worker's clock may differ
+    deadline: float  # in the coordinator's clock: for information, the worker's clock may differ
 
     @property
     def candidate_id(self) -> str:
@@ -71,6 +73,7 @@ def local_transport(api) -> Transport:
         request = json.loads(json.dumps(payload, allow_nan=False))
         reply = api.handle(operation, request)
         return json.loads(json.dumps(reply, allow_nan=False))
+
     return transport
 
 
@@ -98,14 +101,16 @@ class WorkerClient:
         if reply["ok"]:
             return reply
         error = reply.get("error")
-        if not (isinstance(error, dict) and isinstance(error.get("code"), str) and isinstance(error.get("message"), str)):
+        if not (
+            isinstance(error, dict) and isinstance(error.get("code"), str) and isinstance(error.get("message"), str)
+        ):
             raise WorkerAPIError("bad_response", f"a refusal without a code and a message: {reply!r}")
         raise WorkerAPIError(error["code"], error["message"])
 
     def lease(self, generation: int | None = None) -> LeaseReply:
         payload = {"worker_id": self.worker_id, "request_id": uuid.uuid4().hex}
         if generation is not None:
-            payload["generation"] = generation          # the generation of the job this worker is working on (see WorkerAPI)
+            payload["generation"] = generation  # the generation of the job this worker is working on (see WorkerAPI)
         reply = self._call("lease", payload)
         try:
             work = reply["work"]
@@ -114,9 +119,15 @@ class WorkerClient:
             raise WorkerAPIError("bad_response", f"a lease reply that cannot be read: {error!r}") from error
 
     def submit_result(self, assignment: Assignment, reward: float) -> SubmitOutcome:
-        reply = self._call("submit_result", {
-            "descriptor": assignment.descriptor.to_dict(), "attempt_number": assignment.attempt_number,
-            "token": assignment.token, "reward": reward})
+        reply = self._call(
+            "submit_result",
+            {
+                "descriptor": assignment.descriptor.to_dict(),
+                "attempt_number": assignment.attempt_number,
+                "token": assignment.token,
+                "reward": reward,
+            },
+        )
         try:
             return SubmitOutcome(reply["outcome"])
         except (KeyError, TypeError, ValueError) as error:
@@ -124,27 +135,38 @@ class WorkerClient:
 
     def heartbeat(self, assignment: Assignment) -> float:
         """Tell the coordinator that the lease is still wanted; returns the new deadline (the coordinator's clock)."""
-        reply = self._call("heartbeat", {
-            "descriptor": assignment.descriptor.to_dict(), "attempt_number": assignment.attempt_number,
-            "token": assignment.token})
+        reply = self._call(
+            "heartbeat",
+            {
+                "descriptor": assignment.descriptor.to_dict(),
+                "attempt_number": assignment.attempt_number,
+                "token": assignment.token,
+            },
+        )
         deadline = reply.get("deadline")
         if isinstance(deadline, bool) or not isinstance(deadline, (int, float)):
             raise WorkerAPIError("bad_response", f"a heartbeat reply without a deadline: {reply!r}")
         return float(deadline)
 
     def report_failure(self, assignment: Assignment, kind: FailureKind) -> None:
-        self._call("report_failure", {
-            "descriptor": assignment.descriptor.to_dict(), "attempt_number": assignment.attempt_number,
-            "token": assignment.token, "kind": kind.value})
+        self._call(
+            "report_failure",
+            {
+                "descriptor": assignment.descriptor.to_dict(),
+                "attempt_number": assignment.attempt_number,
+                "token": assignment.token,
+                "kind": kind.value,
+            },
+        )
 
 
 class StepKind(Enum):
-    NO_WORK = "NO_WORK"                    # nothing to run now; `generation_state` says whether to wait (OPEN) or stop
+    NO_WORK = "NO_WORK"  # nothing to run now; `generation_state` says whether to wait (OPEN) or stop
     COMMITTED = "COMMITTED"
     ALREADY_COMMITTED = "ALREADY_COMMITTED"
     FAILURE_REPORTED = "FAILURE_REPORTED"
-    REFUSED = "REFUSED"                    # the coordinator did not accept the report (for example a stale attempt); `code` says why
-    QUARANTINED = "QUARANTINED"            # this worker was put aside after a failed restore: it must stop
+    REFUSED = "REFUSED"  # the coordinator did not accept the report (for example a stale attempt); `code` says why
+    QUARANTINED = "QUARANTINED"  # this worker was put aside after a failed restore: it must stop
 
 
 @dataclass(frozen=True)
@@ -157,12 +179,20 @@ class Step:
 
 
 class Worker:
-    def __init__(self, worker_id: str, transport: Transport, evaluate: Callable[[CandidateDescriptor], float],
-                 transient_errors: tuple = (), heartbeat_seconds: float | None = None):
+    def __init__(
+        self,
+        worker_id: str,
+        transport: Transport,
+        evaluate: Callable[[CandidateDescriptor], float],
+        transient_errors: tuple = (),
+        heartbeat_seconds: float | None = None,
+    ):
         self.worker_id = worker_id
         self.client = WorkerClient(worker_id, transport)
         self._evaluate = evaluate
-        self._transient = tuple(transient_errors)       # what a lost network looks like: a reward that meets it waits in the outbox
+        self._transient = tuple(
+            transient_errors
+        )  # what a lost network looks like: a reward that meets it waits in the outbox
         self._pending: tuple[Assignment, float] | None = None
         self._heartbeat_seconds = None
         self.heartbeat_seconds = heartbeat_seconds
@@ -173,8 +203,12 @@ class Worker:
 
     @heartbeat_seconds.setter
     def heartbeat_seconds(self, seconds: float | None) -> None:
-        if seconds is not None and not (isinstance(seconds, (int, float)) and not isinstance(seconds, bool) and seconds > 0
-                                        and math.isfinite(seconds)):
+        if seconds is not None and not (
+            isinstance(seconds, (int, float))
+            and not isinstance(seconds, bool)
+            and seconds > 0
+            and math.isfinite(seconds)
+        ):
             raise ValueError(f"heartbeat_seconds must be a positive finite number or None, got {seconds!r}")
         self._heartbeat_seconds = seconds
 
@@ -205,14 +239,14 @@ class Worker:
                 pass
             raise
         if isinstance(reward, bool) or not isinstance(reward, (int, float)) or not math.isfinite(reward):
-            return self._report(work, FailureKind.VERIFIER_ERROR)    # never sent as a reward
+            return self._report(work, FailureKind.VERIFIER_ERROR)  # never sent as a reward
         return self._deliver(work, reward)
 
     def _deliver(self, work: Assignment, reward: float) -> Step:
         try:
             outcome = self.client.submit_result(work, reward)
         except self._transient:
-            self._pending = (work, reward)                           # the work was done: keep it, try again before anything else
+            self._pending = (work, reward)  # the work was done: keep it, try again before anything else
             raise
         except WorkerAPIError as error:
             return self._refused(work, error)
@@ -221,7 +255,7 @@ class Worker:
 
     def _deliver_pending(self) -> Step:
         work, reward = self._pending
-        self._pending = None                                         # _deliver puts it back if the network is still down
+        self._pending = None  # _deliver puts it back if the network is still down
         return self._deliver(work, reward)
 
     def _report(self, work: Assignment, kind: FailureKind) -> Step:
@@ -251,7 +285,7 @@ class _Heartbeat:
             try:
                 self._client.heartbeat(self._assignment)
             except Exception:
-                pass            # a lost heartbeat is not a reason to stop the candidate: the next one may get through
+                pass  # a lost heartbeat is not a reason to stop the candidate: the next one may get through
 
     def __enter__(self):
         if self._seconds is not None:

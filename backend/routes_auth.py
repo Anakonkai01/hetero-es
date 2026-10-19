@@ -10,21 +10,17 @@ from fastapi import Depends, Header, HTTPException, Request, Response
 from .throttle import client_address
 
 
-
-
-
-
-
-
-
 from fastapi import APIRouter
 
 
 def install_routes(app, store, user, session):
     router = APIRouter()
+
     def authenticate(body: Login):
         with store.db() as db:
-            row = db.execute("SELECT id,hash,profile FROM users WHERE json_extract(profile,'$.username')=?", (body.username,)).fetchone()
+            row = db.execute(
+                "SELECT id,hash,profile FROM users WHERE json_extract(profile,'$.username')=?", (body.username,)
+            ).fetchone()
             try:
                 store.hasher.verify(row["hash"] if row else store.hasher.hash("unknown-user"), body.password)
             except VerificationError:
@@ -32,7 +28,10 @@ def install_routes(app, store, user, session):
             if not row:
                 raise HTTPException(401, "Invalid username or password")
             token = secrets.token_urlsafe(32)
-            db.execute("INSERT INTO sessions VALUES (?,?,?)", (hashlib.sha256(token.encode()).hexdigest(), row['id'], time.time()+43200))
+            db.execute(
+                "INSERT INTO sessions VALUES (?,?,?)",
+                (hashlib.sha256(token.encode()).hexdigest(), row["id"], time.time() + 43200),
+            )
             return {**session(json.loads(row["profile"])), "accessToken": token}
 
     @router.post("/api/v1/auth/login")
@@ -42,7 +41,9 @@ def install_routes(app, store, user, session):
         state = app.state
         wait = max(state.login_failures.retry_after(user_key), state.login_failures_by_address.retry_after(address))
         if wait:
-            raise HTTPException(429, f"Too many attempts. Try again in {wait} seconds.", headers={"Retry-After": str(wait)})
+            raise HTTPException(
+                429, f"Too many attempts. Try again in {wait} seconds.", headers={"Retry-After": str(wait)}
+            )
         try:
             result = authenticate(body)
         except HTTPException as error:

@@ -5,6 +5,7 @@ than the rounding noise of the computation. `generate_with_trace` returns the an
 between the best and the second-best score; `summarize_pair` says where two traces first diverge and how close the decision was
 there. A flip with a tiny margin is the expected numerical noise; a flip with a large margin would point at a real bug.
 """
+
 import math
 
 import torch
@@ -39,15 +40,24 @@ def summarize_pair(a: dict, b: dict) -> dict:
     if step is None:
         return {"differs": False}
     margins = [m for m in (a["margins"][:step] + b["margins"][:step]) if m is not None]
-    return {"differs": True, "step": step,
-            "margin_a": a["margins"][step] if step < len(a["margins"]) else None,
-            "margin_b": b["margins"][step] if step < len(b["margins"]) else None,
-            "min_margin_before": min(margins) if margins else None}
+    return {
+        "differs": True,
+        "step": step,
+        "margin_a": a["margins"][step] if step < len(a["margins"]) else None,
+        "margin_b": b["margins"][step] if step < len(b["margins"]) else None,
+        "min_margin_before": min(margins) if margins else None,
+    }
 
 
 def _prompt_texts(tokenizer, questions):
-    return [tokenizer.apply_chat_template([{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": q}],
-                                          tokenize=False, add_generation_prompt=True) for q in questions]
+    return [
+        tokenizer.apply_chat_template(
+            [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": q}],
+            tokenize=False,
+            add_generation_prompt=True,
+        )
+        for q in questions
+    ]
 
 
 def generate_with_trace(model, tokenizer, questions: list[str], pad: bool | None = None) -> list[dict]:
@@ -65,8 +75,13 @@ def generate_with_trace(model, tokenizer, questions: list[str], pad: bool | None
         tokenizer.padding_side = previous_side
     inputs = {key: value.to(device) for key, value in inputs.items()}
     with torch.no_grad():
-        output = model.generate(**inputs, max_new_tokens=MAX_NEW_TOKENS, do_sample=DO_SAMPLE, output_scores=True,
-                                return_dict_in_generate=True)
+        output = model.generate(
+            **inputs,
+            max_new_tokens=MAX_NEW_TOKENS,
+            do_sample=DO_SAMPLE,
+            output_scores=True,
+            return_dict_in_generate=True,
+        )
     prompt_length = inputs["input_ids"].shape[1]
     eos = {tokenizer.eos_token_id, tokenizer.pad_token_id} - {None}
     results = []
@@ -74,7 +89,13 @@ def generate_with_trace(model, tokenizer, questions: list[str], pad: bool | None
         ids = output.sequences[row, prompt_length:].tolist()
         end = next((i for i, token in enumerate(ids) if token in eos), len(ids))
         margins = margins_from_scores(output.scores, row)
-        results.append({"text": tokenizer.decode(ids[:end], skip_special_tokens=True).strip(), "ids": ids[:end], "margins": margins[:end]})
+        results.append(
+            {
+                "text": tokenizer.decode(ids[:end], skip_special_tokens=True).strip(),
+                "ids": ids[:end],
+                "margins": margins[:end],
+            }
+        )
     return results
 
 
@@ -93,7 +114,9 @@ class fp32_lm_head:
     def __enter__(self):
         head = self._head
         self._forward = head.forward
-        weight = head.weight.detach().float()          # a float32 copy for as long as the context lasts (the weights must not change meanwhile)
+        weight = (
+            head.weight.detach().float()
+        )  # a float32 copy for as long as the context lasts (the weights must not change meanwhile)
 
         def forward(hidden):
             return torch.nn.functional.linear(hidden.float(), weight)

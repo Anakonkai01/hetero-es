@@ -52,7 +52,9 @@ def _pool(threads: int) -> ThreadPoolExecutor:
         return pool
 
 
-def ordered_map(fn: Callable[[T], R], items: Iterable[T], threads: int | None = None, window: int | None = None) -> Iterator[R]:
+def ordered_map(
+    fn: Callable[[T], R], items: Iterable[T], threads: int | None = None, window: int | None = None
+) -> Iterator[R]:
     """
     Like `map(fn, items)`, results in the order of `items`, but `fn` runs on a thread pool, at most
     `window` items ahead of the consumer (default 4 * threads), so memory stays bounded.

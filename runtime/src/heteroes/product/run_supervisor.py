@@ -1,4 +1,5 @@
 """Coordinator supervision shared by agent assignments; process launch and worker RPC are agent hooks."""
+
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 import json
@@ -13,9 +14,9 @@ from .remote import alive
 from .storage import data_root, checked_directory
 
 TERMINAL = {"COMPLETED", "CANCELLED", "FAILED"}
-QUIESCENT = TERMINAL | {'PAUSED'}
+QUIESCENT = TERMINAL | {"PAUSED"}
 ROOT = Path(__file__).resolve().parents[3]
-WORKLOADS = ('arith16', 'cot_l3_q32', 'cot_l3_q64', 'cot_l1_q128')
+WORKLOADS = ("arith16", "cot_l3_q32", "cot_l3_q64", "cot_l1_q128")
 
 
 def iso(timestamp):
@@ -33,12 +34,19 @@ def validate(config, workers):
         value = config.get(key)
         if type(value) not in (int, float) or not 0 < value <= 1:
             raise ValueError(f"{key} must be finite and between 0 and 1")
-    if config.get("workload") not in WORKLOADS and not (config.get('recipeVersion')==2 and config.get('workload')=='text_math_v2'):
+    if config.get("workload") not in WORKLOADS and not (
+        config.get("recipeVersion") == 2 and config.get("workload") == "text_math_v2"
+    ):
         raise ValueError("unsupported workload")
     if config.get("decodeEngine") not in ("hf_generate", "hf_compact"):
         raise ValueError("unsupported decoder")
     selected = config.get("workerIds")
-    if not isinstance(selected, list) or not selected or len(set(selected)) != len(selected) or not set(selected) <= set(workers):
+    if (
+        not isinstance(selected, list)
+        or not selected
+        or len(set(selected)) != len(selected)
+        or not set(selected) <= set(workers)
+    ):
         raise ValueError("select unique configured worker IDs")
     if config.get("schedulerPolicy") != "greedy" or config.get("syncMode") != "synchronous":
         raise ValueError("only the greedy synchronous policy is configured")
@@ -81,21 +89,41 @@ class RunSupervisor(ABC):
                 return self.state(root)
             quarantined = read_json(self.root / "quarantine.json", {})
             if set(body["workerIds"]) & set(quarantined):
-                raise ValueError("Selected worker is quarantined after a restore mismatch; administrator investigation required")
-            pending = [path for path in self.root.iterdir() if path.is_dir() and self.state(path).get("status") not in QUIESCENT]
+                raise ValueError(
+                    "Selected worker is quarantined after a restore mismatch; administrator investigation required"
+                )
+            pending = [
+                path
+                for path in self.root.iterdir()
+                if path.is_dir() and self.state(path).get("status") not in QUIESCENT
+            ]
             if pending:
                 raise RuntimeError("another run still owns the GPU pool")
             root.mkdir(mode=0o700)
-            if self.config.get('largeDataDirectory'):
+            if self.config.get("largeDataDirectory"):
                 try:
-                    large=checked_directory(self.config['largeDataDirectory'],self.config.get('storageVolumeUUID'))/'coordinators'/body['runId']
-                    large.mkdir(parents=True,exist_ok=False,mode=0o700)
-                    write_json(root/'large-data.json',{'directory':str(large),'volumeUUID':self.config.get('storageVolumeUUID')})
+                    large = (
+                        checked_directory(self.config["largeDataDirectory"], self.config.get("storageVolumeUUID"))
+                        / "coordinators"
+                        / body["runId"]
+                    )
+                    large.mkdir(parents=True, exist_ok=False, mode=0o700)
+                    write_json(
+                        root / "large-data.json",
+                        {"directory": str(large), "volumeUUID": self.config.get("storageVolumeUUID")},
+                    )
                 except BaseException:
                     root.rmdir()
                     raise
-            write_json(root / "config.json", {**body, "modelPath": self.config["modelPath"],
-                                              "host": self.config["workerHost"], "port": self.config["workerPort"]})
+            write_json(
+                root / "config.json",
+                {
+                    **body,
+                    "modelPath": self.config["modelPath"],
+                    "host": self.config["workerHost"],
+                    "port": self.config["workerPort"],
+                },
+            )
             self.save(root, status="STARTING", recoveryCount=0, startedAt=time.time(), workerStates={})
             return self.state(root)
 
@@ -107,10 +135,15 @@ class RunSupervisor(ABC):
             if previous.get("notStarted"):
                 continue
             try:
-                value = self.remote(self.workers[worker_id], {"action": "stop" if stop else "poll",
-                                    "runId": root.name + f"-r{recovery}"})
+                value = self.remote(
+                    self.workers[worker_id],
+                    {"action": "stop" if stop else "poll", "runId": root.name + f"-r{recovery}"},
+                )
                 write_json(root / f"worker-{worker_id}-r{recovery}.json", value["events"])
-                if any(item.get("failure") == "RESTORE_MISMATCH" or item.get("reason") == "quarantined" for item in value["events"]):
+                if any(
+                    item.get("failure") == "RESTORE_MISMATCH" or item.get("reason") == "quarantined"
+                    for item in value["events"]
+                ):
                     quarantined = read_json(self.root / "quarantine.json", {})
                     quarantined[worker_id] = {"runId": root.name, "t": time.time()}
                     write_json(self.root / "quarantine.json", quarantined)
@@ -118,7 +151,9 @@ class RunSupervisor(ABC):
             except Exception:
                 result[worker_id] = {**previous, "confirmed": False}
         self.save(root, workerStates=result)
-        return all(value.get("notStarted") or (value.get("confirmed") and not value.get("alive")) for value in result.values())
+        return all(
+            value.get("notStarted") or (value.get("confirmed") and not value.get("alive")) for value in result.values()
+        )
 
     def tick(self, root):
         state = self.state(root)
@@ -179,13 +214,23 @@ class RunSupervisor(ABC):
             if stopped:
                 (root / "workers-stopped.flag").touch()
                 if not running:
-                    self.save(root, status="FAILED" if state.get("failureReason") else runner["status"],
-                              completedAt=time.time(), finalWeightsSha256=runner.get("final_weights_sha256"),
-                              pauseCheckpoint=runner.get('pauseCheckpoint'),
-                              failureReason=state.get("failureReason") or runner.get("failureReason"))
+                    self.save(
+                        root,
+                        status="FAILED" if state.get("failureReason") else runner["status"],
+                        completedAt=time.time(),
+                        finalWeightsSha256=runner.get("final_weights_sha256"),
+                        pauseCheckpoint=runner.get("pauseCheckpoint"),
+                        failureReason=state.get("failureReason") or runner.get("failureReason"),
+                    )
                     return
-            self.save(root, status="CANCELLING" if runner["status"] == "CANCELLED" else
-                      'PAUSING' if runner['status']=='PAUSED' else "DRAINING")
+            self.save(
+                root,
+                status="CANCELLING"
+                if runner["status"] == "CANCELLED"
+                else "PAUSING"
+                if runner["status"] == "PAUSED"
+                else "DRAINING",
+            )
             return
         if not running:
             if not self.poll_workers(root, stop=True):
@@ -196,13 +241,22 @@ class RunSupervisor(ABC):
                 return
             for name in ("runner.json", "process.json", "start.flag", "workers-stopped.flag"):
                 (root / name).unlink(missing_ok=True)
-            self.save(root, status="RECOVERING", recoveryCount=1, workersLaunched=False, workerStates={}, failureReason=None)
+            self.save(
+                root, status="RECOVERING", recoveryCount=1, workersLaunched=False, workerStates={}, failureReason=None
+            )
             self.log(root, "coordinator_recovery", recoveryCount=1)
             self.launch(root)
         else:
-            self.save(root, status="CANCELLING" if (root / "cancel.flag").exists() else
-                      'PAUSING' if (root/'pause.flag').exists() else
-                      "RUNNING" if runner.get("status") == "RUNNING" else "STARTING")
+            self.save(
+                root,
+                status="CANCELLING"
+                if (root / "cancel.flag").exists()
+                else "PAUSING"
+                if (root / "pause.flag").exists()
+                else "RUNNING"
+                if runner.get("status") == "RUNNING"
+                else "STARTING",
+            )
 
     def loop(self):
         while not self.stop.wait(1):
@@ -219,78 +273,159 @@ class RunSupervisor(ABC):
         root = self.directory(run_id)
         if not (root / "config.json").exists():
             raise FileNotFoundError("run not found")
-        result = {"state": self.state(root), "generations": [], "candidates": [], "attempts": [],
-                  "events": events(root / "lifecycle.jsonl") + events(root / "events.jsonl"), "artifacts": []}
+        result = {
+            "state": self.state(root),
+            "generations": [],
+            "candidates": [],
+            "attempts": [],
+            "events": events(root / "lifecycle.jsonl") + events(root / "events.jsonl"),
+            "artifacts": [],
+        }
         for path in root.glob("worker-*.json"):
             result["events"].extend(read_json(path, []))
         recipe = next((item["recipe"] for item in result["events"] if item.get("event") == "managed_start"), {})
-        workload = recipe.get("workload", recipe.get('numerical',{}).get('workload',{}))
-        contexts={}
+        workload = recipe.get("workload", recipe.get("numerical", {}).get("workload", {}))
+        contexts = {}
         db_path = root / "ledger.sqlite"
         checkpoint = result["state"].get("finalWeightsSha256")
-        weights = data_root(root)/'weights'
+        weights = data_root(root) / "weights"
         if db_path.exists():
             with sqlite3.connect(f"file:{db_path}?mode=ro", uri=True) as db:
                 db.row_factory = sqlite3.Row
                 db.execute("BEGIN")  # consistent projection, never mutate the runtime ledger
                 if db.execute("SELECT 1 FROM sqlite_master WHERE name='generation_context'").fetchone():
-                    contexts={r['generation']:json.loads(r['body']) for r in db.execute('SELECT generation,body FROM generation_context')}
-                for gen in db.execute("SELECT g.*, u.child_weights_sha256, u.applied_at FROM generation g LEFT JOIN generation_update u USING(experiment_id,generation) ORDER BY g.generation"):
+                    contexts = {
+                        r["generation"]: json.loads(r["body"])
+                        for r in db.execute("SELECT generation,body FROM generation_context")
+                    }
+                for gen in db.execute(
+                    "SELECT g.*, u.child_weights_sha256, u.applied_at FROM generation g LEFT JOIN generation_update u USING(experiment_id,generation) ORDER BY g.generation"
+                ):
                     if gen["applied_at"] and (weights / (gen["child_weights_sha256"] + ".bin")).is_file():
                         checkpoint = gen["child_weights_sha256"]
                     number = gen["generation"]
                     generation_id = f"{run_id}.g{number}"
-                    rewards = [row[0] for row in db.execute("SELECT reward FROM result JOIN candidate USING(candidate_id) WHERE generation=?", (number,))]
+                    rewards = [
+                        row[0]
+                        for row in db.execute(
+                            "SELECT reward FROM result JOIN candidate USING(candidate_id) WHERE generation=?", (number,)
+                        )
+                    ]
                     count = db.execute("SELECT count(*) FROM candidate WHERE generation=?", (number,)).fetchone()[0]
-                    row = {"experimentId": run_id, "generationId": generation_id, "modelVersion": gen["parent_weights_sha256"],
-                           "status": "COMPLETED" if gen["applied_at"] else
-                           result["state"]["status"] if result["state"].get("status") in ("CANCELLED", "FAILED") else "RUNNING", "candidateCount": count,
-                           "committedCandidateCount": len(rewards), "completedAt": iso(gen["applied_at"])}
-                    row["startedAt"] = next((iso(item["t"]) for item in result["events"]
-                                             if item.get("event") == "generation_open" and item.get("generation") == number), None)
+                    row = {
+                        "experimentId": run_id,
+                        "generationId": generation_id,
+                        "modelVersion": gen["parent_weights_sha256"],
+                        "status": "COMPLETED"
+                        if gen["applied_at"]
+                        else result["state"]["status"]
+                        if result["state"].get("status") in ("CANCELLED", "FAILED")
+                        else "RUNNING",
+                        "candidateCount": count,
+                        "committedCandidateCount": len(rewards),
+                        "completedAt": iso(gen["applied_at"]),
+                    }
+                    row["startedAt"] = next(
+                        (
+                            iso(item["t"])
+                            for item in result["events"]
+                            if item.get("event") == "generation_open" and item.get("generation") == number
+                        ),
+                        None,
+                    )
                     if rewards:
-                        row.update(rewardMean=sum(rewards)/len(rewards), rewardBest=max(rewards))
-                    if number in contexts:row['generationContext']=contexts[number]
+                        row.update(rewardMean=sum(rewards) / len(rewards), rewardBest=max(rewards))
+                    if number in contexts:
+                        row["generationContext"] = contexts[number]
                     result["generations"].append(row)
-                for c in db.execute("SELECT c.*,g.recipe_hash,g.parent_weights_sha256,r.reward FROM candidate c JOIN generation g USING(experiment_id,generation) LEFT JOIN result r USING(candidate_id)"):
-                    attempts = list(db.execute("SELECT attempt_number,worker_id,leased_at,deadline,ended_at,failure_kind FROM attempt WHERE candidate_id=? ORDER BY attempt_number", (c["candidate_id"],)))
+                for c in db.execute(
+                    "SELECT c.*,g.recipe_hash,g.parent_weights_sha256,r.reward FROM candidate c JOIN generation g USING(experiment_id,generation) LEFT JOIN result r USING(candidate_id)"
+                ):
+                    attempts = list(
+                        db.execute(
+                            "SELECT attempt_number,worker_id,leased_at,deadline,ended_at,failure_kind FROM attempt WHERE candidate_id=? ORDER BY attempt_number",
+                            (c["candidate_id"],),
+                        )
+                    )
                     # The UI ID is separate from canonical descriptor identity, which stays in the ledger.
                     cid = f"{run_id}.g{c['generation']}.c{c['candidate_index']}"
-                    item = {"experimentId": run_id, "generationId": f"{run_id}.g{c['generation']}", "candidateId": cid,
-                            "modelVersion": c["parent_weights_sha256"], "seed": str(c["seed"]), "noiseRecipeHash": c["recipe_hash"],
-                            "generationConfigHash": workload.get("generation_config_sha256"),
-                            "batchIds": [workload["hash"]] if workload.get("hash") else [], "status": c["state"]}
+                    item = {
+                        "experimentId": run_id,
+                        "generationId": f"{run_id}.g{c['generation']}",
+                        "candidateId": cid,
+                        "modelVersion": c["parent_weights_sha256"],
+                        "seed": str(c["seed"]),
+                        "noiseRecipeHash": c["recipe_hash"],
+                        "generationConfigHash": workload.get("generation_config_sha256"),
+                        "batchIds": [workload["hash"]] if workload.get("hash") else [],
+                        "status": c["state"],
+                    }
                     if c["reward"] is not None:
                         item["reward"] = c["reward"]
-                    if c['generation'] in contexts:
-                        item['batchIds']=[contexts[c['generation']]['batchHash']]
-                        item['effectiveSigma']=contexts[c['generation']]['sigmaFloat32']
+                    if c["generation"] in contexts:
+                        item["batchIds"] = [contexts[c["generation"]]["batchHash"]]
+                        item["effectiveSigma"] = contexts[c["generation"]]["sigmaFloat32"]
                     for a in attempts:
                         aid = cid + f".a{a['attempt_number']}"
-                        success = db.execute("SELECT committed_at FROM result WHERE candidate_id=? AND attempt_number=?", (c["candidate_id"], a["attempt_number"])).fetchone()
+                        success = db.execute(
+                            "SELECT committed_at FROM result WHERE candidate_id=? AND attempt_number=?",
+                            (c["candidate_id"], a["attempt_number"]),
+                        ).fetchone()
                         expired = not a["ended_at"] and a["deadline"] < time.time()
-                        result["attempts"].append({"experimentId": run_id, "generationId": item["generationId"], "candidateId": cid,
-                            "attemptId": aid, "workerId": a["worker_id"], "modelVersion": c["parent_weights_sha256"],
-                            "status": "SUCCEEDED" if success else "FAILED" if a["failure_kind"] or expired else "RUNNING",
-                            "startedAt": iso(a["leased_at"]), "completedAt": iso(success[0] if success else a["ended_at"]),
-                            "errorType": a["failure_kind"] or ("LEASE_EXPIRED" if expired else None)})
+                        result["attempts"].append(
+                            {
+                                "experimentId": run_id,
+                                "generationId": item["generationId"],
+                                "candidateId": cid,
+                                "attemptId": aid,
+                                "workerId": a["worker_id"],
+                                "modelVersion": c["parent_weights_sha256"],
+                                "status": "SUCCEEDED"
+                                if success
+                                else "FAILED"
+                                if a["failure_kind"] or expired
+                                else "RUNNING",
+                                "startedAt": iso(a["leased_at"]),
+                                "completedAt": iso(success[0] if success else a["ended_at"]),
+                                "errorType": a["failure_kind"] or ("LEASE_EXPIRED" if expired else None),
+                            }
+                        )
                         item.update(attemptId=aid, workerId=a["worker_id"], leaseDeadline=iso(a["deadline"]))
                     result["candidates"].append(item)
         for event in result["events"]:
             if event.get("candidate_id"):
                 event["uiCandidateId"] = event["candidate_id"].replace("/", ".")
-        allowed = [root / "config.json", root / "events.jsonl", root / "lifecycle.jsonl", *root.glob("summary-*.json"),*root.glob('validation-*.json'),*root.glob('study-*.json')]
-        result['studyMetrics']=read_json(root/'study-metrics.json')
+        allowed = [
+            root / "config.json",
+            root / "events.jsonl",
+            root / "lifecycle.jsonl",
+            *root.glob("summary-*.json"),
+            *root.glob("validation-*.json"),
+            *root.glob("study-*.json"),
+        ]
+        result["studyMetrics"] = read_json(root / "study-metrics.json")
         result["checkpointSha256"] = checkpoint
         if checkpoint:
             allowed.append(weights / (checkpoint + ".bin"))
         for path in allowed:
             if path.is_file():
                 name = path.name
-                result["artifacts"].append({"artifactId": run_id + "." + name, "experimentId": run_id,
-                    "name": name, "path": name, "type": "CHECKPOINT" if name.endswith(".bin") else
-                    "CONFIG" if name == "config.json" else "EVALUATION_RESULTS", "status": "READY",
-                    "sizeBytes": path.stat().st_size, "createdAt": iso(path.stat().st_mtime)})
+                result["artifacts"].append(
+                    {
+                        "artifactId": run_id + "." + name,
+                        "experimentId": run_id,
+                        "name": name,
+                        "path": name,
+                        "type": "CHECKPOINT"
+                        if name.endswith(".bin")
+                        else "CONFIG"
+                        if name == "config.json"
+                        else "EVALUATION_RESULTS",
+                        "status": "READY",
+                        "sizeBytes": path.stat().st_size,
+                        "createdAt": iso(path.stat().st_mtime),
+                    }
+                )
         return result
 
     @abstractmethod

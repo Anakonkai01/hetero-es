@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
 interface KeyValueProps {
   label: string;
@@ -10,7 +10,7 @@ export function KeyValue({ label, children, mono }: KeyValueProps) {
   return (
     <div>
       <dt>{label}</dt>
-      <dd className={mono ? "mono" : undefined}>{children}</dd>
+      <dd className={mono ? 'mono' : undefined}>{children}</dd>
     </div>
   );
 }

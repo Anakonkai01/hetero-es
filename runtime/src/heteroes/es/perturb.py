@@ -3,17 +3,18 @@ from heteroes.noise.engine import iter_parameter_noise_chunks
 from heteroes.model.schema import ParameterSchema, resolve_tensors
 from heteroes.es.checks import _check_param_sigma, SUPPORT_DTYPE
 import math
-import torch 
-import numpy as np     
-    
+import torch
+import numpy as np
+
 # The noise of consecutive chunks is joined into pieces of about this many elements before it goes to the device: the arithmetic is
 # elementwise, so the bits do not depend on the piece size (checked by the tests and by the hash of the real model), but one launch of
 # each operation per piece instead of per chunk of 2**18 elements saves most of the Python and launch overhead.
 BATCH_ELEMENTS = 2**22
 
+
 # for param float 16 only
 # perturb inplace, (not copy to new tensor)
-def perturb_parameter_(param: torch.Tensor, param_noise_address: ParameterNoiseAddress, sigma: float) -> None: 
+def perturb_parameter_(param: torch.Tensor, param_noise_address: ParameterNoiseAddress, sigma: float) -> None:
     """
     Perturb one parameter tensor in place:
         param <- fp16( fp32(param) + fp32(sigma) * fp32(eps) )
@@ -26,16 +27,15 @@ def perturb_parameter_(param: torch.Tensor, param_noise_address: ParameterNoiseA
 
     Raises TypeError if param is not FP16, ValueError if it is not contiguous.
     """
-    # check param and sigma 
+    # check param and sigma
     _check_param_sigma(param, sigma)
 
     # convert sigma to float 32 (convert to numpy float 32 then convert to python)
     sigma_float_32 = float(np.float32(sigma))
-            
 
-    # disable gradient 
-    with torch.no_grad(): 
-        flat_param = param.view(-1) # not copy to new tensor 
+    # disable gradient
+    with torch.no_grad():
+        flat_param = param.view(-1)  # not copy to new tensor
         numel = flat_param.numel()
         pending, pending_elements, first = [], 0, 0
 
@@ -47,7 +47,7 @@ def perturb_parameter_(param: torch.Tensor, param_noise_address: ParameterNoiseA
 
             scaled = eps.to(torch.float32) * sigma_float_32
             perturbed = param_chunk.to(torch.float32) + scaled
-            perturbed = perturbed.to(SUPPORT_DTYPE) # cast to orginal dtype 
+            perturbed = perturbed.to(SUPPORT_DTYPE)  # cast to orginal dtype
             param_chunk.copy_(perturbed)
             pending, pending_elements = [], 0
 
@@ -61,8 +61,15 @@ def perturb_parameter_(param: torch.Tensor, param_noise_address: ParameterNoiseA
         if pending:
             apply_pending()
 
-# perturb whole model (inplace ) 
-def perturb_model_(model: torch.nn.Module, schema: ParameterSchema, candidate_seed: int, sigma: float, chunk_elements: int = DEFAULT_CHUNK_ELEMENTS) -> None: 
+
+# perturb whole model (inplace )
+def perturb_model_(
+    model: torch.nn.Module,
+    schema: ParameterSchema,
+    candidate_seed: int,
+    sigma: float,
+    chunk_elements: int = DEFAULT_CHUNK_ELEMENTS,
+) -> None:
     """
     Perturb every tensor of the model in place: theta' = theta + sigma * eps, one noise stream
     per schema entry (see perturb_parameter_ for the exact arithmetic).
@@ -88,22 +95,21 @@ def perturb_model_(model: torch.nn.Module, schema: ParameterSchema, candidate_se
         TypeError / ValueError: a tensor is not contiguous FP16, or sigma is NaN/Inf.
     """
 
-    # resolve tensor 
+    # resolve tensor
     tensors = resolve_tensors(model, schema)
 
-    # check tensor and sigma 
-    for tensor in tensors: 
+    # check tensor and sigma
+    for tensor in tensors:
         _check_param_sigma(tensor, sigma)
-  
+
     # perturb
     schema_hash = schema.hash
-    for entry, tensor in zip(schema.entries, tensors, strict=True): 
+    for entry, tensor in zip(schema.entries, tensors, strict=True):
         param_noise_address = ParameterNoiseAddress(
             candidate_seed=candidate_seed,
-            schema_hash=schema_hash, 
+            schema_hash=schema_hash,
             parameter_index=entry.index,
-            chunk_elements=chunk_elements, 
+            chunk_elements=chunk_elements,
         )
 
         perturb_parameter_(tensor, param_noise_address, sigma)
-    

@@ -2,6 +2,7 @@
 `heteroes.profile_setup`: what `scripts/profile_worker.py` needs to profile ANY workload and ANY noise engine, not only the 16 prompts with the CPU engine.
 No model and no GPU: the questions come from the generators and the engine is chosen by the recipe's engine version.
 """
+
 import pytest
 
 from heteroes.es.cuda_ops import apply_coefficients_cuda_, perturb_model_cuda_
@@ -34,7 +35,7 @@ def test_unknown_workload_is_refused():
 
 
 def test_cpu_engine_uses_the_cpu_functions():
-    perturb, update = noise_ops(ENGINE_VERSION, chunk_elements=2 ** 18)
+    perturb, update = noise_ops(ENGINE_VERSION, chunk_elements=2**18)
     assert perturb.__wrapped_by__ is perturb_model_ and update.__wrapped_by__ is apply_coefficients_
 
 
@@ -55,8 +56,15 @@ def test_the_stored_reference_answers_exist_only_for_arith16():
 
 def test_the_texts_of_a_profile_pass_the_decode_engine_to_the_long_workloads(monkeypatch):
     from heteroes import profile_setup
+
     seen = []
-    monkeypatch.setattr(profile_setup, "cot_generate", lambda model, tokenizer, questions, chunk, decode_engine="hf_generate": seen.append((chunk, decode_engine)) or (["t"], 0))
+    monkeypatch.setattr(
+        profile_setup,
+        "cot_generate",
+        lambda model, tokenizer, questions, chunk, decode_engine="hf_generate": (
+            seen.append((chunk, decode_engine)) or (["t"], 0)
+        ),
+    )
     profile_setup.profile_texts("cot_l1_q128", None, None, 64)
     profile_setup.profile_texts("cot_l1_q128", None, None, 64, "hf_compact")
     assert seen == [(64, "hf_generate"), (64, "hf_compact")]
@@ -64,5 +72,6 @@ def test_the_texts_of_a_profile_pass_the_decode_engine_to_the_long_workloads(mon
 
 def test_the_16_prompt_workload_has_no_other_decode_engine():
     from heteroes import profile_setup
+
     with pytest.raises(ValueError, match="arith16"):
         profile_setup.profile_texts("arith16", None, None, 4, "hf_compact")

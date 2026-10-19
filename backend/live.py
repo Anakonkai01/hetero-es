@@ -1,4 +1,5 @@
 """Server-sent events for one run: the compact timeline is pushed when it changes, with heartbeats in between."""
+
 import asyncio
 import json
 import threading
@@ -36,19 +37,21 @@ class LiveStreams:
             while True:
                 body, snapshot = await run_in_threadpool(lambda: (store.get(run_id), store.snapshot(run_id)))
                 # The clock is left out of the comparison: only real changes are worth sending.
-                current = json.dumps(build_timeline(body, snapshot, now_ms=0), sort_keys=True, separators=(',', ':'), allow_nan=False)
+                current = json.dumps(
+                    build_timeline(body, snapshot, now_ms=0), sort_keys=True, separators=(",", ":"), allow_nan=False
+                )
                 if current != fingerprint:
                     fingerprint = current
-                    payload = json.dumps(build_timeline(body, snapshot), separators=(',', ':'), allow_nan=False)
-                    yield f'event: timeline\ndata: {payload}\n\n'
+                    payload = json.dumps(build_timeline(body, snapshot), separators=(",", ":"), allow_nan=False)
+                    yield f"event: timeline\ndata: {payload}\n\n"
                     last_sent = loop.time()
-                if not body or body.get('status') in TERMINAL or loop.time() - started > self.max_seconds:
-                    yield 'event: end\ndata: {}\n\n'
+                if not body or body.get("status") in TERMINAL or loop.time() - started > self.max_seconds:
+                    yield "event: end\ndata: {}\n\n"
                     return
                 await asyncio.sleep(self.poll)
                 quiet = loop.time() - last_sent
                 if quiet >= self.heartbeat:
-                    yield ': heartbeat\n\n'
+                    yield ": heartbeat\n\n"
                     last_sent = loop.time()
         finally:
             self.release()

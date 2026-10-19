@@ -19,6 +19,7 @@ the update is deterministic), applied (the child is the current weights; if its 
 parent and check that it is the hash the ledger marked). `run` calls it first, so a restarted coordinator continues where the
 dead one stopped and ends with the weights an uninterrupted run would have.
 """
+
 import time
 
 from heteroes.dispatch import Greedy
@@ -30,7 +31,13 @@ from heteroes.generation_record import GenerationRecord
 from heteroes.ledger import GenerationState, Ledger
 from heteroes.manifest import CandidateDescriptor, Recipe, derive_seed
 from heteroes.model.schema import ParameterSchema
-from heteroes.model.weights_io import WeightsFileError, load_weights_, prepare_publication, prune_published, publish_weights
+from heteroes.model.weights_io import (
+    WeightsFileError,
+    load_weights_,
+    prepare_publication,
+    prune_published,
+    publish_weights,
+)
 from heteroes.http_transport import CoordinatorServer
 from heteroes.worker_api import WorkerAPI
 
@@ -56,25 +63,54 @@ class _NoGeneration:
     """What the workers meet before the first generation is open: no work yet, and nothing to deliver to."""
 
     def handle(self, operation, request, authenticated_worker_id=None):
-        if authenticated_worker_id is not None and operation=='lease' and request.get('worker_id')!=authenticated_worker_id:
-            return {'ok':False,'error':{'code':'forbidden','message':'Worker identity mismatch'}}
+        if (
+            authenticated_worker_id is not None
+            and operation == "lease"
+            and request.get("worker_id") != authenticated_worker_id
+        ):
+            return {"ok": False, "error": {"code": "forbidden", "message": "Worker identity mismatch"}}
         if operation == "lease":
             return {"ok": True, "generation_state": "OPEN", "work": None}
         return {"ok": False, "error": {"code": "rejected", "message": "no generation is open"}}
 
 
 class Coordinator:
-    def __init__(self, model, schema: ParameterSchema, recipe: Recipe, ledger: Ledger, models_dir, experiment_id: str,
-                 candidates: int, alpha: float, policy_factory=Greedy, lease_seconds: float = 120.0, host: str = "127.0.0.1",
-                 port: int = 0, token: str | None = None, poll_seconds: float = 0.2, failed_grace_seconds: float = 5.0,
-                 timeout_seconds: float | None = None, stall_seconds=_DEFAULT, keep_published: int | None = 3, allow_unauthenticated: bool = False, log=lambda event: None, timer=time.perf_counter,
-                 monotonic=time.monotonic, sleep=time.sleep, cancel_requested=lambda: False,
-                 device_tokens=None, generation_completed=None, generation_started=None,
-                 pause_requested=lambda: False, dataset=None):
+    def __init__(
+        self,
+        model,
+        schema: ParameterSchema,
+        recipe: Recipe,
+        ledger: Ledger,
+        models_dir,
+        experiment_id: str,
+        candidates: int,
+        alpha: float,
+        policy_factory=Greedy,
+        lease_seconds: float = 120.0,
+        host: str = "127.0.0.1",
+        port: int = 0,
+        token: str | None = None,
+        poll_seconds: float = 0.2,
+        failed_grace_seconds: float = 5.0,
+        timeout_seconds: float | None = None,
+        stall_seconds=_DEFAULT,
+        keep_published: int | None = 3,
+        allow_unauthenticated: bool = False,
+        log=lambda event: None,
+        timer=time.perf_counter,
+        monotonic=time.monotonic,
+        sleep=time.sleep,
+        cancel_requested=lambda: False,
+        device_tokens=None,
+        generation_completed=None,
+        generation_started=None,
+        pause_requested=lambda: False,
+        dataset=None,
+    ):
         self.model = model
         self.schema = schema
         self.recipe = recipe
-        self.dataset=dataset
+        self.dataset = dataset
         self.ledger = ledger
         self.models_dir = models_dir
         self.experiment_id = experiment_id
@@ -85,9 +121,11 @@ class Coordinator:
         self._poll = poll_seconds
         self._grace = failed_grace_seconds
         self._timeout = timeout_seconds
-        self._stall = max(MIN_STALL_SECONDS, STALL_LEASES * lease_seconds) if stall_seconds is _DEFAULT else stall_seconds
-        self._keep_published = keep_published       # how many versions of the weights stay in models_dir (the current one and its ancestors); None: all
-        self._recent: list[str] = []                # the hashes published or loaded, newest last
+        self._stall = (
+            max(MIN_STALL_SECONDS, STALL_LEASES * lease_seconds) if stall_seconds is _DEFAULT else stall_seconds
+        )
+        self._keep_published = keep_published  # how many versions of the weights stay in models_dir (the current one and its ancestors); None: all
+        self._recent: list[str] = []  # the hashes published or loaded, newest last
         self._log = log
         self._timer = timer
         self._monotonic = monotonic
@@ -98,8 +136,16 @@ class Coordinator:
         self._generation_started = generation_started
         self.parent_sha256 = model_weights_sha256(model, schema)
         self._parent_published = False
-        self.server = CoordinatorServer(_NoGeneration(), job=None, models_dir=models_dir, host=host, port=port, token=token,
-                                        allow_unauthenticated=allow_unauthenticated, device_tokens=device_tokens)
+        self.server = CoordinatorServer(
+            _NoGeneration(),
+            job=None,
+            models_dir=models_dir,
+            host=host,
+            port=port,
+            token=token,
+            allow_unauthenticated=allow_unauthenticated,
+            device_tokens=device_tokens,
+        )
 
     @property
     def url(self) -> str:
@@ -115,10 +161,20 @@ class Coordinator:
         self._log({"event": event, "t": time.time(), **fields})
 
     def _job(self, generation: int, policy, state: str = "RUNNING") -> dict:
-        return {"experiment_id": self.experiment_id, "generation": generation, "recipe": self.recipe.to_dict(),
-                "recipe_hash": self.recipe.hash, "parent_weights_sha256": self.parent_sha256, "candidates": self.candidates,
-                "policy": type(policy).__name__, "lease_seconds": self._lease_seconds, "state": state,
-                **({'generationContext':self.recipe.context(self.dataset,generation)} if self.dataset is not None else {})}
+        return {
+            "experiment_id": self.experiment_id,
+            "generation": generation,
+            "recipe": self.recipe.to_dict(),
+            "recipe_hash": self.recipe.hash,
+            "parent_weights_sha256": self.parent_sha256,
+            "candidates": self.candidates,
+            "policy": type(policy).__name__,
+            "lease_seconds": self._lease_seconds,
+            "state": state,
+            **(
+                {"generationContext": self.recipe.context(self.dataset, generation)} if self.dataset is not None else {}
+            ),
+        }
 
     def _wait_until_complete(self, generation: int) -> None:
         started, failed_since = self._monotonic(), None
@@ -132,18 +188,24 @@ class Coordinator:
             if status.state is GenerationState.FAILED:
                 failed_since = now if failed_since is None else failed_since
                 if now - failed_since >= self._grace:
-                    raise CoordinatorError(f"generation {self.experiment_id}/g{generation} failed: "
-                                           f"{', '.join(status.exhausted)} used all attempts")
+                    raise CoordinatorError(
+                        f"generation {self.experiment_id}/g{generation} failed: "
+                        f"{', '.join(status.exhausted)} used all attempts"
+                    )
             else:
                 failed_since = None
             if (status.state, status.committed) != progress:
                 progress, progress_at = (status.state, status.committed), now
             elif self._stall is not None and now - progress_at >= self._stall:
-                raise CoordinatorError(f"generation {self.experiment_id}/g{generation}: no progress for {self._stall} s "
-                                       f"({status.committed} of {status.total} committed): are the workers alive?")
+                raise CoordinatorError(
+                    f"generation {self.experiment_id}/g{generation}: no progress for {self._stall} s "
+                    f"({status.committed} of {status.total} committed): are the workers alive?"
+                )
             if self._timeout is not None and now - started >= self._timeout:
-                raise TimeoutError(f"generation {self.experiment_id}/g{generation}: {status.committed} of {status.total} "
-                                   f"committed after {self._timeout} s")
+                raise TimeoutError(
+                    f"generation {self.experiment_id}/g{generation}: {status.committed} of {status.total} "
+                    f"committed after {self._timeout} s"
+                )
             self._sleep(self._poll)
 
     def _check_cancel(self):
@@ -160,18 +222,22 @@ class Coordinator:
             if sha256 in self._recent:
                 self._recent.remove(sha256)
             self._recent.append(sha256)
-        self._recent = self._recent[-self._keep_published:]
+        self._recent = self._recent[-self._keep_published :]
         removed = prune_published(self.models_dir, self._recent)
         if removed:
             self.log("weights_pruned", removed=[name[:-4] for name in removed], kept=list(self._recent))
 
     def _register_update(self, record, child_sha256: str) -> None:
         """Serve the update (`GET /v1/updates/<parent>`): a worker that is one or a few generations behind can replay it instead of downloading the weights."""
-        self.server.updates[record.parent_weights_sha256] = {"record_json": record.to_json(), "record_hash": record.hash,
-                                                             "child_weights_sha256": child_sha256}
+        self.server.updates[record.parent_weights_sha256] = {
+            "record_json": record.to_json(),
+            "record_hash": record.hash,
+            "child_weights_sha256": child_sha256,
+        }
 
     def _weights_file(self, sha256: str):
         from pathlib import Path
+
         return Path(self.models_dir) / f"{sha256}.bin"
 
     def _load_published(self, sha256: str) -> None:
@@ -180,14 +246,21 @@ class Coordinator:
         try:
             load_weights_(self.model, self.schema, path, sha256)
         except (OSError, WeightsFileError) as error:
-            raise CoordinatorError(f"cannot recover: the published weights {sha256[:12]} are not usable ({error})") from error
+            raise CoordinatorError(
+                f"cannot recover: the published weights {sha256[:12]} are not usable ({error})"
+            ) from error
         self.parent_sha256 = sha256
 
     def _apply_record(self, record):
-        if self.recipe.engine_version == CUDA_ENGINE_VERSION:                  # the engine that made the noise of the candidates makes that of the update
-            return apply_coefficients_cuda_(self.model, self.schema, list(record.seeds), record.coefficients, record.alpha)
-        return apply_coefficients_(self.model, self.schema, list(record.seeds), record.coefficients, record.alpha,
-                                   self.recipe.chunk_elements)
+        if (
+            self.recipe.engine_version == CUDA_ENGINE_VERSION
+        ):  # the engine that made the noise of the candidates makes that of the update
+            return apply_coefficients_cuda_(
+                self.model, self.schema, list(record.seeds), record.coefficients, record.alpha
+            )
+        return apply_coefficients_(
+            self.model, self.schema, list(record.seeds), record.coefficients, record.alpha, self.recipe.chunk_elements
+        )
 
     def recover(self) -> int:
         """
@@ -197,18 +270,20 @@ class Coordinator:
         generations = self.ledger.list_generations(self.experiment_id)
         if not generations:
             return 0
-        for old in generations:                                      # the updates of the past stay available to a worker that restarts behind
+        for old in generations:  # the updates of the past stay available to a worker that restarts behind
             stored_old = self.ledger.get_update(self.experiment_id, old.generation)
             if stored_old is not None and stored_old.child_weights_sha256 is not None:
                 self._register_update(stored_old.record, stored_old.child_weights_sha256)
         last = generations[-1]
         if last.recipe_hash != self.recipe.hash:
-            raise CoordinatorError(f"the ledger holds generation {last.generation} of another recipe "
-                                   f"({last.recipe_hash[:12]}, this is {self.recipe.hash[:12]})")
+            raise CoordinatorError(
+                f"the ledger holds generation {last.generation} of another recipe "
+                f"({last.recipe_hash[:12]}, this is {self.recipe.hash[:12]})"
+            )
         number = last.generation
         stored = self.ledger.get_update(self.experiment_id, number)
 
-        if stored is None:                                           # not finished: its candidates are in the ledger, resume it
+        if stored is None:  # not finished: its candidates are in the ledger, resume it
             if self.parent_sha256 != last.parent_weights_sha256:
                 self._load_published(last.parent_weights_sha256)
             self.log("recovered", generation=number, action="resume_generation", parent_sha256=self.parent_sha256)
@@ -216,7 +291,7 @@ class Coordinator:
             return number
 
         child = stored.child_weights_sha256
-        if child is not None and self.parent_sha256 == child:        # nothing to do: already there
+        if child is not None and self.parent_sha256 == child:  # nothing to do: already there
             return number + 1
         if child is not None:
             try:
@@ -225,14 +300,16 @@ class Coordinator:
                 self._parent_published = True
                 return number + 1
             except CoordinatorError:
-                pass                                                 # missing or damaged: recompute it from the parent below
+                pass  # missing or damaged: recompute it from the parent below
         if self.parent_sha256 != last.parent_weights_sha256:
             self._load_published(last.parent_weights_sha256)
-        report = self._apply_record(stored.record)                   # the stored record, never recomputed (decision O7)
+        report = self._apply_record(stored.record)  # the stored record, never recomputed (decision O7)
         recomputed = model_weights_sha256(self.model, self.schema)
         if child is not None and recomputed != child:
-            raise CoordinatorError(f"cannot recover: applying the stored record of g{number} gives {recomputed[:12]}, "
-                                   f"the ledger marked {child[:12]}")
+            raise CoordinatorError(
+                f"cannot recover: applying the stored record of g{number} gives {recomputed[:12]}, "
+                f"the ledger marked {child[:12]}"
+            )
         if child is None:
             self.ledger.mark_applied(self.experiment_id, number, stored.record_hash, recomputed)
         published = publish_weights(self.model, self.schema, self.models_dir)
@@ -247,30 +324,47 @@ class Coordinator:
     def run_generation(self, generation: int) -> dict:
         begin = self._timer()
         if self.dataset is not None:
-            context=self.recipe.context(self.dataset,generation)
-            self.ledger.freeze_generation_context(self.experiment_id,generation,context)
-            self.log('generation_inputs_frozen',**context)
+            context = self.recipe.context(self.dataset, generation)
+            self.ledger.freeze_generation_context(self.experiment_id, generation, context)
+            self.log("generation_inputs_frozen", **context)
         if not self._parent_published:
-            publish_weights(self.model, self.schema, self.models_dir)       # a worker with other weights can synchronize to them
+            publish_weights(
+                self.model, self.schema, self.models_dir
+            )  # a worker with other weights can synchronize to them
             self._parent_published = True
         parent = self.parent_sha256
-        descriptors = [CandidateDescriptor(recipe_hash=self.recipe.hash, parent_weights_sha256=parent,
-                                           experiment_id=self.experiment_id, generation=generation, index=index,
-                                           seed=derive_seed(self.experiment_id, generation, index))
-                       for index in range(self.candidates)]
+        descriptors = [
+            CandidateDescriptor(
+                recipe_hash=self.recipe.hash,
+                parent_weights_sha256=parent,
+                experiment_id=self.experiment_id,
+                generation=generation,
+                index=index,
+                seed=derive_seed(self.experiment_id, generation, index),
+            )
+            for index in range(self.candidates)
+        ]
         known = [g for g in self.ledger.list_generations(self.experiment_id) if g.generation == generation]
         if known and self.ledger.get_update(self.experiment_id, generation) is not None:
-            known = []                                                # already run: open_generation says so ("already open")
-        if known:                                                     # a restart: this generation was opened by the coordinator that died
+            known = []  # already run: open_generation says so ("already open")
+        if known:  # a restart: this generation was opened by the coordinator that died
             if known[0].parent_weights_sha256 != parent or known[0].recipe_hash != self.recipe.hash:
-                raise CoordinatorError(f"generation {self.experiment_id}/g{generation} is in the ledger with other parent weights or "
-                                       f"another recipe: call recover() first")
+                raise CoordinatorError(
+                    f"generation {self.experiment_id}/g{generation} is in the ledger with other parent weights or "
+                    f"another recipe: call recover() first"
+                )
             self.log("generation_resumed", generation=generation, parent_sha256=parent)
         else:
             self.ledger.open_generation(descriptors)
         policy = self._policy_factory()
-        api = WorkerAPI(self.ledger, self.experiment_id, generation, self._lease_seconds, policy,
-                        cancel_requested=self._cancel_requested)
+        api = WorkerAPI(
+            self.ledger,
+            self.experiment_id,
+            generation,
+            self._lease_seconds,
+            policy,
+            cancel_requested=self._cancel_requested,
+        )
         self.server.set_generation(api, self._job(generation, policy))
         self.log("generation_open", generation=generation, parent_sha256=parent, candidates=self.candidates)
 
@@ -280,10 +374,11 @@ class Coordinator:
         results = self.ledger.get_generation_results(self.experiment_id, generation)
         self.log("generation_complete", generation=generation, rewards=list(results.rewards))
 
-        record = GenerationRecord.from_results(self.experiment_id, generation, results, alpha=self.alpha,
-                                               eta=self.recipe.reward_eta)
-        self._check_cancel()                                                # last cooperative boundary before write-ahead commit
-        self.ledger.record_update(record)                                    # BEFORE the weights are touched
+        record = GenerationRecord.from_results(
+            self.experiment_id, generation, results, alpha=self.alpha, eta=self.recipe.reward_eta
+        )
+        self._check_cancel()  # last cooperative boundary before write-ahead commit
+        self.ledger.record_update(record)  # BEFORE the weights are touched
         recorded = self._timer()
         self.log("update_recorded", generation=generation, record_hash=record.hash)
 
@@ -295,8 +390,14 @@ class Coordinator:
         try:
             self.ledger.mark_applied(self.experiment_id, generation, record.hash, child)
             applied = self._timer()
-            self.log("update_applied", generation=generation, child_sha256=child, noop=report.noop, changed=report.changed,
-                     applied_l2=report.applied_l2)
+            self.log(
+                "update_applied",
+                generation=generation,
+                child_sha256=child,
+                noop=report.noop,
+                changed=report.changed,
+                applied_l2=report.applied_l2,
+            )
             publication.commit()
             self._register_update(record, child)
         except BaseException:
@@ -309,12 +410,23 @@ class Coordinator:
 
         rewards = list(results.rewards)
         summary = {
-            "generation": generation, "parent_sha256": parent, "child_sha256": child, "record_hash": record.hash,
-            "rewards": rewards, "mean_reward": sum(rewards) / len(rewards), "max_reward": max(rewards),
-            "coefficients": list(record.coefficients), "noop": report.noop, "changed": report.changed,
-            "applied_l2": report.applied_l2, "requested_l2": report.requested_l2,
-            "wait_seconds": waited - begin, "record_seconds": recorded - waited, "update_seconds": applied - recorded,
-            "publish_seconds": done - applied, "total_seconds": done - begin,
+            "generation": generation,
+            "parent_sha256": parent,
+            "child_sha256": child,
+            "record_hash": record.hash,
+            "rewards": rewards,
+            "mean_reward": sum(rewards) / len(rewards),
+            "max_reward": max(rewards),
+            "coefficients": list(record.coefficients),
+            "noop": report.noop,
+            "changed": report.changed,
+            "applied_l2": report.applied_l2,
+            "requested_l2": report.requested_l2,
+            "wait_seconds": waited - begin,
+            "record_seconds": recorded - waited,
+            "update_seconds": applied - recorded,
+            "publish_seconds": done - applied,
+            "total_seconds": done - begin,
         }
         self.log("generation_done", **summary)
         return summary
@@ -331,8 +443,9 @@ class Coordinator:
             for generation in range(self.recover(), generations):
                 self._check_cancel()
                 if generation > 0 and self._pause_requested():
-                    raise RunPaused('paused after a published generation')
-                if self._generation_started is not None:self._generation_started(generation)
+                    raise RunPaused("paused after a published generation")
+                if self._generation_started is not None:
+                    self._generation_started(generation)
                 summaries.append(self.run_generation(generation))
                 if self._generation_completed is not None:
                     self._generation_completed(summaries[-1])
@@ -344,7 +457,7 @@ class Coordinator:
             self.finish()  # Workers restore and exit normally at this barrier.
             raise
         except BaseException:
-            self.finish(aborted=True)             # a failed run must not look like a success to the workers
+            self.finish(aborted=True)  # a failed run must not look like a success to the workers
             raise
         self.finish()
         return summaries

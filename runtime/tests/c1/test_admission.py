@@ -2,6 +2,7 @@
 `heteroes.admission`: the hard capability gate, the prediction of the time of a generation and the decision to admit.
 The predictions are computed by hand in the comments (small numbers), not by calling the code under test.
 """
+
 import pytest
 
 from heteroes.admission import (
@@ -20,8 +21,11 @@ KEY = {"device": "cuda", "gpu_total_memory_bytes": 1000, "recipe_hash": "r"}
 
 
 def profile(**changes):
-    base = {"key": dict(KEY), "peak_bytes_candidate": 500,
-            "checks": {"noise_selftest": True, "restore_exact": True, "chunk1_reproduces_reference": True}}
+    base = {
+        "key": dict(KEY),
+        "peak_bytes_candidate": 500,
+        "checks": {"noise_selftest": True, "restore_exact": True, "chunk1_reproduces_reference": True},
+    }
     base.update(changes)
     return base
 
@@ -30,18 +34,31 @@ def profile(**changes):
 # the hard gate
 # ---------------------------------------------------------------------------
 
+
 def test_a_good_profile_passes_the_gate():
     assert capability_gate(profile(), KEY) == []
 
 
-@pytest.mark.parametrize("changes,reason", [
-    ({"key": {**KEY, "device": "cpu"}}, Reason.NOT_A_GPU),
-    ({"key": {**KEY, "recipe_hash": "other"}}, Reason.PROFILE_KEY_MISMATCH),
-    ({"checks": {"noise_selftest": False, "restore_exact": True, "chunk1_reproduces_reference": True}}, Reason.NOISE_SELFTEST_FAILED),
-    ({"checks": {"noise_selftest": True, "restore_exact": False, "chunk1_reproduces_reference": True}}, Reason.RESTORE_FAILED),
-    ({"checks": {"noise_selftest": True, "restore_exact": True, "chunk1_reproduces_reference": False}}, Reason.NUMERICS_FAILED),
-    ({"peak_bytes_candidate": 950}, Reason.MEMORY_MARGIN),
-])
+@pytest.mark.parametrize(
+    "changes,reason",
+    [
+        ({"key": {**KEY, "device": "cpu"}}, Reason.NOT_A_GPU),
+        ({"key": {**KEY, "recipe_hash": "other"}}, Reason.PROFILE_KEY_MISMATCH),
+        (
+            {"checks": {"noise_selftest": False, "restore_exact": True, "chunk1_reproduces_reference": True}},
+            Reason.NOISE_SELFTEST_FAILED,
+        ),
+        (
+            {"checks": {"noise_selftest": True, "restore_exact": False, "chunk1_reproduces_reference": True}},
+            Reason.RESTORE_FAILED,
+        ),
+        (
+            {"checks": {"noise_selftest": True, "restore_exact": True, "chunk1_reproduces_reference": False}},
+            Reason.NUMERICS_FAILED,
+        ),
+        ({"peak_bytes_candidate": 950}, Reason.MEMORY_MARGIN),
+    ],
+)
 def test_each_failure_has_its_own_reason_code(changes, reason):
     expected_key = KEY if "key" not in changes or changes["key"]["device"] != "cpu" else changes["key"]
     expected_key = {**KEY, "recipe_hash": "r"} if reason is Reason.PROFILE_KEY_MISMATCH else expected_key
@@ -53,7 +70,13 @@ def test_each_failure_has_its_own_reason_code(changes, reason):
 
 def test_only_the_fields_named_in_the_expected_key_are_compared():
     # hardware fields (gpu name, memory...) may differ between machines: they are not in the expected key
-    key = {**KEY, "gpu_name": "A", "torch": "2.10", "numpy": "2.4", "transformers": "5.5"}      # NumPy differs: it is not compared
+    key = {
+        **KEY,
+        "gpu_name": "A",
+        "torch": "2.10",
+        "numpy": "2.4",
+        "transformers": "5.5",
+    }  # NumPy differs: it is not compared
     expected = {"device": "cuda", "recipe_hash": "r"}
     assert capability_gate(profile(key=key), expected) == []
 
@@ -79,19 +102,47 @@ def test_a_field_missing_from_the_profile_key_is_a_mismatch():
     assert capability_gate(profile(), {**KEY, "schema_hash": "s"}) == [Reason.PROFILE_KEY_MISMATCH]
 
 
-REFERENCE_KEY = {"gpu_name": "ref", "torch": "2.10", "torch_cuda": "12.8", "numpy": "2.4.5", "transformers": "5.5", "python": "3.12",
-                 "device": "cuda", "recipe_hash": "r", "schema_hash": "s", "workload_hash": "w"}
+REFERENCE_KEY = {
+    "gpu_name": "ref",
+    "torch": "2.10",
+    "torch_cuda": "12.8",
+    "numpy": "2.4.5",
+    "transformers": "5.5",
+    "python": "3.12",
+    "device": "cuda",
+    "recipe_hash": "r",
+    "schema_hash": "s",
+    "workload_hash": "w",
+}
 
 
 def test_expected_key_comes_from_the_reference_not_from_the_candidate():
     expected = expected_key_from_reference(REFERENCE_KEY)
-    assert expected == {"recipe_hash": "r", "schema_hash": "s", "workload_hash": "w", "device": "cuda",
-                        "torch": "2.10", "torch_cuda": "12.8", "transformers": "5.5"}
+    assert expected == {
+        "recipe_hash": "r",
+        "schema_hash": "s",
+        "workload_hash": "w",
+        "device": "cuda",
+        "torch": "2.10",
+        "torch_cuda": "12.8",
+        "transformers": "5.5",
+    }
     # the old G4/G5 construction (candidate key + three overrides) could not see a software difference: this one does
-    candidate_key = {**REFERENCE_KEY, "torch": "2.13", "transformers": "5.17", "gpu_name": "other", "gpu_total_memory_bytes": 1000}
+    candidate_key = {
+        **REFERENCE_KEY,
+        "torch": "2.13",
+        "transformers": "5.17",
+        "gpu_name": "other",
+        "gpu_total_memory_bytes": 1000,
+    }
     assert capability_gate(profile(key=candidate_key), expected) == [Reason.SOFTWARE_MISMATCH]
     # other hardware alone is fine
-    assert capability_gate(profile(key={**REFERENCE_KEY, "gpu_name": "other GPU", "gpu_total_memory_bytes": 1000}), expected) == []
+    assert (
+        capability_gate(
+            profile(key={**REFERENCE_KEY, "gpu_name": "other GPU", "gpu_total_memory_bytes": 1000}), expected
+        )
+        == []
+    )
 
 
 def test_software_can_be_left_out_of_the_expected_key_on_request():
@@ -100,21 +151,32 @@ def test_software_can_be_left_out_of_the_expected_key_on_request():
 
 
 def test_the_memory_margin_is_exactly_the_fraction_of_the_gpu():
-    assert capability_gate(profile(peak_bytes_candidate=900), KEY) == []                      # 100 free = 10 %: allowed
+    assert capability_gate(profile(peak_bytes_candidate=900), KEY) == []  # 100 free = 10 %: allowed
     assert capability_gate(profile(peak_bytes_candidate=901), KEY) == [Reason.MEMORY_MARGIN]
     assert capability_gate(profile(peak_bytes_candidate=901), KEY, min_free_fraction=0.05) == []
 
 
 def test_several_failures_are_all_reported():
-    reasons = capability_gate(profile(peak_bytes_candidate=999, checks={"noise_selftest": False, "restore_exact": False,
-                                                                       "chunk1_reproduces_reference": False}), KEY)
+    reasons = capability_gate(
+        profile(
+            peak_bytes_candidate=999,
+            checks={"noise_selftest": False, "restore_exact": False, "chunk1_reproduces_reference": False},
+        ),
+        KEY,
+    )
 
-    assert set(reasons) == {Reason.MEMORY_MARGIN, Reason.NOISE_SELFTEST_FAILED, Reason.RESTORE_FAILED, Reason.NUMERICS_FAILED}
+    assert set(reasons) == {
+        Reason.MEMORY_MARGIN,
+        Reason.NOISE_SELFTEST_FAILED,
+        Reason.RESTORE_FAILED,
+        Reason.NUMERICS_FAILED,
+    }
 
 
 # ---------------------------------------------------------------------------
 # prediction
 # ---------------------------------------------------------------------------
+
 
 def test_one_worker_takes_n_times_its_candidate_time():
     assert predict_candidates_seconds(B3, [WorkerModel("a", 4.0)], 8) == {"seconds": 32.0, "jobs": {"a": 8}}
@@ -148,7 +210,7 @@ def test_proportional_two_workers_by_hand():
 def test_proportional_ignores_a_worker_with_no_quota():
     result = predict_candidates_seconds(B2, [WorkerModel("a", 1.0), WorkerModel("b", 1000.0, sync_seconds=500.0)], 2)
 
-    assert result["jobs"] == {"a": 2, "b": 0} and result["seconds"] == 2.0        # b's sync does not hold the generation
+    assert result["jobs"] == {"a": 2, "b": 0} and result["seconds"] == 2.0  # b's sync does not hold the generation
 
 
 def test_the_generation_adds_the_update_and_the_publication():
@@ -159,7 +221,9 @@ def test_the_generation_adds_the_update_and_the_publication():
     assert result["workers"] == ["a"] and result["jobs"] == {"a": 8}
 
 
-@pytest.mark.parametrize("workers", [[], [WorkerModel("a", 0.0)], [WorkerModel("a", -1.0)], [WorkerModel("a", 1.0, sync_seconds=-1.0)]])
+@pytest.mark.parametrize(
+    "workers", [[], [WorkerModel("a", 0.0)], [WorkerModel("a", -1.0)], [WorkerModel("a", 1.0, sync_seconds=-1.0)]]
+)
 def test_bad_workers_are_refused(workers):
     with pytest.raises(ValueError):
         predict_candidates_seconds(B3, workers, 4)
@@ -194,12 +258,14 @@ def test_a_slow_worker_with_a_big_sync_cost_is_eligible_but_not_beneficial():
     result = decision(SLOW)
 
     assert result.state is AdmissionState.ELIGIBLE_BUT_NOT_BENEFICIAL and result.reasons == (Reason.NOT_BENEFICIAL,)
-    assert result.without["total_seconds"] == pytest.approx(82.7) and result.with_worker["total_seconds"] == pytest.approx(80.7)
+    assert result.without["total_seconds"] == pytest.approx(82.7) and result.with_worker[
+        "total_seconds"
+    ] == pytest.approx(80.7)
     assert result.predicted_delta_seconds == pytest.approx(2.0) and result.delta_threshold == pytest.approx(4.135)
 
 
 def test_a_worker_that_clearly_helps_is_admitted():
-    helper = WorkerModel("helper", 5.0)                      # almost as fast as `fast`, no sync cost
+    helper = WorkerModel("helper", 5.0)  # almost as fast as `fast`, no sync cost
     # without 82.7. with: c1 fast->4.5 c2 helper->5 c3 fast->9 c4 helper->10 c5 fast->13.5 c6 helper->15 c7 fast->18
     # c8: helper is free at 15, fast at 18 -> helper->20.  The candidates end at 20: 20 + 46.7 = 66.7
     result = decision(helper)
@@ -216,14 +282,16 @@ def test_a_helper_with_a_smaller_chunk_is_admitted_limited():
 
 def test_the_threshold_is_strict_a_gain_equal_to_delta_is_not_enough():
     base = decision(SLOW)
-    exactly = base.predicted_delta_seconds / base.without["total_seconds"]            # delta_fraction that makes gain == threshold
+    exactly = (
+        base.predicted_delta_seconds / base.without["total_seconds"]
+    )  # delta_fraction that makes gain == threshold
 
     assert decision(SLOW, delta_fraction=exactly).state is AdmissionState.ELIGIBLE_BUT_NOT_BENEFICIAL
     assert decision(SLOW, delta_fraction=exactly * 0.99).state is AdmissionState.ADMITTED
 
 
 def test_a_worker_that_makes_the_generation_longer_is_never_admitted_whatever_delta():
-    slower = WorkerModel("tail", 60.0)                       # takes a candidate at 0 and the generation waits 60 s for it
+    slower = WorkerModel("tail", 60.0)  # takes a candidate at 0 and the generation waits 60 s for it
 
     result = decision(slower, delta_fraction=0.0)
 
@@ -233,7 +301,11 @@ def test_a_worker_that_makes_the_generation_longer_is_never_admitted_whatever_de
 def test_the_decision_is_plain_data_for_the_prediction_file():
     data = decision(SLOW).to_dict()
 
-    assert data["worker_id"] == "slow" and data["state"] == "ELIGIBLE_BUT_NOT_BENEFICIAL" and data["reasons"] == ["NOT_BENEFICIAL"]
+    assert (
+        data["worker_id"] == "slow"
+        and data["state"] == "ELIGIBLE_BUT_NOT_BENEFICIAL"
+        and data["reasons"] == ["NOT_BENEFICIAL"]
+    )
     assert data["prediction_with"]["jobs"] == {"fast": 7, "slow": 1}
 
 
@@ -241,10 +313,15 @@ def test_the_decision_is_plain_data_for_the_prediction_file():
 # from a profile to the numbers of the prediction
 # ---------------------------------------------------------------------------
 
+
 def test_a_worker_model_takes_the_median_at_the_asked_chunk_and_the_sync_only_if_remote():
     from heteroes.admission import worker_model_from_profile
-    data = {"worker_id": "w", "candidate_times": {"1": {"total_median": 4.5}, "16": {"total_median": 3.9}},
-            "sync": {"total_seconds": 21.0}}
+
+    data = {
+        "worker_id": "w",
+        "candidate_times": {"1": {"total_median": 4.5}, "16": {"total_median": 3.9}},
+        "sync": {"total_seconds": 21.0},
+    }
 
     assert worker_model_from_profile(data, 1, remote=False) == WorkerModel("w", 4.5, 0.0)
     assert worker_model_from_profile(data, 16, remote=True) == WorkerModel("w", 3.9, 21.0)
@@ -252,7 +329,12 @@ def test_a_worker_model_takes_the_median_at_the_asked_chunk_and_the_sync_only_if
 
 def test_a_chunk_that_was_not_timed_or_a_missing_sync_is_an_error_not_a_guess():
     from heteroes.admission import worker_model_from_profile
-    data = {"worker_id": "w", "candidate_times": {"1": {"total_median": 4.5}, "8": {"failed": "OUT_OF_MEMORY"}}, "sync": None}
+
+    data = {
+        "worker_id": "w",
+        "candidate_times": {"1": {"total_median": 4.5}, "8": {"failed": "OUT_OF_MEMORY"}},
+        "sync": None,
+    }
 
     for chunk in (2, 8):
         with pytest.raises(ValueError, match="not timed"):
@@ -263,7 +345,9 @@ def test_a_chunk_that_was_not_timed_or_a_missing_sync_is_an_error_not_a_guess():
 
 def test_the_fixed_part_of_the_update_is_added_once_whatever_n():
     for n in (2, 8):
-        result = predict_generation_seconds(B3, [WorkerModel("a", 4.0)], n, update_per_candidate=5.0, publish_seconds=0.5, update_fixed_seconds=10.0)
+        result = predict_generation_seconds(
+            B3, [WorkerModel("a", 4.0)], n, update_per_candidate=5.0, publish_seconds=0.5, update_fixed_seconds=10.0
+        )
         assert result["update_seconds"] == 10.0 + 5.0 * n and result["total_seconds"] == 4.0 * n + 10.0 + 5.0 * n + 0.5
 
 
@@ -271,5 +355,7 @@ def test_the_fixed_update_cost_reaches_the_decision_and_does_not_change_the_gain
     plain, fixed = decision(SLOW), decision(SLOW, update_fixed_seconds=10.0)
 
     assert fixed.without["total_seconds"] == pytest.approx(plain.without["total_seconds"] + 10.0)
-    assert fixed.predicted_delta_seconds == pytest.approx(plain.predicted_delta_seconds)           # the same gain on a longer generation
-    assert fixed.delta_threshold > plain.delta_threshold                                         # so the 5 percent bar is higher
+    assert fixed.predicted_delta_seconds == pytest.approx(
+        plain.predicted_delta_seconds
+    )  # the same gain on a longer generation
+    assert fixed.delta_threshold > plain.delta_threshold  # so the 5 percent bar is higher

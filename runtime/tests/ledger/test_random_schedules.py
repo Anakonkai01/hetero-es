@@ -3,6 +3,7 @@ Random schedules: Hypothesis chooses lists of actions (any worker, any candidate
 each must do and checks the ledger after every one. When something goes wrong Hypothesis shrinks the list to a short one
 that still goes wrong. `HETEROES_HYPOTHESIS=fuzz pytest tests/ledger/test_random_schedules.py` hunts with 3000 random lists.
 """
+
 import pytest
 
 pytest.importorskip("hypothesis")
@@ -14,17 +15,26 @@ from harness import LedgerHarness  # noqa: E402
 from heteroes.ledger import FailureKind  # noqa: E402
 
 WORKERS = st.sampled_from(["w1", "w2", "w3"])
-CANDIDATE = st.integers(0, 3)                                             # wraps around when there are fewer candidates
+CANDIDATE = st.integers(0, 3)  # wraps around when there are fewer candidates
 WHICH = st.sampled_from(["first", "last"])
 
 lease = st.tuples(st.just("lease"), WORKERS, CANDIDATE)
 advance = st.tuples(st.just("advance"), st.sampled_from([1.0, 10.0, 29.0, 30.0, 31.0, 100.0]))
-submit = st.tuples(st.just("submit"), WORKERS, CANDIDATE,
-                   st.sampled_from(["good", "good", "good", "other", "wrong_job", "wrong_token"]), WHICH)
+submit = st.tuples(
+    st.just("submit"),
+    WORKERS,
+    CANDIDATE,
+    st.sampled_from(["good", "good", "good", "other", "wrong_job", "wrong_token"]),
+    WHICH,
+)
 fail = st.tuples(st.just("fail"), WORKERS, CANDIDATE, st.sampled_from(list(FailureKind)), WHICH)
 release = st.tuples(st.just("release"), WORKERS)
 
-record = st.tuples(st.just("record"), st.sampled_from([1e-3, 2e-3]), st.sampled_from([None, None, None, "seeds", "rewards", "recipe", "parent"]))
+record = st.tuples(
+    st.just("record"),
+    st.sampled_from([1e-3, 2e-3]),
+    st.sampled_from([None, None, None, "seeds", "rewards", "recipe", "parent"]),
+)
 apply = st.tuples(st.just("apply"), st.sampled_from(["c", "d"]), st.sampled_from(["right", "right", "wrong"]))
 
 ACTIONS = st.one_of(lease, lease, lease, advance, advance, submit, submit, fail, release, record, apply)

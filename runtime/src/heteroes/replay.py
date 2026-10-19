@@ -12,14 +12,15 @@ back to a full synchronization, which overwrites every weight. The hash of the w
 `verify_every` catch-ups instead of every time: between two checks the worker TRUSTS the coordinator's child hash, and a drift would go unseen until the next check.
 The default is every time.
 """
+
 import re
 from dataclasses import dataclass
 
 from heteroes.generation_record import GenerationRecord
 
 MODES = ("never", "always", "auto")
-DEFAULT_VERIFY_SECONDS = 3.6                  # one SHA-256 pass over the 1 GB of weights on the 1660S's CPU (STATUS, G6)
-MAX_CHAIN = 8                                 # a worker further behind than this synchronizes
+DEFAULT_VERIFY_SECONDS = 3.6  # one SHA-256 pass over the 1 GB of weights on the 1660S's CPU (STATUS, G6)
+MAX_CHAIN = 8  # a worker further behind than this synchronizes
 _HEX64 = re.compile(r"[0-9a-f]{64}")
 
 
@@ -35,7 +36,7 @@ class ReplayPolicy:
     sync_seconds: float | None = None
     verify_seconds: float = DEFAULT_VERIFY_SECONDS
     verify_every: int = 1
-    max_chain: int = MAX_CHAIN              # a worker further behind than this many updates synchronizes; raise it for a late joiner that replays from the base weights
+    max_chain: int = MAX_CHAIN  # a worker further behind than this many updates synchronizes; raise it for a late joiner that replays from the base weights
 
     def __post_init__(self):
         if self.mode not in MODES:
@@ -46,20 +47,29 @@ class ReplayPolicy:
             raise ValueError(f"max_chain must be an integer of at least 1, got {self.max_chain!r}")
 
     @classmethod
-    def from_profile(cls, profile: dict, mode: str = "auto", verify_every: int = 1, max_chain: int = MAX_CHAIN) -> "ReplayPolicy":
+    def from_profile(
+        cls, profile: dict, mode: str = "auto", verify_every: int = 1, max_chain: int = MAX_CHAIN
+    ) -> "ReplayPolicy":
         """The numbers of the worker's own profile (`scripts/profile_worker.py --measure-update --sync-url ...`)."""
         update, sync = profile.get("update"), profile.get("sync")
-        return cls(mode=mode,
-                   update_seconds_per_candidate=None if update is None else update["seconds_per_candidate_median"],
-                   update_fixed_seconds=0.0 if update is None else max(0.0, update.get("fixed_seconds", 0.0)),
-                   sync_seconds=None if sync is None else sync["total_seconds"],
-                   verify_seconds=DEFAULT_VERIFY_SECONDS if update is None else update.get("hash_seconds", DEFAULT_VERIFY_SECONDS),
-                   verify_every=verify_every, max_chain=max_chain)
+        return cls(
+            mode=mode,
+            update_seconds_per_candidate=None if update is None else update["seconds_per_candidate_median"],
+            update_fixed_seconds=0.0 if update is None else max(0.0, update.get("fixed_seconds", 0.0)),
+            sync_seconds=None if sync is None else sync["total_seconds"],
+            verify_seconds=DEFAULT_VERIFY_SECONDS
+            if update is None
+            else update.get("hash_seconds", DEFAULT_VERIFY_SECONDS),
+            verify_every=verify_every,
+            max_chain=max_chain,
+        )
 
     def estimate_replay_seconds(self, steps: int, candidates: int, verified: bool = True) -> float | None:
         if self.update_seconds_per_candidate is None:
             return None
-        return steps * (self.update_fixed_seconds + self.update_seconds_per_candidate * candidates) + (self.verify_seconds if verified else 0.0)
+        return steps * (self.update_fixed_seconds + self.update_seconds_per_candidate * candidates) + (
+            self.verify_seconds if verified else 0.0
+        )
 
     def decide(self, steps: int, candidates: int) -> tuple[bool, str]:
         """(replay?, why) for a catch-up of `steps` updates of `candidates` candidates each."""
@@ -74,7 +84,9 @@ class ReplayPolicy:
         return better, f"estimated replay {replay:.1f} s against synchronization {self.sync_seconds:.1f} s"
 
 
-def fetch_chain(client, from_sha256: str, to_sha256: str, recipe_hash: str, max_steps: int = MAX_CHAIN) -> list[tuple[GenerationRecord, str]]:
+def fetch_chain(
+    client, from_sha256: str, to_sha256: str, recipe_hash: str, max_steps: int = MAX_CHAIN
+) -> list[tuple[GenerationRecord, str]]:
     """
     [(record, child sha256), ...] from the weights `from_sha256` to `to_sha256`. Each record is checked against the hash the coordinator sent with it, against the
     weights it starts from and against the recipe. Raises ReplayFailed if the chain does not exist, is too long, loops, or has a record that is not what it says.
@@ -82,7 +94,9 @@ def fetch_chain(client, from_sha256: str, to_sha256: str, recipe_hash: str, max_
     chain, current, seen = [], from_sha256, {from_sha256}
     while current != to_sha256:
         if len(chain) >= max_steps:
-            raise ReplayFailed(f"the chain from {from_sha256[:12]} to {to_sha256[:12]} is longer than {max_steps} updates")
+            raise ReplayFailed(
+                f"the chain from {from_sha256[:12]} to {to_sha256[:12]} is longer than {max_steps} updates"
+            )
         update = client.get_update(current)
         if update is None:
             raise ReplayFailed(f"the coordinator has no update that starts from {current[:12]}")
@@ -114,6 +128,7 @@ def replay_chain(executor, chain, apply_update, verify: bool) -> dict:
     mismatch (the model then holds weights that are nobody's: the caller must synchronize). Returns the seconds it took.
     """
     import time
+
     started = time.perf_counter()
     for record, _child in chain:
         try:
@@ -128,4 +143,9 @@ def replay_chain(executor, chain, apply_update, verify: bool) -> dict:
     except ValueError as error:
         raise ReplayFailed(f"after {len(chain)} replayed updates {error}") from error
     done = time.perf_counter()
-    return {"steps": len(chain), "apply_seconds": applied - started, "check_seconds": done - applied, "verified": verify}
+    return {
+        "steps": len(chain),
+        "apply_seconds": applied - started,
+        "check_seconds": done - applied,
+        "verified": verify,
+    }

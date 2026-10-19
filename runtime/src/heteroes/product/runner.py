@@ -1,4 +1,5 @@
 """Managed coordinator subprocess. Control files contain no browser-supplied paths."""
+
 import json
 import os
 from pathlib import Path
@@ -10,21 +11,31 @@ from .files import read_json, write_json
 from .storage import data_root
 
 
-def apply_backup_policy(root,generation,current,emit):
+def apply_backup_policy(root, generation, current, emit):
     """Optional policy persistence cannot stop otherwise valid computation."""
+
     def log(event):
-        try:emit(event)
-        except Exception:pass
+        try:
+            emit(event)
+        except Exception:
+            pass
+
     try:
-        policy=read_json(root/'backup-policy.json',current)
-        if not isinstance(policy,dict) or set(policy)!={'interval','retain'} or any(type(v) is not int or not 1<=v<=1000 for v in policy.values()):
-            raise ValueError('Invalid operational backup policy')
+        policy = read_json(root / "backup-policy.json", current)
+        if (
+            not isinstance(policy, dict)
+            or set(policy) != {"interval", "retain"}
+            or any(type(v) is not int or not 1 <= v <= 1000 for v in policy.values())
+        ):
+            raise ValueError("Invalid operational backup policy")
     except Exception as error:
-        log({'event':'backup_policy_error','generation':generation,'errorType':type(error).__name__})
+        log({"event": "backup_policy_error", "generation": generation, "errorType": type(error).__name__})
         return current
-    try:write_json(root/f'generation-policy-{generation}.json',policy)
-    except Exception as error:log({'event':'backup_policy_error','generation':generation,'errorType':type(error).__name__})
-    log({'event':'backup_policy_applied','generation':generation,'policy':policy})
+    try:
+        write_json(root / f"generation-policy-{generation}.json", policy)
+    except Exception as error:
+        log({"event": "backup_policy_error", "generation": generation, "errorType": type(error).__name__})
+    log({"event": "backup_policy_applied", "generation": generation, "policy": policy})
     return policy
 
 
@@ -38,14 +49,19 @@ def main(directory):
     root = Path(directory)
     config = read_json(root / "config.json")
     log = JsonlLog(root / "events.jsonl", append=True)
+
     def emit(event):
         log({"t": time.time(), **event})
+
     def state(status, **fields):
         write_json(root / "runner.json", {"status": status, "t": time.time(), **fields})
+
     def cancel():
         return (root / "cancel.flag").exists()
+
     def interrupt(*_):
         (root / "cancel.flag").touch()
+
     signal.signal(signal.SIGTERM, interrupt)
     signal.signal(signal.SIGINT, interrupt)
     coordinator = ledger = None
@@ -54,79 +70,155 @@ def main(directory):
     outcome = "FAILED"
     failure = None
     paused_checkpoint = None
-    tracker=None
+    tracker = None
     try:
         state("STARTING")
         check_noise_selftest()
-        dataset=None
-        if config.get('recipeVersion')==2:
+        dataset = None
+        if config.get("recipeVersion") == 2:
             from heteroes.study.models import load
             from heteroes.study.data import verify
             from heteroes.study.recipe import build
-            loaded=load(config['modelPath'],config['modelManifest'],'cuda')
-            dataset=verify(read_json(Path(config['datasetPath'])))
-            recipe=build(loaded,config['modelManifest'],dataset,sigma=config['sigma'],minimum=config['sigmaMinimum'],
-                generations=config['maxGenerations'],schedule=config['sigmaSchedule'],batch_size=config['batchSize'],batch_seed=config['batchSeed'],max_tokens=config['maxNewTokens'])
+
+            loaded = load(config["modelPath"], config["modelManifest"], "cuda")
+            dataset = verify(read_json(Path(config["datasetPath"])))
+            recipe = build(
+                loaded,
+                config["modelManifest"],
+                dataset,
+                sigma=config["sigma"],
+                minimum=config["sigmaMinimum"],
+                generations=config["maxGenerations"],
+                schedule=config["sigmaSchedule"],
+                batch_size=config["batchSize"],
+                batch_seed=config["batchSeed"],
+                max_tokens=config["maxNewTokens"],
+            )
         else:
             loaded = load_pinned_model(config["modelPath"], "cuda")
-            recipe = build_recipe(loaded, sigma=config["sigma"], eval_dtype="float32", noise_engine="cpu",
-                                  workload=config["workload"], decode_engine=config["decodeEngine"])
+            recipe = build_recipe(
+                loaded,
+                sigma=config["sigma"],
+                eval_dtype="float32",
+                noise_engine="cpu",
+                workload=config["workload"],
+                decode_engine=config["decodeEngine"],
+            )
         check_recipe_selftest(recipe, "cuda")
         ledger = Ledger(root / "ledger.sqlite", max_attempts=3, enforce_chain=True)
-        policy=config.get('backupPolicy')
-        last_summary=None
-        active_policy=policy
+        policy = config.get("backupPolicy")
+        last_summary = None
+        active_policy = policy
+
         def generation_started(generation):
             nonlocal active_policy
             data_root(root)  # Check the selected volume before opening work.
-            active_policy=apply_backup_policy(root,generation,active_policy,emit)
+            active_policy = apply_backup_policy(root, generation, active_policy, emit)
 
         def recovery_point(summary, final=False):
             nonlocal last_summary
-            last_summary=summary
+            last_summary = summary
             if tracker is not None and not final:
-                tracker.observe(summary['generation'],summary['child_sha256'])
+                tracker.observe(summary["generation"], summary["child_sha256"])
             if policy is None:
                 return
             try:
-                from .recovery import capture_point,source_identity
-                generation_policy=read_json(root/f'generation-policy-{summary["generation"]}.json')
-                if generation_policy is None:generation_policy=read_json(root/'backup-policy.json',active_policy)
-                point=capture_point(root,summary,recipe.to_dict(),generation_policy,final=final,
-                                    identity={'code':{**code_info(),**source_identity(Path(__file__).resolve().parents[1])},'environment':environment_info('cuda')})
+                from .recovery import capture_point, source_identity
+
+                generation_policy = read_json(root / f"generation-policy-{summary['generation']}.json")
+                if generation_policy is None:
+                    generation_policy = read_json(root / "backup-policy.json", active_policy)
+                point = capture_point(
+                    root,
+                    summary,
+                    recipe.to_dict(),
+                    generation_policy,
+                    final=final,
+                    identity={
+                        "code": {**code_info(), **source_identity(Path(__file__).resolve().parents[1])},
+                        "environment": environment_info("cuda"),
+                    },
+                )
                 if point:
-                    emit({'event':'recovery_point_created','generation':summary['generation'],'pointId':point.name,'final':final})
+                    emit(
+                        {
+                            "event": "recovery_point_created",
+                            "generation": summary["generation"],
+                            "pointId": point.name,
+                            "final": final,
+                        }
+                    )
             except Exception as error:
                 # Storage failure never turns a valid numerical update into failure.
-                emit({'event':'recovery_point_error','generation':summary['generation'],'errorType':type(error).__name__})
-        coordinator = Coordinator(loaded.model, loaded.schema, recipe, ledger, data_root(root) / "weights", config["runId"],
-            config["candidatesPerGeneration"], config["alpha"],
-            policy_factory=lambda: AdmittedOnly(Greedy(), config["workerIds"]), host=config["host"], port=config["port"],
-            token=os.environ["HETEROES_TOKEN"], timeout_seconds=1800, stall_seconds=300,
-            failed_grace_seconds=60, lease_seconds=60, log=emit, cancel_requested=cancel,
-            device_tokens=read_json(root/'device-grants.json') if config.get('deviceCredentials') else None,
+                emit(
+                    {
+                        "event": "recovery_point_error",
+                        "generation": summary["generation"],
+                        "errorType": type(error).__name__,
+                    }
+                )
+
+        coordinator = Coordinator(
+            loaded.model,
+            loaded.schema,
+            recipe,
+            ledger,
+            data_root(root) / "weights",
+            config["runId"],
+            config["candidatesPerGeneration"],
+            config["alpha"],
+            policy_factory=lambda: AdmittedOnly(Greedy(), config["workerIds"]),
+            host=config["host"],
+            port=config["port"],
+            token=os.environ["HETEROES_TOKEN"],
+            timeout_seconds=1800,
+            stall_seconds=300,
+            failed_grace_seconds=60,
+            lease_seconds=60,
+            log=emit,
+            cancel_requested=cancel,
+            device_tokens=read_json(root / "device-grants.json") if config.get("deviceCredentials") else None,
             generation_completed=recovery_point if policy or dataset is not None else None,
             generation_started=generation_started if policy else None,
-            pause_requested=lambda:(root/'pause.flag').exists(),dataset=dataset)
+            pause_requested=lambda: (root / "pause.flag").exists(),
+            dataset=dataset,
+        )
         coordinator.start()
         next_generation = coordinator.recover()  # finish any recorded update even when cancellation is pending
         if dataset is not None:
             from heteroes.study.tracker import Tracker
-            tracker=Tracker(root,loaded,recipe,dataset,config.get('validationInterval',1))
-            if next_generation==0 and tracker.best is None:
+
+            tracker = Tracker(root, loaded, recipe, dataset, config.get("validationInterval", 1))
+            if next_generation == 0 and tracker.best is None:
                 from heteroes.model.weights_io import publish_weights
-                initial=publish_weights(loaded.model,loaded.schema,data_root(root)/'weights')
-                tracker.observe(-1,initial)
-            elif next_generation>0:
-                tracker.observe(next_generation-1,coordinator.parent_sha256)
-        if policy and next_generation>0:
-            previous=ledger.get_update(config['runId'],next_generation-1)
-            parent=next(g.parent_weights_sha256 for g in ledger.list_generations(config['runId']) if g.generation==next_generation-1)
+
+                initial = publish_weights(loaded.model, loaded.schema, data_root(root) / "weights")
+                tracker.observe(-1, initial)
+            elif next_generation > 0:
+                tracker.observe(next_generation - 1, coordinator.parent_sha256)
+        if policy and next_generation > 0:
+            previous = ledger.get_update(config["runId"], next_generation - 1)
+            parent = next(
+                g.parent_weights_sha256
+                for g in ledger.list_generations(config["runId"])
+                if g.generation == next_generation - 1
+            )
             if previous and previous.applied_at:
-                last_summary={'generation':next_generation-1,'child_sha256':previous.child_weights_sha256,'parent_sha256':parent}
-        emit({"event": "managed_start", "recipe": recipe.to_dict(), "recipe_hash": recipe.hash,
-              "code": code_info(), "environment": environment_info("cuda")})
-        if next_generation<config['maxGenerations']:
+                last_summary = {
+                    "generation": next_generation - 1,
+                    "child_sha256": previous.child_weights_sha256,
+                    "parent_sha256": parent,
+                }
+        emit(
+            {
+                "event": "managed_start",
+                "recipe": recipe.to_dict(),
+                "recipe_hash": recipe.hash,
+                "code": code_info(),
+                "environment": environment_info("cuda"),
+            }
+        )
+        if next_generation < config["maxGenerations"]:
             coordinator.server.set_generation(_NoGeneration(), coordinator._job(next_generation, Greedy(), "PREPARING"))
             state("PREPARING", recipeHash=recipe.hash)
             deadline = time.monotonic() + 600
@@ -135,9 +227,9 @@ def main(directory):
                     raise RunCancelled("cancelled during preparation")
                 if time.monotonic() > deadline:
                     raise TimeoutError("worker preparation timed out")
-                time.sleep(.25)
+                time.sleep(0.25)
         state("RUNNING", recipeHash=recipe.hash)
-        if next_generation<config['maxGenerations']:
+        if next_generation < config["maxGenerations"]:
             coordinator.run(config["maxGenerations"])
         else:
             coordinator.finish()
@@ -145,21 +237,33 @@ def main(directory):
     except RunPaused:
         try:
             if not policy or last_summary is None:
-                raise ValueError('Pause requires a completed recovery checkpoint')
+                raise ValueError("Pause requires a completed recovery checkpoint")
             from .recovery import capture_point, verify_point, source_identity
-            point=capture_point(root,last_summary,recipe.to_dict(),active_policy,final=True,
-                identity={'code':{**code_info(),**source_identity(Path(__file__).resolve().parents[1])},
-                          'environment':environment_info('cuda')})
-            manifest=verify_point(point)
-            paused_checkpoint={key:manifest[key] for key in ('pointId','generation','childWeightsSha256','parentWeightsSha256')}
-            paused_checkpoint['verified']=True
-            write_json(root/'pause-point.json',paused_checkpoint)
-            emit({'event':'generation_boundary_pause',**paused_checkpoint})
-            outcome='PAUSED'
+
+            point = capture_point(
+                root,
+                last_summary,
+                recipe.to_dict(),
+                active_policy,
+                final=True,
+                identity={
+                    "code": {**code_info(), **source_identity(Path(__file__).resolve().parents[1])},
+                    "environment": environment_info("cuda"),
+                },
+            )
+            manifest = verify_point(point)
+            paused_checkpoint = {
+                key: manifest[key] for key in ("pointId", "generation", "childWeightsSha256", "parentWeightsSha256")
+            }
+            paused_checkpoint["verified"] = True
+            write_json(root / "pause-point.json", paused_checkpoint)
+            emit({"event": "generation_boundary_pause", **paused_checkpoint})
+            outcome = "PAUSED"
         except Exception as error:
-            failure=f'Pause checkpoint failed: {type(error).__name__}'
-            emit({'event':'pause_checkpoint_error','errorType':type(error).__name__})
-            if coordinator:coordinator.finish(aborted=True)
+            failure = f"Pause checkpoint failed: {type(error).__name__}"
+            emit({"event": "pause_checkpoint_error", "errorType": type(error).__name__})
+            if coordinator:
+                coordinator.finish(aborted=True)
     except RunCancelled:
         outcome = "CANCELLED"
         if coordinator:
@@ -170,25 +274,37 @@ def main(directory):
         if coordinator:
             coordinator.finish(aborted=True)
     finally:
-        if coordinator and policy and last_summary is not None and outcome!='PAUSED':
-            recovery_point(last_summary,final=True)
-        summary = {"status": outcome, "failureReason": failure,
-                   "final_weights_sha256": coordinator.parent_sha256 if coordinator else None}
-        if paused_checkpoint is not None:summary['pauseCheckpoint']=paused_checkpoint
+        if coordinator and policy and last_summary is not None and outcome != "PAUSED":
+            recovery_point(last_summary, final=True)
+        summary = {
+            "status": outcome,
+            "failureReason": failure,
+            "final_weights_sha256": coordinator.parent_sha256 if coordinator else None,
+        }
+        if paused_checkpoint is not None:
+            summary["pauseCheckpoint"] = paused_checkpoint
         write_json(root / f"summary-{time.time_ns()}.json", summary)
         state(outcome, **{key: value for key, value in summary.items() if key != "status"})
         if coordinator:
             deadline = time.monotonic() + 600
             while not (root / "workers-stopped.flag").exists() and time.monotonic() < deadline:
-                time.sleep(.25)
+                time.sleep(0.25)
             coordinator.stop()
-            if tracker is not None and outcome=='COMPLETED' and (root/'workers-stopped.flag').exists():
+            if tracker is not None and outcome == "COMPLETED" and (root / "workers-stopped.flag").exists():
                 try:
-                    receipt=tracker.export()
-                    emit({'event':'study_export_verified','weightsSha256':receipt['weightsSha256'],'testAccuracy':receipt['test']['accuracy']})
+                    receipt = tracker.export()
+                    emit(
+                        {
+                            "event": "study_export_verified",
+                            "weightsSha256": receipt["weightsSha256"],
+                            "testAccuracy": receipt["test"]["accuracy"],
+                        }
+                    )
                 except Exception as error:
-                    write_json(root/'study-export-error.json',{'errorType':type(error).__name__,'exportVerified':False})
-                    emit({'event':'study_export_error','errorType':type(error).__name__})
+                    write_json(
+                        root / "study-export-error.json", {"errorType": type(error).__name__, "exportVerified": False}
+                    )
+                    emit({"event": "study_export_error", "errorType": type(error).__name__})
         if ledger:
             ledger.close()
         log.close()

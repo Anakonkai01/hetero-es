@@ -1,4 +1,4 @@
-import { createContext,useContext } from "react";
+import { createContext, useContext } from 'react';
 
 export interface AppState {
   toast: string;
@@ -19,7 +19,7 @@ export function useAppState(): AppState {
   const value = useContext(AppStateContext);
 
   if (!value) {
-    throw new Error("useAppState must be used inside AppStateProvider");
+    throw new Error('useAppState must be used inside AppStateProvider');
   }
 
   return value;

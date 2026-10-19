@@ -70,6 +70,7 @@ def bits(array):
 # independent oracle, written straight from numerical-contract.md section 8 with NumPy
 # ---------------------------------------------------------------------------
 
+
 def oracle_z(rewards, eta=ETA):
     r = np.asarray(rewards, dtype=np.float64)
     mu, s = r.mean(), r.std()
@@ -118,6 +119,7 @@ REWARDS = [0.1, 0.4, 0.2, 0.9]
 # ---------------------------------------------------------------------------
 # correctness against the oracle
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.parametrize("device", DEVICES)
 @pytest.mark.parametrize("chunk_elements", [4, 16, DEFAULT_CHUNK_ELEMENTS])
@@ -202,6 +204,7 @@ def test_candidates_are_summed_in_the_order_given_not_sorted():
 # equal rewards: a logged no-op
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.parametrize("rewards", [[0.5] * 4, [0.0] * 4])
 def test_equal_rewards_leave_the_model_untouched_and_say_so(rewards):
     model = make_model()
@@ -220,6 +223,7 @@ def test_equal_rewards_leave_the_model_untouched_and_say_so(rewards):
 # ---------------------------------------------------------------------------
 # report: requested versus actually applied update
 # ---------------------------------------------------------------------------
+
 
 def test_report_describes_the_requested_and_the_applied_update():
     model = make_model()
@@ -244,6 +248,7 @@ def test_report_describes_the_requested_and_the_applied_update():
 # ---------------------------------------------------------------------------
 # all or nothing: bad input is rejected BEFORE any tensor is changed
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.parametrize(
     "kwargs",

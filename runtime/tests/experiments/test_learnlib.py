@@ -1,11 +1,15 @@
 """The helpers of the learning experiment (`artifacts/experiments/2026-10-07-learning-runtime/learnlib.py`): the held-out sets, the checkpoint rule, the verdict."""
+
 import importlib.util
 import os
 from pathlib import Path
 
 import pytest
 
-PATH = Path(os.environ.get("LEARNLIB_PATH") or Path(__file__).resolve().parents[2] / "artifacts/experiments/2026-10-07-learning-runtime/learnlib.py")   # LEARNLIB_PATH: a mutant, for the mutation check
+PATH = Path(
+    os.environ.get("LEARNLIB_PATH")
+    or Path(__file__).resolve().parents[2] / "artifacts/experiments/2026-10-07-learning-runtime/learnlib.py"
+)  # LEARNLIB_PATH: a mutant, for the mutation check
 spec = importlib.util.spec_from_file_location("learnlib", PATH)
 learnlib = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(learnlib)
@@ -41,7 +45,10 @@ def test_the_answers_of_the_heldout_sets_are_computed():
         assert all(isinstance(answer, int) for _, answer in qa)
 
 
-@pytest.mark.parametrize("g,total,every,expected", [(4, 100, 5, True), (3, 100, 5, False), (99, 100, 5, True), (97, 98, 5, True), (96, 98, 5, False), (0, 1, 5, True)])
+@pytest.mark.parametrize(
+    "g,total,every,expected",
+    [(4, 100, 5, True), (3, 100, 5, False), (99, 100, 5, True), (97, 98, 5, True), (96, 98, 5, False), (0, 1, 5, True)],
+)
 def test_keep_checkpoint_rule(g, total, every, expected):
     assert learnlib.keep_checkpoint(g, total, every) is expected
 
@@ -59,10 +66,21 @@ def test_the_checkpoints_of_100_generations_are_20_plus_the_base():
 
 
 def test_summarize_decomposes_accuracy():
-    ev = {"correct": [True, True, False, False], "answer_line": [True, False, False, False], "chars": [10, 20, 30, 40], "tokens": 7}
+    ev = {
+        "correct": [True, True, False, False],
+        "answer_line": [True, False, False, False],
+        "chars": [10, 20, 30, 40],
+        "tokens": 7,
+    }
     s = learnlib.summarize(ev)
 
-    assert s["accuracy"] == 0.5 and s["answer_line_rate"] == 0.25 and s["accuracy_with_line"] == 1.0 and s["mean_chars"] == 25 and s["correct"] == 2
+    assert (
+        s["accuracy"] == 0.5
+        and s["answer_line_rate"] == 0.25
+        and s["accuracy_with_line"] == 1.0
+        and s["mean_chars"] == 25
+        and s["correct"] == 2
+    )
 
 
 def test_accuracy_with_line_is_none_when_no_reply_has_a_line():
@@ -96,7 +114,15 @@ def test_verdict_all_criteria_met():
     assert "not explained by shorter replies" in v["label"]
 
 
-@pytest.mark.parametrize("change,key", [({"h3": 0.33 + 7 / 128}, "S1"), ({"train": 0.39}, "S3"), ({"h1": 0.6 - 9 / 128}, "S4"), ({"h2": 0.9 - 9 / 128}, "S4")])
+@pytest.mark.parametrize(
+    "change,key",
+    [
+        ({"h3": 0.33 + 7 / 128}, "S1"),
+        ({"train": 0.39}, "S3"),
+        ({"h1": 0.6 - 9 / 128}, "S4"),
+        ({"h2": 0.9 - 9 / 128}, "S4"),
+    ],
+)
 def test_each_threshold_is_exact(change, key):
     assert learnlib.verdict(BASE, final(**change), 80, 0.02, 100)[key] is False
 
@@ -120,7 +146,9 @@ def test_s5_false_when_conditional_accuracy_drops_more_than_five_points():
 
 
 def test_labels_for_the_other_outcomes():
-    assert learnlib.verdict(BASE, final(h3=0.33), 80, 0.02, 100)["label"].startswith("the direction carries information")
+    assert learnlib.verdict(BASE, final(h3=0.33), 80, 0.02, 100)["label"].startswith(
+        "the direction carries information"
+    )
     assert learnlib.verdict(BASE, final(h3=0.33), 40, 0.0, 100)["label"] == "no evidence of learning in this experiment"
 
 
@@ -146,7 +174,9 @@ def test_keeper_links_the_base_and_the_chosen_generations_only(tmp_path):
     keeper.poll()
     for g in range(10):
         publish(tmp_path, f"c{g}", f"w{g}".encode())
-        write_events(tmp_path / "events.jsonl", [{"event": "weights_published", "generation": g, "child_sha256": f"c{g}"}])
+        write_events(
+            tmp_path / "events.jsonl", [{"event": "weights_published", "generation": g, "child_sha256": f"c{g}"}]
+        )
         keeper.poll()
 
     assert sorted(keeper.kept) == [0, 5, 10] and keeper.kept[5] == "c4" and keeper.kept[10] == "c9"
@@ -203,7 +233,9 @@ def test_keeper_survives_a_missing_events_file_and_a_repeated_event(tmp_path):
 def test_heldout_questions_come_from_the_generator_with_the_heldout_seed():
     expected = learnlib.make_questions(learnlib.HELDOUT_COUNT, 1, learnlib.HELDOUT_SEED)
 
-    assert learnlib.heldout_sets()["H1"] == expected                       # level 1 has no training question to remove: the generator's own first 128
+    assert (
+        learnlib.heldout_sets()["H1"] == expected
+    )  # level 1 has no training question to remove: the generator's own first 128
 
 
 def test_count_positive_does_not_count_zero():

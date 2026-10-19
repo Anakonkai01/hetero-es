@@ -6,6 +6,7 @@ Each test kills a coordinator at one particular point (a real second Coordinator
 directory, with the weights of the INITIAL checkpoint in memory, as a restarted process would have), starts another and compares the
 final weights with `apply_es_update_` applied by hand to the rewards, which are a function of the seed.
 """
+
 import copy
 import threading
 import time
@@ -38,13 +39,23 @@ class World:
         self.recipe = make_recipe(build_parameter_schema(self.initial))
 
     def coordinator(self, **extra):
-        model = copy.deepcopy(self.initial)               # a restarted process starts from the checkpoint, not from where it died
+        model = copy.deepcopy(self.initial)  # a restarted process starts from the checkpoint, not from where it died
         schema = build_parameter_schema(model)
         ledger = Ledger(self.ledger_path, clock=time.time, max_attempts=3)
         events = []
         options = {**dict(lease_seconds=60.0, poll_seconds=0.01), **self.options, **extra}
-        coordinator = Coordinator(model, schema, self.recipe, ledger, self.models_dir, experiment_id="exp",
-                                  candidates=self.candidates, alpha=ALPHA, log=events.append, **options)
+        coordinator = Coordinator(
+            model,
+            schema,
+            self.recipe,
+            ledger,
+            self.models_dir,
+            experiment_id="exp",
+            candidates=self.candidates,
+            alpha=ALPHA,
+            log=events.append,
+            **options,
+        )
         coordinator.events = events
         coordinator.start()
         self.running.append(coordinator)
@@ -70,6 +81,7 @@ class World:
             stop.set()
             for thread in threads:
                 thread.join(timeout=5)
+
         return halt, steps
 
     def kill(self, coordinator):
@@ -79,11 +91,14 @@ class World:
 
     def oracle(self, generations, rewards=None):
         from heteroes.es.update import apply_es_update_
+
         clone = copy.deepcopy(self.initial)
         schema = build_parameter_schema(clone)
         for generation in range(generations):
             seeds = [derive_seed("exp", generation, i) for i in range(self.candidates)]
-            apply_es_update_(clone, schema, seeds, [reward_of(type("D", (), {"seed": s})) for s in seeds], ALPHA, CHUNK, ETA)
+            apply_es_update_(
+                clone, schema, seeds, [reward_of(type("D", (), {"seed": s})) for s in seeds], ALPHA, CHUNK, ETA
+            )
         return model_weights_sha256(clone, schema)
 
     def close(self):
@@ -113,6 +128,7 @@ def final_hash(coordinator):
 # where a restarted coordinator finds itself
 # ---------------------------------------------------------------------------
 
+
 def test_a_fresh_experiment_has_nothing_to_recover(world):
     coordinator = world.coordinator()
     before = final_hash(coordinator)
@@ -128,7 +144,7 @@ def test_after_a_crash_between_two_generations_the_next_one_starts_from_the_publ
     halt()
     world.kill(first)
 
-    second = world.coordinator()                                          # a new process: initial weights in memory
+    second = world.coordinator()  # a new process: initial weights in memory
     assert final_hash(second) != world.oracle(1)
     assert second.recover() == 1
     assert final_hash(second) == world.oracle(1) == second.parent_sha256
@@ -153,7 +169,7 @@ def test_a_crash_between_the_record_and_the_update_is_finished_from_the_stored_r
     halt()
     monkeypatch.setattr(coordinator_module, "apply_coefficients_", real)
     stored = first.ledger.get_update("exp", 0)
-    assert stored is not None and stored.child_weights_sha256 is None       # premise: recorded, not applied
+    assert stored is not None and stored.child_weights_sha256 is None  # premise: recorded, not applied
     world.kill(first)
 
     second = world.coordinator()
@@ -161,7 +177,7 @@ def test_a_crash_between_the_record_and_the_update_is_finished_from_the_stored_r
     assert final_hash(second) == world.oracle(1)
     again = second.ledger.get_update("exp", 0)
     assert again.child_weights_sha256 == world.oracle(1) and again.record_hash == stored.record_hash
-    assert (world.models_dir / f"{world.oracle(1)}.bin").is_file()          # and the child is published for the workers
+    assert (world.models_dir / f"{world.oracle(1)}.bin").is_file()  # and the child is published for the workers
 
 
 def test_a_crash_after_the_mark_but_before_the_publication_republishes_the_child(world, monkeypatch):
@@ -173,7 +189,7 @@ def test_a_crash_after_the_mark_but_before_the_publication_republishes_the_child
         publication = real(*args, **kwargs)
 
         def die():
-            raise RuntimeError("disk full")                                    # the ledger was told the child; the file never got its name
+            raise RuntimeError("disk full")  # the ledger was told the child; the file never got its name
 
         publication.commit = die
         return publication
@@ -184,9 +200,11 @@ def test_a_crash_after_the_mark_but_before_the_publication_republishes_the_child
     halt()
     monkeypatch.setattr(coordinator_module, "prepare_publication", real)
     child = world.oracle(1)
-    assert first.ledger.get_update("exp", 0).child_weights_sha256 == child       # premise: marked applied
-    assert not (world.models_dir / f"{child}.bin").exists()                      # premise: never published
-    assert [p.name for p in world.models_dir.iterdir() if p.name.startswith(".tmp")] == []     # and no temporary file is left behind
+    assert first.ledger.get_update("exp", 0).child_weights_sha256 == child  # premise: marked applied
+    assert not (world.models_dir / f"{child}.bin").exists()  # premise: never published
+    assert [
+        p.name for p in world.models_dir.iterdir() if p.name.startswith(".tmp")
+    ] == []  # and no temporary file is left behind
     world.kill(first)
 
     second = world.coordinator()
@@ -204,7 +222,7 @@ def test_a_crash_in_the_middle_of_a_generation_resumes_it_and_only_the_missing_c
     def run():
         try:
             outcome.append(first.run_generation(0))
-        except BaseException as error:                                        # noqa: BLE001
+        except BaseException as error:  # noqa: BLE001
             outcome.append(error)
         done.set()
 
@@ -220,12 +238,12 @@ def test_a_crash_in_the_middle_of_a_generation_resumes_it_and_only_the_missing_c
     assert wait_for(done.is_set, 10)
 
     second = world.coordinator()
-    assert second.recover() == 0                                              # generation 0 is not finished: resume it
+    assert second.recover() == 0  # generation 0 is not finished: resume it
     halt, steps = world.workers(second)
     summary = second.run_generation(0)
     halt()
     committed = [step for name in steps for step in steps[name] if step.kind is StepKind.COMMITTED]
-    assert len(committed) == 2                                                # the two that were missing, not four
+    assert len(committed) == 2  # the two that were missing, not four
     assert summary["child_sha256"] == world.oracle(1)
     assert final_hash(second) == world.oracle(1)
 
@@ -262,10 +280,11 @@ def test_a_completed_experiment_run_again_has_nothing_to_do_and_keeps_the_final_
 # what it must refuse
 # ---------------------------------------------------------------------------
 
+
 def test_recovery_refuses_when_the_published_parent_is_gone(world, monkeypatch):
     first = world.coordinator()
     halt, _ = world.workers(first)
-    first.run(2)                                  # generation 1 started from child 0, which is not what a restarted process has in memory
+    first.run(2)  # generation 1 started from child 0, which is not what a restarted process has in memory
     halt()
     world.kill(first)
     for file in world.models_dir.glob("*.bin"):
@@ -284,6 +303,7 @@ def test_recovery_refuses_a_ledger_of_another_recipe(world):
     world.kill(first)
 
     import dataclasses
+
     world.recipe = dataclasses.replace(world.recipe, sigma=world.recipe.sigma * 2)
     second = world.coordinator()
     with pytest.raises(CoordinatorError, match="recipe"):
@@ -297,10 +317,12 @@ def test_recovery_refuses_weights_that_are_not_the_recorded_child(world):
     halt()
     world.kill(first)
     child = world.oracle(1)
-    (world.models_dir / f"{child}.bin").write_bytes(b"not the weights")          # corrupted on disk, but still named after the child
+    (world.models_dir / f"{child}.bin").write_bytes(
+        b"not the weights"
+    )  # corrupted on disk, but still named after the child
 
     second = world.coordinator()
-    second.recover()                                                          # the bad child is replaced by recomputing it from the parent
+    second.recover()  # the bad child is replaced by recomputing it from the parent
     assert final_hash(second) == child
     assert sha256_of_file(world.models_dir / f"{child}.bin") == child
 
@@ -309,12 +331,15 @@ def test_recovery_refuses_weights_that_are_not_the_recorded_child(world):
 # no progress is an error, not a silent wait
 # ---------------------------------------------------------------------------
 
+
 def test_a_generation_with_no_progress_for_too_long_is_an_error_and_the_model_is_untouched(world):
-    coordinator = world.coordinator(stall_seconds=0.3, timeout_seconds=15)       # the timeout only keeps a broken stall rule from hanging the suite
+    coordinator = world.coordinator(
+        stall_seconds=0.3, timeout_seconds=15
+    )  # the timeout only keeps a broken stall rule from hanging the suite
     before = final_hash(coordinator)
     started = time.time()
     with pytest.raises(CoordinatorError, match="no progress"):
-        coordinator.run_generation(0)                                         # nobody works
+        coordinator.run_generation(0)  # nobody works
     assert time.time() - started < 10
     assert final_hash(coordinator) == before
 
@@ -323,7 +348,7 @@ def test_progress_resets_the_stall_timer(world):
     coordinator = world.coordinator(stall_seconds=0.6, timeout_seconds=30)
 
     def slow(descriptor):
-        time.sleep(0.3)                                                       # each candidate takes half the stall time, the total is longer
+        time.sleep(0.3)  # each candidate takes half the stall time, the total is longer
         return reward_of(descriptor)
 
     halt, _ = world.workers(coordinator, names=("w1",), evaluate=slow)
@@ -336,18 +361,19 @@ def test_progress_resets_the_stall_timer(world):
 def test_the_default_stall_time_is_a_multiple_of_the_lease(world):
     coordinator = world.coordinator(lease_seconds=40.0)
     assert coordinator._stall == 200.0
-    assert world.coordinator(lease_seconds=2.0)._stall == 60.0                # but never below a minute
-    assert world.coordinator(lease_seconds=40.0, stall_seconds=None)._stall is None   # and it can be turned off
+    assert world.coordinator(lease_seconds=2.0)._stall == 60.0  # but never below a minute
+    assert world.coordinator(lease_seconds=40.0, stall_seconds=None)._stall is None  # and it can be turned off
 
 
 # ---------------------------------------------------------------------------
 # a failed run is not a finished one
 # ---------------------------------------------------------------------------
 
+
 def test_a_run_that_fails_tells_the_workers_it_was_aborted_not_finished(world):
     coordinator = world.coordinator(stall_seconds=0.2, timeout_seconds=15)
     with pytest.raises(CoordinatorError, match="no progress"):
-        coordinator.run(1)                                                    # nobody works: it stalls
+        coordinator.run(1)  # nobody works: it stalls
     assert HttpClient(coordinator.url).get_json("/v1/job")["job"]["state"] == "ABORTED"
 
 
@@ -363,6 +389,7 @@ def test_a_run_that_ends_well_tells_the_workers_it_is_finished(world):
 # the published directory does not grow for ever
 # ---------------------------------------------------------------------------
 
+
 def test_only_the_newest_versions_of_the_weights_stay_in_the_published_directory(world):
     coordinator = world.coordinator(keep_published=3)
     halt, _ = world.workers(coordinator)
@@ -370,7 +397,9 @@ def test_only_the_newest_versions_of_the_weights_stay_in_the_published_directory
     halt()
     files = sorted(p.name[:-4] for p in world.models_dir.glob("*.bin"))
     assert len(files) == 3
-    assert world.oracle(5) in files and world.oracle(4) in files and world.oracle(3) in files        # the current weights and two ancestors
+    assert (
+        world.oracle(5) in files and world.oracle(4) in files and world.oracle(3) in files
+    )  # the current weights and two ancestors
     assert world.oracle(0) not in files and world.oracle(1) not in files
     assert any(e["event"] == "weights_pruned" for e in coordinator.events)
 
@@ -380,7 +409,7 @@ def test_pruning_can_be_turned_off(world):
     halt, _ = world.workers(coordinator)
     coordinator.run(3)
     halt()
-    assert len(list(world.models_dir.glob("*.bin"))) == 4                                           # the initial weights and three children
+    assert len(list(world.models_dir.glob("*.bin"))) == 4  # the initial weights and three children
 
 
 def test_a_restarted_coordinator_can_still_recover_after_pruning(world):
@@ -401,10 +430,13 @@ def test_recovery_refuses_to_continue_when_the_stored_record_gives_another_child
     halt()
     world.kill(first)
     child = world.oracle(1)
-    (world.models_dir / f"{child}.bin").unlink()                             # the child file is gone: it must be recomputed ...
+    (world.models_dir / f"{child}.bin").unlink()  # the child file is gone: it must be recomputed ...
     import sqlite3
+
     db = sqlite3.connect(world.ledger_path)
-    db.execute("UPDATE generation_update SET child_weights_sha256 = ?", ("f" * 64,))     # ... and the ledger says another child (a corrupted ledger)
+    db.execute(
+        "UPDATE generation_update SET child_weights_sha256 = ?", ("f" * 64,)
+    )  # ... and the ledger says another child (a corrupted ledger)
     db.commit()
     db.close()
 

@@ -8,6 +8,7 @@
 The tests use a tiny FP16 model on the CPU, real HTTP and workers in their own threads; their reward is a function of the seed, so
 the right update is known: it is `apply_es_update_` applied by hand, on a copy, to those rewards.
 """
+
 import copy
 import json
 import threading
@@ -48,9 +49,21 @@ class HalfToy(nn.Module):
 
 
 def make_recipe(schema):
-    return Recipe(model_id="toy", model_revision="1" * 40, tokenizer_revision="1" * 40, dtype="torch.float16",
-                  schema_hash=schema.hash, engine_version=ENGINE_VERSION, chunk_elements=CHUNK, noise_fingerprint="2" * 64,
-                  sigma=SIGMA, reward_eta=ETA, workload_hash="3" * 64, generation_config_sha256="4" * 64, eval_dtype="float16")
+    return Recipe(
+        model_id="toy",
+        model_revision="1" * 40,
+        tokenizer_revision="1" * 40,
+        dtype="torch.float16",
+        schema_hash=schema.hash,
+        engine_version=ENGINE_VERSION,
+        chunk_elements=CHUNK,
+        noise_fingerprint="2" * 64,
+        sigma=SIGMA,
+        reward_eta=ETA,
+        workload_hash="3" * 64,
+        generation_config_sha256="4" * 64,
+        eval_dtype="float16",
+    )
 
 
 def reward_of(descriptor):
@@ -76,8 +89,19 @@ class Env:
         self.events = []
         self.models_dir = tmp_path / "published"
         self.coordinator = Coordinator(
-            self.model, self.schema, self.recipe, self.ledger, self.models_dir, experiment_id="exp", candidates=candidates,
-            alpha=ALPHA, lease_seconds=options.pop("lease_seconds", 60.0), poll_seconds=0.01, log=self.events.append, **options)
+            self.model,
+            self.schema,
+            self.recipe,
+            self.ledger,
+            self.models_dir,
+            experiment_id="exp",
+            candidates=candidates,
+            alpha=ALPHA,
+            lease_seconds=options.pop("lease_seconds", 60.0),
+            poll_seconds=0.01,
+            log=self.events.append,
+            **options,
+        )
         self.coordinator.start()
         self.stop = threading.Event()
         self.threads = []
@@ -131,24 +155,33 @@ def env(tmp_path):
 # one generation
 # ---------------------------------------------------------------------------
 
+
 def test_recovery_hooks_run_between_publications_without_changing_numerics(tmp_path):
-    order=[];env=None
+    order = []
+    env = None
+
     def start(generation):
         if generation:
-            assert env.ledger.get_update('exp',generation-1).applied_at is not None
-        order.append(('start',generation))
+            assert env.ledger.get_update("exp", generation - 1).applied_at is not None
+        order.append(("start", generation))
+
     def complete(summary):
-        child=summary['child_sha256']
-        assert sha256_of_file(env.models_dir/f'{child}.bin')==child
-        assert env.ledger.get_update('exp',summary['generation']).applied_at is not None
-        order.append(('complete',summary['generation']))
-    env=Env(tmp_path,generation_started=start,generation_completed=complete)
+        child = summary["child_sha256"]
+        assert sha256_of_file(env.models_dir / f"{child}.bin") == child
+        assert env.ledger.get_update("exp", summary["generation"]).applied_at is not None
+        order.append(("complete", summary["generation"]))
+
+    env = Env(tmp_path, generation_started=start, generation_completed=complete)
     try:
-        recipe_hash=env.recipe.hash;env.start_workers();summaries=env.coordinator.run(2)
-        assert order==[('start',0),('complete',0),('start',1),('complete',1)]
-        assert summaries[-1]['child_sha256']==env.oracle_child([s['rewards'] for s in summaries])
-        assert env.recipe.hash==recipe_hash
-    finally:env.close()
+        recipe_hash = env.recipe.hash
+        env.start_workers()
+        summaries = env.coordinator.run(2)
+        assert order == [("start", 0), ("complete", 0), ("start", 1), ("complete", 1)]
+        assert summaries[-1]["child_sha256"] == env.oracle_child([s["rewards"] for s in summaries])
+        assert env.recipe.hash == recipe_hash
+    finally:
+        env.close()
+
 
 def test_a_generation_is_run_recorded_applied_and_published(env):
     parent = model_weights_sha256(env.model, env.schema)
@@ -160,14 +193,20 @@ def test_a_generation_is_run_recorded_applied_and_published(env):
     rewards = list(env.ledger.get_generation_results("exp", 0).rewards)
     assert summary["rewards"] == rewards and summary["mean_reward"] == pytest.approx(sum(rewards) / 4)
     child = env.oracle_child([rewards])
-    assert child != parent                                                    # premise: the update changed the weights
+    assert child != parent  # premise: the update changed the weights
     assert summary["parent_sha256"] == parent and summary["child_sha256"] == child
     assert model_weights_sha256(env.model, env.schema) == child
     assert env.coordinator.parent_sha256 == child
     stored = env.ledger.get_update("exp", 0)
-    assert stored.record_hash == summary["record_hash"] and stored.child_weights_sha256 == child and stored.applied_at is not None
+    assert (
+        stored.record_hash == summary["record_hash"]
+        and stored.child_weights_sha256 == child
+        and stored.applied_at is not None
+    )
     assert (env.models_dir / f"{child}.bin").is_file() and sha256_of_file(env.models_dir / f"{child}.bin") == child
-    assert (env.models_dir / f"{parent}.bin").is_file()                      # the parent is published too: a worker with other weights can sync
+    assert (
+        env.models_dir / f"{parent}.bin"
+    ).is_file()  # the parent is published too: a worker with other weights can sync
 
 
 def test_the_summary_is_plain_json_with_the_timings_of_each_part(env):
@@ -176,8 +215,23 @@ def test_the_summary_is_plain_json_with_the_timings_of_each_part(env):
     summary = env.coordinator.run_generation(0)
 
     json.dumps(summary)
-    assert {"generation", "parent_sha256", "child_sha256", "record_hash", "rewards", "mean_reward", "coefficients", "noop",
-            "applied_l2", "changed", "wait_seconds", "record_seconds", "update_seconds", "publish_seconds", "total_seconds"} <= set(summary)
+    assert {
+        "generation",
+        "parent_sha256",
+        "child_sha256",
+        "record_hash",
+        "rewards",
+        "mean_reward",
+        "coefficients",
+        "noop",
+        "applied_l2",
+        "changed",
+        "wait_seconds",
+        "record_seconds",
+        "update_seconds",
+        "publish_seconds",
+        "total_seconds",
+    } <= set(summary)
     assert summary["total_seconds"] >= summary["wait_seconds"] >= 0 and summary["update_seconds"] >= 0
     assert summary["noop"] is False and summary["changed"] > 0
 
@@ -192,7 +246,9 @@ def test_the_job_tells_the_workers_what_this_generation_is(env):
     assert job["recipe"] == env.recipe.to_dict() and job["recipe_hash"] == env.recipe.hash
     assert job["candidates"] == 4 and job["policy"] == "Greedy"
     parent = env.ledger.list_candidates("exp", 0)[0].descriptor.parent_weights_sha256
-    assert job["parent_weights_sha256"] == parent != model_weights_sha256(env.model, env.schema)     # the parent, not the child
+    assert (
+        job["parent_weights_sha256"] == parent != model_weights_sha256(env.model, env.schema)
+    )  # the parent, not the child
 
 
 def test_before_a_generation_is_open_there_is_no_job_and_no_work(env):
@@ -219,13 +275,16 @@ def test_the_candidates_carry_the_recipe_the_parent_and_a_seed_of_their_own(env)
 # the order of things: the record is written before the weights change
 # ---------------------------------------------------------------------------
 
+
 def test_the_update_is_recorded_before_the_weights_are_touched(env, monkeypatch):
     real = coordinator_module.apply_coefficients_
     seen = []
 
     def inspect_then_apply(model, schema, seeds, coefficients, alpha, chunk_elements):
         stored = env.ledger.get_update("exp", 0)
-        seen.append((stored is not None, stored.applied_at if stored else "no record", model_weights_sha256(model, schema)))
+        seen.append(
+            (stored is not None, stored.applied_at if stored else "no record", model_weights_sha256(model, schema))
+        )
         return real(model, schema, seeds, coefficients, alpha, chunk_elements)
 
     monkeypatch.setattr(coordinator_module, "apply_coefficients_", inspect_then_apply)
@@ -234,7 +293,7 @@ def test_the_update_is_recorded_before_the_weights_are_touched(env, monkeypatch)
 
     env.coordinator.run_generation(0)
 
-    assert seen == [(True, None, parent)]                                     # recorded, not yet applied, weights still the parent's
+    assert seen == [(True, None, parent)]  # recorded, not yet applied, weights still the parent's
 
 
 def test_a_crash_while_applying_leaves_the_record_and_no_child(env, monkeypatch):
@@ -249,12 +308,15 @@ def test_a_crash_while_applying_leaves_the_record_and_no_child(env, monkeypatch)
 
     stored = env.ledger.get_update("exp", 0)
     assert stored is not None and stored.child_weights_sha256 is None and stored.applied_at is None
-    assert list(env.models_dir.glob("*.bin")) == [env.models_dir / f"{env.coordinator.parent_sha256}.bin"]    # nothing was published
+    assert list(env.models_dir.glob("*.bin")) == [
+        env.models_dir / f"{env.coordinator.parent_sha256}.bin"
+    ]  # nothing was published
 
 
 # ---------------------------------------------------------------------------
 # several generations
 # ---------------------------------------------------------------------------
+
 
 def test_the_next_generation_starts_from_the_child_and_the_updates_accumulate(env):
     env.start_workers()
@@ -266,7 +328,7 @@ def test_the_next_generation_starts_from_the_child_and_the_updates_accumulate(en
     assert second["parent_sha256"] == first["child_sha256"] != second["child_sha256"]
     rewards = [list(env.ledger.get_generation_results("exp", g).rewards) for g in (0, 1)]
     assert second["child_sha256"] == env.oracle_child(rewards) == model_weights_sha256(env.model, env.schema)
-    assert first["rewards"] != second["rewards"]                              # other seeds, other candidates
+    assert first["rewards"] != second["rewards"]  # other seeds, other candidates
 
 
 def test_run_does_every_generation_and_then_tells_the_workers_the_experiment_is_over(env):
@@ -282,6 +344,7 @@ def test_run_does_every_generation_and_then_tells_the_workers_the_experiment_is_
 # ---------------------------------------------------------------------------
 # when things go wrong
 # ---------------------------------------------------------------------------
+
 
 def test_a_generation_that_can_not_finish_is_an_error_after_the_grace_and_the_model_is_untouched(tmp_path):
     env = Env(tmp_path, max_attempts=1, failed_grace_seconds=0.2)
@@ -312,13 +375,13 @@ def test_a_late_result_inside_the_grace_period_completes_a_generation_that_looke
         thread.start()
         assert wait_for(lambda: env.job() is not None)
         slow = WorkerClient("slow", HttpClient(env.coordinator.url, timeout=10.0))
-        held = slow.lease()                                                   # candidate 0 is leased... and not answered yet
+        held = slow.lease()  # candidate 0 is leased... and not answered yet
         assert held.assignment.candidate_id == "exp/g0/c0"
         env.start_workers(("w1", "w2"))
 
         assert wait_for(lambda: env.ledger.get_generation_status("exp", 0).state is GenerationState.FAILED)
-        time.sleep(0.5)                                                       # long enough for a coordinator that gives up at once
-        assert thread.is_alive()                                              # the coordinator is waiting, not giving up
+        time.sleep(0.5)  # long enough for a coordinator that gives up at once
+        assert thread.is_alive()  # the coordinator is waiting, not giving up
         slow.submit_result(held.assignment, reward_of(held.assignment.descriptor))
         thread.join(timeout=20)
 
@@ -364,6 +427,7 @@ def test_a_generation_cannot_be_run_twice(env):
 # options
 # ---------------------------------------------------------------------------
 
+
 def test_a_static_wave_policy_can_be_chosen_and_the_job_says_so(tmp_path):
     env = Env(tmp_path, policy_factory=lambda: StaticWave(2))
     try:
@@ -383,7 +447,14 @@ def test_every_event_is_plain_json_and_the_phases_come_in_order(env):
 
     json.dumps(env.events)
     kinds = [e["event"] for e in env.events]
-    assert kinds == ["generation_open", "generation_complete", "update_recorded", "update_applied", "weights_published", "generation_done"]
+    assert kinds == [
+        "generation_open",
+        "generation_complete",
+        "update_recorded",
+        "update_applied",
+        "weights_published",
+        "generation_done",
+    ]
     assert env.events[0]["generation"] == 0 and env.events[-1]["child_sha256"] == env.coordinator.parent_sha256
 
 
@@ -392,7 +463,8 @@ def test_the_token_is_passed_to_the_server(tmp_path):
     try:
         assert HttpClient(env.coordinator.url, token="s3cret").get_json("/v1/health")["ok"] is True
         from heteroes.http_transport import UnauthorizedError
-        with pytest.raises(UnauthorizedError):                                    # G6: a refusal of the token is an error, not a JSON reply to ignore
+
+        with pytest.raises(UnauthorizedError):  # G6: a refusal of the token is an error, not a JSON reply to ignore
             HttpClient(env.coordinator.url).get_json("/v1/health")
     finally:
         env.close()
@@ -402,18 +474,27 @@ def test_the_token_is_passed_to_the_server(tmp_path):
 # G7: the engine of the update is the engine of the recipe
 # ---------------------------------------------------------------------------
 
+
 def test_a_cuda_engine_recipe_applies_the_update_with_the_cuda_engine(tmp_path, monkeypatch):
     from heteroes.es.update import apply_coefficients_
     from heteroes.noise.contracts import CUDA_CALL_ELEMENTS, CUDA_ENGINE_VERSION, EXPECTED_CUDA_NOISE_FINGERPRINT
 
     def cuda_recipe(schema):
         base = make_recipe_cpu(schema)
-        return Recipe(**{**base.__dict__, "engine_version": CUDA_ENGINE_VERSION, "chunk_elements": CUDA_CALL_ELEMENTS,
-                         "noise_fingerprint": EXPECTED_CUDA_NOISE_FINGERPRINT})
+        return Recipe(
+            **{
+                **base.__dict__,
+                "engine_version": CUDA_ENGINE_VERSION,
+                "chunk_elements": CUDA_CALL_ELEMENTS,
+                "noise_fingerprint": EXPECTED_CUDA_NOISE_FINGERPRINT,
+            }
+        )
 
     calls = []
 
-    def cuda_apply(model, schema, seeds, coefficients, alpha):          # the toy model is on the CPU: the CPU engine stands in for the arithmetic
+    def cuda_apply(
+        model, schema, seeds, coefficients, alpha
+    ):  # the toy model is on the CPU: the CPU engine stands in for the arithmetic
         calls.append((list(seeds), alpha))
         return apply_coefficients_(model, schema, seeds, coefficients, alpha, CHUNK)
 
@@ -444,6 +525,8 @@ def test_the_update_of_each_generation_is_served_under_its_parent_hash(env):
     assert set(served) == {first["parent_sha256"], second["parent_sha256"]}
     for summary, generation in ((first, 0), (second, 1)):
         stored = env.ledger.get_update("exp", generation)
-        assert served[summary["parent_sha256"]] == {"record_json": stored.record.to_json(), "record_hash": stored.record_hash,
-                                                    "child_weights_sha256": summary["child_sha256"]}
-
+        assert served[summary["parent_sha256"]] == {
+            "record_json": stored.record.to_json(),
+            "record_hash": stored.record_hash,
+            "child_weights_sha256": summary["child_sha256"],
+        }

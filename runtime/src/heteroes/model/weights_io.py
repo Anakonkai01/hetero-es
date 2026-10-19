@@ -7,6 +7,7 @@ worker that downloads a file can check it before it touches its model (full sync
 The bits are copied, never converted: NaN payloads and the sign of zero survive. A model is written and read in slabs, so a
 6 GB card (and the RAM next to it) never holds a second copy.
 """
+
 import hashlib
 import os
 import re
@@ -18,7 +19,7 @@ import torch
 from heteroes.es.checks import _check_param
 from heteroes.model.schema import ParameterSchema, resolve_tensors
 
-DEFAULT_SLAB_ELEMENTS = 2**23          # 16 MiB of FP16 per slab
+DEFAULT_SLAB_ELEMENTS = 2**23  # 16 MiB of FP16 per slab
 _HEX64 = re.compile(r"[0-9a-f]{64}")
 
 
@@ -52,12 +53,14 @@ def write_weights(model, schema: ParameterSchema, path, slab_elements: int = DEF
                 for tensor in tensors:
                     flat = tensor.detach().reshape(-1)
                     for start in range(0, flat.numel(), slab_elements):
-                        data = flat[start:start + slab_elements].view(torch.int16).cpu().numpy()    # a buffer: no extra copy to bytes
+                        data = (
+                            flat[start : start + slab_elements].view(torch.int16).cpu().numpy()
+                        )  # a buffer: no extra copy to bytes
                         digest.update(data)
                         file.write(data)
         except BaseException:
             file.close()
-            path.unlink()                      # never leave half a file that looks like the weights
+            path.unlink()  # never leave half a file that looks like the weights
             raise
     return digest.hexdigest()
 
@@ -65,7 +68,7 @@ def write_weights(model, schema: ParameterSchema, path, slab_elements: int = DEF
 def _fsync_directory(directory) -> None:
     try:
         fd = os.open(directory, os.O_RDONLY)
-    except OSError:                       # a platform that cannot open a directory: the rename is still atomic
+    except OSError:  # a platform that cannot open a directory: the rename is still atomic
         return
     try:
         os.fsync(fd)
@@ -96,7 +99,11 @@ class Publication:
         final = self.path
         # A file that is already there is kept only if it really is these weights: a file damaged by a crash or a full disk and
         # still named after the hash would otherwise be served to the workers for ever.
-        if final.exists() and final.stat().st_size == self.temporary.stat().st_size and sha256_of_file(final) == self.sha256:
+        if (
+            final.exists()
+            and final.stat().st_size == self.temporary.stat().st_size
+            and sha256_of_file(final) == self.sha256
+        ):
             self.temporary.unlink()
         else:
             os.replace(self.temporary, final)
@@ -107,7 +114,9 @@ class Publication:
         self.temporary.unlink(missing_ok=True)
 
 
-def prepare_publication(model, schema: ParameterSchema, directory, slab_elements: int = DEFAULT_SLAB_ELEMENTS) -> Publication:
+def prepare_publication(
+    model, schema: ParameterSchema, directory, slab_elements: int = DEFAULT_SLAB_ELEMENTS
+) -> Publication:
     """Write the weights to a temporary file in `directory` (created if needed) and return the `Publication` (hash known, not yet visible)."""
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
@@ -123,8 +132,14 @@ def publish_weights(model, schema: ParameterSchema, directory, slab_elements: in
     return publication.sha256
 
 
-def load_weights_(model, schema: ParameterSchema, path, expected_sha256: str, slab_elements: int = DEFAULT_SLAB_ELEMENTS,
-                  already_verified: bool = False) -> None:
+def load_weights_(
+    model,
+    schema: ParameterSchema,
+    path,
+    expected_sha256: str,
+    slab_elements: int = DEFAULT_SLAB_ELEMENTS,
+    already_verified: bool = False,
+) -> None:
     """
     Copy the weights in `path` into the model, in place. The size and the SHA-256 of the whole file are checked FIRST: a
     file that is not `expected_sha256` raises WeightsFileError and the model is not touched. (A failure of the disk while
@@ -155,8 +170,8 @@ def load_weights_(model, schema: ParameterSchema, path, expected_sha256: str, sl
                 count = min(slab_elements, flat.numel() - start)
                 buffer = bytearray(2 * count)
                 if file.readinto(buffer) != 2 * count:
-                    raise WeightsFileError(f"{path.name} ended early")        # the file changed after it was checked
-                flat[start:start + count].copy_(torch.frombuffer(buffer, dtype=torch.int16).view(torch.float16))
+                    raise WeightsFileError(f"{path.name} ended early")  # the file changed after it was checked
+                flat[start : start + count].copy_(torch.frombuffer(buffer, dtype=torch.int16).view(torch.float16))
 
 
 def tensors_match_file(tensors, path, slab_elements: int = DEFAULT_SLAB_ELEMENTS) -> bool:
@@ -174,7 +189,7 @@ def tensors_match_file(tensors, path, slab_elements: int = DEFAULT_SLAB_ELEMENTS
         for tensor in tensors:
             flat = tensor.detach().reshape(-1).view(torch.int16).cpu().numpy()
             for start in range(0, flat.size, slab_elements):
-                part = flat[start:start + slab_elements]
+                part = flat[start : start + slab_elements]
                 expected = np.frombuffer(file.read(2 * part.size), dtype=np.int16)
                 if expected.size != part.size or not np.array_equal(expected, part):
                     return False

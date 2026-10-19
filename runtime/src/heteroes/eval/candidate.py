@@ -17,7 +17,7 @@ def tensors_sha256(tensors) -> str:
     """The `model_weights_sha256` of tensors that are already in canonical order (for example the tensors of a snapshot)."""
     digest = hashlib.sha256()
     for tensor in tensors:
-        digest.update(tensor.detach().reshape(-1).view(torch.int16).cpu().numpy())      # a buffer: no extra copy to bytes
+        digest.update(tensor.detach().reshape(-1).view(torch.int16).cpu().numpy())  # a buffer: no extra copy to bytes
     return digest.hexdigest()
 
 
@@ -30,7 +30,7 @@ def model_weights_sha256(model, schema: ParameterSchema) -> str:
     """
     digest = hashlib.sha256()
     for tensor in resolve_tensors(model, schema):
-        digest.update(tensor.detach().reshape(-1).view(torch.int16).cpu().numpy())      # a buffer: no extra copy to bytes
+        digest.update(tensor.detach().reshape(-1).view(torch.int16).cpu().numpy())  # a buffer: no extra copy to bytes
     return digest.hexdigest()
 
 

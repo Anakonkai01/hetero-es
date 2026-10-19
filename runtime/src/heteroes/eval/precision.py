@@ -8,6 +8,7 @@ batch, a few in a thousand between GPUs: `artifacts/experiments/2026-10-07-g6-cr
 tests. `EvalModel("float32")` keeps a float32 shadow copy of the model, refreshed from the live FP16 weights (an exact widening, so
 nothing is lost) before each evaluation; `EvalModel("float16")` is the live model itself and `refresh()` does nothing.
 """
+
 import copy
 
 import torch
@@ -45,4 +46,4 @@ class EvalModel:
             return
         with torch.no_grad():
             for live, shadow in zip(self._live.parameters(), self._shadow.parameters(), strict=True):
-                shadow.copy_(live)                       # FP16 -> FP32: exact
+                shadow.copy_(live)  # FP16 -> FP32: exact

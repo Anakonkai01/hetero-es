@@ -5,6 +5,7 @@ Why: the workload of the contract (`workload.py`) answers in at most 16 tokens, 
 candidate and a slow GPU cannot matter. Here the rollout is the main cost. The questions are generated from a seed, so every machine builds the same ones;
 the answer is computed, never typed. `cot_l3_q32` (word problems, 32 questions) is the workload of the G7 experiments (accuracy 0.28 of the base model).
 """
+
 import operator
 import random
 import re
@@ -58,7 +59,12 @@ def make_questions(count: int, level: int, seed: int = GENERATOR_SEED) -> list[t
             out.append((f"What is {a} {op1} {b} {op2} {c}?", answer))
         else:
             packs, per, sold = rng.randint(12, 60), rng.randint(12, 48), rng.randint(100, 500)
-            out.append((f"A shop has {packs} boxes with {per} pens in each box. It sells {sold} pens. How many pens remain?", packs * per - sold))
+            out.append(
+                (
+                    f"A shop has {packs} boxes with {per} pens in each box. It sells {sold} pens. How many pens remain?",
+                    packs * per - sold,
+                )
+            )
     return out
 
 
@@ -75,11 +81,14 @@ def extract_answer(text: str) -> int | None:
 
 def _check_decode_engine(decode_engine) -> None:
     from heteroes.manifest import DECODE_ENGINES
+
     if not isinstance(decode_engine, str) or decode_engine not in DECODE_ENGINES:
         raise ValueError(f"decode_engine must be one of {DECODE_ENGINES}, got {decode_engine!r}")
 
 
-def generate(model, tokenizer, questions: list[str], chunk: int, decode_engine: str = "hf_generate") -> tuple[list[str], int]:
+def generate(
+    model, tokenizer, questions: list[str], chunk: int, decode_engine: str = "hf_generate"
+) -> tuple[list[str], int]:
     """
     Greedy answers, `chunk` prompts per call (left padding). Returns the texts and the number of tokens generated in total.
     `decode_engine`: "hf_generate" is the library's `generate()`; "hf_compact" is the compacting greedy decoder (`heteroes.eval.compact_decode`), which gives the same
@@ -89,23 +98,32 @@ def generate(model, tokenizer, questions: list[str], chunk: int, decode_engine: 
     device = next(model.parameters()).device
     if decode_engine == "hf_compact":
         from heteroes.eval.compact_decode import compact_generate_ids, decode_settings
+
         eos_ids, pad_id, processors = decode_settings(model, MAX_NEW_TOKENS, tokenizer.pad_token_id)
     texts_out, tokens = [], 0
     previous = tokenizer.padding_side
     tokenizer.padding_side = "left"
     try:
         for start in range(0, len(questions), chunk):
-            group = questions[start:start + chunk]
-            prompts = [tokenizer.apply_chat_template([{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": question}],
-                                                     tokenize=False, add_generation_prompt=True) for question in group]
+            group = questions[start : start + chunk]
+            prompts = [
+                tokenizer.apply_chat_template(
+                    [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": question}],
+                    tokenize=False,
+                    add_generation_prompt=True,
+                )
+                for question in group
+            ]
             inputs = tokenizer(prompts, return_tensors="pt", padding=True)
             inputs = {key: value.to(device) for key, value in inputs.items()}
             if decode_engine == "hf_compact":
-                new, _ = compact_generate_ids(model, inputs["input_ids"], inputs["attention_mask"], MAX_NEW_TOKENS, eos_ids, pad_id, processors)
+                new, _ = compact_generate_ids(
+                    model, inputs["input_ids"], inputs["attention_mask"], MAX_NEW_TOKENS, eos_ids, pad_id, processors
+                )
             else:
                 with torch.no_grad():
                     ids = model.generate(**inputs, max_new_tokens=MAX_NEW_TOKENS, do_sample=DO_SAMPLE)
-                new = ids[:, inputs["input_ids"].shape[1]:]
+                new = ids[:, inputs["input_ids"].shape[1] :]
             tokens += int((new != tokenizer.pad_token_id).sum())
             texts_out += [text.strip() for text in tokenizer.batch_decode(new, skip_special_tokens=True)]
     finally:
@@ -113,7 +131,9 @@ def generate(model, tokenizer, questions: list[str], chunk: int, decode_engine: 
     return texts_out, tokens
 
 
-def evaluate_cot(model, tokenizer, chunk: int, level: int = 3, count: int = 32, decode_engine: str = "hf_generate") -> EvalResult:
+def evaluate_cot(
+    model, tokenizer, chunk: int, level: int = 3, count: int = 32, decode_engine: str = "hf_generate"
+) -> EvalResult:
     """
     Ask the questions and score them: the mean of the exact matches. A failure while generating (for example CUDA out of memory) is raised, never
     turned into a reward of 0 (an infrastructure failure is not a wrong answer); a reply without any integer is a wrong answer.

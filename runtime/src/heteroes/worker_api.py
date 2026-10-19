@@ -19,6 +19,7 @@ A reply is {"ok": true, ...} or {"ok": false, "error": {"code", "message"}}. The
 ledger refuses, plus "bad_request" (a request that is not shaped as above; nothing was changed) and "unknown_operation".
 The coordinator, not the worker, decides which candidate a worker gets and for how long.
 """
+
 import math
 import threading
 from collections import OrderedDict
@@ -111,9 +112,11 @@ def _decode_lease(request):
 
 def _decode_attempt(request, last: str):
     _fields(request, {"descriptor", "attempt_number", "token", last})
-    return (CandidateDescriptor.from_dict(request["descriptor"]),
-            _integer("attempt_number", request["attempt_number"]),
-            _text("token", request["token"]))
+    return (
+        CandidateDescriptor.from_dict(request["descriptor"]),
+        _integer("attempt_number", request["attempt_number"]),
+        _text("token", request["token"]),
+    )
 
 
 def _decode_result(request):
@@ -123,9 +126,11 @@ def _decode_result(request):
 
 def _decode_heartbeat(request):
     _fields(request, {"descriptor", "attempt_number", "token"})
-    return (CandidateDescriptor.from_dict(request["descriptor"]),
-            _integer("attempt_number", request["attempt_number"]),
-            _text("token", request["token"]))
+    return (
+        CandidateDescriptor.from_dict(request["descriptor"]),
+        _integer("attempt_number", request["attempt_number"]),
+        _text("token", request["token"]),
+    )
 
 
 def _decode_failure(request):
@@ -140,8 +145,15 @@ class WorkerAPI:
     so that "pick a candidate, then lease it" cannot be interleaved with another worker's request.
     """
 
-    def __init__(self, ledger, experiment_id: str, generation: int, lease_seconds: float, policy=None,
-                 cancel_requested=lambda: False):
+    def __init__(
+        self,
+        ledger,
+        experiment_id: str,
+        generation: int,
+        lease_seconds: float,
+        policy=None,
+        cancel_requested=lambda: False,
+    ):
         self._ledger = ledger
         self._experiment_id = experiment_id
         self._generation = generation
@@ -149,7 +161,9 @@ class WorkerAPI:
         self._policy = Greedy() if policy is None else policy
         self._cancel_requested = cancel_requested
         self._lock = threading.Lock()
-        self._remembered: OrderedDict = OrderedDict()      # (worker_id, request_id) -> the work that was given, for repeated requests
+        self._remembered: OrderedDict = (
+            OrderedDict()
+        )  # (worker_id, request_id) -> the work that was given, for repeated requests
         self._operations = {
             "lease": (_decode_lease, self._lease),
             "submit_result": (_decode_result, self._submit_result),
@@ -169,9 +183,9 @@ class WorkerAPI:
         with self._lock:
             try:
                 if authenticated_worker_id is not None:
-                    owner = decoded[0] if operation == 'lease' else self._ledger.attempt_worker(*decoded[:3])
+                    owner = decoded[0] if operation == "lease" else self._ledger.attempt_worker(*decoded[:3])
                     if owner != authenticated_worker_id:
-                        return _error('forbidden', 'Credential does not own this worker or attempt')
+                        return _error("forbidden", "Credential does not own this worker or attempt")
                 return {"ok": True, **act(decoded)}
             except LedgerError as error:
                 return _error(_code_of(error), str(error))
@@ -197,8 +211,12 @@ class WorkerAPI:
                 candidate_id = chosen.descriptor.candidate_id
                 lease = self._ledger.lease(candidate_id, worker_id, self._lease_seconds)
                 self._policy.leased(candidate_id, worker_id)
-                work = {"descriptor": chosen.descriptor.to_dict(), "attempt_number": lease.attempt_number,
-                        "token": lease.token, "deadline": lease.deadline}
+                work = {
+                    "descriptor": chosen.descriptor.to_dict(),
+                    "attempt_number": lease.attempt_number,
+                    "token": lease.token,
+                    "deadline": lease.deadline,
+                }
                 if request_id is not None:
                     self._remembered[(worker_id, request_id)] = work
                     while len(self._remembered) > MAX_REMEMBERED_REQUESTS:
@@ -225,7 +243,7 @@ class WorkerAPI:
         descriptor, attempt_number, token, reward = decoded
         outcome = self._ledger.submit_result(descriptor, attempt_number, token, reward)
         if outcome is SubmitOutcome.COMMITTED and hasattr(self._policy, "committed"):
-            self._policy.committed(descriptor.candidate_id)             # a policy may learn from the duration (GreedyTail)
+            self._policy.committed(descriptor.candidate_id)  # a policy may learn from the duration (GreedyTail)
         return {"outcome": outcome.value}
 
     def _report_failure(self, decoded) -> dict:

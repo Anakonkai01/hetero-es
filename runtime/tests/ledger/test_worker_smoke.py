@@ -6,6 +6,7 @@ will run unchanged over HTTP, because everything it sends is already JSON.
 
 The expected rewards come from `reward_of`, a function of the seed that the test knows and the ledger does not.
 """
+
 import itertools
 
 import numpy as np
@@ -93,6 +94,7 @@ def expected_coefficients(rewards):
 
 # ---------------------------------------------------------------------------
 
+
 def test_three_workers_finish_a_generation_and_the_update_is_recorded_and_applied(world):
     workers = [world.worker("fast"), world.worker("slow"), world.worker("flaky", flaky_once(2))]
 
@@ -103,12 +105,14 @@ def test_three_workers_finish_a_generation_and_the_update_is_recorded_and_applie
     assert results.seeds == tuple(d.seed for d in descriptors()) and results.rewards == expected_rewards()
 
     kinds = [step.kind for _, step in log]
-    assert kinds.count(StepKind.COMMITTED) == N                              # one commit per candidate, no more
-    assert StepKind.REFUSED not in kinds and StepKind.ALREADY_COMMITTED not in kinds and StepKind.QUARANTINED not in kinds
+    assert kinds.count(StepKind.COMMITTED) == N  # one commit per candidate, no more
+    assert (
+        StepKind.REFUSED not in kinds and StepKind.ALREADY_COMMITTED not in kinds and StepKind.QUARANTINED not in kinds
+    )
     failures = [step for _, step in log if step.kind is StepKind.FAILURE_REPORTED]
     assert failures == [Step(StepKind.FAILURE_REPORTED, "exp/g0/c2", failure=FailureKind.OUT_OF_MEMORY)]
     attempts = sorted(r.attempts for r in world.ledger.list_candidates("exp", 0))
-    assert attempts == [1] * (N - 1) + [2]                                   # only the failed candidate was tried twice
+    assert attempts == [1] * (N - 1) + [2]  # only the failed candidate was tried twice
 
     record = GenerationRecord.from_results("exp", 0, results, alpha=1e-3, eta=ETA)
     record.verify_coefficients(ETA)
@@ -137,22 +141,22 @@ def test_the_order_in_which_the_workers_take_their_turns_does_not_change_the_upd
 
 def test_a_worker_that_vanishes_with_a_candidate_is_replaced_and_its_late_answer_is_refused(world):
     ghost = world.worker("ghost")
-    leased = ghost.client.lease().assignment                                  # takes candidate 0 and is never heard of again
+    leased = ghost.client.lease().assignment  # takes candidate 0 and is never heard of again
     assert leased.candidate_id == "exp/g0/c0"
     workers = [world.worker("fast"), world.worker("slow")]
 
-    for _ in range(10):                                                        # candidate 0 is held: they do the others first
+    for _ in range(10):  # candidate 0 is held: they do the others first
         for worker in workers:
             worker.step()
     assert world.status().state is GenerationState.OPEN and world.status().committed == N - 1
 
-    world.clock.advance(LEASE_SECONDS)                                         # its lease runs out
+    world.clock.advance(LEASE_SECONDS)  # its lease runs out
     log = drive(workers)
 
     assert world.status().state is GenerationState.COMPLETE
     assert world.ledger.get_candidate("exp/g0/c0").result.attempt_number == 2
     assert [s for _, s in log if s.kind is StepKind.REFUSED] == []
-    with pytest.raises(WorkerAPIError) as caught:                              # the ghost comes back with an answer
+    with pytest.raises(WorkerAPIError) as caught:  # the ghost comes back with an answer
         ghost.client.submit_result(leased, 0.99)
     assert caught.value.code == "stale_attempt"
     assert world.ledger.get_generation_results("exp", 0).rewards == expected_rewards()

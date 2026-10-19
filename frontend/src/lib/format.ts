@@ -1,13 +1,13 @@
-import { activeLanguage,type Language } from "@heteroes/product-ui/preferences";
+import { activeLanguage, type Language } from '@heteroes/product-ui/preferences';
 
-const TIME_ZONE = "Asia/Ho_Chi_Minh";
+const TIME_ZONE = 'Asia/Ho_Chi_Minh';
 
-export const NOT_AVAILABLE = "Not available yet";
+export const NOT_AVAILABLE = 'Not available yet';
 
 function partsOf(date: Date, options: Intl.DateTimeFormatOptions) {
-  const parts = new Intl.DateTimeFormat("en-US", {
+  const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: TIME_ZONE,
-    hourCycle: "h23",
+    hourCycle: 'h23',
     ...options,
   }).formatToParts(date);
 
@@ -17,40 +17,35 @@ function partsOf(date: Date, options: Intl.DateTimeFormatOptions) {
 /** Formats an ISO timestamp as "Oct 03 09:12" (English) or "03/10 09:12" (Vietnamese), in GMT+7. */
 export function formatDateTime(iso?: string, language: Language = activeLanguage()): string {
   if (!iso) {
-    return "—";
+    return '—';
   }
 
   const p = partsOf(new Date(iso), {
-    month: language === "vi" ? "2-digit" : "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
+    month: language === 'vi' ? '2-digit' : 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
   });
 
-  return language === "vi"
-    ? `${p.day}/${p.month} ${p.hour}:${p.minute}`
-    : `${p.month} ${p.day} ${p.hour}:${p.minute}`;
+  return language === 'vi' ? `${p.day}/${p.month} ${p.hour}:${p.minute}` : `${p.month} ${p.day} ${p.hour}:${p.minute}`;
 }
 
 /** Formats a timestamp as "HH:MM:SS" in GMT+7. */
 export function formatClock(value?: string | number | Date): string {
   if (value === undefined) {
-    return "—";
+    return '—';
   }
 
   const p = partsOf(new Date(value), {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
   });
 
   return `${p.hour}:${p.minute}:${p.second}`;
 }
 
-export function formatOptionalDateTime(
-  iso: string | undefined,
-  fallback: string,
-): string {
+export function formatOptionalDateTime(iso: string | undefined, fallback: string): string {
   return iso ? formatDateTime(iso) : fallback;
 }
 
@@ -69,7 +64,7 @@ export function formatGb(megabytes: number, digits = 0): string {
 
 export function formatBytes(bytes?: number): string {
   if (bytes === undefined) {
-    return "—";
+    return '—';
   }
 
   if (bytes >= 1024 ** 3) return `${(bytes / 1024 ** 3).toFixed(2)} GiB`;
@@ -88,11 +83,9 @@ export function percent(done: number, total: number): number {
 /** Formats an ISO timestamp as "Oct 03 15:38:12" (English) or "03/10 15:38:12" (Vietnamese), in GMT+7. */
 export function formatFullDateTime(iso: string, language: Language = activeLanguage()): string {
   const p = partsOf(new Date(iso), {
-    month: language === "vi" ? "2-digit" : "short",
-    day: "2-digit",
+    month: language === 'vi' ? '2-digit' : 'short',
+    day: '2-digit',
   });
 
-  return language === "vi"
-    ? `${p.day}/${p.month} ${formatClock(iso)}`
-    : `${p.month} ${p.day} ${formatClock(iso)}`;
+  return language === 'vi' ? `${p.day}/${p.month} ${formatClock(iso)}` : `${p.month} ${p.day} ${formatClock(iso)}`;
 }

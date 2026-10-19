@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
 interface PageHeaderProps {
   title: ReactNode;
@@ -25,10 +25,10 @@ export function PageHeaderMeta({ children }: { children: ReactNode }) {
   return (
     <p
       style={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: "6px 12px",
-        alignItems: "center",
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '6px 12px',
+        alignItems: 'center',
         marginTop: 10,
       }}
     >

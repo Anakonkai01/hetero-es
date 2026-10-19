@@ -25,11 +25,14 @@ def test_a_jsonl_log_writes_one_json_object_per_line_and_is_readable_while_it_is
     log = JsonlLog(tmp_path / "events.jsonl")
 
     log({"event": "a", "n": 1})
-    assert (tmp_path / "events.jsonl").read_text().splitlines() == ['{"event": "a", "n": 1}']       # flushed at once
+    assert (tmp_path / "events.jsonl").read_text().splitlines() == ['{"event": "a", "n": 1}']  # flushed at once
     log({"event": "b"})
     log.close()
 
-    assert [json.loads(line) for line in (tmp_path / "events.jsonl").read_text().splitlines()] == [{"event": "a", "n": 1}, {"event": "b"}]
+    assert [json.loads(line) for line in (tmp_path / "events.jsonl").read_text().splitlines()] == [
+        {"event": "a", "n": 1},
+        {"event": "b"},
+    ]
 
 
 def test_a_jsonl_log_never_overwrites_a_file(tmp_path):
@@ -45,8 +48,12 @@ def test_a_jsonl_log_can_be_called_from_several_threads_without_mixing_lines(tmp
     import threading
 
     log = JsonlLog(tmp_path / "events.jsonl")
-    threads = [threading.Thread(target=lambda i=i: [log({"event": "x", "thread": i, "pad": "p" * 200, "k": k}) for k in range(50)])
-               for i in range(8)]
+    threads = [
+        threading.Thread(
+            target=lambda i=i: [log({"event": "x", "thread": i, "pad": "p" * 200, "k": k}) for k in range(50)]
+        )
+        for i in range(8)
+    ]
     for thread in threads:
         thread.start()
     for thread in threads:
@@ -70,11 +77,13 @@ def test_a_value_json_cannot_carry_is_a_type_error_and_the_log_stays_valid(tmp_p
 
 def test_a_log_can_be_continued_with_append_and_is_never_overwritten_without_it(tmp_path):
     from heteroes.runtime_info import JsonlLog
+
     path = tmp_path / "events.jsonl"
     log = JsonlLog(path)
     log({"n": 1})
     log.close()
     import pytest
+
     with pytest.raises(FileExistsError):
         JsonlLog(path)
     again = JsonlLog(path, append=True)

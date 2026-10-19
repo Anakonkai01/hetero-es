@@ -6,8 +6,9 @@ PARENT = "b" * 64
 
 
 def make(index, seed, **changes):
-    values = dict(recipe_hash=RECIPE, parent_weights_sha256=PARENT, experiment_id="exp", generation=0,
-                  index=index, seed=seed)
+    values = dict(
+        recipe_hash=RECIPE, parent_weights_sha256=PARENT, experiment_id="exp", generation=0, index=index, seed=seed
+    )
     values.update(changes)
     return CandidateDescriptor(**values)
 

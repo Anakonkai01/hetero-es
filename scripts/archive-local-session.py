@@ -4,6 +4,7 @@
 Secrets and the randomly generated recovery key stay outside source control.
 The destination must be on the owner-selected Archive-2tb filesystem.
 """
+
 import argparse
 import hashlib
 import io
@@ -28,7 +29,9 @@ def check_destination(path):
     path = path.resolve(strict=True)
     result = subprocess.run(
         ["findmnt", "-rn", "-T", str(path), "-o", "SOURCE"],
-        check=True, capture_output=True, text=True,
+        check=True,
+        capture_output=True,
+        text=True,
     )
     expected = Path("/dev/disk/by-uuid") / ARCHIVE_UUID
     if not expected.exists() or Path(result.stdout.strip()).resolve() != expected.resolve():
@@ -50,15 +53,15 @@ def private_key(path):
     if path.stat().st_mode & 0o077:
         raise ValueError("Recovery key must have mode 0600")
     # It must survive independently of the removable archive filesystem.
-    result = subprocess.run(["findmnt", "-rn", "-T", str(path), "-o", "SOURCE"],
-                            check=True, capture_output=True, text=True)
-    if Path(result.stdout.strip()).resolve() == Path("/dev/disk/by-uuid" , ARCHIVE_UUID).resolve():
+    result = subprocess.run(
+        ["findmnt", "-rn", "-T", str(path), "-o", "SOURCE"], check=True, capture_output=True, text=True
+    )
+    if Path(result.stdout.strip()).resolve() == Path("/dev/disk/by-uuid", ARCHIVE_UUID).resolve():
         raise ValueError("Store the recovery key separately from Archive-2tb")
 
 
 def gpg_args(key):
-    return ["gpg", "--batch", "--no-symkey-cache", "--pinentry-mode", "loopback",
-            "--passphrase-file", str(key)]
+    return ["gpg", "--batch", "--no-symkey-cache", "--pinentry-mode", "loopback", "--passphrase-file", str(key)]
 
 
 def create(source, destination, key, extra_files):
@@ -78,9 +81,11 @@ def create(source, destination, key, extra_files):
         files[name] = path
     if not files or "archive-manifest.json" in files:
         raise ValueError("Empty source or reserved manifest name")
-    manifest = {"formatVersion": 1, "component": "heteroes-encrypted-session",
-                "files": {name: {"sha256": sha256(path), "sizeBytes": path.stat().st_size}
-                          for name, path in files.items()}}
+    manifest = {
+        "formatVersion": 1,
+        "component": "heteroes-encrypted-session",
+        "files": {name: {"sha256": sha256(path), "sizeBytes": path.stat().st_size} for name, path in files.items()},
+    }
     required = sum(item["sizeBytes"] for item in manifest["files"].values())
     if shutil.disk_usage(destination.parent).free < required * 2 + 128 * 1024**2:
         raise ValueError("Insufficient archive and restore-test space")
@@ -89,9 +94,12 @@ def create(source, destination, key, extra_files):
     fd, temporary = tempfile.mkstemp(prefix=".archive-", dir=destination.parent)
     os.close(fd)
     temporary = Path(temporary)
-    process = subprocess.Popen(gpg_args(key) + ["--symmetric", "--cipher-algo", "AES256"],
-                               stdin=subprocess.PIPE, stdout=temporary.open("wb"),
-                               stderr=subprocess.PIPE)
+    process = subprocess.Popen(
+        gpg_args(key) + ["--symmetric", "--cipher-algo", "AES256"],
+        stdin=subprocess.PIPE,
+        stdout=temporary.open("wb"),
+        stderr=subprocess.PIPE,
+    )
     try:
         with tarfile.open(fileobj=process.stdin, mode="w|gz", dereference=True) as archive:
             data = json.dumps(manifest, sort_keys=True).encode()
@@ -112,11 +120,17 @@ def create(source, destination, key, extra_files):
         # Atomic no-replace publication, including on NTFS.
         os.link(temporary, destination)
         temporary.unlink()
-        receipt = {"formatVersion": 1, "uuid": ARCHIVE_UUID,
-                   "encryptedArchive": destination.name, "sha256": sha256(destination),
-                   "sizeBytes": destination.stat().st_size, "sourceBytes": required,
-                   "restoredFiles": restored, "restoreVerified": True,
-                   "independentFileBytes": True}
+        receipt = {
+            "formatVersion": 1,
+            "uuid": ARCHIVE_UUID,
+            "encryptedArchive": destination.name,
+            "sha256": sha256(destination),
+            "sizeBytes": destination.stat().st_size,
+            "sourceBytes": required,
+            "restoredFiles": restored,
+            "restoreVerified": True,
+            "independentFileBytes": True,
+        }
         with destination.with_suffix(destination.suffix + ".receipt.json").open("x") as stream:
             json.dump(receipt, stream, indent=2)
             stream.write("\n")
@@ -129,23 +143,35 @@ def create(source, destination, key, extra_files):
 
 
 def verify(encrypted, target, key):
-    process = subprocess.Popen(gpg_args(key) + ["--decrypt", str(encrypted)],
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process = subprocess.Popen(
+        gpg_args(key) + ["--decrypt", str(encrypted)], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
     seen = set()
     try:
         with tempfile.TemporaryDirectory(prefix=".restore-test-", dir=target) as temporary:
             with tarfile.open(fileobj=process.stdout, mode="r|gz") as archive:
                 first = archive.next()
-                if first is None or first.name != "archive-manifest.json" or not first.isfile() or first.size > 16*1024**2:
+                if (
+                    first is None
+                    or first.name != "archive-manifest.json"
+                    or not first.isfile()
+                    or first.size > 16 * 1024**2
+                ):
                     raise ValueError("Missing or invalid archive manifest")
                 manifest = json.load(archive.extractfile(first))
                 if manifest.get("formatVersion") != 1 or manifest.get("component") != "heteroes-encrypted-session":
                     raise ValueError("Unsupported archive manifest")
                 while (entry := archive.next()) is not None:
                     name = PurePosixPath(entry.name)
-                    if (not entry.isfile() or name.is_absolute() or ".." in name.parts
-                            or "\\" in entry.name or name.as_posix() != entry.name
-                            or entry.name in seen or entry.name not in manifest["files"]):
+                    if (
+                        not entry.isfile()
+                        or name.is_absolute()
+                        or ".." in name.parts
+                        or "\\" in entry.name
+                        or name.as_posix() != entry.name
+                        or entry.name in seen
+                        or entry.name not in manifest["files"]
+                    ):
                         raise ValueError("Unsafe or duplicate archive entry")
                     expected = manifest["files"][entry.name]
                     if entry.size != expected["sizeBytes"]:
@@ -187,8 +213,11 @@ def main():
     if args.verify_only:
         if not args.destination.is_file():
             parser.error("Archive does not exist")
-        print(json.dumps({"restoreVerified": True,
-                          "restoredFiles": verify(args.destination, args.destination.parent, args.key)}))
+        print(
+            json.dumps(
+                {"restoreVerified": True, "restoredFiles": verify(args.destination, args.destination.parent, args.key)}
+            )
+        )
     else:
         if args.source is None:
             parser.error("--source is required when creating an archive")

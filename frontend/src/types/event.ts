@@ -1,7 +1,4 @@
-export type EventSeverity =
-  | "INFO"
-  | "WARNING"
-  | "ERROR";
+export type EventSeverity = 'INFO' | 'WARNING' | 'ERROR';
 
 export interface SystemEvent {
   eventId: string;

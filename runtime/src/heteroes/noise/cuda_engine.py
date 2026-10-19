@@ -21,6 +21,7 @@ is the same (the maths functions of the CUDA library: not guaranteed by anybody)
 checked by `compute_noise_fingerprint` (golden values) and by the guard `check_device`, and both must be checked again when torch
 is upgraded. The cross-GPU evidence is in `artifacts/experiments/2026-10-07-g7-restore-tradeoff/`. This engine needs a CUDA device even to reconstruct noise (the coordinator too).
 """
+
 import hashlib
 
 import torch
@@ -43,7 +44,9 @@ def check_device(device) -> None:
     properties = torch.cuda.get_device_properties(device)
     blocks = properties.multi_processor_count * (properties.max_threads_per_multi_processor // 256)
     if blocks * 256 < CUDA_CALL_ELEMENTS:
-        raise RuntimeError(f"{properties.name} runs {blocks} blocks of the random kernel: too few for calls of {CUDA_CALL_ELEMENTS} elements")
+        raise RuntimeError(
+            f"{properties.name} runs {blocks} blocks of the random kernel: too few for calls of {CUDA_CALL_ELEMENTS} elements"
+        )
 
 
 def derive_tensor_seed(schema_hash: str, candidate_seed: int, parameter_index: int) -> int:
@@ -52,27 +55,33 @@ def derive_tensor_seed(schema_hash: str, candidate_seed: int, parameter_index: i
         raise ValueError(f"candidate_seed must be a non-negative integer, got {candidate_seed!r}")
     if not isinstance(parameter_index, int) or isinstance(parameter_index, bool) or parameter_index < 0:
         raise ValueError(f"parameter_index must be a non-negative integer, got {parameter_index!r}")
-    address = (f"{CUDA_ENGINE_VERSION}|candidate_seed={candidate_seed}|schema={schema_hash}|param={parameter_index}"
-               f"|call_elements={CUDA_CALL_ELEMENTS}")
+    address = (
+        f"{CUDA_ENGINE_VERSION}|candidate_seed={candidate_seed}|schema={schema_hash}|param={parameter_index}"
+        f"|call_elements={CUDA_CALL_ELEMENTS}"
+    )
     return int.from_bytes(hashlib.sha256(address.encode("utf-8")).digest()[:8], "little") & ((1 << 63) - 1)
 
 
 class _Scratch:
     """One float32 buffer of PIECE_ELEMENTS per device and the views of one call each, shared by every stream (the pieces handed out are
     converted copies, so the buffer is free again after each `next`). Not thread-safe: one stream at a time per device."""
+
     _cache: dict = {}
 
     @classmethod
     def get(cls, device: torch.device) -> "_Scratch":
         key = (device, PIECE_ELEMENTS)
         if key not in cls._cache:
-            cls._cache.clear()                                    # another size (tests) or device: the old buffer is not needed
+            cls._cache.clear()  # another size (tests) or device: the old buffer is not needed
             cls._cache[key] = cls(device)
         return cls._cache[key]
 
     def __init__(self, device: torch.device):
         self.buffer = torch.empty(PIECE_ELEMENTS, dtype=torch.float32, device=device)
-        self.views = [self.buffer[start:start + CUDA_CALL_ELEMENTS] for start in range(0, PIECE_ELEMENTS - CUDA_CALL_ELEMENTS + 1, CUDA_CALL_ELEMENTS)]
+        self.views = [
+            self.buffer[start : start + CUDA_CALL_ELEMENTS]
+            for start in range(0, PIECE_ELEMENTS - CUDA_CALL_ELEMENTS + 1, CUDA_CALL_ELEMENTS)
+        ]
 
 
 class TensorNoise:
@@ -97,7 +106,9 @@ class TensorNoise:
         if not isinstance(count, int) or isinstance(count, bool) or not 1 <= count <= left:
             raise ValueError(f"count must be an integer between 1 and the {left} elements left, got {count!r}")
         if count % CUDA_CALL_ELEMENTS != 0 and count != left:
-            raise ValueError(f"count must be a multiple of {CUDA_CALL_ELEMENTS} unless it is the rest of the tensor ({left}), got {count}")
+            raise ValueError(
+                f"count must be a multiple of {CUDA_CALL_ELEMENTS} unless it is the rest of the tensor ({left}), got {count}"
+            )
         if count > PIECE_ELEMENTS:
             raise ValueError(f"count must be at most {PIECE_ELEMENTS}, got {count}")
         scratch = _Scratch.get(self.device)
@@ -107,12 +118,16 @@ class TensorNoise:
         for view in scratch.views[:full]:
             view.normal_(0.0, 1.0, generator=self._generator)
         if rest:
-            scratch.buffer[full * CUDA_CALL_ELEMENTS:full * CUDA_CALL_ELEMENTS + rest].normal_(0.0, 1.0, generator=self._generator)
+            scratch.buffer[full * CUDA_CALL_ELEMENTS : full * CUDA_CALL_ELEMENTS + rest].normal_(
+                0.0, 1.0, generator=self._generator
+            )
         self.done += count
         return scratch.buffer[:count].to(torch.float16)
 
 
-def generate_tensor_noise(schema_hash: str, candidate_seed: int, parameter_index: int, numel: int, device) -> torch.Tensor:
+def generate_tensor_noise(
+    schema_hash: str, candidate_seed: int, parameter_index: int, numel: int, device
+) -> torch.Tensor:
     """The whole noise of a tensor as a float16 tensor (for tests and small tensors; the model operations go piece by piece)."""
     stream = TensorNoise(schema_hash, candidate_seed, parameter_index, numel, device)
     pieces = []
@@ -123,7 +138,13 @@ def generate_tensor_noise(schema_hash: str, candidate_seed: int, parameter_index
 
 # Five tensors of the fingerprint: sizes around the call size and one of several pieces. The probe schema hash is a fixed string.
 _FINGERPRINT_SCHEMA = "0" * 64
-_FINGERPRINT_CASES = ((1, 0, 1), (2, 7, CUDA_CALL_ELEMENTS - 1), (3, 123456789, CUDA_CALL_ELEMENTS), (4, 2**53 - 1, CUDA_CALL_ELEMENTS + 1), (5, 42, 3 * 2**20 + 5))
+_FINGERPRINT_CASES = (
+    (1, 0, 1),
+    (2, 7, CUDA_CALL_ELEMENTS - 1),
+    (3, 123456789, CUDA_CALL_ELEMENTS),
+    (4, 2**53 - 1, CUDA_CALL_ELEMENTS + 1),
+    (5, 42, 3 * 2**20 + 5),
+)
 
 
 def compute_noise_fingerprint(device="cuda") -> str:
@@ -139,4 +160,6 @@ def check_cuda_noise_selftest(device="cuda") -> None:
     check_device(device)
     actual = compute_noise_fingerprint(device)
     if actual != EXPECTED_CUDA_NOISE_FINGERPRINT:
-        raise RuntimeError(f"the CUDA noise self-test failed: this GPU and torch do not make the canonical numbers ({actual[:16]}... instead of {EXPECTED_CUDA_NOISE_FINGERPRINT[:16]}...)")
+        raise RuntimeError(
+            f"the CUDA noise self-test failed: this GPU and torch do not make the canonical numbers ({actual[:16]}... instead of {EXPECTED_CUDA_NOISE_FINGERPRINT[:16]}...)"
+        )

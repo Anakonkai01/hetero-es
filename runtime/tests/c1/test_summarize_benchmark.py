@@ -1,5 +1,6 @@
 """`scripts/summarize_benchmark.py` on small synthetic runs written by hand: the headline is the steady-state T (generation 0 left out),
 the intervals are over runs, and the policy is stored under its own key."""
+
 import json
 import sys
 from pathlib import Path
@@ -14,13 +15,38 @@ def write_run(root, name, generation_seconds, policy="greedy", rewards=((0.1, 0.
     run = root / name
     (run / "coordinator").mkdir(parents=True)
     (run / "run.json").write_text(json.dumps({"outcome": "ok"}))
-    generations = [{"total_seconds": t, "wait_seconds": t - 1, "update_seconds": 0.5, "publish_seconds": 0.1,
-                    "rewards": list(rewards[i]), "child_sha256": f"h{i}"} for i, t in enumerate(generation_seconds)]
-    (run / "coordinator" / "summary.json").write_text(json.dumps({
-        "generations": generations, "final_weights_sha256": final, "internal_errors": 0, "args": {"policy": policy}}))
+    generations = [
+        {
+            "total_seconds": t,
+            "wait_seconds": t - 1,
+            "update_seconds": 0.5,
+            "publish_seconds": 0.1,
+            "rewards": list(rewards[i]),
+            "child_sha256": f"h{i}",
+        }
+        for i, t in enumerate(generation_seconds)
+    ]
+    (run / "coordinator" / "summary.json").write_text(
+        json.dumps(
+            {
+                "generations": generations,
+                "final_weights_sha256": final,
+                "internal_errors": 0,
+                "args": {"policy": policy},
+            }
+        )
+    )
     events = [{"event": "worker_start", "args": {"chunk": 1}, "environment": {"gpu_name": "G"}}]
     for i in range(2):
-        events.append({"event": "step", "kind": "COMMITTED", "candidate_id": f"x/g0/c{i}", "timing": {"total": 1.0}, "step_seconds": 1.2})
+        events.append(
+            {
+                "event": "step",
+                "kind": "COMMITTED",
+                "candidate_id": f"x/g0/c{i}",
+                "timing": {"total": 1.0},
+                "step_seconds": 1.2,
+            }
+        )
     (run / "worker-fast.jsonl").write_text("\n".join(json.dumps(e) for e in events) + "\n")
     return run
 
@@ -36,8 +62,8 @@ def test_t_steady_leaves_out_generation_zero_and_is_the_headline(tmp_path, capsy
     conditions = json.loads(out.read_text())["conditions"]
 
     b3 = conditions["n8-B3"]
-    assert b3["T_mean"] == pytest.approx(90.0)                       # with generation 0: looks 10 % faster than B0
-    assert b3["T_steady"] == pytest.approx(100.0)                    # steady state: not faster at all
+    assert b3["T_mean"] == pytest.approx(90.0)  # with generation 0: looks 10 % faster than B0
+    assert b3["T_steady"] == pytest.approx(100.0)  # steady state: not faster at all
     assert conditions["n8-B0"]["cluster_benefit_vs_B0"] == pytest.approx(1.0)
     assert b3["cluster_benefit_vs_B0"] == pytest.approx(100.0 / 90.0)
     assert b3["cluster_benefit_steady"] == pytest.approx(1.0)
@@ -53,7 +79,7 @@ def test_the_interval_is_over_runs_and_contains_the_truth_when_runs_are_noisy(tm
     capsys.readouterr()
     b3 = json.loads(out.read_text())["conditions"]["n8-B3"]
     assert b3["cluster_benefit_steady"] == pytest.approx(1.0)
-    assert b3["cluster_benefit_steady_ci95"] > 0.1          # three noisy runs cannot claim a small gain
+    assert b3["cluster_benefit_steady_ci95"] > 0.1  # three noisy runs cannot claim a small gain
     assert len(b3["T_steady_runs"]) == 3
 
 

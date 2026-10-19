@@ -6,7 +6,13 @@ from dataclasses import dataclass
 import numpy as np
 
 from heteroes.canonical import canonical_json_hash
-from heteroes.noise.contracts import CUDA_CALL_ELEMENTS, CUDA_ENGINE_VERSION, ENGINE_VERSION, EXPECTED_CUDA_NOISE_FINGERPRINT, KNOWN_ENGINES
+from heteroes.noise.contracts import (
+    CUDA_CALL_ELEMENTS,
+    CUDA_ENGINE_VERSION,
+    ENGINE_VERSION,
+    EXPECTED_CUDA_NOISE_FINGERPRINT,
+    KNOWN_ENGINES,
+)
 
 MANIFEST_VERSION = 1
 SUPPORTED_DTYPE = "torch.float16"
@@ -26,12 +32,13 @@ DEFAULT_WORKLOAD_NAME = "arith16"
 # document, so that the hash of every recipe made before the choice existed is unchanged. Both give the same texts in every comparison made so far, but equal texts are not guaranteed
 # (numerical contract section 17), so every worker of an experiment must use the same one: it is in the recipe.
 DECODE_ENGINES = ("hf_generate", "hf_compact")
-DEFAULT_DECODE_ENGINE = "hf_generate"      # what a recipe DOCUMENT without the key means (and the default of the dataclass): the engine of every recipe made before the choice existed
+DEFAULT_DECODE_ENGINE = "hf_generate"  # what a recipe DOCUMENT without the key means (and the default of the dataclass): the engine of every recipe made before the choice existed
 
 
 def default_decode_engine(workload_name: str) -> str:
     """The engine that a NEW experiment uses when the owner does not choose (09/10): the compacting decoder for the long workloads, the library's generate() for arith16, which cannot use it."""
     return DEFAULT_DECODE_ENGINE if workload_name == DEFAULT_WORKLOAD_NAME else "hf_compact"
+
 
 # Seeds travel as JSON. JavaScript reads integers exactly only below 2**53, so v1 does not allow more.
 MAX_SEED = 2**53  # exclusive
@@ -101,6 +108,7 @@ class Recipe:
     Deliberately NOT in it: the NumPy, torch and transformers versions (the noise fingerprint and the workload
     check what really matters), and anything operational (worker, attempt, lease, retry, reward, time).
     """
+
     model_id: str
     model_revision: str
     tokenizer_revision: str
@@ -142,11 +150,15 @@ class Recipe:
         if not isinstance(self.decode_engine, str) or self.decode_engine not in DECODE_ENGINES:
             raise ValueError(f"decode_engine must be one of {DECODE_ENGINES}, got {self.decode_engine!r}")
         if self.decode_engine != DEFAULT_DECODE_ENGINE and self.workload_name == "arith16":
-            raise ValueError(f"the decode engine {self.decode_engine!r} is for the long workloads; arith16 (the 16 prompts of the contract) has its own code")
+            raise ValueError(
+                f"the decode engine {self.decode_engine!r} is for the long workloads; arith16 (the 16 prompts of the contract) has its own code"
+            )
         if self.engine_version == CUDA_ENGINE_VERSION:
             # the CUDA engine has no free parameter: its call size and its fingerprint are the engine (numerical contract section 16)
             if self.chunk_elements != CUDA_CALL_ELEMENTS:
-                raise ValueError(f"the CUDA noise engine makes calls of {CUDA_CALL_ELEMENTS} elements, the recipe says {self.chunk_elements}")
+                raise ValueError(
+                    f"the CUDA noise engine makes calls of {CUDA_CALL_ELEMENTS} elements, the recipe says {self.chunk_elements}"
+                )
             if self.noise_fingerprint != EXPECTED_CUDA_NOISE_FINGERPRINT:
                 raise ValueError("the fingerprint of a CUDA noise engine recipe must be the fingerprint of that engine")
 
@@ -169,10 +181,13 @@ class Recipe:
             # so that it can never disagree with sigma
             "perturbation": {"sigma": self.sigma, "sigma_float32": float(np.float32(self.sigma))},
             "update": {**UPDATE_RECIPE, "reward_eta": self.reward_eta},
-            "workload": {"hash": self.workload_hash, "generation_config_sha256": self.generation_config_sha256,
-                         **({} if self.eval_dtype == LEGACY_EVAL_DTYPE else {"eval_dtype": self.eval_dtype}),
-                         **({} if self.workload_name == DEFAULT_WORKLOAD_NAME else {"name": self.workload_name}),
-                         **({} if self.decode_engine == DEFAULT_DECODE_ENGINE else {"decode_engine": self.decode_engine})},
+            "workload": {
+                "hash": self.workload_hash,
+                "generation_config_sha256": self.generation_config_sha256,
+                **({} if self.eval_dtype == LEGACY_EVAL_DTYPE else {"eval_dtype": self.eval_dtype}),
+                **({} if self.workload_name == DEFAULT_WORKLOAD_NAME else {"name": self.workload_name}),
+                **({} if self.decode_engine == DEFAULT_DECODE_ENGINE else {"decode_engine": self.decode_engine}),
+            },
         }
 
     @property
@@ -188,7 +203,11 @@ class Recipe:
         _check_keys("recipe.noise", data["noise"], {"engine_version", "chunk_elements", "fingerprint"})
         _check_keys("recipe.perturbation", data["perturbation"], {"sigma", "sigma_float32"})
         _check_keys("recipe.update", data["update"], {*UPDATE_RECIPE, "reward_eta"})
-        _check_keys("recipe.workload", data["workload"], {"hash", "generation_config_sha256"} | ({"eval_dtype", "name", "decode_engine"} & set(data["workload"])))
+        _check_keys(
+            "recipe.workload",
+            data["workload"],
+            {"hash", "generation_config_sha256"} | ({"eval_dtype", "name", "decode_engine"} & set(data["workload"])),
+        )
         for key, value in UPDATE_RECIPE.items():
             if data["update"][key] != value:
                 raise ValueError(f"recipe.update.{key} is {data['update'][key]!r}, manifest v1 says {value!r}")
@@ -221,11 +240,12 @@ class CandidateDescriptor:
     Operational data (worker, attempt, lease, retry, reward, time) has no field here: it belongs to the ledger,
     and noise must not depend on it. Passing such a field is a TypeError.
     """
+
     recipe_hash: str
-    parent_weights_sha256: str   # the weights this candidate must be applied to (the model version)
+    parent_weights_sha256: str  # the weights this candidate must be applied to (the model version)
     experiment_id: str
     generation: int
-    index: int                   # position in the canonical candidate order of the generation
+    index: int  # position in the canonical candidate order of the generation
     seed: int
 
     def __post_init__(self):
@@ -253,8 +273,11 @@ class CandidateDescriptor:
 
     @classmethod
     def from_dict(cls, data: dict) -> "CandidateDescriptor":
-        _check_keys("candidate descriptor", data, {
-            "recipe_hash", "parent_weights_sha256", "experiment_id", "generation", "index", "seed"})
+        _check_keys(
+            "candidate descriptor",
+            data,
+            {"recipe_hash", "parent_weights_sha256", "experiment_id", "generation", "index", "seed"},
+        )
         return cls(**data)
 
 

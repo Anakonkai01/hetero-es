@@ -14,7 +14,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
-import {translationKeysUsed} from './translation-usage.mjs';
+import { translationKeysUsed } from './translation-usage.mjs';
 import { translations } from '../packages/product-ui/src/translations.ts';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -23,63 +23,147 @@ const ATTRIBUTES = new Set(['placeholder', 'title', 'aria-label', 'alt', 'aria-d
 // Written the same in Vietnamese and English.
 // Brand eyebrows, option values that are identifiers, and sample data shown only in the demo build.
 const ALLOWED_PATTERNS = [/^[·\s]*(Enter|Esc|Ctrl|⌘)[\s·+K]*$/, /^HETEROES\b/, /^HeteroES( Lab Server| Worker)?$/];
-const ALLOWED = new Set(['constant', 'cosine', 'hf_generate', 'hf_compact', 'GSM8K · ####', 'admin, an, binh · demo-local', 'Mbps', 'GMT+7', 'name@example.com', 'organization/model', 'windows', 'linux-appimage', 'Qwen2.5 0.5B Instruct', 'SmolLM2 135M Instruct', 'HeteroES', 'Hetero', 'ES', 'GPU', 'GPUs', 'CPU', 'VRAM', 'RAM', 'Worker', 'Lab Server', 'Tailscale', 'WireGuard', 'Windows', 'Linux', 'AppImage', 'Telegram', 'SSE', 'CSV', 'PNG', 'PDF', 'JSON', 'UUID', 'ID', 'Qwen', 'arith16', 'GiB', 'MB', 'GB', 'MiB', 'W', 'Wh', 'MHz', 'Tiếng Việt', 'English']);
+const ALLOWED = new Set([
+  'constant',
+  'cosine',
+  'hf_generate',
+  'hf_compact',
+  'GSM8K · ####',
+  'admin, an, binh · demo-local',
+  'Mbps',
+  'GMT+7',
+  'name@example.com',
+  'organization/model',
+  'windows',
+  'linux-appimage',
+  'Qwen2.5 0.5B Instruct',
+  'SmolLM2 135M Instruct',
+  'HeteroES',
+  'Hetero',
+  'ES',
+  'GPU',
+  'GPUs',
+  'CPU',
+  'VRAM',
+  'RAM',
+  'Worker',
+  'Lab Server',
+  'Tailscale',
+  'WireGuard',
+  'Windows',
+  'Linux',
+  'AppImage',
+  'Telegram',
+  'SSE',
+  'CSV',
+  'PNG',
+  'PDF',
+  'JSON',
+  'UUID',
+  'ID',
+  'Qwen',
+  'arith16',
+  'GiB',
+  'MB',
+  'GB',
+  'MiB',
+  'W',
+  'Wh',
+  'MHz',
+  'Tiếng Việt',
+  'English',
+]);
 
 const files = [];
 (function walk(directory) {
-    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
-        const full = path.join(directory, entry.name);
-        if (entry.isDirectory()) { if (!['node_modules', 'dist'].includes(entry.name)) walk(full); }
-        else if (entry.name.endsWith('.tsx')) files.push(full);
-    }
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    const full = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      if (!['node_modules', 'dist'].includes(entry.name)) walk(full);
+    } else if (entry.name.endsWith('.tsx')) files.push(full);
+  }
 })(root);
-const inScope = file => sources.some(source => path.relative(root, file).startsWith(source + path.sep));
+const inScope = (file) => sources.some((source) => path.relative(root, file).startsWith(source + path.sep));
 
-const needsTranslation = text => {
-    const clean = text.replace(/[·|/\-–—:()]+$/, '').trim();
-    return /[A-Za-z]{2}/.test(clean) && !ALLOWED.has(clean) && !ALLOWED_PATTERNS.some(pattern => pattern.test(clean));
+const needsTranslation = (text) => {
+  const clean = text.replace(/[·|/\-–—:()]+$/, '').trim();
+  return /[A-Za-z]{2}/.test(clean) && !ALLOWED.has(clean) && !ALLOWED_PATTERNS.some((pattern) => pattern.test(clean));
 };
-const used = new Map();          // key -> first place
-const bare = [];                 // [place, text]
+const used = new Map(); // key -> first place
+const bare = []; // [place, text]
 let dynamic = 0;
 
 for (const file of files.filter(inScope)) {
-    const source = ts.createSourceFile(file, fs.readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-    const where = node => `${path.relative(root, file)}:${source.getLineAndCharacterOfPosition(node.getStart()).line + 1}`;
-    // Strings a t(...) argument can evaluate to: not the operands of a comparison.
-    const results = node => {
-        if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) return [node.text];
-        if (ts.isParenthesizedExpression(node) || ts.isAsExpression(node) || ts.isNonNullExpression(node)) return results(node.expression);
-        if (ts.isConditionalExpression(node)) return [...results(node.whenTrue), ...results(node.whenFalse)];
-        if (ts.isBinaryExpression(node) && [ts.SyntaxKind.BarBarToken, ts.SyntaxKind.QuestionQuestionToken].includes(node.operatorToken.kind)) return [...results(node.left), ...results(node.right)];
-        if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken) return results(node.right);
-        return [];
-    };
-    (function visit(node) {
-        if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === 't' && node.arguments.length) {
-            const keys = results(node.arguments[0]);
-            if (!keys.length) dynamic++;
-            for (const key of keys) if (!used.has(key)) used.set(key, where(node));
-        } else if (ts.isJsxText(node)) {
-            const text = node.text.replace(/\s+/g, ' ').trim();
-            if (needsTranslation(text)) bare.push([where(node), text]);
-        } else if (ts.isJsxAttribute(node) && ATTRIBUTES.has(node.name.text) && node.initializer && ts.isStringLiteral(node.initializer) && /^[a-z]/.test(node.parent.parent.tagName.getText())) {
-            if (needsTranslation(node.initializer.text)) bare.push([where(node), `${node.name.text}="${node.initializer.text}"`]);
-        } else if (ts.isJsxExpression(node) && node.expression && ts.isStringLiteral(node.expression) && ts.isJsxElement(node.parent)) {
-            if (needsTranslation(node.expression.text)) bare.push([where(node), `{'${node.expression.text}'}`]);
-        }
-        ts.forEachChild(node, visit);
-    })(source);
+  const source = ts.createSourceFile(
+    file,
+    fs.readFileSync(file, 'utf8'),
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX,
+  );
+  const where = (node) =>
+    `${path.relative(root, file)}:${source.getLineAndCharacterOfPosition(node.getStart()).line + 1}`;
+  // Strings a t(...) argument can evaluate to: not the operands of a comparison.
+  const results = (node) => {
+    if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) return [node.text];
+    if (ts.isParenthesizedExpression(node) || ts.isAsExpression(node) || ts.isNonNullExpression(node))
+      return results(node.expression);
+    if (ts.isConditionalExpression(node)) return [...results(node.whenTrue), ...results(node.whenFalse)];
+    if (
+      ts.isBinaryExpression(node) &&
+      [ts.SyntaxKind.BarBarToken, ts.SyntaxKind.QuestionQuestionToken].includes(node.operatorToken.kind)
+    )
+      return [...results(node.left), ...results(node.right)];
+    if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken)
+      return results(node.right);
+    return [];
+  };
+  (function visit(node) {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === 't' &&
+      node.arguments.length
+    ) {
+      const keys = results(node.arguments[0]);
+      if (!keys.length) dynamic++;
+      for (const key of keys) if (!used.has(key)) used.set(key, where(node));
+    } else if (ts.isJsxText(node)) {
+      const text = node.text.replace(/\s+/g, ' ').trim();
+      if (needsTranslation(text)) bare.push([where(node), text]);
+    } else if (
+      ts.isJsxAttribute(node) &&
+      ATTRIBUTES.has(node.name.text) &&
+      node.initializer &&
+      ts.isStringLiteral(node.initializer) &&
+      /^[a-z]/.test(node.parent.parent.tagName.getText())
+    ) {
+      if (needsTranslation(node.initializer.text))
+        bare.push([where(node), `${node.name.text}="${node.initializer.text}"`]);
+    } else if (
+      ts.isJsxExpression(node) &&
+      node.expression &&
+      ts.isStringLiteral(node.expression) &&
+      ts.isJsxElement(node.parent)
+    ) {
+      if (needsTranslation(node.expression.text)) bare.push([where(node), `{'${node.expression.text}'}`]);
+    }
+    ts.forEachChild(node, visit);
+  })(source);
 }
 
 const literalUsage = translationKeysUsed(root);
-const unused = Object.keys(translations).filter(key => !literalUsage.has(key));
+const unused = Object.keys(translations).filter((key) => !literalUsage.has(key));
 const missing = [...used].filter(([key]) => needsTranslation(key) && translations[key] === undefined);
 const list = process.argv.includes('--list');
-console.log(`t() keys: ${used.size}; computed (not checked here): ${dynamic}; missing Vietnamese: ${missing.length}; untranslated text outside t(): ${bare.length}`);
-for (const [key, place] of missing.slice(0, list ? Infinity : 15)) console.log(`  MISSING ${place}  ${JSON.stringify(key)}`);
-for (const [place, text] of bare.slice(0, list ? Infinity : 15)) console.log(`  BARE    ${place}  ${JSON.stringify(text)}`);
+console.log(
+  `t() keys: ${used.size}; computed (not checked here): ${dynamic}; missing Vietnamese: ${missing.length}; untranslated text outside t(): ${bare.length}`,
+);
+for (const [key, place] of missing.slice(0, list ? Infinity : 15))
+  console.log(`  MISSING ${place}  ${JSON.stringify(key)}`);
+for (const [place, text] of bare.slice(0, list ? Infinity : 15))
+  console.log(`  BARE    ${place}  ${JSON.stringify(text)}`);
 if (!list && (missing.length > 15 || bare.length > 15)) console.log('  … run with --list for everything');
-for (const key of unused.slice(0,list ? Infinity : 15)) console.log(`  UNUSED ${JSON.stringify(key)}`);
+for (const key of unused.slice(0, list ? Infinity : 15)) console.log(`  UNUSED ${JSON.stringify(key)}`);
 console.log(`Unused translation keys: ${unused.length}`);
 process.exit(missing.length || bare.length || unused.length ? 1 : 0);

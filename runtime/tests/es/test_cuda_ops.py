@@ -4,6 +4,7 @@ Tests of the perturbation and the update with the noise of the CUDA engine (G7).
 The oracles are plain NumPy written from the contract (O2 = c for the perturbation, O4 and the FP32 accumulation in candidate order for the
 update); the noise they need is made by a loop of `torch.randn` calls of K elements written in this file (not by the engine's class).
 """
+
 import hashlib
 
 import numpy as np
@@ -28,10 +29,10 @@ class HalfToy(nn.Module):
     # FP16, a tied tensor first, then plain tensors; big enough that a tensor has several pieces when PIECE_ELEMENTS is made small
     def __init__(self):
         super().__init__()
-        self.embed = nn.Embedding(25, 2000)                      # 50,000 elements, tied with head.weight
+        self.embed = nn.Embedding(25, 2000)  # 50,000 elements, tied with head.weight
         self.head = nn.Linear(2000, 25, bias=False)
         self.head.weight = self.embed.weight
-        self.fc = nn.Linear(100, 100)                            # 10,000 and 100 elements
+        self.fc = nn.Linear(100, 100)  # 10,000 and 100 elements
         self.half()
 
 
@@ -88,6 +89,7 @@ def piece_elements(request, monkeypatch):
 
 
 # ---- perturbation ---------------------------------------------------------------------------------------------------------------------
+
 
 def test_the_perturbation_is_the_contract_arithmetic_on_the_noise_of_the_engine(piece_elements):
     model = make_model()
@@ -162,7 +164,7 @@ def test_a_float32_tensor_is_refused_and_nothing_is_written():
     schema = build_parameter_schema(model)
     before = flat_weights(model, schema)
     model.fc.bias.data = model.fc.bias.data.float()
-    with pytest.raises(SchemaMismatchError):                       # the schema says float16: the model no longer matches it
+    with pytest.raises(SchemaMismatchError):  # the schema says float16: the model no longer matches it
         perturb_model_cuda_(model, schema, 1, 1e-3)
     model.fc.bias.data = model.fc.bias.data.half()
     assert same_bits(flat_weights(model, schema), before)
@@ -193,7 +195,9 @@ def test_the_report_has_the_norm_of_what_was_applied():
     before = flat_weights(model, schema)
     report = apply_coefficients_cuda_(model, schema, SEEDS, COEFFICIENTS, 1e-3)
     after = flat_weights(model, schema)
-    applied = np.sqrt(sum(float(((a.astype(np.float64) - b.astype(np.float64)) ** 2).sum()) for a, b in zip(after, before)))
+    applied = np.sqrt(
+        sum(float(((a.astype(np.float64) - b.astype(np.float64)) ** 2).sum()) for a, b in zip(after, before))
+    )
     assert report.applied_l2 == pytest.approx(applied, rel=1e-9)
     assert report.requested_l2 > 0
 
@@ -213,8 +217,14 @@ def test_the_order_of_the_candidates_is_the_order_of_the_sum():
     schema = build_parameter_schema(model1)
     apply_coefficients_cuda_(model1, schema, SEEDS, COEFFICIENTS, 1e-3)
     apply_coefficients_cuda_(model2, schema, SEEDS[::-1], COEFFICIENTS[::-1], 1e-3)
-    assert same_bits(flat_weights(model1, schema), expected_updated(flat_weights(make_model(), schema), schema, SEEDS, COEFFICIENTS, 1e-3))
-    assert same_bits(flat_weights(model2, schema), expected_updated(flat_weights(make_model(), schema), schema, SEEDS[::-1], COEFFICIENTS[::-1], 1e-3))
+    assert same_bits(
+        flat_weights(model1, schema),
+        expected_updated(flat_weights(make_model(), schema), schema, SEEDS, COEFFICIENTS, 1e-3),
+    )
+    assert same_bits(
+        flat_weights(model2, schema),
+        expected_updated(flat_weights(make_model(), schema), schema, SEEDS[::-1], COEFFICIENTS[::-1], 1e-3),
+    )
 
 
 def test_equal_rewards_are_a_logged_no_op():
@@ -225,14 +235,17 @@ def test_equal_rewards_are_a_logged_no_op():
     assert report.noop and report.changed == 0 and same_bits(flat_weights(model, schema), before)
 
 
-@pytest.mark.parametrize("seeds,coefficients,alpha,error", [
-    ([1, 1], [1.0, -1.0], 1e-3, ValueError),                      # duplicated seed
-    ([1, 2, 3], [1.0, -1.0], 1e-3, ValueError),                   # length mismatch
-    ([1, 2], [1.0, float("nan")], 1e-3, ValueError),              # NaN coefficient
-    ([1, 2], [1.0, -1.0], float("nan"), ValueError),              # NaN alpha
-    ([1.0, 2], [1.0, -1.0], 1e-3, TypeError),                     # a float seed
-    ([True, 2], [1.0, -1.0], 1e-3, TypeError),                    # a bool seed
-])
+@pytest.mark.parametrize(
+    "seeds,coefficients,alpha,error",
+    [
+        ([1, 1], [1.0, -1.0], 1e-3, ValueError),  # duplicated seed
+        ([1, 2, 3], [1.0, -1.0], 1e-3, ValueError),  # length mismatch
+        ([1, 2], [1.0, float("nan")], 1e-3, ValueError),  # NaN coefficient
+        ([1, 2], [1.0, -1.0], float("nan"), ValueError),  # NaN alpha
+        ([1.0, 2], [1.0, -1.0], 1e-3, TypeError),  # a float seed
+        ([True, 2], [1.0, -1.0], 1e-3, TypeError),  # a bool seed
+    ],
+)
 def test_a_bad_update_is_refused_and_nothing_is_written(seeds, coefficients, alpha, error):
     model = make_model()
     schema = build_parameter_schema(model)

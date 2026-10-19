@@ -12,6 +12,7 @@ Two kinds of line:
 
 Exit code 0: every MUST BE EQUAL line is equal. Exit code 1: at least one differs. Exit code 2: unusable input.
 """
+
 import argparse
 import json
 import sys
@@ -48,7 +49,7 @@ def recipe_hash_of(record: dict) -> str:
             sigma=run["sigma"],
             reward_eta=1e-9,
             workload_hash=run["workload_hash"],
-            eval_dtype="float16",          # a record of format 1 was made with the FP16 evaluation
+            eval_dtype="float16",  # a record of format 1 was made with the FP16 evaluation
             generation_config_sha256=generation_config_sha256(record["model"]["generation_config"]),
         ).hash
     except (ValueError, TypeError) as error:
@@ -64,7 +65,11 @@ def must_be_equal_checks(a: dict, b: dict) -> list[tuple[str, object, object]]:
         ("model revision", a["model"]["revision"], b["model"]["revision"]),
         ("tokenizer revision", a["model"]["tokenizer_revision"], b["model"]["tokenizer_revision"]),
         ("model dtype", a["model"]["dtype"], b["model"]["dtype"]),
-        ("generation config (set values, no library version)", effective_generation_config(a["model"]["generation_config"]), effective_generation_config(b["model"]["generation_config"])),
+        (
+            "generation config (set values, no library version)",
+            effective_generation_config(a["model"]["generation_config"]),
+            effective_generation_config(b["model"]["generation_config"]),
+        ),
     ]
     for key in ("schema_hash", "workload_hash", "engine_version", "chunk_elements", "seed", "sigma", "sigma_float32"):
         checks.append((key, run_a[key], run_b[key]))
@@ -76,9 +81,18 @@ def must_be_equal_checks(a: dict, b: dict) -> list[tuple[str, object, object]]:
 def own_checks(record: dict, label: str) -> list[tuple[str, bool]]:
     """Things that have to hold on each machine by itself (they are not a comparison)."""
     return [
-        (f"{label}: restore gives back the original weights (every run)", all(r["restored_equals_original"] for r in record["runs"])),
-        (f"{label}: restored outputs equal base outputs (every run)", all(r["evaluation"]["restored"] == r["evaluation"]["base"] for r in record["runs"])),
-        (f"{label}: the runs of this file are identical ({len(record['runs'])} runs)", bool(record["repeat_identical"])),
+        (
+            f"{label}: restore gives back the original weights (every run)",
+            all(r["restored_equals_original"] for r in record["runs"]),
+        ),
+        (
+            f"{label}: restored outputs equal base outputs (every run)",
+            all(r["evaluation"]["restored"] == r["evaluation"]["base"] for r in record["runs"]),
+        ),
+        (
+            f"{label}: the runs of this file are identical ({len(record['runs'])} runs)",
+            bool(record["repeat_identical"]),
+        ),
     ]
 
 
@@ -110,7 +124,17 @@ def measured_differences(a: dict, b: dict) -> dict:
 
 
 def environment_lines(a: dict, b: dict) -> list[str]:
-    keys = ("hostname", "gpu_name", "gpu_capability", "python", "torch", "torch_cuda", "numpy", "transformers", "nvidia_driver")
+    keys = (
+        "hostname",
+        "gpu_name",
+        "gpu_capability",
+        "python",
+        "torch",
+        "torch_cuda",
+        "numpy",
+        "transformers",
+        "nvidia_driver",
+    )
     return [f"  {key:<16} {a['environment'].get(key)!s:<34} {b['environment'].get(key)!s}" for key in keys]
 
 
@@ -119,8 +143,19 @@ def compare(a: dict, b: dict, label_a: str = "A", label_b: str = "B") -> tuple[s
     lines = [f"A = {label_a}", f"B = {label_b}", "", "ENVIRONMENT (information)"]
     lines += environment_lines(a, b)
     raw_a, raw_b = a["model"]["generation_config_sha256"], b["model"]["generation_config_sha256"]
-    lines += ["", "raw generation config sha256 " + ("equal" if raw_a == raw_b else f"differs (A {raw_a[:16]}... | B {raw_b[:16]}...): see the line 'generation config' below, which compares the set values only")]
-    lines += ["", f"code: A {a['code']['git_commit']} (dirty {a['code']['git_dirty']}), B {b['code']['git_commit']} (dirty {b['code']['git_dirty']})"]
+    lines += [
+        "",
+        "raw generation config sha256 "
+        + (
+            "equal"
+            if raw_a == raw_b
+            else f"differs (A {raw_a[:16]}... | B {raw_b[:16]}...): see the line 'generation config' below, which compares the set values only"
+        ),
+    ]
+    lines += [
+        "",
+        f"code: A {a['code']['git_commit']} (dirty {a['code']['git_dirty']}), B {b['code']['git_commit']} (dirty {b['code']['git_dirty']})",
+    ]
 
     ok = True
     lines += ["", "MUST BE EQUAL"]
@@ -139,11 +174,16 @@ def compare(a: dict, b: dict, label_a: str = "A", label_b: str = "B") -> tuple[s
     lines += ["", "MEASURED (a difference is listed, not hidden)"]
     for name, info in measured_differences(a, b).items():
         count = len(info["different"])
-        lines.append(f"  {name}: reward A {info['reward_a']} | B {info['reward_b']}; {count} of {info['questions']} output texts differ")
+        lines.append(
+            f"  {name}: reward A {info['reward_a']} | B {info['reward_b']}; {count} of {info['questions']} output texts differ"
+        )
         for item in info["different"]:
             lines.append(f"      question {item['index']}: A {item['output_a']!r} | B {item['output_b']!r}")
 
-    lines += ["", "RESULT: " + ("every MUST BE EQUAL line is equal" if ok else "AT LEAST ONE MUST-BE-EQUAL LINE DIFFERS")]
+    lines += [
+        "",
+        "RESULT: " + ("every MUST BE EQUAL line is equal" if ok else "AT LEAST ONE MUST-BE-EQUAL LINE DIFFERS"),
+    ]
     return "\n".join(lines), ok
 
 

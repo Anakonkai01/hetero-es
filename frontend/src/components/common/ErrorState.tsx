@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
 interface ErrorStateProps {
   title: string;
@@ -8,13 +8,7 @@ interface ErrorStateProps {
   children?: ReactNode;
 }
 
-export function ErrorState({
-  title,
-  message,
-  onRetry,
-  retryLabel = "Retry",
-  children,
-}: ErrorStateProps) {
+export function ErrorState({ title, message, onRetry, retryLabel = 'Retry', children }: ErrorStateProps) {
   return (
     <div className="empty" role="alert">
       <b>{title}</b>

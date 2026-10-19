@@ -6,6 +6,7 @@ error codes) is tested in test_worker_api.py: here it is the carrying that is ch
 of reply, bad bodies, the optional token, the model download (data plane), network errors, and a whole generation done by
 workers that run in their own threads and talk to the server through sockets.
 """
+
 import http.client
 import http.server
 import json
@@ -66,7 +67,9 @@ def raw(server, method, path, body=None, headers=None):
 
 def post(server, path, payload, headers=None):
     body = json.dumps(payload).encode()
-    status, content_type, data = raw(server, "POST", path, body, {"Content-Type": "application/json", **(headers or {})})
+    status, content_type, data = raw(
+        server, "POST", path, body, {"Content-Type": "application/json", **(headers or {})}
+    )
     return status, content_type, json.loads(data)
 
 
@@ -79,6 +82,7 @@ def lease_over_http(server, worker="worker-a"):
 # ---------------------------------------------------------------------------
 # the routes and the HTTP status of every kind of reply
 # ---------------------------------------------------------------------------
+
 
 def test_the_server_answers_health_and_describes_the_job(server):
     assert json.loads(raw(server, "GET", "/v1/health")[2]) == {"ok": True, "status": "up"}
@@ -93,23 +97,32 @@ def test_a_lease_a_result_and_a_failure_go_through_their_routes(server, ledger):
     work = lease_over_http(server)
     assert work["descriptor"] == descriptor_of(0).to_dict()
 
-    status, content_type, reply = post(server, "/v1/results", {
-        "descriptor": work["descriptor"], "attempt_number": 1, "token": work["token"], "reward": 0.5})
+    status, content_type, reply = post(
+        server,
+        "/v1/results",
+        {"descriptor": work["descriptor"], "attempt_number": 1, "token": work["token"], "reward": 0.5},
+    )
     assert (status, content_type, reply) == (200, "application/json", {"ok": True, "outcome": "COMMITTED"})
 
     other = lease_over_http(server, "worker-b")
-    status, _, reply = post(server, "/v1/failures", {
-        "descriptor": other["descriptor"], "attempt_number": 1, "token": other["token"], "kind": "OUT_OF_MEMORY"})
+    status, _, reply = post(
+        server,
+        "/v1/failures",
+        {"descriptor": other["descriptor"], "attempt_number": 1, "token": other["token"], "kind": "OUT_OF_MEMORY"},
+    )
     assert (status, reply) == (200, {"ok": True})
     assert ledger.get_candidate("exp/g0/c0").result.reward == 0.5
     assert ledger.get_candidate("exp/g0/c1").state.name == "PENDING"
 
 
-@pytest.mark.parametrize("path, payload, status, code", [
-    ("/v1/leases", {"worker_id": ""}, 400, "bad_request"),
-    ("/v1/leases", {"worker_id": "a", "duration": 5}, 400, "bad_request"),
-    ("/v1/results", {"descriptor": None, "attempt_number": 1, "token": "x", "reward": 0.5}, 400, "bad_request"),
-])
+@pytest.mark.parametrize(
+    "path, payload, status, code",
+    [
+        ("/v1/leases", {"worker_id": ""}, 400, "bad_request"),
+        ("/v1/leases", {"worker_id": "a", "duration": 5}, 400, "bad_request"),
+        ("/v1/results", {"descriptor": None, "attempt_number": 1, "token": "x", "reward": 0.5}, 400, "bad_request"),
+    ],
+)
 def test_a_malformed_request_is_a_400_with_its_code(server, ledger, path, payload, status, code):
     got_status, content_type, reply = post(server, path, payload)
 
@@ -121,27 +134,43 @@ def test_a_malformed_request_is_a_400_with_its_code(server, ledger, path, payloa
 def test_a_refusal_of_the_ledger_is_a_409_with_its_code(server):
     work = lease_over_http(server)
 
-    status, _, reply = post(server, "/v1/results", {
-        "descriptor": work["descriptor"], "attempt_number": 1, "token": "0" * 32, "reward": 0.5})
+    status, _, reply = post(
+        server, "/v1/results", {"descriptor": work["descriptor"], "attempt_number": 1, "token": "0" * 32, "reward": 0.5}
+    )
 
     assert status == 409 and reply["error"]["code"] == "stale_attempt"
 
 
 def test_a_quarantined_worker_is_refused_with_409(server):
     work = lease_over_http(server)
-    post(server, "/v1/failures", {"descriptor": work["descriptor"], "attempt_number": 1, "token": work["token"],
-                                  "kind": "RESTORE_MISMATCH"})
+    post(
+        server,
+        "/v1/failures",
+        {"descriptor": work["descriptor"], "attempt_number": 1, "token": work["token"], "kind": "RESTORE_MISMATCH"},
+    )
 
     status, _, reply = post(server, "/v1/leases", {"worker_id": "worker-a"})
 
     assert status == 409 and reply["error"]["code"] == "worker_quarantined"
 
 
-@pytest.mark.parametrize("method, path, expected", [
-    ("GET", "/nope", 404), ("POST", "/v1/nope", 404), ("GET", "/v1/models/xyz", 404), ("GET", "/", 404),
-    ("POST", "/v1/health", 405), ("POST", "/v1/job", 405), ("POST", "/v1/models/" + "c" * 64, 405),
-    ("GET", "/v1/leases", 405), ("GET", "/v1/results", 405), ("PUT", "/v1/leases", 405), ("DELETE", "/v1/job", 405),
-    ("PATCH", "/v1/results", 405)])
+@pytest.mark.parametrize(
+    "method, path, expected",
+    [
+        ("GET", "/nope", 404),
+        ("POST", "/v1/nope", 404),
+        ("GET", "/v1/models/xyz", 404),
+        ("GET", "/", 404),
+        ("POST", "/v1/health", 405),
+        ("POST", "/v1/job", 405),
+        ("POST", "/v1/models/" + "c" * 64, 405),
+        ("GET", "/v1/leases", 405),
+        ("GET", "/v1/results", 405),
+        ("PUT", "/v1/leases", 405),
+        ("DELETE", "/v1/job", 405),
+        ("PATCH", "/v1/results", 405),
+    ],
+)
 def test_an_unknown_route_is_a_404_and_a_wrong_method_a_405_both_with_a_json_error(server, method, path, expected):
     status, content_type, body = raw(server, method, path, b"{}" if method in ("POST", "PUT", "PATCH") else None)
 
@@ -167,7 +196,7 @@ def test_a_body_that_is_too_large_is_refused_without_reading_it(server):
     connection = http.client.HTTPConnection(server.host, server.port, timeout=10)
     try:
         connection.putrequest("POST", "/v1/leases")
-        connection.putheader("Content-Length", str(2 << 20))          # it says it is 2 MiB, and sends none of it
+        connection.putheader("Content-Length", str(2 << 20))  # it says it is 2 MiB, and sends none of it
         connection.endheaders()
         response = connection.getresponse()
         status, body = response.status, response.read()
@@ -182,7 +211,7 @@ def test_a_body_of_exactly_the_largest_allowed_size_is_accepted_and_one_more_byt
 
     def padded(size):
         base = b'{"worker_id": "a"}'
-        return base + b" " * (size - len(base))                      # JSON ignores trailing white space
+        return base + b" " * (size - len(base))  # JSON ignores trailing white space
 
     status, _, body = raw(server, "POST", "/v1/leases", padded(MAX_BODY_BYTES), {"Content-Type": "application/json"})
     assert status == 200 and json.loads(body)["ok"] is True
@@ -228,7 +257,11 @@ def test_a_bug_in_the_coordinator_is_a_500_the_server_keeps_serving_and_the_bug_
     server.start()
     try:
         status, _, reply = post(server, "/v1/leases", {"worker_id": "boom"})
-        assert status == 500 and reply["error"]["code"] == "internal_error" and "bug in the coordinator" in reply["error"]["message"]
+        assert (
+            status == 500
+            and reply["error"]["code"] == "internal_error"
+            and "bug in the coordinator" in reply["error"]["message"]
+        )
 
         assert post(server, "/v1/leases", {"worker_id": "fine"})[0] == 200
         assert len(server.internal_errors) == 1 and "bug in the coordinator" in server.internal_errors[0]
@@ -240,6 +273,7 @@ def test_a_bug_in_the_coordinator_is_a_500_the_server_keeps_serving_and_the_bug_
 # the optional token
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def guarded(api, tmp_path):
     server = CoordinatorServer(api, job=JOB, models_dir=tmp_path, token="s3cret")
@@ -248,12 +282,28 @@ def guarded(api, tmp_path):
     server.stop()
 
 
-@pytest.mark.parametrize("headers", [{}, {"Authorization": "Bearer wrong"}, {"Authorization": "s3cret"},
-                                     {"Authorization": "Basic s3cret"}, {"Authorization": "Bearer "}, {"Authorization": "Basic  s3cret"},
-                                     {"Authorization": "bearer s3cret"}, {"Authorization": "Bearer s3cret "}, {"Authorization": "Bearer s3crex"},
-                                     {"Authorization": "Bearer S3CRET"}])
+@pytest.mark.parametrize(
+    "headers",
+    [
+        {},
+        {"Authorization": "Bearer wrong"},
+        {"Authorization": "s3cret"},
+        {"Authorization": "Basic s3cret"},
+        {"Authorization": "Bearer "},
+        {"Authorization": "Basic  s3cret"},
+        {"Authorization": "bearer s3cret"},
+        {"Authorization": "Bearer s3cret "},
+        {"Authorization": "Bearer s3crex"},
+        {"Authorization": "Bearer S3CRET"},
+    ],
+)
 def test_with_a_token_every_route_refuses_a_request_without_it(guarded, ledger, headers):
-    for method, path in [("GET", "/v1/health"), ("GET", "/v1/job"), ("POST", "/v1/leases"), ("GET", "/v1/models/" + "0" * 64)]:
+    for method, path in [
+        ("GET", "/v1/health"),
+        ("GET", "/v1/job"),
+        ("POST", "/v1/leases"),
+        ("GET", "/v1/models/" + "0" * 64),
+    ]:
         status, _, body = raw(guarded, method, path, b'{"worker_id": "a"}' if method == "POST" else None, headers)
         assert status == 401 and json.loads(body)["error"]["code"] == "unauthorized", (method, path)
 
@@ -270,7 +320,7 @@ def test_the_client_sends_its_token(guarded):
     good, bad = HttpClient(guarded.url, token="s3cret"), HttpClient(guarded.url, token="nope")
 
     assert good.get_json("/v1/health") == {"ok": True, "status": "up"}
-    with pytest.raises(UnauthorizedError):                                        # G6: not a reply to read but an error to stop on
+    with pytest.raises(UnauthorizedError):  # G6: not a reply to read but an error to stop on
         WorkerClient("worker-a", bad).lease()
 
 
@@ -278,9 +328,10 @@ def test_the_client_sends_its_token(guarded):
 # the model download (data plane)
 # ---------------------------------------------------------------------------
 
+
 def test_a_published_model_file_is_served_byte_for_byte(server, tmp_path):
     sha = "c" * 64
-    data = bytes(range(256)) * 5000                          # more than one chunk
+    data = bytes(range(256)) * 5000  # more than one chunk
     (tmp_path / f"{sha}.bin").write_bytes(data)
 
     status, content_type, body = raw(server, "GET", f"/v1/models/{sha}")
@@ -290,10 +341,22 @@ def test_a_published_model_file_is_served_byte_for_byte(server, tmp_path):
         assert stream.read() == data
 
 
-@pytest.mark.parametrize("name", ["d" * 64, "../secret", "../" * 4 + "etc/passwd", "C" * 64, "c" * 63, "c" * 65,
-                                  "%2e%2e%2fsecret", "", ("c" * 64) + "/../" + ("c" * 64)])
+@pytest.mark.parametrize(
+    "name",
+    [
+        "d" * 64,
+        "../secret",
+        "../" * 4 + "etc/passwd",
+        "C" * 64,
+        "c" * 63,
+        "c" * 65,
+        "%2e%2e%2fsecret",
+        "",
+        ("c" * 64) + "/../" + ("c" * 64),
+    ],
+)
 def test_a_model_that_is_not_published_or_not_a_hash_is_a_404(server, tmp_path, name):
-    (tmp_path.parent / "secret.bin").write_bytes(b"do not serve")         # outside the directory, but with the right suffix
+    (tmp_path.parent / "secret.bin").write_bytes(b"do not serve")  # outside the directory, but with the right suffix
     (tmp_path / ("c" * 64 + ".bin")).write_bytes(b"x")
 
     status, content_type, body = raw(server, "GET", "/v1/models/" + urllib.parse.quote(name, safe="/%"))
@@ -314,6 +377,7 @@ def test_a_server_without_a_models_directory_has_no_models(api):
 # the next generation replaces the API and the job
 # ---------------------------------------------------------------------------
 
+
 def test_the_server_can_move_on_to_the_next_generation(server, ledger, clock):
     ledger.open_generation(batch(2, generation=1))
     next_api = WorkerAPI(ledger, "exp", 1, lease_seconds=LEASE_SECONDS)
@@ -328,6 +392,7 @@ def test_the_server_can_move_on_to_the_next_generation(server, ledger, clock):
 # ---------------------------------------------------------------------------
 # HttpClient: network errors
 # ---------------------------------------------------------------------------
+
 
 def free_port():
     probe = http.server.HTTPServer(("127.0.0.1", 0), http.server.BaseHTTPRequestHandler)
@@ -362,11 +427,11 @@ def test_a_server_that_was_stopped_is_a_transport_error(api, tmp_path):
     assert client.get_json("/v1/health")["ok"] is True
 
     server.stop()
-    server.stop()                                            # stopping twice is harmless
+    server.stop()  # stopping twice is harmless
 
     with pytest.raises(TransportError):
         client.get_json("/v1/health")
-    with pytest.raises(ConnectionRefusedError):              # the socket is closed, not merely left unserved
+    with pytest.raises(ConnectionRefusedError):  # the socket is closed, not merely left unserved
         socket.create_connection((server.host, server.port), timeout=2).close()
 
 
@@ -429,6 +494,7 @@ def test_a_json_answer_of_the_wrong_shape_is_left_to_the_protocol_layer_to_refus
 # retries: only for what is idempotent
 # ---------------------------------------------------------------------------
 
+
 class Flaky:
     """A real HTTP server that closes the connection without answering for the first `drop` requests of a route."""
 
@@ -442,11 +508,13 @@ class Flaky:
 
             def do_POST(self):
                 body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
-                operation = {"/v1/leases": "lease", "/v1/results": "submit_result", "/v1/failures": "report_failure"}[self.path]
+                operation = {"/v1/leases": "lease", "/v1/results": "submit_result", "/v1/failures": "report_failure"}[
+                    self.path
+                ]
                 flaky.seen[operation] = flaky.seen.get(operation, 0) + 1
-                reply = flaky.api.handle(operation, body)                      # the coordinator DID process it...
+                reply = flaky.api.handle(operation, body)  # the coordinator DID process it...
                 if flaky.seen[operation] <= flaky.drop:
-                    self.connection.close()                                    # ...but the answer never arrives
+                    self.connection.close()  # ...but the answer never arrives
                     return
                 data = json.dumps(reply).encode()
                 self.send_response(200)
@@ -471,11 +539,14 @@ def test_a_result_whose_answer_was_lost_is_sent_again_and_acknowledged_not_count
         work = api.handle("lease", {"worker_id": "worker-a"})["work"]
         from heteroes.worker import Assignment
         from heteroes.manifest import CandidateDescriptor
-        assignment = Assignment(CandidateDescriptor.from_dict(work["descriptor"]), work["attempt_number"], work["token"], work["deadline"])
+
+        assignment = Assignment(
+            CandidateDescriptor.from_dict(work["descriptor"]), work["attempt_number"], work["token"], work["deadline"]
+        )
 
         outcome = client.submit_result(assignment, 0.75)
 
-        assert outcome.name == "ALREADY_COMMITTED"           # the first delivery had committed; the answer to it was lost
+        assert outcome.name == "ALREADY_COMMITTED"  # the first delivery had committed; the answer to it was lost
         assert flaky.seen["submit_result"] == 3
         assert ledger.get_candidate("exp/g0/c0").result.reward == 0.75
     finally:
@@ -488,9 +559,13 @@ def test_a_lease_whose_answer_was_lost_is_not_sent_again(api, ledger):
         client = HttpClient(flaky.url, timeout=2.0, retries=3, backoff=0.0)
 
         with pytest.raises(TransportError):
-            client("lease", {"worker_id": "worker-a"})       # no request id: the coordinator could not tell a repeat from a new request
+            client(
+                "lease", {"worker_id": "worker-a"}
+            )  # no request id: the coordinator could not tell a repeat from a new request
 
-        assert flaky.seen["lease"] == 1                      # asking again would take a second candidate (with an id it is safe: test_http_hardening)
+        assert (
+            flaky.seen["lease"] == 1
+        )  # asking again would take a second candidate (with an id it is safe: test_http_hardening)
         assert ledger.get_candidate("exp/g0/c0").attempts == 1
     finally:
         flaky.stop()
@@ -503,9 +578,12 @@ def test_retries_are_bounded(api):
         work = api.handle("lease", {"worker_id": "worker-a"})["work"]
 
         with pytest.raises(TransportError):
-            client("report_failure", {"descriptor": work["descriptor"], "attempt_number": 1, "token": work["token"], "kind": "OTHER"})
+            client(
+                "report_failure",
+                {"descriptor": work["descriptor"], "attempt_number": 1, "token": work["token"], "kind": "OTHER"},
+            )
 
-        assert flaky.seen["report_failure"] == 3             # one try and two retries
+        assert flaky.seen["report_failure"] == 3  # one try and two retries
     finally:
         flaky.stop()
 
@@ -513,6 +591,7 @@ def test_retries_are_bounded(api):
 # ---------------------------------------------------------------------------
 # whole generations, with workers in their own threads talking through sockets
 # ---------------------------------------------------------------------------
+
 
 def descriptors(n):
     return [make(i, derive_seed("exp", 0, i)) for i in range(n)]
@@ -560,15 +639,19 @@ def test_three_workers_in_threads_finish_a_generation_over_http_and_the_update_i
     seen_oom = set()
 
     def shared_behaviour(descriptor):
-        time.sleep(0.002)                                    # so that the three threads really interleave
-        if descriptor.index == 5 and 5 not in seen_oom:      # whoever is given candidate 5 first runs out of memory
+        time.sleep(0.002)  # so that the three threads really interleave
+        if descriptor.index == 5 and 5 not in seen_oom:  # whoever is given candidate 5 first runs out of memory
             seen_oom.add(5)
             raise CandidateFailed(FailureKind.OUT_OF_MEMORY)
         return reward_of(descriptor)
 
     try:
-        threads, logs = run_workers(server, {"w1": shared_behaviour, "w2": shared_behaviour, "w3": shared_behaviour}, stop)
-        assert wait_for(lambda: ledger.get_generation_status("exp", 0).state is GenerationState.COMPLETE), "the generation did not finish"
+        threads, logs = run_workers(
+            server, {"w1": shared_behaviour, "w2": shared_behaviour, "w3": shared_behaviour}, stop
+        )
+        assert wait_for(lambda: ledger.get_generation_status("exp", 0).state is GenerationState.COMPLETE), (
+            "the generation did not finish"
+        )
         stop.set()
         for thread in threads:
             thread.join(timeout=10)
@@ -580,7 +663,9 @@ def test_three_workers_in_threads_finish_a_generation_over_http_and_the_update_i
         all_steps = [step for steps in logs.values() for step in steps]
         assert sum(step.kind is StepKind.COMMITTED for step in all_steps) == n
         assert Step(StepKind.FAILURE_REPORTED, "exp/g0/c5", failure=FailureKind.OUT_OF_MEMORY) in all_steps
-        assert sum(1 for steps in logs.values() if any(s.kind is StepKind.COMMITTED for s in steps)) >= 2, "premise: the work was shared"
+        assert sum(1 for steps in logs.values() if any(s.kind is StepKind.COMMITTED for s in steps)) >= 2, (
+            "premise: the work was shared"
+        )
         record = GenerationRecord.from_results("exp", 0, results, alpha=1e-3, eta=1e-9)
         assert ledger.record_update(record) is UpdateOutcome.RECORDED
     finally:

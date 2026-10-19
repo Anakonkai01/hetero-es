@@ -6,6 +6,7 @@ The workloads a recipe can name (`Recipe.workload_name`): what each name asks, h
 `cot_l1_q128` (08/10) is 128 questions of level 1 (two-digit operations): its replies are short (about 96 tokens), so the 256-token limit does not decide the score, unlike level 3
 (`artifacts/experiments/2026-10-08-uncut-probe`).
 """
+
 from dataclasses import dataclass
 from typing import Callable
 
@@ -18,14 +19,32 @@ from heteroes.eval.workload import workload_hash
 class Workload:
     name: str
     hash: Callable[[], str]
-    evaluate: Callable                       # (model, tokenizer, chunk[, decode_engine]) -> an object with `.mean_reward`; only the long workloads take a decode engine
+    evaluate: Callable  # (model, tokenizer, chunk[, decode_engine]) -> an object with `.mean_reward`; only the long workloads take a decode engine
 
 
 WORKLOADS = {
     "arith16": Workload("arith16", workload_hash, evaluate_model),
-    "cot_l3_q32": Workload("cot_l3_q32", lambda: workload_hash_of(3, 32), lambda model, tokenizer, chunk, decode_engine="hf_generate": evaluate_cot(model, tokenizer, chunk, level=3, count=32, decode_engine=decode_engine)),
-    "cot_l3_q64": Workload("cot_l3_q64", lambda: workload_hash_of(3, 64), lambda model, tokenizer, chunk, decode_engine="hf_generate": evaluate_cot(model, tokenizer, chunk, level=3, count=64, decode_engine=decode_engine)),
-    "cot_l1_q128": Workload("cot_l1_q128", lambda: workload_hash_of(1, 128), lambda model, tokenizer, chunk, decode_engine="hf_generate": evaluate_cot(model, tokenizer, chunk, level=1, count=128, decode_engine=decode_engine)),
+    "cot_l3_q32": Workload(
+        "cot_l3_q32",
+        lambda: workload_hash_of(3, 32),
+        lambda model, tokenizer, chunk, decode_engine="hf_generate": evaluate_cot(
+            model, tokenizer, chunk, level=3, count=32, decode_engine=decode_engine
+        ),
+    ),
+    "cot_l3_q64": Workload(
+        "cot_l3_q64",
+        lambda: workload_hash_of(3, 64),
+        lambda model, tokenizer, chunk, decode_engine="hf_generate": evaluate_cot(
+            model, tokenizer, chunk, level=3, count=64, decode_engine=decode_engine
+        ),
+    ),
+    "cot_l1_q128": Workload(
+        "cot_l1_q128",
+        lambda: workload_hash_of(1, 128),
+        lambda model, tokenizer, chunk, decode_engine="hf_generate": evaluate_cot(
+            model, tokenizer, chunk, level=1, count=128, decode_engine=decode_engine
+        ),
+    ),
 }
 
 

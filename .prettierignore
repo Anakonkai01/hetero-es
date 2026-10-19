@@ -11,3 +11,4 @@ backend/tests/fixtures/
 frontend/static/demo/
 desktop/*/resources/
 package-lock.json
+**/fixtures/

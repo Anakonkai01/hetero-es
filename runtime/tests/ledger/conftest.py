@@ -2,7 +2,7 @@ import os
 
 try:
     from hypothesis import settings
-except ImportError:             # Hypothesis is a test extra: without it the tests that need it are skipped
+except ImportError:  # Hypothesis is a test extra: without it the tests that need it are skipped
     settings = None
 
 if settings is not None:

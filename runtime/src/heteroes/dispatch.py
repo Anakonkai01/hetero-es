@@ -19,6 +19,7 @@ worker_id)` is called after the ledger gave that lease. The policies are two of 
 A policy only chooses; the ledger still decides whether the lease is valid. The state of a policy lives in memory: after a
 restart of the coordinator it starts empty (a wave is then not "remembered", which only matters for B1's one-per-worker rule).
 """
+
 import math
 import time
 
@@ -41,7 +42,7 @@ def proportional_quotas(candidates: int, speeds: dict[str, float]) -> dict[str, 
             raise ValueError(f"the speed of {worker_id!r} must be a positive finite number, got {speed!r}")
     total = sum(speeds.values())
     shares = {worker_id: candidates * speed / total for worker_id, speed in speeds.items()}
-    quotas = {worker_id: int(share) for worker_id, share in shares.items()}          # floors
+    quotas = {worker_id: int(share) for worker_id, share in shares.items()}  # floors
     left = candidates - sum(quotas.values())
     for worker_id in sorted(speeds, key=lambda w: (-(shares[w] - quotas[w]), w))[:left]:
         quotas[worker_id] += 1
@@ -60,8 +61,10 @@ class Greedy:
         if isinstance(patience, bool) or not isinstance(patience, int) or patience < 1:
             raise ValueError(f"patience must be an integer of at least 1, got {patience!r}")
         self._patience = patience
-        self._seen: set[str] = set()                                  # the workers that have asked for work
-        self._refusals: dict[tuple[str, str, int], int] = {}          # (candidate, worker, attempts so far) -> times it was told to wait
+        self._seen: set[str] = set()  # the workers that have asked for work
+        self._refusals: dict[
+            tuple[str, str, int], int
+        ] = {}  # (candidate, worker, attempts so far) -> times it was told to wait
 
     def pick(self, records: list[CandidateRecord], worker_id: str) -> CandidateRecord | None:
         self._seen.add(worker_id)
@@ -69,11 +72,11 @@ class Greedy:
         if not pending:
             return None
         if self._seen == {worker_id}:
-            return pending[0]                                         # nobody else could take a failed candidate: the plain rule
+            return pending[0]  # nobody else could take a failed candidate: the plain rule
         for record in pending:
             if record.last_failed_worker != worker_id:
                 return record
-        record = pending[0]                                           # every waiting candidate failed on this very worker
+        record = pending[0]  # every waiting candidate failed on this very worker
         key = (record.descriptor.candidate_id, worker_id, record.attempts)
         waited = self._refusals.get(key, 0)
         if waited >= self._patience:
@@ -101,7 +104,11 @@ class SpeedBook:
             self.observe(worker_id, seconds)
 
     def observe(self, worker_id: str, seconds: float) -> None:
-        if isinstance(seconds, bool) or not isinstance(seconds, (int, float)) or not (math.isfinite(seconds) and seconds > 0):
+        if (
+            isinstance(seconds, bool)
+            or not isinstance(seconds, (int, float))
+            or not (math.isfinite(seconds) and seconds > 0)
+        ):
             raise ValueError(f"a duration must be a positive finite number of seconds, got {seconds!r}")
         old = self._estimate.get(worker_id)
         self._estimate[worker_id] = float(seconds) if old is None else self._alpha * seconds + (1 - self._alpha) * old
@@ -123,8 +130,19 @@ class GreedyTail:
     start of a generation, when many candidates are waiting, and a fast one finishes it.
     """
 
-    def __init__(self, book: SpeedBook, clock=time.monotonic, margin: float = 1.0, active_window: float = 30.0, patience: int = 20):
-        if isinstance(margin, bool) or not isinstance(margin, (int, float)) or not (math.isfinite(margin) and margin > 0):
+    def __init__(
+        self,
+        book: SpeedBook,
+        clock=time.monotonic,
+        margin: float = 1.0,
+        active_window: float = 30.0,
+        patience: int = 20,
+    ):
+        if (
+            isinstance(margin, bool)
+            or not isinstance(margin, (int, float))
+            or not (math.isfinite(margin) and margin > 0)
+        ):
             raise ValueError(f"margin must be a positive number, got {margin!r}")
         if isinstance(active_window, bool) or not isinstance(active_window, (int, float)) or not active_window > 0:
             raise ValueError(f"active_window must be a positive number, got {active_window!r}")
@@ -133,8 +151,8 @@ class GreedyTail:
         self._margin = float(margin)
         self._window = float(active_window)
         self._inner = Greedy(patience)
-        self._seen: dict[str, float] = {}                              # worker -> the last time it asked for work or delivered
-        self._leased: dict[str, tuple[str, float]] = {}                # candidate id -> (worker, the time of the lease)
+        self._seen: dict[str, float] = {}  # worker -> the last time it asked for work or delivered
+        self._leased: dict[str, tuple[str, float]] = {}  # candidate id -> (worker, the time of the lease)
 
     def _alive(self, worker_id: str, now: float) -> bool:
         seen = self._seen.get(worker_id)
@@ -147,7 +165,11 @@ class GreedyTail:
         if chosen is None:
             return None
         mine = self._book.estimate(worker_id)
-        others = [self._book.estimate(w) for w in self._seen if w != worker_id and self._alive(w, now) and self._book.estimate(w) is not None]
+        others = [
+            self._book.estimate(w)
+            for w in self._seen
+            if w != worker_id and self._alive(w, now) and self._book.estimate(w) is not None
+        ]
         if mine is None or not others:
             return chosen
         waiting = sum(1 for record in records if record.state is CandidateState.PENDING)
@@ -174,17 +196,20 @@ class StaticWave:
         if wave_size < 1:
             raise ValueError(f"wave_size must be at least 1, got {wave_size}")
         self._wave_size = wave_size
-        self._holder: dict[str, str] = {}      # candidate id -> the worker that was given it last
+        self._holder: dict[str, str] = {}  # candidate id -> the worker that was given it last
 
     def pick(self, records: list[CandidateRecord], worker_id: str) -> CandidateRecord | None:
         for start in range(0, len(records), self._wave_size):
-            wave = records[start:start + self._wave_size]
+            wave = records[start : start + self._wave_size]
             if all(record.state is CandidateState.COMMITTED for record in wave):
-                continue                                                # this wave is over
-            busy = any(self._holder.get(record.descriptor.candidate_id) == worker_id
-                       and record.state in (CandidateState.LEASED, CandidateState.COMMITTED) for record in wave)
+                continue  # this wave is over
+            busy = any(
+                self._holder.get(record.descriptor.candidate_id) == worker_id
+                and record.state in (CandidateState.LEASED, CandidateState.COMMITTED)
+                for record in wave
+            )
             if busy:
-                return None                                             # it has its candidate of this wave
+                return None  # it has its candidate of this wave
             return next((record for record in wave if record.state is CandidateState.PENDING), None)
         return None
 
@@ -200,7 +225,7 @@ class StaticProportional:
         if not any(quotas.values()):
             raise ValueError("the quotas are all 0: nobody would run anything")
         self._quotas = dict(quotas)
-        self._owner: dict[str, str] | None = None            # candidate id -> worker, fixed at the first request
+        self._owner: dict[str, str] | None = None  # candidate id -> worker, fixed at the first request
 
     @property
     def quotas(self) -> dict[str, int]:
@@ -208,10 +233,12 @@ class StaticProportional:
 
     def _assign(self, records: list[CandidateRecord]) -> dict[str, str]:
         if len(records) != sum(self._quotas.values()):
-            raise ValueError(f"the quotas add up to {sum(self._quotas.values())} but the generation has {len(records)} candidates")
+            raise ValueError(
+                f"the quotas add up to {sum(self._quotas.values())} but the generation has {len(records)} candidates"
+            )
         owner, position = {}, 0
-        for worker_id in sorted(self._quotas):              # contiguous blocks in the order of the worker ids
-            for record in records[position:position + self._quotas[worker_id]]:
+        for worker_id in sorted(self._quotas):  # contiguous blocks in the order of the worker ids
+            for record in records[position : position + self._quotas[worker_id]]:
                 owner[record.descriptor.candidate_id] = worker_id
             position += self._quotas[worker_id]
         return owner
@@ -219,8 +246,14 @@ class StaticProportional:
     def pick(self, records: list[CandidateRecord], worker_id: str) -> CandidateRecord | None:
         if self._owner is None:
             self._owner = self._assign(records)
-        return next((record for record in records if record.state is CandidateState.PENDING
-                     and self._owner[record.descriptor.candidate_id] == worker_id), None)
+        return next(
+            (
+                record
+                for record in records
+                if record.state is CandidateState.PENDING and self._owner[record.descriptor.candidate_id] == worker_id
+            ),
+            None,
+        )
 
     def leased(self, candidate_id: str, worker_id: str) -> None:
         pass

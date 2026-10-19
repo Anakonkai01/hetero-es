@@ -7,6 +7,7 @@ The tests use a tiny FP16 model on the CPU and replace `evaluate_model` with a f
 reward tells which weights were evaluated; the real model is checked in the scripts and in the experiment.
 Failures are typed (`CandidateFailed`) and never a reward; the model must always come back to the parent weights.
 """
+
 import copy
 
 import pytest
@@ -41,14 +42,32 @@ class HalfToy(nn.Module):
 
 
 def make_recipe(schema, sigma=SIGMA, chunk=CHUNK):
-    return Recipe(model_id="toy", model_revision="1" * 40, tokenizer_revision="1" * 40, dtype="torch.float16",
-                  schema_hash=schema.hash, engine_version=ENGINE_VERSION, chunk_elements=chunk, noise_fingerprint="2" * 64,
-                  sigma=sigma, reward_eta=1e-9, workload_hash="3" * 64, generation_config_sha256="4" * 64, eval_dtype="float16")
+    return Recipe(
+        model_id="toy",
+        model_revision="1" * 40,
+        tokenizer_revision="1" * 40,
+        dtype="torch.float16",
+        schema_hash=schema.hash,
+        engine_version=ENGINE_VERSION,
+        chunk_elements=chunk,
+        noise_fingerprint="2" * 64,
+        sigma=sigma,
+        reward_eta=1e-9,
+        workload_hash="3" * 64,
+        generation_config_sha256="4" * 64,
+        eval_dtype="float16",
+    )
 
 
 def descriptor_for(recipe, parent, seed, index=0, generation=0):
-    return CandidateDescriptor(recipe_hash=recipe.hash, parent_weights_sha256=parent, experiment_id="exp",
-                               generation=generation, index=index, seed=seed)
+    return CandidateDescriptor(
+        recipe_hash=recipe.hash,
+        parent_weights_sha256=parent,
+        experiment_id="exp",
+        generation=generation,
+        index=index,
+        seed=seed,
+    )
 
 
 def reward_from_weights(model, schema):
@@ -62,7 +81,7 @@ class Fixture:
         self.schema = build_parameter_schema(self.model)
         self.recipe = make_recipe(self.schema)
         self.parent = model_weights_sha256(self.model, self.schema)
-        self.seen = []                                                  # the weights hash at each evaluation
+        self.seen = []  # the weights hash at each evaluation
         self.clock_value = 0.0
         self.oom_next = False
 
@@ -105,16 +124,17 @@ def current(fx):
 # the normal life of a candidate
 # ---------------------------------------------------------------------------
 
+
 def test_the_candidate_is_evaluated_perturbed_and_the_model_comes_back(fx):
     executor = fx.executor()
     expected = fx.expected_perturbed(7)
-    assert expected != fx.parent                                        # premise: the perturbation changes the weights
+    assert expected != fx.parent  # premise: the perturbation changes the weights
 
     reward = executor(fx.descriptor(7))
 
-    assert fx.seen == [expected]                                        # evaluated with the perturbed weights
+    assert fx.seen == [expected]  # evaluated with the perturbed weights
     assert reward == int(expected[:4], 16) / 65535 and isinstance(reward, float)
-    assert current(fx) == fx.parent                                     # restored, bit for bit
+    assert current(fx) == fx.parent  # restored, bit for bit
 
 
 def test_the_sigma_and_the_chunk_size_come_from_the_recipe(fx):
@@ -126,8 +146,8 @@ def test_the_sigma_and_the_chunk_size_come_from_the_recipe(fx):
         executor(fx.descriptor(7))
 
         assert fx.seen == [fx.expected_perturbed(7, sigma, chunk)]
-    assert fx.expected_perturbed(7, 2e-3, CHUNK) != fx.expected_perturbed(7, SIGMA, CHUNK)       # premise: sigma matters
-    assert fx.expected_perturbed(7, SIGMA, 5) != fx.expected_perturbed(7, SIGMA, CHUNK)          # and so does the chunk size
+    assert fx.expected_perturbed(7, 2e-3, CHUNK) != fx.expected_perturbed(7, SIGMA, CHUNK)  # premise: sigma matters
+    assert fx.expected_perturbed(7, SIGMA, 5) != fx.expected_perturbed(7, SIGMA, CHUNK)  # and so does the chunk size
 
 
 def test_the_seed_of_the_descriptor_decides_the_candidate(fx):
@@ -155,7 +175,9 @@ def test_the_phases_are_timed_in_order(fx):
 
     timing = executor.last_timing
     assert set(timing) == {"perturb", "rollout", "restore", "total"}
-    assert timing["perturb"] == timing["rollout"] == timing["restore"] == 1.0 and timing["total"] == 3.0      # the clock ticks once per mark
+    assert (
+        timing["perturb"] == timing["rollout"] == timing["restore"] == 1.0 and timing["total"] == 3.0
+    )  # the clock ticks once per mark
 
 
 def test_the_parent_hash_is_computed_once_and_is_the_model_hash(fx):
@@ -168,6 +190,7 @@ def test_the_parent_hash_is_computed_once_and_is_the_model_hash(fx):
 # a job that is not for this model is refused before anything is touched
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.parametrize("changes", [dict(recipe_hash="9" * 64), dict(parent_weights_sha256="9" * 64)])
 def test_a_job_for_another_recipe_or_other_weights_is_refused_and_nothing_runs(fx, changes):
     executor = fx.executor()
@@ -176,13 +199,16 @@ def test_a_job_for_another_recipe_or_other_weights_is_refused_and_nothing_runs(f
         executor(fx.descriptor(7, **changes))
 
     assert caught.value.kind is FailureKind.OTHER
-    assert ("recipe" in str(caught.value)) == ("recipe_hash" in changes) and ("parent" in str(caught.value)) == ("parent_weights_sha256" in changes)
+    assert ("recipe" in str(caught.value)) == ("recipe_hash" in changes) and ("parent" in str(caught.value)) == (
+        "parent_weights_sha256" in changes
+    )
     assert fx.seen == [] and current(fx) == fx.parent and executor.last_timing is None
 
 
 # ---------------------------------------------------------------------------
 # failures: typed, and the model always comes back
 # ---------------------------------------------------------------------------
+
 
 def test_running_out_of_memory_while_evaluating_is_an_oom_failure_and_the_model_is_restored(fx, monkeypatch):
     def oom(model, tokenizer, chunk=1):
@@ -202,7 +228,7 @@ def test_running_out_of_memory_while_perturbing_is_an_oom_failure_and_the_model_
     real = executor_module.perturb_model_
 
     def half_way_then_oom(model, schema, seed, sigma, chunk):
-        real(model, schema, seed, sigma, chunk)                         # the weights HAVE changed when it fails
+        real(model, schema, seed, sigma, chunk)  # the weights HAVE changed when it fails
         raise torch.cuda.OutOfMemoryError("CUDA out of memory")
 
     monkeypatch.setattr(executor_module, "perturb_model_", half_way_then_oom)
@@ -252,7 +278,7 @@ def test_a_restore_that_fails_after_another_failure_is_still_a_restore_mismatch(
     with pytest.raises(CandidateFailed) as caught:
         executor(fx.descriptor(7))
 
-    assert caught.value.kind is FailureKind.RESTORE_MISMATCH               # the weights are in doubt: that matters most
+    assert caught.value.kind is FailureKind.RESTORE_MISMATCH  # the weights are in doubt: that matters most
 
 
 def test_an_unexpected_exception_is_not_swallowed_and_the_model_is_restored_first(fx, monkeypatch):
@@ -287,10 +313,11 @@ def test_the_timing_of_a_failed_candidate_is_not_reported_as_if_it_had_finished(
 # a new parent (full synchronization replaced the weights)
 # ---------------------------------------------------------------------------
 
+
 def test_after_the_weights_are_replaced_the_executor_works_on_the_new_parent(fx):
     executor = fx.executor()
     old_parent = fx.parent
-    with torch.no_grad():                                               # the "synchronization": other weights arrive
+    with torch.no_grad():  # the "synchronization": other weights arrive
         for parameter, other in zip(fx.model.parameters(), HalfToy(5).parameters()):
             parameter.copy_(other)
     new_parent = model_weights_sha256(fx.model, fx.schema)
@@ -299,18 +326,18 @@ def test_after_the_weights_are_replaced_the_executor_works_on_the_new_parent(fx)
     assert executor.reset_parent() == new_parent
 
     assert executor.parent_sha256 == new_parent
-    with pytest.raises(CandidateFailed):                                # a job for the old parent is now refused
+    with pytest.raises(CandidateFailed):  # a job for the old parent is now refused
         executor(fx.descriptor(7))
     fx.parent = new_parent
     fx.seen.clear()
     executor(fx.descriptor(7))
-    assert current(fx) == new_parent                                    # and it is restored to the NEW parent
+    assert current(fx) == new_parent  # and it is restored to the NEW parent
     assert fx.seen == [fx.expected_perturbed(7)]
 
 
 def test_resetting_the_parent_takes_the_hash_it_is_given_only_if_it_is_the_truth(fx):
     executor = fx.executor()
-    with torch.no_grad():                                               # the weights changed since the executor was made
+    with torch.no_grad():  # the weights changed since the executor was made
         for parameter, other in zip(fx.model.parameters(), HalfToy(5).parameters()):
             parameter.copy_(other)
     changed = model_weights_sha256(fx.model, fx.schema)
@@ -319,8 +346,8 @@ def test_resetting_the_parent_takes_the_hash_it_is_given_only_if_it_is_the_truth
     with pytest.raises(ValueError, match="hash"):
         executor.reset_parent("0" * 64)
 
-    assert executor.parent_sha256 == fx.parent                          # nothing was taken over
-    with pytest.raises(CandidateFailed):                                # and a job for the new weights is still refused
+    assert executor.parent_sha256 == fx.parent  # nothing was taken over
+    with pytest.raises(CandidateFailed):  # and a job for the new weights is still refused
         executor(fx.descriptor(7, parent_weights_sha256=changed))
     assert executor.reset_parent(changed) == changed and executor.parent_sha256 == changed
 
@@ -328,7 +355,9 @@ def test_resetting_the_parent_takes_the_hash_it_is_given_only_if_it_is_the_truth
 def test_the_reward_is_a_plain_float_even_if_the_evaluation_gives_a_numpy_number(fx, monkeypatch):
     import numpy as np
 
-    monkeypatch.setattr(executor_module, "evaluate_model", lambda model, tokenizer, chunk=1: EvalResult(np.float32(0.25), ()))
+    monkeypatch.setattr(
+        executor_module, "evaluate_model", lambda model, tokenizer, chunk=1: EvalResult(np.float32(0.25), ())
+    )
 
     reward = fx.executor()(fx.descriptor(7))
 
@@ -338,6 +367,7 @@ def test_the_reward_is_a_plain_float_even_if_the_evaluation_gives_a_numpy_number
 # ---------------------------------------------------------------------------
 # the number of prompts per generate() call (the "chunk" of MASTER) is the worker's own choice
 # ---------------------------------------------------------------------------
+
 
 def test_the_prompt_chunk_of_the_executor_reaches_the_evaluation(fx, monkeypatch):
     received = []
@@ -351,7 +381,7 @@ def test_the_prompt_chunk_of_the_executor_reaches_the_evaluation(fx, monkeypatch
     CandidateExecutor(fx.model, None, fx.schema, fx.recipe)(fx.descriptor(7))
     CandidateExecutor(fx.model, None, fx.schema, fx.recipe, chunk=8)(fx.descriptor(7))
 
-    assert received == [1, 8]                                           # for an FP16 recipe the default is one prompt at a time
+    assert received == [1, 8]  # for an FP16 recipe the default is one prompt at a time
 
 
 def test_without_a_chunk_the_executor_takes_the_exact_size_of_the_precision_of_the_recipe(fx, monkeypatch):
@@ -362,10 +392,12 @@ def test_without_a_chunk_the_executor_takes_the_exact_size_of_the_precision_of_t
         return EvalResult(mean_reward=0.5, records=())
 
     monkeypatch.setattr(executor_module, "evaluate_model", spy)
-    fx.recipe = fp32 = Recipe(**{**fx.recipe.__dict__, "eval_dtype": "float32"})       # the descriptor carries the hash of this recipe
+    fx.recipe = fp32 = Recipe(
+        **{**fx.recipe.__dict__, "eval_dtype": "float32"}
+    )  # the descriptor carries the hash of this recipe
 
     CandidateExecutor(fx.model, None, fx.schema, fp32)(fx.descriptor(7))
-    CandidateExecutor(fx.model, None, fx.schema, fp32, chunk=4)(fx.descriptor(7))      # an explicit choice still wins
+    CandidateExecutor(fx.model, None, fx.schema, fp32, chunk=4)(fx.descriptor(7))  # an explicit choice still wins
 
     assert received == [16, 4]
 
@@ -380,6 +412,7 @@ def test_a_bad_prompt_chunk_is_refused_at_construction(fx, bad):
 # G6: taking a new parent from a file whose hash was already checked: compare, do not hash again
 # ---------------------------------------------------------------------------
 
+
 def _swap_in(fx, seed=5):
     with torch.no_grad():
         for parameter, other in zip(fx.model.parameters(), HalfToy(seed).parameters()):
@@ -388,17 +421,18 @@ def _swap_in(fx, seed=5):
 
 def test_a_new_parent_can_be_taken_from_a_verified_file_without_hashing_the_model(fx, tmp_path, monkeypatch):
     from heteroes.model.weights_io import write_weights
+
     executor = fx.executor()
     _swap_in(fx)
     path = tmp_path / "w.bin"
-    sha = write_weights(fx.model, fx.schema, path)                      # the file the "download" verified, and the model loaded from it
+    sha = write_weights(fx.model, fx.schema, path)  # the file the "download" verified, and the model loaded from it
     hashed = []
     real = executor_module.tensors_sha256
     monkeypatch.setattr(executor_module, "tensors_sha256", lambda tensors: hashed.append(1) or real(tensors))
 
     assert executor.reset_parent(sha, verified_file=path) == sha
 
-    assert executor.parent_sha256 == sha and hashed == []                # no hash was computed: the file was compared instead
+    assert executor.parent_sha256 == sha and hashed == []  # no hash was computed: the file was compared instead
     fx.parent = sha
     fx.seen.clear()
     executor(fx.descriptor(7))
@@ -407,17 +441,18 @@ def test_a_new_parent_can_be_taken_from_a_verified_file_without_hashing_the_mode
 
 def test_a_model_that_differs_from_the_verified_file_is_refused_and_nothing_changes(fx, tmp_path):
     from heteroes.model.weights_io import write_weights
+
     executor = fx.executor()
     old = executor.parent_sha256
     _swap_in(fx)
     path = tmp_path / "w.bin"
     sha = write_weights(fx.model, fx.schema, path)
-    with torch.no_grad():                                               # one bit of the loaded model differs from the file
+    with torch.no_grad():  # one bit of the loaded model differs from the file
         fx.model.fc.bias.view(torch.int16)[0] ^= 1
 
     with pytest.raises(ValueError, match="differs from"):
         executor.reset_parent(sha, verified_file=path)
-    assert executor.parent_sha256 == old                                # nothing was taken over
+    assert executor.parent_sha256 == old  # nothing was taken over
 
 
 def test_a_verified_file_of_the_wrong_size_is_refused(fx, tmp_path):
@@ -438,12 +473,16 @@ def test_a_verified_file_needs_the_hash_it_claims(fx, tmp_path):
 # G6: an FP32 forward pass (recipe.eval_dtype = float32): the candidate is evaluated on a float32 copy of the perturbed weights
 # ---------------------------------------------------------------------------
 
-def test_an_fp32_recipe_evaluates_a_float32_copy_of_the_perturbed_weights_and_the_fp16_model_comes_back(fx, monkeypatch):
+
+def test_an_fp32_recipe_evaluates_a_float32_copy_of_the_perturbed_weights_and_the_fp16_model_comes_back(
+    fx, monkeypatch
+):
     import dataclasses
+
     seen = []
 
     def evaluate(model, tokenizer, chunk=1):
-        seen.append([p.detach().clone() for p in model.parameters()])      # what the evaluation was given
+        seen.append([p.detach().clone() for p in model.parameters()])  # what the evaluation was given
         return EvalResult(mean_reward=0.5, records=())
 
     monkeypatch.setattr(executor_module, "evaluate_model", evaluate)
@@ -455,27 +494,41 @@ def test_an_fp32_recipe_evaluates_a_float32_copy_of_the_perturbed_weights_and_th
     clone = copy.deepcopy(fx.model)
     perturb_model_(clone, build_parameter_schema(clone), 7, SIGMA, CHUNK)
     (given,) = seen
-    assert all(p.dtype == torch.float32 for p in given)                    # the evaluation saw float32 ...
-    assert all(torch.equal(g, c.float()) for g, c in zip(given, clone.parameters()))   # ... holding exactly the perturbed FP16 weights widened
-    assert current(fx) == fx.parent                                        # and the live FP16 model was restored bit for bit
+    assert all(p.dtype == torch.float32 for p in given)  # the evaluation saw float32 ...
+    assert all(
+        torch.equal(g, c.float()) for g, c in zip(given, clone.parameters())
+    )  # ... holding exactly the perturbed FP16 weights widened
+    assert current(fx) == fx.parent  # and the live FP16 model was restored bit for bit
 
 
 def test_the_fp32_copy_is_refreshed_for_every_candidate(fx, monkeypatch):
     import dataclasses
+
     seen = []
-    monkeypatch.setattr(executor_module, "evaluate_model", lambda model, tokenizer, chunk=1: (seen.append(model.fc.bias.detach().clone()),
-                                                                                              EvalResult(mean_reward=0.5, records=()))[1])
+    monkeypatch.setattr(
+        executor_module,
+        "evaluate_model",
+        lambda model, tokenizer, chunk=1: (
+            seen.append(model.fc.bias.detach().clone()),
+            EvalResult(mean_reward=0.5, records=()),
+        )[1],
+    )
     fx.recipe = dataclasses.replace(fx.recipe, eval_dtype="float32")
     executor = fx.executor()
     executor(fx.descriptor(7))
     executor(fx.descriptor(8))
-    assert len(seen) == 2 and not torch.equal(seen[0], seen[1])            # the second candidate did not see the first one's weights
+    assert len(seen) == 2 and not torch.equal(
+        seen[0], seen[1]
+    )  # the second candidate did not see the first one's weights
 
 
 def test_an_fp16_recipe_still_hands_the_live_model_to_the_evaluation(fx, monkeypatch):
     given = []
-    monkeypatch.setattr(executor_module, "evaluate_model", lambda model, tokenizer, chunk=1: (given.append(model),
-                                                                                              EvalResult(mean_reward=0.5, records=()))[1])
+    monkeypatch.setattr(
+        executor_module,
+        "evaluate_model",
+        lambda model, tokenizer, chunk=1: (given.append(model), EvalResult(mean_reward=0.5, records=()))[1],
+    )
     fx.executor()(fx.descriptor(7))
     assert given == [fx.model]
 
@@ -484,20 +537,28 @@ def test_an_fp16_recipe_still_hands_the_live_model_to_the_evaluation(fx, monkeyp
 # G7: the noise engine and the workload are chosen by the recipe
 # ---------------------------------------------------------------------------
 
+
 def with_recipe(fx, **changes):
     fx.recipe = Recipe(**{**fx.recipe.__dict__, **changes})
 
 
 def cuda_engine_changes():
     from heteroes.noise.contracts import CUDA_CALL_ELEMENTS, CUDA_ENGINE_VERSION, EXPECTED_CUDA_NOISE_FINGERPRINT
-    return dict(engine_version=CUDA_ENGINE_VERSION, chunk_elements=CUDA_CALL_ELEMENTS, noise_fingerprint=EXPECTED_CUDA_NOISE_FINGERPRINT)
+
+    return dict(
+        engine_version=CUDA_ENGINE_VERSION,
+        chunk_elements=CUDA_CALL_ELEMENTS,
+        noise_fingerprint=EXPECTED_CUDA_NOISE_FINGERPRINT,
+    )
 
 
 def test_a_cuda_engine_recipe_perturbs_with_the_cuda_engine_and_not_with_the_cpu_engine(fx, monkeypatch):
     with_recipe(fx, **cuda_engine_changes())
     calls = []
 
-    def cuda_perturb(model, schema, seed, sigma):                        # the toy model is on the CPU: the CPU engine stands in for the arithmetic
+    def cuda_perturb(
+        model, schema, seed, sigma
+    ):  # the toy model is on the CPU: the CPU engine stands in for the arithmetic
         calls.append((seed, sigma))
         perturb_model_(model, schema, seed, sigma, CHUNK)
 
@@ -510,7 +571,7 @@ def test_a_cuda_engine_recipe_perturbs_with_the_cuda_engine_and_not_with_the_cpu
     fx.executor()(fx.descriptor(7))
 
     assert calls == [(7, fx.recipe.sigma)]
-    assert current(fx) == fx.parent                                     # and the restore is the same snapshot restore
+    assert current(fx) == fx.parent  # and the restore is the same snapshot restore
 
 
 def test_a_cpu_engine_recipe_does_not_touch_the_cuda_engine(fx, monkeypatch):
@@ -518,7 +579,7 @@ def test_a_cpu_engine_recipe_does_not_touch_the_cuda_engine(fx, monkeypatch):
         raise AssertionError("the CUDA engine must not be used by a CPU engine recipe")
 
     monkeypatch.setattr(executor_module, "perturb_model_cuda_", cuda_perturb)
-    fx.executor()(fx.descriptor(7))                                     # no error: the CPU engine did it
+    fx.executor()(fx.descriptor(7))  # no error: the CPU engine did it
 
 
 def test_the_workload_of_the_recipe_is_the_one_that_is_evaluated(fx, monkeypatch):

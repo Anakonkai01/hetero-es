@@ -6,6 +6,7 @@ Rewards come from `oracle_reward`, so the right answer of a generation is known 
 Nothing here is the ledger: the ledger is only called, like the coordinator will call it. What the workers did is in
 `cluster.log`: (time, worker, event, candidate index, detail).
 """
+
 from dataclasses import dataclass
 
 import simpy
@@ -22,7 +23,7 @@ from heteroes.ledger import (
 )
 from ledger_helpers import batch, descriptor_of, make
 
-POLL = 1.0      # how long a worker without work waits before asking again
+POLL = 1.0  # how long a worker without work waits before asking again
 
 
 class Cluster:
@@ -84,6 +85,7 @@ class Behavior:
     lossy_ack       delivers, then delivers again (the acknowledgement was lost); `conflict`: with another reward
     wrong_job_once  delivers a result for another job first (with a wrong reward), then the honest one
     """
+
     kind: str = "honest"
     compute: float = 5.0
     after: int = 0
@@ -106,8 +108,11 @@ class Behavior:
 
         seed = descriptor_of(index).seed
         if self.kind == "wrong_job_once" and jobs == 1:
-            wrong = {"seed": make(index, seed + 1), "recipe": make(index, seed, recipe_hash="c" * 64),
-                     "parent": make(index, seed, parent_weights_sha256="d" * 64)}[self.wrong]
+            wrong = {
+                "seed": make(index, seed + 1),
+                "recipe": make(index, seed, recipe_hash="c" * 64),
+                "parent": make(index, seed, parent_weights_sha256="d" * 64),
+            }[self.wrong]
             _submit(cluster, name, lease, index, descriptor=wrong, reward=oracle_reward(seed) + 0.5)
         _submit(cluster, name, lease, index)
         if self.kind == "lossy_ack":
@@ -119,7 +124,7 @@ def _worker(cluster, name, behavior, dispatcher):
     jobs = 0
     while True:
         if cluster.status().state is not GenerationState.OPEN:
-            return                                                       # complete or failed: nothing more to do
+            return  # complete or failed: nothing more to do
         index = dispatcher.next_candidate(cluster, name)
         if index is None:
             yield cluster.env.timeout(POLL)
@@ -129,7 +134,7 @@ def _worker(cluster, name, behavior, dispatcher):
         except WorkerQuarantinedError:
             cluster.note(name, "quarantined", index)
             return
-        except LedgerError as error:                                     # somebody else was faster, or the generation failed
+        except LedgerError as error:  # somebody else was faster, or the generation failed
             cluster.note(name, "lease_refused", index, type(error).__name__)
             yield cluster.env.timeout(POLL)
             continue
@@ -142,10 +147,14 @@ def _worker(cluster, name, behavior, dispatcher):
 
 # ---- how candidates are given to workers (the policies of MASTER section 9; only these two here) ----------------------
 
+
 def _available(cluster):
     """Indexes of the candidates that may be leased now, in index order (nothing running, budget left)."""
-    return [i for i, record in enumerate(cluster.ledger.list_candidates("exp", 0))
-            if record.state is CandidateState.PENDING and record.attempts < cluster.max_attempts]
+    return [
+        i
+        for i, record in enumerate(cluster.ledger.list_candidates("exp", 0))
+        if record.state is CandidateState.PENDING and record.attempts < cluster.max_attempts
+    ]
 
 
 class Greedy:
@@ -165,7 +174,7 @@ class Wave:
     def next_candidate(self, cluster, worker):
         records = cluster.ledger.list_candidates("exp", 0)
         if not any(record.state is CandidateState.LEASED for record in records):
-            self.taken = set()                                           # nothing is running: the barrier is over
+            self.taken = set()  # nothing is running: the barrier is over
         if worker in self.taken:
             return None
         available = _available(cluster)

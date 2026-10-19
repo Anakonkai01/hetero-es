@@ -54,8 +54,17 @@ def test_queued_cancel_never_contacts_runtime(setup):
     assert submitted(runtime) == []
 
 
-@pytest.mark.parametrize("changes", [{"schedulerPolicy": "capacity-weighted"}, {"syncMode": "asynchronous"},
-    {"workerIds": ["unknown"]}, {"candidatesPerGeneration": 1}, {"sigma": 0}, {"datasetIds": ["fake"]}])
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"schedulerPolicy": "capacity-weighted"},
+        {"syncMode": "asynchronous"},
+        {"workerIds": ["unknown"]},
+        {"candidatesPerGeneration": 1},
+        {"sigma": 0},
+        {"datasetIds": ["fake"]},
+    ],
+)
 def test_invalid_or_unsupported_config_rejected(setup, changes):
     client, _, _ = setup
     assert draft(client, login(client, "admin"), **changes).status_code == 422
@@ -66,7 +75,12 @@ def test_config_is_immutable_after_submission(setup):
     headers = login(client, "admin")
     run = draft(client, headers).json()
     client.post(f"/api/v1/experiments/{run['experimentId']}/submit", headers=headers)
-    assert client.patch(f"/api/v1/experiments/{run['experimentId']}", json={"name": "changed"}, headers=headers).status_code == 409
+    assert (
+        client.patch(
+            f"/api/v1/experiments/{run['experimentId']}", json={"name": "changed"}, headers=headers
+        ).status_code
+        == 409
+    )
 
 
 def test_credentials_are_hashed_and_no_lease_secrets_in_product(setup):
@@ -84,9 +98,11 @@ def test_restart_after_lost_start_response_uses_same_run_and_queue(setup):
     run_id = draft(client, headers).json()["experimentId"]
     client.post(f"/api/v1/experiments/{run_id}/submit", headers=headers)
     original = runtime.submit
+
     def lost(config):
         original(config)
         raise TimeoutError("response lost after runtime accepted")
+
     runtime.submit = lost
     store.dispatch_once()  # the dispatcher keeps going and reports the error instead of raising it
     assert store.last_error == "TimeoutError"
@@ -106,8 +122,12 @@ def test_child_objects_and_downloads_share_experiment_authorization(setup):
     run_id = draft(client, admin).json()["experimentId"]
     client.post(f"/api/v1/experiments/{run_id}/submit", headers=admin)
     store.dispatch_once()
-    for route in (f"/generations/{run_id}.g0/candidates", f"/candidates/{run_id}.g0.c0",
-                  f"/attempts/{run_id}.g0.c0.a1", f"/artifacts/{run_id}.config.json/download"):
+    for route in (
+        f"/generations/{run_id}.g0/candidates",
+        f"/candidates/{run_id}.g0.c0",
+        f"/attempts/{run_id}.g0.c0.a1",
+        f"/artifacts/{run_id}.config.json/download",
+    ):
         assert client.get("/api/v1" + route, headers=participant).status_code == 404
     assert client.get("/api/v1/events", headers=participant).json() == []
     assert client.get("/api/v1/artifacts", headers=participant).json() == []
@@ -118,8 +138,10 @@ def test_rejected_start_fails_truthfully_and_releases_queue_claim(setup):
     headers = login(client, "admin")
     run_id = draft(client, headers).json()["experimentId"]
     client.post(f"/api/v1/experiments/{run_id}/submit", headers=headers)
+
     def rejected(_):
         raise RuntimeRejected("Worker quarantined")
+
     runtime.submit = rejected
     store.dispatch_once()
     assert store.get(run_id)["status"] == "FAILED"

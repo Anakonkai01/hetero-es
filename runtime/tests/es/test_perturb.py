@@ -46,6 +46,7 @@ def perturbed_copy(theta, address, sigma, device):
 # bitwise agreement with the NumPy oracle
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.parametrize("device", DEVICES)
 @pytest.mark.parametrize("sigma", [1e-3, 0.0123456789, 0.0])
 @pytest.mark.parametrize(
@@ -132,6 +133,7 @@ def test_does_not_use_fused_in_place_add(monkeypatch):
 # in-place behaviour
 # ---------------------------------------------------------------------------
 
+
 def test_perturbs_in_place_and_returns_none():
     tensor = torch.from_numpy(make_theta(10).copy())
     pointer = tensor.data_ptr()
@@ -194,6 +196,7 @@ def test_gradient_tracking_parameter_can_be_perturbed():
 # ---------------------------------------------------------------------------
 # input validation: wrong input is rejected loudly and nothing is modified
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.parametrize("dtype", [torch.float32, torch.float64, torch.bfloat16, torch.int64])
 def test_rejects_other_dtypes_and_leaves_param_untouched(dtype):

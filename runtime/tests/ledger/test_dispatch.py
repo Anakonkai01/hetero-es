@@ -9,6 +9,7 @@ What is checked here is who gets what and when. What the ledger owes whichever p
 nothing invented) is checked elsewhere; the SimPy tests of `test_dispatch_policies.py` compare how the two treat workers of
 different speeds on simulated time, this file checks the real objects.
 """
+
 import threading
 
 import pytest
@@ -43,20 +44,35 @@ def index_of(work):
 
 
 def deliver(api, work, reward=0.5):
-    reply = api.handle("submit_result", {"descriptor": work["descriptor"], "attempt_number": work["attempt_number"],
-                                         "token": work["token"], "reward": reward})
+    reply = api.handle(
+        "submit_result",
+        {
+            "descriptor": work["descriptor"],
+            "attempt_number": work["attempt_number"],
+            "token": work["token"],
+            "reward": reward,
+        },
+    )
     assert reply["ok"] is True, reply
 
 
 def fail(api, work, kind="OTHER"):
-    reply = api.handle("report_failure", {"descriptor": work["descriptor"], "attempt_number": work["attempt_number"],
-                                          "token": work["token"], "kind": kind})
+    reply = api.handle(
+        "report_failure",
+        {
+            "descriptor": work["descriptor"],
+            "attempt_number": work["attempt_number"],
+            "token": work["token"],
+            "kind": kind,
+        },
+    )
     assert reply["ok"] is True, reply
 
 
 # ---------------------------------------------------------------------------
 # B3: greedy
 # ---------------------------------------------------------------------------
+
 
 def test_the_default_policy_is_greedy(clock):
     ledger = Ledger(":memory:", clock=clock)
@@ -71,8 +87,8 @@ def test_greedy_gives_a_free_worker_the_next_candidate_at_once(clock):
     first = ask(api, "fast")
     deliver(api, first)
 
-    assert index_of(ask(api, "fast")) == 1                 # no waiting for anybody
-    assert index_of(ask(api, "fast")) == 2                 # a worker may hold several candidates at once, it is the caller's business
+    assert index_of(ask(api, "fast")) == 1  # no waiting for anybody
+    assert index_of(ask(api, "fast")) == 2  # a worker may hold several candidates at once, it is the caller's business
 
 
 def test_greedy_gives_a_retried_candidate_before_a_fresh_one(clock):
@@ -88,13 +104,14 @@ def test_greedy_gives_a_retried_candidate_before_a_fresh_one(clock):
 # B1: static waves
 # ---------------------------------------------------------------------------
 
+
 def test_a_wave_gives_each_worker_one_candidate_and_the_others_wait(clock):
     ledger, api = make(clock, StaticWave(2))
 
     assert index_of(ask(api, "a")) == 0
     assert index_of(ask(api, "b")) == 1
     third = api.handle("lease", {"worker_id": "c"})
-    assert third == {"ok": True, "generation_state": "OPEN", "work": None}          # the wave is full: nothing for c
+    assert third == {"ok": True, "generation_state": "OPEN", "work": None}  # the wave is full: nothing for c
 
 
 def test_a_worker_that_is_done_waits_for_the_slow_one_before_the_next_wave(clock):
@@ -102,11 +119,11 @@ def test_a_worker_that_is_done_waits_for_the_slow_one_before_the_next_wave(clock
     fast, slow = ask(api, "fast"), ask(api, "slow")
     deliver(api, fast)
 
-    assert ask(api, "fast") is None                         # c2 is waiting, but the wave of c0 and c1 is not over
+    assert ask(api, "fast") is None  # c2 is waiting, but the wave of c0 and c1 is not over
     assert ledger.get_candidate("exp/g0/c2").attempts == 0
     deliver(api, slow)
 
-    assert index_of(ask(api, "fast")) == 2                 # the wave is over: the next one starts
+    assert index_of(ask(api, "fast")) == 2  # the wave is over: the next one starts
     assert index_of(ask(api, "slow")) == 3
 
 
@@ -115,9 +132,9 @@ def test_a_worker_takes_at_most_one_candidate_per_wave_even_if_it_asks_again(clo
     only = ask(api, "a")
     assert index_of(only) == 0
 
-    assert ask(api, "a") is None                            # it holds c0: c1 is for the other worker
+    assert ask(api, "a") is None  # it holds c0: c1 is for the other worker
     deliver(api, only)
-    assert ask(api, "a") is None                            # it delivered c0: still no second one in this wave
+    assert ask(api, "a") is None  # it delivered c0: still no second one in this wave
     assert index_of(ask(api, "b")) == 1
 
 
@@ -125,7 +142,7 @@ def test_a_failed_candidate_is_retried_inside_its_wave_by_a_worker_that_is_free(
     ledger, api = make(clock, StaticWave(2))
     a, b = ask(api, "a"), ask(api, "b")
     deliver(api, a)
-    fail(api, b)                                            # c1 is waiting again, and "a" has already done its part
+    fail(api, b)  # c1 is waiting again, and "a" has already done its part
 
     assert ask(api, "a") is None
     retry = ask(api, "c")
@@ -146,10 +163,10 @@ def test_the_worker_whose_attempt_failed_may_take_the_retry(clock):
 def test_a_lease_that_ran_out_blocks_its_wave_only_until_somebody_retakes_it(clock):
     ledger, api = make(clock, StaticWave(2))
     deliver(api, ask(api, "a"))
-    ask(api, "b")                                           # c1 is taken and never delivered
+    ask(api, "b")  # c1 is taken and never delivered
     clock.advance(LEASE_SECONDS)
 
-    retry = ask(api, "a")                                   # "a" has done its part; the retry is not for it
+    retry = ask(api, "a")  # "a" has done its part; the retry is not for it
 
     assert retry is None
     assert index_of(ask(api, "c")) == 1
@@ -172,7 +189,7 @@ def test_the_waves_are_cut_by_index_and_the_last_one_may_be_smaller(clock):
 def test_a_wave_of_one_is_a_sequence_a_wave_as_wide_as_the_generation_is_everything_at_once(clock):
     ledger, api = make(clock, StaticWave(1), n=3)
     first = ask(api, "a")
-    assert ask(api, "b") is None                            # one at a time in the whole cluster
+    assert ask(api, "b") is None  # one at a time in the whole cluster
     deliver(api, first)
     assert index_of(ask(api, "b")) == 1
 
@@ -203,6 +220,7 @@ def test_a_policy_is_told_about_the_leases_it_gave(clock):
 # ---------------------------------------------------------------------------
 # the API serves one request at a time, so "pick, then lease" is not a race
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.parametrize("policy", [Greedy, lambda: StaticWave(8)])
 def test_many_threads_asking_at_once_each_get_a_different_candidate_and_no_error(policy):

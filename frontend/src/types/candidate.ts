@@ -1,8 +1,4 @@
-export type CandidateStatus =
-  | "PENDING"
-  | "LEASED"
-  | "RUNNING"
-  | "COMMITTED";
+export type CandidateStatus = 'PENDING' | 'LEASED' | 'RUNNING' | 'COMMITTED';
 
 export interface Candidate {
   experimentId: string;

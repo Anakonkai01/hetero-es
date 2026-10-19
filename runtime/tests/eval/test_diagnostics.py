@@ -1,5 +1,6 @@
 """Pure parts of the cross-GPU diagnostics: the margin between the two best next-token scores at each step of a greedy answer, and
 where two answers first differ. (The model parts are exercised by scripts/cross_gpu_sweep.py on the real model.)"""
+
 import pytest
 import torch
 
@@ -34,7 +35,9 @@ def test_margins_are_float64_numbers_of_the_scores_as_given():
 def test_first_divergence_by_hand():
     assert first_divergence([1, 2, 3, 4], [1, 2, 9, 4]) == 2
     assert first_divergence([1, 2, 3], [1, 2, 3]) is None
-    assert first_divergence([1, 2, 3], [1, 2, 3, 4]) == 3          # one is a prefix of the other: they differ where the shorter ends
+    assert (
+        first_divergence([1, 2, 3], [1, 2, 3, 4]) == 3
+    )  # one is a prefix of the other: they differ where the shorter ends
     assert first_divergence([], [7]) == 0
     assert first_divergence([], []) is None
 
@@ -42,7 +45,13 @@ def test_first_divergence_by_hand():
 def test_summarize_pair_reports_the_step_and_the_margins_there():
     a = {"ids": [5, 6, 7, 8], "margins": [9.0, 8.0, 0.25, 7.0]}
     b = {"ids": [5, 6, 9, 8], "margins": [9.0, 8.0, 0.5, 7.0]}
-    assert summarize_pair(a, b) == {"differs": True, "step": 2, "margin_a": 0.25, "margin_b": 0.5, "min_margin_before": 8.0}
+    assert summarize_pair(a, b) == {
+        "differs": True,
+        "step": 2,
+        "margin_a": 0.25,
+        "margin_b": 0.5,
+        "min_margin_before": 8.0,
+    }
 
 
 def test_summarize_pair_of_equal_answers_says_so():

@@ -4,6 +4,7 @@
 A tiny Qwen2 model with random weights on the CPU (FP32), left-padded prompts of different lengths and end tokens chosen from what the model really generates, so that the rows of a batch
 end at different steps (a premise check makes sure of it: without staggered ends nothing would be compacted and the tests would prove nothing).
 """
+
 import copy
 
 import pytest
@@ -20,8 +21,17 @@ NEW = 30
 
 def tiny_model(repetition_penalty=None):
     torch.manual_seed(1234)
-    config = Qwen2Config(vocab_size=64, hidden_size=32, intermediate_size=64, num_hidden_layers=2, num_attention_heads=4, num_key_value_heads=2,
-                         max_position_embeddings=256, tie_word_embeddings=False, initializer_range=0.4)
+    config = Qwen2Config(
+        vocab_size=64,
+        hidden_size=32,
+        intermediate_size=64,
+        num_hidden_layers=2,
+        num_attention_heads=4,
+        num_key_value_heads=2,
+        max_position_embeddings=256,
+        tie_word_embeddings=False,
+        initializer_range=0.4,
+    )
     model = Qwen2ForCausalLM(config).float().eval()
     model.generation_config.pad_token_id = PAD
     model.generation_config.do_sample = False
@@ -36,8 +46,8 @@ def left_padded(lengths=LENGTHS, seed=7):
     ids = torch.full((len(lengths), width), PAD, dtype=torch.long)
     mask = torch.zeros((len(lengths), width), dtype=torch.long)
     for row, length in enumerate(lengths):
-        ids[row, width - length:] = torch.randint(2, 63, (length,), generator=generator)
-        mask[row, width - length:] = 1
+        ids[row, width - length :] = torch.randint(2, 63, (length,), generator=generator)
+        mask[row, width - length :] = 1
     return ids, mask
 
 
@@ -45,12 +55,14 @@ def library_new_tokens(model, ids, mask, eos):
     model.generation_config.eos_token_id = eos
     with torch.no_grad():
         out = model.generate(input_ids=ids, attention_mask=mask, max_new_tokens=NEW, do_sample=False, pad_token_id=PAD)
-    return out[:, ids.shape[1]:]
+    return out[:, ids.shape[1] :]
 
 
 def staggered_eos(model, ids, mask):
     """End tokens taken from the sequences the model really generates, at different positions, so that the rows end at different steps."""
-    free = library_new_tokens(model, ids, mask, [NEVER])           # an id outside the vocabulary: nothing ends, whole sequences are seen
+    free = library_new_tokens(
+        model, ids, mask, [NEVER]
+    )  # an id outside the vocabulary: nothing ends, whole sequences are seen
     eos = sorted({int(free[0, 3]), int(free[1, 6]), int(free[2, 9])})
     return eos
 
@@ -79,7 +91,9 @@ def run_both(repetition_penalty=None):
 
 def test_same_ids_as_generate_when_the_rows_end_at_different_steps():
     reference, tokens, stats, _ = run_both()
-    assert torch.equal(tokens, reference)                      # the same width too: the library stops when every row has ended, and so does the decoder
+    assert torch.equal(
+        tokens, reference
+    )  # the same width too: the library stops when every row has ended, and so does the decoder
 
 
 def test_same_ids_with_the_repetition_penalty_of_the_generation_config():
@@ -98,12 +112,13 @@ def test_the_penalty_really_changes_the_answers_in_this_setup():
 def test_rows_are_removed_and_work_is_saved():
     _, _, stats, steps = run_both()
     assert stats["compactions"] >= 1 and stats["compaction_supported"] is True
-    assert stats["slot_steps"] < stats["steps"] * len(LENGTHS)       # fewer rows computed than a batch that never shrinks
+    assert stats["slot_steps"] < stats["steps"] * len(LENGTHS)  # fewer rows computed than a batch that never shrinks
 
 
 def test_a_cache_that_cannot_select_rows_still_gives_the_same_ids(monkeypatch):
     def refuse(self, indices):
         raise NotImplementedError("no row selection in this cache")
+
     monkeypatch.setattr(DynamicCache, "batch_select_indices", refuse)
     reference, tokens, stats, _ = run_both()
     assert torch.equal(tokens, reference)

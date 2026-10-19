@@ -1,31 +1,405 @@
-import {useEffect,useState} from 'react';
-import {createRoot} from 'react-dom/client';
-import {ProductProvider,PreferencesControl,StepHeader,Status,Alert,ProductMark,CopyValue,ResourceTelemetry,type ResourceObservation,type ResourceHistoryPoint,readableBytes,useProduct} from '@heteroes/product-ui';
+import { useEffect, useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import {
+  ProductProvider,
+  PreferencesControl,
+  StepHeader,
+  Status,
+  Alert,
+  ProductMark,
+  CopyValue,
+  ResourceTelemetry,
+  type ResourceObservation,
+  type ResourceHistoryPoint,
+  readableBytes,
+  useProduct,
+} from '@heteroes/product-ui';
 import '@heteroes/product-ui/theme.css';
 import '../../worker/src/style.css';
-type Host={sampledAt:number;cpuCount:number;cpuPercent:number|null;ramTotalBytes:number;ramUsedBytes:number;disks:{label:string;totalBytes:number;freeBytes:number;usedBytes:number}[]};
-type State={setup:{installed:boolean;running:boolean;progress:{stage:string;received?:number;total?:number}},initialized:boolean,running:boolean,error?:string,addresses:string[],apiUrl:string|null,storageDirectory:string|null,autostart:boolean,hostTelemetry?:Host;resourceTelemetry?:ResourceObservation;telemetryHistory?:ResourceHistoryPoint[]};
-type Storage={storageDirectory:string,storageVolumeUUID:string|null};
-declare global{interface Window{labServer:{call:(action:string,args?:Record<string,unknown>)=>Promise<{ok:boolean,result?:unknown,error?:string}>}}}
-function App(){
- const {t}=useProduct();const [state,setState]=useState<State>();const [busy,setBusy]=useState('');const [error,setError]=useState('');
- const [host,setHost]=useState('127.0.0.1');const [port,setPort]=useState(8000);const [username,setUsername]=useState('admin');const [password,setPassword]=useState('');const [storage,setStorage]=useState<Storage>();
- useEffect(()=>{let active=true,inFlight=false;const refresh=async()=>{if(inFlight)return;inFlight=true;try{const reply=await window.labServer.call('status');if(active){if(reply.ok)setState(reply.result as State);else setError(reply.error??'ACTION_FAILED');}}catch{if(active)setError('STATUS_UNAVAILABLE');}finally{inFlight=false;}};void refresh();const timer=setInterval(()=>void refresh(),2000);return()=>{active=false;clearInterval(timer);};},[]);
- async function command(action:string,args:Record<string,unknown>={}){setBusy(action);setError('');try{const r=await window.labServer.call(action,args);if(!r.ok)throw Error(r.error);const status=await window.labServer.call('status');if(status.ok)setState(status.result as State);return r.result;}catch(e){setError(e instanceof Error?e.message:'ACTION_FAILED');return undefined;}finally{setBusy('');}}
- const locked=!state||!!busy||!!state.setup.running;
- const errors:Record<string,string>={SERVER_START_FAILED:'Server could not start. Check that the address and port are available.',SERVER_START_TIMEOUT:'Server did not become ready. Retry or review the local diagnostics.',LAB_ADDRESS_UNAVAILABLE:'The selected network address is offline. Reconnect LAN or Tailscale.',INSUFFICIENT_DISK_SPACE:'Free some disk space and retry.',RUNTIME_PROCESS_FAILED:'Setup failed. Check your network and selected storage, then retry.',SERVER_SHUTDOWN_PENDING:'Server is still shutting down. Keep this app open and retry.',ACTION_FAILED:'The action failed. Check the selected storage and network.',STATUS_UNAVAILABLE:'Server status unavailable. Keep the app open and retry.'};
- const errorCode=error||state?.error||'';const progress=state?.setup.progress;
- return <div className="desktop-shell"><header className="desktop-header"><div className="brand"><ProductMark/><span>HeteroES <small>Lab Server</small></span></div><PreferencesControl/></header><main>
- <div className="intro"><div><p className="eyebrow">HETEROES / CONTROL CENTER</p><h1>{t(state?.initialized?'Your lab, on this computer.':'Start a lab on this computer')}</h1><p>{t('Share one lab address with GPU contributors on LAN or Tailscale.')}</p></div><Status value={!state?'CONNECTING':state.running?'ONLINE':'OFF'}/></div>
- {errorCode&&<Alert tone="error">{t(errors[errorCode]??'The action failed. Check the selected storage and network.')}<details><summary>{t('Error details')}</summary><code>{errorCode}</code></details></Alert>}
- {!state?<section className="panel" role="status">{t('Loading…')}</section>:<>
- {!state.initialized&&<StepHeader steps={['Install Server','Create your lab','Start Server']} current={!state.setup.installed?0:1}/>}
- {!state.setup.installed?<div className="onboarding"><section className="panel"><h2>{t('Install Server')}</h2><p className="hint">{t('Install the private Server runtime. This computer does not need a GPU.')}</p><div className="setup-info"><p>{t('An isolated Python environment keeps Server separate from your system software.')}</p></div><button disabled={locked} onClick={()=>void command('install')}>{t(locked?'Installing…':'Install Server')} →</button></section><aside className="panel guide"><h2>{t('One address for your whole lab.')}</h2><p>{t('Server hosts the web dashboard, queue and checkpoint service. GPU computation runs on your connected Workers.')}</p><ul><li>{t('Create your administrator account.')}</li><li>{t('Choose where to keep checkpoints.')}</li><li>{t('Share your lab address with contributors.')}</li></ul></aside></div>:
- !state.initialized?<div className="onboarding"><form className="panel" onSubmit={e=>{e.preventDefault();if(storage)void command('initialize',{username,password,host,port,...storage}).then(result=>{if(result)setPassword('');});}}><h2>{t('Create your lab')}</h2><p className="hint">{t('Choose an address your contributors can reach and a disk for experiment checkpoints.')}</p><div className="server-form-grid"><label>{t('Lab address')}<select value={host} onChange={e=>setHost(e.target.value)}>{state.addresses.map(a=><option key={a}>{a}</option>)}</select></label><label>{t('Port')}<input type="number" min={1024} max={65535} value={port} onChange={e=>setPort(Number(e.target.value))} required/></label></div>{host==='127.0.0.1'&&<Alert>{t('This address works only on this computer. Select LAN or Tailscale to connect other computers.')}</Alert>}<div className="server-form-grid"><label>{t('Administrator username')}<input value={username} onChange={e=>setUsername(e.target.value)} pattern="[a-zA-Z0-9_.-]+" minLength={2} maxLength={100} autoComplete="username" required/></label><label>{t('Administrator password')}<input type="password" value={password} onChange={e=>setPassword(e.target.value)} minLength={12} maxLength={200} autoComplete="new-password" required/><small className="hint">{t('At least 12 characters')}</small></label></div><div className="setup-info"><p>{t('Checkpoint storage')}</p><code>{storage?.storageDirectory??t('No storage selected')}</code></div><div className="secondary-actions"><button type="button" className="secondary" disabled={locked} onClick={()=>void command('chooseStorage').then(r=>{if(r)setStorage(r as Storage);})}>{t('Choose storage')}</button><button disabled={locked||!storage} type="submit">{t('Create your lab')} →</button></div></form><aside className="panel guide"><h2>{t('Ready to bring your lab online.')}</h2><p>{t('Use a LAN or Tailscale address to connect other computers.')}</p><p>{t('The first administrator manages accounts, device approval and dispatch.')}</p></aside></div>:
- <div className="server-overview"><div><section className="panel"><div className="panel-heading"><h2>{t('Lab service')}</h2><Status value={state.running?'ONLINE':'OFF'}/></div><p className="hint">{t(state.running?'Your lab is available at this address.':'Start Server to make the dashboard available.')}</p><div className="server-address"><CopyValue value={state.apiUrl??'—'} label="Copy address"/></div><div className="secondary-actions"><button disabled={locked} onClick={()=>void command(state.running?'stop':'start')}>{t(state.running?'Stop Server':'Start Server')}</button><button className="secondary" disabled={locked||!state.running} onClick={()=>void command('openLab')}>{t('Open lab')} ↗</button></div><label style={{display:'flex',alignItems:'center',marginTop:22}}><input type="checkbox" disabled={locked} checked={state.autostart} onChange={e=>void command('autostart',{enabled:e.target.checked})}/>{t('Start my lab when I sign in to this computer')}</label><p className="hint">{t('Closing this window keeps the Server in the tray. Quit stops the Server; workers keep outage evidence locally.')}</p></section>
- <section className="panel"><h2>{t('Get your lab ready')}</h2><ol className="server-checklist">{[['1','Invite contributors','Share the lab address so contributors can create an account.'],['2','Approve GPU devices','Contributors install Worker and pair their device. Approve it in Operations.'],['3','Review dispatch','New labs start with the queue held. Review resources, then enable dispatch in Operations.']].map(([n,title,text])=><li key={n}><span>{n}</span><div><b>{t(title)}</b><p>{t(text)}</p></div></li>)}</ol></section></div>
- <aside className="panel monitoring-panel"><div className="panel-heading"><h2>{t('Server resources')}</h2><Status value="CPU service"/></div><ResourceTelemetry observation={state.resourceTelemetry} history={state.telemetryHistory}/><details className="desktop-detail"><summary>{t('Checkpoint storage')}</summary><code>{state.storageDirectory}</code></details><p className="hint">{t('Resource measurements describe this computer. GPU monitoring does not start GPU computation.')}</p></aside></div>}
- {(busy||state.setup.running)&&<section className="panel" role="status"><div className="panel-heading"><h2>{t('Progress')}</h2><Status value="RUNNING"/></div><p>{t(progress?.stage??busy)}</p>{!!progress?.total&&<><progress value={progress.received??0} max={progress.total}/><div className="setup-progress"><span>{readableBytes(progress.received)} / {readableBytes(progress.total)}</span><b>{Math.min(100,Math.round((progress.received??0)/progress.total*100))}%</b></div></>}</section>}
- </>}</main><footer className="desktop-footer"><p className="hint">HeteroES Lab Server · {t('CPU service, connected GPUs.')}</p><button className="secondary" disabled={locked} onClick={()=>void command('quit')}>{t('Quit')}</button></footer></div>;
+type Host = {
+  sampledAt: number;
+  cpuCount: number;
+  cpuPercent: number | null;
+  ramTotalBytes: number;
+  ramUsedBytes: number;
+  disks: { label: string; totalBytes: number; freeBytes: number; usedBytes: number }[];
+};
+type State = {
+  setup: { installed: boolean; running: boolean; progress: { stage: string; received?: number; total?: number } };
+  initialized: boolean;
+  running: boolean;
+  error?: string;
+  addresses: string[];
+  apiUrl: string | null;
+  storageDirectory: string | null;
+  autostart: boolean;
+  hostTelemetry?: Host;
+  resourceTelemetry?: ResourceObservation;
+  telemetryHistory?: ResourceHistoryPoint[];
+};
+type Storage = { storageDirectory: string; storageVolumeUUID: string | null };
+declare global {
+  interface Window {
+    labServer: {
+      call: (
+        action: string,
+        args?: Record<string, unknown>,
+      ) => Promise<{ ok: boolean; result?: unknown; error?: string }>;
+    };
+  }
 }
-createRoot(document.getElementById('root')!).render(<ProductProvider><App/></ProductProvider>);
+function App() {
+  const { t } = useProduct();
+  const [state, setState] = useState<State>();
+  const [busy, setBusy] = useState('');
+  const [error, setError] = useState('');
+  const [host, setHost] = useState('127.0.0.1');
+  const [port, setPort] = useState(8000);
+  const [username, setUsername] = useState('admin');
+  const [password, setPassword] = useState('');
+  const [storage, setStorage] = useState<Storage>();
+  useEffect(() => {
+    let active = true,
+      inFlight = false;
+    const refresh = async () => {
+      if (inFlight) return;
+      inFlight = true;
+      try {
+        const reply = await window.labServer.call('status');
+        if (active) {
+          if (reply.ok) setState(reply.result as State);
+          else setError(reply.error ?? 'ACTION_FAILED');
+        }
+      } catch {
+        if (active) setError('STATUS_UNAVAILABLE');
+      } finally {
+        inFlight = false;
+      }
+    };
+    void refresh();
+    const timer = setInterval(() => void refresh(), 2000);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
+  }, []);
+  async function command(action: string, args: Record<string, unknown> = {}) {
+    setBusy(action);
+    setError('');
+    try {
+      const r = await window.labServer.call(action, args);
+      if (!r.ok) throw Error(r.error);
+      const status = await window.labServer.call('status');
+      if (status.ok) setState(status.result as State);
+      return r.result;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'ACTION_FAILED');
+      return undefined;
+    } finally {
+      setBusy('');
+    }
+  }
+  const locked = !state || !!busy || !!state.setup.running;
+  const errors: Record<string, string> = {
+    SERVER_START_FAILED: 'Server could not start. Check that the address and port are available.',
+    SERVER_START_TIMEOUT: 'Server did not become ready. Retry or review the local diagnostics.',
+    LAB_ADDRESS_UNAVAILABLE: 'The selected network address is offline. Reconnect LAN or Tailscale.',
+    INSUFFICIENT_DISK_SPACE: 'Free some disk space and retry.',
+    RUNTIME_PROCESS_FAILED: 'Setup failed. Check your network and selected storage, then retry.',
+    SERVER_SHUTDOWN_PENDING: 'Server is still shutting down. Keep this app open and retry.',
+    ACTION_FAILED: 'The action failed. Check the selected storage and network.',
+    STATUS_UNAVAILABLE: 'Server status unavailable. Keep the app open and retry.',
+  };
+  const errorCode = error || state?.error || '';
+  const progress = state?.setup.progress;
+  return (
+    <div className="desktop-shell">
+      <header className="desktop-header">
+        <div className="brand">
+          <ProductMark />
+          <span>
+            HeteroES <small>Lab Server</small>
+          </span>
+        </div>
+        <PreferencesControl />
+      </header>
+      <main>
+        <div className="intro">
+          <div>
+            <p className="eyebrow">HETEROES / CONTROL CENTER</p>
+            <h1>{t(state?.initialized ? 'Your lab, on this computer.' : 'Start a lab on this computer')}</h1>
+            <p>{t('Share one lab address with GPU contributors on LAN or Tailscale.')}</p>
+          </div>
+          <Status value={!state ? 'CONNECTING' : state.running ? 'ONLINE' : 'OFF'} />
+        </div>
+        {errorCode && (
+          <Alert tone="error">
+            {t(errors[errorCode] ?? 'The action failed. Check the selected storage and network.')}
+            <details>
+              <summary>{t('Error details')}</summary>
+              <code>{errorCode}</code>
+            </details>
+          </Alert>
+        )}
+        {!state ? (
+          <section className="panel" role="status">
+            {t('Loading…')}
+          </section>
+        ) : (
+          <>
+            {!state.initialized && (
+              <StepHeader
+                steps={['Install Server', 'Create your lab', 'Start Server']}
+                current={!state.setup.installed ? 0 : 1}
+              />
+            )}
+            {!state.setup.installed ? (
+              <div className="onboarding">
+                <section className="panel">
+                  <h2>{t('Install Server')}</h2>
+                  <p className="hint">{t('Install the private Server runtime. This computer does not need a GPU.')}</p>
+                  <div className="setup-info">
+                    <p>{t('An isolated Python environment keeps Server separate from your system software.')}</p>
+                  </div>
+                  <button disabled={locked} onClick={() => void command('install')}>
+                    {t(locked ? 'Installing…' : 'Install Server')} →
+                  </button>
+                </section>
+                <aside className="panel guide">
+                  <h2>{t('One address for your whole lab.')}</h2>
+                  <p>
+                    {t(
+                      'Server hosts the web dashboard, queue and checkpoint service. GPU computation runs on your connected Workers.',
+                    )}
+                  </p>
+                  <ul>
+                    <li>{t('Create your administrator account.')}</li>
+                    <li>{t('Choose where to keep checkpoints.')}</li>
+                    <li>{t('Share your lab address with contributors.')}</li>
+                  </ul>
+                </aside>
+              </div>
+            ) : !state.initialized ? (
+              <div className="onboarding">
+                <form
+                  className="panel"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (storage)
+                      void command('initialize', { username, password, host, port, ...storage }).then((result) => {
+                        if (result) setPassword('');
+                      });
+                  }}
+                >
+                  <h2>{t('Create your lab')}</h2>
+                  <p className="hint">
+                    {t('Choose an address your contributors can reach and a disk for experiment checkpoints.')}
+                  </p>
+                  <div className="server-form-grid">
+                    <label>
+                      {t('Lab address')}
+                      <select value={host} onChange={(e) => setHost(e.target.value)}>
+                        {state.addresses.map((a) => (
+                          <option key={a}>{a}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      {t('Port')}
+                      <input
+                        type="number"
+                        min={1024}
+                        max={65535}
+                        value={port}
+                        onChange={(e) => setPort(Number(e.target.value))}
+                        required
+                      />
+                    </label>
+                  </div>
+                  {host === '127.0.0.1' && (
+                    <Alert>
+                      {t(
+                        'This address works only on this computer. Select LAN or Tailscale to connect other computers.',
+                      )}
+                    </Alert>
+                  )}
+                  <div className="server-form-grid">
+                    <label>
+                      {t('Administrator username')}
+                      <input
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        pattern="[a-zA-Z0-9_.-]+"
+                        minLength={2}
+                        maxLength={100}
+                        autoComplete="username"
+                        required
+                      />
+                    </label>
+                    <label>
+                      {t('Administrator password')}
+                      <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        minLength={12}
+                        maxLength={200}
+                        autoComplete="new-password"
+                        required
+                      />
+                      <small className="hint">{t('At least 12 characters')}</small>
+                    </label>
+                  </div>
+                  <div className="setup-info">
+                    <p>{t('Checkpoint storage')}</p>
+                    <code>{storage?.storageDirectory ?? t('No storage selected')}</code>
+                  </div>
+                  <div className="secondary-actions">
+                    <button
+                      type="button"
+                      className="secondary"
+                      disabled={locked}
+                      onClick={() =>
+                        void command('chooseStorage').then((r) => {
+                          if (r) setStorage(r as Storage);
+                        })
+                      }
+                    >
+                      {t('Choose storage')}
+                    </button>
+                    <button disabled={locked || !storage} type="submit">
+                      {t('Create your lab')} →
+                    </button>
+                  </div>
+                </form>
+                <aside className="panel guide">
+                  <h2>{t('Ready to bring your lab online.')}</h2>
+                  <p>{t('Use a LAN or Tailscale address to connect other computers.')}</p>
+                  <p>{t('The first administrator manages accounts, device approval and dispatch.')}</p>
+                </aside>
+              </div>
+            ) : (
+              <div className="server-overview">
+                <div>
+                  <section className="panel">
+                    <div className="panel-heading">
+                      <h2>{t('Lab service')}</h2>
+                      <Status value={state.running ? 'ONLINE' : 'OFF'} />
+                    </div>
+                    <p className="hint">
+                      {t(
+                        state.running
+                          ? 'Your lab is available at this address.'
+                          : 'Start Server to make the dashboard available.',
+                      )}
+                    </p>
+                    <div className="server-address">
+                      <CopyValue value={state.apiUrl ?? '—'} label="Copy address" />
+                    </div>
+                    <div className="secondary-actions">
+                      <button disabled={locked} onClick={() => void command(state.running ? 'stop' : 'start')}>
+                        {t(state.running ? 'Stop Server' : 'Start Server')}
+                      </button>
+                      <button
+                        className="secondary"
+                        disabled={locked || !state.running}
+                        onClick={() => void command('openLab')}
+                      >
+                        {t('Open lab')} ↗
+                      </button>
+                    </div>
+                    <label style={{ display: 'flex', alignItems: 'center', marginTop: 22 }}>
+                      <input
+                        type="checkbox"
+                        disabled={locked}
+                        checked={state.autostart}
+                        onChange={(e) => void command('autostart', { enabled: e.target.checked })}
+                      />
+                      {t('Start my lab when I sign in to this computer')}
+                    </label>
+                    <p className="hint">
+                      {t(
+                        'Closing this window keeps the Server in the tray. Quit stops the Server; workers keep outage evidence locally.',
+                      )}
+                    </p>
+                  </section>
+                  <section className="panel">
+                    <h2>{t('Get your lab ready')}</h2>
+                    <ol className="server-checklist">
+                      {[
+                        ['1', 'Invite contributors', 'Share the lab address so contributors can create an account.'],
+                        [
+                          '2',
+                          'Approve GPU devices',
+                          'Contributors install Worker and pair their device. Approve it in Operations.',
+                        ],
+                        [
+                          '3',
+                          'Review dispatch',
+                          'New labs start with the queue held. Review resources, then enable dispatch in Operations.',
+                        ],
+                      ].map(([n, title, text]) => (
+                        <li key={n}>
+                          <span>{n}</span>
+                          <div>
+                            <b>{t(title)}</b>
+                            <p>{t(text)}</p>
+                          </div>
+                        </li>
+                      ))}
+                    </ol>
+                  </section>
+                </div>
+                <aside className="panel monitoring-panel">
+                  <div className="panel-heading">
+                    <h2>{t('Server resources')}</h2>
+                    <Status value="CPU service" />
+                  </div>
+                  <ResourceTelemetry observation={state.resourceTelemetry} history={state.telemetryHistory} />
+                  <details className="desktop-detail">
+                    <summary>{t('Checkpoint storage')}</summary>
+                    <code>{state.storageDirectory}</code>
+                  </details>
+                  <p className="hint">
+                    {t('Resource measurements describe this computer. GPU monitoring does not start GPU computation.')}
+                  </p>
+                </aside>
+              </div>
+            )}
+            {(busy || state.setup.running) && (
+              <section className="panel" role="status">
+                <div className="panel-heading">
+                  <h2>{t('Progress')}</h2>
+                  <Status value="RUNNING" />
+                </div>
+                <p>{t(progress?.stage ?? busy)}</p>
+                {!!progress?.total && (
+                  <>
+                    <progress value={progress.received ?? 0} max={progress.total} />
+                    <div className="setup-progress">
+                      <span>
+                        {readableBytes(progress.received)} / {readableBytes(progress.total)}
+                      </span>
+                      <b>{Math.min(100, Math.round(((progress.received ?? 0) / progress.total) * 100))}%</b>
+                    </div>
+                  </>
+                )}
+              </section>
+            )}
+          </>
+        )}
+      </main>
+      <footer className="desktop-footer">
+        <p className="hint">HeteroES Lab Server · {t('CPU service, connected GPUs.')}</p>
+        <button className="secondary" disabled={locked} onClick={() => void command('quit')}>
+          {t('Quit')}
+        </button>
+      </footer>
+    </div>
+  );
+}
+createRoot(document.getElementById('root')!).render(
+  <ProductProvider>
+    <App />
+  </ProductProvider>,
+);

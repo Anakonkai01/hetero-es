@@ -1,4 +1,5 @@
 """Agent supervisor ownership and ledger projections, without acquiring a GPU."""
+
 import json
 
 import pytest
@@ -10,16 +11,26 @@ from test_coordinator import Env
 
 
 def config(run_id="a" * 32, **changes):
-    return {"runId": run_id, "maxGenerations": 3, "candidatesPerGeneration": 8, "alpha": .001, "sigma": .001,
-            "workload": "arith16", "decodeEngine": "hf_generate", "workerIds": ["local"],
-            "schedulerPolicy": "greedy", "syncMode": "synchronous", **changes}
+    return {
+        "runId": run_id,
+        "maxGenerations": 3,
+        "candidatesPerGeneration": 8,
+        "alpha": 0.001,
+        "sigma": 0.001,
+        "workload": "arith16",
+        "decodeEngine": "hf_generate",
+        "workerIds": ["local"],
+        "schedulerPolicy": "greedy",
+        "syncMode": "synchronous",
+        **changes,
+    }
 
 
 @pytest.fixture
 def manager(tmp_path):
     device = agent(tmp_path)
     device.enabled = True
-    device.manager.workers = {name: {'id': name} for name in ('local', 'remote')}
+    device.manager.workers = {name: {"id": name} for name in ("local", "remote")}
     return device.manager
 
 
@@ -27,7 +38,7 @@ def test_submission_is_idempotent_and_single_owner(manager):
     manager.submit(config())
     manager.submit(config())
     with pytest.raises(ValueError, match="different"):
-        manager.submit(config(alpha=.002))
+        manager.submit(config(alpha=0.002))
     with pytest.raises(RuntimeError, match="owns"):
         manager.submit(config("b" * 32))
     root = manager.directory("a" * 32)
@@ -35,9 +46,20 @@ def test_submission_is_idempotent_and_single_owner(manager):
     manager.submit(config("b" * 32))
 
 
-@pytest.mark.parametrize("changes", [{"runId": "../escape"}, {"workerIds": ["other"]}, {"workerIds": ["local", "local"]},
-    {"alpha": float("nan")}, {"sigma": float("inf")}, {"maxGenerations": True}, {"candidatesPerGeneration": 1},
-    {"schedulerPolicy": "capacity-weighted"}, {"syncMode": "asynchronous"}])
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"runId": "../escape"},
+        {"workerIds": ["other"]},
+        {"workerIds": ["local", "local"]},
+        {"alpha": float("nan")},
+        {"sigma": float("inf")},
+        {"maxGenerations": True},
+        {"candidatesPerGeneration": 1},
+        {"schedulerPolicy": "capacity-weighted"},
+        {"syncMode": "asynchronous"},
+    ],
+)
 def test_bad_runtime_configuration_never_launches(manager, changes):
     with pytest.raises(ValueError):
         manager.submit(config(**changes))
@@ -49,7 +71,7 @@ def prepare(manager, monkeypatch, workers=("local",)):
     root = manager.directory("a" * 32)
     write_json(root / "process.json", {"pid": 123, "birth": "owned"})
     write_json(root / "runner.json", {"status": "PREPARING"})
-    write_json(root / 'assignment.json', {'config': {'workerIds': list(workers)}})
+    write_json(root / "assignment.json", {"config": {"workerIds": list(workers)}})
     monkeypatch.setattr(run_supervisor, "alive", lambda record: True)
     monkeypatch.setattr(agent_module, "alive", lambda record: True)
     return root
@@ -57,21 +79,30 @@ def prepare(manager, monkeypatch, workers=("local",)):
 
 def test_offline_preflight_never_claims_unstarted_worker(manager, monkeypatch):
     root = prepare(manager, monkeypatch, ("local", "remote"))
+
     def call(worker, request):
         if worker["id"] == "remote":
             raise RuntimeError("Agent offline before launch")
         return {"ready": True, "alive": True, "events": []}
+
     monkeypatch.setattr(manager, "remote", call)
     manager.tick(root)
     assert (root / "start.flag").exists()
     assert manager.state(root)["workerStates"]["remote"]["notStarted"]
-    assert any("remote" in line and "worker_unavailable" in line for line in (root / "lifecycle.jsonl").read_text().splitlines())
+    assert any(
+        "remote" in line and "worker_unavailable" in line
+        for line in (root / "lifecycle.jsonl").read_text().splitlines()
+    )
 
 
 def test_long_healthy_run_is_not_cancelled_by_historical_budget(manager, monkeypatch):
     root = prepare(manager, monkeypatch)
-    manager.save(root, startedAt=run_supervisor.time.time() - 3600, workersLaunched=True,
-                 workerStates={"local": {"alive": True, "ready": True, "confirmed": True}})
+    manager.save(
+        root,
+        startedAt=run_supervisor.time.time() - 3600,
+        workersLaunched=True,
+        workerStates={"local": {"alive": True, "ready": True, "confirmed": True}},
+    )
     write_json(root / "runner.json", {"status": "RUNNING"})
     monkeypatch.setattr(manager, "remote", lambda *_: {"alive": True, "ready": True, "events": []})
     manager.tick(root)
@@ -102,8 +133,10 @@ def test_only_one_automatic_coordinator_recovery(manager, monkeypatch):
     write_json(root / "runner.json", {"status": "RUNNING"})
     monkeypatch.setattr(run_supervisor, "alive", lambda _: False)
     monkeypatch.setattr(agent_module, "alive", lambda _: False)
+
     def launch(root):
         write_json(root / "process.json", {"pid": 999, "birth": "owned"})
+
     monkeypatch.setattr(manager, "launch", launch)
     manager.tick(root)
     assert manager.state(root)["recoveryCount"] == 1
@@ -153,8 +186,11 @@ def test_wsl_worker_rejects_ambiguous_driver_and_preserves_linux_environment(tmp
 def test_restore_mismatch_quarantine_survives_run_completion(manager, monkeypatch):
     root = prepare(manager, monkeypatch)
     manager.save(root, workerStates={"local": {"alive": True, "ready": True, "confirmed": True}})
-    monkeypatch.setattr(manager, "remote", lambda *_: {"alive": False, "ready": True,
-        "events": [{"event": "exit", "reason": "quarantined"}]})
+    monkeypatch.setattr(
+        manager,
+        "remote",
+        lambda *_: {"alive": False, "ready": True, "events": [{"event": "exit", "reason": "quarantined"}]},
+    )
     assert manager.poll_workers(root)
     manager.save(root, status="FAILED")
     with pytest.raises(ValueError, match="quarantined"):
@@ -172,6 +208,7 @@ def test_projection_preserves_seed_string_and_hides_lease_tokens(manager, tmp_pa
     try:
         env.coordinator.run(1)
         import sqlite3
+
         with sqlite3.connect(root / "ledger.sqlite") as destination:
             env.ledger._db.backup(destination)
         result = manager.snapshot("a" * 32)

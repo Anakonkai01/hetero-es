@@ -50,6 +50,7 @@ class GenerationRecord:
     artifacts/experiments/2026-10-06-coefficient-residue.)
     The rewards stay in the record so that the coefficients can be audited (`verify_coefficients`).
     """
+
     experiment_id: str
     generation: int
     recipe_hash: str
@@ -73,11 +74,15 @@ class GenerationRecord:
         if len(set(seeds)) != len(seeds):
             raise ValueError("the seeds of a generation must all be different")
         rewards = tuple(_real("reward", value) for value in _as_tuple("rewards", self.rewards))
-        coefficients = tuple(_float32_value("coefficient", _real("coefficient", value))
-                             for value in _as_tuple("coefficients", self.coefficients))
+        coefficients = tuple(
+            _float32_value("coefficient", _real("coefficient", value))
+            for value in _as_tuple("coefficients", self.coefficients)
+        )
         if not (len(seeds) == len(rewards) == len(coefficients)):
-            raise ValueError(f"seeds, rewards and coefficients must have the same length "
-                             f"({len(seeds)}, {len(rewards)}, {len(coefficients)})")
+            raise ValueError(
+                f"seeds, rewards and coefficients must have the same length "
+                f"({len(seeds)}, {len(rewards)}, {len(coefficients)})"
+            )
         alpha = _real("alpha", self.alpha)
         if abs(alpha) > _FLOAT32_MAX:
             raise ValueError(f"alpha does not fit in a float32, got {alpha}")
@@ -116,15 +121,33 @@ class GenerationRecord:
 
     @classmethod
     def from_dict(cls, data: dict) -> "GenerationRecord":
-        _check_keys("generation record", data, {
-            "record_version", "experiment_id", "generation", "recipe_hash", "parent_weights_sha256", "seeds", "rewards",
-            "coefficients", "alpha", "alpha_float32"})
+        _check_keys(
+            "generation record",
+            data,
+            {
+                "record_version",
+                "experiment_id",
+                "generation",
+                "recipe_hash",
+                "parent_weights_sha256",
+                "seeds",
+                "rewards",
+                "coefficients",
+                "alpha",
+                "alpha_float32",
+            },
+        )
         if data["record_version"] != RECORD_VERSION:
             raise ValueError(f"unknown record version {data['record_version']}")
         record = cls(
-            experiment_id=data["experiment_id"], generation=data["generation"], recipe_hash=data["recipe_hash"],
-            parent_weights_sha256=data["parent_weights_sha256"], seeds=data["seeds"], rewards=data["rewards"],
-            coefficients=data["coefficients"], alpha=data["alpha"],
+            experiment_id=data["experiment_id"],
+            generation=data["generation"],
+            recipe_hash=data["recipe_hash"],
+            parent_weights_sha256=data["parent_weights_sha256"],
+            seeds=data["seeds"],
+            rewards=data["rewards"],
+            coefficients=data["coefficients"],
+            alpha=data["alpha"],
         )
         if record.to_dict() != data:
             raise ValueError("record does not round-trip (a derived value, such as alpha_float32, disagrees)")
@@ -140,7 +163,7 @@ class GenerationRecord:
         Exact by default: right for the coordinator that has just made them. `atol` is for an audit on another machine,
         where a coefficient that is 0.0 here may be a residue of 1e-16 there.
         """
-        from heteroes.es.update import standardize_rewards     # needs torch; the record itself does not
+        from heteroes.es.update import standardize_rewards  # needs torch; the record itself does not
 
         expected = standardize_rewards(self.rewards, eta).astype(np.float64)
         actual = np.asarray(self.coefficients, dtype=np.float32).astype(np.float64)
@@ -151,11 +174,16 @@ class GenerationRecord:
     @classmethod
     def from_results(cls, experiment_id: str, generation: int, results, alpha: float, eta: float) -> "GenerationRecord":
         """The record of a complete generation (`results` is what `Ledger.get_generation_results` returns)."""
-        from heteroes.es.update import standardize_rewards     # needs torch; the record itself does not
+        from heteroes.es.update import standardize_rewards  # needs torch; the record itself does not
 
         coefficients = tuple(float(value) for value in standardize_rewards(results.rewards, eta))
         return cls(
-            experiment_id=experiment_id, generation=generation, recipe_hash=results.recipe_hash,
-            parent_weights_sha256=results.parent_weights_sha256, seeds=tuple(results.seeds),
-            rewards=tuple(results.rewards), coefficients=coefficients, alpha=alpha,
+            experiment_id=experiment_id,
+            generation=generation,
+            recipe_hash=results.recipe_hash,
+            parent_weights_sha256=results.parent_weights_sha256,
+            seeds=tuple(results.seeds),
+            rewards=tuple(results.rewards),
+            coefficients=coefficients,
+            alpha=alpha,
         )

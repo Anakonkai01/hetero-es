@@ -3,6 +3,7 @@
 `evaluate(descriptor) -> reward` is the only thing that touches a GPU in real life; here it is a plain function.
 The worker talks to the coordinator only through a transport, as it will over the network.
 """
+
 import json
 
 import pytest
@@ -54,13 +55,15 @@ def make_worker(api, name="worker-a", evaluate=None):
 
 
 def failure_kind_of(ledger, index=0):
-    return ledger._db.execute("SELECT failure_kind FROM attempt WHERE candidate_id = ? ORDER BY attempt_number DESC",
-                              (f"exp/g0/c{index}",)).fetchone()[0]
+    return ledger._db.execute(
+        "SELECT failure_kind FROM attempt WHERE candidate_id = ? ORDER BY attempt_number DESC", (f"exp/g0/c{index}",)
+    ).fetchone()[0]
 
 
 # ---------------------------------------------------------------------------
 # a normal turn
 # ---------------------------------------------------------------------------
+
 
 def test_a_step_runs_the_candidate_and_delivers_the_reward(api, ledger):
     worker, evaluate = make_worker(api)
@@ -94,7 +97,7 @@ def test_integers_and_floats_are_rewards(api, ledger, reward):
 
 
 def test_with_every_candidate_held_by_others_there_is_no_work_but_the_generation_is_open(api):
-    for _ in range(3):                                                      # another worker takes them straight from the API
+    for _ in range(3):  # another worker takes them straight from the API
         assert api.handle("lease", {"worker_id": "worker-b"})["work"] is not None
     worker, evaluate = make_worker(api)
 
@@ -105,10 +108,17 @@ def test_with_every_candidate_held_by_others_there_is_no_work_but_the_generation
 
 def test_a_failed_generation_gives_no_work_and_says_why(api):
     held = api.handle("lease", {"worker_id": "worker-z"})["work"]
-    for i in range(3):                                # a different worker each time: Greedy (G6) does not hand a failed candidate back at once
+    for i in range(3):  # a different worker each time: Greedy (G6) does not hand a failed candidate back at once
         work = api.handle("lease", {"worker_id": f"worker-b{i}"})["work"]
-        api.handle("report_failure", {"descriptor": work["descriptor"], "attempt_number": work["attempt_number"],
-                                      "token": work["token"], "kind": "OTHER"})
+        api.handle(
+            "report_failure",
+            {
+                "descriptor": work["descriptor"],
+                "attempt_number": work["attempt_number"],
+                "token": work["token"],
+                "kind": "OTHER",
+            },
+        )
     worker, evaluate = make_worker(api)
 
     assert worker.step() == Step(StepKind.NO_WORK, generation_state=GenerationState.FAILED)
@@ -118,6 +128,7 @@ def test_a_failed_generation_gives_no_work_and_says_why(api):
 # ---------------------------------------------------------------------------
 # failures are reported, never turned into a reward
 # ---------------------------------------------------------------------------
+
 
 def test_a_failure_of_the_candidate_is_reported_with_its_kind_and_the_next_turn_retries(api, ledger):
     attempts = []
@@ -177,7 +188,7 @@ def test_a_failed_restore_is_reported_and_the_next_turn_finds_the_worker_in_quar
     after = worker.step()
 
     assert after == Step(StepKind.QUARANTINED, code="worker_quarantined")
-    assert len(evaluate.seen) == 1                                          # it was given nothing more to run
+    assert len(evaluate.seen) == 1  # it was given nothing more to run
     assert [q.worker_id for q in ledger.list_quarantined()] == ["worker-a"]
 
 
@@ -185,12 +196,13 @@ def test_a_failed_restore_is_reported_and_the_next_turn_finds_the_worker_in_quar
 # refusals: a result that is not accepted is not an exception
 # ---------------------------------------------------------------------------
 
+
 def test_a_slow_worker_whose_lease_was_taken_over_is_refused_and_the_other_result_stays(api, ledger, clock):
     quick, _ = make_worker(api, "worker-quick")
 
     def slow_evaluate(descriptor):
-        clock.advance(LEASE_SECONDS)                                        # the lease runs out while it computes...
-        assert quick.step() == Step(StepKind.COMMITTED, "exp/g0/c0")        # ...and another worker takes the candidate
+        clock.advance(LEASE_SECONDS)  # the lease runs out while it computes...
+        assert quick.step() == Step(StepKind.COMMITTED, "exp/g0/c0")  # ...and another worker takes the candidate
         return 0.9
 
     slow, _ = make_worker(api, "worker-slow", Calls(slow_evaluate))
@@ -214,11 +226,13 @@ def test_a_slow_worker_that_nobody_replaced_still_delivers(api, ledger, clock):
 
 
 def test_a_worker_put_in_quarantine_while_it_computes_is_told_when_it_delivers(api, ledger):
-    held = api.handle("lease", {"worker_id": "worker-a"})["work"]           # candidate 0, held by worker-a
+    held = api.handle("lease", {"worker_id": "worker-a"})["work"]  # candidate 0, held by worker-a
 
     def restore_fails_elsewhere(descriptor):
-        reply = api.handle("report_failure", {"descriptor": held["descriptor"], "attempt_number": 1,
-                                              "token": held["token"], "kind": "RESTORE_MISMATCH"})
+        reply = api.handle(
+            "report_failure",
+            {"descriptor": held["descriptor"], "attempt_number": 1, "token": held["token"], "kind": "RESTORE_MISMATCH"},
+        )
         assert reply == {"ok": True}
         return reward_of(descriptor)
 
@@ -259,7 +273,7 @@ def test_a_transport_that_resends_after_a_lost_acknowledgement_gets_the_already_
     def resending(operation, payload):
         reply = inner(operation, payload)
         if operation == "submit_result":
-            assert reply["outcome"] == "COMMITTED"                         # the first delivery committed; its answer is "lost"
+            assert reply["outcome"] == "COMMITTED"  # the first delivery committed; its answer is "lost"
             reply = inner(operation, payload)
         return reply
 
@@ -273,7 +287,9 @@ def test_a_transport_that_resends_after_a_lost_acknowledgement_gets_the_already_
 
 
 @pytest.mark.parametrize("operation, field", [("submit_result", "token"), ("report_failure", "kind")])
-def test_a_request_the_coordinator_cannot_read_is_a_bug_to_raise_not_a_refusal_to_step_over(api, ledger, operation, field):
+def test_a_request_the_coordinator_cannot_read_is_a_bug_to_raise_not_a_refusal_to_step_over(
+    api, ledger, operation, field
+):
     inner = local_transport(api)
 
     def corrupting(op, payload):
@@ -307,7 +323,7 @@ def test_the_worker_sends_only_json_to_the_coordinator(api):
     for _ in range(4):
         worker.step()
 
-    assert len(sent) == 7                                                   # 3 x (lease, result) and the last lease
+    assert len(sent) == 7  # 3 x (lease, result) and the last lease
     assert all(json.loads(json.dumps(payload)) == payload for payload in sent)
 
 

@@ -24,14 +24,13 @@ from heteroes.eval.workload import (
 # Hash of the workload recorded by the physical probes on both machines (2026-09-29).
 PROBE_WORKLOAD_HASH = "cad822bc1e65a9ec37d948e5415cff22c70f96500e2043e6299bbdd5cea0b8d5"
 
-PROBE_JSON = (
-    Path(__file__).resolve().parents[2] / "artifacts" / "probes" / "2026-09-29" / "probe_5070ti.json"
-)
+PROBE_JSON = Path(__file__).resolve().parents[2] / "artifacts" / "probes" / "2026-09-29" / "probe_5070ti.json"
 
 
 # ---------------------------------------------------------------------------
 # the workload is the one the probe recorded
 # ---------------------------------------------------------------------------
+
 
 def test_workload_hash_is_the_one_recorded_by_the_probes():
     assert workload_hash() == PROBE_WORKLOAD_HASH
@@ -87,6 +86,7 @@ def test_dropping_or_reordering_an_example_changes_the_hash():
 # the data itself: independent oracle for the answers
 # ---------------------------------------------------------------------------
 
+
 def test_there_are_16_examples_with_integer_answers_and_distinct_questions():
     assert len(EXAMPLES) == 16
     assert all(isinstance(e.answer, int) and not isinstance(e.answer, bool) for e in EXAMPLES)
@@ -105,10 +105,10 @@ def test_the_twelve_arithmetic_answers_are_right():
 def test_the_four_word_problem_answers_are_right():
     # Worked by hand from the text of each problem.
     expected = {
-        12: 48 * 36 - 725,    # pens remaining
-        13: 36 * 24 - 579,    # notebooks remaining
-        14: 72 * 5 + 148,     # total distance
-        15: 125 * 18 - 347,   # usable items
+        12: 48 * 36 - 725,  # pens remaining
+        13: 36 * 24 - 579,  # notebooks remaining
+        14: 72 * 5 + 148,  # total distance
+        15: 125 * 18 - 347,  # usable items
     }
     assert [EXAMPLES[i].answer for i in expected] == list(expected.values()) == [1003, 285, 508, 1903]
 
@@ -118,13 +118,17 @@ def test_the_workload_cannot_be_changed_by_accident():
     with pytest.raises(dataclasses.FrozenInstanceError):
         EXAMPLES[0].answer = 0
     assert (SYSTEM_PROMPT, MAX_NEW_TOKENS, DO_SAMPLE, REWARD_TYPE) == (
-        "You are a calculator. Answer with only with number", 16, False, "exact_integer_match",
+        "You are a calculator. Answer with only with number",
+        16,
+        False,
+        "exact_integer_match",
     )
 
 
 # ---------------------------------------------------------------------------
 # extract_integer
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.parametrize(
     "text, expected",
@@ -133,7 +137,7 @@ def test_the_workload_cannot_be_changed_by_accident():
         (" 6292\n", 6292),
         ("The answer is 1,003.", 1003),
         ("1,234,567", 1234567),
-        ("3 and then 7", 7),        # the LAST integer wins
+        ("3 and then 7", 7),  # the LAST integer wins
         ("-5", -5),
         ("12 apples", 12),
         ("no number here", None),
@@ -154,6 +158,7 @@ def test_extract_integer_keeps_the_quirks_of_the_probe(text, expected):
 # exact_match_reward
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.parametrize(
     "prediction, expected, reward",
     [(41, 41, 1.0), (40, 41, 0.0), (None, 41, 0.0), (None, 0, 0.0), (-41, 41, 0.0), (0, 0, 1.0)],
@@ -168,6 +173,7 @@ def test_exact_match_reward(prediction, expected, reward):
 # ---------------------------------------------------------------------------
 # against the outputs the probe really recorded (independent evidence, not written by this code)
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.skipif(not PROBE_JSON.exists(), reason="probe evidence file not found")
 @pytest.mark.parametrize("section", ["base_evaluation", "candidate_evaluation"])
@@ -192,6 +198,7 @@ def test_probe_json_stores_the_same_workload_hash():
 # ---------------------------------------------------------------------------
 # no heavy dependency: this module must stay usable on a machine without a GPU stack
 # ---------------------------------------------------------------------------
+
 
 def test_importing_the_workload_does_not_import_torch():
     code = "import sys, heteroes.eval.workload; sys.exit(1 if 'torch' in sys.modules else 0)"

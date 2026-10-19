@@ -10,14 +10,13 @@ from heteroes.eval import generate as generate_module
 from heteroes.eval.generate import evaluate_model, generate_answer
 from heteroes.eval.workload import EXAMPLES, MAX_NEW_TOKENS
 
-PROBE_JSON = (
-    Path(__file__).resolve().parents[2] / "artifacts" / "probes" / "2026-09-29" / "probe_5070ti.json"
-)
+PROBE_JSON = Path(__file__).resolve().parents[2] / "artifacts" / "probes" / "2026-09-29" / "probe_5070ti.json"
 
 
 # ---------------------------------------------------------------------------
 # evaluate_model, with a fake generate_answer: no model needed (runs everywhere)
 # ---------------------------------------------------------------------------
+
 
 def fake_answers(monkeypatch, texts):
     # texts: the answer for each example, in order. Also records how the function was called.
@@ -51,9 +50,9 @@ def test_all_correct_gives_reward_one_and_one_record_per_example_in_order(monkey
 
 def test_mean_reward_is_the_fraction_of_correct_answers(monkeypatch):
     texts = correct_texts()
-    for index in (0, 5, 9):          # three wrong
+    for index in (0, 5, 9):  # three wrong
         texts[index] = "0"
-    texts[2] = "no number at all"    # one with no integer: counts as wrong, not as an error
+    texts[2] = "no number at all"  # one with no integer: counts as wrong, not as an error
     fake_answers(monkeypatch, texts)
 
     result = evaluate_model(None, None)
@@ -236,6 +235,7 @@ def test_a_perturbed_model_gives_different_outputs_from_the_base_model(qwen):
 # chunk: how the 16 questions are grouped into generate() calls (no model needed)
 # ---------------------------------------------------------------------------
 
+
 def fake_batches(monkeypatch, texts):
     groups = []
 
@@ -259,7 +259,7 @@ def test_a_chunk_groups_the_same_questions_in_the_same_order(monkeypatch, chunk,
     result = evaluate_model(None, None, chunk=chunk)
 
     assert [len(g) for g in groups] == sizes
-    assert [q for g in groups for q in g] == EXAMPLES_QUESTIONS            # nothing dropped, nothing reordered
+    assert [q for g in groups for q in g] == EXAMPLES_QUESTIONS  # nothing dropped, nothing reordered
     assert [r.question for r in result.records] == EXAMPLES_QUESTIONS
     assert [r.reward for r in result.records] == [0.0 if i == 3 else 1.0 for i in range(16)]
     assert result.mean_reward == 15 / 16

@@ -10,6 +10,7 @@ update cost per candidate x N + fixed + the check of the hash) instead of downlo
 `sync` block can be completed with `--sync-for <worker id>=<json of scripts/measure_sync.py>` (say so in the README of the experiment). Every subset of the workers that contains the
 first one is predicted under B3 (greedy) and B2 (quotas by speed). The file records the time and the git commit; it is never overwritten.
 """
+
 import argparse
 import itertools
 import json
@@ -36,7 +37,9 @@ def build_models(specs, sync_files, chunk, candidates, replay_hash_seconds=None)
         if mode == "replay":
             update = profile.get("update")
             if update is None:
-                raise ValueError(f"{profile['worker_id']}: a replay estimate needs the update cost in its profile (--measure-update)")
+                raise ValueError(
+                    f"{profile['worker_id']}: a replay estimate needs the update cost in its profile (--measure-update)"
+                )
             policy = ReplayPolicy.from_profile(profile, mode="always")
             seconds = policy.estimate_replay_seconds(1, candidates, verified=True)
             model = worker_model_from_profile({**profile, "sync": {"total_seconds": seconds}}, chunk, remote=True)
@@ -76,8 +79,18 @@ def predict(models, candidates, delta_fraction):
 
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--worker", action="append", required=True, help="profile JSON, optionally followed by :replay (repeat; the first is local)")
-    parser.add_argument("--sync-for", action="append", default=[], help="<worker id>=<json of measure_sync.py> for a profile without `sync`")
+    parser.add_argument(
+        "--worker",
+        action="append",
+        required=True,
+        help="profile JSON, optionally followed by :replay (repeat; the first is local)",
+    )
+    parser.add_argument(
+        "--sync-for",
+        action="append",
+        default=[],
+        help="<worker id>=<json of measure_sync.py> for a profile without `sync`",
+    )
     parser.add_argument("--candidates", type=int, required=True)
     parser.add_argument("--chunk", type=int, required=True)
     parser.add_argument("--delta-fraction", type=float, default=0.05)
@@ -94,16 +107,32 @@ def main(argv: list[str]) -> int:
     from heteroes.runtime_info import code_info
 
     models = build_models(args.worker, sync_files, args.chunk, args.candidates)
-    result = {"written_at_unix": time.time(), "written_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "code": code_info(),
-              "inputs": {"workers": args.worker, "sync_for": args.sync_for, "candidates": args.candidates, "chunk": args.chunk, "delta_fraction": args.delta_fraction},
-              "catch_up_seconds": {m.worker_id: m.sync_seconds for m, _ in models},
-              "predictions": predict(models, args.candidates, args.delta_fraction)}
+    result = {
+        "written_at_unix": time.time(),
+        "written_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "code": code_info(),
+        "inputs": {
+            "workers": args.worker,
+            "sync_for": args.sync_for,
+            "candidates": args.candidates,
+            "chunk": args.chunk,
+            "delta_fraction": args.delta_fraction,
+        },
+        "catch_up_seconds": {m.worker_id: m.sync_seconds for m, _ in models},
+        "predictions": predict(models, args.candidates, args.delta_fraction),
+    }
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     with open(args.out, "x", encoding="utf-8") as file:
         json.dump(result, file, indent=2)
         file.write("\n")
     for key, policies in result["predictions"].items():
-        print(key, {p.split("_")[0]: (round(r["total_seconds"], 1), round(r["cluster_benefit_against_local_alone"], 3)) for p, r in policies.items()})
+        print(
+            key,
+            {
+                p.split("_")[0]: (round(r["total_seconds"], 1), round(r["cluster_benefit_against_local_alone"], 3))
+                for p, r in policies.items()
+            },
+        )
     return 0
 
 

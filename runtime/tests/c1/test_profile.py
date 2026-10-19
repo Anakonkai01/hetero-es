@@ -2,6 +2,7 @@
 `heteroes.profile`: the probe of prompt chunks, the safe chunk, the summary of candidate times and the key of a profile.
 No model and no GPU: the evaluation is a fake whose answers depend on the chunk, so the expected result is known by hand.
 """
+
 import contextlib
 
 import pytest
@@ -37,7 +38,8 @@ class Env:
             try:
                 yield
             finally:
-                self.state = "parent"                  # always put back, also after an exception
+                self.state = "parent"  # always put back, also after an exception
+
         return condition
 
     def evaluate(self, chunk):
@@ -61,7 +63,11 @@ def test_a_chunk_with_the_same_answers_everywhere_is_identical_and_safe():
 
     probes = run(env)
 
-    assert [(p.chunk, p.ran, p.identical, p.differing) for p in probes] == [(1, True, True, ()), (2, True, True, ()), (4, True, True, ())]
+    assert [(p.chunk, p.ran, p.identical, p.differing) for p in probes] == [
+        (1, True, True, ()),
+        (2, True, True, ()),
+        (4, True, True, ()),
+    ]
     assert safe_chunk(probes) == 4
 
 
@@ -69,14 +75,14 @@ def test_one_different_answer_on_one_condition_makes_the_chunk_not_identical_and
     def answers(chunk, condition):
         texts = list(REFERENCE)
         if chunk == 4 and condition == 1:
-            texts[9] = "changed"                     # only on the perturbed condition, only one question
+            texts[9] = "changed"  # only on the perturbed condition, only one question
         return texts
 
     probes = run(Env(answers))
 
     four = probes[-1]
     assert (four.ran, four.identical, four.differing) == (True, False, ((1, 9),))
-    assert safe_chunk(probes) == 2                   # 2 is fine, 4 is not
+    assert safe_chunk(probes) == 2  # 2 is fine, 4 is not
 
 
 def test_a_chunk_that_changes_the_text_is_not_safe_even_if_a_reward_would_be_the_same():
@@ -88,7 +94,7 @@ def test_a_chunk_that_changes_the_text_is_not_safe_even_if_a_reward_would_be_the
 
 def test_the_safe_chunk_is_the_largest_that_is_exact_not_the_first_that_fails():
     def answers(chunk, condition):
-        return list(REFERENCE) if chunk != 2 else ["x"] + REFERENCE[1:]        # 2 differs, 4 and 8 do not
+        return list(REFERENCE) if chunk != 2 else ["x"] + REFERENCE[1:]  # 2 differs, 4 and 8 do not
 
     probes = run(Env(answers), chunks=(1, 2, 4, 8))
 
@@ -106,10 +112,16 @@ def test_out_of_memory_marks_the_chunk_as_not_run_and_the_model_is_put_back():
 
     probes = run(env, chunks=(1, 2, 4, 8))
 
-    assert [(p.chunk, p.ran, p.identical, p.seconds) for p in probes][2:] == [(4, False, None, None), (8, False, None, None)]
-    assert [(state, chunk) for state, chunk in env.log if chunk >= 4] == [(0, 4), (0, 8)]      # tried once, then dropped from condition 1
+    assert [(p.chunk, p.ran, p.identical, p.seconds) for p in probes][2:] == [
+        (4, False, None, None),
+        (8, False, None, None),
+    ]
+    assert [(state, chunk) for state, chunk in env.log if chunk >= 4] == [
+        (0, 4),
+        (0, 8),
+    ]  # tried once, then dropped from condition 1
     assert "FakeOOM" in probes[2].error
-    assert env.state == "parent"                     # the condition's cleanup ran
+    assert env.state == "parent"  # the condition's cleanup ran
     assert safe_chunk(probes) == 2
 
 
@@ -144,12 +156,23 @@ def test_each_condition_is_entered_once_and_every_chunk_is_evaluated_inside_it_i
     entered = []
     env = Env(lambda c, k: REFERENCE, conditions=2)
     inner = env.conditions
-    env.conditions = [(lambda number=number, make=make: (entered.append(number), make())[1]) for number, make in enumerate(inner)]
+    env.conditions = [
+        (lambda number=number, make=make: (entered.append(number), make())[1]) for number, make in enumerate(inner)
+    ]
 
     run(env, chunks=(4, 1, 2, 2))
 
-    assert entered == [0, 1]                                              # a perturbation is paid once per condition
-    assert env.log == [(0, 1), (0, 1), (0, 2), (0, 4), (1, 1), (1, 1), (1, 2), (1, 4)]    # reference, then chunks 1, 2, 4 (once)
+    assert entered == [0, 1]  # a perturbation is paid once per condition
+    assert env.log == [
+        (0, 1),
+        (0, 1),
+        (0, 2),
+        (0, 4),
+        (1, 1),
+        (1, 1),
+        (1, 2),
+        (1, 4),
+    ]  # reference, then chunks 1, 2, 4 (once)
 
 
 def test_the_time_is_the_mean_over_the_conditions_of_one_evaluation():
@@ -160,7 +183,7 @@ def test_the_time_is_the_mean_over_the_conditions_of_one_evaluation():
 
 def test_the_peak_memory_is_the_largest_over_the_conditions_and_reset_before_each_measurement():
     env = Env(lambda c, k: REFERENCE, conditions=2)
-    resets, peaks = [], iter([100, 200, 300, 50])           # condition 0: chunk 1, chunk 2; condition 1: chunk 1, chunk 2
+    resets, peaks = [], iter([100, 200, 300, 50])  # condition 0: chunk 1, chunk 2; condition 1: chunk 1, chunk 2
 
     probes = run(env, chunks=(1, 2), reset_peak=lambda: resets.append(1), peak_bytes=lambda: next(peaks))
 
@@ -181,12 +204,20 @@ def test_safe_chunk_without_any_exact_chunk_is_one_the_reference():
 
 def test_a_probe_is_plain_data_for_the_profile_file():
     assert ChunkProbe(2, True, False, 1.5, 7, None, ((1, 9),)).to_dict() == {
-        "chunk": 2, "ran": True, "identical": False, "seconds": 1.5, "peak_bytes": 7, "error": None, "differing": [[1, 9]]}
+        "chunk": 2,
+        "ran": True,
+        "identical": False,
+        "seconds": 1.5,
+        "peak_bytes": 7,
+        "error": None,
+        "differing": [[1, 9]],
+    }
 
 
 # ---------------------------------------------------------------------------
 # summarize_times, profile_key
 # ---------------------------------------------------------------------------
+
 
 def sample(total, perturb=1.0, rollout=2.0, restore=0.5):
     return {"perturb": perturb, "rollout": rollout, "restore": restore, "total": total}
@@ -196,14 +227,29 @@ def test_the_candidate_times_are_summarized_by_the_median_and_the_extremes():
     summary = summarize_times([sample(4.0, perturb=1), sample(10.0, perturb=9), sample(5.0, perturb=3)])
 
     assert summary["samples"] == 3
-    assert (summary["total_median"], summary["total_min"], summary["total_max"]) == (5.0, 4.0, 10.0)      # not the mean 6.33
+    assert (summary["total_median"], summary["total_min"], summary["total_max"]) == (
+        5.0,
+        4.0,
+        10.0,
+    )  # not the mean 6.33
     assert summary["phases_median"]["perturb"] == 3
     with pytest.raises(ValueError):
         summarize_times([])
 
 
-ENVIRONMENT = {"gpu_name": "G", "gpu_capability": [7, 5], "gpu_total_memory_bytes": 6, "nvidia_driver": "595", "torch": "2.13",
-               "torch_cuda": "13.2", "numpy": "2.5", "transformers": "5.17", "python": "3.14", "hostname": "box", "platform": "linux"}
+ENVIRONMENT = {
+    "gpu_name": "G",
+    "gpu_capability": [7, 5],
+    "gpu_total_memory_bytes": 6,
+    "nvidia_driver": "595",
+    "torch": "2.13",
+    "torch_cuda": "13.2",
+    "numpy": "2.5",
+    "transformers": "5.17",
+    "python": "3.14",
+    "hostname": "box",
+    "platform": "linux",
+}
 
 
 def key(**changes):
@@ -215,9 +261,20 @@ def key(**changes):
 def test_the_key_changes_with_every_thing_a_profile_depends_on():
     base = key_hash(key())
     variants = [key(recipe_hash="r2"), key(schema_hash="s2"), key(workload_hash="w2"), key(device="cpu")]
-    variants += [key(environment={**ENVIRONMENT, name: other}) for name, other in
-                 [("gpu_name", "H"), ("gpu_capability", [8, 6]), ("gpu_total_memory_bytes", 7), ("nvidia_driver", "596"),
-                  ("torch", "2.14"), ("torch_cuda", "13.3"), ("numpy", "2.6"), ("transformers", "5.18"), ("python", "3.15")]]
+    variants += [
+        key(environment={**ENVIRONMENT, name: other})
+        for name, other in [
+            ("gpu_name", "H"),
+            ("gpu_capability", [8, 6]),
+            ("gpu_total_memory_bytes", 7),
+            ("nvidia_driver", "596"),
+            ("torch", "2.14"),
+            ("torch_cuda", "13.3"),
+            ("numpy", "2.6"),
+            ("transformers", "5.18"),
+            ("python", "3.15"),
+        ]
+    ]
 
     hashes = [key_hash(variant) for variant in variants]
 
@@ -262,5 +319,7 @@ def test_a_fit_needs_two_different_sizes_and_matching_lengths():
 
 
 def test_a_negative_intercept_is_reported_as_it_is_and_not_hidden():
-    fit = fit_affine([1, 2, 3], [0.5, 2.0, 3.5])          # slope 1.5, intercept -1.0: nonsense physically, but it is what the data say
+    fit = fit_affine(
+        [1, 2, 3], [0.5, 2.0, 3.5]
+    )  # slope 1.5, intercept -1.0: nonsense physically, but it is what the data say
     assert fit["fixed_seconds"] == pytest.approx(-1.0)

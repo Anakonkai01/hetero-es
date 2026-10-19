@@ -10,6 +10,7 @@ only where the noise comes from changes: it is made on the device, so nothing go
 
 The restore is NOT here: it stays the verified restore from the snapshot (`snapshot.py`), which does not depend on the noise.
 """
+
 import math
 import numbers
 
@@ -47,12 +48,14 @@ def perturb_model_cuda_(model: torch.nn.Module, schema: ParameterSchema, candida
             while noise.done < noise.numel:
                 start = noise.done
                 piece = noise.next(min(PIECE_ELEMENTS, noise.numel - start))
-                part = flat[start:start + piece.numel()]
+                part = flat[start : start + piece.numel()]
                 scaled = piece.to(torch.float32) * sigma32
                 part.copy_((part.to(torch.float32) + scaled).to(torch.float16))
 
 
-def apply_coefficients_cuda_(model: torch.nn.Module, schema: ParameterSchema, candidate_seeds, coefficients, alpha: float) -> UpdateReport:
+def apply_coefficients_cuda_(
+    model: torch.nn.Module, schema: ParameterSchema, candidate_seeds, coefficients, alpha: float
+) -> UpdateReport:
     """The update of one generation with the coefficients given (see `apply_coefficients_`), with the noise of the CUDA engine."""
     tensors = resolve_tensors(model, schema)
     for tensor in tensors:
@@ -70,7 +73,14 @@ def apply_coefficients_cuda_(model: torch.nn.Module, schema: ParameterSchema, ca
         raise ValueError("seed being duplicated")
     total_numel = sum(t.numel() for t in tensors)
     if not z_rewards.any():
-        return UpdateReport(noop=True, coefficients=(0.0,) * len(z_rewards), requested_l2=0.0, applied_l2=0.0, changed=0, numel=total_numel)
+        return UpdateReport(
+            noop=True,
+            coefficients=(0.0,) * len(z_rewards),
+            requested_l2=0.0,
+            applied_l2=0.0,
+            changed=0,
+            numel=total_numel,
+        )
 
     schema_hash = schema.hash
     n_seeds = len(candidate_seeds)
@@ -79,11 +89,14 @@ def apply_coefficients_cuda_(model: torch.nn.Module, schema: ParameterSchema, ca
     with torch.no_grad():
         for entry, tensor in zip(schema.entries, tensors, strict=True):
             flat = tensor.view(-1)
-            streams = [TensorNoise(schema_hash, int(seed), entry.index, flat.numel(), tensor.device) for seed in candidate_seeds]
+            streams = [
+                TensorNoise(schema_hash, int(seed), entry.index, flat.numel(), tensor.device)
+                for seed in candidate_seeds
+            ]
             while streams[0].done < flat.numel():
                 start = streams[0].done
                 count = min(PIECE_ELEMENTS, flat.numel() - start)
-                chunk = flat[start:start + count]
+                chunk = flat[start : start + count]
                 acc = torch.zeros(count, dtype=torch.float32, device=tensor.device)
                 for stream, zi in zip(streams, z_rewards):
                     eps = stream.next(count).to(torch.float32)
@@ -99,5 +112,11 @@ def apply_coefficients_cuda_(model: torch.nn.Module, schema: ParameterSchema, ca
         changed = sum(int(v) for v in torch.stack(changed_parts).tolist())
         requested_l2 = math.sqrt(sum(float(v) for v in torch.stack(requested_parts).tolist()))
         applied_l2 = math.sqrt(sum(float(v) for v in torch.stack(applied_parts).tolist()))
-    return UpdateReport(noop=False, coefficients=tuple(float(v) for v in z_rewards), requested_l2=requested_l2,
-                        applied_l2=applied_l2, changed=changed, numel=total_numel)
+    return UpdateReport(
+        noop=False,
+        coefficients=tuple(float(v) for v in z_rewards),
+        requested_l2=requested_l2,
+        applied_l2=applied_l2,
+        changed=changed,
+        numel=total_numel,
+    )

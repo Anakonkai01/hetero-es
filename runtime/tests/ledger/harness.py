@@ -7,6 +7,7 @@ model says. A second check reads the tables directly and does not use the model 
 
 Used by the random schedules and by the exhaustive ones: the same checks, two ways of choosing the actions.
 """
+
 from collections import Counter
 from dataclasses import dataclass
 
@@ -53,7 +54,7 @@ class _Attempt:
     worker: str
     token: str
     deadline: float
-    status: str = "open"                 # open | failed | committed
+    status: str = "open"  # open | failed | committed
     failure: FailureKind | None = None
     reward: float | None = None
     committed_at: float | None = None
@@ -66,11 +67,11 @@ class LedgerHarness:
         self.clock = FakeClock()
         self.ledger = Ledger(":memory:", clock=self.clock, max_attempts=max_attempts)
         self.ledger.open_generation(batch(candidates))
-        self.attempts = {i: [] for i in range(candidates)}              # the model: what was granted, and what became of it
-        self.quarantine = {}                                            # worker -> (time, candidate_id, attempt_number)
-        self.leases = []                                                # (candidate index, Lease), in the order granted
-        self.update = None                                              # the recorded update: record, recorded_at, child, applied_at
-        self.seen = Counter() if seen is None else seen                 # which predicted outcomes were reached
+        self.attempts = {i: [] for i in range(candidates)}  # the model: what was granted, and what became of it
+        self.quarantine = {}  # worker -> (time, candidate_id, attempt_number)
+        self.leases = []  # (candidate index, Lease), in the order granted
+        self.update = None  # the recorded update: record, recorded_at, child, applied_at
+        self.seen = Counter() if seen is None else seen  # which predicted outcomes were reached
 
     def close(self):
         self.ledger.close()
@@ -83,15 +84,22 @@ class LedgerHarness:
             return CandidateState.COMMITTED
         if a and a[-1].status == "open" and self.clock.now < a[-1].deadline:
             return CandidateState.LEASED
-        return CandidateState.PENDING                                   # never leased, failed, or the lease is over
+        return CandidateState.PENDING  # never leased, failed, or the lease is over
 
     def _charged(self, i):
         """The attempts that count against the budget: not those lost to a worker fault (a restore mismatch, a quarantined worker)."""
-        return sum(1 for a in self.attempts[i] if a.failure is not FailureKind.RESTORE_MISMATCH and a.worker not in self.quarantine)
+        return sum(
+            1
+            for a in self.attempts[i]
+            if a.failure is not FailureKind.RESTORE_MISMATCH and a.worker not in self.quarantine
+        )
 
     def _exhausted(self):
-        return tuple(f"exp/g0/c{i}" for i in range(self.n)
-                     if self._state(i) is CandidateState.PENDING and self._charged(i) >= self.max_attempts)
+        return tuple(
+            f"exp/g0/c{i}"
+            for i in range(self.n)
+            if self._state(i) is CandidateState.PENDING and self._charged(i) >= self.max_attempts
+        )
 
     def _generation_state(self):
         committed = sum(self._state(i) is CandidateState.COMMITTED for i in range(self.n))
@@ -118,9 +126,12 @@ class LedgerHarness:
         except LedgerError as error:
             assert isinstance(expected, type) and type(error) is expected, (
                 f"{function.__name__}{arguments}: the model predicted {label}, the ledger raised "
-                f"{type(error).__name__}: {error}")
+                f"{type(error).__name__}: {error}"
+            )
             return None
-        assert not isinstance(expected, type), f"{function.__name__}{arguments}: the model predicted {label}, nothing was raised"
+        assert not isinstance(expected, type), (
+            f"{function.__name__}{arguments}: the model predicted {label}, nothing was raised"
+        )
         assert value == expected, f"{function.__name__}{arguments}: the model predicted {expected}, got {value}"
         return value
 
@@ -139,13 +150,13 @@ class LedgerHarness:
         if worker in self.quarantine:
             expected = WorkerQuarantinedError
         elif attempts and attempts[-1].status == "committed":
-            expected = LedgerError                                       # not leasable: neither of the two special cases
+            expected = LedgerError  # not leasable: neither of the two special cases
         elif self._state(i) is CandidateState.LEASED:
             expected = AlreadyLeasedError
         elif self._charged(i) >= self.max_attempts:
             expected = RetriesExhaustedError
         elif self._exhausted():
-            expected = GenerationFailedError                             # another candidate can no longer commit
+            expected = GenerationFailedError  # another candidate can no longer commit
         else:
             expected = "granted"
 
@@ -168,7 +179,7 @@ class LedgerHarness:
         seed = descriptor_of(i).seed
         descriptor, token, reward = descriptor_of(i), lease.token, oracle_reward(seed)
         if mode == "other":
-            reward += 0.5                                                # a reward that differs from the honest one
+            reward += 0.5  # a reward that differs from the honest one
         elif mode == "wrong_job":
             descriptor = make(i, seed + 1)
         elif mode == "wrong_token":
@@ -208,11 +219,15 @@ class LedgerHarness:
             self.ledger.report_failure(descriptor_of(i), lease.attempt_number, lease.token, kind)
             if latest.status == "open":
                 latest.status, latest.failure = "failed", kind
-                if kind is FailureKind.RESTORE_MISMATCH:                 # the first record of a worker is kept
+                if kind is FailureKind.RESTORE_MISMATCH:  # the first record of a worker is kept
                     self.quarantine.setdefault(lease.worker_id, (self.clock.now, f"exp/g0/c{i}", lease.attempt_number))
         else:
-            self._expect(expected, self.ledger.report_failure, descriptor_of(i), lease.attempt_number, lease.token, kind)
-            if kind is FailureKind.RESTORE_MISMATCH:                     # refused as late, yet the worker knows that its weights are in doubt
+            self._expect(
+                expected, self.ledger.report_failure, descriptor_of(i), lease.attempt_number, lease.token, kind
+            )
+            if (
+                kind is FailureKind.RESTORE_MISMATCH
+            ):  # refused as late, yet the worker knows that its weights are in doubt
                 self.quarantine.setdefault(lease.worker_id, (self.clock.now, f"exp/g0/c{i}", lease.attempt_number))
 
     def _do_release(self, worker):
@@ -228,8 +243,9 @@ class LedgerHarness:
         The record of the generation as the model knows it (a candidate that is not committed yet counts as reward 0).
         `wrong` makes it say something the ledger did not commit: "seeds", "rewards", "recipe" or "parent".
         """
-        rewards = tuple(self.attempts[i][-1].reward if self._state(i) is CandidateState.COMMITTED else 0.0
-                        for i in range(self.n))
+        rewards = tuple(
+            self.attempts[i][-1].reward if self._state(i) is CandidateState.COMMITTED else 0.0 for i in range(self.n)
+        )
         seeds = tuple(descriptor_of(i).seed for i in range(self.n))
         recipe, parent = RECIPE, PARENT
         if wrong == "seeds":
@@ -251,7 +267,7 @@ class LedgerHarness:
         elif state is GenerationState.OPEN:
             expected = GenerationNotCompleteError
         elif wrong is not None:
-            expected = RecordMismatchError                               # it does not say what was committed
+            expected = RecordMismatchError  # it does not say what was committed
         elif self.update is None:
             expected = UpdateOutcome.RECORDED
         elif self.update["record"].hash == record.hash:
@@ -265,7 +281,7 @@ class LedgerHarness:
     def _do_apply(self, child, which="right"):
         child_hash = CHILDREN[child]
         if which == "wrong" or self.update is None:
-            record_hash = "a" * 64                                       # nobody recorded a record with this hash
+            record_hash = "a" * 64  # nobody recorded a record with this hash
         else:
             record_hash = self.update["record"].hash
         if self.update is None:
@@ -294,12 +310,18 @@ class LedgerHarness:
             assert record.state is self._state(i), (i, record.state, self._state(i))
             assert record.attempts == len(attempts)
             committed = bool(attempts) and attempts[-1].status == "committed"
-            expected = CandidateResult(attempts[-1].number, attempts[-1].reward, attempts[-1].committed_at) if committed else None
+            expected = (
+                CandidateResult(attempts[-1].number, attempts[-1].reward, attempts[-1].committed_at)
+                if committed
+                else None
+            )
             assert record.result == expected, (i, record.result, expected)
 
         state = self._generation_state()
         committed_count = sum(self._state(i) is CandidateState.COMMITTED for i in range(self.n))
-        assert ledger.get_generation_status("exp", 0) == GenerationStatus(state, committed_count, self.n, self._exhausted())
+        assert ledger.get_generation_status("exp", 0) == GenerationStatus(
+            state, committed_count, self.n, self._exhausted()
+        )
         if state is GenerationState.COMPLETE:
             results = ledger.get_generation_results("exp", 0)
             assert results.seeds == tuple(descriptor_of(i).seed for i in range(self.n))
@@ -319,44 +341,87 @@ class LedgerHarness:
             assert stored is None
         else:
             record = self.update["record"]
-            assert stored == StoredUpdate(record, record.hash, self.update["recorded_at"], self.update["child"],
-                                          self.update["applied_at"])
+            assert stored == StoredUpdate(
+                record, record.hash, self.update["recorded_at"], self.update["child"], self.update["applied_at"]
+            )
 
         expected_quarantine = sorted(
             (QuarantineRecord(worker, *cause) for worker, cause in self.quarantine.items()),
-            key=lambda q: (q.quarantined_at, q.worker_id))
+            key=lambda q: (q.quarantined_at, q.worker_id),
+        )
         assert ledger.list_quarantined() == expected_quarantine
         check_tables(ledger, self.max_attempts)
 
 
 def check_tables(ledger, max_attempts):
     """The rules of the contract, asked of the tables directly: no model, no help from the ledger's own code."""
-    db = ledger._db           # test support: the point is to look at what was really written
+    db = ledger._db  # test support: the point is to look at what was really written
 
     def count(sql, *arguments):
         return db.execute(sql, arguments).fetchone()[0]
 
     # at most one committed effect per candidate
-    assert count("SELECT COUNT(*) FROM (SELECT candidate_id FROM result GROUP BY candidate_id HAVING COUNT(*) > 1)") == 0
+    assert (
+        count("SELECT COUNT(*) FROM (SELECT candidate_id FROM result GROUP BY candidate_id HAVING COUNT(*) > 1)") == 0
+    )
     # a result belongs to an attempt that ended, did not fail, and is the latest attempt of its candidate
-    assert count("SELECT COUNT(*) FROM result r JOIN attempt a USING (candidate_id, attempt_number) "
-                 "WHERE a.ended_at IS NULL OR a.failure_kind IS NOT NULL") == 0
-    assert count("SELECT COUNT(*) FROM result r WHERE r.attempt_number != "
-                 "(SELECT MAX(a.attempt_number) FROM attempt a WHERE a.candidate_id = r.candidate_id)") == 0
+    assert (
+        count(
+            "SELECT COUNT(*) FROM result r JOIN attempt a USING (candidate_id, attempt_number) "
+            "WHERE a.ended_at IS NULL OR a.failure_kind IS NOT NULL"
+        )
+        == 0
+    )
+    assert (
+        count(
+            "SELECT COUNT(*) FROM result r WHERE r.attempt_number != "
+            "(SELECT MAX(a.attempt_number) FROM attempt a WHERE a.candidate_id = r.candidate_id)"
+        )
+        == 0
+    )
     # COMMITTED if and only if there is a result
-    assert count("SELECT COUNT(*) FROM candidate c LEFT JOIN result r USING (candidate_id) "
-                 "WHERE (c.state = 'COMMITTED') != (r.candidate_id IS NOT NULL)") == 0
+    assert (
+        count(
+            "SELECT COUNT(*) FROM candidate c LEFT JOIN result r USING (candidate_id) "
+            "WHERE (c.state = 'COMMITTED') != (r.candidate_id IS NOT NULL)"
+        )
+        == 0
+    )
     # attempts are numbered 1..k, and k stays within the budget
-    assert count("SELECT COUNT(*) FROM (SELECT 1 FROM attempt GROUP BY candidate_id HAVING MAX(attempt_number) != COUNT(*))") == 0
+    assert (
+        count(
+            "SELECT COUNT(*) FROM (SELECT 1 FROM attempt GROUP BY candidate_id HAVING MAX(attempt_number) != COUNT(*))"
+        )
+        == 0
+    )
     # the CHARGED attempts (not lost to a worker fault) stay within the budget
-    assert count("SELECT COUNT(*) FROM (SELECT 1 FROM attempt a WHERE COALESCE(a.failure_kind, '') != 'RESTORE_MISMATCH' "
-                 "AND a.worker_id NOT IN (SELECT worker_id FROM quarantine) GROUP BY a.candidate_id HAVING COUNT(*) > ?)", max_attempts) == 0
+    assert (
+        count(
+            "SELECT COUNT(*) FROM (SELECT 1 FROM attempt a WHERE COALESCE(a.failure_kind, '') != 'RESTORE_MISMATCH' "
+            "AND a.worker_id NOT IN (SELECT worker_id FROM quarantine) GROUP BY a.candidate_id HAVING COUNT(*) > ?)",
+            max_attempts,
+        )
+        == 0
+    )
     # a failed attempt has an end time; an attempt cannot both fail and carry a result
     assert count("SELECT COUNT(*) FROM attempt WHERE failure_kind IS NOT NULL AND ended_at IS NULL") == 0
     # an update is written down only for a generation whose candidates are all committed, at most once, and a child only with a time
-    assert count("SELECT COUNT(*) FROM generation_update u WHERE EXISTS (SELECT 1 FROM candidate c WHERE "
-                 "c.experiment_id = u.experiment_id AND c.generation = u.generation AND c.state != 'COMMITTED')") == 0
-    assert count("SELECT COUNT(*) FROM generation_update WHERE (child_weights_sha256 IS NULL) != (applied_at IS NULL)") == 0
+    assert (
+        count(
+            "SELECT COUNT(*) FROM generation_update u WHERE EXISTS (SELECT 1 FROM candidate c WHERE "
+            "c.experiment_id = u.experiment_id AND c.generation = u.generation AND c.state != 'COMMITTED')"
+        )
+        == 0
+    )
+    assert (
+        count("SELECT COUNT(*) FROM generation_update WHERE (child_weights_sha256 IS NULL) != (applied_at IS NULL)")
+        == 0
+    )
     # no attempt started by a worker while it was in quarantine (the quarantine table holds only the current ones)
-    assert count("SELECT COUNT(*) FROM quarantine q JOIN attempt a ON a.worker_id = q.worker_id "
-                 "WHERE a.leased_at > q.quarantined_at") == 0
+    assert (
+        count(
+            "SELECT COUNT(*) FROM quarantine q JOIN attempt a ON a.worker_id = q.worker_id "
+            "WHERE a.leased_at > q.quarantined_at"
+        )
+        == 0
+    )

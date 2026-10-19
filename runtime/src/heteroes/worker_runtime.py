@@ -12,6 +12,7 @@ failed on this worker: it must be looked at by a human), "unreachable" (the coor
 waits and asks again. A recipe that changes under a running worker, or a weights file that is not what its name says
 after every attempt, ARE reasons to stop: the worker raises. Every event is a plain dict (JSON) handed to `log`.
 """
+
 import hashlib
 import http.client
 import os
@@ -45,8 +46,11 @@ def _flatten(value, prefix=""):
 
 def recipe_differences(job_recipe: dict, own_recipe: dict) -> list[str]:
     ours, theirs = dict(_flatten(own_recipe)), dict(_flatten(job_recipe))
-    return [f"{key}: coordinator {theirs.get(key)!r}, worker {ours.get(key)!r}"
-            for key in sorted(set(ours) | set(theirs)) if ours.get(key) != theirs.get(key)]
+    return [
+        f"{key}: coordinator {theirs.get(key)!r}, worker {ours.get(key)!r}"
+        for key in sorted(set(ours) | set(theirs))
+        if ours.get(key) != theirs.get(key)
+    ]
 
 
 def _hash_prefix(path: Path, digest, chunk_bytes: int) -> None:
@@ -55,7 +59,9 @@ def _hash_prefix(path: Path, digest, chunk_bytes: int) -> None:
             digest.update(chunk)
 
 
-def download_weights(client: HttpClient, sha256: str, directory, chunk_bytes: int = 1 << 20, stats: dict | None = None) -> Path:
+def download_weights(
+    client: HttpClient, sha256: str, directory, chunk_bytes: int = 1 << 20, stats: dict | None = None
+) -> Path:
     """
     The weights file of that version in `directory`, downloaded if it is not there already and intact. The bytes are hashed
     while they arrive and the file gets its name only if the hash is the name: a wrong transfer leaves nothing.
@@ -72,7 +78,7 @@ def download_weights(client: HttpClient, sha256: str, directory, chunk_bytes: in
     directory.mkdir(parents=True, exist_ok=True)
     final = directory / f"{sha256}.bin"
     if final.is_file() and sha256_of_file(final) == sha256:
-        return final                                            # a corrupted or cut file is simply replaced below
+        return final  # a corrupted or cut file is simply replaced below
     partial = directory / f".partial-{sha256}"
     digest, offset = hashlib.sha256(), 0
     if partial.is_file():
@@ -96,7 +102,7 @@ def download_weights(client: HttpClient, sha256: str, directory, chunk_bytes: in
             stream = client.open_stream(path)
         with stream as response:
             if offset and getattr(response, "status", None) != 206:
-                digest, offset = hashlib.sha256(), 0           # the server sent everything from the start: so do we
+                digest, offset = hashlib.sha256(), 0  # the server sent everything from the start: so do we
             if stats is not None:
                 stats["resumed_from_bytes"] = offset
             with open(partial, "ab" if offset else "wb") as file:
@@ -113,7 +119,7 @@ def download_weights(client: HttpClient, sha256: str, directory, chunk_bytes: in
             raise WeightsFileError(f"what arrived for {sha256[:12]} has the hash {digest.hexdigest()[:12]}: wrong hash")
         os.replace(partial, final)
     except (TransportError, KeyboardInterrupt):
-        raise                                                   # the partial file stays: the next call continues it
+        raise  # the partial file stays: the next call continues it
     except BaseException:
         partial.unlink(missing_ok=True)
         raise
@@ -121,10 +127,23 @@ def download_weights(client: HttpClient, sha256: str, directory, chunk_bytes: in
 
 
 class WorkerRuntime:
-    def __init__(self, worker_id: str, client: HttpClient, executor: CandidateExecutor, cache_dir, log=lambda event: None,
-                 poll_seconds: float = 0.5, backoff_seconds: float = 2.0, download_attempts: int = 2,
-                 max_unreachable_seconds: float | None = None, sleep=time.sleep, wall_clock=time.time, timer=time.perf_counter,
-                 replay: ReplayPolicy | None = None, cache_guard=lambda: None):
+    def __init__(
+        self,
+        worker_id: str,
+        client: HttpClient,
+        executor: CandidateExecutor,
+        cache_dir,
+        log=lambda event: None,
+        poll_seconds: float = 0.5,
+        backoff_seconds: float = 2.0,
+        download_attempts: int = 2,
+        max_unreachable_seconds: float | None = None,
+        sleep=time.sleep,
+        wall_clock=time.time,
+        timer=time.perf_counter,
+        replay: ReplayPolicy | None = None,
+        cache_guard=lambda: None,
+    ):
         self.worker_id = worker_id
         self.client = client
         self.executor = executor
@@ -139,8 +158,8 @@ class WorkerRuntime:
         self._wall_clock = wall_clock
         self._timer = timer
         self._worker = Worker(worker_id, client, executor, transient_errors=(TransportError,))
-        self.replay = ReplayPolicy() if replay is None else replay       # never, unless the worker is started with a policy
-        self._catch_ups_since_check = 0                                  # replays whose result was trusted, not hashed, since the last check
+        self.replay = ReplayPolicy() if replay is None else replay  # never, unless the worker is started with a policy
+        self._catch_ups_since_check = 0  # replays whose result was trusted, not hashed, since the last check
 
     def log(self, event: str, **fields) -> None:
         self._log({"event": event, "t": self._wall_clock(), "worker_id": self.worker_id, **fields})
@@ -155,9 +174,11 @@ class WorkerRuntime:
         own = self.executor.recipe
         if job["recipe_hash"] != own.hash:
             differences = recipe_differences(job.get("recipe", {}), own.to_dict())
-            raise AdmissionError("this worker's recipe is not the job's: " + "; ".join(differences or ["(the hash differs)"]))
-        if getattr(self.executor,'dataset',None) is not None:
-            self.executor.set_generation(job['generation'],job.get('generationContext'))
+            raise AdmissionError(
+                "this worker's recipe is not the job's: " + "; ".join(differences or ["(the hash differs)"])
+            )
+        if getattr(self.executor, "dataset", None) is not None:
+            self.executor.set_generation(job["generation"], job.get("generationContext"))
 
     def admit(self) -> dict | None:
         """The job, if there is one, after checking that the coordinator is up and that the recipes agree."""
@@ -182,18 +203,30 @@ class WorkerRuntime:
                 if attempt == self._download_attempts:
                     raise
         transferred = self._timer()
-        load_weights_(self.executor.model, self.executor.schema, path, target, already_verified=True)      # download_weights hashed every byte
+        load_weights_(
+            self.executor.model, self.executor.schema, path, target, already_verified=True
+        )  # download_weights hashed every byte
         loaded = self._timer()
-        self.executor.reset_parent(target, verified_file=path)     # the model IS the file whose hash was checked: compared, not hashed again
+        self.executor.reset_parent(
+            target, verified_file=path
+        )  # the model IS the file whose hash was checked: compared, not hashed again
         done = self._timer()
         for old in self.cache_dir.iterdir():
-            if (_WEIGHTS_FILE.fullmatch(old.name) and old != path) or (old.name.startswith(".partial-") and old.name != f".partial-{target}"):
+            if (_WEIGHTS_FILE.fullmatch(old.name) and old != path) or (
+                old.name.startswith(".partial-") and old.name != f".partial-{target}"
+            ):
                 old.unlink()
         (self.cache_dir / f".partial-{target}").unlink(missing_ok=True)
-        event = {"from_sha256": previous, "to_sha256": target, "bytes": path.stat().st_size,
-                 "transfer_seconds": transferred - start, "load_seconds": loaded - transferred, "rehash_seconds": done - loaded,
-                 **stats}                                          # resumed_from_bytes, downloaded_bytes
-        self._catch_ups_since_check = 0                            # the weights are the coordinator's, checked byte by byte
+        event = {
+            "from_sha256": previous,
+            "to_sha256": target,
+            "bytes": path.stat().st_size,
+            "transfer_seconds": transferred - start,
+            "load_seconds": loaded - transferred,
+            "rehash_seconds": done - loaded,
+            **stats,
+        }  # resumed_from_bytes, downloaded_bytes
+        self._catch_ups_since_check = 0  # the weights are the coordinator's, checked byte by byte
         self.log("sync", **event)
         return event
 
@@ -206,13 +239,17 @@ class WorkerRuntime:
         if self.replay.mode == "never":
             return self.sync(job)
         try:
-            chain = fetch_chain(self.client, previous, target, self.executor.recipe.hash, max_steps=self.replay.max_chain)
+            chain = fetch_chain(
+                self.client, previous, target, self.executor.recipe.hash, max_steps=self.replay.max_chain
+            )
             replay, why = self.replay.decide(len(chain), job.get("candidates") or 0)
             if not replay:
                 self.log("replay_declined", from_sha256=previous, to_sha256=target, steps=len(chain), why=why)
                 return self.sync(job)
             recipe = self.executor.recipe
-            _, apply_update = noise_ops(recipe.engine_version, recipe.chunk_elements if recipe.engine_version == ENGINE_VERSION else None)
+            _, apply_update = noise_ops(
+                recipe.engine_version, recipe.chunk_elements if recipe.engine_version == ENGINE_VERSION else None
+            )
             verify = self._catch_ups_since_check + 1 >= self.replay.verify_every
             summary = replay_chain(self.executor, chain, apply_update, verify)
             self._catch_ups_since_check = 0 if verify else self._catch_ups_since_check + 1
@@ -224,7 +261,7 @@ class WorkerRuntime:
                 raise
             self.log("replay_failed", from_sha256=previous, to_sha256=target, error=str(error))
             self._catch_ups_since_check = 0
-            return self.sync(job)             # overwrites every weight, so whatever the replay left in the model does not matter
+            return self.sync(job)  # overwrites every weight, so whatever the replay left in the model does not matter
 
     def run(self, stop=None) -> str:
         self.log("start")
@@ -250,16 +287,22 @@ class WorkerRuntime:
                 if job["parent_weights_sha256"] != self.executor.parent_sha256:
                     self.bring_up_to_date(job)
                 lease_seconds = job.get("lease_seconds")
-                if isinstance(lease_seconds, (int, float)) and not isinstance(lease_seconds, bool) and lease_seconds > 0:
-                    self._worker.heartbeat_seconds = lease_seconds / 3        # three chances to renew before a lease runs out
+                if (
+                    isinstance(lease_seconds, (int, float))
+                    and not isinstance(lease_seconds, bool)
+                    and lease_seconds > 0
+                ):
+                    self._worker.heartbeat_seconds = lease_seconds / 3  # three chances to renew before a lease runs out
                 start = self._timer()
                 step = self._worker.step(job.get("generation"))
                 seconds = self._timer() - start
             except UnauthorizedError as error:
                 self.log("unauthorized", error=str(error))
-                raise                                                # a wrong token does not get better by waiting: stop and say so
+                raise  # a wrong token does not get better by waiting: stop and say so
             except BulkUnavailableError as error:
-                self.log("bulk_unavailable", error=str(error))      # replay-only worker too far behind: waiting will not help
+                self.log(
+                    "bulk_unavailable", error=str(error)
+                )  # replay-only worker too far behind: waiting will not help
                 return "needs_private_route"
             except TransportError as error:
                 self.log("transport_error", error=str(error))
@@ -270,12 +313,20 @@ class WorkerRuntime:
                 self._sleep(self._backoff)
                 continue
             unreachable_since = None
-            timing = self.executor.last_timing if step.kind in (StepKind.COMMITTED, StepKind.ALREADY_COMMITTED) else None
-            self.log("step", kind=step.kind.value, candidate_id=step.candidate_id, code=step.code,
-                     failure=None if step.failure is None else step.failure.value,
-                     generation_state=None if step.generation_state is None else step.generation_state.value,
-                     step_seconds=seconds, timing=timing,
-                     coordination_seconds=None if timing is None else seconds - timing["total"])
+            timing = (
+                self.executor.last_timing if step.kind in (StepKind.COMMITTED, StepKind.ALREADY_COMMITTED) else None
+            )
+            self.log(
+                "step",
+                kind=step.kind.value,
+                candidate_id=step.candidate_id,
+                code=step.code,
+                failure=None if step.failure is None else step.failure.value,
+                generation_state=None if step.generation_state is None else step.generation_state.value,
+                step_seconds=seconds,
+                timing=timing,
+                coordination_seconds=None if timing is None else seconds - timing["total"],
+            )
             if step.kind is StepKind.QUARANTINED:
                 return "quarantined"
             if step.kind is StepKind.NO_WORK:

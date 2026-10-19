@@ -56,6 +56,7 @@ def flip_lowest_bit(tensor, k):
 # take_snapshot
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.parametrize("device", DEVICES)
 def test_snapshot_is_an_independent_fp16_copy_on_the_cpu(device):
     model = make_model(device=device)
@@ -98,6 +99,7 @@ def test_snapshot_rejects_tensors_that_restore_could_not_handle(bad_last, error)
 # ---------------------------------------------------------------------------
 # the point of it all: perturb, then restore, is bitwise exact
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.parametrize("device", DEVICES)
 def test_perturb_then_restore_gives_back_exactly_the_original_bits(device):
@@ -169,6 +171,7 @@ def test_the_same_snapshot_can_be_restored_again_and_again():
 # diff_from_snapshot: the bitwise oracle (decision O3)
 # ---------------------------------------------------------------------------
 
+
 def test_diff_is_empty_when_nothing_changed():
     model = make_model()
     schema = build_parameter_schema(model)
@@ -209,7 +212,7 @@ def test_diff_names_a_tensor_once_even_if_several_slabs_of_it_differ():
     schema = build_parameter_schema(model)
     snapshot = take_snapshot(model, schema)
     embed = resolve_tensors(model, schema)[0]
-    flip_lowest_bit(embed, 0)   # first slab
+    flip_lowest_bit(embed, 0)  # first slab
     flip_lowest_bit(embed, 39)  # last slab
 
     assert diff_from_snapshot(model, schema, snapshot, slab_elements=4) == ["embed.weight"]
@@ -249,7 +252,7 @@ def test_diff_sees_the_sign_of_zero():
     with torch.no_grad():
         bias[1] = -0.0
     assert bias.detach().view(torch.int16)[1].item() == -32768  # premise: really negative zero
-    assert torch.equal(bias.detach(), snapshot.tensors[2])      # as numbers they are "equal"
+    assert torch.equal(bias.detach(), snapshot.tensors[2])  # as numbers they are "equal"
 
     assert diff_from_snapshot(model, schema, snapshot) == ["fc.bias"]
 
@@ -323,6 +326,7 @@ def test_verifying_does_not_copy_a_whole_tensor_to_the_gpu():
 # ---------------------------------------------------------------------------
 # restore_from_snapshot_: validation and failure
 # ---------------------------------------------------------------------------
+
 
 def test_restore_fixes_every_damaged_tensor_not_only_the_perturbed_ones():
     model = make_model()

@@ -32,7 +32,12 @@ def test_this_machine_passes_the_self_test():
 def test_the_golden_table_is_the_five_recorded_chunks():
     assert [row[3] for row in GOLDEN_CHUNKS] == PINNED_DIGESTS
     assert [(row[0], row[1], row[2]) for row in GOLDEN_CHUNKS] == [
-        (0, 0, 262144), (0, 519, 81920), (1, 0, 262144), (2, 0, 896), (289, 0, 896)]
+        (0, 0, 262144),
+        (0, 519, 81920),
+        (1, 0, 262144),
+        (2, 0, 896),
+        (289, 0, 896),
+    ]
 
 
 def test_the_expected_fingerprint_is_pinned():

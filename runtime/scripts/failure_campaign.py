@@ -23,6 +23,7 @@ The reference is the same experiment (same experiment id, candidates and generat
 every scenario must be that one. (The 1660S can in principle give another reward than the 5070 Ti for a candidate, see G4/G5: a scenario
 that ends with another hash is then compared with the cross-GPU sweep before it is called a failure.) The raw logs of every run are kept.
 """
+
 import argparse
 import json
 import os
@@ -37,7 +38,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from cluster_runner import FAST, REPO, SLOW, THIRD, Cluster, add_cluster_arguments  # noqa: E402
 
 SCENARIOS = ["kill-worker", "pause-worker", "cut-link", "kill-coordinator", "kill-coordinator-mid-update"]
-DEFAULT_SCENARIOS = SCENARIOS[:4]       # the four of G6; the fifth is asked for by name
+DEFAULT_SCENARIOS = SCENARIOS[:4]  # the four of G6; the fifth is asked for by name
 
 
 def remote_worker(args) -> tuple[str, str]:
@@ -56,7 +57,9 @@ def open_leases(ledger_path: Path, worker: str) -> int:
     except sqlite3.Error:
         return 0
     try:
-        return connection.execute("SELECT COUNT(*) FROM attempt WHERE worker_id = ? AND ended_at IS NULL", (worker,)).fetchone()[0]
+        return connection.execute(
+            "SELECT COUNT(*) FROM attempt WHERE worker_id = ? AND ended_at IS NULL", (worker,)
+        ).fetchone()[0]
     except sqlite3.Error:
         return 0
     finally:
@@ -83,7 +86,12 @@ def update_recorded_not_applied(ledger_path: Path) -> bool:
     except sqlite3.Error:
         return False
     try:
-        return connection.execute("SELECT COUNT(*) FROM generation_update WHERE child_weights_sha256 IS NULL").fetchone()[0] > 0
+        return (
+            connection.execute("SELECT COUNT(*) FROM generation_update WHERE child_weights_sha256 IS NULL").fetchone()[
+                0
+            ]
+            > 0
+        )
     except sqlite3.Error:
         return False
     finally:
@@ -113,7 +121,14 @@ def wait_until(condition, seconds: float, what: str, poll: float = 0.2):
 
 
 def sudo_run(command: list[str], password: str) -> None:
-    subprocess.run(["sudo", "-S", "-p", ""] + command, input=password + "\n", text=True, check=True, timeout=60, capture_output=True)
+    subprocess.run(
+        ["sudo", "-S", "-p", ""] + command,
+        input=password + "\n",
+        text=True,
+        check=True,
+        timeout=60,
+        capture_output=True,
+    )
 
 
 def final_hash(run_dir: Path) -> str | None:
@@ -148,24 +163,36 @@ def run_scenario(name: str, args, out: Path, password: str | None) -> dict:
             cluster.signal_remote_worker("KILL")
             notes.append("remote worker killed while it held a candidate")
             time.sleep(1.0)
-            cluster.start_worker(remote_id, args.chunk)              # a new process with the same worker id: it must rejoin
+            cluster.start_worker(remote_id, args.chunk)  # a new process with the same worker id: it must rejoin
             notes.append("remote worker started again")
 
         elif name == "pause-worker":
             wait_until(lambda: open_leases(ledger_path, remote_id) > 0, 600, "the remote worker to hold a candidate")
             time.sleep(1.0)
             cluster.signal_remote_worker("STOP")
-            notes.append(f"remote worker stopped for {args.lease_seconds + 15:.0f} s (the lease is {args.lease_seconds:.0f} s)")
+            notes.append(
+                f"remote worker stopped for {args.lease_seconds + 15:.0f} s (the lease is {args.lease_seconds:.0f} s)"
+            )
             time.sleep(args.lease_seconds + 15)
             cluster.signal_remote_worker("CONT")
             notes.append("remote worker continued")
 
         elif name == "cut-link":
             if password is None:
-                raise RuntimeError("cut-link needs the sudo password in the environment variable named by --sudo-password-env")
-            wait_until(lambda: any(e.get("event") == "weights_published" and e.get("generation") == 0 for e in events_of(run_dir / "coordinator" / "events.jsonl")),
-                       900, "generation 0 to be published")
-            time.sleep(args.cut_delay)                          # the download of the new weights (about 9 s) has begun when the packets are dropped
+                raise RuntimeError(
+                    "cut-link needs the sudo password in the environment variable named by --sudo-password-env"
+                )
+            wait_until(
+                lambda: any(
+                    e.get("event") == "weights_published" and e.get("generation") == 0
+                    for e in events_of(run_dir / "coordinator" / "events.jsonl")
+                ),
+                900,
+                "generation 0 to be published",
+            )
+            time.sleep(
+                args.cut_delay
+            )  # the download of the new weights (about 9 s) has begun when the packets are dropped
             sudo_run(drop_rule, password)
             dropped = True
             notes.append(f"packets from {peer} dropped for {args.cut_seconds:.0f} s")
@@ -175,22 +202,36 @@ def run_scenario(name: str, args, out: Path, password: str | None) -> dict:
             notes.append("packets accepted again")
 
         elif name == "kill-coordinator":
-            wait_until(lambda: committed_count(ledger_path) >= max(2, args.candidates // 2 + args.candidates), 900,
-                       "half of generation 1 to be committed")
+            wait_until(
+                lambda: committed_count(ledger_path) >= max(2, args.candidates // 2 + args.candidates),
+                900,
+                "half of generation 1 to be committed",
+            )
             coordinator.send_signal(signal.SIGKILL)
             coordinator.wait(timeout=30)
             notes.append(f"coordinator killed with {committed_count(ledger_path)} results committed")
             time.sleep(args.restart_after)
-            coordinator = cluster.start_coordinator("greedy", [], args.candidates, args.generations, resume=True, label="coordinator-resumed")
+            coordinator = cluster.start_coordinator(
+                "greedy", [], args.candidates, args.generations, resume=True, label="coordinator-resumed"
+            )
             notes.append("coordinator started again with --resume")
 
         elif name == "kill-coordinator-mid-update":
-            wait_until(lambda: update_recorded_not_applied(ledger_path), 900, "an update to be recorded and not yet applied", poll=0.02)
+            wait_until(
+                lambda: update_recorded_not_applied(ledger_path),
+                900,
+                "an update to be recorded and not yet applied",
+                poll=0.02,
+            )
             coordinator.send_signal(signal.SIGKILL)
             coordinator.wait(timeout=30)
-            notes.append(f"coordinator killed between the write-ahead record and the applied update ({committed_count(ledger_path)} results committed)")
+            notes.append(
+                f"coordinator killed between the write-ahead record and the applied update ({committed_count(ledger_path)} results committed)"
+            )
             time.sleep(args.restart_after)
-            coordinator = cluster.start_coordinator("greedy", [], args.candidates, args.generations, resume=True, label="coordinator-resumed")
+            coordinator = cluster.start_coordinator(
+                "greedy", [], args.candidates, args.generations, resume=True, label="coordinator-resumed"
+            )
             notes.append("coordinator started again with --resume")
 
         deadline = time.time() + args.run_timeout
@@ -204,16 +245,22 @@ def run_scenario(name: str, args, out: Path, password: str | None) -> dict:
             except subprocess.TimeoutExpired:
                 pass
         outcome = "ok" if coordinator.returncode == 0 else f"coordinator exit {coordinator.returncode}"
-    except BaseException as error:                    # noqa: BLE001 - the run must say how it ended
+    except BaseException as error:  # noqa: BLE001 - the run must say how it ended
         outcome = f"{type(error).__name__}: {error}"
     finally:
         if dropped and password is not None:
             try:
                 sudo_run(undrop_rule, password)
-            except Exception:                         # noqa: BLE001
+            except Exception:  # noqa: BLE001
                 notes.append("WARNING: the iptables rule may still be there")
         cluster.collect_and_clean(both)
-    record = {"name": name, "outcome": outcome, "wall_seconds": time.time() - started, "notes": notes, "final_weights_sha256": final_hash(run_dir)}
+    record = {
+        "name": name,
+        "outcome": outcome,
+        "wall_seconds": time.time() - started,
+        "notes": notes,
+        "final_weights_sha256": final_hash(run_dir),
+    }
     (run_dir / "run.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
     return record
 
@@ -232,7 +279,10 @@ def run_reference(args, out: Path) -> str:
     finally:
         cluster.collect_and_clean([FAST])
     digest = final_hash(run_dir)
-    (run_dir / "run.json").write_text(json.dumps({"name": "reference", "outcome": outcome, "final_weights_sha256": digest}, indent=2) + "\n", encoding="utf-8")
+    (run_dir / "run.json").write_text(
+        json.dumps({"name": "reference", "outcome": outcome, "final_weights_sha256": digest}, indent=2) + "\n",
+        encoding="utf-8",
+    )
     if digest is None:
         raise RuntimeError(f"the reference run failed: {outcome}")
     return digest
@@ -243,8 +293,16 @@ def verdict(record: dict, reference: str) -> dict:
     ended = record["outcome"] == "ok"
     same = record["final_weights_sha256"] == reference
     # a scenario that timed out WAITING FOR ITS OWN CONDITION (for example "the remote worker holds a candidate") never disturbed anything: not exercised, which is neither a pass nor a failure of the system
-    exercised = not (record["outcome"].startswith("TimeoutError: timed out after") and "waiting for:" in record["outcome"])
-    return {"scenario": record["name"], "ended_ok": ended, "same_final_weights_as_reference": same, "exercised": exercised, "passed": ended and same}
+    exercised = not (
+        record["outcome"].startswith("TimeoutError: timed out after") and "waiting for:" in record["outcome"]
+    )
+    return {
+        "scenario": record["name"],
+        "ended_ok": ended,
+        "same_final_weights_as_reference": same,
+        "exercised": exercised,
+        "passed": ended and same,
+    }
 
 
 def main(argv: list[str]) -> int:
@@ -253,11 +311,28 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--candidates", type=int, default=8)
     parser.add_argument("--generations", type=int, default=3)
     parser.add_argument("--scenarios", default=",".join(DEFAULT_SCENARIOS))
-    parser.add_argument("--reference-final", default=None, help="the final weights hash of the undisturbed run (default: run it first)")
-    parser.add_argument("--chunk", type=int, default=None, help="prompts per generate() call of every worker (default: 16 for --eval-dtype float32, 1 for float16)")
-    parser.add_argument("--remote-worker", choices=["slow", "third"], default="slow", help="which remote machine is disturbed: slow = the 1660S (--remote), third = --third (a borrowed 3060 over the Internet)")
+    parser.add_argument(
+        "--reference-final", default=None, help="the final weights hash of the undisturbed run (default: run it first)"
+    )
+    parser.add_argument(
+        "--chunk",
+        type=int,
+        default=None,
+        help="prompts per generate() call of every worker (default: 16 for --eval-dtype float32, 1 for float16)",
+    )
+    parser.add_argument(
+        "--remote-worker",
+        choices=["slow", "third"],
+        default="slow",
+        help="which remote machine is disturbed: slow = the 1660S (--remote), third = --third (a borrowed 3060 over the Internet)",
+    )
     parser.add_argument("--cut-seconds", type=float, default=8.0)
-    parser.add_argument("--cut-delay", type=float, default=0.0, help="cut-link: seconds after the publication of generation 0 before the packets are dropped (3 s puts the cut in the middle of the download)")
+    parser.add_argument(
+        "--cut-delay",
+        type=float,
+        default=0.0,
+        help="cut-link: seconds after the publication of generation 0 before the packets are dropped (3 s puts the cut in the middle of the download)",
+    )
     parser.add_argument("--restart-after", type=float, default=5.0)
     parser.add_argument("--run-timeout", type=float, default=1800.0)
     parser.add_argument("--sudo-password-env", default="HETEROES_SUDO_PASSWORD")
@@ -267,6 +342,7 @@ def main(argv: list[str]) -> int:
     if args.chunk is None:
         sys.path.insert(0, str(REPO / "src"))
         from heteroes.eval.precision import default_chunk
+
         args.chunk = default_chunk(args.eval_dtype)
     unknown = [name for name in args.scenarios.split(",") if name not in SCENARIOS]
     if unknown:
@@ -274,7 +350,11 @@ def main(argv: list[str]) -> int:
     out = Path(args.out_dir)
     out.mkdir(parents=True, exist_ok=True)
     password = os.environ.get(args.sudo_password_env)
-    reference = args.reference_final or (out / "reference" / "run.json").exists() and json.loads((out / "reference" / "run.json").read_text())["final_weights_sha256"]
+    reference = (
+        args.reference_final
+        or (out / "reference" / "run.json").exists()
+        and json.loads((out / "reference" / "run.json").read_text())["final_weights_sha256"]
+    )
     if not reference:
         print("=== reference (the fast worker alone)", flush=True)
         reference = run_reference(args, out)
@@ -288,7 +368,10 @@ def main(argv: list[str]) -> int:
         record = run_scenario(name, args, out, password)
         results.append(verdict(record, reference))
         print("   ", record["outcome"], record["notes"], results[-1], flush=True)
-    (out / "verdicts.json").write_text(json.dumps({"reference_final_weights_sha256": reference, "verdicts": results}, indent=2) + "\n", encoding="utf-8")
+    (out / "verdicts.json").write_text(
+        json.dumps({"reference_final_weights_sha256": reference, "verdicts": results}, indent=2) + "\n",
+        encoding="utf-8",
+    )
     return 0 if all(r["passed"] for r in results) else 1
 
 

@@ -42,6 +42,7 @@ def quarantine_worker_a(ledger, index=0):
 # a failed restore puts the worker aside
 # ---------------------------------------------------------------------------
 
+
 def test_nobody_is_quarantined_at_the_start(ledger):
     assert ledger.list_quarantined() == []
 
@@ -52,7 +53,8 @@ def test_a_restore_mismatch_quarantines_the_worker_of_that_attempt(ledger, clock
     quarantine_worker_a(ledger, 2)
 
     assert ledger.list_quarantined() == [
-        QuarantineRecord(worker_id="worker-a", quarantined_at=1004.0, candidate_id="exp/g0/c2", attempt_number=1)]
+        QuarantineRecord(worker_id="worker-a", quarantined_at=1004.0, candidate_id="exp/g0/c2", attempt_number=1)
+    ]
 
 
 @pytest.mark.parametrize("kind", [FailureKind.OUT_OF_MEMORY, FailureKind.VERIFIER_ERROR, FailureKind.OTHER])
@@ -75,7 +77,7 @@ def test_the_candidate_of_the_failed_restore_is_free_for_another_worker(ledger):
     quarantine_worker_a(ledger, 0)
 
     assert record(ledger).state is CandidateState.PENDING
-    assert lease(ledger, 0, "worker-b").attempt_number == 2          # the attempt of worker-a counts in the budget
+    assert lease(ledger, 0, "worker-b").attempt_number == 2  # the attempt of worker-a counts in the budget
 
 
 def test_a_second_restore_mismatch_of_the_same_worker_keeps_the_first_record(ledger, clock):
@@ -84,7 +86,7 @@ def test_a_second_restore_mismatch_of_the_same_worker_keeps_the_first_record(led
     fail(ledger, held_c0, RESTORE)
     clock.advance(10.0)
 
-    fail(ledger, held_c1, RESTORE)                                   # a quarantined worker may still report failures
+    fail(ledger, held_c1, RESTORE)  # a quarantined worker may still report failures
 
     assert ledger.list_quarantined() == [QuarantineRecord("worker-a", 1000.0, "exp/g0/c0", 1)]
     assert record(ledger, 1).state is CandidateState.PENDING
@@ -93,7 +95,7 @@ def test_a_second_restore_mismatch_of_the_same_worker_keeps_the_first_record(led
 def test_the_record_names_the_attempt_that_caused_it(ledger, clock):
     first = lease(ledger, 0, "worker-b")
     clock.now = first.deadline
-    second = lease(ledger, 0, "worker-a")                           # attempt 2 of the candidate
+    second = lease(ledger, 0, "worker-a")  # attempt 2 of the candidate
 
     fail(ledger, second, RESTORE)
 
@@ -103,6 +105,7 @@ def test_the_record_names_the_attempt_that_caused_it(ledger, clock):
 # ---------------------------------------------------------------------------
 # a quarantined worker is given nothing and delivers nothing new
 # ---------------------------------------------------------------------------
+
 
 def test_a_quarantined_worker_cannot_lease(ledger):
     quarantine_worker_a(ledger, 0)
@@ -133,9 +136,9 @@ def test_the_other_leases_of_the_worker_stay_until_they_run_out_and_cannot_deliv
     held_c1 = lease(ledger, 1, "worker-a")
     fail(ledger, held_c0, RESTORE)
 
-    assert record(ledger, 1).state is CandidateState.LEASED          # not freed at once: it simply waits for the deadline
+    assert record(ledger, 1).state is CandidateState.LEASED  # not freed at once: it simply waits for the deadline
     with pytest.raises(WorkerQuarantinedError):
-        submit(ledger, held_c1, 0.5)                                 # the result of a worker whose weights are in doubt
+        submit(ledger, held_c1, 0.5)  # the result of a worker whose weights are in doubt
     assert record(ledger, 1).state is CandidateState.LEASED and record(ledger, 1).result is None
 
     clock.now = held_c1.deadline
@@ -149,7 +152,7 @@ def test_a_quarantined_worker_may_still_report_a_failure_for_an_attempt_it_holds
     held_c1 = lease(ledger, 1, "worker-a")
     fail(ledger, held_c0, RESTORE)
 
-    fail(ledger, held_c1, FailureKind.OTHER)                        # that frees the candidate at once, which is welcome
+    fail(ledger, held_c1, FailureKind.OTHER)  # that frees the candidate at once, which is welcome
 
     assert record(ledger, 1).state is CandidateState.PENDING
 
@@ -178,6 +181,7 @@ def test_a_stale_attempt_of_a_quarantined_worker_is_stale_first(ledger, clock):
 # ---------------------------------------------------------------------------
 # letting a worker back in
 # ---------------------------------------------------------------------------
+
 
 def test_a_released_worker_can_lease_again(ledger):
     quarantine_worker_a(ledger, 0)
@@ -217,7 +221,7 @@ def test_the_same_report_sent_again_after_the_release_does_not_quarantine_again(
     held = quarantine_worker_a(ledger, 0)
     ledger.release_worker("worker-a")
 
-    fail(ledger, held, RESTORE)                                      # the ACK was lost, so the worker repeats the report
+    fail(ledger, held, RESTORE)  # the ACK was lost, so the worker repeats the report
 
     assert ledger.list_quarantined() == []
 
@@ -238,7 +242,7 @@ def test_the_list_is_ordered_by_time_then_by_name(ledger, clock):
     fail(ledger, held_c, RESTORE)
     clock.advance(1.0)
     fail(ledger, held_b, RESTORE)
-    fail(ledger, held_a, RESTORE)                                    # same time as worker-b
+    fail(ledger, held_a, RESTORE)  # same time as worker-b
 
     assert [q.worker_id for q in ledger.list_quarantined()] == ["worker-c", "worker-a", "worker-b"]
 
@@ -246,6 +250,7 @@ def test_the_list_is_ordered_by_time_then_by_name(ledger, clock):
 # ---------------------------------------------------------------------------
 # the file, failures in the middle
 # ---------------------------------------------------------------------------
+
 
 def test_the_quarantine_survives_closing_and_reopening_the_file(tmp_path, clock):
     path = tmp_path / "ledger.db"
@@ -280,14 +285,16 @@ def test_a_failure_while_quarantining_leaves_the_attempt_open(tmp_path, clock):
     with Ledger(path, clock=clock) as ledger:
         ledger.open_generation(batch(2))
         held = lease(ledger, 0, "worker-a")
-    raw = sqlite3.connect(path)                                      # the quarantine row is written last
+    raw = sqlite3.connect(path)  # the quarantine row is written last
     raw.execute("CREATE TRIGGER boom BEFORE INSERT ON quarantine BEGIN SELECT RAISE(ABORT, 'injected failure'); END")
     raw.commit()
 
     with Ledger(path, clock=clock) as ledger:
-        with pytest.raises(LedgerError, match="injected failure"):   # the ledger's own error; the SQLite error is its cause
+        with pytest.raises(
+            LedgerError, match="injected failure"
+        ):  # the ledger's own error; the SQLite error is its cause
             fail(ledger, held, RESTORE)
-        assert record(ledger).state is CandidateState.LEASED         # the failure itself was rolled back too
+        assert record(ledger).state is CandidateState.LEASED  # the failure itself was rolled back too
         row = raw.execute("SELECT failure_kind, ended_at FROM attempt").fetchone()
         assert row == (None, None)
 
@@ -301,6 +308,7 @@ def test_a_failure_while_quarantining_leaves_the_attempt_open(tmp_path, clock):
 # ---------------------------------------------------------------------------
 # the rules are in the database itself, not only in Python
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def raw_after_quarantine(tmp_path, clock):
@@ -316,12 +324,14 @@ def raw_after_quarantine(tmp_path, clock):
 
 
 def insert_quarantine(raw, worker="worker-b", candidate_id="exp/g0/c1", attempt_number=1):
-    raw.execute("INSERT INTO quarantine (worker_id, quarantined_at, candidate_id, attempt_number) VALUES (?, ?, ?, ?)",
-                (worker, 1000.0, candidate_id, attempt_number))
+    raw.execute(
+        "INSERT INTO quarantine (worker_id, quarantined_at, candidate_id, attempt_number) VALUES (?, ?, ?, ?)",
+        (worker, 1000.0, candidate_id, attempt_number),
+    )
 
 
 def test_the_database_accepts_a_well_formed_quarantine_row(raw_after_quarantine):
-    insert_quarantine(raw_after_quarantine)                          # the helper is sound: the refusals below are about one field
+    insert_quarantine(raw_after_quarantine)  # the helper is sound: the refusals below are about one field
 
 
 def test_the_database_refuses_a_worker_quarantined_twice(raw_after_quarantine):

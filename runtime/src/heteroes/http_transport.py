@@ -32,6 +32,7 @@ A client that stalls is disconnected after `request_timeout` seconds and at most
 (the others are closed at once and retry): a stalled or hostile peer cannot pin the server's threads for ever. The weights file
 is served with `Accept-Ranges: bytes` and `Range: bytes=N-` is honoured (206), so that a broken download can continue.
 """
+
 import hmac
 import ipaddress
 import http.client
@@ -52,14 +53,19 @@ USER_AGENT = "HeteroES-Worker/1 (+https://heteroes.site)"
 MAX_BODY_BYTES = 1 << 20
 CHUNK_BYTES = 1 << 20
 _HEX64 = re.compile(r"[0-9a-f]{64}")
-_ROUTES = {"/v1/leases": "lease", "/v1/results": "submit_result", "/v1/failures": "report_failure", "/v1/heartbeats": "heartbeat"}
+_ROUTES = {
+    "/v1/leases": "lease",
+    "/v1/results": "submit_result",
+    "/v1/failures": "report_failure",
+    "/v1/heartbeats": "heartbeat",
+}
 _ROUTE_OF = {operation: route for route, operation in _ROUTES.items()}
 _IDEMPOTENT = {"submit_result", "report_failure", "heartbeat"}
 _RANGE = re.compile(r"bytes=(\d+)-(\d*)")
 _LOOPBACK = ("localhost", "::1")
 DEFAULT_REQUEST_TIMEOUT = 60.0
 DEFAULT_MAX_CONNECTIONS = 64
-_ANSWERED = object()      # `_read_json` has already sent the error (None is a valid JSON body)
+_ANSWERED = object()  # `_read_json` has already sent the error (None is a valid JSON body)
 
 
 class BulkUnavailableError(Exception):
@@ -86,7 +92,7 @@ def _status_of(reply: dict) -> int:
     if reply.get("ok") is True:
         return 200
     code = reply.get("error", {}).get("code")
-    return 403 if code == 'forbidden' else 400 if code == "bad_request" else 409
+    return 403 if code == "forbidden" else 400 if code == "bad_request" else 409
 
 
 class _Handler(http.server.BaseHTTPRequestHandler):
@@ -116,19 +122,19 @@ class _Handler(http.server.BaseHTTPRequestHandler):
     def _authorized(self) -> bool:
         self.authenticated_worker_id = None
         if self.coordinator.device_tokens is not None:
-            header = self.headers.get('Authorization', '')
-            if header.startswith('Bearer '):
+            header = self.headers.get("Authorization", "")
+            if header.startswith("Bearer "):
                 for worker_id, secret in self.coordinator.device_tokens.items():
                     if hmac.compare_digest(header[7:].encode(), secret.encode()):
                         self.authenticated_worker_id = worker_id
                         return True
-            self._error(401, 'unauthorized', 'Device credential is missing or revoked')
+            self._error(401, "unauthorized", "Device credential is missing or revoked")
             return False
         token = self.coordinator.token
         if token is None:
             return True
         header = self.headers.get("Authorization", "")
-        if header.startswith("Bearer ") and hmac.compare_digest(header[len("Bearer "):].encode(), token.encode()):
+        if header.startswith("Bearer ") and hmac.compare_digest(header[len("Bearer ") :].encode(), token.encode()):
             return True
         self._error(401, "unauthorized", "missing or wrong token")
         return False
@@ -147,7 +153,7 @@ class _Handler(http.server.BaseHTTPRequestHandler):
             return _ANSWERED
         try:
             return json.loads(self.rfile.read(length))
-        except ValueError as error:                  # includes a body that is not valid UTF-8
+        except ValueError as error:  # includes a body that is not valid UTF-8
             self._error(400, "bad_request", f"the body is not JSON: {error}")
             return _ANSWERED
 
@@ -160,9 +166,9 @@ class _Handler(http.server.BaseHTTPRequestHandler):
         elif path == "/v1/job":
             self._reply(200, {"ok": True, "job": self.coordinator.job})
         elif path.startswith("/v1/models/"):
-            self._serve_model(path[len("/v1/models/"):])
+            self._serve_model(path[len("/v1/models/") :])
         elif path.startswith("/v1/updates/"):
-            self._serve_update(path[len("/v1/updates/"):])
+            self._serve_update(path[len("/v1/updates/") :])
         elif path in _ROUTES:
             self._error(405, "bad_request", "use POST")
         else:
@@ -174,8 +180,11 @@ class _Handler(http.server.BaseHTTPRequestHandler):
         path = self.path.split("?", 1)[0]
         if path not in _ROUTES:
             known = path in ("/v1/health", "/v1/job") or path.startswith(("/v1/models/", "/v1/updates/"))
-            self._error(405 if known else 404, "bad_request" if known else "unknown_operation",
-                        "use GET" if known else f"no such route: {path}")
+            self._error(
+                405 if known else 404,
+                "bad_request" if known else "unknown_operation",
+                "use GET" if known else f"no such route: {path}",
+            )
             return
         request = self._read_json()
         if request is _ANSWERED:
@@ -184,8 +193,10 @@ class _Handler(http.server.BaseHTTPRequestHandler):
             if self.authenticated_worker_id is None:
                 reply = self.coordinator.api.handle(_ROUTES[path], request)
             else:
-                reply = self.coordinator.api.handle(_ROUTES[path], request, authenticated_worker_id=self.authenticated_worker_id)
-        except Exception as error:                   # a bug of the coordinator: say so, keep the server alive
+                reply = self.coordinator.api.handle(
+                    _ROUTES[path], request, authenticated_worker_id=self.authenticated_worker_id
+                )
+        except Exception as error:  # a bug of the coordinator: say so, keep the server alive
             self.coordinator.internal_errors.append(f"{type(error).__name__}: {error}\n{traceback.format_exc()}")
             self._error(500, "internal_error", f"{type(error).__name__}: {error}")
             return
@@ -238,7 +249,7 @@ class _Handler(http.server.BaseHTTPRequestHandler):
                     self.wfile.write(chunk)
                     remaining -= len(chunk)
         except (BrokenPipeError, ConnectionResetError, TimeoutError, socket.timeout):
-            pass                                     # the worker went away or stalled: its business
+            pass  # the worker went away or stalled: its business
 
 
 class _BoundedServer(http.server.ThreadingHTTPServer):
@@ -273,32 +284,53 @@ class CoordinatorServer:
     `<sha256>.bin`, `token` (optional) is the shared secret. `set_generation` moves on to the next generation.
     """
 
-    def __init__(self, api, job: dict | None = None, models_dir=None, host: str = "127.0.0.1", port: int = 0,
-                 token: str | None = None, request_timeout: float = DEFAULT_REQUEST_TIMEOUT,
-                 max_connections: int = DEFAULT_MAX_CONNECTIONS, allow_unauthenticated: bool = False,
-                 device_tokens: dict[str, str] | None = None):
-        if isinstance(request_timeout, bool) or not isinstance(request_timeout, (int, float)) or not request_timeout > 0:
+    def __init__(
+        self,
+        api,
+        job: dict | None = None,
+        models_dir=None,
+        host: str = "127.0.0.1",
+        port: int = 0,
+        token: str | None = None,
+        request_timeout: float = DEFAULT_REQUEST_TIMEOUT,
+        max_connections: int = DEFAULT_MAX_CONNECTIONS,
+        allow_unauthenticated: bool = False,
+        device_tokens: dict[str, str] | None = None,
+    ):
+        if (
+            isinstance(request_timeout, bool)
+            or not isinstance(request_timeout, (int, float))
+            or not request_timeout > 0
+        ):
             raise ValueError(f"request_timeout must be a positive number, got {request_timeout!r}")
         if isinstance(max_connections, bool) or not isinstance(max_connections, int) or max_connections < 1:
             raise ValueError(f"max_connections must be an integer of at least 1, got {max_connections!r}")
         if token is None and device_tokens is None and not _is_loopback(host) and not allow_unauthenticated:
-            raise ValueError(f"refusing to listen on {host} without a token: set one, or pass allow_unauthenticated=True "
-                             f"for a network that is private by other means")
+            raise ValueError(
+                f"refusing to listen on {host} without a token: set one, or pass allow_unauthenticated=True "
+                f"for a network that is private by other means"
+            )
         self._lock = threading.Lock()
         self._api, self._job = api, job
         self.models_dir = None if models_dir is None else Path(models_dir)
         self.token = token
-        if device_tokens is not None and (not device_tokens or any(not isinstance(v,str) or not v for v in device_tokens.values()) or len(set(device_tokens.values()))!=len(device_tokens)):
-            raise ValueError('Device credentials must be nonempty and distinct')
+        if device_tokens is not None and (
+            not device_tokens
+            or any(not isinstance(v, str) or not v for v in device_tokens.values())
+            or len(set(device_tokens.values())) != len(device_tokens)
+        ):
+            raise ValueError("Device credentials must be nonempty and distinct")
         self.device_tokens = device_tokens
         self.request_timeout, self.max_connections = request_timeout, max_connections
         self.internal_errors: list[str] = []
-        self.updates: dict[str, dict] = {}       # parent weights sha256 -> {"record_json", "record_hash", "child_weights_sha256"}: filled by whoever applies the updates
+        self.updates: dict[
+            str, dict
+        ] = {}  # parent weights sha256 -> {"record_json", "record_hash", "child_weights_sha256"}: filled by whoever applies the updates
         self.open_connections = 0
         self.refused_connections = 0
         self._count_lock = threading.Lock()
         self._slots = threading.BoundedSemaphore(max_connections)
-        handler = type("Handler", (_Handler,), {"timeout": request_timeout})     # the socket timeout of every connection
+        handler = type("Handler", (_Handler,), {"timeout": request_timeout})  # the socket timeout of every connection
         self._httpd = _BoundedServer((host, port), handler)
         self._httpd.coordinator = self
         self.host, self.port = self._httpd.server_address[0], self._httpd.server_address[1]
@@ -337,53 +369,77 @@ class CoordinatorServer:
 class HttpClient:
     """A transport for `WorkerClient` (call it with `(operation, payload)`), and the other things a worker asks of the coordinator."""
 
-    def __init__(self, base_url: str, token: str | None = None, timeout: float = 30.0, retries: int = 3, backoff: float = 0.5, *, bulk_url: str | None = None,
-                 allow_no_bulk: bool = False):
+    def __init__(
+        self,
+        base_url: str,
+        token: str | None = None,
+        timeout: float = 30.0,
+        retries: int = 3,
+        backoff: float = 0.5,
+        *,
+        bulk_url: str | None = None,
+        allow_no_bulk: bool = False,
+    ):
         self._base = base_url.rstrip("/")
-        self._bulk = (bulk_url or base_url).rstrip('/')
+        self._bulk = (bulk_url or base_url).rstrip("/")
+
         def private_origin(url):
-            if any(c.isspace() or ord(c)<32 or ord(c)==127 for c in url):return False
-            parsed=urlsplit(url)
+            if any(c.isspace() or ord(c) < 32 or ord(c) == 127 for c in url):
+                return False
+            parsed = urlsplit(url)
             try:
-                address=ipaddress.ip_address(parsed.hostname or '')
-                port=parsed.port
+                address = ipaddress.ip_address(parsed.hostname or "")
+                port = parsed.port
             except ValueError:
                 return False
-            return (parsed.scheme in ('http','https') and not parsed.username and not parsed.password
-                    and not parsed.query and not parsed.fragment and parsed.path in ('','/')
-                    and (port is None or 1 <= port <= 65535)
-                    and not (address.is_unspecified or address.is_multicast or (address.is_reserved and not address.is_loopback))
-                    and (address.is_private or address in ipaddress.ip_network('100.64.0.0/10')))
+            return (
+                parsed.scheme in ("http", "https")
+                and not parsed.username
+                and not parsed.password
+                and not parsed.query
+                and not parsed.fragment
+                and parsed.path in ("", "/")
+                and (port is None or 1 <= port <= 65535)
+                and not (
+                    address.is_unspecified or address.is_multicast or (address.is_reserved and not address.is_loopback)
+                )
+                and (address.is_private or address in ipaddress.ip_network("100.64.0.0/10"))
+            )
+
         # Legacy localhost callers are private, too. No bulk bytes may silently
         # fall back to a public tunnel when a worker lacks LAN/Tailscale access.
-        if bulk_url is None and not private_origin(base_url) and urlsplit(base_url).hostname != 'localhost':
+        if bulk_url is None and not private_origin(base_url) and urlsplit(base_url).hostname != "localhost":
             if not allow_no_bulk:
-                raise ValueError('Public compute requires a private bulk_url')
+                raise ValueError("Public compute requires a private bulk_url")
             # Replay-only: control and update records use the public origin; weights are never fetched.
             self._bulk = None
         if bulk_url is not None and not private_origin(bulk_url):
-            raise ValueError('bulk_url must be a numeric private/Tailscale origin')
+            raise ValueError("bulk_url must be a numeric private/Tailscale origin")
         self._token = token
         self._timeout = timeout
         self._retries = retries
         self._backoff = backoff
-        self._opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))    # a private network, never a proxy
+        self._opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))  # a private network, never a proxy
 
     def _request(self, method: str, path: str, data: bytes | None = None, *, bulk=False):
         if bulk and self._bulk is None:
-            raise BulkUnavailableError("full model transfer needs a private route; this client can only fetch update records")
+            raise BulkUnavailableError(
+                "full model transfer needs a private route; this client can only fetch update records"
+            )
         headers = {"User-Agent": USER_AGENT}
         if data is not None:
             headers["Content-Type"] = "application/json"
         if self._token is not None:
             headers["Authorization"] = f"Bearer {self._token}"
-        return urllib.request.Request((self._bulk if bulk else self._base) + path, data=data, headers=headers, method=method)
+        return urllib.request.Request(
+            (self._bulk if bulk else self._base) + path, data=data, headers=headers, method=method
+        )
 
     def _exchange(self, request) -> tuple[int, bytes]:
         try:
             with self._opener.open(request, timeout=self._timeout) as response:
                 return response.status, response.read()
-        except urllib.error.HTTPError as error:       # a reply with a status of 4xx or 5xx still carries its JSON
+        except urllib.error.HTTPError as error:  # a reply with a status of 4xx or 5xx still carries its JSON
             return error.code, error.read()
         except (urllib.error.URLError, OSError, http.client.HTTPException) as error:
             raise TransportError(f"{request.get_method()} {request.full_url}: {error}") from error
@@ -391,11 +447,15 @@ class HttpClient:
     def _json(self, request):
         status, body = self._exchange(request)
         if status == 401:
-            raise UnauthorizedError(f"{request.get_method()} {request.full_url}: HTTP 401, the token is missing or wrong", 401)
+            raise UnauthorizedError(
+                f"{request.get_method()} {request.full_url}: HTTP 401, the token is missing or wrong", 401
+            )
         try:
             return json.loads(body)
         except ValueError as error:
-            raise TransportError(f"{request.get_method()} {request.full_url}: HTTP {status} without JSON", status) from error
+            raise TransportError(
+                f"{request.get_method()} {request.full_url}: HTTP {status} without JSON", status
+            ) from error
 
     def __call__(self, operation: str, payload: dict):
         if operation not in _ROUTE_OF:
@@ -411,7 +471,7 @@ class HttpClient:
             except TransportError:
                 if attempt == tries - 1:
                     raise
-                time.sleep(self._backoff * 2 ** attempt)
+                time.sleep(self._backoff * 2**attempt)
 
     def get_json(self, path: str):
         return self._json(self._request("GET", path))
@@ -430,8 +490,8 @@ class HttpClient:
         The body of a GET as a file-like object (a context manager), for what is too large to read at once. With `start` > 0 it asks
         for `Range: bytes=start-`; the answer's `status` is 206 if the server honoured it and 200 if it sent the whole file.
         """
-        if not re.fullmatch(r'/v1/models/[a-f0-9]{64}', path):
-            raise ValueError('Only content-addressed weights use the bulk transport')
+        if not re.fullmatch(r"/v1/models/[a-f0-9]{64}", path):
+            raise ValueError("Only content-addressed weights use the bulk transport")
         request = self._request("GET", path, bulk=True)
         if start > 0:
             request.add_header("Range", f"bytes={start}-")

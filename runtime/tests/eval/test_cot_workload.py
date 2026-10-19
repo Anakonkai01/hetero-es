@@ -2,18 +2,28 @@
 Tests of the long arithmetic workload with step-by-step reasoning (G7). No model needed: the generation is replaced by a function that returns texts.
 The arithmetic of the oracle is written here (not taken from the module): the questions are parsed back from their text and solved again.
 """
+
 import re
 
 import pytest
 
 import heteroes.eval.cot_workload as cot
-from heteroes.eval.cot_workload import (MAX_NEW_TOKENS, SYSTEM_PROMPT, evaluate_cot, extract_answer, make_questions, workload_dict, workload_hash_of)
+from heteroes.eval.cot_workload import (
+    MAX_NEW_TOKENS,
+    SYSTEM_PROMPT,
+    evaluate_cot,
+    extract_answer,
+    make_questions,
+    workload_dict,
+    workload_hash_of,
+)
 from heteroes.eval.generate import EvalResult
 from heteroes.eval.workloads import WORKLOADS, get_workload
 from heteroes.eval.workload import workload_hash
 
 
 # ---- the questions ---------------------------------------------------------------------------------------------------------------
+
 
 def test_the_questions_are_a_pure_function_of_the_count_the_level_and_the_seed():
     assert make_questions(32, 3) == make_questions(32, 3)
@@ -24,7 +34,9 @@ def test_the_questions_are_a_pure_function_of_the_count_the_level_and_the_seed()
 
 def solve(question: str) -> int:
     """The answer of a question, from its text only."""
-    word = re.fullmatch(r"A shop has (\d+) boxes with (\d+) pens in each box\. It sells (\d+) pens\. How many pens remain\?", question)
+    word = re.fullmatch(
+        r"A shop has (\d+) boxes with (\d+) pens in each box\. It sells (\d+) pens\. How many pens remain\?", question
+    )
     if word:
         packs, per, sold = map(int, word.groups())
         return packs * per - sold
@@ -53,7 +65,7 @@ def test_every_answer_is_the_solution_of_its_question(level):
 
 def test_a_level_has_the_shape_it_says():
     assert all(re.fullmatch(r"What is \d+ [-+*] \d+\?", q) for q, _ in make_questions(50, 1))
-    assert all(len(q.split()) == 7 for q, _ in make_questions(50, 2))                     # "What is a op b op c?"
+    assert all(len(q.split()) == 7 for q, _ in make_questions(50, 2))  # "What is a op b op c?"
     assert all(q.startswith("A shop has") for q, _ in make_questions(50, 3))
 
 
@@ -65,21 +77,26 @@ def test_bad_arguments_are_refused(count, level):
 
 # ---- the answer in the text -------------------------------------------------------------------------------------------------------
 
-@pytest.mark.parametrize("text,expected", [
-    ("so 3 + 4 = 7.\nAnswer: 7", 7),
-    ("Answer: 1,003", 1003),
-    ("Answer: -12", -12),
-    ("first Answer: 5 then more steps, and Answer: 9", 9),               # the last 'Answer:' counts
-    ("the result is \\boxed{208}", 208),                                 # no 'Answer:': the last integer
-    ("Answer: $41", 41),
-    ("no number at all", None),
-    ("", None),
-])
+
+@pytest.mark.parametrize(
+    "text,expected",
+    [
+        ("so 3 + 4 = 7.\nAnswer: 7", 7),
+        ("Answer: 1,003", 1003),
+        ("Answer: -12", -12),
+        ("first Answer: 5 then more steps, and Answer: 9", 9),  # the last 'Answer:' counts
+        ("the result is \\boxed{208}", 208),  # no 'Answer:': the last integer
+        ("Answer: $41", 41),
+        ("no number at all", None),
+        ("", None),
+    ],
+)
 def test_the_answer_is_the_integer_after_the_last_answer_line_else_the_last_integer(text, expected):
     assert extract_answer(text) == expected
 
 
 # ---- the evaluation ---------------------------------------------------------------------------------------------------------------
+
 
 def fake_generate(monkeypatch, replies):
     calls = []
@@ -99,7 +116,9 @@ def test_the_reward_is_the_exact_match_averaged_over_the_questions(monkeypatch):
     result = evaluate_cot(None, None, 4, level=3, count=8)
     assert isinstance(result, EvalResult) and result.mean_reward == pytest.approx(6 / 8)
     assert [r.reward for r in result.records] == [0.0, 0.0] + [1.0] * 6
-    assert [r.question for r in result.records] == [q for q, _ in qa] and [r.expected for r in result.records] == [a for _, a in qa]
+    assert [r.question for r in result.records] == [q for q, _ in qa] and [r.expected for r in result.records] == [
+        a for _, a in qa
+    ]
 
 
 def test_a_reply_without_an_integer_is_a_wrong_answer_not_an_error(monkeypatch):
@@ -123,6 +142,7 @@ def test_a_bad_chunk_is_refused(monkeypatch, chunk):
 
 # ---- the identity of the workload ---------------------------------------------------------------------------------------------------
 
+
 def test_the_hash_says_everything_that_makes_two_machines_ask_the_same_thing(monkeypatch):
     base = workload_hash_of(3, 32)
     assert base == workload_hash_of(3, 32) and len(base) == 64
@@ -136,7 +156,11 @@ def test_the_hash_says_everything_that_makes_two_machines_ask_the_same_thing(mon
 
 def test_the_workload_document_has_the_questions_and_their_answers():
     document = workload_dict(3, 4)
-    assert document["max_new_tokens"] == MAX_NEW_TOKENS and document["system_prompt"] == SYSTEM_PROMPT and document["do_sample"] is False
+    assert (
+        document["max_new_tokens"] == MAX_NEW_TOKENS
+        and document["system_prompt"] == SYSTEM_PROMPT
+        and document["do_sample"] is False
+    )
     assert document["examples"] == [{"question": q, "answer": a} for q, a in make_questions(4, 3)]
 
 
@@ -147,8 +171,10 @@ def test_the_hash_of_the_workload_of_the_experiments_is_pinned():
 
 # ---- the registry of the names of the recipe --------------------------------------------------------------------------------------
 
+
 def test_the_16_prompt_workload_is_the_one_of_the_contract():
     from heteroes.eval.generate import evaluate_model
+
     assert get_workload("arith16").hash() == workload_hash() and get_workload("arith16").evaluate is evaluate_model
 
 
@@ -162,6 +188,7 @@ def test_the_long_workload_is_level_3_with_32_questions(monkeypatch):
 
 def test_every_name_of_the_manifest_has_a_workload_and_nothing_else_does():
     from heteroes.manifest import WORKLOAD_NAMES
+
     assert set(WORKLOADS) == set(WORKLOAD_NAMES)
 
 
@@ -172,6 +199,7 @@ def test_an_unknown_workload_is_refused(name):
 
 
 # ---- the 64-question workload (G7: a bigger batch is faster per question, and more questions make the reward less noisy) ----------------
+
 
 def test_the_64_question_workload_is_level_3_with_64_questions_and_its_own_hash(monkeypatch):
     workload = get_workload("cot_l3_q64")
@@ -192,10 +220,21 @@ def test_the_hash_of_the_64_question_workload_is_pinned():
 
 # ---- the 128-question level-1 workload (08/10: the level-3 word problems were limited by the 256-token cut, see artifacts/experiments/2026-10-08-uncut-probe) ----
 
+
 def test_the_level_1_workload_has_128_questions_and_its_own_hash(monkeypatch):
     workload = get_workload("cot_l1_q128")
     assert workload.hash() == workload_hash_of(1, 128)
-    assert len({workload.hash(), get_workload("cot_l3_q64").hash(), get_workload("cot_l3_q32").hash(), get_workload("arith16").hash()}) == 4
+    assert (
+        len(
+            {
+                workload.hash(),
+                get_workload("cot_l3_q64").hash(),
+                get_workload("cot_l3_q32").hash(),
+                get_workload("arith16").hash(),
+            }
+        )
+        == 4
+    )
     calls = fake_generate(monkeypatch, lambda q: "Answer: 1")
     workload.evaluate(None, None, 128)
     assert calls == [([q for q, _ in make_questions(128, 1)], 128)]
@@ -203,7 +242,9 @@ def test_the_level_1_workload_has_128_questions_and_its_own_hash(monkeypatch):
 
 def test_the_level_1_questions_are_two_digit_operations_with_computed_answers():
     questions = make_questions(128, 1)
-    assert len(questions) == 128 and len({q for q, _ in questions}) > 100            # a few repeats are possible: the generator draws with replacement
+    assert (
+        len(questions) == 128 and len({q for q, _ in questions}) > 100
+    )  # a few repeats are possible: the generator draws with replacement
     for question, answer in questions:
         a, op, b = re.fullmatch(r"What is (\d+) ([+\-*]) (\d+)\?", question).groups()
         assert 11 <= int(a) <= 99 and 11 <= int(b) <= 99 and answer == eval(f"{a}{op}{b}")
@@ -215,6 +256,7 @@ def test_the_first_64_questions_of_the_128_are_the_64_of_a_smaller_level_1_set()
 
 def test_the_level_1_workload_is_a_name_of_the_manifest_and_a_recipe_can_name_it():
     from heteroes.manifest import WORKLOAD_NAMES
+
     assert "cot_l1_q128" in WORKLOAD_NAMES
 
 
@@ -223,6 +265,7 @@ def test_every_workload_knows_its_own_name():
 
 
 # ---- the decode engine (09/10) ---------------------------------------------------------------------------------------------------------
+
 
 def test_the_decode_engine_goes_from_the_registry_through_the_evaluation_to_the_generation(monkeypatch):
     seen = []
@@ -248,6 +291,7 @@ def test_an_unknown_decode_engine_is_refused_by_the_evaluation(monkeypatch, bad)
 
 # the real glue, on a tiny model: both engines must give the same texts and the same token count
 
+
 class FakeTokenizer:
     pad_token_id = 0
     padding_side = "right"
@@ -257,13 +301,14 @@ class FakeTokenizer:
 
     def __call__(self, prompts, return_tensors="pt", padding=True):
         import torch
+
         rows = [[(ord(c) % 60) + 2 for c in prompt] for prompt in prompts]
         width = max(len(r) for r in rows)
         ids, mask = torch.zeros(len(rows), width, dtype=torch.long), torch.zeros(len(rows), width, dtype=torch.long)
         for i, row in enumerate(rows):
             start = width - len(row) if self.padding_side == "left" else 0
-            ids[i, start:start + len(row)] = torch.tensor(row)
-            mask[i, start:start + len(row)] = 1
+            ids[i, start : start + len(row)] = torch.tensor(row)
+            mask[i, start : start + len(row)] = 1
         return {"input_ids": ids, "attention_mask": mask}
 
     def batch_decode(self, ids, skip_special_tokens=True):
@@ -273,26 +318,52 @@ class FakeTokenizer:
 def test_both_decode_engines_give_the_same_texts_and_the_same_token_count_on_a_tiny_model(monkeypatch):
     import torch
     from transformers import Qwen2Config, Qwen2ForCausalLM
+
     torch.manual_seed(4321)
-    model = Qwen2ForCausalLM(Qwen2Config(vocab_size=64, hidden_size=32, intermediate_size=64, num_hidden_layers=2, num_attention_heads=4, num_key_value_heads=2,
-                                         max_position_embeddings=512, tie_word_embeddings=False, initializer_range=0.4)).float().eval()
+    model = (
+        Qwen2ForCausalLM(
+            Qwen2Config(
+                vocab_size=64,
+                hidden_size=32,
+                intermediate_size=64,
+                num_hidden_layers=2,
+                num_attention_heads=4,
+                num_key_value_heads=2,
+                max_position_embeddings=512,
+                tie_word_embeddings=False,
+                initializer_range=0.4,
+            )
+        )
+        .float()
+        .eval()
+    )
     model.generation_config.pad_token_id = 0
     model.generation_config.do_sample = False
     monkeypatch.setattr(cot, "MAX_NEW_TOKENS", 24)
     tokenizer = FakeTokenizer()
-    questions = [q for q, _ in make_questions(12, 1)] + ["What is 7 * 8 and the rest of a much longer question than the others?"]
+    questions = [q for q, _ in make_questions(12, 1)] + [
+        "What is 7 * 8 and the rest of a much longer question than the others?"
+    ]
     tokenizer.padding_side = "left"
     ids = tokenizer([cot_prompt for cot_prompt in questions])["input_ids"]
     model.generation_config.eos_token_id = [99]
     with torch.no_grad():
-        free = model.generate(input_ids=ids, attention_mask=tokenizer(questions)["attention_mask"], max_new_tokens=24, do_sample=False, pad_token_id=0)[:, ids.shape[1]:]
+        free = model.generate(
+            input_ids=ids,
+            attention_mask=tokenizer(questions)["attention_mask"],
+            max_new_tokens=24,
+            do_sample=False,
+            pad_token_id=0,
+        )[:, ids.shape[1] :]
     model.generation_config.eos_token_id = sorted({int(free[0, 3]), int(free[1, 6]), int(free[2, 9])})
-    tokenizer.padding_side = "right"                 # generate() sets it to left by itself and puts it back
+    tokenizer.padding_side = "right"  # generate() sets it to left by itself and puts it back
     for chunk in (4, 13):
         plain = cot.generate(model, tokenizer, questions, chunk)
         compact = cot.generate(model, tokenizer, questions, chunk, "hf_compact")
         assert compact == plain
-        assert len(set(len(t) for t in plain[0])) > 2          # premise: the texts have different lengths (the rows ended at different steps)
+        assert (
+            len(set(len(t) for t in plain[0])) > 2
+        )  # premise: the texts have different lengths (the rows ended at different steps)
     assert tokenizer.padding_side == "right"
 
 
@@ -300,9 +371,23 @@ def test_each_decode_engine_calls_only_its_own_decoder(monkeypatch):
     import torch
     from transformers import Qwen2Config, Qwen2ForCausalLM
     import heteroes.eval.compact_decode as compact_module
+
     torch.manual_seed(99)
-    model = Qwen2ForCausalLM(Qwen2Config(vocab_size=64, hidden_size=32, intermediate_size=64, num_hidden_layers=1, num_attention_heads=4, num_key_value_heads=2,
-                                         max_position_embeddings=128)).float().eval()
+    model = (
+        Qwen2ForCausalLM(
+            Qwen2Config(
+                vocab_size=64,
+                hidden_size=32,
+                intermediate_size=64,
+                num_hidden_layers=1,
+                num_attention_heads=4,
+                num_key_value_heads=2,
+                max_position_embeddings=128,
+            )
+        )
+        .float()
+        .eval()
+    )
     model.generation_config.pad_token_id = 0
     model.generation_config.eos_token_id = [1]
     monkeypatch.setattr(cot, "MAX_NEW_TOKENS", 4)
@@ -330,7 +415,21 @@ def test_the_compacting_decoder_refuses_an_unsupported_generation_config_before_
     import torch
     from transformers import Qwen2Config, Qwen2ForCausalLM
     from heteroes.eval.compact_decode import UnsupportedDecode
-    model = Qwen2ForCausalLM(Qwen2Config(vocab_size=64, hidden_size=32, intermediate_size=64, num_hidden_layers=1, num_attention_heads=4, num_key_value_heads=2)).float().eval()
+
+    model = (
+        Qwen2ForCausalLM(
+            Qwen2Config(
+                vocab_size=64,
+                hidden_size=32,
+                intermediate_size=64,
+                num_hidden_layers=1,
+                num_attention_heads=4,
+                num_key_value_heads=2,
+            )
+        )
+        .float()
+        .eval()
+    )
     model.generation_config.eos_token_id = [1]
     model.generation_config.no_repeat_ngram_size = 2
     with pytest.raises(UnsupportedDecode):

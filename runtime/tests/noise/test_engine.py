@@ -58,8 +58,7 @@ GOLDEN_PRODUCTION = [
 ]
 
 PROBE_FULL_JSON = (
-    Path(__file__).resolve().parents[2]
-    / "artifacts" / "probes" / "2026-09-29" / "noiseengine_5070ti_full.json"
+    Path(__file__).resolve().parents[2] / "artifacts" / "probes" / "2026-09-29" / "noiseengine_5070ti_full.json"
 )
 
 
@@ -70,6 +69,7 @@ def address(seed=0, schema=PROBE_SCHEMA_HASH, param=0, chunk=0, chunk_elements=C
 # ---------------------------------------------------------------------------
 # derive_chunk_seed
 # ---------------------------------------------------------------------------
+
 
 def test_seed_matches_hand_written_contract_string():
     # Independent oracle: the address string written out by hand, exactly as in the contract.
@@ -139,6 +139,7 @@ def test_seed_is_deterministic():
 # generate_chunk_noise
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.parametrize("param, chunk, n, digest", GOLDEN)
 def test_n_g_golden_vectors_from_physical_probe(param, chunk, n, digest):
     noise = generate_chunk_noise(address(param=param, chunk=chunk), n)
@@ -148,9 +149,7 @@ def test_n_g_golden_vectors_from_physical_probe(param, chunk, n, digest):
 
 @pytest.mark.parametrize("param, chunk, n, digest", GOLDEN_PRODUCTION)
 def test_n_g_production_golden_vectors_regression_guard(param, chunk, n, digest):
-    noise = generate_chunk_noise(
-        address(schema=PRODUCTION_SCHEMA_HASH, param=param, chunk=chunk), n
-    )
+    noise = generate_chunk_noise(address(schema=PRODUCTION_SCHEMA_HASH, param=param, chunk=chunk), n)
 
     assert hashlib.sha256(noise.tobytes()).hexdigest() == digest
 
@@ -232,14 +231,15 @@ def test_generate_accepts_the_boundary_values_of_n():
 # chunk geometry: num_chunks, chunk_length
 # ---------------------------------------------------------------------------
 
+
 def test_geometry_hand_computed_examples():
     assert num_chunks(600_000, C) == 3
     assert [chunk_length(600_000, j, C) for j in range(3)] == [262_144, 262_144, 75_712]
 
-    assert num_chunks(136_134_656, C) == 520          # embedding tensor
+    assert num_chunks(136_134_656, C) == 520  # embedding tensor
     assert chunk_length(136_134_656, 519, C) == 81_920
 
-    assert num_chunks(896, C) == 1                    # tensor smaller than one chunk
+    assert num_chunks(896, C) == 1  # tensor smaller than one chunk
     assert chunk_length(896, 0, C) == 896
 
 
@@ -285,6 +285,7 @@ def test_geometry_matches_probe_chunk_counts_for_all_qwen_tensors():
 # ---------------------------------------------------------------------------
 # whole-parameter noise: iter_parameter_noise_chunks, generate_parameter_noise
 # ---------------------------------------------------------------------------
+
 
 def parameter_address(seed=0, schema=PROBE_SCHEMA_HASH, param=0, chunk_elements=C):
     return ParameterNoiseAddress(seed, schema, param, chunk_elements)

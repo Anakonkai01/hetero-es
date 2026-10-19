@@ -3,6 +3,7 @@ Loading the pinned Qwen checkpoint and describing it as a `Recipe`: the part tha
 The logic is the one of `scripts/run_one_candidate.py` (whose evidence, a recipe hash, is pinned below); the checks that need
 the real model run only with HETEROES_QWEN_PINNED_PATH and a CUDA GPU, like the other real-model tests.
 """
+
 import os
 
 import pytest
@@ -55,11 +56,13 @@ def test_a_machine_that_does_not_generate_the_canonical_noise_is_refused(monkeyp
 def test_the_recipe_of_the_real_model_is_the_recipe_of_the_recorded_evidence():
     loaded = load_pinned_model(PINNED_PATH, "cuda")
 
-    recipe = build_recipe(loaded, sigma=1e-3, eval_dtype="float16")        # the recorded evidence is the FP16 evaluation
+    recipe = build_recipe(loaded, sigma=1e-3, eval_dtype="float16")  # the recorded evidence is the FP16 evaluation
 
     assert recipe.hash == EVIDENCE_RECIPE_HASH
     assert loaded.revision == PINNED_REVISION and recipe.model_revision == PINNED_REVISION == recipe.tokenizer_revision
-    assert next(loaded.model.parameters()).dtype == torch.float16 and next(loaded.model.parameters()).device.type == "cuda"
+    assert (
+        next(loaded.model.parameters()).dtype == torch.float16 and next(loaded.model.parameters()).device.type == "cuda"
+    )
     assert loaded.schema.hash == recipe.schema_hash
 
 
@@ -97,15 +100,25 @@ def test_every_choice_of_the_experiment_goes_into_the_recipe_without_a_real_mode
     assert build_recipe(loaded, sigma=2e-3).sigma == 2e-3
     assert build_recipe(loaded, sigma=1e-3, chunk_elements=1024).chunk_elements == 1024
     assert build_recipe(loaded, sigma=1e-3, reward_eta=1e-8).reward_eta == 1e-8
-    assert len({base.hash, build_recipe(loaded, 2e-3).hash, build_recipe(loaded, 1e-3, 1024).hash,
-                build_recipe(loaded, 1e-3, reward_eta=1e-8).hash}) == 4
+    assert (
+        len(
+            {
+                base.hash,
+                build_recipe(loaded, 2e-3).hash,
+                build_recipe(loaded, 1e-3, 1024).hash,
+                build_recipe(loaded, 1e-3, reward_eta=1e-8).hash,
+            }
+        )
+        == 4
+    )
     other_config = LoadedModel(toy, None, loaded.schema, "1" * 40, {"max_new_tokens": 6}, "cpu")
-    assert build_recipe(other_config, 1e-3).hash != base.hash                          # the generation config is part of it
+    assert build_recipe(other_config, 1e-3).hash != base.hash  # the generation config is part of it
 
 
 # ---------------------------------------------------------------------------
 # G7: the noise engine and the workload are choices of the experiment, and each engine has its own self-test
 # ---------------------------------------------------------------------------
+
 
 def toy_loaded():
     import torch.nn as nn
@@ -124,7 +137,11 @@ def test_the_cuda_noise_engine_is_a_choice_of_the_recipe_with_its_own_call_size_
     cpu = build_recipe(loaded, sigma=1e-3)
     cuda = build_recipe(loaded, sigma=1e-3, noise_engine="cuda")
 
-    assert (cuda.engine_version, cuda.chunk_elements, cuda.noise_fingerprint) == (CUDA_ENGINE_VERSION, CUDA_CALL_ELEMENTS, EXPECTED_CUDA_NOISE_FINGERPRINT)
+    assert (cuda.engine_version, cuda.chunk_elements, cuda.noise_fingerprint) == (
+        CUDA_ENGINE_VERSION,
+        CUDA_CALL_ELEMENTS,
+        EXPECTED_CUDA_NOISE_FINGERPRINT,
+    )
     assert cuda.hash != cpu.hash and cpu.engine_version != cuda.engine_version
 
 
@@ -146,7 +163,10 @@ def test_a_named_workload_goes_into_the_recipe_with_its_own_hash():
     long = build_recipe(loaded, sigma=1e-3, workload="cot_l3_q32")
 
     assert default.workload_name == "arith16" and long.workload_name == "cot_l3_q32"
-    assert default.workload_hash == get_workload("arith16").hash() and long.workload_hash == get_workload("cot_l3_q32").hash()
+    assert (
+        default.workload_hash == get_workload("arith16").hash()
+        and long.workload_hash == get_workload("cot_l3_q32").hash()
+    )
     assert default.workload_hash != long.workload_hash and default.hash != long.hash
 
 
@@ -186,9 +206,11 @@ def test_the_decode_engine_is_a_choice_of_the_recipe_and_the_long_workloads_defa
     default = build_recipe(loaded, sigma=1e-3, workload="cot_l1_q128")
     compact = build_recipe(loaded, sigma=1e-3, workload="cot_l1_q128", decode_engine="hf_compact")
     plain = build_recipe(loaded, sigma=1e-3, workload="cot_l1_q128", decode_engine="hf_generate")
-    assert default.decode_engine == "hf_compact" and default.hash == compact.hash       # new experiments on a long workload use the compacting decoder unless told otherwise
+    assert (
+        default.decode_engine == "hf_compact" and default.hash == compact.hash
+    )  # new experiments on a long workload use the compacting decoder unless told otherwise
     assert plain.decode_engine == "hf_generate" and plain.hash != default.hash
-    assert build_recipe(loaded, sigma=1e-3).decode_engine == "hf_generate"             # the 16-prompt workload cannot use it
+    assert build_recipe(loaded, sigma=1e-3).decode_engine == "hf_generate"  # the 16-prompt workload cannot use it
     with pytest.raises(ValueError):
         build_recipe(loaded, sigma=1e-3, workload="arith16", decode_engine="hf_compact")
     with pytest.raises(ValueError):
@@ -197,8 +219,11 @@ def test_the_decode_engine_is_a_choice_of_the_recipe_and_the_long_workloads_defa
 
 def test_the_default_decode_engine_is_a_function_of_the_workload_and_does_not_touch_stored_documents():
     from heteroes import manifest
+
     assert manifest.default_decode_engine("arith16") == "hf_generate"
-    assert all(manifest.default_decode_engine(name) == "hf_compact" for name in manifest.WORKLOAD_NAMES if name != "arith16")
+    assert all(
+        manifest.default_decode_engine(name) == "hf_compact" for name in manifest.WORKLOAD_NAMES if name != "arith16"
+    )
     # a stored recipe document without the key still means the library's generate(), whatever the default of new recipes is
     document = build_recipe(toy_loaded(), sigma=1e-3, workload="cot_l1_q128", decode_engine="hf_generate").to_dict()
     assert "decode_engine" not in document["workload"]

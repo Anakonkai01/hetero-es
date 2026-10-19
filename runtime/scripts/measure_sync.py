@@ -8,6 +8,7 @@ It does what a worker does at the start of a generation: download the file (the 
 file, not hashed). `--repeats` times; the output has every repeat and the median. The result is `sync` in the shape that `heteroes.admission` reads, so that it can be put in a profile
 that lacks it (say so where you do). The output file must not exist.
 """
+
 import argparse
 import json
 import os
@@ -62,18 +63,52 @@ def main(argv: list[str]) -> int:
         done = time.perf_counter()
         size = path.stat().st_size
         path.unlink()
-        runs.append({"transfer_seconds": transferred - start, "load_seconds": loaded_at - transferred, "rehash_seconds": done - loaded_at,
-                     "total_seconds": done - start, "weights_bytes": size, "throughput_mb_per_second": size / 1e6 / (transferred - start)})
+        runs.append(
+            {
+                "transfer_seconds": transferred - start,
+                "load_seconds": loaded_at - transferred,
+                "rehash_seconds": done - loaded_at,
+                "total_seconds": done - start,
+                "weights_bytes": size,
+                "throughput_mb_per_second": size / 1e6 / (transferred - start),
+            }
+        )
     median = {key: statistics.median(run[key] for run in runs) for key in runs[0]}
-    sync = {"url": args.sync_url, "rtt_median_seconds": statistics.median(rtts), "rtt_max_seconds": max(rtts), "weights_sha256": args.sync_sha256,
-            **median, "repeats": runs}
-    result = {"worker_id": args.worker_id, "measured_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "environment": environment_info(device),
-              "code": code_info(), "sync": sync}
+    sync = {
+        "url": args.sync_url,
+        "rtt_median_seconds": statistics.median(rtts),
+        "rtt_max_seconds": max(rtts),
+        "weights_sha256": args.sync_sha256,
+        **median,
+        "repeats": runs,
+    }
+    result = {
+        "worker_id": args.worker_id,
+        "measured_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "environment": environment_info(device),
+        "code": code_info(),
+        "sync": sync,
+    }
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     with open(args.out, "x", encoding="utf-8") as file:
         json.dump(result, file, indent=2)
         file.write("\n")
-    print(json.dumps({key: sync[key] for key in ("rtt_median_seconds", "transfer_seconds", "load_seconds", "rehash_seconds", "total_seconds", "throughput_mb_per_second")}, indent=1))
+    print(
+        json.dumps(
+            {
+                key: sync[key]
+                for key in (
+                    "rtt_median_seconds",
+                    "transfer_seconds",
+                    "load_seconds",
+                    "rehash_seconds",
+                    "total_seconds",
+                    "throughput_mb_per_second",
+                )
+            },
+            indent=1,
+        )
+    )
     return 0
 
 

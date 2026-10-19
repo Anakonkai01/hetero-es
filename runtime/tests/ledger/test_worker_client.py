@@ -3,6 +3,7 @@ The worker's side of the protocol: `WorkerClient` turns method calls into JSON r
 `(operation, payload) -> reply`), and replies back into Python values. `local_transport(api)` is the transport that
 stays in this process but goes through JSON text both ways, as a network would.
 """
+
 import json
 
 import pytest
@@ -41,6 +42,7 @@ def client(api):
 # ---------------------------------------------------------------------------
 # the happy path, in Python values
 # ---------------------------------------------------------------------------
+
 
 def test_a_lease_comes_back_as_typed_values(client, clock):
     reply = client.lease()
@@ -111,6 +113,7 @@ def test_a_quarantined_worker_gets_its_code_from_the_lease(client):
 # what crosses the boundary
 # ---------------------------------------------------------------------------
 
+
 class Recorder:
     """A transport that remembers what it was asked and answers like the real API."""
 
@@ -136,7 +139,7 @@ def test_the_client_sends_exactly_the_protocol_fields_and_only_json(api):
     lease_payload, submit_payload, _, failure_payload = (payload for _, payload in recorder.sent)
     assert set(lease_payload) == {"worker_id", "request_id"} and lease_payload["worker_id"] == "worker-a"
     assert isinstance(lease_payload["request_id"], str) and lease_payload["request_id"]
-    assert recorder.sent[0][1]["request_id"] != recorder.sent[2][1]["request_id"]      # a new id for every request
+    assert recorder.sent[0][1]["request_id"] != recorder.sent[2][1]["request_id"]  # a new id for every request
     assert set(submit_payload) == {"descriptor", "attempt_number", "token", "reward"}
     assert submit_payload["descriptor"] == descriptor_of(0).to_dict() and submit_payload["reward"] == 0.5
     assert set(failure_payload) == {"descriptor", "attempt_number", "token", "kind"}
@@ -162,7 +165,7 @@ def test_the_local_transport_really_goes_through_json_text_in_both_directions():
     answer = local_transport(api)("lease", payload)
 
     operation, request = api.seen[0]
-    assert operation == "lease" and request == {"worker_id": "w", "pair": [1, 2]}       # a tuple became a list
+    assert operation == "lease" and request == {"worker_id": "w", "pair": [1, 2]}  # a tuple became a list
     assert request is not payload
     assert answer == {"ok": True, "pair": [1, 2]} and answer is not reply
 
@@ -173,7 +176,7 @@ def test_the_local_transport_refuses_what_json_cannot_carry(api, ledger):
     with pytest.raises(TypeError):
         transport("lease", {"worker_id": object()})
     with pytest.raises(ValueError):
-        transport("lease", {"worker_id": float("nan")})          # no NaN on the wire (the JSON text would not be standard)
+        transport("lease", {"worker_id": float("nan")})  # no NaN on the wire (the JSON text would not be standard)
     assert ledger.get_candidate("exp/g0/c0").attempts == 0
 
 
@@ -203,26 +206,37 @@ def test_a_network_error_is_the_transports_business_and_is_not_wrapped():
 GOOD_WORK = {"descriptor": descriptor_of(0).to_dict(), "attempt_number": 1, "token": "0" * 32, "deadline": 1030.0}
 
 
-@pytest.mark.parametrize("reply", [
-    None, [], "ok", {}, {"ok": "yes"}, {"ok": 1},
-    {"ok": False}, {"ok": False, "error": "stale"}, {"ok": False, "error": {"code": "x"}},
-    {"ok": False, "error": {"code": 5, "message": "m"}},
-    {"ok": True},
-    {"ok": True, "work": None},
-    {"ok": True, "generation_state": "BOGUS", "work": None},
-    {"ok": True, "generation_state": "OPEN", "work": {}},
-    {"ok": True, "generation_state": "OPEN", "work": {k: v for k, v in GOOD_WORK.items() if k != "token"}},
-    {"ok": True, "generation_state": "OPEN", "work": dict(GOOD_WORK, descriptor={"seed": 1})},
-    {"ok": True, "generation_state": "OPEN", "work": dict(GOOD_WORK, attempt_number="1")},
-    {"ok": True, "generation_state": "OPEN", "work": dict(GOOD_WORK, deadline="soon")},
-    {"ok": True, "generation_state": "OPEN", "work": dict(GOOD_WORK, deadline="1030.0")},
-    {"ok": True, "generation_state": "OPEN", "work": dict(GOOD_WORK, deadline=True)},
-    {"ok": True, "generation_state": "OPEN", "work": dict(GOOD_WORK, deadline=None)},
-    {"ok": True, "generation_state": "OPEN", "work": dict(GOOD_WORK, token=5)},
-    {"ok": True, "generation_state": "OPEN", "work": dict(GOOD_WORK, token=None)},
-    {"ok": True, "generation_state": "OPEN", "work": dict(GOOD_WORK, attempt_number=True)},
-    {"ok": True, "generation_state": "OPEN", "work": dict(GOOD_WORK, attempt_number=1.0)},
-], ids=lambda reply: json.dumps(reply, default=str)[:60])
+@pytest.mark.parametrize(
+    "reply",
+    [
+        None,
+        [],
+        "ok",
+        {},
+        {"ok": "yes"},
+        {"ok": 1},
+        {"ok": False},
+        {"ok": False, "error": "stale"},
+        {"ok": False, "error": {"code": "x"}},
+        {"ok": False, "error": {"code": 5, "message": "m"}},
+        {"ok": True},
+        {"ok": True, "work": None},
+        {"ok": True, "generation_state": "BOGUS", "work": None},
+        {"ok": True, "generation_state": "OPEN", "work": {}},
+        {"ok": True, "generation_state": "OPEN", "work": {k: v for k, v in GOOD_WORK.items() if k != "token"}},
+        {"ok": True, "generation_state": "OPEN", "work": dict(GOOD_WORK, descriptor={"seed": 1})},
+        {"ok": True, "generation_state": "OPEN", "work": dict(GOOD_WORK, attempt_number="1")},
+        {"ok": True, "generation_state": "OPEN", "work": dict(GOOD_WORK, deadline="soon")},
+        {"ok": True, "generation_state": "OPEN", "work": dict(GOOD_WORK, deadline="1030.0")},
+        {"ok": True, "generation_state": "OPEN", "work": dict(GOOD_WORK, deadline=True)},
+        {"ok": True, "generation_state": "OPEN", "work": dict(GOOD_WORK, deadline=None)},
+        {"ok": True, "generation_state": "OPEN", "work": dict(GOOD_WORK, token=5)},
+        {"ok": True, "generation_state": "OPEN", "work": dict(GOOD_WORK, token=None)},
+        {"ok": True, "generation_state": "OPEN", "work": dict(GOOD_WORK, attempt_number=True)},
+        {"ok": True, "generation_state": "OPEN", "work": dict(GOOD_WORK, attempt_number=1.0)},
+    ],
+    ids=lambda reply: json.dumps(reply, default=str)[:60],
+)
 def test_a_reply_that_breaks_the_protocol_is_a_bad_response(reply):
     client = WorkerClient("worker-a", lambda operation, payload: reply)
 
@@ -261,7 +275,7 @@ def test_a_deadline_that_arrives_as_an_integer_is_a_float():
 
 
 def test_the_good_reply_that_the_bad_ones_are_made_from_is_accepted():
-    reply = {"ok": True, "generation_state": "OPEN", "work": GOOD_WORK}      # premise for the cases above
+    reply = {"ok": True, "generation_state": "OPEN", "work": GOOD_WORK}  # premise for the cases above
 
     work = WorkerClient("worker-a", lambda operation, payload: reply).lease().assignment
 

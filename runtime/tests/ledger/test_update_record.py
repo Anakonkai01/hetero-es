@@ -3,6 +3,7 @@ Writing down the update of a complete generation BEFORE the weights are touched,
 what makes a crash between the two harmless (the update is deterministic, so it can be redone from the parent, and the
 ledger knows whether it was done).
 """
+
 import dataclasses
 import sqlite3
 
@@ -43,8 +44,12 @@ def ledger(clock):
 def complete(ledger, rewards=REWARDS, experiment="exp", generation=0):
     for index, reward in rewards.items():
         held = ledger.lease(f"{experiment}/g{generation}/c{index}", "worker-a", 30.0)
-        ledger.submit_result(make(index, 1000 + 7 * index, experiment_id=experiment, generation=generation),
-                             held.attempt_number, held.token, reward)
+        ledger.submit_result(
+            make(index, 1000 + 7 * index, experiment_id=experiment, generation=generation),
+            held.attempt_number,
+            held.token,
+            reward,
+        )
 
 
 def record_of(ledger, alpha=1e-3, experiment="exp", generation=0):
@@ -69,6 +74,7 @@ def test_the_update_of_a_generation_that_does_not_exist_cannot_be_read(ledger):
 # recording
 # ---------------------------------------------------------------------------
 
+
 def test_a_generation_that_was_never_recorded_has_no_update(ledger):
     complete(ledger)
 
@@ -83,8 +89,9 @@ def test_the_update_of_a_complete_generation_is_recorded_and_can_be_read_back(le
     outcome = ledger.record_update(record)
 
     assert outcome is UpdateOutcome.RECORDED
-    assert stored(ledger) == StoredUpdate(record=record, record_hash=record.hash, recorded_at=1007.0,
-                                          child_weights_sha256=None, applied_at=None)
+    assert stored(ledger) == StoredUpdate(
+        record=record, record_hash=record.hash, recorded_at=1007.0, child_weights_sha256=None, applied_at=None
+    )
 
 
 def test_what_is_read_back_is_exactly_the_record(ledger):
@@ -137,13 +144,16 @@ def test_the_update_of_a_generation_that_does_not_exist_is_refused(ledger):
         ledger.record_update(record)
 
 
-@pytest.mark.parametrize("what, change", [
-    ("seeds", lambda r: dict(seeds=(r.seeds[1], r.seeds[0], r.seeds[2]))),
-    ("seeds", lambda r: dict(seeds=(r.seeds[0], r.seeds[1], r.seeds[2] + 1))),
-    ("rewards", lambda r: dict(rewards=(r.rewards[0], r.rewards[1], 0.8))),
-    ("recipe_hash", lambda r: dict(recipe_hash="e" * 64)),
-    ("parent_weights_sha256", lambda r: dict(parent_weights_sha256="f" * 64)),
-])
+@pytest.mark.parametrize(
+    "what, change",
+    [
+        ("seeds", lambda r: dict(seeds=(r.seeds[1], r.seeds[0], r.seeds[2]))),
+        ("seeds", lambda r: dict(seeds=(r.seeds[0], r.seeds[1], r.seeds[2] + 1))),
+        ("rewards", lambda r: dict(rewards=(r.rewards[0], r.rewards[1], 0.8))),
+        ("recipe_hash", lambda r: dict(recipe_hash="e" * 64)),
+        ("parent_weights_sha256", lambda r: dict(parent_weights_sha256="f" * 64)),
+    ],
+)
 def test_a_record_that_does_not_say_what_was_committed_is_refused(ledger, what, change):
     complete(ledger)
     record = record_of(ledger)
@@ -160,10 +170,16 @@ def test_a_record_with_more_or_fewer_candidates_than_the_generation_is_refused(l
     complete(ledger)
     record = record_of(ledger)
     if extra is None:
-        wrong = dataclasses.replace(record, seeds=record.seeds[:2], rewards=record.rewards[:2], coefficients=record.coefficients[:2])
+        wrong = dataclasses.replace(
+            record, seeds=record.seeds[:2], rewards=record.rewards[:2], coefficients=record.coefficients[:2]
+        )
     else:
-        wrong = dataclasses.replace(record, seeds=record.seeds + (extra[0],), rewards=record.rewards + (extra[1],),
-                                    coefficients=record.coefficients + (extra[2],))
+        wrong = dataclasses.replace(
+            record,
+            seeds=record.seeds + (extra[0],),
+            rewards=record.rewards + (extra[1],),
+            coefficients=record.coefficients + (extra[2],),
+        )
 
     with pytest.raises(RecordMismatchError):
         ledger.record_update(wrong)
@@ -175,7 +191,7 @@ def test_the_alpha_and_the_coefficients_are_the_coordinators_to_decide(ledger):
     complete(ledger)
     record = dataclasses.replace(record_of(ledger), alpha=0.125, coefficients=(0.0, -1.0, 1.0))
 
-    assert ledger.record_update(record) is UpdateOutcome.RECORDED            # the ledger cannot know them: it keeps them
+    assert ledger.record_update(record) is UpdateOutcome.RECORDED  # the ledger cannot know them: it keeps them
 
 
 @pytest.mark.parametrize("bad", [None, {"experiment_id": "exp"}, "exp/g0", 3])
@@ -199,6 +215,7 @@ def test_a_no_op_update_is_recorded_like_any_other(ledger):
 # recording again (a restart, a lost acknowledgement)
 # ---------------------------------------------------------------------------
 
+
 def test_the_same_record_again_is_acknowledged_and_changes_nothing(ledger, clock):
     complete(ledger)
     record = record_of(ledger)
@@ -207,7 +224,9 @@ def test_the_same_record_again_is_acknowledged_and_changes_nothing(ledger, clock
     clock.advance(100.0)
 
     assert ledger.record_update(record) is UpdateOutcome.ALREADY_RECORDED
-    assert ledger.record_update(record_of(ledger)) is UpdateOutcome.ALREADY_RECORDED      # rebuilt from the results: the same
+    assert (
+        ledger.record_update(record_of(ledger)) is UpdateOutcome.ALREADY_RECORDED
+    )  # rebuilt from the results: the same
 
     assert stored(ledger) == first
 
@@ -240,7 +259,10 @@ def test_each_generation_and_each_experiment_has_its_own_update(ledger):
     complete(ledger, experiment="other")
 
     for experiment, generation in (("exp", 0), ("exp", 1), ("other", 0)):
-        assert ledger.record_update(record_of(ledger, experiment=experiment, generation=generation)) is UpdateOutcome.RECORDED
+        assert (
+            ledger.record_update(record_of(ledger, experiment=experiment, generation=generation))
+            is UpdateOutcome.RECORDED
+        )
 
     assert [stored(ledger, e, g).record.generation for e, g in (("exp", 0), ("exp", 1), ("other", 0))] == [0, 1, 0]
     assert stored(ledger, "other", 0).record.experiment_id == "other"
@@ -264,12 +286,17 @@ def test_marking_one_update_applied_marks_only_that_one(ledger):
     assert stored(ledger, "exp", 0).child_weights_sha256 is None
     assert stored(ledger, "other", 0).child_weights_sha256 is None
     ledger.mark_applied("other", 0, hashes[("other", 0)], OTHER_CHILD)
-    assert [stored(ledger, e, g).child_weights_sha256 for e, g in (("exp", 0), ("exp", 1), ("other", 0))] == [None, CHILD, OTHER_CHILD]
+    assert [stored(ledger, e, g).child_weights_sha256 for e, g in (("exp", 0), ("exp", 1), ("other", 0))] == [
+        None,
+        CHILD,
+        OTHER_CHILD,
+    ]
 
 
 # ---------------------------------------------------------------------------
 # applied
 # ---------------------------------------------------------------------------
+
 
 def recorded(ledger):
     complete(ledger)
@@ -335,10 +362,18 @@ def test_the_application_of_a_generation_that_does_not_exist_is_refused(ledger):
         ledger.mark_applied("exp", 7, "a" * 64, CHILD)
 
 
-@pytest.mark.parametrize("record_hash, child, error", [
-    ("g" * 64, CHILD, ValueError), ("a" * 63, CHILD, ValueError), (None, CHILD, TypeError),
-    ("a" * 64, "C" * 64, ValueError), ("a" * 64, "c" * 65, ValueError), ("a" * 64, None, TypeError), ("a" * 64, 5, TypeError),
-])
+@pytest.mark.parametrize(
+    "record_hash, child, error",
+    [
+        ("g" * 64, CHILD, ValueError),
+        ("a" * 63, CHILD, ValueError),
+        (None, CHILD, TypeError),
+        ("a" * 64, "C" * 64, ValueError),
+        ("a" * 64, "c" * 65, ValueError),
+        ("a" * 64, None, TypeError),
+        ("a" * 64, 5, TypeError),
+    ],
+)
 def test_hashes_that_are_not_hashes_are_refused_and_nothing_is_written(ledger, record_hash, child, error):
     record = recorded(ledger)
 
@@ -361,6 +396,7 @@ def test_an_applied_update_cannot_be_recorded_differently_either(ledger):
 # ---------------------------------------------------------------------------
 # the file, two connections, failures in the middle, tampering
 # ---------------------------------------------------------------------------
+
 
 def test_a_recorded_and_applied_update_survives_closing_and_reopening_the_file(tmp_path, clock):
     path = tmp_path / "ledger.db"
@@ -385,7 +421,7 @@ def test_a_recorded_update_that_was_not_applied_yet_is_found_after_a_restart(tmp
         first.open_generation(batch(3))
         complete(first)
         record = record_of(first)
-        first.record_update(record)                         # ... and the coordinator crashes before applying it
+        first.record_update(record)  # ... and the coordinator crashes before applying it
 
     with Ledger(path, clock=clock) as again:
         update = stored(again)
@@ -416,11 +452,15 @@ def test_a_failure_while_recording_writes_nothing(tmp_path, clock):
         complete(ledger)
         record = record_of(ledger)
     raw = sqlite3.connect(path)
-    raw.execute("CREATE TRIGGER boom BEFORE INSERT ON generation_update BEGIN SELECT RAISE(ABORT, 'injected failure'); END")
+    raw.execute(
+        "CREATE TRIGGER boom BEFORE INSERT ON generation_update BEGIN SELECT RAISE(ABORT, 'injected failure'); END"
+    )
     raw.commit()
 
     with Ledger(path, clock=clock) as ledger:
-        with pytest.raises(LedgerError, match="injected failure"):   # the ledger's own error; the SQLite error is its cause
+        with pytest.raises(
+            LedgerError, match="injected failure"
+        ):  # the ledger's own error; the SQLite error is its cause
             ledger.record_update(record)
         assert stored(ledger) is None
 
@@ -453,7 +493,7 @@ def test_a_stored_hash_that_no_longer_matches_its_record_is_found_when_it_is_rea
         complete(ledger)
         ledger.record_update(record_of(ledger))
     raw = sqlite3.connect(path)
-    raw.execute("UPDATE generation_update SET record_hash = ?", ("9" * 64,))      # the record itself is intact and valid
+    raw.execute("UPDATE generation_update SET record_hash = ?", ("9" * 64,))  # the record itself is intact and valid
     raw.commit()
     raw.close()
 
@@ -471,7 +511,7 @@ def test_a_record_stored_under_another_generation_is_found_when_it_is_read(tmp_p
         complete(ledger, generation=1)
         ledger.record_update(record_of(ledger))
         ledger.record_update(record_of(ledger, generation=1))
-    raw = sqlite3.connect(path)                                   # generation 0 now holds the (valid) record of generation 1
+    raw = sqlite3.connect(path)  # generation 0 now holds the (valid) record of generation 1
     json1, hash1 = raw.execute("SELECT record_json, record_hash FROM generation_update WHERE generation = 1").fetchone()
     raw.execute("DELETE FROM generation_update WHERE generation = 1")
     raw.execute("UPDATE generation_update SET record_json = ?, record_hash = ? WHERE generation = 0", (json1, hash1))
@@ -486,6 +526,7 @@ def test_a_record_stored_under_another_generation_is_found_when_it_is_read(tmp_p
 # ---------------------------------------------------------------------------
 # the rules are in the database itself, not only in Python
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def raw_after_record(tmp_path, clock):
@@ -502,13 +543,15 @@ def raw_after_record(tmp_path, clock):
 
 
 def insert_update(raw, experiment="exp", generation=1, record_hash="1" * 64, child=None, applied_at=None):
-    raw.execute("INSERT INTO generation_update (experiment_id, generation, record_json, record_hash, recorded_at, "
-                "child_weights_sha256, applied_at) VALUES (?, ?, '{}', ?, 1000.0, ?, ?)",
-                (experiment, generation, record_hash, child, applied_at))
+    raw.execute(
+        "INSERT INTO generation_update (experiment_id, generation, record_json, record_hash, recorded_at, "
+        "child_weights_sha256, applied_at) VALUES (?, ?, '{}', ?, 1000.0, ?, ?)",
+        (experiment, generation, record_hash, child, applied_at),
+    )
 
 
 def test_the_database_accepts_a_well_formed_update_row(raw_after_record):
-    insert_update(raw_after_record)                              # the helper is sound: the refusals below are about one field
+    insert_update(raw_after_record)  # the helper is sound: the refusals below are about one field
 
 
 def test_the_database_refuses_a_second_update_for_a_generation(raw_after_record):

@@ -1,5 +1,6 @@
 """Small statistics for the benchmark summaries: the unit is a RUN (its steady-state mean), never a generation, because the
 generations of one run share parent weights, seeds and machines (a pseudo-replicate would make the interval look too narrow)."""
+
 import math
 
 import pytest

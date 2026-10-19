@@ -46,8 +46,7 @@ EXAMPLES: tuple[Example, ...] = (
         508,
     ),
     Example(
-        "A factory makes 125 items per hour for 18 hours. "
-        "347 items are defective. How many usable items remain?",
+        "A factory makes 125 items per hour for 18 hours. 347 items are defective. How many usable items remain?",
         1903,
     ),
 )

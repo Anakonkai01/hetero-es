@@ -16,6 +16,7 @@ What it does
 
 It writes nothing to disk except what the Hugging Face cache needs.
 """
+
 import hashlib
 import itertools
 import json
@@ -28,13 +29,13 @@ import numpy as np
 import torch
 
 # ----------------------------- settings (edit here) -------------------------------------
-SIGMA = 1e-3                       # rounded to float32 below
+SIGMA = 1e-3  # rounded to float32 below
 MODEL_ID = "Qwen/Qwen2.5-0.5B-Instruct"
 REVISION = "7ae557604adf67be50417f59c2c2f167def9a775"
-MODEL_PATH = os.environ.get("MODEL_PATH") or None   # local copy; None = download MODEL_ID@REVISION
-CHECK_NOISE = True                 # step 4 (slow on a weak CPU: about 10-60 s)
-QUICK = os.environ.get("QUICK") == "1"   # only the first 20 tensors (smoke test, hashes not comparable)
-SLAB = 1 << 25                     # elements per slab; bounds memory. Must be a multiple of C
+MODEL_PATH = os.environ.get("MODEL_PATH") or None  # local copy; None = download MODEL_ID@REVISION
+CHECK_NOISE = True  # step 4 (slow on a weak CPU: about 10-60 s)
+QUICK = os.environ.get("QUICK") == "1"  # only the first 20 tensors (smoke test, hashes not comparable)
+SLAB = 1 << 25  # elements per slab; bounds memory. Must be a multiple of C
 # -----------------------------------------------------------------------------------------
 
 C = 262_144
@@ -51,7 +52,7 @@ GOLDEN_PROBE = [
     (2, 0, 896, "56d3f8f512beadbebf9cbf0b1e6fda5143f7940375fc4af99a3437943af12602"),
     (289, 0, 896, "3ed137fd746d5f0655e81731e39e80df6857404c5644dad5dd40b6a6767a25ae"),
 ]
-GOLDEN_PRODUCTION = [   # regression guard produced by the engine on the 5070 Ti host, 2026-10-03
+GOLDEN_PRODUCTION = [  # regression guard produced by the engine on the 5070 Ti host, 2026-10-03
     (0, 0, 262144, "ebe2addd4ba90dfaebfad1582712b1660bd271f99e637c0e554caacf5fbcf87c"),
     (0, 519, 81920, "0d1468c0d034367ccd85e3ac80b5d94d7bf37aaf3a11edb718a35cfc5195466c"),
     (1, 0, 262144, "cd47f0154a3e8a8f2092469da29261479d115bc7db4a7794c8d59518f9a77186"),
@@ -71,13 +72,18 @@ def sha(b):
 assert torch.cuda.is_available(), "No CUDA GPU: switch the runtime to a GPU first."
 cap = torch.cuda.get_device_capability(0)
 env = {
-    "gpu": torch.cuda.get_device_name(0), "compute_capability": f"{cap[0]}.{cap[1]}",
-    "torch": torch.__version__, "cuda": torch.version.cuda, "numpy": np.__version__,
-    "python": platform.python_version(), "machine": platform.machine(),
+    "gpu": torch.cuda.get_device_name(0),
+    "compute_capability": f"{cap[0]}.{cap[1]}",
+    "torch": torch.__version__,
+    "cuda": torch.version.cuda,
+    "numpy": np.__version__,
+    "python": platform.python_version(),
+    "machine": platform.machine(),
     "sigma_float32": float(np.float32(SIGMA)),
 }
 try:
     import transformers
+
     env["transformers"] = transformers.__version__
 except Exception:
     pass
@@ -89,8 +95,10 @@ for k, v in env.items():
 
 # ------------------------------- 2. engine copy + golden -------------------------------
 def derive_chunk_seed(seed, schema_hash, param, chunk, chunk_elements):
-    text = (f"{ENGINE_VERSION}|candidate_seed={seed}|schema={schema_hash}|param={param}"
-            f"|chunk={chunk}|chunk_elements={chunk_elements}")
+    text = (
+        f"{ENGINE_VERSION}|candidate_seed={seed}|schema={schema_hash}|param={param}"
+        f"|chunk={chunk}|chunk_elements={chunk_elements}"
+    )
     return int.from_bytes(hashlib.sha256(text.encode("utf-8")).digest()[:16], "little")
 
 
@@ -111,13 +119,15 @@ def generate_parameter_noise(seed, schema_hash, param, numel):
     out = np.empty(numel, dtype=np.float16)
     for j in range(num_chunks(numel)):
         n = chunk_length(numel, j)
-        out[j * C: j * C + n] = generate_chunk(seed, schema_hash, param, j, n)
+        out[j * C : j * C + n] = generate_chunk(seed, schema_hash, param, j, n)
     return out
 
 
 print("\n=== 2. NOISE ENGINE (copy) vs recorded golden vectors")
-for label, table, schema_hash in (("probe     ", GOLDEN_PROBE, PROBE_SCHEMA_HASH),
-                                  ("production", GOLDEN_PRODUCTION, PRODUCTION_SCHEMA_HASH)):
+for label, table, schema_hash in (
+    ("probe     ", GOLDEN_PROBE, PROBE_SCHEMA_HASH),
+    ("production", GOLDEN_PRODUCTION, PRODUCTION_SCHEMA_HASH),
+):
     ok = all(sha(generate_chunk(0, schema_hash, p, c, n).tobytes()) == d for p, c, n, d in table)
     result["checks"][f"golden_{label.strip()}"] = ok
     print(f"  golden {label}: {'PASS' if ok else 'FAIL'}  ({len(table)} chunks)")
@@ -132,7 +142,7 @@ try:
     model = AutoModelForCausalLM.from_pretrained(src, dtype=torch.float16, **kw)
 except TypeError:
     model = AutoModelForCausalLM.from_pretrained(src, torch_dtype=torch.float16, **kw)
-params = list(model.named_parameters())                      # default: duplicates removed
+params = list(model.named_parameters())  # default: duplicates removed
 by_id = {}
 for name, p in model.named_parameters(remove_duplicate=False):
     by_id.setdefault(id(p), []).append(name)
@@ -144,20 +154,41 @@ for names in by_id.values():
 
 entries = []
 for i, (name, p) in enumerate(params):
-    entries.append({"index": i, "canonical_name": name, "aliases": alias_of.get(name, []),
-                    "shape": list(p.shape), "dtype": str(p.dtype), "numel": p.numel()})
+    entries.append(
+        {
+            "index": i,
+            "canonical_name": name,
+            "aliases": alias_of.get(name, []),
+            "shape": list(p.shape),
+            "dtype": str(p.dtype),
+            "numel": p.numel(),
+        }
+    )
 
 
 def canonical(obj):
     return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("utf-8")
 
 
-probe_hash = sha(canonical([{"index": e["index"], "name": e["canonical_name"], "shape": e["shape"],
-                              "dtype": e["dtype"], "numel": e["numel"]} for e in entries]))
+probe_hash = sha(
+    canonical(
+        [
+            {
+                "index": e["index"],
+                "name": e["canonical_name"],
+                "shape": e["shape"],
+                "dtype": e["dtype"],
+                "numel": e["numel"],
+            }
+            for e in entries
+        ]
+    )
+)
 prod_hash = sha(canonical({"schema_version": SCHEMA_VERSION, "entries": entries}))
 total = sum(e["numel"] for e in entries)
 checks = {
-    "tensors_290": len(entries) == 290, "elements_494032768": total == 494_032_768,
+    "tensors_290": len(entries) == 290,
+    "elements_494032768": total == 494_032_768,
     "alias_group": {k: v for k, v in alias_of.items()} == {"model.embed_tokens.weight": ["lm_head.weight"]},
     "probe_schema_hash": probe_hash == PROBE_SCHEMA_HASH,
     "production_schema_hash": prod_hash == PRODUCTION_SCHEMA_HASH,
@@ -186,7 +217,9 @@ if CHECK_NOISE and not QUICK:
         glob.update(agg.hexdigest().encode("ascii"))
     ok = glob.hexdigest() == PROBE_GLOBAL_NOISE_HASH
     result["checks"]["noise_global_hash_matches_probe"] = ok
-    print(f"  {glob.hexdigest()[:16]}…  vs probe {PROBE_GLOBAL_NOISE_HASH[:16]}…  -> {'PASS' if ok else 'FAIL'}  ({time.time()-t0:.0f}s)")
+    print(
+        f"  {glob.hexdigest()[:16]}…  vs probe {PROBE_GLOBAL_NOISE_HASH[:16]}…  -> {'PASS' if ok else 'FAIL'}  ({time.time() - t0:.0f}s)"
+    )
 
 # ------------------------------- 5. perturbation study ---------------------------------
 sig = float(np.float32(SIGMA))
@@ -257,16 +290,18 @@ for ti, (e, (_, param)) in enumerate(zip(entries, params)):
     theta_all = param.detach().reshape(-1).contiguous()
     eps_all = torch.from_numpy(generate_parameter_noise(0, PRODUCTION_SCHEMA_HASH, e["index"], e["numel"]))
     for s in range(0, e["numel"], SLAB):
-        theta, eps = theta_all[s:s + SLAB].contiguous(), eps_all[s:s + SLAB].contiguous()
+        theta, eps = theta_all[s : s + SLAB].contiguous(), eps_all[s : s + SLAB].contiguous()
         outs, tbits = methods(theta, eps)
         for k in names:
             glob[k].update(outs[k].cpu().numpy().tobytes())
         for a, b in pair:
             pair[(a, b)] += int((outs[a] != outs[b]).sum())
         un = int((outs["B"] == tbits).sum())
-        unchanged["all"][0] += theta.numel(); unchanged["all"][1] += un
+        unchanged["all"][0] += theta.numel()
+        unchanged["all"][1] += un
         if len(e["shape"]) == 1:
-            unchanged["1-D"][0] += theta.numel(); unchanged["1-D"][1] += un
+            unchanged["1-D"][0] += theta.numel()
+            unchanged["1-D"][1] += un
         a, b = outs["A"], outs["B"]
         m = a != b
         if m.any():
@@ -292,25 +327,32 @@ for gi, (h, ms) in enumerate(groups.items(), 1):
     for m_ in ms:
         print(f"        {m_:<3} {DESC[m_]}")
 print("\n  Elements that differ (bitwise), out of {:,}:".format(total_el))
-for a, b, label in [("B", "F", "(c) gpu unfused  vs  numpy unfused        "),
-                    ("B", "G", "(c) gpu unfused  vs  torch-cpu unfused    "),
-                    ("B", "L", "(c) whole tensor vs  per-chunk            "),
-                    ("B", "B2", "(c) run 1         vs  run 2               "),
-                    ("A", "B", "add_ (fused)      vs  (c) unfused         "),
-                    ("A", "I", "add_ (fused)      vs  emulated FMA        "),
-                    ("A", "H", "gpu add_          vs  cpu add_            "),
-                    ("B", "E", "(c)               vs  all-fp16 steps      "),
-                    ("B", "J", "(c)               vs  exact single rounding")]:
+for a, b, label in [
+    ("B", "F", "(c) gpu unfused  vs  numpy unfused        "),
+    ("B", "G", "(c) gpu unfused  vs  torch-cpu unfused    "),
+    ("B", "L", "(c) whole tensor vs  per-chunk            "),
+    ("B", "B2", "(c) run 1         vs  run 2               "),
+    ("A", "B", "add_ (fused)      vs  (c) unfused         "),
+    ("A", "I", "add_ (fused)      vs  emulated FMA        "),
+    ("A", "H", "gpu add_          vs  cpu add_            "),
+    ("B", "E", "(c)               vs  all-fp16 steps      "),
+    ("B", "J", "(c)               vs  exact single rounding"),
+]:
     print(f"   {label}: {pair[(a, b)] if (a, b) in pair else pair[(b, a)]:>12,}")
-print("\n  add_ vs (c): sign-of-zero-only = %d, real value differences = %d, max = %d ULP"
-      % (ab["sign_of_zero_only"], ab["value_diff"], ab["max_ulp"]))
+print(
+    "\n  add_ vs (c): sign-of-zero-only = %d, real value differences = %d, max = %d ULP"
+    % (ab["sign_of_zero_only"], ab["value_diff"], ab["max_ulp"])
+)
 for k, (tot, un) in unchanged.items():
     print(f"  elements left unchanged by the perturbation ({k}): {un:,}/{tot:,} = {100 * un / max(tot, 1):.2f}%")
 
 result["methods"] = {h[:16]: ms for h, ms in groups.items()}
 result["class_of"] = {m_: h[:16] for h, ms in groups.items() for m_ in ms}
-result["diffs"] = {f"{a}-{b}": v for (a, b), v in pair.items() if (a, b) in
-                   {("B", "F"), ("B", "G"), ("B", "L"), ("B", "B2"), ("A", "B"), ("A", "H"), ("B", "E"), ("A", "I")}}
+result["diffs"] = {
+    f"{a}-{b}": v
+    for (a, b), v in pair.items()
+    if (a, b) in {("B", "F"), ("B", "G"), ("B", "L"), ("B", "B2"), ("A", "B"), ("A", "H"), ("B", "E"), ("A", "I")}
+}
 result["ab"] = ab
 result["quick"] = QUICK
 print("\n=== RESULT_JSON (paste this line too)")

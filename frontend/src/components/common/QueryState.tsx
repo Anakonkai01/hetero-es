@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
-import { ErrorState } from "./ErrorState";
-import { LoadingState } from "./LoadingState";
+import type { ReactNode } from 'react';
+import { ErrorState } from './ErrorState';
+import { LoadingState } from './LoadingState';
 
 interface QueryStateProps {
   isPending: boolean;
@@ -12,13 +12,7 @@ interface QueryStateProps {
 }
 
 /** Renders loading and error states for a query; `children` render when data is ready. */
-export function QueryState({
-  isPending,
-  isError,
-  hasData,
-  title,
-  children,
-}: QueryStateProps) {
+export function QueryState({ isPending, isError, hasData, title, children }: QueryStateProps) {
   if (isPending) {
     return <LoadingState />;
   }
@@ -26,10 +20,7 @@ export function QueryState({
   if (isError && !hasData) {
     return (
       <div className="card">
-        <ErrorState
-          title={title}
-          message="The data source did not respond. Use Refresh to try again."
-        />
+        <ErrorState title={title} message="The data source did not respond. Use Refresh to try again." />
       </div>
     );
   }

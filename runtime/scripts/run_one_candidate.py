@@ -10,6 +10,7 @@ The record holds the recipe and its hash (manifest v1, heteroes/manifest.py), th
 It refuses to overwrite an existing output file (evidence is never overwritten) and refuses a model
 directory whose name is not the pinned revision.
 """
+
 import argparse
 import json
 import platform
@@ -87,10 +88,14 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--model-path", required=True, help="snapshot directory named after the pinned revision")
     parser.add_argument("--output", required=True, help="JSON file to create (must not exist)")
     parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--experiment-id", default="regression", help="name of the experiment in the candidate descriptor")
+    parser.add_argument(
+        "--experiment-id", default="regression", help="name of the experiment in the candidate descriptor"
+    )
     parser.add_argument("--sigma", type=float, default=1e-3)
     parser.add_argument("--chunk-elements", type=int, default=None, help="default: the contract value")
-    parser.add_argument("--repeat", type=int, default=2, help="how many times the same candidate is run in this process")
+    parser.add_argument(
+        "--repeat", type=int, default=2, help="how many times the same candidate is run in this process"
+    )
     parser.add_argument("--device", choices=["cuda", "cpu"], default=None, help="default: cuda if available")
     args = parser.parse_args(argv)
 
@@ -142,7 +147,7 @@ def main(argv: list[str]) -> int:
     recipe = Recipe(
         model_id=MODEL_ID,
         model_revision=revision,
-        tokenizer_revision=revision,   # the tokenizer files come from the same snapshot directory
+        tokenizer_revision=revision,  # the tokenizer files come from the same snapshot directory
         dtype=str(next(model.parameters()).dtype),
         schema_hash=schema.hash,
         engine_version=ENGINE_VERSION,
@@ -152,7 +157,7 @@ def main(argv: list[str]) -> int:
         reward_eta=DEFAULT_ETA,
         workload_hash=workload_hash(),
         generation_config_sha256=generation_config_sha256(generation_config),
-        eval_dtype="float16",      # this script evaluates the live FP16 model (the regression of steps 6 to 9)
+        eval_dtype="float16",  # this script evaluates the live FP16 model (the regression of steps 6 to 9)
     )
 
     runs = []
@@ -176,11 +181,11 @@ def main(argv: list[str]) -> int:
         "model": {
             "path": str(model_path),
             "revision": revision,
-            "tokenizer_revision": revision,   # the tokenizer files come from the same snapshot directory
+            "tokenizer_revision": revision,  # the tokenizer files come from the same snapshot directory
             "dtype": str(next(model.parameters()).dtype),
             "generation_config": generation_config,
-            "generation_config_sha256": generation_config_sha256(generation_config),   # the SET values (see manifest.py)
-            "generation_config_raw_sha256": canonical_json_hash(generation_config),    # differs between library versions
+            "generation_config_sha256": generation_config_sha256(generation_config),  # the SET values (see manifest.py)
+            "generation_config_raw_sha256": canonical_json_hash(generation_config),  # differs between library versions
         },
         "noise_selftest": selftest,
         "recipe": recipe.to_dict(),

@@ -1,30 +1,30 @@
 export type ExperimentStatus =
-  | "STARTING"
-  | "CANCELLING"
-  | "RECOVERING"
-  | "DRAINING"
-  | "FAILED"
-  | "PAUSING"
-  | "PAUSED"
-  | "DRAFT"
-  | "QUEUED"
-  | "RUNNING"
-  | "COMPLETED"
-  | "CANCELLED";
+  | 'STARTING'
+  | 'CANCELLING'
+  | 'RECOVERING'
+  | 'DRAINING'
+  | 'FAILED'
+  | 'PAUSING'
+  | 'PAUSED'
+  | 'DRAFT'
+  | 'QUEUED'
+  | 'RUNNING'
+  | 'COMPLETED'
+  | 'CANCELLED';
 
-export type SchedulerPolicy = "capacity-weighted" | "round-robin" | "greedy";
+export type SchedulerPolicy = 'capacity-weighted' | 'round-robin' | 'greedy';
 
-export type SyncMode = "synchronous" | "asynchronous";
+export type SyncMode = 'synchronous' | 'asynchronous';
 
 export interface Experiment {
   recipeVersion?: number;
-  batchSize?:number;
-  batchSeed?:number;
-  sigmaSchedule?:string;
-  sigmaMinimum?:number;
-  maxNewTokens?:number;
-  validationInterval?:number;
-  studyMetrics?:{testLocked:boolean;independentReloadPassed?:boolean};
+  batchSize?: number;
+  batchSeed?: number;
+  sigmaSchedule?: string;
+  sigmaMinimum?: number;
+  maxNewTokens?: number;
+  validationInterval?: number;
+  studyMetrics?: { testLocked: boolean; independentReloadPassed?: boolean };
   monitoringPartial?: boolean;
   experimentId: string;
   name: string;
@@ -32,10 +32,10 @@ export interface Experiment {
   ownerUserId?: string;
   workerIds?: string[];
   coordinatorDeviceId?: string;
-  backupPolicy?: {interval:number;retain:number};
-  requestedBackupPolicy?: {interval:number;retain:number};
+  backupPolicy?: { interval: number; retain: number };
+  requestedBackupPolicy?: { interval: number; retain: number };
   waitingReason?: string;
-  cloudSync?: {status:string;lastCloudGeneration?:number;errorType?:string};
+  cloudSync?: { status: string; lastCloudGeneration?: number; errorType?: string };
   modelArtifactId?: string;
   archivedAt?: string;
   maxGenerations?: number;
@@ -73,22 +73,22 @@ export interface Experiment {
 
 export interface CreateExperimentRequest {
   recipeVersion?: number;
-  batchSize?:number;
-  batchSeed?:number;
-  sigmaSchedule?:string;
-  sigmaMinimum?:number;
-  maxNewTokens?:number;
-  validationInterval?:number;
+  batchSize?: number;
+  batchSeed?: number;
+  sigmaSchedule?: string;
+  sigmaMinimum?: number;
+  maxNewTokens?: number;
+  validationInterval?: number;
   name: string;
   modelName: string;
   schedulerPolicy: SchedulerPolicy;
   syncMode: SyncMode;
   workerIds?: string[];
   coordinatorDeviceId?: string;
-  backupPolicy?: {interval:number;retain:number};
-  requestedBackupPolicy?: {interval:number;retain:number};
+  backupPolicy?: { interval: number; retain: number };
+  requestedBackupPolicy?: { interval: number; retain: number };
   waitingReason?: string;
-  cloudSync?: {status:string;lastCloudGeneration?:number;errorType?:string};
+  cloudSync?: { status: string; lastCloudGeneration?: number; errorType?: string };
   modelArtifactId?: string;
   task?: string;
   maxGenerations?: number;

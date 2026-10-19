@@ -1,11 +1,11 @@
-export type WorkspaceRole = "ADMIN" | "PARTICIPANT";
+export type WorkspaceRole = 'ADMIN' | 'PARTICIPANT';
 
 export interface User {
   userId: string;
   username: string;
   displayName: string;
   canCreateWorkspace: boolean;
-  accountStatus?: "PENDING" | "ACTIVE" | "REJECTED" | "SUSPENDED";
+  accountStatus?: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED';
   platformAdmin?: boolean;
   email?: string;
   bio?: string;
@@ -33,25 +33,17 @@ export interface WorkspaceMember {
   role: WorkspaceRole;
 }
 
-
-
-
-
-
-
-
-
 export interface ModelRegistration {
   modelArtifactId: string;
   workspaceId: string;
   ownerUserId: string;
   name: string;
-  source: "REFERENCE" | "UPLOAD_METADATA";
+  source: 'REFERENCE' | 'UPLOAD_METADATA';
   reference?: string;
   revision?: string;
   files?: { name: string; sizeBytes: number }[];
   /** Metadata only: no weights are transferred or validated in this prototype. */
-  status: "REGISTERED";
+  status: 'REGISTERED';
   createdAt: string;
 }
 
@@ -70,8 +62,11 @@ export interface AuditEntry {
   createdAt: string;
 }
 
-
 export interface WorkspaceInvitation {
-  invitationId: string; workspaceId: string; workspaceName: string; email: string;
-  status: "PENDING" | "ACCEPTED"; createdAt: string;
+  invitationId: string;
+  workspaceId: string;
+  workspaceName: string;
+  email: string;
+  status: 'PENDING' | 'ACCEPTED';
+  createdAt: string;
 }

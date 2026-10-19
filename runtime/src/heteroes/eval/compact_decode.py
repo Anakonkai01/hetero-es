@@ -15,11 +15,12 @@ What is measured and what is not (`artifacts/experiments/2026-10-09-compact-deco
 answer of 768 on one task whose two best tokens were 5.7e-6 apart, a tie that `generate()` itself breaks differently at another chunk size. This is NOT a guarantee of equal texts: no batch
 shape change is (numerical contract section 17). The constants below are part of the engine: changing one changes which batch shapes occur, so it would need a new engine name.
 """
+
 import copy
 
 import torch
 
-DROP_FRACTION = 0.1                 # rows are removed when at least this fraction of the rows still in the batch has ended (0.0 to 0.25 gave the same speed within 4 percent)
+DROP_FRACTION = 0.1  # rows are removed when at least this fraction of the rows still in the batch has ended (0.0 to 0.25 gave the same speed within 4 percent)
 SUPPORTED_PROCESSORS = ("RepetitionPenaltyLogitsProcessor",)
 
 
@@ -37,17 +38,25 @@ def decode_settings(model, max_new_tokens: int, tokenizer_pad_id: int | None = N
     config.max_new_tokens = max_new_tokens
     try:
         processors = model._get_logits_processor(config, 1, None, None, [])
-    except Exception as error:                              # noqa: BLE001 - a private method of the library: say plainly if it moved
-        raise UnsupportedDecode(f"cannot build the logits processors of the generation config ({type(error).__name__}: {error})") from error
+    except Exception as error:  # noqa: BLE001 - a private method of the library: say plainly if it moved
+        raise UnsupportedDecode(
+            f"cannot build the logits processors of the generation config ({type(error).__name__}: {error})"
+        ) from error
     names = [type(processor).__name__ for processor in processors]
     unknown = [name for name in names if name not in SUPPORTED_PROCESSORS]
     if unknown:
-        raise UnsupportedDecode(f"the generation config activates logits processors that the compacting decoder does not reproduce: {unknown}")
+        raise UnsupportedDecode(
+            f"the generation config activates logits processors that the compacting decoder does not reproduce: {unknown}"
+        )
     eos = config.eos_token_id
     eos_ids = [] if eos is None else (list(eos) if isinstance(eos, (list, tuple)) else [eos])
     if not eos_ids:
         raise UnsupportedDecode("the generation config has no end token")
-    pad = config.pad_token_id if config.pad_token_id is not None else (tokenizer_pad_id if tokenizer_pad_id is not None else eos_ids[0])
+    pad = (
+        config.pad_token_id
+        if config.pad_token_id is not None
+        else (tokenizer_pad_id if tokenizer_pad_id is not None else eos_ids[0])
+    )
     return eos_ids, pad, processors
 
 
@@ -67,11 +76,13 @@ def compact_generate_ids(model, input_ids, attention_mask, max_new_tokens: int, 
     eos_t = torch.tensor(list(eos_ids), device=device)
     position = position_ids_from_mask(attention_mask)
     out = torch.full((batch, max_new_tokens), pad_id, dtype=torch.long, device=device)
-    rows = torch.arange(batch, device=device)                       # original index of every row still in the batch
+    rows = torch.arange(batch, device=device)  # original index of every row still in the batch
     stats = {"steps": 0, "slot_steps": 0, "compactions": 0, "compaction_supported": True}
     mask, all_ids, last_position = attention_mask, input_ids, position[:, -1]
     with torch.no_grad():
-        result = model(input_ids=input_ids, attention_mask=attention_mask, position_ids=position, use_cache=True, logits_to_keep=1)
+        result = model(
+            input_ids=input_ids, attention_mask=attention_mask, position_ids=position, use_cache=True, logits_to_keep=1
+        )
         cache = result.past_key_values
         scores = result.logits[:, -1].to(dtype=torch.float32)
         finished = torch.zeros(batch, dtype=torch.bool, device=device)
@@ -80,7 +91,9 @@ def compact_generate_ids(model, input_ids, attention_mask, max_new_tokens: int, 
             stats["slot_steps"] += int(rows.shape[0])
             scores = processors(all_ids, scores)
             next_tokens = torch.argmax(scores, dim=-1)
-            next_tokens = torch.where(finished, torch.full_like(next_tokens, pad_id), next_tokens)      # a row that has ended gets padding, like the library
+            next_tokens = torch.where(
+                finished, torch.full_like(next_tokens, pad_id), next_tokens
+            )  # a row that has ended gets padding, like the library
             out[rows, step] = next_tokens
             finished = finished | torch.isin(next_tokens, eos_t)
             if step == max_new_tokens - 1:
@@ -92,7 +105,7 @@ def compact_generate_ids(model, input_ids, attention_mask, max_new_tokens: int, 
                 keep = torch.nonzero(~finished).squeeze(1)
                 try:
                     cache.batch_select_indices(keep)
-                except Exception:                                   # noqa: BLE001 - a cache that cannot select rows: go on without removing any
+                except Exception:  # noqa: BLE001 - a cache that cannot select rows: go on without removing any
                     stats["compaction_supported"] = False
                 else:
                     rows, mask, all_ids, last_position = rows[keep], mask[keep], all_ids[keep], last_position[keep]
@@ -102,7 +115,13 @@ def compact_generate_ids(model, input_ids, attention_mask, max_new_tokens: int, 
             all_ids = torch.cat([all_ids, next_tokens[:, None]], dim=-1)
             mask = torch.cat([mask, mask.new_ones((mask.shape[0], 1))], dim=-1)
             last_position = last_position + 1
-            result = model(input_ids=next_tokens[:, None], attention_mask=mask, position_ids=last_position[:, None], past_key_values=cache, use_cache=True)
+            result = model(
+                input_ids=next_tokens[:, None],
+                attention_mask=mask,
+                position_ids=last_position[:, None],
+                past_key_values=cache,
+                use_cache=True,
+            )
             cache = result.past_key_values
             scores = result.logits[:, -1].to(dtype=torch.float32)
-    return out[:, :stats["steps"]], stats
+    return out[:, : stats["steps"]], stats

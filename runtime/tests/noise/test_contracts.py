@@ -41,9 +41,7 @@ def test_n_m_address_has_exactly_the_five_contract_fields():
     ]
 
 
-@pytest.mark.parametrize(
-    "operational_field", ["worker_id", "attempt_id", "lease_token", "retry", "reward"]
-)
+@pytest.mark.parametrize("operational_field", ["worker_id", "attempt_id", "lease_token", "retry", "reward"])
 def test_n_m_address_rejects_operational_metadata(operational_field):
     # Noise identity must not depend on worker/attempt/lease/retry/reward.
     with pytest.raises(TypeError):
@@ -70,9 +68,7 @@ from heteroes.noise.contracts import ParameterNoiseAddress  # noqa: E402
 
 
 def make_parameter_address():
-    return ParameterNoiseAddress(
-        candidate_seed=11, schema_hash="hh", parameter_index=22, chunk_elements=33
-    )
+    return ParameterNoiseAddress(candidate_seed=11, schema_hash="hh", parameter_index=22, chunk_elements=33)
 
 
 def test_parameter_address_has_exactly_four_fields_and_no_chunk_index():

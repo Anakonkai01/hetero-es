@@ -55,6 +55,7 @@ def exhaust_by_expiry(ledger, clock, index, attempts=3):
 # the state of a generation, computed from its candidates
 # ---------------------------------------------------------------------------
 
+
 def test_a_generation_nobody_worked_on_is_open(ledger):
     assert status(ledger) == GenerationStatus(state=GenerationState.OPEN, committed=0, total=3, exhausted=())
 
@@ -98,7 +99,7 @@ def test_workers_that_vanish_exhaust_a_candidate_just_the_same(ledger, clock):
 def test_the_last_attempt_may_still_deliver_so_the_generation_is_open_until_its_lease_is_over(ledger, clock):
     fail(ledger, lease(ledger, 1))
     fail(ledger, lease(ledger, 1))
-    last = lease(ledger, 1)                                        # the third and last attempt, deadline 1030.0
+    last = lease(ledger, 1)  # the third and last attempt, deadline 1030.0
 
     clock.now = 1029.5
     assert status(ledger).state is GenerationState.OPEN
@@ -129,7 +130,7 @@ def test_one_exhausted_candidate_fails_the_generation_even_if_all_the_others_com
 def test_all_the_exhausted_candidates_are_named_in_index_order(clock):
     with Ledger(":memory:", clock=clock, max_attempts=1) as ledger:
         ledger.open_generation(batch(4))
-        for index in (3, 1):                                       # both leases are given while the generation is still open
+        for index in (3, 1):  # both leases are given while the generation is still open
             lease(ledger, index)
         assert status(ledger).state is GenerationState.OPEN
 
@@ -194,6 +195,7 @@ def test_a_failed_generation_is_open_again_when_the_budget_is_raised(tmp_path, c
 # a failed generation hands out no more work
 # ---------------------------------------------------------------------------
 
+
 def test_no_candidate_of_a_failed_generation_can_be_leased(ledger):
     exhaust(ledger, 1)
 
@@ -228,11 +230,11 @@ def test_another_generation_keeps_getting_work(ledger):
 
 def test_another_experiment_keeps_getting_work_and_a_failure_elsewhere_does_not_leak(ledger):
     ledger.open_generation(batch(3, experiment_id="other"))
-    exhaust(ledger, 1)                                              # exp/g0 failed
+    exhaust(ledger, 1)  # exp/g0 failed
 
-    assert ledger.lease("other/g0/c0", "worker-a", 30.0).attempt_number == 1     # other/g0 is not affected
+    assert ledger.lease("other/g0/c0", "worker-a", 30.0).attempt_number == 1  # other/g0 is not affected
 
-    for _ in range(3):                                              # now other/g0 fails too
+    for _ in range(3):  # now other/g0 fails too
         held = ledger.lease("other/g0/c1", "worker-a", 30.0)
         ledger.report_failure(make(1, 1007, experiment_id="other"), held.attempt_number, held.token, FailureKind.OTHER)
     with pytest.raises(GenerationFailedError, match="other/g0/c1"):
@@ -259,6 +261,7 @@ def test_the_error_of_a_failed_generation_is_a_ledger_error_of_its_own():
 # the data of a complete generation, ready for the update
 # ---------------------------------------------------------------------------
 
+
 def commit_all(ledger, rewards, order):
     leases = {index: lease(ledger, index) for index in order}
     for index in order:
@@ -267,7 +270,7 @@ def commit_all(ledger, rewards, order):
 
 def test_the_results_come_in_index_order_whatever_the_order_of_the_commits(ledger):
     rewards = {0: 0.5, 1: 0.25, 2: 0.75}
-    commit_all(ledger, rewards, order=(2, 0, 1))                    # not the index order
+    commit_all(ledger, rewards, order=(2, 0, 1))  # not the index order
 
     results = ledger.get_generation_results("exp", 0)
 

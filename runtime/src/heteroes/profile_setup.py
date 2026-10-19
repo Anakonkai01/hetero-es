@@ -4,6 +4,7 @@ What `scripts/profile_worker.py` chooses by the recipe: the questions to time an
 The profile of a worker is measured for ONE workload and ONE recipe (`profile.py`); before 08/10 the script knew only the 16 prompts of the contract and the CPU engine,
 so a worker running the CUDA engine on a long workload had no profile of the thing it actually does.
 """
+
 from heteroes.es.cuda_ops import apply_coefficients_cuda_, perturb_model_cuda_
 from heteroes.es.perturb import perturb_model_
 from heteroes.es.update import apply_coefficients_
@@ -36,7 +37,7 @@ def profile_texts(workload_name: str, model, tokenizer, chunk: int, decode_engin
             return [generate_answer(model, tokenizer, question) for question in questions]
         out = []
         for start in range(0, len(questions), chunk):
-            out += generate_answers(model, tokenizer, questions[start:start + chunk])
+            out += generate_answers(model, tokenizer, questions[start : start + chunk])
         return out
     return cot_generate(model, tokenizer, questions, chunk, decode_engine)[0]
 
@@ -49,6 +50,7 @@ def reference_check_applies(workload_name: str) -> bool:
 def _tagged(function):
     def call(*args, **kwargs):
         return function(*args, **kwargs)
+
     call.__wrapped_by__ = function
     return call
 
@@ -69,5 +71,6 @@ def _cpu(chunk_elements):
 
     def update(model, schema, seeds, coefficients, alpha):
         return apply_coefficients_(model, schema, seeds, coefficients, alpha, chunk_elements)
+
     perturb.__wrapped_by__, update.__wrapped_by__ = perturb_model_, apply_coefficients_
     return perturb, update

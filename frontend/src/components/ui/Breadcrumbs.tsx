@@ -1,6 +1,6 @@
 import { useProduct } from '@heteroes/product-ui';
-import { Fragment } from "react";
-import { Link } from "react-router";
+import { Fragment } from 'react';
+import { Link } from 'react-router';
 
 export interface Crumb {
   label: string;
@@ -9,13 +9,13 @@ export interface Crumb {
 }
 
 export function Breadcrumbs({ crumbs }: { crumbs: Crumb[] }) {
-  const {t}=useProduct();
+  const { t } = useProduct();
   if (crumbs.length < 2) {
     return null;
   }
 
   return (
-    <nav aria-label={t("Breadcrumb")} className="crumbs">
+    <nav aria-label={t('Breadcrumb')} className="crumbs">
       {crumbs.map((crumb, index) => {
         const isLast = index === crumbs.length - 1;
 
@@ -24,7 +24,7 @@ export function Breadcrumbs({ crumbs }: { crumbs: Crumb[] }) {
             <span
               key={index}
               className="cr cur"
-              aria-current={isLast ? "page" : undefined}
+              aria-current={isLast ? 'page' : undefined}
               title={crumb.title ?? crumb.label}
             >
               {crumb.label}
@@ -34,11 +34,7 @@ export function Breadcrumbs({ crumbs }: { crumbs: Crumb[] }) {
 
         return (
           <Fragment key={index}>
-            <Link
-              className="link cr"
-              to={crumb.to}
-              title={crumb.title ?? crumb.label}
-            >
+            <Link className="link cr" to={crumb.to} title={crumb.title ?? crumb.label}>
               {crumb.label}
             </Link>
             <span className="sep" aria-hidden="true">

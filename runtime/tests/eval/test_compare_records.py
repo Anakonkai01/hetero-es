@@ -19,26 +19,63 @@ def load_script():
 
 
 def evaluation(texts, reward):
-    return {"mean_reward": reward, "records": [
-        {"question": f"q{i}", "expected": 1, "output_text": t, "prediction": None, "reward": 0.0} for i, t in enumerate(texts)]}
+    return {
+        "mean_reward": reward,
+        "records": [
+            {"question": f"q{i}", "expected": 1, "output_text": t, "prediction": None, "reward": 0.0}
+            for i, t in enumerate(texts)
+        ],
+    }
 
 
 def make_record(**changes):
     run = {
-        "seed": 0, "sigma": 0.001, "sigma_float32": 0.0010000000474974513, "chunk_elements": 262144,
-        "schema_hash": "a" * 64, "engine_version": "numpy_pcg64_normal_f32_to_f16_v1", "workload_hash": "b" * 64,
+        "seed": 0,
+        "sigma": 0.001,
+        "sigma_float32": 0.0010000000474974513,
+        "chunk_elements": 262144,
+        "schema_hash": "a" * 64,
+        "engine_version": "numpy_pcg64_normal_f32_to_f16_v1",
+        "workload_hash": "b" * 64,
         "weights_sha256": {"original": "o" * 64, "perturbed": "p" * 64, "restored": "o" * 64},
         "restored_equals_original": True,
-        "evaluation": {"base": evaluation(["1", "2"], 0.25), "candidate": evaluation(["1", "3"], 0.3), "restored": evaluation(["1", "2"], 0.25)},
-        "timing_seconds": {}, "gpu_memory": None,
+        "evaluation": {
+            "base": evaluation(["1", "2"], 0.25),
+            "candidate": evaluation(["1", "3"], 0.3),
+            "restored": evaluation(["1", "2"], 0.25),
+        },
+        "timing_seconds": {},
+        "gpu_memory": None,
     }
     record = {
         "format_version": 1,
-        "environment": {"hostname": "m", "gpu_name": "g", "gpu_capability": [7, 5], "python": "3.12", "torch": "2", "torch_cuda": "12", "numpy": "2", "transformers": "5", "nvidia_driver": "1"},
+        "environment": {
+            "hostname": "m",
+            "gpu_name": "g",
+            "gpu_capability": [7, 5],
+            "python": "3.12",
+            "torch": "2",
+            "torch_cuda": "12",
+            "numpy": "2",
+            "transformers": "5",
+            "nvidia_driver": "1",
+        },
         "code": {"git_commit": "c" * 40, "git_dirty": False},
-        "model": {"revision": "1" * 40, "tokenizer_revision": "1" * 40, "dtype": "torch.float16", "generation_config_sha256": "g" * 64,
-                  "generation_config": {"do_sample": True, "temperature": 0.7, "repetition_penalty": 1.1, "max_length": None, "transformers_version": "5.5.0"}},
-        "runs": [run, copy.deepcopy(run)], "repeat_identical": True,
+        "model": {
+            "revision": "1" * 40,
+            "tokenizer_revision": "1" * 40,
+            "dtype": "torch.float16",
+            "generation_config_sha256": "g" * 64,
+            "generation_config": {
+                "do_sample": True,
+                "temperature": 0.7,
+                "repetition_penalty": 1.1,
+                "max_length": None,
+                "transformers_version": "5.5.0",
+            },
+        },
+        "runs": [run, copy.deepcopy(run)],
+        "repeat_identical": True,
     }
     for path, value in changes.items():
         target = record
@@ -105,7 +142,7 @@ def test_different_predictions_are_listed_question_by_question_and_do_not_fail()
 
     report, ok = load_script().compare(make_record(), other)
 
-    assert ok is True                                   # a measured difference is not an error by itself
+    assert ok is True  # a measured difference is not an error by itself
     assert "candidate: reward A 0.3 | B 0.5; 1 of 2 output texts differ" in report
     assert "question 1: A '3' | B '4'" in report
     assert "base: reward A 0.25 | B 0.25; 0 of 2 output texts differ" in report
@@ -144,7 +181,9 @@ def test_unusable_input_gives_exit_code_2(tmp_path):
 def test_a_different_library_version_alone_does_not_make_the_generation_config_different():
     # transformers 5.17 adds keys whose value is None and stores its own version: the settings are the same.
     newer = make_record(**{"model.generation_config_sha256": "x" * 64})
-    newer["model"]["generation_config"].update({"use_mtp": None, "max_cache_len": None, "transformers_version": "5.17.0"})
+    newer["model"]["generation_config"].update(
+        {"use_mtp": None, "max_cache_len": None, "transformers_version": "5.17.0"}
+    )
 
     report, ok = load_script().compare(make_record(), newer)
 
@@ -164,12 +203,12 @@ def test_the_recipe_hash_is_compared_and_a_record_of_format_2_uses_its_own():
     script = load_script()
     a = make_record()
     b = make_record()
-    b["recipe_hash"] = "f" * 64          # a format-2 record carries the hash of the recipe it was run with
+    b["recipe_hash"] = "f" * 64  # a format-2 record carries the hash of the recipe it was run with
 
     report, ok = script.compare(a, b)
 
     assert ok is False and "DIFFERENT recipe hash (manifest v1)" in report
-    assert script.recipe_hash_of(make_record()) == script.recipe_hash_of(make_record())   # rebuilt from the fields
+    assert script.recipe_hash_of(make_record()) == script.recipe_hash_of(make_record())  # rebuilt from the fields
 
 
 def test_a_record_that_is_not_a_valid_recipe_is_reported_not_a_crash():

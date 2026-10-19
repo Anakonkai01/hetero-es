@@ -7,6 +7,7 @@
 It stops when the coordinator says the experiment is finished, when it is put in quarantine, or when it is told to.
 A network error is not a reason to die: the worker waits and asks again.
 """
+
 import copy
 import json
 import threading
@@ -47,9 +48,21 @@ class HalfToy(nn.Module):
 
 
 def make_recipe(schema):
-    return Recipe(model_id="toy", model_revision="1" * 40, tokenizer_revision="1" * 40, dtype="torch.float16",
-                  schema_hash=schema.hash, engine_version=ENGINE_VERSION, chunk_elements=CHUNK, noise_fingerprint="2" * 64,
-                  sigma=SIGMA, reward_eta=1e-9, workload_hash="3" * 64, generation_config_sha256="4" * 64, eval_dtype="float16")
+    return Recipe(
+        model_id="toy",
+        model_revision="1" * 40,
+        tokenizer_revision="1" * 40,
+        dtype="torch.float16",
+        schema_hash=schema.hash,
+        engine_version=ENGINE_VERSION,
+        chunk_elements=CHUNK,
+        noise_fingerprint="2" * 64,
+        sigma=SIGMA,
+        reward_eta=1e-9,
+        workload_hash="3" * 64,
+        generation_config_sha256="4" * 64,
+        eval_dtype="float16",
+    )
 
 
 def wait_for(condition, seconds=30):
@@ -77,13 +90,27 @@ class Coordinator:
         self.current = None
 
     def job(self, generation, parent, state="RUNNING"):
-        return {"experiment_id": "exp", "generation": generation, "recipe": self.recipe.to_dict(), "recipe_hash": self.recipe.hash,
-                "parent_weights_sha256": parent, "state": state}
+        return {
+            "experiment_id": "exp",
+            "generation": generation,
+            "recipe": self.recipe.to_dict(),
+            "recipe_hash": self.recipe.hash,
+            "parent_weights_sha256": parent,
+            "state": state,
+        }
 
     def open_generation(self, generation, parent):
-        descriptors = [CandidateDescriptor(recipe_hash=self.recipe.hash, parent_weights_sha256=parent, experiment_id="exp",
-                                           generation=generation, index=i, seed=derive_seed("exp", generation, i))
-                       for i in range(self.n)]
+        descriptors = [
+            CandidateDescriptor(
+                recipe_hash=self.recipe.hash,
+                parent_weights_sha256=parent,
+                experiment_id="exp",
+                generation=generation,
+                index=i,
+                seed=derive_seed("exp", generation, i),
+            )
+            for i in range(self.n)
+        ]
         self.ledger.open_generation(descriptors)
         api = WorkerAPI(self.ledger, "exp", generation, lease_seconds=self.lease_seconds)
         job = self.job(generation, parent)
@@ -125,7 +152,9 @@ class WorkerSide:
 
         monkeypatch.setattr(executor_module, "evaluate_model", fake_evaluate)
         self.executor = CandidateExecutor(self.model, None, self.schema, self.recipe)
-        self.client = HttpClient(coordinator.server.url, timeout=5.0, retries=1, backoff=0.0) if coordinator.server else None
+        self.client = (
+            HttpClient(coordinator.server.url, timeout=5.0, retries=1, backoff=0.0) if coordinator.server else None
+        )
         self.coordinator = coordinator
         self.runtime_args = dict(poll_seconds=0.005, **runtime_args)
         self.name = name
@@ -134,7 +163,9 @@ class WorkerSide:
         self.thread = None
 
     def runtime(self):
-        return WorkerRuntime(self.name, self.client, self.executor, self.dir, log=self.events.append, **self.runtime_args)
+        return WorkerRuntime(
+            self.name, self.client, self.executor, self.dir, log=self.events.append, **self.runtime_args
+        )
 
     def start(self):
         runtime = self.runtime()
@@ -142,7 +173,7 @@ class WorkerSide:
         def run():
             try:
                 self.result = runtime.run(self.stop)
-            except BaseException as error:        # noqa: BLE001
+            except BaseException as error:  # noqa: BLE001
                 self.result = error
 
         self.thread = threading.Thread(target=run, daemon=True)
@@ -169,6 +200,7 @@ def coordinator(tmp_path):
 # ---------------------------------------------------------------------------
 # admission
 # ---------------------------------------------------------------------------
+
 
 def test_a_worker_with_the_same_recipe_is_admitted_and_gets_the_job(coordinator, monkeypatch):
     side = WorkerSide(coordinator, monkeypatch)
@@ -211,6 +243,7 @@ def test_a_coordinator_that_has_no_job_yet_is_waited_for(coordinator, monkeypatc
 # the loop
 # ---------------------------------------------------------------------------
 
+
 def test_the_worker_finishes_a_generation_and_stops_when_the_experiment_is_finished(coordinator, monkeypatch):
     side = WorkerSide(coordinator, monkeypatch).start()
 
@@ -237,7 +270,7 @@ def test_a_step_event_says_what_happened_and_how_long_each_part_took(coordinator
     assert set(step["timing"]) == {"perturb", "rollout", "restore", "total"}
     assert step["step_seconds"] >= step["timing"]["total"] >= 0
     assert step["coordination_seconds"] == pytest.approx(step["step_seconds"] - step["timing"]["total"])
-    json.dumps(side.events)                                                  # every event is plain JSON
+    json.dumps(side.events)  # every event is plain JSON
 
 
 def test_a_stop_request_stops_the_worker(coordinator, monkeypatch):
@@ -271,7 +304,9 @@ def test_a_worker_whose_recipe_changes_under_it_stops_with_an_error(coordinator,
 
 
 def test_the_worker_survives_the_coordinator_going_away_and_coming_back(tmp_path, monkeypatch):
-    coordinator = Coordinator(tmp_path, n=6, lease_seconds=0.5)     # a result lost on the way is recovered when its lease runs out
+    coordinator = Coordinator(
+        tmp_path, n=6, lease_seconds=0.5
+    )  # a result lost on the way is recovered when its lease runs out
     coordinator.open_generation(0, coordinator.parent)
     side = WorkerSide(coordinator, monkeypatch)
     side.client = HttpClient(coordinator.server.url, timeout=1.0, retries=0)
@@ -282,11 +317,11 @@ def test_the_worker_survives_the_coordinator_going_away_and_coming_back(tmp_path
         assert wait_for(lambda: coordinator.ledger.get_generation_status("exp", 0).committed >= 1)
 
         api, job = coordinator.server.api, coordinator.server.job
-        coordinator.server.stop()                                               # the coordinator goes away...
+        coordinator.server.stop()  # the coordinator goes away...
         time.sleep(0.3)
-        assert side.thread.is_alive()                                            # ...and the worker waits
+        assert side.thread.is_alive()  # ...and the worker waits
         coordinator.server = CoordinatorServer(api, job=job, models_dir=coordinator.models_dir, port=port)
-        coordinator.server.start()                                               # ...and comes back
+        coordinator.server.start()  # ...and comes back
 
         assert coordinator.wait_complete()
         coordinator.finish()
@@ -301,13 +336,14 @@ def test_the_worker_survives_the_coordinator_going_away_and_coming_back(tmp_path
 # full synchronization: the next generation has other parent weights
 # ---------------------------------------------------------------------------
 
+
 def test_the_worker_downloads_checks_and_loads_the_new_parent_before_it_works_on_it(coordinator, monkeypatch):
     side = WorkerSide(coordinator, monkeypatch).start()
     assert coordinator.wait_complete()
     first_parent = coordinator.parent
     evaluated_before = len(side.evaluated)
 
-    child_model = HalfToy(5)                                                  # the "updated" model of the coordinator
+    child_model = HalfToy(5)  # the "updated" model of the coordinator
     child = publish_weights(child_model, build_parameter_schema(child_model), coordinator.models_dir)
     assert child != first_parent
     coordinator.open_generation(1, child)
@@ -321,19 +357,19 @@ def test_the_worker_downloads_checks_and_loads_the_new_parent_before_it_works_on
     assert syncs[0]["bytes"] == (coordinator.models_dir / f"{child}.bin").stat().st_size
     assert side.executor.parent_sha256 == child and model_weights_sha256(side.model, side.schema) == child
     expected = set()
-    for index in range(4):                                                    # what each candidate of generation 1 must have looked like
+    for index in range(4):  # what each candidate of generation 1 must have looked like
         clone = copy.deepcopy(child_model)
         perturb_model_(clone, build_parameter_schema(clone), derive_seed("exp", 1, index), SIGMA, CHUNK)
         expected.add(model_weights_sha256(clone, build_parameter_schema(clone)))
     assert set(side.evaluated[evaluated_before:]) == expected and len(side.evaluated) == evaluated_before + 4
-    assert sorted(p.name for p in side.dir.iterdir()) == [f"{child}.bin"]       # the cache keeps only the weights in use
+    assert sorted(p.name for p in side.dir.iterdir()) == [f"{child}.bin"]  # the cache keeps only the weights in use
     assert not any(e["event"] == "step" and e["kind"] == "FAILURE_REPORTED" for e in side.events)
 
 
 def test_a_worker_that_already_has_the_weights_downloads_nothing(coordinator, monkeypatch):
     side = WorkerSide(coordinator, monkeypatch).start()
     assert coordinator.wait_complete()
-    coordinator.open_generation(1, coordinator.parent)                         # same parent again (an update that changed nothing)
+    coordinator.open_generation(1, coordinator.parent)  # same parent again (an update that changed nothing)
     assert coordinator.wait_complete(1)
     coordinator.finish()
 
@@ -360,13 +396,17 @@ def test_two_workers_both_follow_the_new_parent(coordinator, monkeypatch):
 # download_weights
 # ---------------------------------------------------------------------------
 
+
 def test_a_download_is_checked_against_its_name_and_kept_in_the_cache(coordinator, tmp_path):
     client = HttpClient(coordinator.server.url, timeout=5.0)
     cache = tmp_path / "cache"
 
     path = download_weights(client, coordinator.parent, cache)
 
-    assert path == cache / f"{coordinator.parent}.bin" and path.read_bytes() == (coordinator.models_dir / f"{coordinator.parent}.bin").read_bytes()
+    assert (
+        path == cache / f"{coordinator.parent}.bin"
+        and path.read_bytes() == (coordinator.models_dir / f"{coordinator.parent}.bin").read_bytes()
+    )
     assert [p.name for p in cache.iterdir()] == [f"{coordinator.parent}.bin"]
 
 
@@ -383,9 +423,11 @@ def test_a_file_already_in_the_cache_is_not_downloaded_again_if_it_is_intact(coo
     cache = tmp_path / "cache"
     client = HttpClient(coordinator.server.url, timeout=5.0)
     download_weights(client, coordinator.parent, cache)
-    coordinator.server.stop()                                                   # nobody to download from now
+    coordinator.server.stop()  # nobody to download from now
 
-    assert download_weights(HttpClient(coordinator.server.url, timeout=0.5, retries=0), coordinator.parent, cache).is_file()
+    assert download_weights(
+        HttpClient(coordinator.server.url, timeout=0.5, retries=0), coordinator.parent, cache
+    ).is_file()
 
 
 def test_a_corrupted_file_in_the_cache_is_replaced(coordinator, tmp_path):
@@ -421,6 +463,7 @@ def test_downloading_a_model_that_is_not_published_is_a_transport_error(coordina
 # more of the loop
 # ---------------------------------------------------------------------------
 
+
 def test_a_worker_that_starts_before_the_coordinator_has_a_job_waits_for_it(coordinator, monkeypatch):
     api, job = coordinator.server.api, coordinator.server.job
     coordinator.server.set_generation(api, None)
@@ -435,7 +478,9 @@ def test_a_worker_that_starts_before_the_coordinator_has_a_job_waits_for_it(coor
     assert side.join() == "finished"
 
 
-def test_a_transfer_whose_hash_is_wrong_is_tried_again_and_then_the_worker_gives_up_without_touching_its_model(coordinator, monkeypatch):
+def test_a_transfer_whose_hash_is_wrong_is_tried_again_and_then_the_worker_gives_up_without_touching_its_model(
+    coordinator, monkeypatch
+):
     import heteroes.worker_runtime as runtime_module
 
     side = WorkerSide(coordinator, monkeypatch)
@@ -454,18 +499,22 @@ def test_a_transfer_whose_hash_is_wrong_is_tried_again_and_then_the_worker_gives
     monkeypatch.setattr(runtime_module, "download_weights", bad_then_good)
     runtime = side.runtime()
     runtime.sync(job)
-    assert len(calls) == 2 and side.executor.parent_sha256 == child                # the second try worked
+    assert len(calls) == 2 and side.executor.parent_sha256 == child  # the second try worked
 
     calls.clear()
     other = HalfToy(6)
     other_sha = publish_weights(other, build_parameter_schema(other), coordinator.models_dir)
     before = model_weights_sha256(side.model, side.schema)
-    monkeypatch.setattr(runtime_module, "download_weights", lambda *a, **k: (calls.append(1), (_ for _ in ()).throw(WeightsFileError("wrong hash")))[1])
+    monkeypatch.setattr(
+        runtime_module,
+        "download_weights",
+        lambda *a, **k: (calls.append(1), (_ for _ in ()).throw(WeightsFileError("wrong hash")))[1],
+    )
 
     with pytest.raises(WeightsFileError):
         runtime.sync(coordinator.job(2, other_sha))
 
-    assert len(calls) == 2                                                          # two attempts, no more
+    assert len(calls) == 2  # two attempts, no more
     assert model_weights_sha256(side.model, side.schema) == before and side.executor.parent_sha256 == child
 
 
@@ -514,7 +563,7 @@ def test_a_transfer_that_ends_early_is_caught_by_the_hash_and_leaves_nothing(tmp
         handler.send_response(200)
         handler.send_header("Content-Length", "1000")
         handler.end_headers()
-        handler.wfile.write(b"only ten b")                                   # then the connection closes quietly
+        handler.wfile.write(b"only ten b")  # then the connection closes quietly
 
     server, url = serve_download(short)
     try:
@@ -537,15 +586,15 @@ def test_a_connection_that_is_reset_during_a_download_is_a_transport_error_and_l
         handler.wfile.write(b"x" * 1000)
         handler.wfile.flush()
         handler.connection.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii", 1, 0))
-        handler.connection.close()                                           # an RST, not a clean close
+        handler.connection.close()  # an RST, not a clean close
 
     server, url = serve_download(reset)
     try:
         with pytest.raises(TransportError, match="broke off"):
             download_weights(HttpClient(url, timeout=2.0, retries=0), "c" * 64, tmp_path / "cache")
-        kept = list((tmp_path / "cache").iterdir())                            # G6: what arrived is kept, to be continued (Range)
+        kept = list((tmp_path / "cache").iterdir())  # G6: what arrived is kept, to be continued (Range)
         assert [p.name for p in kept] == [f".partial-{'c' * 64}"] and kept[0].stat().st_size <= 1000
-        assert not (tmp_path / "cache" / f"{'c' * 64}.bin").exists()           # but nothing that looks like finished weights
+        assert not (tmp_path / "cache" / f"{'c' * 64}.bin").exists()  # but nothing that looks like finished weights
     finally:
         server.shutdown()
         server.server_close()
@@ -556,7 +605,7 @@ def test_a_worker_gives_up_when_the_coordinator_stays_away_for_too_long(tmp_path
     coordinator.open_generation(0, coordinator.parent)
     side = WorkerSide(coordinator, monkeypatch, max_unreachable_seconds=0.3, backoff_seconds=0.02)
     side.client = HttpClient(coordinator.server.url, timeout=0.5, retries=0)
-    coordinator.close()                                                      # nobody is there any more
+    coordinator.close()  # nobody is there any more
 
     side.start()
 
@@ -565,7 +614,9 @@ def test_a_worker_gives_up_when_the_coordinator_stays_away_for_too_long(tmp_path
     assert len(errors) >= 2 and side.events[-1]["event"] == "exit" and side.events[-1]["reason"] == "unreachable"
 
 
-def test_a_coordinator_that_comes_back_in_time_resets_the_clock_of_a_worker_that_was_about_to_give_up(tmp_path, monkeypatch):
+def test_a_coordinator_that_comes_back_in_time_resets_the_clock_of_a_worker_that_was_about_to_give_up(
+    tmp_path, monkeypatch
+):
     coordinator = Coordinator(tmp_path, n=6, lease_seconds=0.5)
     coordinator.open_generation(0, coordinator.parent)
     side = WorkerSide(coordinator, monkeypatch, max_unreachable_seconds=1.5, backoff_seconds=0.02)
@@ -573,13 +624,13 @@ def test_a_coordinator_that_comes_back_in_time_resets_the_clock_of_a_worker_that
     port, api, job = coordinator.server.port, coordinator.server.api, coordinator.server.job
     side.start()
     try:
-        for _ in range(3):                                                    # three outages, together longer than the limit
+        for _ in range(3):  # three outages, together longer than the limit
             assert wait_for(lambda: side.thread.is_alive())
             coordinator.server.stop()
             time.sleep(0.8)
             coordinator.server = CoordinatorServer(api, job=job, models_dir=coordinator.models_dir, port=port)
             coordinator.server.start()
-            time.sleep(0.4)                                                   # long enough for the worker to talk to it again
+            time.sleep(0.4)  # long enough for the worker to talk to it again
 
         assert side.thread.is_alive()
         assert coordinator.wait_complete()
@@ -608,6 +659,7 @@ def test_a_worker_that_is_asked_to_stop_does_not_have_to_wait_for_the_limit(tmp_
 # G6: what the runtime does about an aborted experiment, a wrong token, heartbeats, an outbox and a broken download
 # ---------------------------------------------------------------------------
 
+
 def test_a_worker_is_told_when_the_experiment_was_aborted_and_that_is_not_finished(coordinator, monkeypatch):
     side = WorkerSide(coordinator, monkeypatch).start()
     assert coordinator.wait_complete()
@@ -620,15 +672,17 @@ def test_a_wrong_token_stops_the_worker_at_once_and_says_so(tmp_path, monkeypatc
     coordinator = Coordinator(tmp_path)
     coordinator.open_generation(0, coordinator.parent)
     coordinator.server.stop()
-    coordinator.server = CoordinatorServer(coordinator.server.api, job=coordinator.server.job, models_dir=coordinator.models_dir,
-                                           token="right")
+    coordinator.server = CoordinatorServer(
+        coordinator.server.api, job=coordinator.server.job, models_dir=coordinator.models_dir, token="right"
+    )
     coordinator.server.start()
     try:
         side = WorkerSide(coordinator, monkeypatch)
         side.client = HttpClient(coordinator.server.url, token="wrong", timeout=2.0, retries=1, backoff=0.0)
         side.start()
         from heteroes.http_transport import UnauthorizedError
-        assert isinstance(side.join(10), UnauthorizedError)                    # no silent loop, no waiting for a timeout
+
+        assert isinstance(side.join(10), UnauthorizedError)  # no silent loop, no waiting for a timeout
         assert any(e["event"] == "unauthorized" for e in side.events)
     finally:
         coordinator.close()
@@ -642,8 +696,11 @@ def test_the_heartbeat_interval_follows_the_lease_length_of_the_job(tmp_path, mo
     runtime = side.runtime()
     seen = []
     real_step = runtime._worker.step
-    runtime._worker.step = lambda generation=None: (seen.append(runtime._worker.heartbeat_seconds), real_step(generation))[1]
-    side.stop.set()                                                            # one turn is enough: stop is checked before the loop starts...
+    runtime._worker.step = lambda generation=None: (
+        seen.append(runtime._worker.heartbeat_seconds),
+        real_step(generation),
+    )[1]
+    side.stop.set()  # one turn is enough: stop is checked before the loop starts...
     side.stop.clear()
     stopper = threading.Timer(0.5, side.stop.set)
     stopper.start()
@@ -670,19 +727,20 @@ def test_a_reward_whose_delivery_failed_is_delivered_when_the_coordinator_is_bac
                 down["submits"] += 1
                 if down["on"]:
                     from heteroes.http_transport import TransportError as TE
+
                     raise TE("cable pulled")
             return super().__call__(operation, payload)
 
     side.client = Cut(coordinator.server.url, timeout=1.0, retries=0, backoff=0.0)
     side.start()
     try:
-        assert wait_for(lambda: down["submits"] >= 2)                           # it tried more than once, with the same reward waiting
+        assert wait_for(lambda: down["submits"] >= 2)  # it tried more than once, with the same reward waiting
         assert coordinator.ledger.get_generation_status("exp", 0).committed == 0
         down["on"] = False
-        assert coordinator.wait_complete()                                      # both rewards arrive: none was lost with the lease
+        assert coordinator.wait_complete()  # both rewards arrive: none was lost with the lease
         coordinator.finish()
         assert side.join() == "finished"
-        assert len(side.evaluated) == 2                                         # the delivered reward was not recomputed
+        assert len(side.evaluated) == 2  # the delivered reward was not recomputed
     finally:
         side.stop.set()
         coordinator.close()
@@ -690,11 +748,13 @@ def test_a_reward_whose_delivery_failed_is_delivered_when_the_coordinator_is_bac
 
 def test_a_replay_only_worker_that_needs_a_full_download_stops_at_once_and_keeps_its_model(coordinator, monkeypatch):
     side = WorkerSide(coordinator, monkeypatch)
+
     def no_bulk(path, start=0):
         raise BulkUnavailableError("full model transfer needs a private route")
+
     monkeypatch.setattr(side.client, "open_stream", no_bulk)
     side.start()
-    assert coordinator.wait_complete()                       # generation 0 needs no download
+    assert coordinator.wait_complete()  # generation 0 needs no download
     before = side.executor.parent_sha256
     child_model = HalfToy(5)
     child = publish_weights(child_model, build_parameter_schema(child_model), coordinator.models_dir)
@@ -702,4 +762,4 @@ def test_a_replay_only_worker_that_needs_a_full_download_stops_at_once_and_keeps
     assert side.join() == "needs_private_route"
     assert side.executor.parent_sha256 == before and model_weights_sha256(side.model, side.schema) == before
     assert "sync" not in side.kinds() and "bulk_unavailable" in side.kinds()
-    assert list(side.dir.iterdir()) == []                      # nothing half-downloaded
+    assert list(side.dir.iterdir()) == []  # nothing half-downloaded

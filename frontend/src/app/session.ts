@@ -1,5 +1,5 @@
-import { createContext,useContext } from "react";
-import type { Session,Workspace } from "../types/access";
+import { createContext, useContext } from 'react';
+import type { Session, Workspace } from '../types/access';
 
 export interface SessionState {
   session?: Session;
@@ -15,7 +15,7 @@ export interface SessionState {
 export const SessionContext = createContext<SessionState | null>(null);
 export function useSession() {
   const value = useContext(SessionContext);
-  if (!value) throw new Error("useSession requires SessionProvider");
+  if (!value) throw new Error('useSession requires SessionProvider');
   return value;
 }
 

@@ -1,5 +1,6 @@
 """`EvalModel`: the model the evaluation runs on. FP16: the live model itself. FP32: a float32 shadow copy that is refreshed from the live FP16
 weights (an exact widening) before each evaluation; the live weights, the noise and the update never change precision."""
+
 import pytest
 import torch
 import torch.nn as nn
@@ -13,7 +14,7 @@ class HalfToy(nn.Module):
         torch.manual_seed(seed)
         self.embed = nn.Embedding(10, 4)
         self.head = nn.Linear(4, 10, bias=False)
-        self.head.weight = self.embed.weight                 # tied, like Qwen
+        self.head.weight = self.embed.weight  # tied, like Qwen
         self.fc = nn.Linear(4, 4)
         self.half()
 
@@ -36,8 +37,12 @@ def test_in_float32_the_evaluation_runs_on_a_float32_copy_with_the_tie_kept():
     evaluation = EvalModel(live, "float32")
     shadow = evaluation.model
     assert shadow is not live
-    assert all(p.dtype == torch.float32 for p in shadow.parameters()) and all(p.dtype == torch.float16 for p in live.parameters())
-    assert shadow.embed.weight is shadow.head.weight                   # one tensor, as in the live model: a perturbation of it is seen by both uses
+    assert all(p.dtype == torch.float32 for p in shadow.parameters()) and all(
+        p.dtype == torch.float16 for p in live.parameters()
+    )
+    assert (
+        shadow.embed.weight is shadow.head.weight
+    )  # one tensor, as in the live model: a perturbation of it is seen by both uses
     assert len(list(shadow.parameters())) == len(list(live.parameters()))
 
 
@@ -51,11 +56,11 @@ def test_the_shadow_starts_as_the_exact_widening_of_the_live_weights():
 def test_refresh_makes_the_shadow_follow_the_live_weights_exactly_and_never_touches_the_live_ones():
     live = HalfToy()
     evaluation = EvalModel(live, "float32")
-    with torch.no_grad():                                              # the live weights change (a perturbation)
+    with torch.no_grad():  # the live weights change (a perturbation)
         for parameter in live.parameters():
             parameter.add_(torch.full_like(parameter, 0.25))
     stale = [p.clone() for p in evaluation.model.parameters()]
-    assert not all(torch.equal(a.float(), b) for a, b in zip(live.parameters(), stale))      # premise: now they differ
+    assert not all(torch.equal(a.float(), b) for a, b in zip(live.parameters(), stale))  # premise: now they differ
     live_bits = bits(live)
 
     evaluation.refresh()
@@ -69,8 +74,8 @@ def test_the_shadow_is_not_a_view_of_the_live_weights():
     live = HalfToy()
     evaluation = EvalModel(live, "float32")
     with torch.no_grad():
-        evaluation.model.fc.bias.add_(1.0)                              # a change of the shadow...
-    assert not torch.equal(live.fc.bias.float(), evaluation.model.fc.bias)       # ... is not a change of the live model
+        evaluation.model.fc.bias.add_(1.0)  # a change of the shadow...
+    assert not torch.equal(live.fc.bias.float(), evaluation.model.fc.bias)  # ... is not a change of the live model
 
 
 @pytest.mark.parametrize("bad", ["bfloat16", "float64", "", None])

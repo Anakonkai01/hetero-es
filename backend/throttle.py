@@ -1,10 +1,11 @@
 """Slow down password guessing and registration spam. Kept in memory: a restart forgets it, which is acceptable."""
+
 from collections import deque
 import ipaddress
 import threading
 import time
 
-TAILSCALE = ipaddress.ip_network('100.64.0.0/10')
+TAILSCALE = ipaddress.ip_network("100.64.0.0/10")
 
 
 class Throttle:
@@ -33,7 +34,7 @@ class Throttle:
             queue = self._recent(key, now)
             if queue is None or len(queue) < self.limit:
                 return 0
-            return max(1, int(queue[0] + self.window - now + .999))
+            return max(1, int(queue[0] + self.window - now + 0.999))
 
     def record(self, key):
         with self.lock:
@@ -55,16 +56,18 @@ def client_address(peer, headers):
     """The caller's address. Forwarding headers are believed only when the direct peer is a local proxy
     (loopback, private or Tailscale); a public peer cannot choose its own identity."""
     if not peer:
-        return 'unknown'
+        return "unknown"
     try:
         address = ipaddress.ip_address(peer)
     except ValueError:
         return peer
     if not (address.is_loopback or address.is_private or address in TAILSCALE):
         return peer
+
     def header(name):
-        return next((value for key, value in headers.items() if key.lower() == name), '')
-    for value in (header('cf-connecting-ip'), header('x-forwarded-for').split(',')[0]):
+        return next((value for key, value in headers.items() if key.lower() == name), "")
+
+    for value in (header("cf-connecting-ip"), header("x-forwarded-for").split(",")[0]):
         try:
             return str(ipaddress.ip_address(value.strip()))
         except ValueError:

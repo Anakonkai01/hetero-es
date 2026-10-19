@@ -15,6 +15,7 @@ from heteroes.eval.workload import (
 @dataclass(frozen=True)
 class EvalRecord:
     """What happened for one question. The full text is kept so that a wrong prediction can be debugged."""
+
     question: str
     expected: int
     output_text: str
@@ -70,9 +71,14 @@ def generate_answers(model, tokenizer, questions: list[str]) -> list[str]:
     (`heteroes.profile` checks that); this function does not promise it.
     """
     device = next(model.parameters()).device
-    texts = [tokenizer.apply_chat_template(
-        [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": question}],
-        tokenize=False, add_generation_prompt=True) for question in questions]
+    texts = [
+        tokenizer.apply_chat_template(
+            [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": question}],
+            tokenize=False,
+            add_generation_prompt=True,
+        )
+        for question in questions
+    ]
     previous_side = tokenizer.padding_side
     tokenizer.padding_side = "left"
     try:
@@ -98,7 +104,7 @@ def evaluate_model(model, tokenizer, chunk: int = 1) -> EvalResult:
         raise ValueError(f"chunk must be an integer of at least 1, got {chunk!r}")
     records = []
     for start in range(0, len(EXAMPLES), chunk):
-        group = EXAMPLES[start:start + chunk]
+        group = EXAMPLES[start : start + chunk]
         # looked up in this module at call time, so that tests can replace them
         if chunk == 1:
             texts = [generate_answer(model, tokenizer, group[0].question)]

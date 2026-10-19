@@ -13,6 +13,7 @@ Exit codes: 0 finished or stopped, 3 not admitted, 4 put in quarantine (a restor
 stopped answering, 6 the coordinator aborted the experiment, 7 the coordinator refused the token, 2 bad usage.
 The shared secret, if the coordinator uses one, is read from the environment variable named by --token-env (default HETEROES_TOKEN).
 """
+
 import argparse
 import json
 import os
@@ -30,50 +31,115 @@ def fail(message: str, code: int = 2) -> None:
 
 def make_client(args):
     from heteroes.http_transport import HttpClient
-    return HttpClient(args.coordinator_url, token=os.environ.get(args.token_env) or None, timeout=args.http_timeout_seconds,
-                      bulk_url=args.bulk_url, allow_no_bulk=args.no_bulk)
+
+    return HttpClient(
+        args.coordinator_url,
+        token=os.environ.get(args.token_env) or None,
+        timeout=args.http_timeout_seconds,
+        bulk_url=args.bulk_url,
+        allow_no_bulk=args.no_bulk,
+    )
 
 
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--model-path", required=True)
-    parser.add_argument('--stop-file', help='Owned process-bound cooperative stop marker')
+    parser.add_argument("--stop-file", help="Owned process-bound cooperative stop marker")
     parser.add_argument("--coordinator-url", required=True)
-    parser.add_argument('--bulk-url', help='Private LAN/Tailscale origin for full weights transfer')
-    parser.add_argument('--no-bulk', action='store_true', help='public coordinator with no private route: catch up by replaying update records only; never download whole weights')
-    parser.add_argument('--dataset',type=Path,help='Verified private dataset object for Recipe v2')
-    parser.add_argument('--model-manifest',type=Path,help='Pinned safetensors file manifest for Recipe v2')
+    parser.add_argument("--bulk-url", help="Private LAN/Tailscale origin for full weights transfer")
+    parser.add_argument(
+        "--no-bulk",
+        action="store_true",
+        help="public coordinator with no private route: catch up by replaying update records only; never download whole weights",
+    )
+    parser.add_argument("--dataset", type=Path, help="Verified private dataset object for Recipe v2")
+    parser.add_argument("--model-manifest", type=Path, help="Pinned safetensors file manifest for Recipe v2")
     parser.add_argument("--worker-id", required=True)
     parser.add_argument("--log", required=True, help="JSONL file for the events of this worker (must not exist)")
-    parser.add_argument("--cache-dir", default=str(Path.home() / ".cache" / "heteroes" / "worker-cache"),
-                        help="where downloaded weights are kept (about 1 GB; use a real disk, /tmp may be RAM)")
-    parser.add_argument('--storage-volume-uuid',help='Refuse cache writes when the selected Linux volume is unavailable')
+    parser.add_argument(
+        "--cache-dir",
+        default=str(Path.home() / ".cache" / "heteroes" / "worker-cache"),
+        help="where downloaded weights are kept (about 1 GB; use a real disk, /tmp may be RAM)",
+    )
+    parser.add_argument(
+        "--storage-volume-uuid", help="Refuse cache writes when the selected Linux volume is unavailable"
+    )
     parser.add_argument("--device", choices=["cuda", "cpu"], default=None)
     parser.add_argument("--token-env", default="HETEROES_TOKEN")
-    parser.add_argument("--chunk", type=int, default=None, help="prompts per generate() call; use the safe chunk of this worker's profile (default: 16 for an FP32 recipe, 1 for FP16)")
-    parser.add_argument("--poll-seconds", type=float, default=0.25, help="how long to wait before asking again when there is no work (a generation boundary costs about half of this per worker)")
-    parser.add_argument("--give-up-after-seconds", type=float, default=120.0, help="exit (code 5) if the coordinator has not answered for this long")
-    parser.add_argument("--noise-threads", type=int, default=None, help="threads for noise generation (default: min(16, CPUs); 1 = serial)")
-    parser.add_argument("--http-timeout-seconds", type=float, default=60.0, help="how long a request to the coordinator may stay silent before it counts as a network error (also the read timeout of the weights download)")
-    parser.add_argument("--startup-timeout-seconds", type=float, default=600.0, help="how long to wait for the coordinator to have a job")
-    parser.add_argument("--replay", choices=["never", "always", "auto"], default="never",
-                        help="how to catch up when the job's weights are not mine: never = download them (the default); always = apply the coordinator's update records; "
-                             "auto = whichever is faster by --profile (the profile of THIS worker with --measure-update and --sync-url)")
-    parser.add_argument("--profile", default=None, help="this worker's profile JSON (scripts/profile_worker.py); needed by --replay auto")
-    parser.add_argument("--replay-verify-every", type=int, default=1,
-                        help="hash the whole weights after every k-th replay (1 = every time: the safe default; a larger k trusts the coordinator's hash in between)")
-    parser.add_argument("--replay-max-chain", type=int, default=8, help="the longest chain of update records a worker replays; further behind it synchronizes (raise it for a worker that joins late and replays from the base weights)")
+    parser.add_argument(
+        "--chunk",
+        type=int,
+        default=None,
+        help="prompts per generate() call; use the safe chunk of this worker's profile (default: 16 for an FP32 recipe, 1 for FP16)",
+    )
+    parser.add_argument(
+        "--poll-seconds",
+        type=float,
+        default=0.25,
+        help="how long to wait before asking again when there is no work (a generation boundary costs about half of this per worker)",
+    )
+    parser.add_argument(
+        "--give-up-after-seconds",
+        type=float,
+        default=120.0,
+        help="exit (code 5) if the coordinator has not answered for this long",
+    )
+    parser.add_argument(
+        "--noise-threads",
+        type=int,
+        default=None,
+        help="threads for noise generation (default: min(16, CPUs); 1 = serial)",
+    )
+    parser.add_argument(
+        "--http-timeout-seconds",
+        type=float,
+        default=60.0,
+        help="how long a request to the coordinator may stay silent before it counts as a network error (also the read timeout of the weights download)",
+    )
+    parser.add_argument(
+        "--startup-timeout-seconds",
+        type=float,
+        default=600.0,
+        help="how long to wait for the coordinator to have a job",
+    )
+    parser.add_argument(
+        "--replay",
+        choices=["never", "always", "auto"],
+        default="never",
+        help="how to catch up when the job's weights are not mine: never = download them (the default); always = apply the coordinator's update records; "
+        "auto = whichever is faster by --profile (the profile of THIS worker with --measure-update and --sync-url)",
+    )
+    parser.add_argument(
+        "--profile",
+        default=None,
+        help="this worker's profile JSON (scripts/profile_worker.py); needed by --replay auto",
+    )
+    parser.add_argument(
+        "--replay-verify-every",
+        type=int,
+        default=1,
+        help="hash the whole weights after every k-th replay (1 = every time: the safe default; a larger k trusts the coordinator's hash in between)",
+    )
+    parser.add_argument(
+        "--replay-max-chain",
+        type=int,
+        default=8,
+        help="the longest chain of update records a worker replays; further behind it synchronizes (raise it for a worker that joins late and replays from the base weights)",
+    )
     args = parser.parse_args(argv)
     stop = threading.Event()
     if args.stop_file:
         from heteroes.product.platform_process import identity, stop_matches
+
         own_birth = identity(os.getpid())
         if stop_matches(args.stop_file, birth=own_birth):
             return 0
+
         def watch_stop():
-            while not stop.wait(.2):
+            while not stop.wait(0.2):
                 if stop_matches(args.stop_file, birth=own_birth):
                     stop.set()
+
         threading.Thread(target=watch_stop, daemon=True).start()
     for name in (signal.SIGINT, signal.SIGTERM):
         signal.signal(name, lambda *_: stop.set())
@@ -111,15 +177,32 @@ def main(argv: list[str]) -> int:
         if event["event"] != "step" or event["kind"] != "NO_WORK":
             print(json.dumps(event), flush=True)
 
-    emit({"event": "worker_start", "t": time.time(), "worker_id": args.worker_id, "environment": environment_info(device),
-          "code": code_info(), "args": {k:str(v) if isinstance(v,Path) else v for k,v in vars(args).items()}, "noise_selftest_seconds": selftest_seconds})
+    emit(
+        {
+            "event": "worker_start",
+            "t": time.time(),
+            "worker_id": args.worker_id,
+            "environment": environment_info(device),
+            "code": code_info(),
+            "args": {k: str(v) if isinstance(v, Path) else v for k, v in vars(args).items()},
+            "noise_selftest_seconds": selftest_seconds,
+        }
+    )
     load_started = time.perf_counter()
     if args.model_manifest:
         from heteroes.study.models import load
-        loaded=load(args.model_path,json.loads(args.model_manifest.read_text()),device)
+
+        loaded = load(args.model_path, json.loads(args.model_manifest.read_text()), device)
     else:
         loaded = load_pinned_model(args.model_path, device)
-    emit({"event": "model_loaded", "t": time.time(), "worker_id": args.worker_id, "seconds": time.perf_counter() - load_started})
+    emit(
+        {
+            "event": "model_loaded",
+            "t": time.time(),
+            "worker_id": args.worker_id,
+            "seconds": time.perf_counter() - load_started,
+        }
+    )
 
     client = make_client(args)
     deadline = time.time() + args.startup_timeout_seconds
@@ -142,40 +225,90 @@ def main(argv: list[str]) -> int:
             time.sleep(args.poll_seconds)
 
     declared = job["recipe"]
-    dataset=None
-    if declared.get('manifest_version')==2:
-        if not args.dataset or not args.model_manifest:fail('Recipe v2 requires pinned model and private dataset files',3)
-        from heteroes.study.recipe import RecipeV2,build
+    dataset = None
+    if declared.get("manifest_version") == 2:
+        if not args.dataset or not args.model_manifest:
+            fail("Recipe v2 requires pinned model and private dataset files", 3)
+        from heteroes.study.recipe import RecipeV2, build
         from heteroes.study.data import verify
-        expected=RecipeV2.from_dict(declared)
-        dataset=verify(json.loads(args.dataset.read_text()))
-        recipe=build(loaded,json.loads(args.model_manifest.read_text()),dataset,sigma=expected.schedule['initial'],minimum=expected.schedule['minimum'],
-            generations=expected.schedule['generations'],schedule=expected.schedule['kind'],batch_size=expected.batch_size,batch_seed=expected.batch_seed,max_tokens=expected.evaluation['maxNewTokens'])
-        if recipe.hash!=expected.hash:fail('Local model/data/decoder differs from declared Recipe v2',3)
+
+        expected = RecipeV2.from_dict(declared)
+        dataset = verify(json.loads(args.dataset.read_text()))
+        recipe = build(
+            loaded,
+            json.loads(args.model_manifest.read_text()),
+            dataset,
+            sigma=expected.schedule["initial"],
+            minimum=expected.schedule["minimum"],
+            generations=expected.schedule["generations"],
+            schedule=expected.schedule["kind"],
+            batch_size=expected.batch_size,
+            batch_seed=expected.batch_seed,
+            max_tokens=expected.evaluation["maxNewTokens"],
+        )
+        if recipe.hash != expected.hash:
+            fail("Local model/data/decoder differs from declared Recipe v2", 3)
     else:
         cuda_engine = declared["noise"]["engine_version"] == CUDA_ENGINE_VERSION
-        recipe = build_recipe(loaded, sigma=declared["perturbation"]["sigma"], chunk_elements=None if cuda_engine else declared["noise"]["chunk_elements"],
-                              reward_eta=declared["update"]["reward_eta"], eval_dtype=declared["workload"].get("eval_dtype", "float16"),
-                              noise_engine="cuda" if cuda_engine else "cpu", workload=declared["workload"].get("name", "arith16"),
-                              decode_engine=declared["workload"].get("decode_engine", "hf_generate"))
+        recipe = build_recipe(
+            loaded,
+            sigma=declared["perturbation"]["sigma"],
+            chunk_elements=None if cuda_engine else declared["noise"]["chunk_elements"],
+            reward_eta=declared["update"]["reward_eta"],
+            eval_dtype=declared["workload"].get("eval_dtype", "float16"),
+            noise_engine="cuda" if cuda_engine else "cpu",
+            workload=declared["workload"].get("name", "arith16"),
+            decode_engine=declared["workload"].get("decode_engine", "hf_generate"),
+        )
     try:
         engine_selftest_seconds = check_recipe_selftest(recipe, device)
     except RuntimeError as error:
         fail(str(error), 3)
     executor_started = time.perf_counter()
-    executor = CandidateExecutor(loaded.model, loaded.tokenizer, loaded.schema, recipe, chunk=args.chunk,dataset=dataset)
-    emit({"event": "executor_ready", "t": time.time(), "worker_id": args.worker_id, "recipe_hash": recipe.hash,
-          "parent_weights_sha256": executor.parent_sha256, "snapshot_and_hash_seconds": time.perf_counter() - executor_started,
-          "engine_selftest_seconds": engine_selftest_seconds, "noise_engine": recipe.engine_version, "workload": recipe.workload_name})
+    executor = CandidateExecutor(
+        loaded.model, loaded.tokenizer, loaded.schema, recipe, chunk=args.chunk, dataset=dataset
+    )
+    emit(
+        {
+            "event": "executor_ready",
+            "t": time.time(),
+            "worker_id": args.worker_id,
+            "recipe_hash": recipe.hash,
+            "parent_weights_sha256": executor.parent_sha256,
+            "snapshot_and_hash_seconds": time.perf_counter() - executor_started,
+            "engine_selftest_seconds": engine_selftest_seconds,
+            "noise_engine": recipe.engine_version,
+            "workload": recipe.workload_name,
+        }
+    )
 
     from heteroes.replay import ReplayPolicy
     from heteroes.product.storage import checked_directory
-    policy = (ReplayPolicy.from_profile(json.loads(Path(args.profile).read_text(encoding="utf-8")), mode=args.replay, verify_every=args.replay_verify_every, max_chain=args.replay_max_chain)
-              if args.profile else ReplayPolicy(mode=args.replay, verify_every=args.replay_verify_every, max_chain=args.replay_max_chain))
+
+    policy = (
+        ReplayPolicy.from_profile(
+            json.loads(Path(args.profile).read_text(encoding="utf-8")),
+            mode=args.replay,
+            verify_every=args.replay_verify_every,
+            max_chain=args.replay_max_chain,
+        )
+        if args.profile
+        else ReplayPolicy(mode=args.replay, verify_every=args.replay_verify_every, max_chain=args.replay_max_chain)
+    )
     emit({"event": "replay_policy", "t": time.time(), "worker_id": args.worker_id, "policy": policy.__dict__})
-    runtime = WorkerRuntime(args.worker_id, client, executor, args.cache_dir, log=emit, poll_seconds=args.poll_seconds,
-                            max_unreachable_seconds=args.give_up_after_seconds, replay=policy,
-                            cache_guard=lambda:checked_directory(args.cache_dir,args.storage_volume_uuid) if args.storage_volume_uuid else None)
+    runtime = WorkerRuntime(
+        args.worker_id,
+        client,
+        executor,
+        args.cache_dir,
+        log=emit,
+        poll_seconds=args.poll_seconds,
+        max_unreachable_seconds=args.give_up_after_seconds,
+        replay=policy,
+        cache_guard=lambda: (
+            checked_directory(args.cache_dir, args.storage_volume_uuid) if args.storage_volume_uuid else None
+        ),
+    )
     try:
         runtime.admit()
         reason = runtime.run(stop)

@@ -1,4 +1,5 @@
 """The pure and file-reading parts of `scripts/failure_campaign.py` (the scenarios themselves need the two machines)."""
+
 import json
 import sys
 from pathlib import Path
@@ -16,7 +17,13 @@ from ledger_helpers import FakeClock, batch, descriptor_of  # noqa: E402
 def test_a_scenario_passes_only_if_it_ended_ok_and_with_the_reference_weights():
     reference = "a" * 64
     good = {"name": "kill-worker", "outcome": "ok", "final_weights_sha256": reference}
-    assert fc.verdict(good, reference) == {"scenario": "kill-worker", "ended_ok": True, "same_final_weights_as_reference": True, "exercised": True, "passed": True}
+    assert fc.verdict(good, reference) == {
+        "scenario": "kill-worker",
+        "ended_ok": True,
+        "same_final_weights_as_reference": True,
+        "exercised": True,
+        "passed": True,
+    }
     assert fc.verdict({**good, "final_weights_sha256": "b" * 64}, reference)["passed"] is False
     assert fc.verdict({**good, "outcome": "TimeoutError: x"}, reference)["passed"] is False
     assert fc.verdict({**good, "final_weights_sha256": None}, reference)["passed"] is False
@@ -34,20 +41,26 @@ def test_open_leases_and_committed_count_read_the_ledger_file_read_only(tmp_path
 
 
 def test_reading_a_ledger_that_is_not_there_yet_is_zero_not_an_error(tmp_path):
-    assert fc.open_leases(tmp_path / "nothing.sqlite", "w") == 0 and fc.committed_count(tmp_path / "nothing.sqlite") == 0
+    assert (
+        fc.open_leases(tmp_path / "nothing.sqlite", "w") == 0 and fc.committed_count(tmp_path / "nothing.sqlite") == 0
+    )
 
 
 def test_final_hash_is_the_one_of_the_summary_that_ended_ok(tmp_path):
     (tmp_path / "coordinator").mkdir()
-    (tmp_path / "coordinator" / "summary.json").write_text(json.dumps({"outcome": "KeyboardInterrupt: SIGKILL", "final_weights_sha256": "x"}))
+    (tmp_path / "coordinator" / "summary.json").write_text(
+        json.dumps({"outcome": "KeyboardInterrupt: SIGKILL", "final_weights_sha256": "x"})
+    )
     assert fc.final_hash(tmp_path) is None
-    (tmp_path / "coordinator" / "summary-resume1.json").write_text(json.dumps({"outcome": "ok", "final_weights_sha256": "f" * 64}))
+    (tmp_path / "coordinator" / "summary-resume1.json").write_text(
+        json.dumps({"outcome": "ok", "final_weights_sha256": "f" * 64})
+    )
     assert fc.final_hash(tmp_path) == "f" * 64
 
 
 def test_events_of_skips_a_line_cut_by_a_kill(tmp_path):
     path = tmp_path / "events.jsonl"
-    path.write_text('{"event": "a"}\n{"event": "b"}\n{"event": "c')           # the process was killed in the middle of a line
+    path.write_text('{"event": "a"}\n{"event": "b"}\n{"event": "c')  # the process was killed in the middle of a line
     assert [e["event"] for e in fc.events_of(path)] == ["a", "b"]
     assert fc.events_of(tmp_path / "missing.jsonl") == []
 
@@ -59,31 +72,46 @@ def test_wait_until_times_out_with_a_message():
 
 
 def test_an_update_that_is_recorded_but_not_yet_applied_is_seen_in_the_ledger_file(tmp_path):
-    from test_update_record import complete, record_of      # the way to a complete generation with a record, as the update-record tests do it
+    from test_update_record import (
+        complete,
+        record_of,
+    )  # the way to a complete generation with a record, as the update-record tests do it
+
     path = tmp_path / "ledger.sqlite"
-    assert fc.update_recorded_not_applied(path) is False                 # no file yet
+    assert fc.update_recorded_not_applied(path) is False  # no file yet
     with Ledger(path, clock=FakeClock()) as ledger:
         ledger.open_generation(batch(3))
         complete(ledger)
-        assert fc.update_recorded_not_applied(path) is False             # complete, nothing recorded
+        assert fc.update_recorded_not_applied(path) is False  # complete, nothing recorded
         record = record_of(ledger)
         ledger.record_update(record)
-        assert fc.update_recorded_not_applied(path) is True              # the write-ahead record exists, the child does not: the window
+        assert (
+            fc.update_recorded_not_applied(path) is True
+        )  # the write-ahead record exists, the child does not: the window
         ledger.mark_applied("exp", 0, record.hash, "c" * 64)
-        assert fc.update_recorded_not_applied(path) is False             # applied: the window is closed
+        assert fc.update_recorded_not_applied(path) is False  # applied: the window is closed
 
 
 def test_a_scenario_that_timed_out_waiting_for_its_own_condition_was_not_exercised():
     reference = "a" * 64
-    waited = {"name": "kill-worker", "outcome": "TimeoutError: timed out after 600 s waiting for: the remote worker to hold a candidate", "final_weights_sha256": reference}
+    waited = {
+        "name": "kill-worker",
+        "outcome": "TimeoutError: timed out after 600 s waiting for: the remote worker to hold a candidate",
+        "final_weights_sha256": reference,
+    }
     result = fc.verdict(waited, reference)
     assert result["exercised"] is False and result["passed"] is False
-    late = {"name": "kill-worker", "outcome": "TimeoutError: kill-worker did not finish in 1800 s", "final_weights_sha256": None}
-    assert fc.verdict(late, reference)["exercised"] is True              # it was disturbed and then did not finish: a real failure
+    late = {
+        "name": "kill-worker",
+        "outcome": "TimeoutError: kill-worker did not finish in 1800 s",
+        "final_weights_sha256": None,
+    }
+    assert fc.verdict(late, reference)["exercised"] is True  # it was disturbed and then did not finish: a real failure
 
 
 def test_the_disturbed_remote_worker_is_the_1660s_by_default_and_the_third_machine_on_request():
     import argparse
+
     base = dict(remote="anakonkai@10.10.10.2", third="worker-user-b@100.64.0.2")
     worker, peer = fc.remote_worker(argparse.Namespace(remote_worker="slow", **base))
     assert (worker, peer) == (fc.SLOW, "10.10.10.2")

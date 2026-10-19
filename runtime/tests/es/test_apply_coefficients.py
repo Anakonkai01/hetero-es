@@ -2,6 +2,7 @@
 apply_coefficients_: the update of the ES step given the coefficients directly, the way a worker applies a generation record.
 The coefficients are NOT recomputed from rewards here: the coordinator computes them once and they travel.
 """
+
 import numpy as np
 import pytest
 import torch
@@ -31,6 +32,7 @@ def as_floats(z):
 # the same result as the update that standardizes the rewards itself
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.parametrize("device", DEVICES)
 @pytest.mark.parametrize("chunk_elements", [4, 16, DEFAULT_CHUNK_ELEMENTS])
 def test_the_coefficients_of_the_rewards_give_the_same_bits_as_the_rewards(chunk_elements, device):
@@ -38,12 +40,13 @@ def test_the_coefficients_of_the_rewards_give_the_same_bits_as_the_rewards(chunk
     schema = build_parameter_schema(a)
 
     report_rewards = apply_es_update_(a, schema, SEEDS, REWARDS, alpha=0.05, chunk_elements=chunk_elements)
-    report_coefficients = apply_coefficients_(b, schema, SEEDS, standardize_rewards(REWARDS), alpha=0.05,
-                                              chunk_elements=chunk_elements)
+    report_coefficients = apply_coefficients_(
+        b, schema, SEEDS, standardize_rewards(REWARDS), alpha=0.05, chunk_elements=chunk_elements
+    )
 
     assert same_bits(b, snapshot_bits(a))
     assert report_rewards == report_coefficients
-    assert report_coefficients.changed > 0                                   # the comparison is not between two no-ops
+    assert report_coefficients.changed > 0  # the comparison is not between two no-ops
 
 
 def test_the_same_bits_on_a_big_tensor_where_rare_rounding_effects_show():
@@ -56,11 +59,14 @@ def test_the_same_bits_on_a_big_tensor_where_rare_rounding_effects_show():
     assert same_bits(b, snapshot_bits(a))
 
 
-@pytest.mark.parametrize("coefficients", [
-    [1.0, -1.0, 0.5, -0.5],
-    [0.25, 0.0, -2.0, 1.75],
-    [3.0, 0.0, 0.0, 0.0],
-])
+@pytest.mark.parametrize(
+    "coefficients",
+    [
+        [1.0, -1.0, 0.5, -0.5],
+        [0.25, 0.0, -2.0, 1.75],
+        [3.0, 0.0, 0.0, 0.0],
+    ],
+)
 def test_the_coefficients_given_are_the_ones_applied_and_nothing_is_standardized_again(coefficients):
     model = make_model()
     schema = build_parameter_schema(model)
@@ -74,7 +80,7 @@ def test_the_coefficients_given_are_the_ones_applied_and_nothing_is_standardized
 
     for tensor, want in zip(resolve_tensors(model, schema), expected):
         assert np.array_equal(bits(tensor.detach().cpu().numpy()), bits(want))
-    standardized = standardize_rewards(coefficients)                          # premise: they would be told apart if it did
+    standardized = standardize_rewards(coefficients)  # premise: they would be told apart if it did
     assert not np.array_equal(np.asarray(coefficients, np.float32), standardized)
 
 
@@ -93,6 +99,7 @@ def test_a_coefficient_that_is_only_a_residue_of_zero_still_counts_as_a_coeffici
 # no signal
 # ---------------------------------------------------------------------------
 
+
 def test_all_zero_coefficients_leave_the_model_untouched_and_say_so():
     model = make_model()
     schema = build_parameter_schema(model)
@@ -101,8 +108,14 @@ def test_all_zero_coefficients_leave_the_model_untouched_and_say_so():
     report = apply_coefficients_(model, schema, SEEDS, [0.0, 0.0, 0.0, 0.0], alpha=0.05)
 
     assert same_bits(model, before)
-    assert report == UpdateReport(noop=True, coefficients=(0.0,) * 4, requested_l2=0.0, applied_l2=0.0, changed=0,
-                                  numel=sum(t.numel() for t in resolve_tensors(model, schema)))
+    assert report == UpdateReport(
+        noop=True,
+        coefficients=(0.0,) * 4,
+        requested_l2=0.0,
+        applied_l2=0.0,
+        changed=0,
+        numel=sum(t.numel() for t in resolve_tensors(model, schema)),
+    )
 
 
 def test_negative_zero_is_no_signal_either():
@@ -119,21 +132,25 @@ def test_negative_zero_is_no_signal_either():
 # bad arguments: refused, and the model is untouched
 # ---------------------------------------------------------------------------
 
-@pytest.mark.parametrize("coefficients, error", [
-    ([1.0, float("nan"), 0.5, -0.5], ValueError),
-    ([1.0, float("inf"), 0.5, -0.5], ValueError),
-    ([1.0, -float("inf"), 0.5, -0.5], ValueError),
-    ([1.0, -1.0, 0.1, -0.5], ValueError),                  # 0.1 is not a float32 value: it would be rounded in silence
-    ([1.0, -1.0, 1e300, -0.5], ValueError),                # does not even fit in a float32
-    ([[1.0, -1.0], [0.5, -0.5]], ValueError),              # not a vector
-    ([[1.0], [-1.0], [0.5], [-0.5]], ValueError),          # a column: as long as the seeds, but not a vector
-    ([], ValueError),
-    ([1.0, -1.0, 0.5], ValueError),                        # fewer coefficients than seeds
-    ([1.0, -1.0, 0.5, -0.5, 0.25], ValueError),            # more
-    ([True, False, True, False], TypeError),               # booleans are not numbers here
-    (["1.0", "-1.0", "0.5", "-0.5"], TypeError),
-    ([None, 1.0, 0.5, -0.5], TypeError),
-])
+
+@pytest.mark.parametrize(
+    "coefficients, error",
+    [
+        ([1.0, float("nan"), 0.5, -0.5], ValueError),
+        ([1.0, float("inf"), 0.5, -0.5], ValueError),
+        ([1.0, -float("inf"), 0.5, -0.5], ValueError),
+        ([1.0, -1.0, 0.1, -0.5], ValueError),  # 0.1 is not a float32 value: it would be rounded in silence
+        ([1.0, -1.0, 1e300, -0.5], ValueError),  # does not even fit in a float32
+        ([[1.0, -1.0], [0.5, -0.5]], ValueError),  # not a vector
+        ([[1.0], [-1.0], [0.5], [-0.5]], ValueError),  # a column: as long as the seeds, but not a vector
+        ([], ValueError),
+        ([1.0, -1.0, 0.5], ValueError),  # fewer coefficients than seeds
+        ([1.0, -1.0, 0.5, -0.5, 0.25], ValueError),  # more
+        ([True, False, True, False], TypeError),  # booleans are not numbers here
+        (["1.0", "-1.0", "0.5", "-0.5"], TypeError),
+        ([None, 1.0, 0.5, -0.5], TypeError),
+    ],
+)
 def test_bad_coefficients_are_refused_and_the_model_is_untouched(coefficients, error):
     model = make_model()
     schema = build_parameter_schema(model)
@@ -146,17 +163,20 @@ def test_bad_coefficients_are_refused_and_the_model_is_untouched(coefficients, e
 
 
 @pytest.mark.parametrize("coefficients", [[0.0] * 4, [1.0, -1.0, 0.5, -0.5]])
-@pytest.mark.parametrize("kwargs, error", [
-    (dict(alpha=float("nan")), ValueError),
-    (dict(alpha=float("inf")), ValueError),
-    (dict(chunk_elements=0), ValueError),
-    (dict(chunk_elements=-8), ValueError),
-    (dict(seeds=[0, 1, 2]), ValueError),
-    (dict(seeds=[0, 1, 1, 3]), ValueError),                 # a duplicated seed
-    (dict(seeds=[0, 1.0, 2, 3]), TypeError),
-    (dict(seeds=[0, True, 2, 3]), TypeError),
-    (dict(seeds=[0, "1", 2, 3]), TypeError),
-])
+@pytest.mark.parametrize(
+    "kwargs, error",
+    [
+        (dict(alpha=float("nan")), ValueError),
+        (dict(alpha=float("inf")), ValueError),
+        (dict(chunk_elements=0), ValueError),
+        (dict(chunk_elements=-8), ValueError),
+        (dict(seeds=[0, 1, 2]), ValueError),
+        (dict(seeds=[0, 1, 1, 3]), ValueError),  # a duplicated seed
+        (dict(seeds=[0, 1.0, 2, 3]), TypeError),
+        (dict(seeds=[0, True, 2, 3]), TypeError),
+        (dict(seeds=[0, "1", 2, 3]), TypeError),
+    ],
+)
 def test_the_other_arguments_are_checked_as_well_even_when_there_is_no_signal(coefficients, kwargs, error):
     # all-zero coefficients would otherwise hide a mistake behind a silent "no-op" answer
     model = make_model()
@@ -201,7 +221,11 @@ def test_numpy_arrays_and_tuples_are_accepted_like_lists():
     schema = build_parameter_schema(reference)
     apply_coefficients_(reference, schema, SEEDS, coefficients, alpha=0.05)
 
-    for variant in (tuple(coefficients), np.array(coefficients, dtype=np.float32), np.array(coefficients, dtype=np.float64)):
+    for variant in (
+        tuple(coefficients),
+        np.array(coefficients, dtype=np.float32),
+        np.array(coefficients, dtype=np.float64),
+    ):
         model = make_model()
         apply_coefficients_(model, schema, SEEDS, variant, alpha=0.05)
         assert same_bits(model, snapshot_bits(reference))

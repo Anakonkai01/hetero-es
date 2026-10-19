@@ -1,4 +1,5 @@
 """`scripts/cross_gpu_sweep.py: compare_sweeps`: joining two sweeps by seed and finding the prompts whose answers differ (pure function)."""
+
 import sys
 from pathlib import Path
 
@@ -40,7 +41,9 @@ def test_one_flipped_prompt_is_found_with_its_step_and_margins():
 
     assert result["candidates_with_a_different_answer"] == 1 and result["candidates_with_a_different_reward"] == 1
     assert result["prompts_with_a_different_answer"] == 1
-    assert result["rate_candidates_with_difference"] == 0.5 and result["rate_prompts_with_difference"] == pytest.approx(1 / 32)
+    assert result["rate_candidates_with_difference"] == 0.5 and result["rate_prompts_with_difference"] == pytest.approx(
+        1 / 32
+    )
     (entry,) = result["differences"]
     assert (entry["seed"], entry["prompt"], entry["step"]) == (1, 3, 1)
     assert (entry["margin_a"], entry["margin_b"]) == (0.25, 0.5) and entry["min_margin_before"] == 5.0

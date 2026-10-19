@@ -1,4 +1,4 @@
-export type AttemptStatus = "RUNNING" | "SUCCEEDED" | "FAILED";
+export type AttemptStatus = 'RUNNING' | 'SUCCEEDED' | 'FAILED';
 
 export interface Attempt {
   experimentId: string;

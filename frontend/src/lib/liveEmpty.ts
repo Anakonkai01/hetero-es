@@ -4,7 +4,11 @@
 const ENDED = new Set(['COMPLETED', 'CANCELLED', 'FAILED']);
 
 export function emptyLiveText(status: string): { title: string; message: string } {
-    return ENDED.has(status)
-        ? { title: 'Nothing has run yet', message: 'This experiment ended before any candidate ran.' }
-        : { title: 'Starting up', message: 'The GPUs are loading the model, which can take a minute or two. This view fills in as soon as the coordinator hands out the first candidate.' };
+  return ENDED.has(status)
+    ? { title: 'Nothing has run yet', message: 'This experiment ended before any candidate ran.' }
+    : {
+        title: 'Starting up',
+        message:
+          'The GPUs are loading the model, which can take a minute or two. This view fills in as soon as the coordinator hands out the first candidate.',
+      };
 }

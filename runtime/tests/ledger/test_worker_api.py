@@ -5,6 +5,7 @@ Requests and replies are plain JSON values, so a network layer only has to carry
 {"ok": false, "error": {"code": ..., "message": ...}}; the codes are part of the protocol and are spelled out here.
 Every test sends a request through JSON text first, so nothing that is not JSON can sneak across.
 """
+
 import json
 import re
 import sqlite3
@@ -68,15 +69,23 @@ def take(api, worker="worker-a"):
 
 
 def result_request(work, reward=0.5, **changes):
-    request = {"descriptor": work["descriptor"], "attempt_number": work["attempt_number"], "token": work["token"],
-               "reward": reward}
+    request = {
+        "descriptor": work["descriptor"],
+        "attempt_number": work["attempt_number"],
+        "token": work["token"],
+        "reward": reward,
+    }
     request.update(changes)
     return request
 
 
 def failure_request(work, kind="OTHER", **changes):
-    request = {"descriptor": work["descriptor"], "attempt_number": work["attempt_number"], "token": work["token"],
-               "kind": kind}
+    request = {
+        "descriptor": work["descriptor"],
+        "attempt_number": work["attempt_number"],
+        "token": work["token"],
+        "kind": kind,
+    }
     request.update(changes)
     return request
 
@@ -100,6 +109,7 @@ def index_of(work):
 # lease: the coordinator picks the candidate
 # ---------------------------------------------------------------------------
 
+
 def test_a_lease_gives_the_first_candidate_with_everything_the_worker_needs(api, ledger, clock):
     reply = call(api, "lease", {"worker_id": "worker-a"})
 
@@ -119,7 +129,7 @@ def test_the_length_of_the_lease_is_the_coordinators_choice(ledger, clock):
 
     assert take(api)["deadline"] == clock.now + 12.5
     reply = call(api, "lease", {"worker_id": "worker-b", "duration": 1e9})
-    assert code_of(reply) == "bad_request"          # a worker cannot ask for a longer lease
+    assert code_of(reply) == "bad_request"  # a worker cannot ask for a longer lease
 
 
 def test_each_lease_goes_to_the_next_candidate_with_its_own_token(api):
@@ -141,11 +151,11 @@ def test_with_every_candidate_held_there_is_no_work_but_the_generation_is_open(a
 
 def test_a_candidate_whose_lease_ran_out_is_given_again_before_a_fresh_one(api, clock):
     first = take(api)
-    clock.advance(LEASE_SECONDS)                     # the deadline itself is already over
+    clock.advance(LEASE_SECONDS)  # the deadline itself is already over
 
     again = take(api, "worker-b")
 
-    assert index_of(again) == 0 and again["attempt_number"] == 2     # not candidate 1, which was never leased
+    assert index_of(again) == 0 and again["attempt_number"] == 2  # not candidate 1, which was never leased
     assert again["token"] != first["token"]
 
 
@@ -165,18 +175,20 @@ def test_a_complete_generation_has_no_work(api):
 
 
 def test_a_failed_generation_has_no_work_even_though_candidates_are_waiting(api, ledger):
-    held = take(api)                                  # candidate 0 stays held, so the next free one is candidate 1
-    for i in range(3):                                # candidate 1 uses all its attempts (on three workers: Greedy gives a failed candidate to another)
+    held = take(api)  # candidate 0 stays held, so the next free one is candidate 1
+    for i in range(
+        3
+    ):  # candidate 1 uses all its attempts (on three workers: Greedy gives a failed candidate to another)
         work = take(api, f"worker-b{i}")
         assert index_of(work) == 1
         fail(api, work)
-    assert ledger.get_candidate("exp/g0/c2").attempts == 0      # premise: there is a candidate nobody has tried
+    assert ledger.get_candidate("exp/g0/c2").attempts == 0  # premise: there is a candidate nobody has tried
 
     reply = call(api, "lease", {"worker_id": "worker-c"})
 
     assert reply == {"ok": True, "generation_state": "FAILED", "work": None}
     assert held["attempt_number"] == 1
-    assert ledger.get_candidate("exp/g0/c2").attempts == 0      # nothing was given out
+    assert ledger.get_candidate("exp/g0/c2").attempts == 0  # nothing was given out
 
 
 def test_the_api_serves_only_its_own_generation(ledger):
@@ -195,7 +207,7 @@ def test_a_quarantined_worker_is_told_so_even_when_there_is_no_work(api):
     assert code_of(call(api, "lease", {"worker_id": "worker-a"})) == "worker_quarantined"
 
     first = take(api, "worker-b")
-    assert first["attempt_number"] == 2                          # premise: another worker is not affected
+    assert first["attempt_number"] == 2  # premise: another worker is not affected
     deliver(api, first)
     for _ in range(2):
         deliver(api, take(api, "worker-b"))
@@ -206,6 +218,7 @@ def test_a_quarantined_worker_is_told_so_even_when_there_is_no_work(api):
 # ---------------------------------------------------------------------------
 # submit_result
 # ---------------------------------------------------------------------------
+
 
 def test_a_result_is_committed(api, ledger):
     work = take(api)
@@ -286,8 +299,8 @@ def test_a_result_for_a_candidate_the_ledger_does_not_have_is_refused(api):
 
 
 def test_a_quarantined_worker_cannot_deliver_and_its_lease_just_runs_out(api, ledger, clock):
-    held = take(api)                                  # candidate 0
-    doomed = take(api)                                # candidate 1, the same worker
+    held = take(api)  # candidate 0
+    doomed = take(api)  # candidate 1, the same worker
     fail(api, doomed, "RESTORE_MISMATCH")
 
     reply = call(api, "submit_result", result_request(held))
@@ -295,12 +308,13 @@ def test_a_quarantined_worker_cannot_deliver_and_its_lease_just_runs_out(api, le
     assert code_of(reply) == "worker_quarantined"
     assert ledger.get_candidate("exp/g0/c0").state.name == "LEASED"
     clock.advance(LEASE_SECONDS)
-    assert index_of(take(api, "worker-b")) == 0       # another worker can have it
+    assert index_of(take(api, "worker-b")) == 0  # another worker can have it
 
 
 # ---------------------------------------------------------------------------
 # report_failure
 # ---------------------------------------------------------------------------
+
 
 def test_a_failure_frees_the_candidate_and_is_never_a_result(api, ledger):
     work = take(api)
@@ -338,6 +352,7 @@ def test_a_failed_restore_puts_the_worker_in_quarantine(api, ledger):
 # the error codes are part of the protocol
 # ---------------------------------------------------------------------------
 
+
 def _all_subclasses(cls):
     for sub in cls.__subclasses__():
         yield sub
@@ -366,9 +381,18 @@ def test_no_error_of_the_ledger_is_left_without_a_code_of_its_own():
     assert LedgerError in covered
     assert set(_all_subclasses(LedgerError)) <= covered
     assert len(set(ERROR_CODES.values())) == len(ERROR_CODES)
-    assert {AlreadyLeasedError, RetriesExhaustedError, StaleAttemptError, ResultMismatchError, ConflictingResultError,
-            GenerationFailedError, GenerationNotCompleteError, WorkerQuarantinedError, RecordMismatchError,
-            ConflictingUpdateError} <= covered
+    assert {
+        AlreadyLeasedError,
+        RetriesExhaustedError,
+        StaleAttemptError,
+        ResultMismatchError,
+        ConflictingResultError,
+        GenerationFailedError,
+        GenerationNotCompleteError,
+        WorkerQuarantinedError,
+        RecordMismatchError,
+        ConflictingUpdateError,
+    } <= covered
 
 
 def test_an_error_that_has_no_code_yet_gets_the_code_of_its_nearest_parent(api, ledger, monkeypatch):
@@ -386,6 +410,7 @@ def test_an_error_that_has_no_code_yet_gets_the_code_of_its_nearest_parent(api, 
 # ---------------------------------------------------------------------------
 # bad requests: refused with a code, and nothing in the ledger moves
 # ---------------------------------------------------------------------------
+
 
 def _without(request, key):
     return {k: v for k, v in request.items() if k != key}
@@ -472,9 +497,11 @@ def _case_names():
 @pytest.mark.parametrize("operation, name", _case_names(), ids=lambda value: str(value))
 def test_a_malformed_request_is_a_bad_request_and_nothing_moves(api, ledger, operation, name):
     work = take(api)
-    bad = {"lease": lambda: _bad_lease_requests(),
-           "submit_result": lambda: _bad_result_requests(work),
-           "report_failure": lambda: _bad_failure_requests(work)}[operation]()[name]
+    bad = {
+        "lease": lambda: _bad_lease_requests(),
+        "submit_result": lambda: _bad_result_requests(work),
+        "report_failure": lambda: _bad_failure_requests(work),
+    }[operation]()[name]
     candidates, quarantined = ledger.list_candidates("exp", 0), ledger.list_quarantined()
 
     reply = call(api, operation, bad)
@@ -482,12 +509,19 @@ def test_a_malformed_request_is_a_bad_request_and_nothing_moves(api, ledger, ope
     assert code_of(reply) == "bad_request"
     assert ledger.list_candidates("exp", 0) == candidates and ledger.list_quarantined() == quarantined
 
-    good = {"lease": {"worker_id": "worker-b"}, "submit_result": result_request(work),
-            "report_failure": failure_request(work)}[operation]
-    assert call(api, operation, good)["ok"] is True       # premise: the request was refused for its shape, and the attempt is still usable
+    good = {
+        "lease": {"worker_id": "worker-b"},
+        "submit_result": result_request(work),
+        "report_failure": failure_request(work),
+    }[operation]
+    assert (
+        call(api, operation, good)["ok"] is True
+    )  # premise: the request was refused for its shape, and the attempt is still usable
 
 
-@pytest.mark.parametrize("operation", ["nope", "", "Lease", "handle", "__init__", "lease ", 5, None, ["lease"], {"lease": 1}])
+@pytest.mark.parametrize(
+    "operation", ["nope", "", "Lease", "handle", "__init__", "lease ", 5, None, ["lease"], {"lease": 1}]
+)
 def test_an_unknown_operation_is_refused_with_a_code(api, operation):
     assert code_of(api.handle(operation, {"worker_id": "worker-a"})) == "unknown_operation"
 

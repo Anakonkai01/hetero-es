@@ -3,6 +3,7 @@ Every order of a small alphabet of actions, up to a length: for these small worl
 harness as the random schedules. A test at the end checks that between them the sequences really reach every kind of
 outcome the model predicts, so that "all of them passed" says something.
 """
+
 import functools
 import itertools
 import os
@@ -20,42 +21,104 @@ LENGTH = 5 if os.environ.get("HETEROES_EXHAUSTIVE") == "deep" else 4
 
 # one candidate, two workers, two attempts: the contention for one candidate in all its forms
 ONE_CANDIDATE = dict(
-    candidates=1, max_attempts=2, length=LENGTH,
-    alphabet=[("lease", "A", 0), ("lease", "B", 0), ("advance", 31.0), ("submit", "A", 0, "good"),
-              ("submit", "B", 0, "good"), ("submit", "A", 0, "other"), ("fail", "A", 0, OTHER), ("fail", "B", 0, RESTORE)],
+    candidates=1,
+    max_attempts=2,
+    length=LENGTH,
+    alphabet=[
+        ("lease", "A", 0),
+        ("lease", "B", 0),
+        ("advance", 31.0),
+        ("submit", "A", 0, "good"),
+        ("submit", "B", 0, "good"),
+        ("submit", "A", 0, "other"),
+        ("fail", "A", 0, OTHER),
+        ("fail", "B", 0, RESTORE),
+    ],
 )
 # two candidates, one attempt each: completion, failure of the generation, and the quarantine as well
 TWO_CANDIDATES = dict(
-    candidates=2, max_attempts=1, length=LENGTH,
-    alphabet=[("lease", "A", 0), ("lease", "B", 1), ("lease", "A", 1), ("advance", 31.0), ("submit", "A", 0, "good"),
-              ("submit", "B", 1, "good"), ("submit", "A", 1, "good"), ("fail", "A", 0, RESTORE), ("release", "A")],
+    candidates=2,
+    max_attempts=1,
+    length=LENGTH,
+    alphabet=[
+        ("lease", "A", 0),
+        ("lease", "B", 1),
+        ("lease", "A", 1),
+        ("advance", 31.0),
+        ("submit", "A", 0, "good"),
+        ("submit", "B", 1, "good"),
+        ("submit", "A", 1, "good"),
+        ("fail", "A", 0, RESTORE),
+        ("release", "A"),
+    ],
 )
 # one worker that holds two candidates when its restore fails: the second failed restore of a worker already put aside
 ONE_WORKER_TWO_ATTEMPTS = dict(
-    candidates=2, max_attempts=2, length=4,
-    alphabet=[("lease", "A", 0), ("lease", "A", 1), ("fail", "A", 0, RESTORE), ("fail", "A", 1, RESTORE),
-              ("submit", "A", 1, "good"), ("release", "A"), ("advance", 31.0)],
+    candidates=2,
+    max_attempts=2,
+    length=4,
+    alphabet=[
+        ("lease", "A", 0),
+        ("lease", "A", 1),
+        ("fail", "A", 0, RESTORE),
+        ("fail", "A", 1, RESTORE),
+        ("submit", "A", 1, "good"),
+        ("release", "A"),
+        ("advance", 31.0),
+    ],
 )
 # two workers put aside one after the other (in the order of the time, which is not that of the names), then released
 TWO_WORKERS = dict(
-    candidates=3, max_attempts=2, length=5,
-    alphabet=[("lease", "A", 0), ("lease", "B", 2), ("fail", "A", 0, RESTORE), ("fail", "B", 2, RESTORE),
-              ("advance", 31.0), ("release", "A")],
+    candidates=3,
+    max_attempts=2,
+    length=5,
+    alphabet=[
+        ("lease", "A", 0),
+        ("lease", "B", 2),
+        ("fail", "A", 0, RESTORE),
+        ("fail", "B", 2, RESTORE),
+        ("advance", 31.0),
+        ("release", "A"),
+    ],
 )
 # the update of a generation: written down only when complete, once, and applied once with one child
 UPDATE = dict(
-    candidates=1, max_attempts=2, length=5,
-    alphabet=[("lease", "A", 0), ("submit", "A", 0, "good"), ("record", 1e-3), ("record", 2e-3), ("apply", "c"), ("apply", "d")],
+    candidates=1,
+    max_attempts=2,
+    length=5,
+    alphabet=[
+        ("lease", "A", 0),
+        ("submit", "A", 0, "good"),
+        ("record", 1e-3),
+        ("record", 2e-3),
+        ("apply", "c"),
+        ("apply", "d"),
+    ],
 )
 # a record that does not say what was committed is refused, before and after the generation is complete
 WRONG_RECORDS = dict(
-    candidates=1, max_attempts=2, length=4,
-    alphabet=[("lease", "A", 0), ("submit", "A", 0, "good"), ("record", 1e-3, "seeds"), ("record", 1e-3, "rewards"),
-              ("record", 1e-3, "recipe"), ("record", 1e-3, "parent"), ("record", 1e-3), ("apply", "c")],
+    candidates=1,
+    max_attempts=2,
+    length=4,
+    alphabet=[
+        ("lease", "A", 0),
+        ("submit", "A", 0, "good"),
+        ("record", 1e-3, "seeds"),
+        ("record", 1e-3, "rewards"),
+        ("record", 1e-3, "recipe"),
+        ("record", 1e-3, "parent"),
+        ("record", 1e-3),
+        ("apply", "c"),
+    ],
 )
-CONFIGS = {"one candidate": ONE_CANDIDATE, "two candidates": TWO_CANDIDATES,
-           "one worker, two attempts": ONE_WORKER_TWO_ATTEMPTS, "two workers": TWO_WORKERS, "update": UPDATE,
-           "wrong records": WRONG_RECORDS}
+CONFIGS = {
+    "one candidate": ONE_CANDIDATE,
+    "two candidates": TWO_CANDIDATES,
+    "one worker, two attempts": ONE_WORKER_TWO_ATTEMPTS,
+    "two workers": TWO_WORKERS,
+    "update": UPDATE,
+    "wrong records": WRONG_RECORDS,
+}
 
 
 @functools.cache
@@ -82,9 +145,24 @@ def test_every_order_of_actions_keeps_the_model_and_the_ledger_in_step(name):
 
 def test_between_them_the_sequences_reach_every_kind_of_outcome():
     reached = set().union(*(set(explored(name)[1]) for name in CONFIGS))
-    expected = {"granted", "AlreadyLeasedError", "RetriesExhaustedError", "GenerationFailedError", "WorkerQuarantinedError",
-                "SubmitOutcome.COMMITTED", "SubmitOutcome.ALREADY_COMMITTED", "ConflictingResultError", "StaleAttemptError",
-                "failure accepted", "released", "GenerationNotCompleteError", "UpdateOutcome.RECORDED",
-                "UpdateOutcome.ALREADY_RECORDED", "ConflictingUpdateError", "UpdateOutcome.APPLIED", "UpdateOutcome.ALREADY_APPLIED",
-                "RecordMismatchError"}
+    expected = {
+        "granted",
+        "AlreadyLeasedError",
+        "RetriesExhaustedError",
+        "GenerationFailedError",
+        "WorkerQuarantinedError",
+        "SubmitOutcome.COMMITTED",
+        "SubmitOutcome.ALREADY_COMMITTED",
+        "ConflictingResultError",
+        "StaleAttemptError",
+        "failure accepted",
+        "released",
+        "GenerationNotCompleteError",
+        "UpdateOutcome.RECORDED",
+        "UpdateOutcome.ALREADY_RECORDED",
+        "ConflictingUpdateError",
+        "UpdateOutcome.APPLIED",
+        "UpdateOutcome.ALREADY_APPLIED",
+        "RecordMismatchError",
+    }
     assert expected <= reached, expected - reached

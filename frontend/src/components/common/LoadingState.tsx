@@ -5,13 +5,9 @@ function Skeleton({ height, width }: { height: number; width?: number }) {
 
 /** Page-level skeleton shown while the first data is loading. */
 export function LoadingState() {
-  const {t}=useProduct();
+  const { t } = useProduct();
   return (
-    <div
-      aria-busy="true"
-      aria-label={t("Loading")}
-      style={{ display: "flex", flexDirection: "column", gap: 18 }}
-    >
+    <div aria-busy="true" aria-label={t('Loading')} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <Skeleton height={30} width={280} />
 
       <div className="stats">
@@ -27,10 +23,7 @@ export function LoadingState() {
         <div className="ch">
           <Skeleton height={16} width={180} />
         </div>
-        <div
-          className="cb"
-          style={{ display: "flex", flexDirection: "column", gap: 12 }}
-        >
+        <div className="cb" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {[0, 1, 2, 3].map((index) => (
             <Skeleton height={18} key={index} />
           ))}

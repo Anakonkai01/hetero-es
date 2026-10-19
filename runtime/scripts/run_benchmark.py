@@ -20,6 +20,7 @@ Conditions (MASTER policy ids; a worker is "fast" = the 5070 Ti, "slow" = the 16
       the safe chunk of its profile, dynamic dispatch. If the admission leaves only the fast worker, H0 is "the fast worker alone with
       its safe chunk": it is NOT B0 (the chunk differs) and it is not a new scheduler.
 """
+
 import argparse
 import json
 import re
@@ -35,7 +36,9 @@ REPO = Path(__file__).resolve().parents[1]
 
 
 def parse_condition(condition: str) -> tuple[str, int]:
+    # fmt: off
     """"B3" -> ("B3", 1); "B0x2" -> ("B0", 2): the number after x is how many worker PROCESSES share the fast GPU (a 5070 Ti is idle most of a candidate: its CPU noise and its GPU rollout overlap across processes)."""
+    # fmt: on
     match = re.fullmatch(r"([A-Z]\d)(?:x(\d+))?", condition)
     if match is None:
         raise ValueError(f"unknown condition {condition!r}")
@@ -57,7 +60,15 @@ def fast_worker_ids(k: int) -> list[str]:
     return [FAST] + [f"{FAST}-{i}" for i in range(2, k + 1)]
 
 
-def plan(condition: str, candidates: int, reference: dict, candidate: dict, prediction: dict | None, chunk: int = 1, third: dict | None = None) -> dict:
+def plan(
+    condition: str,
+    candidates: int,
+    reference: dict,
+    candidate: dict,
+    prediction: dict | None,
+    chunk: int = 1,
+    third: dict | None = None,
+) -> dict:
     """Who works, with which chunk, under which policy: pure, so that it can be tested."""
     from heteroes.dispatch import proportional_quotas
 
@@ -74,14 +85,27 @@ def plan(condition: str, candidates: int, reference: dict, candidate: dict, pred
     if base == "B2":
         speeds = {**{worker: 1.0 / fast1 for worker in fast}, SLOW: 1.0 / slow1}
         quotas = proportional_quotas(candidates, speeds)
-        return {"workers": both, "policy": "proportional", "args": [a for w, q in sorted(quotas.items()) for a in ("--quota", f"{w}={q}")],
-                "quotas": quotas}
+        return {
+            "workers": both,
+            "policy": "proportional",
+            "args": [a for w, q in sorted(quotas.items()) for a in ("--quota", f"{w}={q}")],
+            "quotas": quotas,
+        }
     if base == "B3":
         return {"workers": both, "policy": "greedy", "args": []}
     if base == "B4":
-        return {"workers": both, "policy": "tail", "args": [a for w, seconds in sorted({**{f: fast1 for f in fast}, SLOW: slow1}.items())
-                                                            for a in ("--speed-prior", f"{w}={seconds}")]}
-    if base in ("T2", "T3", "Q3"):                      # 08/10: the third machine. T2 = fast + third, T3 = fast + 1660S + third (greedy), Q3 = the three with quotas by measured speed
+        return {
+            "workers": both,
+            "policy": "tail",
+            "args": [
+                a
+                for w, seconds in sorted({**{f: fast1 for f in fast}, SLOW: slow1}.items())
+                for a in ("--speed-prior", f"{w}={seconds}")
+            ],
+        }
+    if (
+        base in ("T2", "T3", "Q3")
+    ):  # 08/10: the third machine. T2 = fast + third, T3 = fast + 1660S + third (greedy), Q3 = the three with quotas by measured speed
         if third is None:
             raise ValueError(f"{base} needs --profile-third")
         third_seconds = seconds_at(third, chunk)
@@ -90,12 +114,21 @@ def plan(condition: str, candidates: int, reference: dict, candidate: dict, pred
             return {"workers": workers, "policy": "greedy", "args": []}
         speeds = {**{worker: 1.0 / fast1 for worker in fast}, SLOW: 1.0 / slow1, THIRD: 1.0 / third_seconds}
         quotas = proportional_quotas(candidates, speeds)
-        return {"workers": workers, "policy": "proportional", "args": [a for w, q in sorted(quotas.items()) for a in ("--quota", f"{w}={q}")], "quotas": quotas}
-    if base == "U2":                                    # 09/10: T2 with the tail-aware policy (B4 rule), speed priors from the two profiles
+        return {
+            "workers": workers,
+            "policy": "proportional",
+            "args": [a for w, q in sorted(quotas.items()) for a in ("--quota", f"{w}={q}")],
+            "quotas": quotas,
+        }
+    if base == "U2":  # 09/10: T2 with the tail-aware policy (B4 rule), speed priors from the two profiles
         if third is None:
             raise ValueError("U2 needs --profile-third")
         priors = {**{f: fast1 for f in fast}, THIRD: seconds_at(third, chunk)}
-        return {"workers": {**alone, THIRD: chunk}, "policy": "tail", "args": [a for w, seconds in sorted(priors.items()) for a in ("--speed-prior", f"{w}={seconds}")]}
+        return {
+            "workers": {**alone, THIRD: chunk},
+            "policy": "tail",
+            "args": [a for w, seconds in sorted(priors.items()) for a in ("--speed-prior", f"{w}={seconds}")],
+        }
     if base == "H0":
         if k != 1:
             raise ValueError("H0 is defined for one process on the fast GPU")
@@ -105,12 +138,19 @@ def plan(condition: str, candidates: int, reference: dict, candidate: dict, pred
         workers = {FAST: reference["safe_chunk"]}
         if state in ("ADMITTED", "ADMITTED_LIMITED"):
             workers[SLOW] = candidate["safe_chunk"]
-        return {"workers": workers, "policy": "greedy", "args": ["--admit", ",".join(sorted(workers))], "admission_state": state}
+        return {
+            "workers": workers,
+            "policy": "greedy",
+            "args": ["--admit", ",".join(sorted(workers))],
+            "admission_state": state,
+        }
     raise ValueError(f"unknown condition {condition!r}")
 
 
 def existing_run_state(run_dir: Path) -> str:
+    # fmt: off
     """"ok" (a finished run to keep), "failed" (a run that ended badly or never finished: it is set aside and redone) or "new"."""
+    # fmt: on
     if not run_dir.exists():
         return "new"
     record = run_dir / "run.json"
@@ -169,13 +209,13 @@ def run_one(name: str, spec: dict, args, run_dir: Path) -> dict:
             except subprocess.TimeoutExpired:
                 pass
         outcome = "ok" if coordinator.returncode == 0 else f"coordinator exit {coordinator.returncode}"
-    except BaseException as error:                    # noqa: BLE001 - the run must say how it ended
+    except BaseException as error:  # noqa: BLE001 - the run must say how it ended
         outcome = f"{type(error).__name__}: {error}"
     finally:
         cluster.collect_and_clean(spec["workers"])
     absent = workers_that_did_not_start(run_dir, spec["workers"])
     if absent and outcome == "ok":
-        outcome = f"worker did not start: {', '.join(absent)}"           # a run without one of its workers is not the run that was asked for
+        outcome = f"worker did not start: {', '.join(absent)}"  # a run without one of its workers is not the run that was asked for
     record = {"name": name, "outcome": outcome, "wall_seconds": time.time() - started, "spec": spec}
     (run_dir / "run.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
     return record
@@ -190,11 +230,20 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--conditions", required=True)
     parser.add_argument("--profile-reference", required=True)
     parser.add_argument("--profile-candidate", required=True)
-    parser.add_argument("--profile-third", default=None, help="the profile of the third machine (conditions T2, T3, Q3)")
+    parser.add_argument(
+        "--profile-third", default=None, help="the profile of the third machine (conditions T2, T3, Q3)"
+    )
     parser.add_argument("--prediction", default=None)
-    parser.add_argument("--chunk", type=int, default=None, help="prompts per generate() call for every worker of the B conditions "
-                                                                "(default: the exact size of --eval-dtype, 16 for float32 and 1 for float16; see the cross-GPU evidence)")
-    parser.add_argument("--first-repeat", type=int, default=1, help="number the repeats from this (to add repeats later)")
+    parser.add_argument(
+        "--chunk",
+        type=int,
+        default=None,
+        help="prompts per generate() call for every worker of the B conditions "
+        "(default: the exact size of --eval-dtype, 16 for float32 and 1 for float16; see the cross-GPU evidence)",
+    )
+    parser.add_argument(
+        "--first-repeat", type=int, default=1, help="number the repeats from this (to add repeats later)"
+    )
     add_cluster_arguments(parser)
     parser.add_argument("--run-timeout", type=float, default=3600.0)
     args = parser.parse_args(argv)
@@ -211,11 +260,15 @@ def main(argv: list[str]) -> int:
 
     if args.chunk is None:
         args.chunk = default_chunk(args.eval_dtype)
-    specs = {name: plan(name, args.candidates, reference, candidate, prediction, args.chunk, third) for name in conditions}
-    (out / f"plan-n{args.candidates}.json").write_text(json.dumps({"args": vars(args), "specs": specs}, indent=2) + "\n", encoding="utf-8")
+    specs = {
+        name: plan(name, args.candidates, reference, candidate, prediction, args.chunk, third) for name in conditions
+    }
+    (out / f"plan-n{args.candidates}.json").write_text(
+        json.dumps({"args": vars(args), "specs": specs}, indent=2) + "\n", encoding="utf-8"
+    )
     failed = 0
     for repeat in range(args.first_repeat, args.first_repeat + args.repeats):
-        for name in conditions:                           # repeats go round the conditions, so a drift in the machines is spread
+        for name in conditions:  # repeats go round the conditions, so a drift in the machines is spread
             run_name = f"n{args.candidates}-{name}-r{repeat}"
             state = existing_run_state(out / run_name)
             if state == "ok":

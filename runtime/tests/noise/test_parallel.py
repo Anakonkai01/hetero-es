@@ -88,11 +88,13 @@ def test_closing_cancels_the_work_that_was_queued_but_not_started():
         time.sleep(0.05)
         return i
 
-    it = parallel.ordered_map(work, range(10_000), threads=2, window=60)     # 60 queued, 2 at a time: 1.5 s of work if nothing is cancelled
+    it = parallel.ordered_map(
+        work, range(10_000), threads=2, window=60
+    )  # 60 queued, 2 at a time: 1.5 s of work if nothing is cancelled
     next(it)
     it.close()
     time.sleep(2.0)
-    assert len(count) < 15                                                    # the two that were running, a few more, never the 60 queued
+    assert len(count) < 15  # the two that were running, a few more, never the 60 queued
 
 
 def test_empty_input():
@@ -138,10 +140,7 @@ def test_parallel_parameter_noise_is_bit_identical_to_chunk_by_chunk_generation(
     addr = _address()
     # oracle: the single-chunk function, called one chunk at a time, no pool involved
     expected = np.concatenate(
-        [
-            generate_chunk_noise(addr.chunk(i), min(64, numel - i * 64))
-            for i in range(-(-numel // 64))
-        ]
+        [generate_chunk_noise(addr.chunk(i), min(64, numel - i * 64)) for i in range(-(-numel // 64))]
     )
     got = generate_parameter_noise(addr, numel)
     assert got.dtype == np.float16

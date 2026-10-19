@@ -1,6 +1,6 @@
 import { useProduct } from '@heteroes/product-ui';
-import type { Generation } from "../../types/generation";
-import { EmptyState } from "../common/EmptyState";
+import type { Generation } from '../../types/generation';
+import { EmptyState } from '../common/EmptyState';
 
 const LEFT = 48;
 const WIDTH = 576;
@@ -13,30 +13,28 @@ function linePath(points: [number, number][]): string {
     return `M${x.toFixed(1)} ${y.toFixed(1)} L${x.toFixed(1)} ${y.toFixed(1)}`;
   }
 
-  return points
-    .map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`)
-    .join(" ");
+  return points.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
 }
 
 export function RewardChart({ generations }: { generations: Generation[] }) {
-  const {t}=useProduct();
+  const { t } = useProduct();
   const maxReward = Math.max(0.6, ...generations.flatMap((g) => [g.rewardMean ?? 0, g.rewardBest ?? 0]));
   const count = generations.length || 1;
   const x = (index: number) => LEFT + ((index + 0.5) * WIDTH) / count;
   const y = (value: number) => TOP + (1 - value / maxReward) * HEIGHT;
 
-  const pointsOf = (key: "rewardMean" | "rewardBest") =>
+  const pointsOf = (key: 'rewardMean' | 'rewardBest') =>
     generations.flatMap((generation, index): [number, number][] => {
       const value = generation[key];
       return value === undefined ? [] : [[x(index), y(value)]];
     });
 
-  const meanPoints = pointsOf("rewardMean");
+  const meanPoints = pointsOf('rewardMean');
 
   if (meanPoints.length === 0) {
     return (
       <EmptyState
-        title={t("No reward data yet")}
+        title={t('No reward data yet')}
         message="Reward appears once the first generation has an accepted candidate."
       />
     );
@@ -47,15 +45,18 @@ export function RewardChart({ generations }: { generations: Generation[] }) {
   return (
     <>
       <div className="hint" style={{ marginBottom: 6 }}>
-        {t("Vertical axis: reward (score, scale 0 –")}{maxReward.toFixed(2)}{t("). Horizontal axis: generations in order of creation.")}</div>
+        {t('Vertical axis: reward (score, scale 0 –')}
+        {maxReward.toFixed(2)}
+        {t('). Horizontal axis: generations in order of creation.')}
+      </div>
 
       <svg
         viewBox="0 0 640 240"
         className="reward-chart"
         width="100%"
         role="img"
-        aria-label={t("Chart of mean and best reward per generation")}
-        style={{ display: "block" }}
+        aria-label={t('Chart of mean and best reward per generation')}
+        style={{ display: 'block' }}
       >
         <defs>
           <marker id="mA" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5">
@@ -73,9 +74,9 @@ export function RewardChart({ generations }: { generations: Generation[] }) {
 
         {[
           [maxReward.toFixed(2), 16],
-          [(maxReward * 2 / 3).toFixed(2), 86.7],
+          [((maxReward * 2) / 3).toFixed(2), 86.7],
           [(maxReward / 3).toFixed(2), 157.3],
-          ["0", 228],
+          ['0', 228],
         ].map(([label, ty]) => (
           <text key={label} x="40" y={ty} textAnchor="end" fontSize="11" fill="var(--mut)">
             {label}
@@ -83,7 +84,7 @@ export function RewardChart({ generations }: { generations: Generation[] }) {
         ))}
 
         <path
-          d={linePath(pointsOf("rewardBest"))}
+          d={linePath(pointsOf('rewardBest'))}
           fill="none"
           stroke="var(--chart-secondary)"
           strokeWidth="1.75"
@@ -105,12 +106,12 @@ export function RewardChart({ generations }: { generations: Generation[] }) {
 
       <div
         style={{
-          display: "grid",
+          display: 'grid',
           gridTemplateColumns: `repeat(${count},minmax(0,1fr))`,
-          padding: "0 2.5% 0 7.5%",
-          textAlign: "center",
+          padding: '0 2.5% 0 7.5%',
+          textAlign: 'center',
           fontSize: 12,
-          color: "var(--mut)",
+          color: 'var(--mut)',
         }}
       >
         {generations.map((generation, index) => (
@@ -122,10 +123,12 @@ export function RewardChart({ generations }: { generations: Generation[] }) {
 
       <div className="legendl">
         <span>
-          <b style={{ color: "var(--acc)" }}>●━</b> {t("Mean reward of the generation")}</span>
+          <b style={{ color: 'var(--acc)' }}>●━</b> {t('Mean reward of the generation')}
+        </span>
         <span>
-          <b style={{ color: "var(--chart-secondary)" }}>■╌</b> {t("Best reward of the generation")}</span>
-        <span>{t("Generations without a reward are not drawn.")}</span>
+          <b style={{ color: 'var(--chart-secondary)' }}>■╌</b> {t('Best reward of the generation')}
+        </span>
+        <span>{t('Generations without a reward are not drawn.')}</span>
       </div>
     </>
   );

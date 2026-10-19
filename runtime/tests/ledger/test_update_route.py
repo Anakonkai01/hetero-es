@@ -1,4 +1,5 @@
 """`GET /v1/updates/{sha256}`: the small message (a generation record) with which a worker can replay an update instead of downloading 1 GB."""
+
 import pytest
 
 from heteroes.http_transport import CoordinatorServer, HttpClient, TransportError
@@ -31,6 +32,7 @@ def test_a_name_that_is_not_a_hash_gives_none(server):
 
 def test_the_route_needs_the_token_when_the_server_has_one(tmp_path):
     from heteroes.http_transport import UnauthorizedError
+
     server = CoordinatorServer(api=None, job=None, models_dir=tmp_path, token="secret")
     server.start()
     try:
@@ -45,6 +47,7 @@ def test_the_route_needs_the_token_when_the_server_has_one(tmp_path):
 def test_post_to_the_route_is_refused(server):
     import urllib.error
     import urllib.request
+
     request = urllib.request.Request(server.url + f"/v1/updates/{PARENT}", data=b"{}", method="POST")
     with pytest.raises(urllib.error.HTTPError) as caught:
         urllib.request.build_opener(urllib.request.ProxyHandler({})).open(request, timeout=5)

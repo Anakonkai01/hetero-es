@@ -22,9 +22,7 @@ from heteroes.noise.contracts import DEFAULT_CHUNK_ELEMENTS, ENGINE_VERSION
 
 DEVICES = ["cpu"] + (["cuda"] if torch.cuda.is_available() else [])
 SCRIPT = Path(__file__).resolve().parents[2] / "scripts" / "run_one_candidate.py"
-PROBE_JSON = (
-    Path(__file__).resolve().parents[2] / "artifacts" / "probes" / "2026-09-29" / "probe_5070ti.json"
-)
+PROBE_JSON = Path(__file__).resolve().parents[2] / "artifacts" / "probes" / "2026-09-29" / "probe_5070ti.json"
 
 
 class HalfToy(nn.Module):
@@ -63,12 +61,15 @@ def oracle_digest(model, schema):
 # a fake evaluation that looks at the weights it is given, and records when it is called
 # ---------------------------------------------------------------------------
 
+
 class Recorder:
     def __init__(self, monkeypatch, model, schema):
         self.events = []
         self.model, self.schema = model, schema
         real_snapshot, real_perturb, real_restore = (
-            candidate_module.take_snapshot, candidate_module.perturb_model_, candidate_module.restore_from_snapshot_,
+            candidate_module.take_snapshot,
+            candidate_module.perturb_model_,
+            candidate_module.restore_from_snapshot_,
         )
 
         def snapshot(*args, **kwargs):
@@ -112,6 +113,7 @@ def setup(monkeypatch):
 # model_weights_sha256
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.parametrize("device", DEVICES)
 def test_weights_digest_matches_the_hand_written_oracle(device):
     model = make_model(device)
@@ -151,6 +153,7 @@ def test_weights_digest_counts_a_tied_tensor_once():
 # the order of the steps, and what the evaluations see
 # ---------------------------------------------------------------------------
 
+
 def test_steps_run_in_the_right_order_and_each_evaluation_sees_the_right_model(setup):
     model, schema, recorder = setup
     original = oracle_digest(model, schema)
@@ -159,9 +162,9 @@ def test_steps_run_in_the_right_order_and_each_evaluation_sees_the_right_model(s
 
     assert recorder.names() == ["snapshot", "evaluate", "perturb", "evaluate", "restore", "evaluate"]
     seen = [e[1] for e in recorder.events if isinstance(e, tuple) and e[0] == "evaluate"]
-    assert seen[0] == original[:12]          # base: the original weights
-    assert seen[1] != original[:12]          # candidate: perturbed weights
-    assert seen[2] == original[:12]          # after restore: the original weights again
+    assert seen[0] == original[:12]  # base: the original weights
+    assert seen[1] != original[:12]  # candidate: perturbed weights
+    assert seen[2] == original[:12]  # after restore: the original weights again
     assert result["evaluation"]["base"] == result["evaluation"]["restored"]
     assert result["evaluation"]["base"] != result["evaluation"]["candidate"]
 
@@ -188,6 +191,7 @@ def test_the_default_chunk_size_is_the_contract_value(setup):
 # the weights: fingerprints and restore
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.parametrize("device", DEVICES)
 def test_fingerprints_show_perturbation_and_exact_restore(device, monkeypatch):
     model = make_model(device)
@@ -209,6 +213,7 @@ def test_fingerprints_show_perturbation_and_exact_restore(device, monkeypatch):
 # failures: raised, and the model comes back
 # ---------------------------------------------------------------------------
 
+
 def test_a_failure_while_evaluating_the_candidate_restores_the_model_and_is_raised(setup, monkeypatch):
     model, schema, recorder = setup
     reference = bits(model)
@@ -217,7 +222,7 @@ def test_a_failure_while_evaluating_the_candidate_restores_the_model_and_is_rais
 
     def failing(model, tokenizer):
         calls.append(1)
-        if len(calls) == 2:           # the second evaluation is the candidate
+        if len(calls) == 2:  # the second evaluation is the candidate
             raise RuntimeError("CUDA out of memory")
         return real_evaluate(model, tokenizer)
 
@@ -228,7 +233,7 @@ def test_a_failure_while_evaluating_the_candidate_restores_the_model_and_is_rais
 
     assert same_bits(model, reference)
     assert recorder.names()[-1] == "restore"
-    assert len(calls) == 2            # no evaluation after the failure
+    assert len(calls) == 2  # no evaluation after the failure
 
 
 def test_a_failure_of_the_base_evaluation_stops_before_any_perturbation(setup, monkeypatch):
@@ -255,7 +260,7 @@ def test_a_bad_sigma_is_raised_and_nothing_is_evaluated_as_a_candidate(setup, ba
     with pytest.raises(ValueError):
         run_candidate(model, None, schema, seed=3, sigma=bad_sigma, chunk_elements=8)
 
-    assert recorder.names().count("evaluate") == 1     # only the base evaluation
+    assert recorder.names().count("evaluate") == 1  # only the base evaluation
     assert same_bits(model, reference)
 
 
@@ -287,15 +292,26 @@ def test_a_failed_restore_is_raised_as_restore_error(setup, monkeypatch):
 # the record
 # ---------------------------------------------------------------------------
 
+
 def test_the_result_is_plain_json_with_exactly_the_agreed_keys(setup):
     model, schema, _ = setup
 
     result = run_candidate(model, None, schema, seed=3, sigma=1e-3, chunk_elements=8)
 
-    assert json.loads(json.dumps(result)) == result      # nothing that JSON cannot hold
+    assert json.loads(json.dumps(result)) == result  # nothing that JSON cannot hold
     assert set(result) == {
-        "seed", "sigma", "sigma_float32", "chunk_elements", "schema_hash", "engine_version", "workload_hash",
-        "weights_sha256", "restored_equals_original", "evaluation", "timing_seconds", "gpu_memory",
+        "seed",
+        "sigma",
+        "sigma_float32",
+        "chunk_elements",
+        "schema_hash",
+        "engine_version",
+        "workload_hash",
+        "weights_sha256",
+        "restored_equals_original",
+        "evaluation",
+        "timing_seconds",
+        "gpu_memory",
     }
     assert set(result["evaluation"]) == {"base", "candidate", "restored"}
     assert set(result["weights_sha256"]) == {"original", "perturbed", "restored"}
@@ -308,7 +324,7 @@ def test_the_record_names_the_candidate_and_the_recipe(setup):
     result = run_candidate(model, None, schema, seed=3, sigma=1e-3, chunk_elements=8)
 
     assert result["seed"] == 3 and result["sigma"] == 1e-3
-    assert result["sigma_float32"] == float(np.float32(1e-3)) != 1e-3   # 1e-3 is not exact in binary
+    assert result["sigma_float32"] == float(np.float32(1e-3)) != 1e-3  # 1e-3 is not exact in binary
     assert result["schema_hash"] == schema.hash
     assert result["engine_version"] == ENGINE_VERSION == "numpy_pcg64_normal_f32_to_f16_v1"
     assert result["workload_hash"] == workload_hash()
@@ -320,8 +336,15 @@ def test_timings_cover_every_step_and_there_is_no_gpu_record_on_the_cpu(setup):
     result = run_candidate(model, None, schema, seed=3, sigma=1e-3, chunk_elements=8)
 
     assert set(result["timing_seconds"]) == {
-        "hash_original", "snapshot", "evaluate_base", "perturb", "hash_perturbed", "evaluate_candidate",
-        "restore", "hash_restored", "evaluate_restored",
+        "hash_original",
+        "snapshot",
+        "evaluate_base",
+        "perturb",
+        "hash_perturbed",
+        "evaluate_candidate",
+        "restore",
+        "hash_restored",
+        "evaluate_restored",
     }
     assert all(isinstance(v, float) and v >= 0 for v in result["timing_seconds"].values())
     assert result["gpu_memory"] is None
@@ -345,7 +368,7 @@ def test_the_peak_memory_does_not_include_what_happened_before_the_run(monkeypat
     model = make_model("cuda")
     schema = build_parameter_schema(model)
     Recorder(monkeypatch, model, schema)
-    spike = torch.empty(64 * 2**20, dtype=torch.uint8, device="cuda")   # a 64 MiB peak before the run
+    spike = torch.empty(64 * 2**20, dtype=torch.uint8, device="cuda")  # a 64 MiB peak before the run
     del spike
 
     result = run_candidate(model, None, schema, seed=3, sigma=1e-3, chunk_elements=8)
@@ -397,8 +420,8 @@ def test_qwen_candidate_matches_all_the_recorded_evidence(qwen):
     base = result["evaluation"]["base"]
     assert base["mean_reward"] == recorded["mean_reward"] == 0.25
     assert [r["output_text"] for r in base["records"]] == [r["output_text"] for r in recorded["records"]]
-    assert result["evaluation"]["restored"] == base                      # the restored model answers like the base
-    assert result["evaluation"]["candidate"] != base                     # the perturbation is visible
+    assert result["evaluation"]["restored"] == base  # the restored model answers like the base
+    assert result["evaluation"]["candidate"] != base  # the perturbation is visible
 
 
 @needs_model
@@ -417,26 +440,56 @@ def test_the_script_writes_a_complete_json_record(tmp_path):
     output = tmp_path / "candidate.json"
 
     completed = subprocess.run(
-        [sys.executable, str(SCRIPT), "--model-path", PINNED_PATH, "--seed", "1", "--sigma", "2e-3",
-         "--repeat", "2", "--output", str(output)],
-        capture_output=True, text=True,
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--model-path",
+            PINNED_PATH,
+            "--seed",
+            "1",
+            "--sigma",
+            "2e-3",
+            "--repeat",
+            "2",
+            "--output",
+            str(output),
+        ],
+        capture_output=True,
+        text=True,
     )
 
     assert completed.returncode == 0, completed.stderr[-2000:]
     record = json.loads(output.read_text(encoding="utf-8"))
-    assert set(record) == {"format_version", "environment", "code", "model", "noise_selftest", "recipe", "recipe_hash",
-                           "descriptor", "runs", "repeat_identical"}
+    assert set(record) == {
+        "format_version",
+        "environment",
+        "code",
+        "model",
+        "noise_selftest",
+        "recipe",
+        "recipe_hash",
+        "descriptor",
+        "runs",
+        "repeat_identical",
+    }
     assert record["format_version"] == 2
     assert len(record["runs"]) == 2
     assert record["repeat_identical"] is True
     assert set(record["code"]) == {"git_commit", "git_dirty"}
-    assert record["model"]["revision"] == record["model"]["tokenizer_revision"] == "7ae557604adf67be50417f59c2c2f167def9a775"
+    assert (
+        record["model"]["revision"]
+        == record["model"]["tokenizer_revision"]
+        == "7ae557604adf67be50417f59c2c2f167def9a775"
+    )
     assert record["model"]["dtype"] == "torch.float16"
     assert len(record["model"]["generation_config_sha256"]) == 64
-    assert record["model"]["generation_config_sha256"] != record["model"]["generation_config_raw_sha256"]  # set values vs the raw dict
+    assert (
+        record["model"]["generation_config_sha256"] != record["model"]["generation_config_raw_sha256"]
+    )  # set values vs the raw dict
     # the manifest: the recipe, its hash, the descriptor and the self-test
     from heteroes.manifest import CandidateDescriptor, Recipe, effective_generation_config
     from heteroes.noise.selftest import EXPECTED_NOISE_FINGERPRINT
+
     recipe = Recipe.from_dict(record["recipe"])
     assert recipe.hash == record["recipe_hash"]
     assert recipe.sigma == 2e-3 and recipe.schema_hash == record["runs"][0]["schema_hash"]
@@ -449,7 +502,7 @@ def test_the_script_writes_a_complete_json_record(tmp_path):
     assert record["noise_selftest"]["computed_fingerprint"] == EXPECTED_NOISE_FINGERPRINT
     assert {"torch", "numpy", "transformers", "python", "gpu_name", "hostname"} <= set(record["environment"])
     for run in record["runs"]:
-        assert (run["seed"], run["sigma"]) == (1, 2e-3)       # the options really reach the candidate
+        assert (run["seed"], run["sigma"]) == (1, 2e-3)  # the options really reach the candidate
         assert run["weights_sha256"]["perturbed"] != run["weights_sha256"]["original"]
         assert run["restored_equals_original"] is True
 
@@ -460,10 +513,11 @@ def test_the_script_refuses_a_model_that_is_not_the_pinned_revision(tmp_path):
 
     completed = subprocess.run(
         [sys.executable, str(SCRIPT), "--model-path", str(other), "--output", str(tmp_path / "x.json")],
-        capture_output=True, text=True,
+        capture_output=True,
+        text=True,
     )
 
-    assert completed.returncode == 2          # a deliberate refusal, not a crash
+    assert completed.returncode == 2  # a deliberate refusal, not a crash
     assert not (tmp_path / "x.json").exists()
     assert "pinned revision" in completed.stderr
 
@@ -476,7 +530,8 @@ def test_the_script_refuses_to_overwrite_an_existing_output_file(tmp_path):
 
     completed = subprocess.run(
         [sys.executable, str(SCRIPT), "--model-path", str(model_dir), "--output", str(output)],
-        capture_output=True, text=True,
+        capture_output=True,
+        text=True,
     )
 
     assert completed.returncode == 2
@@ -492,9 +547,13 @@ def load_script():
 
 
 def fake_run(**changes):
-    run = {"seed": 0, "weights_sha256": {"original": "a", "perturbed": "b", "restored": "a"},
-           "evaluation": {"base": {"mean_reward": 0.25, "records": []}},
-           "timing_seconds": {"snapshot": 1.0}, "gpu_memory": {"peak_allocated_bytes": 1}}
+    run = {
+        "seed": 0,
+        "weights_sha256": {"original": "a", "perturbed": "b", "restored": "a"},
+        "evaluation": {"base": {"mean_reward": 0.25, "records": []}},
+        "timing_seconds": {"snapshot": 1.0},
+        "gpu_memory": {"peak_allocated_bytes": 1},
+    }
     run.update(changes)
     return run
 

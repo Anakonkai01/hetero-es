@@ -7,8 +7,8 @@ from heteroes.noise.parallel import ordered_map
 
 from dataclasses import dataclass
 import math
-import torch 
-import torch.nn as nn 
+import torch
+import torch.nn as nn
 import numpy as np
 import numbers
 
@@ -17,42 +17,39 @@ DEFAULT_ETA = 1e-9
 
 
 @dataclass(frozen=True)
-class UpdateReport: 
-    noop: bool # no operations 
+class UpdateReport:
+    noop: bool  # no operations
     coefficients: tuple[float, ...]
     requested_l2: float
     applied_l2: float
     changed: int
     numel: int
-    
-    
 
 
-def standardize_rewards(rewards, eta=DEFAULT_ETA) -> np.ndarray: 
-    if not (math.isfinite(eta) and eta > 0): 
-        raise ValueError("eta must finite and > 0") 
-    
-    # calculate in float64 then cast to float32 
+def standardize_rewards(rewards, eta=DEFAULT_ETA) -> np.ndarray:
+    if not (math.isfinite(eta) and eta > 0):
+        raise ValueError("eta must finite and > 0")
+
+    # calculate in float64 then cast to float32
     rewards = np.asarray(rewards, dtype=np.float64)
-    if rewards.ndim != 1: 
+    if rewards.ndim != 1:
         raise ValueError("rewards must be 1d-array")
-    if not rewards.size > 0: 
+    if not rewards.size > 0:
         raise ValueError("rewards size must > 0")
-    if not np.isfinite(rewards).all(): 
-        raise ValueError("rewards has value being Nan/Inf") 
+    if not np.isfinite(rewards).all():
+        raise ValueError("rewards has value being Nan/Inf")
 
     # z = (r - mean(r)) / (std(r) + eta)
     mean_r = rewards.mean(dtype=np.float64)
     std_r = rewards.std(ddof=0, dtype=np.float64)
-    
+
     # no signal
-    if std_r < eta: 
+    if std_r < eta:
         return np.zeros(rewards.size, dtype=np.float32)
 
     z = (rewards - mean_r) / (std_r + np.float64(eta))
-    
-    return z.astype(np.float32)
 
+    return z.astype(np.float32)
 
 
 def _check_coefficients(coefficients) -> np.ndarray:
@@ -74,7 +71,14 @@ def _check_coefficients(coefficients) -> np.ndarray:
     return as_float32
 
 
-def apply_coefficients_(model: nn.Module, schema: ParameterSchema, candidate_seeds: list[int], coefficients, alpha: float, chunk_elements: int=DEFAULT_CHUNK_ELEMENTS) -> UpdateReport:
+def apply_coefficients_(
+    model: nn.Module,
+    schema: ParameterSchema,
+    candidate_seeds: list[int],
+    coefficients,
+    alpha: float,
+    chunk_elements: int = DEFAULT_CHUNK_ELEMENTS,
+) -> UpdateReport:
     """
     The update of one ES generation with the coefficients GIVEN (no standardization here): what a worker applies when it
     replays a generation record. `apply_es_update_` is this with the coefficients computed from the rewards.
@@ -82,47 +86,59 @@ def apply_coefficients_(model: nn.Module, schema: ParameterSchema, candidate_see
     tensors = resolve_tensors(model, schema)
     for tensor in tensors:
         _check_param(tensor)
-    return _apply_coefficients(schema, tensors, candidate_seeds, _check_coefficients(coefficients), alpha, chunk_elements)
+    return _apply_coefficients(
+        schema, tensors, candidate_seeds, _check_coefficients(coefficients), alpha, chunk_elements
+    )
 
 
 # agentic esopt update style
-def apply_es_update_(model: nn.Module, schema: ParameterSchema, candidate_seeds: list[int], rewards, alpha: float, chunk_elements: int=DEFAULT_CHUNK_ELEMENTS, eta=DEFAULT_ETA) -> UpdateReport: 
+def apply_es_update_(
+    model: nn.Module,
+    schema: ParameterSchema,
+    candidate_seeds: list[int],
+    rewards,
+    alpha: float,
+    chunk_elements: int = DEFAULT_CHUNK_ELEMENTS,
+    eta=DEFAULT_ETA,
+) -> UpdateReport:
     # resolve tensor
     tensors = resolve_tensors(model, schema)
-    # check param 
-    for tensor in tensors: 
+    # check param
+    for tensor in tensors:
         _check_param(tensor)
-    
+
     # z already check eta and rewards
     z_rewards = standardize_rewards(rewards, eta)
     return _apply_coefficients(schema, tensors, candidate_seeds, z_rewards, alpha, chunk_elements)
 
 
-def _apply_coefficients(schema: ParameterSchema, tensors, candidate_seeds, z_rewards, alpha: float, chunk_elements: int) -> UpdateReport:
-    total_numel = sum(t.numel() for t in tensors) 
-    
-    # check alpha 
-    if not math.isfinite(alpha): 
-        raise ValueError("alpha must not be Nan/Inf")
-    
-    # check chunks 
-    if not chunk_elements >= 1: 
-        raise ValueError("chunk_elements must be >=1") 
+def _apply_coefficients(
+    schema: ParameterSchema, tensors, candidate_seeds, z_rewards, alpha: float, chunk_elements: int
+) -> UpdateReport:
+    total_numel = sum(t.numel() for t in tensors)
 
-    # check len candidate 
+    # check alpha
+    if not math.isfinite(alpha):
+        raise ValueError("alpha must not be Nan/Inf")
+
+    # check chunks
+    if not chunk_elements >= 1:
+        raise ValueError("chunk_elements must be >=1")
+
+    # check len candidate
     if len(candidate_seeds) != len(z_rewards):
         raise ValueError("length candidate_seeds != lenght rewards")
-    
-    # check seed 
-    for seed in candidate_seeds: 
-        # check if seed is int or np.int 
-        if not (isinstance(seed, numbers.Integral) and not isinstance(seed, bool)): 
+
+    # check seed
+    for seed in candidate_seeds:
+        # check if seed is int or np.int
+        if not (isinstance(seed, numbers.Integral) and not isinstance(seed, bool)):
             raise TypeError("seed must be in int or np.int")
-    
-    # check duplicated seed 
-    if len(set(candidate_seeds)) != len(candidate_seeds): 
-        raise ValueError("seed being duplicated") 
-       
+
+    # check duplicated seed
+    if len(set(candidate_seeds)) != len(candidate_seeds):
+        raise ValueError("seed being duplicated")
+
     # check zero array, mean no signal
     if not z_rewards.any():
         return UpdateReport(
@@ -131,9 +147,9 @@ def _apply_coefficients(schema: ParameterSchema, tensors, candidate_seeds, z_rew
             requested_l2=0.0,
             applied_l2=0.0,
             changed=0,
-            numel=total_numel
-        ) 
-    
+            numel=total_numel,
+        )
+
     schema_hash = schema.hash
     n_seeds = len(candidate_seeds)
     # The update is elementwise, so consecutive chunks of a tensor can be processed as ONE piece of up to BATCH_ELEMENTS elements:
@@ -163,17 +179,17 @@ def _apply_coefficients(schema: ParameterSchema, tensors, candidate_seeds, z_rew
 
     # The three statistics of a piece stay on the device and are read once at the end (one sync instead of three per chunk).
     changed_parts, requested_parts, applied_parts = [], [], []
-    with torch.no_grad(): 
-        for entry, tensor in zip(schema.entries, tensors): 
+    with torch.no_grad():
+        for entry, tensor in zip(schema.entries, tensors):
             numel = tensor.numel()
             n_chunks = num_chunks(numel=numel, chunk_elements=chunk_elements)
             for first in range(0, n_chunks, group_chunks):
                 last = min(first + group_chunks, n_chunks)
                 start = first * chunk_elements
                 n = min(numel, last * chunk_elements) - start
-                chunk = tensor.view(-1)[start: start + n]
+                chunk = tensor.view(-1)[start : start + n]
                 acc = torch.zeros(n, dtype=torch.float32, device=tensor.device)
-                
+
                 for zi in z_rewards:
                     parts = [next(noise_stream) for _ in range(last - first)]
                     eps = parts[0] if len(parts) == 1 else np.concatenate(parts)
@@ -181,17 +197,17 @@ def _apply_coefficients(schema: ParameterSchema, tensors, candidate_seeds, z_rew
                     eps = torch.from_numpy(eps).to(device=tensor.device).to(torch.float32)
 
                     term = eps * float(zi)
-                    acc = acc + term 
-                
+                    acc = acc + term
+
                 direction = acc / n_seeds
                 update = direction * float(np.float32(alpha))
                 new = (chunk.to(torch.float32) + update).to(torch.float16)
-                # compare 
-                
+                # compare
+
                 changed_parts.append((new.view(torch.int16) != chunk.view(torch.int16)).sum())
                 requested_parts.append((update.double() ** 2).sum())
-                applied_parts.append(((new.double() - chunk.double())**2).sum())
-                 
+                applied_parts.append(((new.double() - chunk.double()) ** 2).sum())
+
                 chunk.copy_(new)
 
         changed = 0
@@ -205,7 +221,6 @@ def _apply_coefficients(schema: ParameterSchema, tensors, candidate_seeds, z_rew
             for value in torch.stack(applied_parts).tolist():
                 applied_l2 += float(value)
 
-
     requested_l2 = math.sqrt(requested_l2)
     applied_l2 = math.sqrt(applied_l2)
     coefficients = tuple(float(v) for v in z_rewards)
@@ -218,7 +233,3 @@ def _apply_coefficients(schema: ParameterSchema, tensors, candidate_seeds, z_rew
         changed=changed,
         numel=total_numel,
     )
-        
-    
-        
-    

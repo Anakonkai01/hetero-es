@@ -1,4 +1,5 @@
 """Where and with what a run happened (for the records of an experiment), and the append-only JSONL log the processes write."""
+
 import json
 import platform
 import socket
@@ -20,7 +21,10 @@ def _run(arguments: list[str]) -> str | None:
 def code_info() -> dict:
     commit = _run(["git", "rev-parse", "HEAD"])
     status = _run(["git", "status", "--porcelain"])
-    return {"git_commit": commit, "git_dirty": None if status is None else bool(status)}      # untracked files count as dirty
+    return {
+        "git_commit": commit,
+        "git_dirty": None if status is None else bool(status),
+    }  # untracked files count as dirty
 
 
 def environment_info(device: str) -> dict:
@@ -29,10 +33,18 @@ def environment_info(device: str) -> dict:
     import transformers
 
     info = {
-        "hostname": socket.gethostname(), "platform": platform.platform(), "python": platform.python_version(),
-        "torch": torch.__version__, "torch_cuda": torch.version.cuda, "numpy": numpy.__version__,
-        "transformers": transformers.__version__, "device": device, "gpu_name": None, "gpu_capability": None,
-        "gpu_total_memory_bytes": None, "nvidia_driver": None,
+        "hostname": socket.gethostname(),
+        "platform": platform.platform(),
+        "python": platform.python_version(),
+        "torch": torch.__version__,
+        "torch_cuda": torch.version.cuda,
+        "numpy": numpy.__version__,
+        "transformers": transformers.__version__,
+        "device": device,
+        "gpu_name": None,
+        "gpu_capability": None,
+        "gpu_total_memory_bytes": None,
+        "nvidia_driver": None,
     }
     if device == "cuda":
         properties = torch.cuda.get_device_properties(0)
@@ -54,7 +66,7 @@ class JsonlLog:
         self._lock = threading.Lock()
 
     def __call__(self, event: dict) -> None:
-        line = json.dumps(event)                # may raise TypeError: nothing is written then
+        line = json.dumps(event)  # may raise TypeError: nothing is written then
         with self._lock:
             self._file.write(line + "\n")
             self._file.flush()

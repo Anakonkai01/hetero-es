@@ -114,6 +114,7 @@ def test_s4_different_tensors_same_shape_are_not_grouped():
 # ParameterSchema: hash
 # ---------------------------------------------------------------------------
 
+
 def make_small_schema():
     e0 = SchemaEntry(0, "w", ("b",), (2, 3), "torch.float16", 6)
     e1 = SchemaEntry(1, "x", (), (4,), "torch.float16", 4)
@@ -204,6 +205,7 @@ def test_schema_entry_is_frozen():
 # ---------------------------------------------------------------------------
 # build_parameter_schema
 # ---------------------------------------------------------------------------
+
 
 class NoAliasToy(nn.Module):
     def __init__(self):
@@ -339,8 +341,7 @@ def test_s9_qwen_layout_matches_probe_evidence():
 
     # Rebuild the probe's schema from our entries: it must hash exactly like the probe did.
     probe_style = [
-        {"index": e.index, "name": e.canonical_name, "shape": list(e.shape),
-         "dtype": e.dtype, "numel": e.numel}
+        {"index": e.index, "name": e.canonical_name, "shape": list(e.shape), "dtype": e.dtype, "numel": e.numel}
         for e in schema.entries
     ]
     raw = json.dumps(probe_style, sort_keys=True, separators=(",", ":"), ensure_ascii=True)

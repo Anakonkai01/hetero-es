@@ -6,6 +6,7 @@ Hardening of the HTTP layer found by the audit of 07/10/2026 (G6):
   - the weights download can resume: the server answers `Range: bytes=N-` and the worker keeps and continues a partial file;
   - a lease request that carries a request id is retried by the client (a lost reply costs nothing).
 """
+
 import hashlib
 import http.client
 import os
@@ -48,7 +49,9 @@ def slow_client(server):
 def closed_by_server(sock, within):
     sock.settimeout(within)
     try:
-        return sock.recv(4096) in (b"", ) or True      # any answer (408 or an error page) or a plain close ends the connection
+        return (
+            sock.recv(4096) in (b"",) or True
+        )  # any answer (408 or an error page) or a plain close ends the connection
     except socket.timeout:
         return False
     except ConnectionResetError:
@@ -59,6 +62,7 @@ def closed_by_server(sock, within):
 # stalled clients and the number of connections
 # ---------------------------------------------------------------------------
 
+
 def test_a_client_that_stalls_in_the_middle_of_a_request_is_disconnected(api, tmp_path):
     server = serve(api, tmp_path, request_timeout=0.3)
     try:
@@ -68,7 +72,7 @@ def test_a_client_that_stalls_in_the_middle_of_a_request_is_disconnected(api, tm
         deadline = time.time() + 5
         while server.open_connections and time.time() < deadline:
             time.sleep(0.02)
-        assert server.open_connections == 0                       # its thread is gone, not leaked
+        assert server.open_connections == 0  # its thread is gone, not leaked
         assert HttpClient(server.url).get_json("/v1/health") == {"ok": True, "status": "up"}
     finally:
         server.stop()
@@ -82,7 +86,7 @@ def test_connections_over_the_limit_are_refused_and_the_server_keeps_serving(api
         deadline = time.time() + 5
         while server.open_connections < 2 and time.time() < deadline:
             time.sleep(0.02)
-        assert server.open_connections == 2                       # premise: both slots are taken
+        assert server.open_connections == 2  # premise: both slots are taken
         third = socket.create_connection((server.host, server.port), timeout=5)
         third.sendall(b"GET /v1/health HTTP/1.1\r\nHost: x\r\n\r\n")
         third.settimeout(2.0)
@@ -91,7 +95,7 @@ def test_connections_over_the_limit_are_refused_and_the_server_keeps_serving(api
         except ConnectionResetError:
             data = b""
         third.close()
-        assert data == b""                                        # refused: closed without an answer
+        assert data == b""  # refused: closed without an answer
         assert server.refused_connections >= 1
     finally:
         for sock in stalled:
@@ -100,7 +104,9 @@ def test_connections_over_the_limit_are_refused_and_the_server_keeps_serving(api
         while server.open_connections and time.time() < deadline:
             time.sleep(0.05)
         try:
-            assert HttpClient(server.url).get_json("/v1/health")["ok"] is True       # after the slots are free again it works
+            assert (
+                HttpClient(server.url).get_json("/v1/health")["ok"] is True
+            )  # after the slots are free again it works
         finally:
             server.stop()
 
@@ -114,7 +120,9 @@ def test_the_default_limits_are_reasonable(api, tmp_path):
         server.stop()
 
 
-@pytest.mark.parametrize("name,bad", [("request_timeout", 0), ("request_timeout", -1), ("max_connections", 0), ("max_connections", 1.5)])
+@pytest.mark.parametrize(
+    "name,bad", [("request_timeout", 0), ("request_timeout", -1), ("max_connections", 0), ("max_connections", 1.5)]
+)
 def test_bad_limits_are_refused(api, tmp_path, name, bad):
     with pytest.raises(ValueError):
         CoordinatorServer(api, job=JOB, models_dir=tmp_path, **{name: bad})
@@ -123,6 +131,7 @@ def test_bad_limits_are_refused(api, tmp_path, name, bad):
 # ---------------------------------------------------------------------------
 # token
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def guarded(api, tmp_path):
@@ -140,7 +149,7 @@ def test_a_wrong_or_missing_token_is_an_unauthorized_error_on_every_kind_of_call
         client("lease", {"worker_id": "worker-a"})
     with pytest.raises(UnauthorizedError):
         client.open_stream("/v1/models/" + "a" * 64)
-    assert issubclass(UnauthorizedError, TransportError)          # old code that catches TransportError still catches it
+    assert issubclass(UnauthorizedError, TransportError)  # old code that catches TransportError still catches it
 
 
 def test_the_right_token_is_not_an_error(guarded):
@@ -169,7 +178,7 @@ def test_loopback_needs_no_token(api, tmp_path, host):
 # ranges
 # ---------------------------------------------------------------------------
 
-DATA = bytes(range(256)) * 40                                      # 10,240 bytes with no repeats inside a block
+DATA = bytes(range(256)) * 40  # 10,240 bytes with no repeats inside a block
 SHA = hashlib.sha256(DATA).hexdigest()
 
 
@@ -210,36 +219,39 @@ def test_a_range_at_the_end_of_the_file_is_not_satisfiable(with_file):
     assert raw_get(with_file, {"Range": f"bytes={len(DATA) + 5}-"})[0] == 416
 
 
-@pytest.mark.parametrize('start,end', [(0,63),(5,5),(1000,1200),(10200,99999)])
+@pytest.mark.parametrize("start,end", [(0, 63), (5, 5), (1000, 1200), (10200, 99999)])
 def test_bounded_range_returns_only_the_requested_slice(with_file, start, end):
-    status, headers, body = raw_get(with_file, {'Range':f'bytes={start}-{end}'})
-    last = min(end, len(DATA)-1)
+    status, headers, body = raw_get(with_file, {"Range": f"bytes={start}-{end}"})
+    last = min(end, len(DATA) - 1)
     assert status == 206
-    assert body == DATA[start:last+1]
-    assert headers['Content-Range'] == f'bytes {start}-{last}/{len(DATA)}'
-    assert int(headers['Content-Length']) == last-start+1
+    assert body == DATA[start : last + 1]
+    assert headers["Content-Range"] == f"bytes {start}-{last}/{len(DATA)}"
+    assert int(headers["Content-Length"]) == last - start + 1
 
 
 def test_reversed_bounded_range_is_not_satisfiable(with_file):
-    assert raw_get(with_file, {'Range':'bytes=100-10'})[0] == 416
+    assert raw_get(with_file, {"Range": "bytes=100-10"})[0] == 416
 
 
 def test_bounded_range_never_sends_hidden_bytes_beyond_content_length(with_file):
     # HTTPConnection.read() trusts Content-Length and can hide an oversized
     # response. Inspect the wire until EOF to measure what was actually sent.
     with socket.create_connection((with_file.host, with_file.port), timeout=5) as connection:
-        connection.sendall(f'GET /v1/models/{SHA} HTTP/1.1\r\nHost: local\r\nRange: bytes=0-63\r\nConnection: close\r\n\r\n'.encode())
-        chunks=[]
-        while chunk := connection.recv(65536):chunks.append(chunk)
-    headers, body = b''.join(chunks).split(b'\r\n\r\n',1)
-    assert b'Content-Length: 64' in headers
+        connection.sendall(
+            f"GET /v1/models/{SHA} HTTP/1.1\r\nHost: local\r\nRange: bytes=0-63\r\nConnection: close\r\n\r\n".encode()
+        )
+        chunks = []
+        while chunk := connection.recv(65536):
+            chunks.append(chunk)
+    headers, body = b"".join(chunks).split(b"\r\n\r\n", 1)
+    assert b"Content-Length: 64" in headers
     assert body == DATA[:64]
 
 
 @pytest.mark.parametrize("header", ["bytes=-100", "bytes=1-2,5-6", "items=3-", "bytes=abc-", "garbage"])
 def test_a_range_the_server_does_not_support_gets_the_whole_file(with_file, header):
     status, _, body = raw_get(with_file, {"Range": header})
-    assert status == 200 and body == DATA                         # the client sees 200 and starts again from zero: always correct
+    assert status == 200 and body == DATA  # the client sees 200 and starts again from zero: always correct
 
 
 def test_the_response_to_a_normal_request_says_that_ranges_are_accepted(with_file):
@@ -254,6 +266,7 @@ def test_the_client_can_open_a_stream_from_an_offset(with_file):
 # ---------------------------------------------------------------------------
 # a resumable download
 # ---------------------------------------------------------------------------
+
 
 class CuttingClient:
     """An HttpClient whose first stream breaks after `cut` bytes (a cable pulled), the later ones are whole."""
@@ -294,20 +307,22 @@ def test_a_broken_download_resumes_from_what_arrived_and_the_result_is_verified(
     with pytest.raises(TransportError):
         download_weights(client, SHA, cache, chunk_bytes=512)
     partials = [p for p in cache.iterdir()]
-    assert len(partials) == 1 and 0 < partials[0].stat().st_size <= 3000       # the first bytes are kept, nothing else is left
-    assert not (cache / f"{SHA}.bin").exists()                                  # and the file does not look finished
+    assert (
+        len(partials) == 1 and 0 < partials[0].stat().st_size <= 3000
+    )  # the first bytes are kept, nothing else is left
+    assert not (cache / f"{SHA}.bin").exists()  # and the file does not look finished
 
     path = download_weights(client, SHA, cache, chunk_bytes=512)
 
     assert path.read_bytes() == DATA
-    assert client.streams[0] == 0 and client.streams[1] > 0                     # the second request began where the first stopped
+    assert client.streams[0] == 0 and client.streams[1] > 0  # the second request began where the first stopped
     assert sorted(p.name for p in cache.iterdir()) == [f"{SHA}.bin"]
 
 
 def test_a_partial_file_that_is_longer_than_the_file_or_wrong_is_discarded_not_trusted(with_file, tmp_path):
     cache = tmp_path / "cache"
     cache.mkdir()
-    (cache / f".partial-{SHA}").write_bytes(b"x" * 20_000)                     # more than the real size
+    (cache / f".partial-{SHA}").write_bytes(b"x" * 20_000)  # more than the real size
     client = CuttingClient(HttpClient(with_file.url), cut=10**9)
     assert download_weights(client, SHA, cache).read_bytes() == DATA
 
@@ -316,8 +331,10 @@ def test_a_partial_file_that_is_longer_than_the_file_or_wrong_is_discarded_not_t
     cache2.mkdir()
     (cache2 / f".partial-{SHA}").write_bytes(b"this is not the beginning of the weights")
     with pytest.raises(WeightsFileError):
-        download_weights(CuttingClient(HttpClient(with_file.url), cut=10**9), SHA, cache2)    # the wrong prefix is caught by the hash
-    assert list(cache2.iterdir()) == []                                          # and a prefix that gave a wrong hash is not kept
+        download_weights(
+            CuttingClient(HttpClient(with_file.url), cut=10**9), SHA, cache2
+        )  # the wrong prefix is caught by the hash
+    assert list(cache2.iterdir()) == []  # and a prefix that gave a wrong hash is not kept
 
 
 def test_a_server_that_ignores_the_range_makes_the_download_start_again(tmp_path, api):
@@ -330,7 +347,7 @@ def test_a_server_that_ignores_the_range_makes_the_download_start_again(tmp_path
 
         class NoRange(HttpClient):
             def open_stream(self, path, start=0):
-                return super().open_stream(path, start=0)                       # an old server: always the whole file, status 200
+                return super().open_stream(path, start=0)  # an old server: always the whole file, status 200
 
         assert download_weights(NoRange(server.url), SHA, cache).read_bytes() == DATA
     finally:
@@ -341,6 +358,7 @@ def test_a_server_that_ignores_the_range_makes_the_download_start_again(tmp_path
 # repeating a lease request
 # ---------------------------------------------------------------------------
 
+
 def test_a_lease_with_a_request_id_is_retried_after_a_lost_answer_and_gives_one_lease(api, tmp_path):
     server = serve(api, tmp_path)
     try:
@@ -349,10 +367,10 @@ def test_a_lease_with_a_request_id_is_retried_after_a_lost_answer_and_gives_one_
         state = {"calls": 0}
 
         def lose_the_first_answer(request):
-            result = real(request)                                   # the server did handle it ...
+            result = real(request)  # the server did handle it ...
             state["calls"] += 1
             if state["calls"] == 1:
-                raise TransportError("the answer was lost")          # ... but the worker never saw the answer
+                raise TransportError("the answer was lost")  # ... but the worker never saw the answer
             return result
 
         client._exchange = lose_the_first_answer
@@ -360,7 +378,7 @@ def test_a_lease_with_a_request_id_is_retried_after_a_lost_answer_and_gives_one_
 
         assert state["calls"] == 2 and reply["ok"] is True and reply["work"]["descriptor"]["index"] == 0
         taken = [r.attempts for r in api._ledger.list_candidates("exp", 0)]
-        assert taken == [1, 0, 0, 0]                                 # ONE candidate leased, not two
+        assert taken == [1, 0, 0, 0]  # ONE candidate leased, not two
     finally:
         server.stop()
 
@@ -383,12 +401,14 @@ def test_a_lease_without_a_request_id_is_still_never_retried(api, tmp_path):
 def test_a_partial_file_that_is_already_the_whole_file_is_finished_without_downloading_it_again(with_file, tmp_path):
     cache = tmp_path / "cache"
     cache.mkdir()
-    (cache / f".partial-{SHA}").write_bytes(DATA)                            # everything arrived, the process died before the rename
+    (cache / f".partial-{SHA}").write_bytes(DATA)  # everything arrived, the process died before the rename
     client = CuttingClient(HttpClient(with_file.url), cut=10**9)
 
     path = download_weights(client, SHA, cache)
 
-    assert path.read_bytes() == DATA and client.streams == [len(DATA)]       # one request (answered 416): nothing was transferred again
+    assert path.read_bytes() == DATA and client.streams == [
+        len(DATA)
+    ]  # one request (answered 416): nothing was transferred again
     assert sorted(p.name for p in cache.iterdir()) == [f"{SHA}.bin"]
 
 
@@ -406,5 +426,5 @@ def test_download_reports_from_which_byte_it_resumed(with_file, tmp_path):
     assert fresh == {"resumed_from_bytes": 0, "downloaded_bytes": len(DATA)}
 
     cached = {}
-    download_weights(client, SHA, tmp_path / "other", stats=cached)                  # already there and intact: nothing is transferred
+    download_weights(client, SHA, tmp_path / "other", stats=cached)  # already there and intact: nothing is transferred
     assert cached == {"resumed_from_bytes": 0, "downloaded_bytes": 0}

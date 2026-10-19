@@ -1,13 +1,8 @@
-import type { ResourceHistoryPoint,ResourceObservation } from '@heteroes/product-ui';
+import type { ResourceHistoryPoint, ResourceObservation } from '@heteroes/product-ui';
 export type AdmissionStatus =
-  | "PENDING_VERIFICATION"
-  | "INELIGIBLE"
-  | "ELIGIBLE_BUT_NOT_BENEFICIAL"
-  | "ADMITTED_LIMITED"
-  | "ADMITTED"
-  | "APPROVED";
+  'PENDING_VERIFICATION' | 'INELIGIBLE' | 'ELIGIBLE_BUT_NOT_BENEFICIAL' | 'ADMITTED_LIMITED' | 'ADMITTED' | 'APPROVED';
 
-export type WorkerStatus = "ONLINE" | "OFFLINE";
+export type WorkerStatus = 'ONLINE' | 'OFFLINE';
 
 export interface WorkerProfile {
   gpuName: string;
@@ -19,11 +14,11 @@ export interface WorkerProfile {
 }
 
 export interface Worker {
-  telemetry?:ResourceObservation|null;
-  telemetryHistory?:ResourceHistoryPoint[];
-  displayName?:string;
-  physicalResourceId?:string;
-  approvalStatus?:string;
+  telemetry?: ResourceObservation | null;
+  telemetryHistory?: ResourceHistoryPoint[];
+  displayName?: string;
+  physicalResourceId?: string;
+  approvalStatus?: string;
   workerId: string;
   ownerUserId?: string;
   temperatureC?: number;

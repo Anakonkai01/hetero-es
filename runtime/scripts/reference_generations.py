@@ -12,6 +12,7 @@ applies the coefficients of the generation record), and the hash of the new weig
 the rewards and the parent and child hashes; `scripts/compare_generation_runs.py` compares it with a coordinator's summary.json.
 The output file must not exist.
 """
+
 import argparse
 import json
 import sys
@@ -54,7 +55,13 @@ def main(argv: list[str]) -> int:
     device = args.device or ("cuda" if torch.cuda.is_available() else "cpu")
     chunk = args.chunk_elements or DEFAULT_CHUNK_ELEMENTS
     loaded = load_pinned_model(args.model_path, device)
-    recipe = build_recipe(loaded, sigma=args.sigma, chunk_elements=chunk if args.noise_engine == "cpu" else None, noise_engine=args.noise_engine, workload=args.workload)
+    recipe = build_recipe(
+        loaded,
+        sigma=args.sigma,
+        chunk_elements=chunk if args.noise_engine == "cpu" else None,
+        noise_engine=args.noise_engine,
+        workload=args.workload,
+    )
     check_recipe_selftest(recipe, device)
     executor = CandidateExecutor(loaded.model, loaded.tokenizer, loaded.schema, recipe)
     started = time.time()
@@ -65,25 +72,52 @@ def main(argv: list[str]) -> int:
         seeds = [derive_seed(args.experiment_id, generation, index) for index in range(args.candidates)]
         rewards, candidate_seconds = [], []
         for index, seed in enumerate(seeds):
-            descriptor = CandidateDescriptor(recipe_hash=recipe.hash, parent_weights_sha256=parent, experiment_id=args.experiment_id,
-                                             generation=generation, index=index, seed=seed)
+            descriptor = CandidateDescriptor(
+                recipe_hash=recipe.hash,
+                parent_weights_sha256=parent,
+                experiment_id=args.experiment_id,
+                generation=generation,
+                index=index,
+                seed=seed,
+            )
             begin = time.perf_counter()
             rewards.append(executor(descriptor))
             candidate_seconds.append(time.perf_counter() - begin)
         begin = time.perf_counter()
-        if args.noise_engine == "cuda":                   # the update of the CUDA engine: standardize, then apply the coefficients (as the coordinator does)
-            report = apply_coefficients_cuda_(loaded.model, loaded.schema, seeds, standardize_rewards(rewards, DEFAULT_ETA), args.alpha)
+        if (
+            args.noise_engine == "cuda"
+        ):  # the update of the CUDA engine: standardize, then apply the coefficients (as the coordinator does)
+            report = apply_coefficients_cuda_(
+                loaded.model, loaded.schema, seeds, standardize_rewards(rewards, DEFAULT_ETA), args.alpha
+            )
         else:
             report = apply_es_update_(loaded.model, loaded.schema, seeds, rewards, args.alpha, chunk, DEFAULT_ETA)
         update_seconds = time.perf_counter() - begin
         child = model_weights_sha256(loaded.model, loaded.schema)
-        generations.append({"generation": generation, "parent_sha256": parent, "child_sha256": child, "rewards": rewards,
-                            "seeds": seeds, "noop": report.noop, "changed": report.changed, "candidate_seconds": candidate_seconds,
-                            "update_seconds": update_seconds})
+        generations.append(
+            {
+                "generation": generation,
+                "parent_sha256": parent,
+                "child_sha256": child,
+                "rewards": rewards,
+                "seeds": seeds,
+                "noop": report.noop,
+                "changed": report.changed,
+                "candidate_seconds": candidate_seconds,
+                "update_seconds": update_seconds,
+            }
+        )
         print(json.dumps({"generation": generation, "rewards": rewards, "child_sha256": child}), flush=True)
-    record = {"recipe_hash": recipe.hash, "args": vars(args), "initial_weights_sha256": generations[0]["parent_sha256"],
-              "final_weights_sha256": generations[-1]["child_sha256"], "generations": generations,
-              "total_seconds": time.time() - started, "environment": environment_info(device), "code": code_info()}
+    record = {
+        "recipe_hash": recipe.hash,
+        "args": vars(args),
+        "initial_weights_sha256": generations[0]["parent_sha256"],
+        "final_weights_sha256": generations[-1]["child_sha256"],
+        "generations": generations,
+        "total_seconds": time.time() - started,
+        "environment": environment_info(device),
+        "code": code_info(),
+    }
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
     print(f"wrote {output}")

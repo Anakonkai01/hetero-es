@@ -16,6 +16,7 @@ KNOWN_ENGINES = (ENGINE_VERSION, CUDA_ENGINE_VERSION)
 
 @dataclass(frozen=True)
 class ChunkNoiseAddress:
+    # fmt: off
     """
     Storing Noise Address for generate seed (chunk level) 
         - must frozen 
@@ -23,27 +24,29 @@ class ChunkNoiseAddress:
         - does not has worker_id, attempt_id because noise does not depend on runtime
         - must be reproducible from these five fields alone(for regenerate)
     """
-    candidate_seed: int 
-    schema_hash: str 
-    parameter_index: int 
-    chunk_index: int 
-    chunk_elements: int 
+    # fmt: on
+
+    candidate_seed: int
+    schema_hash: str
+    parameter_index: int
+    chunk_index: int
+    chunk_elements: int
 
 
 @dataclass(frozen=True)
-class ParameterNoiseAddress: 
+class ParameterNoiseAddress:
     """
     Storing address describe NOISE OF SPECIFIC TENSOR (parameter level)
     - must frozen to avoid add/remove or modify attribute
     """
-    candidate_seed: int 
-    schema_hash: str 
-    parameter_index: int 
-    chunk_elements: int 
-    
-    
-    def chunk(self, chunk_index: int) -> ChunkNoiseAddress: 
-        if not chunk_index >= 0: 
+
+    candidate_seed: int
+    schema_hash: str
+    parameter_index: int
+    chunk_elements: int
+
+    def chunk(self, chunk_index: int) -> ChunkNoiseAddress:
+        if not chunk_index >= 0:
             raise ValueError("chunk_index must >= 0")
 
         return ChunkNoiseAddress(
@@ -53,4 +56,3 @@ class ParameterNoiseAddress:
             chunk_elements=self.chunk_elements,
             chunk_index=chunk_index,
         )
-

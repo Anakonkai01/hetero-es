@@ -11,6 +11,7 @@ A safe chunk is a level that was CHECKED, not a promise about every future promp
 same text, not only the same reward: a chunk that changes the text but not the reward on 16 questions would still change the
 numbers the model computes, so it is not safe for a worker that must agree with the others.
 """
+
 import contextlib
 import statistics
 from dataclasses import dataclass, field
@@ -23,19 +24,28 @@ PROFILE_FORMAT = 1
 @dataclass(frozen=True)
 class ChunkProbe:
     chunk: int
-    ran: bool                       # no out-of-memory on any condition
-    identical: bool | None          # the answers equal those of chunk 1 on every condition (None if it did not run)
-    seconds: float | None           # mean time of one evaluation of the whole prompt set over the conditions
-    peak_bytes: int | None          # largest GPU memory allocated while it ran (None if unknown, e.g. on CPU)
+    ran: bool  # no out-of-memory on any condition
+    identical: bool | None  # the answers equal those of chunk 1 on every condition (None if it did not run)
+    seconds: float | None  # mean time of one evaluation of the whole prompt set over the conditions
+    peak_bytes: int | None  # largest GPU memory allocated while it ran (None if unknown, e.g. on CPU)
     error: str | None = None
-    differing: tuple = field(default=())    # (condition index, question index) pairs whose text differs, for the record
+    differing: tuple = field(default=())  # (condition index, question index) pairs whose text differs, for the record
 
     def to_dict(self) -> dict:
-        return {"chunk": self.chunk, "ran": self.ran, "identical": self.identical, "seconds": self.seconds,
-                "peak_bytes": self.peak_bytes, "error": self.error, "differing": [list(pair) for pair in self.differing]}
+        return {
+            "chunk": self.chunk,
+            "ran": self.ran,
+            "identical": self.identical,
+            "seconds": self.seconds,
+            "peak_bytes": self.peak_bytes,
+            "error": self.error,
+            "differing": [list(pair) for pair in self.differing],
+        }
 
 
-def probe_chunks(conditions, evaluate, chunks, is_oom, clock, reset_peak=lambda: None, peak_bytes=lambda: None) -> list[ChunkProbe]:
+def probe_chunks(
+    conditions, evaluate, chunks, is_oom, clock, reset_peak=lambda: None, peak_bytes=lambda: None
+) -> list[ChunkProbe]:
     """
     `conditions`: zero-argument context managers, each one puts the model in a state (the parent weights, a perturbed candidate)
     and puts it back on exit; the state is entered ONCE and every chunk is evaluated inside it (a perturbation costs much more
@@ -67,14 +77,25 @@ def probe_chunks(conditions, evaluate, chunks, is_oom, clock, reset_peak=lambda:
                         raise
                     errors[chunk] = f"{type(caught).__name__}: {caught}"
                     continue
-                differing[chunk] += [(number, question) for question, (a, b) in enumerate(zip(texts, reference)) if a != b]
+                differing[chunk] += [
+                    (number, question) for question, (a, b) in enumerate(zip(texts, reference)) if a != b
+                ]
     probes = []
     for chunk in chunks:
         if chunk in errors:
             probes.append(ChunkProbe(chunk, False, None, None, None, errors[chunk]))
         else:
-            probes.append(ChunkProbe(chunk, True, not differing[chunk], seconds[chunk] / len(conditions), peaks[chunk] or None,
-                                     None, tuple(differing[chunk])))
+            probes.append(
+                ChunkProbe(
+                    chunk,
+                    True,
+                    not differing[chunk],
+                    seconds[chunk] / len(conditions),
+                    peaks[chunk] or None,
+                    None,
+                    tuple(differing[chunk]),
+                )
+            )
     return probes
 
 
@@ -88,8 +109,15 @@ def summarize_times(samples: list[dict]) -> dict:
     if not samples:
         raise ValueError("no sample")
     totals = [sample["total"] for sample in samples]
-    summary = {"samples": len(samples), "total_median": statistics.median(totals), "total_min": min(totals), "total_max": max(totals),
-               "phases_median": {phase: statistics.median(sample[phase] for sample in samples) for phase in ("perturb", "rollout", "restore")}}
+    summary = {
+        "samples": len(samples),
+        "total_median": statistics.median(totals),
+        "total_min": min(totals),
+        "total_max": max(totals),
+        "phases_median": {
+            phase: statistics.median(sample[phase] for sample in samples) for phase in ("perturb", "rollout", "restore")
+        },
+    }
     return summary
 
 
@@ -98,9 +126,21 @@ def profile_key(environment: dict, recipe_hash: str, schema_hash: str, workload_
     Everything that must be the same for a profile to still describe this worker: the GPU, the driver, the software and the
     workload and recipe it was measured with. The time of the measurement and the numbers measured are NOT in it.
     """
-    names = ("gpu_name", "gpu_capability", "gpu_total_memory_bytes", "nvidia_driver", "torch", "torch_cuda", "numpy", "transformers", "python")
+    names = (
+        "gpu_name",
+        "gpu_capability",
+        "gpu_total_memory_bytes",
+        "nvidia_driver",
+        "torch",
+        "torch_cuda",
+        "numpy",
+        "transformers",
+        "python",
+    )
     key = {name: environment.get(name) for name in names}
-    key.update({"device": device, "recipe_hash": recipe_hash, "schema_hash": schema_hash, "workload_hash": workload_hash})
+    key.update(
+        {"device": device, "recipe_hash": recipe_hash, "schema_hash": schema_hash, "workload_hash": workload_hash}
+    )
     return key
 
 
@@ -131,5 +171,11 @@ def fit_affine(sizes, seconds) -> dict:
     slope = sxy / sxx
     intercept = mean_y - slope * mean_x
     residuals = [y - (intercept + slope * x) for x, y in zip(sizes, seconds)]
-    return {"fixed_seconds": intercept, "per_candidate_seconds": slope, "residuals": residuals,
-            "max_abs_residual": max(abs(r) for r in residuals), "sizes": sizes, "seconds": seconds}
+    return {
+        "fixed_seconds": intercept,
+        "per_candidate_seconds": slope,
+        "residuals": residuals,
+        "max_abs_residual": max(abs(r) for r in residuals),
+        "sizes": sizes,
+        "seconds": seconds,
+    }

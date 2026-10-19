@@ -1,4 +1,5 @@
 """`scripts/run_benchmark.py: plan`: who works, with which chunk and policy, for each condition (pure function, no process is started)."""
+
 import json
 import sys
 from pathlib import Path
@@ -34,7 +35,7 @@ def test_b1_and_b3_use_both_workers_with_chunk_one_and_differ_only_in_the_policy
 def test_b2_shares_the_candidates_by_the_measured_speed_and_the_quotas_add_up():
     result = plan("B2", n=10)
 
-    assert result["quotas"] == {rb.FAST: 8, rb.SLOW: 2}                       # speeds 1/4 and 1/16: 4 to 1
+    assert result["quotas"] == {rb.FAST: 8, rb.SLOW: 2}  # speeds 1/4 and 1/16: 4 to 1
     assert result["args"] == ["--quota", f"{rb.SLOW}=2", "--quota", f"{rb.FAST}=8"]
     assert sum(result["quotas"].values()) == 10
 
@@ -48,7 +49,7 @@ def test_h0_follows_the_admission_and_uses_each_workers_safe_chunk():
     assert alone["workers"] == {rb.FAST: 16} and alone["args"] == ["--admit", rb.FAST]
     assert both["workers"] == limited["workers"] == {rb.FAST: 16, rb.SLOW: 1}
     assert refused["workers"] == {rb.FAST: 16}
-    assert alone["workers"] != plan("B0")["workers"]                            # H0 alone is not B0: the chunk differs
+    assert alone["workers"] != plan("B0")["workers"]  # H0 alone is not B0: the chunk differs
 
 
 def test_h0_without_a_prediction_and_an_unknown_condition_are_refused():
@@ -60,11 +61,12 @@ def test_h0_without_a_prediction_and_an_unknown_condition_are_refused():
 
 # ---- G6: a failed run is set aside, not skipped; a finished one is kept
 
+
 def test_a_run_directory_is_new_ok_or_failed(tmp_path):
     assert rb.existing_run_state(tmp_path / "n8-B0-r1") == "new"
     run = tmp_path / "n8-B0-r1"
     run.mkdir()
-    assert rb.existing_run_state(run) == "failed"                             # a directory without a record: it never finished
+    assert rb.existing_run_state(run) == "failed"  # a directory without a record: it never finished
     (run / "run.json").write_text('{"outcome": "TimeoutError: x"}')
     assert rb.existing_run_state(run) == "failed"
     (run / "run.json").write_text("not json")
@@ -78,15 +80,24 @@ def test_a_failed_attempt_is_renamed_never_deleted_and_the_numbers_do_not_collid
     run.mkdir()
     (run / "proof.txt").write_text("evidence")
     first = rb.set_aside(run)
-    assert first.name == "n8-B0-r1.failed-attempt1" and (first / "proof.txt").read_text() == "evidence" and not run.exists()
+    assert (
+        first.name == "n8-B0-r1.failed-attempt1"
+        and (first / "proof.txt").read_text() == "evidence"
+        and not run.exists()
+    )
     run.mkdir()
     assert rb.set_aside(run).name == "n8-B0-r1.failed-attempt2"
 
 
 # ---- G6: several worker processes on the fast GPU
 
+
 def test_a_condition_may_ask_for_several_processes_on_the_fast_gpu():
-    assert rb.parse_condition("B3") == ("B3", 1) and rb.parse_condition("B0x2") == ("B0", 2) and rb.parse_condition("B3x12") == ("B3", 12)
+    assert (
+        rb.parse_condition("B3") == ("B3", 1)
+        and rb.parse_condition("B0x2") == ("B0", 2)
+        and rb.parse_condition("B3x12") == ("B3", 12)
+    )
     for bad in ("B", "b0", "B0x", "B0x0", "B0x-1", "B0y2", "BB0", "B0x2x3"):
         with pytest.raises(ValueError):
             rb.parse_condition(bad)
@@ -107,7 +118,7 @@ def test_b1x2_waves_are_as_wide_as_the_number_of_workers():
 
 
 def test_b2x2_quotas_split_the_fast_share_between_the_two_processes_and_add_up():
-    result = plan("B2x2", n=18)                                               # speeds 1/4, 1/4 and 1/16: shares 8, 8 and 2
+    result = plan("B2x2", n=18)  # speeds 1/4, 1/4 and 1/16: shares 8, 8 and 2
     assert result["quotas"] == {rb.FAST: 8, f"{rb.FAST}-2": 8, rb.SLOW: 2} and sum(result["quotas"].values()) == 18
 
 
@@ -129,10 +140,13 @@ def test_b4x2_gives_every_fast_process_the_fast_speed():
 
 
 def test_the_speed_of_a_worker_is_taken_at_the_chunk_it_will_use_when_the_profile_timed_it_there():
-    profile = {"candidate_seconds_at_chunk_1": 4.0, "candidate_times": {"1": {"total_median": 4.0}, "16": {"total_median": 1.0}}}
+    profile = {
+        "candidate_seconds_at_chunk_1": 4.0,
+        "candidate_times": {"1": {"total_median": 4.0}, "16": {"total_median": 1.0}},
+    }
     assert rb.seconds_at(profile, 16) == 1.0 and rb.seconds_at(profile, 1) == 4.0
-    assert rb.seconds_at(profile, 8) == 4.0                                    # not timed at 8: the chunk-1 time, as the profiles of G4 and G5
-    assert rb.seconds_at({"candidate_seconds_at_chunk_1": 7.0}, 16) == 7.0     # an old profile without the table
+    assert rb.seconds_at(profile, 8) == 4.0  # not timed at 8: the chunk-1 time, as the profiles of G4 and G5
+    assert rb.seconds_at({"candidate_seconds_at_chunk_1": 7.0}, 16) == 7.0  # an old profile without the table
 
 
 def test_b4_priors_follow_the_chunk_of_the_run():
@@ -155,7 +169,7 @@ def test_a_worker_that_never_got_ready_is_reported(tmp_path):
 
 def test_a_log_without_executor_ready_is_a_worker_that_did_not_start(tmp_path):
     write_log(tmp_path, rb.FAST, ["worker_start", "executor_ready"])
-    write_log(tmp_path, rb.SLOW, ["worker_start", "model_loaded"])          # died while it prepared
+    write_log(tmp_path, rb.SLOW, ["worker_start", "model_loaded"])  # died while it prepared
     assert rb.workers_that_did_not_start(tmp_path, [rb.FAST, rb.SLOW]) == [rb.SLOW]
 
 
@@ -190,7 +204,7 @@ def test_q3_gives_each_machine_a_quota_by_its_speed_and_the_quotas_add_up():
 
     quotas = result["quotas"]
     assert sum(quotas.values()) == 28 and set(quotas) == {rb.FAST, rb.SLOW, rb.THIRD}
-    assert quotas[rb.FAST] > quotas[rb.THIRD] > quotas[rb.SLOW]            # 4 s, 8 s and 16 s per candidate
+    assert quotas[rb.FAST] > quotas[rb.THIRD] > quotas[rb.SLOW]  # 4 s, 8 s and 16 s per candidate
     assert result["policy"] == "proportional"
 
 
@@ -211,7 +225,7 @@ def test_u2_is_t2_with_the_tail_policy_and_priors_from_the_two_profiles():
     assert result["args"][0::2] == ["--speed-prior"] * 2
     assert sorted(a.split("=")[0] for a in result["args"][1::2]) == sorted([rb.FAST, rb.THIRD])
     seconds = {a.split("=")[0]: float(a.split("=")[1]) for a in result["args"][1::2]}
-    assert seconds[rb.FAST] == 4.0                       # REFERENCE: 4 s per candidate at chunk 1
+    assert seconds[rb.FAST] == 4.0  # REFERENCE: 4 s per candidate at chunk 1
     assert seconds[rb.THIRD] == rb.seconds_at(THIRD_PROFILE, 1) and seconds[rb.THIRD] > seconds[rb.FAST]
 
 

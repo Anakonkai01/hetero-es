@@ -14,6 +14,7 @@ goes to the first free worker; under B2 the quotas are fixed before. The generat
 coordinator updates (`update_per_candidate * N`) and publishes. What it leaves out: the polling delay of the workers, the
 variation between candidates, contention for the CPU of the coordinator host. Those are what the forced-admit run measures.
 """
+
 import heapq
 from dataclasses import dataclass
 from enum import Enum
@@ -24,22 +25,24 @@ from heteroes.dispatch import proportional_quotas
 class AdmissionState(Enum):
     INELIGIBLE = "INELIGIBLE"
     ELIGIBLE_BUT_NOT_BENEFICIAL = "ELIGIBLE_BUT_NOT_BENEFICIAL"
-    ADMITTED_LIMITED = "ADMITTED_LIMITED"       # admitted, but its safe chunk is below the reference worker's
+    ADMITTED_LIMITED = "ADMITTED_LIMITED"  # admitted, but its safe chunk is below the reference worker's
     ADMITTED = "ADMITTED"
 
 
 class Reason(Enum):
     OK = "OK"
     NOT_A_GPU = "NOT_A_GPU"
-    PROFILE_KEY_MISMATCH = "PROFILE_KEY_MISMATCH"       # the profile was measured for another model, workload, recipe or device
-    SOFTWARE_MISMATCH = "SOFTWARE_MISMATCH"             # torch, CUDA build or transformers differ from the reference worker's
+    PROFILE_KEY_MISMATCH = (
+        "PROFILE_KEY_MISMATCH"  # the profile was measured for another model, workload, recipe or device
+    )
+    SOFTWARE_MISMATCH = "SOFTWARE_MISMATCH"  # torch, CUDA build or transformers differ from the reference worker's
     DTYPE_MISMATCH = "DTYPE_MISMATCH"
-    MEMORY_MARGIN = "MEMORY_MARGIN"                     # the measured peak leaves less than the required margin of the GPU
+    MEMORY_MARGIN = "MEMORY_MARGIN"  # the measured peak leaves less than the required margin of the GPU
     NOISE_SELFTEST_FAILED = "NOISE_SELFTEST_FAILED"
     RESTORE_FAILED = "RESTORE_FAILED"
-    NUMERICS_FAILED = "NUMERICS_FAILED"                 # not even chunk 1 reproduces the reference answers
-    NOT_BENEFICIAL = "NOT_BENEFICIAL"                   # eligible, but the prediction says that it does not shorten a generation
-    CHUNK_LIMITED = "CHUNK_LIMITED"                     # works with a smaller chunk than the reference worker
+    NUMERICS_FAILED = "NUMERICS_FAILED"  # not even chunk 1 reproduces the reference answers
+    NOT_BENEFICIAL = "NOT_BENEFICIAL"  # eligible, but the prediction says that it does not shorten a generation
+    CHUNK_LIMITED = "CHUNK_LIMITED"  # works with a smaller chunk than the reference worker
 
 
 # the software whose version can change a floating-point result of the model. NumPy is not here on purpose: it only makes the noise,
@@ -72,7 +75,11 @@ def capability_gate(profile: dict, expected_key: dict, min_free_fraction: float 
     # it is the main suspect of a reward that differs between two GPUs (G4/G5).
     key = profile["key"]
     software = [name for name in SOFTWARE_FIELDS if name in expected_key and key.get(name) != expected_key[name]]
-    identity = [name for name, value in expected_key.items() if name not in SOFTWARE_FIELDS and (name not in key or key[name] != value)]
+    identity = [
+        name
+        for name, value in expected_key.items()
+        if name not in SOFTWARE_FIELDS and (name not in key or key[name] != value)
+    ]
     if identity:
         reasons.append(Reason.PROFILE_KEY_MISMATCH)
     if software:
@@ -93,8 +100,8 @@ def capability_gate(profile: dict, expected_key: dict, min_free_fraction: float 
 @dataclass(frozen=True)
 class WorkerModel:
     worker_id: str
-    candidate_seconds: float        # median time of one candidate at the chunk this worker will use
-    sync_seconds: float = 0.0       # 0 for the worker on the coordinator's own machine
+    candidate_seconds: float  # median time of one candidate at the chunk this worker will use
+    sync_seconds: float = 0.0  # 0 for the worker on the coordinator's own machine
 
 
 def _check_workers(workers):
@@ -121,21 +128,38 @@ def predict_candidates_seconds(policy: str, workers: list[WorkerModel], candidat
             heapq.heappush(free, (when, worker_id, worker))
         return {"seconds": end, "jobs": jobs}
     if policy == "B2_STATIC_PROPORTIONAL":
-        quotas = proportional_quotas(candidates, {worker.worker_id: 1.0 / worker.candidate_seconds for worker in workers})
-        end = max(worker.sync_seconds + quotas[worker.worker_id] * worker.candidate_seconds
-                  for worker in workers if quotas[worker.worker_id] > 0)
+        quotas = proportional_quotas(
+            candidates, {worker.worker_id: 1.0 / worker.candidate_seconds for worker in workers}
+        )
+        end = max(
+            worker.sync_seconds + quotas[worker.worker_id] * worker.candidate_seconds
+            for worker in workers
+            if quotas[worker.worker_id] > 0
+        )
         return {"seconds": end, "jobs": quotas}
     raise ValueError(f"no prediction for the policy {policy!r}")
 
 
-def predict_generation_seconds(policy: str, workers: list[WorkerModel], candidates: int, update_per_candidate: float,
-                               publish_seconds: float, update_fixed_seconds: float = 0.0) -> dict:
+def predict_generation_seconds(
+    policy: str,
+    workers: list[WorkerModel],
+    candidates: int,
+    update_per_candidate: float,
+    publish_seconds: float,
+    update_fixed_seconds: float = 0.0,
+) -> dict:
     """`update_fixed_seconds`: the part of the update that does not grow with N (hashing the new weights and so on); 0 if unknown."""
     parts = predict_candidates_seconds(policy, workers, candidates)
     update = update_fixed_seconds + update_per_candidate * candidates
-    return {"policy": policy, "workers": [worker.worker_id for worker in workers], "candidates_seconds": parts["seconds"],
-            "jobs": parts["jobs"], "update_seconds": update, "publish_seconds": publish_seconds,
-            "total_seconds": parts["seconds"] + update + publish_seconds}
+    return {
+        "policy": policy,
+        "workers": [worker.worker_id for worker in workers],
+        "candidates_seconds": parts["seconds"],
+        "jobs": parts["jobs"],
+        "update_seconds": update,
+        "publish_seconds": publish_seconds,
+        "total_seconds": parts["seconds"] + update + publish_seconds,
+    }
 
 
 @dataclass(frozen=True)
@@ -143,20 +167,35 @@ class Decision:
     worker_id: str
     state: AdmissionState
     reasons: tuple
-    without: dict | None            # the prediction for the current members W
-    with_worker: dict | None        # the prediction for W + w
-    predicted_delta_seconds: float | None     # T(W) - T(W + w): positive means that the worker shortens a generation
+    without: dict | None  # the prediction for the current members W
+    with_worker: dict | None  # the prediction for W + w
+    predicted_delta_seconds: float | None  # T(W) - T(W + w): positive means that the worker shortens a generation
     delta_threshold: float | None
 
     def to_dict(self) -> dict:
-        return {"worker_id": self.worker_id, "state": self.state.value, "reasons": [reason.value for reason in self.reasons],
-                "prediction_without": self.without, "prediction_with": self.with_worker,
-                "predicted_delta_seconds": self.predicted_delta_seconds, "delta_threshold_seconds": self.delta_threshold}
+        return {
+            "worker_id": self.worker_id,
+            "state": self.state.value,
+            "reasons": [reason.value for reason in self.reasons],
+            "prediction_without": self.without,
+            "prediction_with": self.with_worker,
+            "predicted_delta_seconds": self.predicted_delta_seconds,
+            "delta_threshold_seconds": self.delta_threshold,
+        }
 
 
-def decide(candidate: WorkerModel, members: list[WorkerModel], gate_reasons: list[Reason], policy: str, candidates: int,
-           update_per_candidate: float, publish_seconds: float, delta_fraction: float = 0.05, limited: bool = False,
-           update_fixed_seconds: float = 0.0) -> Decision:
+def decide(
+    candidate: WorkerModel,
+    members: list[WorkerModel],
+    gate_reasons: list[Reason],
+    policy: str,
+    candidates: int,
+    update_per_candidate: float,
+    publish_seconds: float,
+    delta_fraction: float = 0.05,
+    limited: bool = False,
+    update_fixed_seconds: float = 0.0,
+) -> Decision:
     """
     May `candidate` join `members`? Not if the hard gate failed. Otherwise yes iff the predicted time with it is shorter than
     without it by more than `delta_fraction` of the time without it (a margin against noise, so that a gain inside the
@@ -164,12 +203,20 @@ def decide(candidate: WorkerModel, members: list[WorkerModel], gate_reasons: lis
     """
     if gate_reasons:
         return Decision(candidate.worker_id, AdmissionState.INELIGIBLE, tuple(gate_reasons), None, None, None, None)
-    without = predict_generation_seconds(policy, members, candidates, update_per_candidate, publish_seconds, update_fixed_seconds)
-    joined = predict_generation_seconds(policy, members + [candidate], candidates, update_per_candidate, publish_seconds, update_fixed_seconds)
+    without = predict_generation_seconds(
+        policy, members, candidates, update_per_candidate, publish_seconds, update_fixed_seconds
+    )
+    joined = predict_generation_seconds(
+        policy, members + [candidate], candidates, update_per_candidate, publish_seconds, update_fixed_seconds
+    )
     delta = without["total_seconds"] - joined["total_seconds"]
     threshold = delta_fraction * without["total_seconds"]
     if delta > threshold:
-        state, reasons = (AdmissionState.ADMITTED_LIMITED, (Reason.CHUNK_LIMITED,)) if limited else (AdmissionState.ADMITTED, (Reason.OK,))
+        state, reasons = (
+            (AdmissionState.ADMITTED_LIMITED, (Reason.CHUNK_LIMITED,))
+            if limited
+            else (AdmissionState.ADMITTED, (Reason.OK,))
+        )
     else:
         state, reasons = AdmissionState.ELIGIBLE_BUT_NOT_BENEFICIAL, (Reason.NOT_BENEFICIAL,)
     return Decision(candidate.worker_id, state, reasons, without, joined, delta, threshold)

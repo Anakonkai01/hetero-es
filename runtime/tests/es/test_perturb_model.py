@@ -75,6 +75,7 @@ def bits(array):
 # correctness
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.parametrize("device", DEVICES)
 @pytest.mark.parametrize("chunk_elements", [4, 16, DEFAULT_CHUNK_ELEMENTS])
 def test_every_tensor_matches_the_numpy_oracle(chunk_elements, device):
@@ -149,6 +150,7 @@ def test_is_deterministic():
 # ---------------------------------------------------------------------------
 # all or nothing: bad input must be rejected BEFORE any tensor is changed
 # ---------------------------------------------------------------------------
+
 
 def test_model_that_does_not_match_the_schema_is_rejected_and_untouched():
     schema = build_parameter_schema(make_model())

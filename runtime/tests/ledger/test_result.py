@@ -34,6 +34,7 @@ def ledger(clock):
 # submitting a result
 # ---------------------------------------------------------------------------
 
+
 def test_a_candidate_without_a_result_says_so(ledger):
     assert [r.result for r in ledger.list_candidates("exp", 0)] == [None, None, None]
 
@@ -59,7 +60,10 @@ def test_committing_one_candidate_leaves_the_others_alone(ledger):
     submit(ledger, held)
 
     assert [r.state for r in ledger.list_candidates("exp", 0)] == [
-        CandidateState.COMMITTED, CandidateState.LEASED, CandidateState.PENDING]
+        CandidateState.COMMITTED,
+        CandidateState.LEASED,
+        CandidateState.PENDING,
+    ]
     assert [r.result is None for r in ledger.list_candidates("exp", 0)] == [False, True, True]
 
 
@@ -67,13 +71,13 @@ def test_committing_one_candidate_leaves_the_others_alone(ledger):
 def test_any_finite_number_is_a_reward(ledger, reward):
     submit(ledger, lease(ledger), reward)
 
-    assert record(ledger).result.reward == reward                  # (0 and 0.0 are equal: the ledger does not police a range)
+    assert record(ledger).result.reward == reward  # (0 and 0.0 are equal: the ledger does not police a range)
 
 
 def test_a_result_may_arrive_after_the_deadline_when_nobody_else_took_the_candidate(ledger, clock):
-    held = lease(ledger)                                           # deadline 1030.0
-    clock.now = 5000.0                                             # long over
-    assert record(ledger).state is CandidateState.PENDING          # (the read says: free to be given again)
+    held = lease(ledger)  # deadline 1030.0
+    clock.now = 5000.0  # long over
+    assert record(ledger).state is CandidateState.PENDING  # (the read says: free to be given again)
 
     assert submit(ledger, held, 0.75) is SubmitOutcome.COMMITTED
 
@@ -103,10 +107,20 @@ def test_a_committed_candidate_cannot_be_leased_again(ledger, clock):
 # the reward must be a real number
 # ---------------------------------------------------------------------------
 
-@pytest.mark.parametrize("reward, error", [
-    (float("nan"), LedgerError), (float("inf"), LedgerError), (float("-inf"), LedgerError),
-    (True, TypeError), (False, TypeError), ("0.5", TypeError), (None, TypeError), ([0.5], TypeError),
-])
+
+@pytest.mark.parametrize(
+    "reward, error",
+    [
+        (float("nan"), LedgerError),
+        (float("inf"), LedgerError),
+        (float("-inf"), LedgerError),
+        (True, TypeError),
+        (False, TypeError),
+        ("0.5", TypeError),
+        (None, TypeError),
+        ([0.5], TypeError),
+    ],
+)
 def test_a_bad_reward_is_refused_and_the_attempt_stays_open(ledger, reward, error):
     held = lease(ledger)
 
@@ -114,19 +128,23 @@ def test_a_bad_reward_is_refused_and_the_attempt_stays_open(ledger, reward, erro
         submit(ledger, held, reward)
 
     assert record(ledger).state is CandidateState.LEASED and record(ledger).result is None
-    assert submit(ledger, held, 0.5) is SubmitOutcome.COMMITTED    # the same attempt can still deliver a good one
+    assert submit(ledger, held, 0.5) is SubmitOutcome.COMMITTED  # the same attempt can still deliver a good one
 
 
 # ---------------------------------------------------------------------------
 # the result must be of the job that was given
 # ---------------------------------------------------------------------------
 
-@pytest.mark.parametrize("what, wrong", [
-    ("seed", make(0, 4242)),
-    ("recipe", make(0, 1000, recipe_hash="c" * 64)),
-    ("parent weights", make(0, 1000, parent_weights_sha256="d" * 64)),
-    ("another candidate's seed", make(0, 1007)),
-])
+
+@pytest.mark.parametrize(
+    "what, wrong",
+    [
+        ("seed", make(0, 4242)),
+        ("recipe", make(0, 1000, recipe_hash="c" * 64)),
+        ("parent weights", make(0, 1000, parent_weights_sha256="d" * 64)),
+        ("another candidate's seed", make(0, 1007)),
+    ],
+)
 def test_a_result_for_another_job_is_refused_and_changes_nothing(ledger, what, wrong):
     held = lease(ledger)
 
@@ -156,6 +174,7 @@ def test_a_result_for_a_candidate_that_does_not_exist_is_refused(ledger, wrong):
 # ---------------------------------------------------------------------------
 # only the latest attempt, with its own token
 # ---------------------------------------------------------------------------
+
 
 def test_a_wrong_token_is_refused(ledger):
     held = lease(ledger)
@@ -188,9 +207,9 @@ def test_a_candidate_that_was_never_leased_has_no_attempt_to_submit_for(ledger):
 
 
 def test_an_old_attempt_cannot_commit_once_the_candidate_was_given_again(ledger, clock):
-    first = lease(ledger, worker="worker-a")                       # deadline 1030.0
+    first = lease(ledger, worker="worker-a")  # deadline 1030.0
     clock.now = 1030.0
-    second = lease(ledger, worker="worker-b")                      # attempt 2
+    second = lease(ledger, worker="worker-b")  # attempt 2
 
     with pytest.raises(StaleAttemptError):
         submit(ledger, first, 0.9)
@@ -207,7 +226,7 @@ def test_an_old_attempt_arriving_after_the_new_one_committed_is_refused(ledger, 
     submit(ledger, second, 0.5)
 
     with pytest.raises(StaleAttemptError):
-        submit(ledger, first, 0.5)                                 # even with the same reward
+        submit(ledger, first, 0.5)  # even with the same reward
 
     assert record(ledger).result.attempt_number == 2
 
@@ -240,6 +259,7 @@ def test_something_that_is_not_a_descriptor_is_a_type_error(ledger, bad):
 # sending the same result again (the ACK was lost)
 # ---------------------------------------------------------------------------
 
+
 def test_the_same_result_again_is_acknowledged_and_changes_nothing(ledger, clock):
     held = lease(ledger)
     clock.advance(5.0)
@@ -250,7 +270,7 @@ def test_the_same_result_again_is_acknowledged_and_changes_nothing(ledger, clock
     assert submit(ledger, held, 0.5) is SubmitOutcome.ALREADY_COMMITTED
     assert submit(ledger, held, 0.5) is SubmitOutcome.ALREADY_COMMITTED
 
-    assert record(ledger) == before                                # same reward, same attempt, same commit time
+    assert record(ledger) == before  # same reward, same attempt, same commit time
 
 
 def test_the_same_number_written_as_int_or_float_is_the_same_result(ledger):
@@ -276,8 +296,9 @@ def test_another_reward_for_the_same_attempt_is_a_conflict_and_the_first_stays(l
 # reporting a failure: never a reward
 # ---------------------------------------------------------------------------
 
+
 def test_a_reported_failure_frees_the_candidate_at_once_and_gives_no_reward(ledger, clock):
-    held = lease(ledger)                                           # deadline 1030.0: lots of time left
+    held = lease(ledger)  # deadline 1030.0: lots of time left
     clock.advance(1.0)
 
     fail(ledger, held, FailureKind.OUT_OF_MEMORY)
@@ -291,7 +312,7 @@ def test_a_reported_failure_frees_the_candidate_at_once_and_gives_no_reward(ledg
 
 def test_a_failed_candidate_is_given_again_as_the_next_attempt(ledger, clock):
     first = lease(ledger, worker="worker-a")
-    fail(ledger, first)                                            # no waiting for the lease to expire
+    fail(ledger, first)  # no waiting for the lease to expire
 
     second = lease(ledger, worker="worker-b")
 
@@ -325,8 +346,11 @@ def test_every_kind_of_failure_is_recorded_under_its_name(tmp_path, clock, kind)
 
 def test_the_four_kinds_of_failure():
     assert {kind.name: kind.value for kind in FailureKind} == {
-        "OUT_OF_MEMORY": "OUT_OF_MEMORY", "VERIFIER_ERROR": "VERIFIER_ERROR",
-        "RESTORE_MISMATCH": "RESTORE_MISMATCH", "OTHER": "OTHER"}
+        "OUT_OF_MEMORY": "OUT_OF_MEMORY",
+        "VERIFIER_ERROR": "VERIFIER_ERROR",
+        "RESTORE_MISMATCH": "RESTORE_MISMATCH",
+        "OTHER": "OTHER",
+    }
 
 
 @pytest.mark.parametrize("bad", ["OTHER", "OOM", None, 3])
@@ -347,7 +371,7 @@ def test_a_failure_of_an_old_attempt_is_refused(ledger, clock):
     with pytest.raises(StaleAttemptError):
         fail(ledger, first)
 
-    assert record(ledger).state is CandidateState.LEASED          # the attempt that is really running is untouched
+    assert record(ledger).state is CandidateState.LEASED  # the attempt that is really running is untouched
     assert submit(ledger, second) is SubmitOutcome.COMMITTED
 
 
@@ -399,7 +423,7 @@ def test_the_same_failure_reported_twice_is_acknowledged_and_changes_nothing(tmp
         fail(ledger, held, FailureKind.VERIFIER_ERROR)
 
         assert record(ledger).attempts == 1 and record(ledger).state is CandidateState.PENDING
-    assert attempt_row(path, "exp/g0/c0", 1)["ended_at"] == 1002.0       # not rewritten
+    assert attempt_row(path, "exp/g0/c0", 1)["ended_at"] == 1002.0  # not rewritten
 
 
 def test_another_kind_of_failure_for_the_same_attempt_is_a_conflict(tmp_path, clock):
@@ -417,7 +441,7 @@ def test_another_kind_of_failure_for_the_same_attempt_is_a_conflict(tmp_path, cl
 def test_a_failure_report_after_a_new_attempt_started_is_refused_even_if_it_repeats_the_old_one(ledger):
     first = lease(ledger)
     fail(ledger, first)
-    lease(ledger)                                                  # attempt 2 is running
+    lease(ledger)  # attempt 2 is running
 
     with pytest.raises(StaleAttemptError):
         fail(ledger, first)
@@ -429,12 +453,16 @@ def test_a_failure_report_after_a_new_attempt_started_is_refused_even_if_it_repe
 # the file, two connections, failures in the middle
 # ---------------------------------------------------------------------------
 
+
 def attempt_row(path, candidate_id, number):
     raw = sqlite3.connect(path)
     raw.row_factory = sqlite3.Row
     try:
-        return dict(raw.execute("SELECT * FROM attempt WHERE candidate_id = ? AND attempt_number = ?",
-                                (candidate_id, number)).fetchone())
+        return dict(
+            raw.execute(
+                "SELECT * FROM attempt WHERE candidate_id = ? AND attempt_number = ?", (candidate_id, number)
+            ).fetchone()
+        )
     finally:
         raw.close()
 
@@ -499,13 +527,17 @@ def test_a_failure_while_committing_writes_nothing(tmp_path, clock):
     with Ledger(path, clock=clock) as ledger:
         ledger.open_generation(batch(1))
         held = lease(ledger)
-    raw = sqlite3.connect(path)                                    # the result row is written first, the candidate row last
-    raw.execute("CREATE TRIGGER boom BEFORE UPDATE ON candidate WHEN NEW.state = 'COMMITTED' "
-                "BEGIN SELECT RAISE(ABORT, 'injected failure'); END")
+    raw = sqlite3.connect(path)  # the result row is written first, the candidate row last
+    raw.execute(
+        "CREATE TRIGGER boom BEFORE UPDATE ON candidate WHEN NEW.state = 'COMMITTED' "
+        "BEGIN SELECT RAISE(ABORT, 'injected failure'); END"
+    )
     raw.commit()
 
     with Ledger(path, clock=clock) as ledger:
-        with pytest.raises(LedgerError, match="injected failure"):   # the ledger's own error; the SQLite error is its cause
+        with pytest.raises(
+            LedgerError, match="injected failure"
+        ):  # the ledger's own error; the SQLite error is its cause
             submit(ledger, held, 0.5)
         assert record(ledger).result is None and record(ledger).state is CandidateState.LEASED
         assert attempt_row(path, "exp/g0/c0", 1)["ended_at"] is None
@@ -521,13 +553,17 @@ def test_a_failure_while_reporting_a_failure_writes_nothing(tmp_path, clock):
     with Ledger(path, clock=clock) as ledger:
         ledger.open_generation(batch(1))
         held = lease(ledger)
-    raw = sqlite3.connect(path)                                    # the attempt row is written first, the candidate row last
-    raw.execute("CREATE TRIGGER boom BEFORE UPDATE ON candidate WHEN NEW.state = 'PENDING' "
-                "BEGIN SELECT RAISE(ABORT, 'injected failure'); END")
+    raw = sqlite3.connect(path)  # the attempt row is written first, the candidate row last
+    raw.execute(
+        "CREATE TRIGGER boom BEFORE UPDATE ON candidate WHEN NEW.state = 'PENDING' "
+        "BEGIN SELECT RAISE(ABORT, 'injected failure'); END"
+    )
     raw.commit()
 
     with Ledger(path, clock=clock) as ledger:
-        with pytest.raises(LedgerError, match="injected failure"):   # the ledger's own error; the SQLite error is its cause
+        with pytest.raises(
+            LedgerError, match="injected failure"
+        ):  # the ledger's own error; the SQLite error is its cause
             fail(ledger, held)
         row = attempt_row(path, "exp/g0/c0", 1)
         assert row["failure_kind"] is None and row["ended_at"] is None
@@ -538,6 +574,7 @@ def test_a_failure_while_reporting_a_failure_writes_nothing(tmp_path, clock):
 # ---------------------------------------------------------------------------
 # the rules are in the database itself, not only in Python
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def raw_after_commit(tmp_path, clock):
@@ -553,12 +590,14 @@ def raw_after_commit(tmp_path, clock):
 
 
 def insert_result(raw, candidate_id="exp/g0/c1", attempt_number=1, reward=0.25, committed_at=1001.0):
-    raw.execute("INSERT INTO result (candidate_id, attempt_number, reward, committed_at) VALUES (?, ?, ?, ?)",
-                (candidate_id, attempt_number, reward, committed_at))
+    raw.execute(
+        "INSERT INTO result (candidate_id, attempt_number, reward, committed_at) VALUES (?, ?, ?, ?)",
+        (candidate_id, attempt_number, reward, committed_at),
+    )
 
 
 def test_the_database_accepts_a_well_formed_result(raw_after_commit):
-    insert_result(raw_after_commit)                                # the helper is sound: the refusals below are about one field
+    insert_result(raw_after_commit)  # the helper is sound: the refusals below are about one field
 
 
 def test_the_database_refuses_a_second_result_for_a_candidate(raw_after_commit):
@@ -578,8 +617,9 @@ def test_the_database_refuses_a_result_of_a_candidate_that_does_not_exist(raw_af
 
 def test_the_database_refuses_a_failure_kind_that_is_not_one_of_the_four(raw_after_commit):
     with pytest.raises(sqlite3.IntegrityError):
-        raw_after_commit.execute("UPDATE attempt SET ended_at = 1002.0, failure_kind = 'BORED' "
-                                 "WHERE candidate_id = 'exp/g0/c1'")
+        raw_after_commit.execute(
+            "UPDATE attempt SET ended_at = 1002.0, failure_kind = 'BORED' WHERE candidate_id = 'exp/g0/c1'"
+        )
 
 
 def test_the_database_refuses_a_failure_that_has_no_end_time(raw_after_commit):
