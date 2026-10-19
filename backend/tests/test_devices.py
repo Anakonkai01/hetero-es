@@ -1,6 +1,7 @@
 """CPU-only protocol contracts; no runtime or CUDA import is allowed here."""
 
 import json
+from pathlib import Path
 import time
 import uuid
 import pytest
@@ -419,12 +420,18 @@ def test_backup_policy_change_does_not_mutate_frozen_assignment(lab):
     assert any(cmd["kind"] == "UPDATE_BACKUP_POLICY" for cmd in r.commands(d["deviceId"]))
 
 
+# r11 ships the desktop-v3 reference; the r10 desktop-v1 Windows reference lives on as its regression artifact.
+LEGACY_WINDOWS_REFERENCE = (
+    Path(__file__).parents[2] / "runtime/artifacts/regression/2026-10-10-m3-native-profile/reference.json"
+)
+
+
 def test_native_windows_admission_requires_exact_reference_and_worker_only():
     from backend.devices import SelfTest
     from pydantic import ValidationError
     import pathlib
 
-    reference = json.loads((pathlib.Path(__file__).parents[2] / "desktop/worker/resources/reference.json").read_text())
+    reference = json.loads(LEGACY_WINDOWS_REFERENCE.read_text())
     proof = {k: reference[k] for k in ("recipeHash", "parentSha256", "perturbedSha256", "restoredSha256", "reward")}
     proof.update(
         passed=True,

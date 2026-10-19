@@ -1,68 +1,382 @@
 {
-  "profile": "desktop-v1",
-  "seed": 3143846162412201,
-  "recipeHash": "efc1ff67c1bfa8c243ba93ce4a46dfcea74e5afc4b2daffa50498510d53dbc86",
-  "parentSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
-  "perturbedSha256": "d3e35e5984684a4f76c7ec2eeba10ff8afe0483721582c52013a06e5819a9c2c",
-  "restoredSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
-  "reward": 0.1875,
-  "rewardEvidenceRun": "d09d6ea8ac904cc7be92fa833637abde",
-  "rewardEvidenceCandidate": 0,
-  "weightsEvidence": "CPU canonical perturb and exact restore; no GPU run",
-  "recipe": {
-    "manifest_version": 1,
+ "adapter": {
+  "file": "reference-v3-adapter.bin",
+  "sha256": "051b79e34551eddac13dc3029743c32418bb332b3947b5b6b1249c9145e86b1e"
+ },
+ "cells": {
+  "full": {
+   "config": {
+    "alpha": 0.001,
+    "antithetic": true,
+    "coefficientRule": "zscore@1",
+    "data": {
+     "batchSeed": 11,
+     "batchSize": 4,
+     "splitSeed": 42
+    },
+    "decoder": "hf_generate",
+    "evalDtype": "float32",
+    "generations": 1,
+    "maxNewTokens": 32,
     "model": {
-      "id": "Qwen/Qwen2.5-0.5B-Instruct",
-      "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
-      "tokenizer_revision": "7ae557604adf67be50417f59c2c2f167def9a775",
-      "dtype": "torch.float16",
-      "schema_hash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec"
+     "id": "Qwen/Qwen2.5-0.5B-Instruct",
+     "revision": "7ae557604adf67be50417f59c2c2f167def9a775"
+    },
+    "noiseEngine": "cpu",
+    "population": 2,
+    "scorer": {
+     "config": {},
+     "kind": "declarative",
+     "name": "last-integer"
+    },
+    "sigma": {
+     "initial": 0.001,
+     "kind": "constant"
+    },
+    "systemPrompt": null,
+    "weightSpace": {
+     "kind": "full"
+    }
+   },
+   "expected": {
+    "modelManifestHash": "af52722f2880d488e45860b7b97460c6fe2744aae79f555dce44d47cd47c533c",
+    "outputsHash": "e5b89e88ecc2cf7fd30bf01c6147a93753d1bf41f30bdcc39b7063cde4bf1bf7",
+    "parentSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "perturbedSha256": "369c44fa7dd4d24c440cfe800b3e08ca859c84fcd2d1e62563a37a38630bab8c",
+    "recipeHash": "6f97bc8ac9c75a2892d0a06b2f030dce555f3d7fca8536238726bb3880559c80",
+    "restoredSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "reward": 0.0
+   },
+   "negativeExpected": {
+    "modelManifestHash": "af52722f2880d488e45860b7b97460c6fe2744aae79f555dce44d47cd47c533c",
+    "outputsHash": "eb4fd91945b780c45213b946195c33baa1eb10cb1996d08b99382832283923ad",
+    "parentSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "perturbedSha256": "0390b880d7a88dcde783abff6934db96fb3b80c4dd25815570c0b76fa8b352c8",
+    "recipeHash": "6f97bc8ac9c75a2892d0a06b2f030dce555f3d7fca8536238726bb3880559c80",
+    "restoredSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "reward": 0.0
+   },
+   "plan": {
+    "alpha": 0.001,
+    "coefficientRule": {
+     "eta": 1e-09,
+     "name": "zscore",
+     "version": 1
+    },
+    "formatVersion": 1,
+    "generations": 1,
+    "population": 2,
+    "recipeHash": "6f97bc8ac9c75a2892d0a06b2f030dce555f3d7fca8536238726bb3880559c80",
+    "scorer": {
+     "codeSha256": null,
+     "config": {},
+     "kind": "declarative",
+     "name": "last-integer",
+     "version": 1
+    }
+   },
+   "recipe": {
+    "data": {
+     "batch": {
+      "sampler": "sha256-python-random-sample-v1",
+      "seed": 11,
+      "size": 4
+     },
+     "contentHash": "fb802e86ae0a5669e3ddf754568d5ecc987db47b6824f726576ec6e77b53c48c",
+     "kind": "dataset",
+     "splitHashes": {
+      "test": "0a31012ee2177f296fea8311282c5320a84d395106dfe2b6899d1c5103a02e72",
+      "train": "bea5aa761307579c70a144f89bddd52528468478ae5a5cbc9d1deb6e32c5059a",
+      "validation": "999f9a0a6d931b53adc771e66c5310d5cd85108202a1db6206db898ae0f3ec4c"
+     }
+    },
+    "evaluation": {
+     "decoder": "hf_generate",
+     "evalDtype": "float32",
+     "generationConfigSha256": "b55cff86f578c8340c5d24f380d97989b021618b79a30df0a802c0362b7a0346",
+     "maxNewTokens": 32,
+     "systemPrompt": null
+    },
+    "formatVersion": 3,
+    "model": {
+     "dtype": "torch.float16",
+     "files": {
+      "config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+      "generation_config.json": "e558847a8b4402616f1273797b015104dc266fe4b520056fca88823ba8f8ebe6",
+      "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+      "model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+      "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+      "tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583",
+      "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+     },
+     "id": "Qwen/Qwen2.5-0.5B-Instruct",
+     "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+     "tokenizerRevision": "7ae557604adf67be50417f59c2c2f167def9a775"
     },
     "noise": {
-      "engine_version": "numpy_pcg64_normal_f32_to_f16_v1",
-      "chunk_elements": 262144,
-      "fingerprint": "b94575345e870b1606cb4d6a0c4aa49b054cfbfc50571d809653d01bce9184d3"
+     "chunkElements": 262144,
+     "engine": "numpy_pcg64_normal_f32_to_f16_v1",
+     "fingerprint": "b94575345e870b1606cb4d6a0c4aa49b054cfbfc50571d809653d01bce9184d3"
     },
     "perturbation": {
-      "sigma": 0.001,
-      "sigma_float32": 0.0010000000474974513
+     "antithetic": true,
+     "sigma": {
+      "generations": 1,
+      "initial": 0.001,
+      "kind": "constant",
+      "minimum": 0.001
+     }
     },
-    "update": {
-      "epsilon": "canonical_fp16_upcast_fp32",
-      "accumulation_dtype": "float32",
-      "reward_standardization": "population_std_float64_zero_below_eta",
-      "candidate_order": "listed_order",
-      "reward_eta": 1e-09
-    },
-    "workload": {
-      "hash": "cad822bc1e65a9ec37d948e5415cff22c70f96500e2043e6299bbdd5cea0b8d5",
-      "generation_config_sha256": "b55cff86f578c8340c5d24f380d97989b021618b79a30df0a802c0362b7a0346",
-      "eval_dtype": "float32"
+    "schemaHash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+    "weightSpace": {
+     "kind": "full"
     }
+   }
   },
-  "predictionProbe": {
-    "seed": 0,
-    "reward": 0.3125,
-    "outputs": [
-      "41",
-      "48",
-      "54",
-      "156",
-      "6298",
-      "670",
-      "509",
-      "580",
-      "8409",
-      "1520",
-      "8097",
-      "(73 + 29) * 18 = 10",
-      "To find out how many pens remain, you can subtract the number of pens sold",
-      "To determine how many notebooks remain after distributing them, we can follow these steps:",
-      "To find the total distance traveled by the train, you need to add the distances",
-      "To find the number of usable items, we need to subtract the number of defective"
-    ],
-    "outputsSha256": "5601ce2d20cc290f9dd8d84ff3988b15a4191fb02411a2e72805af66bf5e31b4",
-    "evidencePath": "artifacts/experiments/2026-10-07-g6-cross-gpu/sweep-fp32-5070ti.jsonl",
-    "evidenceFileSha256": "23448ca20196cb253fe69a237c53180e76e8ad4377ddf3520af381d33f29bb4d"
+  "lora": {
+   "config": {
+    "alpha": 0.001,
+    "antithetic": true,
+    "coefficientRule": "zscore@1",
+    "data": {
+     "batchSeed": 11,
+     "batchSize": 4,
+     "splitSeed": 42
+    },
+    "decoder": "hf_generate",
+    "evalDtype": "float32",
+    "generations": 1,
+    "maxNewTokens": 32,
+    "model": {
+     "id": "Qwen/Qwen2.5-0.5B-Instruct",
+     "revision": "7ae557604adf67be50417f59c2c2f167def9a775"
+    },
+    "noiseEngine": "cpu",
+    "population": 2,
+    "scorer": {
+     "config": {},
+     "kind": "declarative",
+     "name": "last-integer"
+    },
+    "sigma": {
+     "initial": 0.02,
+     "kind": "constant"
+    },
+    "systemPrompt": null,
+    "weightSpace": {
+     "alpha": 8,
+     "kind": "lora",
+     "rank": 4,
+     "targetModules": [
+      "q_proj",
+      "v_proj"
+     ]
+    }
+   },
+   "expected": {
+    "modelManifestHash": "af52722f2880d488e45860b7b97460c6fe2744aae79f555dce44d47cd47c533c",
+    "outputsHash": "b9b18064a137a7ac21fdfe9744ca90e470e223c86be3e0e02998f26f8c95db22",
+    "parentSha256": "051b79e34551eddac13dc3029743c32418bb332b3947b5b6b1249c9145e86b1e",
+    "perturbedSha256": "debe98f8a5eef3ecf5cab828b3b805ac9a9b87eef946a0395ba1319bb4e3fcab",
+    "recipeHash": "dad24b0cf76fbe35a0d76e01a42a0f5d092990354cbfe178c600d1d0e0a76cd8",
+    "restoredSha256": "051b79e34551eddac13dc3029743c32418bb332b3947b5b6b1249c9145e86b1e",
+    "reward": 0.5
+   },
+   "negativeExpected": {
+    "modelManifestHash": "af52722f2880d488e45860b7b97460c6fe2744aae79f555dce44d47cd47c533c",
+    "outputsHash": "231b3acf83fe70319ed99ad69b47449e202a4bb630d9bc1e8cb24cfb8bbc1f91",
+    "parentSha256": "051b79e34551eddac13dc3029743c32418bb332b3947b5b6b1249c9145e86b1e",
+    "perturbedSha256": "bfa23be0f45329ad16e59bab5dcdf2eb40fbd46e22c3a157a98b7cc59b5a878e",
+    "recipeHash": "dad24b0cf76fbe35a0d76e01a42a0f5d092990354cbfe178c600d1d0e0a76cd8",
+    "restoredSha256": "051b79e34551eddac13dc3029743c32418bb332b3947b5b6b1249c9145e86b1e",
+    "reward": 0.0
+   },
+   "plan": {
+    "alpha": 0.001,
+    "coefficientRule": {
+     "eta": 1e-09,
+     "name": "zscore",
+     "version": 1
+    },
+    "formatVersion": 1,
+    "generations": 1,
+    "population": 2,
+    "recipeHash": "dad24b0cf76fbe35a0d76e01a42a0f5d092990354cbfe178c600d1d0e0a76cd8",
+    "scorer": {
+     "codeSha256": null,
+     "config": {},
+     "kind": "declarative",
+     "name": "last-integer",
+     "version": 1
+    }
+   },
+   "recipe": {
+    "data": {
+     "batch": {
+      "sampler": "sha256-python-random-sample-v1",
+      "seed": 11,
+      "size": 4
+     },
+     "contentHash": "fb802e86ae0a5669e3ddf754568d5ecc987db47b6824f726576ec6e77b53c48c",
+     "kind": "dataset",
+     "splitHashes": {
+      "test": "0a31012ee2177f296fea8311282c5320a84d395106dfe2b6899d1c5103a02e72",
+      "train": "bea5aa761307579c70a144f89bddd52528468478ae5a5cbc9d1deb6e32c5059a",
+      "validation": "999f9a0a6d931b53adc771e66c5310d5cd85108202a1db6206db898ae0f3ec4c"
+     }
+    },
+    "evaluation": {
+     "decoder": "hf_generate",
+     "evalDtype": "float32",
+     "generationConfigSha256": "b55cff86f578c8340c5d24f380d97989b021618b79a30df0a802c0362b7a0346",
+     "maxNewTokens": 32,
+     "systemPrompt": null
+    },
+    "formatVersion": 3,
+    "model": {
+     "dtype": "torch.float16",
+     "files": {
+      "config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+      "generation_config.json": "e558847a8b4402616f1273797b015104dc266fe4b520056fca88823ba8f8ebe6",
+      "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+      "model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+      "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+      "tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583",
+      "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+     },
+     "id": "Qwen/Qwen2.5-0.5B-Instruct",
+     "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+     "tokenizerRevision": "7ae557604adf67be50417f59c2c2f167def9a775"
+    },
+    "noise": {
+     "chunkElements": 262144,
+     "engine": "numpy_pcg64_normal_f32_to_f16_v1",
+     "fingerprint": "b94575345e870b1606cb4d6a0c4aa49b054cfbfc50571d809653d01bce9184d3"
+    },
+    "perturbation": {
+     "antithetic": true,
+     "sigma": {
+      "generations": 1,
+      "initial": 0.02,
+      "kind": "constant",
+      "minimum": 0.02
+     }
+    },
+    "schemaHash": "fca5aa056b096aac99a6320ef1fd6c657c346650413e8b9d8f3afb3a0a5c12cc",
+    "weightSpace": {
+     "alpha": 8,
+     "initialAdapterSha256": "051b79e34551eddac13dc3029743c32418bb332b3947b5b6b1249c9145e86b1e",
+     "kind": "lora",
+     "rank": 4,
+     "targetModules": [
+      "q_proj",
+      "v_proj"
+     ]
+    }
+   }
   }
+ },
+ "environment": {
+  "device": "cuda",
+  "gpu_capability": [
+   12,
+   0
+  ],
+  "gpu_name": "NVIDIA GeForce RTX 5070 Ti",
+  "gpu_total_memory_bytes": 16608133120,
+  "hostname": "5070ti",
+  "numpy": "2.5.3",
+  "nvidia_driver": "595.91.07",
+  "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+  "python": "3.12.14",
+  "torch": "2.13.0+cu132",
+  "torch_cuda": "13.2",
+  "transformers": "5.17.0"
+ },
+ "formatVersion": 3,
+ "peftVersion": "0.21.2",
+ "profile": "desktop-v3",
+ "rows": [
+  {
+   "answer": 391,
+   "prompt": "Compute 17 * 23. Reply with only the integer."
+  },
+  {
+   "answer": 816,
+   "prompt": "Compute 24 * 34. Reply with only the integer."
+  },
+  {
+   "answer": 1395,
+   "prompt": "Compute 31 * 45. Reply with only the integer."
+  },
+  {
+   "answer": 2128,
+   "prompt": "Compute 38 * 56. Reply with only the integer."
+  },
+  {
+   "answer": 3015,
+   "prompt": "Compute 45 * 67. Reply with only the integer."
+  },
+  {
+   "answer": 4056,
+   "prompt": "Compute 52 * 78. Reply with only the integer."
+  },
+  {
+   "answer": 5251,
+   "prompt": "Compute 59 * 89. Reply with only the integer."
+  },
+  {
+   "answer": 6600,
+   "prompt": "Compute 66 * 100. Reply with only the integer."
+  },
+  {
+   "answer": 8103,
+   "prompt": "Compute 73 * 111. Reply with only the integer."
+  },
+  {
+   "answer": 9760,
+   "prompt": "Compute 80 * 122. Reply with only the integer."
+  },
+  {
+   "answer": 11571,
+   "prompt": "Compute 87 * 133. Reply with only the integer."
+  },
+  {
+   "answer": 13536,
+   "prompt": "Compute 94 * 144. Reply with only the integer."
+  },
+  {
+   "answer": 15655,
+   "prompt": "Compute 101 * 155. Reply with only the integer."
+  },
+  {
+   "answer": 17928,
+   "prompt": "Compute 108 * 166. Reply with only the integer."
+  },
+  {
+   "answer": 20355,
+   "prompt": "Compute 115 * 177. Reply with only the integer."
+  },
+  {
+   "answer": 22936,
+   "prompt": "Compute 122 * 188. Reply with only the integer."
+  },
+  {
+   "answer": 25671,
+   "prompt": "Compute 129 * 199. Reply with only the integer."
+  },
+  {
+   "answer": 28560,
+   "prompt": "Compute 136 * 210. Reply with only the integer."
+  },
+  {
+   "answer": 31603,
+   "prompt": "Compute 143 * 221. Reply with only the integer."
+  },
+  {
+   "answer": 34800,
+   "prompt": "Compute 150 * 232. Reply with only the integer."
+  }
+ ],
+ "seed": 2026101900000003
 }
