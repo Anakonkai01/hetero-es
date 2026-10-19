@@ -109,3 +109,9 @@ handoff are done: the cross-OS LoRA cause is identified and a native Windows wor
 desktop-v3 reference and profile are shipped in `desktop/worker/resources/`; the backend admits native Windows as a
 reference-bound v3 worker only; unsigned candidate1 installers exist in `.scratch/` only. Not done: Windows installer
 run (C: lacks space), owner install/uninstall acceptance, the stale Lab Server packaged check, and the flag day.
+
+## Opened ES formula, Countdown/GSM8K, Worker data folder (2026-10-19/20)
+
+Continue from [handoff-es-formula-countdown.md](handoff-es-formula-countdown.md), same branch: coefficient rules,
+alpha schedules and momentum records; Countdown and GSM8K data; evaluation chunk; a Worker data folder on another drive;
+checkpoint evaluation by replay; Countdown pilot 1 learned the format only, pilot 2 (300 generations) was running.
