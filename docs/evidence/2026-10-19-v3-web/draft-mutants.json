@@ -1,0 +1,14 @@
+[
+  {
+    "name": "draft shows pinned Qwen revision",
+    "file": "backend/store.py",
+    "old": "\"modelVersion\": config.get(\"modelManifest\", {}).get(\"revision\", REVISION),",
+    "new": "\"modelVersion\": REVISION,"
+  },
+  {
+    "name": "draft edit retains old recipe fields",
+    "file": "backend/routes_experiments.py",
+    "old": "                old.pop(key, None)",
+    "new": "                pass"
+  }
+]

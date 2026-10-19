@@ -1,0 +1,9 @@
+F821 Undefined name `json`
+   --> runtime/tests/ledger/test_device_agent.py:587:12
+    |
+586 |     path = Path(argv[argv.index("--run-config") + 1])
+587 |     assert json.loads(path.read_text()) == cfg
+    |            ^^^^
+    |
+
+Found 1 error.

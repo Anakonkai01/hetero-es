@@ -1,0 +1,299 @@
+FFFFFFFF                                                                 [100%]
+=================================== FAILURES ===================================
+_______________ test_v3_import_keeps_columns_and_rejects_leakage _______________
+
+study = (<starlette.testclient.TestClient object at 0x70338bdbe4e0>, {'Authorization': 'Bearer [REDACTED FIXTURE AUTH]', 'X-Workspace-Id': 'lab'}, <backend.local_storage.LocalBackend object at 0x70338c053110>)
+
+    def test_v3_import_keeps_columns_and_rejects_leakage(study):
+        from heteroes.v3.data import verify
+    
+        c, admin, storage = study
+>       model, imported = assets(study)
+                          ^^^^^^^^^^^^^
+
+backend/tests/test_v3_study.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+study = (<starlette.testclient.TestClient object at 0x70338bdbe4e0>, {'Authorization': 'Bearer [REDACTED FIXTURE AUTH]', 'X-Workspace-Id': 'lab'}, <backend.local_storage.LocalBackend object at 0x70338c053110>)
+
+    def assets(study):
+        c, admin, storage = study
+        model_manifest, _ = manifest()
+        model_manifest["modelId"] = "research/custom-causal-lm"
+        response = c.post("/api/v1/models/register", headers=admin, json={
+            "recipeVersion": 3, "name": "Custom model", "manifest": model_manifest,
+        })
+>       assert response.status_code == 201, response.text
+E       AssertionError: {"detail":[{"type":"extra_forbidden","loc":["body","recipeVersion"],"msg":"Extra inputs are not permitted","input":3}]}
+E       assert 422 == 201
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+backend/tests/test_v3_study.py:18: AssertionError
+________ test_v3_config_and_worker_command_preserve_the_frozen_options _________
+
+study = (<starlette.testclient.TestClient object at 0x70338bc73440>, {'Authorization': 'Bearer [REDACTED FIXTURE AUTH]', 'X-Workspace-Id': 'lab'}, <backend.local_storage.LocalBackend object at 0x70338bdeb530>)
+
+    def test_v3_config_and_worker_command_preserve_the_frozen_options(study):
+        c, admin, _ = study
+        store = c.app.state.store
+        lab = (c, store, store.runtime, admin)
+        d, device_auth = pair(lab)
+>       model, data = assets(study)
+                      ^^^^^^^^^^^^^
+
+backend/tests/test_v3_study.py:71: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+study = (<starlette.testclient.TestClient object at 0x70338bc73440>, {'Authorization': 'Bearer [REDACTED FIXTURE AUTH]', 'X-Workspace-Id': 'lab'}, <backend.local_storage.LocalBackend object at 0x70338bdeb530>)
+
+    def assets(study):
+        c, admin, storage = study
+        model_manifest, _ = manifest()
+        model_manifest["modelId"] = "research/custom-causal-lm"
+        response = c.post("/api/v1/models/register", headers=admin, json={
+            "recipeVersion": 3, "name": "Custom model", "manifest": model_manifest,
+        })
+>       assert response.status_code == 201, response.text
+E       AssertionError: {"detail":[{"type":"extra_forbidden","loc":["body","recipeVersion"],"msg":"Extra inputs are not permitted","input":3}]}
+E       assert 422 == 201
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+backend/tests/test_v3_study.py:18: AssertionError
+____________ test_v3_invalid_options_never_become_a_draft[change0] _____________
+
+study = (<starlette.testclient.TestClient object at 0x70338bab96d0>, {'Authorization': 'Bearer [REDACTED FIXTURE AUTH]', 'X-Workspace-Id': 'lab'}, <backend.local_storage.LocalBackend object at 0x70338bcc5340>)
+change = {'scorer': {'codeSha256': 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'config': {}, 'kind': 'python', 'name': 'code', ...}}
+
+    @pytest.mark.parametrize("change", [
+        {"scorer": {"kind": "python", "name": "code", "version": 1, "codeSha256": "a" * 64, "config": {}}},
+        {"coefficientRule": "unknown@1"}, {"antithetic": True, "candidatesPerGeneration": 3},
+        {"weightSpace": {"kind": "subset", "include": ["["]}},
+        {"weightSpace": {"kind": "lora", "rank": True, "alpha": 4, "targetModules": ["q_proj"]}},
+        {"scorer": {"kind": "declarative", "name": "choice-letter", "version": 1, "codeSha256": None, "config": {"answerField": "absent"}}},
+    ])
+    def test_v3_invalid_options_never_become_a_draft(study, change):
+        c, admin, _ = study
+        store = c.app.state.store
+        d, device_auth = pair((c, store, store.runtime, admin))
+>       model, data = assets(study)
+                      ^^^^^^^^^^^^^
+
+backend/tests/test_v3_study.py:105: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+study = (<starlette.testclient.TestClient object at 0x70338bab96d0>, {'Authorization': 'Bearer [REDACTED FIXTURE AUTH]', 'X-Workspace-Id': 'lab'}, <backend.local_storage.LocalBackend object at 0x70338bcc5340>)
+
+    def assets(study):
+        c, admin, storage = study
+        model_manifest, _ = manifest()
+        model_manifest["modelId"] = "research/custom-causal-lm"
+        response = c.post("/api/v1/models/register", headers=admin, json={
+            "recipeVersion": 3, "name": "Custom model", "manifest": model_manifest,
+        })
+>       assert response.status_code == 201, response.text
+E       AssertionError: {"detail":[{"type":"extra_forbidden","loc":["body","recipeVersion"],"msg":"Extra inputs are not permitted","input":3}]}
+E       assert 422 == 201
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+backend/tests/test_v3_study.py:18: AssertionError
+____________ test_v3_invalid_options_never_become_a_draft[change1] _____________
+
+study = (<starlette.testclient.TestClient object at 0x70338bce6d20>, {'Authorization': 'Bearer [REDACTED FIXTURE AUTH]', 'X-Workspace-Id': 'lab'}, <backend.local_storage.LocalBackend object at 0x70338b937830>)
+change = {'coefficientRule': 'unknown@1'}
+
+    @pytest.mark.parametrize("change", [
+        {"scorer": {"kind": "python", "name": "code", "version": 1, "codeSha256": "a" * 64, "config": {}}},
+        {"coefficientRule": "unknown@1"}, {"antithetic": True, "candidatesPerGeneration": 3},
+        {"weightSpace": {"kind": "subset", "include": ["["]}},
+        {"weightSpace": {"kind": "lora", "rank": True, "alpha": 4, "targetModules": ["q_proj"]}},
+        {"scorer": {"kind": "declarative", "name": "choice-letter", "version": 1, "codeSha256": None, "config": {"answerField": "absent"}}},
+    ])
+    def test_v3_invalid_options_never_become_a_draft(study, change):
+        c, admin, _ = study
+        store = c.app.state.store
+        d, device_auth = pair((c, store, store.runtime, admin))
+>       model, data = assets(study)
+                      ^^^^^^^^^^^^^
+
+backend/tests/test_v3_study.py:105: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+study = (<starlette.testclient.TestClient object at 0x70338bce6d20>, {'Authorization': 'Bearer [REDACTED FIXTURE AUTH]', 'X-Workspace-Id': 'lab'}, <backend.local_storage.LocalBackend object at 0x70338b937830>)
+
+    def assets(study):
+        c, admin, storage = study
+        model_manifest, _ = manifest()
+        model_manifest["modelId"] = "research/custom-causal-lm"
+        response = c.post("/api/v1/models/register", headers=admin, json={
+            "recipeVersion": 3, "name": "Custom model", "manifest": model_manifest,
+        })
+>       assert response.status_code == 201, response.text
+E       AssertionError: {"detail":[{"type":"extra_forbidden","loc":["body","recipeVersion"],"msg":"Extra inputs are not permitted","input":3}]}
+E       assert 422 == 201
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+backend/tests/test_v3_study.py:18: AssertionError
+____________ test_v3_invalid_options_never_become_a_draft[change2] _____________
+
+study = (<starlette.testclient.TestClient object at 0x70338bd51730>, {'Authorization': 'Bearer [REDACTED FIXTURE AUTH]', 'X-Workspace-Id': 'lab'}, <backend.local_storage.LocalBackend object at 0x70338bc19040>)
+change = {'antithetic': True, 'candidatesPerGeneration': 3}
+
+    @pytest.mark.parametrize("change", [
+        {"scorer": {"kind": "python", "name": "code", "version": 1, "codeSha256": "a" * 64, "config": {}}},
+        {"coefficientRule": "unknown@1"}, {"antithetic": True, "candidatesPerGeneration": 3},
+        {"weightSpace": {"kind": "subset", "include": ["["]}},
+        {"weightSpace": {"kind": "lora", "rank": True, "alpha": 4, "targetModules": ["q_proj"]}},
+        {"scorer": {"kind": "declarative", "name": "choice-letter", "version": 1, "codeSha256": None, "config": {"answerField": "absent"}}},
+    ])
+    def test_v3_invalid_options_never_become_a_draft(study, change):
+        c, admin, _ = study
+        store = c.app.state.store
+        d, device_auth = pair((c, store, store.runtime, admin))
+>       model, data = assets(study)
+                      ^^^^^^^^^^^^^
+
+backend/tests/test_v3_study.py:105: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+study = (<starlette.testclient.TestClient object at 0x70338bd51730>, {'Authorization': 'Bearer [REDACTED FIXTURE AUTH]', 'X-Workspace-Id': 'lab'}, <backend.local_storage.LocalBackend object at 0x70338bc19040>)
+
+    def assets(study):
+        c, admin, storage = study
+        model_manifest, _ = manifest()
+        model_manifest["modelId"] = "research/custom-causal-lm"
+        response = c.post("/api/v1/models/register", headers=admin, json={
+            "recipeVersion": 3, "name": "Custom model", "manifest": model_manifest,
+        })
+>       assert response.status_code == 201, response.text
+E       AssertionError: {"detail":[{"type":"extra_forbidden","loc":["body","recipeVersion"],"msg":"Extra inputs are not permitted","input":3}]}
+E       assert 422 == 201
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+backend/tests/test_v3_study.py:18: AssertionError
+____________ test_v3_invalid_options_never_become_a_draft[change3] _____________
+
+study = (<starlette.testclient.TestClient object at 0x70338bd92690>, {'Authorization': 'Bearer [REDACTED FIXTURE AUTH]', 'X-Workspace-Id': 'lab'}, <backend.local_storage.LocalBackend object at 0x70338bd936b0>)
+change = {'weightSpace': {'include': ['['], 'kind': 'subset'}}
+
+    @pytest.mark.parametrize("change", [
+        {"scorer": {"kind": "python", "name": "code", "version": 1, "codeSha256": "a" * 64, "config": {}}},
+        {"coefficientRule": "unknown@1"}, {"antithetic": True, "candidatesPerGeneration": 3},
+        {"weightSpace": {"kind": "subset", "include": ["["]}},
+        {"weightSpace": {"kind": "lora", "rank": True, "alpha": 4, "targetModules": ["q_proj"]}},
+        {"scorer": {"kind": "declarative", "name": "choice-letter", "version": 1, "codeSha256": None, "config": {"answerField": "absent"}}},
+    ])
+    def test_v3_invalid_options_never_become_a_draft(study, change):
+        c, admin, _ = study
+        store = c.app.state.store
+        d, device_auth = pair((c, store, store.runtime, admin))
+>       model, data = assets(study)
+                      ^^^^^^^^^^^^^
+
+backend/tests/test_v3_study.py:105: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+study = (<starlette.testclient.TestClient object at 0x70338bd92690>, {'Authorization': 'Bearer [REDACTED FIXTURE AUTH]', 'X-Workspace-Id': 'lab'}, <backend.local_storage.LocalBackend object at 0x70338bd936b0>)
+
+    def assets(study):
+        c, admin, storage = study
+        model_manifest, _ = manifest()
+        model_manifest["modelId"] = "research/custom-causal-lm"
+        response = c.post("/api/v1/models/register", headers=admin, json={
+            "recipeVersion": 3, "name": "Custom model", "manifest": model_manifest,
+        })
+>       assert response.status_code == 201, response.text
+E       AssertionError: {"detail":[{"type":"extra_forbidden","loc":["body","recipeVersion"],"msg":"Extra inputs are not permitted","input":3}]}
+E       assert 422 == 201
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+backend/tests/test_v3_study.py:18: AssertionError
+____________ test_v3_invalid_options_never_become_a_draft[change4] _____________
+
+study = (<starlette.testclient.TestClient object at 0x70338b70a7e0>, {'Authorization': 'Bearer [REDACTED FIXTURE AUTH]', 'X-Workspace-Id': 'lab'}, <backend.local_storage.LocalBackend object at 0x70338b73f6e0>)
+change = {'weightSpace': {'alpha': 4, 'kind': 'lora', 'rank': True, 'targetModules': ['q_proj']}}
+
+    @pytest.mark.parametrize("change", [
+        {"scorer": {"kind": "python", "name": "code", "version": 1, "codeSha256": "a" * 64, "config": {}}},
+        {"coefficientRule": "unknown@1"}, {"antithetic": True, "candidatesPerGeneration": 3},
+        {"weightSpace": {"kind": "subset", "include": ["["]}},
+        {"weightSpace": {"kind": "lora", "rank": True, "alpha": 4, "targetModules": ["q_proj"]}},
+        {"scorer": {"kind": "declarative", "name": "choice-letter", "version": 1, "codeSha256": None, "config": {"answerField": "absent"}}},
+    ])
+    def test_v3_invalid_options_never_become_a_draft(study, change):
+        c, admin, _ = study
+        store = c.app.state.store
+        d, device_auth = pair((c, store, store.runtime, admin))
+>       model, data = assets(study)
+                      ^^^^^^^^^^^^^
+
+backend/tests/test_v3_study.py:105: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+study = (<starlette.testclient.TestClient object at 0x70338b70a7e0>, {'Authorization': 'Bearer [REDACTED FIXTURE AUTH]', 'X-Workspace-Id': 'lab'}, <backend.local_storage.LocalBackend object at 0x70338b73f6e0>)
+
+    def assets(study):
+        c, admin, storage = study
+        model_manifest, _ = manifest()
+        model_manifest["modelId"] = "research/custom-causal-lm"
+        response = c.post("/api/v1/models/register", headers=admin, json={
+            "recipeVersion": 3, "name": "Custom model", "manifest": model_manifest,
+        })
+>       assert response.status_code == 201, response.text
+E       AssertionError: {"detail":[{"type":"extra_forbidden","loc":["body","recipeVersion"],"msg":"Extra inputs are not permitted","input":3}]}
+E       assert 422 == 201
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+backend/tests/test_v3_study.py:18: AssertionError
+____________ test_v3_invalid_options_never_become_a_draft[change5] _____________
+
+study = (<starlette.testclient.TestClient object at 0x70338b778ce0>, {'Authorization': 'Bearer [REDACTED FIXTURE AUTH]', 'X-Workspace-Id': 'lab'}, <backend.local_storage.LocalBackend object at 0x70338b5787a0>)
+change = {'scorer': {'codeSha256': None, 'config': {'answerField': 'absent'}, 'kind': 'declarative', 'name': 'choice-letter', ...}}
+
+    @pytest.mark.parametrize("change", [
+        {"scorer": {"kind": "python", "name": "code", "version": 1, "codeSha256": "a" * 64, "config": {}}},
+        {"coefficientRule": "unknown@1"}, {"antithetic": True, "candidatesPerGeneration": 3},
+        {"weightSpace": {"kind": "subset", "include": ["["]}},
+        {"weightSpace": {"kind": "lora", "rank": True, "alpha": 4, "targetModules": ["q_proj"]}},
+        {"scorer": {"kind": "declarative", "name": "choice-letter", "version": 1, "codeSha256": None, "config": {"answerField": "absent"}}},
+    ])
+    def test_v3_invalid_options_never_become_a_draft(study, change):
+        c, admin, _ = study
+        store = c.app.state.store
+        d, device_auth = pair((c, store, store.runtime, admin))
+>       model, data = assets(study)
+                      ^^^^^^^^^^^^^
+
+backend/tests/test_v3_study.py:105: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+study = (<starlette.testclient.TestClient object at 0x70338b778ce0>, {'Authorization': 'Bearer [REDACTED FIXTURE AUTH]', 'X-Workspace-Id': 'lab'}, <backend.local_storage.LocalBackend object at 0x70338b5787a0>)
+
+    def assets(study):
+        c, admin, storage = study
+        model_manifest, _ = manifest()
+        model_manifest["modelId"] = "research/custom-causal-lm"
+        response = c.post("/api/v1/models/register", headers=admin, json={
+            "recipeVersion": 3, "name": "Custom model", "manifest": model_manifest,
+        })
+>       assert response.status_code == 201, response.text
+E       AssertionError: {"detail":[{"type":"extra_forbidden","loc":["body","recipeVersion"],"msg":"Extra inputs are not permitted","input":3}]}
+E       assert 422 == 201
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+backend/tests/test_v3_study.py:18: AssertionError
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_v3_study.py::test_v3_import_keeps_columns_and_rejects_leakage
+FAILED backend/tests/test_v3_study.py::test_v3_config_and_worker_command_preserve_the_frozen_options
+FAILED backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change0]
+FAILED backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change1]
+FAILED backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change2]
+FAILED backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change3]
+FAILED backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change4]
+FAILED backend/tests/test_v3_study.py::test_v3_invalid_options_never_become_a_draft[change5]
+8 failed, 1 warning in 1.13s

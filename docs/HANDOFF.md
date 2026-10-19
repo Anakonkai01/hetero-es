@@ -78,3 +78,12 @@ pairs). Receipts: `evidence/2026-10-19-extensibility-*`, `-v3-ledger-record`, `-
 runner/agent/backend/web on v3, audit scheduling, SDK/CLI, the r11 desktop profile (PEFT, Windows v3 acceptance), GPU
 acceptance with the owner's authorization, and removing the v1/v2 run paths at the switch.
 Detailed state and plan of this workstream for the next agent: [handoff-v3-extensibility.md](handoff-v3-extensibility.md).
+
+
+## Product v3 continuation (2026-10-19)
+
+Steps 1–3 of the extensibility handoff are implemented on `feat/v3-product-integration`: managed runner/agent/worker,
+validation and verified selected export, and backend/web v3 configuration. The branch is local and unmerged; the live lab
+and desktop release remain unchanged. Continue with [handoff-v3-product-integration.md](handoff-v3-product-integration.md)
+for commits, CPU receipts, concrete limits and the remaining audit/r11/flag-day/GPU work. The existing recovery-point
+format also needs v3 state/selection coverage before the flag day. No GPU, Windows or learning acceptance is claimed.

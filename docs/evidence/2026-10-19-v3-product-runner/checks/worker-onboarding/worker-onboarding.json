@@ -1,0 +1,20 @@
+{
+  "gpuWork": false,
+  "realLab": false,
+  "packagedApp": false,
+  "platformExercised": "linux",
+  "windowsExercised": false,
+  "build": "lf1-20261014-r10",
+  "defaultOffered": true,
+  "invalidAddressExplained": true,
+  "unreachableExplained": true,
+  "connectedOnline": true,
+  "pastedUrlReducedToOrigin": true,
+  "changeLabAndCancel": true,
+  "signOutAndBackIn": true,
+  "quitWhileConnectingMs": 53,
+  "plainQuitExits": true,
+  "logHasActionsNoSecrets": true,
+  "requestsIdentifyThemselves": true,
+  "labRequests": 5
+}
