@@ -8,6 +8,9 @@ version = "0.0.1"
 description = "Heterogeneous Evolution Strategies runtime for LLM post-training"
 requires-python = ">=3.12"
 
+[project.scripts]
+heteroes = "heteroes.v3.__main__:main"
+
 [project.optional-dependencies]
 # the ledger tests that search (Hypothesis) and simulate time (SimPy); without them those tests are skipped
 test = ["pytest", "hypothesis", "simpy"]

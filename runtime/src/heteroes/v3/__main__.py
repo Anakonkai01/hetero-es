@@ -20,7 +20,7 @@ def _resolve(spec, base):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
-        prog="python -m heteroes.v3", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+        prog="heteroes", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     commands = parser.add_subparsers(dest="command", required=True)
     run = commands.add_parser("run", help="run an experiment on this machine")

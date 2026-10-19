@@ -136,7 +136,8 @@ def test_a_declarative_scorer_needs_no_code(assets, tmp_path):
     assert plan["scorer"]["codeSha256"] is None and len(summaries) == 1
 
 
-def test_the_command_line_runs_a_spec_with_relative_paths(assets, tmp_path):
+@pytest.mark.parametrize("module", ["heteroes.v3", "heteroes"])
+def test_the_command_line_runs_a_spec_with_relative_paths(assets, tmp_path, module):
     spec = config_for(assets, generations=1)
     spec["data"]["path"] = "rows.jsonl"
     (tmp_path / "rows.jsonl").write_text((assets / "rows.jsonl").read_text())
@@ -145,7 +146,7 @@ def test_the_command_line_runs_a_spec_with_relative_paths(assets, tmp_path):
         [
             sys.executable,
             "-m",
-            "heteroes.v3",
+            module,
             "run",
             str(tmp_path / "spec.json"),
             "--out",
@@ -219,3 +220,14 @@ def test_every_candidate_can_be_audited_on_another_worker_before_updates(assets,
     assert not all(row["noop"] for row in summaries)
     _, _, children = check_run(out, assets)
     assert children == [row["child_sha256"] for row in summaries]
+
+
+def test_installed_entrypoint_loads_without_numerical_dependencies():
+    import tomllib
+
+    project = tomllib.loads((Path(__file__).resolve().parents[2] / "pyproject.toml").read_text())
+    target = project["project"]["scripts"]["heteroes"]
+    # A fresh process proves --help does not import Torch, unlike this test module.
+    script = "import importlib.metadata, sys; entry=importlib.metadata.EntryPoint(name='heteroes',value=sys.argv[1],group='console_scripts').load(); assert 'torch' not in sys.modules; entry(['--help'])"
+    result = subprocess.run([sys.executable, "-c", script, target], capture_output=True, text=True, timeout=15)
+    assert result.returncode == 0 and "run" in result.stdout

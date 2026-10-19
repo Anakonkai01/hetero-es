@@ -73,7 +73,45 @@ coefficients, alpha) let anybody replay the run to the same weights, bit for bit
 
 ## Limits
 
-- One machine. Running the same documents on a lab with remote workers is the product's job (web and agent, not yet on v3).
+- This CLI/SDK runner is for one machine. The staged managed v3 path is documented in `v3-product-runs.md`; it is not deployed to the live lab.
 - LoRA needs PEFT (`pip install peft==0.21.2`, the runtime's `lora` extra). LoRA runs are a different search distribution:
   do not compare them on one chart with full-parameter runs.
-- GPU runs and learning results are not shown by the tests, which use a tiny model on the CPU.
+- Unit tests use a tiny CPU model. Separate Qwen GPU qualification and its limits are recorded in `../../docs/evidence/2026-10-19-v3-gpu/`; it does not establish learning benefit.
+
+## Installed CLI and runnable example
+
+In a dedicated environment with the verified Torch/Transformers/NumPy dependencies
+already installed, install the local SDK with `python -m pip install --no-deps -e runtime`.
+Use `heteroes run spec.json --out runs/first`, `python -m heteroes run ...`, or the
+original `python -m heteroes.v3 run ...`; all three use the same runner. Default device
+is CPU. An explicit `--device cuda` selects CUDA. In this repository GPU work also
+requires owner authorization and `HETEROES_GPU_ACCEPTANCE=1`.
+
+`runtime/examples/v3/train.py` is a runnable SDK example with a separate
+`keyword_reward.py`. Supply a safetensors model directory and JSON/JSONL/CSV with
+`question` and `keyword` columns (at least ten distinct prompts for seeded splits):
+
+```bash
+PYTHONPATH=runtime/src python runtime/examples/v3/train.py \
+  --model-path /models/my-model --model-id my-org/my-model \
+  --dataset questions.jsonl --out runs/keyword --device cpu
+```
+
+`--lora` selects the example's q_proj/v_proj adapter configuration and requires the
+pinned PEFT extra. Edit ESConfig for another model's target modules, subset patterns,
+sigma schedule, population and batch. The example is a short mechanics check;
+meaningful experiments need a defined evaluation and adequate independent runs.
+
+## Python reward execution and identity
+
+Python rewards run directly in the coordinator process with its permissions. Imports
+also execute there. There is no sandbox. Use trusted code on your own coordinator;
+the shared lab accepts declarative scorers only. Define a named top-level function
+in a saved `.py` file; notebook-only functions, lambdas and closures are not supported.
+
+Return one finite numeric score per row in the input order. The coordinator averages
+these scores. An exception, NaN, infinity or wrong-length result aborts scoring; it
+never becomes reward zero. The plan hashes the scorer source file. Changes to imported
+helper modules, package versions, external services or mutable files are not all
+captured by that one hash: freeze and record those dependencies for reproducibility.
+Avoid time, unseeded randomness and network-dependent scoring in reproducible runs.
