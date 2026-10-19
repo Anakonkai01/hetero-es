@@ -1,4 +1,5 @@
 """Hourly consistent product metadata backup; recovery storage failure leaves a local copy."""
+import logging
 import ctypes
 import hashlib
 import json
@@ -55,7 +56,8 @@ def backup_loop(store,storage,stop):
     while not stop.wait(60):
         if time.time()-last<3600:continue
         try:create_metadata_backup(store,storage)
-        except Exception:pass
+        except Exception as error:
+            logging.getLogger(__name__).warning('Metadata backup failed: %s', type(error).__name__)
         last=time.time()
 
 

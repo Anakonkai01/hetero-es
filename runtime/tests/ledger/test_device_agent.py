@@ -125,7 +125,8 @@ def test_released_assignment_never_launches_a_delayed_worker(tmp_path,monkeypatc
 
 
 def test_resume_validates_checkpoint_preserves_ledger_and_rejects_old_epoch(tmp_path):
-    import hashlib,sqlite3
+    import hashlib
+    import sqlite3
     from heteroes.product.recovery import capture_point
     a=agent(tmp_path);a.enabled=True
     cfg={'runId':'b'*32,'workerIds':['test'],'workload':'arith16','decodeEngine':'hf_generate',
@@ -332,7 +333,8 @@ def test_a_worker_on_the_private_route_keeps_its_bulk_and_the_default_chain(tmp_
 
 
 def test_reachable_accepts_only_a_coordinator_that_says_it_is_up(tmp_path):
-    import json, threading
+    import json
+    import threading
     from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
     from heteroes.product.agent import reachable
     class Handler(BaseHTTPRequestHandler):
@@ -361,7 +363,8 @@ def test_reachable_accepts_only_a_coordinator_that_says_it_is_up(tmp_path):
 
 
 def test_agent_requests_carry_the_heteroes_user_agent(tmp_path):
-    import json, threading
+    import json
+    import threading
     from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
     from heteroes.http_transport import USER_AGENT
     from heteroes.product.agent import reachable, request

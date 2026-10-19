@@ -1,5 +1,7 @@
-from .policies import backup_policy
 """Local recovery storage. Manifest publication is the commit."""
+import logging
+from .migrations import initialize_recovery_schema, initialize_recovery_downloads_schema
+from .policies import backup_policy
 import hashlib
 import json
 import re
@@ -21,7 +23,7 @@ class RecoveryStorage:
         self.quota = quota_bytes
         self.lock = threading.RLock()
         with store.db() as db:
-            db.executescript('CREATE TABLE IF NOT EXISTS cloud_objects(sha TEXT PRIMARY KEY,size INTEGER NOT NULL,status TEXT NOT NULL,upload_plan TEXT,expires REAL);\n                CREATE TABLE IF NOT EXISTS recovery_points(id TEXT PRIMARY KEY,run_id TEXT NOT NULL,generation INTEGER NOT NULL,final INTEGER NOT NULL,status TEXT NOT NULL,manifest TEXT NOT NULL,error TEXT,created REAL NOT NULL);\n                CREATE TABLE IF NOT EXISTS cloud_refs(point_id TEXT NOT NULL,sha TEXT NOT NULL,PRIMARY KEY(point_id,sha));\n                CREATE TABLE IF NOT EXISTS cloud_requests(month TEXT PRIMARY KEY,class_a INTEGER NOT NULL,class_b INTEGER NOT NULL);')
+            initialize_recovery_downloads_schema(db)
         self.pending = set()
 
     def validate_manifest(self, m):
@@ -174,8 +176,8 @@ class RecoveryStorage:
         def work():
             try:
                 self.verify(point_id)
-            except Exception:
-                pass
+            except Exception as error:
+                logging.getLogger(__name__).warning('Recovery verification failed: %s', type(error).__name__)
             finally:
                 with self.lock:
                     self.pending.discard(point_id)
@@ -355,7 +357,7 @@ def install_storage_routes(app, store, storage, device_auth, user, scoped, autho
             store.audit(db, current['userId'], 'CLOUD_COPY_DELETED', point_id, body['workspaceId'])
         return {'deleted': True}
     with store.db() as db:
-        db.execute('CREATE TABLE IF NOT EXISTS cloud_downloads(digest TEXT PRIMARY KEY,user_id TEXT NOT NULL,session_digest TEXT NOT NULL,run_id TEXT NOT NULL,sha TEXT NOT NULL,expires REAL NOT NULL)')
+        initialize_recovery_schema(db)
 
     @app.post('/api/v1/artifacts/{artifact_id}/download-ticket')
     def ticket(artifact_id: str, response: Response, request: Request, current=Depends(scoped)):

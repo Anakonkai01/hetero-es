@@ -1,0 +1,9 @@
+ImportError while loading conftest '/home/pc5070ti/projects/heteroes/backend/tests/conftest.py'.
+backend/tests/conftest.py:6: in <module>
+    from backend.devices import AgentRuntime
+backend/devices.py:1: in <module>
+    from .device_models import command_capabilities, re_checkpoint, digest, SelfTest, EndpointUpdate, DeviceConfigurationUpdate, QualificationUpdate, Enrollment, Approval, Contribution, ProcessReport, Report, MonitoringEvent, GPUObservation, HostObservation, DiskObservation, TransportObservation, Telemetry, Poll, WorkerCommand
+E     File "/home/pc5070ti/projects/heteroes/backend/device_models.py", line 72
+E       if 2 in self.recipeVersions:
+E                                   ^
+E   IndentationError: unindent does not match any outer indentation level

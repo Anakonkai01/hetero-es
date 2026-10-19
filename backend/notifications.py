@@ -4,6 +4,7 @@ Nothing here is written by the code that does the work. Each look at the list fi
 (accounts, devices) and with experiments that ended, creating a row per fact (a unique key makes it happen once).
 Rows hold a kind and parameters, never English text, so the interface can translate them.
 """
+from .migrations import initialize_notifications_schema
 from datetime import datetime, timezone
 import json
 
@@ -30,7 +31,7 @@ class Notifications:
     def __init__(self, store):
         self.store = store
         with store.db() as db:
-            db.execute('CREATE TABLE IF NOT EXISTS notifications (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, kind TEXT NOT NULL, params TEXT NOT NULL, target TEXT NOT NULL, created TEXT NOT NULL, read_at TEXT, dedupe TEXT NOT NULL UNIQUE)')
+            initialize_notifications_schema(db)
             db.execute('CREATE INDEX IF NOT EXISTS notifications_user ON notifications(user_id, id)')
         self.start_following()
 

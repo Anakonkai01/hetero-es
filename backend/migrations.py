@@ -33,3 +33,49 @@ def migrate(db):
     db.execute("CREATE UNIQUE INDEX username ON users(json_extract(profile,'$.username'))")
     db.execute('INSERT INTO settings VALUES (?,?)',('dispatchHold','false'))
     db.execute('PRAGMA user_version=1')
+
+
+def initialize_agent_schema(store):
+    with store.db() as db:
+        db.execute('INSERT OR REPLACE INTO settings VALUES (?,?)', ('controlMode', 'agent-v2'))
+        db.executescript("\n                CREATE TABLE IF NOT EXISTS pairing_codes (digest TEXT PRIMARY KEY,owner TEXT NOT NULL,expires REAL NOT NULL,used INTEGER NOT NULL DEFAULT 0);\n                CREATE TABLE IF NOT EXISTS devices (id TEXT PRIMARY KEY,worker_id TEXT UNIQUE NOT NULL,owner TEXT NOT NULL,name TEXT NOT NULL,token_digest TEXT NOT NULL,status TEXT NOT NULL,compute_url TEXT NOT NULL,self_test TEXT NOT NULL,boot_id TEXT,seen REAL NOT NULL DEFAULT 0,enabled INTEGER NOT NULL DEFAULT 0,desired INTEGER NOT NULL DEFAULT 0,processes TEXT NOT NULL DEFAULT '[]');\n                CREATE TABLE IF NOT EXISTS assignments (id TEXT PRIMARY KEY,run_id TEXT UNIQUE NOT NULL,coordinator TEXT NOT NULL,epoch INTEGER NOT NULL,body TEXT NOT NULL,snapshot TEXT NOT NULL,released INTEGER NOT NULL DEFAULT 0);\n                CREATE TABLE IF NOT EXISTS device_reservations (device_id TEXT PRIMARY KEY,assignment_id TEXT NOT NULL);\n                CREATE TABLE IF NOT EXISTS physical_reservations (resource_id TEXT PRIMARY KEY,assignment_id TEXT NOT NULL);\n                CREATE TABLE IF NOT EXISTS device_commands (id TEXT PRIMARY KEY,device_id TEXT NOT NULL,dedupe TEXT NOT NULL UNIQUE,body TEXT NOT NULL,ack INTEGER NOT NULL DEFAULT 0,created REAL NOT NULL);\n                CREATE TABLE IF NOT EXISTS monitoring_events(sequence INTEGER PRIMARY KEY AUTOINCREMENT,event_id TEXT UNIQUE NOT NULL,assignment_id TEXT NOT NULL,body TEXT NOT NULL);\n                CREATE TABLE IF NOT EXISTS device_telemetry_history(device_id TEXT NOT NULL,boot_id TEXT NOT NULL,sampled_at REAL NOT NULL,received_at REAL NOT NULL,body TEXT NOT NULL,PRIMARY KEY(device_id,boot_id,sampled_at));\n                CREATE TABLE IF NOT EXISTS device_reports (device_id TEXT NOT NULL,assignment_id TEXT NOT NULL,sequence INTEGER NOT NULL,PRIMARY KEY(device_id,assignment_id,sequence));\n            ")
+        if 'telemetry' not in {r[1] for r in db.execute('PRAGMA table_info(devices)')}:
+            db.execute('ALTER TABLE devices ADD COLUMN telemetry TEXT')
+        if 'bulk_url' not in {r[1] for r in db.execute('PRAGMA table_info(devices)')}:
+            db.execute('ALTER TABLE devices ADD COLUMN bulk_url TEXT')
+        schema = db.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='assignments'").fetchone()[0]
+        if 'run_id TEXT UNIQUE' in schema:
+            db.executescript('\n                    BEGIN IMMEDIATE;\n                    ALTER TABLE assignments RENAME TO assignments_v2;\n                    CREATE TABLE assignments(id TEXT PRIMARY KEY,run_id TEXT NOT NULL,coordinator TEXT NOT NULL,\n                        epoch INTEGER NOT NULL,body TEXT NOT NULL,snapshot TEXT NOT NULL,released INTEGER NOT NULL DEFAULT 0);\n                    INSERT INTO assignments SELECT * FROM assignments_v2;\n                    DROP TABLE assignments_v2;\n                    COMMIT;\n                ')
+        db.execute('CREATE UNIQUE INDEX IF NOT EXISTS active_assignment_per_run ON assignments(run_id) WHERE released=0')
+        db.execute('CREATE UNIQUE INDEX IF NOT EXISTS assignment_epoch ON assignments(run_id,epoch)')
+        for row in db.execute('SELECT r.assignment_id,d.self_test FROM device_reservations r JOIN devices d ON d.id=r.device_id').fetchall():
+            resource = json.loads(row['self_test']).get('gpuUUID')
+            if resource:
+                old = db.execute('SELECT assignment_id FROM physical_reservations WHERE resource_id=?', (resource,)).fetchone()
+                if old and old[0] != row['assignment_id']:
+                    raise RuntimeError('Conflicting physical GPU ownership; keep dispatch held')
+                db.execute('INSERT OR IGNORE INTO physical_reservations VALUES (?,?)', (resource, row['assignment_id']))
+
+
+def initialize_product_schema(db):
+    db.executescript('\n                PRAGMA journal_mode=WAL;\n                CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, hash TEXT NOT NULL, profile TEXT NOT NULL);\n                CREATE TABLE IF NOT EXISTS sessions (digest TEXT PRIMARY KEY, user_id TEXT NOT NULL, expires REAL NOT NULL);\n                CREATE TABLE IF NOT EXISTS experiments (id TEXT PRIMARY KEY, owner TEXT NOT NULL, body TEXT NOT NULL, snapshot TEXT);\n                CREATE TABLE IF NOT EXISTS queue (sequence INTEGER PRIMARY KEY AUTOINCREMENT, run_id TEXT NOT NULL UNIQUE);\n                CREATE TABLE IF NOT EXISTS audit (sequence INTEGER PRIMARY KEY AUTOINCREMENT, actor TEXT, action TEXT, target TEXT, created TEXT);\n            ')
+
+
+def initialize_study_schema(db):
+    db.executescript('\n                CREATE TABLE IF NOT EXISTS study_assets(id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL,owner TEXT NOT NULL,kind TEXT NOT NULL,body TEXT NOT NULL);\n                CREATE TABLE IF NOT EXISTS study_uploads(id TEXT PRIMARY KEY,asset_id TEXT NOT NULL,name TEXT NOT NULL,object_sha TEXT NOT NULL,upload_key TEXT NOT NULL,size INTEGER NOT NULL);\n            ')
+
+
+def initialize_templates_schema(db):
+    db.execute('CREATE TABLE IF NOT EXISTS experiment_templates (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL, owner_id TEXT NOT NULL, name TEXT NOT NULL, config TEXT NOT NULL, created TEXT NOT NULL)')
+
+
+def initialize_notifications_schema(db):
+    db.execute('CREATE TABLE IF NOT EXISTS notifications (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, kind TEXT NOT NULL, params TEXT NOT NULL, target TEXT NOT NULL, created TEXT NOT NULL, read_at TEXT, dedupe TEXT NOT NULL UNIQUE)')
+
+
+def initialize_recovery_schema(db):
+    db.execute('CREATE TABLE IF NOT EXISTS cloud_downloads(digest TEXT PRIMARY KEY,user_id TEXT NOT NULL,session_digest TEXT NOT NULL,run_id TEXT NOT NULL,sha TEXT NOT NULL,expires REAL NOT NULL)')
+
+
+def initialize_recovery_downloads_schema(db):
+    db.executescript('CREATE TABLE IF NOT EXISTS cloud_objects(sha TEXT PRIMARY KEY,size INTEGER NOT NULL,status TEXT NOT NULL,upload_plan TEXT,expires REAL);\n                CREATE TABLE IF NOT EXISTS recovery_points(id TEXT PRIMARY KEY,run_id TEXT NOT NULL,generation INTEGER NOT NULL,final INTEGER NOT NULL,status TEXT NOT NULL,manifest TEXT NOT NULL,error TEXT,created REAL NOT NULL);\n                CREATE TABLE IF NOT EXISTS cloud_refs(point_id TEXT NOT NULL,sha TEXT NOT NULL,PRIMARY KEY(point_id,sha));\n                CREATE TABLE IF NOT EXISTS cloud_requests(month TEXT PRIMARY KEY,class_a INTEGER NOT NULL,class_b INTEGER NOT NULL);')

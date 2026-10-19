@@ -1,1 +1,1 @@
-export { RuntimeProfilePage as ProfilePage } from './RuntimePages';
+export { LabProfile as ProfilePage } from './LabProfile';

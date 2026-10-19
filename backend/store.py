@@ -1,5 +1,6 @@
-from .policies import dispatch_held, read_setting, set_disabled_workers
 """SQLite product state. Runtime ledgers remain owned by device agents."""
+from .migrations import initialize_product_schema
+from .policies import dispatch_held, read_setting, set_disabled_workers
 from contextlib import contextmanager
 from datetime import datetime, timezone
 import hashlib
@@ -30,14 +31,7 @@ class Store:
         self.hasher = PasswordHasher()
         self.last_error = None
         with self.db() as db:
-            db.executescript("""
-                PRAGMA journal_mode=WAL;
-                CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, hash TEXT NOT NULL, profile TEXT NOT NULL);
-                CREATE TABLE IF NOT EXISTS sessions (digest TEXT PRIMARY KEY, user_id TEXT NOT NULL, expires REAL NOT NULL);
-                CREATE TABLE IF NOT EXISTS experiments (id TEXT PRIMARY KEY, owner TEXT NOT NULL, body TEXT NOT NULL, snapshot TEXT);
-                CREATE TABLE IF NOT EXISTS queue (sequence INTEGER PRIMARY KEY AUTOINCREMENT, run_id TEXT NOT NULL UNIQUE);
-                CREATE TABLE IF NOT EXISTS audit (sequence INTEGER PRIMARY KEY AUTOINCREMENT, actor TEXT, action TEXT, target TEXT, created TEXT);
-            """)
+            initialize_product_schema(db)
             for name, password in passwords.items():
                 profile = {"userId": name, "username": name, "displayName": name.title(), "canCreateWorkspace": False}
                 # Bootstrap secrets seed an empty installation only. A renamed

@@ -7,6 +7,17 @@ from backend.devices import AgentRuntime
 from labkit import boot, draft, enable, login, pair, pending_commands, queued, submitted  # noqa: F401  (fixtures lab and setup: conftest.py)
 
 
+def test_poll_returns_the_current_boot_owner_contribution_choice(lab):
+    client, _, _, owner = lab
+    device, auth = pair(lab)
+    enable(lab, device, auth)
+    assert boot(client, auth, 'boot-1', contribution=True)['desiredContribution'] is True
+    response = client.post('/api/v1/devices/' + device['deviceId'] + '/contribution', headers=owner,
+                           json={'enabled': False, 'bootId': 'boot-1'})
+    assert response.status_code == 200
+    assert boot(client, auth, 'boot-1', contribution=True)['desiredContribution'] is False
+
+
 def test_offline_queue_and_boot_activation_are_independent(lab):
     c,s,r,a=lab;d,h=pair(lab)
     rid=queued(lab,d)

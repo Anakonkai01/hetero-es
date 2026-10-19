@@ -13,7 +13,8 @@ def test_qualification_rejects_reward_or_weight_drift_and_false_restore():
 
 
 def test_prediction_probe_rejects_different_texts_with_identical_reward():
-    import hashlib,json
+    import hashlib
+    import json
     from heteroes.product.qualification import verify_prediction
     outputs=[str(i) for i in range(16)]
     reference={'outputs':outputs,'outputsSha256':hashlib.sha256(json.dumps(outputs,separators=(',',':')).encode()).hexdigest(),'reward':.3125}

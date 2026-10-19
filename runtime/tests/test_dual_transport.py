@@ -76,7 +76,8 @@ def test_run_worker_refuses_no_bulk_with_a_bulk_url_or_without_replay(tmp_path):
 
 
 def test_run_worker_builds_a_replay_only_client_from_its_flag():
-    import argparse, importlib.util
+    import argparse
+    import importlib.util
     spec = importlib.util.spec_from_file_location('run_worker_script', Path(__file__).resolve().parents[1] / 'scripts' / 'run_worker.py')
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)

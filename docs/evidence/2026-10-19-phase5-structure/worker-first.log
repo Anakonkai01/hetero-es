@@ -1,0 +1,18 @@
+
+> build:worker
+> npm run build --workspace @heteroes/worker
+
+
+> @heteroes/worker@0.1.0 build
+> tsc --noEmit && vite build
+
+src/main.tsx(40,108): error TS2304: Cannot find name 'setError'.
+src/main.tsx(40,698): error TS2304: Cannot find name 'setError'.
+src/main.tsx(41,311): error TS2304: Cannot find name 'setError'.
+npm error Lifecycle script `build` failed with error:
+npm error code 2
+npm error path /home/pc5070ti/projects/heteroes/desktop/worker
+npm error workspace @heteroes/worker@0.1.0
+npm error location /home/pc5070ti/projects/heteroes/desktop/worker
+npm error command failed
+npm error command sh -c tsc --noEmit && vite build

@@ -1,10 +1,10 @@
-from .policies import dispatch_held
-from .config import load_config
 """Read-only preflight for a Local Lab Server. It changes no lab file (SQLite may create its
 -shm coordination file when it opens the WAL database); exit status 1 if any check FAILs.
 
     python -m backend.doctor --private ~/.config/heteroes-m2
 """
+from .policies import dispatch_held
+from .config import load_config
 import argparse
 from pathlib import Path
 import shutil

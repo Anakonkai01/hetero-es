@@ -3,6 +3,7 @@
 A template holds only plain settings (sizes, rates, decoder, GPU names), never model, dataset or device ids, which can go
 stale; the experiment wizard still validates everything when a run is created from it.
 """
+from .migrations import initialize_templates_schema
 from datetime import datetime, timezone
 import json
 import uuid
@@ -52,7 +53,7 @@ def clean_config(config):
 
 def install_template_routes(app, store, scoped):
     with store.db() as db:
-        db.execute('CREATE TABLE IF NOT EXISTS experiment_templates (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL, owner_id TEXT NOT NULL, name TEXT NOT NULL, config TEXT NOT NULL, created TEXT NOT NULL)')
+        initialize_templates_schema(db)
 
     def present(row):
         owner = store.profile(row['owner_id']) or {}

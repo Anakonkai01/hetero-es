@@ -52,7 +52,8 @@ def test_restore_publication_refuses_an_empty_competing_destination(tmp_path):
 
 
 def test_ntfs_unsupported_rename_publishes_manifest_last_and_refuses_existing(tmp_path,monkeypatch):
-    import ctypes,errno
+    import ctypes
+    import errno
     from types import SimpleNamespace
     def unsupported(*args):ctypes.set_errno(errno.EINVAL);return -1
     monkeypatch.setattr(ctypes,'CDLL',lambda *args,**kwargs:SimpleNamespace(renameat2=unsupported))

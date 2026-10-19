@@ -14,6 +14,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
+import {translationKeysUsed} from './translation-usage.mjs';
 import { translations } from '../packages/product-ui/src/translations.ts';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -71,10 +72,14 @@ for (const file of files.filter(inScope)) {
     })(source);
 }
 
+const literalUsage = translationKeysUsed(root);
+const unused = Object.keys(translations).filter(key => !literalUsage.has(key));
 const missing = [...used].filter(([key]) => needsTranslation(key) && translations[key] === undefined);
 const list = process.argv.includes('--list');
 console.log(`t() keys: ${used.size}; computed (not checked here): ${dynamic}; missing Vietnamese: ${missing.length}; untranslated text outside t(): ${bare.length}`);
 for (const [key, place] of missing.slice(0, list ? Infinity : 15)) console.log(`  MISSING ${place}  ${JSON.stringify(key)}`);
 for (const [place, text] of bare.slice(0, list ? Infinity : 15)) console.log(`  BARE    ${place}  ${JSON.stringify(text)}`);
 if (!list && (missing.length > 15 || bare.length > 15)) console.log('  … run with --list for everything');
-process.exit(missing.length || bare.length ? 1 : 0);
+for (const key of unused.slice(0,list ? Infinity : 15)) console.log(`  UNUSED ${JSON.stringify(key)}`);
+console.log(`Unused translation keys: ${unused.length}`);
+process.exit(missing.length || bare.length || unused.length ? 1 : 0);

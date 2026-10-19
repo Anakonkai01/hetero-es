@@ -1,5 +1,5 @@
-from .policies import dispatch_held
 """CPU deployment validation and public entrypoint configuration. No GPU imports."""
+from .policies import dispatch_held
 import json
 import os
 from pathlib import Path

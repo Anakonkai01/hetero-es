@@ -1,4 +1,5 @@
 """Workspace-scoped pinned models, immutable data and private transfer grants."""
+from .migrations import initialize_study_schema
 import hashlib
 import json
 import uuid
@@ -28,10 +29,7 @@ class Registry:
     def __init__(self,store):
         self.store=store
         with store.db() as db:
-            db.executescript('''
-                CREATE TABLE IF NOT EXISTS study_assets(id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL,owner TEXT NOT NULL,kind TEXT NOT NULL,body TEXT NOT NULL);
-                CREATE TABLE IF NOT EXISTS study_uploads(id TEXT PRIMARY KEY,asset_id TEXT NOT NULL,name TEXT NOT NULL,object_sha TEXT NOT NULL,upload_key TEXT NOT NULL,size INTEGER NOT NULL);
-            ''')
+            initialize_study_schema(db)
 
     def list(self,workspace,kind):
         with self.store.db() as db:

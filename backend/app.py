@@ -1,65 +1,36 @@
-from .policies import backup_policy as validated_backup_policy, dispatch_held, active_profile, v2_qualification, storage_status
+from .routes_auth import install_routes as install_auth_routes
+from .routes_inventory import install_routes as install_inventory_routes
+from .routes_experiments import install_routes as install_experiments_routes
+from .routes_history import install_routes as install_history_routes
+from .routes_web import install_routes as install_web_routes
+from functools import partial
+from .validation import validate_configuration
+from .policies import active_profile
 from .config import load_config
 from contextlib import asynccontextmanager
 import hashlib
 import json
 import os
 from pathlib import Path
-import secrets
 import threading
 import time
 
-from argon2.exceptions import VerificationError
-from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
-from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
-from pydantic import BaseModel, ConfigDict, Field
 
-from .store import ACTIVE, TERMINAL, Store, now
+from .store import Store
 from .lab import install_lab_routes
 from .live import LiveStreams
 from .templates import install_template_routes
 from .notifications import install_notification_routes
-from .timeline import build_timeline
-from .throttle import Throttle, client_address
+from .throttle import Throttle
 
 
-class Login(BaseModel):
-    username: str = Field(max_length=100)
-    password: str = Field(max_length=200)
 
 
-class BackupPolicy(BaseModel):
-    model_config=ConfigDict(extra='forbid')
-    interval:int=Field(ge=1,le=1000,strict=True)
-    retain:int=Field(ge=1,le=1000,strict=True)
 
 
-class Configuration(BaseModel):
-    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
-    name: str = Field(min_length=3, max_length=160)
-    modelName: str
-    modelArtifactId: str = "qwen-pinned"
-    schedulerPolicy: str = "greedy"
-    syncMode: str = "synchronous"
-    workerIds: list[str] = Field(min_length=1, max_length=10)
-    task: str = "arith16"
-    maxGenerations: int = Field(default=3, ge=1, le=1000, strict=True)
-    candidatesPerGeneration: int = Field(default=8, ge=2, le=256, strict=True)
-    alpha: float = Field(default=.001, gt=0, le=1)
-    sigma: float = Field(default=.001, gt=0, le=1)
-    decodeEngine: str = "hf_generate"
-    datasetIds: list[str] = Field(default_factory=list)
-    coordinatorDeviceId: str | None = None
-    backupPolicy: dict | None = None
-    recipeVersion: int = Field(default=1,ge=1,le=2,strict=True)
-    batchSize: int = Field(default=32,ge=1,le=1024,strict=True)
-    batchSeed: int = Field(default=11,ge=0,lt=2**53,strict=True)
-    sigmaSchedule: str = 'constant'
-    sigmaMinimum: float = Field(default=.00025,gt=0,le=1)
-    maxNewTokens: int = Field(default=512,ge=1,le=2048,strict=True)
-    validationInterval: int = Field(default=1,ge=1,le=1000,strict=True)
 
 
 def create_app(path, passwords, runtime, dispatch=True, web_directory=None, downloads_directory=None, writer_lock=None):
@@ -139,362 +110,49 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
         except Exception:
             raise HTTPException(503, "Runtime control service unavailable") from None
 
-    def validate(config, current):
-        current = scoped(current,current['workspaceId'])
-        cap = capabilities()
-        body = config.model_dump()
-        co = next((d for d in runtime.devices() if d['deviceId']==body['coordinatorDeviceId']),None)
-        if not co or co['approvalStatus']!='APPROVED' or co['workspaceId']!=current['workspaceId'] or not co['selfTest']['coordinator']:
-            raise HTTPException(422, 'Select an approved coordinator in this workspace')
-        try:
-            body['backupPolicy'] = validated_backup_policy(body.get('backupPolicy') or {'interval':1,'retain':3})
-        except ValueError as error:
-            raise HTTPException(422, str(error)) from None
-        if body['recipeVersion']==2:
-            model=registry.get(body['modelArtifactId'],current['workspaceId'],'model')
-            if model['status'] not in ('READY','REGISTERED') or model['reference']!=body['modelName']:raise HTTPException(422,'Model is unavailable or its name differs')
-            if len(body['datasetIds'])!=1:raise HTTPException(422,'Select one frozen dataset')
-            data=registry.get(body['datasetIds'][0],current['workspaceId'],'dataset')
-            if body['batchSize']>data['counts']['train'] or body['sigmaSchedule'] not in ('constant','cosine') or body['sigmaMinimum']>body['sigma']:
-                raise HTTPException(422,'Invalid batch size or sigma schedule')
-            if body['task']!='text_math_v2' or body['decodeEngine']!='hf_generate':raise HTTPException(422,'Recipe v2 uses exact math and the HF decoder')
-            selected=[d for d in runtime.devices() if d['deviceId']==body['coordinatorDeviceId'] or d['workerId'] in body['workerIds']]
-            for d in selected:
-                profile=d['selfTest']
-                if v2_qualification(profile, model['manifestHash']) == 'recipe':raise HTTPException(422,'Selected device requires Recipe v2 qualification; Windows remains v1 worker-only')
-                if v2_qualification(profile, model['manifestHash']) == 'model':raise HTTPException(422,'Qualify every selected device for this pinned model')
-            body.update(modelManifest=model['manifest'],modelSource=model['source'],datasetObjectSha256=data['objectSha256'],datasetIdentity=data['identity'])
-        else:
-            if body["modelName"] != cap["modelId"] or body["modelArtifactId"] != "qwen-pinned":
-                raise HTTPException(422, "Only the pinned Qwen model is supported for Recipe v1")
-            if body["task"] not in cap["workloads"] or body["decodeEngine"] not in ("hf_generate", "hf_compact") or body["datasetIds"]:
-                raise HTTPException(422, "Select a built-in workload and decoder for Recipe v1")
-            for key in ('recipeVersion','batchSize','batchSeed','sigmaSchedule','sigmaMinimum','maxNewTokens','validationInterval'):
-                body.pop(key)
-        if body["schedulerPolicy"] not in cap["schedulerPolicies"] or body["syncMode"] not in cap["syncModes"]:
-            raise HTTPException(422, "Unsupported scheduling policy or synchronization mode")
-        if len(set(body["workerIds"])) != len(body["workerIds"]) or not set(body["workerIds"]) <= set(cap["workerIds"]):
-            raise HTTPException(422, "Select configured workers without duplicates")
-        if set(body["workerIds"]) & set(cap.get("quarantinedWorkerIds", [])):
-            raise HTTPException(422, "Selected worker is quarantined after a restore mismatch")
-        store.ensure_workers(cap['workerIds'])
-        if not set(body['workerIds']) <= set(store.assignments(current['workspaceId'])):
-            raise HTTPException(422, 'Select GPUs assigned to this workspace')
-        return body
-
-    @app.get("/api/v1/health")
-    def health():
-        ui_url=os.environ.get('HETEROES_UI_URL')
-        config={}
-        private_root=os.environ.get('HETEROES_PRIVATE_CONFIG')
-        if private_root:
-            # Quick URLs can rotate while this CPU service retains its identity.
-            try:
-                config=load_config(private_root)
-                ui_url=config.get('publicWebUrl') or ui_url
-            except (OSError,ValueError):
-                pass
-        backend=getattr(runtime,'storage_backend',None)
-        return {"ok": True, "dataSource": "real", "runtimeIssue": store.last_error,
-                # Shipped r10 apps require these protocol capability fields.
-                "agentMode":True,
-                'deviceConfiguration':True,
-                'recipeVersions':[1,2],
-                **storage_status(runtime),
-                "serverInstanceId":getattr(runtime,'server_instance_id',None),
-                **({"uiUrl":ui_url} if ui_url else {}),
-                **({'privateLabUrl':config.get('bulkApiUrl',config['apiUrl'])} if config.get('apiUrl') else {})}
-
-    def authenticate(body: Login):
-        with store.db() as db:
-            row = db.execute("SELECT id,hash,profile FROM users WHERE json_extract(profile,'$.username')=?", (body.username,)).fetchone()
-            try:
-                store.hasher.verify(row["hash"] if row else store.hasher.hash("unknown-user"), body.password)
-            except VerificationError:
-                raise HTTPException(401, "Invalid username or password") from None
-            if not row:
-                raise HTTPException(401, "Invalid username or password")
-            token = secrets.token_urlsafe(32)
-            db.execute("INSERT INTO sessions VALUES (?,?,?)", (hashlib.sha256(token.encode()).hexdigest(), row['id'], time.time()+43200))
-            return {**session(json.loads(row["profile"])), "accessToken": token}
-
-    @app.post("/api/v1/auth/login")
-    def sign_in(body: Login, request: Request):
-        address = client_address(request.client.host if request.client else None, request.headers)
-        user_key = (address, body.username.lower())
-        state = app.state
-        wait = max(state.login_failures.retry_after(user_key), state.login_failures_by_address.retry_after(address))
-        if wait:
-            raise HTTPException(429, f"Too many attempts. Try again in {wait} seconds.", headers={"Retry-After": str(wait)})
-        try:
-            result = authenticate(body)
-        except HTTPException as error:
-            if error.status_code == 401:
-                state.login_failures.record(user_key)
-                state.login_failures_by_address.record(address)
-            raise
-        state.login_failures.clear(user_key)
-        return result
-
-    @app.get("/api/v1/auth/session")
-    def get_session(current=Depends(user)):
-        return session(current)
-
-    @app.post("/api/v1/auth/logout", status_code=204)
-    def sign_out(current=Depends(user), authorization: str = Header()):
-        with store.db() as db:
-            db.execute("DELETE FROM sessions WHERE digest=?", (hashlib.sha256(authorization[7:].encode()).hexdigest(),))
-        return Response(status_code=204)
+    validate = partial(validate_configuration, store=store, runtime=runtime, registry=registry, scoped=scoped, capabilities=capabilities)
 
 
-    @app.get("/api/v1/capabilities")
-    def get_capabilities(current=Depends(scoped)):
-        cap=capabilities()
-        assigned=set(store.assignments(current['workspaceId'],include_disabled=True))
-        return {**cap,'workerIds':store.assignments(current['workspaceId']),
-                'coordinatorDevices':[{'deviceId':d['deviceId'],'workerId':d['workerId']} for d in runtime.devices() if d['workspaceId']==current['workspaceId'] and d['approvalStatus']=='APPROVED' and d['selfTest']['coordinator']],
-                'quarantinedWorkerIds':[w for w in cap.get('quarantinedWorkerIds',[]) if w in assigned]}
-
-    @app.get("/api/v1/resources")
-    def resources(current=Depends(scoped)):
-        with store.db() as db:
-            members = [{"user": {k:v for k,v in json.loads(row['profile']).items() if k not in ('platformAdmin','accountStatus')}, "role": row['role']}
-                for row in db.execute('SELECT u.profile,m.role FROM memberships m JOIN users u ON u.id=m.user_id WHERE workspace_id=?',(current['workspaceId'],))]
-        assigned = set(store.assignments(current['workspaceId'],include_disabled=True))
-        busy = list({worker for run in store.list() if run["status"] in ACTIVE for worker in run["workerIds"]} & assigned)
-        return {"members": members, "busyWorkerIds": busy, "reservedWorkerIds": busy}
-
-    @app.get("/api/v1/models")
-    def models(current=Depends(scoped)):
-        cap = capabilities()
-        return [{"modelArtifactId": "qwen-pinned", "workspaceId": current['workspaceId'], "ownerUserId": "runtime", "name": cap["modelId"],
-                 "reference": cap["modelId"], "revision": cap["modelRevision"], "source": "REFERENCE", "status": "REGISTERED"}]+registry.list(current['workspaceId'],'model')
-
-    @app.get("/api/v1/workers")
-    def workers(current=Depends(scoped)):
-        try:
-            values = runtime.workers()
-        except Exception:
-            raise HTTPException(503, "Worker registry unavailable") from None
-        # Shared GPU ownership is visible; another participant's experiment details are private.
-        permitted = {body["experimentId"] for body in visible(current)}
-        assigned = set(store.assignments(current['workspaceId'],include_disabled=True))
-        enabled=set(store.assignments(current['workspaceId']))
-        return [{**value,'contributionEnabled':value['workerId'] in enabled and value.get('contributionEnabled',True), "allocatedTo": value.get("allocatedTo") if value.get("allocatedTo") in permitted else
-                 "Workspace pool busy" if value.get("allocatedTo") else None} for value in values if value['workerId'] in assigned]
 
 
-    @app.get("/api/v1/workers/{worker_id}")
-    def worker(worker_id: str, current=Depends(scoped)):
-        value = next((value for value in workers(current) if value["workerId"] == worker_id), None)
-        if not value:
-            raise HTTPException(404, "Worker not found")
-        return value
-
-    @app.get("/api/v1/experiments")
-    def experiments(current=Depends(scoped)):
-        return visible(current)
-
-    @app.post("/api/v1/experiments")
-    def create(body: Configuration, current=Depends(scoped)):
-        with store.lock:
-            return store.create(current["userId"], validate(body,current),current['workspaceId'])
-
-    @app.get("/api/v1/experiments/{run_id}")
-    def experiment(run_id: str, current=Depends(scoped)):
-        return authorized(run_id, current)
-
-    @app.get("/api/v1/experiments/{run_id}/timeline")
-    def run_timeline(run_id: str, current=Depends(scoped)):
-        return build_timeline(authorized(run_id, current), store.snapshot(run_id))
-
-    @app.get("/api/v1/experiments/{run_id}/stream")
-    def run_stream(run_id: str, current=Depends(scoped)):
-        authorized(run_id, current)
-        if not app.state.live.acquire():
-            raise HTTPException(429, "Too many live views are open. Close one and try again.")
-        return StreamingResponse(app.state.live.frames(store, run_id), media_type="text/event-stream",
-                                 headers={"Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no"})
-
-    @app.patch("/api/v1/experiments/{run_id}")
-    def edit(run_id: str, request: dict, current=Depends(scoped)):
-        with store.db() as db:
-            old = authorized(run_id, current)
-            if old["status"] != "DRAFT":
-                raise HTTPException(409, "Submitted configuration is immutable")
-            try:
-                body = validate(Configuration(**request),current)
-            except ValueError:
-                raise HTTPException(422, "Invalid configuration") from None
-            digest = hashlib.sha256(json.dumps(body, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
-            old.update(**body, configHash=digest)
-            store.save(db, old)
-            store.audit(db, current["userId"], "EDIT", run_id,current['workspaceId'])
-            return old
-
-    @app.post("/api/v1/experiments/{run_id}/submit")
-    def submit(run_id: str, current=Depends(scoped)):
-        with store.db() as db:
-            body = authorized(run_id, current)
-            if body["status"] == "DRAFT":
-                if dispatch_held(db):
-                    raise HTTPException(409,'Submissions are held for maintenance or restored deployment review')
-                if reason := store.eligibility(db,body):
-                    raise HTTPException(409,reason)
-                body["status"] = "QUEUED"
-                db.execute("INSERT INTO queue(run_id) VALUES (?)", (run_id,))
-                store.save(db, body)
-                store.audit(db, current["userId"], "SUBMIT", run_id,current['workspaceId'])
-            elif body["status"] in TERMINAL:
-                raise HTTPException(409, "Experiment already finished")
-            return body
-
-    @app.post("/api/v1/experiments/{run_id}/cancel")
-    def cancel(run_id: str, current=Depends(scoped)):
-        with store.db() as db:
-            body = authorized(run_id, current)
-            if body["status"] in TERMINAL:
-                return body
-            body["cancelRequested"] = True
-            if body["status"] in ("DRAFT", "QUEUED", "PAUSED"):
-                body.update(status="CANCELLED", completedAt=now())
-                db.execute("DELETE FROM queue WHERE run_id=?", (run_id,))
-            else:
-                body["status"] = "CANCELLING"
-            store.save(db, body)
-            store.audit(db, current["userId"], "CANCEL", run_id,current['workspaceId'])
-            return body
-
-    @app.delete("/api/v1/experiments/{run_id}", status_code=204)
-    def archive(run_id: str, current=Depends(scoped)):
-        with store.db() as db:
-            body = authorized(run_id, current)
-            if body["status"] not in TERMINAL | {"DRAFT"}:
-                raise HTTPException(409, "Cancel and wait for the experiment to finish before archiving")
-            body["archivedAt"] = now()
-            store.save(db, body)
-            store.audit(db, current["userId"], "ARCHIVE", run_id,current['workspaceId'])
-        return Response(status_code=204)
-
-    @app.get("/api/v1/experiments/{run_id}/generations")
-    def generations(run_id: str, current=Depends(scoped)):
-        authorized(run_id, current)
-        return store.snapshot(run_id)["generations"]
-
-    @app.get("/api/v1/experiments/{run_id}/generations/{generation_id}")
-    def generation(run_id: str, generation_id: str, current=Depends(scoped)):
-        value = next((value for value in generations(run_id, current) if value["generationId"] == generation_id), None)
-        if not value:
-            raise HTTPException(404, "Generation not found")
-        return value
-
-    def lookup(identifier, key, collection, current):
-        run_id = identifier.split(".", 1)[0]
-        authorized(run_id, current)
-        value = next((item for item in store.snapshot(run_id)[collection] if item[key] == identifier), None)
-        if not value:
-            raise HTTPException(404, "Object not found")
-        return value
-
-    @app.get("/api/v1/generations/{generation_id}/candidates")
-    def candidates(generation_id: str, current=Depends(scoped)):
-        run_id = generation_id.split(".", 1)[0]
-        authorized(run_id, current)
-        return [item for item in store.snapshot(run_id)["candidates"] if item["generationId"] == generation_id]
-
-    @app.get("/api/v1/candidates/{candidate_id}")
-    def candidate(candidate_id: str, current=Depends(scoped)):
-        return lookup(candidate_id, "candidateId", "candidates", current)
-
-    @app.get("/api/v1/attempts/{attempt_id}")
-    def attempt(attempt_id: str, current=Depends(scoped)):
-        return lookup(attempt_id, "attemptId", "attempts", current)
-
-    @app.get("/api/v1/events")
-    def event_list(current=Depends(scoped)):
-        from datetime import datetime, timezone
-        result = []
-        for run in visible(current):
-            for index, event in enumerate(store.snapshot(run["experimentId"])["events"]):
-                result.append({"eventId": f"{run['experimentId']}.e{index}", "experimentId": run["experimentId"],
-                    "timestamp": datetime.fromtimestamp(event.get("t", 0), timezone.utc).isoformat(),
-                    "eventType": event["event"], "severity": "ERROR" if "error" in event["event"] else
-                    "WARNING" if "unavailable" in event["event"] or "unknown" in event["event"] else "INFO",
-                    "message": event.get("error", event["event"].replace("_", " ")), "workerId": event.get("worker_id"),
-                    "candidateId": event.get("uiCandidateId"),
-                    "generationId": f"{run['experimentId']}.g{event['generation']}" if "generation" in event else None,
-                    "details": event})
-        return sorted(result, key=lambda item: item["timestamp"])[-2000:]
-
-    @app.get("/api/v1/artifacts")
-    def artifact_list(current=Depends(scoped)):
-        return [item for run in visible(current) for item in store.snapshot(run["experimentId"])["artifacts"]]
-
-    @app.get("/api/v1/artifacts/{artifact_id}/download")
-    def download(artifact_id: str, current=Depends(scoped)):
-        artifact = lookup(artifact_id, "artifactId", "artifacts", current)
-        return StreamingResponse(runtime.artifact(artifact["experimentId"], artifact["name"]),
-            media_type="application/octet-stream", headers={"Content-Disposition": f'attachment; filename="{artifact["name"]}"'})
-
-    @app.get("/api/v1/audit")
-    def audit(current=Depends(scoped)):
-        with store.db() as db:
-            return [{"auditId": str(row["sequence"]), "workspaceId": row['workspace_id'], "actorUserId": row["actor"],
-                    "action": row["action"], "targetId": row["target"], "createdAt": row["created"]}
-                    for row in db.execute("SELECT * FROM audit WHERE workspace_id=? ORDER BY sequence DESC LIMIT 100",(current['workspaceId'],))
-                    if current['workspaceRole']=='ADMIN' or row["actor"] == current["userId"]]
-
-    @app.get("/api/v1/datasets")
-    def datasets(current=Depends(scoped)):
-        return registry.list(current['workspaceId'],'dataset')
 
 
-    @app.post('/api/v1/experiments/{run_id}/pause')
-    def pause(run_id:str,current=Depends(scoped)):
-        with store.db() as db:
-            db.execute('BEGIN IMMEDIATE')
-            body=authorized(run_id,current)
-            if body['status']=='PAUSED':return body
-            if body.get('cancelRequested') or body['status'] not in ('STARTING','RUNNING','PAUSING'):
-                raise HTTPException(409,'Pause requires a running experiment')
-            runtime.require_command(db,body['coordinatorDeviceId'],'PAUSE_ASSIGNMENT')
-            runtime.pause(run_id,db=db)
-            body.update(pauseRequested=True,status='PAUSING')
-            store.save(db,body)
-            store.audit(db,current['userId'],'PAUSE_REQUESTED',run_id,body['workspaceId'])
-        return body
 
-    @app.post('/api/v1/experiments/{run_id}/resume')
-    def resume(run_id:str,current=Depends(scoped)):
-        with store.db() as db:
-            db.execute('BEGIN IMMEDIATE')
-            body=authorized(run_id,current)
-            if body.get('resumeRequested') and body['status'] in ('QUEUED','STARTING'):return body
-            row=db.execute('SELECT released,snapshot FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1',(run_id,)).fetchone()
-            if body['status']!='PAUSED' or not row or not row['released'] or json.loads(row['snapshot'])['state']['status']!='PAUSED':
-                raise HTTPException(409,'Wait for the completed checkpoint and confirmed resource release')
-            if reason:=store.eligibility(db,body):raise HTTPException(409,reason)
-            body.update(status='QUEUED',resumeRequested=True,pauseRequested=False,cancelRequested=False)
-            body.pop('waitingReason',None)
-            store.save(db,body)
-            db.execute('INSERT OR IGNORE INTO queue(run_id) VALUES (?)',(run_id,))
-            store.audit(db,current['userId'],'RESUME_REQUESTED',run_id,body['workspaceId'])
-        return body
 
-    @app.patch('/api/v1/experiments/{run_id}/backup-policy')
-    def backup_policy(run_id:str,policy:BackupPolicy,current=Depends(scoped)):
-        with store.db() as db:
-            body=authorized(run_id,current)
-            if body['status'] in TERMINAL:raise HTTPException(409,'Experiment is already finished')
-            assignment=db.execute('SELECT id,coordinator,epoch,released FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1',(run_id,)).fetchone()
-            if assignment and not assignment['released']:
-                runtime.require_command(db,assignment['coordinator'],'UPDATE_BACKUP_POLICY')
-                runtime.enqueue(db,assignment['coordinator'],'UPDATE_BACKUP_POLICY',{'assignmentId':assignment['id'],'epoch':assignment['epoch'],'policy':policy.model_dump()},'backup-policy:'+secrets.token_hex(16))
-            body['requestedBackupPolicy']=policy.model_dump()
-            store.save(db,body)
-            store.audit(db,current['userId'],'BACKUP_POLICY_REQUESTED',run_id,body['workspaceId'])
-        return {'policy':policy.model_dump(),'appliesBeforeNextGeneration':True}
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    install_auth_routes(app, store, user, session)
+    install_inventory_routes(app, store, runtime, scoped, visible, capabilities, registry)
+    install_experiments_routes(app, store, runtime, scoped, visible, authorized, validate)
+    install_history_routes(app, store, runtime, scoped, visible, authorized)
 
     install_lab_routes(app,store,user,scoped,runtime)
     install_template_routes(app,store,scoped)
@@ -513,42 +171,7 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
         if hasattr(runtime.storage_backend,'install_routes'):
             runtime.storage_backend.install_routes(app)
 
-    if web_directory is not None:
-        web = Path(web_directory).resolve(strict=True)
-        if not (web / 'index.html').is_file():
-            raise ValueError('Built web application is missing')
-        app.mount('/assets', StaticFiles(directory=web / 'assets'), name='web-assets')
-        if downloads_directory is not None:
-            @app.get('/downloads/manifest.json',include_in_schema=False)
-            def installer_manifest():
-                manifest=json.loads((Path(downloads_directory)/'manifest.json').read_text())
-                private_root=os.environ.get('HETEROES_PRIVATE_CONFIG')
-                if private_root:
-                    config=load_config(private_root)
-                    # publicDownloads: the operator serves installers on the public origin too.
-                    if config.get('publicWebUrl') and not config.get('publicDownloads'):
-                        bulk=config.get('bulkApiUrl',config.get('apiUrl'))
-                        manifest['privateTransferRequired']=True
-                        for group in ('installers','serverInstallers'):
-                            for item in manifest.get(group,[]):
-                                item['url']=bulk+'/downloads/'+Path(item['name']).name
-                return manifest
-            # The publisher links installers from another disk; Starlette refuses such symlinks by default.
-            # Path traversal is still rejected: the check then compares the link's own location.
-            app.mount('/downloads',StaticFiles(directory=downloads_directory,follow_symlink=True),name='worker-downloads')
-        else:
-            @app.get('/downloads/manifest.json',include_in_schema=False)
-            def no_installers():
-                return {'version':'0.1.0','privateTrial':True,'installers':[]}
-
-        @app.get('/{route:path}', include_in_schema=False)
-        def web_page(route: str):
-            if route == 'api' or route.startswith(('api/', 'assets/', 'downloads/')):
-                raise HTTPException(404, 'Unknown endpoint')
-            candidate = web / route
-            if candidate.is_file() and candidate.resolve().is_relative_to(web):
-                return FileResponse(candidate)
-            return FileResponse(web / 'index.html', headers={'Cache-Control':'no-cache'})
+    install_web_routes(app, web_directory, downloads_directory)
     return app
 
 

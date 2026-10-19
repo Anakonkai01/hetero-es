@@ -1,6 +1,6 @@
+import { Status,useProduct } from '@heteroes/product-ui';
 import type { ReactNode } from 'react';
-import { Status, useProduct } from '@heteroes/product-ui';
-import type { Gauge, StationView } from './station';
+import type { Gauge,StationView } from './station';
 
 const BLOCKERS: Record<string, string> = {
     approval: 'Waiting for administrator approval.',

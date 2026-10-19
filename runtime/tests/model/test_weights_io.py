@@ -366,7 +366,7 @@ def test_prune_keeps_only_the_named_versions_and_removes_the_other_weights_files
 def test_prune_leaves_everything_that_is_not_a_published_weights_file(tmp_path):
     (tmp_path / f"{'a' * 64}.bin").write_bytes(b"x")
     (tmp_path / "notes.txt").write_text("keep me")
-    (tmp_path / f".tmp-1-abc").write_bytes(b"in use by a publication")              # a temporary file may belong to a write in progress
+    (tmp_path / ".tmp-1-abc").write_bytes(b"in use by a publication")              # a temporary file may belong to a write in progress
     (tmp_path / "short.bin").write_bytes(b"x")                                      # not named after a SHA-256
     (tmp_path / "sub").mkdir()
     prune_published(tmp_path, keep=[])

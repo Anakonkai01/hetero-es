@@ -1,5 +1,5 @@
-from .config import load_config
 """CPU-only packaged Lab Server entry point. Bootstrap secrets arrive on stdin."""
+from .config import load_config
 import argparse
 import ipaddress
 import json

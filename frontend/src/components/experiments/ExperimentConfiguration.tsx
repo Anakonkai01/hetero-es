@@ -1,1 +1,1 @@
-export { RuntimeConfiguration as ExperimentConfiguration } from './RuntimeExperiment';
+export { RuntimeConfiguration as ExperimentConfiguration } from './RuntimeConfiguration';

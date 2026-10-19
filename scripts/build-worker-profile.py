@@ -4,7 +4,15 @@
 Reports must be resolved for their target OS (pip --platform alone does not change
 PEP 508 environment markers). No code from reports is executed by this generator.
 """
-import argparse,concurrent.futures,gzip,hashlib,json,pathlib,tarfile,urllib.request,urllib.parse
+import argparse
+import concurrent.futures
+import gzip
+import hashlib
+import json
+import pathlib
+import tarfile
+import urllib.request
+import urllib.parse
 
 
 def get_size(url):

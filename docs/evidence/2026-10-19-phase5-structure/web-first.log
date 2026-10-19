@@ -1,0 +1,17 @@
+
+> build:web
+> npm run build --workspace frontend
+
+
+> frontend@0.0.0 build
+> tsc -b && vite build
+
+src/components/experiments/RuntimeControls.tsx(43,42): error TS2304: Cannot find name 'RuntimeConfiguration'.
+src/components/experiments/RuntimeControls.tsx(43,115): error TS7006: Parameter 'configuration' implicitly has an 'any' type.
+npm error Lifecycle script `build` failed with error:
+npm error code 2
+npm error path /home/pc5070ti/projects/heteroes/frontend
+npm error workspace frontend@0.0.0
+npm error location /home/pc5070ti/projects/heteroes/frontend
+npm error command failed
+npm error command sh -c tsc -b && vite build

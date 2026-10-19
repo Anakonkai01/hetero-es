@@ -1,1 +1,1 @@
-export { RuntimeResults as ExperimentResults } from './RuntimeExperiment';
+export { RuntimeResults as ExperimentResults } from './RuntimeResults';

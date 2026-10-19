@@ -1,1 +1,1 @@
-export { RuntimeControls as ExperimentControls } from './RuntimeExperiment';
+export { RuntimeControls as ExperimentControls } from './RuntimeControls';

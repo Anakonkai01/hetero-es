@@ -1,0 +1,53 @@
+invalid-syntax: unindent does not match any outer indentation level
+  --> backend/device_models.py:72:1
+   |
+70 |     def native_admission(self):
+71 |             if any(not re.fullmatch('[a-f0-9]{64}',h) for h in self.qualifiedModelHashes):raise ValueError('Invalid model qualificatio…
+72 |         if 2 in self.recipeVersions:
+   | ^^^^^^^^
+73 |             evidence=self.compatibility.get('recipeV2',{})
+74 |             if not self.passed or evidence.get('passed') is not True or evidence.get('repeatIdentical') is not True:
+   |
+
+invalid-syntax: unindent does not match any outer indentation level
+  --> backend/device_models.py:79:1
+   |
+77 |                 raise ValueError('Recipe v2 compatibility identity or exact restore mismatch')
+78 |             if evidence['modelManifestHash'] not in self.qualifiedModelHashes:raise ValueError('Recipe v2 model qualification missing')
+79 |         if self.platform == 'windows':
+   | ^^^^^^^^
+80 |             if self.recipeVersions != [1] or self.qualifiedModelHashes:raise ValueError('Windows remains the qualified v1 worker-only …
+81 |             if not self.passed or self.coordinator or self.runtimeProfile != 'desktop-v1' or self.compatibility.get('passed') is not T…
+   |
+
+invalid-syntax: unindent does not match any outer indentation level
+  --> backend/device_models.py:85:1
+   |
+83 |             for key in ('recipeHash','parentSha256','perturbedSha256','restoredSha256'):
+84 |                             if not re.fullmatch(r'[a-f0-9]{64}',str(self.compatibility.get(key,''))):
+85 |                     raise ValueError('Missing native compatibility evidence')
+   | ^^^^^^^^^^^^^^^^^^^^
+86 |             if self.compatibility['parentSha256'] != self.compatibility['restoredSha256']:
+87 |                 raise ValueError('Native candidate restore mismatch')
+   |
+
+invalid-syntax: unindent does not match any outer indentation level
+  --> backend/device_models.py:93:9
+   |
+91 |             if any(self.compatibility.get(k) != value for k,value in reference.items()):
+92 |                 raise ValueError('Native profile does not match the qualified Linux reference')
+93 |         return self
+   |         ^
+94 |
+95 | class EndpointUpdate(FiniteStrict):
+   |
+
+invalid-syntax: Expected dedent, found end of file
+   --> backend/device_models.py:246:1
+    |
+244 |     action: Literal['start', 'poll', 'stop', 'probe']
+245 |     recoveryIndex: int = Field(default=0, ge=0, le=1)
+    |                                                      ^
+    |
+
+Found 444 errors (439 fixed, 5 remaining).

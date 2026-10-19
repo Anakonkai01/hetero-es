@@ -1,5 +1,5 @@
-import type { AuditEntry, LoginResponse, ModelRegistration, ResourceOverview, Session } from "../types/access";
-import { apiGet, apiPost } from "./client";
+import type { AuditEntry,LoginResponse,ModelRegistration,ResourceOverview,Session } from "../types/access";
+import { apiGet,apiPost } from "./client";
 
 export const getSession = () => apiGet<Session>("/api/v1/auth/session");
 export const login = (input: { username: string; password: string }) => apiPost<LoginResponse>("/api/v1/auth/login", input);

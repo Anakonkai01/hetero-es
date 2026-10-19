@@ -1,0 +1,13 @@
+node_modules/
+**/node_modules/
+**/dist/
+**/release/
+**/build/
+docs/evidence/
+docs/archive/
+runtime/artifacts/
+runtime/notebooks/
+backend/tests/fixtures/
+frontend/static/demo/
+desktop/*/resources/
+package-lock.json
