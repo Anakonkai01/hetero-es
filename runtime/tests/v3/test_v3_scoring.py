@@ -131,7 +131,7 @@ def test_mismatched_texts_and_rows_are_refused():
 def test_specs_are_strict_and_a_shared_lab_refuses_python():
     for name, versions in DECLARATIVE.items():
         for version, (_, keys) in versions.items():
-            config = {k: ("x" if k in ("pattern", "answerField") else False) for k in keys}
+            config = {k: ("x" if k == "pattern" or k.endswith("Field") else False) for k in keys}
             assert validate_spec(spec(name, config, version=version))
     python = spec("mine", kind="python", code="a" * 64)
     with pytest.raises(ValueError, match="only declarative"):
@@ -146,6 +146,9 @@ def test_specs_are_strict_and_a_shared_lab_refuses_python():
         spec("regex", {"pattern": "", "answerField": "a"}),
         spec("exact-string", {"answerField": "a", "strip": 1, "casefold": False}),
         spec("choice-letter", {"answerField": ""}),
+        spec("countdown", {"numbersField": "nums", "targetField": ""}),
+        spec("countdown", {"numbersField": 1, "targetField": "target"}),
+        spec("countdown", {"numbersField": "nums"}),
         spec("Bad Name"),
         spec("mine", kind="python", code="short"),
         spec("mine", kind="other"),
@@ -186,3 +189,55 @@ def test_any_exception_of_a_scorer_becomes_a_scorer_error(error):
         score(spec("mine", kind="python", code="a" * 64), ["x"], [{}], python_scorer=scorer)
     with pytest.raises(ScorerError, match="KeyError"):
         score(spec("regex", {"pattern": "x", "answerField": "missing"}), ["x"], [{}])  # a declarative scorer too
+
+
+COUNTDOWN = spec("countdown", {"numbersField": "nums", "targetField": "target"})
+
+
+def countdown(texts, nums="3 7 25 50", target=94):
+    rows = [{"nums": nums, "target": target}] * len(texts)
+    return score(COUNTDOWN, texts, rows)[1]
+
+
+def test_countdown_gives_one_for_a_correct_equation_that_uses_every_number_once():
+    # TinyZero/ES-at-Scale reward: 1.0 correct, 0.1 an answer that is well formed but wrong, 0.0 no answer
+    assert countdown(["<think>50+25=75</think> <answer>(50 + 25) + 7*3 - 2</answer>"]) == [0.1]  # 2 is not given
+    assert countdown(["<answer>50 + 25 + 7 * 3 - 2</answer>"], nums="2 3 7 25 50") == [1.0]
+    assert countdown(["<answer> 50 + 25 + 3*7 </answer>"], target=96) == [1.0]
+    assert countdown(["<answer>(50 + 25 + 3*7)</answer>"], nums="[50, 25, 3, 7]", target=96) == [1.0]
+    # division is exact (fractions), not floating point
+    assert countdown(["<answer>(7 - 3) / (50 / 25)</answer>"], target=2) == [1.0]
+    assert countdown(["<answer>7 / 3 * 3 + 50 - 25</answer>"], nums="3 3 7 25 50", target=32) == [1.0]
+    assert countdown(["<answer>(1 / 10 + 2 / 10) * 10</answer>"], nums="1 2 10 10 10", target=3) == [1.0]
+    # the last answer counts; an earlier correct one does not
+    assert countdown(["<answer>50+25+3*7</answer> wait <answer>50+25+3+7</answer>"], target=96) == [0.1]
+
+
+def test_countdown_gives_format_credit_only_when_numbers_or_value_are_wrong():
+    assert countdown(["<answer>50 + 25 + 7</answer>"], target=82) == [0.1]  # 3 unused
+    assert countdown(["<answer>50 + 50 + 3 - 7</answer>"], target=96) == [0.1]  # 50 twice, 25 unused
+    assert countdown(["<answer>50 + 25 + 3 + 7</answer>"]) == [0.1]  # 85, not 94
+    assert countdown(["<answer>50 / (25 - 25) + 3 + 7</answer>"]) == [0.1]  # division by zero
+    assert countdown(["<answer>2 ** 3 + 1</answer>"], nums="1 2 3", target=9) == [0.1]  # power is not an operation
+    assert countdown(["<answer>-50 + 25 + 3 * 7</answer>"], target=-4) == [0.1]  # unary minus is not allowed
+    assert countdown(["<answer>50 + 25 + 3.5 + 7</answer>"]) == [0.1]
+    assert countdown(["<answer>50 + 25 + 3 * 7.0</answer>"], target=96) == [0.1]  # numbers are integers
+    assert countdown(["<answer>__import__('os')</answer>"]) == [0.1]
+    assert countdown(["<answer>(50 + 25</answer>"]) == [0.1]
+    assert countdown(["<answer></answer>"]) == [0.1]
+
+
+def test_countdown_gives_zero_without_an_answer():
+    assert countdown(["50 + 25 + 3 * 7 = 96"], target=96) == [0.0]
+    assert countdown(["<answer>50 + 25 + 3 * 7"], target=96) == [0.0]
+    assert countdown([""]) == [0.0]
+
+
+def test_countdown_reads_its_columns_and_a_bad_row_is_a_scorer_fault():
+    rows = [{"n": "1 2", "t": 3}]
+    other = spec("countdown", {"numbersField": "n", "targetField": "t"})
+    assert score(other, ["<answer>1+2</answer>"], rows)[1] == [1.0]
+    with pytest.raises(ScorerError):
+        score(other, ["<answer>1+2</answer>"], [{"n": "1 two", "t": 3}])
+    with pytest.raises(ScorerError):
+        score(other, ["<answer>1+2</answer>"], [{"n": "1 2"}])

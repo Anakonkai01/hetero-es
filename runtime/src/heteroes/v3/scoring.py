@@ -10,9 +10,12 @@ of built-in workloads do not change when scoring moves from the worker to the co
 `f(completions, rows) -> scores`, identified by name@version and the SHA-256 of its source files (`code_sha256`).
 """
 
+import ast
 import hashlib
 import math
+import operator
 import re
+from fractions import Fraction
 from pathlib import Path
 
 
@@ -63,6 +66,41 @@ def _choice_letter(text, row, config):
     return 1.0 if found and found[-1] == str(row[config["answerField"]]).strip().upper() else 0.0
 
 
+_ANSWER_TAG = re.compile(r"<answer>(.*?)</answer>", re.DOTALL)
+_COUNTDOWN_OPS = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul, ast.Div: operator.truediv}
+
+
+def _countdown_value(node, used):
+    """The exact value of an expression of integers, + - * / and parentheses; None for anything else."""
+    if isinstance(node, ast.Constant) and type(node.value) is int:
+        used.append(node.value)
+        return Fraction(node.value)
+    if isinstance(node, ast.BinOp) and type(node.op) in _COUNTDOWN_OPS:
+        left, right = _countdown_value(node.left, used), _countdown_value(node.right, used)
+        if left is None or right is None or (isinstance(node.op, ast.Div) and right == 0):
+            return None
+        return _COUNTDOWN_OPS[type(node.op)](left, right)
+    return None
+
+
+def _countdown(text, row, config):
+    # The reward of TinyZero / "Evolution Strategies at Scale": 1.0 for an equation in the last <answer> tag that uses
+    # every given number exactly once and equals the target, 0.1 for any other answer, 0.0 without an answer. Unary
+    # minus, powers and non-integers are not Countdown operations; the expression is parsed, never evaluated by Python.
+    numbers = sorted(int(n) for n in re.split(r"[\s,\[\]]+", str(row[config["numbersField"]]).strip()) if n)
+    target = Fraction(int(row[config["targetField"]]))
+    found = _ANSWER_TAG.findall(text)
+    if not found:
+        return 0.0
+    try:
+        tree = ast.parse(found[-1].strip(), mode="eval")
+    except (SyntaxError, ValueError):
+        return 0.1
+    used = []
+    value = _countdown_value(tree.body, used)
+    return 1.0 if value is not None and sorted(used) == numbers and value == target else 0.1
+
+
 # name -> version -> (function, the exact set of config keys)
 DECLARATIVE = {
     "answer-line-last-number": {1: (_answer_line_last_number, set())},  # Recipe v2 datasets (study/evaluation.py)
@@ -71,6 +109,7 @@ DECLARATIVE = {
     "regex": {1: (_regex, {"pattern", "answerField"})},
     "exact-string": {1: (_exact_string, {"answerField", "strip", "casefold"})},
     "choice-letter": {1: (_choice_letter, {"answerField"})},
+    "countdown": {1: (_countdown, {"numbersField", "targetField"})},
 }
 SPEC_KEYS = {"kind", "name", "version", "codeSha256", "config"}
 
@@ -101,8 +140,9 @@ def validate_spec(spec, *, allow_python=False):
                 re.compile(config["pattern"])
             except re.error as error:
                 raise ValueError(f"invalid regex pattern: {error}") from None
-        if "answerField" in keys and (not isinstance(config["answerField"], str) or not config["answerField"]):
-            raise ValueError("answerField names a column of the dataset")
+        for field in sorted(k for k in keys if k.endswith("Field")):
+            if not isinstance(config[field], str) or not config[field]:
+                raise ValueError(f"{field} names a column of the dataset")
         for flag in {"strip", "casefold"} & keys:
             if type(config[flag]) is not bool:
                 raise ValueError(f"{flag} is true or false")

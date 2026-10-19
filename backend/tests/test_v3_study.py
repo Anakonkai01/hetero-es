@@ -215,6 +215,15 @@ def test_v3_config_and_worker_command_preserve_the_frozen_options(v3_study):
                 "config": {"answerField": "absent"},
             }
         },
+        {
+            "scorer": {
+                "kind": "declarative",
+                "name": "countdown",
+                "version": 1,
+                "codeSha256": None,
+                "config": {"numbersField": "label", "targetField": "absent"},
+            }
+        },
     ],
 )
 def test_v3_invalid_options_never_become_a_draft(v3_study, change):
@@ -226,6 +235,24 @@ def test_v3_invalid_options_never_become_a_draft(v3_study, change):
     qualify_v3(c, device_auth, profile, model)
     response = c.post("/api/v1/experiments", headers=admin, json={**configuration(d, model, data), **change})
     assert response.status_code == 422, response.text
+
+
+def test_v3_scorer_columns_are_every_field_of_its_config(v3_study):
+    c, admin, _ = v3_study
+    store = c.app.state.store
+    d, device_auth = pair((c, store, store.runtime, admin))
+    model, data = assets(v3_study)
+    profile = c.get("/api/v1/devices", headers=admin).json()[0]["selfTest"]
+    qualify_v3(c, device_auth, profile, model)
+    scorer = {
+        "kind": "declarative",
+        "name": "countdown",
+        "version": 1,
+        "codeSha256": None,
+        "config": {"numbersField": "question", "targetField": "level"},
+    }
+    response = c.post("/api/v1/experiments", headers=admin, json={**configuration(d, model, data), "scorer": scorer})
+    assert response.status_code == 200, response.text
 
 
 def test_v3_qualification_cannot_be_inferred_from_the_model_hash():

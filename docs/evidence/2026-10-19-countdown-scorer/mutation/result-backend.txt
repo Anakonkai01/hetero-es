@@ -1,0 +1,5 @@
+control ok    | 8 passed, 7 deselected, 1 warning in 1.21s
+killed       fields-only-answer | 1 failed, 7 passed, 7 deselected, 1 warning in 1.19s
+killed       fields-not-checked | 2 failed, 6 passed, 7 deselected, 1 warning in 1.21s
+
+2 of 2 mutants killed.

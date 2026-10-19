@@ -1,0 +1,4 @@
+[
+ {"name": "fields-only-answer", "file": "backend/validation.py", "old": "fields = [config[k] for k in sorted(config) if k.endswith(\"Field\")] or [\"answer\"]", "new": "fields = [config.get(\"answerField\", \"answer\")]"},
+ {"name": "fields-not-checked", "file": "backend/validation.py", "old": "if not set(fields) <= set(data.get(\"columns\", [])):", "new": "if False:"}
+]

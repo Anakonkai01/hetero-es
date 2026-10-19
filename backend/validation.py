@@ -48,9 +48,10 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
 
             try:
                 validate_options(body)
-                field = body["scorer"]["config"].get("answerField", "answer")
-                if field not in data.get("columns", []):
-                    raise ValueError("Scorer answer field must exist in every dataset row")
+                config = body["scorer"]["config"]
+                fields = [config[k] for k in sorted(config) if k.endswith("Field")] or ["answer"]
+                if not set(fields) <= set(data.get("columns", [])):
+                    raise ValueError("Scorer fields must exist in every dataset row")
             except (ValueError, TypeError, KeyError) as error:
                 raise HTTPException(422, str(error)) from None
         if body["task"] != ("text_v3" if version == 3 else "text_math_v2") or body["decodeEngine"] != "hf_generate":

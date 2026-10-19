@@ -1,0 +1,14 @@
+[
+ {"name": "no-format-credit", "file": "src/heteroes/v3/scoring.py", "old": "    except (SyntaxError, ValueError):\n        return 0.1", "new": "    except (SyntaxError, ValueError):\n        return 0.0"},
+ {"name": "first-answer", "file": "src/heteroes/v3/scoring.py", "old": "tree = ast.parse(found[-1].strip(), mode=\"eval\")", "new": "tree = ast.parse(found[0].strip(), mode=\"eval\")"},
+ {"name": "numbers-not-checked", "file": "src/heteroes/v3/scoring.py", "old": "value is not None and sorted(used) == numbers and value == target", "new": "value is not None and value == target"},
+ {"name": "subset-of-numbers-ok", "file": "src/heteroes/v3/scoring.py", "old": "sorted(used) == numbers and", "new": "set(used) <= set(numbers) and"},
+ {"name": "float-division", "file": "src/heteroes/v3/scoring.py", "old": "        return Fraction(node.value)", "new": "        return float(node.value)"},
+ {"name": "unary-allowed", "file": "src/heteroes/v3/scoring.py", "old": "    if isinstance(node, ast.BinOp) and type(node.op) in _COUNTDOWN_OPS:", "new": "    if isinstance(node, ast.UnaryOp):\n        inner = _countdown_value(node.operand, used)\n        return None if inner is None else -inner\n    if isinstance(node, ast.BinOp) and type(node.op) in _COUNTDOWN_OPS:"},
+ {"name": "power-allowed", "file": "src/heteroes/v3/scoring.py", "old": "ast.Div: operator.truediv}", "new": "ast.Div: operator.truediv, ast.Pow: operator.pow}"},
+ {"name": "zero-division-not-caught", "file": "src/heteroes/v3/scoring.py", "old": " or (isinstance(node.op, ast.Div) and right == 0)", "new": ""},
+ {"name": "non-int-constant", "file": "src/heteroes/v3/scoring.py", "old": "isinstance(node, ast.Constant) and type(node.value) is int", "new": "isinstance(node, ast.Constant) and isinstance(node.value, (int, float))"},
+ {"name": "no-answer-credit", "file": "src/heteroes/v3/scoring.py", "old": "found = _ANSWER_TAG.findall(text)\n    if not found:\n        return 0.0", "new": "found = _ANSWER_TAG.findall(text)\n    if not found:\n        return 0.1"},
+ {"name": "brackets-not-split", "file": "src/heteroes/v3/scoring.py", "old": "r\"[\\s,\\[\\]]+\"", "new": "r\"[\\s,]+\""},
+ {"name": "field-check-only-answer", "file": "src/heteroes/v3/scoring.py", "old": "for field in sorted(k for k in keys if k.endswith(\"Field\")):", "new": "for field in sorted(k for k in keys if k == \"answerField\"):"}
+]
