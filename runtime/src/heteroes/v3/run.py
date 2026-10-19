@@ -30,6 +30,7 @@ class RecipeV3Run:
         noise, evaluation = recipe["noise"], recipe["evaluation"]
         self.engine_version, self.chunk_elements = noise["engine"], noise["chunkElements"]
         self.eval_dtype, self.decode_engine = evaluation["evalDtype"], evaluation["decoder"]
+        self.chunk = evaluation.get("chunk")  # None: the executor's default, as for documents written before the key
         self.sigma = recipe["perturbation"]["sigma"]["initial"]
         self.reward_eta = plan["coefficientRule"]["eta"]
         self.coefficient_rule = f"{plan['coefficientRule']['name']}@{plan['coefficientRule']['version']}"
@@ -149,7 +150,8 @@ def build_documents(
             "generationConfigSha256": generation_config_sha256,
             "maxNewTokens": config.get("maxNewTokens", 256),
             "systemPrompt": config.get("systemPrompt"),
-        },
+        }
+        | ({"chunk": config["evalChunk"]} if "evalChunk" in config else {}),
         "data": {
             "kind": "dataset",
             "contentHash": dataset["contentHash"],

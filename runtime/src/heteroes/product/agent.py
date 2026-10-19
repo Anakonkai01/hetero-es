@@ -366,8 +366,7 @@ class Agent:
                 str(worker_cache(directory, self.config)),
                 "--give-up-after-seconds",
                 "120",
-                "--chunk",
-                "16",
+                *([] if study and command["studyConfig"].get("recipeVersion") == 3 else ["--chunk", "16"]),
                 "--stop-file",
                 str(directory / "stop-request.json"),
             ]

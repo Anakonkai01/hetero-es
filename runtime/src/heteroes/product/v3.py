@@ -80,7 +80,8 @@ def prepare_run(config, root, device, *, declared=None, client=None, cache=None)
             "batchSeed": config["batchSeed"],
             "maxNewTokens": config["maxNewTokens"],
             "decoder": config["decodeEngine"],
-        },
+        }
+        | ({"evalChunk": config["evalChunk"]} if config.get("evalChunk") is not None else {}),
         model_files=manifest["files"],
         revision=manifest["revision"],
         schema_hash=schema.hash,

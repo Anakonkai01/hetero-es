@@ -22,6 +22,9 @@ FORMAT_VERSION = 3
 PLAN_VERSION = 1
 SAMPLER = "sha256-python-random-sample-v1"
 
+# Prompts per generate() call a recipe may declare: FP16 is exact one prompt at a time only; FP32 batches gave the same
+# texts as one prompt at a time in the cross-GPU probes (16, and 64 on 5070 Ti, 3060 and 1660S: RUNTIME-TODO chunk-128)
+EXACT_CHUNKS = {"float16": (1,), "float32": (16, 32, 64)}
 _HEX40, _HEX64 = re.compile("[0-9a-f]{40}"), re.compile("[0-9a-f]{64}")
 _RECIPE_KEYS = {"formatVersion", "model", "weightSpace", "schemaHash", "noise", "perturbation", "evaluation", "data"}
 
@@ -100,9 +103,17 @@ def validate_recipe(doc, *, translated=False):
     if type(perturbation["antithetic"]) is not bool:
         raise ValueError("perturbation.antithetic is true or false")
     evaluation, data = doc["evaluation"], doc["data"]
-    _keys("evaluation", evaluation, {"evalDtype", "decoder", "generationConfigSha256", "maxNewTokens", "systemPrompt"})
+    keys = {"evalDtype", "decoder", "generationConfigSha256", "maxNewTokens", "systemPrompt"}
+    # `chunk` (prompts per generate() call) came after the first v3 documents: absent, it is 16, what they all used
+    _keys("evaluation", evaluation, keys | ({"chunk"} if "chunk" in evaluation else set()))
     if evaluation["evalDtype"] not in EVAL_DTYPES or evaluation["decoder"] not in DECODE_ENGINES:
         raise ValueError("unknown evaluation precision or decoder")
+    if "chunk" in evaluation and (
+        type(evaluation["chunk"]) is not int or evaluation["chunk"] not in EXACT_CHUNKS[evaluation["evalDtype"]]
+    ):
+        raise ValueError(
+            f"evaluation.chunk of {evaluation['evalDtype']} is one of {EXACT_CHUNKS[evaluation['evalDtype']]}"
+        )
     _hex("evaluation.generationConfigSha256", evaluation["generationConfigSha256"], _HEX64)
     if not isinstance(data, dict) or data.get("kind") not in ("builtin", "dataset"):
         raise ValueError("data is a builtin workload or an imported dataset")

@@ -53,6 +53,7 @@ class ESConfig:
     max_new_tokens: int = 256
     system_prompt: str | None = None
     eval_dtype: str = "float32"
+    eval_chunk: int | None = None  # prompts per generate() call, fixed in the recipe (FP32: 16, 32 or 64); None: 16
     decoder: str = "hf_generate"
     noise_engine: str = "cpu"
     weight_space: dict = field(default_factory=lambda: {"kind": "full"})
@@ -80,6 +81,7 @@ class ESConfig:
             "maxNewTokens": self.max_new_tokens,
             "systemPrompt": self.system_prompt,
             "evalDtype": self.eval_dtype,
+            **({"evalChunk": self.eval_chunk} if self.eval_chunk is not None else {}),
             "decoder": self.decoder,
             "population": self.population,
             "generations": self.generations,

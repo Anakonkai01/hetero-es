@@ -585,3 +585,10 @@ def test_v3_worker_receives_the_frozen_config_and_transferred_inputs(tmp_path, m
 
     path = Path(argv[argv.index("--run-config") + 1])
     assert read_json(path) == cfg
+    # a v3 recipe may fix its chunk: the worker must not be told another one
+    assert "--chunk" not in argv
+
+
+def test_a_v1_worker_keeps_the_fp32_chunk(tmp_path, monkeypatch):
+    argv = launch_arguments(agent(tmp_path), monkeypatch, start_command())
+    assert argv[argv.index("--chunk") + 1] == "16"

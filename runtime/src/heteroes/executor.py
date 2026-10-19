@@ -72,12 +72,18 @@ class CandidateExecutor:
         dataset=None,
         return_completions: bool = False,
     ):
+        declared = getattr(
+            recipe, "chunk", None
+        )  # a Recipe v3 document may fix it: then it is not this worker's choice
+        if declared is not None and chunk not in (None, declared):
+            raise ValueError(f"the recipe declares chunk {declared}; this worker asked for {chunk!r}")
         if chunk is None:
-            chunk = default_chunk(recipe.eval_dtype)  # the exact size for the recipe's precision (FP32: 16, FP16: 1)
+            # the recipe's, or the exact size for the recipe's precision (FP32: 16, FP16: 1)
+            chunk = declared if declared is not None else default_chunk(recipe.eval_dtype)
         if isinstance(chunk, bool) or not isinstance(chunk, int) or chunk < 1:
             raise ValueError(f"chunk must be an integer of at least 1, got {chunk!r}")
         self.model = model
-        self.chunk = chunk  # prompts per generate() call: an execution choice of this worker, not part of the recipe
+        self.chunk = chunk  # prompts per generate() call: this worker's choice unless the recipe declares it
         self.tokenizer = tokenizer
         self.schema = schema
         self.recipe = recipe
