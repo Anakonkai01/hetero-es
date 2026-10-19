@@ -13,7 +13,7 @@ set -euo pipefail
 : "${BUILD:?Set BUILD to a new name such as lf1-20261012-r5}"
 ROOT="${DOWNLOADS:-/mnt/Archive-2tb/heteroes-local/downloads}"
 OUT="$ROOT/$BUILD"
-TRACK_A="${TRACK_A:-$(cd "$(dirname "$0")/../.." && pwd)/hetero-es-m3-runtime}"
+TRACK_A="${TRACK_A:-$(cd "$(dirname "$0")/.." && pwd)/runtime}"
 cd "$(dirname "$0")/.."
 findmnt -n -o UUID -T "$ROOT" | grep -qx "${ARCHIVE_UUID:-10443D1F443D094C}" || { echo "The Archive disk is not mounted at $ROOT" >&2; exit 1; }
 [ ! -e "$OUT" ] || { echo "$OUT already exists; choose a new BUILD name" >&2; exit 1; }

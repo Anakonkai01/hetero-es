@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Mutation check on a scratch copy: break the code on purpose and confirm that a test notices.
 
-    mutation-check.py --repo ../hetero-es-m3-runtime --copy src --copy tests/ledger/test_x.py \\
+    mutation-check.py --repo runtime --copy src --copy tests/ledger/test_x.py \\
         --env PYTHONPATH=src --test "python -m pytest -q tests/ledger/test_x.py" --mutants mutants.json
 
 mutants.json is a list of {"name": "...", "file": "src/x.py", "old": "exact text, once", "new": "replacement"}.
