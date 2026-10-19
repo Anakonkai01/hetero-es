@@ -1,0 +1,28 @@
+.EEEE                                                                    [100%]
+==================================== ERRORS ====================================
+_ ERROR at setup of test_other_worker_authentication_hash_and_retry_are_enforced _
+tests/v3/test_v3_audit.py:29: in setup
+    WorkerAPI(ledger, "audit", 0),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: WorkerAPI.__init__() missing 1 required positional argument: 'lease_seconds'
+_ ERROR at setup of test_three_mismatches_quarantine_both_workers_without_changing_rewards _
+tests/v3/test_v3_audit.py:29: in setup
+    WorkerAPI(ledger, "audit", 0),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: WorkerAPI.__init__() missing 1 required positional argument: 'lease_seconds'
+_______ ERROR at setup of test_restart_does_not_repeat_completed_audits ________
+tests/v3/test_v3_audit.py:29: in setup
+    WorkerAPI(ledger, "audit", 0),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: WorkerAPI.__init__() missing 1 required positional argument: 'lease_seconds'
+_ ERROR at setup of test_infrastructure_failure_is_not_recorded_as_a_mismatch __
+tests/v3/test_v3_audit.py:29: in setup
+    WorkerAPI(ledger, "audit", 0),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: WorkerAPI.__init__() missing 1 required positional argument: 'lease_seconds'
+=========================== short test summary info ============================
+ERROR tests/v3/test_v3_audit.py::test_other_worker_authentication_hash_and_retry_are_enforced
+ERROR tests/v3/test_v3_audit.py::test_three_mismatches_quarantine_both_workers_without_changing_rewards
+ERROR tests/v3/test_v3_audit.py::test_restart_does_not_repeat_completed_audits
+ERROR tests/v3/test_v3_audit.py::test_infrastructure_failure_is_not_recorded_as_a_mismatch
+1 passed, 4 errors in 0.14s
