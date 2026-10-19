@@ -1,0 +1,167 @@
+{
+  "recipeHash": "06d48520c4337247920709a20c1e3c1ddff813200c899301f808bbda5ee948db",
+  "planHash": "9f2bc580a4ee818d47f46b22d45d468c24b86cc70db7160737adc0879cc6e001",
+  "initialAdapterSha256": "2eab4f9487c904fbce5228f526f6c5d1ba0a477d048461a793fd63a4719391db",
+  "candidates": [
+    {
+      "candidateId": "c0055000000000000000000000000001/g0/c0",
+      "worker": "linux-a",
+      "texts": [
+        "27480",
+        "3105",
+        "34960",
+        "9440"
+      ],
+      "reward": 0.0
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g0/c1",
+      "worker": "windows-3060",
+      "texts": [
+        "148 * 210.",
+        "90",
+        "150 * 232 = 1500 * ",
+        "80 *\n122\n90\n80\n80\n"
+      ],
+      "reward": 0.0
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g0/c2",
+      "worker": "linux-a",
+      "texts": [
+        "40,560",
+        "3015",
+        "39600",
+        "9760"
+      ],
+      "reward": 0.5
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g0/c3",
+      "worker": "linux-a",
+      "texts": [
+        "27,480",
+        "3015",
+        "34600",
+        "9440"
+      ],
+      "reward": 0.25
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g1/c0",
+      "worker": "linux-a",
+      "texts": [
+        "784",
+        "30953",
+        "4196",
+        "9760"
+      ],
+      "reward": 0.25
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g1/c1",
+      "worker": "linux-a",
+      "texts": [
+        "756",
+        "98571",
+        "4196",
+        "9760"
+      ],
+      "reward": 0.25
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g1/c2",
+      "worker": "windows-3060",
+      "texts": [
+        "780",
+        "31091",
+        "4196",
+        "9440"
+      ],
+      "reward": 0.0
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g1/c3",
+      "worker": "linux-a",
+      "texts": [
+        "776",
+        "31093",
+        "4192",
+        "9,360"
+      ],
+      "reward": 0.0
+    }
+  ],
+  "children": [
+    {
+      "child": "01944ed1fc54916e7aafdeaab5cd3a461b4deb13f384f954858f84a39b7015ee",
+      "noop": false
+    },
+    {
+      "child": "01944ed1fc54916e7aafdeaab5cd3a461b4deb13f384f954858f84a39b7015ee",
+      "noop": true
+    }
+  ],
+  "audits": [
+    {
+      "candidateId": "c0055000000000000000000000000001/g0/c0",
+      "auditor": "windows-3060",
+      "original": "linux-a",
+      "matched": true
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g0/c1",
+      "auditor": "linux-a",
+      "original": "windows-3060",
+      "matched": true
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g0/c2",
+      "auditor": "windows-3060",
+      "original": "linux-a",
+      "matched": true
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g0/c3",
+      "auditor": "windows-3060",
+      "original": "linux-a",
+      "matched": true
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g1/c0",
+      "auditor": "windows-3060",
+      "original": "linux-a",
+      "matched": true
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g1/c1",
+      "auditor": "windows-3060",
+      "original": "linux-a",
+      "matched": true
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g1/c2",
+      "auditor": "linux-a",
+      "original": "windows-3060",
+      "matched": true
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g1/c3",
+      "auditor": "windows-3060",
+      "original": "linux-a",
+      "matched": true
+    }
+  ],
+  "auditCount": 8,
+  "auditMismatches": 0,
+  "crossWorkerAudits": 8,
+  "quarantined": [],
+  "replayPassed": true,
+  "runner": {
+    "status": "COMPLETED",
+    "t": 1792420681.211963,
+    "failureReason": null,
+    "final_weights_sha256": "01944ed1fc54916e7aafdeaab5cd3a461b4deb13f384f954858f84a39b7015ee"
+  },
+  "passed": true
+}

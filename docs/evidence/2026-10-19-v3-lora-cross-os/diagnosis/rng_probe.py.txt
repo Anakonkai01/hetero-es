@@ -1,0 +1,22 @@
+"""CPU-only RNG/uniform probe: where do Linux and native Windows first differ?"""
+import hashlib, json, math, sys
+import torch
+torch.set_num_threads(1)
+out = {"torch": torch.__version__, "cpu_capability": torch.backends.cpu.get_cpu_capability()}
+def h(t):
+    return hashlib.sha256(t.contiguous().numpy().tobytes()).hexdigest()[:16]
+torch.manual_seed(7)
+out["random_int64"] = h(torch.empty(4096, dtype=torch.int64).random_())
+torch.manual_seed(7)
+b = 1 / math.sqrt(896)
+u = torch.empty(4, 896).uniform_(-b, b)
+out["uniform_f32"] = h(u)
+torch.manual_seed(7)
+out["uniform_f64"] = h(torch.empty(4, 896, dtype=torch.float64).uniform_(-b, b))
+torch.manual_seed(7)
+w = torch.empty(4, 896)
+torch.nn.init.kaiming_uniform_(w, a=math.sqrt(5))
+out["kaiming_f32"] = h(w)
+out["kaiming_eq_uniform"] = bool(torch.equal(w, u))
+u.numpy().tofile(sys.argv[1])
+print(json.dumps(out))

@@ -1,0 +1,24 @@
+import sys, numpy as np, torch
+from peft import inject_adapter_in_model
+from peft.tuners.lora.layer import LoraLayer
+from heteroes.model.lora import _config, trainable_schema
+from heteroes.v3.model import file_manifest, load
+mp, out = sys.argv[1], sys.argv[2]
+model, _ = load(mp, file_manifest(mp), "cpu")
+snap = {}
+orig = LoraLayer.reset_lora_parameters
+def patched(self, name, init):
+    orig(self, name, init)
+    snap[id(self.lora_A[name].weight)] = self.lora_A[name].weight.detach().clone()
+    snap[id(self.lora_B[name].weight)] = self.lora_B[name].weight.detach().clone()
+LoraLayer.reset_lora_parameters = patched
+space = {"kind": "lora", "rank": 4, "alpha": 8, "targetModules": ["q_proj", "v_proj"]}
+with torch.random.fork_rng(devices=[]):
+    torch.manual_seed(7)
+    inject_adapter_in_model(_config(space), model)
+named = dict(model.named_parameters())
+dtypes = {t.dtype for t in snap.values()}
+print("snapshot dtypes", dtypes, len(snap))
+schema = trainable_schema(model)
+vals = np.concatenate([snap[id(named[e.canonical_name])].float().numpy().ravel() for e in schema.entries])
+vals.tofile(out)

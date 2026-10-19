@@ -1,0 +1,1 @@
+{"torch": "2.13.0+cu132", "cpu_capability": "AVX2", "random_int64": "f00766c055b84d8e", "uniform_f32": "0f69eb92fd05d811", "uniform_f64": "12a9ddce48adf549", "kaiming_f32": "0f69eb92fd05d811", "kaiming_eq_uniform": true}
