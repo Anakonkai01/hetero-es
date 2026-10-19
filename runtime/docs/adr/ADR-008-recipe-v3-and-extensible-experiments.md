@@ -1,11 +1,11 @@
 # ADR-008 — Recipe v3: one format, coordinator scoring and extensible experiments
 
-Status: **DRAFT** (2026-10-19). The eight owner decisions it implements are DECIDED; the concrete rules below are PROPOSED
-until the owner accepts this ADR. Related: ADR-001, ADR-002, ADR-007 (its "Recipe, noise, update, replay formats" row is
+Status: **ACCEPTED** by the owner on 2026-10-19, with Q-A…Q-D answered (see the end). Drafted the same day; the rules
+below labelled [PROPOSED] are now the accepted design. Related: ADR-001, ADR-002, ADR-007 (its "Recipe, noise, update, replay formats" row is
 superseded by section 9 once this ADR is accepted).
 
 Labels: **[CODE]** exists in the tree · **[DECIDED]** owner decision of 2026-10-19 · **[PROPOSED]** this draft ·
-**[OPEN]** needs an owner answer.
+**[DECIDED Q-x]** an owner answer of 2026-10-19.
 
 ## Context
 
@@ -131,11 +131,11 @@ would no longer be "seeds + coefficients + α" and replay would need optimizer s
 ### 8. Storage, replay and audit [PROPOSED]
 
 - Ledger schema 6: `candidate.sign`, a `completion(candidate_id, attempt_number, sha256, body)` table (zlib-compressed
-  canonical JSON; about 15 KB per candidate at 32 rows × 512 tokens), the scorer and rule in the context. [OPEN Q-A]
+  canonical JSON; about 15 KB per candidate at 32 rows × 512 tokens), the scorer and rule in the context. [DECIDED Q-A]
 - Replay of a v3 run: apply records (seeds, signs, coefficients, α) → child hashes; **re-scoring** stored texts must give
   the recorded rewards and coefficients exactly.
 - Sampled audit: a deterministic ~5 % of committed candidates (by hash of candidate id) is re-executed as an audit attempt
-  on another worker; equal `completionsSha256` is a pass. A mismatch never changes the committed reward. [OPEN Q-B]
+  on another worker; equal `completionsSha256` is a pass. A mismatch never changes the committed reward. [DECIDED Q-B]
 
 ### 9. One format break, and the old formats [PROPOSED]
 
@@ -146,9 +146,10 @@ would no longer be "seeds + coefficients + α" and replay would need optimizer s
 - **Numerics are unchanged.** Acceptance: every recorded identity in `tests/test_golden_identities.py` still holds; for
   every recorded CPU-engine run whose initial weights are available, replay from the translated documents reproduces the
   recorded child hashes; CUDA-engine runs need the owner's GPU authorization.
-- Rollout: r11 desktop workers speak v3; the server assigns v3 work only to devices that advertise `recipeVersions` with
-  3 (`device_models.py:46` [CODE] today allows [1, 2]); r10 devices receive a clear "update to r11" state instead of work.
-  Windows has never been qualified for v2 (`policies.py:53` [CODE]); r11 needs a real Windows v3 acceptance. [OPEN Q-C]
+- Rollout (owner Q-C: **one switch**): r11 desktop workers speak only v3; the server and the devices move on the same day.
+  The server assigns work only to devices that advertise `recipeVersions` with 3 (`device_models.py:46` [CODE] today allows
+  [1, 2]); an r10 device gets a clear "update to r11" state instead of work.
+  Windows has never been qualified for v2 (`policies.py:53` [CODE]); r11 needs a real Windows v3 acceptance before the switch.
 
 ### 10. Where code may change
 
@@ -161,14 +162,15 @@ would no longer be "seeds + coefficients + α" and replay would need optimizer s
 | `model/schema.py`, `model/loading.py` | trainable schema T, LoRA loading | not frozen |
 | new `heteroes/v3/` | documents, translator, scorers, antithetic merge | new, pure functions |
 
-## Open questions for the owner
+## Owner answers (2026-10-19)
 
-- **Q-A** Texts in the ledger (compressed, atomic with the reward) or in content-addressed files next to it? Proposed: in
-  the ledger.
-- **Q-B** On an audit mismatch: notify only, or quarantine after N mismatches? Proposed: notify, quarantine after 3.
-- **Q-C** Does r11 keep a v1 worker for a transition period, or is the switch a flag day? Proposed: r11 speaks v1 and v3,
-  r12 drops v1.
-- **Q-D** Antithetic on by default for new experiments? Proposed: off by default in v3.0, chosen per experiment.
+- **Q-A** Texts are stored **in the ledger**, zlib-compressed, in the transaction that commits the reward. [DECIDED]
+- **Q-B** An audit mismatch is recorded and reported; a worker with **3** mismatches is quarantined for the owner to
+  review. A committed reward never changes. [DECIDED]
+- **Q-C** **One switch** (flag day): r11 speaks only v3; no transition release with both formats. (The draft proposed a
+  transition release; the owner chose the simpler code and accepts that devices not yet on r11 stop receiving work.)
+  [DECIDED]
+- **Q-D** Antithetic sampling is **off by default** and chosen per experiment. [DECIDED]
 
 ## Consequences
 
