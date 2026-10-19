@@ -70,9 +70,10 @@ Step 0 (branch `feat/extensibility-step0`, receipt [2026-10-19-extensibility-ste
 changes no identity: recorded recipe/record/workload hashes and coefficients are tests, product names live in
 `runtime/src/heteroes/catalog.py`, and `heteroes.executor.evaluate_task` is the single task seam.
 
-Then, without touching frozen modules or the worker protocol: the ADR-008 DRAFT
-(`runtime/docs/adr/ADR-008-recipe-v3-and-extensible-experiments.md`, open questions Q-A…Q-D), pure Recipe v3 documents,
-scorers and antithetic merge in `runtime/src/heteroes/v3/`, subset schemas in `model/schema.py` and LoRA in
-`model/lora.py` (PEFT 0.21.2 installed in `heteroes-match` only). Receipts: `evidence/2026-10-19-extensibility-step1`,
-`-subset`, `-lora`. Nothing in the product uses them yet. The ledger schema, generation record, worker protocol,
-executor/runner integration and the r11 desktop profile wait for the owner to accept ADR-008.
+ADR-008 is ACCEPTED (Q-A texts in the ledger, Q-B quarantine after 3 audit mismatches, Q-C one switch with r11,
+Q-D antithetic off by default). Done on the branch: pure `heteroes/v3/` (documents, scorers, antithetic merge), subset
+schemas, LoRA (`model/lora.py`, PEFT 0.21.2 in `heteroes-match` only), ledger schema 6 (signs, texts, audits; schema 5
+refused as history), record version 2, and protocol v3 (workers submit texts, the coordinator scores them; antithetic
+pairs). Receipts: `evidence/2026-10-19-extensibility-*`, `-v3-ledger-record`, `-v3-protocol`. Still to do: the product
+runner/agent/backend/web on v3, audit scheduling, SDK/CLI, the r11 desktop profile (PEFT, Windows v3 acceptance), GPU
+acceptance with the owner's authorization, and removing the v1/v2 run paths at the switch.
