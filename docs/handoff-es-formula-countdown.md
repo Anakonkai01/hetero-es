@@ -27,18 +27,36 @@ After pilot 1 the owner chose to keep the paper's reward and run long rather tha
 | 38eb72b | Worker data folder on another drive, guarded uninstall | `evidence/2026-10-20-worker-data-folder` |
 | 1720b7e | checkpoint evaluation by verified replay | `evidence/2026-10-20-evaluate-checkpoints` |
 
-## Running / open, in order
+## Later results (2026-10-20)
 
-1. **Pilot 2** (`.scratch/countdown/pilot2`, same as pilot 1 but batch 64, 300 generations, one 5070 Ti) started
-   2026-10-20 ~05:10. Read it with `runtime/scripts/v3_evaluate_checkpoints.py` on the validation split (base, then
-   every ~50 generations) and record a new evidence folder. It is exploratory, not the preregistered experiment.
-2. Full `check-all` started at 38eb72b → `docs/evidence/2026-10-20-check-all/checks`; record its result.
-3. Build r11 **candidate2** installers (`scripts/build-apps.sh`, new BUILD name) with these changes; Windows 3060:
-   install with the data folder on D:, v3 self-test, restart, stop, uninstall (owner present for the GUI steps).
-4. Isolated r11 lab on the 5070 Ti (own port/DB; never the live lab or `local-lab.py`) with workers 5070 Ti, 3060
-   (Windows), 1660S (qualify first); short runs of each rule; audits, a 1660S drop, replay.
-5. Preregistration, then the main Countdown comparison (zscore vs centered-rank vs momentum) and one GSM8K cell;
-   HF export reload; preset "Countdown (verified)" on the web; quickstart/report updates.
+- Full CPU check at 38eb72b: 22/22 after fixing the Worker onboarding build-name pattern
+  (`evidence/2026-10-20-check-all`; runtime 2326 passed / 100 skipped, backend 321).
+- r11 **candidate2** built and both packaged Linux checks PASS (`evidence/2026-10-20-r11-candidate2`).
+- GSM8K base Qwen2.5-0.5B: 0.525 on 200 validation rows (`evidence/2026-10-20-gsm8k-dataset`).
+- Countdown pilot 2 stopped after 2 generations by the owner's choice (GPU to GSM8K). Countdown is postponed.
+
+## Owner direction after reading the papers (2026-10-20)
+
+Focus on GSM8K in the spirit of "Understanding ES for LLM Reasoning" (2608.27351): **basic GSM8K run first**
+(one z-score run, greedy evaluation on the held-out test); Pass@K, ablations and GRPO only after learning is
+seen. Do check forgetting on **1–2 small other tasks** (CommonsenseQA first). Agentic ESOpt (multi-turn agents) later.
+
+## Next steps, in order (no heavy design left)
+
+1. **Launch and watch GSM8K run 1** (GPU allowed): `.scratch/gsm8k/run1/launch.sh` (detached with
+   `setsid nohup ./launch.sh &`; spec: N=32, σ=1e-3, α=5e-4, zscore@1, batch 32, 512 tokens, chunk 64,
+   60 generations ≈ 9 min each; data `.scratch/gsm8k/v1` from `runtime/scripts/build_gsm8k_dataset.py`). Two
+   aborted starts are kept as `run-aborted-1/2` (nothing to read). Watch `run/events.jsonl`
+   (`generation_complete` rewards). Stop only by PID/process group, never `pkill -f`.
+2. While it runs: CommonsenseQA builder like the GSM8K one (`tau/commonsense_qa` revision
+   `94630fe30dad47192a8546eb75f094926d47e155`, MIT; rows `prompt` with the question and A–E choices,
+   `answer` letter; scorer `choice-letter@1` takes A–D only today — add E or a `choice-letter@2`, with tests).
+   Add to `runtime/scripts/v3_evaluate_checkpoints.py` an option to score a checkpoint on OTHER rows with another
+   declarative scorer (forgetting), with tests and a mutation check.
+3. After the run: evaluate generations -1, 19, 39, 59 on validation, choose by validation only, then the chosen and
+   the base on the GSM8K test and CommonsenseQA; new evidence folder with "What this does NOT show".
+4. Then: Windows candidate2 (installer, D: data folder, self-test, uninstall; owner present), the isolated
+   3-machine lab, preregistration and the comparisons.
 
 Known limits: `v3_evaluate_checkpoints.py` replays with the CPU engine only; managed-run validation (`v3/tracker.py`)
 still decodes 16 prompts per call regardless of `evaluation.chunk` (coordinator-only, does not affect identity).
