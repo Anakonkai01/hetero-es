@@ -37,7 +37,7 @@ def validate(config, workers):
         if type(value) not in (int, float) or not 0 < value <= 1:
             raise ValueError(f"{key} must be finite and between 0 and 1")
     if config.get("workload") not in WORKLOADS and not (
-        config.get("recipeVersion") == 2 and config.get("workload") == "text_math_v2"
+        config.get("recipeVersion") in (2, 3) and config.get("workload") in ("text_math_v2", "text_v3")
     ):
         raise ValueError("unsupported workload")
     if config.get("decodeEngine") not in DECODE_ENGINES:

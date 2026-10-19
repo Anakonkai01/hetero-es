@@ -565,3 +565,23 @@ def test_agent_requests_carry_the_heteroes_user_agent(tmp_path):
         server.shutdown()
         server.server_close()
     assert seen == [USER_AGENT, USER_AGENT]
+
+
+def test_v3_worker_receives_the_frozen_config_and_transferred_inputs(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    cfg = {"recipeVersion": 3, "scorer": {"kind": "declarative"}}
+    prepared = {
+        "modelPath": "/local/model",
+        "datasetPath": "/local/data.json",
+        "modelManifestPath": "/local/manifest.json",
+    }
+    calls = []
+    monkeypatch.setattr("heteroes.study.prepare.prepare", lambda *args: calls.append(args) or prepared)
+    argv = launch_arguments(a, monkeypatch, start_command(studyConfig=cfg))
+    assert calls[0][2] == cfg
+    assert argv[argv.index("--dataset") + 1] == prepared["datasetPath"]
+    assert argv[argv.index("--model-path") + 1] == prepared["modelPath"]
+    from pathlib import Path
+
+    path = Path(argv[argv.index("--run-config") + 1])
+    assert read_json(path) == cfg

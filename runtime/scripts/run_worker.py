@@ -54,6 +54,7 @@ def main(argv: list[str]) -> int:
     )
     parser.add_argument("--dataset", type=Path, help="Verified private dataset object for Recipe v2")
     parser.add_argument("--model-manifest", type=Path, help="Pinned safetensors file manifest for Recipe v2")
+    parser.add_argument("--run-config", type=Path, help="Frozen product configuration for Recipe v3")
     parser.add_argument("--worker-id", required=True)
     parser.add_argument("--log", required=True, help="JSONL file for the events of this worker (must not exist)")
     parser.add_argument(
@@ -189,7 +190,9 @@ def main(argv: list[str]) -> int:
         }
     )
     load_started = time.perf_counter()
-    if args.model_manifest:
+    if args.run_config:
+        loaded = None  # v3 loads after fetching the declared recipe and its initial adapter
+    elif args.model_manifest:
         from heteroes.study.models import load
 
         loaded = load(args.model_path, json.loads(args.model_manifest.read_text()), device)
@@ -226,7 +229,23 @@ def main(argv: list[str]) -> int:
 
     declared = job["recipe"]
     dataset = None
-    if declared.get("manifest_version") == 2:
+    if declared.get("formatVersion") == 3:
+        if not args.run_config or not args.dataset or not args.model_manifest:
+            fail("Recipe v3 requires frozen configuration, model and dataset files", 3)
+        from heteroes.product.v3 import prepare_run
+        from heteroes.product.storage import checked_directory
+
+        cfg = json.loads(args.run_config.read_text())
+        cfg.update(
+            modelPath=args.model_path,
+            datasetPath=str(args.dataset),
+            modelManifest=json.loads(args.model_manifest.read_text()),
+        )
+        checked_directory(args.cache_dir, args.storage_volume_uuid)
+        loaded, recipe, dataset = prepare_run(
+            cfg, args.run_config.parent, device, declared=declared, client=client, cache=args.cache_dir
+        )
+    elif declared.get("manifest_version") == 2:
         if not args.dataset or not args.model_manifest:
             fail("Recipe v2 requires pinned model and private dataset files", 3)
         from heteroes.study.recipe import RecipeV2, build
@@ -266,7 +285,13 @@ def main(argv: list[str]) -> int:
         fail(str(error), 3)
     executor_started = time.perf_counter()
     executor = CandidateExecutor(
-        loaded.model, loaded.tokenizer, loaded.schema, recipe, chunk=args.chunk, dataset=dataset
+        loaded.model,
+        loaded.tokenizer,
+        loaded.schema,
+        recipe,
+        chunk=args.chunk,
+        dataset=dataset,
+        return_completions=declared.get("formatVersion") == 3,
     )
     emit(
         {

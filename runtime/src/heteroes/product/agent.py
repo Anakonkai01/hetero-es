@@ -240,7 +240,7 @@ class AgentManager(RunSupervisor):
         # Operational settings are local/private, outside canonical Recipe v1.
         local = read_json(root / "config.json")
         local.update(backupPolicy=cfg.get("backupPolicy", {"interval": 1, "retain": 3}), deviceCredentials=True)
-        if cfg.get("recipeVersion") == 2:
+        if cfg.get("recipeVersion") in (2, 3):
             from heteroes.study.prepare import prepare
 
             local.update(prepare(self.agent, command, cfg, root))
@@ -376,6 +376,9 @@ class Agent:
             if route["replayOnly"]:
                 # Other network: update records only. 64 steps is about five minutes of catching up on a 3060.
                 argv.extend(["--no-bulk", "--replay-max-chain", "64"])
+            if study and command["studyConfig"].get("recipeVersion") == 3:
+                write_json(directory / "run-config.json", command["studyConfig"])
+                argv.extend(["--run-config", str(directory / "run-config.json")])
             if study:
                 argv.extend(["--dataset", study["datasetPath"], "--model-manifest", study["modelManifestPath"]])
             if self.config.get("largeDataDirectory") and self.config.get("storageVolumeUUID"):

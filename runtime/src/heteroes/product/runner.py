@@ -39,7 +39,7 @@ def apply_backup_policy(root, generation, current, emit):
     return policy
 
 
-def main(directory):
+def main(directory, *, device="cuda", timeout_seconds=1800):
     from heteroes.coordinator import Coordinator, RunCancelled, RunPaused, _NoGeneration
     from heteroes.dispatch import AdmittedOnly, Greedy
     from heteroes.ledger import Ledger
@@ -75,12 +75,16 @@ def main(directory):
         state("STARTING")
         check_noise_selftest()
         dataset = None
-        if config.get("recipeVersion") == 2:
+        if config.get("recipeVersion") == 3:
+            from heteroes.product.v3 import prepare_run
+
+            loaded, recipe, dataset = prepare_run(config, root, device)
+        elif config.get("recipeVersion") == 2:
             from heteroes.study.models import load
             from heteroes.study.data import verify
             from heteroes.study.recipe import build
 
-            loaded = load(config["modelPath"], config["modelManifest"], "cuda")
+            loaded = load(config["modelPath"], config["modelManifest"], device)
             dataset = verify(read_json(Path(config["datasetPath"])))
             recipe = build(
                 loaded,
@@ -95,7 +99,7 @@ def main(directory):
                 max_tokens=config["maxNewTokens"],
             )
         else:
-            loaded = load_pinned_model(config["modelPath"], "cuda")
+            loaded = load_pinned_model(config["modelPath"], device)
             recipe = build_recipe(
                 loaded,
                 sigma=config["sigma"],
@@ -104,7 +108,7 @@ def main(directory):
                 workload=config["workload"],
                 decode_engine=config["decodeEngine"],
             )
-        check_recipe_selftest(recipe, "cuda")
+        check_recipe_selftest(recipe, device)
         ledger = Ledger(root / "ledger.sqlite", max_attempts=3, enforce_chain=True)
         policy = config.get("backupPolicy")
         last_summary = None
@@ -136,7 +140,7 @@ def main(directory):
                     final=final,
                     identity={
                         "code": {**code_info(), **source_identity(Path(__file__).resolve().parents[1])},
-                        "environment": environment_info("cuda"),
+                        "environment": environment_info(device),
                     },
                 )
                 if point:
@@ -158,6 +162,18 @@ def main(directory):
                     }
                 )
 
+        v3_options = {}
+        if config.get("recipeVersion") == 3:
+            from heteroes.v3.run import make_scorer
+
+            v3_options = {
+                "antithetic": recipe.antithetic,
+                "coefficient_rule": recipe.coefficient_rule,
+                "score": make_scorer(recipe, dataset),
+                "pinned_weights": [recipe.recipe["weightSpace"]["initialAdapterSha256"]]
+                if recipe.recipe["weightSpace"]["kind"] == "lora"
+                else [],
+            }
         coordinator = Coordinator(
             loaded.model,
             loaded.schema,
@@ -171,7 +187,7 @@ def main(directory):
             host=config["host"],
             port=config["port"],
             token=os.environ["HETEROES_TOKEN"],
-            timeout_seconds=1800,
+            timeout_seconds=timeout_seconds,
             stall_seconds=300,
             failed_grace_seconds=60,
             lease_seconds=60,
@@ -182,10 +198,11 @@ def main(directory):
             generation_started=generation_started if policy else None,
             pause_requested=lambda: (root / "pause.flag").exists(),
             dataset=dataset,
+            **v3_options,
         )
         coordinator.start()
         next_generation = coordinator.recover()  # finish any recorded update even when cancellation is pending
-        if dataset is not None:
+        if dataset is not None and config.get("recipeVersion") != 3:
             from heteroes.study.tracker import Tracker
 
             tracker = Tracker(root, loaded, recipe, dataset, config.get("validationInterval", 1))
@@ -215,7 +232,7 @@ def main(directory):
                 "recipe": recipe.to_dict(),
                 "recipe_hash": recipe.hash,
                 "code": code_info(),
-                "environment": environment_info("cuda"),
+                "environment": environment_info(device),
             }
         )
         if next_generation < config["maxGenerations"]:
@@ -248,7 +265,7 @@ def main(directory):
                 final=True,
                 identity={
                     "code": {**code_info(), **source_identity(Path(__file__).resolve().parents[1])},
-                    "environment": environment_info("cuda"),
+                    "environment": environment_info(device),
                 },
             )
             manifest = verify_point(point)

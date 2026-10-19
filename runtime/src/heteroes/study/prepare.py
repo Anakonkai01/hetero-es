@@ -70,7 +70,11 @@ def prepare(agent, assignment, config, directory):
         cache / "datasets" / f"{config['datasetObjectSha256']}.json",
         10_000_000,
     )
-    data = verify_data(json.loads(data_path.read_text()))
+    if config.get("recipeVersion") == 3:
+        from heteroes.v3.data import verify as verify_dataset
+    else:
+        verify_dataset = verify_data
+    data = verify_dataset(json.loads(data_path.read_text()))
     if {k: data[k] for k in ("contentHash", "splitHashes")} != config["datasetIdentity"]:
         raise ValueError("Frozen dataset identity mismatch")
     manifest = config["modelManifest"]
@@ -88,7 +92,12 @@ def prepare(agent, assignment, config, directory):
                 from huggingface_hub import hf_hub_download
 
                 hf_hub_download(manifest["modelId"], name, revision=manifest["revision"], local_dir=model_path)
-    verify_model(model_path, manifest)
+    if config.get("recipeVersion") == 3:
+        from .models import verify_files
+
+        verify_files(model_path, manifest["files"])
+    else:
+        verify_model(model_path, manifest)
     from heteroes.product.files import write_json
 
     directory = Path(directory)

@@ -114,6 +114,7 @@ class Coordinator:
         antithetic: bool = False,
         coefficient_rule: str | None = None,
         score=None,
+        pinned_weights=(),
     ):
         # Recipe v3 (ADR-008): `antithetic` gives pairs (seed, +1), (seed, -1); `coefficient_rule` makes version-2 records;
         # `score(generation, descriptor, completions) -> reward` scores the texts the workers submit, on this process
@@ -141,6 +142,7 @@ class Coordinator:
             max(MIN_STALL_SECONDS, STALL_LEASES * lease_seconds) if stall_seconds is _DEFAULT else stall_seconds
         )
         self._keep_published = keep_published  # how many versions of the weights stay in models_dir (the current one and its ancestors); None: all
+        self._pinned_weights = tuple(pinned_weights)
         self._recent: list[str] = []  # the hashes published or loaded, newest last
         self._log = log
         self._timer = timer
@@ -241,7 +243,7 @@ class Coordinator:
                 self._recent.remove(sha256)
             self._recent.append(sha256)
         self._recent = self._recent[-self._keep_published :]
-        removed = prune_published(self.models_dir, self._recent)
+        removed = prune_published(self.models_dir, [*self._recent, *self._pinned_weights])
         if removed:
             self.log("weights_pruned", removed=[name[:-4] for name in removed], kept=list(self._recent))
 
