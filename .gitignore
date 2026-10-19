@@ -82,6 +82,10 @@ build/
 wandb/
 
 # Private desktop build outputs
+# desktop/worker/build is electron-builder's resource folder: its installer script is source, the rest is output.
+!/desktop/worker/build/
+/desktop/worker/build/*
+!/desktop/worker/build/installer.nsh
 desktop/worker/release/
 desktop/server/release/
 desktop/server/electron/shared/
