@@ -64,3 +64,21 @@ def test_probe_uses_valid_scorer_and_numeric_answers(probe):
         scorer, _ = _scorer_spec(spec)
         validate_spec(scorer)
     assert all(type(row["answer"]) is int for row in probe.qualification_rows())
+
+
+def test_source_identity_uses_portable_relative_paths(probe):
+    posix = {"v3/run.py": "a" * 64, "__init__.py": "b" * 64}
+    windows = {"v3\\run.py": "a" * 64, "__init__.py": "b" * 64}
+    assert probe.portable_identity(posix) == probe.portable_identity(windows)
+
+
+def test_bulk_weights_stay_outside_private_run_state(probe, tmp_path):
+    out, bulk = tmp_path / "private", tmp_path / "bulk"
+    out.mkdir()
+    probe.prepare_bulk_paths(out, bulk)
+    (out / "run/published/checkpoint.bin").write_bytes(b"weights")
+    (out / "run/ledger.sqlite").write_bytes(b"private state")
+    assert (bulk / "published/checkpoint.bin").read_bytes() == b"weights"
+    assert not (bulk / "ledger.sqlite").exists()
+    with pytest.raises(FileExistsError):
+        probe.prepare_bulk_paths(out, bulk)

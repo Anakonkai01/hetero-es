@@ -72,6 +72,31 @@ def configuration(model_path, rows_file, space):
     }
 
 
+def portable_identity(files):
+    import hashlib
+
+    files = {key.replace("\\", "/"): value for key, value in files.items()}
+    encoded = json.dumps(files, sort_keys=True, separators=(",", ":")).encode()
+    return {"sourceFiles": files, "sourceTreeSha256": hashlib.sha256(encoded).hexdigest()}
+
+
+def prepare_bulk_paths(out, bulk):
+    import subprocess
+
+    bulk.mkdir(parents=True, exist_ok=False)
+    run = out / "run"
+    run.mkdir(exist_ok=True)
+    for name in ("published", "cache-0", "cache-1"):
+        target = bulk / name
+        target.mkdir()
+        link = run / name
+        if os.name == "nt":
+            # NTFS directory junctions do not require administrator privileges.
+            subprocess.run(["cmd", "/c", "mklink", "/J", str(link), str(target)], check=True, capture_output=True)
+        else:
+            link.symlink_to(target.resolve(), target_is_directory=True)
+
+
 def run(args):
     require_gpu(args.gpu)
     import torch
@@ -91,6 +116,8 @@ def run(args):
         raise ValueError("CUDA is unavailable")
     torch.set_num_threads(1)
     args.out.mkdir(parents=True, mode=0o700)
+    if args.bulk_dir is not None:
+        prepare_bulk_paths(args.out, args.bulk_dir)
     rows = qualification_rows()
     rows_file = args.out / "rows.json"
     rows_file.write_text(json.dumps(rows))
@@ -144,7 +171,7 @@ def run(args):
             raise ValueError("Forced audits were incomplete or mismatched")
     receipt = {
         "environment": environment_info("cuda"),
-        **source_identity(Path(__file__).resolve().parents[1] / "src/heteroes"),
+        **portable_identity(source_identity(Path(__file__).resolve().parents[1] / "src/heteroes")["sourceFiles"]),
         "recipeHash": document.hash,
         "planHash": document.plan_hash,
         "candidates": candidates,
@@ -181,6 +208,7 @@ def main(argv=None):
     check.add_argument("--model-path", type=Path, required=True)
     check.add_argument("--space", choices=["full", "subset", "lora"], required=True)
     check.add_argument("--out", type=Path, required=True)
+    check.add_argument("--bulk-dir", type=Path, help="fresh directory for published weights and worker caches")
     comparison = sub.add_parser("compare")
     comparison.add_argument("left", type=Path)
     comparison.add_argument("right", type=Path)
