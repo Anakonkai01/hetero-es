@@ -1,0 +1,8 @@
+control ok    | 2 passed in 2.85s
+SURVIVED     no-hash-check | 2 passed in 2.63s
+killed       skip-replay | 1 failed in 4.04s
+killed       no-base | 1 failed in 2.41s
+killed       no-refresh | 1 failed in 2.46s
+killed       range-unchecked | 1 failed, 1 passed in 2.65s
+
+4 of 5 mutants killed.
