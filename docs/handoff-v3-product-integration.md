@@ -12,7 +12,8 @@ Commits:
 - `ae96728`: validation selection, metrics/events and verified full/subset/PEFT export.
 - `7819b09`: backend, qualification fences, arbitrary-column assets, wizard/templates/metrics, Vietnamese strings and browser contract.
 - `6aa95b5`: regression repair for selected-model revision in draft headers and complete replacement of recipe settings when a draft changes format.
-- A final documentation/evidence commit follows these implementation commits; the worktree is clean after it.
+- `5e12ad4`: documentation and intermediate/final evidence snapshots.
+- A follow-up receipt commit adds the complete last desktop probe and erratum; see `evidence/2026-10-19-v3-web-final/README.md`.
 
 ## Completed work
 
@@ -32,9 +33,9 @@ Each step has a NEW immutable-after-commit evidence folder with limits and inter
 
 - `evidence/2026-10-19-v3-product-runner`: final 22/22, runtime 2,241 passed / 100 skipped, backend 287 passed; 6/6 mutants killed. Final check used detached `c9eccfd`.
 - `evidence/2026-10-19-v3-validation`: 22/22, runtime 2,248 passed / 100 skipped, backend 287 passed; 6/6 mutants killed. Check used detached `ae96728`.
-- `evidence/2026-10-19-v3-web`: **22/22**, runtime **2,252 passed / 100 skipped**; complete backend rerun after the final repair **299 passed**. The earlier check-all backend collection had 298 tests. 8 backend + 3 frontend mutants killed, plus 2 draft-regression mutants. No equivalent survivors. The final full browser probe checks the repaired model revision.
+- `evidence/2026-10-19-v3-web-final`: authoritative **22/22** completion log and hashes of all individual step logs (the preceding `v3-web` folder holds the other step logs and mutation receipts). Runtime **2,252 passed / 100 skipped**; complete backend rerun after the final repair **299 passed**. The earlier check-all backend collection had 298 tests. 8 backend + 3 frontend mutants killed, plus 2 draft-regression mutants. No equivalent survivors. The final full browser probe checks the repaired model revision.
 
-The main checkout advanced while step-specific checks ran in detached checkouts; shared ports were serialized. Initial checks failed on test imports, unsupported test rule, exact browser labels or fixture reuse; all are preserved and explained in the READMEs. Fixture authentication in failed tracebacks is redacted. The last two draft regressions were caught with explicit failing tests before repair.
+The main checkout advanced while step-specific checks ran in detached checkouts; shared ports were serialized. Initial checks failed on test imports, unsupported test rule, exact browser labels or fixture reuse; all are preserved and explained in the READMEs. Fixture authentication in failed tracebacks is redacted. The last two draft regressions were caught with explicit failing tests before repair. The first web evidence commit preceded completion of its last desktop probe; its partial log is preserved unchanged, and `v3-web-final` contains the complete 22/22 receipt and explicit erratum.
 
 ## Next work and concrete limits
 
