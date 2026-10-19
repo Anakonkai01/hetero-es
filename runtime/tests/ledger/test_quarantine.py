@@ -323,11 +323,18 @@ def raw_after_quarantine(tmp_path, clock):
     raw.close()
 
 
-def insert_quarantine(raw, worker="worker-b", candidate_id="exp/g0/c1", attempt_number=1):
+def insert_quarantine(raw, worker="worker-b", candidate_id="exp/g0/c1", attempt_number=1, reason="RESTORE_MISMATCH"):
     raw.execute(
-        "INSERT INTO quarantine (worker_id, quarantined_at, candidate_id, attempt_number) VALUES (?, ?, ?, ?)",
-        (worker, 1000.0, candidate_id, attempt_number),
+        "INSERT INTO quarantine (worker_id, quarantined_at, candidate_id, attempt_number, reason) VALUES (?, ?, ?, ?, ?)",
+        (worker, 1000.0, candidate_id, attempt_number, reason),
     )
+
+
+def test_the_database_refuses_a_quarantine_without_a_known_reason(raw_after_quarantine):
+    for reason in (None, "BORED"):
+        with pytest.raises(sqlite3.IntegrityError):
+            insert_quarantine(raw_after_quarantine, reason=reason)
+    insert_quarantine(raw_after_quarantine, reason="AUDIT_MISMATCH")
 
 
 def test_the_database_accepts_a_well_formed_quarantine_row(raw_after_quarantine):

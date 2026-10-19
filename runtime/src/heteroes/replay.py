@@ -135,7 +135,8 @@ def replay_chain(executor, chain, apply_update, verify: bool) -> dict:
             record.verify_coefficients(executor.recipe.reward_eta, atol=1e-6)
         except ValueError as error:
             raise ReplayFailed(f"generation {record.generation}: {error}") from error
-        apply_update(executor.model, executor.schema, list(record.seeds), list(record.coefficients), record.alpha)
+        seeds, coefficients = record.update_inputs()  # antithetic pairs merged; a version-1 record passes unchanged
+        apply_update(executor.model, executor.schema, seeds, coefficients, record.alpha)
     applied = time.perf_counter()
     target = chain[-1][1]
     try:

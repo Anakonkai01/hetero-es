@@ -252,14 +252,13 @@ class Coordinator:
         self.parent_sha256 = sha256
 
     def _apply_record(self, record):
+        seeds, coefficients = record.update_inputs()  # antithetic pairs merged; a version-1 record passes unchanged
         if (
             self.recipe.engine_version == CUDA_ENGINE_VERSION
         ):  # the engine that made the noise of the candidates makes that of the update
-            return apply_coefficients_cuda_(
-                self.model, self.schema, list(record.seeds), record.coefficients, record.alpha
-            )
+            return apply_coefficients_cuda_(self.model, self.schema, seeds, coefficients, record.alpha)
         return apply_coefficients_(
-            self.model, self.schema, list(record.seeds), record.coefficients, record.alpha, self.recipe.chunk_elements
+            self.model, self.schema, seeds, coefficients, record.alpha, self.recipe.chunk_elements
         )
 
     def recover(self) -> int:

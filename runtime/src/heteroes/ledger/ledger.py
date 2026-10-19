@@ -1,5 +1,6 @@
 import dataclasses
 import functools
+import hashlib
 import math
 import re
 import secrets
@@ -12,7 +13,12 @@ from enum import Enum
 from heteroes.generation_record import GenerationRecord
 from heteroes.manifest import CandidateDescriptor
 
-SCHEMA_VERSION = 5
+# 6 (Recipe v3, ADR-008): candidate signs, the texts behind each committed reward, audits, the reason of a quarantine.
+# A schema-5 ledger (Recipe v1/v2) is history: it is replayed, never continued, so it is refused rather than migrated.
+SCHEMA_VERSION = 6
+LEGACY_SCHEMA_VERSION = 5
+# a worker whose texts disagreed with another worker's this many times is put aside for the owner (ADR-008, Q-B)
+AUDIT_QUARANTINE_AFTER = 3
 DEFAULT_MAX_ATTEMPTS = 3
 DEFAULT_BUSY_TIMEOUT_SECONDS = 30.0
 
@@ -75,10 +81,11 @@ CREATE TABLE candidate (
     generation INTEGER NOT NULL,
     candidate_index INTEGER NOT NULL,
     seed INTEGER NOT NULL,
+    sign INTEGER NOT NULL CHECK (sign IN (1, -1)),
     state TEXT NOT NULL CHECK (state IN ({_sql_list(CandidateState)})),
     FOREIGN KEY (experiment_id, generation) REFERENCES generation (experiment_id, generation),
     UNIQUE (experiment_id, generation, candidate_index),
-    UNIQUE (experiment_id, generation, seed)
+    UNIQUE (experiment_id, generation, seed, sign)
 );
 CREATE TABLE attempt (
     candidate_id TEXT NOT NULL REFERENCES candidate (candidate_id),
@@ -105,7 +112,21 @@ CREATE TABLE quarantine (
     quarantined_at REAL NOT NULL,
     candidate_id TEXT NOT NULL,
     attempt_number INTEGER NOT NULL,
+    reason TEXT NOT NULL CHECK (reason IN ('RESTORE_MISMATCH', 'AUDIT_MISMATCH')),
     FOREIGN KEY (candidate_id, attempt_number) REFERENCES attempt (candidate_id, attempt_number)
+);
+CREATE TABLE completion (
+    candidate_id TEXT NOT NULL PRIMARY KEY REFERENCES result (candidate_id),
+    sha256 TEXT NOT NULL,
+    body BLOB NOT NULL
+);
+CREATE TABLE audit (
+    candidate_id TEXT NOT NULL REFERENCES completion (candidate_id),
+    worker_id TEXT NOT NULL,
+    sha256 TEXT NOT NULL,
+    matched INTEGER NOT NULL CHECK (matched IN (0, 1)),
+    audited_at REAL NOT NULL,
+    PRIMARY KEY (candidate_id, worker_id)
 );
 CREATE TABLE generation_update (
     experiment_id TEXT NOT NULL,
@@ -125,7 +146,7 @@ COMMIT;
 
 # one row per candidate, with its attempts so far, the deadline of the latest one and its result, if committed
 _SELECT_CANDIDATES = """
-SELECT c.experiment_id, c.generation, g.recipe_hash, g.parent_weights_sha256, c.candidate_index, c.seed, c.state,
+SELECT c.experiment_id, c.generation, g.recipe_hash, g.parent_weights_sha256, c.candidate_index, c.seed, c.sign, c.state,
        (SELECT COUNT(*) FROM attempt AS a WHERE a.candidate_id = c.candidate_id),
        (SELECT a.deadline FROM attempt AS a WHERE a.candidate_id = c.candidate_id
         ORDER BY a.attempt_number DESC LIMIT 1),
@@ -140,7 +161,7 @@ LEFT JOIN result AS r ON r.candidate_id = c.candidate_id
 """
 
 _SELECT_DESCRIPTOR = """
-SELECT c.experiment_id, c.generation, g.recipe_hash, g.parent_weights_sha256, c.candidate_index, c.seed
+SELECT c.experiment_id, c.generation, g.recipe_hash, g.parent_weights_sha256, c.candidate_index, c.seed, c.sign
 FROM candidate AS c JOIN generation AS g USING (experiment_id, generation)
 WHERE c.candidate_id = ?
 """
@@ -217,6 +238,7 @@ class GenerationResults:
     parent_weights_sha256: str
     seeds: tuple[int, ...]
     rewards: tuple[float, ...]
+    signs: tuple[int, ...] = ()  # +1/-1 per candidate (Recipe v3); empty only when built by hand without signs
 
 
 @dataclass(frozen=True)
@@ -244,8 +266,9 @@ class GenerationInfo:
 class QuarantineRecord:
     worker_id: str
     quarantined_at: float
-    candidate_id: str  # the candidate whose failed restore put the worker aside
+    candidate_id: str  # the candidate whose failed restore, or whose audited texts, put the worker aside
     attempt_number: int
+    reason: str = "RESTORE_MISMATCH"  # or "AUDIT_MISMATCH"
 
 
 @dataclass(frozen=True)
@@ -298,8 +321,9 @@ def _check_descriptors(descriptors) -> list[CandidateDescriptor]:
     ordered = sorted(descriptors, key=lambda descriptor: descriptor.index)
     if [descriptor.index for descriptor in ordered] != list(range(len(ordered))):
         raise LedgerError(f"the indexes must be exactly 0..{len(ordered) - 1}, each once")
-    if len({descriptor.seed for descriptor in ordered}) != len(ordered):
-        raise LedgerError("the seeds of a generation must all be different")
+    # an antithetic pair shares its seed with opposite signs (ADR-008 section 5); (seed, sign) must be unique
+    if len({(descriptor.seed, descriptor.sign) for descriptor in ordered}) != len(ordered):
+        raise LedgerError("the seeds of a generation must all be different (per sign)")
     return ordered
 
 
@@ -351,8 +375,22 @@ def _check_hash(name: str, value) -> None:
         raise ValueError(f"{name} must be 64 lowercase hex digits, got {value!r}")
 
 
+def _completions_body(completions) -> tuple[str, bytes]:
+    """(SHA-256 of the canonical JSON list of texts, zlib-compressed canonical JSON): what the ledger stores for a result."""
+    import zlib
+
+    from heteroes.canonical import canonical_json_bytes
+
+    if not isinstance(completions, (list, tuple)) or not completions:
+        raise TypeError("completions must be a nonempty list of texts")
+    if not all(isinstance(text, str) for text in completions):
+        raise TypeError("every completion must be a text")
+    raw = canonical_json_bytes(list(completions))
+    return hashlib.sha256(raw).hexdigest(), zlib.compress(raw, 6)
+
+
 def _descriptor(row) -> CandidateDescriptor:
-    experiment_id, generation, recipe_hash, parent_weights_sha256, index, seed = row
+    experiment_id, generation, recipe_hash, parent_weights_sha256, index, seed, sign = row
     return CandidateDescriptor(
         recipe_hash=recipe_hash,
         parent_weights_sha256=parent_weights_sha256,
@@ -360,17 +398,18 @@ def _descriptor(row) -> CandidateDescriptor:
         generation=generation,
         index=index,
         seed=seed,
+        sign=sign,
     )
 
 
 def _record(row, now: float) -> CandidateRecord:
-    state, attempts, deadline, result_attempt, reward, committed_at, charged, failed_worker = row[6:]
+    state, attempts, deadline, result_attempt, reward, committed_at, charged, failed_worker = row[7:]
     state = CandidateState(state)
     if state is CandidateState.LEASED and now >= deadline:  # lazy recovery: nobody wrote it, but it is over
         state = CandidateState.PENDING
     result = None if result_attempt is None else CandidateResult(result_attempt, reward, committed_at)
     return CandidateRecord(
-        descriptor=_descriptor(row[:6]),
+        descriptor=_descriptor(row[:7]),
         state=state,
         attempts=attempts,
         result=result,
@@ -446,6 +485,11 @@ class Ledger:
             version = self._db.execute("PRAGMA user_version").fetchone()[0]
             if version == 0:
                 self._db.executescript(_SCHEMA)
+            elif version == LEGACY_SCHEMA_VERSION:
+                raise LedgerError(
+                    f"this ledger has schema {version} (Recipe v1/v2): it can be replayed, not continued by this code "
+                    f"(schema {SCHEMA_VERSION}, Recipe v3)"
+                )
             elif version != SCHEMA_VERSION:
                 raise LedgerError(f"unknown ledger schema version {version} (this code knows {SCHEMA_VERSION})")
             self._db.execute(
@@ -510,10 +554,18 @@ class Ledger:
             except sqlite3.IntegrityError as error:
                 raise LedgerError(f"generation {first.experiment_id}/g{first.generation} is already open") from error
             self._db.executemany(
-                "INSERT INTO candidate (candidate_id, experiment_id, generation, candidate_index, seed, state) "
-                "VALUES (?, ?, ?, ?, ?, ?)",
+                "INSERT INTO candidate (candidate_id, experiment_id, generation, candidate_index, seed, sign, state) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
                 [
-                    (d.candidate_id, d.experiment_id, d.generation, d.index, d.seed, CandidateState.PENDING.value)
+                    (
+                        d.candidate_id,
+                        d.experiment_id,
+                        d.generation,
+                        d.index,
+                        d.seed,
+                        d.sign,
+                        CandidateState.PENDING.value,
+                    )
                     for d in ordered
                 ],
             )
@@ -607,6 +659,7 @@ class Ledger:
             parent_weights_sha256=first.parent_weights_sha256,
             seeds=tuple(record.descriptor.seed for record in records),
             rewards=tuple(record.result.reward for record in records),
+            signs=tuple(record.descriptor.sign for record in records),
         )
 
     @_locked
@@ -734,7 +787,12 @@ class Ledger:
 
     @_locked
     def submit_result(
-        self, descriptor: CandidateDescriptor, attempt_number: int, token: str, reward: float
+        self,
+        descriptor: CandidateDescriptor,
+        attempt_number: int,
+        token: str,
+        reward: float,
+        completions: list[str] | None = None,
     ) -> SubmitOutcome:
         """
         Commit the reward of a candidate: the worker returns the job it ran (descriptor), its attempt number, its
@@ -745,9 +803,13 @@ class Ledger:
         acknowledged (ALREADY_COMMITTED) and nothing is written; another reward for an attempt that already
         delivered raises ConflictingResultError. Raises StaleAttemptError for an old attempt, a wrong token or an
         attempt that was closed, ResultMismatchError for another job.
+
+        `completions` (Recipe v3) are the texts the coordinator scored into `reward`; they are stored, compressed, in the same
+        transaction, so a committed reward never exists without its texts. A repeat must bring the same texts.
         """
         _check_attempt_identity(descriptor, attempt_number, token)
         _check_reward(reward)
+        texts = None if completions is None else _completions_body(completions)
         with self._db:
             self._db.execute("BEGIN IMMEDIATE")
             now = self._clock()
@@ -757,9 +819,19 @@ class Ledger:
                 committed = self._db.execute(
                     "SELECT reward FROM result WHERE candidate_id = ?", (candidate_id,)
                 ).fetchone()[0]
-                if committed == reward:
+                stored = self._db.execute(
+                    "SELECT sha256 FROM completion WHERE candidate_id = ?", (candidate_id,)
+                ).fetchone()
+                same_texts = (stored is None and texts is None) or (
+                    stored is not None and texts is not None and stored[0] == texts[0]
+                )
+                if committed == reward and same_texts:
                     return SubmitOutcome.ALREADY_COMMITTED
-                raise ConflictingResultError(f"{candidate_id} was committed with reward {committed}, not {reward}")
+                raise ConflictingResultError(
+                    f"{candidate_id} was committed with reward {committed} and other texts, not {reward}"
+                    if committed == reward
+                    else f"{candidate_id} was committed with reward {committed}, not {reward}"
+                )
             if state is not CandidateState.LEASED:
                 raise StaleAttemptError(
                     f"candidate {candidate_id} is {state.value}: attempt {attempt_number} is closed"
@@ -772,6 +844,10 @@ class Ledger:
                 "INSERT INTO result (candidate_id, attempt_number, reward, committed_at) VALUES (?, ?, ?, ?)",
                 (candidate_id, attempt_number, reward, now),
             )
+            if texts is not None:
+                self._db.execute(
+                    "INSERT INTO completion (candidate_id, sha256, body) VALUES (?, ?, ?)", (candidate_id, *texts)
+                )
             self._db.execute(
                 "UPDATE attempt SET ended_at = ? WHERE candidate_id = ? AND attempt_number = ?",
                 (now, candidate_id, attempt_number),
@@ -830,8 +906,8 @@ class Ledger:
                 ).fetchone()
                 if holder is not None:
                     self._db.execute(
-                        "INSERT OR IGNORE INTO quarantine (worker_id, quarantined_at, candidate_id, attempt_number) "
-                        "VALUES (?, ?, ?, ?)",
+                        "INSERT OR IGNORE INTO quarantine (worker_id, quarantined_at, candidate_id, attempt_number, reason) "
+                        "VALUES (?, ?, ?, ?, 'RESTORE_MISMATCH')",
                         (holder[0], now, candidate_id, attempt_number),
                     )
         if refused is not None:  # raised after the block, so that the quarantine above is committed and not rolled back
@@ -877,12 +953,14 @@ class Ledger:
 
     def _refuse_if_quarantined(self, worker_id: str) -> None:
         if self._db.execute("SELECT 1 FROM quarantine WHERE worker_id = ?", (worker_id,)).fetchone() is not None:
-            raise WorkerQuarantinedError(f"worker {worker_id} is quarantined (a restore failed)")
+            raise WorkerQuarantinedError(
+                f"worker {worker_id} is quarantined (a failed restore or repeated audit mismatches)"
+            )
 
     @_locked
     def list_quarantined(self) -> list[QuarantineRecord]:
         rows = self._db.execute(
-            "SELECT worker_id, quarantined_at, candidate_id, attempt_number FROM quarantine "
+            "SELECT worker_id, quarantined_at, candidate_id, attempt_number, reason FROM quarantine "
             "ORDER BY quarantined_at, worker_id"
         ).fetchall()
         return [QuarantineRecord(*row) for row in rows]
@@ -896,6 +974,76 @@ class Ledger:
             released = self._db.execute("DELETE FROM quarantine WHERE worker_id = ?", (worker_id,)).rowcount
             if released == 0:
                 raise LedgerError(f"worker {worker_id} is not quarantined")
+
+    @_locked
+    def get_completions(self, candidate_id: str) -> tuple[str, list[str]] | None:
+        """(SHA-256, texts) behind the committed reward of a candidate, or None if it was committed without texts."""
+        import json
+        import zlib
+
+        row = self._db.execute("SELECT sha256, body FROM completion WHERE candidate_id = ?", (candidate_id,)).fetchone()
+        if row is None:
+            return None
+        raw = zlib.decompress(row[1])
+        if hashlib.sha256(raw).hexdigest() != row[0]:
+            raise LedgerError(f"the stored texts of {candidate_id} do not match their hash")
+        return row[0], json.loads(raw)
+
+    @_locked
+    def record_audit(self, candidate_id: str, worker_id: str, completions_sha256: str) -> bool:
+        """
+        Another worker re-ran a committed candidate and got texts with this hash (ADR-008 section 8). Returns whether they
+        match the committed texts. A mismatch never changes the committed reward; it counts against BOTH workers (nobody
+        knows which one is wrong), and a worker with AUDIT_QUARANTINE_AFTER mismatches is quarantined for the owner.
+        The same worker auditing the same candidate again must report the same hash.
+        """
+        _check_hash("completions_sha256", completions_sha256)
+        if not isinstance(worker_id, str) or not worker_id:
+            raise TypeError("worker_id must be a nonempty string")
+        with self._db:
+            self._db.execute("BEGIN IMMEDIATE")
+            now = self._clock()
+            row = self._db.execute(
+                "SELECT c.sha256, r.attempt_number, a.worker_id FROM completion AS c JOIN result AS r USING (candidate_id) "
+                "JOIN attempt AS a ON a.candidate_id = r.candidate_id AND a.attempt_number = r.attempt_number "
+                "WHERE c.candidate_id = ?",
+                (candidate_id,),
+            ).fetchone()
+            if row is None:
+                raise LedgerError(f"{candidate_id} has no committed texts to audit")
+            committed_sha, attempt_number, original_worker = row
+            if worker_id == original_worker:
+                raise LedgerError(f"{candidate_id} must be audited by another worker than {worker_id}")
+            matched = completions_sha256 == committed_sha
+            prior = self._db.execute(
+                "SELECT sha256 FROM audit WHERE candidate_id = ? AND worker_id = ?", (candidate_id, worker_id)
+            ).fetchone()
+            if prior is not None:
+                if prior[0] != completions_sha256:
+                    raise ConflictingResultError(f"{worker_id} already audited {candidate_id} with other texts")
+                return matched
+            self._db.execute(
+                "INSERT INTO audit (candidate_id, worker_id, sha256, matched, audited_at) VALUES (?, ?, ?, ?, ?)",
+                (candidate_id, worker_id, completions_sha256, int(matched), now),
+            )
+            if not matched:
+                for involved in (worker_id, original_worker):
+                    if self._audit_mismatches(involved) >= AUDIT_QUARANTINE_AFTER:
+                        self._db.execute(
+                            "INSERT OR IGNORE INTO quarantine (worker_id, quarantined_at, candidate_id, attempt_number, reason) "
+                            "VALUES (?, ?, ?, ?, 'AUDIT_MISMATCH')",
+                            (involved, now, candidate_id, attempt_number),
+                        )
+        return matched
+
+    def _audit_mismatches(self, worker_id: str) -> int:
+        """Audits that disagreed and involved the worker, as the auditor or as the worker whose texts were committed."""
+        return self._db.execute(
+            "SELECT COUNT(*) FROM audit AS u JOIN result AS r USING (candidate_id) JOIN attempt AS a "
+            "ON a.candidate_id = r.candidate_id AND a.attempt_number = r.attempt_number "
+            "WHERE u.matched = 0 AND (u.worker_id = ? OR a.worker_id = ?)",
+            (worker_id, worker_id),
+        ).fetchone()[0]
 
     def _require_generation(self, experiment_id: str, generation: int) -> None:
         found = self._db.execute(
@@ -925,6 +1073,11 @@ class Ledger:
                 "parent_weights_sha256": (record.parent_weights_sha256, first.parent_weights_sha256),
                 "seeds": (record.seeds, tuple(r.descriptor.seed for r in records)),
                 "rewards": (record.rewards, tuple(r.result.reward for r in records)),
+                # a record without signs (record version 1) describes a generation of +1 candidates only
+                "signs": (
+                    getattr(record, "signs", None) or (1,) * len(records),
+                    tuple(r.descriptor.sign for r in records),
+                ),
             }
             differing = [field for field, (given, committed) in says.items() if given != committed]
             if differing:

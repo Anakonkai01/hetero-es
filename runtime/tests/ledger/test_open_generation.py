@@ -272,9 +272,22 @@ def test_a_new_file_records_its_schema_version(tmp_path):
 
     raw = sqlite3.connect(path)
     try:
-        assert raw.execute("PRAGMA user_version").fetchone()[0] == 5
+        assert raw.execute("PRAGMA user_version").fetchone()[0] == 6
     finally:
         raw.close()
+
+
+def test_a_schema_5_ledger_of_recipe_v1_or_v2_is_refused_as_history_and_left_untouched(tmp_path):
+    path = tmp_path / "ledger.db"
+    Ledger(path).close()
+    raw = sqlite3.connect(path)
+    raw.execute("PRAGMA user_version = 5")
+    raw.commit()
+    raw.close()
+    before = path.read_bytes()
+    with pytest.raises(LedgerError, match="replayed, not continued"):
+        Ledger(path)
+    assert path.read_bytes() == before
 
 
 def test_a_file_with_another_schema_version_is_refused(tmp_path):

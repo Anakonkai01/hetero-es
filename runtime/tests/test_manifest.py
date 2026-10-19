@@ -272,9 +272,21 @@ def test_the_descriptor_document_and_candidate_id():
         "generation": 3,
         "index": 5,
         "seed": 42,
+        "sign": 1,
     }
     assert descriptor.candidate_id == "exp-1/g3/c5"
     assert CandidateDescriptor.from_dict(json.loads(json.dumps(descriptor.to_dict()))) == descriptor
+
+
+def test_the_sign_of_an_antithetic_candidate():
+    minus = make_descriptor(index=1, seed=42, sign=-1)
+    assert minus.to_dict()["sign"] == -1 and CandidateDescriptor.from_dict(minus.to_dict()) == minus
+    assert minus.candidate_id == make_descriptor(index=1, seed=42).candidate_id  # the index identifies the job
+    stored = {k: v for k, v in make_descriptor().to_dict().items() if k != "sign"}  # written before Recipe v3
+    assert CandidateDescriptor.from_dict(stored).sign == 1
+    for bad in (0, 2, True, -1.0, "1"):
+        with pytest.raises(ValueError):
+            make_descriptor(sign=bad)
 
 
 def test_the_candidate_id_does_not_depend_on_the_seed_or_the_parent():

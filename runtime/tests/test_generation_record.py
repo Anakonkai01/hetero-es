@@ -370,3 +370,73 @@ def test_an_unusable_reward_is_refused_when_building():
         GenerationRecord.from_results(
             "learn", 3, make_results(rewards=(0.5, float("nan"), 0.75, 0.5)), alpha=1e-3, eta=ETA
         )
+
+
+# ---------------------------------------------------------------------------
+# record version 2 (Recipe v3, ADR-008): signs and the coefficient rule
+# ---------------------------------------------------------------------------
+
+
+def v2(**changes):
+    values = dict(
+        experiment_id="exp",
+        generation=0,
+        recipe_hash="a" * 64,
+        parent_weights_sha256="b" * 64,
+        seeds=(5, 5, 9, 9),
+        rewards=(1.0, 0.0, 0.5, 0.5),
+        coefficients=(1.0, -1.0, 0.0, 0.0),
+        alpha=0.1,
+        signs=(1, -1, 1, -1),
+        coefficient_rule="zscore@1",
+    )
+    values.update(changes)
+    return GenerationRecord(**values)
+
+
+def test_a_version_2_record_round_trips_and_has_its_own_identity():
+    record = v2()
+    data = json.loads(record.to_json())
+    assert data["record_version"] == 2 and data["signs"] == [1, -1, 1, -1] and data["coefficient_rule"] == "zscore@1"
+    assert GenerationRecord.from_json(record.to_json()) == record
+    plain = v2(seeds=(5, 6, 9, 10), signs=None, coefficient_rule=None)
+    assert "signs" not in plain.to_dict() and plain.to_dict()["record_version"] == 1
+    assert v2(seeds=(5, 6, 9, 10), signs=(1, 1, 1, 1)).hash != plain.hash
+
+
+def test_update_inputs_merge_pairs_and_leave_plain_records_alone():
+    seeds, coefficients = v2().update_inputs()
+    assert seeds == [5, 9] and coefficients.tolist() == [1.0, 0.0]
+    plain = v2(seeds=(5, 6, 9, 10), signs=None, coefficient_rule=None)
+    seeds, coefficients = plain.update_inputs()
+    assert seeds == [5, 6, 9, 10] and coefficients.tolist() == [1.0, -1.0, 0.0, 0.0]
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        dict(coefficient_rule=None),
+        dict(signs=None),
+        dict(coefficient_rule="adam@1"),
+        dict(signs=(1, -1, 1)),
+        dict(signs=(1, -1, 1, 0)),
+        dict(signs=(1, -1, 1, True)),
+        dict(signs=(-1, 1, 1, -1)),  # a pair starts with +1
+        dict(seeds=(5, 6, 9, 9)),  # the two candidates of a pair share one seed
+        dict(seeds=(5, 5, 5, 5)),
+    ],
+)
+def test_malformed_version_2_records_are_refused(changes):
+    with pytest.raises(ValueError):
+        v2(**changes)
+
+
+def test_the_version_decides_which_keys_a_record_document_may_have():
+    v1_document = json.loads(v2(seeds=(5, 6, 9, 10), signs=None, coefficient_rule=None).to_json())
+    with pytest.raises(ValueError):
+        GenerationRecord.from_dict({**v1_document, "signs": [1, 1, 1, 1], "coefficient_rule": "zscore@1"})
+    v2_document = json.loads(v2().to_json())
+    with pytest.raises(ValueError):
+        GenerationRecord.from_dict({k: v for k, v in v2_document.items() if k != "signs"})
+    with pytest.raises(ValueError):
+        GenerationRecord.from_dict({**v2_document, "record_version": 3})

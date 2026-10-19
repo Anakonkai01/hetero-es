@@ -246,6 +246,9 @@ class CandidateDescriptor:
     generation: int
     index: int  # position in the canonical candidate order of the generation
     seed: int
+    # +1, or -1 for the second candidate of an antithetic pair (ADR-008 section 5): it is perturbed with -sigma. Not part of
+    # candidate_id (the index already is unique); a descriptor stored before Recipe v3 has no sign and means +1.
+    sign: int = 1
 
     def __post_init__(self):
         _check_text("recipe_hash", self.recipe_hash, _HEX64)
@@ -254,6 +257,8 @@ class CandidateDescriptor:
         _check_int("generation", self.generation, 0)
         _check_int("index", self.index, 0)
         _check_int("seed", self.seed, 0, MAX_SEED)
+        if type(self.sign) is not int or self.sign not in (1, -1):  # -1.0 == -1 in Python: the type is checked first
+            raise ValueError(f"sign must be +1 or -1, got {self.sign!r}")
 
     @property
     def candidate_id(self) -> str:
@@ -268,15 +273,13 @@ class CandidateDescriptor:
             "generation": self.generation,
             "index": self.index,
             "seed": self.seed,
+            "sign": self.sign,
         }
 
     @classmethod
     def from_dict(cls, data: dict) -> "CandidateDescriptor":
-        _check_keys(
-            "candidate descriptor",
-            data,
-            {"recipe_hash", "parent_weights_sha256", "experiment_id", "generation", "index", "seed"},
-        )
+        keys = {"recipe_hash", "parent_weights_sha256", "experiment_id", "generation", "index", "seed"}
+        _check_keys("candidate descriptor", data, keys | ({"sign"} & set(data)))
         return cls(**data)
 
 

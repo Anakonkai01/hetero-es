@@ -8,6 +8,9 @@ from heteroes.canonical import canonical_json_bytes, canonical_json_hash
 from heteroes.manifest import _HEX64, _NAME, MAX_SEED, _check_int, _check_keys, _check_text
 
 RECORD_VERSION = 1
+# Recipe v3 (ADR-008): the record also says each candidate's sign and the rule that made the coefficients.
+RECORD_VERSION_V3 = 2
+COEFFICIENT_RULES = ("zscore@1",)
 _FLOAT32_MAX = float(np.finfo(np.float32).max)
 
 
@@ -49,6 +52,10 @@ class GenerationRecord:
     made: measured in 0.3 to 0.4% of the sets of rewards k/96, harmless for the weights, but not the same bytes; see
     artifacts/experiments/2026-10-06-coefficient-residue.)
     The rewards stay in the record so that the coefficients can be audited (`verify_coefficients`).
+
+    A record of version 2 (Recipe v3) also has `signs` (+1, or -1 for the second candidate of an antithetic pair) and the
+    `coefficient_rule`; `update_inputs()` gives what `apply_coefficients_` receives. Without them the record is version 1,
+    byte for byte as before.
     """
 
     experiment_id: str
@@ -59,6 +66,8 @@ class GenerationRecord:
     rewards: tuple[float, ...]
     coefficients: tuple[float, ...]
     alpha: float
+    signs: tuple[int, ...] | None = None
+    coefficient_rule: str | None = None
 
     def __post_init__(self):
         _check_text("experiment_id", self.experiment_id, _NAME)
@@ -71,7 +80,14 @@ class GenerationRecord:
             raise ValueError("a record needs at least one candidate")
         for seed in seeds:
             _check_int("seed", seed, 0, MAX_SEED)
-        if len(set(seeds)) != len(seeds):
+        if (self.signs is None) != (self.coefficient_rule is None):
+            raise ValueError("a version-2 record has both signs and a coefficient rule")
+        signs = (1,) * len(seeds) if self.signs is None else _as_tuple("signs", self.signs)
+        if any(type(sign) is not int or sign not in (1, -1) for sign in signs) or len(signs) != len(seeds):
+            raise ValueError("one sign, +1 or -1, per candidate")
+        if self.coefficient_rule is not None and self.coefficient_rule not in COEFFICIENT_RULES:
+            raise ValueError(f"unknown coefficient rule {self.coefficient_rule!r}")
+        if len(set(zip(seeds, signs))) != len(seeds):
             raise ValueError("the seeds of a generation must all be different")
         rewards = tuple(_real("reward", value) for value in _as_tuple("rewards", self.rewards))
         coefficients = tuple(
@@ -87,7 +103,15 @@ class GenerationRecord:
         if abs(alpha) > _FLOAT32_MAX:
             raise ValueError(f"alpha does not fit in a float32, got {alpha}")
 
+        if any(sign == -1 for sign in signs):
+            from heteroes.v3.antithetic import merged_update
+
+            merged_update(
+                list(zip(seeds, signs)), np.asarray(coefficients, dtype=np.float32)
+            )  # pairs must be well formed
         object.__setattr__(self, "seeds", seeds)
+        if self.signs is not None:
+            object.__setattr__(self, "signs", signs)
         object.__setattr__(self, "rewards", rewards)
         object.__setattr__(self, "coefficients", coefficients)
         object.__setattr__(self, "alpha", alpha)
@@ -97,7 +121,24 @@ class GenerationRecord:
         """No signal: every coefficient is zero, so the update changes nothing."""
         return not any(self.coefficients)
 
+    def update_inputs(self):
+        """(seeds, float32 coefficients) for `apply_coefficients_`: antithetic pairs merged (ADR-008 section 5)."""
+        from heteroes.v3.antithetic import merged_update
+
+        signs = self.signs or (1,) * len(self.seeds)
+        return merged_update(list(zip(self.seeds, signs)), np.asarray(self.coefficients, dtype=np.float32))
+
     def to_dict(self) -> dict:
+        if self.signs is not None:
+            return {
+                **self._v1_dict(),
+                "record_version": RECORD_VERSION_V3,
+                "signs": list(self.signs),
+                "coefficient_rule": self.coefficient_rule,
+            }
+        return self._v1_dict()
+
+    def _v1_dict(self) -> dict:
         return {
             "record_version": RECORD_VERSION,
             "experiment_id": self.experiment_id,
@@ -121,23 +162,23 @@ class GenerationRecord:
 
     @classmethod
     def from_dict(cls, data: dict) -> "GenerationRecord":
+        keys = {
+            "record_version",
+            "experiment_id",
+            "generation",
+            "recipe_hash",
+            "parent_weights_sha256",
+            "seeds",
+            "rewards",
+            "coefficients",
+            "alpha",
+            "alpha_float32",
+        }
+        version = data.get("record_version") if isinstance(data, dict) else None
         _check_keys(
-            "generation record",
-            data,
-            {
-                "record_version",
-                "experiment_id",
-                "generation",
-                "recipe_hash",
-                "parent_weights_sha256",
-                "seeds",
-                "rewards",
-                "coefficients",
-                "alpha",
-                "alpha_float32",
-            },
+            "generation record", data, keys | ({"signs", "coefficient_rule"} if version == RECORD_VERSION_V3 else set())
         )
-        if data["record_version"] != RECORD_VERSION:
+        if version not in (RECORD_VERSION, RECORD_VERSION_V3):
             raise ValueError(f"unknown record version {data['record_version']}")
         record = cls(
             experiment_id=data["experiment_id"],
@@ -148,6 +189,8 @@ class GenerationRecord:
             rewards=data["rewards"],
             coefficients=data["coefficients"],
             alpha=data["alpha"],
+            signs=data.get("signs"),
+            coefficient_rule=data.get("coefficient_rule"),
         )
         if record.to_dict() != data:
             raise ValueError("record does not round-trip (a derived value, such as alpha_float32, disagrees)")
@@ -172,8 +215,13 @@ class GenerationRecord:
             raise ValueError("the coefficients are not those of the rewards")
 
     @classmethod
-    def from_results(cls, experiment_id: str, generation: int, results, alpha: float, eta: float) -> "GenerationRecord":
-        """The record of a complete generation (`results` is what `Ledger.get_generation_results` returns)."""
+    def from_results(
+        cls, experiment_id: str, generation: int, results, alpha: float, eta: float, coefficient_rule: str | None = None
+    ) -> "GenerationRecord":
+        """
+        The record of a complete generation (`results` is what `Ledger.get_generation_results` returns). With a
+        `coefficient_rule` (Recipe v3) it is a version-2 record carrying the candidates' signs.
+        """
         from heteroes.es.update import standardize_rewards  # needs torch; the record itself does not
 
         coefficients = tuple(float(value) for value in standardize_rewards(results.rewards, eta))
@@ -186,4 +234,6 @@ class GenerationRecord:
             rewards=tuple(results.rewards),
             coefficients=coefficients,
             alpha=alpha,
+            signs=None if coefficient_rule is None else tuple(results.signs),
+            coefficient_rule=coefficient_rule,
         )
