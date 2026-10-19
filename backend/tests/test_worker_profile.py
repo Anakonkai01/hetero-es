@@ -168,3 +168,42 @@ def test_a_missing_report_hash_comes_only_from_the_same_url_in_a_reviewed_profil
             [*inputs["common"], *selection, "--pinned-profile", str(pinned), "--out", str(inputs["tmp"] / "x")]
         )
     assert not (inputs["tmp"] / "x").exists() and not (inputs["tmp"] / "unpinned").exists()
+
+
+def test_a_size_lookup_retries_transient_network_errors_a_bounded_number_of_times(monkeypatch):
+    import urllib.error
+
+    spec = importlib.util.spec_from_file_location("build_worker_profile_sizes", SCRIPT)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    calls = []
+
+    class Response:
+        headers = {"Content-Range": "bytes 0-0/1234"}
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+    def flaky(request, timeout):
+        calls.append(request.full_url)
+        if len(calls) < module.SIZE_ATTEMPTS:
+            raise urllib.error.URLError("handshake timed out")
+        return Response()
+
+    monkeypatch.setattr(module.urllib.request, "urlopen", flaky)
+    monkeypatch.setattr(module.time, "sleep", lambda seconds: None)
+    assert module.get_size("https://files.example.invalid/a.whl") == 1234
+    assert len(calls) == module.SIZE_ATTEMPTS
+    calls.clear()
+
+    def down(request, timeout):
+        calls.append(request.full_url)
+        raise urllib.error.URLError("handshake timed out")
+
+    monkeypatch.setattr(module.urllib.request, "urlopen", down)
+    with pytest.raises(urllib.error.URLError):
+        module.get_size("https://files.example.invalid/a.whl")
+    assert len(calls) == module.SIZE_ATTEMPTS  # bounded, then the error is reported

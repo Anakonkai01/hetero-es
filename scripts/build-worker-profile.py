@@ -19,6 +19,8 @@ import json
 import pathlib
 import shutil
 import tarfile
+import time
+import urllib.error
 import urllib.request
 import urllib.parse
 
@@ -33,14 +35,22 @@ MODEL_FILES = [
     "vocab.json",
     "merges.txt",
 ]
+SIZE_ATTEMPTS = 4
 LEGACY_REFERENCE = "artifacts/regression/2026-10-10-m3-native-profile/reference.json"
 
 
 def get_size(url):
     request = urllib.request.Request(url, headers={"User-Agent": "pip/25.0.1", "Range": "bytes=0-0"})
-    with urllib.request.urlopen(request, timeout=60) as response:
-        extent = response.headers.get("Content-Range")
-        size = extent.rsplit("/", 1)[1] if extent else response.headers.get("Content-Length")
+    for attempt in range(1, SIZE_ATTEMPTS + 1):
+        try:
+            with urllib.request.urlopen(request, timeout=60) as response:
+                extent = response.headers.get("Content-Range")
+                size = extent.rsplit("/", 1)[1] if extent else response.headers.get("Content-Length")
+            break
+        except urllib.error.URLError:  # CDN edges sometimes time out the TLS handshake
+            if attempt == SIZE_ATTEMPTS:
+                raise
+            time.sleep(2 * attempt)
     if not size:
         raise ValueError("Missing object size: " + url)
     return int(size)
