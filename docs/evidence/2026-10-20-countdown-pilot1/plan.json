@@ -1,0 +1,22 @@
+{
+ "alpha": 0.0005,
+ "coefficientRule": {
+  "eta": 1e-09,
+  "name": "zscore",
+  "version": 1
+ },
+ "formatVersion": 1,
+ "generations": 30,
+ "population": 32,
+ "recipeHash": "5c42087f7c12424aa23482aee3b60859ea4c89e885f13829fe82df3ca114c5fc",
+ "scorer": {
+  "codeSha256": null,
+  "config": {
+   "numbersField": "nums",
+   "targetField": "target"
+  },
+  "kind": "declarative",
+  "name": "countdown",
+  "version": 1
+ }
+}

@@ -1,0 +1,58 @@
+{
+ "data": {
+  "batch": {
+   "sampler": "sha256-python-random-sample-v1",
+   "seed": 11,
+   "size": 32
+  },
+  "contentHash": "cdb656862d2142cb9b7e02607e5a079887f62be875c2f1a5f60949de2300fcb2",
+  "kind": "dataset",
+  "splitHashes": {
+   "test": "0a0076442436ea02c81463f6a704432020b3f8c813e1cbc1906b966c3d54add9",
+   "train": "d3801d8ce12118ecf8f7e0db9be55f602b9cebe3b24a9dcc96b352de709bced2",
+   "validation": "662b5601c3a07e83b1fc019794fbbf808aee7fc0e2823f2877fd6582b0894610"
+  }
+ },
+ "evaluation": {
+  "chunk": 64,
+  "decoder": "hf_generate",
+  "evalDtype": "float32",
+  "generationConfigSha256": "b55cff86f578c8340c5d24f380d97989b021618b79a30df0a802c0362b7a0346",
+  "maxNewTokens": 512,
+  "systemPrompt": null
+ },
+ "formatVersion": 3,
+ "model": {
+  "dtype": "torch.float16",
+  "files": {
+   "config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+   "generation_config.json": "e558847a8b4402616f1273797b015104dc266fe4b520056fca88823ba8f8ebe6",
+   "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+   "model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+   "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+   "tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583",
+   "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+  },
+  "id": "Qwen/Qwen2.5-0.5B-Instruct",
+  "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+  "tokenizerRevision": "7ae557604adf67be50417f59c2c2f167def9a775"
+ },
+ "noise": {
+  "chunkElements": 262144,
+  "engine": "numpy_pcg64_normal_f32_to_f16_v1",
+  "fingerprint": "b94575345e870b1606cb4d6a0c4aa49b054cfbfc50571d809653d01bce9184d3"
+ },
+ "perturbation": {
+  "antithetic": false,
+  "sigma": {
+   "generations": 30,
+   "initial": 0.001,
+   "kind": "constant",
+   "minimum": 0.001
+  }
+ },
+ "schemaHash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+ "weightSpace": {
+  "kind": "full"
+ }
+}

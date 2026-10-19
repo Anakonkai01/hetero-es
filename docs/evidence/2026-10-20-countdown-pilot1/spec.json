@@ -1,0 +1,9 @@
+{
+  "model": {"path": "<HF cache snapshot 7ae55760>", "id": "Qwen/Qwen2.5-0.5B-Instruct", "revision": "7ae557604adf67be50417f59c2c2f167def9a775"},
+  "data": {"path": "../countdown-2500.jsonl", "promptField": "prompt", "batchSize": 32, "batchSeed": 11, "splitSeed": 42},
+  "weightSpace": {"kind": "full"},
+  "sigma": {"kind": "constant", "initial": 0.001, "minimum": 0.001},
+  "antithetic": false, "maxNewTokens": 512, "systemPrompt": null, "evalDtype": "float32", "evalChunk": 64,
+  "decoder": "hf_generate", "population": 32, "generations": 30, "alpha": 0.0005, "coefficientRule": "zscore@1",
+  "scorer": {"kind": "declarative", "name": "countdown", "version": 1, "config": {"numbersField": "nums", "targetField": "target"}}
+}
