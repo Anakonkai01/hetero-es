@@ -110,7 +110,10 @@ async function freePort() {
     assert.ok(monitor.resourceTelemetry.host.cores.length > 0);
     assert.ok(monitor.resourceTelemetry.power.components.some((c) => c.kind === 'cpu-package' && c.powerW != null));
     assert.ok(monitor.telemetryHistory.length >= 2);
-    await page.getByRole('button', { name: 'Chi tiết', exact: true }).click();
+    // The label follows the detected UI language ("Detail" / "Chi tiết"): pick the second view of the switch instead.
+    const detail = page.locator('.telemetry-switch button').nth(1);
+    await detail.click();
+    assert.equal(await detail.getAttribute('aria-pressed'), 'true');
     assert.ok((await page.locator('.telemetry-cores>div').count()) > 0);
     const layout = await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth);
     assert.equal(layout, true);
