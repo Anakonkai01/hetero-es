@@ -121,6 +121,7 @@ class Coordinator:
         audit_workers=None,
         audit_timeout_seconds=120,
         audit_fault_path=None,
+        coefficient_function=None,
     ):
         # Recipe v3 (ADR-008): `antithetic` gives pairs (seed, +1), (seed, -1); `coefficient_rule` makes version-2 records;
         # `score(generation, descriptor, completions) -> reward` scores the texts the workers submit, on this process
@@ -128,6 +129,7 @@ class Coordinator:
             raise CoordinatorError("an antithetic population must be even")
         self._antithetic = antithetic
         self._coefficient_rule = coefficient_rule
+        self._coefficient_function = coefficient_function  # the loaded code of a python@1 coefficient rule
         self._score = score
         self._audit_rate = audit_rate if recipe.to_dict().get("formatVersion") == 3 and score is not None else 0
         self._audit_workers = audit_workers
@@ -296,6 +298,16 @@ class Coordinator:
             ) from error
         self.parent_sha256 = sha256
 
+    def _momentum_history(self, generation, window):
+        """The merged inputs of the window's earlier generations, newest first, from their recorded updates."""
+        history = []
+        for earlier in range(generation - 1, max(-1, generation - window), -1):
+            stored = self.ledger.get_update(self.experiment_id, earlier)
+            if stored is None:
+                raise CoordinatorError(f"momentum needs the update record of generation {earlier}")
+            history.append(stored.record.history_entry())
+        return history
+
     def _apply_record(self, record):
         seeds, coefficients = record.update_inputs()  # antithetic pairs merged; a version-1 record passes unchanged
         if (
@@ -443,13 +455,18 @@ class Coordinator:
         results = self.ledger.get_generation_results(self.experiment_id, generation)
         self.log("generation_complete", generation=generation, rewards=list(results.rewards))
 
+        # a Recipe v3 plan may schedule alpha and add momentum; the record carries the values, so nobody recomputes them
+        alpha_at, update_rule = getattr(self.recipe, "alpha_at", None), getattr(self.recipe, "update_rule", None)
         record = GenerationRecord.from_results(
             self.experiment_id,
             generation,
             results,
-            alpha=self.alpha,
+            alpha=self.alpha if alpha_at is None else alpha_at(generation),
             eta=self.recipe.reward_eta,
             coefficient_rule=self._coefficient_rule,
+            update_rule=update_rule,
+            momentum_history=None if update_rule is None else self._momentum_history(generation, update_rule["window"]),
+            function=self._coefficient_function,
         )
         self._check_cancel()  # last cooperative boundary before write-ahead commit
         self.ledger.record_update(record)  # BEFORE the weights are touched

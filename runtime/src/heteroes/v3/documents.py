@@ -16,11 +16,13 @@ from heteroes.canonical import canonical_json_hash
 from heteroes.catalog import DECODE_ENGINES, WORKLOAD_NAMES
 from heteroes.manifest import EVAL_DTYPES, KNOWN_ENGINES, Recipe
 from heteroes.v3.scoring import validate_spec
+from heteroes.v3.coefficients import validate_update_rule
 from heteroes.v3.options import COEFFICIENT_RULES, validate_weight_space as _check_weight_space
 
 FORMAT_VERSION = 3
 PLAN_VERSION = 1
 SAMPLER = "sha256-python-random-sample-v1"
+ALPHA_SCHEDULES = ("constant", "cosine", "linear")
 
 # Prompts per generate() call a recipe may declare: FP16 is exact one prompt at a time only; FP32 batches gave the same
 # texts as one prompt at a time in the cross-GPU probes (16, and 64 on 5070 Ti, 3060 and 1660S: RUNTIME-TODO chunk-128)
@@ -165,11 +167,53 @@ def sigma_at(doc, generation):
     return effective
 
 
+def _check_alpha(alpha):
+    # a number (every plan written before schedules) or a schedule over the plan's generations
+    if not isinstance(alpha, dict):
+        _positive("alpha", alpha)
+        return
+    _keys("alpha", alpha, {"kind", "initial", "minimum"})
+    if alpha["kind"] not in ALPHA_SCHEDULES:
+        raise ValueError(f"alpha schedule is one of {ALPHA_SCHEDULES}")
+    _positive("alpha.initial", alpha["initial"])
+    _positive("alpha.minimum", alpha["minimum"])
+    if alpha["minimum"] > alpha["initial"]:
+        raise ValueError("alpha.minimum exceeds alpha.initial")
+
+
+def alpha_at(plan, generation):
+    """
+    The alpha of a generation's update record. A plain number is used as it is (as before schedules); a schedule gives
+    its FP32 value: constant, cosine (the rule of `sigma_at`) or linear from `initial` at 0 to `minimum` at G - 1.
+    """
+    total = plan["generations"]
+    if type(generation) is not int or not 0 <= generation < total:
+        raise ValueError("generation outside the plan")
+    alpha = plan["alpha"]
+    if not isinstance(alpha, dict):
+        return alpha
+    initial, minimum, fraction = alpha["initial"], alpha["minimum"], generation / (total - 1) if total > 1 else 0.0
+    if alpha["kind"] == "cosine":
+        value = minimum + (initial - minimum) * (1 + math.cos(math.pi * fraction)) / 2
+    elif alpha["kind"] == "linear":
+        value = initial + (minimum - initial) * fraction
+    else:
+        value = initial
+    effective = float(np.float32(value))
+    if not math.isfinite(effective) or effective <= 0:
+        raise ValueError("effective FP32 alpha is invalid")
+    return effective
+
+
+def coefficient_rule_id(rule):
+    """The record's name of a plan's coefficient rule: name@version, or python@1:<code sha256>."""
+    return f"python@1:{rule['codeSha256']}" if rule["name"] == "python" else f"{rule['name']}@{rule['version']}"
+
+
 def validate_plan(plan, recipe, *, allow_python=False):
     """Check a plan against its (already valid) recipe."""
-    _keys(
-        "plan", plan, {"formatVersion", "recipeHash", "population", "generations", "alpha", "coefficientRule", "scorer"}
-    )
+    keys = {"formatVersion", "recipeHash", "population", "generations", "alpha", "coefficientRule", "scorer"}
+    _keys("plan", plan, keys | ({"update"} if "update" in plan else set()))
     if plan["formatVersion"] != PLAN_VERSION:
         raise ValueError(f"unknown plan format {plan['formatVersion']!r}")
     if plan["recipeHash"] != canonical_json_hash(recipe):
@@ -181,11 +225,23 @@ def validate_plan(plan, recipe, *, allow_python=False):
     scheduled = recipe["perturbation"]["sigma"]["generations"]
     if scheduled is not None and scheduled != plan["generations"]:
         raise ValueError("the sigma schedule and the plan disagree on the number of generations")
-    _positive("alpha", plan["alpha"])
+    _check_alpha(plan["alpha"])
+    if "update" in plan:
+        if plan["update"] is None:
+            raise ValueError("a plan without momentum has no update key")
+        validate_update_rule(plan["update"])
     rule = plan["coefficientRule"]
-    _keys("coefficientRule", rule, {"name", "version", "eta"})
-    if rule["version"] not in COEFFICIENT_RULES.get(rule["name"], ()):
-        raise ValueError(f"unknown coefficient rule {rule['name']}@{rule['version']}")
+    if isinstance(rule, dict) and rule.get("name") == "python":
+        _keys("coefficientRule", rule, {"name", "version", "eta", "codeSha256"})
+        if not allow_python:
+            raise ValueError("this lab accepts only the named coefficient rules, not a python rule")
+        if rule["version"] != 1:
+            raise ValueError("unknown python coefficient rule version")
+        _hex("coefficientRule.codeSha256", rule["codeSha256"], _HEX64)
+    else:
+        _keys("coefficientRule", rule, {"name", "version", "eta"})
+        if rule["version"] not in COEFFICIENT_RULES.get(rule["name"], ()):
+            raise ValueError(f"unknown coefficient rule {rule['name']}@{rule['version']}")
     _positive("coefficientRule.eta", rule["eta"])
     validate_spec(plan["scorer"], allow_python=allow_python)
     return plan

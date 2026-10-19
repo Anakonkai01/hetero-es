@@ -12,7 +12,8 @@ from pathlib import Path
 
 from heteroes.canonical import canonical_json_hash
 from heteroes.v3 import data as v3data
-from heteroes.v3.documents import COEFFICIENT_RULES, recipe_hash, sigma_at, validate_plan, validate_recipe
+from heteroes.v3.coefficients import check_rule
+from heteroes.v3.documents import alpha_at, coefficient_rule_id, recipe_hash, sigma_at, validate_plan, validate_recipe
 from heteroes.v3.scoring import code_sha256, score as score_texts
 
 
@@ -33,7 +34,8 @@ class RecipeV3Run:
         self.chunk = evaluation.get("chunk")  # None: the executor's default, as for documents written before the key
         self.sigma = recipe["perturbation"]["sigma"]["initial"]
         self.reward_eta = plan["coefficientRule"]["eta"]
-        self.coefficient_rule = f"{plan['coefficientRule']['name']}@{plan['coefficientRule']['version']}"
+        self.coefficient_rule = coefficient_rule_id(plan["coefficientRule"])
+        self.update_rule = plan.get("update")  # None: the plain step; a momentum rule goes into every update record
         self.antithetic = recipe["perturbation"]["antithetic"]
         self.workload_name = None
         # what the generation of texts reads (`study.evaluation.generate_rows`); the answers are scored elsewhere
@@ -41,6 +43,9 @@ class RecipeV3Run:
 
     def to_dict(self) -> dict:
         return self.recipe
+
+    def alpha_at(self, generation):
+        return alpha_at(self.plan, generation)
 
     def batch(self, data, generation):
         if {k: data[k] for k in ("contentHash", "splitHashes")} != {
@@ -63,6 +68,11 @@ class RecipeV3Run:
             "scorer": self.plan["scorer"],
             "coefficientRule": self.plan["coefficientRule"],
         }
+        # keys that only plans with an alpha schedule or momentum have, so that earlier contexts keep their hashes
+        if isinstance(self.plan["alpha"], dict):
+            body["alphaFloat32"] = self.alpha_at(generation)
+        if self.update_rule is not None:
+            body["update"] = self.update_rule
         return {**body, "contextHash": canonical_json_hash(body)}
 
 
@@ -160,18 +170,32 @@ def build_documents(
         },
     }
     validate_recipe(recipe)
-    rule = config.get("coefficientRule", "zscore@1")
-    name, version = rule.rsplit("@", 1)
-    if int(version) not in COEFFICIENT_RULES.get(name, ()):
-        raise ValueError(f"unknown coefficient rule {rule}")
+    # "zscore@1", "centered-rank@1" or "python@1:<code sha256>" (`heteroes.v3.coefficients`)
+    rule = check_rule(config.get("coefficientRule", "zscore@1"))
+    eta = config.get("eta", 1e-9)
+    if rule.startswith("python@"):
+        coefficient_rule = {"name": "python", "version": 1, "eta": eta, "codeSha256": rule.split(":", 1)[1]}
+    else:
+        name, version = rule.rsplit("@", 1)
+        coefficient_rule = {"name": name, "version": int(version), "eta": eta}
+    alpha = config["alpha"]
+    if config.get("alphaSchedule") is not None:
+        schedule = config["alphaSchedule"]
+        alpha = {"kind": schedule["kind"], "initial": alpha, "minimum": schedule.get("minimum", alpha)}
     plan = {
         "formatVersion": 1,
         "recipeHash": canonical_json_hash(recipe),
         "population": config["population"],
         "generations": generations,
-        "alpha": config["alpha"],
-        "coefficientRule": {"name": name, "version": int(version), "eta": config.get("eta", 1e-9)},
+        "alpha": alpha,
+        "coefficientRule": coefficient_rule,
         "scorer": config["scorerSpec"],
     }
+    if config.get("momentum") is not None:
+        plan["update"] = {
+            "kind": "momentum",
+            "beta": config["momentum"]["beta"],
+            "window": config["momentum"]["window"],
+        }
     validate_plan(plan, recipe, allow_python=True)
     return recipe, plan

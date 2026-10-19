@@ -41,6 +41,18 @@ def _scorer_spec(config):
     return spec | {"config": scorer.get("config", {})}, None
 
 
+def _coefficient_rule(config):
+    """(rule name for the plan, loaded function or None): a string, or {"kind": "python", "path", "function"}."""
+    rule = config.get("coefficientRule", "zscore@1")
+    if isinstance(rule, dict) and rule.get("kind") == "python":
+        from heteroes.v3.coefficients import python_rule
+        from heteroes.v3.run import load_python_scorer
+
+        function, digest = load_python_scorer(rule["path"], rule["function"])
+        return python_rule(digest), function
+    return rule, None
+
+
 def prepare(config, out_dir, device="cpu", initial_adapter=None):
     """
     Load the model and data, build and write the documents. Returns everything the run needs. `initial_adapter` (a LoRA
@@ -85,8 +97,9 @@ def prepare(config, out_dir, device="cpu", initial_adapter=None):
     else:
         schema = build_parameter_schema(model)
     scorer_spec, python_scorer = _scorer_spec(config)
+    rule, coefficient_function = _coefficient_rule(config)
     recipe, plan = build_documents(
-        {**config, **config["data"], "scorerSpec": scorer_spec},
+        {**config, **config["data"], "scorerSpec": scorer_spec, "coefficientRule": rule},
         model_files=files,
         revision=revision,
         schema_hash=schema.hash,
@@ -109,6 +122,7 @@ def prepare(config, out_dir, device="cpu", initial_adapter=None):
         "schema": schema,
         "dataset": dataset,
         "python_scorer": python_scorer,
+        "coefficient_function": coefficient_function,
         "worker_model": worker_model,
         "out": out,
     }
@@ -156,6 +170,7 @@ def run_local(
         dataset=ready["dataset"],
         antithetic=run.antithetic,
         coefficient_rule=run.coefficient_rule,
+        coefficient_function=ready["coefficient_function"],
         audit_workers=[f"local-{index}" for index in range(workers)],
         audit_rate=audit_rate,
         score=make_scorer(run, ready["dataset"], ready["python_scorer"]),

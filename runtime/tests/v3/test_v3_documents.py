@@ -173,3 +173,41 @@ def test_plans_bind_their_recipe_and_refuse_what_cannot_run():
             validate_plan(plan, recipe)
     assert validate_plan(plan_for(doc, scorer=python), doc, allow_python=True)
     assert validate_plan(plan_for(antithetic, population=8), antithetic)
+
+
+def test_plans_may_schedule_alpha_add_momentum_and_choose_a_coefficient_rule():
+    from heteroes.v3.documents import alpha_at
+
+    doc, _ = from_v2(v2_recipe().to_dict())
+    rank = {"name": "centered-rank", "version": 1, "eta": 1e-9}
+    python = {"name": "python", "version": 1, "eta": 1e-9, "codeSha256": "c" * 64}
+    momentum = {"kind": "momentum", "beta": 0.875, "window": 4}
+    for schedule in ("constant", "cosine", "linear"):
+        plan = plan_for(doc, alpha={"kind": schedule, "initial": 0.001, "minimum": 0.00025})
+        assert validate_plan(plan, doc)
+    assert validate_plan(plan_for(doc, coefficientRule=rank, update=momentum), doc)
+    assert validate_plan(plan_for(doc, coefficientRule=python), doc, allow_python=True)
+    with pytest.raises(ValueError, match="python"):
+        validate_plan(plan_for(doc, coefficientRule=python), doc)
+    for bad in (
+        plan_for(doc, alpha={"kind": "step", "initial": 0.001, "minimum": 0.001}),
+        plan_for(doc, alpha={"kind": "cosine", "initial": 0.001, "minimum": 0.002}),
+        plan_for(doc, alpha={"kind": "cosine", "initial": 0.001}),
+        plan_for(doc, update={"kind": "momentum", "beta": 0.9, "window": 4}),
+        plan_for(doc, update=None),
+        plan_for(doc, coefficientRule={**python, "codeSha256": "short"}),
+        plan_for(doc, coefficientRule={**rank, "codeSha256": "c" * 64}),
+    ):
+        with pytest.raises(ValueError):
+            validate_plan(bad, doc, allow_python=True)
+    # five generations: index 0..4
+    legacy = plan_for(doc, alpha=0.001)
+    assert [alpha_at(legacy, g) for g in range(5)] == [0.001] * 5  # the number itself, as every record had
+    cosine = plan_for(doc, alpha={"kind": "cosine", "initial": 0.001, "minimum": 0.00025})
+    assert alpha_at(cosine, 0) == float(np.float32(0.001)) and alpha_at(cosine, 4) == float(np.float32(0.00025))
+    assert alpha_at(cosine, 2) == float(np.float32(0.00025 + 0.00075 / 2))
+    assert alpha_at(cosine, 1) == float(np.float32(0.00025 + 0.00075 * (1 + np.cos(np.pi / 4)) / 2))
+    linear = plan_for(doc, alpha={"kind": "linear", "initial": 0.001, "minimum": 0.0002})
+    assert alpha_at(linear, 1) == float(np.float32(0.001 - 0.0008 / 4))
+    with pytest.raises(ValueError):
+        alpha_at(linear, 5)

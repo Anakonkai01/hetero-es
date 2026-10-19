@@ -57,7 +57,15 @@ class ESConfig:
     decoder: str = "hf_generate"
     noise_engine: str = "cpu"
     weight_space: dict = field(default_factory=lambda: {"kind": "full"})
-    coefficient_rule: str = "zscore@1"
+    coefficient_rule: str = "zscore@1"  # or "centered-rank@1"; a Python rule is ESTrainer(coefficient_func=...)
+    alpha_schedule: str = (
+        "constant"  # "cosine" or "linear": from alpha at the first generation to alpha_minimum at the last
+    )
+    alpha_minimum: float | None = None
+    momentum_beta: float | None = (
+        None  # momentum over the last momentum_window generations (beta a float32, e.g. 0.875)
+    )
+    momentum_window: int = 4
 
     def to_config(self, scorer: dict) -> dict:
         """The configuration `heteroes.v3.local.run_local` and `python -m heteroes.v3 run` read."""
@@ -88,33 +96,57 @@ class ESConfig:
             "alpha": self.alpha,
             "coefficientRule": self.coefficient_rule,
             "scorer": scorer,
+            **(
+                {}
+                if self.alpha_schedule == "constant" and self.alpha_minimum is None
+                else {"alphaSchedule": {"kind": self.alpha_schedule, "minimum": self.alpha_minimum or self.alpha}}
+            ),
+            **(
+                {}
+                if self.momentum_beta is None
+                else {"momentum": {"beta": self.momentum_beta, "window": self.momentum_window}}
+            ),
         }
 
 
 class ESTrainer:
     """Runs an `ESConfig` with a reward: a Python `reward_func` or a declarative `scorer` (exactly one of them)."""
 
-    def __init__(self, args: ESConfig, reward_func=None, scorer: dict | None = None):
+    def __init__(self, args: ESConfig, reward_func=None, scorer: dict | None = None, coefficient_func=None):
         if (reward_func is None) == (scorer is None):
             raise ValueError("give either reward_func (Python) or scorer (declarative)")
         self.args = args
+        # f(rewards) -> one coefficient per candidate, in a saved .py file like a reward function: pinned by its source
+        self.coefficient_rule = None if coefficient_func is None else self._source(coefficient_func, "coefficient")
         if reward_func is not None:
             self.scorer = self._python_scorer(reward_func)
         else:
             self.scorer = {"kind": "declarative", "version": 1, "config": {}, **scorer}
 
     @staticmethod
-    def _python_scorer(function):
+    def _source(function, what):
         if not callable(function) or function.__name__ == "<lambda>" or function.__qualname__ != function.__name__:
-            raise ValueError("a reward function must be a named function at the top level of a .py file")
+            raise ValueError(f"a {what} function must be a named function at the top level of a .py file")
         path = inspect.getsourcefile(function)
         if path is None:
-            raise ValueError("the reward function's source file cannot be found (define it in a .py file)")
+            raise ValueError(f"the {what} function's source file cannot be found (define it in a .py file)")
+        return {"kind": "python", "path": path, "function": function.__name__}
+
+    @classmethod
+    def _python_scorer(cls, function):
+        source = cls._source(function, "reward")
         name, version = getattr(function, "heteroes_scorer", (function.__name__.replace("_", "-").lower(), 1))
-        return {"kind": "python", "name": name, "version": version, "path": path, "function": function.__name__}
+        return {
+            "kind": "python",
+            "name": name,
+            "version": version,
+            "path": source["path"],
+            "function": function.__name__,
+        }
 
     def config(self) -> dict:
-        return self.args.to_config(self.scorer)
+        config = self.args.to_config(self.scorer)
+        return config if self.coefficient_rule is None else {**config, "coefficientRule": self.coefficient_rule}
 
     def train(self, out_dir, device="cpu", workers=1, log=None, timeout_seconds=None):
         """Run every generation; returns their summaries. The run directory keeps recipe, plan, dataset, ledger and weights."""

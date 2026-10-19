@@ -1,0 +1,29 @@
+control ok    | 118 passed in 4.43s
+killed       rank-no-tie-mean | 1 failed, 1 passed in 0.73s
+killed       rank-not-centered | 1 failed, 1 passed in 0.72s
+killed       rank-is-zscore | 1 failed, 1 passed in 0.72s
+killed       python-any-length | 1 failed, 2 passed in 0.72s
+killed       python-bools-ok | 1 failed, 2 passed in 0.72s
+killed       beta-not-float32 | 1 failed, 3 passed in 0.75s
+killed       window-one-ok | 1 failed, 3 passed in 0.83s
+killed       no-beta-decay | 1 failed, 4 passed in 0.73s
+killed       no-rescale | 1 failed, 4 passed in 0.73s
+killed       newest-first-order | 1 failed, 4 passed in 0.74s
+killed       history-length-free | 1 failed, 102 passed in 0.82s
+SURVIVED     history-not-consecutive | 118 passed in 4.57s
+killed       history-inexact | 1 failed, 6 passed in 0.72s
+killed       seed-reuse-ok | 1 failed, 6 passed in 0.74s
+killed       record-ignores-momentum | 1 failed, 101 passed in 0.77s
+killed       record-python-verifies-anything | 1 failed, 100 passed in 0.77s
+killed       record-verify-always-zscore | 1 failed, 100 passed in 0.76s
+killed       record-from-results-zscore | 1 failed, 100 passed in 0.75s
+killed       record-momentum-not-serialized | 1 failed, 101 passed in 0.77s
+SURVIVED     plan-alpha-cosine-is-linear | 118 passed in 4.87s
+killed       plan-alpha-min-above-initial | 1 failed, 112 passed in 0.76s
+killed       plan-python-anywhere | 1 failed, 112 passed in 0.76s
+killed       coordinator-fixed-alpha | 1 failed, 115 passed in 2.97s
+SURVIVED     coordinator-short-history | 118 passed in 4.40s
+SURVIVED     context-no-alpha | 118 passed in 4.50s
+killed       local-ignores-python-rule | 1 failed, 114 passed in 2.70s
+
+22 of 26 mutants killed.

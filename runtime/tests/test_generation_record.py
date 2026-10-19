@@ -440,3 +440,85 @@ def test_the_version_decides_which_keys_a_record_document_may_have():
         GenerationRecord.from_dict({k: v for k, v in v2_document.items() if k != "signs"})
     with pytest.raises(ValueError):
         GenerationRecord.from_dict({**v2_document, "record_version": 3})
+
+
+# ---------------------------------------------------------------------------
+# coefficient rules other than zscore@1, and momentum (heteroes.v3.coefficients)
+# ---------------------------------------------------------------------------
+
+MOMENTUM = {"kind": "momentum", "beta": 0.5, "window": 3}
+
+
+def test_a_zscore_version_2_record_keeps_its_bytes():
+    # hash pinned before the other rules and momentum existed
+    assert v2().hash == "f892606eea5a799de9a31fe30a3e10edff9a9d4284e546b476b744c1973cd4d1"
+    assert set(v2().to_dict()) == {
+        "record_version", "experiment_id", "generation", "recipe_hash", "parent_weights_sha256", "seeds", "rewards",
+        "coefficients", "alpha", "alpha_float32", "signs", "coefficient_rule",
+    }  # fmt: skip
+
+
+def results(rewards, seeds=(5, 6, 9, 10), signs=(1, 1, 1, 1)):
+    return GenerationResults("a" * 64, "b" * 64, seeds, tuple(rewards), signs)
+
+
+def test_records_are_made_and_verified_by_their_rule():
+    rank = GenerationRecord.from_results("exp", 0, results([0.1, 1.0, 0.0, 0.1]), 0.1, ETA, "centered-rank@1")
+    assert rank.coefficient_rule == "centered-rank@1"
+    assert rank.coefficients == (0.0, 0.5, -0.5, 0.0)
+    assert rank.verify_coefficients(ETA) is True
+    plain = v2(seeds=(5, 6, 9, 10), signs=(1, 1, 1, 1), coefficients=coefficients_of([1.0, 0.0, 0.5, 0.5]))
+    assert plain.verify_coefficients(ETA) is True
+    with pytest.raises(ValueError, match="not those"):
+        GenerationRecord.from_dict({**rank.to_dict(), "coefficient_rule": "zscore@1"}).verify_coefficients(ETA)
+    code = "c" * 64
+    python = GenerationRecord.from_results(
+        "exp", 0, results([1.0, 2.0, 3.0, 4.0]), 0.1, ETA, f"python@1:{code}", function=lambda r: [x - 2.5 for x in r]
+    )
+    assert python.coefficients == (-1.5, -0.5, 0.5, 1.5)
+    assert GenerationRecord.from_json(python.to_json()) == python
+    assert python.verify_coefficients(ETA) is False  # only the coordinator holding the code can recompute them
+    assert python.verify_coefficients(ETA, function=lambda r: [x - 2.5 for x in r]) is True
+    with pytest.raises(ValueError):
+        python.verify_coefficients(ETA, function=lambda r: [0.0] * 4)
+    for rule in ("rank@1", "python@1:short"):
+        with pytest.raises(ValueError):
+            v2(coefficient_rule=rule)
+
+
+def test_a_momentum_record_carries_its_window_and_replays_from_itself():
+    first = GenerationRecord.from_results("exp", 0, results([0.0, 1.0, 0.5, 0.5]), 0.1, ETA, "zscore@1", MOMENTUM, [])
+    assert first.update_inputs()[0] == [5, 6, 9, 10] and np.array_equal(first.update_inputs()[1], first.own_inputs()[1])
+    second = GenerationRecord.from_results(
+        "exp", 1, results([1.0, 0.0, 0.0, 0.0], seeds=(7, 8, 11, 12)), 0.1, ETA, "zscore@1", MOMENTUM,
+        [first.history_entry()],
+    )  # fmt: skip
+    data = second.to_dict()
+    assert data["update_rule"] == MOMENTUM and data["momentum_history"] == [first.history_entry()]
+    assert GenerationRecord.from_json(second.to_json()) == second
+    from heteroes.v3.coefficients import momentum_inputs
+
+    seeds, coefficients = second.update_inputs()
+    expected = momentum_inputs(MOMENTUM, second.own_inputs(), [first.history_entry()])
+    assert seeds == [5, 6, 9, 10, 7, 8, 11, 12] and seeds == expected[0] and np.array_equal(coefficients, expected[1])
+    assert (
+        second.hash
+        != GenerationRecord.from_dict(
+            {k: v for k, v in data.items() if k not in ("update_rule", "momentum_history")}
+        ).hash
+    )
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        dict(update_rule=MOMENTUM, momentum_history=[]),  # generation 1 needs generation 0 in its history
+        dict(update_rule=None, momentum_history=[{"generation": 0, "seeds": [1], "coefficients": [1.0]}]),
+        dict(update_rule={**MOMENTUM, "beta": 0.9}, momentum_history=[{"generation": 0, "seeds": [1], "coefficients": [1.0]}]),
+        dict(update_rule=MOMENTUM, momentum_history=[{"generation": 0, "seeds": [5], "coefficients": [1.0]}]),  # seed reused
+        dict(update_rule=MOMENTUM, momentum_history=[{"generation": 0, "seeds": [1], "coefficients": [1.0]}], signs=None, coefficient_rule=None),
+    ],
+)  # fmt: skip
+def test_malformed_momentum_records_are_refused(changes):
+    with pytest.raises(ValueError):
+        v2(generation=1, **changes)

@@ -5,7 +5,7 @@ import re
 
 from heteroes.v3.scoring import validate_spec
 
-COEFFICIENT_RULES = {"zscore": {1}}
+COEFFICIENT_RULES = {"zscore": {1}, "centered-rank": {1}}  # and python@1, on a self-hosted coordinator only
 
 
 def validate_weight_space(space, *, initial_adapter=True):

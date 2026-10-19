@@ -130,9 +130,10 @@ def replay_chain(executor, chain, apply_update, verify: bool) -> dict:
     import time
 
     started = time.perf_counter()
+    unverified = 0  # records of a python coefficient rule: only the coordinator holding its code can recompute them
     for record, _child in chain:
         try:
-            record.verify_coefficients(executor.recipe.reward_eta, atol=1e-6)
+            unverified += not record.verify_coefficients(executor.recipe.reward_eta, atol=1e-6)
         except ValueError as error:
             raise ReplayFailed(f"generation {record.generation}: {error}") from error
         seeds, coefficients = record.update_inputs()  # antithetic pairs merged; a version-1 record passes unchanged
@@ -149,4 +150,5 @@ def replay_chain(executor, chain, apply_update, verify: bool) -> dict:
         "apply_seconds": applied - started,
         "check_seconds": done - applied,
         "verified": verify,
+        "unverified_coefficients": unverified,
     }

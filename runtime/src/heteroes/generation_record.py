@@ -10,7 +10,8 @@ from heteroes.manifest import _HEX64, _NAME, MAX_SEED, _check_int, _check_keys, 
 RECORD_VERSION = 1
 # Recipe v3 (ADR-008): the record also says each candidate's sign and the rule that made the coefficients.
 RECORD_VERSION_V3 = 2
-COEFFICIENT_RULES = ("zscore@1",)
+# zscore@1, centered-rank@1 and python@1:<sha256> (`heteroes.v3.coefficients.check_rule`)
+COEFFICIENT_RULES = ("zscore@1", "centered-rank@1")
 _FLOAT32_MAX = float(np.finfo(np.float32).max)
 
 
@@ -55,7 +56,9 @@ class GenerationRecord:
 
     A record of version 2 (Recipe v3) also has `signs` (+1, or -1 for the second candidate of an antithetic pair) and the
     `coefficient_rule`; `update_inputs()` gives what `apply_coefficients_` receives. Without them the record is version 1,
-    byte for byte as before.
+    byte for byte as before. A momentum record (version 2 with `update_rule`) also carries the merged inputs of its
+    window's earlier generations (`momentum_history`, newest first), so that it replays from itself alone
+    (`heteroes.v3.coefficients`); without an update rule the document has neither key, byte for byte as before.
     """
 
     experiment_id: str
@@ -68,6 +71,8 @@ class GenerationRecord:
     alpha: float
     signs: tuple[int, ...] | None = None
     coefficient_rule: str | None = None
+    update_rule: dict | None = None
+    momentum_history: tuple | None = None
 
     def __post_init__(self):
         _check_text("experiment_id", self.experiment_id, _NAME)
@@ -85,8 +90,10 @@ class GenerationRecord:
         signs = (1,) * len(seeds) if self.signs is None else _as_tuple("signs", self.signs)
         if any(type(sign) is not int or sign not in (1, -1) for sign in signs) or len(signs) != len(seeds):
             raise ValueError("one sign, +1 or -1, per candidate")
-        if self.coefficient_rule is not None and self.coefficient_rule not in COEFFICIENT_RULES:
-            raise ValueError(f"unknown coefficient rule {self.coefficient_rule!r}")
+        if self.coefficient_rule is not None:
+            from heteroes.v3.coefficients import check_rule
+
+            check_rule(self.coefficient_rule)
         if len(set(zip(seeds, signs))) != len(seeds):
             raise ValueError("the seeds of a generation must all be different")
         rewards = tuple(_real("reward", value) for value in _as_tuple("rewards", self.rewards))
@@ -115,26 +122,59 @@ class GenerationRecord:
         object.__setattr__(self, "rewards", rewards)
         object.__setattr__(self, "coefficients", coefficients)
         object.__setattr__(self, "alpha", alpha)
+        if self.update_rule is not None or self.momentum_history is not None:
+            from heteroes.v3.coefficients import check_history, momentum_inputs
+
+            if self.coefficient_rule is None:
+                raise ValueError("only a version-2 record has an update rule")
+            history = check_history(
+                self.update_rule, self.generation, _as_tuple("momentum_history", self.momentum_history or ())
+            )
+            object.__setattr__(self, "update_rule", dict(self.update_rule))
+            object.__setattr__(self, "momentum_history", tuple(history))
+            momentum_inputs(self.update_rule, self.own_inputs(), history)  # no seed in two generations
 
     @property
     def noop(self) -> bool:
         """No signal: every coefficient is zero, so the update changes nothing."""
         return not any(self.coefficients)
 
-    def update_inputs(self):
-        """(seeds, float32 coefficients) for `apply_coefficients_`: antithetic pairs merged (ADR-008 section 5)."""
+    def own_inputs(self):
+        """(seeds, float32 coefficients) of this generation alone: antithetic pairs merged (ADR-008 section 5)."""
         from heteroes.v3.antithetic import merged_update
 
         signs = self.signs or (1,) * len(self.seeds)
         return merged_update(list(zip(self.seeds, signs)), np.asarray(self.coefficients, dtype=np.float32))
 
+    def update_inputs(self):
+        """(seeds, float32 coefficients) for `apply_coefficients_`: this generation's, joined with its momentum window."""
+        if self.update_rule is None:
+            return self.own_inputs()
+        from heteroes.v3.coefficients import momentum_inputs
+
+        return momentum_inputs(self.update_rule, self.own_inputs(), list(self.momentum_history))
+
+    def history_entry(self) -> dict:
+        """What the momentum record of the next generation carries of this one."""
+        seeds, coefficients = self.own_inputs()
+        return {"generation": self.generation, "seeds": list(seeds), "coefficients": [float(c) for c in coefficients]}
+
     def to_dict(self) -> dict:
         if self.signs is not None:
+            momentum = (
+                {}
+                if self.update_rule is None
+                else {
+                    "update_rule": dict(self.update_rule),
+                    "momentum_history": [dict(e) for e in self.momentum_history],
+                }
+            )
             return {
                 **self._v1_dict(),
                 "record_version": RECORD_VERSION_V3,
                 "signs": list(self.signs),
                 "coefficient_rule": self.coefficient_rule,
+                **momentum,
             }
         return self._v1_dict()
 
@@ -175,9 +215,11 @@ class GenerationRecord:
             "alpha_float32",
         }
         version = data.get("record_version") if isinstance(data, dict) else None
-        _check_keys(
-            "generation record", data, keys | ({"signs", "coefficient_rule"} if version == RECORD_VERSION_V3 else set())
-        )
+        if version == RECORD_VERSION_V3:
+            keys |= {"signs", "coefficient_rule"} | (
+                {"update_rule", "momentum_history"} if "update_rule" in data else set()
+            )
+        _check_keys("generation record", data, keys)
         if version not in (RECORD_VERSION, RECORD_VERSION_V3):
             raise ValueError(f"unknown record version {data['record_version']}")
         record = cls(
@@ -191,6 +233,8 @@ class GenerationRecord:
             alpha=data["alpha"],
             signs=data.get("signs"),
             coefficient_rule=data.get("coefficient_rule"),
+            update_rule=data.get("update_rule"),
+            momentum_history=data.get("momentum_history"),
         )
         if record.to_dict() != data:
             raise ValueError("record does not round-trip (a derived value, such as alpha_float32, disagrees)")
@@ -200,31 +244,48 @@ class GenerationRecord:
     def from_json(cls, text: str) -> "GenerationRecord":
         return cls.from_dict(json.loads(text))
 
-    def verify_coefficients(self, eta: float, atol: float = 0.0) -> None:
+    def verify_coefficients(self, eta: float, atol: float = 0.0, function=None) -> bool:
         """
-        Check that the coefficients are those of the rewards (reward standardization with `eta`, numerical contract 7).
-        Exact by default: right for the coordinator that has just made them. `atol` is for an audit on another machine,
-        where a coefficient that is 0.0 here may be a residue of 1e-16 there.
+        Check that the coefficients are those of the rewards under the record's rule (version 1: reward standardization
+        with `eta`, numerical contract 7). Exact by default: right for the coordinator that has just made them. `atol` is
+        for an audit on another machine, where a coefficient that is 0.0 here may be a residue of 1e-16 there.
+        Returns False, without checking, for a python rule whose code (`function`) is not given: nobody else can
+        recompute those coefficients. Raises ValueError on a mismatch.
         """
-        from heteroes.es.update import standardize_rewards  # needs torch; the record itself does not
+        from heteroes.v3.coefficients import coefficients_for  # needs torch for zscore@1; the record itself does not
 
-        expected = standardize_rewards(self.rewards, eta).astype(np.float64)
+        rule = self.coefficient_rule or "zscore@1"
+        if rule.startswith("python@") and function is None:
+            return False
+        expected = coefficients_for(rule, self.rewards, eta, function).astype(np.float64)
         actual = np.asarray(self.coefficients, dtype=np.float32).astype(np.float64)
         same = np.array_equal(actual, expected) if atol == 0 else bool(np.all(np.abs(actual - expected) <= atol))
         if not same:
             raise ValueError("the coefficients are not those of the rewards")
+        return True
 
     @classmethod
     def from_results(
-        cls, experiment_id: str, generation: int, results, alpha: float, eta: float, coefficient_rule: str | None = None
+        cls,
+        experiment_id: str,
+        generation: int,
+        results,
+        alpha: float,
+        eta: float,
+        coefficient_rule: str | None = None,
+        update_rule: dict | None = None,
+        momentum_history=None,
+        function=None,
     ) -> "GenerationRecord":
         """
         The record of a complete generation (`results` is what `Ledger.get_generation_results` returns). With a
-        `coefficient_rule` (Recipe v3) it is a version-2 record carrying the candidates' signs.
+        `coefficient_rule` (Recipe v3) it is a version-2 record carrying the candidates' signs; `function` is the loaded
+        code of a python rule; a momentum `update_rule` needs the `history_entry()` of the window's earlier records.
         """
-        from heteroes.es.update import standardize_rewards  # needs torch; the record itself does not
+        from heteroes.v3.coefficients import coefficients_for  # needs torch for zscore@1; the record itself does not
 
-        coefficients = tuple(float(value) for value in standardize_rewards(results.rewards, eta))
+        rule = coefficient_rule or "zscore@1"
+        coefficients = tuple(float(value) for value in coefficients_for(rule, results.rewards, eta, function))
         return cls(
             experiment_id=experiment_id,
             generation=generation,
@@ -236,4 +297,6 @@ class GenerationRecord:
             alpha=alpha,
             signs=None if coefficient_rule is None else tuple(results.signs),
             coefficient_rule=coefficient_rule,
+            update_rule=update_rule,
+            momentum_history=None if update_rule is None else tuple(momentum_history or ()),
         )
