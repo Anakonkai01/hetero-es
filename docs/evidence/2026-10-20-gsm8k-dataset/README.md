@@ -14,3 +14,10 @@
 
 - No model run on GSM8K yet; no base accuracy measured with this prompt.
 - The managed lab imports its own split files through the web; this builder only prepares them.
+
+## Base-model probe (RTX 5070 Ti, owner-authorized GPU)
+
+`probe_gsm8k.py` / `probe-base-200.json`: Qwen2.5-0.5B-Instruct on the first 200 validation rows, FP32, chunk 64,
+512 tokens, `answer-line-last-number@1`: accuracy **0.525**, 6 truncated, only 38 answers contain an "Answer:" line
+(the scorer then takes the last number). Unlike Countdown (0/64), about half the rows are right, so candidates'
+rewards differ from the start. One sample of 200 rows; no ES run.
