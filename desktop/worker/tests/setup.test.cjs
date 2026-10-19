@@ -52,3 +52,15 @@ test('runtime subprocess timeout is bounded and errors omit paths and stderr', a
     /^Error: RUNTIME_PROCESS_FAILED$/,
   );
 });
+test('the READY record names the installed profile, not a fixed one', () => {
+  const { readyRecord } = require('../electron/setup.cjs');
+  const at = new Date('2026-10-19T00:00:00Z');
+  for (const name of ['desktop-v1', 'desktop-v3']) {
+    assert.deepEqual(readyRecord({ profile: name, platform: 'windows' }, at), {
+      profile: name,
+      platform: 'windows',
+      verifiedAt: '2026-10-19T00:00:00.000Z',
+    });
+  }
+  assert.throws(() => readyRecord({ platform: 'linux' }, at), /PROFILE_INVALID/);
+});

@@ -410,9 +410,11 @@ class Service {
     this.bridge = this.makeBridge(p.python, p.source, config, token);
     try {
       await this.bridge.ready;
-      if (this.selfTest?.recipeVersions?.includes(2)) {
+      // Recipe v2 and v3 admissions carry reference-bound evidence; an older lab that lacks the version keeps none.
+      const evidenced = (this.selfTest?.recipeVersions ?? []).filter((version) => version >= 2);
+      if (evidenced.length) {
         const health = await this.api('/api/v1/health', undefined, '');
-        if (health.recipeVersions?.includes(2)) {
+        if (evidenced.some((version) => health.recipeVersions?.includes(version))) {
           for (let attempt = 0; attempt < 20; attempt++) {
             const state = await this.bridge.call('status');
             try {

@@ -195,7 +195,13 @@ def main():
         print(json.dumps({"progress": value}), flush=True)
 
     try:
-        result = qualify(request["modelPath"], reference, emit=emit)
+        if reference.get("formatVersion") == 3:
+            from . import qualification_v3
+
+            reference_dir = Path(request["referencePath"]).parent  # the pinned adapter ships beside the reference
+            result = qualification_v3.qualify(request["modelPath"], reference, reference_dir, emit=emit)
+        else:
+            result = qualify(request["modelPath"], reference, emit=emit)
         print(json.dumps({"result": result}), flush=True)
     except Exception as error:
         print(

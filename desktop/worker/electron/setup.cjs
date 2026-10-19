@@ -156,11 +156,7 @@ class Setup {
         this.checkStorage();
         await verifiedDownload(model, p.model, (v) => update({ stage: 'MODEL', ...v }));
       }
-      await fsp.writeFile(
-        p.complete,
-        JSON.stringify({ profile: 'desktop-v1', platform: profile.platform, verifiedAt: new Date().toISOString() }),
-        { mode: 0o600 },
-      );
+      await fsp.writeFile(p.complete, JSON.stringify(readyRecord(profile, new Date())), { mode: 0o600 });
       update({ stage: 'READY' });
       return this.status();
     } catch (error) {
@@ -212,4 +208,8 @@ class Setup {
     }
   }
 }
-module.exports = { Setup, run, extract };
+function readyRecord(profile, verifiedAt) {
+  if (typeof profile.profile !== 'string' || !profile.profile) throw Error('PROFILE_INVALID');
+  return { profile: profile.profile, platform: profile.platform, verifiedAt: verifiedAt.toISOString() };
+}
+module.exports = { Setup, run, extract, readyRecord };

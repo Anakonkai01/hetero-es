@@ -192,3 +192,24 @@ test('startup qualification failure keeps an uncertain bridge owned until Quit c
   assert.equal((await service.quit()).drained, true);
   assert.equal(service.bridge, null);
 });
+
+test('a v3 device sends its qualification only to a lab that speaks v3', async (t) => {
+  for (const [device, lab, sent] of [
+    [[3], [1, 2, 3], true],
+    [[3], [1, 2], false],
+    [[1, 2], [1, 2], true],
+    [[1], [1, 2, 3], false],
+  ]) {
+    const { service, requests } = await fixture(t);
+    service.device = { deviceId: 'dev', workerId: 'desktop' };
+    service.selfTest.recipeVersions = device;
+    service.fetch = async (url, options) => {
+      requests.push({ url, body: options.body && JSON.parse(options.body) });
+      return new Response(JSON.stringify({ ok: true, recipeVersions: lab }));
+    };
+    await service.startAgent();
+    const patch = requests.find((r) => r.url.endsWith('/device/qualification'));
+    assert.equal(Boolean(patch), sent, JSON.stringify({ device, lab }));
+    if (sent) assert.deepEqual(patch.body.selfTest.recipeVersions, device);
+  }
+});

@@ -168,3 +168,46 @@ def test_the_gated_builder_observes_on_the_gpu(reference_dir, tmp_path, monkeypa
     common = ["--model-path", str(reference_dir / "model"), "--model-id", "tiny/qwen2", "--revision", REVISION]
     with pytest.raises(RuntimeError, match="^cuda$"):
         builder().main([*common, "--adapter", str(adapter), "--out", str(tmp_path / "gpu"), "--gpu"])
+
+
+@pytest.mark.parametrize("version", [None, 3])
+def test_the_desktop_entry_point_selects_v3_only_for_a_v3_reference(tmp_path, monkeypatch, capsys, version):
+    import io
+    import json
+
+    import heteroes.product.qualification as legacy
+    import heteroes.product.qualification_v3 as v3
+
+    reference = {"formatVersion": 3, "profile": "desktop-v3"} if version == 3 else {"profile": "desktop-v1"}
+    (tmp_path / "reference.json").write_text(json.dumps(reference))
+    calls = []
+    monkeypatch.setattr(legacy, "qualify", lambda *a, **k: calls.append(("v1", a)) or {"runtimeProfile": "desktop-v1"})
+    monkeypatch.setattr(v3, "qualify", lambda *a, **k: calls.append(("v3", a)) or {"runtimeProfile": "desktop-v3"})
+    request = {"modelPath": "/model", "referencePath": str(tmp_path / "reference.json")}
+    monkeypatch.setattr("sys.stdin", io.StringIO(json.dumps(request)))
+    assert legacy.main() == 0
+    assert calls == ([("v3", ("/model", reference, tmp_path))] if version == 3 else [("v1", ("/model", reference))])
+    line = json.loads(capsys.readouterr().out.strip().splitlines()[-1])
+    assert line["result"]["runtimeProfile"] == ("desktop-v3" if version == 3 else "desktop-v1")
+
+
+def test_the_desktop_entry_point_reports_a_v3_failure_as_a_code(tmp_path, monkeypatch, capsys):
+    import io
+    import json
+
+    import heteroes.product.qualification as legacy
+    import heteroes.product.qualification_v3 as v3
+
+    (tmp_path / "reference.json").write_text(json.dumps({"formatVersion": 3, "profile": "desktop-v3"}))
+
+    called = []
+
+    def unavailable(*args, **kwargs):
+        called.append(args)
+        raise RuntimeError("CUDA_UNAVAILABLE")
+
+    monkeypatch.setattr(v3, "qualify", unavailable)
+    request = {"modelPath": "/model", "referencePath": str(tmp_path / "reference.json")}
+    monkeypatch.setattr("sys.stdin", io.StringIO(json.dumps(request)))
+    assert legacy.main() == 1
+    assert called and json.loads(capsys.readouterr().out.strip())["code"] == "CUDA_UNAVAILABLE"
