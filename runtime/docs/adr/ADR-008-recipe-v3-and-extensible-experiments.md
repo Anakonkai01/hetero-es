@@ -123,7 +123,7 @@ would no longer be "seeds + coefficients + α" and replay would need optimizer s
   infrastructure failure on a worker stays a typed failure (ADR-002).
 - Declarative scorers v1 reuse today's rules exactly: `answer-line-last-number@1` (v2, `study/evaluation.py:9-18`),
   `last-integer@1` (arith16, `eval/workload.py:74-85`), `answer-line-integer@1` (cot workloads,
-  `eval/cot_workload.py:71-79`); new ones: `regex@1`, `exact-string@1`, `choice-letter@1` (A–D).
+  `eval/cot_workload.py:71-79`); new ones: `regex@1`, `exact-string@1`, `choice-letter@1` (A–E).
 - Python scorers (self-hosted coordinator only): `f(completions, rows) -> list[float]`, identified by name@version and the
   SHA-256 of their source files; a lab built for others refuses them (decision 4).
 - Built-in workloads keep their numbers: their scorer on the stored texts gives the same rewards as today's workers.

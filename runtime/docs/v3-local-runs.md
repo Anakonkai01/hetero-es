@@ -34,7 +34,7 @@ Without code, use a declarative scorer (the only kind a shared lab accepts):
 ESTrainer(args, scorer={"name": "answer-line-last-number"})                      # "Answer: <number>" vs column answer
 ESTrainer(args, scorer={"name": "exact-string", "config": {"answerField": "label", "strip": True, "casefold": True}})
 ESTrainer(args, scorer={"name": "regex", "config": {"pattern": r"Answer: (\w+)", "answerField": "answer"}})
-ESTrainer(args, scorer={"name": "choice-letter", "config": {"answerField": "answer"}})                    # A-D
+ESTrainer(args, scorer={"name": "choice-letter", "config": {"answerField": "answer"}})                    # A-E
 ```
 
 ## Command line
