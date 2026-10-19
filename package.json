@@ -5,7 +5,8 @@
     "frontend",
     "packages/product-ui",
     "desktop/worker",
-    "desktop/server"
+    "desktop/server",
+    "desktop/shared"
   ],
   "scripts": {
     "build:web": "npm run build --workspace frontend",

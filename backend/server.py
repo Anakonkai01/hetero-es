@@ -1,3 +1,4 @@
+from .config import load_config
 """CPU-only packaged Lab Server entry point. Bootstrap secrets arrive on stdin."""
 import argparse
 import ipaddress
@@ -80,7 +81,7 @@ def main():
         print(json.dumps(result)); return 0
     if args.web is None:
         parser.error('--web is required for serving')
-    config = json.loads((args.private/'config.json').read_text())
+    config = load_config(args.private)
     os.environ['HETEROES_PRIVATE_CONFIG'] = str(args.private)
     os.environ['HETEROES_WEB_DIRECTORY'] = str(args.web)
     if args.downloads:

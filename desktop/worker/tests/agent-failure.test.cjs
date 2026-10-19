@@ -6,7 +6,7 @@ const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
 const { Bridge, classifyExit } = require('../electron/bridge.cjs');
-const { createLog } = require('../electron/log.cjs');
+const { createLog } = require('@heteroes/desktop-shared/log.cjs');
 const { Service } = require('../electron/service.cjs');
 
 test('a program that cannot be started gives AGENT_SPAWN_FAILED with the system code kept for the log', async () => {

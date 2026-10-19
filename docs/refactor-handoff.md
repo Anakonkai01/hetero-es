@@ -1,4 +1,4 @@
-# Refactor handoff (2026-10-19) — phase 3 complete
+# Refactor handoff (2026-10-19) — phase 4 complete
 
 The owner asked for one repository and a professional cleanup. Talk to the owner in Vietnamese, simply. Rules are in
 `../AGENTS.md`: never push or tag, no Co-Authored-By, tests first plus a mutation check, the lab is touched only through
@@ -45,7 +45,7 @@ The owner asked for one repository and a professional cleanup. Talk to the owner
 - `httpx` stays: Starlette's TestClient needs it. No runtime/profile tarball was changed in the working tree;
   source packaging was checked on a scratch copy. No installer was published and the live lab was not restarted.
 
-## Next: phases 4-6 (full plan in Vietnamese: `docs/refactor-plan-vi.md`)
+## Next: phases 5-6 (full plan in Vietnamese: `docs/refactor-plan-vi.md`)
 - **3. Mock mode, cloud and dead code — completed.**
   Receipts: `docs/evidence/2026-10-19-phase3/`. Backend 277 cases; 3/3 mutants killed.
   Runtime wire/table names beginning with cloud remain solely for compatibility.
@@ -62,7 +62,9 @@ The owner asked for one repository and a professional cleanup. Talk to the owner
     `start-m3-preview.py` and `share-worker-build.py`.
   - Run vulture and knip once and confirm every hit with grep.
   - `assert/`: keep one zip in `docs/archive/`. `notes/` moves to `docs/archive/notes/`.
-- **4. Duplication.**
+- **4. Duplication — completed.**
+  Receipts: `docs/evidence/2026-10-19-phase4/`; backend 282 passed, 4/4 mutants killed.
+  Shared CPU files are selected by `backend/runtime_sources.py`; Electron uses `desktop/shared` as a workspace.
   - `backend/monitoring/*` and `backend/study/*` are byte copies of `runtime/src/heteroes/product/*` and `heteroes/study/*`.
     Keep a single source if those modules do not import torch.
   - Repeated backend checks: `dispatchHold` read 7 times, `disabledWorkers` 6, backup policy 3, admin auth 3,

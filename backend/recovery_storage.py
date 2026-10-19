@@ -1,3 +1,4 @@
+from .policies import backup_policy
 """Local recovery storage. Manifest publication is the commit."""
 import hashlib
 import json
@@ -28,9 +29,7 @@ class RecoveryStorage:
             raise ValueError('Invalid recovery identity')
         if type(m.get('generation')) is not int or m['generation'] < 0 or type(m.get('final')) is not bool:
             raise ValueError('Invalid generation')
-        policy = m.get('backupPolicy', {})
-        if not isinstance(policy, dict) or set(policy) != {'interval', 'retain'} or any((type(v) is not int or not 1 <= v <= 1000 for v in policy.values())):
-            raise ValueError('Invalid backup policy')
+        backup_policy(m.get('backupPolicy', {}))
         files = m.get('files')
         if not isinstance(files, dict) or not {'ledger.sqlite', 'config.json', 'identity.json'} <= files.keys() or (not 4 <= len(files) <= 5):
             raise ValueError('Incomplete recovery manifest')

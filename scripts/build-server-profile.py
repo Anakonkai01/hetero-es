@@ -40,6 +40,10 @@ def main():
         lock_file=f'requirements-{platform}.txt';(out/lock_file).write_text('\n'.join(lock)+'\n')
         platforms[platform]={'python':base['platforms'][platform]['python'],'wheels':wheels,'lockFile':lock_file}
     files=[(file,str(file.relative_to(repo))) for file in sorted((repo/'backend').glob('*.py'))]
+    import sys
+    sys.path.insert(0,str(repo))
+    from backend.runtime_sources import shared_sources
+    files += shared_sources(repo)
     files += [(file,'web/'+file.relative_to(repo/'frontend/dist').as_posix())
               for file in sorted((repo/'frontend/dist').rglob('*')) if file.is_file()
               and 'downloads' not in file.relative_to(repo/'frontend/dist').parts]
@@ -55,8 +59,6 @@ def main():
              'runtimeSha256':hashlib.sha256(target.read_bytes()).hexdigest()}
     (out/'profile.json').write_text(json.dumps(profile,indent=2)+'\n')
     shutil.copyfile(worker/'tray.png',out/'tray.png')
-    shared=repo/'desktop/server/electron/shared';shared.mkdir(parents=True,exist_ok=True)
-    for name in ('setup.cjs','download.cjs'):shutil.copyfile(repo/'desktop/worker/electron'/name,shared/name)
     print(json.dumps({'profile':profile['profile'],'runtimeSha256':profile['runtimeSha256'],
                       'wheels':{p:len(row['wheels']) for p,row in platforms.items()}}))
 

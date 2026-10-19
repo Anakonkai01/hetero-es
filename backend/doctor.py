@@ -1,10 +1,11 @@
+from .policies import dispatch_held
+from .config import load_config
 """Read-only preflight for a Local Lab Server. It changes no lab file (SQLite may create its
 -shm coordination file when it opens the WAL database); exit status 1 if any check FAILs.
 
     python -m backend.doctor --private ~/.config/heteroes-m2
 """
 import argparse
-import json
 from pathlib import Path
 import shutil
 import sqlite3
@@ -27,7 +28,7 @@ def run_checks(private):
         out.append((level, name, message))
 
     try:
-        config = json.loads((private / 'config.json').read_text())
+        config = load_config(private)
     except (OSError, ValueError):
         add(FAIL, 'configuration', f'{private}/config.json is missing or is not valid JSON')
         return out
@@ -84,7 +85,7 @@ def run_checks(private):
                 add(FAIL, 'database', f'database schema {version} is newer than this program knows ({SCHEMA_VERSION}); use the newer release')
             else:
                 add(PASS, 'database', f'product.sqlite is intact (schema {version})')
-            held = json.loads(db.execute("SELECT value FROM settings WHERE key='dispatchHold'").fetchone()[0])
+            held = dispatch_held(db)
             reservations = db.execute('SELECT count(*) FROM physical_reservations').fetchone()[0] if db.execute(
                 "SELECT 1 FROM sqlite_master WHERE name='physical_reservations'").fetchone() else 0
             if db.execute("SELECT 1 FROM sqlite_master WHERE name='devices'").fetchone():

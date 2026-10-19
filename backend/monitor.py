@@ -5,7 +5,7 @@ from pathlib import Path
 import signal
 import sys
 import threading
-from .monitoring.telemetry import TelemetrySampler
+from heteroes.product.telemetry import TelemetrySampler
 
 
 def main():

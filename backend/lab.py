@@ -1,3 +1,5 @@
+from .policies import Strict
+from .policies import dispatch_held, set_disabled_workers, active_profile, platform_profile, storage_status
 """Identity and membership operations, independent of runtime numerical state."""
 import hashlib
 import json
@@ -7,15 +9,13 @@ from typing import Literal
 
 from argon2.exceptions import VerificationError
 from fastapi import Depends, Header, HTTPException, Request, Response
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
 
 from .store import ACTIVE, now
 from .throttle import client_address
 from .passwords import password_problem
 
 
-class Strict(BaseModel):
-    model_config = ConfigDict(extra='forbid')
 
 
 class Registration(Strict):
@@ -60,15 +60,10 @@ class Resume(Strict):
 
 def install_lab_routes(app, store, user, scoped, runtime):
     def active(current=Depends(user)):
-        profile=store.profile(current['userId'])
-        if profile['accountStatus']!='ACTIVE':
-            raise HTTPException(403,'Your account is awaiting approval or is restricted')
-        return profile
+        return active_profile(store, current, 'Your account is awaiting approval or is restricted')
 
     def platform(current=Depends(active)):
-        if not current.get('platformAdmin'):
-            raise HTTPException(403,'Platform administrator permission required')
-        return current
+        return platform_profile(current, 'Platform administrator permission required')
 
     def workspace_admin(workspace_id,current):
         fresh = scoped(current,workspace_id)
@@ -155,7 +150,7 @@ def install_lab_routes(app, store, user, scoped, runtime):
                 disabled=store.disabled_workers(db)
                 for r in db.execute('SELECT worker_id FROM worker_assignments WHERE owner=?',(user_id,)).fetchall():
                     disabled.add(r[0]);store.cancel_selected(db,r[0])
-                db.execute('INSERT OR REPLACE INTO settings VALUES (?,?)',('disabledWorkers',json.dumps(sorted(disabled))))
+                set_disabled_workers(db, disabled)
             store.audit(db,current['userId'],'ACCOUNT_UPDATE',user_id)
             return updated
 
@@ -235,7 +230,7 @@ def install_lab_routes(app, store, user, scoped, runtime):
             disabled=store.disabled_workers(db)
             for r in db.execute('SELECT worker_id FROM worker_assignments WHERE owner=? AND workspace_id=?',(user_id,workspace_id)).fetchall():
                 disabled.add(r[0]);store.cancel_selected(db,r[0])
-            db.execute('INSERT OR REPLACE INTO settings VALUES (?,?)',('disabledWorkers',json.dumps(sorted(disabled))))
+            set_disabled_workers(db, disabled)
         store.audit(db,current['userId'],'MEMBER_ROLE' if role else 'MEMBER_REMOVE',user_id,workspace_id)
 
     @app.patch('/api/v1/workspaces/{workspace_id}/members/{user_id}')
@@ -253,7 +248,7 @@ def install_lab_routes(app, store, user, scoped, runtime):
     @app.get('/api/v1/queue')
     def queue(current=Depends(scoped)):
         with store.db() as db:
-            held=json.loads(db.execute('SELECT value FROM settings WHERE key="dispatchHold"').fetchone()[0])
+            held=dispatch_held(db)
             positions={r['run_id']:i+1 for i,r in enumerate(db.execute('SELECT run_id FROM queue ORDER BY sequence'))}
             result=[]
             for r in db.execute('SELECT body FROM experiments'):
@@ -271,13 +266,11 @@ def install_lab_routes(app, store, user, scoped, runtime):
     @app.get('/api/v1/platform/operations')
     def operations(current=Depends(platform)):
         with store.db() as db:
-            held=json.loads(db.execute('SELECT value FROM settings WHERE key="dispatchHold"').fetchone()[0])
+            held=dispatch_held(db)
             queue_count=db.execute('SELECT count(*) FROM queue').fetchone()[0]
             metadata=db.execute('SELECT value FROM settings WHERE key="metadataBackupStatus"').fetchone()
         result={'dispatchHeld':held,'queueCount':queue_count,'runtimeIssue':store.last_error,
-                'cloudStorageConfigured':False,
-                'recoveryStorageConfigured':getattr(runtime,'storage_backend',None) is not None,
-                'recoveryStorageMode':getattr(runtime.storage_backend,'mode','local') if getattr(runtime,'storage_backend',None) is not None else None,
+                **storage_status(runtime),
                 'metadataBackup':json.loads(metadata[0]) if metadata else None,
                 'productService':'ONLINE','runtimeService':'UNAVAILABLE','workers':[],'reservations':[]}
         try:

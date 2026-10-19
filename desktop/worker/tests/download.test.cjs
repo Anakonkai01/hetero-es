@@ -4,7 +4,7 @@ const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
 const crypto = require('node:crypto');
-const { verifiedDownload } = require('../electron/download.cjs');
+const { verifiedDownload } = require('@heteroes/desktop-shared/download.cjs');
 const body = Buffer.from('abcdefghijk');
 const item = { name: 'data.whl', url: 'https://assets.example/data.whl', sha256: crypto.createHash('sha256').update(body).digest('hex'), sizeBytes: body.length };
 test('an interrupted download resumes, verifies and publishes only complete bytes', async (t) => { const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'worker-download-')); t.after(() => fs.rm(dir, { recursive: true, force: true })); await fs.writeFile(path.join(dir, item.name + '.part'), body.subarray(0, 4)); let calls = 0; const fetcher = async (_url, options) => { calls++; assert.equal(options.headers.Range, 'bytes=4-'); return new Response(body.subarray(4), { status: 206, headers: { 'content-range': 'bytes 4-10/11' } }); }; const result = await verifiedDownload(item, dir, () => { }, fetcher); assert.deepEqual(await fs.readFile(result), body); await verifiedDownload(item, dir, () => { }, () => { throw Error('cache must be used'); }); assert.equal(calls, 1); });

@@ -17,7 +17,7 @@
     "@heteroes/product-ui": "0.1.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "tar": "^7.5.7"
+    "@heteroes/desktop-shared": "0.1.0"
   },
   "devDependencies": {
     "@types/react": "^19.2.18",
@@ -26,7 +26,8 @@
     "electron": "41.10.7",
     "electron-builder": "26.15.3",
     "typescript": "~6.0.2",
-    "vite": "^8.3.0"
+    "vite": "^8.3.0",
+    "tar": "^7.5.7"
   },
   "build": {
     "appId": "org.heteroes.worker",

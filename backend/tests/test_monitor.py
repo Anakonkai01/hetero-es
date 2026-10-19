@@ -6,7 +6,7 @@ import sys
 import pytest
 
 
-# Provenance of the vendored modules is checked in test_provenance.py.
+# Shared CPU-only imports are checked in test_shared_runtime.py.
 @pytest.mark.skipif(sys.platform!='linux',reason='Linux host detail contract')
 def test_private_monitor_reports_real_detail_and_exits_on_parent_eof(tmp_path):
     env=dict(os.environ,CUDA_VISIBLE_DEVICES='',PYTHONNOUSERSITE='1')

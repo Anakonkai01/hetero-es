@@ -14,7 +14,7 @@ def poll(client,auth,value=None,**changes):
 
 
 def enqueue(runtime,device,kind,dedupe):
-    with runtime.store.db() as db:runtime._enqueue(db,device['deviceId'],kind,{},dedupe)
+    with runtime.store.db() as db:runtime.enqueue(db,device['deviceId'],kind,{},dedupe)
 
 
 def test_server_sends_only_declared_command_kinds_without_dropping_pending_commands(lab):
@@ -40,7 +40,7 @@ def test_headerless_agent_is_not_sent_pause_or_policy_commands(lab):
     queued(lab,device);runtime.store.dispatch_once();assignment=runtime.runs()[0]
     with runtime.store.db() as db:
         for kind in ['PAUSE_ASSIGNMENT','UPDATE_BACKUP_POLICY']:
-            runtime._enqueue(db,device['deviceId'],kind,{'assignmentId':assignment['assignmentId'],'epoch':assignment['epoch']},kind)
+            runtime.enqueue(db,device['deviceId'],kind,{'assignmentId':assignment['assignmentId'],'epoch':assignment['epoch']},kind)
     commands=poll(client,auth).json()['commands']
     assert all(c['kind'] in CORE for c in commands)
     modern=poll(client,auth,','.join(CORE|{'PAUSE_ASSIGNMENT','UPDATE_BACKUP_POLICY'})).json()['commands']

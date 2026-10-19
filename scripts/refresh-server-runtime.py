@@ -21,8 +21,10 @@ def main():
     assert profile['profile']=='server-cpu-v1'
     assert (web/'index.html').is_file(),'Build the Web UI first'
     sources=[(p,str(p.relative_to(repo))) for p in sorted((repo/'backend').rglob('*.py')) if 'tests' not in p.relative_to(repo/'backend').parts]
-    sources += [(repo/'backend/monitoring/provenance.json','backend/monitoring/provenance.json')]
-    sources += [(repo/'backend/study/provenance.json','backend/study/provenance.json')]
+    import sys
+    sys.path.insert(0, str(repo))
+    from backend.runtime_sources import shared_sources
+    sources += shared_sources(repo)
     sources += [(p,'web/'+p.relative_to(web).as_posix())
                 for p in sorted(web.rglob('*')) if p.is_file()
                 and 'downloads' not in p.relative_to(web).parts]
@@ -35,8 +37,6 @@ def main():
                 with file.open('rb') as stream:archive.addfile(info,stream)
     profile['runtimeSha256']=hashlib.sha256(target.read_bytes()).hexdigest()
     profile_path.write_text(json.dumps(profile,indent=2)+'\n')
-    shared=repo/'desktop/server/electron/shared';shared.mkdir(parents=True,exist_ok=True)
-    for name in ('setup.cjs','download.cjs'):shutil.copyfile(repo/'desktop/worker/electron'/name,shared/name)
     print(json.dumps({'profile':profile['profile'],'runtimeSha256':profile['runtimeSha256'],'pinsPreserved':True}))
 
 

@@ -1,0 +1,8 @@
+{
+  "name": "@heteroes/desktop-shared",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "tar": "^7.5.7"
+  }
+}

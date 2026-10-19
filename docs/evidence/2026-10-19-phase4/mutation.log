@@ -1,0 +1,7 @@
+control ok    | 10 passed, 1 warning in 0.36s
+killed       allow boolean backup interval | 1 failed, 9 passed, 1 warning in 0.38s
+killed       invert dispatch hold | 1 failed, 9 passed, 1 warning in 0.37s
+killed       treat unknown coordinator as drained | 1 failed, 9 passed, 1 warning in 0.37s
+killed       omit CPU model manifest module | 1 failed, 9 passed, 1 warning in 0.38s
+
+4 of 4 mutants killed.

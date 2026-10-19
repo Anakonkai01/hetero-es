@@ -1,8 +1,11 @@
+from .policies import has_device_reservation, processes_drained
+from .policies import FiniteStrict
+from .policies import set_disabled_workers, active_profile, platform_profile, v2_qualification
+from .config import load_config
 """CPU-only device control. Connectivity is never evidence of process death."""
 import hashlib
 import json
 import os
-from pathlib import Path
 import secrets
 import re
 import time
@@ -10,16 +13,13 @@ import uuid
 from typing import Literal
 
 from fastapi import Depends, Header, HTTPException, Request
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import Field, field_validator, model_validator
 from .errors import RuntimeRejected
 from .monitor_models import Core, Interface, BlockDevice, HostProcess, GPUProcess, Sensor, Power
 from .addresses import endpoint, is_private
-from .study.data import sha as study_hash
+from heteroes.study.data import sha as study_hash
 
-TERMINAL = {'COMPLETED', 'CANCELLED', 'FAILED'}
-QUIESCENT = TERMINAL | {'PAUSED'}
-MODEL = 'Qwen/Qwen2.5-0.5B-Instruct'
-REVISION = '7ae557604adf67be50417f59c2c2f167def9a775'
+from .constants import MODEL, REVISION, QUIESCENT
 CORE_COMMAND_KINDS = frozenset({'SET_CONTRIBUTION','COORDINATE','START_WORKER','STOP_WORKER','CANCEL_ASSIGNMENT'})
 COMMAND_KINDS = CORE_COMMAND_KINDS | {'PAUSE_ASSIGNMENT','UPDATE_BACKUP_POLICY'}
 
@@ -42,11 +42,9 @@ def digest(value):
     return hashlib.sha256(value.encode()).hexdigest()
 
 
-class Strict(BaseModel):
-    model_config = ConfigDict(extra='forbid', allow_inf_nan=False)
 
 
-class SelfTest(Strict):
+class SelfTest(FiniteStrict):
     passed: bool
     coordinator: bool = False
     gpuName: str = Field(max_length=200)
@@ -101,7 +99,7 @@ class SelfTest(Strict):
         return self
 
 
-class EndpointUpdate(Strict):
+class EndpointUpdate(FiniteStrict):
     computeUrl: str
     bulkUrl: str | None = None
 
@@ -128,7 +126,7 @@ class DeviceConfigurationUpdate(EndpointUpdate):
     selfTest: SelfTest
 
 
-class QualificationUpdate(Strict):
+class QualificationUpdate(FiniteStrict):
     bootId: str
     selfTest: SelfTest
 
@@ -145,17 +143,17 @@ class Enrollment(EndpointUpdate):
         return endpoint(value, private=True)
 
 
-class Approval(Strict):
+class Approval(FiniteStrict):
     approved: bool
     workspaceId: str | None = None
 
 
-class Contribution(Strict):
+class Contribution(FiniteStrict):
     enabled: bool
     bootId: str = Field(min_length=1, max_length=100)
 
 
-class ProcessReport(Strict):
+class ProcessReport(FiniteStrict):
     assignmentId: str
     epoch: int = Field(ge=1)
     coordinatorAlive: bool | None = None
@@ -165,21 +163,21 @@ class ProcessReport(Strict):
     events: list[dict] = Field(default_factory=list, max_length=200)
 
 
-class Report(Strict):
+class Report(FiniteStrict):
     sequence: int = Field(ge=1)
     assignmentId: str
     epoch: int = Field(ge=1)
     snapshot: dict
 
 
-class MonitoringEvent(Strict):
+class MonitoringEvent(FiniteStrict):
     eventId:str
     assignmentId:str
     epoch:int=Field(ge=1)
     event:dict
 
 
-class GPUObservation(Strict):
+class GPUObservation(FiniteStrict):
     uuid: str = Field(max_length=100)
     name: str = Field(max_length=200)
     utilizationPercent: float | None = Field(default=None,ge=0,le=100)
@@ -199,7 +197,7 @@ class GPUObservation(Strict):
     energyWh: float | None = Field(default=None,ge=0)
     energySampledSeconds: float = Field(default=0,ge=0)
 
-class HostObservation(Strict):
+class HostObservation(FiniteStrict):
     uptimeSeconds: float | None = Field(default=None,ge=0)
     cpuModel: str | None = Field(default=None,max_length=200)
     cores: list[Core] = Field(default_factory=list,max_length=512)
@@ -225,18 +223,18 @@ class HostObservation(Strict):
     diskWriteBytesPerSecond: float | None = Field(default=None,ge=0)
     loadAverage: list[float] = Field(default_factory=list,max_length=3)
 
-class DiskObservation(Strict):
+class DiskObservation(FiniteStrict):
     label: Literal['state','artifacts']
     totalBytes: int = Field(ge=0)
     usedBytes: int = Field(ge=0)
     freeBytes: int = Field(ge=0)
 
-class TransportObservation(Strict):
+class TransportObservation(FiniteStrict):
     latencyMs: float | None = Field(default=None,ge=0)
     pendingReports: int = Field(default=0,ge=0)
     pendingEvents: int = Field(default=0,ge=0)
 
-class Telemetry(Strict):
+class Telemetry(FiniteStrict):
     power: Power | None = None
     transport: TransportObservation | None = None
     sampledAt: float = Field(ge=0)
@@ -247,7 +245,7 @@ class Telemetry(Strict):
     disks: list[DiskObservation] = Field(default_factory=list,max_length=2)
     errors: list[str] = Field(default_factory=list,max_length=5)
 
-class Poll(Strict):
+class Poll(FiniteStrict):
     telemetry: Telemetry | None = None
     bootId: str = Field(min_length=1, max_length=100)
     contribution: bool = False
@@ -258,7 +256,7 @@ class Poll(Strict):
     selfTest: SelfTest | None = None
 
 
-class WorkerCommand(Strict):
+class WorkerCommand(FiniteStrict):
     assignmentId: str
     epoch: int = Field(ge=1)
     workerId: str
@@ -267,7 +265,7 @@ class WorkerCommand(Strict):
 
 
 class AgentRuntime:
-    """Adapter for the existing product dispatcher; no Track A imports on the server."""
+    """Adapter for the existing product dispatcher; shared runtime imports stay CPU-only."""
 
     def __init__(self, storage_backend=None):
         self.store = None
@@ -354,7 +352,7 @@ class AgentRuntime:
         root=os.environ.get('HETEROES_PRIVATE_CONFIG')
         if not root:return None
         try:
-            value=json.loads((Path(root)/'config.json').read_text()).get('publicComputeUrl')
+            value=load_config(root).get('publicComputeUrl')
             return endpoint(value) if value and not is_private(value) else None
         except (OSError,ValueError,TypeError):
             return None
@@ -382,8 +380,8 @@ class AgentRuntime:
             if not CORE_COMMAND_KINDS <= supported:return 'Update selected device agent to support core lifecycle commands'
             if body.get('recipeVersion')==2:
                 profile=d['selfTest']
-                if profile.get('platform')=='windows' or 2 not in profile.get('recipeVersions',[]):return 'Recipe v2 qualification required'
-                if study_hash(body['modelManifest']) not in profile.get('qualifiedModelHashes',[]):return 'Pinned model qualification required'
+                if v2_qualification(profile, study_hash(body['modelManifest'])) == 'recipe':return 'Recipe v2 qualification required'
+                if v2_qualification(profile, study_hash(body['modelManifest'])) == 'model':return 'Pinned model qualification required'
             if not d['physicalResourceId']:return 'Refresh selected device self-test to identify its physical GPU'
             if d['connectionStatus']!='ONLINE':return 'Waiting for selected device to reconnect'
             if not d['contributionEnabled']:return 'Waiting for owner to turn contribution ON'
@@ -399,7 +397,7 @@ class AgentRuntime:
             return 'Selected worker aliases refer to the same physical GPU'
         return None
 
-    def _enqueue(self, db, device_id, kind, body, dedupe):
+    def enqueue(self, db, device_id, kind, body, dedupe):
         cid=uuid.uuid4().hex
         message={'commandId':cid,'kind':kind,**body}
         db.execute('INSERT OR IGNORE INTO device_commands VALUES (?,?,?,?,0,?)',
@@ -462,7 +460,7 @@ class AgentRuntime:
             for did in chosen:db.execute('INSERT INTO device_reservations VALUES (?,?)',(did,aid))
             for resource in {d['physicalResourceId'] for d in chosen.values()}:
                 db.execute('INSERT INTO physical_reservations VALUES (?,?)',(resource,aid))
-            self._enqueue(db,co['deviceId'],'COORDINATE',{**assignment,'effectiveBackupPolicy':body.get('requestedBackupPolicy') or config['backupPolicy']},'coordinate:'+aid)
+            self.enqueue(db,co['deviceId'],'COORDINATE',{**assignment,'effectiveBackupPolicy':body.get('requestedBackupPolicy') or config['backupPolicy']},'coordinate:'+aid)
             body['resumeRequested']=False
             body['pauseRequested']=False
             self.store.save(db,body)
@@ -493,7 +491,7 @@ class AgentRuntime:
             if not row or row['released']:return
             ar=json.loads(row['body'])
             for did in ar['deviceIds']:
-                self._enqueue(db,did,'CANCEL_ASSIGNMENT',{'assignmentId':ar['assignmentId'],'epoch':ar['epoch']},'cancel:'+ar['assignmentId']+':'+did)
+                self.enqueue(db,did,'CANCEL_ASSIGNMENT',{'assignmentId':ar['assignmentId'],'epoch':ar['epoch']},'cancel:'+ar['assignmentId']+':'+did)
 
     def pause(self,run_id,db=None):
         if db is None:
@@ -501,7 +499,7 @@ class AgentRuntime:
         row=db.execute('SELECT * FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1',(run_id,)).fetchone()
         if not row or row['released']:return
         self.require_command(db,row['coordinator'],'PAUSE_ASSIGNMENT')
-        self._enqueue(db,row['coordinator'],'PAUSE_ASSIGNMENT',
+        self.enqueue(db,row['coordinator'],'PAUSE_ASSIGNMENT',
             {'assignmentId':row['id'],'epoch':row['epoch']},'pause:'+row['id'])
 
     def _release_confirmed(self, db, row, ar):
@@ -565,7 +563,7 @@ class AgentRuntime:
                 for assignment in db.execute('SELECT a.* FROM assignments a JOIN device_reservations r ON r.assignment_id=a.id WHERE r.device_id=?',(device['id'],)).fetchall():
                     run=self.store.get(assignment['run_id'])
                     if run and run.get('cancelRequested'):
-                        self._enqueue(db,device['id'],'CANCEL_ASSIGNMENT',{'assignmentId':assignment['id'],'epoch':assignment['epoch']},f'cancel-boot:{assignment["id"]}:{device["id"]}:{body.bootId}')
+                        self.enqueue(db,device['id'],'CANCEL_ASSIGNMENT',{'assignmentId':assignment['id'],'epoch':assignment['epoch']},f'cancel-boot:{assignment["id"]}:{device["id"]}:{body.bootId}')
             for cid in body.acknowledgements:
                 db.execute('UPDATE device_commands SET ack=1 WHERE id=? AND device_id=?',(cid,device['id']))
             for process in body.processes:
@@ -632,14 +630,14 @@ class AgentRuntime:
             target=db.execute('SELECT * FROM devices WHERE id=?',(did,)).fetchone()
             reports=[p for p in json.loads(target['processes']) if p['assignmentId']==row['id'] and p['epoch']==row['epoch'] and p['recoveryIndex']==body.recoveryIndex]
             if body.action=='start':
-                self._enqueue(db,did,'START_WORKER',{'assignmentId':row['id'],'epoch':row['epoch'],'runId':row['run_id'],
+                self.enqueue(db,did,'START_WORKER',{'assignmentId':row['id'],'epoch':row['epoch'],'runId':row['run_id'],
                     'workerId':body.workerId,'recoveryIndex':body.recoveryIndex,'coordinatorUrl':ar['computeUrl'],
                     'bulkUrl':ar.get('bulkUrl',ar['computeUrl']),
                     **({'studyConfig':ar['config']} if ar['config'].get('recipeVersion')==2 else {}),
                     'computeToken':ar['computeGrants'][body.workerId],
                     **({'publicComputeUrl':self.public_compute_url()} if self.public_compute_url() else {})},f'worker:{row["id"]}:{did}:{body.recoveryIndex}')
             elif body.action=='stop':
-                self._enqueue(db,did,'STOP_WORKER',{'assignmentId':row['id'],'epoch':row['epoch'],'recoveryIndex':body.recoveryIndex},f'stop:{row["id"]}:{did}:{body.recoveryIndex}')
+                self.enqueue(db,did,'STOP_WORKER',{'assignmentId':row['id'],'epoch':row['epoch'],'recoveryIndex':body.recoveryIndex},f'stop:{row["id"]}:{did}:{body.recoveryIndex}')
             if body.action in ('start','stop') and (time.time()-target['seen']>=30 or not reports):
                 return {'alive':None,'ready':False,'events':[]}
             if time.time()-target['seen']>=30:raise HTTPException(503,'Worker process state is unknown')
@@ -669,14 +667,11 @@ class AgentRuntime:
 
 def install_device_routes(app, store, user, runtime):
     def active(current):
-        p=store.profile(current['userId'])
-        if not p or p['accountStatus']!='ACTIVE':raise HTTPException(403,'Active account required')
-        return p
+        return active_profile(store, current)
 
     def admin(current=Depends(user)):
         p=active(current)
-        if not p.get('platformAdmin'):raise HTTPException(403,'Platform administrator required')
-        return p
+        return platform_profile(p)
 
     def device_auth(request:Request,authorization:str=Header(default='')):
         if not authorization.startswith('Bearer '):raise HTTPException(401,'Device authentication required')
@@ -726,11 +721,9 @@ def install_device_routes(app, store, user, runtime):
             if not d:raise HTTPException(404,'Owned device not found')
             if boot_id is not None and d['boot_id']!=boot_id:raise HTTPException(409,'Current boot required')
             resource=json.loads(d['self_test']).get('gpuUUID')
-            reserved=db.execute('SELECT 1 FROM device_reservations WHERE device_id=?',(device_id,)).fetchone()
-            physical=db.execute('SELECT 1 FROM physical_reservations WHERE resource_id=?',(resource,)).fetchone()
+            reserved=has_device_reservation(db, device_id, resource)
             processes=json.loads(d['processes'])
-            if (d['enabled'] or d['desired'] or reserved or physical or
-                    any(p.get('coordinatorAlive') is not False or p.get('workerAlive') is not False for p in processes)):
+            if (d['enabled'] or d['desired'] or reserved or not processes_drained(processes)):
                 raise HTTPException(409,'Turn contribution OFF and confirm all processes drained before changing endpoints')
             if self_test is not None:
                 old=json.loads(d['self_test'])
@@ -759,8 +752,7 @@ def install_device_routes(app, store, user, runtime):
             d=db.execute('SELECT * FROM devices WHERE id=?',(current['id'],)).fetchone()
             old=json.loads(d['self_test'])
             if (d['boot_id']!=body.bootId or d['enabled'] or d['desired'] or
-                    db.execute('SELECT 1 FROM device_reservations WHERE device_id=?',(d['id'],)).fetchone() or
-                    db.execute('SELECT 1 FROM physical_reservations WHERE resource_id=?',(old.get('gpuUUID'),)).fetchone()):
+                    has_device_reservation(db, d['id'], old.get('gpuUUID'))):
                 raise HTTPException(409,'Current boot, OFF and confirmed drain required')
             if not body.selfTest.passed or body.selfTest.gpuUUID!=old.get('gpuUUID') or body.selfTest.platform!=old.get('platform','linux'):
                 raise HTTPException(422,'Qualification cannot replace physical identity or platform')
@@ -782,11 +774,11 @@ def install_device_routes(app, store, user, runtime):
                 if d['status']=='REVOKED':raise HTTPException(409,'Re-enroll with a new device alias after revocation')
                 if not json.loads(d['self_test'])['passed']:raise HTTPException(409,'Self-test must pass')
                 if not body.workspaceId or not db.execute('SELECT 1 FROM memberships WHERE workspace_id=? AND user_id=?',(body.workspaceId,d['owner'])).fetchone():raise HTTPException(422,'Owner must belong to target workspace')
-                if db.execute('SELECT 1 FROM device_reservations WHERE device_id=?',(device_id,)).fetchone():raise HTTPException(409,'Device is reserved')
+                if has_device_reservation(db, device_id):raise HTTPException(409,'Device is reserved')
                 db.execute('UPDATE devices SET status="APPROVED" WHERE id=?',(device_id,))
                 db.execute('UPDATE worker_assignments SET workspace_id=? WHERE worker_id=?',(body.workspaceId,d['worker_id']))
                 disabled=store.disabled_workers(db);disabled.discard(d['worker_id'])
-                db.execute('INSERT OR REPLACE INTO settings VALUES (?,?)',('disabledWorkers',json.dumps(sorted(disabled))))
+                set_disabled_workers(db, disabled)
             else:
                 store.cancel_selected(db,d['worker_id'])
                 for row in db.execute('SELECT a.run_id FROM assignments a JOIN device_reservations r ON a.id=r.assignment_id WHERE r.device_id=?',(device_id,)).fetchall():runtime.cancel(row[0],db=db)
@@ -803,7 +795,7 @@ def install_device_routes(app, store, user, runtime):
             if not d:raise HTTPException(404,'Device not found')
             if d['status']=='QUARANTINED':raise HTTPException(409,'Restore mismatch quarantine requires investigation before removal')
             if d['status'] not in ('REVOKED','PENDING'):raise HTTPException(409,'Revoke the device before removing it')
-            if db.execute('SELECT 1 FROM device_reservations WHERE device_id=?',(device_id,)).fetchone():raise HTTPException(409,'Device is reserved')
+            if has_device_reservation(db, device_id):raise HTTPException(409,'Device is reserved')
             for table in ('device_commands','device_telemetry_history','device_reports'):
                 db.execute(f'DELETE FROM {table} WHERE device_id=?',(device_id,))
             db.execute('DELETE FROM devices WHERE id=?',(device_id,))
@@ -819,7 +811,7 @@ def install_device_routes(app, store, user, runtime):
             if not d:raise HTTPException(404,'Owned device not found')
             if d['status']!='APPROVED' or d['boot_id']!=body.bootId:raise HTTPException(409,'Approval and current boot identity required')
             db.execute('UPDATE devices SET desired=? WHERE id=?',(body.enabled,device_id))
-            runtime._enqueue(db,device_id,'SET_CONTRIBUTION',{'enabled':body.enabled,'bootId':body.bootId},'contribution:'+uuid.uuid4().hex)
+            runtime.enqueue(db,device_id,'SET_CONTRIBUTION',{'enabled':body.enabled,'bootId':body.bootId},'contribution:'+uuid.uuid4().hex)
             if not body.enabled:
                 store.cancel_selected(db,d['worker_id'])
                 for row in db.execute('SELECT a.run_id FROM assignments a JOIN device_reservations r ON a.id=r.assignment_id WHERE r.device_id=?',(device_id,)).fetchall():runtime.cancel(row[0],db=db)

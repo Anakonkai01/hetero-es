@@ -4,7 +4,7 @@ const fs = require('node:fs/promises');
 const { Service } = require('./service.cjs');
 const { Vault } = require('./vault.cjs');
 const { Lifecycle, codeOf } = require('./lifecycle.cjs');
-const { createLog } = require('./log.cjs');
+const { createLog } = require('@heteroes/desktop-shared/log.cjs');
 if (!app.isPackaged && process.env.HETEROES_WORKER_TEST_DATA)
     app.setPath('userData', process.env.HETEROES_WORKER_TEST_DATA);
 const log = createLog(path.join(app.getPath('userData'), 'logs'));

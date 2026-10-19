@@ -5,7 +5,7 @@ const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
 const { Lifecycle, describeCode } = require('../electron/lifecycle.cjs');
-const { createLog } = require('../electron/log.cjs');
+const { createLog } = require('@heteroes/desktop-shared/log.cjs');
 
 function harness(serviceOverrides = {}) {
     const events = [];

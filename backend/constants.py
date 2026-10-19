@@ -1,0 +1,6 @@
+"""CPU-safe product identities and lifecycle state sets."""
+MODEL = 'Qwen/Qwen2.5-0.5B-Instruct'
+REVISION = '7ae557604adf67be50417f59c2c2f167def9a775'
+ACTIVE = {'STARTING', 'RUNNING', 'CANCELLING', 'RECOVERING', 'DRAINING', 'PAUSING'}
+TERMINAL = {'COMPLETED', 'CANCELLED', 'FAILED'}
+QUIESCENT = TERMINAL | {'PAUSED'}

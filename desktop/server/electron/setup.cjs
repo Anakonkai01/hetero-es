@@ -2,9 +2,8 @@ const fs = require('node:fs');
 const fsp = fs.promises;
 const path = require('node:path');
 const crypto = require('node:crypto');
-const shared = fs.existsSync(path.join(__dirname,'shared/setup.cjs')) ? './shared/' : '../../worker/electron/';
-const {extract,run} = require(shared+'setup.cjs');
-const {verifiedDownload,digest} = require(shared+'download.cjs');
+const {extract,run}=require('@heteroes/desktop-shared/runtime.cjs');
+const {verifiedDownload,digest}=require('@heteroes/desktop-shared/download.cjs');
 
 class Setup {
   constructor(root,resources,onProgress=()=>{}) {

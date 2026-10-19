@@ -4,8 +4,8 @@ import json
 import uuid
 from fastapi import Depends,HTTPException
 from pydantic import BaseModel,ConfigDict,Field
-from .study.data import dataset,canonical
-from .study.models import validate as validate_model
+from heteroes.study.data import dataset,canonical
+from heteroes.study.models import validate as validate_model
 
 
 class ImportData(BaseModel):

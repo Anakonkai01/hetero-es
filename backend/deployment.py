@@ -1,3 +1,4 @@
+from .policies import dispatch_held
 """CPU deployment validation and public entrypoint configuration. No GPU imports."""
 import json
 import os
@@ -20,8 +21,7 @@ def save_private(path, value):
 def idle(config):
     path=Path(config['productStateDirectory'])/'product.sqlite'
     with sqlite3.connect(path.as_uri()+'?mode=ro',uri=True) as db:
-        row=db.execute("SELECT value FROM settings WHERE key='dispatchHold'").fetchone()
-        if not row or json.loads(row[0]) is not True:
+        if dispatch_held(db) is not True:
             raise RuntimeError('Hold dispatch before deployment maintenance')
         for table in ('device_reservations','physical_reservations'):
             if db.execute(f'SELECT count(*) FROM {table}').fetchone()[0]:

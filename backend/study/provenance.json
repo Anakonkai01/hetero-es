@@ -1,8 +1,0 @@
-{
-  "source": "Track A src/heteroes/study",
-  "files": {
-    "__init__.py": "ca90ef687f03dd5d307d5e6aa38df44cef5e7fd0f50e9ddeea378900ef474b52",
-    "data.py": "54329b4a229d97091defbeb4b82c219c1726efdb05bfaca49ff8beb18a220f94",
-    "models.py": "cbde0933bee8ec3ac5efdebce9b9e549e20cfc72320d0fd224cf04ea0bdfe658"
-  }
-}

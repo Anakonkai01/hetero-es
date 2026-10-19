@@ -1,3 +1,4 @@
+from .policies import dispatch_held, read_setting, set_disabled_workers
 """SQLite product state. Runtime ledgers remain owned by device agents."""
 from contextlib import contextmanager
 from datetime import datetime, timezone
@@ -13,8 +14,7 @@ from argon2 import PasswordHasher
 from .errors import RuntimeRejected
 from .migrations import migrate
 
-ACTIVE = {"STARTING", "RUNNING", "CANCELLING", "RECOVERING", "DRAINING", "PAUSING"}
-TERMINAL = {"COMPLETED", "CANCELLED", "FAILED"}
+from .constants import ACTIVE, TERMINAL, REVISION
 
 
 def now():
@@ -79,7 +79,7 @@ class Store:
                 if not db.execute('SELECT 1 FROM worker_assignments WHERE worker_id=?',(wid,)).fetchone():
                     db.execute('INSERT INTO worker_assignments VALUES (?,?,?)',(wid,creator,None if initialized else 'lab'))
                     if initialized:disabled.add(wid)
-            db.execute('INSERT OR REPLACE INTO settings VALUES (?,?)',('disabledWorkers',json.dumps(sorted(disabled))))
+            set_disabled_workers(db, disabled)
             db.execute('INSERT OR IGNORE INTO settings VALUES (?,?)',('workersInitialized','true'))
         if self.last_error=='WorkerConfigurationUnavailable':
             self.last_error=None
@@ -101,8 +101,7 @@ class Store:
             return [r[0] for r in db.execute('SELECT worker_id FROM worker_assignments WHERE workspace_id=?',(workspace_id,)) if include_disabled or r[0] not in disabled]
 
     def disabled_workers(self,db):
-        row=db.execute('SELECT value FROM settings WHERE key="disabledWorkers"').fetchone()
-        return set(json.loads(row[0])) if row else set()
+        return set(read_setting(db, 'disabledWorkers', []))
 
     def cancel_selected(self,db,worker_id):
         for row in db.execute('SELECT body FROM experiments').fetchall():
@@ -173,7 +172,7 @@ class Store:
         run_id = uuid.uuid4().hex
         digest = hashlib.sha256(json.dumps(config, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
         body = {**config, "experimentId": run_id, "workspaceId": workspace_id, "ownerUserId": owner, "status": "DRAFT",
-                "cancelRequested": False, "modelVersion": "7ae557604adf67be50417f59c2c2f167def9a775",
+                "cancelRequested": False, "modelVersion": REVISION,
                 "configHash": digest, "createdAt": now(), "completedGenerations": 0}
         with self.db() as db:
             db.execute("INSERT INTO experiments VALUES (?,?,?,NULL)", (run_id, owner, json.dumps(body)))
@@ -203,7 +202,7 @@ class Store:
             with self.db() as db:
                 # Recheck under the same lock as the queued-to-STARTING claim.
                 # An operator can hold admission while reconciliation is running.
-                if json.loads(db.execute('SELECT value FROM settings WHERE key="dispatchHold"').fetchone()[0]):
+                if dispatch_held(db):
                     break
                 active = self.get(run_id)
                 if not active or active['status'] != 'QUEUED':

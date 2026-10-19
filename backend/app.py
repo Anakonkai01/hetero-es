@@ -1,3 +1,5 @@
+from .policies import backup_policy as validated_backup_policy, dispatch_held, active_profile, v2_qualification, storage_status
+from .config import load_config
 from contextlib import asynccontextmanager
 import hashlib
 import json
@@ -108,9 +110,7 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
         return json.loads(row[0])
 
     def scoped(current=Depends(user), x_workspace_id: str = Header(default="")):
-        profile = store.profile(current['userId'])
-        if not profile or profile['accountStatus'] != 'ACTIVE':
-            raise HTTPException(403, 'Your account must be active to access lab resources')
+        profile = active_profile(store, current, 'Your account must be active to access lab resources')
         membership = next((w for w in store.workspaces(current['userId']) if w['workspaceId']==x_workspace_id),None)
         if not membership:
             raise HTTPException(403, 'Select a workspace you belong to')
@@ -146,10 +146,10 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
         co = next((d for d in runtime.devices() if d['deviceId']==body['coordinatorDeviceId']),None)
         if not co or co['approvalStatus']!='APPROVED' or co['workspaceId']!=current['workspaceId'] or not co['selfTest']['coordinator']:
             raise HTTPException(422, 'Select an approved coordinator in this workspace')
-        policy=body.get('backupPolicy') or {'interval':1,'retain':3}
-        if set(policy)!={'interval','retain'} or any(type(v) is not int or not 1<=v<=1000 for v in policy.values()):
-            raise HTTPException(422, 'Backup interval and retention must be integers from 1 to 1000')
-        body['backupPolicy']=policy
+        try:
+            body['backupPolicy'] = validated_backup_policy(body.get('backupPolicy') or {'interval':1,'retain':3})
+        except ValueError as error:
+            raise HTTPException(422, str(error)) from None
         if body['recipeVersion']==2:
             model=registry.get(body['modelArtifactId'],current['workspaceId'],'model')
             if model['status'] not in ('READY','REGISTERED') or model['reference']!=body['modelName']:raise HTTPException(422,'Model is unavailable or its name differs')
@@ -161,8 +161,8 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
             selected=[d for d in runtime.devices() if d['deviceId']==body['coordinatorDeviceId'] or d['workerId'] in body['workerIds']]
             for d in selected:
                 profile=d['selfTest']
-                if profile.get('platform')=='windows' or 2 not in profile.get('recipeVersions',[]):raise HTTPException(422,'Selected device requires Recipe v2 qualification; Windows remains v1 worker-only')
-                if model['manifestHash'] not in profile.get('qualifiedModelHashes',[]):raise HTTPException(422,'Qualify every selected device for this pinned model')
+                if v2_qualification(profile, model['manifestHash']) == 'recipe':raise HTTPException(422,'Selected device requires Recipe v2 qualification; Windows remains v1 worker-only')
+                if v2_qualification(profile, model['manifestHash']) == 'model':raise HTTPException(422,'Qualify every selected device for this pinned model')
             body.update(modelManifest=model['manifest'],modelSource=model['source'],datasetObjectSha256=data['objectSha256'],datasetIdentity=data['identity'])
         else:
             if body["modelName"] != cap["modelId"] or body["modelArtifactId"] != "qwen-pinned":
@@ -190,7 +190,7 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
         if private_root:
             # Quick URLs can rotate while this CPU service retains its identity.
             try:
-                config=json.loads((Path(private_root)/'config.json').read_text())
+                config=load_config(private_root)
                 ui_url=config.get('publicWebUrl') or ui_url
             except (OSError,ValueError):
                 pass
@@ -200,9 +200,7 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
                 "agentMode":True,
                 'deviceConfiguration':True,
                 'recipeVersions':[1,2],
-                "cloudStorageConfigured":False,
-                "recoveryStorageConfigured":backend is not None,
-                "recoveryStorageMode":getattr(backend,'mode','local') if backend else None,
+                **storage_status(runtime),
                 "serverInstanceId":getattr(runtime,'server_instance_id',None),
                 **({"uiUrl":ui_url} if ui_url else {}),
                 **({'privateLabUrl':config.get('bulkApiUrl',config['apiUrl'])} if config.get('apiUrl') else {})}
@@ -339,7 +337,7 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
         with store.db() as db:
             body = authorized(run_id, current)
             if body["status"] == "DRAFT":
-                if json.loads(db.execute('SELECT value FROM settings WHERE key="dispatchHold"').fetchone()[0]):
+                if dispatch_held(db):
                     raise HTTPException(409,'Submissions are held for maintenance or restored deployment review')
                 if reason := store.eligibility(db,body):
                     raise HTTPException(409,reason)
@@ -491,7 +489,7 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
             assignment=db.execute('SELECT id,coordinator,epoch,released FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1',(run_id,)).fetchone()
             if assignment and not assignment['released']:
                 runtime.require_command(db,assignment['coordinator'],'UPDATE_BACKUP_POLICY')
-                runtime._enqueue(db,assignment['coordinator'],'UPDATE_BACKUP_POLICY',{'assignmentId':assignment['id'],'epoch':assignment['epoch'],'policy':policy.model_dump()},'backup-policy:'+secrets.token_hex(16))
+                runtime.enqueue(db,assignment['coordinator'],'UPDATE_BACKUP_POLICY',{'assignmentId':assignment['id'],'epoch':assignment['epoch'],'policy':policy.model_dump()},'backup-policy:'+secrets.token_hex(16))
             body['requestedBackupPolicy']=policy.model_dump()
             store.save(db,body)
             store.audit(db,current['userId'],'BACKUP_POLICY_REQUESTED',run_id,body['workspaceId'])
@@ -526,7 +524,7 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
                 manifest=json.loads((Path(downloads_directory)/'manifest.json').read_text())
                 private_root=os.environ.get('HETEROES_PRIVATE_CONFIG')
                 if private_root:
-                    config=json.loads((Path(private_root)/'config.json').read_text())
+                    config=load_config(private_root)
                     # publicDownloads: the operator serves installers on the public origin too.
                     if config.get('publicWebUrl') and not config.get('publicDownloads'):
                         bulk=config.get('bulkApiUrl',config.get('apiUrl'))
@@ -560,7 +558,7 @@ def app_from_environment():
         raise ValueError('Set HETEROES_PRIVATE_CONFIG to the lab configuration directory')
     root = Path(private_root)
     credentials = json.loads((root / "credentials.json").read_text())
-    config = json.loads((root / "config.json").read_text())
+    config = load_config(root)
     from .writer_lock import acquire_writer
     writer=acquire_writer(Path(config['productStateDirectory'])/'product.sqlite')
     try:return _app_from_config(root,credentials,config,writer)
