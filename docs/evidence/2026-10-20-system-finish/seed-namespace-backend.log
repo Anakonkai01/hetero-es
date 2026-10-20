@@ -1,0 +1,61 @@
+..................F..                                                    [100%]
+=================================== FAILURES ===================================
+_____________ test_v3_templates_validate_and_keep_nullable_prompt ______________
+
+    def test_v3_templates_validate_and_keep_nullable_prompt():
+        from backend.templates import clean_config
+        from fastapi import HTTPException
+    
+        options = {
+            "recipeVersion": 3,
+            "weightSpace": {"kind": "full"},
+            "antithetic": False,
+            "systemPrompt": None,
+            "coefficientRule": "zscore@1",
+            "validationInterval": 2,
+            **UPDATE_OPTIONS,
+            "alphaMinimum": None,
+            "momentumBeta": None,
+            "evalChunk": None,
+            "scorer": {
+                "kind": "declarative",
+                "name": "choice-letter",
+                "version": 1,
+                "codeSha256": None,
+                "config": {"answerField": "label"},
+            },
+        }
+>       assert clean_config(options) == options
+               ^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_v3_study.py:345: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+config = {'alphaMinimum': None, 'alphaSchedule': 'cosine', 'antithetic': False, 'candidateSeedNamespace': 'baseline-5070', ...}
+
+    def clean_config(config):
+        """Validated settings, or HTTPException(422). Unknown keys are refused rather than silently dropped."""
+        if not isinstance(config, dict) or not config:
+            raise HTTPException(422, "A template needs at least one setting")
+        known = (
+            set(INTEGERS)
+            | set(FLOATS)
+            | set(CHOICES)
+            | SHORT_TEXT
+            | {"workerIds", "backupPolicy", "weightSpace", "antithetic", "scorer", "systemPrompt"}
+        )
+        unknown = sorted(set(config) - known)
+        if unknown:
+>           raise HTTPException(422, f"Settings that cannot be saved in a template: {', '.join(unknown)}")
+E           fastapi.exceptions.HTTPException: 422: Settings that cannot be saved in a template: candidateSeedNamespace, sampler
+
+backend/templates.py:61: HTTPException
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_v3_study.py::test_v3_templates_validate_and_keep_nullable_prompt
+1 failed, 20 passed, 1 warning in 2.91s

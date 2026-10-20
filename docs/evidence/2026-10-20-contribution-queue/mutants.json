@@ -1,0 +1,20 @@
+[
+  {
+    "name": "off-discards-the-queue",
+    "file": "backend/devices.py",
+    "old": "store.cancel_selected(db, d[\"worker_id\"], include_queued=False)",
+    "new": "store.cancel_selected(db, d[\"worker_id\"], include_queued=True)"
+  },
+  {
+    "name": "revocation-keeps-the-queue",
+    "file": "backend/store.py",
+    "old": "def cancel_selected(self, db, worker_id, *, include_queued=True):",
+    "new": "def cancel_selected(self, db, worker_id, *, include_queued=False):"
+  },
+  {
+    "name": "off-leaves-active-computation-running",
+    "file": "backend/store.py",
+    "old": "if not include_queued and b[\"status\"] == \"QUEUED\":",
+    "new": "if not include_queued:"
+  }
+]

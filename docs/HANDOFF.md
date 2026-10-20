@@ -124,3 +124,7 @@ system: the researcher's journey on an isolated r11 lab with the 5070 Ti and the
 on the web lab, request-to-join, large datasets, any machine as coordinator plus a per-lab default coordinator,
 `hf_compact` for v3, a vLLM probe, a pluggable sampler, `heteroes eval/compare/serve/worker`, prompt format, a boxed scorer
 and cost accounting, then r11 candidate3. Continue from [handoff-system-finish.md](handoff-system-finish.md).
+
+## Codex continuation paused by owner (2026-10-20)
+
+Current continuation: [handoff-system-finish-codex.md](handoff-system-finish-codex.md). New-model qualification is implemented; the isolated two-machine comparison and final CPU checks were still running when the owner paused for usage. Windows original Worker restoration remains required after acceptance.

@@ -1,0 +1,20 @@
+[
+  {
+    "name": "assignment-drops-seed-namespace",
+    "file": "backend/constants.py",
+    "old": "    \"candidateSeedNamespace\",",
+    "new": ""
+  },
+  {
+    "name": "templates-reject-batch-sampler",
+    "file": "backend/templates.py",
+    "old": "    \"sampler\": {\"sha256-python-random-sample-v1\", \"epoch-shuffle@1\"},",
+    "new": ""
+  },
+  {
+    "name": "templates-accept-invalid-seed-namespace",
+    "file": "backend/templates.py",
+    "old": "                validate_seed_namespace(value)",
+    "new": "                pass"
+  }
+]

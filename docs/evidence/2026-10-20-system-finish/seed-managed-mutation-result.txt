@@ -1,0 +1,4 @@
+control ok    | 3 passed, 7 deselected in 17.18s
+killed       managed-runner-drops-seed-namespace | 3 failed, 7 deselected in 16.78s
+
+1 of 1 mutants killed.

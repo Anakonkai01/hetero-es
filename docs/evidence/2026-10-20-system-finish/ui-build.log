@@ -1,0 +1,122 @@
+vite v8.3.4 building client environment for production...
+transforming...
+✓ 280 modules transformed.
+rendering chunks...
+computing gzip size...
+../.scratch/system-finish-ui/web/index.html                                                     1.17 kB │ gzip:   0.45 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-mono-vietnamese-400-normal-DDuiU_S-.woff       5.62 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-mono-cyrillic-ext-400-normal-DMdlQ8Kv.woff     5.82 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-mono-vietnamese-400-normal-BulugwFq.woff2      5.86 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-vietnamese-400-normal-fK1oJ5dG.woff       6.39 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-vietnamese-700-normal-BV5B8Are.woff       6.42 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-vietnamese-600-normal-DgdngZtN.woff       6.58 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-vietnamese-500-normal-BEb3_waV.woff       6.58 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-mono-cyrillic-ext-400-normal-xuaO2J-f.woff2    6.91 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-mono-cyrillic-400-normal-CEL4l2ZJ.woff         7.20 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-vietnamese-400-normal-DG4YqDda.woff2      8.20 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-vietnamese-700-normal-CkEo6LDy.woff2      8.22 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-mono-cyrillic-400-normal-BSMlKf0J.woff2        8.35 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-vietnamese-500-normal-e4dixQRQ.woff2      8.41 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-vietnamese-600-normal-DpPYBSTl.woff2      8.46 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-greek-700-normal-CkZN0sRy.woff            8.74 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-greek-400-normal-D9ESIMu3.woff            8.76 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-greek-500-normal-CuWXN6rf.woff            9.14 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-greek-600-normal-D-CqTdkO.woff            9.22 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-greek-700-normal-wyJ6jzdA.woff2           9.92 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-greek-400-normal-_efipK4i.woff2           9.94 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-cyrillic-ext-700-normal-DCQwxkRk.woff    10.16 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-cyrillic-ext-400-normal-Dsrv2Tcn.woff    10.28 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-greek-600-normal-DzTrcv_p.woff2          10.36 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-greek-500-normal-JMMifIXV.woff2          10.37 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-cyrillic-ext-500-normal-DB5PtV2g.woff    10.59 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-cyrillic-ext-600-normal-Bz0x94Yp.woff    10.61 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-mono-latin-ext-400-normal-D3D2R8hC.woff       11.76 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-cyrillic-ext-700-normal-BmRLXWpJ.woff2   12.05 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-cyrillic-ext-400-normal-g30qAdWV.woff2   12.14 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-cyrillic-ext-600-normal-DUMzJB7m.woff2   12.30 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-cyrillic-ext-500-normal-Cs5J6C77.woff2   12.30 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-mono-latin-400-normal-CvHOgSBP.woff           13.14 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-cyrillic-700-normal-RFb1v-CK.woff        13.32 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-mono-latin-ext-400-normal-BmRBH3aV.woff2      13.34 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-cyrillic-400-normal-BTotfTJu.woff        13.51 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-cyrillic-500-normal-ByOcLdNv.woff        13.85 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-cyrillic-600-normal-BGq0mW3O.woff        13.88 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-latin-ext-400-normal-RBey6euL.woff       14.36 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-latin-ext-700-normal-DZH6Xh-4.woff       14.42 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-cyrillic-700-normal-D_uavGvn.woff2       14.57 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-mono-latin-400-normal-DMJ8VG8y.woff2          14.70 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-latin-ext-500-normal-D0aIdm-b.woff       14.73 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-latin-ext-600-normal-DIrixKbi.woff       14.77 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-cyrillic-400-normal-DZqxrq2p.woff2       14.80 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-cyrillic-500-normal-CocWQlwt.woff2       15.00 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-cyrillic-600-normal-71GNu3SW.woff2       15.04 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-latin-ext-400-normal-C5H60-Va.woff2      15.98 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-latin-ext-700-normal-aMgXseD4.woff2      16.18 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-latin-ext-600-normal-DOrvGEcy.woff2      16.44 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-latin-ext-500-normal-DakdToA3.woff2      16.45 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-latin-400-normal-CYLoc0-x.woff           22.10 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-latin-700-normal-Bth3BMcD.woff           22.28 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-latin-400-normal-CDDApCn2.woff2          22.58 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-latin-700-normal-Bxkt5Cjx.woff2          22.83 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-latin-600-normal-Cu4Hd6ag.woff           23.87 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-latin-500-normal-BgVn5rGT.woff           23.91 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-latin-500-normal-6ng42L7E.woff2          24.18 kB
+../.scratch/system-finish-ui/web/assets/ibm-plex-sans-latin-600-normal-CuJfVYMP.woff2          24.25 kB
+../.scratch/system-finish-ui/web/assets/index-Cux6js7q.css                                     93.40 kB │ gzip:  17.99 kB
+../.scratch/system-finish-ui/web/assets/workers-CXkjJVzY.js                                     0.15 kB │ gzip:   0.13 kB
+../.scratch/system-finish-ui/web/assets/generations-Dl55ow6u.js                                 0.19 kB │ gzip:   0.14 kB
+../.scratch/system-finish-ui/web/assets/EmptyState-CR_74sC4.js                                  0.24 kB │ gzip:   0.19 kB
+../.scratch/system-finish-ui/web/assets/navigation-BTKkNhM9.js                                  0.26 kB │ gzip:   0.18 kB
+../.scratch/system-finish-ui/web/assets/useEvents-3CCnBxdA.js                                   0.27 kB │ gzip:   0.21 kB
+../.scratch/system-finish-ui/web/assets/useGeneration-CtO71KmT.js                               0.27 kB │ gzip:   0.21 kB
+../.scratch/system-finish-ui/web/assets/useArtifacts-BK-FbBMc.js                                0.27 kB │ gzip:   0.21 kB
+../.scratch/system-finish-ui/web/assets/useCandidates-79uqQc_x.js                               0.28 kB │ gzip:   0.23 kB
+../.scratch/system-finish-ui/web/assets/useAttempt-C9g8B9HG.js                                  0.29 kB │ gzip:   0.23 kB
+../.scratch/system-finish-ui/web/assets/session-B85DFjkN.js                                     0.34 kB │ gzip:   0.25 kB
+../.scratch/system-finish-ui/web/assets/experiments-D5VfKjxO.js                                 0.45 kB │ gzip:   0.22 kB
+../.scratch/system-finish-ui/web/assets/NotFoundPage-5F-QTBKe.js                                0.45 kB │ gzip:   0.28 kB
+../.scratch/system-finish-ui/web/assets/ProgressBar-ByzIP3fM.js                                 0.46 kB │ gzip:   0.30 kB
+../.scratch/system-finish-ui/web/assets/PageHeader-XLGkowg6.js                                  0.46 kB │ gzip:   0.28 kB
+../.scratch/system-finish-ui/web/assets/ObjectNotFound-CwIvsCIi.js                              0.58 kB │ gzip:   0.33 kB
+../.scratch/system-finish-ui/web/assets/QueryState-C3ClyGhX.js                                  0.66 kB │ gzip:   0.38 kB
+../.scratch/system-finish-ui/web/assets/useAccess-CCNGFyIi.js                                   0.66 kB │ gzip:   0.35 kB
+../.scratch/system-finish-ui/web/assets/rolldown-runtime-hePW80VL.js                            0.71 kB │ gzip:   0.42 kB
+../.scratch/system-finish-ui/web/assets/KeyValue-CQwDlStA.js                                    0.83 kB │ gzip:   0.44 kB
+../.scratch/system-finish-ui/web/assets/Modal-BcgHGbxH.js                                       0.86 kB │ gzip:   0.50 kB
+../.scratch/system-finish-ui/web/assets/useExperiment-DhULWEqU.js                               0.89 kB │ gzip:   0.55 kB
+../.scratch/system-finish-ui/web/assets/useQuery-CSeSZtbd.js                                    0.93 kB │ gzip:   0.57 kB
+../.scratch/system-finish-ui/web/assets/EventRows-1rfLkvFk.js                                   0.97 kB │ gzip:   0.50 kB
+../.scratch/system-finish-ui/web/assets/MyWorkersPage-Ts9sf2ue.js                               1.24 kB │ gzip:   0.61 kB
+../.scratch/system-finish-ui/web/assets/ExperimentCreatePage-C823LyfH.js                        2.33 kB │ gzip:   1.10 kB
+../.scratch/system-finish-ui/web/assets/ExperimentLive-BqefIrH5.js                              2.48 kB │ gzip:   1.20 kB
+../.scratch/system-finish-ui/web/assets/client-CNb4okPP.js                                      2.90 kB │ gzip:   1.32 kB
+../.scratch/system-finish-ui/web/assets/LabQueue-DK4qM_lD.js                                    3.01 kB │ gzip:   1.14 kB
+../.scratch/system-finish-ui/web/assets/exportRun-D9UL4aFN.js                                   3.19 kB │ gzip:   1.68 kB
+../.scratch/system-finish-ui/web/assets/RegisterPage-BDRcFymM.js                                3.31 kB │ gzip:   1.38 kB
+../.scratch/system-finish-ui/web/assets/GetStartedPage-DNfRmRiT.js                              3.39 kB │ gzip:   1.30 kB
+../.scratch/system-finish-ui/web/assets/LoginPage-DTHWtByP.js                                   3.43 kB │ gzip:   1.41 kB
+../.scratch/system-finish-ui/web/assets/labels-Do5YkTDQ.js                                      3.44 kB │ gzip:   1.38 kB
+../.scratch/system-finish-ui/web/assets/WorkerFleet-CbaHUNla.js                                 3.65 kB │ gzip:   1.17 kB
+../.scratch/system-finish-ui/web/assets/WorkerDetailPage-C9Td8ILb.js                            3.94 kB │ gzip:   1.57 kB
+../.scratch/system-finish-ui/web/assets/eventText-B9idOf_o.js                                   4.62 kB │ gzip:   1.48 kB
+../.scratch/system-finish-ui/web/assets/GenerationDetailPage-BTZl6Hhp.js                        4.89 kB │ gzip:   1.60 kB
+../.scratch/system-finish-ui/web/assets/ProfilePage-CmWKtZNn.js                                 5.00 kB │ gzip:   1.58 kB
+../.scratch/system-finish-ui/web/assets/WorkspaceListPage-CyQRUUwk.js                           5.40 kB │ gzip:   1.90 kB
+../.scratch/system-finish-ui/web/assets/CandidateDetailPage-rXsvcNFt.js                         6.12 kB │ gzip:   2.07 kB
+../.scratch/system-finish-ui/web/assets/WorkspaceDetailRoute-C1k0EeCi.js                        6.19 kB │ gzip:   2.18 kB
+../.scratch/system-finish-ui/web/assets/ArtifactsPage-CMYjQ5XO.js                               6.44 kB │ gzip:   2.30 kB
+../.scratch/system-finish-ui/web/assets/EventsPage-lk5AIqRK.js                                  7.61 kB │ gzip:   2.61 kB
+../.scratch/system-finish-ui/web/assets/ModelsPage-Bd9PacpM.js                                  7.73 kB │ gzip:   2.75 kB
+../.scratch/system-finish-ui/web/assets/ExperimentsPage-BI5vLaHo.js                             8.07 kB │ gzip:   2.60 kB
+../.scratch/system-finish-ui/web/assets/ExplainPage-Cerqjoyu.js                                 8.82 kB │ gzip:   3.40 kB
+../.scratch/system-finish-ui/web/assets/LabDevices-D2nKFt04.js                                  8.95 kB │ gzip:   3.31 kB
+../.scratch/system-finish-ui/web/assets/LabOperationsPage-CB_otyan.js                           9.17 kB │ gzip:   2.73 kB
+../.scratch/system-finish-ui/web/assets/DashboardPage-BLvUu3jv.js                              12.39 kB │ gzip:   4.09 kB
+../.scratch/system-finish-ui/web/assets/ComparePage-CCoCUNur.js                                13.28 kB │ gzip:   4.92 kB
+../.scratch/system-finish-ui/web/assets/suspense-WkvpYM4r.js                                   22.08 kB │ gzip:   7.35 kB
+../.scratch/system-finish-ui/web/assets/useExperimentMutations-C6en69ty.js                     22.31 kB │ gzip:   5.80 kB
+../.scratch/system-finish-ui/web/assets/ExperimentDetailPage-GO9bjekH.js                       29.00 kB │ gzip:   8.31 kB
+../.scratch/system-finish-ui/web/assets/src-C5ty1oQu.js                                       132.67 kB │ gzip:  42.38 kB
+../.scratch/system-finish-ui/web/assets/index-Bd7fPPx8.js                                     324.51 kB │ gzip: 101.96 kB
+
+✓ built in 140ms
