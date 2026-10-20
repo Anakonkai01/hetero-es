@@ -240,7 +240,7 @@ try {
   await page.getByLabel('LoRA rank', { exact: true }).fill('4');
   await page.getByLabel('Antithetic sampling', { exact: true }).check();
   await page.getByLabel('Candidate seed group', { exact: true }).fill('browser-baseline');
-  await page.getByLabel('Declarative scorer').selectOption('choice-letter');
+  await page.getByRole('combobox', { name: /^Scorer/ }).selectOption('choice-letter');
   await page.getByLabel('Scorer answer field').fill('label');
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   assert.equal(await page.getByLabel('Coordinator').inputValue(), enrolled.deviceId);

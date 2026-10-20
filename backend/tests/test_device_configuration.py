@@ -30,7 +30,7 @@ def test_configuration_updates_role_and_endpoints_atomically(lab):
         ("passed", False),
         ("gpuUUID", "GPU-00000000-0000-0000-0000-000000000000"),
         ("platform", "windows"),
-        ("vramTotalMb", 10999),
+        ("vramTotalMb", 0),  # any GPU may coordinate (owner, 2026-10-20), but a GPU profile needs VRAM
     ],
 )
 def test_invalid_role_or_identity_cannot_partially_change_endpoint(lab, field, value):

@@ -1,0 +1,84 @@
+...............................................................F........ [ 19%]
+........................................................................ [ 38%]
+........................................................................ [ 58%]
+...............................................................F........ [ 77%]
+........................................................................ [ 97%]
+..........                                                               [100%]
+=================================== FAILURES ===================================
+_ test_invalid_role_or_identity_cannot_partially_change_endpoint[vramTotalMb-10999] _
+
+lab = (<starlette.testclient.TestClient object at 0x7c63f55a7b60>, <backend.store.Store object at 0x7c63f5ba1df0>, <backend....t at 0x7c63f5438290>, {'Authorization': 'Bearer KUm3Ty4HhwjEh5pRfdS0JBiRsdmLe6jjg0yVn1fV4Tc', 'X-Workspace-Id': 'lab'})
+field = 'vramTotalMb', value = 10999
+
+    @pytest.mark.parametrize(
+        "field,value",
+        [
+            ("passed", False),
+            ("gpuUUID", "GPU-00000000-0000-0000-0000-000000000000"),
+            ("platform", "windows"),
+            ("vramTotalMb", 10999),
+        ],
+    )
+    def test_invalid_role_or_identity_cannot_partially_change_endpoint(lab, field, value):
+        client, _, runtime, owner = lab
+        device, _ = pair(lab, coordinator=False)
+        before = runtime.devices()[0]
+        body = configuration(lab, device)
+        body["selfTest"][field] = value
+        response = client.patch(f"/api/v1/devices/{device['deviceId']}/configuration", headers=owner, json=body)
+>       assert response.status_code == 422, response.text
+E       AssertionError: {"deviceId":"a1e82697b66c41cf92a0e026b6ba708f","workerId":"test-gpu","ownerUserId":"admin","displayName":"test-gpu","approvalStatus":"APPROVED","bootId":"boot-1","lastSeen":1792493440.13786,"connectionStatus":"ONLINE","contributionEnabled":false,"workspaceId":"lab","computeUrl":"http://192.168.1.8:8765","bulkUrl":"http://192.168.1.8:8765","selfTest":{"passed":true,"coordinator":true,"gpuName":"Fake CPU test GPU","vramTotalMb":10999,"noiseVersion":"numpy_pcg64_normal_f32_to_f16_v1","environment":{},"platform":"linux","runtimeProfile":"legacy","compatibility":{},"gpuUUID":"GPU-e7694f59-9916-5965-92cc-30d5c0375da4","recipeVersions":[1],"qualifiedModelHashes":[],"updateSecondsPerSeed":null},"allocatedTo":null,"physicalResourceId":"GPU-e7694f59-9916-5965-92cc-30d5c0375da4","telemetry":null,"telemetryHistory":[]}
+E       assert 200 == 422
+E        +  where 200 = <Response [200 OK]>.status_code
+
+backend/tests/test_device_configuration.py:43: AssertionError
+_ test_the_shared_runtime_subset_holds_every_runtime_module_the_backend_needs __
+
+    def test_the_shared_runtime_subset_holds_every_runtime_module_the_backend_needs():
+        # The Lab Server ships only SHARED_MODULES: a backend import of another runtime module works in the repository and
+        # fails in the packaged server. Checked over the whole import closure (backend files and the shared modules themselves).
+        from backend.runtime_sources import SHARED_MODULES
+    
+        repo = Path(__file__).resolve().parents[2]
+        root = repo / "runtime/src/heteroes"
+    
+        def file_of(module):
+            relative = Path(*module.split(".")[1:])
+            for candidate in (relative.with_suffix(".py"), relative / "__init__.py"):
+                if (root / candidate).is_file():
+                    return candidate.as_posix()
+            return None  # a name imported FROM a module (a function, a constant), not a module
+    
+        needed = set()
+        for path in (repo / "backend").glob("*.py"):
+            needed |= {file_of(m) for m in _runtime_imports(path, "backend")} - {None}
+        queue = list(needed)
+        while queue:
+            name = queue.pop()
+            package = "heteroes." + name.removesuffix(".py").removesuffix("/__init__").replace("/", ".")
+            if not name.endswith("__init__.py"):
+                package = package.rsplit(".", 1)[0]
+            for module in _runtime_imports(root / name, package, top_level_only=True):
+                found = file_of(module)
+                if found and found not in needed:
+                    needed.add(found)
+                    queue.append(found)
+        assert "catalog.py" in needed  # premise: the scan sees the backend's use of the catalog
+>       assert needed <= set(SHARED_MODULES), sorted(needed - set(SHARED_MODULES))
+E       AssertionError: ['product/cpu_coordinator.py']
+E       assert {'canonical.p...etry.py', ...} <= {'__init__.py...tail.py', ...}
+E         
+E         Extra items in the left set:
+E         'product/cpu_coordinator.py'
+
+backend/tests/test_shared_runtime.py:87: AssertionError
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_device_configuration.py::test_invalid_role_or_identity_cannot_partially_change_endpoint[vramTotalMb-10999]
+FAILED backend/tests/test_shared_runtime.py::test_the_shared_runtime_subset_holds_every_runtime_module_the_backend_needs
+2 failed, 368 passed, 1 warning in 55.26s
