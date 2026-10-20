@@ -1,8 +1,24 @@
 # Session 3 handoff (2026-10-20 evening, Opus)
 
 Read `../AGENTS.md`, then this file. Branch `feat/v3-audit-recovery`, nothing pushed. Owner answers for this session are
-in AI memory (`hetero-es-session3-decisions-2026-10-20`). Each commit below has its evidence folder with
+listed below (also in Claude's local memory, which other agents cannot read). Each commit below has its evidence folder with
 **What this does NOT show**.
+
+## Owner decisions (2026-10-20, do not re-ask)
+- Work Open work in order without stopping; GPU use on the 5070 Ti and both 3060s is authorized.
+- New-model qualification proof: Qwen3-0.6B and SmolLM2-360M-Instruct.
+- 3060s: headless CLI on WSL first; Windows installer tests later. SSH to `thao_nguyen@100.92.20.58` and
+  `quang@100.99.227.8` is authorized (credentials are NOT in the repo; ask the owner). Loaned machines.
+- Test data (isolated lab, Thao's test Worker) may be deleted; restoring Thao's original Worker is not needed.
+- Live lab lab.heteroes.site data (experiments, accounts) is wiped at the r11 flag day (owner picks the day); put it in
+  the flag-day checklist, do not wipe before. Push, tag, deploy and flag day stay owner-only.
+- Linux CLI install = one-line `curl .../install-worker.sh | bash`.
+- Any machine may coordinate, including a real Windows test on Thao's machine and CPU-only machines.
+- APPROVED: the frozen `es/update.py` change (division as float32 reciprocal), done in `238dbd8`. Any further change to
+  frozen numerical files still needs the owner.
+- Priorities of step 3: all of Python rewards + 1 GB data, any-machine coordinator, eval/compare/serve/worker CLI,
+  hf_compact + vLLM.
+- Talk to the owner in Vietnamese, simply; explain terms from basics; for planning, ask several rounds of questions.
 
 ## Done (commits)
 - `699731e` provenance fix; `c1a5d6d` recovery accepts Python-scored plans.
