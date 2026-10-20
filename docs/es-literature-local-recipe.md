@@ -62,3 +62,18 @@ imports preserve all three files and reject prompt duplicates across splits.
 
 Do not claim improved learning until repeated seeds and an independently reloaded
 Hugging Face export reproduce the selected model's evaluation predictions.
+
+## How the references pick training prompts (read from their code, 2026-10-20)
+
+Local copies, not committed: `.scratch/literature/papers/*.pdf` (SHA-256 `e0e42f44…` 2509.24372v3, `2e5a3edf…`
+2608.17310v2, `1c1769f2…` 2608.27351v2) and `.scratch/literature/repos/` (es-at-scale `574a9d13…`,
+understanding-es `4fc0913c…`; never executed). Agentic ESOpt published no repository that we found.
+
+- **Understanding ES** (`src/es_reproduction/data.py:build_training_schedule`, `configs/easy_qwen25_1p5b.yaml`): per
+  epoch the whole train split is shuffled once and cut into batches of 64 (the last one short); GSM8K, 2 epochs,
+  234 steps (about 7,473 rows), N=32, sigma 1.5e-3, alpha 2.5e-4. Every perturbation is scored on the same batch.
+- **ES at Scale** (`es_at_scale/train.py`, `trainer/es_trainer.py:fit`): a PyTorch `DataLoader(shuffle=True)`, so the
+  same epoch-wise pass; the batch is shared by the whole population; default alpha = sigma/2.
+- **Recipe v3 today** (`runtime/src/heteroes/v3/data.py:batch`, sampler `sha256-python-random-sample-v1`): an
+  independent seeded sample per generation, with repeats and gaps across generations. Both references walk the
+  data in epochs; changing that is a new sampler and a recipe-hash change, so it belongs to r11/ADR work.
