@@ -1,7 +1,7 @@
 import { useProduct } from '@heteroes/product-ui';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { apiDelete, apiPatch, apiPost } from '../api/client';
+import { apiDelete, apiGet, apiPatch, apiPost } from '../api/client';
 import { useSession } from '../app/session';
 import { useResources } from '../hooks/useAccess';
 
@@ -26,6 +26,17 @@ export function LabMembership() {
   });
   const admin = workspace?.role === 'ADMIN';
   const prefix = `/api/v1/workspaces/${workspace?.workspaceId}`;
+  const listed = useQuery({
+    queryKey: ['listed-workspaces'],
+    queryFn: () => apiGet<{ workspaceId: string }[]>('/api/v1/listed-workspaces'),
+  });
+  const requests = useQuery({
+    queryKey: ['join-requests', workspace?.workspaceId],
+    queryFn: () => apiGet<{ requestId: string; username: string; displayName?: string }[]>(prefix + '/join-requests'),
+    enabled: admin,
+    refetchInterval: 10000,
+  });
+  const isListed = Boolean(listed.data?.some((w) => w.workspaceId === workspace?.workspaceId));
   return (
     <section className="card">
       <div className="ch">
@@ -61,6 +72,55 @@ export function LabMembership() {
             </button>
           </form>
         )}
+        {admin && (
+          <label className="fg inline">
+            <input
+              type="checkbox"
+              checked={isListed}
+              disabled={mutation.isPending || listed.isPending}
+              onChange={(e) =>
+                mutation.mutate({ path: prefix + '/listing', method: 'PATCH', body: { listed: e.target.checked } })
+              }
+            />{' '}
+            {t('List this workspace so researchers can ask to join')}
+          </label>
+        )}
+        {admin &&
+          requests.data?.map((r) => (
+            <div className="request-card" key={r.requestId}>
+              <span>
+                {t('Asks to join:')} {r.displayName ?? r.username} · {r.username}
+              </span>
+              <div className="acts">
+                <button
+                  className="btn accent"
+                  disabled={mutation.isPending}
+                  onClick={() =>
+                    mutation.mutate({
+                      path: `${prefix}/join-requests/${r.requestId}`,
+                      method: 'POST',
+                      body: { approve: true },
+                    })
+                  }
+                >
+                  {t('Approve')}
+                </button>
+                <button
+                  className="btn"
+                  disabled={mutation.isPending}
+                  onClick={() =>
+                    mutation.mutate({
+                      path: `${prefix}/join-requests/${r.requestId}`,
+                      method: 'POST',
+                      body: { approve: false },
+                    })
+                  }
+                >
+                  {t('Reject')}
+                </button>
+              </div>
+            </div>
+          ))}
         {mutation.error && (
           <p className="note err" role="alert">
             {mutation.error.message}
@@ -70,7 +130,7 @@ export function LabMembership() {
         {query.data?.members.map((m) => (
           <div className="request-card" key={m.user.userId}>
             <span>
-              {m.user.displayName} · {m.user.username} · {m.role}
+              {m.user.displayName} · {m.user.username} · {t(m.role === 'ADMIN' ? 'Administrator' : 'Participant')}
             </span>
             {admin && (
               <div className="acts">
@@ -85,7 +145,7 @@ export function LabMembership() {
                     })
                   }
                 >
-                  {m.role === 'ADMIN' ? 'Make participant' : 'Make administrator'}
+                  {t(m.role === 'ADMIN' ? 'Make participant' : 'Make administrator')}
                 </button>
                 <button
                   className="btn dng"
@@ -93,7 +153,7 @@ export function LabMembership() {
                   onClick={() => {
                     if (
                       window.confirm(
-                        `Remove ${m.user.username}? Their queued jobs will be cancelled and active jobs will drain.`,
+                        `${m.user.username}: ${t('Remove this member? Their queued jobs will be cancelled and active jobs will drain.')}`,
                       )
                     )
                       mutation.mutate({ path: prefix + '/members/' + m.user.userId, method: 'DELETE' });

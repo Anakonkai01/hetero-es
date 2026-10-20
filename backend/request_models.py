@@ -81,6 +81,14 @@ class WorkspaceCreate(Strict):
     description: str = Field(default="", max_length=1000)
 
 
+class Listing(Strict):
+    listed: bool = Field(strict=True)
+
+
+class JoinDecision(Strict):
+    approve: bool = Field(strict=True)
+
+
 class Invite(Strict):
     username: str = Field(min_length=3, max_length=64)
 

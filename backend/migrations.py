@@ -51,6 +51,19 @@ def migrate(db):
     db.execute("PRAGMA user_version=1")
 
 
+def initialize_workspace_extras(db):
+    """Tables added after schema version 1, created when missing: per-workspace settings and join requests."""
+    db.executescript(
+        """
+        CREATE TABLE IF NOT EXISTS workspace_settings(workspace_id TEXT PRIMARY KEY,body TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS join_requests(id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL,user_id TEXT NOT NULL,
+            status TEXT NOT NULL,created TEXT NOT NULL);
+        CREATE UNIQUE INDEX IF NOT EXISTS pending_join_request ON join_requests(workspace_id,user_id)
+            WHERE status="PENDING";
+        """
+    )
+
+
 def initialize_agent_schema(store):
     with store.db() as db:
         db.execute("INSERT OR REPLACE INTO settings VALUES (?,?)", ("controlMode", "agent-v2"))

@@ -14,7 +14,7 @@ import uuid
 
 from argon2 import PasswordHasher
 from .errors import RuntimeRejected
-from .migrations import migrate
+from .migrations import initialize_workspace_extras, migrate
 
 from .constants import ACTIVE, TERMINAL, REVISION, V3_KEYS, V3_UPDATE_KEYS
 
@@ -44,6 +44,7 @@ class Store:
                     )
             db.commit()
             migrate(db)
+            initialize_workspace_extras(db)
         os.chmod(path, 0o600)
         runtime.attach_store(self)
         try:

@@ -1,6 +1,6 @@
 """Identity and membership operations, independent of runtime numerical state."""
 
-from .request_models import WorkspaceCreate, Invite, MemberEdit
+from .request_models import WorkspaceCreate, Invite, JoinDecision, Listing, MemberEdit
 from .policies import dispatch_held, set_disabled_workers
 import json
 import sqlite3
@@ -57,6 +57,113 @@ def install_routes(app, store, scoped, active, workspace_admin):
                 raise HTTPException(409, "A pending invitation already exists") from None
             store.audit(db, current["userId"], "INVITE", target["id"], workspace_id)
             return {"invitationId": iid, "workspaceId": workspace_id, "username": body.username, "status": "PENDING"}
+
+    def settings(db, workspace_id):
+        row = db.execute("SELECT body FROM workspace_settings WHERE workspace_id=?", (workspace_id,)).fetchone()
+        return json.loads(row[0]) if row else {}
+
+    def save_settings(db, workspace_id, changes):
+        body = {**settings(db, workspace_id), **changes}
+        db.execute("INSERT OR REPLACE INTO workspace_settings VALUES (?,?)", (workspace_id, json.dumps(body)))
+        return body
+
+    @router.patch("/api/v1/workspaces/{workspace_id}/listing")
+    def listing(workspace_id: str, body: Listing, current=Depends(active)):
+        # a listed workspace appears in every active user's list and accepts join requests
+        workspace_admin(workspace_id, current)
+        with store.db() as db:
+            save_settings(db, workspace_id, {"listed": body.listed})
+            store.audit(
+                db,
+                current["userId"],
+                "WORKSPACE_LISTED" if body.listed else "WORKSPACE_UNLISTED",
+                workspace_id,
+                workspace_id,
+            )
+        return {"workspaceId": workspace_id, "listed": body.listed}
+
+    @router.get("/api/v1/listed-workspaces")
+    def listed_workspaces(current=Depends(active)):
+        with store.db() as db:
+            rows = db.execute("SELECT w.* FROM workspaces w ORDER BY w.rowid").fetchall()
+            member = {
+                r[0] for r in db.execute("SELECT workspace_id FROM memberships WHERE user_id=?", (current["userId"],))
+            }
+            requested = {
+                r[0]
+                for r in db.execute(
+                    'SELECT workspace_id FROM join_requests WHERE user_id=? AND status="PENDING"', (current["userId"],)
+                )
+            }
+            return [
+                {
+                    "workspaceId": r["id"],
+                    "name": r["name"],
+                    "description": r["description"],
+                    "member": r["id"] in member,
+                    "requested": r["id"] in requested,
+                }
+                for r in rows
+                if settings(db, r["id"]).get("listed")
+            ]
+
+    @router.post("/api/v1/workspaces/{workspace_id}/join-requests", status_code=201)
+    def ask_to_join(workspace_id: str, current=Depends(active)):
+        with store.db() as db:
+            if not db.execute("SELECT 1 FROM workspaces WHERE id=?", (workspace_id,)).fetchone() or not settings(
+                db, workspace_id
+            ).get("listed"):
+                raise HTTPException(404, "Workspace not found")
+            if db.execute(
+                "SELECT 1 FROM memberships WHERE workspace_id=? AND user_id=?", (workspace_id, current["userId"])
+            ).fetchone():
+                raise HTTPException(409, "Already a member")
+            rid = uuid.uuid4().hex
+            try:
+                db.execute(
+                    "INSERT INTO join_requests VALUES (?,?,?,?,?)",
+                    (rid, workspace_id, current["userId"], "PENDING", now()),
+                )
+            except sqlite3.IntegrityError:
+                raise HTTPException(409, "A request is already waiting") from None
+            store.audit(db, current["userId"], "JOIN_REQUEST", rid, workspace_id)
+            return {"requestId": rid, "workspaceId": workspace_id, "status": "PENDING"}
+
+    @router.get("/api/v1/workspaces/{workspace_id}/join-requests")
+    def join_requests(workspace_id: str, current=Depends(active)):
+        workspace_admin(workspace_id, current)
+        with store.db() as db:
+            return [
+                {
+                    "requestId": r["id"],
+                    "userId": r["user_id"],
+                    "username": json.loads(r["profile"])["username"],
+                    "displayName": json.loads(r["profile"]).get("displayName"),
+                    "createdAt": r["created"],
+                }
+                for r in db.execute(
+                    'SELECT j.*,u.profile FROM join_requests j JOIN users u ON u.id=j.user_id WHERE j.workspace_id=? AND j.status="PENDING" ORDER BY j.rowid',
+                    (workspace_id,),
+                )
+            ]
+
+    @router.post("/api/v1/workspaces/{workspace_id}/join-requests/{request_id}")
+    def decide_join(workspace_id: str, request_id: str, body: JoinDecision, current=Depends(active)):
+        workspace_admin(workspace_id, current)
+        with store.db() as db:
+            row = db.execute(
+                "SELECT * FROM join_requests WHERE id=? AND workspace_id=?", (request_id, workspace_id)
+            ).fetchone()
+            if not row or row["status"] != "PENDING":
+                raise HTTPException(404, "Pending request not found")
+            status = "APPROVED" if body.approve else "REJECTED"
+            if body.approve:
+                db.execute(
+                    "INSERT OR IGNORE INTO memberships VALUES (?,?,?)", (workspace_id, row["user_id"], "PARTICIPANT")
+                )
+            db.execute("UPDATE join_requests SET status=? WHERE id=?", (status, request_id))
+            store.audit(db, current["userId"], "JOIN_" + status, row["user_id"], workspace_id)
+            return {"requestId": request_id, "status": status}
 
     @router.get("/api/v1/my-invitations")
     def invitations(current=Depends(active)):

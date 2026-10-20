@@ -1,7 +1,8 @@
 import { useProduct } from '@heteroes/product-ui';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link } from 'react-router';
-import { apiPost } from '../api/client';
+import { apiGet, apiPost } from '../api/client';
 import { useSession } from '../app/session';
 import { DashboardIcon, PlusIcon } from '../components/ui/Icons';
 import { Modal } from '../components/ui/Modal';
@@ -18,6 +19,19 @@ export function WorkspaceListPage() {
     apiPost('/api/v1/workspaces', input),
   );
   const workspaces = session?.workspaces ?? [];
+  const cache = useQueryClient();
+  const listed = useQuery({
+    queryKey: ['listed-workspaces'],
+    queryFn: () =>
+      apiGet<{ workspaceId: string; name: string; description: string; member: boolean; requested: boolean }[]>(
+        '/api/v1/listed-workspaces',
+      ),
+    enabled: session?.user.accountStatus === 'ACTIVE',
+  });
+  const ask = useAccessMutation((workspaceId: string) =>
+    apiPost(`/api/v1/workspaces/${workspaceId}/join-requests`, {}),
+  );
+  const joinable = (listed.data ?? []).filter((w) => !w.member);
   return (
     <>
       <PageHeader
@@ -95,12 +109,12 @@ export function WorkspaceListPage() {
                 <DashboardIcon />
               </span>
               <span className={`role-pill ${w.role.toLowerCase()}`}>
-                {t('Role:')} {w.role === 'ADMIN' ? 'Admin' : 'Participant'}
+                {t('Role:')} {t(w.role === 'ADMIN' ? 'Administrator' : 'Participant')}
               </span>
             </div>
             <div className="workspace-tile-body">
               <h2>{w.name}</h2>
-              <p>{w.description || 'Shared compute workspace'}</p>
+              <p>{w.description || t('Shared compute workspace')}</p>
             </div>
             <div className="workspace-tile-bottom">
               <span>
@@ -114,6 +128,40 @@ export function WorkspaceListPage() {
           </Link>
         ))}
       </div>
+      {joinable.length > 0 && (
+        <section className="card">
+          <div className="ch">
+            <h2>{t('Labs you can ask to join')}</h2>
+          </div>
+          <div className="cb">
+            {joinable.map((w) => (
+              <div className="request-card" key={w.workspaceId}>
+                <div>
+                  <b>{w.name}</b>
+                  {w.description && <small>{w.description}</small>}
+                </div>
+                <button
+                  className="btn accent"
+                  disabled={w.requested || ask.isPending}
+                  onClick={() =>
+                    void ask
+                      .mutateAsync(w.workspaceId)
+                      .then(() => cache.invalidateQueries({ queryKey: ['listed-workspaces'] }))
+                      .catch(() => {})
+                  }
+                >
+                  {t(w.requested ? 'Request sent' : 'Ask to join')}
+                </button>
+              </div>
+            ))}
+            {ask.error && (
+              <p className="note err" role="alert">
+                {t(ask.error.message)}
+              </p>
+            )}
+          </div>
+        </section>
+      )}
       {!workspaces.length && (
         <div className="empty">
           <b>{t('No workspaces')}</b>
