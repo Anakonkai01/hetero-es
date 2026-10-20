@@ -29,6 +29,8 @@ def worker_environment(source, token, wsl=Path("/usr/lib/wsl")):
     rather than picking a possibly stale Windows driver directory by name.
     """
     env = dict(os.environ, HETEROES_TOKEN=token, PYTHONPATH=source)
+    if sys.platform != "linux":
+        return env
     library = wsl / "lib"
     if library.is_dir():
         env["PATH"] = str(library) + ":" + env.get("PATH", "")
@@ -93,10 +95,20 @@ def handle(request):
     record = read_json(root / "process.json")
     if action == "start":
         if not record:
+            intent = root / "launch-intent.json"
+            if intent.exists():
+                raise RuntimeError("Worker launch ownership is unknown")
             root.mkdir(parents=True, exist_ok=True, mode=0o700)
             env = worker_environment(request["source"], request["token"])
             with open(root / "stdout.log", "ab") as output:
-                process = subprocess.Popen(request["argv"], env=env, stdout=output, stderr=output, **spawn_options())
+                write_json(intent, {"started": True})
+                try:
+                    process = subprocess.Popen(request["argv"], env=env, stdout=output, stderr=output, **spawn_options())
+                except OSError:
+                    # Popen reports a failed OS creation/exec only after its failed child, if any, is reaped. Once it
+                    # returns a process, any failure recording identity remains unknown and keeps the intent.
+                    intent.unlink(missing_ok=True)
+                    raise
             record = {"pid": process.pid, "birth": identity(process.pid)}
             write_json(root / "process.json", record)
     elif action == "stop" and alive(record):

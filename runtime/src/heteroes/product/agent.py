@@ -393,7 +393,6 @@ class Agent:
                 argv.extend(["--storage-volume-uuid", self.config["storageVolumeUUID"]])
             if (directory / "launch-intent.json").exists() and not (directory / "process.json").exists():
                 raise RuntimeError("Worker launch ownership is unknown")
-            write_json(directory / "launch-intent.json", {"started": True})
             return remote_handle(
                 {
                     "action": "start",
