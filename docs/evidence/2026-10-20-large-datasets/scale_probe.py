@@ -1,6 +1,6 @@
 """Build, open and sample a file-backed Recipe v3 dataset from a generated JSON Lines file (CPU only).
 
-    python -I scale_probe.py --source runtime/src --rows 10000000 --work <empty folder on a large disk> --out result.json
+python -I scale_probe.py --source runtime/src --rows 10000000 --work <empty folder on a large disk> --out result.json
 """
 
 import argparse

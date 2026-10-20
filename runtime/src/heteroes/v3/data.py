@@ -190,18 +190,27 @@ class _Writer:
 
         self.directory, self.max_rows, self.total = Path(directory), max_rows, 0
         self.buckets = Path(tempfile.mkdtemp(prefix=".prompts-", dir=self.directory))
+        self.pending = {}  # bucket -> digests not yet written (written in pieces of about 1 MB)
 
     def prompt(self, row):
         self.total += 1
         if self.total > self.max_rows:
             raise ValueError(f"a dataset has at most {self.max_rows} rows")
         digest = hashlib.sha256(" ".join(row["prompt"].split()).encode()).digest()[:16]
-        with (self.buckets / digest[:1].hex()).open("ab") as stream:
-            stream.write(digest)
+        pending = self.pending.setdefault(digest[0], bytearray())
+        pending += digest
+        if len(pending) >= 1 << 20:
+            self._flush(digest[0])
+
+    def _flush(self, bucket):
+        with (self.buckets / f"{bucket:02x}").open("ab") as stream:
+            stream.write(self.pending.pop(bucket))
 
     def check_prompts(self):
         import shutil
 
+        for bucket in list(self.pending):
+            self._flush(bucket)
         try:
             for bucket in self.buckets.iterdir():
                 content = bucket.read_bytes()

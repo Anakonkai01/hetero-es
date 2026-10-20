@@ -1,0 +1,39 @@
+{
+ "rows": 10000000,
+ "sourceBytes": 1171951131,
+ "document": {
+  "formatVersion": 3,
+  "splitSeed": 42,
+  "splitMode": "seeded-80-10-10",
+  "splitCounts": {
+   "train": 8000000,
+   "validation": 1000000,
+   "test": 1000000
+  },
+  "splitBytes": {
+   "train": 1422871545,
+   "validation": 177858274,
+   "test": 177860642
+  },
+  "splitHashes": {
+   "train": "71369e8a71aa7b629b2d1c95679128d8fe3065aeaf64659068b86ba628ba7e03",
+   "validation": "612e921681f67b8b9b91fef2ed2b5a600bbcb6a0006b9b4dc0eb2d64a8958a92",
+   "test": "c327a902be83b4633e2c5ae52dda1d9742e545a33b277ea0e612adb67be4c8d2"
+  },
+  "contentHash": "8ff27d15dfc3c6224f834ce3db8bdec13b2913e9ac7605477844dc1227399b1d"
+ },
+ "documentBytes": 532,
+ "seconds": {
+  "generate": 15.455782142002136,
+  "build": 900.3632259540027,
+  "openAndVerify": 3.426757285007625,
+  "firstThreeBatches": 0.6518876449990785,
+  "epochShuffleBatch": 1.195906749999267
+ },
+ "maxResidentMegabytes": 230.70703125,
+ "batchHashes": [
+  "6c2436dcbfb0ee91eb9e3136fe09cc1af6de8acf668c119fc364315b3e75ea07",
+  "85989574b253ea7bdbe1f45cf3a3f1ba8e6d1d7375a1c01832360c0719cf81d6",
+  "56d36be5e496ebed5cf0f45598b284374cf34c19ba3502a01a2fb52a59b57e60"
+ ]
+}
