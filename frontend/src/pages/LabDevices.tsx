@@ -3,7 +3,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { apiDelete, apiGet, apiPatch, apiPost } from '../api/client';
 import { useSession } from '../app/session';
-import { canRemoveDevice, deviceErrorKey, hiddenCount, visibleDevices } from '../lib/deviceList';
+import {
+  canRemoveDevice,
+  defaultApprovalWorkspace,
+  deviceErrorKey,
+  hiddenCount,
+  visibleDevices,
+  workspaceName,
+} from '../lib/deviceList';
 export interface Device {
   deviceId: string;
   workerId: string;
@@ -15,6 +22,7 @@ export interface Device {
   connectionStatus: string;
   contributionEnabled: boolean;
   workspaceId: string | null;
+  ownerWorkspaces?: { workspaceId: string; name: string }[];
   computeUrl: string;
   bulkUrl?: string;
   telemetry?: ResourceObservation | null;
@@ -76,7 +84,7 @@ export function LabDevices({ administration = false }: { administration?: boolea
   const [now, setNow] = useState(() => Date.now());
   const [copied, setCopied] = useState(false);
   const [pairError, setPairError] = useState('');
-  const [workspace, setWorkspace] = useState('lab');
+  const [approvalTarget, setApprovalTarget] = useState<Record<string, string>>({});
   const [showRevoked, setShowRevoked] = useState(false);
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 1000);
@@ -175,18 +183,6 @@ export function LabDevices({ administration = false }: { administration?: boolea
             </div>
           </div>
         )}
-        {administration && (
-          <label className="fg">
-            {t('Approval workspace')}
-            <select className="sel" value={workspace} onChange={(e) => setWorkspace(e.target.value)}>
-              {session?.workspaces.map((w) => (
-                <option value={w.workspaceId} key={w.workspaceId}>
-                  {w.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
         {devices.isPending && <p role="status">{t('Loading…')}</p>}
         {devices.data?.length === 0 && <p className="note">{t('No devices paired yet.')}</p>}
         {administration && devices.data && hiddenCount(devices.data) > 0 && (
@@ -218,23 +214,50 @@ export function LabDevices({ administration = false }: { administration?: boolea
                 {d.lastSeen
                   ? new Date(d.lastSeen * 1000).toLocaleString(preferences.language === 'vi' ? 'vi-VN' : 'en-US')
                   : t('Never')}{' '}
-                · {d.workspaceId ?? t('Unassigned')}
+                · {workspaceName(d) ?? t('Unassigned')}
               </p>
               <div className="acts">
                 {administration && d.approvalStatus === 'PENDING' && (
-                  <button
-                    className="btn accent"
-                    disabled={action.isPending || !d.selfTest.passed || !workspace}
-                    onClick={() =>
-                      action.mutate({
-                        path: '/api/v1/platform/devices/' + d.deviceId,
-                        patch: true,
-                        body: { approved: true, workspaceId: workspace },
-                      })
-                    }
-                  >
-                    {t('Approve device')}
-                  </button>
+                  <>
+                    {/* the lab approves a device only into a workspace its owner belongs to */}
+                    <label className="fg">
+                      {t('Approval workspace')}
+                      <select
+                        className="sel"
+                        value={approvalTarget[d.deviceId] ?? defaultApprovalWorkspace(d)}
+                        onChange={(e) => setApprovalTarget({ ...approvalTarget, [d.deviceId]: e.target.value })}
+                      >
+                        {(d.ownerWorkspaces ?? []).map((w) => (
+                          <option value={w.workspaceId} key={w.workspaceId}>
+                            {w.name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    {!d.ownerWorkspaces?.length && (
+                      <p className="hint">{t('The owner of this device is not in any workspace yet.')}</p>
+                    )}
+                    <button
+                      className="btn accent"
+                      disabled={
+                        action.isPending ||
+                        !d.selfTest.passed ||
+                        !(approvalTarget[d.deviceId] ?? defaultApprovalWorkspace(d))
+                      }
+                      onClick={() =>
+                        action.mutate({
+                          path: '/api/v1/platform/devices/' + d.deviceId,
+                          patch: true,
+                          body: {
+                            approved: true,
+                            workspaceId: approvalTarget[d.deviceId] ?? defaultApprovalWorkspace(d),
+                          },
+                        })
+                      }
+                    >
+                      {t('Approve device')}
+                    </button>
+                  </>
                 )}
                 {administration && d.approvalStatus === 'APPROVED' && (
                   <button

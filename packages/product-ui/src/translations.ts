@@ -151,6 +151,7 @@ export const translations: Record<string, string> = {
   'Approve device': 'Duyệt máy',
   'Revoke device': 'Thu hồi máy',
   'Approval workspace': 'Không gian cấp quyền',
+  'The owner of this device is not in any workspace yet.': 'Chủ của máy này chưa ở trong không gian làm việc nào.',
   'Copy code': 'Sao chép mã',
   Copied: 'Đã sao chép',
   Contribution: 'Đóng góp GPU',

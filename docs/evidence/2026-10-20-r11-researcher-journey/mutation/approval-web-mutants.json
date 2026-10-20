@@ -1,0 +1,8 @@
+[
+ {"name": "ignore current workspace", "file": "src/lib/deviceList.ts",
+  "old": "return choices.some((w) => w.workspaceId === device.workspaceId)", "new": "return false && choices.some((w) => w.workspaceId === device.workspaceId)"},
+ {"name": "keep a workspace the owner left", "file": "src/lib/deviceList.ts",
+  "old": "return choices.some((w) => w.workspaceId === device.workspaceId)\n    ? (device.workspaceId as string)", "new": "return device.workspaceId\n    ? (device.workspaceId as string)"},
+ {"name": "name falls back to null", "file": "src/lib/deviceList.ts",
+  "old": "?.name ?? device.workspaceId;", "new": "?.name ?? null;"}
+]

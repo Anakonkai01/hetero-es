@@ -27,3 +27,21 @@ const EXPLAIN: Record<string, string> = {
 export function deviceErrorKey(message: string | undefined): string | null {
   return message && Object.hasOwn(EXPLAIN, message) ? EXPLAIN[message] : null;
 }
+
+// Approval puts a device into a workspace of its owner (the lab checks the membership), not of the administrator.
+type OwnerWorkspace = { workspaceId: string; name: string };
+type Placed = { workspaceId: string | null; ownerWorkspaces?: OwnerWorkspace[] };
+
+/** The workspace an approval form starts with: the device's current one if its owner is still a member, else the first. */
+export function defaultApprovalWorkspace(device: Placed): string {
+  const choices = device.ownerWorkspaces ?? [];
+  return choices.some((w) => w.workspaceId === device.workspaceId)
+    ? (device.workspaceId as string)
+    : (choices[0]?.workspaceId ?? '');
+}
+
+/** The name of the device's workspace when the list knows it, else its identifier. */
+export function workspaceName(device: Placed): string | null {
+  if (!device.workspaceId) return null;
+  return device.ownerWorkspaces?.find((w) => w.workspaceId === device.workspaceId)?.name ?? device.workspaceId;
+}

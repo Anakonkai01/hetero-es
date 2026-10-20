@@ -34,3 +34,19 @@ test("the lab's English error text maps to an explanation that says what to do, 
   assert.equal(deviceErrorKey('constructor'), null, 'inherited object keys are not messages');
   assert.equal(deviceErrorKey(undefined), null);
 });
+
+test("approval starts in the device's own workspace when its owner is a member, else the owner's first one", async () => {
+  const { defaultApprovalWorkspace, workspaceName } = await import('../src/lib/deviceList.ts');
+  const owned = [
+    { workspaceId: 'w1', name: 'First lab' },
+    { workspaceId: 'w2', name: 'Second lab' },
+  ];
+  assert.equal(defaultApprovalWorkspace({ workspaceId: 'w2', ownerWorkspaces: owned }), 'w2');
+  assert.equal(defaultApprovalWorkspace({ workspaceId: 'gone', ownerWorkspaces: owned }), 'w1');
+  assert.equal(defaultApprovalWorkspace({ workspaceId: null, ownerWorkspaces: owned }), 'w1');
+  assert.equal(defaultApprovalWorkspace({ workspaceId: null, ownerWorkspaces: [] }), '');
+  assert.equal(defaultApprovalWorkspace({ workspaceId: null }), '');
+  assert.equal(workspaceName({ workspaceId: 'w2', ownerWorkspaces: owned }), 'Second lab');
+  assert.equal(workspaceName({ workspaceId: 'w9', ownerWorkspaces: owned }), 'w9');
+  assert.equal(workspaceName({ workspaceId: null, ownerWorkspaces: owned }), null);
+});
