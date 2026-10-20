@@ -103,7 +103,9 @@ def handle(request):
             with open(root / "stdout.log", "ab") as output:
                 write_json(intent, {"started": True})
                 try:
-                    process = subprocess.Popen(request["argv"], env=env, stdout=output, stderr=output, **spawn_options())
+                    process = subprocess.Popen(
+                        request["argv"], env=env, stdout=output, stderr=output, **spawn_options()
+                    )
                 except OSError:
                     # Popen reports a failed OS creation/exec only after its failed child, if any, is reaped. Once it
                     # returns a process, any failure recording identity remains unknown and keeps the intent.
