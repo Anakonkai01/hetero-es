@@ -1,0 +1,5 @@
+[
+ {"name": "any device accepted", "file": "backend/routes_workspaces.py", "old": "if body.deviceId is not None and body.deviceId not in coordinator_devices(db, workspace_id):", "new": "if False:"},
+ {"name": "stale default offered", "file": "backend/routes_inventory.py", "old": "default if any(d[\"deviceId\"] == default for d in coordinators) else None", "new": "default"},
+ {"name": "worker-only counts as coordinator", "file": "backend/routes_workspaces.py", "old": "            if json.loads(r[\"self_test\"]).get(\"coordinator\")\n", "new": ""}
+]

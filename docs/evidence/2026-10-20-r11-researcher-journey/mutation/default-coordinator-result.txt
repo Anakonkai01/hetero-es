@@ -1,0 +1,5 @@
+killed       any device accepted | 1 failed, 3 passed, 1 warning in 0.73s
+killed       stale default offered | 1 failed, 4 passed, 1 warning in 0.86s
+killed       worker-only counts as coordinator | 1 failed, 3 passed, 1 warning in 0.72s
+
+3 of 3 mutants killed.

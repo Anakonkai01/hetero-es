@@ -73,3 +73,49 @@ def test_the_coordinator_choice_shows_the_name_the_owner_gave(lab):
     enable(lab, *pair(lab, "gpu-alias"))
     [device] = client.get("/api/v1/capabilities", headers=admin).json()["coordinatorDevices"]
     assert device["workerId"] == "gpu-alias" and device["displayName"] == "gpu-alias"
+
+
+def test_a_workspace_default_coordinator_is_offered_first_and_must_qualify(lab):
+    from labkit import enable, pair
+
+    client, _, _, admin = lab
+    enable(lab, *pair(lab, "worker-only", coordinator=False))
+    coordinator, _ = pair(lab, "coordinator-gpu")
+    assert client.get("/api/v1/capabilities", headers=admin).json()["defaultCoordinatorDeviceId"] is None
+    refused = client.patch(
+        "/api/v1/workspaces/lab/default-coordinator",
+        headers=admin,
+        json={
+            "deviceId": next(
+                d["deviceId"]
+                for d in client.get("/api/v1/platform/devices", headers=admin).json()
+                if d["workerId"] == "worker-only"
+            )
+        },
+    )
+    assert refused.status_code == 422
+    chosen = client.patch(
+        "/api/v1/workspaces/lab/default-coordinator", headers=admin, json={"deviceId": coordinator["deviceId"]}
+    )
+    assert chosen.status_code == 200
+    assert (
+        client.get("/api/v1/capabilities", headers=admin).json()["defaultCoordinatorDeviceId"]
+        == coordinator["deviceId"]
+    )
+    assert (
+        client.patch("/api/v1/workspaces/lab/default-coordinator", headers=admin, json={"deviceId": None}).status_code
+        == 200
+    )
+    assert client.get("/api/v1/capabilities", headers=admin).json()["defaultCoordinatorDeviceId"] is None
+
+
+def test_a_revoked_default_coordinator_is_no_longer_offered(lab):
+    from labkit import pair
+
+    client, _, _, admin = lab
+    coordinator, _ = pair(lab, "coordinator-gpu")
+    client.patch(
+        "/api/v1/workspaces/lab/default-coordinator", headers=admin, json={"deviceId": coordinator["deviceId"]}
+    )
+    client.patch("/api/v1/platform/devices/" + coordinator["deviceId"], headers=admin, json={"approved": False})
+    assert client.get("/api/v1/capabilities", headers=admin).json()["defaultCoordinatorDeviceId"] is None

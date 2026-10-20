@@ -37,6 +37,15 @@ export function LabMembership() {
     refetchInterval: 10000,
   });
   const isListed = Boolean(listed.data?.some((w) => w.workspaceId === workspace?.workspaceId));
+  const capabilities = useQuery({
+    queryKey: ['capabilities', workspace?.workspaceId],
+    queryFn: () =>
+      apiGet<{
+        coordinatorDevices?: { deviceId: string; workerId: string; displayName?: string }[];
+        defaultCoordinatorDeviceId?: string | null;
+      }>('/api/v1/capabilities'),
+    enabled: admin,
+  });
   return (
     <section className="card">
       <div className="ch">
@@ -83,6 +92,30 @@ export function LabMembership() {
               }
             />{' '}
             {t('List this workspace so researchers can ask to join')}
+          </label>
+        )}
+        {admin && (
+          <label className="fg">
+            {t('Default coordinator of this workspace')}
+            <select
+              className="sel"
+              value={capabilities.data?.defaultCoordinatorDeviceId ?? ''}
+              disabled={mutation.isPending || !capabilities.data}
+              onChange={(e) =>
+                mutation.mutate({
+                  path: prefix + '/default-coordinator',
+                  method: 'PATCH',
+                  body: { deviceId: e.target.value || null },
+                })
+              }
+            >
+              <option value="">{t('None (choose for each experiment)')}</option>
+              {capabilities.data?.coordinatorDevices?.map((d) => (
+                <option key={d.deviceId} value={d.deviceId}>
+                  {d.displayName ?? d.workerId}
+                </option>
+              ))}
+            </select>
           </label>
         )}
         {admin &&

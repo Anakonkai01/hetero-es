@@ -45,16 +45,25 @@ def install_routes(app, store, runtime, scoped, visible, capabilities, registry)
     def get_capabilities(current=Depends(scoped)):
         cap = capabilities()
         assigned = set(store.assignments(current["workspaceId"], include_disabled=True))
+        coordinators = [
+            {"deviceId": d["deviceId"], "workerId": d["workerId"], "displayName": d["displayName"]}
+            for d in runtime.devices()
+            if d["workspaceId"] == current["workspaceId"]
+            and d["approvalStatus"] == "APPROVED"
+            and d["selfTest"]["coordinator"]
+        ]
+        with store.db() as db:
+            row = db.execute(
+                "SELECT json_extract(body,'$.defaultCoordinatorDeviceId') FROM workspace_settings WHERE workspace_id=?",
+                (current["workspaceId"],),
+            ).fetchone()
+        default = row[0] if row else None
         return {
             **cap,
             "workerIds": store.assignments(current["workspaceId"]),
-            "coordinatorDevices": [
-                {"deviceId": d["deviceId"], "workerId": d["workerId"], "displayName": d["displayName"]}
-                for d in runtime.devices()
-                if d["workspaceId"] == current["workspaceId"]
-                and d["approvalStatus"] == "APPROVED"
-                and d["selfTest"]["coordinator"]
-            ],
+            "coordinatorDevices": coordinators,
+            # the lab's default, only while it is still an approved coordinator here
+            "defaultCoordinatorDeviceId": default if any(d["deviceId"] == default for d in coordinators) else None,
             "quarantinedWorkerIds": [w for w in cap.get("quarantinedWorkerIds", []) if w in assigned],
         }
 

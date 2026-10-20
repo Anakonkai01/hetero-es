@@ -151,6 +151,8 @@ export const translations: Record<string, string> = {
   'Approve device': 'Duyệt máy',
   'Revoke device': 'Thu hồi máy',
   'Approval workspace': 'Không gian cấp quyền',
+  'Default coordinator of this workspace': 'Coordinator mặc định của lab này',
+  'None (choose for each experiment)': 'Không có (chọn cho từng thí nghiệm)',
   'List this workspace so researchers can ask to join': 'Hiện lab này trong danh sách để nhà nghiên cứu xin vào',
   'Asks to join:': 'Xin vào lab:',
   'Labs you can ask to join': 'Lab bạn có thể xin vào',

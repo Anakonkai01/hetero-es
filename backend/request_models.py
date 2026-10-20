@@ -85,6 +85,10 @@ class Listing(Strict):
     listed: bool = Field(strict=True)
 
 
+class DefaultCoordinator(Strict):
+    deviceId: str | None = Field(max_length=64)
+
+
 class JoinDecision(Strict):
     approve: bool = Field(strict=True)
 

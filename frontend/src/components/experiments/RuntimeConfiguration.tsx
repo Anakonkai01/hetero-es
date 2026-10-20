@@ -1,6 +1,6 @@
 import { StepHeader, useProduct } from '@heteroes/product-ui';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { apiGet } from '../../api/client';
 import { useScopeKey } from '../../app/session';
@@ -12,6 +12,7 @@ import type { CreateExperimentRequest, Experiment } from '../../types/experiment
 import type { StudyDataset, StudyModel } from './StudyAssets';
 interface Capabilities {
   coordinatorDevices?: { deviceId: string; workerId: string; displayName?: string }[];
+  defaultCoordinatorDeviceId?: string | null;
   modelId: string;
   modelRevision: string;
   workloads: string[];
@@ -37,6 +38,11 @@ export function RuntimeConfiguration({
     queryFn: () => apiGet<Capabilities>('/api/v1/capabilities'),
     enabled: scope.every(Boolean),
   });
+  // the lab's default coordinator is pre-selected; the creator can still choose another one
+  const defaultCoordinator = cap.data?.defaultCoordinatorDeviceId;
+  useEffect(() => {
+    if (defaultCoordinator) setCoordinator((current) => current || defaultCoordinator);
+  }, [defaultCoordinator]);
   const [name, setName] = useState(initial?.name ?? '');
   const [task, setTask] = useState(initial?.task ?? 'arith16');
   const [generations, setGenerations] = useState(initial?.maxGenerations ?? 3);

@@ -1,6 +1,6 @@
 """Identity and membership operations, independent of runtime numerical state."""
 
-from .request_models import WorkspaceCreate, Invite, JoinDecision, Listing, MemberEdit
+from .request_models import DefaultCoordinator, WorkspaceCreate, Invite, JoinDecision, Listing, MemberEdit
 from .policies import dispatch_held, set_disabled_workers
 import json
 import sqlite3
@@ -58,6 +58,16 @@ def install_routes(app, store, scoped, active, workspace_admin):
             store.audit(db, current["userId"], "INVITE", target["id"], workspace_id)
             return {"invitationId": iid, "workspaceId": workspace_id, "username": body.username, "status": "PENDING"}
 
+    def coordinator_devices(db, workspace_id):
+        return {
+            r["id"]
+            for r in db.execute(
+                'SELECT d.id,d.self_test FROM devices d JOIN worker_assignments a ON a.worker_id=d.worker_id WHERE d.status="APPROVED" AND a.workspace_id=?',
+                (workspace_id,),
+            )
+            if json.loads(r["self_test"]).get("coordinator")
+        }
+
     def settings(db, workspace_id):
         row = db.execute("SELECT body FROM workspace_settings WHERE workspace_id=?", (workspace_id,)).fetchone()
         return json.loads(row[0]) if row else {}
@@ -81,6 +91,17 @@ def install_routes(app, store, scoped, active, workspace_admin):
                 workspace_id,
             )
         return {"workspaceId": workspace_id, "listed": body.listed}
+
+    @router.patch("/api/v1/workspaces/{workspace_id}/default-coordinator")
+    def default_coordinator(workspace_id: str, body: DefaultCoordinator, current=Depends(active)):
+        # pre-filled in the experiment form; the creator can still choose another coordinator
+        workspace_admin(workspace_id, current)
+        with store.db() as db:
+            if body.deviceId is not None and body.deviceId not in coordinator_devices(db, workspace_id):
+                raise HTTPException(422, "Select an approved coordinator in this workspace")
+            save_settings(db, workspace_id, {"defaultCoordinatorDeviceId": body.deviceId})
+            store.audit(db, current["userId"], "DEFAULT_COORDINATOR", body.deviceId or "", workspace_id)
+        return {"workspaceId": workspace_id, "defaultCoordinatorDeviceId": body.deviceId}
 
     @router.get("/api/v1/listed-workspaces")
     def listed_workspaces(current=Depends(active)):
