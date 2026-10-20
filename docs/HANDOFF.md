@@ -1,6 +1,7 @@
 # HeteroES — canonical handoff
 
-**Latest: read `handoff-session4-next.md` first (2026-10-20, Codex usage checkpoint).**
+**Latest: read `handoff-session5-next.md` first (2026-10-20, Claude: candidate4 + managed CPU-coordinator parity).**
+Its owner decisions still come from `handoff-session4-next.md`.
 
 Session 4 adds CPU coordination, eval/compare/serve/worker, real native Windows standalone coordinator proof, a limited
 vLLM probe, prompt/scorer/usage features and partial Linux download wiring. Final full checks, candidate3 packaging and
