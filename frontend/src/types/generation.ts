@@ -1,6 +1,9 @@
+import type { UsageSummary } from './usage';
+
 export type GenerationStatus = 'RUNNING' | 'COMPLETED' | 'CANCELLED' | 'FAILED';
 
 export interface Generation {
+  usage?: UsageSummary;
   experimentId: string;
   generationId: string;
 

@@ -14,6 +14,15 @@ EXACT_CHUNKS = {"float16": (1,), "float32": (16, 32, 64)}
 MAX_WINDOW = 8
 
 
+def validate_prompt_format(value, system_prompt=None):
+    selected = "chat" if value is None else value
+    if selected not in ("chat", "raw"):
+        raise ValueError("promptFormat is chat or raw")
+    if selected == "raw" and system_prompt is not None:
+        raise ValueError("Raw prompts require systemPrompt null; put instructions in the dataset prompt")
+    return selected
+
+
 def _is_float32(value):
     return struct.unpack("<f", struct.pack("<f", value))[0] == value
 
@@ -128,6 +137,7 @@ def validate_options(config, *, allow_python=False, with_code=True):
     A web-lab configuration. `allow_python` admits a Python scorer and coefficient rule: with their frozen code (the lab
     and the coordinator), or, `with_code=False`, without it (a worker, which never receives researcher code).
     """
+    validate_prompt_format(config.get("promptFormat"), config.get("systemPrompt"))
     validate_seed_namespace(config.get("candidateSeedNamespace"))
     validate_weight_space(config["weightSpace"], initial_adapter=False)
     validate_spec(config["scorer"], allow_python=allow_python)

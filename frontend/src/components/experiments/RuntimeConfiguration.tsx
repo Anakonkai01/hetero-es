@@ -65,6 +65,8 @@ export function RuntimeConfiguration({
     scorer: initial?.scorer ?? DEFAULT_V3.scorer,
     coefficientRule: initial?.coefficientRule ?? 'zscore@1',
     systemPrompt: initial?.systemPrompt ?? null,
+    promptFormat: initial?.promptFormat ?? null,
+    pythonCode: initial?.pythonCode ?? [],
     alphaSchedule: initial?.alphaSchedule ?? DEFAULT_V3.alphaSchedule,
     alphaMinimum: initial?.alphaMinimum ?? DEFAULT_V3.alphaMinimum,
     momentumBeta: initial?.momentumBeta ?? DEFAULT_V3.momentumBeta,

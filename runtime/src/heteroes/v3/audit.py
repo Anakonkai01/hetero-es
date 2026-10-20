@@ -182,6 +182,7 @@ class AuditAPI:
             return _error("stale_attempt", "Audit identity differs from the lease")
         if entry["done"]:
             if operation == "submit_result" and body["completions_sha256"] == entry["hash"]:
+                self.base.record_usage(descriptor, number, entry["worker"], getattr(decoded[3], "usage", None), "audit")
                 return {
                     "ok": True,
                     "outcome": "ALREADY_COMMITTED",
@@ -215,6 +216,7 @@ class AuditAPI:
             return {"ok": True}
         digest = body["completions_sha256"]
         matched = self.ledger.record_audit(descriptor.candidate_id, worker, digest)
+        self.base.record_usage(descriptor, number, worker, getattr(decoded[3], "usage", None), "audit")
         entry.update(done=True, hash=digest, matched=matched)
         self.log(
             {

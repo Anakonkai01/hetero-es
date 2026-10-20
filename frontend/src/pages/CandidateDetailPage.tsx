@@ -11,6 +11,7 @@ import { Badge } from '../components/ui/Badge';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { CopyButton } from '../components/ui/CopyButton';
 import { KeyValue } from '../components/ui/KeyValue';
+import { UsageFacts } from '../components/experiments/UsageFacts';
 import { PageHeader, PageHeaderMeta } from '../components/ui/PageHeader';
 import { useAttempt } from '../hooks/useAttempt';
 import { useCandidate } from '../hooks/useCandidate';
@@ -120,6 +121,7 @@ export function CandidateDetailPage() {
                 <KeyValue label={t('Reward')} mono>
                   {candidate.reward?.toFixed(3) ?? NOT_AVAILABLE}
                 </KeyValue>
+                <UsageFacts value={candidate.usage} />
                 <KeyValue label={t('Generation')}>
                   <Link className="link mono" to={backToGeneration}>
                     {shortId(generationId)}

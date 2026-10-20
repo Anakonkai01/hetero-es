@@ -1,6 +1,9 @@
+import type { CandidateUsage } from './usage';
+
 export type CandidateStatus = 'PENDING' | 'LEASED' | 'RUNNING' | 'COMMITTED';
 
 export interface Candidate {
+  usage?: CandidateUsage;
   experimentId: string;
   generationId: string;
   candidateId: string;

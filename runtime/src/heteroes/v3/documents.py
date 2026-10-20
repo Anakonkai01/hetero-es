@@ -104,7 +104,18 @@ def validate_recipe(doc, *, translated=False):
     evaluation, data = doc["evaluation"], doc["data"]
     keys = {"evalDtype", "decoder", "generationConfigSha256", "maxNewTokens", "systemPrompt"}
     # `chunk` (prompts per generate() call) came after the first v3 documents: absent, it is 16, what they all used
-    _keys("evaluation", evaluation, keys | ({"chunk"} if "chunk" in evaluation else set()))
+    _keys(
+        "evaluation",
+        evaluation,
+        keys
+        | ({"chunk"} if "chunk" in evaluation else set())
+        | ({"promptFormat"} if "promptFormat" in evaluation else set()),
+    )
+    from heteroes.v3.options import validate_prompt_format
+
+    if "promptFormat" in evaluation and evaluation["promptFormat"] not in ("chat", "raw"):
+        raise ValueError("evaluation.promptFormat is chat or raw")
+    validate_prompt_format(evaluation.get("promptFormat"), evaluation["systemPrompt"])
     if evaluation["evalDtype"] not in EVAL_DTYPES or evaluation["decoder"] not in DECODE_ENGINES:
         raise ValueError("unknown evaluation precision or decoder")
     if "chunk" in evaluation and (

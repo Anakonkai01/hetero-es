@@ -42,6 +42,10 @@ def _vote_key(spec, text):
     elif name == "choice-letter":
         found = re.findall(r"\b([A-E])\b", text)
         answer = found[-1] if found else None
+    elif name == "boxed-number":
+        from heteroes.v3.scoring import extract_boxed_number
+
+        answer = extract_boxed_number(text)
     elif name == "regex":
         found = re.findall(spec["config"]["pattern"], text)
         answer = (found[-1][0] if isinstance(found[-1], tuple) else found[-1]).strip() if found else None
@@ -116,7 +120,7 @@ def evaluate(
     from heteroes.canonical import canonical_json_hash
 
     run_dir = Path(run_dir)
-    recipe, plan, dataset = (json.loads((run_dir / f"{n}.json").read_text()) for n in ("recipe", "plan", "dataset"))
+    recipe, plan = (json.loads((run_dir / f"{n}.json").read_text()) for n in ("recipe", "plan"))
     run = RecipeV3Run(recipe, plan)
     if split not in SPLITS:
         raise ValueError(f"split is one of {SPLITS}")
@@ -140,9 +144,19 @@ def evaluate(
         raise ValueError("The recipe's compact decoder is greedy only; sampled evaluation needs hf_generate")
     if (rows is None) != (rows_scorer is None):
         raise ValueError("other rows and their scorer are given together")
+    if rows is None:
+        from heteroes.v3.data import open_dataset
+
+        dataset = open_dataset(run_dir / "dataset.json")
+        if any(dataset[key] != recipe["data"][key] for key in ("contentHash", "splitHashes")):
+            raise ValueError("dataset identity differs from the recipe")
+        rows = list(dataset["splits"][split])
+        external = False
+    else:
+        external = True
     function = None
     scorer = plan["scorer"]
-    if rows is not None:
+    if external:
         validate_spec(rows_scorer)  # declarative only: no allow_python
         scorer, split = rows_scorer, "external"
     elif plan["scorer"]["kind"] == "python":
@@ -156,7 +170,6 @@ def evaluate(
     schema = trainable_schema(model, recipe["weightSpace"], adapter if adapter.exists() else None)
     if schema.hash != recipe["schemaHash"]:
         raise ValueError("the model does not have the run's trainable schema")
-    rows = dataset["splits"][split] if rows is None else rows
     if not rows:
         raise ValueError("Cannot evaluate empty rows")
     evaluator = EvalModel(model, run.eval_dtype)

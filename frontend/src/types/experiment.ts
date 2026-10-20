@@ -1,3 +1,5 @@
+import type { UsageSummary } from './usage';
+
 export type WeightSpace =
   | { kind: 'full' }
   | { kind: 'subset'; include: string[] }
@@ -31,6 +33,7 @@ export interface V3Settings {
   scorer: DeclarativeScorer | PythonScorer;
   pythonCode: PythonCode[];
   systemPrompt: string | null;
+  promptFormat: 'chat' | 'raw' | null;
   alphaSchedule: string;
   alphaMinimum: number | null;
   momentumBeta: number | null;
@@ -59,6 +62,7 @@ export type SchedulerPolicy = 'capacity-weighted' | 'round-robin' | 'greedy';
 export type SyncMode = 'synchronous' | 'asynchronous';
 
 export interface Experiment extends Partial<V3Settings> {
+  usageSummary?: UsageSummary;
   auditSummary?: { completed: number; mismatches: number; quarantinedWorkers: { worker_id: string; reason: string }[] };
   recipeVersion?: number;
   batchSize?: number;

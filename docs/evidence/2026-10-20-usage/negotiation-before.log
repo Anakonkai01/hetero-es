@@ -1,0 +1,63 @@
+..FFF.                                                                   [100%]
+=================================== FAILURES ===================================
+_ test_optional_usage_reaches_the_sidecar_without_changing_text_identity_or_retry_result _
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-869/test_optional_usage_reaches_th0')
+
+    def test_optional_usage_reaches_the_sidecar_without_changing_text_identity_or_retry_result(tmp_path):
+        from heteroes.v3.usage import UsageStore, CompletionBatch
+    
+        with Ledger(tmp_path / "ledger.sqlite") as ledger:
+            descriptor = CandidateDescriptor("a" * 64, "b" * 64, "usage", 0, 0, 5)
+            ledger.open_generation([descriptor])
+            store = UsageStore(tmp_path / "usage.sqlite")
+            api = WorkerAPI(ledger, "usage", 0, 60, scorer=lambda d, texts: 0.75, usage_sink=store.record)
+>           client = WorkerClient("worker", local_transport(api), usage_reporting=True)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: WorkerClient.__init__() got an unexpected keyword argument 'usage_reporting'
+
+tests/v3/test_v3_usage.py:55: TypeError
+____ test_a_usage_sink_failure_cannot_turn_a_committed_reward_into_failure _____
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-869/test_a_usage_sink_failure_cann0')
+
+    def test_a_usage_sink_failure_cannot_turn_a_committed_reward_into_failure(tmp_path):
+        from heteroes.v3.usage import CompletionBatch
+    
+        def broken(*args):
+            raise OSError("disk unavailable")
+    
+        with Ledger(tmp_path / "ledger.sqlite") as ledger:
+            descriptor = CandidateDescriptor("a" * 64, "b" * 64, "usage", 0, 0, 5)
+            ledger.open_generation([descriptor])
+            api = WorkerAPI(ledger, "usage", 0, 60, scorer=lambda d, texts: 0.75, usage_sink=broken)
+>           client = WorkerClient("worker", local_transport(api), usage_reporting=True)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: WorkerClient.__init__() got an unexpected keyword argument 'usage_reporting'
+
+tests/v3/test_v3_usage.py:82: TypeError
+___ test_workers_do_not_send_usage_to_coordinators_that_did_not_advertise_it ___
+
+    def test_workers_do_not_send_usage_to_coordinators_that_did_not_advertise_it():
+        from heteroes.v3.usage import CompletionBatch
+        from heteroes.worker import Assignment
+    
+        descriptor = CandidateDescriptor("a" * 64, "b" * 64, "usage", 0, 0, 5)
+        assignment = Assignment(descriptor, 1, "fixture-lease", 100)
+        sent = []
+        def transport(operation, payload):
+            sent.append(payload)
+            return {"ok": True, "outcome": "COMMITTED"}
+        batch = CompletionBatch(["a", "b"], usage())
+        old = WorkerClient("worker", transport)
+        old.submit_completions(assignment, batch)
+>       new = WorkerClient("worker", transport, usage_reporting=True)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: WorkerClient.__init__() got an unexpected keyword argument 'usage_reporting'
+
+tests/v3/test_v3_usage.py:104: TypeError
+=========================== short test summary info ============================
+FAILED tests/v3/test_v3_usage.py::test_optional_usage_reaches_the_sidecar_without_changing_text_identity_or_retry_result
+FAILED tests/v3/test_v3_usage.py::test_a_usage_sink_failure_cannot_turn_a_committed_reward_into_failure
+FAILED tests/v3/test_v3_usage.py::test_workers_do_not_send_usage_to_coordinators_that_did_not_advertise_it
+3 failed, 3 passed in 2.29s

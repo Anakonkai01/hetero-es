@@ -135,7 +135,10 @@ def test_mismatched_texts_and_rows_are_refused():
 def test_specs_are_strict_and_a_shared_lab_refuses_python():
     for name, versions in DECLARATIVE.items():
         for version, (_, keys) in versions.items():
-            config = {k: ("x" if k == "pattern" or k.endswith("Field") else False) for k in keys}
+            config = {
+                k: (0.0 if k == "formatReward" else "x" if k == "pattern" or k.endswith("Field") else False)
+                for k in keys
+            }
             assert validate_spec(spec(name, config, version=version))
     python = spec("mine", kind="python", code="a" * 64)
     with pytest.raises(ValueError, match="only declarative"):

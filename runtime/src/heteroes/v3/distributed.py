@@ -118,6 +118,7 @@ def serve(
             poll_seconds=0.05,
             timeout_seconds=timeout_seconds,
             cancel_requested=stop.is_set,
+            usage_path=out / "usage.sqlite",
         )
         coordinator.server.inputs = inputs
         coordinator.start()

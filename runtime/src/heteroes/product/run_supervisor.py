@@ -287,11 +287,26 @@ class RunSupervisor(ABC):
             "events": events(root / "lifecycle.jsonl") + events(root / "events.jsonl"),
             "artifacts": [],
         }
-        for path in root.glob("worker-*.json"):
-            result["events"].extend(read_json(path, []))
+        for path in root.glob("worker-*-r*.json"):
+            # Worker configuration files also start with worker-; only collected event arrays belong here.
+            worker_events = read_json(path, [])
+            if isinstance(worker_events, list) and all(isinstance(event, dict) for event in worker_events):
+                result["events"].extend(worker_events)
+            else:
+                result["monitoringPartial"] = True
         recipe = next((item["recipe"] for item in result["events"] if item.get("event") == "managed_start"), {})
         workload = recipe.get("workload", recipe.get("numerical", {}).get("workload", {}))
         contexts = {}
+        usage_store, usage_candidates = None, {}
+        if (root / "usage.sqlite").is_file():
+            try:
+                from heteroes.v3.usage import UsageStore
+
+                usage_store = UsageStore(root / "usage.sqlite", create=False)
+                usage_candidates = usage_store.candidates()
+            except Exception:
+                result["usageSummary"] = {"partial": True, "unavailable": True}
+                usage_store = None
         db_path = root / "ledger.sqlite"
         checkpoint = result["state"].get("finalWeightsSha256")
         weights = data_root(root) / "weights"
@@ -355,6 +370,20 @@ class RunSupervisor(ABC):
                     validation = read_json(root / f"validation-{number}.json")
                     if validation and "meanReward" in validation:
                         row["validationReward"] = validation["meanReward"]
+                    if usage_store is not None:
+                        try:
+                            audit_count = db.execute(
+                                "SELECT count(*) FROM audit JOIN candidate USING(candidate_id) WHERE generation=?",
+                                (number,),
+                            ).fetchone()[0]
+                            row["usage"] = usage_store.summary(
+                                number,
+                                expected_candidates=count,
+                                expected_audits=audit_count,
+                                expected_updates=int(bool(gen["applied_at"])),
+                            )
+                        except Exception:
+                            row["usage"] = {"partial": True, "unavailable": True}
                     result["generations"].append(row)
                 for c in db.execute(
                     "SELECT c.*,g.recipe_hash,g.parent_weights_sha256,r.reward FROM candidate c JOIN generation g USING(experiment_id,generation) LEFT JOIN result r USING(candidate_id)"
@@ -380,6 +409,8 @@ class RunSupervisor(ABC):
                     }
                     if c["reward"] is not None:
                         item["reward"] = c["reward"]
+                    if c["candidate_id"] in usage_candidates:
+                        item["usage"] = usage_candidates[c["candidate_id"]]
                     if c["generation"] in contexts:
                         item["batchIds"] = [contexts[c["generation"]]["batchHash"]]
                         item["effectiveSigma"] = contexts[c["generation"]]["sigmaFloat32"]
@@ -444,6 +475,15 @@ class RunSupervisor(ABC):
                         "createdAt": iso(path.stat().st_mtime),
                     }
                 )
+        if usage_store is not None:
+            try:
+                result["usageSummary"] = usage_store.summary(
+                    expected_candidates=sum(g["candidateCount"] for g in result["generations"]),
+                    expected_audits=result.get("auditSummary", {}).get("completed", 0),
+                    expected_updates=sum(g["status"] == "COMPLETED" for g in result["generations"]),
+                )
+            except Exception:
+                result["usageSummary"] = {"partial": True, "unavailable": True}
         return result
 
     @abstractmethod

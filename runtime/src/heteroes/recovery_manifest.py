@@ -16,7 +16,9 @@ def safe_name(name, version=1):
     if re.fullmatch(r"weights/[a-f0-9]{64}\.bin", name):
         return True
     return version == 2 and (
-        name in {"v3-state.json", "initial-adapter.bin"} or bool(re.fullmatch(r"selection/[a-f0-9]{64}\.bin", name))
+        name in {"v3-state.json", "initial-adapter.bin", "usage.sqlite"}
+        or bool(re.fullmatch(r"selection/[a-f0-9]{64}\.bin", name))
+        or bool(re.fullmatch(r"[a-f0-9]{64}\.jsonl", name))
     )
 
 
@@ -35,7 +37,7 @@ def validate_manifest(m):
     if (
         not isinstance(files, dict)
         or not required <= files.keys()
-        or not 4 <= len(files) <= (8 if m["formatVersion"] == 2 else 5)
+        or not 4 <= len(files) <= (12 if m["formatVersion"] == 2 else 5)
     ):
         raise ValueError("Incomplete recovery manifest")
     for name, meta in files.items():

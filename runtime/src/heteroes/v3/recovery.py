@@ -3,6 +3,7 @@
 from pathlib import Path
 import os
 import shutil
+import sqlite3
 
 from heteroes.product.files import read_json, write_json
 from heteroes.product.storage import data_root
@@ -82,7 +83,17 @@ def capture_state(root, temporary, recipe, generation):
         except OSError:  # a dataset cache on another file system
             shutil.copyfile(source, target)
     write_json(temporary / "v3-state.json", state)
-    return ["v3-state.json", *paths]
+    extra = []
+    usage = root / "usage.sqlite"
+    if usage.is_file():
+        if usage.is_symlink():
+            raise ValueError("Unsafe usage database")
+        with sqlite3.connect(usage.resolve().as_uri() + "?mode=ro", uri=True) as source:
+            with sqlite3.connect(temporary / "usage.sqlite") as destination:
+                source.backup(destination)
+        os.chmod(temporary / "usage.sqlite", 0o600)
+        extra.append("usage.sqlite")
+    return ["v3-state.json", *paths, *extra]
 
 
 def restore_state(point, temporary, destination):

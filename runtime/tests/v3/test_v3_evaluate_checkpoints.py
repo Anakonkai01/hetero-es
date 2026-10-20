@@ -12,6 +12,7 @@ from heteroes.v3.model import file_manifest, load
 from heteroes.v3.scoring import score
 
 from test_v3_local import assets, config_for  # noqa: F401  (assets is a fixture)
+from test_v3_product import product_assets, product_config, run_product
 
 
 def tool():
@@ -27,6 +28,39 @@ SCORER = {
     "name": "exact-string",
     "config": {"answerField": "answer", "strip": True, "casefold": True},
 }
+
+
+def test_managed_file_dataset_is_evaluated_and_bound_to_the_recipe(product_assets, tmp_path):
+    from heteroes.canonical import canonical_json_hash
+    from heteroes.product.files import write_json
+    from heteroes.v3.data import build_file_dataset, build
+
+    root = tmp_path / "run"
+    root.mkdir()
+    cfg = product_config(product_assets, root)
+    source = tmp_path / "rows.jsonl"
+    source.write_text("".join(json.dumps({"prompt": f"Question {i}?", "label": str(i)}) + "\n" for i in range(20)))
+    data_dir = tmp_path / "data"
+    document = build_file_dataset({"all": (source, "jsonl")}, data_dir)
+    import shutil
+
+    for file in data_dir.iterdir():
+        shutil.copyfile(file, root / file.name)
+    cfg.update(
+        datasetPath=str(root / "dataset.json"), datasetIdentity={k: document[k] for k in ("contentHash", "splitHashes")}
+    )
+    run_product(cfg, root)
+    report = tool().evaluate(root, product_assets / "model", [-1, 0], "validation")
+    expected = [
+        json.loads(line) for line in (root / f"{document['splitHashes']['validation']}.jsonl").read_text().splitlines()
+    ]
+    assert report["rowsHash"] == canonical_json_hash(expected)
+    assert all(c["count"] == len(expected) for c in report["checkpoints"])
+    # A valid but unrelated dataset must not silently become this run's evaluation data.
+    replacement = build([{"prompt": f"Unrelated {i}?"} for i in range(20)])
+    write_json(root / "dataset.json", replacement)
+    with pytest.raises(ValueError, match="dataset identity"):
+        tool().evaluate(root, product_assets / "model", [0], "validation")
 
 
 def test_checkpoints_are_rebuilt_by_replay_and_scored(assets, tmp_path):  # noqa: F811

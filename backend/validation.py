@@ -39,6 +39,8 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
     body = config.model_dump()
     if body.get("candidateSeedNamespace") is None:
         body.pop("candidateSeedNamespace", None)
+    if body.get("promptFormat") is None:
+        body.pop("promptFormat", None)
     co = next((d for d in runtime.devices() if d["deviceId"] == body["coordinatorDeviceId"]), None)
     if (
         not co

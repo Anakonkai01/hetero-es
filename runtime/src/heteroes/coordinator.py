@@ -123,6 +123,7 @@ class Coordinator:
         audit_fault_path=None,
         coefficient_function=None,
         seed_namespace: str | None = None,
+        usage_path=None,
     ):
         # Recipe v3 (ADR-008): `antithetic` gives pairs (seed, +1), (seed, -1); `coefficient_rule` makes version-2 records;
         # `score(generation, descriptor, completions) -> reward` scores the texts the workers submit, on this process
@@ -181,6 +182,11 @@ class Coordinator:
         self._timer = timer
         self._monotonic = monotonic
         self._sleep = sleep
+        self.usage = None
+        if usage_path is not None:
+            from heteroes.v3.usage import UsageStore
+
+            self.usage = UsageStore(usage_path)
         self._cancel_requested = cancel_requested
         self._pause_requested = pause_requested
         self._generation_completed = generation_completed
@@ -222,6 +228,7 @@ class Coordinator:
             "policy": type(policy).__name__,
             "lease_seconds": self._lease_seconds,
             "state": state,
+            **({"usageReporting": True} if self.usage is not None else {}),
             **(
                 {"generationContext": self.recipe.context(self.dataset, generation)} if self.dataset is not None else {}
             ),
@@ -435,6 +442,7 @@ class Coordinator:
             scorer=None
             if self._score is None
             else (lambda descriptor, texts: self._score(generation, descriptor, texts)),
+            usage_sink=self.usage.record if self.usage is not None else None,
         )
         if self._audit_rate:
             from heteroes.v3.audit import AuditAPI
@@ -527,6 +535,21 @@ class Coordinator:
             "publish_seconds": done - applied,
             "total_seconds": done - begin,
         }
+        if self.usage is not None:
+            try:
+                self.usage.record_update(
+                    generation, applied - recorded if next(self.model.parameters()).is_cuda else 0.0
+                )
+                with self.ledger._lock:
+                    audits = self.ledger._db.execute(
+                        "SELECT count(*) FROM audit JOIN candidate USING(candidate_id) WHERE generation=?",
+                        (generation,),
+                    ).fetchone()[0]
+                summary["usage"] = self.usage.summary(
+                    generation, expected_candidates=self.candidates, expected_audits=audits, expected_updates=1
+                )
+            except Exception:
+                summary["usage"] = {"partial": True, "unavailable": True}
         self.log("generation_done", **summary)
         return summary
 

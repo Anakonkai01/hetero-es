@@ -2,6 +2,36 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { DEFAULT_V3, withAlphaSchedule, v3ReviewRows } from '../src/lib/v3Settings.ts';
 
+test('the review distinguishes raw prompts and the boxed format reward', () => {
+  const rows = Object.fromEntries(
+    v3ReviewRows(
+      {
+        ...DEFAULT_V3,
+        promptFormat: 'raw',
+        scorer: {
+          kind: 'declarative',
+          name: 'boxed-number',
+          version: 1,
+          codeSha256: null,
+          config: { answerField: 'answer', formatReward: 0.1 },
+        },
+      },
+      {
+        dataset: 'numbers',
+        batchSize: 4,
+        batchSeed: 11,
+        sigma: 0.001,
+        sigmaSchedule: 'constant',
+        sigmaMinimum: 0.001,
+        alpha: 0.001,
+        maxNewTokens: 32,
+      },
+    ),
+  );
+  assert.equal(rows['Prompt format'], 'raw');
+  assert.equal(rows['Format reward'], '0.1');
+});
+
 test('a decaying alpha starts with an end value of a tenth of alpha, keeps a chosen one, constant clears it', () => {
   assert.equal(withAlphaSchedule(DEFAULT_V3, 'cosine', 0.0005).alphaMinimum, 0.00005);
   assert.equal(withAlphaSchedule(DEFAULT_V3, 'linear', 0.001).alphaSchedule, 'linear');

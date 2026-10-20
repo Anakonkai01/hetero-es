@@ -10,6 +10,7 @@ const SCORERS = [
   'last-integer',
   'answer-line-integer',
   'countdown',
+  'boxed-number',
 ];
 const RULES: [string, string][] = [
   ['zscore@1', 'Z-score of the rewards'],
@@ -77,8 +78,9 @@ export function V3Fields({
     });
   const space = value.weightSpace;
   const scorer = value.scorer;
-  const scorerConfig = (patch: Record<string, unknown>) =>
-    set({ scorer: { ...scorer, config: { ...scorer.config, ...patch } } });
+  const scorerConfig = (patch: Record<string, unknown>) => {
+    if (scorer.kind === 'declarative') set({ scorer: { ...scorer, config: { ...scorer.config, ...patch } } });
+  };
   return (
     <div className="setup-grid">
       <label className="fg">
@@ -302,7 +304,9 @@ export function V3Fields({
                     ? { answerField: 'answer' }
                     : name === 'countdown'
                       ? { numbersField: 'nums', targetField: 'target' }
-                      : {};
+                      : name === 'boxed-number'
+                        ? { answerField: 'answer', formatReward: 0 }
+                        : {};
             setCode('scorer', null, {
               scorer: { kind: 'declarative', name, version: 1, codeSha256: null, config },
             });
@@ -335,6 +339,21 @@ export function V3Fields({
             value={String(scorer.config.answerField)}
             onChange={(e) => scorerConfig({ answerField: e.target.value })}
           />
+        </label>
+      )}
+      {'formatReward' in scorer.config && (
+        <label className="fg">
+          {t('Format reward')}
+          <input
+            className="inp"
+            type="number"
+            min={0}
+            max={0.99}
+            step={0.01}
+            value={Number(scorer.config.formatReward)}
+            onChange={(e) => scorerConfig({ formatReward: Number(e.target.value) })}
+          />
+          <span className="hint">{t('Reward for a well-formed boxed number with the wrong value.')}</span>
         </label>
       )}
       {'numbersField' in scorer.config && (
@@ -392,9 +411,26 @@ export function V3Fields({
         </label>
       )}
       <label className="fg">
+        {t('Prompt format')}
+        <select
+          className="sel"
+          value={value.promptFormat ?? 'chat'}
+          onChange={(e) =>
+            set(e.target.value === 'raw' ? { promptFormat: 'raw', systemPrompt: null } : { promptFormat: null })
+          }
+        >
+          <option value="chat">{t('Chat template')}</option>
+          <option value="raw">{t('Raw dataset prompts')}</option>
+        </select>
+        {value.promptFormat === 'raw' && (
+          <span className="hint">{t('Raw prompts are sent exactly as stored in the dataset.')}</span>
+        )}
+      </label>
+      <label className="fg">
         {t('Use a system prompt')}
         <input
           type="checkbox"
+          disabled={value.promptFormat === 'raw'}
           checked={value.systemPrompt !== null}
           onChange={(e) => set({ systemPrompt: e.target.checked ? '' : null })}
         />

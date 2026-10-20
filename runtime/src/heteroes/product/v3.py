@@ -99,6 +99,7 @@ def prepare_run(config, root, device, *, declared=None, client=None, cache=None)
             "decoder": config["decodeEngine"],
         }
         | ({"evalChunk": config["evalChunk"]} if config.get("evalChunk") is not None else {})
+        | ({"promptFormat": config["promptFormat"]} if config.get("promptFormat") is not None else {})
         | update_options(config),
         model_files=manifest["files"],
         revision=manifest["revision"],

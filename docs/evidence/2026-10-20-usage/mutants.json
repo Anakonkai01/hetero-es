@@ -1,0 +1,56 @@
+[
+  {
+    "name": "omit the generated EOS token",
+    "file": "src/heteroes/v3/usage.py",
+    "old": "return index + 1",
+    "new": "return index"
+  },
+  {
+    "name": "double count a retried usage report",
+    "file": "src/heteroes/v3/usage.py",
+    "old": "PRIMARY KEY(candidate_id,attempt,worker_id,kind)",
+    "new": "CHECK (attempt > 0)"
+  },
+  {
+    "name": "accept changed usage on retry",
+    "file": "src/heteroes/v3/usage.py",
+    "old": "if old is not None and old[0] != body:",
+    "new": "if False:"
+  },
+  {
+    "name": "charge CPU execution as GPU time",
+    "file": "src/heteroes/v3/usage.py",
+    "old": "gpu += value[\"wallSeconds\"] if value[\"device\"] == \"cuda\" else 0",
+    "new": "gpu += value[\"wallSeconds\"]"
+  },
+  {
+    "name": "lose metadata before delivery",
+    "file": "src/heteroes/worker.py",
+    "old": "reward if isinstance(reward, tuple) else tuple(reward)",
+    "new": "tuple(reward)"
+  },
+  {
+    "name": "send usage to an old coordinator",
+    "file": "src/heteroes/worker.py",
+    "old": "if self.usage_reporting and hasattr(completions, \"usage\")",
+    "new": "if hasattr(completions, \"usage\")"
+  },
+  {
+    "name": "let usage failure invalidate canonical success",
+    "file": "src/heteroes/worker_api.py",
+    "old": "self.usage_errors += 1",
+    "new": "raise"
+  },
+  {
+    "name": "restore the too-small recovery manifest",
+    "file": "src/heteroes/recovery_manifest.py",
+    "old": "(12 if m[\"formatVersion\"] == 2 else 5)",
+    "new": "(8 if m[\"formatVersion\"] == 2 else 5)"
+  },
+  {
+    "name": "omit usage from recovery",
+    "file": "src/heteroes/v3/recovery.py",
+    "old": "if usage.is_file():",
+    "new": "if False:"
+  }
+]

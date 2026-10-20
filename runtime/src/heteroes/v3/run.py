@@ -44,6 +44,8 @@ class RecipeV3Run:
             "maxNewTokens": evaluation["maxNewTokens"],
             "decoder": evaluation["decoder"],
         }
+        if "promptFormat" in evaluation:
+            self.evaluation["promptFormat"] = evaluation["promptFormat"]
 
     def to_dict(self) -> dict:
         return self.recipe
@@ -165,7 +167,8 @@ def build_documents(
             "maxNewTokens": config.get("maxNewTokens", 256),
             "systemPrompt": config.get("systemPrompt"),
         }
-        | ({"chunk": config["evalChunk"]} if "evalChunk" in config else {}),
+        | ({"chunk": config["evalChunk"]} if "evalChunk" in config else {})
+        | ({"promptFormat": config["promptFormat"]} if config.get("promptFormat") is not None else {}),
         "data": {
             "kind": "dataset",
             "contentHash": dataset["contentHash"],

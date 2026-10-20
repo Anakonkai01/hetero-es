@@ -1,0 +1,61 @@
+FFFFF                                                                    [100%]
+=================================== FAILURES ===================================
+__ test_token_counts_include_the_first_eos_and_exclude_only_padding_after_it ___
+
+    def test_token_counts_include_the_first_eos_and_exclude_only_padding_after_it():
+>       from heteroes.v3.usage import generated_token_count
+E       ModuleNotFoundError: No module named 'heteroes.v3.usage'
+
+runtime/tests/v3/test_v3_usage.py:20: ModuleNotFoundError
+__ test_usage_store_is_idempotent_separates_audits_and_marks_missing_reports ___
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-861/test_usage_store_is_idempotent0')
+
+    def test_usage_store_is_idempotent_separates_audits_and_marks_missing_reports(tmp_path):
+>       from heteroes.v3.usage import UsageStore
+E       ModuleNotFoundError: No module named 'heteroes.v3.usage'
+
+runtime/tests/v3/test_v3_usage.py:30: ModuleNotFoundError
+_ test_optional_usage_reaches_the_sidecar_without_changing_text_identity_or_retry_result _
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-861/test_optional_usage_reaches_th0')
+
+    def test_optional_usage_reaches_the_sidecar_without_changing_text_identity_or_retry_result(tmp_path):
+>       from heteroes.v3.usage import UsageStore, CompletionBatch
+E       ModuleNotFoundError: No module named 'heteroes.v3.usage'
+
+runtime/tests/v3/test_v3_usage.py:48: ModuleNotFoundError
+____ test_a_usage_sink_failure_cannot_turn_a_committed_reward_into_failure _____
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-861/test_a_usage_sink_failure_cann0')
+
+    def test_a_usage_sink_failure_cannot_turn_a_committed_reward_into_failure(tmp_path):
+>       from heteroes.v3.usage import CompletionBatch
+E       ModuleNotFoundError: No module named 'heteroes.v3.usage'
+
+runtime/tests/v3/test_v3_usage.py:69: ModuleNotFoundError
+_ test_real_candidate_usage_is_recorded_and_old_workers_remain_numerically_identical _
+
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-861/tiny0')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-861/test_real_candidate_usage_is_r0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x76d1c8ecb440>
+
+    def test_real_candidate_usage_is_recorded_and_old_workers_remain_numerically_identical(assets, tmp_path, monkeypatch):
+        from heteroes.v3.local import run_local
+>       from heteroes.v3.usage import UsageStore
+E       ModuleNotFoundError: No module named 'heteroes.v3.usage'
+
+runtime/tests/v3/test_v3_usage.py:86: ModuleNotFoundError
+---------------------------- Captured stdout setup -----------------------------
+
+
+
+---------------------------- Captured stderr setup -----------------------------
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 1110.49it/s]
+=========================== short test summary info ============================
+FAILED runtime/tests/v3/test_v3_usage.py::test_token_counts_include_the_first_eos_and_exclude_only_padding_after_it
+FAILED runtime/tests/v3/test_v3_usage.py::test_usage_store_is_idempotent_separates_audits_and_marks_missing_reports
+FAILED runtime/tests/v3/test_v3_usage.py::test_optional_usage_reaches_the_sidecar_without_changing_text_identity_or_retry_result
+FAILED runtime/tests/v3/test_v3_usage.py::test_a_usage_sink_failure_cannot_turn_a_committed_reward_into_failure
+FAILED runtime/tests/v3/test_v3_usage.py::test_real_candidate_usage_is_recorded_and_old_workers_remain_numerically_identical
+5 failed in 1.77s

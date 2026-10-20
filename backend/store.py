@@ -376,6 +376,8 @@ class Store:
             body["monitoringPartial"] = bool(snapshot.get("monitoringPartial"))
             if snapshot.get("auditSummary") is not None:
                 body["auditSummary"] = snapshot["auditSummary"]
+            if snapshot.get("usageSummary") is not None:
+                body["usageSummary"] = snapshot["usageSummary"]
             if snapshot.get("studyMetrics"):
                 body["studyMetrics"] = snapshot["studyMetrics"]
                 best = snapshot["studyMetrics"].get("best") or {}

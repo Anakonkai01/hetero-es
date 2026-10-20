@@ -66,7 +66,9 @@ def prepare(config, out_dir, device="cpu", initial_adapter=None):
     from heteroes.v3 import data as v3data
     from heteroes.v3.model import file_manifest, load, trainable_schema
     from heteroes.v3.run import RecipeV3Run, build_documents
+    from heteroes.v3.options import validate_prompt_format
 
+    validate_prompt_format(config.get("promptFormat"), config.get("systemPrompt"))
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     model_path = Path(config["model"]["path"])
@@ -181,6 +183,7 @@ def run_local(
         score=make_scorer(run, ready["dataset"], ready["python_scorer"]),
         poll_seconds=0.05,
         timeout_seconds=timeout_seconds,
+        usage_path=out / "usage.sqlite",
     )
     coordinator.start()
     stop, threads = threading.Event(), []

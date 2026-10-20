@@ -16,6 +16,7 @@ import math
 import operator
 import re
 from fractions import Fraction
+from decimal import Decimal
 from pathlib import Path
 
 
@@ -59,6 +60,40 @@ def _exact_string(text, row, config):
 
 
 _CHOICE = re.compile(r"\b([A-E])\b")
+
+_BOXED_START = re.compile(r"\\boxed\s*\{")
+_BOXED_DECIMAL = re.compile(r"[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?")
+
+
+def extract_boxed_number(text):
+    """The last boxed answer, a finite plain decimal; malformed/nested/fractional TeX is not a boxed number."""
+    matches = list(_BOXED_START.finditer(text))
+    if not matches:
+        return None
+    tail = text[matches[-1].end() :]
+    if "}" not in tail:
+        return None
+    body = tail.split("}", 1)[0].strip()
+    if len(body) > 512 or not _BOXED_DECIMAL.fullmatch(body):
+        return None
+    value = Decimal(body.replace(",", ""))
+    if value == 0:
+        return "0"
+    fixed = format(value, "f")
+    return fixed.rstrip("0").rstrip(".") if "." in fixed else fixed
+
+
+def _boxed_number(text, row, config):
+    target = row[config.get("answerField", "answer")]
+    if isinstance(target, bool) or not isinstance(target, (str, int, float)):
+        raise ValueError("A boxed-number target is a finite number")
+    expected = Decimal(str(target).strip().replace(",", ""))
+    if not expected.is_finite():
+        raise ValueError("A boxed-number target must be finite")
+    predicted = extract_boxed_number(text)
+    if predicted is None:
+        return 0.0
+    return 1.0 if Decimal(predicted) == expected else float(config.get("formatReward", 0.0))
 
 
 def _choice_letter(text, row, config):
@@ -110,6 +145,7 @@ DECLARATIVE = {
     "exact-string": {1: (_exact_string, {"answerField", "strip", "casefold"})},
     "choice-letter": {1: (_choice_letter, {"answerField"})},
     "countdown": {1: (_countdown, {"numbersField", "targetField"})},
+    "boxed-number": {1: (_boxed_number, {"answerField", "formatReward"})},
 }
 SPEC_KEYS = {"kind", "name", "version", "codeSha256", "config"}
 
@@ -131,7 +167,19 @@ def validate_spec(spec, *, allow_python=False):
         if version not in DECLARATIVE.get(name, {}):
             raise ValueError(f"unknown declarative scorer {name}@{version}")
         keys = DECLARATIVE[name][version][1]
-        if set(config) != keys:
+        if name == "boxed-number":
+            if not set(config) <= keys:
+                raise ValueError("boxed-number@1 accepts answerField and formatReward")
+            reward = config.get("formatReward", 0.0)
+            if (
+                isinstance(reward, bool)
+                or not isinstance(reward, (int, float))
+                or not math.isfinite(reward)
+                or not 0 <= reward < 1
+            ):
+                raise ValueError("formatReward is finite and at least zero, below one")
+            keys = set(config)
+        elif set(config) != keys:
             raise ValueError(f"{name}@{version} takes the config keys {sorted(keys)}")
         if name == "regex":
             if not isinstance(config["pattern"], str) or not 0 < len(config["pattern"]) <= 500:

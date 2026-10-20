@@ -40,11 +40,16 @@ def sampled_metrics(predictions, expected, ks=(1, 16, 32)):
     }
 
 
-def generate_rows(model, tokenizer, rows, evaluation, chunk=16, *, sample=False, seed=11, temperature=0.6):
+def generate_rows(
+    model, tokenizer, rows, evaluation, chunk=16, *, sample=False, seed=11, temperature=0.6, count_tokens=False
+):
     import torch
 
     if type(chunk) is not int or chunk < 1:
         raise ValueError("Invalid decoding chunk")
+    from heteroes.v3.options import validate_prompt_format
+
+    prompt_format = validate_prompt_format(evaluation.get("promptFormat"), evaluation["systemPrompt"])
     decoder = evaluation.get("decoder", "hf_generate")  # Recipe v2 always, v3 by choice
     from heteroes.catalog import DECODE_ENGINES
 
@@ -72,14 +77,18 @@ def generate_rows(model, tokenizer, rows, evaluation, chunk=16, *, sample=False,
                 if evaluation["systemPrompt"] is None
                 else [{"role": "system", "content": evaluation["systemPrompt"]}]
             )
-            prompts = [
-                tokenizer.apply_chat_template(
-                    [*system, {"role": "user", "content": r["prompt"]}],
-                    tokenize=False,
-                    add_generation_prompt=True,
-                )
-                for r in group
-            ]
+            prompts = (
+                [r["prompt"] for r in group]
+                if prompt_format == "raw"
+                else [
+                    tokenizer.apply_chat_template(
+                        [*system, {"role": "user", "content": r["prompt"]}],
+                        tokenize=False,
+                        add_generation_prompt=True,
+                    )
+                    for r in group
+                ]
+            )
             inputs = {k: v.to(device) for k, v in tokenizer(prompts, return_tensors="pt", padding=True).items()}
             devices = [device.index or 0] if device.type == "cuda" else []
             if decoder == "hf_compact":
@@ -117,15 +126,19 @@ def generate_rows(model, tokenizer, rows, evaluation, chunk=16, *, sample=False,
                         "truncated": truncated,
                     }
                 )
+                if count_tokens:
+                    from heteroes.v3.usage import generated_token_count
+
+                    output[-1]["generatedTokens"] = generated_token_count(tokens.detach().cpu().tolist(), eos_ids)
     finally:
         tokenizer.padding_side = previous
     return output
 
 
-def evaluate(model, tokenizer, rows, evaluation, chunk=16):
+def evaluate(model, tokenizer, rows, evaluation, chunk=16, *, count_tokens=False):
     if not rows:
         raise ValueError("Cannot evaluate an empty split")
-    raw = generate_rows(model, tokenizer, rows, evaluation, chunk)
+    raw = generate_rows(model, tokenizer, rows, evaluation, chunk, **({"count_tokens": True} if count_tokens else {}))
     return {
         "accuracy": sum(r["correct"] for r in raw) / len(raw),
         "rows": raw,

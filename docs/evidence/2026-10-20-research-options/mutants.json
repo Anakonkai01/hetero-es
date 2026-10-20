@@ -1,0 +1,44 @@
+[
+  {
+    "name": "raw still uses a chat template",
+    "file": "src/heteroes/study/evaluation.py",
+    "old": "if prompt_format == \"raw\"",
+    "new": "if False"
+  },
+  {
+    "name": "ignore a raw system prompt",
+    "file": "src/heteroes/v3/options.py",
+    "old": "if selected == \"raw\" and system_prompt is not None:",
+    "new": "if False:"
+  },
+  {
+    "name": "accept an unknown prompt format",
+    "file": "src/heteroes/v3/options.py",
+    "old": "if selected not in (\"chat\", \"raw\"):",
+    "new": "if False:"
+  },
+  {
+    "name": "choose the first boxed answer",
+    "file": "src/heteroes/v3/scoring.py",
+    "old": "text[matches[-1].end() :]",
+    "new": "text[matches[0].end() :]"
+  },
+  {
+    "name": "drop the format reward",
+    "file": "src/heteroes/v3/scoring.py",
+    "old": "else float(config.get(\"formatReward\", 0.0))",
+    "new": "else 0.0"
+  },
+  {
+    "name": "allow a full reward for a wrong boxed answer",
+    "file": "src/heteroes/v3/scoring.py",
+    "old": "not 0 <= reward < 1",
+    "new": "not 0 <= reward <= 1"
+  },
+  {
+    "name": "change default recipe identity",
+    "file": "src/heteroes/sdk.py",
+    "old": "prompt_format: str | None = None",
+    "new": "prompt_format: str | None = \"chat\""
+  }
+]

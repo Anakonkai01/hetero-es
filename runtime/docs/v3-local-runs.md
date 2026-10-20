@@ -219,3 +219,23 @@ installed CLI's private token file; user access tokens are read from the environ
 The managed lab supports its own FP32/CPU-noise recipe choices, fixed Worker port and managed audit/time limits; unsupported
 standalone flags are refused. A managed Windows LoRA coordinator remains subject to the lab's pinned-adapter restriction.
 This staged route requires the matching r11 lab and is not supported by the public r10 deployment.
+
+
+## Prompt, boxed answers and usage
+
+The spec/SDK accepts optional `promptFormat` / `ESConfig.prompt_format`: `chat` uses the model's chat template, `raw`
+sends each dataset prompt verbatim. Raw requires `systemPrompt: null`. Omitting the option preserves previous recipe
+hashes; an explicitly chosen format becomes part of the recipe's evaluation identity.
+
+A declarative scorer `{ "name": "boxed-number", "version": 1, "config": { "answerField": "answer", "formatReward": 0.1 } }`
+scores the last `\boxed{plain decimal}`. Correct numeric answers earn 1; valid wrong numbers earn formatReward (default 0,
+less than 1); malformed final boxes earn 0. Decimal comparison is exact; grouped commas are accepted, fractions and nested
+LaTeX expressions are unsupported. Use the normal declarative kind/codeSha256 fields where a complete scorer is required.
+
+Recipe v3 runners maintain a separate private `usage.sqlite`. Candidate receipts contain generated token counts per row,
+device and synchronized execution wall seconds. Generation events, SDK summaries and managed detail pages expose token
+and reported GPU seconds. Counts include the first EOS token and omit only later padding. Audit tokens are separate.
+GPU seconds sum successful reported CUDA executions (including audits) and coordinator GPU updates; CPU execution adds 0.
+Idle time, validation and unreported failures are excluded. This is execution accounting, not power/energy measurement.
+Old workers remain usable with partial coverage; retry receipts are deduplicated. These optional receipts do not change
+numerical identities, and recovery points include their database when present.

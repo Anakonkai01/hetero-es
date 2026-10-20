@@ -1,0 +1,12 @@
+control ok    | 12 passed, 3 deselected in 2.71s
+killed       omit the generated EOS token | 1 failed, 11 passed, 3 deselected in 2.57s
+killed       double count a retried usage report | 2 failed, 10 passed, 3 deselected in 2.58s
+killed       accept changed usage on retry | 1 failed, 11 passed, 3 deselected in 2.59s
+killed       charge CPU execution as GPU time | 2 failed, 10 passed, 3 deselected in 2.31s
+killed       lose metadata before delivery | 1 failed, 11 passed, 3 deselected in 2.31s
+killed       send usage to an old coordinator | 1 failed, 11 passed, 3 deselected in 2.51s
+killed       let usage failure invalidate canonical success | 1 failed, 11 passed, 3 deselected in 2.53s
+killed       restore the too-small recovery manifest | 2 failed, 10 passed, 3 deselected in 2.50s
+killed       omit usage from recovery | 1 failed, 11 passed, 3 deselected in 2.60s
+
+9 of 9 mutants killed.

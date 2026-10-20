@@ -200,6 +200,7 @@ def main(directory, *, device="cuda", timeout_seconds=1800):
             lease_seconds=60,
             log=emit,
             cancel_requested=cancel,
+            usage_path=root / "usage.sqlite" if config.get("recipeVersion") == 3 else None,
             device_tokens=read_json(root / "device-grants.json") if config.get("deviceCredentials") else None,
             generation_completed=recovery_point if policy or dataset is not None else None,
             generation_started=generation_started if policy else None,

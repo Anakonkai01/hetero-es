@@ -1,0 +1,10 @@
+control ok    | 15 passed in 1.82s
+killed       raw still uses a chat template | 1 failed, 14 passed in 1.83s
+killed       ignore a raw system prompt | 2 failed, 13 passed in 1.88s
+killed       accept an unknown prompt format | 1 failed, 14 passed in 1.80s
+killed       choose the first boxed answer | 1 failed, 14 passed in 1.84s
+killed       drop the format reward | 1 failed, 14 passed in 1.84s
+killed       allow a full reward for a wrong boxed answer | 1 failed, 14 passed in 1.85s
+killed       change default recipe identity | 1 failed, 14 passed in 1.83s
+
+7 of 7 mutants killed.

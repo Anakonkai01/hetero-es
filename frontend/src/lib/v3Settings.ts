@@ -5,6 +5,7 @@ export const DEFAULT_V3: V3Settings = {
   antithetic: false,
   coefficientRule: 'zscore@1',
   systemPrompt: null,
+  promptFormat: null,
   alphaSchedule: 'constant',
   alphaMinimum: null,
   momentumBeta: null,
@@ -68,6 +69,10 @@ export function v3ReviewRows(
       `${settings.scorer.name}@${settings.scorer.version}`,
     ],
     ['Maximum output tokens', `${run.maxNewTokens}`],
+    ['Prompt format', settings.promptFormat ?? 'chat'],
+    ...(settings.scorer.kind === 'declarative' && settings.scorer.name === 'boxed-number'
+      ? [['Format reward', `${settings.scorer.config.formatReward ?? 0}`] as [string, string]]
+      : []),
     ['Prompts per generate() call', `${settings.evalChunk ?? 16}`],
   ];
 }

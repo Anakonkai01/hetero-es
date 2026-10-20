@@ -105,9 +105,10 @@ def _assignment(work) -> Assignment:
 
 
 class WorkerClient:
-    def __init__(self, worker_id: str, transport: Transport):
+    def __init__(self, worker_id: str, transport: Transport, *, usage_reporting=False):
         self.worker_id = worker_id
         self._transport = transport
+        self.usage_reporting = usage_reporting
 
     def _call(self, operation: str, payload: dict) -> dict:
         reply = self._transport(operation, payload)
@@ -157,6 +158,7 @@ class WorkerClient:
                 **assignment.payload(),
                 "completions": texts,
                 "completions_sha256": completions_sha256(texts),
+                **({"usage": completions.usage} if self.usage_reporting and hasattr(completions, "usage") else {}),
             },
         )
         if assignment.audit_id is not None and self.worker_id in reply.get("quarantined_workers", []):
@@ -269,7 +271,7 @@ class Worker:
         if isinstance(reward, (list, tuple)):  # Recipe v3: the texts, scored by the coordinator (ADR-008 section 7)
             if not reward or not all(isinstance(text, str) for text in reward):
                 return self._report(work, FailureKind.VERIFIER_ERROR)
-            return self._deliver(work, tuple(reward))
+            return self._deliver(work, reward if isinstance(reward, tuple) else tuple(reward))
         if isinstance(reward, bool) or not isinstance(reward, (int, float)) or not math.isfinite(reward):
             return self._report(work, FailureKind.VERIFIER_ERROR)  # never sent as a reward
         return self._deliver(work, reward)

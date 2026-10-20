@@ -1,0 +1,58 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________ test_managed_file_dataset_is_evaluated_and_bound_to_the_recipe ________
+
+product_assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-892/product-model0')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-892/test_managed_file_dataset_is_e0')
+
+    def test_managed_file_dataset_is_evaluated_and_bound_to_the_recipe(product_assets, tmp_path):
+        from heteroes.canonical import canonical_json_hash
+        from heteroes.product.files import write_json
+        from heteroes.v3.data import build_file_dataset, build
+    
+        root = tmp_path / "run"
+        root.mkdir()
+        cfg = product_config(product_assets, root, maxGenerations=1)
+        source = tmp_path / "rows.jsonl"
+        source.write_text("".join(json.dumps({"prompt": f"Question {i}?", "label": str(i)}) + "\n" for i in range(20)))
+        data_dir = tmp_path / "data"
+        document = build_file_dataset({"all": (source, "jsonl")}, data_dir)
+        cfg.update(datasetPath=str(data_dir / "dataset.json"), datasetIdentity={k: document[k] for k in ("contentHash", "splitHashes")})
+>       run_product(cfg, root)
+
+tests/v3/test_v3_evaluate_checkpoints.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/v3/test_v3_product.py:179: in run_product
+    candidates = ledger.list_candidates(cfg["runId"], generation)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/heteroes/ledger/ledger.py:428: in wrapper
+    return method(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/heteroes/ledger/ledger.py:623: in list_candidates
+    return self._load_generation(experiment_id, generation, self._clock())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <heteroes.ledger.ledger.Ledger object at 0x7e4570fd0f80>
+experiment_id = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', generation = 1
+now = 1792489325.682465
+
+    def _load_generation(self, experiment_id: str, generation: int, now: float) -> list[CandidateRecord]:
+        rows = self._db.execute(
+            _SELECT_CANDIDATES + "WHERE c.experiment_id = ? AND c.generation = ? ORDER BY c.candidate_index",
+            (experiment_id, generation),
+        ).fetchall()
+        if not rows:  # a generation is opened with at least one candidate, so no rows means it does not exist
+>           raise LedgerError(f"unknown generation {experiment_id}/g{generation}")
+E           heteroes.ledger.ledger.LedgerError: unknown generation aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/g1
+
+src/heteroes/ledger/ledger.py:602: LedgerError
+---------------------------- Captured stdout setup -----------------------------
+
+
+
+---------------------------- Captured stderr setup -----------------------------
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 1245.34it/s]
+=========================== short test summary info ============================
+FAILED tests/v3/test_v3_evaluate_checkpoints.py::test_managed_file_dataset_is_evaluated_and_bound_to_the_recipe
+1 failed, 4 deselected in 6.20s

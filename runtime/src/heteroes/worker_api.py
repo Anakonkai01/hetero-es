@@ -130,12 +130,17 @@ def _decode_attempt(request, *last: str):
 
 def _decode_result(request):
     if isinstance(request, dict) and "completions" in request:
-        descriptor, attempt_number, token = _decode_attempt(request, "completions", "completions_sha256")
+        extra = ("usage",) if "usage" in request else ()
+        descriptor, attempt_number, token = _decode_attempt(request, "completions", "completions_sha256", *extra)
         completions = request["completions"]
         if not isinstance(completions, list) or not completions or not all(isinstance(t, str) for t in completions):
             raise TypeError("completions must be a nonempty list of texts")
         if completions_sha256(completions) != request["completions_sha256"]:
             raise ValueError("completions_sha256 is not the hash of the completions")
+        if extra:
+            from heteroes.v3.usage import UsageTexts
+
+            completions = UsageTexts(completions, request["usage"])
         return descriptor, attempt_number, token, completions
     descriptor, attempt_number, token = _decode_attempt(request, "reward")
     return descriptor, attempt_number, token, _finite_number("reward", request["reward"])
@@ -180,10 +185,12 @@ class WorkerAPI:
         policy=None,
         cancel_requested=lambda: False,
         scorer=None,
+        usage_sink=None,
     ):
         # Recipe v3: `scorer(descriptor, completions) -> reward` runs here, on the coordinator; it raises ScorerError when the
         # experiment's scoring fails, which is never a reward and never the worker's fault (`scoring_error` keeps it)
         self._scorer = scorer
+        self._usage_sink, self.usage_errors = usage_sink, 0
         self.scoring_error: str | None = None
         self._ledger = ledger
         self._experiment_id = experiment_id
@@ -281,18 +288,27 @@ class WorkerAPI:
             from heteroes.v3.scoring import ScorerError
 
             # a stale or foreign report is refused before the experiment's scorer spends any time on it
-            self._ledger.attempt_worker(descriptor, attempt_number, token)
+            worker = self._ledger.attempt_worker(descriptor, attempt_number, token)
             try:
                 reward = self._scorer(descriptor, payload)
             except ScorerError as error:
                 self.scoring_error = str(error)
                 raise ScoringFailedError(str(error)) from error
             outcome = self._ledger.submit_result(descriptor, attempt_number, token, reward, completions=payload)
+            self.record_usage(descriptor, attempt_number, worker, getattr(payload, "usage", None), "candidate")
         else:
             outcome = self._ledger.submit_result(descriptor, attempt_number, token, payload)
         if outcome is SubmitOutcome.COMMITTED and hasattr(self._policy, "committed"):
             self._policy.committed(descriptor.candidate_id)  # a policy may learn from the duration (GreedyTail)
         return {"outcome": outcome.value}
+
+    def record_usage(self, descriptor, attempt_number, worker, usage, kind):
+        if usage is not None and self._usage_sink is not None:
+            try:
+                self._usage_sink(descriptor, attempt_number, worker, usage, kind)
+            except Exception:
+                # Usage is a best-effort sidecar: a failed metrics write cannot undo or misreport a canonical commit.
+                self.usage_errors += 1
 
     def _report_failure(self, decoded) -> dict:
         descriptor, attempt_number, token, kind = decoded

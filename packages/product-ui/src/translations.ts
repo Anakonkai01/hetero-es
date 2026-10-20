@@ -223,6 +223,21 @@ export const translations: Record<string, string> = {
   'Selected device needs approval': 'Máy đã chọn cần được duyệt',
   'Update selected device agent to support core lifecycle commands': 'Cập nhật ứng dụng Worker trên máy đã chọn',
   'Pinned model qualification required': 'Máy đã chọn cần đạt kiểm tra tương thích với model đã ghim',
+  'Prompt format': 'Định dạng prompt',
+  'Chat template': 'Mẫu hội thoại',
+  'Raw dataset prompts': 'Prompt nguyên bản trong dữ liệu',
+  'Raw prompts are sent exactly as stored in the dataset.': 'Prompt được gửi nguyên văn như trong dữ liệu.',
+  'Format reward': 'Điểm định dạng',
+  'Generated tokens': 'Token đã sinh',
+  'Audit generated tokens': 'Token đã sinh để kiểm tra chéo',
+  'Reported GPU seconds': 'Số giây GPU được báo cáo',
+  'Usage coverage': 'Độ đầy đủ của thống kê',
+  'Partial usage reports': 'Chưa đủ báo cáo sử dụng',
+  'Usage scope': 'Phạm vi thống kê',
+  'Successful worker executions and coordinator updates; excludes idle time, validation and unreported failures.':
+    'Các lượt Worker thành công và cập nhật của coordinator; chưa tính thời gian chờ, validation và lượt lỗi chưa báo cáo.',
+  'Reward for a well-formed boxed number with the wrong value.':
+    'Điểm cho đáp án số đúng dạng boxed nhưng sai giá trị.',
   'Refresh selected device self-test to identify its physical GPU':
     'Chạy lại tự kiểm tra trên máy đã chọn để nhận diện GPU',
   'Waiting for selected device to reconnect': 'Đang chờ máy đã chọn kết nối lại',

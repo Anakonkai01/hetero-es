@@ -132,7 +132,11 @@ def managed_configuration(spec, coordinator, workers, model, dataset):
         "momentumBeta": momentum.get("beta"),
         "momentumWindow": momentum.get("window", 4),
         **({"pythonCode": code} if code else {}),
-        **{key: spec[key] for key in ("candidateSeedNamespace", "evalChunk", "pythonTimeoutSeconds") if key in spec},
+        **{
+            key: spec[key]
+            for key in ("candidateSeedNamespace", "evalChunk", "pythonTimeoutSeconds", "promptFormat")
+            if key in spec
+        },
     }
     return result
 

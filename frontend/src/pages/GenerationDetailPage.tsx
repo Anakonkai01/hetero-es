@@ -7,6 +7,7 @@ import { Badge } from '../components/ui/Badge';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { CopyButton } from '../components/ui/CopyButton';
 import { KeyValue } from '../components/ui/KeyValue';
+import { UsageFacts } from '../components/experiments/UsageFacts';
 import { PageHeader, PageHeaderMeta } from '../components/ui/PageHeader';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { useAttempt } from '../hooks/useAttempt';
@@ -139,6 +140,7 @@ export function GenerationDetailPage() {
           <section className="card">
             <div className="cb" style={{ paddingTop: 20 }}>
               <dl className="kv">
+                <UsageFacts value={generation.usage} />
                 <KeyValue label={t('Model version')} mono>
                   {generation.modelVersion}
                 </KeyValue>

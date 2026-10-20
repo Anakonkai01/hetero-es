@@ -39,6 +39,7 @@ class TaskOutcome:
 
     reward: float
     completions: tuple[str, ...]
+    token_counts: tuple[int, ...] | None = None
 
 
 def evaluate_task(recipe, model, tokenizer, chunk: int, rows=None) -> TaskOutcome:
@@ -51,8 +52,13 @@ def evaluate_task(recipe, model, tokenizer, chunk: int, rows=None) -> TaskOutcom
     if rows is not None:
         from heteroes.study.evaluation import evaluate
 
-        raw = evaluate(model, tokenizer, rows, recipe.evaluation, chunk)
-        return TaskOutcome(float(raw["accuracy"]), tuple(row["output"] for row in raw["rows"]))
+        counts = recipe.to_dict().get("formatVersion") == 3
+        raw = evaluate(model, tokenizer, rows, recipe.evaluation, chunk, **({"count_tokens": True} if counts else {}))
+        return TaskOutcome(
+            float(raw["accuracy"]),
+            tuple(row["output"] for row in raw["rows"]),
+            tuple(row["generatedTokens"] for row in raw["rows"]) if counts else None,
+        )
     if recipe.workload_name == "arith16":
         result = evaluate_model(model, tokenizer, chunk=chunk)
     else:
@@ -168,6 +174,13 @@ class CandidateExecutor:
         timing: dict[str, float] = {}
         error: BaseException | None = None
         reward = None
+        measured_cuda = (
+            self.return_completions
+            and self.recipe.to_dict().get("formatVersion") == 3
+            and next(self.model.parameters()).is_cuda
+        )
+        if measured_cuda:
+            torch.cuda.synchronize()
         start = mark = self._clock()
         try:
             # the second candidate of an antithetic pair is perturbed with -sigma (ADR-008 section 5); 1 * sigma is sigma exactly
@@ -192,6 +205,8 @@ class CandidateExecutor:
             restore_from_snapshot_(self.model, self.schema, self._snapshot)
         except RestoreError as restore_error:
             raise CandidateFailed(FailureKind.RESTORE_MISMATCH, str(restore_error)) from restore_error
+        if measured_cuda:
+            torch.cuda.synchronize()
         now = self._clock()
         timing["restore"], timing["total"] = now - mark, now - start
 
@@ -203,4 +218,16 @@ class CandidateExecutor:
             raise error
         self.last_timing = timing
         self.last_completions = completions
+        if self.return_completions and outcome.token_counts is not None:
+            from heteroes.v3.usage import CompletionBatch
+
+            return CompletionBatch(
+                completions,
+                {
+                    "formatVersion": 1,
+                    "generatedTokens": list(outcome.token_counts),
+                    "device": next(self.model.parameters()).device.type,
+                    "wallSeconds": timing["total"],
+                },
+            )
         return completions if self.return_completions else reward

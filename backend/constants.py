@@ -24,6 +24,7 @@ V3_UPDATE_KEYS = (
     "evalChunk",
     "sampler",
     "candidateSeedNamespace",
+    "promptFormat",
 )
 
 # The shipped desktop-v3 qualification reference (docs/evidence/2026-10-19-v3-qualification-reference): a native Windows

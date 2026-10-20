@@ -15,9 +15,21 @@ from heteroes.product.v3 import prepare_run
 from test_v3_product import product_assets, product_config, run_product  # noqa: F401
 
 
-def completed_run(assets, root):
+def completed_run(assets, root, *, file_dataset=False):
     root.mkdir()
     cfg = product_config(assets, root, weightSpace={"kind": "lora", "rank": 2, "alpha": 4, "targetModules": ["q_proj"]})
+    if file_dataset:
+        from heteroes.v3.data import build_file_dataset
+
+        original = read_json(root / "dataset.json")
+        sources = {}
+        for name, rows in original["splits"].items():
+            path = root / (name + "-source.jsonl")
+            path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+            sources[name] = path, "jsonl"
+        dataset = build_file_dataset(sources, root / "file-dataset")
+        cfg["datasetPath"] = str(root / "file-dataset/dataset.json")
+        cfg["datasetIdentity"] = {key: dataset[key] for key in ("contentHash", "splitHashes")}
     write_json(root / "config.json", cfg)
     _, run, _ = prepare_run(cfg, root, "cpu")
     hashes = []
@@ -53,6 +65,41 @@ def completed_run(assets, root):
     write_json(root / "study-metrics.json", {"best": selection, "testLocked": True})
     write_json(root / "audit-faults.json", {"bad-worker": {"reason": "RESTORE_MISMATCH", "candidateId": "a" * 64}})
     return cfg, run, {"generation": 0, "parent_sha256": parent, "child_sha256": child}
+
+
+def test_recovery_preserves_file_backed_splits_lora_and_optional_usage(product_assets, tmp_path):
+    from heteroes.manifest import CandidateDescriptor
+    from heteroes.v3.usage import UsageStore
+
+    root = tmp_path / "source"
+    cfg, run, summary = completed_run(product_assets, root, file_dataset=True)
+    usage = UsageStore(root / "usage.sqlite")
+    usage.record(
+        CandidateDescriptor(run.hash, summary["parent_sha256"], cfg["runId"], 0, 0, 5),
+        1,
+        "worker",
+        {"formatVersion": 1, "device": "cuda", "generatedTokens": [3, 4], "wallSeconds": 2.5},
+    )
+    usage.record_update(0, 0.5)
+    point = capture_point(root, summary, run.to_dict(), {"interval": 1, "retain": 3})
+    assert len(read_json(point / "manifest.json")["files"]) == 12
+    retained = tmp_path / "retained"
+    shutil.copytree(point, retained)
+    shutil.rmtree(root)
+    restored = restore_point(retained, tmp_path / "replacement")
+    actual = UsageStore(restored / "usage.sqlite", create=False).summary(
+        0, expected_candidates=1, expected_audits=0, expected_updates=1
+    )
+    assert actual["generatedTokens"] == 7 and actual["gpuSeconds"] == 3 and not actual["partial"]
+    _, rebuilt, data = prepare_run(read_json(restored / "config.json"), restored, "cpu")
+    assert rebuilt.hash == run.hash and len(data["splits"]["train"]) > 0
+
+
+def test_file_backed_recovery_also_works_without_usage_receipts(product_assets, tmp_path):
+    root = tmp_path / "source"
+    _, run, summary = completed_run(product_assets, root, file_dataset=True)
+    point = capture_point(root, summary, run.to_dict(), {"interval": 1, "retain": 3})
+    assert verify_point(point)["formatVersion"] == 2
 
 
 def test_replacement_preserves_v3_inputs_selection_and_faults(product_assets, tmp_path):

@@ -17,6 +17,7 @@ import { Badge } from '../components/ui/Badge';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { CopyButton } from '../components/ui/CopyButton';
 import { KeyValue } from '../components/ui/KeyValue';
+import { UsageFacts } from '../components/experiments/UsageFacts';
 import { PageHeader, PageHeaderMeta } from '../components/ui/PageHeader';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { useArtifacts } from '../hooks/useArtifacts';
@@ -156,6 +157,7 @@ export function ExperimentDetailPage() {
               <section className="card" aria-label={t('Summary')}>
                 <div className="cb" style={{ paddingTop: 20 }}>
                   <dl className="kv">
+                    <UsageFacts value={experiment.usageSummary} />
                     <KeyValue label={t('Scheduling policy')} mono>
                       {experiment.schedulerPolicy}
                     </KeyValue>

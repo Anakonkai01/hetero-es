@@ -69,6 +69,7 @@ class ESConfig:
     # "epoch-shuffle@1" walks the train split in shuffled epochs; the default draws an independent sample per generation
     sampler: str = "sha256-python-random-sample-v1"
     candidate_seed_namespace: str | None = None  # absent: run ID; reuse a namespace to compare resource layouts
+    prompt_format: str | None = None  # absent: chat; raw sends the dataset prompt verbatim
 
     def to_config(self, scorer: dict) -> dict:
         """The configuration `heteroes.v3.local.run_local` and `python -m heteroes.v3 run` read."""
@@ -92,6 +93,7 @@ class ESConfig:
             "antithetic": self.antithetic,
             "maxNewTokens": self.max_new_tokens,
             "systemPrompt": self.system_prompt,
+            **({"promptFormat": self.prompt_format} if self.prompt_format is not None else {}),
             "evalDtype": self.eval_dtype,
             **({"evalChunk": self.eval_chunk} if self.eval_chunk is not None else {}),
             "decoder": self.decoder,
