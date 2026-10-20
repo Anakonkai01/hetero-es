@@ -31,6 +31,26 @@ Branch `feat/v3-audit-recovery`; `main` not yet fast-forwarded. Commits since th
   Quang's internet is slow (torch wheel). Record C: free before/after (20 GB now).
 - Thao's `worker-system-finish-backup` (5.9 GB, `%APPDATA%\@heteroes`) is the owner's original Worker data; leave it.
 
+## Gotchas for Quang's pairing and step 5 (found when re-reading this handoff)
+
+- **Pairing code for the CLI:** a signed-in lab user gets a 10-minute single-use code with `POST /api/v1/devices/pairing-codes`
+  (researcher token; `cd .scratch/isolated-lab && python3 api.py researcher POST /api/v1/devices/pairing-codes`). Then on Quang:
+  `heteroes-worker join http://100.110.165.40:8790` and paste the code at the prompt (never put it in argv or a log). The
+  device lands PENDING; approve it as admin: `python3 api.py admin PATCH /api/v1/platform/devices/<deviceId>
+  '{"approved": true, "workspaceId": "bcbece5a24834ac28e358fc49db1343f"}'` (the self-test must have passed first).
+- **Stale worker id:** `.scratch/session5-managed/run-thao.sh` has `--worker-ids desktop-6d6e5328c3d1`, which is the OLD
+  uninstalled Windows device (offline). The step 5 GPU workers are: 5070 Ti `desktop-906949218c43`, Thao Windows
+  `desktop-9f9da13f0f82` (new), Quang `cli-…` (read it from `heteroes-worker status` after joining). Copy the script, do
+  not reuse its worker id.
+- **Contribution must be switched ON per boot** on each worker before the run: 5070 Ti via a `contribution` line in
+  `worker5070/commands.jsonl` (`{"action": "contribution", "args": {"enabled": true}}`), Thao Windows via
+  `action.py contribution` (reads `contribution-args.json` on the Windows side), Quang via `heteroes-worker run` plus the
+  lab's Devices page / API. The lab only allocates devices that are ONLINE, approved and ON.
+- The researcher token for `run-thao.sh` comes from stdin; get it with `api.login("researcher")` in `api.py` and pipe it,
+  never print it. The managed-run flow itself is documented in `evidence/2026-10-20-managed-cpu-coordinator/README.md`.
+- SSH logins: Thao `thao_nguyen@100.92.20.58`, Quang `quang@100.99.227.8`, both key-based; the owner's access notes are in
+  `~/.claude/projects/-home-pc5070ti-projects/memory/hetero-es-machine-credentials.md` (outside the repo, do not copy secrets).
+
 ## Next (unchanged order)
 
 1. Finish Quang: after the install, `selftest --device cuda` (GPU + `HETEROES_GPU_ACCEPTANCE=1`;
