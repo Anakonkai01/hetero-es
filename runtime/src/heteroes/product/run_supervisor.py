@@ -45,7 +45,9 @@ def validate(config, workers):
     if config.get("recipeVersion") == 3:
         from heteroes.v3.options import validate_options
 
-        validate_options(config)
+        # The coordinator runs the frozen researcher code (owner decision, ADR-008); it must arrive with the command.
+        python = config["scorer"].get("kind") == "python" or str(config["coefficientRule"]).startswith("python@1:")
+        validate_options(config, allow_python=python)
     selected = config.get("workerIds")
     if (
         not isinstance(selected, list)

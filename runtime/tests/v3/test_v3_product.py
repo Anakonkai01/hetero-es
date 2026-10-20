@@ -356,3 +356,21 @@ def test_the_default_study_cache_is_not_checked_against_the_model_volume(product
     agent.config["largeDataDirectory"] = str(tmp_path / "large")
     with pytest.raises(ValueError, match="volume"):
         prepare(agent, {"assignmentId": "b" * 32, "epoch": 1}, cfg, tmp_path / "private")
+
+
+def test_the_coordinator_agent_accepts_a_managed_python_scorer_only_with_its_frozen_code(product_assets, tmp_path):
+    from heteroes.product.run_supervisor import validate
+    from heteroes.v3.scoring import source_sha256
+
+    entry = {"role": "scorer", "name": "reward.py", "function": "reward", "source": REWARD}
+    entry["codeSha256"] = source_sha256(entry["name"], entry["source"].encode())
+    cfg = product_config(product_assets, tmp_path, workload="text_v3")
+    cfg.update(
+        scorer={"kind": "python", "name": "length", "version": 1, "codeSha256": entry["codeSha256"], "config": {}},
+        pythonCode=[entry],
+    )
+    # The COORDINATE command is checked before the run is prepared: a managed Python reward must get through.
+    validate(cfg, {"fixture": {"id": "fixture"}})
+    del cfg["pythonCode"]
+    with pytest.raises(ValueError, match="pythonCode"):
+        validate(cfg, {"fixture": {"id": "fixture"}})
