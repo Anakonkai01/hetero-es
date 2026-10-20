@@ -592,3 +592,86 @@ def test_v3_worker_receives_the_frozen_config_and_transferred_inputs(tmp_path, m
 def test_a_v1_worker_keeps_the_fp32_chunk(tmp_path, monkeypatch):
     argv = launch_arguments(agent(tmp_path), monkeypatch, start_command())
     assert argv[argv.index("--chunk") + 1] == "16"
+
+
+def _v3_config(run_id):
+    return {
+        "runId": run_id,
+        "workerIds": ["test"],
+        "workload": "text_v3",
+        "candidatesPerGeneration": 4,
+        "maxGenerations": 2,
+        "alpha": 0.0005,
+        "sigma": 0.001,
+        "decodeEngine": "hf_generate",
+        "schedulerPolicy": "greedy",
+        "syncMode": "synchronous",
+        "backupPolicy": {"interval": 1, "retain": 3},
+        "recipeVersion": 3,
+        "modelManifest": {"modelId": "m", "revision": "r", "files": {}},
+        "modelSource": "REFERENCE",
+        "datasetObjectSha256": "d" * 64,
+        "datasetIdentity": {"contentHash": "e" * 64, "splitHashes": {}},
+        "batchSize": 4,
+        "batchSeed": 11,
+        "sigmaSchedule": "constant",
+        "sigmaMinimum": 0.001,
+        "maxNewTokens": 16,
+        "validationInterval": 1,
+        "weightSpace": {"kind": "full"},
+        "antithetic": False,
+        "scorer": {
+            "kind": "declarative",
+            "name": "exact-string",
+            "version": 1,
+            "codeSha256": None,
+            "config": {"answerField": "answer", "strip": True, "casefold": True},
+        },
+        "coefficientRule": "zscore@1",
+        "systemPrompt": None,
+    }
+
+
+def test_a_study_coordinator_never_launches_before_its_inputs_are_prepared(tmp_path, monkeypatch):
+    # Found on the packaged r11 candidate2 (2026-10-20): the supervisor thread launched the coordinator while accept()
+    # was still transferring the dataset, and the coordinator died with KeyError: 'datasetPath'.
+    a = agent(tmp_path)
+    a.enabled = True
+    cfg = _v3_config("f" * 32)
+    launched = []
+    monkeypatch.setattr(a.manager, "launch", lambda root: launched.append(root))
+    root = a.manager.directory(cfg["runId"])
+
+    def slow_prepare(agent_, command, config, directory):
+        a.manager.tick(root)  # the supervisor runs while the inputs are still on their way
+        return {"modelPath": "/local/model", "datasetPath": "/local/data.json", "modelManifestPath": "/local/m.json"}
+
+    monkeypatch.setattr("heteroes.study.prepare.prepare", slow_prepare)
+    a.manager.accept({"assignmentId": "a" * 32, "epoch": 1, "config": cfg, "computeGrants": {"test": "g"}})
+    assert launched == []
+    assert read_json(root / "config.json")["datasetPath"] == "/local/data.json"
+    a.manager.tick(root)
+    assert launched == [root]
+
+
+def test_a_failed_input_transfer_fails_the_run_instead_of_holding_the_gpu_pool(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    a.enabled = True
+
+    def broken(*args):
+        raise ValueError("Study transfer checksum mismatch")
+
+    monkeypatch.setattr("heteroes.study.prepare.prepare", broken)
+    cfg = _v3_config("f" * 32)
+    with pytest.raises(ValueError, match="checksum"):
+        a.manager.accept({"assignmentId": "a" * 32, "epoch": 1, "config": cfg, "computeGrants": {"test": "g"}})
+    state = a.manager.state(a.manager.directory(cfg["runId"]))
+    assert state["status"] == "FAILED" and "checksum" in state["failureReason"]
+    # the pool is free again: another run is accepted
+    monkeypatch.setattr(
+        "heteroes.study.prepare.prepare",
+        lambda *args: {"modelPath": "/m", "datasetPath": "/d.json", "modelManifestPath": "/m.json"},
+    )
+    a.manager.accept(
+        {"assignmentId": "b" * 32, "epoch": 1, "config": _v3_config("e" * 32), "computeGrants": {"test": "g"}}
+    )

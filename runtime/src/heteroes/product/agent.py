@@ -243,7 +243,12 @@ class AgentManager(RunSupervisor):
         if cfg.get("recipeVersion") in (2, 3):
             from heteroes.study.prepare import prepare
 
-            local.update(prepare(self.agent, command, cfg, root))
+            try:
+                local.update(prepare(self.agent, command, cfg, root))
+            except Exception as error:
+                # a run that cannot get its inputs must not keep the GPU pool in STARTING
+                self.save(root, status="FAILED", failureReason=f"{type(error).__name__}: {error}")
+                raise
         write_json(root / "config.json", local)
 
     def tick(self, root):
@@ -263,6 +268,8 @@ class AgentManager(RunSupervisor):
         if owned_state(read_json(root / "process.json"), (root / "launch-intent.json").exists()) is None:
             self.save(root, status="RECOVERING", failureReason="Coordinator process identity is unknown")
             return
+        if ar["config"].get("recipeVersion") in (2, 3) and "datasetPath" not in read_json(root / "config.json", {}):
+            return  # accept() is still transferring the dataset and model: the coordinator reads their paths
         super().tick(root)
 
 
