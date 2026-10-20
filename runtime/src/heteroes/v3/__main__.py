@@ -27,6 +27,11 @@ def main(argv=None):
         prog="heteroes", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     commands = parser.add_subparsers(dest="command", required=True)
+    manifest = commands.add_parser("manifest", help="build a pinned model manifest for registration on the lab")
+    manifest.add_argument("directory", type=Path)
+    manifest.add_argument("--model-id", required=True)
+    manifest.add_argument("--revision", required=True, help="exact 40-character model and tokenizer commit")
+    manifest.add_argument("--out", type=Path, help="new JSON file outside the model directory (default: stdout)")
     run = commands.add_parser("run", help="run an experiment on this machine")
     run.add_argument("spec", type=Path)
     run.add_argument("--out", type=Path, required=True)
@@ -34,6 +39,20 @@ def main(argv=None):
     run.add_argument("--workers", type=int, default=1)
     run.add_argument("--timeout-seconds", type=float, default=None, help="bound on each generation")
     args = parser.parse_args(argv)
+
+    if args.command == "manifest":
+        from heteroes.v3.model import registration_manifest
+
+        if args.out is not None and args.out.resolve().is_relative_to(args.directory.resolve()):
+            parser.error("write the manifest outside the model directory so it does not change the pinned file set")
+        document = registration_manifest(args.directory, args.model_id, args.revision)
+        text = json.dumps(document, sort_keys=True, indent=2) + "\n"
+        if args.out is None:
+            print(text, end="")
+        else:
+            with args.out.open("x", encoding="utf-8") as stream:
+                stream.write(text)
+        return 0
 
     from heteroes.v3.local import run_local
 

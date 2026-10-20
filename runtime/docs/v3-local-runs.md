@@ -59,6 +59,13 @@ PYTHONPATH=runtime/src python -m heteroes.v3 run spec.json --out runs/first --de
 
 ## What the run directory keeps
 
+For controlled repeats, set `candidate_seed_namespace="baseline-id"` in `ESConfig`, or
+`"candidateSeedNamespace": "baseline-id"` in the JSON configuration. The same namespace, generation and candidate index
+choose the same seeds across different run IDs and worker counts. An omitted namespace preserves the existing rule
+(the run ID; `local` by default for this one-machine runner). Candidate seeds are still stored explicitly in the ledger;
+recipe/plan documents, noise, update arithmetic and replay are unchanged. Greedy texts can still differ across hardware
+in a near tie; use the audits and compare the recorded rewards and child hashes.
+
 | File | What it is |
 | --- | --- |
 | `recipe.json` | What every worker must agree on (model files, trainable schema, noise, sigma, prompt, data). Its hash is in every candidate. |
@@ -77,6 +84,19 @@ coefficients, alpha) let anybody replay the run to the same weights, bit for bit
 - LoRA needs PEFT (`pip install peft==0.21.2`, the runtime's `lora` extra). LoRA runs are a different search distribution:
   do not compare them on one chart with full-parameter runs.
 - Unit tests use a tiny CPU model. Separate Qwen GPU qualification and its limits are recorded in `../../docs/evidence/2026-10-19-v3-gpu/`; it does not establish learning benefit.
+
+## Model registration manifest
+
+Build the lab's registration JSON directly from a downloaded safetensors snapshot:
+
+```bash
+heteroes manifest models/my-model --model-id my-org/my-model --revision <40-character-commit> --out my-model.manifest.json
+```
+
+The helper streams SHA-256 over every loadable file, rejects executable code and pickled weights, and requires model
+and tokenizer files. It accepts arbitrary model IDs for Recipe v3. Omit `--out` to print JSON; an output file must be new
+and outside the model directory so the manifest does not change the files it pins. Upload that JSON in the web model
+registration form. Device qualification is a separate step; creating a manifest does not qualify any machine.
 
 ## Installed CLI and runnable example
 

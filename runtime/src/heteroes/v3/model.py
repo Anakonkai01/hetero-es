@@ -9,6 +9,23 @@ from pathlib import Path
 LOADABLE = (".json", ".safetensors", ".model", ".txt", ".tiktoken", ".jinja")
 
 
+def registration_manifest(path, model_id, revision):
+    """The web lab's pinned registration document, built from the same safe files a v3 run loads."""
+    from heteroes.study.models import validate
+
+    return validate(
+        {
+            "formatVersion": 1,
+            "modelId": model_id,
+            "revision": revision,
+            "tokenizerRevision": revision,
+            "format": "safetensors",
+            "files": file_manifest(path),
+        },
+        allow_any=True,
+    )
+
+
 def file_manifest(path) -> dict:
     """{relative name: sha256} of the files of a model directory; refuses code and pickled weights."""
     root = Path(path)
