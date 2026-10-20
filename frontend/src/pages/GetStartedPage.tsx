@@ -1,6 +1,7 @@
 import { CopyValue, useProduct } from '@heteroes/product-ui';
 import { Link } from 'react-router';
 import { useSession } from '../app/session';
+import { LinuxWorkerCommand } from '../components/common/LinuxWorkerCommand';
 import { PageHeader } from '../components/ui/PageHeader';
 import { useInstallerManifest } from '../hooks/useInstallerManifest';
 
@@ -76,6 +77,7 @@ export function GetStartedPage() {
               {t('When the app asks for the lab address, use this one (it is usually filled in already):')}
             </p>
             <CopyValue value={window.location.origin} label="Copy address" />
+            <LinuxWorkerCommand manifest={manifest.data} />
           </div>
         </li>
         <li className="card">

@@ -69,6 +69,16 @@ try {
   const download = await friend.request.get(base + (await windows.getAttribute('href')));
   assert.equal(download.status(), 200);
   results.downloadResponds = true;
+  // Headless Linux: one copyable line whose script and bundle both come from this lab.
+  const command = `curl -fsSL '${base}/downloads/install-worker.sh' | HETEROES_DOWNLOADS='${base}/downloads' bash`;
+  const linux = friend.locator('[data-linux-worker]');
+  await linux.getByText(command, { exact: true }).waitFor();
+  await linux.getByText(`heteroes-worker join ${base}`, { exact: false }).waitFor();
+  assert.equal((await friend.request.get(`${base}/downloads/install-worker.sh`)).status(), 200);
+  await friend.setViewportSize({ width: 375, height: 900 });
+  assert.equal(await friend.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false);
+  await friend.setViewportSize({ width: 1280, height: 900 });
+  results.linuxCommandShown = true;
   await friend.screenshot({ path: path.join(output, 'get-started.png'), fullPage: true });
 
   const admin = await (await browser.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
@@ -112,6 +122,11 @@ try {
   await friend.locator('.bell > summary').click();
   await friend.getByText('Your account was approved').waitFor({ timeout: 20000 });
   results.friendBellSaysApproved = true;
+  // Once approved, the devices page offers the same line next to the pairing code (checked for overflow below).
+  await friend.goto(base + '/workers');
+  await friend.getByRole('button', { name: '+ Add a GPU computer' }).click();
+  await friend.locator('.pairing-panel [data-linux-worker]').getByText(command, { exact: true }).waitFor();
+  results.linuxCommandOnDevicesPage = true;
   for (const width of [375, 768, 1280]) {
     for (const page of [friend, admin]) {
       await page.setViewportSize({ width, height: 900 });

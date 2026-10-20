@@ -979,6 +979,12 @@ export const translations: Record<string, string> = {
     'Mở lab để xem generation, candidate, seed và reward.',
   'Lab connection': 'Kết nối lab',
   'Copy address': 'Sao chép địa chỉ',
+  'Copy command': 'Sao chép lệnh',
+  'Linux or WSL without a desktop': 'Linux hoặc WSL không có giao diện',
+  'Paste this line into a terminal. It needs no administrator password and checks every download.':
+    'Dán dòng này vào terminal. Không cần mật khẩu quản trị và mọi tệp tải về đều được kiểm tra.',
+  'Then check the GPU, pair it with a code from Workers → Add a GPU computer, and keep it online:':
+    'Sau đó kiểm tra GPU, ghép nối bằng mã ở Máy GPU → Thêm máy GPU, rồi giữ máy online:',
   'Signed in as': 'Đăng nhập với',
   'Signed out': 'Chưa đăng nhập',
   'Closing this window keeps Worker in the tray. Use Stop safely before shutting down.':

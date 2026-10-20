@@ -1,0 +1,11 @@
+✔ a same-origin installer fetches its bundle from this lab, not the address baked into the script (0.414811ms)
+✔ a private-transfer installer keeps the private address for both downloads (0.096704ms)
+✔ an address that could break out of the shell command is never shown (0.083081ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 47.489246

@@ -1,7 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 
 export type Installer = { platform: string; name: string; url: string };
-export type Manifest = { installers: Installer[]; serverInstallers?: Installer[]; privateTransferRequired?: boolean };
+export type Manifest = {
+  installers: Installer[];
+  serverInstallers?: Installer[];
+  // The headless Linux/WSL Worker; older builds publish only the desktop apps.
+  linuxWorker?: { installer: { name: string; url: string }; bundle: { name: string; url: string } };
+  privateTransferRequired?: boolean;
+};
 
 export function useInstallerManifest() {
   return useQuery({

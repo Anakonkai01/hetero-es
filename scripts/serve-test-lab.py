@@ -171,10 +171,25 @@ def main():
                 "url": "/downloads/HeteroES-Worker-test-Linux.tar.gz",
             },
         ]
-        for item in installers:
+        linux_worker = {
+            "installer": {"name": "install-worker.sh", "url": "/downloads/install-worker.sh"},
+            "bundle": {
+                "name": "heteroes-worker-linux-test.tar.gz",
+                "url": "/downloads/heteroes-worker-linux-test.tar.gz",
+            },
+        }
+        for item in installers + list(linux_worker.values()):
             (downloads / item["name"]).write_bytes(b"not a real installer")
         (downloads / "manifest.json").write_text(
-            json.dumps({"version": "0.1.0", "build": "test", "installers": installers, "serverInstallers": []})
+            json.dumps(
+                {
+                    "version": "0.1.0",
+                    "build": "test",
+                    "installers": installers,
+                    "serverInstallers": [],
+                    "linuxWorker": linux_worker,
+                }
+            )
         )
         app = create_app(
             state / "product.sqlite",

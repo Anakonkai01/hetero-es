@@ -174,28 +174,32 @@ def main(argv=None):
             )
     encoded = json.dumps(manifest, indent=2) + "\n"
     if not args.prepare_only:
-        for entry in manifest.get("linuxWorker", {}).values():
-            file = args.packages / "cli" / entry["name"]
-            link = links / entry["name"]
-            if entry["name"] == "install-worker.sh":
-                # This stable one-line-install alias follows the reviewed build; bundles keep immutable names.
-                pending_link = links / "install-worker.sh.pending"
-                pending_link.symlink_to(file.resolve())
-                pending_link.replace(link)
-            elif link.exists() or link.is_symlink():
-                if link.resolve() != file.resolve():
-                    raise RuntimeError("Existing CLI bundle link points to another build")
-            else:
+        # Check every link first: a refused publication leaves the live page and its one-line installer unchanged.
+        planned = [
+            (args.packages / kind / entry["name"], links / entry["name"])
+            for key, kind in [("installers", "worker"), ("serverInstallers", "server")]
+            for entry in manifest[key]
+        ]
+        planned += [
+            (args.packages / "cli" / entry["name"], links / entry["name"])
+            for entry in manifest.get("linuxWorker", {}).values()
+            if entry["name"] != "install-worker.sh"
+        ]
+        for file, link in planned:
+            if (link.is_symlink() or link.exists()) and link.resolve() != file.resolve():
+                raise RuntimeError("Existing download link points to another build")
+        for file, link in planned:
+            if not (link.is_symlink() or link.exists()):
                 link.symlink_to(file.resolve())
-        for key, kind in [("installers", "worker"), ("serverInstallers", "server")]:
-            for entry in manifest[key]:
-                file = args.packages / kind / entry["name"]
-                link = links / file.name
-                if link.is_symlink() or link.exists():
-                    if link.resolve() != file.resolve():
-                        raise RuntimeError("Existing download link points to another build")
-                else:
-                    link.symlink_to(file.resolve())
+        if "linuxWorker" in manifest:
+            # This stable alias follows the reviewed build; versioned bundles stay for scripts already handed out.
+            pending_link = links / "install-worker.sh.pending"
+            pending_link.unlink(missing_ok=True)
+            pending_link.symlink_to((args.packages / "cli/install-worker.sh").resolve())
+            pending_link.replace(links / "install-worker.sh")
+        else:
+            # An app-only build (or a rollback to one) must not keep offering another build's command line installer.
+            (links / "install-worker.sh").unlink(missing_ok=True)
         target = links / "manifest.json"
         if target.exists():
             shutil.copyfile(target, args.packages / f"previous-manifest-{time.time_ns()}.json")

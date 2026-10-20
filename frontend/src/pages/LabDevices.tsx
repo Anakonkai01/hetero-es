@@ -3,6 +3,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { apiDelete, apiGet, apiPatch, apiPost } from '../api/client';
 import { useSession } from '../app/session';
+import { LinuxWorkerCommand } from '../components/common/LinuxWorkerCommand';
+import { useInstallerManifest } from '../hooks/useInstallerManifest';
 import {
   canRemoveDevice,
   defaultApprovalWorkspace,
@@ -64,15 +66,7 @@ export function LabDevices({ administration = false }: { administration?: boolea
   const { t, preferences } = useProduct();
   const { session } = useSession();
   const cache = useQueryClient();
-  const installer = useQuery({
-    queryKey: ['worker-installers'],
-    queryFn: async () => {
-      const r = await fetch('/downloads/manifest.json');
-      if (!r.ok) throw Error('BUILD_UNAVAILABLE');
-      return r.json() as Promise<{ version: string; installers: { platform: string; name: string; url: string }[] }>;
-    },
-    retry: false,
-  });
+  const installer = useInstallerManifest();
   const devices = useQuery({
     queryKey: ['devices', session?.user.userId, administration],
     queryFn: () => apiGet<Device[]>(administration ? '/api/v1/platform/devices' : '/api/v1/devices'),
@@ -154,6 +148,7 @@ export function LabDevices({ administration = false }: { administration?: boolea
               <p>
                 {t('The desktop app creates its own one-use pairing code. This code is for an existing device agent.')}
               </p>
+              <LinuxWorkerCommand manifest={installer.data} />
             </div>
             <div>
               <button className="btn" disabled={pairing.isPending} onClick={() => pairing.mutate()}>

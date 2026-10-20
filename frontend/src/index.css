@@ -2124,3 +2124,21 @@ pre.mono {
 .device-cards {
   grid-template-columns: repeat(auto-fit, minmax(min(270px, 100%), 1fr));
 }
+.linux-worker {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  min-width: 0;
+}
+.linux-worker p {
+  margin: 0;
+}
+.linux-worker pre {
+  margin: 0;
+  padding: 10px 14px;
+  overflow-x: auto;
+  background: var(--sf2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 13px;
+}

@@ -108,3 +108,71 @@ def test_prepare_only_builds_four_hashed_installers_without_touching_public_mani
             ]
         )
     assert marker.read_bytes() == before
+
+
+def synthetic_build(root, build, cli=True):
+    """Packages for one build: two desktop apps and (unless app-only) the CLI script/bundle with its inventory."""
+    for kind, product in [("worker", "HeteroES Worker"), ("server", "HeteroES Lab Server")]:
+        unpacked = root / kind / "linux-unpacked"
+        unpacked.mkdir(parents=True)
+        (root / kind / f"{product} Setup 0.1.0.exe").write_bytes(f"windows-{build}".encode())
+        (unpacked / f"heteroes-{kind}").write_bytes(b"executable")
+    if not cli:
+        return root
+    files = {}
+    (root / "cli").mkdir()
+    for name, content in [
+        ("install-worker.sh", f"#!/bin/sh\n# {build}\n"),
+        (f"heteroes-worker-linux-{build}.tar.gz", build),
+    ]:
+        (root / "cli" / name).write_bytes(content.encode())
+        files[name] = {"sha256": hashlib.sha256(content.encode()).hexdigest(), "sizeBytes": len(content)}
+    (root / "cli/linux-worker.json").write_text(json.dumps({"build": build, "files": files}))
+    return root
+
+
+def test_a_refused_publication_leaves_the_previous_one_line_installer_in_place(tmp_path, monkeypatch):
+    source = Path(__file__).resolve().parents[2] / "scripts/publish-local-installers.py"
+    spec = importlib.util.spec_from_file_location("publish_installers", source)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    links = tmp_path / "repo/frontend/public/downloads"
+    links.mkdir(parents=True)
+    module.__file__ = str(tmp_path / "repo/scripts/publish-local-installers.py")
+    monkeypatch.setattr(module.subprocess, "check_output", lambda *a, **kw: "10443D1F443D094C\n")
+
+    def publish(build, step, cli=True):
+        packages = tmp_path / build
+        prepared = tmp_path / f"{build}-prepared.json"
+        if not prepared.exists():
+            synthetic_build(packages, build, cli)
+            module.main(["--packages", str(packages), "--build", build, "--receipt", str(prepared), "--prepare-only"])
+        argv = ["--packages", str(packages), "--build", build, "--receipt", str(tmp_path / f"{build}-{step}.json")]
+        module.main(argv + ["--prepared-receipt", str(prepared)])
+
+    publish("r5", "live")
+    alias, manifest = links / "install-worker.sh", links / "manifest.json"
+    assert alias.read_text() == "#!/bin/sh\n# r5\n"
+    live = manifest.read_bytes()
+    # A crashed earlier attempt left a pending alias; a link of the new build already points elsewhere.
+    (links / "install-worker.sh.pending").symlink_to(tmp_path / "r5/cli/install-worker.sh")
+    (links / "HeteroES Worker-0.1.0-r6-Windows.exe").symlink_to(tmp_path / "r5/cli/install-worker.sh")
+    with pytest.raises(RuntimeError, match="another build"):
+        publish("r6", "refused")
+    assert alias.read_text() == "#!/bin/sh\n# r5\n"
+    assert manifest.read_bytes() == live
+    assert not (links / "heteroes-worker-linux-r6.tar.gz").exists()
+    (links / "HeteroES Worker-0.1.0-r6-Windows.exe").unlink()
+    publish("r6", "live")
+    assert alias.read_text() == "#!/bin/sh\n# r6\n"
+    assert (
+        json.loads(manifest.read_text())["linuxWorker"]["installer"]["sha256"]
+        == hashlib.sha256(alias.read_bytes()).hexdigest()
+    )
+    assert not (links / "install-worker.sh.pending").exists()
+    # The previous bundle stays downloadable for workers still running the r5 script.
+    assert (links / "heteroes-worker-linux-r5.tar.gz").read_text() == "r5"
+    # Rolling back to an app-only build must not keep offering a newer build's command line installer.
+    publish("r4", "rollback", cli=False)
+    assert "linuxWorker" not in json.loads(manifest.read_text())
+    assert not alias.exists() and not alias.is_symlink()

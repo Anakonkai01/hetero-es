@@ -1,5 +1,6 @@
 import { useProduct } from '@heteroes/product-ui';
 import { useInstallerManifest } from '../../hooks/useInstallerManifest';
+import { LinuxWorkerCommand } from './LinuxWorkerCommand';
 
 export function InstallerDownloads() {
   const { t } = useProduct();
@@ -50,6 +51,7 @@ export function InstallerDownloads() {
                   ))}
               </div>
               {!items.length && <p className="hint">{t('No installer available')}</p>}
+              {name === 'Worker' && <LinuxWorkerCommand manifest={manifest.data} />}
             </article>
           ))}
         </div>

@@ -61,6 +61,12 @@ def test_managed_file_dataset_is_evaluated_and_bound_to_the_recipe(product_asset
     write_json(root / "dataset.json", replacement)
     with pytest.raises(ValueError, match="dataset identity"):
         tool().evaluate(root, product_assets / "model", [0], "validation")
+    # Same split files, different recorded provenance: still not the recipe's dataset.
+    body = {key: value for key, value in document.items() if key != "contentHash"}
+    body["splitSeed"] += 1
+    write_json(root / "dataset.json", {**body, "contentHash": canonical_json_hash(body)})
+    with pytest.raises(ValueError, match="dataset identity"):
+        tool().evaluate(root, product_assets / "model", [0], "validation")
 
 
 def test_checkpoints_are_rebuilt_by_replay_and_scored(assets, tmp_path):  # noqa: F811
