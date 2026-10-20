@@ -1,0 +1,42 @@
+{
+ "rows": 500,
+ "rowsSha256": "91d1aac0e6dfee54d0880037076ac49d9c12fce86223662370dfdff5081f8d50",
+ "seconds": {
+  "hf_generate": [
+   239.41697657699933,
+   242.90356623599928
+  ],
+  "hf_compact": [
+   232.99112465000053,
+   235.90821247300028
+  ]
+ },
+ "speedup": 1.0275798141952905,
+ "differentTexts": 0,
+ "differentRows": [],
+ "outputsSha256": {
+  "hf_generate": "3446b3e222dd950d34bee6144083d99160fb23c71279ec0a8775c21123812322",
+  "hf_compact": "3446b3e222dd950d34bee6144083d99160fb23c71279ec0a8775c21123812322"
+ },
+ "environment": {
+  "hostname": "DESKTOP-C20J73F",
+  "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+  "python": "3.12.15",
+  "torch": "2.13.0+cu132",
+  "torch_cuda": "13.2",
+  "numpy": "2.5.3",
+  "transformers": "5.17.0",
+  "device": "cuda",
+  "gpu_name": "NVIDIA GeForce RTX 3060",
+  "gpu_capability": [
+   8,
+   6
+  ],
+  "gpu_total_memory_bytes": 12884377600,
+  "nvidia_driver": null
+ },
+ "code": {
+  "git_commit": null,
+  "git_dirty": null
+ }
+}
