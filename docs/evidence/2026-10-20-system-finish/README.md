@@ -12,6 +12,12 @@ equal the one-machine baseline `9e68c65d77064e9499a92b3c95703cf4` (shared `candi
 `302ceac1c87743698258f649974ea767` failed before spawning the Windows Worker and is kept separately (see
 `windows-*.json`). `two-machine-pause-checkpoint.json` is the earlier mid-run sample.
 
+## Full check
+
+`checks-model-qualification-final/` is the complete `scripts/check-all.sh` against `580f23d` (all steps PASS, including
+runtime tests, Python format after `755ca33`, Prettier, source-package imports, web/desktop units and fixture browser/Electron
+checks). The earlier invocation in `checks-model-qualification/` failed only Python format and is kept unchanged.
+
 ## What this does NOT show
 
 - CPU and fixture checks do not establish GPU, Windows, cross-device or packaged release acceptance.

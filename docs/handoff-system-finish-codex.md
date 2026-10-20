@@ -132,7 +132,7 @@ Done:
   (script `.scratch/record-two-machine.py`): every generation record, child hash, final weights, selection and export equals
   the one-machine baseline; 5/5 audits matched; no quarantine. Limits are written in that README (pause, concurrent CPU work).
 - A new full `scripts/check-all.sh` was started against `580f23d`: `.scratch/check-all-final.log`, receipts
-  `docs/evidence/2026-10-20-system-finish/checks-model-qualification-final/` (see the result line below if it was filled in).
+  `docs/evidence/2026-10-20-system-finish/checks-model-qualification-final/` (result: ALL PASS).
 - The owner authorized SSH to both borrowed 3060s for this work: `thao_nguyen@100.92.20.58` and `quang@100.99.227.8`
   (both land in WSL Ubuntu, RTX 3060, driver 617.42). Windows installer tests come later. Reachability was verified only
   (read-only commands). Findings: no `node`/`xvfb` in either WSL, so the Electron Worker is not the route there;
