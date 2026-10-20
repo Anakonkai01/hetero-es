@@ -1,0 +1,5 @@
+before: app=True appdata=True dataFolder=D:\HeteroES-Worker-data exists=True
+uninstaller exit: 0
+after: app=False appdata=False dataFolderExists=False Dstaged=True
+C freeGB=16.6
+D freeGB=838.4
