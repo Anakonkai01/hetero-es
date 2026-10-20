@@ -594,14 +594,17 @@ class Agent:
             key = ar["assignmentId"]
             if key in released:
                 continue
-            recovery = self.manager.state(root).get("recoveryCount", 0)
+            state = self.manager.state(root)
+            recovery = state.get("recoveryCount", 0)
             combined[key] = {
                 "assignmentId": key,
                 "epoch": ar["epoch"],
                 "coordinatorAlive": owned_state(
                     read_json(root / "process.json"), (root / "launch-intent.json").exists()
                 ),
-                "workerAlive": None,
+                # a stopped coordinator starts no worker: without a worker directory (below) none ever ran here, so
+                # the lab can release a run that failed before its workers started
+                "workerAlive": False if state.get("status") in QUIESCENT else None,
                 "ready": False,
                 "recoveryIndex": recovery,
                 "events": [],

@@ -689,3 +689,36 @@ def test_a_failed_transfer_shows_no_foreign_error_text(tmp_path, monkeypatch):
     with pytest.raises(OSError):
         a.manager.accept({"assignmentId": "a" * 32, "epoch": 1, "config": cfg, "computeGrants": {"test": "g"}})
     assert a.manager.state(a.manager.directory(cfg["runId"]))["failureReason"] == "OSError"
+
+
+@pytest.mark.parametrize("status", ["FAILED", "PAUSED"])
+def test_a_run_that_failed_before_its_workers_started_can_be_released(tmp_path, monkeypatch, status):
+    # Found on the packaged r11 candidate2: the coordinator failed before any worker started, the agent reported
+    # workerAlive=None for the device (coordinator and worker at once) and the lab kept the GPU reserved forever.
+    a = agent(tmp_path)
+    a.enabled = True
+    cfg = _v3_config("f" * 32)
+    monkeypatch.setattr(
+        "heteroes.study.prepare.prepare",
+        lambda *args: {"modelPath": "/m", "datasetPath": "/d.json", "modelManifestPath": "/m.json"},
+    )
+    a.manager.accept({"assignmentId": "a" * 32, "epoch": 1, "config": cfg, "computeGrants": {"test": "g"}})
+    root = a.manager.directory(cfg["runId"])
+    a.manager.save(root, status=status)
+    [report] = [p for p in a.observe() if p["assignmentId"] == "a" * 32]
+    assert report["coordinatorAlive"] is False
+    assert report["workerAlive"] is False  # no worker directory: no worker was ever started on this device
+
+
+def test_a_running_coordinator_does_not_claim_its_workers_are_stopped(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    a.enabled = True
+    cfg = _v3_config("f" * 32)
+    monkeypatch.setattr(
+        "heteroes.study.prepare.prepare",
+        lambda *args: {"modelPath": "/m", "datasetPath": "/d.json", "modelManifestPath": "/m.json"},
+    )
+    a.manager.accept({"assignmentId": "a" * 32, "epoch": 1, "config": cfg, "computeGrants": {"test": "g"}})
+    a.manager.save(a.manager.directory(cfg["runId"]), status="RUNNING")
+    [report] = [p for p in a.observe() if p["assignmentId"] == "a" * 32]
+    assert report["workerAlive"] is None  # a START_WORKER may still be on its way
