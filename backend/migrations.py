@@ -94,6 +94,21 @@ def initialize_agent_schema(store):
                 if old and old[0] != row["assignment_id"]:
                     raise RuntimeError("Conflicting physical GPU ownership; keep dispatch held")
                 db.execute("INSERT OR IGNORE INTO physical_reservations VALUES (?,?)", (resource, row["assignment_id"]))
+        initialize_model_qualification_schema(db)
+
+
+def initialize_model_qualification_schema(db):
+    db.executescript("""
+        CREATE TABLE IF NOT EXISTS model_references(workspace_id TEXT NOT NULL,manifest_hash TEXT NOT NULL,
+            reference_hash TEXT NOT NULL,body TEXT NOT NULL,PRIMARY KEY(workspace_id,manifest_hash));
+        CREATE TABLE IF NOT EXISTS model_probe_jobs(id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL,asset_id TEXT NOT NULL,
+            device_id TEXT NOT NULL,body TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS model_probe_reservations(job_id TEXT PRIMARY KEY,device_id TEXT UNIQUE NOT NULL,
+            resource_id TEXT UNIQUE NOT NULL);
+        CREATE TABLE IF NOT EXISTS model_qualifications(device_id TEXT NOT NULL,workspace_id TEXT NOT NULL,
+            manifest_hash TEXT NOT NULL,profile_hash TEXT NOT NULL,reference_hash TEXT NOT NULL,body TEXT NOT NULL,
+            PRIMARY KEY(device_id,workspace_id,manifest_hash));
+    """)
 
 
 def initialize_product_schema(db):

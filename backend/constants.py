@@ -6,7 +6,12 @@ ACTIVE = {"STARTING", "RUNNING", "CANCELLING", "RECOVERING", "DRAINING", "PAUSIN
 TERMINAL = {"COMPLETED", "CANCELLED", "FAILED"}
 QUIESCENT = TERMINAL | {"PAUSED"}
 CORE_COMMAND_KINDS = frozenset({"SET_CONTRIBUTION", "COORDINATE", "START_WORKER", "STOP_WORKER", "CANCEL_ASSIGNMENT"})
-COMMAND_KINDS = CORE_COMMAND_KINDS | {"PAUSE_ASSIGNMENT", "UPDATE_BACKUP_POLICY"}
+COMMAND_KINDS = CORE_COMMAND_KINDS | {
+    "PAUSE_ASSIGNMENT",
+    "UPDATE_BACKUP_POLICY",
+    "QUALIFY_MODEL",
+    "CANCEL_MODEL_QUALIFICATION",
+}
 # Settings only Recipe v3 has; the update-formula ones came later, so a run saved before them may lack them
 V3_KEYS = ("weightSpace", "antithetic", "scorer", "coefficientRule", "systemPrompt")
 V3_UPDATE_KEYS = (

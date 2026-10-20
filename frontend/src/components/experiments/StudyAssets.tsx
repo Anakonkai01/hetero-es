@@ -23,6 +23,9 @@ export interface StudyModel {
   manifest?: Record<string, unknown>;
 }
 type SourceFile = { format: string; content: string };
+// Executable syntax is the same in both languages.
+const manifestCommand =
+  'heteroes manifest ./model --model-id organization/model --revision COMMIT_SHA --out manifest.json';
 
 export function StudyAssets() {
   const { t } = useProduct();
@@ -277,6 +280,11 @@ export function StudyAssets() {
                     />
                   </label>
                 )}
+                <p className="hint">
+                  {t('Create the pinned manifest from your model folder:')}
+                  <br />
+                  <code>{manifestCommand}</code>
+                </p>
                 <p className="hint">
                   {t(
                     'The manifest pins commit revisions and every file checksum. Every selected GPU must qualify for the model before training.',

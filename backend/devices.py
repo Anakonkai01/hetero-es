@@ -27,6 +27,7 @@ from .device_models import (
 from .agent_scheduling import AgentScheduling
 from .agent_commands import AgentCommands
 from .agent_polling import AgentPolling
+from .model_qualification import ModelQualifications
 from .migrations import initialize_agent_schema
 from .policies import has_device_reservation, processes_drained
 from .policies import set_disabled_workers, active_profile, platform_profile
@@ -51,6 +52,7 @@ class AgentRuntime(AgentScheduling, AgentCommands, AgentPolling):
     def __init__(self, storage_backend=None):
         self.store = None
         self.storage_backend = storage_backend
+        self.qualifications = ModelQualifications(self)
 
     def attach_store(self, store):
         self.store = store
@@ -77,6 +79,13 @@ class AgentRuntime(AgentScheduling, AgentCommands, AgentPolling):
             allocation = db.execute(
                 "SELECT workspace_id FROM worker_assignments WHERE worker_id=?", (row["worker_id"],)
             ).fetchone()
+            probe = db.execute(
+                "SELECT job_id FROM model_probe_reservations WHERE device_id=? OR resource_id=?",
+                (row["id"], profile.get("gpuUUID")),
+            ).fetchone()
+            profile = self.qualifications.effective_profile(
+                db, row["id"], profile, allocation[0] if allocation else None
+            )
             result.append(
                 {
                     "deviceId": row["id"],
@@ -92,7 +101,7 @@ class AgentRuntime(AgentScheduling, AgentCommands, AgentPolling):
                     "computeUrl": row["compute_url"],
                     "bulkUrl": row["bulk_url"] or row["compute_url"],
                     "selfTest": profile,
-                    "allocatedTo": reservation[0] if reservation else None,
+                    "allocatedTo": reservation[0] if reservation else ("qualification:" + probe[0] if probe else None),
                     "physicalResourceId": profile.get("gpuUUID"),
                     "telemetry": json.loads(row["telemetry"]) if row["telemetry"] else None,
                     "telemetryHistory": [

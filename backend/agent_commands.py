@@ -33,6 +33,13 @@ class AgentCommands:
                 command = json.loads(row[0])
                 if command_kinds is not None and command["kind"] not in command_kinds:
                     continue
+                if command["kind"] == "QUALIFY_MODEL":
+                    probe = db.execute("SELECT body FROM model_probe_jobs WHERE id=?", (command["jobId"],)).fetchone()
+                    if not probe:
+                        continue
+                    job = json.loads(probe[0])
+                    if job["cancelRequested"] or job["status"] in ("COMPLETED", "FAILED", "CANCELLED"):
+                        continue
                 if command["kind"] in ("COORDINATE", "START_WORKER", "PAUSE_ASSIGNMENT", "UPDATE_BACKUP_POLICY"):
                     assignment = db.execute(
                         "SELECT released FROM assignments WHERE id=? AND epoch=?",

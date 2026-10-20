@@ -2,6 +2,7 @@ import { Status, useProduct } from '@heteroes/product-ui';
 import { Link } from 'react-router';
 import { QueryState } from '../components/common/QueryState';
 import { StudyAssets } from '../components/experiments/StudyAssets';
+import { ModelQualification } from '../components/experiments/ModelQualification';
 import { PageHeader } from '../components/ui/PageHeader';
 import { useModels } from '../hooks/useAccess';
 export function ModelsPage() {
@@ -18,7 +19,7 @@ export function ModelsPage() {
       >
         <div className="resource-grid">
           {models.data?.map((model) => (
-            <section className="card model-card" key={model.modelArtifactId}>
+            <section className="card model-card" key={model.modelArtifactId} data-model-id={model.modelArtifactId}>
               <Status value="Pinned" />
               <h2>{model.name}</h2>
               <p className="hint">{model.reference ?? model.name}</p>
@@ -32,6 +33,9 @@ export function ModelsPage() {
                   {t('Create experiment')} →
                 </Link>
               </div>
+              {model.recipeVersion === 3 && model.manifestHash && (
+                <ModelQualification assetId={model.modelArtifactId} manifestHash={model.manifestHash} />
+              )}
             </section>
           ))}
         </div>

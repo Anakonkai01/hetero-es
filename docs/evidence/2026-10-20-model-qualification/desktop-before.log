@@ -1,0 +1,20 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________ test_desktop_quit_waits_for_model_probe_identity_confirmation _________
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-635/test_desktop_quit_waits_for_mo0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7abf99376d50>
+
+    def test_desktop_quit_waits_for_model_probe_identity_confirmation(tmp_path, monkeypatch):
+        from heteroes.product.desktop_bridge import Bridge
+    
+        a = agent(tmp_path)
+        bridge = object.__new__(Bridge); bridge.agent = a
+        write_json(a.probes.root / ("d" * 32) / "launch-intent.json", {"started": True})
+>       assert bridge.status()["drained"] is False
+E       assert True is False
+
+runtime/tests/ledger/test_model_probe_agent.py:122: AssertionError
+=========================== short test summary info ============================
+FAILED runtime/tests/ledger/test_model_probe_agent.py::test_desktop_quit_waits_for_model_probe_identity_confirmation
+1 failed in 0.03s

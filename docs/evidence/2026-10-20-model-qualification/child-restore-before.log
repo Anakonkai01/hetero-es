@@ -1,0 +1,41 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______ test_child_reports_restore_failure_without_foreign_exception_text _______
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-638/test_child_reports_restore_fai0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x73be424525a0>
+
+    def test_child_reports_restore_failure_without_foreign_exception_text(tmp_path, monkeypatch):
+        from heteroes.product.model_probe import run
+        from heteroes.worker import CandidateFailed
+        from heteroes.ledger import FailureKind
+    
+        model = tmp_path / "model"
+        build_tiny_lm(model)
+        manifest = registration_manifest(model, "research/new-model", "e" * 40)
+        write_json(tmp_path / "input.json", {"command": {"jobId": "a" * 32, "mode": "BUILD_REFERENCE", "manifest": manifest,
+                   "reference": None, "source": "REFERENCE"}, "config": {}, "stateDirectory": str(tmp_path / "state")})
+        monkeypatch.setattr("heteroes.study.prepare.prepare_model", lambda *a, **kw: model)
+    
+        def fail(*args, **kwargs):
+            raise CandidateFailed(FailureKind.RESTORE_MISMATCH, "private-transfer-grant-never-report")
+    
+        monkeypatch.setattr("heteroes.product.model_qualification.build_reference", fail)
+>       assert run(tmp_path / "input.json", "cpu") == {"status": "FAILED", "errorCode": "RESTORE_MISMATCH"}
+E       AssertionError: assert {'status': 'F...PROBE_FAILED'} == {'status': 'F...ORE_MISMATCH'}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'errorCode': 'MODEL_PROBE_FAILED'} != {'errorCode': 'RESTORE_MISMATCH'}
+E         Use -v to get more diff
+
+runtime/tests/v3/test_model_probe_process.py:100: AssertionError
+----------------------------- Captured stdout call -----------------------------
+
+
+
+----------------------------- Captured stderr call -----------------------------
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 1062.66it/s]
+=========================== short test summary info ============================
+FAILED runtime/tests/v3/test_model_probe_process.py::test_child_reports_restore_failure_without_foreign_exception_text
+1 failed in 1.71s

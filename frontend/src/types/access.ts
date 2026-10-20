@@ -34,16 +34,18 @@ export interface WorkspaceMember {
 }
 
 export interface ModelRegistration {
+  id?: string;
   modelArtifactId: string;
   workspaceId: string;
   ownerUserId: string;
   name: string;
-  source: 'REFERENCE' | 'UPLOAD_METADATA';
+  source: 'REFERENCE' | 'UPLOAD_METADATA' | 'UPLOAD';
+  recipeVersion?: number;
+  manifestHash?: string;
   reference?: string;
   revision?: string;
   files?: { name: string; sizeBytes: number }[];
-  /** Metadata only: no weights are transferred or validated in this prototype. */
-  status: 'REGISTERED';
+  status: 'REGISTERED' | 'AWAITING_FILES' | 'READY';
   createdAt: string;
 }
 

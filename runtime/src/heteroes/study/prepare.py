@@ -20,8 +20,10 @@ def transfer(agent, assignment, digest, target, limit):
                 return target
         raise ValueError("Cached study file checksum mismatch")
     grant = agent.call(
-        "/api/v1/device/study-transfer",
-        {"assignmentId": assignment["assignmentId"], "epoch": assignment["epoch"], "sha256": digest},
+        "/api/v1/device/model-transfer" if "jobId" in assignment else "/api/v1/device/study-transfer",
+        {"jobId": assignment["jobId"], "sha256": digest}
+        if "jobId" in assignment
+        else {"assignmentId": assignment["assignmentId"], "epoch": assignment["epoch"], "sha256": digest},
     )
     parsed = urlsplit(grant["url"])
     origin = f"{parsed.scheme}://{parsed.netloc}"
@@ -53,14 +55,18 @@ def transfer(agent, assignment, digest, target, limit):
     return target
 
 
-def prepare(agent, assignment, config, directory):
+def study_cache(agent):
     from heteroes.product.storage import checked_directory
 
     # the volume identity belongs to the large-data directory; the default cache is in the agent's private state
     large = agent.config.get("largeDataDirectory")
-    cache = (
+    return (
         checked_directory(large, agent.config.get("storageVolumeUUID")) if large else agent.root / "study-cache"
     ) / "study"
+
+
+def prepare(agent, assignment, config, directory):
+    cache = study_cache(agent)
     data_path = transfer(
         agent,
         assignment,
@@ -75,6 +81,22 @@ def prepare(agent, assignment, config, directory):
     data = verify_dataset(json.loads(data_path.read_text()))
     if {k: data[k] for k in ("contentHash", "splitHashes")} != config["datasetIdentity"]:
         raise ValueError("Frozen dataset identity mismatch")
+    model_path = prepare_model(agent, assignment, config)
+    manifest = config["modelManifest"]
+    from heteroes.product.files import write_json
+
+    directory = Path(directory)
+    write_json(directory / "model-manifest.json", manifest)
+    return {
+        "modelPath": str(model_path),
+        "datasetPath": str(data_path),
+        "modelManifestPath": str(directory / "model-manifest.json"),
+    }
+
+
+def prepare_model(agent, assignment, config, emit=lambda event: None):
+    """Pin/verify model bytes independently of datasets, also for a trusted model compatibility probe."""
+    cache = study_cache(agent)
     manifest = config["modelManifest"]
     # Operator paths are private configuration, never browser-supplied paths.
     model_path = agent.config.get("modelPaths", {}).get(sha(manifest))
@@ -83,6 +105,7 @@ def prepare(agent, assignment, config, directory):
     if not model_path:
         model_path = cache / "models" / sha(manifest)
         for name, digest in manifest["files"].items():
+            emit({"stage": "model_file"})
             target = Path(model_path) / name
             if config["modelSource"] == "UPLOAD":
                 transfer(agent, assignment, digest, target, 5_000_000_000)
@@ -96,12 +119,4 @@ def prepare(agent, assignment, config, directory):
         verify_files(model_path, manifest["files"])
     else:
         verify_model(model_path, manifest)
-    from heteroes.product.files import write_json
-
-    directory = Path(directory)
-    write_json(directory / "model-manifest.json", manifest)
-    return {
-        "modelPath": str(model_path),
-        "datasetPath": str(data_path),
-        "modelManifestPath": str(directory / "model-manifest.json"),
-    }
+    return Path(model_path)

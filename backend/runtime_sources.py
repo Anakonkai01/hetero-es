@@ -12,6 +12,8 @@ SHARED_MODULES = (
     "v3/options.py",
     "v3/scoring.py",
     "product/__init__.py",
+    "product/model_qualification.py",
+    "product/qualification_v3.py",
     "product/energy.py",
     "product/host_detail.py",
     "product/windows_detail.py",

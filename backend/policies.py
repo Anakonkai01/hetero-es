@@ -78,7 +78,10 @@ def storage_status(runtime):
 def has_device_reservation(db, device_id, gpu_uuid=None):
     reserved = db.execute("SELECT 1 FROM device_reservations WHERE device_id=?", (device_id,)).fetchone()
     physical = db.execute("SELECT 1 FROM physical_reservations WHERE resource_id=?", (gpu_uuid,)).fetchone()
-    return bool(reserved or physical)
+    probe = db.execute(
+        "SELECT 1 FROM model_probe_reservations WHERE device_id=? OR resource_id=?", (device_id, gpu_uuid)
+    ).fetchone()
+    return bool(reserved or physical or probe)
 
 
 def processes_drained(processes):

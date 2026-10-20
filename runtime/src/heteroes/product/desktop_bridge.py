@@ -20,7 +20,9 @@ class Bridge:
         try:
             with agent.desktop_lock:
                 processes = agent.observe()
-            drained = all(p["workerAlive"] is False and p["coordinatorAlive"] is False for p in processes)
+                drained = not agent.probes.busy() and all(
+                    p["workerAlive"] is False and p["coordinatorAlive"] is False for p in processes
+                )
         except Exception:
             processes = []
             drained = False

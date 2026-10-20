@@ -27,13 +27,18 @@ class AgentPolling:
             self._quarantine_processes(db, device, body, old)
             accepted_events = self._accept_events(db, device, body, old)
             accepted = self._accept_reports(db, device, body, old)
+            accepted_qualifications = self.qualifications.accept(db, device, body.qualificationReports)
             for row in db.execute("SELECT * FROM assignments WHERE released=0").fetchall():
                 self._release_confirmed(db, row, json.loads(row["body"]))
             old = db.execute("SELECT * FROM devices WHERE id=?", (device["id"],)).fetchone()
             allowed = old["status"] == "APPROVED" and self.store.profile(old["owner"])["accountStatus"] == "ACTIVE"
             commands = self.commands(device["id"], command_kinds=command_kinds)
             if not allowed:
-                commands = [c for c in commands if c["kind"] in ("CANCEL_ASSIGNMENT", "STOP_WORKER")]
+                commands = [
+                    c
+                    for c in commands
+                    if c["kind"] in ("CANCEL_ASSIGNMENT", "STOP_WORKER", "CANCEL_MODEL_QUALIFICATION")
+                ]
             # Previously accepted assignments must remain recoverable even after OFF;
             # the agent adopts living processes but gates every new launch locally.
             return {
@@ -42,10 +47,12 @@ class AgentPolling:
                 "desiredContribution": bool(desired and allowed),
                 "commands": commands[:100],
                 "acceptedReports": accepted,
+                "acceptedQualifications": accepted_qualifications,
                 "acceptedEvents": accepted_events,
                 "heartbeatSeconds": 10,
                 "telemetrySupported": True,
                 "detailedTelemetrySupported": True,
+                "modelQualificationSupported": True,
                 "releasedAssignments": [
                     row["id"]
                     for row in db.execute("SELECT id,body FROM assignments WHERE released=1")
@@ -57,7 +64,9 @@ class AgentPolling:
         if body.selfTest is not None:
             previous = json.loads(old["self_test"])
             updated = body.selfTest.model_dump()
-            reserved = db.execute("SELECT 1 FROM device_reservations WHERE device_id=?", (device["id"],)).fetchone()
+            from .policies import has_device_reservation
+
+            reserved = has_device_reservation(db, device["id"], previous.get("gpuUUID"))
             if reserved and updated.get("gpuUUID") != previous.get("gpuUUID"):
                 raise HTTPException(409, "Physical GPU identity cannot change during ownership")
             if not updated["passed"]:

@@ -1,0 +1,32 @@
+[
+  {
+    "name": "start-probe-with-contribution-off",
+    "file": "src/heteroes/product/model_probe_agent.py",
+    "old": "if not self.agent.enabled:",
+    "new": "if False:"
+  },
+  {
+    "name": "ignore-unknown-probe-ownership",
+    "file": "src/heteroes/product/model_probe_agent.py",
+    "old": "return any(self.ownership(root) is not False for root in self.root.iterdir() if root.is_dir())",
+    "new": "return any(self.ownership(root) is True for root in self.root.iterdir() if root.is_dir())"
+  },
+  {
+    "name": "ack-progress-as-terminal",
+    "file": "src/heteroes/product/model_probe_agent.py",
+    "old": "if job_id in self.sent_terminal:",
+    "new": "if True:"
+  },
+  {
+    "name": "stop-fence-allows-delayed-launch",
+    "file": "src/heteroes/product/model_probe_agent.py",
+    "old": "if (root / \"stop.flag\").exists():",
+    "new": "if False:"
+  },
+  {
+    "name": "download-model-via-experiment-grant",
+    "file": "src/heteroes/study/prepare.py",
+    "old": "\"/api/v1/device/model-transfer\" if \"jobId\" in assignment else \"/api/v1/device/study-transfer\"",
+    "new": "\"/api/v1/device/study-transfer\""
+  }
+]

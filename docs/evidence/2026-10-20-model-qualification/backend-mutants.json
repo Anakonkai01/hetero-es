@@ -1,0 +1,32 @@
+[
+  {
+    "name": "release-unknown-probe",
+    "file": "backend/model_qualification.py",
+    "old": "if report.processAlive is not False:",
+    "new": "if report.processAlive is True:"
+  },
+  {
+    "name": "trust-probe-without-checking-repeats",
+    "file": "backend/model_qualification.py",
+    "old": "evidence = verify_observations(reference, report.observations)",
+    "new": "evidence = {\"passed\": True}"
+  },
+  {
+    "name": "reuse-qualification-after-profile-change",
+    "file": "backend/model_qualification.py",
+    "old": "AND q.profile_hash=?",
+    "new": "AND ? IS NOT NULL"
+  },
+  {
+    "name": "accept-late-success-after-cancel",
+    "file": "backend/model_qualification.py",
+    "old": "elif job[\"cancelRequested\"] or report.status == \"CANCELLED\":",
+    "new": "elif report.status == \"CANCELLED\":"
+  },
+  {
+    "name": "ignore-probe-ownership-during-reconfiguration",
+    "file": "backend/policies.py",
+    "old": "return bool(reserved or physical or probe)",
+    "new": "return bool(reserved or physical)"
+  }
+]

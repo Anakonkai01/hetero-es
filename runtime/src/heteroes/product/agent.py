@@ -33,6 +33,8 @@ COMMAND_KINDS = frozenset(
         "CANCEL_ASSIGNMENT",
         "UPDATE_BACKUP_POLICY",
         "PAUSE_ASSIGNMENT",
+        "QUALIFY_MODEL",
+        "CANCEL_MODEL_QUALIFICATION",
     }
 )
 
@@ -144,6 +146,8 @@ class AgentManager(RunSupervisor):
 
     def launch(self, root):
         if self.agent.enabled:
+            if self.agent.probes.busy():
+                raise RuntimeError("Wait for model probe GPU release before training")
             intent = read_json(root / "launch-intent.json")
             if intent and (intent.get("process") is None or owned_state(intent["process"]) is not False):
                 raise RuntimeError("Coordinator launch ownership is unknown")
@@ -302,6 +306,10 @@ class Agent:
             Path.home() / ".local/share/heteroes-power",
         )
         self.manager = AgentManager(self)
+        from .model_probe_agent import ModelProbeManager
+
+        self.probes = ModelProbeManager(self)
+        self.model_qualification_supported = False
         self.db_path = self.root / "outbox.sqlite"
         with self.db() as db:
             db.executescript("""CREATE TABLE IF NOT EXISTS processed(id TEXT PRIMARY KEY);
@@ -343,6 +351,8 @@ class Agent:
         if action == "start":
             if not self.enabled:
                 raise RuntimeError("Contribution is OFF for this boot")
+            if self.probes.busy():
+                raise RuntimeError("Wait for model probe GPU release before training")
             if command["workerId"] != self.config["workerId"]:
                 raise ValueError("Worker identity mismatch")
             if original and original != command:
@@ -451,6 +461,10 @@ class Agent:
                 write_json(self.root / "boot.json", {"bootId": self.boot_id, "enabled": self.enabled})
                 if not self.enabled:
                     self.cancel_all()
+        elif kind == "QUALIFY_MODEL":
+            self.probes.start(command)
+        elif kind == "CANCEL_MODEL_QUALIFICATION":
+            self.probes.cancel(command.get("jobId"))
         elif kind == "COORDINATE":
             if self.config.get("workerOnly"):
                 raise ValueError("This device profile is worker-only")
@@ -461,6 +475,8 @@ class Agent:
                 return
             if not self.enabled:
                 raise RuntimeError("Contribution is OFF for this boot")
+            if self.probes.busy():
+                raise RuntimeError("Wait for model probe GPU release before training")
             if command["coordinatorDeviceId"] != self.config["deviceId"]:
                 raise ValueError("Coordinator identity mismatch")
             self.manager.accept(command)
@@ -570,6 +586,7 @@ class Agent:
         return marker and marker["epoch"] == command["epoch"]
 
     def cancel_all(self):
+        self.probes.cancel_all()
         for root in self.manager.root.iterdir():
             if (
                 root.is_dir()
@@ -709,12 +726,15 @@ class Agent:
                 "reports": reports,
                 "events": event_batch,
                 "acknowledgements": acknowledgements,
+                **({"qualificationReports": self.probes.reports()} if self.model_qualification_supported else {}),
                 **({"selfTest": self.config["selfTest"]} if self.config.get("selfTest") else {}),
             },
         )
         self.last_rtt_ms = (time.monotonic() - poll_started) * 1000
         self.telemetry_supported = response.get("telemetrySupported") is True
         self.detailed_telemetry_supported = response.get("detailedTelemetrySupported") is True
+        self.model_qualification_supported = response.get("modelQualificationSupported") is True
+        self.probes.acknowledge(response.get("acceptedQualifications", []))
         # The first poll of a new boot always returns OFF. A user-authenticated
         # activation or typed command for the current boot is needed before launch.
         if response["approvalStatus"] == "REVOKED" or (self.enabled and not response["desiredContribution"]):

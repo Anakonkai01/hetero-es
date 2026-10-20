@@ -153,6 +153,9 @@ def create_app(path, passwords, runtime, dispatch=True, web_directory=None, down
     from .study_registry import install_routes as study_routes
 
     study_routes(app, registry, runtime, scoped, device_auth)
+    from .model_qualification import install_routes as qualification_routes
+
+    qualification_routes(app, registry, runtime, scoped, device_auth)
     if runtime.storage_backend is not None:
         from .recovery_storage import RecoveryStorage, install_storage_routes
 

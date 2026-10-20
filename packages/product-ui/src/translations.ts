@@ -1,5 +1,26 @@
 /** Vietnamese strings used by active UI, data tables and backend statuses. */
 export const translations: Record<string, string> = {
+  'Model compatibility': 'Tương thích model',
+  Computer: 'Máy tính',
+  'Create the pinned manifest from your model folder:': 'Tạo manifest cố định từ thư mục model của bạn:',
+  'The first computer establishes a reference. Every other computer must reproduce it before using this model.':
+    'Máy đầu tiên tạo kết quả tham chiếu. Các máy khác phải tái hiện đúng kết quả đó trước khi dùng model này.',
+  'Device for model check': 'Máy kiểm tra model',
+  'Select a computer': 'Chọn máy',
+  'This computer is ready for this model.': 'Máy này đã sẵn sàng dùng model.',
+  'This computer needs a model check.': 'Máy này cần kiểm tra model.',
+  'Choose an online computer with contribution ON and no running job.':
+    'Chọn máy đang online, bật đóng góp và chưa chạy việc khác.',
+  'Check compatibility': 'Kiểm tra tương thích',
+  'Cancel model check': 'Hủy kiểm tra model',
+  'Model check passed': 'Model đã qua kiểm tra',
+  'Model check cancelled': 'Đã hủy kiểm tra model',
+  'Model check did not match the lab reference.': 'Kết quả kiểm tra model khác với tham chiếu của lab.',
+  'Model check failed. Check the Worker app and try again.':
+    'Kiểm tra model thất bại. Xem ứng dụng Worker rồi thử lại.',
+  'Preparing model check': 'Đang chuẩn bị kiểm tra model',
+  'Checking model compatibility': 'Đang kiểm tra tương thích model',
+  'Waiting for model check to stop': 'Đang chờ xác nhận kiểm tra model đã dừng',
   'Audits completed': 'Audit đã hoàn tất',
   'Audit mismatches': 'Audit có sai lệch',
   'Quarantined workers': 'Worker bị cách ly',

@@ -298,6 +298,15 @@ class Telemetry(FiniteStrict):
     errors: list[str] = Field(default_factory=list, max_length=5)
 
 
+class ModelQualificationReport(FiniteStrict):
+    jobId: str = Field(pattern="^[a-f0-9]{32}$")
+    status: Literal["PREPARING", "RUNNING", "COMPLETED", "FAILED", "CANCELLED"]
+    processAlive: bool | None = Field(default=None, strict=True)
+    reference: dict | None = None
+    observations: dict | None = None
+    errorCode: str | None = Field(default=None, max_length=100, pattern="^[A-Z][A-Z0-9_]+$")
+
+
 class Poll(FiniteStrict):
     telemetry: Telemetry | None = None
     bootId: str = Field(min_length=1, max_length=100)
@@ -307,6 +316,7 @@ class Poll(FiniteStrict):
     events: list[MonitoringEvent] = Field(default_factory=list, max_length=500)
     acknowledgements: list[str] = Field(default_factory=list, max_length=100)
     selfTest: SelfTest | None = None
+    qualificationReports: list[ModelQualificationReport] = Field(default_factory=list, max_length=10)
 
 
 class WorkerCommand(FiniteStrict):
