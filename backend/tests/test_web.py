@@ -36,6 +36,10 @@ def installer_app(tmp_path, monkeypatch, **extra):
             {
                 "installers": [{"name": "a.exe", "url": "/downloads/a.exe"}],
                 "serverInstallers": [{"name": "s.exe", "url": "/downloads/s.exe"}],
+                "linuxWorker": {
+                    "installer": {"name": "install-worker.sh", "url": "/downloads/install-worker.sh"},
+                    "bundle": {"name": "worker.tar.gz", "url": "/downloads/worker.tar.gz"},
+                },
             }
         )
     )
@@ -68,6 +72,8 @@ def test_installer_links_stay_private_behind_a_public_web_address_by_default(tmp
     assert manifest["privateTransferRequired"] is True
     assert manifest["installers"][0]["url"] == "http://100.64.0.1:8002/downloads/a.exe"
     assert manifest["serverInstallers"][0]["url"] == "http://100.64.0.1:8002/downloads/s.exe"
+    assert manifest["linuxWorker"]["installer"]["url"] == "http://100.64.0.1:8002/downloads/install-worker.sh"
+    assert manifest["linuxWorker"]["bundle"]["url"] == "http://100.64.0.1:8002/downloads/worker.tar.gz"
 
 
 def test_installer_links_use_the_public_origin_when_public_downloads_are_enabled(tmp_path, monkeypatch):

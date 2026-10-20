@@ -18,6 +18,40 @@ def sha(path):
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
+def cli_entries(packages, build, prepared=None):
+    """Verify the complete CLI inventory before publishing any links (old app-only builds remain supported)."""
+    path = packages / "cli/linux-worker.json"
+    if prepared is None and not path.exists():
+        return None
+    names = {"installer": "install-worker.sh", "bundle": f"heteroes-worker-linux-{build}.tar.gz"}
+    if prepared is None:
+        receipt = json.loads(path.read_text())
+        if receipt.get("build") != build or set(receipt.get("files", {})) != set(names.values()):
+            raise RuntimeError("CLI build inventory differs")
+        entries = {key: {"name": name, **receipt["files"][name]} for key, name in names.items()}
+    else:
+        entries = prepared
+    if set(entries) != set(names):
+        raise RuntimeError("CLI prepared inventory differs")
+    result = {}
+    for key, name in names.items():
+        entry, file = entries[key], packages / "cli" / name
+        if (
+            entry.get("name") != name
+            or not file.is_file()
+            or file.stat().st_size != entry.get("sizeBytes")
+            or sha(file) != entry.get("sha256")
+        ):
+            raise RuntimeError("CLI file differs from the reviewed receipt")
+        result[key] = {
+            "name": name,
+            "url": "/downloads/" + name,
+            "sha256": entry["sha256"],
+            "sizeBytes": entry["sizeBytes"],
+        }
+    return result
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--packages", type=Path, required=True)
@@ -91,6 +125,11 @@ def main(argv=None):
                     }
                 )
         manifest["publiclyPublished"] = True
+        cli = cli_entries(args.packages, args.build, prepared.get("linuxWorker")) if "linuxWorker" in prepared else None
+    else:
+        cli = cli_entries(args.packages, args.build)
+    if cli:
+        manifest["linuxWorker"] = cli
     for kind, product, key in [
         ("worker", "HeteroES Worker", "installers"),
         ("server", "HeteroES Lab Server", "serverInstallers"),
@@ -135,6 +174,19 @@ def main(argv=None):
             )
     encoded = json.dumps(manifest, indent=2) + "\n"
     if not args.prepare_only:
+        for entry in manifest.get("linuxWorker", {}).values():
+            file = args.packages / "cli" / entry["name"]
+            link = links / entry["name"]
+            if entry["name"] == "install-worker.sh":
+                # This stable one-line-install alias follows the reviewed build; bundles keep immutable names.
+                pending_link = links / "install-worker.sh.pending"
+                pending_link.symlink_to(file.resolve())
+                pending_link.replace(link)
+            elif link.exists() or link.is_symlink():
+                if link.resolve() != file.resolve():
+                    raise RuntimeError("Existing CLI bundle link points to another build")
+            else:
+                link.symlink_to(file.resolve())
         for key, kind in [("installers", "worker"), ("serverInstallers", "server")]:
             for entry in manifest[key]:
                 file = args.packages / kind / entry["name"]

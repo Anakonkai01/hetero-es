@@ -29,6 +29,8 @@ def install_routes(app, web_directory, downloads_directory):
                         for group in ("installers", "serverInstallers"):
                             for item in manifest.get(group, []):
                                 item["url"] = bulk + "/downloads/" + Path(item["name"]).name
+                        for item in manifest.get("linuxWorker", {}).values():
+                            item["url"] = bulk + "/downloads/" + Path(item["name"]).name
                 return manifest
 
             # The publisher links installers from another disk; Starlette refuses such symlinks by default.

@@ -29,6 +29,7 @@ npm run build --workspace frontend -- --outDir "$OUT/web" --emptyOutDir
 echo "=== runtimes $(date +%T)"
 python3 -I scripts/refresh-worker-runtime.py --track-a "$TRACK_A"
 python3 -I scripts/refresh-server-runtime.py --web "$OUT/web"
+python3 -I scripts/build-linux-worker.py --build "$BUILD" --out "$OUT/cli"
 # The Worker offers this lab address on first start and shows the build name in its footer (commit the file afterwards).
 printf '{"labUrl":"%s","build":"%s"}\n' "${DEFAULT_LAB_URL:-https://lab.heteroes.site}" "$BUILD" > desktop/worker/resources/defaults.json
 for app in worker server; do
