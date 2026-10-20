@@ -1,0 +1,12 @@
+{
+  "allFourTokenArraysEqual": true,
+  "allMatchOriginal5070Hash": true,
+  "inputsAndPrimaryWeightsMatchOriginal": true,
+  "newRecipeHash": "11136dc840e494f27fdfa5930f9b84ec73bb184dcdbee9b2062ef0e0adb617dc",
+  "oldRecipeHash": "859658c6316aba7caf79e1144ec239fe8af0d4991ea7be6ff63dd221ac35863d",
+  "cpuThreads": [
+    20,
+    12
+  ],
+  "limits": "One candidate on a historical verified parent; no release acceptance."
+}

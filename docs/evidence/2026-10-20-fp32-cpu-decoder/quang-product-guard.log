@@ -1,0 +1,3 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  71%|███████▏  | 207/290 [00:00<00:00, 2056.38it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 2185.73it/s]
+{"repeat": 0, "sha256": "519e5172210e0b97dfc20a761c97caa4635056912d67f6120afb52213fca8471", "stats": {"referenceCalls": 2, "referenceBytes": 3952262656, "referenceSeconds": 1.5270993880003516}}
+{"repeat": 1, "sha256": "519e5172210e0b97dfc20a761c97caa4635056912d67f6120afb52213fca8471", "stats": {"referenceCalls": 2, "referenceBytes": 3952262656, "referenceSeconds": 1.8958895310006483}}

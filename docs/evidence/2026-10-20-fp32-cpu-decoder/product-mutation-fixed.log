@@ -1,0 +1,14 @@
+control ok    | 18 passed in 2.01s
+killed       disable-margin | 2 failed, 16 passed in 2.04s
+killed       wrong-prefix | 2 failed, 16 passed in 2.02s
+killed       reference-finished-rows | 1 failed, 17 passed in 2.02s
+killed       discard-reference | 2 failed, 16 passed in 2.02s
+killed       skip-ram-guard | 2 failed, 16 passed in 2.05s
+killed       skip-size-limit | 1 failed, 17 passed in 2.01s
+killed       inexact-reference-cast | 1 failed, 17 passed in 2.03s
+killed       reference-remains-fp32 | 2 failed, 16 passed in 1.99s
+killed       permit-unsupported-mode | 1 failed, 17 passed in 2.04s
+killed       supervisor-rejects-v3-decoder | 1 failed, 17 passed in 2.05s
+killed       allow-v3-fp16-guard | 1 failed, 17 passed in 2.02s
+
+11 of 11 mutants killed.
