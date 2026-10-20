@@ -1,0 +1,24 @@
+{
+ "labUsageSummary": {
+  "generatedTokens": 256,
+  "auditGeneratedTokens": 0,
+  "workerGpuSeconds": 10.515473200000997,
+  "coordinatorUpdateGpuSeconds": 0.0,
+  "gpuSeconds": 10.515473200000997,
+  "reportedCandidates": 8,
+  "recordedUpdates": 2,
+  "partial": false
+ },
+ "perGeneration": [
+  {
+   "generation": 0,
+   "generatedTokens": 128,
+   "workerGpuSeconds": 5.461378899999545
+  },
+  {
+   "generation": 1,
+   "generatedTokens": 128,
+   "workerGpuSeconds": 5.054094300001452
+  }
+ ]
+}
