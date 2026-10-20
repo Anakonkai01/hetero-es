@@ -1,5 +1,7 @@
+import json
+
 import pytest
-from heteroes.product.agent import Agent
+from heteroes.product.agent import Agent, InvalidCommand
 from heteroes.product.files import write_json, read_json
 
 
@@ -406,6 +408,105 @@ def test_command_failure_reaches_the_server_as_a_throttled_assignment_event(tmp_
     assert len(rows) == 1 and rows[0][:2] == ("c" * 32, 3)
     event = __import__("json").loads(rows[0][2])
     assert event["event"] == "agent_command_failed" and event["errorType"] == "OSError" and event["attempts"] == 1
+
+
+def outbox_events(a):
+    with a.db() as db:
+        return [json.loads(body) for (body,) in db.execute("SELECT body FROM event_outbox ORDER BY rowid")]
+
+
+def coordinate(**extra):
+    return {
+        "commandId": "coord",
+        "kind": "COORDINATE",
+        "assignmentId": "c" * 32,
+        "epoch": 3,
+        "runId": "d" * 32,
+        **extra,
+    }
+
+
+def test_deferred_command_tells_the_server_why_at_attempts_1_and_10(tmp_path, monkeypatch):
+    a = agent(tmp_path)  # contribution is OFF for this boot, so the coordinator command has to wait
+    sent = poll_with(a, monkeypatch, [coordinate()])
+    for _ in range(9):
+        a.cycle()
+    [event] = outbox_events(a)
+    assert event["event"] == "agent_command_deferred" and event["attempts"] == 1
+    assert (event["commandId"], event["kind"]) == ("coord", "COORDINATE")
+    assert event["reason"] == "Contribution is OFF for this boot"
+    a.cycle()
+    assert [e["attempts"] for e in outbox_events(a)] == [1, 10]
+    assert not any("coord" in body["acknowledgements"] for body in sent)
+    with a.db() as db:
+        assert db.execute('SELECT attempts FROM command_deferrals WHERE id="coord"').fetchone()[0] == 10
+        assert db.execute("SELECT count(*) FROM command_failures").fetchone()[0] == 0
+
+
+def test_deferral_is_reported_at_attempts_100_and_1000_and_not_in_between(tmp_path):
+    a = agent(tmp_path)
+    for attempt, reported in ((99, False), (100, True), (101, False), (1000, True), (1001, False)):
+        before = len(outbox_events(a))
+        with a.db() as db:
+            db.execute(
+                "INSERT OR REPLACE INTO command_deferrals VALUES (?,?,?,?,0)",
+                ("coord", "COORDINATE", "RuntimeError", attempt - 1),
+            )
+        a.run_commands([coordinate()])
+        assert len(outbox_events(a)) - before == reported, attempt
+
+
+@pytest.mark.parametrize("report,error", [("record_failure", InvalidCommand), ("record_deferral", RuntimeError)])
+@pytest.mark.parametrize(
+    "identity", [{"assignmentId": "not-hex"}, {"assignmentId": None}, {"epoch": 0}, {"epoch": "3"}]
+)
+def test_nothing_is_queued_for_a_command_without_a_valid_assignment_identity(tmp_path, report, error, identity):
+    a = agent(tmp_path)
+    getattr(a, report)(coordinate(**identity), error("x"))
+    assert outbox_events(a) == []
+
+
+def test_deferral_count_survives_an_agent_restart(tmp_path):
+    a = agent(tmp_path)
+    for _ in range(9):
+        a.run_commands([coordinate()])
+    b = Agent(tmp_path / "config.json")
+    b.run_commands([coordinate()])
+    assert [e["attempts"] for e in outbox_events(b)] == [1, 10]
+
+
+def test_failure_event_gives_a_reason_only_for_the_agents_own_errors(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    a.enabled = True
+    bad = {"commandId": "bad", "kind": "START_WORKER", "assignmentId": "c" * 32, "epoch": 1, "runId": "../escape"}
+
+    def broken(command, action):
+        raise OSError("disk full: /home/someone/private/path")
+
+    monkeypatch.setattr(a, "_worker", broken)
+    start = {"commandId": "start", "kind": "START_WORKER", "assignmentId": "c" * 32, "epoch": 1, "runId": "d" * 32}
+    a.config["workerOnly"] = True
+    worker_only = coordinate(commandId="worker-only")
+    a.run_commands([bad, start, worker_only])
+    own, library, plain = outbox_events(a)
+    assert own["event"] == library["event"] == plain["event"] == "agent_command_failed"
+    assert own["reason"] == "Invalid run identity"
+    assert library["errorType"] == "OSError" and "reason" not in library
+    assert plain["errorType"] == "ValueError" and plain["reason"] == "This device profile is worker-only"
+
+
+@pytest.mark.parametrize(
+    "report,error",
+    [("record_failure", InvalidCommand), ("record_deferral", RuntimeError)],
+)
+def test_reason_hides_urls_and_is_cut_to_200_characters(tmp_path, report, error):
+    a = agent(tmp_path)
+    getattr(a, report)(
+        coordinate(), error("see https://grant.example/v1?token=abc123 and ftp://files.example/x " + "y" * 300)
+    )
+    [event] = outbox_events(a)
+    assert "abc123" not in event["reason"] and "grant.example" not in event["reason"]
+    assert event["reason"].startswith("see <url> and <url> y") and len(event["reason"]) == 200
 
 
 PRIVATE = "http://100.64.0.1:8765"

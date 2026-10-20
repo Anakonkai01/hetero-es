@@ -1,7 +1,7 @@
 /**
  * Browser contract for the experiment tools (compare, run again, templates, exports) against the test lab seeded with two
  * recorded runs:
- *   python3 scripts/serve-test-lab.py --web <build> --port 18084 --seed-run backend/tests/fixtures/run-d09d6ea8.json --seed-run backend/tests/fixtures/run-95b34770.json &
+ *   python3 scripts/serve-test-lab.py --web <build> --port 18084 --seed-run backend/tests/fixtures/run-d09d6ea8.json --seed-run backend/tests/fixtures/run-95b34770.json --stuck-run backend/tests/fixtures/run-d09d6ea8.json &
  *   node scripts/check-web-experiments.mjs http://127.0.0.1:18084 <fresh evidence directory>
  */
 import { chromium } from 'playwright';
@@ -271,6 +271,21 @@ try {
   await page.getByText('lora', { exact: true }).waitFor();
   results.v3ImportAndBrowserDraft = true;
   await page.screenshot({ path: path.join(output, 'v3-draft.png'), fullPage: true });
+
+  // A run that cannot start says why, from what its coordinator device reported (not from the run snapshot).
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto(base + '/experiments');
+  await page.locator('a', { hasText: 'Run that cannot start' }).first().click();
+  const waiting = page
+    .getByRole('status')
+    .filter({ hasText: 'This device is waiting: contribution is switched off on it' });
+  await waiting.waitFor();
+  assert.match(await waiting.textContent(), /switched off on it · .*\d/);
+  assert.equal(await waiting.getAttribute('class'), 'note warn');
+  await page.getByRole('tab', { name: 'Logs' }).click();
+  await page.getByText('This device is waiting: contribution is switched off on it').nth(1).waitFor();
+  await page.screenshot({ path: path.join(output, 'run-that-cannot-start.png'), fullPage: true });
+  results.stuckRunShowsWhyItWaits = true;
 
   for (const width of [375, 768, 1280]) {
     await page.setViewportSize({ width, height: 900 });

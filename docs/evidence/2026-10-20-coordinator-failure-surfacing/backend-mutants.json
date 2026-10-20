@@ -1,0 +1,98 @@
+[
+ {
+  "name": "failed-event-not-read",
+  "file": "backend/routes_history.py",
+  "old": "DEVICE_EVENTS = (\"agent_command_failed\", \"agent_command_deferred\")",
+  "new": "DEVICE_EVENTS = (\"agent_command_deferred\",)"
+ },
+ {
+  "name": "deferred-event-not-read",
+  "file": "backend/routes_history.py",
+  "old": "DEVICE_EVENTS = (\"agent_command_failed\", \"agent_command_deferred\")",
+  "new": "DEVICE_EVENTS = (\"agent_command_failed\",)"
+ },
+ {
+  "name": "failed-is-not-an-error",
+  "file": "backend/routes_history.py",
+  "old": "if \"error\" in name or \"failed\" in name:",
+  "new": "if \"error\" in name:"
+ },
+ {
+  "name": "error-is-not-an-error",
+  "file": "backend/routes_history.py",
+  "old": "if \"error\" in name or \"failed\" in name:",
+  "new": "if \"failed\" in name:"
+ },
+ {
+  "name": "deferred-is-not-a-warning",
+  "file": "backend/routes_history.py",
+  "old": "or \"unknown\" in name or \"deferred\" in name:",
+  "new": "or \"unknown\" in name:"
+ },
+ {
+  "name": "unavailable-is-not-a-warning",
+  "file": "backend/routes_history.py",
+  "old": "if \"unavailable\" in name or \"unknown\" in name or \"deferred\" in name:",
+  "new": "if \"unknown\" in name or \"deferred\" in name:"
+ },
+ {
+  "name": "unknown-is-not-a-warning",
+  "file": "backend/routes_history.py",
+  "old": "if \"unavailable\" in name or \"unknown\" in name or \"deferred\" in name:",
+  "new": "if \"unavailable\" in name or \"deferred\" in name:"
+ },
+ {
+  "name": "device-message-uses-error",
+  "file": "backend/routes_history.py",
+  "old": "return event.get(\"reason\", phrase)",
+  "new": "return event.get(\"error\", phrase)"
+ },
+ {
+  "name": "device-message-is-the-name",
+  "file": "backend/routes_history.py",
+  "old": "return event.get(\"reason\", phrase)",
+  "new": "return phrase"
+ },
+ {
+  "name": "coordinator-error-text-lost",
+  "file": "backend/routes_history.py",
+  "old": "return event.get(\"error\", phrase)",
+  "new": "return phrase"
+ },
+ {
+  "name": "every-run-gets-every-device-event",
+  "file": "backend/routes_history.py",
+  "old": "WHERE a.run_id=? AND",
+  "new": "WHERE ?=? AND"
+ },
+ {
+  "name": "device-events-without-filter",
+  "file": "backend/routes_history.py",
+  "old": "AND json_extract(m.body,'$.event') IN (?,?)",
+  "new": "AND ?=? "
+ },
+ {
+  "name": "device-event-ids-collide",
+  "file": "backend/routes_history.py",
+  "old": "(f\"m{row['sequence']}\", json.loads(row[\"body\"]))",
+  "new": "(\"m\", json.loads(row[\"body\"]))"
+ },
+ {
+  "name": "snapshot-event-ids-changed",
+  "file": "backend/routes_history.py",
+  "old": "f\"e{index}\"",
+  "new": "f\"x{index}\""
+ },
+ {
+  "name": "device-events-dropped",
+  "file": "backend/routes_history.py",
+  "old": "for key, event in events + device_events(run_id):",
+  "new": "for key, event in events:"
+ },
+ {
+  "name": "unordered-device-events",
+  "file": "backend/routes_history.py",
+  "old": " ORDER BY m.sequence",
+  "new": ""
+ }
+]

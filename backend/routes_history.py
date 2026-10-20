@@ -1,8 +1,29 @@
+import json
+
 from fastapi import Depends, HTTPException
 from fastapi.responses import StreamingResponse
 
 
 from fastapi import APIRouter
+
+# What a device's agent says about a command it could not finish. Unlike the coordinator's events these never reach the
+# run snapshot, and a run that is still STARTING has no snapshot at all.
+DEVICE_EVENTS = ("agent_command_failed", "agent_command_deferred")
+
+
+def severity(name):
+    if "error" in name or "failed" in name:
+        return "ERROR"
+    if "unavailable" in name or "unknown" in name or "deferred" in name:
+        return "WARNING"
+    return "INFO"
+
+
+def message(event):
+    phrase = event["event"].replace("_", " ")
+    if event["event"] in DEVICE_EVENTS:
+        return event.get("reason", phrase)
+    return event.get("error", phrase)
 
 
 def install_routes(app, store, runtime, scoped, visible, authorized):
@@ -42,30 +63,35 @@ def install_routes(app, store, runtime, scoped, visible, authorized):
     def attempt(attempt_id: str, current=Depends(scoped)):
         return lookup(attempt_id, "attemptId", "attempts", current)
 
+    def device_events(run_id):
+        with store.db() as db:
+            rows = db.execute(
+                "SELECT m.sequence,m.body FROM monitoring_events m JOIN assignments a ON a.id=m.assignment_id "
+                "WHERE a.run_id=? AND json_extract(m.body,'$.event') IN (?,?) ORDER BY m.sequence",
+                (run_id, *DEVICE_EVENTS),
+            ).fetchall()
+        return [(f"m{row['sequence']}", json.loads(row["body"])) for row in rows]
+
     @router.get("/api/v1/events")
     def event_list(current=Depends(scoped)):
         from datetime import datetime, timezone
 
         result = []
         for run in visible(current):
-            for index, event in enumerate(store.snapshot(run["experimentId"])["events"]):
+            run_id = run["experimentId"]
+            events = [(f"e{index}", event) for index, event in enumerate(store.snapshot(run_id)["events"])]
+            for key, event in events + device_events(run_id):
                 result.append(
                     {
-                        "eventId": f"{run['experimentId']}.e{index}",
-                        "experimentId": run["experimentId"],
+                        "eventId": f"{run_id}.{key}",
+                        "experimentId": run_id,
                         "timestamp": datetime.fromtimestamp(event.get("t", 0), timezone.utc).isoformat(),
                         "eventType": event["event"],
-                        "severity": "ERROR"
-                        if "error" in event["event"]
-                        else "WARNING"
-                        if "unavailable" in event["event"] or "unknown" in event["event"]
-                        else "INFO",
-                        "message": event.get("error", event["event"].replace("_", " ")),
+                        "severity": severity(event["event"]),
+                        "message": message(event),
                         "workerId": event.get("worker_id"),
                         "candidateId": event.get("uiCandidateId"),
-                        "generationId": f"{run['experimentId']}.g{event['generation']}"
-                        if "generation" in event
-                        else None,
+                        "generationId": f"{run_id}.g{event['generation']}" if "generation" in event else None,
                         "details": event,
                     }
                 )

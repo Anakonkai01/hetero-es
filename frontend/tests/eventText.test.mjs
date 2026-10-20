@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { describeEvent, fillTemplate } from '../src/lib/eventText.ts';
+import { describeEvent, deviceNotice, fillTemplate } from '../src/lib/eventText.ts';
 
 test('every event the coordinator records has a plain sentence with its numbers filled in', () => {
   const cases = [
@@ -82,4 +82,74 @@ test('audit mismatches and quarantine are visible without claiming a reward chan
   assert.match(fillTemplate(mismatch.template, mismatch.params), /other.*r\/g0\/c0/);
   const quarantine = describeEvent('audit_worker_quarantined', { worker_id: 'original' });
   assert.equal(quarantine.tone, 'err');
+});
+
+test('a device that has to wait says why in plain words; a failure carries the agent’s own reason', () => {
+  const say = (type, details) => {
+    const d = describeEvent(type, details, undefined);
+    return [fillTemplate(d.template, d.params), d.tone, d.level];
+  };
+  assert.deepEqual(say('agent_command_deferred', { reason: 'Contribution is OFF for this boot' }), [
+    'This device is waiting: contribution is switched off on it',
+    'warn',
+    'main',
+  ]);
+  assert.deepEqual(say('agent_command_deferred', { reason: 'A newer agent message' }), [
+    'A device is waiting to carry out a command: A newer agent message',
+    'warn',
+    'main',
+  ]);
+  assert.deepEqual(say('agent_command_deferred', {}), [
+    'A device is waiting to carry out a command: ?',
+    'warn',
+    'main',
+  ]);
+  // a name every object inherits is not one of the known reasons
+  assert.equal(
+    say('agent_command_deferred', { reason: 'constructor' })[0],
+    'A device is waiting to carry out a command: constructor',
+  );
+  assert.deepEqual(say('agent_command_failed', { reason: 'Invalid run identity', errorType: 'InvalidCommand' }), [
+    'A device could not carry out a command: Invalid run identity',
+    'err',
+    'main',
+  ]);
+  assert.deepEqual(say('agent_command_failed', { errorType: 'OSError' }), [
+    'A device could not carry out a command (OSError)',
+    'err',
+    'main',
+  ]);
+  assert.equal(say('agent_command_failed', {})[0], 'A device could not carry out a command (?)');
+});
+
+test('the newest device message explains a run that is starting or running, until the coordinator speaks', () => {
+  const event = (eventType, timestamp, details = {}) => ({
+    eventId: eventType + timestamp,
+    timestamp,
+    eventType,
+    severity: 'INFO',
+    message: '',
+    details,
+  });
+  const early = event('generation_done', '2026-10-20T10:00:00+00:00');
+  const wait = event('agent_command_deferred', '2026-10-20T10:01:00+00:00', {
+    reason: 'Contribution is OFF for this boot',
+  });
+  const failed = event('agent_command_failed', '2026-10-20T10:02:00+00:00', { reason: 'Invalid run identity' });
+  const later = event('managed_start', '2026-10-20T10:03:00+00:00');
+
+  const notice = deviceNotice('STARTING', [early, wait]);
+  assert.equal(notice?.timestamp, wait.timestamp);
+  assert.equal(
+    fillTemplate(notice.template, notice.params),
+    'This device is waiting: contribution is switched off on it',
+  );
+  assert.equal(notice.tone, 'warn');
+  assert.equal(deviceNotice('RUNNING', [wait])?.timestamp, wait.timestamp);
+  assert.equal(deviceNotice('STARTING', [wait, failed])?.tone, 'err', 'the newest one wins');
+  for (const status of ['QUEUED', 'DRAFT', 'PAUSED', 'COMPLETED', 'FAILED', 'CANCELLED'])
+    assert.equal(deviceNotice(status, [wait]), null, status);
+  assert.equal(deviceNotice('RUNNING', [wait, later]), null, 'the coordinator spoke after the device');
+  assert.equal(deviceNotice('STARTING', [early]), null);
+  assert.equal(deviceNotice('STARTING', []), null);
 });

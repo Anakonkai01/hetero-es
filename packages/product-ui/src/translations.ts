@@ -1350,6 +1350,24 @@ export const translations: Record<string, string> = {
   'Worker {worker} is not answering': 'Worker {worker} không phản hồi',
   'Could not confirm whether worker {worker} started': 'Chưa xác nhận được worker {worker} đã khởi động',
   'The coordinator reported an error: {error}': 'Coordinator báo lỗi: {error}',
+  'This device is waiting: contribution is switched off on it': 'Máy này đang chờ: chế độ đóng góp đang tắt trên máy',
+  'This device is waiting for a model check to release its GPU': 'Máy này đang chờ kiểm tra model trả GPU lại',
+  'This device cannot yet tell whether its coordinator is still running':
+    'Máy này chưa xác định được coordinator của nó còn chạy hay không',
+  'This device cannot yet tell whether its worker is still running':
+    'Máy này chưa xác định được worker của nó còn chạy hay không',
+  'A worker device cannot reach the coordinator yet': 'Máy worker chưa kết nối được tới coordinator',
+  'This device cannot tell yet which run it should serve': 'Máy này chưa biết nên phục vụ lần chạy nào',
+  'This device is waiting for the paused coordinator to stop before resuming':
+    'Máy này đang chờ coordinator đã tạm dừng tắt hẳn rồi mới chạy tiếp',
+  'This device is waiting for its worker to stop before resuming': 'Máy này đang chờ worker tắt hẳn rồi mới chạy tiếp',
+  'This device is shutting down and will not start new work': 'Máy này đang tắt nên không nhận việc mới',
+  'This device is waiting for the run assignment before it applies the backup policy':
+    'Máy này đang chờ nhận lần chạy rồi mới áp dụng chính sách sao lưu',
+  'Another run still holds the GPU, so this run waits': 'Một lần chạy khác còn giữ GPU nên lần chạy này phải chờ',
+  'A device is waiting to carry out a command: {reason}': 'Một máy đang chờ để thực hiện một lệnh: {reason}',
+  'A device could not carry out a command: {reason}': 'Một máy không thực hiện được một lệnh: {reason}',
+  'A device could not carry out a command ({error})': 'Một máy không thực hiện được một lệnh ({error})',
   'Recovery point saved for generation {generation}': 'Đã lưu điểm khôi phục cho thế hệ {generation}',
   'Could not save a recovery point for generation {generation}':
     'Không lưu được điểm khôi phục cho thế hệ {generation}',

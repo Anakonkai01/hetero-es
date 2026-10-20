@@ -1,5 +1,7 @@
 // Turns the coordinator's raw event names into plain sentences. The English template is the translation key
 // (looked up with t()); {placeholders} are filled afterwards so numbers never end up inside a translation key.
+import type { SystemEvent } from '../types/event';
+
 export type EventDescription = {
   template: string;
   params: Record<string, string | number>;
@@ -13,6 +15,28 @@ const num = (value: unknown, digits: number) =>
 // Generations are numbered from 0 in the data and from 1 for people.
 const gen = (value: unknown) => (typeof value === 'number' ? value + 1 : '?');
 const text = (value: unknown) => (typeof value === 'string' ? value : '');
+
+// Why a device's agent keeps a command waiting. The keys are the agent's fixed messages; the sentences are translation
+// keys. A message not listed here (a newer agent) is shown in the agent's own words.
+export const DEVICE_WAITS = new Map([
+  ['Contribution is OFF for this boot', 'This device is waiting: contribution is switched off on it'],
+  ['Wait for model probe GPU release before training', 'This device is waiting for a model check to release its GPU'],
+  ['Coordinator launch ownership is unknown', 'This device cannot yet tell whether its coordinator is still running'],
+  ['Worker launch ownership is unknown', 'This device cannot yet tell whether its worker is still running'],
+  ['The coordinator is not reachable on any route yet', 'A worker device cannot reach the coordinator yet'],
+  ['No unique active assignment', 'This device cannot tell yet which run it should serve'],
+  [
+    'Resume requires confirmed paused coordinator shutdown',
+    'This device is waiting for the paused coordinator to stop before resuming',
+  ],
+  ['Resume requires confirmed worker shutdown', 'This device is waiting for its worker to stop before resuming'],
+  ['Desktop shutdown is pending', 'This device is shutting down and will not start new work'],
+  [
+    'Wait for the assignment before applying its policy',
+    'This device is waiting for the run assignment before it applies the backup policy',
+  ],
+  ['another run still owns the GPU pool', 'Another run still holds the GPU, so this run waits'],
+]);
 
 export function fillTemplate(template: string, params: Record<string, string | number>): string {
   return template
@@ -162,6 +186,17 @@ export function describeEvent(type: string, details: Details, workerId?: string)
         'detail',
       );
     }
+    case 'agent_command_deferred': {
+      const reason = text(d.reason);
+      const known = DEVICE_WAITS.get(reason);
+      return known
+        ? done(known, {}, 'warn')
+        : done('A device is waiting to carry out a command: {reason}', { reason: reason || '?' }, 'warn');
+    }
+    case 'agent_command_failed':
+      return text(d.reason)
+        ? done('A device could not carry out a command: {reason}', { reason: text(d.reason) }, 'err')
+        : done('A device could not carry out a command ({error})', { error: text(d.errorType) || '?' }, 'err');
     case 'step':
       return d.kind === 'COMMITTED'
         ? done('Worker {worker} committed a candidate', { worker }, 'info', 'detail')
@@ -171,4 +206,14 @@ export function describeEvent(type: string, details: Details, workerId?: string)
       return done(phrase ? phrase[0].toUpperCase() + phrase.slice(1) : 'Event', {}, 'neutral', 'detail');
     }
   }
+}
+
+/** The device message that explains why a run has not got going: only while the run is starting or running, and only
+ * while it is the newest thing known about the run (anything the coordinator says afterwards means it got going).
+ * `events` are oldest first, as the API returns them. */
+export function deviceNotice(status: string, events: SystemEvent[]): (EventDescription & { timestamp: string }) | null {
+  const newest = events[events.length - 1];
+  if (!newest || !['STARTING', 'RUNNING'].includes(status)) return null;
+  if (newest.eventType !== 'agent_command_deferred' && newest.eventType !== 'agent_command_failed') return null;
+  return { ...describeEvent(newest.eventType, newest.details, newest.workerId), timestamp: newest.timestamp };
 }

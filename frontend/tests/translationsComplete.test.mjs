@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { translations } from '../../packages/product-ui/src/translations.ts';
 import { TEMPLATES } from '../src/lib/notificationText.ts';
-import { describeEvent } from '../src/lib/eventText.ts';
+import { DEVICE_WAITS, describeEvent } from '../src/lib/eventText.ts';
 import { BUILT_IN } from '../src/lib/templates.ts';
 import { GLOSSARY } from '../src/lib/glossary.ts';
 import { presentationScenes } from '../src/lib/presentationScenes.ts';
@@ -35,6 +35,8 @@ const EVENT_TYPES = [
   'recovery_point_error',
   'backup_policy_applied',
   'step',
+  'agent_command_deferred',
+  'agent_command_failed',
 ];
 
 test('every notification sentence has a Vietnamese version with the same placeholders', () => {
@@ -61,6 +63,15 @@ test('every event sentence has a Vietnamese version with the same placeholders',
         `${type} placeholders`,
       );
     }
+});
+
+test('every reason a device can give for waiting has a Vietnamese sentence with the same placeholders', () => {
+  assert.ok(DEVICE_WAITS.size >= 10);
+  for (const reason of DEVICE_WAITS.keys()) {
+    const { template, params } = describeEvent('agent_command_deferred', { reason }, 'w');
+    assert.ok(translations[template], reason);
+    assert.deepEqual(Object.keys(params), [], reason);
+  }
 });
 
 test('the built-in template names are translated', () => {

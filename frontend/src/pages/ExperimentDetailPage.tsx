@@ -24,6 +24,7 @@ import { useArtifacts } from '../hooks/useArtifacts';
 import { useEvents } from '../hooks/useEvents';
 import { useExperiment } from '../hooks/useExperiment';
 import { useGenerations } from '../hooks/useGenerations';
+import { deviceNotice, fillTemplate } from '../lib/eventText';
 import { formatDateTime, formatOptionalDateTime, formatReward, shortId } from '../lib/format';
 import { ARTIFACT_STATUS, ARTIFACT_TYPE_LABEL, EXPERIMENT_STATUS } from '../lib/labels';
 import { useBackState } from '../lib/navigation';
@@ -60,6 +61,7 @@ export function ExperimentDetailPage() {
   const artifacts = (artifactsQuery.data ?? []).filter((a) => a.experimentId === experimentId);
   const currentGeneration = generations.find((g) => g.generationId === experiment?.currentGenerationId);
   const eventsFailed = eventsQuery.isError && isServerError(eventsQuery.error);
+  const notice = experiment ? deviceNotice(experiment.status, events) : null;
   return (
     <QueryState
       isPending={experimentQuery.isPending}
@@ -135,6 +137,13 @@ export function ExperimentDetailPage() {
           />
 
           <ExperimentControls key={`${experiment.experimentId}:${experiment.status}`} experiment={experiment} />
+
+          {notice && (
+            <p className={`note ${notice.tone === 'err' ? 'err' : 'warn'}`} role="status">
+              {fillTemplate(t(notice.template), notice.params)}
+              <span className="hint"> · {formatDateTime(notice.timestamp)}</span>
+            </p>
+          )}
 
           <div role="tablist" className="tabs" aria-label={t('Experiment sections')}>
             {tabs.map((item) => (

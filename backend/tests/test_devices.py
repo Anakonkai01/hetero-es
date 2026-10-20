@@ -1,5 +1,6 @@
 """CPU-only protocol contracts; no runtime or CUDA import is allowed here."""
 
+import hashlib
 import json
 from pathlib import Path
 import time
@@ -400,6 +401,109 @@ def test_monitoring_events_deduplicate_independently_of_snapshot_sequence(lab):
             "SELECT event_id FROM monitoring_events WHERE assignment_id=?", (ar["assignmentId"],)
         ).fetchall()
     assert [row[0] for row in rows] == [eid]
+
+
+def device_event(assignment, event):
+    encoded = json.dumps(event, sort_keys=True, separators=(",", ":"))
+    return {
+        "eventId": hashlib.sha256((assignment["assignmentId"] + encoded).encode()).hexdigest(),
+        "assignmentId": assignment["assignmentId"],
+        "epoch": assignment["epoch"],
+        "event": event,
+    }
+
+
+def test_a_device_that_cannot_start_the_run_says_why_in_the_event_list(lab):
+    c, s, r, a = lab
+    (d1, h1), (d2, h2) = pair(lab, "gpu-one"), pair(lab, "gpu-two")
+    enable(lab, d1, h1)
+    enable(lab, d2, h2)
+    first, second = queued(lab, d1, name="First run"), queued(lab, d2, name="Second run")
+    s.dispatch_once()
+    assignments = {assignment["runId"]: assignment for assignment in r.runs()}
+    deferred = {
+        "event": "agent_command_deferred",
+        "kind": "COORDINATE",
+        "attempts": 10,
+        "reason": "The coordinator is not reachable on any route yet",
+        "t": 200,
+    }
+    failed = {
+        "event": "agent_command_failed",
+        "kind": "START_WORKER",
+        "attempts": 1,
+        "reason": "Invalid run identity",
+        "t": 300,
+    }
+    copied = {"event": "generation_done", "generation": 0, "t": 100}  # the agent also copies the coordinator's events
+    other = {
+        "event": "agent_command_deferred",
+        "kind": "COORDINATE",
+        "attempts": 1,
+        "reason": "Contribution is OFF for this boot",
+        "t": 250,
+    }
+    boot(
+        c,
+        h1,
+        "boot-1",
+        contribution=True,
+        events=[device_event(assignments[first], e) for e in (failed, copied, deferred)],
+    )
+    boot(c, h2, "boot-1", contribution=True, events=[device_event(assignments[second], other)])
+    events = c.get("/api/v1/events", headers=a).json()
+
+    def of(run_id):
+        return [(e["eventType"], e["severity"], e["message"]) for e in events if e["experimentId"] == run_id]
+
+    assert of(first) == [
+        ("agent_command_deferred", "WARNING", "The coordinator is not reachable on any route yet"),
+        ("agent_command_failed", "ERROR", "Invalid run identity"),
+    ]
+    assert of(second) == [("agent_command_deferred", "WARNING", "Contribution is OFF for this boot")]
+    assert len({e["eventId"] for e in events}) == 3
+
+
+def test_event_severity_follows_the_event_name_and_a_missing_reason_falls_back_to_it(lab):
+    c, s, r, a = lab
+    d, h = pair(lab)
+    enable(lab, d, h)
+    rid = queued(lab, d)
+    s.dispatch_once()
+    assignment = r.runs()[0]
+    snapshot = {
+        "state": {"status": "RUNNING"},
+        "generations": [],
+        "candidates": [],
+        "attempts": [],
+        "artifacts": [],
+        "events": [
+            {"event": "generation_failed", "t": 50},
+            {"event": "managed_error", "error": "boom", "t": 55},
+            {"event": "worker_unavailable", "t": 60},
+            {"event": "worker_start_unknown", "t": 65},
+        ],
+    }
+    report = {
+        "sequence": 1,
+        "assignmentId": assignment["assignmentId"],
+        "epoch": assignment["epoch"],
+        "snapshot": snapshot,
+    }
+    bare = {"event": "agent_command_deferred", "kind": "COORDINATE", "attempts": 1, "t": 70}
+    boot(c, h, "boot-1", contribution=True, reports=[report], events=[device_event(assignment, bare)])
+    s.dispatch_once()
+    events = c.get("/api/v1/events", headers=a).json()
+    assert [(e["eventType"], e["severity"], e["message"]) for e in events] == [
+        ("generation_failed", "ERROR", "generation failed"),
+        ("managed_error", "ERROR", "boom"),
+        ("worker_unavailable", "WARNING", "worker unavailable"),
+        ("worker_start_unknown", "WARNING", "worker start unknown"),
+        ("agent_command_deferred", "WARNING", "agent command deferred"),
+    ]
+    # the ids that the Events page links to: coordinator events by position, device events by arrival
+    assert [e["eventId"] for e in events[:4]] == [f"{rid}.e{n}" for n in (0, 1, 2, 3)]
+    assert events[4]["eventId"].startswith(f"{rid}.m")
 
 
 def test_backup_policy_change_does_not_mutate_frozen_assignment(lab):

@@ -93,6 +93,40 @@ def load_run(store, recorded):
     return run_id
 
 
+def load_stuck_run(store, recorded):
+    """A run that was admitted but never got going: STARTING with an empty snapshot, and what its coordinator device
+    reported about the command it could not carry out (kept apart from the run snapshot, as the real lab does)."""
+    import time
+    import uuid
+
+    run_id = load_run(store, recorded)
+    with store.db() as db:
+        body = json.loads(db.execute("SELECT body FROM experiments WHERE id=?", (run_id,)).fetchone()[0])
+        for key in ("completedAt", "currentGenerationId", "startedAt"):
+            body.pop(key, None)
+        body.update(name="Run that cannot start", status="STARTING", completedGenerations=0, committedCandidateCount=0)
+        empty = {"generations": [], "candidates": [], "attempts": [], "events": [], "artifacts": []}
+        db.execute(
+            "UPDATE experiments SET body=?, snapshot=? WHERE id=?", (json.dumps(body), json.dumps(empty), run_id)
+        )
+        assignment = uuid.uuid4().hex
+        db.execute("INSERT INTO assignments VALUES (?,?,?,?,?,?,0)", (assignment, run_id, "test-device", 1, "{}", "{}"))
+        event = {
+            "event": "agent_command_deferred",
+            "commandId": "coordinate",
+            "kind": "COORDINATE",
+            "errorType": "RuntimeError",
+            "attempts": 10,
+            "reason": "Contribution is OFF for this boot",
+            "t": round(time.time(), 3),
+        }
+        db.execute(
+            "INSERT INTO monitoring_events(event_id,assignment_id,body) VALUES (?,?,?)",
+            (uuid.uuid4().hex, assignment, json.dumps(event, sort_keys=True)),
+        )
+    return run_id
+
+
 def start_simulation(store, recording):
     """Insert the recording as a RUNNING experiment and keep rewriting its stored snapshot as time passes."""
     import threading
@@ -154,6 +188,11 @@ def main():
         default=[],
         help="a recorded run ({body, snapshot} JSON) to load as a finished experiment",
     )
+    parser.add_argument(
+        "--stuck-run",
+        type=Path,
+        help="a recorded run ({body, snapshot} JSON) to load as a STARTING run whose device says it cannot start it",
+    )
     args = parser.parse_args()
     state = Path(tempfile.mkdtemp(prefix="test-lab-"))
     try:
@@ -202,6 +241,8 @@ def main():
         pair_devices(app)
         for recorded in args.seed_run:
             load_run(app.state.store, json.loads(recorded.read_text()))
+        if args.stuck_run:
+            load_stuck_run(app.state.store, json.loads(args.stuck_run.read_text()))
         if args.simulate_live:
             start_simulation(app.state.store, json.loads(args.simulate_live.read_text()))
         uvicorn.run(app, host="127.0.0.1", port=args.port, log_level="warning")

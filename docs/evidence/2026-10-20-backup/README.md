@@ -27,3 +27,15 @@ Step 1 of `docs/plan-r11-release.md`.
   blocked by the tool permission layer); the push output itself listed every branch as created, so the next session
   should re-run the comparison.
 - The scan is pattern-based, so it cannot prove absence of every possible secret; binary blobs were not decoded.
+
+## Addendum 2026-10-20 (evening): push completed and branch tips compared
+
+- The owner ran `git push origin --all` in the session; the output was `Everything up-to-date`, so the two commits that
+  were missing after the first push (`ad3f192` and `cf80a1e`) were already on the remote.
+- Comparison made locally against the remote-tracking refs that the push handshake refreshes (no network read): all 38
+  local branches (`refs/heads/*`) have exactly the same commit as `refs/remotes/origin/<name>`, none differs and there
+  is no remote-only branch among the tracking refs. `feat/v3-audit-recovery` and `main` are at their local tips as of
+  `cf80a1e`.
+- What this still does NOT show: it is not a fresh `git ls-remote` (blocked by the tool permission layer earlier, not
+  retried), so a change made on GitHub after the push would not appear here; the repository visibility
+  (private/public) is still unchecked.
