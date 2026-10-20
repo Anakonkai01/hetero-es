@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# HeteroES Worker for Linux and WSL, without a window. Build @BUILD@.
+#
+#   curl -fsSL @DOWNLOADS@/install-worker.sh | bash
+#
+# Installs into HETEROES_WORKER_HOME (default ~/.local/share/heteroes-worker) and puts the `heteroes-worker` command
+# in HETEROES_BIN_DIR (default ~/.local/bin). Every download is checked against a pinned SHA-256; nothing needs root,
+# and no NVIDIA package is installed (WSL uses the Windows driver). HETEROES_BUNDLE=<file> installs from a local copy.
+set -euo pipefail
+
+BUNDLE_NAME=@BUNDLE_NAME@
+BUNDLE_SHA256=@BUNDLE_SHA256@
+PYTHON_URL=@PYTHON_URL@
+PYTHON_SHA256=@PYTHON_SHA256@
+DOWNLOADS="${HETEROES_DOWNLOADS:-@DOWNLOADS@}"
+WORKER_HOME="${HETEROES_WORKER_HOME:-$HOME/.local/share/heteroes-worker}"
+BIN_DIR="${HETEROES_BIN_DIR:-$HOME/.local/bin}"
+
+die() { echo "heteroes-worker install: $*" >&2; exit 1; }
+[ "$(uname -s)-$(uname -m)" = "Linux-x86_64" ] || die "only Linux x86_64 is supported"
+for tool in curl tar sha256sum; do command -v "$tool" >/dev/null || die "please install $tool first"; done
+
+# fetch URL SHA256 FILE: download once, keep only a file whose SHA-256 matches
+fetch() {
+  if [ -f "$3" ] && [ "$(sha256sum "$3" | cut -d' ' -f1)" = "$2" ]; then return; fi
+  echo "downloading $(basename "$3")"
+  curl -fL --retry 3 --progress-bar -o "$3.part" "$1"
+  [ "$(sha256sum "$3.part" | cut -d' ' -f1)" = "$2" ] || { rm -f "$3.part"; die "checksum mismatch for $(basename "$3")"; }
+  mv "$3.part" "$3"
+}
+
+umask 077
+mkdir -p "$WORKER_HOME/downloads" "$BIN_DIR"
+bundle="$WORKER_HOME/downloads/$BUNDLE_NAME"
+if [ -n "${HETEROES_BUNDLE:-}" ]; then
+  [ "$(sha256sum "$HETEROES_BUNDLE" | cut -d' ' -f1)" = "$BUNDLE_SHA256" ] || die "checksum mismatch for $HETEROES_BUNDLE"
+  cp "$HETEROES_BUNDLE" "$bundle"
+fi
+fetch "$DOWNLOADS/$BUNDLE_NAME" "$BUNDLE_SHA256" "$bundle"
+
+rm -rf "$WORKER_HOME/bundle.new"
+mkdir "$WORKER_HOME/bundle.new"
+tar -xzf "$bundle" -C "$WORKER_HOME/bundle.new" --strip-components=1 --no-same-owner
+rm -rf "$WORKER_HOME/bundle"
+mv "$WORKER_HOME/bundle.new" "$WORKER_HOME/bundle"
+
+runtime_sha="$(sha256sum "$WORKER_HOME/bundle/runtime.tar.gz" | cut -d' ' -f1)"
+runtime="$WORKER_HOME/runtimes/${runtime_sha:0:12}"
+if [ ! -x "$runtime/python/bin/python3.12" ]; then
+  python_archive="$WORKER_HOME/downloads/$(basename "$PYTHON_URL" | sed 's/%2B/+/g')"
+  fetch "$PYTHON_URL" "$PYTHON_SHA256" "$python_archive"
+  rm -rf "$runtime.new"
+  mkdir -p "$runtime.new"
+  tar -xzf "$python_archive" -C "$runtime.new" --no-same-owner
+  tar -xzf "$WORKER_HOME/bundle/runtime.tar.gz" -C "$runtime.new" --no-same-owner
+  rm -rf "$runtime"
+  mv "$runtime.new" "$runtime"
+fi
+
+cat > "$BIN_DIR/heteroes-worker.new" <<EOF
+#!/bin/sh
+export HETEROES_WORKER_HOME="$WORKER_HOME" PYTHONPATH="$runtime/src" PYTHONNOUSERSITE=1 PYTHONUTF8=1
+exec "$runtime/python/bin/python3.12" -s -m heteroes.product.worker_cli "\$@"
+EOF
+chmod 755 "$BIN_DIR/heteroes-worker.new"
+mv "$BIN_DIR/heteroes-worker.new" "$BIN_DIR/heteroes-worker"
+
+"$BIN_DIR/heteroes-worker" install
+
+case ":$PATH:" in *":$BIN_DIR:"*) ;; *) echo "add $BIN_DIR to your PATH (for example in ~/.bashrc)";; esac
+cat <<EOF
+
+Installed. Next:
+  heteroes-worker selftest                  # checks this GPU against the pinned reference (a few minutes)
+  heteroes-worker join https://<your lab>   # asks for the pairing code from the lab's Devices page
+  heteroes-worker run                       # keeps this machine online; turn it ON on the Devices page
+EOF

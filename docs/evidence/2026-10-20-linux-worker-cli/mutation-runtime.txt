@@ -1,0 +1,12 @@
+control ok    | 7 passed in 0.07s
+killed       download keeps a file whose SHA-256 differs | 1 failed, 6 passed in 0.08s
+killed       pip without --require-hashes | 1 failed, 6 passed in 0.08s
+killed       runtime checksum not checked | 1 failed, 6 passed in 0.08s
+killed       advertise the self-test's own coordinator flag | 3 failed, 4 passed in 0.08s
+killed       token file readable by others | 1 failed, 6 passed in 0.08s
+killed       second pairing allowed | 1 failed, 6 passed in 0.08s
+killed       agent may coordinate when not asked | 1 failed, 6 passed in 0.08s
+killed       a busy lab (409) is not retried | 1 failed, 6 passed in 0.08s
+killed       a failed self-test is accepted | 1 failed, 6 passed in 0.08s
+
+9 of 9 mutants killed.
