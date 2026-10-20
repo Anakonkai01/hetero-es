@@ -1,0 +1,6 @@
+[
+  {"name":"disable-reference", "file":"margin_guard.py", "old":"< self.threshold", "new":"< -1.0"},
+  {"name":"wrong-prefix", "file":"margin_guard.py", "old":"input_ids[row:row + 1]", "new":"input_ids[0:1]"},
+  {"name":"discard-reference-score", "file":"margin_guard.py", "old":"result[row] = self.reference(row, input_ids[row:row + 1]).to(scores.device, dtype=scores.dtype)", "new":"self.reference(row, input_ids[row:row + 1])"},
+  {"name":"mutate-primary-scores", "file":"margin_guard.py", "old":"result = scores.clone()", "new":"result = scores"}
+]

@@ -1,8 +1,10 @@
 # HeteroES — canonical handoff
 
-**Latest: STOP at a real candidate5 audit mismatch (2026-10-20, Codex).**
-Read [handoff-2026-10-20-audit-mismatch-stop.md](handoff-2026-10-20-audit-mismatch-stop.md) first.
-Quang setup is complete; step 5 paused at 13/50 generations, 4 audits / 1 mismatch; all four devices OFF and unallocated.
+**Latest: candidate5 mismatch reproduced; owner approved separate FP32 + CPU-reference decoder (2026-10-20).**
+Read [handoff-2026-10-20-fp32-inference-diagnosis.md](handoff-2026-10-20-fp32-inference-diagnosis.md) first.
+Exact weights/inputs reproduce the original divergent GPU tokens. The owner questioned full-GPU FP64;
+a selective CPU-reference probe aligns one candidate, with RAM/cost limits and no general guarantee.
+Implementation and renewed acceptance are next. Step 5 remains paused at 13/50; four devices OFF/unallocated.
 No release, merge or live changes. Historical state below is superseded by that handoff.
 
 Session 4 adds CPU coordination, eval/compare/serve/worker, real native Windows standalone coordinator proof, a limited
