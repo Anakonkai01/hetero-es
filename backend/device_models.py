@@ -12,6 +12,7 @@ from fastapi import HTTPException
 from pydantic import Field, field_validator, model_validator
 from .monitor_models import Core, Interface, BlockDevice, HostProcess, GPUProcess, Sensor, Power
 from .addresses import endpoint, is_private
+from heteroes.product.cpu_coordinator import coordinator_only, UPDATE_EVIDENCE
 
 
 def command_capabilities(value):
@@ -36,7 +37,7 @@ class SelfTest(FiniteStrict):
     passed: bool
     coordinator: bool = False
     gpuName: str = Field(max_length=200)
-    vramTotalMb: int = Field(ge=1, le=1000000)
+    vramTotalMb: int = Field(ge=0, le=1000000)
     noiseVersion: Literal["numpy_pcg64_normal_f32_to_f16_v1"]
     environment: dict = Field(default_factory=dict)
     platform: Literal["linux", "windows"] = "linux"
@@ -62,6 +63,20 @@ class SelfTest(FiniteStrict):
 
     @model_validator(mode="after")
     def native_admission(self):
+        if coordinator_only(self.model_dump()):
+            if (
+                not self.passed
+                or not self.coordinator
+                or self.gpuUUID is not None
+                or self.vramTotalMb != 0
+                or self.recipeVersions != [3]
+                or self.qualifiedModelHashes
+                or self.compatibility != {"updateKnownAnswer": UPDATE_EVIDENCE}
+            ):
+                raise ValueError("CPU coordinator requires the pinned update known-answer profile")
+            return self
+        if self.vramTotalMb < 1:
+            raise ValueError("GPU profiles require VRAM")
         if any(not re.fullmatch("[a-f0-9]{64}", h) for h in self.qualifiedModelHashes):
             raise ValueError("Invalid model qualification hash")
         if 3 in self.recipeVersions and self.recipeVersions != [3]:

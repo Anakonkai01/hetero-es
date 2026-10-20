@@ -189,12 +189,17 @@ def qualify(model_path, reference, device="cuda", emit=lambda value: None):
 
 def main():
     request = json.load(sys.stdin)
-    reference = json.loads(Path(request["referencePath"]).read_text())
 
     def emit(value):
         print(json.dumps({"progress": value}), flush=True)
 
     try:
+        if request.get("device") == "cpu":
+            from .cpu_coordinator import qualify as qualify_cpu
+
+            print(json.dumps({"result": qualify_cpu(emit=emit)}), flush=True)
+            return 0
+        reference = json.loads(Path(request["referencePath"]).read_text())
         if reference.get("formatVersion") == 3:
             from . import qualification_v3
 

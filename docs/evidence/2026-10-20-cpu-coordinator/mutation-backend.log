@@ -1,0 +1,10 @@
+control ok    | 6 passed, 1 warning in 0.69s
+killed       accept forged CPU evidence | 2 failed, 4 passed, 1 warning in 0.71s
+killed       offer a CPU as a worker | 1 failed, 5 passed, 1 warning in 0.69s
+killed       require CPU text qualification at experiment creation | 1 failed, 5 passed, 1 warning in 0.70s
+killed       require CPU text qualification at dispatch | 1 failed, 5 passed, 1 warning in 0.66s
+killed       require CPU GPU identity | 1 failed, 5 passed, 1 warning in 0.68s
+killed       CPU reservation looks like a legacy GPU | 1 failed, 5 passed, 1 warning in 0.73s
+killed       restore the Linux big-GPU-only role gate | 1 failed, 5 passed, 1 warning in 0.69s
+
+7 of 7 mutants killed.

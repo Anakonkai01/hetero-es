@@ -1,0 +1,32 @@
+[
+  {
+    "name": "skip the numerical update",
+    "file": "src/heteroes/product/cpu_coordinator.py",
+    "old": "        apply_coefficients_(model, schema, [5, 6, 7], [1.0, -0.5, 0.25], 0.05, 65536)",
+    "new": "        pass"
+  },
+  {
+    "name": "accept a wrong update known answer",
+    "file": "src/heteroes/product/cpu_coordinator.py",
+    "old": "if any(value != UPDATE_EVIDENCE for value in observed):",
+    "new": "if False:"
+  },
+  {
+    "name": "run CPU coordinator on CUDA",
+    "file": "src/heteroes/product/agent.py",
+    "old": "str(root), \"--device\", device]",
+    "new": "str(root), \"--device\", \"cuda\"]"
+  },
+  {
+    "name": "start a worker on the CPU profile",
+    "file": "src/heteroes/product/agent.py",
+    "old": "if action == \"start\" and (",
+    "new": "if False and ("
+  },
+  {
+    "name": "return to true division",
+    "file": "src/heteroes/es/update.py",
+    "old": "direction = acc * float(np.float32(1) / np.float32(n_seeds))",
+    "new": "direction = acc / n_seeds"
+  }
+]

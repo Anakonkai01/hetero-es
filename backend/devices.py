@@ -43,6 +43,7 @@ from fastapi import Depends, Header, HTTPException, Request
 from .addresses import endpoint, is_private
 
 from .constants import MODEL, REVISION, QUIESCENT
+from heteroes.product.cpu_coordinator import coordinator_only
 from heteroes.catalog import WORKLOAD_NAMES
 
 
@@ -123,7 +124,11 @@ class AgentRuntime(AgentScheduling, AgentCommands, AgentPolling):
             "parallelJobs": True,
             "modelId": MODEL,
             "modelRevision": REVISION,
-            "workerIds": [d["workerId"] for d in self.devices() if d["approvalStatus"] == "APPROVED"],
+            "workerIds": [
+                d["workerId"]
+                for d in self.devices()
+                if d["approvalStatus"] == "APPROVED" and not coordinator_only(d["selfTest"])
+            ],
             "workloads": list(WORKLOAD_NAMES),
             "schedulerPolicies": ["greedy"],
             "syncModes": ["synchronous"],
@@ -176,6 +181,7 @@ class AgentRuntime(AgentScheduling, AgentCommands, AgentPolling):
                 "admissionStatus": "APPROVED" if d["approvalStatus"] == "APPROVED" else "PENDING_VERIFICATION",
             }
             for d in self.devices()
+            if not coordinator_only(d["selfTest"])
         ]
 
     def snapshot(self, run_id):
@@ -326,10 +332,9 @@ def install_device_routes(app, store, user, runtime):
                     not self_test.passed
                     or self_test.gpuUUID != old.get("gpuUUID")
                     or self_test.platform != old.get("platform", "linux")
-                    or (self_test.coordinator and (self_test.platform != "linux" or self_test.vramTotalMb < 11000))
                 ):
                     raise HTTPException(
-                        422, "Role change requires a qualified Linux coordinator and the same physical GPU"
+                        422, "Role change requires a passed self-test and the same physical GPU and platform"
                     )
                 db.execute("UPDATE devices SET self_test=? WHERE id=?", (json.dumps(self_test.model_dump()), device_id))
             db.execute(

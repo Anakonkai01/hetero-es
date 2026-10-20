@@ -11,6 +11,7 @@ from pydantic import Field
 from heteroes.canonical import canonical_json_hash
 from heteroes.product.model_qualification import check_reference, verify_observations
 from .policies import FiniteStrict, has_device_reservation
+from heteroes.product.cpu_coordinator import coordinator_only
 
 TERMINAL = {"COMPLETED", "FAILED", "CANCELLED"}
 
@@ -86,6 +87,7 @@ class ModelQualifications:
                 or self.store.profile(device["owner"])["accountStatus"] != "ACTIVE"
                 or not profile.get("passed")
                 or profile.get("recipeVersions") != [3]
+                or coordinator_only(profile)
             ):
                 raise HTTPException(409, "A ready v3 model and an approved v3 device are required")
             if time.time() - device["seen"] >= 30 or not device["enabled"] or not device["desired"]:
@@ -95,7 +97,7 @@ class ModelQualifications:
                 raise HTTPException(409, "Wait for confirmed physical GPU release")
             # A legacy reservation without physical identity may be an alias of this device.
             if any(
-                not json.loads(r[0]).get("gpuUUID")
+                not json.loads(r[0]).get("gpuUUID") and not coordinator_only(json.loads(r[0]))
                 for r in db.execute("SELECT d.self_test FROM device_reservations r JOIN devices d ON d.id=r.device_id")
             ):
                 raise HTTPException(409, "Wait for legacy GPU ownership release")

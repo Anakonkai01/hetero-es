@@ -1,0 +1,161 @@
+FFFFFFF                                                                  [100%]
+=================================== FAILURES ===================================
+_________ test_known_answer_checks_real_update_and_rejects_corruption __________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x780cec89c380>
+
+    def test_known_answer_checks_real_update_and_rejects_corruption(monkeypatch):
+>       from heteroes.product.cpu_coordinator import check_update, UPDATE_EVIDENCE
+E       ModuleNotFoundError: No module named 'heteroes.product.cpu_coordinator'
+
+tests/ledger/test_cpu_coordinator.py:11: ModuleNotFoundError
+__ test_cpu_qualification_never_runs_a_text_probe_or_claims_a_qualified_model __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x780cec89e570>
+
+    def test_cpu_qualification_never_runs_a_text_probe_or_claims_a_qualified_model(monkeypatch):
+        from heteroes.product import qualification, qualification_v3
+>       from heteroes.product.cpu_coordinator import qualify, PROFILE, UPDATE_EVIDENCE
+E       ModuleNotFoundError: No module named 'heteroes.product.cpu_coordinator'
+
+tests/ledger/test_cpu_coordinator.py:29: ModuleNotFoundError
+_______________ test_cpu_entry_point_needs_no_reference_or_model _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x780cec89e450>
+capsys = <_pytest.capture.CaptureFixture object at 0x780cec89e5a0>
+
+    def test_cpu_entry_point_needs_no_reference_or_model(monkeypatch, capsys):
+        from heteroes.product import qualification
+    
+        monkeypatch.setattr("sys.stdin", io.StringIO(json.dumps({"device": "cpu"})))
+>       assert qualification.main() == 0
+               ^^^^^^^^^^^^^^^^^^^^
+
+tests/ledger/test_cpu_coordinator.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def main():
+        request = json.load(sys.stdin)
+>       reference = json.loads(Path(request["referencePath"]).read_text())
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'referencePath'
+
+src/heteroes/product/qualification.py:192: KeyError
+______________ test_cpu_worker_selftest_pairing_and_agent_config _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-787/test_cpu_worker_selftest_pairi0')
+
+    def test_cpu_worker_selftest_pairing_and_agent_config(tmp_path):
+        from test_worker_cli import bundle, SELF_TEST
+>       from heteroes.product.cpu_coordinator import qualify
+E       ModuleNotFoundError: No module named 'heteroes.product.cpu_coordinator'
+
+tests/ledger/test_cpu_coordinator.py:57: ModuleNotFoundError
+________ test_agent_launch_passes_its_configured_device_to_runner[cpu] _________
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-787/test_agent_launch_passes_its_c0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x780cec739f70>
+device = 'cpu'
+
+    @pytest.mark.parametrize("device", ["cpu", "cuda"])
+    def test_agent_launch_passes_its_configured_device_to_runner(tmp_path, monkeypatch, device):
+        from test_device_agent import agent
+        import subprocess
+    
+        a = agent(tmp_path)
+        a.manager.config["device"] = device
+        root = a.manager.root / ("f" * 32)
+        root.mkdir()
+        launched = []
+    
+        def spawn(argv, **kwargs):
+            launched.append((argv, kwargs))
+            return type("Process", (), {"pid": 987654})()
+    
+        monkeypatch.setattr(subprocess, "Popen", spawn)
+        a.manager.spawn(root)
+        argv, kwargs = launched[0]
+>       assert argv[-2:] == ["--device", device]
+E       AssertionError: assert ['heteroes.pr...ffffffffffff'] == ['--device', 'cpu']
+E         
+E         At index 0 diff: 'heteroes.product.runner' != '--device'
+E         Use -v to get more diff
+
+tests/ledger/test_cpu_coordinator.py:104: AssertionError
+________ test_agent_launch_passes_its_configured_device_to_runner[cuda] ________
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-787/test_agent_launch_passes_its_c1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x780cec78e240>
+device = 'cuda'
+
+    @pytest.mark.parametrize("device", ["cpu", "cuda"])
+    def test_agent_launch_passes_its_configured_device_to_runner(tmp_path, monkeypatch, device):
+        from test_device_agent import agent
+        import subprocess
+    
+        a = agent(tmp_path)
+        a.manager.config["device"] = device
+        root = a.manager.root / ("f" * 32)
+        root.mkdir()
+        launched = []
+    
+        def spawn(argv, **kwargs):
+            launched.append((argv, kwargs))
+            return type("Process", (), {"pid": 987654})()
+    
+        monkeypatch.setattr(subprocess, "Popen", spawn)
+        a.manager.spawn(root)
+        argv, kwargs = launched[0]
+>       assert argv[-2:] == ["--device", device]
+E       AssertionError: assert ['heteroes.pr...ffffffffffff'] == ['--device', 'cuda']
+E         
+E         At index 0 diff: 'heteroes.product.runner' != '--device'
+E         Use -v to get more diff
+
+tests/ledger/test_cpu_coordinator.py:104: AssertionError
+____________________ test_cpu_agent_refuses_a_worker_start _____________________
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-787/test_cpu_agent_refuses_a_worke0')
+
+    def test_cpu_agent_refuses_a_worker_start(tmp_path):
+        from test_device_agent import agent
+    
+        a = agent(tmp_path)
+        a.config.update(device="cpu", selfTest={"runtimeProfile": "coordinator-cpu-v3"})
+        a.enabled = True
+        command = {"assignmentId": "b" * 32, "epoch": 1, "runId": "c" * 32, "workerId": "test"}
+        with pytest.raises(ValueError, match="coordinator-only"):
+>           a._worker(command, "start")
+
+tests/ledger/test_cpu_coordinator.py:117: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/heteroes/product/agent.py:368: in _worker
+    route = self.choose_route(command)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <heteroes.product.agent.Agent object at 0x780cec78f620>
+command = {'assignmentId': 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'epoch': 1, 'runId': 'cccccccccccccccccccccccccccccccc', 'workerId': 'test'}
+
+    def choose_route(self, command):
+        """The private route when it answers (replay and full download); else the lab's public one, which
+        carries replay but never whole weights. A lab with no public address keeps the command as it was."""
+        private, bulk, public, token = (
+>           command["coordinatorUrl"],
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+            command.get("bulkUrl"),
+            command.get("publicComputeUrl"),
+            command["computeToken"],
+        )
+E       KeyError: 'coordinatorUrl'
+
+src/heteroes/product/agent.py:427: KeyError
+=========================== short test summary info ============================
+FAILED tests/ledger/test_cpu_coordinator.py::test_known_answer_checks_real_update_and_rejects_corruption
+FAILED tests/ledger/test_cpu_coordinator.py::test_cpu_qualification_never_runs_a_text_probe_or_claims_a_qualified_model
+FAILED tests/ledger/test_cpu_coordinator.py::test_cpu_entry_point_needs_no_reference_or_model
+FAILED tests/ledger/test_cpu_coordinator.py::test_cpu_worker_selftest_pairing_and_agent_config
+FAILED tests/ledger/test_cpu_coordinator.py::test_agent_launch_passes_its_configured_device_to_runner[cpu]
+FAILED tests/ledger/test_cpu_coordinator.py::test_agent_launch_passes_its_configured_device_to_runner[cuda]
+FAILED tests/ledger/test_cpu_coordinator.py::test_cpu_agent_refuses_a_worker_start
+7 failed in 0.06s

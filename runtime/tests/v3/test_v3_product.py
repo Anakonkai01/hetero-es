@@ -117,9 +117,11 @@ def run_product(cfg, tmp_path, python_scorer=None):
     env = {**os.environ, "CUDA_VISIBLE_DEVICES": "", "HETEROES_TOKEN": "fixture-secret"}
     runner_log = (tmp_path / "runner-output.txt").open("w")
     worker_log = (tmp_path / "worker-output.txt").open("w")
-    command = "from heteroes.product.runner import main; import sys; sys.exit(main(sys.argv[1], device='cpu', timeout_seconds=30))"
     runner = subprocess.Popen(
-        [sys.executable, "-c", command, str(tmp_path)], env=env, stdout=runner_log, stderr=runner_log
+        [sys.executable, "-m", "heteroes.product.runner", str(tmp_path), "--device", "cpu"],
+        env=env,
+        stdout=runner_log,
+        stderr=runner_log,
     )
     worker = None
     try:

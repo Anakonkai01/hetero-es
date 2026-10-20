@@ -352,4 +352,10 @@ def main(directory, *, device="cuda", timeout_seconds=1800):
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1]))
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("directory")
+    parser.add_argument("--device", choices=("cpu", "cuda"), default="cuda")
+    args = parser.parse_args()
+    sys.exit(main(args.directory, device=args.device))

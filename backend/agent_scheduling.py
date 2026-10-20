@@ -13,6 +13,7 @@ from .errors import RuntimeRejected
 from heteroes.study.data import sha as study_hash
 
 from .constants import QUIESCENT
+from heteroes.product.cpu_coordinator import coordinator_only
 
 
 class AgentScheduling:
@@ -27,6 +28,8 @@ class AgentScheduling:
         if not coordinator or not coordinator["selfTest"].get("coordinator"):
             return "Select an approved coordinator device"
         chosen = [coordinator] + [by_worker.get(w) for w in body["workerIds"]]
+        if any(d and coordinator_only(d["selfTest"]) for d in chosen[1:]):
+            return "CPU coordinator-only devices cannot be selected as workers"
         for d in chosen:
             if not d or d["approvalStatus"] != "APPROVED":
                 return "Selected device needs approval"
@@ -36,7 +39,10 @@ class AgentScheduling:
             supported = set(json.loads(capabilities[0])) if capabilities else CORE_COMMAND_KINDS
             if not CORE_COMMAND_KINDS <= supported:
                 return "Update selected device agent to support core lifecycle commands"
-            if body.get("recipeVersion") in (2, 3):
+            cpu_coordinator = coordinator_only(d["selfTest"])
+            if cpu_coordinator and body.get("recipeVersion") != 3:
+                return "Recipe v3 qualification required"
+            if body.get("recipeVersion") in (2, 3) and not cpu_coordinator:
                 profile = d["selfTest"]
                 version = body["recipeVersion"]
                 qualification = (v3_qualification if version == 3 else v2_qualification)(
@@ -46,7 +52,7 @@ class AgentScheduling:
                     return f"Recipe v{version} qualification required"
                 if qualification == "model":
                     return "Pinned model qualification required"
-            if not d["physicalResourceId"]:
+            if not d["physicalResourceId"] and not cpu_coordinator:
                 return "Refresh selected device self-test to identify its physical GPU"
             if d["connectionStatus"] != "ONLINE":
                 return "Waiting for selected device to reconnect"
@@ -62,7 +68,8 @@ class AgentScheduling:
                 return "Waiting for confirmed physical GPU release"
         # An old assignment lacking a UUID may be the same GPU as a new alias.
         for reserved in db.execute("SELECT d.self_test FROM device_reservations r JOIN devices d ON d.id=r.device_id"):
-            if not json.loads(reserved[0]).get("gpuUUID"):
+            profile = json.loads(reserved[0])
+            if not profile.get("gpuUUID") and not coordinator_only(profile):
                 return "Waiting for legacy ownership release before physical GPU scheduling"
         workers = [by_worker[w]["physicalResourceId"] for w in body["workerIds"]]
         if len(set(workers)) != len(workers):
@@ -141,7 +148,8 @@ class AgentScheduling:
             for did in chosen:
                 db.execute("INSERT INTO device_reservations VALUES (?,?)", (did, aid))
             for resource in {d["physicalResourceId"] for d in chosen.values()}:
-                db.execute("INSERT INTO physical_reservations VALUES (?,?)", (resource, aid))
+                if resource is not None:  # CPU coordinators own their device, never a physical GPU
+                    db.execute("INSERT INTO physical_reservations VALUES (?,?)", (resource, aid))
             self.enqueue(
                 db,
                 co["deviceId"],

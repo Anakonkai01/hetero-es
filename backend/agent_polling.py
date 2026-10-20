@@ -12,6 +12,7 @@ from .constants import QUIESCENT
 
 
 from .device_models import digest
+from heteroes.product.cpu_coordinator import coordinator_only
 
 
 class AgentPolling:
@@ -67,7 +68,10 @@ class AgentPolling:
             from .policies import has_device_reservation
 
             reserved = has_device_reservation(db, device["id"], previous.get("gpuUUID"))
-            if reserved and updated.get("gpuUUID") != previous.get("gpuUUID"):
+            if reserved and (
+                updated.get("gpuUUID") != previous.get("gpuUUID")
+                or coordinator_only(updated) != coordinator_only(previous)
+            ):
                 raise HTTPException(409, "Physical GPU identity cannot change during ownership")
             if not updated["passed"]:
                 raise HTTPException(422, "Self-test refresh must pass qualification")

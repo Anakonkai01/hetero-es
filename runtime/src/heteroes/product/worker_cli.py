@@ -152,18 +152,26 @@ class Worker:
         )
 
     # --- self-test --------------------------------------------------------------------------------------------------
-    def selftest(self, run=subprocess.run):
+    def selftest(self, run=subprocess.run, device="cuda"):
         from .remote import worker_environment
 
+        if device not in ("cpu", "cuda"):
+            raise ValueError("Choose cpu or cuda")
         if not self.installed():
             raise RuntimeError("RUNTIME_NOT_INSTALLED: run heteroes-worker install")
         p = self.paths()
         completed = run(
             [sys.executable, "-m", "heteroes.product.qualification"],
-            input=json.dumps({"modelPath": str(p["model"]), "referencePath": str(self.bundle / "reference.json")}),
+            input=json.dumps(
+                {"modelPath": str(p["model"]), "referencePath": str(self.bundle / "reference.json"), "device": device}
+            ),
             capture_output=True,
             text=True,
-            env={**worker_environment(str(p["runtime"] / "src"), "self-test-no-network"), "PYTHONNOUSERSITE": "1"},
+            env={
+                **worker_environment(str(p["runtime"] / "src"), "self-test-no-network"),
+                "PYTHONNOUSERSITE": "1",
+                **({"CUDA_VISIBLE_DEVICES": ""} if device == "cpu" else {}),
+            },
         )
         result = error = None
         for line in completed.stdout.splitlines():
@@ -186,6 +194,10 @@ class Worker:
         return {"coordinator": bool(coordinator), "host": host if coordinator else "127.0.0.1"}
 
     def advertised(self, settings):
+        from .cpu_coordinator import coordinator_only
+
+        if coordinator_only(settings["selfTest"]) and not settings["compute"]["coordinator"]:
+            raise ValueError("A CPU coordinator-only profile must join with --coordinator and --host")
         return {**settings["selfTest"], "coordinator": settings["compute"]["coordinator"]}
 
     def join(self, server_url, code, name, coordinator=False, host=None, call=None):
@@ -224,6 +236,8 @@ class Worker:
     # --- agent ------------------------------------------------------------------------------------------------------
     def agent_config(self):
         """The same agent configuration the desktop Worker writes (desktop/worker/electron/service.cjs)."""
+        from .cpu_coordinator import coordinator_only
+
         settings, p = self.settings(), self.paths()
         if not settings.get("device"):
             raise RuntimeError("DEVICE_NOT_PAIRED: run heteroes-worker join")
@@ -238,6 +252,7 @@ class Worker:
             "workerHost": compute["host"],
             "workerPort": WORKER_PORT,
             "workerOnly": not compute["coordinator"],
+            "device": "cpu" if coordinator_only(settings["selfTest"]) else "cuda",
             "largeDataDirectory": str(p["artifacts"]),
             "selfTest": self.advertised(settings),
         }
@@ -335,7 +350,10 @@ def main(argv=None):
     parser = argparse.ArgumentParser(prog="heteroes-worker", description=__doc__.split("\n")[0])
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("install", help="download and install the pinned packages and model")
-    commands.add_parser("selftest", help="run the numerical admission test on this GPU")
+    selftest = commands.add_parser("selftest", help="run the numerical admission test")
+    selftest.add_argument(
+        "--device", choices=("cpu", "cuda"), default="cuda", help="cpu admits coordination only; cuda admits GPU work"
+    )
     join = commands.add_parser("join", help="pair this machine with a lab (asks for the pairing code)")
     join.add_argument("lab", help="lab address, for example https://lab.heteroes.site")
     join.add_argument("--name", default=os.uname().nodename, help="name shown on the lab")
@@ -349,7 +367,7 @@ def main(argv=None):
         if args.command == "install":
             worker.install()
         elif args.command == "selftest":
-            worker.selftest()
+            worker.selftest(device=args.device)
         elif args.command == "join":
             worker.join(args.lab, read_code(), args.name, args.coordinator, args.host)
         elif args.command == "run":

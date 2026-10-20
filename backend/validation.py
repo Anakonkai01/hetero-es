@@ -3,6 +3,7 @@ from .policies import backup_policy as validated_backup_policy, v2_qualification
 from fastapi import HTTPException
 from .constants import V3_CODE_KEYS, V3_KEYS, V3_UPDATE_KEYS
 from heteroes.catalog import DECODE_ENGINES
+from heteroes.product.cpu_coordinator import coordinator_only
 
 
 def freeze_python_code(body):
@@ -46,6 +47,8 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
         or not co["selfTest"]["coordinator"]
     ):
         raise HTTPException(422, "Select an approved coordinator in this workspace")
+    if coordinator_only(co["selfTest"]) and body.get("recipeVersion") != 3:
+        raise HTTPException(422, "CPU coordinators require Recipe v3")
     # Windows draws another initial LoRA adapter from the same seed (torch uniform_), so it never creates one
     if (
         body.get("recipeVersion") == 3
@@ -105,6 +108,8 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
         ]
         for d in selected:
             profile = d["selfTest"]
+            if version == 3 and coordinator_only(profile) and d["deviceId"] == body["coordinatorDeviceId"]:
+                continue  # coordination proves update arithmetic, not GPU-compatible texts for every model
             qualification = (v3_qualification if version == 3 else v2_qualification)(profile, model["manifestHash"])
             if qualification == "recipe":
                 raise HTTPException(

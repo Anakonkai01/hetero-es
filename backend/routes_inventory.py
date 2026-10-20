@@ -67,7 +67,7 @@ def install_routes(app, store, runtime, scoped, visible, capabilities, registry)
         default = row[0] if row else None
         return {
             **cap,
-            "workerIds": store.assignments(current["workspaceId"]),
+            "workerIds": [w for w in store.assignments(current["workspaceId"]) if w in cap["workerIds"]],
             "coordinatorDevices": coordinators,
             # the lab's default, only while it is still an approved coordinator here
             "defaultCoordinatorDeviceId": default if any(d["deviceId"] == default for d in coordinators) else None,

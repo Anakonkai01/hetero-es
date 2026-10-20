@@ -127,9 +127,14 @@ class AgentManager(RunSupervisor):
         import subprocess
 
         env = worker_environment(str(ROOT / "src"), self.token)
+        device = self.config.get("device", "cuda")
+        if device not in ("cpu", "cuda"):
+            raise ValueError("Invalid coordinator device")
+        if device == "cpu":
+            env["CUDA_VISIBLE_DEVICES"] = ""
         with open(root / "coordinator.log", "ab") as output:
             process = subprocess.Popen(
-                [sys.executable, "-m", "heteroes.product.runner", str(root)],
+                [sys.executable, "-m", "heteroes.product.runner", str(root), "--device", device],
                 env=env,
                 cwd=ROOT,
                 stdout=output,
@@ -346,6 +351,12 @@ class Agent:
         return self.root / "workers" / command["assignmentId"] / f"r{recovery}"
 
     def _worker(self, command, action):
+        from .cpu_coordinator import coordinator_only
+
+        if action == "start" and (
+            self.config.get("device") == "cpu" or coordinator_only(self.config.get("selfTest", {}))
+        ):
+            raise ValueError("CPU coordinator-only devices cannot start workers")
         directory = self.worker_directory(command)
         original = read_json(directory / "assignment.json")
         if action == "start":
