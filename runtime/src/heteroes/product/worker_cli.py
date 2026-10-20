@@ -344,7 +344,7 @@ def main(argv=None):
     commands.add_parser("run", help="keep this device online until Ctrl-C")
     commands.add_parser("status", help="show installation, pairing and connection state")
     args = parser.parse_args(argv)
-    worker = Worker()
+    worker = Worker(say=lambda *values: print(*values, flush=True))  # `run` is often logged to a file
     try:
         if args.command == "install":
             worker.install()
