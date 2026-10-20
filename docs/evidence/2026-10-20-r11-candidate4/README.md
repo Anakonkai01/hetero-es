@@ -4,7 +4,7 @@
 `2026-10-20-session5-checks/checks-595faa1`; e123935 only adds that receipt). Candidate3 was superseded because the first
 real managed run on it found two bugs (managed Python rewards refused by the coordinator agent; cancelled-before-accept
 runs never released). Output on the Archive disk: `/mnt/Archive-2tb/heteroes-local/downloads/lf1-20261020-r11-candidate4/`.
-Resources committed in `9ba…` (see `git log -- desktop/*/resources`): only runtime archives, `runtimeSha256` and the
+Resources committed in `d435c3b`: only runtime archives, `runtimeSha256` and the
 build name changed. `runtime-source-*.txt`: every heteroes file in both runtime archives equals the repository.
 
 - `installers-prepared.json` (`--prepare-only`, `publiclyPublished: false`) and `installers.sha256`. Nothing published.
