@@ -199,7 +199,9 @@ def _apply_coefficients(
                     term = eps * float(zi)
                     acc = acc + term
 
-                direction = acc / n_seeds
+                # divide by N as CUDA's division by a scalar does: multiply by the float32 reciprocal. The same bits on
+                # every device (a CPU-only coordinator included); GPU results are unchanged. Owner decision 2026-10-20.
+                direction = acc * float(np.float32(1) / np.float32(n_seeds))
                 update = direction * float(np.float32(alpha))
                 new = (chunk.to(torch.float32) + update).to(torch.float16)
                 # compare

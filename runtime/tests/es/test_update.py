@@ -86,7 +86,9 @@ def oracle_new_tensor(theta, schema, index, seeds, z, alpha, chunk_elements):
         address = ParameterNoiseAddress(seed, schema.hash, index, chunk_elements)
         eps = generate_parameter_noise(address, numel).astype(np.float32)  # canonical FP16 -> FP32 (O4)
         acc = acc + np.float32(zi) * eps
-    direction = acc / np.float32(len(seeds))
+    # divide by N as CUDA does it: multiply by the float32 reciprocal (owner decision 2026-10-20; the same bits on
+    # every device, a CPU-only coordinator included)
+    direction = acc * (np.float32(1) / np.float32(len(seeds)))
     update = np.float32(alpha) * direction
     return (theta.astype(np.float32) + update).astype(np.float16), update
 
@@ -134,13 +136,33 @@ def test_every_tensor_matches_the_numpy_oracle(chunk_elements, device):
         assert np.array_equal(bits(tensor.detach().cpu().numpy()), bits(want))
 
 
+# 4 seeds: 1/N is exact; 3 and 6: it is not, and true division would round differently from CUDA's reciprocal
+COUNTS = [SEEDS, SEEDS[:3], [5, 6, 7, 8, 9, 10]]
+
+
 @pytest.mark.skipif("cuda" not in DEVICES, reason="needs a CUDA GPU")
-def test_cpu_and_gpu_give_the_same_bits():
-    cpu, gpu = make_model(), make_model(device="cuda")
+@pytest.mark.parametrize("seeds", COUNTS)
+def test_cpu_and_gpu_give_the_same_bits(seeds):
+    # the big model: with a few hundred elements a different rounding of the division rarely survives the FP16 cast
+    cpu, gpu = make_big(), make_big(device="cuda")
+    rewards = (REWARDS * 2)[: len(seeds)]
     for model in (cpu, gpu):
-        apply_es_update_(model, build_parameter_schema(model), SEEDS, REWARDS, alpha=0.05, chunk_elements=16)
+        apply_es_update_(model, build_parameter_schema(model), seeds, rewards, alpha=0.05, chunk_elements=16)
 
     assert all(torch.equal(a.cpu(), b.cpu()) for a, b in zip(cpu.parameters(), gpu.parameters()))
+
+
+@pytest.mark.parametrize("seeds", COUNTS[1:])
+def test_any_population_size_matches_the_oracle_on_the_cpu(seeds):
+    model = make_big()
+    schema = build_parameter_schema(model)
+    rewards = (REWARDS * 2)[: len(seeds)]
+    expected, _ = oracle_model(model, schema, seeds, rewards, 0.05, 16)
+
+    apply_es_update_(model, schema, seeds, rewards, alpha=0.05, chunk_elements=16)
+
+    for tensor, want in zip(resolve_tensors(model, schema), expected):
+        assert np.array_equal(bits(tensor.detach().cpu().numpy()), bits(want))
 
 
 def test_a_tied_tensor_is_updated_exactly_once():

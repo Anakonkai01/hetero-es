@@ -243,9 +243,16 @@ for each schema entry k (canonical order):
     direction = zeros(numel_k, FP32)
     for i in candidate canonical order:            # NOT result arrival order
         direction += z_i · fp32(ε_i,k)             # ε from the same NoiseEngine
-    direction /= N
+    direction *= fp32(1 / N)                      # the float32 reciprocal (see below)
     θ_k ← fp16( fp32(θ_k) + α · direction )        # cast once
 ```
+
+- **[D — owner decision 2026-10-20]** "Divide by N" means multiplying by the float32 reciprocal `fp32(1) / fp32(N)`.
+  This is what PyTorch's CUDA division by a scalar computes, so every recorded GPU update keeps its bits; before this
+  decision the CPU computed a true division, which rounds differently whenever N is not a power of two (measured: a
+  CPU replay of run `6590307f` matched generations with 16 and 32 seeds and differed at 48). With the reciprocal a
+  CPU-only coordinator gives the GPU's bits (`docs/evidence/2026-10-20-any-coordinator/`). Changed in
+  `es/update.py` with the owner's approval; `es/cuda_ops.py` already behaves this way on the GPU.
 
 - **[D]** Accumulation MUST be FP32. **[E]** The notebook accumulates in FP16 (`torch.zeros_like(param)` on an FP16 model); this is known debt.
 - **[D — O4 decided 2026-10-05: option A]** `ε_i` in the update is the canonical FP16 noise upcast to FP32 — the same bytes the worker used. (The realized perturbation `fp16(θ + σε) − θ` differs slightly from `σε` because of rounding; the update uses the canonical ε, not the realized difference.)
