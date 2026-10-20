@@ -199,7 +199,11 @@ class AgentScheduling:
 
     def _release_confirmed(self, db, row, ar):
         snap = json.loads(row["snapshot"])
-        if row["released"] or snap["state"].get("status") not in QUIESCENT:
+        status = snap["state"].get("status")
+        # A run cancelled while its coordinator never accepted the assignment has no runner to report an outcome; the
+        # confirmed-stopped processes below are then the whole truth.
+        unstarted = status == "STARTING" and (self.store.get(row["run_id"]) or {}).get("cancelRequested")
+        if row["released"] or (status not in QUIESCENT and not unstarted):
             return
         for did in ar["deviceIds"]:
             d = db.execute("SELECT processes,seen FROM devices WHERE id=?", (did,)).fetchone()
@@ -213,6 +217,9 @@ class AgentScheduling:
                 return
             if did in ar["workerDevices"].values() and p.get("workerAlive") is not False:
                 return
+        if unstarted:
+            snap["state"] = {**snap["state"], "status": "CANCELLED"}
+            db.execute("UPDATE assignments SET snapshot=? WHERE id=?", (json.dumps(snap), ar["assignmentId"]))
         db.execute("UPDATE assignments SET released=1 WHERE id=?", (ar["assignmentId"],))
         db.execute("DELETE FROM device_reservations WHERE assignment_id=?", (ar["assignmentId"],))
         db.execute("DELETE FROM physical_reservations WHERE assignment_id=?", (ar["assignmentId"],))

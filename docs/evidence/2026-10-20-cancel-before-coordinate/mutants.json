@@ -1,0 +1,8 @@
+[
+  {"name": "never finalize an unstarted cancel", "file": "backend/agent_scheduling.py",
+   "old": "        if row[\"released\"] or (status not in QUIESCENT and not unstarted):", "new": "        if row[\"released\"] or status not in QUIESCENT:"},
+  {"name": "release without cancel", "file": "backend/agent_scheduling.py",
+   "old": "unstarted = status == \"STARTING\" and (self.store.get(row[\"run_id\"]) or {}).get(\"cancelRequested\")", "new": "unstarted = status == \"STARTING\""},
+  {"name": "release but keep STARTING snapshot", "file": "backend/agent_scheduling.py",
+   "old": "            snap[\"state\"] = {**snap[\"state\"], \"status\": \"CANCELLED\"}\n", "new": ""}
+]

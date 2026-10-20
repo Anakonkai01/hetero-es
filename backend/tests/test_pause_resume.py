@@ -191,3 +191,22 @@ def test_cancellation_of_paused_or_pausing_run_never_requeues(lab, cancel_before
         client.post(f"/api/v1/experiments/{rid}/cancel", headers=admin)
     assert store.get(rid)["status"] == "CANCELLED" and not runtime.reservations()
     assert client.post(f"/api/v1/experiments/{rid}/resume", headers=admin).status_code == 409
+
+
+@pytest.mark.parametrize("cancelled", [True, False])
+def test_a_run_cancelled_before_its_coordinator_accepted_it_is_released(lab, cancelled):
+    client, store, runtime, admin = lab
+    device, auth = pair(lab)
+    enable(lab, device, auth)
+    rid = queued(lab, device)
+    store.dispatch_once()
+    assignment = runtime.runs()[0]
+    if cancelled:
+        client.post(f"/api/v1/experiments/{rid}/cancel", headers=admin)
+    # The agent never accepted COORDINATE (it was refused, then cancelled): no runner snapshot, nothing alive.
+    boot(client, auth, "boot-1", contribution=True, processes=[stopped(assignment)])
+    store.dispatch_once()
+    if cancelled:
+        assert store.get(rid)["status"] == "CANCELLED" and not runtime.reservations()
+    else:  # without a cancel the lab keeps waiting for the coordinator; it never invents an outcome
+        assert store.get(rid)["status"] == "STARTING" and runtime.reservations()
