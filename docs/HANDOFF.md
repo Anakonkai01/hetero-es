@@ -1,5 +1,7 @@
 # HeteroES — canonical handoff
 
+**Latest: read `handoff-session3-next.md` first (2026-10-20 evening).**
+
 ## Current checkpoint
 
 The approved one-repository cleanup (phases 0–6) is complete on `refactor/cleanup` and local `main`, fast-forwarded after
