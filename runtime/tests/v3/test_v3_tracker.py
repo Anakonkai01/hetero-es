@@ -106,3 +106,22 @@ def test_independent_reload_mismatch_never_unlocks_test(product_assets, tmp_path
         tracker.export()
     assert not (tmp_path / "study-export.json").exists()
     assert read_json(tmp_path / "study-metrics.json")["testLocked"] is True
+
+
+@pytest.mark.parametrize("chunk", [None, 64])
+def test_validation_decodes_with_the_recipes_chunk(product_assets, tmp_path, monkeypatch, chunk):
+    # Found in the isolated r11 lab: a 500-row validation always decoded 16 prompts per call, so the researcher waited
+    # about four times longer than the recipe's chunk of 64 needs (texts: the chunk-64 FP32 probes, RUNTIME-TODO).
+    cfg = product_config(product_assets, tmp_path, **({} if chunk is None else {"evalChunk": chunk}))
+    loaded, run, dataset = prepare_run(cfg, tmp_path, "cpu")
+    chunks = []
+
+    def generate(model, tokenizer, rows, evaluation, chunk=16):
+        chunks.append(chunk)
+        return [{"output": row["label"]} for row in rows]
+
+    monkeypatch.setattr("heteroes.v3.tracker.generate_rows", generate)
+    Tracker(tmp_path, loaded, run, dataset).observe(
+        -1, publish_weights(loaded.model, loaded.schema, tmp_path / "weights")
+    )
+    assert chunks == [16 if chunk is None else chunk]

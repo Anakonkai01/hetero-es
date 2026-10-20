@@ -29,7 +29,8 @@ class Tracker:
 
     def _evaluate(self, model, tokenizer, split):
         rows = self.dataset["splits"][split]
-        raw = generate_rows(model, tokenizer, rows, self.recipe.evaluation)
+        # the recipe's prompts per generate() call (16 when it fixes none, as the executor); texts are coordinator-only
+        raw = generate_rows(model, tokenizer, rows, self.recipe.evaluation, self.recipe.chunk or 16)
         reward, scores = score(self.recipe.plan["scorer"], [r["output"] for r in raw], rows)
         return {
             "meanReward": reward,

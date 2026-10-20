@@ -1,0 +1,4 @@
+killed       always 16 | 1 failed, 8 passed in 2.31s
+killed       no default | 1 failed, 7 passed in 2.17s
+
+2 of 2 mutants killed.
