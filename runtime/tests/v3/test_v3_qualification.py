@@ -82,6 +82,7 @@ def test_a_device_matching_the_reference_qualifies_without_regenerating_the_adap
     assert reference["cells"]["lora"]["recipe"]["weightSpace"]["initialAdapterSha256"] == reference["adapter"]["sha256"]
     result = qualify(reference_dir / "model", reference, reference_dir / "published", device="cpu")
     assert (result["passed"], result["recipeVersions"], result["runtimeProfile"]) == (True, [3], "desktop-v3")
+    assert result["coordinator"] is True and 0 < result["updateSecondsPerSeed"] < 60  # any machine may coordinate
     full, adapter = result["compatibility"]["recipeV3"], result["compatibility"]["recipeV3Lora"]
     for evidence, cell in ((full, "full"), (adapter, "lora")):
         assert evidence["recipeHash"] == canonical_json_hash(reference["cells"][cell]["recipe"])

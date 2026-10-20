@@ -25,14 +25,10 @@ function addresses(interfaces = os.networkInterfaces()) {
   return [...result.values()];
 }
 
+// Any machine whose own self-test passed may coordinate (owner 2026-10-20): Windows and small GPUs included.
 function qualified(selfTest, platform = process.platform) {
-  return (
-    platform === 'linux' &&
-    selfTest?.platform === 'linux' &&
-    selfTest.passed === true &&
-    selfTest.coordinator === true &&
-    selfTest.vramTotalMb >= 11000
-  );
+  const own = platform === 'win32' ? 'windows' : platform === 'linux' ? 'linux' : null;
+  return selfTest?.passed === true && selfTest.coordinator === true && selfTest.platform === own;
 }
 
 function computeConfig(value, selfTest, platform, localAddresses) {

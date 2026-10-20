@@ -46,6 +46,13 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
         or not co["selfTest"]["coordinator"]
     ):
         raise HTTPException(422, "Select an approved coordinator in this workspace")
+    # Windows draws another initial LoRA adapter from the same seed (torch uniform_), so it never creates one
+    if (
+        body.get("recipeVersion") == 3
+        and (body.get("weightSpace") or {}).get("kind") == "lora"
+        and co["selfTest"].get("platform") == "windows"
+    ):
+        raise HTTPException(422, "A Windows coordinator cannot create the LoRA adapter; choose a Linux coordinator")
     try:
         body["backupPolicy"] = validated_backup_policy(body.get("backupPolicy") or {"interval": 1, "retain": 3})
     except ValueError as error:

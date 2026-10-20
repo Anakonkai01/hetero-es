@@ -46,7 +46,14 @@ def install_routes(app, store, runtime, scoped, visible, capabilities, registry)
         cap = capabilities()
         assigned = set(store.assignments(current["workspaceId"], include_disabled=True))
         coordinators = [
-            {"deviceId": d["deviceId"], "workerId": d["workerId"], "displayName": d["displayName"]}
+            {
+                "deviceId": d["deviceId"],
+                "workerId": d["workerId"],
+                "displayName": d["displayName"],
+                "platform": d["selfTest"].get("platform", "linux"),
+                # measured by the device's self-test: the form shows seconds per generation from it
+                "updateSecondsPerSeed": d["selfTest"].get("updateSecondsPerSeed"),
+            }
             for d in runtime.devices()
             if d["workspaceId"] == current["workspaceId"]
             and d["approvalStatus"] == "APPROVED"

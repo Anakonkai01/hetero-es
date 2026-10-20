@@ -43,6 +43,8 @@ export const translations: Record<string, string> = {
   'Antithetic sampling': 'Lấy mẫu cặp đối dấu',
   'Coefficient rule': 'Quy tắc hệ số',
   'Declarative scorer': 'Bộ chấm điểm khai báo',
+  'Update on this coordinator: about': 'Cập nhật trên máy điều phối này: khoảng',
+  's per generation': 'giây mỗi thế hệ',
   'Dataset upload failed: ': 'Tải dữ liệu lên thất bại: ',
   'Dataset file exceeds the lab limit.': 'Tệp dữ liệu vượt giới hạn của lab.',
   'Recipe v3 files up to': 'Tệp Recipe v3 tối đa',

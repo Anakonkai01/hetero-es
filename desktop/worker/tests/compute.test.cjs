@@ -56,8 +56,8 @@ test('qualified Linux coordinator advertises and binds the chosen local address,
   assert.ok(!(await fs.readFile(path.join(root, 'agent-config.json'), 'utf8')).includes('device-secret'));
 });
 
-test('coordinator capability requires Linux, passed self-test, reported capability and 11000 MB', async (t) => {
-  for (const changes of [{ passed: false }, { coordinator: false }, { vramTotalMb: 10999 }, { platform: 'windows' }]) {
+test('coordinator capability requires the passed self-test of this machine and reported capability', async (t) => {
+  for (const changes of [{ passed: false }, { coordinator: false }, { platform: 'windows' }]) {
     const { service } = await fixture(t);
     Object.assign(service.selfTest, changes);
     await assert.rejects(
@@ -66,11 +66,17 @@ test('coordinator capability requires Linux, passed self-test, reported capabili
     );
   }
   const { service } = await fixture(t, 'win32');
-  service.selfTest.platform = 'linux';
+  service.selfTest.platform = 'linux'; // a self-test from another machine
   await assert.rejects(
     service.configureCompute({ network: 'lan', coordinator: true, host: '192.168.1.8' }),
     /COORDINATOR_NOT_QUALIFIED/,
   );
+});
+
+test('a Windows machine and a small GPU may coordinate (owner 2026-10-20)', async (t) => {
+  const { service } = await fixture(t, 'win32');
+  Object.assign(service.selfTest, { platform: 'windows', vramTotalMb: 6144 });
+  await service.configureCompute({ network: 'lan', coordinator: true, host: '192.168.1.8' });
 });
 
 test('listen address must belong to this computer and fit the chosen network', async (t) => {

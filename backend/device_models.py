@@ -45,6 +45,8 @@ class SelfTest(FiniteStrict):
     gpuUUID: str | None = None
     recipeVersions: list[Literal[1, 2, 3]] = Field(default_factory=lambda: [1], max_length=3)
     qualifiedModelHashes: list[str] = Field(default_factory=list, max_length=20)
+    # measured by the self-test: the coordinator's update time per seed (the lab shows seconds per generation from it)
+    updateSecondsPerSeed: float | None = Field(default=None, ge=0, le=3600)
 
     @field_validator("gpuUUID")
     @classmethod
@@ -123,19 +125,23 @@ class SelfTest(FiniteStrict):
         return self
 
     def _native_windows_v3(self):
-        """Worker-only Recipe v3 on native Windows: both reference cells, the pinned adapter, PEFT and model."""
+        """
+        Recipe v3 on native Windows: both reference cells, the pinned adapter, PEFT and model. Since 2026-10-20 it may also
+        coordinate (owner: any machine): the update has the same bits on every device (es/update.py, evidence
+        2026-10-20-any-coordinator); a LoRA run is refused at experiment creation because Windows would create another
+        initial adapter.
+        """
         reference = DESKTOP_V3_REFERENCE
         compatibility = self.compatibility
         if (
             self.recipeVersions != [3]
-            or self.coordinator
             or self.qualifiedModelHashes != [reference["modelManifestHash"]]
             or compatibility.get("passed") is not True
             or compatibility.get("repeatIdentical") is not True
             or compatibility.get("initialAdapterSha256") != reference["initialAdapterSha256"]
             or compatibility.get("peftVersion") != reference["peftVersion"]
         ):
-            raise ValueError("Native Windows v3 requires the worker-only desktop-v3 reference profile")
+            raise ValueError("Native Windows v3 requires the desktop-v3 reference profile")
         for cell in ("recipeV3", "recipeV3Lora"):
             evidence = compatibility.get(cell)
             if (

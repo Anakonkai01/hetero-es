@@ -192,6 +192,26 @@ def write_reference(reference, adapter, directory):
     return directory / REFERENCE_FILE
 
 
+def update_seconds_per_seed(model_path, recipe, device, seeds=(1, 2)):
+    """This machine's coordinator update time per seed on the full model (the lab shows seconds per generation)."""
+    import time
+
+    import torch
+
+    from heteroes.es.update import apply_coefficients_
+    from heteroes.v3.model import load, trainable_schema
+
+    model, _ = load(model_path, recipe["model"]["files"], device)
+    schema = trainable_schema(model, {"kind": "full"})
+    if device == "cuda":
+        torch.cuda.synchronize()
+    started = time.perf_counter()
+    apply_coefficients_(model, schema, list(seeds), [1.0, -1.0], 1e-3, recipe["noise"]["chunkElements"])
+    if device == "cuda":
+        torch.cuda.synchronize()
+    return round((time.perf_counter() - started) / len(seeds), 3)
+
+
 def qualify(model_path, reference, reference_dir, device="cuda", emit=lambda event: None):
     from heteroes.model.loading import check_noise_selftest
     from heteroes.product.recovery import source_identity
@@ -228,9 +248,12 @@ def qualify(model_path, reference, reference_dir, device="cuda", emit=lambda eve
         )
         evidence[name] = verify(cell, observations)
     gpu = handle({"action": "probe"}) if device == "cuda" else {"gpuName": "CPU reference", "vramTotalMb": 1}
+    emit({"stage": "update_speed"})
     return {
         "passed": True,
-        "coordinator": sys.platform != "win32" and gpu["vramTotalMb"] >= 11000,
+        # any machine may coordinate (owner 2026-10-20): the update has the same bits everywhere; its speed is reported
+        "coordinator": True,
+        "updateSecondsPerSeed": update_seconds_per_seed(model_path, reference["cells"]["full"]["recipe"], device),
         "gpuName": gpu["gpuName"],
         "vramTotalMb": gpu["vramTotalMb"],
         **({"gpuUUID": gpu["gpuUUID"]} if "gpuUUID" in gpu else {}),

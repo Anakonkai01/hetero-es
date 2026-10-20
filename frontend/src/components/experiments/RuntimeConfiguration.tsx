@@ -11,7 +11,13 @@ import type { V3Settings } from '../../types/experiment';
 import type { CreateExperimentRequest, Experiment } from '../../types/experiment';
 import type { StudyDataset, StudyModel } from './StudyAssets';
 interface Capabilities {
-  coordinatorDevices?: { deviceId: string; workerId: string; displayName?: string }[];
+  coordinatorDevices?: {
+    deviceId: string;
+    workerId: string;
+    displayName?: string;
+    platform?: string;
+    updateSecondsPerSeed?: number | null;
+  }[];
   defaultCoordinatorDeviceId?: string | null;
   modelId: string;
   modelRevision: string;
@@ -398,6 +404,18 @@ export function RuntimeConfiguration({
               ))}
             </select>
           </label>
+          {(() => {
+            // the update of a generation: one noise pass per seed (momentum adds earlier generations' seeds)
+            const chosen = cap.data?.coordinatorDevices?.find((d) => d.deviceId === coordinator);
+            if (!chosen?.updateSecondsPerSeed) return null;
+            const seeds = version === 3 && v3.momentumBeta ? candidates * v3.momentumWindow : candidates;
+            return (
+              <p className="hint">
+                {t('Update on this coordinator: about')} {Math.ceil(chosen.updateSecondsPerSeed * seeds)}{' '}
+                {t('s per generation')}
+              </p>
+            );
+          })()}
           <fieldset className="worker-picker">
             <legend>{t('Configured workers')}</legend>
             {workers.isError && <p role="alert">{t('Worker status unavailable')}</p>}

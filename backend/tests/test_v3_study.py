@@ -482,3 +482,34 @@ def test_v3_python_code_is_frozen_and_reaches_only_the_coordinator(v3_study):
     assert "pythonCode" not in worker["studyConfig"] and worker["studyConfig"]["scorer"]["codeSha256"] == scorer_sha
     tampered = {**body, "pythonCode": body["pythonCode"][:1]}  # the rule names Python code that is not there
     assert c.post("/api/v1/experiments", headers=admin, json=tampered).status_code == 422
+
+
+def test_a_windows_coordinator_is_admitted_but_never_creates_a_lora_adapter(v3_study):
+    import pathlib
+
+    from labkit import boot
+
+    c, admin, _ = v3_study
+    evidence = pathlib.Path(__file__).parents[2] / "docs/evidence/2026-10-19-v3-qualification-reference"
+    windows = {**json.loads((evidence / "windows-3060-first.json").read_text())["result"], "coordinator": True}
+    code = c.post("/api/v1/devices/pairing-codes", headers=admin).json()["code"]
+    enrolled = c.post(
+        "/api/v1/device/enroll",
+        json={
+            "code": code,
+            "workerId": "win3060",
+            "displayName": "Windows 3060",
+            "selfTest": windows,
+            "computeUrl": "http://100.64.0.9:8765",
+        },  # fmt: skip
+    )
+    assert enrolled.status_code == 201, enrolled.text  # a Windows v3 profile may now coordinate
+    d = enrolled.json()
+    approve = {"approved": True, "workspaceId": "lab"}
+    assert c.patch("/api/v1/platform/devices/" + d["deviceId"], json=approve, headers=admin).status_code == 200
+    boot(c, {"Authorization": "Bearer " + d["deviceToken"]}, "boot-1")
+    model, data = assets(v3_study)
+    body = {**configuration({**d, "workerId": "win3060"}, model, data), "coordinatorDeviceId": d["deviceId"]}
+    lora = {"kind": "lora", "rank": 2, "alpha": 4, "targetModules": ["q_proj", "v_proj"]}
+    refused = c.post("/api/v1/experiments", headers=admin, json={**body, "weightSpace": lora})
+    assert refused.status_code == 422 and "Windows coordinator" in refused.text

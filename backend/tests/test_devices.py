@@ -491,7 +491,6 @@ def test_native_windows_v3_worker_admission_is_bound_to_the_shipped_reference():
         return body
 
     for path, value in [
-        (("coordinator",), True),
         (("runtimeProfile",), "desktop-v1"),
         (("recipeVersions",), [1, 3]),
         (("recipeVersions",), [1]),  # a v3 profile never stands in for the v1 Windows evidence
