@@ -29,6 +29,7 @@ const KEYS = [
   'momentumWindow',
   'evalChunk',
   'sampler',
+  'candidateSeedNamespace',
 ] as const;
 
 export type TemplateConfig = Partial<Pick<Experiment, (typeof KEYS)[number]>> & {

@@ -98,7 +98,9 @@ def wait_for(predicate, process, timeout=60):
     ],
 )
 def test_managed_runner_and_worker_cli_commit_texts(product_assets, tmp_path, space):
-    run_product(product_config(product_assets, tmp_path, weightSpace=space), tmp_path)
+    run_product(
+        product_config(product_assets, tmp_path, weightSpace=space, candidateSeedNamespace="fixture-fixed"), tmp_path
+    )
 
 
 def run_product(cfg, tmp_path):
@@ -172,6 +174,12 @@ def run_product(cfg, tmp_path):
             for generation in range(2):
                 candidates = ledger.list_candidates(cfg["runId"], generation)
                 assert [c.descriptor.sign for c in candidates] == [1, -1, 1, -1]
+                from heteroes.manifest import derive_seed
+
+                namespace = cfg.get("candidateSeedNamespace", cfg["runId"])
+                assert [c.descriptor.seed for c in candidates] == [
+                    derive_seed(namespace, generation, i // 2) for i in range(4)
+                ]
                 rows = data.batch(dataset, generation, 3, 11)["rows"]
                 for candidate in candidates:
                     _, texts = ledger.get_completions(candidate.descriptor.candidate_id)

@@ -46,6 +46,7 @@ const SETTING_LABELS: Record<string, string> = {
   momentumWindow: 'Momentum window',
   evalChunk: 'Prompts per generation call',
   sampler: 'Batch sampler',
+  candidateSeedNamespace: 'Candidate seed group',
 };
 
 export function ComparePage() {

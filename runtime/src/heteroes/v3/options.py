@@ -75,7 +75,17 @@ def validate_weight_space(space, *, initial_adapter=True):
     return space
 
 
+def validate_seed_namespace(value):
+    """Optional namespace for repeatable candidate draws across otherwise distinct runs; absent uses the run ID."""
+    if value is not None and (
+        not isinstance(value, str) or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}", value) is None
+    ):
+        raise ValueError("the seed namespace is 1..128 letters, digits or ._:-, starting with a letter or digit")
+    return value
+
+
 def validate_options(config):
+    validate_seed_namespace(config.get("candidateSeedNamespace"))
     validate_weight_space(config["weightSpace"], initial_adapter=False)
     validate_spec(config["scorer"], allow_python=False)
     if config["coefficientRule"] not in {

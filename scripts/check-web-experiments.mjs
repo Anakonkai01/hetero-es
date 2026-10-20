@@ -239,6 +239,7 @@ try {
   await page.getByLabel('Weight space').selectOption('lora');
   await page.getByLabel('LoRA rank', { exact: true }).fill('4');
   await page.getByLabel('Antithetic sampling', { exact: true }).check();
+  await page.getByLabel('Candidate seed group', { exact: true }).fill('browser-baseline');
   await page.getByLabel('Declarative scorer').selectOption('choice-letter');
   await page.getByLabel('Scorer answer field').fill('label');
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
@@ -263,6 +264,7 @@ try {
   assert.equal(v3.weightSpace.rank, 4);
   assert.equal(v3.scorer.config.answerField, 'label');
   assert.equal(v3.antithetic, true);
+  assert.equal(v3.candidateSeedNamespace, 'browser-baseline');
   assert.equal(v3.systemPrompt, null);
   await page.getByRole('tab', { name: 'Configuration', exact: true }).click();
   await page.getByText('choice-letter@1', { exact: true }).waitFor();

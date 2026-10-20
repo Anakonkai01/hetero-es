@@ -69,6 +69,8 @@ def qualify_v3(c, device_auth, profile, model):
 
 
 UPDATE_OPTIONS = {
+    "candidateSeedNamespace": "baseline-5070",
+    "sampler": "epoch-shuffle@1",
     "coefficientRule": "centered-rank@1",
     "alphaSchedule": "cosine",
     "alphaMinimum": 0.0002,
@@ -248,6 +250,9 @@ def test_v3_config_and_worker_command_preserve_the_frozen_options(v3_study):
         {"momentumBeta": 0.9},
         {"momentumBeta": 0.5, "momentumWindow": 9},
         {"evalChunk": 8},
+        {"candidateSeedNamespace": ""},
+        {"candidateSeedNamespace": "x" * 129},
+        {"candidateSeedNamespace": "name with spaces"},
     ],
 )
 def test_v3_invalid_options_never_become_a_draft(v3_study, change):
@@ -341,6 +346,11 @@ def test_v3_templates_validate_and_keep_nullable_prompt():
         },
     }
     assert clean_config(options) == options
+    for bad in ("", " ", "x" * 129, 1, False):
+        with pytest.raises(HTTPException):
+            clean_config({**options, "candidateSeedNamespace": bad})
+    with pytest.raises(HTTPException):
+        clean_config({**options, "sampler": "random@9"})
     with pytest.raises(HTTPException):
         clean_config({**options, "weightSpace": {"kind": "subset", "include": ["["]}})
 

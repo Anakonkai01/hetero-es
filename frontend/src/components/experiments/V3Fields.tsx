@@ -130,6 +130,19 @@ export function V3Fields({
         </select>
       </label>
       <label className="fg">
+        {t('Candidate seed group')}
+        <input
+          className="inp"
+          value={value.candidateSeedNamespace ?? ''}
+          maxLength={128}
+          pattern="[A-Za-z0-9][A-Za-z0-9_.:\-]*"
+          onChange={(e) => set({ candidateSeedNamespace: e.target.value || null })}
+        />
+        <small>
+          {t('Use the same value to compare runs with the same candidate seeds. Leave blank for fresh seeds.')}
+        </small>
+      </label>
+      <label className="fg">
         {t('Alpha schedule')}
         <select
           className="sel"

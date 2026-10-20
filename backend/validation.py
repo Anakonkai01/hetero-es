@@ -9,6 +9,8 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
     current = scoped(current, current["workspaceId"])
     cap = capabilities()
     body = config.model_dump()
+    if body.get("candidateSeedNamespace") is None:
+        body.pop("candidateSeedNamespace", None)
     co = next((d for d in runtime.devices() if d["deviceId"] == body["coordinatorDeviceId"]), None)
     if (
         not co

@@ -68,6 +68,7 @@ class ESConfig:
     momentum_window: int = 4
     # "epoch-shuffle@1" walks the train split in shuffled epochs; the default draws an independent sample per generation
     sampler: str = "sha256-python-random-sample-v1"
+    candidate_seed_namespace: str | None = None  # absent: run ID; reuse a namespace to compare resource layouts
 
     def to_config(self, scorer: dict) -> dict:
         """The configuration `heteroes.v3.local.run_local` and `python -m heteroes.v3 run` read."""
@@ -98,6 +99,11 @@ class ESConfig:
             "generations": self.generations,
             "alpha": self.alpha,
             "coefficientRule": self.coefficient_rule,
+            **(
+                {"candidateSeedNamespace": self.candidate_seed_namespace}
+                if self.candidate_seed_namespace is not None
+                else {}
+            ),
             "scorer": scorer,
             **(
                 {}

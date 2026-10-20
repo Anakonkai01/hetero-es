@@ -19,6 +19,7 @@ test('the review lists every ES choice, with schedules shown as start → end', 
         alphaMinimum: 0.0001,
         momentumBeta: 0.875,
         coefficientRule: 'centered-rank@1',
+        candidateSeedNamespace: 'baseline-5070',
       },
       {
         dataset: 'GSM8K',
@@ -40,6 +41,7 @@ test('the review lists every ES choice, with schedules shown as start → end', 
   assert.equal(rows['Prompts per generate() call'], '16');
   assert.equal(rows['Declarative scorer'], 'exact-string@1');
   assert.equal(rows['Batch sampler'], 'sha256-python-random-sample-v1');
+  assert.equal(rows['Candidate seed group'], 'baseline-5070');
   const constant = Object.fromEntries(
     v3ReviewRows(DEFAULT_V3, {
       dataset: 'd',

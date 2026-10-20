@@ -92,6 +92,7 @@ const SETTINGS: (keyof Experiment)[] = [
   'momentumWindow',
   'evalChunk',
   'sampler',
+  'candidateSeedNamespace',
 ];
 
 const show = (value: unknown): string =>

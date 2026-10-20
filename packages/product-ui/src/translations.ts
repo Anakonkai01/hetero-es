@@ -152,6 +152,9 @@ export const translations: Record<string, string> = {
   'Revoke device': 'Thu hồi máy',
   'Approval workspace': 'Không gian cấp quyền',
   'Batch sampler': 'Cách chọn batch',
+  'Candidate seed group': 'Nhóm seed ứng viên',
+  'Use the same value to compare runs with the same candidate seeds. Leave blank for fresh seeds.':
+    'Dùng cùng giá trị để so sánh các lần chạy với cùng seed ứng viên. Để trống để dùng seed mới.',
   'Independent sample per generation': 'Mẫu ngẫu nhiên độc lập mỗi thế hệ',
   'Shuffled epochs (every row once per epoch)': 'Theo epoch đã xáo (mỗi câu đúng một lần mỗi epoch)',
   'Default coordinator of this workspace': 'Coordinator mặc định của lab này',

@@ -9,7 +9,15 @@ CORE_COMMAND_KINDS = frozenset({"SET_CONTRIBUTION", "COORDINATE", "START_WORKER"
 COMMAND_KINDS = CORE_COMMAND_KINDS | {"PAUSE_ASSIGNMENT", "UPDATE_BACKUP_POLICY"}
 # Settings only Recipe v3 has; the update-formula ones came later, so a run saved before them may lack them
 V3_KEYS = ("weightSpace", "antithetic", "scorer", "coefficientRule", "systemPrompt")
-V3_UPDATE_KEYS = ("alphaSchedule", "alphaMinimum", "momentumBeta", "momentumWindow", "evalChunk", "sampler")
+V3_UPDATE_KEYS = (
+    "alphaSchedule",
+    "alphaMinimum",
+    "momentumBeta",
+    "momentumWindow",
+    "evalChunk",
+    "sampler",
+    "candidateSeedNamespace",
+)
 
 # The shipped desktop-v3 qualification reference (docs/evidence/2026-10-19-v3-qualification-reference): a native Windows
 # worker is admitted to Recipe v3 only with evidence for exactly these cells, this adapter file and this model.

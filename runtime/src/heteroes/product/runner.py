@@ -167,6 +167,7 @@ def main(directory, *, device="cuda", timeout_seconds=1800):
             from heteroes.v3.run import make_scorer
 
             v3_options = {
+                "seed_namespace": config.get("candidateSeedNamespace"),
                 "audit_workers": config["workerIds"],
                 "audit_fault_path": root / "audit-faults.json",
                 "antithetic": recipe.antithetic,

@@ -6,7 +6,7 @@ stale; the experiment wizard still validates everything when a run is created fr
 
 from .migrations import initialize_templates_schema
 from heteroes.catalog import DECODE_ENGINES
-from heteroes.v3.options import validate_weight_space
+from heteroes.v3.options import validate_weight_space, validate_seed_namespace
 from heteroes.v3.scoring import validate_spec
 from datetime import datetime, timezone
 import json
@@ -41,6 +41,7 @@ CHOICES = {
     "decodeEngine": set(DECODE_ENGINES),
     "coefficientRule": {"zscore@1", "centered-rank@1"},
     "alphaSchedule": {"constant", "cosine", "linear"},
+    "sampler": {"sha256-python-random-sample-v1", "epoch-shuffle@1"},
 }
 SHORT_TEXT = {"task"}
 
@@ -54,7 +55,7 @@ def clean_config(config):
         | set(FLOATS)
         | set(CHOICES)
         | SHORT_TEXT
-        | {"workerIds", "backupPolicy", "weightSpace", "antithetic", "scorer", "systemPrompt"}
+        | {"workerIds", "backupPolicy", "weightSpace", "antithetic", "scorer", "systemPrompt", "candidateSeedNamespace"}
     )
     unknown = sorted(set(config) - known)
     if unknown:
@@ -77,6 +78,11 @@ def clean_config(config):
         elif key in SHORT_TEXT:
             if not isinstance(value, str) or not 1 <= len(value) <= 64:
                 raise HTTPException(422, f"{key} must be a short text")
+        elif key == "candidateSeedNamespace":
+            try:
+                validate_seed_namespace(value)
+            except ValueError as error:
+                raise HTTPException(422, str(error)) from None
         elif key in ("weightSpace", "scorer"):
             try:
                 if key == "weightSpace":

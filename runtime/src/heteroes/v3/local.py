@@ -168,6 +168,7 @@ def run_local(
         ledger,
         out / "published",
         experiment_id=experiment_id,
+        seed_namespace=config.get("candidateSeedNamespace"),
         candidates=run.plan["population"],
         alpha=run.plan["alpha"],
         log=record,

@@ -65,6 +65,7 @@ export function RuntimeConfiguration({
     momentumWindow: initial?.momentumWindow ?? DEFAULT_V3.momentumWindow,
     evalChunk: initial?.evalChunk ?? DEFAULT_V3.evalChunk,
     sampler: initial?.sampler ?? DEFAULT_V3.sampler,
+    candidateSeedNamespace: initial?.candidateSeedNamespace ?? null,
   });
   const [validationInterval, setValidationInterval] = useState(initial?.validationInterval ?? 1);
   const [version, setVersion] = useState(initial?.recipeVersion ?? 1);

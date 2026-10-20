@@ -21,6 +21,7 @@ export interface V3Settings {
   momentumWindow: number;
   evalChunk: number | null;
   sampler: string;
+  candidateSeedNamespace: string | null;
 }
 
 export type ExperimentStatus =

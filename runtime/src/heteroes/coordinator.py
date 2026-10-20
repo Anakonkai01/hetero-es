@@ -122,6 +122,7 @@ class Coordinator:
         audit_timeout_seconds=120,
         audit_fault_path=None,
         coefficient_function=None,
+        seed_namespace: str | None = None,
     ):
         # Recipe v3 (ADR-008): `antithetic` gives pairs (seed, +1), (seed, -1); `coefficient_rule` makes version-2 records;
         # `score(generation, descriptor, completions) -> reward` scores the texts the workers submit, on this process
@@ -156,6 +157,13 @@ class Coordinator:
         self.ledger = ledger
         self.models_dir = models_dir
         self.experiment_id = experiment_id
+        if seed_namespace is not None:
+            from heteroes.v3.options import validate_seed_namespace
+
+            validate_seed_namespace(seed_namespace)
+            if recipe.to_dict().get("formatVersion") != 3:
+                raise ValueError("an explicit seed namespace requires Recipe v3")
+        self._seed_namespace = experiment_id if seed_namespace is None else seed_namespace
         self.candidates = candidates
         self.alpha = alpha
         self._policy_factory = policy_factory
@@ -401,7 +409,7 @@ class Coordinator:
             )
             # without antithetic pairs these are derive_seed(experiment, generation, index) with sign +1, as before
             for index, (seed, sign) in enumerate(
-                candidate_seeds(self.experiment_id, generation, self.candidates, self._antithetic)
+                candidate_seeds(self._seed_namespace, generation, self.candidates, self._antithetic)
             )
         ]
         known = [g for g in self.ledger.list_generations(self.experiment_id) if g.generation == generation]
