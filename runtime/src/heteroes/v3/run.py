@@ -39,7 +39,11 @@ class RecipeV3Run:
         self.antithetic = recipe["perturbation"]["antithetic"]
         self.workload_name = None
         # what the generation of texts reads (`study.evaluation.generate_rows`); the answers are scored elsewhere
-        self.evaluation = {"systemPrompt": evaluation["systemPrompt"], "maxNewTokens": evaluation["maxNewTokens"]}
+        self.evaluation = {
+            "systemPrompt": evaluation["systemPrompt"],
+            "maxNewTokens": evaluation["maxNewTokens"],
+            "decoder": evaluation["decoder"],
+        }
 
     def to_dict(self) -> dict:
         return self.recipe

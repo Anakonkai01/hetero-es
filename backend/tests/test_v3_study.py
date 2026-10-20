@@ -77,6 +77,7 @@ UPDATE_OPTIONS = {
     "momentumBeta": 0.875,
     "momentumWindow": 3,
     "evalChunk": 64,
+    "decodeEngine": "hf_compact",
 }
 
 
@@ -253,6 +254,7 @@ def test_v3_config_and_worker_command_preserve_the_frozen_options(v3_study):
         {"candidateSeedNamespace": ""},
         {"candidateSeedNamespace": "x" * 129},
         {"candidateSeedNamespace": "name with spaces"},
+        {"decodeEngine": "vllm"},
     ],
 )
 def test_v3_invalid_options_never_become_a_draft(v3_study, change):

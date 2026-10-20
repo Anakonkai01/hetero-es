@@ -1,0 +1,8 @@
+control ok    | 4 passed in 1.75s
+killed       v3 always uses generate() | 3 failed, 1 passed in 1.80s
+killed       compact accepts sampling | 1 failed, 3 passed in 1.80s
+killed       unknown decoder silently uses generate() | 1 failed, 3 passed in 1.76s
+killed       the run drops the recipe's decoder | 1 failed, 3 passed in 1.76s
+killed       options accept any decoder | 1 failed, 3 passed in 1.83s
+
+5 of 5 mutants killed.

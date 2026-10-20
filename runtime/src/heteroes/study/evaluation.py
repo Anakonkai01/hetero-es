@@ -45,6 +45,18 @@ def generate_rows(model, tokenizer, rows, evaluation, chunk=16, *, sample=False,
 
     if type(chunk) is not int or chunk < 1:
         raise ValueError("Invalid decoding chunk")
+    decoder = evaluation.get("decoder", "hf_generate")  # Recipe v2 always, v3 by choice
+    if decoder not in ("hf_generate", "hf_compact"):
+        raise ValueError("Unknown decoder")
+    if decoder == "hf_compact":
+        if sample:
+            raise ValueError("The compacting decoder is greedy only")
+        from heteroes.eval import compact_decode
+
+        # refuses a generation config it does not reproduce before anything is decoded
+        eos_ids, pad_id, processors = compact_decode.decode_settings(
+            model, evaluation["maxNewTokens"], tokenizer.pad_token_id
+        )
     device = next(model.parameters()).device
     previous = tokenizer.padding_side
     tokenizer.padding_side = "left"
@@ -68,11 +80,24 @@ def generate_rows(model, tokenizer, rows, evaluation, chunk=16, *, sample=False,
             ]
             inputs = {k: v.to(device) for k, v in tokenizer(prompts, return_tensors="pt", padding=True).items()}
             devices = [device.index or 0] if device.type == "cuda" else []
-            with torch.random.fork_rng(devices=devices), torch.no_grad():
-                torch.manual_seed(seed + offset)
-                options = {"temperature": temperature} if sample else {}
-                ids = model.generate(**inputs, max_new_tokens=evaluation["maxNewTokens"], do_sample=sample, **options)
-            new = ids[:, inputs["input_ids"].shape[1] :]
+            if decoder == "hf_compact":
+                new, _ = compact_decode.compact_generate_ids(
+                    model,
+                    inputs["input_ids"],
+                    inputs["attention_mask"],
+                    evaluation["maxNewTokens"],
+                    eos_ids,
+                    pad_id,
+                    processors,
+                )
+            else:
+                with torch.random.fork_rng(devices=devices), torch.no_grad():
+                    torch.manual_seed(seed + offset)
+                    options = {"temperature": temperature} if sample else {}
+                    ids = model.generate(
+                        **inputs, max_new_tokens=evaluation["maxNewTokens"], do_sample=sample, **options
+                    )
+                new = ids[:, inputs["input_ids"].shape[1] :]
             texts = tokenizer.batch_decode(new, skip_special_tokens=True)
             eos = model.generation_config.eos_token_id
             eos_ids = {eos} if isinstance(eos, int) else set(eos or [])

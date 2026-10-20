@@ -368,7 +368,7 @@ export function RuntimeConfiguration({
                 {t('Decoder')}
                 <select className="sel" value={decoder} onChange={(e) => setDecoder(e.target.value)}>
                   <option>{t('hf_generate')}</option>
-                  {version === 1 && task !== 'arith16' && <option>{t('hf_compact')}</option>}
+                  {(version === 3 || (version === 1 && task !== 'arith16')) && <option>{t('hf_compact')}</option>}
                 </select>
               </label>
               <p className="hint">{t('FP32 evaluation · canonical CPU noise · exact worker restore.')}</p>

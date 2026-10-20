@@ -1,0 +1,1 @@
+[{"name": "Recipe v3 refused the compacting decoder", "file": "backend/validation.py", "old": "            version == 2 and body[\"decodeEngine\"] != \"hf_generate\"", "new": "            body[\"decodeEngine\"] != \"hf_generate\""}]

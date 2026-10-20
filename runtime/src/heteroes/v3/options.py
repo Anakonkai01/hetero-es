@@ -112,8 +112,8 @@ def validate_options(config):
         "epoch-shuffle@1",
     ):
         raise ValueError("unknown batch sampler")
-    if config["decodeEngine"] != "hf_generate":
-        raise ValueError("Recipe v3 uses the HF generate decoder")
+    if config["decodeEngine"] not in ("hf_generate", "hf_compact"):
+        raise ValueError("Recipe v3 uses the hf_generate or hf_compact decoder")
     prompt = config["systemPrompt"]
     if prompt is not None and (not isinstance(prompt, str) or not prompt or len(prompt) > 4000):
         raise ValueError("system prompt is null or a text of at most 4000 characters")

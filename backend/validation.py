@@ -57,7 +57,10 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
                     raise ValueError("Scorer fields must exist in every dataset row")
             except (ValueError, TypeError, KeyError) as error:
                 raise HTTPException(422, str(error)) from None
-        if body["task"] != ("text_v3" if version == 3 else "text_math_v2") or body["decodeEngine"] != "hf_generate":
+        # Recipe v3 may choose the compacting decoder (validate_options above); Recipe v2 keeps generate()
+        if body["task"] != ("text_v3" if version == 3 else "text_math_v2") or (
+            version == 2 and body["decodeEngine"] != "hf_generate"
+        ):
             raise HTTPException(422, "Recipe v2 uses exact math and the HF decoder")
         selected = [
             d

@@ -1,0 +1,7 @@
+[
+ {"name": "v3 always uses generate()", "file": "src/heteroes/study/evaluation.py", "old": "    decoder = evaluation.get(\"decoder\", \"hf_generate\")  # Recipe v2 always, v3 by choice", "new": "    decoder = \"hf_generate\""},
+ {"name": "compact accepts sampling", "file": "src/heteroes/study/evaluation.py", "old": "        if sample:\n            raise ValueError(\"The compacting decoder is greedy only\")\n", "new": ""},
+ {"name": "unknown decoder silently uses generate()", "file": "src/heteroes/study/evaluation.py", "old": "    if decoder not in (\"hf_generate\", \"hf_compact\"):\n        raise ValueError(\"Unknown decoder\")\n", "new": ""},
+ {"name": "the run drops the recipe's decoder", "file": "src/heteroes/v3/run.py", "old": "            \"decoder\": evaluation[\"decoder\"],\n        }", "new": "        }"},
+ {"name": "options accept any decoder", "file": "src/heteroes/v3/options.py", "old": "if config[\"decodeEngine\"] not in (\"hf_generate\", \"hf_compact\"):", "new": "if False:"}
+]
