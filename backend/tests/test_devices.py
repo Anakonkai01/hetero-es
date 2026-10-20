@@ -513,7 +513,7 @@ def test_native_windows_v3_worker_admission_is_bound_to_the_shipped_reference():
             SelfTest(**changed(path, value))
 
 
-def test_turning_a_device_off_cancels_its_queued_and_running_jobs(setup):
+def test_turning_a_device_off_drains_running_jobs_and_preserves_its_queue(setup):
     client, store, runtime = setup
     admin = login(client, "admin")
     ids = [draft(client, admin, name=f"GPU job {i}").json()["experimentId"] for i in range(2)]
@@ -526,7 +526,38 @@ def test_turning_a_device_off_cancels_its_queued_and_running_jobs(setup):
         f"/api/v1/devices/{device['deviceId']}/contribution", json={"enabled": False, "bootId": "boot-1"}, headers=admin
     )
     assert off.status_code == 200
-    assert store.get(ids[0])["cancelRequested"] and store.get(ids[1])["status"] == "CANCELLED"
+    assert store.get(ids[0])["cancelRequested"]
+    assert store.get(ids[1])["status"] == "QUEUED" and not store.get(ids[1])["cancelRequested"]
     assert [(did, c["assignmentId"]) for did, c in pending_commands(runtime, "CANCEL_ASSIGNMENT")] == [
         (device["deviceId"], runtime.runs()[0]["assignmentId"])
     ]
+
+
+def test_an_offline_queue_waits_then_dispatches_when_contribution_returns(lab):
+    client, store, runtime, admin = lab
+    device, auth = pair(lab)
+    enable(lab, device, auth)
+    rid = queued(lab, device)
+    off = client.post(
+        f"/api/v1/devices/{device['deviceId']}/contribution",
+        json={"enabled": False, "bootId": "boot-1"},
+        headers=admin,
+    )
+    assert off.status_code == 200
+    store.dispatch_once()
+    assert store.get(rid)["status"] == "QUEUED" and not store.get(rid)["cancelRequested"]
+    assert not runtime.runs() and not runtime.reservations()
+    enable(lab, device, auth)
+    store.dispatch_once()
+    assert store.get(rid)["status"] == "STARTING"
+
+
+def test_resource_revocation_still_cancels_queued_jobs_and_explicit_cancel_still_works(lab):
+    client, store, _, admin = lab
+    device, auth = pair(lab)
+    first, second = queued(lab, device), queued(lab, device, name="Second queued job")
+    assert client.post(f"/api/v1/experiments/{first}/cancel", headers=admin).status_code == 200
+    assert store.get(first)["status"] == "CANCELLED"
+    result = client.patch(f"/api/v1/platform/devices/{device['deviceId']}", json={"approved": False}, headers=admin)
+    assert result.status_code == 200
+    assert store.get(second)["status"] == "CANCELLED"

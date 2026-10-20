@@ -122,7 +122,7 @@ class Store:
     def disabled_workers(self, db):
         return set(read_setting(db, "disabledWorkers", []))
 
-    def cancel_selected(self, db, worker_id):
+    def cancel_selected(self, db, worker_id, *, include_queued=True):
         for row in db.execute("SELECT body FROM experiments").fetchall():
             b = json.loads(row[0])
             coordinator = b.get("coordinatorDeviceId")
@@ -134,6 +134,8 @@ class Store:
                 "DRAFT",
                 "PAUSED",
             }:
+                continue
+            if not include_queued and b["status"] == "QUEUED":
                 continue
             b["cancelRequested"] = True
             if b["status"] in ("QUEUED", "PAUSED"):

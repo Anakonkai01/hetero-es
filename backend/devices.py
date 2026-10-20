@@ -458,7 +458,7 @@ def install_device_routes(app, store, user, runtime):
                 "contribution:" + uuid.uuid4().hex,
             )
             if not body.enabled:
-                store.cancel_selected(db, d["worker_id"])
+                store.cancel_selected(db, d["worker_id"], include_queued=False)
                 for row in db.execute(
                     "SELECT a.run_id FROM assignments a JOIN device_reservations r ON a.id=r.assignment_id WHERE r.device_id=?",
                     (device_id,),
