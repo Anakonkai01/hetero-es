@@ -45,14 +45,10 @@ Candidate4 artifacts: `/mnt/Archive-2tb/heteroes-local/downloads/lf1-20261020-r1
 - Public lab untouched; `local-lab.py status` shows it alive. Never operate it through the isolated scripts.
 - Isolated lab `.scratch/isolated-lab/` (candidate4: `start-c4.sh`, worker `worker5070/start-c4.sh`), stopped by SIGTERM
   to its drivers; ports 8790/8765/8799 closed. Helper `api.py` (cwd there), `.scratch/session5-managed/state.py <run id>`.
-- **Stuck candidate3 run `ec1c8f27…`** (cancelled) still holds the 5070 Ti device and Quang's CLI coordinator device
-  `47c8cd14…`. Candidate4's release fix applies, but the lab correctly waits for Quang's device to confirm its processes
-  stopped. When Quang is back: run `HETEROES_WORKER_HOME=~/.local/share/heteroes-c3-cpu ~/.local/share/heteroes-c3-cpu/bin/heteroes-worker run`
-  there with the isolated lab running; the next polls should release it (that is the real-world check of 595faa1).
-  Until then the 5070 Ti cannot be selected for a new isolated run.
-- **Quang WSL is down**: during the candidate4 CLI upgrade it returned I/O errors, then SSH resets. Owner's likely cause:
-  Windows C: (which holds the WSL vhdx) ran out of space. Needs someone at that machine (free C:, `wsl --shutdown`).
-  Its `heteroes-c3-cpu` home is half-upgraded; reinstall with the candidate4 one-liner after recovery.
+- The stuck candidate3 run `ec1c8f27…` was **released** (CANCELLED, devices free) after the owner restarted Quang's
+  WSL: `2026-10-20-stuck-run-release`. Quang's WSL works again, but its Windows C: has only **6.9 GB** free (the likely
+  cause of the I/O errors). Its CLI home `~/.local/share/heteroes-c3-cpu` now holds candidate4 (CPU self-test passed;
+  device `47c8cd14…`); the old GPU CLI home `~/.local/share/heteroes-worker` lost its runtime (reinstall when needed).
 - Thao: WSL CLI home `~/.local/share/heteroes-c4-cpu` (13 GB incl. run checkpoints; device `47e0546d…`, approved, offline).
   Windows C: **16.6 GB free** (WSL vhdx grows on C:); D: 838 GB. The Windows test Worker was uninstalled (device
   `106afff2…` remains approved/offline in the isolated lab). Candidate4 installer copy remains in the Windows temp task dir.
@@ -61,7 +57,7 @@ Candidate4 artifacts: `/mnt/Archive-2tb/heteroes-local/downloads/lf1-20261020-r1
 
 ## Unfinished / next
 
-1. Recover Quang, let the stuck run release (above), then optionally repeat the managed run with Quang as GPU worker.
+1. Free space on Quang's C: before any further WSL install there; optionally repeat a managed run with Quang as GPU worker.
 2. Optional: a managed run with audits (two generating workers) and a Linux desktop GPU worker together with Windows.
 3. Owner-only r11 flag day (checklist in `handoff-session4-next.md`): review candidate4 hashes/evidence, choose the
    window, back up, wipe only with explicit approval, publish exactly the prepared bytes (`publish-local-installers.py
