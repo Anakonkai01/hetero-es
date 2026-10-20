@@ -120,7 +120,7 @@ export function WorkspaceListPage() {
         </div>
       )}
       {creating && (
-        <Modal title={t('Create workspace')} subtitle="Workspace details" onClose={() => setCreating(false)}>
+        <Modal title={t('Create workspace')} subtitle={t('Workspace details')} onClose={() => setCreating(false)}>
           <form
             className="modal-form"
             onSubmit={(e) => {

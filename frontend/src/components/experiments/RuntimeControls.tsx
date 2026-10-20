@@ -42,19 +42,19 @@ export function RuntimeControls({ experiment: e }: { experiment: Experiment }) {
               </span>
             ))}
           </div>
-          {e.waitingReason && <p className="note">{e.waitingReason}</p>}
+          {e.waitingReason && <p className="note">{t(e.waitingReason)}</p>}
 
           {e.monitoringPartial && (
             <p>{t('Dashboard details show recent history. Full canonical history is retained in recovery points.')}</p>
           )}
           {e.failureReason && (
             <p className="note err" role="alert">
-              {e.failureReason}
+              {t(e.failureReason)}
             </p>
           )}
           {error && (
             <p className="note err" role="alert">
-              {error.message}
+              {t(error.message)}
             </p>
           )}
           {permitted && (

@@ -40,7 +40,7 @@ export function RunCard({ experiment: e }: { experiment: Experiment }) {
           <dd className="mono">{e.baseSeed ?? t('Per candidate')}</dd>
         </div>
       </dl>
-      {e.waitingReason && <p className="waiting">{e.waitingReason}</p>}
+      {e.waitingReason && <p className="waiting">{t(e.waitingReason)}</p>}
       <footer>
         <small>{formatDateTime(e.createdAt)}</small>
         <Link className="link" to={`/experiments/${e.experimentId}`}>

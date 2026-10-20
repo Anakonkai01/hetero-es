@@ -100,7 +100,7 @@ export function GenerationDetailPage() {
         <>
           <Breadcrumbs
             crumbs={[
-              { label: 'Experiments', to: '/experiments' },
+              { label: t('Experiments'), to: '/experiments' },
               {
                 label: experiment?.name ?? shortId(experimentId),
                 title: experimentId,

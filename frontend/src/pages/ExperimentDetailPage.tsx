@@ -70,7 +70,7 @@ export function ExperimentDetailPage() {
         <>
           <Breadcrumbs
             crumbs={[
-              { label: 'Experiments', to: '/experiments' },
+              { label: t('Experiments'), to: '/experiments' },
               { label: experiment.name, title: experiment.experimentId },
             ]}
           />
@@ -164,10 +164,10 @@ export function ExperimentDetailPage() {
                     </KeyValue>
                     <KeyValue label={t('Created')}>{formatDateTime(experiment.createdAt)}</KeyValue>
                     <KeyValue label={t('Started')}>
-                      {formatOptionalDateTime(experiment.startedAt, 'Not available yet')}
+                      {formatOptionalDateTime(experiment.startedAt, t('Not available yet'))}
                     </KeyValue>
                     <KeyValue label={t('Ended')}>
-                      {formatOptionalDateTime(experiment.completedAt, 'Not ended')}
+                      {formatOptionalDateTime(experiment.completedAt, t('Not ended'))}
                     </KeyValue>
                     <KeyValue label={t('Current generation')}>
                       {currentGeneration ? (

@@ -51,7 +51,7 @@ export function CandidateDetailPage() {
         <>
           <Breadcrumbs
             crumbs={[
-              { label: 'Experiments', to: '/experiments' },
+              { label: t('Experiments'), to: '/experiments' },
               {
                 label: experimentQuery.data?.name ?? shortId(experimentId),
                 title: experimentId,

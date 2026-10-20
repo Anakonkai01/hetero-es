@@ -62,8 +62,7 @@ export function LabAccountApprovals({ state }: { state: PanelState }) {
                 </b>
                 <small>
                   {t(user.accountStatus ?? 'Unknown')} · {t(user.platformAdmin ? 'Platform administrator' : 'Member')}{' '}
-                  {t('· Workspace creation')}
-                  {t(user.canCreateWorkspace ? 'allowed' : 'restricted')}
+                  {t('· Workspace creation')} {t(user.canCreateWorkspace ? 'allowed' : 'restricted')}
                 </small>
               </div>
               <div className="acts">
@@ -85,7 +84,7 @@ export function LabAccountApprovals({ state }: { state: PanelState }) {
                     onClick={() => {
                       if (
                         window.confirm(
-                          `Suspend ${user.username}? Queued jobs will be cancelled and active jobs will drain.`,
+                          `${user.username}: ${t('Suspend this account? Queued jobs will be cancelled and active jobs will drain.')}`,
                         )
                       )
                         update(user, { accountStatus: 'SUSPENDED' });
@@ -102,7 +101,7 @@ export function LabAccountApprovals({ state }: { state: PanelState }) {
                       disabled={action.isPending}
                       onClick={() => update(user, { canCreateWorkspace: !user.canCreateWorkspace })}
                     >
-                      {user.canCreateWorkspace ? 'Revoke workspace creation' : 'Allow workspace creation'}
+                      {t(user.canCreateWorkspace ? 'Revoke workspace creation' : 'Allow workspace creation')}
                     </button>
                     <button
                       className="btn"
@@ -115,11 +114,15 @@ export function LabAccountApprovals({ state }: { state: PanelState }) {
                       className="btn"
                       disabled={action.isPending}
                       onClick={() => {
-                        if (window.confirm(`Change platform administrator permission for ${user.username}?`))
+                        if (
+                          window.confirm(
+                            `${user.username}: ${t('Change the platform administrator permission of this account?')}`,
+                          )
+                        )
                           update(user, { platformAdmin: !user.platformAdmin });
                       }}
                     >
-                      {user.platformAdmin ? 'Remove platform admin' : 'Grant platform admin'}
+                      {t(user.platformAdmin ? 'Remove platform admin' : 'Grant platform admin')}
                     </button>
                   </div>
                 </details>
@@ -178,7 +181,7 @@ export function LabServiceReservations({ state }: { state: PanelState }) {
                 <b>
                   {r.runId} · {r.status}
                 </b>
-                <p>{r.failureReason}</p>
+                <p>{t(r.failureReason)}</p>
                 {Object.entries(r.workerStates).map(([id, state]) => (
                   <p key={id}>
                     {id}: {t(state.confirmed ? 'confirmed' : 'shutdown unknown')} ·{' '}
@@ -195,7 +198,7 @@ export function LabServiceReservations({ state }: { state: PanelState }) {
             ))}
             {ops.data.recentFailures?.map((r) => (
               <p key={r.runId}>
-                {r.runId} · {r.status} · {r.failureReason}
+                {r.runId} · {r.status} · {r.failureReason && t(r.failureReason)}
               </p>
             ))}
           </>
