@@ -61,6 +61,14 @@ seen. Do check forgetting on **1–2 small other tasks** (CommonsenseQA first). 
 5. **r11 / later (owner, 2026-10-20):** make the batch sampler pluggable (today hard-wired, `documents.py:135`) and have a
    fresh strong reviewer run the researcher-readiness review in [review-researcher-readiness.md](review-researcher-readiness.md).
 
+**Update (end of 2026-10-20 session):** run 1 was STOPPED by the owner after generation 29 (30 generations). Validation
+(500 rows): base 0.562, gen 9 0.544, gen 19 0.556, gen 29 0.556: no improvement
+([evidence](evidence/2026-10-20-gsm8k-run1-validation/README.md)). Remaining from step 3: score the GSM8K test and
+CommonsenseQA (`.scratch/csqa/v1/test.jsonl`, scorer `choice-letter@1`, via `v3_evaluate_checkpoints.py --rows
+--rows-scorer`; note the evaluator uses the run's prompt/decoding, 512 tokens) for gen 29 and the base. Then decide
+run 2 with the owner: the references use batch 64, epoch-wise data, 234 steps (see es-literature-local-recipe.md).
+GPU is free. Reference papers and code are in `.scratch/literature/`.
+
 Done 2026-10-20: GSM8K run 1 launched (PID-detached, ~6 min/generation); `choice-letter@1` accepts E;
 `v3_evaluate_checkpoints.py --rows/--rows-scorer`; `build_commonsense_qa_dataset.py` (data in `.scratch/csqa/v1`);
 check-all 22/22. `run1.log` only holds a second, OOM-dead launch; read `run/events.jsonl`.
