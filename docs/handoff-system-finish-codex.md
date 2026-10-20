@@ -35,8 +35,8 @@ The web Models page now offers a device picker, start/cancel/progress and the ma
   WSL-path failure now passes environment preparation and process creation. Both Linux and Windows use unmodified fix1
   Worker runtimes from `637fce3` for the second run.
 - Second two-device run **`6590307f291e4fd3b0774b42bbda7562` is still running**. Same baseline configuration with
-  `candidateSeedNamespace=9e68c65d77064e9499a92b3c95703cf4`. At pause: generations 0–2 match baseline weight hashes,
-  4 cross-device audits match, 62 candidates committed and 2 leased. The latest immutable sampled state is
+  `candidateSeedNamespace=9e68c65d77064e9499a92b3c95703cf4`. At the final pause checkpoint: all four generations match baseline weight hashes,
+  all 5 cross-device audits match and all 64 candidates are committed. The latest immutable sampled state is
   `evidence/2026-10-20-system-finish/two-machine-pause-checkpoint.json`; inspect actual current state before claiming final
   acceptance. The job has four generations and then validation/export; it remains running in the isolated lab.
 - Initial check-all found web type/lint issues (fixed) and a fixture failure caused by concurrent root defaults mutation
@@ -48,7 +48,9 @@ The web Models page now offers a device picker, start/cancel/progress and the ma
   initial harness failures, corrected receipts and limits. Raw synthetic bearer logs are ignored; public copies redacted.
 - A NEW full `scripts/check-all.sh` invocation is running against `368085a`:
   `.scratch/check-all-model-qualification.log`, receipts `evidence/2026-10-20-system-finish/checks-model-qualification/`.
-  It had reached 95% of runtime tests when paused. Do not claim a clean full check until its final result is inspected.
+  Runtime tests, Python lint, Prettier and source-package imports have passed; Python format has failed. Backend tests
+  were still running at the final read. Inspect `python-format.log` and the eventual final result before resuming; do not
+  claim a clean full check.
   This active receipt directory is ignored temporarily so unfinished files are not committed as immutable evidence.
 
 All new system/Windows/queue evidence is in dated directories; old Claude evidence was retained unchanged. Generated root
