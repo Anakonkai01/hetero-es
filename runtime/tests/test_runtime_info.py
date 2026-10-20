@@ -90,3 +90,40 @@ def test_a_log_can_be_continued_with_append_and_is_never_overwritten_without_it(
     again({"n": 2})
     again.close()
     assert path.read_text().splitlines() == ['{"n": 1}', '{"n": 2}']
+
+
+def _copy_of_runtime_info_in_a_git_repository(tmp_path, commit_the_copy):
+    import importlib.util
+    import shutil
+    import subprocess
+
+    import heteroes.runtime_info
+
+    repository = tmp_path / "enclosing"
+    copy = repository / "packaged" / "runtime" / "src" / "heteroes" / "runtime_info.py"
+    copy.parent.mkdir(parents=True)
+    git = ["git", "-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false"]
+    subprocess.run([*git, "init", "-q", str(repository)], check=True)
+    (repository / ".gitignore").write_text("__pycache__/\n")
+    (copy.parents[2] / "NOTES").write_text("a tracked file next to the untracked runtime\n")
+    shutil.copyfile(heteroes.runtime_info.__file__, copy)
+    tracked = ["packaged"] if commit_the_copy else [str(copy.parents[2] / "NOTES")]
+    subprocess.run([*git, "add", ".gitignore", *tracked], cwd=repository, check=True)
+    subprocess.run([*git, "commit", "-q", "-m", "x"], cwd=repository, check=True)
+    head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=repository, capture_output=True, text=True).stdout.strip()
+    spec = importlib.util.spec_from_file_location("runtime_info_copy", copy)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module, head
+
+
+def test_a_packaged_copy_inside_someone_elses_checkout_does_not_claim_that_checkouts_commit(tmp_path):
+    module, _ = _copy_of_runtime_info_in_a_git_repository(tmp_path, commit_the_copy=False)
+
+    assert module.code_info() == {"git_commit": None, "git_dirty": None}
+
+
+def test_a_tracked_source_checkout_still_reports_its_commit(tmp_path):
+    module, head = _copy_of_runtime_info_in_a_git_repository(tmp_path, commit_the_copy=True)
+
+    assert module.code_info() == {"git_commit": head, "git_dirty": False}

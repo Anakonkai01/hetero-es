@@ -19,6 +19,10 @@ def _run(arguments: list[str]) -> str | None:
 
 
 def code_info() -> dict:
+    # git walks up to any enclosing checkout: a packaged copy that lives inside another repository must not report that
+    # repository's commit, so git is believed only if this very file is tracked by it
+    if _run(["git", "ls-files", "--error-unmatch", "--", str(Path(__file__).resolve())]) is None:
+        return {"git_commit": None, "git_dirty": None}
     commit = _run(["git", "rev-parse", "HEAD"])
     status = _run(["git", "status", "--porcelain"])
     return {
