@@ -285,3 +285,31 @@ def test_agent_prepares_v3_columns_from_a_verified_transfer(product_assets, tmp_
     assert prepared["modelPath"] == cfg["modelPath"]
     assert data.verify(read_json(Path(prepared["datasetPath"]))) == read_json(tmp_path / "dataset.json")
     assert read_json(Path(prepared["modelManifestPath"])) == cfg["modelManifest"]
+
+
+def test_the_default_study_cache_is_not_checked_against_the_model_volume(product_assets, tmp_path, monkeypatch):
+    # Found on the packaged r11 candidate2 (2026-10-20): models on another disk (storageVolumeUUID set) and no
+    # large-data directory made every v3 run fail with "Selected large-data volume is unavailable", because the private
+    # default cache under the agent's state directory was checked against the models' disk.
+    from types import SimpleNamespace
+    from heteroes.study.data import sha
+    from heteroes.study.prepare import prepare
+    import heteroes.study.prepare as preparation
+
+    cfg = product_config(product_assets, tmp_path)
+    cfg["datasetObjectSha256"] = "d" * 64
+    config = {"modelPaths": {sha(cfg["modelManifest"]): cfg["modelPath"]}, "storageVolumeUUID": "0" * 16}
+    agent = SimpleNamespace(root=tmp_path / "state", config=config)
+    targets = []
+
+    def transfer(agent, assignment, digest, target, limit):
+        targets.append(target)
+        return Path(cfg["datasetPath"])
+
+    monkeypatch.setattr(preparation, "transfer", transfer)
+    prepare(agent, {"assignmentId": "b" * 32, "epoch": 1}, cfg, tmp_path / "private")
+    assert targets[0].is_relative_to(tmp_path / "state" / "study-cache")
+    # a large-data directory is still checked against its volume
+    agent.config["largeDataDirectory"] = str(tmp_path / "large")
+    with pytest.raises(ValueError, match="volume"):
+        prepare(agent, {"assignmentId": "b" * 32, "epoch": 1}, cfg, tmp_path / "private")

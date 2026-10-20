@@ -246,8 +246,10 @@ class AgentManager(RunSupervisor):
             try:
                 local.update(prepare(self.agent, command, cfg, root))
             except Exception as error:
-                # a run that cannot get its inputs must not keep the GPU pool in STARTING
-                self.save(root, status="FAILED", failureReason=f"{type(error).__name__}: {error}")
+                # a run that cannot get its inputs must not keep the GPU pool in STARTING; only our own messages are
+                # shown (a network error may carry a grant URL)
+                reason = f"{type(error).__name__}: {error}" if type(error) in (ValueError, RuntimeError) else None
+                self.save(root, status="FAILED", failureReason=reason or type(error).__name__)
                 raise
         write_json(root / "config.json", local)
 

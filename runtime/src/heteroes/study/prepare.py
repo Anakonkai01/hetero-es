@@ -56,13 +56,11 @@ def transfer(agent, assignment, digest, target, limit):
 def prepare(agent, assignment, config, directory):
     from heteroes.product.storage import checked_directory
 
+    # the volume identity belongs to the large-data directory; the default cache is in the agent's private state
+    large = agent.config.get("largeDataDirectory")
     cache = (
-        checked_directory(
-            agent.config.get("largeDataDirectory", str(agent.root / "study-cache")),
-            agent.config.get("storageVolumeUUID"),
-        )
-        / "study"
-    )
+        checked_directory(large, agent.config.get("storageVolumeUUID")) if large else agent.root / "study-cache"
+    ) / "study"
     data_path = transfer(
         agent,
         assignment,

@@ -675,3 +675,17 @@ def test_a_failed_input_transfer_fails_the_run_instead_of_holding_the_gpu_pool(t
     a.manager.accept(
         {"assignmentId": "b" * 32, "epoch": 1, "config": _v3_config("e" * 32), "computeGrants": {"test": "g"}}
     )
+
+
+def test_a_failed_transfer_shows_no_foreign_error_text(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    a.enabled = True
+
+    def unreachable(*args):
+        raise OSError("http://lab/grant?token=secret refused")
+
+    monkeypatch.setattr("heteroes.study.prepare.prepare", unreachable)
+    cfg = _v3_config("f" * 32)
+    with pytest.raises(OSError):
+        a.manager.accept({"assignmentId": "a" * 32, "epoch": 1, "config": cfg, "computeGrants": {"test": "g"}})
+    assert a.manager.state(a.manager.directory(cfg["runId"]))["failureReason"] == "OSError"
