@@ -323,6 +323,9 @@ class Coordinator:
             history.append(stored.record.history_entry())
         return history
 
+    def _model_on_gpu(self):
+        return next(self.model.parameters()).is_cuda
+
     def _apply_record(self, record):
         seeds, coefficients = record.update_inputs()  # antithetic pairs merged; a version-1 record passes unchanged
         if (
@@ -490,6 +493,13 @@ class Coordinator:
         self.log("update_recorded", generation=generation, record_hash=record.hash)
 
         report = self._apply_record(record)
+        # Usage bills only the synchronized update; publication below writes and hashes the weights on disk.
+        on_gpu = self._model_on_gpu()
+        if on_gpu:
+            import torch
+
+            torch.cuda.synchronize()
+        update_gpu_seconds = self._timer() - recorded if on_gpu else 0.0
         # The weights are written and hashed ONCE, into a file that is not visible yet; the ledger is told the child, and only then
         # the file gets its name (a crash in between is recovered: the child is recomputed from the parent and the record).
         publication = prepare_publication(self.model, self.schema, self.models_dir)
@@ -537,9 +547,7 @@ class Coordinator:
         }
         if self.usage is not None:
             try:
-                self.usage.record_update(
-                    generation, applied - recorded if next(self.model.parameters()).is_cuda else 0.0
-                )
+                self.usage.record_update(generation, update_gpu_seconds)
                 with self.ledger._lock:
                     audits = self.ledger._db.execute(
                         "SELECT count(*) FROM audit JOIN candidate USING(candidate_id) WHERE generation=?",

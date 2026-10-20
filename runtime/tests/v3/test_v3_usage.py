@@ -141,3 +141,26 @@ def test_real_candidate_usage_is_recorded_and_old_workers_remain_numerically_ide
     old = run_local(config, tmp_path / "old", timeout_seconds=20, audit_rate=0)
     assert first[0]["record_hash"] == old[0]["record_hash"] and first[0]["child_sha256"] == old[0]["child_sha256"]
     assert old[0]["usage"]["partial"] and old[0]["usage"]["reportedCandidates"] == 0
+
+
+def test_coordinator_update_gpu_time_excludes_writing_and_hashing_the_child_weights(assets, tmp_path, monkeypatch):
+    import time
+
+    import torch
+
+    import heteroes.coordinator as coordinator
+    from heteroes.v3.local import run_local
+
+    publish = coordinator.prepare_publication
+
+    def slow_publication(*args, **kwargs):
+        time.sleep(0.5)  # stands in for writing and hashing a full model on disk
+        return publish(*args, **kwargs)
+
+    monkeypatch.setattr(coordinator, "prepare_publication", slow_publication)
+    monkeypatch.setattr(coordinator.Coordinator, "_model_on_gpu", lambda self: True)
+    monkeypatch.setattr(torch.cuda, "synchronize", lambda *a, **kw: None)
+    config = config_for(assets, generations=1, candidateSeedNamespace="usage-update-window")
+    recorded = run_local(config, tmp_path / "run", timeout_seconds=20, audit_rate=0)[0]["usage"]
+    assert recorded["recordedUpdates"] == 1
+    assert 0 < recorded["coordinatorUpdateGpuSeconds"] < 0.4

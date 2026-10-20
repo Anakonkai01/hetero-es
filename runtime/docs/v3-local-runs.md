@@ -235,7 +235,7 @@ LaTeX expressions are unsupported. Use the normal declarative kind/codeSha256 fi
 Recipe v3 runners maintain a separate private `usage.sqlite`. Candidate receipts contain generated token counts per row,
 device and synchronized execution wall seconds. Generation events, SDK summaries and managed detail pages expose token
 and reported GPU seconds. Counts include the first EOS token and omit only later padding. Audit tokens are separate.
-GPU seconds sum successful reported CUDA executions (including audits) and coordinator GPU updates; CPU execution adds 0.
+GPU seconds sum successful reported CUDA executions (including audits) and the synchronized coordinator GPU update itself (not writing or hashing the child weights); CPU execution adds 0.
 Idle time, validation and unreported failures are excluded. This is execution accounting, not power/energy measurement.
 Old workers remain usable with partial coverage; retry receipts are deduplicated. These optional receipts do not change
 numerical identities, and recovery points include their database when present.
