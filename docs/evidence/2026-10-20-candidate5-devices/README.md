@@ -28,3 +28,15 @@ not under `%LOCALAPPDATA%\Packages` of that user.
 - The Windows quit → relaunch and silent uninstall test on candidate5 is still to do (plan: once before flag day; may be
   after step 5). The Windows Worker was driven through its remote-debugging bridge, not clicked by a person.
 - The installer for the one-line command came from a private HTTP server, not from the (unpublished) public download path.
+
+## Update 21:20 — Quang's C: freed, install started
+
+After the owner disabled hibernation on Quang (`hiberfil.sys` 12.7 GB), `df /mnt/c` and PowerShell showed **20 GB free**
+(135 of 155 GB used). A read-only scan before that found: Windows 33.8 GB, WSL disk file `ext4.vhdx` 26.1 GB (20 GB used inside),
+Program Files 12.1 + 6.5 GB, `AppData\Roaming\Python\Python313` 5.8 GB, Chrome 5.8 GB (4.0 GB of it `OptGuideOnDeviceModel`),
+`.minecraft` 5.7 GB, ProgramData 3.9 GB, Riot Games 3.2 GB, `$WINDOWS.~BT` + `$WinREAgent` 3.2 GB. The owner then allowed deleting
+test data: on Quang's WSL `~/.local/share/heteroes-c3-cpu` (8.4 GB, candidate4 CPU home) and `~/.local/share/heteroes-worker`
+(2.2 GB, old GPU home without runtime) were removed (WSL used 20 GB → 9.1 GB; `~/heteroes-venv` 4.8 GB was left on purpose).
+At 21:09 the one-line install of candidate5 started into the default home `~/.local/share/heteroes-worker`; at 21:19 it was
+still downloading wheels (2.2 GB cached, `torch` partial, runtime `49e0c502675a` extracted) on Quang's slow link, C: still 20 GB.
+Not finished when this note was written: no self-test, pairing or approval of Quang yet.

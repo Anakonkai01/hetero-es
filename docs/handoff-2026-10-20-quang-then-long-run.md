@@ -2,7 +2,7 @@
 
 Read `../AGENTS.md`, `plan-r11-release.md` (steps 5–8 open) and `evidence/2026-10-20-candidate5-devices/README.md`.
 Branch `feat/v3-audit-recovery`; `main` not yet fast-forwarded. Commits since the last push: `4ab54c6`, `2c524dd`,
-`a162cde`, `1c7bedc`, `b29a442`, `e1f074a` and this file (owner runs `! cd ~/projects/heteroes && git push origin --all`).
+`a162cde`, `1c7bedc`, `b29a442`, `e1f074a` and this file (owner runs `! cd ~/projects/heteroes && git push origin --all`; the push still has to be done by the owner because the harness blocks the model).
 
 ## State (all on candidate5, isolated lab only; public lab untouched)
 
@@ -17,16 +17,23 @@ Branch `feat/v3-audit-recovery`; `main` not yet fast-forwarded. Commits since th
   `/mnt/Archive-2tb/heteroes-local/downloads/lf1-20261020-r11-candidate5/cli`); stop it by that PID when done.
   Install command: `curl -fsSL http://100.110.165.40:8801/install-worker.sh | HETEROES_DOWNLOADS=http://100.110.165.40:8801 bash`.
 
-## Blocker
+## Quang (updated 21:20, end of the Sonnet session)
 
-Quang's Windows C: shows **6.9 GB free** (same as before). The plan needs ≥ 20 GB before installing the GPU worker
-(`df -h /mnt/c` from WSL, or PowerShell `Get-PSDrive C`). Do not install on Quang until it does. Quang's WSL still has
-`heteroes-c3-cpu` (8.4 GB, candidate4) and `heteroes-worker` (2.2 GB, old). Thao's `worker-system-finish-backup`
-(5.9 GB under `%APPDATA%\@heteroes`) is the owner's original Worker data; leave it unless the owner says otherwise.
+- The blocker is gone: after the owner disabled hibernation, Quang's Windows C: has **20 GB free**. The owner allowed deleting
+  test data; `heteroes-c3-cpu` and the old `heteroes-worker` were removed from Quang's WSL (used 20 → 9.1 GB; `~/heteroes-venv`
+  4.8 GB kept). Details and the C: breakdown: `evidence/2026-10-20-candidate5-devices/README.md` ("Update 21:20").
+- The one-line install of candidate5 into `~/.local/share/heteroes-worker` on Quang **was started at 21:09 and may still be
+  running or may have been cut when the session ended**. Check `~/.local/bin/heteroes-worker status` on Quang
+  (`ssh quang@100.99.227.8`); if it is not installed, start the same command again, it reuses verified downloads in
+  `downloads/` (a half-downloaded `.part` file restarts): `curl -fsSL http://100.110.165.40:8801/install-worker.sh |
+  HETEROES_DOWNLOADS=http://100.110.165.40:8801 bash` (the private HTTP server, PID 2143087, must still be listening;
+  restart: `python3 -m http.server 8801 --bind 100.110.165.40` in the candidate5 `cli` directory on the Archive disk).
+  Quang's internet is slow (torch wheel). Record C: free before/after (20 GB now).
+- Thao's `worker-system-finish-backup` (5.9 GB, `%APPDATA%\@heteroes`) is the owner's original Worker data; leave it.
 
 ## Next (unchanged order)
 
-1. When Quang's C: ≥ 20 GB: one-line CLI install as GPU worker, `selftest --device cuda` (GPU + `HETEROES_GPU_ACCEPTANCE=1`;
+1. Finish Quang: after the install, `selftest --device cuda` (GPU + `HETEROES_GPU_ACCEPTANCE=1`;
    remember the `LD_LIBRARY_PATH=/usr/lib/wsl/lib` fix), pair with the isolated lab, owner/admin approval via
    `PATCH /api/v1/platform/devices/<id>` with the workspace id; record C: before and after.
 2. Step 5 long run (spec and expected checks in the evidence README **before** starting), stop rules apply.
@@ -34,5 +41,5 @@ Quang's Windows C: shows **6.9 GB free** (same as before). The plan needs ≥ 20
 
 Resume prompt:
 
-> Đọc AGENTS.md, docs/handoff-2026-10-20-quang-then-long-run.md và docs/plan-r11-release.md. Kiểm tra ổ C: máy Quang;
-> nếu ≥ 20 GB thì cài GPU worker candidate5 cho Quang rồi làm bước 5. Tuân thủ các luật dừng. Nói chuyện với tôi bằng tiếng Việt.
+> Đọc AGENTS.md, docs/handoff-2026-10-20-quang-then-long-run.md và docs/plan-r11-release.md. Kiểm tra cài candidate5 trên
+> máy Quang (đã bắt đầu), self-test GPU, ghép cặp và duyệt, rồi làm bước 5. Tuân thủ các luật dừng. Nói chuyện với tôi bằng tiếng Việt.
