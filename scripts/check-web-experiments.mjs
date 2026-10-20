@@ -211,6 +211,11 @@ try {
     data: { approved: true, workspaceId: 'lab' },
   });
   assert.ok(approved.ok());
+  const defaultCoordinator = await page.request.patch(base + '/api/v1/workspaces/lab/default-coordinator', {
+    headers,
+    data: { deviceId: enrolled.deviceId },
+  });
+  assert.ok(defaultCoordinator.ok());
   await page.goto(base + '/models');
   await page.getByLabel('Asset recipe').selectOption('3');
   await page.getByText('Import dataset', { exact: true }).first().click();
@@ -237,7 +242,14 @@ try {
   await page.getByLabel('Declarative scorer').selectOption('choice-letter');
   await page.getByLabel('Scorer answer field').fill('label');
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  assert.equal(await page.getByLabel('Coordinator').inputValue(), enrolled.deviceId);
+  // Clearing the selection is a user choice, including after leaving and returning to this step.
+  await page.getByLabel('Coordinator').selectOption('');
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  assert.equal(await page.getByLabel('Coordinator').inputValue(), '');
   await page.getByLabel('Coordinator').selectOption(enrolled.deviceId);
+  results.defaultCoordinatorAndManualChoice = true;
   await page.getByLabel(/CPU fixture/).check();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await page.getByRole('button', { name: 'Save draft', exact: true }).click();

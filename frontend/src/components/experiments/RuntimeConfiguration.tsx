@@ -1,6 +1,6 @@
 import { StepHeader, useProduct } from '@heteroes/product-ui';
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router';
 import { apiGet } from '../../api/client';
 import { useScopeKey } from '../../app/session';
@@ -40,9 +40,6 @@ export function RuntimeConfiguration({
   });
   // the lab's default coordinator is pre-selected; the creator can still choose another one
   const defaultCoordinator = cap.data?.defaultCoordinatorDeviceId;
-  useEffect(() => {
-    if (defaultCoordinator) setCoordinator((current) => current || defaultCoordinator);
-  }, [defaultCoordinator]);
   const [name, setName] = useState(initial?.name ?? '');
   const [task, setTask] = useState(initial?.task ?? 'arith16');
   const [generations, setGenerations] = useState(initial?.maxGenerations ?? 3);
@@ -51,7 +48,8 @@ export function RuntimeConfiguration({
   const [sigma, setSigma] = useState(initial?.sigma ?? 0.001);
   const [decoder, setDecoder] = useState(initial?.decodeEngine ?? 'hf_generate');
   const [selected, setSelected] = useState<string[]>(initial?.workerIds ?? []);
-  const [coordinator, setCoordinator] = useState(initial?.coordinatorDeviceId ?? '');
+  const [coordinatorChoice, setCoordinator] = useState(initial?.coordinatorDeviceId);
+  const coordinator = coordinatorChoice ?? defaultCoordinator ?? '';
   const [interval, setInterval] = useState(initial?.backupPolicy?.interval ?? 1);
   const [retain, setRetain] = useState(initial?.backupPolicy?.retain ?? 3);
   const [error, setError] = useState('');

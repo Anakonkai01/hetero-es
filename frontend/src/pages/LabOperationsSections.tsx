@@ -181,7 +181,7 @@ export function LabServiceReservations({ state }: { state: PanelState }) {
                 <b>
                   {r.runId} · {r.status}
                 </b>
-                <p>{t(r.failureReason)}</p>
+                {r.failureReason && <p>{t(r.failureReason)}</p>}
                 {Object.entries(r.workerStates).map(([id, state]) => (
                   <p key={id}>
                     {id}: {t(state.confirmed ? 'confirmed' : 'shutdown unknown')} ·{' '}
