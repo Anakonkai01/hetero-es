@@ -1,0 +1,18 @@
+{
+  "fixtureLab": true,
+  "realLab": false,
+  "gpuWork": false,
+  "streamRequested": true,
+  "liveNumbersAdvance": true,
+  "sawBusyGpuCards": true,
+  "pauseFreezes": true,
+  "liveButtonReturns": true,
+  "endOfLiveRunStaysOnTheEnd": true,
+  "replayReachesTheEnd": true,
+  "seekShowsPartialRun": true,
+  "threeGpusListed": true,
+  "noOverflow": true,
+  "reducedMotionHasNoPackets": true,
+  "untranslatedEnglishAudit": 0,
+  "browserErrors": []
+}

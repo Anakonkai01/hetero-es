@@ -19,3 +19,9 @@ It FAILED three steps, all real and all from earlier commits that only ran focus
 ## What this does NOT show
 
 CPU fixture checks only: no packaged build, GPU, Windows, real lab or managed CPU-coordinator acceptance.
+
+## Later reruns
+
+- `checks-8ed1935/`: ALL PASS, but backend sources/tests were edited while it ran (the cancel-release fix), so it is kept
+  only as an intermediate receipt.
+- `checks-595faa1/`: ALL PASS at 595faa1 (managed Python coordinator fix + cancel-before-accept release), run alone.
