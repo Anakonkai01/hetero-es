@@ -1,6 +1,11 @@
 # HeteroES — canonical handoff
 
-**Latest: read `handoff-session3-next.md` first (2026-10-20 evening).**
+**Latest: read `handoff-session4-next.md` first (2026-10-20, Codex usage checkpoint).**
+
+Session 4 adds CPU coordination, eval/compare/serve/worker, real native Windows standalone coordinator proof, a limited
+vLLM probe, prompt/scorer/usage features and partial Linux download wiring. Final full checks, candidate3 packaging and
+managed/installer acceptance remain. The isolated lab/workers are stopped; public lab is unchanged. The latest handoff
+is self-contained and supersedes older operational state and original-Worker restoration instructions.
 
 ## Current checkpoint
 

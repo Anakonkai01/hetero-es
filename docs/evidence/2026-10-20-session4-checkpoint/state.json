@@ -1,0 +1,14 @@
+{
+  "baseline": "9a93237",
+  "frozenNumericalDiffEmpty": true,
+  "disposableVllmVenvRemoved": true,
+  "isolatedDriverAlive": {
+    "3388117": false,
+    "3386307": false,
+    "3388135": false,
+    "3386319": false,
+    "3386704": false,
+    "3393711": false
+  },
+  "isolated8790Reachable": false
+}
