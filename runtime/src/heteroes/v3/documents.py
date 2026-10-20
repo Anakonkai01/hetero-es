@@ -22,6 +22,7 @@ from heteroes.v3.options import validate_weight_space as _check_weight_space
 FORMAT_VERSION = 3
 PLAN_VERSION = 1
 SAMPLER = "sha256-python-random-sample-v1"
+SAMPLERS = (SAMPLER, "epoch-shuffle@1")  # heteroes.v3.data.batch
 
 _HEX40, _HEX64 = re.compile("[0-9a-f]{40}"), re.compile("[0-9a-f]{64}")
 _RECIPE_KEYS = {"formatVersion", "model", "weightSpace", "schemaHash", "noise", "perturbation", "evaluation", "data"}
@@ -132,7 +133,7 @@ def validate_recipe(doc, *, translated=False):
         _keys("data.batch", data["batch"], {"size", "seed", "sampler"})
         _count("data.batch.size", data["batch"]["size"])
         _count("data.batch.seed", data["batch"]["seed"], 0, 2**53 - 1)
-        if data["batch"]["sampler"] != SAMPLER:
+        if data["batch"]["sampler"] not in SAMPLERS:
             raise ValueError("unknown batch sampler")
         _count("evaluation.maxNewTokens", evaluation["maxNewTokens"], 1, 2048)
         prompt = evaluation["systemPrompt"]

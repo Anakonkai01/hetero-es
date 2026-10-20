@@ -123,6 +123,13 @@ export function V3Fields({
         </select>
       </label>
       <label className="fg">
+        {t('Batch sampler')}
+        <select className="sel" value={value.sampler} onChange={(e) => set({ sampler: e.target.value })}>
+          <option value="sha256-python-random-sample-v1">{t('Independent sample per generation')}</option>
+          <option value="epoch-shuffle@1">{t('Shuffled epochs (every row once per epoch)')}</option>
+        </select>
+      </label>
+      <label className="fg">
         {t('Alpha schedule')}
         <select
           className="sel"

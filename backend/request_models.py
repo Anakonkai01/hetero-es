@@ -49,6 +49,7 @@ class Configuration(BaseModel):
     momentumBeta: float | None = Field(default=None, gt=0, lt=1)
     momentumWindow: int = Field(default=4, ge=2, le=8, strict=True)
     evalChunk: int | None = Field(default=None, strict=True)
+    sampler: str = Field(default="sha256-python-random-sample-v1", max_length=64)
     systemPrompt: str | None = Field(default=None, max_length=4000)
     validationInterval: int = Field(default=1, ge=1, le=1000, strict=True)
 

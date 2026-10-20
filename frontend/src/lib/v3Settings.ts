@@ -10,6 +10,7 @@ export const DEFAULT_V3: V3Settings = {
   momentumBeta: null,
   momentumWindow: 4,
   evalChunk: null,
+  sampler: 'sha256-python-random-sample-v1',
   scorer: {
     kind: 'declarative',
     name: 'exact-string',
@@ -44,6 +45,7 @@ export function v3ReviewRows(
   return [
     ['Dataset', run.dataset],
     ['Batch', `${run.batchSize} · seed ${run.batchSeed}`],
+    ['Batch sampler', settings.sampler],
     [
       'Sigma',
       run.sigmaSchedule === 'constant' ? `${run.sigma}` : `${run.sigma} → ${run.sigmaMinimum} (${run.sigmaSchedule})`,

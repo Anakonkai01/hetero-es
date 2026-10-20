@@ -91,6 +91,7 @@ const SETTINGS: (keyof Experiment)[] = [
   'momentumBeta',
   'momentumWindow',
   'evalChunk',
+  'sampler',
 ];
 
 const show = (value: unknown): string =>

@@ -53,7 +53,7 @@ class RecipeV3Run:
         }:
             raise ValueError("Dataset differs from recipe")
         size, seed = self.recipe["data"]["batch"]["size"], self.recipe["data"]["batch"]["seed"]
-        return v3data.batch(data, generation, size, seed)
+        return v3data.batch(data, generation, size, seed, self.recipe["data"]["batch"]["sampler"])
 
     def context(self, data, generation):
         """The inputs of a generation, frozen in the ledger before it opens: sigma, batch, scorer and coefficient rule."""
@@ -166,7 +166,11 @@ def build_documents(
             "kind": "dataset",
             "contentHash": dataset["contentHash"],
             "splitHashes": dataset["splitHashes"],
-            "batch": {"size": config["batchSize"], "seed": config.get("batchSeed", 11), "sampler": v3data.SAMPLER},
+            "batch": {
+                "size": config["batchSize"],
+                "seed": config.get("batchSeed", 11),
+                "sampler": config.get("sampler", v3data.SAMPLER),
+            },
         },
     }
     validate_recipe(recipe)

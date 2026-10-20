@@ -18,6 +18,7 @@ from heteroes.canonical import canonical_json_bytes, canonical_json_hash
 
 FORMAT_VERSION = 2  # 1 is the numeric-answer format of Recipe v2
 SAMPLER = "sha256-python-random-sample-v1"
+SAMPLERS = (SAMPLER, "epoch-shuffle@1")
 MAX_ROWS = 100_000
 MAX_PROMPT = 20_000
 SPLITS = ("train", "validation", "test")
@@ -126,19 +127,36 @@ def verify(value):
     return value
 
 
-def batch(value, generation, size, seed):
-    """The training rows of a generation: the Recipe v2 sampler over this dataset's train split."""
+def _seeded(value, seed, sampler, **position):
+    digest = hashlib.sha256(
+        canonical_json_bytes({"dataset": value["contentHash"], **position, "seed": seed, "sampler": sampler})
+    ).hexdigest()
+    return random.Random(int(digest, 16))
+
+
+def batch(value, generation, size, seed, sampler=SAMPLER):
+    """
+    The training rows of a generation, chosen from this dataset's train split by the recipe's sampler:
+        sha256-python-random-sample-v1  an independent seeded sample per generation (the Recipe v2 rule; repeats and
+                                        gaps across generations)
+        epoch-shuffle@1                 epochs: each a seeded shuffle of the whole split cut into batches of `size`,
+                                        the last one short; generation g is batch g mod B of epoch g // B
+    """
     verify(value)
     rows = value["splits"]["train"]
     if type(generation) is not int or generation < 0 or type(size) is not int or not 1 <= size <= len(rows):
         raise ValueError("invalid training batch")
     if type(seed) is not int or not 0 <= seed < 2**53:
         raise ValueError("invalid batch seed")
-    digest = hashlib.sha256(
-        canonical_json_bytes(
-            {"dataset": value["contentHash"], "generation": generation, "seed": seed, "sampler": SAMPLER}
-        )
-    ).hexdigest()
-    indices = random.Random(int(digest, 16)).sample(range(len(rows)), size)
+    if sampler == SAMPLER:
+        indices = _seeded(value, seed, SAMPLER, generation=generation).sample(range(len(rows)), size)
+    elif sampler == "epoch-shuffle@1":
+        per_epoch = -(-len(rows) // size)
+        epoch, position = divmod(generation, per_epoch)
+        order = list(range(len(rows)))
+        _seeded(value, seed, sampler, epoch=epoch).shuffle(order)
+        indices = order[position * size : (position + 1) * size]
+    else:
+        raise ValueError(f"unknown batch sampler {sampler!r}")
     selected = [rows[i] for i in indices]
     return {"indices": indices, "rows": selected, "hash": canonical_json_hash(selected)}

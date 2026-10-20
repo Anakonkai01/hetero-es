@@ -66,6 +66,8 @@ class ESConfig:
         None  # momentum over the last momentum_window generations (beta a float32, e.g. 0.875)
     )
     momentum_window: int = 4
+    # "epoch-shuffle@1" walks the train split in shuffled epochs; the default draws an independent sample per generation
+    sampler: str = "sha256-python-random-sample-v1"
 
     def to_config(self, scorer: dict) -> dict:
         """The configuration `heteroes.v3.local.run_local` and `python -m heteroes.v3 run` read."""
@@ -77,6 +79,7 @@ class ESConfig:
                 "batchSize": self.batch_size,
                 "batchSeed": self.batch_seed,
                 "splitSeed": self.split_seed,
+                "sampler": self.sampler,
             },
             "weightSpace": dict(self.weight_space),
             "noiseEngine": self.noise_engine,

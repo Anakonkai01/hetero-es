@@ -39,6 +39,7 @@ test('the review lists every ES choice, with schedules shown as start → end', 
   assert.equal(rows['Batch'], '32 · seed 11');
   assert.equal(rows['Prompts per generate() call'], '16');
   assert.equal(rows['Declarative scorer'], 'exact-string@1');
+  assert.equal(rows['Batch sampler'], 'sha256-python-random-sample-v1');
   const constant = Object.fromEntries(
     v3ReviewRows(DEFAULT_V3, {
       dataset: 'd',

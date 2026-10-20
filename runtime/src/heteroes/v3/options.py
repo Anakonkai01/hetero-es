@@ -97,6 +97,11 @@ def validate_options(config):
         raise ValueError("unsupported prompts per generate() call")
     if type(config["antithetic"]) is not bool or (config["antithetic"] and config["candidatesPerGeneration"] % 2):
         raise ValueError("antithetic sampling requires an even population")
+    if config.get("sampler", "sha256-python-random-sample-v1") not in (
+        "sha256-python-random-sample-v1",
+        "epoch-shuffle@1",
+    ):
+        raise ValueError("unknown batch sampler")
     if config["decodeEngine"] != "hf_generate":
         raise ValueError("Recipe v3 uses the HF generate decoder")
     prompt = config["systemPrompt"]

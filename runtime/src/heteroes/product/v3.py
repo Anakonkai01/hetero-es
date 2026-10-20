@@ -91,6 +91,7 @@ def prepare_run(config, root, device, *, declared=None, client=None, cache=None)
             "systemPrompt": config["systemPrompt"],
             "batchSize": config["batchSize"],
             "batchSeed": config["batchSeed"],
+            "sampler": config.get("sampler", "sha256-python-random-sample-v1"),
             "maxNewTokens": config["maxNewTokens"],
             "decoder": config["decodeEngine"],
         }
