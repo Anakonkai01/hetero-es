@@ -53,6 +53,8 @@ class Configuration(BaseModel):
     candidateSeedNamespace: str | None = Field(default=None, pattern=r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$")
     systemPrompt: str | None = Field(default=None, max_length=4000)
     validationInterval: int = Field(default=1, ge=1, le=1000, strict=True)
+    # Recipe v3 Python scorer / coefficient rule: [{role, name, function, source}] (the lab adds codeSha256)
+    pythonCode: list[dict] = Field(default_factory=list, max_length=2)
 
 
 class Registration(Strict):

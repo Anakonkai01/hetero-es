@@ -1,5 +1,5 @@
 import { useProduct } from '@heteroes/product-ui';
-import type { V3Settings, WeightSpace } from '../../types/experiment';
+import type { PythonCode, V3Settings, WeightSpace } from '../../types/experiment';
 import { withAlphaSchedule } from '../../lib/v3Settings';
 
 const SCORERS = [
@@ -11,11 +11,53 @@ const SCORERS = [
   'answer-line-integer',
   'countdown',
 ];
-// coefficient rules a shared lab runs (a python rule needs a self-hosted coordinator)
 const RULES: [string, string][] = [
   ['zscore@1', 'Z-score of the rewards'],
   ['centered-rank@1', 'Centered ranks of the rewards'],
+  ['python@1', 'Your Python rule (upload a .py file)'],
 ];
+const PYTHON = '__python__';
+
+/** A .py file and the function to call in it; the lab pins its SHA-256 and runs it on the coordinator only. */
+function CodeUpload({
+  code,
+  onChange,
+  fallback,
+}: {
+  code: PythonCode | undefined;
+  onChange: (code: Omit<PythonCode, 'role'>) => void;
+  fallback: string;
+}) {
+  const { t } = useProduct();
+  return (
+    <>
+      <label className="fg">
+        {t('Python file')}
+        <input
+          type="file"
+          accept=".py,text/x-python"
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (file) onChange({ name: file.name, function: code?.function ?? fallback, source: await file.text() });
+          }}
+        />
+      </label>
+      {code && (
+        <p className="hint">
+          {code.name} · {code.source.length} B
+        </p>
+      )}
+      <label className="fg">
+        {t('Function name')}
+        <input
+          className="inp"
+          value={code?.function ?? fallback}
+          onChange={(e) => onChange({ name: code?.name ?? '', source: code?.source ?? '', function: e.target.value })}
+        />
+      </label>
+    </>
+  );
+}
 export function V3Fields({
   value,
   onChange,
@@ -27,6 +69,12 @@ export function V3Fields({
 }) {
   const { t } = useProduct();
   const set = (patch: Partial<V3Settings>) => onChange({ ...value, ...patch });
+  const code = (role: PythonCode['role']) => (value.pythonCode ?? []).find((c) => c.role === role);
+  const setCode = (role: PythonCode['role'], entry: Omit<PythonCode, 'role'> | null, patch: Partial<V3Settings> = {}) =>
+    set({
+      ...patch,
+      pythonCode: [...(value.pythonCode ?? []).filter((c) => c.role !== role), ...(entry ? [{ ...entry, role }] : [])],
+    });
   const space = value.weightSpace;
   const scorer = value.scorer;
   const scorerConfig = (patch: Record<string, unknown>) =>
@@ -112,8 +160,12 @@ export function V3Fields({
         {t('Coefficient rule')}
         <select
           className="sel"
-          value={value.coefficientRule}
-          onChange={(e) => set({ coefficientRule: e.target.value })}
+          value={value.coefficientRule.startsWith('python@1') ? 'python@1' : value.coefficientRule}
+          onChange={(e) =>
+            e.target.value === 'python@1'
+              ? set({ coefficientRule: 'python@1' })
+              : setCode('coefficients', null, { coefficientRule: e.target.value })
+          }
         >
           {RULES.map(([rule, label]) => (
             <option key={rule} value={rule}>
@@ -122,6 +174,13 @@ export function V3Fields({
           ))}
         </select>
       </label>
+      {value.coefficientRule.startsWith('python@1') && (
+        <CodeUpload
+          code={code('coefficients')}
+          fallback="coefficients"
+          onChange={(entry) => setCode('coefficients', entry)}
+        />
+      )}
       <label className="fg">
         {t('Batch sampler')}
         <select className="sel" value={value.sampler} onChange={(e) => set({ sampler: e.target.value })}>
@@ -224,12 +283,16 @@ export function V3Fields({
         </select>
       </label>
       <label className="fg">
-        {t('Declarative scorer')}
+        {t('Scorer')}
         <select
           className="sel"
-          value={scorer.name}
+          value={scorer.kind === 'python' ? PYTHON : scorer.name}
           onChange={(e) => {
             const name = e.target.value;
+            if (name === PYTHON) {
+              set({ scorer: { kind: 'python', name: 'python-reward', version: 1, codeSha256: null, config: {} } });
+              return;
+            }
             const config: Record<string, unknown> =
               name === 'exact-string'
                 ? { answerField: 'answer', strip: true, casefold: false }
@@ -240,7 +303,9 @@ export function V3Fields({
                     : name === 'countdown'
                       ? { numbersField: 'nums', targetField: 'target' }
                       : {};
-            set({ scorer: { ...scorer, name, config } });
+            setCode('scorer', null, {
+              scorer: { kind: 'declarative', name, version: 1, codeSha256: null, config },
+            });
           }}
         >
           {SCORERS.map((name) => (
@@ -248,8 +313,19 @@ export function V3Fields({
               {name}@1
             </option>
           ))}
+          <option value={PYTHON}>{t('Your Python scorer (upload a .py file)')}</option>
         </select>
       </label>
+      {scorer.kind === 'python' && (
+        <>
+          <CodeUpload code={code('scorer')} fallback="reward" onChange={(entry) => setCode('scorer', entry)} />
+          <p className="hint">
+            {t(
+              'Your code runs on the coordinator device with the permissions of its user, in a child process with a time limit. Workers never run it. It receives (texts, rows) and returns one number per text.',
+            )}
+          </p>
+        </>
+      )}
       {'answerField' in scorer.config && (
         <label className="fg">
           {t('Scorer answer field')}

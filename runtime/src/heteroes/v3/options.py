@@ -84,14 +84,62 @@ def validate_seed_namespace(value):
     return value
 
 
-def validate_options(config):
+PYTHON_ROLES = ("scorer", "coefficients")
+PYTHON_CODE_KEYS = {"role", "name", "function", "source", "codeSha256"}
+MAX_PYTHON_SOURCE = 1_000_000
+
+
+def validate_python_code(config):
+    """
+    The researcher code frozen with a web-lab experiment (`pythonCode`): one file per role, each matching the SHA-256 that
+    the plan pins (the scorer's codeSha256, or the python@1:<sha> coefficient rule), and nothing that the plan does not use.
+    """
+    from heteroes.v3.scoring import source_sha256
+
+    entries = config.get("pythonCode", [])
+    if not isinstance(entries, list) or len({e.get("role") for e in entries if isinstance(e, dict)}) != len(entries):
+        raise ValueError("pythonCode is a list with at most one file per role")
+    wanted = {}
+    if config["scorer"]["kind"] == "python":
+        wanted["scorer"] = config["scorer"]["codeSha256"]
+    if config["coefficientRule"].startswith("python@1:"):
+        wanted["coefficients"] = config["coefficientRule"].removeprefix("python@1:")
+    found = {}
+    for entry in entries:
+        if not isinstance(entry, dict) or set(entry) != PYTHON_CODE_KEYS or entry["role"] not in PYTHON_ROLES:
+            raise ValueError(f"a pythonCode entry has exactly the keys {sorted(PYTHON_CODE_KEYS)}")
+        if not isinstance(entry["name"], str) or not re.fullmatch(
+            r"[A-Za-z0-9_][A-Za-z0-9_.-]{0,99}\.py", entry["name"]
+        ):
+            raise ValueError("a Python code file is named like reward.py")
+        if not isinstance(entry["function"], str) or not entry["function"].isidentifier():
+            raise ValueError("a Python function name is an identifier")
+        if not isinstance(entry["source"], str) or not 0 < len(entry["source"].encode()) <= MAX_PYTHON_SOURCE:
+            raise ValueError(f"a Python code file has 1 to {MAX_PYTHON_SOURCE} bytes")
+        if source_sha256(entry["name"], entry["source"].encode()) != entry["codeSha256"]:
+            raise ValueError("Python code does not match its SHA-256")
+        found[entry["role"]] = entry["codeSha256"]
+    if found != wanted:
+        raise ValueError("pythonCode must be exactly the code the scorer and coefficient rule pin")
+
+
+def validate_options(config, *, allow_python=False, with_code=True):
+    """
+    A web-lab configuration. `allow_python` admits a Python scorer and coefficient rule: with their frozen code (the lab
+    and the coordinator), or, `with_code=False`, without it (a worker, which never receives researcher code).
+    """
     validate_seed_namespace(config.get("candidateSeedNamespace"))
     validate_weight_space(config["weightSpace"], initial_adapter=False)
-    validate_spec(config["scorer"], allow_python=False)
-    if config["coefficientRule"] not in {
+    validate_spec(config["scorer"], allow_python=allow_python)
+    python_rule = allow_python and re.fullmatch("python@1:[0-9a-f]{64}", str(config["coefficientRule"]))
+    if not python_rule and config["coefficientRule"] not in {
         f"{name}@{v}" for name, versions in COEFFICIENT_RULES.items() for v in versions
     }:
         raise ValueError("unsupported coefficient rule")
+    if allow_python and with_code:
+        validate_python_code(config)
+    elif "pythonCode" in config:
+        raise ValueError("this configuration may not carry Python code")
     if config.get("alphaSchedule", "constant") not in ALPHA_SCHEDULES:
         raise ValueError(f"alpha schedule is one of {ALPHA_SCHEDULES}")
     if config.get("alphaMinimum") is not None and config["alphaMinimum"] > config["alpha"]:
@@ -112,7 +160,9 @@ def validate_options(config):
         "epoch-shuffle@1",
     ):
         raise ValueError("unknown batch sampler")
-    if config["decodeEngine"] not in ("hf_generate", "hf_compact"):
+    from heteroes.catalog import DECODE_ENGINES
+
+    if config["decodeEngine"] not in DECODE_ENGINES:
         raise ValueError("Recipe v3 uses the hf_generate or hf_compact decoder")
     prompt = config["systemPrompt"]
     if prompt is not None and (not isinstance(prompt, str) or not prompt or len(prompt) > 4000):

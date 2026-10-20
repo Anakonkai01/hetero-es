@@ -1,8 +1,35 @@
 from .policies import backup_policy as validated_backup_policy, v2_qualification, v3_qualification
 
 from fastapi import HTTPException
-from .constants import V3_KEYS, V3_UPDATE_KEYS
+from .constants import V3_CODE_KEYS, V3_KEYS, V3_UPDATE_KEYS
 from heteroes.catalog import DECODE_ENGINES
+
+
+def freeze_python_code(body):
+    """
+    Pin uploaded researcher code (owner 2026-10-20: Python rewards are open on the web lab). Each file gets its SHA-256,
+    which also completes a Python scorer spec and a `python@1` coefficient rule; validate_options then checks that the plan
+    pins exactly these files. The code runs only on the coordinator device, in a child process with a time limit.
+    """
+    from heteroes.v3.scoring import source_sha256
+
+    entries = body.get("pythonCode") or []
+    if not entries:
+        body.pop("pythonCode", None)
+        return
+    frozen = []
+    for entry in entries:
+        if set(entry) - {"codeSha256"} != {"role", "name", "function", "source"} or not isinstance(
+            entry["source"], str
+        ):
+            raise ValueError("A Python code file has a role, name, function and source")
+        frozen.append({**entry, "codeSha256": source_sha256(str(entry["name"]), entry["source"].encode())})
+    for entry in frozen:
+        if entry["role"] == "scorer" and body["scorer"].get("kind") == "python":
+            body["scorer"] = {**body["scorer"], "codeSha256": entry["codeSha256"]}
+        if entry["role"] == "coefficients" and body["coefficientRule"].startswith("python@1"):  # also a re-upload
+            body["coefficientRule"] = "python@1:" + entry["codeSha256"]
+    body["pythonCode"] = frozen
 
 
 def validate_configuration(config, current, *, store, runtime, registry, scoped, capabilities):
@@ -50,10 +77,12 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
             from heteroes.v3.options import validate_options
 
             try:
-                validate_options(body)
+                freeze_python_code(body)
+                validate_options(body, allow_python=True)
                 config = body["scorer"]["config"]
                 fields = [config[k] for k in sorted(config) if k.endswith("Field")] or ["answer"]
-                if not set(fields) <= set(data.get("columns", [])):
+                # a Python scorer reads the rows itself; a declarative one names its columns
+                if body["scorer"]["kind"] == "declarative" and not set(fields) <= set(data.get("columns", [])):
                     raise ValueError("Scorer fields must exist in every dataset row")
             except (ValueError, TypeError, KeyError) as error:
                 raise HTTPException(422, str(error)) from None
@@ -98,7 +127,7 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
         ):
             body.pop(key)
     if body.get("recipeVersion") != 3:
-        for key in (*V3_KEYS, *V3_UPDATE_KEYS):
+        for key in (*V3_KEYS, *V3_UPDATE_KEYS, *V3_CODE_KEYS):
             body.pop(key, None)
     if body["schedulerPolicy"] not in cap["schedulerPolicies"] or body["syncMode"] not in cap["syncModes"]:
         raise HTTPException(422, "Unsupported scheduling policy or synchronization mode")

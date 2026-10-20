@@ -164,15 +164,19 @@ def main(directory, *, device="cuda", timeout_seconds=1800):
 
         v3_options = {}
         if config.get("recipeVersion") == 3:
+            from heteroes.product.v3 import python_functions
             from heteroes.v3.run import make_scorer
 
+            # researcher code (web lab, owner 2026-10-20) runs here only, in child processes with a time limit
+            python_scorer, coefficient_function = python_functions(config, root)
             v3_options = {
                 "seed_namespace": config.get("candidateSeedNamespace"),
                 "audit_workers": config["workerIds"],
                 "audit_fault_path": root / "audit-faults.json",
                 "antithetic": recipe.antithetic,
                 "coefficient_rule": recipe.coefficient_rule,
-                "score": make_scorer(recipe, dataset),
+                "score": make_scorer(recipe, dataset, python_scorer),
+                "coefficient_function": coefficient_function,
                 "pinned_weights": [recipe.recipe["weightSpace"]["initialAdapterSha256"]]
                 if recipe.recipe["weightSpace"]["kind"] == "lora"
                 else [],
@@ -217,6 +221,7 @@ def main(directory, *, device="cuda", timeout_seconds=1800):
                     config.get("validationInterval", 1),
                     model_path=config["modelPath"],
                     log=emit,
+                    python_scorer=python_scorer,
                 )
             else:
                 from heteroes.study.tracker import Tracker

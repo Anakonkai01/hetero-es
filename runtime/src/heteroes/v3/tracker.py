@@ -17,11 +17,14 @@ from heteroes.v3.scoring import score
 
 
 class Tracker:
-    def __init__(self, root, loaded, recipe, dataset, interval=1, *, model_path=None, log=lambda event: None):
+    def __init__(
+        self, root, loaded, recipe, dataset, interval=1, *, model_path=None, log=lambda event: None, python_scorer=None
+    ):
         if type(interval) is not int or interval < 1:
             raise ValueError("validation interval must be a positive integer")
         self.root, self.loaded, self.recipe, self.dataset = Path(root), loaded, recipe, dataset
         self.interval, self.model_path, self.log = interval, model_path, log
+        self.python_scorer = python_scorer  # the loaded code of a Python scorer spec (None for a declarative one)
         self.eval_model = EvalModel(loaded.model, recipe.eval_dtype)
         self.best = read_json(self.root / "study-selection.json")
         if self.best and (self.best.get("recipeHash") != recipe.hash or self.best.get("planHash") != recipe.plan_hash):
@@ -31,7 +34,7 @@ class Tracker:
         rows = self.dataset["splits"][split]
         # the recipe's prompts per generate() call (16 when it fixes none, as the executor); texts are coordinator-only
         raw = generate_rows(model, tokenizer, rows, self.recipe.evaluation, self.recipe.chunk or 16)
-        reward, scores = score(self.recipe.plan["scorer"], [r["output"] for r in raw], rows)
+        reward, scores = score(self.recipe.plan["scorer"], [r["output"] for r in raw], rows, self.python_scorer)
         return {
             "meanReward": reward,
             "scores": scores,

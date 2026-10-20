@@ -16,7 +16,7 @@ from argon2 import PasswordHasher
 from .errors import RuntimeRejected
 from .migrations import initialize_workspace_extras, migrate
 
-from .constants import ACTIVE, TERMINAL, REVISION, V3_KEYS, V3_UPDATE_KEYS
+from .constants import ACTIVE, TERMINAL, REVISION, V3_CODE_KEYS, V3_KEYS, V3_UPDATE_KEYS
 
 
 def now():
@@ -223,6 +223,9 @@ class Store:
         with self.db() as db:
             db.execute("INSERT INTO experiments VALUES (?,?,?,NULL)", (run_id, owner, json.dumps(body)))
             self.audit(db, owner, "CREATE", run_id, workspace_id)
+            for entry in config.get("pythonCode", []):  # which researcher code this experiment's coordinator will run
+                target = f"{run_id}:{entry['role']}:{entry['codeSha256']}"
+                self.audit(db, owner, "PYTHON_CODE_FROZEN", target, workspace_id)
         return body
 
     def snapshot(self, run_id):
@@ -324,7 +327,7 @@ class Store:
             )
         if active.get("recipeVersion") == 3:
             config.update({key: active[key] for key in V3_KEYS})
-            config.update({key: active[key] for key in V3_UPDATE_KEYS if key in active})
+            config.update({key: active[key] for key in (*V3_UPDATE_KEYS, *V3_CODE_KEYS) if key in active})
         try:
             self.runtime.submit(config)
         except RuntimeRejected as error:

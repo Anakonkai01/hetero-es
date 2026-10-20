@@ -1,6 +1,6 @@
 """CPU-only device control. Connectivity is never evidence of process death."""
 
-from .constants import CORE_COMMAND_KINDS, COMMAND_KINDS
+from .constants import CORE_COMMAND_KINDS, COMMAND_KINDS, V3_CODE_KEYS
 
 import json
 import time
@@ -82,7 +82,12 @@ class AgentCommands:
                         "recoveryIndex": body.recoveryIndex,
                         "coordinatorUrl": ar["computeUrl"],
                         "bulkUrl": ar.get("bulkUrl", ar["computeUrl"]),
-                        **({"studyConfig": ar["config"]} if ar["config"].get("recipeVersion") in (2, 3) else {}),
+                        # a worker never receives researcher code: only the coordinator runs it
+                        **(
+                            {"studyConfig": {k: v for k, v in ar["config"].items() if k not in V3_CODE_KEYS}}
+                            if ar["config"].get("recipeVersion") in (2, 3)
+                            else {}
+                        ),
                         "computeToken": ar["computeGrants"][body.workerId],
                         **({"publicComputeUrl": self.public_compute_url()} if self.public_compute_url() else {}),
                     },

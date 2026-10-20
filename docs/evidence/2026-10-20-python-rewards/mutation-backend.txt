@@ -1,0 +1,6 @@
+killed       workers receive the code | 1 failed, 25 passed, 1 warning in 3.71s
+killed       scorer spec not completed with the hash | 1 failed, 25 passed, 1 warning in 3.68s
+killed       no audit entry for frozen code | 1 failed, 25 passed, 1 warning in 3.65s
+killed       code not passed to the coordinator | 1 failed, 25 passed, 1 warning in 3.70s
+
+4 of 4 mutants killed.

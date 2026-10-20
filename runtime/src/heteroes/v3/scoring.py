@@ -156,6 +156,14 @@ def validate_spec(spec, *, allow_python=False):
     return spec
 
 
+def source_sha256(name, content: bytes):
+    """`code_sha256` of a single file called `name` with these bytes (a file uploaded to the web lab)."""
+    digest = hashlib.sha256()
+    digest.update(f"{name}\0{len(content)}\0".encode())
+    digest.update(content)
+    return digest.hexdigest()
+
+
 def code_sha256(root):
     """The identity of a Python scorer's code: every .py file under `root`, by relative name and content, in name order."""
     root = Path(root)

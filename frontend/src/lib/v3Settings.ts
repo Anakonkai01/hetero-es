@@ -12,6 +12,7 @@ export const DEFAULT_V3: V3Settings = {
   evalChunk: null,
   sampler: 'sha256-python-random-sample-v1',
   candidateSeedNamespace: null,
+  pythonCode: [],
   scorer: {
     kind: 'declarative',
     name: 'exact-string',
@@ -62,7 +63,10 @@ export function v3ReviewRows(
     ['Momentum', settings.momentumBeta === null ? '—' : `β ${settings.momentumBeta} · ${settings.momentumWindow}`],
     ['Antithetic sampling', settings.antithetic ? 'ON' : 'OFF'],
     ['Weight space', space.kind === 'lora' ? `LoRA r${space.rank}` : space.kind],
-    ['Declarative scorer', `${settings.scorer.name}@${settings.scorer.version}`],
+    [
+      settings.scorer.kind === 'python' ? 'Python scorer' : 'Declarative scorer',
+      `${settings.scorer.name}@${settings.scorer.version}`,
+    ],
     ['Maximum output tokens', `${run.maxNewTokens}`],
     ['Prompts per generate() call', `${settings.evalChunk ?? 16}`],
   ];

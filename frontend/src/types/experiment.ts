@@ -9,11 +9,27 @@ export type DeclarativeScorer = {
   codeSha256: null;
   config: Record<string, unknown>;
 };
+// Researcher code run by the coordinator device only (the lab adds codeSha256 and pins it in the plan)
+export type PythonScorer = {
+  kind: 'python';
+  name: string;
+  version: number;
+  codeSha256: string | null;
+  config: Record<string, never>;
+};
+export type PythonCode = {
+  role: 'scorer' | 'coefficients';
+  name: string;
+  function: string;
+  source: string;
+  codeSha256?: string;
+};
 export interface V3Settings {
   weightSpace: WeightSpace;
   antithetic: boolean;
   coefficientRule: string;
-  scorer: DeclarativeScorer;
+  scorer: DeclarativeScorer | PythonScorer;
+  pythonCode: PythonCode[];
   systemPrompt: string | null;
   alphaSchedule: string;
   alphaMinimum: number | null;

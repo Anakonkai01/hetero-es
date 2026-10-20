@@ -172,6 +172,19 @@ would no longer be "seeds + coefficients + α" and replay would need optimizer s
   [DECIDED]
 - **Q-D** Antithetic sampling is **off by default** and chosen per experiment. [DECIDED]
 
+## Owner answers (2026-10-20)
+
+- **Decision 4 reversed for the web lab.** Python scorers and Python coefficient rules are **fully open** on the web
+  lab ("Mở hoàn toàn": the project exists to serve researchers). The uploaded `.py` file is frozen with the experiment
+  (its SHA-256 completes the scorer spec or the `python@1:<sha>` rule), delivered in the coordinator's command only,
+  written to the run folder, checked against the hash and run in a child process with a time limit
+  (`heteroes.v3.sandbox`, without the coordinator's `HETEROES_*` credentials in its environment). Workers never receive
+  or run it: the lab strips it from their command and a worker refuses a configuration that carries code. A hang or a
+  crash is `ScoringFailed`, never reward 0. The audit log records `PYTHON_CODE_FROZEN` per file. [DECIDED]
+- The risk is accepted and recorded in `docs/SECURITY-NOTES.md`: the code runs with the permissions of the
+  coordinator device's user, which may be someone else's machine. The child process is a guard against mistakes, not
+  a security boundary. [DECIDED]
+
 ## Consequences
 
 Researchers change reward, answer format, data, weight space and coefficient rule without touching the runtime; workers

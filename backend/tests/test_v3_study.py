@@ -436,3 +436,49 @@ def test_only_current_v3_coordinator_can_quarantine_its_selected_worker(v3_study
         db.execute("UPDATE devices SET status='APPROVED' WHERE id=?", (auditor["deviceId"],))
     report(original_auth, auditor["workerId"])
     assert status(auditor) == "APPROVED"
+
+
+REWARD = "def reward(texts, rows):\n    return [float(t.strip() == r['label']) for t, r in zip(texts, rows)]\n"
+RULE = "def coefficients(rewards):\n    m = sum(rewards) / len(rewards)\n    return [r - m for r in rewards]\n"
+
+
+def test_v3_python_code_is_frozen_and_reaches_only_the_coordinator(v3_study):
+    from heteroes.v3.scoring import source_sha256
+
+    c, admin, _ = v3_study
+    store = c.app.state.store
+    lab = (c, store, store.runtime, admin)
+    d, device_auth = pair(lab)
+    model, data = assets(v3_study)
+    qualify_v3(c, device_auth, c.get("/api/v1/devices", headers=admin).json()[0]["selfTest"], model)
+    body = {
+        **configuration(d, model, data),
+        "scorer": {"kind": "python", "name": "label-match", "version": 1, "codeSha256": None, "config": {}},
+        "coefficientRule": "python@1",
+        "pythonCode": [
+            {"role": "scorer", "name": "reward.py", "function": "reward", "source": REWARD},
+            {"role": "coefficients", "name": "rule.py", "function": "coefficients", "source": RULE},
+        ],
+    }
+    result = c.post("/api/v1/experiments", headers=admin, json=body)
+    assert result.status_code == 200, result.text
+    run = result.json()
+    scorer_sha, rule_sha = source_sha256("reward.py", REWARD.encode()), source_sha256("rule.py", RULE.encode())
+    assert run["scorer"]["codeSha256"] == scorer_sha and run["coefficientRule"] == "python@1:" + rule_sha
+    with store.db() as db:
+        audited = [r[0] for r in db.execute("SELECT target FROM audit WHERE action='PYTHON_CODE_FROZEN'")]
+    assert sorted(audited) == sorted(
+        f"{run['experimentId']}:{r}" for r in (f"scorer:{scorer_sha}", f"coefficients:{rule_sha}")
+    )
+    enable(lab, d, device_auth)
+    assert c.post(f"/api/v1/experiments/{run['experimentId']}/submit", headers=admin).status_code == 200
+    store.dispatch_once()
+    ar = store.runtime.runs()[0]
+    [coordinate] = [cmd for cmd in store.runtime.commands(d["deviceId"]) if cmd["kind"] == "COORDINATE"]
+    assert [e["source"] for e in coordinate["config"]["pythonCode"]] == [REWARD, RULE]
+    start = {"assignmentId": ar["assignmentId"], "epoch": ar["epoch"], "workerId": d["workerId"], "action": "start"}
+    assert c.post("/api/v1/device/worker-command", headers=device_auth, json=start).status_code == 200
+    worker = next(cmd for cmd in store.runtime.commands(d["deviceId"]) if cmd["kind"] == "START_WORKER")
+    assert "pythonCode" not in worker["studyConfig"] and worker["studyConfig"]["scorer"]["codeSha256"] == scorer_sha
+    tampered = {**body, "pythonCode": body["pythonCode"][:1]}  # the rule names Python code that is not there
+    assert c.post("/api/v1/experiments", headers=admin, json=tampered).status_code == 422

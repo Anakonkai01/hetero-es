@@ -208,13 +208,14 @@ def run_product(cfg, tmp_path):
         worker_log.close()
 
 
-def test_product_refuses_python_scorer_before_loading(product_assets, tmp_path):
+def test_product_refuses_a_python_scorer_without_its_frozen_code_before_loading(product_assets, tmp_path):
     from heteroes.product.v3 import prepare_run
 
     cfg = product_config(product_assets, tmp_path)
     cfg["modelPath"] = "/missing-model"
     cfg["scorer"] = {"kind": "python", "name": "user-code", "version": 1, "codeSha256": "a" * 64, "config": {}}
-    with pytest.raises(ValueError, match="declarative"):
+    # the web lab accepts Python scorers since 2026-10-20 (ADR-008), but only with the code the plan pins
+    with pytest.raises(ValueError, match="pythonCode"):
         prepare_run(cfg, tmp_path, "cpu")
 
 

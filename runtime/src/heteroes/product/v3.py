@@ -28,7 +28,10 @@ def prepare_run(config, root, device, *, declared=None, client=None, cache=None)
     """
     from heteroes.v3.options import validate_options
 
-    validate_options(config)
+    if declared is not None and "pythonCode" in config:
+        raise ValueError("A worker never receives researcher code")
+    python = config["scorer"]["kind"] == "python" or config["coefficientRule"].startswith("python@1:")
+    validate_options(config, allow_python=python, with_code=declared is None)
     from heteroes.manifest import generation_config_sha256
     from heteroes.model.loading import LoadedModel
     from heteroes.model.lora import create_initial_adapter
@@ -104,7 +107,7 @@ def prepare_run(config, root, device, *, declared=None, client=None, cache=None)
         dataset=dataset,
         adapter_sha256=adapter_sha,
     )
-    run = RecipeV3Run(recipe, plan, allow_python=False)
+    run = RecipeV3Run(recipe, plan, allow_python=python)
     if declared is not None:
         if recipe != declared:
             raise ValueError("Local model/data/decoder differs from declared Recipe v3")
@@ -118,3 +121,27 @@ def prepare_run(config, root, device, *, declared=None, client=None, cache=None)
         model, tokenizer, schema, manifest["revision"], model.generation_config.to_dict(), device, manifest["modelId"]
     )
     return loaded, run, dataset
+
+
+def python_functions(config, root):
+    """
+    (scorer, coefficient function) of a coordinator: the frozen researcher code, written under `root`/code and checked
+    against its SHA-256, each run in a child process with a time limit (`heteroes.v3.sandbox`). (None, None) without code.
+    """
+    from heteroes.v3.sandbox import ChildFunction
+    from heteroes.v3.scoring import ScorerError, code_sha256
+
+    loaded = {}
+    for entry in config.get("pythonCode", []):
+        path = Path(root) / "code" / entry["codeSha256"] / entry["name"]
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(entry["source"].encode())  # bytes: the hash must not depend on newline translation
+        if code_sha256(path) != entry["codeSha256"]:
+            raise ValueError("Frozen Python code changed")
+        loaded[entry["role"]] = ChildFunction(
+            path,
+            entry["function"],
+            timeout=config.get("pythonTimeoutSeconds", 300),
+            error=ScorerError if entry["role"] == "scorer" else ValueError,
+        )
+    return loaded.get("scorer"), loaded.get("coefficients")

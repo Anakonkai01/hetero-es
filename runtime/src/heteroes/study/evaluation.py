@@ -46,7 +46,9 @@ def generate_rows(model, tokenizer, rows, evaluation, chunk=16, *, sample=False,
     if type(chunk) is not int or chunk < 1:
         raise ValueError("Invalid decoding chunk")
     decoder = evaluation.get("decoder", "hf_generate")  # Recipe v2 always, v3 by choice
-    if decoder not in ("hf_generate", "hf_compact"):
+    from heteroes.catalog import DECODE_ENGINES
+
+    if decoder not in DECODE_ENGINES:
         raise ValueError("Unknown decoder")
     if decoder == "hf_compact":
         if sample:

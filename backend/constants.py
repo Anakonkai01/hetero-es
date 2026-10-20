@@ -14,6 +14,8 @@ COMMAND_KINDS = CORE_COMMAND_KINDS | {
 }
 # Settings only Recipe v3 has; the update-formula ones came later, so a run saved before them may lack them
 V3_KEYS = ("weightSpace", "antithetic", "scorer", "coefficientRule", "systemPrompt")
+# researcher code frozen with a web-lab experiment (owner 2026-10-20): sent to the coordinator only, never to workers
+V3_CODE_KEYS = ("pythonCode",)
 V3_UPDATE_KEYS = (
     "alphaSchedule",
     "alphaMinimum",

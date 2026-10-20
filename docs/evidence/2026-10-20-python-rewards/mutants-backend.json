@@ -1,0 +1,6 @@
+[
+ {"name": "workers receive the code", "file": "backend/agent_commands.py", "old": "{k: v for k, v in ar[\"config\"].items() if k not in V3_CODE_KEYS}", "new": "ar[\"config\"]"},
+ {"name": "scorer spec not completed with the hash", "file": "backend/validation.py", "old": "            body[\"scorer\"] = {**body[\"scorer\"], \"codeSha256\": entry[\"codeSha256\"]}", "new": "            pass"},
+ {"name": "no audit entry for frozen code", "file": "backend/store.py", "old": "                self.audit(db, owner, \"PYTHON_CODE_FROZEN\", target, workspace_id)", "new": "                pass"},
+ {"name": "code not passed to the coordinator", "file": "backend/store.py", "old": "for key in (*V3_UPDATE_KEYS, *V3_CODE_KEYS) if key in active", "new": "for key in V3_UPDATE_KEYS if key in active"}
+]
