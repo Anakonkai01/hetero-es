@@ -118,3 +118,38 @@ No cache cleanup was performed at pause.
    so this isolated run reports the current root branch commit/dirty state rather than packaged source commit `637fce3`.
    The receipts explicitly identify package source and self-test source tree hashes. Add a meaningful regression before
    changing provenance; do not rewrite existing recorded observations.
+
+## Session 2 (Sonnet 5.5, 2026-10-20 afternoon) — resumed by the owner
+
+The owner resumed work and asked that this session stop before complex logic/code; a stronger model takes those items.
+
+Done:
+
+- `755ca33` formats the Windows launch call in `remote.py` (Python AST unchanged; the only failure of the earlier check).
+- Run `6590307f291e4fd3b0774b42bbda7562` had been left in DRAINING when the isolated apps were stopped. Restarting the isolated
+  server (`start-seed.sh`) and the Linux Worker (`worker5070/start-fix1.sh`, then `login` and `contribution enabled`
+  through the driver) let it finish: COMPLETED. `580f23d` records it in `docs/evidence/2026-10-20-system-finish/two-machine-final.json`
+  (script `.scratch/record-two-machine.py`): every generation record, child hash, final weights, selection and export equals
+  the one-machine baseline; 5/5 audits matched; no quarantine. Limits are written in that README (pause, concurrent CPU work).
+- A new full `scripts/check-all.sh` was started against `580f23d`: `.scratch/check-all-final.log`, receipts
+  `docs/evidence/2026-10-20-system-finish/checks-model-qualification-final/` (see the result line below if it was filled in).
+- The owner authorized SSH to both borrowed 3060s for this work: `thao_nguyen@100.92.20.58` and `quang@100.99.227.8`
+  (both land in WSL Ubuntu, RTX 3060, driver 617.42). Windows installer tests come later. Reachability was verified only
+  (read-only commands). Findings: no `node`/`xvfb` in either WSL, so the Electron Worker is not the route there;
+  `~/heteroes-venv/bin/python -c "import torch"` segfaults unless `LD_LIBRARY_PATH=/usr/lib/wsl/lib` is set; Thao's WSL has
+  `~/heteroes-system-finish` and `~/heteroes-v3-acceptance-20261019`, Quang's has only an old `~/projects/heteroes`.
+
+Left for a stronger model (not started on purpose):
+
+1. `runtime_info.code_info()` provenance: `REPO_ROOT` is `parents[2]` of the module and the git calls walk to any enclosing
+   checkout, so a packaged runtime under `.scratch/` reports the checkout. Idea only: report git info only when
+   `runtime_info.py` itself is tracked (`git ls-files --error-unmatch`). Needs a regression test first and a check of
+   `runner.py` lines 142/250/283 and `qualification*.py` consumers.
+2. Package `368085a` (clean worktree `.scratch/model-probe-source`, build not started) and prove new-model qualification
+   on real GPUs with a different safe pinned model. For the 3060s the headless route is
+   `python -m heteroes.product.agent enroll|run --config <json>` (needs a pairing code, `serverUrl`, `computeUrl`,
+   `modelPath`, `workerId`, `stateDirectory`) with the worker runtime copied to WSL; this has NOT been tried.
+3. Original steps 5-8 (Python rewards, 1 GB/10m-row datasets, any-machine coordinator, `hf_compact` v3, vLLM probe, CLI, prompt
+   format/boxed scorer, UI friction 12, final candidate3, flag-day checklist). The flag-day decision is the owner's.
+4. Windows: the isolated test Worker and the backup of the original are still in place on Thao's native Windows
+   (see the restore section above). Restore after the installer tests.
