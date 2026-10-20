@@ -47,6 +47,13 @@ export function StudyAssets() {
   const [answer, setAnswer] = useState('answer');
   const [adapter, setAdapter] = useState('exact-number-v1');
   const [files, setFiles] = useState<Record<string, SourceFile>>({});
+  // Recipe v3 files above 3 MB: uploaded with signed requests and built into a file-backed dataset on the lab
+  const [large, setLarge] = useState<Record<string, File>>({});
+  const limits = useQuery({
+    queryKey: ['dataset-limits'],
+    queryFn: () => apiGet<{ maxBytes: number; maxRows: number }>('/api/v1/platform/dataset-limits'),
+    enabled: scope.every(Boolean),
+  });
   const [manifest, setManifest] = useState<Record<string, unknown> | null>(null);
   const [modelName, setModelName] = useState('');
   const [source, setSource] = useState('REFERENCE');
@@ -80,7 +87,15 @@ export function StudyAssets() {
         )}
         <label className="fg">
           {t('Asset recipe')}
-          <select className="sel" value={recipeVersion} onChange={(e) => setRecipeVersion(Number(e.target.value))}>
+          <select
+            className="sel"
+            value={recipeVersion}
+            onChange={(e) => {
+              setRecipeVersion(Number(e.target.value));
+              setFiles({});
+              setLarge({});
+            }}
+          >
             <option value={2}>{t('Math dataset · Recipe v2')}</option>
             <option value={3}>{t('Custom experiment · Recipe v3')}</option>
           </select>
@@ -102,6 +117,31 @@ export function StudyAssets() {
                 onSubmit={(event) => {
                   event.preventDefault();
                   void perform(async () => {
+                    // a v3 import with any file above 3 MB uploads every file and builds a file-backed dataset
+                    if (recipeVersion === 3 && Object.values(large).some((file) => file.size > 3_000_000)) {
+                      const format = (file: File) => file.name.split('.').at(-1) ?? '';
+                      const plan = await apiPost<{
+                        uploadId: string;
+                        files: Record<string, { url: string; headers: Record<string, string> }>;
+                      }>('/api/v1/datasets/upload-plan', {
+                        name,
+                        files: Object.fromEntries(
+                          Object.entries(large).map(([split, file]) => [
+                            split,
+                            { format: format(file), sizeBytes: file.size },
+                          ]),
+                        ),
+                      });
+                      for (const [split, target] of Object.entries(plan.files)) {
+                        const response = await fetch(target.url, { method: 'PUT', body: large[split] });
+                        if (!response.ok) throw Error(t('Dataset upload failed: ') + split);
+                      }
+                      await apiPost('/api/v1/datasets/uploads/' + plan.uploadId + '/build', {
+                        mapping: { prompt },
+                        splitSeed: 42,
+                      });
+                      return;
+                    }
                     await apiPost('/api/v1/datasets/import', {
                       name,
                       files,
@@ -131,6 +171,7 @@ export function StudyAssets() {
                     onChange={(e) => {
                       setMode(e.target.value);
                       setFiles({});
+                      setLarge({});
                     }}
                   >
                     <option value="all">{t('One file · seeded 80/10/10')}</option>
@@ -169,7 +210,14 @@ export function StudyAssets() {
                       onChange={(event) => {
                         const file = event.target.files?.[0];
                         if (!file) return;
-                        if (file.size > 3_000_000) {
+                        if (recipeVersion === 3) {
+                          if (file.size > (limits.data?.maxBytes ?? 3_000_000)) {
+                            setMessage(t('Dataset file exceeds the lab limit.'));
+                            return;
+                          }
+                          setLarge((previous) => ({ ...previous, [split]: file }));
+                          if (file.size > 3_000_000) return; // read on the lab, never in the browser
+                        } else if (file.size > 3_000_000) {
                           setMessage(t('Dataset file exceeds 3 MB.'));
                           return;
                         }
@@ -191,7 +239,18 @@ export function StudyAssets() {
                     'Split seed: 42. Duplicate prompts are rejected. Test examples stay out of training and checkpoint selection.',
                   )}
                 </p>
-                <button className="btn" disabled={busy || Object.keys(files).length !== (mode === 'all' ? 1 : 3)}>
+                {recipeVersion === 3 && limits.data && (
+                  <p className="hint">
+                    {t('Recipe v3 files up to')} {(limits.data.maxBytes / 1e9).toFixed(1)} GB ·{' '}
+                    {limits.data.maxRows.toLocaleString()} {t('rows')}
+                  </p>
+                )}
+                <button
+                  className="btn"
+                  disabled={
+                    busy || Object.keys(recipeVersion === 3 ? large : files).length !== (mode === 'all' ? 1 : 3)
+                  }
+                >
                   {t('Import dataset')}
                 </button>
               </form>

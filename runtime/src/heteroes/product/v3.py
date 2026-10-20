@@ -37,12 +37,12 @@ def prepare_run(config, root, device, *, declared=None, client=None, cache=None)
     from heteroes.model.lora import create_initial_adapter
     from heteroes.model.weights_io import publish_weights
     from heteroes.product.storage import data_root
-    from heteroes.v3.data import verify
+    from heteroes.v3.data import open_dataset
     from heteroes.v3.model import load, trainable_schema
     from heteroes.v3.run import RecipeV3Run, build_documents
 
     root = Path(root)
-    dataset = verify(read_json(Path(config["datasetPath"])))
+    dataset = open_dataset(config["datasetPath"])  # a file-backed dataset finds its split files beside it
     if {k: dataset[k] for k in ("contentHash", "splitHashes")} != config["datasetIdentity"]:
         raise ValueError("Frozen dataset identity mismatch")
     manifest = config["modelManifest"]

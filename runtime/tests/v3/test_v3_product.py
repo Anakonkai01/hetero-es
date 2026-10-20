@@ -103,7 +103,7 @@ def test_managed_runner_and_worker_cli_commit_texts(product_assets, tmp_path, sp
     )
 
 
-def run_product(cfg, tmp_path):
+def run_product(cfg, tmp_path, python_scorer=None):
     import socket
 
     with socket.socket() as sock:
@@ -112,6 +112,8 @@ def run_product(cfg, tmp_path):
     cfg = {**cfg, "port": port}
     space = cfg["weightSpace"]
     write_json(tmp_path / "config.json", cfg)
+    # the lab sends a worker the configuration without researcher code
+    write_json(tmp_path / "worker-config.json", {k: v for k, v in cfg.items() if k != "pythonCode"})
     env = {**os.environ, "CUDA_VISIBLE_DEVICES": "", "HETEROES_TOKEN": "fixture-secret"}
     runner_log = (tmp_path / "runner-output.txt").open("w")
     worker_log = (tmp_path / "worker-output.txt").open("w")
@@ -133,7 +135,7 @@ def run_product(cfg, tmp_path):
                 "--dataset",
                 cfg["datasetPath"],
                 "--run-config",
-                str(tmp_path / "config.json"),
+                str(tmp_path / "worker-config.json"),
                 "--coordinator-url",
                 f"http://127.0.0.1:{port}",
                 "--worker-id",
@@ -169,7 +171,7 @@ def run_product(cfg, tmp_path):
         recipe, plan = read_json(tmp_path / "recipe.json"), read_json(tmp_path / "plan.json")
         assert recipe["weightSpace"]["kind"] == space["kind"]
         assert plan["scorer"] == cfg["scorer"]
-        dataset = read_json(tmp_path / "dataset.json")
+        dataset = data.open_dataset(cfg["datasetPath"])
         with Ledger(tmp_path / "ledger.sqlite") as ledger:
             for generation in range(2):
                 candidates = ledger.list_candidates(cfg["runId"], generation)
@@ -183,9 +185,9 @@ def run_product(cfg, tmp_path):
                 rows = data.batch(dataset, generation, 3, 11)["rows"]
                 for candidate in candidates:
                     _, texts = ledger.get_completions(candidate.descriptor.candidate_id)
-                    assert candidate.result.reward == score(cfg["scorer"], texts, rows)[0]
+                    assert candidate.result.reward == score(cfg["scorer"], texts, rows, python_scorer)[0]
                 update = ledger.get_update(cfg["runId"], generation)
-                assert update.applied_at and update.record.coefficient_rule == "zscore@1"
+                assert update.applied_at and update.record.coefficient_rule == cfg["coefficientRule"]
         metrics = read_json(tmp_path / "study-metrics.json")
         assert metrics["testLocked"] is False and metrics["independentReloadPassed"]
         assert [item["generation"] for item in metrics["validation"]] == [-1, 0, 1]
@@ -206,6 +208,36 @@ def run_product(cfg, tmp_path):
                     process.wait()
         runner_log.close()
         worker_log.close()
+
+
+REWARD = "def reward(texts, rows):\n    return [float(len(t) % 5) for t in texts]\n"
+RULE = "def coefficients(rewards):\n    m = sum(rewards) / len(rewards)\n    return [r - m for r in rewards]\n"
+
+
+def test_managed_run_with_a_file_backed_dataset_and_a_python_reward_and_rule(product_assets, tmp_path):
+    from heteroes.v3.scoring import source_sha256
+
+    source = tmp_path / "rows.jsonl"
+    source.write_text(
+        "".join(json.dumps({"prompt": f"What is {i} plus 2?", "label": str(i + 2)}) + "\n" for i in range(20))
+    )
+    document = data.build_file_dataset({"all": (source, "jsonl")}, tmp_path / "data")
+    code = [
+        {"role": "scorer", "name": "reward.py", "function": "reward", "source": REWARD},
+        {"role": "coefficients", "name": "rule.py", "function": "coefficients", "source": RULE},
+    ]
+    for entry in code:
+        entry["codeSha256"] = source_sha256(entry["name"], entry["source"].encode())
+    cfg = product_config(product_assets, tmp_path, candidateSeedNamespace="fixture-fixed")
+    cfg.update(
+        datasetPath=str(tmp_path / "data" / "dataset.json"),
+        datasetIdentity={k: document[k] for k in ("contentHash", "splitHashes")},
+        scorer={"kind": "python", "name": "length", "version": 1, "codeSha256": code[0]["codeSha256"], "config": {}},
+        coefficientRule="python@1:" + code[1]["codeSha256"],
+        pythonCode=code,
+    )
+
+    run_product(cfg, tmp_path, python_scorer=lambda texts, rows: [float(len(t) % 5) for t in texts])
 
 
 def test_product_refuses_a_python_scorer_without_its_frozen_code_before_loading(product_assets, tmp_path):

@@ -111,6 +111,8 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
             datasetObjectSha256=data["objectSha256"],
             datasetIdentity=data["identity"],
         )
+        if data.get("splitObjects"):  # a file-backed dataset: its split files may be transferred too
+            body["datasetSplitObjects"] = data["splitObjects"]
     else:
         if body["modelName"] != cap["modelId"] or body["modelArtifactId"] != "qwen-pinned":
             raise HTTPException(422, "Only the pinned Qwen model is supported for Recipe v1")

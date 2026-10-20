@@ -325,6 +325,8 @@ class Store:
                     )
                 }
             )
+        if "datasetSplitObjects" in active:  # a file-backed dataset (format 3)
+            config["datasetSplitObjects"] = active["datasetSplitObjects"]
         if active.get("recipeVersion") == 3:
             config.update({key: active[key] for key in V3_KEYS})
             config.update({key: active[key] for key in (*V3_UPDATE_KEYS, *V3_CODE_KEYS) if key in active})

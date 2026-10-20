@@ -1,0 +1,7 @@
+[
+ {"name": "split files may not be transferred", "file": "backend/study_registry.py", "old": "            allowed = {config.get(\"datasetObjectSha256\"), *config.get(\"datasetSplitObjects\", [])}", "new": "            allowed = {config.get(\"datasetObjectSha256\")}"},
+ {"name": "anyone changes the limits", "file": "backend/study_registry.py", "old": "    def set_dataset_limits(body: DatasetLimits, current=Depends(scoped)):\n        platform_profile(current)\n", "new": "    def set_dataset_limits(body: DatasetLimits, current=Depends(scoped)):\n"},
+ {"name": "file above the limit gets a plan", "file": "backend/study_registry.py", "old": "or not 1 <= f[\"sizeBytes\"] <= limits[\"maxBytes\"]", "new": "or not 1 <= f[\"sizeBytes\"]"},
+ {"name": "build ignores the row limit", "file": "backend/study_registry.py", "old": "                    max_rows=limits[\"maxRows\"],", "new": "                    max_rows=10**9,"},
+ {"name": "experiment does not freeze split objects", "file": "backend/validation.py", "old": "            body[\"datasetSplitObjects\"] = data[\"splitObjects\"]", "new": "            pass"}
+]

@@ -31,7 +31,7 @@ class Tracker:
             raise ValueError("Validation selection belongs to another recipe or scoring plan")
 
     def _evaluate(self, model, tokenizer, split):
-        rows = self.dataset["splits"][split]
+        rows = list(self.dataset["splits"][split])  # a file-backed split is read once, in order
         # the recipe's prompts per generate() call (16 when it fixes none, as the executor); texts are coordinator-only
         raw = generate_rows(model, tokenizer, rows, self.recipe.evaluation, self.recipe.chunk or 16)
         reward, scores = score(self.recipe.plan["scorer"], [r["output"] for r in raw], rows, self.python_scorer)

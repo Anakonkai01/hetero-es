@@ -16,7 +16,9 @@ results, numpy results, prints kept off the reply channel, exception, crash, tim
 
 ## What this does NOT show
 
-- No GPU run with a Python reward through the lab yet; the coordinator path is covered by unit tests only.
+- No GPU run with a Python reward through the lab yet. On the CPU, a real managed runner and worker process run a
+  Python reward and a Python coefficient rule end to end (`runtime/tests/v3/test_v3_product.py::
+  test_managed_run_with_a_file_backed_dataset_and_a_python_reward_and_rule`, added with the large-dataset commit).
 - The child process is not a security boundary: the code has the coordinator user's permissions (accepted risk in
   `docs/SECURITY-NOTES.md`). There is no memory or file-system limit.
 - The coordinator device's own page does not yet show which experiment's code it runs; the experiment and the audit

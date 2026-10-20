@@ -2,11 +2,12 @@
 
 from pathlib import Path
 import os
+import shutil
 
 from heteroes.product.files import read_json, write_json
 from heteroes.product.storage import data_root
 from heteroes.recovery_manifest import HEX
-from heteroes.v3.data import verify as verify_dataset
+from heteroes.v3.data import split_files, verify as verify_dataset
 from heteroes.v3.run import RecipeV3Run
 
 
@@ -18,6 +19,9 @@ def validate_state(state, config, recipe, generation, files):
     identity = {k: dataset[k] for k in ("contentHash", "splitHashes")}
     if identity != config["datasetIdentity"] or identity != {k: recipe["data"][k] for k in identity}:
         raise ValueError("Recovery dataset mismatch")
+    for digest, size in split_files(dataset).items():  # a file-backed dataset keeps its split files in the point
+        if files.get(f"{digest}.jsonl", {}).get("sha256") != digest or files[f"{digest}.jsonl"]["sizeBytes"] != size:
+            raise ValueError("Missing dataset split file")
     selection = state.get("selection")
     if not isinstance(selection, dict):
         raise ValueError("Recovery requires validation selection")
@@ -63,6 +67,8 @@ def capture_state(root, temporary, recipe, generation):
     if not isinstance(best, str) or not HEX.fullmatch(best):
         raise ValueError("Invalid selected weights")
     paths = {f"selection/{best}.bin": data_root(root) / "selection" / f"{best}.bin"}
+    for digest in split_files(state["dataset"]):  # beside dataset.json once restored
+        paths[f"{digest}.jsonl"] = Path(config["datasetPath"]).parent / f"{digest}.jsonl"
     if recipe["weightSpace"]["kind"] == "lora":
         paths["initial-adapter.bin"] = data_root(root) / "initial-adapter.bin"
     # Sources are immutable weights. Never carry process IDs, credentials or grants.
@@ -71,7 +77,10 @@ def capture_state(root, temporary, recipe, generation):
             raise ValueError("Missing or unsafe selected weights / initial adapter")
         target = temporary / name
         target.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-        os.link(source, target)
+        try:
+            os.link(source, target)
+        except OSError:  # a dataset cache on another file system
+            shutil.copyfile(source, target)
     write_json(temporary / "v3-state.json", state)
     return ["v3-state.json", *paths]
 

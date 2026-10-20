@@ -75,10 +75,14 @@ def prepare(agent, assignment, config, directory):
         10_000_000,
     )
     if config.get("recipeVersion") == 3:
-        from heteroes.v3.data import verify as verify_dataset
+        from heteroes.v3.data import open_dataset, split_files, verify as verify_dataset
+
+        # a file-backed dataset (format 3): its split files, each pinned by the document, go beside it
+        for digest, size in split_files(verify_dataset(json.loads(data_path.read_text()))).items():
+            transfer(agent, assignment, digest, data_path.parent / f"{digest}.jsonl", size)
+        data = open_dataset(data_path)
     else:
-        verify_dataset = verify_data
-    data = verify_dataset(json.loads(data_path.read_text()))
+        data = verify_data(json.loads(data_path.read_text()))
     if {k: data[k] for k in ("contentHash", "splitHashes")} != config["datasetIdentity"]:
         raise ValueError("Frozen dataset identity mismatch")
     model_path = prepare_model(agent, assignment, config)

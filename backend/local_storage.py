@@ -213,6 +213,16 @@ class LocalBackend:
     def put(self, key, data):
         self._publish(self.path(key), [data])
 
+    def put_file(self, key, source, expected=None):
+        """Publish a large local file under `key` without reading it into memory."""
+
+        def chunks():
+            with open(source, "rb") as stream:
+                while chunk := stream.read(1024**2):
+                    yield chunk
+
+        self._publish(self.path(key), chunks(), expected)
+
     def delete(self, key):
         self.path(key).unlink(missing_ok=True)
 
