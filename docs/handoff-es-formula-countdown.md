@@ -58,5 +58,12 @@ seen. Do check forgetting on **1–2 small other tasks** (CommonsenseQA first). 
 4. Then: Windows candidate2 (installer, D: data folder, self-test, uninstall; owner present), the isolated
    3-machine lab, preregistration and the comparisons.
 
+5. **r11 / later (owner, 2026-10-20):** make the batch sampler pluggable (today hard-wired, `documents.py:135`) and have a
+   fresh strong reviewer run the researcher-readiness review in [review-researcher-readiness.md](review-researcher-readiness.md).
+
+Done 2026-10-20: GSM8K run 1 launched (PID-detached, ~6 min/generation); `choice-letter@1` accepts E;
+`v3_evaluate_checkpoints.py --rows/--rows-scorer`; `build_commonsense_qa_dataset.py` (data in `.scratch/csqa/v1`);
+check-all 22/22. `run1.log` only holds a second, OOM-dead launch; read `run/events.jsonl`.
+
 Known limits: `v3_evaluate_checkpoints.py` replays with the CPU engine only; managed-run validation (`v3/tracker.py`)
 still decodes 16 prompts per call regardless of `evaluation.chunk` (coordinator-only, does not affect identity).
