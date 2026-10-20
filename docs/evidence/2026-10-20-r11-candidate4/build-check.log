@@ -1,0 +1,335 @@
+CHECK npm ci --ignore-scripts
+npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+npm warn deprecated rimraf@2.6.3: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+
+added 429 packages, and audited 435 packages in 1m
+
+90 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+CHECK npm run build:web
+
+> build:web
+> npm run build --workspace frontend
+
+
+> frontend@0.0.0 build
+> tsc -b && vite build
+
+vite v8.3.4 building client environment for production...
+transforming...
+✓ 284 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                                     1.17 kB │ gzip:   0.45 kB
+dist/assets/ibm-plex-mono-vietnamese-400-normal-DDuiU_S-.woff       5.62 kB
+dist/assets/ibm-plex-mono-cyrillic-ext-400-normal-DMdlQ8Kv.woff     5.82 kB
+dist/assets/ibm-plex-mono-vietnamese-400-normal-BulugwFq.woff2      5.86 kB
+dist/assets/ibm-plex-sans-vietnamese-400-normal-fK1oJ5dG.woff       6.39 kB
+dist/assets/ibm-plex-sans-vietnamese-700-normal-BV5B8Are.woff       6.42 kB
+dist/assets/ibm-plex-sans-vietnamese-600-normal-DgdngZtN.woff       6.58 kB
+dist/assets/ibm-plex-sans-vietnamese-500-normal-BEb3_waV.woff       6.58 kB
+dist/assets/ibm-plex-mono-cyrillic-ext-400-normal-xuaO2J-f.woff2    6.91 kB
+dist/assets/ibm-plex-mono-cyrillic-400-normal-CEL4l2ZJ.woff         7.20 kB
+dist/assets/ibm-plex-sans-vietnamese-400-normal-DG4YqDda.woff2      8.20 kB
+dist/assets/ibm-plex-sans-vietnamese-700-normal-CkEo6LDy.woff2      8.22 kB
+dist/assets/ibm-plex-mono-cyrillic-400-normal-BSMlKf0J.woff2        8.35 kB
+dist/assets/ibm-plex-sans-vietnamese-500-normal-e4dixQRQ.woff2      8.41 kB
+dist/assets/ibm-plex-sans-vietnamese-600-normal-DpPYBSTl.woff2      8.46 kB
+dist/assets/ibm-plex-sans-greek-700-normal-CkZN0sRy.woff            8.74 kB
+dist/assets/ibm-plex-sans-greek-400-normal-D9ESIMu3.woff            8.76 kB
+dist/assets/ibm-plex-sans-greek-500-normal-CuWXN6rf.woff            9.14 kB
+dist/assets/ibm-plex-sans-greek-600-normal-D-CqTdkO.woff            9.22 kB
+dist/assets/ibm-plex-sans-greek-700-normal-wyJ6jzdA.woff2           9.92 kB
+dist/assets/ibm-plex-sans-greek-400-normal-_efipK4i.woff2           9.94 kB
+dist/assets/ibm-plex-sans-cyrillic-ext-700-normal-DCQwxkRk.woff    10.16 kB
+dist/assets/ibm-plex-sans-cyrillic-ext-400-normal-Dsrv2Tcn.woff    10.28 kB
+dist/assets/ibm-plex-sans-greek-600-normal-DzTrcv_p.woff2          10.36 kB
+dist/assets/ibm-plex-sans-greek-500-normal-JMMifIXV.woff2          10.37 kB
+dist/assets/ibm-plex-sans-cyrillic-ext-500-normal-DB5PtV2g.woff    10.59 kB
+dist/assets/ibm-plex-sans-cyrillic-ext-600-normal-Bz0x94Yp.woff    10.61 kB
+dist/assets/ibm-plex-mono-latin-ext-400-normal-D3D2R8hC.woff       11.76 kB
+dist/assets/ibm-plex-sans-cyrillic-ext-700-normal-BmRLXWpJ.woff2   12.05 kB
+dist/assets/ibm-plex-sans-cyrillic-ext-400-normal-g30qAdWV.woff2   12.14 kB
+dist/assets/ibm-plex-sans-cyrillic-ext-600-normal-DUMzJB7m.woff2   12.30 kB
+dist/assets/ibm-plex-sans-cyrillic-ext-500-normal-Cs5J6C77.woff2   12.30 kB
+dist/assets/ibm-plex-mono-latin-400-normal-CvHOgSBP.woff           13.14 kB
+dist/assets/ibm-plex-sans-cyrillic-700-normal-RFb1v-CK.woff        13.32 kB
+dist/assets/ibm-plex-mono-latin-ext-400-normal-BmRBH3aV.woff2      13.34 kB
+dist/assets/ibm-plex-sans-cyrillic-400-normal-BTotfTJu.woff        13.51 kB
+dist/assets/ibm-plex-sans-cyrillic-500-normal-ByOcLdNv.woff        13.85 kB
+dist/assets/ibm-plex-sans-cyrillic-600-normal-BGq0mW3O.woff        13.88 kB
+dist/assets/ibm-plex-sans-latin-ext-400-normal-RBey6euL.woff       14.36 kB
+dist/assets/ibm-plex-sans-latin-ext-700-normal-DZH6Xh-4.woff       14.42 kB
+dist/assets/ibm-plex-sans-cyrillic-700-normal-D_uavGvn.woff2       14.57 kB
+dist/assets/ibm-plex-mono-latin-400-normal-DMJ8VG8y.woff2          14.70 kB
+dist/assets/ibm-plex-sans-latin-ext-500-normal-D0aIdm-b.woff       14.73 kB
+dist/assets/ibm-plex-sans-latin-ext-600-normal-DIrixKbi.woff       14.77 kB
+dist/assets/ibm-plex-sans-cyrillic-400-normal-DZqxrq2p.woff2       14.80 kB
+dist/assets/ibm-plex-sans-cyrillic-500-normal-CocWQlwt.woff2       15.00 kB
+dist/assets/ibm-plex-sans-cyrillic-600-normal-71GNu3SW.woff2       15.04 kB
+dist/assets/ibm-plex-sans-latin-ext-400-normal-C5H60-Va.woff2      15.98 kB
+dist/assets/ibm-plex-sans-latin-ext-700-normal-aMgXseD4.woff2      16.18 kB
+dist/assets/ibm-plex-sans-latin-ext-600-normal-DOrvGEcy.woff2      16.44 kB
+dist/assets/ibm-plex-sans-latin-ext-500-normal-DakdToA3.woff2      16.45 kB
+dist/assets/ibm-plex-sans-latin-400-normal-CYLoc0-x.woff           22.10 kB
+dist/assets/ibm-plex-sans-latin-700-normal-Bth3BMcD.woff           22.28 kB
+dist/assets/ibm-plex-sans-latin-400-normal-CDDApCn2.woff2          22.58 kB
+dist/assets/ibm-plex-sans-latin-700-normal-Bxkt5Cjx.woff2          22.83 kB
+dist/assets/ibm-plex-sans-latin-600-normal-Cu4Hd6ag.woff           23.87 kB
+dist/assets/ibm-plex-sans-latin-500-normal-BgVn5rGT.woff           23.91 kB
+dist/assets/ibm-plex-sans-latin-500-normal-6ng42L7E.woff2          24.18 kB
+dist/assets/ibm-plex-sans-latin-600-normal-CuJfVYMP.woff2          24.25 kB
+dist/assets/index-BbM6H16Z.css                                     93.64 kB │ gzip:  18.02 kB
+dist/assets/workers-CXkjJVzY.js                                     0.15 kB │ gzip:   0.13 kB
+dist/assets/generations-Dl55ow6u.js                                 0.19 kB │ gzip:   0.14 kB
+dist/assets/EmptyState-DHUXKybI.js                                  0.24 kB │ gzip:   0.19 kB
+dist/assets/navigation-DMgjUlR4.js                                  0.26 kB │ gzip:   0.18 kB
+dist/assets/useEvents-DkAfYdEm.js                                   0.27 kB │ gzip:   0.21 kB
+dist/assets/useGeneration-Dk01Z9IY.js                               0.27 kB │ gzip:   0.21 kB
+dist/assets/useArtifacts-DG_nF3Y8.js                                0.27 kB │ gzip:   0.21 kB
+dist/assets/useCandidates-yZX1wqj0.js                               0.28 kB │ gzip:   0.23 kB
+dist/assets/useAttempt-Dg2J4Pvc.js                                  0.29 kB │ gzip:   0.23 kB
+dist/assets/session-W1YhIiVl.js                                     0.34 kB │ gzip:   0.25 kB
+dist/assets/experiments-D5VfKjxO.js                                 0.45 kB │ gzip:   0.22 kB
+dist/assets/NotFoundPage-OFfIF9zT.js                                0.45 kB │ gzip:   0.28 kB
+dist/assets/ProgressBar-wdFYGJJc.js                                 0.46 kB │ gzip:   0.30 kB
+dist/assets/PageHeader-Bv5Ulck5.js                                  0.46 kB │ gzip:   0.28 kB
+dist/assets/ObjectNotFound-Cln818uW.js                              0.58 kB │ gzip:   0.32 kB
+dist/assets/QueryState-B-C1xshF.js                                  0.66 kB │ gzip:   0.38 kB
+dist/assets/useAccess-C7j1oOJk.js                                   0.66 kB │ gzip:   0.35 kB
+dist/assets/rolldown-runtime-hePW80VL.js                            0.71 kB │ gzip:   0.42 kB
+dist/assets/KeyValue-C7YXWW9y.js                                    0.83 kB │ gzip:   0.44 kB
+dist/assets/Modal-B7AY5PHQ.js                                       0.86 kB │ gzip:   0.50 kB
+dist/assets/useQuery-BoPfRVWI.js                                    0.93 kB │ gzip:   0.57 kB
+dist/assets/EventRows-DHGRRC89.js                                   0.97 kB │ gzip:   0.50 kB
+dist/assets/MyWorkersPage-Bxycoc9_.js                               1.24 kB │ gzip:   0.61 kB
+dist/assets/useExperiment-Y31c4Gr1.js                               1.80 kB │ gzip:   0.94 kB
+dist/assets/ExperimentCreatePage-BEibIGgZ.js                        2.33 kB │ gzip:   1.10 kB
+dist/assets/ExperimentLive-o6FrGdiL.js                              2.48 kB │ gzip:   1.20 kB
+dist/assets/client-CNb4okPP.js                                      2.90 kB │ gzip:   1.32 kB
+dist/assets/LabQueue-Bew4etzX.js                                    3.01 kB │ gzip:   1.14 kB
+dist/assets/exportRun-D9UL4aFN.js                                   3.19 kB │ gzip:   1.68 kB
+dist/assets/RegisterPage-DYO0pk8g.js                                3.31 kB │ gzip:   1.38 kB
+dist/assets/GetStartedPage-ZrEk85tW.js                              3.43 kB │ gzip:   1.31 kB
+dist/assets/LoginPage-DKymBsaT.js                                   3.43 kB │ gzip:   1.41 kB
+dist/assets/labels-X1DurFge.js                                      3.44 kB │ gzip:   1.38 kB
+dist/assets/WorkerFleet-BZXbgJNV.js                                 3.65 kB │ gzip:   1.17 kB
+dist/assets/WorkerDetailPage-BHAri1QQ.js                            3.94 kB │ gzip:   1.58 kB
+dist/assets/eventText-B9idOf_o.js                                   4.62 kB │ gzip:   1.48 kB
+dist/assets/GenerationDetailPage-CD_drYSb.js                        4.93 kB │ gzip:   1.62 kB
+dist/assets/ProfilePage-5Hr2cZ1I.js                                 5.00 kB │ gzip:   1.58 kB
+dist/assets/WorkspaceListPage-DQ16V_rR.js                           5.40 kB │ gzip:   1.91 kB
+dist/assets/CandidateDetailPage-eJ4jXnJ7.js                         6.16 kB │ gzip:   2.09 kB
+dist/assets/WorkspaceDetailRoute-slpQmLBq.js                        6.19 kB │ gzip:   2.18 kB
+dist/assets/ArtifactsPage-D3amQRNE.js                               6.44 kB │ gzip:   2.30 kB
+dist/assets/EventsPage-CMaIJatU.js                                  7.61 kB │ gzip:   2.61 kB
+dist/assets/ExperimentsPage-0jBrkyvL.js                             8.08 kB │ gzip:   2.60 kB
+dist/assets/ExplainPage-BzhzHNZO.js                                 8.81 kB │ gzip:   3.40 kB
+dist/assets/LabDevices-Ck4xxbN9.js                                  8.83 kB │ gzip:   3.24 kB
+dist/assets/LabOperationsPage-Dxw4AaWO.js                           9.17 kB │ gzip:   2.73 kB
+dist/assets/ModelsPage-aUqTjp6m.js                                 12.00 kB │ gzip:   4.16 kB
+dist/assets/DashboardPage-D7tRBvtm.js                              12.38 kB │ gzip:   4.10 kB
+dist/assets/ComparePage-CHFdbkmZ.js                                13.35 kB │ gzip:   4.95 kB
+dist/assets/suspense-i_82oztJ.js                                   22.08 kB │ gzip:   7.35 kB
+dist/assets/useExperimentMutations-Cmvr-mI-.js                     26.37 kB │ gzip:   6.94 kB
+dist/assets/ExperimentDetailPage-BbEqSYyK.js                       29.04 kB │ gzip:   8.32 kB
+dist/assets/src-Cafg_dtM.js                                       137.14 kB │ gzip:  43.81 kB
+dist/assets/index-Tw7zJCkc.js                                     325.58 kB │ gzip: 102.42 kB
+
+✓ built in 219ms
+CHECK /home/pc5070ti/projects/heteroes/.venv-backend/bin/python -I /home/pc5070ti/projects/heteroes/.scratch/fresh-linux-check-candidate4/workspace/scripts/refresh-worker-runtime.py --track-a
+Pinned Python/wheels/model preserved; packaged source refreshed: 7841e040c471c5025d92c1e84b350ff8ee385295ba81957336a35121fd887834
+CHECK /home/pc5070ti/projects/heteroes/.venv-backend/bin/python -I /home/pc5070ti/projects/heteroes/.scratch/fresh-linux-check-candidate4/workspace/scripts/refresh-server-runtime.py --web
+{"profile": "server-cpu-v1", "runtimeSha256": "a7a4abcee52d534373153d8b6484433ac0c104a6115c21c817ce971eb58d50b1", "pinsPreserved": true}
+CHECK npm run build --workspace
+
+> @heteroes/worker@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v8.3.4 building client environment for production...
+transforming...
+✓ 26 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                                     0.60 kB │ gzip:   0.35 kB
+dist/assets/ibm-plex-mono-vietnamese-400-normal-DDuiU_S-.woff       5.62 kB
+dist/assets/ibm-plex-mono-cyrillic-ext-400-normal-DMdlQ8Kv.woff     5.82 kB
+dist/assets/ibm-plex-mono-vietnamese-400-normal-BulugwFq.woff2      5.86 kB
+dist/assets/ibm-plex-sans-vietnamese-400-normal-fK1oJ5dG.woff       6.39 kB
+dist/assets/ibm-plex-sans-vietnamese-700-normal-BV5B8Are.woff       6.42 kB
+dist/assets/ibm-plex-sans-vietnamese-600-normal-DgdngZtN.woff       6.58 kB
+dist/assets/ibm-plex-sans-vietnamese-500-normal-BEb3_waV.woff       6.58 kB
+dist/assets/ibm-plex-mono-cyrillic-ext-400-normal-xuaO2J-f.woff2    6.91 kB
+dist/assets/ibm-plex-mono-cyrillic-400-normal-CEL4l2ZJ.woff         7.20 kB
+dist/assets/ibm-plex-sans-vietnamese-400-normal-DG4YqDda.woff2      8.20 kB
+dist/assets/ibm-plex-sans-vietnamese-700-normal-CkEo6LDy.woff2      8.22 kB
+dist/assets/ibm-plex-mono-cyrillic-400-normal-BSMlKf0J.woff2        8.35 kB
+dist/assets/ibm-plex-sans-vietnamese-500-normal-e4dixQRQ.woff2      8.41 kB
+dist/assets/ibm-plex-sans-vietnamese-600-normal-DpPYBSTl.woff2      8.46 kB
+dist/assets/ibm-plex-sans-greek-700-normal-CkZN0sRy.woff            8.74 kB
+dist/assets/ibm-plex-sans-greek-400-normal-D9ESIMu3.woff            8.76 kB
+dist/assets/ibm-plex-sans-greek-500-normal-CuWXN6rf.woff            9.14 kB
+dist/assets/ibm-plex-sans-greek-600-normal-D-CqTdkO.woff            9.22 kB
+dist/assets/ibm-plex-sans-greek-700-normal-wyJ6jzdA.woff2           9.92 kB
+dist/assets/ibm-plex-sans-greek-400-normal-_efipK4i.woff2           9.94 kB
+dist/assets/ibm-plex-sans-cyrillic-ext-700-normal-DCQwxkRk.woff    10.16 kB
+dist/assets/ibm-plex-sans-cyrillic-ext-400-normal-Dsrv2Tcn.woff    10.28 kB
+dist/assets/ibm-plex-sans-greek-600-normal-DzTrcv_p.woff2          10.36 kB
+dist/assets/ibm-plex-sans-greek-500-normal-JMMifIXV.woff2          10.37 kB
+dist/assets/ibm-plex-sans-cyrillic-ext-500-normal-DB5PtV2g.woff    10.59 kB
+dist/assets/ibm-plex-sans-cyrillic-ext-600-normal-Bz0x94Yp.woff    10.61 kB
+dist/assets/ibm-plex-mono-latin-ext-400-normal-D3D2R8hC.woff       11.76 kB
+dist/assets/ibm-plex-sans-cyrillic-ext-700-normal-BmRLXWpJ.woff2   12.05 kB
+dist/assets/ibm-plex-sans-cyrillic-ext-400-normal-g30qAdWV.woff2   12.14 kB
+dist/assets/ibm-plex-sans-cyrillic-ext-600-normal-DUMzJB7m.woff2   12.30 kB
+dist/assets/ibm-plex-sans-cyrillic-ext-500-normal-Cs5J6C77.woff2   12.30 kB
+dist/assets/ibm-plex-mono-latin-400-normal-CvHOgSBP.woff           13.14 kB
+dist/assets/ibm-plex-sans-cyrillic-700-normal-RFb1v-CK.woff        13.32 kB
+dist/assets/ibm-plex-mono-latin-ext-400-normal-BmRBH3aV.woff2      13.34 kB
+dist/assets/ibm-plex-sans-cyrillic-400-normal-BTotfTJu.woff        13.51 kB
+dist/assets/ibm-plex-sans-cyrillic-500-normal-ByOcLdNv.woff        13.85 kB
+dist/assets/ibm-plex-sans-cyrillic-600-normal-BGq0mW3O.woff        13.88 kB
+dist/assets/ibm-plex-sans-latin-ext-400-normal-RBey6euL.woff       14.36 kB
+dist/assets/ibm-plex-sans-latin-ext-700-normal-DZH6Xh-4.woff       14.42 kB
+dist/assets/ibm-plex-sans-cyrillic-700-normal-D_uavGvn.woff2       14.57 kB
+dist/assets/ibm-plex-mono-latin-400-normal-DMJ8VG8y.woff2          14.70 kB
+dist/assets/ibm-plex-sans-latin-ext-500-normal-D0aIdm-b.woff       14.73 kB
+dist/assets/ibm-plex-sans-latin-ext-600-normal-DIrixKbi.woff       14.77 kB
+dist/assets/ibm-plex-sans-cyrillic-400-normal-DZqxrq2p.woff2       14.80 kB
+dist/assets/ibm-plex-sans-cyrillic-500-normal-CocWQlwt.woff2       15.00 kB
+dist/assets/ibm-plex-sans-cyrillic-600-normal-71GNu3SW.woff2       15.04 kB
+dist/assets/ibm-plex-sans-latin-ext-400-normal-C5H60-Va.woff2      15.98 kB
+dist/assets/ibm-plex-sans-latin-ext-700-normal-aMgXseD4.woff2      16.18 kB
+dist/assets/ibm-plex-sans-latin-ext-600-normal-DOrvGEcy.woff2      16.44 kB
+dist/assets/ibm-plex-sans-latin-ext-500-normal-DakdToA3.woff2      16.45 kB
+dist/assets/ibm-plex-sans-latin-400-normal-CYLoc0-x.woff           22.10 kB
+dist/assets/ibm-plex-sans-latin-700-normal-Bth3BMcD.woff           22.28 kB
+dist/assets/ibm-plex-sans-latin-400-normal-CDDApCn2.woff2          22.58 kB
+dist/assets/ibm-plex-sans-latin-700-normal-Bxkt5Cjx.woff2          22.83 kB
+dist/assets/ibm-plex-sans-latin-600-normal-Cu4Hd6ag.woff           23.87 kB
+dist/assets/ibm-plex-sans-latin-500-normal-BgVn5rGT.woff           23.91 kB
+dist/assets/ibm-plex-sans-latin-500-normal-6ng42L7E.woff2          24.18 kB
+dist/assets/ibm-plex-sans-latin-600-normal-CuJfVYMP.woff2          24.25 kB
+dist/assets/index-wib5HJqd.css                                     33.57 kB │ gzip:   6.79 kB
+dist/assets/index-CsiHXr2f.js                                     376.18 kB │ gzip: 117.91 kB
+
+✓ built in 86ms
+CHECK npx electron-builder --linux dir
+  • electron-builder  version=26.15.3 os=7.0.0-38-generic
+  • loaded configuration  file=package.json ("build" field)
+  • packageManager not detected by file, falling back to environment detection  resolvedPackageManager=npm detected=/home/pc5070ti/projects/heteroes/.scratch/fresh-linux-check-candidate4/workspace/desktop/worker
+  • detected workspace root for project using lock file  pm=npm config=undefined resolved=/home/pc5070ti/projects/heteroes/.scratch/fresh-linux-check-candidate4/workspace projectDir=/home/pc5070ti/projects/heteroes/.scratch/fresh-linux-check-candidate4/workspace/desktop/worker
+  • executing @electron/rebuild  electronVersion=41.10.7 arch=x64 buildFromSource=false workspaceRoot=/home/pc5070ti/projects/heteroes/.scratch/fresh-linux-check-candidate4/workspace projectDir=./ appDir=./
+  • installing native dependencies  arch=x64
+  • completed installing native dependencies
+  • packaging       platform=linux arch=x64 electron=41.10.7 appOutDir=/home/pc5070ti/projects/heteroes/.scratch/fresh-linux-check-candidate4/worker/linux-unpacked
+  • downloaded      label=electron progress=100%
+  • downloaded electron zip extracted successfully  output=/home/pc5070ti/projects/heteroes/.scratch/fresh-linux-check-candidate4/worker/linux-unpacked
+  • searching for node modules  pm=npm searchDir=/home/pc5070ti/projects/heteroes/.scratch/fresh-linux-check-candidate4/workspace/desktop/worker
+CHECK /home/pc5070ti/projects/heteroes/.scratch/fresh-linux-check-candidate4/worker/linux-unpacked/heteroes-worker -e const path=require('node:path');const root=process.argv[1];const shared=path.join(root,'node_modules/@heteroes/desktop-shared');const common=require(path.join(shared,'runtime.cjs'));const download=require(path.join(shared,'download.cjs'));const setup=require(path.join(root,'electron/setup.cjs'));if(typeof common.run!=='function'||typeof common.extract!=='function'||typeof download.verifiedDownload!=='function'||typeof setup.Setup!=='function')process.exit(2); /home/pc5070ti/projects/heteroes/.scratch/fresh-linux-check-candidate4/worker/linux-unpacked/resources/app.asar
+CHECK npm run build --workspace
+
+> @heteroes/server@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v8.3.4 building client environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                                     0.54 kB │ gzip:   0.35 kB
+dist/assets/ibm-plex-mono-vietnamese-400-normal-DDuiU_S-.woff       5.62 kB
+dist/assets/ibm-plex-mono-cyrillic-ext-400-normal-DMdlQ8Kv.woff     5.82 kB
+dist/assets/ibm-plex-mono-vietnamese-400-normal-BulugwFq.woff2      5.86 kB
+dist/assets/ibm-plex-sans-vietnamese-400-normal-fK1oJ5dG.woff       6.39 kB
+dist/assets/ibm-plex-sans-vietnamese-700-normal-BV5B8Are.woff       6.42 kB
+dist/assets/ibm-plex-sans-vietnamese-600-normal-DgdngZtN.woff       6.58 kB
+dist/assets/ibm-plex-sans-vietnamese-500-normal-BEb3_waV.woff       6.58 kB
+dist/assets/ibm-plex-mono-cyrillic-ext-400-normal-xuaO2J-f.woff2    6.91 kB
+dist/assets/ibm-plex-mono-cyrillic-400-normal-CEL4l2ZJ.woff         7.20 kB
+dist/assets/ibm-plex-sans-vietnamese-400-normal-DG4YqDda.woff2      8.20 kB
+dist/assets/ibm-plex-sans-vietnamese-700-normal-CkEo6LDy.woff2      8.22 kB
+dist/assets/ibm-plex-mono-cyrillic-400-normal-BSMlKf0J.woff2        8.35 kB
+dist/assets/ibm-plex-sans-vietnamese-500-normal-e4dixQRQ.woff2      8.41 kB
+dist/assets/ibm-plex-sans-vietnamese-600-normal-DpPYBSTl.woff2      8.46 kB
+dist/assets/ibm-plex-sans-greek-700-normal-CkZN0sRy.woff            8.74 kB
+dist/assets/ibm-plex-sans-greek-400-normal-D9ESIMu3.woff            8.76 kB
+dist/assets/ibm-plex-sans-greek-500-normal-CuWXN6rf.woff            9.14 kB
+dist/assets/ibm-plex-sans-greek-600-normal-D-CqTdkO.woff            9.22 kB
+dist/assets/ibm-plex-sans-greek-700-normal-wyJ6jzdA.woff2           9.92 kB
+dist/assets/ibm-plex-sans-greek-400-normal-_efipK4i.woff2           9.94 kB
+dist/assets/ibm-plex-sans-cyrillic-ext-700-normal-DCQwxkRk.woff    10.16 kB
+dist/assets/ibm-plex-sans-cyrillic-ext-400-normal-Dsrv2Tcn.woff    10.28 kB
+dist/assets/ibm-plex-sans-greek-600-normal-DzTrcv_p.woff2          10.36 kB
+dist/assets/ibm-plex-sans-greek-500-normal-JMMifIXV.woff2          10.37 kB
+dist/assets/ibm-plex-sans-cyrillic-ext-500-normal-DB5PtV2g.woff    10.59 kB
+dist/assets/ibm-plex-sans-cyrillic-ext-600-normal-Bz0x94Yp.woff    10.61 kB
+dist/assets/ibm-plex-mono-latin-ext-400-normal-D3D2R8hC.woff       11.76 kB
+dist/assets/ibm-plex-sans-cyrillic-ext-700-normal-BmRLXWpJ.woff2   12.05 kB
+dist/assets/ibm-plex-sans-cyrillic-ext-400-normal-g30qAdWV.woff2   12.14 kB
+dist/assets/ibm-plex-sans-cyrillic-ext-600-normal-DUMzJB7m.woff2   12.30 kB
+dist/assets/ibm-plex-sans-cyrillic-ext-500-normal-Cs5J6C77.woff2   12.30 kB
+dist/assets/ibm-plex-mono-latin-400-normal-CvHOgSBP.woff           13.14 kB
+dist/assets/ibm-plex-sans-cyrillic-700-normal-RFb1v-CK.woff        13.32 kB
+dist/assets/ibm-plex-mono-latin-ext-400-normal-BmRBH3aV.woff2      13.34 kB
+dist/assets/ibm-plex-sans-cyrillic-400-normal-BTotfTJu.woff        13.51 kB
+dist/assets/ibm-plex-sans-cyrillic-500-normal-ByOcLdNv.woff        13.85 kB
+dist/assets/ibm-plex-sans-cyrillic-600-normal-BGq0mW3O.woff        13.88 kB
+dist/assets/ibm-plex-sans-latin-ext-400-normal-RBey6euL.woff       14.36 kB
+dist/assets/ibm-plex-sans-latin-ext-700-normal-DZH6Xh-4.woff       14.42 kB
+dist/assets/ibm-plex-sans-cyrillic-700-normal-D_uavGvn.woff2       14.57 kB
+dist/assets/ibm-plex-mono-latin-400-normal-DMJ8VG8y.woff2          14.70 kB
+dist/assets/ibm-plex-sans-latin-ext-500-normal-D0aIdm-b.woff       14.73 kB
+dist/assets/ibm-plex-sans-latin-ext-600-normal-DIrixKbi.woff       14.77 kB
+dist/assets/ibm-plex-sans-cyrillic-400-normal-DZqxrq2p.woff2       14.80 kB
+dist/assets/ibm-plex-sans-cyrillic-500-normal-CocWQlwt.woff2       15.00 kB
+dist/assets/ibm-plex-sans-cyrillic-600-normal-71GNu3SW.woff2       15.04 kB
+dist/assets/ibm-plex-sans-latin-ext-400-normal-C5H60-Va.woff2      15.98 kB
+dist/assets/ibm-plex-sans-latin-ext-700-normal-aMgXseD4.woff2      16.18 kB
+dist/assets/ibm-plex-sans-latin-ext-600-normal-DOrvGEcy.woff2      16.44 kB
+dist/assets/ibm-plex-sans-latin-ext-500-normal-DakdToA3.woff2      16.45 kB
+dist/assets/ibm-plex-sans-latin-400-normal-CYLoc0-x.woff           22.10 kB
+dist/assets/ibm-plex-sans-latin-700-normal-Bth3BMcD.woff           22.28 kB
+dist/assets/ibm-plex-sans-latin-400-normal-CDDApCn2.woff2          22.58 kB
+dist/assets/ibm-plex-sans-latin-700-normal-Bxkt5Cjx.woff2          22.83 kB
+dist/assets/ibm-plex-sans-latin-600-normal-Cu4Hd6ag.woff           23.87 kB
+dist/assets/ibm-plex-sans-latin-500-normal-BgVn5rGT.woff           23.91 kB
+dist/assets/ibm-plex-sans-latin-500-normal-6ng42L7E.woff2          24.18 kB
+dist/assets/ibm-plex-sans-latin-600-normal-CuJfVYMP.woff2          24.25 kB
+dist/assets/index-wib5HJqd.css                                     33.57 kB │ gzip:   6.79 kB
+dist/assets/index-B24c7snh.js                                     357.95 kB │ gzip: 111.64 kB
+
+✓ built in 83ms
+CHECK npx electron-builder --linux dir
+  • electron-builder  version=26.15.3 os=7.0.0-38-generic
+  • loaded configuration  file=package.json ("build" field)
+  • packageManager not detected by file, falling back to environment detection  resolvedPackageManager=npm detected=/home/pc5070ti/projects/heteroes/.scratch/fresh-linux-check-candidate4/workspace/desktop/server
+  • detected workspace root for project using lock file  pm=npm config=undefined resolved=/home/pc5070ti/projects/heteroes/.scratch/fresh-linux-check-candidate4/workspace projectDir=/home/pc5070ti/projects/heteroes/.scratch/fresh-linux-check-candidate4/workspace/desktop/server
+  • executing @electron/rebuild  electronVersion=41.10.7 arch=x64 buildFromSource=false workspaceRoot=/home/pc5070ti/projects/heteroes/.scratch/fresh-linux-check-candidate4/workspace projectDir=./ appDir=./
+  • installing native dependencies  arch=x64
+  • completed installing native dependencies
+  • packaging       platform=linux arch=x64 electron=41.10.7 appOutDir=/home/pc5070ti/projects/heteroes/.scratch/fresh-linux-check-candidate4/server/linux-unpacked
+  • downloaded      label=electron progress=100%
+  • downloaded electron zip extracted successfully  output=/home/pc5070ti/projects/heteroes/.scratch/fresh-linux-check-candidate4/server/linux-unpacked
+  • searching for node modules  pm=npm searchDir=/home/pc5070ti/projects/heteroes/.scratch/fresh-linux-check-candidate4/workspace/desktop/server
+CHECK /home/pc5070ti/projects/heteroes/.scratch/fresh-linux-check-candidate4/server/linux-unpacked/heteroes-server -e const path=require('node:path');const root=process.argv[1];const shared=path.join(root,'node_modules/@heteroes/desktop-shared');const common=require(path.join(shared,'runtime.cjs'));const download=require(path.join(shared,'download.cjs'));const setup=require(path.join(root,'electron/setup.cjs'));if(typeof common.run!=='function'||typeof common.extract!=='function'||typeof download.verifiedDownload!=='function'||typeof setup.Setup!=='function')process.exit(2); /home/pc5070ti/projects/heteroes/.scratch/fresh-linux-check-candidate4/server/linux-unpacked/resources/app.asar
+{
+  "sourceCommit": "d435c3be6f44b33aa73825ea1db7713d6e9c4c1c",
+  "linuxOnly": true,
+  "published": false,
+  "apps": [
+    {
+      "app": "worker",
+      "unpacked": "/home/pc5070ti/projects/heteroes/.scratch/fresh-linux-check-candidate4/worker/linux-unpacked",
+      "sharedModulesImport": true
+    },
+    {
+      "app": "server",
+      "unpacked": "/home/pc5070ti/projects/heteroes/.scratch/fresh-linux-check-candidate4/server/linux-unpacked",
+      "sharedModulesImport": true
+    }
+  ]
+}
