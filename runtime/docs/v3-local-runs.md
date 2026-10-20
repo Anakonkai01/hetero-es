@@ -135,3 +135,32 @@ never becomes reward zero. The plan hashes the scorer source file. Changes to im
 helper modules, package versions, external services or mutable files are not all
 captured by that one hash: freeze and record those dependencies for reproducibility.
 Avoid time, unseeded randomness and network-dependent scoring in reproducible runs.
+
+## Evaluate and compare recorded checkpoints
+
+```bash
+heteroes eval runs/first --model-path models/qwen --generations=-1,9,29 --split test --out evaluation.json
+heteroes eval runs/first --model-path models/qwen --generations=29 --split test \
+  --samples 32 --ks 1,16,32 --seed 11 --temperature 0.6 --out sampled.json
+heteroes compare baseline.json trained.json --generation-a -1 --generation-b 29 --out comparison.json
+```
+
+Evaluation reconstructs each checkpoint from recorded updates and refuses a child hash mismatch. It uses the recipe's
+precision, prompt format, decoder and chunk. `--rows other.jsonl --rows-scorer scorer.json` evaluates other ordered rows
+with a declarative scorer. A plan's Python scorer requires its pinned `--scorer-path` and `--scorer-function`.
+The original `runtime/scripts/v3_evaluate_checkpoints.py` delegates to the same implementation.
+
+Reports keep ordered-row and scorer identities, per-row scores, raw greedy outputs and each sampled output/score. Sampling
+requires `hf_generate`; the compact decoder is greedy only. Sampling seeds are `seed + sampleIndex * rowCount + chunkOffset`,
+and temperature, sample count and k values are recorded. Success means a score exactly equal to 1. Pass@K uses the
+[unbiased estimator](https://arxiv.org/abs/2107.03374). Majority votes on the scorer's extracted answer (normalized strings,
+numbers or choice letters); unparsed answers have no vote, and ties select the lexicographically smallest answer. Arbitrary
+Python/expression scorers vote on the entire completion text. The report preserves every output for independent review.
+
+Comparison refuses different ordered rows, scorers, splits or counts. By default it compares the final checkpoint in each
+report; generation flags select others. It reports B minus A mean reward, fixed/broke counts with success defined as
+`score == 1`, the [two-sided exact McNemar binomial test](https://www.statsmodels.org/stable/generated/statsmodels.stats.contingency_tables.mcnemar.html)
+on those binary successes, and a 95% paired percentile bootstrap interval for the mean reward difference. `--resamples`
+(default 10,000) and `--seed` pin the bootstrap. These describe this fixed paired test set, not variation between training
+seeds or a proof of generalization; a degenerate interval is possible when every observed paired difference is equal.
+An output file must be new.

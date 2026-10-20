@@ -1,0 +1,44 @@
+[
+  {
+    "name": "reverse paired difference",
+    "file": "src/heteroes/v3/comparison.py",
+    "old": "delta = y - x",
+    "new": "delta = x - y"
+  },
+  {
+    "name": "omit the two-sided tail",
+    "file": "src/heteroes/v3/comparison.py",
+    "old": "2 * math.exp(log_p) * total",
+    "new": "math.exp(log_p) * total"
+  },
+  {
+    "name": "accept different ordered rows",
+    "file": "src/heteroes/v3/comparison.py",
+    "old": "or a[\"rowsHash\"] != b.get(\"rowsHash\")",
+    "new": "or False"
+  },
+  {
+    "name": "accept a different scorer",
+    "file": "src/heteroes/v3/comparison.py",
+    "old": "or a[\"scorer\"] != b.get(\"scorer\")",
+    "new": "or False"
+  },
+  {
+    "name": "vote on reasoning rather than extracted integers",
+    "file": "src/heteroes/v3/evaluation.py",
+    "old": "answer = extract_integer(text)",
+    "new": "answer = text"
+  },
+  {
+    "name": "reverse majority tie rule",
+    "file": "src/heteroes/v3/evaluation.py",
+    "old": "(-votes[key], key)",
+    "new": "(-votes[key], tuple(-ord(c) for c in key))"
+  },
+  {
+    "name": "omit checkpoint updates",
+    "file": "src/heteroes/v3/evaluation.py",
+    "old": "apply_coefficients_(\n                    model, schema, seeds, coefficients, stored.record.alpha, recipe[\"noise\"][\"chunkElements\"]\n                )",
+    "new": "None"
+  }
+]

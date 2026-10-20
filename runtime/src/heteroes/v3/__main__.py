@@ -27,6 +27,18 @@ def main(argv=None):
         prog="heteroes", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     commands = parser.add_subparsers(dest="command", required=True)
+    from heteroes.v3 import evaluation
+
+    evaluate = commands.add_parser("eval", help="replay and evaluate recorded checkpoints")
+    evaluation.add_arguments(evaluate)
+    compare = commands.add_parser("compare", help="compare paired evaluation reports")
+    compare.add_argument("a", type=Path)
+    compare.add_argument("b", type=Path)
+    compare.add_argument("--generation-a", type=int)
+    compare.add_argument("--generation-b", type=int)
+    compare.add_argument("--resamples", type=int, default=10000)
+    compare.add_argument("--seed", type=int, default=11)
+    compare.add_argument("--out", type=Path, required=True)
     manifest = commands.add_parser("manifest", help="build a pinned model manifest for registration on the lab")
     manifest.add_argument("directory", type=Path)
     manifest.add_argument("--model-id", required=True)
@@ -39,6 +51,26 @@ def main(argv=None):
     run.add_argument("--workers", type=int, default=1)
     run.add_argument("--timeout-seconds", type=float, default=None, help="bound on each generation")
     args = parser.parse_args(argv)
+
+    if args.command == "eval":
+        return evaluation.command(args)
+    if args.command == "compare":
+        from heteroes.v3.comparison import compare as compare_reports
+
+        if args.out.exists():
+            parser.error("choose a fresh output path")
+        result = compare_reports(
+            json.loads(args.a.read_text()),
+            json.loads(args.b.read_text()),
+            args.generation_a,
+            args.generation_b,
+            resamples=args.resamples,
+            seed=args.seed,
+        )
+        with args.out.open("x", encoding="utf-8") as stream:
+            stream.write(json.dumps(result, indent=2) + "\n")
+        print(json.dumps(result))
+        return 0
 
     if args.command == "manifest":
         from heteroes.v3.model import registration_manifest
