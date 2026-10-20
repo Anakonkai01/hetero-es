@@ -52,3 +52,10 @@ top five in Vietnamese. Do not change recipe formats without the owner's decisio
 - **Pluggable batch sampler** (r11): declarative samplers with name+version in the recipe (`random-sample@1` = today's,
   `epoch-shuffle@1`, weighted mix) plus a pinned-Python tier for self-hosted labs like scorers; deterministic in
   (dataset hash, generation, seed); keep `sha256-python-random-sample-v1` so run 1 and old runs replay.
+- **Self-hosted multi-machine (to verify, owner question 2026-10-20):** the SDK/CLI runner (`v3/local.py`) allows Python
+  scorers and Python coefficient rules, but its workers are threads on one machine; the shared lab (`lab.heteroes.site`)
+  has approved remote devices but accepts declarative scorers only and does not run Recipe v3 yet
+  (`runtime/docs/v3-product-runs.md`). So a researcher cannot combine a custom Python reward with several machines.
+  The author read only `local.py`, ADR-008 decision 4 and `v3-product-runs.md`: check whether a self-hosted coordinator
+  can already accept remote workers, and if not, how to allow it without breaking decision 4 (e.g. the researcher's own
+  coordinator, workers that never execute researcher code and only apply recorded coefficients/rewards).
