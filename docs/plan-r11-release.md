@@ -54,6 +54,17 @@ Stop, write `docs/handoff-<date>-<topic>.md`, commit it, tell the owner in Vietn
 
 ## Steps (in order)
 
+### Approved continuation after the candidate5 audit stop (2026-10-20)
+
+Candidate5 step 5 stopped at a genuine audit mismatch (13/50). The owner then authorized full
+investigation/continuation and explicitly selected "Triển khai decoder FP32 + CPU dự phòng, kiểm chứng tiếp".
+The exact mismatch reproduces with equal input/weights; the FP32 greedy winner differs between GPUs.
+The replacement acceptance uses an explicitly identified `hf_fp32_cpu_guard_v1` Recipe v3 decoder:
+GPU inference remains FP32, with a selective CPU reference for near-tied scores. Historical decoder
+meanings remain frozen. This empirical guard is not a universal error bound; strict audit/parity gates
+remain. Implementation checks, replacement candidate6 packages and renewed device acceptance precede
+a fresh full step 5. Earlier interrupted/failed runs are not acceptance. Flag-day confirmations still apply.
+
 ### 1. Backup and push (first, before any other change)
 1. Read `AGENTS.md`, `docs/handoff-session5-next.md`, this plan. `git status` must be clean at `fb35cbc`.
 2. Copy this plan to `docs/plan-r11-release.md` (keep this Vietnamese summary) and commit.

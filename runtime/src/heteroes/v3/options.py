@@ -170,10 +170,12 @@ def validate_options(config, *, allow_python=False, with_code=True):
         "epoch-shuffle@1",
     ):
         raise ValueError("unknown batch sampler")
-    from heteroes.catalog import DECODE_ENGINES
+    from heteroes.catalog import CPU_GUARD_DECODER, V3_DECODE_ENGINES
 
-    if config["decodeEngine"] not in DECODE_ENGINES:
-        raise ValueError("Recipe v3 uses the hf_generate or hf_compact decoder")
+    if config["decodeEngine"] not in V3_DECODE_ENGINES:
+        raise ValueError("unknown Recipe v3 decoder")
+    if config["decodeEngine"] == CPU_GUARD_DECODER and config.get("evalDtype", "float32") != "float32":
+        raise ValueError("The CPU-guard decoder requires FP32 evaluation")
     prompt = config["systemPrompt"]
     if prompt is not None and (not isinstance(prompt, str) or not prompt or len(prompt) > 4000):
         raise ValueError("system prompt is null or a text of at most 4000 characters")

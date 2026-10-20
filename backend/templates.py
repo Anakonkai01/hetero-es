@@ -5,7 +5,7 @@ stale; the experiment wizard still validates everything when a run is created fr
 """
 
 from .migrations import initialize_templates_schema
-from heteroes.catalog import DECODE_ENGINES
+from heteroes.catalog import V3_DECODE_ENGINES
 from heteroes.v3.options import validate_weight_space, validate_seed_namespace
 from heteroes.v3.scoring import validate_spec
 from datetime import datetime, timezone
@@ -38,7 +38,7 @@ CHOICES = {
     "schedulerPolicy": {"capacity-weighted", "round-robin", "greedy"},
     "syncMode": {"synchronous", "asynchronous"},
     "sigmaSchedule": {"constant", "cosine"},
-    "decodeEngine": set(DECODE_ENGINES),
+    "decodeEngine": set(V3_DECODE_ENGINES),
     "coefficientRule": {"zscore@1", "centered-rank@1"},
     "alphaSchedule": {"constant", "cosine", "linear"},
     "sampler": {"sha256-python-random-sample-v1", "epoch-shuffle@1"},

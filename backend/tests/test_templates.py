@@ -39,6 +39,17 @@ def test_a_template_is_saved_listed_and_returned_with_its_settings(setup):
     assert client.get("/api/v1/experiment-templates").status_code == 401
 
 
+def test_v3_cpu_reference_decoder_survives_template_roundtrip(setup):
+    from heteroes.catalog import CPU_GUARD_DECODER
+
+    client, _, _ = setup
+    admin = login(client, "admin")
+    config = {**GOOD, "recipeVersion": 3, "task": "text_v3", "decodeEngine": CPU_GUARD_DECODER}
+    created = create(client, admin, config=config)
+    assert created.status_code == 201, created.text
+    assert created.json()["config"] == config
+
+
 def test_templates_are_private_to_their_workspace(setup):
     client, _, _ = setup
     admin = login(client, "admin")

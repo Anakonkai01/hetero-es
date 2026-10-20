@@ -140,8 +140,8 @@ def evaluate(
         or any(type(k) is not int or not 1 <= k <= max(samples, 1) for k in ks)
     ):
         raise ValueError("Invalid sample count, ks, seed or temperature")
-    if samples and run.decode_engine == "hf_compact":
-        raise ValueError("The recipe's compact decoder is greedy only; sampled evaluation needs hf_generate")
+    if samples and run.decode_engine != "hf_generate":
+        raise ValueError("The recipe's decoder is greedy only; sampled evaluation needs hf_generate")
     if (rows is None) != (rows_scorer is None):
         raise ValueError("other rows and their scorer are given together")
     if rows is None:

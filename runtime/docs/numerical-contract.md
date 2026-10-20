@@ -469,6 +469,38 @@ affected: it uses the recorded rewards). Ideas, not tried and left to the owner 
 
 **Open:** not run on the GTX 1660 SUPER (it was down), nor on other architectures (Ada, Blackwell other than the 5070 Ti); vLLM would remove the same waste but its equality of texts across GPUs, the in-place perturbation of the weights and the installation on WSL2/Turing/Blackwell are unchecked.
 
+### 17.1. Opt-in v3 FP32 decoder with a selective CPU reference (owner approved 2026-10-20)
+
+`hf_fp32_cpu_guard_v1` is a separate, experimental Recipe v3 decoder for dataset workloads. It keeps the
+primary model and generation on FP32; it does not extend Recipe v1's decoder vocabulary or change the
+meaning of `hf_generate`, `hf_compact` or historical hashes. The owner approved implementing and testing
+this option after the exact candidate5 g10/c5 mismatch was reproduced with equal weights and inputs.
+See `../../docs/evidence/2026-10-20-audit-mismatch-investigation/` and `-fp32-margin-cpu-probe/`.
+
+For an unfinished row, after the normal greedy logits processors, a top-two score gap **strictly below
+0.01** triggers a fresh-prefix CPU reference. The reference is lazily copied from the current candidate's
+FP32 parameters directly to CPU FP64, preserving tied parameters. Inside its forward calls, explicit
+FP32 conversions are redirected to FP64. Outside forward, HF performs its normal FP32 logits conversion,
+repetition processing and argmax. These checked scores replace the ambiguous row's scores; completed rows
+are skipped. No cached reference survives a generate call or candidate. The threshold, algorithm and
+precision are part of this versioned decoder identity; changing the selection rule requires another name.
+
+Only plain greedy generation with the repetition-penalty processor and the default/dynamic cache is
+supported. Sampling, beam/multiple-return generation, time/string stops, token healing, static/other
+caches and other logits processors are refused. Reference failure or nonfinite scores fail the candidate;
+they never fall back to an unchecked primary token or submit reward zero. Normal exact restore still runs.
+
+The CPU parameter/buffer reference is limited to 8 GiB. Before allocation, physical available RAM must be
+at least twice its estimated size plus 512 MiB working reserve; the reference is never allocated on GPU.
+This is a resource guard, not a peak-memory theorem. It can refuse large models or busy machines. A 0.5B
+model alone needs about 3.95 GB for FP64 parameters, so this is not a general large-model cost claim.
+
+**Limits:** the 0.01 gate is empirical, not a bound on numerical error. Devices can disagree about a gap
+near the gate, and CPU FP64 also has finite precision. The two-machine one-candidate result is not proof
+of universal bitwise inference. Strict audit equality remains; fresh hardware and managed acceptance
+are required before release. Canonical noise, FP16 publication, FP32 update order and recorded replay
+remain unchanged.
+
 ## Appendix A — Known deviations of the probes/notebook from this contract
 
 | Where | Deviation | Contract section |

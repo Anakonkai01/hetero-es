@@ -14,3 +14,7 @@ WORKLOAD_NAMES = ("arith16", "cot_l3_q32", "cot_l3_q64", "cot_l1_q128")
 
 # How the answers are generated: the library's generate() or the compacting greedy decoder (`heteroes.eval.compact_decode`).
 DECODE_ENGINES = ("hf_generate", "hf_compact")
+
+# A new opt-in Recipe v3 identity; never extend Recipe v1's frozen decoder vocabulary.
+CPU_GUARD_DECODER = "hf_fp32_cpu_guard_v1"
+V3_DECODE_ENGINES = (*DECODE_ENGINES, CPU_GUARD_DECODER)

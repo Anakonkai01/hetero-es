@@ -9,7 +9,7 @@ import sqlite3
 import threading
 import time
 
-from heteroes.catalog import DECODE_ENGINES, WORKLOAD_NAMES
+from heteroes.catalog import DECODE_ENGINES, V3_DECODE_ENGINES, WORKLOAD_NAMES
 
 from .files import events, read_json, write_json
 from .remote import alive
@@ -40,7 +40,8 @@ def validate(config, workers):
         config.get("recipeVersion") in (2, 3) and config.get("workload") in ("text_math_v2", "text_v3")
     ):
         raise ValueError("unsupported workload")
-    if config.get("decodeEngine") not in DECODE_ENGINES:
+    decoders = V3_DECODE_ENGINES if config.get("recipeVersion") == 3 else DECODE_ENGINES
+    if config.get("decodeEngine") not in decoders:
         raise ValueError("unsupported decoder")
     if config.get("recipeVersion") == 3:
         from heteroes.v3.options import validate_options

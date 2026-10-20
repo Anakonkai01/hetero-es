@@ -97,9 +97,13 @@ def wait_for(predicate, process, timeout=60):
         {"kind": "lora", "rank": 2, "alpha": 4, "targetModules": ["q_proj", "v_proj"]},
     ],
 )
-def test_managed_runner_and_worker_cli_commit_texts(product_assets, tmp_path, space):
+@pytest.mark.parametrize("decoder", ["hf_generate", "hf_fp32_cpu_guard_v1"])
+def test_managed_runner_and_worker_cli_commit_texts(product_assets, tmp_path, space, decoder):
     run_product(
-        product_config(product_assets, tmp_path, weightSpace=space, candidateSeedNamespace="fixture-fixed"), tmp_path
+        product_config(
+            product_assets, tmp_path, weightSpace=space, candidateSeedNamespace="fixture-fixed", decodeEngine=decoder
+        ),
+        tmp_path,
     )
 
 

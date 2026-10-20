@@ -377,8 +377,16 @@ export function RuntimeConfiguration({
                 <select className="sel" value={decoder} onChange={(e) => setDecoder(e.target.value)}>
                   <option>{t('hf_generate')}</option>
                   {(version === 3 || (version === 1 && task !== 'arith16')) && <option>{t('hf_compact')}</option>}
+                  {version === 3 && (
+                    <option value="hf_fp32_cpu_guard_v1">{t('FP32 with CPU reference (experimental)')}</option>
+                  )}
                 </select>
               </label>
+              {decoder === 'hf_fp32_cpu_guard_v1' && (
+                <p className="hint">
+                  {t('Near-tied tokens use extra CPU RAM. Large models may exceed the reference memory limit.')}
+                </p>
+              )}
               <p className="hint">{t('FP32 evaluation · canonical CPU noise · exact worker restore.')}</p>
               <p className="hint">
                 {t('Pinned revision:')} {cap.data?.modelRevision}

@@ -51,10 +51,12 @@ def generate_rows(
 
     prompt_format = validate_prompt_format(evaluation.get("promptFormat"), evaluation["systemPrompt"])
     decoder = evaluation.get("decoder", "hf_generate")  # Recipe v2 always, v3 by choice
-    from heteroes.catalog import DECODE_ENGINES
+    from heteroes.catalog import CPU_GUARD_DECODER, V3_DECODE_ENGINES
 
-    if decoder not in DECODE_ENGINES:
+    if decoder not in V3_DECODE_ENGINES:
         raise ValueError("Unknown decoder")
+    if decoder == CPU_GUARD_DECODER and sample:
+        raise ValueError("The CPU-guard decoder is greedy only")
     if decoder == "hf_compact":
         if sample:
             raise ValueError("The compacting decoder is greedy only")
@@ -101,6 +103,11 @@ def generate_rows(
                     pad_id,
                     processors,
                 )
+            elif decoder == CPU_GUARD_DECODER:
+                from heteroes.eval.cpu_guard import guarded_generate_ids
+
+                ids, _ = guarded_generate_ids(model, **inputs, max_new_tokens=evaluation["maxNewTokens"])
+                new = ids[:, inputs["input_ids"].shape[1] :]
             else:
                 with torch.random.fork_rng(devices=devices), torch.no_grad():
                     torch.manual_seed(seed + offset)

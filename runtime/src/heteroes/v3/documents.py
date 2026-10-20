@@ -13,7 +13,7 @@ import re
 import numpy as np
 
 from heteroes.canonical import canonical_json_hash
-from heteroes.catalog import DECODE_ENGINES, WORKLOAD_NAMES
+from heteroes.catalog import CPU_GUARD_DECODER, V3_DECODE_ENGINES, WORKLOAD_NAMES
 from heteroes.manifest import EVAL_DTYPES, KNOWN_ENGINES, Recipe
 from heteroes.v3.scoring import validate_spec
 from heteroes.v3.options import ALPHA_SCHEDULES, COEFFICIENT_RULES, EXACT_CHUNKS, validate_update_rule
@@ -116,8 +116,10 @@ def validate_recipe(doc, *, translated=False):
     if "promptFormat" in evaluation and evaluation["promptFormat"] not in ("chat", "raw"):
         raise ValueError("evaluation.promptFormat is chat or raw")
     validate_prompt_format(evaluation.get("promptFormat"), evaluation["systemPrompt"])
-    if evaluation["evalDtype"] not in EVAL_DTYPES or evaluation["decoder"] not in DECODE_ENGINES:
+    if evaluation["evalDtype"] not in EVAL_DTYPES or evaluation["decoder"] not in V3_DECODE_ENGINES:
         raise ValueError("unknown evaluation precision or decoder")
+    if evaluation["decoder"] == CPU_GUARD_DECODER and evaluation["evalDtype"] != "float32":
+        raise ValueError("The CPU-guard decoder requires FP32 evaluation")
     if "chunk" in evaluation and (
         type(evaluation["chunk"]) is not int or evaluation["chunk"] not in EXACT_CHUNKS[evaluation["evalDtype"]]
     ):
@@ -128,6 +130,8 @@ def validate_recipe(doc, *, translated=False):
     if not isinstance(data, dict) or data.get("kind") not in ("builtin", "dataset"):
         raise ValueError("data is a builtin workload or an imported dataset")
     if data["kind"] == "builtin":
+        if evaluation["decoder"] == CPU_GUARD_DECODER:
+            raise ValueError("The CPU-guard decoder requires a dataset workload")
         _keys("data", data, {"kind", "name", "hash"})
         if data["name"] not in WORKLOAD_NAMES:
             raise ValueError(f"unknown builtin workload {data['name']!r}")

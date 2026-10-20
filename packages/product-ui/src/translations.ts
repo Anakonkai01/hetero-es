@@ -1324,6 +1324,9 @@ export const translations: Record<string, string> = {
   HeteroES: 'HeteroES',
   hf_generate: 'hf_generate',
   hf_compact: 'hf_compact',
+  'FP32 with CPU reference (experimental)': 'FP32 với tham chiếu CPU (thử nghiệm)',
+  'Near-tied tokens use extra CPU RAM. Large models may exceed the reference memory limit.':
+    'Token sát điểm cần thêm RAM trên CPU. Model lớn có thể vượt giới hạn bộ nhớ tham chiếu.',
   'The coordinator started this experiment': 'Coordinator đã bắt đầu thí nghiệm này',
   'Generation {generation} opened with {candidates} candidates': 'Thế hệ {generation} mở với {candidates} candidate',
   'All candidates of generation {generation} are scored': 'Đã chấm xong mọi candidate của thế hệ {generation}',
