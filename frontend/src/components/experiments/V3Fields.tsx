@@ -129,19 +129,21 @@ export function V3Fields({
           <option value="epoch-shuffle@1">{t('Shuffled epochs (every row once per epoch)')}</option>
         </select>
       </label>
-      <label className="fg">
-        {t('Candidate seed group')}
+      <div className="fg">
+        <label htmlFor="candidate-seed-group">{t('Candidate seed group')}</label>
         <input
+          id="candidate-seed-group"
+          aria-describedby="candidate-seed-group-help"
           className="inp"
           value={value.candidateSeedNamespace ?? ''}
           maxLength={128}
           pattern="[A-Za-z0-9][A-Za-z0-9_.:\-]*"
           onChange={(e) => set({ candidateSeedNamespace: e.target.value || null })}
         />
-        <small>
+        <small id="candidate-seed-group-help">
           {t('Use the same value to compare runs with the same candidate seeds. Leave blank for fresh seeds.')}
         </small>
-      </label>
+      </div>
       <label className="fg">
         {t('Alpha schedule')}
         <select
