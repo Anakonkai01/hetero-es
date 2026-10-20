@@ -1,0 +1,38 @@
+{
+  "model": {
+    "path": "/home/thao_nguyen/.local/share/heteroes-c4-cpu/models/7ae557604adf67be50417f59c2c2f167def9a775",
+    "id": "Qwen/Qwen2.5-0.5B-Instruct",
+    "revision": "7ae557604adf67be50417f59c2c2f167def9a775"
+  },
+  "data": {
+    "path": "rows.json",
+    "batchSize": 8,
+    "batchSeed": 11,
+    "splitSeed": 42
+  },
+  "weightSpace": {
+    "kind": "full"
+  },
+  "sigma": {
+    "kind": "constant",
+    "initial": 0.025
+  },
+  "antithetic": true,
+  "maxNewTokens": 32,
+  "systemPrompt": null,
+  "evalDtype": "float32",
+  "decoder": "hf_generate",
+  "population": 8,
+  "generations": 50,
+  "alpha": 0.005,
+  "coefficientRule": "zscore@1",
+  "candidateSeedNamespace": "r11-candidate5-long-3gpu-20261020",
+  "scorer": {
+    "kind": "python",
+    "name": "distinct-characters",
+    "version": 1,
+    "path": "reward.py",
+    "function": "distinct_characters"
+  },
+  "name": "R11 candidate5 \u00b7 3 GPU \u00b7 50 generations \u00b7 audits + Quang failure"
+}
