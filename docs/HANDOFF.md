@@ -123,4 +123,4 @@ run 2, the run 1 test/CommonsenseQA scoring and any parity run are **parked**. T
 system: the researcher's journey on an isolated r11 lab with the 5070 Ti and the native Windows 3060, Python rewards open
 on the web lab, request-to-join, large datasets, any machine as coordinator plus a per-lab default coordinator,
 `hf_compact` for v3, a vLLM probe, a pluggable sampler, `heteroes eval/compare/serve/worker`, prompt format, a boxed scorer
-and cost accounting, then r11 candidate3. Continue from [handoff-system-finish.md](handoff-system-finish.md) once it exists.
+and cost accounting, then r11 candidate3. Continue from [handoff-system-finish.md](handoff-system-finish.md).
