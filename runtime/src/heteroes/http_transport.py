@@ -165,6 +165,8 @@ class _Handler(http.server.BaseHTTPRequestHandler):
             self._reply(200, {"ok": True, "status": "up"})
         elif path == "/v1/job":
             self._reply(200, {"ok": True, "job": self.coordinator.job})
+        elif path == "/v1/inputs" and self.coordinator.inputs is not None:
+            self._reply(200, {"ok": True, "inputs": self.coordinator.inputs})
         elif path.startswith("/v1/models/"):
             self._serve_model(path[len("/v1/models/") :])
         elif path.startswith("/v1/updates/"):
@@ -179,7 +181,7 @@ class _Handler(http.server.BaseHTTPRequestHandler):
             return
         path = self.path.split("?", 1)[0]
         if path not in _ROUTES:
-            known = path in ("/v1/health", "/v1/job") or path.startswith(("/v1/models/", "/v1/updates/"))
+            known = path in ("/v1/health", "/v1/job", "/v1/inputs") or path.startswith(("/v1/models/", "/v1/updates/"))
             self._error(
                 405 if known else 404,
                 "bad_request" if known else "unknown_operation",
@@ -314,6 +316,7 @@ class CoordinatorServer:
         self._api, self._job = api, job
         self.models_dir = None if models_dir is None else Path(models_dir)
         self.token = token
+        self.inputs = None  # optional self-hosted v3 bootstrap: pinned data/documents, never researcher code
         if device_tokens is not None and (
             not device_tokens
             or any(not isinstance(v, str) or not v for v in device_tokens.values())

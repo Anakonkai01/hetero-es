@@ -1,0 +1,20 @@
+[
+  {
+    "name": "reuse changed local inputs",
+    "file": "runtime/src/heteroes/v3/lab_cli.py",
+    "old": "if state[\"identity\"] != identity:",
+    "new": "if False:"
+  },
+  {
+    "name": "use the wrong coordinator",
+    "file": "runtime/src/heteroes/v3/lab_cli.py",
+    "old": "\"datasetIds\": [dataset[\"datasetId\"]],\n        \"coordinatorDeviceId\": coordinator,",
+    "new": "\"datasetIds\": [dataset[\"datasetId\"]],\n        \"coordinatorDeviceId\": workers[0],"
+  },
+  {
+    "name": "lose the chosen sampler",
+    "file": "runtime/src/heteroes/v3/lab_cli.py",
+    "old": "\"sampler\": data.get(\"sampler\", spec.get(\"sampler\", \"sha256-python-random-sample-v1\")),",
+    "new": "\"sampler\": \"sha256-python-random-sample-v1\","
+  }
+]

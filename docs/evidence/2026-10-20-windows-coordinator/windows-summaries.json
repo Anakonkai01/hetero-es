@@ -1,0 +1,60 @@
+[
+ {
+  "generation": 0,
+  "parent_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+  "child_sha256": "5e1cc5550860cd8f82e8ee6097f8d39f81d6a2eee4c17451dfb8a6dc354a7ea2",
+  "record_hash": "9c4a2e0225f2fe3af40356e67cd9980a01728c320b30975edf1abb35539a86d2",
+  "rewards": [
+   0.0947265625,
+   0.095703125,
+   0.0947265625,
+   0.083984375
+  ],
+  "mean_reward": 0.09228515625,
+  "max_reward": 0.095703125,
+  "coefficients": [
+   0.5076729655265808,
+   0.710742175579071,
+   0.5076729655265808,
+   -1.7260881662368774
+  ],
+  "noop": false,
+  "changed": 493318273,
+  "applied_l2": 62.31609936405624,
+  "requested_l2": 62.31598851353303,
+  "wait_seconds": 96.92538290000084,
+  "record_seconds": 0.021472299999004463,
+  "update_seconds": 2.744160499998543,
+  "publish_seconds": 0.0007306000006792601,
+  "total_seconds": 99.69174629999907
+ },
+ {
+  "generation": 1,
+  "parent_sha256": "5e1cc5550860cd8f82e8ee6097f8d39f81d6a2eee4c17451dfb8a6dc354a7ea2",
+  "child_sha256": "88733e3fddcae924e9d15a7f261b860583f1b2d6b5b6c42513487bbd9f8397f3",
+  "record_hash": "af9cc75ac479c7a010959e38afd50d96ab894130f74a73b5bc1d511ee9d2df75",
+  "rewards": [
+   0.1064453125,
+   0.0830078125,
+   0.0859375,
+   0.0849609375
+  ],
+  "mean_reward": 0.090087890625,
+  "max_reward": 0.1064453125,
+  "coefficients": [
+   1.7213470935821533,
+   -0.7450606822967529,
+   -0.43675971031188965,
+   -0.5395267009735107
+  ],
+  "noop": false,
+  "changed": 493374425,
+  "applied_l2": 68.58185965625606,
+  "requested_l2": 68.58175532405565,
+  "wait_seconds": 10.84469590000299,
+  "record_seconds": 0.019630499999038875,
+  "update_seconds": 2.593082499999582,
+  "publish_seconds": 0.0025664999993750826,
+  "total_seconds": 13.459975400000985
+ }
+]

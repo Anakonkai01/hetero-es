@@ -1,0 +1,137 @@
+FFFFF                                                                    [100%]
+=================================== FAILURES ===================================
+__ test_inputs_are_authenticated_and_unconfigured_servers_do_not_expose_them ___
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-819/test_inputs_are_authenticated_0')
+
+    def test_inputs_are_authenticated_and_unconfigured_servers_do_not_expose_them(tmp_path):
+        from heteroes.http_transport import CoordinatorServer, HttpClient, UnauthorizedError, TransportError
+    
+        class API:
+            pass
+    
+        server = CoordinatorServer(API(), token="fixture-token")
+        server.start()
+        try:
+            with pytest.raises(UnauthorizedError):
+                HttpClient(server.url).get_json("/v1/inputs")
+            client = HttpClient(server.url, token="fixture-token")
+>           with pytest.raises(TransportError) as error:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE TransportError
+
+runtime/tests/v3/test_v3_distributed_cli.py:28: Failed
+_____________ test_unpinned_dataset_and_changed_recipe_are_refused _____________
+
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-819/tiny0')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-819/test_unpinned_dataset_and_chan0')
+
+    def test_unpinned_dataset_and_changed_recipe_are_refused(assets, tmp_path):
+        import copy
+        from heteroes.v3.local import prepare
+>       from heteroes.v3.distributed import validate_inputs
+E       ModuleNotFoundError: No module named 'heteroes.v3.distributed'
+
+runtime/tests/v3/test_v3_distributed_cli.py:40: ModuleNotFoundError
+---------------------------- Captured stdout setup -----------------------------
+
+
+
+---------------------------- Captured stderr setup -----------------------------
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 1231.08it/s]
+______ test_serve_requires_an_environment_secret_before_creating_the_run _______
+
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-819/tiny0')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-819/test_serve_requires_an_environ0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x72766b930710>
+
+    def test_serve_requires_an_environment_secret_before_creating_the_run(assets, tmp_path, monkeypatch):
+>       from heteroes.v3.distributed import serve
+E       ModuleNotFoundError: No module named 'heteroes.v3.distributed'
+
+runtime/tests/v3/test_v3_distributed_cli.py:57: ModuleNotFoundError
+___ test_two_worker_processes_match_the_local_run_with_python_scoring[False] ___
+
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-819/tiny0')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-819/test_two_worker_processes_matc0')
+lora = False
+
+    @pytest.mark.parametrize("lora", [False, True])
+    def test_two_worker_processes_match_the_local_run_with_python_scoring(assets, tmp_path, lora):
+        from heteroes.v3.local import run_local
+    
+        config = config_for(assets, generations=2, candidateSeedNamespace="distributed-fixture")
+        if lora:
+            config["weightSpace"] = {"kind": "lora", "rank": 2, "alpha": 4, "targetModules": ["q_proj", "v_proj"]}
+        spec = tmp_path / "spec.json"
+        spec.write_text(json.dumps(config))
+        baseline = run_local(config, tmp_path / "baseline", workers=1, timeout_seconds=30)
+        root = tmp_path / "distributed"
+        env = {**os.environ, "CUDA_VISIBLE_DEVICES": "", "HETEROES_TOKEN": "fixture-distributed-token"}
+        server_output = (tmp_path / "serve.log").open("w")
+        command = [sys.executable, "-m", "heteroes.v3", "serve", str(spec), "--out", str(root), "--host", "127.0.0.1",
+                   "--port", "0", "--device", "cpu", "--timeout-seconds", "40", "--worker-ids", "worker-a,worker-b",
+                   "--audit-rate", "1"]
+        coordinator = subprocess.Popen(command, env=env, stdout=server_output, stderr=server_output)
+        workers, outputs = [], []
+        try:
+            deadline = time.monotonic() + 40
+            while time.monotonic() < deadline and not (root / "server.json").exists() and coordinator.poll() is None:
+                time.sleep(0.05)
+            ready = read_json(root / "server.json")
+>           assert ready, (tmp_path / "serve.log").read_text()
+E           AssertionError: usage: heteroes [-h] {eval,compare,manifest,run} ...
+E             heteroes: error: argument command: invalid choice: 'serve' (choose from eval, compare, manifest, run)
+E             
+E           assert None
+
+runtime/tests/v3/test_v3_distributed_cli.py:88: AssertionError
+----------------------------- Captured stderr call -----------------------------
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 17968.68it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 21399.51it/s]
+___ test_two_worker_processes_match_the_local_run_with_python_scoring[True] ____
+
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-819/tiny0')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-819/test_two_worker_processes_matc1')
+lora = True
+
+    @pytest.mark.parametrize("lora", [False, True])
+    def test_two_worker_processes_match_the_local_run_with_python_scoring(assets, tmp_path, lora):
+        from heteroes.v3.local import run_local
+    
+        config = config_for(assets, generations=2, candidateSeedNamespace="distributed-fixture")
+        if lora:
+            config["weightSpace"] = {"kind": "lora", "rank": 2, "alpha": 4, "targetModules": ["q_proj", "v_proj"]}
+        spec = tmp_path / "spec.json"
+        spec.write_text(json.dumps(config))
+        baseline = run_local(config, tmp_path / "baseline", workers=1, timeout_seconds=30)
+        root = tmp_path / "distributed"
+        env = {**os.environ, "CUDA_VISIBLE_DEVICES": "", "HETEROES_TOKEN": "fixture-distributed-token"}
+        server_output = (tmp_path / "serve.log").open("w")
+        command = [sys.executable, "-m", "heteroes.v3", "serve", str(spec), "--out", str(root), "--host", "127.0.0.1",
+                   "--port", "0", "--device", "cpu", "--timeout-seconds", "40", "--worker-ids", "worker-a,worker-b",
+                   "--audit-rate", "1"]
+        coordinator = subprocess.Popen(command, env=env, stdout=server_output, stderr=server_output)
+        workers, outputs = [], []
+        try:
+            deadline = time.monotonic() + 40
+            while time.monotonic() < deadline and not (root / "server.json").exists() and coordinator.poll() is None:
+                time.sleep(0.05)
+            ready = read_json(root / "server.json")
+>           assert ready, (tmp_path / "serve.log").read_text()
+E           AssertionError: usage: heteroes [-h] {eval,compare,manifest,run} ...
+E             heteroes: error: argument command: invalid choice: 'serve' (choose from eval, compare, manifest, run)
+E             
+E           assert None
+
+runtime/tests/v3/test_v3_distributed_cli.py:88: AssertionError
+----------------------------- Captured stderr call -----------------------------
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 18539.94it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 19428.45it/s]
+=========================== short test summary info ============================
+FAILED runtime/tests/v3/test_v3_distributed_cli.py::test_inputs_are_authenticated_and_unconfigured_servers_do_not_expose_them
+FAILED runtime/tests/v3/test_v3_distributed_cli.py::test_unpinned_dataset_and_changed_recipe_are_refused
+FAILED runtime/tests/v3/test_v3_distributed_cli.py::test_serve_requires_an_environment_secret_before_creating_the_run
+FAILED runtime/tests/v3/test_v3_distributed_cli.py::test_two_worker_processes_match_the_local_run_with_python_scoring[False]
+FAILED runtime/tests/v3/test_v3_distributed_cli.py::test_two_worker_processes_match_the_local_run_with_python_scoring[True]
+5 failed in 2.79s

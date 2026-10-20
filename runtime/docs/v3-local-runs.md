@@ -28,7 +28,7 @@ summaries = ESTrainer(args, reward_func=keyword_hit).train("runs/first", device=
 A reward function must be a named function at the top level of a `.py` file. If it fails or returns a score that is not
 a finite number, the generation stops with `ScoringFailed`: a broken reward is never scored as 0.
 
-Without code, use a declarative scorer (the only kind a shared lab accepts):
+Without code, use a declarative scorer:
 
 ```python
 ESTrainer(args, scorer={"name": "answer-line-last-number"})                      # "Answer: <number>" vs column answer
@@ -80,7 +80,8 @@ coefficients, alpha) let anybody replay the run to the same weights, bit for bit
 
 ## Limits
 
-- This CLI/SDK runner is for one machine. The staged managed v3 path is documented in `v3-product-runs.md`; it is not deployed to the live lab.
+- `run` uses one machine; `serve` and `worker` support separate machines. The staged managed v3 path is documented in
+  `v3-product-runs.md`; it is not deployed to the live lab.
 - LoRA needs PEFT (`pip install peft==0.21.2`, the runtime's `lora` extra). LoRA runs are a different search distribution:
   do not compare them on one chart with full-parameter runs.
 - Unit tests use a tiny CPU model. Separate Qwen GPU qualification and its limits are recorded in `../../docs/evidence/2026-10-19-v3-gpu/`; it does not establish learning benefit.
@@ -124,9 +125,9 @@ meaningful experiments need a defined evaluation and adequate independent runs.
 
 ## Python reward execution and identity
 
-Python rewards run directly in the coordinator process with its permissions. Imports
-also execute there. There is no sandbox. Use trusted code on your own coordinator;
-the shared lab accepts declarative scorers only. Define a named top-level function
+The local and standalone CLI run Python rewards directly in the coordinator process with its permissions. Imports
+also execute there. The managed web lab now accepts Python rewards too, executing them in a coordinator child process
+with a time limit; that child process is not a security sandbox. Workers never receive the source. Define a named top-level function
 in a saved `.py` file; notebook-only functions, lambdas and closures are not supported.
 
 Return one finite numeric score per row in the input order. The coordinator averages
@@ -164,3 +165,57 @@ on those binary successes, and a 95% paired percentile bootstrap interval for th
 (default 10,000) and `--seed` pin the bootstrap. These describe this fixed paired test set, not variation between training
 seeds or a proof of generalization; a degenerate interval is possible when every observed paired difference is equal.
 An output file must be new.
+
+## Coordinate separate machines
+
+Install the same runtime and its numerical dependencies on each machine, and put the pinned safetensors model on each
+worker. Set the same shared secret in `HETEROES_TOKEN` on coordinator and workers (read it privately; do not put it in
+command arguments). The network must be private, such as LAN or Tailscale; this existing HTTP protocol does not provide TLS.
+
+```bash
+heteroes serve spec.json --out runs/distributed --host <coordinator-private-IP> --port 8765 --device cuda \
+  --worker-ids worker-a,worker-b
+heteroes worker --coordinator http://<coordinator-private-IP>:8765 --model-path models/qwen \
+  --worker-id worker-a --out runs/worker-a --device cuda --recipe-hash <hash-from-server.json>
+```
+
+Run the worker command independently on each worker, using distinct worker IDs and fresh output directories. The
+coordinator prints its URL and recipe/plan hashes and writes `server.json`. `--device cpu` lets a CPU coordinate while
+remote GPUs generate texts. Native Windows LoRA coordination requires `--initial-adapter <pinned-file>`; it never creates
+a random adapter. Full/subset Windows runs use the same pinned base files.
+
+Workers fetch only the recipe, plan and dataset through authenticated `/v1/inputs`, verify dataset hashes, model file
+hashes, generation settings and trainable schema, and optionally require the out-of-band `--recipe-hash`. LoRA workers
+download the pinned initial adapter over the existing authenticated weights route. A Python reward/coefficient source
+stays on the coordinator. Workers synchronize by verified replay and retain a checked full-transfer fallback.
+
+The output includes `inputs.json`, the normal v3 documents/ledger/events, and final `summaries.json`. Worker outputs keep
+`identity.json` and `events.jsonl`. SIGINT/SIGTERM requests a cooperative stop. The server retains the terminal job briefly
+so external workers can exit normally. All output directories must be fresh. `--token-env` changes the environment
+variable name; `--timeout-seconds` bounds each generation. `--audit-rate` defaults to 0.05. The single-machine runner and
+the managed web lab continue to use their existing paths.
+
+## Offer a CLI experiment to a lab
+
+Install the Linux `heteroes-worker` first and run its self-test (`--device cpu` for a CPU coordinator, default CUDA for a
+GPU). Set `HETEROES_LAB_ACCESS_TOKEN` privately to the lab user's access token. Then:
+
+```bash
+heteroes serve spec.json --lab https://your-lab.example --workspace <workspace-ID> \
+  --host <reachable-private-IP> --worker-ids gpu-worker-a,gpu-worker-b --device cpu --out runs/lab-offer
+```
+
+`--worker-home` selects another installed CLI home. The command pairs that CLI device if needed, starts its existing
+agent, and waits for administrator approval in the specified workspace. It uploads the pinned model and dataset through
+the lab's normal signed storage routes (including file-backed large datasets), freezes Python source into the plan, and
+creates/submits an experiment with this device as coordinator. Qualified GPU workers must already belong to the workspace.
+Turn contribution ON in the lab for the current boot; the CLI never approves or enables a device itself. It uses the same
+managed coordinator/worker routing, reports and recovery as the desktop app. A paired device's role/address can change
+only through the normal configuration API while OFF and drained.
+
+The non-secret `lab-offer.json` receipt binds local input hashes and remote IDs so completed registration steps and the
+experiment are reused on retry. Editing a local file requires a fresh output directory. Device credentials remain in the
+installed CLI's private token file; user access tokens are read from the environment, never command arguments or receipts.
+The managed lab supports its own FP32/CPU-noise recipe choices, fixed Worker port and managed audit/time limits; unsupported
+standalone flags are refused. A managed Windows LoRA coordinator remains subject to the lab's pinned-adapter restriction.
+This staged route requires the matching r11 lab and is not supported by the public r10 deployment.

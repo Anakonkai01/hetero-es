@@ -50,7 +50,78 @@ def main(argv=None):
     run.add_argument("--device", default="cpu")
     run.add_argument("--workers", type=int, default=1)
     run.add_argument("--timeout-seconds", type=float, default=None, help="bound on each generation")
+    serve = commands.add_parser("serve", help="coordinate an experiment with external workers")
+    serve.add_argument("spec", type=Path)
+    serve.add_argument("--out", type=Path, required=True)
+    serve.add_argument(
+        "--host", help="bind address; standalone default is loopback, --lab requires an explicit address"
+    )
+    serve.add_argument("--port", type=int, default=8765)
+    serve.add_argument("--device", choices=("cpu", "cuda"), default="cpu")
+    serve.add_argument("--token-env", default="HETEROES_TOKEN")
+    serve.add_argument("--timeout-seconds", type=float, default=1800)
+    serve.add_argument("--worker-ids", help="comma-separated worker IDs eligible for audits")
+    serve.add_argument("--audit-rate", type=float, default=0.05)
+    serve.add_argument("--initial-adapter", type=Path, help="pinned initial LoRA weights (required on Windows)")
+    serve.add_argument("--lab", help="offer the specification through an installed Worker's managed-lab agent")
+    serve.add_argument("--workspace", help="workspace ID with --lab")
+    serve.add_argument("--worker-home", type=Path, help="installed Linux CLI Worker home with --lab")
+    serve.add_argument("--lab-token-env", default="HETEROES_LAB_ACCESS_TOKEN")
+    worker = commands.add_parser("worker", help="generate texts for a self-hosted coordinator")
+    worker.add_argument("--coordinator", required=True)
+    worker.add_argument("--model-path", type=Path, required=True)
+    worker.add_argument("--worker-id", required=True)
+    worker.add_argument("--out", type=Path, required=True)
+    worker.add_argument("--device", choices=("cpu", "cuda"), default="cpu")
+    worker.add_argument("--token-env", default="HETEROES_TOKEN")
+    worker.add_argument("--recipe-hash", help="expected recipe hash from the coordinator's ready receipt")
     args = parser.parse_args(argv)
+
+    if args.command in ("serve", "worker"):
+        from heteroes.v3 import distributed
+
+        if args.command == "worker":
+            return distributed.worker(
+                args.coordinator,
+                args.model_path,
+                args.out,
+                args.worker_id,
+                device=args.device,
+                token_env=args.token_env,
+                expected_recipe_hash=args.recipe_hash,
+            )
+        spec = _resolve(json.loads(args.spec.read_text(encoding="utf-8")), args.spec.resolve().parent)
+        if args.lab:
+            if args.initial_adapter is not None:
+                parser.error("the managed lab controls initial adapter creation")
+            if args.port != 8765 or args.audit_rate != 0.05 or args.timeout_seconds != 1800:
+                parser.error("--lab uses the installed Worker's port and the managed lab's audit/time limits")
+            from heteroes.v3.lab_cli import serve_lab
+
+            return serve_lab(
+                spec,
+                args.lab,
+                args.out,
+                workspace=args.workspace,
+                host=args.host,
+                worker_ids=args.worker_ids.split(",") if args.worker_ids else [],
+                worker_home=args.worker_home,
+                device=args.device,
+                token_env=args.lab_token_env,
+            )
+        distributed.serve(
+            spec,
+            args.out,
+            host=args.host or "127.0.0.1",
+            port=args.port,
+            device=args.device,
+            token_env=args.token_env,
+            timeout_seconds=args.timeout_seconds,
+            worker_ids=args.worker_ids.split(",") if args.worker_ids else None,
+            audit_rate=args.audit_rate,
+            initial_adapter=args.initial_adapter,
+        )
+        return 0
 
     if args.command == "eval":
         return evaluation.command(args)

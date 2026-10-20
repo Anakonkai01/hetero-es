@@ -1,0 +1,116 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+_______ test_offer_uploads_pinned_inputs_freezes_code_and_is_idempotent ________
+
+v3_study = (<starlette.testclient.TestClient object at 0x71511fcd0890>, {'Authorization': 'Bearer pvENvDq367TftRg5KOtz2j82jgrU3lra8-yqtXdFDG0', 'X-Workspace-Id': 'lab'}, <backend.local_storage.LocalBackend object at 0x7151200f3650>)
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-841/test_offer_uploads_pinned_inpu0')
+
+    def test_offer_uploads_pinned_inputs_freezes_code_and_is_idempotent(v3_study, tmp_path):
+        from heteroes.v3.lab_cli import offer_experiment
+        from heteroes.v3.model import registration_manifest
+    
+        client, admin, _ = v3_study
+        store = client.app.state.store
+        lab = client, store, store.runtime, admin
+        cpu, cpu_auth = enroll_cpu(lab)
+        gpu, gpu_auth = pair(lab, "gpu")
+        spec = specification(tmp_path)
+        manifest = registration_manifest(spec["model"]["path"], spec["model"]["id"], spec["model"]["revision"])
+        profile = next(d["selfTest"] for d in store.runtime.devices() if d["deviceId"] == gpu["deviceId"])
+        qualify_v3(client, gpu_auth, profile, {"manifestHash": canonical_json_hash(manifest)})
+        enable(lab, cpu, cpu_auth)
+        enable(lab, gpu, gpu_auth)
+        api = API(client, admin)
+        root = tmp_path / "offer"
+        root.mkdir()
+>       result = offer_experiment(spec, cpu["deviceId"], ["gpu"], api, root)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_lab_cli.py:84: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+runtime/src/heteroes/v3/lab_cli.py:215: in offer_experiment
+    configuration = managed_configuration(spec, coordinator, workers, model, dataset)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = {'alpha': 0.001, 'alphaSchedule': {'kind': 'linear', 'minimum': 0.0001}, 'candidateSeedNamespace': 'cli-lab-fixture', 'coefficientRule': 'centered-rank@1', ...}
+coordinator = 'e1782885457a4a0cbea33ec754baec75', workers = ['gpu']
+model = {'modelArtifactId': 'qwen-pinned', 'name': 'Qwen/Qwen2.5-0.5B-Instruct', 'ownerUserId': 'runtime', 'reference': 'Qwen/Qwen2.5-0.5B-Instruct', ...}
+dataset = {'adapter': None, 'columns': ['label', 'prompt', 'question'], 'counts': {'test': 2, 'train': 16, 'validation': 2}, 'datasetId': '00dba062aef24f429539d798fd17a351', ...}
+
+    def managed_configuration(spec, coordinator, workers, model, dataset):
+        if spec.get("evalDtype", "float32") != "float32" or spec.get("noiseEngine", "cpu") != "cpu":
+            raise ValueError("The managed lab uses FP32 evaluation and canonical CPU noise")
+        sigma, data = spec["sigma"], spec["data"]
+        schedule = spec.get("alphaSchedule") or {"kind": "constant"}
+        momentum = spec.get("momentum") or {}
+        scorer = spec["scorer"]
+        code = []
+        if scorer["kind"] == "python":
+            entry = _code(scorer, "scorer")
+            code.append(entry)
+            scorer = {
+                "kind": "python",
+                "name": scorer["name"],
+                "version": scorer.get("version", 1),
+                "codeSha256": entry["codeSha256"],
+                "config": {},
+            }
+        else:
+            scorer = {
+                "kind": "declarative",
+                "name": scorer["name"],
+                "version": scorer.get("version", 1),
+                "codeSha256": None,
+                "config": scorer.get("config", {}),
+            }
+        rule = spec.get("coefficientRule", "zscore@1")
+        if isinstance(rule, dict):
+            entry = _code(rule, "coefficients")
+            code.append(entry)
+            rule = "python@1:" + entry["codeSha256"]
+        result = {
+            "name": spec.get("name", "CLI experiment"),
+            "recipeVersion": 3,
+            "modelName": spec["model"]["id"],
+>           "modelArtifactId": model["id"],
+                               ^^^^^^^^^^^
+            "datasetIds": [dataset["datasetId"]],
+            "coordinatorDeviceId": coordinator,
+            "workerIds": list(workers),
+            "task": "text_v3",
+            "maxGenerations": spec["generations"],
+            "candidatesPerGeneration": spec["population"],
+            "alpha": spec["alpha"],
+            "sigma": sigma["initial"],
+            "sigmaMinimum": sigma.get("minimum", sigma["initial"]),
+            "sigmaSchedule": sigma.get("kind", "constant"),
+            "batchSize": data["batchSize"],
+            "batchSeed": data.get("batchSeed", 11),
+            "sampler": data.get("sampler", spec.get("sampler", "sha256-python-random-sample-v1")),
+            "weightSpace": spec.get("weightSpace", {"kind": "full"}),
+            "antithetic": spec.get("antithetic", False),
+            "maxNewTokens": spec.get("maxNewTokens", 256),
+            "systemPrompt": spec.get("systemPrompt"),
+            "decodeEngine": spec.get("decoder", "hf_generate"),
+            "scorer": scorer,
+            "coefficientRule": rule,
+            "alphaSchedule": schedule["kind"],
+            "alphaMinimum": schedule.get("minimum"),
+            "momentumBeta": momentum.get("beta"),
+            "momentumWindow": momentum.get("window", 4),
+            **({"pythonCode": code} if code else {}),
+            **{key: spec[key] for key in ("candidateSeedNamespace", "evalChunk", "pythonTimeoutSeconds") if key in spec},
+        }
+E       KeyError: 'id'
+
+runtime/src/heteroes/v3/lab_cli.py:105: KeyError
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_lab_cli.py::test_offer_uploads_pinned_inputs_freezes_code_and_is_idempotent
+1 failed, 2 passed, 1 warning in 0.21s

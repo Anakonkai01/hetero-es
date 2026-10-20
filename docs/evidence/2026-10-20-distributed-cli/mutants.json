@@ -1,0 +1,44 @@
+[
+  {
+    "name": "accept a missing secret",
+    "file": "src/heteroes/v3/distributed.py",
+    "old": "if not value:",
+    "new": "if False:"
+  },
+  {
+    "name": "skip dataset integrity",
+    "file": "src/heteroes/v3/distributed.py",
+    "old": "verify(inputs[\"dataset\"])",
+    "new": "None"
+  },
+  {
+    "name": "accept another expected recipe",
+    "file": "src/heteroes/v3/distributed.py",
+    "old": "if expected_recipe_hash is not None and run.hash != expected_recipe_hash:",
+    "new": "if False:"
+  },
+  {
+    "name": "ignore local schema mismatch",
+    "file": "src/heteroes/v3/distributed.py",
+    "old": "if schema.hash != run.recipe[\"schemaHash\"]:",
+    "new": "if False:"
+  },
+  {
+    "name": "ignore generation config mismatch",
+    "file": "src/heteroes/v3/distributed.py",
+    "old": "        if (\n            generation_config_sha256(model.generation_config.to_dict())\n            != run.recipe[\"evaluation\"][\"generationConfigSha256\"]\n        ):\n",
+    "new": "        if False:\n"
+  },
+  {
+    "name": "initialize a Windows adapter",
+    "file": "src/heteroes/v3/distributed.py",
+    "old": "if sys.platform == \"win32\" and (config.get(\"weightSpace\") or {}).get(\"kind\") == \"lora\" and initial_adapter is None:",
+    "new": "if False:"
+  },
+  {
+    "name": "ignore controlled seed namespace",
+    "file": "src/heteroes/v3/distributed.py",
+    "old": "seed_namespace=config.get(\"candidateSeedNamespace\"),",
+    "new": "seed_namespace=None,"
+  }
+]
