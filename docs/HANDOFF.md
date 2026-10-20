@@ -127,4 +127,4 @@ and cost accounting, then r11 candidate3. Continue from [handoff-system-finish.m
 
 ## Codex continuation paused by owner (2026-10-20)
 
-Current continuation: [handoff-system-finish-codex.md](handoff-system-finish-codex.md). New-model qualification is implemented; the isolated two-machine comparison and final CPU checks were still running when the owner paused for usage. Windows original Worker restoration remains required after acceptance.
+Current continuation: [handoff-system-finish-next.md](handoff-system-finish-next.md) (session 2, 2026-10-20; the earlier Codex pause note is [handoff-system-finish-codex.md](handoff-system-finish-codex.md)). New-model qualification is implemented; the isolated two-machine comparison and the final CPU checks have since completed (see the next handoff). Windows original Worker restoration remains required after acceptance.
