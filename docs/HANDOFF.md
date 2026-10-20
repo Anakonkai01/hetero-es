@@ -1,7 +1,9 @@
 # HeteroES — canonical handoff
 
-**Latest: read `handoff-session5-next.md` first (2026-10-20, Claude: candidate4 + managed CPU-coordinator parity).**
-Its owner decisions still come from `handoff-session4-next.md`.
+**Latest: STOP at a real candidate5 audit mismatch (2026-10-20, Codex).**
+Read [handoff-2026-10-20-audit-mismatch-stop.md](handoff-2026-10-20-audit-mismatch-stop.md) first.
+Quang setup is complete; step 5 paused at 13/50 generations, 4 audits / 1 mismatch; all four devices OFF and unallocated.
+No release, merge or live changes. Historical state below is superseded by that handoff.
 
 Session 4 adds CPU coordination, eval/compare/serve/worker, real native Windows standalone coordinator proof, a limited
 vLLM probe, prompt/scorer/usage features and partial Linux download wiring. Final full checks, candidate3 packaging and
