@@ -5,6 +5,14 @@ and `archive/runtime/*` / `archive/product/*` branches are retained. Read `docs/
 and `runtime/docs/numerical-contract.md` for numerical work. Historical agent/session files under `docs/archive/` are dated
 records; this file contains the current common rules.
 
+## Project claim (owner, 2026-10-20)
+
+HeteroES contributes no new ES algorithm, and it does not set out to prove that ES learns; published papers already
+show that. Its contribution is the system: ES post-training on heterogeneous consumer GPUs that is correct, reproducible
+and measurable, offered to researchers as a lab they can sign up to and customize. Do not spend GPU-days on learning
+runs to "show ES learns". A learning run is at most a later, cheap parity check against reference code, and only when
+the owner asks. Prefer finishing the system (product, multi-machine, speed, researcher features) over writing reports.
+
 ## Working rules
 
 - Talk to the owner in Vietnamese, simply and briefly. Code comments and general documentation are English; the approved

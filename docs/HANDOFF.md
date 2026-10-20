@@ -115,3 +115,12 @@ run (C: lacks space), owner install/uninstall acceptance, the stale Lab Server p
 Continue from [handoff-es-formula-countdown.md](handoff-es-formula-countdown.md), same branch: coefficient rules,
 alpha schedules and momentum records; Countdown and GSM8K data; evaluation chunk; a Worker data folder on another drive;
 checkpoint evaluation by replay; Countdown pilot 1 learned the format only, pilot 2 (300 generations) was running.
+
+## System finish (2026-10-20, current)
+
+The owner reframed the work: HeteroES claims a system, not that ES learns (see `AGENTS.md`, "Project claim"). GSM8K
+run 2, the run 1 test/CommonsenseQA scoring and any parity run are **parked**. The owner-approved plan finishes the
+system: the researcher's journey on an isolated r11 lab with the 5070 Ti and the native Windows 3060, Python rewards open
+on the web lab, request-to-join, large datasets, any machine as coordinator plus a per-lab default coordinator,
+`hf_compact` for v3, a vLLM probe, a pluggable sampler, `heteroes eval/compare/serve/worker`, prompt format, a boxed scorer
+and cost accounting, then r11 candidate3. Continue from [handoff-system-finish.md](handoff-system-finish.md) once it exists.

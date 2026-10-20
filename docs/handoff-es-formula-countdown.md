@@ -1,5 +1,9 @@
 # Handoff — opened ES update formula, Countdown/GSM8K, Worker data folder (2026-10-19/20)
 
+> **Superseded on 2026-10-20 by the owner:** the learning items below (run 1 test/CommonsenseQA scoring, run 2) are
+> parked. The project claims a system, not that ES learns (`../AGENTS.md`, "Project claim"); see the last section of
+> [HANDOFF.md](HANDOFF.md).
+
 Continues [handoff-r11-candidate.md](handoff-r11-candidate.md). Branch **feat/v3-audit-recovery**; nothing pushed,
 merged, published or deployed; no lab/device state changed (`3060-thao` REVOKED on the live lab, which runs r10).
 Plan approved by the owner: `~/.claude/plans/c-agents-md-v-jaunty-quasar.md`.
