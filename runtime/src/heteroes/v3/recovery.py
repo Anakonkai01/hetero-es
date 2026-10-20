@@ -13,7 +13,7 @@ from heteroes.v3.run import RecipeV3Run
 def validate_state(state, config, recipe, generation, files):
     if not isinstance(state, dict) or state.get("recipe") != recipe:
         raise ValueError("Recovery recipe mismatch")
-    run = RecipeV3Run(recipe, state["plan"], allow_python=False)
+    run = RecipeV3Run(recipe, state["plan"], allow_python=True)  # its code was pinned when the run was created
     dataset = verify_dataset(state["dataset"])
     identity = {k: dataset[k] for k in ("contentHash", "splitHashes")}
     if identity != config["datasetIdentity"] or identity != {k: recipe["data"][k] for k in identity}:

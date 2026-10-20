@@ -129,3 +129,19 @@ def test_a_missing_function_is_a_loud_failure(tmp_path):
     function = ChildFunction(tmp_path / "reward.py", "absent", timeout=5, error=ScorerError)
     with pytest.raises(ScorerError, match="ended"):
         function([], [])
+
+
+def test_a_recovery_point_of_a_python_scored_plan_is_accepted():
+    from heteroes.v3.recovery import validate_state
+    from heteroes.v3.run import RecipeV3Run
+    from test_v3_data_run import documents
+
+    spec = {"kind": "python", "name": "my-reward", "version": 1, "codeSha256": "a" * 64, "config": {}}
+    recipe, plan, dataset = documents(scorer=spec)
+    run = RecipeV3Run(recipe, plan)
+    row = {"recipeHash": run.hash, "planHash": run.plan_hash, "generation": -1, "weightsSha256": "b" * 64,
+           "meanReward": 0.5}  # fmt: skip
+    state = {"recipe": recipe, "plan": plan, "dataset": dataset, "validation": [row],
+             "selection": {**row, "validationReward": 0.5}}  # fmt: skip
+    config = {"datasetIdentity": {k: dataset[k] for k in ("contentHash", "splitHashes")}}
+    assert validate_state(state, config, recipe, 0, {f"selection/{'b' * 64}.bin": {}}).plan_hash == run.plan_hash
