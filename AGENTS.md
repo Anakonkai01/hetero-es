@@ -17,8 +17,10 @@ the owner asks. Prefer finishing the system (product, multi-machine, speed, rese
 
 - Talk to the owner in Vietnamese, simply and briefly. Code comments and general documentation are English; the approved
   Vietnamese quickstart/plan keep their language.
-- Complete authorized work autonomously. Commit logical groups on a working branch. Never push or tag. Never add
-  `Co-Authored-By`, generated-by or session trailers.
+- Complete authorized work autonomously. Commit logical groups on a working branch. Push and merge are authorized by the owner (2026-10-20):
+  `origin` is `git@github.com:Anakonkai01/hetero-es.git`; `git push origin --all` is allowed, merges into `main` are
+  fast-forward only. Never force-push, never delete remote branches, never push tags; if a push is rejected, stop and
+  ask. Never add `Co-Authored-By`, generated-by or session trailers.
 - Write meaningful tests before new behavior/helpers; use `scripts/mutation-check.py` on scratch copies. A surviving
   mutant needs a test or a documented equivalence. Preserve intermediate receipts and state their limits.
 - Never print or commit passwords, credentials, device/session tokens, signing keys or tunnel secrets.
