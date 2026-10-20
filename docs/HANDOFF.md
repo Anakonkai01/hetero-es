@@ -1,12 +1,14 @@
 # HeteroES — canonical handoff
 
-**Latest: separate FP32 + CPU-reference decoder implemented; candidate6 build in progress (2026-10-20).**
-Read [handoff-2026-10-20-fp32-inference-diagnosis.md](handoff-2026-10-20-fp32-inference-diagnosis.md) first.
-Source f5d311b: owner-approved opt-in v3 decoder, 23/23 combined checks; nine evaluations/device match
-on 5070 and Quang, covering all eight original g10 candidates plus the repeated failing candidate.
-See [implementation proof](evidence/2026-10-20-fp32-cpu-decoder/RESULTS.md). RAM/cost limits and no universal guarantee.
-Candidate6 packaging and renewed acceptance are next. Step 5 remains paused at 13/50; four devices OFF/unallocated.
-No release, merge or live changes. Historical state below is superseded by that handoff.
+**Latest: candidate6 installed; native Windows guarded decoder passes; waiting for Quang online (2026-10-21).**
+Read [handoff-2026-10-21-candidate6-devices.md](handoff-2026-10-21-candidate6-devices.md) first.
+Separate owner-approved FP32 + CPU-reference decoder: source f5d311b, final 23/23 combined checks PASS.
+Candidate6 packages prepared and packaged checks PASS. Installed self-tests pass on 5070 GPU,
+Thao Windows GPU and Thao WSL CPU. Quang install completed, but SSH/Tailscale is now offline.
+Nine native Windows evaluations match 5070 token/text/input/weight arrays exactly; existing Quang
+nine-case proof also matches. One initial Windows self-test ACTION_FAILED remains unexplained and retained.
+The fresh 50-generation run is predeclared, not started. All four isolated contributions OFF; CLI agents stopped.
+No merge/push/public release/live change. Flag-day confirmations still required. Historical state below is superseded.
 
 Session 4 adds CPU coordination, eval/compare/serve/worker, real native Windows standalone coordinator proof, a limited
 vLLM probe, prompt/scorer/usage features and partial Linux download wiring. Final full checks, candidate3 packaging and

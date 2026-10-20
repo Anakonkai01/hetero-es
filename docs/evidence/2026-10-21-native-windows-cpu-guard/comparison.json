@@ -1,0 +1,166 @@
+{
+  "allEqual": true,
+  "evaluations": 9,
+  "decoderSourceSha256": "150ac9fdd1464e6cdb41bbc624173de28f01f53019a04f18b77e178ceb2ea95d",
+  "cpuThreads": 20,
+  "referenceCalls": [
+    0,
+    2,
+    0,
+    4,
+    1,
+    2,
+    3,
+    0,
+    2
+  ],
+  "availableCpuRamGiBAfterEachCandidate": [
+    48.93,
+    46.852,
+    48.894,
+    46.838,
+    46.854,
+    46.714,
+    46.844,
+    48.933,
+    46.841
+  ],
+  "peakGpuAllocatedGiB": 2.8537631034851074,
+  "comparisons": [
+    {
+      "repeat": 0,
+      "allEqual": true,
+      "checks": {
+        "descriptor": true,
+        "texts": true,
+        "sha256": true,
+        "restoredParentSha256": true,
+        "inputIds": true,
+        "attentionMask": true,
+        "newTokenIds": true,
+        "evaluationFp32Sha256": true,
+        "perturbedFp16Sha256": true
+      }
+    },
+    {
+      "repeat": 1,
+      "allEqual": true,
+      "checks": {
+        "descriptor": true,
+        "texts": true,
+        "sha256": true,
+        "restoredParentSha256": true,
+        "inputIds": true,
+        "attentionMask": true,
+        "newTokenIds": true,
+        "evaluationFp32Sha256": true,
+        "perturbedFp16Sha256": true
+      }
+    },
+    {
+      "repeat": 2,
+      "allEqual": true,
+      "checks": {
+        "descriptor": true,
+        "texts": true,
+        "sha256": true,
+        "restoredParentSha256": true,
+        "inputIds": true,
+        "attentionMask": true,
+        "newTokenIds": true,
+        "evaluationFp32Sha256": true,
+        "perturbedFp16Sha256": true
+      }
+    },
+    {
+      "repeat": 3,
+      "allEqual": true,
+      "checks": {
+        "descriptor": true,
+        "texts": true,
+        "sha256": true,
+        "restoredParentSha256": true,
+        "inputIds": true,
+        "attentionMask": true,
+        "newTokenIds": true,
+        "evaluationFp32Sha256": true,
+        "perturbedFp16Sha256": true
+      }
+    },
+    {
+      "repeat": 4,
+      "allEqual": true,
+      "checks": {
+        "descriptor": true,
+        "texts": true,
+        "sha256": true,
+        "restoredParentSha256": true,
+        "inputIds": true,
+        "attentionMask": true,
+        "newTokenIds": true,
+        "evaluationFp32Sha256": true,
+        "perturbedFp16Sha256": true
+      }
+    },
+    {
+      "repeat": 5,
+      "allEqual": true,
+      "checks": {
+        "descriptor": true,
+        "texts": true,
+        "sha256": true,
+        "restoredParentSha256": true,
+        "inputIds": true,
+        "attentionMask": true,
+        "newTokenIds": true,
+        "evaluationFp32Sha256": true,
+        "perturbedFp16Sha256": true
+      }
+    },
+    {
+      "repeat": 6,
+      "allEqual": true,
+      "checks": {
+        "descriptor": true,
+        "texts": true,
+        "sha256": true,
+        "restoredParentSha256": true,
+        "inputIds": true,
+        "attentionMask": true,
+        "newTokenIds": true,
+        "evaluationFp32Sha256": true,
+        "perturbedFp16Sha256": true
+      }
+    },
+    {
+      "repeat": 7,
+      "allEqual": true,
+      "checks": {
+        "descriptor": true,
+        "texts": true,
+        "sha256": true,
+        "restoredParentSha256": true,
+        "inputIds": true,
+        "attentionMask": true,
+        "newTokenIds": true,
+        "evaluationFp32Sha256": true,
+        "perturbedFp16Sha256": true
+      }
+    },
+    {
+      "repeat": 8,
+      "allEqual": true,
+      "checks": {
+        "descriptor": true,
+        "texts": true,
+        "sha256": true,
+        "restoredParentSha256": true,
+        "inputIds": true,
+        "attentionMask": true,
+        "newTokenIds": true,
+        "evaluationFp32Sha256": true,
+        "perturbedFp16Sha256": true
+      }
+    }
+  ]
+}
