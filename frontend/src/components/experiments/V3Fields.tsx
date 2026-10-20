@@ -1,5 +1,6 @@
 import { useProduct } from '@heteroes/product-ui';
 import type { V3Settings, WeightSpace } from '../../types/experiment';
+import { withAlphaSchedule } from '../../lib/v3Settings';
 
 const SCORERS = [
   'exact-string',
@@ -15,7 +16,15 @@ const RULES: [string, string][] = [
   ['zscore@1', 'Z-score of the rewards'],
   ['centered-rank@1', 'Centered ranks of the rewards'],
 ];
-export function V3Fields({ value, onChange }: { value: V3Settings; onChange: (value: V3Settings) => void }) {
+export function V3Fields({
+  value,
+  onChange,
+  alpha,
+}: {
+  value: V3Settings;
+  onChange: (value: V3Settings) => void;
+  alpha: number;
+}) {
   const { t } = useProduct();
   const set = (patch: Partial<V3Settings>) => onChange({ ...value, ...patch });
   const space = value.weightSpace;
@@ -115,7 +124,11 @@ export function V3Fields({ value, onChange }: { value: V3Settings; onChange: (va
       </label>
       <label className="fg">
         {t('Alpha schedule')}
-        <select className="sel" value={value.alphaSchedule} onChange={(e) => set({ alphaSchedule: e.target.value })}>
+        <select
+          className="sel"
+          value={value.alphaSchedule}
+          onChange={(e) => onChange(withAlphaSchedule(value, e.target.value, alpha))}
+        >
           <option value="constant">constant</option>
           <option value="cosine">cosine</option>
           <option value="linear">linear</option>

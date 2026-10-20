@@ -64,3 +64,12 @@ def test_the_owners_view_does_not_list_workspaces_of_other_people(lab):
     researcher, _ = _researcher_with_lab(client, admin)
     for device in client.get("/api/v1/devices", headers=researcher).json():
         assert "ownerWorkspaces" not in device
+
+
+def test_the_coordinator_choice_shows_the_name_the_owner_gave(lab):
+    from labkit import enable, pair
+
+    client, _, _, admin = lab
+    enable(lab, *pair(lab, "gpu-alias"))
+    [device] = client.get("/api/v1/capabilities", headers=admin).json()["coordinatorDevices"]
+    assert device["workerId"] == "gpu-alias" and device["displayName"] == "gpu-alias"

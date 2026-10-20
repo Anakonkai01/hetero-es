@@ -49,7 +49,7 @@ def install_routes(app, store, runtime, scoped, visible, capabilities, registry)
             **cap,
             "workerIds": store.assignments(current["workspaceId"]),
             "coordinatorDevices": [
-                {"deviceId": d["deviceId"], "workerId": d["workerId"]}
+                {"deviceId": d["deviceId"], "workerId": d["workerId"], "displayName": d["displayName"]}
                 for d in runtime.devices()
                 if d["workspaceId"] == current["workspaceId"]
                 and d["approvalStatus"] == "APPROVED"

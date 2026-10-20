@@ -6,12 +6,12 @@ import { apiGet } from '../../api/client';
 import { useScopeKey } from '../../app/session';
 import { useWorkers } from '../../hooks/useWorkers';
 import { V3Fields } from './V3Fields';
-import { DEFAULT_V3 } from '../../lib/v3Settings';
+import { DEFAULT_V3, v3ReviewRows } from '../../lib/v3Settings';
 import type { V3Settings } from '../../types/experiment';
 import type { CreateExperimentRequest, Experiment } from '../../types/experiment';
 import type { StudyDataset, StudyModel } from './StudyAssets';
 interface Capabilities {
-  coordinatorDevices?: { deviceId: string; workerId: string }[];
+  coordinatorDevices?: { deviceId: string; workerId: string; displayName?: string }[];
   modelId: string;
   modelRevision: string;
   workloads: string[];
@@ -311,7 +311,7 @@ export function RuntimeConfiguration({
               </Link>
             </div>
           )}
-          {version === 3 && <V3Fields value={v3} onChange={setV3} />}
+          {version === 3 && <V3Fields value={v3} onChange={setV3} alpha={alpha} />}
           {version >= 2 && (
             <label className="fg">
               {t('Validation interval')}
@@ -387,7 +387,7 @@ export function RuntimeConfiguration({
               <option value="">{t('Select coordinator')}</option>
               {cap.data?.coordinatorDevices?.map((d) => (
                 <option key={d.deviceId} value={d.deviceId}>
-                  {d.workerId}
+                  {d.displayName ?? d.workerId}
                 </option>
               ))}
             </select>
@@ -411,7 +411,8 @@ export function RuntimeConfiguration({
                 <div>
                   <b>{worker.profile.gpuName}</b>
                   <small>
-                    {worker.workerId} · {t(worker.status)} · {t(worker.contributionEnabled === false ? 'OFF' : 'ON')}
+                    {worker.displayName ?? worker.workerId} · {t(worker.status)} ·{' '}
+                    {t(worker.contributionEnabled === false ? 'OFF' : 'ON')}
                   </small>
                 </div>
               </label>
@@ -451,19 +452,37 @@ export function RuntimeConfiguration({
             </div>
             <div>
               <dt>{t('Workers')}</dt>
-              <dd>{selected.join(', ')}</dd>
+              <dd>{selected.map((id) => available.find((w) => w.workerId === id)?.displayName ?? id).join(', ')}</dd>
             </div>
             <div>
               <dt>{t('Coordinator')}</dt>
               <dd>
-                {cap.data?.coordinatorDevices?.find((d) => d.deviceId === coordinator)?.workerId ??
-                  t('Local coordinator')}
+                {(() => {
+                  const device = cap.data?.coordinatorDevices?.find((d) => d.deviceId === coordinator);
+                  return device ? (device.displayName ?? device.workerId) : t('Local coordinator');
+                })()}
               </dd>
             </div>
             <div>
               <dt>{t('Model')}</dt>
               <dd>{version >= 2 ? customModel?.reference : cap.data?.modelId}</dd>
             </div>
+            {version === 3 &&
+              v3ReviewRows(v3, {
+                dataset: dataList.data?.find((d) => d.datasetId === datasetId)?.name ?? datasetId,
+                batchSize,
+                batchSeed,
+                sigma,
+                sigmaSchedule: schedule,
+                sigmaMinimum: minimum,
+                alpha,
+                maxNewTokens: maxTokens,
+              }).map(([label, value]) => (
+                <div key={label}>
+                  <dt>{t(label)}</dt>
+                  <dd>{t(value)}</dd>
+                </div>
+              ))}
           </dl>
           <details className="advanced-panel">
             <summary>{t('Backup policy')}</summary>
