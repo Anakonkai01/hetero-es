@@ -45,6 +45,17 @@ The lab's hourly metadata backups keep only 24 points, which is why this copy li
 - **D (devices):** fresh candidate9 Worker on the 5070 Ti desktop and on Thao's Windows, pair, approve (never a revoked
   identity), self-tests; a 2-generation managed parity run with audits, verified as in candidate9.
 
+## A done (owner "đồng ý", 19:53 +07)
+
+`local-lab.py stop` (live copy `79876cb`): "Owned CPU service and tunnels stopped"; status: all three services not alive.
+No `-wal`/`-shm` file left (the database was closed cleanly). Renamed `state/product.sqlite` →
+`state/product-r10-before-r11-20261021.sqlite` (sha256 `5dd4d05150579d5e…`; written at the stop, 4 minutes after the
+Archive snapshot, so it is the newer copy for a rollback) and `state/metadata-backups` → `state/metadata-backups-r10`.
+lab.heteroes.site is offline until B. The isolated c9 lab (separate folder and ports) is not touched.
+
+The owner chose to set the `admin` password themselves: the r11 server seeds `credentials.json` users only into an empty
+database (`backend/store.py`), so the owner writes it before B in their own terminal (the AI never sees it).
+
 ## Rollback (if B, C or D fails)
 
 1. `local-lab.py stop` (r11 copy).
