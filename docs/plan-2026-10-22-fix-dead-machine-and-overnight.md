@@ -125,19 +125,54 @@ backlog #1 (tar.gz không khởi động trên 5070) tự hết. *Mặc định 
 không phát hành. Nếu bỏ luôn thì app desktop chỉ còn kiểm được qua Wine/máy Windows thật. Lab thử nghiệm riêng (cổng 8790,
 hiện đang chạy bằng app Server Linux unpacked) chuyển sang chạy bằng service như lab thật.
 
-**3b. CLI Linux (`heteroes-worker`).**
+**3b. CLI Linux (`heteroes-worker`): làm lại trải nghiệm, không chỉ vá.**
 
-1. *Tự chạy sau khởi động:* `install` tạo systemd user service + `loginctl enable-linger` (sudo một lần); `run` không còn
-   cần `nohup` tay. Tùy chọn "giữ ON sau khởi động" (quyết định L6): `heteroes-worker contribution on --keep-after-reboot`,
-   lab phải đồng ý cờ đó theo từng máy (chủ máy bật/tắt trên web).
-2. *Tải file bền hơn:* thử lại có giãn cách khi lỗi mạng tạm thời (`handshake timed out`, `Remote end closed`), tải tiếp
-   từ chỗ dừng, hiện tiến độ; kiểm sha256 từng gói (backlog #2).
-3. *Quản lý máy:* `forget` (bỏ ghép đôi), `rename`, `logs` (đọc log service), `update`, `uninstall` gỡ sạch cả service;
-   `status` một màn hình: lab nào, tên máy, ON/OFF, có đang chạy run nào, GPU, phiên bản (backlog #3).
-4. *Join an toàn:* `join` bắt buộc ghi rõ địa chỉ lab, in tên lab + chủ lab và hỏi xác nhận; từ chối `127.0.0.1` không
-   có cờ rõ ràng; cảnh báo nếu lab đó không phải lab đã ghép trước đây (lần nhầm cổng 8790) (backlog #4).
-5. Test: unit test cho từng lệnh + cài thật trên máy Nhựt và 1660S (gỡ bản cũ, cài lại, khởi động lại máy, kiểm agent tự
-   chạy và tự quay lại run khi bật "giữ ON").
+*Hiện trạng đã soi (`runtime/src/heteroes/product/worker_cli.py`, 387 dòng; `scripts/install-worker.sh.in`), và đêm qua
+đã đụng thật:*
+
+| # | Chỗ tệ | Bằng chứng |
+| - | ------ | ---------- |
+| C1 | 4 lệnh rời (`install`, `selftest`, `join`, `run`) phải gõ đúng thứ tự, mỗi bước in "next: …" rồi bỏ đó | cài máy Nhựt mất nhiều lượt |
+| C2 | `run` chạy tiền cảnh, muốn chạy nền phải `nohup setsid … &` tay; không tự chạy sau khởi động | 1660S ngồi không 30 phút |
+| C3 | Không bật/tắt Contribution được từ CLI (chỉ qua web; agent cũ có lệnh `on/off` đòi mật khẩu chủ, CLI mới không có) | đêm qua AI phải gọi API tay |
+| C4 | Lỗi là mã khô: `LAB_HTTP_409`, `ALREADY_PAIRED`, `COMPATIBILITY_FAILED`, `PIP_INSTALL_FAILED`, không nói nguyên nhân hay cách sửa | join nhầm cổng 8790 chỉ ra `LAB_HTTP_409` |
+| C5 | `status` đổ JSON thô; không nói được câu "máy đang làm gì": đã duyệt chưa, ON hay OFF, đang trong run nào, thế hệ mấy, liên lạc lab lần cuối khi nào | |
+| C6 | `selftest` im lặng nhiều phút (`capture_output=True`), không tiến độ, không ước lượng | |
+| C7 | Tải file bằng `urllib`: không thử lại, không tải tiếp, không thanh tiến độ (gói CUDA hàng trăm MB, 56 gói) | backlog #2 |
+| C8 | `join`: không cho biết đang vào lab nào; `--coordinator` bắt gõ `--host` IP tay; không chờ duyệt, phải sang web | nhầm lab 8790 |
+| C9 | Không có `logs`, `stop`, `restart`, `update`, `uninstall`, `forget`, `rename`, `doctor` | backlog #3 |
+| C10 | Đĩa phình mãi: `artifacts` 13 GB trên 5070 này, `downloads` giữ 2.7 GB wheel sau khi cài xong, runtime cũ không dọn | `du` sáng nay |
+| C11 | Không kiểm trước driver NVIDIA/CUDA/đĩa/mạng tới lab trước khi tải ~3 GB; hỏng thì hỏng giữa chừng | |
+| C12 | Cập nhật = chạy lại `curl | bash`, không biết bản đang chạy có cũ hơn lab yêu cầu không | |
+
+*Thiết kế mới:*
+
+1. **Một lệnh cài là xong:** `curl -fsSL https://lab.heteroes.site/install-worker.sh | bash` tự chạy luôn trình
+   `heteroes-worker setup`: kiểm máy (`doctor`) → tải và cài (tiến độ, thử lại, tải tiếp) → self-test (có tiến độ) → hỏi
+   địa chỉ lab (mặc định lab đã tải script) và mã ghép đôi → **hiện tên lab + chủ lab, hỏi xác nhận** → cài service →
+   chờ duyệt (in "đang chờ quản trị viên duyệt…", tự đi tiếp khi được duyệt) → hỏi có bật ON không. Dừng giữa chừng thì
+   chạy lại `setup` đi tiếp từ bước dở. Có chế độ không tương tác cho cài hàng loạt (`--lab`, mã đọc từ file/stdin).
+2. **Service, không tiền cảnh:** systemd user service + linger; `start`, `stop`, `restart`, `logs [-f]`. `run` giữ lại
+   cho debug.
+3. **Bật/tắt ngay ở máy:** `heteroes-worker on [--keep-after-reboot]`, `off`. Xác thực bằng chủ máy (đăng nhập một lần
+   bằng thiết bị-mã trên web, không gõ mật khẩu vào terminal), hoặc lab cho phép máy đã duyệt tự bật nếu chủ đã tick
+   "giữ ON".
+4. **`status` người đọc được** (JSON chỉ khi `--json`), ví dụ:
+   ```
+   5070ti-nhut · lab.heteroes.site · đã duyệt · ON (giữ sau khởi động)
+   Đang chạy: GSM8K tier 3 · thế hệ 41/300 · ứng viên vừa xong 18.2 s
+   Lab liên lạc 2 s trước · GPU RTX 5070 Ti 9.1/16 GB · runtime 9a553d2 (mới nhất)
+   ```
+5. **Lỗi có câu và cách sửa**, giữ mã ở cuối để tra: ví dụ "Lab này không nhận máy (HTTP 409). Có thể bạn đang trỏ tới
+   lab thử nghiệm cũ ở cổng 8790; lab thật là https://lab.heteroes.site. [LAB_HTTP_409]".
+6. **Quản lý:** `rename`, `forget` (bỏ ghép đôi, xóa token), `update` (so phiên bản với lab, tải bản mới, khởi động lại
+   service khi không đang trong run), `uninstall` (gỡ service, hỏi có giữ model/dữ liệu không), `doctor` (driver,
+   CUDA, đĩa, giờ hệ thống, mạng tới lab và tới coordinator, Tailscale), `clean` + tự dọn: xóa wheel sau khi cài, xóa
+   artifacts của assignment đã released quá N ngày, runtime cũ không dùng.
+7. **Coordinator:** `--coordinator` tự dò IP Tailscale, chỉ hỏi khi có nhiều lựa chọn.
+8. Ngôn ngữ thông báo: tiếng Anh (như web), mã lỗi giữ nguyên.
+9. Test: unit test từng lệnh (lab giả), test `setup` dừng giữa chừng rồi chạy tiếp; thử thật trên máy Nhựt và 1660S:
+   gỡ sạch → `curl | bash` một lệnh → khởi động lại máy → tự online, tự ON nếu "giữ ON", tự quay lại run.
 
 **3c. Windows: chỉ app desktop.** App Worker tự chạy khi đăng nhập (kiểm lại; thêm nếu chưa có), có tùy chọn "giữ ON sau
 khởi động"; bỏ hướng dẫn WSL. Máy Quang: gỡ agent WSL, cài app Worker. Máy Thao: cập nhật app.
