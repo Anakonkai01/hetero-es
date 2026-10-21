@@ -13,6 +13,7 @@ NAMES = {
     "cli-73b87e369ddc": "quang-3060",
     "desktop-d9017660e75f": "3060-thao",
     "cli-d90d1da024e9": "1660s",
+    "cli-aa99b4d4ca58": "5070ti-nhut",  # added 2026-10-21 night (PREDECLARATION-tier2b.md, amendment)
 }
 WORKERS = list(NAMES)
 OPTIONAL = {"cli-d90d1da024e9"}  # the 1660S has a PCI fault and may switch off
