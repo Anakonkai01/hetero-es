@@ -22,6 +22,8 @@ ROOT = Path(__file__).resolve().parents[3]
 WORKLOADS = WORKLOAD_NAMES
 RESTART_SECONDS = 30  # a worker that is still away or OFF is asked again after this long
 MAX_LAUNCHES = 20  # launches of one worker in one coordinator recovery; a worker that keeps dying is then left alone
+# a worker unreachable this long is taken as stopped when the run drains; before that an unknown state blocks the release
+UNREACHABLE_STOP_SECONDS = 600
 
 
 def launched(launch):
@@ -151,8 +153,8 @@ class RunSupervisor(ABC):
         recovery = state.get("recoveryCount", 0)
         result = dict(state.get("workerStates", {}))
         for worker_id, previous in list(result.items()):
-            if previous.get("notStarted") or previous.get("left"):
-                continue  # never started, or left the run and confirmed stopped (its GPU may serve another run now)
+            if previous.get("notStarted") or previous.get("left") or previous.get("lost"):
+                continue  # never started, left the run and confirmed stopped (its GPU may serve another run now), or lost
             launch = previous.get("launch", 0)
             suffix = f"-l{launch}" if launch else ""
             try:
@@ -175,7 +177,12 @@ class RunSupervisor(ABC):
                     **launched(launch),
                 }
             except Exception:
-                result[worker_id] = {**previous, "confirmed": False}
+                since = previous.get("unreachableSince") or time.time()
+                if stop and time.time() - since >= UNREACHABLE_STOP_SECONDS:
+                    result[worker_id] = {**previous, "alive": False, "confirmed": True, "lost": True}
+                    self.log(root, "worker_lost", worker_id=worker_id, unreachableSince=since)
+                else:
+                    result[worker_id] = {**previous, "confirmed": False, "unreachableSince": since}
         self.save(root, workerStates=result)
         return all(
             value.get("notStarted") or (value.get("confirmed") and not value.get("alive")) for value in result.values()

@@ -137,6 +137,35 @@ def test_uncertain_shutdown_blocks_pool_release(manager, monkeypatch):
     assert (root / "workers-stopped.flag").exists()
 
 
+def test_a_worker_unreachable_for_long_no_longer_holds_a_finished_run(manager, monkeypatch):
+    # GSM8K demo tier 2b, 2026-10-21: two worker machines died; the finished run stayed DRAINING until one came back
+    root = prepare(manager, monkeypatch, ("local", "remote"))
+    states = {name: {"alive": True, "ready": True, "confirmed": True} for name in ("local", "remote")}
+    manager.save(root, workersLaunched=True, workerStates=states)
+    write_json(root / "runner.json", {"status": "COMPLETED"})
+    monkeypatch.setattr(run_supervisor, "alive", lambda _: False)
+
+    def call(worker, request):
+        if worker["id"] == "remote":
+            raise RuntimeError("Agent vanished")
+        return {"alive": False, "ready": True, "events": []}
+
+    monkeypatch.setattr(manager, "remote", call)
+    manager.tick(root)
+    assert manager.state(root)["status"] == "DRAINING"  # a short absence still blocks (uncertain shutdown)
+    remote_state = manager.state(root)["workerStates"]["remote"]
+    remote_state["unreachableSince"] -= run_supervisor.UNREACHABLE_STOP_SECONDS - 60
+    manager.save(root, workerStates={**manager.state(root)["workerStates"], "remote": remote_state})
+    manager.tick(root)
+    assert manager.state(root)["status"] == "DRAINING"
+    remote_state["unreachableSince"] -= 61
+    manager.save(root, workerStates={**manager.state(root)["workerStates"], "remote": remote_state})
+    manager.tick(root)
+    assert manager.state(root)["status"] == "COMPLETED"
+    assert manager.state(root)["workerStates"]["remote"]["lost"]
+    assert "worker_lost" in (root / "lifecycle.jsonl").read_text()
+
+
 def test_only_one_automatic_coordinator_recovery(manager, monkeypatch):
     root = prepare(manager, monkeypatch)
     write_json(root / "runner.json", {"status": "RUNNING"})
