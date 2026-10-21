@@ -69,6 +69,30 @@ transient `Connection reset by peer` before it acted (`tier2/stage-events-attemp
 reads before generation index 2 opened, so the declared timing was kept. One script was first named `operator.py`, which
 shadows the standard library.
 
-**Tier 2b** (`PREDECLARATION-tier2b.md`, committed before any run) repeats tier 2 with the explicit rejoin. It was **not
-run**: the lab is still blocked by the finished tier 2 (above), and the owner closed the session. **Tier 3 was not
-launched.**
+## Tier 2b: explicit rejoin, five devices (experiment `90147d801ca8463d92143d21f95d63f4`), 23:20–23:46 +07
+
+Run after the night session, once quang-3060 came back (23:00) and the lab released tier 2 by itself. Fifth member
+`5070ti-nhut` added by the amendment committed before the run (`59d6189`).
+
+| Criterion | Result |
+| --------- | ------ |
+| COMPLETED, 160 committed results | **pass** (numerically): runner COMPLETED 23:46:04, 160/160, final `3e02c708…` |
+| 0 audit mismatches, ≥ 1 audit, no quarantine | **pass**: 5 audits, all matched across GPUs (1660S ×2, 3060-thao ×2, 5070ti-nhut ×1) |
+| (b1) quang-3060 OFF at index 2, LEAVE within 10 min | **not a valid pass**: the harness said "recovered" (291 s), but the machine had already died at **23:29:19**, before the OFF (23:31:03). The LEAVE (23:35:05, actor `system`) came from the dead device. |
+| (b2) ON + add back at index 3, JOIN + result within 15 min | **FAIL**: add refused `409 Waiting for confirmed GPU release` (the dead device's reservation, finding 1) |
+| Parity | see `tier2b/parity.json` |
+| Lab releases the finished run | **FAIL, DRAINING** (below) |
+
+Work: 5070ti-nhut 61, 5070ti-nhan 60, 3060-thao 26, quang-3060 8, 1660s 5. Validation (64 rows): base 0.625, final 0.625.
+The 1660S also went down during the run (last seen ~23:39; it rebooted by itself ~23:42, its agent was restarted at 00:14).
+
+**Finding 6 (serious, coordinator side):** the coordinator's supervisor waits for every member worker to confirm its stop
+before it reports COMPLETED (`run_supervisor.poll_workers`, by design: an uncertain shutdown blocks the release). A dead
+machine never answers, so the finished run stays DRAINING on the coordinator itself, not only on the lab (finding 1).
+The 1660S cleared itself once its agent ran again; quang-3060 is still down. Fix on the branch (`e8f26a2`): a worker
+unreachable for 10 minutes counts as stopped when the run drains. It changes a deliberate safety rule; owner review.
+
+**Stop rule:** tier 2b failed (b2). The owner, informed, ordered tier 3 anyway and approved a hand release of the lab
+database for the dead machines (`PREDECLARATION-tier2b.md`, owner decision). **Tier 3 has not started**: the coordinator
+is still DRAINING because of quang-3060 (a separate hand edit of the coordinator's `state.json` was proposed to the owner,
+not approved yet), so the lab release preconditions are never met (`then-tier3.jsonl` gave up after 60 minutes).

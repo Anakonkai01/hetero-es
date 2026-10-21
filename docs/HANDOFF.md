@@ -1,6 +1,10 @@
 # HeteroES — canonical handoff
 
-**Latest (2026-10-21 ~23:00): GSM8K demo night — tier 1 (= r11 smoke run) PASS with full parity; tier 2 done but the lab
+**Latest (2026-10-22 ~01:10): Nhựt's 5070 Ti joined; tier 2 parity ALL EQUAL; tier 2b ran 160/160 but its rejoin failed
+(Quang died); two fixes on the branch (not deployed); tier 3 ordered by the owner but blocked by dead quang-3060.**
+Read [handoff-2026-10-22-night-tier2b-blocked.md](handoff-2026-10-22-night-tier2b-blocked.md) first.
+
+**Previous (2026-10-21 ~23:00): GSM8K demo night — tier 1 (= r11 smoke run) PASS with full parity; tier 2 done but the lab
 is blocked by an offline member (serious finding); tier 2b and the overnight run not started.**
 Read [handoff-2026-10-21-gsm8k-demo-night.md](handoff-2026-10-21-gsm8k-demo-night.md) first. Branch `feat/gsm8k-demo`.
 
