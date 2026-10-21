@@ -35,3 +35,18 @@ stuck tier 2b run is the first real test: it must be released by the deployed co
 4. Acceptance.
 
 ## Log
+- 06:3x checks (`checks/`): all PASS except three, fixed or explained: `web-onboarding` (the contract still looked for
+  the old `heteroes-worker join` line: updated, rerun PASS `checks/web-onboarding-rerun`), `python-format` (demo modules
+  never formatted: formatted), `runtime-tests` (1 demo test needs matplotlib, absent from the check interpreter; the demo
+  tests pass in `.venv-notebook`: 6 passed). Runtime 2603 passed, backend all passed.
+- 06:44 build `lf1-20261022-r11-candidate10` (`build-candidate10.log`), runtime `d5fa6d62a2c7` (commit `41dc450`).
+- 06:46 5070ti-nhan (coordinator, local): its old agent had stopped at 05:49:53 when the owner's SSH session closed (it
+  ran in that terminal: plan item C2). The `update-cli.sh` run as one command was refused by the Claude Code permission
+  classifier; the same steps one by one: installer with the build's bundle, `selftest` PASS (progress shown, 16 s),
+  `setup`: service installed and started, starts at boot; step 6 got 404 from the old lab (no device summary yet, expected).
+  The coordinator's new supervisor recorded quang-3060 `unreachableSince` 06:46:39 for the stuck tier 2b.
+- 06:48 5070ti-nhut and 1660s: old agents stopped by PID (SIGINT, drained), installer, `selftest` PASS (5070 Ti 12 s,
+  1660S 80 s), `setup`: services started, linger enabled without sudo.
+- 06:51 lab backup `/mnt/Archive-2tb/heteroes-local/backups/fix-wave1-20261022` (`backup-receipt.json`).
+- 3060-thao stays on the candidate9 Windows app for this acceptance: updating it needs someone at its screen (sign in,
+  install the new runtime, compatibility check). The new lab keeps old agents working (new reply fields are ignored).

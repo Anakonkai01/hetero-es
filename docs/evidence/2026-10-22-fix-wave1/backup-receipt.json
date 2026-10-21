@@ -1,0 +1,27 @@
+{
+ "createdAt": 1792626687.0440164,
+ "liveAppCommit": "93ff85f28651988a484be69383f0e78cc6c78d0d",
+ "archiveUUID": "10443D1F443D094C",
+ "files": {
+  "live-app.tar.gz": {
+   "sha256": "63a1ddd7db6891df62cf3d17301e5a0f9488e3f3f18f02298190ada86ee79c13",
+   "sizeBytes": 545270656
+  },
+  "private-config.tar.gz": {
+   "sha256": "0dbe20979b07b4561d0e5c58496ada68ffa184f764361e4e0ff7fa1d86a34465",
+   "sizeBytes": 79124771
+  },
+  "product.sqlite": {
+   "sha256": "c5e9cd33dfc64a7f8f064bdd7de71fbd5c32ea7732c7844f637937d6a0462157",
+   "sizeBytes": 12550144
+  },
+  "systemd-unit.tar.gz": {
+   "sha256": "72592c4704a10962235ee84a5cb5054344fa119101dc43ae395697cd9ed0f894",
+   "sizeBytes": 1155
+  },
+  "venv-backend.tar.gz": {
+   "sha256": "4e9fb0cac707dfe3150040e130f4b5636a58cf275ffb79c84975894b5c7c6cdd",
+   "sizeBytes": 31738878
+  }
+ }
+}
