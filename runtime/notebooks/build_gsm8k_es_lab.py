@@ -49,7 +49,7 @@ from IPython.display import HTML, Image, Markdown, display
 
 from heteroes.demo import analysis, gsm8k
 from heteroes.demo.dashboard import Dashboard, live, render_video
-from heteroes.demo.lab import DemoLab
+from heteroes.demo.lab import DemoLab, coordinator_events
 from heteroes.demo.state import build_frame, replay_frames
 
 lab = DemoLab()
@@ -104,9 +104,10 @@ every GPU picks the same token (numerical contract §17.1)."""),
     md("""## 4. Tier 1: smoke (2 generations, N = 8, batch 8)
 
 The first managed run of the r11 lab. `gsm8k.launch` is idempotent: running this cell again returns the same experiment.
-`live` redraws the dashboard until the run ends (for a finished run, it shows the final state at once)."""),
+`live` redraws the dashboard until the run ends (for a finished run, it shows the final state at once). Audits and
+validations are read from the coordinator's own event log on this machine (the lab-wide event feed is slow to poll)."""),
     code("""tier1 = gsm8k.launch(lab, "tier1")
-frame1 = live(lab, tier1["experimentId"], NAMES, coordinator="5070ti-nhan", every=3)"""),
+frame1 = live(lab, tier1["experimentId"], NAMES, coordinator="5070ti-nhan", every=3, events=coordinator_events(tier1["experimentId"]))"""),
     code("""t1 = json.loads((EVIDENCE / "tier1" / "timeline.json").read_text())
 e1 = json.loads((EVIDENCE / "tier1" / "events.json").read_text())
 x1 = json.loads((EVIDENCE / "tier1" / "experiment.json").read_text())
@@ -135,7 +136,7 @@ Same recipe as the overnight run, shorter. Four moments are staged and checked (
 * **(c) audits:** about 5% of candidates are re-run by another device;
 * **(d) parity:** the ledger replay re-derives every update, and one whole generation is regenerated."""),
     code("""tier2 = gsm8k.launch(lab, "tier2")
-frame2 = live(lab, tier2["experimentId"], NAMES, coordinator="5070ti-nhan", every=3)"""),
+frame2 = live(lab, tier2["experimentId"], NAMES, coordinator="5070ti-nhan", every=3, events=coordinator_events(tier2["experimentId"]))"""),
     code("""# The declared events were performed by stage_events.py (the same calls as below) while the run was live:
 #   lab.set_contribution("cli-73b87e369ddc", False)  when generation index 2 opened
 #   lab.set_contribution("cli-73b87e369ddc", True)   when generation index 3 opened
@@ -162,7 +163,7 @@ at any moment: run it again to see where the night is."""),
 if run3 is None:
     display(Markdown("*Tier 3 has not been launched (it needs tiers 1 and 2 to pass).*"))
 else:
-    frame3 = live(lab, run3, NAMES, coordinator="5070ti-nhan", every=10, until=lambda f: True)  # one snapshot; drop `until` to follow"""),
+    frame3 = live(lab, run3, NAMES, coordinator="5070ti-nhan", every=10, until=lambda f: True, events=coordinator_events(run3))  # one snapshot; drop `until` to follow"""),
     code("""results3 = EVIDENCE / "tier3" / "experiment.json"
 if results3.exists():
     x3 = json.loads(results3.read_text()); m3 = x3.get("studyMetrics") or {}

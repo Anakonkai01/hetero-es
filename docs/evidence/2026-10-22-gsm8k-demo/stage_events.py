@@ -30,8 +30,8 @@ def main():
             raise RuntimeError("run ended before the declared event")
         return any(g["index"] >= index for g in timeline["generations"])
 
-    def events(kind):
-        return [e for e in lab.events(run) if e["eventType"] == kind and e.get("workerId") == QUANG]
+    def events(kind):  # the timeline's marks carry membership changes; the lab-wide event feed is too slow to poll
+        return [m for m in lab.timeline(run)["marks"] if m["type"] == kind and m.get("workerId") == QUANG]
 
     def quang_result_after(at):
         return [
@@ -43,7 +43,7 @@ def main():
         log(event="off_requested", response=lab.set_contribution(QUANG, False))
         start = time.time()
         left = wait_until(lambda: events("worker_left") or events("membership_changed"), DEADLINE, every=5)
-        log(event="off_verdict", verdict="recovered", seconds=round(time.time() - start, 1), seen=[e["eventType"] for e in left])
+        log(event="off_verdict", verdict="recovered", seconds=round(time.time() - start, 1), seen=[m["type"] for m in left])
     except Exception as error:
         log(event="off_verdict", verdict="failed", error=str(error)[:300])
         return

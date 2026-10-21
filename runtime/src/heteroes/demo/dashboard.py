@@ -177,13 +177,13 @@ class Dashboard:
         self.draw(frame, tick).savefig(path, dpi=110, facecolor=SURFACE)
 
 
-def live(lab, run_id, names=None, coordinator=None, every=3.0, until=None):
+def live(lab, run_id, names=None, coordinator=None, every=3.0, until=None, events=None):
     """Redraw the dashboard in place in a notebook until the run ends (or `until(frame)`); returns the last frame."""
     from IPython.display import display
 
     board = Dashboard(coordinator)
     handle, frame = None, None
-    for tick, (frame, _) in enumerate(lab.follow(run_id, names, every, until)):
+    for tick, (frame, _) in enumerate(lab.follow(run_id, names, every, until, events=events)):
         board.draw(frame, tick)
         if handle is None:
             handle = display(board.figure, display_id=True)

@@ -15,6 +15,27 @@ from heteroes.v3.lab_cli import Lab, offer_experiment
 SESSION = Path.home() / ".config" / "heteroes-demo" / "session.json"
 TOKEN_ENV = "HETEROES_DEMO_ACCESS_TOKEN"
 TERMINAL = ("COMPLETED", "FAILED", "CANCELLED")
+COORDINATOR_RUNS = Path.home() / ".local" / "share" / "heteroes-worker" / "agent-state" / "runs"
+
+
+def coordinator_events(run_id, root=COORDINATOR_RUNS):
+    """The coordinator's own event log when it runs on this machine (audits, validation), shaped like lab events."""
+    path = Path(root) / run_id / "events.jsonl"
+    if not path.exists():
+        return lambda: []
+
+    def read():
+        out = []
+        for line in path.read_text(encoding="utf-8").splitlines():
+            try:
+                event = json.loads(line)
+            except ValueError:
+                continue  # a line being written
+            if event.get("event") in ("audit_completed", "audit_mismatch", "validation_completed", "worker_joined", "worker_left"):
+                out.append({"eventType": event["event"], "workerId": event.get("worker_id"), "details": event})
+        return out
+
+    return read
 
 
 class DemoLab:
@@ -69,14 +90,15 @@ class DemoLab:
         """This run's events of the lab feed (the newest 2,000 of all runs: enough while a run is watched)."""
         return [e for e in self.request("GET", "/api/v1/events") if e.get("experimentId") == run_id]
 
-    def frame(self, run_id, names=None):
+    def frame(self, run_id, names=None, events=None):
+        """The Frame now. `events` defaults to the lab feed (slow on a busy lab: pass a cheaper source when polling)."""
         timeline = self.timeline(run_id)
-        return build_frame(timeline, self.events(run_id), names), timeline
+        return build_frame(timeline, self.events(run_id) if events is None else events(), names), timeline
 
-    def follow(self, run_id, names=None, every=3.0, until=None, sleep=time.sleep):
+    def follow(self, run_id, names=None, every=3.0, until=None, sleep=time.sleep, events=None):
         """Yield (frame, timeline) every `every` seconds until the run ends or `until(frame)` is true."""
         while True:
-            frame, timeline = self.frame(run_id, names)
+            frame, timeline = self.frame(run_id, names, events)
             yield frame, timeline
             if frame.status in TERMINAL or (until is not None and until(frame)):
                 return
