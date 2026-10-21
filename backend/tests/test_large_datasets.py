@@ -1,5 +1,6 @@
 """Large Recipe v3 datasets: signed uploads, a file-backed build on the lab, limits the administrator sets."""
 
+import hashlib
 import json
 from urllib.parse import urlsplit
 
@@ -99,3 +100,44 @@ def test_only_a_platform_administrator_changes_the_dataset_limits(setup):
         "/api/v1/platform/dataset-limits", headers=member, json={"maxBytes": 2_000_000, "maxRows": 1_000}
     )
     assert refused.status_code == 403 and "Platform administrator" in refused.text
+
+
+def test_a_device_without_the_private_route_gets_small_dataset_files_over_the_public_address(
+    v3_study, tmp_path, monkeypatch
+):
+    # GSM8K demo tier 1, 2026-10-21: with Tailscale off, 3060-thao could never fetch the dataset (private grant only)
+    from backend import local_storage
+
+    c, admin, _ = v3_study
+    store = c.app.state.store
+    lab = (c, store, store.runtime, admin)
+    (tmp_path / "private").mkdir()
+    (tmp_path / "private/config.json").write_text(json.dumps({"publicWebUrl": "https://lab.example"}))
+    monkeypatch.setenv("HETEROES_PRIVATE_CONFIG", str(tmp_path / "private"))
+    upload_id = upload(c, admin, {"all": ("jsonl", lines(400))})
+    data = c.post(
+        f"/api/v1/datasets/uploads/{upload_id}/build", headers=admin, json={"mapping": {"prompt": "question"}}
+    ).json()
+    d, device_auth = pair(lab)
+    model, _ = assets(v3_study)
+    qualify_v3(c, device_auth, c.get("/api/v1/devices", headers=admin).json()[0]["selfTest"], model)
+    run = c.post("/api/v1/experiments", headers=admin, json={**configuration(d, model, data), "datasetIds": [data["datasetId"]]})  # fmt: skip
+    enable(lab, d, device_auth)
+    assert c.post(f"/api/v1/experiments/{run.json()['experimentId']}/submit", headers=admin).status_code == 200
+    store.dispatch_once()
+    ar = store.runtime.runs()[0]
+    query = {"assignmentId": ar["assignmentId"], "epoch": ar["epoch"], "sha256": data["objectSha256"]}
+    grant = c.post("/api/v1/device/study-transfer", headers=device_auth, json=query).json()
+    public = urlsplit(grant["publicUrl"])
+    assert (public.scheme, public.netloc) == ("https", "lab.example") and public.path.startswith(
+        "/api/v1/public-study/"
+    )
+    served = c.get(public.path)
+    assert served.status_code == 200
+    assert hashlib.sha256(served.content).hexdigest() == data["objectSha256"]
+    # each link works only on its own route: the private one is not a public one, and the reverse
+    assert c.get("/api/v1/public-study/" + urlsplit(grant["url"]).path.rsplit("/", 1)[1]).status_code == 403
+    assert c.get("/api/v1/local-storage/" + public.path.rsplit("/", 1)[1]).status_code == 403
+    # a file above the bound (never weights) only goes over the private route
+    monkeypatch.setattr(local_storage, "PUBLIC_STUDY_MAX_BYTES", 10)
+    assert "publicUrl" not in c.post("/api/v1/device/study-transfer", headers=device_auth, json=query).json()

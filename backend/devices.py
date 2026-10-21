@@ -143,6 +143,17 @@ class AgentRuntime(AgentScheduling, AgentCommands, AgentPolling):
             "unsupported": ["model-upload", "dataset-upload"],
         }
 
+    def public_web_url(self):
+        """The lab's public HTTPS address (it carries small dataset files to devices without the private route)."""
+        root = os.environ.get("HETEROES_PRIVATE_CONFIG")
+        if not root:
+            return None
+        try:
+            value = load_config(root).get("publicWebUrl")
+            return endpoint(value) if value and not is_private(value) else None
+        except (OSError, ValueError, TypeError):
+            return None
+
     def public_compute_url(self):
         """The lab's public compute address, read per command so a new Quick URL is used at once.
         Only a public HTTPS host name is passed on; anything else is ignored."""

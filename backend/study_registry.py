@@ -353,10 +353,17 @@ def install_routes(app, registry, runtime, scoped, device_auth):
             if current["id"] not in ar["deviceIds"]:
                 raise HTTPException(403, "Device is not selected")
             config = ar["config"]
-            allowed = {config.get("datasetObjectSha256"), *config.get("datasetSplitObjects", [])}
+            datasets = {config.get("datasetObjectSha256"), *config.get("datasetSplitObjects", [])}
+            allowed = set(datasets)
             if config.get("modelSource") == "UPLOAD":
                 allowed.update(config["modelManifest"]["files"].values())
             sha = body.get("sha256")
             if sha not in allowed or not isinstance(sha, str):
                 raise HTTPException(403, "Object is outside the frozen assignment")
-        return {"url": backend().download_url("objects/" + sha), "sha256": sha}
+        grant = {"url": backend().download_url("objects/" + sha), "sha256": sha}
+        public = runtime.public_web_url()
+        if public and sha in datasets:
+            # for a device that cannot reach the private route (no Tailscale): small dataset files only
+            if url := backend().public_study_url(public, "objects/" + sha):
+                grant["publicUrl"] = url
+        return grant

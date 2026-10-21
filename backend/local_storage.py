@@ -91,6 +91,9 @@ class _Upload:
                     self.partial.unlink(missing_ok=True)
 
 
+PUBLIC_STUDY_MAX_BYTES = 64 * 1024**2  # datasets are at most 10 MB documents plus split files; never weights
+
+
 class LocalBackend:
     mode = "local"
 
@@ -226,14 +229,24 @@ class LocalBackend:
     def delete(self, key):
         self.path(key).unlink(missing_ok=True)
 
-    def _url(self, method, key, size, lifetime):
+    def _token(self, method, key, size, lifetime):
         self.path(key)
         payload = json.dumps(
             {"method": method, "key": key, "size": size, "expires": int(time.time()) + lifetime}, sort_keys=True
         ).encode()
         encoded = base64.urlsafe_b64encode(payload).rstrip(b"=").decode()
-        signature = hmac.new(self.secret, encoded.encode(), hashlib.sha256).hexdigest()
-        return self.base_url + "/api/v1/local-storage/" + encoded + "." + signature
+        return encoded + "." + hmac.new(self.secret, encoded.encode(), hashlib.sha256).hexdigest()
+
+    def _url(self, method, key, size, lifetime):
+        return self.base_url + "/api/v1/local-storage/" + self._token(method, key, size, lifetime)
+
+    def public_study_url(self, public_base, key):
+        """A dataset object for a device without the private route (owner decision 2026-10-22): over the lab's public
+        HTTPS address, for 5 minutes, only for objects up to PUBLIC_STUDY_MAX_BYTES. Model weights never qualify."""
+        path = self.path(key)
+        if not key.startswith("objects/") or not path.is_file() or path.stat().st_size > PUBLIC_STUDY_MAX_BYTES:
+            return None
+        return public_base.rstrip("/") + "/api/v1/public-study/" + self._token("GET-PUBLIC", key, None, 300)
 
     def grant(self, token, method):
         try:
@@ -285,6 +298,14 @@ class LocalBackend:
             finally:
                 with CancelScope(shield=True):
                     await run_in_threadpool(session.close)
+
+        @app.get("/api/v1/public-study/{token}")
+        def public_study(token: str):
+            grant = self.grant(token, "GET-PUBLIC")
+            path = self.path(grant["key"])
+            if not path.is_file() or path.stat().st_size > PUBLIC_STUDY_MAX_BYTES:
+                raise HTTPException(404, "Object unavailable")
+            return FileResponse(path, media_type="application/octet-stream")
 
         @app.get("/api/v1/local-storage/{token}")
         def download(token: str):

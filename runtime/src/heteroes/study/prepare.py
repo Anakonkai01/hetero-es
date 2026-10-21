@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import socket
 import tempfile
 import urllib.request
 from urllib.parse import urlsplit
@@ -12,7 +13,19 @@ from .data import verify as verify_data, sha
 from .models import verify as verify_model
 
 
-def transfer(agent, assignment, digest, target, limit):
+PUBLIC_STUDY_LIMIT = 64 * 1024**2  # the lab gives a public link only for dataset files up to this size
+
+
+def private_reachable(url, timeout=4):
+    parsed = urlsplit(url)
+    try:
+        socket.create_connection((parsed.hostname, parsed.port or (443 if parsed.scheme == "https" else 80)), timeout)
+    except OSError:
+        return False
+    return True
+
+
+def transfer(agent, assignment, digest, target, limit, reachable=private_reachable):
     target = Path(target)
     if target.is_file():
         with target.open("rb") as stream:
@@ -25,12 +38,20 @@ def transfer(agent, assignment, digest, target, limit):
         if "jobId" in assignment
         else {"assignmentId": assignment["assignmentId"], "epoch": assignment["epoch"], "sha256": digest},
     )
-    parsed = urlsplit(grant["url"])
+    url = grant["url"]
+    parsed = urlsplit(url)
     origin = f"{parsed.scheme}://{parsed.netloc}"
-    # Reuse transport validation; never route a large file through public URLs.
+    # Reuse transport validation: a large file never goes through a public URL ...
     from heteroes.http_transport import HttpClient
 
     HttpClient(origin, bulk_url=origin)
+    public = grant.get("publicUrl")
+    if public and limit <= PUBLIC_STUDY_LIMIT and not reachable(url):
+        # ... except a small dataset file, over the lab's own HTTPS address, for a device without the private route
+        # (Tailscale off); its bytes are still checked against the pinned SHA-256 below
+        if urlsplit(public).scheme != "https":
+            raise ValueError("A public study link must use HTTPS")
+        url = public
     target.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     fd, name = tempfile.mkstemp(prefix=".pending-", dir=target.parent)
     temporary = Path(name)
@@ -38,7 +59,7 @@ def transfer(agent, assignment, digest, target, limit):
         hasher = hashlib.sha256()
         total = 0
         opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
-        with opener.open(grant["url"], timeout=120) as response, os.fdopen(fd, "wb") as out:
+        with opener.open(url, timeout=120) as response, os.fdopen(fd, "wb") as out:
             while chunk := response.read(1024**2):
                 total += len(chunk)
                 if total > limit:
