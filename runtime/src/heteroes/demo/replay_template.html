@@ -1,0 +1,240 @@
+<title>HeteroES Run Replay</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600&display=swap">
+<style>
+/* Layout: an instrument readout. Header strip with run identity, one transport bar, then four synchronized panels. */
+:root {
+  --bg: #f5f6f4; --panel: #ffffff; --ink: #14161a; --ink-2: #4c5058; --muted: #8b9098; --rule: #dfe2e0;
+  --grid: #eceeec; --good: #0ca30c; --critical: #d03b3b; --coord: #14161a; --coord-ink: #ffffff;
+  --display: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111316; --panel: #181b1f; --ink: #eceef0; --ink-2: #b4b9c0; --muted: #7d838b; --rule: #2b3036;
+  --grid: #23272c; --coord: #eceef0; --coord-ink: #111316; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #111316; --panel: #181b1f; --ink: #eceef0; --ink-2: #b4b9c0; --muted: #7d838b; --rule: #2b3036;
+  --grid: #23272c; --coord: #eceef0; --coord-ink: #111316; color-scheme: dark; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 14px; line-height: 1.45; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 14px; }
+header { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+h1 { font-family: var(--display); font-weight: 600; font-size: clamp(22px, 3.2vw, 32px); line-height: 1.1; margin: 0; text-wrap: balance; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-family: var(--mono); font-size: 12px; padding: 3px 8px; border: 1px solid var(--rule); border-radius: 4px; background: var(--panel); font-variant-numeric: tabular-nums; }
+.chip b { font-weight: 500; }
+.transport { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 10px 12px; }
+.transport button, .transport select { font: 500 13px var(--body); color: var(--ink); background: var(--bg); border: 1px solid var(--rule); border-radius: 4px; padding: 6px 12px; cursor: pointer; }
+.transport button:focus-visible, .transport select:focus-visible, .transport input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.transport input[type=range] { flex: 1 1 200px; min-width: 0; accent-color: var(--ink); }
+.clock { font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; min-width: 15ch; }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: 14px; }
+@media (max-width: 820px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 12px 12px 8px; min-width: 0; display: grid; gap: 6px; }
+.panel h2 { font: 600 13px var(--body); margin: 0; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.panel h2 span { font: 400 11px var(--mono); color: var(--ink-2); }
+canvas { width: 100%; display: block; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--ink-2); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+.note { font-size: 12.5px; color: var(--ink-2); max-width: 70ch; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; }
+.seg button[aria-pressed=true] { background: var(--ink); color: var(--bg); }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">HeteroES · evolution strategies on volunteer GPUs · replay of a recorded run</div>
+    <h1 id="title">Run replay</h1>
+    <div class="chips" id="chips"></div>
+  </header>
+
+  <div class="transport" role="group" aria-label="Replay controls">
+    <button id="play" type="button">Play</button>
+    <select id="speed" aria-label="Replay speed"></select>
+    <input id="scrub" type="range" min="0" max="1000" value="1000" aria-label="Moment in the run">
+    <span class="clock" id="clock"></span>
+  </div>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>Coordination <span id="gen-label"></span></h2>
+      <canvas id="net" height="300"></canvas>
+      <div class="note">Number in a node: candidates that device committed in the current generation. Moving dots: a candidate out, its score back.</div>
+    </section>
+    <section class="panel">
+      <h2>Who computed what, when
+        <span class="seg" role="group" aria-label="Timeline window"><button type="button" id="w-all" aria-pressed="true">Whole run</button><button type="button" id="w-10" aria-pressed="false">Last 10 min</button></span>
+      </h2>
+      <canvas id="lanes" height="300"></canvas>
+      <div class="legend" id="lane-legend"></div>
+    </section>
+    <section class="panel">
+      <h2>Reward per generation <span>share solved · generation 0 = base model</span></h2>
+      <canvas id="reward" height="240"></canvas>
+      <div class="legend"><span><i style="background:#2a78d6"></i>population mean</span><span><i style="background:#eb6834"></i>best candidate</span><span><i style="background:#1baf7a"></i>validation (held out)</span></div>
+    </section>
+    <section class="panel">
+      <h2>Candidate scores <span id="score-label"></span></h2>
+      <canvas id="scores" height="240"></canvas>
+      <div class="note">Each candidate is the model plus its own noise; its reward is the share of the shared batch it solved. The update weighs every noise direction by its z-scored reward.</div>
+    </section>
+  </div>
+  <p class="note" id="footnote"></p>
+</div>
+
+<script>
+const R = /*RECORDING*/null;
+const $ = (id) => document.getElementById(id);
+const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const fmt = (s) => { s = Math.max(0, Math.round(s)); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60;
+  return (h ? h + "h " : "") + String(m).padStart(h ? 2 : 1, "0") + "m " + String(x).padStart(2, "0") + "s"; };
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let t = R.duration, playing = false, speed = Math.max(1, Math.round(R.duration / 60)), windowS = null, last = 0;
+
+$("title").textContent = R.title;
+const mismatches = R.audits.filter(a => !a[2]).length;
+$("chips").innerHTML = [
+  ["status", R.status], ["generations", R.generations.length + (R.total ? " / " + R.total : "")], ["population", R.population],
+  ["devices", R.devices.length], ["wall time", fmt(R.duration)], ["audits", (R.audits.length - mismatches) + " matched · " + mismatches + " mismatched"],
+  ["coordinator", R.coordinator || "?"]].map(([k, v]) => `<span class="chip">${k} <b>${v}</b></span>`).join("");
+$("lane-legend").innerHTML = R.devices.map(d => `<span><i style="background:${d.color}"></i>${d.name}</span>`).join("") +
+  `<span>dotted line: generation applied · ▼ left · ▲ joined · hatched: failed attempt</span>`;
+const speeds = [1, 10, 60, 300, 1200, 3600].filter(v => v <= Math.max(R.duration, 60));
+if (!speeds.includes(speed)) speeds.push(speed);
+speeds.sort((a, b) => a - b);
+$("speed").innerHTML = speeds.map(v => `<option value="${v}" ${v === speed ? "selected" : ""}>×${v}</option>`).join("");
+$("footnote").textContent = "Times are seconds since the run started. Rewards and audits come from the lab's own records of this run; nothing is simulated.";
+
+function state(at) {
+  const busy = R.devices.map(() => null), done = R.devices.map(() => 0), now = R.devices.map(() => 0);
+  let newest = -1;
+  for (const l of R.lanes) if (l[1] <= at) newest = Math.max(newest, l[3] ?? -1);
+  let scoredGen = -1;
+  for (const l of R.lanes) {
+    const end = l[2] ?? R.duration;
+    if (l[1] > at) continue;
+    if (end > at) busy[l[0]] = true;
+    else if (l[4] === 1) { done[l[0]]++; if (l[3] === newest) now[l[0]]++; scoredGen = Math.max(scoredGen, l[3]); }
+  }
+  const scores = R.lanes.filter(l => l[4] === 1 && (l[2] ?? R.duration) <= at && l[3] === scoredGen).map(l => l[5]);
+  const audits = R.devices.map(() => 0);
+  for (const a of R.audits) if (a[0] <= at && a[2]) audits[a[1]]++;
+  return { busy, done, now, newest, scoredGen, scores, audits };
+}
+
+function canvas(id) {
+  const c = $(id), ratio = devicePixelRatio || 1, w = c.clientWidth, h = +c.getAttribute("height");
+  if (c.width !== Math.round(w * ratio)) { c.width = Math.round(w * ratio); c.height = Math.round(h * ratio); c.style.height = h + "px"; }
+  const g = c.getContext("2d"); g.setTransform(ratio, 0, 0, ratio, 0, 0); g.clearRect(0, 0, w, h);
+  g.font = "12px " + css("--body"); return [g, w, h];
+}
+
+function drawNet(s, phase) {
+  const [g, w, h] = canvas("net"), cx = w / 2, cy = h / 2, n = R.devices.length;
+  const rx = Math.min(w * 0.36, 230), ry = h * 0.33;
+  R.devices.forEach((d, i) => {
+    const a = -Math.PI / 2 + 2 * Math.PI * i / n + Math.PI / n, x = cx + rx * Math.cos(a), y = cy + ry * Math.sin(a);
+    g.strokeStyle = d.color; g.lineWidth = s.busy[i] ? 2.5 : 1; g.globalAlpha = s.busy[i] ? 1 : 0.35;
+    g.beginPath(); g.moveTo(cx, cy); g.lineTo(x, y); g.stroke(); g.globalAlpha = 1;
+    if (s.busy[i] && !reduce) for (const p of [phase, (phase + 0.5) % 1]) {
+      const px = cx + (x - cx) * (0.25 + 0.55 * p), py = cy + (y - cy) * (0.25 + 0.55 * p);
+      g.fillStyle = d.color; g.beginPath(); g.arc(px, py, 4.5, 0, 7); g.fill();
+    }
+    g.lineWidth = 3; g.strokeStyle = d.color; g.fillStyle = s.busy[i] ? d.color : css("--panel");
+    g.beginPath(); g.arc(x, y, 24, 0, 7); g.fill(); g.stroke();
+    g.fillStyle = s.busy[i] ? "#ffffff" : css("--ink"); g.textAlign = "center"; g.textBaseline = "middle";
+    g.font = "600 15px " + css("--mono"); g.fillText(String(s.now[i]), x, y);
+    const below = y > cy; g.fillStyle = css("--ink"); g.font = "600 12px " + css("--body");
+    g.fillText(d.name, x, y + (below ? 40 : -48));
+    g.fillStyle = css("--ink-2"); g.font = "11px " + css("--mono");
+    g.fillText(s.done[i] + " done" + (s.audits[i] ? " · ✓" + s.audits[i] + " audit" : ""), x, y + (below ? 55 : -34));
+  });
+  g.fillStyle = css("--coord"); const bw = 112, bh = 40; g.beginPath(); g.roundRect(cx - bw / 2, cy - bh / 2, bw, bh, 6); g.fill();
+  g.fillStyle = css("--coord-ink"); g.font = "600 11px " + css("--body"); g.textAlign = "center";
+  g.fillText("COORDINATOR", cx, cy - 6); g.font = "10px " + css("--mono"); g.fillText(R.coordinator || "", cx, cy + 9);
+  $("gen-label").textContent = "generation " + (Math.max(s.newest, 0) + 1) + (R.total ? " / " + R.total : "");
+}
+
+function drawLanes(s) {
+  const [g, w, h] = canvas("lanes"), left = 92, top = 8, bottom = 24, rowH = (h - top - bottom) / R.devices.length;
+  const t0 = windowS ? Math.max(0, t - windowS) : 0, t1 = Math.max(t, t0 + 1), X = (v) => left + (w - left - 8) * (v - t0) / (t1 - t0);
+  g.strokeStyle = css("--grid"); g.lineWidth = 1; g.fillStyle = css("--ink-2"); g.font = "11px " + css("--mono"); g.textAlign = "center";
+  const ticks = w < 520 ? 2 : 4;
+  for (let k = 0; k <= ticks; k++) { const v = t0 + (t1 - t0) * k / ticks, x = X(v); g.beginPath(); g.moveTo(x, top); g.lineTo(x, h - bottom); g.stroke();
+    g.textAlign = k === 0 ? "left" : k === ticks ? "right" : "center"; g.fillText(fmt(v), x, h - 8); }
+  g.setLineDash([2, 3]); g.strokeStyle = css("--muted");
+  for (const gen of R.generations) if (gen[1] <= t && gen[1] >= t0) { const x = X(gen[1]); g.beginPath(); g.moveTo(x, top); g.lineTo(x, h - bottom); g.stroke(); }
+  g.setLineDash([]);
+  R.devices.forEach((d, i) => { g.fillStyle = css("--ink"); g.textAlign = "right"; g.textBaseline = "middle"; g.font = "12px " + css("--body");
+    g.fillText(d.name, left - 8, top + rowH * (i + 0.5)); });
+  for (const l of R.lanes) {
+    const end = Math.min(l[2] ?? R.duration, t);
+    if (l[1] > t || end < t0) continue;
+    const x0 = X(Math.max(l[1], t0)), x1 = Math.max(X(end), x0 + 1.5), y = top + rowH * l[0] + rowH * 0.2, hh = rowH * 0.6;
+    const failed = l[4] === 0 && (l[2] ?? Infinity) <= t;
+    g.fillStyle = failed ? css("--panel") : R.devices[l[0]].color; g.globalAlpha = (l[2] ?? Infinity) > t ? 0.5 : 1;
+    g.fillRect(x0, y, x1 - x0, hh); g.globalAlpha = 1;
+    if (failed) { g.strokeStyle = css("--critical"); g.strokeRect(x0, y, x1 - x0, hh); }
+    else if (x1 - x0 > 4) { g.fillStyle = css("--panel"); g.fillRect(x1 - 1, y, 1, hh); }
+  }
+  for (const m of R.membership) if (m[0] <= t && m[0] >= t0) {
+    const x = X(m[0]), y = top + rowH * m[1] + rowH * 0.12; g.fillStyle = css("--ink"); g.beginPath();
+    if (m[2] === "left") { g.moveTo(x - 6, y - 6); g.lineTo(x + 6, y - 6); g.lineTo(x, y + 3); } else { g.moveTo(x - 6, y + 3); g.lineTo(x + 6, y + 3); g.lineTo(x, y - 6); }
+    g.fill();
+  }
+}
+
+function drawReward() {
+  const [g, w, h] = canvas("reward"), left = 34, right = 10, top = 8, bottom = 24;
+  const G = Math.max(R.total || 1, R.generations.length, 1), X = (v) => left + (w - left - right) * v / (G + 0.5), Y = (v) => top + (h - top - bottom) * (1 - v);
+  g.strokeStyle = css("--grid"); g.fillStyle = css("--ink-2"); g.font = "11px " + css("--mono"); g.textAlign = "right"; g.textBaseline = "middle";
+  for (const v of [0, 0.25, 0.5, 0.75, 1]) { g.beginPath(); g.moveTo(left, Y(v)); g.lineTo(w - right, Y(v)); g.stroke(); g.fillText(v.toFixed(2), left - 5, Y(v)); }
+  g.textAlign = "center"; const step = Math.max(1, Math.ceil(G / (w < 520 ? 4 : 8)));
+  g.fillText("base", X(0), h - 7);
+  for (let k = step; k <= G; k += step) g.fillText(String(k), X(k), h - 7);
+  const shown = R.generations.filter(x => x[1] <= t);
+  for (const [k, color] of [[2, "#2a78d6"], [3, "#eb6834"]]) {
+    g.strokeStyle = color; g.lineWidth = 2; g.beginPath();
+    shown.forEach((x, i) => { const px = X(x[0] + 1), py = Y(x[k]); i ? g.lineTo(px, py) : g.moveTo(px, py); }); g.stroke();
+    if (shown.length) { const x = shown[shown.length - 1]; g.fillStyle = color; g.beginPath(); g.arc(X(x[0] + 1), Y(x[k]), 4, 0, 7); g.fill(); }
+  }
+  for (const v of R.validation) if (v[1] <= t && v[2] != null) { g.fillStyle = "#1baf7a"; g.strokeStyle = css("--panel"); g.lineWidth = 2;
+    const x = X(v[0] + 1), y = Y(v[2]); g.beginPath(); g.rect(x - 5, y - 5, 10, 10); g.fill(); g.stroke(); }
+}
+
+function drawScores(s) {
+  const [g, w, h] = canvas("scores"), left = 30, right = 10, top = 8, bottom = 24, bins = 20, counts = new Array(bins).fill(0);
+  for (const v of s.scores) counts[Math.min(bins - 1, Math.floor(v * bins))]++;
+  const peak = Math.max(1, ...counts), X = (v) => left + (w - left - right) * v, Y = (v) => top + (h - top - bottom) * (1 - v / peak);
+  g.strokeStyle = css("--grid"); g.fillStyle = css("--ink-2"); g.font = "11px " + css("--mono"); g.textAlign = "center";
+  for (const v of [0, 0.25, 0.5, 0.75, 1]) { g.beginPath(); g.moveTo(X(v), top); g.lineTo(X(v), h - bottom); g.stroke();
+    g.textAlign = v === 0 ? "left" : v === 1 ? "right" : "center"; g.fillText(v.toFixed(2), X(v), h - 8); }
+  g.fillStyle = "#2a78d6";
+  counts.forEach((c, i) => { if (c) { const x0 = X(i / bins) + 1, x1 = X((i + 1) / bins) - 1; g.beginPath(); g.roundRect(x0, Y(c), x1 - x0, Y(0) - Y(c), [3, 3, 0, 0]); g.fill(); } });
+  if (s.scores.length) { const m = s.scores.reduce((a, b) => a + b, 0) / s.scores.length; g.strokeStyle = css("--ink"); g.lineWidth = 1.5;
+    g.beginPath(); g.moveTo(X(m), top); g.lineTo(X(m), h - bottom); g.stroke(); g.fillStyle = css("--ink"); g.textAlign = m > 0.6 ? "right" : "left"; g.fillText("mean " + m.toFixed(3), X(m) + (m > 0.6 ? -6 : 6), top + 8); }
+  $("score-label").textContent = s.scoredGen >= 0 ? "generation " + (s.scoredGen + 1) + " · " + s.scores.length + " candidates" : "none yet";
+}
+
+function render(now) {
+  const dt = last ? (now - last) / 1000 : 0; last = now;
+  if (playing) { t = Math.min(R.duration, t + dt * speed); if (t >= R.duration) { playing = false; $("play").textContent = "Replay"; } }
+  const s = state(t), phase = ((now || 0) / 900) % 1;
+  drawNet(s, phase); drawLanes(s); drawReward(); drawScores(s);
+  $("scrub").value = Math.round(1000 * t / Math.max(R.duration, 1));
+  $("clock").textContent = fmt(t) + " / " + fmt(R.duration);
+  requestAnimationFrame(render);
+}
+$("play").onclick = () => { if (t >= R.duration) t = 0; playing = !playing; $("play").textContent = playing ? "Pause" : "Play"; };
+$("speed").onchange = (e) => { speed = +e.target.value; };
+$("scrub").oninput = (e) => { t = R.duration * e.target.value / 1000; };
+for (const [id, value] of [["w-all", null], ["w-10", 600]]) $(id).onclick = () => { windowS = value;
+  $("w-all").setAttribute("aria-pressed", String(value === null)); $("w-10").setAttribute("aria-pressed", String(value !== null)); };
+requestAnimationFrame(render);
+</script>

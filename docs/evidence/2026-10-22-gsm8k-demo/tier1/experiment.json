@@ -1,0 +1,62 @@
+{
+ "experimentId": "6d034ac1cfaa48e6b9342ed067705cd8",
+ "status": "COMPLETED",
+ "createdAt": "2026-10-21T14:51:36.875519+00:00",
+ "startedAt": "2026-10-21T14:51:37.235928+00:00",
+ "completedAt": "2026-10-21T14:59:51.605672+00:00",
+ "studyMetrics": {
+  "recipeHash": "67762b953304cafd3af8b198a2e35afedf7a5f6cb74ece50d9d952ea1c3f3729",
+  "planHash": "9d2d7b49d8a62566f5f29a56d71556d5f0b4f3168a5c179b1b5e91a99e19c1bf",
+  "datasetIdentity": {
+   "contentHash": "4e2147d459d5ded1a329d8ab66773e2d76f54ff466dbc071e90d30d41170d017",
+   "splitHashes": {
+    "test": "1681b35d1f490b8ca31260549aa54972e39d88f029b1d5f65f61e813839fb962",
+    "train": "1caae74d81892fe2f6af8d0dafb1a710312acdcd64eb3e16c24c524bd1af11e4",
+    "validation": "dd26926dc9e874db7111efdcf735c71ce3db70957fba7bd8b4593277a390e9f5"
+   }
+  },
+  "metric": "mean-reward",
+  "weightSpace": "full",
+  "scorer": {
+   "kind": "declarative",
+   "name": "answer-line-last-number",
+   "version": 1,
+   "codeSha256": null,
+   "config": {}
+  },
+  "best": {
+   "generation": 1,
+   "weightsSha256": "72874d9d5f611bb3fc366e9fea09ab33a74546066f24a33cd7c693e8be88dab2",
+   "validationReward": 0.640625,
+   "recipeHash": "67762b953304cafd3af8b198a2e35afedf7a5f6cb74ece50d9d952ea1c3f3729",
+   "planHash": "9d2d7b49d8a62566f5f29a56d71556d5f0b4f3168a5c179b1b5e91a99e19c1bf"
+  },
+  "validation": [
+   {
+    "generation": -1,
+    "weightsSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "meanReward": 0.625
+   },
+   {
+    "generation": 1,
+    "weightsSha256": "72874d9d5f611bb3fc366e9fea09ab33a74546066f24a33cd7c693e8be88dab2",
+    "meanReward": 0.640625
+   }
+  ],
+  "testLocked": false,
+  "testReward": 0.390625,
+  "independentReloadPassed": true
+ },
+ "decodeEngine": "hf_fp32_cpu_guard_v1",
+ "evalChunk": 32,
+ "sampler": "epoch-shuffle@1",
+ "sigmaSchedule": "cosine",
+ "validationInterval": 2,
+ "workerIds": [
+  "cli-71b757062fd9",
+  "cli-73b87e369ddc",
+  "desktop-d9017660e75f",
+  "cli-d90d1da024e9"
+ ],
+ "coordinatorDeviceId": "dbe5254b78de4c038550b8b90df13899"
+}
