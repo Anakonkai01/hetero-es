@@ -199,6 +199,32 @@ test('startup qualification failure keeps an uncertain bridge owned until Quit c
   assert.equal(service.bridge, null);
 });
 
+test('a refused startup qualification is logged once and the agent waits before it starts again', async (t) => {
+  // c8 run, 2026-10-21: the lab refused the qualification of an app started again during a run; the app stopped the
+  // agent and started a new one at the next status poll, about every 10 s, and the log said nothing
+  const { service, configs } = await fixture(t);
+  const lines = [];
+  service.log = { info: (message, fields) => lines.push([message, fields]), detail() {}, error() {} };
+  service.device = { deviceId: 'dev', workerId: 'desktop' };
+  service.selfTest.recipeVersions = [1, 2];
+  let now = 1000;
+  service.now = () => now;
+  service.fetch = async (url) =>
+    // 403 takes the same path as a 409 that outlived its retries
+    new Response(JSON.stringify({ recipeVersions: [1, 2] }), { status: url.endsWith('/qualification') ? 403 : 200 });
+  await assert.rejects(service.startAgent(), /LAB_HTTP_403/);
+  assert.equal(service.bridge, null); // drained, so released
+  await service.status();
+  assert.equal(configs.length, 1);
+  now += 30000;
+  await service.status();
+  assert.equal(configs.length, 2);
+  assert.deepEqual(
+    lines.filter(([message]) => message === 'agent failed').map(([, fields]) => fields.code),
+    ['LAB_HTTP_403'],
+  );
+});
+
 test('a v3 device sends its qualification only to a lab that speaks v3', async (t) => {
   for (const [device, lab, sent] of [
     [[3], [1, 2, 3], true],

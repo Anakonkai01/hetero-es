@@ -179,6 +179,25 @@ def test_a_left_worker_releases_its_gpu_once_the_coordinator_confirms_it_stopped
     store.dispatch_once()
     assert store.get(rid)["membership"]["left"] == [first["workerId"]]
     assert store.get(rid)["status"] not in ("CANCELLED", "CANCELLING")
+    # c8 run, 2026-10-21: added back, its next report still says "left" until the coordinator's next boundary; that old
+    # view released it again, so the coordinator was refused when it asked to start it
+    assert change(lab, rid, first["workerId"]).status_code == 200
+    boot(client, ch, "boot-1", contribution=True, reports=[report(3, False)])
+    assert first["workerId"] in assignment_body(store, rid)["workerDevices"]
+    assert any(r["deviceId"] == first["deviceId"] for r in runtime.reservations())
+    assignment = assignment_body(store, rid)
+    probe = client.post(
+        "/api/v1/device/worker-command",
+        headers=ch,
+        json={
+            "assignmentId": assignment["assignmentId"],
+            "epoch": assignment["epoch"],
+            "workerId": first["workerId"],
+            "action": "probe",
+            "recoveryIndex": 0,
+        },
+    )
+    assert probe.status_code == 200, probe.text
 
 
 def test_turning_a_member_off_makes_it_leave_instead_of_cancelling_the_experiment(lab):

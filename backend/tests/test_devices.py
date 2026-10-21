@@ -308,6 +308,27 @@ def test_a_restarted_worker_is_a_new_launch_and_never_reads_the_stopped_one(lab)
     assert send("start", launch=20).status_code == 422
 
 
+def test_an_app_started_again_during_a_run_may_send_the_same_qualification(lab):
+    # c8 run, 2026-10-21: the desktop app sends its qualification at every start; while the run held its GPU the lab
+    # refused it, the app stopped its agent and tried again with a new boot, so it never came back into the run
+    c, s, r, a = lab
+    d, h = pair(lab)
+    enable(lab, d, h)
+    queued(lab, d)
+    s.dispatch_once()
+    assert r.reservations()
+    boot(c, h, "boot-2")  # the whole app was stopped and started again
+    with s.db() as db:
+        stored = json.loads(db.execute("SELECT self_test FROM devices").fetchone()[0])
+
+    def qualify(profile, boot_id="boot-2"):
+        return c.patch("/api/v1/device/qualification", headers=h, json={"bootId": boot_id, "selfTest": profile})
+
+    assert qualify(stored).json() == {"updated": False}
+    assert qualify({**stored, "vramTotalMb": stored["vramTotalMb"] + 1}).status_code == 409  # new evidence waits
+    assert qualify(stored, "boot-1").status_code == 409  # never from an old boot
+
+
 def start_command_for(lab, monkeypatch, tmp_path, config):
     """The START_WORKER command the Lab Server queues for a worker, with `config` as the private config."""
     c, s, r, a = lab

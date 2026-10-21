@@ -204,6 +204,10 @@ class AgentScheduling:
         """A worker that left and that the coordinator confirms stopped gives its device and GPU back at once (ADR-009);
         it no longer counts for the final release of this assignment."""
         left = set((snapshot.get("membership") or {}).get("left", []))
+        # one added back after it left stays "left" in the coordinator's reports until its next boundary
+        experiment = db.execute("SELECT body FROM experiments WHERE id=?", (row["run_id"],)).fetchone()
+        initial = json.loads(experiment[0])["workerIds"] if experiment else []
+        left -= set(self.intended_members(db, row["run_id"], initial))
         states = (snapshot.get("state") or {}).get("workerStates", {})
         ar = json.loads(row["body"])
         changed = False

@@ -8,6 +8,7 @@ import re
 import sqlite3
 import threading
 import time
+import urllib.error
 
 from heteroes.catalog import DECODE_ENGINES, SCHEDULER_POLICIES, SYNC_MODES, V3_DECODE_ENGINES, WORKLOAD_NAMES
 
@@ -78,6 +79,7 @@ class RunSupervisor(ABC):
         self.stop = threading.Event()
         self.processes = {}  # reap owned children rather than leaking zombie processes
         self.retry_at = {}  # (run, worker) -> when a stopped member may be started again
+        self.deferred = {}  # (run, worker) -> the last logged reason it could not be started again
         self.thread = threading.Thread(target=self.loop, daemon=True)
 
     def directory(self, run_id):
@@ -245,8 +247,17 @@ class RunSupervisor(ABC):
                 continue
             try:
                 self.remote(self.workers[worker_id], {"action": "probe"})  # away, OFF or not approved: ask again later
-            except Exception:
+            except Exception as error:
+                # say why, once per reason: the lab's status tells away (503), OFF (409) and not in the run (403) apart
+                reason = {
+                    "error": type(error).__name__,
+                    "httpStatus": error.code if isinstance(error, urllib.error.HTTPError) else None,
+                }
+                if self.deferred.get(key) != reason:
+                    self.deferred[key] = reason
+                    self.log(root, "worker_restart_deferred", worker_id=worker_id, launch=launch, **reason)
                 continue
+            self.deferred.pop(key, None)
             self.log(root, "worker_restarted", worker_id=worker_id, launch=launch)
             self._launch_worker(root, worker_id, result, recovery, launch)
 

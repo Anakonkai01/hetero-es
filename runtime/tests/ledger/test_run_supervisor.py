@@ -1,6 +1,7 @@
 """Agent supervisor ownership and ledger projections, without acquiring a GPU."""
 
 import json
+import urllib.error
 
 import pytest
 
@@ -368,6 +369,37 @@ def test_a_member_whose_worker_died_is_started_again_once_its_device_is_on(manag
     clock[0] += run_supervisor.RESTART_SECONDS
     manager.tick(root)  # running again: only polled
     assert [c for c in calls if c[0] == "late"] == []
+
+
+def test_a_member_not_started_again_says_why_once_per_reason(manager, monkeypatch):
+    # c8 run, 2026-10-21: the 1660S was refused at every probe and nothing said so
+    refusals = [403, 403, 409]  # not in the assignment twice, then OFF
+    states = {"local": ALIVE, "late": {"alive": False, "ready": True, "confirmed": True}}
+    root, calls, clock, polls = restarting(manager, monkeypatch, states)
+    relay = manager.remote
+
+    def remote(worker, request):
+        if request["action"] == "probe" and refusals:
+            raise urllib.error.HTTPError("http://lab", refusals.pop(0), "refused", None, None)
+        return relay(worker, request)
+
+    monkeypatch.setattr(manager, "remote", remote)
+    for _ in range(4):
+        manager.tick(root)
+        clock[0] += run_supervisor.RESTART_SECONDS
+    events = [json.loads(line) for line in (root / "lifecycle.jsonl").read_text().splitlines()]
+    deferred = [
+        (e["worker_id"], e["launch"], e["httpStatus"]) for e in events if e["event"] == "worker_restart_deferred"
+    ]
+    assert deferred == [("late", 1, 403), ("late", 1, 409)]
+    assert [e["event"] for e in events][-1] == "worker_restarted"
+    # it dies again and is refused for the same reason as before: that is a new story, said again
+    states = manager.state(root)["workerStates"]
+    manager.save(root, workerStates={**states, "late": {**states["late"], "alive": False}})
+    refusals.append(409)
+    manager.tick(root)
+    events = [json.loads(line) for line in (root / "lifecycle.jsonl").read_text().splitlines()]
+    assert (events[-1]["event"], events[-1]["launch"], events[-1]["httpStatus"]) == ("worker_restart_deferred", 2, 409)
 
 
 def test_a_worker_away_at_preparation_gets_its_first_launch_when_it_comes_back(manager, monkeypatch):

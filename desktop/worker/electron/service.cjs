@@ -452,6 +452,8 @@ class Service {
       } catch {
         /* Retain uncertain process ownership for the next safe Quit. */
       }
+      // Say why and wait before the next try: a status poll would otherwise start a new agent (a new boot) at once.
+      this.recordAgentFailure(error, failed);
       throw error;
     }
   }

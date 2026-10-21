@@ -357,6 +357,9 @@ def install_device_routes(app, store, user, runtime):
             db.execute("BEGIN IMMEDIATE")
             d = db.execute("SELECT * FROM devices WHERE id=?", (current["id"],)).fetchone()
             old = json.loads(d["self_test"])
+            if d["boot_id"] == body.bootId and body.selfTest.model_dump() == old:
+                # an app started again sends the evidence the lab already holds: nothing changes, even while reserved
+                return {"updated": False}
             if (
                 d["boot_id"] != body.bootId
                 or d["enabled"]
