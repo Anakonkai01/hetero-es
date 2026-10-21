@@ -1,6 +1,11 @@
 # HeteroES — canonical handoff
 
-**Latest: candidate6 installed; native Windows guarded decoder passes; waiting for Quang online (2026-10-21).**
+**Latest (2026-10-21 ~11:00): ADR-009 tail-aware scheduling + elastic membership done (CPU gate 23/23), candidate7
+built; next = candidate7 package checks, device upgrades, redeclared acceptance with join/leave.**
+Read [handoff-2026-10-21-scheduling-elastic.md](handoff-2026-10-21-scheduling-elastic.md) first. Branch
+`feat/r11-scheduling-elastic`, local only (not pushed). The candidate6 notes below are superseded where they differ.
+
+**Previous: candidate6 installed; native Windows guarded decoder passes; waiting for Quang online (2026-10-21).**
 Read [handoff-2026-10-21-candidate6-devices.md](handoff-2026-10-21-candidate6-devices.md) first.
 Separate owner-approved FP32 + CPU-reference decoder: source f5d311b, final 23/23 combined checks PASS.
 Candidate6 packages prepared and packaged checks PASS. Installed self-tests pass on 5070 GPU,
