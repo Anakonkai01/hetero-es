@@ -1,0 +1,4 @@
+#!/bin/sh
+export HETEROES_WORKER_HOME="/home/thao_nguyen/.local/share/heteroes-c4-cpu" PYTHONPATH="/home/thao_nguyen/.local/share/heteroes-c4-cpu/runtimes/57b0faf6d31a/src" PYTHONNOUSERSITE=1 PYTHONUTF8=1
+exec "/home/thao_nguyen/.local/share/heteroes-c4-cpu/runtimes/57b0faf6d31a/python/bin/python3.12" -s -m heteroes.product.worker_cli "$@"
+self-test passed on CPU coordinator; next: heteroes-worker join <lab address>
