@@ -12,6 +12,26 @@ Checkpoint 2026-10-21 ~19:25 +07, branch `feat/r11-scheduling-elastic`, local on
   **Unproven.** By the predeclared stop rule c9 is not accepted; I did not patch anything.
 - Run itself: 50/50, 400 results, 23 audits, 0 mismatches, independent 5070 regeneration ALL EQUAL.
 
+## Post-run analysis (Opus, 2026-10-21 ~19:40): the 1660S starvation is the `greedy-tail` rule itself
+
+`evidence/.../greedy_tail_replay.py` replays `GreedyTail.pick`'s decline rule (`dispatch.py:185-187`) on the ledger copies, with the
+SpeedBook rebuilt from the committed durations (EMA 0.5) at each generation start, in the best case for the joiner (all N=8 waiting).
+Log: `greedy-tail-replay.log`. Measured: 1660S 10.5 s per candidate (one sample, g5, and its estimate stays frozen because it never
+gets another), the others 2.1-3.4 s. With 3 faster members alive, `(ceil(8/3)+1) * ~2.3 s ≈ 9.2 s < 10.5 s`, so it is declined.
+
+- c9, window 2 (g8-49): declined even at p=8 in **38 of 42** generations; the 4 others only while Windows was down (2 others), and
+  only for the very first pick, which the fast workers take first.
+- c8: 14 possible, 20 declined (1 commit). c7 (one other worker): 30 possible, 4 declined (11 commits).
+
+So with these four machines the criterion "a new committed result in window 2" could not be met by design; the restart itself
+worked (`worker_restarted`, 12 audits, each a full recomputation that matched). This is a replay of the rule, not a log of each
+pick (declines are not recorded), so it shows the rule forbids the lease, not every poll the 1660S made. Not a correctness bug;
+a product limit: a slow member's single speed sample is never re-measured.
+
+Recommendation: (a), the owner to decide — accept `worker_restarted` + a matched audit after it as the restart proof for a member
+`greedy-tail` declines, and record that the c9 criterion was unmeetable. (b) would re-test the same restart with a criterion chosen
+after the fact anyway; (c) is a product change too late for r11 (backlog: re-measure a stale slow estimate, log declines).
+
 ## Decisions for the owner / a stronger model
 
 1. Is "a new committed result" the right restart criterion for a slow member under `greedy-tail`? Options: (a) accept a restarted
