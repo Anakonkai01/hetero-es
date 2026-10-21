@@ -32,6 +32,20 @@ driver logs, registry exports, `researcher.json` = the copied researcher login t
 at the owner's request** (`delete-temp.ps1` → `delete-temp.log`: 142 files, 0.833 GB, folder gone, C: 24.9 GB free). Four
 `D:\HeteroES-*` staging folders from earlier sessions stay.
 
+## Cleanup of earlier sessions' leftovers (owner's "đồng ý", ~19:45 +07)
+
+Inventory: `inventory.ps1` (Windows) plus a `du` listing on WSL. Deleted on Windows (`delete-windows-leftovers.ps1` →
+`delete-windows-leftovers.log`): `D:\HeteroES-r11-long-data-20261020` 120.6 GB, `D:\HeteroES-v3-20261019` 4.6 GB,
+`D:\HeteroES-session4-20261020` 2.8 GB, `D:\HeteroES-r11-cpu-guard-probe-20261021` 0.9 GB, `%LOCALAPPDATA%\@heteroesworker-updater`
+(old r10 updater installer) and `%LOCALAPPDATA%\HeteroES-v3-20261019`. After: C: 25.1 GB, D: 845.8 GB free; nothing HeteroES left
+on Windows.
+
+WSL: `delete-wsl-leftovers.sh` deletes the old research environment (`~/heteroes-venv`, `~/projects/heteroes`, `~/.cache/huggingface`,
+m2 config, the c7/c8 run folders in `/tmp`). The AI's SSH call was blocked by the Claude Code permission classifier, so the owner runs
+it; its output is recorded when run. Kept on purpose until the flag-day smoke run is done: `~/.local/share/heteroes-c4-cpu` (the CPU
+coordinator, which uses its own model copy, not `~/.cache/huggingface`), `~/.local/share/heteroes-power` and
+`/tmp/heteroes-r11-c9*`. The WSL disk image (`ext4.vhdx`, 33.9 GB on C:) does not shrink by itself; compact it after the last cleanup.
+
 ## What this does NOT show
 
 The app's own removal of `@heteroes\worker` cannot be told apart from the owner's manual deletion, because the owner deleted the
