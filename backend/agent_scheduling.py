@@ -368,8 +368,19 @@ class AgentScheduling:
         unstarted = status == "STARTING" and (self.store.get(row["run_id"]) or {}).get("cancelRequested")
         if row["released"] or (status not in QUIESCENT and not unstarted):
             return
+        states = snap["state"].get("workerStates", {})
         for did in ar["deviceIds"]:
             d = db.execute("SELECT processes,seen FROM devices WHERE id=?", (did,)).fetchone()
+            workers = [w for w, device_id in ar["workerDevices"].items() if device_id == did]
+            if (
+                did != ar["coordinatorDeviceId"]
+                and workers
+                and time.time() - d["seen"] >= LEFT_OFFLINE_RELEASE_SECONDS
+                and all(states.get(w, {}).get("confirmed") and states[w].get("alive") is False for w in workers)
+            ):
+                # a member machine that died: the finished coordinator counted it stopped (unreachable past the same
+                # grace period), and if it comes back its agent is told to stop that worker (revokedAssignments)
+                continue
             reports = [
                 p for p in json.loads(d[0]) if p["assignmentId"] == ar["assignmentId"] and p["epoch"] == ar["epoch"]
             ]

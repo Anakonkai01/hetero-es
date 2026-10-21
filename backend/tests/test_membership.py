@@ -243,6 +243,79 @@ def test_a_left_worker_that_went_offline_releases_its_gpu_after_a_grace_period(l
     assert reply["revokedAssignments"] == []  # the member still in the run keeps its worker
 
 
+def test_a_finished_run_is_released_when_a_member_machine_died_without_leaving(lab):
+    # GSM8K demo tier 2b, 2026-10-21: the 1660S died during the run (no OFF, no LEAVE). The coordinator finished and
+    # counted it stopped; the lab still waited for the dead machine to report, so every device stayed reserved.
+    client, store, runtime, admin = lab
+    rid, (coordinator, ch), devices = running(lab, workers=2)
+    (dead, _), (live, live_auth) = devices
+    assignment = assignment_body(store, rid)
+    gone = {"alive": False, "confirmed": False}
+
+    def finish(sequence, dead_state):
+        snapshot = {
+            "state": {
+                "status": "COMPLETED",
+                "workerStates": {dead["workerId"]: dead_state, live["workerId"]: {"alive": False, "confirmed": True}},
+            },
+            "generations": [],
+            "candidates": [],
+            "attempts": [],
+            "events": [],
+            "artifacts": [],
+        }
+        report = {"sequence": sequence, "assignmentId": assignment["assignmentId"], "epoch": assignment["epoch"]}
+        stopped = {"assignmentId": assignment["assignmentId"], "epoch": assignment["epoch"]}
+        boot(client, live_auth, "boot-1", contribution=True, processes=[{**stopped, "workerAlive": False}])
+        boot(
+            client,
+            ch,
+            "boot-1",
+            contribution=True,
+            reports=[{**report, "snapshot": snapshot}],
+            processes=[{**stopped, "coordinatorAlive": False}],
+        )
+
+    with store.db() as db:
+        db.execute("UPDATE devices SET seen=? WHERE id=?", (time.time() - LEFT_OFFLINE_RELEASE_SECONDS - 1, dead["deviceId"]))
+    finish(1, gone)
+    assert runtime.reservations()  # the coordinator has not counted it stopped: it may still be working
+    finish(2, {"alive": False, "confirmed": True, "lost": True})
+    assert not runtime.reservations()
+    with store.db() as db:
+        db.execute("UPDATE devices SET seen=? WHERE id=?", (time.time(), dead["deviceId"]))
+    # back with its worker still alive: the release is announced and the process is revoked
+    process = {"assignmentId": assignment["assignmentId"], "epoch": assignment["epoch"], "workerAlive": True}
+    reply = boot(client, devices[0][1], "boot-1", contribution=True, processes=[process])
+    assert assignment["assignmentId"] in reply["releasedAssignments"]
+    assert reply["revokedAssignments"] == [assignment["assignmentId"]]
+
+
+def test_a_finished_run_waits_for_a_member_that_is_only_briefly_offline(lab):
+    client, store, runtime, admin = lab
+    rid, (coordinator, ch), devices = running(lab, workers=2)
+    (dead, _), (live, live_auth) = devices
+    assignment = assignment_body(store, rid)
+    with store.db() as db:
+        db.execute("UPDATE devices SET seen=? WHERE id=?", (time.time() - 120, dead["deviceId"]))
+    snapshot = {
+        "state": {
+            "status": "COMPLETED",
+            "workerStates": {w["workerId"]: {"alive": False, "confirmed": True} for w in (dead, live)},
+        },
+        "generations": [],
+        "candidates": [],
+        "attempts": [],
+        "events": [],
+        "artifacts": [],
+    }
+    stopped = {"assignmentId": assignment["assignmentId"], "epoch": assignment["epoch"]}
+    boot(client, live_auth, "boot-1", contribution=True, processes=[{**stopped, "workerAlive": False}])
+    report = {"sequence": 1, **stopped, "snapshot": snapshot}
+    boot(client, ch, "boot-1", contribution=True, reports=[report], processes=[{**stopped, "coordinatorAlive": False}])
+    assert runtime.reservations()
+
+
 def test_an_offline_worker_that_did_not_leave_keeps_its_reservation(lab):
     client, store, runtime, admin = lab
     rid, (coordinator, ch), devices = running(lab, workers=2)
