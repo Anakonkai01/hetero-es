@@ -94,6 +94,26 @@ def test_the_lab_helpers_toggle_by_boot_and_follow_until_the_end():
     assert wait_until(lambda: "yes", 5, clock=lambda: 0) == "yes"
 
 
+def test_reads_are_retried_through_network_failures_but_not_through_lab_answers():
+    failures = [OSError("reset"), RuntimeError("Lab HTTP 502: edge")]
+
+    class Api:
+        def request(self, method, path, body=None):
+            if path == "/bad":
+                raise RuntimeError("Lab HTTP 404: missing")
+            if failures:
+                raise failures.pop(0)
+            return {"ok": method}
+
+    lab = DemoLab(api=Api())
+    assert lab.request("GET", "/x", sleep=lambda s: None) == {"ok": "GET"} and not failures
+    with pytest.raises(RuntimeError, match="404"):
+        lab.request("GET", "/bad", sleep=lambda s: None)
+    failures.append(OSError("reset"))
+    with pytest.raises(OSError):  # a write is never repeated behind the caller's back
+        lab.request("POST", "/x", {}, sleep=lambda s: None)
+
+
 def test_the_dashboard_draws_a_frame(tmp_path):
     from heteroes.demo.dashboard import Dashboard
 

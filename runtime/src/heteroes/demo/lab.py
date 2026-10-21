@@ -25,8 +25,16 @@ class DemoLab:
             api = Lab(value["url"], value["workspace"], TOKEN_ENV)
         self.api = api
 
-    def request(self, method, path, body=None):
-        return self.api.request(method, path, body)
+    def request(self, method, path, body=None, retries=5, sleep=time.sleep):
+        """A read is retried through short network failures (the public edge resets a connection now and then)."""
+        for attempt in range(retries if method == "GET" else 1):
+            try:
+                return self.api.request(method, path, body)
+            except (OSError, RuntimeError) as error:
+                # a 4xx answer is final; transport failures and 5xx from the edge are retried
+                if method != "GET" or attempt == retries - 1 or str(error).startswith("Lab HTTP 4"):
+                    raise
+                sleep(2 * (attempt + 1))
 
     def devices(self):
         return self.request("GET", "/api/v1/devices")
