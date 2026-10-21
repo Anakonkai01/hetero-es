@@ -308,3 +308,17 @@ def test_the_service_unit_runs_the_command_and_drains_on_stop(tmp_path, monkeypa
     assert "KillSignal=SIGINT" in unit and "KillMode=mixed" in unit and "WantedBy=default.target" in unit
     assert ["systemctl", "--user", "enable", "heteroes-worker.service"] in calls
     assert hint is None and calls[-1][:2] == ["loginctl", "enable-linger"]  # linger switched on without sudo
+
+
+def test_setup_against_an_older_lab_ends_with_the_web_steps(tmp_path, monkeypatch):
+    worker, lab = ready(tmp_path, monkeypatch), FakeLab()
+    said = []
+    worker.say = said.append
+
+    def older(url, path, token, body, method=None):
+        if path == "/api/v1/device/summary":
+            raise LabError(404)
+        return lab(url, path, token, body, method)
+
+    setup(worker, options(), call=older, sleep=lambda _: None)
+    assert "start" in worker.service.calls and "Devices page" in said[-1]

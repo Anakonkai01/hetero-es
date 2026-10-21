@@ -969,7 +969,13 @@ def setup(worker, args, call=None, sleep=time.sleep):
         worker.say("  " + EXPLAIN["SERVICE_UNAVAILABLE"][1])
         return
     worker.say("6/6 approval and contribution")
-    summary = worker.summary(call=call)
+    try:
+        summary = worker.summary(call=call)
+    except LabError as error:
+        if error.status != 404:
+            raise
+        worker.say("  this lab is older than this worker: approve and turn it ON on the lab's Devices page")
+        return
     if summary["approvalStatus"] == "PENDING":
         worker.say(
             f"  waiting for an administrator to approve '{summary['displayName']}' on {worker.settings()['serverUrl']}"
