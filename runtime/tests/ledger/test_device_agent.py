@@ -957,3 +957,47 @@ def test_the_coordinator_names_the_launch_it_starts_and_polls(tmp_path):
         ("start", 1, 2),
         ("poll", 1, 2),
     ]
+
+
+def test_a_worker_whose_gpu_was_given_back_is_stopped_before_another_run_starts_on_it(tmp_path, monkeypatch):
+    # an outage longer than the lab's grace period: the lab gave this GPU back and the worker kept running
+    from heteroes.product import agent as agent_module
+
+    a = agent(tmp_path)
+    a.enabled = True
+    living = {1}
+    monkeypatch.setattr(agent_module, "alive", lambda record: record["pid"] in living)
+    monkeypatch.setattr("heteroes.product.agent.reachable", lambda *args: True)
+    calls = []
+
+    def handle(request):
+        calls.append((request["action"], Path(request["directory"]).parent.name))
+        if request["action"] == "start":
+            write_json(Path(request["directory"]) / "process.json", {"pid": 2, "birth": "b"})
+        if request["action"] == "stop":
+            living.discard(1)
+        return {"alive": True, "ready": True, "events": []}
+
+    monkeypatch.setattr("heteroes.product.agent.remote_handle", handle)
+    old = a.worker_directory(start_command())
+    write_json(old / "assignment.json", start_command())
+    write_json(old / "process.json", {"pid": 1, "birth": "b"})
+    other = start_command(commandId="other", assignmentId="e" * 32)
+    with pytest.raises(RuntimeError, match="another assignment"):
+        a.handle(other)
+    assert calls == []
+    monkeypatch.setattr(a, "observe", lambda: [])
+    monkeypatch.setattr(
+        a,
+        "call",
+        lambda path, body: {
+            "approvalStatus": "APPROVED",
+            "desiredContribution": True,
+            "commands": [other],
+            "acceptedReports": [],
+            "acceptedEvents": [],
+            "revokedAssignments": ["c" * 32],
+        },
+    )
+    a.cycle()
+    assert calls == [("stop", "c" * 32), ("start", "e" * 32)]

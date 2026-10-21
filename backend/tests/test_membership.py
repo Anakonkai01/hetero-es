@@ -235,6 +235,12 @@ def test_a_left_worker_that_went_offline_releases_its_gpu_after_a_grace_period(l
     assert not any(r["deviceId"] == first["deviceId"] for r in runtime.reservations())
     body = assignment_body(store, rid)
     assert first["workerId"] not in body["workerDevices"] and first["deviceId"] not in body["deviceIds"]
+    # it was only cut off: back online with its worker still running, it is told to stop it before anything else
+    process = {"assignmentId": assignment["assignmentId"], "epoch": assignment["epoch"], "workerAlive": True}
+    reply = boot(client, devices[0][1], "boot-1", contribution=True, processes=[process])
+    assert reply["revokedAssignments"] == [assignment["assignmentId"]]
+    reply = boot(client, devices[1][1], "boot-1", contribution=True, processes=[process])
+    assert reply["revokedAssignments"] == []  # the member still in the run keeps its worker
 
 
 def test_an_offline_worker_that_did_not_leave_keeps_its_reservation(lab):

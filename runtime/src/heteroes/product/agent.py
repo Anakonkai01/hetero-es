@@ -409,6 +409,8 @@ class Agent:
                 raise RuntimeError("Wait for model probe GPU release before training")
             if command["workerId"] != self.config["workerId"]:
                 raise ValueError("Worker identity mismatch")
+            if self.other_worker_alive(command):
+                raise RuntimeError("A worker of another assignment is still running on this GPU")
             if original and original != command:
                 raise ValueError("Frozen worker assignment changed")
             for earlier in range(command.get("launch", 0)):
@@ -679,6 +681,26 @@ class Agent:
             if ar:
                 self._worker(ar, "stop")
 
+    def stop_revoked(self, assignment_ids):
+        """The lab no longer reserves this device for these assignments (released, or this member's GPU given back
+        after it left or went offline). A worker of theirs still running here, after an outage longer than the lab's
+        grace period, is stopped before any command of this poll can start another one on the same GPU."""
+        for aid in assignment_ids:
+            if not isinstance(aid, str) or not re.fullmatch("[a-f0-9]{32}", aid):
+                continue
+            for directory in (self.root / "workers" / aid).glob("r*"):
+                ar = read_json(directory / "assignment.json")
+                intent = (directory / "launch-intent.json").exists()
+                if ar and owned_state(read_json(directory / "process.json"), intent) is not False:
+                    self._worker(ar, "stop")
+
+    def other_worker_alive(self, command):
+        """Whether a worker of another assignment still runs on this device: one GPU never serves two runs."""
+        for directory in (self.root / "workers").glob("*/r*"):
+            if directory.parent.name != command["assignmentId"] and owned_state(read_json(directory / "process.json")):
+                return True
+        return False
+
     def observe(self):
         combined = {}
         with self.db() as db:
@@ -821,6 +843,12 @@ class Agent:
         if response["approvalStatus"] == "REVOKED" or (self.enabled and not response["desiredContribution"]):
             self.enabled = False
             self.cancel_all()
+        with self.db() as db:
+            known = {r[0] for r in db.execute("SELECT assignment_id FROM released")}
+        self.stop_revoked(
+            [a for a in response.get("releasedAssignments", []) if a not in known]
+            + response.get("revokedAssignments", [])
+        )
         self.run_commands(response["commands"])
         with self.db() as db:
             for eid in response.get("acceptedEvents", []):

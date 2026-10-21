@@ -62,6 +62,19 @@ class AgentPolling:
                     for row in db.execute("SELECT id,body FROM assignments WHERE released=1")
                     if device["id"] in json.loads(row["body"])["deviceIds"]
                 ],
+                # processes this device still reports for an assignment that no longer reserves it (its GPU was given
+                # back after it left or went offline): the agent stops them before it starts anything else
+                "revokedAssignments": sorted(
+                    {
+                        p.assignmentId
+                        for p in body.processes
+                        if db.execute("SELECT 1 FROM assignments WHERE id=?", (p.assignmentId,)).fetchone()
+                        and not db.execute(
+                            "SELECT 1 FROM device_reservations WHERE device_id=? AND assignment_id=?",
+                            (device["id"], p.assignmentId),
+                        ).fetchone()
+                    }
+                ),
             }
 
     def _refresh_observation(self, db, device, body, old):
