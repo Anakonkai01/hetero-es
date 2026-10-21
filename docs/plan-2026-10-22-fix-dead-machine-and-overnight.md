@@ -106,6 +106,68 @@ Hiện coordinator DRAINING vì máy Quang, lab giữ GPU của 5 máy. Hai các
 Thiết kế trước, bạn duyệt rồi mới code: file study (dataset) đi qua đường public của lab có giới hạn kích thước, kiểm
 sha256 đã khai trong grant, chỉ cho assignment đang giữ máy đó. Thử bằng cách tắt Tailscale trên máy Thao như tier 1.
 
+## Mở rộng phạm vi (bạn, 2026-10-22 sáng): bộ cài, CLI, chunk theo máy
+
+Quyết định:
+
+- **Linux chỉ còn CLI.** Bỏ hẳn app desktop Linux của **cả Worker lẫn Server** (bản tar.gz/AppImage/unpacked phát
+  hành). Lab trên Linux chạy như service bằng lệnh, đúng như lab thật đang chạy (`deploy/heteroes-lab.user.service`).
+- **Windows chỉ còn app desktop, bỏ đường WSL.** Máy Quang chuyển từ WSL + CLI sang app Worker desktop.
+- **CLI Linux:** làm cả 4 nhóm cải thiện (dưới).
+- **Chunk theo từng máy, ghi vào sổ (ledger).**
+
+### Giai đoạn 3 (viết lại): bộ cài
+
+**3a. Bỏ app desktop Linux.** `scripts/build-apps.sh` thôi phát hành bản Linux của `desktop/worker` và `desktop/server`;
+bỏ `pack:linux`, link tải trên web/lab, các đoạn trong `docs/quickstart-vi.md` và handoff hướng dẫn cài bản đó. Lỗi
+backlog #1 (tar.gz không khởi động trên 5070) tự hết. *Mặc định mình chọn, bạn có thể đổi:* vẫn giữ bản Linux unpacked
+**chỉ để chạy test tự động** (`check-linux-server.cjs`, `check-linux-packaged.cjs` kiểm giao diện app trên máy này),
+không phát hành. Nếu bỏ luôn thì app desktop chỉ còn kiểm được qua Wine/máy Windows thật. Lab thử nghiệm riêng (cổng 8790,
+hiện đang chạy bằng app Server Linux unpacked) chuyển sang chạy bằng service như lab thật.
+
+**3b. CLI Linux (`heteroes-worker`).**
+
+1. *Tự chạy sau khởi động:* `install` tạo systemd user service + `loginctl enable-linger` (sudo một lần); `run` không còn
+   cần `nohup` tay. Tùy chọn "giữ ON sau khởi động" (quyết định L6): `heteroes-worker contribution on --keep-after-reboot`,
+   lab phải đồng ý cờ đó theo từng máy (chủ máy bật/tắt trên web).
+2. *Tải file bền hơn:* thử lại có giãn cách khi lỗi mạng tạm thời (`handshake timed out`, `Remote end closed`), tải tiếp
+   từ chỗ dừng, hiện tiến độ; kiểm sha256 từng gói (backlog #2).
+3. *Quản lý máy:* `forget` (bỏ ghép đôi), `rename`, `logs` (đọc log service), `update`, `uninstall` gỡ sạch cả service;
+   `status` một màn hình: lab nào, tên máy, ON/OFF, có đang chạy run nào, GPU, phiên bản (backlog #3).
+4. *Join an toàn:* `join` bắt buộc ghi rõ địa chỉ lab, in tên lab + chủ lab và hỏi xác nhận; từ chối `127.0.0.1` không
+   có cờ rõ ràng; cảnh báo nếu lab đó không phải lab đã ghép trước đây (lần nhầm cổng 8790) (backlog #4).
+5. Test: unit test cho từng lệnh + cài thật trên máy Nhựt và 1660S (gỡ bản cũ, cài lại, khởi động lại máy, kiểm agent tự
+   chạy và tự quay lại run khi bật "giữ ON").
+
+**3c. Windows: chỉ app desktop.** App Worker tự chạy khi đăng nhập (kiểm lại; thêm nếu chưa có), có tùy chọn "giữ ON sau
+khởi động"; bỏ hướng dẫn WSL. Máy Quang: gỡ agent WSL, cài app Worker. Máy Thao: cập nhật app.
+
+### Giai đoạn 8: chunk theo từng máy
+
+Hiện tại: `evaluation.chunk` là một số cố định trong recipe cho mọi máy (`v3/documents.py`, `v3/options.py`
+`EXACT_CHUNKS = {"float32": (16, 32, 64), "float16": (1,)}`); 1660S (6 GB) quyết định cho cả nhóm.
+
+Cách làm (đã chọn):
+
+1. Recipe khai **danh sách chunk cho phép** (mỗi giá trị đã qua probe khớp chéo GPU), thay cho một số duy nhất.
+2. Mỗi máy chọn chunk lớn nhất trong danh sách vừa VRAM của nó (đo ở self-test, có thể ghi đè bằng tay).
+3. Mỗi kết quả ứng viên ghi **chunk đã dùng** vào ledger.
+4. Audit: chỉ giao cho máy chạy được chunk đó, và chạy lại **đúng chunk đó**. Kiểm parity (`verify_managed_run.py
+   --regenerate`) cũng dùng chunk ghi trong ledger.
+5. Replay trọng số không cần chunk (chỉ dùng seed + hệ số), nên không đổi.
+6. Tài liệu `runtime/docs/numerical-contract.md` + ADR mới: phần thưởng là hàm của (ứng viên, batch, chunk); đổi chunk có
+   thể lệch ~1 token / 768 bài, chấp nhận được về mặt ES vì audit vẫn kiểm đúng từng bit.
+7. Đo: probe chunk 128 trên 5070 Ti (RUNTIME-TODO `chunk-128`) để biết máy 16 GB có lợi thật bao nhiêu; chunk mới chỉ
+   được vào danh sách khi probe khớp chéo GPU.
+8. Test: run 3 máy chunk khác nhau (5070 Ti 64, 3060 32, 1660S 16) → audit khớp, parity ALL EQUAL, thời gian mỗi ứng viên
+   của 5070 Ti giảm.
+
+### Thứ tự tổng thể (mới)
+
+1 (dừng worker cũ) → 2 (chốt run khi máy chết) → 3 (bộ cài, CLI, Windows) → 4 (events nhẹ) → 4b (đường public chở
+dataset) → 5 (rút dây thử trên lab riêng, deploy có rollback) → 6 (tier 2b lặp lại, tier 3 đêm) → 8 (chunk theo máy, một
+đợt deploy riêng vì đổi định dạng recipe/ledger) → 7 (script demo, 1660S).
+
 ## Câu hỏi ban đầu (đã trả lời ở trên)
 
 1. **L3, luật an toàn:** đồng ý "10 phút không liên lạc = coi như đã dừng" không? (Khuyên: đồng ý, *với điều kiện* giai đoạn
