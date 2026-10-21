@@ -49,7 +49,7 @@ def draw_network(ax, frame, palette, tick=0, coordinator=None):
         color=INK,
         fontweight="bold",
     )
-    ax.add_patch(FancyBboxPatch((-0.36, -0.17), 0.72, 0.34, boxstyle="round,pad=0.02", fc=INK, ec=INK))
+    ax.add_patch(FancyBboxPatch((-0.42, -0.17), 0.84, 0.34, boxstyle="round,pad=0.02", fc=INK, ec=INK))
     ax.text(0, 0.04, "COORDINATOR", ha="center", va="center", color=SURFACE, fontsize=8, fontweight="bold")
     ax.text(0, -0.08, coordinator or "", ha="center", va="center", color=SURFACE, fontsize=7)
     count = max(len(frame.devices), 1)
@@ -130,9 +130,9 @@ def draw_rewards(ax, frame):
     points = [v for v in frame.validation if v["reward"] is not None]
     if points:
         ax.plot([v["generation"] + 1 for v in points], [v["reward"] for v in points], "s", color=SERIES[2], ms=8, mec=SURFACE, mew=2, label="validation (held out)")
-    ax.set_xlim(0.5, max(frame.generations_total or 1, len(done) or 1) + 0.5)
+    ax.set_xlim(-0.5, max(frame.generations_total or 1, len(done) or 1) + 0.5)
     ax.set_ylim(0, 1)
-    ax.set_xlabel("generation", fontsize=8, color=INK_2)
+    ax.set_xlabel("generation (0 = base model)", fontsize=8, color=INK_2)
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax.grid(axis="y", color=GRID, lw=0.6)
     ax.set_axisbelow(True)

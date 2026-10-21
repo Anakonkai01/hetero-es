@@ -129,10 +129,14 @@ def build_frame(timeline, events=(), names=None, at_ms=None):
         elif kind in MEMBER_EVENTS:
             membership.append({"atS": seconds(int(at * 1000)), "worker": worker, "change": MEMBER_EVENTS[kind]})
 
+    completed = experiment.get("completedMs")
+    status = experiment.get("status")
+    if completed is not None and now < completed:  # a replayed moment shows the state of that moment
+        status = "RUNNING" if newest >= 0 else "STARTING"
     return Frame(
         at_ms=now,
         now_s=seconds(now) or 0.0,
-        status=experiment.get("status"),
+        status=status,
         generation=newest,
         generations_total=experiment.get("maxGenerations"),
         devices=list(devices.values()),

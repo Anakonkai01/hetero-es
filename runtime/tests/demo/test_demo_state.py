@@ -62,6 +62,9 @@ def test_an_earlier_moment_hides_what_had_not_happened_yet():
     assert (fast.done, fast.busy, slow.busy) == (1, "r.g0.c2", "r.g0.c1")
     assert frame.rewards == [] and frame.scores == [0.25] and frame.audits["matched"] == 0
     assert frame.generation == 0 and len(frame.lanes) == 3
+    finished = dict(timeline(), experiment={**timeline()["experiment"], "status": "COMPLETED", "completedMs": T0 + 90_000})
+    assert build_frame(finished, at_ms=T0 + 15_000).status == "RUNNING"
+    assert build_frame(finished, at_ms=T0 + 95_000).status == "COMPLETED"
 
 
 def test_replay_frames_round_trip_through_a_file(tmp_path):
