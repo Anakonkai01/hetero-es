@@ -118,3 +118,17 @@ port where nothing listens. Fixed without code change: `local-lab.py restart --c
 services alive, web 200. The route answers only while a coordinator runs on the 5070 (502 before that, as expected).
 Limits (backlog): one public compute route per lab, to one port on the lab machine (a coordinator elsewhere needs a private
 network); the default/installer configuration should not let `privateComputeUrl` and the coordinator port drift apart.
+
+## D by the owner, with AI help on the CLI machines (20:20-21:15 +07)
+
+- Thao Windows (owner): Worker from the public download, data folder `F:\HeteroES-Worker-data` (fresh downloads 1.85 GB +
+  model 0.93 GB, app log `install ok ms=134905`), paired as `3060-thao` (new identity `desktop-d9017660e75f`), approved, ON.
+- 5070 Ti (owner): the Linux desktop tarball failed to start (owner's report; message to be recorded), so the CLI was used.
+  The first `curl … | bash` stopped twice on `urlopen error … handshake operation timed out` (the CLI downloader has no retry
+  and no progress for large files); a retry loop finished it. First pairing without `--coordinator` (`host 127.0.0.1`), so it
+  was revoked and re-paired as `5070ti-nhan` with `--coordinator --host 100.110.165.40` (no rename and no "forget" in the CLI).
+- 1660S and Quang (AI, owner's request): `reinstall-cli.sh` stopped the old isolated-lab agent, removed the old install and
+  pairing but kept the verified downloads, reinstalled from the public installer, GPU self-test PASS (GTX 1660 SUPER,
+  RTX 3060 with `LD_LIBRARY_PATH=/usr/lib/wsl/lib`); paired with one-time codes from `pairing-code.py` piped into `join`
+  (Quang's first `join` failed with "Remote end closed connection without response", the second worked); agents started with
+  `nohup setsid … run`, ONLINE, waiting for approval.
