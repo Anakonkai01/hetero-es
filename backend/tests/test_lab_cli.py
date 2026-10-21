@@ -60,6 +60,8 @@ def specification(tmp_path):
         "coefficientRule": "centered-rank@1",
         "candidateSeedNamespace": "cli-lab-fixture",
         "evalChunk": 32,
+        "validationInterval": 5,
+        "allowJoin": True,
     }
 
 
@@ -85,6 +87,7 @@ def test_offer_uploads_pinned_inputs_freezes_code_and_is_idempotent(v3_study, tm
     assert result["status"] == "DRAFT" and result["coordinatorDeviceId"] == cpu["deviceId"]
     assert result["sampler"] == "epoch-shuffle@1" and result["evalChunk"] == 32
     assert result["alphaSchedule"] == "linear" and result["momentumWindow"] == 3
+    assert result["validationInterval"] == 5 and result["allowJoin"] is True
     assert result["pythonCode"][0]["source"] == Path(spec["scorer"]["path"]).read_text()
     assert result["scorer"]["codeSha256"] == result["pythonCode"][0]["codeSha256"]
     assert api.request("POST", f"/api/v1/experiments/{result['experimentId']}/submit")["status"] == "QUEUED"

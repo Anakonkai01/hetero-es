@@ -44,6 +44,7 @@ __pycache__/
 
 .venv/
 .venv-backend/
+.venv-notebook/
 venv/
 env/
 

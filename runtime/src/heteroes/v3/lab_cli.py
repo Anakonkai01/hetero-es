@@ -9,6 +9,7 @@ import urllib.error
 import urllib.request
 
 from heteroes.canonical import canonical_json_hash
+from heteroes.http_transport import USER_AGENT
 from heteroes.product.files import read_json, write_json
 from heteroes.product.worker_cli import sha256_file
 
@@ -30,6 +31,7 @@ class Lab:
                 "Authorization": "Bearer " + self.token,
                 "X-Workspace-Id": self.workspace,
                 "Content-Type": "application/json",
+                "User-Agent": USER_AGENT,  # the public lab's edge refuses urllib's default agent (HTTP 403)
             },
         )
         try:
@@ -46,7 +48,8 @@ class Lab:
         # Signed storage capability only: never send the user's bearer credential to an upload URL.
         try:
             with Path(path).open("rb") as stream:
-                request = urllib.request.Request(plan["url"], method="PUT", data=stream, headers=plan["headers"])
+                headers = {"User-Agent": USER_AGENT, **plan["headers"]}
+                request = urllib.request.Request(plan["url"], method="PUT", data=stream, headers=headers)
                 with urllib.request.urlopen(request, timeout=600) as response:
                     response.read()
         except (urllib.error.URLError, OSError):
@@ -134,7 +137,15 @@ def managed_configuration(spec, coordinator, workers, model, dataset):
         **({"pythonCode": code} if code else {}),
         **{
             key: spec[key]
-            for key in ("candidateSeedNamespace", "evalChunk", "pythonTimeoutSeconds", "promptFormat")
+            for key in (
+                "candidateSeedNamespace",
+                "evalChunk",
+                "pythonTimeoutSeconds",
+                "promptFormat",
+                "validationInterval",
+                "allowJoin",
+                "schedulerPolicy",
+            )
             if key in spec
         },
     }

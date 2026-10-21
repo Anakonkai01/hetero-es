@@ -49,6 +49,12 @@ Contribution resets to OFF on every boot. No experiment exists on the live lab y
    route reaches only a coordinator on the lab machine, one at a time.
 7. `greedy-tail` keeps a slow member's single speed sample forever and never logs declines (c9 analysis).
 8. Owner: the web experiment page is too hard to use.
+9. **Big item, after the project acceptance (owner, 2026-10-21 night):** a device's VRAM buys nothing today. Every
+   candidate is scored on the generation's one shared batch (needed: z-scores compare candidates on the same rows), and the
+   decoding `chunk` (rows decoded at once) is fixed in the recipe for every device, because a different batch shape can
+   flip a token (1 GSM8K text in 768, `runtime/docs/numerical-contract.md`) and break replay/audit parity. So a fast
+   device only takes more candidates; the smallest-VRAM member caps `chunk` (or is left out). Open design: per-device
+   chunk sizes without losing exact parity (e.g. a chunk-invariant decoder, or audit/replay on the same chunk).
 
 ## Next session (owner's request)
 
