@@ -6,12 +6,12 @@ No subagents (owner rule).
 
 ## Done this session
 
-| Commit | What |
-| --- | --- |
-| 1837733 | Candidate7 prepare-only; every runtime source byte equals the source (Worker 105 files with `membership.py`, Server 182); source-copy, packaged Linux Worker and Server PASS (`evidence/2026-10-21-r11-candidate7/`) |
+| Commit  | What                                                                                                                                                                                                                                             |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1837733 | Candidate7 prepare-only; every runtime source byte equals the source (Worker 105 files with `membership.py`, Server 182); source-copy, packaged Linux Worker and Server PASS (`evidence/2026-10-21-r11-candidate7/`)                             |
 | 90f4811 | Isolated lab, 5070 desktop, Thao Windows 3060, Thao WSL CPU coordinator and 1660S on candidate7, installed sources equal, all self-tests PASS; 1660S paired + approved as `cli-3e355c6e9e70` (`evidence/2026-10-21-candidate7-device-upgrades/`) |
-| e831f3d | Acceptance predeclaration + operator helpers (monitor logic tested, 10/10 mutants killed) (`evidence/2026-10-21-long-multimachine-run-candidate7/`) |
-| 0f3f2ae | Run logs: `monitor.jsonl`, `operator-events.jsonl` |
+| e831f3d | Acceptance predeclaration + operator helpers (monitor logic tested, 10/10 mutants killed) (`evidence/2026-10-21-long-multimachine-run-candidate7/`)                                                                                              |
+| 0f3f2ae | Run logs: `monitor.jsonl`, `operator-events.jsonl`                                                                                                                                                                                               |
 
 **Owner decisions this session:** delete unneeded files ("có những cái ko cần thiết thì xoá đi"): done, 5070 system disk
 11 → 45 GB free (list in the device RESULTS). Quang is offline, so the g20 hard stop targets **Thao's Windows 3060**.
@@ -32,7 +32,7 @@ quarantine. greedy-tail, ~22 s per generation.
    `~/.local/share/heteroes-c4-cpu/agent-state/runs/18248941640741ccb6f031d43fbf7ec4/` (adapt
    `.scratch/r11-long-run2/collect.py`; state is COMPLETED, not PAUSED; never commit leases/tokens). Then on the 5070 with
    a separate cache: `verify_managed_run.py`, then `verify-records.py --joiner cli-3e355c6e9e70 --failed-worker
-   desktop-9f9da13f0f82` (elastic checks already added). Check that `g19/c3` was committed by a later attempt. Run a
+desktop-9f9da13f0f82` (elastic checks already added). Check that `g19/c3` was committed by a later attempt. Run a
    negative control that makes the elastic check fail (e.g. a scratch-copy ledger with a fake non-member result).
    Usage receipt and a browser screenshot (`.scratch/r11-long-run2/browse.mjs`). Write RESULTS.md + SHA256SUMS.
 2. **Finding to raise with the owner:** a member that dies and comes back is never restarted. After the relaunch the
