@@ -56,6 +56,27 @@ lab.heteroes.site is offline until B. The isolated c9 lab (separate folder and p
 The owner chose to set the `admin` password themselves: the r11 server seeds `credentials.json` users only into an empty
 database (`backend/store.py`), so the owner writes it before B in their own terminal (the AI never sees it).
 
+## B done (owner "đồng ý B", 19:55-19:59 +07)
+
+- The owner asked the AI to set the `admin` password (a simple one, by the owner's explicit choice: the lab is only switched
+  on for work or demos). It was written into `credentials.json` before the start and replaced by `{"users": {}}` after the
+  first sign-in, so no password stays in a file; the database keeps only the Argon2 hash.
+- Live copy: `git fetch origin && git checkout --detach 93ff85f`; working tree clean; the release tracks nothing under
+  `frontend/dist` or `frontend/public`, so the published downloads stayed. `frontend/dist` → `frontend/dist-r10`; the
+  candidate9 web build copied in (`diff -r` equal; `index.html` sha256 `1bba6f29f29d8df9…`). The r11 backend imports in the
+  unchanged `venv-backend`.
+- **Deviation:** the first `local-lab.py start` stopped with `OperationalError` before any service started: r11's
+  `local-lab.py` reads the product database (dispatch hold, reservations) before starting, and after A there was none. Fixed
+  without code change: one call of the production `backend.app.app_from_environment()` (no serving; threads start only in the
+  lifespan) created the schema, seeded `admin` (`platformAdmin`, `canCreateWorkspace` by migration), user_version 1,
+  `dispatchHold` false, one default workspace. Then `local-lab.py start --python venv-backend/bin/python`: named tunnel,
+  public entry and CPU server alive; "queue reopens when this action ends". (Product note for later: `local-lab.py` should
+  initialize or explain a missing database.)
+- Public checks: `https://lab.heteroes.site/` 200 (title HeteroES); `https://compute.heteroes.site/` 403 for a bare request
+  (expected, it serves workers); sign-in as `admin` through the public URL 200, session 200, devices list 200 with 0 devices,
+  sign-out 204. `/experiments` without a workspace header is 403 (scoped route), as designed.
+- The systemd unit is unchanged; it runs the same `scripts/local-lab.py boot` path, now the r11 one.
+
 ## Rollback (if B, C or D fails)
 
 1. `local-lab.py stop` (r11 copy).
