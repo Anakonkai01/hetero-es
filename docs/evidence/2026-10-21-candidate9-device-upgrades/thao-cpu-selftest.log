@@ -1,0 +1,3 @@
+self-test passed on CPU coordinator; next: heteroes-worker join <lab address>
+settings.json coordinatorOnly True CPU coordinator
+agent-config.json device cpu CPU coordinator
