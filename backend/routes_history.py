@@ -63,24 +63,36 @@ def install_routes(app, store, runtime, scoped, visible, authorized):
     def attempt(attempt_id: str, current=Depends(scoped)):
         return lookup(attempt_id, "attemptId", "attempts", current)
 
-    def device_events(run_id):
-        with store.db() as db:
-            rows = db.execute(
-                "SELECT m.sequence,m.body FROM monitoring_events m JOIN assignments a ON a.id=m.assignment_id "
-                "WHERE a.run_id=? AND json_extract(m.body,'$.event') IN (?,?) ORDER BY m.sequence",
-                (run_id, *DEVICE_EVENTS),
-            ).fetchall()
-        return [(f"m{row['sequence']}", json.loads(row["body"])) for row in rows]
-
     @router.get("/api/v1/events")
-    def event_list(current=Depends(scoped)):
+    def event_list(experimentId: str | None = None, limit: int = 2000, current=Depends(scoped)):
+        """The newest events of the visible runs (or of one). Every read happens in ONE database session: the store
+        serializes sessions, and during a busy run the agents' polls hold it; one session per run made this list wait
+        behind them for minutes (HTTP 524 at the public edge, GSM8K demo tier 2)."""
         from datetime import datetime, timezone
 
+        limit = max(1, min(limit, 2000))
+        runs = [run["experimentId"] for run in visible(current) if experimentId in (None, run["experimentId"])]
+        if experimentId and not runs:
+            raise HTTPException(404, "Experiment not found")
+        with store.db() as db:
+            snapshots = {
+                row["id"]: json.loads(row["snapshot"]) if row["snapshot"] else {"events": []}
+                for row in db.execute(
+                    f"SELECT id,snapshot FROM experiments WHERE id IN ({','.join('?' * len(runs))})", runs
+                )
+            }
+            device = {}
+            for row in db.execute(
+                "SELECT a.run_id,m.sequence,m.body FROM monitoring_events m JOIN assignments a ON a.id=m.assignment_id "
+                f"WHERE a.run_id IN ({','.join('?' * len(runs))}) AND json_extract(m.body,'$.event') IN (?,?) "
+                "ORDER BY m.sequence",
+                (*runs, *DEVICE_EVENTS),
+            ):
+                device.setdefault(row["run_id"], []).append((f"m{row['sequence']}", json.loads(row["body"])))
         result = []
-        for run in visible(current):
-            run_id = run["experimentId"]
-            events = [(f"e{index}", event) for index, event in enumerate(store.snapshot(run_id)["events"])]
-            for key, event in events + device_events(run_id):
+        for run_id in runs:
+            events = [(f"e{index}", event) for index, event in enumerate(snapshots.get(run_id, {}).get("events", []))]
+            for key, event in events + device.get(run_id, []):
                 result.append(
                     {
                         "eventId": f"{run_id}.{key}",
@@ -95,7 +107,7 @@ def install_routes(app, store, runtime, scoped, visible, authorized):
                         "details": event,
                     }
                 )
-        return sorted(result, key=lambda item: item["timestamp"])[-2000:]
+        return sorted(result, key=lambda item: item["timestamp"])[-limit:]
 
     @router.get("/api/v1/artifacts")
     def artifact_list(current=Depends(scoped)):
