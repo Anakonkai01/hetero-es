@@ -94,7 +94,19 @@ Hiện coordinator DRAINING vì máy Quang, lab giữ GPU của 5 máy. Hai các
 
 ### Giai đoạn 7 (sau): L8 đường public chở dataset; sửa script demo (L9); điều tra 1660S sập (L10)
 
-## Bạn cần quyết
+## Quyết định của bạn (2026-10-22 sáng)
+
+1. L3: **đồng ý, chỉ sau khi giai đoạn 1 xong** (luật 10 phút bật cùng lúc với cơ chế dừng worker cũ).
+2. L6: **cho chủ máy chọn "giữ ON sau khi khởi động"**, mặc định vẫn OFF.
+3. Giai đoạn 0: **bỏ**, không gỡ tay; bản sửa deploy xong sẽ tự gỡ tier 2b (cũng là phép thử thật của bản sửa).
+4. L8: **làm trong đợt này** → thành giai đoạn 4b (dưới), trước giai đoạn 5.
+
+### Giai đoạn 4b: đường public chở được dataset (L8)
+
+Thiết kế trước, bạn duyệt rồi mới code: file study (dataset) đi qua đường public của lab có giới hạn kích thước, kiểm
+sha256 đã khai trong grant, chỉ cho assignment đang giữ máy đó. Thử bằng cách tắt Tailscale trên máy Thao như tier 1.
+
+## Câu hỏi ban đầu (đã trả lời ở trên)
 
 1. **L3, luật an toàn:** đồng ý "10 phút không liên lạc = coi như đã dừng" không? (Khuyên: đồng ý, *với điều kiện* giai đoạn
    1 xong trước, vì giai đoạn 1 mới là thứ bảo đảm không bao giờ có hai run trên một GPU.)
