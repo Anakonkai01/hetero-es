@@ -60,14 +60,14 @@ runtime: **2,110 passed, 100 skipped**. Product browser/Electron probes use disp
 
 Earlier phase receipts:
 
-| Work | Receipt |
-| --- | --- |
-| Baseline, history-preserving merge and deployed-clone cutover | [2026-10-19-one-repo](evidence/2026-10-19-one-repo/README.md) |
-| Legacy control removal and safe agent supervision extraction | [2026-10-19-phase2-runtime-removal](evidence/2026-10-19-phase2-runtime-removal/README.md) |
-| Mock/cloud/dead-code cleanup and r10 route scan | [2026-10-19-phase3](evidence/2026-10-19-phase3/README.md) |
-| Shared sources, policies and desktop utilities | [2026-10-19-phase4](evidence/2026-10-19-phase4/README.md) |
-| Router/agent/UI splits, translation audit and mutation gap closure | [2026-10-19-phase5-structure](evidence/2026-10-19-phase5-structure/README.md) |
-| 287-file AST proof, formatting/lint and CPU checks | [2026-10-19-phase5-format](evidence/2026-10-19-phase5-format/README.md) |
+| Work                                                               | Receipt                                                                                   |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| Baseline, history-preserving merge and deployed-clone cutover      | [2026-10-19-one-repo](evidence/2026-10-19-one-repo/README.md)                             |
+| Legacy control removal and safe agent supervision extraction       | [2026-10-19-phase2-runtime-removal](evidence/2026-10-19-phase2-runtime-removal/README.md) |
+| Mock/cloud/dead-code cleanup and r10 route scan                    | [2026-10-19-phase3](evidence/2026-10-19-phase3/README.md)                                 |
+| Shared sources, policies and desktop utilities                     | [2026-10-19-phase4](evidence/2026-10-19-phase4/README.md)                                 |
+| Router/agent/UI splits, translation audit and mutation gap closure | [2026-10-19-phase5-structure](evidence/2026-10-19-phase5-structure/README.md)             |
+| 287-file AST proof, formatting/lint and CPU checks                 | [2026-10-19-phase5-format](evidence/2026-10-19-phase5-format/README.md)                   |
 
 Mutation controls pass; final receipts kill 8 phase-2, 3 phase-3, 4 phase-4 and 4 phase-5 mutants. Phase 5 initially exposed
 an untested ON/OFF poll response; the new regression kills that mutant. Retired-only tests and replacement counts are
@@ -101,7 +101,6 @@ pairs). Receipts: `evidence/2026-10-19-extensibility-*`, `-v3-ledger-record`, `-
 runner/agent/backend/web on v3, audit scheduling, SDK/CLI, the r11 desktop profile (PEFT, Windows v3 acceptance), GPU
 acceptance with the owner's authorization, and removing the v1/v2 run paths at the switch.
 Detailed state and plan of this workstream for the next agent: [handoff-v3-extensibility.md](handoff-v3-extensibility.md).
-
 
 ## Product v3 continuation (2026-10-19)
 

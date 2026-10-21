@@ -11,6 +11,7 @@ that the product had hard-coded Greedy since `51e1b2a`; that was an omission, no
 11 related gaps (F1–F12 in `~/.claude/plans/proud-roaming-charm.md`).
 
 The owner approved fixing them **before** the 50-generation acceptance, with these choices:
+
 - the acceptance runs on candidate7;
 - elastic membership, both manual and opt-in `allowJoin`;
 - limits derived from measured speeds and aware of heartbeats;
@@ -22,18 +23,19 @@ Design: `runtime/docs/adr/ADR-009-scheduling-and-elastic-membership.md`.
 
 ## Done (commits, oldest first)
 
-| Commit | What |
-| --- | --- |
-| d92ffcb, df2ba0d | GTX 1660 SUPER candidate6 qualification: self-test PASS, nine-case probe 9/9 exact vs 5070 (`evidence/2026-10-21-1660s-candidate6-qualification/`) |
-| 44e27fc | ADR-009 and predeclaration `evidence/2026-10-21-scheduling-elastic/` |
-| dd875c6 | Dispatch: AdmittedOnly forwards hooks and `set_admitted`; heartbeat liveness for GreedyTail; `SpeedBook.from_ledger` |
-| a34c45f | `greedy-tail`/`greedy` in runner, supervisor, backend, web, `heteroes serve --scheduler`; dead names removed; heartbeat-aware stall; derived limits; audits chosen/completed |
-| d148231 | Elastic membership end to end (details below) |
-| 37723d6 | `privateLabUrl` moved to the signed-in capabilities; desktop keeps the stack of an unclassified action failure |
-| cce2f64 | CPU gate **23/23 ALL PASS** (runtime 2574/102 skipped, backend 392), mutation receipts; `RESULTS.md` |
-| b2eaecd, 638f8e1 | Candidate7 predeclaration; build `lf1-20261021-r11-candidate7` exited 0; refreshed desktop resources committed; `installers.sha256` |
+| Commit           | What                                                                                                                                                                         |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| d92ffcb, df2ba0d | GTX 1660 SUPER candidate6 qualification: self-test PASS, nine-case probe 9/9 exact vs 5070 (`evidence/2026-10-21-1660s-candidate6-qualification/`)                           |
+| 44e27fc          | ADR-009 and predeclaration `evidence/2026-10-21-scheduling-elastic/`                                                                                                         |
+| dd875c6          | Dispatch: AdmittedOnly forwards hooks and `set_admitted`; heartbeat liveness for GreedyTail; `SpeedBook.from_ledger`                                                         |
+| a34c45f          | `greedy-tail`/`greedy` in runner, supervisor, backend, web, `heteroes serve --scheduler`; dead names removed; heartbeat-aware stall; derived limits; audits chosen/completed |
+| d148231          | Elastic membership end to end (details below)                                                                                                                                |
+| 37723d6          | `privateLabUrl` moved to the signed-in capabilities; desktop keeps the stack of an unclassified action failure                                                               |
+| cce2f64          | CPU gate **23/23 ALL PASS** (runtime 2574/102 skipped, backend 392), mutation receipts; `RESULTS.md`                                                                         |
+| b2eaecd, 638f8e1 | Candidate7 predeclaration; build `lf1-20261021-r11-candidate7` exited 0; refreshed desktop resources committed; `installers.sha256`                                          |
 
 What `d148231` adds:
+
 - **Ledger:** additive `membership` and `expiry` tables. The schema stays 6, unlike the plan's schema 7 (see ADR-009 §6).
 - **Runner:** `product/membership.py`.
 - **Agent:** `UPDATE_MEMBERSHIP`.
@@ -43,6 +45,7 @@ What `d148231` adds:
 - **Web:** members panel and timeline events.
 
 Candidate7 runtime SHA256:
+
 - Worker `57b0faf6d31a394afef5fd4760f1d0da6ebbe4e922dce5fb9eea392917c3adc7` (CLI runtime directory `57b0faf6d31a`).
 - Server `fbb2cb7c8dbe6181b3f7089ac23fcd86f19ee813bad626d00bafcf376ee3926a`.
 
