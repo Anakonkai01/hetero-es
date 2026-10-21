@@ -4,7 +4,7 @@ import pytest
 
 from backend.store import Store
 from backend.errors import RuntimeRejected
-from labkit import draft, login, submitted
+from labkit import OMIT, draft, login, submitted
 
 
 def test_real_session_revocation_and_workspace_enforcement(setup):
@@ -58,6 +58,7 @@ def test_queued_cancel_never_contacts_runtime(setup):
     "changes",
     [
         {"schedulerPolicy": "capacity-weighted"},
+        {"schedulerPolicy": "round-robin"},
         {"syncMode": "asynchronous"},
         {"workerIds": ["unknown"]},
         {"candidatesPerGeneration": 1},
@@ -68,6 +69,18 @@ def test_queued_cancel_never_contacts_runtime(setup):
 def test_invalid_or_unsupported_config_rejected(setup, changes):
     client, _, _ = setup
     assert draft(client, login(client, "admin"), **changes).status_code == 422
+
+
+def test_new_experiments_default_to_tail_aware_scheduling_and_greedy_stays_available(setup):
+    client, _, _ = setup
+    headers = login(client, "admin")
+    cap = client.get("/api/v1/capabilities", headers=headers).json()
+    assert cap["schedulerPolicies"] == ["greedy-tail", "greedy"] and cap["syncModes"] == ["synchronous"]
+    assert "asynchronous" not in cap["unsupported"]
+    default = draft(client, headers, schedulerPolicy=OMIT)
+    assert default.status_code == 200, default.text
+    assert default.json()["schedulerPolicy"] == "greedy-tail"
+    assert draft(client, headers, schedulerPolicy="greedy").json()["schedulerPolicy"] == "greedy"
 
 
 def test_config_is_immutable_after_submission(setup):

@@ -9,6 +9,8 @@ import argparse
 import json
 from pathlib import Path
 
+from heteroes.catalog import DEFAULT_SCHEDULER_POLICY, SCHEDULER_POLICIES
+
 
 def _resolve(spec, base):
     spec = json.loads(json.dumps(spec))
@@ -62,6 +64,9 @@ def main(argv=None):
     serve.add_argument("--timeout-seconds", type=float, default=1800)
     serve.add_argument("--worker-ids", help="comma-separated worker IDs eligible for audits")
     serve.add_argument("--audit-rate", type=float, default=0.05)
+    serve.add_argument(
+        "--scheduler", choices=SCHEDULER_POLICIES, default=DEFAULT_SCHEDULER_POLICY, help="how candidates go to workers"
+    )
     serve.add_argument("--initial-adapter", type=Path, help="pinned initial LoRA weights (required on Windows)")
     serve.add_argument("--lab", help="offer the specification through an installed Worker's managed-lab agent")
     serve.add_argument("--workspace", help="workspace ID with --lab")
@@ -94,8 +99,15 @@ def main(argv=None):
         if args.lab:
             if args.initial_adapter is not None:
                 parser.error("the managed lab controls initial adapter creation")
-            if args.port != 8765 or args.audit_rate != 0.05 or args.timeout_seconds != 1800:
-                parser.error("--lab uses the installed Worker's port and the managed lab's audit/time limits")
+            if (
+                args.port != 8765
+                or args.audit_rate != 0.05
+                or args.timeout_seconds != 1800
+                or args.scheduler != DEFAULT_SCHEDULER_POLICY
+            ):
+                parser.error(
+                    "--lab uses the installed Worker's port and the managed lab's audit/time/scheduling settings"
+                )
             from heteroes.v3.lab_cli import serve_lab
 
             return serve_lab(
@@ -120,6 +132,7 @@ def main(argv=None):
             worker_ids=args.worker_ids.split(",") if args.worker_ids else None,
             audit_rate=args.audit_rate,
             initial_adapter=args.initial_adapter,
+            scheduler=args.scheduler,
         )
         return 0
 

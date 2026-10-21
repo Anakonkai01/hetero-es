@@ -358,6 +358,69 @@ def test_progress_resets_the_stall_timer(world):
     assert final_hash(coordinator) == world.oracle(1)
 
 
+def _one_worker(coordinator, evaluate, heartbeat_seconds=None):
+    stop = threading.Event()
+    worker = Worker("w1", HttpClient(coordinator.url, timeout=10.0), evaluate, heartbeat_seconds=heartbeat_seconds)
+
+    def loop():
+        while not stop.is_set():
+            if worker.step().kind is StepKind.NO_WORK:
+                time.sleep(0.005)
+
+    thread = threading.Thread(target=loop, daemon=True)
+    thread.start()
+    return lambda: (stop.set(), thread.join(timeout=10))
+
+
+def _slow(descriptor):
+    time.sleep(0.9)  # one candidate takes longer than the whole stall time below
+    return reward_of(descriptor)
+
+
+def test_a_long_candidate_that_heartbeats_is_progress_not_a_stall(world):
+    # ADR-009: a slow GPU on a long candidate is alive; before, only a commit counted and the run failed after stall_seconds
+    coordinator = world.coordinator(stall_seconds=0.4, timeout_seconds=60)
+    halt = _one_worker(coordinator, _slow, heartbeat_seconds=0.1)
+    summary = coordinator.run_generation(0)
+    halt()
+    assert summary["wait_seconds"] > 0.4 * 4
+    assert final_hash(coordinator) == world.oracle(1)
+
+
+def test_the_same_long_candidate_without_heartbeats_still_stalls(world):
+    coordinator = world.coordinator(stall_seconds=0.4, timeout_seconds=60)
+    halt = _one_worker(coordinator, _slow)
+    with pytest.raises(CoordinatorError, match="no progress"):
+        coordinator.run_generation(0)
+    halt()
+
+
+def test_a_worker_that_only_asks_for_work_is_not_progress(world):
+    # a slow worker that the tail rule keeps waiting asks again and again: that must not hide a real stall
+    coordinator = world.coordinator(stall_seconds=0.3, timeout_seconds=15, policy_factory=lambda: _Never())
+    halt = _one_worker(coordinator, reward_of)
+    with pytest.raises(CoordinatorError, match="no progress"):
+        coordinator.run_generation(0)
+    halt()
+
+
+class _Never:
+    def pick(self, records, worker_id):
+        return None
+
+    def leased(self, candidate_id, worker_id):
+        pass
+
+
+def test_the_generation_time_limit_can_be_computed_for_each_generation(world):
+    seen = []
+    # the stall rule is only a backstop here: if the computed limit were ignored the test fails instead of hanging
+    coordinator = world.coordinator(stall_seconds=5, timeout_seconds=lambda generation: seen.append(generation) or 0.3)
+    with pytest.raises(TimeoutError, match="after 0.3 s"):
+        coordinator.run_generation(0)
+    assert seen and set(seen) == {0}
+
+
 def test_the_default_stall_time_is_a_multiple_of_the_lease(world):
     coordinator = world.coordinator(lease_seconds=40.0)
     assert coordinator._stall == 200.0

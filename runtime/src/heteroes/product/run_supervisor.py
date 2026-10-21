@@ -9,7 +9,7 @@ import sqlite3
 import threading
 import time
 
-from heteroes.catalog import DECODE_ENGINES, V3_DECODE_ENGINES, WORKLOAD_NAMES
+from heteroes.catalog import DECODE_ENGINES, SCHEDULER_POLICIES, SYNC_MODES, V3_DECODE_ENGINES, WORKLOAD_NAMES
 
 from .files import events, read_json, write_json
 from .remote import alive
@@ -57,8 +57,8 @@ def validate(config, workers):
         or not set(selected) <= set(workers)
     ):
         raise ValueError("select unique configured worker IDs")
-    if config.get("schedulerPolicy") != "greedy" or config.get("syncMode") != "synchronous":
-        raise ValueError("only the greedy synchronous policy is configured")
+    if config.get("schedulerPolicy") not in SCHEDULER_POLICIES or config.get("syncMode") not in SYNC_MODES:
+        raise ValueError(f"choose a scheduling policy among {', '.join(SCHEDULER_POLICIES)}, synchronously")
 
 
 class RunSupervisor(ABC):
@@ -326,6 +326,12 @@ class RunSupervisor(ABC):
                     total, mismatches = db.execute("SELECT count(*),coalesce(sum(matched=0),0) FROM audit").fetchone()
                     result["auditSummary"] = {
                         "completed": total,
+                        # chosen for re-execution, from each generation's summary (ADR-009); less completed = timed out
+                        "selected": sum(
+                            event.get("audits", {}).get("selected", 0)
+                            for event in result["events"]
+                            if event.get("event") == "generation_done" and isinstance(event.get("audits"), dict)
+                        ),
                         "mismatches": mismatches,
                         "quarantinedWorkers": [
                             dict(r) for r in db.execute("SELECT worker_id,reason FROM quarantine ORDER BY worker_id")

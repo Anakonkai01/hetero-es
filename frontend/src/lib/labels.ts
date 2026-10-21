@@ -130,13 +130,14 @@ export const ARTIFACT_TYPE_LABEL: Record<ArtifactType, string> = {
   EVALUATION_RESULTS: 'Evaluation results',
 };
 
-export const POLICY_HINT = {
-  greedy: 'Assigns the next available candidate to an admitted worker requesting work.',
-  'capacity-weighted': 'Splits candidates by the estimated capacity of each admitted worker.',
-  'round-robin': 'Hands candidates to admitted workers in turn, ignoring capacity.',
-} as const;
+// The scheduling policies the lab offers (ADR-009); the backend capability lists the ones this lab accepts.
+export const POLICY_LABEL: Record<string, string> = {
+  'greedy-tail': 'Tail-aware (recommended)',
+  greedy: 'Greedy',
+};
 
-export const SYNC_HINT = {
-  synchronous: 'Waits for all candidates of a generation before updating the model.',
-  asynchronous: 'Allows updates before every candidate has finished (a prototype assumption).',
-} as const;
+export const POLICY_HINT: Record<string, string> = {
+  'greedy-tail':
+    'Any free worker takes work, but a much slower worker is kept off the last candidates when a faster one would finish them sooner.',
+  greedy: 'The next waiting candidate goes to whichever selected worker asks first.',
+};

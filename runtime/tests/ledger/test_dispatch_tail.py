@@ -6,7 +6,8 @@ GPU that cost is as large as what the GPU adds. The rule is checked here with ex
 
 import pytest
 
-from heteroes.dispatch import AdmittedOnly, Greedy, GreedyTail, SpeedBook
+from heteroes.catalog import DEFAULT_SCHEDULER_POLICY, SCHEDULER_POLICIES
+from heteroes.dispatch import AdmittedOnly, Greedy, GreedyTail, SpeedBook, policy_factory
 from heteroes.ledger import Ledger
 from heteroes.worker_api import WorkerAPI
 from ledger_helpers import FakeClock, batch
@@ -329,3 +330,39 @@ def test_a_new_book_is_seeded_from_the_durations_in_the_ledger():
     assert SpeedBook.from_ledger(ledger, "exp", alpha=0.5).estimate("w") == 3.5
     assert SpeedBook.from_ledger(ledger, "exp").estimate("x") is None
     assert SpeedBook.from_ledger(ledger, "other").workers() == []
+
+
+# ---- the policies the product offers (ADR-009): one factory, a new policy per generation, one book for the run
+
+
+def test_the_product_offers_tail_first_and_greedy():
+    assert SCHEDULER_POLICIES == ("greedy-tail", "greedy") and DEFAULT_SCHEDULER_POLICY == "greedy-tail"
+
+
+def test_the_tail_factory_shares_one_book_between_generations():
+    book = SpeedBook()
+    make = policy_factory("greedy-tail", ["a", "b"], book=book)
+    assert make.policy_name == "greedy-tail" and policy_factory("greedy").policy_name == "greedy"
+    first, second = make(), make()
+    assert first is not second and isinstance(first, AdmittedOnly) and first.admitted == {"a", "b"}
+    assert first._inner._book is book and second._inner._book is book
+    assert isinstance(first._inner, GreedyTail)
+
+
+def test_the_greedy_factory_and_no_admission_list():
+    assert type(policy_factory("greedy")()) is Greedy
+    assert type(policy_factory("greedy-tail")()) is GreedyTail
+
+
+def test_the_factory_reads_the_current_members_for_each_generation():
+    members = ["a"]
+    make = policy_factory("greedy", lambda: members)
+    assert make().admitted == {"a"}
+    members = ["a", "late"]
+    assert make().admitted == {"a", "late"}
+
+
+@pytest.mark.parametrize("bad", ["capacity-weighted", "round-robin", "asynchronous", "", None, "GREEDY"])
+def test_names_without_a_policy_are_refused(bad):
+    with pytest.raises(ValueError):
+        policy_factory(bad)

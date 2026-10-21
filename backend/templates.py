@@ -5,7 +5,7 @@ stale; the experiment wizard still validates everything when a run is created fr
 """
 
 from .migrations import initialize_templates_schema
-from heteroes.catalog import V3_DECODE_ENGINES
+from heteroes.catalog import SCHEDULER_POLICIES, SYNC_MODES, V3_DECODE_ENGINES
 from heteroes.v3.options import validate_weight_space, validate_seed_namespace
 from heteroes.v3.scoring import validate_spec
 from datetime import datetime, timezone
@@ -35,8 +35,8 @@ FLOATS = {
 }
 NULLABLE = {"alphaMinimum", "momentumBeta", "evalChunk"}  # null: no minimum alpha, no momentum, the default chunk
 CHOICES = {
-    "schedulerPolicy": {"capacity-weighted", "round-robin", "greedy"},
-    "syncMode": {"synchronous", "asynchronous"},
+    "schedulerPolicy": set(SCHEDULER_POLICIES),
+    "syncMode": set(SYNC_MODES),
     "sigmaSchedule": {"constant", "cosine"},
     "decodeEngine": set(V3_DECODE_ENGINES),
     "coefficientRule": {"zscore@1", "centered-rank@1"},

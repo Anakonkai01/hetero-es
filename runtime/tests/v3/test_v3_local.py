@@ -217,9 +217,18 @@ def test_every_candidate_can_be_audited_on_another_worker_before_updates(assets,
         ).fetchall()
         assert len(rows) == 8
         assert all(auditor != original and matched == 1 for auditor, original, matched in rows)
+    # each generation's summary says how many re-executions were chosen and done (ADR-009)
+    assert sum(row["audits"]["selected"] for row in summaries) == 8
+    assert all(row["audits"]["completed"] == row["audits"]["selected"] for row in summaries)
     assert not all(row["noop"] for row in summaries)
     _, _, children = check_run(out, assets)
     assert children == [row["child_sha256"] for row in summaries]
+
+
+def test_audits_that_could_not_run_show_in_the_summary(assets, tmp_path):
+    # one worker cannot re-execute its own candidates: chosen, not completed, and the run still finishes (ADR-009, F9)
+    summaries = run_local(config_for(assets), tmp_path / "alone", workers=1, timeout_seconds=30, audit_rate=1.0)
+    assert [row["audits"] for row in summaries] == [{"selected": 4, "completed": 0}] * len(summaries)
 
 
 def test_installed_entrypoint_loads_without_numerical_dependencies():

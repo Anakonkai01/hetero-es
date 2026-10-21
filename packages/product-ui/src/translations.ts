@@ -1672,14 +1672,11 @@ export const translations: Record<string, string> = {
   'Request received; the coordinator has not confirmed the start yet':
     'Đã nhận yêu cầu; coordinator chưa xác nhận việc bắt đầu',
   'The experiment was cancelled, as confirmed by the coordinator': 'Thí nghiệm đã bị hủy, coordinator đã xác nhận',
-  'Assigns the next available candidate to an admitted worker requesting work.':
-    'Giao candidate kế tiếp còn trống cho worker được nhận đang xin việc.',
-  'Splits candidates by the estimated capacity of each admitted worker.':
-    'Chia candidate theo năng lực ước tính của từng worker được nhận.',
-  'Hands candidates to admitted workers in turn, ignoring capacity.':
-    'Giao candidate lần lượt cho các worker được nhận, không xét năng lực.',
-  'Waits for all candidates of a generation before updating the model.':
-    'Chờ đủ mọi candidate của một generation rồi mới cập nhật model.',
-  'Allows updates before every candidate has finished (a prototype assumption).':
-    'Cho phép cập nhật trước khi mọi candidate xong (giả định của bản mẫu).',
+  'Tail-aware (recommended)': 'Tránh đuôi chậm (khuyên dùng)',
+  chosen: 'được chọn',
+  Greedy: 'Greedy (ai rảnh lấy trước)',
+  'Any free worker takes work, but a much slower worker is kept off the last candidates when a faster one would finish them sooner.':
+    'Worker nào rảnh cũng nhận việc, nhưng worker chậm hơn nhiều không nhận các candidate cuối khi một worker nhanh sẽ làm xong sớm hơn.',
+  'The next waiting candidate goes to whichever selected worker asks first.':
+    'Candidate đang chờ kế tiếp được giao cho worker đã chọn nào hỏi trước.',
 };

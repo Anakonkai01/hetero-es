@@ -71,7 +71,7 @@ def product_config(assets, root, **changes):
         "workerIds": ["fixture"],
         "host": "127.0.0.1",
         "port": 0,
-        "schedulerPolicy": "greedy",
+        "schedulerPolicy": "greedy-tail",
         "syncMode": "synchronous",
         "validationInterval": 1,
         **changes,
@@ -174,6 +174,8 @@ def run_product(cfg, tmp_path, python_scorer=None):
         (tmp_path / "workers-stopped.flag").touch()
         assert runner.wait(timeout=30) == 0, (tmp_path / "runner-output.txt").read_text()[-4000:]
         assert read_json(tmp_path / "runner.json")["status"] == "COMPLETED"
+        events = [json.loads(line) for line in (tmp_path / "events.jsonl").read_text().splitlines()]
+        assert next(e for e in events if e.get("event") == "managed_start")["schedulerPolicy"] == "greedy-tail"
         recipe, plan = read_json(tmp_path / "recipe.json"), read_json(tmp_path / "plan.json")
         assert recipe["weightSpace"]["kind"] == space["kind"]
         assert plan["scorer"] == cfg["scorer"]

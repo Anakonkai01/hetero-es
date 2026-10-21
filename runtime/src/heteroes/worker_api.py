@@ -191,6 +191,9 @@ class WorkerAPI:
         # experiment's scoring fails, which is never a reward and never the worker's fault (`scoring_error` keeps it)
         self._scorer = scorer
         self._usage_sink, self.usage_errors = usage_sink, 0
+        # granted leases, heartbeats, results and failures so far: what the coordinator counts as a generation still moving
+        # (ADR-009). A request that gets no work is not activity: a waiting worker must not hide a real stall.
+        self.activity = 0
         self.scoring_error: str | None = None
         self._ledger = ledger
         self._experiment_id = experiment_id
@@ -249,6 +252,7 @@ class WorkerAPI:
                 candidate_id = chosen.descriptor.candidate_id
                 lease = self._ledger.lease(candidate_id, worker_id, self._lease_seconds)
                 self._policy.leased(candidate_id, worker_id)
+                self.activity += 1
                 work = {
                     "descriptor": chosen.descriptor.to_dict(),
                     "attempt_number": lease.attempt_number,
@@ -275,6 +279,7 @@ class WorkerAPI:
     def _heartbeat(self, decoded) -> dict:
         descriptor, attempt_number, token = decoded
         lease = self._ledger.extend_lease(descriptor, attempt_number, token, self._lease_seconds)
+        self.activity += 1
         if hasattr(self._policy, "heartbeat"):  # a busy worker is alive for the policy too (GreedyTail, ADR-009)
             self._policy.heartbeat(self._ledger.attempt_worker(descriptor, attempt_number, token))
         return {"deadline": lease.deadline}
@@ -302,6 +307,7 @@ class WorkerAPI:
             outcome = self._ledger.submit_result(descriptor, attempt_number, token, payload)
         if outcome is SubmitOutcome.COMMITTED and hasattr(self._policy, "committed"):
             self._policy.committed(descriptor.candidate_id)  # a policy may learn from the duration (GreedyTail)
+        self.activity += 1
         return {"outcome": outcome.value}
 
     def record_usage(self, descriptor, attempt_number, worker, usage, kind):
@@ -315,4 +321,5 @@ class WorkerAPI:
     def _report_failure(self, decoded) -> dict:
         descriptor, attempt_number, token, kind = decoded
         self._ledger.report_failure(descriptor, attempt_number, token, kind)
+        self.activity += 1
         return {}

@@ -57,6 +57,7 @@ class AuditAPI:
         self.fault_path = fault_path
         self.faults = read_json(fault_path, {}) if fault_path is not None else {}
         self._seen, self._leases, self._requests = set(), {}, OrderedDict()
+        self._activity = 0  # audit leases, heartbeats, results and failures (see WorkerAPI.activity)
         self._lock = threading.RLock()
         self.fatal_error = None
         self.cancel_requested = cancel_requested
@@ -68,6 +69,23 @@ class AuditAPI:
     @property
     def quarantined_workers(self):
         return set(self.faults) | {q.worker_id for q in self.ledger.list_quarantined()}
+
+    @property
+    def activity(self):
+        return self.base.activity + self._activity
+
+    def audit_counts(self):
+        """(selected, completed): the committed candidates of this generation chosen for re-execution, and how many of
+        them another worker re-executed. A timed-out drain leaves completed < selected; the summary shows it (ADR-009)."""
+        with self.ledger._lock:
+            rows = self.ledger._db.execute(
+                "SELECT c.candidate_id, EXISTS (SELECT 1 FROM audit u WHERE u.candidate_id = c.candidate_id) "
+                "FROM candidate c JOIN completion t ON t.candidate_id = c.candidate_id "
+                "WHERE c.experiment_id = ? AND c.generation = ?",
+                (self.experiment_id, self.generation),
+            ).fetchall()
+        chosen = [bool(done) for cid, done in rows if selected_for_audit(cid, self.rate)]
+        return len(chosen), sum(chosen)
 
     @property
     def available_workers(self):
@@ -155,6 +173,7 @@ class AuditAPI:
             self.log(
                 {"event": "audit_leased", "candidate_id": cid, "worker_id": worker, "original_worker_id": original}
             )
+            self._activity += 1
             return dict(work)
         return None
 
@@ -193,6 +212,7 @@ class AuditAPI:
         worker = entry["worker"]
         if worker in self.quarantined_workers:
             return _error("worker_quarantined", "Worker is quarantined")
+        self._activity += 1
         if operation == "heartbeat":
             work["deadline"] = self.clock() + self.lease_seconds
             return {"ok": True, "deadline": work["deadline"]}

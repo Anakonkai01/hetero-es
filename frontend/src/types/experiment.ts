@@ -57,13 +57,13 @@ export type ExperimentStatus =
   | 'COMPLETED'
   | 'CANCELLED';
 
-export type SchedulerPolicy = 'capacity-weighted' | 'round-robin' | 'greedy';
+export type SchedulerPolicy = 'greedy-tail' | 'greedy';
 
-export type SyncMode = 'synchronous' | 'asynchronous';
+export type SyncMode = 'synchronous';
 
 export interface Experiment extends Partial<V3Settings> {
   usageSummary?: UsageSummary;
-  auditSummary?: { completed: number; mismatches: number; quarantinedWorkers: { worker_id: string; reason: string }[] };
+  auditSummary?: { completed: number; selected?: number; mismatches: number; quarantinedWorkers: { worker_id: string; reason: string }[] };
   recipeVersion?: number;
   batchSize?: number;
   batchSeed?: number;

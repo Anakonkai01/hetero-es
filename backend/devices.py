@@ -44,7 +44,7 @@ from .addresses import endpoint, is_private
 
 from .constants import MODEL, REVISION, QUIESCENT
 from heteroes.product.cpu_coordinator import coordinator_only
-from heteroes.catalog import WORKLOAD_NAMES
+from heteroes.catalog import SCHEDULER_POLICIES, SYNC_MODES, WORKLOAD_NAMES
 
 
 class AgentRuntime(AgentScheduling, AgentCommands, AgentPolling):
@@ -130,13 +130,13 @@ class AgentRuntime(AgentScheduling, AgentCommands, AgentPolling):
                 if d["approvalStatus"] == "APPROVED" and not coordinator_only(d["selfTest"])
             ],
             "workloads": list(WORKLOAD_NAMES),
-            "schedulerPolicies": ["greedy"],
-            "syncModes": ["synchronous"],
+            "schedulerPolicies": list(SCHEDULER_POLICIES),
+            "syncModes": list(SYNC_MODES),
             "quarantinedWorkerIds": [d["workerId"] for d in self.devices() if d["approvalStatus"] == "QUARANTINED"],
             "maxRunSeconds": None,
             "telemetry": True,
             "pauseResume": True,
-            "unsupported": ["change-workers", "model-upload", "dataset-upload", "asynchronous"],
+            "unsupported": ["change-workers", "model-upload", "dataset-upload"],
         }
 
     def public_compute_url(self):

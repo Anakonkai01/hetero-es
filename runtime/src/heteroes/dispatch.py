@@ -319,3 +319,26 @@ class AdmittedOnly:
     def heartbeat(self, worker_id: str) -> None:
         if hasattr(self._inner, "heartbeat"):
             self._inner.heartbeat(worker_id)
+
+
+def policy_factory(name, admitted=None, book: SpeedBook | None = None):
+    """
+    What the product's coordinator calls once per generation (`Coordinator(policy_factory=...)`): a new policy each time, but ONE
+    SpeedBook for the whole run, so a tail-aware policy keeps what it learned (ADR-009). `name` is one of
+    `catalog.SCHEDULER_POLICIES`. `admitted` is None (any worker), a collection of worker ids, or a function returning the
+    current members, read again for every generation (elastic membership).
+    """
+    from heteroes.catalog import SCHEDULER_POLICIES
+
+    if name not in SCHEDULER_POLICIES:
+        raise ValueError(f"unknown scheduling policy {name!r}: choose one of {', '.join(SCHEDULER_POLICIES)}")
+    shared = SpeedBook() if book is None else book
+
+    def make():
+        inner = GreedyTail(shared) if name == "greedy-tail" else Greedy()
+        members = admitted() if callable(admitted) else admitted
+        return inner if members is None else AdmittedOnly(inner, members)
+
+    make.policy_name = name  # what the run logs: the policy actually built, not a copy of the configuration
+    make.book = shared  # the measured speeds, also used for the run's time limits
+    return make

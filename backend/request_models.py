@@ -3,6 +3,7 @@
 from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 from .policies import Strict
+from heteroes.catalog import DEFAULT_SCHEDULER_POLICY, SYNC_MODES
 
 
 class Login(BaseModel):
@@ -21,8 +22,8 @@ class Configuration(BaseModel):
     name: str = Field(min_length=3, max_length=160)
     modelName: str
     modelArtifactId: str = "qwen-pinned"
-    schedulerPolicy: str = "greedy"
-    syncMode: str = "synchronous"
+    schedulerPolicy: str = DEFAULT_SCHEDULER_POLICY
+    syncMode: str = SYNC_MODES[0]
     workerIds: list[str] = Field(min_length=1, max_length=10)
     task: str = "arith16"
     maxGenerations: int = Field(default=3, ge=1, le=1000, strict=True)

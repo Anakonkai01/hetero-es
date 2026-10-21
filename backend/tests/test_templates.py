@@ -86,10 +86,14 @@ def test_only_known_settings_with_plain_values_are_accepted(setup):
         {"decodeEngine": {"$set": 1}},
         {"task": "x" * 500},
         {"schedulerPolicy": "secret"},
+        {"schedulerPolicy": "capacity-weighted"},
+        {"schedulerPolicy": "round-robin"},
+        {"syncMode": "asynchronous"},
     ):
         reply = create(client, admin, config={**GOOD, **bad})
         assert reply.status_code == 422, (bad, reply.text)
     assert create(client, admin, config={}).status_code == 422, "an empty template is useless"
+    assert create(client, admin, config={**GOOD, "schedulerPolicy": "greedy-tail"}).status_code == 201
 
 
 def test_names_are_trimmed_unique_per_workspace_and_limited(setup):

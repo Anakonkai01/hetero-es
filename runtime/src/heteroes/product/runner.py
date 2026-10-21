@@ -1,6 +1,7 @@
 """Managed coordinator subprocess. Control files contain no browser-supplied paths."""
 
 import json
+import math
 import os
 from pathlib import Path
 import signal
@@ -39,9 +40,31 @@ def apply_backup_policy(root, generation, current, emit):
     return policy
 
 
+def scheduling(config, ledger):
+    """The coordinator's policy factory: only the selected workers get work, and one speed book serves the whole run,
+    seeded from what the ledger already knows after a restart (ADR-009)."""
+    from heteroes.dispatch import SpeedBook, policy_factory
+
+    return policy_factory(
+        config.get("schedulerPolicy", "greedy"),
+        config["workerIds"],
+        book=SpeedBook.from_ledger(ledger, config["runId"]),
+    )
+
+
+def derived_limit(book, workers, candidates, *, floor, factor):
+    """Seconds a generation (or one audit) may take: `factor` times the work of the slowest member, never less than the old fixed
+    `floor` (ADR-009). `workers` is a list or a function returning the current members."""
+    members = workers() if callable(workers) else workers
+    known = [book.estimate(w) for w in members if book.estimate(w) is not None]
+    if not known:
+        return floor
+    return max(floor, factor * math.ceil(candidates / len(members)) * max(known))
+
+
 def main(directory, *, device="cuda", timeout_seconds=1800):
     from heteroes.coordinator import Coordinator, RunCancelled, RunPaused, _NoGeneration
-    from heteroes.dispatch import AdmittedOnly, Greedy
+    from heteroes.dispatch import Greedy
     from heteroes.ledger import Ledger
     from heteroes.model.loading import build_recipe, check_noise_selftest, check_recipe_selftest, load_pinned_model
     from heteroes.runtime_info import JsonlLog, code_info, environment_info
@@ -181,6 +204,7 @@ def main(directory, *, device="cuda", timeout_seconds=1800):
                 if recipe.recipe["weightSpace"]["kind"] == "lora"
                 else [],
             }
+        scheduler = scheduling(config, ledger)
         coordinator = Coordinator(
             loaded.model,
             loaded.schema,
@@ -190,11 +214,14 @@ def main(directory, *, device="cuda", timeout_seconds=1800):
             config["runId"],
             config["candidatesPerGeneration"],
             config["alpha"],
-            policy_factory=lambda: AdmittedOnly(Greedy(), config["workerIds"]),
+            policy_factory=scheduler,
             host=config["host"],
             port=config["port"],
             token=os.environ["HETEROES_TOKEN"],
-            timeout_seconds=timeout_seconds,
+            timeout_seconds=lambda _: derived_limit(
+                scheduler.book, config["workerIds"], config["candidatesPerGeneration"], floor=timeout_seconds, factor=4
+            ),
+            audit_timeout_seconds=lambda _: derived_limit(scheduler.book, config["workerIds"], 1, floor=120, factor=3),
             stall_seconds=300,
             failed_grace_seconds=60,
             lease_seconds=60,
@@ -251,6 +278,7 @@ def main(directory, *, device="cuda", timeout_seconds=1800):
         emit(
             {
                 "event": "managed_start",
+                "schedulerPolicy": scheduler.policy_name,
                 "recipe": recipe.to_dict(),
                 "recipe_hash": recipe.hash,
                 "code": code_info(),

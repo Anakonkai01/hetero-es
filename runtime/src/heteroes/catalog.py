@@ -18,3 +18,9 @@ DECODE_ENGINES = ("hf_generate", "hf_compact")
 # A new opt-in Recipe v3 identity; never extend Recipe v1's frozen decoder vocabulary.
 CPU_GUARD_DECODER = "hf_fp32_cpu_guard_v1"
 V3_DECODE_ENGINES = (*DECODE_ENGINES, CPU_GUARD_DECODER)
+
+# How the coordinator hands candidates to workers (ADR-009); the first is the default. Not part of any recipe identity:
+# a policy only decides which worker evaluates which candidate.
+SCHEDULER_POLICIES = ("greedy-tail", "greedy")
+DEFAULT_SCHEDULER_POLICY = SCHEDULER_POLICIES[0]
+SYNC_MODES = ("synchronous",)

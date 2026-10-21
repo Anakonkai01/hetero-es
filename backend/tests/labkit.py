@@ -18,6 +18,9 @@ def login(client, name):
     return {"Authorization": "Bearer " + result.json()["accessToken"], "X-Workspace-Id": "lab"}
 
 
+OMIT = object()  # draft(..., key=OMIT) sends the request without that key, to test a server default
+
+
 def draft(client, headers, **changes):
     """Create a Recipe v1 draft. Without an explicit coordinator it takes the workspace's first approved coordinator."""
     body = dict(
@@ -38,7 +41,8 @@ def draft(client, headers, **changes):
         coordinators = client.get("/api/v1/capabilities", headers=headers).json().get("coordinatorDevices") or []
         if coordinators:
             body["coordinatorDeviceId"] = coordinators[0]["deviceId"]
-    return client.post("/api/v1/experiments", json={**body, **changes}, headers=headers)
+    body = {key: value for key, value in {**body, **changes}.items() if value is not OMIT}
+    return client.post("/api/v1/experiments", json=body, headers=headers)
 
 
 def enroll(lab, alias="test-gpu", coordinator=True, name=None):

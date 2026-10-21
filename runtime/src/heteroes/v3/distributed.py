@@ -59,14 +59,17 @@ def serve(
     audit_rate=0.05,
     linger_seconds=2,
     initial_adapter=None,
+    scheduler="greedy-tail",
 ):
     from heteroes.coordinator import Coordinator
+    from heteroes.dispatch import policy_factory
     from heteroes.ledger import Ledger
     from heteroes.model.loading import check_recipe_selftest
     from heteroes.runtime_info import JsonlLog
     from heteroes.v3.local import prepare
     from heteroes.v3.run import make_scorer
 
+    scheduling = policy_factory(scheduler)  # an unknown name stops here, before any file is written
     secret = _token(token_env)
     if sys.platform == "win32" and (config.get("weightSpace") or {}).get("kind") == "lora" and initial_adapter is None:
         raise ValueError("A Windows coordinator requires --initial-adapter with the pinned LoRA file")
@@ -103,6 +106,7 @@ def serve(
             seed_namespace=config.get("candidateSeedNamespace"),
             candidates=run.plan["population"],
             alpha=run.plan["alpha"],
+            policy_factory=scheduling,
             host=host,
             port=port,
             token=secret,

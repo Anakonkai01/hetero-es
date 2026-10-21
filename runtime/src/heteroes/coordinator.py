@@ -143,7 +143,7 @@ class Coordinator:
             from heteroes.v3.audit import selected_for_audit
 
             selected_for_audit("validate", self._audit_rate)
-            if (
+            if not callable(audit_timeout_seconds) and (
                 not isinstance(audit_timeout_seconds, (int, float))
                 or isinstance(audit_timeout_seconds, bool)
                 or not math.isfinite(audit_timeout_seconds)
@@ -214,6 +214,17 @@ class Coordinator:
     def stop(self) -> None:
         self.server.stop()
 
+    def set_members(self, members, device_tokens=None) -> None:
+        """At a generation boundary (elastic membership, ADR-009): who may audit, and which per-device credentials the
+        server accepts. Who may lease is the policy's business (`AdmittedOnly`), built for each generation."""
+        members = sorted(members)
+        if not members:
+            raise ValueError("an experiment needs at least one member")
+        if self._audit_workers is not None:
+            self._audit_workers = members
+        if device_tokens is not None:
+            self.server.set_device_tokens(device_tokens)
+
     def log(self, event: str, **fields) -> None:
         self._log({"event": event, "t": time.time(), **fields})
 
@@ -234,9 +245,14 @@ class Coordinator:
             ),
         }
 
+    def _limit(self, value, generation):
+        """A fixed number of seconds, None, or a function of the generation (derived from measured speeds, ADR-009)."""
+        return value(generation) if callable(value) else value
+
     def _wait_until_complete(self, generation: int) -> None:
         started, failed_since = self._monotonic(), None
         progress, progress_at = None, started
+        limit = self._limit(self._timeout, generation)
         while True:
             self._check_cancel()
             if self._api is not None and self._api.scoring_error is not None:
@@ -256,17 +272,19 @@ class Coordinator:
                     )
             else:
                 failed_since = None
-            if (status.state, status.committed) != progress:
-                progress, progress_at = (status.state, status.committed), now
+            # a heartbeat or a new lease is progress too: a long candidate on a slow GPU is alive (ADR-009)
+            moving = (status.state, status.committed, getattr(self._api, "activity", None))
+            if moving != progress:
+                progress, progress_at = moving, now
             elif self._stall is not None and now - progress_at >= self._stall:
                 raise CoordinatorError(
                     f"generation {self.experiment_id}/g{generation}: no progress for {self._stall} s "
                     f"({status.committed} of {status.total} committed): are the workers alive?"
                 )
-            if self._timeout is not None and now - started >= self._timeout:
+            if limit is not None and now - started >= limit:
                 raise TimeoutError(
                     f"generation {self.experiment_id}/g{generation}: {status.committed} of {status.total} "
-                    f"committed after {self._timeout} s"
+                    f"committed after {limit} s"
                 )
             self._sleep(self._poll)
 
@@ -545,6 +563,9 @@ class Coordinator:
             "publish_seconds": done - applied,
             "total_seconds": done - begin,
         }
+        if hasattr(self._api, "audit_counts"):
+            selected, completed = self._api.audit_counts()
+            summary["audits"] = {"selected": selected, "completed": completed}
         if self.usage is not None:
             try:
                 self.usage.record_update(generation, update_gpu_seconds)
@@ -564,7 +585,7 @@ class Coordinator:
     def _drain_audits(self, generation, api, policy):
         if not self._audit_rate:
             return
-        deadline = self._monotonic() + self._audit_timeout
+        deadline = self._monotonic() + self._limit(self._audit_timeout, generation)
         self.server.set_generation(api, self._job(generation, policy, "AUDITING"))
         while api.pending:
             self._check_cancel()

@@ -6,6 +6,7 @@ import { apiGet } from '../../api/client';
 import { useScopeKey } from '../../app/session';
 import { useWorkers } from '../../hooks/useWorkers';
 import { V3Fields } from './V3Fields';
+import { POLICY_HINT, POLICY_LABEL } from '../../lib/labels';
 import { DEFAULT_V3, v3ReviewRows } from '../../lib/v3Settings';
 import type { V3Settings } from '../../types/experiment';
 import type { CreateExperimentRequest, Experiment } from '../../types/experiment';
@@ -58,6 +59,10 @@ export function RuntimeConfiguration({
   const coordinator = coordinatorChoice ?? defaultCoordinator ?? '';
   const [interval, setInterval] = useState(initial?.backupPolicy?.interval ?? 1);
   const [retain, setRetain] = useState(initial?.backupPolicy?.retain ?? 3);
+  const [policyChoice, setPolicy] = useState<string>(initial?.schedulerPolicy ?? 'greedy-tail');
+  // a policy the lab no longer offers (an old template or draft) falls back to the lab's first, recommended one
+  const offered = cap.data?.schedulerPolicies ?? [];
+  const policy = offered.length && !offered.includes(policyChoice) ? offered[0] : policyChoice;
   const [error, setError] = useState('');
   const [v3, setV3] = useState<V3Settings>({
     weightSpace: initial?.weightSpace ?? DEFAULT_V3.weightSpace,
@@ -152,7 +157,7 @@ export function RuntimeConfiguration({
           coordinatorDeviceId: coordinator,
           backupPolicy: { interval, retain },
           workerIds: selected,
-          schedulerPolicy: 'greedy',
+          schedulerPolicy: policy as CreateExperimentRequest['schedulerPolicy'],
           syncMode: 'synchronous',
         }).catch((e: Error) => setError(e.message));
       }}
@@ -426,6 +431,17 @@ export function RuntimeConfiguration({
               </p>
             );
           })()}
+          <label className="fg">
+            {t('Scheduling policy')}
+            <select className="sel" value={policy} onChange={(e) => setPolicy(e.target.value)}>
+              {offered.map((name) => (
+                <option key={name} value={name}>
+                  {t(POLICY_LABEL[name] ?? name)}
+                </option>
+              ))}
+            </select>
+          </label>
+          {POLICY_HINT[policy] && <p className="hint">{t(POLICY_HINT[policy])}</p>}
           <fieldset className="worker-picker">
             <legend>{t('Configured workers')}</legend>
             {workers.isError && <p role="alert">{t('Worker status unavailable')}</p>}
@@ -487,6 +503,10 @@ export function RuntimeConfiguration({
             <div>
               <dt>{t('Workers')}</dt>
               <dd>{selected.map((id) => available.find((w) => w.workerId === id)?.displayName ?? id).join(', ')}</dd>
+            </div>
+            <div>
+              <dt>{t('Scheduling policy')}</dt>
+              <dd>{t(POLICY_LABEL[policy] ?? policy)}</dd>
             </div>
             <div>
               <dt>{t('Coordinator')}</dt>

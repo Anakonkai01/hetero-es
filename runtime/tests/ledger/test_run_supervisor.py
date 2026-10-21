@@ -57,6 +57,8 @@ def test_submission_is_idempotent_and_single_owner(manager):
         {"maxGenerations": True},
         {"candidatesPerGeneration": 1},
         {"schedulerPolicy": "capacity-weighted"},
+        {"schedulerPolicy": "round-robin"},
+        {"schedulerPolicy": None},
         {"syncMode": "asynchronous"},
     ],
 )
@@ -64,6 +66,12 @@ def test_bad_runtime_configuration_never_launches(manager, changes):
     with pytest.raises(ValueError):
         manager.submit(config(**changes))
     assert list(manager.root.iterdir()) == []
+
+
+@pytest.mark.parametrize("policy", ["greedy-tail", "greedy"])
+def test_both_offered_scheduling_policies_are_accepted(manager, policy):
+    manager.submit(config(schedulerPolicy=policy))
+    assert [path.name for path in manager.root.iterdir()] == ["a" * 32]
 
 
 def prepare(manager, monkeypatch, workers=("local",)):
@@ -219,5 +227,28 @@ def test_projection_preserves_seed_string_and_hides_lease_tokens(manager, tmp_pa
         for forbidden in ("lease_token", "leaseToken", "private-token"):
             assert forbidden not in serialized
         assert all(item["status"] == "SUCCEEDED" for item in result["attempts"])
+    finally:
+        env.close()
+
+
+def test_the_audit_summary_shows_how_many_audits_were_chosen_not_only_completed(manager, tmp_path):
+    # ADR-009 (F9): a timed-out audit drain only logged audit_incomplete; the summary must show the gap
+    root = manager.directory("a" * 32)
+    manager.submit(config())
+    env = Env(tmp_path / "toy")
+    env.start_workers()
+    try:
+        env.coordinator.run(1)
+        import sqlite3
+
+        with sqlite3.connect(root / "ledger.sqlite") as destination:
+            env.ledger._db.backup(destination)
+        with (root / "events.jsonl").open("a") as log:
+            for generation, selected, completed in ((0, 2, 2), (1, 1, 0)):
+                event = {"event": "generation_done", "generation": generation}
+                log.write(json.dumps({**event, "audits": {"selected": selected, "completed": completed}}) + "\n")
+            log.write(json.dumps({"event": "generation_done", "generation": 2}) + "\n")  # an older run: no counts
+        summary = manager.snapshot("a" * 32)["auditSummary"]
+        assert summary["selected"] == 3 and summary["completed"] == 0  # the toy ledger itself holds no audit rows
     finally:
         env.close()

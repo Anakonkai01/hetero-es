@@ -57,7 +57,9 @@ export function RuntimeResults({ experiment: e }: { experiment: Experiment }) {
         </dl>
         {e.auditSummary && (
           <p className={e.auditSummary.mismatches ? 'note err' : 'note'}>
-            {t('Audits completed')}: {e.auditSummary.completed} · {t('Audit mismatches')}: {e.auditSummary.mismatches} ·{' '}
+            {t('Audits completed')}: {e.auditSummary.completed}
+            {e.auditSummary.selected ? ` / ${e.auditSummary.selected} ${t('chosen')}` : ''} · {t('Audit mismatches')}:{' '}
+            {e.auditSummary.mismatches} ·{' '}
             {t('Quarantined workers')}:{' '}
             {e.auditSummary.quarantinedWorkers.map((worker) => worker.worker_id).join(', ') || '—'}
           </p>
