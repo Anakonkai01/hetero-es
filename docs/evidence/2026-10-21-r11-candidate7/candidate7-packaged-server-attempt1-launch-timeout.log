@@ -1,0 +1,19 @@
+dbus-daemon[989507]: [session uid=1000 pid=989507] Activating service name='org.gtk.vfs.Daemon' requested by ':1.0' (uid=1000 pid=989533 comm="/mnt/Archive-2tb/heteroes-local/downloads/lf1-2026" label="unconfined")
+dbus-daemon[989507]: [session uid=1000 pid=989507] Successfully activated service 'org.gtk.vfs.Daemon'
+fusermount3: failed to access mountpoint /run/user/1000/gvfs: Permission denied
+dbus-daemon[989507]: [session uid=1000 pid=989507] Activating service name='org.a11y.Bus' requested by ':1.0' (uid=1000 pid=989533 comm="/mnt/Archive-2tb/heteroes-local/downloads/lf1-2026" label="unconfined")
+dbus-daemon[989507]: [session uid=1000 pid=989507] Successfully activated service 'org.a11y.Bus'
+electron.launch: Timeout 30000ms exceeded.
+Call log:
+[2m  - <launching> /mnt/Archive-2tb/heteroes-local/downloads/lf1-20261021-r11-candidate7/server/linux-unpacked/heteroes-server --no-sandbox --inspect=0 --remote-debugging-port=0 --disable-gpu[22m
+[2m  - <launched> pid=989533[22m
+[2m  - [pid=989533][err] Debugger listening on ws://127.0.0.1:39583/50258013-2797-4910-914f-407d8b9f8771[22m
+[2m  - [pid=989533][err] For help, see: https://nodejs.org/learn/getting-started/debugging[22m
+[2m  - <ws connecting> ws://127.0.0.1:39583/50258013-2797-4910-914f-407d8b9f8771[22m
+[2m  - <ws connected> ws://127.0.0.1:39583/50258013-2797-4910-914f-407d8b9f8771[22m
+[2m  - [pid=989533][err] Debugger attached.[22m
+[2m  - [pid=989533][err][22m
+[2m  - [pid=989533][err] DevTools listening on ws://127.0.0.1:42865/devtools/browser/b1b541bb-3d7d-45d0-8ffe-470a6a5f6a4c[22m
+[2m  - <ws connecting> ws://127.0.0.1:42865/devtools/browser/b1b541bb-3d7d-45d0-8ffe-470a6a5f6a4c[22m
+
+A connection to the bus can't be made
