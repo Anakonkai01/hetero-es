@@ -83,7 +83,9 @@ def test_the_installer_puts_the_pinned_runtime_model_and_command_in_place(releas
 
     home = Path(env["HETEROES_WORKER_HOME"])
     assert (home / "models/rev1/model.safetensors").read_bytes() == b"weights"
-    status = subprocess.run([Path(env["HETEROES_BIN_DIR"]) / "heteroes-worker", "status"], env=env, capture_output=True)
+    status = subprocess.run(
+        [Path(env["HETEROES_BIN_DIR"]) / "heteroes-worker", "status", "--json"], env=env, capture_output=True
+    )
     assert json.loads(status.stdout)["installed"] is True
     again = subprocess.run(["bash", out / "install-worker.sh"], env=env, capture_output=True, text=True)
     assert again.returncode == 0, again.stderr  # a second run is a no-op upgrade

@@ -227,6 +227,10 @@ class ContributionPreference(FiniteStrict):
     keepAfterReboot: bool
 
 
+class DeviceName(FiniteStrict):
+    displayName: str = Field(min_length=1, max_length=100)
+
+
 class DeviceContribution(FiniteStrict):
     """An approved device turning itself ON or OFF with its own token (owner decision 2026-10-22)."""
 

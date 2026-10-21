@@ -15,6 +15,7 @@ from .device_models import (
     Contribution,
     DeviceContribution,
     ContributionPreference,
+    DeviceName,
     ProcessReport,
     Report,
     MonitoringEvent,
@@ -514,6 +515,25 @@ def install_device_routes(app, store, user, runtime):
             if d["status"] != "APPROVED" or not d["boot_id"]:
                 raise HTTPException(409, "Approval and a running agent required")
             return set_contribution(db, d, body.enabled, d["boot_id"], body.keepAfterReboot, "device:" + d["id"])
+
+    @app.patch("/api/v1/device/name")
+    def own_name(body: DeviceName, current=Depends(device_auth)):
+        with store.db() as db:
+            db.execute(
+                "UPDATE devices SET name=? WHERE id=?", (body.displayName.strip() or current["name"], current["id"])
+            )
+            store.audit(db, "device:" + current["id"], "DEVICE_RENAMED", current["id"])
+        return {"deviceId": current["id"], "displayName": body.displayName.strip() or current["name"]}
+
+    @app.delete("/api/v1/device", status_code=204)
+    def forget_self(current=Depends(device_auth)):
+        """The machine leaves the lab (`heteroes-worker forget`): its token stops working. Never while it holds work."""
+        with store.db() as db:
+            d = db.execute("SELECT * FROM devices WHERE id=?", (current["id"],)).fetchone()
+            if has_device_reservation(db, d["id"]) or d["enabled"] or not processes_drained(json.loads(d["processes"])):
+                raise HTTPException(409, "Turn contribution OFF and wait for its work to stop first")
+            db.execute('UPDATE devices SET status="REVOKED",enabled=0,desired=0,keep_on=0 WHERE id=?', (d["id"],))
+            store.audit(db, "device:" + d["id"], "DEVICE_LEFT_LAB", d["id"])
 
     @app.get("/api/v1/device/summary")
     def own_summary(current=Depends(device_auth)):

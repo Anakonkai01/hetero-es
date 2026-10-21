@@ -219,7 +219,12 @@ def test_a_left_worker_that_went_offline_releases_its_gpu_after_a_grace_period(l
         "events": [],
         "artifacts": [],
     }
-    report = {"sequence": 1, "assignmentId": assignment["assignmentId"], "epoch": assignment["epoch"], "snapshot": snapshot}
+    report = {
+        "sequence": 1,
+        "assignmentId": assignment["assignmentId"],
+        "epoch": assignment["epoch"],
+        "snapshot": snapshot,
+    }
     boot(client, ch, "boot-1", contribution=True, reports=[report])
     assert any(r["deviceId"] == first["deviceId"] for r in runtime.reservations())  # just seen: it may still be working
 
@@ -277,7 +282,9 @@ def test_a_finished_run_is_released_when_a_member_machine_died_without_leaving(l
         )
 
     with store.db() as db:
-        db.execute("UPDATE devices SET seen=? WHERE id=?", (time.time() - LEFT_OFFLINE_RELEASE_SECONDS - 1, dead["deviceId"]))
+        db.execute(
+            "UPDATE devices SET seen=? WHERE id=?", (time.time() - LEFT_OFFLINE_RELEASE_SECONDS - 1, dead["deviceId"])
+        )
     finish(1, gone)
     assert runtime.reservations()  # the coordinator has not counted it stopped: it may still be working
     finish(2, {"alive": False, "confirmed": True, "lost": True})

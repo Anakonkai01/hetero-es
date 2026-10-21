@@ -54,7 +54,9 @@ def test_every_boot_starts_off_unless_the_owner_chose_to_keep_it_on(lab):
     assert runtime.devices()[0]["keepContributionAfterReboot"] is True
     assert boot(client, auth, "boot-3")["desiredContribution"] is True
     reply = boot(client, auth, "boot-3")  # commands queued during a poll are delivered by the next one
-    assert [(c["enabled"], c["bootId"]) for c in reply["commands"] if c["kind"] == "SET_CONTRIBUTION"] == [(True, "boot-3")]
+    assert [(c["enabled"], c["bootId"]) for c in reply["commands"] if c["kind"] == "SET_CONTRIBUTION"] == [
+        (True, "boot-3")
+    ]
     assert boot(client, auth, "boot-3", contribution=True)["desiredContribution"] is True
     # the device itself can drop the choice
     client.post("/api/v1/device/contribution", headers=auth, json={"enabled": False, "keepAfterReboot": False})
@@ -84,3 +86,17 @@ def test_the_owner_sets_keep_on_without_touching_the_current_boot(lab):
     assert runtime.devices()[0]["contributionEnabled"] is True  # still ON, no command queued
     assert commands(lab, device) == before
     assert boot(client, auth, "boot-2")["desiredContribution"] is True
+
+
+def test_the_device_renames_itself_and_leaves_the_lab_only_when_idle(lab):
+    client, store, runtime, admin = lab
+    device, auth = pair(lab)
+    enable(lab, device, auth)
+    assert client.patch("/api/v1/device/name", headers=auth, json={"displayName": "5070ti-nhut"}).status_code == 200
+    assert runtime.devices()[0]["displayName"] == "5070ti-nhut"
+    assert client.delete("/api/v1/device", headers=auth).status_code == 409  # still ON
+    client.post("/api/v1/device/contribution", headers=auth, json={"enabled": False})
+    boot(client, auth, "boot-1")
+    assert client.delete("/api/v1/device", headers=auth).status_code == 204
+    assert runtime.devices()[0]["approvalStatus"] == "REVOKED"
+    assert client.get("/api/v1/device/summary", headers=auth).status_code == 401

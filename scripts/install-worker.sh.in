@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# HeteroES Worker for Linux and WSL, without a window. Build @BUILD@.
+# HeteroES Worker for Linux, without a window. Build @BUILD@.
 #
 #   curl -fsSL @DOWNLOADS@/install-worker.sh | bash
 #
 # Installs into HETEROES_WORKER_HOME (default ~/.local/share/heteroes-worker) and puts the `heteroes-worker` command
-# in HETEROES_BIN_DIR (default ~/.local/bin). Every download is checked against a pinned SHA-256; nothing needs root,
-# and no NVIDIA package is installed (WSL uses the Windows driver). HETEROES_BUNDLE=<file> installs from a local copy.
+# in HETEROES_BIN_DIR (default ~/.local/bin). Every download is checked against a pinned SHA-256; nothing needs root
+# and no NVIDIA package is installed. HETEROES_BUNDLE=<file> installs from a local copy. In a terminal it then runs
+# `heteroes-worker setup` (self-test, pairing, service, ON); HETEROES_SKIP_SETUP=1 stops after the files.
 set -euo pipefail
 
 BUNDLE_NAME=@BUNDLE_NAME@
@@ -18,6 +19,7 @@ BIN_DIR="${HETEROES_BIN_DIR:-$HOME/.local/bin}"
 
 die() { echo "heteroes-worker install: $*" >&2; exit 1; }
 [ "$(uname -s)-$(uname -m)" = "Linux-x86_64" ] || die "only Linux x86_64 is supported"
+grep -qi microsoft /proc/version 2>/dev/null && die "WSL is not supported: install the HeteroES Worker app on Windows"
 for tool in curl tar sha256sum; do command -v "$tool" >/dev/null || die "please install $tool first"; done
 
 # fetch URL SHA256 FILE: download once, keep only a file whose SHA-256 matches
@@ -68,10 +70,13 @@ mv "$BIN_DIR/heteroes-worker.new" "$BIN_DIR/heteroes-worker"
 "$BIN_DIR/heteroes-worker" install
 
 case ":$PATH:" in *":$BIN_DIR:"*) ;; *) echo "add $BIN_DIR to your PATH (for example in ~/.bashrc)";; esac
+if [ -z "${HETEROES_SKIP_SETUP:-}" ] && [ -t 1 ] && { : </dev/tty; } 2>/dev/null; then
+  echo
+  echo "Installed. Setting this machine up now (Ctrl-C stops; 'heteroes-worker setup' resumes later)."
+  exec "$BIN_DIR/heteroes-worker" setup --lab "${DOWNLOADS%/downloads}" </dev/tty
+fi
 cat <<EOF
 
 Installed. Next:
-  heteroes-worker selftest                  # checks this GPU against the pinned reference (a few minutes)
-  heteroes-worker join https://<your lab>   # asks for the pairing code from the lab's Devices page
-  heteroes-worker run                       # keeps this machine online; turn it ON on the Devices page
+  heteroes-worker setup     # self-test, pairing with the lab, background service, contribution ON
 EOF
