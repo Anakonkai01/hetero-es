@@ -31,7 +31,13 @@ def coordinator_events(run_id, root=COORDINATOR_RUNS):
                 event = json.loads(line)
             except ValueError:
                 continue  # a line being written
-            if event.get("event") in ("audit_completed", "audit_mismatch", "validation_completed", "worker_joined", "worker_left"):
+            if event.get("event") in (
+                "audit_completed",
+                "audit_mismatch",
+                "validation_completed",
+                "worker_joined",
+                "worker_left",
+            ):
                 out.append({"eventType": event["event"], "workerId": event.get("worker_id"), "details": event})
         return out
 

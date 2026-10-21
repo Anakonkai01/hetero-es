@@ -72,9 +72,14 @@ def membership(timeline, names=None):
     names = names or {}
     origin = (timeline.get("experiment") or {}).get("startedMs") or 0
     return [
-        {"at (s)": round((m["atMs"] - origin) / 1000, 1), "device": names.get(m.get("workerId"), m.get("workerId")), "event": m["type"]}
+        {
+            "at (s)": round((m["atMs"] - origin) / 1000, 1),
+            "device": names.get(m.get("workerId"), m.get("workerId")),
+            "event": m["type"],
+        }
         for m in timeline.get("marks") or []
-        if m["type"] in ("worker_joined", "worker_left", "membership_changed", "membership_refused", "worker_unavailable")
+        if m["type"]
+        in ("worker_joined", "worker_left", "membership_changed", "membership_refused", "worker_unavailable")
     ]
 
 

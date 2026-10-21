@@ -38,7 +38,9 @@ def main():
     SESSION.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     descriptor = os.open(SESSION, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
     with os.fdopen(descriptor, "w") as handle:
-        json.dump({"url": args.url.rstrip("/"), "token": session["accessToken"], "workspace": chosen["workspaceId"]}, handle)
+        json.dump(
+            {"url": args.url.rstrip("/"), "token": session["accessToken"], "workspace": chosen["workspaceId"]}, handle
+        )
     print(f"Signed in; workspace {chosen['name']!r}; session saved to {SESSION} (valid 12 hours)")
 
 

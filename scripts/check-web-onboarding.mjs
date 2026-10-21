@@ -73,7 +73,8 @@ try {
   const command = `curl -fsSL '${base}/downloads/install-worker.sh' | HETEROES_DOWNLOADS='${base}/downloads' bash`;
   const linux = friend.locator('[data-linux-worker]');
   await linux.getByText(command, { exact: true }).waitFor();
-  await linux.getByText(`heteroes-worker join ${base}`, { exact: false }).waitFor();
+  // the script runs `heteroes-worker setup` (pairing included); the card lists the commands for afterwards
+  await linux.getByText('heteroes-worker status', { exact: false }).waitFor();
   assert.equal((await friend.request.get(`${base}/downloads/install-worker.sh`)).status(), 200);
   await friend.setViewportSize({ width: 375, height: 900 });
   assert.equal(await friend.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false);

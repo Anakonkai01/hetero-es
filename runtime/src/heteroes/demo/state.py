@@ -105,7 +105,10 @@ def build_frame(timeline, events=(), names=None, at_ms=None):
         for g in timeline.get("generations") or []
         if g.get("doneMs") is not None and g["doneMs"] <= now
     ]
-    newest = max(newest, max((g["index"] for g in timeline.get("generations") or [] if (g.get("openMs") or now + 1) <= now), default=-1))
+    newest = max(
+        newest,
+        max((g["index"] for g in timeline.get("generations") or [] if (g.get("openMs") or now + 1) <= now), default=-1),
+    )
     scored = [g for g in scores_by_generation if scores_by_generation[g]]
 
     audits, validation, membership = {"matched": 0, "mismatched": 0}, [], []

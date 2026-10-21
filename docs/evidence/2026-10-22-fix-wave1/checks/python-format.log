@@ -1,0 +1,9 @@
+Would reformat: runtime/src/heteroes/demo/__init__.py
+Would reformat: runtime/src/heteroes/demo/analysis.py
+Would reformat: runtime/src/heteroes/demo/dashboard.py
+Would reformat: runtime/src/heteroes/demo/lab.py
+Would reformat: runtime/src/heteroes/demo/replay_page.py
+Would reformat: runtime/src/heteroes/demo/state.py
+Would reformat: runtime/tests/demo/test_demo_state.py
+Would reformat: scripts/lab-login.py
+8 files would be reformatted, 403 files already formatted

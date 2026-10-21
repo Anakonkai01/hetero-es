@@ -58,18 +58,57 @@ def draw_network(ax, frame, palette, tick=0, coordinator=None):
         x, y = 0.95 * math.cos(angle), 0.82 * math.sin(angle)
         color = palette[device.worker_id]
         offline = device.alive is False and frame.status == "RUNNING"  # workers stop on purpose while a run drains
-        ax.plot([0.42 * x, 0.78 * x], [0.42 * y, 0.78 * y], color=GRID if offline else color, lw=2 if device.busy else 1)
+        ax.plot(
+            [0.42 * x, 0.78 * x], [0.42 * y, 0.78 * y], color=GRID if offline else color, lw=2 if device.busy else 1
+        )
         if device.busy and not offline:  # a work packet travelling out, its score travelling back
             phase = (tick % 12) / 12
             for p, size in ((phase, 7), ((phase + 0.5) % 1, 5)):
-                ax.plot(0.42 * x + (0.78 - 0.42) * x * p, 0.42 * y + (0.78 - 0.42) * y * p, "o", ms=size, color=color, mec=SURFACE, mew=1.5)
+                ax.plot(
+                    0.42 * x + (0.78 - 0.42) * x * p,
+                    0.42 * y + (0.78 - 0.42) * y * p,
+                    "o",
+                    ms=size,
+                    color=color,
+                    mec=SURFACE,
+                    mew=1.5,
+                )
         ax.add_patch(
-            Circle((x, y), 0.17, fc=SURFACE if not device.busy else color, ec=MUTED if offline else color, lw=2.5, alpha=0.95)
+            Circle(
+                (x, y),
+                0.17,
+                fc=SURFACE if not device.busy else color,
+                ec=MUTED if offline else color,
+                lw=2.5,
+                alpha=0.95,
+            )
         )
-        ax.text(x, y, str(device.done_now), ha="center", va="center", fontsize=11, fontweight="bold", color=SURFACE if device.busy else INK)
+        ax.text(
+            x,
+            y,
+            str(device.done_now),
+            ha="center",
+            va="center",
+            fontsize=11,
+            fontweight="bold",
+            color=SURFACE if device.busy else INK,
+        )
         label = device.name + ("  · offline" if offline else "")
-        ax.text(x, y - 0.27 if y < 0 else y + 0.27, label, ha="center", va="center", fontsize=8.5, color=INK, fontweight="bold")
-        detail = f"{device.done} done" + (f" · ✓{device.audits} audit" if device.audits else "") + (f" · ✗{device.mismatches}" if device.mismatches else "")
+        ax.text(
+            x,
+            y - 0.27 if y < 0 else y + 0.27,
+            label,
+            ha="center",
+            va="center",
+            fontsize=8.5,
+            color=INK,
+            fontweight="bold",
+        )
+        detail = (
+            f"{device.done} done"
+            + (f" · ✓{device.audits} audit" if device.audits else "")
+            + (f" · ✗{device.mismatches}" if device.mismatches else "")
+        )
         ax.text(x, y - 0.38 if y < 0 else y + 0.38, detail, ha="center", va="center", fontsize=7.5, color=INK_2)
     audits = frame.audits
     ax.text(
@@ -113,7 +152,11 @@ def draw_timeline(ax, frame, palette):
     ax.set_yticks(range(len(frame.devices)), [d.name for d in frame.devices], fontsize=8.5, color=INK)
     ax.invert_yaxis()
     ax.set_xlim(0, max(frame.now_s, 1) * 1.02)
-    ax.set_xlabel("seconds since start (dotted: a generation applied; ▼ left, ▲ joined; hatched: failed attempt)", fontsize=8, color=INK_2)
+    ax.set_xlabel(
+        "seconds since start (dotted: a generation applied; ▼ left, ▲ joined; hatched: failed attempt)",
+        fontsize=8,
+        color=INK_2,
+    )
     ax.grid(axis="x", color=GRID, lw=0.6)
     ax.set_axisbelow(True)
 
@@ -129,7 +172,16 @@ def draw_rewards(ax, frame):
         ax.plot(g[-1], done[-1]["mean"], "o", color=SERIES[0], ms=8, mec=SURFACE, mew=2)
     points = [v for v in frame.validation if v["reward"] is not None]
     if points:
-        ax.plot([v["generation"] + 1 for v in points], [v["reward"] for v in points], "s", color=SERIES[2], ms=8, mec=SURFACE, mew=2, label="validation (held out)")
+        ax.plot(
+            [v["generation"] + 1 for v in points],
+            [v["reward"] for v in points],
+            "s",
+            color=SERIES[2],
+            ms=8,
+            mec=SURFACE,
+            mew=2,
+            label="validation (held out)",
+        )
     ax.set_xlim(-0.5, max(frame.generations_total or 1, len(done) or 1) + 0.5)
     ax.set_ylim(0, 1)
     ax.set_xlabel("generation (0 = base model)", fontsize=8, color=INK_2)
@@ -202,7 +254,9 @@ def render_video(frames, mp4=None, gif=None, fps=12, coordinator=None, ffmpeg=No
         binary = ffmpeg or shutil.which("ffmpeg")
         if binary:
             matplotlib.rcParams["animation.ffmpeg_path"] = binary
-            animation.save(mp4, writer=FFMpegWriter(fps=fps, bitrate=2400), dpi=100, savefig_kwargs={"facecolor": SURFACE})
+            animation.save(
+                mp4, writer=FFMpegWriter(fps=fps, bitrate=2400), dpi=100, savefig_kwargs={"facecolor": SURFACE}
+            )
             written.append(mp4)
     if gif:
         animation.save(gif, writer=PillowWriter(fps=max(fps // 2, 4)), dpi=60, savefig_kwargs={"facecolor": SURFACE})

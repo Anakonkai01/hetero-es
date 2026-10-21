@@ -28,8 +28,14 @@ def recording(timeline, events=(), names=None, coordinator=None, title=None):
         return None if ms is None else round((ms - origin) / 1000, 2)
 
     lanes = [
-        [index[j["workerId"]], s(j["startMs"]), s(j.get("endMs")), j.get("generation"),
-         1 if j.get("reward") is not None else (0 if j.get("endMs") is not None else -1), j.get("reward")]  # fmt: skip
+        [
+            index[j["workerId"]],
+            s(j["startMs"]),
+            s(j.get("endMs")),
+            j.get("generation"),
+            1 if j.get("reward") is not None else (0 if j.get("endMs") is not None else -1),
+            j.get("reward"),
+        ]  # fmt: skip
         for j in jobs
         if j.get("workerId") in index
     ]
