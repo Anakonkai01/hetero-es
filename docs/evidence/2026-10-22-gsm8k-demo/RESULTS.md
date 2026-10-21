@@ -80,7 +80,7 @@ Run after the night session, once quang-3060 came back (23:00) and the lab relea
 | 0 audit mismatches, ≥ 1 audit, no quarantine | **pass**: 5 audits, all matched across GPUs (1660S ×2, 3060-thao ×2, 5070ti-nhut ×1) |
 | (b1) quang-3060 OFF at index 2, LEAVE within 10 min | **not a valid pass**: the harness said "recovered" (291 s), but the machine had already died at **23:29:19**, before the OFF (23:31:03). The LEAVE (23:35:05, actor `system`) came from the dead device. |
 | (b2) ON + add back at index 3, JOIN + result within 15 min | **FAIL**: add refused `409 Waiting for confirmed GPU release` (the dead device's reservation, finding 1) |
-| Parity | see `tier2b/parity.json` |
+| Parity | **pass**: `tier2b/parity.json` ALL EQUAL, 5 child hashes rebuilt from the ledger (final `3e02c708…`), generation 3 fully regenerated on the 5070 Ti |
 | Lab releases the finished run | **FAIL, DRAINING** (below) |
 
 Work: 5070ti-nhut 61, 5070ti-nhan 60, 3060-thao 26, quang-3060 8, 1660s 5. Validation (64 rows): base 0.625, final 0.625.

@@ -40,6 +40,6 @@ and tier 2b; `PREDECLARATION-tier2b.md` has the amendment and the owner's decisi
 1. Either the owner approves the `state.json` edit, or Quang's machine comes back (then start its agent:
    `LD_LIBRARY_PATH=/usr/lib/wsl/lib nohup setsid ~/.local/bin/heteroes-worker run`). Then `release_tier2b.py --apply` if the
    lab still holds it, then `gsm8k.launch(lab, "tier3", workers)` with the live members (`then_tier3.py` does both).
-2. Tier 2b parity receipt (`tier2b/parity.json`), commit.
+2. Tier 2b parity: done, ALL EQUAL.
 3. Owner review + deploy of `1a11763`/`e8f26a2` (flag-day style, with rollback).
 4. Then the old list: notebook execution, media, replay Artifact.
