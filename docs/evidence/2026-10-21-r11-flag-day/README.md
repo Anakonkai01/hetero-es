@@ -106,3 +106,15 @@ the final user acceptance (the coordinator runs on the 5070 Ti). The AI stopped 
 `windows-undo-live.ps1` quit the app (4 processes), ran the candidate9 **silent uninstaller: exit 0, app, `%APPDATA%\@heteroes`
 and data folder all gone**, removed the task folder (it held the admin login); the partial coordinator home on the 5070
 (489 MB, no process left) was deleted. The live lab still has 0 devices and 0 pairing codes. No device was paired or approved.
+
+## Public compute route port fixed (owner "đồng ý", 20:57 +07)
+
+Owner test: Tailscale disconnected on Thao's Windows (its WSL keeps its own tailnet address, which Windows does not use):
+from Windows, `100.110.165.40` ports 8002/8765/8769 unreachable; `https://compute.heteroes.site/v1/health` → 502.
+**Found:** every coordinator (desktop `service.cjs:407`, CLI `worker_cli.py:253`, `agent.py:147`) listens on port **8765**, but
+the lab's `privateComputeUrl` (r10 leftover) was `http://100.110.165.40:8769`, so the public tunnel forwarded worker traffic to a
+port where nothing listens. Fixed without code change: `local-lab.py restart --compute-url http://100.110.165.40:8765`
+(lab idle); `config.json` now holds 8765 and the generated Caddyfile forwards the compute host's protocol paths to it; three
+services alive, web 200. The route answers only while a coordinator runs on the 5070 (502 before that, as expected).
+Limits (backlog): one public compute route per lab, to one port on the lab machine (a coordinator elsewhere needs a private
+network); the default/installer configuration should not let `privateComputeUrl` and the coordinator port drift apart.
