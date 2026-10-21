@@ -278,6 +278,36 @@ def test_start_is_durable_before_first_worker_ack(lab):
     assert any(cmd["kind"] == "START_WORKER" for cmd in r.commands(w["deviceId"]))
 
 
+def test_a_restarted_worker_is_a_new_launch_and_never_reads_the_stopped_one(lab):
+    c, s, r, a = lab
+    d, h = pair(lab)
+    w, wh = pair(lab, "worker-only", False)
+    enable(lab, d, h)
+    enable(lab, w, wh)
+    queued(lab, d, workerIds=[w["workerId"]])
+    s.dispatch_once()
+    ar = r.runs()[0]
+    command = {"assignmentId": ar["assignmentId"], "epoch": ar["epoch"], "workerId": w["workerId"], "recoveryIndex": 0}
+
+    def send(action, **extra):
+        return c.post("/api/v1/device/worker-command", headers=h, json={**command, "action": action, **extra})
+
+    def starts():
+        return [cmd for cmd in r.commands(w["deviceId"]) if cmd["kind"] == "START_WORKER"]
+
+    assert send("start").status_code == 200
+    assert "launch" not in starts()[0]  # a first launch keeps the form older agents know
+    dead = {"assignmentId": ar["assignmentId"], "epoch": ar["epoch"], "workerAlive": False, "coordinatorAlive": False}
+    boot(c, wh, "boot-1", contribution=True, processes=[dead])
+    assert send("poll").json()["alive"] is False
+    assert send("start", launch=1).status_code == 200
+    assert [cmd.get("launch", 0) for cmd in starts()] == [0, 1]  # its own command, not swallowed as a duplicate
+    assert send("poll", launch=1).status_code == 503  # the stopped launch 0 is not this one's state
+    boot(c, wh, "boot-1", contribution=True, processes=[{**dead, "workerAlive": True, "launch": 1}])
+    assert send("poll", launch=1).json()["alive"] is True
+    assert send("start", launch=20).status_code == 422
+
+
 def start_command_for(lab, monkeypatch, tmp_path, config):
     """The START_WORKER command the Lab Server queues for a worker, with `config` as the private config."""
     c, s, r, a = lab

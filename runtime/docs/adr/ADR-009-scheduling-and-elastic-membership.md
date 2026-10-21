@@ -48,6 +48,17 @@ An audit on 2026-10-21 found further gaps around it:
 7. **Contribution OFF.** Turning a worker OFF used to cancel every experiment that reserved it. Now a worker that is
    not the coordinator and not the last member leaves at the next boundary instead. The coordinator or the last
    member still cancels, as before.
+8. **A member that comes back is started again** (owner: "sửa luôn", 2026-10-21, after the candidate7 acceptance
+   showed it). Before, the supervisor started a worker only at preparation or on a first JOIN, so a member whose
+   process died (machine off, app killed, crash, two minutes without the coordinator), was away at preparation, or
+   left and was added back stayed idle until the end of the run.
+   - While the run is RUNNING, a member whose worker is confirmed stopped is probed; when its device answers and is ON
+     it is started again. A device that is away or OFF is asked again every 30 s.
+   - A restart is a new **launch** with its own number (0 is the first, absent on the wire for older labs and
+     agents). The lab queues it as its own command and reads only that launch's process report; the device runs it in
+     its own directory `r<recovery>-l<launch>` and refuses while an earlier launch may still be running.
+   - Never for a quarantined worker, never while the old process's state is unknown, and at most 20 launches per
+     worker and coordinator recovery.
 
 ## Why the numbers cannot change
 

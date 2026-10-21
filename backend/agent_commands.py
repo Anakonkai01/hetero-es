@@ -68,7 +68,10 @@ class AgentCommands:
                 if p["assignmentId"] == row["id"]
                 and p["epoch"] == row["epoch"]
                 and p["recoveryIndex"] == body.recoveryIndex
+                and p.get("launch", 0) == body.launch  # never the stopped process of an earlier launch
             ]
+            # a restarted worker is a new launch: its own command, and a first launch keeps its older form
+            launch, suffix = ({"launch": body.launch}, f":{body.launch}") if body.launch else ({}, "")
             if body.action == "start":
                 self.enqueue(
                     db,
@@ -80,6 +83,7 @@ class AgentCommands:
                         "runId": row["run_id"],
                         "workerId": body.workerId,
                         "recoveryIndex": body.recoveryIndex,
+                        **launch,
                         "coordinatorUrl": ar["computeUrl"],
                         "bulkUrl": ar.get("bulkUrl", ar["computeUrl"]),
                         # a worker never receives researcher code: only the coordinator runs it
@@ -91,15 +95,15 @@ class AgentCommands:
                         "computeToken": ar["computeGrants"][body.workerId],
                         **({"publicComputeUrl": self.public_compute_url()} if self.public_compute_url() else {}),
                     },
-                    f"worker:{row['id']}:{did}:{body.recoveryIndex}",
+                    f"worker:{row['id']}:{did}:{body.recoveryIndex}{suffix}",
                 )
             elif body.action == "stop":
                 self.enqueue(
                     db,
                     did,
                     "STOP_WORKER",
-                    {"assignmentId": row["id"], "epoch": row["epoch"], "recoveryIndex": body.recoveryIndex},
-                    f"stop:{row['id']}:{did}:{body.recoveryIndex}",
+                    {"assignmentId": row["id"], "epoch": row["epoch"], "recoveryIndex": body.recoveryIndex, **launch},
+                    f"stop:{row['id']}:{did}:{body.recoveryIndex}{suffix}",
                 )
             if body.action in ("start", "stop") and (time.time() - target["seen"] >= 30 or not reports):
                 return {"alive": None, "ready": False, "events": []}

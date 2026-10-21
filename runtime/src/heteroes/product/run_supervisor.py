@@ -19,6 +19,13 @@ TERMINAL = {"COMPLETED", "CANCELLED", "FAILED"}
 QUIESCENT = TERMINAL | {"PAUSED"}
 ROOT = Path(__file__).resolve().parents[3]
 WORKLOADS = WORKLOAD_NAMES
+RESTART_SECONDS = 30  # a worker that is still away or OFF is asked again after this long
+MAX_LAUNCHES = 20  # launches of one worker in one coordinator recovery; a worker that keeps dying is then left alone
+
+
+def launched(launch):
+    """The launch number in a worker state and a worker command: absent for the first one (older labs and agents)."""
+    return {"launch": launch} if launch else {}
 
 
 def iso(timestamp):
@@ -70,6 +77,7 @@ class RunSupervisor(ABC):
         self.lock = threading.Lock()
         self.stop = threading.Event()
         self.processes = {}  # reap owned children rather than leaking zombie processes
+        self.retry_at = {}  # (run, worker) -> when a stopped member may be started again
         self.thread = threading.Thread(target=self.loop, daemon=True)
 
     def directory(self, run_id):
@@ -143,12 +151,14 @@ class RunSupervisor(ABC):
         for worker_id, previous in list(result.items()):
             if previous.get("notStarted") or previous.get("left"):
                 continue  # never started, or left the run and confirmed stopped (its GPU may serve another run now)
+            launch = previous.get("launch", 0)
+            suffix = f"-l{launch}" if launch else ""
             try:
                 value = self.remote(
                     self.workers[worker_id],
-                    {"action": "stop" if stop else "poll", "runId": root.name + f"-r{recovery}"},
+                    {"action": "stop" if stop else "poll", "runId": root.name + f"-r{recovery}", **launched(launch)},
                 )
-                write_json(root / f"worker-{worker_id}-r{recovery}.json", value["events"])
+                write_json(root / f"worker-{worker_id}-r{recovery}{suffix}.json", value["events"])
                 if any(
                     item.get("failure") == "RESTORE_MISMATCH" or item.get("reason") == "quarantined"
                     for item in value["events"]
@@ -156,7 +166,12 @@ class RunSupervisor(ABC):
                     quarantined = read_json(self.root / "quarantine.json", {})
                     quarantined[worker_id] = {"runId": root.name, "t": time.time()}
                     write_json(self.root / "quarantine.json", quarantined)
-                result[worker_id] = {"alive": value["alive"], "ready": value["ready"], "confirmed": True}
+                result[worker_id] = {
+                    "alive": value["alive"],
+                    "ready": value["ready"],
+                    "confirmed": True,
+                    **launched(launch),
+                }
             except Exception:
                 result[worker_id] = {**previous, "confirmed": False}
         self.save(root, workerStates=result)
@@ -178,15 +193,62 @@ class RunSupervisor(ABC):
             self.log(root, "worker_unavailable", worker_id=worker_id)
             self.save(root, workerStates=result)
             return
+        self._launch_worker(root, worker_id, result, recovery, 0)
+
+    def _launch_worker(self, root, worker_id, result, recovery, launch):
         # Persist unknown ownership before the worker command, since a connection may die after launch.
-        result[worker_id] = {"alive": True, "confirmed": False, "ready": False}
+        result[worker_id] = {"alive": True, "confirmed": False, "ready": False, **launched(launch)}
         self.save(root, workerStates=result)
         try:
-            value = self.start_worker(root, self.workers[worker_id], recovery)
-            result[worker_id] = {"alive": value["alive"], "confirmed": True, "ready": value["ready"]}
+            value = self.start_worker(root, self.workers[worker_id], recovery, launch)
+            result[worker_id] = {
+                "alive": value["alive"],
+                "confirmed": True,
+                "ready": value["ready"],
+                **launched(launch),
+            }
         except Exception:
             self.log(root, "worker_start_unknown", worker_id=worker_id)
         self.save(root, workerStates=result)
+
+    def _restart_members(self, root, state):
+        """
+        A member whose worker is not running while the run goes on is started again once its device answers and is ON:
+        it died (machine off, app killed, crash), gave up on an unreachable coordinator, was away at preparation, or
+        left and was added back. Before, only preparation and a first JOIN started a worker, so such a member stayed
+        idle until the end of the run.
+
+        A restart is a new launch with its own number: the lab queues it as a new command and the device starts it in its
+        own directory, never beside the old process, which is confirmed stopped first (here, and again on the device).
+        A quarantined worker is never started again; a worker that keeps dying stops being restarted after MAX_LAUNCHES.
+        """
+        membership = read_json(root / "membership.json", {})
+        members = membership.get("members", read_json(root / "config.json")["workerIds"])
+        quarantined = read_json(self.root / "quarantine.json", {})
+        result = dict(state.get("workerStates", {}))
+        recovery = state.get("recoveryCount", 0)
+        now = time.time()
+        for worker_id in members:
+            value = result.get(worker_id)
+            key = (root.name, worker_id)
+            stopped = value and value.get("alive") is False  # also one never started, or one that left
+            if not stopped or not value.get("confirmed") or worker_id in quarantined:
+                self.retry_at.pop(key, None)
+                continue
+            if now < self.retry_at.get(key, 0):
+                continue
+            self.retry_at[key] = now + RESTART_SECONDS
+            launch = 0 if value.get("notStarted") else value.get("launch", 0) + 1  # a never-started one has none yet
+            if launch >= MAX_LAUNCHES:
+                self.retry_at[key] = float("inf")
+                self.log(root, "worker_restart_limit", worker_id=worker_id, launch=launch)
+                continue
+            try:
+                self.remote(self.workers[worker_id], {"action": "probe"})  # away, OFF or not approved: ask again later
+            except Exception:
+                continue
+            self.log(root, "worker_restarted", worker_id=worker_id, launch=launch)
+            self._launch_worker(root, worker_id, result, recovery, launch)
 
     def _follow_membership(self, root, state):
         """Elastic membership (ADR-009): start the workers that joined at the last boundary, stop the ones that left.
@@ -205,11 +267,18 @@ class RunSupervisor(ABC):
             if value.get("confirmed") and not value.get("alive"):
                 result[worker_id] = {**value, "left": True}  # already stopped (turned OFF): nothing to stop
             else:
+                launch = value.get("launch", 0)
                 try:
                     reply = self.remote(
-                        self.workers[worker_id], {"action": "stop", "runId": root.name + f"-r{recovery}"}
+                        self.workers[worker_id],
+                        {"action": "stop", "runId": root.name + f"-r{recovery}", **launched(launch)},
                     )
-                    result[worker_id] = {"alive": reply["alive"], "ready": reply.get("ready", False), "confirmed": True}
+                    result[worker_id] = {
+                        "alive": reply["alive"],
+                        "ready": reply.get("ready", False),
+                        "confirmed": True,
+                        **launched(launch),
+                    }
                     if not reply["alive"]:
                         result[worker_id]["left"] = True  # the lab releases its GPU when it sees this
                 except Exception:
@@ -235,6 +304,7 @@ class RunSupervisor(ABC):
         state = self.state(root)
         if state.get("workersLaunched") and runner.get("status") == "RUNNING":
             self._follow_membership(root, state)
+            self._restart_members(root, self.state(root))
             state = self.state(root)
         if state.get("workersLaunched"):
             stopped = self.poll_workers(root)
@@ -542,5 +612,5 @@ class RunSupervisor(ABC):
         """Relay a fixed worker lifecycle command through the Lab Server."""
 
     @abstractmethod
-    def start_worker(self, root, worker, recovery):
-        """Start an assigned worker with the agent's fenced compute grant."""
+    def start_worker(self, root, worker, recovery, launch=0):
+        """Start an assigned worker with the agent's fenced compute grant; `launch` numbers its restarts."""

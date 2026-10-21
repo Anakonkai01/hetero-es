@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 import pytest
 from heteroes.product.agent import Agent, InvalidCommand
@@ -901,3 +902,58 @@ def test_a_change_for_an_assignment_not_here_yet_waits(tmp_path):
     a.enabled = True
     with pytest.raises(RuntimeError, match="assignment"):
         a.handle(membership_command())
+
+
+def test_a_restarted_worker_runs_in_its_own_directory_only_once_the_earlier_launch_is_stopped(tmp_path, monkeypatch):
+    from heteroes.product import agent as agent_module
+
+    a = agent(tmp_path)
+    a.enabled = True
+    living = {1}
+    monkeypatch.setattr(agent_module, "alive", lambda record: record["pid"] in living)
+    monkeypatch.setattr("heteroes.product.agent.reachable", lambda *args: True)
+    started = []
+
+    def handle(request):
+        if request["action"] == "start":
+            started.append(Path(request["directory"]).name)
+            write_json(Path(request["directory"]) / "process.json", {"pid": len(started), "birth": "b"})
+        return {"alive": True, "ready": True, "events": []}
+
+    monkeypatch.setattr("heteroes.product.agent.remote_handle", handle)
+    a.handle(start_command())
+    assert started == ["r0"]
+    with pytest.raises(RuntimeError, match="earlier launch"):
+        a.handle(start_command(commandId="restart", launch=1))  # unacknowledged: the lab sends it again
+    living.clear()  # the first process died
+    first = a.worker_directory(start_command())
+    (first / "process.json").rename(first / "process.saved")
+    (first / "launch-intent.json").write_text("{}")  # a launch whose process was never recorded may be running
+    with pytest.raises(RuntimeError, match="earlier launch"):
+        a.handle(start_command(commandId="restart", launch=1))
+    (first / "launch-intent.json").unlink()
+    (first / "process.saved").rename(first / "process.json")
+    a.handle(start_command(commandId="restart", launch=1))
+    assert started == ["r0", "r0-l1"]
+    living.add(2)
+    report = a.observe()[0]
+    assert (report["recoveryIndex"], report["launch"], report["workerAlive"]) == (0, 1, True)
+    with pytest.raises(InvalidCommand):
+        a.handle(start_command(commandId="bad", launch=-1))
+
+
+def test_the_coordinator_names_the_launch_it_starts_and_polls(tmp_path):
+    a = agent(tmp_path)
+    root = a.manager.root / ("b" * 32)
+    root.mkdir()
+    write_json(root / "assignment.json", {"assignmentId": "c" * 32, "epoch": 1})
+    sent = []
+    a.call = lambda path, body: sent.append(body) or {"alive": True, "ready": False, "events": []}
+    a.manager.start_worker(root, {"id": "test"}, 0)
+    a.manager.start_worker(root, {"id": "test"}, 1, 2)
+    a.manager.remote({"id": "test"}, {"action": "poll", "runId": root.name + "-r1", "launch": 2})
+    assert [(b["action"], b["recoveryIndex"], b.get("launch")) for b in sent] == [
+        ("start", 0, None),  # a first launch keeps the form an older lab accepts
+        ("start", 1, 2),
+        ("poll", 1, 2),
+    ]

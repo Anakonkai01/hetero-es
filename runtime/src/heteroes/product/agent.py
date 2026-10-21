@@ -19,7 +19,7 @@ import urllib.request
 import uuid
 from heteroes.http_transport import USER_AGENT
 from .files import events, read_json, write_json
-from .run_supervisor import RunSupervisor, TERMINAL, QUIESCENT, ROOT, validate
+from .run_supervisor import MAX_LAUNCHES, RunSupervisor, TERMINAL, QUIESCENT, ROOT, launched, validate
 from .remote import alive, identity, worker_environment, handle as remote_handle
 from .platform_process import acquire_instance_lock, ProcessIdentityUnknown, spawn_options
 from .storage import data_root, worker_cache
@@ -216,14 +216,15 @@ class AgentManager(RunSupervisor):
                 "workerId": worker["id"],
                 "action": action,
                 "recoveryIndex": recovery,
+                **launched(body.get("launch", 0)),
             },
         )
         if action != "probe" and result.get("alive") is None:
             raise ConnectionError("Worker ownership is unknown")
         return result
 
-    def start_worker(self, root, worker, recovery):
-        return self.remote(worker, {"action": "start", "runId": root.name + f"-r{recovery}"})
+    def start_worker(self, root, worker, recovery, launch=0):
+        return self.remote(worker, {"action": "start", "runId": root.name + f"-r{recovery}", **launched(launch)})
 
     def accept(self, command):
         cfg = command["config"]
@@ -385,7 +386,12 @@ class Agent:
         recovery = command.get("recoveryIndex", 0)
         if type(recovery) is not int or recovery not in (0, 1):
             raise InvalidCommand("Invalid recovery attempt")
-        return self.root / "workers" / command["assignmentId"] / f"r{recovery}"
+        launch = command.get("launch", 0)
+        if type(launch) is not int or not 0 <= launch < MAX_LAUNCHES:
+            raise InvalidCommand("Invalid worker launch")
+        return (
+            self.root / "workers" / command["assignmentId"] / (f"r{recovery}-l{launch}" if launch else f"r{recovery}")
+        )
 
     def _worker(self, command, action):
         from .cpu_coordinator import coordinator_only
@@ -405,6 +411,11 @@ class Agent:
                 raise ValueError("Worker identity mismatch")
             if original and original != command:
                 raise ValueError("Frozen worker assignment changed")
+            for earlier in range(command.get("launch", 0)):
+                # a restart never runs beside an earlier launch of this run on this device
+                old = self.worker_directory({**command, "launch": earlier})
+                if owned_state(read_json(old / "process.json"), (old / "launch-intent.json").exists()) is not False:
+                    raise RuntimeError("An earlier launch of this worker may still be running")
             if original is None:
                 # Persist ownership before launch so a lost ack is idempotent.
                 write_json(directory / "assignment.json", command)
@@ -731,18 +742,19 @@ class Agent:
             key = ar["assignmentId"]
             if key in released:
                 continue
-            p = self._worker(ar, "poll")
             old = combined.get(key)
-            if old and ar["recoveryIndex"] < old["recoveryIndex"]:
-                continue
-            if not old or ar["recoveryIndex"] >= old["recoveryIndex"]:
-                combined[key] = {
-                    **(old or {"assignmentId": key, "epoch": ar["epoch"], "coordinatorAlive": False}),
-                    "workerAlive": p["alive"],
-                    "ready": p["ready"],
-                    "recoveryIndex": ar["recoveryIndex"],
-                    "events": p["events"][-200:],
-                }
+            if old and (ar["recoveryIndex"], ar.get("launch", 0)) < (old["recoveryIndex"], old.get("launch", 0)):
+                continue  # the newest launch is the one the lab asks about
+            p = self._worker(ar, "poll")
+            old = {k: v for k, v in (old or {}).items() if k != "launch"}
+            combined[key] = {
+                **(old or {"assignmentId": key, "epoch": ar["epoch"], "coordinatorAlive": False}),
+                "workerAlive": p["alive"],
+                "ready": p["ready"],
+                "recoveryIndex": ar["recoveryIndex"],
+                **launched(ar.get("launch", 0)),
+                "events": p["events"][-200:],
+            }
         for path in (self.root / "cancelled-assignments").glob("*.json"):
             marker = read_json(path)
             key = marker["assignmentId"]

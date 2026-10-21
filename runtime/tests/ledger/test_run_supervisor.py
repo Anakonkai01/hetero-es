@@ -323,3 +323,97 @@ def test_a_worker_that_was_already_stopped_when_it_left_is_marked_without_a_stop
     manager.tick(root)
     assert ("late", "stop") not in calls
     assert manager.state(root)["workerStates"]["late"]["left"] is True
+
+
+# ---- a member whose worker stopped while the run goes on is started again, as a new launch
+
+
+def restarting(manager, monkeypatch, states, members=("local", "late"), probe=lambda worker: True):
+    root, _ = running_with(manager, monkeypatch, members, states=states)
+    clock = [1000.0]
+    monkeypatch.setattr(run_supervisor.time, "time", lambda: clock[0])
+    calls, polls, running = [], [], {w for w, value in states.items() if value.get("alive") and value.get("confirmed")}
+
+    def call(worker, request):  # a dead worker process stays dead until it is started again
+        action = request["action"]
+        (polls if action == "poll" else calls).append((worker["id"], action, request.get("launch", 0)))
+        if action == "probe" and not probe(worker["id"]):
+            raise RuntimeError("Worker contribution is OFF")
+        {"start": running.add, "stop": running.discard}.get(action, lambda _: None)(worker["id"])
+        return {"alive": worker["id"] in running, "ready": True, "events": []}
+
+    monkeypatch.setattr(manager, "remote", call)
+    return root, calls, clock, polls
+
+
+ALIVE = {"alive": True, "ready": True, "confirmed": True}
+
+
+def test_a_member_whose_worker_died_is_started_again_once_its_device_is_on(manager, monkeypatch):
+    back = []
+    states = {"local": ALIVE, "late": {"alive": False, "ready": True, "confirmed": True}}
+    root, calls, clock, polls = restarting(manager, monkeypatch, states, probe=lambda worker: worker in back)
+    manager.tick(root)  # its device is still away or OFF: asked, nothing started
+    assert ("late", "probe", 0) in calls and not [c for c in calls if c[1] == "start"]
+    calls.clear()
+    back.append("late")
+    manager.tick(root)  # not asked again at once
+    assert ("late", "probe", 0) not in calls
+    clock[0] += run_supervisor.RESTART_SECONDS
+    manager.tick(root)
+    assert ("late", "start", 1) in calls and polls[-1] == ("late", "poll", 1)  # a new launch, polled as that one
+    assert manager.state(root)["workerStates"]["late"] == {**ALIVE, "launch": 1}
+    assert any('"worker_restarted"' in line for line in (root / "lifecycle.jsonl").read_text().splitlines())
+    calls.clear()
+    clock[0] += run_supervisor.RESTART_SECONDS
+    manager.tick(root)  # running again: only polled
+    assert [c for c in calls if c[0] == "late"] == []
+
+
+def test_a_worker_away_at_preparation_gets_its_first_launch_when_it_comes_back(manager, monkeypatch):
+    away = {"notStarted": True, "alive": False, "ready": False, "confirmed": True}
+    root, calls, *_ = restarting(manager, monkeypatch, {"local": ALIVE, "late": away})
+    manager.tick(root)
+    assert ("late", "start", 0) in calls and manager.state(root)["workerStates"]["late"] == ALIVE
+
+
+def test_a_worker_added_back_after_it_left_starts_after_its_last_launch(manager, monkeypatch):
+    gone = {"alive": False, "ready": True, "confirmed": True, "launch": 2, "left": True}
+    root, calls, *_ = restarting(manager, monkeypatch, {"local": ALIVE, "late": gone})
+    manager.tick(root)
+    assert ("late", "start", 3) in calls and manager.state(root)["workerStates"]["late"] == {**ALIVE, "launch": 3}
+
+
+@pytest.mark.parametrize(
+    "late",
+    [
+        {"alive": True, "ready": False, "confirmed": False},  # unknown: it may still run
+        {"alive": False, "ready": True, "confirmed": False},  # last seen stopped, not confirmed now
+    ],
+)
+def test_a_worker_whose_state_is_unknown_is_never_started_beside_itself(manager, monkeypatch, late):
+    root, calls, *_ = restarting(manager, monkeypatch, {"local": ALIVE, "late": late})
+    monkeypatch.setattr(manager, "poll_workers", lambda root, stop=False: False)
+    manager.tick(root)
+    assert [c for c in calls if c[0] == "late"] == []
+
+
+def test_quarantined_and_departed_workers_are_not_started_again(manager, monkeypatch):
+    dead = {"alive": False, "ready": True, "confirmed": True}
+    states = {"local": ALIVE, "bad": dict(dead), "gone": {**dead, "left": True}}
+    root, calls, *_ = restarting(manager, monkeypatch, states, members=("local", "bad"))
+    write_json(manager.root / "quarantine.json", {"bad": {"runId": "x", "t": 1}})
+    manager.tick(root)
+    assert [c for c in calls if c[0] != "local"] == []
+
+
+def test_a_worker_that_keeps_dying_is_left_alone_after_the_last_launch(manager, monkeypatch):
+    last = run_supervisor.MAX_LAUNCHES - 1
+    states = {"local": ALIVE, "late": {"alive": False, "ready": True, "confirmed": True, "launch": last}}
+    root, calls, clock, polls = restarting(manager, monkeypatch, states)
+    for _ in range(2):
+        manager.tick(root)
+        clock[0] += run_supervisor.RESTART_SECONDS
+    assert [c for c in calls if c[0] == "late"] == []
+    lines = (root / "lifecycle.jsonl").read_text().splitlines()
+    assert sum('"worker_restart_limit"' in line for line in lines) == 1

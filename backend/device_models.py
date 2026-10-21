@@ -229,6 +229,7 @@ class ProcessReport(FiniteStrict):
     workerAlive: bool | None = None
     ready: bool = False
     recoveryIndex: int = Field(default=0, ge=0, le=1)
+    launch: int = Field(default=0, ge=0, lt=20)  # a restarted worker's launch (run_supervisor.MAX_LAUNCHES)
     events: list[dict] = Field(default_factory=list, max_length=200)
 
 
@@ -346,3 +347,4 @@ class WorkerCommand(FiniteStrict):
     workerId: str
     action: Literal["start", "poll", "stop", "probe"]
     recoveryIndex: int = Field(default=0, ge=0, le=1)
+    launch: int = Field(default=0, ge=0, lt=20)
