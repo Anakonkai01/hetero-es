@@ -171,6 +171,17 @@ hiện đang chạy bằng app Server Linux unpacked) chuyển sang chạy bằn
    artifacts của assignment đã released quá N ngày, runtime cũ không dùng.
 7. **Coordinator:** `--coordinator` tự dò IP Tailscale, chỉ hỏi khi có nhiều lựa chọn.
 8. Ngôn ngữ thông báo: tiếng Anh (như web), mã lỗi giữ nguyên.
+10. **Bật ON (bạn chọn):** máy đã được duyệt **tự bật/tắt được** bằng token của chính nó (`on`/`off`), không cần đăng
+    nhập chủ. Lab vẫn giữ quyền: chỉ máy APPROVED, quản trị viên vẫn tắt/thu hồi được từ web, mọi lần bật ghi actor là
+    máy. Lệnh `on/off` cũ đòi mật khẩu trong `agent.py` bỏ đi.
+11. **Nhiều GPU trên một máy:** mỗi GPU là một worker riêng (self-test riêng, tên `máy/gpu0`, `máy/gpu1`, giữ chỗ theo
+    `gpuUUID` như lab đã làm ở `physical_reservations`), một service quản lý tất cả; `setup` hỏi góp GPU nào;
+    `CUDA_VISIBLE_DEVICES` cho từng worker. Cần kiểm agent/lab có giả định "một máy một GPU" ở đâu (đo trước khi làm).
+12. **Giới hạn tài nguyên do chủ máy đặt:** khung giờ góp (ví dụ 22:00–07:00, ngoài giờ thì rời run ở ranh giới thế hệ
+    như OFF), trần VRAM (nối với chunk theo máy, giai đoạn 8), ngưỡng nhiệt độ GPU (quá thì rời run ở ranh giới), trần
+    công suất (`nvidia-smi -pl`, cần sudo, tùy chọn). Đặt bằng `heteroes-worker limits …`, hiện trong `status` và trên web.
+13. **`heteroes-worker watch`:** màn hình terminal cập nhật liên tục (kiểu htop): trạng thái lab, run và thế hệ hiện tại,
+    ứng viên đang chấm, tốc độ, GPU (VRAM, nhiệt, công suất), log gần nhất; thoát bằng `q`.
 9. Test: unit test từng lệnh (lab giả), test `setup` dừng giữa chừng rồi chạy tiếp; thử thật trên máy Nhựt và 1660S:
    gỡ sạch → `curl | bash` một lệnh → khởi động lại máy → tự online, tự ON nếu "giữ ON", tự quay lại run.
 
