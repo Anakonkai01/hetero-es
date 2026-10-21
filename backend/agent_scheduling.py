@@ -15,6 +15,10 @@ from heteroes.study.data import sha as study_hash
 from .constants import QUIESCENT
 from heteroes.product.cpu_coordinator import coordinator_only
 
+# A worker that left and whose device has not been seen for this long counts as stopped: it cannot confirm the stop while
+# offline, and waiting for it held every device of a finished run (GSM8K demo tier 2, 2026-10-21).
+LEFT_OFFLINE_RELEASE_SECONDS = 600
+
 
 class AgentScheduling:
     def waiting_reason(self, body, db=None, workers=None):
@@ -214,9 +218,16 @@ class AgentScheduling:
         for worker_id in sorted(left):
             state = states.get(worker_id) or {}
             device_id = ar["workerDevices"].get(worker_id)
-            if device_id is None or not (state.get("left") or (state.get("confirmed") and state.get("alive") is False)):
+            if device_id is None:
                 continue
-            resource = db.execute("SELECT self_test FROM devices WHERE id=?", (device_id,)).fetchone()
+            resource = db.execute("SELECT self_test,seen FROM devices WHERE id=?", (device_id,)).fetchone()
+            gone = (
+                resource is not None
+                and device_id != ar["coordinatorDeviceId"]
+                and time.time() - resource["seen"] >= LEFT_OFFLINE_RELEASE_SECONDS
+            )
+            if not (state.get("left") or (state.get("confirmed") and state.get("alive") is False) or gone):
+                continue
             gpu = json.loads(resource[0]).get("gpuUUID") if resource else None
             db.execute("DELETE FROM device_reservations WHERE device_id=? AND assignment_id=?", (device_id, row["id"]))
             if gpu:

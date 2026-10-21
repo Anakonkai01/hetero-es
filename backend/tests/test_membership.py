@@ -5,7 +5,9 @@ worker's own credential, and every change is audited. The frozen configuration n
 """
 
 import json
+import time
 
+from backend.agent_scheduling import LEFT_OFFLINE_RELEASE_SECONDS
 from labkit import boot, draft, enable, pair
 
 
@@ -198,6 +200,51 @@ def test_a_left_worker_releases_its_gpu_once_the_coordinator_confirms_it_stopped
         },
     )
     assert probe.status_code == 200, probe.text
+
+
+def test_a_left_worker_that_went_offline_releases_its_gpu_after_a_grace_period(lab):
+    # GSM8K demo tier 2, 2026-10-21: quang-3060 left and its machine died; it could never confirm the stop, so the finished
+    # run stayed DRAINING and held every device until the machine came back 40 minutes later
+    client, store, runtime, admin = lab
+    rid, (coordinator, ch), devices = running(lab, workers=2)
+    first = devices[0][0]
+    assert change(lab, rid, first["workerId"], "remove").status_code == 200
+    assignment = assignment_body(store, rid)
+    snapshot = {
+        "state": {"status": "COMPLETED", "workerStates": {first["workerId"]: {"alive": True, "confirmed": False}}},
+        "membership": {"generation": 4, "members": [devices[1][0]["workerId"]], "left": [first["workerId"]]},
+        "generations": [],
+        "candidates": [],
+        "attempts": [],
+        "events": [],
+        "artifacts": [],
+    }
+    report = {"sequence": 1, "assignmentId": assignment["assignmentId"], "epoch": assignment["epoch"], "snapshot": snapshot}
+    boot(client, ch, "boot-1", contribution=True, reports=[report])
+    assert any(r["deviceId"] == first["deviceId"] for r in runtime.reservations())  # just seen: it may still be working
+
+    def offline_for(seconds):
+        with store.db() as db:
+            db.execute("UPDATE devices SET seen=? WHERE id=?", (time.time() - seconds, first["deviceId"]))
+
+    offline_for(LEFT_OFFLINE_RELEASE_SECONDS - 60)
+    boot(client, ch, "boot-1", contribution=True)
+    assert any(r["deviceId"] == first["deviceId"] for r in runtime.reservations())
+    offline_for(LEFT_OFFLINE_RELEASE_SECONDS + 1)
+    boot(client, ch, "boot-1", contribution=True)  # no new report: the coordinator has nothing more to say
+    assert not any(r["deviceId"] == first["deviceId"] for r in runtime.reservations())
+    body = assignment_body(store, rid)
+    assert first["workerId"] not in body["workerDevices"] and first["deviceId"] not in body["deviceIds"]
+
+
+def test_an_offline_worker_that_did_not_leave_keeps_its_reservation(lab):
+    client, store, runtime, admin = lab
+    rid, (coordinator, ch), devices = running(lab, workers=2)
+    first = devices[0][0]
+    with store.db() as db:
+        db.execute("UPDATE devices SET seen=? WHERE id=?", (time.time() - 3600, first["deviceId"]))
+    boot(client, ch, "boot-1", contribution=True)
+    assert any(r["deviceId"] == first["deviceId"] for r in runtime.reservations())  # a member is waited for (restart)
 
 
 def test_turning_a_member_off_makes_it_leave_instead_of_cancelling_the_experiment(lab):

@@ -30,6 +30,9 @@ class AgentPolling:
             accepted = self._accept_reports(db, device, body, old)
             accepted_qualifications = self.qualifications.accept(db, device, body.qualificationReports)
             for row in db.execute("SELECT * FROM assignments WHERE released=0").fetchall():
+                # a left worker that went offline is released by time, even when its coordinator reports nothing new
+                self.release_left_members(db, row, json.loads(row["snapshot"]))
+                row = db.execute("SELECT * FROM assignments WHERE id=?", (row["id"],)).fetchone()
                 self._release_confirmed(db, row, json.loads(row["body"]))
             old = db.execute("SELECT * FROM devices WHERE id=?", (device["id"],)).fetchone()
             allowed = old["status"] == "APPROVED" and self.store.profile(old["owner"])["accountStatus"] == "ACTIVE"
