@@ -28,8 +28,9 @@ Consequence: the original r10 Worker can no longer be restored (`restore.ps1` wo
 that must never be enabled again, and flag day installs a fresh Worker for the live lab, so nothing planned needs it.
 
 Still on the machine: `%LOCALAPPDATA%\Temp\heteroes-system-finish` (~0.85 GB: the original program 0.35 GB, the c5-c9 installers,
-driver logs, registry exports, `researcher.json` = the copied researcher login the handoff says to remove at cleanup). Not deleted
-(owner's machine, owner to decide). Four `D:\HeteroES-*` staging folders from earlier sessions also stay.
+driver logs, registry exports, `researcher.json` = the copied researcher login the handoff says to remove at cleanup). **Deleted
+at the owner's request** (`delete-temp.ps1` → `delete-temp.log`: 142 files, 0.833 GB, folder gone, C: 24.9 GB free). Four
+`D:\HeteroES-*` staging folders from earlier sessions stay.
 
 ## What this does NOT show
 
