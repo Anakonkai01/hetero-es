@@ -1,6 +1,10 @@
 # HeteroES — canonical handoff
 
-**Latest (2026-10-21 ~13:25): candidate7 checked and installed on 4 devices; managed acceptance with 1660S join/leave
+**Latest (2026-10-21 ~14:00): member-restart fix `98dd705` (CPU tests + mutation pass); owner chose a FULL 50-generation
+final acceptance on candidate8, planned in detail next session.**
+Read [handoff-2026-10-21-member-restart-candidate8-next.md](handoff-2026-10-21-member-restart-candidate8-next.md) first.
+
+**Previous (2026-10-21 ~13:25): candidate7 checked and installed on 4 devices; managed acceptance with 1660S join/leave
 and Thao Windows hard stop COMPLETED 50/50, 0 audit mismatches; next = verification.**
 Read [handoff-2026-10-21-candidate7-acceptance.md](handoff-2026-10-21-candidate7-acceptance.md) first.
 
