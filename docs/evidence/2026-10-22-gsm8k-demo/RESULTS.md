@@ -40,7 +40,7 @@ private route for every member.
 | (a) uneven work by speed | **shown**: 5070ti-nhan 90 (18.2 s per candidate of 32 questions), 3060-thao 44 (36.3 s), quang-3060 12 (40.7 s, until it vanished), 1660s 14 (90.9 s) |
 | (b) quang-3060 OFF at index 2 | **recovered**: OFF requested 22:20:15; LEAVE effective at the next boundary (`worker_left` 22:26:38, 396 s) |
 | (b) quang-3060 ON at index 3, must rejoin within 10 min | **FAIL**: no JOIN (see below) |
-| (d) parity: ledger replay + one generation regenerated | **not run** (session closed by the owner; left for the next session) |
+| (d) parity: ledger replay + one generation regenerated | **pass** (run 2026-10-21 ~23:40, after the session): `tier2/parity.json` ALL EQUAL, 5 child hashes rebuilt from the ledger (final `276a6a78…`), generation 3 fully regenerated on the 5070 Ti (texts, rewards, records equal) |
 | Lab releases the finished run | **FAIL, still DRAINING** at the session's end (see below) |
 
 Generations took 365, 357, 385, 420 and 426 s (four devices, then three). Mean batch reward 0.556, 0.484, 0.627, 0.642,
