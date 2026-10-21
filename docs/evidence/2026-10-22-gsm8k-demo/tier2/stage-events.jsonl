@@ -1,0 +1,4 @@
+{"t": 1792596015.539, "event": "off_requested", "response": {"deviceId": "951df03b826d4d58ac89aa3926ef3a0a", "enabled": false, "pending": true}}
+{"t": 1792596411.197, "event": "off_verdict", "verdict": "recovered", "seconds": 395.7, "seen": ["worker_left", "worker_left"]}
+{"t": 1792596412.665, "event": "on_requested", "response": {"deviceId": "951df03b826d4d58ac89aa3926ef3a0a", "enabled": true, "pending": true}}
+{"t": 1792597016.012, "event": "on_verdict", "verdict": "failed", "error": "condition not met within 600 s"}

@@ -1,6 +1,10 @@
 # HeteroES — canonical handoff
 
-**Latest (2026-10-21 ~21:20): r11 is LIVE on lab.heteroes.site (release `93ff85f`, candidate9 installers published); smoke
+**Latest (2026-10-21 ~23:00): GSM8K demo night — tier 1 (= r11 smoke run) PASS with full parity; tier 2 done but the lab
+is blocked by an offline member (serious finding); tier 2b and the overnight run not started.**
+Read [handoff-2026-10-21-gsm8k-demo-night.md](handoff-2026-10-21-gsm8k-demo-night.md) first. Branch `feat/gsm8k-demo`.
+
+**Previous (2026-10-21 ~21:20): r11 is LIVE on lab.heteroes.site (release `93ff85f`, candidate9 installers published); smoke
 run and close-out left; next session = the owner's GSM8K notebook (grill first).**
 Read [handoff-2026-10-21-flag-day-next.md](handoff-2026-10-21-flag-day-next.md) first.
 

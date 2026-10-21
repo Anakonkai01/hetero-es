@@ -30,3 +30,45 @@ question ("does the replay-only route carry a v3 full-weight run end to end?") i
 **Deviation, approved by the owner in chat (22:0x):** Tailscale was switched back on remotely on Thao's Windows
 (`tailscale-ipn.exe` started in the user session, then `tailscale up`; node `desktop-qp0nta7-1`). Tiers 2 and 3 use the
 private route for every member.
+
+## Tier 2: system under stress (experiment `01f8c5df4ac84846a4beaf9599857935`), 22:05–22:41 +07
+
+| Criterion | Result |
+| --------- | ------ |
+| 160 committed results, coordinator COMPLETED | **pass**: 160/160, runner COMPLETED 22:41:18, final `276a6a78…` |
+| 0 audit mismatches, ≥ 1 audit, no quarantine | **pass**: 4 audits, all matched across different GPUs (Quang re-ran a candidate, the 1660S two, the 5070 Ti one) |
+| (a) uneven work by speed | **shown**: 5070ti-nhan 90 (18.2 s per candidate of 32 questions), 3060-thao 44 (36.3 s), quang-3060 12 (40.7 s, until it vanished), 1660s 14 (90.9 s) |
+| (b) quang-3060 OFF at index 2 | **recovered**: OFF requested 22:20:15; LEAVE effective at the next boundary (`worker_left` 22:26:38, 396 s) |
+| (b) quang-3060 ON at index 3, must rejoin within 10 min | **FAIL**: no JOIN (see below) |
+| (d) parity: ledger replay + one generation regenerated | **not run** (session closed by the owner; left for the next session) |
+| Lab releases the finished run | **FAIL, still DRAINING** at the session's end (see below) |
+
+Generations took 365, 357, 385, 420 and 426 s (four devices, then three). Mean batch reward 0.556, 0.484, 0.627, 0.642,
+0.455. Validation (64 rows): base 0.625, final 0.594. The stop rule applies: **tier 2 does not open the overnight run.**
+
+**What actually happened to quang-3060.** Its machine went offline at **22:18:44** (lab last-seen; Tailscale "offline";
+SSH timed out) during generation index 1, *before* the scripted OFF at 22:20:15. The run kept going on three devices: its
+unfinished work was taken by the others and nothing failed. The rejoin could not have happened for two reasons. (1) The
+machine was gone. (2) By design (ADR-009, `backend/agent_scheduling.py:auto_join`), a worker that LEFT an experiment is
+never auto-joined again: the owner must add it back explicitly (`POST /api/v1/experiments/{id}/workers {"action":"add"}`).
+Contribution ON alone does not do it. The predeclared step expected the wrong mechanism.
+
+**Finding (product, serious): an offline member blocks the release of a finished run indefinitely.** The coordinator
+completed, and its membership lists quang-3060 as `left`. But its worker state for it is still `alive: true,
+confirmed: false` (the device cannot confirm a stop while offline). `release_left_members` needs `left` in the worker
+state or a confirmed stop. `_release_confirmed` needs every device seen within 30 s. Neither has a timeout. So the lab
+keeps the run DRAINING, and the reservations of **all four** devices stay held. No other experiment can start until the
+missing machine comes back. In tier 1 the same mechanism only cost about 4 minutes, because Thao's device was online.
+
+**Finding (product): `/api/v1/events` is too slow to poll.** It rebuilds the events of every run each time. While tier 2
+ran it answered HTTP 524 (the Cloudflare edge gave up after 100 s), whereas the per-run timeline answered in 0.5 s. The demo
+tools now read the timeline and the coordinator's own `events.jsonl`.
+
+**Harness mistakes (the AI's, not the system's), recorded so nothing is hidden:** the first tier 2 event script died on a
+transient `Connection reset by peer` before it acted (`tier2/stage-events-attempt1.jsonl`); it was restarted with retried
+reads before generation index 2 opened, so the declared timing was kept. One script was first named `operator.py`, which
+shadows the standard library.
+
+**Tier 2b** (`PREDECLARATION-tier2b.md`, committed before any run) repeats tier 2 with the explicit rejoin. It was **not
+run**: the lab is still blocked by the finished tier 2 (above), and the owner closed the session. **Tier 3 was not
+launched.**
