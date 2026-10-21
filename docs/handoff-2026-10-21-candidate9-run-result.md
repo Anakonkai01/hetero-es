@@ -1,5 +1,8 @@
 # Candidate9 restart run done: 2 of 3 restarts recovered, the 1660S verdict `failed` (STOP rule), parity exact. Needs a decision.
 
+**Update ~19:30 +07: the owner chose (a); candidate9 is ACCEPTED** (decision and event-3 audit facts appended to `RESULTS.md`),
+and asked for `plan-r11-release.md` step 6 (FF `main` to the release commit, push all branches).
+
 Checkpoint 2026-10-21 ~19:25 +07, branch `feat/r11-scheduling-elastic`, local only (**not pushed**). Supersedes
 `handoff-2026-10-21-candidate9-restart-run.md`. Result and evidence: `evidence/2026-10-21-restart-run-candidate9/RESULTS.md`.
 

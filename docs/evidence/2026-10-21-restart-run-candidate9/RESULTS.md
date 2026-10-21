@@ -49,3 +49,20 @@ or the scheduler should change is a decision for the owner or a stronger-model s
 One configuration of five machines, one occurrence of each fault. No claim about learning, speed, arbitrary models or universal
 cross-GPU equality. No coordinator or lab crash test, no stale-result recheck, no publication, deployment, merge or push.
 The release flag day (`plan-r11-release.md` steps 6-8) is NOT started and needs the owner's explicit "đồng ý" at each step.
+
+## Owner decision (2026-10-21 ~19:30 +07, after the result): option (a), candidate9 ACCEPTED
+
+The owner chose option (a) after seeing the result and the scheduler replay (`greedy_tail_replay.py`, `greedy-tail-replay.log`):
+for a member that `greedy-tail` declines, the restart proof is `worker_restarted` followed by audits done by that member and matched.
+This changes the event-3 criterion **after** the result, by the owner's explicit choice; the predeclared criterion ("a new committed
+result in the second window") was not met and could not be met with these machines (the rule declined the 1660S even with all 8
+candidates waiting in 38 of 42 window-2 generations).
+
+Event 3 under (a), from the ledger copy: `worker_restarted` launch 1 at t=1792582433.36 (followed by `worker_start_unknown`: the
+launch reply was not confirmed, so this line alone proves nothing); then 12 audits by `cli-3e355c6e9e70` at g16, 18, 26, 27, 31, 33,
+35, 38, 45, 46, 47, 48, the first ~221 s after the restart, **all `matched = 1`**: each a full regeneration of a candidate that
+another GPU computed, byte-identical (`completions_sha256`). The old process was confirmed stopped before the restart
+(`_restart_members` restarts only a member whose worker is confirmed not alive).
+
+With this, all three verdicts count as recovered and candidate9 is accepted for `plan-r11-release.md` step 6. Not changed: the
+scheduler (backlog: re-measure a stale slow estimate; log declines) and every other check above.
