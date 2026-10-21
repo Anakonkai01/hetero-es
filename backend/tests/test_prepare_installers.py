@@ -4,11 +4,10 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
-import tarfile
 import pytest
 
 
-def test_prepare_only_builds_four_hashed_installers_without_touching_public_manifest(tmp_path, monkeypatch):
+def test_prepare_only_builds_hashed_windows_installers_without_touching_public_manifest(tmp_path, monkeypatch):
     source = Path(__file__).resolve().parents[2] / "scripts/publish-local-installers.py"
     spec = importlib.util.spec_from_file_location("prepare_installers", source)
     module = importlib.util.module_from_spec(spec)
@@ -47,15 +46,14 @@ def test_prepare_only_builds_four_hashed_installers_without_touching_public_mani
     assert report["linuxWorker"]["installer"]["url"] == "/downloads/install-worker.sh"
     assert report["linuxWorker"]["bundle"]["sha256"] == cli_files["heteroes-worker-linux-test-r5.tar.gz"]["sha256"]
     entries = report["installers"] + report["serverInstallers"]
-    assert len(entries) == 4
+    # desktop apps for Windows only: Linux is the command line Worker (owner decision 2026-10-22)
+    assert [e["platform"] for e in entries] == ["windows", "windows"]
+    assert not list(packages.rglob("*Linux.tar.gz"))
     for entry in entries:
         kind = "worker" if entry["name"].startswith("HeteroES Worker") else "server"
         file = packages / kind / entry["name"]
         assert file.stat().st_size == entry["sizeBytes"]
         assert hashlib.sha256(file.read_bytes()).hexdigest() == entry["sha256"]
-        if entry["platform"] == "linux":
-            with tarfile.open(file) as archive:
-                assert archive.getmember(f"heteroes-{kind}/heteroes-{kind}").mode == 0o755
     published = tmp_path / "published.json"
     module.main(
         [

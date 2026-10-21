@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""Prepare immutable installers; --prepare-only leaves the live download page untouched."""
+"""Prepare immutable installers; --prepare-only leaves the live download page untouched.
+
+Desktop apps are published for Windows only (owner decision 2026-10-22): Linux uses the command line Worker
+(`install-worker.sh`) and a Linux lab runs as a service. The Linux unpacked builds stay as test fixtures."""
 
 import argparse
-import gzip
 import hashlib
 import json
 from pathlib import Path
 import re
 import shutil
 import subprocess
-import tarfile
 import time
 
 
@@ -101,9 +102,9 @@ def main(argv=None):
             ("serverInstallers", "server", "HeteroES Lab Server"),
         ]:
             entries = prepared.get(key, [])
-            if len(entries) != 2 or {e.get("platform") for e in entries} != {"linux", "windows"}:
+            if [e.get("platform") for e in entries if e.get("platform") == "windows"] != ["windows"]:
                 raise RuntimeError("Prepared receipt inventory differs")
-            for entry in entries:
+            for entry in (e for e in entries if e["platform"] == "windows"):  # an older receipt may list Linux too
                 platform = entry["platform"]
                 suffix = "Windows.exe" if platform == "windows" else "Linux.tar.gz"
                 name = f"{product}-0.1.0-{args.build}-{suffix}"
@@ -144,25 +145,7 @@ def main(argv=None):
                 raise RuntimeError("Existing immutable Windows build differs; choose a new build name")
         else:
             shutil.copyfile(source, windows)
-        linux = directory / f"{product}-0.1.0-{args.build}-Linux.tar.gz"
-        if linux.exists():
-            raise RuntimeError("Existing immutable Linux build; choose a new build name")
-        with linux.open("xb") as raw, gzip.GzipFile(fileobj=raw, mode="wb", filename="", mtime=0) as compressed:
-            with tarfile.open(fileobj=compressed, mode="w") as archive:
-
-                def normalize(info):
-                    info.uid = info.gid = info.mtime = 0
-                    info.uname = info.gname = ""
-                    executable = Path(info.name).name in {
-                        "heteroes-" + kind,
-                        "chrome-sandbox",
-                        "chrome_crashpad_handler",
-                    }
-                    info.mode = 0o755 if info.isdir() or executable else 0o644
-                    return info
-
-                archive.add(directory / "linux-unpacked", arcname="heteroes-" + kind, filter=normalize)
-        for platform, file in [("windows", windows), ("linux", linux)]:
+        for platform, file in [("windows", windows)]:
             manifest[key].append(
                 {
                     "platform": platform,

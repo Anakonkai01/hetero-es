@@ -43,14 +43,17 @@ export function InstallerDownloads() {
               <p>{t(description)}</p>
               <div className="acts">
                 {items
-                  .filter((item) => item.platform !== 'linux-appimage')
+                  .filter((item) => item.platform === 'windows')
                   .map((item) => (
                     <a className="btn" href={item.url} download={item.name} key={item.platform}>
-                      {item.platform === 'windows' ? 'Windows' : 'Linux'} <span aria-hidden="true">↓</span>
+                      Windows <span aria-hidden="true">↓</span>
                     </a>
                   ))}
               </div>
               {!items.length && <p className="hint">{t('No installer available')}</p>}
+              {name === 'Lab Server' && (
+                <p className="hint">{t('On Linux the lab runs as a service from the command line (see the handbook).')}</p>
+              )}
               {name === 'Worker' && <LinuxWorkerCommand manifest={manifest.data} />}
             </article>
           ))}

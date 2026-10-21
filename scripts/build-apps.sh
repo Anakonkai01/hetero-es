@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Build the Worker and Lab Server apps for Linux (unpacked) and Windows (NSIS, through Wine) into a FRESH
-# directory. It never replaces an existing build, because published installers and evidence refer to them.
+# Build the Worker and Lab Server apps for Windows (NSIS, through Wine) and the Linux command line Worker into a FRESH
+# directory. It never replaces an existing build, because published installers and evidence refer to them. The Linux
+# unpacked apps are built only as test fixtures for the packaged checks; they are never published (Linux = CLI only).
 #
 #   BUILD=lf1-20261012-r5 scripts/build-apps.sh
 #
@@ -35,7 +36,7 @@ printf '{"labUrl":"%s","build":"%s"}\n' "${DEFAULT_LAB_URL:-https://lab.heteroes
 for app in worker server; do
   echo "=== $app: type check and bundle $(date +%T)"
   npm run build --workspace "@heteroes/$app"
-  echo "=== $app: Linux unpacked $(date +%T)"
+  echo "=== $app: Linux unpacked, test fixture only $(date +%T)"
   (cd "desktop/$app" && npx electron-builder --linux dir --x64 --publish never --config.directories.output="$OUT/$app")
 done
 for app in worker server; do
