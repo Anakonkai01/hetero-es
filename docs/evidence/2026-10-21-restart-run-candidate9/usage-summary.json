@@ -1,0 +1,49 @@
+{
+ "usageRows": 423,
+ "byWorkerAndKind": [
+  [
+   "cli-3e355c6e9e70",
+   "audit",
+   12
+  ],
+  [
+   "cli-3e355c6e9e70",
+   "candidate",
+   1
+  ],
+  [
+   "cli-894b5d440398",
+   "audit",
+   3
+  ],
+  [
+   "cli-894b5d440398",
+   "candidate",
+   108
+  ],
+  [
+   "desktop-906949218c43",
+   "audit",
+   4
+  ],
+  [
+   "desktop-906949218c43",
+   "candidate",
+   178
+  ],
+  [
+   "desktop-9f9da13f0f82",
+   "audit",
+   4
+  ],
+  [
+   "desktop-9f9da13f0f82",
+   "candidate",
+   113
+  ]
+ ],
+ "coordinatorGpuSeconds": [
+  0.0,
+  0.0
+ ]
+}
