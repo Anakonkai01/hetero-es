@@ -96,3 +96,13 @@ installer `/downloads/install-worker.sh` points at `https://lab.heteroes.site/do
 3. Move the r11 database aside, rename `product-r10-before-r11-20261021.sqlite` back to `product.sqlite` and
    `metadata-backups-r10` back (or restore `product.sqlite` from the Archive snapshot after checking its sha256).
 4. `local-lab.py start` (r10 copy); status; sign in. Device pairings of r10 come back with the database.
+
+## D started by the AI, then handed to the owner (20:05-20:15 +07)
+
+The AI began D (downloaded the public one-line installer, equal to the prepared one, sha256 `9e2837c90cff…`; started a
+coordinator CLI install on the 5070; installed the Worker on Thao's Windows from the public URL, hash equal to the receipt,
+exit 0, `defaults.json` = `https://lab.heteroes.site`, `windows-install-live.log`). The owner then asked to do D themselves as
+the final user acceptance (the coordinator runs on the 5070 Ti). The AI stopped both tasks and undid them:
+`windows-undo-live.ps1` quit the app (4 processes), ran the candidate9 **silent uninstaller: exit 0, app, `%APPDATA%\@heteroes`
+and data folder all gone**, removed the task folder (it held the admin login); the partial coordinator home on the 5070
+(489 MB, no process left) was deleted. The live lab still has 0 devices and 0 pairing codes. No device was paired or approved.
