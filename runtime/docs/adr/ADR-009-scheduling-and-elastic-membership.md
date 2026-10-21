@@ -1,0 +1,63 @@
+# ADR-009 — Tail-aware scheduling, liveness and elastic worker membership in the product
+
+Status: **ACCEPTED** by the owner on 2026-10-21 (chat answers, see the end). Related: ADR-002 (ledger, leases),
+ADR-005 (lifecycle authority), ADR-008 (Recipe v3; this ADR changes nothing in its documents or hashes).
+
+Labels: **[CODE]** exists in the tree · **[DECIDED]** owner decision of 2026-10-21.
+
+## Context
+
+The research runtime measured four dispatch policies (`heteroes/dispatch.py`). The tail-aware policy B4 `GreedyTail`
+was the only one whose gain over the best single machine excluded "no effect" (STATUS C2; G6 FP16 0.94× with greedy
+against 1.06× with tail-aware, G7 CUDA 0.95× against 1.09×). The managed product run, written later (commit `51e1b2a`),
+hard-codes `AdmittedOnly(Greedy(), workerIds)` and every layer above it (supervisor, backend capability and
+validation, web form) accepts only `greedy` + `synchronous`. No document records a reason; it was an omission.
+
+An audit on 2026-10-21 found further gaps around it:
+- `AdmittedOnly` drops the `committed()` hook, so `AdmittedOnly(GreedyTail)` would never learn speeds.
+- A new policy object is created each generation.
+- A worker busy for more than 30 s looks dead to GreedyTail.
+- The stall detector counts only commits, not heartbeats.
+- The time limits are fixed numbers.
+- The experiment's worker list is frozen at submission.
+- Three option names (`capacity-weighted`, `round-robin`, `asynchronous`) are advertised with no code behind them.
+
+## Decision
+
+1. **Policies.** The product offers `greedy-tail` (B4, default for new experiments) and `greedy` (B3). The other names
+   are removed from the templates, types and labels. Asynchronous ES stays FUTURE (a separate ADR after r11). [DECIDED]
+2. **Policy state.** One `SpeedBook` per run, shared by every generation's policy. After a coordinator restart it is
+   seeded from the ledger's committed attempt durations. `AdmittedOnly` forwards every optional hook. A heartbeat
+   counts as "alive" for the policy.
+3. **Liveness.** The stall check fails a generation only when nothing was committed AND no leased candidate sent a
+   heartbeat for the stall period. The generation and audit time caps are derived from the measured speeds, never below
+   the previous fixed values. [DECIDED]
+4. **Elastic membership.** Workers can join or leave a running experiment, either when the owner adds or removes them,
+   or automatically when the experiment opts in with `allowJoin`. [DECIDED]
+   - A change takes effect at the next generation boundary.
+   - Every change is written to the ledger (`membership`, schema 7).
+   - A leaving worker gets no new lease; its current lease finishes or expires and is retried elsewhere.
+   - The last worker cannot be removed.
+5. **Explicit expiry.** When the ledger recovers an expired lease it writes `ended_at` and `failure_kind = EXPIRED`
+   (schema 7), so the ledger itself shows a timed-out attempt.
+
+## Why the numbers cannot change
+
+The policy and the membership decide only *which worker* evaluates *which candidate*. The recipe hash is built from
+`model`, `weightSpace`, `sigma`, `population`, `generations`, `batchSize`, `evalChunk`, decoder, sampler, prompt and
+scorer fields (`heteroes/v3/run.py`). It never reads `schedulerPolicy`, `workerIds` or membership.
+- Candidate seeds and signs are fixed by the plan.
+- The update uses the rewards in index order, whoever computed them.
+- The nine-case probes show that the 5070 Ti, both 3060s and the 1660 SUPER give the same token arrays.
+
+A CPU end-to-end test must show that the child hashes of a run with a mid-run join/leave equal those of a
+fixed-membership run.
+
+## Owner answers (2026-10-21)
+
+- Fix before the 50-generation acceptance; the acceptance runs on candidate7.
+- Elastic now, both manual and opt-in automatic joining.
+- Limits derived automatically, heartbeat-aware.
+- Remove the dead names; keep greedy and greedy-tail; greedy-tail is the default.
+- The acceptance adds a machine around generation 10 and removes it around generation 30.
+- Separate finding: the public health endpoint stops returning `privateLabUrl`; it moves behind sign-in.
