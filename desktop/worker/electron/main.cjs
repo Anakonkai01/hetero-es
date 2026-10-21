@@ -250,6 +250,7 @@ app
     });
     await window.loadFile(path.join(__dirname, '../dist/index.html'));
     if (!process.argv.includes('--background')) show(); // opened with Windows: stay in the tray
+    void service.status().catch(() => {}); // start the agent now: a hidden window polls slowly
   })
   .catch((error) =>
     (lifecycle ?? new Lifecycle({ service: null, quitApp: () => app.quit(), show, notify, fail, log })).startupFailed(
