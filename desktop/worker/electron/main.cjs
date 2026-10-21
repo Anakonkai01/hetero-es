@@ -74,6 +74,12 @@ app
       build: service.defaults.build,
     });
     lifecycle = new Lifecycle({ service, quitApp: () => app.quit(), show, notify, fail, log });
+    // Opens with Windows (to the tray) unless the owner turned it off, so a restarted machine comes back by itself.
+    const loginItem = () =>
+      app.isPackaged &&
+      process.platform === 'win32' &&
+      app.setLoginItemSettings({ openAtLogin: service.settings.startAtLogin !== false, args: ['--background'] });
+    loginItem();
     window = new BrowserWindow({
       width: 820,
       height: 780,
@@ -142,6 +148,13 @@ app
         if (typeof args.enabled !== 'boolean') throw Error('INVALID_ARGUMENT');
         return service.contribution(args.enabled);
       }
+      if (action === 'preferences') {
+        if (['startAtLogin', 'keepOn'].some((key) => key in args && typeof args[key] !== 'boolean'))
+          throw Error('INVALID_ARGUMENT');
+        const result = await service.preferences(args);
+        loginItem();
+        return result;
+      }
       if (action === 'logout') return service.logout();
       if (action === 'forgetDevice') return service.forgetDevice();
       if (action === 'chooseDataFolder') {
@@ -200,6 +213,7 @@ app
         'selftest',
         'pair',
         'contribution',
+        'preferences',
         'logout',
         'forgetDevice',
         'chooseDataFolder',
@@ -215,6 +229,7 @@ app
         login: ['username', 'password'],
         pair: ['displayName'],
         contribution: ['enabled'],
+        preferences: ['startAtLogin', 'keepOn'],
         external: ['target'],
       };
       if (Object.keys(args).some((key) => !(allowed[action] ?? []).includes(key)))
@@ -234,7 +249,7 @@ app
       }
     });
     await window.loadFile(path.join(__dirname, '../dist/index.html'));
-    show();
+    if (!process.argv.includes('--background')) show(); // opened with Windows: stay in the tray
   })
   .catch((error) =>
     (lifecycle ?? new Lifecycle({ service: null, quitApp: () => app.quit(), show, notify, fail, log })).startupFailed(

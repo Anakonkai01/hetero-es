@@ -258,6 +258,7 @@ export const translations: Record<string, string> = {
   'Turn ON': 'Bật đóng góp',
   'Turn OFF': 'Tắt đóng góp',
   'Keep ON after restart': 'Giữ ON sau khi khởi động lại',
+  'Open with Windows': 'Mở cùng Windows',
   ONLINE: 'Online',
   OFFLINE: 'Offline',
   CONNECTING: 'Đang kết nối',
@@ -1211,6 +1212,7 @@ export const translations: Record<string, string> = {
     'Máy này đã ghép với lab khác. Hãy ghép lại để dùng lab này.',
   'Enter the lab address first.': 'Hãy nhập địa chỉ lab trước.',
   'Sign in first.': 'Hãy đăng nhập trước.',
+  'Pair this computer with the lab first.': 'Hãy ghép cặp máy này với lab trước.',
   'Cancelled.': 'Đã hủy.',
   'The lab server is not answering right now. Try again later or ask the lab administrator.':
     'Máy chủ lab đang không phản hồi. Hãy thử lại sau hoặc hỏi quản trị viên lab.',

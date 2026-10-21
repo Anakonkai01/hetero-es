@@ -52,7 +52,9 @@ export function InstallerDownloads() {
               </div>
               {!items.length && <p className="hint">{t('No installer available')}</p>}
               {name === 'Lab Server' && (
-                <p className="hint">{t('On Linux the lab runs as a service from the command line (see the handbook).')}</p>
+                <p className="hint">
+                  {t('On Linux the lab runs as a service from the command line (see the handbook).')}
+                </p>
               )}
               {name === 'Worker' && <LinuxWorkerCommand manifest={manifest.data} />}
             </article>

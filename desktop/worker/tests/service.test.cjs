@@ -168,3 +168,21 @@ test('connection failures report only safe codes, and compute reports come from 
   assert.equal(report.assignments[0].replayOnly, true);
   assert.equal(report.checks.length, 1);
 });
+test('opening with Windows is kept locally and keep ON after restart is the owner choice on the lab', async (t) => {
+  const { service } = await fixture(t);
+  assert.equal((await service.status()).startAtLogin, true); // the default: a restarted machine comes back
+  assert.deepEqual(await service.preferences({ startAtLogin: false }), { startAtLogin: false, keepOn: false });
+  assert.equal(JSON.parse(await fs.readFile(path.join(service.root, 'settings.json'), 'utf8')).startAtLogin, false);
+  await assert.rejects(service.preferences({ keepOn: true }), /DEVICE_NOT_PAIRED/);
+  service.device = { deviceId: 'dev', workerId: 'desktop' };
+  await assert.rejects(service.preferences({ keepOn: true }), /SIGN_IN_REQUIRED/);
+  service.userToken = 'owner-session';
+  const sent = [];
+  service.fetch = async (url, options) => {
+    sent.push([url, options.method, JSON.parse(options.body)]);
+    return new Response('{}');
+  };
+  service.settings.serverUrl = 'https://lab.example';
+  assert.deepEqual(await service.preferences({ keepOn: true }), { startAtLogin: false, keepOn: true });
+  assert.deepEqual(sent, [['https://lab.example/api/v1/devices/dev/contribution', 'PATCH', { keepAfterReboot: true }]]);
+});

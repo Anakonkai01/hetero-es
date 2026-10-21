@@ -60,6 +60,7 @@ Object.assign(explanations, {
   AGENT_EXITED: 'The local agent stopped right after it started. Export diagnostics and send the log file.',
   SELECT_LAB_FIRST: 'Enter the lab address first.',
   SIGN_IN_REQUIRED: 'Sign in first.',
+  DEVICE_NOT_PAIRED: 'Pair this computer with the lab first.',
   ACTION_CANCELLED: 'Cancelled.',
 });
 export const explain = (code: string) =>

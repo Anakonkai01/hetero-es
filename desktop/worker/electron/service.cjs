@@ -499,6 +499,25 @@ class Service {
     const state = await this.bridge.call('status');
     return this.api('/api/v1/devices/' + this.device.deviceId + '/contribution', { enabled, bootId: state.bootId });
   }
+  // Owner choices for unattended machines (2026-10-22): open with Windows, and stay ON after a restart (kept by the lab).
+  async preferences({ startAtLogin, keepOn }) {
+    if (typeof startAtLogin === 'boolean') {
+      this.settings.startAtLogin = startAtLogin;
+      await this.save();
+    }
+    if (typeof keepOn === 'boolean') {
+      if (!this.device) throw Error('DEVICE_NOT_PAIRED');
+      if (!this.userToken) throw Error('SIGN_IN_REQUIRED');
+      await this.api(
+        '/api/v1/devices/' + this.device.deviceId + '/contribution',
+        { keepAfterReboot: keepOn },
+        this.userToken,
+        'PATCH',
+      );
+      this.device = { ...this.device, keepContributionAfterReboot: keepOn };
+    }
+    return { startAtLogin: this.settings.startAtLogin !== false, keepOn: !!this.device?.keepContributionAfterReboot };
+  }
   async status() {
     if (this.autoStart && this.device && this.setup.status().installed && !this.bridge && this.now() >= this.retryAt)
       try {
@@ -538,6 +557,7 @@ class Service {
         addresses: addresses(this.interfaces()),
       },
       serverUrl: this.settings.serverUrl ?? '',
+      startAtLogin: this.settings.startAtLogin !== false,
       defaultLabUrl: this.defaults.labUrl,
       build: this.defaults.build,
       signedIn: !!this.userToken,

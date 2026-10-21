@@ -39,7 +39,9 @@ export type State = {
     workerId: string;
     displayName: string;
     approvalStatus: string;
+    keepContributionAfterReboot?: boolean;
   };
+  startAtLogin?: boolean;
   selfTest?: {
     passed: boolean;
     gpuName: string;

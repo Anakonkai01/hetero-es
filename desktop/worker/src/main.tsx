@@ -465,6 +465,26 @@ function App() {
                         <dd>{t(state.setup.installed ? 'Installed' : 'Not installed')}</dd>
                       </div>
                     </dl>
+                    <div className="preferences">
+                      <label className="check">
+                        <input
+                          type="checkbox"
+                          checked={state.startAtLogin !== false}
+                          disabled={!!busy}
+                          onChange={(e) => void act('preferences', { startAtLogin: e.target.checked })}
+                        />
+                        {t('Open with Windows')}
+                      </label>
+                      <label className="check">
+                        <input
+                          type="checkbox"
+                          checked={!!state.device.keepContributionAfterReboot}
+                          disabled={!!busy || !state.signedIn || state.device.approvalStatus !== 'APPROVED'}
+                          onChange={(e) => void act('preferences', { keepOn: e.target.checked })}
+                        />
+                        {t('Keep ON after restart')}
+                      </label>
+                    </div>
                     <details className="desktop-detail">
                       <summary>{t('Device identity')}</summary>
                       <p>
