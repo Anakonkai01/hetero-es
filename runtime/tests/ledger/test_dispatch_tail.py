@@ -6,7 +6,7 @@ GPU that cost is as large as what the GPU adds. The rule is checked here with ex
 
 import pytest
 
-from heteroes.dispatch import Greedy, GreedyTail, SpeedBook
+from heteroes.dispatch import AdmittedOnly, Greedy, GreedyTail, SpeedBook
 from heteroes.ledger import Ledger
 from heteroes.worker_api import WorkerAPI
 from ledger_helpers import FakeClock, batch
@@ -223,3 +223,109 @@ def test_greedy_tail_keeps_the_rule_that_a_failed_candidate_is_not_handed_straig
     fail(api, work, "OUT_OF_MEMORY")
     retry = ask(api, "fast")
     assert index_of(retry) == 2  # not candidate 1 again: it failed on this very worker and another one is around
+
+
+# ---- in the product: wrapped by AdmittedOnly, kept alive by heartbeats, one book for the whole run (ADR-009)
+
+
+def heartbeat(api, work):
+    reply = api.handle(
+        "heartbeat",
+        {"descriptor": work["descriptor"], "attempt_number": work["attempt_number"], "token": work["token"]},
+    )
+    assert reply["ok"] is True, reply
+
+
+def make_admitted(n=12, admitted=("fast", "slow"), **kwargs):
+    clock, book, ledger, api, policy = make(n=n, **kwargs)
+    wrapped = AdmittedOnly(policy, admitted)
+    api = WorkerAPI(ledger, "exp", 0, lease_seconds=LEASE_SECONDS, policy=wrapped)
+    return clock, book, ledger, api, policy, wrapped
+
+
+def test_a_tail_policy_wrapped_by_admitted_only_still_learns_the_durations():
+    # the product wraps every policy: before ADR-009 the wrapper dropped `committed` and GreedyTail silently became Greedy
+    clock, book, ledger, api, policy, wrapped = make_admitted(n=3, admitted=("w",), observed=False)
+    work = ask(api, "w")
+    clock.advance(4.0)
+    deliver(api, work)
+    assert book.estimate("w") == 4.0
+
+
+def test_a_wrapped_tail_policy_still_keeps_the_slow_worker_off_the_last_candidates():
+    clock, book, ledger, api, policy, wrapped = make_admitted(n=12)
+    for _ in range(11):
+        ask(api, "fast")
+    assert ask(api, "slow") is None
+
+
+def test_a_heartbeat_keeps_a_busy_fast_worker_alive_for_the_tail_rule():
+    # fast candidates of 25 s: the fast worker does not ask for 25 s, longer than the 20 s window, but it heartbeats
+    clock, book, ledger, api, policy = make(n=12, active_window=20.0)
+    leases = [ask(api, "fast") for _ in range(11)]
+    clock.advance(12.0)
+    heartbeat(api, leases[0])
+    clock.advance(12.0)  # 24 s since it asked, 12 s since its heartbeat (all leases of 30 s still valid)
+    assert ask(api, "slow") is None
+
+
+def test_without_a_heartbeat_the_same_busy_fast_worker_is_not_waited_for():
+    clock, book, ledger, api, policy = make(n=12, active_window=20.0)
+    for _ in range(11):
+        ask(api, "fast")
+    clock.advance(24.0)
+    assert index_of(ask(api, "slow")) == 11
+
+
+def test_admitted_only_passes_the_heartbeat_on():
+    clock, book, ledger, api, policy, wrapped = make_admitted(n=12, active_window=20.0)
+    leases = [ask(api, "fast") for _ in range(11)]
+    clock.advance(12.0)
+    heartbeat(api, leases[0])
+    clock.advance(12.0)
+    assert ask(api, "slow") is None
+
+
+def test_a_policy_without_heartbeat_still_works_with_the_api():
+    ledger = Ledger(":memory:", clock=FakeClock())
+    ledger.open_generation(batch(2))
+    for policy in (Greedy(), AdmittedOnly(Greedy(), ["a"])):
+        api = WorkerAPI(ledger, "exp", 0, lease_seconds=LEASE_SECONDS, policy=policy)
+        work = ask(api, "a")
+        heartbeat(api, work)
+        deliver(api, work)
+
+
+def test_the_admitted_workers_can_change_while_the_run_goes_on():
+    clock, book, ledger, api, policy, wrapped = make_admitted(n=4, admitted=("fast",))
+    assert ask(api, "late") is None  # not a member yet
+    wrapped.set_admitted(["fast", "late"])
+    assert ask(api, "late") is not None
+    wrapped.set_admitted(["fast"])  # it left: no new lease
+    assert ask(api, "late") is None
+    for bad in ([], ["fast", ""], "fast", [3]):
+        with pytest.raises((ValueError, TypeError)):
+            wrapped.set_admitted(bad)
+    assert wrapped.admitted == frozenset({"fast"})  # a refused change leaves the members as they were
+
+
+def test_a_new_book_is_seeded_from_the_durations_in_the_ledger():
+    # after a coordinator restart the policy starts from what the ledger knows, not from nothing
+    clock = Clock()
+    ledger = Ledger(":memory:", clock=clock)
+    ledger.open_generation(batch(3))
+    api = WorkerAPI(ledger, "exp", 0, lease_seconds=LEASE_SECONDS, policy=Greedy())
+    for seconds in (4.0, 6.0):
+        work = ask(api, "w")
+        clock.advance(seconds)
+        deliver(api, work)
+    failed = ask(api, "x")
+    clock.advance(9.0)
+    fail(api, failed, "OUT_OF_MEMORY")  # a failure is not a duration
+    retry = ask(api, "w")  # the same candidate, its second attempt
+    clock.advance(2.0)
+    deliver(api, retry)
+    assert ledger.worker_durations("exp") == [("w", 4.0), ("w", 6.0), ("w", 2.0)]
+    assert SpeedBook.from_ledger(ledger, "exp", alpha=0.5).estimate("w") == 3.5
+    assert SpeedBook.from_ledger(ledger, "exp").estimate("x") is None
+    assert SpeedBook.from_ledger(ledger, "other").workers() == []

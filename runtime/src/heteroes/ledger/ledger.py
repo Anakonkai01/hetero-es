@@ -966,6 +966,19 @@ class Ledger:
         return [QuarantineRecord(*row) for row in rows]
 
     @_locked
+    def worker_durations(self, experiment_id: str) -> list[tuple[str, float]]:
+        """(worker, seconds from lease to committed result) of every committed candidate, oldest first: what a restarted
+        coordinator's tail-aware policy starts from (ADR-009). Failed and expired attempts are not durations."""
+        rows = self._db.execute(
+            "SELECT a.worker_id, r.committed_at - a.leased_at FROM result AS r "
+            "JOIN attempt AS a ON a.candidate_id = r.candidate_id AND a.attempt_number = r.attempt_number "
+            "JOIN candidate AS c ON c.candidate_id = r.candidate_id WHERE c.experiment_id = ? "
+            "ORDER BY r.committed_at, c.generation, c.candidate_index",
+            (experiment_id,),
+        ).fetchall()
+        return [(worker, float(seconds)) for worker, seconds in rows]
+
+    @_locked
     def release_worker(self, worker_id: str) -> None:
         """Take a worker out of quarantine. A human does this, after dealing with the worker; nothing calls it by itself."""
         if not isinstance(worker_id, str):

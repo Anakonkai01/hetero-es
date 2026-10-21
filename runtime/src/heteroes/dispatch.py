@@ -113,6 +113,16 @@ class SpeedBook:
         old = self._estimate.get(worker_id)
         self._estimate[worker_id] = float(seconds) if old is None else self._alpha * seconds + (1 - self._alpha) * old
 
+    @classmethod
+    def from_ledger(cls, ledger, experiment_id: str, alpha: float = 0.5) -> "SpeedBook":
+        """A book that has already seen every committed duration of the experiment, in the order they were committed: a
+        restarted coordinator does not start knowing nothing (ADR-009). Zero-length durations of a fake clock are skipped."""
+        book = cls(alpha=alpha)
+        for worker_id, seconds in ledger.worker_durations(experiment_id):
+            if seconds > 0:
+                book.observe(worker_id, seconds)
+        return book
+
     def estimate(self, worker_id: str) -> float | None:
         return self._estimate.get(worker_id)
 
@@ -179,6 +189,10 @@ class GreedyTail:
     def leased(self, candidate_id: str, worker_id: str) -> None:
         self._inner.leased(candidate_id, worker_id)
         self._leased[candidate_id] = (worker_id, self._clock())
+
+    def heartbeat(self, worker_id: str) -> None:
+        """Called by the worker API on a heartbeat: a worker busy with one long candidate is alive, not gone (ADR-009)."""
+        self._seen[worker_id] = self._clock()
 
     def committed(self, candidate_id: str) -> None:
         """Called by the worker API when a result was committed (not for a repeat): the duration of that candidate teaches the book."""
@@ -259,23 +273,49 @@ class StaticProportional:
         pass
 
 
+def _admitted_set(admitted) -> frozenset[str]:
+    if isinstance(admitted, (str, bytes)) or not hasattr(admitted, "__iter__"):
+        raise TypeError(f"admitted must be a collection of worker ids, got {type(admitted).__name__}")
+    admitted = list(admitted)
+    for worker_id in admitted:
+        if not isinstance(worker_id, str):
+            raise TypeError(f"a worker id must be a string, got {type(worker_id).__name__}")
+        if not worker_id:
+            raise ValueError("a worker id must not be empty")
+    if not admitted:
+        raise ValueError("no worker is admitted: every generation would wait for ever")
+    return frozenset(admitted)
+
+
 class AdmittedOnly:
+    """
+    Gives work only to the admitted workers and passes everything else on to the inner policy, including its optional hooks
+    (`committed`, `heartbeat`): a wrapper that dropped them would turn GreedyTail into Greedy without a word (ADR-009).
+    The members can change while the run goes on (`set_admitted`, elastic membership): the set is replaced as a whole, so a
+    worker thread reads either the old members or the new ones.
+    """
+
     def __init__(self, inner, admitted):
-        if isinstance(admitted, (str, bytes)) or not hasattr(admitted, "__iter__"):
-            raise TypeError(f"admitted must be a collection of worker ids, got {type(admitted).__name__}")
-        admitted = list(admitted)
-        for worker_id in admitted:
-            if not isinstance(worker_id, str):
-                raise TypeError(f"a worker id must be a string, got {type(worker_id).__name__}")
-            if not worker_id:
-                raise ValueError("a worker id must not be empty")
-        if not admitted:
-            raise ValueError("no worker is admitted: every generation would wait for ever")
         self._inner = inner
-        self._admitted = frozenset(admitted)
+        self._admitted = _admitted_set(admitted)
+
+    @property
+    def admitted(self) -> frozenset[str]:
+        return self._admitted
+
+    def set_admitted(self, admitted) -> None:
+        self._admitted = _admitted_set(admitted)
 
     def pick(self, records: list[CandidateRecord], worker_id: str) -> CandidateRecord | None:
         return self._inner.pick(records, worker_id) if worker_id in self._admitted else None
 
     def leased(self, candidate_id: str, worker_id: str) -> None:
         self._inner.leased(candidate_id, worker_id)
+
+    def committed(self, candidate_id: str) -> None:
+        if hasattr(self._inner, "committed"):
+            self._inner.committed(candidate_id)
+
+    def heartbeat(self, worker_id: str) -> None:
+        if hasattr(self._inner, "heartbeat"):
+            self._inner.heartbeat(worker_id)

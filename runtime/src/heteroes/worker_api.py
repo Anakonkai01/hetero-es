@@ -275,6 +275,8 @@ class WorkerAPI:
     def _heartbeat(self, decoded) -> dict:
         descriptor, attempt_number, token = decoded
         lease = self._ledger.extend_lease(descriptor, attempt_number, token, self._lease_seconds)
+        if hasattr(self._policy, "heartbeat"):  # a busy worker is alive for the policy too (GreedyTail, ADR-009)
+            self._policy.heartbeat(self._ledger.attempt_worker(descriptor, attempt_number, token))
         return {"deadline": lease.deadline}
 
     def _submit_result(self, decoded) -> dict:

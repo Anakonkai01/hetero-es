@@ -1,0 +1,30 @@
+[
+ {
+  "name": "admitted-drops-committed",
+  "killed": true
+ },
+ {
+  "name": "admitted-drops-heartbeat",
+  "killed": true
+ },
+ {
+  "name": "tail-ignores-heartbeat",
+  "killed": true
+ },
+ {
+  "name": "api-skips-heartbeat-hook",
+  "killed": true
+ },
+ {
+  "name": "set-admitted-ignored",
+  "killed": true
+ },
+ {
+  "name": "book-not-seeded",
+  "killed": true
+ },
+ {
+  "name": "durations-include-failures",
+  "killed": true
+ }
+]
