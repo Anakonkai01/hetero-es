@@ -1,6 +1,10 @@
 # HeteroES — canonical handoff
 
-**Latest (2026-10-21 ~14:00): member-restart fix `98dd705` (CPU tests + mutation pass); owner chose a FULL 50-generation
+**Latest (2026-10-21 ~15:25): candidate8 final run COMPLETED 50/50 with exact parity, but the member-restart fix did NOT restart the
+Thao Windows or the rejoined 1660S on real machines — STOP, a stronger model is needed.**
+Read [handoff-2026-10-21-c8-member-restart-stop.md](handoff-2026-10-21-c8-member-restart-stop.md) first.
+
+**Previous (2026-10-21 ~14:00): member-restart fix `98dd705` (CPU tests + mutation pass); owner chose a FULL 50-generation
 final acceptance on candidate8, planned in detail next session.**
 Read [handoff-2026-10-21-member-restart-candidate8-next.md](handoff-2026-10-21-member-restart-candidate8-next.md) first.
 
