@@ -1,6 +1,10 @@
 # HeteroES — canonical handoff
 
-**Latest (2026-10-21 ~11:00): ADR-009 tail-aware scheduling + elastic membership done (CPU gate 23/23), candidate7
+**Latest (2026-10-21 ~13:25): candidate7 checked and installed on 4 devices; managed acceptance with 1660S join/leave
+and Thao Windows hard stop COMPLETED 50/50, 0 audit mismatches; next = verification.**
+Read [handoff-2026-10-21-candidate7-acceptance.md](handoff-2026-10-21-candidate7-acceptance.md) first.
+
+**Previous (2026-10-21 ~11:00): ADR-009 tail-aware scheduling + elastic membership done (CPU gate 23/23), candidate7
 built; next = candidate7 package checks, device upgrades, redeclared acceptance with join/leave.**
 Read [handoff-2026-10-21-scheduling-elastic.md](handoff-2026-10-21-scheduling-elastic.md) first. Branch
 `feat/r11-scheduling-elastic`, local only (not pushed). The candidate6 notes below are superseded where they differ.
