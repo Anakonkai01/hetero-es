@@ -45,7 +45,10 @@ models/runtime/artifacts on D:, no original Worker backup removal.
 All four isolated devices APPROVED and contribution OFF on fresh API read; both CLI agents stopped.
 Desktop agents idle. Historical attempt2 `e07deeb168ae4baaba3ac770b89043a6` remains PAUSED 13/50 with
 4 audits/1 mismatch, preserved. No new managed run offered. Local main remains `086c282`, public r10
-clone remains `79876cb`. This continuation commits evidence only; no merge, push, live restart or publish.
+clone remains `79876cb`. The acceptance continuation committed source/evidence without release merge,
+live restart or publication. The owner later requested session close and a branch backup push: source/evidence
+through `53911aa` is now pushed; fresh `git ls-remote` confirms all 38 local branch tips match GitHub.
+See `evidence/2026-10-21-session-close/README.md`. This backup push does not complete release-plan step 6.
 
 | Role | Worker ID | Device ID |
 | --- | --- | --- |
@@ -111,3 +114,9 @@ Isolated Lab Server driver `.scratch/isolated-lab/start-c6.sh`, port8790, log `s
 private installer HTTP8802 on tailnet, log `.scratch/r11-audit-investigation/candidate6-private-http.log`.
 Private server/Worker XDG state stays under `.scratch/isolated-lab/`; no public controller restart.
 Use fresh process inspection rather than old PID files. Do NOT use broad old stop scripts or pkill.
+
+## Owner-requested session close
+
+Closed 2026-10-21T07:14:27+07:00. Working branch remains `feat/v3-audit-recovery`; no new acceptance work
+should be inferred from the backup push. Latest HANDOFF and memory point here. Both evidence checksum
+manifests reverified. Resume at Quang connectivity/self-test and then the declared managed acceptance.

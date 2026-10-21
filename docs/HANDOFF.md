@@ -8,7 +8,10 @@ Thao Windows GPU and Thao WSL CPU. Quang install completed, but SSH/Tailscale is
 Nine native Windows evaluations match 5070 token/text/input/weight arrays exactly; existing Quang
 nine-case proof also matches. One initial Windows self-test ACTION_FAILED remains unexplained and retained.
 The fresh 50-generation run is predeclared, not started. All four isolated contributions OFF; CLI agents stopped.
-No merge/push/public release/live change. Flag-day confirmations still required. Historical state below is superseded.
+Session closed at owner request; source/evidence through `53911aa` pushed and all 38 local branches verified
+against GitHub. Main remains `086c282`; no release merge/public release/live change.
+See [session-close receipt](evidence/2026-10-21-session-close/README.md). Flag-day confirmations still required.
+Historical state below is superseded.
 
 Session 4 adds CPU coordination, eval/compare/serve/worker, real native Windows standalone coordinator proof, a limited
 vLLM probe, prompt/scorer/usage features and partial Linux download wiring. Final full checks, candidate3 packaging and

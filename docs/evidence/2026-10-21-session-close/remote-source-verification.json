@@ -1,0 +1,13 @@
+{
+  "localBranches": 38,
+  "remoteHeads": 41,
+  "allLocalBranchTipsMatch": true,
+  "differences": [],
+  "sourceAndEvidenceCommit": "53911aac999ad9e07998c27ab702bf919cd10cdb",
+  "mainCommit": "086c282fb18b32b2349edf2e4c4bce53d482f91e",
+  "remoteOnlyHeads": [
+    "refs/heads/feat/canonical-noise-engine",
+    "refs/heads/feat/perturb-restore-update",
+    "refs/heads/feat/to-90-c1-profile"
+  ]
+}
