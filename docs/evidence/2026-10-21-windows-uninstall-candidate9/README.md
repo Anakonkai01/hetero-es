@@ -41,8 +41,8 @@ Inventory: `inventory.ps1` (Windows) plus a `du` listing on WSL. Deleted on Wind
 on Windows.
 
 WSL: `delete-wsl-leftovers.sh` deletes the old research environment (`~/heteroes-venv`, `~/projects/heteroes`, `~/.cache/huggingface`,
-m2 config, the c7/c8 run folders in `/tmp`). The AI's SSH call was blocked by the Claude Code permission classifier, so the owner runs
-it; its output is recorded when run. Kept on purpose until the flag-day smoke run is done: `~/.local/share/heteroes-c4-cpu` (the CPU
+m2 config, the c7/c8 run folders in `/tmp`). The AI's SSH call was blocked by the Claude Code permission classifier, so the owner ran
+it from the chat (`delete-wsl-leftovers.log`): 10 paths deleted (~5.9 GB), no failure; WSL disk use 23 GB → 17 GB. Kept on purpose until the flag-day smoke run is done: `~/.local/share/heteroes-c4-cpu` (the CPU
 coordinator, which uses its own model copy, not `~/.cache/huggingface`), `~/.local/share/heteroes-power` and
 `/tmp/heteroes-r11-c9*`. The WSL disk image (`ext4.vhdx`, 33.9 GB on C:) does not shrink by itself; compact it after the last cleanup.
 

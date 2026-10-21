@@ -1,0 +1,16 @@
+deleted heteroes-venv 4.8G
+deleted projects/heteroes 122M
+deleted .cache/huggingface 954M
+deleted .cache/heteroes 12K
+deleted .local/share/heteroes-m2 1.6M
+deleted .config/heteroes-m2-agent 8.0K
+deleted /tmp/heteroes-r11-c7 40K
+deleted /tmp/heteroes-r11-c7-verify 1.7M
+deleted /tmp/heteroes-r11-c8 44K
+deleted /tmp/heteroes-r11-c8-copy 1.6M
+kept:
+8.5G	.local/share/heteroes-c4-cpu
+32K	.local/share/heteroes-power
+28K	/tmp/heteroes-r11-c9
+1.7M	/tmp/heteroes-r11-c9-copy
+/dev/sdd       1007G   17G  940G   2% /
