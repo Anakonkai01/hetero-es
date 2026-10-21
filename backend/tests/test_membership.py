@@ -203,7 +203,11 @@ def test_turning_a_member_off_sends_no_cancellation_to_anyone(lab):
     client, store, runtime, admin = lab
     rid, (coordinator, ch), devices = running(lab, workers=2)
     first = devices[0][0]
-    client.post("/api/v1/devices/" + first["deviceId"] + "/contribution", headers=admin, json={"enabled": False, "bootId": "boot-1"})
+    client.post(
+        "/api/v1/devices/" + first["deviceId"] + "/contribution",
+        headers=admin,
+        json={"enabled": False, "bootId": "boot-1"},
+    )
     everyone = [coordinator, *[d for d, _ in devices]]
     assert not [c for d in everyone for c in runtime.commands(d["deviceId"]) if c["kind"] == "CANCEL_ASSIGNMENT"]
 
