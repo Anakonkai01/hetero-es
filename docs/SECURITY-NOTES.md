@@ -3,10 +3,14 @@
 These existing behaviors are recorded during the cleanup. They have not been changed because that would change the
 product/network policy rather than only its structure and presentation.
 
-| Finding | Evidence in current code | Decision needed |
-| --- | --- | --- |
-| Public health reveals a private lab address | `routes_inventory.py` returns `privateLabUrl` from `bulkApiUrl`/`apiUrl` without a session. The import UI uses it to link to the private lab. | Decide whether to expose that address, return it only after sign-in, or provide a separate authenticated endpoint. |
+| Finding                                                       | Evidence in current code                                                                                                                      | Decision needed                                                                                                                                          |
+| ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | A workstation-specific directory is forbidden in shipped code | `backend/local_storage.py`, `runtime/src/heteroes/product/storage.py` and `desktop/worker/electron/setup.cjs` reject `/mnt/sekai` explicitly. | Decide the configurable storage policy and its migration/installer defaults. The owner rule prohibiting this directory on the workstation still applies. |
+
+## Resolved: the private lab address is for members only (owner, 2026-10-21)
+
+The public `/api/v1/health` no longer returns `privateLabUrl`. A signed-in workspace member gets it from
+`/api/v1/capabilities`, which the dataset import page now reads (`backend/tests/test_private_address.py`).
 
 ## Accepted risk: researcher Python code on the coordinator (owner, 2026-10-20)
 

@@ -14,7 +14,7 @@ const path = require('node:path');
 const fs = require('node:fs/promises');
 const { Service } = require('./service.cjs');
 const { Vault } = require('./vault.cjs');
-const { Lifecycle, codeOf } = require('./lifecycle.cjs');
+const { Lifecycle, recordActionFailure } = require('./lifecycle.cjs');
 const { createLog } = require('@heteroes/desktop-shared/log.cjs');
 if (!app.isPackaged && process.env.HETEROES_WORKER_TEST_DATA)
   app.setPath('userData', process.env.HETEROES_WORKER_TEST_DATA);
@@ -230,9 +230,7 @@ app
         if (action !== 'status') log.info('action', { action, ok: true, ms: Date.now() - started });
         return { ok: true, result };
       } catch (error) {
-        const code = codeOf(error);
-        log.info('action', { action, ok: false, code, ms: Date.now() - started });
-        return { ok: false, error: code };
+        return { ok: false, error: recordActionFailure(log, action, error, Date.now() - started) };
       }
     });
     await window.loadFile(path.join(__dirname, '../dist/index.html'));

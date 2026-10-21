@@ -88,4 +88,14 @@ class Lifecycle {
     this.quitApp();
   }
 }
-module.exports = { Lifecycle, describeCode, codeOf };
+// One failed action in the log: its code always, and for an unclassified failure (ACTION_FAILED) the sanitised stack too,
+// so that a failure seen once can be diagnosed from the log (ADR-009, F12). Returns the code shown to the person.
+function recordActionFailure(log, action, error, ms) {
+  const code = codeOf(error);
+  log.info('action', { action, ok: false, code, ms });
+  if (code === 'ACTION_FAILED')
+    log.detail(`action ${action} failed: ${error?.name ?? 'Error'}`, error?.stack ?? String(error));
+  return code;
+}
+
+module.exports = { Lifecycle, describeCode, codeOf, recordActionFailure };

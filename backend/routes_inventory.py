@@ -11,21 +11,23 @@ from .store import ACTIVE
 from fastapi import APIRouter
 
 
+def _private_config():
+    private_root = os.environ.get("HETEROES_PRIVATE_CONFIG")
+    if not private_root:
+        return {}
+    try:
+        return load_config(private_root)
+    except (OSError, ValueError):
+        return {}
+
+
 def install_routes(app, store, runtime, scoped, visible, capabilities, registry):
     router = APIRouter()
 
     @router.get("/api/v1/health")
     def health():
-        ui_url = os.environ.get("HETEROES_UI_URL")
-        config = {}
-        private_root = os.environ.get("HETEROES_PRIVATE_CONFIG")
-        if private_root:
-            # Quick URLs can rotate while this CPU service retains its identity.
-            try:
-                config = load_config(private_root)
-                ui_url = config.get("publicWebUrl") or ui_url
-            except (OSError, ValueError):
-                pass
+        # Quick URLs can rotate while this CPU service retains its identity.
+        ui_url = _private_config().get("publicWebUrl") or os.environ.get("HETEROES_UI_URL")
         backend = getattr(runtime, "storage_backend", None)
         return {
             "ok": True,
@@ -38,7 +40,7 @@ def install_routes(app, store, runtime, scoped, visible, capabilities, registry)
             **storage_status(runtime),
             "serverInstanceId": getattr(runtime, "server_instance_id", None),
             **({"uiUrl": ui_url} if ui_url else {}),
-            **({"privateLabUrl": config.get("bulkApiUrl", config["apiUrl"])} if config.get("apiUrl") else {}),
+            # the private lab address is for signed-in members only: see /api/v1/capabilities (SECURITY-NOTES)
         }
 
     @router.get("/api/v1/capabilities")
@@ -65,6 +67,7 @@ def install_routes(app, store, runtime, scoped, visible, capabilities, registry)
                 (current["workspaceId"],),
             ).fetchone()
         default = row[0] if row else None
+        private = _private_config()
         return {
             **cap,
             "workerIds": [w for w in store.assignments(current["workspaceId"]) if w in cap["workerIds"]],
@@ -72,6 +75,8 @@ def install_routes(app, store, runtime, scoped, visible, capabilities, registry)
             # the lab's default, only while it is still an approved coordinator here
             "defaultCoordinatorDeviceId": default if any(d["deviceId"] == default for d in coordinators) else None,
             "quarantinedWorkerIds": [w for w in cap.get("quarantinedWorkerIds", []) if w in assigned],
+            # the private lab address, for members (moved here from the public health check, SECURITY-NOTES)
+            **({"privateLabUrl": private.get("bulkApiUrl", private["apiUrl"])} if private.get("apiUrl") else {}),
         }
 
     @router.get("/api/v1/resources")

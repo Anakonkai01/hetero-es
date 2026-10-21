@@ -214,3 +214,22 @@ test('the log keeps recent lines, redacts secrets, rotates and never throws', as
   broken.info('still fine');
   assert.equal(broken.tail(5), '');
 });
+
+test('an unclassified action failure keeps its stack in the log; a known code does not need one', async (t) => {
+  // The first Windows candidate6 self-test failed with ACTION_FAILED and left nothing to diagnose (ADR-009, F12).
+  const { recordActionFailure } = require('../electron/lifecycle.cjs');
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'worker-log-'));
+  t.after(() => fs.rm(dir, { recursive: true, force: true }));
+  const log = createLog(path.join(dir, 'logs'));
+  const error = new TypeError(
+    'cannot read the reference at C:\\Users\\someone with token=abcdefabcdefabcdefabcdefabcdefabcdef',
+  );
+  assert.equal(recordActionFailure(log, 'selftest', error, 23800), 'ACTION_FAILED');
+  const text = log.tail();
+  assert.match(text, /action=selftest ok=false code=ACTION_FAILED ms=23800/);
+  assert.match(text, /DETAIL action selftest failed: TypeError/);
+  assert.match(text, /at /); // a stack frame
+  assert.ok(!text.includes('abcdefabcdefabcdefabcdefabcdefabcdef'));
+  assert.equal(recordActionFailure(log, 'pair', Error('PAIRING_CODE_EXPIRED'), 5), 'PAIRING_CODE_EXPIRED');
+  assert.equal(log.tail().match(/DETAIL/g).length, 1);
+});

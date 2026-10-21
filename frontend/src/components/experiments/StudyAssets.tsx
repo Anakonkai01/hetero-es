@@ -31,9 +31,11 @@ export function StudyAssets() {
   const { t } = useProduct();
   const cache = useQueryClient();
   const scope = useScopeKey();
+  // the private lab address is only given to signed-in members, with the capabilities (SECURITY-NOTES)
   const health = useQuery({
-    queryKey: ['study-health'],
-    queryFn: () => apiGet<{ privateLabUrl?: string }>('/api/v1/health'),
+    queryKey: ['capabilities', ...scope],
+    queryFn: () => apiGet<{ privateLabUrl?: string }>('/api/v1/capabilities'),
+    enabled: scope.every(Boolean),
   });
   const data = useQuery({
     queryKey: ['study-datasets', ...scope],
