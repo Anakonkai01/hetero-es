@@ -1,5 +1,9 @@
 # HeteroES — canonical handoff
 
+**Latest (2026-10-21 ~21:20): r11 is LIVE on lab.heteroes.site (release `93ff85f`, candidate9 installers published); smoke
+run and close-out left; next session = the owner's GSM8K notebook (grill first).**
+Read [handoff-2026-10-21-flag-day-next.md](handoff-2026-10-21-flag-day-next.md) first.
+
 **Latest (2026-10-21 ~15:25): candidate8 final run COMPLETED 50/50 with exact parity, but the member-restart fix did NOT restart the
 Thao Windows or the rejoined 1660S on real machines — STOP, a stronger model is needed.**
 Read [handoff-2026-10-21-c8-member-restart-stop.md](handoff-2026-10-21-c8-member-restart-stop.md) first.
