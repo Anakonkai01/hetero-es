@@ -220,6 +220,18 @@ class Approval(FiniteStrict):
 class Contribution(FiniteStrict):
     enabled: bool
     bootId: str = Field(min_length=1, max_length=100)
+    keepAfterReboot: bool | None = None  # None leaves the device's choice unchanged
+
+
+class ContributionPreference(FiniteStrict):
+    keepAfterReboot: bool
+
+
+class DeviceContribution(FiniteStrict):
+    """An approved device turning itself ON or OFF with its own token (owner decision 2026-10-22)."""
+
+    enabled: bool
+    keepAfterReboot: bool | None = None
 
 
 class ProcessReport(FiniteStrict):

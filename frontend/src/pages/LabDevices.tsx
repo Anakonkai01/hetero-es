@@ -23,6 +23,7 @@ export interface Device {
   lastSeen: number;
   connectionStatus: string;
   contributionEnabled: boolean;
+  keepContributionAfterReboot?: boolean;
   workspaceId: string | null;
   ownerWorkspaces?: { workspaceId: string; name: string }[];
   computeUrl: string;
@@ -296,6 +297,23 @@ export function LabDevices({ administration = false }: { administration?: boolea
                     {t(d.contributionEnabled ? 'Turn OFF' : 'Turn ON')}
                   </button>
                 )}
+                {d.ownerUserId === session?.user.userId && d.approvalStatus === 'APPROVED' && (
+                  <label className="check">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(d.keepContributionAfterReboot)}
+                      disabled={action.isPending}
+                      onChange={(event) =>
+                        action.mutate({
+                          path: '/api/v1/devices/' + d.deviceId + '/contribution',
+                          patch: true,
+                          body: { keepAfterReboot: event.target.checked },
+                        })
+                      }
+                    />
+                    {t('Keep ON after restart')}
+                  </label>
+                )}
               </div>
               {d.ownerUserId === session?.user.userId && d.selfTest.coordinator && (
                 <EndpointForm
@@ -319,7 +337,7 @@ export function LabDevices({ administration = false }: { administration?: boolea
         </div>
         <p className="hint">
           {t(
-            'Contribution starts OFF after each agent restart. Offline devices keep their reservations until owned processes are confirmed stopped.',
+            'Contribution starts OFF after each agent restart unless Keep ON after restart is ticked. A member offline for 10 minutes after its run finished no longer holds the other devices.',
           )}
         </p>
       </div>

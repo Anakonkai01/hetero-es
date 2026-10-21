@@ -13,6 +13,8 @@ from .device_models import (
     Enrollment,
     Approval,
     Contribution,
+    DeviceContribution,
+    ContributionPreference,
     ProcessReport,
     Report,
     MonitoringEvent,
@@ -98,6 +100,7 @@ class AgentRuntime(AgentScheduling, AgentCommands, AgentPolling):
                     "lastSeen": row["seen"],
                     "connectionStatus": "ONLINE" if time.time() - row["seen"] < 30 else "OFFLINE",
                     "contributionEnabled": bool(row["enabled"] and row["desired"]),
+                    "keepContributionAfterReboot": bool(row["keep_on"]),
                     "workspaceId": allocation[0] if allocation else None,
                     "computeUrl": row["compute_url"],
                     "bulkUrl": row["bulk_url"] or row["compute_url"],
@@ -457,6 +460,29 @@ def install_device_routes(app, store, user, runtime):
                 db.execute("DELETE FROM worker_assignments WHERE worker_id=?", (d["worker_id"],))
             store.audit(db, current["userId"], "DEVICE_REMOVED", device_id)
 
+    def set_contribution(db, d, enabled, boot_id, keep, actor):
+        db.execute("UPDATE devices SET desired=? WHERE id=?", (enabled, d["id"]))
+        if keep is not None:
+            db.execute("UPDATE devices SET keep_on=? WHERE id=?", (keep, d["id"]))
+        runtime.enqueue(
+            db,
+            d["id"],
+            "SET_CONTRIBUTION",
+            {"enabled": enabled, "bootId": boot_id},
+            "contribution:" + uuid.uuid4().hex,
+        )
+        if not enabled:
+            left = runtime.leave_on_disable(db, d)  # a worker of a run with others leaves it (ADR-009)
+            store.cancel_selected(db, d["worker_id"], include_queued=False, keep=left)
+            for row in db.execute(
+                "SELECT a.run_id FROM assignments a JOIN device_reservations r ON a.id=r.assignment_id WHERE r.device_id=?",
+                (d["id"],),
+            ).fetchall():
+                if row[0] not in left:
+                    runtime.cancel(row[0], db=db)
+        store.audit(db, actor, "DEVICE_ON" if enabled else "DEVICE_OFF", d["id"])
+        return {"deviceId": d["id"], "enabled": enabled, "pending": True}
+
     @app.post("/api/v1/devices/{device_id}/contribution")
     def contribution(device_id: str, body: Contribution, current=Depends(user)):
         p = active(current)
@@ -466,25 +492,62 @@ def install_device_routes(app, store, user, runtime):
                 raise HTTPException(404, "Owned device not found")
             if d["status"] != "APPROVED" or d["boot_id"] != body.bootId:
                 raise HTTPException(409, "Approval and current boot identity required")
-            db.execute("UPDATE devices SET desired=? WHERE id=?", (body.enabled, device_id))
-            runtime.enqueue(
-                db,
-                device_id,
-                "SET_CONTRIBUTION",
-                {"enabled": body.enabled, "bootId": body.bootId},
-                "contribution:" + uuid.uuid4().hex,
-            )
-            if not body.enabled:
-                left = runtime.leave_on_disable(db, d)  # a worker of a run with others leaves it (ADR-009)
-                store.cancel_selected(db, d["worker_id"], include_queued=False, keep=left)
-                for row in db.execute(
-                    "SELECT a.run_id FROM assignments a JOIN device_reservations r ON a.id=r.assignment_id WHERE r.device_id=?",
-                    (device_id,),
-                ).fetchall():
-                    if row[0] not in left:
-                        runtime.cancel(row[0], db=db)
-            store.audit(db, p["userId"], "DEVICE_ON" if body.enabled else "DEVICE_OFF", device_id)
-        return {"deviceId": device_id, "enabled": body.enabled, "pending": True}
+            return set_contribution(db, d, body.enabled, body.bootId, body.keepAfterReboot, p["userId"])
+
+    @app.patch("/api/v1/devices/{device_id}/contribution")
+    def contribution_preference(device_id: str, body: ContributionPreference, current=Depends(user)):
+        # only the choice for future restarts: the current boot's ON/OFF and its runs are untouched
+        p = active(current)
+        with store.db() as db:
+            d = db.execute("SELECT * FROM devices WHERE id=? AND owner=?", (device_id, p["userId"])).fetchone()
+            if not d:
+                raise HTTPException(404, "Owned device not found")
+            db.execute("UPDATE devices SET keep_on=? WHERE id=?", (body.keepAfterReboot, device_id))
+            store.audit(db, p["userId"], "DEVICE_KEEP_ON" if body.keepAfterReboot else "DEVICE_KEEP_OFF", device_id)
+        return {"deviceId": device_id, "keepAfterReboot": body.keepAfterReboot}
+
+    @app.post("/api/v1/device/contribution")
+    def own_contribution(body: DeviceContribution, current=Depends(device_auth)):
+        # the machine's own command line: an approved device turns itself ON or OFF; the audit names the device
+        with store.db() as db:
+            d = db.execute("SELECT * FROM devices WHERE id=?", (current["id"],)).fetchone()
+            if d["status"] != "APPROVED" or not d["boot_id"]:
+                raise HTTPException(409, "Approval and a running agent required")
+            return set_contribution(db, d, body.enabled, d["boot_id"], body.keepAfterReboot, "device:" + d["id"])
+
+    @app.get("/api/v1/device/summary")
+    def own_summary(current=Depends(device_auth)):
+        """What the machine's command line shows: its name, approval, contribution and the run it takes part in."""
+        with store.db() as db:
+            d = db.execute("SELECT * FROM devices WHERE id=?", (current["id"],)).fetchone()
+            runs = []
+            for row in db.execute(
+                "SELECT a.run_id,a.coordinator,a.snapshot FROM assignments a JOIN device_reservations r "
+                "ON r.assignment_id=a.id WHERE r.device_id=? AND a.released=0",
+                (d["id"],),
+            ):
+                body = store.get(row["run_id"]) or {}
+                snapshot = json.loads(row["snapshot"])
+                runs.append(
+                    {
+                        "experimentId": row["run_id"],
+                        "name": body.get("name"),
+                        "status": body.get("status"),
+                        "role": "coordinator" if row["coordinator"] == d["id"] else "worker",
+                        "completedGenerations": snapshot.get("completedGenerationCount"),
+                        "maxGenerations": body.get("maxGenerations"),
+                    }
+                )
+        return {
+            "deviceId": d["id"],
+            "workerId": d["worker_id"],
+            "displayName": d["name"],
+            "approvalStatus": d["status"],
+            "contributionDesired": bool(d["desired"]),
+            "contributionEnabled": bool(d["enabled"] and d["desired"]),
+            "keepContributionAfterReboot": bool(d["keep_on"]),
+            "runs": runs,
+        }
 
     @app.post("/api/v1/device/poll")
     def poll(

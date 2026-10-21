@@ -74,6 +74,9 @@ def initialize_agent_schema(store):
             db.execute("ALTER TABLE devices ADD COLUMN telemetry TEXT")
         if "bulk_url" not in {r[1] for r in db.execute("PRAGMA table_info(devices)")}:
             db.execute("ALTER TABLE devices ADD COLUMN bulk_url TEXT")
+        if "keep_on" not in {r[1] for r in db.execute("PRAGMA table_info(devices)")}:
+            # the owner's choice to keep contributing after the machine restarts (otherwise every boot starts OFF)
+            db.execute("ALTER TABLE devices ADD COLUMN keep_on INTEGER NOT NULL DEFAULT 0")
         schema = db.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='assignments'").fetchone()[0]
         if "run_id TEXT UNIQUE" in schema:
             db.executescript(

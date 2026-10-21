@@ -257,6 +257,7 @@ export const translations: Record<string, string> = {
   Contribution: 'Đóng góp GPU',
   'Turn ON': 'Bật đóng góp',
   'Turn OFF': 'Tắt đóng góp',
+  'Keep ON after restart': 'Giữ ON sau khi khởi động lại',
   ONLINE: 'Online',
   OFFLINE: 'Offline',
   CONNECTING: 'Đang kết nối',
@@ -373,8 +374,8 @@ export const translations: Record<string, string> = {
     'Điểm phục hồi được tạo giữa các generation. Metadata được sao lưu mỗi giờ khi đã cấu hình lưu trữ. Lưu trữ:',
   'Config hash': 'Hash cấu hình',
   Configuration: 'Cấu hình',
-  'Contribution starts OFF after each agent restart. Offline devices keep their reservations until owned processes are confirmed stopped.':
-    'Đóng góp luôn OFF khi khởi động lại agent. Máy mất kết nối vẫn giữ tài nguyên đến khi xác nhận tiến trình đã dừng.',
+  'Contribution starts OFF after each agent restart unless Keep ON after restart is ticked. A member offline for 10 minutes after its run finished no longer holds the other devices.':
+    'Đóng góp luôn OFF khi khởi động lại agent, trừ khi tick Giữ ON sau khi khởi động lại. Máy thành viên mất kết nối 10 phút sau khi run xong không còn giữ các máy khác.',
   'Copy ID': 'Sao chép mã',
   'Could not load artifacts': 'Không tải được tệp kết quả',
   'Could not load events': 'Không tải được sự kiện',

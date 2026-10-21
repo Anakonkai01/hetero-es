@@ -132,8 +132,8 @@ class AgentPolling:
 
     def _update_boot(self, db, device, body, old):
         changed = old["boot_id"] != body.bootId
-        desired = 0 if changed else old["desired"]
-        # ON must be requested through owner auth and observed on this same boot.
+        desired = old["keep_on"] if changed else old["desired"]
+        # ON is requested for this same boot (by the owner, the device itself, or the owner's keep-after-reboot choice).
         enabled = bool(desired and body.contribution)
         db.execute(
             "UPDATE devices SET boot_id=?,seen=?,enabled=?,desired=?,processes=? WHERE id=?",
@@ -151,6 +151,15 @@ class AgentPolling:
                 "UPDATE device_commands SET ack=1 WHERE device_id=? AND json_extract(body,'$.kind')='SET_CONTRIBUTION'",
                 (device["id"],),
             )
+            if old["keep_on"]:
+                # the owner chose to keep contributing after a restart: this new boot is turned ON like the last one
+                self.enqueue(
+                    db,
+                    device["id"],
+                    "SET_CONTRIBUTION",
+                    {"enabled": True, "bootId": body.bootId},
+                    f"keep-on:{device['id']}:{body.bootId}",
+                )
             # Cancellation remains authoritative across agent boots, including
             # when an old boot acknowledged it before a process-state report.
             for assignment in db.execute(
