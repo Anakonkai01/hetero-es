@@ -77,6 +77,17 @@ database (`backend/store.py`), so the owner writes it before B in their own term
   sign-out 204. `/experiments` without a workspace header is 403 (scoped route), as designed.
 - The systemd unit is unchanged; it runs the same `scripts/local-lab.py boot` path, now the r11 one.
 
+## C done (owner "đồng ý C", 19:59 +07)
+
+`publish-local-installers.py` (r11 live copy) with `--prepared-receipt ../2026-10-21-r11-candidate9/installers-prepared.json`
+and the candidate9 package folder on the Archive: every file checked against the reviewed hashes before any link;
+output `{"downloads": 4, "cloudPublish": false, "publiclyPublished": true}`; receipt `installers-published.json`. The r10
+manifest was replaced (the r10 installer files and their links stay on disk).
+`verify-public-lab.py --base https://lab.heteroes.site` (`public-verification.json`): the four installers downloaded through the
+public URL with equal size and SHA-256, web pages 200, `allOk: true`, build `lf1-20261021-r11-candidate9`. The one-line Linux
+installer `/downloads/install-worker.sh` points at `https://lab.heteroes.site/downloads`; its CLI bundle is served (200,
+563038 bytes = the Archive file).
+
 ## Rollback (if B, C or D fails)
 
 1. `local-lab.py stop` (r11 copy).
