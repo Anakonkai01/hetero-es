@@ -31,3 +31,17 @@ five members: 5070ti-nhan (coordinator), 5070ti-nhut, 3060-thao, quang-3060, 166
 **Known risk, recorded before the run.** quang-3060's machine rebooted uncleanly at 22:18 (Windows Kernel-Power 41 with a
 fatal WHEA boot record, no bugcheck; three unexpected shutdowns in 30 days). If it drops again during 2b's declared events,
 2b fails by the stop rule; in tier 3 a lost member is recorded and the run goes on.
+
+## Owner decision after tier 2b's event failure (2026-10-21 ~23:45 +07, before tier 3 ran)
+
+quang-3060's machine died again at 23:29:19 (lab last-seen), before the declared OFF (23:31:03): the coordinator's LEAVE
+(23:35:05, actor `system`) came from the dead device, not from the OFF, and the add-back was refused (`409 Waiting for
+confirmed GPU release`, the offline-left-member reservation of finding 1). By the stop rule tier 2b fails and the overnight
+run would not start. **The owner, informed of this, ordered tier 3 to run anyway** ("ok chạy tiếp tier 3 luôn"). This is a
+deviation from the predeclared stop rule, made by the owner, not a pass.
+
+- Tier 3 members: 5070ti-nhan (coordinator), 5070ti-nhut, 3060-thao, 1660s. quang-3060 is left out (machine down).
+- To start it, the finished tier 2b assignment is released **by hand in the lab database**, with the owner's explicit OK,
+  after a backup: exactly what `_release_confirmed` does (released=1, its device and physical reservations deleted), since
+  the dead machine can never confirm. The fix for this (`1a11763`) is on the branch, not deployed.
+- Tier 3 spec unchanged (`tier3.json`, G = 300, validation every 25).
