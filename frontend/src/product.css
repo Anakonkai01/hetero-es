@@ -2210,6 +2210,18 @@ body {
   font-size: 13px;
   font-family: 'IBM Plex Mono', monospace;
 }
+.chip.muted {
+  opacity: 0.6;
+}
+.chip-x {
+  margin-left: 6px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
 .mgmt-actions {
   margin: 0;
 }

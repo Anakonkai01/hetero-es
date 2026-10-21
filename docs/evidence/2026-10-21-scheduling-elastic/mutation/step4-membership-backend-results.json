@@ -1,0 +1,66 @@
+[
+ {
+  "name": "join-skips-eligibility",
+  "outcome": "KILLED",
+  "killed": true
+ },
+ {
+  "name": "join-skips-reservation-check",
+  "outcome": "KILLED",
+  "killed": true
+ },
+ {
+  "name": "join-no-reservation",
+  "outcome": "KILLED",
+  "killed": true
+ },
+ {
+  "name": "leave-last-allowed",
+  "outcome": "KILLED",
+  "killed": true
+ },
+ {
+  "name": "no-capability-check",
+  "outcome": "KILLED",
+  "killed": true
+ },
+ {
+  "name": "grant-shared",
+  "outcome": "KILLED",
+  "killed": true
+ },
+ {
+  "name": "release-ignores-confirmation",
+  "outcome": "KILLED",
+  "killed": true
+ },
+ {
+  "name": "auto-join-readds-left",
+  "outcome": "KILLED",
+  "killed": true,
+  "note": "survived the first run; killed after the backend membership tests were strengthened"
+ },
+ {
+  "name": "auto-join-ignores-flag",
+  "outcome": "KILLED",
+  "killed": true,
+  "note": "survived the first run; killed after the backend membership tests were strengthened"
+ },
+ {
+  "name": "off-cancels-anyway",
+  "outcome": "KILLED",
+  "killed": true,
+  "note": "survived the first run; killed after the backend membership tests were strengthened"
+ },
+ {
+  "name": "resume-forgets-joined",
+  "outcome": "KILLED",
+  "killed": true,
+  "note": "survived the first run; killed after the backend membership tests were strengthened"
+ },
+ {
+  "name": "intended-ignores-leave",
+  "outcome": "KILLED",
+  "killed": true
+ }
+]

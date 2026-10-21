@@ -63,7 +63,20 @@ export type SyncMode = 'synchronous';
 
 export interface Experiment extends Partial<V3Settings> {
   usageSummary?: UsageSummary;
-  auditSummary?: { completed: number; selected?: number; mismatches: number; quarantinedWorkers: { worker_id: string; reason: string }[] };
+  allowJoin?: boolean;
+  membershipRequests?: { changeId: string; workerId: string; action: 'JOIN' | 'LEAVE'; actor: string }[];
+  membership?: {
+    generation?: number;
+    members?: string[];
+    left?: string[];
+    refused?: { changeId: string; reason: string }[];
+  };
+  auditSummary?: {
+    completed: number;
+    selected?: number;
+    mismatches: number;
+    quarantinedWorkers: { worker_id: string; reason: string }[];
+  };
   recipeVersion?: number;
   batchSize?: number;
   batchSeed?: number;
@@ -134,6 +147,7 @@ export interface CreateExperimentRequest extends Partial<V3Settings> {
   modelName: string;
   schedulerPolicy: SchedulerPolicy;
   syncMode: SyncMode;
+  allowJoin?: boolean;
   workerIds?: string[];
   coordinatorDeviceId?: string;
   backupPolicy?: { interval: number; retain: number };

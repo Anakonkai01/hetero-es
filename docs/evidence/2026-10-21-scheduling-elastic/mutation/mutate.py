@@ -1,7 +1,9 @@
 """Apply one textual mutant at a time to a scratch copy of runtime/, run the given tests, restore the file.
 
 Usage: mutate.py ROOT MUTANTS.json TESTS...   (ROOT is a full copy of runtime/: tests start subprocesses from scripts/)
-A mutant whose tests do not finish in TIMEOUT seconds is reported as a hang; it is not counted as killed.
+For backend mutants ROOT is a copy of the repository and MUTATE_PYTHON the backend environment's interpreter
+(backend/__init__.py finds runtime/src next to it). A mutant whose tests do not finish in TIMEOUT seconds is reported as
+a hang; it is not counted as killed.
 """
 
 import json
@@ -14,8 +16,10 @@ TIMEOUT = 1200
 root = pathlib.Path(sys.argv[1])
 mutants = json.load(open(sys.argv[2]))
 tests = sys.argv[3:]
-env = dict(os.environ, CUDA_VISIBLE_DEVICES="", PYTHONPATH=str(root / "src"))
-python = os.path.expanduser("~/miniforge3/envs/heteroes-match/bin/python")
+python = os.environ.get("MUTATE_PYTHON", os.path.expanduser("~/miniforge3/envs/heteroes-match/bin/python"))
+env = dict(os.environ, CUDA_VISIBLE_DEVICES="")
+if "MUTATE_PYTHON" not in os.environ:
+    env["PYTHONPATH"] = str(root / "src")
 results = []
 for mutant in mutants:
     path = root / mutant["file"]

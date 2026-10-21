@@ -20,6 +20,26 @@ test('every event the coordinator records has a plain sentence with its numbers 
     ['replay', {}, '3060', 'Worker 3060 rebuilt the new weights by replaying the updates'],
     ['exit', { reason: 'finished' }, '3060', 'Worker 3060 finished (finished)'],
     ['worker_unavailable', {}, '3060', 'Worker 3060 is not answering'],
+    [
+      'membership_changed',
+      { workerId: '1660s', action: 'JOIN', generation: 9 },
+      undefined,
+      'Worker 1660s joined from generation 10',
+    ],
+    [
+      'membership_changed',
+      { workerId: '3060', action: 'LEAVE', generation: 29 },
+      undefined,
+      'Worker 3060 left from generation 30',
+    ],
+    [
+      'membership_refused',
+      { reason: 'the last member cannot leave' },
+      undefined,
+      'A membership change was refused: the last member cannot leave',
+    ],
+    ['worker_joined', { worker_id: '1660s' }, '1660s', 'Worker 1660s is starting for this run'],
+    ['worker_left', { worker_id: '3060' }, '3060', 'Worker 3060 stopped and left this run'],
     ['recovery_point_created', { generation: 0 }, undefined, 'Recovery point saved for generation 1'],
     ['recovery_point_error', { generation: 0 }, undefined, 'Could not save a recovery point for generation 1'],
     [

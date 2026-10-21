@@ -26,6 +26,10 @@ MARKS = frozenset(
         "audit_mismatch",
         "audit_worker_quarantined",
         "audit_incomplete",
+        "membership_changed",
+        "membership_refused",
+        "worker_joined",
+        "worker_left",
     }
 )
 SECONDS = (

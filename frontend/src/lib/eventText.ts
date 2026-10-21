@@ -54,6 +54,19 @@ export function describeEvent(type: string, details: Details, workerId?: string)
     level: EventDescription['level'] = 'main',
   ): EventDescription => ({ template, params, level, tone });
   switch (type) {
+    case 'membership_changed':
+      return done(
+        d.action === 'LEAVE'
+          ? 'Worker {worker} left from generation {generation}'
+          : 'Worker {worker} joined from generation {generation}',
+        { worker: text(d.workerId) || worker, generation: gen(d.generation) },
+      );
+    case 'membership_refused':
+      return done('A membership change was refused: {reason}', { reason: text(d.reason) || '?' }, 'warn');
+    case 'worker_joined':
+      return done('Worker {worker} is starting for this run', { worker });
+    case 'worker_left':
+      return done('Worker {worker} stopped and left this run', { worker });
     case 'audit_mismatch':
       return done(
         'Audit on {worker} disagreed for {candidate}; committed reward is unchanged',

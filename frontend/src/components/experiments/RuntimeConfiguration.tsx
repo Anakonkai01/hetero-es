@@ -60,6 +60,7 @@ export function RuntimeConfiguration({
   const [interval, setInterval] = useState(initial?.backupPolicy?.interval ?? 1);
   const [retain, setRetain] = useState(initial?.backupPolicy?.retain ?? 3);
   const [policyChoice, setPolicy] = useState<string>(initial?.schedulerPolicy ?? 'greedy-tail');
+  const [allowJoin, setAllowJoin] = useState(initial?.allowJoin ?? false);
   // a policy the lab no longer offers (an old template or draft) falls back to the lab's first, recommended one
   const offered = cap.data?.schedulerPolicies ?? [];
   const policy = offered.length && !offered.includes(policyChoice) ? offered[0] : policyChoice;
@@ -159,6 +160,7 @@ export function RuntimeConfiguration({
           workerIds: selected,
           schedulerPolicy: policy as CreateExperimentRequest['schedulerPolicy'],
           syncMode: 'synchronous',
+          allowJoin,
         }).catch((e: Error) => setError(e.message));
       }}
     >
@@ -442,6 +444,10 @@ export function RuntimeConfiguration({
             </select>
           </label>
           {POLICY_HINT[policy] && <p className="hint">{t(POLICY_HINT[policy])}</p>}
+          <label className="fg">
+            {t('Let idle eligible workers of this workspace join while it runs')}
+            <input type="checkbox" checked={allowJoin} onChange={(e) => setAllowJoin(e.target.checked)} />
+          </label>
           <fieldset className="worker-picker">
             <legend>{t('Configured workers')}</legend>
             {workers.isError && <p role="alert">{t('Worker status unavailable')}</p>}

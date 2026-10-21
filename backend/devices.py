@@ -136,7 +136,7 @@ class AgentRuntime(AgentScheduling, AgentCommands, AgentPolling):
             "maxRunSeconds": None,
             "telemetry": True,
             "pauseResume": True,
-            "unsupported": ["change-workers", "model-upload", "dataset-upload"],
+            "unsupported": ["model-upload", "dataset-upload"],
         }
 
     def public_compute_url(self):
@@ -472,12 +472,14 @@ def install_device_routes(app, store, user, runtime):
                 "contribution:" + uuid.uuid4().hex,
             )
             if not body.enabled:
-                store.cancel_selected(db, d["worker_id"], include_queued=False)
+                left = runtime.leave_on_disable(db, d)  # a worker of a run with others leaves it (ADR-009)
+                store.cancel_selected(db, d["worker_id"], include_queued=False, keep=left)
                 for row in db.execute(
                     "SELECT a.run_id FROM assignments a JOIN device_reservations r ON a.id=r.assignment_id WHERE r.device_id=?",
                     (device_id,),
                 ).fetchall():
-                    runtime.cancel(row[0], db=db)
+                    if row[0] not in left:
+                        runtime.cancel(row[0], db=db)
             store.audit(db, p["userId"], "DEVICE_ON" if body.enabled else "DEVICE_OFF", device_id)
         return {"deviceId": device_id, "enabled": body.enabled, "pending": True}
 

@@ -1,3 +1,4 @@
+import { MembershipPanel } from './MembershipPanel';
 import { RuntimeConfiguration } from './RuntimeConfiguration';
 import { useProduct } from '@heteroes/product-ui';
 import { useState } from 'react';
@@ -34,14 +35,7 @@ export function RuntimeControls({ experiment: e }: { experiment: Experiment }) {
     <section className="card experiment-management" aria-label={t('Experiment management')}>
       <div className="cb demo-form">
         <div className="mgmt-row">
-          <div className="gpu-chips">
-            <span className="hint">{t('GPUs')}</span>
-            {e.workerIds?.map((id) => (
-              <span className="chip" key={id}>
-                {id}
-              </span>
-            ))}
-          </div>
+          <MembershipPanel experiment={e} permitted={permitted} />
           {e.waitingReason && <p className="note">{t(e.waitingReason)}</p>}
 
           {e.monitoringPartial && (

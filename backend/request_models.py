@@ -23,6 +23,7 @@ class Configuration(BaseModel):
     modelName: str
     modelArtifactId: str = "qwen-pinned"
     schedulerPolicy: str = DEFAULT_SCHEDULER_POLICY
+    allowJoin: bool = Field(default=False, strict=True)  # idle eligible workers may join while it runs (ADR-009)
     syncMode: str = SYNC_MODES[0]
     workerIds: list[str] = Field(min_length=1, max_length=10)
     task: str = "arith16"
@@ -109,3 +110,9 @@ class MemberEdit(Strict):
 
 class Resume(Strict):
     workerConfigurationConfirmed: Literal[True]
+
+
+class MembershipRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    workerId: str = Field(min_length=1, max_length=100)
+    action: Literal["add", "remove"]

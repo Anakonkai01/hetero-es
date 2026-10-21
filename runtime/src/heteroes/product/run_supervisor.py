@@ -141,8 +141,8 @@ class RunSupervisor(ABC):
         recovery = state.get("recoveryCount", 0)
         result = dict(state.get("workerStates", {}))
         for worker_id, previous in list(result.items()):
-            if previous.get("notStarted"):
-                continue
+            if previous.get("notStarted") or previous.get("left"):
+                continue  # never started, or left the run and confirmed stopped (its GPU may serve another run now)
             try:
                 value = self.remote(
                     self.workers[worker_id],
@@ -164,6 +164,59 @@ class RunSupervisor(ABC):
             value.get("notStarted") or (value.get("confirmed") and not value.get("alive")) for value in result.values()
         )
 
+    def _start_one(self, root, worker_id, result, recovery):
+        """Start one worker of this run (at preparation, or when it joins later) and record what is known about it."""
+        if worker_id in read_json(self.root / "quarantine.json", {}):
+            result[worker_id] = {"notStarted": True, "alive": False, "ready": False, "confirmed": True}
+            self.log(root, "worker_quarantined", worker_id=worker_id)
+            self.save(root, workerStates=result)
+            return
+        try:
+            self.remote(self.workers[worker_id], {"action": "probe"})
+        except Exception:
+            result[worker_id] = {"notStarted": True, "alive": False, "ready": False, "confirmed": True}
+            self.log(root, "worker_unavailable", worker_id=worker_id)
+            self.save(root, workerStates=result)
+            return
+        # Persist unknown ownership before the worker command, since a connection may die after launch.
+        result[worker_id] = {"alive": True, "confirmed": False, "ready": False}
+        self.save(root, workerStates=result)
+        try:
+            value = self.start_worker(root, self.workers[worker_id], recovery)
+            result[worker_id] = {"alive": value["alive"], "confirmed": True, "ready": value["ready"]}
+        except Exception:
+            self.log(root, "worker_start_unknown", worker_id=worker_id)
+        self.save(root, workerStates=result)
+
+    def _follow_membership(self, root, state):
+        """Elastic membership (ADR-009): start the workers that joined at the last boundary, stop the ones that left.
+        The runner decides membership and records it in the ledger; this only owns the worker processes."""
+        membership = read_json(root / "membership.json", {})
+        result = dict(state.get("workerStates", {}))
+        recovery = state.get("recoveryCount", 0)
+        for worker_id in membership.get("members", []):
+            if worker_id not in result:
+                self.log(root, "worker_joined", worker_id=worker_id)
+                self._start_one(root, worker_id, result, recovery)
+        for worker_id in membership.get("left", []):
+            value = result.get(worker_id)
+            if not value or value.get("notStarted") or value.get("left"):
+                continue
+            if value.get("confirmed") and not value.get("alive"):
+                result[worker_id] = {**value, "left": True}  # already stopped (turned OFF): nothing to stop
+            else:
+                try:
+                    reply = self.remote(
+                        self.workers[worker_id], {"action": "stop", "runId": root.name + f"-r{recovery}"}
+                    )
+                    result[worker_id] = {"alive": reply["alive"], "ready": reply.get("ready", False), "confirmed": True}
+                    if not reply["alive"]:
+                        result[worker_id]["left"] = True  # the lab releases its GPU when it sees this
+                except Exception:
+                    result[worker_id] = {**value, "confirmed": False}
+            self.log(root, "worker_left", worker_id=worker_id)
+            self.save(root, workerStates=result)
+
     def tick(self, root):
         state = self.state(root)
         process_record = read_json(root / "process.json")
@@ -177,29 +230,12 @@ class RunSupervisor(ABC):
         if runner.get("status") == "PREPARING" and not state.get("workersLaunched"):
             result = {}
             for worker_id in read_json(root / "config.json")["workerIds"]:
-                if worker_id in read_json(self.root / "quarantine.json", {}):
-                    result[worker_id] = {"notStarted": True, "alive": False, "ready": False, "confirmed": True}
-                    self.log(root, "worker_quarantined", worker_id=worker_id)
-                    self.save(root, workerStates=result)
-                    continue
-                try:
-                    self.remote(self.workers[worker_id], {"action": "probe"})
-                except Exception:
-                    result[worker_id] = {"notStarted": True, "alive": False, "ready": False, "confirmed": True}
-                    self.log(root, "worker_unavailable", worker_id=worker_id)
-                    self.save(root, workerStates=result)
-                    continue
-                # Persist unknown ownership before the worker command, since a connection may die after launch.
-                result[worker_id] = {"alive": True, "confirmed": False, "ready": False}
-                self.save(root, workerStates=result)
-                try:
-                    value = self.start_worker(root, self.workers[worker_id], state.get("recoveryCount", 0))
-                    result[worker_id] = {"alive": value["alive"], "confirmed": True, "ready": value["ready"]}
-                except Exception:
-                    self.log(root, "worker_start_unknown", worker_id=worker_id)
-                self.save(root, workerStates=result)
+                self._start_one(root, worker_id, result, state.get("recoveryCount", 0))
             self.save(root, workersLaunched=True, preparingAt=time.time())
         state = self.state(root)
+        if state.get("workersLaunched") and runner.get("status") == "RUNNING":
+            self._follow_membership(root, state)
+            state = self.state(root)
         if state.get("workersLaunched"):
             stopped = self.poll_workers(root)
         else:
@@ -290,6 +326,8 @@ class RunSupervisor(ABC):
             "events": events(root / "lifecycle.jsonl") + events(root / "events.jsonl"),
             "artifacts": [],
         }
+        if (root / "membership.json").exists():  # members now, left, refused: no credential is in this file
+            result["membership"] = read_json(root / "membership.json")
         for path in root.glob("worker-*-r*.json"):
             # Worker configuration files also start with worker-; only collected event arrays belong here.
             worker_events = read_json(path, [])

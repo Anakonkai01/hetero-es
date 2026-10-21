@@ -823,3 +823,81 @@ def test_a_running_coordinator_does_not_claim_its_workers_are_stopped(tmp_path, 
     a.manager.save(a.manager.directory(cfg["runId"]), status="RUNNING")
     [report] = [p for p in a.observe() if p["assignmentId"] == "a" * 32]
     assert report["workerAlive"] is None  # a START_WORKER may still be on its way
+
+
+# ---- elastic membership (ADR-009): the lab's request becomes one line of membership-requests.json for the runner
+
+
+def coordinating(tmp_path):
+    a = agent(tmp_path)
+    a.enabled = True
+    cfg = {
+        "runId": "b" * 32,
+        "workerIds": ["test"],
+        "workload": "arith16",
+        "decodeEngine": "hf_generate",
+        "maxGenerations": 3,
+        "candidatesPerGeneration": 4,
+        "alpha": 0.001,
+        "sigma": 0.001,
+        "schedulerPolicy": "greedy-tail",
+        "syncMode": "synchronous",
+        "backupPolicy": {"interval": 1, "retain": 3},
+    }
+    a.manager.accept({"assignmentId": "c" * 32, "epoch": 1, "config": cfg, "computeGrants": {"test": "private"}})
+    return a, a.manager.directory(cfg["runId"])
+
+
+def membership_command(command_id="m1", **change):
+    body = {"changeId": "r1", "workerId": "late", "action": "JOIN", "actor": "owner", "grant": "late-private"}
+    return {
+        "commandId": command_id,
+        "kind": "UPDATE_MEMBERSHIP",
+        "assignmentId": "c" * 32,
+        "epoch": 1,
+        "change": {**body, **change},
+    }
+
+
+def test_the_agent_offers_membership_changes():
+    from heteroes.product.agent import COMMAND_KINDS
+
+    assert "UPDATE_MEMBERSHIP" in COMMAND_KINDS
+
+
+def test_a_membership_change_is_written_once_for_the_runner(tmp_path):
+    a, root = coordinating(tmp_path)
+    a.handle(membership_command())
+    a.handle(membership_command("m1-retried"))  # the same change delivered twice
+    a.handle(membership_command("m2", changeId="r2", workerId="test", action="LEAVE", grant=None))
+    requests = read_json(root / "membership-requests.json")["requests"]
+    assert [(r["changeId"], r["workerId"], r["action"]) for r in requests] == [
+        ("r1", "late", "JOIN"),
+        ("r2", "test", "LEAVE"),
+    ]
+    assert "grant" not in requests[1]
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"action": "ADD"},
+        {"changeId": ""},
+        {"workerId": 3},
+        {"grant": ""},
+        {"actor": None},
+        {"extra": "x"},
+    ],
+)
+def test_a_malformed_membership_change_is_refused_without_a_trace(tmp_path, change):
+    a, root = coordinating(tmp_path)
+    with pytest.raises(InvalidCommand):
+        a.handle(membership_command(**change))
+    assert not (root / "membership-requests.json").exists()
+
+
+def test_a_change_for_an_assignment_not_here_yet_waits(tmp_path):
+    a = agent(tmp_path)
+    a.enabled = True
+    with pytest.raises(RuntimeError, match="assignment"):
+        a.handle(membership_command())

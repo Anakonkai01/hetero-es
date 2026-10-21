@@ -122,9 +122,11 @@ class Store:
     def disabled_workers(self, db):
         return set(read_setting(db, "disabledWorkers", []))
 
-    def cancel_selected(self, db, worker_id, *, include_queued=True):
+    def cancel_selected(self, db, worker_id, *, include_queued=True, keep=()):
         for row in db.execute("SELECT body FROM experiments").fetchall():
             b = json.loads(row[0])
+            if b["experimentId"] in keep:
+                continue  # the worker leaves this run instead (ADR-009)
             coordinator = b.get("coordinatorDeviceId")
             coordinator_alias = None
             if coordinator:
@@ -162,7 +164,7 @@ class Store:
             self.save(db, body)
             self.audit(db, "system", "ACCESS_REVOKED", body["experimentId"], body["workspaceId"])
 
-    def eligibility(self, db, body):
+    def eligibility(self, db, body, workers=None):
         row = db.execute("SELECT profile FROM users WHERE id=?", (body["ownerUserId"],)).fetchone()
         if not row or json.loads(row[0])["accountStatus"] != "ACTIVE":
             return "Owner account is not active"
@@ -174,7 +176,9 @@ class Store:
             r[0]
             for r in db.execute("SELECT worker_id FROM worker_assignments WHERE workspace_id=?", (body["workspaceId"],))
         }
-        if not set(body["workerIds"]) <= ids - self.disabled_workers(db):
+        if workers is None:  # every member, including the ones that joined (ADR-009); or only a joining worker
+            workers = self.runtime.intended_members(db, body["experimentId"], body["workerIds"])
+        if not set(workers) <= ids - self.disabled_workers(db):
             return "Selected GPU assignment changed before launch"
         co = db.execute(
             "SELECT worker_id,status,owner FROM devices WHERE id=?", (body.get("coordinatorDeviceId"),)
@@ -182,10 +186,10 @@ class Store:
         if not co or co["status"] != "APPROVED" or co["worker_id"] not in ids - self.disabled_workers(db):
             return "Coordinator approval or workspace assignment changed"
         chosen = db.execute(
-            "SELECT owner,status FROM devices WHERE worker_id IN (" + ",".join("?" for _ in body["workerIds"]) + ")",
-            body["workerIds"],
+            "SELECT owner,status FROM devices WHERE worker_id IN (" + ",".join("?" for _ in workers) + ")",
+            workers,
         ).fetchall()
-        if len(chosen) != len(body["workerIds"]) or any(
+        if len(chosen) != len(workers) or any(
             d["status"] != "APPROVED" or self.profile(d["owner"])["accountStatus"] != "ACTIVE" for d in [co, *chosen]
         ):
             return "Device owner or approval was revoked"
@@ -247,6 +251,9 @@ class Store:
         for active in [body for body in self.list() if body["status"] in ACTIVE]:
             try:
                 self._dispatch_run(active)
+                with self.db() as db:
+                    db.execute("BEGIN IMMEDIATE")
+                    self.runtime.auto_join(db, self.get(active["experimentId"]))  # it checks allowJoin itself
             except Exception as error:
                 errors.append(type(error).__name__)
         with self.db() as db:
@@ -376,6 +383,12 @@ class Store:
             body["monitoringPartial"] = bool(snapshot.get("monitoringPartial"))
             if snapshot.get("auditSummary") is not None:
                 body["auditSummary"] = snapshot["auditSummary"]
+            if isinstance(
+                snapshot.get("membership"), dict
+            ):  # who works on it now, as its coordinator recorded (ADR-009)
+                body["membership"] = {
+                    key: snapshot["membership"].get(key, []) for key in ("members", "left", "refused")
+                } | {"generation": snapshot["membership"].get("generation")}
             if snapshot.get("usageSummary") is not None:
                 body["usageSummary"] = snapshot["usageSummary"]
             if snapshot.get("studyMetrics"):

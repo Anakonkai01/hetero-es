@@ -280,6 +280,16 @@ class _BoundedServer(http.server.ThreadingHTTPServer):
             owner._slots.release()
 
 
+def _check_device_tokens(tokens) -> None:
+    if (
+        not isinstance(tokens, dict)
+        or not tokens
+        or any(not isinstance(k, str) or not k or not isinstance(v, str) or not v for k, v in tokens.items())
+        or len(set(tokens.values())) != len(tokens)
+    ):
+        raise ValueError("Device credentials must be nonempty and distinct")
+
+
 class CoordinatorServer:
     """
     `api` serves the leases, `job` describes the generation (JSON-able), `models_dir` holds the published weights as
@@ -317,12 +327,8 @@ class CoordinatorServer:
         self.models_dir = None if models_dir is None else Path(models_dir)
         self.token = token
         self.inputs = None  # optional self-hosted v3 bootstrap: pinned data/documents, never researcher code
-        if device_tokens is not None and (
-            not device_tokens
-            or any(not isinstance(v, str) or not v for v in device_tokens.values())
-            or len(set(device_tokens.values())) != len(device_tokens)
-        ):
-            raise ValueError("Device credentials must be nonempty and distinct")
+        if device_tokens is not None:
+            _check_device_tokens(device_tokens)
         self.device_tokens = device_tokens
         self.request_timeout, self.max_connections = request_timeout, max_connections
         self.internal_errors: list[str] = []
@@ -338,6 +344,14 @@ class CoordinatorServer:
         self._httpd.coordinator = self
         self.host, self.port = self._httpd.server_address[0], self._httpd.server_address[1]
         self._thread: threading.Thread | None = None
+
+    def set_device_tokens(self, tokens: dict[str, str]) -> None:
+        """Replace the per-device credentials as a whole (elastic membership, ADR-009): a request thread reads either the
+        old set or the new one, never a dict that changes while it looks through it."""
+        if self.device_tokens is None:
+            raise ValueError("this server authenticates with one shared token, not per-device credentials")
+        _check_device_tokens(tokens)
+        self.device_tokens = dict(tokens)
 
     @property
     def api(self):

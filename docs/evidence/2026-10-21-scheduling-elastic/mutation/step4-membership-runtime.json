@@ -1,0 +1,18 @@
+[
+ {"name": "expiry-not-recorded", "file": "src/heteroes/ledger/ledger.py", "old": "            if expired:  # written now", "new": "            if False:  # written now"},
+ {"name": "expiry-on-any-lease", "file": "src/heteroes/ledger/ledger.py", "old": "            expired = state is CandidateState.LEASED  # its deadline passed", "new": "            expired = True  # its deadline passed"},
+ {"name": "members-ignore-generation", "file": "src/heteroes/ledger/ledger.py", "old": "            if change.effective_generation <= generation:", "new": "            if True:"},
+ {"name": "membership-repeat-not-checked", "file": "src/heteroes/ledger/ledger.py", "old": "                if tuple(row) != (worker_id, action, effective_generation, actor):", "new": "                if False:"},
+ {"name": "runner-applies-in-open-generation", "file": "src/heteroes/product/membership.py", "old": "        if not opened:", "new": "        if True:"},
+ {"name": "join-without-credential", "file": "src/heteroes/product/membership.py", "old": "                if not isinstance(grant, str) or not grant or grant in self.grants.values():", "new": "                if False:"},
+ {"name": "last-member-may-leave", "file": "src/heteroes/product/membership.py", "old": "            if members == {worker}:", "new": "            if False:"},
+ {"name": "tokens-not-updated", "file": "src/heteroes/product/membership.py", "old": "        coordinator.set_members(members, tokens)", "new": "        coordinator.set_members(members, None)"},
+ {"name": "refused-retried-every-boundary", "file": "src/heteroes/product/membership.py", "old": "                if change in known or change in self.refused:", "new": "                if change in known:"},
+ {"name": "joined-grant-lost-on-restart", "file": "src/heteroes/product/membership.py", "old": "            self.grants.update(read_json(root / \"membership-grants.json\", {}))", "new": "            pass"},
+ {"name": "violations-ignored", "file": "src/heteroes/product/membership.py", "old": "        if worker_id not in members[generation]:", "new": "        if False:"},
+ {"name": "server-tokens-not-checked", "file": "src/heteroes/http_transport.py", "old": "        _check_device_tokens(tokens)\n        self.device_tokens = dict(tokens)", "new": "        self.device_tokens = dict(tokens)"},
+ {"name": "supervisor-ignores-joined", "file": "src/heteroes/product/run_supervisor.py", "old": "            if worker_id not in result:\n                self.log(root, \"worker_joined\"", "new": "            if False:\n                self.log(root, \"worker_joined\""},
+ {"name": "supervisor-keeps-polling-left", "file": "src/heteroes/product/run_supervisor.py", "old": "            if previous.get(\"notStarted\") or previous.get(\"left\"):", "new": "            if previous.get(\"notStarted\"):"},
+ {"name": "agent-writes-duplicates", "file": "src/heteroes/product/agent.py", "old": "                    if all(item.get(\"changeId\") != change[\"changeId\"] for item in requests):", "new": "                    if True:"},
+ {"name": "agent-accepts-join-without-grant", "file": "src/heteroes/product/agent.py", "old": "    if change[\"action\"] == \"JOIN\" and (not isinstance(grant, str) or not grant):", "new": "    if False:"}
+]

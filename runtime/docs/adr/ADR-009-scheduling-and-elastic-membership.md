@@ -35,11 +35,19 @@ An audit on 2026-10-21 found further gaps around it:
 4. **Elastic membership.** Workers can join or leave a running experiment, either when the owner adds or removes them,
    or automatically when the experiment opts in with `allowJoin`. [DECIDED]
    - A change takes effect at the next generation boundary.
-   - Every change is written to the ledger (`membership`, schema 7).
+   - Every change is written to the ledger (the `membership` table, see 6).
    - A leaving worker gets no new lease; its current lease finishes or expires and is retried elsewhere.
    - The last worker cannot be removed.
-5. **Explicit expiry.** When the ledger recovers an expired lease it writes `ended_at` and `failure_kind = EXPIRED`
-   (schema 7), so the ledger itself shows a timed-out attempt.
+5. **Explicit expiry.** When another attempt takes over a lease that ran out, the ledger writes it to an `expiry`
+   table, so the ledger itself shows a timed-out attempt.
+6. **No schema break.** `membership` and `expiry` are additive tables created on open, like the existing
+   `generation_context`, so the version stays 6. This changes the plan, which said schema 7. A candidate6 ledger,
+   including the preserved attempt2 evidence, still opens; an older runtime ignores the new tables. The unused
+   `RUNNING` candidate state stays in the `CHECK` constraint, because removing it would rebuild the table.
+   `failure_kind` keeps its meaning: an expiry is not a failure the worker reported, so dispatch is unchanged.
+7. **Contribution OFF.** Turning a worker OFF used to cancel every experiment that reserved it. Now a worker that is
+   not the coordinator and not the last member leaves at the next boundary instead. The coordinator or the last
+   member still cancels, as before.
 
 ## Why the numbers cannot change
 

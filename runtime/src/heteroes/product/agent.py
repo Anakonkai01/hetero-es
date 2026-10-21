@@ -32,11 +32,31 @@ COMMAND_KINDS = frozenset(
         "STOP_WORKER",
         "CANCEL_ASSIGNMENT",
         "UPDATE_BACKUP_POLICY",
+        "UPDATE_MEMBERSHIP",
         "PAUSE_ASSIGNMENT",
         "QUALIFY_MODEL",
         "CANCEL_MODEL_QUALIFICATION",
     }
 )
+
+
+def membership_change(change):
+    """A lab request to add or remove a worker of a running experiment (ADR-009), or InvalidCommand: it can never succeed."""
+    if not isinstance(change, dict):
+        raise InvalidCommand("Invalid membership change")
+    allowed = {"changeId", "workerId", "action", "actor", "grant"}
+    texts = ("changeId", "workerId", "actor")
+    if (
+        set(change) - allowed
+        or not set(texts) <= set(change)
+        or any(not isinstance(change[key], str) or not change[key] or len(change[key]) > 200 for key in texts)
+        or change.get("action") not in ("JOIN", "LEAVE")
+    ):
+        raise InvalidCommand("Invalid membership change")
+    grant = change.get("grant")
+    if change["action"] == "JOIN" and (not isinstance(grant, str) or not grant):
+        raise InvalidCommand("A joining worker needs its compute credential")
+    return {key: change[key] for key in texts + ("action",)} | ({"grant": grant} if change["action"] == "JOIN" else {})
 
 
 def request(url, path, token, body, method=None):
@@ -279,7 +299,11 @@ class AgentManager(RunSupervisor):
         ar = read_json(root / "assignment.json")
         if not ar:
             return
-        self.workers = {w: {"id": w} for w in ar["config"]["workerIds"]}
+        membership = read_json(root / "membership.json", {})  # workers that joined or left while it runs (ADR-009)
+        self.workers = {
+            w: {"id": w}
+            for w in [*ar["config"]["workerIds"], *membership.get("members", []), *membership.get("left", [])]
+        }
         # Dead-process recovery must wait for this boot's owner opt-in. A living
         # child can still be adopted/observed and reach normal shutdown while OFF.
         if (
@@ -470,7 +494,7 @@ class Agent:
             if db.execute("SELECT 1 FROM processed WHERE id=?", (cid,)).fetchone():
                 return
             if (
-                kind in ("COORDINATE", "START_WORKER", "PAUSE_ASSIGNMENT", "UPDATE_BACKUP_POLICY")
+                kind in ("COORDINATE", "START_WORKER", "PAUSE_ASSIGNMENT", "UPDATE_BACKUP_POLICY", "UPDATE_MEMBERSHIP")
                 and db.execute(
                     "SELECT 1 FROM released WHERE assignment_id=?", (command.get("assignmentId"),)
                 ).fetchone()
@@ -523,6 +547,19 @@ class Agent:
                     matched = True
             if not matched:
                 raise RuntimeError("Wait for the assignment before applying its policy")
+        elif kind == "UPDATE_MEMBERSHIP":
+            self.worker_directory(command)
+            change = membership_change(command.get("change"))
+            for root in self.manager.root.iterdir():
+                ar = read_json(root / "assignment.json") if root.is_dir() else None
+                if ar and (ar["assignmentId"], ar["epoch"]) == (command["assignmentId"], command["epoch"]):
+                    # the runner applies it at the next generation boundary and records it in the ledger (ADR-009)
+                    requests = read_json(root / "membership-requests.json", {"requests": []})["requests"]
+                    if all(item.get("changeId") != change["changeId"] for item in requests):
+                        write_json(root / "membership-requests.json", {"requests": [*requests, change]})
+                    break
+            else:
+                raise RuntimeError("Wait for the assignment before changing its members")
         elif kind == "START_WORKER":
             self.worker_directory(command)
             if not self.cancelled(command):

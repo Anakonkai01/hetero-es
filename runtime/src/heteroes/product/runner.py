@@ -40,14 +40,15 @@ def apply_backup_policy(root, generation, current, emit):
     return policy
 
 
-def scheduling(config, ledger):
-    """The coordinator's policy factory: only the selected workers get work, and one speed book serves the whole run,
-    seeded from what the ledger already knows after a restart (ADR-009)."""
+def scheduling(config, ledger, members=None):
+    """The coordinator's policy factory: only the members get work (`members` returns the current ones, elastic membership;
+    default: the selected workers), and one speed book serves the whole run, seeded from what the ledger already knows
+    after a restart (ADR-009)."""
     from heteroes.dispatch import SpeedBook, policy_factory
 
     return policy_factory(
         config.get("schedulerPolicy", "greedy"),
-        config["workerIds"],
+        config["workerIds"] if members is None else members,
         book=SpeedBook.from_ledger(ledger, config["runId"]),
     )
 
@@ -137,10 +138,17 @@ def main(directory, *, device="cuda", timeout_seconds=1800):
         last_summary = None
         active_policy = policy
 
+        from .membership import Membership
+
+        grants = read_json(root / "device-grants.json") if config.get("deviceCredentials") else None
+        membership = Membership(ledger, config["runId"], config["workerIds"], root, emit, grants=grants)
+
         def generation_started(generation):
             nonlocal active_policy
             data_root(root)  # Check the selected volume before opening work.
-            active_policy = apply_backup_policy(root, generation, active_policy, emit)
+            membership.apply(generation, coordinator)  # joins and leaves take effect here, at the boundary (ADR-009)
+            if policy:
+                active_policy = apply_backup_policy(root, generation, active_policy, emit)
 
         def recovery_point(summary, final=False):
             nonlocal last_summary
@@ -204,7 +212,7 @@ def main(directory, *, device="cuda", timeout_seconds=1800):
                 if recipe.recipe["weightSpace"]["kind"] == "lora"
                 else [],
             }
-        scheduler = scheduling(config, ledger)
+        scheduler = scheduling(config, ledger, membership.current)
         coordinator = Coordinator(
             loaded.model,
             loaded.schema,
@@ -219,18 +227,19 @@ def main(directory, *, device="cuda", timeout_seconds=1800):
             port=config["port"],
             token=os.environ["HETEROES_TOKEN"],
             timeout_seconds=lambda _: derived_limit(
-                scheduler.book, config["workerIds"], config["candidatesPerGeneration"], floor=timeout_seconds, factor=4
+                scheduler.book, membership.current, config["candidatesPerGeneration"], floor=timeout_seconds, factor=4
             ),
-            audit_timeout_seconds=lambda _: derived_limit(scheduler.book, config["workerIds"], 1, floor=120, factor=3),
+            audit_timeout_seconds=lambda _: derived_limit(scheduler.book, membership.current, 1, floor=120, factor=3),
             stall_seconds=300,
             failed_grace_seconds=60,
             lease_seconds=60,
             log=emit,
             cancel_requested=cancel,
             usage_path=root / "usage.sqlite" if config.get("recipeVersion") == 3 else None,
-            device_tokens=read_json(root / "device-grants.json") if config.get("deviceCredentials") else None,
+            # until the first boundary the workers that joined before a restart can authenticate too (ADR-009)
+            device_tokens=None if grants is None else membership.all_grants(),
             generation_completed=recovery_point if policy or dataset is not None else None,
-            generation_started=generation_started if policy else None,
+            generation_started=generation_started,
             pause_requested=lambda: (root / "pause.flag").exists(),
             dataset=dataset,
             **v3_options,

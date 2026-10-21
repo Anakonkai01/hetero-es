@@ -263,6 +263,21 @@ class GenerationInfo:
 
 
 @dataclass(frozen=True)
+class MembershipChange:
+    """A worker joins or leaves an experiment from `effective_generation` on (ADR-009, elastic membership)."""
+
+    change_id: str  # unique per experiment: a repeated request is written once
+    worker_id: str
+    action: str  # "JOIN" or "LEAVE"
+    effective_generation: int
+    actor: str  # "experiment" (the members it started with), the owner's name, or "system" (automatic join)
+    recorded_at: float
+
+
+MEMBERSHIP_ACTIONS = ("JOIN", "LEAVE")
+
+
+@dataclass(frozen=True)
 class QuarantineRecord:
     worker_id: str
     quarantined_at: float
@@ -495,6 +510,19 @@ class Ledger:
             self._db.execute(
                 "CREATE TABLE IF NOT EXISTS generation_context(experiment_id TEXT NOT NULL,generation INTEGER NOT NULL,body TEXT NOT NULL,PRIMARY KEY(experiment_id,generation))"
             )
+            # ADR-009, additive like generation_context so that a schema 6 file of candidate6 still opens: elastic
+            # membership, and leases that ran out (written when another attempt takes the candidate over)
+            self._db.execute(
+                "CREATE TABLE IF NOT EXISTS membership(experiment_id TEXT NOT NULL, change_id TEXT NOT NULL, "
+                "worker_id TEXT NOT NULL, action TEXT NOT NULL CHECK (action IN ('JOIN', 'LEAVE')), "
+                "effective_generation INTEGER NOT NULL CHECK (effective_generation >= 0), actor TEXT NOT NULL, "
+                "recorded_at REAL NOT NULL, PRIMARY KEY (experiment_id, change_id))"
+            )
+            self._db.execute(
+                "CREATE TABLE IF NOT EXISTS expiry(candidate_id TEXT NOT NULL, attempt_number INTEGER NOT NULL, "
+                "recorded_at REAL NOT NULL, PRIMARY KEY (candidate_id, attempt_number), "
+                "FOREIGN KEY (candidate_id, attempt_number) REFERENCES attempt (candidate_id, attempt_number))"
+            )
         except BaseException:
             self._db.close()
             raise
@@ -714,6 +742,7 @@ class Ledger:
             attempts = 0 if last is None else last[0]
             if state is CandidateState.LEASED and now < last[1]:
                 raise AlreadyLeasedError(f"candidate {candidate_id} is leased until {last[1]}")
+            expired = state is CandidateState.LEASED  # its deadline passed with no report: it ran out
             if self._charged_attempts(candidate_id) >= self._max_attempts:
                 raise RetriesExhaustedError(f"candidate {candidate_id} has used its {self._max_attempts} attempts")
             generation_status = self._status_of(self._load_generation(row[1], row[2], now))
@@ -738,6 +767,11 @@ class Ledger:
             self._db.execute(
                 "UPDATE candidate SET state = ? WHERE candidate_id = ?", (CandidateState.LEASED.value, candidate_id)
             )
+            if expired:  # written now, when another attempt takes it over: the ledger itself shows the time-out
+                self._db.execute(
+                    "INSERT OR IGNORE INTO expiry (candidate_id, attempt_number, recorded_at) VALUES (?, ?, ?)",
+                    (candidate_id, last[0], now),
+                )
         return lease
 
     def _charged_attempts(self, candidate_id: str) -> int:
@@ -964,6 +998,83 @@ class Ledger:
             "ORDER BY quarantined_at, worker_id"
         ).fetchall()
         return [QuarantineRecord(*row) for row in rows]
+
+    @_locked
+    def list_committed_attempts(self, experiment_id: str) -> list[tuple[int, str, str]]:
+        """(generation, candidate, worker) of every committed result, in order: who made each reward."""
+        return [
+            tuple(row)
+            for row in self._db.execute(
+                "SELECT c.generation, c.candidate_id, a.worker_id FROM result AS r "
+                "JOIN attempt AS a ON a.candidate_id = r.candidate_id AND a.attempt_number = r.attempt_number "
+                "JOIN candidate AS c ON c.candidate_id = r.candidate_id WHERE c.experiment_id = ? "
+                "ORDER BY c.generation, c.candidate_index",
+                (experiment_id,),
+            )
+        ]
+
+    @_locked
+    def list_expired(self, experiment_id: str) -> list[tuple[str, int, str, float]]:
+        """(candidate, attempt, worker, deadline) of every lease that ran out and was taken over, oldest first."""
+        return [
+            tuple(row)
+            for row in self._db.execute(
+                "SELECT a.candidate_id, a.attempt_number, a.worker_id, a.deadline FROM expiry AS e "
+                "JOIN attempt AS a ON a.candidate_id = e.candidate_id AND a.attempt_number = e.attempt_number "
+                "JOIN candidate AS c ON c.candidate_id = e.candidate_id WHERE c.experiment_id = ? "
+                "ORDER BY e.recorded_at, a.candidate_id, a.attempt_number",
+                (experiment_id,),
+            )
+        ]
+
+    @_locked
+    def record_membership(
+        self, experiment_id: str, change_id: str, worker_id: str, action: str, effective_generation: int, actor: str
+    ) -> bool:
+        """Write one membership change; True if new, False if this very change was written before. The same id with
+        other content is refused: a request is applied once, whoever repeats it (a restarted runner, a retried command)."""
+        for name, value in (("experiment_id", experiment_id), ("change_id", change_id), ("worker_id", worker_id)):
+            if not isinstance(value, str) or not value:
+                raise LedgerError(f"{name} must be a non-empty string")
+        if not isinstance(actor, str) or not actor:
+            raise LedgerError("actor must be a non-empty string")
+        if action not in MEMBERSHIP_ACTIONS:
+            raise LedgerError(f"a membership action is JOIN or LEAVE, not {action!r}")
+        if type(effective_generation) is not int or effective_generation < 0:
+            raise LedgerError("the effective generation is a whole number of at least 0")
+        with self._db:
+            row = self._db.execute(
+                "SELECT worker_id, action, effective_generation, actor FROM membership "
+                "WHERE experiment_id = ? AND change_id = ?",
+                (experiment_id, change_id),
+            ).fetchone()
+            if row is not None:
+                if tuple(row) != (worker_id, action, effective_generation, actor):
+                    raise LedgerError(f"membership change {change_id} was already written with other content")
+                return False
+            self._db.execute(
+                "INSERT INTO membership (experiment_id, change_id, worker_id, action, effective_generation, actor, "
+                "recorded_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (experiment_id, change_id, worker_id, action, effective_generation, actor, self._clock()),
+            )
+        return True
+
+    @_locked
+    def list_membership(self, experiment_id: str) -> list[MembershipChange]:
+        rows = self._db.execute(
+            "SELECT change_id, worker_id, action, effective_generation, actor, recorded_at FROM membership "
+            "WHERE experiment_id = ? ORDER BY rowid",
+            (experiment_id,),
+        ).fetchall()
+        return [MembershipChange(*row) for row in rows]
+
+    def members_at(self, experiment_id: str, generation: int) -> set[str]:
+        """The workers that may work on `generation`: those whose latest change effective by then is a JOIN."""
+        latest: dict[str, str] = {}
+        for change in self.list_membership(experiment_id):
+            if change.effective_generation <= generation:
+                latest[change.worker_id] = change.action
+        return {worker for worker, action in latest.items() if action == "JOIN"}
 
     @_locked
     def worker_durations(self, experiment_id: str) -> list[tuple[str, float]]:

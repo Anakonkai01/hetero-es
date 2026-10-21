@@ -1,4 +1,5 @@
-from .request_models import BackupPolicy, Configuration
+from .errors import RuntimeRejected
+from .request_models import BackupPolicy, Configuration, MembershipRequest
 from .policies import dispatch_held
 import hashlib
 import json
@@ -178,5 +179,19 @@ def install_routes(app, store, runtime, scoped, visible, authorized, validate):
             store.save(db, body)
             store.audit(db, current["userId"], "BACKUP_POLICY_REQUESTED", run_id, body["workspaceId"])
         return {"policy": policy.model_dump(), "appliesBeforeNextGeneration": True}
+
+    @router.post("/api/v1/experiments/{run_id}/workers")
+    def members(run_id: str, request: MembershipRequest, current=Depends(scoped)):
+        """Add or remove a worker while the experiment runs (ADR-009); it applies at the next generation boundary."""
+        action = "JOIN" if request.action == "add" else "LEAVE"
+        with store.db() as db:
+            db.execute("BEGIN IMMEDIATE")
+            authorized(run_id, current)
+            try:
+                change = runtime.change_members(db, run_id, request.workerId, action, current["username"])
+            except RuntimeRejected as error:
+                raise HTTPException(409, str(error)) from None
+            runtime.note_membership(db, run_id, change, current["userId"])
+        return {**change, "appliesAtNextGeneration": True}
 
     app.include_router(router)

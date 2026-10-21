@@ -252,3 +252,74 @@ def test_the_audit_summary_shows_how_many_audits_were_chosen_not_only_completed(
         assert summary["selected"] == 3 and summary["completed"] == 0  # the toy ledger itself holds no audit rows
     finally:
         env.close()
+
+
+# ---- elastic membership (ADR-009): the runner writes membership.json at each boundary, the supervisor follows it
+
+
+def running_with(manager, monkeypatch, members, left=(), states=None):
+    root = prepare(manager, monkeypatch, ("local",))
+    manager.save(
+        root,
+        workersLaunched=True,
+        workerStates=states or {"local": {"alive": True, "ready": True, "confirmed": True}},
+    )
+    write_json(root / "runner.json", {"status": "RUNNING"})
+    write_json(root / "membership.json", {"generation": 10, "members": list(members), "left": list(left)})
+    calls, stopped = [], set()
+
+    def call(worker, request):  # a stopped worker process stays stopped when it is polled
+        calls.append((worker["id"], request["action"]))
+        if request["action"] == "stop":
+            stopped.add(worker["id"])
+        return {"alive": worker["id"] not in stopped, "ready": True, "events": []}
+
+    monkeypatch.setattr(manager, "remote", call)
+    return root, calls
+
+
+def test_a_worker_that_joined_is_started_while_the_run_goes_on(manager, monkeypatch):
+    root, calls = running_with(manager, monkeypatch, ["local", "late"])
+    manager.tick(root)
+    assert ("late", "probe") in calls and ("late", "start") in calls
+    assert manager.state(root)["workerStates"]["late"] == {"alive": True, "confirmed": True, "ready": True}
+    calls.clear()
+    manager.tick(root)  # started once, then only polled
+    assert ("late", "start") not in calls and ("late", "poll") in calls
+
+
+def test_a_worker_that_left_is_stopped_and_not_started_again(manager, monkeypatch):
+    states = {
+        "local": {"alive": True, "ready": True, "confirmed": True},
+        "late": {"alive": True, "ready": True, "confirmed": True},
+    }
+    root, calls = running_with(manager, monkeypatch, ["local"], left=["late"], states=states)
+    manager.tick(root)
+    assert ("late", "stop") in calls and ("late", "start") not in calls
+    late = manager.state(root)["workerStates"]["late"]
+    assert (late["alive"], late["confirmed"], late["left"]) == (False, True, True)
+    assert manager.state(root)["status"] == "RUNNING"
+    calls.clear()
+    manager.tick(root)  # the lab may already have given its GPU to another run: it is not asked about this one again
+    assert [call for call in calls if call[0] == "late"] == []
+    snapshot = manager.snapshot(root.name)
+    assert snapshot["membership"]["left"] == ["late"] and snapshot["state"]["workerStates"]["late"]["left"] is True
+
+
+def test_a_quarantined_worker_that_joins_is_not_started(manager, monkeypatch):
+    root, calls = running_with(manager, monkeypatch, ["local", "late"])
+    write_json(manager.root / "quarantine.json", {"late": {"runId": "x", "t": 1}})
+    manager.tick(root)
+    assert ("late", "start") not in calls
+    assert manager.state(root)["workerStates"]["late"]["notStarted"] is True
+
+
+def test_a_worker_that_was_already_stopped_when_it_left_is_marked_without_a_stop(manager, monkeypatch):
+    states = {
+        "local": {"alive": True, "ready": True, "confirmed": True},
+        "late": {"alive": False, "ready": True, "confirmed": True},  # its owner turned it OFF before the boundary
+    }
+    root, calls = running_with(manager, monkeypatch, ["local"], left=["late"], states=states)
+    manager.tick(root)
+    assert ("late", "stop") not in calls
+    assert manager.state(root)["workerStates"]["late"]["left"] is True

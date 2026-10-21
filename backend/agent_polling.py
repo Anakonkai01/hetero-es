@@ -264,6 +264,7 @@ class AgentPolling:
                     "UPDATE assignments SET snapshot=? WHERE id=?",
                     (json.dumps(report.snapshot, allow_nan=False), report.assignmentId),
                 )
+                self.release_left_members(db, row, report.snapshot)  # a worker that left gives its GPU back
             elif report.sequence > maximum and row["released"]:
                 # A completed assignment can still finish artifact/event sync.
                 # Its terminal state and numerical lineage remain immutable.
