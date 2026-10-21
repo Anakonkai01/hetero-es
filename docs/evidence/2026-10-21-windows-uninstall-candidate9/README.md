@@ -5,19 +5,36 @@ Upgrade: candidate8 → candidate9 in `../2026-10-21-candidate9-device-upgrades/
 `lf1-20261021-r11-candidate9`). Restart: the whole-app hard stop of `../2026-10-21-restart-run-candidate9/` (event 4, recovered).
 Uninstall: this receipt.
 
-- **The owner uninstalled the app by hand** on the Windows machine after the candidate9 run (not the silent `/S` uninstaller that
-  candidate4 used; the exact Windows dialog was not recorded). The installed build before it was candidate9.
-- Read-only check afterwards over SSH (`after-uninstall.ps1`, output `after-uninstall.log`): the app executable and its program
-  folder are gone, the app data `%APPDATA%\@heteroes\worker` is gone, the data folder `D:\HeteroES-Worker-data` the app created is
-  gone, no `HeteroES Worker` process, no HeteroES entry left in the Windows uninstall list. C: 24.1 GB free, D: 796.9 GB free.
-- The four `D:\HeteroES-*` folders still present are staging/test folders made by earlier sessions, not by the app (the newest is
-  from 02:48 today); the uninstaller is not meant to remove them, as in candidate4. Left as they are.
+## What happened
 
-The result equals candidate4's (`../2026-10-20-r11-candidate4/windows-uninstall.log`: app, app data and data folder removed,
-unrelated staging folders kept).
+1. **The owner uninstalled the app by hand** on the Windows machine after the candidate9 run (not the silent `/S` uninstaller that
+   candidate4 used; the exact Windows dialog was not recorded). The installed build before it was candidate9.
+2. Afterwards `%APPDATA%\@heteroes` was **still there with about 5.6 GB** (owner's report), and the owner deleted it by hand.
+3. Read-only check after both (`after-uninstall.ps1` → `after-uninstall.log`, `appdata-check.ps1` → `appdata-check.log`): no app
+   executable or program folder, no `%APPDATA%\@heteroes` at all, no `D:\HeteroES-Worker-data`, no `HeteroES Worker` process, no
+   HeteroES entry in the Windows uninstall list, nothing HeteroES in the Recycle Bin. C: 24.1 GB free, D: 796.9 GB free.
+
+## Why `@heteroes` stayed: an AI-made backup next to the app's folder, not the uninstaller
+
+`%LOCALAPPDATA%\Temp\heteroes-system-finish\restore-state.json` (written by an earlier AI session, see
+`../../handoff-system-finish-codex.md` lines 80-94) records that the **original r10 Worker's user data was moved to
+`%APPDATA%\@heteroes\worker-system-finish-backup`** to be restored later. The uninstaller (`desktop/worker/build/installer.nsh`)
+removes `@heteroes\worker` recursively and then the parent `@heteroes` only if it is empty (`RMDir` without `/r`, tested in
+`desktop/worker/tests/installer-config.test.cjs`). With the backup folder beside it the parent was not empty and stayed, as designed:
+the uninstaller must not delete folders it did not create. So the ~5.6 GB was, by every record, that backup (the old runtime and
+model of the r10 Worker). The folder's content was not listed before it was deleted, so this is inferred from the records.
+
+Consequence: the original r10 Worker can no longer be restored (`restore.ps1` would miss its data). It held the revoked live identity
+that must never be enabled again, and flag day installs a fresh Worker for the live lab, so nothing planned needs it.
+
+Still on the machine: `%LOCALAPPDATA%\Temp\heteroes-system-finish` (~0.85 GB: the original program 0.35 GB, the c5-c9 installers,
+driver logs, registry exports, `researcher.json` = the copied researcher login the handoff says to remove at cleanup). Not deleted
+(owner's machine, owner to decide). Four `D:\HeteroES-*` staging folders from earlier sessions also stay.
 
 ## What this does NOT show
 
-No "before" snapshot was taken right before the uninstall (the last one is the candidate9 install receipt). The silent uninstaller
-path of candidate9 was not run. The Windows device record stays in the isolated lab (offline; its credential was on the machine and is
-gone with the app data). For flag day the Windows Worker is a fresh install pointing at the live lab.
+The app's own removal of `@heteroes\worker` cannot be told apart from the owner's manual deletion, because the owner deleted the
+parent folder before the check. `D:\HeteroES-Worker-data` being gone points to the uninstaller's `customUnInstall` (only it reads
+`data-folder.txt`), unless that was also deleted by hand. The silent uninstaller path of candidate9 was not run; candidate4's
+silent run (`../2026-10-20-r11-candidate4/windows-uninstall.log`) is the clean-machine proof. The Windows device record stays in the
+isolated lab (offline; its credential was on the machine and is gone).
