@@ -232,6 +232,11 @@ class Store:
                 self.audit(db, owner, "PYTHON_CODE_FROZEN", target, workspace_id)
         return body
 
+    def device_names(self):
+        """{worker id: the name its owner gave the device}, for screens that would otherwise show the raw id."""
+        with self.db() as db:
+            return {r[0]: r[1] for r in db.execute("SELECT worker_id,name FROM devices WHERE name<>''")}
+
     def snapshot(self, run_id):
         with self.db() as db:
             row = db.execute("SELECT snapshot FROM experiments WHERE id=?", (run_id,)).fetchone()

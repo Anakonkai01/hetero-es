@@ -1,6 +1,6 @@
 import { useProduct } from '@heteroes/product-ui';
 import { useRef } from 'react';
-import { candidateLabel, formatDuration, niceTicks } from '../../lib/diagramLayout';
+import { candidateLabel, formatDuration, niceTicks, shortName } from '../../lib/diagramLayout';
 import { fillTemplate } from '../../lib/eventText';
 import type { Frame, Timeline } from '../../lib/runFrame';
 
@@ -95,7 +95,7 @@ export function RunGantt({
         return (
           <g key={worker.id}>
             <text x={LEFT - 10} y={y + BAR / 2 + 4} textAnchor="end" className="lv-lane-name">
-              {worker.id.length > 12 ? worker.id.slice(0, 11) + '…' : worker.id}
+              {shortName(worker.name || worker.id, 12)}
             </text>
             <line className="lv-lane" x1={LEFT} x2={W - RIGHT} y1={y + BAR + 5} y2={y + BAR + 5} />
             {timeline.jobs

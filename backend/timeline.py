@@ -68,7 +68,8 @@ def _generation_index(generation_id):
         return None
 
 
-def build_timeline(body, snapshot, now_ms=None):
+def build_timeline(body, snapshot, now_ms=None, names=None):
+    names = names or {}
     snapshot = snapshot or {}
     state = snapshot.get("state") or {}
     events = sorted(
@@ -149,6 +150,7 @@ def build_timeline(body, snapshot, now_ms=None):
         workers.append(
             {
                 "id": worker_id,
+                "name": names.get(worker_id),
                 "started": not info.get("notStarted", False),
                 "alive": info.get("alive"),
                 "unreachableSinceMs": away,
@@ -157,7 +159,7 @@ def build_timeline(body, snapshot, now_ms=None):
     for job in jobs:
         if job["workerId"] and job["workerId"] not in known:
             known.add(job["workerId"])
-            workers.append({"id": job["workerId"], "started": True, "alive": None})
+            workers.append({"id": job["workerId"], "name": names.get(job["workerId"]), "started": True, "alive": None})
 
     marks = []
     for event in events:

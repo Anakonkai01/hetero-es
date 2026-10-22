@@ -89,3 +89,8 @@ export function formatDuration(ms: number): string {
   const two = (n: number) => String(n).padStart(2, '0');
   return hours ? `${hours}:${two(minutes)}:${two(seconds)}` : `${minutes}:${two(seconds)}`;
 }
+
+/** A device name cut to fit its label. */
+export function shortName(name: string, max: number): string {
+  return name.length > max ? name.slice(0, max - 1) + '…' : name;
+}

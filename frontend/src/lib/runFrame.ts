@@ -44,7 +44,7 @@ export type Timeline = {
     maxGenerations: number | null;
     candidatesPerGeneration: number | null;
   };
-  workers: { id: string; started: boolean; alive: boolean | null; unreachableSinceMs?: number | null }[];
+  workers: { id: string; name?: string | null; started: boolean; alive: boolean | null; unreachableSinceMs?: number | null }[];
   generations: TimelineGeneration[];
   jobs: TimelineJob[];
   marks: TimelineMark[];
@@ -53,6 +53,7 @@ export type Timeline = {
 
 export type WorkerFrame = {
   id: string;
+  name: string | null;
   state: 'unstarted' | 'starting' | 'idle' | 'busy' | 'offline';
   job?: { candidateId: string; generation: number | null; progress: number; startMs: number };
   done: number;
@@ -146,6 +147,7 @@ export function frameAt(timeline: Timeline, atMs: number, options: { flightMs?: 
     const current = mine.find((j) => j.startMs <= atMs && (j.endMs === null || atMs < j.endMs));
     const frame: WorkerFrame = {
       id: w.id,
+      name: w.name ?? null,
       state: 'idle',
       done: succeeded.length,
       failed: failed.length,

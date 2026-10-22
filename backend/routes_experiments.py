@@ -34,7 +34,7 @@ def install_routes(app, store, runtime, scoped, visible, authorized, validate):
 
     @router.get("/api/v1/experiments/{run_id}/timeline")
     def run_timeline(run_id: str, current=Depends(scoped)):
-        return build_timeline(authorized(run_id, current), store.snapshot(run_id))
+        return build_timeline(authorized(run_id, current), store.snapshot(run_id), names=store.device_names())
 
     @router.get("/api/v1/experiments/{run_id}/stream")
     def run_stream(run_id: str, current=Depends(scoped)):

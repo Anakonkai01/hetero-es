@@ -190,3 +190,11 @@ def test_a_member_not_answering_shows_since_when_and_its_membership_moments_are_
     ids = {w["id"]: w for w in shown["workers"]}
     assert ids["b"]["unreachableSinceMs"] == 1791619300000 and ids["a"]["unreachableSinceMs"] is None
     assert {"worker_unreachable", "worker_joined"} <= {m["type"] for m in shown["marks"]}
+
+
+def test_a_worker_lane_carries_the_device_name_when_the_lab_knows_it():
+    body, snapshot = FIXTURE["body"], FIXTURE["snapshot"]
+    ids = [w["id"] for w in build_timeline(body, snapshot)["workers"]]
+    named = build_timeline(body, snapshot, names={ids[0]: "my-gpu"})["workers"]
+    assert named[0]["name"] == "my-gpu"
+    assert all(w["name"] is None for w in named[1:])

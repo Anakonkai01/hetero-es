@@ -1,6 +1,6 @@
 import { useProduct } from '@heteroes/product-ui';
 import { useMemo } from 'react';
-import { candidateLabel, connector, layoutWorkers, packetPosition } from '../../lib/diagramLayout';
+import { candidateLabel, connector, layoutWorkers, packetPosition, shortName } from '../../lib/diagramLayout';
 import { fillTemplate } from '../../lib/eventText';
 import type { Frame, WorkerFrame } from '../../lib/runFrame';
 
@@ -101,7 +101,7 @@ export function LiveDiagram({
                   : '●'}
             </text>
             <text x={card.x + 82} y={card.y + 42} className="lv-worker">
-              {worker.id.length > 16 ? worker.id.slice(0, 15) + '…' : worker.id}
+              {shortName(worker.name || worker.id, 16)}
             </text>
             <text x={card.x + 82} y={card.y + 64} className="lv-state">
               {stateText(worker, t)}
