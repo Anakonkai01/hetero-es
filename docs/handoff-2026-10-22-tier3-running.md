@@ -1,0 +1,33 @@
+# 2026-10-22 ~10:05: (b2) fixed and accepted (tier 2e), tier 3 running
+
+Branch **`feat/gsm8k-demo`** (not pushed). Owner GO ~09:10: "Bắt đầu luôn auto run luôn" (deploy the (b2) fix, repeat
+(b2), then tier 3, without asking).
+
+## Live state
+
+- Lab: `a198cb0` = candidate12 (`c472d2a`) + `b5e1bc7` cherry-picked, branch **`deploy/candidate13`**, backend only, since
+  09:12 (`docs/evidence/2026-10-22-tier3/deploy-lab-c13.sh` + log; database copy at stop in
+  `/mnt/Archive-2tb/heteroes-local/backups/c13-20261022`). Rollback: check out `c472d2a` and restart. Agents and web are
+  still candidate12; `b5e1bc7` is also on `feat/gsm8k-demo` (after wave 2).
+- Tier 2e (`c48ea62d...`) **passed** (`docs/evidence/2026-10-22-gsm8k-demo/RESULTS.md`): the add 0.2 s after ON is
+  accepted, nhut rejoined at generation 4, 160/160, 8 audits matched, parity ALL EQUAL. Finding 9: the coordinator logs
+  `worker_restarted`, not `worker_joined`, for a re-added former member, so the staging script's literal check failed.
+- **Tier 3** `fa67c66c203a4afaaaad9f9215656e4d` launched ~10:01 (`tier3.json`, G = 300, about 30 h at ~6 min per
+  generation), members 5070ti-nhan (coordinator), 5070ti-nhut, 3060-thao, 1660s. Receipts in `.scratch/gsm8k-demo/tier3*`:
+  `watch.py tier3 60` writes `tier3-watch.jsonl`.
+- The lab token (`~/.config/heteroes-demo/session.json`) lasts 12 h; a background loop signs in again every 10 h for
+  48 h (`tier3-relogin.out`). If it died: `HETEROES_ADMIN_PASSWORD=... python3 scripts/lab-login.py`. A 401 means this.
+
+## Tier 3 rules (README of the demo evidence)
+
+A FAILED run or an audit mismatch is recorded, not restarted; a lost 1660S is recorded and the run goes on. Do not deploy
+wave 2 or restart workers while it runs. At the end: final state, applied generations, audits, member leave/join,
+validation every 25 generations, selected checkpoint, **one** test evaluation of it against the base, parity (ledger
+replay of child hashes + regenerate every audited candidate and one generation; `verify_managed_run.py`, the 4th argument
+is the run id).
+
+## After tier 3
+
+1. Results + parity into RESULTS.md, replay page / video.
+2. Wave 2 deploy (candidate13 proper = `feat/gsm8k-demo`), then a short `evalChunks: [16, 32, 64]` run (ADR-010).
+3. Finding 9 product fix (timeline shows a re-added member). Windows app update on 3060-thao (someone at the screen).
