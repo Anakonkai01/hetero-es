@@ -187,3 +187,64 @@ def test_a_notebook_gets_the_dashboard_as_a_png_image():
 
     image = png(Dashboard().draw(build_frame(timeline(), EVENTS)))
     assert image.format == "png" and image.data[:4] == b"\x89PNG" and len(image.data) > 20_000
+
+
+def test_a_timeline_rebuilt_from_the_ledger_has_every_attempt(tmp_path):
+    import json
+    import sqlite3
+
+    from heteroes.demo.ledger_view import ledger_events, ledger_timeline
+
+    run = tmp_path / "r"
+    run.mkdir()
+    (run / "config.json").write_text(json.dumps({"workerIds": ["fast", "slow"]}))
+    events = [
+        {"event": "managed_start", "t": 100.0},
+        {"event": "generation_open", "generation": 0, "t": 101.0},
+        {"event": "audit_completed", "worker_id": "slow", "t": 130.0},
+        {"event": "update_applied", "generation": 0, "t": 140.0},
+        {"event": "generation_open", "generation": 1, "t": 141.0},
+    ]
+    (run / "events.jsonl").write_text("\n".join(json.dumps(e) for e in events) + "\n{partial")
+    db = sqlite3.connect(run / "ledger.sqlite")
+    db.execute("CREATE TABLE candidate (candidate_id, experiment_id, generation, candidate_index, seed, sign, state)")
+    db.execute(
+        "CREATE TABLE attempt (candidate_id, attempt_number, worker_id, lease_token, leased_at, deadline, ended_at, failure_kind)"
+    )
+    db.execute("CREATE TABLE result (candidate_id, attempt_number, reward, committed_at)")
+    for cid, g in (("r/g0/c0", 0), ("r/g0/c1", 0), ("r/g1/c0", 1), ("r/g1/c1", 1)):
+        db.execute("INSERT INTO candidate VALUES (?,?,?,0,1,1,'X')", (cid, "r", g))
+    db.executemany(
+        "INSERT INTO attempt VALUES (?,?,?,'t',?,?,?,NULL)",
+        [
+            ("r/g0/c0", 1, "fast", 102.0, 160.0, 110.0),  # committed
+            ("r/g0/c1", 1, "slow", 102.0, 120.0, None),  # its machine died: lost at the deadline
+            ("r/g0/c1", 2, "fast", 121.0, 180.0, 130.0),  # retried and committed
+            ("r/g1/c0", 1, "fast", 142.0, 999.0, None),  # running now
+        ],
+    )
+    db.executemany("INSERT INTO result VALUES (?,?,?,?)", [("r/g0/c0", 1, 0.5, 110.0), ("r/g0/c1", 2, 0.75, 130.0)])
+    db.commit()
+    db.close()
+    t = ledger_timeline(run, now_s=150.0, name="n", max_generations=3, population=2)
+    assert [(j["workerId"], j["status"], j["endMs"], j["reward"]) for j in t["jobs"]] == [
+        ("fast", "SUCCEEDED", 110_000, 0.5),
+        ("slow", "LOST", 120_000, None),
+        ("fast", "SUCCEEDED", 130_000, 0.75),
+        ("fast", "RUNNING", None, None),
+    ]
+    g0, g1 = t["generations"]
+    assert (g0["status"], g0["openMs"], g0["doneMs"], g0["rewardMean"], g0["rewardBest"]) == (
+        "COMPLETED",
+        101_000,
+        140_000,
+        0.625,
+        0.75,
+    )
+    assert (g1["status"], g1["rewardMean"]) == ("RUNNING", None)
+    assert t["experiment"]["startedMs"] == 100_000 and t["nowMs"] == 150_000
+    frame = build_frame(t, ledger_events(run), {"fast": "5070", "slow": "1660"})
+    assert [(d.name, d.done, d.busy, d.audits) for d in frame.devices] == [
+        ("5070", 2, "r/g1/c0", 0),
+        ("1660", 0, None, 1),
+    ]

@@ -137,14 +137,52 @@ def bounded_snapshot(snapshot, max_bytes=1_250_000):
     def size():
         return len(json.dumps(snapshot, allow_nan=False).encode())
 
-    for key in ("events", "attempts", "candidates", "generations"):
-        while snapshot[key] and size() > max_bytes:
+    def halve(key, limit=None):
+        def over():
+            if limit is None:
+                return size() > max_bytes
+            return size() > max_bytes and len(json.dumps(snapshot[key], allow_nan=False).encode()) > limit
+
+        while snapshot[key] and over():
             snapshot[key] = snapshot[key][max(1, len(snapshot[key]) // 2) :]
             snapshot["monitoringPartial"] = True
+
+    if size() <= max_bytes:
+        return snapshot
+    # lifecycle, coordinator and worker logs are concatenated: order them so the newest survive
+    snapshot["events"].sort(key=lambda e: e.get("t") if isinstance(e.get("t"), (int, float)) else 0)
+    halve("events", limit=max_bytes // 4)  # a quarter for the newest events; the rest only as a last resort
+    # copies of whole log files are a download convenience: they go before any live work
     while snapshot.get("artifactContents") and size() > max_bytes:
         largest = max(snapshot["artifactContents"], key=lambda k: len(snapshot["artifactContents"][k]["base64"]))
         del snapshot["artifactContents"][largest]
         snapshot["monitoringPartial"] = True
+
+    # attempts and candidates go by generation, oldest first and together, so the live view keeps the newest
+    # generations whole (halving attempts alone once left a long run with candidates but no attempt: finding 10)
+    def generation(item):
+        match = re.search(r"\.g(\d+)$", str(item.get("generationId")))
+        return int(match.group(1)) if match else -1
+
+    excess = size() - max_bytes
+    if excess > 0:
+        weight = {}
+        for key in ("attempts", "candidates"):
+            for item in snapshot[key]:
+                g = generation(item)
+                weight[g] = weight.get(g, 0) + len(json.dumps(item, allow_nan=False).encode()) + 1
+        dropped = set()
+        for g in sorted(weight)[:-1]:  # never the newest one here; the halving below is the last resort
+            if excess <= 0:
+                break
+            dropped.add(g)
+            excess -= weight[g]
+        if dropped:
+            for key in ("attempts", "candidates"):
+                snapshot[key] = [item for item in snapshot[key] if generation(item) not in dropped]
+            snapshot["monitoringPartial"] = True
+    for key in ("events", "attempts", "candidates", "generations"):
+        halve(key)
     if size() > max_bytes:
         raise ValueError("Runtime state exceeds the monitoring budget")
     return snapshot

@@ -145,6 +145,41 @@ def test_large_monitoring_projection_preserves_completion_and_latest_metrics():
     assert result["monitoringPartial"]
 
 
+def test_a_long_run_keeps_its_newest_generations_whole_for_the_live_view():
+    # GSM8K tier 3 at generation 40 (RESULTS.md finding 10): candidates and file copies filled the budget, so every
+    # attempt was dropped and the web's live view showed no work at all
+    import json
+    from heteroes.product.agent import bounded_snapshot
+
+    def generation(g):
+        return f"run.g{g}"
+
+    snapshot = {
+        "state": {"status": "RUNNING"},
+        "generations": [{"generationId": generation(g), "status": "COMPLETED"} for g in range(45)],
+        "events": [{"t": i, "data": "e" * 300} for i in range(2000)][::-1],  # not in time order: worker logs come last
+        "candidates": [
+            {"generationId": generation(g), "candidateId": f"run.g{g}.c{c}", "data": "c" * 900}
+            for g in range(45)
+            for c in range(32)
+        ],
+        "attempts": [
+            {"generationId": generation(g), "candidateId": f"run.g{g}.c{c}", "data": "a" * 350}
+            for g in range(45)
+            for c in range(32)
+        ],
+        "artifactContents": {"events.jsonl": {"base64": "x" * 250_000}, "lifecycle.jsonl": {"base64": "y" * 60_000}},
+    }
+    result = bounded_snapshot(snapshot)
+    assert len(json.dumps(result).encode()) <= 1_250_000 and result["monitoringPartial"]
+    kept = sorted({int(a["generationId"].rsplit(".g", 1)[1]) for a in result["attempts"]})
+    assert kept and kept[-1] == 44 and kept == list(range(kept[0], 45))  # the newest generations, none skipped
+    assert len(result["attempts"]) == 32 * len(kept)  # each kept generation whole
+    assert {c["candidateId"] for c in result["candidates"]} == {a["candidateId"] for a in result["attempts"]}
+    assert len(result["generations"]) == 45 and result["artifactContents"] == {}
+    assert min(e["t"] for e in result["events"]) > 0 and max(e["t"] for e in result["events"]) == 1999  # the newest
+
+
 def test_worker_only_observation_does_not_invent_unknown_coordinator(tmp_path, monkeypatch):
     a = agent(tmp_path)
     command = {"assignmentId": "b" * 32, "epoch": 1, "recoveryIndex": 0}
