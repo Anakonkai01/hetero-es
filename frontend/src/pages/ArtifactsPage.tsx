@@ -12,6 +12,8 @@ import { friendlyFileName } from '../lib/files';
 import { formatBytes, formatDateTime } from '../lib/format';
 import { ARTIFACT_NOTE, ARTIFACT_STATUS, ARTIFACT_TYPE_LABEL } from '../lib/labels';
 import { fromArtifacts } from '../lib/navigation';
+import { SearchSelect } from '../components/ui/SearchSelect';
+import { Pagination } from '../components/ui/Pagination';
 import type { ArtifactType } from '../types/artifact';
 type TypeFilter = 'all' | ArtifactType;
 const typeOptions = Object.keys(ARTIFACT_TYPE_LABEL) as ArtifactType[];
@@ -24,6 +26,7 @@ export function ArtifactsPage() {
   const [params, setParams] = useSearchParams();
   const [type, setType] = useState<TypeFilter>('all');
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
   const experimentFilter = params.get('experiment') ?? 'all';
   const selectedId = params.get('selected');
   const artifacts = artifactsQuery.data ?? [];
@@ -35,11 +38,12 @@ export function ArtifactsPage() {
       (type === 'all' || a.type === type) &&
       (!search.trim() || a.name.toLowerCase().includes(search.trim().toLowerCase())),
   );
-  // One block per experiment, newest first, instead of one endless table.
+  const currentPage = Math.min(page, Math.max(1, Math.ceil(rows.length / 10)));
+  // Paginate files, preserving their experiment grouping.
   const groups = useMemo(() => {
     const order = new Map(experiments.map((e, index) => [e.experimentId, { index, at: e.createdAt ?? '' }]));
     const byRun = new Map<string, typeof rows>();
-    for (const artifact of rows)
+    for (const artifact of rows.slice((currentPage - 1) * 10, currentPage * 10))
       byRun.set(artifact.experimentId, [...(byRun.get(artifact.experimentId) ?? []), artifact]);
     return [...byRun.entries()]
       .sort(
@@ -52,7 +56,7 @@ export function ArtifactsPage() {
         files: [...files].sort((x, y) => (y.createdAt ?? '').localeCompare(x.createdAt ?? '')),
       }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [artifacts, experiments, experimentFilter, type, search]);
+  }, [artifacts, experiments, experimentFilter, type, search, currentPage]);
   const selected = artifacts.find((a) => a.artifactId === selectedId);
   function updateParams(changes: Record<string, string | null>) {
     const next = new URLSearchParams(params);
@@ -63,6 +67,7 @@ export function ArtifactsPage() {
     setParams(next, { replace: true });
   }
   function clearFilters() {
+    setPage(1);
     setType('all');
     setSearch('');
     updateParams({ experiment: null });
@@ -89,23 +94,22 @@ export function ArtifactsPage() {
           <div className="filters" style={{ paddingTop: 16 }}>
             <div className="fg">
               <label htmlFor="f-ar-e">{t('Experiment')}</label>
-              <select
+              <SearchSelect
                 id="f-ar-e"
-                className="sel"
+                label={t('Experiment')}
                 value={experimentFilter}
-                onChange={(event) =>
-                  updateParams({
-                    experiment: event.target.value === 'all' ? null : event.target.value,
-                  })
-                }
-              >
-                <option value="all">{t('All')}</option>
-                {experiments.map((experiment) => (
-                  <option key={experiment.experimentId} value={experiment.experimentId}>
-                    {experiment.name}
-                  </option>
-                ))}
-              </select>
+                options={[
+                  { value: 'all', label: t('All') },
+                  ...experiments.map((experiment) => ({
+                    value: experiment.experimentId,
+                    label: experiment.name,
+                  })),
+                ]}
+                onChange={(value) => {
+                  setPage(1);
+                  updateParams({ experiment: value === 'all' ? null : value });
+                }}
+              />
             </div>
             <div className="fg">
               <label htmlFor="f-ar-q">{t('Search')}</label>
@@ -114,7 +118,10 @@ export function ArtifactsPage() {
                 className="inp"
                 type="search"
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                  setPage(1);
+                }}
                 placeholder={t('File name')}
               />
             </div>
@@ -124,12 +131,15 @@ export function ArtifactsPage() {
                 id="f-ar-t"
                 className="sel"
                 value={type}
-                onChange={(event) => setType(event.target.value as TypeFilter)}
+                onChange={(event) => {
+                  setType(event.target.value as TypeFilter);
+                  setPage(1);
+                }}
               >
                 <option value="all">{t('All')}</option>
                 {typeOptions.map((option) => (
                   <option key={option} value={option}>
-                    {ARTIFACT_TYPE_LABEL[option]}
+                    {t(ARTIFACT_TYPE_LABEL[option])}
                   </option>
                 ))}
               </select>
@@ -203,6 +213,7 @@ export function ArtifactsPage() {
               })}
             </div>
           )}
+          {rows.length > 0 && <Pagination page={currentPage} total={rows.length} onChange={setPage} />}
         </section>
 
         <section className="card b" aria-label={t('Artifact metadata')}>

@@ -14,6 +14,8 @@ import {
   workspaceName,
 } from '../lib/deviceList';
 export interface Device {
+  stopReason?: string | null;
+  blockedRunId?: string | null;
   deviceId: string;
   workerId: string;
   displayName: string;

@@ -11,10 +11,14 @@ const COORD_W = 300,
 
 /** `narrow` is for small spaces (the home page): a smaller canvas so the text stays readable when it is scaled down to fit. */
 export function layoutWorkers(count: number, narrow = false): DiagramLayout {
-  const WIDTH = narrow ? 600 : 960,
+  const BASE_WIDTH = narrow ? 600 : 960,
     CARD_W = narrow ? 172 : 214,
     GAP = narrow ? 14 : 22;
-  const perRow = Math.max(1, Math.floor((WIDTH - GAP) / (CARD_W + GAP)));
+  const perRow = Math.max(1, Math.floor((BASE_WIDTH - GAP) / (CARD_W + GAP)));
+  const margin = (BASE_WIDTH - (perRow * CARD_W + (perRow - 1) * GAP)) / 2;
+  const WIDTH = BASE_WIDTH + 2 * Math.max(0, count * 12 + 24 - margin);
+  const rowTop = Math.max(ROW_TOP, COORD_Y + COORD_H + count * 2 + 48);
+  const rowGap = 64;
   const rows = Math.max(1, Math.ceil(count / perRow));
   const coordinator: Card = {
     x: (WIDTH - COORD_W) / 2,
@@ -30,10 +34,45 @@ export function layoutWorkers(count: number, narrow = false): DiagramLayout {
     const inRow = Math.min(perRow, count - row * perRow);
     const rowWidth = inRow * CARD_W + (inRow - 1) * GAP;
     const x = (WIDTH - rowWidth) / 2 + (index % perRow) * (CARD_W + GAP);
-    const y = ROW_TOP + row * (CARD_H + GAP);
+    const y = rowTop + row * (CARD_H + rowGap);
     cards.push({ x, y, w: CARD_W, h: CARD_H, cx: x + CARD_W / 2, cy: y + CARD_H / 2 });
   }
-  return { width: WIDTH, height: ROW_TOP + rows * CARD_H + (rows - 1) * GAP + 16, coordinator, cards };
+  return { width: WIDTH, height: rowTop + rows * CARD_H + (rows - 1) * rowGap + 16, coordinator, cards };
+}
+
+/** Each worker has its own outer rail. Row gutters keep every route outside cards. */
+export function workerRoute(layout: DiagramLayout, index: number): Point[] {
+  const card = layout.cards[index];
+  if (!card) throw new RangeError('Unknown worker card');
+  const c = layout.coordinator;
+  const source = { x: c.x + 16 + ((index + 0.5) * (c.w - 32)) / layout.cards.length, y: c.y + c.h };
+  const column = layout.cards.filter((other) => other.y === card.y && other.x < card.x).length;
+  const channel = source.y + 12 + index * 2;
+  const rail = 12 + index * 12;
+  const approach = card.y - 18 - column * 8;
+  return [
+    source,
+    { x: source.x, y: channel },
+    { x: rail, y: channel },
+    { x: rail, y: approach },
+    { x: card.cx, y: approach },
+    { x: card.cx, y: card.y },
+  ];
+}
+
+/** Constant-distance travel along precisely the same polyline used by the SVG. */
+export function routePosition(route: Point[], progress: number): Point {
+  if (progress >= 1) return { ...route[route.length - 1] };
+  const lengths = route.slice(1).map((point, i) => Math.hypot(point.x - route[i].x, point.y - route[i].y));
+  let distance = Math.max(0, Math.min(1, progress)) * lengths.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < lengths.length; i++) {
+    if (distance <= lengths[i] && lengths[i] > 0) {
+      const t = distance / lengths[i];
+      return { x: route[i].x + (route[i + 1].x - route[i].x) * t, y: route[i].y + (route[i + 1].y - route[i].y) * t };
+    }
+    distance -= lengths[i];
+  }
+  return { ...route[route.length - 1] };
 }
 
 export function bezierPoint(p0: Point, p1: Point, p2: Point, p3: Point, t: number): Point {

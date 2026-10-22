@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router';
 import { apiGet } from '../api/client';
 import { useSession } from '../app/session';
+import { AccountMenu } from '../components/common/AccountMenu';
 import { InstallerDownloads } from '../components/common/InstallerDownloads';
 import { DemoReplay } from '../components/live/DemoReplay';
 import { ChipIcon, DashboardIcon, FileIcon, FlaskIcon } from '../components/ui/Icons';
@@ -46,6 +47,7 @@ export function HomePage() {
         </nav>
         <div className="acts">
           <PreferencesControl />
+          <AccountMenu />
           <Link className="btn pri" to={session ? '/dashboard' : '/login'}>
             {t(session ? 'Open dashboard' : 'Sign in')} <span aria-hidden="true">↗</span>
           </Link>
@@ -71,9 +73,9 @@ export function HomePage() {
               <Link className="btn pri" to={session ? '/dashboard' : '/login'}>
                 {t(session ? 'Open dashboard' : 'Enter your lab')} <span aria-hidden="true">→</span>
               </Link>
-              <Link className="btn" to="/explain">
-                {t('Explore the workflow')}
-              </Link>
+              <a className="btn" href="#downloads">
+                {t('Contribute a GPU')}
+              </a>
             </div>
             <div className="hero-caption">
               <span className={health.isError ? 'live-dot offline' : 'live-dot'} />

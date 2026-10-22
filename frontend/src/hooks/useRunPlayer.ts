@@ -106,7 +106,13 @@ export function useRunPlayer(
       setFollowing(false);
       setState((s) => ({ ...s, atMs: value }));
     }, []),
-    setSpeed: useCallback((speed: number) => setState((s) => ({ ...s, speed })), []),
+    setSpeed: useCallback(
+      (speed: number) => {
+        setFollowing(false);
+        setState((s) => ({ ...s, atMs: live ? Date.now() + clockOffsetMs : s.atMs, speed, playing: true }));
+      },
+      [live, clockOffsetMs],
+    ),
     goLive: useCallback(() => {
       setFollowing(true);
       setState((s) => ({ ...s, playing: false }));

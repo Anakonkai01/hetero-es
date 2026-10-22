@@ -83,6 +83,13 @@ try {
   await page.getByRole('button', { name: 'Live' }).click();
   assert.equal(await page.getByRole('button', { name: 'Live' }).getAttribute('aria-pressed'), 'true');
   results.liveButtonReturns = true;
+  assert.equal(await page.locator('.lv-speeds [aria-pressed="true"]').count(), 0, 'Live has no selected replay speed');
+  await page.getByRole('button', { name: '16×', exact: true }).click();
+  assert.equal(await page.getByRole('button', { name: 'Live', exact: true }).getAttribute('aria-pressed'), 'false');
+  assert.equal(await page.getByRole('button', { name: '16×', exact: true }).getAttribute('aria-pressed'), 'true');
+  await page.getByRole('button', { name: 'Live', exact: true }).click();
+  assert.equal(await page.locator('.lv-speeds [aria-pressed="true"]').count(), 0);
+  results.liveAndReplayAreExclusive = true;
 
   // 2b. The run ends while someone is watching: the view stays on the finished picture instead of rewinding to the start.
   await page.getByRole('button', { name: 'Live' }).waitFor({ state: 'detached', timeout: 150000 });

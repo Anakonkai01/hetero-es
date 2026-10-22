@@ -1,5 +1,6 @@
 import { Status, useProduct } from '@heteroes/product-ui';
 import type { useLabOperations } from './useLabOperations';
+import { workerLabel } from '../lib/workerIdentity';
 type PanelState = ReturnType<typeof useLabOperations>;
 
 export function LabAccountApprovals({ state }: { state: PanelState }) {
@@ -93,39 +94,43 @@ export function LabAccountApprovals({ state }: { state: PanelState }) {
                     {t('Suspend')}
                   </button>
                 )}
-                <details className="more-actions">
-                  <summary className="btn">{t('More')}</summary>
-                  <div className="acts">
-                    <button
-                      className="btn"
-                      disabled={action.isPending}
-                      onClick={() => update(user, { canCreateWorkspace: !user.canCreateWorkspace })}
-                    >
-                      {t(user.canCreateWorkspace ? 'Revoke workspace creation' : 'Allow workspace creation')}
-                    </button>
-                    <button
-                      className="btn"
-                      disabled={action.isPending}
-                      onClick={() => action.mutate({ path: `/api/v1/platform/users/${user.userId}/revoke-sessions` })}
-                    >
-                      {t('Revoke sessions')}
-                    </button>
-                    <button
-                      className="btn"
-                      disabled={action.isPending}
-                      onClick={() => {
-                        if (
-                          window.confirm(
-                            `${user.username}: ${t('Change the platform administrator permission of this account?')}`,
+                {user.userId !== session?.user.userId ? (
+                  <details className="more-actions">
+                    <summary className="btn">{t('Actions')} ⋯</summary>
+                    <div className="acts">
+                      <button
+                        className="btn"
+                        disabled={action.isPending}
+                        onClick={() => update(user, { canCreateWorkspace: !user.canCreateWorkspace })}
+                      >
+                        {t(user.canCreateWorkspace ? 'Revoke workspace creation' : 'Allow workspace creation')}
+                      </button>
+                      <button
+                        className="btn"
+                        disabled={action.isPending}
+                        onClick={() => action.mutate({ path: `/api/v1/platform/users/${user.userId}/revoke-sessions` })}
+                      >
+                        {t('Revoke sessions')}
+                      </button>
+                      <button
+                        className="btn"
+                        disabled={action.isPending}
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              `${user.username}: ${t('Change the platform administrator permission of this account?')}`,
+                            )
                           )
-                        )
-                          update(user, { platformAdmin: !user.platformAdmin });
-                      }}
-                    >
-                      {t(user.platformAdmin ? 'Remove platform admin' : 'Grant platform admin')}
-                    </button>
-                  </div>
-                </details>
+                            update(user, { platformAdmin: !user.platformAdmin });
+                        }}
+                      >
+                        {t(user.platformAdmin ? 'Remove platform admin' : 'Grant platform admin')}
+                      </button>
+                    </div>
+                  </details>
+                ) : (
+                  <span className="hint">{t('Your account')}</span>
+                )}
               </div>
             </div>
           ))}
@@ -172,7 +177,12 @@ export function LabServiceReservations({ state }: { state: PanelState }) {
             </p>
             {ops.data.workers.map((w) => (
               <p key={w.workerId}>
-                <b>{w.workerId}</b> · {t(w.status)} · {w.admissionReason}
+                <b title={w.workerId}>{workerLabel(w, w.workerId)}</b> · {t(w.status)} · {w.admissionReason}
+                {w.stopReason && (
+                  <span className="note warn">
+                    {t('Cannot synchronize weights on this connection. Automatic retry is paused temporarily.')}
+                  </span>
+                )}
               </p>
             ))}
             {ops.data.reservations.length === 0 && <p className="hint">{t('No active reservations.')}</p>}

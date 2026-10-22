@@ -51,8 +51,13 @@ export function WorkerFleet() {
             </div>
             <div className="cb">
               <Link className="link mono" to={`/workers/${worker.workerId}`}>
-                {worker.workerId}
+                {t('View device')}
               </Link>
+              {worker.stopReason && (
+                <p className="note warn">
+                  {t('Cannot synchronize weights on this connection. Automatic retry is paused temporarily.')}
+                </p>
+              )}
               <div className="device-statuses">
                 <Status value={worker.approvalStatus ?? worker.admissionStatus} />
                 <Status value={worker.contributionEnabled ? 'ON' : 'OFF'} />
@@ -71,6 +76,7 @@ export function WorkerFleet() {
               <details className="advanced-panel">
                 <summary>{t('Device identity')}</summary>
                 <div>
+                  <p className="mono">{worker.workerId}</p>
                   <p className="device-identity">
                     {worker.physicalResourceId ?? t('Physical GPU identity unavailable')}
                   </p>
@@ -101,6 +107,11 @@ export function WorkerFleet() {
                     {worker.profile.gpuName} · {(worker.profile.vramTotalMb / 1024).toFixed(1)} GiB
                   </small>
                 </div>
+                {worker.stopReason && (
+                  <p className="note warn">
+                    {t('Cannot synchronize weights on this connection. Automatic retry is paused temporarily.')}
+                  </p>
+                )}
                 <div className="device-statuses">
                   <Status value={worker.status} />
                   <Status value={worker.approvalStatus ?? worker.admissionStatus} />

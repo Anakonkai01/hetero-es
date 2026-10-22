@@ -11,6 +11,7 @@ import type { User } from '../../types/access';
 import { ChipIcon, DashboardIcon, FileIcon, FlaskIcon, HomeIcon, ListIcon, LogoMark, RefreshIcon } from '../ui/Icons';
 import { CommandPalette } from './CommandPalette';
 import { NotificationBell } from './NotificationBell';
+import { AccountMenu } from '../common/AccountMenu';
 import { PresentationBar } from './PresentationBar';
 import { useStatusToasts } from './useStatusToasts';
 const navigationItems = [
@@ -61,7 +62,7 @@ export function AppLayout() {
     refetchInterval: 5000,
     retry: 1,
   });
-  const { session, workspace, selectWorkspace, signOut } = useSession();
+  const { session, workspace, selectWorkspace } = useSession();
   const presentation = usePresentation();
   const administrator = Boolean(session?.user.platformAdmin && session.user.accountStatus === 'ACTIVE');
   const accounts = useQuery({
@@ -73,7 +74,7 @@ export function AppLayout() {
   const waiting = accounts.data?.filter((user) => user.accountStatus === 'PENDING').length ?? 0;
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { refresh, refreshing, lastUpdated, toast, flash } = useAppState();
+  const { refresh, refreshing, lastUpdated, toast } = useAppState();
   useStatusToasts();
   const stale = health.isError;
   const updatedAt = `${formatClock(health.dataUpdatedAt || lastUpdated)} GMT+7`;
@@ -157,27 +158,6 @@ export function AppLayout() {
             </NavLink>
           )}
         </nav>
-        <div className="side-account">
-          <Link to="/profile" className="account-link">
-            <span className="account-avatar">{session?.user.displayName?.slice(0, 1).toUpperCase() ?? 'H'}</span>
-            <span>
-              <b>{session?.user.displayName}</b>
-              <small>{t(session?.user.platformAdmin ? 'Platform administrator' : 'Member')}</small>
-            </span>
-          </Link>
-          <button
-            type="button"
-            className="link"
-            onClick={() =>
-              void signOut().catch((error: unknown) =>
-                flash(error instanceof Error ? error.message : 'Could not sign out.'),
-              )
-            }
-          >
-            {t('Sign out')}
-          </button>
-        </div>
-
         <div className="demo">{t('Private runtime · shared GPU pool.')}</div>
       </aside>
 
@@ -226,6 +206,7 @@ export function AppLayout() {
           )}
           {session && <NotificationBell />}
           <PreferencesControl />
+          <AccountMenu />
         </header>
 
         <main className="content" id="main-content" tabIndex={-1}>

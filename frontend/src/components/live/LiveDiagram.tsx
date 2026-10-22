@@ -1,6 +1,6 @@
 import { useProduct } from '@heteroes/product-ui';
 import { useMemo } from 'react';
-import { candidateLabel, connector, layoutWorkers, packetPosition, shortName } from '../../lib/diagramLayout';
+import { candidateLabel, layoutWorkers, workerRoute, routePosition, shortName } from '../../lib/diagramLayout';
 import { fillTemplate } from '../../lib/eventText';
 import type { Frame, WorkerFrame } from '../../lib/runFrame';
 
@@ -11,6 +11,7 @@ function stateText(worker: WorkerFrame, t: (key: string) => string): string {
   if (worker.state === 'busy' && worker.job)
     return fillTemplate(t('Evaluating {candidate}'), { candidate: candidateLabel(worker.job.candidateId) });
   if (worker.state === 'offline') return t('Connection lost');
+  if (worker.state === 'blocked') return t('Synchronization blocked');
   if (worker.state === 'unstarted') return t('Not started');
   if (worker.state === 'starting') return t('Loading the model');
   return t('Waiting for work');
@@ -29,14 +30,39 @@ export function LiveDiagram({
   const { t } = useProduct();
   const layout = useMemo(() => layoutWorkers(frame.workers.length, narrow), [frame.workers.length, narrow]);
   const { coordinator } = layout;
-  const anchor = { x: coordinator.cx, y: coordinator.y + coordinator.h };
   const generation = frame.generation;
   const busy = frame.workers.filter((w) => w.state === 'busy').length;
+
+  if (narrow)
+    return (
+      <div className="hero-flow" aria-label={t('Distributed experiment workflow')}>
+        <div className="hero-coordinator">
+          <b>{t('Coordinator')}</b>
+          <span>{generation ? `${t('Generation')} ${generation.index + 1}` : t('Not started')}</span>
+          <small>
+            {frame.totals.committed} / {frame.totals.total ?? '—'} {t('Candidates committed')}
+          </small>
+        </div>
+        <div className="hero-gpus">
+          {frame.workers.map((worker) => (
+            <div className={`hero-gpu ${worker.state}`} key={worker.id}>
+              <span className="hero-gpu-dot" aria-hidden="true" />
+              <b title={worker.name ?? worker.id}>{worker.name ?? worker.id}</b>
+              <span>{stateText(worker, t)}</span>
+              <small>
+                {worker.done} {t('done')}
+              </small>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
 
   return (
     <svg
       className="lv-diagram"
       viewBox={`0 0 ${layout.width} ${layout.height}`}
+      style={{ minWidth: layout.width }}
       role="img"
       aria-label={fillTemplate(t('Diagram: the coordinator and {count} GPUs, {busy} working'), {
         count: frame.workers.length,
@@ -44,13 +70,12 @@ export function LiveDiagram({
       })}
     >
       {frame.workers.map((worker, i) => {
-        const card = layout.cards[i];
-        const [p0, p1, p2, p3] = connector(anchor, { x: card.cx, y: card.y });
+        const route = workerRoute(layout, i);
         return (
           <path
             key={worker.id}
             className={`lv-link lv-link-${worker.state}`}
-            d={`M${p0.x} ${p0.y} C${p1.x} ${p1.y} ${p2.x} ${p2.y} ${p3.x} ${p3.y}`}
+            d={route.map((p, index) => `${index ? 'L' : 'M'}${p.x} ${p.y}`).join(' ')}
           />
         );
       })}
@@ -81,6 +106,18 @@ export function LiveDiagram({
         const progress = worker.job?.progress ?? 0;
         return (
           <g key={worker.id} className={`lv-card lv-card-${worker.state}`}>
+            <title>
+              {[
+                worker.name || worker.id,
+                worker.gpuName,
+                worker.id,
+                worker.state === 'blocked'
+                  ? t('Cannot synchronize weights on this connection. Automatic retry is paused temporarily.')
+                  : null,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            </title>
             <rect x={card.x} y={card.y} width={card.w} height={card.h} rx="14" />
             <circle className="lv-ring-track" cx={card.x + 44} cy={card.y + 56} r={RING_R} />
             {worker.state === 'busy' && (
@@ -106,6 +143,11 @@ export function LiveDiagram({
             <text x={card.x + 82} y={card.y + 64} className="lv-state">
               {stateText(worker, t)}
             </text>
+            {worker.gpuName && (
+              <text x={card.x + 82} y={card.y + 82} className="lv-state">
+                {shortName(worker.gpuName, 19)}
+              </text>
+            )}
             <line x1={card.x + 16} x2={card.x + card.w - 16} y1={card.y + 100} y2={card.y + 100} className="lv-rule" />
             <text x={card.x + 16} y={card.y + 124} className="lv-stat">
               {fillTemplate(t('{n} done'), { n: worker.done })}
@@ -124,20 +166,20 @@ export function LiveDiagram({
         frame.packets.map((packet) => {
           const index = frame.workers.findIndex((w) => w.id === packet.workerId);
           if (index < 0) return null;
-          const card = layout.cards[index];
-          const at = packetPosition(packet.kind, packet.progress, anchor, { x: card.cx, y: card.y });
+          const route = workerRoute(layout, index);
+          const at = routePosition(route, packet.kind === 'dispatch' ? packet.progress : 1 - packet.progress);
           return (
             <g
-              key={`${packet.candidateId}-${packet.kind}`}
+              key={`${packet.workerId}-${packet.candidateId}-${packet.kind}`}
               className={`lv-packet lv-packet-${packet.kind}`}
               transform={`translate(${at.x} ${at.y})`}
             >
-              <circle r="9" />
-              <text y="-14" textAnchor="middle">
+              <circle r="4" />
+              <title>
                 {packet.kind === 'result' && packet.reward != null
                   ? packet.reward.toFixed(2)
                   : candidateLabel(packet.candidateId)}
-              </text>
+              </title>
             </g>
           );
         })}

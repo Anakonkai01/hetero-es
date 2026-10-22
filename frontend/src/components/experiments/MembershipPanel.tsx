@@ -5,6 +5,7 @@ import { useAccessMutation } from '../../hooks/useAccess';
 import { useWorkers } from '../../hooks/useWorkers';
 import { memberView } from '../../lib/membership';
 import type { Experiment } from '../../types/experiment';
+import { workerLabel } from '../../lib/workerIdentity';
 
 const STATE_LABEL = { member: '', joining: 'joining', leaving: 'leaving', left: 'left' } as const;
 
@@ -13,7 +14,7 @@ export function MembershipPanel({ experiment: e, permitted }: { experiment: Expe
   const { t } = useProduct();
   const workers = useWorkers();
   const [choice, setChoice] = useState('');
-  const change = useAccessMutation((body: { workerId: string; action: 'add' | 'remove' }) =>
+  const change = useAccessMutation((body: { workerId: string; action: 'add' | 'remove' | 'retry' }) =>
     apiPost(`/api/v1/experiments/${e.experimentId}/workers`, body),
   );
   const view = memberView(e);
@@ -26,8 +27,8 @@ export function MembershipPanel({ experiment: e, permitted }: { experiment: Expe
     <div className="gpu-chips">
       <span className="hint">{t('GPUs')}</span>
       {view.map(({ workerId, state }) => (
-        <span className={`chip${state === 'left' ? ' muted' : ''}`} key={workerId}>
-          {workerId}
+        <span className={`chip${state === 'left' ? ' muted' : ''}`} key={workerId} title={workerId}>
+          {workerLabel(e.workerIdentities?.[workerId] ?? workers.data?.find((w) => w.workerId === workerId), workerId)}
           {STATE_LABEL[state] && <small> · {t(STATE_LABEL[state])}</small>}
           {permitted && running && state === 'member' && active.length > 1 && (
             <button
@@ -41,6 +42,22 @@ export function MembershipPanel({ experiment: e, permitted }: { experiment: Expe
             </button>
           )}
         </span>
+      ))}
+      {Object.entries(e.workerBlocks ?? {}).map(([workerId]) => (
+        <div className="note warn worker-block" key={workerId}>
+          <b>{workerLabel(e.workerIdentities?.[workerId], workerId)}</b>
+          <p>{t('Cannot synchronize weights on this connection. Automatic retry is paused temporarily.')}</p>
+          {permitted && running && (
+            <button
+              className="btn"
+              type="button"
+              disabled={change.isPending}
+              onClick={() => void change.mutateAsync({ workerId, action: 'retry' }).catch(() => {})}
+            >
+              {t('Retry worker')}
+            </button>
+          )}
+        </div>
       ))}
       {e.allowJoin && <span className="hint">{t('Idle eligible workers join by themselves')}</span>}
       {permitted && running && candidates.length > 0 && (

@@ -53,8 +53,8 @@ export function PlayerBar({
           <button
             key={speed}
             type="button"
-            className={state.speed === speed ? 'btn pri' : 'btn'}
-            aria-pressed={state.speed === speed}
+            className={!player.live && state.speed === speed ? 'btn pri' : 'btn'}
+            aria-pressed={!player.live && state.speed === speed}
             onClick={() => player.setSpeed(speed)}
           >
             {speed}×

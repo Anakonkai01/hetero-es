@@ -7,7 +7,33 @@ import {
   niceTicks,
   candidateLabel,
   formatDuration,
+  workerRoute,
+  routePosition,
 } from '../src/lib/diagramLayout.ts';
+
+test('multi-row routes and animated packets stay outside every GPU card', () => {
+  for (const narrow of [false, true])
+    for (const count of [1, 2, 5, 8, 16]) {
+      const layout = layoutWorkers(count, narrow);
+      const routes = layout.cards.map((_, index) => workerRoute(layout, index));
+      assert.equal(new Set(routes.map(JSON.stringify)).size, count);
+      for (let index = 0; index < count; index++) {
+        const route = routes[index];
+        for (let step = 0; step < 1000; step++) {
+          const point = routePosition(route, step / 1000);
+          assert.ok(point.x >= 0 && point.x <= layout.width && point.y >= 0 && point.y <= layout.height);
+          for (const card of layout.cards) {
+            assert.ok(
+              !(point.x > card.x && point.x < card.x + card.w && point.y > card.y && point.y < card.y + card.h),
+              `route ${index} crossed a card (${count} GPUs, narrow=${narrow})`,
+            );
+          }
+        }
+        const target = layout.cards[index];
+        assert.deepEqual(routePosition(route, 1), { x: target.cx, y: target.y });
+      }
+    }
+});
 
 test('cards sit in one centred row when they fit and wrap into rows otherwise, never overlapping or leaving the canvas', () => {
   for (const count of [1, 2, 3, 4, 5, 6, 8, 11]) {

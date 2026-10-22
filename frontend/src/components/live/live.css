@@ -134,6 +134,9 @@
 }
 .lv-stage {
   position: relative;
+  min-width: 0;
+  overflow: auto;
+  max-height: 700px;
   border: 1px solid var(--line);
   border-radius: 14px;
   background: var(--sf);
@@ -461,4 +464,112 @@
 }
 .lv-hero .lv-stats {
   grid-template-columns: repeat(3, 1fr);
+}
+
+.lv-card-blocked rect {
+  stroke: var(--warning);
+}
+.lv-link-blocked {
+  stroke: var(--warning);
+  stroke-dasharray: 4 6;
+}
+
+.hero-flow {
+  padding: 18px 4px 8px;
+  container-type: inline-size;
+}
+.hero-coordinator {
+  display: grid;
+  gap: 4px;
+  width: min(100%, 280px);
+  margin: 0 auto 32px;
+  padding: 16px;
+  text-align: center;
+  border: 1px solid var(--acc);
+  border-radius: 14px;
+  background: var(--acct);
+  position: relative;
+}
+.hero-coordinator > span,
+.hero-coordinator > small {
+  font-size: 12px;
+  color: var(--mut);
+}
+.hero-coordinator::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  height: 20px;
+  border-left: 1px dashed var(--acc);
+  left: 50%;
+}
+.hero-gpus {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.hero-gpu {
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--sf2);
+  position: relative;
+}
+.hero-gpu::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  height: 12px;
+  border-left: 1px dashed var(--acc);
+}
+.hero-gpu > b {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 14px;
+}
+.hero-gpu > span:not(.hero-gpu-dot),
+.hero-gpu > small {
+  font-size: 12px;
+  color: var(--mut);
+}
+.hero-gpu-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mut);
+}
+.hero-gpu.busy .hero-gpu-dot {
+  background: var(--acc);
+  box-shadow: 0 0 0 5px var(--acct);
+}
+.lv-hero .lv-stage {
+  overflow: visible;
+}
+@container (max-width: 380px) {
+  .hero-gpus {
+    grid-template-columns: 1fr;
+  }
+  .hero-gpu {
+    grid-template-columns: 12px 1fr auto;
+    align-items: center;
+    gap: 6px 10px;
+  }
+  .hero-gpu > span:not(.hero-gpu-dot) {
+    grid-column: 2;
+  }
+  .hero-gpu > small {
+    grid-column: 3;
+    grid-row: 1 / 3;
+  }
+  .hero-gpu-dot {
+    grid-row: 1 / 3;
+  }
+  .hero-gpu::before {
+    display: none;
+  }
 }

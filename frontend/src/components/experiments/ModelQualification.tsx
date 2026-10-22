@@ -11,7 +11,13 @@ interface ProbeDevice {
   contributionEnabled: boolean;
   approvalStatus: string;
   allocatedTo?: string | null;
-  selfTest: { recipeVersions?: number[]; qualifiedModelHashes?: string[] };
+  selfTest: {
+    recipeVersions?: number[];
+    qualifiedModelHashes?: string[];
+    qualifiedModelsByNoiseEngine?: Record<string, string[]>;
+    noiseVersion?: string;
+    supportedNoiseEngines?: Record<string, string>;
+  };
 }
 interface Job {
   jobId: string;
@@ -24,6 +30,8 @@ interface Checks {
   referenceHash: string | null;
   jobs: Job[];
 }
+const v2 = 'pcg64_u32_to_f16_normal_quantile_v2';
+const v1 = 'numpy_pcg64_normal_f32_to_f16_v1';
 const terminal = new Set(['COMPLETED', 'CANCELLED', 'FAILED']);
 
 export function ModelQualification({ assetId, manifestHash }: { assetId: string; manifestHash: string }) {
@@ -33,6 +41,7 @@ export function ModelQualification({ assetId, manifestHash }: { assetId: string;
   const cache = useQueryClient();
   const endpoint = '/api/v1/models/' + encodeURIComponent(assetId) + '/qualifications';
   const [deviceId, setDeviceId] = useState('');
+  const [engine, setEngine] = useState(v2);
   const checks = useQuery({
     queryKey: ['model-qualifications', ...scope, assetId],
     queryFn: () => apiGet<Checks>(endpoint),
@@ -46,7 +55,10 @@ export function ModelQualification({ assetId, manifestHash }: { assetId: string;
     refetchInterval: 2500,
   });
   const refresh = () => cache.invalidateQueries({ predicate: (q) => q.queryKey[0] !== 'session' });
-  const start = useMutation({ mutationFn: () => apiPost(endpoint, { deviceId }), onSuccess: refresh });
+  const start = useMutation({
+    mutationFn: () => apiPost(endpoint, { deviceId, noiseEngineVersion: engine }),
+    onSuccess: refresh,
+  });
   const cancel = useMutation({
     mutationFn: (jobId: string) => apiPost(endpoint + '/' + jobId + '/cancel'),
     onSuccess: refresh,
@@ -55,7 +67,11 @@ export function ModelQualification({ assetId, manifestHash }: { assetId: string;
     devices.data?.filter((d) => d.approvalStatus === 'APPROVED' && d.selfTest.recipeVersions?.includes(3)) ?? [];
   const selected = eligible.find((d) => d.deviceId === deviceId);
   const active = checks.data?.jobs.find((j) => !terminal.has(j.status));
-  const ready = selected?.status === 'ONLINE' && selected.contributionEnabled && !selected.allocatedTo;
+  const supportsEngine = selected?.selfTest.supportedNoiseEngines
+    ? Boolean(selected.selfTest.supportedNoiseEngines[engine])
+    : engine === v1;
+  const ready =
+    selected?.status === 'ONLINE' && selected.contributionEnabled && !selected.allocatedTo && supportsEngine;
   const jobStatus = (job: Job) => {
     if (job.status === 'COMPLETED') return t('Model check passed');
     if (job.status === 'CANCELLED') return t('Model check cancelled');
@@ -76,6 +92,18 @@ export function ModelQualification({ assetId, manifestHash }: { assetId: string;
         )}
       </p>
       <label className="fg">
+        {t('Compatibility for')}
+        <select
+          className="sel"
+          value={engine}
+          disabled={Boolean(active)}
+          onChange={(event) => setEngine(event.target.value)}
+        >
+          <option value={v2}>{t('New experiments (v2)')}</option>
+          <option value={v1}>{t('Historical experiments (v1)')}</option>
+        </select>
+      </label>
+      <label className="fg">
         {t('Device for model check')}
         <select
           className="sel"
@@ -93,10 +121,16 @@ export function ModelQualification({ assetId, manifestHash }: { assetId: string;
       </label>
       {selected && (
         <p className="hint">
-          {selected.selfTest.qualifiedModelHashes?.includes(manifestHash)
+          {(
+            selected.selfTest.qualifiedModelsByNoiseEngine?.[engine] ??
+            (selected.selfTest.noiseVersion === engine ? selected.selfTest.qualifiedModelHashes : [])
+          )?.includes(manifestHash)
             ? t('This computer is ready for this model.')
             : t('This computer needs a model check.')}
         </p>
+      )}
+      {selected && !supportsEngine && (
+        <p className="hint">{t("Update and self-test selected device for the run's noise engine")}</p>
       )}
       {!ready && !active && (
         <p className="hint">{t('Choose an online computer with contribution ON and no running job.')}</p>

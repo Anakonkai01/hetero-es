@@ -74,6 +74,7 @@ try {
   const linux = friend.locator('[data-linux-worker]');
   await linux.getByText(command, { exact: true }).waitFor();
   // the script runs `heteroes-worker setup` (pairing included); the card lists the commands for afterwards
+  await linux.locator('summary').click();
   await linux.getByText('heteroes-worker status', { exact: false }).waitFor();
   assert.equal((await friend.request.get(`${base}/downloads/install-worker.sh`)).status(), 200);
   await friend.setViewportSize({ width: 375, height: 900 });

@@ -56,7 +56,7 @@ try {
   await page.goto(base + '/');
   await page.locator('.demo-replay').waitFor();
   await page.getByText('A real run from this lab, replayed').first().waitFor();
-  await page.waitForFunction(() => document.querySelectorAll('.demo-replay .lv-card').length === 3);
+  await page.waitForFunction(() => document.querySelectorAll('.demo-replay .hero-gpu').length === 3);
   results.homeReplaysThreeGpus = true;
 
   // 3. Sign in, open the palette with Ctrl+K and use it.

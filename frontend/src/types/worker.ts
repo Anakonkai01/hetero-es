@@ -5,6 +5,7 @@ export type AdmissionStatus =
 export type WorkerStatus = 'ONLINE' | 'OFFLINE';
 
 export interface WorkerProfile {
+  gpuIndex?: number;
   gpuName: string;
   vramTotalMb: number;
   vramFreeMb?: number;
@@ -14,6 +15,8 @@ export interface WorkerProfile {
 }
 
 export interface Worker {
+  stopReason?: string | null;
+  blockedRunId?: string | null;
   telemetry?: ResourceObservation | null;
   telemetryHistory?: ResourceHistoryPoint[];
   displayName?: string;

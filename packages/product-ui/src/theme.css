@@ -840,3 +840,56 @@ button:disabled {
   margin-bottom: 8px;
   color: var(--ink);
 }
+
+.telemetry-switch {
+  flex-wrap: nowrap;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+}
+.resource-telemetry .telemetry-switch button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.resource-telemetry[data-compact='true'] {
+  font-size: 13px;
+}
+.resource-telemetry[data-compact='true'] .telemetry-metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.resource-telemetry[data-compact='true'] .telemetry-heading {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.resource-telemetry[data-compact='true'] .telemetry-model {
+  font-size: 12px;
+}
+.resource-telemetry[data-compact='true'] .telemetry-metric {
+  padding: 9px;
+}
+.telemetry-energy-heading {
+  min-width: 0;
+}
+.telemetry-energy-heading > * {
+  min-width: 0;
+}
+
+.copy-value button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 9px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--sf);
+  color: var(--acc);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.copy-value button:hover {
+  background: var(--acct);
+}

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useProduct, useObservationTime } from './index';
+import { cpuTemperature, metricUnavailableLabel, type Availability } from './telemetryFacts';
 type N = number | null | undefined;
 export interface ResourceHistoryPoint {
   at: number;
@@ -37,6 +38,7 @@ export interface PowerComponent {
   energy: EnergyObservation;
 }
 export interface ResourceObservation {
+  availability?: Availability;
   sampledAt: number;
   receivedAt?: number;
   sessionStartedAt: number;
@@ -134,14 +136,26 @@ const duration = (n: N) =>
           ? `${(n / 60).toFixed(1)} min`
           : `${n.toFixed(0)} s`;
 const energy = (n: N) => (n == null ? '—' : n >= 1000 ? `${(n / 1000).toFixed(3)} kWh` : `${n.toFixed(3)} Wh`);
-function Metric({ label, value, unit = '', percent }: { label: string; value: string; unit?: string; percent?: N }) {
+function Metric({
+  label,
+  value,
+  unit = '',
+  percent,
+  unavailable = 'No data yet',
+}: {
+  label: string;
+  value: string;
+  unit?: string;
+  percent?: N;
+  unavailable?: string;
+}) {
   const { t } = useProduct();
   return (
     <div className="telemetry-metric">
       <dt>{t(label)}</dt>
       <dd>
-        <span>{value}</span>
-        {unit && <small>{unit}</small>}
+        <span>{value === '—' ? t(unavailable) : value}</span>
+        {unit && value !== '—' && <small>{unit}</small>}
       </dd>
       {percent != null && <progress value={percent} max={100} aria-label={t(label)} />}
     </div>
@@ -168,6 +182,7 @@ export function ResourceTelemetry({
   history?: ResourceHistoryPoint[];
 }) {
   const [view, setView] = useState<'overview' | 'detail'>('overview');
+  const missing = (key: string) => metricUnavailableLabel(observation?.availability, key);
   const now = useObservationTime();
   const { t, preferences } = useProduct();
   const g = observation?.gpu,
@@ -200,12 +215,19 @@ export function ResourceTelemetry({
       <div className="telemetry-sections">
         <Group title="Utilization & memory">
           <dl className="telemetry-metrics">
-            <Metric label="CPU utilization" value={number(h?.cpuPercent)} unit="%" percent={h?.cpuPercent} />
+            <Metric
+              label="CPU utilization"
+              value={number(h?.cpuPercent)}
+              unit="%"
+              percent={h?.cpuPercent}
+              unavailable={missing('cpuPercent')}
+            />
             <Metric
               label="GPU utilization"
               value={number(g?.utilizationPercent)}
               unit="%"
               percent={g?.utilizationPercent}
+              unavailable={missing('gpuUtilizationPercent')}
             />
             <Metric
               label="RAM usage"
@@ -220,46 +242,67 @@ export function ResourceTelemetry({
               )}
               percent={percent(g?.vramUsedMb, g?.vramTotalMb)}
             />
-            <Metric label="GPU temperature" value={number(g?.temperatureC)} unit="°C" />
             <Metric
-              label="CPU package temperature"
-              value={number(h?.sensors?.find((s) => s.group === 'coretemp' && s.label.startsWith('Package'))?.value)}
-              unit="°C"
+              label="Network receive"
+              value={readableBytes(h?.networkRxBytesPerSecond)}
+              unit="/s"
+              unavailable={missing('networkRxBytesPerSecond')}
             />
-          </dl>
-        </Group>
-        <PowerPanel observation={observation} detailed={view === 'detail'} />
-        <Group title="Recent history">
-          <ResourceTrend points={history} />
-        </Group>
-        <Group title="Storage & activity">
-          <div className="telemetry-disks">
-            {observation?.disks.length ? (
-              observation.disks.map((d) => (
-                <div className="telemetry-disk" key={d.label}>
-                  <div>
-                    <b>{t(d.label === 'state' ? 'System / state disk' : 'Artifact disk')}</b>
-                    <span>
-                      {readableBytes(d.freeBytes)} {t('free')}
-                    </span>
-                  </div>
-                  <progress max={d.totalBytes || 1} value={d.usedBytes} aria-label={t('Disk usage')} />
-                  <small>
-                    {readableBytes(d.usedBytes)} / {readableBytes(d.totalBytes)}
-                  </small>
-                </div>
-              ))
-            ) : (
-              <p className="telemetry-caption">{t('Disk metrics unavailable')}</p>
+            <Metric
+              label="Network send"
+              value={readableBytes(h?.networkTxBytesPerSecond)}
+              unit="/s"
+              unavailable={missing('networkTxBytesPerSecond')}
+            />
+            {view === 'detail' && (
+              <>
+                <Metric label="GPU temperature" value={number(g?.temperatureC)} unit="°C" />
+                <Metric
+                  label="CPU package temperature"
+                  value={number(cpuTemperature(h?.sensors))}
+                  unit="°C"
+                  unavailable={missing('cpuTemperatureC')}
+                />
+              </>
             )}
-          </div>
-          <dl className="telemetry-metrics">
-            <Metric label="Network receive" value={readableBytes(h?.networkRxBytesPerSecond)} unit="/s" />
-            <Metric label="Network send" value={readableBytes(h?.networkTxBytesPerSecond)} unit="/s" />
-            <Metric label="Disk read" value={readableBytes(h?.diskReadBytesPerSecond)} unit="/s" />
-            <Metric label="Disk write" value={readableBytes(h?.diskWriteBytesPerSecond)} unit="/s" />
           </dl>
         </Group>
+        {view === 'detail' && (
+          <>
+            <PowerPanel observation={observation} detailed />
+            <Group title="Recent history">
+              <ResourceTrend points={history} />
+            </Group>
+            <Group title="Storage & activity">
+              <div className="telemetry-disks">
+                {observation?.disks.length ? (
+                  observation.disks.map((d) => (
+                    <div className="telemetry-disk" key={d.label}>
+                      <div>
+                        <b>{t(d.label === 'state' ? 'System / state disk' : 'Artifact disk')}</b>
+                        <span>
+                          {readableBytes(d.freeBytes)} {t('free')}
+                        </span>
+                      </div>
+                      <progress max={d.totalBytes || 1} value={d.usedBytes} aria-label={t('Disk usage')} />
+                      <small>
+                        {readableBytes(d.usedBytes)} / {readableBytes(d.totalBytes)}
+                      </small>
+                    </div>
+                  ))
+                ) : (
+                  <p className="telemetry-caption">{t('Disk metrics unavailable')}</p>
+                )}
+              </div>
+              <dl className="telemetry-metrics">
+                <Metric label="Network receive" value={readableBytes(h?.networkRxBytesPerSecond)} unit="/s" />
+                <Metric label="Network send" value={readableBytes(h?.networkTxBytesPerSecond)} unit="/s" />
+                <Metric label="Disk read" value={readableBytes(h?.diskReadBytesPerSecond)} unit="/s" />
+                <Metric label="Disk write" value={readableBytes(h?.diskWriteBytesPerSecond)} unit="/s" />
+              </dl>
+            </Group>
+          </>
+        )}
         {view === 'detail' && (
           <>
             <Group title="CPU detail">
@@ -508,8 +551,18 @@ function PowerPanel({ observation, detailed }: { observation?: ResourceObservati
   return (
     <Group title="Power & energy">
       <dl className="telemetry-metrics">
-        <Metric label="CPU package power" value={number(cpu, 1)} unit="W" />
-        <Metric label="GPU power" value={number(observation?.gpu?.powerDrawW, 1)} unit="W" />
+        <Metric
+          label="CPU package power"
+          value={number(cpu, 1)}
+          unit="W"
+          unavailable={metricUnavailableLabel(observation?.availability, 'cpuPowerW')}
+        />
+        <Metric
+          label="GPU power"
+          value={number(observation?.gpu?.powerDrawW, 1)}
+          unit="W"
+          unavailable={metricUnavailableLabel(observation?.availability, 'gpuPowerW')}
+        />
         <Metric label="Measured component subtotal" value={number(p?.componentSubtotalW, 1)} unit="W" />
         <Metric label="Whole machine (AC)" value={number(p?.wholeMachineW, 1)} unit="W" />
       </dl>

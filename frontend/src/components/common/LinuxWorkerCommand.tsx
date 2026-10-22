@@ -15,12 +15,15 @@ export function LinuxWorkerCommand({ manifest }: { manifest: Manifest | undefine
         {t('Paste this line into a terminal. It needs no administrator password and checks every download.')}
       </p>
       <CopyValue value={command} label="Copy command" />
-      <p className="hint">
-        {t(
-          'It then checks the GPU, asks for a pairing code from Workers → Add a GPU computer and keeps the machine online in the background. Afterwards:',
-        )}
-      </p>
-      <pre className="mono">{`heteroes-worker status\nheteroes-worker on | off\nheteroes-worker doctor`}</pre>
+      <details className="install-details">
+        <summary>{t('Detailed instructions')}</summary>
+        <p className="hint">
+          {t(
+            'It then checks the GPU, asks for a pairing code from Workers → Add a GPU computer and keeps the machine online in the background. Afterwards:',
+          )}
+        </p>
+        <pre className="mono">{`heteroes-worker status\nheteroes-worker on | off\nheteroes-worker doctor`}</pre>
+      </details>
     </div>
   );
 }

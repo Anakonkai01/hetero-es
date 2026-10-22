@@ -62,9 +62,12 @@ export type SchedulerPolicy = 'greedy-tail' | 'greedy';
 export type SyncMode = 'synchronous';
 
 export interface Experiment extends Partial<V3Settings> {
+  noiseEngineVersion?: string;
+  workerIdentities?: Record<string, { name: string; gpuName?: string; gpuIndex?: number }>;
+  workerBlocks?: Record<string, { reason: string; blockedAt?: number }>;
   usageSummary?: UsageSummary;
   allowJoin?: boolean;
-  membershipRequests?: { changeId: string; workerId: string; action: 'JOIN' | 'LEAVE'; actor: string }[];
+  membershipRequests?: { changeId: string; workerId: string; action: 'JOIN' | 'LEAVE' | 'RETRY'; actor: string }[];
   membership?: {
     generation?: number;
     members?: string[];

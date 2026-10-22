@@ -44,7 +44,16 @@ export type Timeline = {
     maxGenerations: number | null;
     candidatesPerGeneration: number | null;
   };
-  workers: { id: string; name?: string | null; started: boolean; alive: boolean | null; unreachableSinceMs?: number | null }[];
+  workers: {
+    id: string;
+    name?: string | null;
+    gpuName?: string | null;
+    started: boolean;
+    alive: boolean | null;
+    unreachableSinceMs?: number | null;
+    stopReason?: string | null;
+    blockedAtMs?: number | null;
+  }[];
   generations: TimelineGeneration[];
   jobs: TimelineJob[];
   marks: TimelineMark[];
@@ -54,7 +63,9 @@ export type Timeline = {
 export type WorkerFrame = {
   id: string;
   name: string | null;
-  state: 'unstarted' | 'starting' | 'idle' | 'busy' | 'offline';
+  gpuName?: string | null;
+  stopReason?: string | null;
+  state: 'unstarted' | 'starting' | 'idle' | 'busy' | 'offline' | 'blocked';
   job?: { candidateId: string; generation: number | null; progress: number; startMs: number };
   done: number;
   failed: number;
@@ -148,13 +159,29 @@ export function frameAt(timeline: Timeline, atMs: number, options: { flightMs?: 
     const frame: WorkerFrame = {
       id: w.id,
       name: w.name ?? null,
+      gpuName: w.gpuName,
+      stopReason: w.stopReason,
       state: 'idle',
       done: succeeded.length,
       failed: failed.length,
       meanSeconds: durations.length ? durations.reduce((a, b) => a + b, 0) / durations.length : null,
       lastReward: succeeded.length ? [...succeeded].sort((a, b) => a.endMs! - b.endMs!).at(-1)!.reward : null,
     };
-    if (isUnreachable(timeline, w, atMs)) {
+    const blockMark = timeline.marks
+      .filter(
+        (m) =>
+          m.workerId === w.id &&
+          m.atMs <= atMs &&
+          ['worker_blocked', 'worker_retry_requested', 'worker_restarted', 'worker_joined'].includes(m.type),
+      )
+      .at(-1);
+    const blocked =
+      blockMark && blockMark.atMs >= (w.blockedAtMs ?? -Infinity)
+        ? blockMark.type === 'worker_blocked'
+        : w.stopReason === 'needs_private_route' && w.blockedAtMs != null && atMs >= w.blockedAtMs;
+    if (blocked) {
+      frame.state = 'blocked';
+    } else if (isUnreachable(timeline, w, atMs)) {
       frame.state = 'offline';
     } else if (current) {
       const expected = current.endMs !== null ? current.endMs - current.startMs : (frame.meanSeconds ?? 5) * 1000;

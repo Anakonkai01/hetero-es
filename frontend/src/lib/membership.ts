@@ -1,7 +1,7 @@
 // Elastic membership (ADR-009): what the lab asked for, and what the coordinator has applied at a generation boundary.
 interface Change {
   workerId: string;
-  action: 'JOIN' | 'LEAVE';
+  action: 'JOIN' | 'LEAVE' | 'RETRY';
 }
 
 export interface MembershipFields {

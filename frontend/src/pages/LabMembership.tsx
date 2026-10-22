@@ -7,7 +7,7 @@ import { useResources } from '../hooks/useAccess';
 
 export function LabMembership() {
   const { t } = useProduct();
-  const { workspace, refreshSession } = useSession();
+  const { workspace, refreshSession, session } = useSession();
   const query = useResources();
   const cache = useQueryClient();
   const [username, setUsername] = useState('');
@@ -165,7 +165,7 @@ export function LabMembership() {
             <span>
               {m.user.displayName} · {m.user.username} · {t(m.role === 'ADMIN' ? 'Administrator' : 'Participant')}
             </span>
-            {admin && (
+            {admin && m.user.userId !== session?.user.userId && (
               <div className="acts">
                 <button
                   className="btn"

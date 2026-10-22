@@ -188,7 +188,10 @@ try {
       coordinator: true,
       gpuName: 'CPU fixture (no GPU computation)',
       vramTotalMb: 1024,
-      noiseVersion: 'numpy_pcg64_normal_f32_to_f16_v1',
+      noiseVersion: 'pcg64_u32_to_f16_normal_quantile_v2',
+      supportedNoiseEngines: {
+        pcg64_u32_to_f16_normal_quantile_v2: 'e80f079ca06fd3e2fcae7b41583aedd8b407e65c196677d5da54c1dc6de02bb4',
+      },
       gpuUUID: 'GPU-00000000-0000-4000-8000-000000000003',
       recipeVersions: [3],
       qualifiedModelHashes: [modelHash],

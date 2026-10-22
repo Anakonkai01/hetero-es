@@ -2,10 +2,13 @@ import { useProduct } from '@heteroes/product-ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { apiGet, apiPost } from '../../api/client';
+import { Pagination } from '../ui/Pagination';
+import { formatDateTime } from '../../lib/format';
 import { useScopeKey } from '../../app/session';
 
 export interface StudyDataset {
   recipeVersion?: number;
+  createdAt?: string;
   columns?: string[];
   datasetId: string;
   name: string;
@@ -62,6 +65,14 @@ export function StudyAssets() {
   const [weightFiles, setWeightFiles] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  const [datasetSearch, setDatasetSearch] = useState('');
+  const [datasetPage, setDatasetPage] = useState(1);
+  const datasets = (data.data ?? []).filter((item) =>
+    `${item.name} ${item.identity.contentHash} ${item.datasetId}`
+      .toLocaleLowerCase()
+      .includes(datasetSearch.toLocaleLowerCase()),
+  );
+  const currentPage = Math.min(datasetPage, Math.max(1, Math.ceil(datasets.length / 10)));
   const publicEntry = location.hostname.endsWith('.trycloudflare.com');
   const perform = async (task: () => Promise<void>) => {
     setBusy(true);
@@ -203,7 +214,14 @@ export function StudyAssets() {
                 )}
                 {(mode === 'all' ? ['all'] : ['train', 'validation', 'test']).map((split) => (
                   <label className="fg" key={split}>
-                    {split}
+                    {t(
+                      {
+                        all: 'All samples',
+                        train: 'Training samples',
+                        validation: 'Validation samples',
+                        test: 'Test samples',
+                      }[split] ?? split,
+                    )}
                     <input
                       key={mode + split}
                       type="file"
@@ -359,15 +377,30 @@ export function StudyAssets() {
           </>
         )}
         <h3>{t('Frozen datasets')}</h3>
-        {data.data?.map((item) => (
-          <div className="demo-item" key={item.datasetId}>
+        <label className="fg">
+          {t('Search datasets')}
+          <input
+            className="inp"
+            type="search"
+            value={datasetSearch}
+            placeholder={t('Name or checksum')}
+            onChange={(event) => {
+              setDatasetSearch(event.target.value);
+              setDatasetPage(1);
+            }}
+          />
+        </label>
+        {datasets.slice((currentPage - 1) * 10, currentPage * 10).map((item) => (
+          <div className="demo-item dataset-item" key={item.datasetId}>
             <b>{item.name}</b>
             <span>
               {item.counts.train} / {item.counts.validation} / {item.counts.test} · {item.splitMode} ·{' '}
-              {item.identity.contentHash.slice(0, 12)}
+              <code title={item.identity.contentHash}>{item.identity.contentHash.slice(0, 12)}</code>
+              {item.createdAt && <> · {formatDateTime(item.createdAt)}</>}
             </span>
           </div>
         ))}
+        <Pagination page={currentPage} total={datasets.length} onChange={setDatasetPage} />
         {data.error && <p role="alert">{data.error.message}</p>}
       </div>
     </section>

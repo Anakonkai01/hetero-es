@@ -5,6 +5,16 @@ import { frameAt, runBounds, advance, applyDelta, replayStart } from '../src/lib
 
 const real = JSON.parse(fs.readFileSync(new URL('./fixtures/run-fifo.timeline.json', import.meta.url), 'utf8'));
 const T0 = 1_000_000;
+
+test('a terminal worker block appears at its event time and an explicit retry clears its replay state', () => {
+  const timeline = synthetic();
+  timeline.workers[0] = { ...timeline.workers[0], stopReason: 'needs_private_route', blockedAtMs: T0 + 4000 };
+  timeline.marks = [{ atMs: T0 + 4000, type: 'worker_blocked', workerId: 'a', generation: 0 }];
+  assert.notEqual(frameAt(timeline, T0 + 3999).workers[0].state, 'blocked');
+  assert.equal(frameAt(timeline, T0 + 4000).workers[0].state, 'blocked');
+  timeline.marks.push({ atMs: T0 + 6000, type: 'worker_retry_requested', workerId: 'a', generation: 0 });
+  assert.notEqual(frameAt(timeline, T0 + 6000).workers[0].state, 'blocked');
+});
 // Two workers, one generation of four candidates: a is faster than b; c0 on a, c1 on b, c2 on a, c3 on b.
 function synthetic(overrides = {}) {
   return {

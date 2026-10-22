@@ -100,7 +100,7 @@ export function LabProfile() {
             </button>
           </form>
         </section>
-        <section className="card">
+        <section className="card" id="security">
           <div className="ch">
             <h2>{t('Security')}</h2>
           </div>

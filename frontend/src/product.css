@@ -2571,3 +2571,342 @@ body {
   font-size: 22px;
   font-variant-numeric: tabular-nums;
 }
+
+/* Candidate14: shared controls and bounded content layouts. */
+.search-select {
+  position: relative;
+  min-width: 0;
+}
+.search-select > button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+}
+.search-select > button > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.select-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 60;
+  width: max(100%, 280px);
+  max-width: min(520px, calc(100vw - 48px));
+  padding: 8px;
+  background: var(--sf);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px #0003;
+}
+.select-popover [role='listbox'] {
+  max-height: 280px;
+  overflow-y: auto;
+  margin-top: 8px;
+}
+.select-popover .option {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: var(--ink);
+}
+.select-popover .option.active,
+.select-popover .option:hover {
+  background: var(--sf2);
+}
+.select-popover .option[aria-selected='true'] {
+  color: var(--acc);
+  background: var(--acct);
+}
+.select-popover .option span:first-child {
+  overflow-wrap: anywhere;
+}
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 16px 20px;
+  border-top: 1px solid var(--line2);
+}
+.pagination .acts {
+  flex-wrap: nowrap;
+}
+.account-control {
+  position: relative;
+  margin-left: auto;
+}
+.account-menu {
+  position: relative;
+}
+.account-menu > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  list-style: none;
+  padding: 5px 10px 5px 5px;
+  cursor: pointer;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--sf);
+  white-space: nowrap;
+}
+.account-menu summary::-webkit-details-marker {
+  display: none;
+}
+.account-menu nav,
+.more-actions[open] > .acts {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 100;
+  display: grid;
+  gap: 4px;
+  min-width: 230px;
+  max-width: calc(100vw - 40px);
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--sf);
+  box-shadow: 0 12px 32px #0003;
+}
+.account-menu nav > *,
+.more-actions .acts > .btn {
+  display: block;
+  text-align: left;
+  padding: 10px 12px;
+  border: 0;
+  color: var(--ink);
+  text-decoration: none;
+  background: transparent;
+  font: inherit;
+  border-radius: 6px;
+}
+.account-menu nav > b {
+  color: var(--mut);
+  font-size: 13px;
+}
+.account-menu nav > a:hover,
+.account-menu nav > button:hover,
+.more-actions .acts > .btn:hover {
+  background: var(--sf2);
+}
+.more-actions {
+  position: relative;
+}
+.more-actions .acts > .btn {
+  width: 100%;
+  white-space: normal;
+}
+.install-card {
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--sf);
+  min-width: 0;
+}
+.install-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.install-heading h3 {
+  margin: 0 0 8px;
+  font-size: 22px;
+}
+.install-heading p {
+  color: var(--mut);
+  margin: 0 0 24px;
+}
+.install-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px;
+  background: var(--sf2);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  max-width: 100%;
+}
+.install-picker .btn {
+  white-space: nowrap;
+  border: 0;
+  background: transparent;
+}
+.install-picker .btn[aria-pressed='true'] {
+  background: var(--sf);
+  color: var(--acc);
+  box-shadow: 0 2px 6px #0001;
+}
+.install-details {
+  margin: 18px 0 0;
+}
+.install-details summary {
+  cursor: pointer;
+  color: var(--acc);
+  padding: 8px 0;
+}
+.linux-worker .copy-value code {
+  white-space: pre;
+  overflow: auto;
+  overflow-wrap: normal;
+  min-width: 0;
+  padding-block: 8px;
+}
+.linux-worker .copy-value {
+  align-items: center;
+}
+.advanced-panel > form {
+  display: grid;
+  gap: 16px;
+  padding: 8px 20px 20px;
+  min-width: 0;
+}
+.advanced-panel > summary {
+  padding: 14px 20px;
+}
+.demo-form input[type='file'] {
+  width: 100%;
+  min-width: 0;
+  padding: 8px;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  background: var(--sf2);
+}
+.demo-form input[type='file']::file-selector-button {
+  margin-right: 12px;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--sf);
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+}
+.sel option {
+  background: var(--sf);
+  color: var(--ink);
+}
+input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--acc);
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+.compare-pick-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  margin-bottom: 8px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--sf);
+  cursor: pointer;
+}
+.run-card {
+  container-type: inline-size;
+}
+.run-card .run-meta dt {
+  overflow-wrap: normal;
+}
+@container (max-width: 350px) {
+  .run-card .run-meta {
+    grid-template-columns: 1fr 1.4fr;
+  }
+  .run-card .run-meta > div:first-child {
+    grid-column: 1 / -1;
+  }
+}
+.dataset-item {
+  gap: 12px;
+  min-width: 0;
+}
+.dataset-item > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--mut);
+  font-size: 13px;
+}
+.artifact-group {
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  overflow: visible;
+}
+.artifact-group [role='table'] {
+  overflow: auto;
+}
+.artifact-group .cols-art {
+  min-width: 580px;
+  grid-template-columns: minmax(160px, 1.7fr) minmax(160px, 1fr) 80px 100px;
+}
+.artifact-group .row > .c:nth-child(2) {
+  white-space: nowrap;
+  font-size: 13px;
+}
+.device-gpu-name {
+  display: block;
+  color: var(--mut);
+  font-size: 13px;
+  font-weight: 400;
+}
+.worker-block {
+  width: 100%;
+}
+.worker-block p {
+  margin: 8px 0;
+}
+@media (max-width: 768px) {
+  .account-name {
+    display: none;
+  }
+  .install-card {
+    padding: 20px;
+  }
+  .dataset-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+@media (max-width: 480px) {
+  .linux-worker .copy-value {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .linux-worker .copy-value button {
+    justify-self: start;
+  }
+  .top {
+    gap: 8px;
+  }
+  .pagination {
+    padding-inline: 12px;
+  }
+}
+.artifact-groups {
+  grid-template-columns: minmax(0, 1fr);
+}
+.artifact-group,
+.artifact-group > [role='table'] {
+  min-width: 0;
+  max-width: 100%;
+}
+.artifact-group-name {
+  overflow-wrap: anywhere;
+}
