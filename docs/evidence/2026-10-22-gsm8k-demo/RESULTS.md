@@ -108,8 +108,8 @@ Predeclared in `PREDECLARATION-tier2c.md` (commit `a1ff45a`, before the run). Me
 | (b1) 5070ti-nhut OFF at index 2, LEAVE within 10 min | **pass**: OFF 07:20:18, LEAVE applied at the boundary, seen after 439 s |
 | (b2) ON + add back at index 3, JOIN + result within 15 min | **FAIL**: the add, one second after the LEAVE applied, was refused `409 Waiting for confirmed GPU release`; the script makes one attempt |
 | 3. (c) 1660s killed at index 1 (07:16:22): `worker_lost`, lab release ≤ 11 min after the later of run end and kill + 10 min | **pass**: `worker_lost` 1660s at 07:44:07 (unreachable since 07:16:49); assignment released with the run's end, 0 reservations, no hand action |
-| 4. 1660s back by its timer (07:56:22): ON by itself, idle, no worker of this run | pending |
-| 5. Parity | pending |
+| 4. 1660s back by its timer (07:56:22): ON by itself, idle, no worker of this run | **pass**: service started 07:56:24 (new boot), the lab turned it ON from Keep ON after restart (no owner action), `processes: []` |
+| 5. Parity | **pass**: `tier2c/parity.json` ALL EQUAL (5 child hashes from the ledger, generation 3 regenerated on the 5070 Ti) |
 
 **Finding 7 (product, fixed in `ec5fdc0`):** an owner who turns a worker OFF and adds it back right after the LEAVE is
 refused, because the device is still reserved by this same run until its stop is confirmed. The lab now accepts that JOIN
