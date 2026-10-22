@@ -1,0 +1,39 @@
+{
+  "version": "0.1.0",
+  "build": "lf1-20261022-r11-candidate10",
+  "privateTrial": true,
+  "nativeWindowsGpuVerified": false,
+  "installers": [
+    {
+      "platform": "windows",
+      "name": "HeteroES Worker-0.1.0-lf1-20261022-r11-candidate10-Windows.exe",
+      "url": "/downloads/HeteroES Worker-0.1.0-lf1-20261022-r11-candidate10-Windows.exe",
+      "sha256": "fa1b9704ac349ead608345d0a0c7fa4376becb37d589635fa54c34659a7f6860",
+      "sizeBytes": 103369670
+    }
+  ],
+  "serverInstallers": [
+    {
+      "platform": "windows",
+      "name": "HeteroES Lab Server-0.1.0-lf1-20261022-r11-candidate10-Windows.exe",
+      "url": "/downloads/HeteroES Lab Server-0.1.0-lf1-20261022-r11-candidate10-Windows.exe",
+      "sha256": "93c7d60ff664de7adf4f93bad523e5446bcd0ad61e65a88e0503146adbae8b75",
+      "sizeBytes": 103867978
+    }
+  ],
+  "publiclyPublished": true,
+  "linuxWorker": {
+    "installer": {
+      "name": "install-worker.sh",
+      "url": "/downloads/install-worker.sh",
+      "sha256": "9417fd814e6ffb2e05572a331a911a587e7ca99354be6dd40fd90a7eec08f507",
+      "sizeBytes": 4097
+    },
+    "bundle": {
+      "name": "heteroes-worker-linux-lf1-20261022-r11-candidate10.tar.gz",
+      "url": "/downloads/heteroes-worker-linux-lf1-20261022-r11-candidate10.tar.gz",
+      "sha256": "3bf3cfd0437625fab55f48b68b8f14197af76f84974c4f2ba897ab48268eeea5",
+      "sizeBytes": 585812
+    }
+  }
+}

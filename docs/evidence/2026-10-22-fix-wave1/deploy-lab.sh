@@ -21,7 +21,7 @@ assert n == 0, f"{n} reservations: the lab is not idle"
 print("lab idle: no reservations")
 EOF
 # 1. stop, then a final consistent copy of the database (written after the stop)
-/usr/bin/python3 -I "$APP/scripts/local-lab.py" stop --python "$PY"
+"$PY" -I "$APP/scripts/local-lab.py" stop --python "$PY"
 "$PY" -c "
 import sqlite3, pathlib
 src = sqlite3.connect(f'file:{pathlib.Path.home()}/.config/heteroes-m2/state/product.sqlite?mode=ro', uri=True)
@@ -34,7 +34,7 @@ mv "$APP/frontend/dist" "$APP/frontend/dist-r11c9"
 cp -a "$PACKAGES/web" "$APP/frontend/dist"
 diff -rq "$PACKAGES/web" "$APP/frontend/dist" && echo "web build in place"
 # 3. start (the schema migration adds devices.keep_on)
-/usr/bin/python3 -I "$APP/scripts/local-lab.py" start --python "$PY"
+"$PY" -I "$APP/scripts/local-lab.py" start --python "$PY"
 sleep 5
 curl -fsS https://lab.heteroes.site/api/v1/health | head -c 300; echo
 # 4. installers: Windows apps and the CLI of this build on the download page
