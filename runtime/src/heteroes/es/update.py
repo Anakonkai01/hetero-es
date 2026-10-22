@@ -1,7 +1,8 @@
 from heteroes.model.schema import ParameterSchema, resolve_tensors
 from heteroes.es.checks import _check_param
 from heteroes.noise.engine import num_chunks, generate_chunk_noise, chunk_length, generator_for_engine
-from heteroes.noise.contracts import ParameterNoiseAddress, DEFAULT_CHUNK_ELEMENTS, ENGINE_VERSION
+from heteroes.noise.contracts import ParameterNoiseAddress, DEFAULT_CHUNK_ELEMENTS, ENGINE_VERSION, ENGINE_V2
+from heteroes.noise import engine_v2_cuda
 from heteroes.es import perturb as _perturb
 from heteroes.noise.parallel import ordered_map, noise_threads
 
@@ -14,6 +15,8 @@ import numbers
 
 
 DEFAULT_ETA = 1e-9
+# engine v2 on the GPU: the noise of this many candidates is made in one launch (memory about 12 bytes per element)
+SEEDS_PER_LAUNCH = 4
 
 
 @dataclass(frozen=True)
@@ -186,7 +189,14 @@ def _apply_coefficients(
                         ).chunk(chunk_index)
                         yield address, chunk_length(numel, chunk_index, chunk_elements)
 
-    noise_stream = ordered_map(lambda task: generate(*task), tasks(), threads=noise_threads(engine))
+    # Engine v2 can be made on the coordinator's GPU itself, with the same bits (engine_v2_cuda); then no CPU stream.
+    on_device = (
+        engine == ENGINE_V2
+        and bool(tensors)
+        and all(engine_v2_cuda.enabled(device) for device in {t.device for t in tensors})
+    )
+    if not on_device:
+        noise_stream = ordered_map(lambda task: generate(*task), tasks(), threads=noise_threads(engine))
 
     # The three statistics of a piece stay on the device and are read once at the end (one sync instead of three per chunk).
     changed_parts, requested_parts, applied_parts = [], [], []
@@ -201,11 +211,35 @@ def _apply_coefficients(
                 chunk = tensor.view(-1)[start : start + n]
                 acc = torch.zeros(n, dtype=torch.float32, device=tensor.device)
 
-                for zi in z_rewards:
-                    parts = [next(noise_stream) for _ in range(last - first)]
-                    eps = parts[0] if len(parts) == 1 else np.concatenate(parts)
-                    # fp16 to the device first, then widen there: widening on the CPU first costs a single-threaded cast of every element
-                    eps = torch.from_numpy(eps).to(device=tensor.device).to(torch.float32)
+                made = []
+                for position, (seed, zi) in enumerate(zip(candidate_seeds, z_rewards)):
+                    if on_device:
+                        if not made:  # the noise of the next few candidates in one launch; still summed in order
+                            batch = candidate_seeds[position : position + SEEDS_PER_LAUNCH]
+                            indices = range(first, last)
+                            lengths = [chunk_length(numel, i, chunk_elements) for i in indices]
+                            addresses = [
+                                ParameterNoiseAddress(
+                                    candidate_seed=s,
+                                    schema_hash=schema_hash,
+                                    parameter_index=entry.index,
+                                    chunk_elements=chunk_elements,
+                                ).chunk(i)
+                                for s in batch
+                                for i in indices
+                            ]
+                            made = list(
+                                engine_v2_cuda.generate_chunks(addresses, lengths * len(batch), tensor.device)
+                                .view(len(batch), n)
+                                .unbind(0)
+                            )
+                        eps = made.pop(0).to(torch.float32)
+                    else:
+                        parts = [next(noise_stream) for _ in range(last - first)]
+                        eps = parts[0] if len(parts) == 1 else np.concatenate(parts)
+                        # fp16 to the device first, then widen there: widening on the CPU first costs a single-threaded
+                        # cast of every element
+                        eps = torch.from_numpy(eps).to(device=tensor.device).to(torch.float32)
 
                     term = eps * float(zi)
                     acc = acc + term

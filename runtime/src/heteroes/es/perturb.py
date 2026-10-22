@@ -1,5 +1,6 @@
-from heteroes.noise.contracts import ParameterNoiseAddress, DEFAULT_CHUNK_ELEMENTS, ENGINE_VERSION
-from heteroes.noise.engine import iter_parameter_noise_chunks, generator_for_engine
+from heteroes.noise.contracts import ParameterNoiseAddress, DEFAULT_CHUNK_ELEMENTS, ENGINE_VERSION, ENGINE_V2
+from heteroes.noise.engine import iter_parameter_noise_chunks, generator_for_engine, num_chunks, chunk_length
+from heteroes.noise import engine_v2_cuda
 from heteroes.model.schema import ParameterSchema, resolve_tensors
 from heteroes.es.checks import _check_param_sigma, SUPPORT_DTYPE
 import math
@@ -41,16 +42,32 @@ def perturb_parameter_(
         numel = flat_param.numel()
         pending, pending_elements, first = [], 0, 0
 
-        def apply_pending():
-            nonlocal pending, pending_elements
-            noise_numpy_f16 = pending[0] if len(pending) == 1 else np.concatenate(pending)
-            param_chunk = flat_param[first : first + noise_numpy_f16.size]
-            eps = torch.from_numpy(noise_numpy_f16).to(param.device)
-
+        def add_(start, eps):
+            param_chunk = flat_param[start : start + eps.numel()]
             scaled = eps.to(torch.float32) * sigma_float_32
             perturbed = param_chunk.to(torch.float32) + scaled
             perturbed = perturbed.to(SUPPORT_DTYPE)  # cast to orginal dtype
             param_chunk.copy_(perturbed)
+
+        if engine == ENGINE_V2 and engine_v2_cuda.enabled(param.device):
+            # the same bits made on the device itself (engine_v2_cuda); the arithmetic below them is unchanged
+            chunk_elements = param_noise_address.chunk_elements
+            n_chunks = num_chunks(numel, chunk_elements)
+            group = max(1, BATCH_ELEMENTS // chunk_elements)
+            for first in range(0, n_chunks, group):
+                indices = range(first, min(first + group, n_chunks))
+                eps = engine_v2_cuda.generate_chunks(
+                    [param_noise_address.chunk(i) for i in indices],
+                    [chunk_length(numel, i, chunk_elements) for i in indices],
+                    param.device,
+                )
+                add_(first * chunk_elements, eps)
+            return
+
+        def apply_pending():
+            nonlocal pending, pending_elements
+            noise_numpy_f16 = pending[0] if len(pending) == 1 else np.concatenate(pending)
+            add_(first, torch.from_numpy(noise_numpy_f16).to(param.device))
             pending, pending_elements = [], 0
 
         for _, start, noise_numpy_f16 in iter_parameter_noise_chunks(param_noise_address, numel, engine=engine):

@@ -521,3 +521,16 @@ the original v1 APIs and byte identities are unchanged. The full byte/address/ta
 reference cache compatibility and temporary `needs_private_route` policy are in
 [ADR-011](adr/ADR-011-integer-cpu-noise-v2.md). This is a finite quantized Gaussian FP16 law with a versioned tail cutoff.
 CPU and cross-machine acceptance receipts must be distinguished from GPU/native Windows and live-lab acceptance.
+
+### 18.1 Engine v2 made on the GPU [D — owner approved 2026-10-23 night; an execution path, not a new engine]
+
+`heteroes/noise/engine_v2_cuda.py` makes the noise of `pcg64_u32_to_f16_normal_quantile_v2` on the CUDA device that
+holds the tensors, with **the same bits** as the CPU engine: the recipe, the chunk addresses, the seeds and the table are
+unchanged, so records made either way are interchangeable and a CPU-only coordinator still replays a GPU run. Only
+integer arithmetic is involved: numpy's PCG64 state (SeedSequence seeding, read with `PCG64(seed).state`) is advanced to
+every 64-bit word of a chunk at once by jump-ahead (`state_m = A_m * state_0 + B_m * inc mod 2**128`, seed-independent
+tables), the XSL-RR output and the threshold count (`searchsorted`, right side) follow. The kernel is compiled at run
+time by NVRTC through `torch.cuda.jiterator` (no `__int128`: 64-bit halves and `__umul64hi`). Before first use on a device
+`selftest` compares fixed chunks (full, odd tail, small chunk size) with the CPU engine; any failure, a CPU tensor or
+`HETEROES_NOISE_DEVICE=cpu` keeps the CPU path. Perturbation and the update use the same FP32 arithmetic as before on the
+generated FP16 noise. V1 and the CUDA engine of section 16 are untouched. Evidence: `docs/evidence/2026-10-23-overnight/`.

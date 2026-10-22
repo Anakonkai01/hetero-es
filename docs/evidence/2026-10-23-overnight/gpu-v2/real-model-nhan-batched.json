@@ -1,0 +1,35 @@
+{
+  "host": "5070ti",
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "torch": "2.13.0+cu132",
+  "seeds": 48,
+  "cpu": [
+    {
+      "perturbSeconds": 0.7037141819891986,
+      "updateSeconds": 20.58807491301559,
+      "perturbedSha256": "7c4df2413dce400bf046212759aebd660c64267c4eb95e7e3de1fb27346fc8a3",
+      "updatedSha256": "e063439028673ee7253e8839d6a369ffedaf14f7b65c4a817c832cacca338cb5"
+    },
+    {
+      "perturbSeconds": 0.6648538369918242,
+      "updateSeconds": 20.22668800401152,
+      "perturbedSha256": "7c4df2413dce400bf046212759aebd660c64267c4eb95e7e3de1fb27346fc8a3",
+      "updatedSha256": "e063439028673ee7253e8839d6a369ffedaf14f7b65c4a817c832cacca338cb5"
+    }
+  ],
+  "cuda": [
+    {
+      "perturbSeconds": 0.1401409530080855,
+      "updateSeconds": 3.2008623639994767,
+      "perturbedSha256": "7c4df2413dce400bf046212759aebd660c64267c4eb95e7e3de1fb27346fc8a3",
+      "updatedSha256": "e063439028673ee7253e8839d6a369ffedaf14f7b65c4a817c832cacca338cb5"
+    },
+    {
+      "perturbSeconds": 0.08655002599698491,
+      "updateSeconds": 3.1873354650160763,
+      "perturbedSha256": "7c4df2413dce400bf046212759aebd660c64267c4eb95e7e3de1fb27346fc8a3",
+      "updatedSha256": "e063439028673ee7253e8839d6a369ffedaf14f7b65c4a817c832cacca338cb5"
+    }
+  ],
+  "equal": true
+}
