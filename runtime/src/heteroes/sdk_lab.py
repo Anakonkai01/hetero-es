@@ -5,7 +5,7 @@ A shared lab from a notebook (owner 2026-10-22: "the notebook is the main way to
     from heteroes.sdk_lab import Dataset, Lab, Model
 
     lab = Lab.connect("https://lab.heteroes.site", username="me")        # the password is asked, never stored
-    model = Model.from_hf("Qwen/Qwen2.5-0.5B-Instruct")                   # pinned to the commit it resolves to
+    model = Model.from_hf("org/model")                                   # pinned to the commit it resolves to
     data = Dataset.from_rows(train=train_rows, validation=val_rows, test=test_rows)   # rows from your own loader
     print(lab.suggest(model, data, max_new_tokens=256))                  # batch and chunks from each GPU's numbers
     run = ESTrainer(ESConfig(model=model, dataset=data, ...), reward_func=my_reward).submit(

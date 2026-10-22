@@ -12,6 +12,7 @@ SHARED_MODULES = (
     "v3/options.py",
     "v3/scoring.py",
     "product/__init__.py",
+    "product/chunk_memory.py",
     "product/cpu_coordinator.py",
     "product/model_qualification.py",
     "product/qualification_v3.py",

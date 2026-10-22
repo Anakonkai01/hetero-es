@@ -302,8 +302,6 @@ export const translations: Record<string, string> = {
   'Pair this device': 'Ghép máy này',
   'Device name': 'Tên máy',
   Delete: 'Xóa',
-  Cancel: 'Hủy',
-  Save: 'Lưu',
   Rename: 'Đổi tên',
   'Worker ID': 'Mã Worker',
   'Pair device': 'Ghép máy',

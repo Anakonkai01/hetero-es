@@ -1,0 +1,127 @@
+........................................................................ [  2%]
+........................................................................ [  5%]
+........F.F.F...............................................ssssssssssss [  7%]
+sssssssssss....................................s........................ [ 10%]
+......s.....................................................s....s...... [ 13%]
+.....................sss..................................s............. [ 15%]
+...sssss................................................................ [ 18%]
+........................................................................ [ 21%]
+........................sssssss.....................s................... [ 23%]
+........................................................................ [ 26%]
+........................................................................ [ 28%]
+........................................................................ [ 31%]
+........................................................................ [ 34%]
+........................................................................ [ 36%]
+........................................................................ [ 39%]
+........................................................................ [ 42%]
+.........s.............................................................. [ 44%]
+........................................................................ [ 47%]
+........................................................................ [ 50%]
+........................................................................ [ 52%]
+........................................................................ [ 55%]
+........................................................................ [ 57%]
+........................................................................ [ 60%]
+........................................................................ [ 63%]
+........................................................................ [ 65%]
+........................................................................ [ 68%]
+...................sss.................................................. [ 71%]
+....s...........................................s....................... [ 73%]
+.........sssssssssssssssssssssssssssssssssssssssssssssssss.............. [ 76%]
+........................................................................ [ 79%]
+.......................................................sss.............. [ 81%]
+........................................................................ [ 84%]
+........................................................................ [ 86%]
+........................................................................ [ 89%]
+........................................................................ [ 92%]
+........................................................................ [ 94%]
+........................................................................ [ 97%]
+.....................................................................    [100%]
+=================================== FAILURES ===================================
+_______________________ test_the_dashboard_draws_a_frame _______________________
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-404/test_the_dashboard_draws_a_fra0')
+
+    def test_the_dashboard_draws_a_frame(tmp_path):
+>       from heteroes.demo.dashboard import Dashboard
+
+tests/demo/test_demo_state.py:123: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    """Draw a Frame as one figure: who works on what (network), when (per-device timeline), how the rewards move, and how the
+    candidates of the newest generation scored. `live` refreshes it in a notebook; `render_video` turns recorded frames into
+    MP4/GIF.
+    """
+    
+    import math
+    import shutil
+    
+>   import matplotlib
+E   ModuleNotFoundError: No module named 'matplotlib'
+
+src/heteroes/demo/dashboard.py:9: ModuleNotFoundError
+__ test_a_ledger_join_draws_a_rejoin_and_a_process_and_ledger_pair_draws_once __
+
+    def test_a_ledger_join_draws_a_rejoin_and_a_process_and_ledger_pair_draws_once():
+        # a re-added member has no worker_joined (RESULTS.md finding 9): its JOIN is the coordinator's membership_changed
+        events = [
+            {"eventType": "worker_left", "details": {"t": (T0 + 35_000) / 1000, "worker_id": "slow"}},
+            {
+                "eventType": "membership_changed",
+                "details": {"t": (T0 + 36_000) / 1000, "workerId": "slow", "action": "LEAVE"},
+            },
+            {
+                "eventType": "membership_changed",
+                "details": {"t": (T0 + 60_000) / 1000, "workerId": "slow", "action": "JOIN"},
+            },
+        ]
+        frame = build_frame(timeline(), events)
+        assert [(m["atS"], m["worker"], m["change"]) for m in frame.membership] == [
+            (35.0, "slow", "left"),
+            (60.0, "slow", "joined"),
+        ]
+    
+>       from heteroes.demo.replay_page import recording
+
+tests/demo/test_demo_state.py:172: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/heteroes/demo/replay_page.py:10: in <module>
+    from heteroes.demo.dashboard import SERIES
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    """Draw a Frame as one figure: who works on what (network), when (per-device timeline), how the rewards move, and how the
+    candidates of the newest generation scored. `live` refreshes it in a notebook; `render_video` turns recorded frames into
+    MP4/GIF.
+    """
+    
+    import math
+    import shutil
+    
+>   import matplotlib
+E   ModuleNotFoundError: No module named 'matplotlib'
+
+src/heteroes/demo/dashboard.py:9: ModuleNotFoundError
+______________ test_a_notebook_gets_the_dashboard_as_a_png_image _______________
+
+    def test_a_notebook_gets_the_dashboard_as_a_png_image():
+>       from heteroes.demo.dashboard import Dashboard, png
+
+tests/demo/test_demo_state.py:186: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    """Draw a Frame as one figure: who works on what (network), when (per-device timeline), how the rewards move, and how the
+    candidates of the newest generation scored. `live` refreshes it in a notebook; `render_video` turns recorded frames into
+    MP4/GIF.
+    """
+    
+    import math
+    import shutil
+    
+>   import matplotlib
+E   ModuleNotFoundError: No module named 'matplotlib'
+
+src/heteroes/demo/dashboard.py:9: ModuleNotFoundError
+=========================== short test summary info ============================
+FAILED tests/demo/test_demo_state.py::test_the_dashboard_draws_a_frame - Modu...
+FAILED tests/demo/test_demo_state.py::test_a_ledger_join_draws_a_rejoin_and_a_process_and_ledger_pair_draws_once
+FAILED tests/demo/test_demo_state.py::test_a_notebook_gets_the_dashboard_as_a_png_image
+3 failed, 2628 passed, 102 skipped in 214.10s (0:03:34)
