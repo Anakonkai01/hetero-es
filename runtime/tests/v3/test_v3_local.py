@@ -89,7 +89,13 @@ def check_run(out, assets, experiment_id="local"):
             stored.record.verify_coefficients(plan["coefficientRule"]["eta"])
             seeds, coefficients = stored.record.update_inputs()
             apply_coefficients_(
-                model, schema, seeds, coefficients, stored.record.alpha, recipe["noise"]["chunkElements"]
+                model,
+                schema,
+                seeds,
+                coefficients,
+                stored.record.alpha,
+                recipe["noise"]["chunkElements"],
+                engine=recipe["noise"]["engine"],
             )
             assert model_weights_sha256(model, schema) == stored.child_weights_sha256
             children.append(stored.child_weights_sha256)

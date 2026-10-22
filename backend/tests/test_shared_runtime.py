@@ -27,7 +27,11 @@ def test_server_packager_selects_only_cpu_shared_modules():
     names = {name for _, name in sources}
     assert "heteroes/product/telemetry.py" in names
     assert "heteroes/study/models.py" in names
-    assert not any(name.endswith("/runner.py") or "/noise/" in name for name in names)
+    assert not any(name.endswith("/runner.py") for name in names)
+    assert {name for name in names if "/noise/" in name} == {
+        "heteroes/noise/__init__.py",
+        "heteroes/noise/contracts.py",
+    }  # identities only; never NumPy, generators or numerical execution
     assert all(source.is_file() for source, _ in sources)
 
 

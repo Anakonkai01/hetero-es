@@ -351,7 +351,13 @@ class Coordinator:
         ):  # the engine that made the noise of the candidates makes that of the update
             return apply_coefficients_cuda_(self.model, self.schema, seeds, coefficients, record.alpha)
         return apply_coefficients_(
-            self.model, self.schema, seeds, coefficients, record.alpha, self.recipe.chunk_elements
+            self.model,
+            self.schema,
+            seeds,
+            coefficients,
+            record.alpha,
+            self.recipe.chunk_elements,
+            engine=self.recipe.engine_version,
         )
 
     def recover(self) -> int:

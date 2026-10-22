@@ -102,6 +102,16 @@ def test_file_backed_recovery_also_works_without_usage_receipts(product_assets, 
     assert verify_point(point)["formatVersion"] == 2
 
 
+def test_recovery_preserves_terminal_worker_blocks(product_assets, tmp_path):
+    root = tmp_path / "source"
+    _, run, summary = completed_run(product_assets, root)
+    blocks = {"fixture": {"reason": "needs_private_route", "blockedAt": 123.0}}
+    write_json(root / "worker-blocks.json", blocks)
+    point = capture_point(root, summary, run.to_dict(), {"interval": 1, "retain": 3})
+    restored = restore_point(point, tmp_path / "replacement")
+    assert read_json(restored / "worker-blocks.json") == blocks
+
+
 def test_replacement_preserves_v3_inputs_selection_and_faults(product_assets, tmp_path):
     root = tmp_path / "source"
     cfg, run, summary = completed_run(product_assets, root)

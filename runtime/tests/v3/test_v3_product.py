@@ -313,6 +313,30 @@ def test_worker_rebuild_rejects_a_different_schema(product_assets, tmp_path):
         prepare_run(cfg, tmp_path, "cpu", declared=declared)
 
 
+def test_resume_and_worker_rebuild_take_saved_engine_not_new_default(product_assets, tmp_path):
+    from heteroes.noise.contracts import ENGINE_VERSION, ENGINE_V2
+    from heteroes.product.v3 import prepare_run
+
+    cfg = product_config(product_assets, tmp_path)
+    _, old, _ = prepare_run({**cfg, "noiseEngineVersion": ENGINE_VERSION}, tmp_path, "cpu")
+    _, resumed, _ = prepare_run(cfg, tmp_path, "cpu")
+    assert old.recipe == resumed.recipe
+    assert resumed.engine_version == ENGINE_VERSION
+    _, worker, _ = prepare_run(
+        {**cfg, "noiseEngineVersion": ENGINE_V2}, tmp_path / "worker", "cpu", declared=old.recipe
+    )
+    assert worker.recipe == old.recipe
+
+
+def test_new_managed_run_pins_v2_explicitly(product_assets, tmp_path):
+    from heteroes.noise.contracts import ENGINE_V2
+    from heteroes.product.v3 import prepare_run
+
+    cfg = product_config(product_assets, tmp_path, noiseEngineVersion=ENGINE_V2)
+    _, run, _ = prepare_run(cfg, tmp_path, "cpu")
+    assert run.engine_version == ENGINE_V2
+
+
 def test_agent_prepares_v3_columns_from_a_verified_transfer(product_assets, tmp_path, monkeypatch):
     from types import SimpleNamespace
     from heteroes.study.data import sha

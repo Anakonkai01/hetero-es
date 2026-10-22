@@ -513,3 +513,11 @@ remain unchanged.
 | Notebook `es_update_direction` | FP16 direction accumulation | §8 |
 | Notebook perturb / reconstruct / update | CUDA `torch.Generator` noise, duplicated in several functions | §4 |
 | Notebook `run_es_generation` | Reward-after measured on the same 16 training prompts (no held-out set) | out of scope here |
+
+## 18. Integer CPU noise v2 [D — owner approved 2026-10-22]
+
+New Recipe v3 lab/SDK runs pin `pcg64_u32_to_f16_normal_quantile_v2`. Historical recipes keep their recorded engine;
+the original v1 APIs and byte identities are unchanged. The full byte/address/table contract, engine-specific admission,
+reference cache compatibility and temporary `needs_private_route` policy are in
+[ADR-011](adr/ADR-011-integer-cpu-noise-v2.md). This is a finite quantized Gaussian FP16 law with a versioned tail cutoff.
+CPU and cross-machine acceptance receipts must be distinguished from GPU/native Windows and live-lab acceptance.

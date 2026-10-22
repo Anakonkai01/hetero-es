@@ -112,6 +112,16 @@ class WindowsDetail:
                 result[target].append(item)
                 current[key] = (read, write)
             result[target] = result[target][:32]
+            read_rate = "rxBytesPerSecond" if prefix == "net" else "readBytesPerSecond"
+            write_rate = "txBytesPerSecond" if prefix == "net" else "writeBytesPerSecond"
+            # Warmup/reset/new interfaces are unknown, never fabricated zero.
+            if result[target] and all(read_rate in item and write_rate in item for item in result[target]):
+                result["networkRxBytesPerSecond" if prefix == "net" else "diskReadBytesPerSecond"] = sum(
+                    item[read_rate] for item in result[target]
+                )
+                result["networkTxBytesPerSecond" if prefix == "net" else "diskWriteBytesPerSecond"] = sum(
+                    item[write_rate] for item in result[target]
+                )
         for row in rows(raw.get("process"))[:20]:
             pid = number(row.get("IDProcess"))
             ram = number(row.get("WorkingSet"))

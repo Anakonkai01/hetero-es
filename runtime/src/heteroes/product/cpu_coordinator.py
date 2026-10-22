@@ -11,13 +11,17 @@ UPDATE_EVIDENCE = {
     "parentSha256": "d1254dcd275cbbd842bfd1b91c3597e3ccef79712811221e03a007c15ca3d9e2",
     "updatedSha256": "0646ab4cabef88213c7803683b4951e240b1da6687b7d33c7eb42b7859504b10",
 }
+UPDATE_EVIDENCE_V2 = {
+    **UPDATE_EVIDENCE,
+    "updatedSha256": "ddcb2770a92a7dd24f9f02625a8687cc9c69f8a74896ee74351c2d70f76204b5",
+}
 
 
 def coordinator_only(profile):
     return profile.get("runtimeProfile") == PROFILE
 
 
-def check_update():
+def check_update(engine=None):
     import hashlib
 
     import numpy as np
@@ -26,8 +30,11 @@ def check_update():
     from heteroes.es.update import apply_coefficients_
     from heteroes.model.loading import check_noise_selftest
     from heteroes.model.schema import build_parameter_schema
+    from heteroes.noise.contracts import ENGINE_VERSION, ENGINE_V2
 
-    check_noise_selftest()
+    engine = ENGINE_VERSION if engine is None else engine
+    check_noise_selftest(engine)
+    expected = UPDATE_EVIDENCE_V2 if engine == ENGINE_V2 else UPDATE_EVIDENCE
     baseline = ((np.arange(200_003, dtype=np.int32) % 251 - 125) / 4096).astype(np.float16)
     observed = []
     for _ in range(2):
@@ -35,7 +42,7 @@ def check_update():
         model.register_parameter("w", torch.nn.Parameter(torch.from_numpy(baseline.copy())))
         schema = build_parameter_schema(model)
         parent = hashlib.sha256(model.w.detach().numpy().tobytes()).hexdigest()
-        apply_coefficients_(model, schema, [5, 6, 7], [1.0, -0.5, 0.25], 0.05, 65536)
+        apply_coefficients_(model, schema, [5, 6, 7], [1.0, -0.5, 0.25], 0.05, 65536, engine=engine)
         observed.append(
             {
                 "version": 1,
@@ -44,9 +51,9 @@ def check_update():
                 "updatedSha256": hashlib.sha256(model.w.detach().numpy().tobytes()).hexdigest(),
             }
         )
-    if any(value != UPDATE_EVIDENCE for value in observed):
+    if any(value != expected for value in observed):
         raise ValueError("CPU coordinator update known-answer mismatch")
-    return dict(UPDATE_EVIDENCE)
+    return dict(expected)
 
 
 def qualify(emit=lambda event: None):
@@ -58,17 +65,22 @@ def qualify(emit=lambda event: None):
 
     emit({"stage": "update_known_answer"})
     evidence = check_update()
+    from heteroes.model.loading import checked_cpu_noise_engines
+    from heteroes.noise.contracts import ENGINE_V2
+
+    v2_evidence = check_update(ENGINE_V2)
     return {
         "passed": True,
         "coordinator": True,
         "gpuName": "CPU coordinator",
         "vramTotalMb": 0,
         "noiseVersion": "numpy_pcg64_normal_f32_to_f16_v1",
+        "supportedNoiseEngines": checked_cpu_noise_engines(),
         "platform": "windows" if sys.platform == "win32" else "linux",
         "runtimeProfile": PROFILE,
         "recipeVersions": [3],
         "qualifiedModelHashes": [],
-        "compatibility": {"updateKnownAnswer": evidence},
+        "compatibility": {"updateKnownAnswer": evidence, "updateKnownAnswerV2": v2_evidence},
         "updateSecondsPerSeed": None,
         "environment": {**environment_info("cpu"), **source_identity(Path(__file__).resolve().parents[1])},
     }

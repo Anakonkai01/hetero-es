@@ -227,8 +227,8 @@ def test_running_out_of_memory_while_evaluating_is_an_oom_failure_and_the_model_
 def test_running_out_of_memory_while_perturbing_is_an_oom_failure_and_the_model_is_restored(fx, monkeypatch):
     real = executor_module.perturb_model_
 
-    def half_way_then_oom(model, schema, seed, sigma, chunk):
-        real(model, schema, seed, sigma, chunk)  # the weights HAVE changed when it fails
+    def half_way_then_oom(model, schema, seed, sigma, chunk, **kwargs):
+        real(model, schema, seed, sigma, chunk, **kwargs)  # the weights HAVE changed when it fails
         raise torch.cuda.OutOfMemoryError("CUDA out of memory")
 
     monkeypatch.setattr(executor_module, "perturb_model_", half_way_then_oom)

@@ -24,7 +24,7 @@ from pathlib import Path
 from heteroes.executor import CandidateExecutor
 from heteroes.http_transport import BulkUnavailableError, HttpClient, TransportError, UnauthorizedError
 from heteroes.model.weights_io import WeightsFileError, load_weights_, sha256_of_file
-from heteroes.noise.contracts import ENGINE_VERSION
+from heteroes.noise.contracts import ENGINE_VERSION, CPU_ENGINES
 from heteroes.profile_setup import noise_ops
 from heteroes.replay import ReplayFailed, ReplayPolicy, fetch_chain, replay_chain
 from heteroes.worker import StepKind, Worker
@@ -249,7 +249,7 @@ class WorkerRuntime:
                 return self.sync(job)
             recipe = self.executor.recipe
             _, apply_update = noise_ops(
-                recipe.engine_version, recipe.chunk_elements if recipe.engine_version == ENGINE_VERSION else None
+                recipe.engine_version, recipe.chunk_elements if recipe.engine_version in CPU_ENGINES else None
             )
             verify = self._catch_ups_since_check + 1 >= self.replay.verify_every
             summary = replay_chain(self.executor, chain, apply_update, verify)

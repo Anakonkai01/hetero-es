@@ -12,8 +12,8 @@ requires-python = ">=3.12"
 heteroes = "heteroes.v3.__main__:main"
 
 [project.optional-dependencies]
-# the ledger tests that search (Hypothesis) and simulate time (SimPy); without them those tests are skipped
-test = ["pytest", "hypothesis", "simpy"]
+# CPU tests include ledger simulation, offline plots and notebook contract checks.
+test = ["pytest", "hypothesis", "simpy", "matplotlib", "ipython"]
 # the LoRA weight space of Recipe v3 (ADR-008); not yet in the desktop worker profile
 lora = ["peft==0.21.2"]
 

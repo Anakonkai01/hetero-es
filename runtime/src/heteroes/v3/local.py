@@ -117,8 +117,12 @@ def prepare(config, out_dir, device="cpu", initial_adapter=None):
     rule, coefficient_function = _coefficient_rule(config)
     sampler, sampler_function = _sampler(config)
     data_choices = {**config["data"], **({"sampler": sampler} if sampler is not None else {})}
+    frozen_path = out / "recipe.json"
+    choices = {**config, **data_choices, "scorerSpec": scorer_spec, "coefficientRule": rule}
+    if frozen_path.exists():
+        choices["noiseEngineVersion"] = json.loads(frozen_path.read_text())["noise"]["engine"]
     recipe, plan = build_documents(
-        {**config, **data_choices, "scorerSpec": scorer_spec, "coefficientRule": rule},
+        choices,
         model_files=files,
         revision=revision,
         schema_hash=schema.hash,

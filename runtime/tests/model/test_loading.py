@@ -179,7 +179,7 @@ def test_the_self_test_that_runs_is_the_one_of_the_engine_of_the_recipe(monkeypa
     import heteroes.model.loading as loading
 
     ran = []
-    monkeypatch.setattr(loading, "check_noise_selftest", lambda: ran.append("cpu") or 0.5)
+    monkeypatch.setattr(loading, "check_noise_selftest", lambda engine=None: ran.append("cpu") or 0.5)
     monkeypatch.setattr(loading, "check_cuda_noise_selftest", lambda device="cuda": ran.append(f"cuda:{device}"))
     loaded = toy_loaded()
 

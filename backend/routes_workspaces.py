@@ -236,6 +236,8 @@ def install_routes(app, store, scoped, active, workspace_admin):
             ).fetchone()[0]
             if others == 0:
                 raise HTTPException(409, "Keep at least one workspace administrator")
+        if user_id == current["userId"] and (role is None or (old[0] == "ADMIN" and role != "ADMIN")):
+            raise HTTPException(409, "You cannot remove your own membership or administrator role")
         if role:
             db.execute(
                 "UPDATE memberships SET role=? WHERE workspace_id=? AND user_id=?", (role, workspace_id, user_id)

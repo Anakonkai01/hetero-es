@@ -16,6 +16,8 @@ def main():
     )
     check_recipe_selftest(recipe, "cuda")
     gpu = handle({"action": "probe"})
+    from heteroes.model.loading import checked_cpu_noise_engines
+
     print(
         json.dumps(
             {
@@ -24,7 +26,9 @@ def main():
                 "gpuName": gpu["gpuName"],
                 "vramTotalMb": gpu["vramTotalMb"],
                 "gpuUUID": gpu["gpuUUID"],
+                "gpuIndex": gpu["gpuIndex"],
                 "noiseVersion": "numpy_pcg64_normal_f32_to_f16_v1",
+                "supportedNoiseEngines": checked_cpu_noise_engines(),
                 "environment": environment_info("cuda"),
             }
         )

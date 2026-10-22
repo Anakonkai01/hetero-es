@@ -1,6 +1,6 @@
 """CPU-only device control. Connectivity is never evidence of process death."""
 
-from .constants import CORE_COMMAND_KINDS, COMMAND_KINDS, DESKTOP_V3_REFERENCE
+from .constants import CORE_COMMAND_KINDS, COMMAND_KINDS, DESKTOP_V3_REFERENCE, DESKTOP_V3_REFERENCE_V2
 
 from .policies import FiniteStrict
 import hashlib
@@ -12,7 +12,8 @@ from fastapi import HTTPException
 from pydantic import Field, field_validator, model_validator
 from .monitor_models import Core, Interface, BlockDevice, HostProcess, GPUProcess, Sensor, Power
 from .addresses import endpoint, is_private
-from heteroes.product.cpu_coordinator import coordinator_only, UPDATE_EVIDENCE
+from heteroes.product.cpu_coordinator import coordinator_only, UPDATE_EVIDENCE, UPDATE_EVIDENCE_V2
+from heteroes.noise.contracts import CPU_NOISE_FINGERPRINTS
 
 
 def command_capabilities(value):
@@ -38,16 +39,39 @@ class SelfTest(FiniteStrict):
     coordinator: bool = False
     gpuName: str = Field(max_length=200)
     vramTotalMb: int = Field(ge=0, le=1000000)
-    noiseVersion: Literal["numpy_pcg64_normal_f32_to_f16_v1"]
+    noiseVersion: Literal["numpy_pcg64_normal_f32_to_f16_v1", "pcg64_u32_to_f16_normal_quantile_v2"]
+    supportedNoiseEngines: dict[str, str] | None = None
     environment: dict = Field(default_factory=dict)
     platform: Literal["linux", "windows"] = "linux"
     runtimeProfile: str = Field(default="legacy", max_length=100)
     compatibility: dict = Field(default_factory=dict)
     gpuUUID: str | None = None
+    gpuIndex: int | None = Field(default=None, ge=0, le=1024)
     recipeVersions: list[Literal[1, 2, 3]] = Field(default_factory=lambda: [1], max_length=3)
     qualifiedModelHashes: list[str] = Field(default_factory=list, max_length=20)
+    qualifiedModelsByNoiseEngine: dict[str, list[str]] | None = None
+
+    @field_validator("qualifiedModelsByNoiseEngine")
+    @classmethod
+    def qualified_engines(cls, value):
+        if value is not None and any(
+            engine not in CPU_NOISE_FINGERPRINTS
+            or len(hashes) > 100
+            or any(not re.fullmatch("[a-f0-9]{64}", h) for h in hashes)
+            for engine, hashes in value.items()
+        ):
+            raise ValueError("Invalid engine-bound model qualification")
+        return value
+
     # measured by the self-test: the coordinator's update time per seed (the lab shows seconds per generation from it)
     updateSecondsPerSeed: float | None = Field(default=None, ge=0, le=3600)
+
+    @field_validator("supportedNoiseEngines")
+    @classmethod
+    def known_noise_engines(cls, value):
+        if value is not None and any(CPU_NOISE_FINGERPRINTS.get(k) != v for k, v in value.items()):
+            raise ValueError("Noise engine fingerprint differs from the known engine")
+        return value
 
     @field_validator("gpuUUID")
     @classmethod
@@ -63,7 +87,18 @@ class SelfTest(FiniteStrict):
 
     @model_validator(mode="after")
     def native_admission(self):
+        # Other engine/model qualifications come from the lab's verified cache, never an unbound device claim.
+        if self.qualifiedModelsByNoiseEngine and any(
+            engine != self.noiseVersion or not set(hashes) <= set(self.qualifiedModelHashes)
+            for engine, hashes in self.qualifiedModelsByNoiseEngine.items()
+        ):
+            raise ValueError("Model qualifications must match the reported reference engine and models")
         if coordinator_only(self.model_dump()):
+            expected = {"updateKnownAnswer": UPDATE_EVIDENCE}
+            from heteroes.noise.contracts import ENGINE_V2
+
+            if self.supportedNoiseEngines and ENGINE_V2 in self.supportedNoiseEngines:
+                expected["updateKnownAnswerV2"] = UPDATE_EVIDENCE_V2
             if (
                 not self.passed
                 or not self.coordinator
@@ -71,7 +106,7 @@ class SelfTest(FiniteStrict):
                 or self.vramTotalMb != 0
                 or self.recipeVersions != [3]
                 or self.qualifiedModelHashes
-                or self.compatibility != {"updateKnownAnswer": UPDATE_EVIDENCE}
+                or self.compatibility != expected
             ):
                 raise ValueError("CPU coordinator requires the pinned update known-answer profile")
             return self
@@ -146,7 +181,9 @@ class SelfTest(FiniteStrict):
         2026-10-20-any-coordinator); a LoRA run is refused at experiment creation because Windows would create another
         initial adapter.
         """
-        reference = DESKTOP_V3_REFERENCE
+        from heteroes.noise.contracts import ENGINE_V2
+
+        reference = DESKTOP_V3_REFERENCE_V2 if self.noiseVersion == ENGINE_V2 else DESKTOP_V3_REFERENCE
         compatibility = self.compatibility
         if (
             self.recipeVersions != [3]
@@ -245,7 +282,7 @@ class ProcessReport(FiniteStrict):
     workerAlive: bool | None = None
     ready: bool = False
     recoveryIndex: int = Field(default=0, ge=0, le=1)
-    launch: int = Field(default=0, ge=0, lt=20)  # a restarted worker's launch (run_supervisor.MAX_LAUNCHES)
+    launch: int = Field(default=0, ge=0, lt=1_000_000)  # unique process/command identity, including explicit retries
     events: list[dict] = Field(default_factory=list, max_length=200)
 
 
@@ -324,7 +361,12 @@ class TransportObservation(FiniteStrict):
     pendingEvents: int = Field(default=0, ge=0)
 
 
+class MetricAvailability(FiniteStrict):
+    status: Literal["warming_up", "unsupported", "permission_denied", "error", "unavailable"]
+
+
 class Telemetry(FiniteStrict):
+    availability: dict[str, MetricAvailability] | None = Field(default=None, max_length=32)
     power: Power | None = None
     transport: TransportObservation | None = None
     sampledAt: float = Field(ge=0)
@@ -364,4 +406,4 @@ class WorkerCommand(FiniteStrict):
     workerId: str
     action: Literal["start", "poll", "stop", "probe"]
     recoveryIndex: int = Field(default=0, ge=0, le=1)
-    launch: int = Field(default=0, ge=0, lt=20)
+    launch: int = Field(default=0, ge=0, lt=1_000_000)

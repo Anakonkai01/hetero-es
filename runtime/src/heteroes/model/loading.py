@@ -35,12 +35,31 @@ class LoadedModel:
     model_id: str = MODEL_ID
 
 
-def check_noise_selftest() -> float:
+def check_noise_selftest(engine: str = ENGINE_VERSION) -> float:
     """This machine must generate the canonical noise bytes, or nothing it computes can be trusted. Returns the seconds it took."""
     start = time.perf_counter()
-    if compute_noise_fingerprint() != EXPECTED_NOISE_FINGERPRINT:
-        raise RuntimeError("the noise self-test failed: this NumPy does not generate the canonical noise bytes")
+    from heteroes.noise.contracts import ENGINE_V2, EXPECTED_V2_NOISE_FINGERPRINT
+
+    if engine == ENGINE_VERSION:
+        observed, expected = compute_noise_fingerprint(), EXPECTED_NOISE_FINGERPRINT
+    elif engine == ENGINE_V2:
+        from heteroes.noise.selftest_v2 import compute_noise_fingerprint as compute_v2
+
+        observed, expected = compute_v2(), EXPECTED_V2_NOISE_FINGERPRINT
+    else:
+        raise ValueError(f"unknown CPU noise engine {engine!r}")
+    if observed != expected:
+        raise RuntimeError(f"the noise self-test failed for {engine}")
     return time.perf_counter() - start
+
+
+def checked_cpu_noise_engines() -> dict[str, str]:
+    """Advertise an engine only after its local known-answer test passes."""
+    from heteroes.noise.contracts import CPU_NOISE_FINGERPRINTS
+
+    for engine in CPU_NOISE_FINGERPRINTS:
+        check_noise_selftest(engine)
+    return dict(CPU_NOISE_FINGERPRINTS)
 
 
 def load_pinned_model(model_path, device: str) -> LoadedModel:
@@ -69,7 +88,7 @@ def check_recipe_selftest(recipe: Recipe, device: str) -> float:
     if recipe.engine_version == CUDA_ENGINE_VERSION:
         check_cuda_noise_selftest(device)
         return time.perf_counter() - start
-    return check_noise_selftest()
+    return check_noise_selftest(recipe.engine_version)
 
 
 def build_recipe(
@@ -86,7 +105,15 @@ def build_recipe(
     The recipe of an experiment from the loaded model and the choices. `noise_engine` is "cpu" (the canonical engine, `chunk_elements` its chunk,
     default 2**18) or "cuda" (the GPU engine of section 16 of the numerical contract: its call size is part of the engine, there is nothing to choose).
     """
-    if noise_engine == "cpu":
+    from heteroes.noise.contracts import ENGINE_V2, EXPECTED_V2_NOISE_FINGERPRINT
+
+    if noise_engine == ENGINE_V2:
+        engine_version, noise_chunk, fingerprint = (
+            ENGINE_V2,
+            DEFAULT_CHUNK_ELEMENTS if chunk_elements is None else chunk_elements,
+            EXPECTED_V2_NOISE_FINGERPRINT,
+        )
+    elif noise_engine in ("cpu", ENGINE_VERSION):
         engine_version, noise_chunk, fingerprint = (
             ENGINE_VERSION,
             DEFAULT_CHUNK_ELEMENTS if chunk_elements is None else chunk_elements,

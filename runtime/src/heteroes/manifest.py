@@ -152,6 +152,10 @@ class Recipe:
             raise ValueError(
                 f"the decode engine {self.decode_engine!r} is for the long workloads; arith16 (the 16 prompts of the contract) has its own code"
             )
+        from heteroes.noise.contracts import ENGINE_V2, EXPECTED_V2_NOISE_FINGERPRINT
+
+        if self.engine_version == ENGINE_V2 and self.noise_fingerprint != EXPECTED_V2_NOISE_FINGERPRINT:
+            raise ValueError("V2 noise fingerprint mismatch")
         if self.engine_version == CUDA_ENGINE_VERSION:
             # the CUDA engine has no free parameter: its call size and its fingerprint are the engine (numerical contract section 16)
             if self.chunk_elements != CUDA_CALL_ELEMENTS:

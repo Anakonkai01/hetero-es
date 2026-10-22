@@ -21,6 +21,7 @@ QUIESCENT = TERMINAL | {"PAUSED"}
 ROOT = Path(__file__).resolve().parents[3]
 WORKLOADS = WORKLOAD_NAMES
 RESTART_SECONDS = 30  # a worker that is still away or OFF is asked again after this long
+MAX_LAUNCH_ID = 1_000_000  # explicit retries keep unique process/command identities
 MAX_LAUNCHES = 20  # launches of one worker in one coordinator recovery; a worker that keeps dying is then left alone
 # a worker unreachable this long is taken as stopped when the run drains; before that an unknown state blocks the release
 UNREACHABLE_STOP_SECONDS = 600
@@ -157,7 +158,14 @@ class RunSupervisor(ABC):
         recovery = state.get("recoveryCount", 0)
         result = dict(state.get("workerStates", {}))
         for worker_id, previous in list(result.items()):
-            if previous.get("notStarted") or previous.get("left") or previous.get("lost"):
+            if previous.get("stopReason") == "needs_private_route" and previous.get("alive") is False:
+                continue
+            if (
+                previous.get("notStarted")
+                or previous.get("left")
+                or previous.get("lost")
+                or previous.get("retryPending")
+            ):
                 continue  # never started, left the run and confirmed stopped (its GPU may serve another run now), or lost
             launch = previous.get("launch", 0)
             suffix = f"-l{launch}" if launch else ""
@@ -180,6 +188,7 @@ class RunSupervisor(ABC):
                     "confirmed": True,
                     **launched(launch),
                 }
+                self._record_worker_block(root, worker_id, result[worker_id], value.get("events", []))
                 if previous.get("unreachableNoticed"):
                     self.log(
                         root, "worker_reachable", worker_id=worker_id, unreachableSince=previous["unreachableSince"]
@@ -200,8 +209,77 @@ class RunSupervisor(ABC):
             value.get("notStarted") or (value.get("confirmed") and not value.get("alive")) for value in result.values()
         )
 
+    def _record_worker_block(self, root, worker_id, state, worker_events):
+        """Temporary policy: public-route bulk recovery is not implemented yet.
+
+        Keep this outside transient process state so recovery/OFF/ON/rejoin
+        cannot accidentally authorize another identical failed replay.
+        """
+        if state.get("alive") is not False or not any(
+            event.get("event") == "exit" and event.get("reason") == "needs_private_route" for event in worker_events
+        ):
+            return
+        blocks = read_json(root / "worker-blocks.json", {})
+        if worker_id not in blocks:
+            blocks[worker_id] = {
+                "reason": "needs_private_route",
+                "blockedAt": time.time(),
+                "launch": state.get("launch", 0),
+            }
+            write_json(root / "worker-blocks.json", blocks)
+            self.log(root, "worker_blocked", worker_id=worker_id, reason="needs_private_route", temporary=True)
+        state.update(stopReason=blocks[worker_id]["reason"], blockedAt=blocks[worker_id]["blockedAt"])
+
+    def retry_worker(self, root, worker_id, request_id):
+        """An explicit, idempotent request. Automatic recovery never calls this."""
+        with self.lock:
+            done = read_json(root / "worker-retries.json", [])
+            if request_id in done:
+                return
+            state = self.state(root)
+            membership = read_json(root / "membership.json", {})
+            members = membership.get("members", read_json(root / "config.json")["workerIds"])
+            if state.get("status") not in ("RUNNING", "STARTING") or worker_id not in members:
+                raise ValueError("Retry requires a member of an active run")
+            blocks = read_json(root / "worker-blocks.json", {})
+            if worker_id not in blocks:
+                raise ValueError("Worker is not blocked")
+            values = dict(state.get("workerStates", {}))
+            previous = values.get(worker_id, {})
+            if previous.get("alive") is not False or previous.get("confirmed") is not True:
+                raise RuntimeError("Retry requires confirmed worker shutdown")
+            if previous.get("launch", 0) + 1 >= MAX_LAUNCH_ID:
+                raise ValueError("Worker launch identity exhausted; start a new run")
+            # Persist the consumed request before releasing the block. A retried
+            # delivery must not clear a subsequent failure from the same launch.
+            write_json(root / "worker-retries.json", [*done, request_id])
+            blocks.pop(worker_id)
+            write_json(root / "worker-blocks.json", blocks)
+            values[worker_id] = {
+                "alive": False,
+                "ready": False,
+                "confirmed": True,
+                **launched(previous.get("launch", 0)),
+                "retryPending": True,
+            }
+            self.save(root, workerStates=values)
+            self.retry_at.pop((root.name, worker_id), None)
+            self.log(root, "worker_retry_requested", worker_id=worker_id, requestId=request_id)
+
     def _start_one(self, root, worker_id, result, recovery):
         """Start one worker of this run (at preparation, or when it joins later) and record what is known about it."""
+        block = read_json(root / "worker-blocks.json", {}).get(worker_id)
+        if block:
+            result[worker_id] = {
+                "alive": False,
+                "ready": False,
+                "confirmed": True,
+                "stopReason": block["reason"],
+                "blockedAt": block["blockedAt"],
+                **launched(block.get("launch", 0)),
+            }
+            self.save(root, workerStates=result)
+            return
         if worker_id in read_json(self.root / "quarantine.json", {}):
             result[worker_id] = {"notStarted": True, "alive": False, "ready": False, "confirmed": True}
             self.log(root, "worker_quarantined", worker_id=worker_id)
@@ -228,6 +306,7 @@ class RunSupervisor(ABC):
                 "ready": value["ready"],
                 **launched(launch),
             }
+            self._record_worker_block(root, worker_id, result[worker_id], value.get("events", []))
         except Exception as error:
             # why it is unknown: the lab has not seen the worker yet (ConnectionError), or it refused (HTTP status)
             self.log(
@@ -253,6 +332,7 @@ class RunSupervisor(ABC):
         membership = read_json(root / "membership.json", {})
         members = membership.get("members", read_json(root / "config.json")["workerIds"])
         quarantined = read_json(self.root / "quarantine.json", {})
+        blocked = read_json(root / "worker-blocks.json", {})
         result = dict(state.get("workerStates", {}))
         recovery = state.get("recoveryCount", 0)
         now = time.time()
@@ -260,14 +340,14 @@ class RunSupervisor(ABC):
             value = result.get(worker_id)
             key = (root.name, worker_id)
             stopped = value and value.get("alive") is False  # also one never started, or one that left
-            if not stopped or not value.get("confirmed") or worker_id in quarantined:
+            if not stopped or not value.get("confirmed") or worker_id in quarantined or worker_id in blocked:
                 self.retry_at.pop(key, None)
                 continue
             if now < self.retry_at.get(key, 0):
                 continue
             self.retry_at[key] = now + RESTART_SECONDS
             launch = 0 if value.get("notStarted") else value.get("launch", 0) + 1  # a never-started one has none yet
-            if launch >= MAX_LAUNCHES:
+            if launch >= MAX_LAUNCHES and not value.get("retryPending"):
                 self.retry_at[key] = float("inf")
                 self.log(root, "worker_restart_limit", worker_id=worker_id, launch=launch)
                 continue

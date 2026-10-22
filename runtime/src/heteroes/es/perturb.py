@@ -1,5 +1,5 @@
-from heteroes.noise.contracts import ParameterNoiseAddress, DEFAULT_CHUNK_ELEMENTS
-from heteroes.noise.engine import iter_parameter_noise_chunks
+from heteroes.noise.contracts import ParameterNoiseAddress, DEFAULT_CHUNK_ELEMENTS, ENGINE_VERSION
+from heteroes.noise.engine import iter_parameter_noise_chunks, generator_for_engine
 from heteroes.model.schema import ParameterSchema, resolve_tensors
 from heteroes.es.checks import _check_param_sigma, SUPPORT_DTYPE
 import math
@@ -14,7 +14,9 @@ BATCH_ELEMENTS = 2**22
 
 # for param float 16 only
 # perturb inplace, (not copy to new tensor)
-def perturb_parameter_(param: torch.Tensor, param_noise_address: ParameterNoiseAddress, sigma: float) -> None:
+def perturb_parameter_(
+    param: torch.Tensor, param_noise_address: ParameterNoiseAddress, sigma: float, *, engine: str = ENGINE_VERSION
+) -> None:
     """
     Perturb one parameter tensor in place:
         param <- fp16( fp32(param) + fp32(sigma) * fp32(eps) )
@@ -51,7 +53,7 @@ def perturb_parameter_(param: torch.Tensor, param_noise_address: ParameterNoiseA
             param_chunk.copy_(perturbed)
             pending, pending_elements = [], 0
 
-        for _, start, noise_numpy_f16 in iter_parameter_noise_chunks(param_noise_address, numel):
+        for _, start, noise_numpy_f16 in iter_parameter_noise_chunks(param_noise_address, numel, engine=engine):
             if not pending:
                 first = start
             pending.append(noise_numpy_f16)
@@ -69,6 +71,8 @@ def perturb_model_(
     candidate_seed: int,
     sigma: float,
     chunk_elements: int = DEFAULT_CHUNK_ELEMENTS,
+    *,
+    engine: str = ENGINE_VERSION,
 ) -> None:
     """
     Perturb every tensor of the model in place: theta' = theta + sigma * eps, one noise stream
@@ -95,6 +99,7 @@ def perturb_model_(
         TypeError / ValueError: a tensor is not contiguous FP16, or sigma is NaN/Inf.
     """
 
+    generator_for_engine(engine)
     # resolve tensor
     tensors = resolve_tensors(model, schema)
 
@@ -112,4 +117,4 @@ def perturb_model_(
             chunk_elements=chunk_elements,
         )
 
-        perturb_parameter_(tensor, param_noise_address, sigma)
+        perturb_parameter_(tensor, param_noise_address, sigma, engine=engine)

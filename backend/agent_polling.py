@@ -56,6 +56,7 @@ class AgentPolling:
                 "heartbeatSeconds": 10,
                 "telemetrySupported": True,
                 "detailedTelemetrySupported": True,
+                "metricAvailabilitySupported": True,
                 "modelQualificationSupported": True,
                 "releasedAssignments": [
                     row["id"]

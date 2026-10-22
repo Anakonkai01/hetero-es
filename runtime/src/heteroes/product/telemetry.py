@@ -124,7 +124,7 @@ def legacy_observation(row):
         "energyWh",
         "energySampledSeconds",
     }
-    result = {key: value for key, value in row.items() if key != "power"}
+    result = {key: value for key, value in row.items() if key not in ("power", "availability")}
     for key, allowed in [("host", host_keys), ("gpu", gpu_keys)]:
         if key in result:
             result[key] = {name: value for name, value in result[key].items() if name in allowed}
@@ -223,8 +223,12 @@ class TelemetrySampler:
             return self.last
         row = {"sampledAt": now, "sessionStartedAt": self.started_at, "source": "host-observation", "disks": []}
         errors = []
+        host_permission_denied = False
         try:
             row["host"] = self.host()
+        except PermissionError:
+            host_permission_denied = True
+            errors.append("HOST_METRICS_UNAVAILABLE")
         except (OSError, ValueError, KeyError, subprocess.SubprocessError):
             errors.append("HOST_METRICS_UNAVAILABLE")
         try:
@@ -265,6 +269,44 @@ class TelemetrySampler:
         except (OSError, ValueError, KeyError):
             row["errors"].append("POWER_ACCOUNTING_UNAVAILABLE")
         row["errors"] = list(dict.fromkeys(row["errors"]))[:5]
+        host = row.get("host") or {}
+        gpu = row.get("gpu") or {}
+        missing_host = (
+            "permission_denied"
+            if host_permission_denied
+            else ("error" if "HOST_METRICS_UNAVAILABLE" in errors else "unavailable")
+        )
+        availability = {}
+        for key in (
+            "cpuPercent",
+            "ramUsedBytes",
+            "networkRxBytesPerSecond",
+            "networkTxBytesPerSecond",
+            "diskReadBytesPerSecond",
+            "diskWriteBytesPerSecond",
+        ):
+            if host.get(key) is None:
+                status = missing_host
+                if key == "cpuPercent" and self.last_tick is None and host.get("platform") == "linux":
+                    status = "warming_up"
+                if key.startswith("network") and host.get("networkInterfaces"):
+                    status = "warming_up"
+                if key.startswith("disk") and host.get("blockDevices"):
+                    status = "warming_up"
+                availability[key] = {"status": status}
+        for key, field in (
+            ("gpuUtilizationPercent", "utilizationPercent"),
+            ("gpuTemperatureC", "temperatureC"),
+            ("gpuPowerW", "powerDrawW"),
+        ):
+            if gpu.get(field) is None:
+                availability[key] = {"status": "error" if "GPU_METRICS_UNAVAILABLE" in errors else "unavailable"}
+        if host.get("platform") == "windows":
+            # Our built-in Windows collector has ACPI zones, not a CPU package
+            # temperature/power provider. Never relabel motherboard zones as CPU.
+            availability["cpuPowerW"] = {"status": "unsupported"}
+            availability["cpuTemperatureC"] = {"status": "unsupported"}
+        row["availability"] = availability
         gpu, host = row.get("gpu", {}), row.get("host", {})
         power = row.get("power", {})
         self.history.append(

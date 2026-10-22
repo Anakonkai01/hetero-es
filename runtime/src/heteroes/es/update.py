@@ -1,9 +1,9 @@
 from heteroes.model.schema import ParameterSchema, resolve_tensors
 from heteroes.es.checks import _check_param
-from heteroes.noise.engine import num_chunks, generate_chunk_noise, chunk_length
-from heteroes.noise.contracts import ParameterNoiseAddress, DEFAULT_CHUNK_ELEMENTS
+from heteroes.noise.engine import num_chunks, generate_chunk_noise, chunk_length, generator_for_engine
+from heteroes.noise.contracts import ParameterNoiseAddress, DEFAULT_CHUNK_ELEMENTS, ENGINE_VERSION
 from heteroes.es import perturb as _perturb
-from heteroes.noise.parallel import ordered_map
+from heteroes.noise.parallel import ordered_map, noise_threads
 
 from dataclasses import dataclass
 import math
@@ -78,6 +78,8 @@ def apply_coefficients_(
     coefficients,
     alpha: float,
     chunk_elements: int = DEFAULT_CHUNK_ELEMENTS,
+    *,
+    engine: str = ENGINE_VERSION,
 ) -> UpdateReport:
     """
     The update of one ES generation with the coefficients GIVEN (no standardization here): what a worker applies when it
@@ -87,7 +89,7 @@ def apply_coefficients_(
     for tensor in tensors:
         _check_param(tensor)
     return _apply_coefficients(
-        schema, tensors, candidate_seeds, _check_coefficients(coefficients), alpha, chunk_elements
+        schema, tensors, candidate_seeds, _check_coefficients(coefficients), alpha, chunk_elements, engine
     )
 
 
@@ -100,6 +102,8 @@ def apply_es_update_(
     alpha: float,
     chunk_elements: int = DEFAULT_CHUNK_ELEMENTS,
     eta=DEFAULT_ETA,
+    *,
+    engine: str = ENGINE_VERSION,
 ) -> UpdateReport:
     # resolve tensor
     tensors = resolve_tensors(model, schema)
@@ -109,12 +113,19 @@ def apply_es_update_(
 
     # z already check eta and rewards
     z_rewards = standardize_rewards(rewards, eta)
-    return _apply_coefficients(schema, tensors, candidate_seeds, z_rewards, alpha, chunk_elements)
+    return _apply_coefficients(schema, tensors, candidate_seeds, z_rewards, alpha, chunk_elements, engine)
 
 
 def _apply_coefficients(
-    schema: ParameterSchema, tensors, candidate_seeds, z_rewards, alpha: float, chunk_elements: int
+    schema: ParameterSchema,
+    tensors,
+    candidate_seeds,
+    z_rewards,
+    alpha: float,
+    chunk_elements: int,
+    engine: str = ENGINE_VERSION,
 ) -> UpdateReport:
+    generate = generate_chunk_noise if engine == ENGINE_VERSION else generator_for_engine(engine)
     total_numel = sum(t.numel() for t in tensors)
 
     # check alpha
@@ -175,7 +186,7 @@ def _apply_coefficients(
                         ).chunk(chunk_index)
                         yield address, chunk_length(numel, chunk_index, chunk_elements)
 
-    noise_stream = ordered_map(lambda task: generate_chunk_noise(*task), tasks())
+    noise_stream = ordered_map(lambda task: generate(*task), tasks(), threads=noise_threads(engine))
 
     # The three statistics of a piece stay on the device and are read once at the end (one sync instead of three per chunk).
     changed_parts, requested_parts, applied_parts = [], [], []

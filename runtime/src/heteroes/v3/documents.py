@@ -96,6 +96,10 @@ def validate_recipe(doc, *, translated=False):
         raise ValueError(f"unknown noise engine {noise['engine']!r}")
     _count("noise.chunkElements", noise["chunkElements"])
     _hex("noise.fingerprint", noise["fingerprint"], _HEX64)
+    from heteroes.noise.contracts import ENGINE_V2, EXPECTED_V2_NOISE_FINGERPRINT
+
+    if noise["engine"] == ENGINE_V2 and noise["fingerprint"] != EXPECTED_V2_NOISE_FINGERPRINT:
+        raise ValueError("V2 noise fingerprint mismatch")
     perturbation = doc["perturbation"]
     _keys("perturbation", perturbation, {"sigma", "antithetic"})
     _check_sigma(perturbation["sigma"])

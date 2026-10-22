@@ -2,7 +2,7 @@
 
 from .constants import CORE_COMMAND_KINDS, COMMAND_KINDS
 
-from .policies import v2_qualification, v3_qualification
+from .policies import v2_qualification, v3_qualification, noise_qualification, display_identity
 import json
 import secrets
 import time
@@ -41,6 +41,11 @@ class AgentScheduling:
         for d in chosen:
             if not d or d["approvalStatus"] != "APPROVED":
                 return "Selected device needs approval"
+            from heteroes.noise.contracts import ENGINE_VERSION
+
+            engine = body.get("noiseEngineVersion") or ENGINE_VERSION
+            if noise_qualification(d["selfTest"], engine):
+                return "Update and self-test selected device for the run's noise engine"
             capabilities = db.execute(
                 "SELECT value FROM settings WHERE key=?", ("agentCommands:" + d["deviceId"],)
             ).fetchone()
@@ -53,8 +58,10 @@ class AgentScheduling:
             if body.get("recipeVersion") in (2, 3) and not cpu_coordinator:
                 profile = d["selfTest"]
                 version = body["recipeVersion"]
-                qualification = (v3_qualification if version == 3 else v2_qualification)(
-                    profile, study_hash(body["modelManifest"])
+                qualification = (
+                    v3_qualification(profile, study_hash(body["modelManifest"]), engine)
+                    if version == 3
+                    else v2_qualification(profile, study_hash(body["modelManifest"]))
                 )
                 if qualification == "recipe":
                     return f"Recipe v{version} qualification required"
@@ -108,10 +115,34 @@ class AgentScheduling:
         row = db.execute("SELECT * FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1", (run_id,)).fetchone()
         if not body or body["status"] not in ("STARTING", "RUNNING") or not row or row["released"]:
             raise RuntimeRejected("Members change only while the experiment is running")
-        self.require_command(db, row["coordinator"], "UPDATE_MEMBERSHIP")
+        self.require_command(db, row["coordinator"], "RETRY_WORKER" if action == "RETRY" else "UPDATE_MEMBERSHIP")
         ar = json.loads(row["body"])
         members = self.intended_members(db, run_id, body["workerIds"])
         change = {"changeId": uuid.uuid4().hex, "workerId": worker_id, "action": action, "actor": actor}
+        if action == "RETRY":
+            state = (self.store.snapshot(run_id).get("state") or {}).get("workerStates", {}).get(worker_id, {})
+            if worker_id not in members or state.get("stopReason") != "needs_private_route":
+                raise RuntimeRejected("Select a blocked member to retry")
+            if state.get("alive") is not False or state.get("confirmed") is not True:
+                raise RuntimeRejected("Retry requires confirmed worker shutdown")
+            change["changeId"] = uuid.uuid5(
+                uuid.NAMESPACE_OID, f"{row['id']}:{worker_id}:{state.get('blockedAt')}:{state.get('launch', 0)}"
+            ).hex
+            if reason := self.waiting_reason(body, db, [worker_id]) or self.store.eligibility(db, body, [worker_id]):
+                raise RuntimeRejected(reason)
+            self.enqueue(
+                db,
+                row["coordinator"],
+                "RETRY_WORKER",
+                {
+                    "assignmentId": row["id"],
+                    "epoch": row["epoch"],
+                    "workerId": worker_id,
+                    "requestId": change["changeId"],
+                },
+                "retry:" + change["changeId"],
+            )
+            return change
         if action == "JOIN":
             if worker_id in members:
                 raise RuntimeRejected("The worker is already a member")
@@ -168,7 +199,12 @@ class AgentScheduling:
 
     def note_membership(self, db, run_id, change, actor_id):
         """Keep the request on the experiment for the lab's pages and audit it; the coordinator's view arrives later."""
-        body = self.store.get(run_id)
+        body = json.loads(db.execute("SELECT body FROM experiments WHERE id=?", (run_id,)).fetchone()[0])
+        if any(item["changeId"] == change["changeId"] for item in body.get("membershipRequests", [])):
+            return
+        if change["action"] == "JOIN":
+            device = next(d for d in self.devices(db) if d["workerId"] == change["workerId"])
+            body.setdefault("workerIdentities", {}).setdefault(change["workerId"], display_identity(device))
         body.setdefault("membershipRequests", []).append({**change, "requestedAt": time.time()})
         self.store.save(db, body)
         self.store.audit(db, actor_id, f"MEMBERSHIP_{change['action']}_REQUESTED", run_id, body["workspaceId"])
@@ -293,6 +329,12 @@ class AgentScheduling:
             co = by_id[config["coordinatorDeviceId"]]
             members = self.intended_members(db, config["runId"], config["workerIds"])
             chosen = {d["deviceId"]: d for d in [co] + [by_worker[w] for w in members]}
+            identities = body.setdefault("workerIdentities", {})
+            for worker_id in members:
+                identities.setdefault(
+                    worker_id, display_identity(by_worker[worker_id], source="current" if old else "recorded")
+                )
+            body.setdefault("coordinatorIdentity", display_identity(co, source="current" if old else "recorded"))
             aid = uuid.uuid4().hex
             # Secrets are random per device/run, stored only in the private product DB.
             grants = {d["workerId"]: secrets.token_urlsafe(32) for d in chosen.values() if d["workerId"] in members}

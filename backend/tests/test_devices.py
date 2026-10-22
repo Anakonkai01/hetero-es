@@ -305,7 +305,8 @@ def test_a_restarted_worker_is_a_new_launch_and_never_reads_the_stopped_one(lab)
     assert send("poll", launch=1).status_code == 503  # the stopped launch 0 is not this one's state
     boot(c, wh, "boot-1", contribution=True, processes=[{**dead, "workerAlive": True, "launch": 1}])
     assert send("poll", launch=1).json()["alive"] is True
-    assert send("start", launch=20).status_code == 422
+    assert send("start", launch=20).status_code == 200  # explicit retries can go beyond the automatic budget
+    assert send("start", launch=1_000_000).status_code == 422
 
 
 def test_an_app_started_again_during_a_run_may_send_the_same_qualification(lab):

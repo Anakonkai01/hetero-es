@@ -90,6 +90,12 @@ class AgentRuntime(AgentScheduling, AgentCommands, AgentPolling):
             profile = self.qualifications.effective_profile(
                 db, row["id"], profile, allocation[0] if allocation else None
             )
+            block = {}
+            if reservation:
+                snapshot = db.execute("SELECT snapshot FROM experiments WHERE id=?", (reservation[0],)).fetchone()
+                if snapshot and snapshot[0]:
+                    states = (json.loads(snapshot[0]).get("state") or {}).get("workerStates", {})
+                    block = states.get(row["worker_id"], {})
             result.append(
                 {
                     "deviceId": row["id"],
@@ -109,6 +115,8 @@ class AgentRuntime(AgentScheduling, AgentCommands, AgentPolling):
                     "selfTest": profile,
                     "allocatedTo": reservation[0] if reservation else ("qualification:" + probe[0] if probe else None),
                     "physicalResourceId": profile.get("gpuUUID"),
+                    "stopReason": block.get("stopReason"),
+                    "blockedRunId": reservation[0] if reservation and block.get("stopReason") else None,
                     "telemetry": json.loads(row["telemetry"]) if row["telemetry"] else None,
                     "telemetryHistory": [
                         json.loads(h[0])

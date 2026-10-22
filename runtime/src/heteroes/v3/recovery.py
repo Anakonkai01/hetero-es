@@ -60,6 +60,7 @@ def capture_state(root, temporary, recipe, generation):
         "selection": read_json(root / "study-selection.json"),
         "validation": [read_json(p) for p in sorted(root.glob("validation-*.json"))],
         "auditFaults": read_json(root / "audit-faults.json", {}),
+        "workerBlocks": read_json(root / "worker-blocks.json", {}),
     }
     selection = state["selection"]
     if not selection:
@@ -104,6 +105,7 @@ def restore_state(point, temporary, destination):
         ("dataset.json", state["dataset"]),
         ("study-selection.json", state["selection"]),
         ("audit-faults.json", state["auditFaults"]),
+        ("worker-blocks.json", state.get("workerBlocks", {})),
     ):
         write_json(temporary / name, value)
     for row in state["validation"]:

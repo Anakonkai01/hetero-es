@@ -41,6 +41,25 @@ def test_a_new_model_reference_round_trips_and_never_initializes_worker_adapters
     assert not list(root.glob("*.bin"))
 
 
+def test_model_references_pin_the_engine_and_preserve_legacy_config(new_model):
+    from heteroes.noise.contracts import ENGINE_VERSION, ENGINE_V2
+
+    root, manifest = new_model
+    old, _ = build_reference(root, manifest, device="cpu")
+    assert old["cell"]["recipe"]["noise"]["engine"] == ENGINE_VERSION
+    assert "noiseEngineVersion" not in old["cell"]["config"]
+    new, observations = build_reference(root, manifest, device="cpu", engine=ENGINE_V2)
+    assert new["cell"]["recipe"]["noise"]["engine"] == ENGINE_V2
+    assert new["cell"]["config"]["noiseEngineVersion"] == ENGINE_V2
+    assert new["cell"]["expected"]["perturbedSha256"] != old["cell"]["expected"]["perturbedSha256"]
+    assert check_reference(new, manifest) is new
+    assert qualify(root, manifest, new, device="cpu") == observations
+    bad = copy.deepcopy(new)
+    bad["cell"]["recipe"]["noise"] = old["cell"]["recipe"]["noise"]
+    with pytest.raises(ValueError):
+        check_reference(bad, manifest)
+
+
 @pytest.mark.parametrize("drift", ["manifest", "scorer-code", "rows", "recipe", "plan", "restore", "seed", "profile"])
 def test_reference_inputs_are_checked_before_any_model_is_loaded(new_model, drift, monkeypatch):
     import heteroes.product.model_qualification as probe

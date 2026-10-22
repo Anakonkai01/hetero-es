@@ -34,7 +34,7 @@ def install_routes(app, store, runtime, scoped, visible, authorized, validate):
 
     @router.get("/api/v1/experiments/{run_id}/timeline")
     def run_timeline(run_id: str, current=Depends(scoped)):
-        return build_timeline(authorized(run_id, current), store.snapshot(run_id), names=store.device_names())
+        return build_timeline(authorized(run_id, current), store.snapshot(run_id), names=store.device_identities())
 
     @router.get("/api/v1/experiments/{run_id}/stream")
     def run_stream(run_id: str, current=Depends(scoped)):
@@ -183,7 +183,7 @@ def install_routes(app, store, runtime, scoped, visible, authorized, validate):
     @router.post("/api/v1/experiments/{run_id}/workers")
     def members(run_id: str, request: MembershipRequest, current=Depends(scoped)):
         """Add or remove a worker while the experiment runs (ADR-009); it applies at the next generation boundary."""
-        action = "JOIN" if request.action == "add" else "LEAVE"
+        action = {"add": "JOIN", "remove": "LEAVE", "retry": "RETRY"}[request.action]
         with store.db() as db:
             db.execute("BEGIN IMMEDIATE")
             authorized(run_id, current)
@@ -192,6 +192,6 @@ def install_routes(app, store, runtime, scoped, visible, authorized, validate):
             except RuntimeRejected as error:
                 raise HTTPException(409, str(error)) from None
             runtime.note_membership(db, run_id, change, current["userId"])
-        return {**change, "appliesAtNextGeneration": True}
+        return {**change, "appliesAtNextGeneration": action != "RETRY"}
 
     app.include_router(router)

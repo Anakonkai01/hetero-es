@@ -72,8 +72,13 @@ def handle(request):
         completed = subprocess.run(
             [
                 executable,
-                "--query-gpu=name,memory.total,memory.free,temperature.gpu,utilization.gpu,uuid",
+                "--query-gpu=name,memory.total,memory.free,temperature.gpu,utilization.gpu,uuid,index",
                 "--format=csv,noheader,nounits",
+                *(
+                    ["--id=" + os.environ["CUDA_VISIBLE_DEVICES"].split(",")[0]]
+                    if os.environ.get("CUDA_VISIBLE_DEVICES")
+                    else []
+                ),
             ],
             capture_output=True,
             text=True,
@@ -82,7 +87,7 @@ def handle(request):
         )
         if completed.returncode:
             raise RuntimeError("nvidia-smi unavailable")
-        name, total, free, temperature, utilization, gpu_uuid = completed.stdout.splitlines()[0].split(",")
+        name, total, free, temperature, utilization, gpu_uuid, gpu_index = completed.stdout.splitlines()[0].split(",")
         return {
             "gpuName": name.strip(),
             "vramTotalMb": int(total),
@@ -90,6 +95,7 @@ def handle(request):
             "temperatureC": int(temperature),
             "utilizationPercent": int(utilization),
             "gpuUUID": gpu_uuid.strip(),
+            "gpuIndex": int(gpu_index),
         }
     root = Path(request["directory"]).expanduser()
     record = read_json(root / "process.json")

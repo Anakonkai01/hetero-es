@@ -300,6 +300,7 @@ def test_detail_capability_negotiates_before_sending_extended_observations(tmp_p
         "disks": [],
         "host": {"platform": "linux", "cores": [{"id": "cpu0"}]},
         "power": {"hostId": "local"},
+        "availability": {"cpuPercent": {"status": "warming_up"}},
     }
     monkeypatch.setattr(a.telemetry, "sample", lambda: row)
 
@@ -313,6 +314,7 @@ def test_detail_capability_negotiates_before_sending_extended_observations(tmp_p
             "acceptedEvents": [],
             "telemetrySupported": True,
             "detailedTelemetrySupported": len(sent) >= 2,
+            "metricAvailabilitySupported": len(sent) >= 2,
         }
 
     monkeypatch.setattr(a, "call", reply)
@@ -322,6 +324,8 @@ def test_detail_capability_negotiates_before_sending_extended_observations(tmp_p
     assert "telemetry" not in sent[0]
     assert "power" not in sent[1]["telemetry"] and "cores" not in sent[1]["telemetry"]["host"]
     assert sent[2]["telemetry"]["power"] == {"hostId": "local"}
+    assert "availability" not in sent[1]["telemetry"]
+    assert sent[2]["telemetry"]["availability"] == row["availability"]
     assert not a.enabled
 
 
@@ -901,6 +905,25 @@ def test_the_agent_offers_membership_changes():
     assert "UPDATE_MEMBERSHIP" in COMMAND_KINDS
 
 
+def test_agent_retries_only_its_assignment_and_deduplicates_command(tmp_path, monkeypatch):
+    a, root = coordinating(tmp_path)
+    retries = []
+    monkeypatch.setattr(a.manager, "retry_worker", lambda *args: retries.append(args))
+    command = {
+        "commandId": "retry-1",
+        "kind": "RETRY_WORKER",
+        "assignmentId": "c" * 32,
+        "epoch": 1,
+        "workerId": "test",
+        "requestId": "retry-request-1",
+    }
+    a.handle(command)
+    a.handle(command)
+    assert retries == [(root, "test", "retry-request-1")]
+    with pytest.raises(RuntimeError, match="assignment"):
+        a.handle({**command, "commandId": "retry-wrong", "epoch": 2})
+
+
 def test_a_membership_change_is_written_once_for_the_runner(tmp_path):
     a, root = coordinating(tmp_path)
     a.handle(membership_command())
@@ -1063,3 +1086,21 @@ def test_owner_limits_take_the_device_out_of_runs_and_bring_it_back(tmp_path, mo
     assert sent == [{"enabled": False}, {"enabled": True}] and a.paused_by_limits is None
     a.apply_limits(cool, {"desiredContribution": False})  # the owner's own OFF is never undone
     assert len(sent) == 2
+
+
+def test_probe_uses_the_selected_gpu_and_reports_its_index(monkeypatch):
+    from types import SimpleNamespace
+    from heteroes.product.remote import handle
+
+    seen = []
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "2")
+    monkeypatch.setattr("heteroes.product.remote.shutil.which", lambda value: "/usr/bin/nvidia-smi")
+
+    def run(argv, **kwargs):
+        seen.append(argv)
+        return SimpleNamespace(returncode=0, stdout="GPU two, 8192, 7000, 40, 0, GPU-uuid, 2\n")
+
+    monkeypatch.setattr("heteroes.product.remote.subprocess.run", run)
+    gpu = handle({"action": "probe"})
+    assert "--id=2" in seen[0]
+    assert gpu["gpuIndex"] == 2 and gpu["gpuName"] == "GPU two"

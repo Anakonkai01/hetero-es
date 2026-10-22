@@ -29,11 +29,14 @@ _pools: dict[int, ThreadPoolExecutor] = {}
 _pools_lock = threading.Lock()
 
 
-def noise_threads() -> int:
+def noise_threads(engine: str | None = None) -> int:
     """Number of threads for noise generation: HETEROES_NOISE_THREADS if set (>= 1), else min(16, CPUs)."""
     raw = os.environ.get(ENV_THREADS)
     if raw is None:
-        return max(1, min(MAX_DEFAULT_THREADS, os.cpu_count() or 1))
+        from heteroes.noise.contracts import ENGINE_V2
+
+        limit = 8 if engine == ENGINE_V2 else MAX_DEFAULT_THREADS
+        return max(1, min(limit, os.cpu_count() or 1))
     try:
         value = int(raw.strip())
     except ValueError:

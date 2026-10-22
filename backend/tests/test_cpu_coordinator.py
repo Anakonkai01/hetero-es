@@ -98,6 +98,15 @@ def test_v3_cpu_coordinator_skips_text_qualification_and_keeps_ownership(v3_stud
     lab = (client, store, runtime, admin)
     model, data = assets(v3_study)
     cpu, cpu_auth = enroll_cpu(lab)
+    from heteroes.noise.contracts import CPU_NOISE_FINGERPRINTS
+    from heteroes.product.cpu_coordinator import UPDATE_EVIDENCE_V2
+
+    modern = {
+        **profile(),
+        "supportedNoiseEngines": dict(CPU_NOISE_FINGERPRINTS),
+        "compatibility": {"updateKnownAnswer": UPDATE_EVIDENCE, "updateKnownAnswerV2": UPDATE_EVIDENCE_V2},
+    }
+    boot(client, cpu_auth, "boot-1", selfTest=modern)
     gpu, gpu_auth = pair(lab, "gpu")
     gpu_profile = next(d["selfTest"] for d in runtime.devices() if d["deviceId"] == gpu["deviceId"])
     # Only the GPU qualifies the model; CPU generated texts need not match it.

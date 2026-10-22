@@ -47,6 +47,30 @@ def membership_commands(runtime, coordinator):
     return [c for c in runtime.commands(coordinator["deviceId"]) if c["kind"] == "UPDATE_MEMBERSHIP"]
 
 
+def test_blocked_member_can_only_retry_explicitly_with_capable_coordinator(lab):
+    client, store, runtime, admin = lab
+    rid, (coordinator, ch), devices = running(lab)
+    worker = devices[0][0]["workerId"]
+    before = store.get(rid)["configHash"]
+    assert change(lab, rid, worker, "retry").status_code == 409
+    snapshot = {
+        "state": {"workerStates": {worker: {"alive": False, "confirmed": True, "stopReason": "needs_private_route"}}}
+    }
+    with store.db() as db:
+        db.execute("UPDATE experiments SET snapshot=? WHERE id=?", (json.dumps(snapshot), rid))
+    # Same capability protocol as the other lifecycle operations.
+    modern = {**ch, "X-HeteroES-Agent-Commands": ch["X-HeteroES-Agent-Commands"] + ",RETRY_WORKER"}
+    boot(client, modern, "boot-1", contribution=True)
+    response = change(lab, rid, worker, "retry")
+    assert response.status_code == 200, response.text
+    command = [c for c in runtime.commands(coordinator["deviceId"]) if c["kind"] == "RETRY_WORKER"][0]
+    assert command["workerId"] == worker
+    assert change(lab, rid, worker, "retry").status_code == 200
+    assert len([c for c in runtime.commands(coordinator["deviceId"]) if c["kind"] == "RETRY_WORKER"]) == 1
+    assert store.get(rid)["configHash"] == before
+    assert membership_commands(runtime, coordinator) == []
+
+
 def test_a_worker_joins_a_running_experiment_with_its_own_credential_and_reservation(lab):
     client, store, runtime, admin = lab
     rid, (coordinator, ch), devices = running(lab, workers=1, extra=1)
@@ -81,6 +105,25 @@ def test_a_worker_joins_a_running_experiment_with_its_own_credential_and_reserva
     with store.db() as db:
         assert db.execute("SELECT count(*) FROM audit WHERE action='MEMBERSHIP_JOIN_REQUESTED'").fetchone()[0] == 1
     assert change(lab, rid, late["workerId"]).status_code == 409  # already a member
+
+
+def test_dispatch_and_join_capture_display_identity_without_changing_config(lab):
+    client, store, runtime, admin = lab
+    rid, _, devices = running(lab, workers=1, extra=1)
+    body = store.get(rid)
+    worker, late = devices[0][0], devices[1][0]
+    identity = body["workerIdentities"][worker["workerId"]]
+    assert identity["name"] == "gpu-0" and identity["gpuName"] == "Fake CPU test GPU"
+    assert change(lab, rid, late["workerId"]).status_code == 200
+    assert store.get(rid)["workerIdentities"][late["workerId"]]["name"] == "gpu-1"
+    assert store.get(rid)["configHash"] == body["configHash"]
+    assert (
+        client.patch(
+            f"/api/v1/devices/{worker['deviceId']}", headers=admin, json={"displayName": "renamed"}
+        ).status_code
+        == 200
+    )
+    assert store.get(rid)["workerIdentities"][worker["workerId"]]["name"] == "gpu-0"
 
 
 def test_a_worker_leaves_but_the_last_one_cannot(lab):

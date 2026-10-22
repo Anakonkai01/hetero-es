@@ -59,7 +59,11 @@ def run(input_path, device):
         )
         emit({"stage": "recipe_v3"})
         if command["mode"] == "BUILD_REFERENCE":
-            reference, observations = build_reference(model, command["manifest"], device, emit)
+            from heteroes.noise.contracts import ENGINE_VERSION
+
+            reference, observations = build_reference(
+                model, command["manifest"], device, emit, engine=command.get("noiseEngineVersion", ENGINE_VERSION)
+            )
         else:
             reference = None
             observations = qualify(model, command["manifest"], command["reference"], device, emit)

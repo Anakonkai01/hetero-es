@@ -13,7 +13,7 @@ from heteroes.es.update import apply_coefficients_
 from heteroes.eval.candidate import model_weights_sha256
 from heteroes.ledger import Ledger
 from heteroes.noise.contracts import ParameterNoiseAddress
-from heteroes.noise.engine import chunk_length, generate_chunk_noise, num_chunks
+from heteroes.noise.engine import chunk_length, generator_for_engine, num_chunks
 from heteroes.v3.documents import alpha_at
 from heteroes.v3.local import run_local
 from heteroes.v3.model import file_manifest, load, trainable_schema
@@ -45,7 +45,15 @@ def replay(out, assets, check=None):  # noqa: F811
                 {e.canonical_name: p.detach().clone() for e, p in zip(schema.entries, schema_tensors(model, schema))}
             )
             seeds, coefficients = record.update_inputs()
-            apply_coefficients_(model, schema, seeds, coefficients, record.alpha, recipe["noise"]["chunkElements"])
+            apply_coefficients_(
+                model,
+                schema,
+                seeds,
+                coefficients,
+                record.alpha,
+                recipe["noise"]["chunkElements"],
+                engine=recipe["noise"]["engine"],
+            )
             children.append(model_weights_sha256(model, schema))
             assert children[-1] == ledger.get_update("local", generation).child_weights_sha256
             records.append(record)
@@ -119,13 +127,13 @@ def run_of(out, config=None):
     return RecipeV3Run(documents[0], documents[1]), documents[2]
 
 
-def noise(seed, schema, entry, numel, chunk_elements):
+def noise(seed, schema, entry, numel, chunk_elements, engine):
     parts = []
     for index in range(num_chunks(numel=numel, chunk_elements=chunk_elements)):
         address = ParameterNoiseAddress(
             candidate_seed=seed, schema_hash=schema.hash, parameter_index=entry.index, chunk_elements=chunk_elements
         ).chunk(index)
-        parts.append(generate_chunk_noise(address, chunk_length(numel, index, chunk_elements)))
+        parts.append(generator_for_engine(engine)(address, chunk_length(numel, index, chunk_elements)))
     return np.concatenate(parts).astype(np.float64)
 
 
@@ -151,7 +159,10 @@ def test_momentum_steps_are_the_beta_weighted_sum_of_the_window_and_replay(asset
         step = np.zeros(numel)
         for age, record in enumerate([records[2], records[1], records[0]]):
             seeds, coefficients = record.own_inputs()
-            direction = sum(c * noise(s, schema, entry, numel, chunk_elements) for s, c in zip(seeds, coefficients))
+            direction = sum(
+                c * noise(s, schema, entry, numel, chunk_elements, recipe["noise"]["engine"])
+                for s, c in zip(seeds, coefficients)
+            )
             step += 0.5**age * direction / len(seeds)
         expected = before + records[2].alpha * step
         after = parents[3][entry.canonical_name].double().view(-1).numpy()  # the weights generation 2 produced

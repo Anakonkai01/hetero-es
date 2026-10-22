@@ -34,6 +34,8 @@ MARKS = frozenset(
         "worker_unreachable",
         "worker_reachable",
         "worker_lost",
+        "worker_blocked",
+        "worker_retry_requested",
     }
 )
 SECONDS = (
@@ -72,6 +74,22 @@ def build_timeline(body, snapshot, now_ms=None, names=None):
     names = names or {}
     snapshot = snapshot or {}
     state = snapshot.get("state") or {}
+    recorded = (body or {}).get("workerIdentities", {})
+
+    def identity(worker_id):
+        value = recorded.get(worker_id) or names.get(worker_id)
+        if isinstance(value, str):
+            return {"name": value, "identitySource": "current"}
+        if isinstance(value, dict):
+            return {
+                "name": value.get("name"),
+                "gpuName": value.get("gpuName"),
+                "gpuUUID": value.get("gpuUUID"),
+                "gpuIndex": value.get("gpuIndex"),
+                "identitySource": value.get("source", "current"),
+            }
+        return {"name": None, "identitySource": "unknown"}
+
     events = sorted(
         (e for e in snapshot.get("events") or [] if isinstance(e, dict) and _number(e.get("t")) is not None),
         key=lambda e: e["t"],
@@ -150,16 +168,22 @@ def build_timeline(body, snapshot, now_ms=None, names=None):
         workers.append(
             {
                 "id": worker_id,
-                "name": names.get(worker_id),
+                **identity(worker_id),
                 "started": not info.get("notStarted", False),
                 "alive": info.get("alive"),
                 "unreachableSinceMs": away,
+                "stopReason": info.get("stopReason"),
+                "blockedAtMs": _ms_from_epoch(info.get("blockedAt")),
             }
         )
     for job in jobs:
         if job["workerId"] and job["workerId"] not in known:
             known.add(job["workerId"])
-            workers.append({"id": job["workerId"], "name": names.get(job["workerId"]), "started": True, "alive": None})
+            workers.append({"id": job["workerId"], **identity(job["workerId"]), "started": True, "alive": None})
+    for worker_id in (body or {}).get("workerIds", []):
+        if worker_id not in known:
+            known.add(worker_id)
+            workers.append({"id": worker_id, **identity(worker_id), "started": False, "alive": None})
 
     marks = []
     for event in events:
@@ -172,6 +196,8 @@ def build_timeline(body, snapshot, now_ms=None, names=None):
             }
             if isinstance(event.get("error"), str):
                 mark["detail"] = event["error"][:200]
+            elif isinstance(event.get("reason"), str):
+                mark["detail"] = event["reason"][:200]
             marks.append(mark)
 
     body = body or {}

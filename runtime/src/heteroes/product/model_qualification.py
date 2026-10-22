@@ -9,6 +9,7 @@ import math
 import re
 
 from heteroes.canonical import canonical_json_hash
+from heteroes.noise.contracts import ENGINE_VERSION, CPU_NOISE_FINGERPRINTS
 from heteroes.product.qualification_v3 import SEED, cell_configs, observe, reference_rows, verify
 from heteroes.study.models import validate as validate_manifest
 from heteroes.v3 import data
@@ -29,7 +30,9 @@ OBSERVATION_KEYS = {
 }
 
 
-def _documents(manifest, schema_hash, generation_config_hash):
+def _documents(manifest, schema_hash, generation_config_hash, engine=ENGINE_VERSION):
+    if engine not in CPU_NOISE_FINGERPRINTS:
+        raise ValueError("Unknown CPU noise engine")
     for digest in (schema_hash, generation_config_hash):
         if not isinstance(digest, str) or re.fullmatch("[a-f0-9]{64}", digest) is None:
             raise ValueError("Invalid reference schema or generation configuration hash")
@@ -46,9 +49,9 @@ def _documents(manifest, schema_hash, generation_config_hash):
         "weightSpace": {"kind": "full"},
         "schemaHash": schema_hash,
         "noise": {
-            "engine": "numpy_pcg64_normal_f32_to_f16_v1",
+            "engine": engine,
             "chunkElements": 262144,
-            "fingerprint": NOISE_FINGERPRINT,
+            "fingerprint": CPU_NOISE_FINGERPRINTS[engine],
         },
         "perturbation": {
             "sigma": {"kind": "constant", "initial": 0.001, "minimum": 0.001, "generations": 1},
@@ -115,12 +118,17 @@ def check_reference(reference, manifest):
     cell = reference["cell"]
     if not isinstance(cell, dict) or set(cell) != {"config", "recipe", "plan", "expected", "negativeExpected"}:
         raise ValueError("Invalid model qualification cell")
-    config = cell_configs(manifest["modelId"], manifest["revision"])["full"]
+    engine = cell.get("recipe", {}).get("noise", {}).get("engine")
+    if engine not in CPU_NOISE_FINGERPRINTS:
+        raise ValueError("Unknown CPU noise engine")
+    config = cell_configs(manifest["modelId"], manifest["revision"], None if engine == ENGINE_VERSION else engine)[
+        "full"
+    ]
     if canonical_json_hash(cell["config"]) != canonical_json_hash(config):
         raise ValueError("Model qualification uses the trusted full-model probe only")
     try:
         recipe, plan = _documents(
-            manifest, cell["recipe"]["schemaHash"], cell["recipe"]["evaluation"]["generationConfigSha256"]
+            manifest, cell["recipe"]["schemaHash"], cell["recipe"]["evaluation"]["generationConfigSha256"], engine
         )
     except (KeyError, TypeError):
         raise ValueError("Invalid model qualification recipe") from None
@@ -155,10 +163,12 @@ def verify_observations(reference, observations):
     return verify(cell, {sign: observations[str(sign)] for sign in (1, -1)})
 
 
-def build_reference(model_path, manifest, device="cuda", emit=lambda event: None):
+def build_reference(model_path, manifest, device="cuda", emit=lambda event: None, *, engine=ENGINE_VERSION):
     validate_manifest(manifest, allow_any=True)
-    config = cell_configs(manifest["modelId"], manifest["revision"])["full"]
-    run, observed = observe(model_path, config, reference_rows(), SEED, device, emit)
+    config = cell_configs(manifest["modelId"], manifest["revision"], None if engine == ENGINE_VERSION else engine)[
+        "full"
+    ]
+    run, observed = observe(model_path, {**config, "noiseEngineVersion": engine}, reference_rows(), SEED, device, emit)
     observations = {str(sign): rows for sign, rows in observed.items()}
     reference = {
         "formatVersion": 1,

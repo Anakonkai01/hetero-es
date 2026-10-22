@@ -44,6 +44,10 @@ def prepare_run(config, root, device, *, declared=None, client=None, cache=None)
     from heteroes.v3.run import RecipeV3Run, build_documents
 
     root = Path(root)
+    from heteroes.noise.contracts import ENGINE_VERSION
+
+    frozen = declared if declared is not None else read_json(root / "recipe.json")
+    noise_engine = frozen["noise"]["engine"] if frozen else config.get("noiseEngineVersion", ENGINE_VERSION)
     dataset = open_dataset(config["datasetPath"])  # a file-backed dataset finds its split files beside it
     if {k: dataset[k] for k in ("contentHash", "splitHashes")} != config["datasetIdentity"]:
         raise ValueError("Frozen dataset identity mismatch")
@@ -85,6 +89,7 @@ def prepare_run(config, root, device, *, declared=None, client=None, cache=None)
     recipe, plan = build_documents(
         {
             "model": {"id": manifest["modelId"]},
+            "noiseEngineVersion": noise_engine,
             "weightSpace": space,
             "sigma": {"kind": config["sigmaSchedule"], "initial": config["sigma"], "minimum": config["sigmaMinimum"]},
             "generations": config["maxGenerations"],

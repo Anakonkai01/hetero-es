@@ -12,7 +12,7 @@ from heteroes.eval.cot_workload import generate as cot_generate
 from heteroes.eval.cot_workload import make_questions
 from heteroes.eval.generate import generate_answer, generate_answers
 from heteroes.eval.workload import EXAMPLES
-from heteroes.noise.contracts import CUDA_ENGINE_VERSION, ENGINE_VERSION
+from heteroes.noise.contracts import CUDA_ENGINE_VERSION, ENGINE_VERSION, CPU_ENGINES
 
 # (level, count) of each long workload; the names are those of `heteroes.eval.workloads`
 _COT = {"cot_l3_q32": (3, 32), "cot_l3_q64": (3, 64), "cot_l1_q128": (1, 128)}
@@ -57,20 +57,20 @@ def _tagged(function):
 
 def noise_ops(engine_version: str, chunk_elements: int | None):
     """(perturb(model, schema, seed, sigma), update(model, schema, seeds, coefficients, alpha)) of the engine, as the executor and the coordinator use them."""
-    if engine_version == ENGINE_VERSION:
-        return _cpu(chunk_elements)
+    if engine_version in CPU_ENGINES:
+        return _cpu(chunk_elements, engine_version)
     if engine_version == CUDA_ENGINE_VERSION:
         perturb, update = _tagged(perturb_model_cuda_), _tagged(apply_coefficients_cuda_)
         return perturb, update
     raise ValueError(f"unknown noise engine version {engine_version!r}")
 
 
-def _cpu(chunk_elements):
+def _cpu(chunk_elements, engine=ENGINE_VERSION):
     def perturb(model, schema, seed, sigma):
-        return perturb_model_(model, schema, seed, sigma, chunk_elements)
+        return perturb_model_(model, schema, seed, sigma, chunk_elements, engine=engine)
 
     def update(model, schema, seeds, coefficients, alpha):
-        return apply_coefficients_(model, schema, seeds, coefficients, alpha, chunk_elements)
+        return apply_coefficients_(model, schema, seeds, coefficients, alpha, chunk_elements, engine=engine)
 
     perturb.__wrapped_by__, update.__wrapped_by__ = perturb_model_, apply_coefficients_
     return perturb, update

@@ -93,6 +93,18 @@ def documents(scorer=None, **config):
     return recipe, plan, dataset
 
 
+def test_new_cpu_runs_default_to_v2_and_explicit_legacy_stays_v1():
+    from heteroes.noise.contracts import ENGINE_VERSION, ENGINE_V2, EXPECTED_V2_NOISE_FINGERPRINT
+
+    recipe, _, _ = documents()
+    assert recipe["noise"]["engine"] == ENGINE_V2
+    assert recipe["noise"]["fingerprint"] == EXPECTED_V2_NOISE_FINGERPRINT
+    legacy, _, _ = documents(noiseEngineVersion=ENGINE_VERSION)
+    assert legacy["noise"]["engine"] == ENGINE_VERSION
+    with pytest.raises(ValueError, match="engine"):
+        documents(noiseEngineVersion="unknown")
+
+
 def test_the_generation_context_freezes_sigma_batch_scorer_and_rule():
     recipe, plan, dataset = documents(sigma={"kind": "cosine", "initial": 0.01, "minimum": 0.001})
     run = RecipeV3Run(recipe, plan)

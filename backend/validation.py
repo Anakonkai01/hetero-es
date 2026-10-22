@@ -39,6 +39,12 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
     current = scoped(current, current["workspaceId"])
     cap = capabilities()
     body = config.model_dump()
+    if body.get("recipeVersion") == 3:
+        from heteroes.noise.contracts import ENGINE_V2
+
+        body["noiseEngineVersion"] = body.get("noiseEngineVersion") or ENGINE_V2
+    else:
+        body.pop("noiseEngineVersion", None)
     if body.get("candidateSeedNamespace") is None:
         body.pop("candidateSeedNamespace", None)
     if body.get("promptFormat") is None:
@@ -114,7 +120,11 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
             profile = d["selfTest"]
             if version == 3 and coordinator_only(profile) and d["deviceId"] == body["coordinatorDeviceId"]:
                 continue  # coordination proves update arithmetic, not GPU-compatible texts for every model
-            qualification = (v3_qualification if version == 3 else v2_qualification)(profile, model["manifestHash"])
+            qualification = (
+                v3_qualification(profile, model["manifestHash"], body["noiseEngineVersion"])
+                if version == 3
+                else v2_qualification(profile, model["manifestHash"])
+            )
             if qualification == "recipe":
                 raise HTTPException(
                     422, f"Selected device requires Recipe v{version} qualification; Windows remains v1 worker-only"

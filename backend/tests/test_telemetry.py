@@ -24,6 +24,16 @@ def observation(alias="test-gpu"):
     }
 
 
+def test_availability_metadata_negotiates_and_round_trips(lab):
+    client, _, runtime, _ = lab
+    _, auth = pair(lab)
+    row = observation()
+    row["availability"] = {"cpuTemperatureC": {"status": "unsupported"}}
+    response = boot(client, auth, "boot-1", telemetry=row)
+    assert response["metricAvailabilitySupported"] is True
+    assert runtime.workers()[0]["telemetry"]["availability"] == row["availability"]
+
+
 def test_telemetry_round_trip_and_boot_reset_preserve_contribution(lab):
     c, s, r, admin = lab
     d, auth = pair(lab)

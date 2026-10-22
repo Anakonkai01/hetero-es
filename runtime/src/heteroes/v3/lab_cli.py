@@ -114,7 +114,10 @@ def managed_configuration(spec, coordinator, workers, model, dataset):
         entry = _code(sampler, "sampler")
         code.append(entry)
         sampler = "python@1:" + entry["codeSha256"]
+    from heteroes.noise.contracts import ENGINE_V2
+
     result = {
+        "noiseEngineVersion": spec.get("noiseEngineVersion") or ENGINE_V2,
         "name": spec.get("name", "CLI experiment"),
         "recipeVersion": 3,
         "modelName": spec["model"]["id"],

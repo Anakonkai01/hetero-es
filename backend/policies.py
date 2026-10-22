@@ -57,13 +57,50 @@ def v2_qualification(profile, model_hash):
     return None
 
 
-def v3_qualification(profile, model_hash):
+def v3_qualification(profile, model_hash, engine=None):
     # A native Windows profile reaches [3] only through the reference-bound worker-only validation of SelfTest.
     if profile.get("recipeVersions") != [3]:
         return "recipe"
-    if model_hash not in profile.get("qualifiedModelHashes", []):
+    from heteroes.noise.contracts import ENGINE_VERSION
+
+    engine = engine or ENGINE_VERSION
+    by_engine = profile.get("qualifiedModelsByNoiseEngine")
+    hashes = (
+        by_engine.get(engine, [])
+        if by_engine is not None
+        else (profile.get("qualifiedModelHashes", []) if profile.get("noiseVersion", ENGINE_VERSION) == engine else [])
+    )
+    if model_hash not in hashes:
         return "model"
     return None
+
+
+def noise_qualification(profile, engine):
+    """Legacy reports prove v1 only; connectivity never proves engine support."""
+    from heteroes.noise.contracts import ENGINE_VERSION, CPU_NOISE_FINGERPRINTS
+
+    engines = profile.get("supportedNoiseEngines")
+    if engines is None:
+        return None if engine == ENGINE_VERSION else "noise"
+    expected = CPU_NOISE_FINGERPRINTS.get(engine)
+    return None if expected is not None and engines.get(engine) == expected else "noise"
+
+
+def display_identity(device, *, source="recorded"):
+    """Display metadata only: never part of a recipe, seed or config hash."""
+    import time
+
+    profile = device.get("selfTest") or {}
+    return {
+        "name": device.get("displayName") or device["workerId"],
+        "gpuName": profile.get("gpuName"),
+        "gpuIndex": profile.get("gpuIndex"),
+        "gpuUUID": device.get("physicalResourceId"),
+        "deviceId": device.get("deviceId"),
+        "ownerUserId": device.get("ownerUserId"),
+        "capturedAt": time.time(),
+        "source": source,
+    }
 
 
 def storage_status(runtime):

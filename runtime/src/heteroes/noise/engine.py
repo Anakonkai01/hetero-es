@@ -1,5 +1,5 @@
 from heteroes.noise.contracts import ChunkNoiseAddress, ParameterNoiseAddress, ENGINE_VERSION
-from heteroes.noise.parallel import ordered_map
+from heteroes.noise.parallel import ordered_map, noise_threads
 
 from collections.abc import Iterator
 import numpy as np
@@ -82,7 +82,7 @@ def chunk_length(numel: int, chunk_index: int, chunk_elements: int) -> int:
 
 
 def iter_parameter_noise_chunks(
-    parameter_noise_address: ParameterNoiseAddress, numel: int
+    parameter_noise_address: ParameterNoiseAddress, numel: int, *, generate=None, engine: str = ENGINE_VERSION
 ) -> Iterator[tuple[int, int, np.ndarray]]:
     # fmt: off
     """
@@ -93,6 +93,7 @@ def iter_parameter_noise_chunks(
     ALWAYS yielded in chunk order, and each chunk is the same bytes as when generated alone.
     """
     # fmt: on
+    generate = generator_for_engine(engine) if generate is None else generate
     number_of_chunks = num_chunks(numel, parameter_noise_address.chunk_elements)
 
     def make(chunk_index: int) -> tuple[int, int, np.ndarray]:
@@ -102,13 +103,15 @@ def iter_parameter_noise_chunks(
         return (
             chunk_index,
             start_index_pos_of_tensor,
-            generate_chunk_noise(chunk_noise_address=chunk_noise_address, n=len_of_chunk),
+            generate(chunk_noise_address, len_of_chunk),
         )
 
-    yield from ordered_map(make, range(number_of_chunks))
+    yield from ordered_map(make, range(number_of_chunks), threads=noise_threads(engine))
 
 
-def generate_parameter_noise(parameter_noise_address: ParameterNoiseAddress, numel: int) -> np.ndarray:
+def generate_parameter_noise(
+    parameter_noise_address: ParameterNoiseAddress, numel: int, *, engine: str = ENGINE_VERSION
+) -> np.ndarray:
     """
     generate full noise of a tensor:
         - generate noise per chunk then combine it and return
@@ -124,7 +127,22 @@ def generate_parameter_noise(parameter_noise_address: ParameterNoiseAddress, num
     parameter_noise = np.empty(numel, dtype=np.float16)
 
     # reuse logic in iter_parameter_noise_chunks
-    for _, start_index_pos_of_tensor, chunk_noise in iter_parameter_noise_chunks(parameter_noise_address, numel):
+    for _, start_index_pos_of_tensor, chunk_noise in iter_parameter_noise_chunks(
+        parameter_noise_address, numel, engine=engine
+    ):
         parameter_noise[start_index_pos_of_tensor : start_index_pos_of_tensor + len(chunk_noise)] = chunk_noise
 
     return parameter_noise
+
+
+def generator_for_engine(engine: str):
+    """Resolve before any model write; an unknown identity never falls back to v1."""
+    from heteroes.noise.contracts import ENGINE_V2
+
+    if engine == ENGINE_VERSION:
+        return generate_chunk_noise
+    if engine == ENGINE_V2:
+        from heteroes.noise.engine_v2 import generate_chunk_noise as generate_v2
+
+        return generate_v2
+    raise ValueError(f"unknown CPU noise engine {engine!r}")

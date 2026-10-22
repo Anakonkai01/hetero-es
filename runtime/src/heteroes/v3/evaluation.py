@@ -237,7 +237,13 @@ def evaluate(
                 apply_coefficients_cuda_(model, schema, seeds, coefficients, stored.record.alpha)
             else:
                 apply_coefficients_(
-                    model, schema, seeds, coefficients, stored.record.alpha, recipe["noise"]["chunkElements"]
+                    model,
+                    schema,
+                    seeds,
+                    coefficients,
+                    stored.record.alpha,
+                    recipe["noise"]["chunkElements"],
+                    engine=recipe["noise"]["engine"],
                 )
             weights = model_weights_sha256(model, schema)
             if weights != stored.child_weights_sha256:

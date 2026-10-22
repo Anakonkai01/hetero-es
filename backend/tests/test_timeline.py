@@ -8,6 +8,26 @@ from backend.timeline import build_timeline
 FIXTURE = json.loads((Path(__file__).parent / "fixtures" / "run-fifo.json").read_text())
 
 
+def test_recorded_identity_survives_device_rename_or_removal():
+    body, snapshot = synthetic()
+    body["workerIdentities"] = {"a": {"name": "original", "gpuName": "RTX 5070 Ti", "source": "recorded"}}
+    shown = build_timeline(body, snapshot, names={"a": "renamed"})["workers"]
+    assert shown[0]["name"] == "original" and shown[0]["gpuName"] == "RTX 5070 Ti"
+    assert build_timeline(body, snapshot)["workers"][0]["name"] == "original"
+
+
+def test_block_reason_is_exposed_and_marked_once_without_a_raw_exit_stream():
+    body, snapshot = synthetic()
+    snapshot["state"]["workerStates"]["a"].update(alive=False, stopReason="needs_private_route", blockedAt=123.0)
+    snapshot["events"].append(
+        {"event": "worker_blocked", "worker_id": "a", "reason": "needs_private_route", "t": 123.0}
+    )
+    timeline = build_timeline(body, snapshot)
+    assert timeline["workers"][0]["stopReason"] == "needs_private_route"
+    assert timeline["workers"][0]["blockedAtMs"] == 123000
+    assert any(m["type"] == "worker_blocked" and m["detail"] == "needs_private_route" for m in timeline["marks"])
+
+
 def attempt(candidate, worker, started, completed=None, status="SUCCEEDED", n=1):
     return {
         "experimentId": "r",

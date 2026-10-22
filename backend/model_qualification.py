@@ -10,7 +10,9 @@ from pydantic import Field
 
 from heteroes.canonical import canonical_json_hash
 from heteroes.product.model_qualification import check_reference, verify_observations
-from .policies import FiniteStrict, has_device_reservation
+from .policies import FiniteStrict, has_device_reservation, noise_qualification
+from heteroes.noise.contracts import ENGINE_VERSION, ENGINE_V2, CPU_NOISE_FINGERPRINTS
+from typing import Literal
 from heteroes.product.cpu_coordinator import coordinator_only
 
 TERMINAL = {"COMPLETED", "FAILED", "CANCELLED"}
@@ -36,6 +38,7 @@ def restore_mismatch(report):
 
 class ProbeRequest(FiniteStrict):
     deviceId: str = Field(pattern="^[a-f0-9]{32}$")
+    noiseEngineVersion: Literal[ENGINE_VERSION, ENGINE_V2] | None = None
 
 
 class ModelQualifications:
@@ -49,24 +52,46 @@ class ModelQualifications:
     def save(self, db, job):
         db.execute("UPDATE model_probe_jobs SET body=? WHERE id=?", (json.dumps(job, allow_nan=False), job["jobId"]))
 
-    def reference(self, db, workspace, manifest_hash):
+    def reference(self, db, workspace, manifest_hash, engine=ENGINE_VERSION):
+        if engine == ENGINE_VERSION:
+            return db.execute(
+                "SELECT * FROM model_references WHERE workspace_id=? AND manifest_hash=?", (workspace, manifest_hash)
+            ).fetchone()
         return db.execute(
-            "SELECT * FROM model_references WHERE workspace_id=? AND manifest_hash=?", (workspace, manifest_hash)
+            "SELECT * FROM model_engine_references WHERE workspace_id=? AND manifest_hash=? AND engine=?",
+            (workspace, manifest_hash, engine),
         ).fetchone()
 
     def effective_profile(self, db, device, profile, workspace):
-        hashes = list(profile.get("qualifiedModelHashes", []))
-        for row in db.execute(
-            "SELECT q.manifest_hash FROM model_qualifications q JOIN model_references r ON "
-            "r.workspace_id=q.workspace_id AND r.manifest_hash=q.manifest_hash AND r.reference_hash=q.reference_hash "
-            "WHERE q.device_id=? AND q.workspace_id=? AND q.profile_hash=?",
-            (device, workspace, canonical_json_hash(profile)),
+        # Old immutable rows prove v1 only. New references have a separate engine key; neither rewrites the other.
+        by_engine = {k: list(v) for k, v in (profile.get("qualifiedModelsByNoiseEngine") or {}).items()}
+        baseline = by_engine.setdefault(profile.get("noiseVersion", ENGINE_VERSION), [])
+        for digest in profile.get("qualifiedModelHashes", []):
+            if digest not in baseline:
+                baseline.append(digest)
+        for table, engine_clause in (
+            ("model_qualifications", ""),
+            ("model_engine_qualifications", " AND r.engine=q.engine"),
         ):
-            if row[0] not in hashes:
-                hashes.append(row[0])
-        return {**profile, "qualifiedModelHashes": hashes}
+            references = "model_references" if table == "model_qualifications" else "model_engine_references"
+            engine_column = "'" + ENGINE_VERSION + "'" if not engine_clause else "q.engine"
+            for row in db.execute(
+                f"SELECT q.manifest_hash,{engine_column} FROM {table} q JOIN {references} r ON "
+                "r.workspace_id=q.workspace_id AND r.manifest_hash=q.manifest_hash AND r.reference_hash=q.reference_hash"
+                + engine_clause
+                + " WHERE q.device_id=? AND q.workspace_id=? AND q.profile_hash=?",
+                (device, workspace, canonical_json_hash(profile)),
+            ):
+                hashes = by_engine.setdefault(row[1], [])
+                if row[0] not in hashes:
+                    hashes.append(row[0])
+        return {
+            **profile,
+            "qualifiedModelHashes": sorted({h for values in by_engine.values() for h in values}),
+            "qualifiedModelsByNoiseEngine": by_engine,
+        }
 
-    def start(self, asset, device_id, current):
+    def start(self, asset, device_id, current, engine=None):
         with self.store.db() as db:
             db.execute("BEGIN IMMEDIATE")
             device = db.execute("SELECT * FROM devices WHERE id=?", (device_id,)).fetchone()
@@ -92,6 +117,9 @@ class ModelQualifications:
                 raise HTTPException(409, "A ready v3 model and an approved v3 device are required")
             if time.time() - device["seen"] >= 30 or not device["enabled"] or not device["desired"]:
                 raise HTTPException(409, "Reconnect the device and turn contribution ON")
+            engine = engine or profile.get("noiseVersion", ENGINE_VERSION)
+            if engine not in CPU_NOISE_FINGERPRINTS or noise_qualification(profile, engine):
+                raise HTTPException(409, "Update and self-test selected device for the run's noise engine")
             resource = profile.get("gpuUUID")
             if not resource or has_device_reservation(db, device_id, resource):
                 raise HTTPException(409, "Wait for confirmed physical GPU release")
@@ -103,13 +131,17 @@ class ModelQualifications:
                 raise HTTPException(409, "Wait for legacy GPU ownership release")
             self.runtime.require_command(db, device_id, "QUALIFY_MODEL")
             self.runtime.require_command(db, device_id, "CANCEL_MODEL_QUALIFICATION")
-            reference = self.reference(db, current["workspaceId"], asset["manifestHash"])
+            reference = self.reference(db, current["workspaceId"], asset["manifestHash"], engine)
             if not reference:
                 for row in db.execute(
                     "SELECT body FROM model_probe_jobs WHERE workspace_id=?", (current["workspaceId"],)
                 ):
                     other = json.loads(row[0])
-                    if other["manifestHash"] == asset["manifestHash"] and other["status"] not in TERMINAL:
+                    if (
+                        other["manifestHash"] == asset["manifestHash"]
+                        and other["status"] not in TERMINAL
+                        and other.get("noiseEngineVersion", ENGINE_VERSION) == engine
+                    ):
                         raise HTTPException(409, "Wait for the first device to establish the model reference")
             job = {
                 "jobId": uuid.uuid4().hex,
@@ -118,6 +150,7 @@ class ModelQualifications:
                 "workspaceId": current["workspaceId"],
                 "ownerUserId": current["userId"],
                 "manifestHash": asset["manifestHash"],
+                "noiseEngineVersion": engine,
                 "manifest": asset["manifest"],
                 "source": asset["source"],
                 "profileHash": canonical_json_hash(profile),
@@ -138,7 +171,7 @@ class ModelQualifications:
                 db,
                 device_id,
                 "QUALIFY_MODEL",
-                {k: job[k] for k in ("jobId", "mode", "manifest", "source", "reference")},
+                {k: job[k] for k in ("jobId", "mode", "manifest", "source", "reference", "noiseEngineVersion")},
                 "model-probe:" + job["jobId"],
             )
             self.store.audit(db, current["userId"], "MODEL_QUALIFICATION_REQUESTED", job["jobId"], job["workspaceId"])
@@ -149,7 +182,7 @@ class ModelQualifications:
         return {
             k: job[k]
             for k in ("jobId", "deviceId", "assetId", "ownerUserId", "mode", "status", "errorCode", "createdAt")
-        } | {"chunkMemory": job.get("chunkMemory")}
+        } | {"chunkMemory": job.get("chunkMemory"), "noiseEngineVersion": job.get("noiseEngineVersion", ENGINE_VERSION)}
 
     def cancel(self, db, job):
         if job["status"] in TERMINAL:
@@ -220,17 +253,25 @@ class ModelQualifications:
                         raise ValueError("Native profile changed")
                     reference = report.reference if job["mode"] == "BUILD_REFERENCE" else job["reference"]
                     check_reference(reference, job["manifest"])
+                    engine = job.get("noiseEngineVersion", ENGINE_VERSION)
+                    if reference["cell"]["recipe"]["noise"]["engine"] != engine:
+                        raise ValueError("Model reference noise engine differs")
                     evidence = verify_observations(reference, report.observations)
                     reference_hash = canonical_json_hash(reference)
-                    old = self.reference(db, job["workspaceId"], job["manifestHash"])
+                    old = self.reference(db, job["workspaceId"], job["manifestHash"], engine)
                     if old and old["reference_hash"] != reference_hash:
                         raise ValueError("Frozen reference changed")
+                    engine_args = () if engine == ENGINE_VERSION else (engine,)
                     db.execute(
-                        "INSERT OR IGNORE INTO model_references VALUES (?,?,?,?)",
-                        (job["workspaceId"], job["manifestHash"], reference_hash, json.dumps(reference)),
+                        "INSERT OR IGNORE INTO model_references VALUES (?,?,?,?)"
+                        if not engine_args
+                        else "INSERT OR IGNORE INTO model_engine_references VALUES (?,?,?,?,?)",
+                        (job["workspaceId"], job["manifestHash"], reference_hash, json.dumps(reference), *engine_args),
                     )
                     db.execute(
-                        "INSERT OR REPLACE INTO model_qualifications VALUES (?,?,?,?,?,?)",
+                        "INSERT OR REPLACE INTO model_qualifications VALUES (?,?,?,?,?,?)"
+                        if not engine_args
+                        else "INSERT OR REPLACE INTO model_engine_qualifications VALUES (?,?,?,?,?,?,?)",
                         (
                             device["id"],
                             job["workspaceId"],
@@ -238,6 +279,7 @@ class ModelQualifications:
                             job["profileHash"],
                             reference_hash,
                             json.dumps(evidence),
+                            *engine_args,
                         ),
                     )
                     job.update(status="COMPLETED", errorCode=None, chunkMemory=checked_memory(report.chunkMemory))
@@ -264,7 +306,9 @@ def install_routes(app, registry, runtime, scoped, device_auth):
 
     @app.post("/api/v1/models/{asset_id}/qualifications", status_code=201)
     def start(asset_id: str, body: ProbeRequest, current=Depends(scoped)):
-        return service.start(registry.get(asset_id, current["workspaceId"], "model"), body.deviceId, current)
+        return service.start(
+            registry.get(asset_id, current["workspaceId"], "model"), body.deviceId, current, body.noiseEngineVersion
+        )
 
     @app.get("/api/v1/models/{asset_id}/qualifications")
     def status(asset_id: str, current=Depends(scoped)):
@@ -273,6 +317,11 @@ def install_routes(app, registry, runtime, scoped, device_auth):
             reference = service.reference(db, current["workspaceId"], asset["manifestHash"])
             return {
                 "referenceHash": reference["reference_hash"] if reference else None,
+                "referenceHashesByNoiseEngine": {
+                    engine: row["reference_hash"]
+                    for engine in CPU_NOISE_FINGERPRINTS
+                    if (row := service.reference(db, current["workspaceId"], asset["manifestHash"], engine))
+                },
                 "jobs": [
                     service.public(json.loads(r[0]))
                     for r in db.execute(

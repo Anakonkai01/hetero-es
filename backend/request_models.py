@@ -36,6 +36,7 @@ class Configuration(BaseModel):
     coordinatorDeviceId: str | None = None
     backupPolicy: dict | None = None
     recipeVersion: int = Field(default=1, ge=1, le=3, strict=True)
+    noiseEngineVersion: Literal["numpy_pcg64_normal_f32_to_f16_v1", "pcg64_u32_to_f16_normal_quantile_v2"] | None = None
     batchSize: int = Field(default=32, ge=1, le=1024, strict=True)
     batchSeed: int = Field(default=11, ge=0, lt=2**53, strict=True)
     sigmaSchedule: str = "constant"
@@ -116,4 +117,4 @@ class Resume(Strict):
 class MembershipRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     workerId: str = Field(min_length=1, max_length=100)
-    action: Literal["add", "remove"]
+    action: Literal["add", "remove", "retry"]

@@ -38,7 +38,9 @@ def test_cpu_qualification_never_runs_a_text_probe_or_claims_a_qualified_model(m
     assert result["runtimeProfile"] == PROFILE and result["recipeVersions"] == [3]
     assert result["qualifiedModelHashes"] == [] and result["vramTotalMb"] == 0
     assert "gpuUUID" not in result
-    assert result["compatibility"] == {"updateKnownAnswer": UPDATE_EVIDENCE}
+    from heteroes.product.cpu_coordinator import UPDATE_EVIDENCE_V2
+
+    assert result["compatibility"] == {"updateKnownAnswer": UPDATE_EVIDENCE, "updateKnownAnswerV2": UPDATE_EVIDENCE_V2}
     assert result["environment"]["device"] == "cpu"
     assert result["updateSecondsPerSeed"] is None  # no full-model measurement from a synthetic vector
 

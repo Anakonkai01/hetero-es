@@ -6,6 +6,7 @@ import json
 import pytest
 
 from heteroes.canonical import canonical_json_hash
+from heteroes.noise.contracts import ENGINE_V2, ENGINE_VERSION
 from heteroes.product.model_qualification import PROFILE, SEED, _documents, cell_configs, reference_rows
 from labkit import boot, enable, pair, queued
 from test_v3_study import assets, configuration, qualify_v3, v3_study as study_fixture
@@ -33,10 +34,10 @@ def setup(study, alias="probe-gpu"):
     return lab, device, auth, model
 
 
-def report_inputs(model):
+def report_inputs(model, engine=ENGINE_V2):
     """Synthetic observations exercise admission, not GPU numerical compatibility."""
     manifest = model["manifest"]
-    recipe, plan = _documents(manifest, "a" * 64, "b" * 64)
+    recipe, plan = _documents(manifest, "a" * 64, "b" * 64, engine)
     common = {
         "recipeHash": canonical_json_hash(recipe),
         "modelManifestHash": model["manifestHash"],
@@ -54,7 +55,9 @@ def report_inputs(model):
         "seed": SEED,
         "rows": reference_rows(),
         "cell": {
-            "config": cell_configs(manifest["modelId"], manifest["revision"])["full"],
+            "config": cell_configs(
+                manifest["modelId"], manifest["revision"], None if engine == ENGINE_VERSION else engine
+            )["full"],
             "recipe": recipe,
             "plan": plan,
             "expected": positive,
@@ -70,7 +73,9 @@ def route(model):
 
 def start(lab, device, model):
     c, _, _, admin = lab
-    response = c.post(route(model), headers=admin, json={"deviceId": device["deviceId"]})
+    response = c.post(
+        route(model), headers=admin, json={"deviceId": device["deviceId"], "noiseEngineVersion": ENGINE_V2}
+    )
     assert response.status_code == 201, response.text
     return response.json()
 
@@ -110,7 +115,7 @@ def test_first_reference_then_second_device_reproduces_it(v3_study):
     assert job["jobId"] in result["acceptedQualifications"]
     shown = c.get(route(model), headers=admin).json()
     assert shown["jobs"][0]["status"] == "COMPLETED"
-    assert shown["referenceHash"] == canonical_json_hash(report_inputs(model)[0])
+    assert shown["referenceHashesByNoiseEngine"][ENGINE_V2] == canonical_json_hash(report_inputs(model)[0])
     assert model["manifestHash"] in runtime.devices()[0]["selfTest"]["qualifiedModelHashes"]
     with store.db() as db:
         raw = json.loads(db.execute("SELECT self_test FROM devices WHERE id=?", (d["deviceId"],)).fetchone()[0])
@@ -183,7 +188,12 @@ def test_cancel_is_fenced_and_other_devices_cannot_release_the_gpu(v3_study):
     _, other, other_auth, _ = setup(v3_study, "other-gpu")
     job = start(lab, d, model)
     finish(c, other_auth, job, model)
-    assert c.post(route(model), headers=admin, json={"deviceId": other["deviceId"]}).status_code == 409
+    assert (
+        c.post(
+            route(model), headers=admin, json={"deviceId": other["deviceId"], "noiseEngineVersion": ENGINE_V2}
+        ).status_code
+        == 409
+    )
     assert c.post(route(model) + "/" + job["jobId"] + "/cancel", headers=admin).status_code == 200
     assert any(x["kind"] == "CANCEL_MODEL_QUALIFICATION" for x in runtime.commands(d["deviceId"]))
     finish(c, auth, job, model)
@@ -286,3 +296,41 @@ def test_a_qualification_keeps_what_the_gpu_measured_per_chunk_and_drops_anythin
     finish(c, auth2, second, model, chunkMemory={**MEMORY, "secret": "x"})
     jobs = c.get(route(model), headers=admin).json()["jobs"]
     assert jobs[0]["status"] == "COMPLETED" and jobs[0]["chunkMemory"] is None  # the qualification still stands
+
+
+def test_old_and_new_references_coexist_without_cross_engine_admission(v3_study):
+    lab, device, auth, model = setup(v3_study)
+    c, store, runtime, admin = lab
+    old = c.post(
+        route(model), headers=admin, json={"deviceId": device["deviceId"], "noiseEngineVersion": ENGINE_VERSION}
+    )
+    assert old.status_code == 201, old.text
+    reference, observations = report_inputs(model, ENGINE_VERSION)
+    finish(c, auth, old.json(), model, reference=reference, observations=observations)
+    with store.db() as db:
+        row = db.execute("SELECT * FROM model_references").fetchone()
+        old_bytes = tuple(row)
+    from backend.policies import v3_qualification
+
+    profile = runtime.devices()[0]["selfTest"]
+    assert v3_qualification(profile, model["manifestHash"], ENGINE_VERSION) is None
+    assert v3_qualification(profile, model["manifestHash"], ENGINE_V2) == "model"
+    new = start(lab, device, model)
+    assert new["mode"] == "BUILD_REFERENCE"
+    finish(c, auth, new, model)
+    profile = runtime.devices()[0]["selfTest"]
+    for engine in (ENGINE_VERSION, ENGINE_V2):
+        assert v3_qualification(profile, model["manifestHash"], engine) is None
+    with store.db() as db:
+        assert tuple(db.execute("SELECT * FROM model_references").fetchone()) == old_bytes
+        assert db.execute("SELECT count(*) FROM model_engine_references").fetchone()[0] == 1
+
+
+def test_new_engine_probe_rejects_a_valid_old_engine_reference(v3_study):
+    lab, device, auth, model = setup(v3_study)
+    c, _, runtime, admin = lab
+    job = start(lab, device, model)
+    reference, observations = report_inputs(model, ENGINE_VERSION)
+    finish(c, auth, job, model, reference=reference, observations=observations)
+    assert c.get(route(model), headers=admin).json()["jobs"][0]["errorCode"] == "MODEL_QUALIFICATION_MISMATCH"
+    assert model["manifestHash"] not in runtime.devices()[0]["selfTest"]["qualifiedModelHashes"]

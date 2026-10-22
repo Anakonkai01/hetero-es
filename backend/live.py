@@ -36,15 +36,20 @@ class LiveStreams:
         try:
             while True:
                 body, snapshot, names = await run_in_threadpool(
-                    lambda: (store.get(run_id), store.snapshot(run_id), store.device_names())
+                    lambda: (store.get(run_id), store.snapshot(run_id), store.device_identities())
                 )
                 # The clock is left out of the comparison: only real changes are worth sending.
                 current = json.dumps(
-                    build_timeline(body, snapshot, now_ms=0, names=names), sort_keys=True, separators=(",", ":"), allow_nan=False
+                    build_timeline(body, snapshot, now_ms=0, names=names),
+                    sort_keys=True,
+                    separators=(",", ":"),
+                    allow_nan=False,
                 )
                 if current != fingerprint:
                     fingerprint = current
-                    payload = json.dumps(build_timeline(body, snapshot, names=names), separators=(",", ":"), allow_nan=False)
+                    payload = json.dumps(
+                        build_timeline(body, snapshot, names=names), separators=(",", ":"), allow_nan=False
+                    )
                     yield f"event: timeline\ndata: {payload}\n\n"
                     last_sent = loop.time()
                 if not body or body.get("status") in TERMINAL or loop.time() - started > self.max_seconds:

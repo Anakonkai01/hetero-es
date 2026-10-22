@@ -51,7 +51,15 @@ def assets(study):
 
 
 def qualify_v3(c, device_auth, profile, model):
-    profile.update(recipeVersions=[3], qualifiedModelHashes=[model["manifestHash"]])
+    from heteroes.noise.contracts import CPU_NOISE_FINGERPRINTS, ENGINE_V2
+
+    profile.update(
+        recipeVersions=[3],
+        qualifiedModelHashes=[model["manifestHash"]],
+        supportedNoiseEngines=dict(CPU_NOISE_FINGERPRINTS),
+        noiseVersion=ENGINE_V2,
+        qualifiedModelsByNoiseEngine={ENGINE_V2: [model["manifestHash"]]},
+    )
     profile["compatibility"]["recipeV3"] = {
         "passed": True,
         "repeatIdentical": True,

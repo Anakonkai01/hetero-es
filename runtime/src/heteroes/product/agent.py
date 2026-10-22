@@ -19,7 +19,7 @@ import urllib.request
 import uuid
 from heteroes.http_transport import USER_AGENT
 from .files import events, read_json, write_json
-from .run_supervisor import MAX_LAUNCHES, RunSupervisor, TERMINAL, QUIESCENT, ROOT, launched, validate
+from .run_supervisor import MAX_LAUNCH_ID, RunSupervisor, TERMINAL, QUIESCENT, ROOT, launched, validate
 from .remote import alive, identity, worker_environment, handle as remote_handle
 from .platform_process import acquire_instance_lock, ProcessIdentityUnknown, spawn_options
 from .storage import data_root, worker_cache
@@ -33,6 +33,7 @@ COMMAND_KINDS = frozenset(
         "CANCEL_ASSIGNMENT",
         "UPDATE_BACKUP_POLICY",
         "UPDATE_MEMBERSHIP",
+        "RETRY_WORKER",
         "PAUSE_ASSIGNMENT",
         "QUALIFY_MODEL",
         "CANCEL_MODEL_QUALIFICATION",
@@ -389,6 +390,7 @@ class Agent:
         self.last_rtt_ms = None
         self.telemetry_supported = False
         self.detailed_telemetry_supported = False
+        self.metric_availability_supported = False
         self.telemetry = TelemetrySampler(
             self.root,
             self.config.get("largeDataDirectory"),
@@ -435,7 +437,7 @@ class Agent:
         if type(recovery) is not int or recovery not in (0, 1):
             raise InvalidCommand("Invalid recovery attempt")
         launch = command.get("launch", 0)
-        if type(launch) is not int or not 0 <= launch < MAX_LAUNCHES:
+        if type(launch) is not int or not 0 <= launch < MAX_LAUNCH_ID:
             raise InvalidCommand("Invalid worker launch")
         return (
             self.root / "workers" / command["assignmentId"] / (f"r{recovery}-l{launch}" if launch else f"r{recovery}")
@@ -560,7 +562,15 @@ class Agent:
             if db.execute("SELECT 1 FROM processed WHERE id=?", (cid,)).fetchone():
                 return
             if (
-                kind in ("COORDINATE", "START_WORKER", "PAUSE_ASSIGNMENT", "UPDATE_BACKUP_POLICY", "UPDATE_MEMBERSHIP")
+                kind
+                in (
+                    "COORDINATE",
+                    "START_WORKER",
+                    "PAUSE_ASSIGNMENT",
+                    "UPDATE_BACKUP_POLICY",
+                    "UPDATE_MEMBERSHIP",
+                    "RETRY_WORKER",
+                )
                 and db.execute(
                     "SELECT 1 FROM released WHERE assignment_id=?", (command.get("assignmentId"),)
                 ).fetchone()
@@ -613,6 +623,17 @@ class Agent:
                     matched = True
             if not matched:
                 raise RuntimeError("Wait for the assignment before applying its policy")
+        elif kind == "RETRY_WORKER":
+            self.worker_directory(command)
+            if not isinstance(command.get("requestId"), str) or not command["requestId"]:
+                raise InvalidCommand("Missing retry request identity")
+            for root in self.manager.root.iterdir():
+                ar = read_json(root / "assignment.json") if root.is_dir() else None
+                if ar and (ar["assignmentId"], ar["epoch"]) == (command["assignmentId"], command["epoch"]):
+                    self.manager.retry_worker(root, command.get("workerId"), command["requestId"])
+                    break
+            else:
+                raise RuntimeError("Wait for the assignment before retrying a worker")
         elif kind == "UPDATE_MEMBERSHIP":
             self.worker_directory(command)
             change = membership_change(command.get("change"))
@@ -901,6 +922,8 @@ class Agent:
         }
         write_json(self.root / "telemetry.json", telemetry)
         wire_telemetry = telemetry
+        if not self.metric_availability_supported:
+            wire_telemetry = {key: value for key, value in telemetry.items() if key != "availability"}
         if not self.detailed_telemetry_supported:
             from .telemetry import legacy_observation
 
@@ -923,6 +946,7 @@ class Agent:
         self.last_rtt_ms = (time.monotonic() - poll_started) * 1000
         self.telemetry_supported = response.get("telemetrySupported") is True
         self.detailed_telemetry_supported = response.get("detailedTelemetrySupported") is True
+        self.metric_availability_supported = response.get("metricAvailabilitySupported") is True
         self.model_qualification_supported = response.get("modelQualificationSupported") is True
         self.probes.acknowledge(response.get("acceptedQualifications", []))
         # The first poll of a new boot always returns OFF. A user-authenticated

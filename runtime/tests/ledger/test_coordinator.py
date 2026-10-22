@@ -280,12 +280,12 @@ def test_the_update_is_recorded_before_the_weights_are_touched(env, monkeypatch)
     real = coordinator_module.apply_coefficients_
     seen = []
 
-    def inspect_then_apply(model, schema, seeds, coefficients, alpha, chunk_elements):
+    def inspect_then_apply(model, schema, seeds, coefficients, alpha, chunk_elements, **kwargs):
         stored = env.ledger.get_update("exp", 0)
         seen.append(
             (stored is not None, stored.applied_at if stored else "no record", model_weights_sha256(model, schema))
         )
-        return real(model, schema, seeds, coefficients, alpha, chunk_elements)
+        return real(model, schema, seeds, coefficients, alpha, chunk_elements, **kwargs)
 
     monkeypatch.setattr(coordinator_module, "apply_coefficients_", inspect_then_apply)
     parent = model_weights_sha256(env.model, env.schema)

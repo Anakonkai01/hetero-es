@@ -40,7 +40,13 @@ class AgentCommands:
                     job = json.loads(probe[0])
                     if job["cancelRequested"] or job["status"] in ("COMPLETED", "FAILED", "CANCELLED"):
                         continue
-                if command["kind"] in ("COORDINATE", "START_WORKER", "PAUSE_ASSIGNMENT", "UPDATE_BACKUP_POLICY"):
+                if command["kind"] in (
+                    "COORDINATE",
+                    "START_WORKER",
+                    "PAUSE_ASSIGNMENT",
+                    "UPDATE_BACKUP_POLICY",
+                    "RETRY_WORKER",
+                ):
                     assignment = db.execute(
                         "SELECT released FROM assignments WHERE id=? AND epoch=?",
                         (command["assignmentId"], command["epoch"]),

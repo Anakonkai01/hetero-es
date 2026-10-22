@@ -32,6 +32,12 @@ def install_routes(app, store, runtime, platform):
                 others = [json.loads(r[0]) for r in db.execute("SELECT profile FROM users WHERE id<>?", (user_id,))]
                 if not any(p.get("platformAdmin") and p["accountStatus"] == "ACTIVE" for p in others):
                     raise HTTPException(409, "Keep at least one active platform administrator")
+            if user_id == current["userId"] and (
+                updated.get("accountStatus") != "ACTIVE"
+                or (old.get("platformAdmin") and not updated.get("platformAdmin"))
+                or (old.get("canCreateWorkspace") and not updated.get("canCreateWorkspace"))
+            ):
+                raise HTTPException(409, "You cannot remove your own access or permissions")
             db.execute("UPDATE users SET profile=? WHERE id=?", (json.dumps(updated), user_id))
             if updated["accountStatus"] != "ACTIVE":
                 db.execute("DELETE FROM sessions WHERE user_id=?", (user_id,))
@@ -50,6 +56,8 @@ def install_routes(app, store, runtime, platform):
             platform(current)
             if not store.profile(user_id):
                 raise HTTPException(404, "Account not found")
+            if user_id == current["userId"]:
+                raise HTTPException(409, "Use your account security page to sign out other sessions")
             db.execute("DELETE FROM sessions WHERE user_id=?", (user_id,))
             store.audit(db, current["userId"], "REVOKE_SESSIONS", user_id)
         return Response(status_code=204)

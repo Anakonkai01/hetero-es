@@ -237,6 +237,19 @@ class Store:
         with self.db() as db:
             return {r[0]: r[1] for r in db.execute("SELECT worker_id,name FROM devices WHERE name<>''")}
 
+    def device_identities(self):
+        with self.db() as db:
+            return {
+                row["worker_id"]: {
+                    "name": row["name"],
+                    "gpuName": json.loads(row["self_test"]).get("gpuName"),
+                    "gpuUUID": json.loads(row["self_test"]).get("gpuUUID"),
+                    "gpuIndex": json.loads(row["self_test"]).get("gpuIndex"),
+                    "source": "current",
+                }
+                for row in db.execute("SELECT worker_id,name,self_test FROM devices")
+            }
+
     def snapshot(self, run_id):
         with self.db() as db:
             row = db.execute("SELECT snapshot FROM experiments WHERE id=?", (run_id,)).fetchone()
@@ -386,6 +399,11 @@ class Store:
             complete = [item for item in generations if item["status"] == "COMPLETED"]
             body["completedGenerations"] = snapshot.get("completedGenerationCount", len(complete))
             body["monitoringPartial"] = bool(snapshot.get("monitoringPartial"))
+            body["workerBlocks"] = {
+                worker: {"reason": value["stopReason"], "blockedAt": value.get("blockedAt")}
+                for worker, value in state.get("workerStates", {}).items()
+                if value.get("stopReason")
+            }
             if snapshot.get("auditSummary") is not None:
                 body["auditSummary"] = snapshot["auditSummary"]
             if isinstance(

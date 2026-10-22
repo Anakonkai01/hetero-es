@@ -134,14 +134,24 @@ def build_documents(
     from heteroes.noise.contracts import EXPECTED_CUDA_NOISE_FINGERPRINT
     from heteroes.noise.selftest import EXPECTED_NOISE_FINGERPRINT
 
-    engine = config.get("noiseEngine", "cpu")
+    from heteroes.noise.contracts import ENGINE_V2, EXPECTED_V2_NOISE_FINGERPRINT
+
+    engine = config.get("noiseEngineVersion") or config.get("noiseEngine", "cpu")
+    if engine not in ("cpu", "cuda", ENGINE_VERSION, ENGINE_V2, CUDA_ENGINE_VERSION):
+        raise ValueError(f"unknown noise engine {engine!r}")
+    engine = {"cpu": ENGINE_V2, "cuda": CUDA_ENGINE_VERSION}.get(engine, engine)
     noise = {
-        "cpu": {
+        ENGINE_V2: {
+            "engine": ENGINE_V2,
+            "chunkElements": DEFAULT_CHUNK_ELEMENTS,
+            "fingerprint": EXPECTED_V2_NOISE_FINGERPRINT,
+        },
+        ENGINE_VERSION: {
             "engine": ENGINE_VERSION,
             "chunkElements": DEFAULT_CHUNK_ELEMENTS,
             "fingerprint": EXPECTED_NOISE_FINGERPRINT,
         },
-        "cuda": {
+        CUDA_ENGINE_VERSION: {
             "engine": CUDA_ENGINE_VERSION,
             "chunkElements": CUDA_CALL_ELEMENTS,
             "fingerprint": EXPECTED_CUDA_NOISE_FINGERPRINT,

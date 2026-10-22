@@ -220,7 +220,14 @@ class CandidateExecutor:
             if self.recipe.engine_version == CUDA_ENGINE_VERSION:
                 perturb_model_cuda_(self.model, self.schema, descriptor.seed, scale)
             else:
-                perturb_model_(self.model, self.schema, descriptor.seed, scale, self.recipe.chunk_elements)
+                perturb_model_(
+                    self.model,
+                    self.schema,
+                    descriptor.seed,
+                    scale,
+                    self.recipe.chunk_elements,
+                    engine=self.recipe.engine_version,
+                )
             now = self._clock()
             timing["perturb"], mark = now - mark, now
             self._eval.refresh()  # an FP32 copy takes the perturbed weights (nothing to do in FP16)

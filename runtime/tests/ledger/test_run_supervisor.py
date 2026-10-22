@@ -399,6 +399,58 @@ def restarting(manager, monkeypatch, states, members=("local", "late"), probe=la
 ALIVE = {"alive": True, "ready": True, "confirmed": True}
 
 
+def blocked_member(manager, monkeypatch):
+    root, calls, clock, polls = restarting(manager, monkeypatch, {"local": ALIVE, "late": ALIVE})
+    relay = manager.remote
+
+    def remote(worker, request):
+        if worker["id"] == "late" and request["action"] == "poll":
+            return {"alive": False, "ready": True, "events": [{"event": "exit", "reason": "needs_private_route"}]}
+        return relay(worker, request)
+
+    monkeypatch.setattr(manager, "remote", remote)
+    manager.tick(root)
+    return root, calls, clock
+
+
+def test_private_route_failure_blocks_only_that_member_and_never_restarts(manager, monkeypatch):
+    root, calls, clock = blocked_member(manager, monkeypatch)
+    for _ in range(6):
+        clock[0] += run_supervisor.RESTART_SECONDS
+        manager.tick(root)
+    assert not [call for call in calls if call[0] == "late" and call[1] == "start"]
+    state = manager.state(root)
+    assert state["status"] == "RUNNING" and state["workerStates"]["local"]["alive"]
+    assert state["workerStates"]["late"]["stopReason"] == "needs_private_route"
+    assert read_json(root / "worker-blocks.json")["late"]["reason"] == "needs_private_route"
+    assert not (manager.root / "quarantine.json").exists()
+    events = [json.loads(line) for line in (root / "lifecycle.jsonl").read_text().splitlines()]
+    assert sum(e["event"] == "worker_blocked" for e in events) == 1
+
+
+def test_block_survives_transient_state_reset_and_rejoin(manager, monkeypatch):
+    root, calls, clock = blocked_member(manager, monkeypatch)
+    manager.save(root, workerStates={"local": ALIVE})
+    manager._follow_membership(root, manager.state(root))
+    assert manager.state(root)["workerStates"]["late"]["stopReason"] == "needs_private_route"
+    manager._start_one(root, "late", {}, 1)
+    assert not [call for call in calls if call[0] == "late" and call[1] == "start"]
+
+
+def test_explicit_retry_is_idempotent_and_same_failure_blocks_again(manager, monkeypatch):
+    root, calls, clock = blocked_member(manager, monkeypatch)
+    manager.retry_worker(root, "late", "retry-1")
+    clock[0] += run_supervisor.RESTART_SECONDS
+    manager.tick(root)
+    assert len([call for call in calls if call[0] == "late" and call[1] == "start"]) == 1
+    assert manager.state(root)["workerStates"]["late"]["stopReason"] == "needs_private_route"
+    manager.retry_worker(root, "late", "retry-1")
+    for _ in range(3):
+        clock[0] += run_supervisor.RESTART_SECONDS
+        manager.tick(root)
+    assert len([call for call in calls if call[0] == "late" and call[1] == "start"]) == 1
+
+
 def test_a_member_whose_worker_died_is_started_again_once_its_device_is_on(manager, monkeypatch):
     back = []
     states = {"local": ALIVE, "late": {"alive": False, "ready": True, "confirmed": True}}
@@ -543,3 +595,51 @@ def test_a_start_whose_outcome_is_unknown_says_why(manager, monkeypatch):
     manager._launch_worker(root, "remote", {}, 0, 0)
     event = json.loads((root / "lifecycle.jsonl").read_text().splitlines()[-1])
     assert (event["event"], event["error"], event["httpStatus"]) == ("worker_start_unknown", "HTTPError", 403)
+
+
+def test_explicit_retry_can_launch_once_after_the_automatic_limit(manager, monkeypatch):
+    root, calls, clock = blocked_member(manager, monkeypatch)
+    states = manager.state(root)["workerStates"]
+    states["late"]["launch"] = run_supervisor.MAX_LAUNCHES - 1
+    manager.save(root, workerStates=states)
+    manager.retry_worker(root, "late", "retry-limit")
+    manager.tick(root)
+    starts = [call for call in calls if call[0] == "late" and call[1] == "start"]
+    assert len(starts) == 1
+    assert starts[0][2] == run_supervisor.MAX_LAUNCHES
+    clock[0] += run_supervisor.RESTART_SECONDS
+    manager.tick(root)
+    assert len([call for call in calls if call[0] == "late" and call[1] == "start"]) == 1
+
+
+def test_pending_explicit_retry_does_not_reconsume_the_old_exit_when_probe_is_away(manager, monkeypatch):
+    root, calls, clock = blocked_member(manager, monkeypatch)
+    manager.retry_worker(root, "late", "retry-offline")
+    relay = manager.remote
+
+    def away(worker, request):
+        if worker["id"] == "late" and request["action"] == "probe":
+            raise RuntimeError("away")
+        return relay(worker, request)
+
+    monkeypatch.setattr(manager, "remote", away)
+    manager.tick(root)
+    assert read_json(root / "worker-blocks.json") == {}
+    assert manager.state(root)["workerStates"]["late"]["retryPending"]
+    monkeypatch.setattr(manager, "remote", relay)
+    clock[0] += run_supervisor.RESTART_SECONDS
+    manager.tick(root)
+    assert len([call for call in calls if call[0] == "late" and call[1] == "start"]) == 1
+    assert manager.state(root)["workerStates"]["late"]["stopReason"] == "needs_private_route"
+
+
+def test_a_persistent_block_keeps_the_launch_identity_after_process_state_is_cleared(manager, monkeypatch):
+    root, calls, clock = blocked_member(manager, monkeypatch)
+    block = read_json(root / "worker-blocks.json")
+    block["late"]["launch"] = 7
+    write_json(root / "worker-blocks.json", block)
+    manager.save(root, workerStates={})
+    manager._start_one(root, "late", {}, 0)
+    manager.retry_worker(root, "late", "retry-after-resume")
+    manager.tick(root)
+    assert ("late", "start", 8) in calls

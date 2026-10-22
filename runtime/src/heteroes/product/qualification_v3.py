@@ -32,7 +32,7 @@ def reference_rows():
     return [{"prompt": f"Compute {a} * {b}. Reply with only the integer.", "answer": a * b} for a, b in pairs]
 
 
-def cell_configs(model_id, revision):
+def cell_configs(model_id, revision, engine=None):
     """The SDK configurations of the two cells, without local paths."""
     common = {
         "model": {"id": model_id, "revision": revision},
@@ -43,6 +43,7 @@ def cell_configs(model_id, revision):
         "evalDtype": "float32",
         "decoder": "hf_generate",
         "noiseEngine": "cpu",
+        **({"noiseEngineVersion": engine} if engine is not None else {}),
         "population": 2,
         "generations": 1,
         "alpha": 0.001,
@@ -94,6 +95,8 @@ def observe(model_path, config, rows, seed, device, emit=lambda event: None, ada
         rows_file = root / "rows.json"
         rows_file.write_text(json.dumps(rows), encoding="utf-8")
         config = json.loads(json.dumps(config))
+        if expected is not None:
+            config["noiseEngineVersion"] = expected["recipe"]["noise"]["engine"]
         config["model"]["path"], config["data"]["path"] = str(model_path), str(rows_file)
         ready = prepare(config, root / "run", device, initial_adapter=adapter)
         run = ready["run"]
@@ -156,14 +159,22 @@ def observe(model_path, config, rows, seed, device, emit=lambda event: None, ada
         return run, observations
 
 
-def build_reference(model_path, model_id, revision, adapter, device="cuda", emit=lambda event: None):
+def build_reference(model_path, model_id, revision, adapter, device="cuda", emit=lambda event: None, *, engine=None):
     """Observe both cells on this machine and keep what it produced as the reference (repeats must agree)."""
     from heteroes.runtime_info import environment_info
 
     rows, cells = reference_rows(), {}
-    for name, config in cell_configs(model_id, revision).items():
+    from heteroes.noise.contracts import ENGINE_VERSION
+
+    for name, config in cell_configs(model_id, revision, engine).items():
         run, observations = observe(
-            model_path, config, rows, SEED, device, emit, adapter=adapter if name == "lora" else None
+            model_path,
+            {**config, "noiseEngineVersion": engine or ENGINE_VERSION},
+            rows,
+            SEED,
+            device,
+            emit,
+            adapter=adapter if name == "lora" else None,
         )
         cell = {"config": config, "recipe": run.recipe, "plan": run.plan}
         cell |= {"expected": observations[1][0], "negativeExpected": observations[-1][0]}
@@ -206,7 +217,15 @@ def update_seconds_per_seed(model_path, recipe, device, seeds=(1, 2)):
     if device == "cuda":
         torch.cuda.synchronize()
     started = time.perf_counter()
-    apply_coefficients_(model, schema, list(seeds), [1.0, -1.0], 1e-3, recipe["noise"]["chunkElements"])
+    apply_coefficients_(
+        model,
+        schema,
+        list(seeds),
+        [1.0, -1.0],
+        1e-3,
+        recipe["noise"]["chunkElements"],
+        engine=recipe["noise"]["engine"],
+    )
     if device == "cuda":
         torch.cuda.synchronize()
     return round((time.perf_counter() - started) / len(seeds), 3)
@@ -231,6 +250,9 @@ def qualify(model_path, reference, reference_dir, device="cuda", emit=lambda eve
     if _file_sha256(adapter) != reference["adapter"]["sha256"]:
         raise ValueError("Pinned reference adapter file differs")
     check_noise_selftest()
+    from heteroes.model.loading import checked_cpu_noise_engines
+
+    supported_noise_engines = checked_cpu_noise_engines()
     evidence = {}
     for name in ("full", "lora"):
         cell = reference["cells"][name]
@@ -257,7 +279,9 @@ def qualify(model_path, reference, reference_dir, device="cuda", emit=lambda eve
         "gpuName": gpu["gpuName"],
         "vramTotalMb": gpu["vramTotalMb"],
         **({"gpuUUID": gpu["gpuUUID"]} if "gpuUUID" in gpu else {}),
+        **({"gpuIndex": gpu["gpuIndex"]} if "gpuIndex" in gpu else {}),
         "noiseVersion": reference["cells"]["full"]["recipe"]["noise"]["engine"],
+        "supportedNoiseEngines": supported_noise_engines,
         "platform": "windows" if sys.platform == "win32" else "linux",
         "runtimeProfile": PROFILE,
         "recipeVersions": [3],
