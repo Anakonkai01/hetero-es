@@ -100,7 +100,8 @@ class Lab:
 
     def devices(self):
         """The GPUs of this workspace, with what the lab knows about each."""
-        return [Device.of(value) for value in self.request("GET", "/api/v1/workers")]
+        values = self.request("GET", "/api/v1/workers")
+        return [Device.of(v) for v in values if v.get("approvalStatus") != "REVOKED"]
 
     def device(self, name):
         found = [d for d in self.devices() if name in (d.name, d.worker_id, d.device_id)]

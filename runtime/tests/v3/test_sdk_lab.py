@@ -127,3 +127,14 @@ def test_a_reported_chunk_measurement_keeps_its_small_numeric_shape_only():
     ):
         with pytest.raises(ValueError):
             check(broken)
+
+
+def test_the_device_table_leaves_out_revoked_devices():
+    from heteroes.sdk_lab import Lab
+
+    lab = Lab.__new__(Lab)
+    lab.request = lambda method, path, *a, **k: [
+        {"workerId": "w-ok", "deviceId": "d-ok", "approvalStatus": "APPROVED"},
+        {"workerId": "w-old", "deviceId": "d-old", "approvalStatus": "REVOKED"},
+    ]
+    assert [d.worker_id for d in lab.devices()] == ["w-ok"]
