@@ -1,5 +1,7 @@
 """The managed run's scheduling (ADR-009): the chosen policy, only the selected workers, one book seeded from the ledger."""
 
+import pytest
+
 from heteroes.dispatch import AdmittedOnly, Greedy, GreedyTail
 from heteroes.ledger import Ledger
 from heteroes.product.runner import scheduling
@@ -49,3 +51,22 @@ def test_time_limits_follow_the_measured_speeds_but_never_drop_below_the_old_fix
     assert derived_limit(book, ["a", "b"], 1, floor=120, factor=3) == 900.0  # one audit by the slowest member
     assert derived_limit(book, lambda: ["a"], 1, floor=120, factor=3) == 120  # members may be a function
     assert scheduling(config(), Ledger(":memory:", clock=FakeClock())).book is not None
+
+
+def test_background_base_validation_is_waited_for_and_its_failure_is_raised():
+    import threading
+
+    from heteroes.product.runner import _Background
+
+    gate, done = threading.Event(), []
+    job = _Background(lambda: (gate.wait(5), done.append(True)))
+    assert done == []
+    gate.set()
+    job.join()
+    assert done == [True]
+
+    def fail():
+        raise ValueError("validation failed")
+
+    with pytest.raises(ValueError, match="validation failed"):
+        _Background(fail).join()

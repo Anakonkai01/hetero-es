@@ -176,6 +176,14 @@ def run_product(cfg, tmp_path, python_scorer=None):
         assert read_json(tmp_path / "runner.json")["status"] == "COMPLETED"
         events = [json.loads(line) for line in (tmp_path / "events.jsonl").read_text().splitlines()]
         assert next(e for e in events if e.get("event") == "managed_start")["schedulerPolicy"] == "greedy-tail"
+        # overnight 2026-10-23: the workers load their model while the coordinator validates the base model
+        kinds = [(e.get("event"), e.get("generation")) for e in events]
+        if ("generation_open", 0) in kinds:  # a fresh run (a resumed one starts after its recovery point)
+            assert (
+                kinds.index(("preparing", 0))
+                < kinds.index(("validation_completed", -1))
+                < kinds.index(("generation_open", 0))
+            )
         recipe, plan = read_json(tmp_path / "recipe.json"), read_json(tmp_path / "plan.json")
         assert recipe["weightSpace"]["kind"] == space["kind"]
         assert plan["scorer"] == cfg["scorer"]

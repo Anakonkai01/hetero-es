@@ -40,6 +40,28 @@ def apply_backup_policy(root, generation, current, emit):
     return policy
 
 
+class _Background:
+    """Run one function on a thread; `join` waits and raises what it raised."""
+
+    def __init__(self, function):
+        import threading
+
+        self.error = None
+        self.thread = threading.Thread(target=self._run, args=(function,), daemon=True)
+        self.thread.start()
+
+    def _run(self, function):
+        try:
+            function()
+        except BaseException as error:  # handed to the main thread by join
+            self.error = error
+
+    def join(self):
+        self.thread.join()
+        if self.error is not None:
+            raise self.error
+
+
 def scheduling(config, ledger, members=None):
     """The coordinator's policy factory: only the members get work (`members` returns the current ones, elastic membership;
     default: the selected workers), and one speed book serves the whole run, seeded from what the ledger already knows
@@ -95,6 +117,7 @@ def main(directory, *, device="cuda", timeout_seconds=1800):
     failure = None
     paused_checkpoint = None
     tracker = None
+    base_validation = None
     try:
         state("STARTING")
         check_noise_selftest()
@@ -268,7 +291,7 @@ def main(directory, *, device="cuda", timeout_seconds=1800):
                 from heteroes.model.weights_io import publish_weights
 
                 initial = publish_weights(loaded.model, loaded.schema, data_root(root) / "weights")
-                tracker.observe(-1, initial)
+                base_validation = lambda: tracker.observe(-1, initial)  # noqa: E731
             elif next_generation > 0:
                 tracker.observe(next_generation - 1, coordinator.parent_sha256)
         if policy and next_generation > 0:
@@ -297,13 +320,23 @@ def main(directory, *, device="cuda", timeout_seconds=1800):
         if next_generation < config["maxGenerations"]:
             coordinator.server.set_generation(_NoGeneration(), coordinator._job(next_generation, Greedy(), "PREPARING"))
             state("PREPARING", recipeHash=recipe.hash)
+            emit({"event": "preparing", "generation": next_generation})
+            # The base model is validated on this GPU while the workers load theirs (about 20 s saved per run,
+            # overnight 2026-10-23); the first generation opens only after it is done.
+            validating = _Background(base_validation) if base_validation else None
             deadline = time.monotonic() + 600
-            while not (root / "start.flag").exists():
-                if cancel():
-                    raise RunCancelled("cancelled during preparation")
-                if time.monotonic() > deadline:
-                    raise TimeoutError("worker preparation timed out")
-                time.sleep(0.25)
+            try:
+                while not (root / "start.flag").exists():
+                    if cancel():
+                        raise RunCancelled("cancelled during preparation")
+                    if time.monotonic() > deadline:
+                        raise TimeoutError("worker preparation timed out")
+                    time.sleep(0.25)
+            finally:
+                if validating:
+                    validating.join()
+        elif base_validation:
+            base_validation()
         state("RUNNING", recipeHash=recipe.hash)
         if next_generation < config["maxGenerations"]:
             coordinator.run(config["maxGenerations"])
