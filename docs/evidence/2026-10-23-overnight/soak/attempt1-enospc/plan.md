@@ -1,0 +1,11 @@
+# Soak run (declared before submission, 23 Oct ~01:45)
+
+Candidate15, engine v2 noise made on the GPU (the default), coordinator nhan, workers nhan + nhut + native Windows
+3060. Qwen 0.5B FP32, the twenty multiplication rows, last-integer, 24 antithetic candidates, batch 8, 32 new tokens,
+900 generations, validation every 50, seed namespace `overnight-soak-2026-10-23`. One declared fault: SIGKILL of nhut's
+newest worker process at completed generation 20 (it was not injected in the fault run). `soak-sampler.sh` records GPU
+memory/utilisation/temperature and HeteroES process memory on the three machines every 5 minutes.
+
+Accept if the run completes, audits have no mismatch, no worker is quarantined or blocked, memory does not grow without
+bound, and an independent ledger replay matches every child hash on nhan (GPU noise) and nhut (CPU noise). If it cannot
+finish before ~07:30 it is cancelled and the completed part is replayed and reported as such. System evidence only.

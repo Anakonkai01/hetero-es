@@ -62,6 +62,31 @@ class _Background:
             raise self.error
 
 
+def pause_check(root, reserve_bytes, emit, usage=None):
+    """The coordinator's pause request: the lab's pause, or less free disk than `reserve_bytes` where the run writes.
+
+    Overnight 2026-10-23: a soak run failed at generation 60 with "No space left on device". Pausing at the generation
+    boundary instead keeps a verified checkpoint (hard links, a few MB), so the run resumes once space is freed.
+    """
+    import shutil
+
+    usage = usage or shutil.disk_usage
+    said = []
+
+    def check():
+        if (root / "pause.flag").exists():
+            return True
+        free = usage(data_root(root)).free
+        if free >= reserve_bytes:
+            return False
+        if not said:
+            said.append(True)
+            emit({"event": "paused_low_disk", "freeBytes": free, "reserveBytes": reserve_bytes})
+        return True
+
+    return check
+
+
 def scheduling(config, ledger, members=None):
     """The coordinator's policy factory: only the members get work (`members` returns the current ones, elastic membership;
     default: the selected workers), and one speed book serves the whole run, seeded from what the ledger already knows
@@ -263,7 +288,10 @@ def main(directory, *, device="cuda", timeout_seconds=1800):
             device_tokens=None if grants is None else membership.all_grants(),
             generation_completed=recovery_point if policy or dataset is not None else None,
             generation_started=generation_started,
-            pause_requested=lambda: (root / "pause.flag").exists(),
+            # room for the next published weights, an export and a margin (each about the model's size)
+            pause_requested=pause_check(
+                root, 3 * sum(p.numel() * p.element_size() for p in loaded.model.parameters()) + 2**30, emit
+            ),
             dataset=dataset,
             **v3_options,
         )

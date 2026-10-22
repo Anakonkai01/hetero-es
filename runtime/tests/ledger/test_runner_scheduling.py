@@ -70,3 +70,21 @@ def test_background_base_validation_is_waited_for_and_its_failure_is_raised():
 
     with pytest.raises(ValueError, match="validation failed"):
         _Background(fail).join()
+
+
+def test_a_coordinator_pauses_at_the_boundary_when_its_disk_is_nearly_full(tmp_path):
+    # overnight 2026-10-23: a soak run failed at generation 60 with "No space left on device"; pausing keeps it resumable
+    from collections import namedtuple
+
+    from heteroes.product.runner import pause_check
+
+    Usage = namedtuple("Usage", "total used free")
+    free, said = [10 * 2**30], []
+    check = pause_check(tmp_path, 4 * 2**30, said.append, usage=lambda path: Usage(0, 0, free[0]))
+    assert check() is False and said == []
+    free[0] = 3 * 2**30
+    assert check() is True and check() is True
+    assert said == [{"event": "paused_low_disk", "freeBytes": 3 * 2**30, "reserveBytes": 4 * 2**30}]
+    free[0] = 10 * 2**30
+    (tmp_path / "pause.flag").touch()
+    assert check() is True

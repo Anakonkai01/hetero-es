@@ -1,0 +1,5 @@
+{"event": "worker_start_unknown", "t": 1792694601.491226, "worker_id": "cli-71b757062fd9", "error": "ConnectionError", "httpStatus": null}
+{"event": "worker_start_unknown", "t": 1792694602.0149071, "worker_id": "cli-34312a79fbbc", "error": "ConnectionError", "httpStatus": null}
+{"event": "worker_start_unknown", "t": 1792694602.7111073, "worker_id": "desktop-d9017660e75f", "error": "ConnectionError", "httpStatus": null}
+{"event": "worker_restarted", "t": 1792695038.833851, "worker_id": "cli-34312a79fbbc", "launch": 1}
+{"event": "worker_start_unknown", "t": 1792695039.3128395, "worker_id": "cli-34312a79fbbc", "error": "ConnectionError", "httpStatus": null}

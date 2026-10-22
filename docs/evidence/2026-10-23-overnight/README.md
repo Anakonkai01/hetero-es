@@ -73,3 +73,20 @@ on nhan, nhut and native Windows. Faults (`fault/fault-log.jsonl`, coordinator l
 Result: **COMPLETED 80/80 generations, 99/99 selected audits matched, no quarantine**. Independent ledger replay:
 nhan with GPU noise and nhut with `HETEROES_NOISE_DEVICE=cpu` both **ALL EQUAL (80 generations)** with the same receipt
 hash `708c0e01…` (`fault/replay-*`); no candidate text regeneration is claimed. 79 distinct parent hashes over 80 generations (78 of 79 transitions changed weights).
+
+## 5. Soak
+
+**Attempt 1 failed at generation 60: nhan's root disk was full** (`soak/attempt1-enospc/`, run
+`f10720536eba436ba026d650edbb6f16`, `failureReason: OSError: [Errno 28] No space left on device`). The run ended
+cleanly as FAILED with its final weights hash and a final recovery point; 69/69 audits had matched, the declared SIGKILL
+of nhut's worker at generation 20 was restarted in 14 s. Cause: every finished run leaves ~5.6 GB of coordinator data
+(recovery points, export, weights) under `~/.local/share/heteroes-worker/artifacts/coordinators/` and nothing removes it;
+tonight's runs had added ~67 GB to a disk that was already ~85 % full, and the soak itself held 11 recovery points
+(~1 GB each, hard-linked weights) while their upload to the lab lagged. Nothing checked free space.
+Recovery: own packaged-check fixtures deleted (9.8 GB); the coordinator data of tonight's eight finished runs was copied
+to the Archive disk (UUID verified), compared by size/path listing, and replaced by symlinks so the lab's result pages
+still resolve (`soak/disk-move.log`); 62 GB free. Product fix (not deployed during the soak): `pause_check` in
+`product/runner.py` pauses at the generation boundary when free space under the run's data directory is below
+3 × model size + 1 GiB, with a `paused_low_disk` event; the pause keeps a verified checkpoint so the run can resume once
+space is freed. Tests first, 4/4 mutants killed (`checks/low-disk-*`). Not exercised on a real full disk.
+Open product question for the owner: a retention rule for finished runs' local coordinator data.
