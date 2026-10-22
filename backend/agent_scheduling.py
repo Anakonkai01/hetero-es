@@ -116,20 +116,31 @@ class AgentScheduling:
             if worker_id not in devices:
                 raise RuntimeRejected("Select an approved worker device")
             device = devices[worker_id]
-            if db.execute("SELECT 1 FROM device_reservations WHERE device_id=?", (device["deviceId"],)).fetchone():
-                raise RuntimeRejected("Waiting for confirmed GPU release")  # busy elsewhere, or still leaving this run
+            held = db.execute(
+                "SELECT assignment_id FROM device_reservations WHERE device_id=?", (device["deviceId"],)
+            ).fetchone()
+            # still reserved by THIS run (it is leaving it right now): it may come back at once; its agent never starts
+            # the new launch beside the old one (GSM8K demo tier 2c: an add one second after the leave was refused)
+            leaving = held and held[0] == row["id"] and ar["workerDevices"].get(worker_id) == device["deviceId"]
+            if held and not leaving:
+                raise RuntimeRejected("Waiting for confirmed GPU release")  # busy elsewhere (or this run's coordinator)
             if reason := self.waiting_reason(body, db, [worker_id]) or self.store.eligibility(db, body, [worker_id]):
                 raise RuntimeRejected(reason)
             if device["physicalResourceId"] in {devices[m]["physicalResourceId"] for m in members if m in devices}:
                 raise RuntimeRejected("Selected worker aliases refer to the same physical GPU")
             change["grant"] = ar["computeGrants"][worker_id] = secrets.token_urlsafe(32)
             ar["workerDevices"][worker_id] = device["deviceId"]
+            ar.get("releasedWorkers", {}).pop(worker_id, None)
             if device["deviceId"] not in ar["deviceIds"]:
                 ar["deviceIds"].append(device["deviceId"])
             db.execute("UPDATE assignments SET body=? WHERE id=?", (json.dumps(ar), row["id"]))
-            db.execute("INSERT INTO device_reservations VALUES (?,?)", (device["deviceId"], row["id"]))
-            if device["physicalResourceId"]:
-                db.execute("INSERT INTO physical_reservations VALUES (?,?)", (device["physicalResourceId"], row["id"]))
+            if not leaving:
+                db.execute("INSERT INTO device_reservations VALUES (?,?)", (device["deviceId"], row["id"]))
+                if device["physicalResourceId"]:
+                    db.execute(
+                        "INSERT OR IGNORE INTO physical_reservations VALUES (?,?)",
+                        (device["physicalResourceId"], row["id"]),
+                    )
             device_id = device["deviceId"]
         elif action == "LEAVE":
             if worker_id not in members:
@@ -236,6 +247,8 @@ class AgentScheduling:
                 )
             ar["workerDevices"].pop(worker_id)
             ar["computeGrants"].pop(worker_id, None)
+            # the coordinator may still ask about it: the lab answers "stopped" instead of refusing (worker_command)
+            ar.setdefault("releasedWorkers", {})[worker_id] = device_id
             if device_id not in ar["workerDevices"].values() and device_id != ar["coordinatorDeviceId"]:
                 ar["deviceIds"] = [d for d in ar["deviceIds"] if d != device_id]
             changed = True

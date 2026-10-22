@@ -301,7 +301,10 @@ class RunSupervisor(ABC):
                         result[worker_id]["left"] = True  # the lab releases its GPU when it sees this
                 except Exception:
                     result[worker_id] = {**value, "confirmed": False}
-            self.log(root, "worker_left", worker_id=worker_id)
+            if result[worker_id].get("left"):
+                self.log(
+                    root, "worker_left", worker_id=worker_id
+                )  # once, when it is really out (it was logged per tick)
             self.save(root, workerStates=result)
 
     def tick(self, root):

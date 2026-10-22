@@ -336,6 +336,26 @@ def test_a_worker_that_left_is_stopped_and_not_started_again(manager, monkeypatc
     assert snapshot["membership"]["left"] == ["late"] and snapshot["state"]["workerStates"]["late"]["left"] is True
 
 
+def test_a_left_worker_whose_stop_cannot_be_confirmed_is_not_logged_as_left_every_tick(manager, monkeypatch):
+    # GSM8K demo tier 2c: the lab refused the stop of a worker it had already released; worker_left was logged per tick
+    states = {
+        "local": {"alive": True, "ready": True, "confirmed": True},
+        "late": {"alive": True, "ready": True, "confirmed": False},
+    }
+    root, calls = running_with(manager, monkeypatch, ["local"], left=["late"], states=states)
+
+    def call(worker, request):
+        if worker["id"] == "late":
+            raise RuntimeError("Device is not authorized for this assignment")
+        return {"alive": True, "ready": True, "events": []}
+
+    monkeypatch.setattr(manager, "remote", call)
+    for _ in range(3):
+        manager.tick(root)
+    log = root / "lifecycle.jsonl"
+    assert not log.exists() or "worker_left" not in log.read_text()
+
+
 def test_a_quarantined_worker_that_joins_is_not_started(manager, monkeypatch):
     root, calls = running_with(manager, monkeypatch, ["local", "late"])
     write_json(manager.root / "quarantine.json", {"late": {"runId": "x", "t": 1}})

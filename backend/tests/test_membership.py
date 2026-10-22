@@ -443,3 +443,53 @@ def test_a_resumed_experiment_keeps_the_workers_that_joined(lab):
     assert resumed["epoch"] == old["epoch"] + 1
     assert set(resumed["workerDevices"]) == {first["workerId"], late["workerId"]}
     assert resumed["computeGrants"][late["workerId"]] and resumed["config"]["workerIds"] == [first["workerId"]]
+
+
+def test_a_worker_added_back_while_still_leaving_this_run_rejoins_at_once(lab):
+    # GSM8K demo tier 2c, 2026-10-22: OFF, the LEAVE applied, then ON and add one second later: refused (409) because
+    # the device was still reserved by this same run while its stop was being confirmed
+    client, store, runtime, admin = lab
+    rid, (coordinator, ch), devices = running(lab, workers=2)
+    first = devices[0][0]
+    assert change(lab, rid, first["workerId"], "remove").status_code == 200
+    assert any(r["deviceId"] == first["deviceId"] for r in runtime.reservations())  # not confirmed stopped yet
+    again = change(lab, rid, first["workerId"])
+    assert again.status_code == 200, again.text
+    assert [r["deviceId"] for r in runtime.reservations()].count(first["deviceId"]) == 1
+    assert [c["change"]["action"] for c in membership_commands(runtime, coordinator)] == ["LEAVE", "JOIN"]
+
+
+def test_the_coordinator_hears_stopped_for_a_left_worker_the_lab_already_released(lab):
+    client, store, runtime, admin = lab
+    rid, (coordinator, ch), devices = running(lab, workers=2)
+    first = devices[0][0]
+    assert change(lab, rid, first["workerId"], "remove").status_code == 200
+    assignment = assignment_body(store, rid)
+    snapshot = {
+        "state": {"status": "RUNNING", "workerStates": {first["workerId"]: {"alive": False, "confirmed": True}}},
+        "membership": {"generation": 4, "members": [devices[1][0]["workerId"]], "left": [first["workerId"]]},
+        "generations": [],
+        "candidates": [],
+        "attempts": [],
+        "events": [],
+        "artifacts": [],
+    }
+    report = {
+        "sequence": 1,
+        "assignmentId": assignment["assignmentId"],
+        "epoch": assignment["epoch"],
+        "snapshot": snapshot,
+    }
+    boot(client, ch, "boot-1", contribution=True, reports=[report])
+    assert first["workerId"] not in assignment_body(store, rid)["workerDevices"]
+    ask = {
+        "assignmentId": assignment["assignmentId"],
+        "epoch": assignment["epoch"],
+        "workerId": first["workerId"],
+        "action": "stop",
+        "recoveryIndex": 0,
+    }
+    reply = client.post("/api/v1/device/worker-command", headers=ch, json=ask)
+    assert reply.status_code == 200, reply.text  # was 403: the coordinator retried and logged worker_left every tick
+    assert reply.json()["alive"] is False
+    assert client.post("/api/v1/device/worker-command", headers=ch, json={**ask, "action": "start"}).status_code == 403

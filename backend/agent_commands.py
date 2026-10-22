@@ -54,6 +54,15 @@ class AgentCommands:
         with self.store.db() as db:
             row, ar = self._assignment(db, body.assignmentId)
             if (
+                row["coordinator"] == device["id"]
+                and row["epoch"] == body.epoch
+                and body.workerId in ar.get("releasedWorkers", {})
+                and body.workerId not in ar["workerDevices"]
+                and body.action in ("poll", "stop")
+            ):
+                # it left and the lab gave its GPU back (confirmed stopped, or offline past the grace period)
+                return {"alive": False, "ready": False, "events": [], "released": True}
+            if (
                 row["coordinator"] != device["id"]
                 or row["epoch"] != body.epoch
                 or body.workerId not in ar["workerDevices"]
