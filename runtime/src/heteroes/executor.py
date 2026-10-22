@@ -66,6 +66,15 @@ def evaluate_task(recipe, model, tokenizer, chunk: int, rows=None) -> TaskOutcom
     return TaskOutcome(float(result.mean_reward), tuple(record.output_text for record in result.records))
 
 
+class ChunkTexts(tuple):
+    """Completions with the chunk that produced them (ADR-010)."""
+
+    def __new__(cls, texts, chunk):
+        value = super().__new__(cls, texts)
+        value.chunk = chunk
+        return value
+
+
 class CandidateExecutor:
     def __init__(
         self,
@@ -81,8 +90,11 @@ class CandidateExecutor:
         declared = getattr(
             recipe, "chunk", None
         )  # a Recipe v3 document may fix it: then it is not this worker's choice
-        if declared is not None and chunk not in (None, declared):
-            raise ValueError(f"the recipe declares chunk {declared}; this worker asked for {chunk!r}")
+        # ADR-010: a recipe may allow several chunks; the one used goes with the result
+        allowed = tuple(getattr(recipe, "chunks", ()) or ()) or ((declared,) if declared is not None else ())
+        if declared is not None and chunk not in (None, *allowed):
+            raise ValueError(f"the recipe allows chunks {allowed}; this worker asked for {chunk!r}")
+        self.allowed_chunks = allowed
         if chunk is None:
             # the recipe's, or the exact size for the recipe's precision (FP32: 16, FP16: 1)
             chunk = declared if declared is not None else default_chunk(recipe.eval_dtype)
@@ -153,7 +165,22 @@ class CandidateExecutor:
         self.parent_sha256 = actual
         return actual
 
-    def __call__(self, descriptor: CandidateDescriptor) -> float:
+    def __call__(self, descriptor: CandidateDescriptor, chunk: int | None = None) -> float:
+        """`chunk`: an audit re-runs a candidate at the chunk its first result used (ADR-010); otherwise this worker's."""
+        used = self.chunk if chunk is None else chunk
+        if self.allowed_chunks and used not in self.allowed_chunks:
+            raise CandidateFailed(FailureKind.OTHER, f"chunk {used} is not allowed by the recipe")
+        try:
+            return self._run(descriptor, used)
+        except CandidateFailed as failed:
+            declared = getattr(self.recipe, "chunk", None)
+            if failed.kind is not FailureKind.OUT_OF_MEMORY or chunk is not None or declared in (None, used):
+                raise
+            # this device cannot hold the larger chunk: from now on it uses the recipe's own, which every member can
+            self.chunk = declared
+            return self._run(descriptor, declared)
+
+    def _run(self, descriptor: CandidateDescriptor, chunk: int):
         self.last_timing = None
         self.last_completions = None
         if descriptor.recipe_hash != self.recipe.hash:
@@ -193,7 +220,7 @@ class CandidateExecutor:
             timing["perturb"], mark = now - mark, now
             self._eval.refresh()  # an FP32 copy takes the perturbed weights (nothing to do in FP16)
             # batch_rows is None without a dataset (set_generation needs one), and a dataset job without them is refused above
-            outcome = evaluate_task(self.recipe, self._eval.model, self.tokenizer, self.chunk, self.batch_rows)
+            outcome = evaluate_task(self.recipe, self._eval.model, self.tokenizer, chunk, self.batch_rows)
             reward, completions = outcome.reward, outcome.completions
             now = self._clock()
             timing["rollout"], mark = now - mark, now
@@ -221,7 +248,7 @@ class CandidateExecutor:
         if self.return_completions and outcome.token_counts is not None:
             from heteroes.v3.usage import CompletionBatch
 
-            return CompletionBatch(
+            batch = CompletionBatch(
                 completions,
                 {
                     "formatVersion": 1,
@@ -230,4 +257,8 @@ class CandidateExecutor:
                     "wallSeconds": timing["total"],
                 },
             )
+            batch.chunk = chunk if len(self.allowed_chunks) > 1 else None
+            return batch
+        if self.return_completions and len(self.allowed_chunks) > 1:
+            return ChunkTexts(completions, chunk)
         return completions if self.return_completions else reward

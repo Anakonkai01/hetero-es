@@ -140,6 +140,7 @@ def managed_configuration(spec, coordinator, workers, model, dataset):
             for key in (
                 "candidateSeedNamespace",
                 "evalChunk",
+                "evalChunks",
                 "pythonTimeoutSeconds",
                 "promptFormat",
                 "validationInterval",

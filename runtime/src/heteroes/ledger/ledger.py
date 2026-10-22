@@ -523,6 +523,12 @@ class Ledger:
                 "recorded_at REAL NOT NULL, PRIMARY KEY (candidate_id, attempt_number), "
                 "FOREIGN KEY (candidate_id, attempt_number) REFERENCES attempt (candidate_id, attempt_number))"
             )
+            # ADR-010, additive too: the prompts per generate() call that produced a candidate's texts, when the recipe
+            # allows several (absent: the recipe's own chunk)
+            self._db.execute(
+                "CREATE TABLE IF NOT EXISTS completion_chunk(candidate_id TEXT NOT NULL PRIMARY KEY "
+                "REFERENCES completion (candidate_id), chunk INTEGER NOT NULL CHECK (chunk >= 1))"
+            )
         except BaseException:
             self._db.close()
             raise
@@ -827,6 +833,7 @@ class Ledger:
         token: str,
         reward: float,
         completions: list[str] | None = None,
+        chunk: int | None = None,
     ) -> SubmitOutcome:
         """
         Commit the reward of a candidate: the worker returns the job it ran (descriptor), its attempt number, its
@@ -840,7 +847,12 @@ class Ledger:
 
         `completions` (Recipe v3) are the texts the coordinator scored into `reward`; they are stored, compressed, in the same
         transaction, so a committed reward never exists without its texts. A repeat must bring the same texts.
+        `chunk` (ADR-010) is the chunk that produced them, stored with them when the recipe allows several.
         """
+        if chunk is not None and (
+            completions is None or isinstance(chunk, bool) or not isinstance(chunk, int) or chunk < 1
+        ):
+            raise ValueError("a chunk is recorded only with completions, as a positive integer")
         _check_attempt_identity(descriptor, attempt_number, token)
         _check_reward(reward)
         texts = None if completions is None else _completions_body(completions)
@@ -882,6 +894,8 @@ class Ledger:
                 self._db.execute(
                     "INSERT INTO completion (candidate_id, sha256, body) VALUES (?, ?, ?)", (candidate_id, *texts)
                 )
+                if chunk is not None:
+                    self._db.execute("INSERT INTO completion_chunk VALUES (?, ?)", (candidate_id, chunk))
             self._db.execute(
                 "UPDATE attempt SET ended_at = ? WHERE candidate_id = ? AND attempt_number = ?",
                 (now, candidate_id, attempt_number),
@@ -890,6 +904,12 @@ class Ledger:
                 "UPDATE candidate SET state = ? WHERE candidate_id = ?", (CandidateState.COMMITTED.value, candidate_id)
             )
         return SubmitOutcome.COMMITTED
+
+    @_locked
+    def completion_chunk(self, candidate_id: str) -> int | None:
+        """The chunk a candidate's texts were produced with (ADR-010); None: the recipe's own chunk."""
+        row = self._db.execute("SELECT chunk FROM completion_chunk WHERE candidate_id = ?", (candidate_id,)).fetchone()
+        return None if row is None else row[0]
 
     @_locked
     def report_failure(

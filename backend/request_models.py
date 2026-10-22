@@ -51,6 +51,7 @@ class Configuration(BaseModel):
     momentumBeta: float | None = Field(default=None, gt=0, lt=1)
     momentumWindow: int = Field(default=4, ge=2, le=8, strict=True)
     evalChunk: int | None = Field(default=None, strict=True)
+    evalChunks: list[int] | None = Field(default=None, max_length=8)  # ADR-010: chunks a worker may use
     sampler: str = Field(default="sha256-python-random-sample-v1", max_length=64)
     candidateSeedNamespace: str | None = Field(default=None, pattern=r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$")
     systemPrompt: str | None = Field(default=None, max_length=4000)

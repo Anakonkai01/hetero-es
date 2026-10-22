@@ -163,6 +163,13 @@ def validate_options(config, *, allow_python=False, with_code=True):
         and config["evalChunk"] not in EXACT_CHUNKS[config.get("evalDtype", "float32")]
     ):
         raise ValueError("unsupported prompts per generate() call")
+    if config.get("evalChunks") is not None and (
+        not isinstance(config["evalChunks"], list)
+        or not config["evalChunks"]
+        or any(c not in EXACT_CHUNKS[config.get("evalDtype", "float32")] for c in config["evalChunks"])
+        or config.get("evalChunk") not in config["evalChunks"]
+    ):
+        raise ValueError("evalChunks lists exact chunks and includes evalChunk")
     if type(config["antithetic"]) is not bool or (config["antithetic"] and config["candidatesPerGeneration"] % 2):
         raise ValueError("antithetic sampling requires an even population")
     if config.get("sampler", "sha256-python-random-sample-v1") not in (

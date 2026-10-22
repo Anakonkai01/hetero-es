@@ -464,6 +464,7 @@ class Coordinator:
             if self._score is None
             else (lambda descriptor, texts: self._score(generation, descriptor, texts)),
             usage_sink=self.usage.record if self.usage is not None else None,
+            allowed_chunks=getattr(self.recipe, "chunks", ()) if len(getattr(self.recipe, "chunks", ())) > 1 else (),
         )
         if self._audit_rate:
             from heteroes.v3.audit import AuditAPI

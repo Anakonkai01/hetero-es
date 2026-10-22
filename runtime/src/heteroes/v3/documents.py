@@ -109,6 +109,7 @@ def validate_recipe(doc, *, translated=False):
         evaluation,
         keys
         | ({"chunk"} if "chunk" in evaluation else set())
+        | ({"chunks"} if "chunks" in evaluation else set())
         | ({"promptFormat"} if "promptFormat" in evaluation else set()),
     )
     from heteroes.v3.options import validate_prompt_format
@@ -126,6 +127,16 @@ def validate_recipe(doc, *, translated=False):
         raise ValueError(
             f"evaluation.chunk of {evaluation['evalDtype']} is one of {EXACT_CHUNKS[evaluation['evalDtype']]}"
         )
+    if "chunks" in evaluation:  # ADR-010: the chunks a worker may use; the result records which one it used
+        allowed = evaluation["chunks"]
+        if (
+            "chunk" not in evaluation
+            or not isinstance(allowed, list)
+            or any(type(c) is not int or c not in EXACT_CHUNKS[evaluation["evalDtype"]] for c in allowed)
+            or allowed != sorted(set(allowed))
+            or evaluation["chunk"] not in allowed
+        ):
+            raise ValueError("evaluation.chunks lists exact chunks in ascending order and includes evaluation.chunk")
     _hex("evaluation.generationConfigSha256", evaluation["generationConfigSha256"], _HEX64)
     if not isinstance(data, dict) or data.get("kind") not in ("builtin", "dataset"):
         raise ValueError("data is a builtin workload or an imported dataset")

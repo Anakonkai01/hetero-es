@@ -32,6 +32,8 @@ class RecipeV3Run:
         self.engine_version, self.chunk_elements = noise["engine"], noise["chunkElements"]
         self.eval_dtype, self.decode_engine = evaluation["evalDtype"], evaluation["decoder"]
         self.chunk = evaluation.get("chunk")  # None: the executor's default, as for documents written before the key
+        # ADR-010: the chunks a worker may evaluate with (one, the recipe's, unless the recipe lists more)
+        self.chunks = tuple(evaluation.get("chunks") or ([self.chunk] if self.chunk is not None else []))
         self.sigma = recipe["perturbation"]["sigma"]["initial"]
         self.reward_eta = plan["coefficientRule"]["eta"]
         self.coefficient_rule = coefficient_rule_id(plan["coefficientRule"])
@@ -168,6 +170,7 @@ def build_documents(
             "systemPrompt": config.get("systemPrompt"),
         }
         | ({"chunk": config["evalChunk"]} if "evalChunk" in config else {})
+        | ({"chunks": sorted(set(config["evalChunks"]))} if config.get("evalChunks") else {})
         | ({"promptFormat": config["promptFormat"]} if config.get("promptFormat") is not None else {}),
         "data": {
             "kind": "dataset",

@@ -104,6 +104,15 @@ def public_reason(error):
     return re.sub(r"\b[a-z][a-z0-9+.-]*://\S+", "<url>", str(error))[:200]
 
 
+def max_chunk(config):
+    """The largest evaluation chunk this device offers a recipe that allows several (ADR-010): the owner's limit, or one
+    from its memory (a larger chunk that does not fit falls back to the recipe's own, CandidateExecutor)."""
+    if config.get("maxChunk"):
+        return int(config["maxChunk"])
+    vram = (config.get("selfTest") or {}).get("vramTotalMb") or 0
+    return 64 if vram >= 14_000 else 32 if vram >= 8_000 else 16
+
+
 def owned_state(record, intent=False):
     if record is None:
         return None if intent else False
@@ -447,6 +456,11 @@ class Agent:
                 "--give-up-after-seconds",
                 "120",
                 *([] if study and command["studyConfig"].get("recipeVersion") == 3 else ["--chunk", "16"]),
+                *(
+                    ["--max-chunk", str(max_chunk(self.config))]
+                    if study and command["studyConfig"].get("recipeVersion") == 3
+                    else []
+                ),
                 "--stop-file",
                 str(directory / "stop-request.json"),
             ]

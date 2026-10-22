@@ -111,7 +111,10 @@ def _finite_number(name: str, value):
 
 
 def _decode_lease(request):
-    _fields(request, {"worker_id"}, frozenset({"request_id", "generation"}))
+    # max_chunk (ADR-010) is read by the audit layer: the largest chunk the worker may use
+    _fields(request, {"worker_id"}, frozenset({"request_id", "generation", "max_chunk"}))
+    if "max_chunk" in request and (_integer("max_chunk", request["max_chunk"]) < 1):
+        raise ValueError("max_chunk must be positive")
     generation = request.get("generation")
     if "generation" in request:
         generation = _integer("generation", generation)
@@ -119,8 +122,8 @@ def _decode_lease(request):
     return _text("worker_id", request["worker_id"]), request_id, generation
 
 
-def _decode_attempt(request, *last: str):
-    _fields(request, {"descriptor", "attempt_number", "token", *last})
+def _decode_attempt(request, *last: str, optional: frozenset = frozenset()):
+    _fields(request, {"descriptor", "attempt_number", "token", *last}, optional)
     return (
         CandidateDescriptor.from_dict(request["descriptor"]),
         _integer("attempt_number", request["attempt_number"]),
@@ -131,7 +134,9 @@ def _decode_attempt(request, *last: str):
 def _decode_result(request):
     if isinstance(request, dict) and "completions" in request:
         extra = ("usage",) if "usage" in request else ()
-        descriptor, attempt_number, token = _decode_attempt(request, "completions", "completions_sha256", *extra)
+        descriptor, attempt_number, token = _decode_attempt(
+            request, "completions", "completions_sha256", *extra, optional=frozenset({"chunk"})
+        )
         completions = request["completions"]
         if not isinstance(completions, list) or not completions or not all(isinstance(t, str) for t in completions):
             raise TypeError("completions must be a nonempty list of texts")
@@ -141,9 +146,19 @@ def _decode_result(request):
             from heteroes.v3.usage import UsageTexts
 
             completions = UsageTexts(completions, request["usage"])
+        if "chunk" in request:  # ADR-010: the chunk that produced these texts
+            if _integer("chunk", request["chunk"]) < 1:
+                raise ValueError("chunk must be positive")
+            if type(completions) is list:  # UsageTexts already takes attributes (and keeps its usage)
+                completions = TextList(completions)
+            completions.chunk = request["chunk"]
         return descriptor, attempt_number, token, completions
     descriptor, attempt_number, token = _decode_attempt(request, "reward")
     return descriptor, attempt_number, token, _finite_number("reward", request["reward"])
+
+
+class TextList(list):
+    """Submitted texts with attributes beside them (the chunk, ADR-010)."""
 
 
 def completions_sha256(completions) -> str:
@@ -186,11 +201,13 @@ class WorkerAPI:
         cancel_requested=lambda: False,
         scorer=None,
         usage_sink=None,
+        allowed_chunks=(),
     ):
         # Recipe v3: `scorer(descriptor, completions) -> reward` runs here, on the coordinator; it raises ScorerError when the
         # experiment's scoring fails, which is never a reward and never the worker's fault (`scoring_error` keeps it)
         self._scorer = scorer
         self._usage_sink, self.usage_errors = usage_sink, 0
+        self.allowed_chunks = tuple(allowed_chunks)  # ADR-010: the recipe's chunks when it allows several
         # granted leases, heartbeats, results and failures so far: what the coordinator counts as a generation still moving
         # (ADR-009). A request that gets no work is not activity: a waiting worker must not hide a real stall.
         self.activity = 0
@@ -301,7 +318,12 @@ class WorkerAPI:
             except ScorerError as error:
                 self.scoring_error = str(error)
                 raise ScoringFailedError(str(error)) from error
-            outcome = self._ledger.submit_result(descriptor, attempt_number, token, reward, completions=payload)
+            chunk = getattr(payload, "chunk", None)
+            if chunk is not None and chunk not in self.allowed_chunks:
+                raise LedgerError(f"chunk {chunk} is not one the recipe allows {self.allowed_chunks}")
+            outcome = self._ledger.submit_result(
+                descriptor, attempt_number, token, reward, completions=payload, chunk=chunk
+            )
             self.record_usage(descriptor, attempt_number, worker, getattr(payload, "usage", None), "candidate")
         else:
             outcome = self._ledger.submit_result(descriptor, attempt_number, token, payload)

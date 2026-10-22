@@ -429,6 +429,8 @@ class Worker:
             "device": "cpu" if coordinator_only(settings["selfTest"]) else "cuda",
             "largeDataDirectory": str(p["artifacts"]),
             "selfTest": self.advertised(settings),
+            # ADR-010: the owner's cap on prompts per generate() call (else the agent picks one from the GPU memory)
+            **({"maxChunk": settings["limits"]["maxChunk"]} if (settings.get("limits") or {}).get("maxChunk") else {}),
         }
         write_json(p["agentConfig"], config)
         return p["agentConfig"]
@@ -1123,6 +1125,11 @@ def main(argv=None):
     u = commands.add_parser("update", help="install the lab's newest worker and restart the service")
     u.add_argument("--force", action="store_true", help="update even while this machine is in a run")
     commands.add_parser("clean", help="delete leftover downloads and old runtimes (never run data)")
+    limits = commands.add_parser("limits", help="show or set this machine's limits (taken at the next service start)")
+    limits.add_argument(
+        "--max-chunk", type=int, choices=(16, 32, 64), help="largest prompts per generate() call this GPU may use"
+    )
+    limits.add_argument("--clear", action="store_true", help="remove every limit")
     rename = commands.add_parser("rename", help="change the name shown on the lab")
     rename.add_argument("name")
     commands.add_parser("forget", help="unpair this machine from its lab")
@@ -1186,6 +1193,16 @@ def main(argv=None):
             print(
                 f"freed {result['freedBytes'] / 1e9:.2f} GB; run data kept: {result['runDataBytes'] / 1e9:.2f} GB in"
                 f" {worker.paths()['artifacts'] / 'coordinators'}"
+            )
+        elif args.command == "limits":
+            settings = worker.settings()
+            current = {} if args.clear else dict(settings.get("limits") or {})
+            if args.max_chunk:
+                current["maxChunk"] = args.max_chunk
+            worker.save_settings({**settings, "limits": current})
+            print(
+                json.dumps(current) if current else "no limits",
+                "(restart the service to apply: heteroes-worker restart)",
             )
         elif args.command == "rename":
             print("renamed to " + worker.rename(args.name)["displayName"])

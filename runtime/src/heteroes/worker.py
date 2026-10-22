@@ -58,6 +58,7 @@ class Assignment:
     deadline: float  # in the coordinator's clock: for information, the worker's clock may differ
 
     audit_id: str | None = None
+    chunk: int | None = None  # an audit's: the chunk the first result used (ADR-010); None: this worker's own
 
     def payload(self):
         return {
@@ -101,14 +102,20 @@ def _assignment(work) -> Assignment:
         not isinstance(audit_id, str) or len(audit_id) != 64 or any(c not in "0123456789abcdef" for c in audit_id)
     ):
         raise TypeError("audit_id must be a SHA-256 hex identity")
-    return Assignment(descriptor, attempt_number, token, float(deadline), audit_id)
+    chunk = work.get("chunk")
+    if chunk is not None and (isinstance(chunk, bool) or not isinstance(chunk, int) or chunk < 1):
+        raise TypeError("chunk must be a positive integer")
+    return Assignment(descriptor, attempt_number, token, float(deadline), audit_id, chunk)
 
 
 class WorkerClient:
-    def __init__(self, worker_id: str, transport: Transport, *, usage_reporting=False):
+    def __init__(self, worker_id: str, transport: Transport, *, usage_reporting=False, max_chunk=None):
         self.worker_id = worker_id
         self._transport = transport
         self.usage_reporting = usage_reporting
+        self.max_chunk = (
+            max_chunk  # ADR-010: the largest chunk this device may use, so it is given only audits it can run
+        )
 
     def _call(self, operation: str, payload: dict) -> dict:
         reply = self._transport(operation, payload)
@@ -127,6 +134,8 @@ class WorkerClient:
         payload = {"worker_id": self.worker_id, "request_id": uuid.uuid4().hex}
         if generation is not None:
             payload["generation"] = generation  # the generation of the job this worker is working on (see WorkerAPI)
+        if self.max_chunk is not None:
+            payload["max_chunk"] = self.max_chunk
         reply = self._call("lease", payload)
         try:
             work = reply["work"]
@@ -159,6 +168,7 @@ class WorkerClient:
                 "completions": texts,
                 "completions_sha256": completions_sha256(texts),
                 **({"usage": completions.usage} if self.usage_reporting and hasattr(completions, "usage") else {}),
+                **({"chunk": completions.chunk} if getattr(completions, "chunk", None) is not None else {}),
             },
         )
         if assignment.audit_id is not None and self.worker_id in reply.get("quarantined_workers", []):
@@ -257,7 +267,11 @@ class Worker:
 
         try:
             with _Heartbeat(self.client, work, self._heartbeat_seconds):
-                reward = self._evaluate(work.descriptor)
+                reward = (
+                    self._evaluate(work.descriptor)
+                    if work.chunk is None
+                    else self._evaluate(work.descriptor, chunk=work.chunk)  # an audit, at the original's chunk
+                )
         except CandidateFailed as failed:
             return self._report(work, failed.kind)
         except Exception:

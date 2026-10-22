@@ -23,6 +23,7 @@ V3_UPDATE_KEYS = (
     "momentumBeta",
     "momentumWindow",
     "evalChunk",
+    "evalChunks",
     "sampler",
     "candidateSeedNamespace",
     "promptFormat",

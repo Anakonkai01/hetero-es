@@ -70,7 +70,10 @@ def main():
                 rows = run.batch(dataset, generation)["rows"]
                 executor.set_generation(generation, run.context(dataset, generation))  # computed here, not received
                 for record in ledger.list_candidates(args.experiment, generation):
-                    texts = list(executor(record.descriptor))
+                    # ADR-010: at the chunk the result recorded (None: the recipe's own)
+                    texts = list(
+                        executor(record.descriptor, chunk=ledger.completion_chunk(record.descriptor.candidate_id))
+                    )
                     stored_sha, stored = ledger.get_completions(record.descriptor.candidate_id)
                     reward, _ = score(plan["scorer"], texts, [dict(r) for r in rows], python_scorer)
                     candidates.append(
@@ -118,7 +121,9 @@ def main():
     with open(args.out, "x") as stream:
         json.dump(result, stream, indent=1)
         stream.write("\n")
-    print("ALL EQUAL" if equal else "DIFFERENCES FOUND", f"({len(generations)} generations, regenerated {sorted(chosen)})")
+    print(
+        "ALL EQUAL" if equal else "DIFFERENCES FOUND", f"({len(generations)} generations, regenerated {sorted(chosen)})"
+    )
 
 
 if __name__ == "__main__":

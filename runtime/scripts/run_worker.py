@@ -74,6 +74,12 @@ def main(argv: list[str]) -> int:
         help="prompts per generate() call; use the safe chunk of this worker's profile (default: 16 for an FP32 recipe, 1 for FP16)",
     )
     parser.add_argument(
+        "--max-chunk",
+        type=int,
+        default=None,
+        help="Recipe v3 allowing several chunks (ADR-010): the largest this device may use; it uses the largest allowed one",
+    )
+    parser.add_argument(
         "--poll-seconds",
         type=float,
         default=0.25,
@@ -284,12 +290,17 @@ def main(argv: list[str]) -> int:
     except RuntimeError as error:
         fail(str(error), 3)
     executor_started = time.perf_counter()
+    chunk = args.chunk
+    allowed = tuple(getattr(recipe, "chunks", ()) or ())
+    if chunk is None and len(allowed) > 1 and args.max_chunk is not None:
+        # the largest allowed chunk the device may use, and never below the recipe's own (which every member can run)
+        chunk = max([c for c in allowed if c <= args.max_chunk] + [recipe.chunk])
     executor = CandidateExecutor(
         loaded.model,
         loaded.tokenizer,
         loaded.schema,
         recipe,
-        chunk=args.chunk,
+        chunk=chunk,
         dataset=dataset,
         return_completions=declared.get("formatVersion") == 3,
     )

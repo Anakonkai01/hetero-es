@@ -132,7 +132,7 @@ class AuditAPI:
                     or (generation is not None and generation != self.generation)
                 ):
                     return reply
-                work = self._lease(worker, request_id)
+                work = self._lease(worker, request_id, request.get("max_chunk"))
                 return {
                     "ok": True,
                     "generation_state": "OPEN" if work or self.pending else reply["generation_state"],
@@ -143,7 +143,7 @@ class AuditAPI:
             except LedgerError as error:
                 return _error(_code_of(error), str(error))
 
-    def _lease(self, worker, request_id):
+    def _lease(self, worker, request_id, max_chunk=None):
         now = self.clock()
         if request_id is not None:
             cid = self._requests.get((worker, request_id))
@@ -152,6 +152,10 @@ class AuditAPI:
                 return dict(entry["work"])
         for cid, original in self._records():
             if original == worker:
+                continue
+            # ADR-010: re-run at the chunk the result used, by a worker that may use it (else it fails for memory)
+            chunk = self.ledger.completion_chunk(cid)
+            if chunk is not None and (max_chunk is None or chunk > max_chunk):
                 continue
             entry = self._leases.get(cid)
             if entry and not entry["done"] and entry["work"]["deadline"] > now:
@@ -164,6 +168,7 @@ class AuditAPI:
                 "token": secrets.token_urlsafe(32),
                 "deadline": now + self.lease_seconds,
                 "audit_id": hashlib.sha256(cid.encode()).hexdigest(),
+                **({"chunk": chunk} if chunk is not None else {}),
             }
             self._leases[cid] = {"worker": worker, "work": work, "done": False, "hash": None}
             if request_id is not None:

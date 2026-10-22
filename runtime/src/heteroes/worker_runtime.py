@@ -296,6 +296,10 @@ class WorkerRuntime:
                     and lease_seconds > 0
                 ):
                     self._worker.heartbeat_seconds = lease_seconds / 3  # three chances to renew before a lease runs out
+                if (
+                    len(getattr(self.executor, "allowed_chunks", ())) > 1
+                ):  # ADR-010: audits it can run (it may drop after OOM)
+                    self._worker.client.max_chunk = self.executor.chunk
                 start = self._timer()
                 step = self._worker.step(job.get("generation"))
                 seconds = self._timer() - start
