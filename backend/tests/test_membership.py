@@ -493,3 +493,21 @@ def test_the_coordinator_hears_stopped_for_a_left_worker_the_lab_already_release
     assert reply.status_code == 200, reply.text  # was 403: the coordinator retried and logged worker_left every tick
     assert reply.json()["alive"] is False
     assert client.post("/api/v1/device/worker-command", headers=ch, json={**ask, "action": "start"}).status_code == 403
+
+
+def test_a_worker_turned_on_can_be_added_back_before_its_agent_confirms_the_on(lab):
+    # GSM8K demo tiers 2c and 2d: OFF, LEAVE, then ON and add 0.2 s later: 409 "Waiting for owner to turn contribution
+    # ON", because the agent applies the ON at its next poll
+    client, store, runtime, admin = lab
+    rid, (coordinator, ch), devices = running(lab, workers=2)
+    first, first_auth = devices[0]
+    client.post(
+        f"/api/v1/devices/{first['deviceId']}/contribution", headers=admin, json={"enabled": False, "bootId": "boot-1"}
+    )
+    boot(client, first_auth, "boot-1")  # the agent applied the OFF
+    client.post(
+        f"/api/v1/devices/{first['deviceId']}/contribution", headers=admin, json={"enabled": True, "bootId": "boot-1"}
+    )
+    reply = change(lab, rid, first["workerId"])  # before the agent's next poll
+    assert reply.status_code == 200, reply.text
+    assert membership_commands(runtime, coordinator)[-1]["change"]["action"] == "JOIN"

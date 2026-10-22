@@ -64,7 +64,10 @@ class AgentScheduling:
                 return "Refresh selected device self-test to identify its physical GPU"
             if d["connectionStatus"] != "ONLINE":
                 return "Waiting for selected device to reconnect"
-            if not d["contributionEnabled"]:
+            # a worker joining a running run (ADR-009) may be added right after the owner's ON: its agent defers the start
+            # until it has applied that ON (GSM8K demo tiers 2c and 2d: ON then add 0.2 s later was refused)
+            joining = workers is not None and d is not coordinator and d.get("contributionDesired")
+            if not d["contributionEnabled"] and not joining:
                 return "Waiting for owner to turn contribution ON"
             if d["allocatedTo"] and d["allocatedTo"] != body["experimentId"]:
                 return "Waiting for confirmed GPU release"
