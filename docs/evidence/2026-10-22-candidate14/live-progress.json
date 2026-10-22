@@ -1,0 +1,218 @@
+{
+  "name": "Candidate14 V2 public-route / Linux + native Windows",
+  "modelName": "Qwen/Qwen2.5-0.5B-Instruct",
+  "modelArtifactId": "fa204d7200474030ade76a66ab701aa3",
+  "schedulerPolicy": "greedy-tail",
+  "allowJoin": false,
+  "syncMode": "synchronous",
+  "workerIds": [
+    "cli-71b757062fd9",
+    "cli-34312a79fbbc",
+    "desktop-d9017660e75f"
+  ],
+  "task": "text_v3",
+  "maxGenerations": 10,
+  "candidatesPerGeneration": 8,
+  "alpha": 0.001,
+  "sigma": 0.001,
+  "decodeEngine": "hf_generate",
+  "datasetIds": [
+    "c0fb8931642b467da2ca39ee9e889bdb"
+  ],
+  "coordinatorDeviceId": "dbe5254b78de4c038550b8b90df13899",
+  "backupPolicy": {
+    "interval": 1,
+    "retain": 3
+  },
+  "recipeVersion": 3,
+  "noiseEngineVersion": "pcg64_u32_to_f16_normal_quantile_v2",
+  "batchSize": 4,
+  "batchSeed": 11,
+  "sigmaSchedule": "constant",
+  "sigmaMinimum": 0.001,
+  "maxNewTokens": 32,
+  "weightSpace": {
+    "kind": "full"
+  },
+  "antithetic": true,
+  "scorer": {
+    "kind": "declarative",
+    "name": "last-integer",
+    "version": 1,
+    "codeSha256": null,
+    "config": {}
+  },
+  "coefficientRule": "zscore@1",
+  "alphaSchedule": "constant",
+  "alphaMinimum": null,
+  "momentumBeta": null,
+  "momentumWindow": 4,
+  "evalChunk": 16,
+  "evalChunks": null,
+  "sampler": "sha256-python-random-sample-v1",
+  "candidateSeedNamespace": "candidate14-v2-acceptance",
+  "systemPrompt": null,
+  "validationInterval": 10,
+  "modelManifest": {
+    "formatVersion": 1,
+    "modelId": "Qwen/Qwen2.5-0.5B-Instruct",
+    "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+    "tokenizerRevision": "7ae557604adf67be50417f59c2c2f167def9a775",
+    "format": "safetensors",
+    "files": {
+      "config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+      "generation_config.json": "e558847a8b4402616f1273797b015104dc266fe4b520056fca88823ba8f8ebe6",
+      "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+      "model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+      "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+      "tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583",
+      "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+    }
+  },
+  "modelSource": "REFERENCE",
+  "datasetObjectSha256": "53898985c8f06eace25dd21590b770e0d6c04e22b37b46ccb4bbeeadc2538e12",
+  "datasetIdentity": {
+    "contentHash": "abd5d6bf20b03b9a90d6ac545cacb0be9ec1eb2b51045891a4f5b7aec7422cba",
+    "splitHashes": {
+      "train": "dfe9fd73fb915286c98a813b426c76c4fa97b2dc6eca10cf72acf542dd27eba5",
+      "validation": "b31d32e681d7aae4c6e9715e4ac14af24952e660332f4569f1b1592a76e61859",
+      "test": "2b204160c79747d3f268d7afe6d6007c36a34c7b4388e13599613d8cc1c8f6f8"
+    }
+  },
+  "datasetSplitObjects": [
+    "2b204160c79747d3f268d7afe6d6007c36a34c7b4388e13599613d8cc1c8f6f8",
+    "b31d32e681d7aae4c6e9715e4ac14af24952e660332f4569f1b1592a76e61859",
+    "dfe9fd73fb915286c98a813b426c76c4fa97b2dc6eca10cf72acf542dd27eba5"
+  ],
+  "experimentId": "2dd6e2f78aa84e60aa5bafaed3fe2c6b",
+  "workspaceId": "lab",
+  "ownerUserId": "admin",
+  "status": "RUNNING",
+  "cancelRequested": false,
+  "modelVersion": "a326003dd4c5ff1e95cf556c8aff352198b42782be04c450762d093b57c7a5e4",
+  "configHash": "7230a23b87f5716cbf5044ca795a5b4a7731b3c5a247fb33df5a40223caf9f51",
+  "createdAt": "2026-10-22T16:15:19.395144+00:00",
+  "completedGenerations": 7,
+  "startedAt": "2026-10-22T16:15:20.178554+00:00",
+  "workerIdentities": {
+    "cli-71b757062fd9": {
+      "name": "5070ti-nhan",
+      "gpuName": "NVIDIA GeForce RTX 5070 Ti",
+      "gpuIndex": 0,
+      "gpuUUID": "GPU-64187d93-f2bb-d43f-6c63-2547df16a9a4",
+      "deviceId": "dbe5254b78de4c038550b8b90df13899",
+      "ownerUserId": "admin",
+      "capturedAt": 1792685720.2003713,
+      "source": "recorded"
+    },
+    "cli-34312a79fbbc": {
+      "name": "5070ti-nhut",
+      "gpuName": "NVIDIA GeForce RTX 5070 Ti",
+      "gpuIndex": 0,
+      "gpuUUID": "GPU-9bc596d9-19e9-6f43-dc2c-a80da924263c",
+      "deviceId": "093cd4deafe84eb3adb704f76cfed64d",
+      "ownerUserId": "admin",
+      "capturedAt": 1792685720.2003727,
+      "source": "recorded"
+    },
+    "desktop-d9017660e75f": {
+      "name": "3060-thao",
+      "gpuName": "NVIDIA GeForce RTX 3060",
+      "gpuIndex": 0,
+      "gpuUUID": "GPU-9e338f21-cbc9-8b05-4b4e-406c273ed19d",
+      "deviceId": "922b858a244f451eb3a154b612d20a4c",
+      "ownerUserId": "6a3dd8bebc904bc38c071b6f6c231228",
+      "capturedAt": 1792685720.2003734,
+      "source": "recorded"
+    }
+  },
+  "coordinatorIdentity": {
+    "name": "5070ti-nhan",
+    "gpuName": "NVIDIA GeForce RTX 5070 Ti",
+    "gpuIndex": 0,
+    "gpuUUID": "GPU-64187d93-f2bb-d43f-6c63-2547df16a9a4",
+    "deviceId": "dbe5254b78de4c038550b8b90df13899",
+    "ownerUserId": "admin",
+    "capturedAt": 1792685720.2003741,
+    "source": "recorded"
+  },
+  "resumeRequested": false,
+  "pauseRequested": false,
+  "monitoringPartial": false,
+  "workerBlocks": {},
+  "cloudSync": {
+    "status": "PENDING",
+    "errorType": "TimeoutError",
+    "t": 1792685858.6909873,
+    "lastCloudGeneration": 0,
+    "pointId": "fa33c7b0522043b788b9bf457fb2b5f6"
+  },
+  "auditSummary": {
+    "completed": 2,
+    "selected": 2,
+    "mismatches": 0,
+    "quarantinedWorkers": []
+  },
+  "usageSummary": {
+    "generatedTokens": 1769,
+    "auditGeneratedTokens": 75,
+    "workerWallSeconds": 72.3117796729639,
+    "workerGpuSeconds": 72.3117796729639,
+    "coordinatorUpdateGpuSeconds": 10.774516859994037,
+    "gpuSeconds": 83.08629653295793,
+    "reportedCandidates": 64,
+    "reportedAudits": 2,
+    "recordedUpdates": 7,
+    "partial": false,
+    "scope": "successful worker executions and coordinator updates"
+  },
+  "studyMetrics": {
+    "recipeHash": "bf9a8f6e54eaa4558ab33b600f3abde6439b5d314b6facb8211698f4818da50f",
+    "planHash": "894923a6e40a0c7a28d81f76946fe9737fad58eceb598700a61b456c7e1a3644",
+    "datasetIdentity": {
+      "contentHash": "abd5d6bf20b03b9a90d6ac545cacb0be9ec1eb2b51045891a4f5b7aec7422cba",
+      "splitHashes": {
+        "test": "2b204160c79747d3f268d7afe6d6007c36a34c7b4388e13599613d8cc1c8f6f8",
+        "train": "dfe9fd73fb915286c98a813b426c76c4fa97b2dc6eca10cf72acf542dd27eba5",
+        "validation": "b31d32e681d7aae4c6e9715e4ac14af24952e660332f4569f1b1592a76e61859"
+      }
+    },
+    "metric": "mean-reward",
+    "weightSpace": "full",
+    "scorer": {
+      "kind": "declarative",
+      "name": "last-integer",
+      "version": 1,
+      "codeSha256": null,
+      "config": {}
+    },
+    "best": {
+      "generation": -1,
+      "weightsSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+      "validationReward": 0.5,
+      "recipeHash": "bf9a8f6e54eaa4558ab33b600f3abde6439b5d314b6facb8211698f4818da50f",
+      "planHash": "894923a6e40a0c7a28d81f76946fe9737fad58eceb598700a61b456c7e1a3644"
+    },
+    "validation": [
+      {
+        "generation": -1,
+        "weightsSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+        "meanReward": 0.5
+      }
+    ],
+    "testLocked": true
+  },
+  "validationScore": 0.5,
+  "membership": {
+    "members": [
+      "cli-34312a79fbbc",
+      "cli-71b757062fd9",
+      "desktop-d9017660e75f"
+    ],
+    "left": [],
+    "refused": [],
+    "generation": 7
+  },
+  "currentGenerationId": "2dd6e2f78aa84e60aa5bafaed3fe2c6b.g7",
+  "committedCandidateCount": 8
+}

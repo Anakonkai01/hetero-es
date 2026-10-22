@@ -1,0 +1,43 @@
+{
+  "portableSourceTreeSha256": {
+    "nhan": "d568b62bcba4bd09438b80e3a90b95904f81bee1f41fa09dce35fd0ee0714b0f",
+    "nhut": "d568b62bcba4bd09438b80e3a90b95904f81bee1f41fa09dce35fd0ee0714b0f",
+    "windows": "d568b62bcba4bd09438b80e3a90b95904f81bee1f41fa09dce35fd0ee0714b0f"
+  },
+  "fingerprint": {
+    "nhan": "e80f079ca06fd3e2fcae7b41583aedd8b407e65c196677d5da54c1dc6de02bb4",
+    "nhut": "e80f079ca06fd3e2fcae7b41583aedd8b407e65c196677d5da54c1dc6de02bb4",
+    "windows": "e80f079ca06fd3e2fcae7b41583aedd8b407e65c196677d5da54c1dc6de02bb4"
+  },
+  "legacyFingerprint": {
+    "nhan": "b94575345e870b1606cb4d6a0c4aa49b054cfbfc50571d809653d01bce9184d3",
+    "nhut": "b94575345e870b1606cb4d6a0c4aa49b054cfbfc50571d809653d01bce9184d3",
+    "windows": "b94575345e870b1606cb4d6a0c4aa49b054cfbfc50571d809653d01bce9184d3"
+  },
+  "boundarySha256": {
+    "nhan": "373d06fb6014fcf3e11e96b1fd10476cc21ddffe69c7b88f7b3eca0164fff162",
+    "nhut": "373d06fb6014fcf3e11e96b1fd10476cc21ddffe69c7b88f7b3eca0164fff162",
+    "windows": "373d06fb6014fcf3e11e96b1fd10476cc21ddffe69c7b88f7b3eca0164fff162"
+  },
+  "updateKnownAnswer": {
+    "nhan": {
+      "version": 1,
+      "schemaHash": "dccf3b4a32c06af71831a5645b07beeedfddf1c61bd9be267f603b740b76dbba",
+      "parentSha256": "d1254dcd275cbbd842bfd1b91c3597e3ccef79712811221e03a007c15ca3d9e2",
+      "updatedSha256": "ddcb2770a92a7dd24f9f02625a8687cc9c69f8a74896ee74351c2d70f76204b5"
+    },
+    "nhut": {
+      "version": 1,
+      "schemaHash": "dccf3b4a32c06af71831a5645b07beeedfddf1c61bd9be267f603b740b76dbba",
+      "parentSha256": "d1254dcd275cbbd842bfd1b91c3597e3ccef79712811221e03a007c15ca3d9e2",
+      "updatedSha256": "ddcb2770a92a7dd24f9f02625a8687cc9c69f8a74896ee74351c2d70f76204b5"
+    },
+    "windows": {
+      "version": 1,
+      "schemaHash": "dccf3b4a32c06af71831a5645b07beeedfddf1c61bd9be267f603b740b76dbba",
+      "parentSha256": "d1254dcd275cbbd842bfd1b91c3597e3ccef79712811221e03a007c15ca3d9e2",
+      "updatedSha256": "ddcb2770a92a7dd24f9f02625a8687cc9c69f8a74896ee74351c2d70f76204b5"
+    }
+  },
+  "allEqual": true
+}

@@ -1,0 +1,161 @@
+✔ a program that cannot be started gives AGENT_SPAWN_FAILED with the system code kept for the log (5.573556ms)
+✔ an agent that exits early gives AGENT_EXITED; stderr is kept for the log but never in the error (4.556692ms)
+✔ missing Windows system libraries are recognised from the exit code or from the message (0.229244ms)
+✔ the log keeps multi-line detail, drops secrets and the user profile path, and is clipped (2.858494ms)
+✔ a dead agent is released, reported with its real code, and the Enable button is usable (12.511876ms)
+✔ the same failure is logged once even though the window polls every 3 seconds (3.302865ms)
+✔ automatic retries wait 30 seconds between attempts (2.088989ms)
+✔ pressing Enable after a failed start tries again and reports the real code, then works once the cause is gone (1.884791ms)
+✔ connection check says why the coordinator step cannot run when no agent is running (0.902644ms)
+✔ status never exposes the device token or stderr text (0.902999ms)
+✔ an agent that dies after a good start is released and reported, not kept as an unknown process (1.511576ms)
+✔ real Python bridge boots OFF, accepts only fixed actions and drains before Quit (307.038466ms)
+✔ qualified Linux coordinator advertises and binds the chosen local address, persists across restart, boots OFF (8.133508ms)
+✔ coordinator capability requires the passed self-test of this machine and reported capability (1.229425ms)
+✔ a Windows machine and a small GPU may coordinate (owner 2026-10-20) (0.598363ms)
+✔ listen address must belong to this computer and fit the chosen network (0.912271ms)
+✔ existing worker changes endpoints and role together only while signed in, OFF and drained (12.051412ms)
+✔ rejected server update preserves the old worker settings and restarts it OFF (1.261464ms)
+✔ worker role stays loopback; disappearing or no-longer-qualified coordinator settings cannot start an agent (1.348466ms)
+✔ lost configuration reply records uncertainty and prevents polling from silently restarting the old role (2.964616ms)
+✔ cannot change server configuration if the local pending record cannot be saved (0.731061ms)
+✔ startup qualification failure keeps an uncertain bridge owned until Quit confirms drain (0.779863ms)
+✔ a refused startup qualification is logged once and the agent waits before it starts again (0.92482ms)
+✔ a v3 device sends its qualification only to a lab that speaks v3 (1.326538ms)
+✔ an interrupted download resumes, verifies and publishes only complete bytes (25.456454ms)
+✔ a server ignoring Range restarts and corruption never becomes ready (6.983965ms)
+✔ manifest path and partial range must be valid (1.346037ms)
+✔ Forget this pairing works with no network, removes the stored credential and unpairs (4.73984ms)
+✔ after forgetting, any lab can be connected, with no "different lab" refusal (11.089023ms)
+✔ Forget refuses while contribution is ON, so a running GPU job is never orphaned (0.837547ms)
+✔ Forget refuses when a process has not confirmed it stopped (0.748728ms)
+✔ the old agent state is set aside, not deleted, and a new pairing starts empty (0.874358ms)
+✔ Change lab while paired and the old address is dead says so, instead of a bare timeout (1.206948ms)
+✔ forgetting is not offered to a computer that is not paired (0.626268ms)
+✔ uninstalling the Worker deletes its app data; uninstalling the Lab Server does not (0.400954ms)
+✔ the Worker uninstall script removes its own folder and the parent only when empty, and keeps data on an upgrade (0.187166ms)
+✔ the folder the script removes is the folder the app really uses (0.067504ms)
+✔ the uninstaller removes a chosen data folder only when it is the app's own subfolder (0.117772ms)
+✔ system error codes map to specific, owner-readable codes (0.947679ms)
+✔ a failed request throws the specific code and logs one line with the cause, never the body or the token (4.296777ms)
+✔ connecting to a lab address reports the same specific code (1.407283ms)
+✔ the Connection check shows the specific code for the lab step (1.512022ms)
+✔ a repeated failure is logged once per cause and host, not on every 3 second poll (1.122813ms)
+✔ a timeout that the app itself enforces stays LAB_TIMEOUT (0.9102ms)
+✔ only one ordinary action runs at a time, and the gate is always released (0.791815ms)
+✔ Quit is never refused because another action is running; it exits once drained (0.458165ms)
+✔ repeated Quit clicks run the shutdown once (0.117217ms)
+✔ once the app is leaving, another Quit does not start a second shutdown (0.101698ms)
+✔ Quit that cannot confirm the drain keeps the app open and brings the window back (0.122125ms)
+✔ a failed tray Quit tells the user why; it never just reopens the window (0.251976ms)
+✔ a tray Quit that cannot confirm the drain also says so (0.095039ms)
+✔ Stop safely with nothing running says so instead of reopening the window (0.114386ms)
+✔ Stop safely confirms when it really stopped something (0.098407ms)
+✔ Stop safely failures are shown with their code (3.380594ms)
+✔ a startup failure is logged, shown to the user and then the app exits (0.279486ms)
+✔ every code the app can raise has a bilingual explanation, and unknown codes still show the code (0.143617ms)
+✔ the log keeps recent lines, redacts secrets, rotates and never throws (9.769906ms)
+✔ an unclassified action failure keeps its stack in the log; a known code does not need one (1.508403ms)
+✔ a lab address can be typed or pasted the way people actually write it (4.361907ms)
+✔ an unusable lab address fails with a stable code, never a raw exception (1.214426ms)
+✔ connect reports the connection as ONLINE and remembers the origin only (24.98598ms)
+✔ connect failures are told apart: unreachable, timeout, not a lab, server down, old lab (2.611926ms)
+✔ Quit cancels a connection attempt that is still waiting instead of being blocked by it (0.593678ms)
+✔ Quit does not abort a pairing request, which could lose the new device credential (31.370534ms)
+✔ turning contribution OFF with nothing running succeeds (0.574126ms)
+✔ after Sign out the next Sign in brings the agent back, still with contribution OFF (2.062455ms)
+✔ the default lab address ships with the app and is offered until a lab is chosen (1.041602ms)
+✔ a failed attempt at another address does not flip a working connection to OFFLINE; the same address does (0.828262ms)
+✔ Quit also cancels waiting reads such as the device list (0.386236ms)
+✔ HTTP is restricted to private networks; credentials and query are rejected (2.77538ms)
+✖ a paired device can opt in without an account session and OFF stops locally (3.070647ms)
+✖ a legacy lab falls back to an owner session with the current boot only (11.641432ms)
+✔ unknown process holds Quit; successful Quit is not restarted by polling (1.175455ms)
+✔ API outage still drains locally and public status never contains either token (1.252292ms)
+✔ URL rotation preserves enrolled identity only for the same server while drained OFF (2.208322ms)
+✔ requests identify themselves as HeteroES so a public edge does not block them (0.863019ms)
+✔ connection check preserves login, pairing and agent state; unassigned compute is explicitly untested (0.76164ms)
+✔ connection failures report only safe codes, and compute reports come from the credential-owning bridge (0.571264ms)
+✔ opening with Windows is kept locally and keep ON after restart is the owner choice on the lab (0.968815ms)
+✔ missing selected storage disk fails before creating a fallback runtime (3.135257ms)
+✔ archive rejects links outside runtime; safe relative symlinks are retained (10.337877ms)
+✔ runtime subprocess timeout is bounded and errors omit paths and stderr (48.581004ms)
+✔ the READY record names the installed profile, not a fixed one (0.711324ms)
+✔ a chosen data folder holds runtime, model and downloads in its own subfolder (1.884513ms)
+✔ the data folder cannot move once a runtime is installed (0.464645ms)
+(node:2502508) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/pc5070ti/projects/heteroes/desktop/worker/src/station.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/pc5070ti/projects/heteroes/desktop/worker/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ an approved, signed-in station that is OFF offers to start contributing (0.517595ms)
+✔ ON with no work is ready; ON with a live worker is working and says for which assignment (0.516134ms)
+✔ stopping shows draining and cannot be pressed again; an unknown process state holds the toggle (0.109689ms)
+✖ starting requires approval and an agent, while paired contribution does not require sign-in (0.606805ms)
+✔ gauges come from fresh measurements only and never invent a number (0.204318ms)
+✔ Linux plaintext fallback cannot persist device credentials (0.563581ms)
+ℹ tests 91
+ℹ suites 0
+ℹ pass 88
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 368.844883
+
+✖ failing tests:
+
+test at tests/service.test.cjs:41:1
+✖ a paired device can opt in without an account session and OFF stops locally (3.070647ms)
+  Error: SIGN_IN_REQUIRED
+      at Service.contribution (/home/pc5070ti/projects/heteroes/desktop/worker/electron/service.cjs:497:13)
+      at TestContext.<anonymous> (/home/pc5070ti/projects/heteroes/desktop/worker/tests/service.test.cjs:50:17)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at tests/service.test.cjs:57:1
+✖ a legacy lab falls back to an owner session with the current boot only (11.641432ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + undefined
+  - [
+  -   'https://lab.heteroes.site/api/v1/devices/dev/contribution',
+  -   'Bearer owner-session',
+  -   {
+  -     bootId: 'new-boot',
+  -     enabled: true
+  -   }
+  - ]
+  
+      at TestContext.<anonymous> (/home/pc5070ti/projects/heteroes/desktop/worker/tests/service.test.cjs:68:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: [ 'https://lab.heteroes.site/api/v1/devices/dev/contribution', 'Bearer owner-session', { enabled: true, bootId: 'new-boot' } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/station.test.mjs:63:1
+✖ starting requires approval and an agent, while paired contribution does not require sign-in (0.606805ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///home/pc5070ti/projects/heteroes/desktop/worker/tests/station.test.mjs:68:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

@@ -1,0 +1,41 @@
+........................................ssssssssssssssssssssssssssssssss [ 14%]
+sssssssssssssssss....................................................... [ 29%]
+........................................................................ [ 44%]
+.............................................sssssssssssssssssssssss.... [ 59%]
+................................s..............................s........ [ 74%]
+.............................................s....s..................... [ 89%]
+......sss..................................s.F.....                      [100%]
+=================================== FAILURES ===================================
+__ test_cpu_qualification_never_runs_a_text_probe_or_claims_a_qualified_model __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7cd6dcc97bc0>
+
+    def test_cpu_qualification_never_runs_a_text_probe_or_claims_a_qualified_model(monkeypatch):
+        from heteroes.product import qualification, qualification_v3
+        from heteroes.product.cpu_coordinator import qualify, PROFILE, UPDATE_EVIDENCE
+    
+        def refuse(*args, **kwargs):
+            raise AssertionError("a CPU coordinator never qualifies GPU-compatible texts")
+    
+        monkeypatch.setattr(qualification_v3, "observe", refuse)
+        monkeypatch.setattr(qualification, "qualify", refuse)
+        result = qualify()
+        assert result["passed"] is True and result["coordinator"] is True
+        assert result["runtimeProfile"] == PROFILE and result["recipeVersions"] == [3]
+        assert result["qualifiedModelHashes"] == [] and result["vramTotalMb"] == 0
+        assert "gpuUUID" not in result
+>       assert result["compatibility"] == {"updateKnownAnswer": UPDATE_EVIDENCE}
+E       AssertionError: assert {'updateKnown...d70f76204b5'}} == {'updateKnown...b7859504b10'}}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Left contains 1 more item:
+E         {'updateKnownAnswerV2': {'parentSha256': 'd1254dcd275cbbd842bfd1b91c3597e3ccef79712811221e03a007c15ca3d9e2',
+E                                  'schemaHash': 'dccf3b4a32c06af71831a5645b07beeedfddf1c61bd9be267f603b740b76dbba',
+E                                  'updatedSha256': 'ddcb2770a92a7dd24f9f02625a8687cc9c69f8a74896ee74351c2d70f76204b5',
+E                                  'version': 1}}
+E         Use -v to get more diff
+
+tests/ledger/test_cpu_coordinator.py:41: AssertionError
+=========================== short test summary info ============================
+FAILED tests/ledger/test_cpu_coordinator.py::test_cpu_qualification_never_runs_a_text_probe_or_claims_a_qualified_model
+1 failed, 402 passed, 80 skipped in 21.08s

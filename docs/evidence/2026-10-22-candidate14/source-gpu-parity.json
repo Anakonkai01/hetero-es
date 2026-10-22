@@ -1,0 +1,13 @@
+{
+  "scope": "Source runtime GPU full-model and pinned LoRA probes; not installed/lab acceptance",
+  "machines": [
+    "nhan",
+    "nhut",
+    "windows"
+  ],
+  "fullEqual": true,
+  "loraEqual": true,
+  "modelPerturbEqual": true,
+  "modelUpdateEqual": true,
+  "nativeAdmissionPassed": true
+}

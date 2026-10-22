@@ -1,0 +1,19 @@
+✔ HTTP is restricted to private networks; credentials and query are rejected (2.608721ms)
+✔ a paired device can opt in without an account session and OFF stops locally (15.575133ms)
+✔ a legacy lab falls back to an owner session with the current boot only (1.14894ms)
+✔ unknown process holds Quit; successful Quit is not restarted by polling (1.150699ms)
+✔ API outage still drains locally and public status never contains either token (1.333249ms)
+✔ URL rotation preserves enrolled identity only for the same server while drained OFF (2.270386ms)
+✔ requests identify themselves as HeteroES so a public edge does not block them (0.889916ms)
+✔ connection check preserves login, pairing and agent state; unassigned compute is explicitly untested (0.581087ms)
+✔ connection failures report only safe codes, and compute reports come from the credential-owning bridge (0.492886ms)
+✔ opening with Windows is kept locally and keep ON after restart is the owner choice on the lab (1.088622ms)
+✔ device policy failures are not retried with broader account credentials (0.615756ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 68.636635

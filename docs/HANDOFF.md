@@ -1,5 +1,11 @@
 # HeteroES — canonical handoff
 
+**Latest (2026-10-22 ~23:30): candidate14 CPU V2 + systems/UI changes installed;
+real three-machine run completed 10 generations/80 candidates, 3/3 audits match.
+Owner requests handoff to Claude at 15% usage. Native signed-out approval display
+still needs repair/acceptance; final cleanup and push/FF remain.** Read
+[handoff-2026-10-22-candidate14-claude-next.md](handoff-2026-10-22-candidate14-claude-next.md) first.
+
 **Latest (2026-10-22 ~19:00): candidate13 (real-user fixes) DEPLOYED and ACCEPTED: notebook → lab, no Tailscale by
 default, device rename/delete, findings 9-12; a notebook run with a public-only worker COMPLETED, parity ALL EQUAL.**
 Read [handoff-2026-10-22-candidate13-close.md](handoff-2026-10-22-candidate13-close.md) first.

@@ -1,0 +1,96 @@
+........................................................................ [  2%]
+........................................................................ [  5%]
+........F.F.F...............................................ssssssssssss [  7%]
+sssssssssss....................................s........................ [ 10%]
+......s.....................................................s....s...... [ 13%]
+.....................sss..................................s............. [ 15%]
+...sssss................................................................ [ 18%]
+..........................................................F............. [ 20%]
+........................sssssss.....................s................... [ 23%]
+........................................................................ [ 26%]
+...........................F............................................ [ 28%]
+........................................................................ [ 31%]
+........................................................................ [ 33%]
+........................................................................ [ 36%]
+........................................................................ [ 39%]
+........................................................................ [ 41%]
+..........s............................................................. [ 44%]
+........................................................................ [ 46%]
+........................................................................ [ 49%]
+........................................................................ [ 52%]
+........................................................................ [ 54%]
+........................................................................ [ 57%]
+........................................................................ [ 60%]
+........................................................................ [ 62%]
+........................................................................ [ 65%]
+........................................................................ [ 67%]
+........................sss......F...................................... [ 70%]
+.........s...........................................s.................. [ 73%]
+..............sssssssssssssssssssssssssssssssssssssssssssssssss......... [ 75%]
+........................................................................ [ 78%]
+........................................................................ [ 80%]
+...sss.................................................................. [ 83%]
+........................................................................ [ 86%]
+........................................................................ [ 88%]
+........................................................................ [ 91%]
+........................................................................ [ 93%]
+........................................................................ [ 96%]
+........................................................................ [ 99%]
+......................                                                   [100%]
+=================================== FAILURES ===================================
+_______________________ test_the_dashboard_draws_a_frame _______________________
+tests/demo/test_demo_state.py:123: in test_the_dashboard_draws_a_frame
+    from heteroes.demo.dashboard import Dashboard
+src/heteroes/demo/dashboard.py:9: in <module>
+    import matplotlib
+E   ModuleNotFoundError: No module named 'matplotlib'
+__ test_a_ledger_join_draws_a_rejoin_and_a_process_and_ledger_pair_draws_once __
+tests/demo/test_demo_state.py:172: in test_a_ledger_join_draws_a_rejoin_and_a_process_and_ledger_pair_draws_once
+    from heteroes.demo.replay_page import recording
+src/heteroes/demo/replay_page.py:10: in <module>
+    from heteroes.demo.dashboard import SERIES
+src/heteroes/demo/dashboard.py:9: in <module>
+    import matplotlib
+E   ModuleNotFoundError: No module named 'matplotlib'
+______________ test_a_notebook_gets_the_dashboard_as_a_png_image _______________
+tests/demo/test_demo_state.py:186: in test_a_notebook_gets_the_dashboard_as_a_png_image
+    from heteroes.demo.dashboard import Dashboard, png
+src/heteroes/demo/dashboard.py:9: in <module>
+    import matplotlib
+E   ModuleNotFoundError: No module named 'matplotlib'
+_ test_running_out_of_memory_while_perturbing_is_an_oom_failure_and_the_model_is_restored _
+tests/eval/test_executor.py:238: in test_running_out_of_memory_while_perturbing_is_an_oom_failure_and_the_model_is_restored
+    executor(fx.descriptor(7))
+src/heteroes/executor.py:179: in __call__
+    return self._run(descriptor, used)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/heteroes/executor.py:253: in _run
+    raise error
+src/heteroes/executor.py:223: in _run
+    perturb_model_(
+E   TypeError: test_running_out_of_memory_while_perturbing_is_an_oom_failure_and_the_model_is_restored.<locals>.half_way_then_oom() got an unexpected keyword argument 'engine'
+__________ test_the_update_is_recorded_before_the_weights_are_touched __________
+tests/ledger/test_coordinator.py:294: in test_the_update_is_recorded_before_the_weights_are_touched
+    env.coordinator.run_generation(0)
+src/heteroes/coordinator.py:515: in run_generation
+    report = self._apply_record(record)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/heteroes/coordinator.py:353: in _apply_record
+    return apply_coefficients_(
+E   TypeError: test_the_update_is_recorded_before_the_weights_are_touched.<locals>.inspect_then_apply() got an unexpected keyword argument 'engine'
+_____ test_the_self_test_that_runs_is_the_one_of_the_engine_of_the_recipe ______
+tests/model/test_loading.py:186: in test_the_self_test_that_runs_is_the_one_of_the_engine_of_the_recipe
+    assert loading.check_recipe_selftest(build_recipe(loaded, sigma=1e-3), "cuda") >= 0.0
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/heteroes/model/loading.py:91: in check_recipe_selftest
+    return check_noise_selftest(recipe.engine_version)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: test_the_self_test_that_runs_is_the_one_of_the_engine_of_the_recipe.<locals>.<lambda>() takes 0 positional arguments but 1 was given
+=========================== short test summary info ============================
+FAILED tests/demo/test_demo_state.py::test_the_dashboard_draws_a_frame - Modu...
+FAILED tests/demo/test_demo_state.py::test_a_ledger_join_draws_a_rejoin_and_a_process_and_ledger_pair_draws_once
+FAILED tests/demo/test_demo_state.py::test_a_notebook_gets_the_dashboard_as_a_png_image
+FAILED tests/eval/test_executor.py::test_running_out_of_memory_while_perturbing_is_an_oom_failure_and_the_model_is_restored
+FAILED tests/ledger/test_coordinator.py::test_the_update_is_recorded_before_the_weights_are_touched
+FAILED tests/model/test_loading.py::test_the_self_test_that_runs_is_the_one_of_the_engine_of_the_recipe
+6 failed, 2650 passed, 102 skipped in 204.48s (0:03:24)

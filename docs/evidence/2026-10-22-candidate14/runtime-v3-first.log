@@ -1,0 +1,617 @@
+.....................sssssssssssssssssssssssssssssssssssssssssssssssss.. [  9%]
+........................................................................ [ 19%]
+........................................................................ [ 29%]
+..........................sssssssssssssssssssssss....................... [ 39%]
+.............s..............................s........................... [ 48%]
+..........................s....s...........................sss.......... [ 58%]
+........................s............................................... [ 68%]
+........................................................................ [ 78%]
+.............................FFF.....F.................................. [ 88%]
+..F..................................................................... [ 97%]
+.FFFF...........                                                         [100%]
+=================================== FAILURES ===================================
+_ test_a_local_run_replays_bit_for_bit_and_scores_its_stored_texts[space0-True] _
+
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/tiny5')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/test_a_local_run_replays_bit_f0')
+space = {'kind': 'full'}, antithetic = True
+
+    @pytest.mark.parametrize(
+        "space, antithetic",
+        [
+            ({"kind": "full"}, True),
+            ({"kind": "subset", "include": [r"layers\.1\."]}, False),
+            ({"kind": "lora", "rank": 2, "alpha": 4, "targetModules": ["q_proj", "v_proj"], "adapterSeed": 5}, True),
+        ],
+    )
+    def test_a_local_run_replays_bit_for_bit_and_scores_its_stored_texts(assets, tmp_path, space, antithetic):
+        out = tmp_path / "run"
+        summaries = run_local(
+            config_for(assets, weightSpace=space, antithetic=antithetic), out, workers=2, timeout_seconds=30
+        )
+        assert [s["generation"] for s in summaries] == [0, 1]
+        assert not all(s["noop"] for s in summaries)  # premise: the weights did move
+>       model, schema, children = check_run(out, assets)
+                                  ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/v3/test_v3_local.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+out = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/test_a_local_run_replays_bit_f0/run')
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/tiny5')
+experiment_id = 'local'
+
+    def check_run(out, assets, experiment_id="local"):
+        """Re-score the stored texts and replay the recorded updates on a fresh model; returns the replayed child."""
+        recipe = json.loads((out / "recipe.json").read_text())
+        plan = json.loads((out / "plan.json").read_text())
+        dataset = json.loads((out / "dataset.json").read_text())
+        assert plan["scorer"]["codeSha256"] == code_sha256(assets / "scorer.py")
+        model, _ = load(assets / "model", file_manifest(assets / "model"))
+        adapter = out / "initial-adapter.bin"
+        schema = trainable_schema(model, recipe["weightSpace"], adapter if adapter.exists() else None)
+        assert schema.hash == recipe["schemaHash"]
+        namespace = {}
+        exec(SCORER, namespace)
+        with Ledger(out / "ledger.sqlite") as ledger:
+            children = []
+            for generation in range(plan["generations"]):
+                rows = v3data.batch(dataset, generation, recipe["data"]["batch"]["size"], recipe["data"]["batch"]["seed"])[
+                    "rows"
+                ]
+                for candidate in ledger.list_candidates(experiment_id, generation):
+                    _, texts = ledger.get_completions(candidate.descriptor.candidate_id)
+                    assert len(texts) == len(rows)
+                    assert (
+                        candidate.result.reward == score(plan["scorer"], texts, rows, namespace["distinct_characters"])[0]
+                    )
+                stored = ledger.get_update(experiment_id, generation)
+                assert isinstance(stored.record, GenerationRecord) and stored.record.coefficient_rule == "zscore@1"
+                stored.record.verify_coefficients(plan["coefficientRule"]["eta"])
+                seeds, coefficients = stored.record.update_inputs()
+                apply_coefficients_(
+                    model, schema, seeds, coefficients, stored.record.alpha, recipe["noise"]["chunkElements"]
+                )
+>               assert model_weights_sha256(model, schema) == stored.child_weights_sha256
+E               AssertionError: assert '451fe6296a60...b4b1f9b315218' == '78ae6c90b079...303837f47ee4e'
+E                 
+E                 - 78ae6c90b07970a1747112356313b53f347962ad3449508e450303837f47ee4e
+E                 + 451fe6296a60e0726df39c1a3869a5e11ff1c2f479fe76a179bb4b1f9b315218
+
+tests/v3/test_v3_local.py:94: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+
+
+
+---------------------------- Captured stderr setup -----------------------------
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 2878.73it/s]
+----------------------------- Captured stderr call -----------------------------
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 17414.87it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 18309.59it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 18169.26it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 17154.62it/s]
+_ test_a_local_run_replays_bit_for_bit_and_scores_its_stored_texts[space1-False] _
+
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/tiny5')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/test_a_local_run_replays_bit_f1')
+space = {'kind': 'subset', 'include': ['layers\\.1\\.']}, antithetic = False
+
+    @pytest.mark.parametrize(
+        "space, antithetic",
+        [
+            ({"kind": "full"}, True),
+            ({"kind": "subset", "include": [r"layers\.1\."]}, False),
+            ({"kind": "lora", "rank": 2, "alpha": 4, "targetModules": ["q_proj", "v_proj"], "adapterSeed": 5}, True),
+        ],
+    )
+    def test_a_local_run_replays_bit_for_bit_and_scores_its_stored_texts(assets, tmp_path, space, antithetic):
+        out = tmp_path / "run"
+        summaries = run_local(
+            config_for(assets, weightSpace=space, antithetic=antithetic), out, workers=2, timeout_seconds=30
+        )
+        assert [s["generation"] for s in summaries] == [0, 1]
+        assert not all(s["noop"] for s in summaries)  # premise: the weights did move
+>       model, schema, children = check_run(out, assets)
+                                  ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/v3/test_v3_local.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+out = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/test_a_local_run_replays_bit_f1/run')
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/tiny5')
+experiment_id = 'local'
+
+    def check_run(out, assets, experiment_id="local"):
+        """Re-score the stored texts and replay the recorded updates on a fresh model; returns the replayed child."""
+        recipe = json.loads((out / "recipe.json").read_text())
+        plan = json.loads((out / "plan.json").read_text())
+        dataset = json.loads((out / "dataset.json").read_text())
+        assert plan["scorer"]["codeSha256"] == code_sha256(assets / "scorer.py")
+        model, _ = load(assets / "model", file_manifest(assets / "model"))
+        adapter = out / "initial-adapter.bin"
+        schema = trainable_schema(model, recipe["weightSpace"], adapter if adapter.exists() else None)
+        assert schema.hash == recipe["schemaHash"]
+        namespace = {}
+        exec(SCORER, namespace)
+        with Ledger(out / "ledger.sqlite") as ledger:
+            children = []
+            for generation in range(plan["generations"]):
+                rows = v3data.batch(dataset, generation, recipe["data"]["batch"]["size"], recipe["data"]["batch"]["seed"])[
+                    "rows"
+                ]
+                for candidate in ledger.list_candidates(experiment_id, generation):
+                    _, texts = ledger.get_completions(candidate.descriptor.candidate_id)
+                    assert len(texts) == len(rows)
+                    assert (
+                        candidate.result.reward == score(plan["scorer"], texts, rows, namespace["distinct_characters"])[0]
+                    )
+                stored = ledger.get_update(experiment_id, generation)
+                assert isinstance(stored.record, GenerationRecord) and stored.record.coefficient_rule == "zscore@1"
+                stored.record.verify_coefficients(plan["coefficientRule"]["eta"])
+                seeds, coefficients = stored.record.update_inputs()
+                apply_coefficients_(
+                    model, schema, seeds, coefficients, stored.record.alpha, recipe["noise"]["chunkElements"]
+                )
+>               assert model_weights_sha256(model, schema) == stored.child_weights_sha256
+E               AssertionError: assert '5a2f727223f4...22b14bdea429e' == 'd8947f556754...b314de780ed57'
+E                 
+E                 - d8947f5567545115734503b6fe328c45d834f55027a97bc6f22b314de780ed57
+E                 + 5a2f727223f4627663b3902c3b36d8fba15d310b7c8f74e571e22b14bdea429e
+
+tests/v3/test_v3_local.py:94: AssertionError
+----------------------------- Captured stderr call -----------------------------
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 27434.44it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 17047.35it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 14893.73it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 16936.16it/s]
+_ test_a_local_run_replays_bit_for_bit_and_scores_its_stored_texts[space2-True] _
+
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/tiny5')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/test_a_local_run_replays_bit_f2')
+space = {'kind': 'lora', 'rank': 2, 'alpha': 4, 'targetModules': ['q_proj', 'v_proj'], ...}
+antithetic = True
+
+    @pytest.mark.parametrize(
+        "space, antithetic",
+        [
+            ({"kind": "full"}, True),
+            ({"kind": "subset", "include": [r"layers\.1\."]}, False),
+            ({"kind": "lora", "rank": 2, "alpha": 4, "targetModules": ["q_proj", "v_proj"], "adapterSeed": 5}, True),
+        ],
+    )
+    def test_a_local_run_replays_bit_for_bit_and_scores_its_stored_texts(assets, tmp_path, space, antithetic):
+        out = tmp_path / "run"
+        summaries = run_local(
+            config_for(assets, weightSpace=space, antithetic=antithetic), out, workers=2, timeout_seconds=30
+        )
+        assert [s["generation"] for s in summaries] == [0, 1]
+        assert not all(s["noop"] for s in summaries)  # premise: the weights did move
+>       model, schema, children = check_run(out, assets)
+                                  ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/v3/test_v3_local.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+out = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/test_a_local_run_replays_bit_f2/run')
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/tiny5')
+experiment_id = 'local'
+
+    def check_run(out, assets, experiment_id="local"):
+        """Re-score the stored texts and replay the recorded updates on a fresh model; returns the replayed child."""
+        recipe = json.loads((out / "recipe.json").read_text())
+        plan = json.loads((out / "plan.json").read_text())
+        dataset = json.loads((out / "dataset.json").read_text())
+        assert plan["scorer"]["codeSha256"] == code_sha256(assets / "scorer.py")
+        model, _ = load(assets / "model", file_manifest(assets / "model"))
+        adapter = out / "initial-adapter.bin"
+        schema = trainable_schema(model, recipe["weightSpace"], adapter if adapter.exists() else None)
+        assert schema.hash == recipe["schemaHash"]
+        namespace = {}
+        exec(SCORER, namespace)
+        with Ledger(out / "ledger.sqlite") as ledger:
+            children = []
+            for generation in range(plan["generations"]):
+                rows = v3data.batch(dataset, generation, recipe["data"]["batch"]["size"], recipe["data"]["batch"]["seed"])[
+                    "rows"
+                ]
+                for candidate in ledger.list_candidates(experiment_id, generation):
+                    _, texts = ledger.get_completions(candidate.descriptor.candidate_id)
+                    assert len(texts) == len(rows)
+                    assert (
+                        candidate.result.reward == score(plan["scorer"], texts, rows, namespace["distinct_characters"])[0]
+                    )
+                stored = ledger.get_update(experiment_id, generation)
+                assert isinstance(stored.record, GenerationRecord) and stored.record.coefficient_rule == "zscore@1"
+                stored.record.verify_coefficients(plan["coefficientRule"]["eta"])
+                seeds, coefficients = stored.record.update_inputs()
+                apply_coefficients_(
+                    model, schema, seeds, coefficients, stored.record.alpha, recipe["noise"]["chunkElements"]
+                )
+>               assert model_weights_sha256(model, schema) == stored.child_weights_sha256
+E               AssertionError: assert '3d68a319a90b...de50e42ea1a5e' == '37458a84de41...176d3ecb7775a'
+E                 
+E                 - 37458a84de4196cf26c03c5d66150d230a9c744d16d99e076ad176d3ecb7775a
+E                 + 3d68a319a90bedb903b5574b069f8804081b662ff3b2a6d648fde50e42ea1a5e
+
+tests/v3/test_v3_local.py:94: AssertionError
+----------------------------- Captured stderr call -----------------------------
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 17540.92it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 17071.37it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 16518.01it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 18248.31it/s]
+_____ test_every_candidate_can_be_audited_on_another_worker_before_updates _____
+
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/tiny5')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/test_every_candidate_can_be_au0')
+
+    def test_every_candidate_can_be_audited_on_another_worker_before_updates(assets, tmp_path):
+        import sqlite3
+    
+        out = tmp_path / "audited"
+        summaries = run_local(config_for(assets), out, workers=2, timeout_seconds=30, audit_rate=1.0)
+        with sqlite3.connect(out / "ledger.sqlite") as db:
+            rows = db.execute(
+                "SELECT u.worker_id,a.worker_id,u.matched FROM audit u JOIN result r USING(candidate_id) JOIN attempt a ON a.candidate_id=r.candidate_id AND a.attempt_number=r.attempt_number"
+            ).fetchall()
+            assert len(rows) == 8
+            assert all(auditor != original and matched == 1 for auditor, original, matched in rows)
+        # each generation's summary says how many re-executions were chosen and done (ADR-009)
+        assert sum(row["audits"]["selected"] for row in summaries) == 8
+        assert all(row["audits"]["completed"] == row["audits"]["selected"] for row in summaries)
+        assert not all(row["noop"] for row in summaries)
+>       _, _, children = check_run(out, assets)
+                         ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/v3/test_v3_local.py:224: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+out = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/test_every_candidate_can_be_au0/audited')
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/tiny5')
+experiment_id = 'local'
+
+    def check_run(out, assets, experiment_id="local"):
+        """Re-score the stored texts and replay the recorded updates on a fresh model; returns the replayed child."""
+        recipe = json.loads((out / "recipe.json").read_text())
+        plan = json.loads((out / "plan.json").read_text())
+        dataset = json.loads((out / "dataset.json").read_text())
+        assert plan["scorer"]["codeSha256"] == code_sha256(assets / "scorer.py")
+        model, _ = load(assets / "model", file_manifest(assets / "model"))
+        adapter = out / "initial-adapter.bin"
+        schema = trainable_schema(model, recipe["weightSpace"], adapter if adapter.exists() else None)
+        assert schema.hash == recipe["schemaHash"]
+        namespace = {}
+        exec(SCORER, namespace)
+        with Ledger(out / "ledger.sqlite") as ledger:
+            children = []
+            for generation in range(plan["generations"]):
+                rows = v3data.batch(dataset, generation, recipe["data"]["batch"]["size"], recipe["data"]["batch"]["seed"])[
+                    "rows"
+                ]
+                for candidate in ledger.list_candidates(experiment_id, generation):
+                    _, texts = ledger.get_completions(candidate.descriptor.candidate_id)
+                    assert len(texts) == len(rows)
+                    assert (
+                        candidate.result.reward == score(plan["scorer"], texts, rows, namespace["distinct_characters"])[0]
+                    )
+                stored = ledger.get_update(experiment_id, generation)
+                assert isinstance(stored.record, GenerationRecord) and stored.record.coefficient_rule == "zscore@1"
+                stored.record.verify_coefficients(plan["coefficientRule"]["eta"])
+                seeds, coefficients = stored.record.update_inputs()
+                apply_coefficients_(
+                    model, schema, seeds, coefficients, stored.record.alpha, recipe["noise"]["chunkElements"]
+                )
+>               assert model_weights_sha256(model, schema) == stored.child_weights_sha256
+E               AssertionError: assert 'b2c783b0602c...72d1a7192bb24' == '70cb29b00baf...8126db0531961'
+E                 
+E                 - 70cb29b00bafc31da7cdbfed6118f7f737ab39775245ff6c3f78126db0531961
+E                 + b2c783b0602c6e6364f4a866fc1344788115fce6a6ede84d79872d1a7192bb24
+
+tests/v3/test_v3_local.py:94: AssertionError
+----------------------------- Captured stderr call -----------------------------
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 23426.83it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 16508.01it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 18202.62it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 23967.45it/s]
+________ test_a_run_with_a_python_sampler_freezes_its_rows_and_replays _________
+
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/tiny6')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/test_a_run_with_a_python_sampl0')
+
+    def test_a_run_with_a_python_sampler_freezes_its_rows_and_replays(assets, tmp_path):  # noqa: F811
+        (assets / "curriculum.py").write_text(CURRICULUM, encoding="utf-8")
+        sampler = {"kind": "python", "path": str(assets / "curriculum.py"), "function": "curriculum"}
+        config = config_for(assets, generations=3)
+        config["data"] = {**config["data"], "sampler": sampler}
+        out = tmp_path / "curriculum"
+        summaries = run_local(config, out, workers=2, timeout_seconds=30)  # the workers accepted every context
+        recipe = json.loads((out / "recipe.json").read_text())
+        from heteroes.v3.scoring import code_sha256
+    
+        assert recipe["data"]["batch"]["sampler"] == "python@1:" + code_sha256(assets / "curriculum.py")
+        train = len(json.loads((out / "dataset.json").read_text())["splits"]["train"])
+        frozen = [frozen_context(out / "ledger.sqlite", "local", g)["batchIndices"] for g in range(3)]
+        assert frozen == [[(g * 4 + i) % train for i in range(4)] for g in range(3)]
+>       children, _, _, _ = replay(out, assets)
+                            ^^^^^^^^^^^^^^^^^^^
+
+tests/v3/test_v3_python_sampler.py:82: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+out = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/test_a_run_with_a_python_sampl0/curriculum')
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/tiny6'), check = None
+
+    def replay(out, assets, check=None):  # noqa: F811
+        """Apply every recorded update to a fresh model; returns (children, records, weights before each update)."""
+        recipe = json.loads((out / "recipe.json").read_text())
+        plan = json.loads((out / "plan.json").read_text())
+        model, _ = load(assets / "model", file_manifest(assets / "model"))
+        schema = trainable_schema(model, recipe["weightSpace"])
+        children, records, parents = [], [], []
+        with Ledger(out / "ledger.sqlite") as ledger:
+            for generation in range(plan["generations"]):
+                record = ledger.get_update("local", generation).record
+                assert record.alpha == alpha_at(plan, generation)
+                if check:
+                    check(record)
+                parents.append(
+                    {e.canonical_name: p.detach().clone() for e, p in zip(schema.entries, schema_tensors(model, schema))}
+                )
+                seeds, coefficients = record.update_inputs()
+                apply_coefficients_(model, schema, seeds, coefficients, record.alpha, recipe["noise"]["chunkElements"])
+                children.append(model_weights_sha256(model, schema))
+>               assert children[-1] == ledger.get_update("local", generation).child_weights_sha256
+E               AssertionError: assert '30b5d72f5e17...2ab751cec72a3' == 'd4db66b25431...a279a8b0c08dc'
+E                 
+E                 - d4db66b254311e3d30103991f66e7ffcbd0e4315fb435172b14a279a8b0c08dc
+E                 + 30b5d72f5e1756428787e47792674b467ec38e6f67fcb3846a02ab751cec72a3
+
+tests/v3/test_v3_update_rules.py:50: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+
+
+
+---------------------------- Captured stderr setup -----------------------------
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 3102.30it/s]
+----------------------------- Captured stderr call -----------------------------
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 18371.28it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 18824.77it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 18045.99it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 16917.76it/s]
+______________ test_a_centered_rank_run_records_ranks_and_replays ______________
+
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/tiny9')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/test_a_centered_rank_run_recor0')
+
+    def test_a_centered_rank_run_records_ranks_and_replays(assets, tmp_path):  # noqa: F811
+        out = tmp_path / "rank"
+        summaries = run_local(config_for(assets, coefficientRule="centered-rank@1"), out, workers=2, timeout_seconds=30)
+        assert any(moved(summaries))
+    
+        def check(record):
+            assert record.coefficient_rule == "centered-rank@1" and record.verify_coefficients(1e-9)
+            assert sorted(record.coefficients) == sorted(record.coefficients[::-1])  # ranks are symmetric around 0
+    
+>       children, _, _, _ = replay(out, assets, check)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/v3/test_v3_update_rules.py:74: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+out = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/test_a_centered_rank_run_recor0/rank')
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/tiny9')
+check = <function test_a_centered_rank_run_records_ranks_and_replays.<locals>.check at 0x70e20ff9a520>
+
+    def replay(out, assets, check=None):  # noqa: F811
+        """Apply every recorded update to a fresh model; returns (children, records, weights before each update)."""
+        recipe = json.loads((out / "recipe.json").read_text())
+        plan = json.loads((out / "plan.json").read_text())
+        model, _ = load(assets / "model", file_manifest(assets / "model"))
+        schema = trainable_schema(model, recipe["weightSpace"])
+        children, records, parents = [], [], []
+        with Ledger(out / "ledger.sqlite") as ledger:
+            for generation in range(plan["generations"]):
+                record = ledger.get_update("local", generation).record
+                assert record.alpha == alpha_at(plan, generation)
+                if check:
+                    check(record)
+                parents.append(
+                    {e.canonical_name: p.detach().clone() for e, p in zip(schema.entries, schema_tensors(model, schema))}
+                )
+                seeds, coefficients = record.update_inputs()
+                apply_coefficients_(model, schema, seeds, coefficients, record.alpha, recipe["noise"]["chunkElements"])
+                children.append(model_weights_sha256(model, schema))
+>               assert children[-1] == ledger.get_update("local", generation).child_weights_sha256
+E               AssertionError: assert 'a3d22cdee092...318235982c540' == 'da77ae5759de...e82beb9d8cb03'
+E                 
+E                 - da77ae5759def61268e162f16361348fcbf28bb68e220a1667ae82beb9d8cb03
+E                 + a3d22cdee092f70f328ee0a39312c3ba2b5bebe88ffa407dd7e318235982c540
+
+tests/v3/test_v3_update_rules.py:50: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+
+
+
+---------------------------- Captured stderr setup -----------------------------
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 3509.88it/s]
+----------------------------- Captured stderr call -----------------------------
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 18634.98it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 18007.25it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 16230.38it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 17824.76it/s]
+_ test_a_python_coefficient_rule_is_pinned_and_only_its_coordinator_can_recompute_it _
+
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/tiny9')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/test_a_python_coefficient_rule0')
+
+    def test_a_python_coefficient_rule_is_pinned_and_only_its_coordinator_can_recompute_it(assets, tmp_path):  # noqa: F811
+        (assets / "centered.py").write_text(CENTERED, encoding="utf-8")
+        rule = {"kind": "python", "path": str(assets / "centered.py"), "function": "centered"}
+        out = tmp_path / "python"
+        summaries = run_local(config_for(assets, coefficientRule=rule), out, workers=2, timeout_seconds=30)
+        plan = json.loads((out / "plan.json").read_text())
+        from heteroes.v3.scoring import code_sha256
+    
+        assert plan["coefficientRule"] == {
+            "name": "python", "version": 1, "eta": 1e-9, "codeSha256": code_sha256(assets / "centered.py"),
+        }  # fmt: skip
+        namespace = {}
+        exec(CENTERED, namespace)
+    
+        def check(record):
+            assert record.coefficient_rule == f"python@1:{plan['coefficientRule']['codeSha256']}"
+            assert record.verify_coefficients(1e-9) is False
+            assert record.verify_coefficients(1e-9, function=namespace["centered"]) is True
+    
+>       children, _, _, _ = replay(out, assets, check)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/v3/test_v3_update_rules.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+out = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/test_a_python_coefficient_rule0/python')
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/tiny9')
+check = <function test_a_python_coefficient_rule_is_pinned_and_only_its_coordinator_can_recompute_it.<locals>.check at 0x70e20ff9afc0>
+
+    def replay(out, assets, check=None):  # noqa: F811
+        """Apply every recorded update to a fresh model; returns (children, records, weights before each update)."""
+        recipe = json.loads((out / "recipe.json").read_text())
+        plan = json.loads((out / "plan.json").read_text())
+        model, _ = load(assets / "model", file_manifest(assets / "model"))
+        schema = trainable_schema(model, recipe["weightSpace"])
+        children, records, parents = [], [], []
+        with Ledger(out / "ledger.sqlite") as ledger:
+            for generation in range(plan["generations"]):
+                record = ledger.get_update("local", generation).record
+                assert record.alpha == alpha_at(plan, generation)
+                if check:
+                    check(record)
+                parents.append(
+                    {e.canonical_name: p.detach().clone() for e, p in zip(schema.entries, schema_tensors(model, schema))}
+                )
+                seeds, coefficients = record.update_inputs()
+                apply_coefficients_(model, schema, seeds, coefficients, record.alpha, recipe["noise"]["chunkElements"])
+                children.append(model_weights_sha256(model, schema))
+>               assert children[-1] == ledger.get_update("local", generation).child_weights_sha256
+E               AssertionError: assert 'f8bb465ddae9...846e17aba326d' == 'fc2aec770a05...200e863fb26ec'
+E                 
+E                 - fc2aec770a0522af32fc43436859e2387e3ebd977b5e0ec9088200e863fb26ec
+E                 + f8bb465ddae968eb4c807b1b8de65f48a07f6a556c0668f0ea4846e17aba326d
+
+tests/v3/test_v3_update_rules.py:50: AssertionError
+----------------------------- Captured stderr call -----------------------------
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 18205.66it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 18448.98it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 18480.24it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 16894.18it/s]
+_________________ test_an_alpha_schedule_goes_into_each_record _________________
+
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/tiny9')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/test_an_alpha_schedule_goes_in0')
+
+    def test_an_alpha_schedule_goes_into_each_record(assets, tmp_path):  # noqa: F811
+        out = tmp_path / "alpha"
+        config = config_for(assets, generations=3, alphaSchedule={"kind": "linear", "minimum": 0.125})
+        summaries = run_local(config, out, workers=1, timeout_seconds=30)
+>       children, records, _, _ = replay(out, assets)
+                                  ^^^^^^^^^^^^^^^^^^^
+
+tests/v3/test_v3_update_rules.py:105: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+out = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/test_an_alpha_schedule_goes_in0/alpha')
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/tiny9'), check = None
+
+    def replay(out, assets, check=None):  # noqa: F811
+        """Apply every recorded update to a fresh model; returns (children, records, weights before each update)."""
+        recipe = json.loads((out / "recipe.json").read_text())
+        plan = json.loads((out / "plan.json").read_text())
+        model, _ = load(assets / "model", file_manifest(assets / "model"))
+        schema = trainable_schema(model, recipe["weightSpace"])
+        children, records, parents = [], [], []
+        with Ledger(out / "ledger.sqlite") as ledger:
+            for generation in range(plan["generations"]):
+                record = ledger.get_update("local", generation).record
+                assert record.alpha == alpha_at(plan, generation)
+                if check:
+                    check(record)
+                parents.append(
+                    {e.canonical_name: p.detach().clone() for e, p in zip(schema.entries, schema_tensors(model, schema))}
+                )
+                seeds, coefficients = record.update_inputs()
+                apply_coefficients_(model, schema, seeds, coefficients, record.alpha, recipe["noise"]["chunkElements"])
+                children.append(model_weights_sha256(model, schema))
+>               assert children[-1] == ledger.get_update("local", generation).child_weights_sha256
+E               AssertionError: assert 'b2c783b0602c...72d1a7192bb24' == '70cb29b00baf...8126db0531961'
+E                 
+E                 - 70cb29b00bafc31da7cdbfed6118f7f737ab39775245ff6c3f78126db0531961
+E                 + b2c783b0602c6e6364f4a866fc1344788115fce6a6ede84d79872d1a7192bb24
+
+tests/v3/test_v3_update_rules.py:50: AssertionError
+----------------------------- Captured stderr call -----------------------------
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 17063.36it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 16199.04it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 16570.72it/s]
+____ test_momentum_steps_are_the_beta_weighted_sum_of_the_window_and_replay ____
+
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/tiny9')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/test_momentum_steps_are_the_be0')
+
+    def test_momentum_steps_are_the_beta_weighted_sum_of_the_window_and_replay(assets, tmp_path):  # noqa: F811
+        plain = run_local(config_for(assets, generations=4), tmp_path / "plain", workers=1, timeout_seconds=30)
+        out = tmp_path / "momentum"
+        summaries = run_local(config_for(assets, generations=4, momentum=MOMENTUM), out, workers=1, timeout_seconds=30)
+        assert all(moved(summaries))  # premise: every generation has a signal
+        assert summaries[0]["child_sha256"] == plain[0]["child_sha256"]  # nothing to remember yet: today's step exactly
+        assert summaries[1]["child_sha256"] != plain[1]["child_sha256"]
+>       children, records, parents, (model, schema, recipe) = replay(out, assets)
+                                                              ^^^^^^^^^^^^^^^^^^^
+
+tests/v3/test_v3_update_rules.py:139: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+out = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/test_momentum_steps_are_the_be0/momentum')
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-419/tiny9'), check = None
+
+    def replay(out, assets, check=None):  # noqa: F811
+        """Apply every recorded update to a fresh model; returns (children, records, weights before each update)."""
+        recipe = json.loads((out / "recipe.json").read_text())
+        plan = json.loads((out / "plan.json").read_text())
+        model, _ = load(assets / "model", file_manifest(assets / "model"))
+        schema = trainable_schema(model, recipe["weightSpace"])
+        children, records, parents = [], [], []
+        with Ledger(out / "ledger.sqlite") as ledger:
+            for generation in range(plan["generations"]):
+                record = ledger.get_update("local", generation).record
+                assert record.alpha == alpha_at(plan, generation)
+                if check:
+                    check(record)
+                parents.append(
+                    {e.canonical_name: p.detach().clone() for e, p in zip(schema.entries, schema_tensors(model, schema))}
+                )
+                seeds, coefficients = record.update_inputs()
+                apply_coefficients_(model, schema, seeds, coefficients, record.alpha, recipe["noise"]["chunkElements"])
+                children.append(model_weights_sha256(model, schema))
+>               assert children[-1] == ledger.get_update("local", generation).child_weights_sha256
+E               AssertionError: assert 'b2c783b0602c...72d1a7192bb24' == '70cb29b00baf...8126db0531961'
+E                 
+E                 - 70cb29b00bafc31da7cdbfed6118f7f737ab39775245ff6c3f78126db0531961
+E                 + b2c783b0602c6e6364f4a866fc1344788115fce6a6ede84d79872d1a7192bb24
+
+tests/v3/test_v3_update_rules.py:50: AssertionError
+----------------------------- Captured stderr call -----------------------------
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 18442.74it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 17874.43it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 18151.12it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 21641.58it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 22610.80it/s]
+=========================== short test summary info ============================
+FAILED tests/v3/test_v3_local.py::test_a_local_run_replays_bit_for_bit_and_scores_its_stored_texts[space0-True]
+FAILED tests/v3/test_v3_local.py::test_a_local_run_replays_bit_for_bit_and_scores_its_stored_texts[space1-False]
+FAILED tests/v3/test_v3_local.py::test_a_local_run_replays_bit_for_bit_and_scores_its_stored_texts[space2-True]
+FAILED tests/v3/test_v3_local.py::test_every_candidate_can_be_audited_on_another_worker_before_updates
+FAILED tests/v3/test_v3_python_sampler.py::test_a_run_with_a_python_sampler_freezes_its_rows_and_replays
+FAILED tests/v3/test_v3_update_rules.py::test_a_centered_rank_run_records_ranks_and_replays
+FAILED tests/v3/test_v3_update_rules.py::test_a_python_coefficient_rule_is_pinned_and_only_its_coordinator_can_recompute_it
+FAILED tests/v3/test_v3_update_rules.py::test_an_alpha_schedule_goes_into_each_record
+FAILED tests/v3/test_v3_update_rules.py::test_momentum_steps_are_the_beta_weighted_sum_of_the_window_and_replay
+9 failed, 647 passed, 80 skipped in 119.38s (0:01:59)

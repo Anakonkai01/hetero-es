@@ -1,0 +1,26 @@
+...............F....................                                     [100%]
+=================================== FAILURES ===================================
+___ test_dispatch_and_join_capture_display_identity_without_changing_config ____
+
+lab = (<starlette.testclient.TestClient object at 0x7b42fcf72990>, <backend.store.Store object at 0x7b42fd16d2b0>, <backend....t at 0x7b42fd16fc80>, {'Authorization': 'Bearer uPudvmuACzHz3KfJXPN38HeV7EH6lLWDjXgj32VtlJQ', 'X-Workspace-Id': 'lab'})
+
+    def test_dispatch_and_join_capture_display_identity_without_changing_config(lab):
+        client, store, runtime, admin = lab
+        rid, _, devices = running(lab, workers=1, extra=1)
+        body = store.get(rid)
+        worker, late = devices[0][0], devices[1][0]
+        identity = body["workerIdentities"][worker["workerId"]]
+>       assert identity["name"] == worker["displayName"] and identity["gpuName"] == "Fake CPU test GPU"
+                                   ^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'displayName'
+
+backend/tests/test_membership.py:112: KeyError
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_membership.py::test_dispatch_and_join_capture_display_identity_without_changing_config
+1 failed, 35 passed, 1 warning in 3.99s

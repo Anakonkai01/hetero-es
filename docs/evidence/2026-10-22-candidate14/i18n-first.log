@@ -1,0 +1,21 @@
+t() keys: 1109; computed (not checked here): 84; missing Vietnamese: 19; untranslated text outside t(): 0
+  MISSING frontend/src/components/common/AccountMenu.tsx:15  "Account menu"
+  MISSING frontend/src/components/common/AccountMenu.tsx:24  "Could not sign out."
+  MISSING frontend/src/components/common/InstallerDownloads.tsx:20  "Choose an app"
+  MISSING frontend/src/components/common/InstallerDownloads.tsx:21  "Connect a GPU"
+  MISSING frontend/src/components/common/InstallerDownloads.tsx:22  "Host a lab"
+  MISSING frontend/src/components/common/InstallerDownloads.tsx:29  "Operating system"
+  MISSING frontend/src/components/common/InstallerDownloads.tsx:37  "Download for Windows"
+  MISSING frontend/src/components/common/InstallerDownloads.tsx:38  "Detailed instructions"
+  MISSING frontend/src/components/common/InstallerDownloads.tsx:38  "Open setup guide"
+  MISSING frontend/src/components/experiments/MembershipPanel.tsx:48  "Cannot synchronize weights on this connection. Automatic retry is paused temporarily."
+  MISSING frontend/src/components/experiments/MembershipPanel.tsx:50  "Retry worker"
+  MISSING frontend/src/components/experiments/StudyAssets.tsx:369  "Search datasets"
+  MISSING frontend/src/components/experiments/StudyAssets.tsx:370  "Name or checksum"
+  MISSING frontend/src/components/live/LiveDiagram.tsx:14  "Synchronization blocked"
+  MISSING frontend/src/components/ui/Pagination.tsx:8  "Pagination"
+  … run with --list for everything
+  UNUSED "Explore the workflow"
+  UNUSED "Desktop apps"
+  UNUSED "More"
+Unused translation keys: 3

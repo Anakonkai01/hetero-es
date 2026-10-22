@@ -1,0 +1,54 @@
+........................................................................ [ 16%]
+.............................F.......................................... [ 33%]
+........................................................................ [ 49%]
+........................................................................ [ 66%]
+........................................................................ [ 82%]
+........................................................................ [ 99%]
+....                                                                     [100%]
+=================================== FAILURES ===================================
+___ test_a_restarted_worker_is_a_new_launch_and_never_reads_the_stopped_one ____
+
+lab = (<starlette.testclient.TestClient object at 0x74540fdd7320>, <backend.store.Store object at 0x745410940ec0>, <backend....t at 0x74540f403080>, {'Authorization': 'Bearer 264R5qHb0bpi8aKrHb4gce2nAa7Zf2Uln8gM5YIt7-w', 'X-Workspace-Id': 'lab'})
+
+    def test_a_restarted_worker_is_a_new_launch_and_never_reads_the_stopped_one(lab):
+        c, s, r, a = lab
+        d, h = pair(lab)
+        w, wh = pair(lab, "worker-only", False)
+        enable(lab, d, h)
+        enable(lab, w, wh)
+        queued(lab, d, workerIds=[w["workerId"]])
+        s.dispatch_once()
+        ar = r.runs()[0]
+        command = {"assignmentId": ar["assignmentId"], "epoch": ar["epoch"], "workerId": w["workerId"], "recoveryIndex": 0}
+    
+        def send(action, **extra):
+            return c.post("/api/v1/device/worker-command", headers=h, json={**command, "action": action, **extra})
+    
+        def starts():
+            return [cmd for cmd in r.commands(w["deviceId"]) if cmd["kind"] == "START_WORKER"]
+    
+        assert send("start").status_code == 200
+        assert "launch" not in starts()[0]  # a first launch keeps the form older agents know
+        dead = {"assignmentId": ar["assignmentId"], "epoch": ar["epoch"], "workerAlive": False, "coordinatorAlive": False}
+        boot(c, wh, "boot-1", contribution=True, processes=[dead])
+        assert send("poll").json()["alive"] is False
+        assert send("start", launch=1).status_code == 200
+        assert [cmd.get("launch", 0) for cmd in starts()] == [0, 1]  # its own command, not swallowed as a duplicate
+        assert send("poll", launch=1).status_code == 503  # the stopped launch 0 is not this one's state
+        boot(c, wh, "boot-1", contribution=True, processes=[{**dead, "workerAlive": True, "launch": 1}])
+        assert send("poll", launch=1).json()["alive"] is True
+>       assert send("start", launch=20).status_code == 422
+E       AssertionError: assert 200 == 422
+E        +  where 200 = <Response [200 OK]>.status_code
+E        +    where <Response [200 OK]> = <function test_a_restarted_worker_is_a_new_launch_and_never_reads_the_stopped_one.<locals>.send at 0x74541029ef20>('start', launch=20)
+
+backend/tests/test_devices.py:308: AssertionError
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_devices.py::test_a_restarted_worker_is_a_new_launch_and_never_reads_the_stopped_one
+1 failed, 435 passed, 1 warning in 67.21s (0:01:07)

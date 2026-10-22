@@ -1,0 +1,38 @@
+[
+  {
+    "name": "admin can remove own permissions",
+    "file": "backend/routes_operations.py",
+    "old": "if user_id == current[\"userId\"] and (",
+    "new": "if False and user_id == current[\"userId\"] and ("
+  },
+  {
+    "name": "workspace admin can remove own membership",
+    "file": "backend/routes_workspaces.py",
+    "old": "if user_id == current[\"userId\"] and (role is None or (old[0] == \"ADMIN\" and role != \"ADMIN\")):",
+    "new": "if False:"
+  },
+  {
+    "name": "legacy agents can run v2 without selftest",
+    "file": "backend/policies.py",
+    "old": "return None if engine == ENGINE_VERSION else \"noise\"",
+    "new": "return None"
+  },
+  {
+    "name": "v1 model qualification authorizes v2",
+    "file": "backend/policies.py",
+    "old": "if profile.get(\"noiseVersion\", ENGINE_VERSION) == engine else []",
+    "new": "if True else []"
+  },
+  {
+    "name": "v2 report can substitute v1 reference",
+    "file": "backend/model_qualification.py",
+    "old": "if reference[\"cell\"][\"recipe\"][\"noise\"][\"engine\"] != engine:",
+    "new": "if False:"
+  },
+  {
+    "name": "unbound model qualifications can be claimed by a native device",
+    "file": "backend/device_models.py",
+    "old": "        if self.qualifiedModelsByNoiseEngine and any(\n            engine != self.noiseVersion or not set(hashes) <= set(self.qualifiedModelHashes)\n            for engine, hashes in self.qualifiedModelsByNoiseEngine.items()\n        ):\n            raise ValueError(\"Model qualifications must match the reported reference engine and models\")\n",
+    "new": ""
+  }
+]

@@ -1,0 +1,115 @@
+{
+  "experiment": {
+    "id": "2dd6e2f78aa84e60aa5bafaed3fe2c6b",
+    "name": "Candidate14 V2 public-route / Linux + native Windows",
+    "status": "STARTING",
+    "createdMs": 1792685719395,
+    "startedMs": 1792685723633,
+    "completedMs": null,
+    "maxGenerations": 10,
+    "candidatesPerGeneration": 8
+  },
+  "workers": [
+    {
+      "id": "cli-71b757062fd9",
+      "name": "5070ti-nhan",
+      "gpuName": "NVIDIA GeForce RTX 5070 Ti",
+      "gpuUUID": "GPU-64187d93-f2bb-d43f-6c63-2547df16a9a4",
+      "gpuIndex": 0,
+      "identitySource": "recorded",
+      "started": true,
+      "alive": true,
+      "unreachableSinceMs": null,
+      "stopReason": null,
+      "blockedAtMs": null
+    },
+    {
+      "id": "cli-34312a79fbbc",
+      "name": "5070ti-nhut",
+      "gpuName": "NVIDIA GeForce RTX 5070 Ti",
+      "gpuUUID": "GPU-9bc596d9-19e9-6f43-dc2c-a80da924263c",
+      "gpuIndex": 0,
+      "identitySource": "recorded",
+      "started": true,
+      "alive": true,
+      "unreachableSinceMs": null,
+      "stopReason": null,
+      "blockedAtMs": null
+    },
+    {
+      "id": "desktop-d9017660e75f",
+      "name": "3060-thao",
+      "gpuName": "NVIDIA GeForce RTX 3060",
+      "gpuUUID": "GPU-9e338f21-cbc9-8b05-4b4e-406c273ed19d",
+      "gpuIndex": 0,
+      "identitySource": "recorded",
+      "started": true,
+      "alive": true,
+      "unreachableSinceMs": 1792685734267,
+      "stopReason": null,
+      "blockedAtMs": null
+    }
+  ],
+  "generations": [],
+  "jobs": [],
+  "marks": [
+    {
+      "atMs": 1792685731904,
+      "type": "worker_start_unknown",
+      "workerId": "cli-71b757062fd9",
+      "generation": null,
+      "detail": "ConnectionError"
+    },
+    {
+      "atMs": 1792685732709,
+      "type": "worker_start_unknown",
+      "workerId": "cli-34312a79fbbc",
+      "generation": null,
+      "detail": "ConnectionError"
+    },
+    {
+      "atMs": 1792685733494,
+      "type": "worker_start_unknown",
+      "workerId": "desktop-d9017660e75f",
+      "generation": null,
+      "detail": "ConnectionError"
+    },
+    {
+      "atMs": 1792685737457,
+      "type": "worker_start",
+      "workerId": "cli-71b757062fd9",
+      "generation": null
+    },
+    {
+      "atMs": 1792685737773,
+      "type": "model_loaded",
+      "workerId": "cli-71b757062fd9",
+      "generation": null
+    },
+    {
+      "atMs": 1792685738908,
+      "type": "worker_start",
+      "workerId": "cli-34312a79fbbc",
+      "generation": null
+    },
+    {
+      "atMs": 1792685739202,
+      "type": "model_loaded",
+      "workerId": "cli-34312a79fbbc",
+      "generation": null
+    },
+    {
+      "atMs": 1792685739974,
+      "type": "executor_ready",
+      "workerId": "cli-71b757062fd9",
+      "generation": null
+    },
+    {
+      "atMs": 1792685741955,
+      "type": "executor_ready",
+      "workerId": "cli-34312a79fbbc",
+      "generation": null
+    }
+  ],
+  "nowMs": 1792685760151
+}

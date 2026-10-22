@@ -1,0 +1,13 @@
+.........F.............................................................. [ 79%]
+......sss..........                                                      [100%]
+=================================== FAILURES ===================================
+______________ test_a_notebook_gets_the_dashboard_as_a_png_image _______________
+tests/demo/test_demo_state.py:188: in test_a_notebook_gets_the_dashboard_as_a_png_image
+    image = png(Dashboard().draw(build_frame(timeline(), EVENTS)))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/heteroes/demo/dashboard.py:236: in png
+    from IPython.display import Image
+E   ModuleNotFoundError: No module named 'IPython'
+=========================== short test summary info ============================
+FAILED tests/demo/test_demo_state.py::test_a_notebook_gets_the_dashboard_as_a_png_image
+1 failed, 87 passed, 3 skipped in 5.12s

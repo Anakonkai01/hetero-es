@@ -1,0 +1,26 @@
+[
+  {
+    "displayName": "3060-thao",
+    "workerId": "desktop-d9017660e75f",
+    "approvalStatus": "APPROVED",
+    "connectionStatus": "ONLINE",
+    "contributionEnabled": true,
+    "allocatedTo": null
+  },
+  {
+    "displayName": "5070ti-nhan",
+    "workerId": "cli-71b757062fd9",
+    "approvalStatus": "APPROVED",
+    "connectionStatus": "ONLINE",
+    "contributionEnabled": true,
+    "allocatedTo": null
+  },
+  {
+    "displayName": "5070ti-nhut",
+    "workerId": "cli-34312a79fbbc",
+    "approvalStatus": "APPROVED",
+    "connectionStatus": "ONLINE",
+    "contributionEnabled": true,
+    "allocatedTo": null
+  }
+]
