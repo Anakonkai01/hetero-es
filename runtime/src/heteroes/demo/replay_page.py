@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 
 from heteroes.demo.dashboard import SERIES
+from heteroes.demo.state import member_changes
 
 TEMPLATE = Path(__file__).with_name("replay_template.html")
 
@@ -44,8 +45,7 @@ def recording(timeline, events=(), names=None, coordinator=None, title=None):
         for g in timeline.get("generations") or []
         if g.get("doneMs") is not None
     ]
-    validation, audits, membership = [], [], []
-    changes = {"worker_joined": "joined", "worker_left": "left", "membership_changed": "changed"}
+    validation, audits = [], []
     for event in events:
         kind = event.get("eventType") or event.get("event")
         details = event.get("details") or event
@@ -57,8 +57,9 @@ def recording(timeline, events=(), names=None, coordinator=None, title=None):
             validation.append([details.get("generation"), at, details.get("meanReward")])
         elif kind in ("audit_completed", "audit_mismatch") and worker is not None:
             audits.append([at, worker, kind == "audit_completed"])
-        elif kind in changes and worker is not None:
-            membership.append([at, worker, changes[kind]])
+    membership = [
+        [s(at * 1000), index[worker], change] for at, worker, change in member_changes(events) if worker in index
+    ]
     return {
         "title": title or experiment.get("name") or "HeteroES run",
         "status": experiment.get("status"),

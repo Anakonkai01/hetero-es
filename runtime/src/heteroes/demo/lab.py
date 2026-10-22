@@ -37,6 +37,7 @@ def coordinator_events(run_id, root=COORDINATOR_RUNS):
                 "validation_completed",
                 "worker_joined",
                 "worker_left",
+                "membership_changed",
             ):
                 out.append({"eventType": event["event"], "workerId": event.get("worker_id"), "details": event})
         return out

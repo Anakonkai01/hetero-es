@@ -83,6 +83,57 @@ def membership(timeline, names=None):
     ]
 
 
+DEFERRED = {409: "not ON (yet)", 403: "not in the run", 503: "away from the lab", None: "not reachable"}
+LIFECYCLE = {
+    "worker_unavailable": "not reachable at start",
+    "worker_restart_deferred": "cannot start yet: asked again in 30 s",
+    "worker_restarted": "worker started again",
+    "worker_left": "worker stopped (left)",
+    "worker_joined": "worker started (new member)",
+    "worker_lost": "given up as lost",
+    "worker_restart_limit": "too many restarts: left alone",
+}
+
+
+def member_story(lifecycle, ledger_membership, names=None, origin_ms=0, lost=(), silent=None):
+    """Who left, died and came back, in time order: the coordinator's own lifecycle log (process side) merged with the
+    ledger's membership records (the JOIN/LEAVE that the update math sees). The lab timeline alone cannot tell this: a
+    re-added member is `worker_restarted`, never `worker_joined` (RESULTS.md, finding 9).
+
+    The coordinator logs nothing when a machine just stops answering, so two more sources show a drop-out: `lost`, the
+    ledger's attempts {workerId, leasedAt, deadline} that never returned, and `silent`, the coordinator's current
+    {worker id: unreachable since} for members not answering now."""
+    names = names or {}
+
+    def what(e):
+        if e["event"] == "worker_restart_deferred":
+            return f"{DEFERRED.get(e.get('httpStatus'), 'refused')}: asked again in 30 s"
+        return LIFECYCLE[e["event"]]
+
+    rows = [
+        (e["t"], names.get(e["worker_id"], e["worker_id"]), "coordinator", what(e), e.get("launch"))
+        for e in lifecycle
+        if e.get("event") in LIFECYCLE
+    ]
+    rows += [
+        (m["at"], names.get(m["workerId"], m["workerId"]), "ledger", f"{m['action']} from generation {m['generation'] + 1}", None)
+        for m in ledger_membership
+        if m["actor"] != "experiment"  # the initial members, all at generation 0
+    ]  # fmt: skip
+    rows += [
+        (a["deadline"], names.get(a["workerId"], a["workerId"]), "ledger", "work lost: no answer by its deadline", None)
+        for a in lost
+    ]
+    rows += [
+        (since, names.get(w, w), "coordinator", "not answering (still, at this snapshot)", None)
+        for w, since in (silent or {}).items()
+    ]
+    return [
+        {"at (min)": round((t - origin_ms / 1000) / 60, 1), "device": device, "source": source, "what": what, "launch": launch}
+        for t, device, source, what, launch in sorted(rows, key=lambda r: r[0])
+    ]  # fmt: skip
+
+
 def html_table(rows, caption=None):
     if not rows:
         return "<p><em>none</em></p>"

@@ -1,0 +1,50 @@
+[
+ {
+  "workerId": "cli-71b757062fd9",
+  "connectionStatus": "ONLINE",
+  "selfTest": {
+   "gpuName": "NVIDIA GeForce RTX 5070 Ti",
+   "vramTotalMb": 16303,
+   "environment": {
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "torch": "2.13.0+cu132"
+   }
+  }
+ },
+ {
+  "workerId": "cli-73b87e369ddc",
+  "connectionStatus": "OFFLINE",
+  "selfTest": {
+   "gpuName": "NVIDIA GeForce RTX 3060",
+   "vramTotalMb": 12288,
+   "environment": {
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "torch": "2.13.0+cu132"
+   }
+  }
+ },
+ {
+  "workerId": "cli-d90d1da024e9",
+  "connectionStatus": "OFFLINE",
+  "selfTest": {
+   "gpuName": "NVIDIA GeForce GTX 1660 SUPER",
+   "vramTotalMb": 6144,
+   "environment": {
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "torch": "2.13.0+cu132"
+   }
+  }
+ },
+ {
+  "workerId": "cli-aa99b4d4ca58",
+  "connectionStatus": "ONLINE",
+  "selfTest": {
+   "gpuName": "NVIDIA GeForce RTX 5070 Ti",
+   "vramTotalMb": 16303,
+   "environment": {
+    "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.39",
+    "torch": "2.13.0+cu132"
+   }
+  }
+ }
+]

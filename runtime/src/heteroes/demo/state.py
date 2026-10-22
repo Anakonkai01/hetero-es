@@ -10,6 +10,28 @@ from pathlib import Path
 
 AUDIT_EVENTS = ("audit_completed", "audit_mismatch")
 MEMBER_EVENTS = {"worker_joined": "joined", "worker_left": "left", "membership_changed": "changed"}
+ACTIONS = {"JOIN": "joined", "LEAVE": "left"}
+SAME_CHANGE_SECONDS = 600  # a process event and its ledger record (worker_left, then LEAVE) are one change
+
+
+def member_changes(events):
+    """(seconds, worker, "joined"/"left") in time order. A re-added member has no `worker_joined`: its JOIN is the
+    coordinator's `membership_changed` (ledger) record (RESULTS.md, finding 9), whose worker key is `workerId`. A process
+    event and the ledger record of the same change are drawn once."""
+    found = []
+    for event in events:
+        kind = event.get("eventType") or event.get("event")
+        details = event.get("details") or event
+        if kind not in MEMBER_EVENTS or details.get("t") is None:
+            continue
+        change = ACTIONS.get(details.get("action"), "changed") if kind == "membership_changed" else MEMBER_EVENTS[kind]
+        found.append((details["t"], details.get("worker_id") or details.get("workerId"), change))
+    out = []
+    for at, worker, change in sorted(found, key=lambda c: c[0]):
+        last = next((c for c in reversed(out) if c[1] == worker), None)
+        if last is None or last[2] != change or at - last[0] > SAME_CHANGE_SECONDS:
+            out.append((at, worker, change))
+    return out
 
 
 @dataclass
@@ -68,8 +90,10 @@ def build_frame(timeline, events=(), names=None, at_ms=None):
         if job.get("workerId") and job["workerId"] not in order:
             order.append(job["workerId"])
     devices = {w: Device(w, names.get(w, w)) for w in order}
+    completed = experiment.get("completedMs")
+    replayed = completed is not None and now < completed
     for w in timeline.get("workers") or []:
-        devices[w["id"]].alive = w.get("alive")
+        devices[w["id"]].alive = None if replayed else w.get("alive")  # the timeline knows only the latest liveness
 
     jobs = [j for j in timeline.get("jobs") or [] if j.get("startMs") is not None and j["startMs"] <= now]
     newest = max((j["generation"] for j in jobs if j.get("generation") is not None), default=-1)
@@ -111,7 +135,7 @@ def build_frame(timeline, events=(), names=None, at_ms=None):
     )
     scored = [g for g in scores_by_generation if scores_by_generation[g]]
 
-    audits, validation, membership = {"matched": 0, "mismatched": 0}, [], []
+    audits, validation = {"matched": 0, "mismatched": 0}, []
     for event in events:
         kind = event.get("eventType") or event.get("event")
         details = event.get("details") or event
@@ -129,12 +153,14 @@ def build_frame(timeline, events=(), names=None, at_ms=None):
                     devices[worker].mismatches += 1
         elif kind == "validation_completed":
             validation.append({"generation": details.get("generation"), "reward": details.get("meanReward")})
-        elif kind in MEMBER_EVENTS:
-            membership.append({"atS": seconds(int(at * 1000)), "worker": worker, "change": MEMBER_EVENTS[kind]})
+    membership = [
+        {"atS": seconds(int(at * 1000)), "worker": worker, "change": change}
+        for at, worker, change in member_changes(events)
+        if at * 1000 <= now
+    ]
 
-    completed = experiment.get("completedMs")
     status = experiment.get("status")
-    if completed is not None and now < completed:  # a replayed moment shows the state of that moment
+    if replayed:  # a replayed moment shows the state of that moment
         status = "RUNNING" if newest >= 0 else "STARTING"
     return Frame(
         at_ms=now,

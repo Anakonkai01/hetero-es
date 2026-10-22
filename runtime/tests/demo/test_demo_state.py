@@ -124,3 +124,66 @@ def test_the_dashboard_draws_a_frame(tmp_path):
 
     Dashboard("5070ti-nhan").save(build_frame(timeline(), EVENTS), tmp_path / "frame.png")
     assert (tmp_path / "frame.png").stat().st_size > 20_000
+
+
+def test_the_member_story_merges_process_and_ledger_records_in_time_order():
+    from heteroes.demo.analysis import member_story
+
+    lifecycle = [
+        {"event": "worker_start_unknown", "t": 1000.0, "worker_id": "a"},  # routine at every start: not a story line
+        {"event": "worker_restart_deferred", "t": 1300.0, "worker_id": "a", "launch": 1, "httpStatus": 409},
+        {"event": "worker_restarted", "t": 1330.0, "worker_id": "a", "launch": 1},
+    ]
+    ledger = [
+        {"at": 1000.0, "workerId": "a", "action": "JOIN", "generation": 0, "actor": "experiment"},
+        {"at": 1200.0, "workerId": "a", "action": "LEAVE", "generation": 3, "actor": "system"},
+    ]
+    lost = [{"workerId": "a", "leasedAt": 1100.0, "deadline": 1160.0}]
+    rows = member_story(lifecycle, ledger, {"a": "1660s"}, 1_000_000, lost, {"a": 1400.0})
+    assert [(r["at (min)"], r["source"], r["what"]) for r in rows] == [
+        (2.7, "ledger", "work lost: no answer by its deadline"),
+        (3.3, "ledger", "LEAVE from generation 4"),
+        (5.0, "coordinator", "not ON (yet): asked again in 30 s"),
+        (5.5, "coordinator", "worker started again"),
+        (6.7, "coordinator", "not answering (still, at this snapshot)"),
+    ]
+    assert {r["device"] for r in rows} == {"1660s"} and rows[3]["launch"] == 1
+
+
+def test_a_ledger_join_draws_a_rejoin_and_a_process_and_ledger_pair_draws_once():
+    # a re-added member has no worker_joined (RESULTS.md finding 9): its JOIN is the coordinator's membership_changed
+    events = [
+        {"eventType": "worker_left", "details": {"t": (T0 + 35_000) / 1000, "worker_id": "slow"}},
+        {
+            "eventType": "membership_changed",
+            "details": {"t": (T0 + 36_000) / 1000, "workerId": "slow", "action": "LEAVE"},
+        },
+        {
+            "eventType": "membership_changed",
+            "details": {"t": (T0 + 60_000) / 1000, "workerId": "slow", "action": "JOIN"},
+        },
+    ]
+    frame = build_frame(timeline(), events)
+    assert [(m["atS"], m["worker"], m["change"]) for m in frame.membership] == [
+        (35.0, "slow", "left"),
+        (60.0, "slow", "joined"),
+    ]
+
+    from heteroes.demo.replay_page import recording
+
+    assert recording(timeline(), events)["membership"] == [[35.0, 1, "left"], [60.0, 1, "joined"]]
+
+
+def test_a_replayed_moment_does_not_show_the_end_state_of_the_workers():
+    ended = timeline()
+    ended["experiment"].update(status="COMPLETED", completedMs=T0 + 100_000)  # every worker stopped at the end
+    ended["workers"] = [{"id": "fast", "alive": False}, {"id": "slow", "alive": False}]
+    assert [d.alive for d in build_frame(ended, at_ms=T0 + 50_000).devices] == [None, None]
+    assert [d.alive for d in build_frame(ended).devices] == [False, False]
+
+
+def test_a_notebook_gets_the_dashboard_as_a_png_image():
+    from heteroes.demo.dashboard import Dashboard, png
+
+    image = png(Dashboard().draw(build_frame(timeline(), EVENTS)))
+    assert image.format == "png" and image.data[:4] == b"\x89PNG" and len(image.data) > 20_000

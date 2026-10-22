@@ -229,6 +229,17 @@ class Dashboard:
         self.draw(frame, tick).savefig(path, dpi=110, facecolor=SURFACE)
 
 
+def png(figure):
+    """The figure as a notebook image. This module draws with Agg (no window), so a bare figure shows as text in Jupyter."""
+    from io import BytesIO
+
+    from IPython.display import Image
+
+    buffer = BytesIO()
+    figure.savefig(buffer, format="png", dpi=110, facecolor=SURFACE)
+    return Image(data=buffer.getvalue(), format="png")
+
+
 def live(lab, run_id, names=None, coordinator=None, every=3.0, until=None, events=None):
     """Redraw the dashboard in place in a notebook until the run ends (or `until(frame)`); returns the last frame."""
     from IPython.display import display
@@ -236,11 +247,11 @@ def live(lab, run_id, names=None, coordinator=None, every=3.0, until=None, event
     board = Dashboard(coordinator)
     handle, frame = None, None
     for tick, (frame, _) in enumerate(lab.follow(run_id, names, every, until, events=events)):
-        board.draw(frame, tick)
+        image = png(board.draw(frame, tick))
         if handle is None:
-            handle = display(board.figure, display_id=True)
+            handle = display(image, display_id=True)
         else:
-            handle.update(board.figure)
+            handle.update(image)
     plt.close(board.figure)
     return frame
 

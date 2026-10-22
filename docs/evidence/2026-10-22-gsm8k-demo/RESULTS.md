@@ -170,3 +170,28 @@ timeline) for a re-added member.
 **Gate decision (AI, owner's auto-run GO 2026-10-22 ~09:10).** Judged a pass: the refusal that failed (b2) twice is gone,
 and the only miss is the name of a log mark, checked against the ledger and the coordinator's lifecycle log. Tier 3
 starts on this result once parity is equal.
+
+## Tier 3: the long run (experiment `fa67c66c203a4afaaaad9f9215656e4d`), launched 10:01 +07, running
+
+Lab `a198cb0`, members 5070ti-nhan (coordinator), 5070ti-nhut, 3060-thao, 1660s; `tier3.json` (G = 300, N = 32, batch
+32, 500 validation rows every 25 generations). The lab session token had expired at 09:47 (12 h): the first launch got
+401, a sign-in, then the launch. A loop signs in again every 10 h for the watcher.
+
+**Start.** 5070ti-nhut's first probe came before its agent had its allocation (`worker_unavailable`); the supervisor
+started it 2 minutes later, once the run was RUNNING (`worker_restarted`, launch 0). No hand action.
+
+**1660S, recorded per the stop rules (the run goes on).** It stopped answering at 10:19 (one attempt lost at its
+deadline, 10:20:39), came back ~11:00 (`409` while its Keep ON was being applied, then `worker_restarted` launch 1 at
+11:01:10, results again), and stopped answering again at 11:16 (SSH and Tailscale ping time out). Likely its known PCI
+fault; not diagnosed (unreachable).
+
+**Finding 10 (monitoring, not the run).** On a long run the lab's timeline and web page hold only the newest attempts
+and events: the coordinator bounds what it sends to 1.25 MB (`product/agent.py: bounded_snapshot`, `monitoringPartial`),
+halving the attempt list each time it is over. At generation 22 the timeline kept ~370 of ~700 attempts and none of the
+per-generation timing events, so per-device totals read from the lab were about half the real ones (the watcher's `done`
+counts dropped). The ledger has everything: the demo snapshot (`snapshot.py`) counts work and audits from it.
+
+**Snapshot at generation 25** (`tier3-g25/`, 12:14, for the midterm demo while the run goes on): 25 generations, 800
+candidates committed (5070ti-nhut 343, 5070ti-nhan 306, 3060-thao 143, 1660s 8), 44 audits all matched, a generation every
+4.8 min (median). Validation (500 rows): base 0.608, after 25 generations **0.606** (within noise: no learning signal yet).
+Video and replay page in `media/`.
