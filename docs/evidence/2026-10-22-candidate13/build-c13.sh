@@ -4,7 +4,7 @@
 set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/../../.." && pwd)
 cd "$ROOT"
-export BUILD=lf1-20261022-r11-candidate13
+export BUILD=${BUILD:-lf1-20261022-r11-candidate13}
 OUT=/mnt/Archive-2tb/heteroes-local/downloads/$BUILD
 scripts/build-apps.sh
 mkdir -p "$OUT/web/notebooks"
