@@ -1,6 +1,10 @@
 # HeteroES — canonical handoff
 
-**Latest (2026-10-22 ~16:30): tier 3 STOPPED (owner) after a learning audit — the system is right, the learning was not
+**Latest (2026-10-22 ~19:00): candidate13 (real-user fixes) DEPLOYED and ACCEPTED: notebook → lab, no Tailscale by
+default, device rename/delete, findings 9-12; a notebook run with a public-only worker COMPLETED, parity ALL EQUAL.**
+Read [handoff-2026-10-22-candidate13-close.md](handoff-2026-10-22-candidate13-close.md) first.
+
+**Previous (2026-10-22 ~16:30): tier 3 STOPPED (owner) after a learning audit — the system is right, the learning was not
 expected to show; GSM8K parked. Next session fixes the open system bugs only (candidate13 deploy first).**
 Read [handoff-2026-10-22-tier3-stopped-bugs-next.md](handoff-2026-10-22-tier3-stopped-bugs-next.md) first.
 
