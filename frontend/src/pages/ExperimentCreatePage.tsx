@@ -2,6 +2,7 @@ import { useProduct } from '@heteroes/product-ui';
 import { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { ExperimentConfiguration } from '../components/experiments/ExperimentConfiguration';
+import { NotebookGuide } from '../components/experiments/NotebookGuide';
 import { TemplatePicker } from '../components/experiments/TemplatePicker';
 import { PageHeader } from '../components/ui/PageHeader';
 import { useCreateExperiment } from '../hooks/useExperimentMutations';
@@ -26,9 +27,11 @@ export function ExperimentCreatePage() {
     <>
       <PageHeader
         title={t('Create experiment')}
-        description={t('Choose a built-in workload, ES configuration and workers from the shared pool.')}
+        description={t('Experiments are created from a notebook; the web shows and manages them.')}
       />
-      {
+      <NotebookGuide />
+      <details className="advanced-panel" open={Boolean(clone)}>
+        <summary>{t('Or use the web form (built-in workloads and simple settings)')}</summary>
         <section className="card">
           <div className="cb">
             <TemplatePicker
@@ -41,18 +44,18 @@ export function ExperimentCreatePage() {
             />
           </div>
         </section>
-      }
-      <section className="card">
-        <ExperimentConfiguration
-          key={source || 'empty'}
-          initial={initial as Experiment | undefined}
-          pending={create.isPending}
-          onSave={async (configuration) => {
-            const e = await create.mutateAsync(configuration);
-            navigate(`/experiments/${e.experimentId}`);
-          }}
-        />
-      </section>
+        <section className="card">
+          <ExperimentConfiguration
+            key={source || 'empty'}
+            initial={initial as Experiment | undefined}
+            pending={create.isPending}
+            onSave={async (configuration) => {
+              const e = await create.mutateAsync(configuration);
+              navigate(`/experiments/${e.experimentId}`);
+            }}
+          />
+        </section>
+      </details>
     </>
   );
 }

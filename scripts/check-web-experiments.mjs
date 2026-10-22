@@ -231,6 +231,11 @@ try {
   const dataset = datasets.find((d) => d.name === 'V3 arbitrary columns');
   assert.ok(dataset.columns.includes('label') && dataset.columns.includes('level'));
   await page.goto(base + '/experiments/new');
+  // a notebook creates experiments (owner 2026-10-22); the web form stays one click away
+  await page.getByRole('heading', { name: 'Create an experiment from a notebook' }).waitFor();
+  assert.equal(await page.getByLabel('Experiment recipe').isVisible(), false);
+  results.notebookGuideFirst = true;
+  await page.getByText('Or use the web form', { exact: false }).click();
   await page.getByLabel('Experiment recipe').selectOption('3');
   await page.getByLabel('Experiment name', { exact: true }).fill('V3 browser draft');
   await page.getByLabel('Pinned model').selectOption(model.modelArtifactId);

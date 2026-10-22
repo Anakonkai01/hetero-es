@@ -371,8 +371,6 @@ export const translations: Record<string, string> = {
   'Change password': 'Đổi mật khẩu',
   'Changing your password signs out all other sessions.': 'Đổi mật khẩu sẽ đăng xuất các phiên khác.',
   'Chart of mean and best reward per generation': 'Biểu đồ reward trung bình và cao nhất theo thế hệ',
-  'Choose a built-in workload, ES configuration and workers from the shared pool.':
-    'Chọn tác vụ có sẵn, cấu hình ES và máy GPU của lab.',
   'Clear filters': 'Xóa bộ lọc',
   'Close dialog': 'Đóng hộp thoại',
   'Recovery points are created between generations. Metadata backups run hourly when recovery storage is configured. Storage:':
@@ -1264,6 +1262,16 @@ export const translations: Record<string, string> = {
     'Kết nối LAN của lab hoặc Tailscale để tải bộ cài và tệp lớn.',
   'Your lab': 'Lab của bạn',
   'Any network': 'Mọi mạng',
+  'Create an experiment from a notebook': 'Tạo thí nghiệm từ notebook',
+  'Load a model and rows with your own code, write the reward (and, if you like, the sampler) in Python, then submit. The notebook pins every input, qualifies the devices and returns a run you can watch here or in the notebook.':
+    'Nạp model và dữ liệu bằng code của bạn, viết hàm reward (và sampler nếu muốn) bằng Python rồi gửi đi. Notebook ghim mọi đầu vào, kiểm tra tương thích các máy và trả về một lần chạy để theo dõi ở đây hoặc ngay trong notebook.',
+  'Download the example notebook': 'Tải notebook mẫu',
+  'Copy the code': 'Sao chép code',
+  'Install the SDK where the notebook runs (Python 3.12):': 'Cài SDK ở nơi chạy notebook (Python 3.12):',
+  'Experiments are created from a notebook; the web shows and manages them.':
+    'Thí nghiệm được tạo từ notebook; web để xem và quản lý.',
+  'Or use the web form (built-in workloads and simple settings)':
+    'Hoặc dùng form trên web (bài có sẵn và cài đặt đơn giản)',
   'Distributed experiment workflow': 'Quy trình thí nghiệm phân tán',
   'Could not sign in.': 'Không đăng nhập được.',
   'Pinned revision': 'Phiên bản đã ghim',

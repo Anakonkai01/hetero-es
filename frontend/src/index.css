@@ -2142,3 +2142,20 @@ pre.mono {
   border-radius: 10px;
   font-size: 13px;
 }
+.notebook-guide {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+.notebook-guide p {
+  margin: 0;
+}
+.notebook-guide pre {
+  margin: 0;
+  padding: 10px 14px;
+  overflow-x: auto;
+  background: var(--sf2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 13px;
+}
