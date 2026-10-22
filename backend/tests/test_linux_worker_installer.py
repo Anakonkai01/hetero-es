@@ -113,3 +113,37 @@ def test_the_builder_refuses_resources_whose_runtime_does_not_match_the_profile(
     (resources / "runtime.tar.gz").write_bytes(b"other")
     with pytest.raises(RuntimeError, match="does not match"):
         builder.build(resources, tmp_path / "out2", "test2", "https://lab.invalid/downloads")
+
+
+def test_an_update_with_the_same_pinned_packages_reuses_them_instead_of_downloading(release, tmp_path):
+    # 2026-10-22: every update fetched 2.7 GB of wheels again and its disk check refused a nearly full disk
+    out, env = release
+    assert subprocess.run(["bash", out / "install-worker.sh"], env=env, capture_output=True).returncode == 0
+    home = Path(env["HETEROES_WORKER_HOME"])
+    [first] = list((home / "runtimes").iterdir())
+    resources = tmp_path / "resources"
+    runtime_src = ROOT / "runtime"
+    sources = [
+        (str(f.relative_to(runtime_src)), f.read_bytes(), 0o644)
+        for f in sorted((runtime_src / "src/heteroes").rglob("*.py"))
+    ]
+    tar_gz(resources / "runtime.tar.gz", sources + [("src/heteroes/NEWER.txt", b"a newer HeteroES\n", 0o644)])
+    profile = json.loads((resources / "profile.json").read_text())
+    profile["runtimeSha256"] = hashlib.sha256((resources / "runtime.tar.gz").read_bytes()).hexdigest()
+    (resources / "profile.json").write_text(json.dumps(profile))
+    builder.build(resources, tmp_path / "out2", "test2", "https://lab.invalid/downloads")
+    (tmp_path / "source/python.tar.gz").unlink()  # nothing may be downloaded again
+    for cached in (home / "downloads").glob("*python*"):
+        cached.unlink()
+    updated = subprocess.run(
+        ["bash", tmp_path / "out2/install-worker.sh"],
+        env={**env, "HETEROES_BUNDLE": str(tmp_path / "out2/heteroes-worker-linux-test2.tar.gz")},
+        capture_output=True,
+        text=True,
+    )
+    assert updated.returncode == 0, updated.stderr
+    assert "reusing the pinned Python and packages" in updated.stdout
+    second = home / "runtimes" / profile["runtimeSha256"][:12]
+    assert (second / "python/bin/python3.12").stat().st_ino == (first / "python/bin/python3.12").stat().st_ino
+    assert (second / "src/heteroes/NEWER.txt").read_text() == "a newer HeteroES\n"
+    assert second.name in (Path(env["HETEROES_BIN_DIR"]) / "heteroes-worker").read_text()

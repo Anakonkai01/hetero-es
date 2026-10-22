@@ -220,6 +220,13 @@ class Worker:
         if sha256_file(self.bundle / "runtime.tar.gz") != profile["runtimeSha256"]:
             raise RuntimeError("RUNTIME_CHECKSUM_MISMATCH")
         selected = profile["selected"]
+        lock = sha256_file(self.bundle / selected["lockFile"])
+        marker = p["runtime"] / "LOCK_SHA256"
+        if self.installed() and marker.is_file() and marker.read_text().strip() == lock:
+            # install-worker.sh linked the same pinned Python and packages from the previous runtime: nothing to fetch
+            shutil.rmtree(p["wheels"], ignore_errors=True)
+            self.say("installed (pinned packages reused from the previous runtime)")
+            return
         self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
         if shutil.disk_usage(self.root).free < self.needed_bytes():
             raise RuntimeError("INSUFFICIENT_DISK_SPACE")
@@ -251,9 +258,11 @@ class Worker:
             {
                 "profile": profile["profile"],
                 "platform": "linux",
+                "lockSha256": lock,
                 "verifiedAt": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             },
         )
+        marker.write_text(lock + "\n")  # the next runtime with the same lock file reuses these packages
         # the packages are inside the runtime now: the wheel files (gigabytes of CUDA) are not needed any more
         shutil.rmtree(p["wheels"], ignore_errors=True)
         self.say("installed")
@@ -603,8 +612,9 @@ class Worker:
         (a coordinator's ledger and weights under artifacts/coordinators) is the only copy and is never removed here."""
         p, freed = self.paths(), 0
 
-        def size(path):
-            return sum(f.stat().st_size for f in Path(path).rglob("*") if f.is_file())
+        def size(path):  # a file linked into several places (runtimes, checkpoints) counts once
+            files = {(f.stat().st_dev, f.stat().st_ino): f.stat().st_size for f in Path(path).rglob("*") if f.is_file()}
+            return sum(files.values())
 
         if p["wheels"].exists():
             freed += size(p["wheels"])

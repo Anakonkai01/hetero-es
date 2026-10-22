@@ -48,12 +48,27 @@ mv "$WORKER_HOME/bundle.new" "$WORKER_HOME/bundle"
 
 runtime_sha="$(sha256sum "$WORKER_HOME/bundle/runtime.tar.gz" | cut -d' ' -f1)"
 runtime="$WORKER_HOME/runtimes/${runtime_sha:0:12}"
-if [ ! -x "$runtime/python/bin/python3.12" ]; then
-  python_archive="$WORKER_HOME/downloads/$(basename "$PYTHON_URL" | sed 's/%2B/+/g')"
-  fetch "$PYTHON_URL" "$PYTHON_SHA256" "$python_archive"
+if [ ! -f "$runtime/READY.json" ]; then  # written only once its packages are installed
+  # A new runtime usually changes only HeteroES's own source: a previous runtime installed from the same pinned lock
+  # file lends its Python and packages as hard links (no download, almost no disk).
+  lock="$(sha256sum "$WORKER_HOME/bundle/requirements-linux.txt" | cut -d' ' -f1)"
+  previous=""
+  for dir in "$WORKER_HOME"/runtimes/*/; do
+    dir="${dir%/}"
+    if [ "$dir" != "$runtime" ] && [ -x "$dir/python/bin/python3.12" ] && [ -f "$dir/READY.json" ] \
+      && [ "$(cat "$dir/LOCK_SHA256" 2>/dev/null)" = "$lock" ]; then previous="$dir"; break; fi
+  done
   rm -rf "$runtime.new"
   mkdir -p "$runtime.new"
-  tar -xzf "$python_archive" -C "$runtime.new" --no-same-owner
+  if [ -n "$previous" ]; then
+    echo "reusing the pinned Python and packages of $(basename "$previous")"
+    cp -al "$previous/python" "$runtime.new/python"
+    cp "$previous/READY.json" "$previous/LOCK_SHA256" "$runtime.new/"
+  else
+    python_archive="$WORKER_HOME/downloads/$(basename "$PYTHON_URL" | sed 's/%2B/+/g')"
+    fetch "$PYTHON_URL" "$PYTHON_SHA256" "$python_archive"
+    tar -xzf "$python_archive" -C "$runtime.new" --no-same-owner
+  fi
   tar -xzf "$WORKER_HOME/bundle/runtime.tar.gz" -C "$runtime.new" --no-same-owner
   rm -rf "$runtime"
   mv "$runtime.new" "$runtime"
