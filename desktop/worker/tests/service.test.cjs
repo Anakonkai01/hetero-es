@@ -208,3 +208,16 @@ test('opening with Windows is kept locally and keep ON after restart is the owne
   assert.deepEqual(await service.preferences({ keepOn: true }), { startAtLogin: false, keepOn: true });
   assert.deepEqual(sent, [['https://lab.example/api/v1/devices/dev/contribution', 'PATCH', { keepAfterReboot: true }]]);
 });
+test('device policy failures are not retried with broader account credentials', async (t) => {
+  const { service } = await fixture(t);
+  service.device = { deviceId: 'dev', workerId: 'desktop' };
+  await service.startAgent();
+  service.userToken = 'owner-session';
+  let requests = 0;
+  service.fetch = async () => {
+    requests++;
+    return new Response('{}', { status: 403 });
+  };
+  await assert.rejects(service.contribution(true), /LAB_HTTP_403/);
+  assert.equal(requests, 1);
+});
