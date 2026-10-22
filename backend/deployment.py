@@ -53,8 +53,15 @@ def caddyfile(config):
 }
 http://:%d {
     bind 127.0.0.1
-    request_body {
+    # one larger body: a signed dataset upload from a researcher without the private route (the lab checks the
+    # size it signed, at most 64 MiB); every other request stays small
+    @small not path /api/v1/public-upload/*
+    request_body @small {
         max_size 3MB
+    }
+    @upload path /api/v1/public-upload/*
+    request_body @upload {
+        max_size 64MiB
     }
     header X-Content-Type-Options nosniff
     header Referrer-Policy no-referrer

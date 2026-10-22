@@ -44,12 +44,16 @@ class Lab:
                 detail = None
             raise RuntimeError(f"Lab HTTP {error.code}: {detail if isinstance(detail, str) else path}") from None
 
-    def upload(self, plan, path):
+    def upload(self, plan, path, reachable=None):
         # Signed storage capability only: never send the user's bearer credential to an upload URL.
+        # Without the private route (no Tailscale), a small dataset file goes over the lab's public address.
+        if reachable is None:
+            from heteroes.study.prepare import private_reachable as reachable
+        url = plan["url"] if not plan.get("publicUrl") or reachable(plan["url"]) else plan["publicUrl"]
         try:
             with Path(path).open("rb") as stream:
                 headers = {"User-Agent": USER_AGENT, **plan["headers"]}
-                request = urllib.request.Request(plan["url"], method="PUT", data=stream, headers=headers)
+                request = urllib.request.Request(url, method="PUT", data=stream, headers=headers)
                 with urllib.request.urlopen(request, timeout=600) as response:
                     response.read()
         except (urllib.error.URLError, OSError):

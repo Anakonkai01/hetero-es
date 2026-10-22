@@ -88,3 +88,31 @@ def test_an_access_token_is_required_but_never_saved_in_an_api_receipt(monkeypat
     monkeypatch.delenv("HETEROES_LAB_ACCESS_TOKEN", raising=False)
     with pytest.raises(ValueError, match="HETEROES_LAB_ACCESS_TOKEN"):
         Lab("https://lab.test", "lab")
+
+
+def test_a_dataset_upload_without_the_private_route_goes_over_the_public_link(monkeypatch, tmp_path):
+    # owner 2026-10-22: no Tailscale by default; the private signed URL is used whenever it answers
+    from heteroes.v3 import lab_cli
+
+    monkeypatch.setenv("HETEROES_LAB_ACCESS_TOKEN", "token")
+    sent = []
+
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def read(self):
+            return b""
+
+    monkeypatch.setattr(lab_cli.urllib.request, "urlopen", lambda request, timeout: sent.append(request) or Response())
+    (tmp_path / "all.jsonl").write_text("{}\n")
+    plan = {"url": "http://100.64.0.1:8002/u/1", "publicUrl": "https://lab.test/api/v1/public-upload/1", "headers": {}}
+    lab = lab_cli.Lab("https://lab.test", "lab")
+    lab.upload(plan, tmp_path / "all.jsonl", reachable=lambda url: False)
+    lab.upload(plan, tmp_path / "all.jsonl", reachable=lambda url: True)
+    lab.upload({**plan, "publicUrl": None}, tmp_path / "all.jsonl", reachable=lambda url: False)
+    assert [r.full_url for r in sent] == [plan["publicUrl"], plan["url"], plan["url"]]
+    assert all("Authorization" not in r.headers for r in sent), "the user's credential never goes to a storage link"

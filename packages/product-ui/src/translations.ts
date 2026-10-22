@@ -1263,7 +1263,7 @@ export const translations: Record<string, string> = {
   'Connect to the lab LAN or Tailscale to download installers and large files.':
     'Kết nối LAN của lab hoặc Tailscale để tải bộ cài và tệp lớn.',
   'Your lab': 'Lab của bạn',
-  'LAN & Tailscale': 'LAN & Tailscale',
+  'Any network': 'Mọi mạng',
   'Distributed experiment workflow': 'Quy trình thí nghiệm phân tán',
   'Could not sign in.': 'Không đăng nhập được.',
   'Pinned revision': 'Phiên bản đã ghim',

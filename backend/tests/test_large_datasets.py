@@ -141,3 +141,32 @@ def test_a_device_without_the_private_route_gets_small_dataset_files_over_the_pu
     # a file above the bound (never weights) only goes over the private route
     monkeypatch.setattr(local_storage, "PUBLIC_STUDY_MAX_BYTES", 10)
     assert "publicUrl" not in c.post("/api/v1/device/study-transfer", headers=device_auth, json=query).json()
+
+
+def test_a_researcher_without_the_private_route_uploads_a_small_dataset_over_the_public_address(
+    v3_study, tmp_path, monkeypatch
+):
+    # owner 2026-10-22: no Tailscale by default; a notebook far from the lab must still be able to send its dataset
+    from backend import local_storage
+
+    c, admin, _ = v3_study
+    (tmp_path / "private").mkdir()
+    (tmp_path / "private/config.json").write_text(json.dumps({"publicWebUrl": "https://lab.example"}))
+    monkeypatch.setenv("HETEROES_PRIVATE_CONFIG", str(tmp_path / "private"))
+    data = lines(400)
+    sizes = {"all": {"format": "jsonl", "sizeBytes": len(data)}}
+    plan = c.post("/api/v1/datasets/upload-plan", headers=admin, json={"name": "far", "files": sizes}).json()
+    target = plan["files"]["all"]
+    public = urlsplit(target["publicUrl"])
+    assert (public.scheme, public.netloc) == ("https", "lab.example") and public.path.startswith(
+        "/api/v1/public-upload/"
+    )
+    # each link works only on its own route
+    assert c.put("/api/v1/local-storage/" + public.path.rsplit("/", 1)[1], content=data, headers=target["headers"]).status_code == 403  # fmt: skip
+    assert c.put(public.path, content=data, headers=target["headers"]).status_code in (200, 201, 204)
+    built = c.post(f"/api/v1/datasets/uploads/{plan['uploadId']}/build", headers=admin, json={"mapping": {"prompt": "question"}})  # fmt: skip
+    assert built.status_code == 201, built.text
+    # a file above the bound only goes over the private route
+    monkeypatch.setattr(local_storage, "PUBLIC_STUDY_MAX_BYTES", 10)
+    plan = c.post("/api/v1/datasets/upload-plan", headers=admin, json={"name": "far", "files": sizes}).json()
+    assert "publicUrl" not in plan["files"]["all"]

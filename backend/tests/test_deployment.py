@@ -87,6 +87,11 @@ def test_real_proxy_accepts_tunnel_host_and_denies_bulk_even_with_forged_host(tm
             self.end_headers()
             self.wfile.write(body)
 
+        def do_PUT(self):
+            self.rfile.read(int(self.headers["Content-Length"]))
+            self.send_response(204)
+            self.end_headers()
+
         def log_message(self, *args):
             pass
 
@@ -138,6 +143,15 @@ def test_real_proxy_accepts_tunnel_host_and_denies_bulk_even_with_forged_host(tm
                     urllib.request.Request(f"http://127.0.0.1:{p}" + path, headers={"Host": "127.0.0.1"}), timeout=2
                 )
             assert error.value.code == 403
+        # a signed dataset upload may carry a larger body than any other public request (no Tailscale by default)
+        big = b"x" * (4 * 1024**2)
+        put = lambda path: opener.open(  # noqa: E731
+            urllib.request.Request(f"http://127.0.0.1:{web}" + path, data=big, method="PUT"), timeout=5
+        )
+        assert put("/api/v1/public-upload/token").status == 204
+        with pytest.raises(urllib.error.HTTPError) as error:
+            put("/api/v1/experiments")
+        assert error.value.code == 413
         if public_downloads:
             # The installer path now reaches the Web/API origin; nothing else was opened.
             assert (

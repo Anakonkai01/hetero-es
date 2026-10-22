@@ -587,14 +587,13 @@ class Worker:
             )
         else:
             row("warn", "service", "no systemd user session", "Run `heteroes-worker run` inside tmux or screen.")
-        tailscale = tailscale_ip(run)
+        # no Tailscale by default (owner 2026-10-22): a worker reaches the lab and its runs over the public address
+        private = tailscale_ip(run)
         row(
-            "ok" if tailscale else "warn",
-            "tailscale",
-            tailscale or "not connected",
-            ""
-            if tailscale
-            else "Needed only to coordinate runs or reach a coordinator on a private network: `sudo tailscale up`.",
+            "ok",
+            "network",
+            "the lab's public address" + (f"; private route {private} (Tailscale) too" if private else ""),
+            "",
         )
         url = (lab or self.settings().get("serverUrl") or "").rstrip("/")
         if url:
@@ -1028,9 +1027,10 @@ def setup(worker, args, call=None, sleep=time.sleep):
         url = confirm_lab(args.lab or ask("Lab address", DEFAULT_LAB), call, args.yes)
         gpu = getattr(args, "gpu", None)
         name = args.name or ask("Name for this GPU", socket.gethostname() + (f"-gpu{gpu}" if gpu else ""))
-        host = args.host or (tailscale_ip() if args.coordinator else None)
+        host = args.host
         if args.coordinator and not host:
-            host = ask("Address other machines reach this one at (Tailscale IP)")
+            # a coordinator outside the lab machine is reached on a private network (LAN or Tailscale), never by default
+            host = ask("Address other machines reach this one at (LAN or Tailscale IP)", tailscale_ip())
         print(f"Make a pairing code on {url}/devices (it works once, for 10 minutes).")
         worker.join(url, read_code(), name, args.coordinator, host, call=call)
     worker.say("5/6 starting the service")
@@ -1155,7 +1155,8 @@ def main(argv=None):
     s.add_argument("--name", help="name shown on the lab (default: ask, suggesting the host name)")
     s.add_argument("--coordinator", action="store_true", help="also offer this machine as a coordinator")
     s.add_argument(
-        "--host", help="with --coordinator: the address other machines reach this one at (default: Tailscale)"
+        "--host",
+        help="with --coordinator: the LAN or Tailscale address other machines reach this one at (default: ask)",
     )
     s.add_argument("--cpu", action="store_true", help="a CPU-only coordinator (no GPU work)")
     s.add_argument("--on", action=argparse.BooleanOptionalAction, default=None, help="turn contribution ON at the end")

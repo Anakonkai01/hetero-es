@@ -262,24 +262,31 @@ class LocalBackend:
         except (ValueError, KeyError, TypeError, UnicodeError):
             raise HTTPException(403, "Invalid or expired storage capability") from None
 
-    def upload_plan(self, key, size):
+    def upload_plan(self, key, size, public_base=None):
+        """A signed upload. With `public_base`, a dataset file up to PUBLIC_STUDY_MAX_BYTES also gets a link over the lab's
+        public HTTPS address, for a researcher without the private route (owner 2026-10-22: no Tailscale by default)."""
         if not key.startswith("uploads/") or type(size) is not int or not 0 < size <= 5_000_000_000:
             raise ValueError("Invalid upload size or key")
-        return {
+        plan = {
             "mode": "single",
             "key": key,
             "url": self._url("PUT", key, size, 900),
             "headers": {"Content-Length": str(size)},
         }
+        if public_base and size <= PUBLIC_STUDY_MAX_BYTES:
+            plan["publicUrl"] = (
+                public_base.rstrip("/") + "/api/v1/public-upload/" + self._token("PUT-PUBLIC", key, size, 900)
+            )
+        return plan
 
     def download_url(self, key):
         return self._url("GET", key, None, 60)
 
-    def _open_upload(self, session, token, content_length):
+    def _open_upload(self, session, token, content_length, method="PUT"):
         with session.lock:
             if session.closed:
                 raise RuntimeError("Upload already closed")
-            grant = self.grant(token, "PUT")
+            grant = self.grant(token, method)
             if content_length != str(grant["size"]):
                 raise HTTPException(400, "Signed upload length required")
             if shutil.disk_usage(self.root).free < grant["size"] + 64 * 1024**2:
@@ -289,9 +296,18 @@ class LocalBackend:
     def install_routes(self, app):
         @app.put("/api/v1/local-storage/{token}")
         async def upload(token: str, request: Request):
+            return await receive(token, request, "PUT")
+
+        @app.put("/api/v1/public-upload/{token}")
+        async def public_upload(token: str, request: Request):
+            return await receive(token, request, "PUT-PUBLIC")
+
+        async def receive(token, request, method):
             session = _Upload()
             try:
-                await run_in_threadpool(self._open_upload, session, token, request.headers.get("content-length"))
+                await run_in_threadpool(
+                    self._open_upload, session, token, request.headers.get("content-length"), method
+                )
                 async for chunk in request.stream():
                     await run_in_threadpool(session.write, chunk)
                 return await run_in_threadpool(session.finish)

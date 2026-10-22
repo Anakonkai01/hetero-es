@@ -175,7 +175,7 @@ def install_routes(app, registry, runtime, scoped, device_auth):
         for name, f in sorted(body.files.items()):
             key = "uploads/" + hashlib.sha256(f"{upload_id}:{name}".encode()).hexdigest() + "/" + upload_id
             files[name] = {**f, "key": key}
-            plans[name] = b.upload_plan(key, f["sizeBytes"])
+            plans[name] = b.upload_plan(key, f["sizeBytes"], public_base=runtime.public_web_url())
         record = {"id": upload_id, "name": body.name, "ownerUserId": current["userId"], "files": files}
         registry.save(record, current["workspaceId"], current["userId"], "dataset-upload")
         return {"uploadId": upload_id, "files": plans}

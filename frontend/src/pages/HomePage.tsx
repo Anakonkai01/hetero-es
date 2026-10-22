@@ -87,7 +87,7 @@ export function HomePage() {
                       : 'Lab status unavailable',
               )}
               <span>·</span>
-              {t('LAN & Tailscale')}
+              {t('Any network')}
             </div>
           </div>
           <DemoReplay
