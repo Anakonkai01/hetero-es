@@ -1,6 +1,7 @@
 # HeteroES — canonical handoff
 
-**Latest (2026-10-22 ~08:45): fix wave 1 DEPLOYED (lab + Linux agents on candidate12) and accepted (tiers 2c, 2d); wave 2
+**Latest (2026-10-22 ~09:00): fix wave 1 DEPLOYED (lab + Linux agents on candidate12); tiers 2c/2d pass all but the
+immediate re-add (b2), fixed in `b5e1bc7`, not deployed; wave 2
 (per-device chunk, several GPUs, limits, watch) coded and tested, not deployed; tier 3 is for the next session.**
 Read [handoff-2026-10-22-fix-waves-tier3-next.md](handoff-2026-10-22-fix-waves-tier3-next.md) first.
 

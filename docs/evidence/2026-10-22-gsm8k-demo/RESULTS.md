@@ -120,3 +120,25 @@ coordinator's stop for it (403); the supervisor retried and logged `worker_left`
 
 **Stop rule:** (b2) failed, so by the predeclared rule tier 3 does not start on this result. Tier 2d repeats (b1)+(b2)
 on the fixed build (`PREDECLARATION-tier2d.md`).
+
+## Tier 2d: rejoin on the fixed build (experiment `366cb11c0af240a0a502baf9b6608bea`), 08:14–08:50 +07, candidate12
+
+Predeclared in `PREDECLARATION-tier2d.md` (commit `8758c6a`, before the run). Events in `tier2d/stage-events.jsonl`.
+
+| Criterion | Result |
+| --------- | ------ |
+| COMPLETED, 160 results, ≥ 1 audit, 0 mismatches, no quarantine | **pass**: 160/160 (5070ti-nhan 80, 3060-thao 39, 5070ti-nhut 27, 1660s 14), 13 audits all matched |
+| (b1) 5070ti-nhut OFF at index 2, LEAVE within 10 min | **pass**: OFF 08:26:30, seen after 466 s; `worker_left` logged once (finding 8 fixed) |
+| (b2) ON + add at index 3, JOIN + result within 15 min | **FAIL**: the add, 0.2 s after the ON, refused `409` |
+| Release at the end, no hand action | **pass**: released, 0 reservations |
+| Parity | **pass**: `tier2d/parity.json` ALL EQUAL (5 child hashes from the ledger, generation 3 regenerated) |
+
+**Finding 7, corrected.** The 409 of tiers 2c and 2d was "Waiting for owner to turn contribution ON": the lab counts a
+device ON only once its agent applied the ON at its next poll (up to about 10 s), and the script adds the worker 0.2 s
+after the ON. The first fix (`ec5fdc0`, a re-add while the same run still holds the device) is a real case but was not
+this refusal: the diagnosis in the tier 2c section was wrong. Fixed in `b5e1bc7`: a JOIN into a running
+run needs the owner's ON only; the agent defers the worker's start until it has applied the ON. Not deployed.
+
+**Stop rule:** (b2) failed again, so tier 3 does not start on this result. The owner had already decided that tier 3 is
+for the next session (2026-10-22 ~08:40: "Nếu đạt tier 3 để phiên sau, phiên này dài rồi"). Next session: deploy the fix
+and repeat (b2) before tier 3.

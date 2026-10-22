@@ -21,8 +21,9 @@ on/off, logs, doctor, update, clean, rename, forget, uninstall; updates reuse th
 desktop apps for Windows only, the event list in one database session, small dataset files over the public address,
 re-adding a worker that is still leaving the same run.
 
-Acceptance: stuck tier 2b released by the deployed code (06:56); tier 2c passed everything except the immediate re-add
-(fixed in `ec5fdc0`); tier 2d = that re-add on the fixed build: see RESULTS.md.
+Acceptance: stuck tier 2b released by the deployed code (06:56). Tiers 2c and 2d passed everything (dead member killed
+and released, Keep ON return, OFF/LEAVE, 7 + 13 matched audits, parity) **except (b2)**: an add 0.2 s after the owner's
+ON is refused 409 "Waiting for owner to turn contribution ON" (finding 7, corrected). Fixed in `b5e1bc7`, **not deployed**.
 
 ## Coded, tested, NOT deployed (wave 2)
 
@@ -33,7 +34,8 @@ with two GPUs, a run with `evalChunks`.
 
 ## Next session
 
-1. If tier 2d passed: **tier 3** (`tier3.json`, G = 300, about a day) with 5070ti-nhan, 5070ti-nhut, 3060-thao, 1660s:
+1. Deploy `b5e1bc7` (lab only: candidate13 build, `deploy-lab-c12.sh` pattern) and repeat (b2) (a short tier 2e, or
+   run `stage_tier2c.py --no-kill --tier <new>`); by the stop rule tier 3 waits for it. Then **tier 3** (`tier3.json`, G = 300, about a day) with 5070ti-nhan, 5070ti-nhut, 3060-thao, 1660s:
    `gsm8k.launch(lab, "tier3", workers)` (retry on a connection reset: it is idempotent), then
    `.scratch/gsm8k-demo/watch.py tier3 60`. Deploying wave 2 restarts workers, so do it before or after tier 3, not during.
 2. Wave 2 deploy (build candidate13, `docs/evidence/2026-10-22-fix-wave1/update-to-c12.sh` pattern for the agents,
