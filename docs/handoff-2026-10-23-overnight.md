@@ -51,4 +51,5 @@ system default** (00:55). Evidence and numbers: `docs/evidence/2026-10-23-overni
 - Start-up is dominated by workers loading the model (~20 s); the end of a run ~35 s.
 - Windows device does not keep ON after restart (its owner choice); after an app crash someone must switch it ON.
 - Old isolated lab on port 8790 (`.scratch/isolated-lab`) is still running from an earlier session; untouched.
-- Pre-existing untracked `docs/evidence/2026-10-22-candidate13/deploy-lab-c13c.log`, `monitor.pid`: preserved.
+- The previous session's untracked `docs/evidence/2026-10-22-candidate13/deploy-lab-c13c.log` (15-line deploy receipt, no
+  secrets) was committed by a broad `git add docs` in `ef2d0ec`; `monitor.pid` (stale) left untouched.
