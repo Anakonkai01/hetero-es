@@ -67,16 +67,8 @@ def main():
                 break
             candidates, rewards = [], []
             if generation in chosen:
-                # a Python sampler's rows are the coordinator's frozen choice (checked here); any other is recomputed
-                given = (
-                    ledger.generation_context(args.experiment, generation)["batchIndices"]
-                    if run.python_sampler
-                    else None
-                )
-                rows = run.batch(dataset, generation, given)["rows"]
-                executor.set_generation(
-                    generation, run.context(dataset, generation, given)
-                )  # computed here, not received
+                rows = run.batch(dataset, generation)["rows"]
+                executor.set_generation(generation, run.context(dataset, generation))  # computed here, not received
                 for record in ledger.list_candidates(args.experiment, generation):
                     # ADR-010: at the chunk the result recorded (None: the recipe's own)
                     texts = list(

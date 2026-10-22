@@ -4,10 +4,10 @@ generation on the coordinator; the frozen context carries them to workers, audit
 """
 
 import json
+from pathlib import Path
 
 import pytest
 
-from heteroes.ledger import Ledger
 from heteroes.v3 import data as v3data
 from heteroes.v3.local import run_local
 
@@ -21,6 +21,17 @@ def curriculum(generation, size, train_rows, seed):
     return [(start + i) % train_rows for i in range(size)]
 """
 PYTHON = "python@1:" + "a" * 64
+
+
+def frozen_context(ledger_path, experiment_id, generation):
+    """The context the coordinator froze for a generation (read only; the ledger module itself is not changed)."""
+    import sqlite3
+
+    with sqlite3.connect(Path(ledger_path).as_uri() + "?mode=ro", uri=True) as db:
+        row = db.execute(
+            "SELECT body FROM generation_context WHERE experiment_id=? AND generation=?", (experiment_id, generation)
+        ).fetchone()
+    return json.loads(row[0]) if row else None
 
 
 def dataset():
@@ -66,8 +77,7 @@ def test_a_run_with_a_python_sampler_freezes_its_rows_and_replays(assets, tmp_pa
 
     assert recipe["data"]["batch"]["sampler"] == "python@1:" + code_sha256(assets / "curriculum.py")
     train = len(json.loads((out / "dataset.json").read_text())["splits"]["train"])
-    with Ledger(out / "ledger.sqlite") as ledger:
-        frozen = [ledger.generation_context("local", g)["batchIndices"] for g in range(3)]
+    frozen = [frozen_context(out / "ledger.sqlite", "local", g)["batchIndices"] for g in range(3)]
     assert frozen == [[(g * 4 + i) % train for i in range(4)] for g in range(3)]
     children, _, _, _ = replay(out, assets)
     assert children == [s["child_sha256"] for s in summaries]
@@ -83,8 +93,7 @@ def test_a_worker_takes_the_coordinators_rows_and_refuses_a_broken_context(asset
     run_local(config, out, workers=1, timeout_seconds=30)
     documents = [json.loads((out / f"{n}.json").read_text()) for n in ("recipe", "plan", "dataset")]
     worker = RecipeV3Run(documents[0], documents[1])  # no sampler function: a worker never runs researcher code
-    with Ledger(out / "ledger.sqlite") as ledger:
-        context = ledger.generation_context("local", 0)
+    context = frozen_context(out / "ledger.sqlite", "local", 0)
     assert worker.context(documents[2], 0, context["batchIndices"]) == context
     with pytest.raises(ValueError, match="comes from the coordinator"):
         worker.context(documents[2], 0)
