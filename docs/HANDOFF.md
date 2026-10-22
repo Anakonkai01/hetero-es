@@ -1,5 +1,9 @@
 # HeteroES — canonical handoff
 
+**Latest (2026-10-23 night, Claude autonomous): candidate15 live on all three machines — engine v2 noise made on the GPU
+(same bits, system default) and the lost-START fix; speed series, fault run and soak.** Read
+[handoff-2026-10-23-overnight.md](handoff-2026-10-23-overnight.md) first.
+
 **Latest (2026-10-23 ~00:30): candidate14 CLOSED by Claude. Native signed-out approval fix packaged as candidate14e,
 published and accepted on native Windows; cleanup done; pushed and main fast-forwarded.** Overnight system work
 (speed, fault injection, soak, CUDA V2) follows in its own handoff. Details:
