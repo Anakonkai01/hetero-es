@@ -342,6 +342,7 @@ class ModelQualificationReport(FiniteStrict):
     processAlive: bool | None = Field(default=None, strict=True)
     reference: dict | None = None
     observations: dict | None = None
+    chunkMemory: dict | None = None  # heteroes.product.chunk_memory: memory and time per chunk on this GPU
     errorCode: str | None = Field(default=None, max_length=100, pattern="^[A-Z][A-Z0-9_]+$")
 
 

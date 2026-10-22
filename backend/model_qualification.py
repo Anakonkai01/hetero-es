@@ -149,7 +149,7 @@ class ModelQualifications:
         return {
             k: job[k]
             for k in ("jobId", "deviceId", "assetId", "ownerUserId", "mode", "status", "errorCode", "createdAt")
-        }
+        } | {"chunkMemory": job.get("chunkMemory")}
 
     def cancel(self, db, job):
         if job["status"] in TERMINAL:
@@ -240,13 +240,23 @@ class ModelQualifications:
                             json.dumps(evidence),
                         ),
                     )
-                    job.update(status="COMPLETED", errorCode=None)
+                    job.update(status="COMPLETED", errorCode=None, chunkMemory=checked_memory(report.chunkMemory))
                 except (ValueError, TypeError, KeyError):
                     job.update(status="FAILED", errorCode="MODEL_QUALIFICATION_MISMATCH")
             db.execute("DELETE FROM model_probe_reservations WHERE job_id=?", (job["jobId"],))
             self.save(db, job)
             self.store.audit(db, "system", "MODEL_QUALIFICATION_" + job["status"], job["jobId"], job["workspaceId"])
         return accepted
+
+
+def checked_memory(value):
+    """A device's chunk measurement as the lab keeps it; anything else is dropped (the qualification stands)."""
+    from heteroes.product.chunk_memory import check
+
+    try:
+        return None if value is None else check(value)
+    except ValueError:
+        return None
 
 
 def install_routes(app, registry, runtime, scoped, device_auth):

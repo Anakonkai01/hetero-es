@@ -162,8 +162,13 @@ def managed_configuration(spec, coordinator, workers, model, dataset):
     return result
 
 
-def offer_experiment(spec, coordinator, workers, api, directory):
-    """Upload frozen local inputs and create one draft; receipt identity makes a retry idempotent."""
+def offer_experiment(spec, coordinator, workers, api, directory, before_create=None):
+    """Upload frozen local inputs and create one draft; receipt identity makes a retry idempotent.
+
+    `spec["model"]["source"]`: "UPLOAD" (default) sends the files to the lab; "REFERENCE" registers the pinned Hugging
+    Face revision only, and every device downloads it from the hub and checks each file's SHA-256 (no private route
+    needed). `before_create(model)` runs once the model is registered, before the experiment exists (the SDK qualifies
+    the selected devices there)."""
     from heteroes.v3.model import file_manifest, registration_manifest
 
     _managed_choices(spec)
@@ -196,13 +201,21 @@ def offer_experiment(spec, coordinator, workers, api, directory):
     write_json(root / "lab-offer.json", state)
     if state.get("experimentId"):
         return api.request("GET", "/api/v1/experiments/" + state["experimentId"])
+    source = spec["model"].get("source", "UPLOAD")
+    if source not in ("UPLOAD", "REFERENCE"):
+        raise ValueError("a model source is UPLOAD or REFERENCE")
     models = api.request("GET", "/api/v1/models")
     model = next(
         (
             m
             for m in models
             if (state.get("modelId") is not None and m.get("id") == state["modelId"])
-            or (m.get("manifestHash") == identity["modelManifestHash"] and m.get("status") in ("READY", "REGISTERED"))
+            or (
+                m.get("manifestHash") == identity["modelManifestHash"]
+                and m.get("status") in ("READY", "REGISTERED")
+                # a hub reference is reused only as a reference: an uploaded copy needs the private route
+                and (source == "UPLOAD" or m.get("source") == "REFERENCE")
+            )
         ),
         None,
     )
@@ -210,7 +223,7 @@ def offer_experiment(spec, coordinator, workers, api, directory):
         model = api.request(
             "POST",
             "/api/v1/models/register",
-            {"recipeVersion": 3, "name": "CLI pinned model", "manifest": manifest, "source": "UPLOAD"},
+            {"recipeVersion": 3, "name": spec["model"]["id"], "manifest": manifest, "source": source},
         )
         state["modelId"] = model["id"]
         write_json(root / "lab-offer.json", state)
@@ -247,6 +260,8 @@ def offer_experiment(spec, coordinator, workers, api, directory):
         state["datasetId"] = dataset["datasetId"]
         write_json(root / "lab-offer.json", state)
     configuration = managed_configuration(spec, coordinator, workers, model, dataset)
+    if before_create is not None:
+        before_create(model)
     experiment = api.request("POST", "/api/v1/experiments", configuration)
     state["experimentId"] = experiment["experimentId"]
     write_json(root / "lab-offer.json", state)

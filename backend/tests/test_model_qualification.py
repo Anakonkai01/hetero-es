@@ -258,3 +258,31 @@ def test_stopped_contribution_cannot_change_endpoints_while_the_probe_is_still_u
         ).status_code
         == 409
     )
+
+
+MEMORY = {
+    "formatVersion": 1,
+    "promptTokens": 200,
+    "newTokens": 256,
+    "baseBytes": 3_000_000_000,
+    "totalBytes": 16_000_000_000,
+    "chunks": [
+        {"chunk": 16, "ran": True, "peakBytes": 4_000_000_000, "seconds": 9.5},
+        {"chunk": 32, "ran": True, "peakBytes": 5_000_000_000, "seconds": 11.0},
+        {"chunk": 64, "ran": False, "peakBytes": None, "seconds": None},
+    ],
+}
+
+
+def test_a_qualification_keeps_what_the_gpu_measured_per_chunk_and_drops_anything_else(v3_study):
+    # owner 2026-10-22: a batch and chunks are suggested from each GPU's own numbers, also for a GPU never seen before
+    lab, d, auth, model = setup(v3_study)
+    c, _, _, admin = lab
+    job = start(lab, d, model)
+    finish(c, auth, job, model, chunkMemory=MEMORY)
+    assert c.get(route(model), headers=admin).json()["jobs"][0]["chunkMemory"] == MEMORY
+    _, d2, auth2, _ = setup(v3_study, "second-gpu")
+    second = start(lab, d2, model)
+    finish(c, auth2, second, model, chunkMemory={**MEMORY, "secret": "x"})
+    jobs = c.get(route(model), headers=admin).json()["jobs"]
+    assert jobs[0]["status"] == "COMPLETED" and jobs[0]["chunkMemory"] is None  # the qualification still stands

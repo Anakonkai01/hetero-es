@@ -18,7 +18,10 @@ def run(input_path, device):
     def emit(event):
         if (root / "stop.flag").exists():
             raise Cancelled()
-        write_json(root / "progress.json", {"status": "RUNNING" if event.get("stage") == "recipe_v3" else "PREPARING"})
+        write_json(
+            root / "progress.json",
+            {"status": "RUNNING" if event.get("stage") in ("recipe_v3", "chunk_memory") else "PREPARING"},
+        )
 
     try:
         emit({"stage": "start"})
@@ -60,8 +63,17 @@ def run(input_path, device):
         else:
             reference = None
             observations = qualify(model, command["manifest"], command["reference"], device, emit)
-        emit({"stage": "done"})
         result = {"status": "COMPLETED", "reference": reference, "observations": observations}
+        if device == "cuda":
+            # memory and time per chunk on this GPU for this model (suggestions of batch and chunks); never fatal
+            emit({"stage": "chunk_memory"})
+            try:
+                from .chunk_memory import measure
+
+                result["chunkMemory"] = measure(model, command["manifest"]["files"], device)
+            except Exception:  # noqa: BLE001 - the qualification itself passed; only the suggestion is missing
+                result["chunkMemory"] = None
+        emit({"stage": "done"})
     except Cancelled:
         result = {"status": "CANCELLED"}
     except Exception as error:
