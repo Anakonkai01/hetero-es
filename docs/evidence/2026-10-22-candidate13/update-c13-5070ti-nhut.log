@@ -1,0 +1,27 @@
+reusing the pinned Python and packages of d5fa6d62a2c7
+installed (pinned packages reused from the previous runtime)
+next: heteroes-worker selftest (or heteroes-worker setup)
+add /home/heheboiz/.local/bin to your PATH (for example in ~/.bashrc)
+
+Installed. Next:
+  heteroes-worker setup     # self-test, pairing with the lab, background service, contribution ON
+self-test: running the pinned reference on this GPU (a few minutes)
+  [    3 s] checking recipe v3 (full, sign +1) 1/2
+  [    5 s] checking recipe v3 (full, sign +1) 2/2
+  [    7 s] checking recipe v3 (full, sign -1) 1/2
+  [    8 s] checking recipe v3 (full, sign -1) 2/2
+  [   11 s] checking recipe v3 (lora, sign +1) 1/2
+  [   11 s] checking recipe v3 (lora, sign +1) 2/2
+  [   11 s] checking recipe v3 (lora, sign -1) 1/2
+  [   11 s] checking recipe v3 (lora, sign -1) 2/2
+  [   11 s] measuring update speed
+self-test passed on NVIDIA GeForce RTX 5070 Ti
+5070ti-nhut  ·  https://lab.heteroes.site
+  Approval      approved
+  Contribution  turning ON (stays ON after restart)
+  Run           none
+  Service       running, starts at boot
+  Lab contact   online, 9 s ago
+  GPU           NVIDIA GeForce RTX 5070 Ti · 0.4/15.9 GB · 47 °C · 19 W · 0% busy
+  Runtime       08411835bac0
+/dev/nvme0n1p5  630G  551G   47G  93% /

@@ -1,0 +1,15 @@
+=== 2026-10-22T17:58:32+07:00 deploy 948059b (lf1-20261022-r11-candidate13)
+lab idle: no reservations
+Owned CPU service and tunnels stopped.
+database copied at stop
+web build in place
+{
+  "webUrl": "https://lab.heteroes.site",
+  "computeUrl": "https://compute.heteroes.site",
+  "privateBulkUrl": "http://100.110.165.40:8765",
+  "computeStarted": false,
+  "queue": "reopens when this action ends"
+}
+{"ok":true,"dataSource":"real","runtimeIssue":null,"agentMode":true,"deviceConfiguration":true,"recipeVersions":[1,2,3],"cloudStorageConfigured":false,"recoveryStorageConfigured":true,"recoveryStorageMode":"local","serverInstanceId":"34d68e114a5316bb76de9c12f657dff0","uiUrl":"https://lab.heteroes.si
+curl: (22) The requested URL returned error: 405
+HTTP/2 405 

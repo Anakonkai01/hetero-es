@@ -39,7 +39,7 @@ diff -rq "$PACKAGES/web" "$APP/frontend/dist" && echo "web build in place"
 "$PY" -I "$APP/scripts/local-lab.py" start --python "$PY"
 sleep 5
 curl -fsS https://lab.heteroes.site/api/v1/health | head -c 300; echo
-curl -fsSI https://lab.heteroes.site/notebooks/researcher.ipynb | head -1
+curl -fsS -o /dev/null -w "notebook %{http_code}\n" https://lab.heteroes.site/notebooks/researcher.ipynb
 # 4. installers: Windows apps and the CLI of this build on the download page
 "$PY" -I "$APP/scripts/publish-local-installers.py" --packages "$PACKAGES" --build "$BUILD" \
   --receipt "$HERE/installers-prepared-c13.json" --prepare-only
