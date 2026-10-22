@@ -1,0 +1,108 @@
+{
+ "allEqual": true,
+ "device": "cuda",
+ "regenerated": [],
+ "generations": [
+  {
+   "generation": 0,
+   "parentSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+   "recordHash": "342b4a70171f154d9c95d3027d60cec4ec5e0a7c8ee3b4c01de3e31c02eef5b5",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "0c0eeb33119b966b621b384d4c132411892577a68f8af049872bf83e1cad22ec",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 1,
+   "parentSha256": "0c0eeb33119b966b621b384d4c132411892577a68f8af049872bf83e1cad22ec",
+   "recordHash": "05750653659359a971a68b82e3d66e9c87f3ff3dfc2aabd3915ca6b09efdb06a",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "e78ab1ed3d62854c145cf608b35a60a7b7b123f40179e2bb51fbaeb0b217f23e",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 2,
+   "parentSha256": "e78ab1ed3d62854c145cf608b35a60a7b7b123f40179e2bb51fbaeb0b217f23e",
+   "recordHash": "b19dc0b3f93a6922d08a5dbdf4e3dc9b4933933e9a73da0e06794ad251b62ddf",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "32c1e101ddf1042e8a10cd1286312149011392d0da87a3e1d754a51f0158bb15",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 3,
+   "parentSha256": "32c1e101ddf1042e8a10cd1286312149011392d0da87a3e1d754a51f0158bb15",
+   "recordHash": "b82ef11322861da1504e54a2d9894c8b35c4459d5317a70f9aa33f38b2f2e069",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "d6a3398f6c7c615b1ddacd78b019ead74c36d82d8520f7c50b09733bd3962c69",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 4,
+   "parentSha256": "d6a3398f6c7c615b1ddacd78b019ead74c36d82d8520f7c50b09733bd3962c69",
+   "recordHash": "6efd00bf653df3d2a35a0abded620ce3e2c71ef799a724dca8db0346984b79d1",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "101f3508810857d19e9b643645d4ad80abd1529bf3b0f0240d214a70d0ac0f11",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 5,
+   "parentSha256": "101f3508810857d19e9b643645d4ad80abd1529bf3b0f0240d214a70d0ac0f11",
+   "recordHash": "8650b8963458e10101d84f371d3a0ad953fa62a39f89cb82aa5edf56b282818a",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "ef6fd468314a9dfd7244a05048124de3d28b4cda78b3b99393a1eb7a35bd58e4",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 6,
+   "parentSha256": "ef6fd468314a9dfd7244a05048124de3d28b4cda78b3b99393a1eb7a35bd58e4",
+   "recordHash": "b96c8ee6020d5e830a0edce7f59a5481df965b440329db8b90135ae255ac6c81",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "c791709a34382a01b6dfc5d68c95ca6c0b0cb3412b64af508faa57ecc1c2185e",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 7,
+   "parentSha256": "c791709a34382a01b6dfc5d68c95ca6c0b0cb3412b64af508faa57ecc1c2185e",
+   "recordHash": "eac6102cdbe9411dc7cbe0560d9327612122962421f0a3e0235a5935051c1ce2",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "d864a9b6a80cc3242ecff753edd6316b4efdbb8eb8bb12849a17c094fa676692",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 8,
+   "parentSha256": "d864a9b6a80cc3242ecff753edd6316b4efdbb8eb8bb12849a17c094fa676692",
+   "recordHash": "c3d9a1439b3705bde3dde74a7f2241ac08683eba2152f304e58cdec3f5be873a",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "19d16deeba6438dcfd30a10c683c9ec58b48b3afe78d7326117b8bddb4f797cb",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 9,
+   "parentSha256": "19d16deeba6438dcfd30a10c683c9ec58b48b3afe78d7326117b8bddb4f797cb",
+   "recordHash": "c1f68411e38b348c0ada304509cdf870134fa10479484048f3b28ee9a57b6f65",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "2ffe8771e8254f2657b6fc40e65266830d323ae5bb84561e2fe5ab29f6ec124d",
+   "childEqual": true,
+   "candidates": []
+  }
+ ],
+ "receiptHash": "a63bf8733dec70c36f606a5f2d70bfc22614b156cc375d57bc266b1d2a568441"
+}
