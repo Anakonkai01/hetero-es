@@ -198,3 +198,8 @@ them all. The web page's live view of a long run therefore shows no work at all.
 candidates committed (5070ti-nhut 343, 5070ti-nhan 306, 3060-thao 143, 1660s 8), 44 audits all matched, a generation every
 4.8 min (median). Validation (500 rows): base 0.608, after 25 generations **0.606** (within noise: no learning signal yet).
 Video and replay page in `media/`.
+
+**Progress at 15:22 (session closed, run going on):** 65 generations, 2,080 results (5070ti-nhut 898, 5070ti-nhan 794,
+3060-thao 370, 1660s 18), 101/101 audits matched. Validation: gen 50 **0.572** (base 0.608). The 1660S rebooted by itself
+~13:04 and was restarted by the coordinator (launch 2). Finding 10 fixed on the branch (`94225d2`), deployed only after
+the run ends (a coordinator update mid-run would end or crash-recover it; owner chose to wait).

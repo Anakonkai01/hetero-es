@@ -1,6 +1,10 @@
 # HeteroES — canonical handoff
 
-**Latest (2026-10-22 ~10:05): (b2) fix deployed on the lab (`a198cb0`) and accepted by tier 2e; tier 3 (G = 300, ~30 h)
+**Latest (2026-10-22 ~15:30): session closed. Tier 3 RUNNING (`fa67c66c...`, gen 65/300, ends ~2026-10-23 10-11h);
+midterm notebook done; finding 10 (web live view of a long run empty) fixed on the branch, deploy after tier 3.**
+Read [handoff-2026-10-22-session-close.md](handoff-2026-10-22-session-close.md) first.
+
+**Previous (2026-10-22 ~10:05): (b2) fix deployed on the lab (`a198cb0`) and accepted by tier 2e; tier 3 (G = 300, ~30 h)
 RUNNING as `fa67c66c...`.** Read [handoff-2026-10-22-tier3-running.md](handoff-2026-10-22-tier3-running.md) first.
 
 **Previous (2026-10-22 ~09:00): fix wave 1 DEPLOYED (lab + Linux agents on candidate12); tiers 2c/2d pass all but the
