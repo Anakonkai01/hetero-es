@@ -57,3 +57,19 @@ namespace (`speed-gpu/`, `speed-gpu/summary-cpu-vs-gpu.json`):
 All six runs have **the same parent-weights hash at every generation** (`c9118c8a…`, `e3923dc8…`, `65371460…`,
 `db9e4737…`): 1, 2 or 3 machines, CPU or GPU noise, Linux or Windows workers. All audits matched. Start-up (~75 s) now
 dominates such short runs. One sample per cell; not a benchmark of the model or of ES.
+
+## 4. Fault injection run (candidate15, GPU noise) — `fault/`
+
+Declared in `fault/plan.md` before submission. Run `d1f6ad7bfdb34b47bf6a987a615949f2`: 24 candidates × 80 generations
+on nhan, nhut and native Windows. Faults (`fault/fault-log.jsonl`, coordinator lifecycle in `fault/lifecycle.jsonl`):
+
+| generation | fault | what the system did |
+| --- | --- | --- |
+| 6 | SIGKILL nhut's worker | **not injected**: the script looked one directory too high for `process.json` (fixed for the soak) |
+| 14 | nhut: new outbound TCP rejected for 180 s, then the exact rule removed | the worker gave up, the coordinator started launch 1 when nhut answered again |
+| 25 | `systemctl reboot` of nhut | 409 (device not ON yet) recorded as deferred, then launch 2 ~1.5 min after the reboot (lingering service, keep ON) |
+| 34 | `taskkill /F /T` of the Windows app, normal relaunch, switch ON by UI Automation | deferred (409) until ON, then launch 1 |
+
+Result: **COMPLETED 80/80 generations, 99/99 selected audits matched, no quarantine**. Independent ledger replay:
+nhan with GPU noise and nhut with `HETEROES_NOISE_DEVICE=cpu` both **ALL EQUAL (80 generations)** with the same receipt
+hash `708c0e01…` (`fault/replay-*`); no candidate text regeneration is claimed. 79 distinct parent hashes over 80 generations (78 of 79 transitions changed weights).

@@ -25,7 +25,7 @@ def sh(argv, timeout=180):
 KILL_WORKER = r'''python3 - <<'PY'
 import json, os, signal, pathlib
 best = None
-for p in pathlib.Path.home().glob('.local/share/heteroes-worker/agent-state/workers/*/process.json'):
+for p in pathlib.Path.home().glob('.local/share/heteroes-worker/agent-state/workers/*/*/process.json'):
     pid = json.loads(p.read_text()).get('pid')
     try: cmd = open(f'/proc/{pid}/cmdline', 'rb').read().decode(errors='replace')
     except OSError: continue
@@ -37,12 +37,15 @@ PY'''
 CUT = "echo 123 | sudo -S -p '' iptables -I OUTPUT 1 -m owner --uid-owner 1000 -m conntrack --ctstate NEW -p tcp ! --dport 22 -j REJECT -m comment --comment heteroes-fault"
 HEAL = "echo 123 | sudo -S -p '' iptables -D OUTPUT -m owner --uid-owner 1000 -m conntrack --ctstate NEW -p tcp ! --dport 22 -j REJECT -m comment --comment heteroes-fault; echo 123 | sudo -S -p '' iptables -S OUTPUT | grep -c heteroes-fault"
 
+import os
 plan = [
     (6, 'kill-nhut-worker', lambda: sh(['ssh', '-o', 'BatchMode=yes', NHUT, KILL_WORKER])),
     (14, 'cut-nhut-network-180s', None),
     (24, 'reboot-nhut', lambda: sh(['ssh', '-o', 'BatchMode=yes', NHUT, "echo 123 | sudo -S -p '' systemctl reboot"], 30)),
     (34, 'kill-windows-app', None),
 ]
+if os.environ.get('FAULT_PLAN') == 'soak':
+    plan = [(int(os.environ.get('FAULT_KILL_AT', '20')), 'kill-nhut-worker', plan[0][2])]
 done = set()
 log(event='fault_driver_start', runId=run_id, plan=[(g, n) for g, n, _ in plan])
 while True:

@@ -1,0 +1,417 @@
+{
+  "status": "COMPLETED",
+  "generations": [
+    {
+      "generation": 0,
+      "rewardMean": 0.109375,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 1,
+      "rewardMean": 0.13020833333333334,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 2,
+      "rewardMean": 0.15104166666666666,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 3,
+      "rewardMean": 0.13541666666666666,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 4,
+      "rewardMean": 0.234375,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 5,
+      "rewardMean": 0.1875,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 6,
+      "rewardMean": 0.18229166666666666,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 7,
+      "rewardMean": 0.125,
+      "rewardBest": 0.25
+    },
+    {
+      "generation": 8,
+      "rewardMean": 0.13541666666666666,
+      "rewardBest": 0.25
+    },
+    {
+      "generation": 9,
+      "rewardMean": 0.2552083333333333,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 10,
+      "rewardMean": 0.08854166666666667,
+      "rewardBest": 0.25
+    },
+    {
+      "generation": 11,
+      "rewardMean": 0.19270833333333334,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 12,
+      "rewardMean": 0.21875,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 13,
+      "rewardMean": 0.3072916666666667,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 14,
+      "rewardMean": 0.1875,
+      "rewardBest": 0.25
+    },
+    {
+      "generation": 15,
+      "rewardMean": 0.057291666666666664,
+      "rewardBest": 0.125
+    },
+    {
+      "generation": 16,
+      "rewardMean": 0.234375,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 17,
+      "rewardMean": 0.3072916666666667,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 18,
+      "rewardMean": 0.296875,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 19,
+      "rewardMean": 0.20833333333333334,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 20,
+      "rewardMean": 0.1875,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 21,
+      "rewardMean": 0.53125,
+      "rewardBest": 0.75
+    },
+    {
+      "generation": 22,
+      "rewardMean": 0.28125,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 23,
+      "rewardMean": 0.40625,
+      "rewardBest": 0.625
+    },
+    {
+      "generation": 24,
+      "rewardMean": 0.359375,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 25,
+      "rewardMean": 0.21875,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 26,
+      "rewardMean": 0.21875,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 27,
+      "rewardMean": 0.3072916666666667,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 28,
+      "rewardMean": 0.328125,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 29,
+      "rewardMean": 0.3333333333333333,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 30,
+      "rewardMean": 0.1875,
+      "rewardBest": 0.25
+    },
+    {
+      "generation": 31,
+      "rewardMean": 0.3697916666666667,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 32,
+      "rewardMean": 0.3333333333333333,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 33,
+      "rewardMean": 0.3802083333333333,
+      "rewardBest": 0.625
+    },
+    {
+      "generation": 34,
+      "rewardMean": 0.265625,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 35,
+      "rewardMean": 0.3229166666666667,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 36,
+      "rewardMean": 0.22916666666666666,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 37,
+      "rewardMean": 0.3229166666666667,
+      "rewardBest": 0.625
+    },
+    {
+      "generation": 38,
+      "rewardMean": 0.4322916666666667,
+      "rewardBest": 0.625
+    },
+    {
+      "generation": 39,
+      "rewardMean": 0.25,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 40,
+      "rewardMean": 0.3333333333333333,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 41,
+      "rewardMean": 0.4114583333333333,
+      "rewardBest": 0.625
+    },
+    {
+      "generation": 42,
+      "rewardMean": 0.22916666666666666,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 43,
+      "rewardMean": 0.4427083333333333,
+      "rewardBest": 0.625
+    },
+    {
+      "generation": 44,
+      "rewardMean": 0.11458333333333333,
+      "rewardBest": 0.125
+    },
+    {
+      "generation": 45,
+      "rewardMean": 0.421875,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 46,
+      "rewardMean": 0.21875,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 47,
+      "rewardMean": 0.4739583333333333,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 48,
+      "rewardMean": 0.40625,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 49,
+      "rewardMean": 0.4479166666666667,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 50,
+      "rewardMean": 0.4739583333333333,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 51,
+      "rewardMean": 0.328125,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 52,
+      "rewardMean": 0.515625,
+      "rewardBest": 0.625
+    },
+    {
+      "generation": 53,
+      "rewardMean": 0.3229166666666667,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 54,
+      "rewardMean": 0.23958333333333334,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 55,
+      "rewardMean": 0.3802083333333333,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 56,
+      "rewardMean": 0.22916666666666666,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 57,
+      "rewardMean": 0.3385416666666667,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 58,
+      "rewardMean": 0.5052083333333334,
+      "rewardBest": 0.75
+    },
+    {
+      "generation": 59,
+      "rewardMean": 0.3489583333333333,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 60,
+      "rewardMean": 0.4427083333333333,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 61,
+      "rewardMean": 0.19791666666666666,
+      "rewardBest": 0.25
+    },
+    {
+      "generation": 62,
+      "rewardMean": 0.5989583333333334,
+      "rewardBest": 0.75
+    },
+    {
+      "generation": 63,
+      "rewardMean": 0.578125,
+      "rewardBest": 0.75
+    },
+    {
+      "generation": 64,
+      "rewardMean": 0.453125,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 65,
+      "rewardMean": 0.3645833333333333,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 66,
+      "rewardMean": 0.4479166666666667,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 67,
+      "rewardMean": 0.453125,
+      "rewardBest": 0.625
+    },
+    {
+      "generation": 68,
+      "rewardMean": 0.4427083333333333,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 69,
+      "rewardMean": 0.3385416666666667,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 70,
+      "rewardMean": 0.23958333333333334,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 71,
+      "rewardMean": 0.3958333333333333,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 72,
+      "rewardMean": 0.3072916666666667,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 73,
+      "rewardMean": 0.5833333333333334,
+      "rewardBest": 0.625
+    },
+    {
+      "generation": 74,
+      "rewardMean": 0.3541666666666667,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 75,
+      "rewardMean": 0.3072916666666667,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 76,
+      "rewardMean": 0.22916666666666666,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 77,
+      "rewardMean": 0.359375,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 78,
+      "rewardMean": 0.125,
+      "rewardBest": 0.125
+    },
+    {
+      "generation": 79,
+      "rewardMean": 0.3072916666666667,
+      "rewardBest": 0.375
+    }
+  ],
+  "validation": [
+    {
+      "generation": 79,
+      "reward": 0.5
+    }
+  ],
+  "completedPerDevice": {
+    "cli-71b757062fd9": 399,
+    "cli-34312a79fbbc": 281,
+    "desktop-d9017660e75f": 40
+  },
+  "partialTimeline": false
+}
