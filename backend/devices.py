@@ -101,6 +101,7 @@ class AgentRuntime(AgentScheduling, AgentCommands, AgentPolling):
                     "lastSeen": row["seen"],
                     "connectionStatus": "ONLINE" if time.time() - row["seen"] < 30 else "OFFLINE",
                     "contributionEnabled": bool(row["enabled"] and row["desired"]),
+                    "contributionDesired": bool(row["desired"]),
                     "keepContributionAfterReboot": bool(row["keep_on"]),
                     "workspaceId": allocation[0] if allocation else None,
                     "computeUrl": row["compute_url"],
