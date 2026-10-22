@@ -190,6 +190,9 @@ and events: the coordinator bounds what it sends to 1.25 MB (`product/agent.py: 
 halving the attempt list each time it is over. At generation 22 the timeline kept ~370 of ~700 attempts and none of the
 per-generation timing events, so per-device totals read from the lab were about half the real ones (the watcher's `done`
 counts dropped). The ledger has everything: the demo snapshot (`snapshot.py`) counts work and audits from it.
+At generation 40 (13:30) the lab timeline held **0 attempts and 0 marks** (41 generations only) while the ledger had
+1,284 results: `bounded_snapshot` halves `events`, then `attempts`, until the heartbeat fits, and on this run it drops
+them all. The web page's live view of a long run therefore shows no work at all. The run itself is unaffected.
 
 **Snapshot at generation 25** (`tier3-g25/`, 12:14, for the midterm demo while the run goes on): 25 generations, 800
 candidates committed (5070ti-nhut 343, 5070ti-nhan 306, 3060-thao 143, 1660s 8), 44 audits all matched, a generation every
