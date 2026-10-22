@@ -34,7 +34,7 @@ export type StationView = {
   headline: string;
   detail: string;
   toggle: { action: 'enable' | 'stop'; label: string; disabled: boolean };
-  blocker: 'approval' | 'sign-in' | 'agent' | null;
+  blocker: 'approval' | 'agent' | null;
   assignments: { id: string; epoch?: number; ready?: boolean }[];
 };
 
@@ -58,7 +58,7 @@ export function stationView(input: StationInput): StationView {
   const approved = input.device.approvalStatus === 'APPROVED';
   const stopping = mode === 'ready' || mode === 'working';
   let blocker: StationView['blocker'] = null;
-  if (!stopping) blocker = !approved ? 'approval' : !input.signedIn ? 'sign-in' : !agent ? 'agent' : null;
+  if (!stopping) blocker = !approved ? 'approval' : !agent ? 'agent' : null;
   const copy: Record<Mode, [string, string]> = {
     off: ['Contribution is OFF', 'No GPU work is running.'],
     ready: ['Ready to contribute', 'Waiting for the lab to hand out work.'],

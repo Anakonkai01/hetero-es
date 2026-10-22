@@ -403,8 +403,8 @@ function App() {
         {state?.device && (
           <>
             {!state.signedIn && (
-              <section className="panel">
-                <h2>{t('Sign in')}</h2>
+              <details className="panel advanced-panel">
+                <summary>{t('Sign in')}</summary>
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -422,7 +422,7 @@ function App() {
                   <button disabled={!!busy}>{t('Sign in')}</button>
                 </form>
                 {forgetPairing}
-              </section>
+              </details>
             )}
             <Station
               view={station!}

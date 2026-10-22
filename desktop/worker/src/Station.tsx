@@ -4,7 +4,6 @@ import type { Gauge, StationView } from './station';
 
 const BLOCKERS: Record<string, string> = {
   approval: 'Waiting for administrator approval.',
-  'sign-in': 'Sign in to start contributing.',
   agent: 'The local agent is not running yet.',
 };
 

@@ -99,9 +99,9 @@ const packaged = process.argv.includes('--packaged')
     await station.getByText('My gaming PC').waitFor();
     results.stationShowsTheGpu = true;
     const toggle = page.getByRole('switch');
-    assert.equal(await toggle.isDisabled(), true, 'signed out: the switch cannot be pressed');
-    await station.getByText('Sign in to start contributing.').waitFor();
-    results.signedOutExplained = true;
+    assert.equal(await toggle.isDisabled(), true, 'without an installed agent the switch cannot be pressed');
+    await station.getByText('The local agent is not running yet.').waitFor();
+    results.agentUnavailableExplained = true;
     assert.equal(await page.locator('.gauge').count(), 3);
     assert.equal(await page.locator('.gauge-bar[aria-valuenow]').count(), 0, 'no agent: no measurement is invented');
     results.gaugesStayUnknown = true;
@@ -115,6 +115,10 @@ const packaged = process.argv.includes('--packaged')
     results.compactWindow = size;
     await page.screenshot({ path: path.join(output, 'station-signed-out.png') });
 
+    await page
+      .locator('summary')
+      .filter({ hasText: /^Sign in$/ })
+      .click();
     await page.getByLabel('Username').fill('fixture');
     await page.getByLabel('Password').fill('synthetic-password');
     await page.getByRole('button', { name: 'Sign in', exact: true }).click();

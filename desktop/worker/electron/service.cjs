@@ -492,6 +492,15 @@ class Service {
       await this.startAgent();
     }
     if (!enabled) await this.bridge.call('off');
+    const deviceToken = await this.vault.read('device-token');
+    if (deviceToken) {
+      try {
+        return await this.api('/api/v1/device/contribution', { enabled }, deviceToken);
+      } catch (error) {
+        // Older labs require an owner session; approval/account failures must never be bypassed.
+        if (!/^LAB_HTTP_(404|405)$/.test(error.message)) throw error;
+      }
+    }
     if (!this.userToken) {
       if (!enabled) return this.bridge.call('status');
       throw Error('SIGN_IN_REQUIRED');

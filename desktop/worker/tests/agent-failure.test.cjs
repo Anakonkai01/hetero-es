@@ -174,7 +174,7 @@ test('pressing Enable after a failed start tries again and reports the real code
     return new Response('{}');
   };
   await service.contribution(true);
-  assert.deepEqual(body, { enabled: true, bootId: 'boot' });
+  assert.deepEqual(body, { enabled: true });
   const status = await service.status();
   assert.equal(status.agent.startError, undefined);
   assert.equal(state.enabled, false);

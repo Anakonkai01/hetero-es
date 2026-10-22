@@ -1587,7 +1587,6 @@ export const translations: Record<string, string> = {
   'Waiting for the lab to hand out work.': 'Đang chờ lab giao việc.',
   'Your GPU is working': 'GPU của bạn đang làm việc',
   'Do not shut this computer down yet.': 'Chưa tắt máy vội.',
-  'Sign in to start contributing.': 'Đăng nhập để bắt đầu đóng góp.',
   'The local agent is not running yet.': 'Agent trên máy chưa chạy.',
   'Evaluating candidates for the lab': 'Đang đánh giá candidate cho lab',
   'GPU measurements': 'Số đo GPU',

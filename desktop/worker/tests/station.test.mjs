@@ -60,13 +60,13 @@ test('stopping shows draining and cannot be pressed again; an unknown process st
   );
 });
 
-test('what blocks starting is explained: not approved yet, signed out, or no agent', () => {
+test('starting requires approval and an agent, while paired contribution does not require sign-in', () => {
   const waiting = view({ device: { approvalStatus: 'PENDING' } });
   assert.equal(waiting.toggle.disabled, true);
   assert.equal(waiting.blocker, 'approval');
   const signedOut = view({ signedIn: false });
-  assert.equal(signedOut.toggle.disabled, true);
-  assert.equal(signedOut.blocker, 'sign-in');
+  assert.equal(signedOut.toggle.disabled, false);
+  assert.equal(signedOut.blocker, null);
   const noAgent = view({ agent: null });
   assert.equal(noAgent.mode, 'off');
   assert.equal(noAgent.blocker, 'agent');

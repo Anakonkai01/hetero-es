@@ -38,23 +38,44 @@ test('HTTP is restricted to private networks; credentials and query are rejected
   for (const u of ['http://example.com', 'http://user:pass@localhost', 'https://example.com/?token=x', 'file:///tmp'])
     assert.throws(() => serverAddress(u));
 });
-test('owner opt-in is boot scoped and OFF stops locally even without a session', async (t) => {
+test('a paired device can opt in without an account session and OFF stops locally', async (t) => {
   const { service, state, calls } = await fixture(t);
   service.device = { deviceId: 'dev', workerId: 'desktop' };
   await service.startAgent();
-  await assert.rejects(service.contribution(true), /SIGN_IN/);
+  service.settings.serverUrl = 'https://lab.example';
+  const sent = [];
+  service.fetch = async (url, options) => {
+    sent.push([url, options.headers.Authorization, JSON.parse(options.body)]);
+    return new Response('{}');
+  };
+  await service.contribution(true);
+  assert.deepEqual(sent[0], [
+    'https://lab.example/api/v1/device/contribution',
+    'Bearer secret-device-token',
+    { enabled: true },
+  ]);
   state.enabled = true;
   await service.contribution(false);
   assert.equal(state.enabled, false);
   assert.ok(calls.includes('off'));
-  let body;
+});
+test('a legacy lab falls back to an owner session with the current boot only', async (t) => {
+  const { service } = await fixture(t);
+  service.device = { deviceId: 'dev', workerId: 'desktop' };
+  await service.startAgent();
   service.userToken = 'owner-session';
-  service.fetch = async (_url, options) => {
-    body = JSON.parse(options.body);
-    return new Response('{}');
+  service.settings.serverUrl = 'https://lab.example';
+  const sent = [];
+  service.fetch = async (url, options) => {
+    sent.push([url, options.headers.Authorization, JSON.parse(options.body)]);
+    return new Response('{}', { status: url.endsWith('/device/contribution') ? 404 : 200 });
   };
   await service.contribution(true);
-  assert.deepEqual(body, { enabled: true, bootId: 'new-boot' });
+  assert.deepEqual(sent[1], [
+    'https://lab.example/api/v1/devices/dev/contribution',
+    'Bearer owner-session',
+    { enabled: true, bootId: 'new-boot' },
+  ]);
 });
 test('unknown process holds Quit; successful Quit is not restarted by polling', async (t) => {
   const { service, state } = await fixture(t);
@@ -177,6 +198,7 @@ test('opening with Windows is kept locally and keep ON after restart is the owne
   service.device = { deviceId: 'dev', workerId: 'desktop' };
   await assert.rejects(service.preferences({ keepOn: true }), /SIGN_IN_REQUIRED/);
   service.userToken = 'owner-session';
+  service.settings.serverUrl = 'https://lab.example';
   const sent = [];
   service.fetch = async (url, options) => {
     sent.push([url, options.method, JSON.parse(options.body)]);
