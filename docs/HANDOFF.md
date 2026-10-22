@@ -1,6 +1,10 @@
 # HeteroES — canonical handoff
 
-**Latest (2026-10-22 ~15:30): session closed. Tier 3 RUNNING (`fa67c66c...`, gen 65/300, ends ~2026-10-23 10-11h);
+**Latest (2026-10-22 ~16:30): tier 3 STOPPED (owner) after a learning audit — the system is right, the learning was not
+expected to show; GSM8K parked. Next session fixes the open system bugs only (candidate13 deploy first).**
+Read [handoff-2026-10-22-tier3-stopped-bugs-next.md](handoff-2026-10-22-tier3-stopped-bugs-next.md) first.
+
+**Previous (2026-10-22 ~15:30): session closed. Tier 3 RUNNING (`fa67c66c...`, gen 65/300, ends ~2026-10-23 10-11h);
 midterm notebook done; finding 10 (web live view of a long run empty) fixed on the branch, deploy after tier 3.**
 Read [handoff-2026-10-22-session-close.md](handoff-2026-10-22-session-close.md) first.
 
