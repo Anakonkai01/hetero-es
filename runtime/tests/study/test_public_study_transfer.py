@@ -20,8 +20,10 @@ def device(tmp_path, monkeypatch, grant):
     opened = []
 
     class Opener:
-        def open(self, url, timeout):
-            opened.append(url)
+        def open(self, request, timeout):
+            # the public edge refuses urllib's default agent: every download names the worker (finding 12)
+            assert request.get_header("User-agent", "").startswith("HeteroES-Worker/")
+            opened.append(request.full_url)
             return io.BytesIO(DATA)
 
     monkeypatch.setattr(prepare.urllib.request, "build_opener", lambda *a: Opener())

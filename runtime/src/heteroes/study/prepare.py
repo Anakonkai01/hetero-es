@@ -58,8 +58,12 @@ def transfer(agent, assignment, digest, target, limit, reachable=private_reachab
     try:
         hasher = hashlib.sha256()
         total = 0
+        from heteroes.http_transport import USER_AGENT
+
         opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
-        with opener.open(url, timeout=120) as response, os.fdopen(fd, "wb") as out:
+        # the public edge refuses urllib's default agent (HTTP 403): candidate13 acceptance, finding 12
+        request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        with opener.open(request, timeout=120) as response, os.fdopen(fd, "wb") as out:
             while chunk := response.read(1024**2):
                 total += len(chunk)
                 if total > limit:
