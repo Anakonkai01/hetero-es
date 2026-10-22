@@ -42,7 +42,7 @@ Real Qwen 0.5B on nhan (`real-model-nhan-batched.json`): equal perturbed and upd
 
 ## 3. Speed again with candidate15 (engine v2 made on the GPU by default)
 
-Candidate15 (`f…` packaging commit after `d1912f3`; runtime `3fd3f301ef0a`, Windows Desktop runtime `0ce7d7013c33`)
+Candidate15 (packaging commit `004da17`; runtime `3fd3f301ef0a`, Windows Desktop runtime `0ce7d7013c33`)
 was published and installed: nhan by the public `install-worker.sh`, nhut by `heteroes-worker update`, native Windows
 by Quit safely → silent install of the prepared hash → app RPC install + GPU self-test → normal relaunch without debug
 ports → switch ON by UI Automation (`upgrade-*-c15*.log`, `install-c15.ps1`). Same declared runs, same candidate seed
