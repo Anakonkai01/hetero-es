@@ -68,6 +68,8 @@ function networkCode(error) {
 }
 // After a failed start, the window's own polling waits this long before trying again; pressing Enable never waits.
 const RETRY_MS = 30000;
+// Lab facts about this machine that the window must show correctly after a restart, before any refresh.
+const KEPT_DEVICE_FIELDS = ['deviceId', 'workerId', 'displayName', 'approvalStatus', 'keepContributionAfterReboot'];
 class Service {
   constructor(root, resources, vault, options = {}) {
     this.root = root;
@@ -527,6 +529,42 @@ class Service {
     }
     return { startAtLogin: this.settings.startAtLogin !== false, keepOn: !!this.device?.keepContributionAfterReboot };
   }
+  // The lab's view of this machine. Signed out, the device token reads only the machine's own summary; a rejected token
+  // shows REVOKED and an outage keeps the last known value. What changed is saved so a restart does not show stale
+  // approval. The lab still authorizes every contribution change.
+  async refreshDevice() {
+    let current;
+    try {
+      if (this.userToken)
+        current = (await this.api('/api/v1/devices')).find((d) => d.deviceId === this.device.deviceId);
+      else {
+        const deviceToken = await this.vault.read('device-token');
+        if (!deviceToken) return;
+        const summary = await this.api('/api/v1/device/summary', undefined, deviceToken);
+        current = {
+          approvalStatus: summary.approvalStatus,
+          ...(summary.displayName ? { displayName: summary.displayName } : {}),
+          ...(typeof summary.keepContributionAfterReboot === 'boolean'
+            ? { keepContributionAfterReboot: summary.keepContributionAfterReboot }
+            : {}),
+        };
+      }
+    } catch (error) {
+      if (!this.userToken && error.message === 'LAB_HTTP_401') current = { approvalStatus: 'REVOKED' };
+    }
+    if (!current) return;
+    const { deviceToken, ...publicDevice } = { ...this.device, ...current };
+    this.device = publicDevice;
+    const saved = this.settings.device ?? {};
+    const durable = Object.fromEntries(
+      KEPT_DEVICE_FIELDS.filter((key) => publicDevice[key] !== undefined).map((key) => [key, publicDevice[key]]),
+    );
+    if (Object.keys(durable).every((key) => saved[key] === durable[key])) return;
+    this.settings = { ...this.settings, device: { ...saved, ...durable } };
+    try {
+      await this.save();
+    } catch {}
+  }
   async status() {
     if (this.autoStart && this.device && this.setup.status().installed && !this.bridge && this.now() >= this.retryAt)
       try {
@@ -551,12 +589,7 @@ class Service {
           this.lastState = { drained: true, enabled: false, startError: this.agentFailure.code };
         } else this.lastState = { drained: false, enabled: false, error: 'AGENT_UNAVAILABLE' };
       }
-    if (this.userToken && this.device)
-      try {
-        const devices = await this.api('/api/v1/devices');
-        const current = devices.find((d) => d.deviceId === this.device.deviceId);
-        if (current) this.device = { ...this.device, ...current };
-      } catch {}
+    if (this.device) await this.refreshDevice();
     const p = this.lastState;
     return {
       compute: {

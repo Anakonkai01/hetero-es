@@ -221,3 +221,67 @@ test('device policy failures are not retried with broader account credentials', 
   await assert.rejects(service.contribution(true), /LAB_HTTP_403/);
   assert.equal(requests, 1);
 });
+test('signed out, status refreshes approval with the device token and keeps it for the next start', async (t) => {
+  const { service } = await fixture(t);
+  service.device = { deviceId: 'dev', workerId: 'desktop', displayName: 'old', approvalStatus: 'PENDING' };
+  service.settings = { serverUrl: 'https://lab.example', device: service.device };
+  await service.startAgent();
+  const sent = [];
+  service.fetch = async (url, options) => {
+    sent.push([url, options.method, options.headers.Authorization]);
+    return new Response(
+      JSON.stringify({
+        deviceId: 'dev',
+        displayName: 'Thao',
+        approvalStatus: 'APPROVED',
+        deviceToken: 'leak',
+        runs: [],
+      }),
+    );
+  };
+  const status = await service.status();
+  assert.deepEqual(sent, [['https://lab.example/api/v1/device/summary', 'GET', 'Bearer secret-device-token']]);
+  assert.equal(status.signedIn, false);
+  assert.equal(status.device.approvalStatus, 'APPROVED');
+  assert.equal(status.device.displayName, 'Thao');
+  assert.ok(!JSON.stringify(status).includes('leak'));
+  const saved = JSON.parse(await fs.readFile(path.join(service.root, 'settings.json'), 'utf8'));
+  assert.equal(saved.device.approvalStatus, 'APPROVED');
+  assert.ok(!JSON.stringify(saved).includes('leak') && !JSON.stringify(saved).includes('secret-device-token'));
+});
+test('signed out, a pending or rejected device stays blocked and an outage keeps the last known approval', async (t) => {
+  const { service } = await fixture(t);
+  service.device = { deviceId: 'dev', workerId: 'desktop', approvalStatus: 'APPROVED' };
+  service.settings = { serverUrl: 'https://lab.example', device: service.device };
+  await service.startAgent();
+  service.fetch = async () => new Response(JSON.stringify({ deviceId: 'dev', approvalStatus: 'PENDING' }));
+  assert.equal((await service.status()).device.approvalStatus, 'PENDING');
+  service.device.approvalStatus = 'APPROVED';
+  service.fetch = async () => {
+    throw Error('offline');
+  };
+  assert.equal((await service.status()).device.approvalStatus, 'APPROVED');
+  service.fetch = async () => new Response('{}', { status: 503 });
+  assert.equal((await service.status()).device.approvalStatus, 'APPROVED');
+  service.fetch = async () => new Response('{}', { status: 401 });
+  assert.equal((await service.status()).device.approvalStatus, 'REVOKED');
+});
+test('signed in, the account device list is used and its approval is kept for the next start', async (t) => {
+  const { service } = await fixture(t);
+  service.device = { deviceId: 'dev', workerId: 'desktop', approvalStatus: 'PENDING' };
+  service.settings = { serverUrl: 'https://lab.example', device: service.device };
+  service.userToken = 'owner-session';
+  await service.startAgent();
+  const sent = [];
+  service.fetch = async (url, options) => {
+    sent.push([url, options.headers.Authorization]);
+    return new Response(JSON.stringify([{ deviceId: 'dev', approvalStatus: 'APPROVED', lastSeen: 5 }]));
+  };
+  const status = await service.status();
+  assert.equal(status.device.approvalStatus, 'APPROVED');
+  assert.equal(status.device.lastSeen, 5);
+  assert.deepEqual(sent, [['https://lab.example/api/v1/devices', 'Bearer owner-session']]);
+  const saved = JSON.parse(await fs.readFile(path.join(service.root, 'settings.json'), 'utf8'));
+  assert.equal(saved.device.approvalStatus, 'APPROVED');
+  assert.equal(saved.device.lastSeen, undefined);
+});
