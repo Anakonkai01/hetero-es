@@ -96,3 +96,27 @@ unreachable for 10 minutes counts as stopped when the run drains. It changes a d
 database for the dead machines (`PREDECLARATION-tier2b.md`, owner decision). **Tier 3 has not started**: the coordinator
 is still DRAINING because of quang-3060 (a separate hand edit of the coordinator's `state.json` was proposed to the owner,
 not approved yet), so the lab release preconditions are never met (`then-tier3.jsonl` gave up after 60 minutes).
+
+## Tier 2c: fixes under stress (experiment `43c37454015c4bb3ad1257ea3894a1e7`), 07:12–07:46 +07, lab and Linux agents on candidate10
+
+Predeclared in `PREDECLARATION-tier2c.md` (commit `a1ff45a`, before the run). Members 5070ti-nhan (coordinator),
+5070ti-nhut, 3060-thao, 1660s. Events in `.scratch/gsm8k-demo/tier2c-stage-events.jsonl`.
+
+| Criterion | Result |
+| --------- | ------ |
+| 1. COMPLETED, 160 results, ≥ 1 audit, 0 mismatches, no quarantine | **pass**: 160/160 (5070ti-nhan 89, 3060-thao 41, 5070ti-nhut 28, 1660s 2), 7 audits all matched |
+| (b1) 5070ti-nhut OFF at index 2, LEAVE within 10 min | **pass**: OFF 07:20:18, LEAVE applied at the boundary, seen after 439 s |
+| (b2) ON + add back at index 3, JOIN + result within 15 min | **FAIL**: the add, one second after the LEAVE applied, was refused `409 Waiting for confirmed GPU release`; the script makes one attempt |
+| 3. (c) 1660s killed at index 1 (07:16:22): `worker_lost`, lab release ≤ 11 min after the later of run end and kill + 10 min | **pass**: `worker_lost` 1660s at 07:44:07 (unreachable since 07:16:49); assignment released with the run's end, 0 reservations, no hand action |
+| 4. 1660s back by its timer (07:56:22): ON by itself, idle, no worker of this run | pending |
+| 5. Parity | pending |
+
+**Finding 7 (product, fixed in `ec5fdc0`):** an owner who turns a worker OFF and adds it back right after the LEAVE is
+refused, because the device is still reserved by this same run until its stop is confirmed. The lab now accepts that JOIN
+(the reservation is this run's own; never another run's or the coordinator's) and the agent never starts the new launch
+beside the old one. **Finding 8 (fixed in `ec5fdc0`):** after the lab released the left worker it refused the
+coordinator's stop for it (403); the supervisor retried and logged `worker_left` every tick, and counted the worker
+`lost` at the end. The lab now answers "stopped" for a worker it released, and `worker_left` is logged once.
+
+**Stop rule:** (b2) failed, so by the predeclared rule tier 3 does not start on this result. Tier 2d repeats (b1)+(b2)
+on the fixed build (`PREDECLARATION-tier2d.md`).

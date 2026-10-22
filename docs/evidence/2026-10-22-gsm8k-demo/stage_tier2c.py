@@ -1,6 +1,8 @@
 """Tier 2c's declared events (PREDECLARATION-tier2c.md), each performed once and logged:
 
-    python stage_tier2c.py <out jsonl>
+    python stage_tier2c.py <out jsonl> [--no-kill] [--tier tier2d]
+
+`--no-kill --tier tier2d` (PREDECLARATION-tier2d.md): the same (b1) and (b2), without killing 1660s.
 
 (c) the 1660s Worker service killed (SIGKILL, every process) when generation index 1 opens and started again by a timer on
 that machine 40 minutes later; (b1) 5070ti-nhut OFF when index 2 opens; (b2) ON and added back when index 3 opens. The
@@ -25,9 +27,17 @@ KILL = (
 )
 
 
+def kill(log):
+    killed = subprocess.run(SSH_1660S + [KILL], capture_output=True, text=True, timeout=60)
+    log(
+        event="kill_requested", target="1660s", returncode=killed.returncode, out=(killed.stdout + killed.stderr)[-300:]
+    )
+
+
 def main():
     lab = DemoLab()
-    run = gsm8k.run_id("tier2c")
+    tier = sys.argv[sys.argv.index("--tier") + 1] if "--tier" in sys.argv else "tier2c"
+    run = gsm8k.run_id(tier)
     out = open(sys.argv[1], "a")
 
     def log(**entry):
@@ -51,10 +61,8 @@ def main():
         ]
 
     wait_until(lambda: opened(1), 3600, every=5)
-    killed = subprocess.run(SSH_1660S + [KILL], capture_output=True, text=True, timeout=60)
-    log(
-        event="kill_requested", target="1660s", returncode=killed.returncode, out=(killed.stdout + killed.stderr)[-300:]
-    )
+    if "--no-kill" not in sys.argv:
+        kill(log)
     try:
         wait_until(lambda: opened(2), 3600, every=5)
         log(event="off_requested", response=lab.set_contribution(NHUT, False))
