@@ -463,6 +463,41 @@ def test_a_worker_added_back_after_it_left_starts_after_its_last_launch(manager,
     root, calls, *_ = restarting(manager, monkeypatch, {"local": ALIVE, "late": gone})
     manager.tick(root)
     assert ("late", "start", 3) in calls and manager.state(root)["workerStates"]["late"] == {**ALIVE, "launch": 3}
+    # tier 2e: it was logged `worker_restarted`, so the timeline never showed the member coming back (finding 9)
+    events = [json.loads(line) for line in (root / "lifecycle.jsonl").read_text().splitlines()]
+    assert [(e["event"], e.get("rejoin")) for e in events if e["worker_id"] == "late"] == [("worker_joined", True)]
+
+
+def test_a_member_not_answering_during_the_run_is_said_once_and_again_when_it_is_back(manager, monkeypatch):
+    # tier 3, 2026-10-22: the 1660S was unreachable for 2 h 13 min and the coordinator logged nothing (finding 11)
+    root, calls, clock, polls = restarting(manager, monkeypatch, {"local": ALIVE, "late": ALIVE})
+    relay, away = manager.remote, [True]
+
+    def remote(worker, request):
+        if worker["id"] == "late" and away[0]:
+            raise RuntimeError("timed out")
+        return relay(worker, request)
+
+    monkeypatch.setattr(manager, "remote", remote)
+
+    def said():
+        log = root / "lifecycle.jsonl"
+        return [json.loads(line)["event"] for line in log.read_text().splitlines()] if log.exists() else []
+
+    manager.tick(root)
+    clock[0] += run_supervisor.UNREACHABLE_NOTICE_SECONDS - 1
+    manager.tick(root)
+    assert "worker_unreachable" not in said()  # a short silence is not news
+    for _ in range(3):
+        clock[0] += run_supervisor.UNREACHABLE_NOTICE_SECONDS
+        manager.tick(root)
+    assert said().count("worker_unreachable") == 1
+    late = manager.state(root)["workerStates"]["late"]
+    assert late["confirmed"] is False and late["unreachableSince"] == 1000.0
+    assert not [c for c in calls if c[0] == "late" and c[1] == "start"]  # never started beside a process it cannot see
+    away[0] = False
+    manager.tick(root)
+    assert said()[-1] == "worker_reachable" and manager.state(root)["workerStates"]["late"] == ALIVE
 
 
 @pytest.mark.parametrize(

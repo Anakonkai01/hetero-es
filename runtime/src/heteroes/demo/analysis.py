@@ -98,9 +98,10 @@ LIFECYCLE = {
 def member_story(lifecycle, ledger_membership, names=None, origin_ms=0, lost=(), silent=None):
     """Who left, died and came back, in time order: the coordinator's own lifecycle log (process side) merged with the
     ledger's membership records (the JOIN/LEAVE that the update math sees). The lab timeline alone cannot tell this: a
-    re-added member is `worker_restarted`, never `worker_joined` (RESULTS.md, finding 9).
+    re-added member was `worker_restarted`, never `worker_joined`, before candidate13 (RESULTS.md, finding 9).
 
-    The coordinator logs nothing when a machine just stops answering, so two more sources show a drop-out: `lost`, the
+    Before candidate13 the coordinator logged nothing when a machine just stopped answering (finding 11; now
+    `worker_unreachable`), so two more sources show a drop-out: `lost`, the
     ledger's attempts {workerId, leasedAt, deadline} that never returned, and `silent`, the coordinator's current
     {worker id: unreachable since} for members not answering now."""
     names = names or {}

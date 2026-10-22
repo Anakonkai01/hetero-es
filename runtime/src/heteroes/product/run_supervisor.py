@@ -24,6 +24,8 @@ RESTART_SECONDS = 30  # a worker that is still away or OFF is asked again after 
 MAX_LAUNCHES = 20  # launches of one worker in one coordinator recovery; a worker that keeps dying is then left alone
 # a worker unreachable this long is taken as stopped when the run drains; before that an unknown state blocks the release
 UNREACHABLE_STOP_SECONDS = 600
+# a member unreachable this long while the run goes on is logged (once) and shown as lost on the timeline (finding 11)
+UNREACHABLE_NOTICE_SECONDS = 120
 
 
 def launched(launch):
@@ -176,6 +178,10 @@ class RunSupervisor(ABC):
                     "confirmed": True,
                     **launched(launch),
                 }
+                if previous.get("unreachableNoticed"):
+                    self.log(
+                        root, "worker_reachable", worker_id=worker_id, unreachableSince=previous["unreachableSince"]
+                    )
             except Exception:
                 since = previous.get("unreachableSince") or time.time()
                 if stop and time.time() - since >= UNREACHABLE_STOP_SECONDS:
@@ -183,6 +189,10 @@ class RunSupervisor(ABC):
                     self.log(root, "worker_lost", worker_id=worker_id, unreachableSince=since)
                 else:
                     result[worker_id] = {**previous, "confirmed": False, "unreachableSince": since}
+                    # tier 3: the 1660S stopped answering for 2 h 13 min and nothing said so until the drain
+                    if time.time() - since >= UNREACHABLE_NOTICE_SECONDS and not previous.get("unreachableNoticed"):
+                        result[worker_id]["unreachableNoticed"] = True
+                        self.log(root, "worker_unreachable", worker_id=worker_id, unreachableSince=since)
         self.save(root, workerStates=result)
         return all(
             value.get("notStarted") or (value.get("confirmed") and not value.get("alive")) for value in result.values()
@@ -265,7 +275,11 @@ class RunSupervisor(ABC):
                     self.log(root, "worker_restart_deferred", worker_id=worker_id, launch=launch, **reason)
                 continue
             self.deferred.pop(key, None)
-            self.log(root, "worker_restarted", worker_id=worker_id, launch=launch)
+            # a member added back after it left joins again; the timeline shows it as a join (finding 9)
+            if value.get("left"):
+                self.log(root, "worker_joined", worker_id=worker_id, launch=launch, rejoin=True)
+            else:
+                self.log(root, "worker_restarted", worker_id=worker_id, launch=launch)
             self._launch_worker(root, worker_id, result, recovery, launch)
 
     def _follow_membership(self, root, state):

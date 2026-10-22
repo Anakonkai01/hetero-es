@@ -176,3 +176,17 @@ def test_audit_mismatch_and_quarantine_are_timeline_marks():
     }
     shown = build_timeline(body, snapshot)
     assert {m["type"] for m in shown["marks"]} >= {"audit_mismatch", "audit_worker_quarantined"}
+
+
+def test_a_member_not_answering_shows_since_when_and_its_membership_moments_are_marks():
+    # tier 3, 2026-10-22: the 1660S stopped answering for 2 h 13 min while the lab still read it as alive (finding 11)
+    body, snapshot = synthetic()
+    snapshot["state"]["workerStates"]["b"] = {"alive": True, "confirmed": False, "unreachableSince": 1791619300.0}
+    snapshot["events"] += [
+        {"event": "worker_unreachable", "t": 1791619420.0, "worker_id": "b", "unreachableSince": 1791619300.0},
+        {"event": "worker_joined", "t": 1791619421.0, "worker_id": "a", "rejoin": True},
+    ]
+    shown = build_timeline(body, snapshot)
+    ids = {w["id"]: w for w in shown["workers"]}
+    assert ids["b"]["unreachableSinceMs"] == 1791619300000 and ids["a"]["unreachableSinceMs"] is None
+    assert {"worker_unreachable", "worker_joined"} <= {m["type"] for m in shown["marks"]}

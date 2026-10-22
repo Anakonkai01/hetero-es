@@ -15,8 +15,8 @@ SAME_CHANGE_SECONDS = 600  # a process event and its ledger record (worker_left,
 
 
 def member_changes(events):
-    """(seconds, worker, "joined"/"left") in time order. A re-added member has no `worker_joined`: its JOIN is the
-    coordinator's `membership_changed` (ledger) record (RESULTS.md, finding 9), whose worker key is `workerId`. A process
+    """(seconds, worker, "joined"/"left") in time order. Before candidate13 a re-added member had no `worker_joined`: its
+    JOIN is the coordinator's `membership_changed` (ledger) record (RESULTS.md, finding 9), whose worker key is `workerId`. A process
     event and the ledger record of the same change are drawn once."""
     found = []
     for event in events:

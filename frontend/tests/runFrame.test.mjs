@@ -252,6 +252,21 @@ test('marks appear only shortly after they happen, and an unavailable worker sho
   );
 });
 
+test('a member that stops answering shows as lost until it answers again, even with a job still leased (finding 11)', () => {
+  const marks = [
+    { atMs: T0 + 12600, type: 'worker_unreachable', workerId: 'a', generation: null },
+    { atMs: T0 + 20000, type: 'worker_reachable', workerId: 'a', generation: null },
+  ];
+  const synth = synthetic({ marks });
+  assert.equal(worker(frameAt(synth, T0 + 12550), 'a').state, 'busy');
+  assert.equal(worker(frameAt(synth, T0 + 15000), 'a').state, 'offline', 'its leased job does not make it look busy');
+  assert.notEqual(worker(frameAt(synth, T0 + 20001), 'a').state, 'offline');
+  // a long run's snapshot may have dropped the mark: the coordinator's current state still says so after 2 minutes
+  const away = synthetic({ marks: [], workers: [{ id: 'b', started: true, alive: true, unreachableSinceMs: T0 }] });
+  assert.equal(worker(frameAt(away, T0 + 60_000), 'b').state, 'idle');
+  assert.equal(worker(frameAt(away, T0 + 120_000), 'b').state, 'offline');
+});
+
 test('a worker that has started but is not ready yet shows as loading the model, until it is ready or has work', () => {
   const marks = [
     { atMs: T0 + 100, type: 'worker_start', workerId: 'a', generation: null },

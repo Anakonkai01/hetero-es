@@ -64,7 +64,17 @@ export function describeEvent(type: string, details: Details, workerId?: string)
     case 'membership_refused':
       return done('A membership change was refused: {reason}', { reason: text(d.reason) || '?' }, 'warn');
     case 'worker_joined':
-      return done('Worker {worker} is starting for this run', { worker });
+      return d.rejoin
+        ? done('Worker {worker} was added back and is starting again', { worker })
+        : done('Worker {worker} is starting for this run', { worker });
+    case 'worker_restarted':
+      return done('Worker {worker} stopped and is being started again', { worker }, 'warn');
+    case 'worker_unreachable':
+      return done('Worker {worker} has not answered for 2 minutes', { worker }, 'warn');
+    case 'worker_reachable':
+      return done('Worker {worker} answers again', { worker });
+    case 'worker_lost':
+      return done('Worker {worker} was given up as lost', { worker }, 'err');
     case 'worker_left':
       return done('Worker {worker} stopped and left this run', { worker });
     case 'audit_mismatch':

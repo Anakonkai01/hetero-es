@@ -44,7 +44,7 @@ export type Timeline = {
     maxGenerations: number | null;
     candidatesPerGeneration: number | null;
   };
-  workers: { id: string; started: boolean; alive: boolean | null }[];
+  workers: { id: string; started: boolean; alive: boolean | null; unreachableSinceMs?: number | null }[];
   generations: TimelineGeneration[];
   jobs: TimelineJob[];
   marks: TimelineMark[];
@@ -92,6 +92,22 @@ const RUNNING_CAP = 0.95; // a job with no end yet never looks finished
 const MARK_VISIBLE_MS = 4000; // how long a notable moment stays on screen
 const TERMINAL = new Set(['COMPLETED', 'CANCELLED', 'FAILED']);
 
+const PRESENCE = new Set([
+  'worker_unreachable',
+  'worker_lost',
+  'worker_reachable',
+  'worker_restarted',
+  'worker_joined',
+]);
+
+/** Not answering at that moment: the coordinator's last presence mark for it says so, or it is not answering now
+ * (an old mark may have been dropped from a long run's snapshot). Finding 11. */
+function isUnreachable(timeline: Timeline, w: Timeline['workers'][number], atMs: number): boolean {
+  const last = timeline.marks.filter((m) => m.workerId === w.id && m.atMs <= atMs && PRESENCE.has(m.type)).at(-1);
+  if (last) return last.type === 'worker_unreachable' || last.type === 'worker_lost';
+  return w.unreachableSinceMs != null && atMs - w.unreachableSinceMs >= 120_000;
+}
+
 /** A worker process that has been launched but has not reported ready yet (it is loading the model). */
 function isStarting(marks: TimelineMark[], workerId: string, atMs: number): boolean {
   const mine = marks.filter((m) => m.workerId === workerId && m.atMs <= atMs);
@@ -136,7 +152,9 @@ export function frameAt(timeline: Timeline, atMs: number, options: { flightMs?: 
       meanSeconds: durations.length ? durations.reduce((a, b) => a + b, 0) / durations.length : null,
       lastReward: succeeded.length ? [...succeeded].sort((a, b) => a.endMs! - b.endMs!).at(-1)!.reward : null,
     };
-    if (current) {
+    if (isUnreachable(timeline, w, atMs)) {
+      frame.state = 'offline';
+    } else if (current) {
       const expected = current.endMs !== null ? current.endMs - current.startMs : (frame.meanSeconds ?? 5) * 1000;
       const raw = expected > 0 ? (atMs - current.startMs) / expected : 0;
       frame.state = 'busy';

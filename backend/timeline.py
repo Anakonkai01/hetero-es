@@ -30,6 +30,10 @@ MARKS = frozenset(
         "membership_refused",
         "worker_joined",
         "worker_left",
+        "worker_restarted",
+        "worker_unreachable",
+        "worker_reachable",
+        "worker_lost",
     }
 )
 SECONDS = (
@@ -139,8 +143,16 @@ def build_timeline(body, snapshot, now_ms=None):
     workers, known = [], set()
     for worker_id, info in (state.get("workerStates") or {}).items():
         known.add(worker_id)
+        info = info or {}
+        # not answering now (finding 11): its last known alive/ready says nothing about the present
+        away = None if info.get("confirmed", True) else _ms_from_epoch(info.get("unreachableSince"))
         workers.append(
-            {"id": worker_id, "started": not (info or {}).get("notStarted", False), "alive": (info or {}).get("alive")}
+            {
+                "id": worker_id,
+                "started": not info.get("notStarted", False),
+                "alive": info.get("alive"),
+                "unreachableSinceMs": away,
+            }
         )
     for job in jobs:
         if job["workerId"] and job["workerId"] not in known:
