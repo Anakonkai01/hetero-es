@@ -142,3 +142,31 @@ run needs the owner's ON only; the agent defers the worker's start until it has 
 **Stop rule:** (b2) failed again, so tier 3 does not start on this result. The owner had already decided that tier 3 is
 for the next session (2026-10-22 ~08:40: "Nếu đạt tier 3 để phiên sau, phiên này dài rồi"). Next session: deploy the fix
 and repeat (b2) before tier 3.
+
+## Tier 2e: (b2) on the lab with the fix (experiment `c48ea62d743941b38ed497570f6b753b`), 09:14–09:46 +07
+
+Predeclared in `PREDECLARATION-tier2e.md` (commit `cd4ab94`, before the run). Lab `a198cb0` = candidate12 + `b5e1bc7`
+(deployed 09:12, `docs/evidence/2026-10-22-tier3/`); agents and web candidate12. Events in `tier2e/stage-events.jsonl`.
+
+| Criterion | Result |
+| --------- | ------ |
+| COMPLETED, 160 results, ≥ 1 audit, 0 mismatches, no quarantine | **pass**: 160/160 (5070ti-nhan 75, 5070ti-nhut 39, 3060-thao 35, 1660s 11), 8 audits all matched, 0 quarantined |
+| (b1) 5070ti-nhut OFF at index 2, LEAVE within 10 min | **pass**: OFF 09:23:58, LEAVE in the ledger at generation 3, seen after 439 s |
+| (b2) ON + add at index 3, JOIN + result within 15 min | **pass in substance, the script's mark check failed** (below) |
+| Release at the end, no hand action | **pass**: 0 reservations after COMPLETED |
+| Parity | **pass**: `tier2e/parity.json` ALL EQUAL (5 child hashes from the ledger, generation 4, the one with the re-added worker, regenerated) |
+
+**(b2).** ON 09:31:18, add 0.2 s later **accepted** (`JOIN`, `appliesAtNextGeneration`; tiers 2c/2d got 409 here). The
+ledger records the JOIN at generation 4 (09:38:19, the next boundary); the coordinator logged `worker_restarted` (launch 1)
+and 5070ti-nhut's first result after the request started 09:39:10 and committed 09:39:31 (492 s after the add); it
+committed 11 results in generation 4. `stage_tier2c.py` waited for a `worker_joined` mark and logged `failed` after
+900 s: the coordinator logs `worker_joined` only for a worker that was never a member of the run
+(`run_supervisor._follow_membership`); a former member added back is started by `_restart_members`, which logs
+`worker_restarted`. **Finding 9:** the declared mark was the wrong name for a re-add (the same check would never have
+passed in tiers 2b-2d either); the event it stood for (the run takes the worker back and gets a result from it within
+15 minutes) happened. Product follow-up (not during tier 3): log `worker_joined` (or show `worker_restarted` on the
+timeline) for a re-added member.
+
+**Gate decision (AI, owner's auto-run GO 2026-10-22 ~09:10).** Judged a pass: the refusal that failed (b2) twice is gone,
+and the only miss is the name of a log mark, checked against the ledger and the coordinator's lifecycle log. Tier 3
+starts on this result once parity is equal.

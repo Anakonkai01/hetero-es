@@ -1,0 +1,5 @@
+{"t": 1792635838.423, "event": "off_requested", "response": {"deviceId": "a4f401a7610b4fd286cf134de3206a6f", "enabled": false, "pending": true}}
+{"t": 1792636277.758, "event": "off_verdict", "verdict": "recovered", "seconds": 439.3, "seen": ["worker_left"]}
+{"t": 1792636278.839, "event": "on_requested", "response": {"deviceId": "a4f401a7610b4fd286cf134de3206a6f", "enabled": true, "pending": true}}
+{"t": 1792636279.057, "event": "add_requested", "response": {"changeId": "3e74346b0a1a42b0b03b4f0903afcfc0", "workerId": "cli-aa99b4d4ca58", "action": "JOIN", "actor": "admin", "appliesAtNextGeneration": true}}
+{"t": 1792637183.857, "event": "on_verdict", "verdict": "failed", "error": "condition not met within 900 s"}
