@@ -27,7 +27,7 @@ candidate13b installers are published. Lab idle. Evidence: [evidence/2026-10-22-
    by the owner (`deploy-lab-c13.sh` pattern with the 13b build; the classifier refuses stopping the lab).
 3. **Windows app on 3060-thao** (someone at the screen): the candidate13b Windows installer; then the 3060 in a
    notebook run, which also exercises a real model qualification and the chunk measurement (never run on a GPU yet).
-4. Open, smaller: `/api/v1/workers` lists revoked devices (the notebook's device table shows them); an audit was not
+4. Open, smaller: ~~`/api/v1/workers` lists revoked devices~~ (fixed in the SDK, `f30aa06`, ships with the next notebook/wheel redeploy; the web list still shows them on purpose so they can be deleted); an audit was not
    drawn in the acceptance run (5 % of 40): a run with audits on this build; the 1660S is offline (hardware).
 5. Decide with the owner: chunk 128 (5 % gain), push/merge of `feat/real-user-c13`.
 
