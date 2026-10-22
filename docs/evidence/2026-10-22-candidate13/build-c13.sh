@@ -9,5 +9,5 @@ OUT=/mnt/Archive-2tb/heteroes-local/downloads/$BUILD
 scripts/build-apps.sh
 mkdir -p "$OUT/web/notebooks"
 cp runtime/notebooks/researcher.ipynb "$OUT/web/notebooks/"
-"$HOME/miniforge3/envs/heteroes-match/bin/python" -m pip wheel --no-deps --no-build-isolation -q -w "$OUT/web/notebooks" runtime
+"$HOME/miniforge3/envs/heteroes-match/bin/python" -m pip wheel --no-deps --no-build-isolation -q -w "$OUT/web/notebooks" ./runtime
 ls -la "$OUT/web/notebooks"
