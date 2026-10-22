@@ -4,6 +4,7 @@ service, setup from scratch to ON, contribution/rename/forget as the device, upd
 import argparse
 import io
 import json
+import time
 import urllib.error
 
 import pytest
@@ -263,6 +264,9 @@ def test_status_reads_like_a_sentence(tmp_path, monkeypatch):
     assert "Run           GSM8K tier 3 (worker, generation 41/300, RUNNING)" in text
     assert "9.1/15.9 GB · 63 °C · 210 W · 97% busy" in text
     assert json.dumps(status)  # --json prints the same data
+    assert "Lab contact   none for 33 min" in render_status(
+        {**status, "connection": {"status": "ONLINE", "t": time.time() - 1980}}
+    )
     bad = {**status, "lab": {"error": "LAB_HTTP_401"}}
     assert "no longer accepts this machine's key" in render_status(bad)
 

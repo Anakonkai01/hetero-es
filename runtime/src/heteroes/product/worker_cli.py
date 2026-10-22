@@ -827,7 +827,13 @@ def render_status(s):
     )
     connection = s.get("connection") or {}
     if connection.get("t"):
-        line("Lab contact", f"{connection['status'].lower()}, {ago(connection['t'])}")
+        stale = time.time() - connection["t"] > 60  # the agent writes it every ~10 s while it runs
+        line(
+            "Lab contact",
+            f"none for {ago(connection['t'])[:-4]}"
+            if stale
+            else f"{connection['status'].lower()}, {ago(connection['t'])}",
+        )
     gpu = s.get("gpu")
     if gpu:
         parts = [gpu.get("name") or s.get("gpuName") or "GPU"]
