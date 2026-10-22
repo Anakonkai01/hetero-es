@@ -98,7 +98,8 @@ last_number(["... so the answer is\\n72", "I think 71"], [{"answer": "72"}, {"an
 is how many of them go through the GPU in one call: a larger chunk is faster but needs more memory. Each GPU measured
 its memory per chunk for this model when it qualified; `suggest` scales that to your answer length and gives each GPU
 the largest chunk it holds (a GPU not measured yet gets a chunk from its memory size, and the note says so)."""),
-    code("""hint = lab.suggest(model, data, max_new_tokens=256)
+    code("""COORDINATOR, WORKERS = "5070ti-nhan", ["5070ti-nhan", "5070ti-nhut"]   # names or worker ids from section 1
+hint = lab.suggest(model, data, max_new_tokens=256, devices=WORKERS)
 print(hint)"""),
     code("""args = ESConfig(
     model=model,
@@ -120,7 +121,7 @@ trainer = ESTrainer(args, reward_func=last_number, sampler_func=curriculum)"""),
 `coordinator` is the GPU that keeps the ledger and runs your reward; `workers` evaluate candidates. A GPU not yet
 qualified for this model is qualified first (a few minutes; it must be ON). `submit` returns at once; `watch` draws the
 run live and can be interrupted at any time: the run goes on, and the lab's web page shows it too."""),
-    code("""run = trainer.submit(lab, coordinator="5070ti-nhan", workers=["5070ti-nhan", "5070ti-nhut"], name="GSM8K curriculum")
+    code("""run = trainer.submit(lab, coordinator=COORDINATOR, workers=WORKERS, name="GSM8K curriculum")
 run.url"""),
     code("""run.watch()"""),
     code("""run.results()"""),
