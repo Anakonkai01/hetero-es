@@ -74,7 +74,7 @@ def test_a_notebook_submits_a_hub_model_its_own_rows_reward_and_sampler(v3_study
         lab.upload(plan, Path(path) / name)
     assert lab.request("POST", f"/api/v1/models/{uploaded['id']}/publish")["status"] == "READY"
     asked = []
-    lab.qualify = lambda m, devices, log: asked.append((m, [d.worker_id for d in devices]))
+    lab.qualify = lambda m, devices, log, engine: asked.append((m, [d.worker_id for d in devices]))
 
     rows = [{"prompt": f"Q{i}", "label": "A"} for i in range(20)]
     data = Dataset.from_rows(train=rows[:12], validation=rows[12:16], test=rows[16:], directory=tmp_path / "rows")

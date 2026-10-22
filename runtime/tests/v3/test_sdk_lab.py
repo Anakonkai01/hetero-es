@@ -138,3 +138,37 @@ def test_the_device_table_leaves_out_revoked_devices():
         {"workerId": "w-old", "deviceId": "d-old", "approvalStatus": "REVOKED"},
     ]
     assert [d.worker_id for d in lab.devices()] == ["w-ok"]
+
+
+def test_notebook_qualification_never_reuses_v1_for_a_v2_run_and_deduplicates_devices():
+    from types import SimpleNamespace
+    from heteroes.noise.contracts import ENGINE_VERSION, ENGINE_V2
+    from heteroes.sdk_lab import Lab, Device
+
+    digest = "d" * 64
+    model = SimpleNamespace(manifest_hash=digest, id="fixture/model")
+    device = Device.of(
+        {
+            "workerId": "w",
+            "deviceId": "a" * 32,
+            "selfTest": {
+                "noiseVersion": ENGINE_VERSION,
+                "qualifiedModelHashes": [digest],
+                "qualifiedModelsByNoiseEngine": {ENGINE_VERSION: [digest]},
+            },
+        }
+    )
+    lab = Lab("https://lab.example", "fixture", "lab")
+    lab.model_asset = lambda model: {"id": "model"}
+    requests = []
+
+    def request(method, path, body=None):
+        requests.append((method, body))
+        return {"jobId": "job", "status": "COMPLETED"}
+
+    lab.request = request
+    lab.qualify(model, [device, device], log=lambda *_: None)
+    assert requests == [("POST", {"deviceId": "a" * 32, "noiseEngineVersion": ENGINE_V2})]
+    requests.clear()
+    lab.qualify(model, [device], engine=ENGINE_VERSION, log=lambda *_: None)
+    assert requests == []

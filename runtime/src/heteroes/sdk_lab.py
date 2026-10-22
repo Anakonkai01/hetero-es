@@ -154,17 +154,33 @@ class Lab:
             dataset.counts.get("train") if dataset is not None else None,
         )
 
-    def qualify(self, model, devices, timeout=3600, every=10.0, log=print, sleep=time.sleep):
+    def qualify(self, model, devices, timeout=3600, every=10.0, log=print, sleep=time.sleep, *, engine=None):
         """Qualify every given device for this model that is not yet (the first one builds the lab's reference); a
         device must be ON and idle. Waits for each, one at a time."""
+        from heteroes.noise.contracts import CPU_ENGINES, ENGINE_V2
+
+        engine = engine or ENGINE_V2
+        if engine not in CPU_ENGINES:
+            raise ValueError("Unknown CPU noise engine")
         asset = self.model_asset(model)
         if asset is None:
             raise LabError("Register the model first (submit does it)")
+        seen = set()
         for device in [self.device(d) if isinstance(d, str) else d for d in devices]:
-            if model.manifest_hash in device.qualified or device.cpu_only:
+            if device.device_id in seen:
+                continue
+            seen.add(device.device_id)
+            if model.manifest_hash in device.qualified_for(engine) or device.cpu_only:
                 continue
             log(f"Qualifying {device.name} for {model.id} (a few minutes)…")
-            job = self.request("POST", f"/api/v1/models/{asset['id']}/qualifications", {"deviceId": device.device_id})
+            job = self.request(
+                "POST",
+                f"/api/v1/models/{asset['id']}/qualifications",
+                {
+                    "deviceId": device.device_id,
+                    "noiseEngineVersion": engine,
+                },
+            )
             deadline = time.monotonic() + timeout
             while job["status"] not in TERMINAL:
                 if time.monotonic() > deadline:
@@ -191,7 +207,7 @@ class Lab:
 
         def before_create(asset):
             if qualify:
-                self.qualify(config.model, [coordinator, *members], log=log)
+                self.qualify(config.model, [coordinator, *members], log=log, engine=spec.get("noiseEngineVersion"))
 
         experiment = offer_experiment(
             spec, coordinator.device_id, [m.worker_id for m in members], self, root, before_create
@@ -219,6 +235,13 @@ class Device:
     coordinator: bool
     cpu_only: bool
     qualified: list = field(repr=False, default_factory=list)
+    noise_version: str = field(repr=False, default="numpy_pcg64_normal_f32_to_f16_v1")
+    qualified_by_engine: dict | None = field(repr=False, default=None)
+
+    def qualified_for(self, engine):
+        if self.qualified_by_engine is not None:
+            return self.qualified_by_engine.get(engine, [])
+        return self.qualified if engine == self.noise_version else []
 
     @classmethod
     def of(cls, value):
@@ -237,6 +260,8 @@ class Device:
             coordinator=bool(profile.get("coordinator")),
             cpu_only=coordinator_only(profile),
             qualified=list(profile.get("qualifiedModelHashes") or []),
+            noise_version=profile.get("noiseVersion", "numpy_pcg64_normal_f32_to_f16_v1"),
+            qualified_by_engine=profile.get("qualifiedModelsByNoiseEngine"),
         )
 
 
