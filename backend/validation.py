@@ -30,6 +30,8 @@ def freeze_python_code(body):
             body["scorer"] = {**body["scorer"], "codeSha256": entry["codeSha256"]}
         if entry["role"] == "coefficients" and body["coefficientRule"].startswith("python@1"):  # also a re-upload
             body["coefficientRule"] = "python@1:" + entry["codeSha256"]
+        if entry["role"] == "sampler" and str(body.get("sampler", "")).startswith("python@1"):
+            body["sampler"] = "python@1:" + entry["codeSha256"]
     body["pythonCode"] = frozen
 
 

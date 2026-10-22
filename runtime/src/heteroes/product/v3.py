@@ -30,7 +30,9 @@ def prepare_run(config, root, device, *, declared=None, client=None, cache=None)
 
     if declared is not None and "pythonCode" in config:
         raise ValueError("A worker never receives researcher code")
-    python = config["scorer"]["kind"] == "python" or config["coefficientRule"].startswith("python@1:")
+    python = config["scorer"]["kind"] == "python" or any(
+        str(config.get(key, "")).startswith("python@1:") for key in ("coefficientRule", "sampler")
+    )
     validate_options(config, allow_python=python, with_code=declared is None)
     from heteroes.manifest import generation_config_sha256
     from heteroes.model.loading import LoadedModel
@@ -126,8 +128,8 @@ def prepare_run(config, root, device, *, declared=None, client=None, cache=None)
 
 def python_functions(config, root):
     """
-    (scorer, coefficient function) of a coordinator: the frozen researcher code, written under `root`/code and checked
-    against its SHA-256, each run in a child process with a time limit (`heteroes.v3.sandbox`). (None, None) without code.
+    (scorer, coefficient function, sampler) of a coordinator: the frozen researcher code, written under `root`/code and
+    checked against its SHA-256, each run in a child process with a time limit (`heteroes.v3.sandbox`). None without code.
     """
     from heteroes.v3.sandbox import ChildFunction
     from heteroes.v3.scoring import ScorerError, code_sha256
@@ -145,4 +147,4 @@ def python_functions(config, root):
             timeout=config.get("pythonTimeoutSeconds", 300),
             error=ScorerError if entry["role"] == "scorer" else ValueError,
         )
-    return loaded.get("scorer"), loaded.get("coefficients")
+    return loaded.get("scorer"), loaded.get("coefficients"), loaded.get("sampler")

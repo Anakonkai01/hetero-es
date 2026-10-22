@@ -121,7 +121,12 @@ class CandidateExecutor:
         self.reset_parent()
 
     def set_generation(self, generation, context):
-        expected = self.recipe.context(self.dataset, generation)
+        if getattr(self.recipe, "python_sampler", False):
+            # a researcher's sampler ran on the coordinator: its row numbers are taken from the context and checked
+            given = context.get("batchIndices") if isinstance(context, dict) else None
+            expected = self.recipe.context(self.dataset, generation, given)
+        else:
+            expected = self.recipe.context(self.dataset, generation)
         if context != expected:
             raise ValueError("Generation batch/sigma context mismatch")
         self.effective_sigma = expected["sigmaFloat32"]

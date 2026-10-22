@@ -109,6 +109,11 @@ def managed_configuration(spec, coordinator, workers, model, dataset):
         entry = _code(rule, "coefficients")
         code.append(entry)
         rule = "python@1:" + entry["codeSha256"]
+    sampler = data.get("sampler", spec.get("sampler", "sha256-python-random-sample-v1"))
+    if isinstance(sampler, dict):  # a researcher's sampler: it runs on the coordinator, pinned like the scorer
+        entry = _code(sampler, "sampler")
+        code.append(entry)
+        sampler = "python@1:" + entry["codeSha256"]
     result = {
         "name": spec.get("name", "CLI experiment"),
         "recipeVersion": 3,
@@ -126,7 +131,7 @@ def managed_configuration(spec, coordinator, workers, model, dataset):
         "sigmaSchedule": sigma.get("kind", "constant"),
         "batchSize": data["batchSize"],
         "batchSeed": data.get("batchSeed", 11),
-        "sampler": data.get("sampler", spec.get("sampler", "sha256-python-random-sample-v1")),
+        "sampler": sampler,
         "weightSpace": spec.get("weightSpace", {"kind": "full"}),
         "antithetic": spec.get("antithetic", False),
         "maxNewTokens": spec.get("maxNewTokens", 256),
@@ -175,7 +180,11 @@ def offer_experiment(spec, coordinator, workers, api, directory):
         "dataFiles": {name: sha256_file(path) for name, path in sources.items()},
         "code": {
             role: sha256_file(choice["path"])
-            for role, choice in (("scorer", spec["scorer"]), ("coefficients", spec.get("coefficientRule")))
+            for role, choice in (
+                ("scorer", spec["scorer"]),
+                ("coefficients", spec.get("coefficientRule")),
+                ("sampler", spec["data"].get("sampler")),
+            )
             if isinstance(choice, dict) and choice.get("kind") == "python"
         },
         "coordinatorDeviceId": coordinator,

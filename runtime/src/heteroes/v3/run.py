@@ -48,6 +48,10 @@ class RecipeV3Run:
         }
         if "promptFormat" in evaluation:
             self.evaluation["promptFormat"] = evaluation["promptFormat"]
+        # a Python sampler (python@1:<sha>): its function, set on the coordinator only, and the batches it chose
+        self.python_sampler = v3data.python_sampler(recipe["data"]["batch"]["sampler"])
+        self.sampler_function = None
+        self._chosen = {}
 
     def to_dict(self) -> dict:
         return self.recipe
@@ -55,17 +59,26 @@ class RecipeV3Run:
     def alpha_at(self, generation):
         return alpha_at(self.plan, generation)
 
-    def batch(self, data, generation):
+    def batch(self, data, generation, indices=None):
+        """The rows of a generation. A Python sampler's `indices` come from the coordinator's frozen context; the
+        coordinator itself asks its `sampler_function` (once per generation, so the scorer reads the same rows)."""
         if {k: data[k] for k in ("contentHash", "splitHashes")} != {
             k: self.recipe["data"][k] for k in ("contentHash", "splitHashes")
         }:
             raise ValueError("Dataset differs from recipe")
         size, seed = self.recipe["data"]["batch"]["size"], self.recipe["data"]["batch"]["seed"]
-        return v3data.batch(data, generation, size, seed, self.recipe["data"]["batch"]["sampler"])
+        if self.python_sampler and indices is None:
+            indices = self._chosen.get(generation)
+            if indices is None and self.sampler_function is not None:
+                indices = self.sampler_function(generation, size, len(data["splits"]["train"]), seed)
+        selected = v3data.batch(data, generation, size, seed, self.recipe["data"]["batch"]["sampler"], indices)
+        if self.python_sampler and self.sampler_function is not None:
+            self._chosen.setdefault(generation, selected["indices"])
+        return selected
 
-    def context(self, data, generation):
+    def context(self, data, generation, indices=None):
         """The inputs of a generation, frozen in the ledger before it opens: sigma, batch, scorer and coefficient rule."""
-        selected = self.batch(data, generation)
+        selected = self.batch(data, generation, indices)
         body = {
             "generation": generation,
             "recipeHash": self.hash,

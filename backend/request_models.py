@@ -52,13 +52,13 @@ class Configuration(BaseModel):
     momentumWindow: int = Field(default=4, ge=2, le=8, strict=True)
     evalChunk: int | None = Field(default=None, strict=True)
     evalChunks: list[int] | None = Field(default=None, max_length=8)  # ADR-010: chunks a worker may use
-    sampler: str = Field(default="sha256-python-random-sample-v1", max_length=64)
+    sampler: str = Field(default="sha256-python-random-sample-v1", max_length=80)  # or python@1:<sha256>
     candidateSeedNamespace: str | None = Field(default=None, pattern=r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$")
     systemPrompt: str | None = Field(default=None, max_length=4000)
     promptFormat: Literal["chat", "raw"] | None = None
     validationInterval: int = Field(default=1, ge=1, le=1000, strict=True)
     # Recipe v3 Python scorer / coefficient rule: [{role, name, function, source}] (the lab adds codeSha256)
-    pythonCode: list[dict] = Field(default_factory=list, max_length=2)
+    pythonCode: list[dict] = Field(default_factory=list, max_length=3)  # scorer, coefficients, sampler
 
 
 class Registration(Strict):

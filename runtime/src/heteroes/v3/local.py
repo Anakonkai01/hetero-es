@@ -53,6 +53,17 @@ def _coefficient_rule(config):
     return rule, None
 
 
+def _sampler(config):
+    """(sampler name for the recipe, loaded function or None): a string, or {"kind": "python", "path", "function"}."""
+    sampler = config["data"].get("sampler")
+    if isinstance(sampler, dict) and sampler.get("kind") == "python":
+        from heteroes.v3.run import load_python_scorer
+
+        function, digest = load_python_scorer(sampler["path"], sampler["function"])
+        return "python@1:" + digest, function
+    return sampler, None
+
+
 def prepare(config, out_dir, device="cpu", initial_adapter=None):
     """
     Load the model and data, build and write the documents. Returns everything the run needs. `initial_adapter` (a LoRA
@@ -104,8 +115,10 @@ def prepare(config, out_dir, device="cpu", initial_adapter=None):
         schema = build_parameter_schema(model)
     scorer_spec, python_scorer = _scorer_spec(config)
     rule, coefficient_function = _coefficient_rule(config)
+    sampler, sampler_function = _sampler(config)
+    data_choices = {**config["data"], **({"sampler": sampler} if sampler is not None else {})}
     recipe, plan = build_documents(
-        {**config, **config["data"], "scorerSpec": scorer_spec, "coefficientRule": rule},
+        {**config, **data_choices, "scorerSpec": scorer_spec, "coefficientRule": rule},
         model_files=files,
         revision=revision,
         schema_hash=schema.hash,
@@ -116,6 +129,7 @@ def prepare(config, out_dir, device="cpu", initial_adapter=None):
     for name, value in (("recipe.json", recipe), ("plan.json", plan), ("dataset.json", dataset)):
         _write_json(out / name, value)
     run = RecipeV3Run(recipe, plan)
+    run.sampler_function = sampler_function  # this coordinator is the researcher's own, like its scorer
 
     def worker_model():
         worker, worker_tokenizer = load(model_path, files, device)

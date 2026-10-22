@@ -93,7 +93,7 @@ def validate_seed_namespace(value):
     return value
 
 
-PYTHON_ROLES = ("scorer", "coefficients")
+PYTHON_ROLES = ("scorer", "coefficients", "sampler")
 PYTHON_CODE_KEYS = {"role", "name", "function", "source", "codeSha256"}
 MAX_PYTHON_SOURCE = 1_000_000
 
@@ -113,6 +113,8 @@ def validate_python_code(config):
         wanted["scorer"] = config["scorer"]["codeSha256"]
     if config["coefficientRule"].startswith("python@1:"):
         wanted["coefficients"] = config["coefficientRule"].removeprefix("python@1:")
+    if str(config.get("sampler", "")).startswith("python@1:"):
+        wanted["sampler"] = config["sampler"].removeprefix("python@1:")
     found = {}
     for entry in entries:
         if not isinstance(entry, dict) or set(entry) != PYTHON_CODE_KEYS or entry["role"] not in PYTHON_ROLES:
@@ -129,7 +131,7 @@ def validate_python_code(config):
             raise ValueError("Python code does not match its SHA-256")
         found[entry["role"]] = entry["codeSha256"]
     if found != wanted:
-        raise ValueError("pythonCode must be exactly the code the scorer and coefficient rule pin")
+        raise ValueError("pythonCode must be exactly the code the scorer, coefficient rule and sampler pin")
 
 
 def validate_options(config, *, allow_python=False, with_code=True):
@@ -172,9 +174,9 @@ def validate_options(config, *, allow_python=False, with_code=True):
         raise ValueError("evalChunks lists exact chunks and includes evalChunk")
     if type(config["antithetic"]) is not bool or (config["antithetic"] and config["candidatesPerGeneration"] % 2):
         raise ValueError("antithetic sampling requires an even population")
-    if config.get("sampler", "sha256-python-random-sample-v1") not in (
-        "sha256-python-random-sample-v1",
-        "epoch-shuffle@1",
+    sampler = config.get("sampler", "sha256-python-random-sample-v1")
+    if sampler not in ("sha256-python-random-sample-v1", "epoch-shuffle@1") and not (
+        allow_python and re.fullmatch("python@1:[0-9a-f]{64}", str(sampler))
     ):
         raise ValueError("unknown batch sampler")
     from heteroes.catalog import CPU_GUARD_DECODER, V3_DECODE_ENGINES

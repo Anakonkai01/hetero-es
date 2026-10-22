@@ -99,7 +99,8 @@ def test_a_worker_refuses_a_configuration_that_carries_code(tmp_path):
 
 def test_the_coordinator_runs_the_frozen_code_in_a_child_process(tmp_path, capfd, monkeypatch):
     monkeypatch.setenv("HETEROES_TOKEN", "coordinator-secret")
-    scorer, rule = python_functions(config(pythonTimeoutSeconds=5), tmp_path)
+    scorer, rule, sampler = python_functions(config(pythonTimeoutSeconds=5), tmp_path)
+    assert sampler is None  # this experiment pins no sampler
     try:
         assert scorer(["token"], [{"answer": "x"}]) == [0.0]  # the child never sees the coordinator's credentials
         assert scorer(["4", "5"], [{"answer": "4"}, {"answer": "4"}]) == [1.0, 0.0]

@@ -59,7 +59,9 @@ def validate(config, workers):
         from heteroes.v3.options import validate_options
 
         # The coordinator runs the frozen researcher code (owner decision, ADR-008); it must arrive with the command.
-        python = config["scorer"].get("kind") == "python" or str(config["coefficientRule"]).startswith("python@1:")
+        python = config["scorer"].get("kind") == "python" or any(
+            str(config.get(key, "")).startswith("python@1:") for key in ("coefficientRule", "sampler")
+        )
         validate_options(config, allow_python=python)
     selected = config.get("workerIds")
     if (

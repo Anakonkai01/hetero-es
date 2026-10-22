@@ -159,7 +159,9 @@ def validate_recipe(doc, *, translated=False):
         _keys("data.batch", data["batch"], {"size", "seed", "sampler"})
         _count("data.batch.size", data["batch"]["size"])
         _count("data.batch.seed", data["batch"]["seed"], 0, 2**53 - 1)
-        if data["batch"]["sampler"] not in SAMPLERS:
+        if data["batch"]["sampler"] not in SAMPLERS and not re.fullmatch(
+            r"python@1:[0-9a-f]{64}", str(data["batch"]["sampler"])
+        ):
             raise ValueError("unknown batch sampler")
         _count("evaluation.maxNewTokens", evaluation["maxNewTokens"], 1, 2048)
         prompt = evaluation["systemPrompt"]

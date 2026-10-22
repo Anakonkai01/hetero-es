@@ -568,6 +568,16 @@ class Ledger:
         return json.loads(body)
 
     @_locked
+    def generation_context(self, experiment_id, generation):
+        """The context frozen for a generation (None if it never opened): a Python sampler's batch is read from here."""
+        import json
+
+        row = self._db.execute(
+            "SELECT body FROM generation_context WHERE experiment_id=? AND generation=?", (experiment_id, generation)
+        ).fetchone()
+        return json.loads(row[0]) if row else None
+
+    @_locked
     def open_generation(self, descriptors) -> None:
         """
         Record, before anything runs, the exact set of candidates of one generation, all PENDING.

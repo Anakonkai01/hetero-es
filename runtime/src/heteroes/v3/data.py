@@ -12,6 +12,7 @@ import io
 import json
 import math
 import random
+import re
 from pathlib import Path
 
 from heteroes.canonical import canonical_json_bytes, canonical_json_hash
@@ -380,13 +381,22 @@ def _seeded(value, seed, sampler, **position):
     return random.Random(int(digest, 16))
 
 
-def batch(value, generation, size, seed, sampler=SAMPLER):
+def python_sampler(sampler):
+    """A researcher's sampler, `python@1:<SHA-256 of its code>`."""
+    return isinstance(sampler, str) and re.fullmatch(r"python@1:[0-9a-f]{64}", sampler) is not None
+
+
+def batch(value, generation, size, seed, sampler=SAMPLER, indices=None):
     """
     The training rows of a generation, chosen from this dataset's train split by the recipe's sampler:
         sha256-python-random-sample-v1  an independent seeded sample per generation (the Recipe v2 rule; repeats and
                                         gaps across generations)
         epoch-shuffle@1                 epochs: each a seeded shuffle of the whole split cut into batches of `size`,
                                         the last one short; generation g is batch g mod B of epoch g // B
+        python@1:<sha>                  a researcher's `f(generation, size, train_rows, seed) -> row numbers` (owner
+                                        2026-10-22). It runs on the coordinator only, which freezes its `indices` in the
+                                        generation context; workers, audits and replays take them from there and only
+                                        check them here (`size` numbers of train rows; repeats allowed)
     """
     verify(value)
     rows = value["splits"]["train"]
@@ -394,7 +404,19 @@ def batch(value, generation, size, seed, sampler=SAMPLER):
         raise ValueError("invalid training batch")
     if type(seed) is not int or not 0 <= seed < 2**53:
         raise ValueError("invalid batch seed")
-    if sampler == SAMPLER:
+    if python_sampler(sampler):
+        if indices is None:
+            raise ValueError("the batch of a Python sampler comes from the coordinator")
+        if (
+            not isinstance(indices, (list, tuple))
+            or len(indices) != size
+            or any(type(i) is not int or not 0 <= i < len(rows) for i in indices)
+        ):
+            raise ValueError(f"a Python sampler returns {size} row numbers of the train split (0 to {len(rows) - 1})")
+        indices = list(indices)
+    elif indices is not None:
+        raise ValueError("only a Python sampler's batch is given from outside")
+    elif sampler == SAMPLER:
         indices = _seeded(value, seed, SAMPLER, generation=generation).sample(range(len(rows)), size)
     elif sampler == "epoch-shuffle@1":
         per_epoch = -(-len(rows) // size)
