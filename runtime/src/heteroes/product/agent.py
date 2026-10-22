@@ -342,6 +342,7 @@ class Agent:
         self.desktop_lock = threading.RLock()
         self.boot_id = uuid.uuid4().hex
         self.enabled = False
+        self.paused_by_limits = (read_json(self.root / "limits.json", {}) or {}).get("paused")
         self.stopping = False
         self.shutdown_requested = False
         write_json(self.root / "boot.json", {"bootId": self.boot_id, "enabled": False})
@@ -695,6 +696,40 @@ class Agent:
             if ar:
                 self._worker(ar, "stop")
 
+    def limits_hold(self, telemetry, now=None):
+        """The owner's limits (agent config `limits`): a reason to stop contributing now, or None.
+        `hours` [start, end] in local time (end may be past midnight); `maxTemperatureC` with a 10 degree hysteresis."""
+        limits = self.config.get("limits") or {}
+        if hours := limits.get("hours"):
+            hour = time.localtime(now).tm_hour
+            start, end = hours
+            inside = start <= hour < end if start < end else hour >= start or hour < end
+            if not inside:
+                return f"outside the contribution hours {start:02d}-{end:02d}"
+        if (ceiling := limits.get("maxTemperatureC")) is not None:
+            temperature = ((telemetry or {}).get("gpu") or {}).get("temperatureC")
+            if temperature is not None:
+                held = (self.paused_by_limits or "").startswith("GPU at")
+                if temperature > ceiling or (held and temperature > ceiling - 10):
+                    return f"GPU at {temperature:.0f} C (limit {ceiling} C)"
+        return None
+
+    def apply_limits(self, telemetry, response):
+        """Leave runs (OFF through the lab, as the owner's OFF does) while a limit holds; come back when it no longer
+        does, only if it was the limit that turned this device OFF."""
+        reason = self.limits_hold(telemetry)
+        try:
+            if reason and self.enabled and response.get("desiredContribution"):
+                self.call("/api/v1/device/contribution", {"enabled": False})
+                self.paused_by_limits = reason
+                write_json(self.root / "limits.json", {"paused": reason, "t": time.time()})
+            elif reason is None and self.paused_by_limits and not response.get("desiredContribution"):
+                self.call("/api/v1/device/contribution", {"enabled": True})
+                self.paused_by_limits = None
+                write_json(self.root / "limits.json", {"paused": None, "t": time.time()})
+        except Exception:
+            pass  # an older lab, or a lost reply: the next poll tries again, and polling itself must go on
+
     def stop_revoked(self, assignment_ids):
         """The lab no longer reserves this device for these assignments (released, or this member's GPU given back
         after it left or went offline). A worker of theirs still running here, after an outage longer than the lab's
@@ -864,6 +899,7 @@ class Agent:
             + response.get("revokedAssignments", [])
         )
         self.run_commands(response["commands"])
+        self.apply_limits(telemetry, response)
         with self.db() as db:
             for eid in response.get("acceptedEvents", []):
                 db.execute("UPDATE event_outbox SET ack=1 WHERE id=?", (eid,))

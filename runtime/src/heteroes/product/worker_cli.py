@@ -431,6 +431,8 @@ class Worker:
             "selfTest": self.advertised(settings),
             # ADR-010: the owner's cap on prompts per generate() call (else the agent picks one from the GPU memory)
             **({"maxChunk": settings["limits"]["maxChunk"]} if (settings.get("limits") or {}).get("maxChunk") else {}),
+            # the owner's contribution hours and GPU temperature ceiling (the agent leaves runs while one holds)
+            "limits": {k: v for k, v in (settings.get("limits") or {}).items() if k in ("hours", "maxTemperatureC")},
         }
         write_json(p["agentConfig"], config)
         return p["agentConfig"]
@@ -1158,6 +1160,8 @@ def main(argv=None):
     limits.add_argument(
         "--max-chunk", type=int, choices=(16, 32, 64), help="largest prompts per generate() call this GPU may use"
     )
+    limits.add_argument("--hours", help="contribute only between these local hours, e.g. 22-7 (past midnight is fine)")
+    limits.add_argument("--max-temp", type=int, help="leave runs while the GPU is hotter than this (degrees C)")
     limits.add_argument("--clear", action="store_true", help="remove every limit")
     rename = commands.add_parser("rename", help="change the name shown on the lab")
     rename.add_argument("name")
@@ -1230,6 +1234,15 @@ def main(argv=None):
             current = {} if args.clear else dict(settings.get("limits") or {})
             if args.max_chunk:
                 current["maxChunk"] = args.max_chunk
+            if args.hours:
+                start, _, end = args.hours.partition("-")
+                if not (start.isdigit() and end.isdigit() and 0 <= int(start) < 24 and 0 <= int(end) < 24):
+                    raise ValueError("--hours is START-END in whole hours, for example 22-7")
+                current["hours"] = [int(start), int(end)]
+            if args.max_temp:
+                if not 50 <= args.max_temp <= 100:
+                    raise ValueError("--max-temp is between 50 and 100 degrees C")
+                current["maxTemperatureC"] = args.max_temp
             worker.save_settings({**settings, "limits": current})
             print(
                 json.dumps(current) if current else "no limits",

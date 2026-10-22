@@ -1001,3 +1001,30 @@ def test_a_worker_whose_gpu_was_given_back_is_stopped_before_another_run_starts_
     )
     a.cycle()
     assert calls == [("stop", "c" * 32), ("start", "e" * 32)]
+
+
+def test_owner_limits_take_the_device_out_of_runs_and_bring_it_back(tmp_path, monkeypatch):
+    import time as clock
+
+    a = agent(tmp_path)
+    a.enabled = True
+    a.config["limits"] = {"hours": [22, 7], "maxTemperatureC": 80}
+    sent = []
+    monkeypatch.setattr(a, "call", lambda path, body: sent.append(body))
+    noon = clock.mktime((2026, 10, 22, 12, 0, 0, 0, 0, -1))
+    night = clock.mktime((2026, 10, 22, 23, 0, 0, 0, 0, -1))
+    assert "hours" in a.limits_hold(None, now=noon)
+    cool, hot, warm = ({"gpu": {"temperatureC": t}} for t in (60, 85, 75))
+    assert a.limits_hold(cool, now=night) is None
+    assert "GPU at 85" in a.limits_hold(hot, now=night)
+    monkeypatch.setattr(a, "limits_hold", lambda telemetry, now=None: "GPU at 85 C (limit 80 C)")
+    a.apply_limits(hot, {"desiredContribution": True})
+    assert sent == [{"enabled": False}] and a.paused_by_limits.startswith("GPU at")
+    monkeypatch.undo()
+    monkeypatch.setattr(a, "call", lambda path, body: sent.append(body))
+    assert a.limits_hold(warm, now=night)  # 75 C is still within the 10 degree hysteresis
+    a.config["limits"] = {"maxTemperatureC": 80}
+    a.apply_limits(cool, {"desiredContribution": False})
+    assert sent == [{"enabled": False}, {"enabled": True}] and a.paused_by_limits is None
+    a.apply_limits(cool, {"desiredContribution": False})  # the owner's own OFF is never undone
+    assert len(sent) == 2
