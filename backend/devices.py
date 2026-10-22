@@ -452,26 +452,61 @@ def install_device_routes(app, store, user, runtime):
             )
         return next(d for d in runtime.devices() if d["deviceId"] == device_id)
 
+    def remove(db, d, actor):
+        # A device that still holds a reservation or is under restore quarantine is never removed. The audit log keeps
+        # the history.
+        if d["status"] == "QUARANTINED":
+            raise HTTPException(409, "Restore mismatch quarantine requires investigation before removal")
+        if has_device_reservation(db, d["id"]):
+            raise HTTPException(409, "Device is reserved")
+        for table in ("device_commands", "device_telemetry_history", "device_reports"):
+            db.execute(f"DELETE FROM {table} WHERE device_id=?", (d["id"],))
+        db.execute("DELETE FROM devices WHERE id=?", (d["id"],))
+        if not db.execute("SELECT 1 FROM devices WHERE worker_id=?", (d["worker_id"],)).fetchone():
+            db.execute("DELETE FROM worker_assignments WHERE worker_id=?", (d["worker_id"],))
+        store.audit(db, actor, "DEVICE_REMOVED", d["id"])
+
     @app.delete("/api/v1/platform/devices/{device_id}", status_code=204)
     def remove_device(device_id: str, current=Depends(admin)):
-        # A revoked (or never approved) device stays listed forever otherwise. Approved devices must be revoked first, and a
-        # device that still holds a reservation or is under restore quarantine is never removed. The audit log keeps the history.
+        # A revoked (or never approved) device stays listed forever otherwise. Approved devices must be revoked first.
         with store.db() as db:
             d = db.execute("SELECT * FROM devices WHERE id=?", (device_id,)).fetchone()
             if not d:
                 raise HTTPException(404, "Device not found")
-            if d["status"] == "QUARANTINED":
-                raise HTTPException(409, "Restore mismatch quarantine requires investigation before removal")
-            if d["status"] not in ("REVOKED", "PENDING"):
+            if d["status"] not in ("REVOKED", "PENDING", "QUARANTINED"):
                 raise HTTPException(409, "Revoke the device before removing it")
+            remove(db, d, current["userId"])
+
+    def managed(db, device_id, current):
+        """A device its owner or a platform administrator may rename or delete; to anyone else it does not exist."""
+        p = active(current)
+        d = db.execute("SELECT * FROM devices WHERE id=?", (device_id,)).fetchone()
+        if not d or (d["owner"] != p["userId"] and not p.get("platformAdmin")):
+            raise HTTPException(404, "Device not found")
+        return d, p
+
+    @app.patch("/api/v1/devices/{device_id}")
+    def rename(device_id: str, body: DeviceName, current=Depends(user)):
+        with store.db() as db:
+            d, p = managed(db, device_id, current)
+            name = body.displayName.strip() or d["name"]
+            db.execute("UPDATE devices SET name=? WHERE id=?", (name, device_id))
+            store.audit(db, p["userId"], "DEVICE_RENAMED", device_id)
+        return {"deviceId": device_id, "displayName": name}
+
+    @app.delete("/api/v1/devices/{device_id}", status_code=204)
+    def delete_device(device_id: str, current=Depends(user)):
+        """Revoke and remove in one step (owner 2026-10-22): its credential stops working and it leaves every list.
+        Never while a run holds it, which would cancel that run: it is turned OFF or the run ends first."""
+        with store.db() as db:
+            d, p = managed(db, device_id, current)
             if has_device_reservation(db, device_id):
-                raise HTTPException(409, "Device is reserved")
-            for table in ("device_commands", "device_telemetry_history", "device_reports"):
-                db.execute(f"DELETE FROM {table} WHERE device_id=?", (device_id,))
-            db.execute("DELETE FROM devices WHERE id=?", (device_id,))
-            if not db.execute("SELECT 1 FROM devices WHERE worker_id=?", (d["worker_id"],)).fetchone():
-                db.execute("DELETE FROM worker_assignments WHERE worker_id=?", (d["worker_id"],))
-            store.audit(db, current["userId"], "DEVICE_REMOVED", device_id)
+                raise HTTPException(409, "Device is in a run: turn it OFF or wait for the run to end, then delete it")
+            if d["status"] == "APPROVED":
+                store.cancel_selected(db, d["worker_id"])
+                db.execute('UPDATE devices SET status="REVOKED",enabled=0,desired=0 WHERE id=?', (device_id,))
+                store.audit(db, p["userId"], "DEVICE_REVOKED", device_id)
+            remove(db, d, p["userId"])
 
     def set_contribution(db, d, enabled, boot_id, keep, actor):
         db.execute("UPDATE devices SET desired=? WHERE id=?", (enabled, d["id"]))

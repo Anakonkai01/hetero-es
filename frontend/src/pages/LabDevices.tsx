@@ -63,6 +63,47 @@ function EndpointForm({ device, save, pending }: { device: Device; save: (body: 
     </details>
   );
 }
+/** The device's name, which its owner or an administrator can change in place. */
+function DeviceTitle({ device, editable, save }: { device: Device; editable: boolean; save: (name: string) => void }) {
+  const { t } = useProduct();
+  const [draft, setDraft] = useState<string | null>(null);
+  if (draft === null)
+    return (
+      <div className="device-heading">
+        <h3>{device.displayName}</h3>
+        {editable && (
+          <button className="btn" onClick={() => setDraft(device.displayName)}>
+            {t('Rename')}
+          </button>
+        )}
+      </div>
+    );
+  return (
+    <form
+      className="device-heading"
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (draft.trim()) save(draft.trim());
+        setDraft(null);
+      }}
+    >
+      <input
+        className="inp"
+        aria-label={t('Device name')}
+        maxLength={100}
+        autoFocus
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+      />
+      <button className="btn pri" disabled={!draft.trim()}>
+        {t('Save')}
+      </button>
+      <button type="button" className="btn" onClick={() => setDraft(null)}>
+        {t('Cancel')}
+      </button>
+    </form>
+  );
+}
 export function LabDevices({ administration = false }: { administration?: boolean }) {
   const { t, preferences } = useProduct();
   const { session } = useSession();
@@ -190,9 +231,13 @@ export function LabDevices({ administration = false }: { administration?: boolea
         <div className="device-cards">
           {(administration ? visibleDevices(devices.data ?? [], showRevoked) : devices.data)?.map((d) => (
             <article className="device-card" key={d.deviceId} data-device={d.workerId}>
-              <div className="device-heading">
-                <h3>{d.displayName}</h3>
-              </div>
+              <DeviceTitle
+                device={d}
+                editable={d.ownerUserId === session?.user.userId || administration}
+                save={(name) =>
+                  action.mutate({ path: '/api/v1/devices/' + d.deviceId, patch: true, body: { displayName: name } })
+                }
+              />
               <p>
                 {d.selfTest.gpuName} · {(d.selfTest.vramTotalMb / 1024).toFixed(1)} {t('GiB')}
               </p>
@@ -271,16 +316,22 @@ export function LabDevices({ administration = false }: { administration?: boolea
                     {t('Revoke device')}
                   </button>
                 )}
-                {administration && canRemoveDevice(d) && (
+                {(administration || d.ownerUserId === session?.user.userId) && canRemoveDevice(d) && (
                   <button
                     className="btn dng"
-                    disabled={action.isPending}
+                    disabled={action.isPending || Boolean(d.allocatedTo)}
                     onClick={() => {
-                      if (window.confirm(t('Remove this device from the list? Its history stays in the audit log.')))
-                        action.mutate({ path: '/api/v1/platform/devices/' + d.deviceId, remove: true });
+                      if (
+                        window.confirm(
+                          t(
+                            'Delete this device? It is revoked and removed at once: the computer has to be paired again to come back. Its history stays in the audit log.',
+                          ),
+                        )
+                      )
+                        action.mutate({ path: '/api/v1/devices/' + d.deviceId, remove: true });
                     }}
                   >
-                    {t(d.approvalStatus === 'PENDING' ? 'Decline and remove' : 'Remove from list')}
+                    {t(d.approvalStatus === 'PENDING' ? 'Decline and delete' : 'Delete')}
                   </button>
                 )}
                 {d.ownerUserId === session?.user.userId && d.approvalStatus === 'APPROVED' && (

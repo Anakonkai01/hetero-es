@@ -301,6 +301,10 @@ export const translations: Record<string, string> = {
   'Run compatibility check': 'Kiểm tra tương thích GPU',
   'Pair this device': 'Ghép máy này',
   'Device name': 'Tên máy',
+  Delete: 'Xóa',
+  Cancel: 'Hủy',
+  Save: 'Lưu',
+  Rename: 'Đổi tên',
   'Worker ID': 'Mã Worker',
   'Pair device': 'Ghép máy',
   'Contribution is OFF': 'Đóng góp GPU đang tắt',
@@ -732,10 +736,11 @@ export const translations: Record<string, string> = {
   'A revoked device cannot be approved again. Pair the computer again from the Worker app.':
     'Máy đã thu hồi không duyệt lại được. Hãy ghép máy lại từ app Worker.',
   'Show revoked devices': 'Hiện máy đã thu hồi',
-  'Remove this device from the list? Its history stays in the audit log.':
-    'Xóa máy này khỏi danh sách? Lịch sử vẫn được giữ trong nhật ký kiểm toán.',
-  'Remove from list': 'Xóa khỏi danh sách',
-  'Decline and remove': 'Từ chối và xóa',
+  'Delete this device? It is revoked and removed at once: the computer has to be paired again to come back. Its history stays in the audit log.':
+    'Xóa máy này? Máy bị thu hồi và xóa ngay: muốn dùng lại phải ghép máy lại từ đầu. Lịch sử vẫn được giữ trong nhật ký kiểm toán.',
+  'Decline and delete': 'Từ chối và xóa',
+  'This device is working in a run. Turn it OFF (it leaves the run) or wait for the run to end, then delete it.':
+    'Máy này đang chạy trong một lần chạy. Hãy tắt (OFF, máy rời lần chạy) hoặc chờ lần chạy kết thúc rồi xóa.',
   'This computer is paired to': 'Máy này đang được ghép với',
   'If that address no longer works, you can forget the pairing and pair again.':
     'Nếu địa chỉ đó không còn dùng được, bạn có thể quên lần ghép này và ghép lại.',

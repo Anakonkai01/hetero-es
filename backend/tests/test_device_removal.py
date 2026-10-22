@@ -131,3 +131,66 @@ def test_removal_is_written_to_the_audit_log_and_frees_the_worker_alias(lab):
 def test_an_unknown_device_is_not_found(lab):
     c, s, r, a = lab
     assert c.delete("/api/v1/platform/devices/does-not-exist", headers=a).status_code == 404
+
+
+def own(d):
+    return "/api/v1/devices/" + d["deviceId"]
+
+
+def test_an_approved_device_is_revoked_and_removed_in_one_step(lab):
+    # owner 2026-10-22: "xoá thì vừa thu hồi vừa xoá luôn"
+    c, s, r, a = lab
+    d, h = pair(lab, "old-3060")
+    assert c.delete(own(d), headers=a).status_code == 204
+    assert "old-3060" not in listed(lab)
+    assert c.post("/api/v1/device/poll", headers=h, json={"bootId": "x"}).status_code == 401
+    with s.db() as db:
+        actions = [row[0] for row in db.execute("SELECT action FROM audit WHERE target=?", (d["deviceId"],))]
+    assert actions[-2:] == ["DEVICE_REVOKED", "DEVICE_REMOVED"]
+
+
+def test_one_step_delete_never_cancels_a_run_nor_removes_a_quarantined_device(lab):
+    c, s, r, a = lab
+    d, h = pair(lab, "busy-pc")
+    with s.db() as db:
+        db.execute("INSERT INTO device_reservations VALUES (?,?)", (d["deviceId"], "assignment-1"))
+    response = c.delete(own(d), headers=a)
+    assert response.status_code == 409 and "OFF" in response.text
+    with s.db() as db:
+        assert db.execute("SELECT status FROM devices WHERE id=?", (d["deviceId"],)).fetchone()[0] == "APPROVED"
+        db.execute("DELETE FROM device_reservations")
+        db.execute('UPDATE devices SET status="QUARANTINED" WHERE id=?', (d["deviceId"],))
+    assert c.delete(own(d), headers=a).status_code == 409
+    assert "busy-pc" in listed(lab)
+
+
+def test_the_owner_renames_and_deletes_its_device_and_nobody_else_can(lab):
+    c, s, r, a = lab
+    owner_profile, owner = register(c, "bob")
+    activate(c, a, owner_profile)
+    stranger_profile, stranger = register(c, "eve")
+    activate(c, a, stranger_profile)
+    code = c.post("/api/v1/devices/pairing-codes", headers=owner).json()["code"]
+    data = {
+        "code": code,
+        "workerId": "bob-pc",
+        "displayName": "DESKTOP-7Q3",
+        "selfTest": {
+            "passed": True,
+            "coordinator": False,
+            "gpuName": "GPU",
+            "vramTotalMb": 12000,
+            "noiseVersion": "numpy_pcg64_normal_f32_to_f16_v1",
+            "gpuUUID": "GPU-" + str(uuid.uuid5(uuid.NAMESPACE_DNS, "bob-pc")),
+        },
+        "computeUrl": "http://100.64.0.1:8769",
+    }
+    device = c.post("/api/v1/device/enroll", json=data).json()
+    assert c.patch(own(device), headers=stranger, json={"displayName": "mine"}).status_code == 404
+    assert c.delete(own(device), headers=stranger).status_code == 404
+    renamed = c.patch(own(device), headers=owner, json={"displayName": "  3060 phòng lab  "})
+    assert renamed.status_code == 200 and renamed.json()["displayName"] == "3060 phòng lab"
+    assert c.patch(own(device), headers=a, json={"displayName": "3060 Bob"}).status_code == 200, "the admin may too"
+    assert {d["workerId"]: d["displayName"] for d in r.devices()}["bob-pc"] == "3060 Bob"
+    assert c.delete(own(device), headers=owner).status_code == 204
+    assert "bob-pc" not in listed(lab)

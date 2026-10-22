@@ -10,9 +10,10 @@ export function hiddenCount(devices: Listed[]): number {
   return devices.filter((device) => device.approvalStatus === 'REVOKED').length;
 }
 
-/** Same rule as the lab: a device that is approved or quarantined must be revoked or investigated first. */
+/** Same rule as the lab: any device can be deleted (an approved one is revoked in the same step), except one under
+ * restore quarantine, which an administrator investigates first. A device in a run is refused by the lab with a reason. */
 export function canRemoveDevice(device: Listed): boolean {
-  return device.approvalStatus === 'REVOKED' || device.approvalStatus === 'PENDING';
+  return device.approvalStatus !== 'QUARANTINED';
 }
 
 // Messages from the lab that an owner can act on, with an explanation that says what to do. The English text is also the translation key.
@@ -21,6 +22,8 @@ const EXPLAIN: Record<string, string> = {
     'The owner of this device is not a member of the selected workspace. Add them to the workspace first (Workspaces, then Members), then approve again.',
   'Revoke the device before removing it': 'Revoke this device first. Only revoked or waiting devices can be removed.',
   'Device is reserved': 'This device is reserved by a running experiment. Try again when it has finished.',
+  'Device is in a run: turn it OFF or wait for the run to end, then delete it':
+    'This device is working in a run. Turn it OFF (it leaves the run) or wait for the run to end, then delete it.',
   'Re-enroll with a new device alias after revocation':
     'A revoked device cannot be approved again. Pair the computer again from the Worker app.',
 };

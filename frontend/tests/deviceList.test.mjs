@@ -18,10 +18,10 @@ test('revoked devices are hidden by default and shown on request, order kept', (
   assert.equal(hiddenCount([]), 0);
 });
 
-test('only revoked and pending devices can be removed, never an approved or quarantined one', () => {
+test('any device can be deleted (an approved one is revoked in the same step), never a quarantined one', () => {
   assert.equal(canRemoveDevice(d('x', 'REVOKED')), true);
   assert.equal(canRemoveDevice(d('x', 'PENDING')), true);
-  assert.equal(canRemoveDevice(d('x', 'APPROVED')), false);
+  assert.equal(canRemoveDevice(d('x', 'APPROVED')), true);
   assert.equal(canRemoveDevice(d('x', 'QUARANTINED')), false);
 });
 
