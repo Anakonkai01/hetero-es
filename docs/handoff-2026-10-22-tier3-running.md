@@ -31,3 +31,13 @@ is the run id).
 1. Results + parity into RESULTS.md, replay page / video.
 2. Wave 2 deploy (candidate13 proper = `feat/gsm8k-demo`), then a short `evalChunks: [16, 32, 64]` run (ADR-010).
 3. Finding 9 product fix (timeline shows a re-added member). Windows app update on 3060-thao (someone at the screen).
+
+## Midterm demo (12:15, `7c48403`)
+
+- Notebook `runtime/notebooks/gsm8k_es_lab.ipynb` (committed without outputs) runs offline from saved records; tier 3
+  snapshot at generation 25 in `docs/evidence/2026-10-22-gsm8k-demo/tier3-g25/` (validation 0.608 → 0.606).
+- Executed copy + HTML + videos + replay pages: `.scratch/gsm8k-demo/midterm/` and
+  `/mnt/Archive-2tb/heteroes-local/midterm-demo-20261022/` (not in git, ~11 MB).
+- Refresh later: `PYTHONPATH=runtime/src .venv-notebook/bin/python docs/evidence/2026-10-22-gsm8k-demo/snapshot.py tier3
+  <dir>` then `media.py <dir> --video`.
+- 1660S: dropped 10:19, back 11:01, dropped again 11:16 (unreachable). Finding 10: lab timeline of a long run is partial.
