@@ -1,6 +1,10 @@
 # HeteroES — canonical handoff
 
-**Latest (2026-10-22 ~01:10): Nhựt's 5070 Ti joined; tier 2 parity ALL EQUAL; tier 2b ran 160/160 but its rejoin failed
+**Latest (2026-10-22 ~08:45): fix wave 1 DEPLOYED (lab + Linux agents on candidate12) and accepted (tiers 2c, 2d); wave 2
+(per-device chunk, several GPUs, limits, watch) coded and tested, not deployed; tier 3 is for the next session.**
+Read [handoff-2026-10-22-fix-waves-tier3-next.md](handoff-2026-10-22-fix-waves-tier3-next.md) first.
+
+**Previous (2026-10-22 ~01:10): Nhựt's 5070 Ti joined; tier 2 parity ALL EQUAL; tier 2b ran 160/160 but its rejoin failed
 (Quang died); two fixes on the branch (not deployed); tier 3 ordered by the owner but blocked by dead quang-3060.**
 Read [handoff-2026-10-22-night-tier2b-blocked.md](handoff-2026-10-22-night-tier2b-blocked.md) first.
 
