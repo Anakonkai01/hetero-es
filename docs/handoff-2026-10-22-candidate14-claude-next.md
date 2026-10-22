@@ -1,5 +1,12 @@
 # Candidate14: session handoff to Claude (2026-10-22, ~23:30 Vietnam)
 
+> **Status 23 Oct 00:30 (Claude): DONE.** Native approval fix `6ad540d`, packaged as
+> candidate14e (`f478121`), published on the live lab and installed on native
+> Windows: signed out shows APPROVED, OFF→ON works, normal relaunch without debug
+> ports is ON. nhut rule and temporary folders removed. Evidence:
+> `docs/evidence/2026-10-22-candidate14/README.md`. Live lab code stays `f70b05f`
+> (14e changed only the Desktop app). The text below is the original handoff.
+
 The owner requested closing this session at 15% remaining usage and handing
 unfinished work to Claude. **Implementation and real run are done; final product
 acceptance, cleanup, push and FF main remain.** Do not restart from the prototype

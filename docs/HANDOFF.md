@@ -1,5 +1,10 @@
 # HeteroES — canonical handoff
 
+**Latest (2026-10-23 ~00:30): candidate14 CLOSED by Claude. Native signed-out approval fix packaged as candidate14e,
+published and accepted on native Windows; cleanup done; pushed and main fast-forwarded.** Overnight system work
+(speed, fault injection, soak, CUDA V2) follows in its own handoff. Details:
+[handoff-2026-10-22-candidate14-claude-next.md](handoff-2026-10-22-candidate14-claude-next.md).
+
 **Latest (2026-10-22 ~23:30): candidate14 CPU V2 + systems/UI changes installed;
 real three-machine run completed 10 generations/80 candidates, 3/3 audits match.
 Owner requests handoff to Claude at 15% usage. Native signed-out approval display

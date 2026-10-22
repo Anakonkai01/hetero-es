@@ -2,7 +2,7 @@
 
 Owner-approved work from `96182b7`, branch `feat/real-user-c13`. CPU V2 first;
 CUDA enablement and chunk 128 deferred. The owner requested handoff to Claude
-at 15% remaining usage. **Not final product acceptance; not pushed/merged.**
+at 15% remaining usage. Claude finished the native approval fix (candidate14e) and close-out on 23 Oct.
 See [current handoff](../../handoff-2026-10-22-candidate14-claude-next.md).
 
 ## Implemented and deployed
@@ -57,12 +57,42 @@ See [current handoff](../../handoff-2026-10-22-candidate14-claude-next.md).
   with nonzero updates (`managed-replay-summary.json`); no candidate text
   regeneration is claimed.
 
-## Open native UI defect and intermediate receipts
+## Native approval defect: fixed in candidate14e (23 Oct, Claude)
 
-Native D's cached `device.approvalStatus` remains PENDING when signed out,
-although the live device is APPROVED and actually contributes. Service ON works,
-but the UI can block the next OFF-to-ON action. Fix and packaged/native UI
-acceptance remain; complete native user-journey acceptance is not claimed.
+Candidate14d kept `device.approvalStatus=PENDING` from pairing while signed out,
+although the live device was APPROVED. `native-c14e/before-click-off-14d.json`
+and `before-off-14d.png` record the real defect: after OFF, the switch was
+disabled with "Waiting for administrator approval".
+
+`6ad540d`: signed out, the Desktop reads `/api/v1/device/summary` with the
+device token; a rejected token shows REVOKED, an outage keeps the last value, and
+only durable device fields are saved. The lab still authorizes every change.
+Tests were red first; `checks-c14e/` has Worker unit (all pass), Prettier,
+types, build, Electron onboarding/station, and 8/8 killed mutants.
+`build-apps-c14e.log`, `packaged-worker-install-c14e/`: candidate14e build and
+packaged Linux install check. The Worker runtime archive is unchanged (C/D SHA).
+Installers were first published by mistake into the working tree's ignored
+`frontend/public/downloads` (`installers-published-e-worktree-only.*`, removed;
+the live lab was not changed by it), then published on the live lab with the
+deployed app's script (`installers-published-e.*`); the public downloads match
+the prepared hashes (`installers-public-download-e.txt`).
+
+Native D→E upgrade on Thao (`native-c14e/`): RPC quit, silent install with the
+prepared hash, then signed out: APPROVED, OFF switch enabled, a real click turns
+it ON (`after-click-on-14e.json`, `station-on-14e.png`), and the lab reports
+ONLINE/ON (`lab-thao-after-on.json`). Actual OS telemetry (process/disk/network
+lists reduced to counts) is in `windows-telemetry-14e.json`; CPU power/temperature
+are reported as unsupported with a reason. Final relaunch is a normal launch in
+the console session without debug ports (`relaunch-normal.ps1`), switched ON by
+UI Automation (`uia-enable.ps1`), lab ONLINE/ON
+(`lab-thao-on-after-normal-relaunch.log`). Real lab run page and Live/replay tab
+at 1440/768/375 px: no horizontal overflow and no console errors
+(`web-final-c14e/`).
+
+Close-out: nhut's exact temporary public-only rule was removed and its absence
+recorded, `~/f13-diag` and own replay/probe folders deleted
+(`nhut-firewall-removed.log`); own Windows temporary folders and installers
+deleted (`native-c14e/windows-temp-cleanup.log`).
 
 Candidate14/B/C/D retain successive fixes: Server SDK capture, engine-aware
 qualification, paired local ON. Failed red tests, fixture selector/timing
@@ -82,3 +112,6 @@ Fixture UI checks do not prove every OS sensor or the complete native journey.
 Managed acceptance does not prove every real restart/retry scenario. Final live
 screenshots, native UI repair, diagnostic cleanup and push/FF are outstanding
 unless explicitly closed in the current handoff.
+The candidate14e native fix was accepted on one Windows machine signed out with
+an APPROVED device; PENDING/REVOKED/outage paths are covered by unit tests and
+mutants, not by a real revoked device. No account sign-in UI change was made.
