@@ -864,6 +864,33 @@ def render_status(s):
     return "\n".join(lines)
 
 
+def watch(worker, every=2.0, log_lines=8, run=subprocess.run):
+    """A screen that refreshes itself (like htop): the status, then the newest lines of the service's log. q quits."""
+    import curses
+
+    def lines():
+        text = render_status(worker.status()).splitlines()
+        if worker.service.installed():
+            command = worker.service.logs_command(lines=log_lines)
+            logged = run(command, capture_output=True, text=True).stdout.splitlines()
+            text += ["", "Log:"] + ["  " + line[-200:] for line in logged[-log_lines:]]
+        return text + ["", f"refreshes every {every:.0f} s · q quits"]
+
+    def screen(window):
+        curses.curs_set(0)
+        window.timeout(int(every * 1000))
+        while True:
+            window.erase()
+            height, width = window.getmaxyx()
+            for row, line in enumerate(lines()[: height - 1]):
+                window.addnstr(row, 0, line, width - 1)
+            window.refresh()
+            if window.getch() in (ord("q"), ord("Q"), 27):
+                return
+
+    curses.wrapper(screen)
+
+
 # --- terminal ----------------------------------------------------------------------------------------------------------
 def terminal():
     """Where questions go: the terminal even when stdin is the piped install script (`curl ... | bash`)."""
@@ -1115,6 +1142,8 @@ def main(argv=None):
     )
     off = commands.add_parser("off", help="stop lending this GPU (a run in progress continues on the other machines)")
     off.add_argument("--no-keep", action="store_true", help="also stop turning ON after restarts")
+    w = commands.add_parser("watch", help="a live screen: run, generation, GPU, newest log lines (q quits)")
+    w.add_argument("--every", type=float, default=2.0, help="seconds between refreshes")
     commands.add_parser("start", help="start the background service")
     commands.add_parser("stop", help="stop the background service (contribution OFF first, work drained)")
     commands.add_parser("restart", help="restart the background service")
@@ -1160,6 +1189,8 @@ def main(argv=None):
         elif args.command == "status":
             value = worker.status()
             print(json.dumps(value, indent=2) if args.json else render_status(value))
+        elif args.command == "watch":
+            watch(worker, args.every)
         elif args.command == "on":
             worker.contribution(True, args.keep_after_reboot)
             print(
