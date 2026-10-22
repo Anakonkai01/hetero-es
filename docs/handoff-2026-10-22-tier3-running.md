@@ -43,3 +43,12 @@ is the run id).
 - Refresh later: `PYTHONPATH=runtime/src .venv-notebook/bin/python docs/evidence/2026-10-22-gsm8k-demo/snapshot.py tier3
   <dir>` then `media.py <dir> --video`.
 - 1660S: dropped 10:19, back 11:01, dropped again 11:16 (unreachable). Finding 10: lab timeline of a long run is partial.
+
+## Finding 10 fix (14:10, `94225d2`, NOT deployed)
+
+`bounded_snapshot` (coordinator side, `runtime/src/heteroes/product/agent.py`) now keeps a long run's newest generations
+whole, so the web's live view and replay work again. Tests: runtime 2608 passed; mutation 5/5. Deploy needs a new runtime
+build on the coordinator machine (5070ti-nhan), which restarts the coordinator: either after tier 3 ends (~2026-10-23
+11:00) or, if the owner approves, as a deliberate coordinator stop + recovery during tier 3 (never staged on real
+machines yet). Owner decides after the midterm demo. Meanwhile: video/replay of tier 3 from the ledger
+(`heteroes.demo.ledger_view`), `.scratch/gsm8k-demo/midterm/tier3-now.*`.
