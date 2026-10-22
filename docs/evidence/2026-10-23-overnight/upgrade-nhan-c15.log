@@ -1,0 +1,8 @@
+downloading heteroes-worker-linux-lf1-20261023-r11-candidate15.tar.gz
+#=#=#                                                                          #                                                                          2.4%################                                                          22.7%############################################################              83.4%######################################################################## 100.0%
+reusing the pinned Python and packages of 08411835bac0
+installed (pinned packages reused from the previous runtime)
+next: heteroes-worker selftest (or heteroes-worker setup)
+
+Installed. Next:
+  heteroes-worker setup     # self-test, pairing with the lab, background service, contribution ON

@@ -39,3 +39,21 @@ initialisation the Windows base weights differ from Linux, which is torch's CPU 
 Real Qwen 0.5B on nhan (`real-model-nhan-batched.json`): equal perturbed and updated hashes for both paths, perturb
 0.68 s → 0.09-0.14 s, update of 48 candidates 20.4 s → 3.2 s (two samples each). GPU tests and 10/10 mutants:
 `checks/gpu-v2-mutation.log`.
+
+## 3. Speed again with candidate15 (engine v2 made on the GPU by default)
+
+Candidate15 (`f…` packaging commit after `d1912f3`; runtime `3fd3f301ef0a`, Windows Desktop runtime `0ce7d7013c33`)
+was published and installed: nhan by the public `install-worker.sh`, nhut by `heteroes-worker update`, native Windows
+by Quit safely → silent install of the prepared hash → app RPC install + GPU self-test → normal relaunch without debug
+ports → switch ON by UI Automation (`upgrade-*-c15*.log`, `install-c15.ps1`). Same declared runs, same candidate seed
+namespace (`speed-gpu/`, `speed-gpu/summary-cpu-vs-gpu.json`):
+
+| machines | CPU v2: sum of generations / wall (s) | GPU v2: sum of generations / wall (s) | update per generation (s) |
+| --- | --- | --- | --- |
+| 1 | 302.0 / 375.9 | 110.0 / 186.6 | ~11 → 2.3 |
+| 2 | 192.1 / 249.4 | 75.7 / 153.2 | ~12 → 2.3 (one 14.4 outlier) |
+| 3 | 199.7 / 315.2 | 68.7 / 149.4 | ~12 → 2.3-3.4 |
+
+All six runs have **the same parent-weights hash at every generation** (`c9118c8a…`, `e3923dc8…`, `65371460…`,
+`db9e4737…`): 1, 2 or 3 machines, CPU or GPU noise, Linux or Windows workers. All audits matched. Start-up (~75 s) now
+dominates such short runs. One sample per cell; not a benchmark of the model or of ES.

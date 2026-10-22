@@ -1,0 +1,40 @@
+{
+  "status": "COMPLETED",
+  "generations": [
+    {
+      "generation": 0,
+      "rewardMean": 0.140625,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 1,
+      "rewardMean": 0.09895833333333333,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 2,
+      "rewardMean": 0.171875,
+      "rewardBest": 0.375
+    },
+    {
+      "generation": 3,
+      "rewardMean": 0.13541666666666666,
+      "rewardBest": 0.25
+    }
+  ],
+  "validation": [
+    {
+      "generation": -1,
+      "reward": 0.5
+    },
+    {
+      "generation": 3,
+      "reward": 0.5
+    }
+  ],
+  "completedPerDevice": {
+    "cli-71b757062fd9": 110,
+    "cli-34312a79fbbc": 82
+  },
+  "partialTimeline": false
+}

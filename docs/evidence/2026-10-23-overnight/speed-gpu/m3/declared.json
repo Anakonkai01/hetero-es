@@ -1,0 +1,18 @@
+{
+  "declaredAt": "2026-10-22T17:50:14.734221+00:00",
+  "name": "Overnight speed GPU v2: 3 machine(s)",
+  "coordinator": "5070ti-nhan",
+  "workers": [
+    "5070ti-nhan",
+    "5070ti-nhut",
+    "3060-thao"
+  ],
+  "population": 48,
+  "generations": 4,
+  "batch": 8,
+  "maxNewTokens": 32,
+  "engine": "pcg64_u32_to_f16_normal_quantile_v2",
+  "model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "modelManifestHash": "af52722f2880d488e45860b7b97460c6fe2744aae79f555dce44d47cd47c533c",
+  "datasetInputHash": "e5dc4a698305d131a5a5169d2bd0a7f302fbcb059885e1d56447c0aa4e43fb5a"
+}
