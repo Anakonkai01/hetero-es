@@ -10,11 +10,16 @@ import subprocess
 UNIT = "heteroes-worker.service"
 
 
-def unit_path():
-    return Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config") / "systemd/user" / UNIT
+def unit_name(gpu=None):
+    """One service per lent GPU: GPU 0 keeps the plain name (and every existing install)."""
+    return UNIT if not gpu else f"heteroes-worker-gpu{gpu}.service"
 
 
-def unit_text(command, home):
+def unit_path(gpu=None):
+    return Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config") / "systemd/user" / unit_name(gpu)
+
+
+def unit_text(command, home, gpu=None):
     def quoted(value):
         return '"' + str(value).replace("\\", "\\\\").replace('"', '\\"') + '"'
 
@@ -25,8 +30,8 @@ After=network-online.target
 
 [Service]
 Type=simple
-ExecStart={quoted(command)} run
-Environment={quoted("HETEROES_WORKER_HOME=" + str(home))}
+ExecStart={quoted(command)}{"" if not gpu else f" --gpu {gpu}"} run
+Environment={quoted("HETEROES_WORKER_HOME=" + str(home))}{"" if not gpu else chr(10) + f"Environment=CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES={gpu}"}
 Restart=on-failure
 RestartSec=15
 # like Ctrl-C on `run`: contribution OFF, then wait until the work this machine owns has stopped (only the agent gets the
@@ -41,8 +46,10 @@ WantedBy=default.target
 
 
 class Service:
-    def __init__(self, run=subprocess.run):
+    def __init__(self, run=subprocess.run, gpu=None):
         self._run = run
+        self.gpu = gpu
+        self.unit = unit_name(gpu)
 
     def systemctl(self, *args, check=True):
         return self._run(["systemctl", "--user", *args], capture_output=True, text=True, check=check)
@@ -54,15 +61,15 @@ class Service:
             return False
 
     def installed(self):
-        return unit_path().is_file()
+        return unit_path(self.gpu).is_file()
 
     def install(self, command, home):
         """Write and enable the unit; returns the shell command the owner still has to run for boot start, or None."""
-        path = unit_path()
+        path = unit_path(self.gpu)
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(unit_text(command, home))
+        path.write_text(unit_text(command, home, self.gpu))
         self.systemctl("daemon-reload")
-        self.systemctl("enable", UNIT)
+        self.systemctl("enable", self.unit)
         return self.ensure_linger()
 
     def ensure_linger(self):
@@ -79,32 +86,32 @@ class Service:
         return "sudo loginctl enable-linger " + shlex.quote(user)
 
     def start(self):
-        self.systemctl("start", UNIT)
+        self.systemctl("start", self.unit)
 
     def stop(self):
-        self.systemctl("stop", UNIT)
+        self.systemctl("stop", self.unit)
 
     def restart(self):
-        self.systemctl("restart", UNIT)
+        self.systemctl("restart", self.unit)
 
     def active(self):
         try:
-            return self.systemctl("is-active", UNIT, check=False).stdout.strip() == "active"
+            return self.systemctl("is-active", self.unit, check=False).stdout.strip() == "active"
         except FileNotFoundError:
             return False
 
     def enabled(self):
         try:
-            return self.systemctl("is-enabled", UNIT, check=False).stdout.strip() == "enabled"
+            return self.systemctl("is-enabled", self.unit, check=False).stdout.strip() == "enabled"
         except FileNotFoundError:
             return False
 
     def remove(self):
         if not self.installed():
             return
-        self.systemctl("disable", "--now", UNIT, check=False)
-        unit_path().unlink()
+        self.systemctl("disable", "--now", self.unit, check=False)
+        unit_path(self.gpu).unlink()
         self.systemctl("daemon-reload", check=False)
 
     def logs_command(self, follow=False, lines=200):
-        return ["journalctl", "--user", "-u", UNIT, "-n", str(lines), "--no-pager", *(["-f"] if follow else [])]
+        return ["journalctl", "--user", "-u", self.unit, "-n", str(lines), "--no-pager", *(["-f"] if follow else [])]

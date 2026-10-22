@@ -50,6 +50,25 @@ def home():
     return Path(os.environ.get("HETEROES_WORKER_HOME") or Path.home() / ".local/share/heteroes-worker")
 
 
+SHARED = ("bundle", "runtimes", "models", "downloads")
+
+
+def gpu_home(gpu=None):
+    """GPU 0 lives in the main home. Another lent GPU of the same machine is its own device (pairing, token, agent state,
+    service) in `gpu<N>` beside it, sharing the main home's runtime, model and downloads through links."""
+    main = home()
+    if not gpu:
+        return main
+    root = main / f"gpu{gpu}"
+    root.mkdir(parents=True, exist_ok=True, mode=0o700)
+    for name in SHARED:
+        link = root / name
+        if not link.exists() and not link.is_symlink():
+            (main / name).mkdir(parents=True, exist_ok=True, mode=0o700)
+            link.symlink_to(main / name)
+    return root
+
+
 def sha256_file(path):
     digest = hashlib.sha256()
     with open(path, "rb") as stream:
@@ -957,7 +976,7 @@ def confirm_lab(url, call=None, yes=False):
 def start_service(worker):
     if not worker.service.available():
         raise RuntimeError("SERVICE_UNAVAILABLE")
-    hint = worker.service.install(launcher(), worker.root)
+    hint = worker.service.install(launcher(), home())  # the unit adds --gpu N for another GPU
     if worker.service.active():
         worker.service.restart()
     else:
@@ -987,6 +1006,12 @@ def setup(worker, args, call=None, sleep=time.sleep):
             )
     if any(r["level"] == "fail" and r["check"] in ("system", "GPU", "disk") for r in rows) and not args.cpu:
         raise RuntimeError("MACHINE_NOT_READY: see the checks above")
+    gpus = next((r["detail"].count(";") + 1 for r in rows if r["check"] == "GPU" and r["level"] == "ok"), 1)
+    if gpus > 1 and not getattr(args, "gpu", None):
+        worker.say(
+            f"  this machine has {gpus} GPUs; this setup lends GPU 0. Lend another one with:"
+            " heteroes-worker --gpu 1 setup"
+        )
     worker.say("2/6 installing" if not worker.installed() else "2/6 installed already")
     if not worker.installed():
         worker.install(progress=lambda item: Progress(item["name"], item["sizeBytes"]))
@@ -1001,7 +1026,8 @@ def setup(worker, args, call=None, sleep=time.sleep):
     else:
         worker.say("4/6 pairing")
         url = confirm_lab(args.lab or ask("Lab address", DEFAULT_LAB), call, args.yes)
-        name = args.name or ask("Name for this machine", socket.gethostname())
+        gpu = getattr(args, "gpu", None)
+        name = args.name or ask("Name for this GPU", socket.gethostname() + (f"-gpu{gpu}" if gpu else ""))
         host = args.host or (tailscale_ip() if args.coordinator else None)
         if args.coordinator and not host:
             host = ask("Address other machines reach this one at (Tailscale IP)")
@@ -1104,8 +1130,8 @@ def uninstall(worker, args, call=None):
     else:
         shutil.rmtree(worker.root, ignore_errors=True)
     command = Path(launcher())
-    if command.is_file() and "HETEROES_WORKER_HOME" in command.read_text(errors="ignore"):
-        command.unlink()
+    if worker.root == home() and command.is_file() and "HETEROES_WORKER_HOME" in command.read_text(errors="ignore"):
+        command.unlink()  # another GPU's uninstall keeps the command the others use
     worker.say("removed")
 
 
@@ -1120,6 +1146,9 @@ def show_doctor(rows):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="heteroes-worker", description=__doc__.split("\n")[0])
+    parser.add_argument(
+        "--gpu", type=int, default=None, help="act on another GPU of this machine (each lent GPU is its own device)"
+    )
     commands = parser.add_subparsers(dest="command", required=True, metavar="command")
     s = commands.add_parser("setup", help="set this machine up from scratch, or resume where setup stopped")
     s.add_argument("--lab", help=f"lab address (default: ask, suggesting {DEFAULT_LAB})")
@@ -1184,7 +1213,14 @@ def main(argv=None):
     join.add_argument("--yes", action="store_true", help="do not ask to confirm the lab")
     commands.add_parser("run", help="step: keep this device online in the foreground until Ctrl-C")
     args = parser.parse_args(argv)
-    worker = Worker(say=lambda *values: print(*values, flush=True))  # `run` is often logged to a file
+    if args.gpu:
+        if args.gpu < 0:
+            parser.error("--gpu is a GPU index, 1 or more (GPU 0 needs no option)")
+        # the self-test and the agent see only that GPU, numbered as nvidia-smi numbers it
+        os.environ.update(CUDA_DEVICE_ORDER="PCI_BUS_ID", CUDA_VISIBLE_DEVICES=str(args.gpu))
+    worker = Worker(  # `run` is often logged to a file
+        gpu_home(args.gpu), say=lambda *values: print(*values, flush=True), service=Service(gpu=args.gpu)
+    )
     try:
         if args.command == "setup":
             setup(worker, args)

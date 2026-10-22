@@ -326,3 +326,18 @@ def test_setup_against_an_older_lab_ends_with_the_web_steps(tmp_path, monkeypatc
 
     setup(worker, options(), call=older, sleep=lambda _: None)
     assert "start" in worker.service.calls and "Devices page" in said[-1]
+
+
+def test_another_gpu_is_its_own_device_sharing_the_runtime_and_model(tmp_path, monkeypatch):
+    monkeypatch.setenv("HETEROES_WORKER_HOME", str(tmp_path / "home"))
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
+    second = worker_cli.gpu_home(1)
+    assert second == tmp_path / "home/gpu1" and worker_cli.gpu_home(None) == tmp_path / "home"
+    for name in worker_cli.SHARED:
+        assert (second / name).resolve() == (tmp_path / "home" / name).resolve()
+    assert not (second / "settings.json").exists()  # its own pairing and token
+    unit = worker_service.unit_text("/bin/heteroes-worker", tmp_path / "home", gpu=1)
+    assert 'ExecStart="/bin/heteroes-worker" --gpu 1 run' in unit
+    assert "CUDA_VISIBLE_DEVICES=1" in unit and "CUDA_DEVICE_ORDER=PCI_BUS_ID" in unit
+    assert worker_service.Service(gpu=1).unit == "heteroes-worker-gpu1.service"
+    assert worker_service.Service().unit == "heteroes-worker.service"
