@@ -228,8 +228,15 @@ class RunSupervisor(ABC):
                 "ready": value["ready"],
                 **launched(launch),
             }
-        except Exception:
-            self.log(root, "worker_start_unknown", worker_id=worker_id)
+        except Exception as error:
+            # why it is unknown: the lab has not seen the worker yet (ConnectionError), or it refused (HTTP status)
+            self.log(
+                root,
+                "worker_start_unknown",
+                worker_id=worker_id,
+                error=type(error).__name__,
+                httpStatus=error.code if isinstance(error, urllib.error.HTTPError) else None,
+            )
         self.save(root, workerStates=result)
 
     def _restart_members(self, root, state):

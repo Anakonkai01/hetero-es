@@ -533,3 +533,13 @@ def test_a_worker_that_keeps_dying_is_left_alone_after_the_last_launch(manager, 
     assert [c for c in calls if c[0] == "late"] == []
     lines = (root / "lifecycle.jsonl").read_text().splitlines()
     assert sum('"worker_restart_limit"' in line for line in lines) == 1
+
+
+def test_a_start_whose_outcome_is_unknown_says_why(manager, monkeypatch):
+    # candidate13 acceptance: two starts were "unknown" and nothing said whether the lab refused or just had not seen it
+    root, calls, clock, polls = restarting(manager, monkeypatch, {"local": ALIVE})
+    refusal = urllib.error.HTTPError("http://lab", 403, "refused", None, None)
+    monkeypatch.setattr(manager, "start_worker", lambda *a, **k: (_ for _ in ()).throw(refusal))
+    manager._launch_worker(root, "remote", {}, 0, 0)
+    event = json.loads((root / "lifecycle.jsonl").read_text().splitlines()[-1])
+    assert (event["event"], event["error"], event["httpStatus"]) == ("worker_start_unknown", "HTTPError", 403)
