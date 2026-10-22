@@ -1,0 +1,18 @@
+{
+  "identity": {
+    "specHash": "ac666c665a57af0980c24039d765b11e3e0bae9e420f323e15b6e08b1658f559",
+    "modelManifestHash": "af52722f2880d488e45860b7b97460c6fe2744aae79f555dce44d47cd47c533c",
+    "dataFiles": {
+      "all": "84504ce9cf6fdc2fa7946045c21f7072523fccfcde159979890f9c1da0ca6aa7"
+    },
+    "code": {},
+    "coordinatorDeviceId": "dbe5254b78de4c038550b8b90df13899",
+    "workerIds": [
+      "cli-71b757062fd9",
+      "cli-34312a79fbbc",
+      "desktop-d9017660e75f"
+    ]
+  },
+  "datasetId": "44927adebba744aeabd9d086463c424f",
+  "experimentId": "44e65d7b2975447fa15fe85f115bad92"
+}

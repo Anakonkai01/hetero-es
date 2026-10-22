@@ -90,3 +90,21 @@ still resolve (`soak/disk-move.log`); 62 GB free. Product fix (not deployed duri
 3 × model size + 1 GiB, with a `paused_low_disk` event; the pause keeps a verified checkpoint so the run can resume once
 space is freed. Tests first, 4/4 mutants killed (`checks/low-disk-*`). Not exercised on a real full disk.
 Open product question for the owner: a retention rule for finished runs' local coordinator data.
+
+**Attempt 2 COMPLETED** (`soak/`, run `44e65d7b2975447fa15fe85f115bad92`, declared in `soak/plan.md`): 600/600
+generations of 24 candidates in 4 h 01 min (02:24 → 06:25), 14,400 candidates, 600 distinct parent hashes (599 of 599
+transitions changed weights), **720 audits completed, 0 mismatches**, no quarantine, no failed attempt in the ledger.
+Attempts: nhan 7,696, nhut 6,294, Windows 410 (the scheduler gives the slower 3060 few candidates; it took part in
+every 50-generation window and did audits). Disk stayed 45-54 GiB free; GPU memory rose during the first ~45 min
+(PyTorch's caching allocator) and then stayed flat for 3 h+ on all three GPUs; host memory flat (`resources.jsonl`).
+
+Unplanned real failure, recovered without intervention: at 02:50 **systemd-oomd killed the whole `heteroes-worker`
+service on nhan** (memory pressure of the user slice 53 % > 50 % for 20 s; the unit's peak was 17.4 GB on a 30 GB host,
+`soak/oomd-journal.log`). systemd restarted the agent 15 s later, the supervisor restarted the members, the coordinator
+recovered from its ledger (`recovered … action reapply_record`, generation 62) and the run went on to completion
+(`soak/lifecycle.jsonl`: one `coordinator_recovery`). The declared SIGKILL of nhut's worker at generation 20 was
+restarted in 16 s. The likely pressure source is page cache from ~1 GB of weights and recovery points written per
+generation inside the service's cgroup; not proven.
+Independent ledger replay of all 600 generations: nhan and nhut both **ALL EQUAL (600 generations)** with the same
+receipt hash `fd445ac8…` (`soak/replay-*`, 19 and 16 min), so the hash chain stayed exact across the oomd kill and the
+coordinator recovery. No candidate text regeneration is claimed (the 720 matched audits are the text checks).
