@@ -44,7 +44,18 @@ about 5 % over 64 and the 1660S (Turing) was not probed.
 1. **A new machine without Tailscale.** 5070ti-nhut: new outbound connections of the worker's user to 100.64.0.0/10
    rejected (iptables owner match; inbound SSH unaffected), `uninstall`, then the public one-line install from the lab,
    `setup` with a pairing code: paired as `cli-34312a79fbbc`, approved, ON, `doctor` network ok.
-2. **A real run from the notebook** (`notebook-run/`): RESULTS BELOW.
+2. **A real run from the notebook** (`notebook-run/`). Attempt 1 (run `99cca6a3`, `attempt1-executed.ipynb`): the
+   notebook ran, but no worker passed preparation: **finding 12**, a worker's public dataset download sent urllib's
+   default User-Agent and the edge refused it (403), so no machine without the private route could ever prepare a run
+   (the fixture test could not see the edge). Fixed in `f5180bb` (build `lf1-20261022-r11-candidate13b`, both agents
+   updated, nhut by `heteroes-worker update` over the public address; installers published; the lab code is unchanged).
+   Attempt 2 (run `fde1fccf6fcf4222b45d7c82a757c4e2`, `executed.ipynb`): the researcher venv installed the SDK from the
+   lab's wheel; GSM8K loaded from the hub by the notebook's own loader, Qwen2.5-0.5B-Instruct as a hub REFERENCE, a
+   cell-written reward and curriculum sampler, `suggest` for the two devices (batch 64, chunks [64]); 5 generations × 8
+   candidates COMPLETED, 20 results each on 5070ti-nhan and 5070ti-nhut (nhut's worker: `https://compute.heteroes.site`,
+   `--no-bulk`, replay only), live dashboard drawn in the notebook, validation 0.358 → 0.374, web timeline complete.
+   **Parity: `notebook-run/parity.json` ALL EQUAL**, all 5 generations regenerated on the 5070 Ti (texts, rewards,
+   records, child hashes), the Python sampler's rows read from the frozen contexts. No audit was drawn (5 % of 40).
 3. **The owner tries the web**: rename, delete (the old revoked `5070ti` and `5070ti-nhut` devices are left for it),
    live view.
 
@@ -53,6 +64,8 @@ about 5 % over 64 and the 1660S (Turing) was not probed.
 - Windows: the 3060-thao app is still the candidate9/12 one; the Windows installer of this build is untested.
 - A machine that never had Tailscale: 5070ti-nhut has it installed; only its worker's new connections into the tailnet
   are refused.
-- Chunk memory measurement and suggestions on any GPU but those that qualify during the acceptance run.
+- Chunk memory measurement on a real GPU: both acceptance devices were already qualified for the pinned model, so no
+  qualification (and no measurement) ran; `suggest` used the VRAM rule. The measurement code is tested on CPU only.
+- An audit on this build (none was drawn in the 40-candidate run).
 - The 1660S (offline since 13:40, hardware) runs nothing of this build.
 - Learning: the acceptance run is 5 generations of 8 candidates.

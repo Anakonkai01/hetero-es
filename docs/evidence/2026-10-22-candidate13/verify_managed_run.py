@@ -32,7 +32,7 @@ def frozen_batch(path, experiment, generation):
     """A Python sampler's rows: the coordinator's frozen context, read directly (the ledger module stays unchanged)."""
     import sqlite3
 
-    with sqlite3.connect(Path(path).as_uri() + "?mode=ro", uri=True) as db:
+    with sqlite3.connect(Path(path).resolve().as_uri() + "?mode=ro", uri=True) as db:
         row = db.execute(
             "SELECT body FROM generation_context WHERE experiment_id=? AND generation=?", (experiment, generation)
         ).fetchone()

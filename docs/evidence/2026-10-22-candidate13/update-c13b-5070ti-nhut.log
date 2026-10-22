@@ -1,0 +1,9 @@
+  [   11 s] checking recipe v3 (lora, sign +1) 2/2
+  [   11 s] checking recipe v3 (lora, sign -1) 1/2
+  [   11 s] checking recipe v3 (lora, sign -1) 2/2
+  [   12 s] measuring update speed
+self-test passed on NVIDIA GeForce RTX 5070 Ti
+service restarted
+  Lab contact   online, 6 s ago
+  GPU           NVIDIA GeForce RTX 5070 Ti · 0.4/15.9 GB · 49 °C · 51 W · 0% busy
+  Runtime       756272d28ef3
