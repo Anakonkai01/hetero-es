@@ -203,3 +203,15 @@ Video and replay page in `media/`.
 3060-thao 370, 1660s 18), 101/101 audits matched. Validation: gen 50 **0.572** (base 0.608). The 1660S rebooted by itself
 ~13:04 and was restarted by the coordinator (launch 2). Finding 10 fixed on the branch (`94225d2`), deployed only after
 the run ends (a coordinator update mid-run would end or crash-recover it; owner chose to wait).
+
+**End (added 2026-10-22 ~18:30).** Cancelled 15:53 by the owner after the learning audit (`learning-audit/`): CANCELLING
+→ CANCELLED in about a minute, final recovery point at generation 70, every worker exited. 71 updates, 2,304 results,
+114/114 audits matched, final weights `43ec49ce…`. Archive: `/mnt/Archive-2tb/heteroes-local/tier3-fa67c66c-20261022/`.
+
+**Parity: pass.** `tier3/parity.json` ALL EQUAL: all 71 child hashes rebuilt from the ledger (final `43ec49ce…`, the
+run's own), generations 0 and 70 fully regenerated on the 5070 Ti with the workers' runtime (texts, rewards and records
+equal). The first attempt (15:56) died with the session that started it; this one ran 16:13–18:2x.
+
+**Finding 11 (found at the cancel).** The 1660S was unreachable from 13:40 to the end (2 h 13 min) while the coordinator
+kept it `alive: true` and logged nothing until the drain (`worker_lost`). Fixed for candidate13: a member silent for
+2 minutes is logged `worker_unreachable` (again `worker_reachable` when back) and shown as lost on the live view.
