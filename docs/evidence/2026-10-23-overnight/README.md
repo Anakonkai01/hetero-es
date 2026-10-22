@@ -108,3 +108,31 @@ generation inside the service's cgroup; not proven.
 Independent ledger replay of all 600 generations: nhan and nhut both **ALL EQUAL (600 generations)** with the same
 receipt hash `fd445ac8…` (`soak/replay-*`, 19 and 16 min), so the hash chain stayed exact across the oomd kill and the
 coordinator recovery. No candidate text regeneration is claimed (the 720 matched audits are the text checks).
+
+## 6. Candidate16 (installed and published after the soak)
+
+`9318af4` packages `1809f08` (base validation on a background thread while the workers start) and `e4a71d0` (pause at
+the generation boundary when the run's disk is nearly full). Runtime `a1c686050d9e` on nhan and nhut (local bundle with
+the pinned install script, self-test, restart), Windows Desktop runtime `c7d751ce8b3a` (same route as candidate15);
+installers published after the check (`installers-published-c16.*`). Check run `c16-check/m3` (the 3-machine speed
+config, same seed namespace): COMPLETED, audits matched, **the same four parent hashes** as the CPU and GPU runs of
+section 3.
+
+**Correction:** the overlap saves almost nothing on these runs. The base validation of the two validation rows takes
+~1 s, not ~25 s as estimated in the `1809f08` message (that estimate mixed up the submission time with the coordinator
+start). Start-up is dominated by the workers loading the model (~20 s); in the check run the Windows worker's first start
+on its new runtime took 15 s more. The overlap only matters for a large validation split (not measured). The low-disk
+pause is the useful part of candidate16; it was not exercised on a full disk.
+
+## What this does NOT show
+
+- No learning claim: the soak and the speed runs use twenty multiplication rows; rewards and validation scores are not
+  evidence that ES learns.
+- One sample per speed cell; not a benchmark of the model, of ES or of the GPUs.
+- GPU engine v2 bit parity is shown on two 5070 Ti and one 3060 with torch 2.13/CUDA 13.2 (Linux glibc 2.43/2.39 and
+  native Windows 11); other GPUs/drivers are covered only by the per-device self-test that gates the path.
+- Ledger replays recompute updates from the recorded coefficients; candidate texts were not regenerated (the matched
+  audits are the text checks).
+- The oomd kill was unplanned and recovered; the memory-pressure source is inferred, not proven. The low-disk pause and
+  the startup overlap were not exercised on real full disks / large validation sets.
+- The fault run's worker SIGKILL was not injected there (script bug); it was injected in the soak instead.
