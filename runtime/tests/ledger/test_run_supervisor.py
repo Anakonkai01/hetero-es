@@ -643,3 +643,62 @@ def test_a_persistent_block_keeps_the_launch_identity_after_process_state_is_cle
     manager.retry_worker(root, "late", "retry-after-resume")
     manager.tick(root)
     assert ("late", "start", 8) in calls
+
+
+def test_a_start_lost_on_the_way_to_the_lab_is_sent_again_with_the_same_launch(manager, monkeypatch):
+    # overnight 2026-10-23: the edge timed out on two START requests; the lab never queued them, every poll answered
+    # "waiting for worker acknowledgement" and the run stayed STARTING. The lab ignores a repeated start (dedupe key).
+    root, calls, clock, polls = restarting(manager, monkeypatch, {"local": ALIVE})
+    relay, lost = manager.remote, [True]
+    started, sent = set(), []
+
+    def remote(worker, request):
+        if worker["id"] == "late":
+            sent.append((request["action"], request.get("launch", 0)))
+            if request["action"] == "start":
+                if lost[0]:
+                    lost[0] = False
+                    raise urllib.error.URLError("timed out")
+                started.add(request.get("launch", 0))
+            elif request["action"] == "poll" and not started:
+                raise RuntimeError("HTTP 503 Waiting for worker acknowledgement")
+        return relay(worker, request)
+
+    monkeypatch.setattr(manager, "remote", remote)
+    manager.workers["late"] = {"id": "late"}
+    manager._launch_worker(root, "late", manager.state(root)["workerStates"], 0, 0)
+    assert manager.state(root)["workerStates"]["late"]["startUnconfirmed"] is True
+    manager.poll_workers(root)
+    assert sent == [("start", 0), ("poll", 0), ("start", 0)]
+    assert manager.state(root)["workerStates"]["late"] == ALIVE
+    away = [True]
+    relay_after = manager.remote
+
+    def unreachable(worker, request):  # confirmed once: a silence later is never answered with a start
+        if worker["id"] == "late" and away[0]:
+            sent.append((request["action"], request.get("launch", 0)))
+            raise RuntimeError("timed out")
+        return relay_after(worker, request)
+
+    monkeypatch.setattr(manager, "remote", unreachable)
+    manager.poll_workers(root)
+    manager.poll_workers(root, stop=True)
+    assert sent.count(("start", 0)) == 2
+
+
+def test_a_stop_never_resends_a_lost_start(manager, monkeypatch):
+    root, calls, clock, polls = restarting(manager, monkeypatch, {"local": ALIVE})
+    relay, sent = manager.remote, []
+
+    def remote(worker, request):
+        if worker["id"] == "late":
+            sent.append(request["action"])
+            if request["action"] in ("start", "stop"):
+                raise urllib.error.URLError("timed out")
+        return relay(worker, request)
+
+    monkeypatch.setattr(manager, "remote", remote)
+    manager.workers["late"] = {"id": "late"}
+    manager._launch_worker(root, "late", manager.state(root)["workerStates"], 0, 0)
+    manager.poll_workers(root, stop=True)
+    assert sent == ["start", "stop"]

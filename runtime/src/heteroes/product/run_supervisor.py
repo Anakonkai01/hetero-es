@@ -194,6 +194,12 @@ class RunSupervisor(ABC):
                         root, "worker_reachable", worker_id=worker_id, unreachableSince=previous["unreachableSince"]
                     )
             except Exception:
+                if (
+                    previous.get("startUnconfirmed")
+                    and not stop
+                    and self._resend_start(root, worker_id, result, recovery)
+                ):
+                    continue
                 since = previous.get("unreachableSince") or time.time()
                 if stop and time.time() - since >= UNREACHABLE_STOP_SECONDS:
                     result[worker_id] = {**previous, "alive": False, "confirmed": True, "lost": True}
@@ -308,6 +314,8 @@ class RunSupervisor(ABC):
             }
             self._record_worker_block(root, worker_id, result[worker_id], value.get("events", []))
         except Exception as error:
+            # The request may never have reached the lab (edge timeout): poll_workers sends this same launch again.
+            result[worker_id]["startUnconfirmed"] = True
             # why it is unknown: the lab has not seen the worker yet (ConnectionError), or it refused (HTTP status)
             self.log(
                 root,
@@ -317,6 +325,26 @@ class RunSupervisor(ABC):
                 httpStatus=error.code if isinstance(error, urllib.error.HTTPError) else None,
             )
         self.save(root, workerStates=result)
+
+    def _resend_start(self, root, worker_id, result, recovery):
+        """Send a start whose outcome was never confirmed again, with the same launch number.
+
+        Overnight 2026-10-23: two START requests timed out at the edge, the lab never queued them, and every poll said
+        "waiting for worker acknowledgement", so the run stayed STARTING. The lab queues a start once per (assignment,
+        device, recovery, launch) and ignores a repeat, so this never starts a second process."""
+        previous = result[worker_id]
+        try:
+            value = self.start_worker(root, self.workers[worker_id], recovery, previous.get("launch", 0))
+        except Exception:
+            return False
+        result[worker_id] = {
+            "alive": value["alive"],
+            "confirmed": True,
+            "ready": value["ready"],
+            **launched(previous.get("launch", 0)),
+        }
+        self._record_worker_block(root, worker_id, result[worker_id], value.get("events", []))
+        return True
 
     def _restart_members(self, root, state):
         """
