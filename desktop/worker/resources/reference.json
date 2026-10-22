@@ -23,6 +23,7 @@
      "revision": "7ae557604adf67be50417f59c2c2f167def9a775"
     },
     "noiseEngine": "cpu",
+    "noiseEngineVersion": "pcg64_u32_to_f16_normal_quantile_v2",
     "population": 2,
     "scorer": {
      "config": {},
@@ -40,21 +41,21 @@
    },
    "expected": {
     "modelManifestHash": "af52722f2880d488e45860b7b97460c6fe2744aae79f555dce44d47cd47c533c",
-    "outputsHash": "e5b89e88ecc2cf7fd30bf01c6147a93753d1bf41f30bdcc39b7063cde4bf1bf7",
+    "outputsHash": "a819adf852d943749f73b4dd55771c1cc4dccc2c18b1fb7c35fd0c3cebcc1bb0",
     "parentSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
-    "perturbedSha256": "369c44fa7dd4d24c440cfe800b3e08ca859c84fcd2d1e62563a37a38630bab8c",
-    "recipeHash": "6f97bc8ac9c75a2892d0a06b2f030dce555f3d7fca8536238726bb3880559c80",
+    "perturbedSha256": "137f6e8628bea54a40041f10569ed30ac47911fbb9d5ba36f160d21f5027dcff",
+    "recipeHash": "794bd6614e6e0465fe73f590f0644e29d9aee1ba0bb9a1100e9a284716999b06",
     "restoredSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
-    "reward": 0.0
+    "reward": 0.25
    },
    "negativeExpected": {
     "modelManifestHash": "af52722f2880d488e45860b7b97460c6fe2744aae79f555dce44d47cd47c533c",
-    "outputsHash": "eb4fd91945b780c45213b946195c33baa1eb10cb1996d08b99382832283923ad",
+    "outputsHash": "7f1bfcc49ab87d337d6d10fca4ac26d8ab6e77d5b90fd8c0eb31a6e6d3fc7d73",
     "parentSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
-    "perturbedSha256": "0390b880d7a88dcde783abff6934db96fb3b80c4dd25815570c0b76fa8b352c8",
-    "recipeHash": "6f97bc8ac9c75a2892d0a06b2f030dce555f3d7fca8536238726bb3880559c80",
+    "perturbedSha256": "570065465e6490f0e8420f62afd5f6481947e036a6b2902ff3e038cb6bc776a2",
+    "recipeHash": "794bd6614e6e0465fe73f590f0644e29d9aee1ba0bb9a1100e9a284716999b06",
     "restoredSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
-    "reward": 0.0
+    "reward": 0.5
    },
    "plan": {
     "alpha": 0.001,
@@ -66,7 +67,7 @@
     "formatVersion": 1,
     "generations": 1,
     "population": 2,
-    "recipeHash": "6f97bc8ac9c75a2892d0a06b2f030dce555f3d7fca8536238726bb3880559c80",
+    "recipeHash": "794bd6614e6e0465fe73f590f0644e29d9aee1ba0bb9a1100e9a284716999b06",
     "scorer": {
      "codeSha256": null,
      "config": {},
@@ -115,8 +116,8 @@
     },
     "noise": {
      "chunkElements": 262144,
-     "engine": "numpy_pcg64_normal_f32_to_f16_v1",
-     "fingerprint": "b94575345e870b1606cb4d6a0c4aa49b054cfbfc50571d809653d01bce9184d3"
+     "engine": "pcg64_u32_to_f16_normal_quantile_v2",
+     "fingerprint": "e80f079ca06fd3e2fcae7b41583aedd8b407e65c196677d5da54c1dc6de02bb4"
     },
     "perturbation": {
      "antithetic": true,
@@ -152,6 +153,7 @@
      "revision": "7ae557604adf67be50417f59c2c2f167def9a775"
     },
     "noiseEngine": "cpu",
+    "noiseEngineVersion": "pcg64_u32_to_f16_normal_quantile_v2",
     "population": 2,
     "scorer": {
      "config": {},
@@ -175,21 +177,21 @@
    },
    "expected": {
     "modelManifestHash": "af52722f2880d488e45860b7b97460c6fe2744aae79f555dce44d47cd47c533c",
-    "outputsHash": "b9b18064a137a7ac21fdfe9744ca90e470e223c86be3e0e02998f26f8c95db22",
+    "outputsHash": "7ac95670aefb5568325703d8be305bcb4395deab448feff4ffb3430ab1ac5bc4",
     "parentSha256": "051b79e34551eddac13dc3029743c32418bb332b3947b5b6b1249c9145e86b1e",
-    "perturbedSha256": "debe98f8a5eef3ecf5cab828b3b805ac9a9b87eef946a0395ba1319bb4e3fcab",
-    "recipeHash": "dad24b0cf76fbe35a0d76e01a42a0f5d092990354cbfe178c600d1d0e0a76cd8",
+    "perturbedSha256": "626b4f7ac4032988c8eada783665bd09b0d5c4604b28058277a2f8697718c2f1",
+    "recipeHash": "9008786686dd02ea81ed012413dca5581a0fd452e1fd88a8cdaeaeeb0c7b2f2d",
     "restoredSha256": "051b79e34551eddac13dc3029743c32418bb332b3947b5b6b1249c9145e86b1e",
-    "reward": 0.5
+    "reward": 0.25
    },
    "negativeExpected": {
     "modelManifestHash": "af52722f2880d488e45860b7b97460c6fe2744aae79f555dce44d47cd47c533c",
-    "outputsHash": "231b3acf83fe70319ed99ad69b47449e202a4bb630d9bc1e8cb24cfb8bbc1f91",
+    "outputsHash": "71b2e28492ad88480cf9b9ea8b27058ae5fda4600a0617fa20cc3506c51b8662",
     "parentSha256": "051b79e34551eddac13dc3029743c32418bb332b3947b5b6b1249c9145e86b1e",
-    "perturbedSha256": "bfa23be0f45329ad16e59bab5dcdf2eb40fbd46e22c3a157a98b7cc59b5a878e",
-    "recipeHash": "dad24b0cf76fbe35a0d76e01a42a0f5d092990354cbfe178c600d1d0e0a76cd8",
+    "perturbedSha256": "a36baa904fca69d013d4c23c945503124e867aa75035d8643431f67cb65c2a6b",
+    "recipeHash": "9008786686dd02ea81ed012413dca5581a0fd452e1fd88a8cdaeaeeb0c7b2f2d",
     "restoredSha256": "051b79e34551eddac13dc3029743c32418bb332b3947b5b6b1249c9145e86b1e",
-    "reward": 0.0
+    "reward": 0.25
    },
    "plan": {
     "alpha": 0.001,
@@ -201,7 +203,7 @@
     "formatVersion": 1,
     "generations": 1,
     "population": 2,
-    "recipeHash": "dad24b0cf76fbe35a0d76e01a42a0f5d092990354cbfe178c600d1d0e0a76cd8",
+    "recipeHash": "9008786686dd02ea81ed012413dca5581a0fd452e1fd88a8cdaeaeeb0c7b2f2d",
     "scorer": {
      "codeSha256": null,
      "config": {},
@@ -250,8 +252,8 @@
     },
     "noise": {
      "chunkElements": 262144,
-     "engine": "numpy_pcg64_normal_f32_to_f16_v1",
-     "fingerprint": "b94575345e870b1606cb4d6a0c4aa49b054cfbfc50571d809653d01bce9184d3"
+     "engine": "pcg64_u32_to_f16_normal_quantile_v2",
+     "fingerprint": "e80f079ca06fd3e2fcae7b41583aedd8b407e65c196677d5da54c1dc6de02bb4"
     },
     "perturbation": {
      "antithetic": true,
@@ -283,7 +285,7 @@
    0
   ],
   "gpu_name": "NVIDIA GeForce RTX 5070 Ti",
-  "gpu_total_memory_bytes": 16608133120,
+  "gpu_total_memory_bytes": 16611278848,
   "hostname": "5070ti",
   "numpy": "2.5.3",
   "nvidia_driver": "595.91.07",

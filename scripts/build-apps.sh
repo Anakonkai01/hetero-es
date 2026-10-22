@@ -27,6 +27,10 @@ findmnt -n -o UUID -T "$ROOT" | grep -qx "${ARCHIVE_UUID:-10443D1F443D094C}" || 
 mkdir -p "$OUT"
 echo "=== web $(date +%T)"
 npm run build --workspace frontend -- --outDir "$OUT/web" --emptyOutDir
+# Ship the SDK of this source with the notebook before the Server archive captures the web build.
+mkdir -p "$OUT/web/notebooks"
+cp runtime/notebooks/researcher.ipynb "$OUT/web/notebooks/"
+"${RUNTIME_PYTHON:-$HOME/miniforge3/envs/heteroes-match/bin/python}" -m pip wheel --no-deps --no-build-isolation -q -w "$OUT/web/notebooks" ./runtime
 echo "=== runtimes $(date +%T)"
 python3 -I scripts/refresh-worker-runtime.py --track-a "$TRACK_A"
 python3 -I scripts/refresh-server-runtime.py --web "$OUT/web"

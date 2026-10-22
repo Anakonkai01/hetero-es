@@ -28,7 +28,13 @@ def main():
         if not name:
             continue
         allowed = name.startswith(("backend/", "desktop/", "frontend/", "packages/", "scripts/", "runtime/src/"))
-        allowed = allowed or name in ("package.json", "package-lock.json", "runtime/scripts/run_worker.py")
+        allowed = allowed or name in (
+            "package.json",
+            "package-lock.json",
+            "runtime/scripts/run_worker.py",
+            "runtime/pyproject.toml",
+            "runtime/notebooks/researcher.ipynb",
+        )
         source = repo / name
         if not allowed or not source.is_file():
             continue
@@ -44,6 +50,23 @@ def main():
 
     run(["npm", "ci", "--ignore-scripts"])
     run(["npm", "run", "build:web"])
+    sdk = work / "frontend/dist/notebooks"
+    sdk.mkdir()
+    shutil.copyfile(work / "runtime/notebooks/researcher.ipynb", sdk / "researcher.ipynb")
+    run(
+        [
+            os.environ.get("RUNTIME_PYTHON", str(Path.home() / "miniforge3/envs/heteroes-match/bin/python")),
+            "-m",
+            "pip",
+            "wheel",
+            "--no-deps",
+            "--no-build-isolation",
+            "-q",
+            "-w",
+            sdk,
+            work / "runtime",
+        ]
+    )
     run([sys.executable, "-I", work / "scripts/refresh-worker-runtime.py", "--track-a", work / "runtime"])
     run([sys.executable, "-I", work / "scripts/refresh-server-runtime.py", "--web", work / "frontend/dist"])
     receipt = {
