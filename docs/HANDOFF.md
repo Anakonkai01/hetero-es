@@ -1,5 +1,12 @@
 # HeteroES — canonical handoff
 
+**Owner follow-up (2026-10-23): retention and Archive policies agreed; real low-disk
+acceptance deferred. IMPORTANT: the oomd incident remains unresolved. Keep oomd
+enabled, prioritize host usability, and diagnose/reduce memory pressure before
+considering worker protection. The supervisor currently permits only one automatic
+coordinator recovery per run.** Read
+[the decisions and open incident](operations-decisions-2026-10-23.md).
+
 **Latest (2026-10-23 night, Claude autonomous): candidate15 live on all three machines — engine v2 noise made on the GPU
 (same bits, system default) and the lost-START fix; speed series, fault run and soak.** Read
 [handoff-2026-10-23-overnight.md](handoff-2026-10-23-overnight.md) first.
