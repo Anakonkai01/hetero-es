@@ -16,10 +16,11 @@ export function layoutWorkers(count: number, narrow = false): DiagramLayout {
     GAP = narrow ? 14 : 22;
   const perRow = Math.max(1, Math.floor((BASE_WIDTH - GAP) / (CARD_W + GAP)));
   const margin = (BASE_WIDTH - (perRow * CARD_W + (perRow - 1) * GAP)) / 2;
-  const WIDTH = BASE_WIDTH + 2 * Math.max(0, count * 12 + 24 - margin);
-  const rowTop = Math.max(ROW_TOP, COORD_Y + COORD_H + count * 2 + 48);
-  const rowGap = 64;
   const rows = Math.max(1, Math.ceil(count / perRow));
+  const sideChannels = (rows - 1) * Math.ceil(perRow / 2);
+  const WIDTH = BASE_WIDTH + 2 * Math.max(0, (sideChannels ? sideChannels * 6 + 24 : 0) - margin);
+  const rowTop = ROW_TOP;
+  const rowGap = 64;
   const coordinator: Card = {
     x: (WIDTH - COORD_W) / 2,
     y: COORD_Y,
@@ -40,24 +41,52 @@ export function layoutWorkers(count: number, narrow = false): DiagramLayout {
   return { width: WIDTH, height: rowTop + rows * CARD_H + (rows - 1) * rowGap + 16, coordinator, cards };
 }
 
-/** Each worker has its own outer rail. Row gutters keep every route outside cards. */
+/** Sample rounded corners so the visible wire and its packets share precisely the same route. */
+function roundRoute(points: Point[]): Point[] {
+  const route = [points[0]];
+  for (let index = 1; index < points.length - 1; index++) {
+    const previous = points[index - 1],
+      corner = points[index],
+      next = points[index + 1];
+    const before = Math.hypot(corner.x - previous.x, corner.y - previous.y);
+    const after = Math.hypot(next.x - corner.x, next.y - corner.y);
+    const radius = Math.min(12, before / 2, after / 2);
+    if (!radius) continue;
+    const enter = {
+      x: corner.x + ((previous.x - corner.x) * radius) / before,
+      y: corner.y + ((previous.y - corner.y) * radius) / before,
+    };
+    const leave = {
+      x: corner.x + ((next.x - corner.x) * radius) / after,
+      y: corner.y + ((next.y - corner.y) * radius) / after,
+    };
+    route.push(enter);
+    for (let step = 1; step <= 8; step++) route.push(bezierPoint(enter, corner, corner, leave, step / 8));
+  }
+  route.push(points[points.length - 1]);
+  return route;
+}
+
+/** First-row GPUs connect directly; lower rows use the nearest outer edge and empty row gutters. */
 export function workerRoute(layout: DiagramLayout, index: number): Point[] {
   const card = layout.cards[index];
   if (!card) throw new RangeError('Unknown worker card');
   const c = layout.coordinator;
-  const source = { x: c.x + 16 + ((index + 0.5) * (c.w - 32)) / layout.cards.length, y: c.y + c.h };
-  const column = layout.cards.filter((other) => other.y === card.y && other.x < card.x).length;
-  const channel = source.y + 12 + index * 2;
-  const rail = 12 + index * 12;
-  const approach = card.y - 18 - column * 8;
-  return [
-    source,
-    { x: source.x, y: channel },
-    { x: rail, y: channel },
-    { x: rail, y: approach },
-    { x: card.cx, y: approach },
-    { x: card.cx, y: card.y },
-  ];
+  const target = { x: card.cx, y: card.y };
+  const firstRow = layout.cards[0].y;
+  if (card.y === firstRow) {
+    const curve = connector({ x: c.cx, y: c.y + c.h }, target);
+    return Array.from({ length: 33 }, (_, step) => bezierPoint(...curve, step / 32));
+  }
+  const left = card.cx < c.cx;
+  const side = layout.cards.filter((other) => other.y > firstRow && other.cx < c.cx === left);
+  const outside = (other: Card) => Math.abs(other.cx - c.cx) > Math.abs(card.cx - c.cx);
+  const lane = side.filter((other) => other.y < card.y || (other.y === card.y && outside(other))).length;
+  const column = side.filter((other) => other.y === card.y && outside(other)).length;
+  const source = { x: left ? c.x : c.x + c.w, y: c.y + 16 + ((lane + 0.5) * (c.h - 32)) / side.length };
+  const rail = left ? 12 + lane * 6 : layout.width - 12 - lane * 6;
+  const approach = card.y - 24 - column * 8;
+  return roundRoute([source, { x: rail, y: source.y }, { x: rail, y: approach }, { x: card.cx, y: approach }, target]);
 }
 
 /** Constant-distance travel along precisely the same polyline used by the SVG. */

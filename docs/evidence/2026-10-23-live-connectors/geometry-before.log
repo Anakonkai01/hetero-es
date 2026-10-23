@@ -1,0 +1,59 @@
+✖ first-row connections fan out directly and symmetrically without an outer detour (5.932992ms)
+✖ lower rows take the nearest outer side instead of sending every cable to the left (0.270757ms)
+✔ multi-row routes and animated packets stay outside every GPU card (46.099607ms)
+✔ cards sit in one centred row when they fit and wrap into rows otherwise, never overlapping or leaving the canvas (0.20654ms)
+✔ the narrow layout used on the home page keeps three cards in one row on a smaller canvas (0.086981ms)
+✔ no workers still gives a drawable canvas (0.065755ms)
+✔ a bezier starts and ends at its anchors and a packet travels out and back along the same curve (0.162189ms)
+✔ axis ticks use round steps, stay inside the range and are few enough to read (0.108691ms)
+✔ labels are short and durations read naturally (0.102132ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 7
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 122.146022
+
+✖ failing tests:
+
+test at frontend/tests/diagramLayout.test.mjs:14:1
+✖ first-row connections fan out directly and symmetrically without an outer detour (5.932992ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(point.x >= Math.min(source.x, card.cx) - 0.001 && point.x <= Math.max(source.x, card.cx) + 0.001)
+  
+      at TestContext.<anonymous> (file:///home/pc5070ti/projects/heteroes/frontend/tests/diagramLayout.test.mjs:25:18)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at frontend/tests/diagramLayout.test.mjs:37:1
+✖ lower rows take the nearest outer side instead of sending every cable to the left (0.270757ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  463.25 !== 330
+  
+      at TestContext.<anonymous> (file:///home/pc5070ti/projects/heteroes/frontend/tests/diagramLayout.test.mjs:47:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 463.25,
+    expected: 330,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

@@ -29,6 +29,7 @@ export function LiveDiagram({
 }) {
   const { t } = useProduct();
   const layout = useMemo(() => layoutWorkers(frame.workers.length, narrow), [frame.workers.length, narrow]);
+  const routes = useMemo(() => layout.cards.map((_, index) => workerRoute(layout, index)), [layout]);
   const { coordinator } = layout;
   const generation = frame.generation;
   const busy = frame.workers.filter((w) => w.state === 'busy').length;
@@ -70,7 +71,7 @@ export function LiveDiagram({
       })}
     >
       {frame.workers.map((worker, i) => {
-        const route = workerRoute(layout, i);
+        const route = routes[i];
         return (
           <path
             key={worker.id}
@@ -145,7 +146,7 @@ export function LiveDiagram({
             </text>
             {worker.gpuName && (
               <text x={card.x + 82} y={card.y + 82} className="lv-state">
-                {shortName(worker.gpuName, 19)}
+                {shortName(worker.gpuName.replace(/^NVIDIA (?:GeForce )?/, ''), 19)}
               </text>
             )}
             <line x1={card.x + 16} x2={card.x + card.w - 16} y1={card.y + 100} y2={card.y + 100} className="lv-rule" />
@@ -166,7 +167,7 @@ export function LiveDiagram({
         frame.packets.map((packet) => {
           const index = frame.workers.findIndex((w) => w.id === packet.workerId);
           if (index < 0) return null;
-          const route = workerRoute(layout, index);
+          const route = routes[index];
           const at = routePosition(route, packet.kind === 'dispatch' ? packet.progress : 1 - packet.progress);
           return (
             <g

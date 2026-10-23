@@ -1,0 +1,20 @@
+[
+  {
+    "name": "first-row-detours-return",
+    "file": "src/lib/diagramLayout.ts",
+    "old": "if (card.y === firstRow) {",
+    "new": "if (false) {"
+  },
+  {
+    "name": "all-lower-cables-go-left",
+    "file": "src/lib/diagramLayout.ts",
+    "old": "const left = card.cx < c.cx;",
+    "new": "const left = true;"
+  },
+  {
+    "name": "cable-enters-gpu-card",
+    "file": "src/lib/diagramLayout.ts",
+    "old": "const target = { x: card.cx, y: card.y };",
+    "new": "const target = { x: card.cx, y: card.y + 20 };"
+  }
+]

@@ -1,0 +1,10 @@
+{
+  "fixtureOnly": true,
+  "directFirstRow": true,
+  "readableDeviceNames": true,
+  "gpuModels": true,
+  "identifiersInTooltips": true,
+  "multiRow": true,
+  "responsive": true,
+  "reducedMotion": true
+}

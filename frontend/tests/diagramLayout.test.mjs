@@ -11,6 +11,49 @@ import {
   routePosition,
 } from '../src/lib/diagramLayout.ts';
 
+test('first-row connections fan out directly and symmetrically without an outer detour', () => {
+  for (const narrow of [false, true])
+    for (const count of [1, 2, 3]) {
+      const layout = layoutWorkers(count, narrow);
+      assert.equal(layout.width, layoutWorkers(0, narrow).width, 'cables do not widen a single row');
+      const source = { x: layout.coordinator.cx, y: layout.coordinator.y + layout.coordinator.h };
+      for (let index = 0; index < count; index++) {
+        const route = workerRoute(layout, index);
+        const card = layout.cards[index];
+        assert.deepEqual(route[0], source, 'the fan starts at the coordinator bottom centre');
+        for (const point of route) {
+          assert.ok(point.x >= Math.min(source.x, card.cx) - 0.001 && point.x <= Math.max(source.x, card.cx) + 0.001);
+          assert.ok(point.y >= source.y && point.y <= card.y, 'first-row cables stay in the header gap');
+        }
+        const mirror = workerRoute(layout, count - index - 1);
+        for (let step = 0; step <= 20; step++) {
+          const a = routePosition(route, step / 20),
+            b = routePosition(mirror, step / 20);
+          assert.ok(Math.abs(a.x + b.x - layout.width) < 0.001 && Math.abs(a.y - b.y) < 0.001);
+        }
+      }
+    }
+});
+
+test('lower rows take the nearest outer side instead of sending every cable to the left', () => {
+  const layout = layoutWorkers(8);
+  const firstRow = layout.cards[0].y;
+  const left = Math.min(...layout.cards.map((c) => c.x));
+  const right = Math.max(...layout.cards.map((c) => c.x + c.w));
+  for (let index = 0; index < layout.cards.length; index++) {
+    const card = layout.cards[index];
+    if (card.y === firstRow) continue;
+    const route = workerRoute(layout, index);
+    if (card.cx < layout.coordinator.cx) {
+      assert.equal(route[0].x, layout.coordinator.x);
+      assert.ok(route.some((p) => p.x < left));
+    } else {
+      assert.equal(route[0].x, layout.coordinator.x + layout.coordinator.w);
+      assert.ok(route.some((p) => p.x > right));
+    }
+  }
+});
+
 test('multi-row routes and animated packets stay outside every GPU card', () => {
   for (const narrow of [false, true])
     for (const count of [1, 2, 5, 8, 16]) {

@@ -1,0 +1,6 @@
+control ok    | ℹ duration_ms 120.130871
+killed       first-row-detours-return |   }
+killed       all-lower-cables-go-left |   }
+killed       cable-enters-gpu-card |   }
+
+3 of 3 mutants killed.

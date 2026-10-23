@@ -179,6 +179,8 @@
   fill: none;
   stroke: var(--line);
   stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
   stroke-dasharray: 5 6;
 }
 .lv-link-busy {
@@ -398,6 +400,15 @@
 }
 .lv-table td {
   font-variant-numeric: tabular-nums;
+}
+.lv-device {
+  display: grid;
+  gap: 3px;
+}
+.lv-device small {
+  color: var(--mut);
+  font-size: 12px;
+  font-weight: 400;
 }
 @keyframes lv-pulse {
   0%,

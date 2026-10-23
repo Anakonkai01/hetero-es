@@ -191,7 +191,14 @@ export function RunLiveView({
               <tbody>
                 {frame.workers.map((worker) => (
                   <tr key={worker.id}>
-                    <th scope="row">{worker.id}</th>
+                    <th scope="row" title={worker.id}>
+                      <span className="lv-device">
+                        <span>{worker.name || worker.gpuName || worker.id}</span>
+                        {worker.name && worker.gpuName && worker.gpuName !== worker.name && (
+                          <small>{worker.gpuName}</small>
+                        )}
+                      </span>
+                    </th>
                     <td>
                       {t(
                         worker.state === 'busy'
