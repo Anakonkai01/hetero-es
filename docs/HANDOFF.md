@@ -1,5 +1,16 @@
 # HeteroES — canonical handoff
 
+**Latest owner-requested web repair (2026-10-23 morning): backend + web deployed
+at `82c37fc`, accepted on both real overnight soaks.** Direct curved GPU wiring,
+device names/models instead of raw IDs, correct stopped replay state and whole-run
+totals, readable reward/Gantt labels and explicit limited candidate-history scope.
+The completed soak's stale shutdown warning is cleared on reads. **Important:
+720 matched audits out of 722 selected; two timed out at generation 63.** The old
+719 denominator came from incomplete generation logs after recovery. This fixes
+reporting, not the timeouts or oomd cause. Original run records and ledgers were
+not rewritten. See [investigation](evidence/2026-10-23-long-run-ui/README.md) and
+[public acceptance](evidence/2026-10-23-long-run-ui/DEPLOYMENT.md).
+
 **Owner follow-up (2026-10-23): retention and Archive policies agreed; real low-disk
 acceptance deferred. IMPORTANT: the oomd incident remains unresolved. Keep oomd
 enabled, prioritize host usability, and diagnose/reduce memory pressure before

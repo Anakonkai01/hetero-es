@@ -41,6 +41,7 @@ try {
   ]) {
     await page.goto(`${base}/experiments/${id}`);
     await page.locator('.detail-summary').waitFor();
+    await page.locator('svg.reward-chart').waitFor();
     const summary = page.locator('.detail-summary').locator('..');
     await summary.screenshot({ path: path.join(output, `${kind}-overview.png`) });
     if (!captureOnly) {
