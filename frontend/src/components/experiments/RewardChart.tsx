@@ -20,6 +20,7 @@ export function RewardChart({ generations }: { generations: Generation[] }) {
   const { t } = useProduct();
   const maxReward = Math.max(0.6, ...generations.flatMap((g) => [g.rewardMean ?? 0, g.rewardBest ?? 0]));
   const count = generations.length || 1;
+  const labelEvery = Math.max(1, Math.ceil(count / 8));
   const x = (index: number) => LEFT + ((index + 0.5) * WIDTH) / count;
   const y = (value: number) => TOP + (1 - value / maxReward) * HEIGHT;
 
@@ -51,7 +52,7 @@ export function RewardChart({ generations }: { generations: Generation[] }) {
       </div>
 
       <svg
-        viewBox="0 0 640 240"
+        viewBox="0 0 640 264"
         className="reward-chart"
         width="100%"
         role="img"
@@ -90,7 +91,7 @@ export function RewardChart({ generations }: { generations: Generation[] }) {
           strokeWidth="1.75"
           strokeDasharray="6 4"
           markerStart="url(#mB)"
-          markerMid="url(#mB)"
+          markerMid={count <= 30 ? 'url(#mB)' : undefined}
           markerEnd="url(#mB)"
         />
         <path
@@ -99,27 +100,27 @@ export function RewardChart({ generations }: { generations: Generation[] }) {
           stroke="var(--acc)"
           strokeWidth="2.5"
           markerStart="url(#mA)"
-          markerMid="url(#mA)"
+          markerMid={count <= 30 ? 'url(#mA)' : undefined}
           markerEnd="url(#mA)"
         />
+        <g className="reward-axis">
+          {generations.map(
+            (generation, index) =>
+              (index % labelEvery === 0 || index === generations.length - 1) && (
+                <text
+                  key={generation.generationId}
+                  x={x(index)}
+                  y={248}
+                  textAnchor="middle"
+                  fontSize="10"
+                  fill="var(--mut)"
+                >
+                  #{Number(generation.generationId.split('.g').at(-1) ?? index) + 1}
+                </text>
+              ),
+          )}
+        </g>
       </svg>
-
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: `repeat(${count},minmax(0,1fr))`,
-          padding: '0 2.5% 0 7.5%',
-          textAlign: 'center',
-          fontSize: 12,
-          color: 'var(--mut)',
-        }}
-      >
-        {generations.map((generation, index) => (
-          <span className="mono" key={generation.generationId}>
-            #{index}
-          </span>
-        ))}
-      </div>
 
       <div className="legendl">
         <span>

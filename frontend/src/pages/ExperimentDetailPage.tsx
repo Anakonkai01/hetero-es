@@ -50,7 +50,7 @@ export function ExperimentDetailPage() {
   const [cancelOpen, setCancelOpen] = useState(false);
   const experimentQuery = useExperiment(experimentId);
   const generationsQuery = useGenerations(experimentId);
-  const eventsQuery = useEvents();
+  const eventsQuery = useEvents(experimentId);
   const artifactsQuery = useArtifacts();
   if (isNotFoundError(experimentQuery.error)) {
     return <ObjectNotFound backTo="/experiments" backLabel="Back to Experiments" />;

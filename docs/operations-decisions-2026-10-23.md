@@ -68,6 +68,14 @@ Evidence and implementation references:
 
 ## Deferred verification
 
+Important follow-up from the owner's live-run review: the completed 600-generation
+soak has **722 selected audits, 720 completed and matched, and two timeouts at
+generation 63**. The missing generation-62 summary after recovery made the old
+log-based selection total 719. A successful numerical replay and 720 matched audit
+rows must not be described as proof that every selected audit finished. Reporting
+is repaired separately; the audit-timeout/recovery behavior remains an open
+follow-up. See [the investigation](evidence/2026-10-23-long-run-ui/README.md).
+
 Future low-disk acceptance should use an isolated storage environment, verify a
 pause at a generation boundary, free space, resume the run, and check replay
 against its recorded hashes. Scope and scheduling are undecided.

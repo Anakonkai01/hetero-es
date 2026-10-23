@@ -1,0 +1,12 @@
+{
+  "base": "https://lab.heteroes.site",
+  "run": "d5ea4ddb2d40429b8e6f8af81c54b22c",
+  "rows": [
+    "5070ti-nhan\nNVIDIA GeForce RTX 5070 Ti",
+    "5070ti-nhut\nNVIDIA GeForce RTX 5070 Ti",
+    "3060-thao\nNVIDIA GeForce RTX 3060"
+  ],
+  "pageErrors": [],
+  "assertions": true,
+  "checkedAt": "2026-10-23T02:35:11.697Z"
+}

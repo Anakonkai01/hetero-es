@@ -56,11 +56,20 @@ export function RuntimeResults({ experiment: e }: { experiment: Experiment }) {
           </div>
         </dl>
         {e.auditSummary && (
-          <p className={e.auditSummary.mismatches ? 'note err' : 'note'}>
+          <p className={e.auditSummary.mismatches ? 'note err' : e.auditSummary.incomplete ? 'note warn' : 'note'}>
             {t('Audits completed')}: {e.auditSummary.completed}
-            {e.auditSummary.selected ? ` / ${e.auditSummary.selected} ${t('chosen')}` : ''} · {t('Audit mismatches')}:{' '}
-            {e.auditSummary.mismatches} · {t('Quarantined workers')}:{' '}
-            {e.auditSummary.quarantinedWorkers.map((worker) => worker.worker_id).join(', ') || '—'}
+            {e.auditSummary.selected != null ? ` / ${e.auditSummary.selected} ${t('chosen')}` : ''}
+            {e.auditSummary.incomplete ? ` · ${t('Audits not completed')}: ${e.auditSummary.incomplete}` : ''} ·{' '}
+            {t('Audit mismatches')}: {e.auditSummary.mismatches} · {t('Quarantined workers')}:{' '}
+            {e.auditSummary.quarantinedWorkers
+              .map((worker) => e.workerIdentities?.[worker.worker_id]?.name ?? worker.worker_id)
+              .join(', ') || '0'}
+            {e.auditSummary.selectionComplete === false && (
+              <>
+                <br />
+                {t('Audit selection history is incomplete; the completed count is verified.')}
+              </>
+            )}
           </p>
         )}
         {generations.isError && (
@@ -105,6 +114,11 @@ export function RuntimeResults({ experiment: e }: { experiment: Experiment }) {
           </div>
         ) : null}
         <section className="experiment-inspector">
+          {e.monitoringPartial && (
+            <p className="note">
+              {t('Candidate details are limited to recent generations. Generation summaries cover the recorded run.')}
+            </p>
+          )}
           <div className="generation-picker">
             <div>
               <h3>{t('Generation & candidate inspector')}</h3>
@@ -121,7 +135,7 @@ export function RuntimeResults({ experiment: e }: { experiment: Experiment }) {
                 {!gs.length && <option value="">{t('No generations yet')}</option>}
                 {gs.map((g, i) => (
                   <option key={g.generationId} value={g.generationId}>
-                    {t('Generation')} {i} · {t(g.status)}
+                    {t('Generation')} {Number(g.generationId.split('.g').at(-1) ?? i) + 1} · {t(g.status)}
                   </option>
                 ))}
               </select>
@@ -170,8 +184,8 @@ export function RuntimeResults({ experiment: e }: { experiment: Experiment }) {
                       </td>
                       <td>
                         {c.workerId ? (
-                          <Link className="mono" to={`/workers/${c.workerId}`}>
-                            {c.workerId}
+                          <Link title={c.workerId} to={`/workers/${c.workerId}`}>
+                            {e.workerIdentities?.[c.workerId]?.name ?? c.workerId}
                           </Link>
                         ) : (
                           t('Not assigned')
@@ -184,7 +198,13 @@ export function RuntimeResults({ experiment: e }: { experiment: Experiment }) {
               </table>
             </div>
           ) : (
-            <p className="note">{t('Candidates appear after the coordinator opens a generation.')}</p>
+            <p className="note">
+              {t(
+                e.monitoringPartial && selected?.status === 'COMPLETED'
+                  ? 'Candidate details for this generation are outside the dashboard history.'
+                  : 'Candidates appear after the coordinator opens a generation.',
+              )}
+            </p>
           )}
           <p className="info-caption">
             {t(

@@ -1,0 +1,53 @@
+✔ trimmed attempt history does not reduce completed-generation totals or leave stopped workers working (0.898018ms)
+✔ a failed run stays stopped instead of showing an update continuing after its end (0.144601ms)
+✔ a terminal worker block appears at its event time and an explicit retry clears its replay state (0.720012ms)
+✔ before the run nothing is happening; each worker is idle, and an unstarted worker says so (0.458176ms)
+✔ a busy worker shows its candidate with a progress that follows the clock (0.126372ms)
+✔ finished jobs are counted per worker; a failed attempt counts as failed and not as done (0.116026ms)
+✔ the generation moves through evaluating, updating the model and finished before the next opens (0.145525ms)
+✔ between two generations of a live run the screen says so instead of "finished" (0.157081ms)
+✔ the last planned generation reads finished as soon as it is done, even before the run is marked complete (0.076725ms)
+✔ a running job with no end yet keeps moving but never claims to be finished (0.114921ms)
+✔ packets fly from the coordinator when a job starts and back when it ends, for as long as the flight lasts (0.141832ms)
+✔ marks appear only shortly after they happen, and an unavailable worker shows as offline meanwhile (0.100041ms)
+✔ a member that stops answering shows as lost until it answers again, even with a job still leased (finding 11) (0.087673ms)
+✔ a worker that has started but is not ready yet shows as loading the model, until it is ready or has work (0.089484ms)
+✔ rewards of completed generations accumulate for the chart (0.082847ms)
+✔ bounds cover the whole run, and a running run ends at "now" (0.135225ms)
+✔ the player advances by real time times speed, stops at the end and cannot go before the start (0.065049ms)
+✖ a real finished run replays: both jobs complete, the model is updated and the totals reach the end (0.55657ms)
+✔ a streamed update replaces what changed and never goes backwards in time (0.070579ms)
+✔ a replay starts from the beginning, playing; after watching the run live it stays on the finished picture (0.061533ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 19
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 61.432296
+
+✖ failing tests:
+
+test at frontend/tests/runFrame.test.mjs:382:1
+✖ a real finished run replays: both jobs complete, the model is updated and the totals reach the end (0.55657ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'stopped'
+  - 'unstarted'
+  
+      at TestContext.<anonymous> (file:///home/pc5070ti/projects/heteroes/frontend/tests/runFrame.test.mjs:388:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'stopped',
+    expected: 'unstarted',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

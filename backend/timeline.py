@@ -203,6 +203,8 @@ def build_timeline(body, snapshot, now_ms=None, names=None):
     body = body or {}
     started = _ms_from_epoch(state.get("startedAt")) or _ms_from_iso(body.get("startedAt"))
     completed = _ms_from_epoch(state.get("completedAt")) or _ms_from_iso(body.get("completedAt"))
+    detailed = sorted({job["generation"] for job in jobs if job["generation"] is not None})
+    expected = sum(item.get("candidateCount") or 0 for item in generations)
     return {
         "experiment": {
             "id": body.get("experimentId"),
@@ -218,5 +220,11 @@ def build_timeline(body, snapshot, now_ms=None, names=None):
         "generations": generations,
         "jobs": jobs,
         "marks": marks,
+        "history": {
+            "partial": len(candidates) < expected,
+            "detailedStartMs": min((job["startMs"] for job in jobs), default=None),
+            "firstDetailedGeneration": detailed[0] if detailed else None,
+            "lastDetailedGeneration": detailed[-1] if detailed else None,
+        },
         "nowMs": int(time.time() * 1000) if now_ms is None else now_ms,
     }

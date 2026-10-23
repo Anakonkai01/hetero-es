@@ -3,11 +3,11 @@ import { useScopeKey } from '../app/session';
 
 import { getEvents } from '../api/events';
 
-export function useEvents() {
+export function useEvents(experimentId?: string) {
   const scope = useScopeKey();
   return useQuery({
     enabled: scope.every(Boolean),
-    queryKey: ['events', ...scope],
-    queryFn: getEvents,
+    queryKey: ['events', ...scope, experimentId ?? 'all'],
+    queryFn: () => getEvents(experimentId),
   });
 }

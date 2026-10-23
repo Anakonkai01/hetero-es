@@ -46,9 +46,17 @@ function Ribbon({
           )}
         </li>
       ))}
-      <li className={step === 2 ? (phase === 'finished' ? 'done' : 'now') : ''}>
+      <li className={phase === 'stopped' ? 'stopped' : step === 2 ? (phase === 'finished' ? 'done' : 'now') : ''}>
         <span className="lv-step-no">{phase === 'finished' ? '✓' : 3}</span>
-        <span>{t(phase === 'finished' ? 'Experiment finished' : 'Next generation')}</span>
+        <span>
+          {t(
+            phase === 'stopped'
+              ? 'Experiment stopped'
+              : phase === 'finished'
+                ? 'Experiment finished'
+                : 'Next generation',
+          )}
+        </span>
       </li>
     </ol>
   );
@@ -86,7 +94,7 @@ export function RunLiveView({
       ? { loop: true, speed: 4 }
       : variant === 'compact' && mode === 'replay'
         ? { loop: true, speed: 8 }
-        : { afterLive },
+        : { afterLive: afterLive || (mode === 'replay' && Boolean(timeline.history?.partial)) },
   );
   const { frame, bounds } = player;
   if (!frame || !bounds) return null;
@@ -97,6 +105,35 @@ export function RunLiveView({
   return (
     <section className={`lv lv-${variant}`} aria-label={title ?? t('Live view of the run')}>
       {variant !== 'hero' && <PlayerBar player={player} mode={mode} source={source} />}
+      {variant !== 'hero' && timeline.history?.partial && (
+        <div className="note lv-history-note">
+          <span>
+            {timeline.history.firstDetailedGeneration != null && timeline.history.lastDetailedGeneration != null
+              ? fillTemplate(
+                  t(
+                    'Candidate replay covers generations {first}–{last}. Totals use the recorded generation summaries.',
+                  ),
+                  {
+                    first: timeline.history.firstDetailedGeneration + 1,
+                    last: timeline.history.lastDetailedGeneration + 1,
+                  },
+                )
+              : t('Candidate details are limited to recent generations. Generation summaries cover the recorded run.')}
+          </span>
+          {timeline.history.detailedStartMs != null && (
+            <button
+              type="button"
+              className="btn"
+              onClick={() => {
+                player.seek(timeline.history!.detailedStartMs!);
+                player.play();
+              }}
+            >
+              {t('Replay available details')}
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="lv-stats">
         <div>
@@ -177,7 +214,13 @@ export function RunLiveView({
 
           <div className="scroll">
             <table className="lv-table">
-              <caption className="sr-only">{t('GPUs in this run')}</caption>
+              <caption className={timeline.history?.partial ? 'lv-history-caption' : 'sr-only'}>
+                {t(
+                  timeline.history?.partial
+                    ? 'GPU statistics cover only the available candidate history.'
+                    : 'GPUs in this run',
+                )}
+              </caption>
               <thead>
                 <tr>
                   <th scope="col">{t('GPU')}</th>
@@ -201,15 +244,17 @@ export function RunLiveView({
                     </th>
                     <td>
                       {t(
-                        worker.state === 'busy'
-                          ? 'Working'
-                          : worker.state === 'offline'
-                            ? 'Connection lost'
-                            : worker.state === 'unstarted'
-                              ? 'Not started'
-                              : worker.state === 'starting'
-                                ? 'Loading the model'
-                                : 'Waiting for work',
+                        worker.state === 'stopped'
+                          ? 'Stopped'
+                          : worker.state === 'busy'
+                            ? 'Working'
+                            : worker.state === 'offline'
+                              ? 'Connection lost'
+                              : worker.state === 'unstarted'
+                                ? 'Not started'
+                                : worker.state === 'starting'
+                                  ? 'Loading the model'
+                                  : 'Waiting for work',
                       )}
                     </td>
                     <td>{worker.done}</td>

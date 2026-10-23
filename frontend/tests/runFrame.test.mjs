@@ -6,6 +6,30 @@ import { frameAt, runBounds, advance, applyDelta, replayStart } from '../src/lib
 const real = JSON.parse(fs.readFileSync(new URL('./fixtures/run-fifo.timeline.json', import.meta.url), 'utf8'));
 const T0 = 1_000_000;
 
+test('trimmed attempt history does not reduce completed-generation totals or leave stopped workers working', () => {
+  const timeline = synthetic();
+  timeline.experiment.status = 'COMPLETED';
+  timeline.experiment.completedMs = T0 + 20000;
+  timeline.generations[1] = { ...timeline.generations[1], status: 'COMPLETED', doneMs: T0 + 19000, committedCount: 4 };
+  timeline.jobs = timeline.jobs.filter((job) => job.generation === 1);
+  timeline.history = { partial: true, detailedStartMs: T0 + 12500 };
+  const shown = frameAt(timeline, T0 + 20000);
+  assert.equal(shown.totals.committed, 8);
+  assert.equal(shown.generation.committed, 4);
+  assert.ok(shown.workers.filter((worker) => worker.id !== 'c').every((worker) => worker.state === 'stopped'));
+  assert.equal(shown.workers.find((worker) => worker.id === 'c').state, 'unstarted');
+});
+
+test('a failed run stays stopped instead of showing an update continuing after its end', () => {
+  const timeline = synthetic();
+  timeline.experiment.status = 'FAILED';
+  timeline.experiment.completedMs = T0 + 20000;
+  timeline.generations[1].evaluatedMs = T0 + 16000;
+  const shown = frameAt(timeline, T0 + 20000);
+  assert.equal(shown.generation.phase, 'stopped');
+  assert.ok(shown.workers.filter((worker) => worker.id !== 'c').every((worker) => worker.state === 'stopped'));
+});
+
 test('a terminal worker block appears at its event time and an explicit retry clears its replay state', () => {
   const timeline = synthetic();
   timeline.workers[0] = { ...timeline.workers[0], stopReason: 'needs_private_route', blockedAtMs: T0 + 4000 };

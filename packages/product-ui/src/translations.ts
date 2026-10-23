@@ -442,8 +442,24 @@ export const translations: Record<string, string> = {
   'Current generation progress': 'Tiến độ thế hệ hiện tại',
   'Current password': 'Mật khẩu hiện tại',
   Dashboard: 'Tổng quan',
-  'Dashboard details show recent history. Full canonical history is retained in recovery points.':
-    'Dashboard hiển thị lịch sử gần đây. Lịch sử đầy đủ được giữ trong các điểm phục hồi.',
+  'Audits not completed': 'Audit chưa hoàn tất',
+  'Audit selection history is incomplete; the completed count is verified.':
+    'Lịch sử chọn audit chưa đầy đủ; số audit hoàn tất đã được xác minh.',
+  'Candidate details are limited to recent generations. Generation summaries cover the recorded run.':
+    'Chi tiết candidate chỉ còn ở các thế hệ gần đây. Số tổng hợp bao gồm các thế hệ đã ghi nhận của run.',
+  'Candidate details for this generation are outside the dashboard history.':
+    'Chi tiết candidate của thế hệ này nằm ngoài phần lịch sử còn trên dashboard.',
+  'Candidate replay covers generations {first}–{last}. Totals use the recorded generation summaries.':
+    'Replay candidate có chi tiết từ thế hệ {first} đến {last}. Tổng số được tính từ bản ghi tổng hợp các thế hệ.',
+  'Replay available details': 'Phát lại phần có chi tiết',
+  'GPU statistics cover only the available candidate history.':
+    'Thống kê từng GPU chỉ tính phần lịch sử candidate còn trên dashboard.',
+  'Timeline range': 'Phạm vi dòng thời gian',
+  'Available candidate history': 'Phần lịch sử có chi tiết candidate',
+  'Entire run': 'Toàn bộ run',
+  'Blank lanes outside the available history do not mean the GPUs were idle.':
+    'Vùng trống ngoài phần lịch sử có chi tiết không có nghĩa là GPU đã rảnh.',
+  'Experiment stopped': 'Thí nghiệm đã dừng',
   'Data source connection; individual worker connectivity is reported separately.':
     'Kết nối với nguồn dữ liệu; mỗi máy có trạng thái kết nối riêng.',
   Description: 'Mô tả',

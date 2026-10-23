@@ -14,6 +14,7 @@ function stateText(worker: WorkerFrame, t: (key: string) => string): string {
   if (worker.state === 'blocked') return t('Synchronization blocked');
   if (worker.state === 'unstarted') return t('Not started');
   if (worker.state === 'starting') return t('Loading the model');
+  if (worker.state === 'stopped') return t('Stopped');
   return t('Waiting for work');
 }
 

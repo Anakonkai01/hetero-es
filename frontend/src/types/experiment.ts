@@ -76,7 +76,9 @@ export interface Experiment extends Partial<V3Settings> {
   };
   auditSummary?: {
     completed: number;
-    selected?: number;
+    selected?: number | null;
+    selectionComplete?: boolean;
+    incomplete?: number | null;
     mismatches: number;
     quarantinedWorkers: { worker_id: string; reason: string }[];
   };

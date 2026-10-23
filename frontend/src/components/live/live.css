@@ -401,6 +401,34 @@
 .lv-table td {
   font-variant-numeric: tabular-nums;
 }
+.lv-history-note,
+.lv-range {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.lv-range {
+  justify-content: flex-start;
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: var(--mut);
+}
+.lv-range .sel {
+  width: auto;
+  max-width: 100%;
+}
+.lv-history-caption {
+  padding: 0 12px 10px;
+  text-align: left;
+  color: var(--mut);
+  font-size: 13px;
+}
+.lv-ribbon li.stopped {
+  color: var(--warning);
+  border-color: var(--warning);
+}
 .lv-device {
   display: grid;
   gap: 3px;

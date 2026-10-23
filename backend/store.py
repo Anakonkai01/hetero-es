@@ -1,6 +1,7 @@
 """SQLite product state. Runtime ledgers remain owned by device agents."""
 
 from .migrations import initialize_product_schema
+from .experiment_view import experiment_view
 from .policies import dispatch_held, read_setting, set_disabled_workers
 from contextlib import contextmanager
 from datetime import datetime, timezone
@@ -197,12 +198,15 @@ class Store:
 
     def get(self, run_id):
         with self.db() as db:
-            row = db.execute("SELECT body FROM experiments WHERE id=?", (run_id,)).fetchone()
-            return json.loads(row[0]) if row else None
+            row = db.execute("SELECT body,snapshot FROM experiments WHERE id=?", (run_id,)).fetchone()
+            return experiment_view(json.loads(row[0]), json.loads(row[1]) if row[1] else None) if row else None
 
     def list(self):
         with self.db() as db:
-            return [json.loads(row[0]) for row in db.execute("SELECT body FROM experiments ORDER BY rowid")]
+            return [
+                experiment_view(json.loads(row[0]), json.loads(row[1]) if row[1] else None)
+                for row in db.execute("SELECT body,snapshot FROM experiments ORDER BY rowid")
+            ]
 
     def save(self, db, body):
         db.execute(
@@ -430,7 +434,7 @@ class Store:
                 body["currentGenerationId"] = latest["generationId"]
                 body["committedCandidateCount"] = latest["committedCandidateCount"]
                 body["modelVersion"] = latest["modelVersion"]
-            if state.get("failureReason"):
+            if "failureReason" in state:
                 body["failureReason"] = state["failureReason"]
             if state.get("finalWeightsSha256"):
                 body["modelVersion"] = state["finalWeightsSha256"]

@@ -58,6 +58,12 @@ export type Timeline = {
   jobs: TimelineJob[];
   marks: TimelineMark[];
   nowMs: number;
+  history?: {
+    partial: boolean;
+    detailedStartMs: number | null;
+    firstDetailedGeneration?: number | null;
+    lastDetailedGeneration?: number | null;
+  };
 };
 
 export type WorkerFrame = {
@@ -65,7 +71,7 @@ export type WorkerFrame = {
   name: string | null;
   gpuName?: string | null;
   stopReason?: string | null;
-  state: 'unstarted' | 'starting' | 'idle' | 'busy' | 'offline' | 'blocked';
+  state: 'unstarted' | 'starting' | 'idle' | 'busy' | 'offline' | 'blocked' | 'stopped';
   job?: { candidateId: string; generation: number | null; progress: number; startMs: number };
   done: number;
   failed: number;
@@ -85,7 +91,7 @@ export type GenerationFrame = {
   total: number | null;
   committed: number | null;
   count: number | null;
-  phase: 'evaluating' | 'updating' | 'between' | 'finished';
+  phase: 'evaluating' | 'updating' | 'between' | 'finished' | 'stopped';
   phaseProgress: number;
   rewardMean: number | null;
   rewardBest: number | null;
@@ -147,6 +153,15 @@ export function runBounds(timeline: Timeline): { startMs: number; endMs: number 
 export function frameAt(timeline: Timeline, atMs: number, options: { flightMs?: number } = {}): Frame {
   const flightMs = options.flightMs ?? 700;
   const finished = timeline.jobs.filter((j) => j.endMs !== null && j.endMs <= atMs);
+  const committedByGeneration = new Map<number | null, number>();
+  for (const job of finished) {
+    if (job.status === 'SUCCEEDED')
+      committedByGeneration.set(job.generation, (committedByGeneration.get(job.generation) ?? 0) + 1);
+  }
+  const stopped =
+    TERMINAL.has(timeline.experiment.status ?? '') &&
+    timeline.experiment.completedMs != null &&
+    atMs >= timeline.experiment.completedMs;
 
   const workers: WorkerFrame[] = timeline.workers.map((w) => {
     const mine = timeline.jobs.filter((j) => j.workerId === w.id);
@@ -179,7 +194,9 @@ export function frameAt(timeline: Timeline, atMs: number, options: { flightMs?: 
       blockMark && blockMark.atMs >= (w.blockedAtMs ?? -Infinity)
         ? blockMark.type === 'worker_blocked'
         : w.stopReason === 'needs_private_route' && w.blockedAtMs != null && atMs >= w.blockedAtMs;
-    if (blocked) {
+    if (stopped && w.started) {
+      frame.state = 'stopped';
+    } else if (blocked) {
       frame.state = 'blocked';
     } else if (isUnreachable(timeline, w, atMs)) {
       frame.state = 'offline';
@@ -212,12 +229,16 @@ export function frameAt(timeline: Timeline, atMs: number, options: { flightMs?: 
   const current = opened.at(-1);
   let generation: GenerationFrame | null = null;
   if (current) {
-    const committed = timeline.jobs.filter(
-      (j) => j.generation === current.index && j.status === 'SUCCEEDED' && j.endMs !== null && j.endMs <= atMs,
-    ).length;
+    const observedCommitted = committedByGeneration.get(current.index) ?? 0;
+    const committed =
+      stopped || (current.doneMs !== null && atMs >= current.doneMs)
+        ? (current.committedCount ?? observedCommitted)
+        : observedCommitted;
     let phase: GenerationFrame['phase'] = 'evaluating';
     let phaseProgress = 0;
-    if (current.doneMs !== null && atMs >= current.doneMs) {
+    if (stopped && timeline.experiment.status !== 'COMPLETED') {
+      phase = 'stopped';
+    } else if (current.doneMs !== null && atMs >= current.doneMs) {
       // "finished" only when no further generation can follow: it was the last one planned, or the run has stopped.
       const isLast = current.index + 1 >= (timeline.experiment.maxGenerations ?? Infinity);
       const stopped =
@@ -276,7 +297,14 @@ export function frameAt(timeline: Timeline, atMs: number, options: { flightMs?: 
     packets,
     marks: timeline.marks.filter((m) => m.atMs <= atMs && atMs - m.atMs < MARK_VISIBLE_MS),
     totals: {
-      committed: finished.filter((j) => j.status === 'SUCCEEDED').length,
+      committed: timeline.generations.reduce(
+        (total, g) =>
+          total +
+          (stopped || (g.doneMs !== null && g.doneMs <= atMs)
+            ? (g.committedCount ?? 0)
+            : (committedByGeneration.get(g.index) ?? 0)),
+        0,
+      ),
       total:
         timeline.experiment.maxGenerations && timeline.experiment.candidatesPerGeneration
           ? timeline.experiment.maxGenerations * timeline.experiment.candidatesPerGeneration

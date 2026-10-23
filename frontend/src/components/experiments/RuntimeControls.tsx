@@ -38,9 +38,6 @@ export function RuntimeControls({ experiment: e }: { experiment: Experiment }) {
           <MembershipPanel experiment={e} permitted={permitted} />
           {e.waitingReason && <p className="note">{t(e.waitingReason)}</p>}
 
-          {e.monitoringPartial && (
-            <p>{t('Dashboard details show recent history. Full canonical history is retained in recovery points.')}</p>
-          )}
           {e.failureReason && (
             <p className="note err" role="alert">
               {t(e.failureReason)}
