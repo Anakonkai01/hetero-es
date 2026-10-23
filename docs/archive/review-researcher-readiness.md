@@ -1,7 +1,7 @@
 # Brief for a deep review: what is still missing for researchers and scientists? (opened 2026-10-20)
 
 > **Superseded on 2026-10-20:** the owner did not ask for this report and dropped it. Its two backlog items (pluggable
-> sampler, self-hosted multi-machine with a Python reward) are steps of the system-finish plan in [HANDOFF.md](HANDOFF.md).
+> sampler, self-hosted multi-machine with a Python reward) are steps of the system-finish plan in [HANDOFF.md](../HANDOFF.md).
 
 Written for a later Claude Opus session (or any strong reviewer) that starts cold. The owner wants an **independent
 review**, not a continuation: read the primary sources yourself, read the project as it is, and report what stops a

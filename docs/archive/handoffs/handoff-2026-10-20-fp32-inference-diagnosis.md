@@ -6,7 +6,7 @@ The owner subsequently authorized full continuation. Release step 5 is still inc
 
 ## Established cause of this candidate's mismatch
 
-[Original investigation](evidence/2026-10-20-audit-mismatch-investigation/RESULTS.md): both GPUs independently
+[Original investigation](../../evidence/2026-10-20-audit-mismatch-investigation/RESULTS.md): both GPUs independently
 reconstructed all ten original updates, checking each intermediate child hash. On exact g10/c5, input IDs,
 attention masks, perturbed FP16 and shadow FP32 weights match bit for bit. Two repeats on each GPU reproduce
 its original completion hash. Row 0 first diverges at generated token 13: 5070 selects 16861, Quang selects
@@ -22,7 +22,7 @@ the model's internal explicit FP32 conversions. This is diagnostic, not a produc
 The owner replied: "nhưng trong thực tế máy gpu consummer làm gì xài fp64". This is NOT approval of the
 earlier proposed full-FP64 decoder. GPU generation should remain FP32 pending a policy decision.
 
-[Selective CPU probe](evidence/2026-10-20-fp32-margin-cpu-probe/RESULTS.md): only 2/256 token slots have
+[Selective CPU probe](../../evidence/2026-10-20-fp32-margin-cpu-probe/RESULTS.md): only 2/256 token slots have
 top-two gaps below 0.01. A scratch-only final logits processor keeps GPU inference FP32 and recomputes
 those prefixes with a CPU FP64 reference. Both full token arrays/texts then match the original 5070 hash.
 Measured guarded generation is 1.182 s on 5070 / 2.331 s on Quang, including lazy reference creation;

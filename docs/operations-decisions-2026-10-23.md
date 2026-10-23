@@ -24,6 +24,12 @@ Source: owner responses in the follow-up grilling session for
 
 Status: **policy agreed; root cause unresolved; mitigation not implemented**.
 
+**Review 2026-10-23 10:20 ([evidence](evidence/2026-10-23-oomd-review/README.md)):** strong hypothesis = the
+recovery-point upload thread (`product/cloud_sync.py`) re-hashing ~3-4 GB per attempt, buffering ~1 GB per upload and
+writing ~1 GB every ~2 min to the lab storage on the NTFS/FUSE Archive disk during a 24 s/generation run. Confirmed
+separate bug: with the Archive full, the worker service still re-reads ~60 MB/s every 30 s with no run active and holds
+9.1 GB of page cache. Five fixes proposed there; none implemented.
+
 On 2026-10-23 at 02:50:07 (journal timestamp), systemd-oomd killed three processes
 in nhan's `heteroes-worker.service`. Its parent `user@1000.service` had memory
 pressure of 53.10%, exceeding 50% for more than 20 seconds with reclaim activity.

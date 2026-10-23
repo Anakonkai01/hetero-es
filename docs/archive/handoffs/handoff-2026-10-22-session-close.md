@@ -37,7 +37,7 @@ Details of the morning: [handoff-2026-10-22-tier3-running.md](handoff-2026-10-22
 2. **Build candidate13** = `feat/gsm8k-demo` (wave 2 + `b5e1bc7` + finding 10 fix) and deploy: lab (`deploy-lab-c12.sh`
    pattern, idle lab) and the three Linux agents (`update-to-c12.sh` pattern). Then a short `evalChunks: [16, 32, 64]` run
    (ADR-010) and check the web live view on it.
-3. **SDK → lab bridge** + "you are the researcher" notebook section: [plan-sdk-lab-bridge.md](plan-sdk-lab-bridge.md);
+3. **SDK → lab bridge** + "you are the researcher" notebook section: [plan-sdk-lab-bridge.md](../../plan-sdk-lab-bridge.md);
    grill the owner on the API first.
 4. Finding 9 product fix (timeline shows a re-added member); Windows app update on 3060-thao (someone at the screen);
    disk: finished runs keep 4–6 GB of weights each under `~/.local/share/heteroes-worker/artifacts/coordinators/` (~33 GB),

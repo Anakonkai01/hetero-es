@@ -2,7 +2,7 @@
 
 Branch **`feat/real-user-c13`** (not pushed). Lab on **`948059b`** (build `lf1-20261022-r11-candidate13`); agents
 5070ti-nhan and 5070ti-nhut on **`lf1-20261022-r11-candidate13b`** (runtime `756272d28ef3`, finding 12 fix); the
-candidate13b installers are published. Lab idle. Evidence: [evidence/2026-10-22-candidate13/](evidence/2026-10-22-candidate13/README.md).
+candidate13b installers are published. Lab idle. Evidence: [evidence/2026-10-22-candidate13/](../../evidence/2026-10-22-candidate13/README.md).
 
 ## Done this session (owner's scope from the grill, memory `hetero-es-real-user-c13-2026-10-22`)
 
@@ -46,7 +46,7 @@ candidate13b installers are published. Lab idle. Evidence: [evidence/2026-10-22-
 - Lab redeployed by the owner to **`2047452`** (`evidence/2026-10-22-candidate13/deploy-lab-c13c.sh`, rollback
   `deploy-lab-rollback-c13c.sh`; agents stay on 13b). Live view now shows device names (`89710ff`), the notebook's
   device table leaves out revoked devices (`f30aa06`). The owner deleted the revoked devices on the web.
-- Audit run `4eadb5b4…` from the notebook ([evidence/2026-10-22-candidate13c-audit-run/](evidence/2026-10-22-candidate13c-audit-run/README.md)):
+- Audit run `4eadb5b4…` from the notebook ([evidence/2026-10-22-candidate13c-audit-run/](../../evidence/2026-10-22-candidate13c-audit-run/README.md)):
   10/10 generations, audits 9 selected / 8 completed / all matched (done: next-session item 4 of the list above).
 - **Finding 13 (do first next session, Opus, effort high):** nhut's worker (`cli-34312a79fbbc`) died after generation 7;
   its replay of the 8th update (g7→g8) gives `2b9b3f1e…`, expected `d864a9b6…`, identical on all 6 automatic restarts.

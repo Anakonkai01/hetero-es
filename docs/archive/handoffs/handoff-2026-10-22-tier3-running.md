@@ -32,7 +32,7 @@ is the run id).
 2. Wave 2 deploy (candidate13 proper = `feat/gsm8k-demo`), then a short `evalChunks: [16, 32, 64]` run (ADR-010).
 3. Finding 9 product fix (timeline shows a re-added member). Windows app update on 3060-thao (someone at the screen).
 4. **SDK → lab bridge + a "you are the researcher" notebook section** (owner asked 12:30, planned for later):
-   [plan-sdk-lab-bridge.md](plan-sdk-lab-bridge.md). Grill the owner on the API first.
+   [plan-sdk-lab-bridge.md](../../plan-sdk-lab-bridge.md). Grill the owner on the API first.
 
 ## Midterm demo (12:15, `7c48403`)
 

@@ -5,7 +5,7 @@ Branch **`feat/gsm8k-demo`** (not pushed). Lab still on `a198cb0` (candidate12 +
 ## What happened
 
 1. The owner asked why tier 3 did not get better. A read-only audit of its ledger and weight files
-   ([evidence/2026-10-22-gsm8k-demo/learning-audit/](evidence/2026-10-22-gsm8k-demo/learning-audit/README.md)) found
+   ([evidence/2026-10-22-gsm8k-demo/learning-audit/](../../evidence/2026-10-22-gsm8k-demo/learning-audit/README.md)) found
    **no system fault**: 0 of 2,304 rewards change when re-scored, 114/114 audits matched, the update has the documented
    size (applied L2 1.966 vs 1.965) and float16 keeps it, and the center drifts exactly like a random walk. The cause
    is learning, not the system: at σ = 1e-3 the ranking of candidates on 32 questions is luck (noise ratio 1.00,
@@ -37,5 +37,5 @@ Branch **`feat/gsm8k-demo`** (not pushed). Lab still on `a198cb0` (candidate12 +
 7. Disk: finished runs keep 4–6 GB of weights under `~/.local/share/heteroes-worker/artifacts/coordinators/` (~38 GB
    with tier 3); prunable after parity receipts **only with the owner's OK**.
 
-Later, not next session: SDK → lab bridge ([plan-sdk-lab-bridge.md](plan-sdk-lab-bridge.md), grill the owner first);
+Later, not next session: SDK → lab bridge ([plan-sdk-lab-bridge.md](../../plan-sdk-lab-bridge.md), grill the owner first);
 any new learning run (Countdown would be the case where ES visibly helps a 0.5B model).

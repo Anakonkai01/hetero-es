@@ -3,7 +3,7 @@
 Owner-approved work from `96182b7`, branch `feat/real-user-c13`. CPU V2 first;
 CUDA enablement and chunk 128 deferred. The owner requested handoff to Claude
 at 15% remaining usage. Claude finished the native approval fix (candidate14e) and close-out on 23 Oct.
-See [current handoff](../../handoff-2026-10-22-candidate14-claude-next.md).
+See [current handoff](../../archive/handoffs/handoff-2026-10-22-candidate14-claude-next.md).
 
 ## Implemented and deployed
 

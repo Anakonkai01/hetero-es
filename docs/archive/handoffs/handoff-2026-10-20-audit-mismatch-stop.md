@@ -1,7 +1,7 @@
 # Handoff: STOP at candidate5 long-run audit mismatch — 2026-10-20
 
 Read `../AGENTS.md`, `plan-r11-release.md` and
-[evidence/2026-10-20-long-multimachine-run-attempt2/RESULTS.md](evidence/2026-10-20-long-multimachine-run-attempt2/RESULTS.md).
+[evidence/2026-10-20-long-multimachine-run-attempt2/RESULTS.md](../../evidence/2026-10-20-long-multimachine-run-attempt2/RESULTS.md).
 This supersedes the operational state in `handoff-2026-10-20-quang-then-long-run.md`.
 Branch `feat/v3-audit-recovery`; main remains **086c282**. No source/runtime/backend/frontend/desktop code was
 changed relative to the starting commit 35603d4. This continuation changed operational test state and documentation only.
