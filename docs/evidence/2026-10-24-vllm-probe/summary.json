@@ -1,0 +1,1041 @@
+{
+  "inputs": {
+    "strict-nhan-large-01.json": "b0cd6d18f8eddcaaa81a0528d3f0692dfdd4d61d7e416605b7f421d358191d51",
+    "strict-thao-large-01.json": "acafbf8ffcc236995c775193997662a060e66ba78b3ed2d367a3c2a6af5b1f26",
+    "vllm-nhan-default-large-01.json": "1ec549c99745b2aba41afe587288618f5bdfd35372828dea58305b1c0287cc9d",
+    "vllm-nhan-invariant-large-01.json": "4c138679b9660bc3bdbf58533cec2b48a677b11c4fad88d09b37479b18dedb2c",
+    "vllm-thao-default-large-01.json": "c1a5cc829f0539cd2aa8bcfd0d08bc70dd1ff436d949c20862a94cafdf8ddd7f",
+    "vllm-thao-invariant-large-01.json": "a294c7d8d49b885bd076b2ed518ef72e87a8dc6ab2a330afa9ca1f9435a0c6c5"
+  },
+  "crossGpu": {
+    "vllm-default": {
+      "prompts": 208,
+      "tokensFirstMachine": 44536,
+      "promptsEqual": 193,
+      "promptsDiffering": 15,
+      "differences": [
+        {
+          "prompt": 4,
+          "firstDifferentToken": 241
+        },
+        {
+          "prompt": 7,
+          "firstDifferentToken": 36
+        },
+        {
+          "prompt": 24,
+          "firstDifferentToken": 2
+        },
+        {
+          "prompt": 38,
+          "firstDifferentToken": 183
+        },
+        {
+          "prompt": 46,
+          "firstDifferentToken": 73
+        },
+        {
+          "prompt": 57,
+          "firstDifferentToken": 92
+        },
+        {
+          "prompt": 96,
+          "firstDifferentToken": 96
+        },
+        {
+          "prompt": 123,
+          "firstDifferentToken": 2
+        },
+        {
+          "prompt": 124,
+          "firstDifferentToken": 110
+        },
+        {
+          "prompt": 126,
+          "firstDifferentToken": 66
+        },
+        {
+          "prompt": 144,
+          "firstDifferentToken": 60
+        },
+        {
+          "prompt": 147,
+          "firstDifferentToken": 2
+        },
+        {
+          "prompt": 148,
+          "firstDifferentToken": 145
+        },
+        {
+          "prompt": 149,
+          "firstDifferentToken": 9
+        },
+        {
+          "prompt": 166,
+          "firstDifferentToken": 2
+        }
+      ]
+    },
+    "vllm-invariant": {
+      "prompts": 208,
+      "tokensFirstMachine": 44451,
+      "promptsEqual": 193,
+      "promptsDiffering": 15,
+      "differences": [
+        {
+          "prompt": 4,
+          "firstDifferentToken": 241
+        },
+        {
+          "prompt": 17,
+          "firstDifferentToken": 93
+        },
+        {
+          "prompt": 37,
+          "firstDifferentToken": 128
+        },
+        {
+          "prompt": 39,
+          "firstDifferentToken": 2
+        },
+        {
+          "prompt": 42,
+          "firstDifferentToken": 183
+        },
+        {
+          "prompt": 46,
+          "firstDifferentToken": 73
+        },
+        {
+          "prompt": 50,
+          "firstDifferentToken": 173
+        },
+        {
+          "prompt": 57,
+          "firstDifferentToken": 92
+        },
+        {
+          "prompt": 60,
+          "firstDifferentToken": 123
+        },
+        {
+          "prompt": 68,
+          "firstDifferentToken": 110
+        },
+        {
+          "prompt": 96,
+          "firstDifferentToken": 96
+        },
+        {
+          "prompt": 125,
+          "firstDifferentToken": 236
+        },
+        {
+          "prompt": 154,
+          "firstDifferentToken": 156
+        },
+        {
+          "prompt": 177,
+          "firstDifferentToken": 137
+        },
+        {
+          "prompt": 206,
+          "firstDifferentToken": 197
+        }
+      ]
+    },
+    "strict": {
+      "prompts": 208,
+      "tokensFirstMachine": 47826,
+      "promptsEqual": 208,
+      "promptsDiffering": 0,
+      "differences": []
+    }
+  },
+  "vllm-default-nhan": {
+    "gpu": "NVIDIA GeForce RTX 5070 Ti",
+    "vllm": "0.32.0",
+    "batchedEqualsSinglePrompts": 194,
+    "copiesEqualSingle": false,
+    "batchTokensPerSecondTotal": 33903.8,
+    "batchSequences": 128,
+    "singleSequenceTokensPerSecond": 522.3
+  },
+  "vllm-default-thao": {
+    "gpu": "NVIDIA GeForce RTX 3060",
+    "vllm": "0.32.0",
+    "batchedEqualsSinglePrompts": 193,
+    "copiesEqualSingle": false,
+    "batchTokensPerSecondTotal": 11182.0,
+    "batchSequences": 128,
+    "singleSequenceTokensPerSecond": 235.9
+  },
+  "vllm-invariant-nhan": {
+    "gpu": "NVIDIA GeForce RTX 5070 Ti",
+    "vllm": "0.32.0",
+    "batchedEqualsSinglePrompts": 208,
+    "copiesEqualSingle": true,
+    "batchTokensPerSecondTotal": 14721.6,
+    "batchSequences": 128,
+    "singleSequenceTokensPerSecond": 146.2
+  },
+  "vllm-invariant-thao": {
+    "gpu": "NVIDIA GeForce RTX 3060",
+    "vllm": "0.32.0",
+    "batchedEqualsSinglePrompts": 208,
+    "copiesEqualSingle": true,
+    "batchTokensPerSecondTotal": 7589.2,
+    "batchSequences": 128,
+    "singleSequenceTokensPerSecond": 77.7
+  },
+  "strictVsVllmInvariantNhan": {
+    "prompts": 208,
+    "tokensFirstMachine": 47826,
+    "promptsEqual": 0,
+    "promptsDiffering": 208,
+    "differences": [
+      {
+        "prompt": 0,
+        "firstDifferentToken": 7
+      },
+      {
+        "prompt": 1,
+        "firstDifferentToken": 20
+      },
+      {
+        "prompt": 2,
+        "firstDifferentToken": 0
+      },
+      {
+        "prompt": 3,
+        "firstDifferentToken": 54
+      },
+      {
+        "prompt": 4,
+        "firstDifferentToken": 6
+      },
+      {
+        "prompt": 5,
+        "firstDifferentToken": 1
+      },
+      {
+        "prompt": 6,
+        "firstDifferentToken": 0
+      },
+      {
+        "prompt": 7,
+        "firstDifferentToken": 15
+      },
+      {
+        "prompt": 8,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 9,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 10,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 11,
+        "firstDifferentToken": 14
+      },
+      {
+        "prompt": 12,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 13,
+        "firstDifferentToken": 8
+      },
+      {
+        "prompt": 14,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 15,
+        "firstDifferentToken": 17
+      },
+      {
+        "prompt": 16,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 17,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 18,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 19,
+        "firstDifferentToken": 9
+      },
+      {
+        "prompt": 20,
+        "firstDifferentToken": 14
+      },
+      {
+        "prompt": 21,
+        "firstDifferentToken": 10
+      },
+      {
+        "prompt": 22,
+        "firstDifferentToken": 20
+      },
+      {
+        "prompt": 23,
+        "firstDifferentToken": 16
+      },
+      {
+        "prompt": 24,
+        "firstDifferentToken": 3
+      },
+      {
+        "prompt": 25,
+        "firstDifferentToken": 17
+      },
+      {
+        "prompt": 26,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 27,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 28,
+        "firstDifferentToken": 14
+      },
+      {
+        "prompt": 29,
+        "firstDifferentToken": 10
+      },
+      {
+        "prompt": 30,
+        "firstDifferentToken": 18
+      },
+      {
+        "prompt": 31,
+        "firstDifferentToken": 17
+      },
+      {
+        "prompt": 32,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 33,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 34,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 35,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 36,
+        "firstDifferentToken": 14
+      },
+      {
+        "prompt": 37,
+        "firstDifferentToken": 8
+      },
+      {
+        "prompt": 38,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 39,
+        "firstDifferentToken": 3
+      },
+      {
+        "prompt": 40,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 41,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 42,
+        "firstDifferentToken": 16
+      },
+      {
+        "prompt": 43,
+        "firstDifferentToken": 17
+      },
+      {
+        "prompt": 44,
+        "firstDifferentToken": 14
+      },
+      {
+        "prompt": 45,
+        "firstDifferentToken": 10
+      },
+      {
+        "prompt": 46,
+        "firstDifferentToken": 14
+      },
+      {
+        "prompt": 47,
+        "firstDifferentToken": 3
+      },
+      {
+        "prompt": 48,
+        "firstDifferentToken": 11
+      },
+      {
+        "prompt": 49,
+        "firstDifferentToken": 10
+      },
+      {
+        "prompt": 50,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 51,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 52,
+        "firstDifferentToken": 12
+      },
+      {
+        "prompt": 53,
+        "firstDifferentToken": 10
+      },
+      {
+        "prompt": 54,
+        "firstDifferentToken": 12
+      },
+      {
+        "prompt": 55,
+        "firstDifferentToken": 18
+      },
+      {
+        "prompt": 56,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 57,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 58,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 59,
+        "firstDifferentToken": 14
+      },
+      {
+        "prompt": 60,
+        "firstDifferentToken": 17
+      },
+      {
+        "prompt": 61,
+        "firstDifferentToken": 13
+      },
+      {
+        "prompt": 62,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 63,
+        "firstDifferentToken": 16
+      },
+      {
+        "prompt": 64,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 65,
+        "firstDifferentToken": 12
+      },
+      {
+        "prompt": 66,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 67,
+        "firstDifferentToken": 9
+      },
+      {
+        "prompt": 68,
+        "firstDifferentToken": 14
+      },
+      {
+        "prompt": 69,
+        "firstDifferentToken": 10
+      },
+      {
+        "prompt": 70,
+        "firstDifferentToken": 20
+      },
+      {
+        "prompt": 71,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 72,
+        "firstDifferentToken": 3
+      },
+      {
+        "prompt": 73,
+        "firstDifferentToken": 17
+      },
+      {
+        "prompt": 74,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 75,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 76,
+        "firstDifferentToken": 19
+      },
+      {
+        "prompt": 77,
+        "firstDifferentToken": 10
+      },
+      {
+        "prompt": 78,
+        "firstDifferentToken": 18
+      },
+      {
+        "prompt": 79,
+        "firstDifferentToken": 18
+      },
+      {
+        "prompt": 80,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 81,
+        "firstDifferentToken": 18
+      },
+      {
+        "prompt": 82,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 83,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 84,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 85,
+        "firstDifferentToken": 10
+      },
+      {
+        "prompt": 86,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 87,
+        "firstDifferentToken": 17
+      },
+      {
+        "prompt": 88,
+        "firstDifferentToken": 14
+      },
+      {
+        "prompt": 89,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 90,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 91,
+        "firstDifferentToken": 17
+      },
+      {
+        "prompt": 92,
+        "firstDifferentToken": 14
+      },
+      {
+        "prompt": 93,
+        "firstDifferentToken": 10
+      },
+      {
+        "prompt": 94,
+        "firstDifferentToken": 19
+      },
+      {
+        "prompt": 95,
+        "firstDifferentToken": 2
+      },
+      {
+        "prompt": 96,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 97,
+        "firstDifferentToken": 18
+      },
+      {
+        "prompt": 98,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 99,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 100,
+        "firstDifferentToken": 14
+      },
+      {
+        "prompt": 101,
+        "firstDifferentToken": 9
+      },
+      {
+        "prompt": 102,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 103,
+        "firstDifferentToken": 18
+      },
+      {
+        "prompt": 104,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 105,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 106,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 107,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 108,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 109,
+        "firstDifferentToken": 10
+      },
+      {
+        "prompt": 110,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 111,
+        "firstDifferentToken": 16
+      },
+      {
+        "prompt": 112,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 113,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 114,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 115,
+        "firstDifferentToken": 11
+      },
+      {
+        "prompt": 116,
+        "firstDifferentToken": 14
+      },
+      {
+        "prompt": 117,
+        "firstDifferentToken": 10
+      },
+      {
+        "prompt": 118,
+        "firstDifferentToken": 14
+      },
+      {
+        "prompt": 119,
+        "firstDifferentToken": 16
+      },
+      {
+        "prompt": 120,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 121,
+        "firstDifferentToken": 17
+      },
+      {
+        "prompt": 122,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 123,
+        "firstDifferentToken": 2
+      },
+      {
+        "prompt": 124,
+        "firstDifferentToken": 12
+      },
+      {
+        "prompt": 125,
+        "firstDifferentToken": 10
+      },
+      {
+        "prompt": 126,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 127,
+        "firstDifferentToken": 18
+      },
+      {
+        "prompt": 128,
+        "firstDifferentToken": 3
+      },
+      {
+        "prompt": 129,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 130,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 131,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 132,
+        "firstDifferentToken": 14
+      },
+      {
+        "prompt": 133,
+        "firstDifferentToken": 10
+      },
+      {
+        "prompt": 134,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 135,
+        "firstDifferentToken": 18
+      },
+      {
+        "prompt": 136,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 137,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 138,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 139,
+        "firstDifferentToken": 11
+      },
+      {
+        "prompt": 140,
+        "firstDifferentToken": 14
+      },
+      {
+        "prompt": 141,
+        "firstDifferentToken": 10
+      },
+      {
+        "prompt": 142,
+        "firstDifferentToken": 19
+      },
+      {
+        "prompt": 143,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 144,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 145,
+        "firstDifferentToken": 18
+      },
+      {
+        "prompt": 146,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 147,
+        "firstDifferentToken": 16
+      },
+      {
+        "prompt": 148,
+        "firstDifferentToken": 17
+      },
+      {
+        "prompt": 149,
+        "firstDifferentToken": 9
+      },
+      {
+        "prompt": 150,
+        "firstDifferentToken": 18
+      },
+      {
+        "prompt": 151,
+        "firstDifferentToken": 18
+      },
+      {
+        "prompt": 152,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 153,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 154,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 155,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 156,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 157,
+        "firstDifferentToken": 9
+      },
+      {
+        "prompt": 158,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 159,
+        "firstDifferentToken": 2
+      },
+      {
+        "prompt": 160,
+        "firstDifferentToken": 19
+      },
+      {
+        "prompt": 161,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 162,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 163,
+        "firstDifferentToken": 9
+      },
+      {
+        "prompt": 164,
+        "firstDifferentToken": 14
+      },
+      {
+        "prompt": 165,
+        "firstDifferentToken": 10
+      },
+      {
+        "prompt": 166,
+        "firstDifferentToken": 20
+      },
+      {
+        "prompt": 167,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 168,
+        "firstDifferentToken": 2
+      },
+      {
+        "prompt": 169,
+        "firstDifferentToken": 17
+      },
+      {
+        "prompt": 170,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 171,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 172,
+        "firstDifferentToken": 14
+      },
+      {
+        "prompt": 173,
+        "firstDifferentToken": 10
+      },
+      {
+        "prompt": 174,
+        "firstDifferentToken": 18
+      },
+      {
+        "prompt": 175,
+        "firstDifferentToken": 18
+      },
+      {
+        "prompt": 176,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 177,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 178,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 179,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 180,
+        "firstDifferentToken": 14
+      },
+      {
+        "prompt": 181,
+        "firstDifferentToken": 10
+      },
+      {
+        "prompt": 182,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 183,
+        "firstDifferentToken": 17
+      },
+      {
+        "prompt": 184,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 185,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 186,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 187,
+        "firstDifferentToken": 17
+      },
+      {
+        "prompt": 188,
+        "firstDifferentToken": 14
+      },
+      {
+        "prompt": 189,
+        "firstDifferentToken": 10
+      },
+      {
+        "prompt": 190,
+        "firstDifferentToken": 14
+      },
+      {
+        "prompt": 191,
+        "firstDifferentToken": 2
+      },
+      {
+        "prompt": 192,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 193,
+        "firstDifferentToken": 18
+      },
+      {
+        "prompt": 194,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 195,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 196,
+        "firstDifferentToken": 14
+      },
+      {
+        "prompt": 197,
+        "firstDifferentToken": 10
+      },
+      {
+        "prompt": 198,
+        "firstDifferentToken": 18
+      },
+      {
+        "prompt": 199,
+        "firstDifferentToken": 18
+      },
+      {
+        "prompt": 200,
+        "firstDifferentToken": 3
+      },
+      {
+        "prompt": 201,
+        "firstDifferentToken": 3
+      },
+      {
+        "prompt": 202,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 203,
+        "firstDifferentToken": 14
+      },
+      {
+        "prompt": 204,
+        "firstDifferentToken": 11
+      },
+      {
+        "prompt": 205,
+        "firstDifferentToken": 8
+      },
+      {
+        "prompt": 206,
+        "firstDifferentToken": 4
+      },
+      {
+        "prompt": 207,
+        "firstDifferentToken": 16
+      }
+    ]
+  },
+  "strict-nhan": {
+    "gpu": "NVIDIA GeForce RTX 5070 Ti",
+    "singleSequenceTokensPerSecond": 65.8,
+    "cudaPeakAllocatedBytes": 1065254912
+  },
+  "strict-thao": {
+    "gpu": "NVIDIA GeForce RTX 3060",
+    "singleSequenceTokensPerSecond": 24.8,
+    "cudaPeakAllocatedBytes": 1065254912
+  }
+}

@@ -34,6 +34,20 @@ PROMPTS = (
 EXPECTED = (4, 8, 32, 72, None, 270, None, None)
 
 
+def generated_prompts(count):
+    """Deterministic templated word problems (no RNG), shared with the vLLM comparison probe."""
+    names = ("Ana", "Binh", "Chi", "Duc", "Emma", "Fatima", "Goro", "Hana")
+    items = ("apples", "pencils", "marbles", "stickers", "books", "coins")
+    prompts = []
+    for i in range(count):
+        a, b, c = 3 + (i * 7) % 41, 2 + (i * 11) % 23, 2 + (i * 5) % 9
+        prompts.append(
+            f"{names[i % 8]} has {a} {items[i % 6]}. She buys {b} more, then gives away a {c}th of what she has, "
+            f"rounded down. How many {items[i % 6]} are left? Explain step by step and end with the number."
+        )
+    return prompts
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model-path", required=True, type=Path)
@@ -46,12 +60,18 @@ def main(argv=None):
     parser.add_argument("--sigma", type=float, default=1e-3)
     parser.add_argument("--max-context", type=int, default=512)
     parser.add_argument("--eager-check", type=int, default=0, help="prompts whose prefill logits use eager too")
+    parser.add_argument("--generated", type=int, default=0, help="extra templated prompts after the fixed ones")
     args = parser.parse_args(argv)
     if args.out.exists():
         parser.error("Evidence already exists; choose a fresh --out")
     if not args.gpu or os.environ.get("HETEROES_GPU_ACCEPTANCE") != "1":
         parser.error("This probe requires --gpu and HETEROES_GPU_ACCEPTANCE=1")
-    if not 0 <= args.candidates <= 1000 or not 1 <= args.prompts <= len(PROMPTS) or not 1 <= args.max_new_tokens:
+    if (
+        not 0 <= args.candidates <= 1000
+        or not 1 <= args.prompts <= len(PROMPTS)
+        or not 1 <= args.max_new_tokens
+        or not 0 <= args.generated <= 10000
+    ):
         parser.error("Invalid candidate/prompt/token limits")
 
     import torch
@@ -117,7 +137,8 @@ def main(argv=None):
             "candidates": [],
         }
         report["comparison"] = comparison
-        prompts = [tokenizer(text, return_tensors="pt")["input_ids"].cuda() for text in PROMPTS[: args.prompts]]
+        texts = list(PROMPTS[: args.prompts]) + generated_prompts(args.generated)
+        prompts = [tokenizer(text, return_tensors="pt")["input_ids"].cuda() for text in texts]
         candidates = [("parent", None, 0.0)]
         for index in range(args.candidates):
             # Antithetic pairs: seed s with +sigma and -sigma, as ES rollouts use them.
@@ -153,7 +174,7 @@ def main(argv=None):
                         textSha256=hashlib.sha256(text.encode()).hexdigest(),
                         text=text,
                     )
-                    if EXPECTED[number] is not None:
+                    if number < len(EXPECTED) and EXPECTED[number] is not None:
                         case["reward"] = float(extract_integer(text) == EXPECTED[number])
                     entry["prompts"].append(case)
             finally:

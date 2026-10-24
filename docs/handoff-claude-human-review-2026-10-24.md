@@ -43,6 +43,14 @@ they were left alone.
    launch overhead (cache argument arrays, or CUDA graphs per decode step). Add a multi-row linear (ILP over rows)
    and batched multi-sequence decode; row independence is already tested. Measure native HF FP16 for the same
    prompts, then propose thresholds to the owner.
+   vLLM comparison (owner discussion 2026-10-24): vLLM is not a strict replacement. Its vendor kernels and
+   "batch-invariant" mode target the same hardware/software, not 3060 vs 5070 Ti; it keeps its own weight
+   copy and VRAM reservation (conflicts with D1), fuses QKV/gate_up (in-place ES perturb/exact restore is
+   unsupported) and has no official native Windows. Borrow its throughput techniques for the strict backend instead:
+   continuous batching of many sequences (row independence is tested), paged KV cache, CUDA graphs per decode
+   step. A vLLM "fast, non-strict" mode may exist only if labeled not cross-machine equal (D3). Measured (`docs/evidence/2026-10-24-vllm-probe/`):
+   batch-invariant vLLM 0.32 differs between 5070 Ti and 3060 on 15/208 prompts; strict differs on 0/208.
+   vLLM batch throughput 7.6k–34k tok/s vs strict 25–66 tok/s per sequence, so batching is the next M1 speed work.
 4. Native Windows: not run. The tailscale node `desktop-qp0nta7-1` (100.81.45.107, Windows) may be Thao's Windows
    side. **SSH to it was not authorized: ask the owner.**
 5. M4 integration (recipe/backend identity, qualification cache keyed by backend, GPU ownership across roles,

@@ -1,0 +1,2 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 3136.19it/s]
+{"status": "ok", "out": "/tmp/heteroes-strict-20261024-large-thao-01/probe.json", "wallSeconds": 2009.4920731269995}
