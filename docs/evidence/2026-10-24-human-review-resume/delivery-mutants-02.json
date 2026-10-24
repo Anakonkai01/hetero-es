@@ -1,0 +1,98 @@
+[
+  {
+    "name": "stop-heartbeat-before-ack",
+    "file": "src/heteroes/worker.py",
+    "old": "reply = self.client._call(operation, payload)",
+    "new": "self.close()\n            reply = self.client._call(operation, payload)"
+  },
+  {
+    "name": "forget-pending-on-transient",
+    "file": "src/heteroes/worker.py",
+    "old": "except self._transient:\n            raise",
+    "new": "except self._transient:\n            self._finish_pending()\n            raise"
+  },
+  {
+    "name": "do-not-recover-pending",
+    "file": "src/heteroes/worker.py",
+    "old": "if state[\"pending\"] is not None:",
+    "new": "if False:"
+  },
+  {
+    "name": "omit-local-restore-poison",
+    "file": "src/heteroes/worker.py",
+    "old": "self._poisoned = True  # local stop precedes persistence and any attempt to notify the coordinator",
+    "new": "pass  # no local poison"
+  },
+  {
+    "name": "do-not-save-before-send",
+    "file": "src/heteroes/worker.py",
+    "old": "self._save_pending()  # an earlier persistence error must be retried before sending anything",
+    "new": "pass  # not persisted"
+  },
+  {
+    "name": "forget-heartbeat-on-restart",
+    "file": "src/heteroes/worker.py",
+    "old": "\"heartbeatSeconds\": self.heartbeat_seconds,",
+    "new": "\"heartbeatSeconds\": None,"
+  },
+  {
+    "name": "clear-poison-at-terminal-ack",
+    "file": "src/heteroes/worker.py",
+    "old": "pending, self._pending = self._pending, None",
+    "new": "self._poisoned = False\n        pending, self._pending = self._pending, None"
+  },
+  {
+    "name": "ignore-worker-lineage",
+    "file": "src/heteroes/worker_outbox.py",
+    "old": "state[\"workerId\"] != self.worker_id",
+    "new": "False"
+  },
+  {
+    "name": "ignore-endpoint-scope",
+    "file": "src/heteroes/worker_outbox.py",
+    "old": "state[\"scope\"] != self.scope",
+    "new": "False"
+  },
+  {
+    "name": "accept-corrupt-outbox",
+    "file": "src/heteroes/worker_outbox.py",
+    "old": "if hashlib.sha256(self._encode(state)).hexdigest() != envelope[\"sha256\"]:",
+    "new": "if False:"
+  },
+  {
+    "name": "unbounded-outbox-write",
+    "file": "src/heteroes/worker_outbox.py",
+    "old": "if len(data) > self.max_bytes:\n            raise ValueError(\"Outbox exceeds its byte limit\")\n        if self.path.is_symlink():",
+    "new": "if False:\n            raise ValueError(\"Outbox exceeds its byte limit\")\n        if self.path.is_symlink():"
+  },
+  {
+    "name": "skip-runtime-drain",
+    "file": "src/heteroes/worker_runtime.py",
+    "old": "if self._worker.pending_delivery:",
+    "new": "if False:"
+  },
+  {
+    "name": "drop-text-metadata-on-restart",
+    "file": "src/heteroes/worker.py",
+    "old": "operation, payload = value[\"operation\"], value[\"payload\"]",
+    "new": "operation, payload = value[\"operation\"], {k:v for k,v in value[\"payload\"].items() if k not in (\"usage\", \"chunk\")}"
+  },
+  {
+    "name": "ignore-private-delivery-directory",
+    "file": "src/heteroes/worker_runtime.py",
+    "old": "if delivery_state_dir is None",
+    "new": "if True"
+  },
+  {
+    "name": "keep-delivery-in-per-launch-directory",
+    "file": "src/heteroes/product/agent.py",
+    "old": "str(self.root / \"worker-delivery\" / command[\"assignmentId\"])",
+    "new": "str(directory / \".delivery\")"
+  },
+  {
+    "name": "touch-executor-during-cancellation",
+    "file": "src/heteroes/worker_runtime.py",
+    "old": "recipe_hash = getattr(getattr(executor, \"recipe\", None), \"hash\", None)",
+    "new": "recipe_hash = executor.recipe.hash"
+  }
+]

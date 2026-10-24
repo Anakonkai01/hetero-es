@@ -4,14 +4,15 @@ Owner approved the plan and autonomous implementation on 2026-10-24, including G
 `3060-thao`. Decisions: [ADR-012](../runtime/docs/adr/ADR-012-single-model-strict-inference.md).
 Branch: `fix/human-review-single-model-2026-10-24`; base: `c9997734`.
 No lab deployment or device approval changes are included.
-Owner paused Codex auto-run and requested continuation by Claude on 2026-10-24;
-read the [handoff](handoff-claude-human-review-2026-10-24.md). Implementation head at handoff: `3914fb5`.
+The owner resumed Codex on 2026-10-24 from clean `ecc2d19`, preserving the full approved plan and authorizing
+GPU/SSH experiments including SGLang. No push, merge, deployment, device-state change or learning run.
+The [Claude handoff](handoff-claude-human-review-2026-10-24.md) remains the historical starting point.
 
 | Milestone                                  | State                                                                                    | Next gate                                                    |
 | ------------------------------------------ | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
 | M0 contract/baseline                       | In progress: ADR, phase traces/storage inventory and real Qwen CPU lifecycle probe       | Broader pipeline timing                                      |
 | M1 one-model strict backend                | Reference plus audited NVRTC kernels; Qwen 0.5B tokens agree on four GPUs (sm_120/sm_86) | Native Windows, batching/throughput, lifecycle gates         |
-| M2 delivery/scorer/audit/watchdog/recovery | Not started                                                                              | Reproduce each behavior with fault/concurrency tests         |
+| M2 delivery/scorer/audit/watchdog/recovery | In progress: scorer reservation; delivery heartbeat, durable outbox and local restore poison | Bounded usage, audit controls/statuses, watchdog and D10 recovery |
 | M3 recovery I/O and long-run overhead      | Not started                                                                              | Bounded upload/retry and consistency tests                   |
 | M4 product/lifecycle/packaging             | Not started                                                                              | SDK/lab capability and native runtime acceptance             |
 | M5 system acceptance                       | Not started                                                                              | End-to-end, faults, memory and throughput receipts           |
@@ -47,3 +48,12 @@ both 3060s (WSL2). Speed: about 60 tokens/s per sequence on a 5070 Ti and 23–2
 took 46–149 s per token. Peak allocation is about 1.08 GB, close to one FP16 weight set. See
 [strict CUDA receipts](evidence/2026-10-24-strict-cuda/README.md). Not yet: native Windows, batched sequences,
 managed lifecycle/recipe integration and packaging.
+
+Codex continuation: the scorer reservation now lasts through canonical commit, closing a second-scoring race;
+mutation check 11/11. Delivery keeps heartbeat until terminal ACK/refusal, persists exact result/failure payloads
+in a bounded private outbox, and preserves local restore poison across restart. The agent shares private delivery
+storage across launches independently of the large weights cache. Mutation check 16/16; final runtime CPU suite
+2,837 passed, 186 skipped. The initial full check-all caught a cancellation constructor regression, now corrected;
+the other check-all steps and fresh Linux source-copy packages passed. See the retained failures and limits in
+[delivery evidence](evidence/2026-10-24-human-review-resume/delivery-summary.md).
+M2 and the overall M0–M6 plan remain incomplete; outbox tests do not qualify D10 automatic restore recovery.

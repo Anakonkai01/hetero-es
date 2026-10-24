@@ -494,6 +494,8 @@ class Agent:
                 "1",
                 "--cache-dir",
                 str(worker_cache(directory, self.config)),
+                "--delivery-state-dir",
+                str(self.root / "worker-delivery" / command["assignmentId"]),
                 "--give-up-after-seconds",
                 "120",
                 *([] if study and command["studyConfig"].get("recipeVersion") == 3 else ["--chunk", "16"]),

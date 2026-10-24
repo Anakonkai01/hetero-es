@@ -1,0 +1,58 @@
+{
+  "status": "pass-after-correction",
+  "base": "8dcfb6a",
+  "initialCheckAll": {
+    "receipt": "checks-01",
+    "failed": [
+      "runtime-tests"
+    ],
+    "otherStepsPassed": [
+      "python-lint",
+      "python-format",
+      "prettier",
+      "source-packages",
+      "backend-tests",
+      "frontend-unit",
+      "worker-unit",
+      "server-unit",
+      "product-ui-unit",
+      "types",
+      "lint",
+      "i18n",
+      "web-build",
+      "worker-build",
+      "web-onboarding",
+      "web-live",
+      "web-experiments",
+      "web-model-qualification",
+      "web-showcase",
+      "web-pages",
+      "worker-onboarding",
+      "worker-station"
+    ]
+  },
+  "correctiveChecks": {
+    "runtime": {
+      "passed": 2837,
+      "skipped": 186,
+      "receipt": "runtime-tests-02.log"
+    },
+    "deliveryMutations": {
+      "controlPassed": 16,
+      "killed": 16,
+      "total": 16,
+      "receipt": "delivery-mutation-02.log"
+    },
+    "targetedPrivateStateAndCancellation": {
+      "passed": 88,
+      "receipt": "delivery-private-state-green-02.log"
+    },
+    "packaging": "packaging-01.log",
+    "lint": "python-lint-02.log",
+    "format": "python-format-02.log"
+  },
+  "limits": [
+    "Initial check-all failure is retained; it was not relabeled ALL PASS.",
+    "CPU/package checks do not qualify GPU/native Windows or complete M2."
+  ]
+}

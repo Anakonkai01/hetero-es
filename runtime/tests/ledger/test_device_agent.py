@@ -628,6 +628,18 @@ def test_a_worker_on_the_private_route_keeps_its_bulk_and_the_default_chain(tmp_
     assert "--no-bulk" not in argv and "--replay-max-chain" not in argv
 
 
+def test_delivery_state_stays_private_and_is_shared_by_worker_relaunches(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    a.config["largeDataDirectory"] = str(tmp_path / "large-data")
+    first = launch_arguments(a, monkeypatch, start_command())
+    second = launch_arguments(a, monkeypatch, start_command(launch=1, commandId="relaunch"))
+    index = first.index("--delivery-state-dir") + 1
+    state = Path(first[index])
+    assert state == Path(second[second.index("--delivery-state-dir") + 1])
+    assert state.is_relative_to(a.root)
+    assert not state.is_relative_to(tmp_path / "large-data")
+
+
 def test_reachable_accepts_only_a_coordinator_that_says_it_is_up(tmp_path):
     import json
     import threading

@@ -58,6 +58,9 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--worker-id", required=True)
     parser.add_argument("--log", required=True, help="JSONL file for the events of this worker (must not exist)")
     parser.add_argument(
+        "--delivery-state-dir", type=Path, help="Private durable delivery state shared across launches of this run"
+    )
+    parser.add_argument(
         "--cache-dir",
         default=str(Path.home() / ".cache" / "heteroes" / "worker-cache"),
         help="where downloaded weights are kept (about 1 GB; use a real disk, /tmp may be RAM)",
@@ -344,6 +347,7 @@ def main(argv: list[str]) -> int:
         cache_guard=lambda: (
             checked_directory(args.cache_dir, args.storage_volume_uuid) if args.storage_volume_uuid else None
         ),
+        delivery_state_dir=args.delivery_state_dir or Path(args.log).parent / ".delivery",
     )
     try:
         runtime.admit()

@@ -8,10 +8,11 @@ network would; an HTTP transport will be another such function. `Worker.step()` 
 A failure is reported with its kind and never turned into a reward.
 
 Three things make a turn survive what goes wrong around it. A lease request carries a fresh `request_id`, so the client may repeat it
-after a lost reply and gets the same lease back. While `evaluate` runs, a heartbeat thread (if `heartbeat_seconds` is set) tells the
-coordinator that the lease is still wanted, so leases can be short. A reward that could not be delivered because of a transient error
-(the network) is kept in an outbox and is delivered FIRST at the next turn; an exception that is not a typed failure releases the
-candidate at once (reported as OTHER) before it propagates.
+after a lost reply and gets the same lease back. A heartbeat thread (if `heartbeat_seconds` is set) renews the lease
+through evaluation, restore, delivery and pending retries until terminal ACK/refusal. Results and failures are
+delivered before new work; an optional bounded private outbox preserves their exact payload across restart.
+A restore fault poisons the worker locally before reporting, including while the coordinator is unreachable.
+An exception that is not a typed failure is reported as OTHER before it propagates.
 """
 
 import json
@@ -158,19 +159,22 @@ class WorkerClient:
 
     def submit_completions(self, assignment: Assignment, completions) -> SubmitOutcome:
         """Recipe v3: send the texts of the candidate; the coordinator scores them (ADR-008 section 7)."""
+        reply = self._call("submit_result", self.completion_payload(assignment, completions))
+        return self.result_outcome(assignment, reply)
+
+    def completion_payload(self, assignment, completions):
         from heteroes.worker_api import completions_sha256
 
         texts = list(completions)
-        reply = self._call(
-            "submit_result",
-            {
-                **assignment.payload(),
-                "completions": texts,
-                "completions_sha256": completions_sha256(texts),
-                **({"usage": completions.usage} if self.usage_reporting and hasattr(completions, "usage") else {}),
-                **({"chunk": completions.chunk} if getattr(completions, "chunk", None) is not None else {}),
-            },
-        )
+        return {
+            **assignment.payload(),
+            "completions": texts,
+            "completions_sha256": completions_sha256(texts),
+            **({"usage": completions.usage} if self.usage_reporting and hasattr(completions, "usage") else {}),
+            **({"chunk": completions.chunk} if getattr(completions, "chunk", None) is not None else {}),
+        }
+
+    def result_outcome(self, assignment, reply):
         if assignment.audit_id is not None and self.worker_id in reply.get("quarantined_workers", []):
             raise WorkerAPIError("worker_quarantined", "Repeated audit mismatches")
         try:
@@ -226,6 +230,8 @@ class Worker:
         evaluate: Callable[[CandidateDescriptor], float | tuple[str, ...]],  # a reward, or the texts (Recipe v3)
         transient_errors: tuple = (),
         heartbeat_seconds: float | None = None,
+        outbox_path=None,
+        outbox_scope=None,
     ):
         self.worker_id = worker_id
         self.client = WorkerClient(worker_id, transport)
@@ -233,9 +239,20 @@ class Worker:
         self._transient = tuple(
             transient_errors
         )  # what a lost network looks like: a reward that meets it waits in the outbox
-        self._pending: tuple[Assignment, float] | None = None
+        self._pending = None
+        self._poisoned = False
+        self._heartbeat = None
+        self._outbox = None
         self._heartbeat_seconds = None
         self.heartbeat_seconds = heartbeat_seconds
+        if outbox_path is not None:
+            from heteroes.worker_outbox import DeliveryOutbox
+
+            self._outbox = DeliveryOutbox(outbox_path, worker_id, outbox_scope)
+            state = self._outbox.load()
+            self._poisoned = state["poisoned"]
+            if state["pending"] is not None:
+                self._pending = self._read_pending(state["pending"])
 
     @property
     def heartbeat_seconds(self) -> float | None:
@@ -255,6 +272,8 @@ class Worker:
     def step(self, generation: int | None = None) -> Step:
         if self._pending is not None:
             return self._deliver_pending()
+        if self._poisoned:
+            return Step(StepKind.QUARANTINED, code="worker_quarantined")
         try:
             reply = self.client.lease(generation)
         except WorkerAPIError as error:
@@ -265,20 +284,20 @@ class Worker:
         if work is None:
             return Step(StepKind.NO_WORK, generation_state=reply.generation_state)
 
+        self._start_heartbeat(work)
         try:
-            with _Heartbeat(self.client, work, self._heartbeat_seconds):
-                reward = (
-                    self._evaluate(work.descriptor)
-                    if work.chunk is None
-                    else self._evaluate(work.descriptor, chunk=work.chunk)  # an audit, at the original's chunk
-                )
+            reward = (
+                self._evaluate(work.descriptor)
+                if work.chunk is None
+                else self._evaluate(work.descriptor, chunk=work.chunk)  # an audit, at the original's chunk
+            )
         except CandidateFailed as failed:
             return self._report(work, failed.kind)
         except Exception:
             # not a typed failure: a bug, or something the executor could not classify. Free the candidate NOW (the lease would
             # otherwise hold it for its whole length) and let the exception reach the caller; a failure to say so changes nothing.
             try:
-                self.client.report_failure(work, FailureKind.OTHER)
+                self._report(work, FailureKind.OTHER)
             except Exception:
                 pass
             raise
@@ -290,31 +309,112 @@ class Worker:
             return self._report(work, FailureKind.VERIFIER_ERROR)  # never sent as a reward
         return self._deliver(work, reward)
 
+    @property
+    def pending_delivery(self):
+        return self._pending is not None
+
+    @property
+    def poisoned(self):
+        return self._poisoned
+
     def _deliver(self, work: Assignment, reward) -> Step:
+        payload = (
+            self.client.completion_payload(work, reward)
+            if isinstance(reward, tuple)
+            else {**work.payload(), "reward": reward}
+        )
+        self._pending = (work, "submit_result", payload, None)
+        return self._deliver_pending()
+
+    def _deliver_pending(self) -> Step:
+        work, operation, payload, failure = self._pending
+        self._save_pending()  # an earlier persistence error must be retried before sending anything
+        self._start_heartbeat(work)
         try:
-            if isinstance(reward, tuple):
-                outcome = self.client.submit_completions(work, reward)
-            else:
-                outcome = self.client.submit_result(work, reward)
+            reply = self.client._call(operation, payload)
+            outcome = self.client.result_outcome(work, reply) if operation == "submit_result" else None
         except self._transient:
-            self._pending = (work, reward)  # the work was done: keep it, try again before anything else
             raise
         except WorkerAPIError as error:
-            return self._refused(work, error)
+            if error.code in _PROTOCOL_ERRORS:
+                raise
+            if error.code == "worker_quarantined":
+                self._poisoned = True
+            self._finish_pending()
+            return self._refused(work, error, failure)
+        except BaseException:
+            if self._outbox is None:
+                self._finish_pending()  # legacy callers without configured transport retries
+            raise
+        self._finish_pending()
+        if operation == "report_failure":
+            return Step(StepKind.FAILURE_REPORTED, work.candidate_id, failure=failure)
         kind = StepKind.COMMITTED if outcome is SubmitOutcome.COMMITTED else StepKind.ALREADY_COMMITTED
         return Step(StepKind.AUDITED if work.audit_id is not None else kind, work.candidate_id)
 
-    def _deliver_pending(self) -> Step:
-        work, reward = self._pending
-        self._pending = None  # _deliver puts it back if the network is still down
-        return self._deliver(work, reward)
-
     def _report(self, work: Assignment, kind: FailureKind) -> Step:
+        if kind is FailureKind.RESTORE_MISMATCH:
+            self._poisoned = True  # local stop precedes persistence and any attempt to notify the coordinator
+        self._pending = (work, "report_failure", {**work.payload(), "kind": kind.value}, kind)
+        return self._deliver_pending()
+
+    def _start_heartbeat(self, work):
+        if self._heartbeat is None:
+            self._heartbeat = _Heartbeat(self.client, work, self._heartbeat_seconds)
+            self._heartbeat.__enter__()
+
+    def close(self):
+        """Stop this process's heartbeat. Durable delivery/poison state remains for the next process."""
+        if self._heartbeat is not None:
+            self._heartbeat.__exit__(None, None, None)
+            self._heartbeat = None
+
+    def _save_pending(self):
+        if self._outbox is not None:
+            pending = None
+            if self._pending is not None:
+                work, operation, payload, failure = self._pending
+                pending = {
+                    "assignment": {**work.payload(), "deadline": work.deadline, "chunk": work.chunk},
+                    "operation": operation,
+                    "payload": payload,
+                    "failure": None if failure is None else failure.value,
+                    "heartbeatSeconds": self.heartbeat_seconds,
+                }
+            self._outbox.save(pending, self._poisoned)
+
+    def _finish_pending(self):
+        pending, self._pending = self._pending, None
         try:
-            self.client.report_failure(work, kind)
-        except WorkerAPIError as error:
-            return self._refused(work, error, kind)
-        return Step(StepKind.FAILURE_REPORTED, work.candidate_id, failure=kind)
+            self._save_pending()
+        except BaseException:
+            self._pending = pending
+            raise
+        self.close()
+
+    def _read_pending(self, value):
+        from heteroes.worker_api import _decode_failure, _decode_result
+
+        work = _assignment(value["assignment"])
+        self.heartbeat_seconds = value.get("heartbeatSeconds")
+        operation, payload = value["operation"], value["payload"]
+        if operation not in ("submit_result", "report_failure"):
+            raise ValueError("Invalid outbox delivery operation")
+        if any(payload.get(key) != expected for key, expected in work.payload().items()):
+            raise ValueError("Outbox assignment lineage differs from the payload")
+        failure = None if value["failure"] is None else FailureKind(value["failure"])
+        decoded = {key: item for key, item in payload.items() if key != "audit_id"}
+        if operation == "submit_result":
+            _decode_result(decoded)
+            if failure is not None:
+                raise ValueError("A result outbox cannot contain a failure")
+        else:
+            _decode_failure(decoded)
+            if failure is None or payload["kind"] != failure.value:
+                raise ValueError("Outbox failure differs from the payload")
+            if failure is FailureKind.RESTORE_MISMATCH and not self._poisoned:
+                raise ValueError("Restore fault outbox must keep the worker poisoned")
+        return work, operation, payload, failure
 
     def _refused(self, work: Assignment, error: WorkerAPIError, failure: FailureKind | None = None) -> Step:
         if error.code in _PROTOCOL_ERRORS:

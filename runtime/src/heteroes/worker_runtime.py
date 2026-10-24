@@ -143,6 +143,7 @@ class WorkerRuntime:
         timer=time.perf_counter,
         replay: ReplayPolicy | None = None,
         cache_guard=lambda: None,
+        delivery_state_dir=None,
     ):
         self.worker_id = worker_id
         self.client = client
@@ -157,7 +158,24 @@ class WorkerRuntime:
         self._sleep = sleep
         self._wall_clock = wall_clock
         self._timer = timer
-        self._worker = Worker(worker_id, client, executor, transient_errors=(TransportError,))
+        endpoint = getattr(client, "_base", "local")
+        # A cancellation-only handle need not construct an executor/model. Normal work still checks the full recipe.
+        recipe_hash = getattr(getattr(executor, "recipe", None), "hash", None)
+        scope = hashlib.sha256(f"{endpoint}\n{recipe_hash}".encode()).hexdigest()
+        worker_key = hashlib.sha256(worker_id.encode()).hexdigest()
+        state_dir = (
+            self.cache_dir.parent / f".delivery-{self.cache_dir.name}"
+            if delivery_state_dir is None
+            else Path(delivery_state_dir)
+        )
+        self._worker = Worker(
+            worker_id,
+            client,
+            executor,
+            transient_errors=(TransportError,),
+            outbox_path=state_dir / f"{worker_key}.json" if recipe_hash is not None else None,
+            outbox_scope=scope,
+        )
         self.replay = ReplayPolicy() if replay is None else replay  # never, unless the worker is started with a policy
         self._catch_ups_since_check = 0  # replays whose result was trusted, not hashed, since the last check
 
@@ -266,7 +284,10 @@ class WorkerRuntime:
 
     def run(self, stop=None) -> str:
         self.log("start")
-        reason = self._loop(stop)
+        try:
+            reason = self._loop(stop)
+        finally:
+            self._worker.close()
         self.log("exit", reason=reason)
         return reason
 
@@ -274,6 +295,14 @@ class WorkerRuntime:
         unreachable_since = None
         while stop is None or not stop.is_set():
             try:
+                if self._worker.pending_delivery:
+                    step = self._worker.step()
+                    self.log("delivery_retry", kind=step.kind.value, candidate_id=step.candidate_id, code=step.code)
+                    if step.kind is StepKind.QUARANTINED:
+                        return "quarantined"
+                    continue
+                if self._worker.poisoned:
+                    return "quarantined"
                 job = self._fetch_job()
                 if job is None:
                     self._sleep(self._poll)
