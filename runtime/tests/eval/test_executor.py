@@ -180,6 +180,62 @@ def test_the_phases_are_timed_in_order(fx):
     )  # the clock ticks once per mark
 
 
+def test_opt_in_trace_measures_refresh_separately_and_preserves_legacy_timings(fx, monkeypatch):
+    from heteroes.eval.phase_trace import PhaseTrace
+
+    events, wall = [], [0.0]
+    trace = PhaseTrace(events.append, clock=lambda: wall[0])
+    executor = CandidateExecutor(fx.model, None, fx.schema, fx.recipe, clock=fx.tick, phase_trace=trace)
+    for name, seconds in (("perturb_model_", 2.0), ("evaluate_task", 5.0), ("restore_from_snapshot_", 7.0)):
+        original = getattr(executor_module, name)
+
+        def timed(*args, _original=original, _seconds=seconds, **kwargs):
+            result = _original(*args, **kwargs)
+            wall[0] += _seconds
+            return result
+
+        monkeypatch.setattr(executor_module, name, timed)
+
+    def refresh():
+        wall[0] += 3.0
+
+    monkeypatch.setattr(executor._eval, "refresh", refresh)
+    descriptor = fx.descriptor(7)
+
+    result = executor(descriptor)
+
+    assert [e["phase"] for e in events] == ["perturb", "refresh", "rollout", "restore"]
+    assert [e["wallSeconds"] for e in events] == [2.0, 3.0, 5.0, 7.0]
+    assert all(e["candidateId"] == descriptor.candidate_id and e["recipeHash"] == fx.recipe.hash for e in events)
+    assert all(e["generation"] == descriptor.generation and e["status"] == "ok" for e in events)
+    assert executor.last_timing == {"perturb": 1.0, "rollout": 1.0, "restore": 1.0, "total": 3.0}
+    assert current(fx) == fx.parent and result == int(fx.seen[-1][:4], 16) / 65535
+
+
+def test_a_rollout_error_is_traced_and_exact_restore_still_runs(fx, monkeypatch):
+    from heteroes.eval.phase_trace import PhaseTrace
+
+    events = []
+    executor = CandidateExecutor(fx.model, None, fx.schema, fx.recipe, phase_trace=PhaseTrace(events.append))
+    failure = RuntimeError("the original inference error")
+
+    def fails(*args, **kwargs):
+        raise failure
+
+    monkeypatch.setattr(executor_module, "evaluate_task", fails)
+    with pytest.raises(RuntimeError) as caught:
+        executor(fx.descriptor(7))
+
+    assert caught.value is failure
+    assert [(e["phase"], e["status"]) for e in events] == [
+        ("perturb", "ok"),
+        ("refresh", "ok"),
+        ("rollout", "error"),
+        ("restore", "ok"),
+    ]
+    assert current(fx) == fx.parent and executor.last_completions is None
+
+
 def test_the_parent_hash_is_computed_once_and_is_the_model_hash(fx):
     executor = fx.executor()
 

@@ -1,0 +1,13 @@
+control ok    | 54 passed in 0.82s
+killed       failed phase reported as success | 2 failed, 52 passed in 0.83s
+killed       negative duration published | 1 failed, 53 passed in 0.82s
+killed       telemetry exception masks operation | 2 failed, 52 passed in 0.83s
+killed       buffers omitted from inventory | 1 failed, 53 passed in 0.82s
+killed       logical views mistaken for physical backing storage | 1 failed, 53 passed in 0.82s
+killed       empty storage counted | 1 failed, 53 passed in 0.82s
+killed       unique cross-role union empty | 2 failed, 52 passed in 0.82s
+killed       host dispatch mislabeled device time | 1 failed, 53 passed in 0.83s
+killed       refresh confused with rollout | 2 failed, 52 passed in 0.82s
+killed       restore missing from trace | 2 failed, 52 passed in 0.83s
+
+10 of 10 mutants killed.

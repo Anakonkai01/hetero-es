@@ -1,0 +1,12 @@
+[
+  {"name":"failed phase reported as success","file":"src/heteroes/eval/phase_trace.py","old":"status = \"error\"","new":"status = \"ok\""},
+  {"name":"negative duration published","file":"src/heteroes/eval/phase_trace.py","old":"if not math.isfinite(elapsed) or elapsed < 0:","new":"if not math.isfinite(elapsed):"},
+  {"name":"telemetry exception masks operation","file":"src/heteroes/eval/phase_trace.py","old":"except Exception:\n                self._drop()","new":"except Exception:\n                raise"},
+  {"name":"buffers omitted from inventory","file":"src/heteroes/eval/phase_trace.py","old":"chain(model.parameters(), model.buffers())","new":"model.parameters()"},
+  {"name":"logical views mistaken for physical backing storage","file":"src/heteroes/eval/phase_trace.py","old":"storages.add((str(tensor.device), storage.data_ptr(), size))","new":"storages.add((str(tensor.device), tensor.data_ptr(), tensor.numel() * tensor.element_size()))"},
+  {"name":"empty storage counted","file":"src/heteroes/eval/phase_trace.py","old":"if size:","new":"if size >= 0:"},
+  {"name":"unique cross-role union empty","file":"src/heteroes/eval/phase_trace.py","old":"unique.update(storages)","new":"unique.update(set())"},
+  {"name":"host dispatch mislabeled device time","file":"src/heteroes/eval/phase_trace.py","old":"\"timingKind\": \"host_wall\"","new":"\"timingKind\": \"cuda_kernel\""},
+  {"name":"refresh confused with rollout","file":"src/heteroes/executor.py","old":"self._phase(\"refresh\", descriptor)","new":"self._phase(\"rollout\", descriptor)"},
+  {"name":"restore missing from trace","file":"src/heteroes/executor.py","old":"with self._phase(\"restore\", descriptor):","new":"with nullcontext():"}
+]

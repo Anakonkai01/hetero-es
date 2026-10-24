@@ -15,6 +15,7 @@ perturbed weights just before the evaluation (`heteroes.eval.precision`). The we
 """
 
 import time
+from contextlib import nullcontext
 from dataclasses import dataclass
 
 import torch
@@ -86,6 +87,7 @@ class CandidateExecutor:
         chunk: int | None = None,
         dataset=None,
         return_completions: bool = False,
+        phase_trace=None,
     ):
         declared = getattr(
             recipe, "chunk", None
@@ -114,11 +116,23 @@ class CandidateExecutor:
             model, recipe.eval_dtype
         )  # the model the answers are made on: the live one, or an FP32 copy of it
         self._clock = clock
+        self.phase_trace = phase_trace  # opt-in host telemetry; never part of numerical or retry identity
         self.last_timing: dict[str, float] | None = None
         self.last_completions: tuple[str, ...] | None = None  # the texts behind the last reward; None after a failure
         self.parent_sha256 = ""
         self._snapshot = None
         self.reset_parent()
+
+    def _phase(self, name, descriptor):
+        if self.phase_trace is None:
+            return nullcontext()
+        return self.phase_trace.phase(
+            name,
+            candidate_id=descriptor.candidate_id,
+            generation=descriptor.generation,
+            recipe_hash=descriptor.recipe_hash,
+            device=str(next(self.model.parameters()).device),
+        )
 
     def set_generation(self, generation, context):
         if getattr(self.recipe, "python_sampler", False):
@@ -217,22 +231,25 @@ class CandidateExecutor:
         try:
             # the second candidate of an antithetic pair is perturbed with -sigma (ADR-008 section 5); 1 * sigma is sigma exactly
             scale = descriptor.sign * self.effective_sigma
-            if self.recipe.engine_version == CUDA_ENGINE_VERSION:
-                perturb_model_cuda_(self.model, self.schema, descriptor.seed, scale)
-            else:
-                perturb_model_(
-                    self.model,
-                    self.schema,
-                    descriptor.seed,
-                    scale,
-                    self.recipe.chunk_elements,
-                    engine=self.recipe.engine_version,
-                )
+            with self._phase("perturb", descriptor):
+                if self.recipe.engine_version == CUDA_ENGINE_VERSION:
+                    perturb_model_cuda_(self.model, self.schema, descriptor.seed, scale)
+                else:
+                    perturb_model_(
+                        self.model,
+                        self.schema,
+                        descriptor.seed,
+                        scale,
+                        self.recipe.chunk_elements,
+                        engine=self.recipe.engine_version,
+                    )
             now = self._clock()
             timing["perturb"], mark = now - mark, now
-            self._eval.refresh()  # an FP32 copy takes the perturbed weights (nothing to do in FP16)
+            with self._phase("refresh", descriptor):
+                self._eval.refresh()  # an FP32 copy takes the perturbed weights (nothing to do in FP16)
             # batch_rows is None without a dataset (set_generation needs one), and a dataset job without them is refused above
-            outcome = evaluate_task(self.recipe, self._eval.model, self.tokenizer, chunk, self.batch_rows)
+            with self._phase("rollout", descriptor):
+                outcome = evaluate_task(self.recipe, self._eval.model, self.tokenizer, chunk, self.batch_rows)
             reward, completions = outcome.reward, outcome.completions
             now = self._clock()
             timing["rollout"], mark = now - mark, now
@@ -241,7 +258,8 @@ class CandidateExecutor:
             mark = self._clock()
 
         try:
-            restore_from_snapshot_(self.model, self.schema, self._snapshot)
+            with self._phase("restore", descriptor):
+                restore_from_snapshot_(self.model, self.schema, self._snapshot)
         except RestoreError as restore_error:
             raise CandidateFailed(FailureKind.RESTORE_MISMATCH, str(restore_error)) from restore_error
         if measured_cuda:
