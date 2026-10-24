@@ -1,0 +1,17 @@
+{
+  "sourceCommit": "2776e8880407092211e35ac796b76faec4f83a9b",
+  "linuxOnly": true,
+  "published": false,
+  "apps": [
+    {
+      "app": "worker",
+      "unpacked": "/home/pc5070ti/projects/heteroes/.scratch/audit-safety-linux-20261025/worker/linux-unpacked",
+      "sharedModulesImport": true
+    },
+    {
+      "app": "server",
+      "unpacked": "/home/pc5070ti/projects/heteroes/.scratch/audit-safety-linux-20261025/server/linux-unpacked",
+      "sharedModulesImport": true
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+[
+  {
+    "name": "missing-is-not-matched",
+    "file": "src/heteroes/v3/audit.py",
+    "old": "chosen.count(1), chosen.count(0)",
+    "new": "chosen.count(None), chosen.count(0)"
+  },
+  {
+    "name": "any-mismatch-wins",
+    "file": "src/heteroes/v3/audit.py",
+    "old": "min(u.matched)",
+    "new": "max(u.matched)"
+  },
+  {
+    "name": "sampling-still-filters",
+    "file": "src/heteroes/v3/audit.py",
+    "old": "chosen = [matched for cid, matched in rows if selected_for_audit(cid, self.rate)]",
+    "new": "chosen = [matched for cid, matched in rows]"
+  },
+  {
+    "name": "restore-drain-closure",
+    "file": "src/heteroes/v3/audit.py",
+    "old": "self._drain = read_json(state_path) if state_path is not None else None",
+    "new": "self._drain = None"
+  },
+  {
+    "name": "no-new-lease-after-closure",
+    "file": "src/heteroes/v3/audit.py",
+    "old": "if self._drain is not None:\n            return None",
+    "new": "if False:\n            return None"
+  },
+  {
+    "name": "timeout-is-not-pending",
+    "file": "src/heteroes/v3/audit.py",
+    "old": "\"timed_out\": incomplete if reason == \"timeout\" else 0",
+    "new": "\"timed_out\": 0"
+  },
+  {
+    "name": "skipped-is-not-completed",
+    "file": "src/heteroes/v3/audit.py",
+    "old": "\"skipped\": incomplete if reason in {\"insufficient_workers\", \"cancelled\"} else 0",
+    "new": "\"skipped\": 0"
+  },
+  {
+    "name": "frozen-drain-identity",
+    "file": "src/heteroes/v3/audit.py",
+    "old": "self._drain != {**self._drain_identity, \"reason\": self._drain.get(\"reason\")}",
+    "new": "False"
+  },
+  {
+    "name": "no-fake-complete-close",
+    "file": "src/heteroes/v3/audit.py",
+    "old": "if reason == \"complete\" and self.pending:",
+    "new": "if False:"
+  },
+  {
+    "name": "closure-is-idempotent",
+    "file": "src/heteroes/v3/audit.py",
+    "old": "if self._drain is not None:\n                return",
+    "new": "if False:\n                return"
+  }
+]

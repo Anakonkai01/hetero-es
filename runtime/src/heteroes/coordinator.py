@@ -144,6 +144,17 @@ class Coordinator:
         self._audit_faults = (
             Path(audit_fault_path) if audit_fault_path is not None else Path(models_dir).parent / "audit-faults.json"
         )
+        self._audit_guard = None
+        if recipe.to_dict().get("formatVersion") == 3 and score is not None:
+            from heteroes.v3.audit_guard import AuditRunGuard
+
+            # Historical mismatch policy only. M4 must qualify a real backend/recipe before activating strict stops.
+            self._audit_guard = AuditRunGuard(
+                ledger,
+                experiment_id,
+                fault_path=self._audit_faults,
+                stop_path=self._audit_faults.with_name("audit-stop.json"),
+            )
         if self._audit_rate:
             from heteroes.v3.audit import selected_for_audit
 
@@ -308,6 +319,8 @@ class Coordinator:
     def _check_cancel(self):
         if self._cancel_requested():
             raise RunCancelled("run cancelled before recording the next update")
+        if self._audit_guard is not None and self._audit_guard.fatal_error:
+            raise CoordinatorError(self._audit_guard.fatal_error)
 
     # ---- restart ----------------------------------------------------------------------------------------------------
 
@@ -437,6 +450,7 @@ class Coordinator:
         return number + 1
 
     def run_generation(self, generation: int) -> dict:
+        self._check_cancel()
         begin = self._timer()
         if self.dataset is not None:
             context = self.recipe.context(self.dataset, generation)
@@ -489,7 +503,7 @@ class Coordinator:
             usage_sink=self._usage_sink,
             allowed_chunks=getattr(self.recipe, "chunks", ()) if len(getattr(self.recipe, "chunks", ())) > 1 else (),
         )
-        if self._audit_rate:
+        if self.recipe.to_dict().get("formatVersion") == 3 and self._score is not None:
             from heteroes.v3.audit import AuditAPI
 
             api = AuditAPI(
@@ -502,6 +516,8 @@ class Coordinator:
                 lease_seconds=self._lease_seconds,
                 clock=time.time,
                 fault_path=self._audit_faults,
+                state_path=self._audit_faults.parent / "audit-state" / f"g{generation}.json",
+                guard=self._audit_guard,
                 log=lambda event: self.log(**event),
                 cancel_requested=self._cancel_requested,
             )
@@ -530,7 +546,15 @@ class Coordinator:
             function=self._coefficient_function,
         )
         self._check_cancel()  # last cooperative boundary before write-ahead commit
-        self.ledger.record_update(record)  # BEFORE the weights are touched
+        if self._audit_guard is None:
+            self.ledger.record_update(record)  # BEFORE the weights are touched
+        else:
+            from heteroes.v3.audit_guard import AuditStopped
+
+            try:
+                self._audit_guard.record_update(record)
+            except AuditStopped as error:
+                raise CoordinatorError(str(error)) from error
         recorded = self._timer()
         self.log("update_recorded", generation=generation, record_hash=record.hash)
 
@@ -587,9 +611,8 @@ class Coordinator:
             "publish_seconds": done - applied,
             "total_seconds": done - begin,
         }
-        if hasattr(self._api, "audit_counts"):
-            selected, completed = self._api.audit_counts()
-            summary["audits"] = {"selected": selected, "completed": completed}
+        if hasattr(api, "audit_summary"):
+            summary["audits"] = api.audit_summary()
         if self.usage is not None:
             try:
                 self._usage_sink.flush(self._usage_flush_seconds)
@@ -610,7 +633,7 @@ class Coordinator:
         return summary
 
     def _drain_audits(self, generation, api, policy):
-        if not self._audit_rate:
+        if not self._audit_rate or api.drain_closed:
             return
         deadline = self._monotonic() + self._limit(self._audit_timeout, generation)
         self.server.set_generation(api, self._job(generation, policy, "AUDITING"))
@@ -619,16 +642,20 @@ class Coordinator:
             if api.fatal_error:
                 raise CoordinatorError(api.fatal_error)
             if len(api.available_workers) < 2 or self._monotonic() >= deadline:
+                reason = "insufficient_workers" if len(api.available_workers) < 2 else "timeout"
+                api.close_drain(reason)
                 self.log(
                     "audit_incomplete",
                     generation=generation,
                     pending=api.pending,
-                    reason="insufficient_workers" if len(api.available_workers) < 2 else "timeout",
+                    reason=reason,
                 )
                 break
             self._sleep(self._poll)
         if api.fatal_error:
             raise CoordinatorError(api.fatal_error)
+        if not api.drain_closed:
+            api.close_drain("complete")
 
     def finish(self, aborted: bool = False, cancelled: bool = False) -> None:
         """Tell the workers that the experiment is over: FINISHED if it ran to its end, ABORTED if it stopped on an error."""

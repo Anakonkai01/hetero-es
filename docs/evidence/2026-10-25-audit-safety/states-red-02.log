@@ -1,0 +1,20 @@
+.......F..                                                               [100%]
+=================================== FAILURES ===================================
+_________ test_corrupt_existing_drain_is_not_treated_as_unclosed[None] _________
+
+setup = (<heteroes.ledger.ledger.Ledger object at 0x78ace5d01610>, <heteroes.v3.audit.AuditAPI object at 0x78acea3706e0>, [Can...22222222222222222222222222222222222222222222222222222', experiment_id='audit', generation=0, index=5, seed=5, sign=1)])
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-142/test_corrupt_existing_drain_is0')
+body = None
+
+    @pytest.mark.parametrize("body", [None, [], {"reason": "timeout"}])
+    def test_corrupt_existing_drain_is_not_treated_as_unclosed(setup, tmp_path, body):
+        ledger, _, _ = setup
+        (tmp_path / "audit-state.json").write_text(json.dumps(body))
+>       with pytest.raises(ValueError, match="audit drain"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/v3/test_audit_states.py:118: Failed
+=========================== short test summary info ============================
+FAILED tests/v3/test_audit_states.py::test_corrupt_existing_drain_is_not_treated_as_unclosed[None]
+1 failed, 9 passed in 0.15s

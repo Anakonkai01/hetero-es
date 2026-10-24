@@ -10,8 +10,8 @@ from collections import OrderedDict
 import hashlib
 import math
 import secrets
-import threading
 import time
+from pathlib import Path
 
 from heteroes.ledger import LedgerError, FailureKind
 from heteroes.product.files import read_json, write_json
@@ -51,6 +51,8 @@ class AuditAPI:
         lease_seconds=60,
         clock=time.time,
         fault_path=None,
+        state_path=None,
+        guard=None,
         log=lambda event: None,
         cancel_requested=lambda: False,
     ):
@@ -67,16 +69,54 @@ class AuditAPI:
         self.workers = None if workers is None else frozenset(workers)
         self.lease_seconds, self.clock, self.log = lease_seconds, clock, log
         self.fault_path = fault_path
-        self.faults = read_json(fault_path, {}) if fault_path is not None else {}
-        self._seen, self._leases, self._requests = set(), {}, OrderedDict()
+        from heteroes.v3.audit_guard import AuditRunGuard
+
+        if guard is not None and (guard.ledger is not ledger or guard.experiment_id != experiment_id):
+            raise ValueError("audit guard belongs to another ledger or experiment")
+        self.guard = (
+            guard
+            if guard is not None
+            else AuditRunGuard(
+                ledger,
+                experiment_id,
+                fault_path=fault_path,
+                stop_path=Path(fault_path).with_name("audit-stop.json") if fault_path is not None else None,
+            )
+        )
+        self._seen, self._leases, self._requests = set(), self.guard.audit_leases, OrderedDict()
         self._activity = 0  # audit leases, heartbeats, results and failures (see WorkerAPI.activity)
-        self._lock = threading.RLock()
-        self.fatal_error = None
+        self._lock = self.guard.audit_lock
         self.cancel_requested = cancel_requested
+        self.state_path = state_path
+        self._drain_identity = {
+            "formatVersion": 1,
+            "experimentId": experiment_id,
+            "generation": generation,
+            "auditRate": rate,
+        }
+        self._drain = read_json(state_path) if state_path is not None else None
+        if (
+            state_path is not None
+            and Path(state_path).exists()
+            and (
+                not isinstance(self._drain, dict)
+                or self._drain != {**self._drain_identity, "reason": self._drain.get("reason")}
+                or self._drain.get("reason") not in {"complete", "timeout", "insufficient_workers", "cancelled"}
+            )
+        ):
+            raise ValueError("invalid or conflicting audit drain state")
 
     @property
     def scoring_error(self):
         return self.base.scoring_error
+
+    @property
+    def faults(self):
+        return self.guard.faults
+
+    @property
+    def fatal_error(self):
+        return self.guard.fatal_error
 
     @property
     def quarantined_workers(self):
@@ -87,17 +127,62 @@ class AuditAPI:
         return self.base.activity + self._activity
 
     def audit_counts(self):
-        """(selected, completed): the committed candidates of this generation chosen for re-execution, and how many of
-        them another worker re-executed. A timed-out drain leaves completed < selected; the summary shows it (ADR-009)."""
+        """Compatibility projection: completed includes matches and mismatches, once per candidate."""
+        summary = self.audit_summary()
+        return summary["selected"], summary["completed"]
+
+    def audit_summary(self):
+        """Canonical outcomes supersede drain dispositions, including results arriving after a timeout.
+
+        A selected candidate is counted once. If more than one ledger audit exists, any mismatch makes that
+        candidate mismatched. Missing execution evidence never counts as a match.
+        """
+        with self._lock:
+            return self._audit_summary()
+
+    def _audit_summary(self):
         with self.ledger._lock:
             rows = self.ledger._db.execute(
-                "SELECT c.candidate_id, EXISTS (SELECT 1 FROM audit u WHERE u.candidate_id = c.candidate_id) "
+                "SELECT c.candidate_id, (SELECT min(u.matched) FROM audit u WHERE u.candidate_id=c.candidate_id) "
                 "FROM candidate c JOIN completion t ON t.candidate_id = c.candidate_id "
                 "WHERE c.experiment_id = ? AND c.generation = ?",
                 (self.experiment_id, self.generation),
             ).fetchall()
-        chosen = [bool(done) for cid, done in rows if selected_for_audit(cid, self.rate)]
-        return len(chosen), sum(chosen)
+        chosen = [matched for cid, matched in rows if selected_for_audit(cid, self.rate)]
+        matched, mismatched = chosen.count(1), chosen.count(0)
+        incomplete = len(chosen) - matched - mismatched
+        reason = self._drain["reason"] if self._drain is not None else None
+        return {
+            "enabled": self.rate > 0,
+            "selected": len(chosen),
+            "completed": matched + mismatched,
+            "matched": matched,
+            "mismatched": mismatched,
+            "pending": incomplete if reason is None else 0,
+            "timed_out": incomplete if reason == "timeout" else 0,
+            "skipped": incomplete if reason in {"insufficient_workers", "cancelled"} else 0,
+            "incomplete": incomplete,
+            "drain_reason": reason,
+        }
+
+    @property
+    def drain_closed(self):
+        with self._lock:
+            return self._drain is not None
+
+    def close_drain(self, reason):
+        """Persist why further audits were not admitted; retain already leased results and canonical history."""
+        if reason not in {"complete", "timeout", "insufficient_workers", "cancelled"}:
+            raise ValueError("invalid audit drain reason")
+        with self._lock:
+            if self._drain is not None:
+                return
+            if reason == "complete" and self.pending:
+                raise ValueError("audit drain still has pending candidates")
+            value = {**self._drain_identity, "reason": reason}
+            if self.state_path is not None:
+                write_json(self.state_path, value)
+            self._drain = value
 
     @property
     def available_workers(self):
@@ -137,6 +222,8 @@ class AuditAPI:
                     return _error("forbidden", "Worker was not admitted for this run")
                 if worker in self.quarantined_workers:
                     return _error("worker_quarantined", "Worker is quarantined")
+                if self.fatal_error:
+                    return _error("audit_stopped", self.fatal_error)
                 self._seen.add(worker)
                 reply = self.base.handle(operation, request, authenticated_worker_id=authenticated_worker_id)
                 if (
@@ -149,7 +236,9 @@ class AuditAPI:
                 work = self._lease(worker, request_id, request.get("max_chunk"))
                 return {
                     "ok": True,
-                    "generation_state": "OPEN" if work or self.pending else reply["generation_state"],
+                    "generation_state": "OPEN"
+                    if work or (self.pending and not self.drain_closed)
+                    else reply["generation_state"],
                     "work": work,
                 }
             except (TypeError, ValueError, KeyError) as error:
@@ -158,6 +247,8 @@ class AuditAPI:
                 return _error(_code_of(error), str(error))
 
     def _lease(self, worker, request_id, max_chunk=None):
+        if self._drain is not None:
+            return None
         now = self.clock()
         if request_id is not None:
             cid = self._requests.get((worker, request_id))
@@ -174,6 +265,8 @@ class AuditAPI:
             entry = self._leases.get(cid)
             if entry and not entry["done"] and entry["work"]["deadline"] > now:
                 continue
+            if entry is None and not self.guard.room_for_lease():
+                return None
             descriptor = self.ledger.get_candidate(cid).descriptor
             number = 1 if entry is None else entry["work"]["attempt_number"] + 1
             work = {
@@ -230,6 +323,9 @@ class AuditAPI:
             return _error("conflicting_result", "Completed audit cannot change")
         worker = entry["worker"]
         if worker in self.quarantined_workers:
+            if operation == "report_failure" and decoded[3] is FailureKind.RESTORE_MISMATCH:
+                # The preceding report may have stopped locally but failed to persist. Do not ACK that retry early.
+                self.guard.record_restore_fault(worker, descriptor.candidate_id)
             return _error("worker_quarantined", "Worker is quarantined")
         self._activity += 1
         if operation == "heartbeat":
@@ -247,14 +343,11 @@ class AuditAPI:
                 }
             )
             if kind is FailureKind.RESTORE_MISMATCH:
-                self.faults[worker] = {"reason": kind.value, "candidateId": descriptor.candidate_id}
-                if self.fault_path is not None:
-                    write_json(self.fault_path, self.faults)
-                self.fatal_error = "Audit worker failed exact restore"
+                self.guard.record_restore_fault(worker, descriptor.candidate_id)
                 return _error("worker_quarantined", self.fatal_error)
             return {"ok": True}
         digest = body["completions_sha256"]
-        matched = self.ledger.record_audit(descriptor.candidate_id, worker, digest)
+        matched = self.guard.record_audit(descriptor, worker, number, decoded[3])
         self.base.record_usage(descriptor, number, worker, getattr(decoded[3], "usage", None), "audit")
         entry.update(done=True, hash=digest, matched=matched)
         self.log(

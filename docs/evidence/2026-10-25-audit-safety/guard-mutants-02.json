@@ -1,0 +1,104 @@
+[
+  {
+    "name": "first-mismatch-latches",
+    "file": "src/heteroes/v3/audit_guard.py",
+    "old": "if self.stop_on_mismatch:",
+    "new": "if False:"
+  },
+  {
+    "name": "historical-policy-kept",
+    "file": "src/heteroes/v3/audit_guard.py",
+    "old": "if self.stop_on_mismatch:",
+    "new": "if True:"
+  },
+  {
+    "name": "update-checks-run-stop",
+    "file": "src/heteroes/v3/audit_guard.py",
+    "old": "if error:\n                raise AuditStopped(error)",
+    "new": "if False:\n                raise AuditStopped(error)"
+  },
+  {
+    "name": "restore-stop-survives-restart",
+    "file": "src/heteroes/v3/audit_guard.py",
+    "old": "self._faults = read_json(fault_path, {}) if fault_path is not None else {}",
+    "new": "self._faults = {}"
+  },
+  {
+    "name": "text-stop-survives-restart",
+    "file": "src/heteroes/v3/audit_guard.py",
+    "old": "self._stop = read_json(stop_path) if stop_path is not None else None",
+    "new": "self._stop = None"
+  },
+  {
+    "name": "persist-before-ledger-commit",
+    "file": "src/heteroes/v3/audit_guard.py",
+    "old": "write_json(self.stop_path, self._stop)",
+    "new": "pass"
+  },
+  {
+    "name": "matching-audit-not-a-stop",
+    "file": "src/heteroes/v3/audit_guard.py",
+    "old": "if digest != original[\"completions_sha256\"]:",
+    "new": "if True:"
+  },
+  {
+    "name": "auditor-text-is-retained",
+    "file": "src/heteroes/v3/audit_guard.py",
+    "old": "\"completions\": list(texts)",
+    "new": "\"completions\": []"
+  },
+  {
+    "name": "validate-saved-receipt",
+    "file": "src/heteroes/v3/audit_guard.py",
+    "old": "self._validate_stop(self._stop)",
+    "new": "pass"
+  },
+  {
+    "name": "update-lock-serializes-observation",
+    "file": "src/heteroes/v3/audit_guard.py",
+    "old": "with self._lock:\n            error = self.fatal_error",
+    "new": "if True:\n            error = self.fatal_error"
+  },
+  {
+    "name": "observation-lock-serializes-update",
+    "file": "src/heteroes/v3/audit_guard.py",
+    "old": "with self._lock:\n            if self.stop_on_mismatch:",
+    "new": "if True:\n            if self.stop_on_mismatch:"
+  },
+  {
+    "name": "restore-retry-does-not-ack-too-soon",
+    "file": "src/heteroes/v3/audit.py",
+    "old": "if operation == \"report_failure\" and decoded[3] is FailureKind.RESTORE_MISMATCH:",
+    "new": "if False:"
+  },
+  {
+    "name": "coordinator-shares-run-guard",
+    "file": "src/heteroes/coordinator.py",
+    "old": "guard=self._audit_guard,",
+    "new": "guard=None,"
+  },
+  {
+    "name": "last-update-boundary-rechecks",
+    "file": "src/heteroes/coordinator.py",
+    "old": "self._audit_guard.record_update(record)",
+    "new": "self.ledger.record_update(record)"
+  },
+  {
+    "name": "late-delivery-shares-lease-registry",
+    "file": "src/heteroes/v3/audit.py",
+    "old": "set(), self.guard.audit_leases, OrderedDict()",
+    "new": "set(), {}, OrderedDict()"
+  },
+  {
+    "name": "audit-lease-capacity-is-enforced",
+    "file": "src/heteroes/v3/audit.py",
+    "old": "if entry is None and not self.guard.room_for_lease():",
+    "new": "if False:"
+  },
+  {
+    "name": "never-evict-unfinished-audit",
+    "file": "src/heteroes/v3/audit_guard.py",
+    "old": "if entry[\"done\"]), None)",
+    "new": "if True), None)"
+  }
+]

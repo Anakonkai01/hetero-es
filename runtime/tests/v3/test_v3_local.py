@@ -234,7 +234,22 @@ def test_every_candidate_can_be_audited_on_another_worker_before_updates(assets,
 def test_audits_that_could_not_run_show_in_the_summary(assets, tmp_path):
     # one worker cannot re-execute its own candidates: chosen, not completed, and the run still finishes (ADR-009, F9)
     summaries = run_local(config_for(assets), tmp_path / "alone", workers=1, timeout_seconds=30, audit_rate=1.0)
-    assert [row["audits"] for row in summaries] == [{"selected": 4, "completed": 0}] * len(summaries)
+    assert all(
+        row["audits"]
+        == {
+            "enabled": True,
+            "selected": 4,
+            "completed": 0,
+            "matched": 0,
+            "mismatched": 0,
+            "pending": 0,
+            "timed_out": 0,
+            "skipped": 4,
+            "incomplete": 4,
+            "drain_reason": "insufficient_workers",
+        }
+        for row in summaries
+    )
 
 
 def test_installed_entrypoint_loads_without_numerical_dependencies():

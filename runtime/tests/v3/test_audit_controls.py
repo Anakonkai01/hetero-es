@@ -49,6 +49,7 @@ def test_config_controls_coverage_without_changing_recipe_plan_or_child(assets, 
     off, on = results[0][1], results[1][1]
     assert on["audits"]["selected"] == on["audits"]["completed"] == 4
     assert off.get("audits", {}).get("selected", 0) == 0
+    assert off["audits"]["enabled"] is False
     assert off["record_hash"] == on["record_hash"] and off["child_sha256"] == on["child_sha256"]
     for name in ("recipe.json", "plan.json"):
         assert (results[0][0] / name).read_bytes() == (results[1][0] / name).read_bytes()

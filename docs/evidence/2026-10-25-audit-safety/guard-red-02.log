@@ -1,0 +1,87 @@
+..........FF......                                                       [100%]
+=================================== FAILURES ===================================
+____________ test_invalid_direct_receipt_cannot_latch_a_strict_stop ____________
+
+setup = (<heteroes.ledger.ledger.Ledger object at 0x760a8581ed20>, <heteroes.v3.audit.AuditAPI object at 0x760a8581c110>, [Can...22222222222222222222222222222222222222222222222222222', experiment_id='audit', generation=0, index=5, seed=5, sign=1)])
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-158/test_invalid_direct_receipt_ca0')
+
+    def test_invalid_direct_receipt_cannot_latch_a_strict_stop(setup, tmp_path):
+        ledger, _, descriptors = setup
+        guard = guard_for(ledger, tmp_path, strict=True)
+        with pytest.raises(ValueError, match="audit stop"):
+>           guard.record_audit(descriptors[0], "original", 1, ["different"])
+
+tests/v3/test_audit_guard.py:216: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/heteroes/v3/audit_guard.py:162: in record_audit
+    return self.ledger.record_audit(descriptor.candidate_id, worker, digest)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/heteroes/ledger/ledger.py:443: in wrapper
+    return method(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <heteroes.ledger.ledger.Ledger object at 0x760a8581ed20>
+candidate_id = 'audit/g0/c0', worker_id = 'original'
+completions_sha256 = '3c892c25255fc632942a4d2dfedfb3232bd15503b905650552dab58bb588148e'
+
+    @_locked
+    def record_audit(self, candidate_id: str, worker_id: str, completions_sha256: str) -> bool:
+        """
+        Another worker re-ran a committed candidate and got texts with this hash (ADR-008 section 8). Returns whether they
+        match the committed texts. A mismatch never changes the committed reward; it counts against BOTH workers (nobody
+        knows which one is wrong), and a worker with AUDIT_QUARANTINE_AFTER mismatches is quarantined for the owner.
+        The same worker auditing the same candidate again must report the same hash.
+        """
+        _check_hash("completions_sha256", completions_sha256)
+        if not isinstance(worker_id, str) or not worker_id:
+            raise TypeError("worker_id must be a nonempty string")
+        with self._db:
+            self._db.execute("BEGIN IMMEDIATE")
+            now = self._clock()
+            row = self._db.execute(
+                "SELECT c.sha256, r.attempt_number, a.worker_id FROM completion AS c JOIN result AS r USING (candidate_id) "
+                "JOIN attempt AS a ON a.candidate_id = r.candidate_id AND a.attempt_number = r.attempt_number "
+                "WHERE c.candidate_id = ?",
+                (candidate_id,),
+            ).fetchone()
+            if row is None:
+                raise LedgerError(f"{candidate_id} has no committed texts to audit")
+            committed_sha, attempt_number, original_worker = row
+            if worker_id == original_worker:
+>               raise LedgerError(f"{candidate_id} must be audited by another worker than {worker_id}")
+E               heteroes.ledger.ledger.LedgerError: audit/g0/c0 must be audited by another worker than original
+
+src/heteroes/ledger/ledger.py:1160: LedgerError
+_____________ test_restore_fault_retry_persists_after_failed_write _____________
+
+setup = (<heteroes.ledger.ledger.Ledger object at 0x760a8581eb10>, <heteroes.v3.audit.AuditAPI object at 0x760a8581c440>, [Can...22222222222222222222222222222222222222222222222222222', experiment_id='audit', generation=0, index=5, seed=5, sign=1)])
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-158/test_restore_fault_retry_persi0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x760a8581d160>
+
+    def test_restore_fault_retry_persists_after_failed_write(setup, tmp_path, monkeypatch):
+        import heteroes.v3.audit_guard as module
+    
+        ledger, _, _ = setup
+        guard = guard_for(ledger, tmp_path)
+        api = api_for(ledger, guard)
+        work = lease(api)["work"]
+        request = {k: work[k] for k in ("descriptor", "attempt_number", "token", "audit_id")}
+        request["kind"] = "RESTORE_MISMATCH"
+        write = module.write_json
+        monkeypatch.setattr(module, "write_json", lambda *args: (_ for _ in ()).throw(OSError("disk full")))
+        with pytest.raises(OSError):
+            api.handle("report_failure", request, authenticated_worker_id="auditor")
+        monkeypatch.setattr(module, "write_json", write)
+        reply = api.handle("report_failure", request, authenticated_worker_id="auditor")
+        assert reply["error"]["code"] == "worker_quarantined"
+>       assert guard_for(ledger, tmp_path).fatal_error
+E       AssertionError: assert None
+E        +  where None = <heteroes.v3.audit_guard.AuditRunGuard object at 0x760a8581ed80>.fatal_error
+E        +    where <heteroes.v3.audit_guard.AuditRunGuard object at 0x760a8581ed80> = guard_for(<heteroes.ledger.ledger.Ledger object at 0x760a8581eb10>, PosixPath('/tmp/pytest-of-pc5070ti/pytest-158/test_restore_fault_retry_persi0'))
+
+tests/v3/test_audit_guard.py:236: AssertionError
+=========================== short test summary info ============================
+FAILED tests/v3/test_audit_guard.py::test_invalid_direct_receipt_cannot_latch_a_strict_stop
+FAILED tests/v3/test_audit_guard.py::test_restore_fault_retry_persists_after_failed_write
+2 failed, 16 passed in 2.47s

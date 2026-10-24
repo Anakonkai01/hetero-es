@@ -1,0 +1,22 @@
+{
+  "base": "2776e8880407092211e35ac796b76faec4f83a9b",
+  "python": "3.12.14",
+  "cpuOnly": true,
+  "sourceSha256": {
+    "runtime/src/heteroes/coordinator.py": "1d38a8bc2b7792e34d4b9545d0b0f20912f34dcf43272cdec21df165a3736ce1",
+    "runtime/src/heteroes/v3/audit.py": "1aa0e463a827d7c440d0edf53bec99dc34ea1f1bbc7da634573fdca246c446be",
+    "runtime/src/heteroes/v3/audit_guard.py": "db44cc6728d7ca6b8e938c29444d0aa6ede554a7f6be2a6f02bb855afa7a2974",
+    "runtime/tests/v3/test_audit_states.py": "f09f23a88eef14982e70a936b006006df378987cdd18d8f299f474fbaa3c08c2",
+    "runtime/tests/v3/test_audit_guard.py": "69c39663de3d217c952527d15e3c09e0063ef3803a7ee52558e1b44ced310990",
+    "runtime/tests/v3/test_audit_guard_integration.py": "4883f43938874b3325cdfa56341607a1956404f0b26c4215ad368af2b8e0ab65",
+    "runtime/tests/v3/test_v3_local.py": "bb33c11c189842aca16ade13d6b1b35abda69b19a786e2e913aaa8275ac782b5",
+    "runtime/tests/v3/test_audit_controls.py": "9642edce40a90321ce41380c1b86e08de9c9094f71dafaa573655810643fe29b"
+  },
+  "frozenNumericalPaths": [
+    "runtime/src/heteroes/noise",
+    "runtime/src/heteroes/es",
+    "runtime/src/heteroes/ledger",
+    "runtime/src/heteroes/generation_record.py"
+  ],
+  "changedFrozenPaths": []
+}
