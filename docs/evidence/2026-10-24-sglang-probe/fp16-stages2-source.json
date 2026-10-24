@@ -1,0 +1,5 @@
+{
+  "stockSha256": "116abe217cae8d402783006ab0ddf60d9eef9e39a18ebe656d391fe6f5520ec5",
+  "tunedSha256": "5de8415e31bc622f0e072fe7d07fa237e1fe645176cdd4e85892c1f4ca949f10",
+  "change": "FP16 persistent Triton matmul num_stages 3 -> 2; tiles and math unchanged in source"
+}

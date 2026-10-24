@@ -1,0 +1,32 @@
+[
+  {
+    "name": "ignore-missing-output-rows",
+    "file": "scripts/probe_sglang_tokens.py",
+    "old": "if len(left) != len(right):",
+    "new": "if False:"
+  },
+  {
+    "name": "miss-prefix-truncation",
+    "file": "scripts/probe_sglang_tokens.py",
+    "old": "min(len(a), len(b))",
+    "new": "None"
+  },
+  {
+    "name": "ignore-model-prompt-token-limits",
+    "file": "scripts/probe_sglang_tokens.py",
+    "old": "if left[\"workload\"] != right[\"workload\"]:",
+    "new": "if False:"
+  },
+  {
+    "name": "accept-failed-receipt",
+    "file": "scripts/probe_sglang_tokens.py",
+    "old": "if left.get(\"status\") != \"ok\" or right.get(\"status\") != \"ok\":",
+    "new": "if False:"
+  },
+  {
+    "name": "skip-gpu-opt-in",
+    "file": "scripts/probe_sglang_tokens.py",
+    "old": "if not args.gpu or os.environ.get(\"HETEROES_GPU_ACCEPTANCE\") != \"1\":",
+    "new": "if False:"
+  }
+]

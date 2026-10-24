@@ -1,0 +1,204 @@
+EEEEEEEE                                                                 [100%]
+==================================== ERRORS ====================================
+___ ERROR at setup of test_prefix_is_a_difference_at_the_first_missing_token ___
+
+    @pytest.fixture
+    def probe():
+        path = Path(__file__).parents[2] / "scripts/probe_sglang_tokens.py"
+        spec = importlib.util.spec_from_file_location("sglang_probe", path)
+        module = importlib.util.module_from_spec(spec)
+>       spec.loader.exec_module(module)
+
+tests/eval/test_probe_sglang_tokens.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_frozen_importlib_external.SourceFileLoader object at 0x7611158f6690>
+path = '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_sglang_tokens.py'
+
+>   ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_sglang_tokens.py'
+
+<frozen importlib._bootstrap_external>:1190: FileNotFoundError
+_________ ERROR at setup of test_missing_rows_cannot_be_hidden_by_zip __________
+
+    @pytest.fixture
+    def probe():
+        path = Path(__file__).parents[2] / "scripts/probe_sglang_tokens.py"
+        spec = importlib.util.spec_from_file_location("sglang_probe", path)
+        module = importlib.util.module_from_spec(spec)
+>       spec.loader.exec_module(module)
+
+tests/eval/test_probe_sglang_tokens.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_frozen_importlib_external.SourceFileLoader object at 0x7611158f5f70>
+path = '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_sglang_tokens.py'
+
+>   ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_sglang_tokens.py'
+
+<frozen importlib._bootstrap_external>:1190: FileNotFoundError
+_ ERROR at setup of test_comparison_requires_identical_inputs_and_generation_limits[modelFiles-value0] _
+
+    @pytest.fixture
+    def probe():
+        path = Path(__file__).parents[2] / "scripts/probe_sglang_tokens.py"
+        spec = importlib.util.spec_from_file_location("sglang_probe", path)
+        module = importlib.util.module_from_spec(spec)
+>       spec.loader.exec_module(module)
+
+tests/eval/test_probe_sglang_tokens.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_frozen_importlib_external.SourceFileLoader object at 0x7611158f72c0>
+path = '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_sglang_tokens.py'
+
+>   ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_sglang_tokens.py'
+
+<frozen importlib._bootstrap_external>:1190: FileNotFoundError
+_ ERROR at setup of test_comparison_requires_identical_inputs_and_generation_limits[maxNewTokens-4] _
+
+    @pytest.fixture
+    def probe():
+        path = Path(__file__).parents[2] / "scripts/probe_sglang_tokens.py"
+        spec = importlib.util.spec_from_file_location("sglang_probe", path)
+        module = importlib.util.module_from_spec(spec)
+>       spec.loader.exec_module(module)
+
+tests/eval/test_probe_sglang_tokens.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_frozen_importlib_external.SourceFileLoader object at 0x76111591daf0>
+path = '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_sglang_tokens.py'
+
+>   ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_sglang_tokens.py'
+
+<frozen importlib._bootstrap_external>:1190: FileNotFoundError
+_ ERROR at setup of test_comparison_requires_identical_inputs_and_generation_limits[promptTokenIds-value2] _
+
+    @pytest.fixture
+    def probe():
+        path = Path(__file__).parents[2] / "scripts/probe_sglang_tokens.py"
+        spec = importlib.util.spec_from_file_location("sglang_probe", path)
+        module = importlib.util.module_from_spec(spec)
+>       spec.loader.exec_module(module)
+
+tests/eval/test_probe_sglang_tokens.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_frozen_importlib_external.SourceFileLoader object at 0x76111591e900>
+path = '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_sglang_tokens.py'
+
+>   ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_sglang_tokens.py'
+
+<frozen importlib._bootstrap_external>:1190: FileNotFoundError
+_________ ERROR at setup of test_failed_receipt_cannot_pass_comparison _________
+
+    @pytest.fixture
+    def probe():
+        path = Path(__file__).parents[2] / "scripts/probe_sglang_tokens.py"
+        spec = importlib.util.spec_from_file_location("sglang_probe", path)
+        module = importlib.util.module_from_spec(spec)
+>       spec.loader.exec_module(module)
+
+tests/eval/test_probe_sglang_tokens.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_frozen_importlib_external.SourceFileLoader object at 0x76111591f5f0>
+path = '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_sglang_tokens.py'
+
+>   ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_sglang_tokens.py'
+
+<frozen importlib._bootstrap_external>:1190: FileNotFoundError
+____ ERROR at setup of test_compare_checks_single_and_batched_independently ____
+
+    @pytest.fixture
+    def probe():
+        path = Path(__file__).parents[2] / "scripts/probe_sglang_tokens.py"
+        spec = importlib.util.spec_from_file_location("sglang_probe", path)
+        module = importlib.util.module_from_spec(spec)
+>       spec.loader.exec_module(module)
+
+tests/eval/test_probe_sglang_tokens.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_frozen_importlib_external.SourceFileLoader object at 0x76111591e420>
+path = '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_sglang_tokens.py'
+
+>   ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_sglang_tokens.py'
+
+<frozen importlib._bootstrap_external>:1190: FileNotFoundError
+_____ ERROR at setup of test_gpu_opt_in_is_checked_before_optional_imports _____
+
+    @pytest.fixture
+    def probe():
+        path = Path(__file__).parents[2] / "scripts/probe_sglang_tokens.py"
+        spec = importlib.util.spec_from_file_location("sglang_probe", path)
+        module = importlib.util.module_from_spec(spec)
+>       spec.loader.exec_module(module)
+
+tests/eval/test_probe_sglang_tokens.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_frozen_importlib_external.SourceFileLoader object at 0x7611158f7890>
+path = '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_sglang_tokens.py'
+
+>   ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_sglang_tokens.py'
+
+<frozen importlib._bootstrap_external>:1190: FileNotFoundError
+=========================== short test summary info ============================
+ERROR tests/eval/test_probe_sglang_tokens.py::test_prefix_is_a_difference_at_the_first_missing_token
+ERROR tests/eval/test_probe_sglang_tokens.py::test_missing_rows_cannot_be_hidden_by_zip
+ERROR tests/eval/test_probe_sglang_tokens.py::test_comparison_requires_identical_inputs_and_generation_limits[modelFiles-value0]
+ERROR tests/eval/test_probe_sglang_tokens.py::test_comparison_requires_identical_inputs_and_generation_limits[maxNewTokens-4]
+ERROR tests/eval/test_probe_sglang_tokens.py::test_comparison_requires_identical_inputs_and_generation_limits[promptTokenIds-value2]
+ERROR tests/eval/test_probe_sglang_tokens.py::test_failed_receipt_cannot_pass_comparison
+ERROR tests/eval/test_probe_sglang_tokens.py::test_compare_checks_single_and_batched_independently
+ERROR tests/eval/test_probe_sglang_tokens.py::test_gpu_opt_in_is_checked_before_optional_imports
+8 errors in 0.08s

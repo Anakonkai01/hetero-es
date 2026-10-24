@@ -4,14 +4,17 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
 [archive/handoffs/](archive/handoffs/); the previous version of this file is
 [HANDOFF-history-2026-10.md](archive/handoffs/HANDOFF-history-2026-10.md).
 
-## Tóm tắt cho chủ dự án (2026-10-24)
+## Tóm tắt cho chủ dự án (2026-10-25)
 
-- 24/10 tối: Claude làm xong kernel CUDA strict (khớp bit, token giống nhau trên 4 GPU: 2×5070 Ti, 2×3060), bắt đầu M2;
-  giao lại Codex. Xem mục "Claude session result" trong [bàn giao](handoff-claude-human-review-2026-10-24.md).
-- Chủ dự án đã duyệt kế hoạch human-review, rồi tạm dừng Codex và giao Claude tiếp tục.
-  Đọc [bàn giao Claude](handoff-claude-human-review-2026-10-24.md) và [tiến độ](HUMAN-REVIEW-IMPLEMENTATION.md).
-- Đã có prototype một model FP16; probe hữu hạn khớp trên CPU, 5070 Ti và hai 3060 WSL2. Bản tham chiếu còn quá chậm,
-  chưa có kernel tối ưu, chưa thay backend chạy chính hay nghiệm thu native Windows. M2–M6 chưa triển khai.
+- Codex đã tiếp tục từ repo sạch `ecc2d19`, giữ toàn bộ kế hoạch. Đã mutation-check scorer, sửa race trước commit;
+  bổ sung heartbeat xuyên delivery, outbox bền vững và chặn worker local sau lỗi restore. M2 còn đang làm;
+  xem [tiến độ](HUMAN-REVIEW-IMPLEMENTATION.md) và [bằng chứng delivery](evidence/2026-10-24-human-review-resume/delivery-summary.md).
+- Đã thử SGLang 0.5.22: bản thường lệch giữa 5070 Ti/3060 ở 14/208 prompt chạy từng chuỗi, 34/208 chạy batch.
+  Deterministic gốc vượt shared memory; bản giảm pipeline stage vẫn lệch 2/32 prompt giữa 5070 Ti/3060 Quang,
+  dù batch/từng chuỗi khớp trong mỗi máy. [Receipt, patch và giới hạn](evidence/2026-10-24-sglang-probe/README.md).
+- Kernel strict của Claude đã khớp trên bốn GPU trong matrix hữu hạn; chưa thay backend chính, chưa nghiệm thu native
+  Windows, batching hay managed lifecycle. Đọc [bàn giao Claude](handoff-claude-human-review-2026-10-24.md) cho nền tảng.
+- Chủ dự án đã cấp lại quyền GPU và SSH đầy đủ. Không push/merge, deploy lab, đổi trạng thái thiết bị hay chạy learning run.
 - Bằng chứng lịch sử có replay/trọng số khớp nhiều máy và soak 600 thế hệ; không suy thành bảo đảm inference mọi input.
   Oomd/recovery I/O, retention và lợi ích GPU yếu vẫn cần sửa theo kế hoạch.
 - Dự án chỉ claim **hệ thống**, không claim ES làm mô hình giỏi hơn.
@@ -25,14 +28,15 @@ Deployment/disk entries below were last recorded on 2026-10-23; live lab state w
 | Lab            | `lab.heteroes.site`, deployed clone `~/.local/share/heteroes-lab/app` at `82c37fc`; operations: [local-lab-operations.md](local-lab-operations.md)                                                              |
 | Devices        | Standalone SSH/GPU probes on 2026-10-24 reached local 5070 Ti and Thao/Quang 3060 through WSL2. Live approval/contribution was not re-read or changed; follow AGENTS.md. Native Windows acceptance remains open |
 | Default engine | engine v2 noise made on the GPU (same bits as CPU; `HETEROES_NOISE_DEVICE=cpu` forces CPU)                                                                                                                      |
-| Code           | Human-review branch `fix/human-review-single-model-2026-10-24`, implementation head `1cf0843` (was `3914fb5`); no push/merge/deployment in this work. Later handoff commit is docs only                         |
+| Code           | Human-review branch `fix/human-review-single-model-2026-10-24`; scorer/delivery commits `8dcfb6a`, `c80969d`, followed by local continuation commits. No push/merge/deployment                         |
 | Disk (nhan)    | `/` 90 % used; Archive (NTFS/FUSE, also personal data) **full**, holds lab recovery storage and moved run data                                                                                                  |
 
 ## Open work, in order
 
-1. **Approved human-review plan, handed to Claude.** Continue from the
-   [handoff](handoff-claude-human-review-2026-10-24.md), preserving full scope. Next numerical gate: a checked fast
-   linear kernel matching the reference; reliability/I/O fixes can proceed independently. Codex auto-run is paused.
+1. **Approved human-review plan, Codex resumed.** Preserve the full M0–M6 scope. Finish M2 (usage queue, audit
+   controls/statuses, progress watchdog/hard caps and D10 recovery), then M3 recovery I/O. Next numerical work:
+   cached RoPE, launch cost and multi-sequence batching with unchanged strict arithmetic and cross-GPU token checks;
+   then M4 integration/packaging, M5 and M6. The SGLang probe does not replace these gates.
 2. **oomd / recovery-point upload loop.** Evidence and five proposed fixes:
    [evidence/2026-10-23-oomd-review/](evidence/2026-10-23-oomd-review/README.md). Policy:
    [operations-decisions-2026-10-23.md](operations-decisions-2026-10-23.md) (keep oomd on; supervisor recovers a run

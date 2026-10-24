@@ -1,0 +1,154 @@
+In file included from /home/quang/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12/Python.h:12,
+                 from /home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/triton/backends/nvidia/driver.c:9:
+/home/quang/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12/pyconfig.h:1877:9: warning: ‘_POSIX_C_SOURCE’ redefined
+ 1877 | #define _POSIX_C_SOURCE 200809L
+      |         ^~~~~~~~~~~~~~~
+In file included from /usr/include/x86_64-linux-gnu/bits/libc-header-start.h:33,
+                 from /usr/include/stdlib.h:26,
+                 from /home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/triton/backends/nvidia/include/cuda.h:56,
+                 from /home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/triton/backends/nvidia/driver.c:1:
+/usr/include/features.h:319:10: note: this is the location of the previous definition
+  319 | # define _POSIX_C_SOURCE        202405L
+      |          ^~~~~~~~~~~~~~~
+[2026-10-24 23:52:27] nvidia-smi not found. Ensure NVIDIA drivers are installed and accessible. Falling back to torch.cuda.mem_get_info(). Reported total GPU memory per device (MiB): [12287], using min: 12287 MiB.
+[2026-10-24 23:52:27] Sampling backend is set to pytorch for deterministic inference.
+[2026-10-24 23:52:27] No HuggingFace chat template found
+/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/torch/jit/_script.py:1643: FutureWarning: `torch.jit.interface` is deprecated. Please use `torch.compile` instead.
+  warnings.warn(
+/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+Multi-thread loading shards:   0% Completed | 0/1 [00:00<?, ?it/s]Multi-thread loading shards: 100% Completed | 1/1 [00:00<00:00,  2.34it/s]Multi-thread loading shards: 100% Completed | 1/1 [00:00<00:00,  2.34it/s]
+  0%|          | 0/42 [00:00<?, ?it/s]Capturing prefill shape (num_tokens=2048 avail_mem=7.04 GB):   0%|          | 0/42 [00:00<?, ?it/s][2026-10-24 23:52:37] Cannot fingerprint compiler c++: [Errno 2] No such file or directory: 'c++'
+Capturing prefill shape (num_tokens=2048 avail_mem=7.04 GB):   0%|          | 0/42 [00:00<?, ?it/s]
+[2026-10-24 23:52:37] RuntimeError: Failed to build JIT module sgl_kernel_jit_fused_rope_true_64_false_fp16_t_fp16_t in /home/quang/heteroes-sglang-20261024-Es9qXF/jit/sm86/sgl_kernel_jit_fused_rope_true_64_false_fp16_t_fp16_t/build-bc314820d75d1808/.staging-172b526d3ad7449992c5344a3a378d11
+stdout:
+[1/2] /home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/nvidia/cu13/bin/nvcc -MD -MF "cuda_0.o.d" -Xcompiler -fPIC -gencode=arch=compute_86,code=sm_86 -DSGL_CUDA_ARCH=860 -std=c++20 -O3 --expt-relaxed-constexpr -I/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/tvm_ffi/include -I/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/kernels/jit/include -c "cuda.cu" -o "cuda_0.o"
+FAILED: [code=1] cuda_0.o 
+/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/nvidia/cu13/bin/nvcc -MD -MF "cuda_0.o.d" -Xcompiler -fPIC -gencode=arch=compute_86,code=sm_86 -DSGL_CUDA_ARCH=860 -std=c++20 -O3 --expt-relaxed-constexpr -I/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/tvm_ffi/include -I/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/kernels/jit/include -c "cuda.cu" -o "cuda_0.o"
+gcc: fatal error: cannot execute ‘cc1plus’: posix_spawnp: No such file or directory
+compilation terminated.
+nvcc fatal   : Failed to preprocess host compiler properties.
+ninja: build stopped: subcommand failed.
+
+stderr:
+
+Fail when using backend: breakable for prefill runner.
+Possible suggestions:
+1. disable the prefill CUDA graph by --cuda-graph-backend-prefill=disabled
+2. if it is an OOM problem, set --mem-fraction-static to a smaller value (e.g., 0.8 or 0.7) or set --cuda-graph-max-bs-prefill to a smaller value (e.g., 2048)
+Open an issue on GitHub https://github.com/sgl-project/sglang/issues/new/choose 
+
+[2026-10-24 23:52:37] Scheduler hit an exception: Traceback (most recent call last):
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/srt/managers/scheduler.py", line 6128, in run_scheduler_process
+    scheduler = Scheduler(server_args, port_args)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/srt/managers/scheduler.py", line 563, in __init__
+    self.init_model_worker()
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/srt/managers/scheduler.py", line 1111, in init_model_worker
+    self.init_all_cuda_graphs()
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/srt/managers/scheduler.py", line 1094, in init_all_cuda_graphs
+    self.tp_worker.init_cuda_graphs()
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/srt/managers/tp_worker.py", line 428, in init_cuda_graphs
+    self.model_runner.init_cuda_graphs(
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/srt/model_executor/model_runner.py", line 1178, in init_cuda_graphs
+    capture = capture_cuda_graphs(
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/srt/model_executor/model_runner_components/cuda_graph_setup.py", line 400, in capture_cuda_graphs
+    prefill = capture_prefill_graph(
+              ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/srt/model_executor/model_runner_components/cuda_graph_setup.py", line 647, in capture_prefill_graph
+    prefill_runner = PrefillCudaGraphRunner(model_runner)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/srt/model_executor/runner/prefill_cuda_graph_runner.py", line 675, in __init__
+    self.capture()
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/srt/model_executor/runner/prefill_cuda_graph_runner.py", line 1638, in capture
+    self._capture_one_stream()
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/srt/model_executor/runner/prefill_cuda_graph_runner.py", line 1674, in _capture_one_stream
+    self.capture_one_shape(num_tokens)
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/srt/model_executor/runner/prefill_cuda_graph_runner.py", line 1764, in capture_one_shape
+    self.backend.capture_one(
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/srt/model_executor/runner_backend/breakable_cuda_graph_backend.py", line 125, in capture_one
+    warmup_out = forward_fn()
+                 ^^^^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/srt/model_executor/runner/prefill_cuda_graph_runner.py", line 1737, in run_once
+    return self._run_forward(forward_batch, num_tokens)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/srt/model_executor/runner/prefill_cuda_graph_runner.py", line 850, in _run_forward
+    output = self.layer_model.forward(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/srt/models/qwen2.py", line 450, in forward
+    hidden_states = self.layers[i](
+                    ^^^^^^^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/srt/models/qwen2.py", line 333, in forward
+    hidden_states = self.self_attn(
+                    ^^^^^^^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/srt/models/qwen2.py", line 226, in forward
+    q, k = self.rotary_emb(positions, q, k)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/kernels/fused_op.py", line 659, in forward
+    result = method(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/srt/layers/rotary_embedding/base.py", line 405, in forward_cuda
+    apply_rope_with_cos_sin_cache_inplace(
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/kernels/ops/attention/rope.py", line 223, in apply_rope_with_cos_sin_cache_inplace
+    apply_rope_inplace(
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/torch/_ops.py", line 1350, in __call__
+    return self._op(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/kernels/ops/attention/rope.py", line 140, in apply_rope_inplace
+    module = _jit_fused_rope_module(is_neox, rope_dim, k.dtype, q.dtype)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/kernels/jit/utils/common.py", line 39, in wrapper
+    result_map[key] = fn(*args, **kwargs)
+                      ^^^^^^^^^^^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/kernels/ops/attention/rope.py", line 36, in _jit_fused_rope_module
+    return load_jit(
+           ^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/torch/_dynamo/eval_frame.py", line 1548, in _fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/kernels/jit/utils/compile/loader.py", line 178, in load_jit
+    library = ninja.build(spec=spec, build_dir=staging, build_file=build_file)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/kernels/jit/utils/compile/ninja.py", line 169, in build
+    raise RuntimeError(
+RuntimeError: Failed to build JIT module sgl_kernel_jit_fused_rope_true_64_false_fp16_t_fp16_t in /home/quang/heteroes-sglang-20261024-Es9qXF/jit/sm86/sgl_kernel_jit_fused_rope_true_64_false_fp16_t_fp16_t/build-bc314820d75d1808/.staging-172b526d3ad7449992c5344a3a378d11
+stdout:
+[1/2] /home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/nvidia/cu13/bin/nvcc -MD -MF "cuda_0.o.d" -Xcompiler -fPIC -gencode=arch=compute_86,code=sm_86 -DSGL_CUDA_ARCH=860 -std=c++20 -O3 --expt-relaxed-constexpr -I/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/tvm_ffi/include -I/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/kernels/jit/include -c "cuda.cu" -o "cuda_0.o"
+FAILED: [code=1] cuda_0.o 
+/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/nvidia/cu13/bin/nvcc -MD -MF "cuda_0.o.d" -Xcompiler -fPIC -gencode=arch=compute_86,code=sm_86 -DSGL_CUDA_ARCH=860 -std=c++20 -O3 --expt-relaxed-constexpr -I/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/tvm_ffi/include -I/home/quang/heteroes-sglang-20261024-Es9qXF/venv/lib/python3.12/site-packages/sglang/kernels/jit/include -c "cuda.cu" -o "cuda_0.o"
+gcc: fatal error: cannot execute ‘cc1plus’: posix_spawnp: No such file or directory
+compilation terminated.
+nvcc fatal   : Failed to preprocess host compiler properties.
+ninja: build stopped: subcommand failed.
+
+stderr:
+
+
+[2026-10-24 23:52:37] Received sigquit from a child process. It usually means the child failed.
