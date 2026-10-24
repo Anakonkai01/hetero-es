@@ -1,0 +1,114 @@
+{
+  "formatVersion": 1,
+  "status": "passed-with-targeted-rerun",
+  "scope": "Full CPU check-all on the experimental-reference worktree; targeted browser retry after fixing a stale test selector; no product UI behavior changed.",
+  "steps": [
+    {
+      "step": "runtime-tests",
+      "initialResult": "PASS"
+    },
+    {
+      "step": "python-lint",
+      "initialResult": "PASS"
+    },
+    {
+      "step": "python-format",
+      "initialResult": "PASS"
+    },
+    {
+      "step": "prettier",
+      "initialResult": "PASS"
+    },
+    {
+      "step": "source-packages",
+      "initialResult": "PASS"
+    },
+    {
+      "step": "backend-tests",
+      "initialResult": "PASS"
+    },
+    {
+      "step": "frontend-unit",
+      "initialResult": "PASS"
+    },
+    {
+      "step": "worker-unit",
+      "initialResult": "PASS"
+    },
+    {
+      "step": "server-unit",
+      "initialResult": "PASS"
+    },
+    {
+      "step": "product-ui-unit",
+      "initialResult": "PASS"
+    },
+    {
+      "step": "types",
+      "initialResult": "PASS"
+    },
+    {
+      "step": "lint",
+      "initialResult": "PASS"
+    },
+    {
+      "step": "i18n",
+      "initialResult": "PASS"
+    },
+    {
+      "step": "web-build",
+      "initialResult": "PASS"
+    },
+    {
+      "step": "worker-build",
+      "initialResult": "PASS"
+    },
+    {
+      "step": "web-onboarding",
+      "initialResult": "PASS"
+    },
+    {
+      "step": "web-live (see docs/evidence/2026-10-24-human-review/checks-reference-01/web-live.log)",
+      "initialResult": "FAIL"
+    },
+    {
+      "step": "web-experiments",
+      "initialResult": "PASS"
+    },
+    {
+      "step": "web-model-qualification",
+      "initialResult": "PASS"
+    },
+    {
+      "step": "web-showcase",
+      "initialResult": "PASS"
+    },
+    {
+      "step": "web-pages",
+      "initialResult": "PASS"
+    },
+    {
+      "step": "worker-onboarding",
+      "initialResult": "PASS"
+    },
+    {
+      "step": "worker-station",
+      "initialResult": "PASS"
+    }
+  ],
+  "runtimeTests": {
+    "passed": 2725,
+    "skipped": 105
+  },
+  "backendTests": {
+    "passed": 439
+  },
+  "retry": {
+    "step": "web-live",
+    "status": "passed",
+    "receipt": "web-live-retry-01/web-live.json",
+    "sha256": "6e2519201d1916f9010c5a5509da1225169ea116263e823a4a604233f9be12de"
+  },
+  "subsequentTargetedTests": "Scratch probe mutation control: 10 passed; 5/5 mutants killed. Covers the final added candidate-hash assertion.",
+  "limits": "Full check-all was not repeated after the test-selector-only fix. The failed original browser receipt and all other passing checks are retained. These checks do not qualify hardware inference or deployment."
+}

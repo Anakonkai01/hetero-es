@@ -1,0 +1,44 @@
+........F..                                                              [100%]
+=================================== FAILURES ===================================
+_________ test_masked_out_of_range_tokens_are_rejected_before_forward __________
+
+model = Qwen2ForCausalLM(
+  (model): Qwen2Model(
+    (embed_tokens): Embedding(41, 16, padding_idx=0)
+    (layers): ModuleList...=1e-06)
+    (rotary_emb): Qwen2RotaryEmbedding()
+  )
+  (lm_head): Linear(in_features=16, out_features=41, bias=False)
+)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7675aff91190>
+
+    def test_masked_out_of_range_tokens_are_rejected_before_forward(model, monkeypatch):
+        reference = Qwen2Reference(model, max_context=64, allow_fixture=True)
+    
+        def forbidden(*args, **kwargs):
+            raise AssertionError("Validate all token ids before computing any row")
+    
+        monkeypatch.setattr(reference, "forward_tokens", forbidden)
+        with pytest.raises(ReferenceArithmeticError):
+>           reference.generate(torch.tensor([[-1, 2, 5]]), attention_mask=torch.tensor([[0, 1, 1]]))
+
+runtime/tests/eval/test_qwen2_reference.py:132: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/qwen2_reference.py:217: in generate
+    scores, new_cache = self.forward_tokens(current, cache if use_cache else None)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (tensor([[2, 5]]), None), kwargs = {}
+
+    def forbidden(*args, **kwargs):
+>       raise AssertionError("Validate all token ids before computing any row")
+E       AssertionError: Validate all token ids before computing any row
+
+runtime/tests/eval/test_qwen2_reference.py:128: AssertionError
+=========================== short test summary info ============================
+FAILED runtime/tests/eval/test_qwen2_reference.py::test_masked_out_of_range_tokens_are_rejected_before_forward
+1 failed, 10 passed in 2.43s

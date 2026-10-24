@@ -85,3 +85,61 @@ def test_cpu_fixture_runs_one_model_and_records_real_generation_restore_and_phas
     )
     assert all(event["timingKind"] == "host_wall" for event in receipt["phases"])
     assert "not a cross-device equality test" in receipt["limitations"]
+
+
+def test_reference_probe_wraps_one_loaded_model_and_records_its_experimental_identity(tmp_path, monkeypatch):
+    import sys
+
+    from heteroes.eval import qwen2_reference
+    from heteroes.v3 import model as model_loader
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "v3"))
+    from tinylm import build_tiny_lm
+
+    model_path = build_tiny_lm(tmp_path / "model")
+    out = tmp_path / "reference.json"
+    load, reference = model_loader.load, qwen2_reference.Qwen2Reference
+    loaded, wrapped = [], []
+
+    def tracked_load(*args):
+        result = load(*args)
+        loaded.append(result[0])
+        return result
+
+    def fixture_reference(model):
+        result = reference(model, max_context=64, allow_fixture=True)
+        wrapped.append(result)
+        return result
+
+    monkeypatch.setattr(model_loader, "load", tracked_load)
+    monkeypatch.setattr(qwen2_reference, "Qwen2Reference", fixture_reference)
+    assert (
+        probe().main(
+            [
+                "--model-path",
+                str(model_path),
+                "--out",
+                str(out),
+                "--backend",
+                "qwen2-reference",
+                "--candidates",
+                "1",
+                "--max-new-tokens",
+                "2",
+                "--prompt",
+                "2+2=",
+            ]
+        )
+        == 0
+    )
+    receipt = json.loads(out.read_text())
+    assert len(loaded) == len(wrapped) == 1 and wrapped[0].model is loaded[0]
+    assert receipt["inferenceBackend"] == qwen2_reference.REFERENCE_BACKEND
+    assert receipt["backendIdentity"] == wrapped[0].identity
+    assert receipt["backendFingerprint"] == wrapped[0].fingerprint
+    assert receipt["strictInference"] is False and not receipt["backendIdentity"]["hardwareQualified"]
+    assert receipt["parentBeforeSha256"] == receipt["parentAfterSha256"]
+    assert receipt["samples"][0]["restoreExact"] is True
+    assert receipt["samples"][0]["tokenIds"]
+    # Same backing weights under both roles, with only the tiny RoPE buffer added by the reference.
+    assert receipt["storage"]["unique"]["cpu"]["storageBytes"] < receipt["snapshotBytes"] + 1024

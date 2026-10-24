@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Profile a single native FP16 model's lifecycle without a shadow (ADR-012).
+"""Profile a single FP16 model's lifecycle without a shadow (ADR-012).
 
 This is a resource/timing baseline, not a strict cross-device inference backend.
 CPU is the default. CUDA requires --device cuda --gpu and HETEROES_GPU_ACCEPTANCE=1.
@@ -19,6 +19,7 @@ def main(argv=None):
     parser.add_argument("--model-path", required=True, type=Path)
     parser.add_argument("--out", required=True, type=Path)
     parser.add_argument("--device", choices=("cpu", "cuda"), default="cpu")
+    parser.add_argument("--backend", choices=("native", "qwen2-reference"), default="native")
     parser.add_argument("--gpu", action="store_true")
     parser.add_argument("--candidates", type=int, default=3)
     parser.add_argument("--max-new-tokens", type=int, default=8)
@@ -95,8 +96,19 @@ def main(argv=None):
             files = file_manifest(args.model_path)
         with phase("model_load"):
             model, tokenizer = load(args.model_path, files, args.device)
+        inference = model
+        if args.backend == "qwen2-reference":
+            from heteroes.eval.qwen2_reference import Qwen2Reference
+
+            with phase("backend_setup"):
+                inference = Qwen2Reference(model)
+            report.update(
+                inferenceBackend=inference.identity["backend"],
+                backendIdentity=inference.identity,
+                backendFingerprint=inference.fingerprint,
+            )
         report["modelFilesHash"] = canonical_json_hash(files)
-        report["storage"] = storage_inventory({"inference": model})
+        report["storage"] = storage_inventory({"inference": inference})
         schema = build_parameter_schema(model)
         with phase("snapshot"):
             snapshot = take_snapshot(model, schema)
@@ -116,7 +128,7 @@ def main(argv=None):
                 with phase("perturb"):
                     perturb_model_(model, schema, sample["seed"], args.sigma, engine=ENGINE_V2)
                 with phase("rollout"), torch.inference_mode():
-                    output = model.generate(
+                    output = inference.generate(
                         **encoded, max_new_tokens=args.max_new_tokens, do_sample=False, use_cache=True
                     )
                 sample["tokenIds"] = output[0, width:].tolist()

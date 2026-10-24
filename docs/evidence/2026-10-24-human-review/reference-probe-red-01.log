@@ -1,0 +1,75 @@
+.....F                                                                   [100%]
+=================================== FAILURES ===================================
+_ test_reference_probe_wraps_one_loaded_model_and_records_its_experimental_identity _
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-21/test_reference_probe_wraps_one0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7d59c1033410>
+
+    def test_reference_probe_wraps_one_loaded_model_and_records_its_experimental_identity(tmp_path, monkeypatch):
+        import sys
+    
+        from heteroes.eval import qwen2_reference
+        from heteroes.v3 import model as model_loader
+    
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "v3"))
+        from tinylm import build_tiny_lm
+    
+        model_path = build_tiny_lm(tmp_path / "model")
+        out = tmp_path / "reference.json"
+        load, reference = model_loader.load, qwen2_reference.Qwen2Reference
+        loaded, wrapped = [], []
+    
+        def tracked_load(*args):
+            result = load(*args)
+            loaded.append(result[0])
+            return result
+    
+        def fixture_reference(model):
+            result = reference(model, max_context=64, allow_fixture=True)
+            wrapped.append(result)
+            return result
+    
+        monkeypatch.setattr(model_loader, "load", tracked_load)
+        monkeypatch.setattr(qwen2_reference, "Qwen2Reference", fixture_reference)
+>       assert probe().main([
+            "--model-path", str(model_path), "--out", str(out), "--backend", "qwen2-reference",
+            "--candidates", "1", "--max-new-tokens", "2", "--prompt", "2+2=",
+        ]) == 0
+
+runtime/tests/eval/test_profile_single_model.py:116: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+runtime/scripts/profile_single_model.py:30: in main
+    args = parser.parse_args(argv)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/heteroes-match/lib/python3.12/argparse.py:1908: in parse_args
+    self.error(msg)
+../../miniforge3/envs/heteroes-match/lib/python3.12/argparse.py:2650: in error
+    self.exit(2, _('%(prog)s: error: %(message)s\n') % args)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = ArgumentParser(prog='__main__.py', usage=None, description="Profile a single native FP16 model's lifecycle without a s...r remote device changes.\n", formatter_class=<class 'argparse.HelpFormatter'>, conflict_handler='error', add_help=True)
+status = 2
+message = '__main__.py: error: unrecognized arguments: --backend qwen2-reference\n'
+
+    def exit(self, status=0, message=None):
+        if message:
+            self._print_message(message, _sys.stderr)
+>       _sys.exit(status)
+E       SystemExit: 2
+
+../../miniforge3/envs/heteroes-match/lib/python3.12/argparse.py:2637: SystemExit
+----------------------------- Captured stdout call -----------------------------
+
+
+
+----------------------------- Captured stderr call -----------------------------
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 2347.12it/s]
+usage: __main__.py [-h] --model-path MODEL_PATH --out OUT
+                   [--device {cpu,cuda}] [--gpu] [--candidates CANDIDATES]
+                   [--max-new-tokens MAX_NEW_TOKENS] [--prompt PROMPT]
+                   [--expected-answer EXPECTED_ANSWER] [--seed SEED]
+                   [--sigma SIGMA] [--threads THREADS]
+__main__.py: error: unrecognized arguments: --backend qwen2-reference
+=========================== short test summary info ============================
+FAILED runtime/tests/eval/test_profile_single_model.py::test_reference_probe_wraps_one_loaded_model_and_records_its_experimental_identity
+1 failed, 5 passed in 1.77s

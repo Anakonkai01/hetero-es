@@ -1,0 +1,2 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  38%|███▊      | 111/290 [00:00<00:00, 1109.89it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 2615.26it/s]
+{"status": "ok", "out": "qwen-thao-reference-01.json", "samples": 1}

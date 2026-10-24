@@ -1,0 +1,17 @@
+control ok    | 28 passed in 2.51s
+killed       reverse reduction pairing | 6 failed, 22 passed in 2.49s
+killed       discard odd tail | 6 failed, 22 passed in 2.53s
+killed       disable subnormal flush | 1 failed, 27 passed in 2.14s
+SURVIVED     full weight widening | 28 passed in 2.55s
+killed       drop linear bias | 1 failed, 27 passed in 2.49s
+killed       drop softmax mask | 3 failed, 25 passed in 2.50s
+killed       drop RMS epsilon | 3 failed, 25 passed in 2.47s
+killed       wrong RoPE rotation sign | 1 failed, 27 passed in 2.55s
+killed       remove causal mask | 2 failed, 26 passed in 2.51s
+killed       remove cached keys | 2 failed, 26 passed in 2.52s
+killed       wrong MLP gate | 1 failed, 27 passed in 2.48s
+killed       wrong greedy tie | 5 failed, 23 passed in 2.08s
+killed       disable repetition penalty | 1 failed, 27 passed in 2.57s
+killed       ignore masked invalid tokens | 1 failed, 27 passed in 2.56s
+
+13 of 14 mutants killed.

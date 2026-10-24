@@ -1,0 +1,251 @@
+{
+  "formatVersion": 1,
+  "status": "ok",
+  "device": "cuda",
+  "inferenceBackend": "qwen2_pairwise_f32_reference_v1_experimental",
+  "strictInference": false,
+  "synchronizedPhases": true,
+  "environment": {
+    "python": "3.12.15",
+    "torch": "2.13.0+cu132",
+    "threads": 2
+  },
+  "maxNewTokens": 1,
+  "sigma": 0.001,
+  "samples": [
+    {
+      "seed": 7001,
+      "restoreExact": true,
+      "tokenIds": [
+        17607
+      ],
+      "text": " ?\n",
+      "reward": 0.0
+    }
+  ],
+  "phases": [
+    {
+      "formatVersion": 1,
+      "event": "phase_timing",
+      "phase": "model_files_hash",
+      "wallSeconds": 1.3332945949996429,
+      "status": "ok",
+      "timingKind": "host_wall",
+      "candidateId": null,
+      "generation": null,
+      "recipeHash": null,
+      "device": "cuda"
+    },
+    {
+      "formatVersion": 1,
+      "event": "phase_timing",
+      "phase": "model_load",
+      "wallSeconds": 3.1649084529999527,
+      "status": "ok",
+      "timingKind": "host_wall",
+      "candidateId": null,
+      "generation": null,
+      "recipeHash": null,
+      "device": "cuda"
+    },
+    {
+      "formatVersion": 1,
+      "event": "phase_timing",
+      "phase": "backend_setup",
+      "wallSeconds": 0.00202355399960652,
+      "status": "ok",
+      "timingKind": "host_wall",
+      "candidateId": null,
+      "generation": null,
+      "recipeHash": null,
+      "device": "cuda"
+    },
+    {
+      "formatVersion": 1,
+      "event": "phase_timing",
+      "phase": "snapshot",
+      "wallSeconds": 0.44330590999925334,
+      "status": "ok",
+      "timingKind": "host_wall",
+      "candidateId": null,
+      "generation": null,
+      "recipeHash": null,
+      "device": "cuda"
+    },
+    {
+      "formatVersion": 1,
+      "event": "phase_timing",
+      "phase": "parent_hash",
+      "wallSeconds": 0.3939033409997137,
+      "status": "ok",
+      "timingKind": "host_wall",
+      "candidateId": null,
+      "generation": null,
+      "recipeHash": null,
+      "device": "cuda"
+    },
+    {
+      "formatVersion": 1,
+      "event": "phase_timing",
+      "phase": "tokenize",
+      "wallSeconds": 0.010763430000224616,
+      "status": "ok",
+      "timingKind": "host_wall",
+      "candidateId": null,
+      "generation": null,
+      "recipeHash": null,
+      "device": "cuda"
+    },
+    {
+      "formatVersion": 1,
+      "event": "phase_timing",
+      "phase": "perturb",
+      "wallSeconds": 0.5094367390001935,
+      "status": "ok",
+      "timingKind": "host_wall",
+      "candidateId": "baseline/g0/c0",
+      "generation": 0,
+      "recipeHash": null,
+      "device": "cuda"
+    },
+    {
+      "formatVersion": 1,
+      "event": "phase_timing",
+      "phase": "rollout",
+      "wallSeconds": 148.67875006400027,
+      "status": "ok",
+      "timingKind": "host_wall",
+      "candidateId": "baseline/g0/c0",
+      "generation": 0,
+      "recipeHash": null,
+      "device": "cuda"
+    },
+    {
+      "formatVersion": 1,
+      "event": "phase_timing",
+      "phase": "restore",
+      "wallSeconds": 0.21108313199965778,
+      "status": "ok",
+      "timingKind": "host_wall",
+      "candidateId": "baseline/g0/c0",
+      "generation": 0,
+      "recipeHash": null,
+      "device": "cuda"
+    },
+    {
+      "formatVersion": 1,
+      "event": "phase_timing",
+      "phase": "parent_hash_after",
+      "wallSeconds": 0.5711434539998663,
+      "status": "ok",
+      "timingKind": "host_wall",
+      "candidateId": "baseline/g0/c0",
+      "generation": 0,
+      "recipeHash": null,
+      "device": "cuda"
+    }
+  ],
+  "cudaPeakAllocatedBytes": 1076176896,
+  "cudaPeakReservedBytes": 1203765248,
+  "limitations": [
+    "not a cross-device equality test",
+    "host wall timings include synchronization overhead on CUDA and are not kernel elapsed time",
+    "storage inventory excludes allocator reserve, temporaries, other processes and the CPU snapshot",
+    "a finite CPU fixture run does not establish strict inference or native GPU/Windows acceptance"
+  ],
+  "backendIdentity": {
+    "backend": "qwen2_pairwise_f32_reference_v1_experimental",
+    "operators": "pairwise_f32_reference_v1_experimental",
+    "sourceSha256": "a3254928d522eefdf1e821b9436827f64ba9a28d82a84fd5673c78c4619075d7",
+    "modelSignature": [
+      896,
+      4864,
+      24,
+      14,
+      2,
+      151936,
+      1000000.0
+    ],
+    "rmsNormEpsilon": 1e-06,
+    "attentionScale": 0.125,
+    "ropeFrequencyBits": [
+      1065353216,
+      1059470816,
+      1054337179,
+      1049376004,
+      1043732615,
+      1038909397,
+      1033475086,
+      1028093503,
+      1023510242,
+      1017657739,
+      1012562929,
+      1007542573,
+      1001931932,
+      997151245,
+      991652109,
+      986306396,
+      981668463,
+      975846211,
+      970790694,
+      965710450,
+      960132947,
+      955395299,
+      949830564,
+      944521149,
+      939827891,
+      934036253,
+      929020495,
+      923879650,
+      918335681,
+      913641584,
+      908010468,
+      902737785
+    ],
+    "maxContext": 256,
+    "fixture": false,
+    "hardwareQualified": false
+  },
+  "backendFingerprint": "42330af9791d7d97538510feeb6dfb0cbf8ee2fa8f1132d51b853bccab66a689",
+  "modelFilesHash": "74bf6dd08049d862b3bd56ac2a84a8e1980ae93acfad71612a9ea00548e887b7",
+  "storage": {
+    "formatVersion": 1,
+    "roles": {
+      "inference": {
+        "cuda:0": {
+          "storageBytes": 988065920,
+          "storages": 293
+        }
+      }
+    },
+    "unique": {
+      "cuda:0": {
+        "storageBytes": 988065920,
+        "storages": 293
+      }
+    }
+  },
+  "snapshotBytes": 988065536,
+  "parentBeforeSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+  "schemaHash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+  "promptTokenIds": [
+    5598,
+    1172,
+    279,
+    4226,
+    25,
+    220,
+    17,
+    488,
+    220,
+    17,
+    284
+  ],
+  "scorer": {
+    "name": "last-integer",
+    "expectedAnswer": 4
+  },
+  "parentAfterSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+  "droppedTraceEvents": 0,
+  "processPeakResidentBytes": 2844168192
+}

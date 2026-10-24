@@ -130,9 +130,12 @@ try {
     'seeking to 30% shows a partial run: ' + mid,
   );
   results.seekShowsPartialRun = true;
-  const names = await page.locator('.lv-table tbody th').allInnerTexts();
+  const names = await page.locator('.lv-table tbody th .lv-device > span').allInnerTexts();
   assert.deepEqual(names.sort(), ['3060', '3060-thao', '5070ti']);
+  const gpuModels = await page.locator('.lv-table tbody th .lv-device > small').allInnerTexts();
+  assert.deepEqual(gpuModels.sort(), ['NVIDIA GeForce RTX 3060', 'NVIDIA GeForce RTX 5070 Ti']);
   results.threeGpusListed = true;
+  results.gpuModelDetailsListed = true;
   await page.screenshot({ path: path.join(output, 'replay.png'), fullPage: true });
 
   // 4. Narrow screens do not overflow; reduced motion removes the flying packets.
