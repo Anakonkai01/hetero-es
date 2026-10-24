@@ -197,3 +197,42 @@ def test_the_audit_layer_does_not_hold_its_lock_while_the_base_scores(ledger):
         scorer.release.set()
         thread.join(WAIT)
     assert replies[0]["outcome"] == "COMMITTED"
+
+
+def test_a_duplicate_arriving_after_scoring_before_commit_still_shares_the_flight(ledger, monkeypatch):
+    import heteroes.worker_api as module
+
+    scored, publish = threading.Event(), threading.Event()
+    original = module._Flight
+
+    class GatedFlight(original):
+        def __init__(self):
+            super().__init__()
+            event = self.done
+
+            class Gate:
+                def set(self):
+                    scored.set()
+                    assert publish.wait(WAIT)
+                    event.set()
+
+                def wait(self):
+                    return event.wait(WAIT)
+
+            self.done = Gate()
+
+    monkeypatch.setattr(module, "_Flight", GatedFlight)
+    calls = []
+    api = WorkerAPI(ledger, "exp", 0, LEASE_SECONDS, scorer=lambda d, t: calls.append(1) or 0.5)
+    request = texts(take(api))
+    first, first_reply = submit_in_thread(api, request)
+    assert scored.wait(WAIT)
+    second, second_reply = submit_in_thread(api, request)
+    try:
+        assert api.wait_for_waiters(1, 1), "completed scoring must stay reserved until its canonical commit"
+    finally:
+        publish.set()
+        first.join(WAIT)
+        second.join(WAIT)
+    assert calls == [1]
+    assert sorted(r["outcome"] for r in first_reply + second_reply) == ["ALREADY_COMMITTED", "COMMITTED"]

@@ -322,6 +322,7 @@ class WorkerAPI:
         descriptor, attempt_number, token, payload = decoded
         digest = completions_sha256(payload)
         key = (descriptor.candidate_id, attempt_number, token, digest)
+        leader = False
         try:
             with self._lock:
                 worker = self._ledger.attempt_worker(descriptor, attempt_number, token)  # stale/foreign: no scoring
@@ -347,11 +348,9 @@ class WorkerAPI:
             if leader:
                 try:
                     flight.reward = self._score(descriptor, payload)
-                except ScoringFailedError as error:
+                except BaseException as error:
                     flight.error = error
                 finally:
-                    with self._lock:
-                        self._flights.pop(key, None)
                     flight.done.set()
             else:
                 flight.done.wait()
@@ -368,6 +367,12 @@ class WorkerAPI:
                 self.activity += 1
         except LedgerError as error:
             return _error(_code_of(error), str(error))
+        finally:
+            if leader:
+                # Keep completed scoring reserved through commit: a retry in that interval must still share it.
+                # Publish unexpected scorer failures too, so existing waiters cannot hang or commit a missing reward.
+                with self._lock:
+                    self._flights.pop(key, None)
         self.record_usage(descriptor, attempt_number, worker, getattr(payload, "usage", None), "candidate")
         return {"ok": True, "outcome": outcome.value}
 
