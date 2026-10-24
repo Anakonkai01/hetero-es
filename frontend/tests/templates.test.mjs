@@ -24,6 +24,11 @@ const run = {
   configHash: 'h',
 };
 
+test('audit disabled remains disabled when copying a run into a template', () => {
+  assert.equal(templateConfigFromExperiment({ ...run, auditRate: 0 }).auditRate, 0);
+  assert.equal(templateConfigFromExperiment({ ...run, auditRate: 1 }).auditRate, 1);
+});
+
 test('a template keeps the reusable settings and never ids that can go stale', () => {
   const config = templateConfigFromExperiment(run);
   assert.deepEqual(Object.keys(config).sort(), [

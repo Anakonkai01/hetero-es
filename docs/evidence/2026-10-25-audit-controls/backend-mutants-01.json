@@ -1,0 +1,26 @@
+[
+  {
+    "name": "api-coerces-strings-and-booleans",
+    "file": "backend/request_models.py",
+    "old": "auditRate: float = Field(default=0.05, ge=0, le=1, strict=True)",
+    "new": "auditRate: float = Field(default=0.05, ge=0, le=1, strict=False)"
+  },
+  {
+    "name": "template-refuses-audit-off",
+    "file": "backend/templates.py",
+    "old": "\"auditRate\": (0, 1)",
+    "new": "\"auditRate\": (1e-7, 1)"
+  },
+  {
+    "name": "dispatch-drops-frozen-rate",
+    "file": "backend/constants.py",
+    "old": "\"auditRate\",  # operational coverage; optional in older product configurations, outside numerical recipes",
+    "new": "\"unusedAuditRate\",  # broken forwarding"
+  },
+  {
+    "name": "view-assumes-five-percent",
+    "file": "backend/experiment_view.py",
+    "old": "body.get(\"auditRate\", 0.05)",
+    "new": "0.05"
+  }
+]

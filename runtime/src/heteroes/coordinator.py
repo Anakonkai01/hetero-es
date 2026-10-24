@@ -134,6 +134,10 @@ class Coordinator:
         self._coefficient_rule = coefficient_rule
         self._coefficient_function = coefficient_function  # the loaded code of a python@1 coefficient rule
         self._score = score
+        if recipe.to_dict().get("formatVersion") == 3 and score is not None:
+            from heteroes.v3.options import validate_audit_rate
+
+            audit_rate = validate_audit_rate(audit_rate)
         self._audit_rate = audit_rate if recipe.to_dict().get("formatVersion") == 3 and score is not None else 0
         self._audit_workers = audit_workers
         self._audit_timeout = audit_timeout_seconds

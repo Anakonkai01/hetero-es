@@ -1,5 +1,8 @@
 /** Vietnamese strings used by active UI, data tables and backend statuses. */
 export const translations: Record<string, string> = {
+  'Audit rate (%)': 'Tỷ lệ kiểm tra lại (%)',
+  '0 disables audits; 100 selects every candidate for another worker to check.':
+    '0 tắt kiểm tra lại; 100 chọn mọi candidate để một worker khác kiểm tra.',
   'Compatibility for': 'Kiểm tra tương thích cho',
   'New experiments (v2)': 'Thí nghiệm mới (v2)',
   'Historical experiments (v1)': 'Thí nghiệm trước đây (v1)',

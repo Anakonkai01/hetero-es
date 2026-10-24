@@ -56,7 +56,7 @@ def serve(
     token_env="HETEROES_TOKEN",
     timeout_seconds=1800,
     worker_ids=None,
-    audit_rate=0.05,
+    audit_rate=None,
     linger_seconds=2,
     initial_adapter=None,
     scheduler="greedy-tail",
@@ -70,6 +70,9 @@ def serve(
     from heteroes.v3.run import make_scorer
 
     scheduling = policy_factory(scheduler)  # an unknown name stops here, before any file is written
+    from heteroes.v3.options import validate_audit_rate
+
+    audit_rate = validate_audit_rate(config.get("auditRate", 0.05) if audit_rate is None else audit_rate)
     secret = _token(token_env)
     if sys.platform == "win32" and (config.get("weightSpace") or {}).get("kind") == "lora" and initial_adapter is None:
         raise ValueError("A Windows coordinator requires --initial-adapter with the pinned LoRA file")
@@ -77,6 +80,9 @@ def serve(
     if out.exists():
         raise FileExistsError("Choose a fresh run directory")
     out.mkdir(parents=True, exist_ok=False)
+    from heteroes.v3.audit import freeze_audit_config
+
+    freeze_audit_config(out, audit_rate)
     ready = prepare(config, out, device, initial_adapter=initial_adapter)
     run = ready["run"]
     check_recipe_selftest(run, device)

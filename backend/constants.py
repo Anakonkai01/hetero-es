@@ -29,6 +29,7 @@ V3_UPDATE_KEYS = (
     "sampler",
     "candidateSeedNamespace",
     "promptFormat",
+    "auditRate",  # operational coverage; optional in older product configurations, outside numerical recipes
 )
 
 # The shipped desktop-v3 qualification reference (docs/evidence/2026-10-19-v3-qualification-reference): a native Windows

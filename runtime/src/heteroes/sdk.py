@@ -80,8 +80,12 @@ class ESConfig:
     dataset: object = None  # heteroes.sdk_lab.Dataset: replaces train_dataset and prompt_field
     eval_chunks: list | None = None  # the chunks devices may use (ADR-010), e.g. from Lab.suggest; includes eval_chunk
     validation_interval: int | None = None  # a lab run: score the validation split every this many generations
+    audit_rate: float = 0.05  # operational re-execution coverage, 0..1; zero disables audits
 
     def __post_init__(self):
+        from heteroes.v3.options import validate_audit_rate
+
+        self.audit_rate = validate_audit_rate(self.audit_rate)
         if self.model is not None:
             self.model_path, self.model_id = self.model.path, self.model.id
         if self.dataset is not None:
@@ -123,6 +127,7 @@ class ESConfig:
             **({"evalChunks": list(self.eval_chunks)} if self.eval_chunks else {}),
             "decoder": self.decoder,
             "population": self.population,
+            "auditRate": self.audit_rate,
             "generations": self.generations,
             "alpha": self.alpha,
             "coefficientRule": self.coefficient_rule,

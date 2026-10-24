@@ -7,12 +7,14 @@ No lab deployment or device approval changes are included.
 The owner resumed Codex on 2026-10-24 from clean `ecc2d19`, preserving the full approved plan and authorizing
 GPU/SSH experiments including SGLang. No push, merge, deployment, device-state change or learning run.
 The [Claude handoff](handoff-claude-human-review-2026-10-24.md) remains the historical starting point.
+Owner closed the Codex session on 2026-10-25 to conserve usage. Do not resume automatically;
+continue from the [new handoff](handoff-codex-human-review-2026-10-25.md) when asked.
 
 | Milestone                                  | State                                                                                    | Next gate                                                    |
 | ------------------------------------------ | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
 | M0 contract/baseline                       | In progress: ADR, phase traces/storage inventory and real Qwen CPU lifecycle probe       | Broader pipeline timing                                      |
 | M1 one-model strict backend                | Reference plus audited NVRTC kernels; Qwen 0.5B tokens agree on four GPUs (sm_120/sm_86) | Native Windows, batching/throughput, lifecycle gates         |
-| M2 delivery/scorer/audit/watchdog/recovery | In progress: scorer reservation; durable delivery/local poison; bounded usage and partial monitoring | Audit controls/statuses, watchdog and D10 recovery |
+| M2 delivery/scorer/audit/watchdog/recovery | In progress: scorer/delivery/local poison; bounded usage; frozen audit rate through SDK/API/UI | Detailed audit states, strict stop gate, watchdog and D10 recovery |
 | M3 recovery I/O and long-run overhead      | Not started                                                                              | Bounded upload/retry and consistency tests                   |
 | M4 product/lifecycle/packaging             | Not started                                                                              | SDK/lab capability and native runtime acceptance             |
 | M5 system acceptance                       | Not started                                                                              | End-to-end, faults, memory and throughput receipts           |
@@ -68,3 +70,9 @@ stock default 14/208 prompts serially and 34/208 batched; stock deterministic ex
 FP16 pipeline-stage patch ran but still differed on 2/32 prompts between 5070 Ti and Quang's 3060, with no same-host
 batch/serial differences on those rows. It is not a strict replacement or a managed backend. Thao's interrupted tuned
 run yielded no receipt after host sleep; the final owned-probe check is clear on both remotes.
+
+Final session slice: audit coverage is explicit (0..1/default .05), pinned independently of numerical identity and
+carried through SDK, CLI, API, templates, managed runner and UI. Rate-zero forwarding and exact historical hash
+boundaries have mutation coverage; backend reporting uses the frozen rate. Targeted runtime 58/backend 66 tests,
+mutation groups 8/8, 4/4 and 2/2, TypeScript/i18n/template units and the experiment-tools browser contract passed.
+The full suites were not rerun after this slice. See [audit-control evidence](evidence/2026-10-25-audit-controls/README.md).

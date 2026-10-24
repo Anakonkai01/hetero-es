@@ -244,6 +244,13 @@ try {
   await page.getByLabel('Pinned model').selectOption(model.modelArtifactId);
   await page.getByLabel('Frozen dataset').selectOption(dataset.datasetId);
   await page.getByLabel('Batch size', { exact: true }).fill('4');
+  const auditRate = page.getByLabel('Audit rate (%)', { exact: true });
+  assert.equal(await auditRate.inputValue(), '5');
+  await auditRate.fill('29');
+  assert.equal(await auditRate.inputValue(), '29');
+  await auditRate.fill('100');
+  assert.equal(await auditRate.inputValue(), '100');
+  await auditRate.fill('0');
   await page.getByLabel('Weight space').selectOption('lora');
   await page.getByLabel('LoRA rank', { exact: true }).fill('4');
   await page.getByLabel('Antithetic sampling', { exact: true }).check();
@@ -267,6 +274,7 @@ try {
     await page.request.get(base + '/api/v1/experiments/' + page.url().split('/').at(-1), { headers })
   ).json();
   assert.equal(v3.recipeVersion, 3);
+  assert.equal(v3.auditRate, 0);
   assert.equal(v3.modelVersion, manifest.revision);
   assert.equal(v3.weightSpace.kind, 'lora');
   assert.equal(v3.weightSpace.rank, 4);

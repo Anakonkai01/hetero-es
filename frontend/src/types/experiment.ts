@@ -89,6 +89,7 @@ export interface Experiment extends Partial<V3Settings> {
   sigmaMinimum?: number;
   maxNewTokens?: number;
   validationInterval?: number;
+  auditRate?: number;
   studyMetrics?: {
     testLocked: boolean;
     independentReloadPassed?: boolean;
@@ -141,6 +142,7 @@ export interface Experiment extends Partial<V3Settings> {
 }
 
 export interface CreateExperimentRequest extends Partial<V3Settings> {
+  auditRate?: number;
   recipeVersion?: number;
   batchSize?: number;
   batchSeed?: number;

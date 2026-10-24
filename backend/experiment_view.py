@@ -1,7 +1,7 @@
 """Read-only corrections to experiment monitoring; canonical run evidence is never rewritten."""
 
-import hashlib
 import re
+from heteroes.v3.options import audit_selected
 
 
 def experiment_view(body, snapshot):
@@ -14,7 +14,7 @@ def experiment_view(body, snapshot):
     if not summary or body.get("recipeVersion") != 3:
         return shown
 
-    # Managed v3 runs use Coordinator's fixed default audit rate of 1/20. Audit
+    # Historical managed v3 runs without auditRate retain the 1/20 default. Audit
     # addresses are run/gN/cN, independent of seed namespace. Count committed
     # addresses instead of generation_done logs, which can be lost on recovery.
     generations = snapshot.get("generations") or []
@@ -48,8 +48,7 @@ def experiment_view(body, snapshot):
                 complete = False
                 break
         selected += sum(
-            int.from_bytes(hashlib.sha256(f"{body['experimentId']}/g{index}/c{candidate}".encode()).digest(), "big")
-            < 2**256 // 20
+            audit_selected(f"{body['experimentId']}/g{index}/c{candidate}", body.get("auditRate", 0.05))
             for candidate in candidates
         )
     complete = complete and indices == set(range(max(indices, default=-1) + 1))

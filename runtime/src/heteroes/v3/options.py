@@ -1,6 +1,7 @@
 """CPU-safe validation of v3 weight spaces and shared-lab settings."""
 
 import math
+import hashlib
 import re
 import struct
 
@@ -12,6 +13,20 @@ ALPHA_SCHEDULES = ("constant", "cosine", "linear")
 # texts as one prompt at a time in the cross-GPU probes (16, and 64 on 5070 Ti, 3060 and 1660S: RUNTIME-TODO chunk-128)
 EXACT_CHUNKS = {"float16": (1,), "float32": (16, 32, 64)}
 MAX_WINDOW = 8
+
+
+def validate_audit_rate(value):
+    """Operational coverage, independent of numerical recipe/plan identity; zero explicitly disables auditing."""
+    if type(value) not in (int, float) or not math.isfinite(value) or not 0 <= value <= 1:
+        raise ValueError("audit rate must be a finite number between zero and one")
+    return float(value)
+
+
+def audit_selected(candidate_id, rate=0.05):
+    """Historical 1/20 hash rule at the default rate; the exact address space at explicit coverage 0..1."""
+    validate_audit_rate(rate)
+    threshold = 2**256 // 20 if rate == 0.05 else int(rate * 2**256)
+    return int(hashlib.sha256(candidate_id.encode()).hexdigest(), 16) < threshold
 
 
 def validate_prompt_format(value, system_prompt=None):
@@ -139,6 +154,7 @@ def validate_options(config, *, allow_python=False, with_code=True):
     A web-lab configuration. `allow_python` admits a Python scorer and coefficient rule: with their frozen code (the lab
     and the coordinator), or, `with_code=False`, without it (a worker, which never receives researcher code).
     """
+    validate_audit_rate(config.get("auditRate", 0.05))
     validate_prompt_format(config.get("promptFormat"), config.get("systemPrompt"))
     validate_seed_namespace(config.get("candidateSeedNamespace"))
     validate_weight_space(config["weightSpace"], initial_adapter=False)

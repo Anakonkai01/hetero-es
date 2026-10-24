@@ -1,0 +1,26 @@
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_experiment_view_uses_frozen_rate_instead_of_assuming_five_percent[1-4] __
+
+rate = 1, selected = 4
+
+    @pytest.mark.parametrize("rate,selected", [(0, 0), (1, 4)])
+    def test_experiment_view_uses_frozen_rate_instead_of_assuming_five_percent(rate, selected):
+        from backend.experiment_view import experiment_view
+    
+        run_id = "a" * 32
+        body = {"experimentId": run_id, "recipeVersion": 3, "auditRate": rate, "auditSummary": {"completed": 0}}
+        snapshot = {"generations": [{"generationId": run_id + ".g0", "candidateCount": 4, "committedCandidateCount": 4, "status": "COMPLETED"}]}
+>       assert experiment_view(body, snapshot)["auditSummary"]["selected"] == selected
+E       assert 0 == 4
+
+backend/tests/test_v3_study.py:123: AssertionError
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_v3_study.py::test_experiment_view_uses_frozen_rate_instead_of_assuming_five_percent[1-4]
+1 failed, 1 passed, 38 deselected, 1 warning in 0.04s

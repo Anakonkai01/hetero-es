@@ -58,6 +58,7 @@ class Configuration(BaseModel):
     systemPrompt: str | None = Field(default=None, max_length=4000)
     promptFormat: Literal["chat", "raw"] | None = None
     validationInterval: int = Field(default=1, ge=1, le=1000, strict=True)
+    auditRate: float = Field(default=0.05, ge=0, le=1, strict=True)
     # Recipe v3 Python scorer / coefficient rule: [{role, name, function, source}] (the lab adds codeSha256)
     pythonCode: list[dict] = Field(default_factory=list, max_length=3)  # scorer, coefficients, sampler
 

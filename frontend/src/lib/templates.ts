@@ -18,6 +18,7 @@ const KEYS = [
   'coefficientRule',
   'systemPrompt',
   'validationInterval',
+  'auditRate',
   'batchSize',
   'batchSeed',
   'sigmaSchedule',

@@ -6,6 +6,11 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
 
 ## Tóm tắt cho chủ dự án (2026-10-25)
 
+- Chủ dự án yêu cầu chốt phiên để tiết kiệm usage. **Dừng tự chạy tại đây**, đợi yêu cầu tiếp tục.
+  Điểm dừng và thứ tự việc còn lại: [bàn giao Codex](handoff-codex-human-review-2026-10-25.md).
+- Đã thêm cấu hình audit 0–100% xuyên SDK/API/UI, mặc định 5%, lưu cố định theo run; template giữ đúng 0%.
+  Đã qua test mục tiêu, mutation và trình duyệt; chưa chạy lại toàn bộ suite sau phần này.
+  [Bằng chứng](evidence/2026-10-25-audit-controls/README.md).
 - Codex đã tiếp tục từ repo sạch `ecc2d19`, giữ toàn bộ kế hoạch. Đã mutation-check scorer, sửa race trước commit;
   bổ sung heartbeat xuyên delivery, outbox bền vững, chặn worker local sau lỗi restore và queue usage có giới hạn.
   Runtime CPU: 2.848 pass, 186 skip; backend: 439 pass. M2 còn đang làm;
@@ -35,7 +40,8 @@ was performed. The disk entry below is historical (2026-10-23).
 
 ## Open work, in order
 
-1. **Approved human-review plan, Codex resumed.** Preserve the full M0–M6 scope. Finish M2 (audit
+1. **Approved human-review plan, paused at the owner's request.** Preserve the full M0–M6 scope. When resumed,
+   finish M2 (audit
    controls/statuses, progress watchdog/hard caps and D10 recovery), then M3 recovery I/O. Next numerical work:
    cached RoPE, launch cost and multi-sequence batching with unchanged strict arithmetic and cross-GPU token checks;
    then M4 integration/packaging, M5 and M6. The SGLang probe does not replace these gates.

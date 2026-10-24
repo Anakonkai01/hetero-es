@@ -119,6 +119,10 @@ def main(directory, *, device="cuda", timeout_seconds=1800):
 
     root = Path(directory)
     config = read_json(root / "config.json")
+    if config.get("recipeVersion") == 3:
+        from heteroes.v3.audit import freeze_audit_config
+
+        freeze_audit_config(root, config.get("auditRate", 0.05))
     log = JsonlLog(root / "events.jsonl", append=True)
 
     def emit(event):
@@ -251,6 +255,7 @@ def main(directory, *, device="cuda", timeout_seconds=1800):
             v3_options = {
                 "seed_namespace": config.get("candidateSeedNamespace"),
                 "audit_workers": config["workerIds"],
+                "audit_rate": config.get("auditRate", 0.05),
                 "audit_fault_path": root / "audit-faults.json",
                 "antithetic": recipe.antithetic,
                 "coefficient_rule": recipe.coefficient_rule,

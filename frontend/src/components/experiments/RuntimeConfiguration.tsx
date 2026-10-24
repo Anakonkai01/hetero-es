@@ -82,6 +82,7 @@ export function RuntimeConfiguration({
     candidateSeedNamespace: initial?.candidateSeedNamespace ?? null,
   });
   const [validationInterval, setValidationInterval] = useState(initial?.validationInterval ?? 1);
+  const [auditPercent, setAuditPercent] = useState(Number(((initial?.auditRate ?? 0.05) * 100).toPrecision(15)));
   const [version, setVersion] = useState(initial?.recipeVersion ?? 1);
   const [modelId, setModelId] = useState(initial?.modelArtifactId ?? '');
   const [datasetId, setDatasetId] = useState(initial?.datasetIds?.[0] ?? '');
@@ -147,7 +148,7 @@ export function RuntimeConfiguration({
                 sigmaMinimum: minimum,
                 maxNewTokens: maxTokens,
                 validationInterval,
-                ...(version === 3 ? v3 : {}),
+                ...(version === 3 ? { ...v3, auditRate: auditPercent / 100 } : {}),
               }
             : {}),
           maxGenerations: generations,
@@ -333,6 +334,26 @@ export function RuntimeConfiguration({
             </div>
           )}
           {version === 3 && <V3Fields value={v3} onChange={setV3} alpha={alpha} />}
+          {version === 3 && (
+            <label className="fg">
+              {t('Audit rate (%)')}
+              <input
+                className="inp"
+                type="number"
+                required
+                min={0}
+                max={100}
+                step="any"
+                value={auditPercent}
+                aria-label={t('Audit rate (%)')}
+                aria-describedby="audit-rate-help"
+                onChange={(e) => setAuditPercent(Number(e.target.value))}
+              />
+              <small id="audit-rate-help">
+                {t('0 disables audits; 100 selects every candidate for another worker to check.')}
+              </small>
+            </label>
+          )}
           {version >= 2 && (
             <label className="fg">
               {t('Validation interval')}
@@ -543,6 +564,12 @@ export function RuntimeConfiguration({
                   <dd>{t(value)}</dd>
                 </div>
               ))}
+            {version === 3 && (
+              <div>
+                <dt>{t('Audit rate (%)')}</dt>
+                <dd>{auditPercent}</dd>
+              </div>
+            )}
           </dl>
           <details className="advanced-panel">
             <summary>{t('Backup policy')}</summary>

@@ -153,7 +153,7 @@ def prepare(config, out_dir, device="cpu", initial_adapter=None):
 
 
 def run_local(
-    config, out_dir, device="cpu", workers=1, experiment_id="local", log=None, timeout_seconds=None, audit_rate=0.05
+    config, out_dir, device="cpu", workers=1, experiment_id="local", log=None, timeout_seconds=None, audit_rate=None
 ):
     """
     Run the experiment to its end; returns the generation summaries. Events go to `<out_dir>/events.jsonl` and `log`.
@@ -167,6 +167,9 @@ def run_local(
     from heteroes.v3.run import make_scorer
     from heteroes.worker_runtime import WorkerRuntime
 
+    from heteroes.v3.audit import freeze_audit_config
+
+    audit_rate = freeze_audit_config(out_dir, config.get("auditRate", 0.05) if audit_rate is None else audit_rate)
     ready = prepare(config, out_dir, device)
     run, out = ready["run"], ready["out"]
     check_recipe_selftest(run, device)

@@ -75,6 +75,9 @@ def _code(config, role):
 
 
 def _managed_choices(spec):
+    from heteroes.v3.options import validate_audit_rate
+
+    validate_audit_rate(spec.get("auditRate", 0.05))
     if spec.get("evalDtype", "float32") != "float32" or spec.get("noiseEngine", "cpu") != "cpu":
         raise ValueError("The managed lab uses FP32 evaluation and canonical CPU noise")
 
@@ -120,6 +123,7 @@ def managed_configuration(spec, coordinator, workers, model, dataset):
         "noiseEngineVersion": spec.get("noiseEngineVersion") or ENGINE_V2,
         "name": spec.get("name", "CLI experiment"),
         "recipeVersion": 3,
+        "auditRate": spec.get("auditRate", 0.05),
         "modelName": spec["model"]["id"],
         "modelArtifactId": model["id"],
         "datasetIds": [dataset["datasetId"]],

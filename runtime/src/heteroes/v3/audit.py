@@ -16,14 +16,26 @@ import time
 from heteroes.ledger import LedgerError, FailureKind
 from heteroes.product.files import read_json, write_json
 from heteroes.worker_api import _decode_lease, _decode_result, _decode_heartbeat, _decode_failure, _error, _code_of
+from heteroes.v3.options import validate_audit_rate, audit_selected
+
+
+def freeze_audit_config(directory, rate):
+    """Pin operational coverage beside the run without changing recipe, plan or recorded update hashes."""
+    from pathlib import Path
+
+    value = {"formatVersion": 1, "auditRate": validate_audit_rate(rate)}
+    path = Path(directory) / "audit-config.json"
+    exists = path.exists()
+    prior = read_json(path) if exists else None
+    if exists and prior != value:
+        raise ValueError("audit settings differ from this run's frozen audit configuration")
+    if not exists:
+        write_json(path, value)
+    return value["auditRate"]
 
 
 def selected_for_audit(candidate_id, rate=0.05):
-    if type(rate) not in (int, float) or not math.isfinite(rate) or not 0 <= rate <= 1:
-        raise ValueError("audit rate must be between zero and one")
-    # The default is exactly 1/20 of the SHA-256 address space, not a process RNG.
-    threshold = 2**256 // 20 if rate == 0.05 else int(rate * 2**256)
-    return int(hashlib.sha256(candidate_id.encode()).hexdigest(), 16) < threshold
+    return audit_selected(candidate_id, rate)
 
 
 class AuditAPI:

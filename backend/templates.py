@@ -27,6 +27,7 @@ INTEGERS = {
     "evalChunk": (1, 64),
 }
 FLOATS = {
+    "auditRate": (0, 1),
     "alpha": (1e-7, 1.0),
     "sigma": (1e-7, 1.0),
     "sigmaMinimum": (1e-7, 1.0),

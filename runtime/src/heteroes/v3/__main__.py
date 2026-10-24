@@ -63,7 +63,7 @@ def main(argv=None):
     serve.add_argument("--token-env", default="HETEROES_TOKEN")
     serve.add_argument("--timeout-seconds", type=float, default=1800)
     serve.add_argument("--worker-ids", help="comma-separated worker IDs eligible for audits")
-    serve.add_argument("--audit-rate", type=float, default=0.05)
+    serve.add_argument("--audit-rate", type=float, default=None, help="override auditRate before run creation (0..1)")
     serve.add_argument(
         "--scheduler", choices=SCHEDULER_POLICIES, default=DEFAULT_SCHEDULER_POLICY, help="how candidates go to workers"
     )
@@ -96,18 +96,15 @@ def main(argv=None):
                 expected_recipe_hash=args.recipe_hash,
             )
         spec = _resolve(json.loads(args.spec.read_text(encoding="utf-8")), args.spec.resolve().parent)
+        if args.audit_rate is not None:
+            from heteroes.v3.options import validate_audit_rate
+
+            spec = {**spec, "auditRate": validate_audit_rate(args.audit_rate)}
         if args.lab:
             if args.initial_adapter is not None:
                 parser.error("the managed lab controls initial adapter creation")
-            if (
-                args.port != 8765
-                or args.audit_rate != 0.05
-                or args.timeout_seconds != 1800
-                or args.scheduler != DEFAULT_SCHEDULER_POLICY
-            ):
-                parser.error(
-                    "--lab uses the installed Worker's port and the managed lab's audit/time/scheduling settings"
-                )
+            if args.port != 8765 or args.timeout_seconds != 1800 or args.scheduler != DEFAULT_SCHEDULER_POLICY:
+                parser.error("--lab uses the installed Worker's port and the managed lab's time/scheduling settings")
             from heteroes.v3.lab_cli import serve_lab
 
             return serve_lab(
