@@ -4,6 +4,8 @@ Owner approved the plan and autonomous implementation on 2026-10-24, including G
 `3060-thao`. Decisions: [ADR-012](../runtime/docs/adr/ADR-012-single-model-strict-inference.md).
 Branch: `fix/human-review-single-model-2026-10-24`; base: `c9997734`.
 No lab deployment or device approval changes are included.
+Owner paused Codex auto-run and requested continuation by Claude on 2026-10-24;
+read the [handoff](handoff-claude-human-review-2026-10-24.md). Implementation head at handoff: `3914fb5`.
 
 | Milestone                                  | State                                                                                | Next gate                                                    |
 | ------------------------------------------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
