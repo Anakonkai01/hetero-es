@@ -1,0 +1,165 @@
+{
+  "status": "counterexample",
+  "hardwareQualified": false,
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "sourceSha256": "cf4df2e5050b08889e3668acc29138c2fca567a25f5727979430f1997ef3d099",
+  "cases": [
+    {
+      "operation": "add",
+      "count": 3139288,
+      "differences": 0,
+      "counterexamples": []
+    },
+    {
+      "operation": "mul",
+      "count": 3139288,
+      "differences": 17,
+      "counterexamples": [
+        {
+          "a": 8388608,
+          "b": 1065353215,
+          "cpu": 8388608,
+          "cuda": 0
+        },
+        {
+          "a": 8388608,
+          "b": -1082130433,
+          "cpu": -2139095040,
+          "cuda": -2147483648
+        },
+        {
+          "a": 16777216,
+          "b": 1056964607,
+          "cpu": 8388608,
+          "cuda": 0
+        },
+        {
+          "a": 16777216,
+          "b": -1090519041,
+          "cpu": -2139095040,
+          "cuda": -2147483648
+        },
+        {
+          "a": 1056964607,
+          "b": 16777216,
+          "cpu": 8388608,
+          "cuda": 0
+        },
+        {
+          "a": 1056964607,
+          "b": -2130706432,
+          "cpu": -2139095040,
+          "cuda": -2147483648
+        },
+        {
+          "a": 1065353215,
+          "b": 8388608,
+          "cpu": 8388608,
+          "cuda": 0
+        },
+        {
+          "a": 1065353215,
+          "b": -2139095040,
+          "cpu": -2139095040,
+          "cuda": -2147483648
+        },
+        {
+          "a": -2139095040,
+          "b": 1065353215,
+          "cpu": -2139095040,
+          "cuda": -2147483648
+        },
+        {
+          "a": -2139095040,
+          "b": -1082130433,
+          "cpu": 8388608,
+          "cuda": 0
+        },
+        {
+          "a": -2130706432,
+          "b": 1056964607,
+          "cpu": -2139095040,
+          "cuda": -2147483648
+        },
+        {
+          "a": -2130706432,
+          "b": -1090519041,
+          "cpu": 8388608,
+          "cuda": 0
+        },
+        {
+          "a": -1090519041,
+          "b": 16777216,
+          "cpu": -2139095040,
+          "cuda": -2147483648
+        },
+        {
+          "a": -1090519041,
+          "b": -2130706432,
+          "cpu": 8388608,
+          "cuda": 0
+        },
+        {
+          "a": -1082130433,
+          "b": 8388608,
+          "cpu": -2139095040,
+          "cuda": -2147483648
+        },
+        {
+          "a": -1082130433,
+          "b": -2139095040,
+          "cpu": 8388608,
+          "cuda": 0
+        },
+        {
+          "a": 8388608,
+          "b": 1065353215,
+          "cpu": 8388608,
+          "cuda": 0
+        }
+      ]
+    }
+  ],
+  "limits": "Finite primitive study, not adoption/qualification. Scratch audit normalization only admits the two explicitly selected native signed-FTZ operations.",
+  "identity": {
+    "kernel": "pairwise_f32_cuda_linear_v2_experimental",
+    "operators": "pairwise_f32_reference_v1_experimental",
+    "sourceSha256": "05decf56fedafef977adbb31113c012312885008cafcd9843e29a514eff44d6e",
+    "nvrtcOptions": [
+      "--fmad=false",
+      "--ftz=false",
+      "--prec-div=true",
+      "--prec-sqrt=true",
+      "--std=c++17"
+    ],
+    "hardwareQualified": false,
+    "arch": "sm_120",
+    "gpu": "NVIDIA GeForce RTX 5070 Ti",
+    "nvrtcVersion": [
+      13,
+      2
+    ],
+    "builds": {
+      "probe-native-ftz": {
+        "sourceSha256": "e18554037785c493985d0caaae94f1b6d8bf086cdac9df98f6f12103eb763722",
+        "ptxSha256": "77bc1ed2535ff058788812532c4b484b5c8b969f71d91c61fb728c872de6dc26",
+        "cubinSha256": "1a64372506bc2bee0d82fcd897ec527e4a86fbd820ca43f5b791e2d6f8cf6c3a",
+        "ptxAudit": {
+          "floatOps": {
+            "add.rn.f32": 1,
+            "mul.rn.f32": 1
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FADD": 1,
+            "FMUL": 1
+          },
+          "violations": []
+        }
+      }
+    },
+    "fingerprint": "edef06bef03b25b750675aa9c1189a303f2febee92c7d4ea4cbe1d2c49f52be5"
+  }
+}

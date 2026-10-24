@@ -108,12 +108,18 @@ def load_engine(args, report):
 
     else:
         model, _ = load(args.model_path, files, "cuda")
-        if args.engine in ("strict", "strict-packed"):
+        if args.engine in ("strict", "strict-packed", "strict-graph"):
             from heteroes.eval.strict_decoder import StrictDecoderCuda
+            from heteroes.eval.strict_decoder_graph import StrictDecoderGraph
             from heteroes.eval.strict_decoder_packed import StrictDecoderPacked
 
-            backend = StrictDecoderPacked if args.engine == "strict-packed" else StrictDecoderCuda
-            engine = backend(model, max_context=args.max_context)
+            backend = {
+                "strict": StrictDecoderCuda,
+                "strict-packed": StrictDecoderPacked,
+                "strict-graph": StrictDecoderGraph,
+            }[args.engine]
+            options = {"max_graph_bytes": args.graph_max_bytes} if args.engine == "strict-graph" else {}
+            engine = backend(model, max_context=args.max_context, **options)
             report["backendIdentity"] = engine.identity
         else:
             engine = model
@@ -145,7 +151,7 @@ def load_engine(args, report):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--engine", choices=("strict", "strict-packed", "hf", "vllm"), required=True)
+    parser.add_argument("--engine", choices=("strict", "strict-packed", "strict-graph", "hf", "vllm"), required=True)
     parser.add_argument("--model-path", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--gpu", action="store_true")
@@ -154,6 +160,7 @@ def main(argv=None):
     parser.add_argument("--max-context", type=int, default=512)
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--memory-fraction", type=float, default=0.35)
+    parser.add_argument("--graph-max-bytes", type=int, default=1024**3, help="strict-graph scratch admission budget")
     parser.add_argument("--enforce-eager", action="store_true", help="vLLM only: disable CUDA Graph replay")
     args = parser.parse_args(argv)
     if args.out.exists():
@@ -166,6 +173,7 @@ def main(argv=None):
         or not 1 <= args.max_context <= 4096
         or any(not 1 <= size <= 128 for size in args.batch_sizes)
         or not 0 < args.memory_fraction < 0.9
+        or not 1 <= args.graph_max_bytes <= 64 * 1024**3
     ):
         parser.error("Invalid finite benchmark limits")
     report = {
@@ -207,7 +215,7 @@ def main(argv=None):
             report["cases"].append(result)
         report["parentProcessPeakAllocatedBytes"] = torch.cuda.max_memory_allocated()
         report["parentProcessPeakReservedBytes"] = torch.cuda.max_memory_reserved()
-        if args.engine in ("strict", "strict-packed"):
+        if args.engine in ("strict", "strict-packed", "strict-graph"):
             report["kernelIdentity"] = engine.kernel_identity()
         report["status"] = "ok"
     except Exception as error:

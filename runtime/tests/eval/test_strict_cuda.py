@@ -375,10 +375,12 @@ def test_cuda_build_identity_records_audited_binaries(kernels):
     x = torch.ones(1, 896).cuda()
     kernels.linear(x, torch.ones(3, 896, dtype=torch.float16).cuda())
     identity = kernels.identity()
-    build = identity["builds"]["linear-896-nobias"]
-    assert build["ptxAudit"]["violations"] == [] and build["ptxAudit"]["floatOps"]["mul.rn.f32"] >= 1
-    assert len(build["cubinSha256"]) == 64 and identity["arch"].startswith("sm_")
-    assert build["sassAudit"] == "unavailable" or build["sassAudit"]["violations"] == []
+    builds = [build for name, build in identity["builds"].items() if name.startswith("linear-896-nobias")]
+    assert builds
+    for build in builds:
+        assert build["ptxAudit"]["violations"] == [] and build["ptxAudit"]["floatOps"]["mul.rn.f32"] >= 1
+        assert len(build["cubinSha256"]) == 64 and identity["arch"].startswith("sm_")
+        assert build["sassAudit"] == "unavailable" or build["sassAudit"]["violations"] == []
     assert math.isfinite(identity["nvrtcVersion"][0])
 
 

@@ -146,7 +146,7 @@ class StrictDecoderPacked(StrictDecoderCuda):
         return logits, tuple(tuple(cache) for cache in new_caches)
 
     @torch.inference_mode()
-    def generate(
+    def _prepare_generation(
         self,
         input_ids,
         attention_mask=None,
@@ -214,6 +214,37 @@ class StrictDecoderPacked(StrictDecoderCuda):
             if prompt.shape[1] + max_new_tokens > self.max_context:
                 raise ReferenceArithmeticError("Requested prompt/token budget exceeds the context limit")
             histories.append(prompt)
+        return histories, ends, pad, penalty
+
+    @torch.inference_mode()
+    def generate(
+        self,
+        input_ids,
+        attention_mask=None,
+        *,
+        max_new_tokens=16,
+        do_sample=False,
+        use_cache=True,
+        eos_token_id=None,
+        pad_token_id=None,
+        repetition_penalty=None,
+        num_beams=1,
+        num_return_sequences=1,
+        **kwargs,
+    ):
+        histories, ends, pad, penalty = self._prepare_generation(
+            input_ids,
+            attention_mask,
+            max_new_tokens=max_new_tokens,
+            do_sample=do_sample,
+            use_cache=use_cache,
+            eos_token_id=eos_token_id,
+            pad_token_id=pad_token_id,
+            repetition_penalty=repetition_penalty,
+            num_beams=num_beams,
+            num_return_sequences=num_return_sequences,
+            **kwargs,
+        )
         active = list(range(len(histories)))
         caches = None
         outputs = [[] for _ in histories]

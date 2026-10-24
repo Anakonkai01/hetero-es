@@ -38,6 +38,8 @@ Packing changes data placement and independent work scheduling; it does not comb
   Each staging address has one writer; barriers separate the weight/read/activation phases. Register weights remain
   live while the shared plane is reused. Staging is disabled when its tile exceeds 40 KiB; the original blocked
   path remains available for wider operators. This is bounded workspace, not another model weight set.
+  Version 3 selects smaller per-thread subtrees for widths 512..8192 and row tiles by matrix dimensions.
+  One-row and batched decompositions remain identical to the same CPU tree; compile keys include the decomposition.
 - RoPE sine/cosine tables are computed once from canonical frequencies and reference operators. Their explicit
   bound is two FP32 tables of `max_context * head_dim` elements, exposed as buffers for storage inventory.
 - Packed attention supplies an independent key offset, key count and causal position for every query. Each query
@@ -49,6 +51,35 @@ Packing changes data placement and independent work scheduling; it does not comb
   EOS and compaction. Cache ownership stays local to a generation call and cannot cross candidate mutation.
   The lower-level cache API validates structure, not parent/candidate lineage, just as the original reference did.
 
+## Captured decode
+
+`eval/strict_decoder_graph.py` adds an experimental `StrictDecoderGraph` generation path. Packed prefill publishes
+verified contiguous KV slabs, which are copied to bounded slots indexed by original sequence owner. Decode reads
+the actual prefix length from a device range table; unused capacity is not included in an attention reduction.
+EOS removes owners from the query batch without moving their neighbors' KV. A change in active count replaces
+the single retained capture; changing owners at the same count updates its stable owner buffer.
+
+Capture runs the same projections, RMSNorm, RoPE, attention, SiLU and residual arithmetic. New kernels move KV bits,
+build checked ranges and implement greedy minimum-ID ties/repetition penalty. A separate ordered publication kernel
+copies the accumulated error status alongside chosen IDs; the host checks it before returning any result.
+Warmup compiles outside capture and restores mutable selector state. In-place perturb/restore stays visible through
+the original weight pointers. Rebinding a parameter, changing stream or batch capacity invalidates the session;
+old buffers are cleared and synchronized on their owning stream before release. Concurrent use is refused.
+
+KV, seen-token flags and selector state are cleared at request boundaries. Stable allocation/capture reuse does not
+reuse candidate content. `use_cache=False` uses the existing noncaptured strict path. `release_graph()` releases the
+retained session; `buffers()` exposes its live explicit tensors. Capture pools also retain intermediate allocations.
+This does not provide cross-process/role physical-GPU ownership.
+
+The default additional tensor-payload admission budget is 1 GiB, configurable explicitly. Its conservative estimate
+includes fixed/packed KV, actual packed prefill workspace, decode intermediates, warmup snapshots and a margin.
+It excludes existing weights/RoPE and CUDA driver state; it is not a total-device VRAM limit. Actual allocated and
+reserved peaks must still be measured. Oversized requests are refused before prefill instead of bypassing the budget.
+
+Receipts: [overnight continuation](../../docs/evidence/2026-10-25-strict-overnight/README.md). Native FTZ multiply was
+examined and rejected: the surveyed GPUs flush some tiny exact products before rounding, whereas the reference
+rounds first and can produce the smallest normal. The selected path retains integer signed-zero flushing everywhere.
+
 ## Evidence and remaining work
 
 [Receipts and limits](../../docs/evidence/2026-10-25-strict-throughput/README.md) distinguish three model families,
@@ -57,6 +88,6 @@ used for throughput comparison. Tiny graph equality is not acceptance of trained
 
 The [vLLM source review](../../docs/STRICT-PERFORMANCE-VLLM.md) identifies which execution techniques transfer and
 which arithmetic cannot be substituted. The current scalar strict projections remain substantially slower than
-vendor/tensor-core inference. Performance thresholds are not accepted. CUDA Graphs, further projection speed,
-paged/bounded persistent KV storage, wider operator/model coverage, native Windows and managed lifecycle/packaging
+vendor/tensor-core inference. Performance thresholds are not accepted. Further projection speed,
+paged KV storage, wider operator/model coverage, native Windows and managed lifecycle/packaging
 qualification remain open. The full M0–M6 plan, including unfinished M2 and M6 quantized-base/LoRA, is unchanged.

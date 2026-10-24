@@ -1,0 +1,4 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 3295.40it/s]
+{"status": "ok", "out": "bench-graph-thao-02.json", "wallSeconds": 42.579180476001056}
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 3085.35it/s]
+{"status": "ok", "out": "bench-smollm-graph-thao-01.json", "wallSeconds": 33.545085161000316}

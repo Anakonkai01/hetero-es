@@ -1,0 +1,25 @@
+{"width": 768, "per": 4, "rowTile": 8, "medianEventMs": 0.14401919841766359, "workspaceBytes": 3145728}
+{"width": 768, "per": 8, "rowTile": 8, "medianEventMs": 0.20298879146575927, "workspaceBytes": 1572864}
+{"width": 768, "per": 8, "rowTile": 16, "medianEventMs": 0.2557760000228882, "workspaceBytes": 1572864}
+{"width": 768, "per": 8, "rowTile": 32, "medianEventMs": 0.480844783782959, "workspaceBytes": 1572864}
+{"width": 768, "per": 16, "rowTile": 8, "medianEventMs": 0.7400112152099609, "workspaceBytes": 1048576}
+{"width": 768, "per": 16, "rowTile": 16, "medianEventMs": 1.4226608276367188, "workspaceBytes": 1048576}
+{"width": 1024, "per": 4, "rowTile": 8, "medianEventMs": 1.585536003112793, "workspaceBytes": 33554432}
+{"width": 1024, "per": 8, "rowTile": 8, "medianEventMs": 2.174216079711914, "workspaceBytes": 16777216}
+{"width": 1024, "per": 8, "rowTile": 16, "medianEventMs": 2.762361526489258, "workspaceBytes": 16777216}
+{"width": 1024, "per": 8, "rowTile": 32, "medianEventMs": 5.370252990722657, "workspaceBytes": 16777216}
+{"width": 1024, "per": 16, "rowTile": 8, "medianEventMs": 6.910167694091797, "workspaceBytes": 8388608}
+{"width": 1024, "per": 16, "rowTile": 16, "medianEventMs": 14.548016357421876, "workspaceBytes": 8388608}
+{"width": 2048, "per": 4, "rowTile": 8, "medianEventMs": 1.0773856163024902, "workspaceBytes": 22544384}
+{"width": 2048, "per": 8, "rowTile": 8, "medianEventMs": 1.4883631706237792, "workspaceBytes": 11272192}
+{"width": 2048, "per": 8, "rowTile": 16, "medianEventMs": 1.8846111297607422, "workspaceBytes": 11272192}
+{"width": 2048, "per": 8, "rowTile": 32, "medianEventMs": 3.641337585449219, "workspaceBytes": 11272192}
+{"width": 2048, "per": 16, "rowTile": 8, "medianEventMs": 4.686395263671875, "workspaceBytes": 5636096}
+{"width": 2048, "per": 16, "rowTile": 16, "medianEventMs": 9.541737365722657, "workspaceBytes": 5636096}
+{"width": 4096, "per": 4, "rowTile": 8, "medianEventMs": 0.8004544258117676, "workspaceBytes": 16777216}
+{"width": 4096, "per": 8, "rowTile": 8, "medianEventMs": 1.067972755432129, "workspaceBytes": 8388608}
+{"width": 4096, "per": 8, "rowTile": 16, "medianEventMs": 1.3496095657348632, "workspaceBytes": 8388608}
+{"width": 4096, "per": 8, "rowTile": 32, "medianEventMs": 2.5277328491210938, "workspaceBytes": 8388608}
+{"width": 4096, "per": 16, "rowTile": 8, "medianEventMs": 3.3822654724121093, "workspaceBytes": 4194304}
+{"width": 4096, "per": 16, "rowTile": 16, "medianEventMs": 6.91338882446289, "workspaceBytes": 4194304}
+{"status": "ok", "error": null}

@@ -78,7 +78,32 @@ five calls in a two-layer/32-sequence fixture gave only a small additional end-t
 sweeps then isolated a much larger projection cost. Weight-only shared staging regressed some cases; staging both
 weights and activations improved the tested widths on both architectures, without changing reduction trees.
 
-The next heavy performance work is projection arithmetic/memory throughput and bounded decode capture, guided by
+The next heavy performance work is projection arithmetic/memory throughput, guided by
 operator and end-to-end profiles. More Python orchestration changes alone cannot be assumed to close the tensor-core
 throughput gap. Keep model adapters, arithmetic and execution tuning separate; new graph operations require a new
 coverage argument, and every supported architecture/build still needs qualification. The full M0–M6 plan is open.
+
+## Captured decode continuation
+
+The [overnight continuation](evidence/2026-10-25-strict-overnight/README.md) adds dimension-selected independent
+subtrees and a single bounded decode capture, with stable original-owner KV slots, EOS compaction and error-checked
+publication. Captures read the original live weights, invalidate on parameter rebinding/stream/capacity changes,
+and clear KV/selector content at request boundaries. No managed default is enabled.
+
+Profiles of one-layer random layouts at hidden widths 512/1024/1536 show projections accounting for approximately
+93–99% of CUDA kernel time at batch 32. These are graph-layout measurements, not trained-model performance evidence.
+The same controlled trained-checkpoint workload improves from 100.5/334.6/379.8 to approximately
+209.9/422.6/500.7 total tokens/s at batch 1/8/32 on the local 5070 Ti. The prior vLLM default comparison is
+518.7/4037.9/13802.5, and batch-invariant is 146.0/1164.5/4697.2. Library builds and measurement stages differ;
+neither the single-request improvement nor finite passing fixture matrix closes the large-batch gap.
+
+Native FTZ multiplication was explicitly examined instead of assumed equivalent. In 3,139,288 finite input pairs,
+17 multiplication results differ on each surveyed architecture; the boundary study includes
+`0x00800000 * 0x3f7fffff`, where round-then-flush yields the smallest normal and native FTZ yields zero.
+Unrestricted native FTZ multiplication was rejected. The selected kernels retain integer signed-zero flushing.
+Smaller-tree, split-K and matrix-tile prototypes, including slower variants, remain in the receipts.
+
+Further speed work must still preserve the present reference or introduce a separate fully specified numerical
+backend/reference, as ADR-012 permits. An integer Tensor Core prototype needs bounded accumulation/reconstruction,
+independent CPU answers, trained parent/perturbation comparisons and cross-GPU evidence before adoption.
+The published integer-emulation papers remain research leads, not acceptance of an implementation.

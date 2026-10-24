@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Boolean row count admitted",
+    "file": "src/heteroes/eval/strict_cuda.py",
+    "old": "if type(rows) is not int or rows < 1:",
+    "new": "if not isinstance(rows, int) or rows < 1:"
+  },
+  {
+    "name": "Unpadded warp reduction",
+    "file": "src/heteroes/eval/strict_cuda.py",
+    "old": "padded_warps = 1 << (warps - 1).bit_length()",
+    "new": "padded_warps = warps"
+  },
+  {
+    "name": "Boolean graph budget admitted",
+    "file": "src/heteroes/eval/strict_decoder_graph.py",
+    "old": "if type(max_graph_bytes) is not int or max_graph_bytes < 1:",
+    "new": "if not isinstance(max_graph_bytes, int) or max_graph_bytes < 1:"
+  }
+]

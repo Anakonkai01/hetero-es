@@ -1,0 +1,2 @@
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 2361.73it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-strict-overnight/bench-tinyllama-graph-nhan-01.json", "wallSeconds": 28.009179995999148}

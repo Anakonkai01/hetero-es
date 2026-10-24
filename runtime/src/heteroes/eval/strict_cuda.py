@@ -33,7 +33,7 @@ from heteroes.canonical import canonical_json_hash
 from heteroes.eval import reference_ops as ops
 from heteroes.eval.reference_ops import ReferenceArithmeticError
 
-KERNEL_VERSION = "pairwise_f32_cuda_linear_v2_experimental"
+KERNEL_VERSION = "pairwise_f32_cuda_linear_v3_experimental"
 MAX_LINEAR_WIDTH = 32768
 MAX_ATTENTION_KEYS = 4096
 MAX_NORM_WIDTH = 8192
@@ -433,6 +433,24 @@ def linear_plan(width):
     return LinearPlan(width, padded, per_thread, warps, padded_warps, max(1, 8 // warps))
 
 
+def linear_execution_plan(width, rows):
+    """Select independent work decomposition by matrix dimensions; the arithmetic tree stays fixed.
+
+    Smaller per-thread subtrees expose more K parallelism and reduce shared memory per output group.
+    Keep the original wide path. Both decompositions use the same signed-zero padding and rounded
+    primitives; this selects no model-specific arithmetic or checkpoint identity.
+    """
+    plan = linear_plan(width)
+    if type(rows) is not int or rows < 1:
+        raise ReferenceArithmeticError("Strict linear needs a positive integer row count")
+    if 512 <= width <= 8192:
+        per_thread = 8 if rows > 1 and width <= 1024 else 16
+        warps = -(-width // (32 * per_thread))
+        padded_warps = 1 << (warps - 1).bit_length()
+        plan = LinearPlan(width, plan.padded, per_thread, warps, padded_warps, max(1, 8 // warps))
+    return plan, 1 if rows == 1 else 4 if rows < 8 else 8
+
+
 def _binary_counter_tree(blocks):
     """Reduce the last dimension (a power of two) in input order exactly as the kernel's register stack does."""
     count = blocks.shape[-1]
@@ -711,6 +729,8 @@ class StrictCudaKernels:
 
     def _linear_function(self, plan, has_bias, row_tile):
         name = f"linear-{plan.width}-{'bias' if has_bias else 'nobias'}"
+        if plan.per_thread != linear_plan(plan.width).per_thread:
+            name += f"-per{plan.per_thread}"
         if row_tile != 1:
             name += f"-rows{row_tile}"
         if name not in self._functions:
@@ -932,16 +952,16 @@ class StrictCudaKernels:
         return result
 
     @torch.inference_mode()
-    def linear(self, value, weight, bias=None, *, error_flag=None, row_tile=4):
+    def linear(self, value, weight, bias=None, *, error_flag=None, row_tile=None):
         """Bitwise ``reference_ops.linear`` with FP16 weights read in place; FP32 output only.
 
         With ``error_flag`` the nonfinite check is deferred to ``raise_if_error`` (no host sync here).
         """
-        if type(row_tile) is not int or row_tile not in (1, 2, 4, 8):
+        if row_tile is not None and (type(row_tile) is not int or row_tile not in (1, 2, 4, 8)):
             raise ReferenceArithmeticError("Strict linear row tile must be 1, 2, 4 or 8")
         rows, width, outputs = validate_linear(value, weight, bias, device=self.device)
-        plan = linear_plan(width)
-        row_tile = 1 if rows == 1 else row_tile
+        plan, selected_tile = linear_execution_plan(width, rows)
+        row_tile = selected_tile if row_tile is None else 1 if rows == 1 else row_tile
         function = self._linear_function(plan, bias is not None, row_tile)
         flat = value.to(torch.float32).reshape(rows, width).contiguous()
         result = torch.empty((rows, outputs), dtype=torch.float32, device=self.device)

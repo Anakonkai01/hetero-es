@@ -1,0 +1,20 @@
+F
+=================================== FAILURES ===================================
+_____ test_budget_accounts_for_actual_prefill_workspace_before_computation _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x71be25ef8fe0>
+
+    @gpu
+    def test_budget_accounts_for_actual_prefill_workspace_before_computation(monkeypatch):
+        from heteroes.eval.strict_decoder_graph import graph_memory_bound
+    
+        model = model_for("llama-wide").cuda()
+>       limit = graph_memory_bound(model.config, 2, 32, 12, prompt_tokens=4)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: graph_memory_bound() got an unexpected keyword argument 'prompt_tokens'
+
+tests/eval/test_strict_decode_graph.py:109: TypeError
+=========================== short test summary info ============================
+FAILED tests/eval/test_strict_decode_graph.py::test_budget_accounts_for_actual_prefill_workspace_before_computation
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 13 deselected in 1.95s

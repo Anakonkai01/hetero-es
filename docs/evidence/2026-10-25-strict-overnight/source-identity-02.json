@@ -1,0 +1,11 @@
+{
+  "base": "81110a14",
+  "files": {
+    "runtime/src/heteroes/eval/strict_cuda.py": "0537279a9daf3b51814d6f88e7389e7fb625572f55fce43b6a4e94d8b4b5ed20",
+    "runtime/src/heteroes/eval/strict_decoder_packed.py": "1ed39a36197c61f17655e2bd5b44ab508bd96e06ae177dab4b5bfa9da57e9c5e",
+    "runtime/src/heteroes/eval/strict_decoder_graph.py": "584b93aaae9d8b806a1cbc8496357211089c34c9b7db20ca9d711353d34dac42",
+    "runtime/src/heteroes/eval/strict_decode_cuda.py": "d14d993230f9942cc535bd4585f5157055fa2464a4d5260c78a727a8275426f4"
+  },
+  "packagedRuntimeBytesEqual": true,
+  "protectedFilesChanged": false
+}

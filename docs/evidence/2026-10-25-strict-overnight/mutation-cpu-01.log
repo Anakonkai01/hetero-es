@@ -1,0 +1,6 @@
+control ok    | 18 passed, 15 skipped in 1.89s
+killed       Boolean row count admitted | 1 failed, 17 passed, 15 skipped in 1.89s
+killed       Unpadded warp reduction | 2 failed, 16 passed, 15 skipped in 2.53s
+killed       Boolean graph budget admitted | 1 failed, 17 passed, 15 skipped in 1.94s
+
+3 of 3 mutants killed.

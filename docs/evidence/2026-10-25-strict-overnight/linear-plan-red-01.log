@@ -1,0 +1,285 @@
+FFFFFFFFFFFFFFFFFss                                                      [100%]
+=================================== FAILURES ===================================
+___ test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch[3] ____
+
+width = 3
+
+    @pytest.mark.parametrize("width", [3, 31, 33, 129, 768, 896, 1024, 2048, 4096, 4864, 8193, 32768])
+    def test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch(width):
+        gen = torch.Generator().manual_seed(width)
+        values = torch.randn(4, width, generator=gen) * torch.logspace(-5, 5, width)
+        values[1] = -0.0
+        values[2, ::3] = -0.0
+        expected = ops.pairwise_sum(values).view(torch.int32)
+        for rows in (1, 2, 8, 32, 129):
+>           plan, tile = sc.linear_execution_plan(width, rows)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'heteroes.eval.strict_cuda' has no attribute 'linear_execution_plan'
+
+tests/eval/test_strict_linear_plan.py:21: AttributeError
+___ test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch[31] ___
+
+width = 31
+
+    @pytest.mark.parametrize("width", [3, 31, 33, 129, 768, 896, 1024, 2048, 4096, 4864, 8193, 32768])
+    def test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch(width):
+        gen = torch.Generator().manual_seed(width)
+        values = torch.randn(4, width, generator=gen) * torch.logspace(-5, 5, width)
+        values[1] = -0.0
+        values[2, ::3] = -0.0
+        expected = ops.pairwise_sum(values).view(torch.int32)
+        for rows in (1, 2, 8, 32, 129):
+>           plan, tile = sc.linear_execution_plan(width, rows)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'heteroes.eval.strict_cuda' has no attribute 'linear_execution_plan'
+
+tests/eval/test_strict_linear_plan.py:21: AttributeError
+___ test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch[33] ___
+
+width = 33
+
+    @pytest.mark.parametrize("width", [3, 31, 33, 129, 768, 896, 1024, 2048, 4096, 4864, 8193, 32768])
+    def test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch(width):
+        gen = torch.Generator().manual_seed(width)
+        values = torch.randn(4, width, generator=gen) * torch.logspace(-5, 5, width)
+        values[1] = -0.0
+        values[2, ::3] = -0.0
+        expected = ops.pairwise_sum(values).view(torch.int32)
+        for rows in (1, 2, 8, 32, 129):
+>           plan, tile = sc.linear_execution_plan(width, rows)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'heteroes.eval.strict_cuda' has no attribute 'linear_execution_plan'
+
+tests/eval/test_strict_linear_plan.py:21: AttributeError
+__ test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch[129] ___
+
+width = 129
+
+    @pytest.mark.parametrize("width", [3, 31, 33, 129, 768, 896, 1024, 2048, 4096, 4864, 8193, 32768])
+    def test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch(width):
+        gen = torch.Generator().manual_seed(width)
+        values = torch.randn(4, width, generator=gen) * torch.logspace(-5, 5, width)
+        values[1] = -0.0
+        values[2, ::3] = -0.0
+        expected = ops.pairwise_sum(values).view(torch.int32)
+        for rows in (1, 2, 8, 32, 129):
+>           plan, tile = sc.linear_execution_plan(width, rows)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'heteroes.eval.strict_cuda' has no attribute 'linear_execution_plan'
+
+tests/eval/test_strict_linear_plan.py:21: AttributeError
+__ test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch[768] ___
+
+width = 768
+
+    @pytest.mark.parametrize("width", [3, 31, 33, 129, 768, 896, 1024, 2048, 4096, 4864, 8193, 32768])
+    def test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch(width):
+        gen = torch.Generator().manual_seed(width)
+        values = torch.randn(4, width, generator=gen) * torch.logspace(-5, 5, width)
+        values[1] = -0.0
+        values[2, ::3] = -0.0
+        expected = ops.pairwise_sum(values).view(torch.int32)
+        for rows in (1, 2, 8, 32, 129):
+>           plan, tile = sc.linear_execution_plan(width, rows)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'heteroes.eval.strict_cuda' has no attribute 'linear_execution_plan'
+
+tests/eval/test_strict_linear_plan.py:21: AttributeError
+__ test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch[896] ___
+
+width = 896
+
+    @pytest.mark.parametrize("width", [3, 31, 33, 129, 768, 896, 1024, 2048, 4096, 4864, 8193, 32768])
+    def test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch(width):
+        gen = torch.Generator().manual_seed(width)
+        values = torch.randn(4, width, generator=gen) * torch.logspace(-5, 5, width)
+        values[1] = -0.0
+        values[2, ::3] = -0.0
+        expected = ops.pairwise_sum(values).view(torch.int32)
+        for rows in (1, 2, 8, 32, 129):
+>           plan, tile = sc.linear_execution_plan(width, rows)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'heteroes.eval.strict_cuda' has no attribute 'linear_execution_plan'
+
+tests/eval/test_strict_linear_plan.py:21: AttributeError
+__ test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch[1024] __
+
+width = 1024
+
+    @pytest.mark.parametrize("width", [3, 31, 33, 129, 768, 896, 1024, 2048, 4096, 4864, 8193, 32768])
+    def test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch(width):
+        gen = torch.Generator().manual_seed(width)
+        values = torch.randn(4, width, generator=gen) * torch.logspace(-5, 5, width)
+        values[1] = -0.0
+        values[2, ::3] = -0.0
+        expected = ops.pairwise_sum(values).view(torch.int32)
+        for rows in (1, 2, 8, 32, 129):
+>           plan, tile = sc.linear_execution_plan(width, rows)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'heteroes.eval.strict_cuda' has no attribute 'linear_execution_plan'
+
+tests/eval/test_strict_linear_plan.py:21: AttributeError
+__ test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch[2048] __
+
+width = 2048
+
+    @pytest.mark.parametrize("width", [3, 31, 33, 129, 768, 896, 1024, 2048, 4096, 4864, 8193, 32768])
+    def test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch(width):
+        gen = torch.Generator().manual_seed(width)
+        values = torch.randn(4, width, generator=gen) * torch.logspace(-5, 5, width)
+        values[1] = -0.0
+        values[2, ::3] = -0.0
+        expected = ops.pairwise_sum(values).view(torch.int32)
+        for rows in (1, 2, 8, 32, 129):
+>           plan, tile = sc.linear_execution_plan(width, rows)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'heteroes.eval.strict_cuda' has no attribute 'linear_execution_plan'
+
+tests/eval/test_strict_linear_plan.py:21: AttributeError
+__ test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch[4096] __
+
+width = 4096
+
+    @pytest.mark.parametrize("width", [3, 31, 33, 129, 768, 896, 1024, 2048, 4096, 4864, 8193, 32768])
+    def test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch(width):
+        gen = torch.Generator().manual_seed(width)
+        values = torch.randn(4, width, generator=gen) * torch.logspace(-5, 5, width)
+        values[1] = -0.0
+        values[2, ::3] = -0.0
+        expected = ops.pairwise_sum(values).view(torch.int32)
+        for rows in (1, 2, 8, 32, 129):
+>           plan, tile = sc.linear_execution_plan(width, rows)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'heteroes.eval.strict_cuda' has no attribute 'linear_execution_plan'
+
+tests/eval/test_strict_linear_plan.py:21: AttributeError
+__ test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch[4864] __
+
+width = 4864
+
+    @pytest.mark.parametrize("width", [3, 31, 33, 129, 768, 896, 1024, 2048, 4096, 4864, 8193, 32768])
+    def test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch(width):
+        gen = torch.Generator().manual_seed(width)
+        values = torch.randn(4, width, generator=gen) * torch.logspace(-5, 5, width)
+        values[1] = -0.0
+        values[2, ::3] = -0.0
+        expected = ops.pairwise_sum(values).view(torch.int32)
+        for rows in (1, 2, 8, 32, 129):
+>           plan, tile = sc.linear_execution_plan(width, rows)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'heteroes.eval.strict_cuda' has no attribute 'linear_execution_plan'
+
+tests/eval/test_strict_linear_plan.py:21: AttributeError
+__ test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch[8193] __
+
+width = 8193
+
+    @pytest.mark.parametrize("width", [3, 31, 33, 129, 768, 896, 1024, 2048, 4096, 4864, 8193, 32768])
+    def test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch(width):
+        gen = torch.Generator().manual_seed(width)
+        values = torch.randn(4, width, generator=gen) * torch.logspace(-5, 5, width)
+        values[1] = -0.0
+        values[2, ::3] = -0.0
+        expected = ops.pairwise_sum(values).view(torch.int32)
+        for rows in (1, 2, 8, 32, 129):
+>           plan, tile = sc.linear_execution_plan(width, rows)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'heteroes.eval.strict_cuda' has no attribute 'linear_execution_plan'
+
+tests/eval/test_strict_linear_plan.py:21: AttributeError
+_ test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch[32768] __
+
+width = 32768
+
+    @pytest.mark.parametrize("width", [3, 31, 33, 129, 768, 896, 1024, 2048, 4096, 4864, 8193, 32768])
+    def test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch(width):
+        gen = torch.Generator().manual_seed(width)
+        values = torch.randn(4, width, generator=gen) * torch.logspace(-5, 5, width)
+        values[1] = -0.0
+        values[2, ::3] = -0.0
+        expected = ops.pairwise_sum(values).view(torch.int32)
+        for rows in (1, 2, 8, 32, 129):
+>           plan, tile = sc.linear_execution_plan(width, rows)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'heteroes.eval.strict_cuda' has no attribute 'linear_execution_plan'
+
+tests/eval/test_strict_linear_plan.py:21: AttributeError
+_____________ test_execution_plan_rejects_invalid_dimensions[0-1] ______________
+
+width = 0, rows = 1
+
+    @pytest.mark.parametrize("width,rows", [(0, 1), (32769, 1), (3, 0), (3, True), (3, 1.5)])
+    def test_execution_plan_rejects_invalid_dimensions(width, rows):
+        with pytest.raises(ReferenceArithmeticError):
+>           sc.linear_execution_plan(width, rows)
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'heteroes.eval.strict_cuda' has no attribute 'linear_execution_plan'
+
+tests/eval/test_strict_linear_plan.py:32: AttributeError
+___________ test_execution_plan_rejects_invalid_dimensions[32769-1] ____________
+
+width = 32769, rows = 1
+
+    @pytest.mark.parametrize("width,rows", [(0, 1), (32769, 1), (3, 0), (3, True), (3, 1.5)])
+    def test_execution_plan_rejects_invalid_dimensions(width, rows):
+        with pytest.raises(ReferenceArithmeticError):
+>           sc.linear_execution_plan(width, rows)
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'heteroes.eval.strict_cuda' has no attribute 'linear_execution_plan'
+
+tests/eval/test_strict_linear_plan.py:32: AttributeError
+_____________ test_execution_plan_rejects_invalid_dimensions[3-0] ______________
+
+width = 3, rows = 0
+
+    @pytest.mark.parametrize("width,rows", [(0, 1), (32769, 1), (3, 0), (3, True), (3, 1.5)])
+    def test_execution_plan_rejects_invalid_dimensions(width, rows):
+        with pytest.raises(ReferenceArithmeticError):
+>           sc.linear_execution_plan(width, rows)
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'heteroes.eval.strict_cuda' has no attribute 'linear_execution_plan'
+
+tests/eval/test_strict_linear_plan.py:32: AttributeError
+____________ test_execution_plan_rejects_invalid_dimensions[3-True] ____________
+
+width = 3, rows = True
+
+    @pytest.mark.parametrize("width,rows", [(0, 1), (32769, 1), (3, 0), (3, True), (3, 1.5)])
+    def test_execution_plan_rejects_invalid_dimensions(width, rows):
+        with pytest.raises(ReferenceArithmeticError):
+>           sc.linear_execution_plan(width, rows)
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'heteroes.eval.strict_cuda' has no attribute 'linear_execution_plan'
+
+tests/eval/test_strict_linear_plan.py:32: AttributeError
+____________ test_execution_plan_rejects_invalid_dimensions[3-1.5] _____________
+
+width = 3, rows = 1.5
+
+    @pytest.mark.parametrize("width,rows", [(0, 1), (32769, 1), (3, 0), (3, True), (3, 1.5)])
+    def test_execution_plan_rejects_invalid_dimensions(width, rows):
+        with pytest.raises(ReferenceArithmeticError):
+>           sc.linear_execution_plan(width, rows)
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'heteroes.eval.strict_cuda' has no attribute 'linear_execution_plan'
+
+tests/eval/test_strict_linear_plan.py:32: AttributeError
+=========================== short test summary info ============================
+FAILED tests/eval/test_strict_linear_plan.py::test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch[3]
+FAILED tests/eval/test_strict_linear_plan.py::test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch[31]
+FAILED tests/eval/test_strict_linear_plan.py::test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch[33]
+FAILED tests/eval/test_strict_linear_plan.py::test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch[129]
+FAILED tests/eval/test_strict_linear_plan.py::test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch[768]
+FAILED tests/eval/test_strict_linear_plan.py::test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch[896]
+FAILED tests/eval/test_strict_linear_plan.py::test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch[1024]
+FAILED tests/eval/test_strict_linear_plan.py::test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch[2048]
+FAILED tests/eval/test_strict_linear_plan.py::test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch[4096]
+FAILED tests/eval/test_strict_linear_plan.py::test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch[4864]
+FAILED tests/eval/test_strict_linear_plan.py::test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch[8193]
+FAILED tests/eval/test_strict_linear_plan.py::test_execution_plans_keep_the_same_cpu_tree_for_every_selected_batch[32768]
+FAILED tests/eval/test_strict_linear_plan.py::test_execution_plan_rejects_invalid_dimensions[0-1]
+FAILED tests/eval/test_strict_linear_plan.py::test_execution_plan_rejects_invalid_dimensions[32769-1]
+FAILED tests/eval/test_strict_linear_plan.py::test_execution_plan_rejects_invalid_dimensions[3-0]
+FAILED tests/eval/test_strict_linear_plan.py::test_execution_plan_rejects_invalid_dimensions[3-True]
+FAILED tests/eval/test_strict_linear_plan.py::test_execution_plan_rejects_invalid_dimensions[3-1.5]
+17 failed, 2 skipped in 0.72s
