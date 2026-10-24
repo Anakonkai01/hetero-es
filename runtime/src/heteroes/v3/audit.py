@@ -110,12 +110,14 @@ class AuditAPI:
             return len(self._records())
 
     def handle(self, operation, request, authenticated_worker_id=None):
+        if operation != "lease" and not (isinstance(request, dict) and "audit_id" in request):
+            # Candidate results/heartbeats/failures are the base API's: its own lock keeps them consistent, and
+            # holding the audit lock here would make heartbeats wait behind the experiment's scorer.
+            return self.base.handle(operation, request, authenticated_worker_id=authenticated_worker_id)
         with self._lock:
             try:
                 if isinstance(request, dict) and "audit_id" in request:
                     return self._audit(operation, request, authenticated_worker_id)
-                if operation != "lease":
-                    return self.base.handle(operation, request, authenticated_worker_id=authenticated_worker_id)
                 worker, request_id, generation = _decode_lease(request)
                 if authenticated_worker_id is not None and worker != authenticated_worker_id:
                     return _error("forbidden", "Credential does not own this worker")

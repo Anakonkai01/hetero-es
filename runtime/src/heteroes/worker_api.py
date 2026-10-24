@@ -157,6 +157,13 @@ def _decode_result(request):
     return descriptor, attempt_number, token, _finite_number("reward", request["reward"])
 
 
+class _Flight:
+    def __init__(self):
+        self.done = threading.Event()
+        self.reward = None
+        self.error = None
+
+
 class TextList(list):
     """Submitted texts with attributes beside them (the chunk, ADR-010)."""
 
@@ -219,6 +226,8 @@ class WorkerAPI:
         self._policy = Greedy() if policy is None else policy
         self._cancel_requested = cancel_requested
         self._lock = threading.Lock()
+        self._waiting = threading.Condition(self._lock)
+        self._flights, self._waiters = {}, 0  # identical submissions being scored: scored once, the others wait
         self._remembered: OrderedDict = (
             OrderedDict()
         )  # (worker_id, request_id) -> the work that was given, for repeated requests
@@ -238,6 +247,8 @@ class WorkerAPI:
             decoded = decode(request)
         except (TypeError, ValueError) as error:
             return _error("bad_request", f"{type(error).__name__}: {error}")
+        if operation == "submit_result" and isinstance(decoded[3], list) and self._scorer is not None:
+            return self._submit_texts(decoded, authenticated_worker_id)
         with self._lock:
             try:
                 if authenticated_worker_id is not None:
@@ -300,6 +311,79 @@ class WorkerAPI:
         if hasattr(self._policy, "heartbeat"):  # a busy worker is alive for the policy too (GreedyTail, ADR-009)
             self._policy.heartbeat(self._ledger.attempt_worker(descriptor, attempt_number, token))
         return {"deadline": lease.deadline}
+
+    def _submit_texts(self, decoded, authenticated_worker_id) -> dict:
+        """
+        Recipe v3: check (briefly, under the lock) -> score (no lock, one scoring per identical submission) -> commit
+        (under the lock; the ledger re-checks that this is still the latest attempt). Heartbeats and leases are served
+        while the experiment's scorer runs. An identical retry of a committed result is answered from the ledger
+        without scoring; other texts conflict. A crash after scoring but before the commit may still score again.
+        """
+        descriptor, attempt_number, token, payload = decoded
+        digest = completions_sha256(payload)
+        key = (descriptor.candidate_id, attempt_number, token, digest)
+        try:
+            with self._lock:
+                worker = self._ledger.attempt_worker(descriptor, attempt_number, token)  # stale/foreign: no scoring
+                if authenticated_worker_id is not None and worker != authenticated_worker_id:
+                    return _error("forbidden", "Credential does not own this worker or attempt")
+                chunk = getattr(payload, "chunk", None)
+                if chunk is not None and chunk not in self.allowed_chunks:
+                    raise LedgerError(f"chunk {chunk} is not one the recipe allows {self.allowed_chunks}")
+                record = self._ledger.get_candidate(descriptor.candidate_id)
+                if record.state is CandidateState.COMMITTED:
+                    stored = self._ledger.get_completions(descriptor.candidate_id)
+                    if stored is not None and stored[0] == digest:
+                        self.activity += 1
+                        return {"ok": True, "outcome": SubmitOutcome.ALREADY_COMMITTED.value}
+                    raise ConflictingResultError(f"{descriptor.candidate_id} was committed with other texts")
+                flight = self._flights.get(key)
+                leader = flight is None
+                if leader:
+                    flight = self._flights[key] = _Flight()
+                else:
+                    self._waiters += 1
+                    self._waiting.notify_all()
+            if leader:
+                try:
+                    flight.reward = self._score(descriptor, payload)
+                except ScoringFailedError as error:
+                    flight.error = error
+                finally:
+                    with self._lock:
+                        self._flights.pop(key, None)
+                    flight.done.set()
+            else:
+                flight.done.wait()
+                with self._lock:
+                    self._waiters -= 1
+            if flight.error is not None:
+                raise flight.error
+            with self._lock:
+                outcome = self._ledger.submit_result(
+                    descriptor, attempt_number, token, flight.reward, completions=payload, chunk=chunk
+                )
+                if outcome is SubmitOutcome.COMMITTED and hasattr(self._policy, "committed"):
+                    self._policy.committed(descriptor.candidate_id)
+                self.activity += 1
+        except LedgerError as error:
+            return _error(_code_of(error), str(error))
+        self.record_usage(descriptor, attempt_number, worker, getattr(payload, "usage", None), "candidate")
+        return {"ok": True, "outcome": outcome.value}
+
+    def _score(self, descriptor, payload):
+        from heteroes.v3.scoring import ScorerError
+
+        try:
+            return self._scorer(descriptor, payload)
+        except ScorerError as error:
+            self.scoring_error = str(error)
+            raise ScoringFailedError(str(error)) from error
+
+    def wait_for_waiters(self, count, timeout) -> bool:
+        """Test/diagnostic hook: wait until `count` duplicate submissions are waiting on a scoring in flight."""
+        with self._lock:
+            return self._waiting.wait_for(lambda: self._waiters >= count, timeout)
 
     def _submit_result(self, decoded) -> dict:
         descriptor, attempt_number, token, payload = decoded
