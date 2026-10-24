@@ -1,0 +1,766 @@
+{
+  "status": "ok",
+  "hardwareQualified": false,
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "limits": "Synthetic finite matrices. Event intervals include host-launch gaps; host wall is synchronized. No full-model, quality or universal performance claim.",
+  "cases": [
+    {
+      "width": 768,
+      "outputs": 4096,
+      "rows": 1,
+      "rowTile": 1,
+      "medianEventMsPerCall": 0.03997866561015447,
+      "medianHostMsPerCall": 0.0427980000191989,
+      "bitsEqual": true
+    },
+    {
+      "width": 768,
+      "outputs": 4096,
+      "rows": 1,
+      "rowTile": 2,
+      "medianEventMsPerCall": 0.037087999284267426,
+      "medianHostMsPerCall": 0.03940966659380744,
+      "bitsEqual": true
+    },
+    {
+      "width": 768,
+      "outputs": 4096,
+      "rows": 1,
+      "rowTile": 4,
+      "medianEventMsPerCall": 0.035605333745479584,
+      "medianHostMsPerCall": 0.03794700023718178,
+      "bitsEqual": true
+    },
+    {
+      "width": 768,
+      "outputs": 4096,
+      "rows": 1,
+      "rowTile": 8,
+      "medianEventMsPerCall": 0.03559466699759165,
+      "medianHostMsPerCall": 0.03855099930660799,
+      "bitsEqual": true
+    },
+    {
+      "width": 768,
+      "outputs": 4096,
+      "rows": 8,
+      "rowTile": 1,
+      "medianEventMsPerCall": 0.20102399587631226,
+      "medianHostMsPerCall": 0.2034920010676918,
+      "bitsEqual": true
+    },
+    {
+      "width": 768,
+      "outputs": 4096,
+      "rows": 8,
+      "rowTile": 2,
+      "medianEventMsPerCall": 0.1722666621208191,
+      "medianHostMsPerCall": 0.17471200165649256,
+      "bitsEqual": true
+    },
+    {
+      "width": 768,
+      "outputs": 4096,
+      "rows": 8,
+      "rowTile": 4,
+      "medianEventMsPerCall": 0.15833600362141928,
+      "medianHostMsPerCall": 0.16068700157726803,
+      "bitsEqual": true
+    },
+    {
+      "width": 768,
+      "outputs": 4096,
+      "rows": 8,
+      "rowTile": 8,
+      "medianEventMsPerCall": 0.16114133596420288,
+      "medianHostMsPerCall": 0.1637833338463679,
+      "bitsEqual": true
+    },
+    {
+      "width": 768,
+      "outputs": 4096,
+      "rows": 32,
+      "rowTile": 1,
+      "medianEventMsPerCall": 0.7687466939290365,
+      "medianHostMsPerCall": 0.7711513317190111,
+      "bitsEqual": true
+    },
+    {
+      "width": 768,
+      "outputs": 4096,
+      "rows": 32,
+      "rowTile": 2,
+      "medianEventMsPerCall": 0.643669327100118,
+      "medianHostMsPerCall": 0.6477889983216301,
+      "bitsEqual": true
+    },
+    {
+      "width": 768,
+      "outputs": 4096,
+      "rows": 32,
+      "rowTile": 4,
+      "medianEventMsPerCall": 0.5821119944254557,
+      "medianHostMsPerCall": 0.5843800002670226,
+      "bitsEqual": true
+    },
+    {
+      "width": 768,
+      "outputs": 4096,
+      "rows": 32,
+      "rowTile": 8,
+      "medianEventMsPerCall": 0.5666666825612386,
+      "medianHostMsPerCall": 0.5690433342048588,
+      "bitsEqual": true
+    },
+    {
+      "width": 1024,
+      "outputs": 65536,
+      "rows": 1,
+      "rowTile": 1,
+      "medianEventMsPerCall": 0.5188693205515543,
+      "medianHostMsPerCall": 0.5215813337902849,
+      "bitsEqual": true
+    },
+    {
+      "width": 1024,
+      "outputs": 65536,
+      "rows": 1,
+      "rowTile": 2,
+      "medianEventMsPerCall": 0.5172479947408041,
+      "medianHostMsPerCall": 0.5196103350802636,
+      "bitsEqual": true
+    },
+    {
+      "width": 1024,
+      "outputs": 65536,
+      "rows": 1,
+      "rowTile": 4,
+      "medianEventMsPerCall": 0.5172586838404337,
+      "medianHostMsPerCall": 0.519558666079926,
+      "bitsEqual": true
+    },
+    {
+      "width": 1024,
+      "outputs": 65536,
+      "rows": 1,
+      "rowTile": 8,
+      "medianEventMsPerCall": 0.5175360043843588,
+      "medianHostMsPerCall": 0.5199086687449986,
+      "bitsEqual": true
+    },
+    {
+      "width": 1024,
+      "outputs": 65536,
+      "rows": 8,
+      "rowTile": 1,
+      "medianEventMsPerCall": 4.047199885050456,
+      "medianHostMsPerCall": 4.0507056667896295,
+      "bitsEqual": true
+    },
+    {
+      "width": 1024,
+      "outputs": 65536,
+      "rows": 8,
+      "rowTile": 2,
+      "medianEventMsPerCall": 3.3721494674682617,
+      "medianHostMsPerCall": 3.3751139999367297,
+      "bitsEqual": true
+    },
+    {
+      "width": 1024,
+      "outputs": 65536,
+      "rows": 8,
+      "rowTile": 4,
+      "medianEventMsPerCall": 3.044992129007975,
+      "medianHostMsPerCall": 3.047848333759854,
+      "bitsEqual": true
+    },
+    {
+      "width": 1024,
+      "outputs": 65536,
+      "rows": 8,
+      "rowTile": 8,
+      "medianEventMsPerCall": 2.898687998453776,
+      "medianHostMsPerCall": 2.90164399969702,
+      "bitsEqual": true
+    },
+    {
+      "width": 1024,
+      "outputs": 65536,
+      "rows": 32,
+      "rowTile": 1,
+      "medianEventMsPerCall": 16.14845911661784,
+      "medianHostMsPerCall": 16.15153266660248,
+      "bitsEqual": true
+    },
+    {
+      "width": 1024,
+      "outputs": 65536,
+      "rows": 32,
+      "rowTile": 2,
+      "medianEventMsPerCall": 13.45303471883138,
+      "medianHostMsPerCall": 13.45568233227823,
+      "bitsEqual": true
+    },
+    {
+      "width": 1024,
+      "outputs": 65536,
+      "rows": 32,
+      "rowTile": 4,
+      "medianEventMsPerCall": 12.130303700764975,
+      "medianHostMsPerCall": 12.133096667336455,
+      "bitsEqual": true
+    },
+    {
+      "width": 1024,
+      "outputs": 65536,
+      "rows": 32,
+      "rowTile": 8,
+      "medianEventMsPerCall": 11.496106465657553,
+      "medianHostMsPerCall": 11.498626998218242,
+      "bitsEqual": true
+    },
+    {
+      "width": 2048,
+      "outputs": 11008,
+      "rows": 1,
+      "rowTile": 1,
+      "medianEventMsPerCall": 0.18434133132298788,
+      "medianHostMsPerCall": 0.18672566511668265,
+      "bitsEqual": true
+    },
+    {
+      "width": 2048,
+      "outputs": 11008,
+      "rows": 1,
+      "rowTile": 2,
+      "medianEventMsPerCall": 0.18314667542775473,
+      "medianHostMsPerCall": 0.18548633185370514,
+      "bitsEqual": true
+    },
+    {
+      "width": 2048,
+      "outputs": 11008,
+      "rows": 1,
+      "rowTile": 4,
+      "medianEventMsPerCall": 0.18333866198857626,
+      "medianHostMsPerCall": 0.18566100091751045,
+      "bitsEqual": true
+    },
+    {
+      "width": 2048,
+      "outputs": 11008,
+      "rows": 1,
+      "rowTile": 8,
+      "medianEventMsPerCall": 0.18318933248519897,
+      "medianHostMsPerCall": 0.18561066584273553,
+      "bitsEqual": true
+    },
+    {
+      "width": 2048,
+      "outputs": 11008,
+      "rows": 8,
+      "rowTile": 1,
+      "medianEventMsPerCall": 1.373685359954834,
+      "medianHostMsPerCall": 1.3759723321224253,
+      "bitsEqual": true
+    },
+    {
+      "width": 2048,
+      "outputs": 11008,
+      "rows": 8,
+      "rowTile": 2,
+      "medianEventMsPerCall": 1.1431573232014973,
+      "medianHostMsPerCall": 1.1455730006370384,
+      "bitsEqual": true
+    },
+    {
+      "width": 2048,
+      "outputs": 11008,
+      "rows": 8,
+      "rowTile": 4,
+      "medianEventMsPerCall": 1.031050682067871,
+      "medianHostMsPerCall": 1.0335243326456596,
+      "bitsEqual": true
+    },
+    {
+      "width": 2048,
+      "outputs": 11008,
+      "rows": 8,
+      "rowTile": 8,
+      "medianEventMsPerCall": 0.9982613722483317,
+      "medianHostMsPerCall": 1.0008699997949104,
+      "bitsEqual": true
+    },
+    {
+      "width": 2048,
+      "outputs": 11008,
+      "rows": 32,
+      "rowTile": 1,
+      "medianEventMsPerCall": 5.458784103393555,
+      "medianHostMsPerCall": 5.461861001094803,
+      "bitsEqual": true
+    },
+    {
+      "width": 2048,
+      "outputs": 11008,
+      "rows": 32,
+      "rowTile": 2,
+      "medianEventMsPerCall": 4.533226648966472,
+      "medianHostMsPerCall": 4.535811667058927,
+      "bitsEqual": true
+    },
+    {
+      "width": 2048,
+      "outputs": 11008,
+      "rows": 32,
+      "rowTile": 4,
+      "medianEventMsPerCall": 4.083157221476237,
+      "medianHostMsPerCall": 4.085644332614417,
+      "bitsEqual": true
+    },
+    {
+      "width": 2048,
+      "outputs": 11008,
+      "rows": 32,
+      "rowTile": 8,
+      "medianEventMsPerCall": 3.9142719904581704,
+      "medianHostMsPerCall": 3.9169000010588206,
+      "bitsEqual": true
+    },
+    {
+      "width": 4096,
+      "outputs": 4096,
+      "rows": 1,
+      "rowTile": 1,
+      "medianEventMsPerCall": 0.14046933253606161,
+      "medianHostMsPerCall": 0.1428660010181678,
+      "bitsEqual": true
+    },
+    {
+      "width": 4096,
+      "outputs": 4096,
+      "rows": 1,
+      "rowTile": 2,
+      "medianEventMsPerCall": 0.1397226651509603,
+      "medianHostMsPerCall": 0.14199666717710593,
+      "bitsEqual": true
+    },
+    {
+      "width": 4096,
+      "outputs": 4096,
+      "rows": 1,
+      "rowTile": 4,
+      "medianEventMsPerCall": 0.13939199844996134,
+      "medianHostMsPerCall": 0.14164033442890892,
+      "bitsEqual": true
+    },
+    {
+      "width": 4096,
+      "outputs": 4096,
+      "rows": 1,
+      "rowTile": 8,
+      "medianEventMsPerCall": 0.13917866349220276,
+      "medianHostMsPerCall": 0.14140666462481022,
+      "bitsEqual": true
+    },
+    {
+      "width": 4096,
+      "outputs": 4096,
+      "rows": 8,
+      "rowTile": 1,
+      "medianEventMsPerCall": 1.0245227018992107,
+      "medianHostMsPerCall": 1.0270333320174057,
+      "bitsEqual": true
+    },
+    {
+      "width": 4096,
+      "outputs": 4096,
+      "rows": 8,
+      "rowTile": 2,
+      "medianEventMsPerCall": 0.8556693394978842,
+      "medianHostMsPerCall": 0.8581949999400725,
+      "bitsEqual": true
+    },
+    {
+      "width": 4096,
+      "outputs": 4096,
+      "rows": 8,
+      "rowTile": 4,
+      "medianEventMsPerCall": 0.773738702138265,
+      "medianHostMsPerCall": 0.7762796667520888,
+      "bitsEqual": true
+    },
+    {
+      "width": 4096,
+      "outputs": 4096,
+      "rows": 8,
+      "rowTile": 8,
+      "medianEventMsPerCall": 0.7676160335540771,
+      "medianHostMsPerCall": 0.7701879997815316,
+      "bitsEqual": true
+    },
+    {
+      "width": 4096,
+      "outputs": 4096,
+      "rows": 32,
+      "rowTile": 1,
+      "medianEventMsPerCall": 4.051989237467448,
+      "medianHostMsPerCall": 4.056650335163188,
+      "bitsEqual": true
+    },
+    {
+      "width": 4096,
+      "outputs": 4096,
+      "rows": 32,
+      "rowTile": 2,
+      "medianEventMsPerCall": 3.375093460083008,
+      "medianHostMsPerCall": 3.37739966683633,
+      "bitsEqual": true
+    },
+    {
+      "width": 4096,
+      "outputs": 4096,
+      "rows": 32,
+      "rowTile": 4,
+      "medianEventMsPerCall": 3.0506985982259116,
+      "medianHostMsPerCall": 3.0530136670374,
+      "bitsEqual": true
+    },
+    {
+      "width": 4096,
+      "outputs": 4096,
+      "rows": 32,
+      "rowTile": 8,
+      "medianEventMsPerCall": 2.991882642110189,
+      "medianHostMsPerCall": 2.9942040006668926,
+      "bitsEqual": true
+    }
+  ],
+  "kernelIdentity": {
+    "kernel": "pairwise_f32_cuda_linear_v2_experimental",
+    "operators": "pairwise_f32_reference_v1_experimental",
+    "sourceSha256": "241be444e439d133f7182acd0a24c523b07e827255440464d339e943a3f836e0",
+    "nvrtcOptions": [
+      "--fmad=false",
+      "--ftz=false",
+      "--prec-div=true",
+      "--prec-sqrt=true",
+      "--std=c++17"
+    ],
+    "hardwareQualified": false,
+    "arch": "sm_120",
+    "gpu": "NVIDIA GeForce RTX 5070 Ti",
+    "nvrtcVersion": [
+      13,
+      2
+    ],
+    "builds": {
+      "linear-1024-nobias": {
+        "sourceSha256": "e777d6ef3e4fb14429f4846d7cbedb73b71ec8fb5353f36d80048104370484f6",
+        "ptxSha256": "8cb2073213827899020ecb21a1cf5602461e5fa6d03e5ce417bdf921b914006a",
+        "cubinSha256": "48d4946985870c4e66a0cf0a97634dbacab8ddb549b4b404fa7bb33f2c017e64",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 32,
+            "add.rn.f32": 36
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 32,
+            "FADD": 36
+          },
+          "violations": []
+        }
+      },
+      "linear-1024-nobias-rows2": {
+        "sourceSha256": "ba182b7dc990c8b6eb6c0b704506ab11500fd56fa446415619e9722645339884",
+        "ptxSha256": "601b67ab0f9392c57ff8ae132ed43d5c97b7e64d319985a11aefb74d1fc5900f",
+        "cubinSha256": "7a2729752cafd26bd0ad87ee95f468dfa487fa665b4408169a4dc29d48f71c50",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 64,
+            "add.rn.f32": 72
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 64,
+            "FADD": 72
+          },
+          "violations": []
+        }
+      },
+      "linear-1024-nobias-rows4": {
+        "sourceSha256": "426afc87828625b73ca7d5eeb6844e920741043dde3405bfd72fca3a29b6f3da",
+        "ptxSha256": "802c111540eb3c093a2866f4a6a0004aa9ec1121e6b1361628361c8138439df3",
+        "cubinSha256": "3323787d1f610d22e4a5757e7cc87cc40a0a6aaaaa31492a15f9324d55c92f2b",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 128,
+            "add.rn.f32": 144
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 128,
+            "FADD": 144
+          },
+          "violations": []
+        }
+      },
+      "linear-1024-nobias-rows8": {
+        "sourceSha256": "a60f6025469750983efea8c3c92361a33bc4a654b7258cebf6a88bcfaa3d045a",
+        "ptxSha256": "021c7e466ad47b06c2aeb7b328321a18e30ce079ca166d6db60d0d82a3dbc80f",
+        "cubinSha256": "abbc95e69fde4ebfcf762b7240259bab8334f727d73dc75bfda1e139427b93de",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 256,
+            "add.rn.f32": 288
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 256,
+            "FADD": 288
+          },
+          "violations": []
+        }
+      },
+      "linear-2048-nobias": {
+        "sourceSha256": "0ffbff1bfa4ec24eedb41ffb4b982ff00219164d5f901a2c86b96cf8151d43bd",
+        "ptxSha256": "7e668f7bd9e374c617ea075537309b8b3f9f8387d5f2651f52cd3add434ba16b",
+        "cubinSha256": "d832a121ce702476db4e1e251150fad1684b88f518bcfd267a2019ba6609ce9b",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 32,
+            "add.rn.f32": 37
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 32,
+            "FADD": 37
+          },
+          "violations": []
+        }
+      },
+      "linear-2048-nobias-rows2": {
+        "sourceSha256": "1e73f418d817bb2903f5510ef1f38b313c8ea0e776d04adf36771ca2cc75fa5f",
+        "ptxSha256": "99b63202d84abc69d467016aa4d3b629ac432bbd607516418fc73c748c548c39",
+        "cubinSha256": "8b2941f82d7ac7f99716821751f3e36e263eaaf76a5a7f5dae5c7eca22379ff8",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 64,
+            "add.rn.f32": 74
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 64,
+            "FADD": 74
+          },
+          "violations": []
+        }
+      },
+      "linear-2048-nobias-rows4": {
+        "sourceSha256": "4740226a13ca30e815882dd04d59825c079670367e6d27e8318979969cb73c4e",
+        "ptxSha256": "37cc39c20b31eb8b89b20b9bf0d805ea71f2beacdf6bdbd0aef895a5035bba8d",
+        "cubinSha256": "f84c11450f0c7810aff3a080c0e37003e5168f62023b62f45f57471f3625d3e7",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 128,
+            "add.rn.f32": 148
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 128,
+            "FADD": 148
+          },
+          "violations": []
+        }
+      },
+      "linear-2048-nobias-rows8": {
+        "sourceSha256": "4a4ceffdfe9d86cbf52aee650a0ae90843122b85c7b757c550ba45eea2b39ce4",
+        "ptxSha256": "a72eb6c7e2253128f74359ca7770b4eaa81b731d61d6fb7b1b1d1d518ce8b40b",
+        "cubinSha256": "aec488b90e21ad4a930231aab0a7e48510a194a9bc1ef045fbd3d5ab519e38ab",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 256,
+            "add.rn.f32": 296
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 256,
+            "FADD": 296
+          },
+          "violations": []
+        }
+      },
+      "linear-4096-nobias": {
+        "sourceSha256": "d2d21420dfb8fdc87232820d80fcf2c4a05c6e99b75fea48230e00ef50dd8de1",
+        "ptxSha256": "b2fec4d3b510908cb2a440644e66b76cd81b2ea4ec8a32faf8276ce70e9daa94",
+        "cubinSha256": "2142004cfe44bcdc232cf0137d37ff1f709a9503e37ff0a4735b91cc2f501540",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 32,
+            "add.rn.f32": 39
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 32,
+            "FADD": 39
+          },
+          "violations": []
+        }
+      },
+      "linear-4096-nobias-rows2": {
+        "sourceSha256": "6d1e668683c7d3a7114afcbc3f16ce0ba27c57618c8f857d16e877619358c03f",
+        "ptxSha256": "e12fbaefbbf3e3e332a13413933b2ead0334da8add12d9e6378dc3bce7170645",
+        "cubinSha256": "d429a4aa18a8ccb205c1b0b8274c1a5d5cbb1a2ffe6303dba9545551a472ffdf",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 64,
+            "add.rn.f32": 78
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 64,
+            "FADD": 78
+          },
+          "violations": []
+        }
+      },
+      "linear-4096-nobias-rows4": {
+        "sourceSha256": "32b18b3e57927ec57b98da1a4317a845dadc177f963e4686bc8531e48e062e1c",
+        "ptxSha256": "a041603c3495105e8de1ec957c2f3117d8565a20c18d0993c65636dc9d477a74",
+        "cubinSha256": "808d4d01450cc2523eea6b781dd0ee6dfdc37eac5f13e13c05336f9119df5c50",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 128,
+            "add.rn.f32": 156
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 128,
+            "FADD": 156
+          },
+          "violations": []
+        }
+      },
+      "linear-4096-nobias-rows8": {
+        "sourceSha256": "bb0f16825f6d4f7991e9829c9b61cc63d8aa807820322b01fb2522a5b0699f54",
+        "ptxSha256": "5a727dfee71e5137803f131fa68caad71c8188921fc2497df02b5e716771d7a2",
+        "cubinSha256": "9d17449f380420b439d32ef2c962f560c0c44936e1b88e009ce6547add0c40f6",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 256,
+            "add.rn.f32": 312
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 256,
+            "FADD": 312
+          },
+          "violations": []
+        }
+      },
+      "linear-768-nobias": {
+        "sourceSha256": "9c1f212713c0dcfc3911a4bfe97b77293edf0044c85503d32c2e769e37ebcc2e",
+        "ptxSha256": "f416b55a8da5c78f5741e02fa3b530261c8c310c405cd34e5c734017868bcb22",
+        "cubinSha256": "d46871092f7bba6d84696a56ebdc9db83ebdb508d1b71631d735e69fef2abb12",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 32,
+            "add.rn.f32": 36
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 32,
+            "FADD": 36
+          },
+          "violations": []
+        }
+      },
+      "linear-768-nobias-rows2": {
+        "sourceSha256": "026e5612739d32a9e5afd0053aa314f781860f8eab1eb07d64e2593296cd6e78",
+        "ptxSha256": "7f0e25cbc33f137e5eaa08d2d0d66741dd207c6d570982ae0363430823d58b7d",
+        "cubinSha256": "b5531d33938405aadfa679a7820503651bde8d4f60e428f7f21d006c2667c824",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 64,
+            "add.rn.f32": 72
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 64,
+            "FADD": 72
+          },
+          "violations": []
+        }
+      },
+      "linear-768-nobias-rows4": {
+        "sourceSha256": "6ef8c826b62216735df2ef59f411da99705642266b7c0b1d1143a73f78a5f355",
+        "ptxSha256": "12307e6924ef999c686ee8b53744d01011a848165b145737660ba374f20839c2",
+        "cubinSha256": "3c857649a9df142a154dd673b78c05fb77a43790e0ab6f93cee84ff650a33fc0",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 128,
+            "add.rn.f32": 144
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 128,
+            "FADD": 144
+          },
+          "violations": []
+        }
+      },
+      "linear-768-nobias-rows8": {
+        "sourceSha256": "91e6cdb30c19151473732269f8d9b810d276e6fefa23e9bef7b0bb2932c964cd",
+        "ptxSha256": "03415938b463673dc11ac0e859713378c5815a9e06528f6a9d5880d487ba95f5",
+        "cubinSha256": "7dfa8ce5af02c57d8b761584e5e789fdb33c4d18a0b099fd0fe9554ad335d803",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 256,
+            "add.rn.f32": 288
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 256,
+            "FADD": 288
+          },
+          "violations": []
+        }
+      }
+    },
+    "fingerprint": "ce2d0c8b37cb68f45ce315d310239ea90d82154f44ad110d54ec547a978dbad7"
+  }
+}

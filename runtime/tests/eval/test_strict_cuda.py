@@ -197,6 +197,14 @@ def test_identity_covers_source_options_and_kernel_version():
     assert len(identity["sourceSha256"]) == 64 and identity["hardwareQualified"] is False
 
 
+@pytest.mark.parametrize("tile", [0, -1, 3, 16, True, 4.0, "4"])
+def test_linear_row_tile_rejected_before_compilation_or_launch(tile):
+    kernels = object.__new__(strict_cuda.StrictCudaKernels)
+    kernels.device = torch.device("cpu")
+    with pytest.raises(ReferenceArithmeticError, match="row tile"):
+        kernels.linear(torch.ones(3, 5), torch.ones(7, 5, dtype=torch.float16), row_tile=tile)
+
+
 # ---------------------------------------------------------------------------------------------------------------
 # CUDA: bit equality with the eager reference (same device and CPU). Opt-in only.
 
@@ -231,6 +239,36 @@ def test_cuda_linear_matches_reference_bits(kernels, width, rows):
     for bias in (None, b):
         assert torch.equal(bits(kernels.linear(x, w, bias)), bits(_reference_both(x, w, bias)))
     assert torch.equal(w.view(torch.int16), before)
+
+
+@gpu
+@pytest.mark.parametrize("width", [3, 33, 896, 4864])
+def test_cuda_row_tiles_match_oracle_with_partial_tiles_and_permutations(kernels, width):
+    generator = torch.Generator().manual_seed(width)
+    x = torch.randn(9, width, generator=generator).cuda()
+    x[2] = -0.0
+    x[5] *= 1e-38
+    w = torch.randn(11, width, generator=generator).half().cuda()
+    bias = torch.randn(11, generator=generator).half().cuda()
+    # Multiple rows, an incomplete last tile, output tails and cancellation use independent trees.
+    expected = _reference_both(x, w, bias)
+    permutation = torch.tensor([8, 2, 7, 1, 5, 0, 4, 3, 6], device="cuda")
+    for tile in (1, 2, 4, 8):
+        assert torch.equal(bits(kernels.linear(x, w, bias, row_tile=tile)), bits(expected))
+        permuted = kernels.linear(x[permutation], w, bias, row_tile=tile)
+        assert torch.equal(bits(permuted), bits(expected[permutation]))
+        assert torch.equal(bits(kernels.linear(x[:3], w, bias, row_tile=tile)), bits(expected[:3]))
+
+
+@gpu
+@pytest.mark.parametrize("tile", [2, 4, 8])
+def test_cuda_row_tile_preserves_negative_zero_and_reports_fault_in_last_row(kernels, tile):
+    x = torch.full((tile + 1, 4864), -0.0, device="cuda")
+    w = torch.ones(3, 4864, dtype=torch.float16, device="cuda")
+    assert bits(kernels.linear(x, w, row_tile=tile)).tolist() == [[f32_bits(-0.0)] * 3] * (tile + 1)
+    x[-1, -1] = float("inf")
+    with pytest.raises(ReferenceArithmeticError, match="Nonfinite"):
+        kernels.linear(x, w, row_tile=tile)
 
 
 @gpu

@@ -1,0 +1,11 @@
+control ok    | 23 passed, 162 deselected in 10.81s
+killed       packed-key-offset | 2 failed, 21 passed, 162 deselected in 10.76s
+killed       packed-causal-limit | 2 failed, 21 passed, 162 deselected in 10.77s
+killed       row-tile-origin | 8 failed, 15 passed, 162 deselected in 6.66s
+killed       row-output-address | 11 failed, 12 passed, 162 deselected in 7.90s
+killed       row-fault-only-first | 4 failed, 19 passed, 162 deselected in 11.94s
+killed       stage-wrong-weight-address | 5 failed, 18 passed, 162 deselected in 6.69s
+killed       stage-activation-row-owner | 13 failed, 10 passed, 162 deselected in 6.72s
+killed       stage-activation-channel | 11 failed, 12 passed, 162 deselected in 7.47s
+
+8 of 8 mutants killed.

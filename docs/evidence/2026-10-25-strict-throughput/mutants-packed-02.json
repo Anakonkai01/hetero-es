@@ -1,0 +1,50 @@
+[
+  {
+    "name": "reset-rope-positions",
+    "file": "src/heteroes/eval/strict_decoder_packed.py",
+    "old": "[p + i for length, p in zip(lengths, pasts) for i in range(length)]",
+    "new": "[i for length, p in zip(lengths, pasts) for i in range(length)]"
+  },
+  {
+    "name": "discard-key-prefix",
+    "file": "src/heteroes/eval/strict_decoder_packed.py",
+    "old": "keys.append(old_k[0])",
+    "new": "keys.append(torch.zeros_like(old_k[0]))"
+  },
+  {
+    "name": "last-logit-row",
+    "file": "src/heteroes/eval/strict_decoder_packed.py",
+    "old": "last.append(offset - 1)",
+    "new": "last.append(offset - length)"
+  },
+  {
+    "name": "swap-key-value-cache",
+    "file": "src/heteroes/eval/strict_decoder_packed.py",
+    "old": "new_caches[index].append((key[None], value[None]))",
+    "new": "new_caches[index].append((value[None], key[None]))"
+  },
+  {
+    "name": "compaction-output-owner",
+    "file": "src/heteroes/eval/strict_decoder_packed.py",
+    "old": "active = [active[i] for i in survivors]",
+    "new": "active = list(range(len(survivors)))"
+  },
+  {
+    "name": "cache-compaction-owner",
+    "file": "src/heteroes/eval/strict_decoder_packed.py",
+    "old": "caches = [new_caches[i] for i in survivors] if use_cache else None",
+    "new": "caches = list(new_caches[:len(survivors)]) if use_cache else None"
+  },
+  {
+    "name": "cache-split-forgets-prefix",
+    "file": "src/heteroes/eval/strict_decoder_packed.py",
+    "old": "sizes = [span[1] for span in spans]",
+    "new": "sizes = [span[0] for span in spans]"
+  },
+  {
+    "name": "per-sequence-copy-regression",
+    "file": "src/heteroes/eval/strict_decoder_packed.py",
+    "old": "                    keys.append(old_k[0])\n                    values.append(old_v[0])",
+    "new": "                    key = torch.cat((old_k[0], key), dim=1)\n                    value = torch.cat((old_v[0], value), dim=1)"
+  }
+]

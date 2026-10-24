@@ -61,6 +61,9 @@ def main(argv=None):
     parser.add_argument("--max-context", type=int, default=512)
     parser.add_argument("--eager-check", type=int, default=0, help="prompts whose prefill logits use eager too")
     parser.add_argument("--generated", type=int, default=0, help="extra templated prompts after the fixed ones")
+    parser.add_argument(
+        "--packed", action="store_true", help="test packed CUDA execution against independent serial rows"
+    )
     args = parser.parse_args(argv)
     if args.out.exists():
         parser.error("Evidence already exists; choose a fresh --out")
@@ -84,6 +87,7 @@ def main(argv=None):
     from heteroes.eval.phase_trace import storage_inventory
     from heteroes.eval.qwen2_reference import Qwen2Reference
     from heteroes.eval.qwen2_strict_cuda import Qwen2StrictCuda
+    from heteroes.eval.strict_decoder_packed import StrictDecoderPacked
     from heteroes.eval.workload import extract_integer
     from heteroes.model.schema import build_parameter_schema
     from heteroes.noise.contracts import ENGINE_V2
@@ -120,7 +124,8 @@ def main(argv=None):
         torch.cuda.reset_peak_memory_stats()
         files = file_manifest(args.model_path)
         model, tokenizer = load(args.model_path, files, "cuda")
-        backend = Qwen2StrictCuda(model, max_context=args.max_context)
+        backend_type = StrictDecoderPacked if args.packed else Qwen2StrictCuda
+        backend = backend_type(model, max_context=args.max_context)
         schema = build_parameter_schema(model)
         snapshot = take_snapshot(model, schema)
         report["backendIdentity"] = backend.identity
@@ -177,6 +182,31 @@ def main(argv=None):
                     if number < len(EXPECTED) and EXPECTED[number] is not None:
                         case["reward"] = float(extract_integer(text) == EXPECTED[number])
                     entry["prompts"].append(case)
+                if args.packed:
+                    if len(prompts) > 128:
+                        raise ValueError("Packed probe supports at most 128 prompts")
+                    width = max(ids.shape[1] for ids in prompts)
+                    packed = torch.zeros((len(prompts), width), dtype=torch.long, device="cuda")
+                    mask = torch.zeros_like(packed)
+                    for i, ids in enumerate(prompts):
+                        packed[i, -ids.shape[1] :] = ids[0]
+                        mask[i, -ids.shape[1] :] = 1
+                    packed_logits, _ = backend.forward_batch(prompts)
+                    entry["packedPrefillLogitsSha256"] = [digest(row[None]) for row in packed_logits]
+                    if entry["packedPrefillLogitsSha256"] != [case["prefillLogitsSha256"] for case in entry["prompts"]]:
+                        raise ValueError("Packed prefill differs from serial execution")
+                    s = synchronized()
+                    packed_output = backend.generate(
+                        packed, attention_mask=mask, max_new_tokens=args.max_new_tokens, do_sample=False, pad_token_id=0
+                    )[:, width:].tolist()
+                    packed_seconds = synchronized() - s
+                    entry["packedTokensEqualSerial"] = all(
+                        row[: len(case["tokenIds"])] == case["tokenIds"]
+                        and all(t == 0 for t in row[len(case["tokenIds"]) :])
+                        for row, case in zip(packed_output, entry["prompts"])
+                    )
+                    if not entry["packedTokensEqualSerial"]:
+                        raise ValueError("Packed token stream differs from serial execution")
             finally:
                 t2 = synchronized()
                 restore_from_snapshot_(model, schema, snapshot)
@@ -191,6 +221,11 @@ def main(argv=None):
                     "tokensPerSecond": generated / rollout if rollout else None,
                 }
             )
+            if args.packed:
+                report["timings"][-1].update(
+                    packedRolloutSeconds=packed_seconds,
+                    packedTokensPerSecond=generated / packed_seconds,
+                )
         comparison["parentAfterSha256"] = model_weights_sha256(model, schema)
         comparison["restoreExact"] = comparison["parentAfterSha256"] == comparison["parentBeforeSha256"]
         if not comparison["restoreExact"]:

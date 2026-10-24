@@ -1,0 +1,98 @@
+{
+  "768/rows1": {
+    "NUM_REGS": 48,
+    "LOCAL_SIZE_BYTES": 0,
+    "SHARED_SIZE_BYTES": 0,
+    "MAX_THREADS_PER_BLOCK": 256
+  },
+  "768/rows2": {
+    "NUM_REGS": 62,
+    "LOCAL_SIZE_BYTES": 0,
+    "SHARED_SIZE_BYTES": 0,
+    "MAX_THREADS_PER_BLOCK": 256
+  },
+  "768/rows4": {
+    "NUM_REGS": 70,
+    "LOCAL_SIZE_BYTES": 0,
+    "SHARED_SIZE_BYTES": 0,
+    "MAX_THREADS_PER_BLOCK": 256
+  },
+  "768/rows8": {
+    "NUM_REGS": 127,
+    "LOCAL_SIZE_BYTES": 0,
+    "SHARED_SIZE_BYTES": 0,
+    "MAX_THREADS_PER_BLOCK": 256
+  },
+  "1024/rows1": {
+    "NUM_REGS": 48,
+    "LOCAL_SIZE_BYTES": 0,
+    "SHARED_SIZE_BYTES": 0,
+    "MAX_THREADS_PER_BLOCK": 256
+  },
+  "1024/rows2": {
+    "NUM_REGS": 62,
+    "LOCAL_SIZE_BYTES": 0,
+    "SHARED_SIZE_BYTES": 0,
+    "MAX_THREADS_PER_BLOCK": 256
+  },
+  "1024/rows4": {
+    "NUM_REGS": 70,
+    "LOCAL_SIZE_BYTES": 0,
+    "SHARED_SIZE_BYTES": 0,
+    "MAX_THREADS_PER_BLOCK": 256
+  },
+  "1024/rows8": {
+    "NUM_REGS": 94,
+    "LOCAL_SIZE_BYTES": 0,
+    "SHARED_SIZE_BYTES": 0,
+    "MAX_THREADS_PER_BLOCK": 256
+  },
+  "2048/rows1": {
+    "NUM_REGS": 47,
+    "LOCAL_SIZE_BYTES": 0,
+    "SHARED_SIZE_BYTES": 32,
+    "MAX_THREADS_PER_BLOCK": 256
+  },
+  "2048/rows2": {
+    "NUM_REGS": 62,
+    "LOCAL_SIZE_BYTES": 0,
+    "SHARED_SIZE_BYTES": 64,
+    "MAX_THREADS_PER_BLOCK": 256
+  },
+  "2048/rows4": {
+    "NUM_REGS": 71,
+    "LOCAL_SIZE_BYTES": 0,
+    "SHARED_SIZE_BYTES": 128,
+    "MAX_THREADS_PER_BLOCK": 256
+  },
+  "2048/rows8": {
+    "NUM_REGS": 95,
+    "LOCAL_SIZE_BYTES": 0,
+    "SHARED_SIZE_BYTES": 256,
+    "MAX_THREADS_PER_BLOCK": 256
+  },
+  "4096/rows1": {
+    "NUM_REGS": 53,
+    "LOCAL_SIZE_BYTES": 0,
+    "SHARED_SIZE_BYTES": 32,
+    "MAX_THREADS_PER_BLOCK": 256
+  },
+  "4096/rows2": {
+    "NUM_REGS": 62,
+    "LOCAL_SIZE_BYTES": 0,
+    "SHARED_SIZE_BYTES": 64,
+    "MAX_THREADS_PER_BLOCK": 256
+  },
+  "4096/rows4": {
+    "NUM_REGS": 72,
+    "LOCAL_SIZE_BYTES": 0,
+    "SHARED_SIZE_BYTES": 128,
+    "MAX_THREADS_PER_BLOCK": 256
+  },
+  "4096/rows8": {
+    "NUM_REGS": 97,
+    "LOCAL_SIZE_BYTES": 0,
+    "SHARED_SIZE_BYTES": 256,
+    "MAX_THREADS_PER_BLOCK": 256
+  }
+}

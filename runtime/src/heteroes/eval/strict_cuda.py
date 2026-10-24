@@ -33,7 +33,7 @@ from heteroes.canonical import canonical_json_hash
 from heteroes.eval import reference_ops as ops
 from heteroes.eval.reference_ops import ReferenceArithmeticError
 
-KERNEL_VERSION = "pairwise_f32_cuda_linear_v1_experimental"
+KERNEL_VERSION = "pairwise_f32_cuda_linear_v2_experimental"
 MAX_LINEAR_WIDTH = 32768
 MAX_ATTENTION_KEYS = 4096
 MAX_NORM_WIDTH = 8192
@@ -70,51 +70,106 @@ strict_linear(const float* __restrict__ x, const u16* __restrict__ w, const u16*
   const int o = blockIdx.x * GROUPS + threadIdx.y;
   const bool live = o < outputs;
   const int start = t * PER;
-  __shared__ float partial[GROUPS][PADDED_WARPS];
+  __shared__ float partial[GROUPS][ROW_TILE][PADDED_WARPS];
   float weight[PER];
+#if STAGE_WEIGHTS
+  // Global reads are consecutive across lanes; padding removes shared-memory bank conflicts on blocked reads.
+  __shared__ float staged[GROUPS][32 * WARPS][PER + 1];
+  for (int p = t; p < WIDTH; p += 32 * WARPS)
+    staged[threadIdx.y][p / PER][p % PER] = live ? widen(w[(size_t)o * WIDTH + p]) : 0.0f;
+  __syncthreads();
+#endif
 #pragma unroll
   for (int i = 0; i < PER; ++i) {
     const int k = start + i;
+#if STAGE_WEIGHTS
+    weight[i] = (live && k < WIDTH) ? staged[threadIdx.y][t][i] : 0.0f;
+#else
     weight[i] = (live && k < WIDTH) ? widen(w[(size_t)o * WIDTH + k]) : 0.0f;
+#endif
   }
   float b = 0.0f;
   if (HAS_BIAS && live) b = widen(bias[o]);
-  for (int m = 0; m < rows; ++m) {
-    const float* row = x + (size_t)m * WIDTH;
-    float stack[LOG_PER + 1];
+  // Independent row trees share the same widened weights. Blocks run row tiles concurrently; the grid-stride
+  // loop also supports more tiles than CUDA's y dimension. No reduction ever combines different rows.
+  for (int first = blockIdx.y * ROW_TILE; first < rows; first += gridDim.y * ROW_TILE) {
+    float stack[ROW_TILE][LOG_PER + 1];
+#if STAGE_WEIGHTS
+    __syncthreads();  // all widened weights are now in registers; reuse the first shared plane for activations
+#pragma unroll
+    for (int r = 0; r < ROW_TILE; ++r) {
+      const int m = first + r;
+      if (threadIdx.y == 0) {
+        for (int p = t; p < WIDTH; p += 32 * WARPS)
+          staged[0][p / PER][p % PER] = m < rows ? x[(size_t)m * WIDTH + p] : -0.0f;
+      }
+      __syncthreads();
+#pragma unroll
+      for (int i = 0; i < PER; ++i) {
+        const int k = start + i;
+        float v = (live && m < rows && k < WIDTH) ? mul_rn(flush(staged[0][t][i]), weight[i]) : -0.0f;
+        int level = 0;
+#pragma unroll
+        for (; level < LOG_PER && ((i >> level) & 1); ++level) v = add_rn(stack[r][level], v);
+        stack[r][level] = v;
+      }
+      __syncthreads();
+    }
+#else
 #pragma unroll
     for (int i = 0; i < PER; ++i) {
       const int k = start + i;
-      float v = (live && k < WIDTH) ? mul_rn(flush(row[k]), weight[i]) : -0.0f;
-      int level = 0;
 #pragma unroll
-      for (; level < LOG_PER && ((i >> level) & 1); ++level) v = add_rn(stack[level], v);
-      stack[level] = v;
+      for (int r = 0; r < ROW_TILE; ++r) {
+        const int m = first + r;
+        float v = (live && m < rows && k < WIDTH) ? mul_rn(flush(x[(size_t)m * WIDTH + k]), weight[i]) : -0.0f;
+        int level = 0;
+#pragma unroll
+        for (; level < LOG_PER && ((i >> level) & 1); ++level) v = add_rn(stack[r][level], v);
+        stack[r][level] = v;
+      }
     }
-    float v = stack[LOG_PER];
+#endif
+    float v[ROW_TILE];
 #pragma unroll
-    for (int offset = 1; offset < 32; offset <<= 1) v = add_rn(v, __shfl_xor_sync(0xffffffffu, v, offset));
+    for (int r = 0; r < ROW_TILE; ++r) {
+      v[r] = stack[r][LOG_PER];
+#pragma unroll
+      for (int offset = 1; offset < 32; offset <<= 1) v[r] = add_rn(v[r], __shfl_xor_sync(0xffffffffu, v[r], offset));
+    }
     if (PADDED_WARPS > 1) {
-      if (lane == 0) partial[threadIdx.y][warp] = v;
+#pragma unroll
+      for (int r = 0; r < ROW_TILE; ++r) {
+        if (lane == 0) partial[threadIdx.y][r][warp] = v[r];
+      }
       __syncthreads();
       if (t == 0) {
-        float s[LOG_WARPS + 1];
 #pragma unroll
-        for (int i = 0; i < PADDED_WARPS; ++i) {
-          float u = i < WARPS ? partial[threadIdx.y][i] : -0.0f;
-          int level = 0;
+        for (int r = 0; r < ROW_TILE; ++r) {
+          float s[LOG_WARPS + 1];
 #pragma unroll
-          for (; level < LOG_WARPS && ((i >> level) & 1); ++level) u = add_rn(s[level], u);
-          s[level] = u;
+          for (int i = 0; i < PADDED_WARPS; ++i) {
+            float u = i < WARPS ? partial[threadIdx.y][r][i] : -0.0f;
+            int level = 0;
+#pragma unroll
+            for (; level < LOG_WARPS && ((i >> level) & 1); ++level) u = add_rn(s[level], u);
+            s[level] = u;
+          }
+          v[r] = s[LOG_WARPS];
         }
-        v = s[LOG_WARPS];
       }
       __syncthreads();
     }
     if (t == 0 && live) {
-      if (HAS_BIAS) v = add_rn(v, b);
-      out[(size_t)m * outputs + o] = v;
-      if ((__float_as_uint(v) & 0x7f800000u) == 0x7f800000u) atomicOr(error, 1);
+#pragma unroll
+      for (int r = 0; r < ROW_TILE; ++r) {
+        const int m = first + r;
+        if (m < rows) {
+          if (HAS_BIAS) v[r] = add_rn(v[r], b);
+          out[(size_t)m * outputs + o] = v[r];
+          if ((__float_as_uint(v[r]) & 0x7f800000u) == 0x7f800000u) atomicOr(error, 1);
+        }
+      }
     }
   }
 }
@@ -292,20 +347,23 @@ extern "C" __global__ void strict_rope(const float* x, const float* cosine, cons
 
 // Grid (query, kv head, repeat). q: [heads, length, dim]; k/v: [kv_heads, keys, dim]; out: [length, heads*dim].
 extern "C" __global__ void strict_attention(const float* q, const float* key, const float* value, float* out,
-                                            int* error, int heads, int length, int keys, int past, int repeats,
-                                            int dim, float scale) {
+                                            int* error, const int* ranges, int heads, int length, int total_keys,
+                                            int past, int repeats, int dim, int packed, float scale) {
+  const int i = blockIdx.x, kv = blockIdx.y, h = kv * repeats + blockIdx.z;
+  const int start = packed ? ranges[3 * i] : 0;
+  const int keys = packed ? ranges[3 * i + 1] : total_keys;
+  const int limit = packed ? ranges[3 * i + 2] : past + i;
   extern __shared__ float shared[];
   float* query = shared;
   float* numerators = shared + dim;
   float* tree = numerators + keys;
   __shared__ float maxima[32];
   unsigned bad = 0;
-  const int i = blockIdx.x, kv = blockIdx.y, h = kv * repeats + blockIdx.z, limit = past + i;
   for (int d = threadIdx.x; d < dim; d += blockDim.x) query[d] = load(q + ((size_t)h * length + i) * dim + d, bad);
   __syncthreads();
   float local = -FLT_BIG;
   for (int j = threadIdx.x; j < keys; j += blockDim.x) {
-    const float* row = key + ((size_t)kv * keys + j) * dim;
+    const float* row = key + ((size_t)kv * total_keys + start + j) * dim;
     Tree t;
     t.n = 0;
     for (int d = 0; d < dim; ++d) push(t, mul_(query[d], load(row + d, bad), bad), bad);
@@ -339,7 +397,7 @@ extern "C" __global__ void strict_attention(const float* q, const float* key, co
   for (int d = threadIdx.x; d < dim; d += blockDim.x) {
     Tree t;
     t.n = 0;
-    for (int j = 0; j < keys; ++j) push(t, mul_(numerators[j], load(value + ((size_t)kv * keys + j) * dim + d, bad), bad), bad);
+    for (int j = 0; j < keys; ++j) push(t, mul_(numerators[j], load(value + ((size_t)kv * total_keys + start + j) * dim + d, bad), bad), bad);
     out[(size_t)i * heads * dim + h * dim + d] = finish(t, bad);
   }
   report(error, bad);
@@ -355,6 +413,14 @@ class LinearPlan:
     warps: int
     padded_warps: int
     outputs_per_block: int
+
+
+@dataclass(frozen=True)
+class _PackedAttentionLayout:
+    ranges: torch.Tensor
+    queries: int
+    keys: int
+    max_keys: int
 
 
 def linear_plan(width):
@@ -643,8 +709,10 @@ class StrictCudaKernels:
             return "unavailable"
         return audit_sass(result.stdout, exact)
 
-    def _linear_function(self, plan, has_bias):
+    def _linear_function(self, plan, has_bias, row_tile):
         name = f"linear-{plan.width}-{'bias' if has_bias else 'nobias'}"
+        if row_tile != 1:
+            name += f"-rows{row_tile}"
         if name not in self._functions:
             defines = {
                 "WIDTH": plan.width,
@@ -655,6 +723,8 @@ class StrictCudaKernels:
                 "LOG_WARPS": plan.padded_warps.bit_length() - 1,
                 "GROUPS": plan.outputs_per_block,
                 "HAS_BIAS": int(has_bias),
+                "ROW_TILE": row_tile,
+                "STAGE_WEIGHTS": int(plan.outputs_per_block * 32 * plan.warps * (plan.per_thread + 1) * 4 <= 40 * 1024),
             }
             header = "".join(f"#define {k} {v}\n" for k, v in defines.items())
             self._functions[name] = self._compile(name, header + _LINEAR_SOURCE, ["strict_linear"])["strict_linear"]
@@ -795,29 +865,90 @@ class StrictCudaKernels:
             self._ops("strict_attention"),
             grid=(length, key.shape[0], repeats),
             block=(128, 1),
-            pointers=(query, key, value, result, flag),
-            integers=(heads, length, keys, past, repeats, dim),
+            pointers=(query, key, value, result, flag, flag),
+            integers=(heads, length, keys, past, repeats, dim, 0),
             floats=(scale,),
             shared=4 * (dim + 2 * keys),
         )
         self._finish(flag, error_flag)
         return result
 
+    def attention_layout(self, spans):
+        """One call-local range table shared by all layers; each span is (queries, keys, cached prefix)."""
+        if not isinstance(spans, (list, tuple)) or not 1 <= len(spans) <= 128:
+            raise ReferenceArithmeticError("Spans need 1..128 independent sequences")
+        ranges, offset, queries, maximum = [], 0, 0, 0
+        for span in spans:
+            if (
+                not isinstance(span, (tuple, list))
+                or len(span) != 3
+                or any(type(n) is not int for n in span)
+                or not 1 <= span[0] <= span[1] <= MAX_ATTENTION_KEYS
+                or span[2] != span[1] - span[0]
+            ):
+                raise ReferenceArithmeticError("Span needs positive query/key counts and the exact cached prefix")
+            length, keys, past = span
+            ranges.extend((offset, keys, past + i) for i in range(length))
+            offset += keys
+            queries += length
+            maximum = max(maximum, keys)
+        return _PackedAttentionLayout(
+            torch.tensor(ranges, dtype=torch.int32, device=self.device), queries, offset, maximum
+        )
+
     @torch.inference_mode()
-    def linear(self, value, weight, bias=None, *, error_flag=None):
+    def attention_packed(self, query, key, value, spans, repeats, scale, *, error_flag=None):
+        """Ragged sequences share a launch, with a separate causal mask and reduction tree for every query."""
+        layout = spans if isinstance(spans, _PackedAttentionLayout) else self.attention_layout(spans)
+        query, key, value = self._float32(query, key, value)
+        if (
+            query.ndim != 3
+            or key.ndim != 3
+            or key.shape != value.shape
+            or query.shape[1] != layout.queries
+            or key.shape[1] != layout.keys
+            or layout.ranges.device != self.device
+            or type(repeats) is not int
+            or repeats < 1
+            or query.shape[0] != key.shape[0] * repeats
+            or query.shape[2] != key.shape[2]
+            or not 1 <= query.shape[2] <= 256
+            or not (isinstance(scale, float) and math.isfinite(scale))
+        ):
+            raise ReferenceArithmeticError("Packed attention shape/device/scale does not match its spans")
+        heads, length, dim = query.shape
+        result = torch.empty((length, heads * dim), dtype=torch.float32, device=self.device)
+        flag = self.new_error_flag() if error_flag is None else error_flag
+        self._launch(
+            self._ops("strict_attention"),
+            grid=(length, key.shape[0], repeats),
+            block=(128, 1),
+            pointers=(query, key, value, result, flag, layout.ranges),
+            integers=(heads, length, key.shape[1], 0, repeats, dim, 1),
+            floats=(scale,),
+            shared=4 * (dim + 2 * layout.max_keys),
+        )
+        self._finish(flag, error_flag)
+        return result
+
+    @torch.inference_mode()
+    def linear(self, value, weight, bias=None, *, error_flag=None, row_tile=4):
         """Bitwise ``reference_ops.linear`` with FP16 weights read in place; FP32 output only.
 
         With ``error_flag`` the nonfinite check is deferred to ``raise_if_error`` (no host sync here).
         """
+        if type(row_tile) is not int or row_tile not in (1, 2, 4, 8):
+            raise ReferenceArithmeticError("Strict linear row tile must be 1, 2, 4 or 8")
         rows, width, outputs = validate_linear(value, weight, bias, device=self.device)
         plan = linear_plan(width)
-        function = self._linear_function(plan, bias is not None)
+        row_tile = 1 if rows == 1 else row_tile
+        function = self._linear_function(plan, bias is not None, row_tile)
         flat = value.to(torch.float32).reshape(rows, width).contiguous()
         result = torch.empty((rows, outputs), dtype=torch.float32, device=self.device)
         flag = self.new_error_flag() if error_flag is None else error_flag
         self._launch(
             function,
-            grid=-(-outputs // plan.outputs_per_block),
+            grid=(-(-outputs // plan.outputs_per_block), min(65535, -(-rows // row_tile))),
             block=(32 * plan.warps, plan.outputs_per_block),
             pointers=(flat, weight, weight if bias is None else bias, result, flag),
             integers=(rows, outputs),

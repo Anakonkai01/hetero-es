@@ -1,0 +1,11 @@
+control ok    | 13 passed, 8 deselected in 22.28s
+killed       reset-rope-positions | 2 failed, 11 passed, 8 deselected in 22.32s
+killed       discard-key-prefix | 2 failed, 11 passed, 8 deselected in 22.29s
+killed       last-logit-row | 5 failed, 8 passed, 8 deselected in 12.74s
+killed       swap-key-value-cache | 2 failed, 11 passed, 8 deselected in 22.22s
+killed       compaction-output-owner | 2 failed, 11 passed, 8 deselected in 20.46s
+killed       cache-compaction-owner | 1 failed, 12 passed, 8 deselected in 22.38s
+killed       cache-split-forgets-prefix | 5 failed, 8 passed, 8 deselected in 12.41s
+killed       per-sequence-copy-regression | 1 failed, 12 passed, 8 deselected in 22.15s
+
+8 of 8 mutants killed.

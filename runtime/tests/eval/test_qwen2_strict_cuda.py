@@ -5,13 +5,17 @@ batching and candidate changes; it is not full-model or hardware qualification.
 """
 
 import copy
+import hashlib
 import os
+from pathlib import Path
 
 import pytest
 import torch
 from transformers import Qwen2Config, Qwen2ForCausalLM
 
 from heteroes.eval.candidate import model_weights_sha256
+from heteroes.eval import reference_ops as ops
+from heteroes.eval import qwen2_strict_cuda, strict_decoder
 from heteroes.eval.phase_trace import storage_inventory
 from heteroes.eval.qwen2_reference import Qwen2Reference
 from heteroes.eval.qwen2_strict_cuda import STRICT_CUDA_BACKEND, Qwen2StrictCuda
@@ -106,6 +110,29 @@ def test_strict_incremental_cache_equals_prefill_and_eager_cache_format(cuda_mod
 
 
 @gpu
+def test_rope_tables_are_exact_bounded_buffers_reused_by_prefill_and_decode(cuda_model, monkeypatch):
+    strict = Qwen2StrictCuda(cuda_model, max_context=64, allow_fixture=True)
+    positions = torch.arange(64, device="cuda", dtype=torch.float32)
+    sine, cosine = ops.sin_cos(ops.mul(positions[:, None], strict._inverse_frequency[None, :]))
+    for actual, expected in ((strict._rope_sine, sine), (strict._rope_cosine, cosine)):
+        assert torch.equal(bits(actual), bits(torch.cat((expected, expected), dim=-1)))
+        assert actual.dtype == torch.float32 and actual.is_contiguous()
+        assert any(buffer is actual for buffer in strict.buffers())
+    size = sum(t.numel() * t.element_size() for t in (strict._rope_sine, strict._rope_cosine))
+    assert size == 2 * strict.max_context * strict.head_dim * 4
+    ids = torch.tensor([[2, 5, 7, 11, 13]], device="cuda")
+    eager = Qwen2Reference(cuda_model, max_context=64, allow_fixture=True)
+    expected = eager.forward_tokens(ids)[0]
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("RoPE tables must not be recomputed during forward")
+
+    monkeypatch.setattr(ops, "sin_cos", forbidden)
+    _, cache = strict.forward_tokens(ids[:, :3])
+    assert torch.equal(bits(strict.forward_tokens(ids[:, 3:], cache)[0]), bits(expected))
+
+
+@gpu
 def test_strict_generation_matches_eager_with_padding_batches_eos_and_penalty(cuda_model):
     strict = Qwen2StrictCuda(cuda_model, max_context=64, allow_fixture=True)
     eager = Qwen2Reference(cuda_model, max_context=64, allow_fixture=True)
@@ -173,7 +200,14 @@ def test_strict_identity_is_distinct_and_names_kernel_builds(cuda_model):
     assert strict.identity["hardwareQualified"] is False
     assert strict.fingerprint != eager.fingerprint
     builds = strict.kernel_identity()["builds"]
-    assert {"ops", "linear-16-bias", "linear-16-nobias", "linear-35-nobias"} <= set(builds)
+    assert {"ops", "linear-16-bias-rows4", "linear-16-nobias", "linear-35-nobias-rows4"} <= set(builds)
+    assert (
+        strict.identity["graphSourceSha256"] == hashlib.sha256(Path(strict_decoder.__file__).read_bytes()).hexdigest()
+    )
+    assert (
+        strict.identity["wrapperSourceSha256"]
+        == hashlib.sha256(Path(qwen2_strict_cuda.__file__).read_bytes()).hexdigest()
+    )
     assert all(build["ptxAudit"]["violations"] == [] for build in builds.values())
     with pytest.raises(ReferenceArithmeticError):
         Qwen2StrictCuda(cuda_model, max_context=8192, allow_fixture=True)
