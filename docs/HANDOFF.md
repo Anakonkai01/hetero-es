@@ -6,6 +6,8 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
 
 ## Tóm tắt cho chủ dự án (2026-10-24)
 
+- 24/10 tối: Claude làm xong kernel CUDA strict (khớp bit, token giống nhau trên 4 GPU: 2×5070 Ti, 2×3060), bắt đầu M2;
+  giao lại Codex. Xem mục "Claude session result" trong [bàn giao](handoff-claude-human-review-2026-10-24.md).
 - Chủ dự án đã duyệt kế hoạch human-review, rồi tạm dừng Codex và giao Claude tiếp tục.
   Đọc [bàn giao Claude](handoff-claude-human-review-2026-10-24.md) và [tiến độ](HUMAN-REVIEW-IMPLEMENTATION.md).
 - Đã có prototype một model FP16; probe hữu hạn khớp trên CPU, 5070 Ti và hai 3060 WSL2. Bản tham chiếu còn quá chậm,
@@ -23,7 +25,7 @@ Deployment/disk entries below were last recorded on 2026-10-23; live lab state w
 | Lab            | `lab.heteroes.site`, deployed clone `~/.local/share/heteroes-lab/app` at `82c37fc`; operations: [local-lab-operations.md](local-lab-operations.md)                                                              |
 | Devices        | Standalone SSH/GPU probes on 2026-10-24 reached local 5070 Ti and Thao/Quang 3060 through WSL2. Live approval/contribution was not re-read or changed; follow AGENTS.md. Native Windows acceptance remains open |
 | Default engine | engine v2 noise made on the GPU (same bits as CPU; `HETEROES_NOISE_DEVICE=cpu` forces CPU)                                                                                                                      |
-| Code           | Human-review branch `fix/human-review-single-model-2026-10-24`, implementation head `3914fb5`; no push/merge/deployment in this work. Later handoff commit is docs only                                         |
+| Code           | Human-review branch `fix/human-review-single-model-2026-10-24`, implementation head `1cf0843` (was `3914fb5`); no push/merge/deployment in this work. Later handoff commit is docs only                         |
 | Disk (nhan)    | `/` 90 % used; Archive (NTFS/FUSE, also personal data) **full**, holds lab recovery storage and moved run data                                                                                                  |
 
 ## Open work, in order

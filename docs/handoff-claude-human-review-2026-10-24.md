@@ -5,6 +5,49 @@ implementation; the overall objective is **not complete**. No new kernel was sta
 sessions started here returned terminal status; no acceptance run was deliberately left running. Revalidate external
 state before continuing. This handoff does not resume the paused Codex goal.
 
+## Claude session result (2026-10-24 evening) — read this first, then hand to Codex
+
+Commits on the branch after `aae2671`: `e7b39cd` (audited NVRTC linear kernel), `282e7c6` (fused-op kernels,
+`Qwen2StrictCuda`, probe, comparison script, four-GPU receipts), `1cf0843` (M2: v3 scoring outside the lock).
+No push, merge, deployment, lab or device-state change. The local lab services were not running at session start;
+they were left alone.
+
+- **M1 kernel gate reached on a finite matrix.** `eval/strict_cuda.py`: linear, RMSNorm, residual add, SiLU gate,
+  RoPE, attention/softmax. They give the same bits as `reference_ops`, per kernel and per graph, and pass PTX/SASS
+  audits. `eval/qwen2_strict_cuda.py` runs the Qwen2 graph on them. The pinned Qwen2.5-0.5B (parent + 8 antithetic
+  candidates × 8 prompts, 4,387 tokens) agrees on the local 5070 Ti, **Nhựt's 5070 Ti** (`heheboiz@100.108.195.50`,
+  native Linux, driver 580; the owner added it this session), Thao 3060 and Quang 3060 (WSL2).
+  ~60 tokens/s on a 5070 Ti, ~24 on a 3060; peak ~1.08 GB. Receipts, equivalent mutants and limits:
+  `docs/evidence/2026-10-24-strict-cuda/README.md`.
+- Remote runs used fresh `/tmp/heteroes-strict-20261024-*` directories and each host's existing Python, read-only.
+  Pure-Python pytest wheels were added on `PYTHONPATH` from the scratch directory; nothing was installed.
+  Nhựt's model is at `~/.local/share/heteroes-worker/models/7ae557604adf67be50417f59c2c2f167def9a775`; Python is
+  `~/.local/share/heteroes-worker/runtimes/bf28fa656ad4/python/bin/python3`. His worker service was running but idle.
+  Do not touch it.
+- **M2 started (`1cf0843`):** `WorkerAPI._submit_texts` validates under the lock, scores outside it, makes
+  identical in-flight submissions wait for one scoring, then commits under the lock. The ledger re-checks for a
+  stale attempt. An identical retry of a committed result returns ALREADY_COMMITTED without scoring. `AuditAPI`
+  forwards non-audit, non-lease operations without its own lock. Tests: `tests/ledger/test_worker_api_concurrency.py`;
+  ledger+v3 suites pass. **Mutation check for this change has NOT been run yet: do it first.** The usage sink is still
+  called synchronously, outside the lock (W3 item 5: bounded queue still open).
+
+### Next actions for Codex (in order)
+
+1. Mutation-check `1cf0843` (scratch copy, `scripts/mutation-check.py`): leader/waiter, the fast-path digest
+   compare, the audit lock bypass.
+2. Continue M2: heartbeat across delivery/pending retries and a durable outbox (`worker.py`); local poison on restore
+   fault; usage bounded queue; audit rate in SDK/API/UI; selected/completed/matched/mismatched/timed-out/skipped
+   states; stage watchdog plus explicit hard caps; the restore-recovery state machine (D10). Then M3 (bounded
+   streaming upload/backoff in `product/cloud_sync.py`).
+3. M1 remainder: precompute RoPE tables once per backend (eager `sin_cos` per forward costs time). Reduce Python
+   launch overhead (cache argument arrays, or CUDA graphs per decode step). Add a multi-row linear (ILP over rows)
+   and batched multi-sequence decode; row independence is already tested. Measure native HF FP16 for the same
+   prompts, then propose thresholds to the owner.
+4. Native Windows: not run. The tailscale node `desktop-qp0nta7-1` (100.81.45.107, Windows) may be Thao's Windows
+   side. **SSH to it was not authorized: ask the owner.**
+5. M4 integration (recipe/backend identity, qualification cache keyed by backend, GPU ownership across roles,
+   packaging so that kernels and `cuda-bindings` reach workers), then M5 and M6, as in the plan.
+
 ## Read first
 
 1. [AGENTS.md](../AGENTS.md), then [HANDOFF.md](HANDOFF.md).

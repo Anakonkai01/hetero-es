@@ -7,15 +7,15 @@ No lab deployment or device approval changes are included.
 Owner paused Codex auto-run and requested continuation by Claude on 2026-10-24;
 read the [handoff](handoff-claude-human-review-2026-10-24.md). Implementation head at handoff: `3914fb5`.
 
-| Milestone                                  | State                                                                                | Next gate                                                    |
-| ------------------------------------------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
-| M0 contract/baseline                       | In progress: ADR, phase traces/storage inventory and real Qwen CPU lifecycle probe   | Broader pipeline timing                                      |
-| M1 one-model strict backend                | Reference plus audited NVRTC kernels; Qwen 0.5B tokens agree on four GPUs (sm_120/sm_86) | Native Windows, batching/throughput, lifecycle gates          |
-| M2 delivery/scorer/audit/watchdog/recovery | Not started                                                                          | Reproduce each behavior with fault/concurrency tests         |
-| M3 recovery I/O and long-run overhead      | Not started                                                                          | Bounded upload/retry and consistency tests                   |
-| M4 product/lifecycle/packaging             | Not started                                                                          | SDK/lab capability and native runtime acceptance             |
-| M5 system acceptance                       | Not started                                                                          | End-to-end, faults, memory and throughput receipts           |
-| M6 quantized base + LoRA                   | Not started                                                                          | Same strict contract without a dequantized full-model shadow |
+| Milestone                                  | State                                                                                    | Next gate                                                    |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| M0 contract/baseline                       | In progress: ADR, phase traces/storage inventory and real Qwen CPU lifecycle probe       | Broader pipeline timing                                      |
+| M1 one-model strict backend                | Reference plus audited NVRTC kernels; Qwen 0.5B tokens agree on four GPUs (sm_120/sm_86) | Native Windows, batching/throughput, lifecycle gates         |
+| M2 delivery/scorer/audit/watchdog/recovery | Not started                                                                              | Reproduce each behavior with fault/concurrency tests         |
+| M3 recovery I/O and long-run overhead      | Not started                                                                              | Bounded upload/retry and consistency tests                   |
+| M4 product/lifecycle/packaging             | Not started                                                                              | SDK/lab capability and native runtime acceptance             |
+| M5 system acceptance                       | Not started                                                                              | End-to-end, faults, memory and throughput receipts           |
+| M6 quantized base + LoRA                   | Not started                                                                              | Same strict contract without a dequantized full-model shadow |
 
 Execution permissions were updated after the initial sandbox failures. The local RTX 5070 Ti is accessible and key
 SSH works to `thao_nguyen@100.92.20.58` and `quang@100.99.227.8`. Both remote hosts expose RTX 3060 GPUs through WSL2.
