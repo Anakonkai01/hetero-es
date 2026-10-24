@@ -7,14 +7,16 @@ No lab deployment or device approval changes are included.
 The owner resumed Codex on 2026-10-24 from clean `ecc2d19`, preserving the full approved plan and authorizing
 GPU/SSH experiments including SGLang. No push, merge, deployment, device-state change or learning run.
 The [Claude handoff](handoff-claude-human-review-2026-10-24.md) remains the historical starting point.
-Owner closed the Codex session on 2026-10-25 to conserve usage. Do not resume automatically;
-continue from the [new handoff](handoff-codex-human-review-2026-10-25.md) when asked.
+Owner closed the earlier Codex session on 2026-10-25, then explicitly resumed from clean `2776e88` in an xhigh
+session. The new instruction prioritizes difficult core work here and reserves straightforward product follow-ups
+for a later, lower-effort session. See the [effort split](HUMAN-REVIEW-EFFORT-SPLIT.md); M0–M6 scope is unchanged.
+The [earlier handoff](handoff-codex-human-review-2026-10-25.md) remains the record of the previous stop.
 
 | Milestone                                  | State                                                                                    | Next gate                                                    |
 | ------------------------------------------ | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
 | M0 contract/baseline                       | In progress: ADR, phase traces/storage inventory and real Qwen CPU lifecycle probe       | Broader pipeline timing                                      |
 | M1 one-model strict backend                | Reference plus audited NVRTC kernels; Qwen 0.5B tokens agree on four GPUs (sm_120/sm_86) | Native Windows, batching/throughput, lifecycle gates         |
-| M2 delivery/scorer/audit/watchdog/recovery | In progress: scorer/delivery/local poison; bounded usage; frozen audit rate through SDK/API/UI | Detailed audit states, strict stop gate, watchdog and D10 recovery |
+| M2 delivery/scorer/audit/watchdog/recovery | In progress: delivery/scorer/usage; audit rate; canonical outcome accounting, durable drain closure and shared run guard | Product state projection/UI; strict activation/storage/replacement gates; watchdog and D10 |
 | M3 recovery I/O and long-run overhead      | Not started                                                                              | Bounded upload/retry and consistency tests                   |
 | M4 product/lifecycle/packaging             | Not started                                                                              | SDK/lab capability and native runtime acceptance             |
 | M5 system acceptance                       | Not started                                                                              | End-to-end, faults, memory and throughput receipts           |
@@ -76,3 +78,18 @@ carried through SDK, CLI, API, templates, managed runner and UI. Rate-zero forwa
 boundaries have mutation coverage; backend reporting uses the frozen rate. Targeted runtime 58/backend 66 tests,
 mutation groups 8/8, 4/4 and 2/2, TypeScript/i18n/template units and the experiment-tools browser contract passed.
 The full suites were not rerun after this slice. See [audit-control evidence](evidence/2026-10-25-audit-controls/README.md).
+
+Xhigh continuation from `2776e88`: runtime audit outcomes distinguish pending, matched, mismatched, timed-out and
+skipped, with explicit disabled coverage and unchanged `audit_counts()` compatibility. Drain closure survives local
+restart; late canonical results supersede incomplete dispositions. A bounded shared lease registry authenticates
+older audit deliveries through the new generation endpoint, and a shared run guard serializes faults with numerical
+update admission. Audit restore faults survive restart, including retry after a failed fault write. An internal
+strict first-mismatch primitive retains both text receipts and stops future admissions, but is **not enabled for the
+current recipe**; backend/identity and storage/replacement acceptance remain M4/M5 gates.
+See the [core contract and limits](../runtime/docs/audit-state-v1.md) and
+[new receipts](evidence/2026-10-25-audit-safety/README.md). Supervisor/backend/UI projection is deliberately reserved
+for the next medium-effort slice. Watchdog, D10, M3 and all remaining heavy milestones are still open.
+Code/evidence commit: `1eaaecc`. Final check-all **ALL PASS**: runtime CPU 2,900 passed/186 skipped, backend
+452 passed/one dependency warning; final-source mutations 10/10 and 17/17. Fresh Linux source-copy packages and
+packaged guard import passed. The [new handoff](handoff-codex-xhigh-human-review-2026-10-25.md) gives concrete medium/low
+tasks and lists the remaining heavy gates; this does not mark M2 or the overall plan complete.

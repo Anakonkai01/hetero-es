@@ -6,21 +6,27 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
 
 ## Tóm tắt cho chủ dự án (2026-10-25)
 
-- Chủ dự án yêu cầu chốt phiên để tiết kiệm usage. **Dừng tự chạy tại đây**, đợi yêu cầu tiếp tục.
-  Điểm dừng và thứ tự việc còn lại: [bàn giao Codex](handoff-codex-human-review-2026-10-25.md).
+- Chủ dự án đã yêu cầu tiếp tục từ repo sạch `2776e88`, ưu tiên việc nặng trong phiên xhigh; chia phần nhẹ hơn cho
+  phiên sau dùng effort thấp hơn. Giữ nguyên toàn bộ M0–M6. [Phân việc theo effort](HUMAN-REVIEW-EFFORT-SPLIT.md).
+  Lát cắt xhigh đã chốt ở `1eaaecc`; [bàn giao phiên medium](handoff-codex-xhigh-human-review-2026-10-25.md).
+- Đã làm lõi trạng thái audit, lưu lý do timeout/thiếu worker, nhận kết quả audit cũ sau đổi thế hệ và guard dùng chung
+  toàn run để chặn race trước ghi update. Primitive strict giữ hai receipt nhưng **chưa bật cho recipe hiện hành**.
+  Projection/UI và nghiệm thu storage/replacement còn mở; [contract](../runtime/docs/audit-state-v1.md).
+- Toàn bộ check-all mới **ALL PASS**: runtime CPU 2.900 pass/186 skip, backend 452 pass; mutation 27/27;
+  browser/Electron và kiểm tra gói Linux từ source mới đạt. Chưa nghiệm thu GPU/native Windows cho lát cắt này.
 - Đã thêm cấu hình audit 0–100% xuyên SDK/API/UI, mặc định 5%, lưu cố định theo run; template giữ đúng 0%.
-  Đã qua test mục tiêu, mutation và trình duyệt; chưa chạy lại toàn bộ suite sau phần này.
-  [Bằng chứng](evidence/2026-10-25-audit-controls/README.md).
+  [Bằng chứng của lát cắt trước](evidence/2026-10-25-audit-controls/README.md),
+  [kiểm tra tiếp theo](evidence/2026-10-25-audit-safety/README.md).
 - Codex đã tiếp tục từ repo sạch `ecc2d19`, giữ toàn bộ kế hoạch. Đã mutation-check scorer, sửa race trước commit;
   bổ sung heartbeat xuyên delivery, outbox bền vững, chặn worker local sau lỗi restore và queue usage có giới hạn.
-  Runtime CPU: 2.848 pass, 186 skip; backend: 439 pass. M2 còn đang làm;
+  Kết quả ở checkpoint trước: runtime CPU 2.848 pass/186 skip; backend 439 pass. M2 còn đang làm;
   xem [tiến độ](HUMAN-REVIEW-IMPLEMENTATION.md) và [bằng chứng delivery](evidence/2026-10-24-human-review-resume/delivery-summary.md).
 - Đã thử SGLang 0.5.22: bản thường lệch giữa 5070 Ti/3060 ở 14/208 prompt chạy từng chuỗi, 34/208 chạy batch.
   Deterministic gốc vượt shared memory; bản giảm pipeline stage vẫn lệch 2/32 prompt giữa 5070 Ti/3060 Quang,
   dù batch/từng chuỗi khớp trong mỗi máy. [Receipt, patch và giới hạn](evidence/2026-10-24-sglang-probe/README.md).
 - Kernel strict của Claude đã khớp trên bốn GPU trong matrix hữu hạn; chưa thay backend chính, chưa nghiệm thu native
   Windows, batching hay managed lifecycle. Đọc [bàn giao Claude](handoff-claude-human-review-2026-10-24.md) cho nền tảng.
-- Chủ dự án đã cấp lại quyền GPU và SSH đầy đủ. Không push/merge, deploy lab, đổi trạng thái thiết bị hay chạy learning run.
+- Phiên xhigh này chỉ chạy CPU và fixture; không push/merge, deploy lab, đổi trạng thái thiết bị hay chạy learning run.
 - Bằng chứng lịch sử có replay/trọng số khớp nhiều máy và soak 600 thế hệ; không suy thành bảo đảm inference mọi input.
   Oomd/recovery I/O, retention và lợi ích GPU yếu vẫn cần sửa theo kế hoạch.
 - Dự án chỉ claim **hệ thống**, không claim ES làm mô hình giỏi hơn.
@@ -40,11 +46,11 @@ was performed. The disk entry below is historical (2026-10-23).
 
 ## Open work, in order
 
-1. **Approved human-review plan, paused at the owner's request.** Preserve the full M0–M6 scope. When resumed,
-   finish M2 (audit
-   controls/statuses, progress watchdog/hard caps and D10 recovery), then M3 recovery I/O. Next numerical work:
-   cached RoPE, launch cost and multi-sequence batching with unchanged strict arithmetic and cross-GPU token checks;
-   then M4 integration/packaging, M5 and M6. The SGLang probe does not replace these gates.
+1. **Approved human-review plan, split by effort at the owner's request.** Preserve full M0–M6 scope. Next medium
+   slice: supervisor/backend projection and audit UI using the committed core contract. Heavy work remains: M2
+   progress watchdog/hard caps and D10 recovery, M3 recovery I/O/dependencies, strict cached RoPE/launch cost/batching,
+   then M4 integration/native packaging, M5 and M6. Strict activation also needs storage-failure and replacement
+   recovery gates. See [the effort split](HUMAN-REVIEW-EFFORT-SPLIT.md); SGLang does not replace these gates.
 2. **oomd / recovery-point upload loop.** Evidence and five proposed fixes:
    [evidence/2026-10-23-oomd-review/](evidence/2026-10-23-oomd-review/README.md). Policy:
    [operations-decisions-2026-10-23.md](operations-decisions-2026-10-23.md) (keep oomd on; supervisor recovers a run
