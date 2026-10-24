@@ -10,7 +10,7 @@ read the [handoff](handoff-claude-human-review-2026-10-24.md). Implementation he
 | Milestone                                  | State                                                                                | Next gate                                                    |
 | ------------------------------------------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
 | M0 contract/baseline                       | In progress: ADR, phase traces/storage inventory and real Qwen CPU lifecycle probe   | Broader pipeline timing                                      |
-| M1 one-model strict backend                | Experimental FP16-weight reference implemented; finite CPU/5070 Ti/3060 probes agree | Faster checked kernels, broader graph/OS and lifecycle gates |
+| M1 one-model strict backend                | Reference plus audited NVRTC kernels; Qwen 0.5B tokens agree on four GPUs (sm_120/sm_86) | Native Windows, batching/throughput, lifecycle gates          |
 | M2 delivery/scorer/audit/watchdog/recovery | Not started                                                                          | Reproduce each behavior with fault/concurrency tests         |
 | M3 recovery I/O and long-run overhead      | Not started                                                                          | Bounded upload/retry and consistency tests                   |
 | M4 product/lifecycle/packaging             | Not started                                                                          | SDK/lab capability and native runtime acceptance             |
@@ -39,3 +39,11 @@ checks do not qualify the backend for managed use. The eager full-model forward 
 kernel optimization, native Windows, recipe/capability integration and cross-process weight ownership remain open.
 See [reference receipts and scope](evidence/2026-10-24-human-review/reference-summary.md), including the full CPU checks
 and the targeted retry of a stale live-view browser selector.
+
+Strict CUDA kernels (2026-10-24, Claude): `eval/strict_cuda.py` and `eval/qwen2_strict_cuda.py` reproduce the
+reference bit for bit, per kernel and per graph, and are audited at the PTX/SASS level. On the pinned Qwen2.5-0.5B, a
+parent and 8 antithetic candidates × 8 prompts (4,387 tokens) agree across the local 5070 Ti, Nhựt's 5070 Ti and
+both 3060s (WSL2). Speed: about 60 tokens/s per sequence on a 5070 Ti and 23–26 on a 3060; the eager reference
+took 46–149 s per token. Peak allocation is about 1.08 GB, close to one FP16 weight set. See
+[strict CUDA receipts](evidence/2026-10-24-strict-cuda/README.md). Not yet: native Windows, batched sequences,
+managed lifecycle/recipe integration and packaging.

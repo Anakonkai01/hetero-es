@@ -74,3 +74,16 @@ ties, repetition penalty and error paths. Scratch mutation checks test whether t
 Cross-device receipts supplement those arguments and do not establish universal hardware or native Windows support.
 The source is experimental until graph/operator coverage, native packaging, lifecycle ownership, regeneration and
 throughput gates pass. No full FP32 weight shadow may be introduced to make a performance gate pass.
+
+## CUDA kernel implementation (experimental)
+
+`eval/strict_cuda.py` compiles NVRTC kernels that execute this arithmetic sequence: linear projections reading the
+FP16 weights in place, RMSNorm, residual add, the SiLU gate, RoPE and causal GQA attention with the specified
+softmax. `eval/qwen2_strict_cuda.py` (`qwen2_pairwise_f32_cuda_v1_experimental`) runs the same graph, cache format
+and generation rules on them. Primitive operations are inline PTX `add.rn.f32`/`mul.rn.f32` with integer subnormal
+flushing. Trees are formed by aligned blocks padded with -0.0, a binary-counter stack, or a barrier-separated
+in-place stride tree. Each form equals the adjacent-pair tree above, because x + (-0) == x for finite x. Every
+build's PTX and (where `nvdisasm` exists) SASS is audited for contraction, flush modes and vendor arithmetic, and
+its NVRTC version, options, architecture and binary hashes are recorded. Bit equality with the eager operations is
+tested per kernel and per graph. Receipts and limits: `docs/evidence/2026-10-24-strict-cuda/`. The kernels
+remain experimental: no native Windows, lifecycle or packaging gate has passed.

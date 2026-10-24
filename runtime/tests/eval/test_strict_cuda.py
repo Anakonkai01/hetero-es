@@ -369,3 +369,204 @@ def test_cuda_linear_missing_warps_are_negative_zero(kernels, width):
     actual = kernels.linear(x, w)
     assert bits(actual).tolist() == [[f32_bits(-0.0)] * 2]
     assert torch.equal(bits(actual), bits(_reference_both(x, w, None)))
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Fused-operation kernels: RMSNorm, residual add, SiLU gate, RoPE and attention/softmax.
+
+
+@pytest.mark.parametrize("count", [1, 2, 3, 5, 6, 7, 64, 100, 255, 256, 257, 4096, 4097])
+def test_running_tree_with_final_fold_equals_reference_tree(count):
+    # Kernels reduce runtime-length rows with a binary-counter stack, then fold pending nodes from the lowest
+    # set bit of the count upward. That is the padded tree without padding work.
+    generator = torch.Generator().manual_seed(count)
+    values = torch.randn(3, count, generator=generator) * torch.logspace(-4, 4, count)
+    values[1] = -0.0
+    assert torch.equal(bits(strict_cuda.emulate_running_sum(values)), bits(ops.pairwise_sum(values)))
+
+
+def test_scalar_constants_are_the_reference_float32_roundings():
+    constants = strict_cuda.reference_constants()
+    assert constants["LOG2E"] == f32_bits(1.4426950408889634)
+    assert constants["EXP_C0"] == f32_bits(1.0 / 40320.0) and constants["EXP_C7"] == f32_bits(1.0)
+    assert constants["LN2_LO"] == f32_bits(0.000001428606765330187)
+    assert constants["DOMAIN_LOW"] == f32_bits(1e-30) and constants["DOMAIN_HIGH"] == f32_bits(1e30)
+
+
+def _cuda_ops_cases():
+    generator = torch.Generator().manual_seed(9)
+    wide = torch.randn(5, 896, generator=generator) * 4
+    wide[1] = 0.0
+    wide[2, ::3] = -0.0
+    wide[3] *= 1e-20
+    edge = torch.tensor([0.0, -0.0, 1e-38, -1e-38, 80.0, -80.0, -81.0, -200.0, 1e-7, -1e-7, 30.0, -30.0, 88.0])
+    return wide, edge
+
+
+@gpu
+def test_cuda_rms_norm_matches_reference_bits(kernels):
+    wide, _ = _cuda_ops_cases()
+    weight = (torch.randn(896) * 0.3).half()
+    for rows, w in ((wide, weight), (wide[:, :16], weight[:16]), (wide[:, :5], weight[:5])):
+        flag = kernels.new_error_flag()
+        actual = kernels.rms_norm(rows.cuda(), w.cuda(), 1e-6, error_flag=flag)
+        kernels.raise_if_error(flag)
+        expected = ops.rms_norm(rows.cuda(), w.cuda(), 1e-6)
+        assert torch.equal(bits(actual), bits(expected))
+        assert torch.equal(bits(expected.cpu()), bits(ops.rms_norm(rows, w, 1e-6)))
+
+
+@gpu
+def test_cuda_add_and_silu_gate_match_reference_bits(kernels):
+    wide, edge = _cuda_ops_cases()
+    gate = torch.cat((wide.flatten(), edge[edge.abs() <= 80], torch.linspace(-90, 79, 1001)))
+    up = torch.randn(gate.shape, generator=torch.Generator().manual_seed(3)) * 2
+    flag = kernels.new_error_flag()
+    actual = kernels.silu_mul(gate.cuda(), up.cuda(), error_flag=flag)
+    summed = kernels.add(gate.cuda(), up.cuda(), error_flag=flag)
+    kernels.raise_if_error(flag)
+    expected = ops.mul(ops.silu(gate.cuda()), up.cuda())
+    assert torch.equal(bits(actual), bits(expected))
+    assert torch.equal(bits(expected.cpu()), bits(ops.mul(ops.silu(gate), up)))
+    assert torch.equal(bits(summed), bits(ops.add(gate.cuda(), up.cuda())))
+
+
+@gpu
+def test_cuda_rope_matches_reference_rotation_and_layout(kernels):
+    generator = torch.Generator().manual_seed(5)
+    length, heads, dim = 7, 3, 8
+    x = torch.randn(length, heads * dim, generator=generator).cuda()
+    angles = ops.mul(torch.arange(3, 3 + length, dtype=torch.float32)[:, None], torch.rand(dim // 2) * 0.9 + 0.01)
+    sine, cosine = ops.sin_cos(angles)
+    sine, cosine = (torch.cat((p, p), dim=-1).cuda() for p in (sine, cosine))
+    flag = kernels.new_error_flag()
+    actual = kernels.rope(x, cosine, sine, heads, error_flag=flag)
+    kernels.raise_if_error(flag)
+    value = x.reshape(1, length, heads, dim).transpose(1, 2)
+    rotated = torch.cat((-value[..., dim // 2 :], value[..., : dim // 2]), dim=-1)
+    expected = ops.add(ops.mul(value, cosine[None, None]), ops.mul(rotated, sine[None, None]))[0]
+    assert actual.shape == (heads, length, dim) and actual.is_contiguous()
+    assert torch.equal(bits(actual), bits(expected))
+
+
+def _reference_attention(q, k, v, past, repeats, scale):
+    # Same sequence as Qwen2Reference._attention (written out here as an independent oracle).
+    key = k.repeat_interleave(repeats, dim=0)
+    value = v.repeat_interleave(repeats, dim=0)
+    scores = ops.mul(ops.pairwise_sum(ops.mul(q[:, :, None, :], key[:, None, :, :])), scale)
+    positions = torch.arange(past, past + q.shape[1], device=q.device)
+    causal = torch.arange(key.shape[1], device=q.device)[None, None, :] <= positions[None, :, None]
+    probabilities = ops.softmax(scores, causal)
+    out = ops.pairwise_sum(ops.mul(probabilities[:, :, None, :], value.transpose(-1, -2)[:, None, :, :]))
+    return out.transpose(0, 1).reshape(q.shape[1], -1)
+
+
+@gpu
+@pytest.mark.parametrize(
+    "length,past,dim", [(1, 0, 64), (1, 37, 64), (5, 0, 64), (3, 129, 64), (6, 2, 4), (1, 255, 64)]
+)
+def test_cuda_attention_matches_reference_bits(kernels, length, past, dim):
+    generator = torch.Generator().manual_seed(length * 1000 + past)
+    heads, kv_heads = 14 if dim == 64 else 4, 2
+    q = (torch.randn(heads, length, dim, generator=generator) * 2).cuda()
+    k = (torch.randn(kv_heads, past + length, dim, generator=generator) * 2).cuda()
+    v = torch.randn(kv_heads, past + length, dim, generator=generator).cuda()
+    scale = 1 / math.sqrt(dim)
+    flag = kernels.new_error_flag()
+    actual = kernels.attention(q, k, v, past, heads // kv_heads, scale, error_flag=flag)
+    kernels.raise_if_error(flag)
+    expected = _reference_attention(q, k, v, past, heads // kv_heads, scale)
+    assert actual.shape == (length, heads * dim)
+    assert torch.equal(bits(actual), bits(expected))
+    assert torch.equal(
+        bits(expected.cpu()), bits(_reference_attention(q.cpu(), k.cpu(), v.cpu(), past, heads // 2, scale))
+    )
+
+
+@gpu
+def test_cuda_attention_extreme_scores_and_masked_signed_zero_products(kernels):
+    q = torch.tensor([[[30.0, -30.0, 0.5, 1.0]]]).repeat(2, 3, 1).cuda()
+    k = torch.tensor([[[30.0, -30.0, 0.0, 0.0], [-30.0, 30.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [1.0, 1, 1, 1]]]).cuda()
+    v = torch.tensor([[[-1.0, 2.0, -0.0, 0.0], [3.0, -4.0, -5.0, 0.0], [-0.0, -0.0, -0.0, -0.0], [-7.0, 8, -9, 1]]])
+    actual = kernels.attention(q, k, v.cuda(), 1, 2, 0.5)
+    assert torch.equal(bits(actual), bits(_reference_attention(q, k, v.cuda(), 1, 2, 0.5)))
+
+
+@gpu
+@pytest.mark.parametrize("operation", ["rms_overflow", "silu_overflow", "add_overflow", "attention_inf", "rms_nan"])
+def test_cuda_fused_operations_flag_nonfinite_and_domain_failures(kernels, operation):
+    flag = kernels.new_error_flag()
+    big = torch.full((2, 16), 3e38).cuda()
+    if operation == "rms_overflow":
+        kernels.rms_norm(big, torch.ones(16, dtype=torch.float16).cuda(), 1e-6, error_flag=flag)
+    elif operation == "rms_nan":
+        kernels.rms_norm(big * float("nan"), torch.ones(16, dtype=torch.float16).cuda(), 1e-6, error_flag=flag)
+    elif operation == "silu_overflow":
+        kernels.silu_mul(big.flatten(), big.flatten(), error_flag=flag)
+    elif operation == "add_overflow":
+        kernels.add(big.flatten(), big.flatten(), error_flag=flag)
+    else:
+        q = torch.full((2, 1, 4), 3e30).cuda()
+        k = torch.full((1, 3, 4), 3e30).cuda()  # masked-in and masked-out scores overflow alike
+        kernels.attention(q, k, torch.ones(1, 3, 4).cuda(), 2, 2, 0.5, error_flag=flag)
+    with pytest.raises(ReferenceArithmeticError):
+        kernels.raise_if_error(flag)
+
+
+@gpu
+def test_cuda_fused_operations_validate_shapes_before_launch(kernels):
+    with pytest.raises(ReferenceArithmeticError):
+        kernels.rms_norm(torch.ones(2, 16).cuda(), torch.ones(15, dtype=torch.float16).cuda(), 1e-6)
+    with pytest.raises(ReferenceArithmeticError):
+        kernels.add(torch.ones(4).cuda(), torch.ones(5).cuda())
+    with pytest.raises(ReferenceArithmeticError):
+        kernels.attention(torch.ones(3, 1, 4).cuda(), torch.ones(2, 1, 4).cuda(), torch.ones(2, 1, 4).cuda(), 0, 2, 0.5)
+    with pytest.raises(ReferenceArithmeticError):
+        too_long = strict_cuda.MAX_ATTENTION_KEYS + 1
+        kernels.attention(
+            torch.ones(2, 1, 4).cuda(),
+            torch.ones(1, too_long, 4).cuda(),
+            torch.ones(1, too_long, 4).cuda(),
+            too_long - 1,
+            2,
+            0.5,
+        )
+
+
+@gpu
+def test_cuda_rms_norm_out_of_domain_mean_square_fails(kernels):
+    flag = kernels.new_error_flag()
+    kernels.rms_norm(
+        torch.full((1, 16), 1e16).cuda(), torch.ones(16, dtype=torch.float16).cuda(), 1e-6, error_flag=flag
+    )
+    with pytest.raises(ReferenceArithmeticError, match="domain"):
+        kernels.raise_if_error(flag)
+    with pytest.raises(ReferenceArithmeticError):
+        ops.rms_norm(torch.full((1, 16), 1e16), torch.ones(16, dtype=torch.float16), 1e-6)
+
+
+@gpu
+def test_cuda_fused_operations_flush_subnormal_inputs(kernels):
+    tiny = torch.tensor([1 << 10], dtype=torch.int32).view(torch.float32).item()  # a subnormal FP32 input
+    gate, up = torch.tensor([1e30, 2.0, -3.0]), torch.tensor([tiny, tiny, -tiny])
+    assert torch.equal(bits(kernels.silu_mul(gate.cuda(), up.cuda())), bits(ops.mul(ops.silu(gate), up).cuda()))
+    rows = torch.full((2, 16), tiny)
+    weight = torch.ones(16, dtype=torch.float16)
+    actual = kernels.rms_norm(rows.cuda(), weight.cuda(), 1e-6)
+    assert torch.equal(bits(actual), bits(ops.rms_norm(rows, weight, 1e-6).cuda()))
+    q = torch.full((2, 1, 4), tiny)
+    k = torch.full((1, 2, 4), 1e30)
+    v = torch.tensor([[[1.0, 2.0, 3.0, 4.0], [tiny, tiny, -tiny, 5.0]]])
+    expected = _reference_attention(q, k, v, 1, 2, 0.5)
+    assert torch.equal(bits(kernels.attention(q.cuda(), k.cuda(), v.cuda(), 1, 2, 0.5)), bits(expected.cuda()))
+
+
+@gpu
+@pytest.mark.parametrize("dim", [8, 6])
+def test_cuda_attention_with_inexact_scale(kernels, dim):
+    generator = torch.Generator().manual_seed(dim)
+    q = torch.randn(4, 3, dim, generator=generator).cuda()
+    k = torch.randn(2, 5, dim, generator=generator).cuda()
+    v = torch.randn(2, 5, dim, generator=generator).cuda()
+    scale = 1 / math.sqrt(dim)
+    assert torch.equal(bits(kernels.attention(q, k, v, 2, 2, scale)), bits(_reference_attention(q, k, v, 2, 2, scale)))

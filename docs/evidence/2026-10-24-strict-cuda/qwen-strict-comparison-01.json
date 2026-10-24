@@ -1,0 +1,172 @@
+{
+  "formatVersion": 1,
+  "hardwareQualified": false,
+  "comparisonEqual": false,
+  "baseline": "qwen-strict-nhan-01.json",
+  "mismatches": {
+    "qwen-strict-nhut-01.json": [
+      "/candidates[0]/prompts[0]/eagerPrefillLogitsEqual"
+    ],
+    "qwen-strict-thao-01.json": [
+      "/candidates[0]/prompts[0]/eagerPrefillLogitsEqual"
+    ],
+    "qwen-strict-quang-01.json": [
+      "/candidates[0]/prompts[0]/eagerPrefillLogitsEqual"
+    ]
+  },
+  "machines": {
+    "qwen-strict-nhan-01.json": {
+      "gpu": "NVIDIA GeForce RTX 5070 Ti",
+      "computeCapability": [
+        12,
+        0
+      ],
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "torch": "2.13.0+cu132",
+      "arch": "sm_120",
+      "nvrtcVersion": [
+        13,
+        2
+      ],
+      "cubinSha256": {
+        "linear-4864-nobias": "134405733f8e35e2c96507fef712b89a490df555217a6f11d89f9a9a80cdbb6f",
+        "linear-896-bias": "1a7fd82febfc62952fee043a83051888a08b0ccca39b3066967489673088129a",
+        "linear-896-nobias": "bb565123999714bf0314625bb3c93b90433e475550811a0b8380d99caa230237",
+        "ops": "be13d1a481b1fc5865244bf55e72d56259b00e98db910acb6880b86d2e17b525"
+      },
+      "tokensPerSecondByCandidate": [
+        63.44,
+        64.05,
+        64.16,
+        63.71,
+        63.65,
+        63.78,
+        63.79,
+        60.57,
+        58.07
+      ],
+      "perturbSecondsMedian": 0.08426328800123883,
+      "restoreSecondsMedian": 0.13792405399726704,
+      "cudaPeakAllocatedBytes": 1077519872,
+      "cudaPeakReservedBytes": 1153433600,
+      "wallSeconds": 131.78356492699822
+    },
+    "qwen-strict-nhut-01.json": {
+      "gpu": "NVIDIA GeForce RTX 5070 Ti",
+      "computeCapability": [
+        12,
+        0
+      ],
+      "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.39",
+      "torch": "2.13.0+cu132",
+      "arch": "sm_120",
+      "nvrtcVersion": [
+        13,
+        2
+      ],
+      "cubinSha256": {
+        "linear-4864-nobias": "134405733f8e35e2c96507fef712b89a490df555217a6f11d89f9a9a80cdbb6f",
+        "linear-896-bias": "1a7fd82febfc62952fee043a83051888a08b0ccca39b3066967489673088129a",
+        "linear-896-nobias": "bb565123999714bf0314625bb3c93b90433e475550811a0b8380d99caa230237",
+        "ops": "be13d1a481b1fc5865244bf55e72d56259b00e98db910acb6880b86d2e17b525"
+      },
+      "tokensPerSecondByCandidate": [
+        61.94,
+        62.4,
+        62.4,
+        62.14,
+        61.55,
+        61.96,
+        61.8,
+        61.5,
+        61.49
+      ],
+      "perturbSecondsMedian": 0.09045203399955426,
+      "restoreSecondsMedian": 0.14165169800025978,
+      "cudaPeakAllocatedBytes": 1076912128,
+      "cudaPeakReservedBytes": 1153433600,
+      "wallSeconds": 85.37141931099995
+    },
+    "qwen-strict-thao-01.json": {
+      "gpu": "NVIDIA GeForce RTX 3060",
+      "computeCapability": [
+        8,
+        6
+      ],
+      "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+      "torch": "2.13.0+cu132",
+      "arch": "sm_86",
+      "nvrtcVersion": [
+        13,
+        2
+      ],
+      "cubinSha256": {
+        "linear-4864-nobias": "d6e43489e1cdcf07c84a1c62f5a57151d3a8f0dcae6872b30ae717f112ff20db",
+        "linear-896-bias": "c1ce036f5e3d15713f4817bf2fbfc2781614bac6ab868d9fe162acb75b16d561",
+        "linear-896-nobias": "ed46a1f22c91817ef7772b051d348db1401314e4ffac3cb4df4540c6f2dcccc7",
+        "ops": "2c3f6c94569424c626f3d24f0bbe730eb161516e88cfb76dc4c24b1ce94525a5"
+      },
+      "tokensPerSecondByCandidate": [
+        25.78,
+        25.82,
+        25.81,
+        25.5,
+        25.41,
+        25.67,
+        25.73,
+        25.44,
+        22.97
+      ],
+      "perturbSecondsMedian": 0.3145223999999871,
+      "restoreSecondsMedian": 0.19616022199988947,
+      "cudaPeakAllocatedBytes": 1076912128,
+      "cudaPeakReservedBytes": 1153433600,
+      "wallSeconds": 204.45423917100015
+    },
+    "qwen-strict-quang-01.json": {
+      "gpu": "NVIDIA GeForce RTX 3060",
+      "computeCapability": [
+        8,
+        6
+      ],
+      "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+      "torch": "2.13.0+cu132",
+      "arch": "sm_86",
+      "nvrtcVersion": [
+        13,
+        2
+      ],
+      "cubinSha256": {
+        "linear-4864-nobias": "d6e43489e1cdcf07c84a1c62f5a57151d3a8f0dcae6872b30ae717f112ff20db",
+        "linear-896-bias": "c1ce036f5e3d15713f4817bf2fbfc2781614bac6ab868d9fe162acb75b16d561",
+        "linear-896-nobias": "ed46a1f22c91817ef7772b051d348db1401314e4ffac3cb4df4540c6f2dcccc7",
+        "ops": "2c3f6c94569424c626f3d24f0bbe730eb161516e88cfb76dc4c24b1ce94525a5"
+      },
+      "tokensPerSecondByCandidate": [
+        24.26,
+        23.74,
+        24.29,
+        24.37,
+        23.92,
+        24.27,
+        21.63,
+        22.3,
+        23.22
+      ],
+      "perturbSecondsMedian": 0.31237164400045003,
+      "restoreSecondsMedian": 0.21209907599950384,
+      "cudaPeakAllocatedBytes": 1076912128,
+      "cudaPeakReservedBytes": 1153433600,
+      "wallSeconds": 218.05598729199937
+    }
+  },
+  "candidates": 9,
+  "promptCasesPerMachine": 72,
+  "generatedTokensPerMachine": 4387,
+  "inputs": {
+    "qwen-strict-nhan-01.json": "950b29b66c0bafbb5ee0f240419cc27d1b57126f009e063eb0f1374a378afe87",
+    "qwen-strict-nhut-01.json": "0de5cd3cb12d8b4f6ace9382ea96dcd473660416a4f50d1a1b4b414af8e0af2f",
+    "qwen-strict-thao-01.json": "f3f18cd7cc55b49d6a1aa0658fe9544c8481486b37076e137842add7819c14b2",
+    "qwen-strict-quang-01.json": "0c654b7feea7354209d98e035a2576fe09bd1cacb92794551028816d54bcf53b"
+  }
+}
