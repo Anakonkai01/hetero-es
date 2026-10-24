@@ -1,0 +1,48 @@
+{
+  "status": "pass-after-correction",
+  "sourceBaseCommit": "82368bf",
+  "sourceFingerprintReceipt": "session-final-observations-01.json",
+  "fullRuntime": {
+    "passed": 2848,
+    "skipped": 186,
+    "receipt": "runtime-tests-04.log"
+  },
+  "backend": {
+    "passed": 439,
+    "warnings": 1,
+    "receipt": "backend-tests-02.log"
+  },
+  "mutationGroups": {
+    "scoring": {
+      "killed": 11,
+      "total": 11,
+      "receipt": "scorer-mutation-03.log"
+    },
+    "delivery": {
+      "killed": 16,
+      "total": 16,
+      "receipt": "delivery-mutation-02.log"
+    },
+    "usageQueue": {
+      "killed": 11,
+      "total": 11,
+      "receipt": "usage-queue-mutation-01.log"
+    },
+    "usageProjection": {
+      "killed": 3,
+      "total": 3,
+      "receipt": "usage-projection-mutation-02.log"
+    }
+  },
+  "currentChecks": [
+    "python-lint-03.log",
+    "python-format-03.log",
+    "source-packages-03.log",
+    "packaging-02.log"
+  ],
+  "earlierFullMatrix": {
+    "receipt": "checks-01",
+    "preservedFailure": "runtime cancellation constructor regression; fixed and full runtime rechecked"
+  },
+  "scope": "CPU/source-copy Linux package acceptance only; full approved M0\u2013M6 plan remains incomplete"
+}

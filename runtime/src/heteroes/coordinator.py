@@ -124,6 +124,7 @@ class Coordinator:
         coefficient_function=None,
         seed_namespace: str | None = None,
         usage_path=None,
+        usage_flush_seconds=1.0,
     ):
         # Recipe v3 (ADR-008): `antithetic` gives pairs (seed, +1), (seed, -1); `coefficient_rule` makes version-2 records;
         # `score(generation, descriptor, completions) -> reward` scores the texts the workers submit, on this process
@@ -183,10 +184,20 @@ class Coordinator:
         self._monotonic = monotonic
         self._sleep = sleep
         self.usage = None
+        self._usage_sink = None
+        if (
+            type(usage_flush_seconds) not in (int, float)
+            or not math.isfinite(usage_flush_seconds)
+            or usage_flush_seconds < 0
+        ):
+            raise ValueError("usage_flush_seconds must be finite and nonnegative")
+        self._usage_flush_seconds = usage_flush_seconds
         if usage_path is not None:
             from heteroes.v3.usage import UsageStore
+            from heteroes.v3.usage_queue import BoundedUsageSink
 
             self.usage = UsageStore(usage_path)
+            self._usage_sink = BoundedUsageSink(self.usage.record)
         self._cancel_requested = cancel_requested
         self._pause_requested = pause_requested
         self._generation_completed = generation_completed
@@ -213,6 +224,8 @@ class Coordinator:
 
     def stop(self) -> None:
         self.server.stop()
+        if self._usage_sink is not None:
+            self._usage_sink.close(self._usage_flush_seconds)
 
     def set_members(self, members, device_tokens=None) -> None:
         """At a generation boundary (elastic membership, ADR-009): who may audit, and which per-device credentials the
@@ -469,7 +482,7 @@ class Coordinator:
             scorer=None
             if self._score is None
             else (lambda descriptor, texts: self._score(generation, descriptor, texts)),
-            usage_sink=self.usage.record if self.usage is not None else None,
+            usage_sink=self._usage_sink,
             allowed_chunks=getattr(self.recipe, "chunks", ()) if len(getattr(self.recipe, "chunks", ())) > 1 else (),
         )
         if self._audit_rate:
@@ -575,6 +588,7 @@ class Coordinator:
             summary["audits"] = {"selected": selected, "completed": completed}
         if self.usage is not None:
             try:
+                self._usage_sink.flush(self._usage_flush_seconds)
                 self.usage.record_update(generation, update_gpu_seconds)
                 with self.ledger._lock:
                     audits = self.ledger._db.execute(
@@ -584,6 +598,8 @@ class Coordinator:
                 summary["usage"] = self.usage.summary(
                     generation, expected_candidates=self.candidates, expected_audits=audits, expected_updates=1
                 )
+                summary["usage"]["delivery"] = self._usage_sink.status()
+                summary["usage"]["partial"] |= summary["usage"]["delivery"]["partial"]
             except Exception:
                 summary["usage"] = {"partial": True, "unavailable": True}
         self.log("generation_done", **summary)

@@ -7,7 +7,8 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
 ## Tóm tắt cho chủ dự án (2026-10-25)
 
 - Codex đã tiếp tục từ repo sạch `ecc2d19`, giữ toàn bộ kế hoạch. Đã mutation-check scorer, sửa race trước commit;
-  bổ sung heartbeat xuyên delivery, outbox bền vững và chặn worker local sau lỗi restore. M2 còn đang làm;
+  bổ sung heartbeat xuyên delivery, outbox bền vững, chặn worker local sau lỗi restore và queue usage có giới hạn.
+  Runtime CPU: 2.848 pass, 186 skip; backend: 439 pass. M2 còn đang làm;
   xem [tiến độ](HUMAN-REVIEW-IMPLEMENTATION.md) và [bằng chứng delivery](evidence/2026-10-24-human-review-resume/delivery-summary.md).
 - Đã thử SGLang 0.5.22: bản thường lệch giữa 5070 Ti/3060 ở 14/208 prompt chạy từng chuỗi, 34/208 chạy batch.
   Deterministic gốc vượt shared memory; bản giảm pipeline stage vẫn lệch 2/32 prompt giữa 5070 Ti/3060 Quang,
@@ -21,7 +22,8 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
 
 ## Live
 
-Deployment/disk entries below were last recorded on 2026-10-23; live lab state was not re-read during this handoff.
+Deployment remains `82c37fc`. Service status re-read on 2026-10-25: all three lab services stopped; no lab operation
+was performed. The disk entry below is historical (2026-10-23).
 
 | What           | State                                                                                                                                                                                                           |
 | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -33,7 +35,7 @@ Deployment/disk entries below were last recorded on 2026-10-23; live lab state w
 
 ## Open work, in order
 
-1. **Approved human-review plan, Codex resumed.** Preserve the full M0–M6 scope. Finish M2 (usage queue, audit
+1. **Approved human-review plan, Codex resumed.** Preserve the full M0–M6 scope. Finish M2 (audit
    controls/statuses, progress watchdog/hard caps and D10 recovery), then M3 recovery I/O. Next numerical work:
    cached RoPE, launch cost and multi-sequence batching with unchanged strict arithmetic and cross-GPU token checks;
    then M4 integration/packaging, M5 and M6. The SGLang probe does not replace these gates.

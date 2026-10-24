@@ -561,6 +561,17 @@ class RunSupervisor(ABC):
         workload = recipe.get("workload", recipe.get("numerical", {}).get("workload", {}))
         contexts = {}
         usage_store, usage_candidates = None, {}
+        delivery_faults = set()
+        for event in result["events"]:
+            usage = event.get("usage")
+            delivery = usage.get("delivery") if isinstance(usage, dict) else None
+            if (
+                event.get("event") == "generation_done"
+                and type(event.get("generation")) is int
+                and isinstance(delivery, dict)
+                and any(type(delivery.get(key)) is int and delivery[key] > 0 for key in ("errors", "dropped"))
+            ):
+                delivery_faults.add(event["generation"])
         if (root / "usage.sqlite").is_file():
             try:
                 from heteroes.v3.usage import UsageStore
@@ -651,6 +662,7 @@ class RunSupervisor(ABC):
                                 expected_audits=audit_count,
                                 expected_updates=int(bool(gen["applied_at"])),
                             )
+                            row["usage"]["partial"] |= number in delivery_faults
                         except Exception:
                             row["usage"] = {"partial": True, "unavailable": True}
                     result["generations"].append(row)
@@ -751,6 +763,7 @@ class RunSupervisor(ABC):
                     expected_audits=result.get("auditSummary", {}).get("completed", 0),
                     expected_updates=sum(g["status"] == "COMPLETED" for g in result["generations"]),
                 )
+                result["usageSummary"]["partial"] |= bool(delivery_faults)
             except Exception:
                 result["usageSummary"] = {"partial": True, "unavailable": True}
         return result

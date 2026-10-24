@@ -72,6 +72,7 @@ def test_optional_usage_reaches_the_sidecar_without_changing_text_identity_or_re
         assert completions_sha256(batch) == completions_sha256(["a", "b"])
         assert client.submit_completions(work, batch) is SubmitOutcome.COMMITTED
         assert client.submit_completions(work, batch) is SubmitOutcome.ALREADY_COMMITTED
+        assert api.flush_usage(3)
         assert ledger.get_completions(descriptor.candidate_id) == (completions_sha256(["a", "b"]), ["a", "b"])
         assert store.summary(0, expected_candidates=1, expected_audits=0)["generatedTokens"] == 5
         bad = {
@@ -81,6 +82,7 @@ def test_optional_usage_reaches_the_sidecar_without_changing_text_identity_or_re
             "usage": {**usage(), "generatedTokens": [True, 2]},
         }
         assert api.handle("submit_result", bad)["error"]["code"] == "bad_request"
+        assert api.close_usage(3)
 
 
 def test_a_usage_sink_failure_cannot_turn_a_committed_reward_into_failure(tmp_path):
@@ -99,7 +101,9 @@ def test_a_usage_sink_failure_cannot_turn_a_committed_reward_into_failure(tmp_pa
             is SubmitOutcome.COMMITTED
         )
         assert ledger.get_candidate(descriptor.candidate_id).result.reward == 0.75
+        assert api.flush_usage(3)
         assert api.usage_errors == 1
+        assert api.close_usage(3)
 
 
 def test_workers_do_not_send_usage_to_coordinators_that_did_not_advertise_it():

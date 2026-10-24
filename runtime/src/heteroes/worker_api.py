@@ -213,7 +213,14 @@ class WorkerAPI:
         # Recipe v3: `scorer(descriptor, completions) -> reward` runs here, on the coordinator; it raises ScorerError when the
         # experiment's scoring fails, which is never a reward and never the worker's fault (`scoring_error` keeps it)
         self._scorer = scorer
-        self._usage_sink, self.usage_errors = usage_sink, 0
+        from heteroes.v3.usage_queue import BoundedUsageSink
+
+        self._usage_sink = (
+            usage_sink
+            if usage_sink is None or isinstance(usage_sink, BoundedUsageSink)
+            else BoundedUsageSink(usage_sink)
+        )
+        self._usage_errors = 0
         self.allowed_chunks = tuple(allowed_chunks)  # ADR-010: the recipe's chunks when it allows several
         # granted leases, heartbeats, results and failures so far: what the coordinator counts as a generation still moving
         # (ADR-009). A request that gets no work is not activity: a waiting worker must not hide a real stall.
@@ -427,7 +434,18 @@ class WorkerAPI:
                 self._usage_sink(descriptor, attempt_number, worker, usage, kind)
             except Exception:
                 # Usage is a best-effort sidecar: a failed metrics write cannot undo or misreport a canonical commit.
-                self.usage_errors += 1
+                self._usage_errors += 1
+
+    @property
+    def usage_errors(self):
+        status = {} if self._usage_sink is None else self._usage_sink.status()
+        return self._usage_errors + status.get("errors", 0) + status.get("dropped", 0)
+
+    def flush_usage(self, timeout):
+        return self._usage_sink is None or self._usage_sink.flush(timeout)
+
+    def close_usage(self, timeout=0):
+        return self._usage_sink is None or self._usage_sink.close(timeout)
 
     def _report_failure(self, decoded) -> dict:
         descriptor, attempt_number, token, kind = decoded

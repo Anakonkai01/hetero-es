@@ -12,7 +12,7 @@ The [Claude handoff](handoff-claude-human-review-2026-10-24.md) remains the hist
 | ------------------------------------------ | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
 | M0 contract/baseline                       | In progress: ADR, phase traces/storage inventory and real Qwen CPU lifecycle probe       | Broader pipeline timing                                      |
 | M1 one-model strict backend                | Reference plus audited NVRTC kernels; Qwen 0.5B tokens agree on four GPUs (sm_120/sm_86) | Native Windows, batching/throughput, lifecycle gates         |
-| M2 delivery/scorer/audit/watchdog/recovery | In progress: scorer reservation; delivery heartbeat, durable outbox and local restore poison | Bounded usage, audit controls/statuses, watchdog and D10 recovery |
+| M2 delivery/scorer/audit/watchdog/recovery | In progress: scorer reservation; durable delivery/local poison; bounded usage and partial monitoring | Audit controls/statuses, watchdog and D10 recovery |
 | M3 recovery I/O and long-run overhead      | Not started                                                                              | Bounded upload/retry and consistency tests                   |
 | M4 product/lifecycle/packaging             | Not started                                                                              | SDK/lab capability and native runtime acceptance             |
 | M5 system acceptance                       | Not started                                                                              | End-to-end, faults, memory and throughput receipts           |
@@ -57,3 +57,14 @@ storage across launches independently of the large weights cache. Mutation check
 the other check-all steps and fresh Linux source-copy packages passed. See the retained failures and limits in
 [delivery evidence](evidence/2026-10-24-human-review-resume/delivery-summary.md).
 M2 and the overall M0–M6 plan remain incomplete; outbox tests do not qualify D10 automatic restore recovery.
+
+Bounded usage delivery (2026-10-25): result/audit ACKs enqueue metrics without waiting for the sink; the coordinator
+shares one queue across generations. Record/byte bounds include in-flight work, and recorded errors/drops remain
+visible as partial monitoring. Queue mutations 11/11, projection mutations 3/3. Final CPU suite: 2,848 runtime tests
+passed, 186 skipped; 439 backend tests passed. See [usage receipts and limits](evidence/2026-10-24-human-review-resume/usage-summary.md).
+
+The requested [SGLang comparison](evidence/2026-10-24-sglang-probe/README.md) found cross-GPU token differences:
+stock default 14/208 prompts serially and 34/208 batched; stock deterministic exceeded shared memory. A source-pinned
+FP16 pipeline-stage patch ran but still differed on 2/32 prompts between 5070 Ti and Quang's 3060, with no same-host
+batch/serial differences on those rows. It is not a strict replacement or a managed backend. Thao's interrupted tuned
+run yielded no receipt after host sleep; the final owned-probe check is clear on both remotes.
