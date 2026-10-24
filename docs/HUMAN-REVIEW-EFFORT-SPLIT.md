@@ -1,11 +1,12 @@
 # Human-review work by reasoning effort
 
-Owner instruction, 2026-10-25: resume from clean `2776e88`, use this xhigh session for difficult work, and leave
-straightforward work to a later session at lower effort. The approved M0–M6 plan remains the source of scope:
+Owner instruction, 2026-10-25: the latest continuation from clean `033065d` prioritizes the strict kernel,
+performance, vLLM source/paper review and general model/GPU coverage. Straightforward audit product work remains
+reserved for a lower-effort session. The approved M0–M6 plan remains the source of scope:
 `/home/pc5070ti/projects/heteroes-review-2026-10-24/PLAN-SUA-HUMAN-REVIEW.md`.
 No push, merge, deployment, live device change or learning run is included.
 
-## This xhigh session
+## Earlier audit core checkpoint (closed at `1eaaecc`)
 
 1. M2 audit accounting: canonical candidate outcomes, durable drain closure, restart and late-result races.
    Preserve historical sampling and three-mismatch ledger behavior, and keep `audit_counts()` compatibility.
@@ -14,17 +15,31 @@ No push, merge, deployment, live device change or learning run is included.
    backend/recipe identity and qualification gates; an internal fixture does not make the current recipe strict.
 3. Adversarial tests, scratch mutations and CPU integration checks for these core changes. Record precise limits.
 
+## Shared strict checkpoint (`a232ad0`)
+
+The owner specifically rejected optimization tied to a single Qwen checkpoint. The shared graph now admits a
+restricted Qwen2/Llama/Mistral operator set, with four fixture layouts tested on four GPUs. Row tiling, coalesced
+bounded staging, cached canonical RoPE and packed causal execution retain the specified FP32 trees.
+[Contract](../runtime/docs/strict-decoder-v1.md), [source/paper review](STRICT-PERFORMANCE-VLLM.md),
+[receipts and limits](evidence/2026-10-25-strict-throughput/README.md),
+[next heavy handoff](handoff-codex-strict-kernel-2026-10-25.md).
+
+The current throughput remains far below vLLM. Projection throughput, bounded CUDA Graph/launch buffers, wider
+operator/trained-model coverage and qualification remain high-effort work. Integer/component Tensor Core designs
+need a separate numerical contract/oracle and measured accuracy/range/memory behavior; no such backend is implemented.
+The earlier audit accounting and safety work is unchanged, and M1/M2/M0–M6 remain incomplete.
+
 ## Next lower-effort session: bounded product work
 
 Recommended **medium** effort for the first connected slice; **low** for isolated copy/documentation follow-ups.
 Read the new handoff before changing anything; these are follow-ups after the core contracts are committed.
 
-| Task | Concrete completion gate |
-| --- | --- |
+| Task                                                             | Concrete completion gate                                                                                                                                                                                                                         |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Project detailed audit outcomes through supervisor/backend/types | Read canonical ledger outcomes and durable per-generation drain reasons; count candidates once; preserve `completed`/`mismatches` API compatibility. Never derive matches from missing events. Mark old or missing operational evidence unknown. |
-| Audit UI and translations | Explicit disabled, pending, matched, mismatched, timed-out and skipped labels. Zero selected is not evidence of successful checking. Cover zero rate, no auditor, timeout and historical partial data with fixture browser checks. |
-| CLI/help and examples for existing audit controls | Preserve explicit zero, frozen coverage and historical identities. Document that mid-run coverage changes are unsupported. |
-| Routine receipt indexing and package reruns | Link the exact commits/checks; preserve failures and platform limits. Rerun packages after code changes that affect runtime contents. No native Windows claim from Linux source packages. |
+| Audit UI and translations                                        | Explicit disabled, pending, matched, mismatched, timed-out and skipped labels. Zero selected is not evidence of successful checking. Cover zero rate, no auditor, timeout and historical partial data with fixture browser checks.               |
+| CLI/help and examples for existing audit controls                | Preserve explicit zero, frozen coverage and historical identities. Document that mid-run coverage changes are unsupported.                                                                                                                       |
+| Routine receipt indexing and package reruns                      | Link the exact commits/checks; preserve failures and platform limits. Rerun packages after code changes that affect runtime contents. No native Windows claim from Linux source packages.                                                        |
 
 Do not turn a low/medium-effort session into an unplanned numerical or recovery redesign. Use the committed
 contracts; if a new cross-component invariant is uncovered, record it for the next heavy slice.
@@ -40,8 +55,9 @@ These are **not** reassigned to low effort just because they remain after this s
 - M3: bounded recovery streaming/backoff, safe verification caching, retention dependency graph and measured
   early/middle/late bookkeeping. Carry the new audit drain/stop sidecars and reconcile faults later than an immutable
   recovery snapshot; replacement recovery does not yet preserve this strict guard. Real full-disk acceptance remains deferred.
-- M1: exact arithmetic while caching RoPE, reducing launch cost and batching rows/sequences; cross-GPU token and
-  native baseline/performance evidence. Existing SGLang/vLLM results do not replace these gates.
+- M1: projection throughput, bounded launch/CUDA Graph buffers, further arithmetic research and broader operator/model
+  coverage; trained-model cross-GPU/native Windows and all-phase performance evidence. Shared RoPE/row/packed foundations
+  are implemented, but existing SGLang/vLLM results and tiny graph receipts do not replace the remaining gates.
 - M4: real backend/recipe identity and qualification namespaces, managed physical-GPU ownership, lifecycle and
   native packaging. Connect strict mismatch activation only here, with a supported qualified identity.
 - M0 broader measurements, M5 full system acceptance and M6 frozen quantized base plus ES LoRA remain open.

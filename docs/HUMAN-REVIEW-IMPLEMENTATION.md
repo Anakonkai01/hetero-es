@@ -10,17 +10,20 @@ The [Claude handoff](handoff-claude-human-review-2026-10-24.md) remains the hist
 Owner closed the earlier Codex session on 2026-10-25, then explicitly resumed from clean `2776e88` in an xhigh
 session. The new instruction prioritizes difficult core work here and reserves straightforward product follow-ups
 for a later, lower-effort session. See the [effort split](HUMAN-REVIEW-EFFORT-SPLIT.md); M0–M6 scope is unchanged.
+The owner then resumed from clean `033065d`, refocusing xhigh on shared strict inference, performance and broad
+model/GPU coverage, and explicitly requested vLLM source/paper comparison. The shared core is `a232ad0`;
+[latest kernel handoff](handoff-codex-strict-kernel-2026-10-25.md). The earlier audit product follow-ups remain reserved.
 The [earlier handoff](handoff-codex-human-review-2026-10-25.md) remains the record of the previous stop.
 
-| Milestone                                  | State                                                                                    | Next gate                                                    |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| M0 contract/baseline                       | In progress: ADR, phase traces/storage inventory and real Qwen CPU lifecycle probe       | Broader pipeline timing                                      |
-| M1 one-model strict backend                | Reference plus audited NVRTC kernels; Qwen 0.5B tokens agree on four GPUs (sm_120/sm_86) | Native Windows, batching/throughput, lifecycle gates         |
+| Milestone                                  | State                                                                                                                    | Next gate                                                                                  |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| M0 contract/baseline                       | In progress: ADR, phase traces/storage inventory; controlled strict/HF/vLLM comparison on one checkpoint                 | Broader pipeline timing                                                                    |
+| M1 one-model strict backend                | Shared graph/packed CUDA for three restricted families; four fixture layouts agree on four GPUs; coalesced projections   | Broader trained-model/operator coverage, throughput, native Windows and lifecycle gates    |
 | M2 delivery/scorer/audit/watchdog/recovery | In progress: delivery/scorer/usage; audit rate; canonical outcome accounting, durable drain closure and shared run guard | Product state projection/UI; strict activation/storage/replacement gates; watchdog and D10 |
-| M3 recovery I/O and long-run overhead      | Not started                                                                              | Bounded upload/retry and consistency tests                   |
-| M4 product/lifecycle/packaging             | Not started                                                                              | SDK/lab capability and native runtime acceptance             |
-| M5 system acceptance                       | Not started                                                                              | End-to-end, faults, memory and throughput receipts           |
-| M6 quantized base + LoRA                   | Not started                                                                              | Same strict contract without a dequantized full-model shadow |
+| M3 recovery I/O and long-run overhead      | Not started                                                                                                              | Bounded upload/retry and consistency tests                                                 |
+| M4 product/lifecycle/packaging             | Not started                                                                                                              | SDK/lab capability and native runtime acceptance                                           |
+| M5 system acceptance                       | Not started                                                                                                              | End-to-end, faults, memory and throughput receipts                                         |
+| M6 quantized base + LoRA                   | Not started                                                                                                              | Same strict contract without a dequantized full-model shadow                               |
 
 Execution permissions were updated after the initial sandbox failures. The local RTX 5070 Ti is accessible and key
 SSH works to `thao_nguyen@100.92.20.58` and `quang@100.99.227.8`. Both remote hosts expose RTX 3060 GPUs through WSL2.
@@ -50,8 +53,20 @@ reference bit for bit, per kernel and per graph, and are audited at the PTX/SASS
 parent and 8 antithetic candidates × 8 prompts (4,387 tokens) agree across the local 5070 Ti, Nhựt's 5070 Ti and
 both 3060s (WSL2). Speed: about 60 tokens/s per sequence on a 5070 Ti and 23–26 on a 3060; the eager reference
 took 46–149 s per token. Peak allocation is about 1.08 GB, close to one FP16 weight set. See
-[strict CUDA receipts](evidence/2026-10-24-strict-cuda/README.md). Not yet: native Windows, batched sequences,
-managed lifecycle/recipe integration and packaging.
+[strict CUDA receipts](evidence/2026-10-24-strict-cuda/README.md). That receipt uses serial sequences. Native Windows, managed lifecycle/recipe integration and packaged GPU
+qualification remain open; the shared packed continuation is recorded below.
+
+Shared strict continuation (`a232ad0`, 2026-10-25): the CUDA graph is now shared by restricted Qwen2/Llama/Mistral
+adapters; query width may differ from hidden width. Canonical RoPE tables, independent row tiles, coalesced bounded
+shared staging and packed causal prefill/decode/EOS compaction preserve reference arithmetic. Four fixture layouts,
+two finite weight states and serial/packed/CPU results match across all four GPUs; 215 tests pass per target.
+The controlled 5070 Ti batch-32 benchmark improves from 67.4 to 379.8 total tokens/s, still below vLLM default
+(13,802.5) and batch-invariant (4,697.2). This is one trained checkpoint, not broad-model performance acceptance.
+Final check-all: runtime 2,943 passed/211 skipped, backend 452 passed; scratch mutations 23/23 and fresh Linux
+source-copy package/import checks pass. No native Windows, managed strict activation or M1 completion is claimed.
+See the [shared graph contract](../runtime/docs/strict-decoder-v1.md),
+[vLLM source/paper review](STRICT-PERFORMANCE-VLLM.md) and
+[exact receipts/limits](evidence/2026-10-25-strict-throughput/README.md).
 
 Codex continuation: the scorer reservation now lasts through canonical commit, closing a second-scoring race;
 mutation check 11/11. Delivery keeps heartbeat until terminal ACK/refusal, persists exact result/failure payloads
