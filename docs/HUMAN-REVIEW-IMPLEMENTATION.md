@@ -12,13 +12,16 @@ session. The new instruction prioritizes difficult core work here and reserves s
 for a later, lower-effort session. See the [effort split](HUMAN-REVIEW-EFFORT-SPLIT.md); M0–M6 scope is unchanged.
 The owner then resumed from clean `033065d`, refocusing xhigh on shared strict inference, performance and broad
 model/GPU coverage, and explicitly requested vLLM source/paper comparison. The shared core is `a232ad0`;
-[latest kernel handoff](handoff-codex-strict-kernel-2026-10-25.md). The earlier audit product follow-ups remain reserved.
+[shared kernel handoff](handoff-codex-strict-kernel-2026-10-25.md). The earlier audit product follow-ups remain reserved.
 The [earlier handoff](handoff-codex-human-review-2026-10-25.md) remains the record of the previous stop.
+The owner then requested unattended overnight completion of the full plan, prioritizing vLLM-level general performance.
+Current core `e05c9ab5` adds bounded captured decode and dimension-selected subtrees; three trained checkpoints are
+benchmarked. See the [current handoff](handoff-codex-strict-overnight-2026-10-25.md). Full M0–M6 remains open.
 
 | Milestone                                  | State                                                                                                                    | Next gate                                                                                  |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
 | M0 contract/baseline                       | In progress: ADR, phase traces/storage inventory; controlled strict/HF/vLLM comparison on one checkpoint                 | Broader pipeline timing                                                                    |
-| M1 one-model strict backend                | Shared graph/packed CUDA for three restricted families; four fixture layouts agree on four GPUs; coalesced projections   | Broader trained-model/operator coverage, throughput, native Windows and lifecycle gates    |
+| M1 one-model strict backend                | Shared packed/captured CUDA for three restricted families; four-GPU fixtures and three trained parent benchmarks   | Broader trained-model/operator coverage, throughput, native Windows and lifecycle gates    |
 | M2 delivery/scorer/audit/watchdog/recovery | In progress: delivery/scorer/usage; audit rate; canonical outcome accounting, durable drain closure and shared run guard | Product state projection/UI; strict activation/storage/replacement gates; watchdog and D10 |
 | M3 recovery I/O and long-run overhead      | Not started                                                                                                              | Bounded upload/retry and consistency tests                                                 |
 | M4 product/lifecycle/packaging             | Not started                                                                                                              | SDK/lab capability and native runtime acceptance                                           |

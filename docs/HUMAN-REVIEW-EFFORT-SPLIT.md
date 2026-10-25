@@ -1,9 +1,9 @@
 # Human-review work by reasoning effort
 
-Owner instruction, 2026-10-25: the latest continuation from clean `033065d` prioritizes the strict kernel,
+Owner instruction, 2026-10-25: the unattended continuation prioritizes the strict kernel,
 performance, vLLM source/paper review and general model/GPU coverage. Straightforward audit product work remains
-reserved for a lower-effort session. The approved M0–M6 plan remains the source of scope:
-`/home/pc5070ti/projects/heteroes-review-2026-10-24/PLAN-SUA-HUMAN-REVIEW.md`.
+reserved for a lower-effort session. The approved [M0–M6 plan](PLAN-SUA-HUMAN-REVIEW.md) remains the source of scope;
+the in-repo copy preserves the original external plan bytes.
 No push, merge, deployment, live device change or learning run is included.
 
 ## Earlier audit core checkpoint (closed at `1eaaecc`)
@@ -15,16 +15,19 @@ No push, merge, deployment, live device change or learning run is included.
    backend/recipe identity and qualification gates; an internal fixture does not make the current recipe strict.
 3. Adversarial tests, scratch mutations and CPU integration checks for these core changes. Record precise limits.
 
-## Shared strict checkpoint (`a232ad0`)
+## Captured strict checkpoint (`e05c9ab5`)
 
 The owner specifically rejected optimization tied to a single Qwen checkpoint. The shared graph now admits a
 restricted Qwen2/Llama/Mistral operator set, with four fixture layouts tested on four GPUs. Row tiling, coalesced
 bounded staging, cached canonical RoPE and packed causal execution retain the specified FP32 trees.
+Dimension-selected subtrees and bounded captured decode now extend that foundation, with original-owner KV slots,
+request/candidate clearing, live weights, checked publication and stream-safe release. Three trained checkpoints
+are benchmarked; native Windows and managed qualification remain open.
 [Contract](../runtime/docs/strict-decoder-v1.md), [source/paper review](STRICT-PERFORMANCE-VLLM.md),
-[receipts and limits](evidence/2026-10-25-strict-throughput/README.md),
-[next heavy handoff](handoff-codex-strict-kernel-2026-10-25.md).
+[receipts and limits](evidence/2026-10-25-strict-overnight/README.md),
+[next heavy handoff](handoff-codex-strict-overnight-2026-10-25.md).
 
-The current throughput remains far below vLLM. Projection throughput, bounded CUDA Graph/launch buffers, wider
+The current large-batch throughput remains far below vLLM. Projection throughput, wider
 operator/trained-model coverage and qualification remain high-effort work. Integer/component Tensor Core designs
 need a separate numerical contract/oracle and measured accuracy/range/memory behavior; no such backend is implemented.
 The earlier audit accounting and safety work is unchanged, and M1/M2/M0–M6 remain incomplete.
@@ -55,7 +58,7 @@ These are **not** reassigned to low effort just because they remain after this s
 - M3: bounded recovery streaming/backoff, safe verification caching, retention dependency graph and measured
   early/middle/late bookkeeping. Carry the new audit drain/stop sidecars and reconcile faults later than an immutable
   recovery snapshot; replacement recovery does not yet preserve this strict guard. Real full-disk acceptance remains deferred.
-- M1: projection throughput, bounded launch/CUDA Graph buffers, further arithmetic research and broader operator/model
+- M1: projection throughput beyond captured decode, further arithmetic research and broader operator/model
   coverage; trained-model cross-GPU/native Windows and all-phase performance evidence. Shared RoPE/row/packed foundations
   are implemented, but existing SGLang/vLLM results and tiny graph receipts do not replace the remaining gates.
 - M4: real backend/recipe identity and qualification namespaces, managed physical-GPU ownership, lifecycle and
