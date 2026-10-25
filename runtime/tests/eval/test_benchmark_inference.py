@@ -84,3 +84,89 @@ def test_integer_precision_guard_precedes_model_loading(tmp_path, monkeypatch, p
                 str(tmp_path / "r.json"),
             ]
         )
+
+
+def test_existing_output_is_rejected_before_model_loading(tmp_path, monkeypatch):
+    module = script()
+    destination = tmp_path / "existing.json"
+    destination.write_text("original evidence")
+    monkeypatch.setenv("HETEROES_GPU_ACCEPTANCE", "1")
+    monkeypatch.setattr(module, "load_engine", lambda *args: pytest.fail("existing evidence guard must run first"))
+    with pytest.raises(SystemExit):
+        module.main(["--engine", "hf-shadow", "--gpu", "--model-path", str(tmp_path), "--out", str(destination)])
+    assert destination.read_text() == "original evidence"
+
+
+def test_shadow_refresh_is_inside_each_timed_observation_and_warmup(monkeypatch):
+    module = script()
+    times = iter([10.0, 10.5, 12.0, 20.0, 21.0, 24.0])
+    monkeypatch.setattr(module.time, "perf_counter", lambda: next(times))
+    calls = []
+
+    def refresh():
+        calls.append("refresh")
+
+    def run(rows):
+        calls.append("generate")
+        return [[7, 8]]
+
+    result = module.measure(run, [[1]], 2, 2, lambda: None, before_run=refresh)
+    assert calls == ["refresh", "generate"] * 3
+    assert result["seconds"] == [2.0, 4.0]
+    assert result["refreshSeconds"] == [0.5, 1.0]
+    assert result["decodeSeconds"] == [1.5, 3.0]
+    assert result["tokensPerSecondTotal"] == 2 / 3
+    assert result["decodeOnlyTokensPerSecondTotal"] == 2 / 2.25
+
+
+def test_hf_shadow_keeps_live_fp16_and_refreshes_exact_widened_weights():
+    import torch
+
+    module = script()
+    live = torch.nn.Linear(3, 2, bias=False).half()
+    shadow = module.make_shadow(live)
+    assert shadow.model is not live
+    assert live.weight.dtype == torch.float16 and shadow.model.weight.dtype == torch.float32
+    with torch.no_grad():
+        live.weight.fill_(0.125)
+    shadow.refresh()
+    assert torch.equal(shadow.model.weight, torch.full((2, 3), 0.125, dtype=torch.float32))
+    assert shadow.model.weight.data_ptr() != live.weight.data_ptr()
+
+
+def test_decoder_run_preserves_order_and_padding_when_chunking():
+    import torch
+
+    module = script()
+    seen = []
+
+    class Engine:
+        def generate(self, ids, **kwargs):
+            seen.append((ids.tolist(), kwargs["attention_mask"].tolist()))
+            assert kwargs["eos_token_id"] == [] and kwargs["do_sample"] is False
+            assert kwargs["repetition_penalty"] == 1.0 and kwargs["use_cache"] is True
+            return torch.cat((ids, ids[:, -1:].repeat(1, kwargs["max_new_tokens"])), dim=1)
+
+    run = module.decoder_run(Engine(), pad=0, tokens=2, device="cpu", chunk=2)
+    assert run([[1], [2, 3], [4]]) == [[1, 1], [3, 3], [4, 4]]
+    assert seen == [([[0, 1], [2, 3]], [[0, 1], [1, 1]]), ([[4]], [[1]])]
+
+
+@pytest.mark.parametrize(
+    "engine,options",
+    [
+        ("hf-shadow", ["--frozen-head"]),
+        ("strict-integer", ["--hf-chunk", "16"]),
+        ("strict-frozen", ["--lora-rank", "33"]),
+        ("strict-frozen", ["--lora-alpha", "nan"]),
+        ("hf-shadow", ["--hf-chunk", "-1"]),
+    ],
+)
+def test_comparison_options_fail_before_loading(tmp_path, monkeypatch, engine, options):
+    module = script()
+    monkeypatch.setenv("HETEROES_GPU_ACCEPTANCE", "1")
+    monkeypatch.setattr(module, "load_engine", lambda *args: pytest.fail("option guard must run first"))
+    with pytest.raises(SystemExit):
+        module.main(
+            ["--engine", engine, "--gpu", "--model-path", str(tmp_path), "--out", str(tmp_path / "r.json"), *options]
+        )
