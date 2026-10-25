@@ -175,6 +175,74 @@ strict_linear(const float* __restrict__ x, const u16* __restrict__ w, const u16*
 }
 """
 
+_LORA_SOURCE = r"""
+typedef unsigned short u16;
+
+__device__ __forceinline__ float flush(float v) {
+  unsigned u = __float_as_uint(v);
+  return (u & 0x7f800000u) == 0u ? __uint_as_float(u & 0x80000000u) : v;
+}
+__device__ __forceinline__ float add_rn(float a, float b) {
+  float r;
+  asm volatile("add.rn.f32 %0, %1, %2;" : "=f"(r) : "f"(a), "f"(b));
+  return flush(r);
+}
+__device__ __forceinline__ float mul_rn(float a, float b) {
+  float r;
+  asm volatile("mul.rn.f32 %0, %1, %2;" : "=f"(r) : "f"(a), "f"(b));
+  return flush(r);
+}
+__device__ __forceinline__ float widen(u16 h) {
+  float r;
+  asm("cvt.f32.f16 %0, %1;" : "=f"(r) : "h"(h));
+  return r;
+}
+
+// Epilogue of a strict rank-WIDTH product: one warp owns one output column and keeps the same one-lane-per-
+// element xor tree as `strict_linear` at this width, then the strict scalar multiply. The scaled column goes
+// through shared memory so base reads and output writes are coalesced along the output tile.
+extern "C" __global__ void __launch_bounds__(256)
+strict_lora_finish(const float* __restrict__ mid, const u16* __restrict__ w, const float* __restrict__ base,
+                   float* __restrict__ out, int* __restrict__ error, int rows, int outputs, float scale) {
+  const int lane = threadIdx.x & 31, warp = threadIdx.x >> 5;
+  const int obase = blockIdx.x * OUT_TILE, mbase = blockIdx.y * ROW_TILE;
+  __shared__ float scaled_tile[ROW_TILE][OUT_TILE];
+#pragma unroll
+  for (int j = warp; j < OUT_TILE; j += 8) {
+    const int o = obase + j;
+    const bool live = o < outputs;
+#pragma unroll
+    for (int r = 0; r < ROW_TILE; ++r) {
+      const int m = mbase + r;
+      float v = (live && m < rows && lane < WIDTH)
+                    ? mul_rn(flush(mid[(size_t)m * WIDTH + lane]), widen(w[(size_t)o * WIDTH + lane]))
+                    : -0.0f;
+#pragma unroll
+      for (int offset = 1; offset < 32; offset <<= 1) v = add_rn(v, __shfl_xor_sync(0xffffffffu, v, offset));
+      if (lane == 0) {
+        const float scaled = mul_rn(v, scale);
+        scaled_tile[r][j] = scaled;
+        if ((__float_as_uint(scaled) & 0x7f800000u) == 0x7f800000u) atomicOr(error, 1);
+      }
+    }
+  }
+  __syncthreads();
+  if (threadIdx.x >= ROW_TILE * OUT_TILE) return;
+  const int r = threadIdx.x / OUT_TILE, j = threadIdx.x % OUT_TILE;
+  const int m = mbase + r, o = obase + j;
+  if (m < rows && o < outputs) {
+    const float scaled = scaled_tile[r][j];
+    const size_t index = (size_t)m * outputs + o;
+    const float b = base[index];
+    const unsigned bb = __float_as_uint(b);
+    const float result = (__float_as_uint(scaled) & 0x7fffffffu) == 0u ? b : add_rn(b, scaled);
+    out[index] = result;
+    if ((bb & 0x7f800000u) == 0x7f800000u || (__float_as_uint(result) & 0x7f800000u) == 0x7f800000u)
+      atomicOr(error, 1);
+  }
+}
+"""
+
 _OPS_SOURCE = r"""
 typedef unsigned short u16;
 #define FLT_BIG 3.4028234663852886e+38f
@@ -814,6 +882,16 @@ class StrictCudaKernels:
             self._functions[name] = self._compile(name, header + _LINEAR_SOURCE, ["strict_linear"])["strict_linear"]
         return self._functions[name]
 
+    def _lora_function(self, rank, row_tile):
+        name = f"lora-{rank}-rows{row_tile}"
+        if name not in self._functions:
+            defines = {"WIDTH": rank, "OUT_TILE": 32, "ROW_TILE": row_tile}
+            header = "".join(f"#define {k} {v}\n" for k, v in defines.items())
+            self._functions[name] = self._compile(
+                name, header + _LORA_SOURCE, ["strict_lora_finish"], ptx_exact=OPS_PTX_EXACT, sass_exact=OPS_SASS_EXACT
+            )["strict_lora_finish"]
+        return self._functions[name]
+
     def new_error_flag(self):
         return torch.zeros(1, dtype=torch.int32, device=self.device)
 
@@ -1063,6 +1141,49 @@ class StrictCudaKernels:
         if error_flag is None:
             self.raise_if_error(flag)
         return result.reshape(*value.shape[:-1], outputs)
+
+    @torch.inference_mode()
+    def lora_finish(self, middle, weight, base, scaling, *, error_flag=None, row_tile=8):
+        """Fuse the second rank product, strict scale and zero-delta select into one replayed kernel.
+
+        ``middle`` is the exact ``linear(value, A)``; ``weight`` is ``B``; the result is bitwise
+        ``combine_adapter(base, scale(linear(middle, B)))`` without materializing the delta or a second pass.
+        """
+        middle, base = self._float32(middle, base)
+        if (
+            not isinstance(weight, torch.Tensor)
+            or weight.dtype != torch.float16
+            or weight.ndim != 2
+            or weight.device != self.device
+            or not weight.is_contiguous()
+            or not 1 <= weight.shape[1] <= 32
+            or weight.shape[0] < 1
+        ):
+            raise ReferenceArithmeticError("Strict LoRA finish needs a contiguous FP16 [N, rank<=32] factor")
+        rank, outputs = weight.shape[1], weight.shape[0]
+        if middle.shape[-1] != rank or base.shape != (*middle.shape[:-1], outputs):
+            raise ReferenceArithmeticError("Strict LoRA finish shapes do not match the rank product")
+        rows = middle.numel() // rank
+        if type(row_tile) is not int or row_tile not in (1, 2, 4, 8):
+            raise ReferenceArithmeticError("Strict LoRA finish row tile must be 1, 2, 4 or 8")
+        if not isinstance(scaling, (int, float)) or isinstance(scaling, bool):
+            raise ReferenceArithmeticError("A strict scalar multiply needs a numeric factor")
+        rounded = struct.unpack("<f", struct.pack("<f", float(scaling)))[0]
+        if not math.isfinite(rounded):
+            raise ReferenceArithmeticError("A strict scalar multiply needs a finite FP32 factor")
+        flat, flat_base = middle.reshape(rows, rank), base.reshape(rows, outputs)
+        result = torch.empty_like(flat_base)
+        flag = self.new_error_flag() if error_flag is None else error_flag
+        self._launch(
+            self._lora_function(rank, row_tile),
+            grid=(-(-outputs // 32), min(65535, -(-rows // row_tile))),
+            block=(256, 1),
+            pointers=(flat, weight, flat_base, result, flag),
+            integers=(rows, outputs),
+            floats=(rounded,),
+        )
+        self._finish(flag, error_flag)
+        return result.reshape(base.shape)
 
     def _launch(self, function, *, grid, block, pointers, integers, floats=(), shared=0):
         import numpy as np

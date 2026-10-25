@@ -457,6 +457,86 @@ def test_cuda_rms_norm_matches_reference_bits(kernels):
 
 
 @gpu
+def test_cuda_linear_row_tile_changes_only_scheduling_not_a_single_bit(kernels):
+    generator = torch.Generator().manual_seed(101)
+    for rows, width, outputs in ((1, 8, 32), (3, 17, 7), (8, 896, 8), (32, 896, 8), (32, 8, 896), (5, 2048, 16)):
+        value = torch.randn((rows, width), generator=generator) * 4
+        weight = (torch.randn((outputs, width), generator=generator) * 0.25).half()
+        value[0, 0] = -0.0
+        if width > 1:
+            weight[0, 1] = -0.0
+        expected = kernels.linear(value.cuda(), weight.cuda())
+        for row_tile in (1, 2, 4, 8):
+            actual = kernels.linear(value.cuda(), weight.cuda(), row_tile=row_tile)
+            assert torch.equal(bits(actual), bits(expected)), (rows, width, outputs, row_tile)
+        assert torch.equal(bits(expected.cpu()), bits(ops.linear(value, weight)))
+
+
+@gpu
+def test_cuda_lora_finish_fuses_rank_product_scale_and_zero_select_bit_for_bit(kernels):
+    generator = torch.Generator().manual_seed(103)
+    cases = ((1, 1, 7), (3, 2, 128), (8, 3, 17), (32, 8, 896), (5, 16, 257), (2, 32, 33), (4, 8, 2560))
+    for rows, rank, outputs in cases:
+        middle = torch.randn((rows, rank), generator=generator) * 3
+        weight = (torch.randn((outputs, rank), generator=generator) * 0.2).half()
+        base = torch.randn((rows, outputs), generator=generator)
+        middle[0, 0], base[0, 0] = -0.0, -0.0
+        if rank > 1:
+            middle[0, 1] = 2.0**-149
+        factor = 5.0 / 3.0
+        delta = kernels.linear(middle.cuda(), weight.cuda())
+        scaled = kernels.scale(delta, factor)
+        expected = torch.where(scaled == 0, base.cuda(), kernels.add(base.cuda(), scaled))
+        actual = kernels.lora_finish(middle.cuda(), weight.cuda(), base.cuda(), factor)
+        assert torch.equal(bits(actual), bits(expected)), (rows, rank, outputs)
+        for row_tile in (1, 2, 4, 8):
+            tiled = kernels.lora_finish(middle.cuda(), weight.cuda(), base.cuda(), factor, row_tile=row_tile)
+            assert torch.equal(bits(tiled), bits(expected)), (rows, rank, outputs, row_tile)
+        cpu_delta = ops.linear(middle, weight)
+        cpu_scaled = ops.mul(cpu_delta, factor)
+        cpu_expected = torch.where(cpu_scaled == 0, base, ops.add(base, cpu_scaled))
+        assert torch.equal(bits(actual.cpu()), bits(cpu_expected)), (rows, rank, outputs)
+    # The real constructor zeroes B, so the delta is exactly +0 while the base can hold -0.0. The select must
+    # return the base bits rather than the bit pattern of base + 0.
+    zero_middle = torch.randn((5, 8), generator=generator)
+    zero_middle[0, 0] = -0.0
+    zero_weight = torch.zeros((17, 8), dtype=torch.float16)
+    zero_base = torch.randn((5, 17), generator=generator)
+    zero_base[0, 0] = -0.0
+    zero_scaled = kernels.scale(kernels.linear(zero_middle.cuda(), zero_weight.cuda()), factor)
+    assert bits(zero_scaled[0, 0]).item() == 0, bits(zero_scaled[0, 0]).item()
+    zero_actual = kernels.lora_finish(zero_middle.cuda(), zero_weight.cuda(), zero_base.cuda(), factor)
+    assert torch.equal(bits(zero_actual), bits(zero_base.cuda()))
+
+
+@gpu
+def test_cuda_lora_finish_is_capture_safe_and_rejects_nonfinite_inputs(kernels):
+    generator = torch.Generator().manual_seed(107)
+    middle = torch.randn((32, 8), generator=generator)
+    weight = (torch.randn((896, 8), generator=generator) * 0.2).half()
+    base = torch.randn((32, 896), generator=generator)
+    middle = middle.cuda()
+    weight = weight.cuda()
+    base = base.cuda()
+    flag = kernels.new_error_flag()
+    graph = torch.cuda.CUDAGraph()
+    with torch.cuda.graph(graph):
+        captured = kernels.lora_finish(middle, weight, base, 0.5, error_flag=flag)
+    graph.replay()
+    kernels.raise_if_error(flag)
+    expected = kernels.lora_finish(middle, weight, base, 0.5)
+    assert torch.equal(bits(captured), bits(expected))
+    bad_base = base.clone()
+    bad_base[0, 0] = float("inf")
+    with pytest.raises(ReferenceArithmeticError, match="Nonfinite"):
+        kernels.lora_finish(middle, weight, bad_base, 0.5)
+    with pytest.raises(ReferenceArithmeticError, match="factor"):
+        kernels.lora_finish(middle, weight, base, float("nan"))
+    with pytest.raises(ReferenceArithmeticError, match="Unsupported|rank"):
+        kernels.lora_finish(middle, weight[:1, :8].repeat(1, 5), base[:, :1], 0.5)
+
+
+@gpu
 def test_cuda_add_and_silu_gate_match_reference_bits(kernels):
     wide, edge = _cuda_ops_cases()
     gate = torch.cat((wide.flatten(), edge[edge.abs() <= 80], torch.linspace(-90, 79, 1001)))

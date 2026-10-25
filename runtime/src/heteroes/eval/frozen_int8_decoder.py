@@ -205,17 +205,25 @@ class FrozenInt8DecoderGraph(StrictDecoderGraph):
             error_flag=flag,
         )
 
-    def _adapter_delta(self, value, module, flag):
-        """Strict pairwise FP32 delta of the widened FP16 factors, then the strict scale."""
-        adapter_a = module.lora_A[module.adapter_name].weight
-        adapter_b = module.lora_B[module.adapter_name].weight
-        middle = self.kernels.linear(value, adapter_a, None, error_flag=flag)
-        delta = self.kernels.linear(middle, adapter_b, None, error_flag=flag)
-        return self.kernels.scale(delta, module.scaling, error_flag=flag)
+    def _adapter_middle(self, value, module, flag):
+        """First strict rank product. One row per block; the row tree itself is unchanged."""
+        return self.kernels.linear(
+            value,
+            module.lora_A[module.adapter_name].weight,
+            None,
+            error_flag=flag,
+            row_tile=1,
+        )
 
-    def _combine_adapter(self, base, delta, flag):
-        added = self.kernels.add(base, delta, error_flag=flag)
-        return torch.where(delta == 0, base, added)
+    def _adapter_finish(self, middle, base, module, flag):
+        """Second rank product, strict scale, zero-delta select and strict add in one replayable kernel."""
+        return self.kernels.lora_finish(
+            middle,
+            module.lora_B[module.adapter_name].weight,
+            base,
+            module.scaling,
+            error_flag=flag,
+        )
 
     def _project(self, value, module, flag):
         if module is self._frozen_head:
@@ -235,14 +243,14 @@ class FrozenInt8DecoderGraph(StrictDecoderGraph):
             getattr(module, "bias", None),
             error_flag=flag,
         )
-        return self._combine_adapter(base, self._adapter_delta(value, module, flag), flag)
+        return self._adapter_finish(self._adapter_middle(value, module, flag), base, module, flag)
 
     def _project_many(self, value, modules, flag):
         modules = tuple(modules)
         if modules and all(_is_frozen(module) for module in modules):
             bases = self._frozen_bases(value, modules, flag)
             return tuple(
-                self._combine_adapter(base, self._adapter_delta(value, module, flag), flag)
+                self._adapter_finish(self._adapter_middle(value, module, flag), base, module, flag)
                 for base, module in zip(bases, modules, strict=True)
             )
         return tuple(self._project(value, module, flag) for module in modules)
@@ -258,7 +266,7 @@ class FrozenInt8DecoderGraph(StrictDecoderGraph):
             error_flag=flag,
             target_ctas_per_sm=self._decode_target,
         )
-        return self._combine_adapter(base, self._adapter_delta(value, module, flag), flag)
+        return self._adapter_finish(self._adapter_middle(value, module, flag), base, module, flag)
 
     def _decode_project_many(self, value, modules, flag):
         modules = tuple(modules)
@@ -271,7 +279,7 @@ class FrozenInt8DecoderGraph(StrictDecoderGraph):
                 decode_target_ctas_per_sm=self._decode_target,
             )
             return tuple(
-                self._combine_adapter(base, self._adapter_delta(value, module, flag), flag)
+                self._adapter_finish(self._adapter_middle(value, module, flag), base, module, flag)
                 for base, module in zip(bases, modules, strict=True)
             )
         return tuple(self._decode_project(value, module, flag) for module in modules)
