@@ -1,0 +1,15 @@
+{"phase": "native-tests", "sourceFiles": 178, "gpu": "NVIDIA GeForce RTX 3060"}
+........................................................................ [ 21%]
+........................................................................ [ 42%]
+........................................................................ [ 63%]
+........................................................................ [ 84%]
+......................................................                   [100%]{"status": "ok", "nativeWindows": true, "error": null}
+
+============================== warnings summary ===============================
+..\venv\Lib\site-packages\_pytest\config\__init__.py:1303
+  C:\Users\Thao Nguyen\.cache\heteroes-native-strict-20261025-01\venv\Lib\site-packages\_pytest\config\__init__.py:1303: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; anyio
+    self._mark_plugins_for_rewrite(hook, disable_autoload)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+342 passed, 1 warning in 263.86s (0:04:23)
+{"status": "ok", "wallSeconds": 301.43146260000503, "error": null}

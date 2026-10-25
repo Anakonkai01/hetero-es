@@ -1,0 +1,8 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 8021.08it/s]
+USDT:2026-10-25 11:01:16 1595885:1595885 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-10-25 11:01:16 1595885:1595885 SyncActivityProfilerHandler.cpp:59] profiler_stop
+USDT:2026-10-25 11:01:20 1595885:1595885 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-10-25 11:01:20 1595885:1595885 SyncActivityProfilerHandler.cpp:59] profiler_stop
+USDT:2026-10-25 11:01:24 1595885:1595885 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-10-25 11:01:25 1595885:1595885 SyncActivityProfilerHandler.cpp:59] profiler_stop
+{"status": "ok", "error": null}
