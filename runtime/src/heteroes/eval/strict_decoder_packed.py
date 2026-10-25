@@ -100,9 +100,10 @@ class StrictDecoderPacked(StrictDecoderCuda):
         for number, layer in enumerate(self.model.model.layers):
             attention = layer.self_attn
             normalized = kernels.rms_norm(hidden, layer.input_layernorm.weight, epsilon, error_flag=flag)
-            q = kernels.rope(self._project(normalized, attention.q_proj, flag), cosine, sine, heads, error_flag=flag)
-            k = kernels.rope(self._project(normalized, attention.k_proj, flag), cosine, sine, kv_heads, error_flag=flag)
-            v = self._project(normalized, attention.v_proj, flag).reshape(-1, kv_heads, dim).transpose(0, 1)
+            q, k, v = self._project_many(normalized, (attention.q_proj, attention.k_proj, attention.v_proj), flag)
+            q = kernels.rope(q, cosine, sine, heads, error_flag=flag)
+            k = kernels.rope(k, cosine, sine, kv_heads, error_flag=flag)
+            v = v.reshape(-1, kv_heads, dim).transpose(0, 1)
             key_parts, value_parts = k.split(lengths, dim=1), v.split(lengths, dim=1)
             keys, values = [], []
             for key, value, cache in zip(key_parts, value_parts, caches):
@@ -129,11 +130,8 @@ class StrictDecoderPacked(StrictDecoderCuda):
             )
             hidden = kernels.add(hidden, self._project(mixed, attention.o_proj, flag), error_flag=flag)
             normalized = kernels.rms_norm(hidden, layer.post_attention_layernorm.weight, epsilon, error_flag=flag)
-            gated = kernels.silu_mul(
-                self._project(normalized, layer.mlp.gate_proj, flag),
-                self._project(normalized, layer.mlp.up_proj, flag),
-                error_flag=flag,
-            )
+            gate, up = self._project_many(normalized, (layer.mlp.gate_proj, layer.mlp.up_proj), flag)
+            gated = kernels.silu_mul(gate, up, error_flag=flag)
             hidden = kernels.add(hidden, self._project(gated, layer.mlp.down_proj, flag), error_flag=flag)
         offset, last = 0, []
         for length in lengths:

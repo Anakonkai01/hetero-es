@@ -230,6 +230,9 @@ class CudaDecoderMixin:
     def _project(self, value, module, flag):
         return self.kernels.linear(value, module.weight, getattr(module, "bias", None), error_flag=flag)
 
+    def _project_many(self, value, modules, flag):
+        return tuple(self._project(value, module, flag) for module in modules)
+
     @torch.inference_mode()
     def forward_tokens(self, input_ids, cache=None):
         """Last-position logits and a call-local KV cache for ONE packed prompt, in the reference cache format."""
@@ -270,9 +273,10 @@ class CudaDecoderMixin:
         for number, layer in enumerate(self.model.model.layers):
             attention = layer.self_attn
             normalized = kernels.rms_norm(hidden, layer.input_layernorm.weight, epsilon, error_flag=flag)
-            q = kernels.rope(self._project(normalized, attention.q_proj, flag), cosine, sine, heads, error_flag=flag)
-            k = kernels.rope(self._project(normalized, attention.k_proj, flag), cosine, sine, kv_heads, error_flag=flag)
-            v = self._project(normalized, attention.v_proj, flag).reshape(length, kv_heads, dim).transpose(0, 1)
+            q, k, v = self._project_many(normalized, (attention.q_proj, attention.k_proj, attention.v_proj), flag)
+            q = kernels.rope(q, cosine, sine, heads, error_flag=flag)
+            k = kernels.rope(k, cosine, sine, kv_heads, error_flag=flag)
+            v = v.reshape(length, kv_heads, dim).transpose(0, 1)
             k, v = k[None], v[None].contiguous()
             if cache is not None:
                 k, v = (torch.cat((old, current), dim=2) for old, current in zip(cache[number], (k, v)))
@@ -282,11 +286,8 @@ class CudaDecoderMixin:
             )
             hidden = kernels.add(hidden, self._project(mixed, attention.o_proj, flag), error_flag=flag)
             normalized = kernels.rms_norm(hidden, layer.post_attention_layernorm.weight, epsilon, error_flag=flag)
-            gated = kernels.silu_mul(
-                self._project(normalized, layer.mlp.gate_proj, flag),
-                self._project(normalized, layer.mlp.up_proj, flag),
-                error_flag=flag,
-            )
+            gate, up = self._project_many(normalized, (layer.mlp.gate_proj, layer.mlp.up_proj), flag)
+            gated = kernels.silu_mul(gate, up, error_flag=flag)
             hidden = kernels.add(hidden, self._project(gated, layer.mlp.down_proj, flag), error_flag=flag)
         final = kernels.rms_norm(hidden[-1:], self.model.model.norm.weight, epsilon, error_flag=flag)
         logits = self._project(final, self.model.lm_head, flag)

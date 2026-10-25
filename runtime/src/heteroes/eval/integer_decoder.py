@@ -79,6 +79,14 @@ class IntegerDecoderGraph(StrictDecoderGraph):
                 yield getattr(layer.mlp, name).weight
         yield self.model.lm_head.weight
 
+    def _project_many(self, value, modules, flag):
+        return self.kernels.linear_many(
+            value,
+            tuple(module.weight for module in modules),
+            tuple(getattr(module, "bias", None) for module in modules),
+            error_flag=flag,
+        )
+
     def _request_workspace_bytes(self):
         return sum(w.shape[0] * 4 for w in {id(w): w for w in self._projection_weights()}.values())
 

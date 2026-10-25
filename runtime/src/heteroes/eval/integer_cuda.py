@@ -404,6 +404,56 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
     def linear(
         self, value, weight, bias=None, *, error_flag=None, row_tile=None, warps=4, split_k=1, implementation="auto"
     ):
+        return self._linear(
+            value,
+            weight,
+            bias,
+            error_flag=error_flag,
+            row_tile=row_tile,
+            warps=warps,
+            split_k=split_k,
+            implementation=implementation,
+        )
+
+    @torch.inference_mode()
+    def linear_many(self, value, weights, biases=None, *, error_flag=None):
+        """Project one activation through independent live matrices with one call-local quantization.
+
+        No activation/content cache, concatenated weights or cross-call prepared input is retained. Validate
+        every component before allocating the shared quantization; the caller's error flag stays monotonic.
+        """
+        if not isinstance(weights, (list, tuple)) or not weights:
+            raise ReferenceArithmeticError("Integer projection group needs a nonempty list/tuple of weights")
+        if biases is None:
+            biases = (None,) * len(weights)
+        if not isinstance(biases, (list, tuple)) or len(biases) != len(weights):
+            raise ReferenceArithmeticError("Integer projection group needs matching weights and biases")
+        if not isinstance(value, torch.Tensor) or value.dtype != torch.float32:
+            raise ReferenceArithmeticError("Integer linear activation must be FP32")
+        for weight, bias in zip(weights, biases):
+            rows, width, _ = sc.validate_linear(value, weight, bias, device=self.device)
+        flag = self.new_error_flag() if error_flag is None else error_flag
+        prepared = self.quantize_input(value.reshape(rows, width), error_flag=flag)
+        outputs = tuple(
+            self._linear(value, weight, bias, error_flag=flag, prepared=prepared)
+            for weight, bias in zip(weights, biases)
+        )
+        self._finish(flag, error_flag)
+        return outputs
+
+    def _linear(
+        self,
+        value,
+        weight,
+        bias=None,
+        *,
+        error_flag=None,
+        row_tile=None,
+        warps=4,
+        split_k=1,
+        implementation="auto",
+        prepared=None,
+    ):
         if row_tile is not None and (type(row_tile) is not int or row_tile not in (16, 32)):
             raise ReferenceArithmeticError("Integer row tile must be 16 or 32")
         if type(warps) is not int or warps not in (4, 8):
@@ -421,7 +471,11 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
         mode = ("simt" if rows == 1 else "mma") if implementation == "auto" else implementation
         functions = self._integer_functions(width, bias is not None, row_tile, warps, split_k)
         flag = self.new_error_flag() if error_flag is None else error_flag
-        quantized, ex = self.quantize_input(value.reshape(rows, width), error_flag=flag, _functions=functions)
+        quantized, ex = (
+            self.quantize_input(value.reshape(rows, width), error_flag=flag, _functions=functions)
+            if prepared is None
+            else prepared
+        )
         ew = self._weight_exponents(weight, flag)
         out = torch.empty((rows, outputs), dtype=torch.float32, device=self.device)
         partials = torch.empty((split_k, rows, outputs), dtype=torch.int64, device=self.device) if split_k > 1 else out
