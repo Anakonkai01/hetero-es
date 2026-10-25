@@ -7,7 +7,9 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
 ## Tóm tắt cho chủ dự án (2026-10-25)
 
 - Chủ dự án bàn giao thử cho DeepSeek v4.1 Flash trên nhánh/worktree riêng; Codex audit rồi tiếp tục sau khi reset usage.
-  [Bản giao và quy trình audit](handoff-deepseek-flash-2026-10-25.md). M6 mới đọc thiết kế, chưa sửa mã.
+  [Bản giao tiếp tục chi tiết, lỗi audit và yêu cầu đo hiệu năng](handoff-deepseek-performance-continue-2026-10-25.md).
+  Nhánh thử đã có mã M6 tại `6299f62e` và WIP; chưa có số đo model thật hay nghiệm thu strict đa GPU.
+  Bản giao này chỉ cập nhật quy trình; triển khai Codex đang tạm dừng theo yêu cầu chủ dự án.
 - Tiếp tục toàn bộ **M0–M6**, ưu tiên kernel tổng quát tiến gần vLLM. Mã nền **`3fd704a5`** đã chọn chuyển đổi
   chính xác, chung lượng tử hóa đầu vào, split-K decode tự động và đóng gói activation một lần và cây cộng attention theo nhóm 8 giữ nguyên số học.
   M1/M2 và mục tiêu chung chưa hoàn tất; [kế hoạch đã duyệt](PLAN-SUA-HUMAN-REVIEW.md) giữ nguyên byte/phạm vi.
