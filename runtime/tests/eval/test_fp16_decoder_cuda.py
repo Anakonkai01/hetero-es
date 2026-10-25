@@ -38,13 +38,22 @@ def eager_logits(model, ids):
         q = q.reshape(1, -1, config.num_attention_heads, dim).transpose(1, 2)
         k = k.reshape(1, -1, config.num_key_value_heads, dim).transpose(1, 2)
         v = v.reshape(1, -1, config.num_key_value_heads, dim).transpose(1, 2)
-        query = q * cosine[None, None, :, :] + torch.cat((-q[..., dim // 2 :], q[..., : dim // 2]), -1) * sine[None, None, :, :]
-        key = k * cosine[None, None, :, :] + torch.cat((-k[..., dim // 2 :], k[..., : dim // 2]), -1) * sine[None, None, :, :]
+        query = (
+            q * cosine[None, None, :, :]
+            + torch.cat((-q[..., dim // 2 :], q[..., : dim // 2]), -1) * sine[None, None, :, :]
+        )
+        key = (
+            k * cosine[None, None, :, :]
+            + torch.cat((-k[..., dim // 2 :], k[..., : dim // 2]), -1) * sine[None, None, :, :]
+        )
         repeat = config.num_attention_heads // config.num_key_value_heads
         key = key.repeat_interleave(repeat, dim=1)
         value = v.repeat_interleave(repeat, dim=1)
         scores = (query @ key.transpose(-1, -2)) / (dim**0.5)
-        mask = torch.arange(ids.shape[1], device=ids.device)[None, :] <= torch.arange(ids.shape[1], device=ids.device)[:, None]
+        mask = (
+            torch.arange(ids.shape[1], device=ids.device)[None, :]
+            <= torch.arange(ids.shape[1], device=ids.device)[:, None]
+        )
         probabilities = torch.softmax(scores.masked_fill(~mask, float("-inf")), dim=-1)
         mixed = (probabilities @ value).transpose(1, 2).reshape(1, -1, config.hidden_size)
         hidden = hidden + F.linear(mixed.half(), attention.o_proj.weight, attention.o_proj.bias).float()
@@ -54,7 +63,9 @@ def eager_logits(model, ids):
         gate = F.linear(normalized.half(), layer.mlp.gate_proj.weight).float()
         up = F.linear(normalized.half(), layer.mlp.up_proj.weight).float()
         hidden = hidden + F.linear((gate * torch.sigmoid(gate) * up).half(), layer.mlp.down_proj.weight).float()
-    final = torch.nn.functional.rms_norm(hidden, (config.hidden_size,), model.model.norm.weight.float(), config.rms_norm_eps)
+    final = torch.nn.functional.rms_norm(
+        hidden, (config.hidden_size,), model.model.norm.weight.float(), config.rms_norm_eps
+    )
     return F.linear(final.half(), model.lm_head.weight).float()
 
 
