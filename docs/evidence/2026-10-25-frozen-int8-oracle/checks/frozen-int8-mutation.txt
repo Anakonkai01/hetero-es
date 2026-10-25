@@ -1,0 +1,19 @@
+control ok    | 53 passed in 0.71s
+killed       quantizer rounds ties away from zero | 2 failed, 51 passed in 0.72s
+killed       tiny nonzero row accepted | 1 failed, 52 passed in 0.72s
+killed       zero row scale relationship unchecked | 2 failed, 51 passed in 0.71s
+killed       minus 128 accepted | 1 failed, 52 passed in 0.71s
+killed       negative scale accepted | 2 failed, 51 passed in 0.72s
+killed       noncanonical header accepted | 1 failed, 52 passed in 0.73s
+killed       descriptor dtype unchecked | 1 failed, 52 passed in 0.71s
+killed       boolean format version accepted | 1 failed, 52 passed in 0.71s
+killed       exact maximum float32 rejected | 1 failed, 52 passed in 0.72s
+killed       subnormal output not flushed | 7 failed, 46 passed in 0.73s
+killed       projection exponent off by one | 2 failed, 51 passed in 0.72s
+killed       normal scale significand loses hidden bit | 2 failed, 51 passed in 0.73s
+killed       expected artifact hash ignored | 1 failed, 52 passed in 0.71s
+killed       weight payload hash ignored | 1 failed, 52 passed in 0.70s
+killed       round shift ties away from even | 1 failed, 52 passed in 0.72s
+killed       encoder lower exponent bound removed | 1 failed, 52 passed in 0.72s
+
+16 of 16 mutants killed.
