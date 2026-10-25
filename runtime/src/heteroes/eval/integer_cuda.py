@@ -20,8 +20,18 @@ from heteroes.eval.reference_ops import ReferenceArithmeticError
 INTEGER_CUDA_VERSION = "row_scaled_integer_mma_cuda_v1_experimental"
 
 
-def static_identity(magnitude_bits=14, max_partial_bytes=16 * 1024**2):
+def weight_read_plan(magnitude_bits, arch, requested):
     reference._precision(magnitude_bits)
+    if requested not in ("auto", "scalar", "paired"):
+        raise ReferenceArithmeticError("Integer weight load must be auto, scalar or paired")
+    if requested == "auto":
+        return "paired" if magnitude_bits == 22 and arch == "sm_120" else "scalar"
+    return requested
+
+
+def static_identity(magnitude_bits=14, max_partial_bytes=16 * 1024**2, *, weight_load="auto"):
+    reference._precision(magnitude_bits)
+    weight_read_plan(magnitude_bits, "sm_120", weight_load)
     if type(max_partial_bytes) is not int or max_partial_bytes < 1:
         raise ReferenceArithmeticError("Integer workspace budget must be a positive integer")
     return {
@@ -31,6 +41,8 @@ def static_identity(magnitude_bits=14, max_partial_bytes=16 * 1024**2):
         "integerSourceSha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "maxPartialBytes": max_partial_bytes,
         "activationPacking": "radix_planes_once_v1_experimental",
+        "weightLoad": weight_load,
+        "weightReadPolicy": "aligned_half2_sm120_b22_v1_experimental",
         "decodePlanning": planning.identity(),
         "hardwareQualified": False,
     }
@@ -182,12 +194,31 @@ integer_linear(const qi_t* x,const u16* w,const u16* bias,const int* ex,const in
       #pragma unroll
       for(int word=0;word<2;++word) {
         unsigned packed[DIGITS]={};
+#if WEIGHT_READ32
+        #pragma unroll
+        for(int pair=0;pair<2;++pair) {
+          int k=start+thread*4+word*16+pair*2;
+          unsigned halves=0;
+          if(n<outputs) {
+            if((WIDTH%2)==0 && (((unsigned long long)w)&3ull)==0ull && k+1<WIDTH) {
+              const u16* address=w+(size_t)n*WIDTH+k;
+              asm volatile("ld.global.u32 %0, [%1];" : "=r"(halves) : "l"(address));
+            } else {
+              if(k<WIDTH) halves=(unsigned)w[(size_t)n*WIDTH+k];
+              if(k+1<WIDTH) halves|=((unsigned)w[(size_t)n*WIDTH+k+1])<<16;
+            }
+          }
+          pack_digits(packed,quant_half((u16)halves,exponent),pair*2);
+          pack_digits(packed,quant_half((u16)(halves>>16),exponent),pair*2+1);
+        }
+#else
         #pragma unroll
         for(int i=0;i<4;++i) {
           int k=start+thread*4+word*16+i;
           int q=(n<outputs && k<WIDTH) ? quant_half(w[(size_t)n*WIDTH+k],exponent) : 0;
           pack_digits(packed,q,i);
         }
+#endif
         #pragma unroll
         for(int d=0;d<DIGITS;++d) b[d][word]=packed[d];
       }
@@ -290,14 +321,16 @@ extern "C" __global__ void integer_finish(const i64* partials,const u16* bias,co
 
 
 class IntegerCudaKernels(sc.StrictCudaKernels):
-    def __init__(self, device, *, magnitude_bits=14, max_partial_bytes=16 * 1024**2):
+    def __init__(self, device, *, magnitude_bits=14, max_partial_bytes=16 * 1024**2, weight_load="auto"):
         reference._precision(magnitude_bits)
+        weight_read_plan(magnitude_bits, "sm_120", weight_load)
         if type(max_partial_bytes) is not int or max_partial_bytes < 1:
             raise ReferenceArithmeticError("Integer workspace budget must be a positive integer")
         super().__init__(device)
         if int(self.arch[3:]) < 80:
             raise ReferenceArithmeticError("Integer MMA prototype currently requires sm80 or newer")
         self.magnitude_bits = magnitude_bits
+        self.weight_load = weight_load
         self.max_partial_bytes = max_partial_bytes
         self.multiprocessors = int(torch.cuda.get_device_properties(self.device).multi_processor_count)
         self._weight_metadata, self._request_active = {}, False
@@ -368,12 +401,13 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
     def identity(self):
         identity = {
             **super().identity(),
-            **static_identity(self.magnitude_bits, self.max_partial_bytes),
+            **static_identity(self.magnitude_bits, self.max_partial_bytes, weight_load=self.weight_load),
             "integerKernel": INTEGER_CUDA_VERSION,
             "integerReference": reference.identity(self.magnitude_bits),
             "integerSourceSha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
             "maxPartialBytes": self.max_partial_bytes,
             "multiprocessors": self.multiprocessors,
+            "weightLoadEffective": weight_read_plan(self.magnitude_bits, self.arch, self.weight_load),
             "hardwareQualified": False,
         }
         identity["fingerprint"] = canonical_json_hash({k: v for k, v in identity.items() if k != "fingerprint"})
@@ -381,6 +415,9 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
 
     def _integer_functions(self, width, has_bias=False, row_tile=16, warps=4, split_k=1, *, packed_input=False):
         name = f"integer-{self.magnitude_bits}-{width}-bias{int(has_bias)}-m{row_tile}-w{warps}-s{split_k}-p{int(packed_input)}"
+        paired = weight_read_plan(self.magnitude_bits, self.arch, self.weight_load) == "paired"
+        if paired:
+            name += "-load32"
         if name not in self._functions:
             defines = dict(
                 WIDTH=width,
@@ -391,6 +428,7 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
                 WARPS=warps,
                 SPLIT_K=split_k,
                 PACKED_INPUT=int(packed_input),
+                WEIGHT_READ32=int(paired),
             )
             header = "".join(f"#define {k} {v}\n" for k, v in defines.items())
             self._functions[name] = self._compile(

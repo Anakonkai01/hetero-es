@@ -24,6 +24,18 @@ def test_integer_constructor_guards_before_cuda(monkeypatch):
         cuda_class()("cuda", magnitude_bits=True)
 
 
+def test_weight_read_policy_keeps_the_unselected_architecture_and_precision_on_scalar():
+    from heteroes.eval.integer_cuda import weight_read_plan
+
+    assert weight_read_plan(22, "sm_120", "auto") == "paired"
+    assert weight_read_plan(22, "sm_86", "auto") == "scalar"
+    assert weight_read_plan(14, "sm_120", "auto") == "scalar"
+    assert weight_read_plan(22, "sm_120", "scalar") == "scalar"
+    assert weight_read_plan(22, "sm_86", "paired") == "paired"
+    with pytest.raises(ReferenceArithmeticError, match="weight load"):
+        cuda_class()("cuda", weight_load="vendor")
+
+
 def test_integer_audit_requires_exact_signed_mma_and_refuses_float_multiply():
     clean = "mma.sync.aligned.m16n8k32.row.col.s32.s8.s8.s32 {d0,d1,d2,d3}, {a0,a1,a2,a3}, {b0,b1}, {c0,c1,c2,c3};"
     assert sc.audit_integer_ptx(clean)["violations"] == []
@@ -46,6 +58,36 @@ def test_integer_conversion_audit_only_admits_the_proved_nearest_even_mode():
 gpu = pytest.mark.skipif(
     os.environ.get("HETEROES_GPU_ACCEPTANCE") != "1" or not torch.cuda.is_available(), reason="GPU opt-in"
 )
+
+
+@gpu
+@pytest.mark.parametrize("magnitude_bits", [14, 22])
+def test_paired_weight_reads_preserve_bits_with_even_odd_tail_and_offset_layouts(magnitude_bits):
+    scalar = cuda_class()("cuda", magnitude_bits=magnitude_bits, weight_load="scalar")
+    paired = cuda_class()("cuda", magnitude_bits=magnitude_bits, weight_load="paired")
+    generator = torch.Generator().manual_seed(887)
+    for rows, width, outputs, offset in (
+        (3, 33, 7, 0),
+        (17, 66, 19, 0),
+        (32, 896, 17, 0),
+        (5, 64, 13, 1),
+        (9, 17, 7, 1),
+        (4, 32, 17, 2),
+    ):
+        cpu_x = torch.randn(rows, width, generator=generator)
+        cpu_x[0, :3] = torch.tensor([-0.0, 2.0**-127, -(2.0**-127)])
+        cpu_w = (torch.randn(outputs, width, generator=generator) * 0.125).half()
+        cpu_w[0, 0] = 65504.0
+        cpu_w[1, 0] = 2.0**-24
+        cpu_bias = torch.randn(outputs, generator=generator).half()
+        backing = torch.empty(offset + outputs * width, dtype=torch.float16, device="cuda")
+        weight = backing[offset:].reshape(outputs, width)
+        weight.copy_(cpu_w)
+        expected = reference.linear(cpu_x, cpu_w, cpu_bias, magnitude_bits=magnitude_bits)
+        for kernel in (scalar, paired):
+            actual = kernel.linear(cpu_x.cuda(), weight, cpu_bias.cuda(), implementation="mma")
+            assert torch.equal(actual.cpu().view(torch.int32), expected.view(torch.int32)), (width, offset)
+    assert paired.identity()["weightLoadEffective"] == "paired"
 
 
 @gpu

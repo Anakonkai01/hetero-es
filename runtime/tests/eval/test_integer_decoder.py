@@ -223,6 +223,13 @@ def test_decode_policy_uses_split_partials_matches_cpu_and_keeps_live_restore(mo
     assert backend._session is None and not backend._call_lock.locked()
     backend.kernels.max_partial_bytes = budget
     assert torch.equal(parents[0], backend.generate(ids, max_new_tokens=4, eos_token_id=[]))
+    previous_load = backend.kernels.weight_load
+    backend.kernels.weight_load = "scalar" if previous_load != "scalar" else "paired"
+    with pytest.raises(ReferenceArithmeticError, match="configuration"):
+        backend.generate(ids, max_new_tokens=4, eos_token_id=[])
+    assert backend._session is None and not backend._call_lock.locked()
+    backend.kernels.weight_load = previous_load
+    assert torch.equal(parents[0], backend.generate(ids, max_new_tokens=4, eos_token_id=[]))
 
 
 @gpu

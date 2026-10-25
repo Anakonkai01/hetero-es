@@ -136,7 +136,7 @@ class FrozenInt8DecoderGraph(StrictDecoderGraph):
     def _current_kernel_configuration(self):
         return tuple(
             getattr(self.frozen_kernels, name, None)
-            for name in ("magnitude_bits", "max_partial_bytes", "device", "multiprocessors")
+            for name in ("magnitude_bits", "max_partial_bytes", "device", "multiprocessors", "weight_load")
         )
 
     def _frozen_storage_state(self):
