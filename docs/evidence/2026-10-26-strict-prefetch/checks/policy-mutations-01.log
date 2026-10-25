@@ -1,0 +1,5 @@
+control ok    | 1 passed, 74 deselected in 0.68s
+killed       prefetch-policy-leaks-to-B14 | 1 failed, 74 deselected in 0.67s
+killed       unknown-architecture-enables-prefetch | 1 failed, 74 deselected in 0.67s
+
+2 of 2 mutants killed.

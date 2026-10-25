@@ -10,23 +10,29 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
   vLLM; đạt mục tiêu hiệu năng thì làm tiếp đầy đủ M0–M6.** Không dùng tốc độ của wrapper vLLM để đóng
   mục tiêu kernel. D2/D3 (cùng candidate/input, cùng token/reward trên GPU khác nhau) vẫn giữ.
 - Nhánh `work/codex-frozen-perf-2026-10-25`, worktree `/home/pc5070ti/projects/heteroes-codex-frozen-perf`.
-  Strict B22 `9acf8bfa`: batch 32 **4073 / 3757 / 1992** token/s cho Smol/Qwen/Tiny trên 5070 Ti,
-  tăng **5,5% / 8,4% / 10,0%**. Mới khoảng **26–28%** vLLM đối chứng; mục tiêu chưa đạt.
-  SM86 giữ scalar sau regression. [B22](evidence/2026-10-25-b22-core-perf/README.md).
+  Strict B22 `b1ef257a`: batch 32 **4504 / 4346 / 2322** token/s cho Smol/Qwen/Tiny trên 5070 Ti,
+  tăng thêm **10,8% / 15,8% / 16,9%** nhờ prefetch trọng số, giữ nguyên số học. SM86 tăng thêm
+  **8,2% / 8,0% / 9,2%**. Mới khoảng **30–33%** vLLM đối chứng; mục tiêu chưa đạt.
+  [Bằng chứng](evidence/2026-10-26-strict-prefetch/README.md).
 - Khảo sát vLLM đã đo parent và 8 candidate chuẩn ± trên hai GPU: Qwen đổi reward **51/2421** lượt trong
   bộ raw/256 token. Kiểm tra lại chat/512 token: **7/576** lượt, cả 7 câu đã xong; điểm candidate lệch
   tối đa **1,56 điểm phần trăm**, best candidate giữ nguyên nhưng ties/hệ số ES đổi. Không suy thành
   ảnh hưởng learning nhỏ hoặc bỏ strict. [Khảo sát và giới hạn](evidence/2026-10-26-vllm-impact/README.md).
-- vLLM upstream chưa hỗ trợ native Windows. Strict `3fd704a5` từng đạt 452 test trên native Win11/3060;
-  bốn layout nhỏ B14/B22/changed/restore khớp Linux. Source mới/trained model lớn/installer còn mở.
+- vLLM upstream chưa hỗ trợ native Windows. Strict `b1ef257a` đạt **505 test trên native Win11/3060**;
+  bốn layout nhỏ B14/B22 và Qwen trained parent/canonical ±/restore khớp Linux/WSL2 về weights,
+  token/reward/logits. Native throughput, installer và managed acceptance còn mở.
 - Thử nghiệm riêng `c9a37059` chia sẻ storage HF với vLLM để giữ schema, candidate hash và exact restore;
   inference gần 100% vLLM vì dùng chính engine đó. Đây là control/khảo sát standalone, chưa managed.
   `3735d6db` sửa FP16 merged GEMM bị stale khi ES ghi tại chỗ.
   [Bằng chứng riêng](evidence/2026-10-25-fast-engine/README.md).
 - LoRA strict `20856dea` tăng batch 32 khoảng 12–29% tùy model/GPU; artifact/adapter/candidate/restore đã
   đối chiếu hai host. Search space riêng, không phải full-weight control.
-- Source `c9a37059`: full check ALL PASS, runtime CPU 3158 pass/459 skip, backend 452; nhóm mới 17 test
-  mỗi host, 4/4 mutation; gói Linux/SDK khớp. Khảo sát mới chỉ thêm harness/evidence/docs, không đổi runtime.
+- Source `b1ef257a`: full check ALL PASS, runtime CPU **3158 pass/461 skip**, backend **452**;
+  75 operator test mỗi GPU trước annotation alignment, nhóm cuối 4 test mỗi GPU, thêm 57 graph/LoRA
+  test SM120, 4/4 mutation; gói Linux/SDK khớp toàn bộ 141 runtime Python file.
+- Đang khảo sát tiếp: gộp projection tăng Qwen batch 32 khoảng 3%, copy 16 byte khoảng 4,7% trên SM120;
+  chưa chọn. Profile gợi ý MLP khoảng 42%, attention 19% thời gian decode. Không suy prototype thành
+  nghiệm thu; tiếp tục tối ưu kernel và khảo sát số học có chứng minh/gate riêng khi cần.
 - Tiếp tục projection throughput, số học có đặc tả và gate chất lượng/portable/native; không sửa recipe
   lịch sử để lấy tốc độ. Kế hoạch đã duyệt vẫn giữ hash
   `4ee6838fa47f810ee40348b5f0bc556834bf50825eb0b7b0795b5053743cb17f`.
@@ -37,13 +43,13 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
 
 Deployment remains `82c37fc`. Service status re-read on 2026-10-26: all three lab services stopped; no lab operation was performed. The disk entry below is historical (2026-10-23).
 
-| What           | State                                                                                                                                                                                                                                                       |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Lab            | `lab.heteroes.site`, deployed clone `~/.local/share/heteroes-lab/app` at `82c37fc`; operations: [local-lab-operations.md](local-lab-operations.md)                                                                                                          |
-| Devices        | 2026-10-25 standalone probes reached local/Nhut 5070 Ti (Linux) and Thao/Quang 3060 (WSL2). Live approval/contribution was not re-read or changed; follow AGENTS.md. Native Windows source/fixtures pass; trained/installer/managed acceptance remains open |
-| Default engine | engine v2 noise made on the GPU (same bits as CPU; `HETEROES_NOISE_DEVICE=cpu` forces CPU)                                                                                                                                                                  |
-| Code           | Owned performance branch `work/codex-frozen-perf-2026-10-25`; strict B22 `9acf8bfa`, experimental live FP16/vLLM views `c9a37059`. No push/merge/deployment                                                                                                 |
-| Disk (nhan)    | `/` 90 % used; Archive (NTFS/FUSE, also personal data) **full**, holds lab recovery storage and moved run data                                                                                                                                              |
+| What           | State                                                                                                                                                                                                                                                      |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Lab            | `lab.heteroes.site`, deployed clone `~/.local/share/heteroes-lab/app` at `82c37fc`; operations: [local-lab-operations.md](local-lab-operations.md)                                                                                                         |
+| Devices        | Standalone probes: local 5070 Ti Linux and Thao 3060 WSL2/native Win11. Live approval/contribution was not changed; follow AGENTS.md. Native source/fixtures and finite trained Qwen candidates pass; installer/throughput/managed acceptance remains open |
+| Default engine | engine v2 noise made on the GPU (same bits as CPU; `HETEROES_NOISE_DEVICE=cpu` forces CPU)                                                                                                                                                                 |
+| Code           | Owned performance branch `work/codex-frozen-perf-2026-10-25`; strict B22 `b1ef257a`, experimental live FP16/vLLM views `c9a37059`. No push/merge/deployment                                                                                                |
+| Disk (nhan)    | `/` 90 % used; Archive (NTFS/FUSE, also personal data) **full**, holds lab recovery storage and moved run data                                                                                                                                             |
 
 ## Open work, in order
 
