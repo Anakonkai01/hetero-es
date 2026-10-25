@@ -1,0 +1,131 @@
+{
+  "header": {
+    "kind": "header",
+    "label": "qwen-frozen-head-nonzero-prefix",
+    "engine": "frozen",
+    "host": "5070ti",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "gpu": "NVIDIA GeForce RTX 5070 Ti",
+    "torch": "2.13.0+cu132",
+    "cuda": "13.2",
+    "modelPath": "/home/pc5070ti/projects/heteroes-deepseek-flash/.scratch/strict-integer-20261025/models/qwen",
+    "promptTokens": [
+      11,
+      27,
+      20,
+      53,
+      14,
+      82,
+      10,
+      5
+    ],
+    "promptDigest": "95c48c4165f660e9bc9bda1ddff9a37d26411512aff6e1dae24100692c43afee",
+    "workload": {
+      "prompts": 8,
+      "maxNewTokens": 32,
+      "maxContext": 512,
+      "greedy": true,
+      "prefixCache": false,
+      "repeats": 5,
+      "nonzeroAdapter": true
+    }
+  },
+  "identity": {
+    "kind": "identity",
+    "label": "qwen-frozen-head-nonzero-prefix",
+    "backend": "decoder_frozen_int8_lora_cuda_graph_v1_experimental",
+    "fingerprint": "8f7b305449bf453ab43462f020c18e29e8d739976a0fd05be0d39b72e26de93c",
+    "loadSeconds": 0.8751826179941418,
+    "prepareSeconds": 6.567198197997641,
+    "device": "NVIDIA GeForce RTX 5070 Ti"
+  },
+  "results": [
+    {
+      "kind": "result",
+      "label": "qwen-frozen-head-nonzero-prefix",
+      "engine": "frozen",
+      "device": "NVIDIA GeForce RTX 5070 Ti",
+      "batch": 1,
+      "seconds": [
+        0.1780417449917877,
+        0.17633357099839486,
+        0.17642334099218715,
+        0.17576992500107735,
+        0.17584359300963115
+      ],
+      "medianSeconds": 0.17633357099839486,
+      "millisecondsPerStep": 5.510424093699839,
+      "tokensPerSecond": 181.47423555717188,
+      "equal": true,
+      "sample": [
+        220,
+        19,
+        13,
+        3555,
+        374,
+        279,
+        1102,
+        5267
+      ],
+      "peakMemoryBytes": 793607680
+    },
+    {
+      "kind": "result",
+      "label": "qwen-frozen-head-nonzero-prefix",
+      "engine": "frozen",
+      "device": "NVIDIA GeForce RTX 5070 Ti",
+      "batch": 8,
+      "seconds": [
+        0.26413992799643893,
+        0.26263978899805807,
+        0.2627676600095583,
+        0.2624965639988659,
+        0.2625291209988063
+      ],
+      "medianSeconds": 0.26263978899805807,
+      "millisecondsPerStep": 8.207493406189315,
+      "tokensPerSecond": 974.7190285851656,
+      "equal": true,
+      "sample": [
+        220,
+        19,
+        13,
+        3555,
+        374,
+        279,
+        1102,
+        5267
+      ],
+      "peakMemoryBytes": 934120960
+    },
+    {
+      "kind": "result",
+      "label": "qwen-frozen-head-nonzero-prefix",
+      "engine": "frozen",
+      "device": "NVIDIA GeForce RTX 5070 Ti",
+      "batch": 32,
+      "seconds": [
+        0.42417484099860303,
+        0.4236253240087535,
+        0.4227901479898719,
+        0.42288268099946436,
+        0.42341119299817365
+      ],
+      "medianSeconds": 0.42341119299817365,
+      "millisecondsPerStep": 13.231599781192926,
+      "tokensPerSecond": 2418.4528348177537,
+      "equal": true,
+      "sample": [
+        220,
+        19,
+        13,
+        3555,
+        374,
+        279,
+        1102,
+        5267
+      ],
+      "peakMemoryBytes": 1401863680
+    }
+  ]
+}
