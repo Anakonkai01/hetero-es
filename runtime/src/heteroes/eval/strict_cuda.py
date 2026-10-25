@@ -589,6 +589,27 @@ def audit_sass(text, exact=()):
     return {"floatOps": counts, "violations": violations}
 
 
+def audit_integer_ptx(text):
+    """Integer projections admit signed int8 MMA and rounded bias add, never floating dot/multiply."""
+    result = audit_ptx(text)
+    result["integerMmaOps"] = len(re.findall(r"\bmma\.sync\.aligned\.m16n8k32\.row\.col\.s32\.s8\.s8\.s32\s", text))
+    if not result["integerMmaOps"]:
+        result["violations"].append("Missing signed integer m16n8k32 MMA")
+    if result["floatOps"].get("mul.rn.f32", 0):
+        result["violations"].append("Floating multiply in integer projection")
+    return result
+
+
+def audit_integer_sass(text):
+    result = audit_sass(text)
+    result["integerMmaOps"] = len(re.findall(r"\bIMMA(?:\.[A-Z0-9_]+)*\s", text))
+    if not result["integerMmaOps"]:
+        result["violations"].append("Missing integer IMMA")
+    if result["floatOps"].get("FMUL", 0):
+        result["violations"].append("Floating multiply in integer projection")
+    return result
+
+
 def static_identity():
     source = Path(__file__).read_bytes() + Path(ops.__file__).read_bytes()
     return {
@@ -679,7 +700,7 @@ class StrictCudaKernels:
         identity["fingerprint"] = canonical_json_hash(identity)
         return identity
 
-    def _compile(self, name, source, entries, *, ptx_exact=(), sass_exact=()):
+    def _compile(self, name, source, entries, *, ptx_exact=(), sass_exact=(), integer_mma=False):
         nvrtc = self._nvrtc
         program = _check(nvrtc.nvrtcCreateProgram(source.encode(), f"{name}.cu".encode(), 0, [], []))
         options = [f"--gpu-architecture={self.arch}".encode(), *(o.encode() for o in NVRTC_OPTIONS)]
@@ -697,8 +718,8 @@ class StrictCudaKernels:
         finally:
             nvrtc.nvrtcDestroyProgram(program)
         ptx_text = ptx.rstrip(b"\0").decode()
-        ptx_audit = audit_ptx(ptx_text, ptx_exact)
-        sass_audit = self._audit_cubin(cubin, sass_exact)
+        ptx_audit = audit_integer_ptx(ptx_text) if integer_mma else audit_ptx(ptx_text, ptx_exact)
+        sass_audit = self._audit_cubin(cubin, sass_exact, integer_mma=integer_mma)
         violations = ptx_audit["violations"] + ([] if sass_audit == "unavailable" else sass_audit["violations"])
         if violations:
             raise ReferenceArithmeticError(f"Compiled strict kernel failed its instruction audit: {violations[:5]}")
@@ -716,7 +737,7 @@ class StrictCudaKernels:
         }
         return functions
 
-    def _audit_cubin(self, cubin, exact=()):
+    def _audit_cubin(self, cubin, exact=(), *, integer_mma=False):
         if not self._nvdisasm:
             return "unavailable"
         with tempfile.TemporaryDirectory() as directory:
@@ -725,7 +746,7 @@ class StrictCudaKernels:
             result = subprocess.run([self._nvdisasm, str(path)], capture_output=True, text=True, check=False)
         if result.returncode != 0:
             return "unavailable"
-        return audit_sass(result.stdout, exact)
+        return audit_integer_sass(result.stdout) if integer_mma else audit_sass(result.stdout, exact)
 
     def _linear_function(self, plan, has_bias, row_tile):
         name = f"linear-{plan.width}-{'bias' if has_bias else 'nobias'}"

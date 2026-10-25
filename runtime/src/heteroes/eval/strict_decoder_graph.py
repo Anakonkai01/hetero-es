@@ -215,6 +215,15 @@ class StrictDecoderGraph(StrictDecoderPacked):
             self._session = _DecodeSession(self, capacity, signature)
         return self._session
 
+    def _request_workspace_bytes(self):
+        return 0
+
+    def _generation_begin(self):
+        """Optional operator request state, always prepared while the generation lock is held."""
+
+    def _generation_end(self):
+        """Release request state before allowing another caller to enter."""
+
     def _decode_core(self, state):
         config, kernels, flag = self.config, self.kernels, state.flag
         state.flag.zero_()
@@ -288,15 +297,18 @@ class StrictDecoderGraph(StrictDecoderPacked):
         try:
             if not use_cache:
                 self._release_graph()
+                self._generation_begin()
                 return super().generate(input_ids, attention_mask, **options)
             capacity = len(histories)
             lengths = [row.shape[1] for row in histories]
             if (
                 graph_memory_bound(self.config, capacity, self.max_context, self.head_dim, prompt_tokens=sum(lengths))
+                + self._request_workspace_bytes()
                 > self.max_graph_bytes
             ):
                 raise ReferenceArithmeticError("Captured decode exceeds its explicit memory budget")
             state = self._session_for(capacity)
+            self._generation_begin()
             state.clear()
             state.lengths.copy_(torch.tensor(lengths, dtype=torch.int32, device=self.device))
             for owner, row in enumerate(histories):
@@ -337,7 +349,10 @@ class StrictDecoderGraph(StrictDecoderPacked):
             self._release_graph()
             raise
         finally:
-            if self._session is not None:
-                self._session.clear()
-                self._session.stream.synchronize()
-            self._call_lock.release()
+            try:
+                self._generation_end()
+                if self._session is not None:
+                    self._session.clear()
+                    self._session.stream.synchronize()
+            finally:
+                self._call_lock.release()

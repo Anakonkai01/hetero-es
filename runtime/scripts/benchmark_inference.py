@@ -108,7 +108,8 @@ def load_engine(args, report):
 
     else:
         model, _ = load(args.model_path, files, "cuda")
-        if args.engine in ("strict", "strict-packed", "strict-graph"):
+        if args.engine in ("strict", "strict-packed", "strict-graph", "strict-integer"):
+            from heteroes.eval.integer_decoder import IntegerDecoderGraph
             from heteroes.eval.strict_decoder import StrictDecoderCuda
             from heteroes.eval.strict_decoder_graph import StrictDecoderGraph
             from heteroes.eval.strict_decoder_packed import StrictDecoderPacked
@@ -117,8 +118,13 @@ def load_engine(args, report):
                 "strict": StrictDecoderCuda,
                 "strict-packed": StrictDecoderPacked,
                 "strict-graph": StrictDecoderGraph,
+                "strict-integer": IntegerDecoderGraph,
             }[args.engine]
-            options = {"max_graph_bytes": args.graph_max_bytes} if args.engine == "strict-graph" else {}
+            options = (
+                {"max_graph_bytes": args.graph_max_bytes} if args.engine in ("strict-graph", "strict-integer") else {}
+            )
+            if args.engine == "strict-integer":
+                options["magnitude_bits"] = args.integer_bits
             engine = backend(model, max_context=args.max_context, **options)
             report["backendIdentity"] = engine.identity
         else:
@@ -151,7 +157,16 @@ def load_engine(args, report):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--engine", choices=("strict", "strict-packed", "strict-graph", "hf", "vllm"), required=True)
+    parser.add_argument(
+        "--engine", choices=("strict", "strict-packed", "strict-graph", "strict-integer", "hf", "vllm"), required=True
+    )
+    parser.add_argument(
+        "--integer-bits",
+        type=int,
+        choices=(14, 22),
+        default=22,
+        help="strict-integer only: NEW row-scaled arithmetic, not FP32-tree equivalence",
+    )
     parser.add_argument("--model-path", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--gpu", action="store_true")
@@ -215,7 +230,7 @@ def main(argv=None):
             report["cases"].append(result)
         report["parentProcessPeakAllocatedBytes"] = torch.cuda.max_memory_allocated()
         report["parentProcessPeakReservedBytes"] = torch.cuda.max_memory_reserved()
-        if args.engine in ("strict", "strict-packed", "strict-graph"):
+        if args.engine in ("strict", "strict-packed", "strict-graph", "strict-integer"):
             report["kernelIdentity"] = engine.kernel_identity()
         report["status"] = "ok"
     except Exception as error:

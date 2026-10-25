@@ -54,3 +54,24 @@ def test_measurement_detects_a_changed_repeat(monkeypatch):
     monkeypatch.setattr(module.time, "perf_counter", lambda: next(times))
     outputs = iter([[[1]], [[1]], [[2]]])
     assert module.measure(lambda _: next(outputs), [[7]], 1, 2, lambda: None)["repeatTokensEqual"] is False
+
+
+@pytest.mark.parametrize("precision", ["13", "23", "0"])
+def test_integer_precision_guard_precedes_model_loading(tmp_path, monkeypatch, precision):
+    module = script()
+    monkeypatch.setenv("HETEROES_GPU_ACCEPTANCE", "1")
+    monkeypatch.setattr(module, "load_engine", lambda *args: pytest.fail("precision guard must run first"))
+    with pytest.raises(SystemExit):
+        module.main(
+            [
+                "--engine",
+                "strict-integer",
+                "--integer-bits",
+                precision,
+                "--gpu",
+                "--model-path",
+                str(tmp_path),
+                "--out",
+                str(tmp_path / "r.json"),
+            ]
+        )
