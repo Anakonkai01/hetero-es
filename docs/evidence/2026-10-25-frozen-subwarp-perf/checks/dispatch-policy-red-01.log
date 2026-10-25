@@ -1,0 +1,112 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+_ test_adapter_finish_uses_the_measured_rank_policy_and_retains_a_strict_control[8-output] _
+
+rank = 8, execution = 'output'
+
+    @pytest.mark.parametrize("rank,execution", [(8, "output"), (16, "output"), (17, "warp"), (32, "warp")])
+    def test_adapter_finish_uses_the_measured_rank_policy_and_retains_a_strict_control(rank, execution):
+        from types import SimpleNamespace
+    
+        from heteroes.eval.frozen_int8_decoder import FrozenInt8DecoderGraph
+    
+        captured = {}
+    
+        def finish(*args, **kwargs):
+            captured.update(kwargs)
+            return args[2]
+    
+        decoder = object.__new__(FrozenInt8DecoderGraph)
+        decoder.kernels = SimpleNamespace(lora_finish=finish)
+        module = SimpleNamespace(rank=rank, adapter_name="default", lora_B={"default": SimpleNamespace(weight=None)}, scaling=2.0)
+        base = object()
+        assert decoder._adapter_finish(None, base, module, None) is base
+>       assert captured["execution"] == execution
+               ^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'execution'
+
+runtime/tests/eval/test_frozen_int8_decoder.py:142: KeyError
+_ test_adapter_finish_uses_the_measured_rank_policy_and_retains_a_strict_control[16-output] _
+
+rank = 16, execution = 'output'
+
+    @pytest.mark.parametrize("rank,execution", [(8, "output"), (16, "output"), (17, "warp"), (32, "warp")])
+    def test_adapter_finish_uses_the_measured_rank_policy_and_retains_a_strict_control(rank, execution):
+        from types import SimpleNamespace
+    
+        from heteroes.eval.frozen_int8_decoder import FrozenInt8DecoderGraph
+    
+        captured = {}
+    
+        def finish(*args, **kwargs):
+            captured.update(kwargs)
+            return args[2]
+    
+        decoder = object.__new__(FrozenInt8DecoderGraph)
+        decoder.kernels = SimpleNamespace(lora_finish=finish)
+        module = SimpleNamespace(rank=rank, adapter_name="default", lora_B={"default": SimpleNamespace(weight=None)}, scaling=2.0)
+        base = object()
+        assert decoder._adapter_finish(None, base, module, None) is base
+>       assert captured["execution"] == execution
+               ^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'execution'
+
+runtime/tests/eval/test_frozen_int8_decoder.py:142: KeyError
+_ test_adapter_finish_uses_the_measured_rank_policy_and_retains_a_strict_control[17-warp] _
+
+rank = 17, execution = 'warp'
+
+    @pytest.mark.parametrize("rank,execution", [(8, "output"), (16, "output"), (17, "warp"), (32, "warp")])
+    def test_adapter_finish_uses_the_measured_rank_policy_and_retains_a_strict_control(rank, execution):
+        from types import SimpleNamespace
+    
+        from heteroes.eval.frozen_int8_decoder import FrozenInt8DecoderGraph
+    
+        captured = {}
+    
+        def finish(*args, **kwargs):
+            captured.update(kwargs)
+            return args[2]
+    
+        decoder = object.__new__(FrozenInt8DecoderGraph)
+        decoder.kernels = SimpleNamespace(lora_finish=finish)
+        module = SimpleNamespace(rank=rank, adapter_name="default", lora_B={"default": SimpleNamespace(weight=None)}, scaling=2.0)
+        base = object()
+        assert decoder._adapter_finish(None, base, module, None) is base
+>       assert captured["execution"] == execution
+               ^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'execution'
+
+runtime/tests/eval/test_frozen_int8_decoder.py:142: KeyError
+_ test_adapter_finish_uses_the_measured_rank_policy_and_retains_a_strict_control[32-warp] _
+
+rank = 32, execution = 'warp'
+
+    @pytest.mark.parametrize("rank,execution", [(8, "output"), (16, "output"), (17, "warp"), (32, "warp")])
+    def test_adapter_finish_uses_the_measured_rank_policy_and_retains_a_strict_control(rank, execution):
+        from types import SimpleNamespace
+    
+        from heteroes.eval.frozen_int8_decoder import FrozenInt8DecoderGraph
+    
+        captured = {}
+    
+        def finish(*args, **kwargs):
+            captured.update(kwargs)
+            return args[2]
+    
+        decoder = object.__new__(FrozenInt8DecoderGraph)
+        decoder.kernels = SimpleNamespace(lora_finish=finish)
+        module = SimpleNamespace(rank=rank, adapter_name="default", lora_B={"default": SimpleNamespace(weight=None)}, scaling=2.0)
+        base = object()
+        assert decoder._adapter_finish(None, base, module, None) is base
+>       assert captured["execution"] == execution
+               ^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'execution'
+
+runtime/tests/eval/test_frozen_int8_decoder.py:142: KeyError
+=========================== short test summary info ============================
+FAILED runtime/tests/eval/test_frozen_int8_decoder.py::test_adapter_finish_uses_the_measured_rank_policy_and_retains_a_strict_control[8-output]
+FAILED runtime/tests/eval/test_frozen_int8_decoder.py::test_adapter_finish_uses_the_measured_rank_policy_and_retains_a_strict_control[16-output]
+FAILED runtime/tests/eval/test_frozen_int8_decoder.py::test_adapter_finish_uses_the_measured_rank_policy_and_retains_a_strict_control[17-warp]
+FAILED runtime/tests/eval/test_frozen_int8_decoder.py::test_adapter_finish_uses_the_measured_rank_policy_and_retains_a_strict_control[32-warp]
+4 failed, 20 deselected in 1.72s

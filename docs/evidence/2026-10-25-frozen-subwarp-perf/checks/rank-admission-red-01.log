@@ -1,0 +1,41 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_cuda_rank_admission_precedes_cuda_allocation_and_keeps_the_cpu_reference _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7344c61e8e00>
+
+    def test_cuda_rank_admission_precedes_cuda_allocation_and_keeps_the_cpu_reference(monkeypatch):
+        from heteroes.eval.frozen_int8_decoder import FrozenInt8DecoderGraph
+        from heteroes.eval.strict_decoder_graph import StrictDecoderGraph
+    
+        model = model_for("qwen2")
+        freeze_projections(model, rank=33, alpha=66, seed=19, target_modules=("q_proj",))
+        # The eager oracle supports this rank. CUDA's fused product currently supports only rank <= 32.
+        reference = FrozenInt8DecoderReference(model, max_context=64, allow_fixture=True)
+        assert all(item["rank"] == 33 for item in reference.identity["graph"]["frozenProjections"].values())
+        monkeypatch.setattr(StrictDecoderGraph, "__init__", lambda *a, **k: pytest.fail("must reject before CUDA setup"))
+        with pytest.raises(ReferenceArithmeticError, match="rank.*32"):
+>           FrozenInt8DecoderGraph(model, max_context=64, allow_fixture=True)
+
+runtime/tests/eval/test_frozen_int8_decoder.py:107: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+runtime/src/heteroes/eval/frozen_int8_decoder.py:100: in __init__
+    super().__init__(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = (<heteroes.eval.frozen_int8_decoder.FrozenInt8DecoderGraph object at 0x7344d48c40e0>, Qwen2ForCausalLM(
+  (model): Qwe...1e-06)
+    (rotary_emb): Qwen2RotaryEmbedding()
+  )
+  (lm_head): Linear(in_features=24, out_features=43, bias=False)
+))
+k = {'max_context': 64, 'allow_fixture': True, 'max_graph_bytes': 1073741824, 'frozen_int8': True}
+
+>   monkeypatch.setattr(StrictDecoderGraph, "__init__", lambda *a, **k: pytest.fail("must reject before CUDA setup"))
+                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: must reject before CUDA setup
+
+runtime/tests/eval/test_frozen_int8_decoder.py:105: Failed
+=========================== short test summary info ============================
+FAILED runtime/tests/eval/test_frozen_int8_decoder.py::test_cuda_rank_admission_precedes_cuda_allocation_and_keeps_the_cpu_reference
+1 failed, 18 deselected in 2.66s

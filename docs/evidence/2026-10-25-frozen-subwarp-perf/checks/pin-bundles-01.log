@@ -1,0 +1,6 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7103.34it/s]
+smol 9a974917894e4c789497c468b3f304efbaf4c6d66126781b2faba9cd1f6a079f 224 projections
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7142.59it/s]
+qwen 2dd77d6af5fedc9122978ef69f74ba389e8ee0dc7aa0bbd91ec5c4f6d466e577 168 projections
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 2275.42it/s]
+tiny a5656752396e9d78465096ad8d494605651a4385745dd2509bd9397120af1b34 154 projections

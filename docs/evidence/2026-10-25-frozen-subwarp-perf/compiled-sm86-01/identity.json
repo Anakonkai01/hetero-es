@@ -1,0 +1,101 @@
+{
+  "sourceSha256": "8f709d98dd9b1d4ea72006f995758fbf52fa355ac2846c443a06b3dac07cc054",
+  "identity": {
+    "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+    "operators": "pairwise_f32_reference_v1_experimental",
+    "sourceSha256": "daf13db126e0b4b4d5c7258a3f8c8be67ef7171dda2d62889c9e8b41b08a95ec",
+    "nvrtcOptions": [
+      "--fmad=false",
+      "--ftz=false",
+      "--prec-div=true",
+      "--prec-sqrt=true",
+      "--std=c++17"
+    ],
+    "hardwareQualified": false,
+    "arch": "sm_86",
+    "gpu": "NVIDIA GeForce RTX 3060",
+    "nvrtcVersion": [
+      13,
+      2
+    ],
+    "builds": {
+      "lora-16-rows8-output": {
+        "sourceSha256": "890d92794495b7b17233eef3f3ed31e78b3a5991f864c766982c245bf0f379a9",
+        "ptxSha256": "07df80eedec641fbe447b5d0c8cfaa148dd24cad7ca9d27ebf8641114725bf8d",
+        "cubinSha256": "d0ce677144b2d40e9fdf4cbb4b01cd85513ff3dd7f4a228a0f0a2514c14e7ef5",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 17,
+            "add.rn.f32": 17
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 17,
+            "FADD": 17
+          },
+          "violations": []
+        }
+      },
+      "lora-32-rows8": {
+        "sourceSha256": "c59ed4cc7023c69dbc88c3dbadac5aa2344beb890be0f98fc9abfd67b7253e07",
+        "ptxSha256": "468c63a1c891f5959ffeb94a703886bf0e42a228fe1bfada43fbc250ffcf4099",
+        "cubinSha256": "f1396e067bd60b043c2f23c9d98552053675b0809418d5282aea8cb15af72cf0",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 64,
+            "add.rn.f32": 161
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 64,
+            "FADD": 257
+          },
+          "violations": []
+        }
+      },
+      "lora-8-rows8": {
+        "sourceSha256": "32ecda48b9c9aa001ee62b7c23d48f8b36c2612b83d26aca595b5a767042b550",
+        "ptxSha256": "ad493fffd196a8afb2a2ba95087e82b5388a5a3aec828e918dc780d0939d6ddf",
+        "cubinSha256": "3c514cb2546541656a63f7129e8a782f9cb370ddfeb2f3c9e283dd03f4ab58f7",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 64,
+            "add.rn.f32": 161
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 64,
+            "FADD": 257
+          },
+          "violations": []
+        }
+      },
+      "lora-8-rows8-output": {
+        "sourceSha256": "13bb0c42c5d2d0521867a480774a7ae0d595cab6ff34c322fc9ddae6a379af43",
+        "ptxSha256": "3140b29d3f16017f16420df43f93c2c8097a2f01274b9614d93089b7c25b2b11",
+        "cubinSha256": "ae58ae455d989984494a2596dfa915ee4145754277719b8664ebd73475374678",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 9,
+            "add.rn.f32": 10
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 9,
+            "FADD": 10
+          },
+          "violations": []
+        }
+      }
+    },
+    "fingerprint": "8b32b86ed5f30a6142907d747b4204f163224dd8088f5e2430e199a9003d9788"
+  }
+}

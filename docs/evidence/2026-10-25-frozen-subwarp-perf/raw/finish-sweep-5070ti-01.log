@@ -1,0 +1,59 @@
+1 8 256 [('warp', 8, 6.17), ('output', 1, 2.04), ('output', 2, 1.98), ('output', 4, 1.98), ('output', 8, 1.85)]
+1 8 896 [('warp', 8, 6.15), ('output', 1, 2.04), ('output', 2, 2.02), ('output', 4, 2.0), ('output', 8, 2.02)]
+1 8 960 [('warp', 8, 6.16), ('output', 1, 2.06), ('output', 2, 1.97), ('output', 4, 1.97), ('output', 8, 1.59)]
+1 8 2048 [('warp', 8, 6.17), ('output', 1, 2.05), ('output', 2, 2.01), ('output', 4, 1.99), ('output', 8, 1.66)]
+1 8 2560 [('warp', 8, 8.19), ('output', 1, 2.04), ('output', 2, 2.01), ('output', 4, 2.01), ('output', 8, 1.93)]
+1 8 4864 [('warp', 8, 8.19), ('output', 1, 2.08), ('output', 2, 2.07), ('output', 4, 2.07), ('output', 8, 2.0)]
+1 8 5632 [('warp', 8, 8.2), ('output', 1, 2.07), ('output', 2, 2.08), ('output', 4, 2.04), ('output', 8, 1.99)]
+1 32 256 [('warp', 8, 6.15), ('output', 1, 4.09), ('output', 2, 4.09), ('output', 4, 2.07), ('output', 8, 2.06)]
+1 32 896 [('warp', 8, 6.16), ('output', 1, 4.11), ('output', 2, 4.09), ('output', 4, 2.06), ('output', 8, 2.06)]
+1 32 960 [('warp', 8, 6.16), ('output', 1, 4.11), ('output', 2, 4.09), ('output', 4, 2.06), ('output', 8, 2.06)]
+1 32 2048 [('warp', 8, 6.16), ('output', 1, 4.1), ('output', 2, 3.63), ('output', 4, 2.07), ('output', 8, 2.06)]
+1 32 2560 [('warp', 8, 8.2), ('output', 1, 4.1), ('output', 2, 4.09), ('output', 4, 2.06), ('output', 8, 2.06)]
+1 32 4864 [('warp', 8, 8.19), ('output', 1, 4.09), ('output', 2, 4.1), ('output', 4, 4.09), ('output', 8, 2.06)]
+1 32 5632 [('warp', 8, 8.19), ('output', 1, 4.1), ('output', 2, 4.09), ('output', 4, 4.09), ('output', 8, 2.07)]
+8 8 256 [('warp', 8, 8.2), ('output', 1, 2.05), ('output', 2, 2.05), ('output', 4, 2.05), ('output', 8, 2.05)]
+8 8 896 [('warp', 8, 8.2), ('output', 1, 2.04), ('output', 2, 2.04), ('output', 4, 2.04), ('output', 8, 2.05)]
+8 8 960 [('warp', 8, 8.21), ('output', 1, 2.05), ('output', 2, 2.05), ('output', 4, 2.05), ('output', 8, 2.05)]
+8 8 2048 [('warp', 8, 8.21), ('output', 1, 2.05), ('output', 2, 2.04), ('output', 4, 2.06), ('output', 8, 2.06)]
+8 8 2560 [('warp', 8, 8.2), ('output', 1, 2.06), ('output', 2, 2.06), ('output', 4, 2.06), ('output', 8, 2.06)]
+8 8 4864 [('warp', 8, 10.24), ('output', 1, 2.08), ('output', 2, 2.07), ('output', 4, 2.06), ('output', 8, 2.06)]
+8 8 5632 [('warp', 8, 10.03), ('output', 1, 2.08), ('output', 2, 2.07), ('output', 4, 2.06), ('output', 8, 2.06)]
+8 32 256 [('warp', 8, 8.2), ('output', 1, 4.1), ('output', 2, 4.1), ('output', 4, 4.1), ('output', 8, 4.1)]
+8 32 896 [('warp', 8, 8.21), ('output', 1, 4.11), ('output', 2, 4.09), ('output', 4, 4.11), ('output', 8, 4.11)]
+8 32 960 [('warp', 8, 8.2), ('output', 1, 4.09), ('output', 2, 4.11), ('output', 4, 4.11), ('output', 8, 4.11)]
+8 32 2048 [('warp', 8, 8.21), ('output', 1, 4.1), ('output', 2, 4.15), ('output', 4, 4.11), ('output', 8, 4.1)]
+8 32 2560 [('warp', 8, 8.22), ('output', 1, 6.18), ('output', 2, 6.17), ('output', 4, 6.17), ('output', 8, 6.14)]
+8 32 4864 [('warp', 8, 8.21), ('output', 1, 7.37), ('output', 2, 6.2), ('output', 4, 6.2), ('output', 8, 6.21)]
+8 32 5632 [('warp', 8, 8.21), ('output', 1, 8.18), ('output', 2, 6.31), ('output', 4, 6.2), ('output', 8, 6.16)]
+32 8 256 [('warp', 8, 8.2), ('output', 1, 2.05), ('output', 2, 2.05), ('output', 4, 2.05), ('output', 8, 2.03)]
+32 8 896 [('warp', 8, 8.21), ('output', 1, 2.06), ('output', 2, 2.06), ('output', 4, 2.06), ('output', 8, 2.06)]
+32 8 960 [('warp', 8, 8.2), ('output', 1, 2.06), ('output', 2, 2.06), ('output', 4, 2.06), ('output', 8, 2.06)]
+32 8 2048 [('warp', 8, 10.25), ('output', 1, 2.06), ('output', 2, 2.06), ('output', 4, 2.06), ('output', 8, 2.06)]
+32 8 2560 [('warp', 8, 10.26), ('output', 1, 4.09), ('output', 2, 4.02), ('output', 4, 2.07), ('output', 8, 2.06)]
+32 8 4864 [('warp', 8, 18.45), ('output', 1, 4.09), ('output', 2, 4.09), ('output', 4, 4.09), ('output', 8, 4.09)]
+32 8 5632 [('warp', 8, 20.49), ('output', 1, 4.11), ('output', 2, 4.11), ('output', 4, 4.1), ('output', 8, 4.1)]
+32 32 256 [('warp', 8, 8.2), ('output', 1, 4.09), ('output', 2, 4.1), ('output', 4, 4.11), ('output', 8, 4.11)]
+32 32 896 [('warp', 8, 8.2), ('output', 1, 6.14), ('output', 2, 6.14), ('output', 4, 6.14), ('output', 8, 6.14)]
+32 32 960 [('warp', 8, 8.21), ('output', 1, 6.14), ('output', 2, 6.13), ('output', 4, 6.14), ('output', 8, 6.14)]
+32 32 2048 [('warp', 8, 10.25), ('output', 1, 8.21), ('output', 2, 8.2), ('output', 4, 8.2), ('output', 8, 8.21)]
+32 32 2560 [('warp', 8, 10.3), ('output', 1, 10.29), ('output', 2, 10.29), ('output', 4, 10.29), ('output', 8, 10.25)]
+32 32 4864 [('warp', 8, 18.44), ('output', 1, 16.41), ('output', 2, 16.4), ('output', 4, 16.4), ('output', 8, 16.39)]
+32 32 5632 [('warp', 8, 20.49), ('output', 1, 20.52), ('output', 2, 20.47), ('output', 4, 19.42), ('output', 8, 18.7)]
+Traceback (most recent call last):
+  File "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/frozen-subwarp-20261025/bench_finish.py", line 49, in <module>
+    with args.out.open('x') as f:json.dump(report,f,indent=2);f.write('\n')
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/json/__init__.py", line 179, in dump
+    for chunk in iterable:
+                 ^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/json/encoder.py", line 432, in _iterencode
+    yield from _iterencode_dict(o, _current_indent_level)
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/json/encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/json/encoder.py", line 439, in _iterencode
+    o = _default(o)
+        ^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/json/encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+TypeError: Object of type method is not JSON serializable
