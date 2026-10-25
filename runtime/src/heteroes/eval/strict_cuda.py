@@ -261,22 +261,23 @@ __device__ float silu_(float x, unsigned& bad) {
 }
 
 // Binary-counter reduction in input order; finish() folds pending nodes from the lowest set bit upward.
+// Expanding constant slot indices preserves the same carry and fold order; allocation is compiler-dependent.
 struct Tree {
   float s[17];
   unsigned n;
 };
 __device__ __forceinline__ void push(Tree& t, float v, unsigned& bad) {
   unsigned i = t.n++;
-  int level = 0;
-  while ((i >> level) & 1u) {
-    v = add_(t.s[level], v, bad);
-    ++level;
+#pragma unroll
+  for (int level = 0; level < 17; ++level) {
+    if ((i >> level) & 1u) v = add_(t.s[level], v, bad);
+    else { t.s[level] = v; return; }
   }
-  t.s[level] = v;
 }
 __device__ __forceinline__ float finish(const Tree& t, unsigned& bad) {
   float acc = 0.0f;
   bool any = false;
+#pragma unroll
   for (int level = 0; level < 17; ++level) {
     if ((t.n >> level) & 1u) {
       acc = any ? add_(t.s[level], acc, bad) : t.s[level];
@@ -345,6 +346,9 @@ extern "C" __global__ void strict_rope(const float* x, const float* cosine, cons
   report(error, bad);
 }
 
+// A power-of-two group is an aligned canonical subtree. Reduce groups, including the final pruned tail,
+// with the same Tree: this preserves every ordered rounded node without appending identity zeros.
+// Loads and checks still cover all keys, including causally masked keys.
 // Grid (query, kv head, repeat). q: [heads, length, dim]; k/v: [kv_heads, keys, dim]; out: [length, heads*dim].
 extern "C" __global__ void strict_attention(const float* q, const float* key, const float* value, float* out,
                                             int* error, const int* ranges, int heads, int length, int total_keys,
@@ -366,7 +370,22 @@ extern "C" __global__ void strict_attention(const float* q, const float* key, co
     const float* row = key + ((size_t)kv * total_keys + start + j) * dim;
     Tree t;
     t.n = 0;
-    for (int d = 0; d < dim; ++d) push(t, mul_(query[d], load(row + d, bad), bad), bad);
+    for (int first = 0; first < dim; first += 8) {
+      int valid = dim - first < 8 ? dim - first : 8;
+      float terms[8] = {};
+#pragma unroll
+      for (int item = 0; item < 8; ++item) {
+        int d = first + item;
+        if (item < valid) terms[item] = mul_(query[d], load(row + d, bad), bad);
+      }
+#pragma unroll
+      for (int stride = 1; stride < 8; stride <<= 1) {
+#pragma unroll
+        for (int item = 0; item < 8; item += 2 * stride)
+          if (item + stride < valid) terms[item] = add_(terms[item], terms[item + stride], bad);
+      }
+      push(t, terms[0], bad);
+    }
     float score = mul_(finish(t, bad), scale, bad);
     numerators[j] = score;
     if (j <= limit && score > local) local = score;
@@ -397,7 +416,22 @@ extern "C" __global__ void strict_attention(const float* q, const float* key, co
   for (int d = threadIdx.x; d < dim; d += blockDim.x) {
     Tree t;
     t.n = 0;
-    for (int j = 0; j < keys; ++j) push(t, mul_(numerators[j], load(value + ((size_t)kv * total_keys + start + j) * dim + d, bad), bad), bad);
+    for (int first = 0; first < keys; first += 8) {
+      int valid = keys - first < 8 ? keys - first : 8;
+      float terms[8] = {};
+#pragma unroll
+      for (int item = 0; item < 8; ++item) {
+        int j = first + item;
+        if (item < valid) terms[item] = mul_(numerators[j], load(value + ((size_t)kv * total_keys + start + j) * dim + d, bad), bad);
+      }
+#pragma unroll
+      for (int stride = 1; stride < 8; stride <<= 1) {
+#pragma unroll
+        for (int item = 0; item < 8; item += 2 * stride)
+          if (item + stride < valid) terms[item] = add_(terms[item], terms[item + stride], bad);
+      }
+      push(t, terms[0], bad);
+    }
     out[(size_t)i * heads * dim + h * dim + d] = finish(t, bad);
   }
   report(error, bad);
