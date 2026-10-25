@@ -93,6 +93,20 @@ def frozen_model(seed=7, targets=TARGETS):
     return model
 
 
+def test_cuda_rank_admission_precedes_cuda_allocation_and_keeps_the_cpu_reference(monkeypatch):
+    from heteroes.eval.frozen_int8_decoder import FrozenInt8DecoderGraph
+    from heteroes.eval.strict_decoder_graph import StrictDecoderGraph
+
+    model = model_for("qwen2")
+    freeze_projections(model, rank=33, alpha=66, seed=19, target_modules=("q_proj",))
+    # The eager oracle supports this rank. CUDA's fused product currently supports only rank <= 32.
+    reference = FrozenInt8DecoderReference(model, max_context=64, allow_fixture=True)
+    assert all(item["rank"] == 33 for item in reference.identity["graph"]["frozenProjections"].values())
+    monkeypatch.setattr(StrictDecoderGraph, "__init__", lambda *a, **k: pytest.fail("must reject before CUDA setup"))
+    with pytest.raises(ReferenceArithmeticError, match="rank.*32"):
+        FrozenInt8DecoderGraph(model, max_context=64, allow_fixture=True)
+
+
 def test_cpu_reference_projects_a_pinned_tied_head_and_changes_only_the_head_arithmetic():
     strict_model = frozen_model()
     pinned_model = frozen_model()

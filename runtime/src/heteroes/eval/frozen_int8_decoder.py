@@ -93,6 +93,9 @@ class FrozenInt8DecoderGraph(StrictDecoderGraph):
         max_partial_bytes=16 * 1024**2,
         decode_target_ctas_per_sm=8,
     ):
+        for name, module in model.named_modules():
+            if _is_frozen(module) and type(getattr(module, "rank", None)) is int and module.rank > 32:
+                raise ReferenceArithmeticError(f"Frozen CUDA projection {name} requires LoRA rank <= 32")
         try:
             integer_plan.validate_target(decode_target_ctas_per_sm)
         except ValueError as error:
