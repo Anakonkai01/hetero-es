@@ -125,6 +125,7 @@ def load_engine(args, report):
             )
             if args.engine == "strict-integer":
                 options["magnitude_bits"] = args.integer_bits
+                options["decode_target_ctas_per_sm"] = getattr(args, "decode_ctas_per_sm", 8)
             engine = backend(model, max_context=args.max_context, **options)
             report["backendIdentity"] = engine.identity
         else:
@@ -170,6 +171,12 @@ def main(argv=None):
     parser.add_argument("--model-path", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--gpu", action="store_true")
+    parser.add_argument(
+        "--decode-ctas-per-sm",
+        type=int,
+        default=8,
+        help="strict-integer decode only: occupancy target 0..64; 0 disables automatic split-K",
+    )
     parser.add_argument("--batch-sizes", type=int, nargs="+", default=[1, 8, 32])
     parser.add_argument("--max-new-tokens", type=int, default=32)
     parser.add_argument("--max-context", type=int, default=512)
@@ -189,6 +196,7 @@ def main(argv=None):
         or any(not 1 <= size <= 128 for size in args.batch_sizes)
         or not 0 < args.memory_fraction < 0.9
         or not 1 <= args.graph_max_bytes <= 64 * 1024**3
+        or not 0 <= args.decode_ctas_per_sm <= 64
     ):
         parser.error("Invalid finite benchmark limits")
     report = {

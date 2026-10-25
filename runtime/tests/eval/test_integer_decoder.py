@@ -40,6 +40,9 @@ def test_integer_decoder_precision_and_cuda_guards():
             backend(model, magnitude_bits=True)
     with pytest.raises(ReferenceArithmeticError):
         graph(model)
+    for target in (True, -1, 65, 1.5):
+        with pytest.raises(ReferenceArithmeticError, match="target"):
+            graph(model, decode_target_ctas_per_sm=target)
 
 
 gpu = pytest.mark.skipif(
@@ -159,3 +162,80 @@ def test_metadata_invalidates_on_rebind_and_nonfinite_request_does_not_poison_ne
     # The same refresh lifetime applies to the uncaptured generation path.
     assert torch.equal(backend.generate(ids, max_new_tokens=3, eos_token_id=[], use_cache=False).cpu(), expected)
     assert not backend.kernels._request_active
+
+
+@gpu
+def test_decode_policy_uses_split_partials_matches_cpu_and_keeps_live_restore(monkeypatch):
+    from transformers import LlamaConfig, LlamaForCausalLM
+
+    reference, graph = classes()
+    torch.manual_seed(193)
+    cpu = (
+        LlamaForCausalLM(
+            LlamaConfig(
+                hidden_size=64,
+                intermediate_size=769,
+                num_attention_heads=8,
+                num_key_value_heads=2,
+                num_hidden_layers=1,
+                vocab_size=67,
+                max_position_embeddings=64,
+                eos_token_id=66,
+                pad_token_id=0,
+            )
+        )
+        .half()
+        .eval()
+    )
+    model = copy.deepcopy(cpu).cuda()
+    backend = graph(model, max_context=64, allow_fixture=True, decode_target_ctas_per_sm=8)
+    oracle = reference(cpu, max_context=64, allow_fixture=True)
+    ids = torch.tensor([[3, 5, 7], [11, 13, 17], [19, 23, 29]], device="cuda")
+    calls = []
+    linear = backend.kernels._linear
+
+    def observed(value, weight, bias=None, **kwargs):
+        calls.append((weight.shape[1], kwargs.get("split_k", 1)))
+        return linear(value, weight, bias, **kwargs)
+
+    monkeypatch.setattr(backend.kernels, "_linear", observed)
+    saved = cpu.model.layers[0].mlp.down_proj.weight.detach().clone()
+    parents = []
+    for factor in (1.0, -16.0, 1.0):
+        with torch.no_grad():
+            cpu.model.layers[0].mlp.down_proj.weight.copy_(saved * factor)
+            model.model.layers[0].mlp.down_proj.weight.copy_((saved * factor).cuda())
+        expected = oracle.generate(ids.cpu(), max_new_tokens=4, eos_token_id=[])
+        actual = backend.generate(ids, max_new_tokens=4, eos_token_id=[])
+        assert torch.equal(actual.cpu(), expected)
+        parents.append(actual.clone())
+        assert backend._session.capture_count == 1
+    assert torch.equal(parents[0], parents[2])
+    assert any(width == 769 and split == 8 for width, split in calls)
+    assert backend.identity["decodeExecution"]["targetCtasPerSm"] == 8
+    assert backend._request_workspace_bytes(3) > sum(t.numel() * 4 for t in backend.kernels.weight_metadata_buffers())
+    with pytest.raises(AttributeError):
+        backend.decode_target_ctas_per_sm = 0
+    budget = backend.kernels.max_partial_bytes
+    backend.kernels.max_partial_bytes = 1
+    with pytest.raises(ReferenceArithmeticError, match="configuration"):
+        backend.generate(ids, max_new_tokens=4, eos_token_id=[])
+    assert backend._session is None and not backend._call_lock.locked()
+    backend.kernels.max_partial_bytes = budget
+    assert torch.equal(parents[0], backend.generate(ids, max_new_tokens=4, eos_token_id=[]))
+
+
+@gpu
+def test_decode_partial_budget_is_admitted_before_request_cache_or_metadata_allocations(monkeypatch):
+    import heteroes.eval.strict_decoder_graph as graph_module
+
+    _, graph = classes()
+    backend = graph(model_for("llama").cuda(), max_context=32, allow_fixture=True)
+    # A deterministic synthetic extra bound isolates the generation admission path without a large model.
+    monkeypatch.setattr(backend, "_request_workspace_bytes", lambda capacity=1: 1024)
+    monkeypatch.setattr(graph_module, "graph_memory_bound", lambda *args, **kwargs: 0)
+    backend.max_graph_bytes = 1023
+    monkeypatch.setattr(backend, "_session_for", lambda *args: pytest.fail("budget must precede cache allocation"))
+    monkeypatch.setattr(backend, "_generation_begin", lambda: pytest.fail("budget must precede metadata refresh"))
+    with pytest.raises(ReferenceArithmeticError, match="budget"):
+        backend.generate(torch.tensor([[3, 5]], device="cuda"), max_new_tokens=3, eos_token_id=[])

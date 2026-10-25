@@ -15,7 +15,16 @@ def script():
     return module
 
 
-@pytest.mark.parametrize("options", [[], ["--gpu", "--repeats", "0"], ["--gpu", "--batch-sizes", "0"]])
+@pytest.mark.parametrize(
+    "options",
+    [
+        [],
+        ["--gpu", "--repeats", "0"],
+        ["--gpu", "--batch-sizes", "0"],
+        ["--gpu", "--decode-ctas-per-sm", "-1"],
+        ["--gpu", "--decode-ctas-per-sm", "65"],
+    ],
+)
 def test_benchmark_guards_before_inference_imports(tmp_path, monkeypatch, options):
     module = script()
     monkeypatch.setenv("HETEROES_GPU_ACCEPTANCE", "1")

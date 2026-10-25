@@ -215,8 +215,14 @@ class StrictDecoderGraph(StrictDecoderPacked):
             self._session = _DecodeSession(self, capacity, signature)
         return self._session
 
-    def _request_workspace_bytes(self):
+    def _request_workspace_bytes(self, capacity=1):
         return 0
+
+    def _decode_project(self, value, module, flag):
+        return self._project(value, module, flag)
+
+    def _decode_project_many(self, value, modules, flag):
+        return self._project_many(value, modules, flag)
 
     def _generation_begin(self):
         """Optional operator request state, always prepared while the generation lock is held."""
@@ -240,7 +246,9 @@ class StrictDecoderGraph(StrictDecoderPacked):
         for number, layer in enumerate(self.model.model.layers):
             attention = layer.self_attn
             normalized = kernels.rms_norm(hidden, layer.input_layernorm.weight, epsilon, error_flag=flag)
-            q, k, v = self._project_many(normalized, (attention.q_proj, attention.k_proj, attention.v_proj), flag)
+            q, k, v = self._decode_project_many(
+                normalized, (attention.q_proj, attention.k_proj, attention.v_proj), flag
+            )
             q = kernels.rope(q, cosine, sine, heads, error_flag=flag)
             k = kernels.rope(k, cosine, sine, kv_heads, error_flag=flag)
 
@@ -249,13 +257,13 @@ class StrictDecoderGraph(StrictDecoderPacked):
             mixed = kernels.attention_packed(
                 q, keys, values, layout, heads // kv_heads, float(self._attention_scale), error_flag=flag
             )
-            hidden = kernels.add(hidden, self._project(mixed, attention.o_proj, flag), error_flag=flag)
+            hidden = kernels.add(hidden, self._decode_project(mixed, attention.o_proj, flag), error_flag=flag)
             normalized = kernels.rms_norm(hidden, layer.post_attention_layernorm.weight, epsilon, error_flag=flag)
-            gate, up = self._project_many(normalized, (layer.mlp.gate_proj, layer.mlp.up_proj), flag)
+            gate, up = self._decode_project_many(normalized, (layer.mlp.gate_proj, layer.mlp.up_proj), flag)
             gated = kernels.silu_mul(gate, up, error_flag=flag)
-            hidden = kernels.add(hidden, self._project(gated, layer.mlp.down_proj, flag), error_flag=flag)
+            hidden = kernels.add(hidden, self._decode_project(gated, layer.mlp.down_proj, flag), error_flag=flag)
         normalized = kernels.rms_norm(hidden, self.model.model.norm.weight, epsilon, error_flag=flag)
-        logits = self._project(normalized, self.model.lm_head, flag)
+        logits = self._decode_project(normalized, self.model.lm_head, flag)
         state.decode.greedy(
             logits, state.seen, state.owners, state.tokens, state.result, flag, state.penalty, state.inverse
         )
@@ -301,7 +309,7 @@ class StrictDecoderGraph(StrictDecoderPacked):
             lengths = [row.shape[1] for row in histories]
             if (
                 graph_memory_bound(self.config, capacity, self.max_context, self.head_dim, prompt_tokens=sum(lengths))
-                + self._request_workspace_bytes()
+                + self._request_workspace_bytes(capacity)
                 > self.max_graph_bytes
             ):
                 raise ReferenceArithmeticError("Captured decode exceeds its explicit memory budget")

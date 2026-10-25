@@ -13,6 +13,7 @@ import torch
 
 from heteroes.canonical import canonical_json_hash
 from heteroes.eval import integer_reference as reference
+from heteroes.eval import integer_plan as planning
 from heteroes.eval import strict_cuda as sc
 from heteroes.eval.reference_ops import ReferenceArithmeticError
 
@@ -29,6 +30,7 @@ def static_identity(magnitude_bits=14, max_partial_bytes=16 * 1024**2):
         "nonlinear": sc.static_identity(),
         "integerSourceSha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "maxPartialBytes": max_partial_bytes,
+        "decodePlanning": planning.identity(),
         "hardwareQualified": False,
     }
 
@@ -275,6 +277,7 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
             raise ReferenceArithmeticError("Integer MMA prototype currently requires sm80 or newer")
         self.magnitude_bits = magnitude_bits
         self.max_partial_bytes = max_partial_bytes
+        self.multiprocessors = int(torch.cuda.get_device_properties(self.device).multi_processor_count)
         self._weight_metadata, self._request_active = {}, False
 
     def weight_metadata_buffers(self):
@@ -348,6 +351,7 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
             "integerReference": reference.identity(self.magnitude_bits),
             "integerSourceSha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
             "maxPartialBytes": self.max_partial_bytes,
+            "multiprocessors": self.multiprocessors,
             "hardwareQualified": False,
         }
         identity["fingerprint"] = canonical_json_hash({k: v for k, v in identity.items() if k != "fingerprint"})
@@ -416,7 +420,36 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
         )
 
     @torch.inference_mode()
-    def linear_many(self, value, weights, biases=None, *, error_flag=None):
+    def linear_decode(self, value, weight, bias=None, *, error_flag=None, target_ctas_per_sm=8):
+        if not isinstance(value, torch.Tensor) or value.dtype != torch.float32:
+            raise ReferenceArithmeticError("Integer linear activation must be FP32")
+        rows, width, outputs = sc.validate_linear(value, weight, bias, device=self.device)
+        plan = self._decode_plan(width, rows, outputs, target_ctas_per_sm)
+        return self._linear(
+            value,
+            weight,
+            bias,
+            error_flag=error_flag,
+            row_tile=plan.row_tile,
+            split_k=plan.split_k,
+            implementation=plan.implementation,
+        )
+
+    def _decode_plan(self, width, rows, outputs, target):
+        try:
+            return planning.decode_linear_plan(
+                width,
+                rows,
+                outputs,
+                self.multiprocessors,
+                max_partial_bytes=self.max_partial_bytes,
+                target_ctas_per_sm=target,
+            )
+        except ValueError as error:
+            raise ReferenceArithmeticError(str(error)) from error
+
+    @torch.inference_mode()
+    def linear_many(self, value, weights, biases=None, *, error_flag=None, decode_target_ctas_per_sm=None):
         """Project one activation through independent live matrices with one call-local quantization.
 
         No activation/content cache, concatenated weights or cross-call prepared input is retained. Validate
@@ -430,13 +463,35 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
             raise ReferenceArithmeticError("Integer projection group needs matching weights and biases")
         if not isinstance(value, torch.Tensor) or value.dtype != torch.float32:
             raise ReferenceArithmeticError("Integer linear activation must be FP32")
+        plans = []
         for weight, bias in zip(weights, biases):
-            rows, width, _ = sc.validate_linear(value, weight, bias, device=self.device)
+            rows, width, outputs = sc.validate_linear(value, weight, bias, device=self.device)
+            plan = (
+                None
+                if decode_target_ctas_per_sm is None
+                else self._decode_plan(width, rows, outputs, decode_target_ctas_per_sm)
+            )
+            plans.append(plan)
         flag = self.new_error_flag() if error_flag is None else error_flag
         prepared = self.quantize_input(value.reshape(rows, width), error_flag=flag)
         outputs = tuple(
-            self._linear(value, weight, bias, error_flag=flag, prepared=prepared)
-            for weight, bias in zip(weights, biases)
+            self._linear(
+                value,
+                weight,
+                bias,
+                error_flag=flag,
+                prepared=prepared,
+                **(
+                    {}
+                    if plan is None
+                    else {
+                        "row_tile": plan.row_tile,
+                        "split_k": plan.split_k,
+                        "implementation": plan.implementation,
+                    }
+                ),
+            )
+            for weight, bias, plan in zip(weights, biases, plans)
         )
         self._finish(flag, error_flag)
         return outputs
