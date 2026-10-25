@@ -58,8 +58,15 @@ length; max_context is not a count of keys unnecessarily computed by each decode
 
 ## Latest experiments, not selected
 
+- Four-product SIMT scheduling improves 5070 Ti B1 by 3.6–11.3%, but regresses 3060 B1 by 1.0–3.0% across
+  the same three models. Aligned 64-bit MMA weight reads improve 5070 Ti B32 by 1.1–6.4%, but regress
+  TinyLlama on 3060 by about 4% at B8/B32. Both remain unselected; no model-name-specific exception was added.
+  Same-process ABBA controls retain exact parent tokens/final logits across both GPUs, with complete file manifests
+  and passing compiled PTX/SASS audits. These finite checks do not establish candidate/native/managed acceptance.
+  [SIMT decision](evidence/2026-10-25-simt-vector/DECISION-01.md),
+  [MMA decision](evidence/2026-10-25-mma-vector/DECISION-01.md).
 - Uniform one/two-warp groups regress geometric mean on both 5070 Ti and 3060 across 40 shape/batch cases. Retain 4 warps.
-- Row tiles 64/128 regress overall on both devices. On 5070 Ti tile 64 uses 237–241 registers/thread; tile 128 spills
+- Row tiles 64/128 under the preceding raw-activation packing regress overall on both devices. On 5070 Ti tile 64 uses 237–241 registers/thread; tile 128 spills
   336–424 bytes/thread. Increasing tile size alone is not sufficient.
 - Under preceding 97f62431, shift/PRMT prototypes improved trained B32 by 6–9%. After prepacking, shift gains
   are below 1% with B8 regressions; a direct-integer weight fast path is slower despite exhaustive correctness.

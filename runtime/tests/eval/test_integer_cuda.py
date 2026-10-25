@@ -225,6 +225,38 @@ def test_simt_and_mma_implement_the_same_integer_contract_including_split_reduct
 
 @gpu
 @pytest.mark.parametrize("magnitude_bits", [14, 22])
+@pytest.mark.parametrize("width", [1, 3, 64, 67, 128, 263])
+@pytest.mark.parametrize("storage_offset", [0, 1])
+def test_simt_exact_with_aligned_or_offset_weights_vector_tails_and_all_split_counts(
+    magnitude_bits, width, storage_offset
+):
+    gen = torch.Generator().manual_seed(613 + width)
+    x = torch.randn(3, width, generator=gen, dtype=torch.float32)
+    x[0, -1] = 16.0
+    x[1] = -0.0
+    base = (torch.randn(11 * width + storage_offset, generator=gen) * 0.03).half()
+    w = base[storage_offset:].reshape(11, width)
+    w[0, -1] = 1.0
+    w[1].copy_(-w[0])
+    bias = (torch.randn(11, generator=gen) * 0.1).half()
+    expected = reference.linear(x, w, bias, magnitude_bits=magnitude_bits)
+    device_base = base.cuda()
+    device_weight = device_base[storage_offset:].reshape(11, width)
+    assert device_weight.is_contiguous()
+    assert device_weight.data_ptr() % 8 == 2 * storage_offset
+    kernels = cuda_class()("cuda", magnitude_bits=magnitude_bits)
+    for split in (1, 2, 4, 8):
+        actual = kernels.linear(x.cuda(), device_weight, bias.cuda(), implementation="simt", split_k=split)
+        assert torch.equal(actual.cpu().view(torch.int32), expected.view(torch.int32)), (
+            magnitude_bits,
+            width,
+            storage_offset,
+            split,
+        )
+
+
+@gpu
+@pytest.mark.parametrize("magnitude_bits", [14, 22])
 def test_integer_zero_smallest_normal_rounding_and_overflow(magnitude_bits):
     kernels = cuda_class()("cuda", magnitude_bits=magnitude_bits)
     x = torch.tensor([[-0.0], [2.0**-126], [-(2.0**-126)], [2.0**-100]])

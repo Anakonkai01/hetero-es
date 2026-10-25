@@ -1,0 +1,81 @@
+{
+  "status": "ok",
+  "selected": false,
+  "hardwareQualified": false,
+  "baselineNumericCommit": "3fd704a5",
+  "models": {
+    "smol": {
+      "modelFilesAndPromptsEqual": true,
+      "parentTokensAndFinalLogitsEqualWithinAndAcrossDevices": true,
+      "ratios5070Ti": [
+        0.9992864606104561,
+        1.0061936685836923,
+        1.0111012810824935
+      ],
+      "ratios3060": [
+        0.9965456952576447,
+        0.9629573994899122,
+        1.037440327114806
+      ],
+      "auditedBuilds": {
+        "nhan": {
+          "old": 12,
+          "new": 12
+        },
+        "thao": {
+          "old": 14,
+          "new": 14
+        }
+      }
+    },
+    "tiny": {
+      "modelFilesAndPromptsEqual": true,
+      "parentTokensAndFinalLogitsEqualWithinAndAcrossDevices": true,
+      "ratios5070Ti": [
+        0.9986707781564527,
+        1.0377667587044463,
+        1.0641562403410811
+      ],
+      "ratios3060": [
+        1.000822636644314,
+        0.9607798320858594,
+        0.9606585216187752
+      ],
+      "auditedBuilds": {
+        "nhan": {
+          "old": 14,
+          "new": 14
+        },
+        "thao": {
+          "old": 16,
+          "new": 16
+        }
+      }
+    },
+    "qwen": {
+      "modelFilesAndPromptsEqual": true,
+      "parentTokensAndFinalLogitsEqualWithinAndAcrossDevices": true,
+      "ratios5070Ti": [
+        1.0078902586848264,
+        1.0144353595471556,
+        1.0505450691702787
+      ],
+      "ratios3060": [
+        0.9611798684500908,
+        1.0070053343474858,
+        1.0683670027205519
+      ],
+      "auditedBuilds": {
+        "nhan": {
+          "old": 19,
+          "new": 19
+        },
+        "thao": {
+          "old": 19,
+          "new": 19
+        }
+      }
+    }
+  },
+  "limits": "Finite three-model parent inference only, runtime CUDA source/function-cache override; ABBA six timed samples per variant. Unisolated GPUs. No candidate/restore/managed/native acceptance or performance guarantee."
+}
