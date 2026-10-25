@@ -537,6 +537,57 @@ def test_cuda_lora_finish_is_capture_safe_and_rejects_nonfinite_inputs(kernels):
 
 
 @gpu
+@pytest.mark.parametrize("rank", [1, 2, 3, 7, 8, 9, 16, 17, 31, 32])
+def test_cuda_lora_output_parallel_preserves_tree_tails_zero_and_ftz(kernels, rank):
+    generator = torch.Generator().manual_seed(401 + rank)
+    middle = torch.randn((9, rank), generator=generator)
+    weight = (torch.randn((19, rank), generator=generator) * 0.25).half()
+    base = torch.randn((9, 19), generator=generator)
+    middle[0] = -0.0
+    base[0] = -0.0
+    middle[1] = 0.0
+    middle[1, 0] = 2.0**-127
+    weight[2, 0] = 32768.0
+    base[1, 2] = 0.0
+    weight[0] = 0.0
+    if rank >= 4:
+        middle[2, :4] = torch.tensor([2.0**24, 1.0, -(2.0**24), -1.0])
+        middle[2, 4:] = 0.0
+        weight[1] = 1.0
+    scaled = ops.mul(ops.linear(middle, weight), -5.0 / 3.0)
+    expected = torch.where(scaled == 0, base, ops.add(base, scaled))
+    for row_tile in (1, 2, 4, 8):
+        actual = kernels.lora_finish(
+            middle.cuda(), weight.cuda(), base.cuda(), -5.0 / 3.0, execution="output", row_tile=row_tile
+        )
+        assert torch.equal(bits(actual.cpu()), bits(expected)), (rank, row_tile)
+    legacy = kernels.lora_finish(middle.cuda(), weight.cuda(), base.cuda(), -5.0 / 3.0, execution="warp")
+    assert torch.equal(bits(legacy.cpu()), bits(expected))
+
+
+@gpu
+def test_cuda_lora_output_parallel_captures_and_flags_nonfinite(kernels):
+    middle = torch.ones((3, 8), device="cuda")
+    weight = torch.ones((257, 8), dtype=torch.float16, device="cuda")
+    base = torch.zeros((3, 257), device="cuda")
+    flag = kernels.new_error_flag()
+    graph = torch.cuda.CUDAGraph()
+    with torch.cuda.graph(graph):
+        actual = kernels.lora_finish(middle, weight, base, 0.5, error_flag=flag, execution="output")
+    graph.replay()
+    kernels.raise_if_error(flag)
+    assert torch.equal(actual, torch.full_like(base, 4.0))
+    for tensor in (middle, weight, base):
+        before = tensor[0, 0].clone()
+        tensor[0, 0] = float("nan")
+        with pytest.raises(ReferenceArithmeticError, match="Nonfinite"):
+            kernels.lora_finish(middle, weight, base, 0.5, execution="output")
+        tensor[0, 0] = before
+    with pytest.raises(ReferenceArithmeticError, match="execution"):
+        kernels.lora_finish(middle, weight, base, 0.5, execution="vendor")
+
+
+@gpu
 def test_cuda_add_and_silu_gate_match_reference_bits(kernels):
     wide, edge = _cuda_ops_cases()
     gate = torch.cat((wide.flatten(), edge[edge.abs() <= 80], torch.linspace(-90, 79, 1001)))

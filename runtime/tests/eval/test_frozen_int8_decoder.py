@@ -107,6 +107,43 @@ def test_cuda_rank_admission_precedes_cuda_allocation_and_keeps_the_cpu_referenc
         FrozenInt8DecoderGraph(model, max_context=64, allow_fixture=True)
 
 
+def test_cuda_rank_32_reaches_cuda_setup(monkeypatch):
+    from heteroes.eval.frozen_int8_decoder import FrozenInt8DecoderGraph
+    from heteroes.eval.strict_decoder_graph import StrictDecoderGraph
+
+    model = model_for("qwen2")
+    freeze_projections(model, rank=32, alpha=64, seed=23, target_modules=("q_proj",))
+
+    def admitted(*args, **kwargs):
+        raise RuntimeError("admitted to CUDA setup")
+
+    monkeypatch.setattr(StrictDecoderGraph, "__init__", admitted)
+    with pytest.raises(RuntimeError, match="admitted to CUDA setup"):
+        FrozenInt8DecoderGraph(model, max_context=64, allow_fixture=True)
+
+
+@pytest.mark.parametrize("rank,execution", [(8, "output"), (16, "output"), (17, "warp"), (32, "warp")])
+def test_adapter_finish_uses_the_measured_rank_policy_and_retains_a_strict_control(rank, execution):
+    from types import SimpleNamespace
+
+    from heteroes.eval.frozen_int8_decoder import FrozenInt8DecoderGraph
+
+    captured = {}
+
+    def finish(*args, **kwargs):
+        captured.update(kwargs)
+        return args[2]
+
+    decoder = object.__new__(FrozenInt8DecoderGraph)
+    decoder.kernels = SimpleNamespace(lora_finish=finish)
+    module = SimpleNamespace(
+        rank=rank, adapter_name="default", lora_B={"default": SimpleNamespace(weight=None)}, scaling=2.0
+    )
+    base = object()
+    assert decoder._adapter_finish(None, base, module, None) is base
+    assert captured["execution"] == execution
+
+
 def test_cpu_reference_projects_a_pinned_tied_head_and_changes_only_the_head_arithmetic():
     strict_model = frozen_model()
     pinned_model = frozen_model()

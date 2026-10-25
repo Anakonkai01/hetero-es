@@ -219,13 +219,14 @@ class FrozenInt8DecoderGraph(StrictDecoderGraph):
         )
 
     def _adapter_finish(self, middle, base, module, flag):
-        """Second rank product, strict scale, zero-delta select and strict add in one replayable kernel."""
+        """Keep the strict tree; schedule short rank products independently along the output dimension."""
         return self.kernels.lora_finish(
             middle,
             module.lora_B[module.adapter_name].weight,
             base,
             module.scaling,
             error_flag=flag,
+            execution="output" if module.rank <= 16 else "warp",
         )
 
     def _project(self, value, module, flag):

@@ -198,6 +198,38 @@ __device__ __forceinline__ float widen(u16 h) {
   return r;
 }
 
+#if OUTPUT_PARALLEL
+// Each thread owns an output element. The rank product keeps the canonical adjacent-pair tree in registers;
+// the trailing all-negative-zero subtrees of the 32-lane reference are applied explicitly after reduction.
+extern "C" __global__ void __launch_bounds__(256)
+strict_lora_finish(const float* __restrict__ mid, const u16* __restrict__ w, const float* __restrict__ base,
+                   float* __restrict__ out, int* __restrict__ error, int rows, int outputs, float scale) {
+  const int m = blockIdx.y * ROW_TILE + threadIdx.x / OUT_TILE;
+  const int o = blockIdx.x * OUT_TILE + threadIdx.x % OUT_TILE;
+  if (m >= rows || o >= outputs) return;
+  float products[PADDED_RANK];
+#pragma unroll
+  for (int k = 0; k < PADDED_RANK; ++k)
+    products[k] = k < WIDTH ? mul_rn(flush(mid[(size_t)m * WIDTH + k]), widen(w[(size_t)o * WIDTH + k])) : -0.0f;
+#pragma unroll
+  for (int offset = 1; offset < PADDED_RANK; offset <<= 1) {
+#pragma unroll
+    for (int k = 0; k < PADDED_RANK; k += offset * 2)
+      products[k] = add_rn(products[k], products[k + offset]);
+  }
+  float value = products[0];
+#pragma unroll
+  for (int padded = PADDED_RANK; padded < 32; padded <<= 1) value = add_rn(value, -0.0f);
+  const float scaled = mul_rn(value, scale);
+  const size_t index = (size_t)m * outputs + o;
+  const float b = base[index];
+  const float result = (__float_as_uint(scaled) & 0x7fffffffu) == 0u ? b : add_rn(b, scaled);
+  out[index] = result;
+  if ((__float_as_uint(scaled) & 0x7f800000u) == 0x7f800000u ||
+      (__float_as_uint(b) & 0x7f800000u) == 0x7f800000u ||
+      (__float_as_uint(result) & 0x7f800000u) == 0x7f800000u) atomicOr(error, 1);
+}
+#else
 // Epilogue of a strict rank-WIDTH product: one warp owns one output column and keeps the same one-lane-per-
 // element xor tree as `strict_linear` at this width, then the strict scalar multiply. The scaled column goes
 // through shared memory so base reads and output writes are coalesced along the output tile.
@@ -241,6 +273,7 @@ strict_lora_finish(const float* __restrict__ mid, const u16* __restrict__ w, con
       atomicOr(error, 1);
   }
 }
+#endif
 """
 
 _OPS_SOURCE = r"""
@@ -882,10 +915,18 @@ class StrictCudaKernels:
             self._functions[name] = self._compile(name, header + _LINEAR_SOURCE, ["strict_linear"])["strict_linear"]
         return self._functions[name]
 
-    def _lora_function(self, rank, row_tile):
+    def _lora_function(self, rank, row_tile, execution="warp"):
         name = f"lora-{rank}-rows{row_tile}"
+        if execution == "output":
+            name += "-output"
         if name not in self._functions:
-            defines = {"WIDTH": rank, "OUT_TILE": 32, "ROW_TILE": row_tile}
+            defines = {
+                "WIDTH": rank,
+                "OUT_TILE": 256 // row_tile if execution == "output" else 32,
+                "ROW_TILE": row_tile,
+                "PADDED_RANK": 1 << (rank - 1).bit_length(),
+                "OUTPUT_PARALLEL": int(execution == "output"),
+            }
             header = "".join(f"#define {k} {v}\n" for k, v in defines.items())
             self._functions[name] = self._compile(
                 name, header + _LORA_SOURCE, ["strict_lora_finish"], ptx_exact=OPS_PTX_EXACT, sass_exact=OPS_SASS_EXACT
@@ -1143,7 +1184,7 @@ class StrictCudaKernels:
         return result.reshape(*value.shape[:-1], outputs)
 
     @torch.inference_mode()
-    def lora_finish(self, middle, weight, base, scaling, *, error_flag=None, row_tile=8):
+    def lora_finish(self, middle, weight, base, scaling, *, error_flag=None, row_tile=8, execution="warp"):
         """Fuse the second rank product, strict scale and zero-delta select into one replayed kernel.
 
         ``middle`` is the exact ``linear(value, A)``; ``weight`` is ``B``; the result is bitwise
@@ -1166,6 +1207,8 @@ class StrictCudaKernels:
         rows = middle.numel() // rank
         if type(row_tile) is not int or row_tile not in (1, 2, 4, 8):
             raise ReferenceArithmeticError("Strict LoRA finish row tile must be 1, 2, 4 or 8")
+        if execution not in ("warp", "output"):
+            raise ReferenceArithmeticError("Strict LoRA finish execution must be warp or output")
         if not isinstance(scaling, (int, float)) or isinstance(scaling, bool):
             raise ReferenceArithmeticError("A strict scalar multiply needs a numeric factor")
         rounded = struct.unpack("<f", struct.pack("<f", float(scaling)))[0]
@@ -1174,9 +1217,10 @@ class StrictCudaKernels:
         flat, flat_base = middle.reshape(rows, rank), base.reshape(rows, outputs)
         result = torch.empty_like(flat_base)
         flag = self.new_error_flag() if error_flag is None else error_flag
+        output_tile = 256 // row_tile if execution == "output" else 32
         self._launch(
-            self._lora_function(rank, row_tile),
-            grid=(-(-outputs // 32), min(65535, -(-rows // row_tile))),
+            self._lora_function(rank, row_tile, execution),
+            grid=(-(-outputs // output_tile), min(65535, -(-rows // row_tile))),
             block=(256, 1),
             pointers=(flat, weight, flat_base, result, flag),
             integers=(rows, outputs),

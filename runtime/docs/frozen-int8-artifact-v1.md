@@ -63,8 +63,9 @@ not fit int64; the reference uses Python integers and a future CUDA operator mus
 a single exact RNE/FTZ encoding. Multiplying an int64 dot by an FP32 scale and calling the result exact is forbidden
 under this identity.
 
-The encoder accepts an exact integer `T` with `|T| < 2^96` and an exponent not below `-2048`; values above the
-largest finite FP32 are rejected, not rounded to infinity. It rounds subnormals in units of `2^-149`, then flushes
+The encoder accepts an exact integer `T` with `|T| < 2^96` and an exponent not below `-2048`; values at or above the
+FP32 RNE overflow midpoint are rejected, not rounded to infinity. Values above max-finite but below that
+midpoint still round down to max-finite. It rounds subnormals in units of `2^-149`, then flushes
 signed zero. A value that rounds up to the smallest normal survives. The CPU result is independent of the output
 tile, row order, batch size and host FPU.
 
@@ -95,10 +96,17 @@ reader enforce those invariants once. Shape, dtype, device, layout and liveness 
 `linear_many` shares one activation quantization across projections. Per-device compilation receipts are exposed by
 `kernel_identity()`; the identity remains `hardwareQualified: false`.
 
-The adapter delta is ordinary FP32 matrix multiplication from the widened FP16 factors, followed by the FP32 scaling
-multiply. `combine_adapter` returns the base unchanged, including a signed zero, when the delta element is exactly
-zero. A nonzero delta uses the adapter's ordinary FP32 add, with no subnormal-flush, nonfinite-flag or cross-device
-bit-equality claim. It contains no host synchronization, so it is legal inside captured decode.
+The adapter delta uses the strict adjacent-pair FP32 tree on widened FP16 factors for both rank products, followed
+by the strict separately rounded scaling multiply. Each arithmetic boundary applies the declared signed FTZ rule;
+nonfinite results fail explicitly. `combine_adapter` returns the base unchanged, including its signed zero, when
+the scaled delta element is exactly zero; otherwise it uses the strict FP32 add. This is the strict adapter
+contract implemented by `cc76a03d`, separate from the integer base identity. The captured CUDA implementation is
+required to agree bit-for-bit with that reference; finite tests do not establish universal hardware qualification.
+
+The CUDA decoder admits ranks 1-32 before graph setup; the eager CPU reference retains higher-rank support.
+For ranks <=16, the selected second product keeps that same tree within each output thread's registers. Larger
+ranks keep the strict warp path. The execution argument and compiler assumptions are documented in
+[strict-lora-output-execution.md](strict-lora-output-execution.md).
 
 ## Typed storage and graph composition
 
