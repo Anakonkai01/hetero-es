@@ -1,0 +1,5 @@
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 2198.29it/s]
+tiny {'batch': 1, 'before': 188.68673044996692, 'after': 270.3579242366966, 'ratio': 1.4328401557012829}
+tiny {'batch': 8, 'before': 840.43490431508, 'after': 1653.6977306248136, 'ratio': 1.967669027231216}
+tiny {'batch': 32, 'before': 1985.9714294641058, 'after': 4851.890372420089, 'ratio': 2.443081657891384}
+DONE docs/evidence/2026-10-25-fast-engine/raw/tiny-fp16-5070ti-01.json

@@ -203,3 +203,30 @@ of nine cases, so its speed is not a quality/parity acceptance. Canonical pertur
 lifecycle were not timed. No learning, managed activation, remote work, push, merge or deployment occurred.
 Targeted harness/precision CPU checks: **34 passed, 1 skipped**; four scratch mutants killed. All benchmark
 jobs are terminal. [Full receipts, commands and limitations](evidence/2026-10-25-shadow-baseline/README.md).
+
+## Codex continuation into 2026-10-26: full-weight core and owner-authorized fast inference
+
+Worktree `/home/pc5070ti/projects/heteroes-codex-frozen-perf`, branch
+`work/codex-frozen-perf-2026-10-25`; original/DeepSeek trees remain untouched. The owner subsequently
+prioritized approaching vLLM and permitted alternative arithmetic. Historical noise/ES/ledger recipes
+and the approved-plan bytes remain unchanged; vendor inference has a new experimental identity.
+
+- `9acf8bfa`: exact B22 paired weight reads selected only on SM120. Native ABBA batch-32 gains are
+  5.48%/8.37%/9.98% for Smol/Qwen/Tiny; SM86 retains scalar after a measured Tiny regression.
+  [Evidence, failed prototypes and candidate/restore proof](evidence/2026-10-25-b22-core-perf/README.md).
+- `3735d6db`: FP16 graph v2 binds original parameters into merged storage, fixing stale ES updates.
+- `c9a37059`: canonical HF parameter views over vLLM fused storage, plus an explicit standalone ES probe.
+  Parent/canonical plus/minus/restore weights match B22 on both hosts without a second GPU model. Batch-32
+  inference reaches 99.5–100.7% of matched vLLM controls; publication/audit time is separate. Smol has one
+  cross-GPU token-row difference in this finite corpus; Qwen/Tiny have none. This is not bit-exact vendor
+  inference or managed acceptance. [Fast-engine receipts](evidence/2026-10-25-fast-engine/README.md).
+- The earlier selected LoRA finish `20856dea` and pinned two-host adapter/model checks are now sealed in
+  [their own evidence](evidence/2026-10-25-frozen-subwarp-perf/README.md). They are a separate search space.
+
+No push, merge, deploy, live device-state change or learning run. Broader quality/drift, candidate/update
+throughput, ownership/lifecycle, native Windows and general qualification remain open.
+
+Final checks at `c9a37059`: full check `ALL PASS` (runtime CPU 3158 passed/459 skipped, backend 452),
+17 targeted tests per GPU host, four scratch mutants killed. Isolated Linux Worker/Server packages pass;
+Worker and notebook SDK match all 141 runtime sources, Server shared subset matches 23. Package/import
+acceptance does not establish an installed managed vLLM runtime. Live status was read only: services stopped.

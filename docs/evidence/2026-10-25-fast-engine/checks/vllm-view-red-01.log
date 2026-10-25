@@ -1,0 +1,100 @@
+FFFFFFFFF                                                                [100%]
+=================================== FAILURES ===================================
+_ test_fused_views_keep_hf_schema_bits_and_canonical_candidate_restore[qwen2] __
+
+family = 'qwen2'
+
+    @pytest.mark.parametrize("family", ["qwen2", "llama", "llama-wide", "mistral"])
+    def test_fused_views_keep_hf_schema_bits_and_canonical_candidate_restore(family):
+>       from heteroes.eval.vllm_weights import hf_parameter_view
+E       ModuleNotFoundError: No module named 'heteroes.eval.vllm_weights'
+
+runtime/tests/eval/test_vllm_weights.py:36: ModuleNotFoundError
+_ test_fused_views_keep_hf_schema_bits_and_canonical_candidate_restore[llama] __
+
+family = 'llama'
+
+    @pytest.mark.parametrize("family", ["qwen2", "llama", "llama-wide", "mistral"])
+    def test_fused_views_keep_hf_schema_bits_and_canonical_candidate_restore(family):
+>       from heteroes.eval.vllm_weights import hf_parameter_view
+E       ModuleNotFoundError: No module named 'heteroes.eval.vllm_weights'
+
+runtime/tests/eval/test_vllm_weights.py:36: ModuleNotFoundError
+_ test_fused_views_keep_hf_schema_bits_and_canonical_candidate_restore[llama-wide] _
+
+family = 'llama-wide'
+
+    @pytest.mark.parametrize("family", ["qwen2", "llama", "llama-wide", "mistral"])
+    def test_fused_views_keep_hf_schema_bits_and_canonical_candidate_restore(family):
+>       from heteroes.eval.vllm_weights import hf_parameter_view
+E       ModuleNotFoundError: No module named 'heteroes.eval.vllm_weights'
+
+runtime/tests/eval/test_vllm_weights.py:36: ModuleNotFoundError
+_ test_fused_views_keep_hf_schema_bits_and_canonical_candidate_restore[mistral] _
+
+family = 'mistral'
+
+    @pytest.mark.parametrize("family", ["qwen2", "llama", "llama-wide", "mistral"])
+    def test_fused_views_keep_hf_schema_bits_and_canonical_candidate_restore(family):
+>       from heteroes.eval.vllm_weights import hf_parameter_view
+E       ModuleNotFoundError: No module named 'heteroes.eval.vllm_weights'
+
+runtime/tests/eval/test_vllm_weights.py:36: ModuleNotFoundError
+__ test_incompatible_fused_storage_is_rejected_without_writing_owner[missing] __
+
+defect = 'missing'
+
+    @pytest.mark.parametrize("defect", ["missing", "shape", "dtype", "extra"])
+    def test_incompatible_fused_storage_is_rejected_without_writing_owner(defect):
+>       from heteroes.eval.vllm_weights import hf_parameter_view
+E       ModuleNotFoundError: No module named 'heteroes.eval.vllm_weights'
+
+runtime/tests/eval/test_vllm_weights.py:58: ModuleNotFoundError
+___ test_incompatible_fused_storage_is_rejected_without_writing_owner[shape] ___
+
+defect = 'shape'
+
+    @pytest.mark.parametrize("defect", ["missing", "shape", "dtype", "extra"])
+    def test_incompatible_fused_storage_is_rejected_without_writing_owner(defect):
+>       from heteroes.eval.vllm_weights import hf_parameter_view
+E       ModuleNotFoundError: No module named 'heteroes.eval.vllm_weights'
+
+runtime/tests/eval/test_vllm_weights.py:58: ModuleNotFoundError
+___ test_incompatible_fused_storage_is_rejected_without_writing_owner[dtype] ___
+
+defect = 'dtype'
+
+    @pytest.mark.parametrize("defect", ["missing", "shape", "dtype", "extra"])
+    def test_incompatible_fused_storage_is_rejected_without_writing_owner(defect):
+>       from heteroes.eval.vllm_weights import hf_parameter_view
+E       ModuleNotFoundError: No module named 'heteroes.eval.vllm_weights'
+
+runtime/tests/eval/test_vllm_weights.py:58: ModuleNotFoundError
+___ test_incompatible_fused_storage_is_rejected_without_writing_owner[extra] ___
+
+defect = 'extra'
+
+    @pytest.mark.parametrize("defect", ["missing", "shape", "dtype", "extra"])
+    def test_incompatible_fused_storage_is_rejected_without_writing_owner(defect):
+>       from heteroes.eval.vllm_weights import hf_parameter_view
+E       ModuleNotFoundError: No module named 'heteroes.eval.vllm_weights'
+
+runtime/tests/eval/test_vllm_weights.py:58: ModuleNotFoundError
+_________ test_padded_tied_vocabulary_remains_one_canonical_parameter __________
+
+    def test_padded_tied_vocabulary_remains_one_canonical_parameter():
+>       from heteroes.eval.vllm_weights import hf_parameter_view
+E       ModuleNotFoundError: No module named 'heteroes.eval.vllm_weights'
+
+runtime/tests/eval/test_vllm_weights.py:78: ModuleNotFoundError
+=========================== short test summary info ============================
+FAILED runtime/tests/eval/test_vllm_weights.py::test_fused_views_keep_hf_schema_bits_and_canonical_candidate_restore[qwen2]
+FAILED runtime/tests/eval/test_vllm_weights.py::test_fused_views_keep_hf_schema_bits_and_canonical_candidate_restore[llama]
+FAILED runtime/tests/eval/test_vllm_weights.py::test_fused_views_keep_hf_schema_bits_and_canonical_candidate_restore[llama-wide]
+FAILED runtime/tests/eval/test_vllm_weights.py::test_fused_views_keep_hf_schema_bits_and_canonical_candidate_restore[mistral]
+FAILED runtime/tests/eval/test_vllm_weights.py::test_incompatible_fused_storage_is_rejected_without_writing_owner[missing]
+FAILED runtime/tests/eval/test_vllm_weights.py::test_incompatible_fused_storage_is_rejected_without_writing_owner[shape]
+FAILED runtime/tests/eval/test_vllm_weights.py::test_incompatible_fused_storage_is_rejected_without_writing_owner[dtype]
+FAILED runtime/tests/eval/test_vllm_weights.py::test_incompatible_fused_storage_is_rejected_without_writing_owner[extra]
+FAILED runtime/tests/eval/test_vllm_weights.py::test_padded_tied_vocabulary_remains_one_canonical_parameter
+9 failed in 1.70s

@@ -1,0 +1,939 @@
+{
+  "sourceCommit": "c9a37059",
+  "models": {
+    "smol": {
+      "canonicalWeightsEqualB22BothHosts": true,
+      "restorationExactBothHosts": true,
+      "hostStrictComparisons": {
+        "5070ti": [
+          {
+            "state": "parent",
+            "tokensComparedToB22Batch8": {
+              "equalRows": 8,
+              "rows": 8,
+              "equalPositions": 256,
+              "positions": 256
+            },
+            "rewardsEqualB22Rows": 8,
+            "publicationSecondsIncludingRestore": 0.14777756200010117
+          },
+          {
+            "state": "plus",
+            "tokensComparedToB22Batch8": {
+              "equalRows": 7,
+              "rows": 8,
+              "equalPositions": 247,
+              "positions": 256
+            },
+            "rewardsEqualB22Rows": 8,
+            "publicationSecondsIncludingRestore": 1.023074170999962
+          },
+          {
+            "state": "minus",
+            "tokensComparedToB22Batch8": {
+              "equalRows": 8,
+              "rows": 8,
+              "equalPositions": 256,
+              "positions": 256
+            },
+            "rewardsEqualB22Rows": 8,
+            "publicationSecondsIncludingRestore": 0.17825674400000935
+          },
+          {
+            "state": "restored",
+            "tokensComparedToB22Batch8": {
+              "equalRows": 8,
+              "rows": 8,
+              "equalPositions": 256,
+              "positions": 256
+            },
+            "rewardsEqualB22Rows": 8,
+            "publicationSecondsIncludingRestore": 0.11591951000013978
+          }
+        ],
+        "3060": [
+          {
+            "state": "parent",
+            "tokensComparedToB22Batch8": {
+              "equalRows": 8,
+              "rows": 8,
+              "equalPositions": 256,
+              "positions": 256
+            },
+            "rewardsEqualB22Rows": 8,
+            "publicationSecondsIncludingRestore": 0.21295987100165803
+          },
+          {
+            "state": "plus",
+            "tokensComparedToB22Batch8": {
+              "equalRows": 8,
+              "rows": 8,
+              "equalPositions": 256,
+              "positions": 256
+            },
+            "rewardsEqualB22Rows": 8,
+            "publicationSecondsIncludingRestore": 1.010911956007476
+          },
+          {
+            "state": "minus",
+            "tokensComparedToB22Batch8": {
+              "equalRows": 8,
+              "rows": 8,
+              "equalPositions": 256,
+              "positions": 256
+            },
+            "rewardsEqualB22Rows": 8,
+            "publicationSecondsIncludingRestore": 0.37094099599926267
+          },
+          {
+            "state": "restored",
+            "tokensComparedToB22Batch8": {
+              "equalRows": 8,
+              "rows": 8,
+              "equalPositions": 256,
+              "positions": 256
+            },
+            "rewardsEqualB22Rows": 8,
+            "publicationSecondsIncludingRestore": 0.1556662530056201
+          }
+        ]
+      },
+      "crossHostInference": [
+        {
+          "state": "parent",
+          "batch": 1,
+          "tokens": {
+            "equalRows": 1,
+            "rows": 1,
+            "equalPositions": 32,
+            "positions": 32
+          },
+          "equalRewardRows": 1,
+          "scorableRows": 1,
+          "equalScorableRewardRows": 1
+        },
+        {
+          "state": "parent",
+          "batch": 8,
+          "tokens": {
+            "equalRows": 8,
+            "rows": 8,
+            "equalPositions": 256,
+            "positions": 256
+          },
+          "equalRewardRows": 8,
+          "scorableRows": 5,
+          "equalScorableRewardRows": 5
+        },
+        {
+          "state": "parent",
+          "batch": 32,
+          "tokens": {
+            "equalRows": 32,
+            "rows": 32,
+            "equalPositions": 1024,
+            "positions": 1024
+          },
+          "equalRewardRows": 32,
+          "scorableRows": 20,
+          "equalScorableRewardRows": 20
+        },
+        {
+          "state": "plus",
+          "batch": 1,
+          "tokens": {
+            "equalRows": 1,
+            "rows": 1,
+            "equalPositions": 32,
+            "positions": 32
+          },
+          "equalRewardRows": 1,
+          "scorableRows": 1,
+          "equalScorableRewardRows": 1
+        },
+        {
+          "state": "plus",
+          "batch": 8,
+          "tokens": {
+            "equalRows": 7,
+            "rows": 8,
+            "equalPositions": 247,
+            "positions": 256
+          },
+          "equalRewardRows": 8,
+          "scorableRows": 5,
+          "equalScorableRewardRows": 5
+        },
+        {
+          "state": "plus",
+          "batch": 32,
+          "tokens": {
+            "equalRows": 32,
+            "rows": 32,
+            "equalPositions": 1024,
+            "positions": 1024
+          },
+          "equalRewardRows": 32,
+          "scorableRows": 20,
+          "equalScorableRewardRows": 20
+        },
+        {
+          "state": "minus",
+          "batch": 1,
+          "tokens": {
+            "equalRows": 1,
+            "rows": 1,
+            "equalPositions": 32,
+            "positions": 32
+          },
+          "equalRewardRows": 1,
+          "scorableRows": 1,
+          "equalScorableRewardRows": 1
+        },
+        {
+          "state": "minus",
+          "batch": 8,
+          "tokens": {
+            "equalRows": 8,
+            "rows": 8,
+            "equalPositions": 256,
+            "positions": 256
+          },
+          "equalRewardRows": 8,
+          "scorableRows": 5,
+          "equalScorableRewardRows": 5
+        },
+        {
+          "state": "minus",
+          "batch": 32,
+          "tokens": {
+            "equalRows": 32,
+            "rows": 32,
+            "equalPositions": 1024,
+            "positions": 1024
+          },
+          "equalRewardRows": 32,
+          "scorableRows": 20,
+          "equalScorableRewardRows": 20
+        },
+        {
+          "state": "restored",
+          "batch": 1,
+          "tokens": {
+            "equalRows": 1,
+            "rows": 1,
+            "equalPositions": 32,
+            "positions": 32
+          },
+          "equalRewardRows": 1,
+          "scorableRows": 1,
+          "equalScorableRewardRows": 1
+        },
+        {
+          "state": "restored",
+          "batch": 8,
+          "tokens": {
+            "equalRows": 8,
+            "rows": 8,
+            "equalPositions": 256,
+            "positions": 256
+          },
+          "equalRewardRows": 8,
+          "scorableRows": 5,
+          "equalScorableRewardRows": 5
+        },
+        {
+          "state": "restored",
+          "batch": 32,
+          "tokens": {
+            "equalRows": 32,
+            "rows": 32,
+            "equalPositions": 1024,
+            "positions": 1024
+          },
+          "equalRewardRows": 32,
+          "scorableRows": 20,
+          "equalScorableRewardRows": 20
+        }
+      ]
+    },
+    "qwen": {
+      "canonicalWeightsEqualB22BothHosts": true,
+      "restorationExactBothHosts": true,
+      "hostStrictComparisons": {
+        "5070ti": [
+          {
+            "state": "parent",
+            "tokensComparedToB22Batch8": {
+              "equalRows": 8,
+              "rows": 8,
+              "equalPositions": 256,
+              "positions": 256
+            },
+            "rewardsEqualB22Rows": 8,
+            "publicationSecondsIncludingRestore": 0.1507967140000801
+          },
+          {
+            "state": "plus",
+            "tokensComparedToB22Batch8": {
+              "equalRows": 8,
+              "rows": 8,
+              "equalPositions": 256,
+              "positions": 256
+            },
+            "rewardsEqualB22Rows": 8,
+            "publicationSecondsIncludingRestore": 0.2894573210000999
+          },
+          {
+            "state": "minus",
+            "tokensComparedToB22Batch8": {
+              "equalRows": 8,
+              "rows": 8,
+              "equalPositions": 256,
+              "positions": 256
+            },
+            "rewardsEqualB22Rows": 8,
+            "publicationSecondsIncludingRestore": 0.23545279800009666
+          },
+          {
+            "state": "restored",
+            "tokensComparedToB22Batch8": {
+              "equalRows": 8,
+              "rows": 8,
+              "equalPositions": 256,
+              "positions": 256
+            },
+            "rewardsEqualB22Rows": 8,
+            "publicationSecondsIncludingRestore": 0.14252135800006727
+          }
+        ],
+        "3060": [
+          {
+            "state": "parent",
+            "tokensComparedToB22Batch8": {
+              "equalRows": 8,
+              "rows": 8,
+              "equalPositions": 256,
+              "positions": 256
+            },
+            "rewardsEqualB22Rows": 8,
+            "publicationSecondsIncludingRestore": 0.3054520799923921
+          },
+          {
+            "state": "plus",
+            "tokensComparedToB22Batch8": {
+              "equalRows": 8,
+              "rows": 8,
+              "equalPositions": 256,
+              "positions": 256
+            },
+            "rewardsEqualB22Rows": 8,
+            "publicationSecondsIncludingRestore": 0.6690939459949732
+          },
+          {
+            "state": "minus",
+            "tokensComparedToB22Batch8": {
+              "equalRows": 8,
+              "rows": 8,
+              "equalPositions": 256,
+              "positions": 256
+            },
+            "rewardsEqualB22Rows": 8,
+            "publicationSecondsIncludingRestore": 0.5985113209899282
+          },
+          {
+            "state": "restored",
+            "tokensComparedToB22Batch8": {
+              "equalRows": 8,
+              "rows": 8,
+              "equalPositions": 256,
+              "positions": 256
+            },
+            "rewardsEqualB22Rows": 8,
+            "publicationSecondsIncludingRestore": 0.23679670099227224
+          }
+        ]
+      },
+      "crossHostInference": [
+        {
+          "state": "parent",
+          "batch": 1,
+          "tokens": {
+            "equalRows": 1,
+            "rows": 1,
+            "equalPositions": 32,
+            "positions": 32
+          },
+          "equalRewardRows": 1,
+          "scorableRows": 1,
+          "equalScorableRewardRows": 1
+        },
+        {
+          "state": "parent",
+          "batch": 8,
+          "tokens": {
+            "equalRows": 8,
+            "rows": 8,
+            "equalPositions": 256,
+            "positions": 256
+          },
+          "equalRewardRows": 8,
+          "scorableRows": 5,
+          "equalScorableRewardRows": 5
+        },
+        {
+          "state": "parent",
+          "batch": 32,
+          "tokens": {
+            "equalRows": 32,
+            "rows": 32,
+            "equalPositions": 1024,
+            "positions": 1024
+          },
+          "equalRewardRows": 32,
+          "scorableRows": 20,
+          "equalScorableRewardRows": 20
+        },
+        {
+          "state": "plus",
+          "batch": 1,
+          "tokens": {
+            "equalRows": 1,
+            "rows": 1,
+            "equalPositions": 32,
+            "positions": 32
+          },
+          "equalRewardRows": 1,
+          "scorableRows": 1,
+          "equalScorableRewardRows": 1
+        },
+        {
+          "state": "plus",
+          "batch": 8,
+          "tokens": {
+            "equalRows": 8,
+            "rows": 8,
+            "equalPositions": 256,
+            "positions": 256
+          },
+          "equalRewardRows": 8,
+          "scorableRows": 5,
+          "equalScorableRewardRows": 5
+        },
+        {
+          "state": "plus",
+          "batch": 32,
+          "tokens": {
+            "equalRows": 32,
+            "rows": 32,
+            "equalPositions": 1024,
+            "positions": 1024
+          },
+          "equalRewardRows": 32,
+          "scorableRows": 20,
+          "equalScorableRewardRows": 20
+        },
+        {
+          "state": "minus",
+          "batch": 1,
+          "tokens": {
+            "equalRows": 1,
+            "rows": 1,
+            "equalPositions": 32,
+            "positions": 32
+          },
+          "equalRewardRows": 1,
+          "scorableRows": 1,
+          "equalScorableRewardRows": 1
+        },
+        {
+          "state": "minus",
+          "batch": 8,
+          "tokens": {
+            "equalRows": 8,
+            "rows": 8,
+            "equalPositions": 256,
+            "positions": 256
+          },
+          "equalRewardRows": 8,
+          "scorableRows": 5,
+          "equalScorableRewardRows": 5
+        },
+        {
+          "state": "minus",
+          "batch": 32,
+          "tokens": {
+            "equalRows": 32,
+            "rows": 32,
+            "equalPositions": 1024,
+            "positions": 1024
+          },
+          "equalRewardRows": 32,
+          "scorableRows": 20,
+          "equalScorableRewardRows": 20
+        },
+        {
+          "state": "restored",
+          "batch": 1,
+          "tokens": {
+            "equalRows": 1,
+            "rows": 1,
+            "equalPositions": 32,
+            "positions": 32
+          },
+          "equalRewardRows": 1,
+          "scorableRows": 1,
+          "equalScorableRewardRows": 1
+        },
+        {
+          "state": "restored",
+          "batch": 8,
+          "tokens": {
+            "equalRows": 8,
+            "rows": 8,
+            "equalPositions": 256,
+            "positions": 256
+          },
+          "equalRewardRows": 8,
+          "scorableRows": 5,
+          "equalScorableRewardRows": 5
+        },
+        {
+          "state": "restored",
+          "batch": 32,
+          "tokens": {
+            "equalRows": 32,
+            "rows": 32,
+            "equalPositions": 1024,
+            "positions": 1024
+          },
+          "equalRewardRows": 32,
+          "scorableRows": 20,
+          "equalScorableRewardRows": 20
+        }
+      ]
+    },
+    "tiny": {
+      "canonicalWeightsEqualB22BothHosts": true,
+      "restorationExactBothHosts": true,
+      "hostStrictComparisons": {
+        "5070ti": [
+          {
+            "state": "parent",
+            "tokensComparedToB22Batch8": {
+              "equalRows": 8,
+              "rows": 8,
+              "equalPositions": 256,
+              "positions": 256
+            },
+            "rewardsEqualB22Rows": 8,
+            "publicationSecondsIncludingRestore": 0.28688281799986726
+          },
+          {
+            "state": "plus",
+            "tokensComparedToB22Batch8": {
+              "equalRows": 8,
+              "rows": 8,
+              "equalPositions": 256,
+              "positions": 256
+            },
+            "rewardsEqualB22Rows": 8,
+            "publicationSecondsIncludingRestore": 0.4451870970001437
+          },
+          {
+            "state": "minus",
+            "tokensComparedToB22Batch8": {
+              "equalRows": 8,
+              "rows": 8,
+              "equalPositions": 256,
+              "positions": 256
+            },
+            "rewardsEqualB22Rows": 8,
+            "publicationSecondsIncludingRestore": 0.3855134729999463
+          },
+          {
+            "state": "restored",
+            "tokensComparedToB22Batch8": {
+              "equalRows": 8,
+              "rows": 8,
+              "equalPositions": 256,
+              "positions": 256
+            },
+            "rewardsEqualB22Rows": 8,
+            "publicationSecondsIncludingRestore": 0.27569210900014696
+          }
+        ],
+        "3060": [
+          {
+            "state": "parent",
+            "tokensComparedToB22Batch8": {
+              "equalRows": 8,
+              "rows": 8,
+              "equalPositions": 256,
+              "positions": 256
+            },
+            "rewardsEqualB22Rows": 8,
+            "publicationSecondsIncludingRestore": 0.4661807950033108
+          },
+          {
+            "state": "plus",
+            "tokensComparedToB22Batch8": {
+              "equalRows": 8,
+              "rows": 8,
+              "equalPositions": 256,
+              "positions": 256
+            },
+            "rewardsEqualB22Rows": 8,
+            "publicationSecondsIncludingRestore": 0.9562835599936079
+          },
+          {
+            "state": "minus",
+            "tokensComparedToB22Batch8": {
+              "equalRows": 8,
+              "rows": 8,
+              "equalPositions": 256,
+              "positions": 256
+            },
+            "rewardsEqualB22Rows": 8,
+            "publicationSecondsIncludingRestore": 0.9855466480075847
+          },
+          {
+            "state": "restored",
+            "tokensComparedToB22Batch8": {
+              "equalRows": 8,
+              "rows": 8,
+              "equalPositions": 256,
+              "positions": 256
+            },
+            "rewardsEqualB22Rows": 8,
+            "publicationSecondsIncludingRestore": 0.44540891800716054
+          }
+        ]
+      },
+      "crossHostInference": [
+        {
+          "state": "parent",
+          "batch": 1,
+          "tokens": {
+            "equalRows": 1,
+            "rows": 1,
+            "equalPositions": 32,
+            "positions": 32
+          },
+          "equalRewardRows": 1,
+          "scorableRows": 1,
+          "equalScorableRewardRows": 1
+        },
+        {
+          "state": "parent",
+          "batch": 8,
+          "tokens": {
+            "equalRows": 8,
+            "rows": 8,
+            "equalPositions": 256,
+            "positions": 256
+          },
+          "equalRewardRows": 8,
+          "scorableRows": 5,
+          "equalScorableRewardRows": 5
+        },
+        {
+          "state": "parent",
+          "batch": 32,
+          "tokens": {
+            "equalRows": 32,
+            "rows": 32,
+            "equalPositions": 1024,
+            "positions": 1024
+          },
+          "equalRewardRows": 32,
+          "scorableRows": 20,
+          "equalScorableRewardRows": 20
+        },
+        {
+          "state": "plus",
+          "batch": 1,
+          "tokens": {
+            "equalRows": 1,
+            "rows": 1,
+            "equalPositions": 32,
+            "positions": 32
+          },
+          "equalRewardRows": 1,
+          "scorableRows": 1,
+          "equalScorableRewardRows": 1
+        },
+        {
+          "state": "plus",
+          "batch": 8,
+          "tokens": {
+            "equalRows": 8,
+            "rows": 8,
+            "equalPositions": 256,
+            "positions": 256
+          },
+          "equalRewardRows": 8,
+          "scorableRows": 5,
+          "equalScorableRewardRows": 5
+        },
+        {
+          "state": "plus",
+          "batch": 32,
+          "tokens": {
+            "equalRows": 32,
+            "rows": 32,
+            "equalPositions": 1024,
+            "positions": 1024
+          },
+          "equalRewardRows": 32,
+          "scorableRows": 20,
+          "equalScorableRewardRows": 20
+        },
+        {
+          "state": "minus",
+          "batch": 1,
+          "tokens": {
+            "equalRows": 1,
+            "rows": 1,
+            "equalPositions": 32,
+            "positions": 32
+          },
+          "equalRewardRows": 1,
+          "scorableRows": 1,
+          "equalScorableRewardRows": 1
+        },
+        {
+          "state": "minus",
+          "batch": 8,
+          "tokens": {
+            "equalRows": 8,
+            "rows": 8,
+            "equalPositions": 256,
+            "positions": 256
+          },
+          "equalRewardRows": 8,
+          "scorableRows": 5,
+          "equalScorableRewardRows": 5
+        },
+        {
+          "state": "minus",
+          "batch": 32,
+          "tokens": {
+            "equalRows": 32,
+            "rows": 32,
+            "equalPositions": 1024,
+            "positions": 1024
+          },
+          "equalRewardRows": 32,
+          "scorableRows": 20,
+          "equalScorableRewardRows": 20
+        },
+        {
+          "state": "restored",
+          "batch": 1,
+          "tokens": {
+            "equalRows": 1,
+            "rows": 1,
+            "equalPositions": 32,
+            "positions": 32
+          },
+          "equalRewardRows": 1,
+          "scorableRows": 1,
+          "equalScorableRewardRows": 1
+        },
+        {
+          "state": "restored",
+          "batch": 8,
+          "tokens": {
+            "equalRows": 8,
+            "rows": 8,
+            "equalPositions": 256,
+            "positions": 256
+          },
+          "equalRewardRows": 8,
+          "scorableRows": 5,
+          "equalScorableRewardRows": 5
+        },
+        {
+          "state": "restored",
+          "batch": 32,
+          "tokens": {
+            "equalRows": 32,
+            "rows": 32,
+            "equalPositions": 1024,
+            "positions": 1024
+          },
+          "equalRewardRows": 32,
+          "scorableRows": 20,
+          "equalScorableRewardRows": 20
+        }
+      ]
+    }
+  },
+  "timings": [
+    {
+      "model": "smol",
+      "host": "5070ti",
+      "batch": 1,
+      "bareVllm": 528.209071489106,
+      "heteroesVllm": 529.9002245906526,
+      "ratio": 1.003201673717528
+    },
+    {
+      "model": "smol",
+      "host": "5070ti",
+      "batch": 8,
+      "bareVllm": 4087.9539255664868,
+      "heteroesVllm": 4070.741213591483,
+      "ratio": 0.9957894065617144
+    },
+    {
+      "model": "smol",
+      "host": "5070ti",
+      "batch": 32,
+      "bareVllm": 14487.429714200705,
+      "heteroesVllm": 14414.557058474677,
+      "ratio": 0.9949699389633899
+    },
+    {
+      "model": "smol",
+      "host": "3060",
+      "batch": 1,
+      "bareVllm": 274.1948555123949,
+      "heteroesVllm": 285.84354057293365,
+      "ratio": 1.0424832371080432
+    },
+    {
+      "model": "smol",
+      "host": "3060",
+      "batch": 8,
+      "bareVllm": 1901.0754450760553,
+      "heteroesVllm": 1922.6273906634622,
+      "ratio": 1.0113367124083519
+    },
+    {
+      "model": "smol",
+      "host": "3060",
+      "batch": 32,
+      "bareVllm": 5439.591041330253,
+      "heteroesVllm": 5478.473417053534,
+      "ratio": 1.007148032899505
+    },
+    {
+      "model": "qwen",
+      "host": "5070ti",
+      "batch": 1,
+      "bareVllm": 518.6976060702224,
+      "heteroesVllm": 516.5258824257519,
+      "ratio": 0.9958131219056051
+    },
+    {
+      "model": "qwen",
+      "host": "5070ti",
+      "batch": 8,
+      "bareVllm": 4048.0321788097503,
+      "heteroesVllm": 4031.6660913602777,
+      "ratio": 0.9959570263459998
+    },
+    {
+      "model": "qwen",
+      "host": "5070ti",
+      "batch": 32,
+      "bareVllm": 13834.572131006671,
+      "heteroesVllm": 13813.168079626072,
+      "ratio": 0.9984528577264324
+    },
+    {
+      "model": "qwen",
+      "host": "3060",
+      "batch": 1,
+      "bareVllm": 244.1184633916832,
+      "heteroesVllm": 244.33848824027754,
+      "ratio": 1.0009013035947278
+    },
+    {
+      "model": "qwen",
+      "host": "3060",
+      "batch": 8,
+      "bareVllm": 1656.1379102214246,
+      "heteroesVllm": 1655.0443012860103,
+      "ratio": 0.999339663123062
+    },
+    {
+      "model": "qwen",
+      "host": "3060",
+      "batch": 32,
+      "bareVllm": 4868.068266684576,
+      "heteroesVllm": 4855.3563963321385,
+      "ratio": 0.997388723892918
+    },
+    {
+      "model": "tiny",
+      "host": "5070ti",
+      "batch": 1,
+      "bareVllm": 322.7937443504457,
+      "heteroesVllm": 322.3687072343009,
+      "ratio": 0.9986832547916934
+    },
+    {
+      "model": "tiny",
+      "host": "5070ti",
+      "batch": 8,
+      "bareVllm": 2323.6315754681505,
+      "heteroesVllm": 2324.0335315883667,
+      "ratio": 1.0001729861671962
+    },
+    {
+      "model": "tiny",
+      "host": "5070ti",
+      "batch": 32,
+      "bareVllm": 7769.051706360855,
+      "heteroesVllm": 7760.964300422706,
+      "ratio": 0.9989590227683094
+    },
+    {
+      "model": "tiny",
+      "host": "3060",
+      "batch": 1,
+      "bareVllm": 137.64443503774615,
+      "heteroesVllm": 137.7148150963533,
+      "ratio": 1.0005113178646696
+    },
+    {
+      "model": "tiny",
+      "host": "3060",
+      "batch": 8,
+      "bareVllm": 880.2279501463061,
+      "heteroesVllm": 881.9274678843456,
+      "ratio": 1.001930770021285
+    },
+    {
+      "model": "tiny",
+      "host": "3060",
+      "batch": 32,
+      "bareVllm": 2433.820308085227,
+      "heteroesVllm": 2426.669306086164,
+      "ratio": 0.9970618200631709
+    }
+  ],
+  "inputs": {
+    "docs/evidence/2026-10-25-fast-engine/raw/smol-vllm-es-5070ti-01.json": "2414667512e9e763ec9d40487945992f4c02c73d0f741a9622c19c8d39484714",
+    "docs/evidence/2026-10-25-fast-engine/raw/smol-vllm-5070ti-03.json": "ae8e26ba182e56fc448492f6637731399268f4cd3dd386cac0ce77d12ba4f07b",
+    "docs/evidence/2026-10-25-b22-core-perf/raw/smol-candidates-5070ti-01.json": "66abb0fba73b22739d43113612282b397ba6fa198de9088a3b9c0db3e813275f",
+    "docs/evidence/2026-10-25-fast-engine/remote-01/smol-vllm-es-3060-01.json": "425ac18c05158cbebae120fcfbc0596aa1eaf5155c353b4f54e5f85b87f59cbe",
+    "docs/evidence/2026-10-25-fast-engine/remote-01/smol-vllm-3060-03.json": "7815e2637d67a96ee3d8b7d36a8c5d17640e9abe4e1dfaac07b032e73eb7b2c8",
+    "docs/evidence/2026-10-25-b22-core-perf/remote-selected-01/smol-candidates-3060-01.json": "0d73497f61560ef1d78b8f5cc83d2eb61412f288d88f9c57956ed83a528f2d9f",
+    "docs/evidence/2026-10-25-fast-engine/raw/qwen-vllm-es-5070ti-01.json": "89ccb005d8d0996b18dc1e4e6deb39c31562b0cabf952c8f60976c75f1f090b3",
+    "docs/evidence/2026-10-25-fast-engine/raw/qwen-vllm-5070ti-03.json": "5b06c67c67f8ff6a8d49dda98b2d1011e72662b3d3e2cbdaa80f8d58503faa16",
+    "docs/evidence/2026-10-25-b22-core-perf/raw/qwen-candidates-5070ti-01.json": "86e739f6fbd773ce9eeee8dcb5225096cd1fc86b3c52af51ad9a7efbeb977dcc",
+    "docs/evidence/2026-10-25-fast-engine/remote-01/qwen-vllm-es-3060-01.json": "476fd19dff4bd6e9f455537644933ea5e78d2c2b5a1a7457797592ba6f159d2b",
+    "docs/evidence/2026-10-25-fast-engine/remote-01/qwen-vllm-3060-03.json": "72c43efbe9fe93bb49b5f46f8ff1fc1d3a6d1ea77316e1487cfd09b93acf93fd",
+    "docs/evidence/2026-10-25-b22-core-perf/remote-selected-01/qwen-candidates-3060-01.json": "c7af3a75f66446bb91fb46ae2dd83dfd5ee8016bcd2ce240bb83deab50e94146",
+    "docs/evidence/2026-10-25-fast-engine/raw/tiny-vllm-es-5070ti-01.json": "b2b62e1c8afda376f44d03538c2c588ac5ac193aca40e0c0fb14bdec659876bc",
+    "docs/evidence/2026-10-25-fast-engine/raw/tiny-vllm-5070ti-03.json": "7a98d925747c8db4cb852279ce31aa2703e211c26df955213beac9dfbf69e387",
+    "docs/evidence/2026-10-25-b22-core-perf/raw/tiny-candidates-5070ti-01.json": "019fc76efdc7d017a485721fc932d29ff3d1eb82c3bab63cec5a6cce05ff5345",
+    "docs/evidence/2026-10-25-fast-engine/remote-01/tiny-vllm-es-3060-01.json": "7f87bcae31b8824a7059e22ce833e2c614be4481d1270ab4973e34e5f922a11e",
+    "docs/evidence/2026-10-25-fast-engine/remote-01/tiny-vllm-3060-03.json": "4e624c7c6f09866ac12ee5446fbd67817a1704250037da6864ac2453c9933387",
+    "docs/evidence/2026-10-25-b22-core-perf/remote-selected-01/tiny-candidates-3060-01.json": "4c8e49c52c466f96a51b75af19aab19db7ccdaf16b88651ce16ecbd41b8c1254"
+  }
+}

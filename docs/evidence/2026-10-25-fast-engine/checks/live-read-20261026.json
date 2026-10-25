@@ -1,0 +1,9 @@
+{
+  "readOnly": true,
+  "serviceStatus": {
+    "named-tunnel": false,
+    "public-entry": false,
+    "cpu-server": false
+  },
+  "operationPerformed": false
+}

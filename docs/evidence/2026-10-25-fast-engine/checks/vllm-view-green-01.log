@@ -1,0 +1,281 @@
+F..FFFFFF                                                                [100%]
+=================================== FAILURES ===================================
+_ test_fused_views_keep_hf_schema_bits_and_canonical_candidate_restore[qwen2] __
+
+family = 'qwen2'
+
+    @pytest.mark.parametrize("family", ["qwen2", "llama", "llama-wide", "mistral"])
+    def test_fused_views_keep_hf_schema_bits_and_canonical_candidate_restore(family):
+        from heteroes.eval.vllm_weights import hf_parameter_view
+    
+        parent = model_for(family)
+>       owner = fused_owner(parent)
+                ^^^^^^^^^^^^^^^^^^^
+
+runtime/tests/eval/test_vllm_weights.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+model = Qwen2ForCausalLM(
+  (model): Qwen2Model(
+    (embed_tokens): Embedding(43, 24, padding_idx=0)
+    (layers): ModuleList...=1e-06)
+    (rotary_emb): Qwen2RotaryEmbedding()
+  )
+  (lm_head): Linear(in_features=24, out_features=43, bias=False)
+)
+
+    def fused_owner(model):
+        owner = copy.deepcopy(model)
+        for layer in owner.model.layers:
+            for parent, names, packed in (
+                (layer.self_attn, ("q_proj", "k_proj", "v_proj"), "qkv_proj"),
+                (layer.mlp, ("gate_proj", "up_proj"), "gate_up_proj"),
+            ):
+                modules = [getattr(parent, name) for name in names]
+                combined = torch.nn.Linear(modules[0].weight.shape[1], sum(m.weight.shape[0] for m in modules), bias=True)
+                combined.weight = torch.nn.Parameter(torch.cat([m.weight for m in modules]))
+>               combined.bias = torch.nn.Parameter(torch.cat([m.bias for m in modules]))
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               TypeError: expected Tensor as element 0 in argument 0, but got NoneType
+
+runtime/tests/eval/test_vllm_weights.py:27: TypeError
+_ test_fused_views_keep_hf_schema_bits_and_canonical_candidate_restore[mistral] _
+
+family = 'mistral'
+
+    @pytest.mark.parametrize("family", ["qwen2", "llama", "llama-wide", "mistral"])
+    def test_fused_views_keep_hf_schema_bits_and_canonical_candidate_restore(family):
+        from heteroes.eval.vllm_weights import hf_parameter_view
+    
+        parent = model_for(family)
+>       owner = fused_owner(parent)
+                ^^^^^^^^^^^^^^^^^^^
+
+runtime/tests/eval/test_vllm_weights.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+model = MistralForCausalLM(
+  (model): MistralModel(
+    (embed_tokens): Embedding(43, 48, padding_idx=0)
+    (layers): Module...e-06)
+    (rotary_emb): MistralRotaryEmbedding()
+  )
+  (lm_head): Linear(in_features=48, out_features=43, bias=False)
+)
+
+    def fused_owner(model):
+        owner = copy.deepcopy(model)
+        for layer in owner.model.layers:
+            for parent, names, packed in (
+                (layer.self_attn, ("q_proj", "k_proj", "v_proj"), "qkv_proj"),
+                (layer.mlp, ("gate_proj", "up_proj"), "gate_up_proj"),
+            ):
+                modules = [getattr(parent, name) for name in names]
+                combined = torch.nn.Linear(modules[0].weight.shape[1], sum(m.weight.shape[0] for m in modules), bias=True)
+                combined.weight = torch.nn.Parameter(torch.cat([m.weight for m in modules]))
+>               combined.bias = torch.nn.Parameter(torch.cat([m.bias for m in modules]))
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               TypeError: expected Tensor as element 0 in argument 0, but got NoneType
+
+runtime/tests/eval/test_vllm_weights.py:27: TypeError
+__ test_incompatible_fused_storage_is_rejected_without_writing_owner[missing] __
+
+defect = 'missing'
+
+    @pytest.mark.parametrize("defect", ["missing", "shape", "dtype", "extra"])
+    def test_incompatible_fused_storage_is_rejected_without_writing_owner(defect):
+        from heteroes.eval.vllm_weights import hf_parameter_view
+    
+        parent = model_for("qwen2")
+>       owner = fused_owner(parent)
+                ^^^^^^^^^^^^^^^^^^^
+
+runtime/tests/eval/test_vllm_weights.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+model = Qwen2ForCausalLM(
+  (model): Qwen2Model(
+    (embed_tokens): Embedding(43, 24, padding_idx=0)
+    (layers): ModuleList...=1e-06)
+    (rotary_emb): Qwen2RotaryEmbedding()
+  )
+  (lm_head): Linear(in_features=24, out_features=43, bias=False)
+)
+
+    def fused_owner(model):
+        owner = copy.deepcopy(model)
+        for layer in owner.model.layers:
+            for parent, names, packed in (
+                (layer.self_attn, ("q_proj", "k_proj", "v_proj"), "qkv_proj"),
+                (layer.mlp, ("gate_proj", "up_proj"), "gate_up_proj"),
+            ):
+                modules = [getattr(parent, name) for name in names]
+                combined = torch.nn.Linear(modules[0].weight.shape[1], sum(m.weight.shape[0] for m in modules), bias=True)
+                combined.weight = torch.nn.Parameter(torch.cat([m.weight for m in modules]))
+>               combined.bias = torch.nn.Parameter(torch.cat([m.bias for m in modules]))
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               TypeError: expected Tensor as element 0 in argument 0, but got NoneType
+
+runtime/tests/eval/test_vllm_weights.py:27: TypeError
+___ test_incompatible_fused_storage_is_rejected_without_writing_owner[shape] ___
+
+defect = 'shape'
+
+    @pytest.mark.parametrize("defect", ["missing", "shape", "dtype", "extra"])
+    def test_incompatible_fused_storage_is_rejected_without_writing_owner(defect):
+        from heteroes.eval.vllm_weights import hf_parameter_view
+    
+        parent = model_for("qwen2")
+>       owner = fused_owner(parent)
+                ^^^^^^^^^^^^^^^^^^^
+
+runtime/tests/eval/test_vllm_weights.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+model = Qwen2ForCausalLM(
+  (model): Qwen2Model(
+    (embed_tokens): Embedding(43, 24, padding_idx=0)
+    (layers): ModuleList...=1e-06)
+    (rotary_emb): Qwen2RotaryEmbedding()
+  )
+  (lm_head): Linear(in_features=24, out_features=43, bias=False)
+)
+
+    def fused_owner(model):
+        owner = copy.deepcopy(model)
+        for layer in owner.model.layers:
+            for parent, names, packed in (
+                (layer.self_attn, ("q_proj", "k_proj", "v_proj"), "qkv_proj"),
+                (layer.mlp, ("gate_proj", "up_proj"), "gate_up_proj"),
+            ):
+                modules = [getattr(parent, name) for name in names]
+                combined = torch.nn.Linear(modules[0].weight.shape[1], sum(m.weight.shape[0] for m in modules), bias=True)
+                combined.weight = torch.nn.Parameter(torch.cat([m.weight for m in modules]))
+>               combined.bias = torch.nn.Parameter(torch.cat([m.bias for m in modules]))
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               TypeError: expected Tensor as element 0 in argument 0, but got NoneType
+
+runtime/tests/eval/test_vllm_weights.py:27: TypeError
+___ test_incompatible_fused_storage_is_rejected_without_writing_owner[dtype] ___
+
+defect = 'dtype'
+
+    @pytest.mark.parametrize("defect", ["missing", "shape", "dtype", "extra"])
+    def test_incompatible_fused_storage_is_rejected_without_writing_owner(defect):
+        from heteroes.eval.vllm_weights import hf_parameter_view
+    
+        parent = model_for("qwen2")
+>       owner = fused_owner(parent)
+                ^^^^^^^^^^^^^^^^^^^
+
+runtime/tests/eval/test_vllm_weights.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+model = Qwen2ForCausalLM(
+  (model): Qwen2Model(
+    (embed_tokens): Embedding(43, 24, padding_idx=0)
+    (layers): ModuleList...=1e-06)
+    (rotary_emb): Qwen2RotaryEmbedding()
+  )
+  (lm_head): Linear(in_features=24, out_features=43, bias=False)
+)
+
+    def fused_owner(model):
+        owner = copy.deepcopy(model)
+        for layer in owner.model.layers:
+            for parent, names, packed in (
+                (layer.self_attn, ("q_proj", "k_proj", "v_proj"), "qkv_proj"),
+                (layer.mlp, ("gate_proj", "up_proj"), "gate_up_proj"),
+            ):
+                modules = [getattr(parent, name) for name in names]
+                combined = torch.nn.Linear(modules[0].weight.shape[1], sum(m.weight.shape[0] for m in modules), bias=True)
+                combined.weight = torch.nn.Parameter(torch.cat([m.weight for m in modules]))
+>               combined.bias = torch.nn.Parameter(torch.cat([m.bias for m in modules]))
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               TypeError: expected Tensor as element 0 in argument 0, but got NoneType
+
+runtime/tests/eval/test_vllm_weights.py:27: TypeError
+___ test_incompatible_fused_storage_is_rejected_without_writing_owner[extra] ___
+
+defect = 'extra'
+
+    @pytest.mark.parametrize("defect", ["missing", "shape", "dtype", "extra"])
+    def test_incompatible_fused_storage_is_rejected_without_writing_owner(defect):
+        from heteroes.eval.vllm_weights import hf_parameter_view
+    
+        parent = model_for("qwen2")
+>       owner = fused_owner(parent)
+                ^^^^^^^^^^^^^^^^^^^
+
+runtime/tests/eval/test_vllm_weights.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+model = Qwen2ForCausalLM(
+  (model): Qwen2Model(
+    (embed_tokens): Embedding(43, 24, padding_idx=0)
+    (layers): ModuleList...=1e-06)
+    (rotary_emb): Qwen2RotaryEmbedding()
+  )
+  (lm_head): Linear(in_features=24, out_features=43, bias=False)
+)
+
+    def fused_owner(model):
+        owner = copy.deepcopy(model)
+        for layer in owner.model.layers:
+            for parent, names, packed in (
+                (layer.self_attn, ("q_proj", "k_proj", "v_proj"), "qkv_proj"),
+                (layer.mlp, ("gate_proj", "up_proj"), "gate_up_proj"),
+            ):
+                modules = [getattr(parent, name) for name in names]
+                combined = torch.nn.Linear(modules[0].weight.shape[1], sum(m.weight.shape[0] for m in modules), bias=True)
+                combined.weight = torch.nn.Parameter(torch.cat([m.weight for m in modules]))
+>               combined.bias = torch.nn.Parameter(torch.cat([m.bias for m in modules]))
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               TypeError: expected Tensor as element 0 in argument 0, but got NoneType
+
+runtime/tests/eval/test_vllm_weights.py:27: TypeError
+_________ test_padded_tied_vocabulary_remains_one_canonical_parameter __________
+
+    def test_padded_tied_vocabulary_remains_one_canonical_parameter():
+        from heteroes.eval.vllm_weights import hf_parameter_view
+    
+        parent = model_for("qwen2")
+>       owner = fused_owner(parent)
+                ^^^^^^^^^^^^^^^^^^^
+
+runtime/tests/eval/test_vllm_weights.py:81: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+model = Qwen2ForCausalLM(
+  (model): Qwen2Model(
+    (embed_tokens): Embedding(43, 24, padding_idx=0)
+    (layers): ModuleList...=1e-06)
+    (rotary_emb): Qwen2RotaryEmbedding()
+  )
+  (lm_head): Linear(in_features=24, out_features=43, bias=False)
+)
+
+    def fused_owner(model):
+        owner = copy.deepcopy(model)
+        for layer in owner.model.layers:
+            for parent, names, packed in (
+                (layer.self_attn, ("q_proj", "k_proj", "v_proj"), "qkv_proj"),
+                (layer.mlp, ("gate_proj", "up_proj"), "gate_up_proj"),
+            ):
+                modules = [getattr(parent, name) for name in names]
+                combined = torch.nn.Linear(modules[0].weight.shape[1], sum(m.weight.shape[0] for m in modules), bias=True)
+                combined.weight = torch.nn.Parameter(torch.cat([m.weight for m in modules]))
+>               combined.bias = torch.nn.Parameter(torch.cat([m.bias for m in modules]))
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               TypeError: expected Tensor as element 0 in argument 0, but got NoneType
+
+runtime/tests/eval/test_vllm_weights.py:27: TypeError
+=========================== short test summary info ============================
+FAILED runtime/tests/eval/test_vllm_weights.py::test_fused_views_keep_hf_schema_bits_and_canonical_candidate_restore[qwen2]
+FAILED runtime/tests/eval/test_vllm_weights.py::test_fused_views_keep_hf_schema_bits_and_canonical_candidate_restore[mistral]
+FAILED runtime/tests/eval/test_vllm_weights.py::test_incompatible_fused_storage_is_rejected_without_writing_owner[missing]
+FAILED runtime/tests/eval/test_vllm_weights.py::test_incompatible_fused_storage_is_rejected_without_writing_owner[shape]
+FAILED runtime/tests/eval/test_vllm_weights.py::test_incompatible_fused_storage_is_rejected_without_writing_owner[dtype]
+FAILED runtime/tests/eval/test_vllm_weights.py::test_incompatible_fused_storage_is_rejected_without_writing_owner[extra]
+FAILED runtime/tests/eval/test_vllm_weights.py::test_padded_tied_vocabulary_remains_one_canonical_parameter
+7 failed, 2 passed in 1.76s

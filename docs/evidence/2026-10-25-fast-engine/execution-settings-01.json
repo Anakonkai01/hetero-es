@@ -1,0 +1,28 @@
+{
+  "scope": "explicit standalone probes only",
+  "sourceCommit": "c9a37059",
+  "local": {
+    "inferencePython": "/home/pc5070ti/projects/heteroes/.scratch/vllm-venv-20261024/bin/python",
+    "CUDA_HOME": "/home/pc5070ti/projects/heteroes/.scratch/vllm-venv-20261024/lib/python3.12/site-packages/nvidia/cu13"
+  },
+  "remote": {
+    "inferencePython": "/home/thao_nguyen/heteroes-vllm-20261024/venv/bin/python",
+    "CUDA_HOME": "/home/thao_nguyen/heteroes-vllm-20261024/venv/lib/python3.12/site-packages/nvidia/cu13",
+    "LD_LIBRARY_PATH": "/usr/lib/wsl/drivers/nv_dispi.inf_amd64_feedb8c0271ca811:/usr/lib/wsl/lib"
+  },
+  "common": {
+    "HETEROES_GPU_ACCEPTANCE": "1",
+    "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+    "VLLM_USE_FLASHINFER_SAMPLER": "0",
+    "VLLM_BATCH_INVARIANT": "unset/default 0; control receipts report 0",
+    "dtype": "float16",
+    "max_model_len": 512,
+    "gpu_memory_utilization": 0.35,
+    "seed": 0,
+    "enable_prefix_caching": false,
+    "temperature": 0.0,
+    "max_tokens": 32,
+    "ignore_eos": true,
+    "repetition_penalty": 1.0
+  }
+}

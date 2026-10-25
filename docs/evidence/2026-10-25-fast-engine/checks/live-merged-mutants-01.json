@@ -1,0 +1,8 @@
+[
+  {
+    "name": "leave separate stale parameter storage",
+    "file": "src/heteroes/eval/fp16_decoder.py",
+    "old": "parameter.set_(view)",
+    "new": "parameter.copy_(view)"
+  }
+]
