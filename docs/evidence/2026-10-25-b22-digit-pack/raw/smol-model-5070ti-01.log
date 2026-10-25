@@ -1,0 +1,5 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 8048.41it/s]
+smol {'batch': 1, 'before': 277.2722193013414, 'after': 277.1763940264042, 'ratio': 0.9996544000146186}
+smol {'batch': 8, 'before': 1563.200215233302, 'after': 1574.265230459736, 'ratio': 1.0070784376298096}
+smol {'batch': 32, 'before': 4071.251052131513, 'after': 4122.77775484965, 'ratio': 1.0126562331967124}
+DONE docs/evidence/2026-10-25-b22-digit-pack/raw/smol-model-5070ti-01.json

@@ -1,0 +1,14 @@
+[
+  {
+    "name": "swap paired high half",
+    "file": "src/heteroes/eval/integer_cuda.py",
+    "old": "(u16)(halves>>16)",
+    "new": "(u16)(halves>>8)"
+  },
+  {
+    "name": "drop tail half",
+    "file": "src/heteroes/eval/integer_cuda.py",
+    "old": "if(k+1<WIDTH) halves|=",
+    "new": "if(false) halves|="
+  }
+]

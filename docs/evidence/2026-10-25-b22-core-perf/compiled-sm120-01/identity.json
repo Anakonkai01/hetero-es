@@ -1,0 +1,219 @@
+{
+  "sourceSha256": "a3bdf0060de4a75dd3fdca5323af8be0114c76df8c10ef5b1db36225f15c43ca",
+  "identities": {
+    "scalar": {
+      "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+      "operators": "pairwise_f32_reference_v1_experimental",
+      "sourceSha256": "daf13db126e0b4b4d5c7258a3f8c8be67ef7171dda2d62889c9e8b41b08a95ec",
+      "nvrtcOptions": [
+        "--fmad=false",
+        "--ftz=false",
+        "--prec-div=true",
+        "--prec-sqrt=true",
+        "--std=c++17"
+      ],
+      "hardwareQualified": false,
+      "arch": "sm_120",
+      "gpu": "NVIDIA GeForce RTX 5070 Ti",
+      "nvrtcVersion": [
+        13,
+        2
+      ],
+      "builds": {
+        "integer-22-2048-bias0-m16-w4-s1-p1": {
+          "sourceSha256": "a12e7334beb551853d9c7a59459acdc3dd6e77c580c7f94fd31dd4ea7c1102ee",
+          "ptxSha256": "f0639c18343d7f2e9e122ba5c25d8be385fc7b56720676ca68b7652a9d5ca555",
+          "cubinSha256": "c6197970f9e41682a1a980db0a143bc4b6bd5071863aad29192abeb86f89e735",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        },
+        "integer-22-896-bias0-m16-w4-s1-p1": {
+          "sourceSha256": "715494448e99e46f85969c5d3f40a1e46d15bf77eb61031432562d5a7132698c",
+          "ptxSha256": "af0be3c4c4d5882bece57bd0293bf6435757047c48a2f400e0c03db588a914d7",
+          "cubinSha256": "1a0422a17af93ae42491b915f373895047a40b951d95c107c4760cff5f458731",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        }
+      },
+      "fingerprint": "2d4c59a839a4b6fe966f17ae687746cb727bec5ca012a920456f34a067c67832",
+      "linear": {
+        "operator": "row_scaled_signed_integer_dot_v1_experimental",
+        "magnitudeBits": 22,
+        "limbs": 3,
+        "maxWidth": 32768,
+        "zeroIntegerOutput": "+0",
+        "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+        "bias": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+        "hardwareQualified": false
+      },
+      "nonlinear": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "daf13db126e0b4b4d5c7258a3f8c8be67ef7171dda2d62889c9e8b41b08a95ec",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false
+      },
+      "integerSourceSha256": "a3bdf0060de4a75dd3fdca5323af8be0114c76df8c10ef5b1db36225f15c43ca",
+      "maxPartialBytes": 16777216,
+      "activationPacking": "radix_planes_once_v1_experimental",
+      "weightLoad": "scalar",
+      "weightReadPolicy": "aligned_half2_sm120_b22_v1_experimental",
+      "decodePlanning": {
+        "policy": "occupancy_split_k_v1_experimental",
+        "rowTiles": [
+          16,
+          32
+        ],
+        "maxSplitK": 8,
+        "minSplitWidth": 256,
+        "maxBatch": 128,
+        "singleRow": "simt_split1",
+        "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+      },
+      "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+      "integerReference": {
+        "operator": "row_scaled_signed_integer_dot_v1_experimental",
+        "magnitudeBits": 22,
+        "limbs": 3,
+        "maxWidth": 32768,
+        "zeroIntegerOutput": "+0",
+        "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+        "bias": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+        "hardwareQualified": false
+      },
+      "multiprocessors": 70,
+      "weightLoadEffective": "scalar"
+    },
+    "paired": {
+      "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+      "operators": "pairwise_f32_reference_v1_experimental",
+      "sourceSha256": "daf13db126e0b4b4d5c7258a3f8c8be67ef7171dda2d62889c9e8b41b08a95ec",
+      "nvrtcOptions": [
+        "--fmad=false",
+        "--ftz=false",
+        "--prec-div=true",
+        "--prec-sqrt=true",
+        "--std=c++17"
+      ],
+      "hardwareQualified": false,
+      "arch": "sm_120",
+      "gpu": "NVIDIA GeForce RTX 5070 Ti",
+      "nvrtcVersion": [
+        13,
+        2
+      ],
+      "builds": {
+        "integer-22-2048-bias0-m16-w4-s1-p1-load32": {
+          "sourceSha256": "10955f48360a68e5b67c5fa43d836da4778841c09644449d73f654a1e091bdf7",
+          "ptxSha256": "905660aa897da867d962ce5ffa9d303c386c8d8baffa864575e44555dfa7fa26",
+          "cubinSha256": "c8216d1e641f1a0ff7031a01cc3cdec28bfb8d8458e60665de1120467f5783c5",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        },
+        "integer-22-896-bias0-m16-w4-s1-p1-load32": {
+          "sourceSha256": "9ee85aa6452c93178670d46a2a846335e8198dc8965912de0b6fc1ff8c1c5a1d",
+          "ptxSha256": "68202a06ac1a261903e60a6d9df215fd3479663b02af73c1bfbcf19c0f84441e",
+          "cubinSha256": "ecf0b7acf39dc10c031c12419549114e6be9bd5129c08b569e1f2f2fccc13758",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        }
+      },
+      "fingerprint": "793fb7ee8e6c7c806b69f99e041c4626e136214a50c951b3a4fa19f266885cff",
+      "linear": {
+        "operator": "row_scaled_signed_integer_dot_v1_experimental",
+        "magnitudeBits": 22,
+        "limbs": 3,
+        "maxWidth": 32768,
+        "zeroIntegerOutput": "+0",
+        "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+        "bias": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+        "hardwareQualified": false
+      },
+      "nonlinear": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "daf13db126e0b4b4d5c7258a3f8c8be67ef7171dda2d62889c9e8b41b08a95ec",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false
+      },
+      "integerSourceSha256": "a3bdf0060de4a75dd3fdca5323af8be0114c76df8c10ef5b1db36225f15c43ca",
+      "maxPartialBytes": 16777216,
+      "activationPacking": "radix_planes_once_v1_experimental",
+      "weightLoad": "paired",
+      "weightReadPolicy": "aligned_half2_sm120_b22_v1_experimental",
+      "decodePlanning": {
+        "policy": "occupancy_split_k_v1_experimental",
+        "rowTiles": [
+          16,
+          32
+        ],
+        "maxSplitK": 8,
+        "minSplitWidth": 256,
+        "maxBatch": 128,
+        "singleRow": "simt_split1",
+        "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+      },
+      "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+      "integerReference": {
+        "operator": "row_scaled_signed_integer_dot_v1_experimental",
+        "magnitudeBits": 22,
+        "limbs": 3,
+        "maxWidth": 32768,
+        "zeroIntegerOutput": "+0",
+        "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+        "bias": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+        "hardwareQualified": false
+      },
+      "multiprocessors": 70,
+      "weightLoadEffective": "paired"
+    }
+  }
+}
