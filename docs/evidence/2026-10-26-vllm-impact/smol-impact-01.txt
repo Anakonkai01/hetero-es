@@ -1,0 +1,12 @@
+smol all rows 2448 token-diff 5 reward-flips 0 scorable 2421 max candidate reward delta pp 0.0 strict rank inversions 0 tie changes 0
+means [0.0, 0.0, 0.0, 0.0037174721189591076, 0.0, 0.0, 0.0037174721189591076, 0.0] [0.0, 0.0, 0.0, 0.0037174721189591076, 0.0, 0.0, 0.0037174721189591076, 0.0]
+zscore@1 all-other cosine 1.0 worst-mixed cosine 1.0 mixed best changes 0
+centered-rank@1 all-other cosine 1.0 worst-mixed cosine 1.0 mixed best changes 0
+smol historical rows 1872 token-diff 3 reward-flips 0 scorable 1845 max candidate reward delta pp 0.0 strict rank inversions 0 tie changes 0
+means [0.0, 0.0, 0.0, 0.004878048780487805, 0.0, 0.0, 0.004878048780487805, 0.0] [0.0, 0.0, 0.0, 0.004878048780487805, 0.0, 0.0, 0.004878048780487805, 0.0]
+zscore@1 all-other cosine 1.0 worst-mixed cosine 1.0 mixed best changes 0
+centered-rank@1 all-other cosine 1.0 worst-mixed cosine 1.0 mixed best changes 0
+smol gsm8k-first64 rows 576 token-diff 2 reward-flips 0 scorable 576 max candidate reward delta pp 0.0 strict rank inversions 0 tie changes 0
+means [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+zscore@1 all-other cosine None worst-mixed cosine None mixed best changes 0
+centered-rank@1 all-other cosine None worst-mixed cosine None mixed best changes 0

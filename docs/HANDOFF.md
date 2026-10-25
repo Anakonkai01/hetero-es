@@ -6,33 +6,32 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
 
 ## Tóm tắt cho chủ dự án (2026-10-26)
 
-- Chủ dự án ưu tiên tốc độ gần vLLM và cho phép thử số học khác. Nhánh hiện hành
-  `work/codex-frozen-perf-2026-10-25`, worktree `/home/pc5070ti/projects/heteroes-codex-frozen-perf`.
-  Code mới `c9a37059`; hai worktree gốc không sửa. Không push/merge/deploy, đổi device state hay learning.
-- **Đường nhanh mới dùng vLLM làm backend inference**, HeteroES giữ nhiễu/candidate/restore. Batch 32 trên
-  5070 Ti: Smol **14415**, Qwen **13813**, Tiny **7761** token/s, đạt **99,5–99,9%** vLLM cùng cấu hình.
-  Trên 3060 đạt **99,7–100,7%**. Đây là tốc độ inference; thời gian snapshot, audit hash và xuất bản candidate
-  được ghi riêng. [Bằng chứng và phạm vi](evidence/2026-10-25-fast-engine/README.md).
-- View tham số HF chia sẻ trực tiếp storage QKV/gate-up của vLLM, giữ schema và hash candidate chuẩn ±
-  khớp B22 trên cả hai GPU; restore đúng byte. Bộ nhỏ có Smol **163/164** chuỗi token khớp giữa GPU,
-  Qwen/Tiny **164/164**; reward số chấm được **104/104** cho từng model. Không suy thành chất lượng rộng
-  hoặc bit-exact đa GPU. Đường này là standalone thử nghiệm, chưa bật cho managed Worker.
-- **B22 tự viết vẫn là control strict riêng**: `9acf8bfa` đọc FP16 theo cặp trên SM120, tăng batch 32
-  **5,5% / 8,4% / 10,0%** cho Smol/Qwen/Tiny, đạt **4073 / 3757 / 1992** token/s. SM86 giữ scalar do
-  Tiny bị chậm trong thử nghiệm. [Core B22](evidence/2026-10-25-b22-core-perf/README.md).
-- LoRA strict trước đó `20856dea` tăng batch 32 khoảng **12–29%** tùy model/GPU; artifact, adapter chuẩn ±,
-  token/logit và restore đã đối chiếu hai GPU. Đây là search space riêng, không phải control full-weight.
-  [Bằng chứng](evidence/2026-10-25-frozen-subwarp-perf/README.md).
-- FP16 graph v2 `3735d6db` sửa bản ghép trọng số bị stale khi ES ghi tại chỗ. Mọi mã noise/ES/ledger và
-  recipe lịch sử giữ nguyên. Kế hoạch đã duyệt giữ hash
-  `4ee6838fa47f810ee40348b5f0bc556834bf50825eb0b7b0795b5053743cb17f`; chỉ đạo mới về ưu tiên số học
-  được ghi riêng trong [thiết kế đường vLLM](../runtime/docs/vllm-es-parameter-view.md).
-- Nghiệm thu code `c9a37059`: full check **ALL PASS**, runtime CPU **3158 pass/459 skip**, backend **452 pass**;
-  nhóm mới **17 test trên mỗi host**, mutation **4/4**. Gói Linux Worker/Server và hash nguồn SDK khớp;
-  không suy thành vLLM đã chạy trong managed installer.
-- Việc tiếp theo: đo candidate/update end-to-end trên workload rộng hơn, định lượng drift/chất lượng,
-  đưa đường nhanh qua ownership/lifecycle và qualification trước khi chọn cho managed Worker. M0–M6,
-  watchdog/D10, storage/replacement và native Windows còn mở; không tuyên bố nghiệm thu toàn bộ.
+- **Chỉ đạo mới nhất: hoàn tất khảo sát vLLM, ghi lại, rồi tiếp tục tối ưu strict kernel riêng để gần ngang
+  vLLM; đạt mục tiêu hiệu năng thì làm tiếp đầy đủ M0–M6.** Không dùng tốc độ của wrapper vLLM để đóng
+  mục tiêu kernel. D2/D3 (cùng candidate/input, cùng token/reward trên GPU khác nhau) vẫn giữ.
+- Nhánh `work/codex-frozen-perf-2026-10-25`, worktree `/home/pc5070ti/projects/heteroes-codex-frozen-perf`.
+  Strict B22 `9acf8bfa`: batch 32 **4073 / 3757 / 1992** token/s cho Smol/Qwen/Tiny trên 5070 Ti,
+  tăng **5,5% / 8,4% / 10,0%**. Mới khoảng **26–28%** vLLM đối chứng; mục tiêu chưa đạt.
+  SM86 giữ scalar sau regression. [B22](evidence/2026-10-25-b22-core-perf/README.md).
+- Khảo sát vLLM đã đo parent và 8 candidate chuẩn ± trên hai GPU: Qwen đổi reward **51/2421** lượt trong
+  bộ raw/256 token. Kiểm tra lại chat/512 token: **7/576** lượt, cả 7 câu đã xong; điểm candidate lệch
+  tối đa **1,56 điểm phần trăm**, best candidate giữ nguyên nhưng ties/hệ số ES đổi. Không suy thành
+  ảnh hưởng learning nhỏ hoặc bỏ strict. [Khảo sát và giới hạn](evidence/2026-10-26-vllm-impact/README.md).
+- vLLM upstream chưa hỗ trợ native Windows. Strict `3fd704a5` từng đạt 452 test trên native Win11/3060;
+  bốn layout nhỏ B14/B22/changed/restore khớp Linux. Source mới/trained model lớn/installer còn mở.
+- Thử nghiệm riêng `c9a37059` chia sẻ storage HF với vLLM để giữ schema, candidate hash và exact restore;
+  inference gần 100% vLLM vì dùng chính engine đó. Đây là control/khảo sát standalone, chưa managed.
+  `3735d6db` sửa FP16 merged GEMM bị stale khi ES ghi tại chỗ.
+  [Bằng chứng riêng](evidence/2026-10-25-fast-engine/README.md).
+- LoRA strict `20856dea` tăng batch 32 khoảng 12–29% tùy model/GPU; artifact/adapter/candidate/restore đã
+  đối chiếu hai host. Search space riêng, không phải full-weight control.
+- Source `c9a37059`: full check ALL PASS, runtime CPU 3158 pass/459 skip, backend 452; nhóm mới 17 test
+  mỗi host, 4/4 mutation; gói Linux/SDK khớp. Khảo sát mới chỉ thêm harness/evidence/docs, không đổi runtime.
+- Tiếp tục projection throughput, số học có đặc tả và gate chất lượng/portable/native; không sửa recipe
+  lịch sử để lấy tốc độ. Kế hoạch đã duyệt vẫn giữ hash
+  `4ee6838fa47f810ee40348b5f0bc556834bf50825eb0b7b0795b5053743cb17f`.
+  M0–M6, watchdog/D10, storage/replacement, ownership/lifecycle và qualification vẫn còn việc.
+- Không push/merge/deploy, đổi device state, learning run hay sửa môi trường `ai`. Hai worktree gốc không sửa.
 
 ## Live
 
@@ -48,13 +47,15 @@ Deployment remains `82c37fc`. Service status re-read on 2026-10-26: all three la
 
 ## Open work, in order
 
-1. **Current priority: fast inference and measured ES lifecycle.** The owner permits alternative arithmetic in a new namespace; preserve historical recipes. Continue the vLLM-backed canonical parameter-view experiment, measure candidate/update overhead and inference drift, then qualify ownership/lifecycle before managed selection. The strict control remains separately versioned. The approved plan still has open coverage work. Continue projection
-   throughput beyond the captured decode implementation across model/GPU dimensions; continue the separately versioned integer Tensor Core
-   arithmetic with exact-conversion, tile reuse and range/accuracy/footprint gates.
-   Do not infer universal support from the current fixtures or relax exactness for a timing result. M4 qualification,
-   managed weight ownership and native Windows trained/installer acceptance remain open. Keep audit projection/UI for medium effort; M2 progress
-   watchdog/hard caps/D10 and M3 I/O/sidecar/replacement consistency remain heavy work. Strict activation still needs
-   those gates. See [effort split](HUMAN-REVIEW-EFFORT-SPLIT.md) and [kernel handoff](handoff-codex-strict-integer-2026-10-25.md).
+1. **Own strict kernels approaching vLLM, then complete M0–M6.** The vLLM impact survey is recorded;
+   the vendor path remains a separate control. Preserve D2/D3 across GPU architectures and the native
+   Windows direction. Alternative arithmetic may have a new namespace and must pass numerical, quality,
+   footprint and portability gates; historical recipes remain intact. Focus on full-weight projections,
+   then remaining shared operators and lifecycle/ownership qualification. M2 watchdog/hard caps/D10,
+   M3 storage/replacement, native installers and managed activation gates remain open. See the
+   [approved plan](PLAN-SUA-HUMAN-REVIEW.md), [effort split](HUMAN-REVIEW-EFFORT-SPLIT.md), and
+   [impact results](evidence/2026-10-26-vllm-impact/README.md).
+
 2. **oomd / recovery-point upload loop.** Evidence and five proposed fixes:
    [evidence/2026-10-23-oomd-review/](evidence/2026-10-23-oomd-review/README.md). Policy:
    [operations-decisions-2026-10-23.md](operations-decisions-2026-10-23.md) (keep oomd on; supervisor recovers a run
