@@ -1,0 +1,128 @@
+{
+  "status": "ok",
+  "selected": false,
+  "hardwareQualified": false,
+  "prototypeSourceSha256": "cde8dafc9b32fe5386fdd28b42ad5988cdcce64d8e3b1768e767bddcbcb518a6",
+  "limits": "Finite parent throughput/logits only. Separate source identity, not managed/native acceptance.",
+  "devices": {
+    "nhan": {
+      "smol": [
+        {
+          "batch": 1,
+          "beforeTokensPerSecond": 262.9548421084427,
+          "afterTokensPerSecond": 286.15138449536323,
+          "ratio": 1.0882149277074513,
+          "peakAllocatedDeltaBytes": 0
+        },
+        {
+          "batch": 8,
+          "beforeTokensPerSecond": 1208.344717290153,
+          "afterTokensPerSecond": 1303.657571684249,
+          "ratio": 1.0788788605025275,
+          "peakAllocatedDeltaBytes": 0
+        },
+        {
+          "batch": 32,
+          "beforeTokensPerSecond": 2865.345756863592,
+          "afterTokensPerSecond": 3025.0383428319997,
+          "ratio": 1.055732396547915,
+          "peakAllocatedDeltaBytes": 0
+        }
+      ],
+      "tiny": [
+        {
+          "batch": 1,
+          "beforeTokensPerSecond": 180.05826675248352,
+          "afterTokensPerSecond": 189.9439032019738,
+          "ratio": 1.054902430350946,
+          "peakAllocatedDeltaBytes": 0
+        },
+        {
+          "batch": 8,
+          "beforeTokensPerSecond": 692.4869628021462,
+          "afterTokensPerSecond": 698.0761446656891,
+          "ratio": 1.008071172691723,
+          "peakAllocatedDeltaBytes": 0
+        },
+        {
+          "batch": 32,
+          "beforeTokensPerSecond": 1386.3167512059072,
+          "afterTokensPerSecond": 1406.5407231563015,
+          "ratio": 1.0145882764042216,
+          "peakAllocatedDeltaBytes": 0
+        }
+      ],
+      "qwen": [
+        {
+          "batch": 1,
+          "beforeTokensPerSecond": 262.85470180146143,
+          "afterTokensPerSecond": 280.5322882896688,
+          "ratio": 1.067252312273872,
+          "peakAllocatedDeltaBytes": 0
+        },
+        {
+          "batch": 8,
+          "beforeTokensPerSecond": 1170.9231246662794,
+          "afterTokensPerSecond": 1211.8676207814656,
+          "ratio": 1.034967706463954,
+          "peakAllocatedDeltaBytes": 0
+        },
+        {
+          "batch": 32,
+          "beforeTokensPerSecond": 2809.668591036745,
+          "afterTokensPerSecond": 2947.4368107423525,
+          "ratio": 1.0490336191766916,
+          "peakAllocatedDeltaBytes": 0
+        }
+      ]
+    },
+    "thao": {
+      "smol": [
+        {
+          "batch": 1,
+          "beforeTokensPerSecond": 158.40142705536172,
+          "afterTokensPerSecond": 163.55345476090918,
+          "ratio": 1.0325251344089648,
+          "peakAllocatedDeltaBytes": 0
+        },
+        {
+          "batch": 8,
+          "beforeTokensPerSecond": 527.5686076471168,
+          "afterTokensPerSecond": 543.1563786710036,
+          "ratio": 1.0295464339574831,
+          "peakAllocatedDeltaBytes": 0
+        },
+        {
+          "batch": 32,
+          "beforeTokensPerSecond": 963.126241568411,
+          "afterTokensPerSecond": 988.2046646320596,
+          "ratio": 1.026038562735877,
+          "peakAllocatedDeltaBytes": 0
+        }
+      ],
+      "qwen": [
+        {
+          "batch": 1,
+          "beforeTokensPerSecond": 150.55792319941108,
+          "afterTokensPerSecond": 159.20921974733466,
+          "ratio": 1.0574615826525788,
+          "peakAllocatedDeltaBytes": 0
+        },
+        {
+          "batch": 8,
+          "beforeTokensPerSecond": 479.4777573231586,
+          "afterTokensPerSecond": 493.0628104175455,
+          "ratio": 1.0283330204308745,
+          "peakAllocatedDeltaBytes": 0
+        },
+        {
+          "batch": 32,
+          "beforeTokensPerSecond": 885.0335330088794,
+          "afterTokensPerSecond": 933.1131057578257,
+          "ratio": 1.05432514244459,
+          "peakAllocatedDeltaBytes": 0
+        }
+      ]
+    }
+  }
+}

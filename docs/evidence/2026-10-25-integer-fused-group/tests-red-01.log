@@ -1,0 +1,17 @@
+F
+=================================== FAILURES ===================================
+_ test_group_exact_independent_rows_tails_biases_and_splits[1-33-outputs0-14] __
+
+bits = 14, rows = 1, width = 33, outputs = (7, 17)
+
+    @pytest.mark.parametrize('bits',[14,22])
+    @pytest.mark.parametrize('rows,width,outputs',[(1,33,(7,17)),(3,257,(17,11,37)),(19,769,(3,33,35)),(32,67,(65,9))])
+    def test_group_exact_independent_rows_tails_biases_and_splits(bits,rows,width,outputs):
+>    from integer_grouped_prototype import grouped
+E    ModuleNotFoundError: No module named 'integer_grouped_prototype'
+
+.scratch/strict-integer-20261025/test_fused_group_prototype.py:13: ModuleNotFoundError
+=========================== short test summary info ============================
+FAILED .scratch/strict-integer-20261025/test_fused_group_prototype.py::test_group_exact_independent_rows_tails_biases_and_splits[1-33-outputs0-14]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 0.78s

@@ -1,0 +1,24 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7370.24it/s]
+USDT:2026-10-25 13:52:51 3443097:3443097 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-10-25 13:52:51 3443097:3443097 SyncActivityProfilerHandler.cpp:59] profiler_stop
+USDT:2026-10-25 13:52:54 3443097:3443097 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-10-25 13:52:54 3443097:3443097 SyncActivityProfilerHandler.cpp:59] profiler_stop
+USDT:2026-10-25 13:52:57 3443097:3443097 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-10-25 13:52:57 3443097:3443097 SyncActivityProfilerHandler.cpp:59] profiler_stop
+{"status": "ok", "error": null}
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 2321.11it/s]
+USDT:2026-10-25 13:53:05 3445178:3445178 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-10-25 13:53:06 3445178:3445178 SyncActivityProfilerHandler.cpp:59] profiler_stop
+USDT:2026-10-25 13:53:09 3445178:3445178 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-10-25 13:53:09 3445178:3445178 SyncActivityProfilerHandler.cpp:59] profiler_stop
+USDT:2026-10-25 13:53:13 3445178:3445178 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-10-25 13:53:14 3445178:3445178 SyncActivityProfilerHandler.cpp:59] profiler_stop
+{"status": "ok", "error": null}
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7420.60it/s]
+USDT:2026-10-25 13:53:21 3447680:3447680 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-10-25 13:53:21 3447680:3447680 SyncActivityProfilerHandler.cpp:59] profiler_stop
+USDT:2026-10-25 13:53:24 3447680:3447680 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-10-25 13:53:25 3447680:3447680 SyncActivityProfilerHandler.cpp:59] profiler_stop
+USDT:2026-10-25 13:53:28 3447680:3447680 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-10-25 13:53:28 3447680:3447680 SyncActivityProfilerHandler.cpp:59] profiler_stop
+{"status": "ok", "error": null}
