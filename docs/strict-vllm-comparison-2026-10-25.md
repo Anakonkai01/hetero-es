@@ -1,69 +1,87 @@
 # HeteroES versus vLLM — measured 2026-10-25
 
-The fastest measured HeteroES **scratch prototype** reaches about half of vLLM default's B1 throughput and one tenth
-at B32. It exceeds the surveyed vLLM batch-invariant B1 result, but remains 3.1–3.7x slower than that mode at B32.
-The near-vLLM objective is not met. Full M0–M6 remains active.
+Selected HeteroES source `97f62431` reaches 18–20% of the prior measured vLLM default B32 throughput on three
+models. B8 is 84–101% of the surveyed vLLM batch-invariant result; B1 exceeds that mode but is about half of default.
+The near-vLLM objective is not met. Full M0–M6 remains active; managed strict/default remains inactive.
 
 ## Same-workload local 5070 Ti measurements
 
-Units: total output tokens/s. B32 is the aggregate of all 32 sequences. FP16 weight storage; greedy, 32 output
-tokens; context limit 512; EOS stopping and prefix reuse disabled. Eight prompts form the pool: B1 uses the first,
-B8 uses each once, B32 repeats them four times. One warmup is excluded; report the median of three synchronized host
-wall measurements including prefill, decode and host overhead. This is fixed-batch throughput, not a serving SLO test.
+Total output tokens/s; B32 aggregates all 32 sequences. FP16 weight storage, greedy, 32 output tokens, context 512,
+EOS stopping and prefix reuse disabled. Eight prompts form the pool: B1 uses the first, B8 each once, B32 repeats
+four times. One warmup is excluded; median of three synchronized host wall measurements includes prefill/decode
+and host overhead. Separate environments/builds, unisolated GPU and sequential measurement stages apply.
 
-| Model | Batch | HeteroES committed B22 | HeteroES faster B22 prototype | vLLM default | vLLM batch-invariant | Default / prototype |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| SmolLM2-360M | 1 | 177.1 | 249.4 | 529.2 | 173.8 | 2.12x |
-| SmolLM2-360M | 8 | 434.3 | 497.9 | 4093.2 | 1371.2 | 8.22x |
-| SmolLM2-360M | 32 | 1318.2 | 1451.6 | 14429.4 | 5339.8 | 9.94x |
-| TinyLlama-1.1B | 1 | 114.5 | 174.4 | 322.9 | 103.2 | 1.85x |
-| TinyLlama-1.1B | 8 | 299.4 | 344.7 | 2330.6 | 825.3 | 6.76x |
-| TinyLlama-1.1B | 32 | 830.7 | 918.9 | 7791.8 | 3194.7 | 8.48x |
-| Qwen2.5-0.5B | 1 | 171.8 | 254.7 | 518.7 | 146.0 | 2.04x |
-| Qwen2.5-0.5B | 8 | 465.1 | 531.3 | 4037.9 | 1164.5 | 7.60x |
-| Qwen2.5-0.5B | 32 | 1358.5 | 1507.7 | 13802.5 | 4697.2 | 9.15x |
+| Model          | Batch | HeteroES selected B22 | vLLM default | vLLM batch-invariant | Default / selected |
+| -------------- | ----: | --------------------: | -----------: | -------------------: | -----------------: |
+| SmolLM2-360M   |     1 |                 262.3 |        529.2 |                173.8 |              2.02x |
+| SmolLM2-360M   |     8 |                1206.4 |       4093.2 |               1371.2 |              3.39x |
+| SmolLM2-360M   |    32 |                2863.3 |      14429.4 |               5339.8 |              5.04x |
+| TinyLlama-1.1B |     1 |                 180.0 |        322.9 |                103.2 |              1.79x |
+| TinyLlama-1.1B |     8 |                 691.6 |       2330.6 |                825.3 |              3.37x |
+| TinyLlama-1.1B |    32 |                1377.3 |       7791.8 |               3194.7 |              5.66x |
+| Qwen2.5-0.5B   |     1 |                 263.0 |        518.7 |                146.0 |              1.97x |
+| Qwen2.5-0.5B   |     8 |                1170.4 |       4037.9 |               1164.5 |              3.45x |
+| Qwen2.5-0.5B   |    32 |                2810.7 |      13802.5 |               4697.2 |              4.91x |
 
-Committed implementation: `fb18a7b7`; evidence/handoff: `0ba3af41`. The prototype changes weight quantization to an
-equivalent exact exponent-bit adjustment plus PTX integer RNE conversion. It remains **unselected**. New tests are
-being added before moving it into the implementation. All three preserve a separately versioned integer reference;
-this arithmetic is different from the prior FP32 pairwise tree. No managed strict/default activation occurred.
+Exact conversion (`53af58c1`), shared input quantization (`eeb74c23`) and bounded automatic decode split-K
+(`97f62431`) are selected. Against the preceding `eeb74c23` source, B8 improves 1.99–2.39x and B32 1.49–1.96x;
+B1 is unchanged. [Asserted trained comparison](evidence/2026-10-25-integer-decode-plan/trained-comparison-01.json).
+These changes retain the separate integer reference; they do not make it the historical FP32 pairwise tree.
 
-Compared with the preceding captured FP32 backend, prototype B1 improves approximately 1.04x/1.31x/1.21x for
-Smol/Tiny/Qwen; B32 improves 1.80x/3.18x/3.01x. These are real gains but do not close the aggregate-compute gap.
+## Direct source comparison, not a language explanation
 
-## Correctness and measurement limits
+The locally inspected vLLM source is pinned at `e7473bf6862289f0647d1f4b01498288b181e063`; the measured installation
+is vLLM 0.32.0. Source observations describe that pin, not every backend/version or the exact dispatch of every op.
 
-- B22 prototype and integer baseline have equal finite prefill hashes, tokens/text/rewards and exact restore on
-  all three trained models for parent, canonical seed 7001 at ±sigma 1e-3, and restored parent. B22 also matches the
-  prior tree's tokens on this corpus. **B14 changes one Qwen minus-candidate stream**; that counterexample is retained.
-- Selected-source regression: 301 tests per run on each of four GPUs; 3016 runtime CPU passed / 285 skipped,
-  452 backend passed, full check-all and Linux packaging passed; 11/11 scratch mutations killed. These include
-  independent CPU rational oracles. Prototype weight quantization exhausts 1,017,852 admitted finite FP16
-  value/row-exponent pairs per precision on 5070 Ti and 3060, plus 99 reference/operator/decoder checks per target.
-- Selected Smol/Qwen parent/canonical-candidate logits, token/text/reward and weight hashes match between local
-  5070 Ti and Thao 3060. The faster prototype's trained measurements above are local. Native Windows, full managed
-  lifecycle/ownership, general model quality and universal heterogeneous acceptance remain open.
-- vLLM 0.32.0 uses a separate Torch/CUDA/Transformers environment. GPUs are unisolated and receipts come from
-  separate measurement stages. Prompt/workload/consumed model assets match. Old Smol full manifests include extra
-  HF download metadata; comparison excludes it only for asset equality and explicitly retains full-manifest inequality.
-- vLLM batch-invariant is a distinct measured configuration, not a demonstrated substitute for this project's
-  heterogeneous strict contract. No serving concurrency, long-context, long-output or end-to-end ES claim follows
-  from the fixed-batch table.
+| Mechanism                 | Inspected vLLM source                                                                                                    | HeteroES selected source                                                                                             | Consequence / next action                                                                                                                                                                |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Linear dispatch           | Python `UnquantizedLinearMethod.apply` dispatches to a backend; default unquantized path is `torch.nn.functional.linear` | Python launches NVRTC CUDA C++/PTX integer kernels                                                                   | Both delegate GPU math to compiled kernels. Rewriting the outer Python in C++ does not remove the arithmetic/layout gap.                                                                 |
+| Q/K/V and MLP projections | Llama uses `QKVParallelLinear` and `MergedColumnParallelLinear` for gate/up                                              | `linear_many` quantizes input once, then launches independent `_linear` calls                                        | A real gap: shared quantization is not a grouped matrix kernel. Prototype a bounded segmented launch over live original matrices, then verify trained throughput.                        |
+| Arithmetic work           | Native floating GEMM; batch-invariant path uses floating `tl.dot`                                                        | B22 uses three balanced int8 limbs and nine limb products per dot tile, plus conversion/packing/int64 reconstruction | Exact portability has a real cost. MMA shapes differ, so nine limb products is not a claim of exactly nine times hardware work or runtime. Keep the separate identity and measure costs. |
+| Fusion                    | Merged gate/up feeds `SiluAndMul`; RMSNorm supports fused residual add                                                   | SiLU/multiply is already fused; residual add and RMSNorm are separate calls                                          | Inspect add+norm fusion next, preserving the specified FP32 rounding tree. Do not claim every fusion is absent.                                                                          |
+| Execution and KV          | CUDA graph modes, optimized attention and paged KV allocation                                                            | Captured decode exists, fixed-owner bounded full-context KV                                                          | Graph existence alone is not the gap. Paging primarily helps allocation/concurrency; current short fixed-batch timings do not establish that as the main bottleneck.                     |
 
-The remaining performance targets are on-the-fly integer packing, projection tile/data reuse and duplicated
-activation quantization. Earlier random-layout profiles identified projections as dominant; those percentages must
-be remeasured on the faster trained decoder before choosing its next bottleneck. More scheduling alone cannot be
-assumed to explain this fixed-batch gap.
+Specific inspected files: [Llama merged projections](https://github.com/vllm-project/vllm/blob/e7473bf6862289f0647d1f4b01498288b181e063/vllm/model_executor/models/llama.py#L95),
+[linear dispatch](https://github.com/vllm-project/vllm/blob/e7473bf6862289f0647d1f4b01498288b181e063/vllm/model_executor/layers/linear.py#L232),
+[default GEMM](https://github.com/vllm-project/vllm/blob/e7473bf6862289f0647d1f4b01498288b181e063/vllm/model_executor/layers/utils.py#L83),
+[batch-invariant dot](https://github.com/vllm-project/vllm/blob/e7473bf6862289f0647d1f4b01498288b181e063/vllm/model_executor/determinism/batch_invariant.py#L119),
+[CUDA graph design](https://docs.vllm.ai/en/latest/design/cuda_graphs/).
+Local counterparts are `runtime/src/heteroes/eval/integer_cuda.py:linear_many/_linear` and
+`strict_decoder_graph.py:_decode_core`. Prefix caching is off in the comparison, so prefix hits do not explain it.
+Earlier trained profiles under `53af58c1` put 82–89% of B8/B32 CUDA event time in projections. That attribution is
+stale after split-K and must be remeasured before assigning a current percentage to a bottleneck.
+
+## Latest experiments, not selected
+
+- Uniform one/two-warp groups regress geometric mean on both 5070 Ti and 3060 across 40 shape/batch cases. Retain 4 warps.
+- Row tiles 64/128 regress overall on both devices. On 5070 Ti tile 64 uses 237–241 registers/thread; tile 128 spills
+  336–424 bytes/thread. Increasing tile size alone is not sufficient.
+- Exact shift/PRMT packing prototypes improve trained B32 by approximately 6–9% locally; arithmetic tests and
+  source promotion are separate. [Raw experiments](evidence/2026-10-25-integer-warp/README.md).
+- Existing B14 with the selected schedule reaches B32 Smol/Tiny/Qwen 3141/1579/3126 token/s, about 10–15% over B22.
+  This changes precision and is not a free B22 optimization. Historical B14/FP32 token counterexamples remain.
+  [Raw timing scope](evidence/2026-10-25-integer-b14-scheduling/README.md).
+
+## Correctness and scope
+
+Selected source passes 378 tests per GPU on each of four devices, full check-all and Linux packaging. Five planner
+mutants are caught, including duplicate-projection workspace undercount and the maximum occurring before batch
+capacity. Weight conversion exhausts 1,017,852 finite FP16 value/row-exponent pairs per precision.
+Parent/canonical seed 7001 at ±sigma 1e-3/restored prefill, token/text/reward and exact restore match the preceding B22
+source on all three trained models. This finite corpus does not establish general model quality.
+
+Native Windows source also passes 378 tests. Four pinned tiny layouts, both precisions and parent/changed/restored
+match Linux 5070 Ti exactly, including portable identities and logits/token/cache hashes.
+[Exact source comparison](evidence/2026-10-25-integer-decode-plan/native-windows-comparison-01.json).
+Trained cross-GPU equality, general quality and managed lifecycle/ownership remain separate gates; consult dated
+receipts for the exact source each proves. vLLM batch invariance describes
+batch size/order stability; it is not evidence of equality across heterogeneous GPUs under our strict contract.
+[Official scope](https://docs.vllm.ai/en/latest/features/batch_invariance/).
 
 ## Exact receipts
 
-- [Selected results and prior receipt paths](evidence/2026-10-25-strict-integer/RESULTS-01.md),
-  [asserted baseline comparisons](evidence/2026-10-25-strict-integer/trained-comparison-01.json).
-- [Prototype results](evidence/2026-10-25-strict-integer/CVT-RESULTS-01.md),
-  [asserted prototype comparisons](evidence/2026-10-25-strict-integer/cvt-trained-comparison-01.json).
-- Prototype timing files: [Smol](evidence/2026-10-25-strict-integer/bench-cvt-smol-b22-nhan-01.json),
-  [TinyLlama](evidence/2026-10-25-strict-integer/bench-cvt-tiny-b22-nhan-01.json),
-  [Qwen](evidence/2026-10-25-strict-integer/bench-cvt-qwen-b22-nhan-01.json).
+- [Selected source and trained comparisons](evidence/2026-10-25-integer-decode-plan/README.md).
+- [Earlier conversion/grouping and native Windows receipts](evidence/2026-10-25-integer-conversion/README.md).
 - vLLM default: [Smol](evidence/2026-10-25-strict-overnight/bench-smollm-vllm-nhan-01.json),
   [TinyLlama](evidence/2026-10-25-strict-overnight/bench-tinyllama-vllm-nhan-01.json),
   [Qwen](evidence/2026-10-25-strict-throughput/bench-vllm-nhan-01.json).

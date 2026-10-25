@@ -6,38 +6,38 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
 
 ## Tóm tắt cho chủ dự án (2026-10-25)
 
-- Tiếp tục tự chạy toàn bộ **M0–M6**, ưu tiên kernel tổng quát tiến gần vLLM. Mã nền mới **`fb18a7b7`** thêm reference,
-  CUDA integer Tensor Core và decoder riêng; [bàn giao hiện tại](handoff-codex-strict-integer-2026-10-25.md).
-  M1/M2 và mục tiêu chung vẫn chưa hoàn tất; [kế hoạch đã duyệt](PLAN-SUA-HUMAN-REVIEW.md) giữ nguyên byte/phạm vi.
-- Số học mới B14/B22 có RNE/scale/overflow và chứng minh bound riêng; giữ cây FP32 cũ. Scale trọng số làm mới ở đầu
-  mỗi request có khóa rồi xóa khi kết thúc, đọc FP16 gốc, không giữ thêm nguyên model FP32/quantized. Chưa bật managed strict.
-- Đã đo SmolLM2-360M, TinyLlama-1.1B và Qwen2.5-0.5B; parent, nhiễu chuẩn ± và restore đều được kiểm tra. B22 khớp
-  token với FP32 trong bộ thử; B14 có một candidate Qwen khác token, receipt được giữ lại. Smol/Qwen khớp logits/token/
-  text/reward và hash trọng số giữa 5070 Ti/3060. TinyLlama trained cross-GPU, native Windows và quality rộng còn mở.
-- B22 nền trên 5070 Ti đạt B1 **177,1 / 114,5 / 171,8** và B32 **1318,2 / 830,7 / 1358,5** token/s theo thứ tự
-  Smol/Tiny/Qwen: B32 tăng 1,64–2,88 lần nhưng chỉ ~9–11% vLLM default; B1 còn chậm hơn FP32 cũ.
-  Prototype chuyển đổi chính xác riêng đạt B1 **249,4 / 174,4 / 254,7**, B32 **1451,6 / 918,9 / 1507,7**;
-  chưa chọn vào mã nền. Không gọi đây là đã gần vLLM.
-- **301 kiểm tra/target trên cả bốn GPU**, mutation **11/11**. Check-all ALL PASS: runtime **3016 pass/285 skip**,
-  backend **452 pass**; gói Linux và hash source Worker/SDK đạt.
-  [Kết quả nền](evidence/2026-10-25-strict-integer/RESULTS-01.md),
-  [prototype chuyển đổi](evidence/2026-10-25-strict-integer/CVT-RESULTS-01.md).
-- Bước tiếp: chọn tối ưu chuyển đổi sau khi đưa vét cạn vào test, rồi giảm lặp quantization/packing và cải thiện reuse
-  trong tile; đo lại nhiều model/GPU. Các phần watchdog/D10, storage/replacement, managed qualification và M6 còn mở.
-  [Phân việc](HUMAN-REVIEW-EFFORT-SPLIT.md). Không push/merge/deploy, đổi device state, learning run hay sửa môi trường `ai`.
+- Tiếp tục toàn bộ **M0–M6**, ưu tiên kernel tổng quát tiến gần vLLM. Mã nền **`97f62431`** đã chọn chuyển đổi
+  chính xác, chung lượng tử hóa đầu vào và split-K decode tự động có giới hạn bộ nhớ.
+  M1/M2 và mục tiêu chung chưa hoàn tất; [kế hoạch đã duyệt](PLAN-SUA-HUMAN-REVIEW.md) giữ nguyên byte/phạm vi.
+- Số học riêng B14/B22 giữ reference độc lập; FP32 cũ và recipe hiện hành không đổi. Đọc FP16 gốc, chỉ giữ metadata
+  nhỏ trong request có khóa, không giữ thêm nguyên model FP32/quantized. Managed strict chưa bật.
+- B22 trên 5070 Ti đạt B1 **262 / 180 / 263**, B8 **1206 / 692 / 1170**, B32 **2863 / 1377 / 2811** token/s
+  theo thứ tự SmolLM2-360M/TinyLlama-1.1B/Qwen2.5-0.5B. B32 tăng **49–96%** so với eeb74c23, đạt khoảng
+  **18–20% vLLM default**. [So sánh tốc độ và mã nguồn](strict-vllm-comparison-2026-10-25.md).
+- **378 test trên mỗi GPU trong bốn máy**, native Windows 3060 **378 pass**; bốn fixture layout, hai precision,
+  parent/changed/restored khớp Linux5070Ti. Check-all **ALL PASS**: runtime **3038 pass/297 skip**, backend452;
+  planner mutation **5/5**; gói Linux và hash nguồn Worker/ServerSDK đạt.
+  [Receipt đúng nguồn](evidence/2026-10-25-integer-decode-plan/RESULTS-01.md).
+- Parent, nhiễu chuẩn± và restore của ba trained model giữ nguyên so với B22 trước. Counterexample B14/FP32 cũ
+  vẫn được giữ. Trained cross-GPU đúng nguồn hiện tại, quality rộng, native installer và managed lifecycle còn mở.
+- Đối chiếu trực tiếp vLLM thấy QKV và gate/up được gộp thật sự; ta mới chung lượng tử hóa. Đang thử segmented
+  grouped launch trên trọng số gốc. Các phép thử warp1/2 và tile64/128 bị loại vì chậm hơn tổng thể; packing shift
+  tăng khoảng6–9% ở trained B32 nhưng chưa chọn. Không suy từ fixture sang qualification.
+- Watchdog/D10, storage/replacement, managed ownership/qualification và M6 vẫn mở.
+  [Phân việc](HUMAN-REVIEW-EFFORT-SPLIT.md). Không push/merge/deploy, đổi device state, learning run hay sửa `ai`.
 
 ## Live
 
 Deployment remains `82c37fc`. Service status re-read after the overnight strict continuation on 2026-10-25: all three lab services stopped; no lab operation
 was performed. The disk entry below is historical (2026-10-23).
 
-| What           | State                                                                                                                                                                                                       |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Lab            | `lab.heteroes.site`, deployed clone `~/.local/share/heteroes-lab/app` at `82c37fc`; operations: [local-lab-operations.md](local-lab-operations.md)                                                          |
-| Devices        | 2026-10-25 standalone probes reached local/Nhut 5070 Ti (Linux) and Thao/Quang 3060 (WSL2). Live approval/contribution was not re-read or changed; follow AGENTS.md. Native Windows acceptance remains open |
-| Default engine | engine v2 noise made on the GPU (same bits as CPU; `HETEROES_NOISE_DEVICE=cpu` forces CPU)                                                                                                                  |
-| Code           | Human-review branch `fix/human-review-single-model-2026-10-24`; integer feasibility core `fb18a7b7`, after captured strict/scorer/delivery/audit continuations. No push/merge/deployment                                        |
-| Disk (nhan)    | `/` 90 % used; Archive (NTFS/FUSE, also personal data) **full**, holds lab recovery storage and moved run data                                                                                              |
+| What           | State                                                                                                                                                                                                                                                       |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Lab            | `lab.heteroes.site`, deployed clone `~/.local/share/heteroes-lab/app` at `82c37fc`; operations: [local-lab-operations.md](local-lab-operations.md)                                                                                                          |
+| Devices        | 2026-10-25 standalone probes reached local/Nhut 5070 Ti (Linux) and Thao/Quang 3060 (WSL2). Live approval/contribution was not re-read or changed; follow AGENTS.md. Native Windows source/fixtures pass; trained/installer/managed acceptance remains open |
+| Default engine | engine v2 noise made on the GPU (same bits as CPU; `HETEROES_NOISE_DEVICE=cpu` forces CPU)                                                                                                                                                                  |
+| Code           | Human-review branch `fix/human-review-single-model-2026-10-24`; selected integer decode core `97f62431`, after captured strict/scorer/delivery/audit continuations. No push/merge/deployment                                                                |
+| Disk (nhan)    | `/` 90 % used; Archive (NTFS/FUSE, also personal data) **full**, holds lab recovery storage and moved run data                                                                                                                                              |
 
 ## Open work, in order
 
@@ -45,7 +45,7 @@ was performed. The disk entry below is historical (2026-10-23).
    throughput beyond the captured decode implementation across model/GPU dimensions; continue the separately versioned integer Tensor Core
    arithmetic with exact-conversion, tile reuse and range/accuracy/footprint gates.
    Do not infer universal support from the current fixtures or relax exactness for a timing result. M4 qualification,
-   managed weight ownership and native Windows remain open. Keep audit projection/UI for medium effort; M2 progress
+   managed weight ownership and native Windows trained/installer acceptance remain open. Keep audit projection/UI for medium effort; M2 progress
    watchdog/hard caps/D10 and M3 I/O/sidecar/replacement consistency remain heavy work. Strict activation still needs
    those gates. See [effort split](HUMAN-REVIEW-EFFORT-SPLIT.md) and [kernel handoff](handoff-codex-strict-integer-2026-10-25.md).
 2. **oomd / recovery-point upload loop.** Evidence and five proposed fixes:

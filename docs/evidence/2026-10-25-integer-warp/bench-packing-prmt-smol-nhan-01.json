@@ -1,0 +1,25 @@
+{
+  "formatVersion": 1,
+  "status": "error",
+  "engine": "strict-integer",
+  "benchmarkSourceSha256": "b7676b60e20a3a8929ad222efe92ac0f8a1634de8921b7a7933211e4c7b3287d",
+  "hardwareQualified": false,
+  "environment": {
+    "python": "3.12.14",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43"
+  },
+  "workload": {
+    "maxNewTokens": 32,
+    "maxContext": 512,
+    "eosStopping": false,
+    "prefixCaching": false,
+    "repetitionPenalty": 1.0,
+    "dtype": "float16",
+    "repeats": 3
+  },
+  "limitations": "Offline fixed-length greedy parent inference; synchronized host wall time, not CUDA kernel time. Separate environments/builds; unisolated GPUs. 'strict' serializes sequences; 'strict-packed' batches. No ES lifecycle, native Windows, quality or heterogeneous qualification.",
+  "cases": [],
+  "errorType": "ModuleNotFoundError",
+  "error": "No module named 'heteroes'",
+  "wallSeconds": 1.48780561699823
+}

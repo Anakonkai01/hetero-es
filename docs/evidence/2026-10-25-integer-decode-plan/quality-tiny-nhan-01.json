@@ -1,0 +1,7519 @@
+{
+  "formatVersion": 1,
+  "status": "ok",
+  "hardwareQualified": false,
+  "sourceSha256": "aacb36905b0e4cf0925971701f838e67524bff231aff8e7983167288bd516471",
+  "environment": {
+    "python": "3.12.14",
+    "torch": "2.13.0+cu132",
+    "transformers": "5.17.0",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "gpu": "NVIDIA GeForce RTX 5070 Ti",
+    "computeCapability": [
+      12,
+      0
+    ]
+  },
+  "limitations": "Eight canned prompts, parent and one antithetic canonical seed pair, plus restored parent. Prefill logit differences and autoregressive token agreement are not general model quality. Single warm/cold wall measurements include compilation/capture, not steady throughput. No learning, managed lifecycle, native Windows or hardware qualification.",
+  "noiseEngine": "pcg64_u32_to_f16_normal_quantile_v2",
+  "sigma": 0.001,
+  "seed": 7001,
+  "maxContext": 512,
+  "maxNewTokens": 32,
+  "cases": [
+    {
+      "state": "parent",
+      "seed": null,
+      "sigma": 0,
+      "engines": {
+        "fp32-tree": {
+          "prefillLogitsSha256": "063a17fd479dce5be0db87d17ba4c38062133bcf00dafbc2d5eb747a215ac42b",
+          "tokens": [
+            [
+              29871,
+              29946,
+              13,
+              13,
+              28956,
+              13,
+              13,
+              797,
+              445,
+              1342,
+              29892,
+              278,
+              421,
+              2457,
+              29952,
+              3229,
+              338,
+              1304,
+              304,
+              736,
+              278,
+              995,
+              310,
+              278,
+              421,
+              12011,
+              29952,
+              2286,
+              29889,
+              450,
+              421,
+              2457
+            ],
+            [
+              4335,
+              756,
+              29871,
+              29941,
+              623,
+              793,
+              322,
+              1321,
+              952,
+              29871,
+              29945,
+              901,
+              29889,
+              13,
+              13,
+              29933,
+              1463,
+              373,
+              278,
+              1426,
+              5518,
+              29892,
+              508,
+              366,
+              5706,
+              263,
+              2933,
+              304,
+              278,
+              1139,
+              376,
+              5328
+            ],
+            [
+              2023,
+              13,
+              13,
+              14448,
+              29871,
+              29906,
+              29901,
+              5399,
+              565,
+              278,
+              1857,
+              1353,
+              338,
+              7621,
+              1135,
+              278,
+              3517,
+              1353,
+              13,
+              13,
+              3644,
+              278,
+              1857,
+              1353,
+              338,
+              7621,
+              1135,
+              278,
+              3517,
+              1353,
+              29892,
+              769
+            ],
+            [
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1762,
+              8147,
+              278,
+              3001,
+              1353,
+              310,
+              9335,
+              567,
+              26259,
+              423,
+              5239,
+              297,
+              3786,
+              322,
+              2610,
+              29892,
+              591,
+              817,
+              304,
+              788,
+              701,
+              278
+            ],
+            [
+              13,
+              13,
+              4300,
+              18411,
+              29901,
+              951,
+              13563,
+              707,
+              17573,
+              424,
+              1190,
+              425,
+              269,
+              3498,
+              818,
+              286,
+              4600,
+              10329,
+              566,
+              29889,
+              13,
+              13,
+              14023,
+              29871,
+              29906,
+              29901,
+              13,
+              13,
+              26036,
+              29901,
+              450,
+              6635
+            ],
+            [
+              29871,
+              29896,
+              29892,
+              29906,
+              29900,
+              29900,
+              2383,
+              29889,
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1762,
+              8147,
+              278,
+              5418,
+              1020,
+              345,
+              839,
+              491,
+              385,
+              319,
+              7945,
+              9850,
+              292,
+              472
+            ],
+            [
+              13,
+              13,
+              29896,
+              29889,
+              29871,
+              29906,
+              29945,
+              13,
+              29906,
+              29889,
+              29871,
+              29945,
+              29900,
+              13,
+              29941,
+              29889,
+              29871,
+              29955,
+              29945,
+              13,
+              13,
+              10454,
+              29892,
+              1235,
+              29915,
+              29879,
+              1653,
+              263,
+              740,
+              393,
+              4893,
+              263
+            ],
+            [
+              565,
+              302,
+              1275,
+              29871,
+              29900,
+              29901,
+              13,
+              308,
+              736,
+              29871,
+              29900,
+              13,
+              268,
+              25342,
+              302,
+              1275,
+              29871,
+              29896,
+              29901,
+              13,
+              308,
+              736,
+              29871,
+              29896,
+              13,
+              268,
+              1683,
+              29901,
+              13,
+              308,
+              736,
+              18755
+            ]
+          ],
+          "texts": [
+            "4\n\n```\n\nIn this example, the `return` statement is used to return the value of the `answer` variable. The `return",
+            "Tom has 3 apples and buys 5 more.\n\nBased on the text material, can you generate a response to the question \"How",
+            "...\n\nStep 2: Check if the current number is greater than the previous number\n\nIf the current number is greater than the previous number, then",
+            "\n<|assistant|>\nTo calculate the total number of clips Natalia sold in April and May, we need to add up the",
+            "\n\nTranslation: Le chat est reposant sur la salle \u00e0 manger chaud.\n\nExample 2:\n\nOriginal: The cat",
+            "1,200 km. \n<|assistant|>\nTo calculate the distance traveled by an A train traveling at",
+            "\n\n1. 25\n2. 50\n3. 75\n\nNow, let's create a function that takes a",
+            "if n == 0:\n         return 0\n     elif n == 1:\n         return 1\n     else:\n         return fib"
+          ],
+          "secondsIncludingWarmup": 2.4304929549980443,
+          "rewards": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            null,
+            0.0,
+            null,
+            null
+          ],
+          "packedFirstRowLogitsEqualSerial": true
+        },
+        "integer-b14": {
+          "prefillLogitsSha256": "7f1777339139c20186a98943120a979c24154ae2fa3790d208123c476533b61d",
+          "tokens": [
+            [
+              29871,
+              29946,
+              13,
+              13,
+              28956,
+              13,
+              13,
+              797,
+              445,
+              1342,
+              29892,
+              278,
+              421,
+              2457,
+              29952,
+              3229,
+              338,
+              1304,
+              304,
+              736,
+              278,
+              995,
+              310,
+              278,
+              421,
+              12011,
+              29952,
+              2286,
+              29889,
+              450,
+              421,
+              2457
+            ],
+            [
+              4335,
+              756,
+              29871,
+              29941,
+              623,
+              793,
+              322,
+              1321,
+              952,
+              29871,
+              29945,
+              901,
+              29889,
+              13,
+              13,
+              29933,
+              1463,
+              373,
+              278,
+              1426,
+              5518,
+              29892,
+              508,
+              366,
+              5706,
+              263,
+              2933,
+              304,
+              278,
+              1139,
+              376,
+              5328
+            ],
+            [
+              2023,
+              13,
+              13,
+              14448,
+              29871,
+              29906,
+              29901,
+              5399,
+              565,
+              278,
+              1857,
+              1353,
+              338,
+              7621,
+              1135,
+              278,
+              3517,
+              1353,
+              13,
+              13,
+              3644,
+              278,
+              1857,
+              1353,
+              338,
+              7621,
+              1135,
+              278,
+              3517,
+              1353,
+              29892,
+              769
+            ],
+            [
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1762,
+              8147,
+              278,
+              3001,
+              1353,
+              310,
+              9335,
+              567,
+              26259,
+              423,
+              5239,
+              297,
+              3786,
+              322,
+              2610,
+              29892,
+              591,
+              817,
+              304,
+              788,
+              701,
+              278
+            ],
+            [
+              13,
+              13,
+              4300,
+              18411,
+              29901,
+              951,
+              13563,
+              707,
+              17573,
+              424,
+              1190,
+              425,
+              269,
+              3498,
+              818,
+              286,
+              4600,
+              10329,
+              566,
+              29889,
+              13,
+              13,
+              14023,
+              29871,
+              29906,
+              29901,
+              13,
+              13,
+              26036,
+              29901,
+              450,
+              6635
+            ],
+            [
+              29871,
+              29896,
+              29892,
+              29906,
+              29900,
+              29900,
+              2383,
+              29889,
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1762,
+              8147,
+              278,
+              5418,
+              1020,
+              345,
+              839,
+              491,
+              385,
+              319,
+              7945,
+              9850,
+              292,
+              472
+            ],
+            [
+              13,
+              13,
+              29896,
+              29889,
+              29871,
+              29906,
+              29945,
+              13,
+              29906,
+              29889,
+              29871,
+              29945,
+              29900,
+              13,
+              29941,
+              29889,
+              29871,
+              29955,
+              29945,
+              13,
+              13,
+              10454,
+              29892,
+              1235,
+              29915,
+              29879,
+              1653,
+              263,
+              740,
+              393,
+              4893,
+              263
+            ],
+            [
+              565,
+              302,
+              1275,
+              29871,
+              29900,
+              29901,
+              13,
+              308,
+              736,
+              29871,
+              29900,
+              13,
+              268,
+              25342,
+              302,
+              1275,
+              29871,
+              29896,
+              29901,
+              13,
+              308,
+              736,
+              29871,
+              29896,
+              13,
+              268,
+              1683,
+              29901,
+              13,
+              308,
+              736,
+              18755
+            ]
+          ],
+          "texts": [
+            "4\n\n```\n\nIn this example, the `return` statement is used to return the value of the `answer` variable. The `return",
+            "Tom has 3 apples and buys 5 more.\n\nBased on the text material, can you generate a response to the question \"How",
+            "...\n\nStep 2: Check if the current number is greater than the previous number\n\nIf the current number is greater than the previous number, then",
+            "\n<|assistant|>\nTo calculate the total number of clips Natalia sold in April and May, we need to add up the",
+            "\n\nTranslation: Le chat est reposant sur la salle \u00e0 manger chaud.\n\nExample 2:\n\nOriginal: The cat",
+            "1,200 km. \n<|assistant|>\nTo calculate the distance traveled by an A train traveling at",
+            "\n\n1. 25\n2. 50\n3. 75\n\nNow, let's create a function that takes a",
+            "if n == 0:\n         return 0\n     elif n == 1:\n         return 1\n     else:\n         return fib"
+          ],
+          "secondsIncludingWarmup": 3.0618392680044053,
+          "rewards": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            null,
+            0.0,
+            null,
+            null
+          ],
+          "packedFirstRowLogitsEqualSerial": true,
+          "prefillComparedToFp32Tree": {
+            "rows": 8,
+            "maxAbsoluteError": 0.040413856506347656,
+            "rmsError": 0.00756953936655081,
+            "relativeRmsError": 0.0015528699374993667,
+            "top1EqualRows": 8,
+            "meanKLDivergence": 2.1921575354936406e-05
+          },
+          "tokensComparedToFp32Tree": {
+            "rows": 8,
+            "equalRows": 8,
+            "equalTokenPositions": 256,
+            "totalTokenPositions": 256,
+            "firstDivergence": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          }
+        },
+        "integer-b22": {
+          "prefillLogitsSha256": "5ddef6d2f52f282c34edbd9845eef388a9040e4660385b367430635cb09b3573",
+          "tokens": [
+            [
+              29871,
+              29946,
+              13,
+              13,
+              28956,
+              13,
+              13,
+              797,
+              445,
+              1342,
+              29892,
+              278,
+              421,
+              2457,
+              29952,
+              3229,
+              338,
+              1304,
+              304,
+              736,
+              278,
+              995,
+              310,
+              278,
+              421,
+              12011,
+              29952,
+              2286,
+              29889,
+              450,
+              421,
+              2457
+            ],
+            [
+              4335,
+              756,
+              29871,
+              29941,
+              623,
+              793,
+              322,
+              1321,
+              952,
+              29871,
+              29945,
+              901,
+              29889,
+              13,
+              13,
+              29933,
+              1463,
+              373,
+              278,
+              1426,
+              5518,
+              29892,
+              508,
+              366,
+              5706,
+              263,
+              2933,
+              304,
+              278,
+              1139,
+              376,
+              5328
+            ],
+            [
+              2023,
+              13,
+              13,
+              14448,
+              29871,
+              29906,
+              29901,
+              5399,
+              565,
+              278,
+              1857,
+              1353,
+              338,
+              7621,
+              1135,
+              278,
+              3517,
+              1353,
+              13,
+              13,
+              3644,
+              278,
+              1857,
+              1353,
+              338,
+              7621,
+              1135,
+              278,
+              3517,
+              1353,
+              29892,
+              769
+            ],
+            [
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1762,
+              8147,
+              278,
+              3001,
+              1353,
+              310,
+              9335,
+              567,
+              26259,
+              423,
+              5239,
+              297,
+              3786,
+              322,
+              2610,
+              29892,
+              591,
+              817,
+              304,
+              788,
+              701,
+              278
+            ],
+            [
+              13,
+              13,
+              4300,
+              18411,
+              29901,
+              951,
+              13563,
+              707,
+              17573,
+              424,
+              1190,
+              425,
+              269,
+              3498,
+              818,
+              286,
+              4600,
+              10329,
+              566,
+              29889,
+              13,
+              13,
+              14023,
+              29871,
+              29906,
+              29901,
+              13,
+              13,
+              26036,
+              29901,
+              450,
+              6635
+            ],
+            [
+              29871,
+              29896,
+              29892,
+              29906,
+              29900,
+              29900,
+              2383,
+              29889,
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1762,
+              8147,
+              278,
+              5418,
+              1020,
+              345,
+              839,
+              491,
+              385,
+              319,
+              7945,
+              9850,
+              292,
+              472
+            ],
+            [
+              13,
+              13,
+              29896,
+              29889,
+              29871,
+              29906,
+              29945,
+              13,
+              29906,
+              29889,
+              29871,
+              29945,
+              29900,
+              13,
+              29941,
+              29889,
+              29871,
+              29955,
+              29945,
+              13,
+              13,
+              10454,
+              29892,
+              1235,
+              29915,
+              29879,
+              1653,
+              263,
+              740,
+              393,
+              4893,
+              263
+            ],
+            [
+              565,
+              302,
+              1275,
+              29871,
+              29900,
+              29901,
+              13,
+              308,
+              736,
+              29871,
+              29900,
+              13,
+              268,
+              25342,
+              302,
+              1275,
+              29871,
+              29896,
+              29901,
+              13,
+              308,
+              736,
+              29871,
+              29896,
+              13,
+              268,
+              1683,
+              29901,
+              13,
+              308,
+              736,
+              18755
+            ]
+          ],
+          "texts": [
+            "4\n\n```\n\nIn this example, the `return` statement is used to return the value of the `answer` variable. The `return",
+            "Tom has 3 apples and buys 5 more.\n\nBased on the text material, can you generate a response to the question \"How",
+            "...\n\nStep 2: Check if the current number is greater than the previous number\n\nIf the current number is greater than the previous number, then",
+            "\n<|assistant|>\nTo calculate the total number of clips Natalia sold in April and May, we need to add up the",
+            "\n\nTranslation: Le chat est reposant sur la salle \u00e0 manger chaud.\n\nExample 2:\n\nOriginal: The cat",
+            "1,200 km. \n<|assistant|>\nTo calculate the distance traveled by an A train traveling at",
+            "\n\n1. 25\n2. 50\n3. 75\n\nNow, let's create a function that takes a",
+            "if n == 0:\n         return 0\n     elif n == 1:\n         return 1\n     else:\n         return fib"
+          ],
+          "secondsIncludingWarmup": 2.7597166430059588,
+          "rewards": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            null,
+            0.0,
+            null,
+            null
+          ],
+          "packedFirstRowLogitsEqualSerial": true,
+          "prefillComparedToFp32Tree": {
+            "rows": 8,
+            "maxAbsoluteError": 0.00019073486328125,
+            "rmsError": 3.2987526030243853e-05,
+            "relativeRmsError": 6.767299171625183e-06,
+            "top1EqualRows": 8,
+            "meanKLDivergence": 2.93147084141373e-10
+          },
+          "tokensComparedToFp32Tree": {
+            "rows": 8,
+            "equalRows": 8,
+            "equalTokenPositions": 256,
+            "totalTokenPositions": 256,
+            "firstDivergence": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          }
+        }
+      },
+      "weightsSha256": "01df4e24c71f310b3a6e1ba93ede0a61323ee828ffb9125e8486d93a353a7912",
+      "restoreExact": true
+    },
+    {
+      "state": "plus",
+      "seed": 7001,
+      "sigma": 0.001,
+      "engines": {
+        "fp32-tree": {
+          "prefillLogitsSha256": "5b19d3d005b4e7be75ba0503729447d410a4d8111503e50f653c4f24fb58c4be",
+          "tokens": [
+            [
+              29871,
+              29946,
+              13,
+              29899,
+              960,
+              278,
+              1881,
+              338,
+              451,
+              263,
+              2854,
+              6043,
+              29892,
+              736,
+              448,
+              29896,
+              13,
+              13,
+              14023,
+              29871,
+              29906,
+              29901,
+              13,
+              4290,
+              29901,
+              376,
+              12199,
+              29908,
+              13,
+              6466,
+              29901,
+              29871
+            ],
+            [
+              4335,
+              756,
+              29871,
+              29941,
+              623,
+              793,
+              322,
+              1321,
+              952,
+              29871,
+              29945,
+              901,
+              29889,
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              8241,
+              29892,
+              278,
+              2183,
+              1426,
+              26649,
+              393,
+              4335,
+              756
+            ],
+            [
+              29871,
+              29941,
+              29906,
+              29892,
+              2023,
+              13,
+              13,
+              14448,
+              29871,
+              29906,
+              29901,
+              5399,
+              565,
+              278,
+              1857,
+              1353,
+              338,
+              8572,
+              1821,
+              491,
+              29871,
+              29946,
+              13,
+              13,
+              3644,
+              278,
+              1857,
+              1353,
+              338,
+              8572,
+              1821,
+              491
+            ],
+            [
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1762,
+              8147,
+              278,
+              3001,
+              1353,
+              310,
+              9335,
+              567,
+              5239,
+              491,
+              26259,
+              423,
+              297,
+              3786,
+              322,
+              2610,
+              29892,
+              591,
+              817,
+              304,
+              22932,
+              278
+            ],
+            [
+              13,
+              29899,
+              4103,
+              9632,
+              304,
+              10432,
+              29901,
+              1260,
+              330,
+              1219,
+              7919,
+              270,
+              555,
+              1941,
+              427,
+              425,
+              9712,
+              1648,
+              1208,
+              6759,
+              29889,
+              13,
+              29899,
+              4103,
+              9632,
+              304,
+              10545,
+              29901,
+              1720,
+              330,
+              16234,
+              2077
+            ],
+            [
+              29901,
+              29871,
+              29896,
+              29906,
+              29900,
+              29900,
+              2383,
+              29889,
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1762,
+              8147,
+              278,
+              5418,
+              1020,
+              345,
+              839,
+              491,
+              263,
+              7945,
+              9850,
+              292,
+              472,
+              263
+            ],
+            [
+              13,
+              13,
+              29896,
+              29889,
+              29871,
+              29906,
+              29945,
+              13,
+              29906,
+              29889,
+              29871,
+              29945,
+              29900,
+              13,
+              29941,
+              29889,
+              29871,
+              29896,
+              29900,
+              29900,
+              13,
+              13,
+              29906,
+              29889,
+              10987,
+              278,
+              2533,
+              310,
+              278,
+              937,
+              29871,
+              29896
+            ],
+            [
+              565,
+              302,
+              1275,
+              29871,
+              29900,
+              29901,
+              13,
+              308,
+              736,
+              29871,
+              29900,
+              13,
+              268,
+              25342,
+              302,
+              1275,
+              29871,
+              29896,
+              29901,
+              13,
+              308,
+              736,
+              29871,
+              29896,
+              13,
+              268,
+              1683,
+              29901,
+              13,
+              308,
+              736,
+              18755
+            ]
+          ],
+          "texts": [
+            "4\n- If the input is not a valid integer, return -1\n\nExample 2:\nInput: \"hello\"\nOutput: ",
+            "Tom has 3 apples and buys 5 more. \n<|assistant|>\nYes, the given text mentions that Tom has",
+            "32, ...\n\nStep 2: Check if the current number is divisible by 4\n\nIf the current number is divisible by",
+            "\n<|assistant|>\nTo calculate the total number of clips sold by Natalia in April and May, we need to multiply the",
+            "\n- Translate to Spanish: El gato est\u00e1 dormido en la ventana caliente.\n- Translate to Italian: Il gatto \u00e8",
+            ": 1200 km. \n<|assistant|>\nTo calculate the distance traveled by a train traveling at a",
+            "\n\n1. 25\n2. 50\n3. 100\n\n2. Find the sum of the first 1",
+            "if n == 0:\n         return 0\n     elif n == 1:\n         return 1\n     else:\n         return fib"
+          ],
+          "secondsIncludingWarmup": 1.667491215004702,
+          "rewards": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            null,
+            0.0,
+            null,
+            null
+          ],
+          "packedFirstRowLogitsEqualSerial": true,
+          "tokensComparedToParent": {
+            "rows": 8,
+            "equalRows": 1,
+            "equalTokenPositions": 110,
+            "totalTokenPositions": 256,
+            "firstDivergence": [
+              3,
+              13,
+              0,
+              18,
+              1,
+              0,
+              17,
+              null
+            ]
+          },
+          "prefillComparedToParent": {
+            "rows": 8,
+            "maxAbsoluteError": 2.625565528869629,
+            "rmsError": 0.46186967735927226,
+            "relativeRmsError": 0.09475127907823551,
+            "top1EqualRows": 6,
+            "meanKLDivergence": 0.07475908673230405
+          }
+        },
+        "integer-b14": {
+          "prefillLogitsSha256": "4a486760e0777b72cf9d6d89a8ce6a3cd45a8ba851ee08a43c955955fd8d39b9",
+          "tokens": [
+            [
+              29871,
+              29946,
+              13,
+              29899,
+              960,
+              278,
+              1881,
+              338,
+              451,
+              263,
+              2854,
+              6043,
+              29892,
+              736,
+              448,
+              29896,
+              13,
+              13,
+              14023,
+              29871,
+              29906,
+              29901,
+              13,
+              4290,
+              29901,
+              376,
+              12199,
+              29908,
+              13,
+              6466,
+              29901,
+              29871
+            ],
+            [
+              4335,
+              756,
+              29871,
+              29941,
+              623,
+              793,
+              322,
+              1321,
+              952,
+              29871,
+              29945,
+              901,
+              29889,
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              8241,
+              29892,
+              278,
+              2183,
+              1426,
+              26649,
+              393,
+              4335,
+              756
+            ],
+            [
+              29871,
+              29941,
+              29906,
+              29892,
+              2023,
+              13,
+              13,
+              14448,
+              29871,
+              29906,
+              29901,
+              5399,
+              565,
+              278,
+              1857,
+              1353,
+              338,
+              8572,
+              1821,
+              491,
+              29871,
+              29946,
+              13,
+              13,
+              3644,
+              278,
+              1857,
+              1353,
+              338,
+              8572,
+              1821,
+              491
+            ],
+            [
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1762,
+              8147,
+              278,
+              3001,
+              1353,
+              310,
+              9335,
+              567,
+              5239,
+              491,
+              26259,
+              423,
+              297,
+              3786,
+              322,
+              2610,
+              29892,
+              591,
+              817,
+              304,
+              22932,
+              278
+            ],
+            [
+              13,
+              29899,
+              4103,
+              9632,
+              304,
+              10432,
+              29901,
+              1260,
+              330,
+              1219,
+              7919,
+              270,
+              555,
+              1941,
+              427,
+              425,
+              9712,
+              1648,
+              1208,
+              6759,
+              29889,
+              13,
+              29899,
+              4103,
+              9632,
+              304,
+              10545,
+              29901,
+              1720,
+              330,
+              16234,
+              2077
+            ],
+            [
+              29901,
+              29871,
+              29896,
+              29906,
+              29900,
+              29900,
+              2383,
+              29889,
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1762,
+              8147,
+              278,
+              5418,
+              1020,
+              345,
+              839,
+              491,
+              263,
+              7945,
+              9850,
+              292,
+              472,
+              263
+            ],
+            [
+              13,
+              13,
+              29896,
+              29889,
+              29871,
+              29906,
+              29945,
+              13,
+              29906,
+              29889,
+              29871,
+              29945,
+              29900,
+              13,
+              29941,
+              29889,
+              29871,
+              29896,
+              29900,
+              29900,
+              13,
+              13,
+              29906,
+              29889,
+              10987,
+              278,
+              2533,
+              310,
+              278,
+              937,
+              29871,
+              29896
+            ],
+            [
+              565,
+              302,
+              1275,
+              29871,
+              29900,
+              29901,
+              13,
+              308,
+              736,
+              29871,
+              29900,
+              13,
+              268,
+              25342,
+              302,
+              1275,
+              29871,
+              29896,
+              29901,
+              13,
+              308,
+              736,
+              29871,
+              29896,
+              13,
+              268,
+              1683,
+              29901,
+              13,
+              308,
+              736,
+              18755
+            ]
+          ],
+          "texts": [
+            "4\n- If the input is not a valid integer, return -1\n\nExample 2:\nInput: \"hello\"\nOutput: ",
+            "Tom has 3 apples and buys 5 more. \n<|assistant|>\nYes, the given text mentions that Tom has",
+            "32, ...\n\nStep 2: Check if the current number is divisible by 4\n\nIf the current number is divisible by",
+            "\n<|assistant|>\nTo calculate the total number of clips sold by Natalia in April and May, we need to multiply the",
+            "\n- Translate to Spanish: El gato est\u00e1 dormido en la ventana caliente.\n- Translate to Italian: Il gatto \u00e8",
+            ": 1200 km. \n<|assistant|>\nTo calculate the distance traveled by a train traveling at a",
+            "\n\n1. 25\n2. 50\n3. 100\n\n2. Find the sum of the first 1",
+            "if n == 0:\n         return 0\n     elif n == 1:\n         return 1\n     else:\n         return fib"
+          ],
+          "secondsIncludingWarmup": 0.6967061790055595,
+          "rewards": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            null,
+            0.0,
+            null,
+            null
+          ],
+          "packedFirstRowLogitsEqualSerial": true,
+          "prefillComparedToFp32Tree": {
+            "rows": 8,
+            "maxAbsoluteError": 0.04306507110595703,
+            "rmsError": 0.007282635521385492,
+            "relativeRmsError": 0.001485997649246981,
+            "top1EqualRows": 8,
+            "meanKLDivergence": 1.0526503120073144e-05
+          },
+          "tokensComparedToFp32Tree": {
+            "rows": 8,
+            "equalRows": 8,
+            "equalTokenPositions": 256,
+            "totalTokenPositions": 256,
+            "firstDivergence": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          "tokensComparedToParent": {
+            "rows": 8,
+            "equalRows": 1,
+            "equalTokenPositions": 110,
+            "totalTokenPositions": 256,
+            "firstDivergence": [
+              3,
+              13,
+              0,
+              18,
+              1,
+              0,
+              17,
+              null
+            ]
+          },
+          "prefillComparedToParent": {
+            "rows": 8,
+            "maxAbsoluteError": 2.6485648155212402,
+            "rmsError": 0.462387322859495,
+            "relativeRmsError": 0.09486341301489809,
+            "top1EqualRows": 6,
+            "meanKLDivergence": 0.07483337020246464
+          }
+        },
+        "integer-b22": {
+          "prefillLogitsSha256": "ad153852027001729f950fbb9c25d7756ba18bed8e7c72d198795338364f7e81",
+          "tokens": [
+            [
+              29871,
+              29946,
+              13,
+              29899,
+              960,
+              278,
+              1881,
+              338,
+              451,
+              263,
+              2854,
+              6043,
+              29892,
+              736,
+              448,
+              29896,
+              13,
+              13,
+              14023,
+              29871,
+              29906,
+              29901,
+              13,
+              4290,
+              29901,
+              376,
+              12199,
+              29908,
+              13,
+              6466,
+              29901,
+              29871
+            ],
+            [
+              4335,
+              756,
+              29871,
+              29941,
+              623,
+              793,
+              322,
+              1321,
+              952,
+              29871,
+              29945,
+              901,
+              29889,
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              8241,
+              29892,
+              278,
+              2183,
+              1426,
+              26649,
+              393,
+              4335,
+              756
+            ],
+            [
+              29871,
+              29941,
+              29906,
+              29892,
+              2023,
+              13,
+              13,
+              14448,
+              29871,
+              29906,
+              29901,
+              5399,
+              565,
+              278,
+              1857,
+              1353,
+              338,
+              8572,
+              1821,
+              491,
+              29871,
+              29946,
+              13,
+              13,
+              3644,
+              278,
+              1857,
+              1353,
+              338,
+              8572,
+              1821,
+              491
+            ],
+            [
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1762,
+              8147,
+              278,
+              3001,
+              1353,
+              310,
+              9335,
+              567,
+              5239,
+              491,
+              26259,
+              423,
+              297,
+              3786,
+              322,
+              2610,
+              29892,
+              591,
+              817,
+              304,
+              22932,
+              278
+            ],
+            [
+              13,
+              29899,
+              4103,
+              9632,
+              304,
+              10432,
+              29901,
+              1260,
+              330,
+              1219,
+              7919,
+              270,
+              555,
+              1941,
+              427,
+              425,
+              9712,
+              1648,
+              1208,
+              6759,
+              29889,
+              13,
+              29899,
+              4103,
+              9632,
+              304,
+              10545,
+              29901,
+              1720,
+              330,
+              16234,
+              2077
+            ],
+            [
+              29901,
+              29871,
+              29896,
+              29906,
+              29900,
+              29900,
+              2383,
+              29889,
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1762,
+              8147,
+              278,
+              5418,
+              1020,
+              345,
+              839,
+              491,
+              263,
+              7945,
+              9850,
+              292,
+              472,
+              263
+            ],
+            [
+              13,
+              13,
+              29896,
+              29889,
+              29871,
+              29906,
+              29945,
+              13,
+              29906,
+              29889,
+              29871,
+              29945,
+              29900,
+              13,
+              29941,
+              29889,
+              29871,
+              29896,
+              29900,
+              29900,
+              13,
+              13,
+              29906,
+              29889,
+              10987,
+              278,
+              2533,
+              310,
+              278,
+              937,
+              29871,
+              29896
+            ],
+            [
+              565,
+              302,
+              1275,
+              29871,
+              29900,
+              29901,
+              13,
+              308,
+              736,
+              29871,
+              29900,
+              13,
+              268,
+              25342,
+              302,
+              1275,
+              29871,
+              29896,
+              29901,
+              13,
+              308,
+              736,
+              29871,
+              29896,
+              13,
+              268,
+              1683,
+              29901,
+              13,
+              308,
+              736,
+              18755
+            ]
+          ],
+          "texts": [
+            "4\n- If the input is not a valid integer, return -1\n\nExample 2:\nInput: \"hello\"\nOutput: ",
+            "Tom has 3 apples and buys 5 more. \n<|assistant|>\nYes, the given text mentions that Tom has",
+            "32, ...\n\nStep 2: Check if the current number is divisible by 4\n\nIf the current number is divisible by",
+            "\n<|assistant|>\nTo calculate the total number of clips sold by Natalia in April and May, we need to multiply the",
+            "\n- Translate to Spanish: El gato est\u00e1 dormido en la ventana caliente.\n- Translate to Italian: Il gatto \u00e8",
+            ": 1200 km. \n<|assistant|>\nTo calculate the distance traveled by a train traveling at a",
+            "\n\n1. 25\n2. 50\n3. 100\n\n2. Find the sum of the first 1",
+            "if n == 0:\n         return 0\n     elif n == 1:\n         return 1\n     else:\n         return fib"
+          ],
+          "secondsIncludingWarmup": 0.7151926649967209,
+          "rewards": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            null,
+            0.0,
+            null,
+            null
+          ],
+          "packedFirstRowLogitsEqualSerial": true,
+          "prefillComparedToFp32Tree": {
+            "rows": 8,
+            "maxAbsoluteError": 0.00017452239990234375,
+            "rmsError": 3.375868173903825e-05,
+            "relativeRmsError": 6.8883471592910476e-06,
+            "top1EqualRows": 8,
+            "meanKLDivergence": 3.9836619090778515e-10
+          },
+          "tokensComparedToFp32Tree": {
+            "rows": 8,
+            "equalRows": 8,
+            "equalTokenPositions": 256,
+            "totalTokenPositions": 256,
+            "firstDivergence": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          "tokensComparedToParent": {
+            "rows": 8,
+            "equalRows": 1,
+            "equalTokenPositions": 110,
+            "totalTokenPositions": 256,
+            "firstDivergence": [
+              3,
+              13,
+              0,
+              18,
+              1,
+              0,
+              17,
+              null
+            ]
+          },
+          "prefillComparedToParent": {
+            "rows": 8,
+            "maxAbsoluteError": 2.625645637512207,
+            "rmsError": 0.46187444776921843,
+            "relativeRmsError": 0.09475218409009081,
+            "top1EqualRows": 6,
+            "meanKLDivergence": 0.07476113848820938
+          }
+        }
+      },
+      "weightsSha256": "db19385cc3cfd3bde33f2b5ae63115ab238b5028dc57e538e75b820e99faa33d",
+      "restoreExact": true
+    },
+    {
+      "state": "minus",
+      "seed": 7001,
+      "sigma": -0.001,
+      "engines": {
+        "fp32-tree": {
+          "prefillLogitsSha256": "f0cdbf10f945774f3c65c58a6cadb222497d1adc1b7e15be2ce44c4b9b774a22",
+          "tokens": [
+            [
+              29871,
+              29946,
+              13,
+              13,
+              28956,
+              13,
+              13,
+              797,
+              445,
+              1342,
+              29892,
+              591,
+              29915,
+              276,
+              773,
+              278,
+              421,
+              2457,
+              29952,
+              13553,
+              304,
+              736,
+              278,
+              995,
+              310,
+              278,
+              421,
+              12011,
+              29952,
+              2286,
+              29889,
+              450
+            ],
+            [
+              4335,
+              756,
+              29871,
+              29941,
+              623,
+              793,
+              322,
+              1321,
+              952,
+              29871,
+              29945,
+              901,
+              29889,
+              13,
+              13,
+              29933,
+              1463,
+              373,
+              278,
+              13382,
+              2038,
+              29892,
+              1815,
+              366,
+              5706,
+              263,
+              2933,
+              304,
+              278,
+              1139,
+              470,
+              15278
+            ],
+            [
+              29871,
+              29941,
+              29906,
+              29892,
+              2023,
+              13,
+              13,
+              14448,
+              29871,
+              29906,
+              29901,
+              14542,
+              852,
+              263,
+              4036,
+              1353,
+              1546,
+              29871,
+              29896,
+              322,
+              278,
+              1857,
+              1353,
+              297,
+              278,
+              5665,
+              13,
+              13,
+              14448,
+              29871,
+              29941,
+              29901
+            ],
+            [
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1762,
+              8147,
+              278,
+              3001,
+              1353,
+              310,
+              9335,
+              567,
+              26259,
+              423,
+              5239,
+              297,
+              3786,
+              322,
+              2610,
+              29892,
+              591,
+              817,
+              304,
+              788,
+              701,
+              278
+            ],
+            [
+              13,
+              13,
+              29906,
+              29889,
+              4103,
+              9632,
+              304,
+              10432,
+              29901,
+              1260,
+              639,
+              307,
+              7919,
+              270,
+              555,
+              17008,
+              427,
+              425,
+              282,
+              1965,
+              1208,
+              6759,
+              29889,
+              13,
+              13,
+              29941,
+              29889,
+              4103,
+              9632,
+              304,
+              5332,
+              29901
+            ],
+            [
+              29871,
+              29896,
+              29906,
+              29900,
+              24016,
+              29889,
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1762,
+              8147,
+              278,
+              5418,
+              1020,
+              345,
+              839,
+              491,
+              263,
+              7945,
+              9850,
+              292,
+              472,
+              263,
+              4868,
+              6210
+            ],
+            [
+              13,
+              13,
+              29896,
+              29889,
+              29871,
+              29955,
+              29945,
+              13,
+              29906,
+              29889,
+              29871,
+              29896,
+              29900,
+              29900,
+              13,
+              29941,
+              29889,
+              29871,
+              29896,
+              29906,
+              29945,
+              13,
+              13,
+              10454,
+              29892,
+              591,
+              508,
+              671,
+              278,
+              878,
+              14999,
+              5455
+            ],
+            [
+              565,
+              302,
+              1275,
+              29871,
+              29900,
+              29901,
+              13,
+              308,
+              736,
+              29871,
+              29900,
+              13,
+              268,
+              25342,
+              302,
+              1275,
+              29871,
+              29896,
+              29901,
+              13,
+              308,
+              736,
+              29871,
+              29896,
+              13,
+              268,
+              1683,
+              29901,
+              13,
+              308,
+              736,
+              18755
+            ]
+          ],
+          "texts": [
+            "4\n\n```\n\nIn this example, we're using the `return` keyword to return the value of the `answer` variable. The",
+            "Tom has 3 apples and buys 5 more.\n\nBased on the passage above, Can you generate a response to the question or instruction",
+            "32, ...\n\nStep 2: Choose a random number between 1 and the current number in the sequence\n\nStep 3:",
+            "\n<|assistant|>\nTo calculate the total number of clips Natalia sold in April and May, we need to add up the",
+            "\n\n2. Translate to Spanish: El perro est\u00e1 dormiendo en la pared caliente.\n\n3. Translate to German:",
+            "120 kilometres. \n<|assistant|>\nTo calculate the distance traveled by a train traveling at a constant speed",
+            "\n\n1. 75\n2. 100\n3. 125\n\nNow, we can use the modulus operator",
+            "if n == 0:\n         return 0\n     elif n == 1:\n         return 1\n     else:\n         return fib"
+          ],
+          "secondsIncludingWarmup": 1.6692190430039773,
+          "rewards": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            null,
+            0.0,
+            null,
+            null
+          ],
+          "packedFirstRowLogitsEqualSerial": true,
+          "tokensComparedToParent": {
+            "rows": 8,
+            "equalRows": 2,
+            "equalTokenPositions": 117,
+            "totalTokenPositions": 256,
+            "firstDivergence": [
+              11,
+              19,
+              0,
+              null,
+              2,
+              2,
+              5,
+              null
+            ]
+          },
+          "prefillComparedToParent": {
+            "rows": 8,
+            "maxAbsoluteError": 2.2633109092712402,
+            "rmsError": 0.44000356065554236,
+            "relativeRmsError": 0.0902655060827055,
+            "top1EqualRows": 7,
+            "meanKLDivergence": 0.06443759794789837
+          }
+        },
+        "integer-b14": {
+          "prefillLogitsSha256": "4b4d1368976f116a6ac13e233af0742583cc8cea17d7f7389dfcf4e868216ee9",
+          "tokens": [
+            [
+              29871,
+              29946,
+              13,
+              13,
+              28956,
+              13,
+              13,
+              797,
+              445,
+              1342,
+              29892,
+              591,
+              29915,
+              276,
+              773,
+              278,
+              421,
+              2457,
+              29952,
+              13553,
+              304,
+              736,
+              278,
+              995,
+              310,
+              278,
+              421,
+              12011,
+              29952,
+              2286,
+              29889,
+              450
+            ],
+            [
+              4335,
+              756,
+              29871,
+              29941,
+              623,
+              793,
+              322,
+              1321,
+              952,
+              29871,
+              29945,
+              901,
+              29889,
+              13,
+              13,
+              29933,
+              1463,
+              373,
+              278,
+              13382,
+              2038,
+              29892,
+              1815,
+              366,
+              5706,
+              263,
+              2933,
+              304,
+              278,
+              1139,
+              470,
+              15278
+            ],
+            [
+              29871,
+              29941,
+              29906,
+              29892,
+              2023,
+              13,
+              13,
+              14448,
+              29871,
+              29906,
+              29901,
+              14542,
+              852,
+              263,
+              4036,
+              1353,
+              1546,
+              29871,
+              29896,
+              322,
+              278,
+              1857,
+              1353,
+              297,
+              278,
+              5665,
+              13,
+              13,
+              14448,
+              29871,
+              29941,
+              29901
+            ],
+            [
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1762,
+              8147,
+              278,
+              3001,
+              1353,
+              310,
+              9335,
+              567,
+              26259,
+              423,
+              5239,
+              297,
+              3786,
+              322,
+              2610,
+              29892,
+              591,
+              817,
+              304,
+              788,
+              701,
+              278
+            ],
+            [
+              13,
+              13,
+              29906,
+              29889,
+              4103,
+              9632,
+              304,
+              10432,
+              29901,
+              1260,
+              639,
+              307,
+              7919,
+              270,
+              555,
+              17008,
+              427,
+              425,
+              282,
+              1965,
+              1208,
+              6759,
+              29889,
+              13,
+              13,
+              29941,
+              29889,
+              4103,
+              9632,
+              304,
+              5332,
+              29901
+            ],
+            [
+              29871,
+              29896,
+              29906,
+              29900,
+              24016,
+              29889,
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1762,
+              8147,
+              278,
+              5418,
+              1020,
+              345,
+              839,
+              491,
+              263,
+              7945,
+              9850,
+              292,
+              472,
+              263,
+              4868,
+              6210
+            ],
+            [
+              13,
+              13,
+              29896,
+              29889,
+              29871,
+              29955,
+              29945,
+              13,
+              29906,
+              29889,
+              29871,
+              29896,
+              29900,
+              29900,
+              13,
+              29941,
+              29889,
+              29871,
+              29896,
+              29906,
+              29945,
+              13,
+              13,
+              10454,
+              29892,
+              591,
+              508,
+              671,
+              278,
+              878,
+              14999,
+              5455
+            ],
+            [
+              565,
+              302,
+              1275,
+              29871,
+              29900,
+              29901,
+              13,
+              308,
+              736,
+              29871,
+              29900,
+              13,
+              268,
+              25342,
+              302,
+              1275,
+              29871,
+              29896,
+              29901,
+              13,
+              308,
+              736,
+              29871,
+              29896,
+              13,
+              268,
+              1683,
+              29901,
+              13,
+              308,
+              736,
+              18755
+            ]
+          ],
+          "texts": [
+            "4\n\n```\n\nIn this example, we're using the `return` keyword to return the value of the `answer` variable. The",
+            "Tom has 3 apples and buys 5 more.\n\nBased on the passage above, Can you generate a response to the question or instruction",
+            "32, ...\n\nStep 2: Choose a random number between 1 and the current number in the sequence\n\nStep 3:",
+            "\n<|assistant|>\nTo calculate the total number of clips Natalia sold in April and May, we need to add up the",
+            "\n\n2. Translate to Spanish: El perro est\u00e1 dormiendo en la pared caliente.\n\n3. Translate to German:",
+            "120 kilometres. \n<|assistant|>\nTo calculate the distance traveled by a train traveling at a constant speed",
+            "\n\n1. 75\n2. 100\n3. 125\n\nNow, we can use the modulus operator",
+            "if n == 0:\n         return 0\n     elif n == 1:\n         return 1\n     else:\n         return fib"
+          ],
+          "secondsIncludingWarmup": 0.6942623680079123,
+          "rewards": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            null,
+            0.0,
+            null,
+            null
+          ],
+          "packedFirstRowLogitsEqualSerial": true,
+          "prefillComparedToFp32Tree": {
+            "rows": 8,
+            "maxAbsoluteError": 0.04613971710205078,
+            "rmsError": 0.007245686237595969,
+            "relativeRmsError": 0.0014928026785576162,
+            "top1EqualRows": 8,
+            "meanKLDivergence": 1.1614751114309832e-05
+          },
+          "tokensComparedToFp32Tree": {
+            "rows": 8,
+            "equalRows": 8,
+            "equalTokenPositions": 256,
+            "totalTokenPositions": 256,
+            "firstDivergence": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          "tokensComparedToParent": {
+            "rows": 8,
+            "equalRows": 2,
+            "equalTokenPositions": 117,
+            "totalTokenPositions": 256,
+            "firstDivergence": [
+              11,
+              19,
+              0,
+              null,
+              2,
+              2,
+              5,
+              null
+            ]
+          },
+          "prefillComparedToParent": {
+            "rows": 8,
+            "maxAbsoluteError": 2.2746376991271973,
+            "rmsError": 0.4407673584485699,
+            "relativeRmsError": 0.09042785972031911,
+            "top1EqualRows": 7,
+            "meanKLDivergence": 0.06561184358923683
+          }
+        },
+        "integer-b22": {
+          "prefillLogitsSha256": "92dcb1589edb8de1d82d842ddd7417d6e79ae51277aac56846b5c5b292a7b5eb",
+          "tokens": [
+            [
+              29871,
+              29946,
+              13,
+              13,
+              28956,
+              13,
+              13,
+              797,
+              445,
+              1342,
+              29892,
+              591,
+              29915,
+              276,
+              773,
+              278,
+              421,
+              2457,
+              29952,
+              13553,
+              304,
+              736,
+              278,
+              995,
+              310,
+              278,
+              421,
+              12011,
+              29952,
+              2286,
+              29889,
+              450
+            ],
+            [
+              4335,
+              756,
+              29871,
+              29941,
+              623,
+              793,
+              322,
+              1321,
+              952,
+              29871,
+              29945,
+              901,
+              29889,
+              13,
+              13,
+              29933,
+              1463,
+              373,
+              278,
+              13382,
+              2038,
+              29892,
+              1815,
+              366,
+              5706,
+              263,
+              2933,
+              304,
+              278,
+              1139,
+              470,
+              15278
+            ],
+            [
+              29871,
+              29941,
+              29906,
+              29892,
+              2023,
+              13,
+              13,
+              14448,
+              29871,
+              29906,
+              29901,
+              14542,
+              852,
+              263,
+              4036,
+              1353,
+              1546,
+              29871,
+              29896,
+              322,
+              278,
+              1857,
+              1353,
+              297,
+              278,
+              5665,
+              13,
+              13,
+              14448,
+              29871,
+              29941,
+              29901
+            ],
+            [
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1762,
+              8147,
+              278,
+              3001,
+              1353,
+              310,
+              9335,
+              567,
+              26259,
+              423,
+              5239,
+              297,
+              3786,
+              322,
+              2610,
+              29892,
+              591,
+              817,
+              304,
+              788,
+              701,
+              278
+            ],
+            [
+              13,
+              13,
+              29906,
+              29889,
+              4103,
+              9632,
+              304,
+              10432,
+              29901,
+              1260,
+              639,
+              307,
+              7919,
+              270,
+              555,
+              17008,
+              427,
+              425,
+              282,
+              1965,
+              1208,
+              6759,
+              29889,
+              13,
+              13,
+              29941,
+              29889,
+              4103,
+              9632,
+              304,
+              5332,
+              29901
+            ],
+            [
+              29871,
+              29896,
+              29906,
+              29900,
+              24016,
+              29889,
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1762,
+              8147,
+              278,
+              5418,
+              1020,
+              345,
+              839,
+              491,
+              263,
+              7945,
+              9850,
+              292,
+              472,
+              263,
+              4868,
+              6210
+            ],
+            [
+              13,
+              13,
+              29896,
+              29889,
+              29871,
+              29955,
+              29945,
+              13,
+              29906,
+              29889,
+              29871,
+              29896,
+              29900,
+              29900,
+              13,
+              29941,
+              29889,
+              29871,
+              29896,
+              29906,
+              29945,
+              13,
+              13,
+              10454,
+              29892,
+              591,
+              508,
+              671,
+              278,
+              878,
+              14999,
+              5455
+            ],
+            [
+              565,
+              302,
+              1275,
+              29871,
+              29900,
+              29901,
+              13,
+              308,
+              736,
+              29871,
+              29900,
+              13,
+              268,
+              25342,
+              302,
+              1275,
+              29871,
+              29896,
+              29901,
+              13,
+              308,
+              736,
+              29871,
+              29896,
+              13,
+              268,
+              1683,
+              29901,
+              13,
+              308,
+              736,
+              18755
+            ]
+          ],
+          "texts": [
+            "4\n\n```\n\nIn this example, we're using the `return` keyword to return the value of the `answer` variable. The",
+            "Tom has 3 apples and buys 5 more.\n\nBased on the passage above, Can you generate a response to the question or instruction",
+            "32, ...\n\nStep 2: Choose a random number between 1 and the current number in the sequence\n\nStep 3:",
+            "\n<|assistant|>\nTo calculate the total number of clips Natalia sold in April and May, we need to add up the",
+            "\n\n2. Translate to Spanish: El perro est\u00e1 dormiendo en la pared caliente.\n\n3. Translate to German:",
+            "120 kilometres. \n<|assistant|>\nTo calculate the distance traveled by a train traveling at a constant speed",
+            "\n\n1. 75\n2. 100\n3. 125\n\nNow, we can use the modulus operator",
+            "if n == 0:\n         return 0\n     elif n == 1:\n         return 1\n     else:\n         return fib"
+          ],
+          "secondsIncludingWarmup": 0.7160432259988738,
+          "rewards": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            null,
+            0.0,
+            null,
+            null
+          ],
+          "packedFirstRowLogitsEqualSerial": true,
+          "prefillComparedToFp32Tree": {
+            "rows": 8,
+            "maxAbsoluteError": 0.00019621849060058594,
+            "rmsError": 3.409008884180308e-05,
+            "relativeRmsError": 7.0234584091230756e-06,
+            "top1EqualRows": 8,
+            "meanKLDivergence": 3.6218535402627075e-10
+          },
+          "tokensComparedToFp32Tree": {
+            "rows": 8,
+            "equalRows": 8,
+            "equalTokenPositions": 256,
+            "totalTokenPositions": 256,
+            "firstDivergence": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          "tokensComparedToParent": {
+            "rows": 8,
+            "equalRows": 2,
+            "equalTokenPositions": 117,
+            "totalTokenPositions": 256,
+            "firstDivergence": [
+              11,
+              19,
+              0,
+              null,
+              2,
+              2,
+              5,
+              null
+            ]
+          },
+          "prefillComparedToParent": {
+            "rows": 8,
+            "maxAbsoluteError": 2.2632861137390137,
+            "rmsError": 0.43999562371914686,
+            "relativeRmsError": 0.09026380770538352,
+            "top1EqualRows": 7,
+            "meanKLDivergence": 0.06443520077437077
+          }
+        }
+      },
+      "weightsSha256": "008d811995e2359dafb96ac5a28e76092df2db6e4bf40a9b80bce5452ccaa533",
+      "restoreExact": true
+    },
+    {
+      "state": "restored",
+      "seed": null,
+      "sigma": 0,
+      "engines": {
+        "fp32-tree": {
+          "prefillLogitsSha256": "063a17fd479dce5be0db87d17ba4c38062133bcf00dafbc2d5eb747a215ac42b",
+          "tokens": [
+            [
+              29871,
+              29946,
+              13,
+              13,
+              28956,
+              13,
+              13,
+              797,
+              445,
+              1342,
+              29892,
+              278,
+              421,
+              2457,
+              29952,
+              3229,
+              338,
+              1304,
+              304,
+              736,
+              278,
+              995,
+              310,
+              278,
+              421,
+              12011,
+              29952,
+              2286,
+              29889,
+              450,
+              421,
+              2457
+            ],
+            [
+              4335,
+              756,
+              29871,
+              29941,
+              623,
+              793,
+              322,
+              1321,
+              952,
+              29871,
+              29945,
+              901,
+              29889,
+              13,
+              13,
+              29933,
+              1463,
+              373,
+              278,
+              1426,
+              5518,
+              29892,
+              508,
+              366,
+              5706,
+              263,
+              2933,
+              304,
+              278,
+              1139,
+              376,
+              5328
+            ],
+            [
+              2023,
+              13,
+              13,
+              14448,
+              29871,
+              29906,
+              29901,
+              5399,
+              565,
+              278,
+              1857,
+              1353,
+              338,
+              7621,
+              1135,
+              278,
+              3517,
+              1353,
+              13,
+              13,
+              3644,
+              278,
+              1857,
+              1353,
+              338,
+              7621,
+              1135,
+              278,
+              3517,
+              1353,
+              29892,
+              769
+            ],
+            [
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1762,
+              8147,
+              278,
+              3001,
+              1353,
+              310,
+              9335,
+              567,
+              26259,
+              423,
+              5239,
+              297,
+              3786,
+              322,
+              2610,
+              29892,
+              591,
+              817,
+              304,
+              788,
+              701,
+              278
+            ],
+            [
+              13,
+              13,
+              4300,
+              18411,
+              29901,
+              951,
+              13563,
+              707,
+              17573,
+              424,
+              1190,
+              425,
+              269,
+              3498,
+              818,
+              286,
+              4600,
+              10329,
+              566,
+              29889,
+              13,
+              13,
+              14023,
+              29871,
+              29906,
+              29901,
+              13,
+              13,
+              26036,
+              29901,
+              450,
+              6635
+            ],
+            [
+              29871,
+              29896,
+              29892,
+              29906,
+              29900,
+              29900,
+              2383,
+              29889,
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1762,
+              8147,
+              278,
+              5418,
+              1020,
+              345,
+              839,
+              491,
+              385,
+              319,
+              7945,
+              9850,
+              292,
+              472
+            ],
+            [
+              13,
+              13,
+              29896,
+              29889,
+              29871,
+              29906,
+              29945,
+              13,
+              29906,
+              29889,
+              29871,
+              29945,
+              29900,
+              13,
+              29941,
+              29889,
+              29871,
+              29955,
+              29945,
+              13,
+              13,
+              10454,
+              29892,
+              1235,
+              29915,
+              29879,
+              1653,
+              263,
+              740,
+              393,
+              4893,
+              263
+            ],
+            [
+              565,
+              302,
+              1275,
+              29871,
+              29900,
+              29901,
+              13,
+              308,
+              736,
+              29871,
+              29900,
+              13,
+              268,
+              25342,
+              302,
+              1275,
+              29871,
+              29896,
+              29901,
+              13,
+              308,
+              736,
+              29871,
+              29896,
+              13,
+              268,
+              1683,
+              29901,
+              13,
+              308,
+              736,
+              18755
+            ]
+          ],
+          "texts": [
+            "4\n\n```\n\nIn this example, the `return` statement is used to return the value of the `answer` variable. The `return",
+            "Tom has 3 apples and buys 5 more.\n\nBased on the text material, can you generate a response to the question \"How",
+            "...\n\nStep 2: Check if the current number is greater than the previous number\n\nIf the current number is greater than the previous number, then",
+            "\n<|assistant|>\nTo calculate the total number of clips Natalia sold in April and May, we need to add up the",
+            "\n\nTranslation: Le chat est reposant sur la salle \u00e0 manger chaud.\n\nExample 2:\n\nOriginal: The cat",
+            "1,200 km. \n<|assistant|>\nTo calculate the distance traveled by an A train traveling at",
+            "\n\n1. 25\n2. 50\n3. 75\n\nNow, let's create a function that takes a",
+            "if n == 0:\n         return 0\n     elif n == 1:\n         return 1\n     else:\n         return fib"
+          ],
+          "secondsIncludingWarmup": 1.6667515160079347,
+          "rewards": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            null,
+            0.0,
+            null,
+            null
+          ],
+          "packedFirstRowLogitsEqualSerial": true,
+          "tokensComparedToParent": {
+            "rows": 8,
+            "equalRows": 8,
+            "equalTokenPositions": 256,
+            "totalTokenPositions": 256,
+            "firstDivergence": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          "prefillComparedToParent": {
+            "rows": 8,
+            "maxAbsoluteError": 0.0,
+            "rmsError": 0.0,
+            "relativeRmsError": 0.0,
+            "top1EqualRows": 8,
+            "meanKLDivergence": 0.0
+          }
+        },
+        "integer-b14": {
+          "prefillLogitsSha256": "7f1777339139c20186a98943120a979c24154ae2fa3790d208123c476533b61d",
+          "tokens": [
+            [
+              29871,
+              29946,
+              13,
+              13,
+              28956,
+              13,
+              13,
+              797,
+              445,
+              1342,
+              29892,
+              278,
+              421,
+              2457,
+              29952,
+              3229,
+              338,
+              1304,
+              304,
+              736,
+              278,
+              995,
+              310,
+              278,
+              421,
+              12011,
+              29952,
+              2286,
+              29889,
+              450,
+              421,
+              2457
+            ],
+            [
+              4335,
+              756,
+              29871,
+              29941,
+              623,
+              793,
+              322,
+              1321,
+              952,
+              29871,
+              29945,
+              901,
+              29889,
+              13,
+              13,
+              29933,
+              1463,
+              373,
+              278,
+              1426,
+              5518,
+              29892,
+              508,
+              366,
+              5706,
+              263,
+              2933,
+              304,
+              278,
+              1139,
+              376,
+              5328
+            ],
+            [
+              2023,
+              13,
+              13,
+              14448,
+              29871,
+              29906,
+              29901,
+              5399,
+              565,
+              278,
+              1857,
+              1353,
+              338,
+              7621,
+              1135,
+              278,
+              3517,
+              1353,
+              13,
+              13,
+              3644,
+              278,
+              1857,
+              1353,
+              338,
+              7621,
+              1135,
+              278,
+              3517,
+              1353,
+              29892,
+              769
+            ],
+            [
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1762,
+              8147,
+              278,
+              3001,
+              1353,
+              310,
+              9335,
+              567,
+              26259,
+              423,
+              5239,
+              297,
+              3786,
+              322,
+              2610,
+              29892,
+              591,
+              817,
+              304,
+              788,
+              701,
+              278
+            ],
+            [
+              13,
+              13,
+              4300,
+              18411,
+              29901,
+              951,
+              13563,
+              707,
+              17573,
+              424,
+              1190,
+              425,
+              269,
+              3498,
+              818,
+              286,
+              4600,
+              10329,
+              566,
+              29889,
+              13,
+              13,
+              14023,
+              29871,
+              29906,
+              29901,
+              13,
+              13,
+              26036,
+              29901,
+              450,
+              6635
+            ],
+            [
+              29871,
+              29896,
+              29892,
+              29906,
+              29900,
+              29900,
+              2383,
+              29889,
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1762,
+              8147,
+              278,
+              5418,
+              1020,
+              345,
+              839,
+              491,
+              385,
+              319,
+              7945,
+              9850,
+              292,
+              472
+            ],
+            [
+              13,
+              13,
+              29896,
+              29889,
+              29871,
+              29906,
+              29945,
+              13,
+              29906,
+              29889,
+              29871,
+              29945,
+              29900,
+              13,
+              29941,
+              29889,
+              29871,
+              29955,
+              29945,
+              13,
+              13,
+              10454,
+              29892,
+              1235,
+              29915,
+              29879,
+              1653,
+              263,
+              740,
+              393,
+              4893,
+              263
+            ],
+            [
+              565,
+              302,
+              1275,
+              29871,
+              29900,
+              29901,
+              13,
+              308,
+              736,
+              29871,
+              29900,
+              13,
+              268,
+              25342,
+              302,
+              1275,
+              29871,
+              29896,
+              29901,
+              13,
+              308,
+              736,
+              29871,
+              29896,
+              13,
+              268,
+              1683,
+              29901,
+              13,
+              308,
+              736,
+              18755
+            ]
+          ],
+          "texts": [
+            "4\n\n```\n\nIn this example, the `return` statement is used to return the value of the `answer` variable. The `return",
+            "Tom has 3 apples and buys 5 more.\n\nBased on the text material, can you generate a response to the question \"How",
+            "...\n\nStep 2: Check if the current number is greater than the previous number\n\nIf the current number is greater than the previous number, then",
+            "\n<|assistant|>\nTo calculate the total number of clips Natalia sold in April and May, we need to add up the",
+            "\n\nTranslation: Le chat est reposant sur la salle \u00e0 manger chaud.\n\nExample 2:\n\nOriginal: The cat",
+            "1,200 km. \n<|assistant|>\nTo calculate the distance traveled by an A train traveling at",
+            "\n\n1. 25\n2. 50\n3. 75\n\nNow, let's create a function that takes a",
+            "if n == 0:\n         return 0\n     elif n == 1:\n         return 1\n     else:\n         return fib"
+          ],
+          "secondsIncludingWarmup": 0.6941044599952875,
+          "rewards": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            null,
+            0.0,
+            null,
+            null
+          ],
+          "packedFirstRowLogitsEqualSerial": true,
+          "prefillComparedToFp32Tree": {
+            "rows": 8,
+            "maxAbsoluteError": 0.040413856506347656,
+            "rmsError": 0.00756953936655081,
+            "relativeRmsError": 0.0015528699374993667,
+            "top1EqualRows": 8,
+            "meanKLDivergence": 2.1921575354936406e-05
+          },
+          "tokensComparedToFp32Tree": {
+            "rows": 8,
+            "equalRows": 8,
+            "equalTokenPositions": 256,
+            "totalTokenPositions": 256,
+            "firstDivergence": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          "tokensComparedToParent": {
+            "rows": 8,
+            "equalRows": 8,
+            "equalTokenPositions": 256,
+            "totalTokenPositions": 256,
+            "firstDivergence": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          "prefillComparedToParent": {
+            "rows": 8,
+            "maxAbsoluteError": 0.0,
+            "rmsError": 0.0,
+            "relativeRmsError": 0.0,
+            "top1EqualRows": 8,
+            "meanKLDivergence": 0.0
+          }
+        },
+        "integer-b22": {
+          "prefillLogitsSha256": "5ddef6d2f52f282c34edbd9845eef388a9040e4660385b367430635cb09b3573",
+          "tokens": [
+            [
+              29871,
+              29946,
+              13,
+              13,
+              28956,
+              13,
+              13,
+              797,
+              445,
+              1342,
+              29892,
+              278,
+              421,
+              2457,
+              29952,
+              3229,
+              338,
+              1304,
+              304,
+              736,
+              278,
+              995,
+              310,
+              278,
+              421,
+              12011,
+              29952,
+              2286,
+              29889,
+              450,
+              421,
+              2457
+            ],
+            [
+              4335,
+              756,
+              29871,
+              29941,
+              623,
+              793,
+              322,
+              1321,
+              952,
+              29871,
+              29945,
+              901,
+              29889,
+              13,
+              13,
+              29933,
+              1463,
+              373,
+              278,
+              1426,
+              5518,
+              29892,
+              508,
+              366,
+              5706,
+              263,
+              2933,
+              304,
+              278,
+              1139,
+              376,
+              5328
+            ],
+            [
+              2023,
+              13,
+              13,
+              14448,
+              29871,
+              29906,
+              29901,
+              5399,
+              565,
+              278,
+              1857,
+              1353,
+              338,
+              7621,
+              1135,
+              278,
+              3517,
+              1353,
+              13,
+              13,
+              3644,
+              278,
+              1857,
+              1353,
+              338,
+              7621,
+              1135,
+              278,
+              3517,
+              1353,
+              29892,
+              769
+            ],
+            [
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1762,
+              8147,
+              278,
+              3001,
+              1353,
+              310,
+              9335,
+              567,
+              26259,
+              423,
+              5239,
+              297,
+              3786,
+              322,
+              2610,
+              29892,
+              591,
+              817,
+              304,
+              788,
+              701,
+              278
+            ],
+            [
+              13,
+              13,
+              4300,
+              18411,
+              29901,
+              951,
+              13563,
+              707,
+              17573,
+              424,
+              1190,
+              425,
+              269,
+              3498,
+              818,
+              286,
+              4600,
+              10329,
+              566,
+              29889,
+              13,
+              13,
+              14023,
+              29871,
+              29906,
+              29901,
+              13,
+              13,
+              26036,
+              29901,
+              450,
+              6635
+            ],
+            [
+              29871,
+              29896,
+              29892,
+              29906,
+              29900,
+              29900,
+              2383,
+              29889,
+              2,
+              29871,
+              13,
+              29966,
+              29989,
+              465,
+              22137,
+              29989,
+              29958,
+              13,
+              1762,
+              8147,
+              278,
+              5418,
+              1020,
+              345,
+              839,
+              491,
+              385,
+              319,
+              7945,
+              9850,
+              292,
+              472
+            ],
+            [
+              13,
+              13,
+              29896,
+              29889,
+              29871,
+              29906,
+              29945,
+              13,
+              29906,
+              29889,
+              29871,
+              29945,
+              29900,
+              13,
+              29941,
+              29889,
+              29871,
+              29955,
+              29945,
+              13,
+              13,
+              10454,
+              29892,
+              1235,
+              29915,
+              29879,
+              1653,
+              263,
+              740,
+              393,
+              4893,
+              263
+            ],
+            [
+              565,
+              302,
+              1275,
+              29871,
+              29900,
+              29901,
+              13,
+              308,
+              736,
+              29871,
+              29900,
+              13,
+              268,
+              25342,
+              302,
+              1275,
+              29871,
+              29896,
+              29901,
+              13,
+              308,
+              736,
+              29871,
+              29896,
+              13,
+              268,
+              1683,
+              29901,
+              13,
+              308,
+              736,
+              18755
+            ]
+          ],
+          "texts": [
+            "4\n\n```\n\nIn this example, the `return` statement is used to return the value of the `answer` variable. The `return",
+            "Tom has 3 apples and buys 5 more.\n\nBased on the text material, can you generate a response to the question \"How",
+            "...\n\nStep 2: Check if the current number is greater than the previous number\n\nIf the current number is greater than the previous number, then",
+            "\n<|assistant|>\nTo calculate the total number of clips Natalia sold in April and May, we need to add up the",
+            "\n\nTranslation: Le chat est reposant sur la salle \u00e0 manger chaud.\n\nExample 2:\n\nOriginal: The cat",
+            "1,200 km. \n<|assistant|>\nTo calculate the distance traveled by an A train traveling at",
+            "\n\n1. 25\n2. 50\n3. 75\n\nNow, let's create a function that takes a",
+            "if n == 0:\n         return 0\n     elif n == 1:\n         return 1\n     else:\n         return fib"
+          ],
+          "secondsIncludingWarmup": 0.715098187996773,
+          "rewards": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            null,
+            0.0,
+            null,
+            null
+          ],
+          "packedFirstRowLogitsEqualSerial": true,
+          "prefillComparedToFp32Tree": {
+            "rows": 8,
+            "maxAbsoluteError": 0.00019073486328125,
+            "rmsError": 3.2987526030243853e-05,
+            "relativeRmsError": 6.767299171625183e-06,
+            "top1EqualRows": 8,
+            "meanKLDivergence": 2.93147084141373e-10
+          },
+          "tokensComparedToFp32Tree": {
+            "rows": 8,
+            "equalRows": 8,
+            "equalTokenPositions": 256,
+            "totalTokenPositions": 256,
+            "firstDivergence": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          "tokensComparedToParent": {
+            "rows": 8,
+            "equalRows": 8,
+            "equalTokenPositions": 256,
+            "totalTokenPositions": 256,
+            "firstDivergence": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          "prefillComparedToParent": {
+            "rows": 8,
+            "maxAbsoluteError": 0.0,
+            "rmsError": 0.0,
+            "relativeRmsError": 0.0,
+            "top1EqualRows": 8,
+            "meanKLDivergence": 0.0
+          }
+        }
+      },
+      "weightsSha256": "01df4e24c71f310b3a6e1ba93ede0a61323ee828ffb9125e8486d93a353a7912",
+      "restoreExact": true
+    }
+  ],
+  "modelFiles": {
+    "config.json": "486bedda3a6988332e60d9638a09ca4b260d34ebcf1b19e22cf3b140b63d8fe9",
+    "eval_results.json": "637daaebe7aa8af0e678f9e79ec33fa29f8635090d45ec813f0e7474320d7351",
+    "generation_config.json": "18046d04f5bd8b4998095ecabdd17a1bf0053d9acdccead4a05be4a3575f3c5c",
+    "model.safetensors": "6e6001da2106d4757498752a021df6c2bdc332c650aae4bae6b0c004dcf14933",
+    "special_tokens_map.json": "82d96d7a9e6ced037f12394b7ea6a5b02e6ca87e0d11edaa8d60d9be857ce7db",
+    "tokenizer.json": "bcd04f0eadf90287bd26e1a183ac487d8a141b09b06aecb7725bbdd343640f2e",
+    "tokenizer.model": "9e556afd44213b6bd1be2b850ebbbd98f5481437a8021afaf58ee7fb1818d347",
+    "tokenizer_config.json": "7b41ba7d0eb91e77914ca3dafde559ea3e19878769b7e68409e89bed5222e77a"
+  },
+  "modelFilesHash": "368b8cf6add69431d70b94d6dc41ff738d4c3bc5a537dc12d388c03592f8594d",
+  "schemaHash": "59410e8daf9ed66271387d52bdaa9acd75be7d0afcec22f2232f47510a061ce7",
+  "parentSha256": "01df4e24c71f310b3a6e1ba93ede0a61323ee828ffb9125e8486d93a353a7912",
+  "snapshotBytes": 2200096768,
+  "backendIdentities": {
+    "fp32-tree": {
+      "backend": "decoder_pairwise_f32_cuda_graph_v1_experimental",
+      "operators": "pairwise_f32_reference_v1_experimental",
+      "graph": {
+        "version": "rms_swiglu_causal_rope_decoder_v1_experimental",
+        "family": "llama",
+        "dimensions": [
+          2048,
+          5632,
+          22,
+          32,
+          4,
+          32000
+        ],
+        "headDim": 64,
+        "ropeTheta": 10000.0,
+        "rmsNormEpsilon": 1e-05,
+        "tiedHead": false,
+        "parameterShapes": {
+          "lm_head.weight": [
+            32000,
+            2048
+          ],
+          "model.embed_tokens.weight": [
+            32000,
+            2048
+          ],
+          "model.layers.0.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.0.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.0.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.0.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.0.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.0.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.0.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.0.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.0.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.1.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.1.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.1.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.1.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.1.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.1.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.1.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.1.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.1.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.10.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.10.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.10.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.10.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.10.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.10.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.10.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.10.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.10.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.11.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.11.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.11.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.11.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.11.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.11.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.11.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.11.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.11.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.12.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.12.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.12.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.12.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.12.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.12.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.12.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.12.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.12.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.13.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.13.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.13.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.13.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.13.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.13.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.13.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.13.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.13.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.14.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.14.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.14.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.14.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.14.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.14.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.14.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.14.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.14.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.15.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.15.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.15.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.15.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.15.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.15.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.15.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.15.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.15.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.16.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.16.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.16.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.16.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.16.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.16.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.16.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.16.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.16.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.17.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.17.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.17.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.17.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.17.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.17.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.17.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.17.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.17.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.18.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.18.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.18.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.18.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.18.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.18.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.18.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.18.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.18.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.19.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.19.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.19.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.19.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.19.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.19.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.19.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.19.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.19.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.2.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.2.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.2.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.2.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.2.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.2.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.2.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.2.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.2.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.20.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.20.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.20.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.20.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.20.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.20.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.20.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.20.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.20.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.21.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.21.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.21.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.21.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.21.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.21.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.21.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.21.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.21.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.3.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.3.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.3.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.3.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.3.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.3.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.3.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.3.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.3.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.4.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.4.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.4.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.4.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.4.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.4.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.4.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.4.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.4.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.5.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.5.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.5.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.5.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.5.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.5.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.5.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.5.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.5.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.6.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.6.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.6.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.6.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.6.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.6.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.6.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.6.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.6.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.7.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.7.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.7.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.7.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.7.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.7.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.7.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.7.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.7.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.8.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.8.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.8.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.8.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.8.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.8.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.8.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.8.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.8.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.9.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.9.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.9.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.9.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.9.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.9.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.9.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.9.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.9.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.norm.weight": [
+            2048
+          ]
+        }
+      },
+      "sourceSha256": "ae5678901fb004ae155090b0651aef6a9ec498f8048917086bd46854e46900ca",
+      "attentionScale": 0.125,
+      "ropeFrequencyBits": [
+        1065353216,
+        1061157137,
+        1058010522,
+        1054337179,
+        1050798235,
+        1047712804,
+        1043732615,
+        1040747895,
+        1036831949,
+        1033475086,
+        1030116803,
+        1026341397,
+        1023510242,
+        1019364176,
+        1016180025,
+        1012562929,
+        1008981770,
+        1005959600,
+        1001931932,
+        998911607,
+        995049015,
+        991652109,
+        988353832,
+        984533390,
+        981668463,
+        977573004,
+        974350870,
+        970790694,
+        967166815,
+        964208660,
+        960132947,
+        957076594
+      ],
+      "maxContext": 512,
+      "fixture": false,
+      "hardwareQualified": false,
+      "graphSourceSha256": "b1f49a30c40f5abeb2bed09cec3b58c656d67667a66ac6eeac526c0b78b21368",
+      "kernels": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "3fb54200df22bea349ac2d6d384504554fa95d0b085ea7810ce2448bb305ef30",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false
+      },
+      "packedSourceSha256": "009bdfb7baf97dc7fa43a6f5dc60981841be5c3a933c91e21f7d5fda218a9778",
+      "maxBatch": 128,
+      "decodeGraphSourceSha256": "ca413f1ceffda70742c4dfa1bb6781401d5f7dfaa9cfb3f12263b44fb0a4271b",
+      "decodeKernelsSourceSha256": "d14d993230f9942cc535bd4585f5157055fa2464a4d5260c78a727a8275426f4",
+      "maxGraphBytes": 4294967296,
+      "cachePolicy": "clear_on_request_boundary",
+      "maxRetainedCaptures": 1
+    },
+    "integer-b14": {
+      "backend": "decoder_scaled_integer_cuda_graph_v1_experimental",
+      "operators": {
+        "linear": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "nonlinear": "pairwise_f32_reference_v1_experimental"
+      },
+      "graph": {
+        "version": "rms_swiglu_causal_rope_decoder_v1_experimental",
+        "family": "llama",
+        "dimensions": [
+          2048,
+          5632,
+          22,
+          32,
+          4,
+          32000
+        ],
+        "headDim": 64,
+        "ropeTheta": 10000.0,
+        "rmsNormEpsilon": 1e-05,
+        "tiedHead": false,
+        "parameterShapes": {
+          "lm_head.weight": [
+            32000,
+            2048
+          ],
+          "model.embed_tokens.weight": [
+            32000,
+            2048
+          ],
+          "model.layers.0.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.0.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.0.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.0.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.0.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.0.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.0.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.0.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.0.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.1.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.1.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.1.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.1.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.1.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.1.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.1.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.1.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.1.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.10.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.10.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.10.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.10.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.10.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.10.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.10.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.10.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.10.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.11.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.11.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.11.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.11.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.11.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.11.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.11.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.11.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.11.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.12.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.12.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.12.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.12.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.12.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.12.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.12.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.12.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.12.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.13.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.13.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.13.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.13.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.13.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.13.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.13.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.13.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.13.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.14.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.14.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.14.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.14.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.14.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.14.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.14.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.14.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.14.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.15.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.15.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.15.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.15.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.15.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.15.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.15.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.15.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.15.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.16.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.16.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.16.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.16.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.16.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.16.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.16.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.16.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.16.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.17.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.17.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.17.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.17.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.17.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.17.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.17.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.17.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.17.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.18.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.18.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.18.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.18.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.18.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.18.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.18.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.18.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.18.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.19.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.19.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.19.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.19.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.19.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.19.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.19.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.19.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.19.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.2.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.2.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.2.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.2.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.2.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.2.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.2.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.2.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.2.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.20.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.20.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.20.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.20.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.20.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.20.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.20.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.20.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.20.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.21.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.21.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.21.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.21.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.21.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.21.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.21.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.21.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.21.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.3.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.3.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.3.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.3.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.3.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.3.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.3.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.3.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.3.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.4.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.4.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.4.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.4.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.4.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.4.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.4.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.4.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.4.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.5.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.5.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.5.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.5.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.5.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.5.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.5.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.5.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.5.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.6.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.6.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.6.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.6.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.6.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.6.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.6.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.6.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.6.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.7.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.7.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.7.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.7.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.7.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.7.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.7.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.7.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.7.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.8.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.8.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.8.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.8.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.8.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.8.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.8.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.8.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.8.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.9.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.9.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.9.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.9.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.9.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.9.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.9.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.9.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.9.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.norm.weight": [
+            2048
+          ]
+        }
+      },
+      "sourceSha256": "ae5678901fb004ae155090b0651aef6a9ec498f8048917086bd46854e46900ca",
+      "attentionScale": 0.125,
+      "ropeFrequencyBits": [
+        1065353216,
+        1061157137,
+        1058010522,
+        1054337179,
+        1050798235,
+        1047712804,
+        1043732615,
+        1040747895,
+        1036831949,
+        1033475086,
+        1030116803,
+        1026341397,
+        1023510242,
+        1019364176,
+        1016180025,
+        1012562929,
+        1008981770,
+        1005959600,
+        1001931932,
+        998911607,
+        995049015,
+        991652109,
+        988353832,
+        984533390,
+        981668463,
+        977573004,
+        974350870,
+        970790694,
+        967166815,
+        964208660,
+        960132947,
+        957076594
+      ],
+      "maxContext": 512,
+      "fixture": false,
+      "hardwareQualified": false,
+      "graphSourceSha256": "b1f49a30c40f5abeb2bed09cec3b58c656d67667a66ac6eeac526c0b78b21368",
+      "kernels": {
+        "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "linear": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "nonlinear": {
+          "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+          "operators": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "3fb54200df22bea349ac2d6d384504554fa95d0b085ea7810ce2448bb305ef30",
+          "nvrtcOptions": [
+            "--fmad=false",
+            "--ftz=false",
+            "--prec-div=true",
+            "--prec-sqrt=true",
+            "--std=c++17"
+          ],
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "253fa58a3ea3969e10c04f8371deb7550d58fb0439ad1edc01162de143723965",
+        "maxPartialBytes": 16777216,
+        "decodePlanning": {
+          "policy": "occupancy_split_k_v1_experimental",
+          "rowTiles": [
+            16,
+            32
+          ],
+          "maxSplitK": 8,
+          "minSplitWidth": 256,
+          "maxBatch": 128,
+          "singleRow": "simt_split1",
+          "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+        },
+        "hardwareQualified": false
+      },
+      "packedSourceSha256": "009bdfb7baf97dc7fa43a6f5dc60981841be5c3a933c91e21f7d5fda218a9778",
+      "maxBatch": 128,
+      "decodeGraphSourceSha256": "ca413f1ceffda70742c4dfa1bb6781401d5f7dfaa9cfb3f12263b44fb0a4271b",
+      "decodeKernelsSourceSha256": "d14d993230f9942cc535bd4585f5157055fa2464a4d5260c78a727a8275426f4",
+      "maxGraphBytes": 4294967296,
+      "cachePolicy": "clear_on_request_boundary",
+      "maxRetainedCaptures": 1,
+      "integerDecoderSourceSha256": "16cd2e978e0de27446b09b83279302bc039d5050317ec653d521179910d9add9",
+      "decodeExecution": {
+        "policy": "occupancy_split_k_v1_experimental",
+        "rowTiles": [
+          16,
+          32
+        ],
+        "maxSplitK": 8,
+        "minSplitWidth": 256,
+        "maxBatch": 128,
+        "singleRow": "simt_split1",
+        "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb",
+        "targetCtasPerSm": 8
+      }
+    },
+    "integer-b22": {
+      "backend": "decoder_scaled_integer_cuda_graph_v1_experimental",
+      "operators": {
+        "linear": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "nonlinear": "pairwise_f32_reference_v1_experimental"
+      },
+      "graph": {
+        "version": "rms_swiglu_causal_rope_decoder_v1_experimental",
+        "family": "llama",
+        "dimensions": [
+          2048,
+          5632,
+          22,
+          32,
+          4,
+          32000
+        ],
+        "headDim": 64,
+        "ropeTheta": 10000.0,
+        "rmsNormEpsilon": 1e-05,
+        "tiedHead": false,
+        "parameterShapes": {
+          "lm_head.weight": [
+            32000,
+            2048
+          ],
+          "model.embed_tokens.weight": [
+            32000,
+            2048
+          ],
+          "model.layers.0.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.0.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.0.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.0.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.0.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.0.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.0.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.0.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.0.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.1.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.1.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.1.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.1.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.1.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.1.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.1.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.1.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.1.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.10.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.10.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.10.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.10.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.10.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.10.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.10.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.10.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.10.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.11.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.11.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.11.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.11.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.11.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.11.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.11.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.11.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.11.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.12.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.12.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.12.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.12.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.12.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.12.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.12.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.12.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.12.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.13.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.13.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.13.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.13.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.13.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.13.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.13.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.13.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.13.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.14.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.14.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.14.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.14.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.14.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.14.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.14.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.14.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.14.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.15.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.15.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.15.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.15.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.15.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.15.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.15.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.15.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.15.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.16.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.16.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.16.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.16.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.16.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.16.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.16.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.16.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.16.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.17.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.17.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.17.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.17.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.17.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.17.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.17.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.17.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.17.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.18.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.18.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.18.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.18.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.18.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.18.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.18.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.18.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.18.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.19.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.19.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.19.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.19.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.19.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.19.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.19.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.19.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.19.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.2.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.2.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.2.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.2.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.2.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.2.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.2.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.2.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.2.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.20.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.20.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.20.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.20.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.20.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.20.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.20.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.20.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.20.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.21.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.21.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.21.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.21.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.21.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.21.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.21.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.21.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.21.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.3.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.3.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.3.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.3.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.3.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.3.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.3.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.3.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.3.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.4.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.4.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.4.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.4.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.4.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.4.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.4.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.4.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.4.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.5.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.5.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.5.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.5.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.5.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.5.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.5.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.5.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.5.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.6.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.6.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.6.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.6.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.6.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.6.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.6.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.6.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.6.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.7.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.7.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.7.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.7.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.7.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.7.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.7.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.7.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.7.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.8.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.8.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.8.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.8.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.8.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.8.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.8.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.8.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.8.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.9.input_layernorm.weight": [
+            2048
+          ],
+          "model.layers.9.mlp.down_proj.weight": [
+            2048,
+            5632
+          ],
+          "model.layers.9.mlp.gate_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.9.mlp.up_proj.weight": [
+            5632,
+            2048
+          ],
+          "model.layers.9.post_attention_layernorm.weight": [
+            2048
+          ],
+          "model.layers.9.self_attn.k_proj.weight": [
+            256,
+            2048
+          ],
+          "model.layers.9.self_attn.o_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.9.self_attn.q_proj.weight": [
+            2048,
+            2048
+          ],
+          "model.layers.9.self_attn.v_proj.weight": [
+            256,
+            2048
+          ],
+          "model.norm.weight": [
+            2048
+          ]
+        }
+      },
+      "sourceSha256": "ae5678901fb004ae155090b0651aef6a9ec498f8048917086bd46854e46900ca",
+      "attentionScale": 0.125,
+      "ropeFrequencyBits": [
+        1065353216,
+        1061157137,
+        1058010522,
+        1054337179,
+        1050798235,
+        1047712804,
+        1043732615,
+        1040747895,
+        1036831949,
+        1033475086,
+        1030116803,
+        1026341397,
+        1023510242,
+        1019364176,
+        1016180025,
+        1012562929,
+        1008981770,
+        1005959600,
+        1001931932,
+        998911607,
+        995049015,
+        991652109,
+        988353832,
+        984533390,
+        981668463,
+        977573004,
+        974350870,
+        970790694,
+        967166815,
+        964208660,
+        960132947,
+        957076594
+      ],
+      "maxContext": 512,
+      "fixture": false,
+      "hardwareQualified": false,
+      "graphSourceSha256": "b1f49a30c40f5abeb2bed09cec3b58c656d67667a66ac6eeac526c0b78b21368",
+      "kernels": {
+        "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "linear": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "nonlinear": {
+          "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+          "operators": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "3fb54200df22bea349ac2d6d384504554fa95d0b085ea7810ce2448bb305ef30",
+          "nvrtcOptions": [
+            "--fmad=false",
+            "--ftz=false",
+            "--prec-div=true",
+            "--prec-sqrt=true",
+            "--std=c++17"
+          ],
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "253fa58a3ea3969e10c04f8371deb7550d58fb0439ad1edc01162de143723965",
+        "maxPartialBytes": 16777216,
+        "decodePlanning": {
+          "policy": "occupancy_split_k_v1_experimental",
+          "rowTiles": [
+            16,
+            32
+          ],
+          "maxSplitK": 8,
+          "minSplitWidth": 256,
+          "maxBatch": 128,
+          "singleRow": "simt_split1",
+          "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+        },
+        "hardwareQualified": false
+      },
+      "packedSourceSha256": "009bdfb7baf97dc7fa43a6f5dc60981841be5c3a933c91e21f7d5fda218a9778",
+      "maxBatch": 128,
+      "decodeGraphSourceSha256": "ca413f1ceffda70742c4dfa1bb6781401d5f7dfaa9cfb3f12263b44fb0a4271b",
+      "decodeKernelsSourceSha256": "d14d993230f9942cc535bd4585f5157055fa2464a4d5260c78a727a8275426f4",
+      "maxGraphBytes": 4294967296,
+      "cachePolicy": "clear_on_request_boundary",
+      "maxRetainedCaptures": 1,
+      "integerDecoderSourceSha256": "16cd2e978e0de27446b09b83279302bc039d5050317ec653d521179910d9add9",
+      "decodeExecution": {
+        "policy": "occupancy_split_k_v1_experimental",
+        "rowTiles": [
+          16,
+          32
+        ],
+        "maxSplitK": 8,
+        "minSplitWidth": 256,
+        "maxBatch": 128,
+        "singleRow": "simt_split1",
+        "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb",
+        "targetCtasPerSm": 8
+      }
+    }
+  },
+  "promptTokenIds": [
+    [
+      1,
+      7106,
+      871,
+      278,
+      1234,
+      29901,
+      29871,
+      29906,
+      718,
+      29871,
+      29906,
+      353
+    ],
+    [
+      1,
+      660,
+      29901,
+      4335,
+      756,
+      29871,
+      29941,
+      623,
+      793,
+      322,
+      1321,
+      952,
+      29871,
+      29945,
+      901,
+      29889,
+      1128,
+      1784,
+      623,
+      793,
+      947,
+      540,
+      505,
+      29973,
+      673,
+      411,
+      263,
+      1353,
+      29889,
+      13,
+      29909,
+      29901
+    ],
+    [
+      1,
+      14350,
+      278,
+      2446,
+      1353,
+      297,
+      278,
+      5665,
+      29871,
+      29906,
+      29892,
+      29871,
+      29946,
+      29892,
+      29871,
+      29947,
+      29892,
+      29871,
+      29896,
+      29953,
+      29892
+    ],
+    [
+      1,
+      26259,
+      423,
+      5239,
+      9335,
+      567,
+      304,
+      29871,
+      29946,
+      29947,
+      310,
+      902,
+      7875,
+      297,
+      3786,
+      29892,
+      322,
+      769,
+      1183,
+      5239,
+      4203,
+      408,
+      1784,
+      9335,
+      567,
+      304,
+      902,
+      7875,
+      297,
+      2610,
+      29889,
+      1128,
+      1784,
+      9335,
+      567,
+      1258,
+      26259,
+      423,
+      19417,
+      19148,
+      297,
+      3786,
+      322,
+      2610,
+      29973,
+      25086,
+      4331,
+      491,
+      4331,
+      29892,
+      769,
+      2367,
+      278,
+      2186,
+      1353,
+      29889
+    ],
+    [
+      1,
+      4103,
+      9632,
+      304,
+      5176,
+      29901,
+      450,
+      6635,
+      338,
+      8709,
+      292,
+      373,
+      278,
+      14294,
+      5417,
+      453,
+      29889
+    ],
+    [
+      1,
+      319,
+      7945,
+      9850,
+      29879,
+      29871,
+      29953,
+      29900,
+      24016,
+      639,
+      7234,
+      363,
+      29871,
+      29906,
+      29889,
+      29945,
+      6199,
+      29892,
+      769,
+      29871,
+      29947,
+      29900,
+      24016,
+      639,
+      7234,
+      363,
+      29871,
+      29896,
+      29889,
+      29945,
+      6199,
+      29889,
+      12027,
+      7420,
+      920,
+      2215,
+      372,
+      9850,
+      29879,
+      297,
+      3001,
+      29892,
+      6445,
+      1269,
+      4331,
+      310,
+      278,
+      13944,
+      29892,
+      322,
+      8341,
+      411,
+      278,
+      3001,
+      5418,
+      297,
+      24016,
+      408,
+      263,
+      2323,
+      6043,
+      373,
+      278,
+      1833,
+      1196,
+      29889,
+      1522,
+      16010,
+      411,
+      278,
+      21666,
+      322,
+      278,
+      6124,
+      29892,
+      322,
+      437,
+      451,
+      14383,
+      738,
+      19697,
+      1121,
+      29889,
+      450,
+      1234,
+      338
+    ],
+    [
+      1,
+      2391,
+      2211,
+      6019,
+      3694,
+      7621,
+      1135,
+      29871,
+      29945,
+      29900,
+      29901
+    ],
+    [
+      1,
+      822,
+      18755,
+      265,
+      21566,
+      29898,
+      29876,
+      1125,
+      13,
+      268
+    ]
+  ],
+  "kernelIdentities": {
+    "fp32-tree": {
+      "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+      "operators": "pairwise_f32_reference_v1_experimental",
+      "sourceSha256": "3fb54200df22bea349ac2d6d384504554fa95d0b085ea7810ce2448bb305ef30",
+      "nvrtcOptions": [
+        "--fmad=false",
+        "--ftz=false",
+        "--prec-div=true",
+        "--prec-sqrt=true",
+        "--std=c++17"
+      ],
+      "hardwareQualified": false,
+      "arch": "sm_120",
+      "gpu": "NVIDIA GeForce RTX 5070 Ti",
+      "nvrtcVersion": [
+        13,
+        2
+      ],
+      "builds": {
+        "decode-graph-ops": {
+          "sourceSha256": "0f79d399fb1e040e95aa173b12a5895725feabbe6546561afb3eb085dc5f21a3",
+          "ptxSha256": "559e78c69076d20f477ddbc355b7e8e2990b468f58916b1e3bc365e299763764",
+          "cubinSha256": "bf3043908214e5ff89c16b48dd0e06ab16722fe045f399310f3967d9389293e9",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 5
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 9
+            },
+            "violations": []
+          }
+        },
+        "linear-2048-nobias-per16": {
+          "sourceSha256": "b9c6f4818565a6f796687536b4c0e593a52122f776731158b0b450a29b5fd8fe",
+          "ptxSha256": "bd6dfc6d0c961bd5cc645fd293990e3a6e58f81d22f6beefd6eae65ada3aaf61",
+          "cubinSha256": "a0f8c93c70da0e2c80df2cab63d38e2f7e759659695c9b5eeda11562be15a58c",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 16,
+              "add.rn.f32": 23
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 16,
+              "FADD": 23
+            },
+            "violations": []
+          }
+        },
+        "linear-2048-nobias-per16-rows8": {
+          "sourceSha256": "7ab30170e978f6b861bd2be0be9a6172d7840405cc12b98f97c489247a5260be",
+          "ptxSha256": "abdd6c76107a9be16f1ca6f8f0b2cf92e707eca5c7dcbffb4de4671c2fc2c033",
+          "cubinSha256": "bc5906ef119bc24db86d3f8bd997acc04718971b140b161c47bb09192afe3af8",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 128,
+              "add.rn.f32": 184
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 128,
+              "FADD": 184
+            },
+            "violations": []
+          }
+        },
+        "linear-5632-nobias-per16-rows8": {
+          "sourceSha256": "136354cf3701e4124f73ec395cf7b84a4271d02e55258f9e4ccae273dbb2b1fe",
+          "ptxSha256": "5331375434b3f0d8eef5caeca42b0de8c415e14a2a0c1635574d7be162614395",
+          "cubinSha256": "1f14471d2f52291912cd4ac7b4c9108317e34d479e8d85508a60c39fd553aebb",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 128,
+              "add.rn.f32": 280
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 128,
+              "FADD": 256
+            },
+            "violations": []
+          }
+        },
+        "ops": {
+          "sourceSha256": "ed4b8ea030ec2879d0da93720333d3915e72731209a8a1ce5b995e586580842c",
+          "ptxSha256": "eb53de7164bd97644373ab6ecbfb47666cf72eb37d64cf7f0e8df28d048d3128",
+          "cubinSha256": "433d7f1e62342733a66f6a2ca6fd71fe0f4c256e407f0ae3cb03564a937d3ba5",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 82,
+              "add.rn.f32": 79
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 82,
+              "FADD": 80
+            },
+            "violations": []
+          }
+        }
+      },
+      "fingerprint": "ebb55740db4149dd5af3016c110047ad51a38f7505a4374ad37e140f89ce96ef"
+    },
+    "integer-b14": {
+      "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+      "operators": "pairwise_f32_reference_v1_experimental",
+      "sourceSha256": "3fb54200df22bea349ac2d6d384504554fa95d0b085ea7810ce2448bb305ef30",
+      "nvrtcOptions": [
+        "--fmad=false",
+        "--ftz=false",
+        "--prec-div=true",
+        "--prec-sqrt=true",
+        "--std=c++17"
+      ],
+      "hardwareQualified": false,
+      "arch": "sm_120",
+      "gpu": "NVIDIA GeForce RTX 5070 Ti",
+      "nvrtcVersion": [
+        13,
+        2
+      ],
+      "builds": {
+        "decode-graph-ops": {
+          "sourceSha256": "0f79d399fb1e040e95aa173b12a5895725feabbe6546561afb3eb085dc5f21a3",
+          "ptxSha256": "559e78c69076d20f477ddbc355b7e8e2990b468f58916b1e3bc365e299763764",
+          "cubinSha256": "bf3043908214e5ff89c16b48dd0e06ab16722fe045f399310f3967d9389293e9",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 5
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 9
+            },
+            "violations": []
+          }
+        },
+        "integer-14-2048-bias0-m16-w4-s1": {
+          "sourceSha256": "1467db5a88964f5eccefafcd927152aa42964bba1ffeb7ef97c58fa099c4de7e",
+          "ptxSha256": "2e56eb45ada4d39df94a09064fef83d9802e799d02f5310ae5d69a71ce97ff77",
+          "cubinSha256": "fdff1484f7657d7466424e6c6bb2cb604e9b0b5f871d7b3fafbeab49beedf593",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 4
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 4
+          }
+        },
+        "integer-14-2048-bias0-m16-w4-s4": {
+          "sourceSha256": "82b60077c661f499f48a71d8a2e11654430524201ed32b33a959fc71ee1d379c",
+          "ptxSha256": "121fa815caf2ed4f212b3a35dd173228706800cb82586a042308f4c6f6c86318",
+          "cubinSha256": "92bedb90a1c06ee452dbdbae1a7407634e7c7ddb48e7ee1dc6490610e89731db",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 4
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 4
+          }
+        },
+        "integer-14-2048-bias0-m16-w4-s8": {
+          "sourceSha256": "4a5e271e20341c119526ae3a5bd2b4453058f3e08b7333ab6904d6dee05d55eb",
+          "ptxSha256": "b453548f77221bcac8c349d139ceefcb7c618fe86d87fe9492674e10e75b1a7a",
+          "cubinSha256": "7771360a2afbccac3139bbdffff5cf8139989d1525507ea88687cf59492b5b3c",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 4
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 4
+          }
+        },
+        "integer-14-2048-bias0-m32-w4-s1": {
+          "sourceSha256": "54d40115d444d03c44e4b7be04bff2ca0f37204e09eaf21557633e1a324d7aeb",
+          "ptxSha256": "bc808751d268f66dc68fa51b123a562a6d1fb32a10be731c49fd1320b524f422",
+          "cubinSha256": "0e709e1442165ceacf298b0dcedc686bbc6d0720d3039a9ca3e83f825ab21f89",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 8
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 8
+          }
+        },
+        "integer-14-5632-bias0-m16-w4-s1": {
+          "sourceSha256": "0facde917e13f9d55f8e0d67e292b3656f6a926b36d1dbf0dcc6b2821fdfd7a4",
+          "ptxSha256": "1c2ef52734837b0a0c8120a7d1389af5aca3e62676e94bfebb30d53b289daf29",
+          "cubinSha256": "95f27e11598fb053ee8350d60338b7e0e1dbb861c918ba3423b2308fad28525f",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 4
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 4
+          }
+        },
+        "integer-14-5632-bias0-m16-w4-s8": {
+          "sourceSha256": "4995cb699878f1f3f39ddf11b2925457274b38f239cc60d77c8c9ddbe9aceae5",
+          "ptxSha256": "15f2e1ef5cd2ff672ab313fed813a6abd2c67439f909b255651d35789ab48d70",
+          "cubinSha256": "2054921e5ea920db7aee152c92157f034a10fceea2d05effd303262f2bc791aa",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 4
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 4
+          }
+        },
+        "integer-14-5632-bias0-m32-w4-s1": {
+          "sourceSha256": "4a75f97fc1fe9a6eb13f85e27f0590e177f028ab05aa8cd188edbb3ed24ba247",
+          "ptxSha256": "781f829cdcbb1eabfbce8002ee8082b13f2d9f1147cdbd9b1e2433024bb82892",
+          "cubinSha256": "b0a07dacdc53a986724c0d25d324782c2c37795da75db2217307757536664158",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 8
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 8
+          }
+        },
+        "ops": {
+          "sourceSha256": "ed4b8ea030ec2879d0da93720333d3915e72731209a8a1ce5b995e586580842c",
+          "ptxSha256": "eb53de7164bd97644373ab6ecbfb47666cf72eb37d64cf7f0e8df28d048d3128",
+          "cubinSha256": "433d7f1e62342733a66f6a2ca6fd71fe0f4c256e407f0ae3cb03564a937d3ba5",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 82,
+              "add.rn.f32": 79
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 82,
+              "FADD": 80
+            },
+            "violations": []
+          }
+        }
+      },
+      "fingerprint": "3c93d58e1574b8283a29104264349b611360877afbb894fb323e5526a01fa001",
+      "linear": {
+        "operator": "row_scaled_signed_integer_dot_v1_experimental",
+        "magnitudeBits": 14,
+        "limbs": 2,
+        "maxWidth": 32768,
+        "zeroIntegerOutput": "+0",
+        "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+        "bias": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+        "hardwareQualified": false
+      },
+      "nonlinear": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "3fb54200df22bea349ac2d6d384504554fa95d0b085ea7810ce2448bb305ef30",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false
+      },
+      "integerSourceSha256": "253fa58a3ea3969e10c04f8371deb7550d58fb0439ad1edc01162de143723965",
+      "maxPartialBytes": 16777216,
+      "decodePlanning": {
+        "policy": "occupancy_split_k_v1_experimental",
+        "rowTiles": [
+          16,
+          32
+        ],
+        "maxSplitK": 8,
+        "minSplitWidth": 256,
+        "maxBatch": 128,
+        "singleRow": "simt_split1",
+        "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+      },
+      "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+      "integerReference": {
+        "operator": "row_scaled_signed_integer_dot_v1_experimental",
+        "magnitudeBits": 14,
+        "limbs": 2,
+        "maxWidth": 32768,
+        "zeroIntegerOutput": "+0",
+        "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+        "bias": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+        "hardwareQualified": false
+      },
+      "multiprocessors": 70
+    },
+    "integer-b22": {
+      "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+      "operators": "pairwise_f32_reference_v1_experimental",
+      "sourceSha256": "3fb54200df22bea349ac2d6d384504554fa95d0b085ea7810ce2448bb305ef30",
+      "nvrtcOptions": [
+        "--fmad=false",
+        "--ftz=false",
+        "--prec-div=true",
+        "--prec-sqrt=true",
+        "--std=c++17"
+      ],
+      "hardwareQualified": false,
+      "arch": "sm_120",
+      "gpu": "NVIDIA GeForce RTX 5070 Ti",
+      "nvrtcVersion": [
+        13,
+        2
+      ],
+      "builds": {
+        "decode-graph-ops": {
+          "sourceSha256": "0f79d399fb1e040e95aa173b12a5895725feabbe6546561afb3eb085dc5f21a3",
+          "ptxSha256": "559e78c69076d20f477ddbc355b7e8e2990b468f58916b1e3bc365e299763764",
+          "cubinSha256": "bf3043908214e5ff89c16b48dd0e06ab16722fe045f399310f3967d9389293e9",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 5
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 9
+            },
+            "violations": []
+          }
+        },
+        "integer-22-2048-bias0-m16-w4-s1": {
+          "sourceSha256": "93ecb4d3512da5eccc8eefd2aa1b5d06b61531e0158e84eacbe0f9405bf73be5",
+          "ptxSha256": "adc119393501160b77068bf340f92f1f5a3f131fa5b58aaaf2f9190cf8864dbf",
+          "cubinSha256": "ab946ef7dd9917fdea0c74de2fb9bb02662b34afb4253a23485311d94b70b6bd",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        },
+        "integer-22-2048-bias0-m16-w4-s4": {
+          "sourceSha256": "f704fe90437006801dfd7c37cd8e3e35eb2ff45954aae59cef5bae2a6bfca3c9",
+          "ptxSha256": "e7465f35e5e5c58a1b9016986e675b12f1ff88841deeb9b5629f965f40094a85",
+          "cubinSha256": "122e76f51e40633d62ca31c4df5b90eb0a1962ad5f3027ce824ec5c3baf8a955",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        },
+        "integer-22-2048-bias0-m16-w4-s8": {
+          "sourceSha256": "7de52fcf2afe10eb1938ce16613e75b947bd3c91af83ae3ae8a4ab6eb55b8638",
+          "ptxSha256": "dc9293fc0bed444a1adbdc1e03535b9549a10ba67e01f0c0fbc20520d171d6ea",
+          "cubinSha256": "971ba741c68cf675b5028ac4b098af1b04cde16e0357890261d52f0e5d07d548",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        },
+        "integer-22-2048-bias0-m32-w4-s1": {
+          "sourceSha256": "6bf8bb915f56184c73298c73aeb91e2328559e7c0face6a8c27e3239f09b5ee8",
+          "ptxSha256": "cdf832d20133e197d0ebb3018a492dc2679b5c47985792b6a28f756ff189d84f",
+          "cubinSha256": "f132b4d539e536ce473cd87a9bb9f6ffca0c8ce46c7f110fd42c4eccbb624e46",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          }
+        },
+        "integer-22-5632-bias0-m16-w4-s1": {
+          "sourceSha256": "6ed563aeb7b179dda57a101a321314380bbe5faae76d09b174cda2832d0c9e93",
+          "ptxSha256": "2e763d3f26a714c191cd88695d42c0d955776aac42867ea90106872c37bc465a",
+          "cubinSha256": "29eed147227cf37ea5251e7110bc1c6e9be96e3c7404754a1621b4c3473924ac",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        },
+        "integer-22-5632-bias0-m16-w4-s8": {
+          "sourceSha256": "bb690f6bf5671388e0a2846c4012e4be7e76e0fa61dc3e9a87e03ae5c3f83f1b",
+          "ptxSha256": "9abf9022fda91e7d027fa2a05f4fec4d065b12f3f891ea8dcc3fdae5a7ce2621",
+          "cubinSha256": "591cf99afff1128cb57bc91a4956d9f1320c277748ab4a9c76bd1bc6c903d1ce",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        },
+        "integer-22-5632-bias0-m32-w4-s1": {
+          "sourceSha256": "73334c12136fd07cd0eaa1877683506a148faee943c0cd321cd6807f1024733c",
+          "ptxSha256": "c132bde3b17bfb7192706f076d571eca7ac2b808ea8cf04eea062527914ec03d",
+          "cubinSha256": "5dafae7971a18c5d03d20c356d85abdc9b640aec2b0affd16e9e9b2ae7e2ecbd",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          }
+        },
+        "ops": {
+          "sourceSha256": "ed4b8ea030ec2879d0da93720333d3915e72731209a8a1ce5b995e586580842c",
+          "ptxSha256": "eb53de7164bd97644373ab6ecbfb47666cf72eb37d64cf7f0e8df28d048d3128",
+          "cubinSha256": "433d7f1e62342733a66f6a2ca6fd71fe0f4c256e407f0ae3cb03564a937d3ba5",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 82,
+              "add.rn.f32": 79
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 82,
+              "FADD": 80
+            },
+            "violations": []
+          }
+        }
+      },
+      "fingerprint": "1cbf0d35d7f95ce445e454d48ec3f48dfd60c894ded8dfa9732fd76aa7e93005",
+      "linear": {
+        "operator": "row_scaled_signed_integer_dot_v1_experimental",
+        "magnitudeBits": 22,
+        "limbs": 3,
+        "maxWidth": 32768,
+        "zeroIntegerOutput": "+0",
+        "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+        "bias": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+        "hardwareQualified": false
+      },
+      "nonlinear": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "3fb54200df22bea349ac2d6d384504554fa95d0b085ea7810ce2448bb305ef30",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false
+      },
+      "integerSourceSha256": "253fa58a3ea3969e10c04f8371deb7550d58fb0439ad1edc01162de143723965",
+      "maxPartialBytes": 16777216,
+      "decodePlanning": {
+        "policy": "occupancy_split_k_v1_experimental",
+        "rowTiles": [
+          16,
+          32
+        ],
+        "maxSplitK": 8,
+        "minSplitWidth": 256,
+        "maxBatch": 128,
+        "singleRow": "simt_split1",
+        "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+      },
+      "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+      "integerReference": {
+        "operator": "row_scaled_signed_integer_dot_v1_experimental",
+        "magnitudeBits": 22,
+        "limbs": 3,
+        "maxWidth": 32768,
+        "zeroIntegerOutput": "+0",
+        "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+        "bias": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+        "hardwareQualified": false
+      },
+      "multiprocessors": 70
+    }
+  },
+  "cudaPeakAllocatedBytes": 2446396928,
+  "cudaPeakReservedBytes": 2512388096,
+  "wallSeconds": 32.153920234995894
+}

@@ -1,0 +1,22 @@
+F
+=================================== FAILURES ===================================
+________________ test_integer_decoder_precision_and_cuda_guards ________________
+
+    def test_integer_decoder_precision_and_cuda_guards():
+        reference, graph = classes()
+        model = model_for("llama")
+        for backend in (reference, graph):
+            with pytest.raises(ReferenceArithmeticError, match="magnitude"):
+                backend(model, magnitude_bits=True)
+        with pytest.raises(ReferenceArithmeticError):
+            graph(model)
+        for target in (True, -1, 65, 1.5):
+            with pytest.raises(ReferenceArithmeticError, match="target"):
+>               graph(model, decode_target_ctas_per_sm=target)
+E               TypeError: IntegerDecoderGraph.__init__() got an unexpected keyword argument 'decode_target_ctas_per_sm'
+
+runtime/tests/eval/test_integer_decoder.py:45: TypeError
+=========================== short test summary info ============================
+FAILED runtime/tests/eval/test_integer_decoder.py::test_integer_decoder_precision_and_cuda_guards
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 14 deselected in 1.69s
