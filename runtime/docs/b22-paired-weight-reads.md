@@ -14,9 +14,9 @@ tails use guarded scalar loads. Missing elements are positive zero, as in the sc
 No new arithmetic operation is performed on the weight values themselves.
 
 `weight_load="scalar"` retains the previous reads. `"paired"` forces this guarded implementation
-for numerical comparisons. `"auto"` selects paired reads only for B22 on SM120; other architectures
-and B14 retain scalar reads. This is a measured execution policy, not a general hardware claim:
-the SM86 prototype regressed on TinyLlama. Kernel identities record requested/effective policies
+for numerical comparisons. This was the automatic policy selected at `9acf8bfa` for B22 on SM120;
+the current [two-stage prefetch policy](b22-weight-prefetch.md) supersedes that automatic choice.
+The SM86 paired-read prototype regressed on TinyLlama. Kernel identities record requested/effective policies
 and distinct compiled build names. Decoder configuration checks reject changing the policy after
 construction, including within an active graph session.
 

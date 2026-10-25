@@ -22,10 +22,10 @@ INTEGER_CUDA_VERSION = "row_scaled_integer_mma_cuda_v1_experimental"
 
 def weight_read_plan(magnitude_bits, arch, requested):
     reference._precision(magnitude_bits)
-    if requested not in ("auto", "scalar", "paired"):
-        raise ReferenceArithmeticError("Integer weight load must be auto, scalar or paired")
+    if requested not in ("auto", "scalar", "paired", "prefetch2"):
+        raise ReferenceArithmeticError("Integer weight load must be auto, scalar, paired or prefetch2")
     if requested == "auto":
-        return "paired" if magnitude_bits == 22 and arch == "sm_120" else "scalar"
+        return "prefetch2" if magnitude_bits == 22 and arch in ("sm_86", "sm_120") else "scalar"
     return requested
 
 
@@ -42,7 +42,7 @@ def static_identity(magnitude_bits=14, max_partial_bytes=16 * 1024**2, *, weight
         "maxPartialBytes": max_partial_bytes,
         "activationPacking": "radix_planes_once_v1_experimental",
         "weightLoad": weight_load,
-        "weightReadPolicy": "aligned_half2_sm120_b22_v1_experimental",
+        "weightReadPolicy": "raw_half_prefetch2_sm86_sm120_b22_v2_experimental",
         "decodePlanning": planning.identity(),
         "hardwareQualified": False,
     }
@@ -92,6 +92,38 @@ __device__ __forceinline__ void pack_digits(unsigned* words, int q, int element)
     q=(q-low)/256; // exact division, including negative values; no signed-left-shift assumption
   }
 }
+
+#if WEIGHT_PREFETCH
+// Each lane owns four words in each stage. Copies and their consumers use the same lane;
+// no other thread reads this storage, so the per-thread async wait needs no CTA barrier.
+__device__ __forceinline__ void prefetch_half_tile(unsigned* destination,const u16* w,
+                                                  int n,int outputs,int start,int thread) {
+  #pragma unroll
+  for(int word=0;word<2;++word) {
+    int k=start+thread*4+word*16;
+#if WIDTH % 4 == 0
+    if((((unsigned long long)w)&7ull)==0ull) {
+      int valid=(n<outputs && k+3<WIDTH) ? 8 : 0;
+      const u16* pointer=valid ? w+(size_t)n*WIDTH+k : w;
+      unsigned long long address;
+      asm volatile("cvta.to.shared.u64 %0, %1;" : "=l"(address) : "l"(destination+word*2));
+      asm volatile("cp.async.ca.shared.global [%0], [%1], 8, %2;" ::
+                   "r"((unsigned)address), "l"(pointer), "r"(valid) : "memory");
+    } else
+#endif
+    {
+      unsigned lo=0,hi=0;
+      if(n<outputs) {
+        if(k<WIDTH)lo=(unsigned)w[(size_t)n*WIDTH+k];
+        if(k+1<WIDTH)lo|=((unsigned)w[(size_t)n*WIDTH+k+1])<<16;
+        if(k+2<WIDTH)hi=(unsigned)w[(size_t)n*WIDTH+k+2];
+        if(k+3<WIDTH)hi|=((unsigned)w[(size_t)n*WIDTH+k+3])<<16;
+      }
+      destination[word*2]=lo;destination[word*2+1]=hi;
+    }
+  }
+}
+#endif
 
 extern "C" __global__ void integer_input(const float* x, qi_t* q, int* exponents, int* error, int rows) {
   int row=blockIdx.x, t=threadIdx.x;
@@ -183,18 +215,42 @@ integer_linear(const qi_t* x,const u16* w,const u16* bias,const int* ex,const in
                float* out,int* error,i64* partials,int rows,int outputs) {
   int lane=threadIdx.x&31, warp=threadIdx.x>>5, group=lane>>2, thread=lane&3;
   int column=blockIdx.x*(WARPS*8)+warp*8;
+#if WEIGHT_PREFETCH
+  __shared__ __align__(16) unsigned raw_shared[2][32*WARPS][4];
+#endif
   for(int first=blockIdx.y*(M_GROUPS*16);first<rows;first+=gridDim.y*(M_GROUPS*16)) {
     // Equal radix degrees share an int32 accumulator. At most three limb products contribute to a
     // degree: 3*128^2*32768 < 2^31, including every possible signed partial sum.
     int accum[M_GROUPS][2*DIGITS-1][4]={};
+#if WEIGHT_PREFETCH
+    int phase=0;
+    prefetch_half_tile(raw_shared[0][threadIdx.x],w,column+group,outputs,blockIdx.z*32,thread);
+    asm volatile("cp.async.commit_group;" ::: "memory");
+#endif
     for(int start=blockIdx.z*32;start<WIDTH;start+=SPLIT_K*32) {
+#if WEIGHT_PREFETCH
+      asm volatile("cp.async.wait_group 0;" ::: "memory");
+      unsigned current[4];
+      #pragma unroll
+      for(int i=0;i<4;++i)current[i]=raw_shared[phase][threadIdx.x][i];
+      phase^=1;
+      prefetch_half_tile(raw_shared[phase][threadIdx.x],w,column+group,outputs,start+SPLIT_K*32,thread);
+      asm volatile("cp.async.commit_group;" ::: "memory");
+#endif
       unsigned b[DIGITS][2]={};
       int n=column+group;
       int exponent=n<outputs ? ew[n] : 0;
       #pragma unroll
       for(int word=0;word<2;++word) {
         unsigned packed[DIGITS]={};
-#if WEIGHT_READ32
+#if WEIGHT_PREFETCH
+        #pragma unroll
+        for(int pair=0;pair<2;++pair) {
+          unsigned halves=current[word*2+pair];
+          pack_digits(packed,quant_half((u16)halves,exponent),pair*2);
+          pack_digits(packed,quant_half((u16)(halves>>16),exponent),pair*2+1);
+        }
+#elif WEIGHT_READ32
         #pragma unroll
         for(int pair=0;pair<2;++pair) {
           int k=start+thread*4+word*16+pair*2;
@@ -252,6 +308,10 @@ integer_linear(const qi_t* x,const u16* w,const u16* bias,const int* ex,const in
         }
       }
     }
+#if WEIGHT_PREFETCH
+    // Includes the last zero-filled lookahead and split partitions with no live K tile.
+    asm volatile("cp.async.wait_group 0;" ::: "memory");
+#endif
     #pragma unroll
     for(int m=0;m<M_GROUPS;++m) {
       #pragma unroll
@@ -415,9 +475,12 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
 
     def _integer_functions(self, width, has_bias=False, row_tile=16, warps=4, split_k=1, *, packed_input=False):
         name = f"integer-{self.magnitude_bits}-{width}-bias{int(has_bias)}-m{row_tile}-w{warps}-s{split_k}-p{int(packed_input)}"
-        paired = weight_read_plan(self.magnitude_bits, self.arch, self.weight_load) == "paired"
+        mode = weight_read_plan(self.magnitude_bits, self.arch, self.weight_load)
+        paired, prefetch = mode == "paired", mode == "prefetch2"
         if paired:
             name += "-load32"
+        if prefetch:
+            name += "-prefetch2"
         if name not in self._functions:
             defines = dict(
                 WIDTH=width,
@@ -429,6 +492,7 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
                 SPLIT_K=split_k,
                 PACKED_INPUT=int(packed_input),
                 WEIGHT_READ32=int(paired),
+                WEIGHT_PREFETCH=int(prefetch),
             )
             header = "".join(f"#define {k} {v}\n" for k, v in defines.items())
             self._functions[name] = self._compile(

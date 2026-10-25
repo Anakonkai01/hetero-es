@@ -1,6 +1,7 @@
 """Integer MMA must implement the NEW row-scaled contract, with no float GEMM or hidden weight copy."""
 
 import os
+import re
 
 import pytest
 import torch
@@ -24,14 +25,16 @@ def test_integer_constructor_guards_before_cuda(monkeypatch):
         cuda_class()("cuda", magnitude_bits=True)
 
 
-def test_weight_read_policy_keeps_the_unselected_architecture_and_precision_on_scalar():
+def test_weight_read_policy_selects_measured_prefetch_and_keeps_explicit_controls():
     from heteroes.eval.integer_cuda import weight_read_plan
 
-    assert weight_read_plan(22, "sm_120", "auto") == "paired"
-    assert weight_read_plan(22, "sm_86", "auto") == "scalar"
+    assert weight_read_plan(22, "sm_120", "auto") == "prefetch2"
+    assert weight_read_plan(22, "sm_86", "auto") == "prefetch2"
+    assert weight_read_plan(22, "sm_89", "auto") == "scalar"
     assert weight_read_plan(14, "sm_120", "auto") == "scalar"
     assert weight_read_plan(22, "sm_120", "scalar") == "scalar"
     assert weight_read_plan(22, "sm_86", "paired") == "paired"
+    assert weight_read_plan(14, "sm_86", "prefetch2") == "prefetch2"
     with pytest.raises(ReferenceArithmeticError, match="weight load"):
         cuda_class()("cuda", weight_load="vendor")
 
@@ -65,6 +68,7 @@ gpu = pytest.mark.skipif(
 def test_paired_weight_reads_preserve_bits_with_even_odd_tail_and_offset_layouts(magnitude_bits):
     scalar = cuda_class()("cuda", magnitude_bits=magnitude_bits, weight_load="scalar")
     paired = cuda_class()("cuda", magnitude_bits=magnitude_bits, weight_load="paired")
+    prefetched = cuda_class()("cuda", magnitude_bits=magnitude_bits, weight_load="prefetch2")
     generator = torch.Generator().manual_seed(887)
     for rows, width, outputs, offset in (
         (3, 33, 7, 0),
@@ -84,10 +88,71 @@ def test_paired_weight_reads_preserve_bits_with_even_odd_tail_and_offset_layouts
         weight = backing[offset:].reshape(outputs, width)
         weight.copy_(cpu_w)
         expected = reference.linear(cpu_x, cpu_w, cpu_bias, magnitude_bits=magnitude_bits)
-        for kernel in (scalar, paired):
+        for kernel in (scalar, paired, prefetched):
             actual = kernel.linear(cpu_x.cuda(), weight, cpu_bias.cuda(), implementation="mma")
             assert torch.equal(actual.cpu().view(torch.int32), expected.view(torch.int32)), (width, offset)
     assert paired.identity()["weightLoadEffective"] == "paired"
+    assert prefetched.identity()["weightLoadEffective"] == "prefetch2"
+
+
+@gpu
+def test_async_copy_destination_has_explicit_compiled_eight_byte_alignment(monkeypatch):
+    audited = []
+    original = sc.audit_integer_ptx
+
+    def inspect(ptx):
+        if "cp.async.ca.shared.global" in ptx:
+            alignment = re.search(r"\.shared\s+\.align\s+(\d+)\s+\.b8\s+\S*raw_shared", ptx)
+            assert alignment and int(alignment[1]) >= 8
+            audited.append(int(alignment[1]))
+        return original(ptx)
+
+    monkeypatch.setattr(sc, "audit_integer_ptx", inspect)
+    context = torch.empty(1, device="cuda")
+    kernel = cuda_class()("cuda", magnitude_bits=22, weight_load="prefetch2")
+    for warps in (4, 8):
+        kernel._integer_functions(64, warps=warps)
+    assert len(audited) == 2
+    del context
+
+
+@gpu
+def test_prefetched_tiles_replay_with_live_weight_changes_and_exact_restore():
+    kernel = cuda_class()("cuda", magnitude_bits=22, weight_load="prefetch2")
+    generator = torch.Generator().manual_seed(333)
+    cpu_x = torch.randn(8, 128, generator=generator)
+    parent = (torch.randn(16, 128, generator=generator) * 0.125).half()
+    x, weight = cpu_x.cuda(), parent.cuda()
+    flag = kernel.new_error_flag()
+    kernel._begin_request((weight,))
+    try:
+        kernel.linear_decode(x, weight, error_flag=flag)
+        graph = torch.cuda.CUDAGraph()
+        with torch.cuda.graph(graph):
+            actual = kernel.linear_decode(x, weight, error_flag=flag)
+    finally:
+        kernel._end_request()
+    first = None
+    for changed in (False, True, False):
+        candidate = parent.clone()
+        if changed:
+            candidate[0, 0] = 0.5
+        weight.copy_(candidate)
+        kernel._begin_request((weight,))
+        try:
+            flag.zero_()
+            graph.replay()
+            torch.cuda.synchronize()
+            kernel.raise_if_error(flag)
+            bits = actual.cpu().view(torch.int32)
+            expected = reference.linear(cpu_x, candidate, magnitude_bits=22).view(torch.int32)
+            assert torch.equal(bits, expected)
+            if first is None:
+                first = bits.clone()
+            else:
+                assert torch.equal(first, bits) is (not changed)
+        finally:
+            kernel._end_request()
 
 
 @gpu
