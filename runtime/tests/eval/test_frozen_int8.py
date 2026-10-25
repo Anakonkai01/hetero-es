@@ -249,6 +249,8 @@ def test_artifact_roundtrip_is_byte_deterministic_and_row_major(tmp_path):
     second, second_digest = artifact_file(tmp_path, quantized, scale, {"note": "first"}, "second.fint8")
     assert first_digest == second_digest
     assert first.read_bytes() == second.read_bytes()
+    assert frozen_int8.artifact_digest(quantized, scale, metadata={"note": "first"}) == first_digest
+    assert frozen_int8.artifact_bytes(quantized, scale, metadata={"note": "first"}) == first.read_bytes()
     reordered, reordered_digest = artifact_file(tmp_path, quantized, scale, {"b": 2, "a": 1}, "reordered.fint8")
     canonical, canonical_digest = artifact_file(tmp_path, quantized, scale, {"a": 1, "b": 2}, "canonical.fint8")
     assert reordered_digest == canonical_digest

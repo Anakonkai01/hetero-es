@@ -32,6 +32,8 @@ ARTIFACT_FORMAT = "heteroes.frozen-int8-b22"
 ARTIFACT_FORMAT_VERSION = 1
 QUANTIZER_VERSION = "per_output_channel_int8_ceil_absmax_over_127_rne_v1_experimental"
 OPERATOR_VERSION = "frozen_int8_b22_exact_reference_v1_experimental"
+ADAPTER_STORAGE_VERSION = "frozen_int8_fp16_lora_storage_v1_experimental"
+ADAPTER_ARITHMETIC_VERSION = "fp32_matmul_from_fp16_factors_zero_delta_preserves_base_v1_experimental"
 MAGNITUDE_BITS = 22
 ACTIVATION_LIMBS = 3
 MAX_WIDTH = integer_reference.MAX_WIDTH
@@ -297,16 +299,13 @@ def _payload_bytes(weight_q, weight_scale):
 
 
 @torch.inference_mode()
-def write_artifact(path, weight_q, weight_scale, *, metadata=None):
-    """Write one canonical artifact and return the SHA-256 of the whole file."""
+def artifact_bytes(weight_q, weight_scale, *, metadata=None):
+    """Return the canonical artifact bytes without writing them."""
     _validate_payload(weight_q, weight_scale)
     if metadata is None:
         metadata = {}
     if not isinstance(metadata, dict):
         raise ReferenceArithmeticError("Artifact metadata must be an object")
-    path = Path(path)
-    if not path.parent.is_dir():
-        raise ReferenceArithmeticError("Artifact parent directory does not exist")
     weight_bytes, scale_bytes = _payload_bytes(weight_q, weight_scale)
     outputs, width = weight_q.shape
     header = {
@@ -337,7 +336,22 @@ def write_artifact(path, weight_q, weight_scale, *, metadata=None):
     header_bytes = _canonical_json(header)
     if len(header_bytes) > MAX_HEADER_BYTES:
         raise ReferenceArithmeticError("Artifact header is too large")
-    data = MAGIC + struct.pack("<Q", len(header_bytes)) + header_bytes + weight_bytes + scale_bytes
+    return MAGIC + struct.pack("<Q", len(header_bytes)) + header_bytes + weight_bytes + scale_bytes
+
+
+@torch.inference_mode()
+def artifact_digest(weight_q, weight_scale, *, metadata=None):
+    """Content address for the exact canonical bytes the writer would emit."""
+    return hashlib.sha256(artifact_bytes(weight_q, weight_scale, metadata=metadata)).hexdigest()
+
+
+@torch.inference_mode()
+def write_artifact(path, weight_q, weight_scale, *, metadata=None):
+    """Write one canonical artifact and return the SHA-256 of the whole file."""
+    path = Path(path)
+    if not path.parent.is_dir():
+        raise ReferenceArithmeticError("Artifact parent directory does not exist")
+    data = artifact_bytes(weight_q, weight_scale, metadata=metadata)
     digest = hashlib.sha256(data).hexdigest()
     handle, temporary = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
     try:
@@ -515,6 +529,26 @@ def linear(value, artifact, bias=None, *, output_tile=32):
             tile = ops.add(tile, bias[first:stop].float())
         result[:, first:stop] = tile
     return result.reshape(*value.shape[:-1], outputs)
+
+
+def combine_adapter(base, delta):
+    """Combine the exact base output with a separately named FP32 adapter delta.
+
+    A zero delta preserves the base bit pattern, including a signed zero. Every nonzero delta is an ordinary
+    FP32 add: this is the adapter's own namespace, not part of the exact-integer base projection, so it makes no
+    subnormal-flush, nonfinite-flag or cross-vendor bit-equality claim. It is also free of host synchronization,
+    which keeps the CUDA captured decode legal.
+    """
+    if (
+        not isinstance(base, torch.Tensor)
+        or not isinstance(delta, torch.Tensor)
+        or base.dtype != torch.float32
+        or delta.dtype != torch.float32
+        or base.shape != delta.shape
+        or base.device != delta.device
+    ):
+        raise ReferenceArithmeticError("Unsupported frozen adapter delta")
+    return torch.where(delta == 0, base, torch.add(base, delta))
 
 
 def identity():
