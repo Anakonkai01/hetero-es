@@ -86,7 +86,7 @@ def test_fast_path_identity_is_explicitly_not_the_exact_integer_identity():
     strict = StrictDecoderGraph(model, max_context=64, allow_fixture=True)
     assert fast.identity["backend"] == FP16_GRAPH_BACKEND
     assert fast.identity["projectionImplementation"]["exactIntegerIdentity"] is False
-    assert fast.identity["projectionImplementation"]["operator"] == "vendor_fp16_linear_v1_experimental"
+    assert fast.identity["projectionImplementation"]["operator"] == "vendor_fp16_live_linear_v2_experimental"
     assert fast.identity["hardwareQualified"] is False
     assert len(fast.identity["mergedGroups"]) == 2 * len(model.model.layers)
     assert fast.fingerprint != strict.fingerprint
@@ -118,3 +118,70 @@ def test_fast_path_requires_an_fp16_model():
     model = model_for("qwen2").float().cuda()
     with pytest.raises(ReferenceArithmeticError, match="FP16"):
         Fp16DecoderGraph(model, max_context=64, allow_fixture=True)
+
+
+def test_live_merged_storage_keeps_parameter_objects_and_tracks_in_place_updates():
+    from heteroes.eval.fp16_decoder import bind_merged_parameters
+
+    parameters = [torch.nn.Parameter(torch.arange(n * 5).reshape(n, 5).half()) for n in (3, 2, 4)]
+    objects = [id(p) for p in parameters]
+    expected = torch.cat([p.detach().clone() for p in parameters])
+    merged = bind_merged_parameters(parameters)
+    assert [id(p) for p in parameters] == objects
+    assert torch.equal(merged, expected)
+    assert all(p.untyped_storage().data_ptr() == merged.untyped_storage().data_ptr() for p in parameters)
+    with torch.no_grad():
+        parameters[1].add_(7)
+    assert torch.equal(merged[3:5], expected[3:5] + 7)
+    second = bind_merged_parameters(parameters)
+    assert second.data_ptr() == merged.data_ptr()
+    assert second.untyped_storage().nbytes() == sum(p.numel() * p.element_size() for p in parameters)
+
+
+def test_live_merged_storage_rejects_empty_and_overlapping_parameters_before_writing():
+    from heteroes.eval.fp16_decoder import bind_merged_parameters
+
+    with pytest.raises(ReferenceArithmeticError):
+        bind_merged_parameters([])
+    first = torch.nn.Parameter(torch.arange(20).reshape(4, 5).half())
+    second = torch.nn.Parameter(first[1:].detach())
+    pointers = first.data_ptr(), second.data_ptr()
+    with pytest.raises(ReferenceArithmeticError, match="overlap"):
+        bind_merged_parameters([first, second])
+    assert (first.data_ptr(), second.data_ptr()) == pointers
+
+
+@gpu
+def test_merged_fast_path_rebinds_after_parameter_replacement():
+    model = model_for("qwen2").cuda()
+    graph = Fp16DecoderGraph(model, max_context=64, allow_fixture=True)
+    ids = torch.tensor([[3, 5, 7, 11]], device="cuda")
+    graph.generate(ids, max_new_tokens=3, eos_token_id=[])
+    old = model.model.layers[0].self_attn.v_proj.weight
+    model.model.layers[0].self_attn.v_proj.weight = torch.nn.Parameter(old.detach().clone() + 0.125)
+    changed, _ = graph.forward_tokens(ids)
+    torch.testing.assert_close(changed, eager_logits(model, ids)[:, -1], rtol=2e-3, atol=2e-3)
+    assert torch.equal(
+        graph.generate(ids, max_new_tokens=3, eos_token_id=[]),
+        graph.generate(ids, max_new_tokens=3, eos_token_id=[], use_cache=False),
+    )
+
+
+@gpu
+def test_merged_fast_path_observes_mutated_weights_and_biases_and_exact_restore():
+    model = model_for("qwen2").cuda()
+    graph = Fp16DecoderGraph(model, max_context=64, allow_fixture=True)
+    ids = torch.tensor([[3, 5, 7, 11]], device="cuda")
+    before, _ = graph.forward_tokens(ids)
+    parent = {name: p.detach().cpu().clone() for name, p in model.named_parameters()}
+    with torch.no_grad():
+        model.model.layers[0].self_attn.q_proj.weight.add_(0.125)
+        model.model.layers[0].self_attn.v_proj.bias.add_(0.25)
+        model.model.layers[0].mlp.gate_proj.weight.mul_(2)
+    changed, _ = graph.forward_tokens(ids)
+    assert not torch.equal(before, changed)
+    torch.testing.assert_close(changed, eager_logits(model, ids)[:, -1], rtol=2e-3, atol=2e-3)
+    for name, p in model.named_parameters():
+        p.data.copy_(parent[name])
+    restored, _ = graph.forward_tokens(ids)
+    assert torch.equal(restored, before)
