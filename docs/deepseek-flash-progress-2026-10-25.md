@@ -22,6 +22,9 @@ GPU checks below ran only with `HETEROES_GPU_ACCEPTANCE=1` and explicit opt-in.
 | `f4ef2884` | Add typed int8 base storage with FP16 LoRA-only adapters and pinning. |
 | `b8648792` | Add the exact three-limb frozen-int8 CUDA projection. |
 | `fe7c472b` | Integrate frozen projections into strict captured decode and update the format doc. |
+| `e03307ae` | Add explicit vendor-FP16 fast-path decoder experimental baseline. |
+| `cc76a03d` | Harden frozen-int8 rounding, artifact seal, strict adapter arithmetic and limb sign. |
+| `f9bfd254` | Fuse the strict LoRA finish and tile the first adapter product. |
 
 ## Completed in this trial
 
@@ -90,18 +93,84 @@ Verification for the four commits above:
 
 Receipts are in `docs/evidence/2026-10-25-frozen-int8-integration/`.
 
+### M6 audit fixes and first measured performance gain
+
+Audit A–D from the continuation handoff were addressed before new speed claims:
+
+- A: the FP32 RNE overflow midpoint is fixed in the CPU oracle/encoder and the CUDA encoder; below/at/above the
+  midpoint, both signs, min-normal and signed FTZ are covered, including the `linear` case `0x7F7FFFFF`.
+- B: `FrozenInt8Artifact` now recomputes its digest at construction and carries a version+metadata seal; the reader,
+  typed module and decoder re-verify ownership/admission at construction and the request boundary, not per token.
+- C: the adapter delta uses the strict pairwise FP32 contract (`ops.linear` twice, strict scalar multiply, strict add
+  with zero-delta preserving the base bits) on CPU and CUDA. Non-finite inputs and canonical ± ES perturbations are
+  covered; zero-initialised B is no longer the only evidence.
+- D: signed limbs use defined `combine_limbs` multiplication instead of signed left shifts; tied-head sidecar
+  metadata declares storage tie only, with numerical weight
+  `int8_approximation_of_storage_tied_fp16_embedding`; the FP16 decoder is explicitly labelled experimental.
+
+Performance source `f9bfd254` makes two changes: the first rank product uses `row_tile=1`, and a new
+`strict_lora_finish` kernel fuses the second rank product, strict scale, zero-delta select and strict add. The fused
+kernel is tested bit-for-bit against the old sequence over ranks 1/2/3/8/16/32, odd shapes, signed zero, subnormals,
+non-finite inputs, row tiles 1/2/4/8 and CUDA-graph replay. Three of three mutants (drop scale, drop add, drop
+zero-delta select) were killed.
+
+Local 5070 Ti, fixed eight-prompt decode, greedy 32 tokens, context 512, one warmup and five timed observations.
+Median tokens/s (observed spread in parentheses); details and raw durations are in
+`docs/evidence/2026-10-25-frozen-audit-perf/`:
+
+| Case | B1 | B8 | B32 |
+| --- | ---: | ---: | ---: |
+| SmolLM2 frozen head | 152.5 (0.9%) | 1101.4 (1.0%) | 3077.7 (0.2%) |
+| SmolLM2 frozen no head | 149.1 (0.7%) | 1021.0 (1.1%) | 2446.1 (0.4%) |
+| SmolLM2 FP16 baseline | 365.2 (1.2%) | 2229.4 (1.5%) | 7195.2 (0.8%) |
+| Qwen2.5-0.5B frozen head | 181.2 (0.8%) | 1215.8 (0.5%) | 2907.5 (0.4%) |
+| Qwen2.5-0.5B frozen no head | 166.2 (1.0%) | 900.0 (0.7%) | 1521.4 (0.2%) |
+| Qwen2.5-0.5B FP16 baseline | 382.7 (1.3%) | 2477.7 (1.2%) | 7849.2 (0.5%) |
+| TinyLlama frozen no head | 149.3 (0.6%) | 785.9 (0.3%) | 1437.3 (0.1%) |
+| TinyLlama B22 | 187.2 (0.4%) | 786.4 (0.2%) | 1810.5 (0.3%) |
+| TinyLlama FP16 baseline | 270.9 (1.0%) | 1655.3 (0.8%) | 4858.5 (0.6%) |
+
+Frozen head B32 improved from 2511.8 to 3077.7 tok/s on SmolLM2 (+22.5%) and from 2413.2 to 2907.5 on Qwen
+(+20.5%); B8 improved +24.0% and +24.8%. B1 is unchanged inside run noise. The intermediate row-tile-only Smol
+B32 case was 2870.7. A nonzero-B probe (fixed normal fill of every `lora_B`, not a trained/ES adapter) reproduced
+the same throughput within 0.2%, so the add path is not a hidden zero-delta shortcut.
+
+The gap to the prior vLLM controls is still large: best B32 is 21.3% of vLLM on SmolLM2, 21.1% on Qwen and 18.4%
+on TinyLlama. These are unmatched prior controls, not a fresh same-host comparison. The FP16 baseline reaches
+49.9%/56.9%/62.4% of the same controls, so the strict/frozen gap is not only the adapter epilogue. A profile of
+Smol B32 frozen head puts 71.5% of CUDA event time in projection (`frozen_linear` 32.4%, `strict_lora_finish`
+26.1%, `strict_linear` 13.1%), with `strict_attention` at 12.7%.
+
+Checks: full CPU runtime suite `3131 passed, 444 skipped`; GPU `180 passed` (`test_strict_cuda.py` plus
+`test_frozen_int8_decoder_cuda.py`); Ruff format/check clean. Receipts, model file manifests, prompt IDs, the
+profiler table and the "What this does NOT show" section are in
+`docs/evidence/2026-10-25-frozen-audit-perf/`.
+
+### State of this work
+
+- **Proposed:** a matched 3060/vLLM matrix, a trained-adapter quality/lifecycle run, and the next base-projection
+  kernel change.
+- **Implemented:** the audit fixes and the two adapter-epilogue optimizations on this branch.
+- **Tested:** the CPU/GPU suites above, bit-equality tests, the zero-B/`-0.0` select case and three mutants.
+- **Selected:** the exact frozen-int8 path remains the default; the FP16 decoder remains an explicitly labelled
+  experimental baseline; the Fused finish is used by `FrozenInt8DecoderGraph`.
+- **Unaccepted:** every throughput number here is local, unmatched and awaiting Codex audit. `hardwareQualified`
+  remains false and no managed/default path is activated.
+
 ## Not yet done
 
-- No real-model frozen artifact bundle and no SmolLM2/TinyLlama/Qwen quality, reward, token, lifecycle or throughput
-  measurement under this identity.
-- No measured speed improvement. The three-limb work count is a hypothesis; activation quantization, encoding and
-  launch overheads are unmeasured.
-- No cross-GPU bit equality with nonzero adapters, no SM86/SM120 comparison, no hardware qualification.
+- No pinned on-disk frozen artifact bundle and no trained-adapter SmolLM2/TinyLlama/Qwen quality, reward or token
+  evaluation. The benchmark adapters are random and the nonzero-B probe is not an ES perturbation.
+- No 3060 matrix, no matched same-host vLLM control and no cross-GPU bit equality with nonzero adapters; the
+  5070 Ti gain does not establish a 3060 gain.
+- No lifecycle measurement (candidate entry, perturb, restore, reload) and no process-RSS/peak-memory acceptance.
 - No `scripts/check-all.sh`, packaging acceptance, managed-recipe change or Codex audit.
 - M0–M5 items and the rest of M6 remain required as listed in the handoff.
 
 ## Next step
 
-Build pinned real-model artifacts, then measure the frozen-base/LoRA path separately from full-weight FP16 ES on
-SM86 and SM120: quality/tokens/rewards, lifecycle peak memory and throughput. Report unfavorable or unchanged speed
-honestly; do not reinterpret an existing artifact under a changed quantizer, scale or encoding rule.
+The owner is handing continuation to Codex. Start from `f9bfd254` and
+`docs/evidence/2026-10-25-frozen-audit-perf/`; do not re-derive the old speed claims from the pre-fix receipts.
+The next useful work is (1) a matched 3060/vLLM control on the same workload, (2) a base-projection/`strict_lora_finish`
+kernel change guided by the profile, and (3) trained nonzero-adapter quality/lifecycle and cross-GPU checks. Keep the
+plan hash and the audit rules unchanged; do not treat the local +22% as a general or near-vLLM result.
