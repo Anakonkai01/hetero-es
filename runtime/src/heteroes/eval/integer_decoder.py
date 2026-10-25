@@ -146,7 +146,16 @@ class IntegerDecoderGraph(StrictDecoderGraph):
                 max_partial_bytes=self.kernels.max_partial_bytes,
                 target_ctas_per_sm=self._decode_target,
             )
-        return sum(w.shape[0] * 4 for w in {id(w): w for w in weights}.values()) + self._workspace_bounds[key]
+        # Packed input replaces the FP32-sized quantization term already covered by graph_memory_bound.
+        # ceil(K/4) word tails can exceed that term for very narrow K; cover every projection occurrence,
+        # even without allocator reuse, over the maximum prefill token count and all active decode rows.
+        digits = 2 if self.kernels.magnitude_bits == 14 else 3
+        padding = (
+            capacity
+            * self.max_context
+            * sum(max(0, digits * 4 * ((width + 3) // 4) - 4 * width) for width, _ in shapes)
+        )
+        return sum(w.shape[0] * 4 for w in {id(w): w for w in weights}.values()) + self._workspace_bounds[key] + padding
 
     def _generation_begin(self):
         self._check_kernel_configuration()

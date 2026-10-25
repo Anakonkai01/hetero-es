@@ -30,6 +30,7 @@ def static_identity(magnitude_bits=14, max_partial_bytes=16 * 1024**2):
         "nonlinear": sc.static_identity(),
         "integerSourceSha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "maxPartialBytes": max_partial_bytes,
+        "activationPacking": "radix_planes_once_v1_experimental",
         "decodePlanning": planning.identity(),
         "hardwareQualified": False,
     }
@@ -98,7 +99,21 @@ extern "C" __global__ void integer_input(const float* x, qi_t* q, int* exponents
   }
   int exponent=shared[0] ? (int)(shared[0]>>23)-127 : 0;
   if(t==0) exponents[row]=exponent;
+#if PACKED_INPUT
+  for(int word=t;word<(WIDTH+3)/4;word+=256) {
+    unsigned packed[DIGITS]={};
+    #pragma unroll
+    for(int i=0;i<4;++i) {
+      int k=word*4+i;
+      int value=k<WIDTH ? quant_float(__float_as_uint(x[(size_t)row*WIDTH+k]),exponent) : 0;
+      pack_digits(packed,value,i);
+    }
+    #pragma unroll
+    for(int d=0;d<DIGITS;++d) ((unsigned*)q)[((size_t)d*rows+row)*((WIDTH+3)/4)+word]=packed[d];
+  }
+#else
   for(int k=t;k<WIDTH;k+=256) q[(size_t)row*WIDTH+k]=(qi_t)quant_float(__float_as_uint(x[(size_t)row*WIDTH+k]),exponent);
+#endif
   if(bad) atomicOr(error,1);
 }
 
@@ -182,6 +197,12 @@ integer_linear(const qi_t* x,const u16* w,const u16* bias,const int* ex,const in
         #pragma unroll
         for(int word=0;word<4;++word) {
           int row=first+m*16+group+(word&1)*8;
+#if PACKED_INPUT
+          int k=start+thread*4+(word>>1)*16;
+          #pragma unroll
+          for(int d=0;d<DIGITS;++d)
+            a[d][word]=(row<rows && k<WIDTH) ? ((const unsigned*)x)[((size_t)d*rows+row)*((WIDTH+3)/4)+k/4] : 0;
+#else
           unsigned packed[DIGITS]={};
           #pragma unroll
           for(int i=0;i<4;++i) {
@@ -191,6 +212,7 @@ integer_linear(const qi_t* x,const u16* w,const u16* bias,const int* ex,const in
           }
           #pragma unroll
           for(int d=0;d<DIGITS;++d) a[d][word]=packed[d];
+#endif
         }
         #pragma unroll
         for(int i=0;i<DIGITS;++i) {
@@ -357,8 +379,8 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
         identity["fingerprint"] = canonical_json_hash({k: v for k, v in identity.items() if k != "fingerprint"})
         return identity
 
-    def _integer_functions(self, width, has_bias=False, row_tile=16, warps=4, split_k=1):
-        name = f"integer-{self.magnitude_bits}-{width}-bias{int(has_bias)}-m{row_tile}-w{warps}-s{split_k}"
+    def _integer_functions(self, width, has_bias=False, row_tile=16, warps=4, split_k=1, *, packed_input=False):
+        name = f"integer-{self.magnitude_bits}-{width}-bias{int(has_bias)}-m{row_tile}-w{warps}-s{split_k}-p{int(packed_input)}"
         if name not in self._functions:
             defines = dict(
                 WIDTH=width,
@@ -368,6 +390,7 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
                 M_GROUPS=row_tile // 16,
                 WARPS=warps,
                 SPLIT_K=split_k,
+                PACKED_INPUT=int(packed_input),
             )
             header = "".join(f"#define {k} {v}\n" for k, v in defines.items())
             self._functions[name] = self._compile(
@@ -379,7 +402,10 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
         return self._functions[name]
 
     @torch.inference_mode()
-    def quantize_input(self, value, *, error_flag=None, _functions=None):
+    def quantize_input(self, value, *, error_flag=None, _functions=None, _packed=False):
+        """Raw q by default; MMA packs signed radix bytes once into [digit, row, ceil(K/4)] planes."""
+        if type(_packed) is not bool:
+            raise ReferenceArithmeticError("Unsupported integer activation layout")
         if (
             not isinstance(value, torch.Tensor)
             or value.dtype != torch.float32
@@ -390,8 +416,16 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
         ):
             raise ReferenceArithmeticError("Integer quantization needs a nonempty FP32 matrix on its CUDA device")
         value = value.contiguous()
-        functions = self._integer_functions(value.shape[1]) if _functions is None else _functions
-        quantized = torch.empty_like(value, dtype=torch.int16 if self.magnitude_bits == 14 else torch.int32)
+        functions = self._integer_functions(value.shape[1], packed_input=_packed) if _functions is None else _functions
+        quantized = (
+            torch.empty(
+                (2 if self.magnitude_bits == 14 else 3, value.shape[0], (value.shape[1] + 3) // 4),
+                dtype=torch.int32,
+                device=self.device,
+            )
+            if _packed
+            else torch.empty_like(value, dtype=torch.int16 if self.magnitude_bits == 14 else torch.int32)
+        )
         exponents = torch.empty(value.shape[0], dtype=torch.int32, device=self.device)
         flag = self.new_error_flag() if error_flag is None else error_flag
         self._launch(
@@ -473,7 +507,7 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
             )
             plans.append(plan)
         flag = self.new_error_flag() if error_flag is None else error_flag
-        prepared = self.quantize_input(value.reshape(rows, width), error_flag=flag)
+        prepared = self.quantize_input(value.reshape(rows, width), error_flag=flag, _packed=rows > 1)
         outputs = tuple(
             self._linear(
                 value,
@@ -524,10 +558,14 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
             raise ReferenceArithmeticError("Integer split-K workspace budget exceeded")
         row_tile = (16 if rows <= 16 else 32) if row_tile is None else row_tile
         mode = ("simt" if rows == 1 else "mma") if implementation == "auto" else implementation
-        functions = self._integer_functions(width, bias is not None, row_tile, warps, split_k)
+        functions = self._integer_functions(
+            width, bias is not None, row_tile, warps, split_k, packed_input=mode == "mma"
+        )
         flag = self.new_error_flag() if error_flag is None else error_flag
         quantized, ex = (
-            self.quantize_input(value.reshape(rows, width), error_flag=flag, _functions=functions)
+            self.quantize_input(
+                value.reshape(rows, width), error_flag=flag, _functions=functions, _packed=mode == "mma"
+            )
             if prepared is None
             else prepared
         )
