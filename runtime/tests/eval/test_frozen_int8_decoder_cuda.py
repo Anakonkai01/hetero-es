@@ -7,14 +7,13 @@ import torch
 
 from heteroes.es.perturb import perturb_model_
 from heteroes.es.snapshot import restore_from_snapshot_, take_snapshot
-from heteroes.eval import frozen_int8
 from heteroes.eval.frozen_int8_decoder import (
     GRAPH_BACKEND,
     FrozenInt8DecoderGraph,
     FrozenInt8DecoderReference,
 )
 from heteroes.eval.reference_ops import ReferenceArithmeticError
-from heteroes.model.frozen_int8 import freeze_projections, frozen_modules
+from heteroes.model.frozen_int8 import freeze_projections, freeze_tied_head, frozen_modules
 from heteroes.model.lora import trainable_schema
 from test_strict_decoder import bits, model_for
 
@@ -126,6 +125,43 @@ def test_frozen_graph_keeps_tied_embedding_and_lm_head_in_fp16_storage():
     assert graph.kernel_identity()["frozen"]["builds"]
 
 
+def frozen_model_with_head(seed):
+    model = frozen_model(seed)
+    freeze_tied_head(model)
+    return model
+
+
+@gpu
+def test_pinned_tied_head_matches_the_cpu_oracle_in_captured_decode():
+    reference = FrozenInt8DecoderReference(frozen_model_with_head(71), max_context=64, allow_fixture=True)
+    graph = FrozenInt8DecoderGraph(frozen_model_with_head(71).cuda(), max_context=64, allow_fixture=True)
+    model = graph.model
+    assert model.lm_head.weight is model.model.embed_tokens.weight
+    assert model.lm_head.weight.dtype == torch.float16
+    assert graph.identity["graph"]["frozenTiedHead"]["lm_head"]["artifactSha256"] == (model.lm_head.frozen_head_sha256)
+    ids = torch.tensor([[3, 5, 7, 11, 13]])
+    expected, _ = reference.forward_tokens(ids)
+    actual, _ = graph.forward_tokens(ids.cuda())
+    assert torch.equal(bits(actual.cpu()), bits(expected))
+    captured = graph.generate(ids.cuda(), max_new_tokens=4, use_cache=True)
+    assert torch.equal(captured.cpu(), reference.generate(ids, max_new_tokens=4, use_cache=True))
+
+
+@gpu
+def test_replacing_a_head_sidecar_buffer_forces_a_fresh_capture_session():
+    model = frozen_model(73).cuda()
+    freeze_tied_head(model)
+    graph = FrozenInt8DecoderGraph(model, max_context=64, allow_fixture=True)
+    ids = torch.tensor([[3, 5, 7, 11]])
+    graph.generate(ids.cuda(), max_new_tokens=2, use_cache=True)
+    previous = graph._session
+    original = graph.model.lm_head.frozen_weight_q
+    graph.model.lm_head.frozen_weight_q = original.clone()
+    graph.generate(ids.cuda(), max_new_tokens=2, use_cache=True)
+    assert graph._session is not None and graph._session is not previous
+    graph.model.lm_head.frozen_weight_q = original
+
+
 @gpu
 def test_frozen_graph_identity_covers_live_artifacts_and_nonzero_adapter_roundtrip():
     reference, graph = backends(47)
@@ -176,11 +212,106 @@ def test_replacing_a_frozen_buffer_forces_a_fresh_capture_session():
 
 
 @gpu
-def test_adapter_combine_is_capture_safe_with_signed_zero_base():
+def test_nonzero_signed_adapters_match_the_cpu_strict_oracle_in_capture():
+    reference, graph = backends(79)
+    shape = reference.model.model.layers[0].self_attn.q_proj.lora_B["default"].weight.shape
+    replacement = torch.randn(shape, generator=torch.Generator().manual_seed(83), dtype=torch.float16) * 0.2
+    replacement[0, 0], replacement[0, 1] = 1.0, -1.0
+    for model in (reference.model, graph.model):
+        with torch.no_grad():
+            model.model.layers[0].self_attn.q_proj.lora_B["default"].weight.copy_(replacement)
+    ids = torch.tensor([[1, 4, 9, 16, 25, 36]])
+    expected, _ = reference.forward_tokens(ids)
+    actual, _ = graph.forward_tokens(ids.cuda())
+    assert torch.equal(bits(actual.cpu()), bits(expected))
+    expected_tokens = reference.generate(ids, max_new_tokens=3, use_cache=True)
+    actual_tokens = graph.generate(ids.cuda(), max_new_tokens=3, use_cache=True)
+    assert torch.equal(actual_tokens.cpu(), expected_tokens)
+
+
+@gpu
+def test_in_place_frozen_storage_mutation_is_refused_at_the_request_boundary():
+    _, graph = backends(83)
+    ids = torch.tensor([[3, 5, 7, 11]])
+    graph.generate(ids.cuda(), max_new_tokens=2, use_cache=True)
+    module = graph.model.model.layers[0].self_attn.q_proj
+    original = module.weight_q[0, 0].clone()
+    with torch.no_grad():
+        module.weight_q[0, 0] = 1 if int(original) != 1 else 2
+    with pytest.raises(ReferenceArithmeticError, match="digest|changed"):
+        graph.generate(ids.cuda(), max_new_tokens=2, use_cache=True)
+    with torch.no_grad():
+        module.weight_q[0, 0] = original
+    tokens = graph.generate(ids.cuda(), max_new_tokens=2, use_cache=True)
+    assert tokens.shape[0] == 1
+
+
+@gpu
+def test_metadata_mutation_is_refused_at_the_request_boundary():
+    _, graph = backends(87)
+    ids = torch.tensor([[3, 5, 7, 11]])
+    graph.generate(ids.cuda(), max_new_tokens=2, use_cache=True)
+    graph.model.model.layers[0].self_attn.q_proj.artifact_metadata["forged"] = True
+    with pytest.raises(ReferenceArithmeticError, match="digest|metadata"):
+        graph.generate(ids.cuda(), max_new_tokens=2, use_cache=True)
+
+
+@gpu
+def test_replacing_a_frozen_buffer_with_a_different_payload_is_refused():
+    _, graph = backends(89)
+    ids = torch.tensor([[3, 5, 7, 11]])
+    graph.generate(ids.cuda(), max_new_tokens=2, use_cache=True)
+    module = graph.model.model.layers[0].self_attn.q_proj
+    original = module.weight_q
+    replacement = original.clone()
+    replacement[0, 0] = 1 if int(original[0, 0]) != 1 else 2
+    module.weight_q = replacement
+    with pytest.raises(ReferenceArithmeticError, match="digest|changed"):
+        graph.generate(ids.cuda(), max_new_tokens=2, use_cache=True)
+    graph.release_graph()
+    module.weight_q = original
+    assert graph.generate(ids.cuda(), max_new_tokens=2, use_cache=True).shape[0] == 1
+
+
+@gpu
+def test_canonical_plus_minus_adapters_match_cpu_bits_and_restore_exactly():
+    reference, graph = backends(91)
+    ids = torch.tensor([[1, 4, 9, 16, 25, 36]])
+    reference_schema = trainable_schema(reference.model)
+    graph_schema = trainable_schema(graph.model)
+    reference_snapshot = take_snapshot(reference.model, reference_schema)
+    graph_snapshot = take_snapshot(graph.model, graph_schema)
+    baseline, _ = reference.forward_tokens(ids)
+    baseline_tokens = reference.generate(ids, max_new_tokens=3, use_cache=True)
+    assert torch.equal(graph.generate(ids.cuda(), max_new_tokens=3, use_cache=True).cpu(), baseline_tokens)
+    for sign in (1, -1):
+        perturb_model_(reference.model, reference_schema, 93, sign * 5e-2, 64)
+        perturb_model_(graph.model, graph_schema, 93, sign * 5e-2, 64)
+        expected, _ = reference.forward_tokens(ids)
+        actual, _ = graph.forward_tokens(ids.cuda())
+        assert torch.equal(bits(actual.cpu()), bits(expected))
+        expected_tokens = reference.generate(ids, max_new_tokens=3, use_cache=True)
+        actual_tokens = graph.generate(ids.cuda(), max_new_tokens=3, use_cache=True)
+        assert torch.equal(actual_tokens.cpu(), expected_tokens)
+        assert not torch.equal(bits(expected), bits(baseline))
+        restore_from_snapshot_(reference.model, reference_schema, reference_snapshot)
+        restore_from_snapshot_(graph.model, graph_schema, graph_snapshot)
+        restored, _ = reference.forward_tokens(ids)
+        assert torch.equal(bits(restored), bits(baseline))
+
+
+@gpu
+def test_cuda_adapter_combine_is_capture_safe_with_signed_zero_base():
+    from heteroes.eval import strict_cuda
+
+    kernels = strict_cuda.StrictCudaKernels("cuda")
     base = torch.tensor([-0.0, 0.0, -1.0], device="cuda", dtype=torch.float32)
     delta = torch.zeros(3, device="cuda", dtype=torch.float32)
+    flag = kernels.new_error_flag()
     graph = torch.cuda.CUDAGraph()
     with torch.cuda.graph(graph):
-        combined = frozen_int8.combine_adapter(base, delta)
+        added = kernels.add(base, delta, error_flag=flag)
+        combined = torch.where(delta == 0, base, added)
     graph.replay()
+    kernels.raise_if_error(flag)
     assert torch.equal(bits(combined.cpu()), bits(base.cpu()))

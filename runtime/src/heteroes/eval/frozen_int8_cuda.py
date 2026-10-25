@@ -82,6 +82,12 @@ __device__ __forceinline__ float inf_with_sign(unsigned sign) {
   return __uint_as_float(sign|0x7f800000u);
 }
 
+// Reconstruct the exact signed sum of three base-256 MMA limbs. Multiplication by a power of two is defined
+// for negative signed operands; a left shift of a negative value is not.
+__device__ __forceinline__ i64 combine_limbs(int low,int middle,int high) {
+  return (i64)low+(i64)middle*256ll+(i64)high*65536ll;
+}
+
 // Exact RNE/FTZ encoding of (sum * significand) * 2**exponent. The product is formed in two limbs so that a
 // 68-bit value is never rounded through FP32 or multiplied as int64 by a float.
 __device__ __forceinline__ float encode_product(i64 sum, unsigned significand, int exponent, int* error) {
@@ -89,7 +95,7 @@ __device__ __forceinline__ float encode_product(i64 sum, unsigned significand, i
   if(!significand) { atomicOr(error,1); return 0.0f; }
   if(exponent<-2048) { atomicOr(error,1); return 0.0f; }
   unsigned sign=sum<0 ? 0x80000000u : 0;
-  u64 magnitude=sum<0 ? (u64)(-sum) : (u64)sum;
+  u64 magnitude=sum<0 ? (~(u64)sum)+1ull : (u64)sum;
   u64 low_product=(u64)(unsigned)(magnitude&0xffffffffull)*(u64)significand;
   u64 high_product=(magnitude>>32)*(u64)significand;
   u64 low=low_product+(high_product<<32);
@@ -164,7 +170,7 @@ frozen_linear(const void* xraw,const signed char* w,const u16* bias,const int* e
         int row=first+m*16+group+(d>>1)*8;
         int n=column+thread*2+(d&1);
         if(row<rows && n<outputs) {
-          i64 sum=(i64)accum[m][0][d]+((i64)accum[m][1][d]<<8)+((i64)accum[m][2][d]<<16);
+          i64 sum=combine_limbs(accum[m][0][d],accum[m][1][d],accum[m][2][d]);
           unsigned significand;
           int scale_exponent;
           scale_parts(scales[n],significand,scale_exponent);

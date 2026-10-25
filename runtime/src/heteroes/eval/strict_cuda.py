@@ -323,6 +323,13 @@ extern "C" __global__ void strict_add(const float* a, const float* b, float* out
   report(error, bad);
 }
 
+extern "C" __global__ void strict_scale(const float* a, float* out, int* error, int count, float scale) {
+  unsigned bad = 0;
+  int i = blockIdx.x * blockDim.x + threadIdx.x;
+  if (i < count) out[i] = mul_(load(a + i, bad), scale, bad);
+  report(error, bad);
+}
+
 extern "C" __global__ void strict_silu_mul(const float* gate, const float* up, float* out, int* error, int count) {
   unsigned bad = 0;
   int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -824,7 +831,7 @@ class StrictCudaKernels:
             self._functions["ops"] = self._compile(
                 "ops",
                 header + _OPS_SOURCE,
-                ["strict_rms_norm", "strict_add", "strict_silu_mul", "strict_rope", "strict_attention"],
+                ["strict_rms_norm", "strict_add", "strict_scale", "strict_silu_mul", "strict_rope", "strict_attention"],
                 ptx_exact=OPS_PTX_EXACT,
                 sass_exact=OPS_SASS_EXACT,
             )
@@ -887,6 +894,29 @@ class StrictCudaKernels:
     @torch.inference_mode()
     def add(self, a, b, *, error_flag=None):
         return self._elementwise("strict_add", a, b, error_flag)
+
+    @torch.inference_mode()
+    def scale(self, value, factor, *, error_flag=None):
+        """``mul(value, factor)`` of the reference, with one FP32-rounded scalar."""
+        (value,) = self._float32(value)
+        if not isinstance(factor, (int, float)) or isinstance(factor, bool):
+            raise ReferenceArithmeticError("A strict scalar multiply needs a numeric factor")
+        rounded = struct.unpack("<f", struct.pack("<f", float(factor)))[0]
+        if not math.isfinite(rounded):
+            raise ReferenceArithmeticError("A strict scalar multiply needs a finite FP32 factor")
+        result = torch.empty_like(value)
+        flag = self.new_error_flag() if error_flag is None else error_flag
+        count = value.numel()
+        self._launch(
+            self._ops("strict_scale"),
+            grid=-(-count // 256),
+            block=(256, 1),
+            pointers=(value, result, flag),
+            integers=(count,),
+            floats=(rounded,),
+        )
+        self._finish(flag, error_flag)
+        return result
 
     @torch.inference_mode()
     def silu_mul(self, gate, up, *, error_flag=None):

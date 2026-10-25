@@ -13,7 +13,7 @@ from heteroes.eval.frozen_int8_decoder import (
 )
 from heteroes.eval.reference_ops import ReferenceArithmeticError
 from heteroes.eval.strict_decoder import describe_graph
-from heteroes.model.frozen_int8 import freeze_projections, frozen_modules
+from heteroes.model.frozen_int8 import freeze_projections, freeze_tied_head, frozen_modules
 from heteroes.model.lora import trainable_schema
 from test_strict_decoder import bits, model_for
 
@@ -21,6 +21,15 @@ TARGETS = ("q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down
 
 
 def project(value, module):
+    if getattr(module, "is_frozen_int8_head", False):
+        artifact = frozen_int8.FrozenInt8Artifact(
+            weight_q=module.frozen_weight_q,
+            weight_scale=module.frozen_weight_scale,
+            metadata=dict(module.frozen_head_metadata),
+            sha256=module.frozen_head_sha256,
+            format_version=frozen_int8.ARTIFACT_FORMAT_VERSION,
+        )
+        return frozen_int8.linear(value, artifact, getattr(module, "bias", None))
     if getattr(module, "is_frozen_int8_linear", False):
         return frozen_int8.combine_adapter(module.base_linear_cpu(value), module.lora_delta(value))
     return ops.linear(value, module.weight, getattr(module, "bias", None))
@@ -82,6 +91,31 @@ def frozen_model(seed=7, targets=TARGETS):
     model = model_for("qwen2")
     freeze_projections(model, rank=2, alpha=4, seed=seed, target_modules=targets)
     return model
+
+
+def test_cpu_reference_projects_a_pinned_tied_head_and_changes_only_the_head_arithmetic():
+    strict_model = frozen_model()
+    pinned_model = frozen_model()
+    digest = freeze_tied_head(pinned_model)
+    strict = FrozenInt8DecoderReference(strict_model, max_context=64, allow_fixture=True)
+    pinned = FrozenInt8DecoderReference(pinned_model, max_context=64, allow_fixture=True)
+    ids = torch.tensor([[3, 5, 7, 11, 13]])
+    expected, _ = eager_forward(pinned, ids)
+    actual, _ = pinned.forward_tokens(ids)
+    assert torch.equal(bits(actual), bits(expected))
+    strict_head, _ = strict.forward_tokens(ids)
+    assert not torch.equal(bits(actual), bits(strict_head))
+    assert pinned.identity["graph"]["frozenTiedHead"] == {
+        "lm_head": {
+            "artifactSha256": digest,
+            "storageTied": True,
+            "numericalWeight": "int8_approximation_of_storage_tied_fp16_embedding",
+            "inFeatures": pinned.config.hidden_size,
+            "outFeatures": pinned.config.vocab_size,
+            "bias": False,
+            "rank": 0,
+        }
+    }
 
 
 def test_cpu_reference_matches_independent_eager_projection_composition():
@@ -191,6 +225,19 @@ def test_zero_adapter_delta_preserves_signed_zero_base_bits():
         frozen_int8.combine_adapter(torch.zeros(1), torch.zeros(2))
 
 
+def test_nonzero_adapter_delta_uses_the_strict_flushed_add_and_rejects_nonfinite():
+    # An ordinary FP32 add would keep the subnormal delta; the strict adapter contract flushes it to signed zero.
+    base = torch.zeros(3, dtype=torch.float32)
+    delta = torch.tensor([2.0**-149, -(2.0**-149), 1.0], dtype=torch.float32)
+    combined = frozen_int8.combine_adapter(base, delta)
+    assert bits(combined).tolist() == [0, 0, 0x3F800000]
+    assert bits(torch.add(base, delta)).tolist() != bits(combined).tolist()
+    with pytest.raises(ReferenceArithmeticError, match="Nonfinite"):
+        frozen_int8.combine_adapter(torch.zeros(1), torch.tensor([float("nan")]))
+    with pytest.raises(ReferenceArithmeticError, match="Nonfinite"):
+        frozen_int8.combine_adapter(torch.tensor([float("inf")]), torch.zeros(1))
+
+
 def test_es_moves_only_adapters_and_restore_is_exact():
     model = frozen_model(seed=17)
     backend = FrozenInt8DecoderReference(model, max_context=64, allow_fixture=True)
@@ -222,7 +269,7 @@ def test_identity_is_separate_and_not_hardware_qualified():
     identity = backend.identity
     assert identity["backend"] == REFERENCE_BACKEND
     assert identity["adapterStorage"] == "frozen_int8_fp16_lora_storage_v1_experimental"
-    assert identity["adapterArithmetic"].startswith("fp32_matmul_from_fp16_factors")
+    assert identity["adapterArithmetic"].startswith("pairwise_f32_fp16_factors")
     assert identity["operators"]["linear"]["format"] == frozen_int8.ARTIFACT_FORMAT
     assert identity["hardwareQualified"] is False
     assert backend.fingerprint

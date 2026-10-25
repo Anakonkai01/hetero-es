@@ -9,12 +9,14 @@ from transformers import Qwen2Config, Qwen2ForCausalLM
 from heteroes.es.perturb import perturb_model_
 from heteroes.es.snapshot import restore_from_snapshot_, take_snapshot
 from heteroes.eval import frozen_int8
+from heteroes.eval import reference_ops as ops
 from heteroes.eval.reference_ops import ReferenceArithmeticError
 from heteroes.model.frozen_int8 import (
     FrozenInt8LoraLinear,
     create_initial_frozen_adapter,
     freeze_linear,
     freeze_projections,
+    freeze_tied_head,
     frozen_modules,
     load_frozen_adapter_,
     require_frozen_projections,
@@ -90,7 +92,7 @@ def test_zero_adapter_preserves_the_base_and_es_moves_only_the_adapter():
     assert torch.equal(bits(module(value)), bits(before_output))
 
 
-def test_cpu_forward_matches_explicit_base_plus_fp32_adapter_delta(tmp_path):
+def test_cpu_forward_matches_explicit_base_plus_strict_adapter_delta():
     model = tiny()
     freeze_projections(model, rank=3, alpha=5, seed=17, target_modules=("down_proj",))
     module = model.model.layers[1].mlp.down_proj
@@ -98,12 +100,38 @@ def test_cpu_forward_matches_explicit_base_plus_fp32_adapter_delta(tmp_path):
         module.lora_B["default"].weight.normal_(generator=torch.Generator().manual_seed(19))
     value = torch.randn(7, module.in_features, generator=torch.Generator().manual_seed(23)).half().float()
     base = module.base_linear_cpu(value)
-    adapter_a = module.lora_A["default"].weight.float()
-    adapter_b = module.lora_B["default"].weight.float()
-    delta = (value @ adapter_a.T) @ adapter_b.T * module.scaling
-    expected = torch.where(delta == 0, base, torch.add(base, delta))
+    adapter_a = module.lora_A["default"].weight
+    adapter_b = module.lora_B["default"].weight
+    delta = ops.mul(ops.linear(ops.linear(value, adapter_a), adapter_b), module.scaling)
+    assert torch.equal(bits(module.lora_delta(value)), bits(delta))
+    ordinary = (value @ adapter_a.float().T) @ adapter_b.float().T * module.scaling
+    assert not torch.equal(bits(delta), bits(ordinary))
+    expected = torch.where(delta == 0, base, ops.add(base, delta))
     assert torch.equal(bits(module(value)), bits(expected))
     assert not torch.equal(bits(base), bits(expected))
+
+
+def test_metadata_mutation_invalidates_the_module_artifact_cache():
+    model = tiny()
+    freeze_projections(model, rank=2, alpha=4, seed=31, target_modules=("q_proj",))
+    module = model.model.layers[0].self_attn.q_proj
+    value = torch.randn(2, module.in_features, generator=torch.Generator().manual_seed(37)).half().float()
+    module.base_linear_cpu(value)
+    module.artifact_metadata["forged"] = True
+    with pytest.raises(ReferenceArithmeticError, match="digest"):
+        module.base_linear_cpu(value)
+
+
+def test_in_place_payload_mutation_invalidates_the_module_artifact_cache():
+    model = tiny()
+    freeze_projections(model, rank=2, alpha=4, seed=41, target_modules=("q_proj",))
+    module = model.model.layers[0].self_attn.q_proj
+    value = torch.randn(2, module.in_features, generator=torch.Generator().manual_seed(43)).half().float()
+    module.base_linear_cpu(value)
+    with torch.no_grad():
+        module.weight_q[0, 0] = 1 if int(module.weight_q[0, 0]) != 1 else 2
+    with pytest.raises(ReferenceArithmeticError, match="digest"):
+        module.base_linear_cpu(value)
 
 
 def test_pinned_artifact_is_reused_and_mismatch_is_refused(tmp_path):
@@ -220,6 +248,81 @@ def test_constructor_refuses_bytes_that_do_not_match_the_pinned_digest():
             seed=1,
             artifact_sha256="0" * 64,
         )
+
+
+def test_frozen_tied_head_keeps_the_embedding_tie_and_pins_sidecar_storage():
+    model = tiny()
+    embed = model.model.embed_tokens.weight
+    head = model.lm_head
+    digest = freeze_tied_head(model, metadata={"source": "unit"})
+    assert head.weight is embed and embed.dtype == torch.float16
+    assert head.is_frozen_int8_head is True
+    assert head.frozen_head_sha256 == digest
+    assert head.frozen_head_metadata == {"source": "unit", "module": "lm_head"}
+    assert head.frozen_weight_q.dtype == torch.int8
+    assert head.frozen_weight_q.shape == head.weight.shape
+    assert head.frozen_weight_scale.dtype == torch.float32
+    assert head.frozen_weight_scale.shape == (head.weight.shape[0],)
+    assert digest == frozen_int8.artifact_digest(
+        head.frozen_weight_q.cpu(), head.frozen_weight_scale.cpu(), metadata=head.frozen_head_metadata
+    )
+    assert all(parameter is not head.frozen_weight_q for parameter in model.parameters())
+    with pytest.raises(ReferenceArithmeticError, match="already carries"):
+        freeze_tied_head(model)
+
+
+def test_frozen_tied_head_sidecar_is_int8_only_and_adds_no_fp16_shadow():
+    model = tiny()
+    head = model.lm_head
+    parameters_before = set(model.parameters())
+    digest = freeze_tied_head(model)
+    assert set(model.parameters()) == parameters_before
+    assert head.weight is model.model.embed_tokens.weight
+    assert not hasattr(head, "frozen_dequantized_weight")
+    assert not hasattr(head, "frozen_fp16_weight")
+    assert head.frozen_weight_q.numel() == head.weight.numel()
+    assert head.frozen_weight_scale.numel() == head.weight.shape[0]
+    assert head.frozen_weight_q.dtype == torch.int8
+    assert digest == head.frozen_head_sha256
+    original_embedding = model.model.embed_tokens.weight[0, 0].clone()
+    with torch.no_grad():
+        head.frozen_weight_q[0, 0] = 1 if int(head.frozen_weight_q[0, 0]) != 1 else 2
+    assert torch.equal(model.model.embed_tokens.weight[0, 0], original_embedding)
+
+
+def test_frozen_tied_head_requires_the_original_tied_fp16_head():
+    model = tiny()
+    head = model.lm_head
+    head.weight = torch.nn.Parameter(head.weight.detach().clone())
+    with pytest.raises(ReferenceArithmeticError, match="tied"):
+        freeze_tied_head(model)
+
+
+def test_graph_identity_admits_a_pinned_tied_head_only_in_frozen_mode():
+    from heteroes.eval.strict_decoder import describe_graph
+
+    model = tiny()
+    freeze_projections(model, rank=2, alpha=4, seed=7, target_modules=("q_proj",))
+    digest = freeze_tied_head(model)
+    with pytest.raises(ReferenceArithmeticError, match="frozen"):
+        describe_graph(model, 64, frozen_int8=False)
+    graph = describe_graph(model, 64, frozen_int8=True)
+    assert graph["tiedHead"] is True
+    assert graph["frozenTiedHead"] == {
+        "lm_head": {
+            "artifactSha256": digest,
+            "storageTied": True,
+            "numericalWeight": "int8_approximation_of_storage_tied_fp16_embedding",
+            "inFeatures": model.config.hidden_size,
+            "outFeatures": model.config.vocab_size,
+            "bias": False,
+            "rank": 0,
+        }
+    }
+    assert "lm_head" not in graph["frozenProjections"]
+    model.lm_head.frozen_head_sha256 = "not-a-digest"
+    with pytest.raises(ReferenceArithmeticError, match="pinned artifact digest"):
+        describe_graph(model, 64, frozen_int8=True)
 
 
 def test_fresh_quantization_must_match_the_expected_digest(tmp_path):

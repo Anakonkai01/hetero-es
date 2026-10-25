@@ -1,13 +1,17 @@
 """Experimental decoder composition over typed frozen-int8 projections and FP16 LoRA adapters.
 
 The base projections keep the pinned int8 artifact and execute the exact B22 three-limb product; only the
-adapter factors are trainable and their delta uses its own FP32 namespace. Embeddings, normalization weights and
-a tied or untied FP16 LM head keep the existing strict graph arithmetic. This module composes existing pieces; it
-does not change a managed recipe, qualify hardware or claim the FP32-tree identity.
+adapter factors are trainable and their delta uses its own FP32 namespace. Embeddings and normalization weights
+keep the strict graph arithmetic. A tied FP16 LM head can stay on the strict path or carry optional sidecar int8
+storage prepared by ``freeze_tied_head``; the sidecar preserves the embedding tie and moves only the head
+projection onto the pinned product. This module composes existing pieces; it does not change a managed recipe,
+qualify hardware or claim the FP32-tree identity.
 """
 
 import hashlib
 from pathlib import Path
+
+import torch
 
 from heteroes.canonical import canonical_json_hash
 from heteroes.eval import frozen_int8 as artifact
@@ -41,6 +45,10 @@ def _is_frozen(module):
     return bool(getattr(module, "is_frozen_int8_linear", False))
 
 
+def _is_frozen_head(module):
+    return bool(getattr(module, "is_frozen_int8_head", False))
+
+
 class FrozenInt8DecoderReference(StrictDecoderReference):
     """CPU eager oracle for the frozen-int8 base plus separately named adapter arithmetic."""
 
@@ -48,12 +56,27 @@ class FrozenInt8DecoderReference(StrictDecoderReference):
         if next(model.parameters()).device.type != "cpu":
             raise ReferenceArithmeticError("The frozen int8 decoder oracle is CPU-only")
         super().__init__(model, max_context=max_context, allow_fixture=allow_fixture, frozen_int8=True)
+        self._head_artifact = self._tied_head_artifact()
         self.identity = _compose(self.identity, REFERENCE_BACKEND)
         self.fingerprint = canonical_json_hash(self.identity)
+
+    def _tied_head_artifact(self):
+        head = self.model.lm_head
+        if not _is_frozen_head(head):
+            return None
+        return artifact.FrozenInt8Artifact(
+            weight_q=head.frozen_weight_q,
+            weight_scale=head.frozen_weight_scale,
+            metadata=dict(head.frozen_head_metadata),
+            sha256=head.frozen_head_sha256,
+            format_version=artifact.ARTIFACT_FORMAT_VERSION,
+        )
 
     def _linear(self, value, module):
         if _is_frozen(module):
             return module(value)
+        if module is self.model.lm_head and self._head_artifact is not None:
+            return artifact.linear(value, self._head_artifact, getattr(module, "bias", None))
         return super()._linear(value, module)
 
 
@@ -86,6 +109,9 @@ class FrozenInt8DecoderGraph(StrictDecoderGraph):
         self._workspace_bounds = {}
         self._kernel_configuration = self._current_kernel_configuration()
         self._frozen = tuple(self.model.get_submodule(name) for name in self.identity["graph"]["frozenProjections"])
+        self._frozen_head = self.model.lm_head if "frozenTiedHead" in self.identity["graph"] else None
+        self._frozen_seal = None
+        self._verify_frozen_storage()
         self.identity = {
             **_compose(self.identity, GRAPH_BACKEND),
             "frozenKernels": frozen_int8_cuda.static_identity(max_partial_bytes),
@@ -110,6 +136,63 @@ class FrozenInt8DecoderGraph(StrictDecoderGraph):
             for name in ("magnitude_bits", "max_partial_bytes", "device", "multiprocessors")
         )
 
+    def _frozen_storage_state(self):
+        state = []
+        for module in self._frozen:
+            state.append(
+                (
+                    id(module.weight_q),
+                    module.weight_q.data_ptr(),
+                    module.weight_q._version,
+                    id(module.weight_scale),
+                    module.weight_scale.data_ptr(),
+                    module.weight_scale._version,
+                    canonical_json_hash(module.artifact_metadata),
+                )
+            )
+        head = self._frozen_head
+        if head is not None:
+            state.append(
+                (
+                    id(head.frozen_weight_q),
+                    head.frozen_weight_q.data_ptr(),
+                    head.frozen_weight_q._version,
+                    id(head.frozen_weight_scale),
+                    head.frozen_weight_scale.data_ptr(),
+                    head.frozen_weight_scale._version,
+                    canonical_json_hash(head.frozen_head_metadata),
+                )
+            )
+        return tuple(state)
+
+    def _verify_frozen_storage(self):
+        """Re-hash only when a frozen tensor object, pointer or version changed.
+
+        The seal is checked at engine construction and at each generation request boundary, never per decode
+        token. Replacement with an identical payload is admitted as a new capture; an in-place edit raises.
+        """
+        state = self._frozen_storage_state()
+        if state == self._frozen_seal:
+            return
+        with torch.inference_mode():
+            for module in self._frozen:
+                artifact.verify_payload(
+                    module.weight_q, module.weight_scale, module.artifact_metadata, module.artifact_sha256
+                )
+            head = self._frozen_head
+            if head is not None:
+                artifact.verify_payload(
+                    head.frozen_weight_q,
+                    head.frozen_weight_scale,
+                    head.frozen_head_metadata,
+                    head.frozen_head_sha256,
+                )
+        self._frozen_seal = state
+
+    def _session_for(self, capacity):
+        self._verify_frozen_storage()
+        return super()._session_for(capacity)
+
     def _check_kernel_configuration(self):
         if self._current_kernel_configuration() != self._kernel_configuration:
             raise ReferenceArithmeticError("Frozen int8 graph execution configuration changed; construct a new backend")
@@ -122,7 +205,27 @@ class FrozenInt8DecoderGraph(StrictDecoderGraph):
             error_flag=flag,
         )
 
+    def _adapter_delta(self, value, module, flag):
+        """Strict pairwise FP32 delta of the widened FP16 factors, then the strict scale."""
+        adapter_a = module.lora_A[module.adapter_name].weight
+        adapter_b = module.lora_B[module.adapter_name].weight
+        middle = self.kernels.linear(value, adapter_a, None, error_flag=flag)
+        delta = self.kernels.linear(middle, adapter_b, None, error_flag=flag)
+        return self.kernels.scale(delta, module.scaling, error_flag=flag)
+
+    def _combine_adapter(self, base, delta, flag):
+        added = self.kernels.add(base, delta, error_flag=flag)
+        return torch.where(delta == 0, base, added)
+
     def _project(self, value, module, flag):
+        if module is self._frozen_head:
+            return self.frozen_kernels.linear(
+                value,
+                module.frozen_weight_q,
+                module.frozen_weight_scale,
+                getattr(module, "bias", None),
+                error_flag=flag,
+            )
         if not _is_frozen(module):
             return super()._project(value, module, flag)
         base = self.frozen_kernels.linear(
@@ -132,14 +235,14 @@ class FrozenInt8DecoderGraph(StrictDecoderGraph):
             getattr(module, "bias", None),
             error_flag=flag,
         )
-        return artifact.combine_adapter(base, module.lora_delta(value))
+        return self._combine_adapter(base, self._adapter_delta(value, module, flag), flag)
 
     def _project_many(self, value, modules, flag):
         modules = tuple(modules)
         if modules and all(_is_frozen(module) for module in modules):
             bases = self._frozen_bases(value, modules, flag)
             return tuple(
-                artifact.combine_adapter(base, module.lora_delta(value))
+                self._combine_adapter(base, self._adapter_delta(value, module, flag), flag)
                 for base, module in zip(bases, modules, strict=True)
             )
         return tuple(self._project(value, module, flag) for module in modules)
@@ -155,7 +258,7 @@ class FrozenInt8DecoderGraph(StrictDecoderGraph):
             error_flag=flag,
             target_ctas_per_sm=self._decode_target,
         )
-        return artifact.combine_adapter(base, module.lora_delta(value))
+        return self._combine_adapter(base, self._adapter_delta(value, module, flag), flag)
 
     def _decode_project_many(self, value, modules, flag):
         modules = tuple(modules)
@@ -168,7 +271,7 @@ class FrozenInt8DecoderGraph(StrictDecoderGraph):
                 decode_target_ctas_per_sm=self._decode_target,
             )
             return tuple(
-                artifact.combine_adapter(base, module.lora_delta(value))
+                self._combine_adapter(base, self._adapter_delta(value, module, flag), flag)
                 for base, module in zip(bases, modules, strict=True)
             )
         return tuple(self._decode_project(value, module, flag) for module in modules)

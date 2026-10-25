@@ -86,6 +86,7 @@ def describe_graph(model, max_context, *, frozen_int8=False):
         raise ReferenceArithmeticError("Graph needs one live FP16 weight set on one device")
     expected = {}
     frozen = {}
+    frozen_tied = {}
 
     def frozen_projection(name, module, outputs, inputs):
         weight_q = getattr(module, "weight_q", None)
@@ -171,7 +172,60 @@ def describe_graph(model, max_context, *, frozen_int8=False):
             "bias": bias is not None,
         }
 
+    def frozen_tied_head(name, module, outputs, inputs):
+        weight_q = getattr(module, "frozen_weight_q", None)
+        weight_scale = getattr(module, "frozen_weight_scale", None)
+        if (
+            not isinstance(weight_q, torch.Tensor)
+            or weight_q.dtype != torch.int8
+            or tuple(weight_q.shape) != (outputs, inputs)
+            or weight_q.device != device
+            or not weight_q.is_contiguous()
+            or not isinstance(weight_scale, torch.Tensor)
+            or weight_scale.dtype != torch.float32
+            or tuple(weight_scale.shape) != (outputs,)
+            or weight_scale.device != device
+            or not weight_scale.is_contiguous()
+            or getattr(module, "in_features", None) != inputs
+            or getattr(module, "out_features", None) != outputs
+            or getattr(module, "training", True)
+        ):
+            raise ReferenceArithmeticError(f"Unsupported frozen int8 tied head storage at {name}")
+        digest = getattr(module, "frozen_head_sha256", None)
+        if (
+            not isinstance(digest, str)
+            or len(digest) != 64
+            or any(character not in "0123456789abcdef" for character in digest)
+        ):
+            raise ReferenceArithmeticError(f"Frozen int8 tied head {name} lacks a pinned artifact digest")
+        bias = getattr(module, "bias", None)
+        if bias is not None and (
+            not isinstance(bias, torch.Tensor)
+            or bias.dtype != torch.float16
+            or tuple(bias.shape) != (outputs,)
+            or bias.device != device
+            or not bias.is_contiguous()
+        ):
+            raise ReferenceArithmeticError(f"Frozen int8 tied head {name} has an invalid bias")
+        frozen_tied[name] = {
+            "artifactSha256": digest,
+            "storageTied": True,
+            "numericalWeight": "int8_approximation_of_storage_tied_fp16_embedding",
+            "inFeatures": inputs,
+            "outFeatures": outputs,
+            "bias": bias is not None,
+            "rank": 0,
+        }
+
     def projection(name, module, outputs, inputs):
+        if getattr(module, "is_frozen_int8_head", False):
+            if not frozen_int8:
+                raise ReferenceArithmeticError("A frozen int8 tied head needs the explicit frozen graph mode")
+            frozen_tied_head(name, module, outputs, inputs)
+            expected[name + ".weight"] = (outputs, inputs)
+            if getattr(module, "bias", None) is not None:
+                expected[name + ".bias"] = (outputs,)
+            return
         if getattr(module, "is_frozen_int8_linear", False):
             if not frozen_int8:
                 raise ReferenceArithmeticError("Frozen int8 projections need the explicit frozen graph mode")
@@ -228,6 +282,8 @@ def describe_graph(model, max_context, *, frozen_int8=False):
     }
     if frozen_int8:
         result["frozenProjections"] = dict(sorted(frozen.items()))
+        if frozen_tied:
+            result["frozenTiedHead"] = dict(sorted(frozen_tied.items()))
     return result
 
 

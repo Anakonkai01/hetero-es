@@ -3,11 +3,12 @@
 The projections targeted here keep only the pinned int8 rows, FP32 row scales and an optional frozen FP16 bias.
 There is no dequantized ``weight`` parameter. Only ``lora_A``/``lora_B`` tensors are parameters; the ES code
 selects them through the unchanged canonical schema. Embeddings and a possibly tied LM head stay in the
-original FP16 storage and are not quantized by this module.
+original FP16 storage; a tied LM head can optionally receive sidecar int8 storage without breaking the tie.
 
 This is experimental storage, not a managed recipe. The CPU forward is an oracle; CUDA execution is provided by
-``heteroes.eval.frozen_int8_cuda``. The adapter delta uses ordinary FP32 matrix multiplication and has its own
-identity; it is not part of the exact-integer base projection.
+``heteroes.eval.frozen_int8_cuda``. The adapter delta uses the strict pairwise FP32 operator contract on the
+widened FP16 factors; it is not part of the exact-integer base projection but is bit-identical across the
+reference and CUDA kernels that implement that contract.
 """
 
 from __future__ import annotations
@@ -20,6 +21,7 @@ import torch
 import torch.nn as nn
 
 from heteroes.eval import frozen_int8
+from heteroes.eval import reference_ops as ops
 from heteroes.eval.reference_ops import ReferenceArithmeticError
 from heteroes.model.lora import load_adapter_, trainable_schema
 from heteroes.model.weights_io import write_weights
@@ -90,6 +92,7 @@ class FrozenInt8LoraLinear(nn.Module):
             self.register_buffer("bias", bias.detach().to(device=device, dtype=torch.float16).contiguous())
         self.lora_A = nn.ModuleDict()
         self.lora_B = nn.ModuleDict()
+        self._artifact_cache = None
         # Initialize on CPU so the same seed produces the same adapter on every device and the caller's
         # random state is untouched. PEFT's default is Kaiming-uniform A and zero B.
         with torch.random.fork_rng(devices=[]):
@@ -106,35 +109,45 @@ class FrozenInt8LoraLinear(nn.Module):
     def cpu_artifact(self):
         if self.weight_q.device.type != "cpu":
             raise ReferenceArithmeticError("The CPU oracle needs the frozen module on the host")
-        return frozen_int8.FrozenInt8Artifact(
+        key = (
+            self.weight_q.data_ptr(),
+            self.weight_scale.data_ptr(),
+            self.weight_q._version,
+            self.weight_scale._version,
+            frozen_int8.metadata_digest(self.artifact_metadata),
+        )
+        if self._artifact_cache is not None and self._artifact_cache[0] == key:
+            return self._artifact_cache[1]
+        artifact = frozen_int8.FrozenInt8Artifact(
             weight_q=self.weight_q,
             weight_scale=self.weight_scale,
             metadata=self.artifact_metadata,
             sha256=self.artifact_sha256,
             format_version=frozen_int8.ARTIFACT_FORMAT_VERSION,
         )
+        self._artifact_cache = (key, artifact)
+        return artifact
 
     def base_linear_cpu(self, value):
         """Exact B22 int8 projection with the stored frozen bias, on the host."""
         return frozen_int8.linear(value, self.cpu_artifact(), self.bias)
 
     def lora_delta(self, value):
-        """FP32 adapter delta from the ORIGINAL activation, in the adapter's own arithmetic namespace.
+        """CPU strict adapter delta from the ORIGINAL activation.
 
-        ``A`` and ``B`` are widened FP16 factors; both matrix products and the scale multiply are ordinary
-        FP32 torch operations. This is deliberately separate from the exact-integer base projection and is not
-        claimed to be bit-identical across vendors.
+        Both matrix products widen the FP16 factors and use the fixed adjacent-pair FP32 tree, the scale uses
+        the strict multiply and nonfinite values are rejected. This is separate from the exact-integer base but
+        is the same operator contract the CUDA graph implements for nonzero adapters.
         """
         if not isinstance(value, torch.Tensor) or not value.is_floating_point() or value.shape[-1] != self.in_features:
             raise ReferenceArithmeticError("A LoRA delta needs a floating tensor with the base input width")
-        if value.device != self.weight_q.device:
-            raise ReferenceArithmeticError("A LoRA delta needs the activation on the frozen module's device")
+        if value.device.type != "cpu" or self.weight_q.device.type != "cpu":
+            raise ReferenceArithmeticError("The strict CPU adapter delta needs host storage")
         adapter_a = self.lora_A[self.adapter_name].weight
         adapter_b = self.lora_B[self.adapter_name].weight
-        flat = value.reshape(-1, self.in_features).float()
-        middle = torch.matmul(flat, adapter_a.float().transpose(0, 1))
-        delta = torch.matmul(middle, adapter_b.float().transpose(0, 1))
-        return (delta * self.scaling).reshape(*value.shape[:-1], self.out_features)
+        middle = ops.linear(value, adapter_a)
+        delta = ops.linear(middle, adapter_b)
+        return ops.mul(delta, self.scaling)
 
     def forward(self, value):
         """CPU oracle: exact frozen base, then the separately named adapter delta."""
@@ -173,29 +186,9 @@ def _check_source_linear(module):
     return module
 
 
-def freeze_linear(
-    module,
-    *,
-    rank,
-    alpha,
-    seed,
-    name="projection",
-    device=None,
-    adapter_name="default",
-    metadata=None,
-    artifact_path=None,
-    expected_sha256=None,
-):
-    """Replace one FP16 ``nn.Linear`` by typed frozen storage, optionally pinned to an artifact file.
-
-    Without ``artifact_path`` the source weight is quantized on the host and the canonical bytes are content
-    addressed in memory. With a path, an existing file is verified and used; a missing file is written only
-    after the computed digest matches ``expected_sha256`` when one is supplied.
-    """
-    _check_source_linear(module)
+def _quantize_and_pin(module, name, metadata, artifact_path, expected_sha256):
     metadata = {} if metadata is None else dict(metadata)
     metadata.setdefault("module", name)
-    target_device = module.weight.device if device is None else torch.device(device)
     source = module.weight.detach().to(device="cpu", dtype=torch.float32)
     if artifact_path is not None:
         artifact_path = Path(artifact_path)
@@ -220,6 +213,31 @@ def freeze_linear(
         digest = frozen_int8.artifact_digest(weight_q, weight_scale, metadata=metadata)
         if expected_sha256 is not None and digest != expected_sha256:
             raise ReferenceArithmeticError("Freshly quantized bytes do not match the pinned artifact hash")
+    return weight_q, weight_scale, metadata, digest
+
+
+def freeze_linear(
+    module,
+    *,
+    rank,
+    alpha,
+    seed,
+    name="projection",
+    device=None,
+    adapter_name="default",
+    metadata=None,
+    artifact_path=None,
+    expected_sha256=None,
+):
+    """Replace one FP16 ``nn.Linear`` by typed frozen storage, optionally pinned to an artifact file.
+
+    Without ``artifact_path`` the source weight is quantized on the host and the canonical bytes are content
+    addressed in memory. With a path, an existing file is verified and used; a missing file is written only
+    after the computed digest matches ``expected_sha256`` when one is supplied.
+    """
+    _check_source_linear(module)
+    target_device = module.weight.device if device is None else torch.device(device)
+    weight_q, weight_scale, metadata, digest = _quantize_and_pin(module, name, metadata, artifact_path, expected_sha256)
     result = FrozenInt8LoraLinear(
         weight_q,
         weight_scale,
@@ -303,6 +321,38 @@ def freeze_projections(
         _replace(parent, attribute, frozen)
         digests[name] = digest
     return digests
+
+
+def freeze_tied_head(model, *, metadata=None, artifact_path=None, expected_sha256=None):
+    """Attach pinned int8 storage to a tied LM head without replacing the shared FP16 embedding weight.
+
+    The head has no ``weight`` parameter of its own after this call either: the original FP16 parameter stays
+    tied to ``embed_tokens`` and the frozen rows/scales live in sidecar buffers. Decoding through the frozen
+    backend selects those buffers, so the head arithmetic is the pinned int8 product rather than the strict
+    FP16 product. Replacing the module instead would break the tie, which is why this is a separate explicit
+    operation from :func:`freeze_projections`.
+    """
+    head = getattr(model, "lm_head", None)
+    embeddings = getattr(getattr(model, "model", None), "embed_tokens", None)
+    if (
+        not isinstance(head, nn.Linear)
+        or not isinstance(embeddings, nn.Embedding)
+        or head.weight is not embeddings.weight
+    ):
+        raise ReferenceArithmeticError("A frozen sidecar head requires the tied FP16 LM head")
+    if getattr(head, "is_frozen_int8_head", False) or hasattr(head, "frozen_weight_q"):
+        raise ReferenceArithmeticError("The LM head already carries frozen int8 storage")
+    _check_source_linear(head)
+    weight_q, weight_scale, metadata, digest = _quantize_and_pin(
+        head, "lm_head", metadata, artifact_path, expected_sha256
+    )
+    device = head.weight.device
+    head.is_frozen_int8_head = True
+    head.frozen_head_sha256 = digest
+    head.frozen_head_metadata = dict(metadata)
+    head.register_buffer("frozen_weight_q", weight_q.to(device=device, dtype=torch.int8).contiguous())
+    head.register_buffer("frozen_weight_scale", weight_scale.to(device=device, dtype=torch.float32).contiguous())
+    return digest
 
 
 def require_frozen_projections(model, names):

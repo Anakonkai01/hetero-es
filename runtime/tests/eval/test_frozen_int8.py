@@ -33,11 +33,16 @@ def fraction_from_bits(bits):
 
 
 def float_bits(value):
-    """Nearest FP32 (ties-even), with signed-zero FTZ. Exact rational input, no binary64."""
+    """Nearest FP32 (ties-even), with signed-zero FTZ. Exact rational input, no binary64.
+
+    Values above max-finite but below the RNE overflow midpoint still round DOWN to max-finite. Only the
+    midpoint itself and values above it round to infinity.
+    """
     if not value:
         return 0
     sign, value = (0x80000000 if value < 0 else 0), abs(value)
-    if value > Fraction((1 << 24) - 1) * power_two(104):
+    maximum = Fraction((1 << 24) - 1) * power_two(104)
+    if value >= maximum + power_two(103):
         raise ReferenceArithmeticError("overflow")
     lo, hi = 0, 0x7F7FFFFF
     while lo < hi:
@@ -277,6 +282,70 @@ def test_artifact_hash_covers_metadata_and_payload(tmp_path):
     assert first != third
 
 
+def test_artifact_admission_recomputes_the_content_address_and_seals_live_storage():
+    quantized = torch.tensor([[1, 2], [3, 4]], dtype=torch.int8)
+    scale = torch.tensor([1.0, 2.0], dtype=torch.float32)
+    digest = frozen_int8.artifact_digest(quantized, scale)
+    artifact = frozen_int8.FrozenInt8Artifact(quantized, scale, {}, digest, frozen_int8.ARTIFACT_FORMAT_VERSION)
+    artifact.verify()
+    with pytest.raises(ReferenceArithmeticError, match="version"):
+        frozen_int8.FrozenInt8Artifact(quantized, scale, {}, digest, frozen_int8.ARTIFACT_FORMAT_VERSION + 1)
+    with pytest.raises(ReferenceArithmeticError, match="digest"):
+        frozen_int8.FrozenInt8Artifact(quantized, scale, {"forged": True}, digest, frozen_int8.ARTIFACT_FORMAT_VERSION)
+    with pytest.raises(ReferenceArithmeticError, match="digest"):
+        frozen_int8.FrozenInt8Artifact(quantized, scale, {}, "0" * 64, frozen_int8.ARTIFACT_FORMAT_VERSION)
+    with pytest.raises(ReferenceArithmeticError, match="digest"):
+        frozen_int8.verify_payload(quantized, scale, {}, "0" * 64)
+
+    quantized[0, 0] = 9
+    with pytest.raises(ReferenceArithmeticError, match="changed after verification"):
+        artifact.verify()
+    with pytest.raises(ReferenceArithmeticError, match="changed after verification"):
+        frozen_int8.linear(torch.ones((1, 2), dtype=torch.float32), artifact)
+
+
+def test_artifact_verify_rehashes_a_storage_write_that_bypasses_the_version_counter():
+    quantized = torch.tensor([[1, 2], [3, 4]], dtype=torch.int8)
+    scale = torch.tensor([1.0, 2.0], dtype=torch.float32)
+    digest = frozen_int8.artifact_digest(quantized, scale)
+    artifact = frozen_int8.FrozenInt8Artifact(quantized, scale, {}, digest, frozen_int8.ARTIFACT_FORMAT_VERSION)
+    with torch.no_grad():
+        quantized.data[0, 0] = 7
+    with pytest.raises(ReferenceArithmeticError, match="no longer matches"):
+        artifact.verify()
+
+
+def test_artifact_metadata_mutation_breaks_the_seal_before_arithmetic():
+    quantized = torch.tensor([[1, 2], [3, 4]], dtype=torch.int8)
+    scale = torch.tensor([1.0, 2.0], dtype=torch.float32)
+    digest = frozen_int8.artifact_digest(quantized, scale, metadata={"module": "q"})
+    artifact = frozen_int8.FrozenInt8Artifact(
+        quantized, scale, {"module": "q"}, digest, frozen_int8.ARTIFACT_FORMAT_VERSION
+    )
+    artifact.metadata["module"] = "forged"
+    with pytest.raises(ReferenceArithmeticError, match="metadata changed"):
+        artifact.verify()
+    with pytest.raises(ReferenceArithmeticError, match="metadata changed"):
+        frozen_int8.linear(torch.ones((1, 2), dtype=torch.float32), artifact)
+
+
+def test_linear_consumes_the_audit_artifact_at_the_max_finite_rounding_boundary():
+    source = torch.tensor([[1.0, 2.0**-6, 127.0 / 64.0 - 2.0**-23]], dtype=torch.float32)
+    quantized, scale = frozen_int8.quantize_weight(source)
+    assert quantized.tolist() == [[64, 1, 127]]
+    assert int(scale.view(torch.int32)[0]) & 0xFFFFFFFF == 0x3C7FFFFF
+    value = torch.tensor([[3.4028234663852886e38, 2.0**106, 0.0]], dtype=torch.float32)
+    artifact = frozen_int8.FrozenInt8Artifact(
+        quantized,
+        scale,
+        {},
+        frozen_int8.artifact_digest(quantized, scale),
+        frozen_int8.ARTIFACT_FORMAT_VERSION,
+    )
+    output = frozen_int8.linear(value, artifact)
+    assert int(output.view(torch.int32)[0]) & 0xFFFFFFFF == 0x7F7FFFFF
+
+
 def test_reader_rejects_payload_header_and_expected_hash_tampering(tmp_path):
     quantized = torch.tensor([[1, 2], [3, 4]], dtype=torch.int8)
     scale = torch.tensor([1.0, 2.0], dtype=torch.float32)
@@ -475,6 +544,29 @@ def test_scaled_integer_encoder_exact_max_and_smallest_normal_boundaries():
     assert frozen_int8.encode_scaled_integer_bits((1 << 24) - 1, -150) == 0x00800000
     assert frozen_int8.encode_scaled_integer_bits((1 << 24) - 2, -150) == 0
     assert frozen_int8.encode_scaled_integer_bits(-((1 << 24) - 2), -150) == 0x80000000
+
+
+def test_encoder_rounds_down_to_max_finite_above_max_finite_below_the_overflow_midpoint():
+    # 2**102 above max-finite and 2**102 below the RNE overflow midpoint. IEEE RNE still returns max-finite.
+    integer = (((1 << 24) - 1) << 2) + 1
+    exact = Fraction(integer) * power_two(102)
+    assert Fraction((1 << 24) - 1) * power_two(104) < exact < Fraction(2**128) - power_two(103)
+    assert float_bits(exact) == 0x7F7FFFFF
+    assert float_bits(-exact) == 0xFF7FFFFF
+    assert frozen_int8.encode_scaled_integer_bits(integer, 102) == 0x7F7FFFFF
+    assert frozen_int8.encode_scaled_integer_bits(-integer, 102) == 0xFF7FFFFF
+
+
+@pytest.mark.parametrize("integer", [((((1 << 24) - 1) << 2) + 2), ((((1 << 24) - 1) << 2) + 3)])
+def test_encoder_overflows_at_or_above_the_rne_overflow_midpoint(integer):
+    exact = Fraction(integer) * power_two(102)
+    assert exact >= Fraction(2**128) - power_two(103)
+    with pytest.raises(ReferenceArithmeticError):
+        float_bits(exact)
+    with pytest.raises(ReferenceArithmeticError, match="[Oo]verflow|Nonfinite"):
+        frozen_int8.encode_scaled_integer_bits(integer, 102)
+    with pytest.raises(ReferenceArithmeticError, match="[Oo]verflow|Nonfinite"):
+        frozen_int8.encode_scaled_integer_bits(-integer, 102)
 
 
 def test_scaled_integer_encoder_rounds_normal_ties_to_even():

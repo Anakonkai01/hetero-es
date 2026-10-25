@@ -33,7 +33,7 @@ ARTIFACT_FORMAT_VERSION = 1
 QUANTIZER_VERSION = "per_output_channel_int8_ceil_absmax_over_127_rne_v1_experimental"
 OPERATOR_VERSION = "frozen_int8_b22_exact_reference_v1_experimental"
 ADAPTER_STORAGE_VERSION = "frozen_int8_fp16_lora_storage_v1_experimental"
-ADAPTER_ARITHMETIC_VERSION = "fp32_matmul_from_fp16_factors_zero_delta_preserves_base_v1_experimental"
+ADAPTER_ARITHMETIC_VERSION = "pairwise_f32_fp16_factors_scale_add_zero_delta_preserves_base_v1_experimental"
 MAGNITUDE_BITS = 22
 ACTIVATION_LIMBS = 3
 MAX_WIDTH = integer_reference.MAX_WIDTH
@@ -109,7 +109,6 @@ def _weight_matrix(weight):
     return weight
 
 
-@torch.inference_mode()
 def quantize_weight(weight):
     """Return signed int8 rows and FP32 per-row scales using the exact ceiling rule.
 
@@ -187,15 +186,6 @@ def encode_scaled_integer_bits(value, exponent):
     final_exponent = leading + exponent
     if final_exponent > 127:
         raise ReferenceArithmeticError("Nonfinite scaled integer output overflow")
-    if final_exponent == 127:
-        # Least FP32 is (2**24 - 1) * 2**104; compare exactly without a float or Fraction intermediate.
-        shift = exponent - 104
-        if shift >= 0:
-            too_large = magnitude << shift > (1 << 24) - 1
-        else:
-            too_large = magnitude > ((1 << 24) - 1) << -shift
-        if too_large:
-            raise ReferenceArithmeticError("Nonfinite scaled integer output overflow")
     if final_exponent < -126:
         # Round in units of 2**-149 before flushing; a round up to the smallest normal survives.
         rounded = _round_shift(magnitude, -exponent - 149)
@@ -205,19 +195,85 @@ def encode_scaled_integer_bits(value, exponent):
         rounded >>= 1
         final_exponent += 1
     if final_exponent > 127:
+        # RNE overflow midpoint: max-finite + 2**103 rounds to infinity; below it rounds down to max-finite.
         raise ReferenceArithmeticError("Nonfinite scaled integer output overflow")
     return sign | ((final_exponent + 127) << 23) | (rounded & 0x7FFFFF)
 
 
 @dataclass(frozen=True)
 class FrozenInt8Artifact:
-    """Verified immutable artifact payload. There is deliberately no dequantized weight tensor."""
+    """Verified immutable artifact payload. There is deliberately no dequantized weight tensor.
+
+    Construction re-derives the content address from the payload, so a forged version, dtype, out-of-range
+    scale or mismatched hash is rejected before arithmetic. The payload tensors are still backed by mutable
+    torch storage: any versioned in-place write invalidates the seal, and ``verify`` re-hashes the payload for
+    explicit lifecycle checks. ``.data`` writes bypass the autograd version counter, so callers that use that
+    escape hatch must call ``verify`` at the next admission boundary.
+    """
 
     weight_q: torch.Tensor
     weight_scale: torch.Tensor
     metadata: dict
     sha256: str
     format_version: int
+
+    def __post_init__(self):
+        _validate_payload(self.weight_q, self.weight_scale)
+        if type(self.format_version) is not int or self.format_version != ARTIFACT_FORMAT_VERSION:
+            raise ReferenceArithmeticError("Unsupported frozen int8 artifact format version")
+        if not isinstance(self.metadata, dict):
+            raise ReferenceArithmeticError("Frozen int8 artifact metadata must be an object")
+        if not _valid_digest(self.sha256):
+            raise ReferenceArithmeticError("Frozen int8 artifact needs one lowercase SHA-256 digest")
+        digest = artifact_digest(self.weight_q, self.weight_scale, metadata=self.metadata)
+        if digest != self.sha256:
+            raise ReferenceArithmeticError("Frozen int8 artifact digest does not match its payload")
+        object.__setattr__(self, "_sealed_versions", self._versions())
+        object.__setattr__(self, "_sealed_metadata", metadata_digest(self.metadata))
+
+    def _versions(self):
+        return (self.weight_q._version, self.weight_scale._version)
+
+    def _seal(self):
+        if self._versions() != self._sealed_versions or metadata_digest(self.metadata) != self._sealed_metadata:
+            raise ReferenceArithmeticError("Frozen int8 artifact storage or metadata changed after verification")
+
+    @torch.inference_mode()
+    def verify(self):
+        """Re-check the seal and the full content address at an admission boundary."""
+        self._seal()
+        if artifact_digest(self.weight_q, self.weight_scale, metadata=self.metadata) != self.sha256:
+            raise ReferenceArithmeticError("Frozen int8 artifact payload no longer matches its digest")
+
+
+def _valid_digest(value):
+    return isinstance(value, str) and len(value) == 64 and all(character in "0123456789abcdef" for character in value)
+
+
+def metadata_digest(metadata):
+    """Canonical SHA-256 of artifact metadata, used by the seal and the module cache key."""
+    if not isinstance(metadata, dict):
+        raise ReferenceArithmeticError("Artifact metadata must be an object")
+    return hashlib.sha256(_canonical_json(metadata)).hexdigest()
+
+
+@torch.inference_mode()
+def verify_payload(weight_q, weight_scale, metadata, sha256):
+    """Admit a payload that may live on another device by re-hashing a bounded CPU copy."""
+    if (
+        not isinstance(weight_q, torch.Tensor)
+        or not isinstance(weight_scale, torch.Tensor)
+        or weight_q.device != weight_scale.device
+        or not isinstance(metadata, dict)
+        or not _valid_digest(sha256)
+    ):
+        raise ReferenceArithmeticError("Unsupported frozen int8 artifact storage or admission input")
+    host_q = weight_q.detach().to(device="cpu", dtype=torch.int8).contiguous()
+    host_scale = weight_scale.detach().to(device="cpu", dtype=torch.float32).contiguous()
+    _validate_payload(host_q, host_scale)
+    if artifact_digest(host_q, host_scale, metadata=metadata) != sha256:
+        raise ReferenceArithmeticError("Frozen int8 artifact payload no longer matches its digest")
+    return True
 
 
 def _validate_payload(weight_q, weight_scale):
@@ -429,9 +485,11 @@ def _validate_header(header):
     return shape
 
 
-@torch.inference_mode()
 def read_artifact(path, *, expected_sha256=None):
-    """Read and verify one artifact. Supplying `expected_sha256` pins the whole file."""
+    """Read and verify one artifact. Supplying `expected_sha256` pins the whole file.
+
+    The payload is a normal (not inference-mode) tensor so its storage stamp tracks in-place writes for the seal.
+    """
     if expected_sha256 is not None and (
         type(expected_sha256) is not str
         or len(expected_sha256) != 64
@@ -482,6 +540,7 @@ def linear(value, artifact, bias=None, *, output_tile=32):
     """Exact CPU projection with B22 activations, one final encoding, then the reference bias add."""
     if not isinstance(artifact, FrozenInt8Artifact):
         raise ReferenceArithmeticError("Frozen int8 linear needs a verified artifact")
+    artifact._seal()
     if (
         not isinstance(value, torch.Tensor)
         or value.dtype != torch.float32
@@ -532,12 +591,12 @@ def linear(value, artifact, bias=None, *, output_tile=32):
 
 
 def combine_adapter(base, delta):
-    """Combine the exact base output with a separately named FP32 adapter delta.
+    """Combine the exact base output with the strict FP32 adapter delta.
 
-    A zero delta preserves the base bit pattern, including a signed zero. Every nonzero delta is an ordinary
-    FP32 add: this is the adapter's own namespace, not part of the exact-integer base projection, so it makes no
-    subnormal-flush, nonfinite-flag or cross-vendor bit-equality claim. It is also free of host synchronization,
-    which keeps the CUDA captured decode legal.
+    A zero delta preserves the base bit pattern, including a signed zero. A nonzero delta is the strict
+    ``reference_ops.add``: separate FP32 add, subnormals flushed to signed zero, nonfinite values rejected.
+    The zero-delta select is part of the adapter contract and is not an IEEE add with a signed-zero rounding
+    choice.
     """
     if (
         not isinstance(base, torch.Tensor)
@@ -548,7 +607,8 @@ def combine_adapter(base, delta):
         or base.device != delta.device
     ):
         raise ReferenceArithmeticError("Unsupported frozen adapter delta")
-    return torch.where(delta == 0, base, torch.add(base, delta))
+    added = ops.add(base, delta)
+    return torch.where(delta == 0, base, added)
 
 
 def identity():

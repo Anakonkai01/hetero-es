@@ -94,6 +94,9 @@ def test_encoder_matches_the_python_big_integer_oracle():
         # The high limb addition carries: low32(magnitude)=all ones and the product below the split is all ones.
         (0x00010001FFFFFFFF, 0xFFFF, -40),
         (-0x00010001FFFFFFFF, 0xFFFF, -40),
+        # Just above max-finite but below the RNE overflow midpoint: rounds down to max-finite.
+        ((((1 << 24) - 1) << 2) + 1, 1, 102),
+        (-((((1 << 24) - 1) << 2) + 1), 1, 102),
     ]
     generator = random.Random(20261025)
     for _ in range(300):
@@ -145,6 +148,41 @@ def test_encoder_flags_overflow_and_unsupported_exponent():
             torch.tensor([1], dtype=torch.int32, device="cuda"),
             torch.tensor([-2049], dtype=torch.int32, device="cuda"),
         )
+
+
+def test_encoder_matches_the_rne_overflow_midpoint_and_below_it():
+    kernel = kernels()
+    below = (((1 << 24) - 1) << 2) + 1
+    actual = kernel.encode_products(
+        torch.tensor([below, -below], dtype=torch.int64, device="cuda"),
+        torch.tensor([1, 1], dtype=torch.int32, device="cuda"),
+        torch.tensor([102, 102], dtype=torch.int32, device="cuda"),
+    )
+    assert bits(actual.cpu()).tolist() == [0x7F7FFFFF, -8388609]
+    for integer in ((((1 << 24) - 1) << 2) + 2, ((((1 << 24) - 1) << 2) + 3)):
+        with pytest.raises(ReferenceArithmeticError, match="Nonfinite"):
+            kernel.encode_products(
+                torch.tensor([integer], dtype=torch.int64, device="cuda"),
+                torch.tensor([1], dtype=torch.int32, device="cuda"),
+                torch.tensor([102], dtype=torch.int32, device="cuda"),
+            )
+
+
+def test_negative_limbs_reconstruct_an_exact_signed_projection():
+    kernel = kernels()
+    generator = torch.Generator().manual_seed(89)
+    weight = (-torch.rand((5, 257), generator=generator, dtype=torch.float32)).half()
+    value = -torch.rand((3, 257), generator=generator, dtype=torch.float32) * 0.5
+    quantized, scale = frozen_int8.quantize_weight(weight)
+    compare(kernel, value, quantized, scale, None)
+
+
+def test_linear_consumes_the_audit_artifact_at_the_max_finite_rounding_boundary():
+    kernel = kernels()
+    source = torch.tensor([[1.0, 2.0**-6, 127.0 / 64.0 - 2.0**-23]], dtype=torch.float32)
+    quantized, scale = frozen_int8.quantize_weight(source)
+    value = torch.tensor([[3.4028234663852886e38, 2.0**106, 0.0]], dtype=torch.float32)
+    compare(kernel, value, quantized, scale, None)
 
 
 @pytest.mark.parametrize(

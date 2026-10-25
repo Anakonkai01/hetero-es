@@ -472,6 +472,31 @@ def test_cuda_add_and_silu_gate_match_reference_bits(kernels):
 
 
 @gpu
+def test_cuda_scale_matches_reference_bits_including_subnormal_flush(kernels):
+    value = torch.tensor(
+        [2.0**-126, -(2.0**-126), -0.0, 0.0, 1.0, -3.5, 2.0**-149],
+        dtype=torch.float32,
+        device="cuda",
+    )
+    for factor in (0.5, -0.5, 5.0 / 3.0):
+        flag = kernels.new_error_flag()
+        actual = kernels.scale(value, factor, error_flag=flag)
+        kernels.raise_if_error(flag)
+        expected = ops.mul(value, factor)
+        assert torch.equal(bits(actual), bits(expected))
+        assert torch.equal(bits(expected.cpu()), bits(ops.mul(value.cpu(), factor)))
+    flag = kernels.new_error_flag()
+    big = torch.full((4,), 3e38, device="cuda")
+    kernels.scale(big, 2.0, error_flag=flag)
+    with pytest.raises(ReferenceArithmeticError):
+        kernels.raise_if_error(flag)
+    with pytest.raises(ReferenceArithmeticError, match="factor"):
+        kernels.scale(value, float("nan"))
+    with pytest.raises(ReferenceArithmeticError, match="factor"):
+        kernels.scale(value, True)
+
+
+@gpu
 def test_cuda_rope_matches_reference_rotation_and_layout(kernels):
     generator = torch.Generator().manual_seed(5)
     length, heads, dim = 7, 3, 8
