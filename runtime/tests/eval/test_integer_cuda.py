@@ -33,9 +33,78 @@ def test_integer_audit_requires_exact_signed_mma_and_refuses_float_multiply():
     assert sc.audit_integer_ptx(clean.replace(".s8.s8.s32", ".u8.u8.s32"))["violations"]
 
 
+def test_integer_conversion_audit_only_admits_the_proved_nearest_even_mode():
+    mma = "mma.sync.aligned.m16n8k32.row.col.s32.s8.s8.s32 {d0,d1,d2,d3}, {a0,a1,a2,a3}, {b0,b1}, {c0,c1,c2,c3};"
+    assert not sc.audit_integer_ptx(mma + "\ncvt.rni.s32.f32 r0,f0;")["violations"]
+    for rounding in ("rzi", "rmi", "rpi"):
+        assert sc.audit_integer_ptx(mma + f"\ncvt.{rounding}.s32.f32 r0,f0;")["violations"]
+    assert sc.audit_integer_ptx(mma + "\ncvt.rni.f32.f32 f0,f1;")["violations"]
+    assert not sc.audit_integer_sass("IMMA.16832.S8.S8 R0,R1,R2,R3;\nF2I.NTZ R0,R1;")["violations"]
+    assert sc.audit_integer_sass("IMMA.16832.S8.S8 R0,R1,R2,R3;\nF2I.FLOOR.NTZ R0,R1;")["violations"]
+
+
 gpu = pytest.mark.skipif(
     os.environ.get("HETEROES_GPU_ACCEPTANCE") != "1" or not torch.cuda.is_available(), reason="GPU opt-in"
 )
+
+
+@gpu
+@pytest.mark.parametrize("magnitude_bits", [14, 22])
+def test_every_admitted_finite_fp16_value_and_weight_row_exponent_quantizes_exactly(magnitude_bits):
+    """All ~1M finite value/exponent pairs, not just random matmul outputs after cancellation."""
+    from heteroes.eval.integer_cuda import _SOURCE
+
+    context = torch.empty(1, device="cuda")
+    kernels = cuda_class()("cuda", magnitude_bits=magnitude_bits)
+    stub = r"""
+extern "C" __global__ void probe_quant(int* out) {
+  int i=blockIdx.x*256+threadIdx.x;
+  if(i>=40*65536)return;
+  int exponent=i/65536-24; u16 u=(u16)i; unsigned a=u&0x7fffu, e=a>>10;
+  int actual=!a ? -1000 : e ? (int)e-15 : 31-__clz(a)-24;
+  out[i]=(a>=0x7c00u || actual>exponent) ? (-2147483647-1) : quant_half(u,exponent);
+}
+"""
+    defines = {
+        "WIDTH": 32,
+        "MAGNITUDE_BITS": magnitude_bits,
+        "DIGITS": 2 if magnitude_bits == 14 else 3,
+        "HAS_BIAS": 0,
+        "M_GROUPS": 1,
+        "WARPS": 4,
+        "SPLIT_K": 1,
+    }
+    header = "".join(f"#define {key} {value}\n" for key, value in defines.items())
+    fn = kernels._compile("exhaust-half-quant", header + _SOURCE + stub, ["probe_quant"], integer_mma=True)[
+        "probe_quant"
+    ]
+    output = torch.empty((40, 65536), dtype=torch.int32, device="cuda")
+    kernels._launch(fn, grid=output.numel() // 256, block=(256, 1), pointers=(output,), integers=())
+    actual = output.cpu()
+    patterns = torch.arange(65536, dtype=torch.int32)
+    values = patterns.to(torch.int16).view(torch.float16).double()
+    floor_exponents = torch.tensor(
+        [
+            -1000
+            if not (u & 0x7FFF)
+            else ((u & 0x7FFF) >> 10) - 15
+            if (u & 0x7FFF) >> 10
+            else (u & 1023).bit_length() - 1 - 24
+            for u in range(65536)
+        ]
+    )
+    finite = (patterns & 0x7FFF) < 0x7C00
+    admitted = 0
+    for row, exponent in enumerate(range(-24, 16)):
+        valid = finite & (floor_exponents <= exponent)
+        admitted += int(valid.sum())
+        # FP16 has 11 significand bits; multiplying by this power of two is exact in binary64.
+        # Its entire admitted magnitude range lies within [2^-26, 2^22], so no double rounding occurs.
+        expected = torch.full((65536,), -(2**31), dtype=torch.int32)
+        expected[valid] = torch.round(values[valid] * 2.0 ** (magnitude_bits - 1 - exponent)).to(torch.int32)
+        assert bool((expected[valid].abs() <= 2**magnitude_bits).all())
+        assert torch.equal(actual[row], expected), (magnitude_bits, exponent)
+    assert admitted == 1017852
 
 
 @gpu

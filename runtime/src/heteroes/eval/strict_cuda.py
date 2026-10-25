@@ -591,7 +591,9 @@ def audit_sass(text, exact=()):
 
 def audit_integer_ptx(text):
     """Integer projections admit signed int8 MMA and rounded bias add, never floating dot/multiply."""
-    result = audit_ptx(text)
+    # Exact normal exponent-bit scaling of finite FP16 weights followed by integer ties-even RNE.
+    # The admitted domain is proved in integer-projection-v1.md; all other rounding modes are refused.
+    result = audit_ptx(text, exact=("cvt.rni.s32.f32",))
     result["integerMmaOps"] = len(re.findall(r"\bmma\.sync\.aligned\.m16n8k32\.row\.col\.s32\.s8\.s8\.s32\s", text))
     if not result["integerMmaOps"]:
         result["violations"].append("Missing signed integer m16n8k32 MMA")
@@ -601,7 +603,7 @@ def audit_integer_ptx(text):
 
 
 def audit_integer_sass(text):
-    result = audit_sass(text)
+    result = audit_sass(text, exact=("F2I.NTZ",))
     result["integerMmaOps"] = len(re.findall(r"\bIMMA(?:\.[A-Z0-9_]+)*\s", text))
     if not result["integerMmaOps"]:
         result["violations"].append("Missing integer IMMA")

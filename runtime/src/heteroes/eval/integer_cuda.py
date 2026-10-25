@@ -57,11 +57,16 @@ __device__ __forceinline__ int quant_float(unsigned u, int exponent) {
   return u>>31 ? -q : q;
 }
 __device__ __forceinline__ int quant_half(u16 u, int exponent) {
-  unsigned a=u&0x7fffu, e=a>>10, m=a&1023u;
-  if(!a || e==31) return 0;
-  int shift=e ? exponent-((int)e-15)+11-MAGNITUDE_BITS : exponent+25-MAGNITUDE_BITS;
-  int q=(int)rne_shift(e ? (m|1024u) : m,shift);
-  return u>>15 ? -q : q;
+  unsigned a=u&0x7fffu;
+  if(!a || a>=0x7c00u) return 0;
+  // Exact FP16 widening and exponent-bit scaling. For every admitted live row exponent in [-24,15],
+  // the nonzero scaled weight is normal FP32: >=2^-26 (B14) or >=2^-18 (B22), and <2^B.
+  // Thus no intermediate rounding/underflow/overflow occurs; integer RNE matches the CPU contract.
+  unsigned bits=__float_as_uint(widen(u));
+  bits+=(unsigned)((MAGNITUDE_BITS-1-exponent)*0x800000);
+  int result;
+  asm("cvt.rni.s32.f32 %0, %1;" : "=r"(result) : "f"(__uint_as_float(bits)));
+  return result;
 }
 __device__ __forceinline__ void pack_digits(unsigned* words, int q, int element) {
   #pragma unroll

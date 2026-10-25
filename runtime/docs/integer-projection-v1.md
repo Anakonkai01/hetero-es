@@ -27,6 +27,15 @@ minimum normal. Multiplying by a precomputed FP32 scale would lose this boundary
 underflow have explicit tests. Rational test oracles use `Fraction` and a search over representable FP32 values,
 avoiding an intermediate binary64 rounding.
 
+The optimized weight quantizer widens FP16 exactly, adjusts FP32 exponent bits, then executes PTX
+`cvt.rni.s32.f32`. Every admitted finite nonzero weight has a normal scaled FP32 magnitude: at least 2^-26 for
+B14 or 2^-18 for B22 and less than 2^B, because its row exponent is in [-24,15] and dominates that value's exponent.
+The exponent change therefore has no rounding, underflow or overflow, and the integer conversion implements exactly
+the reference's nearest-even rounding. Both signed zeros and all nonfinite patterns have explicit branches; the
+independent row-metadata pass rejects nonfinite weights before their scales may be used. There is no FP multiply.
+An opt-in test exhausts all 1,017,852 admitted finite FP16 value/row-exponent pairs per precision. Its FP64
+power-of-two oracle is exact on this domain, not an approximate binary64 substitute for the final integer encoder.
+
 ## Exact integer execution
 
 Balanced radix-256 signed digits reconstruct q exactly. Low digits are in [-128,127], the final digit in [-64,64].
