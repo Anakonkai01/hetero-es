@@ -69,7 +69,7 @@ existing strict decoder; the prototype is not a replacement for managed GPU owne
 
 ## Evidence and remaining gates
 
-Receipts: [integer feasibility](../../docs/evidence/2026-10-25-strict-integer/README.md). CPU rational answers, physical
+Receipts: [integer feasibility](../../docs/evidence/2026-10-25-strict-integer/RESULTS-01.md). CPU rational answers, physical
 GPU encoder boundaries, odd widths/tails, precision identity, compiler audit, batch/permutation equality, live-weight
 changes and graph composition are distinct checks. Synthetic matrix speed is not trained-model throughput.
 

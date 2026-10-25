@@ -1,0 +1,8 @@
+control ok    | 42 passed in 0.71s
+killed       drop-halfway-parity | 1 failed, 9 passed in 0.70s
+killed       flush-before-rounding | 1 failed, 13 passed in 0.70s
+killed       batch-dependent-scale | 1 failed in 0.70s
+killed       discard-radix-carry | 1 failed, 2 passed in 0.69s
+killed       omit-bias | 1 failed, 26 passed in 0.70s
+
+5 of 5 mutants killed.

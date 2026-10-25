@@ -1,0 +1,32 @@
+[
+  {
+    "name": "drop-halfway-parity",
+    "file": "src/heteroes/eval/integer_reference.py",
+    "old": "return whole + (remainder > halfway or (remainder == halfway and whole & 1))",
+    "new": "return whole + (remainder > halfway)"
+  },
+  {
+    "name": "flush-before-rounding",
+    "file": "src/heteroes/eval/integer_reference.py",
+    "old": "rounded = _round_shift(magnitude, -exponent - 149)",
+    "new": "rounded = 0"
+  },
+  {
+    "name": "batch-dependent-scale",
+    "file": "src/heteroes/eval/integer_reference.py",
+    "old": "maximum = absolute.amax(dim=1)",
+    "new": "maximum = absolute.amax().expand(value.shape[0])"
+  },
+  {
+    "name": "discard-radix-carry",
+    "file": "src/heteroes/eval/integer_reference.py",
+    "old": "remaining = (remaining - digit.to(torch.int32)) >> 8",
+    "new": "remaining = remaining >> 8"
+  },
+  {
+    "name": "omit-bias",
+    "file": "src/heteroes/eval/integer_reference.py",
+    "old": "tile = ops.add(tile, bias[first : first + tile.shape[1]].float())",
+    "new": "tile = tile"
+  }
+]

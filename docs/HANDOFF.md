@@ -6,26 +6,25 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
 
 ## Tóm tắt cho chủ dự án (2026-10-25)
 
-- Chủ dự án yêu cầu **tự chạy xuyên đêm, làm toàn bộ M0–M6**, ưu tiên lớn nhất là kernel strict tiến gần vLLM,
-  dùng chung nhiều model/GPU. Checkpoint mã mới **`e05c9ab5`**, sau `81110a14`;
-  [bàn giao hiện tại](handoff-codex-strict-overnight-2026-10-25.md). Mục tiêu tiếp tục còn active, M1/M2 chưa hoàn tất.
-  [Kế hoạch đã duyệt](PLAN-SUA-HUMAN-REVIEW.md) nay được lưu trong repo, giữ nguyên byte và phạm vi.
-- Đã thêm CUDA Graph decode với KV có bound theo owner gốc, EOS compaction, error trước trả kết quả; xóa KV giữa
-  request/candidate. Thay pointer/stream/capacity thì bỏ capture; đổi trọng số tại chỗ vẫn được đọc đúng. Chọn cây con
-  projection theo kích thước, giữ nguyên số học FP32. Backend/strict policy mới chưa bật cho recipe managed.
-- Đã đo **Qwen2.5-0.5B, SmolLM2-360M và TinyLlama-1.1B**. Trên 5070 Ti, batch 1 đạt **209,9 / 239,9 / 133,3**
-  token/s; batch 32 đạt **500,7 / 804,9 / 288,8** tổng token/s. Tương đương khoảng 40–45% vLLM default ở batch 1,
-  nhưng chỉ 4–6% ở batch 32. Tính toán projection vẫn là nút thắt lớn; chưa đạt mục tiêu gần vLLM ở batch lớn.
-- **255 kiểm tra trên mỗi GPU**, bốn máy; fixture ba họ/bốn layout/hai trạng thái trọng số khớp bit, 30 build/target
-  có PTX/SASS audit không vi phạm. Parent Qwen/SmolLM khớp token trên 5070 Ti/3060; TinyLlama mới đo cục bộ.
-  Check-all **ALL PASS**: runtime CPU **2.961 pass/233 skip**, backend **452 pass**; mutation **13/13**, gói Linux đạt.
-  [Receipt và giới hạn](evidence/2026-10-25-strict-overnight/README.md). Native Windows và managed lifecycle còn mở.
-- Bước ưu tiên tiếp theo là prototype Tensor Core số nguyên với **reference/identity riêng**, range/rounding/overflow,
-  accuracy, perturbation sensitivity và kiểm tra nhiều model/GPU. [Đề xuất chưa triển khai](strict-integer-projection-design.md).
-  Không thay cây FP32 cũ dưới định danh cũ, không coi quantization hay corpus hữu hạn là bằng chứng đủ.
-- Lõi audit `1eaaecc` giữ nguyên; projection/API/UI, watchdog/D10, storage/replacement, qualification và M6 còn mở.
-  [Phân việc](HUMAN-REVIEW-EFFORT-SPLIT.md). Không push/merge/deploy, đổi approval/contribution, learning run hay sửa
-  môi trường `ai`. GPU/SSH đã được cho phép trong phiên này; không có thao tác trên lab đang dừng.
+- Tiếp tục tự chạy toàn bộ **M0–M6**, ưu tiên kernel tổng quát tiến gần vLLM. Mã nền mới **`fb18a7b7`** thêm reference,
+  CUDA integer Tensor Core và decoder riêng; [bàn giao hiện tại](handoff-codex-strict-integer-2026-10-25.md).
+  M1/M2 và mục tiêu chung vẫn chưa hoàn tất; [kế hoạch đã duyệt](PLAN-SUA-HUMAN-REVIEW.md) giữ nguyên byte/phạm vi.
+- Số học mới B14/B22 có RNE/scale/overflow và chứng minh bound riêng; giữ cây FP32 cũ. Scale trọng số làm mới ở đầu
+  mỗi request có khóa rồi xóa khi kết thúc, đọc FP16 gốc, không giữ thêm nguyên model FP32/quantized. Chưa bật managed strict.
+- Đã đo SmolLM2-360M, TinyLlama-1.1B và Qwen2.5-0.5B; parent, nhiễu chuẩn ± và restore đều được kiểm tra. B22 khớp
+  token với FP32 trong bộ thử; B14 có một candidate Qwen khác token, receipt được giữ lại. Smol/Qwen khớp logits/token/
+  text/reward và hash trọng số giữa 5070 Ti/3060. TinyLlama trained cross-GPU, native Windows và quality rộng còn mở.
+- B22 nền trên 5070 Ti đạt B1 **177,1 / 114,5 / 171,8** và B32 **1318,2 / 830,7 / 1358,5** token/s theo thứ tự
+  Smol/Tiny/Qwen: B32 tăng 1,64–2,88 lần nhưng chỉ ~9–11% vLLM default; B1 còn chậm hơn FP32 cũ.
+  Prototype chuyển đổi chính xác riêng đạt B1 **249,4 / 174,4 / 254,7**, B32 **1451,6 / 918,9 / 1507,7**;
+  chưa chọn vào mã nền. Không gọi đây là đã gần vLLM.
+- **301 kiểm tra/target trên cả bốn GPU**, mutation **11/11**. Check-all ALL PASS: runtime **3016 pass/285 skip**,
+  backend **452 pass**; gói Linux và hash source Worker/SDK đạt.
+  [Kết quả nền](evidence/2026-10-25-strict-integer/RESULTS-01.md),
+  [prototype chuyển đổi](evidence/2026-10-25-strict-integer/CVT-RESULTS-01.md).
+- Bước tiếp: chọn tối ưu chuyển đổi sau khi đưa vét cạn vào test, rồi giảm lặp quantization/packing và cải thiện reuse
+  trong tile; đo lại nhiều model/GPU. Các phần watchdog/D10, storage/replacement, managed qualification và M6 còn mở.
+  [Phân việc](HUMAN-REVIEW-EFFORT-SPLIT.md). Không push/merge/deploy, đổi device state, learning run hay sửa môi trường `ai`.
 
 ## Live
 
@@ -37,18 +36,18 @@ was performed. The disk entry below is historical (2026-10-23).
 | Lab            | `lab.heteroes.site`, deployed clone `~/.local/share/heteroes-lab/app` at `82c37fc`; operations: [local-lab-operations.md](local-lab-operations.md)                                                          |
 | Devices        | 2026-10-25 standalone probes reached local/Nhut 5070 Ti (Linux) and Thao/Quang 3060 (WSL2). Live approval/contribution was not re-read or changed; follow AGENTS.md. Native Windows acceptance remains open |
 | Default engine | engine v2 noise made on the GPU (same bits as CPU; `HETEROES_NOISE_DEVICE=cpu` forces CPU)                                                                                                                  |
-| Code           | Human-review branch `fix/human-review-single-model-2026-10-24`; captured strict core `e05c9ab5`, after the shared/scorer/delivery/audit continuations. No push/merge/deployment                                        |
+| Code           | Human-review branch `fix/human-review-single-model-2026-10-24`; integer feasibility core `fb18a7b7`, after captured strict/scorer/delivery/audit continuations. No push/merge/deployment                                        |
 | Disk (nhan)    | `/` 90 % used; Archive (NTFS/FUSE, also personal data) **full**, holds lab recovery storage and moved run data                                                                                              |
 
 ## Open work, in order
 
 1. **Approved human-review plan, current priority: shared strict performance and coverage.** Continue projection
-   throughput beyond the captured decode implementation across model/GPU dimensions; inspect integer/component Tensor Core
-   arithmetic as a separate versioned research path, with an independent reference and range/accuracy/footprint gates.
+   throughput beyond the captured decode implementation across model/GPU dimensions; continue the separately versioned integer Tensor Core
+   arithmetic with exact-conversion, tile reuse and range/accuracy/footprint gates.
    Do not infer universal support from the current fixtures or relax exactness for a timing result. M4 qualification,
    managed weight ownership and native Windows remain open. Keep audit projection/UI for medium effort; M2 progress
    watchdog/hard caps/D10 and M3 I/O/sidecar/replacement consistency remain heavy work. Strict activation still needs
-   those gates. See [effort split](HUMAN-REVIEW-EFFORT-SPLIT.md) and [kernel handoff](handoff-codex-strict-overnight-2026-10-25.md).
+   those gates. See [effort split](HUMAN-REVIEW-EFFORT-SPLIT.md) and [kernel handoff](handoff-codex-strict-integer-2026-10-25.md).
 2. **oomd / recovery-point upload loop.** Evidence and five proposed fixes:
    [evidence/2026-10-23-oomd-review/](evidence/2026-10-23-oomd-review/README.md). Policy:
    [operations-decisions-2026-10-23.md](operations-decisions-2026-10-23.md) (keep oomd on; supervisor recovers a run

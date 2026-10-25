@@ -28,8 +28,12 @@ are benchmarked; native Windows and managed qualification remain open.
 [next heavy handoff](handoff-codex-strict-overnight-2026-10-25.md).
 
 The current large-batch throughput remains far below vLLM. Projection throughput, wider
-operator/trained-model coverage and qualification remain high-effort work. Integer/component Tensor Core designs
-need a separate numerical contract/oracle and measured accuracy/range/memory behavior; no such backend is implemented.
+operator/trained-model coverage and qualification remain high-effort work. The separately versioned integer feasibility
+backend is now implemented at `fb18a7b7`, with independent CPU answers, four-GPU fixtures, three trained-model timings
+and Smol/Qwen cross-GPU canonical-candidate comparisons. B22 improves B32 but regresses B1 and reaches only ~9–11% of
+vLLM default at B32. B14 has a retained token difference. It remains experimental and unqualified; exact-conversion,
+tile reuse and trained/native/managed acceptance remain heavy work.
+[Current handoff](handoff-codex-strict-integer-2026-10-25.md).
 The earlier audit accounting and safety work is unchanged, and M1/M2/M0–M6 remain incomplete.
 
 ## Next lower-effort session: bounded product work

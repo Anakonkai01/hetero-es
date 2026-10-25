@@ -1,0 +1,31 @@
+F
+=================================== FAILURES ===================================
+_ test_logit_metrics_detect_argmax_flip_and_keep_zero_reference_error_defined __
+
+    def test_logit_metrics_detect_argmax_flip_and_keep_zero_reference_error_defined():
+        reference = torch.tensor([[1.0, 0.0], [0.0, 1.0]])
+        actual = torch.tensor([[0.0, 1.0], [0.0, 1.0]])
+>       result = script().logit_metrics(reference, actual)
+                 ^^^^^^^^
+
+runtime/tests/eval/test_probe_integer_decoder.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+runtime/tests/eval/test_probe_integer_decoder.py:14: in script
+    spec.loader.exec_module(module)
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_frozen_importlib_external.SourceFileLoader object at 0x7d441417fe60>
+path = '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_integer_decoder.py'
+
+>   ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_integer_decoder.py'
+
+<frozen importlib._bootstrap_external>:1190: FileNotFoundError
+=========================== short test summary info ============================
+FAILED runtime/tests/eval/test_probe_integer_decoder.py::test_logit_metrics_detect_argmax_flip_and_keep_zero_reference_error_defined
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 0.64s

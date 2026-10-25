@@ -1,0 +1,1 @@
+{"status": "error", "error": "Compiled strict kernel failed its instruction audit: ['I2F.U32.RP R10, R2 ;', 'MUFU.RCP R10, R10 ;', 'F2I.FTZ.U32.TRUNC.NTZ R7, R6 ;']"}

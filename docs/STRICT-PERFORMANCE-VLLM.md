@@ -53,7 +53,7 @@ precision/integer matrix products. They are useful research leads for a future s
 The [error analysis](https://arxiv.org/abs/2506.11277) warns that poorly scaled rows/columns can impair accuracy or
 require many component products. High accuracy alone also does not reproduce our particular FP32 reduction tree.
 
-No integer/Tensor-Core backend was implemented or qualified here. Before adopting one, specify conversion and
+At that source-review checkpoint no integer/Tensor-Core backend was implemented or qualified. Before adopting one, specify conversion and
 reconstruction, overflow/range rules, row independence and bounded workspace; build an independent oracle; then
 measure token behavior, ES perturbation sensitivity, exact restore and heterogeneous model/GPU performance.
 Published FP64 emulation results are not LLM or HeteroES acceptance receipts.
@@ -107,3 +107,40 @@ Further speed work must still preserve the present reference or introduce a sepa
 backend/reference, as ADR-012 permits. An integer Tensor Core prototype needs bounded accumulation/reconstruction,
 independent CPU answers, trained parent/perturbation comparisons and cross-GPU evidence before adoption.
 The published integer-emulation papers remain research leads, not acceptance of an implementation.
+
+## Separately versioned integer continuation
+
+`fb18a7b7` adds an experimental row-scaled integer projection and captured decoder with its own independent CPU
+reference. B14/B22 precision, exact RNE quantization, nonoverflowing integer MMA/int64 reconstruction and final scaled
+RNE/FTZ encoding are specified in the [contract](../runtime/docs/integer-projection-v1.md). The old FP32 tree is retained
+under its existing operator identity. There is no full quantized or FP32 second weight matrix; small row-scale metadata
+is refreshed from live FP16 weights at every locked generation entry and cleared at exit. No managed default changes.
+
+The [new receipts](evidence/2026-10-25-strict-integer/RESULTS-01.md) use the same eight tokenized prompts, 32 generated
+tokens, FP16 storage, context limit 512, one excluded warmup and median of three synchronized host measurements.
+The comparisons below use the prior vLLM default receipts and separate unisolated process runs/builds. Consumed model
+asset hashes and workloads match; prior Smol download metadata prevents claiming identical *full* manifests there.
+
+| Model on 5070 Ti | B22 token/s, B1 | B22 total token/s, B32 | B32 vs prior FP32 | B32 vs vLLM default |
+| --- | ---: | ---: | ---: | ---: |
+| SmolLM2-360M | 177.1 | 1318.2 | 1.64x | 9.1% |
+| TinyLlama-1.1B | 114.5 | 830.7 | 2.88x | 10.7% |
+| Qwen2.5-0.5B | 171.8 | 1358.5 | 2.71x | 9.8% |
+
+B1 regresses to 74–86% of the previous FP32 backend. B22 on the 3060 reaches 663.6/613.1 total token/s at B32 for
+Smol/Qwen, compared with 211.6/157.7 previously. These results do not meet the near-vLLM objective. Scalar weight
+conversion and tile reuse remain performance targets; lowering precision alone was not consistently faster.
+
+Parent and a canonical antithetic seed pair (`7001`, sigma `1e-3`), followed by exact restore, were checked on all
+three local trained models. B22 matches their FP32-tree token streams on this finite corpus. B14 changes one Qwen
+minus-candidate stream and has larger prefill errors; this counterexample is retained. Neither result establishes
+general model quality or an all-input equivalence to the old tree. Smol/Qwen parent/candidate logits, tokens, text,
+reward and weight hashes match between 5070 Ti and 3060 with the same new full asset manifests/source identities.
+TinyLlama's trained cross-GPU check and native Windows remain open.
+
+A scratch-only conversion prototype changes the FP16 exponent bits exactly and uses PTX integer RNE conversion.
+It exhaustively matches admitted finite FP16 value/row-exponent pairs and improves the surveyed single-row operator
+by roughly 1.2–1.6x on Nhut's 5070 Ti. Trained scratch B22 B1/B32 results are 249.4/1451.6 (Smol), 174.4/918.9
+(TinyLlama) and 254.7/1507.7 (Qwen), with the same finite logits/tokens/restore results as the integer baseline.
+It remains unselected and unqualified. The selected
+baseline, rejected vector-load/control-code attempts, compiler audits and mutation failures are preserved separately.
