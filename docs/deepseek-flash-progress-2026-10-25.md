@@ -11,20 +11,20 @@ GPU checks below ran only with `HETEROES_GPU_ACCEPTANCE=1` and explicit opt-in.
 
 ## Commits on this branch
 
-| Commit | Purpose |
-| --- | --- |
-| `253ebb98` | Implementation baseline named by the handoff. |
-| `da009182` | Add the isolated DeepSeek trial handoff. |
-| `79681d88` | Audit pinned vLLM/SGLang/TensorRT-LLM source for M6 placement and constraints. |
+| Commit     | Purpose                                                                                  |
+| ---------- | ---------------------------------------------------------------------------------------- |
+| `253ebb98` | Implementation baseline named by the handoff.                                            |
+| `da009182` | Add the isolated DeepSeek trial handoff.                                                 |
+| `79681d88` | Audit pinned vLLM/SGLang/TensorRT-LLM source for M6 placement and constraints.           |
 | `e0b1d57c` | Add the exact frozen-int8 base artifact, CPU quantizer/reader and B22 projection oracle. |
-| `3ed26c68` | Record the frozen-int8 oracle tests, mutation check and source identity. |
-| `39aefba9` | Content-address canonical artifact bytes and define the adapter combine contract. |
-| `f4ef2884` | Add typed int8 base storage with FP16 LoRA-only adapters and pinning. |
-| `b8648792` | Add the exact three-limb frozen-int8 CUDA projection. |
-| `fe7c472b` | Integrate frozen projections into strict captured decode and update the format doc. |
-| `e03307ae` | Add explicit vendor-FP16 fast-path decoder experimental baseline. |
-| `cc76a03d` | Harden frozen-int8 rounding, artifact seal, strict adapter arithmetic and limb sign. |
-| `f9bfd254` | Fuse the strict LoRA finish and tile the first adapter product. |
+| `3ed26c68` | Record the frozen-int8 oracle tests, mutation check and source identity.                 |
+| `39aefba9` | Content-address canonical artifact bytes and define the adapter combine contract.        |
+| `f4ef2884` | Add typed int8 base storage with FP16 LoRA-only adapters and pinning.                    |
+| `b8648792` | Add the exact three-limb frozen-int8 CUDA projection.                                    |
+| `fe7c472b` | Integrate frozen projections into strict captured decode and update the format doc.      |
+| `e03307ae` | Add explicit vendor-FP16 fast-path decoder experimental baseline.                        |
+| `cc76a03d` | Harden frozen-int8 rounding, artifact seal, strict adapter arithmetic and limb sign.     |
+| `f9bfd254` | Fuse the strict LoRA finish and tile the first adapter product.                          |
 
 ## Completed in this trial
 
@@ -118,17 +118,17 @@ Local 5070 Ti, fixed eight-prompt decode, greedy 32 tokens, context 512, one war
 Median tokens/s (observed spread in parentheses); details and raw durations are in
 `docs/evidence/2026-10-25-frozen-audit-perf/`:
 
-| Case | B1 | B8 | B32 |
-| --- | ---: | ---: | ---: |
-| SmolLM2 frozen head | 152.5 (0.9%) | 1101.4 (1.0%) | 3077.7 (0.2%) |
-| SmolLM2 frozen no head | 149.1 (0.7%) | 1021.0 (1.1%) | 2446.1 (0.4%) |
-| SmolLM2 FP16 baseline | 365.2 (1.2%) | 2229.4 (1.5%) | 7195.2 (0.8%) |
-| Qwen2.5-0.5B frozen head | 181.2 (0.8%) | 1215.8 (0.5%) | 2907.5 (0.4%) |
-| Qwen2.5-0.5B frozen no head | 166.2 (1.0%) | 900.0 (0.7%) | 1521.4 (0.2%) |
-| Qwen2.5-0.5B FP16 baseline | 382.7 (1.3%) | 2477.7 (1.2%) | 7849.2 (0.5%) |
-| TinyLlama frozen no head | 149.3 (0.6%) | 785.9 (0.3%) | 1437.3 (0.1%) |
-| TinyLlama B22 | 187.2 (0.4%) | 786.4 (0.2%) | 1810.5 (0.3%) |
-| TinyLlama FP16 baseline | 270.9 (1.0%) | 1655.3 (0.8%) | 4858.5 (0.6%) |
+| Case                        |           B1 |            B8 |           B32 |
+| --------------------------- | -----------: | ------------: | ------------: |
+| SmolLM2 frozen head         | 152.5 (0.9%) | 1101.4 (1.0%) | 3077.7 (0.2%) |
+| SmolLM2 frozen no head      | 149.1 (0.7%) | 1021.0 (1.1%) | 2446.1 (0.4%) |
+| SmolLM2 FP16 baseline       | 365.2 (1.2%) | 2229.4 (1.5%) | 7195.2 (0.8%) |
+| Qwen2.5-0.5B frozen head    | 181.2 (0.8%) | 1215.8 (0.5%) | 2907.5 (0.4%) |
+| Qwen2.5-0.5B frozen no head | 166.2 (1.0%) |  900.0 (0.7%) | 1521.4 (0.2%) |
+| Qwen2.5-0.5B FP16 baseline  | 382.7 (1.3%) | 2477.7 (1.2%) | 7849.2 (0.5%) |
+| TinyLlama frozen no head    | 149.3 (0.6%) |  785.9 (0.3%) | 1437.3 (0.1%) |
+| TinyLlama B22               | 187.2 (0.4%) |  786.4 (0.2%) | 1810.5 (0.3%) |
+| TinyLlama FP16 baseline     | 270.9 (1.0%) | 1655.3 (0.8%) | 4858.5 (0.6%) |
 
 Frozen head B32 improved from 2511.8 to 3077.7 tok/s on SmolLM2 (+22.5%) and from 2413.2 to 2907.5 on Qwen
 (+20.5%); B8 improved +24.0% and +24.8%. B1 is unchanged inside run noise. The intermediate row-tile-only Smol
@@ -152,8 +152,8 @@ profiler table and the "What this does NOT show" section are in
   kernel change.
 - **Implemented:** the audit fixes and the two adapter-epilogue optimizations on this branch.
 - **Tested:** the CPU/GPU suites above, bit-equality tests, the zero-B/`-0.0` select case and three mutants.
-- **Selected:** the exact frozen-int8 path remains the default; the FP16 decoder remains an explicitly labelled
-  experimental baseline; the Fused finish is used by `FrozenInt8DecoderGraph`.
+- **Selected in this trial:** the fused finish is used by the experimental `FrozenInt8DecoderGraph`; the FP16
+  decoder remains a labelled non-strict baseline. No managed recipe/default has been changed.
 - **Unaccepted:** every throughput number here is local, unmatched and awaiting Codex audit. `hardwareQualified`
   remains false and no managed/default path is activated.
 
@@ -169,8 +169,16 @@ profiler table and the "What this does NOT show" section are in
 
 ## Next step
 
-The owner is handing continuation to Codex. Start from `f9bfd254` and
-`docs/evidence/2026-10-25-frozen-audit-perf/`; do not re-derive the old speed claims from the pre-fix receipts.
-The next useful work is (1) a matched 3060/vLLM control on the same workload, (2) a base-projection/`strict_lora_finish`
-kernel change guided by the profile, and (3) trained nonzero-adapter quality/lifecycle and cross-GPU checks. Keep the
-plan hash and the audit rules unchanged; do not treat the local +22% as a general or near-vLLM result.
+The owner ended the current implementation session. **Codex will audit and continue next session** from the
+DeepSeek checkpoint `777a0211`, performance code `f9bfd254`, and the immutable receipts in
+`docs/evidence/2026-10-25-frozen-audit-perf/`. Read
+`docs/handoff-codex-performance-after-deepseek-2026-10-25.md`; the older DeepSeek continuation task is superseded.
+
+Next: audit the actual source and existing regression fixes; pin frozen-base/adapter artifacts and full-output
+evidence; establish nonzero canonical-candidate/restore equality on 5070 Ti and 3060; run matched M6/B22/vLLM
+controls; then implement the next projection optimization from profiles of the exact workload. The 71.5%
+profile share includes base and adapter work. Trained-adapter quality remains missing unless a compatible
+existing artifact is available; no learning run is authorized to create one.
+
+Keep all old receipts immutable and the full M0–M6 scope open. This closing handoff changes documentation only;
+no further kernel, GPU, deployment or integration work is started in this session.
