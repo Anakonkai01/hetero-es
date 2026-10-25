@@ -1,0 +1,14 @@
+{"status": "ok", "resources": {"NUM_REGS": 38, "LOCAL_SIZE_BYTES": 144, "SHARED_SIZE_BYTES": 128, "MAX_THREADS_PER_BLOCK": 1024}, "error": null}
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 6562.40it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-attention-tree/bench-scalars-smol-nhan-01.json", "wallSeconds": 9.858007496994105}
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 2490.52it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-attention-tree/bench-scalars-tiny-nhan-01.json", "wallSeconds": 14.159343316001468}
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7692.08it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-attention-tree/bench-scalars-qwen-nhan-01.json", "wallSeconds": 12.029979414990521}
+{"status": "ok", "resources": {"NUM_REGS": 72, "LOCAL_SIZE_BYTES": 0, "SHARED_SIZE_BYTES": 128, "MAX_THREADS_PER_BLOCK": 896}, "error": null}
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7567.04it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-attention-tree/bench-slots-smol-nhan-01.json", "wallSeconds": 10.123491979000391}
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 2573.75it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-attention-tree/bench-slots-tiny-nhan-01.json", "wallSeconds": 14.195066825006506}
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7580.57it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-attention-tree/bench-slots-qwen-nhan-01.json", "wallSeconds": 12.1239490989974}

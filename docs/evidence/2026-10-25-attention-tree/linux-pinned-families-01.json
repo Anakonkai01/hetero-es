@@ -1,0 +1,5109 @@
+{
+  "status": "ok",
+  "fixture": true,
+  "hardwareQualified": false,
+  "nativeWindows": false,
+  "probeSha256": "b1c69ad4eed277ca148c63db014925b29343941cc536c4478c28b01870bb02aa",
+  "limits": "Pinned tiny safetensors, four layouts, both precisions, parent/exponent-changing/restored states. Independent CPU oracle and serial/packed/captured checks. Not trained quality, managed lifecycle, native installer or universal qualification.",
+  "environment": {
+    "python": "3.12.15 (main, Oct  9 2026, 15:22:32) [Clang 22.1.3 ]",
+    "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.39",
+    "torch": "2.13.0+cu132",
+    "transformers": "5.17.0",
+    "gpu": "NVIDIA GeForce RTX 5070 Ti",
+    "cc": [
+      12,
+      0
+    ]
+  },
+  "comparison": {
+    "qwen2": {
+      "fixtureSha256": "c4b9b9a2e6ef954514239db936ea439620625bdac736c5631a666e244ec00184",
+      "schemaHash": "0594950536cefd130646ae86b215f18f9fc02774295dbb06efd0ee96ba3f3bc5",
+      "parentWeightsSha256": "d388e43298f7aaff501eed35e5f599a90ad1ee3002e1cc47b63ad5c3fd0658ca",
+      "precisions": {
+        "14": {
+          "identity": {
+            "backend": "decoder_scaled_integer_cuda_graph_v1_experimental",
+            "operators": {
+              "linear": {
+                "operator": "row_scaled_signed_integer_dot_v1_experimental",
+                "magnitudeBits": 14,
+                "limbs": 2,
+                "maxWidth": 32768,
+                "zeroIntegerOutput": "+0",
+                "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+                "bias": "pairwise_f32_reference_v1_experimental",
+                "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+                "hardwareQualified": false
+              },
+              "nonlinear": "pairwise_f32_reference_v1_experimental"
+            },
+            "graph": {
+              "version": "rms_swiglu_causal_rope_decoder_v1_experimental",
+              "family": "qwen2",
+              "dimensions": [
+                24,
+                47,
+                2,
+                6,
+                2,
+                43
+              ],
+              "headDim": 4,
+              "ropeTheta": 10000.0,
+              "rmsNormEpsilon": 1e-06,
+              "tiedHead": true,
+              "parameterShapes": {
+                "lm_head.weight": [
+                  43,
+                  24
+                ],
+                "model.embed_tokens.weight": [
+                  43,
+                  24
+                ],
+                "model.layers.0.input_layernorm.weight": [
+                  24
+                ],
+                "model.layers.0.mlp.down_proj.weight": [
+                  24,
+                  47
+                ],
+                "model.layers.0.mlp.gate_proj.weight": [
+                  47,
+                  24
+                ],
+                "model.layers.0.mlp.up_proj.weight": [
+                  47,
+                  24
+                ],
+                "model.layers.0.post_attention_layernorm.weight": [
+                  24
+                ],
+                "model.layers.0.self_attn.k_proj.bias": [
+                  8
+                ],
+                "model.layers.0.self_attn.k_proj.weight": [
+                  8,
+                  24
+                ],
+                "model.layers.0.self_attn.o_proj.weight": [
+                  24,
+                  24
+                ],
+                "model.layers.0.self_attn.q_proj.bias": [
+                  24
+                ],
+                "model.layers.0.self_attn.q_proj.weight": [
+                  24,
+                  24
+                ],
+                "model.layers.0.self_attn.v_proj.bias": [
+                  8
+                ],
+                "model.layers.0.self_attn.v_proj.weight": [
+                  8,
+                  24
+                ],
+                "model.layers.1.input_layernorm.weight": [
+                  24
+                ],
+                "model.layers.1.mlp.down_proj.weight": [
+                  24,
+                  47
+                ],
+                "model.layers.1.mlp.gate_proj.weight": [
+                  47,
+                  24
+                ],
+                "model.layers.1.mlp.up_proj.weight": [
+                  47,
+                  24
+                ],
+                "model.layers.1.post_attention_layernorm.weight": [
+                  24
+                ],
+                "model.layers.1.self_attn.k_proj.bias": [
+                  8
+                ],
+                "model.layers.1.self_attn.k_proj.weight": [
+                  8,
+                  24
+                ],
+                "model.layers.1.self_attn.o_proj.weight": [
+                  24,
+                  24
+                ],
+                "model.layers.1.self_attn.q_proj.bias": [
+                  24
+                ],
+                "model.layers.1.self_attn.q_proj.weight": [
+                  24,
+                  24
+                ],
+                "model.layers.1.self_attn.v_proj.bias": [
+                  8
+                ],
+                "model.layers.1.self_attn.v_proj.weight": [
+                  8,
+                  24
+                ],
+                "model.norm.weight": [
+                  24
+                ]
+              }
+            },
+            "sourceSha256": "ae5678901fb004ae155090b0651aef6a9ec498f8048917086bd46854e46900ca",
+            "attentionScale": 0.5,
+            "ropeFrequencyBits": [
+              1065353216,
+              1008981770
+            ],
+            "maxContext": 64,
+            "fixture": true,
+            "hardwareQualified": false,
+            "graphSourceSha256": "b1f49a30c40f5abeb2bed09cec3b58c656d67667a66ac6eeac526c0b78b21368",
+            "kernels": {
+              "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+              "linear": {
+                "operator": "row_scaled_signed_integer_dot_v1_experimental",
+                "magnitudeBits": 14,
+                "limbs": 2,
+                "maxWidth": 32768,
+                "zeroIntegerOutput": "+0",
+                "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+                "bias": "pairwise_f32_reference_v1_experimental",
+                "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+                "hardwareQualified": false
+              },
+              "nonlinear": {
+                "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+                "operators": "pairwise_f32_reference_v1_experimental",
+                "sourceSha256": "d66ef6565f96cd4f56ef3feefc34b51323c0d00f4876be1cd3350209c2a63fdf",
+                "nvrtcOptions": [
+                  "--fmad=false",
+                  "--ftz=false",
+                  "--prec-div=true",
+                  "--prec-sqrt=true",
+                  "--std=c++17"
+                ],
+                "hardwareQualified": false
+              },
+              "integerSourceSha256": "e77d157f76d9dceec74165d1164812a7f87ee19ddebd0c0ccc7d2e9ecfa20cb9",
+              "maxPartialBytes": 16777216,
+              "activationPacking": "radix_planes_once_v1_experimental",
+              "decodePlanning": {
+                "policy": "occupancy_split_k_v1_experimental",
+                "rowTiles": [
+                  16,
+                  32
+                ],
+                "maxSplitK": 8,
+                "minSplitWidth": 256,
+                "maxBatch": 128,
+                "singleRow": "simt_split1",
+                "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+              },
+              "hardwareQualified": false
+            },
+            "packedSourceSha256": "009bdfb7baf97dc7fa43a6f5dc60981841be5c3a933c91e21f7d5fda218a9778",
+            "maxBatch": 128,
+            "decodeGraphSourceSha256": "ca413f1ceffda70742c4dfa1bb6781401d5f7dfaa9cfb3f12263b44fb0a4271b",
+            "decodeKernelsSourceSha256": "d14d993230f9942cc535bd4585f5157055fa2464a4d5260c78a727a8275426f4",
+            "maxGraphBytes": 1073741824,
+            "cachePolicy": "clear_on_request_boundary",
+            "maxRetainedCaptures": 1,
+            "integerDecoderSourceSha256": "9111893a588825d4f89d635b7b96e3014a4ffc94cbd71fdb2ddc3649c487d5dc",
+            "decodeExecution": {
+              "policy": "occupancy_split_k_v1_experimental",
+              "rowTiles": [
+                16,
+                32
+              ],
+              "maxSplitK": 8,
+              "minSplitWidth": 256,
+              "maxBatch": 128,
+              "singleRow": "simt_split1",
+              "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb",
+              "targetCtasPerSm": 8
+            }
+          },
+          "cases": [
+            {
+              "state": "parent",
+              "weightsSha256": "d388e43298f7aaff501eed35e5f599a90ad1ee3002e1cc47b63ad5c3fd0658ca",
+              "prefillLogitsSha256": "44e83219226ef243baee6e53313a2475626112465babbe16fba2486d489dfb4e",
+              "capturedLogitsSha256": "67d919f902050cf0731f081be066d4e4028fcf69dfbf4175291c253e38c7b9db",
+              "tokenIds": [
+                [
+                  0,
+                  0,
+                  3,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5
+                ],
+                [
+                  7,
+                  11,
+                  13,
+                  17,
+                  17,
+                  17,
+                  17,
+                  17
+                ],
+                [
+                  0,
+                  19,
+                  23,
+                  29,
+                  29,
+                  29,
+                  29,
+                  29
+                ]
+              ],
+              "cacheHashes": [
+                [
+                  [
+                    "7df45bb5540511ea648408738fd3ae9c01b61181b18eeb30c9759af4ba605f0e",
+                    "7c0708fcc3d5e184b61c0dd236746d7eb6a758971579a25fb63bb7307acdbd13"
+                  ],
+                  [
+                    "665d9a41d71a2bfb6075def75745386c5efd41b2f5a0bacff0e5b7abcd349e3f",
+                    "acd5af5292705dce38980f8c081ed411ec933dd2494ffb8d70dbdd625ae667c8"
+                  ]
+                ],
+                [
+                  [
+                    "e709dc6e9c8f6107b72488a15bf74dbee0e592698bb49ee23dc5078198907880",
+                    "ddf76cd86d7b7c22f510a66fd817412920378c1adb35679fb6cdf95da4fff27e"
+                  ],
+                  [
+                    "e1935b8ed3d7fc102bcc602cf89a53b4cd366c5d2e1b2b41df79fd529bad0599",
+                    "d280c9f9a885f8bbc7bd69748fd32760106c33bc7e6b93c18e5be9841a73b122"
+                  ]
+                ],
+                [
+                  [
+                    "5e79fdec257a3fabecfd759425a23c80a5817e034928190ef533a8bb61c0476b",
+                    "1019fd4ab1ebcb465cff1a302771e66364bf6a25af0ed6c5e60077813a47e2bf"
+                  ],
+                  [
+                    "01aa75fcbde4d823e63aa2c1b2bab7dc318596eaf118ff91cba57a75e396ecd1",
+                    "b3d4591c3db2ea7e457594c24c8dae71083ebe899a354c50a0e64a4da45dfa5f"
+                  ]
+                ]
+              ],
+              "captureCount": 1,
+              "requestBuffersCleared": true
+            },
+            {
+              "state": "changed",
+              "weightsSha256": "bbdabbe9883098326c632608fbf5df546691ca10a750ad3379a3c64201a6b98b",
+              "prefillLogitsSha256": "f3dc6e20b61d839beeb564c6e0afe8ace9cd8d75178175c0ff33f591eccb2532",
+              "capturedLogitsSha256": "2742afe8e36e29be1e51dd50a83c1111902aff0d9629932d1f51cfa81fa64852",
+              "tokenIds": [
+                [
+                  0,
+                  0,
+                  3,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5
+                ],
+                [
+                  7,
+                  11,
+                  13,
+                  17,
+                  17,
+                  17,
+                  17,
+                  17
+                ],
+                [
+                  0,
+                  19,
+                  23,
+                  29,
+                  29,
+                  29,
+                  29,
+                  29
+                ]
+              ],
+              "cacheHashes": [
+                [
+                  [
+                    "7df45bb5540511ea648408738fd3ae9c01b61181b18eeb30c9759af4ba605f0e",
+                    "7c0708fcc3d5e184b61c0dd236746d7eb6a758971579a25fb63bb7307acdbd13"
+                  ],
+                  [
+                    "8cdf9f908d79588abf0260fe018aed91dda75d674cb5cb0aa315ace4cee43379",
+                    "18f5290375ccd3ce4c0b474ea67486c917901eb2e95d0fead5e5d70c16fb27b9"
+                  ]
+                ],
+                [
+                  [
+                    "e709dc6e9c8f6107b72488a15bf74dbee0e592698bb49ee23dc5078198907880",
+                    "ddf76cd86d7b7c22f510a66fd817412920378c1adb35679fb6cdf95da4fff27e"
+                  ],
+                  [
+                    "4476ba4e52fa45d167d7c9219cc651e90045ac66cd640957bca30fec043cef1b",
+                    "1edfe0188dc598f7ed5d92a1baa1d582b2280aff525f3f6db306df19f989950d"
+                  ]
+                ],
+                [
+                  [
+                    "5e79fdec257a3fabecfd759425a23c80a5817e034928190ef533a8bb61c0476b",
+                    "1019fd4ab1ebcb465cff1a302771e66364bf6a25af0ed6c5e60077813a47e2bf"
+                  ],
+                  [
+                    "e31908436312aa26dadb4d261516584fbfa9bcd470dc0333b69ae2a5b14fd7e7",
+                    "6068c9f0b2775ad3bb64d5814a44e940ceef714c52da3d85d5fd385dee0d0277"
+                  ]
+                ]
+              ],
+              "captureCount": 1,
+              "requestBuffersCleared": true
+            },
+            {
+              "state": "restored",
+              "weightsSha256": "d388e43298f7aaff501eed35e5f599a90ad1ee3002e1cc47b63ad5c3fd0658ca",
+              "prefillLogitsSha256": "44e83219226ef243baee6e53313a2475626112465babbe16fba2486d489dfb4e",
+              "capturedLogitsSha256": "67d919f902050cf0731f081be066d4e4028fcf69dfbf4175291c253e38c7b9db",
+              "tokenIds": [
+                [
+                  0,
+                  0,
+                  3,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5
+                ],
+                [
+                  7,
+                  11,
+                  13,
+                  17,
+                  17,
+                  17,
+                  17,
+                  17
+                ],
+                [
+                  0,
+                  19,
+                  23,
+                  29,
+                  29,
+                  29,
+                  29,
+                  29
+                ]
+              ],
+              "cacheHashes": [
+                [
+                  [
+                    "7df45bb5540511ea648408738fd3ae9c01b61181b18eeb30c9759af4ba605f0e",
+                    "7c0708fcc3d5e184b61c0dd236746d7eb6a758971579a25fb63bb7307acdbd13"
+                  ],
+                  [
+                    "665d9a41d71a2bfb6075def75745386c5efd41b2f5a0bacff0e5b7abcd349e3f",
+                    "acd5af5292705dce38980f8c081ed411ec933dd2494ffb8d70dbdd625ae667c8"
+                  ]
+                ],
+                [
+                  [
+                    "e709dc6e9c8f6107b72488a15bf74dbee0e592698bb49ee23dc5078198907880",
+                    "ddf76cd86d7b7c22f510a66fd817412920378c1adb35679fb6cdf95da4fff27e"
+                  ],
+                  [
+                    "e1935b8ed3d7fc102bcc602cf89a53b4cd366c5d2e1b2b41df79fd529bad0599",
+                    "d280c9f9a885f8bbc7bd69748fd32760106c33bc7e6b93c18e5be9841a73b122"
+                  ]
+                ],
+                [
+                  [
+                    "5e79fdec257a3fabecfd759425a23c80a5817e034928190ef533a8bb61c0476b",
+                    "1019fd4ab1ebcb465cff1a302771e66364bf6a25af0ed6c5e60077813a47e2bf"
+                  ],
+                  [
+                    "01aa75fcbde4d823e63aa2c1b2bab7dc318596eaf118ff91cba57a75e396ecd1",
+                    "b3d4591c3db2ea7e457594c24c8dae71083ebe899a354c50a0e64a4da45dfa5f"
+                  ]
+                ]
+              ],
+              "captureCount": 1,
+              "requestBuffersCleared": true
+            }
+          ],
+          "restoreExact": true
+        },
+        "22": {
+          "identity": {
+            "backend": "decoder_scaled_integer_cuda_graph_v1_experimental",
+            "operators": {
+              "linear": {
+                "operator": "row_scaled_signed_integer_dot_v1_experimental",
+                "magnitudeBits": 22,
+                "limbs": 3,
+                "maxWidth": 32768,
+                "zeroIntegerOutput": "+0",
+                "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+                "bias": "pairwise_f32_reference_v1_experimental",
+                "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+                "hardwareQualified": false
+              },
+              "nonlinear": "pairwise_f32_reference_v1_experimental"
+            },
+            "graph": {
+              "version": "rms_swiglu_causal_rope_decoder_v1_experimental",
+              "family": "qwen2",
+              "dimensions": [
+                24,
+                47,
+                2,
+                6,
+                2,
+                43
+              ],
+              "headDim": 4,
+              "ropeTheta": 10000.0,
+              "rmsNormEpsilon": 1e-06,
+              "tiedHead": true,
+              "parameterShapes": {
+                "lm_head.weight": [
+                  43,
+                  24
+                ],
+                "model.embed_tokens.weight": [
+                  43,
+                  24
+                ],
+                "model.layers.0.input_layernorm.weight": [
+                  24
+                ],
+                "model.layers.0.mlp.down_proj.weight": [
+                  24,
+                  47
+                ],
+                "model.layers.0.mlp.gate_proj.weight": [
+                  47,
+                  24
+                ],
+                "model.layers.0.mlp.up_proj.weight": [
+                  47,
+                  24
+                ],
+                "model.layers.0.post_attention_layernorm.weight": [
+                  24
+                ],
+                "model.layers.0.self_attn.k_proj.bias": [
+                  8
+                ],
+                "model.layers.0.self_attn.k_proj.weight": [
+                  8,
+                  24
+                ],
+                "model.layers.0.self_attn.o_proj.weight": [
+                  24,
+                  24
+                ],
+                "model.layers.0.self_attn.q_proj.bias": [
+                  24
+                ],
+                "model.layers.0.self_attn.q_proj.weight": [
+                  24,
+                  24
+                ],
+                "model.layers.0.self_attn.v_proj.bias": [
+                  8
+                ],
+                "model.layers.0.self_attn.v_proj.weight": [
+                  8,
+                  24
+                ],
+                "model.layers.1.input_layernorm.weight": [
+                  24
+                ],
+                "model.layers.1.mlp.down_proj.weight": [
+                  24,
+                  47
+                ],
+                "model.layers.1.mlp.gate_proj.weight": [
+                  47,
+                  24
+                ],
+                "model.layers.1.mlp.up_proj.weight": [
+                  47,
+                  24
+                ],
+                "model.layers.1.post_attention_layernorm.weight": [
+                  24
+                ],
+                "model.layers.1.self_attn.k_proj.bias": [
+                  8
+                ],
+                "model.layers.1.self_attn.k_proj.weight": [
+                  8,
+                  24
+                ],
+                "model.layers.1.self_attn.o_proj.weight": [
+                  24,
+                  24
+                ],
+                "model.layers.1.self_attn.q_proj.bias": [
+                  24
+                ],
+                "model.layers.1.self_attn.q_proj.weight": [
+                  24,
+                  24
+                ],
+                "model.layers.1.self_attn.v_proj.bias": [
+                  8
+                ],
+                "model.layers.1.self_attn.v_proj.weight": [
+                  8,
+                  24
+                ],
+                "model.norm.weight": [
+                  24
+                ]
+              }
+            },
+            "sourceSha256": "ae5678901fb004ae155090b0651aef6a9ec498f8048917086bd46854e46900ca",
+            "attentionScale": 0.5,
+            "ropeFrequencyBits": [
+              1065353216,
+              1008981770
+            ],
+            "maxContext": 64,
+            "fixture": true,
+            "hardwareQualified": false,
+            "graphSourceSha256": "b1f49a30c40f5abeb2bed09cec3b58c656d67667a66ac6eeac526c0b78b21368",
+            "kernels": {
+              "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+              "linear": {
+                "operator": "row_scaled_signed_integer_dot_v1_experimental",
+                "magnitudeBits": 22,
+                "limbs": 3,
+                "maxWidth": 32768,
+                "zeroIntegerOutput": "+0",
+                "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+                "bias": "pairwise_f32_reference_v1_experimental",
+                "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+                "hardwareQualified": false
+              },
+              "nonlinear": {
+                "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+                "operators": "pairwise_f32_reference_v1_experimental",
+                "sourceSha256": "d66ef6565f96cd4f56ef3feefc34b51323c0d00f4876be1cd3350209c2a63fdf",
+                "nvrtcOptions": [
+                  "--fmad=false",
+                  "--ftz=false",
+                  "--prec-div=true",
+                  "--prec-sqrt=true",
+                  "--std=c++17"
+                ],
+                "hardwareQualified": false
+              },
+              "integerSourceSha256": "e77d157f76d9dceec74165d1164812a7f87ee19ddebd0c0ccc7d2e9ecfa20cb9",
+              "maxPartialBytes": 16777216,
+              "activationPacking": "radix_planes_once_v1_experimental",
+              "decodePlanning": {
+                "policy": "occupancy_split_k_v1_experimental",
+                "rowTiles": [
+                  16,
+                  32
+                ],
+                "maxSplitK": 8,
+                "minSplitWidth": 256,
+                "maxBatch": 128,
+                "singleRow": "simt_split1",
+                "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+              },
+              "hardwareQualified": false
+            },
+            "packedSourceSha256": "009bdfb7baf97dc7fa43a6f5dc60981841be5c3a933c91e21f7d5fda218a9778",
+            "maxBatch": 128,
+            "decodeGraphSourceSha256": "ca413f1ceffda70742c4dfa1bb6781401d5f7dfaa9cfb3f12263b44fb0a4271b",
+            "decodeKernelsSourceSha256": "d14d993230f9942cc535bd4585f5157055fa2464a4d5260c78a727a8275426f4",
+            "maxGraphBytes": 1073741824,
+            "cachePolicy": "clear_on_request_boundary",
+            "maxRetainedCaptures": 1,
+            "integerDecoderSourceSha256": "9111893a588825d4f89d635b7b96e3014a4ffc94cbd71fdb2ddc3649c487d5dc",
+            "decodeExecution": {
+              "policy": "occupancy_split_k_v1_experimental",
+              "rowTiles": [
+                16,
+                32
+              ],
+              "maxSplitK": 8,
+              "minSplitWidth": 256,
+              "maxBatch": 128,
+              "singleRow": "simt_split1",
+              "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb",
+              "targetCtasPerSm": 8
+            }
+          },
+          "cases": [
+            {
+              "state": "parent",
+              "weightsSha256": "d388e43298f7aaff501eed35e5f599a90ad1ee3002e1cc47b63ad5c3fd0658ca",
+              "prefillLogitsSha256": "82d33a08cac4904f642b2fe07251acf9c2b40c09087fb0bb9be13c590bbb2949",
+              "capturedLogitsSha256": "3600657ab6c9540bf0998ca03ecac87cedb10679140eafd402156a7700671828",
+              "tokenIds": [
+                [
+                  0,
+                  0,
+                  3,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5
+                ],
+                [
+                  7,
+                  11,
+                  13,
+                  17,
+                  17,
+                  17,
+                  17,
+                  17
+                ],
+                [
+                  0,
+                  19,
+                  23,
+                  29,
+                  29,
+                  29,
+                  29,
+                  29
+                ]
+              ],
+              "cacheHashes": [
+                [
+                  [
+                    "ce790ed441232531401cfde9ed8260a86ba0c98f761e668125a9aeff26d45402",
+                    "b6e3a5ced70c41be1140d0480e6377a010942f3a61c09cddf304e7d09dd11f11"
+                  ],
+                  [
+                    "d74d130452f9b17dbf64d48be03a520b03be7773199bd943ac830fad350d5ca1",
+                    "9251f2687a434fb37339e2ad26d2950e9769e9a225354d66b1dbd36c4f5c9639"
+                  ]
+                ],
+                [
+                  [
+                    "215c0ffaa301e20591f9774ec6247e5eb1930ee476d3f71d0bb916ae81bfb550",
+                    "0b52125a9dfb532131eb81ef15629d1dc497e13928e488b9e50cbd59a4324328"
+                  ],
+                  [
+                    "a94d788183180a251fd86854ef75db3bb3ae1598d9634e1e7efa7aad72a64ea3",
+                    "f7efdcabb346d9bf7cd77f3ac77ae926ac4ddbe8278fddbd75c232ad8935d7ff"
+                  ]
+                ],
+                [
+                  [
+                    "45d2e91f3775e270db8fc5edc0c531b41c5d1637a10eb2580f49dfa9649d00a7",
+                    "6c397a8b81091f3f387bd411838bc2bf8968ebd1346542d9303137acad944ee7"
+                  ],
+                  [
+                    "ec32df134c37bc9f10080408ee1d7645971b621c6617c89fea23818ddd6f77d2",
+                    "1e332f84dfb365786737b051a646addbc707a13e498dc992f356c102b48fa91b"
+                  ]
+                ]
+              ],
+              "captureCount": 1,
+              "requestBuffersCleared": true
+            },
+            {
+              "state": "changed",
+              "weightsSha256": "bbdabbe9883098326c632608fbf5df546691ca10a750ad3379a3c64201a6b98b",
+              "prefillLogitsSha256": "8b81b3dff538c1655d085f0905e48b4f4b92fc53444626600146d04197e759f0",
+              "capturedLogitsSha256": "6c6fd204c4e0b2c5abe77b9d7c08c68bc560520b5596a6e661022b11a232c0b6",
+              "tokenIds": [
+                [
+                  0,
+                  0,
+                  3,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5
+                ],
+                [
+                  7,
+                  11,
+                  13,
+                  17,
+                  17,
+                  17,
+                  17,
+                  17
+                ],
+                [
+                  0,
+                  19,
+                  23,
+                  29,
+                  29,
+                  29,
+                  29,
+                  29
+                ]
+              ],
+              "cacheHashes": [
+                [
+                  [
+                    "ce790ed441232531401cfde9ed8260a86ba0c98f761e668125a9aeff26d45402",
+                    "b6e3a5ced70c41be1140d0480e6377a010942f3a61c09cddf304e7d09dd11f11"
+                  ],
+                  [
+                    "8ada74c02e201f7ca39db98fd1da247c7b7411fa6790595ffddf61af6d3be1d1",
+                    "f59172b432992b7d90913052bda77eff3d7e0db56789d311fd1ef6298e88183d"
+                  ]
+                ],
+                [
+                  [
+                    "215c0ffaa301e20591f9774ec6247e5eb1930ee476d3f71d0bb916ae81bfb550",
+                    "0b52125a9dfb532131eb81ef15629d1dc497e13928e488b9e50cbd59a4324328"
+                  ],
+                  [
+                    "191431bea9ad845f6ab4cf7c6d88783088a542c5f9ae18994447373ef115603a",
+                    "b5e04cfc1ca25988e0ee27959a2ab6630fd7d8a61405313df9fc7a8849029593"
+                  ]
+                ],
+                [
+                  [
+                    "45d2e91f3775e270db8fc5edc0c531b41c5d1637a10eb2580f49dfa9649d00a7",
+                    "6c397a8b81091f3f387bd411838bc2bf8968ebd1346542d9303137acad944ee7"
+                  ],
+                  [
+                    "472e444e1bd1ff3be4ffb8456b1c0177be7b262d026673470a69e038cc45f2b7",
+                    "f892f58b6e10304351f842a21aac5778e312e78ec50c318e231422477a35ff70"
+                  ]
+                ]
+              ],
+              "captureCount": 1,
+              "requestBuffersCleared": true
+            },
+            {
+              "state": "restored",
+              "weightsSha256": "d388e43298f7aaff501eed35e5f599a90ad1ee3002e1cc47b63ad5c3fd0658ca",
+              "prefillLogitsSha256": "82d33a08cac4904f642b2fe07251acf9c2b40c09087fb0bb9be13c590bbb2949",
+              "capturedLogitsSha256": "3600657ab6c9540bf0998ca03ecac87cedb10679140eafd402156a7700671828",
+              "tokenIds": [
+                [
+                  0,
+                  0,
+                  3,
+                  5,
+                  5,
+                  5,
+                  5,
+                  5
+                ],
+                [
+                  7,
+                  11,
+                  13,
+                  17,
+                  17,
+                  17,
+                  17,
+                  17
+                ],
+                [
+                  0,
+                  19,
+                  23,
+                  29,
+                  29,
+                  29,
+                  29,
+                  29
+                ]
+              ],
+              "cacheHashes": [
+                [
+                  [
+                    "ce790ed441232531401cfde9ed8260a86ba0c98f761e668125a9aeff26d45402",
+                    "b6e3a5ced70c41be1140d0480e6377a010942f3a61c09cddf304e7d09dd11f11"
+                  ],
+                  [
+                    "d74d130452f9b17dbf64d48be03a520b03be7773199bd943ac830fad350d5ca1",
+                    "9251f2687a434fb37339e2ad26d2950e9769e9a225354d66b1dbd36c4f5c9639"
+                  ]
+                ],
+                [
+                  [
+                    "215c0ffaa301e20591f9774ec6247e5eb1930ee476d3f71d0bb916ae81bfb550",
+                    "0b52125a9dfb532131eb81ef15629d1dc497e13928e488b9e50cbd59a4324328"
+                  ],
+                  [
+                    "a94d788183180a251fd86854ef75db3bb3ae1598d9634e1e7efa7aad72a64ea3",
+                    "f7efdcabb346d9bf7cd77f3ac77ae926ac4ddbe8278fddbd75c232ad8935d7ff"
+                  ]
+                ],
+                [
+                  [
+                    "45d2e91f3775e270db8fc5edc0c531b41c5d1637a10eb2580f49dfa9649d00a7",
+                    "6c397a8b81091f3f387bd411838bc2bf8968ebd1346542d9303137acad944ee7"
+                  ],
+                  [
+                    "ec32df134c37bc9f10080408ee1d7645971b621c6617c89fea23818ddd6f77d2",
+                    "1e332f84dfb365786737b051a646addbc707a13e498dc992f356c102b48fa91b"
+                  ]
+                ]
+              ],
+              "captureCount": 1,
+              "requestBuffersCleared": true
+            }
+          ],
+          "restoreExact": true
+        }
+      }
+    },
+    "llama": {
+      "fixtureSha256": "1a79f252e6701f01a0383262c4cedc62b3e240fe0a9a8520cd7d12a355765971",
+      "schemaHash": "512f62d2e88773e1b72f83730d8b50ae99216ef8bafa1ca1fee0e623ac8041b7",
+      "parentWeightsSha256": "c17a43a2f2cb8915c3500a8a97afc90338717712ee3b933c9e84eecb74427848",
+      "precisions": {
+        "14": {
+          "identity": {
+            "backend": "decoder_scaled_integer_cuda_graph_v1_experimental",
+            "operators": {
+              "linear": {
+                "operator": "row_scaled_signed_integer_dot_v1_experimental",
+                "magnitudeBits": 14,
+                "limbs": 2,
+                "maxWidth": 32768,
+                "zeroIntegerOutput": "+0",
+                "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+                "bias": "pairwise_f32_reference_v1_experimental",
+                "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+                "hardwareQualified": false
+              },
+              "nonlinear": "pairwise_f32_reference_v1_experimental"
+            },
+            "graph": {
+              "version": "rms_swiglu_causal_rope_decoder_v1_experimental",
+              "family": "llama",
+              "dimensions": [
+                32,
+                67,
+                2,
+                4,
+                1,
+                43
+              ],
+              "headDim": 8,
+              "ropeTheta": 10000.0,
+              "rmsNormEpsilon": 1e-06,
+              "tiedHead": false,
+              "parameterShapes": {
+                "lm_head.weight": [
+                  43,
+                  32
+                ],
+                "model.embed_tokens.weight": [
+                  43,
+                  32
+                ],
+                "model.layers.0.input_layernorm.weight": [
+                  32
+                ],
+                "model.layers.0.mlp.down_proj.bias": [
+                  32
+                ],
+                "model.layers.0.mlp.down_proj.weight": [
+                  32,
+                  67
+                ],
+                "model.layers.0.mlp.gate_proj.bias": [
+                  67
+                ],
+                "model.layers.0.mlp.gate_proj.weight": [
+                  67,
+                  32
+                ],
+                "model.layers.0.mlp.up_proj.bias": [
+                  67
+                ],
+                "model.layers.0.mlp.up_proj.weight": [
+                  67,
+                  32
+                ],
+                "model.layers.0.post_attention_layernorm.weight": [
+                  32
+                ],
+                "model.layers.0.self_attn.k_proj.bias": [
+                  8
+                ],
+                "model.layers.0.self_attn.k_proj.weight": [
+                  8,
+                  32
+                ],
+                "model.layers.0.self_attn.o_proj.bias": [
+                  32
+                ],
+                "model.layers.0.self_attn.o_proj.weight": [
+                  32,
+                  32
+                ],
+                "model.layers.0.self_attn.q_proj.bias": [
+                  32
+                ],
+                "model.layers.0.self_attn.q_proj.weight": [
+                  32,
+                  32
+                ],
+                "model.layers.0.self_attn.v_proj.bias": [
+                  8
+                ],
+                "model.layers.0.self_attn.v_proj.weight": [
+                  8,
+                  32
+                ],
+                "model.layers.1.input_layernorm.weight": [
+                  32
+                ],
+                "model.layers.1.mlp.down_proj.bias": [
+                  32
+                ],
+                "model.layers.1.mlp.down_proj.weight": [
+                  32,
+                  67
+                ],
+                "model.layers.1.mlp.gate_proj.bias": [
+                  67
+                ],
+                "model.layers.1.mlp.gate_proj.weight": [
+                  67,
+                  32
+                ],
+                "model.layers.1.mlp.up_proj.bias": [
+                  67
+                ],
+                "model.layers.1.mlp.up_proj.weight": [
+                  67,
+                  32
+                ],
+                "model.layers.1.post_attention_layernorm.weight": [
+                  32
+                ],
+                "model.layers.1.self_attn.k_proj.bias": [
+                  8
+                ],
+                "model.layers.1.self_attn.k_proj.weight": [
+                  8,
+                  32
+                ],
+                "model.layers.1.self_attn.o_proj.bias": [
+                  32
+                ],
+                "model.layers.1.self_attn.o_proj.weight": [
+                  32,
+                  32
+                ],
+                "model.layers.1.self_attn.q_proj.bias": [
+                  32
+                ],
+                "model.layers.1.self_attn.q_proj.weight": [
+                  32,
+                  32
+                ],
+                "model.layers.1.self_attn.v_proj.bias": [
+                  8
+                ],
+                "model.layers.1.self_attn.v_proj.weight": [
+                  8,
+                  32
+                ],
+                "model.norm.weight": [
+                  32
+                ]
+              }
+            },
+            "sourceSha256": "ae5678901fb004ae155090b0651aef6a9ec498f8048917086bd46854e46900ca",
+            "attentionScale": 0.3535533905932738,
+            "ropeFrequencyBits": [
+              1065353216,
+              1036831949,
+              1008981770,
+              981668463
+            ],
+            "maxContext": 64,
+            "fixture": true,
+            "hardwareQualified": false,
+            "graphSourceSha256": "b1f49a30c40f5abeb2bed09cec3b58c656d67667a66ac6eeac526c0b78b21368",
+            "kernels": {
+              "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+              "linear": {
+                "operator": "row_scaled_signed_integer_dot_v1_experimental",
+                "magnitudeBits": 14,
+                "limbs": 2,
+                "maxWidth": 32768,
+                "zeroIntegerOutput": "+0",
+                "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+                "bias": "pairwise_f32_reference_v1_experimental",
+                "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+                "hardwareQualified": false
+              },
+              "nonlinear": {
+                "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+                "operators": "pairwise_f32_reference_v1_experimental",
+                "sourceSha256": "d66ef6565f96cd4f56ef3feefc34b51323c0d00f4876be1cd3350209c2a63fdf",
+                "nvrtcOptions": [
+                  "--fmad=false",
+                  "--ftz=false",
+                  "--prec-div=true",
+                  "--prec-sqrt=true",
+                  "--std=c++17"
+                ],
+                "hardwareQualified": false
+              },
+              "integerSourceSha256": "e77d157f76d9dceec74165d1164812a7f87ee19ddebd0c0ccc7d2e9ecfa20cb9",
+              "maxPartialBytes": 16777216,
+              "activationPacking": "radix_planes_once_v1_experimental",
+              "decodePlanning": {
+                "policy": "occupancy_split_k_v1_experimental",
+                "rowTiles": [
+                  16,
+                  32
+                ],
+                "maxSplitK": 8,
+                "minSplitWidth": 256,
+                "maxBatch": 128,
+                "singleRow": "simt_split1",
+                "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+              },
+              "hardwareQualified": false
+            },
+            "packedSourceSha256": "009bdfb7baf97dc7fa43a6f5dc60981841be5c3a933c91e21f7d5fda218a9778",
+            "maxBatch": 128,
+            "decodeGraphSourceSha256": "ca413f1ceffda70742c4dfa1bb6781401d5f7dfaa9cfb3f12263b44fb0a4271b",
+            "decodeKernelsSourceSha256": "d14d993230f9942cc535bd4585f5157055fa2464a4d5260c78a727a8275426f4",
+            "maxGraphBytes": 1073741824,
+            "cachePolicy": "clear_on_request_boundary",
+            "maxRetainedCaptures": 1,
+            "integerDecoderSourceSha256": "9111893a588825d4f89d635b7b96e3014a4ffc94cbd71fdb2ddc3649c487d5dc",
+            "decodeExecution": {
+              "policy": "occupancy_split_k_v1_experimental",
+              "rowTiles": [
+                16,
+                32
+              ],
+              "maxSplitK": 8,
+              "minSplitWidth": 256,
+              "maxBatch": 128,
+              "singleRow": "simt_split1",
+              "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb",
+              "targetCtasPerSm": 8
+            }
+          },
+          "cases": [
+            {
+              "state": "parent",
+              "weightsSha256": "c17a43a2f2cb8915c3500a8a97afc90338717712ee3b933c9e84eecb74427848",
+              "prefillLogitsSha256": "5396af0301ffe207d378736f6ff13cbc6af92edf3966b77bc90fe7a2ec264bf6",
+              "capturedLogitsSha256": "c8ee134beb1b23fe856ec63e57dab111e47643fe5164ba6f93d3e09fb14ec9d6",
+              "tokenIds": [
+                [
+                  0,
+                  0,
+                  3,
+                  5,
+                  37,
+                  37,
+                  37,
+                  37
+                ],
+                [
+                  7,
+                  11,
+                  13,
+                  17,
+                  30,
+                  17,
+                  13,
+                  22
+                ],
+                [
+                  0,
+                  19,
+                  23,
+                  29,
+                  28,
+                  8,
+                  20,
+                  10
+                ]
+              ],
+              "cacheHashes": [
+                [
+                  [
+                    "d9301ef550c3b55a61d655283e3c2ee735c9f69f3f9a34023d32a230a0efd918",
+                    "1c705ab813864353954ef228c50ea5284abcdeff7f456b914c67aa144f5d5a86"
+                  ],
+                  [
+                    "7af3b1668c423bb3f2ff05ee26082c9c61caa43c387e466dd2d46dc270f698ed",
+                    "ef8041314a2ea36e72b73f731716b59e72d1a9719b6df57b6fdf230168b65ffa"
+                  ]
+                ],
+                [
+                  [
+                    "be8a1465dc566e773261ab820095becf9911c97debc819da929868cbe1a43ac5",
+                    "df9854ea7cafac654fd0898a4e158fb584c9ab78ae31b983c83a50aa0fbe478e"
+                  ],
+                  [
+                    "4109dd33789bd7d1cfb9de16bb73ec9861b758b5fc54bf9a36a14030d3dda169",
+                    "55927faecd6789fca95712da1d21abae2dbfe5d7a04e7689e91c551311d5d164"
+                  ]
+                ],
+                [
+                  [
+                    "0fdaa1a9f16b56b0822e32f4ce860311536447edd597664014ea76aaa1d6b937",
+                    "6e77585b9091cf04a3689828dbb5080100f6a88163f4c262db8efc6556976ab4"
+                  ],
+                  [
+                    "2acf717ab7af2ea246126581dccd8be079e97969d426ff00fb5316dd4709406c",
+                    "39349c07f40c1e13ad24651d5f3c7f291b8d84324025346eb5751b1a532dc006"
+                  ]
+                ]
+              ],
+              "captureCount": 1,
+              "requestBuffersCleared": true
+            },
+            {
+              "state": "changed",
+              "weightsSha256": "f90bc6ee55779ad51a9356bb5f29860872be2359a4cb00b7588650be588907ed",
+              "prefillLogitsSha256": "fb25a57489a252ec6c0e15aa51d11b2df2d2a415412626718d91a6e08fe93de9",
+              "capturedLogitsSha256": "01c209808376c8c634e8a951e576b2cbecc6db07ff822f100e555b2b808b7e54",
+              "tokenIds": [
+                [
+                  0,
+                  0,
+                  3,
+                  5,
+                  34,
+                  10,
+                  13,
+                  21
+                ],
+                [
+                  7,
+                  11,
+                  13,
+                  17,
+                  35,
+                  28,
+                  10,
+                  0
+                ],
+                [
+                  0,
+                  19,
+                  23,
+                  29,
+                  42,
+                  36,
+                  30,
+                  24
+                ]
+              ],
+              "cacheHashes": [
+                [
+                  [
+                    "d9301ef550c3b55a61d655283e3c2ee735c9f69f3f9a34023d32a230a0efd918",
+                    "1c705ab813864353954ef228c50ea5284abcdeff7f456b914c67aa144f5d5a86"
+                  ],
+                  [
+                    "63204769901d9680a004cd5366f0477d5b4705da9559b2a99c741aa61749686e",
+                    "571308ee0abcf3288f0017523acd65002e71b5e69e4482b187c4ac5a4f9dfa33"
+                  ]
+                ],
+                [
+                  [
+                    "be8a1465dc566e773261ab820095becf9911c97debc819da929868cbe1a43ac5",
+                    "df9854ea7cafac654fd0898a4e158fb584c9ab78ae31b983c83a50aa0fbe478e"
+                  ],
+                  [
+                    "f75d905c13e0ec4450debca9e6bd6aca5e2c645b68985f7d4b0fddf3ff92f45b",
+                    "ec2ac06f8bac77568b5ea82701f88e0731a91c8eca823632d5a5556d103b34f4"
+                  ]
+                ],
+                [
+                  [
+                    "0fdaa1a9f16b56b0822e32f4ce860311536447edd597664014ea76aaa1d6b937",
+                    "6e77585b9091cf04a3689828dbb5080100f6a88163f4c262db8efc6556976ab4"
+                  ],
+                  [
+                    "a5e172937ae02337027982f99875b120ce0e74e32f7cecfdeb124ef3bba717a0",
+                    "6b8158772c66d293b1a36b750b9c38e1f3cb80a7cc212d8df05e3c2db354e3ea"
+                  ]
+                ]
+              ],
+              "captureCount": 1,
+              "requestBuffersCleared": true
+            },
+            {
+              "state": "restored",
+              "weightsSha256": "c17a43a2f2cb8915c3500a8a97afc90338717712ee3b933c9e84eecb74427848",
+              "prefillLogitsSha256": "5396af0301ffe207d378736f6ff13cbc6af92edf3966b77bc90fe7a2ec264bf6",
+              "capturedLogitsSha256": "c8ee134beb1b23fe856ec63e57dab111e47643fe5164ba6f93d3e09fb14ec9d6",
+              "tokenIds": [
+                [
+                  0,
+                  0,
+                  3,
+                  5,
+                  37,
+                  37,
+                  37,
+                  37
+                ],
+                [
+                  7,
+                  11,
+                  13,
+                  17,
+                  30,
+                  17,
+                  13,
+                  22
+                ],
+                [
+                  0,
+                  19,
+                  23,
+                  29,
+                  28,
+                  8,
+                  20,
+                  10
+                ]
+              ],
+              "cacheHashes": [
+                [
+                  [
+                    "d9301ef550c3b55a61d655283e3c2ee735c9f69f3f9a34023d32a230a0efd918",
+                    "1c705ab813864353954ef228c50ea5284abcdeff7f456b914c67aa144f5d5a86"
+                  ],
+                  [
+                    "7af3b1668c423bb3f2ff05ee26082c9c61caa43c387e466dd2d46dc270f698ed",
+                    "ef8041314a2ea36e72b73f731716b59e72d1a9719b6df57b6fdf230168b65ffa"
+                  ]
+                ],
+                [
+                  [
+                    "be8a1465dc566e773261ab820095becf9911c97debc819da929868cbe1a43ac5",
+                    "df9854ea7cafac654fd0898a4e158fb584c9ab78ae31b983c83a50aa0fbe478e"
+                  ],
+                  [
+                    "4109dd33789bd7d1cfb9de16bb73ec9861b758b5fc54bf9a36a14030d3dda169",
+                    "55927faecd6789fca95712da1d21abae2dbfe5d7a04e7689e91c551311d5d164"
+                  ]
+                ],
+                [
+                  [
+                    "0fdaa1a9f16b56b0822e32f4ce860311536447edd597664014ea76aaa1d6b937",
+                    "6e77585b9091cf04a3689828dbb5080100f6a88163f4c262db8efc6556976ab4"
+                  ],
+                  [
+                    "2acf717ab7af2ea246126581dccd8be079e97969d426ff00fb5316dd4709406c",
+                    "39349c07f40c1e13ad24651d5f3c7f291b8d84324025346eb5751b1a532dc006"
+                  ]
+                ]
+              ],
+              "captureCount": 1,
+              "requestBuffersCleared": true
+            }
+          ],
+          "restoreExact": true
+        },
+        "22": {
+          "identity": {
+            "backend": "decoder_scaled_integer_cuda_graph_v1_experimental",
+            "operators": {
+              "linear": {
+                "operator": "row_scaled_signed_integer_dot_v1_experimental",
+                "magnitudeBits": 22,
+                "limbs": 3,
+                "maxWidth": 32768,
+                "zeroIntegerOutput": "+0",
+                "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+                "bias": "pairwise_f32_reference_v1_experimental",
+                "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+                "hardwareQualified": false
+              },
+              "nonlinear": "pairwise_f32_reference_v1_experimental"
+            },
+            "graph": {
+              "version": "rms_swiglu_causal_rope_decoder_v1_experimental",
+              "family": "llama",
+              "dimensions": [
+                32,
+                67,
+                2,
+                4,
+                1,
+                43
+              ],
+              "headDim": 8,
+              "ropeTheta": 10000.0,
+              "rmsNormEpsilon": 1e-06,
+              "tiedHead": false,
+              "parameterShapes": {
+                "lm_head.weight": [
+                  43,
+                  32
+                ],
+                "model.embed_tokens.weight": [
+                  43,
+                  32
+                ],
+                "model.layers.0.input_layernorm.weight": [
+                  32
+                ],
+                "model.layers.0.mlp.down_proj.bias": [
+                  32
+                ],
+                "model.layers.0.mlp.down_proj.weight": [
+                  32,
+                  67
+                ],
+                "model.layers.0.mlp.gate_proj.bias": [
+                  67
+                ],
+                "model.layers.0.mlp.gate_proj.weight": [
+                  67,
+                  32
+                ],
+                "model.layers.0.mlp.up_proj.bias": [
+                  67
+                ],
+                "model.layers.0.mlp.up_proj.weight": [
+                  67,
+                  32
+                ],
+                "model.layers.0.post_attention_layernorm.weight": [
+                  32
+                ],
+                "model.layers.0.self_attn.k_proj.bias": [
+                  8
+                ],
+                "model.layers.0.self_attn.k_proj.weight": [
+                  8,
+                  32
+                ],
+                "model.layers.0.self_attn.o_proj.bias": [
+                  32
+                ],
+                "model.layers.0.self_attn.o_proj.weight": [
+                  32,
+                  32
+                ],
+                "model.layers.0.self_attn.q_proj.bias": [
+                  32
+                ],
+                "model.layers.0.self_attn.q_proj.weight": [
+                  32,
+                  32
+                ],
+                "model.layers.0.self_attn.v_proj.bias": [
+                  8
+                ],
+                "model.layers.0.self_attn.v_proj.weight": [
+                  8,
+                  32
+                ],
+                "model.layers.1.input_layernorm.weight": [
+                  32
+                ],
+                "model.layers.1.mlp.down_proj.bias": [
+                  32
+                ],
+                "model.layers.1.mlp.down_proj.weight": [
+                  32,
+                  67
+                ],
+                "model.layers.1.mlp.gate_proj.bias": [
+                  67
+                ],
+                "model.layers.1.mlp.gate_proj.weight": [
+                  67,
+                  32
+                ],
+                "model.layers.1.mlp.up_proj.bias": [
+                  67
+                ],
+                "model.layers.1.mlp.up_proj.weight": [
+                  67,
+                  32
+                ],
+                "model.layers.1.post_attention_layernorm.weight": [
+                  32
+                ],
+                "model.layers.1.self_attn.k_proj.bias": [
+                  8
+                ],
+                "model.layers.1.self_attn.k_proj.weight": [
+                  8,
+                  32
+                ],
+                "model.layers.1.self_attn.o_proj.bias": [
+                  32
+                ],
+                "model.layers.1.self_attn.o_proj.weight": [
+                  32,
+                  32
+                ],
+                "model.layers.1.self_attn.q_proj.bias": [
+                  32
+                ],
+                "model.layers.1.self_attn.q_proj.weight": [
+                  32,
+                  32
+                ],
+                "model.layers.1.self_attn.v_proj.bias": [
+                  8
+                ],
+                "model.layers.1.self_attn.v_proj.weight": [
+                  8,
+                  32
+                ],
+                "model.norm.weight": [
+                  32
+                ]
+              }
+            },
+            "sourceSha256": "ae5678901fb004ae155090b0651aef6a9ec498f8048917086bd46854e46900ca",
+            "attentionScale": 0.3535533905932738,
+            "ropeFrequencyBits": [
+              1065353216,
+              1036831949,
+              1008981770,
+              981668463
+            ],
+            "maxContext": 64,
+            "fixture": true,
+            "hardwareQualified": false,
+            "graphSourceSha256": "b1f49a30c40f5abeb2bed09cec3b58c656d67667a66ac6eeac526c0b78b21368",
+            "kernels": {
+              "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+              "linear": {
+                "operator": "row_scaled_signed_integer_dot_v1_experimental",
+                "magnitudeBits": 22,
+                "limbs": 3,
+                "maxWidth": 32768,
+                "zeroIntegerOutput": "+0",
+                "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+                "bias": "pairwise_f32_reference_v1_experimental",
+                "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+                "hardwareQualified": false
+              },
+              "nonlinear": {
+                "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+                "operators": "pairwise_f32_reference_v1_experimental",
+                "sourceSha256": "d66ef6565f96cd4f56ef3feefc34b51323c0d00f4876be1cd3350209c2a63fdf",
+                "nvrtcOptions": [
+                  "--fmad=false",
+                  "--ftz=false",
+                  "--prec-div=true",
+                  "--prec-sqrt=true",
+                  "--std=c++17"
+                ],
+                "hardwareQualified": false
+              },
+              "integerSourceSha256": "e77d157f76d9dceec74165d1164812a7f87ee19ddebd0c0ccc7d2e9ecfa20cb9",
+              "maxPartialBytes": 16777216,
+              "activationPacking": "radix_planes_once_v1_experimental",
+              "decodePlanning": {
+                "policy": "occupancy_split_k_v1_experimental",
+                "rowTiles": [
+                  16,
+                  32
+                ],
+                "maxSplitK": 8,
+                "minSplitWidth": 256,
+                "maxBatch": 128,
+                "singleRow": "simt_split1",
+                "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+              },
+              "hardwareQualified": false
+            },
+            "packedSourceSha256": "009bdfb7baf97dc7fa43a6f5dc60981841be5c3a933c91e21f7d5fda218a9778",
+            "maxBatch": 128,
+            "decodeGraphSourceSha256": "ca413f1ceffda70742c4dfa1bb6781401d5f7dfaa9cfb3f12263b44fb0a4271b",
+            "decodeKernelsSourceSha256": "d14d993230f9942cc535bd4585f5157055fa2464a4d5260c78a727a8275426f4",
+            "maxGraphBytes": 1073741824,
+            "cachePolicy": "clear_on_request_boundary",
+            "maxRetainedCaptures": 1,
+            "integerDecoderSourceSha256": "9111893a588825d4f89d635b7b96e3014a4ffc94cbd71fdb2ddc3649c487d5dc",
+            "decodeExecution": {
+              "policy": "occupancy_split_k_v1_experimental",
+              "rowTiles": [
+                16,
+                32
+              ],
+              "maxSplitK": 8,
+              "minSplitWidth": 256,
+              "maxBatch": 128,
+              "singleRow": "simt_split1",
+              "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb",
+              "targetCtasPerSm": 8
+            }
+          },
+          "cases": [
+            {
+              "state": "parent",
+              "weightsSha256": "c17a43a2f2cb8915c3500a8a97afc90338717712ee3b933c9e84eecb74427848",
+              "prefillLogitsSha256": "105e20d2670993b63919f7e17754b5fb9c29182c9de45e168bfe6b36b5a5b335",
+              "capturedLogitsSha256": "0667e529af77a55d01bae5e59fb9b26f332b4214453aea76675944d93214e849",
+              "tokenIds": [
+                [
+                  0,
+                  0,
+                  3,
+                  5,
+                  37,
+                  37,
+                  37,
+                  37
+                ],
+                [
+                  7,
+                  11,
+                  13,
+                  17,
+                  30,
+                  17,
+                  13,
+                  22
+                ],
+                [
+                  0,
+                  19,
+                  23,
+                  29,
+                  28,
+                  8,
+                  20,
+                  10
+                ]
+              ],
+              "cacheHashes": [
+                [
+                  [
+                    "61f0c265e40effab04547a0581ce394fee19d824632f8b641979441be78f5fdb",
+                    "5f2658b60081865e14d231ed5a68f7acf787ec1065ca64ca228de86628172db0"
+                  ],
+                  [
+                    "b52a2efd2039d686015a88b2d64f90dea3e6745f6c2a732d5607f85d26154dcb",
+                    "a3b6317303155fd28b66f473d5f4935a7dad20cd9c0a2030a2a3d6445e0f2cf7"
+                  ]
+                ],
+                [
+                  [
+                    "96c577a14a40f70266a3be88d1e7c388ca260f3f12546ae5fb7dc257ba374ccb",
+                    "244e37df94a4c47587540044f503c4c6fad4d11c8d11fd2a947f9431de22ae0c"
+                  ],
+                  [
+                    "891fecb7fd2a5b640ecd7e13fa580f6afdd1b8bb24d3514d18b622591c47e942",
+                    "372e1673f4bccf1691fc31756a731c878e67a9d9475e4c0a5b48ff7ade6c01b3"
+                  ]
+                ],
+                [
+                  [
+                    "fde44a33f71c44de060815cdad87d052261c2e18da107a28500153a0ba8c2409",
+                    "827cfa9755b35720b866e59d69e19776e85e9f131a7f33f8764279f7c6770048"
+                  ],
+                  [
+                    "20f2e72be230460b521170ebed64ca7025a31934742d15f4d9f0af89c4fddcd0",
+                    "cb9b272c32e93c2fd05eec3c5063f038f4174e0da72f717ffe883dc662cb7dc7"
+                  ]
+                ]
+              ],
+              "captureCount": 1,
+              "requestBuffersCleared": true
+            },
+            {
+              "state": "changed",
+              "weightsSha256": "f90bc6ee55779ad51a9356bb5f29860872be2359a4cb00b7588650be588907ed",
+              "prefillLogitsSha256": "b24d5ba4498eb30d536773f78b6cb18a90d31128026c976a92a72ada36ff6b0c",
+              "capturedLogitsSha256": "af3782a07f099d5bef7050477d354799d492f7d4ac2eab99468aefa46574456b",
+              "tokenIds": [
+                [
+                  0,
+                  0,
+                  3,
+                  5,
+                  34,
+                  10,
+                  13,
+                  21
+                ],
+                [
+                  7,
+                  11,
+                  13,
+                  17,
+                  35,
+                  28,
+                  10,
+                  0
+                ],
+                [
+                  0,
+                  19,
+                  23,
+                  29,
+                  42,
+                  36,
+                  30,
+                  24
+                ]
+              ],
+              "cacheHashes": [
+                [
+                  [
+                    "61f0c265e40effab04547a0581ce394fee19d824632f8b641979441be78f5fdb",
+                    "5f2658b60081865e14d231ed5a68f7acf787ec1065ca64ca228de86628172db0"
+                  ],
+                  [
+                    "2176a88882ea9dd918272062db0b73708486ad9a615e58420f840c3fa1ddf6f7",
+                    "4c491409965120ffa913ae75a2eeb5ba6c05abb2bdb4a028e73b4aadb77f66e6"
+                  ]
+                ],
+                [
+                  [
+                    "96c577a14a40f70266a3be88d1e7c388ca260f3f12546ae5fb7dc257ba374ccb",
+                    "244e37df94a4c47587540044f503c4c6fad4d11c8d11fd2a947f9431de22ae0c"
+                  ],
+                  [
+                    "b47d6614bba7ff69f0a81fd00ad207912bd0a9c6920b74a4e1ca136d6dbd26f8",
+                    "06c1ab6447845786add439796dbd235bcd1e64ce7c814702a3d9dea809d29e1d"
+                  ]
+                ],
+                [
+                  [
+                    "fde44a33f71c44de060815cdad87d052261c2e18da107a28500153a0ba8c2409",
+                    "827cfa9755b35720b866e59d69e19776e85e9f131a7f33f8764279f7c6770048"
+                  ],
+                  [
+                    "b0aa92c8f430869cb7983705b9241aed060ffaebd6bbc854a10b5a4bf3659a93",
+                    "eb94e5ae6318873b94da5d871c16bc461d629b1ff6c730164d589511c7ba6a4b"
+                  ]
+                ]
+              ],
+              "captureCount": 1,
+              "requestBuffersCleared": true
+            },
+            {
+              "state": "restored",
+              "weightsSha256": "c17a43a2f2cb8915c3500a8a97afc90338717712ee3b933c9e84eecb74427848",
+              "prefillLogitsSha256": "105e20d2670993b63919f7e17754b5fb9c29182c9de45e168bfe6b36b5a5b335",
+              "capturedLogitsSha256": "0667e529af77a55d01bae5e59fb9b26f332b4214453aea76675944d93214e849",
+              "tokenIds": [
+                [
+                  0,
+                  0,
+                  3,
+                  5,
+                  37,
+                  37,
+                  37,
+                  37
+                ],
+                [
+                  7,
+                  11,
+                  13,
+                  17,
+                  30,
+                  17,
+                  13,
+                  22
+                ],
+                [
+                  0,
+                  19,
+                  23,
+                  29,
+                  28,
+                  8,
+                  20,
+                  10
+                ]
+              ],
+              "cacheHashes": [
+                [
+                  [
+                    "61f0c265e40effab04547a0581ce394fee19d824632f8b641979441be78f5fdb",
+                    "5f2658b60081865e14d231ed5a68f7acf787ec1065ca64ca228de86628172db0"
+                  ],
+                  [
+                    "b52a2efd2039d686015a88b2d64f90dea3e6745f6c2a732d5607f85d26154dcb",
+                    "a3b6317303155fd28b66f473d5f4935a7dad20cd9c0a2030a2a3d6445e0f2cf7"
+                  ]
+                ],
+                [
+                  [
+                    "96c577a14a40f70266a3be88d1e7c388ca260f3f12546ae5fb7dc257ba374ccb",
+                    "244e37df94a4c47587540044f503c4c6fad4d11c8d11fd2a947f9431de22ae0c"
+                  ],
+                  [
+                    "891fecb7fd2a5b640ecd7e13fa580f6afdd1b8bb24d3514d18b622591c47e942",
+                    "372e1673f4bccf1691fc31756a731c878e67a9d9475e4c0a5b48ff7ade6c01b3"
+                  ]
+                ],
+                [
+                  [
+                    "fde44a33f71c44de060815cdad87d052261c2e18da107a28500153a0ba8c2409",
+                    "827cfa9755b35720b866e59d69e19776e85e9f131a7f33f8764279f7c6770048"
+                  ],
+                  [
+                    "20f2e72be230460b521170ebed64ca7025a31934742d15f4d9f0af89c4fddcd0",
+                    "cb9b272c32e93c2fd05eec3c5063f038f4174e0da72f717ffe883dc662cb7dc7"
+                  ]
+                ]
+              ],
+              "captureCount": 1,
+              "requestBuffersCleared": true
+            }
+          ],
+          "restoreExact": true
+        }
+      }
+    },
+    "llama-wide": {
+      "fixtureSha256": "5d5e054c2e7f60d8597cfec0a0a9888b3043094d4d7198c5dcb804275d8f5382",
+      "schemaHash": "c85dbb6b3f6a301eb00d85cb518d0833541cb347083e773a50a4facf37c59a02",
+      "parentWeightsSha256": "9d117d6dbce6f2ebd8ffde1d1f5e4fbbf9eb78016d9b230e13ede820c2dd1e5d",
+      "precisions": {
+        "14": {
+          "identity": {
+            "backend": "decoder_scaled_integer_cuda_graph_v1_experimental",
+            "operators": {
+              "linear": {
+                "operator": "row_scaled_signed_integer_dot_v1_experimental",
+                "magnitudeBits": 14,
+                "limbs": 2,
+                "maxWidth": 32768,
+                "zeroIntegerOutput": "+0",
+                "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+                "bias": "pairwise_f32_reference_v1_experimental",
+                "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+                "hardwareQualified": false
+              },
+              "nonlinear": "pairwise_f32_reference_v1_experimental"
+            },
+            "graph": {
+              "version": "rms_swiglu_causal_rope_decoder_v1_experimental",
+              "family": "llama",
+              "dimensions": [
+                32,
+                67,
+                2,
+                4,
+                1,
+                43
+              ],
+              "headDim": 12,
+              "ropeTheta": 10000.0,
+              "rmsNormEpsilon": 1e-06,
+              "tiedHead": false,
+              "parameterShapes": {
+                "lm_head.weight": [
+                  43,
+                  32
+                ],
+                "model.embed_tokens.weight": [
+                  43,
+                  32
+                ],
+                "model.layers.0.input_layernorm.weight": [
+                  32
+                ],
+                "model.layers.0.mlp.down_proj.bias": [
+                  32
+                ],
+                "model.layers.0.mlp.down_proj.weight": [
+                  32,
+                  67
+                ],
+                "model.layers.0.mlp.gate_proj.bias": [
+                  67
+                ],
+                "model.layers.0.mlp.gate_proj.weight": [
+                  67,
+                  32
+                ],
+                "model.layers.0.mlp.up_proj.bias": [
+                  67
+                ],
+                "model.layers.0.mlp.up_proj.weight": [
+                  67,
+                  32
+                ],
+                "model.layers.0.post_attention_layernorm.weight": [
+                  32
+                ],
+                "model.layers.0.self_attn.k_proj.bias": [
+                  12
+                ],
+                "model.layers.0.self_attn.k_proj.weight": [
+                  12,
+                  32
+                ],
+                "model.layers.0.self_attn.o_proj.bias": [
+                  32
+                ],
+                "model.layers.0.self_attn.o_proj.weight": [
+                  32,
+                  48
+                ],
+                "model.layers.0.self_attn.q_proj.bias": [
+                  48
+                ],
+                "model.layers.0.self_attn.q_proj.weight": [
+                  48,
+                  32
+                ],
+                "model.layers.0.self_attn.v_proj.bias": [
+                  12
+                ],
+                "model.layers.0.self_attn.v_proj.weight": [
+                  12,
+                  32
+                ],
+                "model.layers.1.input_layernorm.weight": [
+                  32
+                ],
+                "model.layers.1.mlp.down_proj.bias": [
+                  32
+                ],
+                "model.layers.1.mlp.down_proj.weight": [
+                  32,
+                  67
+                ],
+                "model.layers.1.mlp.gate_proj.bias": [
+                  67
+                ],
+                "model.layers.1.mlp.gate_proj.weight": [
+                  67,
+                  32
+                ],
+                "model.layers.1.mlp.up_proj.bias": [
+                  67
+                ],
+                "model.layers.1.mlp.up_proj.weight": [
+                  67,
+                  32
+                ],
+                "model.layers.1.post_attention_layernorm.weight": [
+                  32
+                ],
+                "model.layers.1.self_attn.k_proj.bias": [
+                  12
+                ],
+                "model.layers.1.self_attn.k_proj.weight": [
+                  12,
+                  32
+                ],
+                "model.layers.1.self_attn.o_proj.bias": [
+                  32
+                ],
+                "model.layers.1.self_attn.o_proj.weight": [
+                  32,
+                  48
+                ],
+                "model.layers.1.self_attn.q_proj.bias": [
+                  48
+                ],
+                "model.layers.1.self_attn.q_proj.weight": [
+                  48,
+                  32
+                ],
+                "model.layers.1.self_attn.v_proj.bias": [
+                  12
+                ],
+                "model.layers.1.self_attn.v_proj.weight": [
+                  12,
+                  32
+                ],
+                "model.norm.weight": [
+                  32
+                ]
+              }
+            },
+            "sourceSha256": "ae5678901fb004ae155090b0651aef6a9ec498f8048917086bd46854e46900ca",
+            "attentionScale": 0.28867513459481287,
+            "ropeFrequencyBits": [
+              1065353216,
+              1046256950,
+              1027481238,
+              1008981770,
+              990720363,
+              972249690
+            ],
+            "maxContext": 64,
+            "fixture": true,
+            "hardwareQualified": false,
+            "graphSourceSha256": "b1f49a30c40f5abeb2bed09cec3b58c656d67667a66ac6eeac526c0b78b21368",
+            "kernels": {
+              "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+              "linear": {
+                "operator": "row_scaled_signed_integer_dot_v1_experimental",
+                "magnitudeBits": 14,
+                "limbs": 2,
+                "maxWidth": 32768,
+                "zeroIntegerOutput": "+0",
+                "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+                "bias": "pairwise_f32_reference_v1_experimental",
+                "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+                "hardwareQualified": false
+              },
+              "nonlinear": {
+                "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+                "operators": "pairwise_f32_reference_v1_experimental",
+                "sourceSha256": "d66ef6565f96cd4f56ef3feefc34b51323c0d00f4876be1cd3350209c2a63fdf",
+                "nvrtcOptions": [
+                  "--fmad=false",
+                  "--ftz=false",
+                  "--prec-div=true",
+                  "--prec-sqrt=true",
+                  "--std=c++17"
+                ],
+                "hardwareQualified": false
+              },
+              "integerSourceSha256": "e77d157f76d9dceec74165d1164812a7f87ee19ddebd0c0ccc7d2e9ecfa20cb9",
+              "maxPartialBytes": 16777216,
+              "activationPacking": "radix_planes_once_v1_experimental",
+              "decodePlanning": {
+                "policy": "occupancy_split_k_v1_experimental",
+                "rowTiles": [
+                  16,
+                  32
+                ],
+                "maxSplitK": 8,
+                "minSplitWidth": 256,
+                "maxBatch": 128,
+                "singleRow": "simt_split1",
+                "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+              },
+              "hardwareQualified": false
+            },
+            "packedSourceSha256": "009bdfb7baf97dc7fa43a6f5dc60981841be5c3a933c91e21f7d5fda218a9778",
+            "maxBatch": 128,
+            "decodeGraphSourceSha256": "ca413f1ceffda70742c4dfa1bb6781401d5f7dfaa9cfb3f12263b44fb0a4271b",
+            "decodeKernelsSourceSha256": "d14d993230f9942cc535bd4585f5157055fa2464a4d5260c78a727a8275426f4",
+            "maxGraphBytes": 1073741824,
+            "cachePolicy": "clear_on_request_boundary",
+            "maxRetainedCaptures": 1,
+            "integerDecoderSourceSha256": "9111893a588825d4f89d635b7b96e3014a4ffc94cbd71fdb2ddc3649c487d5dc",
+            "decodeExecution": {
+              "policy": "occupancy_split_k_v1_experimental",
+              "rowTiles": [
+                16,
+                32
+              ],
+              "maxSplitK": 8,
+              "minSplitWidth": 256,
+              "maxBatch": 128,
+              "singleRow": "simt_split1",
+              "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb",
+              "targetCtasPerSm": 8
+            }
+          },
+          "cases": [
+            {
+              "state": "parent",
+              "weightsSha256": "9d117d6dbce6f2ebd8ffde1d1f5e4fbbf9eb78016d9b230e13ede820c2dd1e5d",
+              "prefillLogitsSha256": "e73cfc40d13eee87e4b0cbcaba38f350dfba5cc3cbd975ff62e90fb810d1f7ae",
+              "capturedLogitsSha256": "1c3f081fc05e4975225d17389932b3407f2d13026d4b83385c4f7d33197ffc81",
+              "tokenIds": [
+                [
+                  0,
+                  0,
+                  3,
+                  5,
+                  17,
+                  16,
+                  41,
+                  37
+                ],
+                [
+                  7,
+                  11,
+                  13,
+                  17,
+                  16,
+                  22,
+                  1,
+                  2
+                ],
+                [
+                  0,
+                  19,
+                  23,
+                  29,
+                  1,
+                  2,
+                  19,
+                  3
+                ]
+              ],
+              "cacheHashes": [
+                [
+                  [
+                    "a3ec12e61fa845394a7e3cc145052979377fe18c0513e577caa4b3c74aaff0c3",
+                    "e6eee23f393013864d910e4b7ca3efc26d6827b05cb8ad4404089d32103b5381"
+                  ],
+                  [
+                    "a8c6338a7708420a6c65d096f1a10be3a9a69aad3833e0b0cd2185f62d01d5c9",
+                    "b83a6596c2d74d6865b37a26bb99f86950fe9d9f5479f5fd8397f046d2091b6a"
+                  ]
+                ],
+                [
+                  [
+                    "8f757393010d3eef3fd18ec32b67af3402bd32e3cb10a9e3bb1789419fc720d8",
+                    "b59d650e06142bd828562b333ca41f08e7b2b4f850fde4939acafee62d7343d2"
+                  ],
+                  [
+                    "ce2ed8e38da702d98956914c5f0511c6a04a19b7aad8fbe959099bb9e892cb00",
+                    "8763fd231ae820de1955e1c6b8b913609fb9a9f05ee63ecfc33124171218740e"
+                  ]
+                ],
+                [
+                  [
+                    "3437fd904787b64a33debb16021c1ece83bf7fc7dd9be2eb9dd3c3ee2033bde2",
+                    "b1ddb5245bcd8b0b945915237f03910b16e064c9d674a60738d14f0eac22b0ca"
+                  ],
+                  [
+                    "1a7e83552c03fc5151d8afe9c44c90b5cb03ed901c7be7c22c120d00899d2b8b",
+                    "b531570f1f5c0c0df679001e72090c05c983ecb7edb19f5f0e75afc8c4ad9f34"
+                  ]
+                ]
+              ],
+              "captureCount": 1,
+              "requestBuffersCleared": true
+            },
+            {
+              "state": "changed",
+              "weightsSha256": "e10398bd9e8ead202cfb3828dc67e1af62e0fce7e37964a96c4531592dff88f6",
+              "prefillLogitsSha256": "21c68781d533cc8973a3eea33d8cfff33704db6e8faf3e7d7107e0ebd1d99342",
+              "capturedLogitsSha256": "f4ab208564e02407016f170e8fbbf48152b27973cb5f4d36f6d26591e86adc8e",
+              "tokenIds": [
+                [
+                  0,
+                  0,
+                  3,
+                  5,
+                  31,
+                  37,
+                  37,
+                  37
+                ],
+                [
+                  7,
+                  11,
+                  13,
+                  17,
+                  16,
+                  22,
+                  31,
+                  6
+                ],
+                [
+                  0,
+                  19,
+                  23,
+                  29,
+                  40,
+                  42,
+                  8,
+                  1
+                ]
+              ],
+              "cacheHashes": [
+                [
+                  [
+                    "a3ec12e61fa845394a7e3cc145052979377fe18c0513e577caa4b3c74aaff0c3",
+                    "e6eee23f393013864d910e4b7ca3efc26d6827b05cb8ad4404089d32103b5381"
+                  ],
+                  [
+                    "818e48f5f3e8bf44e1ecd003f9f712af40501878c629a2a919ab6c45118b5465",
+                    "4c0e240488cce8aaab441113088bc93cd4e02361a536bbefcd71e0bfba1f9349"
+                  ]
+                ],
+                [
+                  [
+                    "8f757393010d3eef3fd18ec32b67af3402bd32e3cb10a9e3bb1789419fc720d8",
+                    "b59d650e06142bd828562b333ca41f08e7b2b4f850fde4939acafee62d7343d2"
+                  ],
+                  [
+                    "6582141c69d3a6cd68862a44ccf7d06abd16d3b8e732c0b092bf7f112eec3fbf",
+                    "0146e1751eb2f5fb4d59c6333f5a0692bb7a32afa7df9389f77fdb14d5aa26b7"
+                  ]
+                ],
+                [
+                  [
+                    "3437fd904787b64a33debb16021c1ece83bf7fc7dd9be2eb9dd3c3ee2033bde2",
+                    "b1ddb5245bcd8b0b945915237f03910b16e064c9d674a60738d14f0eac22b0ca"
+                  ],
+                  [
+                    "aa15040d041c7eb9765e01aa522172050d9bf67994ff9c3fa2fd767f10f09ca6",
+                    "076e47c76a0b838b464a23a9ccfeb838190f56248a8cc57ebf7d067e05bc35eb"
+                  ]
+                ]
+              ],
+              "captureCount": 1,
+              "requestBuffersCleared": true
+            },
+            {
+              "state": "restored",
+              "weightsSha256": "9d117d6dbce6f2ebd8ffde1d1f5e4fbbf9eb78016d9b230e13ede820c2dd1e5d",
+              "prefillLogitsSha256": "e73cfc40d13eee87e4b0cbcaba38f350dfba5cc3cbd975ff62e90fb810d1f7ae",
+              "capturedLogitsSha256": "1c3f081fc05e4975225d17389932b3407f2d13026d4b83385c4f7d33197ffc81",
+              "tokenIds": [
+                [
+                  0,
+                  0,
+                  3,
+                  5,
+                  17,
+                  16,
+                  41,
+                  37
+                ],
+                [
+                  7,
+                  11,
+                  13,
+                  17,
+                  16,
+                  22,
+                  1,
+                  2
+                ],
+                [
+                  0,
+                  19,
+                  23,
+                  29,
+                  1,
+                  2,
+                  19,
+                  3
+                ]
+              ],
+              "cacheHashes": [
+                [
+                  [
+                    "a3ec12e61fa845394a7e3cc145052979377fe18c0513e577caa4b3c74aaff0c3",
+                    "e6eee23f393013864d910e4b7ca3efc26d6827b05cb8ad4404089d32103b5381"
+                  ],
+                  [
+                    "a8c6338a7708420a6c65d096f1a10be3a9a69aad3833e0b0cd2185f62d01d5c9",
+                    "b83a6596c2d74d6865b37a26bb99f86950fe9d9f5479f5fd8397f046d2091b6a"
+                  ]
+                ],
+                [
+                  [
+                    "8f757393010d3eef3fd18ec32b67af3402bd32e3cb10a9e3bb1789419fc720d8",
+                    "b59d650e06142bd828562b333ca41f08e7b2b4f850fde4939acafee62d7343d2"
+                  ],
+                  [
+                    "ce2ed8e38da702d98956914c5f0511c6a04a19b7aad8fbe959099bb9e892cb00",
+                    "8763fd231ae820de1955e1c6b8b913609fb9a9f05ee63ecfc33124171218740e"
+                  ]
+                ],
+                [
+                  [
+                    "3437fd904787b64a33debb16021c1ece83bf7fc7dd9be2eb9dd3c3ee2033bde2",
+                    "b1ddb5245bcd8b0b945915237f03910b16e064c9d674a60738d14f0eac22b0ca"
+                  ],
+                  [
+                    "1a7e83552c03fc5151d8afe9c44c90b5cb03ed901c7be7c22c120d00899d2b8b",
+                    "b531570f1f5c0c0df679001e72090c05c983ecb7edb19f5f0e75afc8c4ad9f34"
+                  ]
+                ]
+              ],
+              "captureCount": 1,
+              "requestBuffersCleared": true
+            }
+          ],
+          "restoreExact": true
+        },
+        "22": {
+          "identity": {
+            "backend": "decoder_scaled_integer_cuda_graph_v1_experimental",
+            "operators": {
+              "linear": {
+                "operator": "row_scaled_signed_integer_dot_v1_experimental",
+                "magnitudeBits": 22,
+                "limbs": 3,
+                "maxWidth": 32768,
+                "zeroIntegerOutput": "+0",
+                "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+                "bias": "pairwise_f32_reference_v1_experimental",
+                "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+                "hardwareQualified": false
+              },
+              "nonlinear": "pairwise_f32_reference_v1_experimental"
+            },
+            "graph": {
+              "version": "rms_swiglu_causal_rope_decoder_v1_experimental",
+              "family": "llama",
+              "dimensions": [
+                32,
+                67,
+                2,
+                4,
+                1,
+                43
+              ],
+              "headDim": 12,
+              "ropeTheta": 10000.0,
+              "rmsNormEpsilon": 1e-06,
+              "tiedHead": false,
+              "parameterShapes": {
+                "lm_head.weight": [
+                  43,
+                  32
+                ],
+                "model.embed_tokens.weight": [
+                  43,
+                  32
+                ],
+                "model.layers.0.input_layernorm.weight": [
+                  32
+                ],
+                "model.layers.0.mlp.down_proj.bias": [
+                  32
+                ],
+                "model.layers.0.mlp.down_proj.weight": [
+                  32,
+                  67
+                ],
+                "model.layers.0.mlp.gate_proj.bias": [
+                  67
+                ],
+                "model.layers.0.mlp.gate_proj.weight": [
+                  67,
+                  32
+                ],
+                "model.layers.0.mlp.up_proj.bias": [
+                  67
+                ],
+                "model.layers.0.mlp.up_proj.weight": [
+                  67,
+                  32
+                ],
+                "model.layers.0.post_attention_layernorm.weight": [
+                  32
+                ],
+                "model.layers.0.self_attn.k_proj.bias": [
+                  12
+                ],
+                "model.layers.0.self_attn.k_proj.weight": [
+                  12,
+                  32
+                ],
+                "model.layers.0.self_attn.o_proj.bias": [
+                  32
+                ],
+                "model.layers.0.self_attn.o_proj.weight": [
+                  32,
+                  48
+                ],
+                "model.layers.0.self_attn.q_proj.bias": [
+                  48
+                ],
+                "model.layers.0.self_attn.q_proj.weight": [
+                  48,
+                  32
+                ],
+                "model.layers.0.self_attn.v_proj.bias": [
+                  12
+                ],
+                "model.layers.0.self_attn.v_proj.weight": [
+                  12,
+                  32
+                ],
+                "model.layers.1.input_layernorm.weight": [
+                  32
+                ],
+                "model.layers.1.mlp.down_proj.bias": [
+                  32
+                ],
+                "model.layers.1.mlp.down_proj.weight": [
+                  32,
+                  67
+                ],
+                "model.layers.1.mlp.gate_proj.bias": [
+                  67
+                ],
+                "model.layers.1.mlp.gate_proj.weight": [
+                  67,
+                  32
+                ],
+                "model.layers.1.mlp.up_proj.bias": [
+                  67
+                ],
+                "model.layers.1.mlp.up_proj.weight": [
+                  67,
+                  32
+                ],
+                "model.layers.1.post_attention_layernorm.weight": [
+                  32
+                ],
+                "model.layers.1.self_attn.k_proj.bias": [
+                  12
+                ],
+                "model.layers.1.self_attn.k_proj.weight": [
+                  12,
+                  32
+                ],
+                "model.layers.1.self_attn.o_proj.bias": [
+                  32
+                ],
+                "model.layers.1.self_attn.o_proj.weight": [
+                  32,
+                  48
+                ],
+                "model.layers.1.self_attn.q_proj.bias": [
+                  48
+                ],
+                "model.layers.1.self_attn.q_proj.weight": [
+                  48,
+                  32
+                ],
+                "model.layers.1.self_attn.v_proj.bias": [
+                  12
+                ],
+                "model.layers.1.self_attn.v_proj.weight": [
+                  12,
+                  32
+                ],
+                "model.norm.weight": [
+                  32
+                ]
+              }
+            },
+            "sourceSha256": "ae5678901fb004ae155090b0651aef6a9ec498f8048917086bd46854e46900ca",
+            "attentionScale": 0.28867513459481287,
+            "ropeFrequencyBits": [
+              1065353216,
+              1046256950,
+              1027481238,
+              1008981770,
+              990720363,
+              972249690
+            ],
+            "maxContext": 64,
+            "fixture": true,
+            "hardwareQualified": false,
+            "graphSourceSha256": "b1f49a30c40f5abeb2bed09cec3b58c656d67667a66ac6eeac526c0b78b21368",
+            "kernels": {
+              "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+              "linear": {
+                "operator": "row_scaled_signed_integer_dot_v1_experimental",
+                "magnitudeBits": 22,
+                "limbs": 3,
+                "maxWidth": 32768,
+                "zeroIntegerOutput": "+0",
+                "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+                "bias": "pairwise_f32_reference_v1_experimental",
+                "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+                "hardwareQualified": false
+              },
+              "nonlinear": {
+                "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+                "operators": "pairwise_f32_reference_v1_experimental",
+                "sourceSha256": "d66ef6565f96cd4f56ef3feefc34b51323c0d00f4876be1cd3350209c2a63fdf",
+                "nvrtcOptions": [
+                  "--fmad=false",
+                  "--ftz=false",
+                  "--prec-div=true",
+                  "--prec-sqrt=true",
+                  "--std=c++17"
+                ],
+                "hardwareQualified": false
+              },
+              "integerSourceSha256": "e77d157f76d9dceec74165d1164812a7f87ee19ddebd0c0ccc7d2e9ecfa20cb9",
+              "maxPartialBytes": 16777216,
+              "activationPacking": "radix_planes_once_v1_experimental",
+              "decodePlanning": {
+                "policy": "occupancy_split_k_v1_experimental",
+                "rowTiles": [
+                  16,
+                  32
+                ],
+                "maxSplitK": 8,
+                "minSplitWidth": 256,
+                "maxBatch": 128,
+                "singleRow": "simt_split1",
+                "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+              },
+              "hardwareQualified": false
+            },
+            "packedSourceSha256": "009bdfb7baf97dc7fa43a6f5dc60981841be5c3a933c91e21f7d5fda218a9778",
+            "maxBatch": 128,
+            "decodeGraphSourceSha256": "ca413f1ceffda70742c4dfa1bb6781401d5f7dfaa9cfb3f12263b44fb0a4271b",
+            "decodeKernelsSourceSha256": "d14d993230f9942cc535bd4585f5157055fa2464a4d5260c78a727a8275426f4",
+            "maxGraphBytes": 1073741824,
+            "cachePolicy": "clear_on_request_boundary",
+            "maxRetainedCaptures": 1,
+            "integerDecoderSourceSha256": "9111893a588825d4f89d635b7b96e3014a4ffc94cbd71fdb2ddc3649c487d5dc",
+            "decodeExecution": {
+              "policy": "occupancy_split_k_v1_experimental",
+              "rowTiles": [
+                16,
+                32
+              ],
+              "maxSplitK": 8,
+              "minSplitWidth": 256,
+              "maxBatch": 128,
+              "singleRow": "simt_split1",
+              "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb",
+              "targetCtasPerSm": 8
+            }
+          },
+          "cases": [
+            {
+              "state": "parent",
+              "weightsSha256": "9d117d6dbce6f2ebd8ffde1d1f5e4fbbf9eb78016d9b230e13ede820c2dd1e5d",
+              "prefillLogitsSha256": "f2b596e2da72716162cc6e40fb54db09c8b9481f3adf7f8f553cdc57ef30eead",
+              "capturedLogitsSha256": "333676f19f3e9c3c5d5736eb91c621e416aef500693bee8e90a540403815f417",
+              "tokenIds": [
+                [
+                  0,
+                  0,
+                  3,
+                  5,
+                  17,
+                  16,
+                  41,
+                  37
+                ],
+                [
+                  7,
+                  11,
+                  13,
+                  17,
+                  16,
+                  22,
+                  1,
+                  2
+                ],
+                [
+                  0,
+                  19,
+                  23,
+                  29,
+                  1,
+                  2,
+                  19,
+                  3
+                ]
+              ],
+              "cacheHashes": [
+                [
+                  [
+                    "46fa5fa9147241cb173e7d02c19f55bce0ae79694ca3f4c9505a844fdf378c98",
+                    "5c7ef5d4a1b836571f14097343b1a73f1d359c6cb2bf9c0d4e4950f91030fec3"
+                  ],
+                  [
+                    "bd640803387f38bb2ea5691b1dd7eef7709ec07f5b69cec5400e1c97d4a8ebcc",
+                    "45532f4c0d1b7feb53c2b0b5c4a3f5675fdae7aee6b4530f2ea060a04497e60f"
+                  ]
+                ],
+                [
+                  [
+                    "e6d53d49103138a8ce0de1371ac245c52edc5dfe5be2b3f67595361f010b8c9b",
+                    "2de1b9033d90dfa8391deb65217ca1b1267087d04eddac8dc549a77515334d05"
+                  ],
+                  [
+                    "47681c1ce8021dacef5d9d2454efb99e4c2a112dcbd1cd0b4aa34b87c81ee612",
+                    "c2f19b7a6e8bc4b656f2aaffe9187858436f06659924ea98f7f0495fb8090956"
+                  ]
+                ],
+                [
+                  [
+                    "a7f6586a4d3fdc8cd654877f71c32939f2f3d2b131b908c5858caf8abb2dc46b",
+                    "08d1bbeeafc3f95ca7d5e7b63cef7ee84e5e7bf3e329241626027b32a249e4c1"
+                  ],
+                  [
+                    "6aed8ebc3241deaf8af6da4b95b5a6e5d96984d0115d7ad4c8bbb960ceb1e3d0",
+                    "36a27eeb88160a7aad26e8dd513ab7867c896e43400040641701bae0641b97c8"
+                  ]
+                ]
+              ],
+              "captureCount": 1,
+              "requestBuffersCleared": true
+            },
+            {
+              "state": "changed",
+              "weightsSha256": "e10398bd9e8ead202cfb3828dc67e1af62e0fce7e37964a96c4531592dff88f6",
+              "prefillLogitsSha256": "d77804b59cc961eb477d7474e7e82a0f89c61f4ec27c5379d7d988e80d3ab140",
+              "capturedLogitsSha256": "226e516854717a0f7d7fc515d6844ce986f27ec1544a054e4d314404b880efa4",
+              "tokenIds": [
+                [
+                  0,
+                  0,
+                  3,
+                  5,
+                  31,
+                  37,
+                  37,
+                  37
+                ],
+                [
+                  7,
+                  11,
+                  13,
+                  17,
+                  16,
+                  22,
+                  31,
+                  6
+                ],
+                [
+                  0,
+                  19,
+                  23,
+                  29,
+                  40,
+                  42,
+                  8,
+                  1
+                ]
+              ],
+              "cacheHashes": [
+                [
+                  [
+                    "46fa5fa9147241cb173e7d02c19f55bce0ae79694ca3f4c9505a844fdf378c98",
+                    "5c7ef5d4a1b836571f14097343b1a73f1d359c6cb2bf9c0d4e4950f91030fec3"
+                  ],
+                  [
+                    "0847deeda2184576f7f0b623da3899b546fad0200db67cb4513d9cde70fc20d3",
+                    "20773571248634294607ccc83597913127fb4e60b1caaf908447bfe0dfad2b21"
+                  ]
+                ],
+                [
+                  [
+                    "e6d53d49103138a8ce0de1371ac245c52edc5dfe5be2b3f67595361f010b8c9b",
+                    "2de1b9033d90dfa8391deb65217ca1b1267087d04eddac8dc549a77515334d05"
+                  ],
+                  [
+                    "ab4bf07681ba061d84f6d8758a8e08fb70d279579c5446c3f2cbc5028e612550",
+                    "f23defb414ba07bab49d4214f621d830d1cd8411d1e400979ed89ce265e67576"
+                  ]
+                ],
+                [
+                  [
+                    "a7f6586a4d3fdc8cd654877f71c32939f2f3d2b131b908c5858caf8abb2dc46b",
+                    "08d1bbeeafc3f95ca7d5e7b63cef7ee84e5e7bf3e329241626027b32a249e4c1"
+                  ],
+                  [
+                    "b8a648d68589d4db3fb911485daa24cd93f73b03c95666d7cd93c6eb0c3d8e7d",
+                    "7ac28f337bec381c176b3c376da16efdbf08da06fc2660d10e35f00fbc95b44c"
+                  ]
+                ]
+              ],
+              "captureCount": 1,
+              "requestBuffersCleared": true
+            },
+            {
+              "state": "restored",
+              "weightsSha256": "9d117d6dbce6f2ebd8ffde1d1f5e4fbbf9eb78016d9b230e13ede820c2dd1e5d",
+              "prefillLogitsSha256": "f2b596e2da72716162cc6e40fb54db09c8b9481f3adf7f8f553cdc57ef30eead",
+              "capturedLogitsSha256": "333676f19f3e9c3c5d5736eb91c621e416aef500693bee8e90a540403815f417",
+              "tokenIds": [
+                [
+                  0,
+                  0,
+                  3,
+                  5,
+                  17,
+                  16,
+                  41,
+                  37
+                ],
+                [
+                  7,
+                  11,
+                  13,
+                  17,
+                  16,
+                  22,
+                  1,
+                  2
+                ],
+                [
+                  0,
+                  19,
+                  23,
+                  29,
+                  1,
+                  2,
+                  19,
+                  3
+                ]
+              ],
+              "cacheHashes": [
+                [
+                  [
+                    "46fa5fa9147241cb173e7d02c19f55bce0ae79694ca3f4c9505a844fdf378c98",
+                    "5c7ef5d4a1b836571f14097343b1a73f1d359c6cb2bf9c0d4e4950f91030fec3"
+                  ],
+                  [
+                    "bd640803387f38bb2ea5691b1dd7eef7709ec07f5b69cec5400e1c97d4a8ebcc",
+                    "45532f4c0d1b7feb53c2b0b5c4a3f5675fdae7aee6b4530f2ea060a04497e60f"
+                  ]
+                ],
+                [
+                  [
+                    "e6d53d49103138a8ce0de1371ac245c52edc5dfe5be2b3f67595361f010b8c9b",
+                    "2de1b9033d90dfa8391deb65217ca1b1267087d04eddac8dc549a77515334d05"
+                  ],
+                  [
+                    "47681c1ce8021dacef5d9d2454efb99e4c2a112dcbd1cd0b4aa34b87c81ee612",
+                    "c2f19b7a6e8bc4b656f2aaffe9187858436f06659924ea98f7f0495fb8090956"
+                  ]
+                ],
+                [
+                  [
+                    "a7f6586a4d3fdc8cd654877f71c32939f2f3d2b131b908c5858caf8abb2dc46b",
+                    "08d1bbeeafc3f95ca7d5e7b63cef7ee84e5e7bf3e329241626027b32a249e4c1"
+                  ],
+                  [
+                    "6aed8ebc3241deaf8af6da4b95b5a6e5d96984d0115d7ad4c8bbb960ceb1e3d0",
+                    "36a27eeb88160a7aad26e8dd513ab7867c896e43400040641701bae0641b97c8"
+                  ]
+                ]
+              ],
+              "captureCount": 1,
+              "requestBuffersCleared": true
+            }
+          ],
+          "restoreExact": true
+        }
+      }
+    },
+    "mistral": {
+      "fixtureSha256": "3ba87dda9880bc66c4a4b3312c20825d0898fb9cad38d260001a7d0311dcea05",
+      "schemaHash": "b3463041dfd091607784fcaddb1fe3f1b2772f2111c28393f22ffe08e80cd138",
+      "parentWeightsSha256": "323fcab29be414c1ddf57772c384e8e22bedd1142f03de095529086092c5a6a6",
+      "precisions": {
+        "14": {
+          "identity": {
+            "backend": "decoder_scaled_integer_cuda_graph_v1_experimental",
+            "operators": {
+              "linear": {
+                "operator": "row_scaled_signed_integer_dot_v1_experimental",
+                "magnitudeBits": 14,
+                "limbs": 2,
+                "maxWidth": 32768,
+                "zeroIntegerOutput": "+0",
+                "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+                "bias": "pairwise_f32_reference_v1_experimental",
+                "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+                "hardwareQualified": false
+              },
+              "nonlinear": "pairwise_f32_reference_v1_experimental"
+            },
+            "graph": {
+              "version": "rms_swiglu_causal_rope_decoder_v1_experimental",
+              "family": "mistral",
+              "dimensions": [
+                48,
+                91,
+                2,
+                6,
+                3,
+                43
+              ],
+              "headDim": 8,
+              "ropeTheta": 10000.0,
+              "rmsNormEpsilon": 1e-06,
+              "tiedHead": false,
+              "parameterShapes": {
+                "lm_head.weight": [
+                  43,
+                  48
+                ],
+                "model.embed_tokens.weight": [
+                  43,
+                  48
+                ],
+                "model.layers.0.input_layernorm.weight": [
+                  48
+                ],
+                "model.layers.0.mlp.down_proj.weight": [
+                  48,
+                  91
+                ],
+                "model.layers.0.mlp.gate_proj.weight": [
+                  91,
+                  48
+                ],
+                "model.layers.0.mlp.up_proj.weight": [
+                  91,
+                  48
+                ],
+                "model.layers.0.post_attention_layernorm.weight": [
+                  48
+                ],
+                "model.layers.0.self_attn.k_proj.weight": [
+                  24,
+                  48
+                ],
+                "model.layers.0.self_attn.o_proj.weight": [
+                  48,
+                  48
+                ],
+                "model.layers.0.self_attn.q_proj.weight": [
+                  48,
+                  48
+                ],
+                "model.layers.0.self_attn.v_proj.weight": [
+                  24,
+                  48
+                ],
+                "model.layers.1.input_layernorm.weight": [
+                  48
+                ],
+                "model.layers.1.mlp.down_proj.weight": [
+                  48,
+                  91
+                ],
+                "model.layers.1.mlp.gate_proj.weight": [
+                  91,
+                  48
+                ],
+                "model.layers.1.mlp.up_proj.weight": [
+                  91,
+                  48
+                ],
+                "model.layers.1.post_attention_layernorm.weight": [
+                  48
+                ],
+                "model.layers.1.self_attn.k_proj.weight": [
+                  24,
+                  48
+                ],
+                "model.layers.1.self_attn.o_proj.weight": [
+                  48,
+                  48
+                ],
+                "model.layers.1.self_attn.q_proj.weight": [
+                  48,
+                  48
+                ],
+                "model.layers.1.self_attn.v_proj.weight": [
+                  24,
+                  48
+                ],
+                "model.norm.weight": [
+                  48
+                ]
+              }
+            },
+            "sourceSha256": "ae5678901fb004ae155090b0651aef6a9ec498f8048917086bd46854e46900ca",
+            "attentionScale": 0.3535533905932738,
+            "ropeFrequencyBits": [
+              1065353216,
+              1036831949,
+              1008981770,
+              981668463
+            ],
+            "maxContext": 64,
+            "fixture": true,
+            "hardwareQualified": false,
+            "graphSourceSha256": "b1f49a30c40f5abeb2bed09cec3b58c656d67667a66ac6eeac526c0b78b21368",
+            "kernels": {
+              "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+              "linear": {
+                "operator": "row_scaled_signed_integer_dot_v1_experimental",
+                "magnitudeBits": 14,
+                "limbs": 2,
+                "maxWidth": 32768,
+                "zeroIntegerOutput": "+0",
+                "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+                "bias": "pairwise_f32_reference_v1_experimental",
+                "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+                "hardwareQualified": false
+              },
+              "nonlinear": {
+                "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+                "operators": "pairwise_f32_reference_v1_experimental",
+                "sourceSha256": "d66ef6565f96cd4f56ef3feefc34b51323c0d00f4876be1cd3350209c2a63fdf",
+                "nvrtcOptions": [
+                  "--fmad=false",
+                  "--ftz=false",
+                  "--prec-div=true",
+                  "--prec-sqrt=true",
+                  "--std=c++17"
+                ],
+                "hardwareQualified": false
+              },
+              "integerSourceSha256": "e77d157f76d9dceec74165d1164812a7f87ee19ddebd0c0ccc7d2e9ecfa20cb9",
+              "maxPartialBytes": 16777216,
+              "activationPacking": "radix_planes_once_v1_experimental",
+              "decodePlanning": {
+                "policy": "occupancy_split_k_v1_experimental",
+                "rowTiles": [
+                  16,
+                  32
+                ],
+                "maxSplitK": 8,
+                "minSplitWidth": 256,
+                "maxBatch": 128,
+                "singleRow": "simt_split1",
+                "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+              },
+              "hardwareQualified": false
+            },
+            "packedSourceSha256": "009bdfb7baf97dc7fa43a6f5dc60981841be5c3a933c91e21f7d5fda218a9778",
+            "maxBatch": 128,
+            "decodeGraphSourceSha256": "ca413f1ceffda70742c4dfa1bb6781401d5f7dfaa9cfb3f12263b44fb0a4271b",
+            "decodeKernelsSourceSha256": "d14d993230f9942cc535bd4585f5157055fa2464a4d5260c78a727a8275426f4",
+            "maxGraphBytes": 1073741824,
+            "cachePolicy": "clear_on_request_boundary",
+            "maxRetainedCaptures": 1,
+            "integerDecoderSourceSha256": "9111893a588825d4f89d635b7b96e3014a4ffc94cbd71fdb2ddc3649c487d5dc",
+            "decodeExecution": {
+              "policy": "occupancy_split_k_v1_experimental",
+              "rowTiles": [
+                16,
+                32
+              ],
+              "maxSplitK": 8,
+              "minSplitWidth": 256,
+              "maxBatch": 128,
+              "singleRow": "simt_split1",
+              "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb",
+              "targetCtasPerSm": 8
+            }
+          },
+          "cases": [
+            {
+              "state": "parent",
+              "weightsSha256": "323fcab29be414c1ddf57772c384e8e22bedd1142f03de095529086092c5a6a6",
+              "prefillLogitsSha256": "9cd4f40ffc3df6624663eacb52f3bd71faa5e6443174649626cdc7a5bdf475b6",
+              "capturedLogitsSha256": "ef27327b779459bc4e2add9174157507513cc8910f803fcaa0043df8c8f7938a",
+              "tokenIds": [
+                [
+                  0,
+                  0,
+                  3,
+                  5,
+                  12,
+                  8,
+                  41,
+                  2
+                ],
+                [
+                  7,
+                  11,
+                  13,
+                  17,
+                  38,
+                  39,
+                  39,
+                  39
+                ],
+                [
+                  0,
+                  19,
+                  23,
+                  29,
+                  20,
+                  6,
+                  3,
+                  4
+                ]
+              ],
+              "cacheHashes": [
+                [
+                  [
+                    "54dc993ac48b3ecd01ac4d95dddcf43b1eb7fbc4c857b17a7d03703b03d46ccd",
+                    "b49e73d9532fe6b78a085e8da3f9eb67f94dcecfe2690afddc371206c5241a3c"
+                  ],
+                  [
+                    "8c16d1a0619a6f370b5c3331a746856f88edd9ac08ed0b6d54126e42a4096c6a",
+                    "bd909223723ca8cb48d33152e2331359e9cad6b8f754b43bc2f59aa5eddc121b"
+                  ]
+                ],
+                [
+                  [
+                    "4a78fd77a0994819e359d68e428bc23f964694234d09779044d9344a02b32761",
+                    "ef0977e2602e40503c19aac3eb3e8890eaad81e5660b326204cdbfe11c1b55b1"
+                  ],
+                  [
+                    "6714c4db8a296a5f6f58f46c50ae9c716db4176171c721e2b30d3c513a31349d",
+                    "d857a533c2b36c3be81878cadb31d34ad6aee3bcb842a217658f5837a6b16088"
+                  ]
+                ],
+                [
+                  [
+                    "f3d477d7f026c7acc2fff5faef91c567445364a875b6dbd64859075c6f2c30f6",
+                    "ee4793b78a8b2ae27a88bda898c3bb3ea11b3fc97a4ed48d81b0ac65eb39908c"
+                  ],
+                  [
+                    "4ad91fa89807316943ebcf27fcc5bf1e827caec15df9d9b93c87808576933ed1",
+                    "86b6d4e9dda16e565e2d2cda95a0d9d545961d4d6804aeab0809cd5d4e78bd2d"
+                  ]
+                ]
+              ],
+              "captureCount": 1,
+              "requestBuffersCleared": true
+            },
+            {
+              "state": "changed",
+              "weightsSha256": "5cb757dc9e2d11a46b5d6182df0e1cafc484ebe4d741f161ea3f79cf1af04655",
+              "prefillLogitsSha256": "8cb1023c1c905c59e719cbdd20283e7147c679a77d1542f053f968cf4d445cf2",
+              "capturedLogitsSha256": "7e5ddeea3e3d8c1455e401d51d388bebe1e47b553b0afdcd9974f723684dc01c",
+              "tokenIds": [
+                [
+                  0,
+                  0,
+                  3,
+                  5,
+                  39,
+                  39,
+                  39,
+                  39
+                ],
+                [
+                  7,
+                  11,
+                  13,
+                  17,
+                  0,
+                  11,
+                  14,
+                  41
+                ],
+                [
+                  0,
+                  19,
+                  23,
+                  29,
+                  32,
+                  31,
+                  40,
+                  19
+                ]
+              ],
+              "cacheHashes": [
+                [
+                  [
+                    "54dc993ac48b3ecd01ac4d95dddcf43b1eb7fbc4c857b17a7d03703b03d46ccd",
+                    "b49e73d9532fe6b78a085e8da3f9eb67f94dcecfe2690afddc371206c5241a3c"
+                  ],
+                  [
+                    "15f2a3199fef9f63e11a71861d6b64c747a7a2a6ef9d4e92e809cab14b3c6173",
+                    "6d5bd595aba9f56644e2104d942cc67a303920c9e0a27bca7d3e69f8476b66cc"
+                  ]
+                ],
+                [
+                  [
+                    "4a78fd77a0994819e359d68e428bc23f964694234d09779044d9344a02b32761",
+                    "ef0977e2602e40503c19aac3eb3e8890eaad81e5660b326204cdbfe11c1b55b1"
+                  ],
+                  [
+                    "b9d24b471c155daace1ecc5885d1cfed7b48fd06e3447ceeeef8327e816272cb",
+                    "e954d60d5f8b593378197ceeb267d5db26697b287ac93d3f472b02174dd0cebe"
+                  ]
+                ],
+                [
+                  [
+                    "f3d477d7f026c7acc2fff5faef91c567445364a875b6dbd64859075c6f2c30f6",
+                    "ee4793b78a8b2ae27a88bda898c3bb3ea11b3fc97a4ed48d81b0ac65eb39908c"
+                  ],
+                  [
+                    "12743b082f95299da4354451a4bf18ad0fd9231bae4aa8f3edbd1506780e8987",
+                    "d2b451a913ebe92040014c5bb6fa656db411f8f4cf511c5a8f9687451993ae8c"
+                  ]
+                ]
+              ],
+              "captureCount": 1,
+              "requestBuffersCleared": true
+            },
+            {
+              "state": "restored",
+              "weightsSha256": "323fcab29be414c1ddf57772c384e8e22bedd1142f03de095529086092c5a6a6",
+              "prefillLogitsSha256": "9cd4f40ffc3df6624663eacb52f3bd71faa5e6443174649626cdc7a5bdf475b6",
+              "capturedLogitsSha256": "ef27327b779459bc4e2add9174157507513cc8910f803fcaa0043df8c8f7938a",
+              "tokenIds": [
+                [
+                  0,
+                  0,
+                  3,
+                  5,
+                  12,
+                  8,
+                  41,
+                  2
+                ],
+                [
+                  7,
+                  11,
+                  13,
+                  17,
+                  38,
+                  39,
+                  39,
+                  39
+                ],
+                [
+                  0,
+                  19,
+                  23,
+                  29,
+                  20,
+                  6,
+                  3,
+                  4
+                ]
+              ],
+              "cacheHashes": [
+                [
+                  [
+                    "54dc993ac48b3ecd01ac4d95dddcf43b1eb7fbc4c857b17a7d03703b03d46ccd",
+                    "b49e73d9532fe6b78a085e8da3f9eb67f94dcecfe2690afddc371206c5241a3c"
+                  ],
+                  [
+                    "8c16d1a0619a6f370b5c3331a746856f88edd9ac08ed0b6d54126e42a4096c6a",
+                    "bd909223723ca8cb48d33152e2331359e9cad6b8f754b43bc2f59aa5eddc121b"
+                  ]
+                ],
+                [
+                  [
+                    "4a78fd77a0994819e359d68e428bc23f964694234d09779044d9344a02b32761",
+                    "ef0977e2602e40503c19aac3eb3e8890eaad81e5660b326204cdbfe11c1b55b1"
+                  ],
+                  [
+                    "6714c4db8a296a5f6f58f46c50ae9c716db4176171c721e2b30d3c513a31349d",
+                    "d857a533c2b36c3be81878cadb31d34ad6aee3bcb842a217658f5837a6b16088"
+                  ]
+                ],
+                [
+                  [
+                    "f3d477d7f026c7acc2fff5faef91c567445364a875b6dbd64859075c6f2c30f6",
+                    "ee4793b78a8b2ae27a88bda898c3bb3ea11b3fc97a4ed48d81b0ac65eb39908c"
+                  ],
+                  [
+                    "4ad91fa89807316943ebcf27fcc5bf1e827caec15df9d9b93c87808576933ed1",
+                    "86b6d4e9dda16e565e2d2cda95a0d9d545961d4d6804aeab0809cd5d4e78bd2d"
+                  ]
+                ]
+              ],
+              "captureCount": 1,
+              "requestBuffersCleared": true
+            }
+          ],
+          "restoreExact": true
+        },
+        "22": {
+          "identity": {
+            "backend": "decoder_scaled_integer_cuda_graph_v1_experimental",
+            "operators": {
+              "linear": {
+                "operator": "row_scaled_signed_integer_dot_v1_experimental",
+                "magnitudeBits": 22,
+                "limbs": 3,
+                "maxWidth": 32768,
+                "zeroIntegerOutput": "+0",
+                "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+                "bias": "pairwise_f32_reference_v1_experimental",
+                "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+                "hardwareQualified": false
+              },
+              "nonlinear": "pairwise_f32_reference_v1_experimental"
+            },
+            "graph": {
+              "version": "rms_swiglu_causal_rope_decoder_v1_experimental",
+              "family": "mistral",
+              "dimensions": [
+                48,
+                91,
+                2,
+                6,
+                3,
+                43
+              ],
+              "headDim": 8,
+              "ropeTheta": 10000.0,
+              "rmsNormEpsilon": 1e-06,
+              "tiedHead": false,
+              "parameterShapes": {
+                "lm_head.weight": [
+                  43,
+                  48
+                ],
+                "model.embed_tokens.weight": [
+                  43,
+                  48
+                ],
+                "model.layers.0.input_layernorm.weight": [
+                  48
+                ],
+                "model.layers.0.mlp.down_proj.weight": [
+                  48,
+                  91
+                ],
+                "model.layers.0.mlp.gate_proj.weight": [
+                  91,
+                  48
+                ],
+                "model.layers.0.mlp.up_proj.weight": [
+                  91,
+                  48
+                ],
+                "model.layers.0.post_attention_layernorm.weight": [
+                  48
+                ],
+                "model.layers.0.self_attn.k_proj.weight": [
+                  24,
+                  48
+                ],
+                "model.layers.0.self_attn.o_proj.weight": [
+                  48,
+                  48
+                ],
+                "model.layers.0.self_attn.q_proj.weight": [
+                  48,
+                  48
+                ],
+                "model.layers.0.self_attn.v_proj.weight": [
+                  24,
+                  48
+                ],
+                "model.layers.1.input_layernorm.weight": [
+                  48
+                ],
+                "model.layers.1.mlp.down_proj.weight": [
+                  48,
+                  91
+                ],
+                "model.layers.1.mlp.gate_proj.weight": [
+                  91,
+                  48
+                ],
+                "model.layers.1.mlp.up_proj.weight": [
+                  91,
+                  48
+                ],
+                "model.layers.1.post_attention_layernorm.weight": [
+                  48
+                ],
+                "model.layers.1.self_attn.k_proj.weight": [
+                  24,
+                  48
+                ],
+                "model.layers.1.self_attn.o_proj.weight": [
+                  48,
+                  48
+                ],
+                "model.layers.1.self_attn.q_proj.weight": [
+                  48,
+                  48
+                ],
+                "model.layers.1.self_attn.v_proj.weight": [
+                  24,
+                  48
+                ],
+                "model.norm.weight": [
+                  48
+                ]
+              }
+            },
+            "sourceSha256": "ae5678901fb004ae155090b0651aef6a9ec498f8048917086bd46854e46900ca",
+            "attentionScale": 0.3535533905932738,
+            "ropeFrequencyBits": [
+              1065353216,
+              1036831949,
+              1008981770,
+              981668463
+            ],
+            "maxContext": 64,
+            "fixture": true,
+            "hardwareQualified": false,
+            "graphSourceSha256": "b1f49a30c40f5abeb2bed09cec3b58c656d67667a66ac6eeac526c0b78b21368",
+            "kernels": {
+              "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+              "linear": {
+                "operator": "row_scaled_signed_integer_dot_v1_experimental",
+                "magnitudeBits": 22,
+                "limbs": 3,
+                "maxWidth": 32768,
+                "zeroIntegerOutput": "+0",
+                "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+                "bias": "pairwise_f32_reference_v1_experimental",
+                "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+                "hardwareQualified": false
+              },
+              "nonlinear": {
+                "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+                "operators": "pairwise_f32_reference_v1_experimental",
+                "sourceSha256": "d66ef6565f96cd4f56ef3feefc34b51323c0d00f4876be1cd3350209c2a63fdf",
+                "nvrtcOptions": [
+                  "--fmad=false",
+                  "--ftz=false",
+                  "--prec-div=true",
+                  "--prec-sqrt=true",
+                  "--std=c++17"
+                ],
+                "hardwareQualified": false
+              },
+              "integerSourceSha256": "e77d157f76d9dceec74165d1164812a7f87ee19ddebd0c0ccc7d2e9ecfa20cb9",
+              "maxPartialBytes": 16777216,
+              "activationPacking": "radix_planes_once_v1_experimental",
+              "decodePlanning": {
+                "policy": "occupancy_split_k_v1_experimental",
+                "rowTiles": [
+                  16,
+                  32
+                ],
+                "maxSplitK": 8,
+                "minSplitWidth": 256,
+                "maxBatch": 128,
+                "singleRow": "simt_split1",
+                "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+              },
+              "hardwareQualified": false
+            },
+            "packedSourceSha256": "009bdfb7baf97dc7fa43a6f5dc60981841be5c3a933c91e21f7d5fda218a9778",
+            "maxBatch": 128,
+            "decodeGraphSourceSha256": "ca413f1ceffda70742c4dfa1bb6781401d5f7dfaa9cfb3f12263b44fb0a4271b",
+            "decodeKernelsSourceSha256": "d14d993230f9942cc535bd4585f5157055fa2464a4d5260c78a727a8275426f4",
+            "maxGraphBytes": 1073741824,
+            "cachePolicy": "clear_on_request_boundary",
+            "maxRetainedCaptures": 1,
+            "integerDecoderSourceSha256": "9111893a588825d4f89d635b7b96e3014a4ffc94cbd71fdb2ddc3649c487d5dc",
+            "decodeExecution": {
+              "policy": "occupancy_split_k_v1_experimental",
+              "rowTiles": [
+                16,
+                32
+              ],
+              "maxSplitK": 8,
+              "minSplitWidth": 256,
+              "maxBatch": 128,
+              "singleRow": "simt_split1",
+              "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb",
+              "targetCtasPerSm": 8
+            }
+          },
+          "cases": [
+            {
+              "state": "parent",
+              "weightsSha256": "323fcab29be414c1ddf57772c384e8e22bedd1142f03de095529086092c5a6a6",
+              "prefillLogitsSha256": "d891374b634c6509f1da8f922d5be19e2e67a0b16c1e4ae59599d60d62308654",
+              "capturedLogitsSha256": "3501a2c7523643957e8a6f168afbb7c94691b19ec571791e3bb2fbce42950911",
+              "tokenIds": [
+                [
+                  0,
+                  0,
+                  3,
+                  5,
+                  12,
+                  8,
+                  41,
+                  2
+                ],
+                [
+                  7,
+                  11,
+                  13,
+                  17,
+                  38,
+                  39,
+                  39,
+                  39
+                ],
+                [
+                  0,
+                  19,
+                  23,
+                  29,
+                  20,
+                  6,
+                  3,
+                  4
+                ]
+              ],
+              "cacheHashes": [
+                [
+                  [
+                    "f4bf8ccee31e1fc20121cc7a6180eff42b1f1ce3f2edb98ed1d55f7cacf8ba73",
+                    "a68bc0a16ebda497fbb10bc245ebe5ec5c6c3536c4e0e472b0ba2c8830246b39"
+                  ],
+                  [
+                    "0668b918e807a3c02b76f9cea1572d6f1e9db4afae32a6b86e22a2779ff22c42",
+                    "8e2aa663f75be3b55eace05cca88d18e2152b4beaca1c77ea989177bbe0f98f7"
+                  ]
+                ],
+                [
+                  [
+                    "d5b21679151c9aaf9d1482f79e8fff95363990dfb2b597c36050f8e14db29a6f",
+                    "ed25c8991edcb6eb6de2ebd9c9665ddc0fb8289bdabb11f3c2580492e68a8268"
+                  ],
+                  [
+                    "01c8216c12fc21f838c2cba4de6595560124bcd9fdf71d7ff90af14d85b25fcc",
+                    "f27774f110690186844a5e05fed12c4a2b25e60c41608e0e5cc6971b37141d57"
+                  ]
+                ],
+                [
+                  [
+                    "3935f9e1b561d2d2899f0b4481ff0d89b4663700221d2888c07cb9fdc023c3ea",
+                    "ed2ac4251e82030b0acc24997c4d55b62ae9b73820276d7bb6e85bb653a9409c"
+                  ],
+                  [
+                    "1cdfdfdab24780af11a779d3fa5b1a73a2b408b101a4f4c28aeb76e835812642",
+                    "4de851bb02250320694cc351d7aa28dd241edb5d3641d48cf51c202c1145df7b"
+                  ]
+                ]
+              ],
+              "captureCount": 1,
+              "requestBuffersCleared": true
+            },
+            {
+              "state": "changed",
+              "weightsSha256": "5cb757dc9e2d11a46b5d6182df0e1cafc484ebe4d741f161ea3f79cf1af04655",
+              "prefillLogitsSha256": "e9980fe901bef1568ad0432d1fdf5e29de3ab1b65a8108dcc81a696609f7d45e",
+              "capturedLogitsSha256": "f3ce1daa9e00404fcc62f3fa283c8798dea301cc6a54323c1993ddc74e8e60f6",
+              "tokenIds": [
+                [
+                  0,
+                  0,
+                  3,
+                  5,
+                  39,
+                  39,
+                  39,
+                  39
+                ],
+                [
+                  7,
+                  11,
+                  13,
+                  17,
+                  0,
+                  11,
+                  14,
+                  41
+                ],
+                [
+                  0,
+                  19,
+                  23,
+                  29,
+                  32,
+                  31,
+                  40,
+                  19
+                ]
+              ],
+              "cacheHashes": [
+                [
+                  [
+                    "f4bf8ccee31e1fc20121cc7a6180eff42b1f1ce3f2edb98ed1d55f7cacf8ba73",
+                    "a68bc0a16ebda497fbb10bc245ebe5ec5c6c3536c4e0e472b0ba2c8830246b39"
+                  ],
+                  [
+                    "f67273d275cd14293e6a351efcfcc2a154ef99f32351c433675923cf7c9af070",
+                    "cafedeba8cca7a45575452b9db5788054bf90c81dda66dd38586f3c63b2e516f"
+                  ]
+                ],
+                [
+                  [
+                    "d5b21679151c9aaf9d1482f79e8fff95363990dfb2b597c36050f8e14db29a6f",
+                    "ed25c8991edcb6eb6de2ebd9c9665ddc0fb8289bdabb11f3c2580492e68a8268"
+                  ],
+                  [
+                    "f1193cc6f779e21157f1ba133dd401bfc1e53c128ff55c0752cc6716c4c303c3",
+                    "aa52927fb1ec0a6a8a9a82517c6bce5a2f6d809dc1dd3e0402ca20c2406643ac"
+                  ]
+                ],
+                [
+                  [
+                    "3935f9e1b561d2d2899f0b4481ff0d89b4663700221d2888c07cb9fdc023c3ea",
+                    "ed2ac4251e82030b0acc24997c4d55b62ae9b73820276d7bb6e85bb653a9409c"
+                  ],
+                  [
+                    "510fdc35bf97bb198d69e90ca69e42982206de833a851db4ba35df8ba9fb3818",
+                    "5a25b115328a56fd056f4939f4f3ff8d7fafeda975ad201635f96fc3057b805d"
+                  ]
+                ]
+              ],
+              "captureCount": 1,
+              "requestBuffersCleared": true
+            },
+            {
+              "state": "restored",
+              "weightsSha256": "323fcab29be414c1ddf57772c384e8e22bedd1142f03de095529086092c5a6a6",
+              "prefillLogitsSha256": "d891374b634c6509f1da8f922d5be19e2e67a0b16c1e4ae59599d60d62308654",
+              "capturedLogitsSha256": "3501a2c7523643957e8a6f168afbb7c94691b19ec571791e3bb2fbce42950911",
+              "tokenIds": [
+                [
+                  0,
+                  0,
+                  3,
+                  5,
+                  12,
+                  8,
+                  41,
+                  2
+                ],
+                [
+                  7,
+                  11,
+                  13,
+                  17,
+                  38,
+                  39,
+                  39,
+                  39
+                ],
+                [
+                  0,
+                  19,
+                  23,
+                  29,
+                  20,
+                  6,
+                  3,
+                  4
+                ]
+              ],
+              "cacheHashes": [
+                [
+                  [
+                    "f4bf8ccee31e1fc20121cc7a6180eff42b1f1ce3f2edb98ed1d55f7cacf8ba73",
+                    "a68bc0a16ebda497fbb10bc245ebe5ec5c6c3536c4e0e472b0ba2c8830246b39"
+                  ],
+                  [
+                    "0668b918e807a3c02b76f9cea1572d6f1e9db4afae32a6b86e22a2779ff22c42",
+                    "8e2aa663f75be3b55eace05cca88d18e2152b4beaca1c77ea989177bbe0f98f7"
+                  ]
+                ],
+                [
+                  [
+                    "d5b21679151c9aaf9d1482f79e8fff95363990dfb2b597c36050f8e14db29a6f",
+                    "ed25c8991edcb6eb6de2ebd9c9665ddc0fb8289bdabb11f3c2580492e68a8268"
+                  ],
+                  [
+                    "01c8216c12fc21f838c2cba4de6595560124bcd9fdf71d7ff90af14d85b25fcc",
+                    "f27774f110690186844a5e05fed12c4a2b25e60c41608e0e5cc6971b37141d57"
+                  ]
+                ],
+                [
+                  [
+                    "3935f9e1b561d2d2899f0b4481ff0d89b4663700221d2888c07cb9fdc023c3ea",
+                    "ed2ac4251e82030b0acc24997c4d55b62ae9b73820276d7bb6e85bb653a9409c"
+                  ],
+                  [
+                    "1cdfdfdab24780af11a779d3fa5b1a73a2b408b101a4f4c28aeb76e835812642",
+                    "4de851bb02250320694cc351d7aa28dd241edb5d3641d48cf51c202c1145df7b"
+                  ]
+                ]
+              ],
+              "captureCount": 1,
+              "requestBuffersCleared": true
+            }
+          ],
+          "restoreExact": true
+        }
+      }
+    }
+  },
+  "builds": {
+    "qwen2": {
+      "14": {
+        "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "d66ef6565f96cd4f56ef3feefc34b51323c0d00f4876be1cd3350209c2a63fdf",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "decode-graph-ops": {
+            "sourceSha256": "0f79d399fb1e040e95aa173b12a5895725feabbe6546561afb3eb085dc5f21a3",
+            "ptxSha256": "559e78c69076d20f477ddbc355b7e8e2990b468f58916b1e3bc365e299763764",
+            "cubinSha256": "bf3043908214e5ff89c16b48dd0e06ab16722fe045f399310f3967d9389293e9",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 5
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 9
+              },
+              "violations": []
+            }
+          },
+          "integer-14-24-bias0-m16-w4-s1-p0": {
+            "sourceSha256": "5d4853cd2fd137d3175483faa79c4acd09bf3b35985f612a616c2354f5d51284",
+            "ptxSha256": "b9428d0e5d3f6894223d269bd1b5c21e6ea5638b9f4bcc0ed84e617bc1e5a551",
+            "cubinSha256": "f9f431dd1f67a3c98737f3f1103e7272a311edcdb7aa942b0fea1a0dfc18e6eb",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "integer-14-24-bias0-m16-w4-s1-p1": {
+            "sourceSha256": "99cc93eb9b123dd134a64e063a583ea3791a4e2c122a4c6582c9d93f7527883b",
+            "ptxSha256": "06017d0030dbbc5d446de8a80d6f78107f429930a3f909a589c5df567f281f7b",
+            "cubinSha256": "f0df841b774ec981c8df02f258bfe42912354bd4359b8a6a7ca8183994d5f183",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "integer-14-24-bias1-m16-w4-s1-p1": {
+            "sourceSha256": "cbf767a987c58b4304d1f4e948d17e92accc6608f55b922db2ab6f8220d430e3",
+            "ptxSha256": "69387cf8425dcebe03731ff91910d69b109e3e8c753f47ecead9030737762e35",
+            "cubinSha256": "314104f09498e5e9a90053fc34898cd3974224478e85d76b286a00bcbfaf502d",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 6
+              },
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 6
+              },
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "integer-14-47-bias0-m16-w4-s1-p0": {
+            "sourceSha256": "e963813a27a8d5fb48d16d329f6c24ad82af6e51cbcd767242d4c5e3c0d85d4c",
+            "ptxSha256": "a9ab2eaf013025489c7445a3d9b67e3e00900317e23ccd78a1482d828ff18a75",
+            "cubinSha256": "20a1b1f16d6b9d1f5d5bf927c81686ddecb2e4db17aef6d8d8b159e5fd8541de",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "integer-14-47-bias0-m16-w4-s1-p1": {
+            "sourceSha256": "ca1a8bbf1e3e50158ada614ca3d2b5a39569cc43e7072a8845fb54e7c222a06f",
+            "ptxSha256": "fbd57ba1511658868b77b835c8a83f52e50f145c9c6615ab974b59f712146a6f",
+            "cubinSha256": "d788256b5b6371e237c564a86839702ae5aabd2d13fe2714a3de29902281d8be",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "ops": {
+            "sourceSha256": "dfbde23ca66d53914f4c8fdd036b8dc5ad112a5a90c7253a2add9dac5deceebc",
+            "ptxSha256": "1df917aae7230c7cabecf04e204ff4478ed9d70f6e745d22caef309f051ca01a",
+            "cubinSha256": "6a863ee00e18734d3295f6f078a34564ff7f2c099cda8e612eabf09be97356a2",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 96,
+                "add.rn.f32": 125
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 96,
+                "FADD": 126
+              },
+              "violations": []
+            }
+          }
+        },
+        "fingerprint": "922566e7b880f0484ed2d6f04be416312646d20ce835a4c580b3cb883730fbc5",
+        "linear": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "nonlinear": {
+          "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+          "operators": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "d66ef6565f96cd4f56ef3feefc34b51323c0d00f4876be1cd3350209c2a63fdf",
+          "nvrtcOptions": [
+            "--fmad=false",
+            "--ftz=false",
+            "--prec-div=true",
+            "--prec-sqrt=true",
+            "--std=c++17"
+          ],
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "e77d157f76d9dceec74165d1164812a7f87ee19ddebd0c0ccc7d2e9ecfa20cb9",
+        "maxPartialBytes": 16777216,
+        "activationPacking": "radix_planes_once_v1_experimental",
+        "decodePlanning": {
+          "policy": "occupancy_split_k_v1_experimental",
+          "rowTiles": [
+            16,
+            32
+          ],
+          "maxSplitK": 8,
+          "minSplitWidth": 256,
+          "maxBatch": 128,
+          "singleRow": "simt_split1",
+          "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+        },
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "multiprocessors": 70
+      },
+      "22": {
+        "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "d66ef6565f96cd4f56ef3feefc34b51323c0d00f4876be1cd3350209c2a63fdf",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "decode-graph-ops": {
+            "sourceSha256": "0f79d399fb1e040e95aa173b12a5895725feabbe6546561afb3eb085dc5f21a3",
+            "ptxSha256": "559e78c69076d20f477ddbc355b7e8e2990b468f58916b1e3bc365e299763764",
+            "cubinSha256": "bf3043908214e5ff89c16b48dd0e06ab16722fe045f399310f3967d9389293e9",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 5
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 9
+              },
+              "violations": []
+            }
+          },
+          "integer-22-24-bias0-m16-w4-s1-p0": {
+            "sourceSha256": "20764eedf2accc9b5a17aeb7f9f2f286321eae88e840b7c0eeb8c27c9f4efbad",
+            "ptxSha256": "f76777fc69ad1abbaf01192d149170a0625019fdc7e27aa31c907af6ba82d92a",
+            "cubinSha256": "8053e5d33bcbcdcebe92e6a8d36b91a6546585b052d319aa4cbaf746662960c0",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "integer-22-24-bias0-m16-w4-s1-p1": {
+            "sourceSha256": "540d5253bfcb07d421d84d162d7b11e62c4b7951755f12c25b99f6629b483e9b",
+            "ptxSha256": "16e6bf0a10e0112069e5797947d17bacb969c0501cc58313563eac48a65212d4",
+            "cubinSha256": "4340a784f75454782d6fa13933b37559f2ae4d106daa993d6ef44ebc65750db3",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "integer-22-24-bias1-m16-w4-s1-p1": {
+            "sourceSha256": "37abfcbeb7e84ffb09ce5598c0b746eda3bf97ff954ba599c3fd7e41e884481a",
+            "ptxSha256": "314a916a565ca9a5de3d0b7a461d0a27d5d1409a3ec76f2796ba217913f92661",
+            "cubinSha256": "042d0ab4cd986ad51eb712eca191e7d42e88b915a84c812fa4e8e68fbf95d5ce",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 6
+              },
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 6
+              },
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "integer-22-47-bias0-m16-w4-s1-p0": {
+            "sourceSha256": "0a62082079a6204d347ad5999ac39a3da0660afa0db74674fc8412d07ef5c073",
+            "ptxSha256": "55b7c3deb7ba8761fe88a7307f658e38d66cfb4bb7ede927b8a63fe7b9578429",
+            "cubinSha256": "a19085bc43116862c1f0f28f2245311ed9498ef69d38670b3a846070e3a7f4a1",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "integer-22-47-bias0-m16-w4-s1-p1": {
+            "sourceSha256": "66a69aa7a9005871e4de875eea1cade6a6a41d8791f20add0a826a1b26d10a94",
+            "ptxSha256": "a6949e5d525931f27362afa7726d9e48fa3a0e9df5b16f5be0aa51f2c902179e",
+            "cubinSha256": "7ed9db0ab5c530062c0c6d2b4c10080c5ec731ce9d5a30c326cc6815ee330b0f",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "ops": {
+            "sourceSha256": "dfbde23ca66d53914f4c8fdd036b8dc5ad112a5a90c7253a2add9dac5deceebc",
+            "ptxSha256": "1df917aae7230c7cabecf04e204ff4478ed9d70f6e745d22caef309f051ca01a",
+            "cubinSha256": "6a863ee00e18734d3295f6f078a34564ff7f2c099cda8e612eabf09be97356a2",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 96,
+                "add.rn.f32": 125
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 96,
+                "FADD": 126
+              },
+              "violations": []
+            }
+          }
+        },
+        "fingerprint": "448db2ee6f567c67133321711e5f75727f09bdb877d0ed0c2bfe54488411d8db",
+        "linear": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "nonlinear": {
+          "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+          "operators": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "d66ef6565f96cd4f56ef3feefc34b51323c0d00f4876be1cd3350209c2a63fdf",
+          "nvrtcOptions": [
+            "--fmad=false",
+            "--ftz=false",
+            "--prec-div=true",
+            "--prec-sqrt=true",
+            "--std=c++17"
+          ],
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "e77d157f76d9dceec74165d1164812a7f87ee19ddebd0c0ccc7d2e9ecfa20cb9",
+        "maxPartialBytes": 16777216,
+        "activationPacking": "radix_planes_once_v1_experimental",
+        "decodePlanning": {
+          "policy": "occupancy_split_k_v1_experimental",
+          "rowTiles": [
+            16,
+            32
+          ],
+          "maxSplitK": 8,
+          "minSplitWidth": 256,
+          "maxBatch": 128,
+          "singleRow": "simt_split1",
+          "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+        },
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "multiprocessors": 70
+      }
+    },
+    "llama": {
+      "14": {
+        "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "d66ef6565f96cd4f56ef3feefc34b51323c0d00f4876be1cd3350209c2a63fdf",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "decode-graph-ops": {
+            "sourceSha256": "0f79d399fb1e040e95aa173b12a5895725feabbe6546561afb3eb085dc5f21a3",
+            "ptxSha256": "559e78c69076d20f477ddbc355b7e8e2990b468f58916b1e3bc365e299763764",
+            "cubinSha256": "bf3043908214e5ff89c16b48dd0e06ab16722fe045f399310f3967d9389293e9",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 5
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 9
+              },
+              "violations": []
+            }
+          },
+          "integer-14-32-bias0-m16-w4-s1-p0": {
+            "sourceSha256": "5261ff3bab25f650102ace6191b167c05212091447b571096a71eaf24ed2a90b",
+            "ptxSha256": "d1d490cc2006895cdc7038c60bda8cab291c5a9f31404533682dbc58bad8bd74",
+            "cubinSha256": "2dfdf0ef729704954abf491bf6515dec12704b3121bd41821059f1477df0b751",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "integer-14-32-bias0-m16-w4-s1-p1": {
+            "sourceSha256": "9c310dadcd6511a032eaa63572cf72e493a14330b68830cc593d0df5afcdacf8",
+            "ptxSha256": "251c3151f39fddaf9caa7e872080e4b988ff5a0b0dd4e8a805f6c319f360e3f9",
+            "cubinSha256": "51e9898d13c50143f6bd057743def5a7325da04abb9652a31e590ffd4be81f7d",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "integer-14-32-bias1-m16-w4-s1-p1": {
+            "sourceSha256": "64bd38fdec2913551384899f96b2ec0f1dc90871490e46af70ca0f818c555f86",
+            "ptxSha256": "76cd8864966190882f2770947023a099801b40f3af3f568da5a5e1fc3fa75ef3",
+            "cubinSha256": "ca7b05c324f2486980664efc97b8a0c08399ac577c8eefbdff150a411eb42f28",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 6
+              },
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 6
+              },
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "integer-14-67-bias0-m16-w4-s1-p0": {
+            "sourceSha256": "0ea5da0d382f5b395180215b00838c42ca04048988b48dec1f553790e3f33f7f",
+            "ptxSha256": "3a74c6efdd403423a7776fb4453288b48b5e6b124628cb88e26c9f9915a4d185",
+            "cubinSha256": "de11d28fd8be4bae34f4b4a0033f887d1d3f757e8351e3a2fd6b3b8c103f83ef",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "integer-14-67-bias1-m16-w4-s1-p1": {
+            "sourceSha256": "63b2d470aeda568c291a300e966c5870cea082ad1cc97cc5f3b1ffd579491ac2",
+            "ptxSha256": "662fb3c7662e32a14eddd5fb22e8d4a40d4b4e320f7e22d3e962acf111d73910",
+            "cubinSha256": "560fd92515c0a912910410e5baa1bca513e5ec3ed8c67ed7e39f103ac2eed9df",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 6
+              },
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 6
+              },
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "ops": {
+            "sourceSha256": "dfbde23ca66d53914f4c8fdd036b8dc5ad112a5a90c7253a2add9dac5deceebc",
+            "ptxSha256": "1df917aae7230c7cabecf04e204ff4478ed9d70f6e745d22caef309f051ca01a",
+            "cubinSha256": "6a863ee00e18734d3295f6f078a34564ff7f2c099cda8e612eabf09be97356a2",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 96,
+                "add.rn.f32": 125
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 96,
+                "FADD": 126
+              },
+              "violations": []
+            }
+          }
+        },
+        "fingerprint": "197fb1a202925d3276b741e5cddb5e7131cfb9aac1e122476fb5c40c5c293c55",
+        "linear": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "nonlinear": {
+          "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+          "operators": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "d66ef6565f96cd4f56ef3feefc34b51323c0d00f4876be1cd3350209c2a63fdf",
+          "nvrtcOptions": [
+            "--fmad=false",
+            "--ftz=false",
+            "--prec-div=true",
+            "--prec-sqrt=true",
+            "--std=c++17"
+          ],
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "e77d157f76d9dceec74165d1164812a7f87ee19ddebd0c0ccc7d2e9ecfa20cb9",
+        "maxPartialBytes": 16777216,
+        "activationPacking": "radix_planes_once_v1_experimental",
+        "decodePlanning": {
+          "policy": "occupancy_split_k_v1_experimental",
+          "rowTiles": [
+            16,
+            32
+          ],
+          "maxSplitK": 8,
+          "minSplitWidth": 256,
+          "maxBatch": 128,
+          "singleRow": "simt_split1",
+          "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+        },
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "multiprocessors": 70
+      },
+      "22": {
+        "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "d66ef6565f96cd4f56ef3feefc34b51323c0d00f4876be1cd3350209c2a63fdf",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "decode-graph-ops": {
+            "sourceSha256": "0f79d399fb1e040e95aa173b12a5895725feabbe6546561afb3eb085dc5f21a3",
+            "ptxSha256": "559e78c69076d20f477ddbc355b7e8e2990b468f58916b1e3bc365e299763764",
+            "cubinSha256": "bf3043908214e5ff89c16b48dd0e06ab16722fe045f399310f3967d9389293e9",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 5
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 9
+              },
+              "violations": []
+            }
+          },
+          "integer-22-32-bias0-m16-w4-s1-p0": {
+            "sourceSha256": "7087b0f9d1189834b741ce498bf1f1311e3912c6b03bdc90509e9926ffb62c58",
+            "ptxSha256": "110b89145834726cb9334f52a565469f45b0475491f429ef7f996114bf8058c0",
+            "cubinSha256": "8fd490117a902ece1abad6f86ff1e0e4d86a839e26c24cb8b9a744abc8074516",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "integer-22-32-bias0-m16-w4-s1-p1": {
+            "sourceSha256": "5acb08e8e9c5dc164fca22c28895a1208ff2c37910e5a7202035f21aa13c51ab",
+            "ptxSha256": "d7b27c0e953bdf50d51bad75500c5648bb60342abf98d138f54526d9ddf92611",
+            "cubinSha256": "9a010e889004943e17a048a0f8f95ba440e5c830408e8cf55a70916d16888436",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "integer-22-32-bias1-m16-w4-s1-p1": {
+            "sourceSha256": "50181ff0d938ec88a41a40efc9fa90b67b677c48fa8f9abebe23e55301895e36",
+            "ptxSha256": "e0f2351cad454270de5bdfbf99412edad4abac21e5f2b48944d52dedb127df88",
+            "cubinSha256": "ca4c71cc85ba410870fe7c4d18d2edc06f70e43cb044ef3d95ed1e21899d2813",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 6
+              },
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 6
+              },
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "integer-22-67-bias0-m16-w4-s1-p0": {
+            "sourceSha256": "422009da26df2fe4db9c88b9c6e05866c036345b75a4dbce283236141dc4a437",
+            "ptxSha256": "a909677db05dadfcd7abac4442379a5940567a15a26f656199cb439a58a18ccb",
+            "cubinSha256": "c52cd5ca0a76e56f82028cc536700385dee1ed5480400ae170e6560de6b2f62c",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "integer-22-67-bias1-m16-w4-s1-p1": {
+            "sourceSha256": "fc38124812e06c391b6f62009c1613fc29496f0c90b5dc4ac3b191b24fa2b874",
+            "ptxSha256": "70474de6e7055633a06067dd08e3ff6b925883864a13c92e2312a0cf3c56e400",
+            "cubinSha256": "c8011409f43bd187d127d6a339ea9e32c1c60bbd8df33e5969104ebdce33186e",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 6
+              },
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 6
+              },
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "ops": {
+            "sourceSha256": "dfbde23ca66d53914f4c8fdd036b8dc5ad112a5a90c7253a2add9dac5deceebc",
+            "ptxSha256": "1df917aae7230c7cabecf04e204ff4478ed9d70f6e745d22caef309f051ca01a",
+            "cubinSha256": "6a863ee00e18734d3295f6f078a34564ff7f2c099cda8e612eabf09be97356a2",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 96,
+                "add.rn.f32": 125
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 96,
+                "FADD": 126
+              },
+              "violations": []
+            }
+          }
+        },
+        "fingerprint": "8329935600594b2fdc5203c73dc7cdb70fbd3acf7380d909bfe75b15b0b7e975",
+        "linear": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "nonlinear": {
+          "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+          "operators": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "d66ef6565f96cd4f56ef3feefc34b51323c0d00f4876be1cd3350209c2a63fdf",
+          "nvrtcOptions": [
+            "--fmad=false",
+            "--ftz=false",
+            "--prec-div=true",
+            "--prec-sqrt=true",
+            "--std=c++17"
+          ],
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "e77d157f76d9dceec74165d1164812a7f87ee19ddebd0c0ccc7d2e9ecfa20cb9",
+        "maxPartialBytes": 16777216,
+        "activationPacking": "radix_planes_once_v1_experimental",
+        "decodePlanning": {
+          "policy": "occupancy_split_k_v1_experimental",
+          "rowTiles": [
+            16,
+            32
+          ],
+          "maxSplitK": 8,
+          "minSplitWidth": 256,
+          "maxBatch": 128,
+          "singleRow": "simt_split1",
+          "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+        },
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "multiprocessors": 70
+      }
+    },
+    "llama-wide": {
+      "14": {
+        "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "d66ef6565f96cd4f56ef3feefc34b51323c0d00f4876be1cd3350209c2a63fdf",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "decode-graph-ops": {
+            "sourceSha256": "0f79d399fb1e040e95aa173b12a5895725feabbe6546561afb3eb085dc5f21a3",
+            "ptxSha256": "559e78c69076d20f477ddbc355b7e8e2990b468f58916b1e3bc365e299763764",
+            "cubinSha256": "bf3043908214e5ff89c16b48dd0e06ab16722fe045f399310f3967d9389293e9",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 5
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 9
+              },
+              "violations": []
+            }
+          },
+          "integer-14-32-bias0-m16-w4-s1-p0": {
+            "sourceSha256": "5261ff3bab25f650102ace6191b167c05212091447b571096a71eaf24ed2a90b",
+            "ptxSha256": "d1d490cc2006895cdc7038c60bda8cab291c5a9f31404533682dbc58bad8bd74",
+            "cubinSha256": "2dfdf0ef729704954abf491bf6515dec12704b3121bd41821059f1477df0b751",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "integer-14-32-bias0-m16-w4-s1-p1": {
+            "sourceSha256": "9c310dadcd6511a032eaa63572cf72e493a14330b68830cc593d0df5afcdacf8",
+            "ptxSha256": "251c3151f39fddaf9caa7e872080e4b988ff5a0b0dd4e8a805f6c319f360e3f9",
+            "cubinSha256": "51e9898d13c50143f6bd057743def5a7325da04abb9652a31e590ffd4be81f7d",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "integer-14-32-bias1-m16-w4-s1-p1": {
+            "sourceSha256": "64bd38fdec2913551384899f96b2ec0f1dc90871490e46af70ca0f818c555f86",
+            "ptxSha256": "76cd8864966190882f2770947023a099801b40f3af3f568da5a5e1fc3fa75ef3",
+            "cubinSha256": "ca7b05c324f2486980664efc97b8a0c08399ac577c8eefbdff150a411eb42f28",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 6
+              },
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 6
+              },
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "integer-14-48-bias0-m16-w4-s1-p0": {
+            "sourceSha256": "60f0be5fca7be71e15d2e094a8e5a264341af6ae41f0680f817d14ddbf76bdaa",
+            "ptxSha256": "24bbc966874b62c4fa74edb5e1027a79cbee9f2908dc18a6c7c5b93e18caa0ea",
+            "cubinSha256": "dde11522c816e7e03b7dc8b4ff27f92d180b27fcd6d0605e41b5f25d7911a58d",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "integer-14-48-bias1-m16-w4-s1-p1": {
+            "sourceSha256": "810d1d9b41f9be60bebcbb99b85ebd9e848cf1e9026109a4818091429a009dcd",
+            "ptxSha256": "7cf24f7879f635f38e830ade64fa724633b841f7279d43f0e15adb94e784ef65",
+            "cubinSha256": "11619bf7dae9dbb1e73deca60075c4f7d3d514cee82d09bc558cfabe8709e201",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 6
+              },
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 6
+              },
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "integer-14-67-bias0-m16-w4-s1-p0": {
+            "sourceSha256": "0ea5da0d382f5b395180215b00838c42ca04048988b48dec1f553790e3f33f7f",
+            "ptxSha256": "3a74c6efdd403423a7776fb4453288b48b5e6b124628cb88e26c9f9915a4d185",
+            "cubinSha256": "de11d28fd8be4bae34f4b4a0033f887d1d3f757e8351e3a2fd6b3b8c103f83ef",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "integer-14-67-bias1-m16-w4-s1-p1": {
+            "sourceSha256": "63b2d470aeda568c291a300e966c5870cea082ad1cc97cc5f3b1ffd579491ac2",
+            "ptxSha256": "662fb3c7662e32a14eddd5fb22e8d4a40d4b4e320f7e22d3e962acf111d73910",
+            "cubinSha256": "560fd92515c0a912910410e5baa1bca513e5ec3ed8c67ed7e39f103ac2eed9df",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 6
+              },
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 6
+              },
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "ops": {
+            "sourceSha256": "dfbde23ca66d53914f4c8fdd036b8dc5ad112a5a90c7253a2add9dac5deceebc",
+            "ptxSha256": "1df917aae7230c7cabecf04e204ff4478ed9d70f6e745d22caef309f051ca01a",
+            "cubinSha256": "6a863ee00e18734d3295f6f078a34564ff7f2c099cda8e612eabf09be97356a2",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 96,
+                "add.rn.f32": 125
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 96,
+                "FADD": 126
+              },
+              "violations": []
+            }
+          }
+        },
+        "fingerprint": "d95d238a70d82ba27f4902c20624dc3fde570cf77241930ce1e8999d648e30b9",
+        "linear": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "nonlinear": {
+          "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+          "operators": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "d66ef6565f96cd4f56ef3feefc34b51323c0d00f4876be1cd3350209c2a63fdf",
+          "nvrtcOptions": [
+            "--fmad=false",
+            "--ftz=false",
+            "--prec-div=true",
+            "--prec-sqrt=true",
+            "--std=c++17"
+          ],
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "e77d157f76d9dceec74165d1164812a7f87ee19ddebd0c0ccc7d2e9ecfa20cb9",
+        "maxPartialBytes": 16777216,
+        "activationPacking": "radix_planes_once_v1_experimental",
+        "decodePlanning": {
+          "policy": "occupancy_split_k_v1_experimental",
+          "rowTiles": [
+            16,
+            32
+          ],
+          "maxSplitK": 8,
+          "minSplitWidth": 256,
+          "maxBatch": 128,
+          "singleRow": "simt_split1",
+          "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+        },
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "multiprocessors": 70
+      },
+      "22": {
+        "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "d66ef6565f96cd4f56ef3feefc34b51323c0d00f4876be1cd3350209c2a63fdf",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "decode-graph-ops": {
+            "sourceSha256": "0f79d399fb1e040e95aa173b12a5895725feabbe6546561afb3eb085dc5f21a3",
+            "ptxSha256": "559e78c69076d20f477ddbc355b7e8e2990b468f58916b1e3bc365e299763764",
+            "cubinSha256": "bf3043908214e5ff89c16b48dd0e06ab16722fe045f399310f3967d9389293e9",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 5
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 9
+              },
+              "violations": []
+            }
+          },
+          "integer-22-32-bias0-m16-w4-s1-p0": {
+            "sourceSha256": "7087b0f9d1189834b741ce498bf1f1311e3912c6b03bdc90509e9926ffb62c58",
+            "ptxSha256": "110b89145834726cb9334f52a565469f45b0475491f429ef7f996114bf8058c0",
+            "cubinSha256": "8fd490117a902ece1abad6f86ff1e0e4d86a839e26c24cb8b9a744abc8074516",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "integer-22-32-bias0-m16-w4-s1-p1": {
+            "sourceSha256": "5acb08e8e9c5dc164fca22c28895a1208ff2c37910e5a7202035f21aa13c51ab",
+            "ptxSha256": "d7b27c0e953bdf50d51bad75500c5648bb60342abf98d138f54526d9ddf92611",
+            "cubinSha256": "9a010e889004943e17a048a0f8f95ba440e5c830408e8cf55a70916d16888436",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "integer-22-32-bias1-m16-w4-s1-p1": {
+            "sourceSha256": "50181ff0d938ec88a41a40efc9fa90b67b677c48fa8f9abebe23e55301895e36",
+            "ptxSha256": "e0f2351cad454270de5bdfbf99412edad4abac21e5f2b48944d52dedb127df88",
+            "cubinSha256": "ca4c71cc85ba410870fe7c4d18d2edc06f70e43cb044ef3d95ed1e21899d2813",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 6
+              },
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 6
+              },
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "integer-22-48-bias0-m16-w4-s1-p0": {
+            "sourceSha256": "55531b1fe4dfb8154dbd0c70a67866ec850e039ba4907038a3f5cf11e70625e5",
+            "ptxSha256": "002a5c4fedffa89d3e0fe075d0a9d9a1f172685ed3d538efdbdc751fc666ab72",
+            "cubinSha256": "0df92f28af71ec824c424c4d78b6edc5b71c70fee7fe70280861ef1682215482",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "integer-22-48-bias1-m16-w4-s1-p1": {
+            "sourceSha256": "d22efed5159e9c3b3c7e5d1a58be0efba58482fab45d783c004c43d075d91750",
+            "ptxSha256": "fbaf839dc69b9b8bd6fc1febcd7d19ce2a31459df4c8301b01215c0d7d3f1982",
+            "cubinSha256": "42a2d234a50e14ba2af62c5d92b4a225d12f7af823bec3ce7d586bedca4f3cb1",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 6
+              },
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 6
+              },
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "integer-22-67-bias0-m16-w4-s1-p0": {
+            "sourceSha256": "422009da26df2fe4db9c88b9c6e05866c036345b75a4dbce283236141dc4a437",
+            "ptxSha256": "a909677db05dadfcd7abac4442379a5940567a15a26f656199cb439a58a18ccb",
+            "cubinSha256": "c52cd5ca0a76e56f82028cc536700385dee1ed5480400ae170e6560de6b2f62c",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "integer-22-67-bias1-m16-w4-s1-p1": {
+            "sourceSha256": "fc38124812e06c391b6f62009c1613fc29496f0c90b5dc4ac3b191b24fa2b874",
+            "ptxSha256": "70474de6e7055633a06067dd08e3ff6b925883864a13c92e2312a0cf3c56e400",
+            "cubinSha256": "c8011409f43bd187d127d6a339ea9e32c1c60bbd8df33e5969104ebdce33186e",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 6
+              },
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 6
+              },
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "ops": {
+            "sourceSha256": "dfbde23ca66d53914f4c8fdd036b8dc5ad112a5a90c7253a2add9dac5deceebc",
+            "ptxSha256": "1df917aae7230c7cabecf04e204ff4478ed9d70f6e745d22caef309f051ca01a",
+            "cubinSha256": "6a863ee00e18734d3295f6f078a34564ff7f2c099cda8e612eabf09be97356a2",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 96,
+                "add.rn.f32": 125
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 96,
+                "FADD": 126
+              },
+              "violations": []
+            }
+          }
+        },
+        "fingerprint": "c1dc977deb0228b393e267707469b24a62e8bb25da6fc9a54b41ec38818ec69c",
+        "linear": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "nonlinear": {
+          "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+          "operators": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "d66ef6565f96cd4f56ef3feefc34b51323c0d00f4876be1cd3350209c2a63fdf",
+          "nvrtcOptions": [
+            "--fmad=false",
+            "--ftz=false",
+            "--prec-div=true",
+            "--prec-sqrt=true",
+            "--std=c++17"
+          ],
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "e77d157f76d9dceec74165d1164812a7f87ee19ddebd0c0ccc7d2e9ecfa20cb9",
+        "maxPartialBytes": 16777216,
+        "activationPacking": "radix_planes_once_v1_experimental",
+        "decodePlanning": {
+          "policy": "occupancy_split_k_v1_experimental",
+          "rowTiles": [
+            16,
+            32
+          ],
+          "maxSplitK": 8,
+          "minSplitWidth": 256,
+          "maxBatch": 128,
+          "singleRow": "simt_split1",
+          "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+        },
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "multiprocessors": 70
+      }
+    },
+    "mistral": {
+      "14": {
+        "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "d66ef6565f96cd4f56ef3feefc34b51323c0d00f4876be1cd3350209c2a63fdf",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "decode-graph-ops": {
+            "sourceSha256": "0f79d399fb1e040e95aa173b12a5895725feabbe6546561afb3eb085dc5f21a3",
+            "ptxSha256": "559e78c69076d20f477ddbc355b7e8e2990b468f58916b1e3bc365e299763764",
+            "cubinSha256": "bf3043908214e5ff89c16b48dd0e06ab16722fe045f399310f3967d9389293e9",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 5
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 9
+              },
+              "violations": []
+            }
+          },
+          "integer-14-48-bias0-m16-w4-s1-p0": {
+            "sourceSha256": "60f0be5fca7be71e15d2e094a8e5a264341af6ae41f0680f817d14ddbf76bdaa",
+            "ptxSha256": "24bbc966874b62c4fa74edb5e1027a79cbee9f2908dc18a6c7c5b93e18caa0ea",
+            "cubinSha256": "dde11522c816e7e03b7dc8b4ff27f92d180b27fcd6d0605e41b5f25d7911a58d",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "integer-14-48-bias0-m16-w4-s1-p1": {
+            "sourceSha256": "161f965af3cba2c1631d5eb96e2e40b51b4f3ad8f3c0a4ab1d6366ed262822e8",
+            "ptxSha256": "a3f774d8d43945981033f57ab81e0e1b38e92f901a82e45c978d10e3973069b7",
+            "cubinSha256": "c0e337a5b3026586f0eb5a351e2d71f3b995465780d2342cc0ed8efb80311d8c",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "integer-14-91-bias0-m16-w4-s1-p0": {
+            "sourceSha256": "33b51e77d975e543d212a03501ea4254f9abd14679b935f013f9eaa6c8fade7b",
+            "ptxSha256": "6700a62a79c361c66acda79f12206d08d56a65419d2c74fbd44d7cb147f813f4",
+            "cubinSha256": "acbe0373e1dcac5fbaaa0ce67a4816f1aa3c45dd290e5fc58afa4c27be728e1e",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "integer-14-91-bias0-m16-w4-s1-p1": {
+            "sourceSha256": "c0e9464be697526b3374418407bbf2c795203cf14882bcb67f2da801d6be3d5f",
+            "ptxSha256": "875ac274081908754bb0b3f83db3dbccb2fd4961874ae030234ed403475b7b84",
+            "cubinSha256": "8b67aa99814e779ee65952c81595edfabcbd799b507a2bf6853bb24e47f8592e",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "ops": {
+            "sourceSha256": "dfbde23ca66d53914f4c8fdd036b8dc5ad112a5a90c7253a2add9dac5deceebc",
+            "ptxSha256": "1df917aae7230c7cabecf04e204ff4478ed9d70f6e745d22caef309f051ca01a",
+            "cubinSha256": "6a863ee00e18734d3295f6f078a34564ff7f2c099cda8e612eabf09be97356a2",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 96,
+                "add.rn.f32": 125
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 96,
+                "FADD": 126
+              },
+              "violations": []
+            }
+          }
+        },
+        "fingerprint": "7512a28e7e05a645da4a613b99afeeeaeae65cc50537bd0c01e0cb8955471896",
+        "linear": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "nonlinear": {
+          "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+          "operators": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "d66ef6565f96cd4f56ef3feefc34b51323c0d00f4876be1cd3350209c2a63fdf",
+          "nvrtcOptions": [
+            "--fmad=false",
+            "--ftz=false",
+            "--prec-div=true",
+            "--prec-sqrt=true",
+            "--std=c++17"
+          ],
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "e77d157f76d9dceec74165d1164812a7f87ee19ddebd0c0ccc7d2e9ecfa20cb9",
+        "maxPartialBytes": 16777216,
+        "activationPacking": "radix_planes_once_v1_experimental",
+        "decodePlanning": {
+          "policy": "occupancy_split_k_v1_experimental",
+          "rowTiles": [
+            16,
+            32
+          ],
+          "maxSplitK": 8,
+          "minSplitWidth": 256,
+          "maxBatch": 128,
+          "singleRow": "simt_split1",
+          "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+        },
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "multiprocessors": 70
+      },
+      "22": {
+        "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "d66ef6565f96cd4f56ef3feefc34b51323c0d00f4876be1cd3350209c2a63fdf",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "decode-graph-ops": {
+            "sourceSha256": "0f79d399fb1e040e95aa173b12a5895725feabbe6546561afb3eb085dc5f21a3",
+            "ptxSha256": "559e78c69076d20f477ddbc355b7e8e2990b468f58916b1e3bc365e299763764",
+            "cubinSha256": "bf3043908214e5ff89c16b48dd0e06ab16722fe045f399310f3967d9389293e9",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 5
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 9
+              },
+              "violations": []
+            }
+          },
+          "integer-22-48-bias0-m16-w4-s1-p0": {
+            "sourceSha256": "55531b1fe4dfb8154dbd0c70a67866ec850e039ba4907038a3f5cf11e70625e5",
+            "ptxSha256": "002a5c4fedffa89d3e0fe075d0a9d9a1f172685ed3d538efdbdc751fc666ab72",
+            "cubinSha256": "0df92f28af71ec824c424c4d78b6edc5b71c70fee7fe70280861ef1682215482",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "integer-22-48-bias0-m16-w4-s1-p1": {
+            "sourceSha256": "e8c131f093132a44e718eec130724386604bfc73581566350c6177ae8a993cfb",
+            "ptxSha256": "51c0415cf15056fb7efd153a3bb792f8fd9492d2c334091e034b2d96c86f794c",
+            "cubinSha256": "b28a7e05e53238a412e5a24615f68ca3540a1ef347473d7b986dc58fd23d9a95",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "integer-22-91-bias0-m16-w4-s1-p0": {
+            "sourceSha256": "e06295138ecde05b100fd8ca7f98633bf2d9736427dd3d272b45d5749e87bca8",
+            "ptxSha256": "aa3dc14d8a7c93f4539fbaf820378cbca627101d6c13b65506df8de5e94f8ab5",
+            "cubinSha256": "a2468f7cd4526f6bfdd8640d2252f7683278c2e36a27db67a2357afdc8097def",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "integer-22-91-bias0-m16-w4-s1-p1": {
+            "sourceSha256": "f53628a044d92cdf33ddd0886aad9b6adabb700b3a4b8a62e7787849c2e722a6",
+            "ptxSha256": "a666afd5f91821ca066d8332cc617d27eb6aa417016958c3086d7f83d40189eb",
+            "cubinSha256": "e838ac50051288aa27c3cbb6823b12c3475aa72c57ea7918f3593ff464e0ae26",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "ops": {
+            "sourceSha256": "dfbde23ca66d53914f4c8fdd036b8dc5ad112a5a90c7253a2add9dac5deceebc",
+            "ptxSha256": "1df917aae7230c7cabecf04e204ff4478ed9d70f6e745d22caef309f051ca01a",
+            "cubinSha256": "6a863ee00e18734d3295f6f078a34564ff7f2c099cda8e612eabf09be97356a2",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 96,
+                "add.rn.f32": 125
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 96,
+                "FADD": 126
+              },
+              "violations": []
+            }
+          }
+        },
+        "fingerprint": "399529bc41bc4024f40d2dfc69965e184625ff5d4e945bbf047e4e98be922b99",
+        "linear": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "nonlinear": {
+          "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+          "operators": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "d66ef6565f96cd4f56ef3feefc34b51323c0d00f4876be1cd3350209c2a63fdf",
+          "nvrtcOptions": [
+            "--fmad=false",
+            "--ftz=false",
+            "--prec-div=true",
+            "--prec-sqrt=true",
+            "--std=c++17"
+          ],
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "e77d157f76d9dceec74165d1164812a7f87ee19ddebd0c0ccc7d2e9ecfa20cb9",
+        "maxPartialBytes": 16777216,
+        "activationPacking": "radix_planes_once_v1_experimental",
+        "decodePlanning": {
+          "policy": "occupancy_split_k_v1_experimental",
+          "rowTiles": [
+            16,
+            32
+          ],
+          "maxSplitK": 8,
+          "minSplitWidth": 256,
+          "maxBatch": 128,
+          "singleRow": "simt_split1",
+          "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+        },
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "multiprocessors": 70
+      }
+    }
+  }
+}

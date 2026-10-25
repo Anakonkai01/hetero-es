@@ -6,23 +6,23 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
 
 ## Tóm tắt cho chủ dự án (2026-10-25)
 
-- Tiếp tục toàn bộ **M0–M6**, ưu tiên kernel tổng quát tiến gần vLLM. Mã nền **`1848d57c`** đã chọn chuyển đổi
-  chính xác, chung lượng tử hóa đầu vào, split-K decode tự động và đóng gói activation một lần cho mọi tile.
+- Tiếp tục toàn bộ **M0–M6**, ưu tiên kernel tổng quát tiến gần vLLM. Mã nền **`3fd704a5`** đã chọn chuyển đổi
+  chính xác, chung lượng tử hóa đầu vào, split-K decode tự động và đóng gói activation một lần và cây cộng attention theo nhóm 8 giữ nguyên số học.
   M1/M2 và mục tiêu chung chưa hoàn tất; [kế hoạch đã duyệt](PLAN-SUA-HUMAN-REVIEW.md) giữ nguyên byte/phạm vi.
 - Số học riêng B14/B22 giữ reference độc lập; FP32 cũ và recipe hiện hành không đổi. Đọc FP16 gốc, chỉ giữ metadata
   nhỏ trong request có khóa, không giữ thêm nguyên model FP32/quantized. Managed strict chưa bật.
-- B22 trên 5070 Ti đạt B1 **259 / 182 / 265**, B8 **1336 / 745 / 1291**, B32 **3386 / 1679 / 3193** token/s
-  theo thứ tự SmolLM2-360M/TinyLlama-1.1B/Qwen2.5-0.5B. B32 tăng thêm **14–22%** so với 97f62431, đạt khoảng
-  **22–24% vLLM default**. [So sánh tốc độ và mã nguồn](strict-vllm-comparison-2026-10-25.md).
-- **396 test trên mỗi GPU trong bốn máy**, gồm native Windows 3060 **396 pass**; bốn fixture layout, hai precision,
-  parent/changed/restored khớp Linux5070Ti. Check-all **ALL PASS**: runtime **3038 pass/315 skip**, backend452;
-  prepacking/admission mutation **6/6**; gói Linux và hash nguồn Worker/ServerSDK đạt.
-  [Receipt đúng nguồn](evidence/2026-10-25-integer-prepacked/SELECTED-RESULTS-01.md).
+- B22 trên 5070 Ti đạt B1 **277 / 188 / 278**, B8 **1494 / 784 / 1386**, B32 **3861 / 1805 / 3471** token/s
+  theo thứ tự SmolLM2-360M/TinyLlama-1.1B/Qwen2.5-0.5B. A/B B32 tăng thêm **8–14%** trên 5070 Ti, **6–12%** trên 3060, đạt khoảng
+  **23–27% vLLM default**. [So sánh tốc độ và mã nguồn](strict-vllm-comparison-2026-10-25.md).
+- **452 test trên mỗi GPU trong bốn máy**, gồm native Windows 3060 **452 pass**; bốn fixture layout, hai precision,
+  parent/changed/restored khớp Linux5070Ti. Check-all **ALL PASS**: runtime **3038 pass/371 skip**, backend452;
+  tree/error-semantics mutation **6/6**; gói Linux và hash nguồn Worker/ServerSDK đạt.
+  [Receipt đúng nguồn](evidence/2026-10-25-attention-tree/SELECTED-RESULTS-01.md).
 - Parent, nhiễu chuẩn± và restore của ba trained model giữ nguyên so với B22 trước. Counterexample B14/FP32 cũ
-  vẫn được giữ. Smol/Qwen trained cross-GPU đúng nguồn hiện tại khớp; TinyLlama trained cross-GPU, quality rộng,
+  vẫn được giữ. Cả ba trained model khớp 5070 Ti/3060 đúng nguồn hiện tại, gồm cả manifest và identity. Quality rộng,
   native installer và managed lifecycle còn mở.
-- Đối chiếu trực tiếp vLLM thấy QKV và gate/up được gộp thật sự; ta mới chung lượng tử hóa. Segmented grouped launch chỉ tăng khoảng 1,5–5,6% ở B32 nên chưa chọn. Profile mới: linear 58–78%, attention 16–30%
-  thời gian CUDA B32; đang thử cách thực thi cây cộng attention. Warp1/2, tile64/128 và chuyển đổi trọng số mới bị loại
+- Đối chiếu trực tiếp vLLM thấy QKV và gate/up được gộp thật sự; ta mới chung lượng tử hóa. Segmented grouped launch chỉ tăng khoảng 1,5–5,6% ở B32 nên chưa chọn. Profile mới: linear 66–84%, attention 10–20%
+  thời gian CUDA B32; tiếp theo tập trung projection. Warp1/2, tile64/128 và chuyển đổi trọng số mới bị loại
   khi không có lợi. Không suy từ fixture sang qualification.
 - Watchdog/D10, storage/replacement, managed ownership/qualification và M6 vẫn mở.
   [Phân việc](HUMAN-REVIEW-EFFORT-SPLIT.md). Không push/merge/deploy, đổi device state, learning run hay sửa `ai`.
@@ -37,7 +37,7 @@ was performed. The disk entry below is historical (2026-10-23).
 | Lab            | `lab.heteroes.site`, deployed clone `~/.local/share/heteroes-lab/app` at `82c37fc`; operations: [local-lab-operations.md](local-lab-operations.md)                                                                                                          |
 | Devices        | 2026-10-25 standalone probes reached local/Nhut 5070 Ti (Linux) and Thao/Quang 3060 (WSL2). Live approval/contribution was not re-read or changed; follow AGENTS.md. Native Windows source/fixtures pass; trained/installer/managed acceptance remains open |
 | Default engine | engine v2 noise made on the GPU (same bits as CPU; `HETEROES_NOISE_DEVICE=cpu` forces CPU)                                                                                                                                                                  |
-| Code           | Human-review branch `fix/human-review-single-model-2026-10-24`; selected integer decode core `1848d57c`, after captured strict/scorer/delivery/audit continuations. No push/merge/deployment                                                                |
+| Code           | Human-review branch `fix/human-review-single-model-2026-10-24`; selected integer decode core `3fd704a5`, after captured strict/scorer/delivery/audit continuations. No push/merge/deployment                                                                |
 | Disk (nhan)    | `/` 90 % used; Archive (NTFS/FUSE, also personal data) **full**, holds lab recovery storage and moved run data                                                                                                                                              |
 
 ## Open work, in order

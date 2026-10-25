@@ -1,0 +1,12 @@
+{
+  "status": "ok",
+  "sourceSha256": "9b2488e0ddc33ba2e55a2bc0ece9eee1a3cc6a315171c3a48c39a85265b34dfb",
+  "lengths": 4096,
+  "chunkSizes": [
+    8,
+    16
+  ],
+  "exactTopologyComparisons": 8192,
+  "wallSeconds": 1.6068660550081404,
+  "limits": "Exact symbolic adjacent-pair topology equality for every supported length. Requires source/compiled kernels to implement the shown topology and identical rounded primitives/loads/error checks; not a compiler, device or model-quality theorem."
+}

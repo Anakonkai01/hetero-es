@@ -1,0 +1,6 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7763.36it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-attention-tree/bench-tree-smol-nhan-01.json", "wallSeconds": 9.932234260995756}
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 2386.90it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-attention-tree/bench-tree-tiny-nhan-01.json", "wallSeconds": 14.217264121005428}
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7933.19it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-attention-tree/bench-tree-qwen-nhan-01.json", "wallSeconds": 12.056642790994374}

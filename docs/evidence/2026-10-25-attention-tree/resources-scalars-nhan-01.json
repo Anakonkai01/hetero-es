@@ -1,0 +1,53 @@
+{
+  "hardwareQualified": false,
+  "sourceSha256": "71125ad9bead6b41157a955b255d049b933d3c3c3e3cc6391324fcad3cb15f96",
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "status": "ok",
+  "resources": {
+    "NUM_REGS": 38,
+    "LOCAL_SIZE_BYTES": 144,
+    "SHARED_SIZE_BYTES": 128,
+    "MAX_THREADS_PER_BLOCK": 1024
+  },
+  "kernelIdentity": {
+    "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+    "operators": "pairwise_f32_reference_v1_experimental",
+    "sourceSha256": "3c69e88175b24ca3b23383fbddc0661644243824cefda9063f8d77a67696e015",
+    "nvrtcOptions": [
+      "--fmad=false",
+      "--ftz=false",
+      "--prec-div=true",
+      "--prec-sqrt=true",
+      "--std=c++17"
+    ],
+    "hardwareQualified": false,
+    "arch": "sm_120",
+    "gpu": "NVIDIA GeForce RTX 5070 Ti",
+    "nvrtcVersion": [
+      13,
+      2
+    ],
+    "builds": {
+      "ops": {
+        "sourceSha256": "51df3ff86ad37c7f5ca4b508a97acb46384a356857aa4c4ac6a0b790099f42f0",
+        "ptxSha256": "675de291254432dd608aafb61c885ece62da7cba93f92418a32eaf25669d34ea",
+        "cubinSha256": "e4304858fe4ddb1b0d182031b68a7c5af7a9a780c480901642423bc1e349c761",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 96,
+            "add.rn.f32": 125
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 96,
+            "FADD": 126
+          },
+          "violations": []
+        }
+      }
+    },
+    "fingerprint": "6fccbb30876bad79513e12bb8abbe85d2fa5e3952247e3980ba67e28cee29f50"
+  }
+}
