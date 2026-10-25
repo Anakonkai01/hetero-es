@@ -21,8 +21,8 @@ MAX_BATCH = 128
 
 
 class StrictDecoderPacked(StrictDecoderCuda):
-    def __init__(self, model, *, max_context=256, allow_fixture=False):
-        super().__init__(model, max_context=max_context, allow_fixture=allow_fixture)
+    def __init__(self, model, *, max_context=256, allow_fixture=False, frozen_int8=False):
+        super().__init__(model, max_context=max_context, allow_fixture=allow_fixture, frozen_int8=frozen_int8)
         self.identity = {
             **self.identity,
             "backend": STRICT_PACKED_BACKEND,

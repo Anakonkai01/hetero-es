@@ -27,7 +27,9 @@ CUDA_BACKEND = "decoder_pairwise_f32_cuda_v1_experimental"
 FAMILIES = {"qwen2": "Qwen2ForCausalLM", "llama": "LlamaForCausalLM", "mistral": "MistralForCausalLM"}
 
 
-def describe_graph(model, max_context):
+def describe_graph(model, max_context, *, frozen_int8=False):
+    if type(frozen_int8) is not bool:
+        raise ReferenceArithmeticError("The frozen-int8 graph mode must be a boolean")
     config = model.config
     family = config.model_type
     rope = getattr(config, "rope_parameters", None) or {
@@ -83,8 +85,98 @@ def describe_graph(model, max_context):
     if any(p.dtype != torch.float16 or p.device != device for p in parameters.values()):
         raise ReferenceArithmeticError("Graph needs one live FP16 weight set on one device")
     expected = {}
+    frozen = {}
+
+    def frozen_projection(name, module, outputs, inputs):
+        weight_q = getattr(module, "weight_q", None)
+        weight_scale = getattr(module, "weight_scale", None)
+        if (
+            not isinstance(weight_q, torch.Tensor)
+            or weight_q.dtype != torch.int8
+            or tuple(weight_q.shape) != (outputs, inputs)
+            or weight_q.device != device
+            or not weight_q.is_contiguous()
+            or not isinstance(weight_scale, torch.Tensor)
+            or weight_scale.dtype != torch.float32
+            or tuple(weight_scale.shape) != (outputs,)
+            or weight_scale.device != device
+            or not weight_scale.is_contiguous()
+            or hasattr(module, "weight")
+            or getattr(module, "in_features", None) != inputs
+            or getattr(module, "out_features", None) != outputs
+            or getattr(module, "training", True)
+        ):
+            raise ReferenceArithmeticError(f"Unsupported frozen int8 projection storage at {name}")
+        digest = getattr(module, "artifact_sha256", None)
+        if (
+            not isinstance(digest, str)
+            or len(digest) != 64
+            or any(character not in "0123456789abcdef" for character in digest)
+        ):
+            raise ReferenceArithmeticError(f"Frozen int8 projection {name} lacks a pinned artifact digest")
+        rank = getattr(module, "rank", None)
+        alpha = getattr(module, "alpha", None)
+        scaling = getattr(module, "scaling", None)
+        if (
+            type(rank) is not int
+            or rank < 1
+            or isinstance(alpha, bool)
+            or not isinstance(alpha, (int, float))
+            or not math.isfinite(alpha)
+            or alpha <= 0
+            or scaling != float(alpha) / rank
+        ):
+            raise ReferenceArithmeticError(f"Frozen int8 projection {name} has an invalid LoRA configuration")
+        adapter = getattr(module, "adapter_name", None)
+        first = getattr(module, "lora_A", None)
+        second = getattr(module, "lora_B", None)
+        if (
+            not isinstance(adapter, str)
+            or not adapter
+            or "." in adapter
+            or not isinstance(first, torch.nn.ModuleDict)
+            or not isinstance(second, torch.nn.ModuleDict)
+            or set(first.keys()) != {adapter}
+            or set(second.keys()) != {adapter}
+        ):
+            raise ReferenceArithmeticError(f"Frozen int8 projection {name} has an unsupported adapter set")
+        for label, child, shape in (("A", first[adapter], (rank, inputs)), ("B", second[adapter], (outputs, rank))):
+            weight = getattr(child, "weight", None)
+            if (
+                not isinstance(weight, torch.Tensor)
+                or weight.dtype != torch.float16
+                or tuple(weight.shape) != shape
+                or weight.device != device
+                or not weight.is_contiguous()
+                or not weight.requires_grad
+            ):
+                raise ReferenceArithmeticError(f"Frozen int8 projection {name} has an invalid LoRA {label} factor")
+            expected[f"{name}.lora_{label}.{adapter}.weight"] = shape
+        bias = getattr(module, "bias", None)
+        if bias is not None and (
+            not isinstance(bias, torch.Tensor)
+            or bias.dtype != torch.float16
+            or tuple(bias.shape) != (outputs,)
+            or bias.device != device
+            or not bias.is_contiguous()
+        ):
+            raise ReferenceArithmeticError(f"Frozen int8 projection {name} has an invalid frozen bias")
+        frozen[name] = {
+            "artifactSha256": digest,
+            "rank": rank,
+            "alpha": float(alpha),
+            "scaling": scaling,
+            "inFeatures": inputs,
+            "outFeatures": outputs,
+            "bias": bias is not None,
+        }
 
     def projection(name, module, outputs, inputs):
+        if getattr(module, "is_frozen_int8_linear", False):
+            if not frozen_int8:
+                raise ReferenceArithmeticError("Frozen int8 projections need the explicit frozen graph mode")
+            frozen_projection(name, module, outputs, inputs)
+            return
         expected[name + ".weight"] = (outputs, inputs)
         if getattr(module, "bias", None) is not None:
             expected[name + ".bias"] = (outputs,)
@@ -118,10 +210,13 @@ def describe_graph(model, max_context):
         tuple(parameters[name].shape) != shape for name, shape in expected.items()
     ):
         raise ReferenceArithmeticError("Unsupported graph parameters: missing, unconsumed or incompatible weights")
-    tied = model.lm_head.weight is model.model.embed_tokens.weight
+    tied_weight = getattr(model.lm_head, "weight", None)
+    tied = tied_weight is not None and tied_weight is model.model.embed_tokens.weight
     if tied != bool(config.tie_word_embeddings):
         raise ReferenceArithmeticError("Unsupported graph tied-head metadata mismatch")
-    return {
+    if frozen_int8 and not frozen:
+        raise ReferenceArithmeticError("The explicit frozen int8 graph mode selects no typed projection")
+    result = {
         "version": GRAPH_VERSION,
         "family": family,
         "dimensions": list(dimensions),
@@ -131,16 +226,20 @@ def describe_graph(model, max_context):
         "tiedHead": tied,
         "parameterShapes": {name: list(shape) for name, shape in sorted(expected.items())},
     }
+    if frozen_int8:
+        result["frozenProjections"] = dict(sorted(frozen.items()))
+    return result
 
 
 class StrictDecoderReference(Qwen2Reference):
     """Independent eager operator oracle for every admitted graph adapter, with no vendor forward call."""
 
-    def __init__(self, model, *, max_context=256, allow_fixture=False):
+    def __init__(self, model, *, max_context=256, allow_fixture=False, frozen_int8=False):
         if next(model.parameters()).device.type == "cuda" and os.environ.get("HETEROES_GPU_ACCEPTANCE") != "1":
             raise ReferenceArithmeticError("CUDA reference experiments need HETEROES_GPU_ACCEPTANCE=1")
-        graph = describe_graph(model, max_context)
+        graph = describe_graph(model, max_context, frozen_int8=frozen_int8)
         self.model, self.config, self.generation_config = model, model.config, model.generation_config
+        self.frozen_int8 = frozen_int8
         self.device = next(model.parameters()).device
         self.head_dim, self.theta, self.max_context = graph["headDim"], graph["ropeTheta"], max_context
         with localcontext() as context:
@@ -166,6 +265,12 @@ class StrictDecoderReference(Qwen2Reference):
             "hardwareQualified": False,
         }
         self.fingerprint = canonical_json_hash(self.identity)
+
+    def _linear(self, value, module):
+        """Projection hook for adapters that replace the FP16 linear contract."""
+        if getattr(module, "is_frozen_int8_linear", False):
+            raise ReferenceArithmeticError("This reference has no frozen int8 projection arithmetic")
+        return super()._linear(value, module)
 
     def _attention(self, query, key, value, past_length):
         repeats = self.config.num_attention_heads // self.config.num_key_value_heads
@@ -296,7 +401,7 @@ class CudaDecoderMixin:
 
 
 class StrictDecoderCuda(CudaDecoderMixin, StrictDecoderReference):
-    def __init__(self, model, *, max_context=256, allow_fixture=False):
+    def __init__(self, model, *, max_context=256, allow_fixture=False, frozen_int8=False):
         require_cuda(model)
-        super().__init__(model, max_context=max_context, allow_fixture=allow_fixture)
+        super().__init__(model, max_context=max_context, allow_fixture=allow_fixture, frozen_int8=frozen_int8)
         self._initialize_cuda_graph(CUDA_BACKEND)

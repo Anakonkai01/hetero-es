@@ -1,14 +1,16 @@
 # Frozen int8 base artifact v1 (experimental)
 
-Status: implemented CPU oracle for the M6 feasibility experiment. It is not an accepted backend, not a managed
-recipe, and not a claim about model quality or speed. `heteroes/eval/frozen_int8.py` is the reference for this
-identity; no CUDA operator or graph integration exists under it yet.
+Status: implemented CPU oracle, separately named CUDA operator, typed frozen storage with FP16 LoRA adapters and an
+explicit captured-decode composition. It is not an accepted backend, not a managed recipe, and not a claim about model
+quality or speed. `heteroes/eval/frozen_int8.py` is the reference for this identity; CUDA results are bit-compared
+against it under zero adapters. Adapter deltas have their own FP32 namespace and are not part of the exact base claim.
 
 ## Scope
 
 One linear weight matrix `W` with logical shape `[N, K]`, stored as signed int8 rows plus one FP32 scale per output
-row, used with the existing B22 activation reference and, later, FP16 LoRA adapters. The base weights are immutable.
-There is no dequantized FP16 weight tensor in the runtime representation.
+row, used with the existing B22 activation reference and FP16 LoRA adapters. The base weights are immutable. The
+typed module stores only `weight_q`, `weight_scale`, an optional FP16 bias and the two FP16 adapter factors; there is
+no dequantized `.weight` tensor. Embeddings and a possibly tied LM head stay in their original FP16 storage.
 
 ## Weight quantization
 
@@ -79,6 +81,41 @@ FP16 publication.
   is not part of the logical artifact and must contribute exact zeros.
 - Artifact files are little-endian. Reading on a big-endian host is unsupported and fails explicitly.
 
+## CUDA operator
+
+`heteroes/eval/frozen_int8_cuda.py` implements `frozen_int8_b22_mma_cuda_v1_experimental` as a separate identity. It
+uses one weight limb per MMA product, so a dot is three signed-byte products (one per activation limb) instead of the
+nine products of the B22-by-B22 integer path. Multi-row inputs use `mma.sync.m16n8k32.s8`, single-row decode can use
+the SIMT path, and split-K is admitted only where the decode plan selects it. The `S * signif(scale)` product is kept
+in two 64-bit limbs and encoded by the same RNE/FTZ rule as the CPU oracle; it is never formed as an int64-by-FP32
+multiply. Nonfinite inputs/outputs, unsupported exponents and overflow set one error flag that the caller checks.
+
+The operator does not rescan the full weight matrix for provenance on every call: the typed storage and artifact
+reader enforce those invariants once. Shape, dtype, device, layout and liveness are still checked before launch.
+`linear_many` shares one activation quantization across projections. Per-device compilation receipts are exposed by
+`kernel_identity()`; the identity remains `hardwareQualified: false`.
+
+The adapter delta is ordinary FP32 matrix multiplication from the widened FP16 factors, followed by the FP32 scaling
+multiply. `combine_adapter` returns the base unchanged, including a signed zero, when the delta element is exactly
+zero. A nonzero delta uses the adapter's ordinary FP32 add, with no subnormal-flush, nonfinite-flag or cross-device
+bit-equality claim. It contains no host synchronization, so it is legal inside captured decode.
+
+## Typed storage and graph composition
+
+`heteroes/model/frozen_int8.py` replaces selected FP16 `nn.Linear` modules with `FrozenInt8LoraLinear`: `weight_q`,
+`weight_scale` and an optional FP16 bias are buffers; `lora_A`/`lora_B` are the only parameters and remain trainable.
+The canonical ES schema therefore moves only adapters. A tied LM head is never targeted silently, because quantizing
+it alone would break tied storage. Initial adapters are deterministic from a caller seed and do not consume the
+caller's RNG state; adapter files are written and loaded through the existing weights format.
+
+`describe_graph(..., frozen_int8=True)` is the explicit frozen mode. It validates the typed buffers, the pinned
+digest, the exact adapter set/shapes/dtypes/`requires_grad`, the bias type and the module configuration, and rejects a
+frozen mode that selects no typed projection. Without the flag, a typed projection is refused rather than silently
+executed. Mixed frozen and strict FP16 projections are allowed. `FrozenInt8DecoderReference` is the CPU composition
+oracle; `FrozenInt8DecoderGraph` runs captured decode with a separate backend identity and `frozenKernels` receipts.
+When frozen, the capture signature includes model buffers, so replacing a frozen buffer forces a fresh capture
+instead of reusing a stale pointer.
+
 ## Container and identity
 
 The artifact is one file:
@@ -91,6 +128,12 @@ offset  size            content
 16+L    N*K             weight_q bytes, row-major
 ...     N*4             weight_scale bytes, little-endian float32
 ```
+
+`artifact_bytes(...)` returns exactly these bytes and `artifact_digest(...)` is their SHA-256; `write_artifact`
+writes the same bytes atomically and returns the same digest. A typed module stores that digest as
+`artifact_sha256`, and graph admission requires a lowercase 64-character digest. A module constructed from
+`weight_q`/`weight_scale` with a wrong pinned digest fails before use. This is content addressing of the bytes a
+caller would write, not proof that the bytes came from the claimed source weights.
 
 For format version 1 the header has exactly these keys:
 
@@ -127,13 +170,22 @@ the wrong dtype/shape/hash, a tensor hash mismatch, or an artifact hash mismatch
 ## Verification
 
 `runtime/tests/eval/test_frozen_int8.py` contains the independent Fraction/bit-search oracle, exact ceiling and RNE
-boundaries, encoder overflow and subnormal boundaries, artifact determinism and tamper tests, and projection tests
-against the rational oracle with bias, row permutation and output tiles. The committed mutation run kills 16 of 16
-mutants.
+boundaries, encoder overflow and subnormal boundaries, artifact determinism/tamper tests, content-address checks
+and projection tests against the rational oracle with bias, row permutation and output tiles.
+`runtime/tests/eval/test_frozen_int8_cuda.py` compares the CUDA operator bit-for-bit against that oracle, including
+tails, split-K schedules, ties, subnormal scales and a high-limb carry. `runtime/tests/model/test_frozen_int8_storage.py`
+covers typed storage, deterministic adapters, pinned files, the adapter-only ES schema and the tied-head guard.
+`runtime/tests/eval/test_frozen_int8_decoder.py` and its CUDA counterpart cover graph admission, mixed FP16/frozen
+projections, incremental/packed/captured decode, perturb/restore and buffer recapture. The committed mutation runs
+kill 8 of 8 storage/artifact mutants, 3 of 3 graph mutants (one via the GPU recapture test) and 5 of 5 CUDA mutants.
+
+The full CPU runtime suite passes with `3116 passed, 426 skipped`; the frozen CUDA operator plus graph tests pass
+`31` with explicit GPU opt-in. These are fixture-scale checks.
 
 ## What this does not establish
 
-No CUDA implementation, graph integration, LoRA training, model-quality result, throughput measurement, cross-GPU
-token equality or managed acceptance. The CPU path is an oracle and may be slow by design. The format is
-experimental and may be replaced by a new versioned identity; existing artifacts must not be reinterpreted under a
-new rule.
+No real-model artifact bundle, model-quality result, LoRA training run, throughput measurement, lifecycle peak,
+cross-GPU token/logit equality with nonzero adapters or managed acceptance. The CPU path is an oracle and may be slow
+by design. The three-limb work count is a hypothesis, not a measured speed improvement. The format and the CUDA
+operator are experimental and may be replaced by a new versioned identity; existing artifacts must not be
+reinterpreted under a new rule.

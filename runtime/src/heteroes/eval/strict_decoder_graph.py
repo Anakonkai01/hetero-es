@@ -163,10 +163,12 @@ class _DecodeSession:
 
 
 class StrictDecoderGraph(StrictDecoderPacked):
-    def __init__(self, model, *, max_context=256, allow_fixture=False, max_graph_bytes=DEFAULT_GRAPH_BYTES):
+    def __init__(
+        self, model, *, max_context=256, allow_fixture=False, max_graph_bytes=DEFAULT_GRAPH_BYTES, frozen_int8=False
+    ):
         if type(max_graph_bytes) is not int or max_graph_bytes < 1:
             raise ReferenceArithmeticError("Captured decode needs a positive integer memory budget")
-        super().__init__(model, max_context=max_context, allow_fixture=allow_fixture)
+        super().__init__(model, max_context=max_context, allow_fixture=allow_fixture, frozen_int8=frozen_int8)
         self.max_graph_bytes = max_graph_bytes
         self._session, self._call_lock = None, threading.Lock()
         self.identity = {
@@ -199,13 +201,18 @@ class StrictDecoderGraph(StrictDecoderPacked):
     def _session_for(self, capacity):
         if next(self.model.parameters()).device != self.device:
             raise ReferenceArithmeticError("Captured decoder model moved away from its CUDA device")
-        graph = describe_graph(self.model, self.max_context)
+        graph = describe_graph(self.model, self.max_context, frozen_int8=self.frozen_int8)
         if graph != self.identity["graph"]:
             raise ReferenceArithmeticError("Captured decoder graph configuration changed")
         signature = tuple(
             (name, p.data_ptr(), tuple(p.shape), tuple(p.stride()), p.dtype, p.device)
             for name, p in self.model.named_parameters(remove_duplicate=False)
         )
+        if self.frozen_int8:
+            signature += tuple(
+                ("buffer:" + name, b.data_ptr(), tuple(b.shape), tuple(b.stride()), b.dtype, b.device)
+                for name, b in self.model.named_buffers(remove_duplicate=False)
+            )
         stream = torch.cuda.current_stream(self.device)
         if self._session is not None and (
             self._session.capacity != capacity or self._session.signature != signature or self._session.stream != stream
