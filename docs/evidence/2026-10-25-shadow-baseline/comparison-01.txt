@@ -1,0 +1,30 @@
+smol  hf-shadow-full      B 1    121.3 tok/s 1.000x spread= 2.3% peak= 2129 MiB tokensEqualShadow=True
+smol  hf-shadow-full      B 8    982.2 tok/s 1.000x spread= 2.0% peak= 2229 MiB tokensEqualShadow=True
+smol  hf-shadow-full      B32   2425.7 tok/s 1.000x spread= 0.4% peak= 2455 MiB tokensEqualShadow=True
+smol  hf-shadow-chunk16   B32   1642.8 tok/s 0.677x spread= 0.2% peak= 2292 MiB tokensEqualShadow=True
+smol  b22                 B 1    278.6 tok/s 2.297x spread= 0.2% peak=  747 MiB tokensEqualShadow=True
+smol  b22                 B 8   1494.8 tok/s 1.522x spread= 0.5% peak= 1061 MiB tokensEqualShadow=True
+smol  b22                 B32   3855.4 tok/s 1.589x spread= 0.2% peak= 2130 MiB tokensEqualShadow=True
+smol  frozen-head         B 1    153.2 tok/s 1.263x spread= 0.7% peak=  488 MiB tokensEqualShadow=False
+smol  frozen-head         B 8   1100.7 tok/s 1.121x spread= 1.0% peak=  812 MiB tokensEqualShadow=False
+smol  frozen-head         B32   3077.1 tok/s 1.269x spread= 0.4% peak= 1892 MiB tokensEqualShadow=False
+tiny  hf-shadow-full      B 1    140.1 tok/s 1.000x spread= 0.5% peak= 6332 MiB tokensEqualShadow=True
+tiny  hf-shadow-full      B 8    690.6 tok/s 1.000x spread= 0.3% peak= 6427 MiB tokensEqualShadow=True
+tiny  hf-shadow-full      B32   1465.1 tok/s 1.000x spread= 0.2% peak= 6723 MiB tokensEqualShadow=True
+tiny  hf-shadow-chunk16   B32    896.8 tok/s 0.612x spread= 0.1% peak= 6521 MiB tokensEqualShadow=True
+tiny  b22                 B 1    187.5 tok/s 1.338x spread= 0.3% peak= 2126 MiB tokensEqualShadow=True
+tiny  b22                 B 8    786.2 tok/s 1.138x spread= 0.3% peak= 2328 MiB tokensEqualShadow=True
+tiny  b22                 B32   1812.4 tok/s 1.237x spread= 0.3% peak= 3002 MiB tokensEqualShadow=True
+tiny  frozen-no-head      B 1    149.9 tok/s 1.070x spread= 0.5% peak= 1237 MiB tokensEqualShadow=True
+tiny  frozen-no-head      B 8    787.0 tok/s 1.140x spread= 0.3% peak= 1445 MiB tokensEqualShadow=False
+tiny  frozen-no-head      B32   1437.1 tok/s 0.981x spread= 0.1% peak= 2150 MiB tokensEqualShadow=False
+qwen  hf-shadow-full      B 1    144.5 tok/s 1.000x spread= 2.6% peak= 2885 MiB tokensEqualShadow=True
+qwen  hf-shadow-full      B 8   1110.4 tok/s 1.000x spread= 0.8% peak= 2943 MiB tokensEqualShadow=True
+qwen  hf-shadow-full      B32   2525.8 tok/s 1.000x spread= 0.2% peak= 3132 MiB tokensEqualShadow=True
+qwen  hf-shadow-chunk16   B32   1591.4 tok/s 0.630x spread= 0.1% peak= 3005 MiB tokensEqualShadow=True
+qwen  b22                 B 1    277.5 tok/s 1.920x spread= 0.9% peak=  967 MiB tokensEqualShadow=True
+qwen  b22                 B 8   1390.0 tok/s 1.252x spread= 0.7% peak= 1084 MiB tokensEqualShadow=True
+qwen  b22                 B32   3471.4 tok/s 1.374x spread= 0.2% peak= 1480 MiB tokensEqualShadow=True
+qwen  frozen-head         B 1    181.7 tok/s 1.257x spread= 1.3% peak=  756 MiB tokensEqualShadow=False
+qwen  frozen-head         B 8   1219.6 tok/s 1.098x spread= 0.9% peak=  881 MiB tokensEqualShadow=False
+qwen  frozen-head         B32   2911.0 tok/s 1.152x spread= 0.3% peak= 1300 MiB tokensEqualShadow=False

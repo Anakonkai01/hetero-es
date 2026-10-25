@@ -1,0 +1,2 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 8063.46it/s]
+{"status": "ok", "out": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/docs/evidence/2026-10-25-shadow-baseline/raw/smol-b22-01.json", "wallSeconds": 12.059232160987449}

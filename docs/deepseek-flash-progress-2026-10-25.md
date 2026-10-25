@@ -182,3 +182,24 @@ existing artifact is available; no learning run is authorized to create one.
 
 Keep all old receipts immutable and the full M0–M6 scope open. This closing handoff changes documentation only;
 no further kernel, GPU, deployment or integration work is started in this session.
+
+## Codex follow-up: original shadow-FP32 comparison
+
+The owner resumed discussion and explicitly requested this benchmark. Codex created the isolated branch
+`work/codex-frozen-perf-2026-10-25` from `cb9aa2aa`, leaving the DeepSeek/original Codex worktrees unchanged.
+Harness/test commit `d9a11627` adds the original `EvalModel` FP32 shadow control, timed refresh, chunked HF
+control and frozen decoder selection. Numerical source remains `f9bfd254`; the full checkpoint audit and
+remaining performance handoff have not been completed by this measurement.
+
+Local 5070 Ti, same model files/prompt token IDs, greedy 32 tokens, context 512, one warmup and five timed
+observations. Original full-batch HF shadow B32 Smol/Tiny/Qwen: **2425.7 / 1465.1 / 2525.8 tok/s**;
+B22: **3855.4 / 1812.4 / 3471.4**; frozen: **3077.1 / 1437.1 / 2911.0** (Smol/Qwen tied-head sidecar,
+Tiny untied FP16 head). Shadow refresh is included. B22 wins all nine model/batch cases; frozen wins eight
+of nine. Tiny B32 A/B/B/A confirms frozen/shadow **0.98124**, a -1.88% regression. Both new paths exceed
+the separately measured original chunk-16 B32 control. Preserve this unfavorable case.
+
+B22 parent tokens equal the original shadow in this finite corpus. Frozen parent tokens differ in eight
+of nine cases, so its speed is not a quality/parity acceptance. Canonical perturb/restore and full ES
+lifecycle were not timed. No learning, managed activation, remote work, push, merge or deployment occurred.
+Targeted harness/precision CPU checks: **34 passed, 1 skipped**; four scratch mutants killed. All benchmark
+jobs are terminal. [Full receipts, commands and limitations](evidence/2026-10-25-shadow-baseline/README.md).

@@ -1,0 +1,26 @@
+[
+  {
+    "name": "skip-timed-refresh",
+    "file": "scripts/benchmark_inference.py",
+    "old": "            before_run()\n            synchronize()",
+    "new": "            pass\n            synchronize()"
+  },
+  {
+    "name": "wrong-shadow-precision",
+    "file": "scripts/benchmark_inference.py",
+    "old": "return EvalModel(model, \"float32\")",
+    "new": "return EvalModel(model, \"float16\")"
+  },
+  {
+    "name": "ignore-hf-chunk",
+    "file": "scripts/benchmark_inference.py",
+    "old": "for offset in range(0, len(rows), chunk or len(rows)):",
+    "new": "for offset in range(0, len(rows), len(rows)):"
+  },
+  {
+    "name": "exclude-refresh-from-total",
+    "file": "scripts/benchmark_inference.py",
+    "old": "durations.append(end - start)",
+    "new": "durations.append(end - refreshed)"
+  }
+]
