@@ -333,3 +333,77 @@ def test_wide_integer_decoder_with_fused_finishes_matches_cpu_and_unfused_graph(
     )
     assert torch.equal(bits(unfused._session.last_logits), bits(logits))
     unfused.release_graph()
+
+
+@gpu
+def test_fused_finishes_flag_a_nonfinite_bias_and_qkv_declines_odd_head_dims():
+    from heteroes.eval import strict_decode_cuda
+
+    kernels = cuda_class()("cuda", magnitude_bits=22)
+    decode = strict_decode_cuda.DecodeKernels(kernels)
+    gen = torch.Generator(device="cuda").manual_seed(41)
+    w = (torch.randn(384, 512, device="cuda", generator=gen) * 0.03).half()
+    b = (torch.randn(384, device="cuda", generator=gen) * 0.1).half()
+    b[7] = float("inf")  # added after encoding: only the finish's own nonfinite check can see it
+    weights = [(torch.randn(n * 64, 256, device="cuda", generator=gen) * 0.04).half() for n in (4, 2, 2)]
+    biases = [(torch.randn(m.shape[0], device="cuda", generator=gen) * 0.1).half() for m in weights]
+    biases[2][5] = float("inf")  # a v bias: v is stored without any later strict load
+    odd = [(torch.randn(n * 63, 256, device="cuda", generator=gen) * 0.04).half() for n in (4, 2, 2)]
+    request(kernels, [w, *weights, *odd])
+    x, hidden = scaled(gen, 4, 512), scaled(gen, 4, 384)
+    flags = [kernels.new_error_flag(), kernels.new_error_flag()]
+    actual = kernels.linear_decode(x, w, b, error_flag=flags[0], target_ctas_per_sm=TARGET, residual=hidden)
+    control = kernels.add(
+        hidden, kernels.linear_decode(x, w, b, error_flag=flags[1], target_ctas_per_sm=TARGET), error_flag=flags[1]
+    )
+    assert int(flags[0].item()) == int(flags[1].item()) == 1
+    assert torch.equal(bits(actual), bits(control))
+    rows, total = 4, 16
+    ranges = torch.tensor([[0, 3, 2], [4, 1, 0], [8, 2, 1], [12, 4, 3]], dtype=torch.int32, device="cuda")
+    angle = torch.randn(rows, 64, device="cuda", generator=gen)
+    cosine, sine = torch.cos(angle), torch.sin(angle)
+    prepared = kernels.quantize_input(scaled(gen, rows, 256), _packed=True)
+    keys, values = _caches(gen, 2, total, 64)
+    control_keys, control_values = keys.clone(), values.clone()
+    flags = [kernels.new_error_flag(), kernels.new_error_flag()]
+    q = kernels.qkv_rope_store(
+        prepared,
+        weights,
+        biases,
+        cosine,
+        sine,
+        4,
+        2,
+        ranges,
+        keys,
+        values,
+        error_flag=flags[0],
+        decode_target_ctas_per_sm=TARGET,
+    )
+    cq, ck, cv = kernels.linear_many(
+        None, weights, biases, error_flag=flags[1], decode_target_ctas_per_sm=TARGET, prepared=prepared
+    )
+    cq = kernels.rope(cq, cosine, sine, 4, error_flag=flags[1])
+    ck = kernels.rope(ck, cosine, sine, 2, error_flag=flags[1])
+    decode.store(ck, cv, ranges, control_keys, control_values)
+    assert int(flags[0].item()) == int(flags[1].item()) == 1
+    assert torch.equal(bits(q), bits(cq)) and torch.equal(bits(values), bits(control_values))
+    angle = torch.randn(rows, 63, device="cuda", generator=gen)
+    keys, values = _caches(gen, 2, total, 63)
+    assert (
+        kernels.qkv_rope_store(
+            prepared,
+            odd,
+            None,
+            torch.cos(angle),
+            torch.sin(angle),
+            4,
+            2,
+            ranges,
+            keys,
+            values,
+            decode_target_ctas_per_sm=TARGET,
+        )
+        is None
+    )
+    kernels._end_request()

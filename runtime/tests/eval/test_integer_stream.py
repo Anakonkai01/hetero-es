@@ -84,11 +84,18 @@ def test_streamed_tiles_match_cpu_oracle_and_tile_kernel_for_every_split(
     tile = cuda_class()("cuda", magnitude_bits=magnitude_bits, max_partial_bytes=1 << 30, mma_schedule="tile")
     used = entries_used(stream, monkeypatch)
     gx, gw, gb = x.cuda(), w.cuda(), b.cuda()
-    for row_tile in (16, 32):
+    for row_tile, columns in ((16, 64), (32, 64), (16, 32), (32, 32)):
         for split in (1, 2, 4, 8):  # 16-wide K has one stage: splits 2..8 include empty K partitions
             flags = [stream.new_error_flag(), tile.new_error_flag()]
-            actual = stream.linear(
-                gx, gw, gb, error_flag=flags[0], row_tile=row_tile, split_k=split, implementation="mma"
+            actual = stream._linear(
+                gx,
+                gw,
+                gb,
+                error_flag=flags[0],
+                row_tile=row_tile,
+                split_k=split,
+                implementation="mma",
+                stream_columns=columns,
             )
             control = tile.linear(
                 gx, gw, gb, error_flag=flags[1], row_tile=row_tile, split_k=split, implementation="mma"

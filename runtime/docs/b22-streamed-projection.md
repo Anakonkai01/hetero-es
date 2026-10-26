@@ -10,8 +10,8 @@ flags are unchanged; only the order in which exact integer terms are added and t
 and live FP16 weights 16-byte aligned. Other shapes and layouts keep the tile kernel (`integer_linear`); the
 single-row SIMT path is unchanged.
 
-- A CTA (four warps) owns 64 output columns and one 16- or 32-row tile; each warp owns 16 columns (two n8 MMA
-  tiles). Raw FP16 weight rows and the packed activation digit planes stream through three shared-memory stages
+- A CTA (four warps) owns 64 output columns (prefill; 16 per warp, two n8 MMA tiles) or 32 (decode plans; 8 per
+  warp, one n8 tile, twice the CTAs and fewer registers) and one 16- or 32-row tile. Raw FP16 weight rows and the packed activation digit planes stream through three shared-memory stages
   of 64 K values with 16-byte `cp.async` copies (zero-filled beyond the matrix, the K tail and the row count).
   Weights are quantized from shared memory, once per CTA; there is no persistent or global transformed weight.
 - Split-K divides the 64-wide K stages into contiguous ranges, one per `blockIdx.z` (a range may be empty).

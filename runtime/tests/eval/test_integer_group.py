@@ -96,13 +96,17 @@ def test_shared_graph_uses_one_quantization_per_projection_fanout_and_matches_cp
     oracle = IntegerDecoderReference(cpu, max_context=32, allow_fixture=True)
     rows = [torch.tensor([ids], device="cuda") for ids in ([3, 5, 7], [11, 13])]
     calls = []
-    quantize = backend.kernels.quantize_input
 
-    def counted(*args, **kwargs):
-        calls.append(True)
-        return quantize(*args, **kwargs)
+    def counted(original):
+        def wrapper(*args, **kwargs):
+            calls.append(True)
+            return original(*args, **kwargs)
 
-    monkeypatch.setattr(backend.kernels, "quantize_input", counted)
+        return wrapper
+
+    # A quantization is either quantize_input or RMSNorm fused with it (the norms feeding QKV and gate/up).
+    monkeypatch.setattr(backend.kernels, "quantize_input", counted(backend.kernels.quantize_input))
+    monkeypatch.setattr(backend.kernels, "rms_norm_quantized", counted(backend.kernels.rms_norm_quantized))
     actual, _ = backend.forward_batch(rows)
     expected = torch.cat([oracle.forward_tokens(row.cpu())[0] for row in rows])
     assert torch.equal(bits(actual.cpu()), bits(expected))

@@ -22,7 +22,8 @@ INTEGER_CUDA_VERSION = "row_scaled_integer_mma_cuda_v1_experimental"
 # "stream" schedules eligible MMA projections (K % 16 == 0, 16-byte aligned operands) through the multistage
 # kernel; "tile" keeps the per-warp tile kernel. Both compute the same exact integer dot and final encoding.
 MMA_SCHEDULES = ("auto", "tile", "stream")
-STREAM_COLUMNS = 64
+STREAM_COLUMNS = 64  # prefill: 16 columns per warp amortize the weight conversion over many row tiles
+DECODE_STREAM_COLUMNS = 32  # decode: 8 columns per warp, twice the CTAs and fewer registers (measured, SM120)
 RMS_THREADS, SILU_THREADS = 256, 1024  # RMS rows up to 32 * RMS_THREADS = MAX_NORM_WIDTH
 
 
@@ -405,12 +406,15 @@ extern "C" __global__ void integer_finish(const i64* partials,const u16* bias,co
   }
 }
 // ---- Multistage streamed decode projection (same exact integer dot as integer_linear) ----
-// Requires WIDTH % 16 == 0 and 16-byte aligned x/w. A CTA owns NT=64 output columns and one row tile;
-// each warp owns 16 columns (two n8 MMA tiles). Raw FP16 weights and packed activation planes stream
+// Requires WIDTH % 16 == 0 and 16-byte aligned x/w. A CTA owns NT=32*JN output columns and one row tile;
+// each warp owns 8*JN columns (JN n8 MMA tiles). Raw FP16 weights and packed activation planes stream
 // through STAGES shared-memory buffers of KS=64 K values with cp.async. The K order inside each k32 MMA
 // step is permuted identically for both operands (thread t holds physical K 8t..8t+7); an exact integer
 // sum does not depend on the order of its terms, so every int32 degree accumulator and output is unchanged.
-#define NT 64
+#ifndef JN
+#define JN 2
+#endif
+#define NT (32*JN)  // a CTA owns NT columns: four warps of 8*JN
 #define KS 64
 #ifndef STAGES
 #define STAGES 3
@@ -500,8 +504,8 @@ __device__ __forceinline__ void stream_body(const qi_t* x,const u16* w,const u16
   int scale[2];
 #endif
   #pragma unroll
-  for(int j=0;j<2;++j) {
-    int n=column0+warp*16+j*8+group, e=n<outputs ? ew[n] : 0;
+  for(int j=0;j<JN;++j) {
+    int n=column0+warp*8*JN+j*8+group, e=n<outputs ? ew[n] : 0;
 #if FAST_CONVERT
     scale[j]=(unsigned)((MAGNITUDE_BITS-1-e)*0x800000);
 #else
@@ -509,7 +513,7 @@ __device__ __forceinline__ void stream_body(const qi_t* x,const u16* w,const u16
 #endif
   }
   for(int first=blockIdx.y*MT;first<rows;first+=gridDim.y*MT) {
-    int accum[M_GROUPS][2][2*DIGITS-1][4]={};
+    int accum[M_GROUPS][JN][2*DIGITS-1][4]={};
     #pragma unroll
     for(int s=0;s<STAGES-1;++s) {
       if(s<count) stream_stage(weights_shared[s],inputs_shared[s],x,w,rows,outputs,first,column0,(begin+s)*KS);
@@ -526,10 +530,10 @@ __device__ __forceinline__ void stream_body(const qi_t* x,const u16* w,const u16
       const unsigned char* sa=inputs_shared[it%STAGES];
       #pragma unroll
       for(int step=0;step<KS/32;++step) {
-        unsigned b[2][DIGITS][2];
+        unsigned b[JN][DIGITS][2];
         #pragma unroll
-        for(int j=0;j<2;++j) {
-          int r=warp*16+j*8+group;
+        for(int j=0;j<JN;++j) {
+          int r=warp*8*JN+j*8+group;
           uint4 h=*(const uint4*)(sw+r*128+(((step*4+thread)^((r&1)<<2))<<4));
           unsigned lo[DIGITS], hi[DIGITS];
           convert4(lo,h.x,h.y,scale[j]);
@@ -552,7 +556,7 @@ __device__ __forceinline__ void stream_body(const qi_t* x,const u16* w,const u16
             #pragma unroll
             for(int jd=0;jd<DIGITS;++jd) {
               #pragma unroll
-              for(int j=0;j<2;++j) mma(accum[m][j][i+jd],a[i],b[j][jd]);
+              for(int j=0;j<JN;++j) mma(accum[m][j][i+jd],a[i],b[j][jd]);
             }
           }
         }
@@ -563,10 +567,10 @@ __device__ __forceinline__ void stream_body(const qi_t* x,const u16* w,const u16
     #pragma unroll
     for(int m=0;m<M_GROUPS;++m) {
       #pragma unroll
-      for(int j=0;j<2;++j) {
+      for(int j=0;j<JN;++j) {
         #pragma unroll
         for(int d=0;d<4;++d) {
-          int row=first+m*16+group+(d>>1)*8, n=column0+warp*16+j*8+thread*2+(d&1);
+          int row=first+m*16+group+(d>>1)*8, n=column0+warp*8*JN+j*8+thread*2+(d&1);
           if(row<rows && n<outputs) {
             i64 sum=0;
             #pragma unroll
@@ -1022,8 +1026,14 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
         identity["fingerprint"] = canonical_json_hash({k: v for k, v in identity.items() if k != "fingerprint"})
         return identity
 
-    def _integer_functions(self, width, has_bias=False, row_tile=16, warps=4, split_k=1, *, packed_input=False):
+    def _integer_functions(
+        self, width, has_bias=False, row_tile=16, warps=4, split_k=1, *, packed_input=False, columns=STREAM_COLUMNS
+    ):
+        if columns not in (32, 64):
+            raise ReferenceArithmeticError("Streamed projections use 32 or 64 columns per CTA")
         name = f"integer-{self.magnitude_bits}-{width}-bias{int(has_bias)}-m{row_tile}-w{warps}-s{split_k}-p{int(packed_input)}"
+        if columns != STREAM_COLUMNS:
+            name += f"-n{columns}"
         mode = weight_read_plan(self.magnitude_bits, self.arch, self.weight_load)
         paired, prefetch = mode == "paired", mode == "prefetch2"
         if paired:
@@ -1043,6 +1053,7 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
                 WEIGHT_READ32=int(paired),
                 WEIGHT_PREFETCH=int(prefetch),
                 FAST_CONVERT=int(self.magnitude_bits == 22),
+                JN=columns // 32,
             )
             header = "".join(f"#define {k} {v}\n" for k, v in defines.items())
             self._functions[name] = self._compile(
@@ -1142,6 +1153,7 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
             row_tile=plan.row_tile,
             split_k=plan.split_k,
             implementation=plan.implementation,
+            stream_columns=DECODE_STREAM_COLUMNS,
             prepared=prepared,
             residual=residual,
         )
@@ -1446,6 +1458,7 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
                         "row_tile": plan.row_tile,
                         "split_k": plan.split_k,
                         "implementation": plan.implementation,
+                        "stream_columns": DECODE_STREAM_COLUMNS,
                     }
                 ),
             )
@@ -1471,7 +1484,9 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
         total = sum(counts)
         plan = self._decode_plan(width, rows, total, target)
         has_bias = biases[0] is not None
-        functions = self._integer_functions(width, has_bias, plan.row_tile, 4, plan.split_k, packed_input=True)
+        functions = self._integer_functions(
+            width, has_bias, plan.row_tile, 4, plan.split_k, packed_input=True, columns=DECODE_STREAM_COLUMNS
+        )
         quantized, ex = prepared
         exponents = [self._weight_exponents(weight, flag) for weight in weights]
         outs = [torch.empty((rows, count), dtype=torch.float32, device=self.device) for count in counts]
@@ -1486,7 +1501,7 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
         self._launch(
             functions["integer_stream_group"],
             grid=(
-                sum(-(-count // STREAM_COLUMNS) for count in counts),
+                sum(-(-count // DECODE_STREAM_COLUMNS) for count in counts),
                 min(65535, -(-rows // plan.row_tile)),
                 plan.split_k,
             ),
@@ -1529,6 +1544,7 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
         implementation="auto",
         prepared=None,
         residual=None,
+        stream_columns=STREAM_COLUMNS,
     ):
         if row_tile is not None and (type(row_tile) is not int or row_tile not in (16, 32)):
             raise ReferenceArithmeticError("Integer row tile must be 16 or 32")
@@ -1555,7 +1571,7 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
         row_tile = (16 if rows <= 16 else 32) if row_tile is None else row_tile
         mode = ("simt" if rows == 1 else "mma") if implementation == "auto" else implementation
         functions = self._integer_functions(
-            width, bias is not None, row_tile, warps, split_k, packed_input=mode == "mma"
+            width, bias is not None, row_tile, warps, split_k, packed_input=mode == "mma", columns=stream_columns
         )
         flag = self.new_error_flag() if error_flag is None else error_flag
         quantized, ex = (
@@ -1569,7 +1585,7 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
         out = torch.empty((rows, outputs), dtype=torch.float32, device=self.device)
         partials = torch.empty((split_k, rows, outputs), dtype=torch.int64, device=self.device) if split_k > 1 else out
         if mode == "mma" and self._stream_eligible(width, quantized, weight):
-            entry, grid, block = "integer_stream", (-(-outputs // STREAM_COLUMNS), -(-rows // row_tile), split_k), 128
+            entry, grid, block = "integer_stream", (-(-outputs // stream_columns), -(-rows // row_tile), split_k), 128
         elif mode == "simt":
             entry, grid, block = "integer_simt", (-(-outputs // 8), rows, split_k), 256
         else:
