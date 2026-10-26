@@ -1,0 +1,429 @@
+diff --git a/runtime/src/heteroes/eval/integer_cuda.py b/runtime/src/heteroes/eval/integer_cuda.py
+index 73045f50..34826384 100644
+--- a/runtime/src/heteroes/eval/integer_cuda.py
++++ b/runtime/src/heteroes/eval/integer_cuda.py
+@@ -643,57 +643,21 @@ extern "C" __global__ void integer_finish_group(const i64* partials,const int* e
+ # row: it computes the row exactly as strict_rms_norm / strict_silu_mul (same loads, rounded ops and flags),
+ # keeps it in shared memory and then performs integer_input's maximum, exponent and packed-digit quantization on
+ # those values. The FP32 row is never stored; the planes and exponents equal quantize_input(op(...)).
+-_FUSED_SOURCE = (
+-    _QUANT_FLOAT
+-    + _PACK_DIGITS
+-    + r"""
+-template <int THREADS>
+-__device__ void quantize_row(const float* a, int n, unsigned* planes, int* exponents, int rows, unsigned& bad) {
+-  __shared__ unsigned maxima[THREADS];
+-  unsigned maximum=0;
+-  for(int k=threadIdx.x;k<n;k+=THREADS) {
+-    unsigned u=__float_as_uint(a[k])&0x7fffffffu;
+-    if(u>=0x7f800000u) {bad|=1u; u=0;}
+-    if((u&0x7f800000u)==0) u=0;
+-    maximum=u>maximum ? u : maximum;
+-  }
+-  maxima[threadIdx.x]=maximum;
+-  __syncthreads();
+-  for(int stride=THREADS/2;stride;stride>>=1) {
+-    if(threadIdx.x<stride) maxima[threadIdx.x]=maxima[threadIdx.x+stride]>maxima[threadIdx.x] ? maxima[threadIdx.x+stride] : maxima[threadIdx.x];
+-    __syncthreads();
+-  }
+-  int exponent=maxima[0] ? (int)(maxima[0]>>23)-127 : 0;
+-  if(threadIdx.x==0) exponents[blockIdx.x]=exponent;
+-  const int words=(n+3)/4;
+-  for(int word=threadIdx.x;word<words;word+=THREADS) {
+-    unsigned packed[DIGITS]={};
+-    #pragma unroll
+-    for(int i=0;i<4;++i) {
+-      int k=word*4+i;
+-      pack_digits(packed,k<n ? quant_float(__float_as_uint(a[k]),exponent) : 0,i);
+-    }
+-    #pragma unroll
+-    for(int d=0;d<DIGITS;++d) planes[((size_t)d*rows+blockIdx.x)*words+word]=packed[d];
+-  }
+-}
+-
++_RMS_QUANT_ROW = r"""
+ // strict_rms_norm's sum of squares is block_tree: the pruned aligned in-place tree (level stride s adds a[i+s]
+ // into a[i] for i a multiple of 2s when i+s < n). Here thread t owns the aligned chunk [tC, tC+C) (C a power of
+ // two): levels below C run in registers, the next five through warp shuffles and the rest across warp leaders,
+ // each with the same pruning test, so every rounded node and flag is the same as block_tree's.
++// x[j] holds element threadIdx.x * C + j of the row as strictly loaded (zero past n).
+ template <int C>
+-__device__ __forceinline__ void rms_quant_row(const float* row, const u16* w, int n, float inv_n, float eps,
+-                                              float* a, unsigned* planes, int* exponents, int rows, unsigned& bad) {
++__device__ __forceinline__ void rms_quant_core(const float (&x)[C], const u16* w, int n, float inv_n, float eps,
++                                               float* a, unsigned* planes, int* exponents, int rows, unsigned& bad) {
+   __shared__ float nodes[RMS_THREADS / 32];
+   __shared__ unsigned maxima[RMS_THREADS / 32];
+   const int t = threadIdx.x, lane = t & 31, warp = t >> 5, base = t * C;
+-  float x[C], v[C];
++  float v[C];
+ #pragma unroll
+-  for (int j = 0; j < C; ++j) {
+-    x[j] = base + j < n ? load(row + base + j, bad) : 0.0f;
+-    v[j] = base + j < n ? mul_(x[j], x[j], bad) : 0.0f;
+-  }
++  for (int j = 0; j < C; ++j) v[j] = base + j < n ? mul_(x[j], x[j], bad) : 0.0f;
+ #pragma unroll
+   for (int s = 1; s < C; s <<= 1) {
+ #pragma unroll
+@@ -756,6 +720,54 @@ __device__ __forceinline__ void rms_quant_row(const float* row, const u16* w, in
+   }
+ }
+ 
++template <int C>
++__device__ __forceinline__ void rms_quant_row(const float* row, const u16* w, int n, float inv_n, float eps,
++                                              float* a, unsigned* planes, int* exponents, int rows, unsigned& bad) {
++  const int base = threadIdx.x * C;
++  float x[C];
++#pragma unroll
++  for (int j = 0; j < C; ++j) x[j] = base + j < n ? load(row + base + j, bad) : 0.0f;
++  rms_quant_core<C>(x, w, n, inv_n, eps, a, planes, exponents, rows, bad);
++}
++
++"""
++
++_FUSED_SOURCE = (
++    _QUANT_FLOAT
++    + _PACK_DIGITS
++    + _RMS_QUANT_ROW
++    + r"""
++template <int THREADS>
++__device__ void quantize_row(const float* a, int n, unsigned* planes, int* exponents, int rows, unsigned& bad) {
++  __shared__ unsigned maxima[THREADS];
++  unsigned maximum=0;
++  for(int k=threadIdx.x;k<n;k+=THREADS) {
++    unsigned u=__float_as_uint(a[k])&0x7fffffffu;
++    if(u>=0x7f800000u) {bad|=1u; u=0;}
++    if((u&0x7f800000u)==0) u=0;
++    maximum=u>maximum ? u : maximum;
++  }
++  maxima[threadIdx.x]=maximum;
++  __syncthreads();
++  for(int stride=THREADS/2;stride;stride>>=1) {
++    if(threadIdx.x<stride) maxima[threadIdx.x]=maxima[threadIdx.x+stride]>maxima[threadIdx.x] ? maxima[threadIdx.x+stride] : maxima[threadIdx.x];
++    __syncthreads();
++  }
++  int exponent=maxima[0] ? (int)(maxima[0]>>23)-127 : 0;
++  if(threadIdx.x==0) exponents[blockIdx.x]=exponent;
++  const int words=(n+3)/4;
++  for(int word=threadIdx.x;word<words;word+=THREADS) {
++    unsigned packed[DIGITS]={};
++    #pragma unroll
++    for(int i=0;i<4;++i) {
++      int k=word*4+i;
++      pack_digits(packed,k<n ? quant_float(__float_as_uint(a[k]),exponent) : 0,i);
++    }
++    #pragma unroll
++    for(int d=0;d<DIGITS;++d) planes[((size_t)d*rows+blockIdx.x)*words+word]=packed[d];
++  }
++}
++
+ extern "C" __global__ void __launch_bounds__(RMS_THREADS) strict_rms_quant(const float* x, const u16* w, unsigned* planes,
+     int* exponents, int* error, int rows, int n, float inv_n, float eps) {
+   extern __shared__ float a[];
+@@ -799,6 +811,7 @@ _DECODE_FINISH_SOURCE += (
+     _ENCODE
+     + _QUANT_FLOAT
+     + _PACK_DIGITS
++    + _RMS_QUANT_ROW
+     + r"""
+ __device__ __forceinline__ float add_rn(float a, float b) {
+   float r;
+@@ -837,6 +850,45 @@ extern "C" __global__ void finish_residual(const i64* partials, const u16* bias,
+   report(error, bad);
+ }
+ 
++// finish_residual of one row, then strict_rms_quant of the updated row (the next projection's input). One CTA
++// per row. The updated values are stored for the residual stream and kept in registers for the norm: their
++// strict load would only flush an already flushed sum and repeat its nonfinite flag.
++template <int C>
++__device__ __forceinline__ void residual_rms_row(const i64* partials, const u16* bias, const int* ex, const int* ew,
++                                                 const float* residual, float* out, const u16* w, unsigned* planes,
++                                                 int* exponents, int* error, int rows, int n, float inv_n,
++                                                 float eps, float* a, unsigned& bad) {
++  const int row = blockIdx.x, base = threadIdx.x * C;
++  float x[C];
++#pragma unroll
++  for (int j = 0; j < C; ++j) {
++    x[j] = 0.0f;
++    const int k = base + j;
++    if (k < n) {
++      float v = projected(partials, rows, n, row, k, ex[row] + ew[k] - 2 * (MAGNITUDE_BITS - 1), bias, k, error);
++      size_t i = (size_t)row * n + k;
++      x[j] = add_(load(residual + i, bad), loaded(v, bad), bad);
++      out[i] = x[j];
++    }
++  }
++  rms_quant_core<C>(x, w, n, inv_n, eps, a, planes, exponents, rows, bad);
++}
++extern "C" __global__ void __launch_bounds__(RMS_THREADS) finish_residual_rms_quant(
++    const i64* partials, const u16* bias, const int* ex, const int* ew, const float* residual, float* out,
++    const u16* w, unsigned* planes, int* exponents, int* error, int rows, int n, float inv_n, float eps) {
++  extern __shared__ float a[];
++  unsigned bad = 0;
++#define RESIDUAL_RMS(C) residual_rms_row<C>(partials, bias, ex, ew, residual, out, w, planes, exponents, error, rows, n, inv_n, eps, a, bad)
++  if (n <= RMS_THREADS) RESIDUAL_RMS(1);
++  else if (n <= 2 * RMS_THREADS) RESIDUAL_RMS(2);
++  else if (n <= 4 * RMS_THREADS) RESIDUAL_RMS(4);
++  else if (n <= 8 * RMS_THREADS) RESIDUAL_RMS(8);
++  else if (n <= 16 * RMS_THREADS) RESIDUAL_RMS(16);
++  else RESIDUAL_RMS(32);
++#undef RESIDUAL_RMS
++  report(error, bad);
++}
++
+ // gated = strict_silu_mul(gate, up) from a [gate | up] group of n columns each, plus the per-row maximum that
+ // integer_input / quantize_row derive from the gated row (order-independent; nonfinite flagged and ignored,
+ // subnormals ignored). `maxima` was cleared by the group projection that produced the partials.
+@@ -1137,8 +1189,10 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
+ 
+     @torch.inference_mode()
+     def linear_decode(
+-        self, value, weight, bias=None, *, error_flag=None, target_ctas_per_sm=8, prepared=None, residual=None
++        self, value, weight, bias=None, *, error_flag=None, target_ctas_per_sm=8, prepared=None, residual=None, norm=None
+     ):
++        """Decode projection; with ``norm=(weight, epsilon)`` and a residual, returns the updated residual row and
++        rms_norm_quantized(updated, *norm) for the next projection (fused into the split-K finish when split)."""
+         if prepared is not None:
+             value = self._prepared_shape(prepared, weight)
+         if not isinstance(value, torch.Tensor) or value.dtype != torch.float32:
+@@ -1156,6 +1210,7 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
+             stream_columns=DECODE_STREAM_COLUMNS,
+             prepared=prepared,
+             residual=residual,
++            norm=norm,
+         )
+ 
+     def _prepared_shape(self, prepared, weight):
+@@ -1204,14 +1259,9 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
+             torch.empty(rows, dtype=torch.int32, device=self.device),
+         )
+ 
+-    @torch.inference_mode()
+-    def rms_norm_quantized(self, value, weight, epsilon, *, error_flag=None):
+-        """Packed planes of quantize_input(rms_norm(value)) for a [rows>=2, width] activation, in one kernel."""
+-        (value,) = self._float32(value)
+-        width = value.shape[-1] if value.ndim == 2 else 0
++    def _check_norm(self, rows, width, weight, epsilon):
+         if (
+-            value.ndim != 2
+-            or value.shape[0] < 2
++            rows < 2
+             or not isinstance(weight, torch.Tensor)
+             or weight.dtype != torch.float16
+             or weight.shape != (width,)
+@@ -1221,7 +1271,15 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
+             or not (isinstance(epsilon, float) and math.isfinite(epsilon) and epsilon > 0)
+         ):
+             raise ReferenceArithmeticError("Unsupported fused RMSNorm quantization input")
+-        rows = value.shape[0]
++
++    @torch.inference_mode()
++    def rms_norm_quantized(self, value, weight, epsilon, *, error_flag=None):
++        """Packed planes of quantize_input(rms_norm(value)) for a [rows>=2, width] activation, in one kernel."""
++        (value,) = self._float32(value)
++        if value.ndim != 2:
++            raise ReferenceArithmeticError("Unsupported fused RMSNorm quantization input")
++        self._check_norm(value.shape[0], value.shape[1], weight, epsilon)
++        rows, width = value.shape
+         planes, exponents = self._planes(rows, width)
+         flag = self.new_error_flag() if error_flag is None else error_flag
+         self._launch(
+@@ -1265,12 +1323,13 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
+                 DIGITS=2 if self.magnitude_bits == 14 else 3,
+                 SPLIT_K=split_k,
+                 HAS_BIAS=int(has_bias),
++                RMS_THREADS=RMS_THREADS,
+             )
+             header += "".join(f"#define {k} {v}\n" for k, v in defines.items())
+             self._functions[name] = self._compile(
+                 name,
+                 header + sc._OPS_SOURCE + _DECODE_FINISH_SOURCE,
+-                ["finish_residual", "finish_silu", "pack_rows", "finish_qkv_rope"],
++                ["finish_residual", "finish_residual_rms_quant", "finish_silu", "pack_rows", "finish_qkv_rope"],
+                 ptx_exact=sc.OPS_PTX_EXACT,
+                 sass_exact=sc.OPS_SASS_EXACT,
+             )
+@@ -1545,6 +1604,7 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
+         prepared=None,
+         residual=None,
+         stream_columns=STREAM_COLUMNS,
++        norm=None,
+     ):
+         if row_tile is not None and (type(row_tile) is not int or row_tile not in (16, 32)):
+             raise ReferenceArithmeticError("Integer row tile must be 16 or 32")
+@@ -1566,6 +1626,10 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
+             and residual.shape[-1] == outputs
+         ):
+             raise ReferenceArithmeticError("Residual must be a contiguous FP32 tensor shaped like the projection")
++        if norm is not None:
++            if residual is None or not isinstance(norm, tuple) or len(norm) != 2:
++                raise ReferenceArithmeticError("A fused RMSNorm needs a residual and a (weight, epsilon) pair")
++            self._check_norm(rows, outputs, *norm)
+         if split_k > 1 and split_k * rows * outputs * 8 > self.max_partial_bytes:
+             raise ReferenceArithmeticError("Integer split-K workspace budget exceeded")
+         row_tile = (16 if rows <= 16 else 32) if row_tile is None else row_tile
+@@ -1601,6 +1665,21 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
+             pointers=(quantized, weight, weight if bias is None else bias, ex, ew, out, flag, partials),
+             integers=(rows, outputs),
+         )
++        if split_k > 1 and residual is not None and norm is not None:
++            # strict_add(residual, projection) and the next strict_rms_quant fused into the split-K finish.
++            out = torch.empty((rows, outputs), dtype=torch.float32, device=self.device)
++            planes, exponents = self._planes(rows, outputs)
++            self._launch(
++                self._finish_functions(split_k, bias is not None)["finish_residual_rms_quant"],
++                grid=rows,
++                block=(RMS_THREADS, 1),
++                pointers=(partials, weight if bias is None else bias, ex, ew, residual, out, norm[0], planes, exponents, flag),
++                integers=(rows, outputs),
++                floats=(1.0 / outputs, norm[1]),
++                shared=4 * outputs,
++            )
++            self._finish(flag, error_flag)
++            return out.reshape(*value.shape[:-1], outputs), (planes, exponents)
+         if split_k > 1 and residual is not None:
+             # strict_add(residual, projection) fused into the split-K finish.
+             out = torch.empty((rows, outputs), dtype=torch.float32, device=self.device)
+@@ -1623,5 +1702,8 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
+             )
+         if residual is not None:
+             out = self.add(residual, out, error_flag=flag)
++        out = out.reshape(*value.shape[:-1], outputs)
++        if norm is not None:
++            prepared = self.rms_norm_quantized(out, *norm, error_flag=flag)
+         self._finish(flag, error_flag)
+-        return out.reshape(*value.shape[:-1], outputs)
++        return out if norm is None else (out, prepared)
+diff --git a/runtime/src/heteroes/eval/integer_decoder.py b/runtime/src/heteroes/eval/integer_decoder.py
+index cc8baa89..64d7af85 100644
+--- a/runtime/src/heteroes/eval/integer_decoder.py
++++ b/runtime/src/heteroes/eval/integer_decoder.py
+@@ -79,6 +79,15 @@ class IntegerDecoderGraph(StrictDecoderGraph):
+             mma_schedule=mma_schedule,
+         )
+         self._decode_target = decode_target_ctas_per_sm
++        # The RMSNorm applied to each decode residual update: post-attention after o_proj, then the next
++        # layer's input norm (or the final norm) after down_proj. Their quantization is fused into the finish.
++        layers = list(self.model.model.layers)
++        norms = [layer.input_layernorm.weight for layer in layers[1:]] + [self.model.model.norm.weight]
++        self._next_norm = {}
++        for layer, after in zip(layers, norms):
++            self._next_norm[id(layer.self_attn.o_proj.weight)] = layer.post_attention_layernorm.weight
++            self._next_norm[id(layer.mlp.down_proj.weight)] = after
++        self._carried = None
+         self._workspace_bounds = {}
+         self._kernel_configuration = self._current_kernel_configuration()
+         self.identity = {
+@@ -166,6 +175,33 @@ class IntegerDecoderGraph(StrictDecoderGraph):
+         # Two or more rows use packed planes; one row keeps the unfused SIMT quantization.
+         return rows > 1
+ 
++    def _norm_quantized(self, hidden, norm, epsilon, flag):
++        """rms_norm_quantized(hidden), taken from the residual finish that produced `hidden` when it fused it."""
++        carried, self._carried = self._carried, None
++        if carried is not None and carried[0] is hidden and carried[1] is norm and carried[2] == epsilon:
++            return carried[3]
++        return self.kernels.rms_norm_quantized(hidden, norm, epsilon, error_flag=flag)
++
++    def _residual(self, hidden, module, flag, **projection):
++        """strict_add(hidden, projection) whose next RMSNorm quantization is carried to _norm_quantized."""
++        norm = self._next_norm.get(id(module.weight))
++        epsilon = float(self.config.rms_norm_eps)
++        fuse = norm is not None and self._fused(hidden.shape[0])
++        out = self.kernels.linear_decode(
++            weight=module.weight,
++            bias=getattr(module, "bias", None),
++            error_flag=flag,
++            target_ctas_per_sm=self._decode_target,
++            residual=hidden,
++            norm=(norm, epsilon) if fuse else None,
++            **projection,
++        )
++        if not fuse:
++            return out
++        out, prepared = out
++        self._carried = (out, norm, epsilon, prepared)
++        return out
++
+     def _decode_norm_project_many(self, hidden, norm, epsilon, modules, flag):
+         if not self._fused(hidden.shape[0]):
+             return super()._decode_norm_project_many(hidden, norm, epsilon, modules, flag)
+@@ -175,7 +211,7 @@ class IntegerDecoderGraph(StrictDecoderGraph):
+             tuple(getattr(module, "bias", None) for module in modules),
+             error_flag=flag,
+             decode_target_ctas_per_sm=self._decode_target,
+-            prepared=self.kernels.rms_norm_quantized(hidden, norm, epsilon, error_flag=flag),
++            prepared=self._norm_quantized(hidden, norm, epsilon, flag),
+         )
+ 
+     def _decode_norm_project(self, hidden, norm, epsilon, module, flag):
+@@ -187,7 +223,7 @@ class IntegerDecoderGraph(StrictDecoderGraph):
+             getattr(module, "bias", None),
+             error_flag=flag,
+             target_ctas_per_sm=self._decode_target,
+-            prepared=self.kernels.rms_norm_quantized(hidden, norm, epsilon, error_flag=flag),
++            prepared=self._norm_quantized(hidden, norm, epsilon, flag),
+         )
+ 
+     def _decode_gated_project(self, gate, up, module, flag):
+@@ -209,7 +245,7 @@ class IntegerDecoderGraph(StrictDecoderGraph):
+         modules = (attention.q_proj, attention.k_proj, attention.v_proj)
+         weights = tuple(module.weight for module in modules)
+         biases = tuple(getattr(module, "bias", None) for module in modules)
+-        prepared = self.kernels.rms_norm_quantized(hidden, layer.input_layernorm.weight, epsilon, error_flag=flag)
++        prepared = self._norm_quantized(hidden, layer.input_layernorm.weight, epsilon, flag)
+         q = self.kernels.qkv_rope_store(
+             prepared,
+             weights,
+@@ -235,23 +271,14 @@ class IntegerDecoderGraph(StrictDecoderGraph):
+         return q
+ 
+     def _decode_residual_project(self, hidden, value, module, flag):
+-        return self.kernels.linear_decode(
+-            value,
+-            module.weight,
+-            getattr(module, "bias", None),
+-            error_flag=flag,
+-            target_ctas_per_sm=self._decode_target,
+-            residual=hidden,
+-        )
++        return self._residual(hidden, module, flag, value=value)
+ 
+     def _decode_mlp(self, hidden, layer, epsilon, flag):
+         if not self._fused(hidden.shape[0]):
+             return super()._decode_mlp(hidden, layer, epsilon, flag)
+         mlp = layer.mlp
+         biases = (getattr(mlp.gate_proj, "bias", None), getattr(mlp.up_proj, "bias", None))
+-        prepared = self.kernels.rms_norm_quantized(
+-            hidden, layer.post_attention_layernorm.weight, epsilon, error_flag=flag
+-        )
++        prepared = self._norm_quantized(hidden, layer.post_attention_layernorm.weight, epsilon, flag)
+         planes = self.kernels.gate_up_silu_quantized(
+             prepared,
+             mlp.gate_proj.weight,
+@@ -273,15 +300,7 @@ class IntegerDecoderGraph(StrictDecoderGraph):
+                 gated = self.kernels.silu_mul(gate, up, error_flag=flag)
+                 return self._decode_residual_project(hidden, gated, mlp.down_proj, flag)
+             planes = self.kernels.silu_mul_quantized(gate, up, error_flag=flag)
+-        return self.kernels.linear_decode(
+-            None,
+-            mlp.down_proj.weight,
+-            getattr(mlp.down_proj, "bias", None),
+-            error_flag=flag,
+-            target_ctas_per_sm=self._decode_target,
+-            prepared=planes,
+-            residual=hidden,
+-        )
++        return self._residual(hidden, mlp.down_proj, flag, value=None, prepared=planes)
+ 
+     def _request_workspace_bytes(self, capacity=1):
+         self._check_kernel_configuration()
+@@ -311,6 +330,7 @@ class IntegerDecoderGraph(StrictDecoderGraph):
+         return sum(w.shape[0] * 4 for w in {id(w): w for w in weights}.values()) + self._workspace_bounds[key] + padding
+ 
+     def _generation_begin(self):
++        self._carried = None
+         self._check_kernel_configuration()
+         self.kernels._begin_request(self._projection_weights())
+ 

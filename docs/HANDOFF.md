@@ -4,7 +4,17 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
 [archive/handoffs/](archive/handoffs/); the previous version of this file is
 [HANDOFF-history-2026-10.md](archive/handoffs/HANDOFF-history-2026-10.md).
 
-## Tóm tắt cho chủ dự án (2026-10-26)
+## Tóm tắt cho chủ dự án (2026-10-27)
+
+- **Phiên Claude đêm 26→27/10 đã chốt theo yêu cầu, bàn giao Codex.** Đọc
+  [bàn giao mới](handoff-codex-after-claude-night-2026-10-27.md). Windows trực tiếp của bản prefill đã nghiệm thu.
+  Commit `7ca91112` (prefill GEMM 2 tầng/3 khối mỗi SM, gộp tính số mũ trọng số): Qwen B32 5070 Ti short32
+  **8913 → 9155** (+2,7%), chat128 **9107 → 9240** (+1,5%), token giống hệt; 249 test GPU + 12 test mới qua.
+  Còn mở: 3060, Windows, mutation, parity đã train, check-all. Việc tiếp theo đã được duyệt: **argmax lm_head
+  chính xác bằng cận số nguyên** (ước tính +4,5–5%). Nhiều hướng khác đã thử và bỏ, có số đo.
+  [Bằng chứng](evidence/2026-10-27-strict-prefill-gemm-weights/README.md). Mục tiêu gần vLLM **chưa đạt** (~66%).
+
+## Tóm tắt trước đó (2026-10-26)
 
 - **Phiên Codex đã chốt theo yêu cầu chủ dự án để bàn giao Claude (26/10, khoảng 22:14).** Đọc
   [bàn giao mới](handoff-claude-after-codex-prefill-2026-10-26.md). Runtime `2eb4da0d`, test `6cc69d26`:

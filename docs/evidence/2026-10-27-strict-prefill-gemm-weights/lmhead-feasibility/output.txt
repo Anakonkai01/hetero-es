@@ -1,0 +1,5 @@
+7-bit weights: survivors per row median 1 mean 2.0 max 17 of 151936; argmax kept True
+7-bit w x 16-bit a: survivors median 1 mean 2.1 max 17
+7-bit w x 14-bit a: survivors median 1 mean 2.1 max 18
+rows 744 top-2 logit gap median 2.6950867902487516
+floor7+offset: tiles surviving per row median 1 mean 1.94 max 13 of 4748
