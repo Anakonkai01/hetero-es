@@ -39,8 +39,17 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
   [FMA](evidence/2026-10-26-ordered-fma/README.md).
 - Control toàn luồng Qwen batch 32: thay toàn bộ projection bằng vendor FP16 đạt khoảng **7804**
   token/s ở short32, vẫn cách đối chứng vLLM **13835**. Capture prefill giữ B22 chỉ **4365→4364**;
-  chat128 **3953→3956**, không có lợi đáng kể. Tiếp theo đo GPU work còn lại/fusion/attention trên
-  toàn luồng trước khi viết thêm kernel nhỏ; không coi thời gian `read` chờ GPU là chi phí CPU.
+  chat128 **3953→3956**, không có lợi đáng kể. Profile đủ operator: attention bước cuối chat128
+  khoảng **2,8/7,9 ms** B22, nhưng prototype warp attention toàn luồng chỉ khoảng **+1%**, chưa chọn.
+  [Profile và thử nghiệm](evidence/2026-10-26-strict-remaining/README.md).
+  Không coi thời gian `read` chờ GPU là chi phí CPU.
+- Hướng mới đặc thù ES: dùng completion trước làm proposal, **strict xác minh lại mọi token bằng
+  candidate hiện tại**, không dùng KV/logits cũ. Bộ chấm B22 nhiều vị trí đã khớp CPU hai layout và
+  trained Qwen tuần tự, 2/2 mutation bị bắt. Batch 1 chấm 4 vị trí gần bằng chi phí 1; batch 8 chấm
+  2 vị trí thêm khoảng 9–10%; batch 32 chi phí cao, chưa có lợi đã đo. **Chưa có vòng speculative
+  end-to-end hoặc tăng tốc đầu ra.** Tiếp theo thử vòng nhỏ batch 1/8 với proposal đúng/sai/rỗng,
+  fallback số học và candidate boundaries; không dùng hướng này để đóng mục tiêu kernel gần vLLM.
+  [Bằng chứng và việc còn thiếu](evidence/2026-10-26-strict-verification/README.md).
 - Tiếp tục projection throughput, số học có đặc tả và gate chất lượng/portable/native; không sửa recipe
   lịch sử để lấy tốc độ. Kế hoạch đã duyệt vẫn giữ hash
   `4ee6838fa47f810ee40348b5f0bc556834bf50825eb0b7b0795b5053743cb17f`.

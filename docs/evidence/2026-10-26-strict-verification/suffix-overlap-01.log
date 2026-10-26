@@ -1,0 +1,12 @@
+strict-short parent 2 1.333 tokens/round 1.06 query expansion
+strict-short parent 4 1.575 tokens/round 1.206 query expansion
+strict-short parent 8 1.722 tokens/round 1.468 query expansion
+strict-short previous 2 1.341 tokens/round 1.073 query expansion
+strict-short previous 4 1.595 tokens/round 1.236 query expansion
+strict-short previous 8 1.753 tokens/round 1.522 query expansion
+vendor-chat-control parent 2 1.289 tokens/round 1.138 query expansion
+vendor-chat-control parent 4 1.477 tokens/round 1.463 query expansion
+vendor-chat-control parent 8 1.566 tokens/round 2.178 query expansion
+vendor-chat-control previous 2 1.412 tokens/round 1.164 query expansion
+vendor-chat-control previous 4 1.735 tokens/round 1.544 query expansion
+vendor-chat-control previous 8 1.913 tokens/round 2.377 query expansion
