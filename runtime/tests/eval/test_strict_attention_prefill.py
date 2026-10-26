@@ -61,7 +61,6 @@ class Spy(sc.StrictCudaKernels):
 def kernels():
     original, tiled = sc.StrictCudaKernels("cuda"), Spy("cuda")
     original._attention_entry = "strict_attention"
-    tiled._attention_entry = "strict_attention_prefill"
     tiled.compiled = []
     return original, tiled
 
