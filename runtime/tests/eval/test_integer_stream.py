@@ -281,6 +281,43 @@ def test_integer_source_passes_the_instruction_audit_on_other_architectures(arch
 
 
 @gpu
+@pytest.mark.parametrize("arch", ["sm_75", "sm_80", "sm_86", "sm_89", "sm_90", "sm_120"])
+@pytest.mark.parametrize("magnitude_bits", [14, 22])
+def test_fused_quantization_source_passes_the_ops_instruction_audit_on_other_architectures(arch, magnitude_bits):
+    # The fused RMSNorm/SiLU module is built from the ops source, so it must pass the ops audit on every target.
+    from heteroes.eval.integer_cuda import _FUSED_SOURCE, RMS_THREADS, SILU_THREADS
+
+    context = torch.empty(1, device="cuda")
+    owner = cuda_class()("cuda", magnitude_bits=magnitude_bits)
+    if not owner._nvdisasm:
+        pytest.skip("nvdisasm unavailable")
+    header = "".join(f"#define {k} 0x{v:08x}u\n" for k, v in sc.reference_constants().items())
+    header += f"#define MAGNITUDE_BITS {magnitude_bits}\n#define DIGITS {2 if magnitude_bits == 14 else 3}\n"
+    header += f"#define RMS_THREADS {RMS_THREADS}\n#define SILU_THREADS {SILU_THREADS}\n"
+    nvrtc = owner._nvrtc
+    program = sc._check(
+        nvrtc.nvrtcCreateProgram((header + sc._OPS_SOURCE + _FUSED_SOURCE).encode(), b"fused.cu", 0, [], [])
+    )
+    try:
+        options = [f"--gpu-architecture={arch}".encode(), *(o.encode() for o in sc.NVRTC_OPTIONS)]
+        assert int(nvrtc.nvrtcCompileProgram(program, len(options), options)[0]) == 0
+        ptx = b" " * sc._check(nvrtc.nvrtcGetPTXSize(program))
+        sc._check(nvrtc.nvrtcGetPTX(program, ptx))
+        cubin = b" " * sc._check(nvrtc.nvrtcGetCUBINSize(program))
+        sc._check(nvrtc.nvrtcGetCUBIN(program, cubin))
+    finally:
+        nvrtc.nvrtcDestroyProgram(program)
+    assert sc.audit_ptx(ptx.rstrip(b"\0").decode(), sc.OPS_PTX_EXACT)["violations"] == []
+    with tempfile.TemporaryDirectory() as directory:
+        path = Path(directory) / "fused.cubin"
+        path.write_bytes(cubin)
+        text = subprocess.run([owner._nvdisasm, str(path)], capture_output=True, text=True, check=True).stdout
+    assert "strict_rms_quant" in text and "strict_silu_quant" in text
+    assert sc.audit_sass(text, sc.OPS_SASS_EXACT)["violations"] == []
+    del context
+
+
+@gpu
 @pytest.mark.parametrize("counts", [(896, 128, 128), (64, 1, 65), (130, 7), (4864, 4864)])
 @pytest.mark.parametrize("bias", [False, True])
 def test_grouped_decode_launch_matches_separate_tile_projections(counts, bias, monkeypatch):
