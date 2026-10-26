@@ -23,6 +23,9 @@ INTEGER_CUDA_VERSION = "row_scaled_integer_mma_cuda_v1_experimental"
 # kernel; "tile" keeps the per-warp tile kernel. Both compute the same exact integer dot and final encoding.
 MMA_SCHEDULES = ("auto", "tile", "stream")
 STREAM_COLUMNS = 64  # prefill: 16 columns per warp amortize the weight conversion over many row tiles
+# Prefill (64 columns) is MMA-bound: two stages and a 168-register bound fit three CTAs per SM (measured,
+# SM120: 896x9728 at 888 rows 546 -> 496 us). Decode (32 columns) keeps three stages to hide DRAM latency.
+PREFILL_STAGES, PREFILL_MIN_BLOCKS = 2, 3
 DECODE_STREAM_COLUMNS = 32  # decode: 8 columns per warp, twice the CTAs and fewer registers (measured, SM120)
 RMS_THREADS, SILU_THREADS = 256, 1024  # RMS rows up to 32 * RMS_THREADS = MAX_NORM_WIDTH
 
@@ -63,6 +66,47 @@ def static_identity(magnitude_bits=14, max_partial_bytes=16 * 1024**2, *, weight
         "hardwareQualified": False,
     }
 
+
+# integer_weights for every live matrix of a request in one launch: one warp per row and 16-byte loads. The
+# maximum magnitude, exponent and nonfinite flag of each row are those of integer_weights (order-independent).
+_WEIGHTS_BATCHED_SOURCE = r"""
+typedef unsigned short u16;
+// table: [matrices + 1] first CTA of each matrix, then per matrix (weight, exponents, rows, width).
+extern "C" __global__ void __launch_bounds__(256) integer_weights_batched(const long long* table, int* error,
+                                                                           int matrices) {
+  const long long block = blockIdx.x;
+  int lo = 0, hi = matrices - 1;
+  while (lo < hi) {
+    const int mid = (lo + hi + 1) >> 1;
+    if (table[mid] <= block) lo = mid; else hi = mid - 1;
+  }
+  const long long* meta = table + matrices + 1 + 4 * lo;
+  const int rows = (int)meta[2], width = (int)meta[3], lane = threadIdx.x & 31;
+  const int row = (int)(block - table[lo]) * 8 + (threadIdx.x >> 5);
+  if (row >= rows) return;
+  const uint4* source = reinterpret_cast<const uint4*>(reinterpret_cast<const u16*>(meta[0]) + (size_t)row * width);
+  unsigned maximum = 0, bad = 0;
+  for (int c = lane; c < (width >> 3); c += 32) {
+    const uint4 v = source[c];
+    const unsigned words[4] = {v.x, v.y, v.z, v.w};
+#pragma unroll
+    for (int i = 0; i < 8; ++i) {
+      unsigned a = (words[i >> 1] >> (16 * (i & 1))) & 0x7fffu;
+      if (a >= 0x7c00u) {bad = 1; a = 0;}
+      maximum = a > maximum ? a : maximum;
+    }
+  }
+#pragma unroll
+  for (int m = 16; m; m >>= 1) {
+    const unsigned other = __shfl_xor_sync(0xffffffffu, maximum, m);
+    maximum = other > maximum ? other : maximum;
+  }
+  const unsigned e = maximum >> 10;
+  const int exponent = !maximum ? 0 : e ? (int)e - 15 : 31 - __clz(maximum) - 24;
+  if (lane == 0) reinterpret_cast<int*>(meta[1])[row] = exponent;
+  if (bad) atomicOr(error, 1);
+}
+"""
 
 # Shared by the projection module and the fused strict-op module (which has its own float helpers).
 _QUANT_FLOAT = r"""__device__ __forceinline__ unsigned rne_shift(unsigned value, int shift) {
@@ -590,7 +634,11 @@ __device__ __forceinline__ void stream_body(const qi_t* x,const u16* w,const u16
   }
 }
 
+#if STREAM_MIN_BLOCKS > 1
+extern "C" __global__ void __launch_bounds__(128, STREAM_MIN_BLOCKS)
+#else
 extern "C" __global__ void __launch_bounds__(128)
+#endif
 integer_stream(const qi_t* x,const u16* w,const u16* bias,const int* ex,const int* ew,
                float* out,int* error,i64* partials,int rows,int outputs) {
   stream_body(x,w,bias,ex,ew,out,error,partials,rows,outputs,blockIdx.x*NT,outputs,0);
@@ -959,6 +1007,26 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
             integers=(weight.shape[0],),
         )
 
+    def _refresh_exponents_batched(self, entries, flag):
+        """integer_weights of every (weight, exponents) pair in one launch; the table is call-local."""
+        if "weights-batched" not in self._functions:
+            self._functions["weights-batched"] = self._compile(
+                "weights-batched", _WEIGHTS_BATCHED_SOURCE, ["integer_weights_batched"]
+            )["integer_weights_batched"]
+        offsets, meta, blocks = [], [], 0
+        for weight, exponents in entries:
+            offsets.append(blocks)
+            blocks += -(-weight.shape[0] // 8)
+            meta += [weight.data_ptr(), exponents.data_ptr(), weight.shape[0], weight.shape[1]]
+        table = torch.tensor(offsets + [blocks] + meta, dtype=torch.int64, device=self.device)
+        self._launch(
+            self._functions["weights-batched"],
+            grid=blocks,
+            block=(256, 1),
+            pointers=(table, flag),
+            integers=(len(entries),),
+        )
+
     @torch.inference_mode()
     def _begin_request(self, weights):
         if self._request_active:
@@ -984,16 +1052,22 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
             retained[key] = previous
         self._weight_metadata = retained
         flag = self.new_error_flag()
-        for key, (target, _, exponents) in retained.items():
-            self._refresh_weight_exponents(target(), exponents, flag)
+        entries = [(target(), exponents) for target, _, exponents in retained.values()]
+        batched = [(w, e) for w, e in entries if w.shape[1] % 8 == 0 and w.data_ptr() % 16 == 0]
+        if batched:
+            self._refresh_exponents_batched(batched, flag)
+        for weight, exponents in entries:
+            if not (weight.shape[1] % 8 == 0 and weight.data_ptr() % 16 == 0):
+                self._refresh_weight_exponents(weight, exponents, flag)
         self.raise_if_error(flag)  # a bad scale may never be hidden by resetting a later decode flag
         self._request_active = True
 
     @torch.inference_mode()
     def _end_request(self):
         self._request_active = False
-        for tensor in self.weight_metadata_buffers():
-            tensor.zero_()
+        buffers = list(self.weight_metadata_buffers())
+        if buffers:
+            torch._foreach_zero_(buffers)
 
     def _weight_exponents(self, weight, flag):
         if self._request_active:
@@ -1054,6 +1128,7 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
                 WEIGHT_PREFETCH=int(prefetch),
                 FAST_CONVERT=int(self.magnitude_bits == 22),
                 JN=columns // 32,
+                **({"STAGES": PREFILL_STAGES, "STREAM_MIN_BLOCKS": PREFILL_MIN_BLOCKS} if columns == STREAM_COLUMNS else {}),
             )
             header = "".join(f"#define {k} {v}\n" for k, v in defines.items())
             self._functions[name] = self._compile(

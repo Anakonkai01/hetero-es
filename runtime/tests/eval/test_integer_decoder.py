@@ -94,14 +94,20 @@ def test_metadata_refreshes_once_per_request_and_is_cleared_under_generation_loc
     backend = graph(model, max_context=32, allow_fixture=True)
     kernels = backend.kernels
     calls = []
-    refresh = kernels._refresh_weight_exponents
+    refresh, batched = kernels._refresh_weight_exponents, kernels._refresh_exponents_batched
 
     def counted(weight, exponents, flag):
         assert backend._call_lock.locked()
         calls.append(weight.data_ptr())
         return refresh(weight, exponents, flag)
 
+    def counted_batch(entries, flag):
+        assert backend._call_lock.locked()
+        calls.extend(weight.data_ptr() for weight, _ in entries)
+        return batched(entries, flag)
+
     monkeypatch.setattr(kernels, "_refresh_weight_exponents", counted)
+    monkeypatch.setattr(kernels, "_refresh_exponents_batched", counted_batch)
     ids = torch.tensor([[3, 5, 7], [11, 13, 17]], device="cuda")
     weight = model.model.layers[0].mlp.down_proj.weight
     saved = weight.detach().clone()
