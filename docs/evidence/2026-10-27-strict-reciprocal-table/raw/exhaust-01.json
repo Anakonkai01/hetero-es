@@ -1,0 +1,810 @@
+{
+  "status": "ok",
+  "tableBytes": 33554432,
+  "tableSha256": "c30d9363d614f4ac77143bc2e5e5f63c5ee14056e3b7d4eafd96e2c62ef4253a",
+  "positiveFp32PatternsTested": 1671934059,
+  "exponents": [
+    {
+      "exponentField": 27,
+      "bitPatterns": 6143392
+    },
+    {
+      "exponentField": 28,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 29,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 30,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 31,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 32,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 33,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 34,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 35,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 36,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 37,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 38,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 39,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 40,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 41,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 42,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 43,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 44,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 45,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 46,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 47,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 48,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 49,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 50,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 51,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 52,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 53,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 54,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 55,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 56,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 57,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 58,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 59,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 60,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 61,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 62,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 63,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 64,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 65,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 66,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 67,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 68,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 69,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 70,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 71,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 72,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 73,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 74,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 75,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 76,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 77,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 78,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 79,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 80,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 81,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 82,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 83,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 84,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 85,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 86,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 87,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 88,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 89,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 90,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 91,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 92,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 93,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 94,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 95,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 96,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 97,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 98,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 99,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 100,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 101,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 102,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 103,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 104,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 105,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 106,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 107,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 108,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 109,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 110,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 111,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 112,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 113,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 114,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 115,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 116,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 117,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 118,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 119,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 120,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 121,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 122,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 123,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 124,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 125,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 126,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 127,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 128,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 129,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 130,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 131,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 132,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 133,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 134,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 135,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 136,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 137,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 138,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 139,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 140,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 141,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 142,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 143,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 144,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 145,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 146,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 147,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 148,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 149,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 150,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 151,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 152,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 153,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 154,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 155,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 156,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 157,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 158,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 159,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 160,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 161,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 162,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 163,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 164,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 165,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 166,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 167,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 168,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 169,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 170,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 171,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 172,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 173,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 174,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 175,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 176,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 177,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 178,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 179,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 180,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 181,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 182,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 183,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 184,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 185,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 186,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 187,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 188,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 189,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 190,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 191,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 192,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 193,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 194,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 195,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 196,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 197,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 198,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 199,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 200,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 201,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 202,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 203,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 204,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 205,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 206,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 207,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 208,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 209,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 210,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 211,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 212,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 213,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 214,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 215,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 216,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 217,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 218,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 219,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 220,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 221,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 222,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 223,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 224,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 225,
+      "bitPatterns": 8388608
+    },
+    {
+      "exponentField": 226,
+      "bitPatterns": 4846283
+    }
+  ],
+  "wallSeconds": 12.76300292200176,
+  "limits": "CPU NumPy separate FP32 primitives, plus sampled independent Torch reference tests. No GPU speed or decoder/platform qualification."
+}

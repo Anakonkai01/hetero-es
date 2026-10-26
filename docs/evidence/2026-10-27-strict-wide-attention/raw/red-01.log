@@ -1,0 +1,16 @@
+
+==================================== ERRORS ====================================
+_ ERROR collecting docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py _
+ImportError while importing test module '/home/pc5070ti/projects/heteroes-codex-frozen-perf/docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../miniforge3/envs/heteroes-match/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:7: in <module>
+    from wide_attention import WideAttention
+E   ModuleNotFoundError: No module named 'wide_attention'
+=========================== short test summary info ============================
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+no tests collected, 1 error in 0.68s

@@ -1,0 +1,2 @@
+name, driver_version, temperature.gpu, clocks.current.sm [MHz], clocks.current.memory [MHz]
+NVIDIA GeForce RTX 5070 Ti, 595.91.07, 33, 180 MHz, 405 MHz

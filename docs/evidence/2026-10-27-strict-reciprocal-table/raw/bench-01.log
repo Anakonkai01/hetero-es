@@ -1,0 +1,9 @@
+32 4864 newton 2.784 us
+32 4864 nibble-table 4.968 us
+32 4864 full-table 4.852 us
+888 4864 newton 53.36 us
+888 4864 nibble-table 84.3 us
+888 4864 full-table 95.712 us
+32 2048 newton 1.816 us
+32 2048 nibble-table 3.424 us
+32 2048 full-table 2.86 us
