@@ -1,0 +1,34 @@
+{
+  "label": "base",
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "model": "tiny",
+  "modelFiles": {
+    "config.json": "486bedda3a6988332e60d9638a09ca4b260d34ebcf1b19e22cf3b140b63d8fe9",
+    "eval_results.json": "637daaebe7aa8af0e678f9e79ec33fa29f8635090d45ec813f0e7474320d7351",
+    "generation_config.json": "18046d04f5bd8b4998095ecabdd17a1bf0053d9acdccead4a05be4a3575f3c5c",
+    "model.safetensors": "6e6001da2106d4757498752a021df6c2bdc332c650aae4bae6b0c004dcf14933",
+    "special_tokens_map.json": "82d96d7a9e6ced037f12394b7ea6a5b02e6ca87e0d11edaa8d60d9be857ce7db",
+    "tokenizer.json": "bcd04f0eadf90287bd26e1a183ac487d8a141b09b06aecb7725bbdd343640f2e",
+    "tokenizer.model": "9e556afd44213b6bd1be2b850ebbbd98f5481437a8021afaf58ee7fb1818d347",
+    "tokenizer_config.json": "7b41ba7d0eb91e77914ca3dafde559ea3e19878769b7e68409e89bed5222e77a"
+  },
+  "sourceRoot": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/codex-prefill-20261026/stage-local-01/base/src/heteroes",
+  "fingerprint": "787edee1a1cc75f763257b83f53ba57f6346cc818d38a6d904309b19a387a2b3",
+  "integerCudaSha256": "26622cb7c361627f83b45ab56d4e623f24842be43e2289bdd11b28304b2a737b",
+  "decoderGraphSha256": "ae35be6539649b2e42511ad59c1a1e8bc7bbadb64db1a47fc1368e99e898b25c",
+  "cases": [
+    {
+      "case": "short32",
+      "outputTokens": 32,
+      "secondsSamples": [
+        0.2257237870071549,
+        0.22585781999805477,
+        0.22556281799916178,
+        0.22607879900897387,
+        0.2264751349866856
+      ],
+      "medianTokensPerSecond": 4533.825749353374,
+      "tokensSha256": "db262d7ab9fa09fb7ad5749d3a474a1fc8316089a958d10457dd2a908bb9610a"
+    }
+  ]
+}

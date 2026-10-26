@@ -1,0 +1,8 @@
+[
+  {
+    "name": "default bypasses prefill kernel",
+    "file": "src/heteroes/eval/strict_cuda.py",
+    "old": "_attention_entry = \"strict_attention_prefill\"",
+    "new": "_attention_entry = \"strict_attention_gqa\""
+  }
+]

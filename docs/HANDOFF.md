@@ -6,13 +6,15 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
 
 ## Tóm tắt cho chủ dự án (2026-10-26)
 
-- **Phiên Claude 26/10 tối đã chốt theo yêu cầu chủ dự án (sắp hết usage); bàn giao cho Codex.** Đọc
-  [handoff Codex mới](handoff-codex-after-claude-fused-2026-10-26.md) trước. Strict B22 (số học giữ nguyên
-  từng bit) Qwen batch 32 5070 Ti: `75f92c30` **4761** → `d4030b52` **7589** → `1c9a54b9` **8580** token/s
-  short32; vLLM đối chứng **13835**, mục tiêu chưa đạt. Bằng chứng:
-  [phép chiếu](evidence/2026-10-26-strict-projection-shapes/README.md) (niêm phong, 5070 Ti/3060 WSL2/Win11),
-  [finish gộp](evidence/2026-10-26-strict-fused-finish/README.md). Việc tiếp: attention prefill, phép chiếu
-  prefill, attention decode ngữ cảnh dài, wave của phép chiếu decode.
+- **Phiên Codex đã chốt theo yêu cầu chủ dự án để bàn giao Claude (26/10, khoảng 22:14).** Đọc
+  [bàn giao mới](handoff-claude-after-codex-prefill-2026-10-26.md). Runtime `2eb4da0d`, test `6cc69d26`:
+  attention prefill Qwen chat **25,3 → 12,3 ms**; Qwen batch 32 5070 Ti đo xen kẽ máy rảnh:
+  short32 **8746 → 8922** (+2,0%), chat128 **8866 → 9109** (+2,7%). Token/logits/weights parent/±/restore,
+  EOS của Qwen/Smol/Tiny khớp 5070 Ti/3060 WSL2 và bằng chứng B22 cũ. GPU: 5070 Ti **458**, WSL2 **1002**;
+  mutation đã đóng hết 11 lỗi; check-all **ALL PASS** (CPU runtime **3237**, backend **452**), gói Worker
+  khớp đủ **142** file runtime. [Bằng chứng](evidence/2026-10-26-strict-prefill-attention/README.md).
+  **Windows trực tiếp đang chạy, chưa nghiệm thu**; PID/console/cách lấy kết quả ở bàn giao, không chạy lặp.
+  Mục tiêu gần vLLM **chưa đạt** (short32 khoảng **64,5%** đối chứng 13835). Chưa push/merge/deploy.
 - **Chỉ đạo mới nhất: hoàn tất khảo sát vLLM, ghi lại, rồi tiếp tục tối ưu strict kernel riêng để gần ngang
   vLLM; đạt mục tiêu hiệu năng thì làm tiếp đầy đủ M0–M6.** Không dùng tốc độ của wrapper vLLM để đóng
   mục tiêu kernel. D2/D3 (cùng candidate/input, cùng token/reward trên GPU khác nhau) vẫn giữ.
@@ -98,7 +100,7 @@ Deployment remains `82c37fc`. Service status re-read on 2026-10-26: all three la
 | Lab            | `lab.heteroes.site`, deployed clone `~/.local/share/heteroes-lab/app` at `82c37fc`; operations: [local-lab-operations.md](local-lab-operations.md)                                                                                                         |
 | Devices        | Standalone probes: local 5070 Ti Linux and Thao 3060 WSL2/native Win11. Live approval/contribution was not changed; follow AGENTS.md. Native source/fixtures and finite trained Qwen candidates pass; installer/throughput/managed acceptance remains open |
 | Default engine | engine v2 noise made on the GPU (same bits as CPU; `HETEROES_NOISE_DEVICE=cpu` forces CPU)                                                                                                                                                                 |
-| Code           | Owned performance branch `work/codex-frozen-perf-2026-10-25`; strict B22 + GQA attention + streamed/fused projections (`1c9a54b9`, 26/10), experimental live FP16/vLLM views `c9a37059`. No push/merge/deployment |
+| Code           | Owned performance branch `work/codex-frozen-perf-2026-10-25`; strict B22 + GQA attention + streamed/fused projections (`1c9a54b9`, 26/10), experimental live FP16/vLLM views `c9a37059`. No push/merge/deployment                                          |
 | Disk (nhan)    | `/` 90 % used; Archive (NTFS/FUSE, also personal data) **full**, holds lab recovery storage and moved run data                                                                                                                                             |
 
 ## Open work, in order

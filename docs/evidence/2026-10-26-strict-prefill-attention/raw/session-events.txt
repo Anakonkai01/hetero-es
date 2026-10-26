@@ -1,0 +1,8 @@
+2026-10-26 Asia/Ho_Chi_Minh
+Initial sandbox preflight could not access NVIDIA devices or local sockets. Owner enabled full permissions.
+Owner explicitly authorized SSH to 3060-thao for WSL2 and native Windows.
+First WSL stage at /tmp/heteroes-codex-prefill-20261026-01 was interrupted by the host going offline/rebooting; /tmp was lost. No completed acceptance was claimed from it.
+Fresh stage -02: first pytest import failed because isolated testdeps omitted the pure-Python py.py shim. The failure log is retained. Added a separate /tmp/heteroes-codex-prefill-pytest-shim-02 and confirmed pytest --version.
+The stage driver completed all trained parity and ABAB measurements, then the isolated full GPU suite was rerun successfully: 1002 passed, exit 0.
+Native Windows was queued after that exit code and is currently running. Its live console was moved outside evidence before sealing; see the handoff for process IDs and collection paths.
+Owner requested session closure/handoff to Claude at about 22:14. No further experiments started after that request.
