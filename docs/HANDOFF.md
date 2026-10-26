@@ -6,8 +6,10 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
 
 ## Tóm tắt cho chủ dự án (2026-10-26)
 
-- **Phiên Codex đã chốt theo yêu cầu chủ dự án; auto-run tạm dừng, bàn giao Claude.**
-  Đọc [handoff Claude](handoff-claude-performance-after-codex-2026-10-26.md) trước khi làm tiếp.
+- **Phiên Claude 26/10 đã chốt (14:12) theo yêu cầu chủ dự án; không còn job chạy, cây sạch.** Phiên sau
+  đọc [handoff mới](handoff-next-after-claude-attention-2026-10-26.md) trước, rồi
+  [handoff Codex trước đó](handoff-claude-performance-after-codex-2026-10-26.md) cho ràng buộc và môi trường.
+  Việc tiếp theo: phép chiếu B22 (65% thời gian Qwen chat128).
 - **Chỉ đạo mới nhất: hoàn tất khảo sát vLLM, ghi lại, rồi tiếp tục tối ưu strict kernel riêng để gần ngang
   vLLM; đạt mục tiêu hiệu năng thì làm tiếp đầy đủ M0–M6.** Không dùng tốc độ của wrapper vLLM để đóng
   mục tiêu kernel. D2/D3 (cùng candidate/input, cùng token/reward trên GPU khác nhau) vẫn giữ.
