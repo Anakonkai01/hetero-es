@@ -85,7 +85,9 @@ class _DecodeSession:
 
     @torch.inference_mode()
     def clear(self):
-        for tensor in chain(self.caches, (self.seen, self.tokens, self.lengths, self.flag)):
+        if self.caches:
+            torch._foreach_zero_(list(self.caches))
+        for tensor in (self.seen, self.tokens, self.lengths, self.flag):
             tensor.zero_()
 
     def drop_capture(self):
@@ -215,6 +217,7 @@ class StrictDecoderGraph(StrictDecoderPacked):
         super().__init__(model, max_context=max_context, allow_fixture=allow_fixture, frozen_int8=frozen_int8)
         self.max_graph_bytes = max_graph_bytes
         self._session, self._call_lock = None, threading.Lock()
+        self._inverse_cache = None
         self.identity = {
             **self.identity,
             "backend": GRAPH_BACKEND,
@@ -323,6 +326,13 @@ class StrictDecoderGraph(StrictDecoderPacked):
     def _generation_decode_ready(self, capacity, penalty):
         """Optional decode-only request preparation after admission and before prefill/capture."""
 
+    def _inverse_for(self, penalty):
+        key = struct.pack("<f", penalty)
+        if self._inverse_cache is None or self._inverse_cache[0] != key:
+            inverse = float(ops.reciprocal(torch.tensor(penalty, dtype=torch.float32, device=self.device)).item())
+            self._inverse_cache = (key, inverse)
+        return self._inverse_cache[1]
+
     def _decode_output(self, hidden, epsilon, state):
         logits = self._decode_norm_project(
             hidden, self.model.model.norm.weight, epsilon, self.model.lm_head, state.flag
@@ -407,7 +417,7 @@ class StrictDecoderGraph(StrictDecoderPacked):
             state.lengths.copy_(torch.tensor(lengths, dtype=torch.int32, device=self.device))
             for owner, row in enumerate(histories):
                 state.seen[owner, row[0]] = 1
-            inverse = float(ops.reciprocal(torch.tensor(penalty, dtype=torch.float32, device=self.device)).item())
+            inverse = self._inverse_for(penalty)
             active = list(range(capacity))
             state.select(active, penalty, inverse)
             # The prefill status is checked once the cache copy and first selection are queued behind it.
@@ -467,9 +477,10 @@ class StrictDecoderGraph(StrictDecoderPacked):
                 pending = state.launch() if step + 2 < max_new_tokens else None
                 chosen, status = state.wait(current)
                 state.check(status)
-            completion = torch.full((capacity, max(map(len, outputs))), pad, dtype=torch.long, device=self.device)
-            for i, row in enumerate(outputs):
-                completion[i, : len(row)] = torch.tensor(row, dtype=torch.long, device=self.device)
+            width = max(map(len, outputs))
+            completion = torch.tensor(
+                [row + [pad] * (width - len(row)) for row in outputs], dtype=torch.long, device=self.device
+            )
             return torch.cat((input_ids, completion), dim=1)
         except BaseException:
             self._release_graph()
