@@ -8,6 +8,8 @@ import torch
 
 from heteroes.eval import strict_cuda as sc
 
+GREEDY_CHUNK = 8192  # columns per CTA of the split greedy selection (matches the kernel source)
+
 _SOURCE = (
     sc._OPS_SOURCE.split("// Binary-counter reduction")[0]
     + r"""
@@ -84,6 +86,62 @@ extern "C" __global__ void decode_greedy(const float* scores, unsigned char* see
   if(bad) atomicOr(error,(int)bad);
 }
 
+// decode_greedy split over GREEDY_CHUNK-column chunks: the selection (largest score, smallest index on a tie;
+// NaN never selected) is order-independent, so per-chunk winners combined in any order give the same token.
+#define GREEDY_CHUNK 8192
+extern "C" __global__ void decode_greedy_chunks(const float* scores, const unsigned char* seen, const long long* owners,
+                                                float* best_scores, int* best_indices, int* error, int vocab,
+                                                int apply_penalty, float penalty, float inverse) {
+  const int chunk = blockIdx.x, i = blockIdx.y, t = threadIdx.x, chunks = gridDim.x;
+  const size_t owner = (size_t)owners[i];
+  const int end = vocab - chunk * GREEDY_CHUNK < GREEDY_CHUNK ? vocab : (chunk + 1) * GREEDY_CHUNK;
+  unsigned bad = 0;
+  float best = -FLT_BIG;
+  int index = vocab;
+  for (int j = chunk * GREEDY_CHUNK + t; j < end; j += 256) {
+    float s = load(scores + (size_t)i * vocab + j, bad);
+    if (apply_penalty && seen[owner * vocab + j]) s = mul_(s, s < 0.0f ? penalty : inverse, bad);
+    if (s > best || (s == best && j < index)) {best = s; index = j;}
+  }
+  for (int offset = 16; offset >= 1; offset >>= 1) {
+    float other = __shfl_xor_sync(0xffffffffu, best, offset);
+    int id = __shfl_xor_sync(0xffffffffu, index, offset);
+    if (other > best || (other == best && id < index)) {best = other; index = id;}
+  }
+  __shared__ float maxima[8];
+  __shared__ int indices[8];
+  if ((t & 31) == 0) {maxima[t >> 5] = best; indices[t >> 5] = index;}
+  __syncthreads();
+  if (t == 0) {
+    for (int w = 0; w < 8; ++w) {
+      float other = maxima[w]; int id = indices[w];
+      if (other > best || (other == best && id < index)) {best = other; index = id;}
+    }
+    best_scores[i * chunks + chunk] = best;
+    best_indices[i * chunks + chunk] = index;
+  }
+  if (bad) atomicOr(error, (int)bad);
+}
+
+extern "C" __global__ void decode_greedy_select(const float* best_scores, const int* best_indices, unsigned char* seen,
+                                                const long long* owners, long long* tokens, long long* result,
+                                                int* error, int vocab, int chunks) {
+  const int i = blockIdx.x;
+  if (threadIdx.x) return;
+  const size_t owner = (size_t)owners[i];
+  float best = -FLT_BIG;
+  int index = vocab;
+  for (int c = 0; c < chunks; ++c) {
+    float other = best_scores[i * chunks + c]; int id = best_indices[i * chunks + c];
+    if (other > best || (other == best && id < index)) {best = other; index = id;}
+  }
+  // As decode_greedy: report a row without a selectable score, keep the writes bounded.
+  if (index >= vocab) {atomicOr(error, 1); index = 0;}
+  tokens[owner] = index;
+  seen[owner * vocab + index] = 1;
+  result[i] = index;
+}
+
 // Kernel ordering is the global barrier between arithmetic/selection flags and host publication.
 extern "C" __global__ void decode_publish(const long long* owners, int* lengths, const int* error,
                                           long long* result, int active, int advance) {
@@ -102,7 +160,15 @@ class DecodeKernels:
         self.functions = kernels._compile(
             "decode-graph-ops",
             header + _SOURCE,
-            ["decode_layout", "decode_store", "decode_prefix", "decode_greedy", "decode_publish"],
+            [
+                "decode_layout",
+                "decode_store",
+                "decode_prefix",
+                "decode_greedy",
+                "decode_greedy_chunks",
+                "decode_greedy_select",
+                "decode_publish",
+            ],
             ptx_exact=sc.OPS_PTX_EXACT,
             sass_exact=sc.OPS_SASS_EXACT,
         )
@@ -138,13 +204,35 @@ class DecodeKernels:
         )
 
     def greedy(self, scores, seen, owners, tokens, result, flag, penalty, inverse):
+        active, vocab = owners.numel(), scores.shape[1]
+        chunks = -(-vocab // GREEDY_CHUNK)
+        if chunks == 1:
+            self.kernels._launch(
+                self.functions["decode_greedy"],
+                grid=active,
+                block=(256, 1),
+                pointers=(scores, seen, owners, tokens, result, flag),
+                integers=(active, vocab, int(penalty != 1.0)),
+                floats=(penalty, inverse),
+            )
+            return
+        # Wide vocabularies: one CTA per row and chunk, then an in-order combination of the chunk winners.
+        best = torch.empty((active, chunks), dtype=torch.float32, device=scores.device)
+        indices = torch.empty((active, chunks), dtype=torch.int32, device=scores.device)
         self.kernels._launch(
-            self.functions["decode_greedy"],
-            grid=owners.numel(),
+            self.functions["decode_greedy_chunks"],
+            grid=(chunks, active),
             block=(256, 1),
-            pointers=(scores, seen, owners, tokens, result, flag),
-            integers=(owners.numel(), scores.shape[1], int(penalty != 1.0)),
+            pointers=(scores, seen, owners, best, indices, flag),
+            integers=(vocab, int(penalty != 1.0)),
             floats=(penalty, inverse),
+        )
+        self.kernels._launch(
+            self.functions["decode_greedy_select"],
+            grid=active,
+            block=(32, 1),
+            pointers=(best, indices, seen, owners, tokens, result, flag),
+            integers=(vocab, chunks),
         )
 
     def publish(self, owners, lengths, flag, result, *, advance):

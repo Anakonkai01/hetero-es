@@ -16,6 +16,7 @@ gpu = pytest.mark.skipif(
 def decode_kernels():
     from heteroes.eval.strict_decode_cuda import DecodeKernels
 
+    torch.zeros(1, device="cuda")  # a current CUDA context: the file must also pass when run alone
     kernels = StrictCudaKernels("cuda")
     return kernels, DecodeKernels(kernels)
 
@@ -99,3 +100,41 @@ def test_greedy_ties_penalty_and_publication_use_original_owner_and_canonical_op
     flag.fill_(2)
     decode.publish(owners, lengths, flag, result, advance=True)
     assert result[-1].item() == 2 and lengths.tolist() == [4, 5, 8]
+
+
+@gpu
+@pytest.mark.parametrize("vocab", [8193, 20000, 151936])
+@pytest.mark.parametrize("penalty", [1.0, 1.3])
+def test_split_greedy_over_wide_vocabularies_equals_the_single_cta_selection(vocab, penalty):
+    from heteroes.eval import strict_decode_cuda
+
+    kernels, decode = decode_kernels()
+    gen = torch.Generator(device="cuda").manual_seed(vocab)
+    rows = 6
+    owners = torch.tensor([5, 0, 3, 1, 4, 2], device="cuda")
+    scores = torch.randn(rows, vocab, device="cuda", generator=gen)
+    scores[0, [7, 8191, 8192, vocab - 1]] = 9.0  # ties across chunk boundaries: smallest index wins
+    scores[1] = -0.0
+    scores[1, vocab - 2] = 0.0  # +0 and -0 tie
+    scores[2, 100] = float("nan")
+    scores[2, vocab - 1] = 1e30
+    scores[3] = float("-inf")  # no selectable score
+    scores[4, 12345 % vocab] = float("inf")
+    seen = (torch.rand(rows, vocab, device="cuda", generator=gen) < 0.3).to(torch.uint8)
+    inverse = float(ops.reciprocal(torch.tensor(penalty)).item())
+    outputs = []
+    for split in (True, False):
+        if not split:
+            decode_chunk = strict_decode_cuda.GREEDY_CHUNK
+            strict_decode_cuda.GREEDY_CHUNK = 1 << 30  # forces the single-CTA kernel
+        try:
+            tokens = torch.full((rows,), -1, dtype=torch.long, device="cuda")
+            result = torch.empty(rows + 1, dtype=torch.long, device="cuda")
+            local_seen, flag = seen.clone(), kernels.new_error_flag()
+            decode.greedy(scores, local_seen, owners, tokens, result, flag, penalty, inverse)
+            outputs.append((tokens.cpu(), result[:rows].cpu(), local_seen.cpu(), int(flag.item())))
+        finally:
+            if not split:
+                strict_decode_cuda.GREEDY_CHUNK = decode_chunk
+    assert torch.equal(outputs[0][0], outputs[1][0]) and torch.equal(outputs[0][1], outputs[1][1])
+    assert torch.equal(outputs[0][2], outputs[1][2]) and outputs[0][3] == outputs[1][3] != 0
