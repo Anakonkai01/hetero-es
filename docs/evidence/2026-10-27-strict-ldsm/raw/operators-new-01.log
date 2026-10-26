@@ -1,0 +1,6 @@
+SMs 70
+[0.00 TOP] 896x1152 (2.1 MB, DRAM floor 2.4 us) plan split 8 regs 124 smem 30720 ctas/SM 3 | s1: cold    6.4 warm    8.4 | s2: cold    4.6 warm    6.9 | s4: cold    3.9 warm    6.5 | s8: cold    4.5 warm    7.3
+[0.00 TOP] 896x896 (1.6 MB, DRAM floor 1.9 us) plan split 8 regs 124 smem 30720 ctas/SM 3 | s1: cold    7.4 warm    8.6 | s2: cold    4.1 warm    5.7 | s4: cold    3.7 warm    5.5 | s8: cold    4.6 warm    5.6
+[0.01 TOP] 896x9728 (17.4 MB, DRAM floor 20.6 us) plan split 2 regs 124 smem 30720 ctas/SM 3 | s1: cold   25.4 warm   24.5 | s2: cold   29.4 warm   24.3 | s4: cold   36.6 warm   27.4
+[0.00 TOP] 4864x896 (8.7 MB, DRAM floor 10.3 us) plan split 8 regs 124 smem 30720 ctas/SM 3 | s1: cold   26.3 warm   34.7 | s2: cold   17.7 warm   19.2 | s4: cold   13.6 warm   14.1 | s8: cold   14.6 warm   14.0
+[0.08 TOP] 896x151936 (272.3 MB, DRAM floor 322.2 us) plan split 1 regs 114 smem 30720 ctas/SM 3 | s1: cold  364.7 warm  352.7

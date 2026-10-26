@@ -1,0 +1,108 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+_______________ test_projection_and_live_weight_refresh[896-96] ________________
+
+width = 896, outputs = 96
+
+    @pytest.mark.parametrize('width,outputs',[(64,37),(896,96),(4864,64)])
+    def test_projection_and_live_weight_refresh(width,outputs):
+        k=IntegerCudaKernels('cuda',magnitude_bits=22)
+        g=torch.Generator(device='cuda').manual_seed(851)
+        x=torch.randn(65,width,device='cuda',generator=g)
+        w=(torch.randn(outputs,width,device='cuda',generator=g)*.03).half()
+>       p=PackedPrefill(k,width,columns=32)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-prefill-prepack/harness/test_prepack.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-prefill-prepack/harness/prepack.py:57: in __init__
+    self.functions=kernels._compile(f'bounded-prefill-pack-v1-k{width}-n{columns}',source(width,columns),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <heteroes.eval.integer_cuda.IntegerCudaKernels object at 0x7b8208da0890>
+name = 'bounded-prefill-pack-v1-k896-n32'
+source = '#define WIDTH 896\n#define MAGNITUDE_BITS 22\n#define DIGITS 3\n#define HAS_BIAS 0\n#define M_GROUPS 2\n#define WARPS...,h.x,h.y,scale);\n    #pragma unroll\n    for(int i=0;i<DIGITS;++i)out[((size_t)i*rows+r)*(WIDTH/4)+c]=d[i];\n  }\n}\n'
+entries = ['pack_prefill', 'integer_stream'], ptx_exact = (), sass_exact = ()
+integer_mma = True
+
+    def _compile(self, name, source, entries, *, ptx_exact=(), sass_exact=(), integer_mma=False):
+        nvrtc = self._nvrtc
+        program = _check(nvrtc.nvrtcCreateProgram(source.encode(), f"{name}.cu".encode(), 0, [], []))
+        options = [f"--gpu-architecture={self.arch}".encode(), *(o.encode() for o in NVRTC_OPTIONS)]
+        try:
+            status = nvrtc.nvrtcCompileProgram(program, len(options), options)[0]
+            if int(status) != 0:
+                size = _check(nvrtc.nvrtcGetProgramLogSize(program))
+                log = b" " * size
+                nvrtc.nvrtcGetProgramLog(program, log)
+                raise ReferenceArithmeticError(f"Strict kernel compilation failed: {log.decode(errors='replace')}")
+            ptx = b" " * _check(nvrtc.nvrtcGetPTXSize(program))
+            _check(nvrtc.nvrtcGetPTX(program, ptx))
+            cubin = b" " * _check(nvrtc.nvrtcGetCUBINSize(program))
+            _check(nvrtc.nvrtcGetCUBIN(program, cubin))
+        finally:
+            nvrtc.nvrtcDestroyProgram(program)
+        ptx_text = ptx.rstrip(b"\0").decode()
+        ptx_audit = audit_integer_ptx(ptx_text) if integer_mma else audit_ptx(ptx_text, ptx_exact)
+        sass_audit = self._audit_cubin(cubin, sass_exact, integer_mma=integer_mma)
+        violations = ptx_audit["violations"] + ([] if sass_audit == "unavailable" else sass_audit["violations"])
+        if violations:
+>           raise ReferenceArithmeticError(f"Compiled strict kernel failed its instruction audit: {violations[:5]}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: Compiled strict kernel failed its instruction audit: ['I2F.U32.RP R10, R7 ;', 'MUFU.RCP R10, R10 ;', 'F2I.FTZ.U32.TRUNC.NTZ R3, R2 ;']
+
+runtime/src/heteroes/eval/strict_cuda.py:1192: ReferenceArithmeticError
+_______________ test_projection_and_live_weight_refresh[4864-64] _______________
+
+width = 4864, outputs = 64
+
+    @pytest.mark.parametrize('width,outputs',[(64,37),(896,96),(4864,64)])
+    def test_projection_and_live_weight_refresh(width,outputs):
+        k=IntegerCudaKernels('cuda',magnitude_bits=22)
+        g=torch.Generator(device='cuda').manual_seed(851)
+        x=torch.randn(65,width,device='cuda',generator=g)
+        w=(torch.randn(outputs,width,device='cuda',generator=g)*.03).half()
+>       p=PackedPrefill(k,width,columns=32)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-prefill-prepack/harness/test_prepack.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-prefill-prepack/harness/prepack.py:57: in __init__
+    self.functions=kernels._compile(f'bounded-prefill-pack-v1-k{width}-n{columns}',source(width,columns),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <heteroes.eval.integer_cuda.IntegerCudaKernels object at 0x7b82047f9dc0>
+name = 'bounded-prefill-pack-v1-k4864-n32'
+source = '#define WIDTH 4864\n#define MAGNITUDE_BITS 22\n#define DIGITS 3\n#define HAS_BIAS 0\n#define M_GROUPS 2\n#define WARP...,h.x,h.y,scale);\n    #pragma unroll\n    for(int i=0;i<DIGITS;++i)out[((size_t)i*rows+r)*(WIDTH/4)+c]=d[i];\n  }\n}\n'
+entries = ['pack_prefill', 'integer_stream'], ptx_exact = (), sass_exact = ()
+integer_mma = True
+
+    def _compile(self, name, source, entries, *, ptx_exact=(), sass_exact=(), integer_mma=False):
+        nvrtc = self._nvrtc
+        program = _check(nvrtc.nvrtcCreateProgram(source.encode(), f"{name}.cu".encode(), 0, [], []))
+        options = [f"--gpu-architecture={self.arch}".encode(), *(o.encode() for o in NVRTC_OPTIONS)]
+        try:
+            status = nvrtc.nvrtcCompileProgram(program, len(options), options)[0]
+            if int(status) != 0:
+                size = _check(nvrtc.nvrtcGetProgramLogSize(program))
+                log = b" " * size
+                nvrtc.nvrtcGetProgramLog(program, log)
+                raise ReferenceArithmeticError(f"Strict kernel compilation failed: {log.decode(errors='replace')}")
+            ptx = b" " * _check(nvrtc.nvrtcGetPTXSize(program))
+            _check(nvrtc.nvrtcGetPTX(program, ptx))
+            cubin = b" " * _check(nvrtc.nvrtcGetCUBINSize(program))
+            _check(nvrtc.nvrtcGetCUBIN(program, cubin))
+        finally:
+            nvrtc.nvrtcDestroyProgram(program)
+        ptx_text = ptx.rstrip(b"\0").decode()
+        ptx_audit = audit_integer_ptx(ptx_text) if integer_mma else audit_ptx(ptx_text, ptx_exact)
+        sass_audit = self._audit_cubin(cubin, sass_exact, integer_mma=integer_mma)
+        violations = ptx_audit["violations"] + ([] if sass_audit == "unavailable" else sass_audit["violations"])
+        if violations:
+>           raise ReferenceArithmeticError(f"Compiled strict kernel failed its instruction audit: {violations[:5]}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: Compiled strict kernel failed its instruction audit: ['I2F.U32.RP R11, R7 ;', 'MUFU.RCP R11, R11 ;', 'F2I.FTZ.U32.TRUNC.NTZ R5, R4 ;']
+
+runtime/src/heteroes/eval/strict_cuda.py:1192: ReferenceArithmeticError
+=========================== short test summary info ============================
+FAILED docs/evidence/2026-10-27-strict-prefill-prepack/harness/test_prepack.py::test_projection_and_live_weight_refresh[896-96]
+FAILED docs/evidence/2026-10-27-strict-prefill-prepack/harness/test_prepack.py::test_projection_and_live_weight_refresh[4864-64]
+2 failed, 1 passed in 3.90s

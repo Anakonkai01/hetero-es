@@ -1,0 +1,13 @@
+{
+  "files": {
+    "README.md": "225cc79a3ab545b180b61cb936c3a01748e7a51ca188fad58b64cc602355900c",
+    "harness/fast14-v2.diff": "9f5bfbf5e67df66abbde555ed71664043ac5c5692857b9019aacdc2ccdc96b50",
+    "harness/test_integer_stream.py": "47e905ac8b22659aa51ac1d1b80beb738e326f614b630777fb78c3b799062f75",
+    "raw/curves-5070ti-01.json": "0b96380bf59f800e1ffd0e7bf74c8fa44ba22f7b0830e85cebe0a7ca276d77a5",
+    "raw/curves-5070ti-01.kernels.json": "229d12cedf42164f667b8092ccc79dc6a444ea75be5a5a0cd65ccaa000995e2d",
+    "raw/curves-5070ti-01.log": "d3a28315c86444a54f771d59563bbf6bd517dcbd67c95f583b789bba28736f64",
+    "raw/exhaustive-01.log": "e30886fa242768d17ae052d63ecaf2198bd8a1970ed2ca40c09f94596e408af0",
+    "raw/red-01.log": "7528c697d759c66bc74aa05303ee699c57d717d2972839b2d13d91757b60cc45"
+  },
+  "limits": "Listed experiment integrity only; acceptance scopes are in README."
+}

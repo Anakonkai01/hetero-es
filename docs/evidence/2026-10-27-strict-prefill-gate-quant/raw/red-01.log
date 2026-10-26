@@ -1,0 +1,220 @@
+FFFFFF.                                                                  [100%]
+=================================== FAILURES ===================================
+_ test_prefill_gate_uses_fused_planes_when_eligible_and_preserves_results[1-17-14] _
+
+magnitude_bits = 14, rows = 1, width = 17
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7afa1faa52e0>
+
+    @gpu
+    @pytest.mark.parametrize("magnitude_bits", [14, 22])
+    @pytest.mark.parametrize("rows,width", [(1, 17), (33, 64), (2, 12289)])
+    def test_prefill_gate_uses_fused_planes_when_eligible_and_preserves_results(magnitude_bits, rows, width, monkeypatch):
+        from heteroes.eval.integer_cuda import IntegerCudaKernels
+        from heteroes.eval import reference_ops
+    
+        g = torch.Generator().manual_seed(322)
+        gate = torch.randn(rows, width, generator=g)
+        up = torch.randn(rows, width, generator=g)
+        weight = (torch.randn(3, width, generator=g) * 0.03).half()
+        bias = torch.tensor([0.0, -0.01, 0.02], dtype=torch.float16)
+        decoder = object.__new__(IntegerDecoderGraph)
+        decoder.kernels = IntegerCudaKernels("cuda", magnitude_bits=magnitude_bits)
+        calls, original = [], decoder.kernels.silu_mul_quantized
+    
+        def spy(*args, **kwargs):
+            calls.append(True)
+            return original(*args, **kwargs)
+    
+        monkeypatch.setattr(decoder.kernels, "silu_mul_quantized", spy)
+        module = SimpleNamespace(weight=weight.cuda(), bias=bias.cuda())
+        for factor in (1, -4, 0):
+            weight.mul_(factor)
+            module.weight.copy_(weight)
+>           expected = reference.linear(reference_ops.silu_mul(gate, up), weight, bias, magnitude_bits=magnitude_bits)
+                                        ^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'heteroes.eval.reference_ops' has no attribute 'silu_mul'
+
+runtime/tests/eval/test_integer_prefill_gate.py:43: AttributeError
+_ test_prefill_gate_uses_fused_planes_when_eligible_and_preserves_results[1-17-22] _
+
+magnitude_bits = 22, rows = 1, width = 17
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7af811fb01a0>
+
+    @gpu
+    @pytest.mark.parametrize("magnitude_bits", [14, 22])
+    @pytest.mark.parametrize("rows,width", [(1, 17), (33, 64), (2, 12289)])
+    def test_prefill_gate_uses_fused_planes_when_eligible_and_preserves_results(magnitude_bits, rows, width, monkeypatch):
+        from heteroes.eval.integer_cuda import IntegerCudaKernels
+        from heteroes.eval import reference_ops
+    
+        g = torch.Generator().manual_seed(322)
+        gate = torch.randn(rows, width, generator=g)
+        up = torch.randn(rows, width, generator=g)
+        weight = (torch.randn(3, width, generator=g) * 0.03).half()
+        bias = torch.tensor([0.0, -0.01, 0.02], dtype=torch.float16)
+        decoder = object.__new__(IntegerDecoderGraph)
+        decoder.kernels = IntegerCudaKernels("cuda", magnitude_bits=magnitude_bits)
+        calls, original = [], decoder.kernels.silu_mul_quantized
+    
+        def spy(*args, **kwargs):
+            calls.append(True)
+            return original(*args, **kwargs)
+    
+        monkeypatch.setattr(decoder.kernels, "silu_mul_quantized", spy)
+        module = SimpleNamespace(weight=weight.cuda(), bias=bias.cuda())
+        for factor in (1, -4, 0):
+            weight.mul_(factor)
+            module.weight.copy_(weight)
+>           expected = reference.linear(reference_ops.silu_mul(gate, up), weight, bias, magnitude_bits=magnitude_bits)
+                                        ^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'heteroes.eval.reference_ops' has no attribute 'silu_mul'
+
+runtime/tests/eval/test_integer_prefill_gate.py:43: AttributeError
+_ test_prefill_gate_uses_fused_planes_when_eligible_and_preserves_results[33-64-14] _
+
+magnitude_bits = 14, rows = 33, width = 64
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7af811fb0a70>
+
+    @gpu
+    @pytest.mark.parametrize("magnitude_bits", [14, 22])
+    @pytest.mark.parametrize("rows,width", [(1, 17), (33, 64), (2, 12289)])
+    def test_prefill_gate_uses_fused_planes_when_eligible_and_preserves_results(magnitude_bits, rows, width, monkeypatch):
+        from heteroes.eval.integer_cuda import IntegerCudaKernels
+        from heteroes.eval import reference_ops
+    
+        g = torch.Generator().manual_seed(322)
+        gate = torch.randn(rows, width, generator=g)
+        up = torch.randn(rows, width, generator=g)
+        weight = (torch.randn(3, width, generator=g) * 0.03).half()
+        bias = torch.tensor([0.0, -0.01, 0.02], dtype=torch.float16)
+        decoder = object.__new__(IntegerDecoderGraph)
+        decoder.kernels = IntegerCudaKernels("cuda", magnitude_bits=magnitude_bits)
+        calls, original = [], decoder.kernels.silu_mul_quantized
+    
+        def spy(*args, **kwargs):
+            calls.append(True)
+            return original(*args, **kwargs)
+    
+        monkeypatch.setattr(decoder.kernels, "silu_mul_quantized", spy)
+        module = SimpleNamespace(weight=weight.cuda(), bias=bias.cuda())
+        for factor in (1, -4, 0):
+            weight.mul_(factor)
+            module.weight.copy_(weight)
+>           expected = reference.linear(reference_ops.silu_mul(gate, up), weight, bias, magnitude_bits=magnitude_bits)
+                                        ^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'heteroes.eval.reference_ops' has no attribute 'silu_mul'
+
+runtime/tests/eval/test_integer_prefill_gate.py:43: AttributeError
+_ test_prefill_gate_uses_fused_planes_when_eligible_and_preserves_results[33-64-22] _
+
+magnitude_bits = 22, rows = 33, width = 64
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7af811fb12e0>
+
+    @gpu
+    @pytest.mark.parametrize("magnitude_bits", [14, 22])
+    @pytest.mark.parametrize("rows,width", [(1, 17), (33, 64), (2, 12289)])
+    def test_prefill_gate_uses_fused_planes_when_eligible_and_preserves_results(magnitude_bits, rows, width, monkeypatch):
+        from heteroes.eval.integer_cuda import IntegerCudaKernels
+        from heteroes.eval import reference_ops
+    
+        g = torch.Generator().manual_seed(322)
+        gate = torch.randn(rows, width, generator=g)
+        up = torch.randn(rows, width, generator=g)
+        weight = (torch.randn(3, width, generator=g) * 0.03).half()
+        bias = torch.tensor([0.0, -0.01, 0.02], dtype=torch.float16)
+        decoder = object.__new__(IntegerDecoderGraph)
+        decoder.kernels = IntegerCudaKernels("cuda", magnitude_bits=magnitude_bits)
+        calls, original = [], decoder.kernels.silu_mul_quantized
+    
+        def spy(*args, **kwargs):
+            calls.append(True)
+            return original(*args, **kwargs)
+    
+        monkeypatch.setattr(decoder.kernels, "silu_mul_quantized", spy)
+        module = SimpleNamespace(weight=weight.cuda(), bias=bias.cuda())
+        for factor in (1, -4, 0):
+            weight.mul_(factor)
+            module.weight.copy_(weight)
+>           expected = reference.linear(reference_ops.silu_mul(gate, up), weight, bias, magnitude_bits=magnitude_bits)
+                                        ^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'heteroes.eval.reference_ops' has no attribute 'silu_mul'
+
+runtime/tests/eval/test_integer_prefill_gate.py:43: AttributeError
+_ test_prefill_gate_uses_fused_planes_when_eligible_and_preserves_results[2-12289-14] _
+
+magnitude_bits = 14, rows = 2, width = 12289
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7af811fb1c40>
+
+    @gpu
+    @pytest.mark.parametrize("magnitude_bits", [14, 22])
+    @pytest.mark.parametrize("rows,width", [(1, 17), (33, 64), (2, 12289)])
+    def test_prefill_gate_uses_fused_planes_when_eligible_and_preserves_results(magnitude_bits, rows, width, monkeypatch):
+        from heteroes.eval.integer_cuda import IntegerCudaKernels
+        from heteroes.eval import reference_ops
+    
+        g = torch.Generator().manual_seed(322)
+        gate = torch.randn(rows, width, generator=g)
+        up = torch.randn(rows, width, generator=g)
+        weight = (torch.randn(3, width, generator=g) * 0.03).half()
+        bias = torch.tensor([0.0, -0.01, 0.02], dtype=torch.float16)
+        decoder = object.__new__(IntegerDecoderGraph)
+        decoder.kernels = IntegerCudaKernels("cuda", magnitude_bits=magnitude_bits)
+        calls, original = [], decoder.kernels.silu_mul_quantized
+    
+        def spy(*args, **kwargs):
+            calls.append(True)
+            return original(*args, **kwargs)
+    
+        monkeypatch.setattr(decoder.kernels, "silu_mul_quantized", spy)
+        module = SimpleNamespace(weight=weight.cuda(), bias=bias.cuda())
+        for factor in (1, -4, 0):
+            weight.mul_(factor)
+            module.weight.copy_(weight)
+>           expected = reference.linear(reference_ops.silu_mul(gate, up), weight, bias, magnitude_bits=magnitude_bits)
+                                        ^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'heteroes.eval.reference_ops' has no attribute 'silu_mul'
+
+runtime/tests/eval/test_integer_prefill_gate.py:43: AttributeError
+_ test_prefill_gate_uses_fused_planes_when_eligible_and_preserves_results[2-12289-22] _
+
+magnitude_bits = 22, rows = 2, width = 12289
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7af811fb2600>
+
+    @gpu
+    @pytest.mark.parametrize("magnitude_bits", [14, 22])
+    @pytest.mark.parametrize("rows,width", [(1, 17), (33, 64), (2, 12289)])
+    def test_prefill_gate_uses_fused_planes_when_eligible_and_preserves_results(magnitude_bits, rows, width, monkeypatch):
+        from heteroes.eval.integer_cuda import IntegerCudaKernels
+        from heteroes.eval import reference_ops
+    
+        g = torch.Generator().manual_seed(322)
+        gate = torch.randn(rows, width, generator=g)
+        up = torch.randn(rows, width, generator=g)
+        weight = (torch.randn(3, width, generator=g) * 0.03).half()
+        bias = torch.tensor([0.0, -0.01, 0.02], dtype=torch.float16)
+        decoder = object.__new__(IntegerDecoderGraph)
+        decoder.kernels = IntegerCudaKernels("cuda", magnitude_bits=magnitude_bits)
+        calls, original = [], decoder.kernels.silu_mul_quantized
+    
+        def spy(*args, **kwargs):
+            calls.append(True)
+            return original(*args, **kwargs)
+    
+        monkeypatch.setattr(decoder.kernels, "silu_mul_quantized", spy)
+        module = SimpleNamespace(weight=weight.cuda(), bias=bias.cuda())
+        for factor in (1, -4, 0):
+            weight.mul_(factor)
+            module.weight.copy_(weight)
+>           expected = reference.linear(reference_ops.silu_mul(gate, up), weight, bias, magnitude_bits=magnitude_bits)
+                                        ^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'heteroes.eval.reference_ops' has no attribute 'silu_mul'
+
+runtime/tests/eval/test_integer_prefill_gate.py:43: AttributeError
+=========================== short test summary info ============================
+FAILED runtime/tests/eval/test_integer_prefill_gate.py::test_prefill_gate_uses_fused_planes_when_eligible_and_preserves_results[1-17-14]
+FAILED runtime/tests/eval/test_integer_prefill_gate.py::test_prefill_gate_uses_fused_planes_when_eligible_and_preserves_results[1-17-22]
+FAILED runtime/tests/eval/test_integer_prefill_gate.py::test_prefill_gate_uses_fused_planes_when_eligible_and_preserves_results[33-64-14]
+FAILED runtime/tests/eval/test_integer_prefill_gate.py::test_prefill_gate_uses_fused_planes_when_eligible_and_preserves_results[33-64-22]
+FAILED runtime/tests/eval/test_integer_prefill_gate.py::test_prefill_gate_uses_fused_planes_when_eligible_and_preserves_results[2-12289-14]
+FAILED runtime/tests/eval/test_integer_prefill_gate.py::test_prefill_gate_uses_fused_planes_when_eligible_and_preserves_results[2-12289-22]
+6 failed, 1 passed in 2.03s

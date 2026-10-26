@@ -1,0 +1,22 @@
+{
+  "files": {
+    "README.md": "c7e7dc9b6e995a50bc59f9da3b07f989695b29b0e046aed85cc1b36995d018b7",
+    "harness/pilot-01.diff": "a96cd9587afecdc3ddc491c02b4588c63283ca605166d508b3a05f1ffa3b7034",
+    "harness/pilot.sh": "e2c509cd4be71dbdf7e07e6c33bd03f206610f93b5302ad9364f5e92eb07978f",
+    "raw/cpu-01.log": "84989153e8b95c9e14a9c724185827d0e83567a8ee471834b8133ffa9b155855",
+    "raw/cpu-red-01.log": "be426b24da69144615c91ab0c2652a2279680b219dd98b5b82b482f46a6d102e",
+    "raw/gpu-5070ti-01.log": "929f65d75bc3b9a22ff868a6f45102be932cd98917022488b905ed076e30b4eb",
+    "raw/operators-base-01.log": "ff166359867cb7e1cfbd7fe9da96f638fe8b7c121a26caac789bc562d30f73cf",
+    "raw/operators-new-01.log": "aab5f7d1347bddc846e739f8260319989e793faf375f6ae8e79d737d8c4abe8c",
+    "raw/pilot-01.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "raw/single-qwen-base-5070ti-01a.json": "b612c75289d6d0df7fc78a6b0ccbae4dfbbb76b8c55526d2aae07adf05a1ac0c",
+    "raw/single-qwen-base-5070ti-01a.log": "ef8b51b18d43062849050407cae14673bba3cfb01f8244d4bc80de0f78669a40",
+    "raw/single-qwen-base-5070ti-01b.json": "f1ad833c8ee0642aa66669a178edb9819553b262603a88904ee8819d9db75810",
+    "raw/single-qwen-base-5070ti-01b.log": "e27bfc92a17d1314cc6e43a38797f1c7464fe997a6c92508d25848324ca02485",
+    "raw/single-qwen-new-5070ti-01a.json": "5293e4381b706700caa497847cefd62c23ae8926678df949e92311860c66dbbf",
+    "raw/single-qwen-new-5070ti-01a.log": "76468e4c3e5ee2b31b4375f2599e3ba345257d91dd04d296ebc963be7ddcd38c",
+    "raw/single-qwen-new-5070ti-01b.json": "b9dead3dacfb7e784cf4b0086162291453c198a2d8b824f0b1c7ea599776e6d5",
+    "raw/single-qwen-new-5070ti-01b.log": "9aba230620106cff6e5c7e0c4448263714259b31b92f3a225faa04ff9cb00800"
+  },
+  "limits": "Listed experiment integrity only; acceptance scopes are in README."
+}

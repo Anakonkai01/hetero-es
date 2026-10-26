@@ -1,0 +1,22 @@
+diff --git a/runtime/src/heteroes/eval/integer_decoder.py b/runtime/src/heteroes/eval/integer_decoder.py
+index 58fb69b7..f335a32d 100644
+--- a/runtime/src/heteroes/eval/integer_decoder.py
++++ b/runtime/src/heteroes/eval/integer_decoder.py
+@@ -155,6 +155,17 @@ class IntegerDecoderGraph(StrictDecoderGraph):
+             target_ctas_per_sm=self._decode_target,
+         )
+ 
++    def _prefill_gated_project(self, gate, up, module, flag):
++        if not self._fused(gate.shape[0]) or gate.shape[1] > 12288:
++            return super()._prefill_gated_project(gate, up, module, flag)
++        return self.kernels.linear_many(
++            None,
++            (module.weight,),
++            (getattr(module, "bias", None),),
++            error_flag=flag,
++            prepared=self.kernels.silu_mul_quantized(gate, up, error_flag=flag),
++        )[0]
++
+     def _decode_project_many(self, value, modules, flag):
+         return self.kernels.linear_many(
+             value,
