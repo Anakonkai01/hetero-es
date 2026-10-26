@@ -267,6 +267,17 @@ class StrictDecoderGraph(StrictDecoderPacked):
     def _decode_project_many(self, value, modules, flag):
         return self._project_many(value, modules, flag)
 
+    def _decode_norm_project_many(self, hidden, norm, epsilon, modules, flag):
+        """RMSNorm whose output feeds only these projections (an adapter may fuse the two)."""
+        return self._decode_project_many(self.kernels.rms_norm(hidden, norm, epsilon, error_flag=flag), modules, flag)
+
+    def _decode_norm_project(self, hidden, norm, epsilon, module, flag):
+        return self._decode_project(self.kernels.rms_norm(hidden, norm, epsilon, error_flag=flag), module, flag)
+
+    def _decode_gated_project(self, gate, up, module, flag):
+        """SiLU gate whose output feeds only this projection (an adapter may fuse the two)."""
+        return self._decode_project(self.kernels.silu_mul(gate, up, error_flag=flag), module, flag)
+
     def _generation_begin(self):
         """Optional operator request state, always prepared while the generation lock is held."""
 
@@ -288,9 +299,12 @@ class StrictDecoderGraph(StrictDecoderPacked):
         epsilon = float(config.rms_norm_eps)
         for number, layer in enumerate(self.model.model.layers):
             attention = layer.self_attn
-            normalized = kernels.rms_norm(hidden, layer.input_layernorm.weight, epsilon, error_flag=flag)
-            q, k, v = self._decode_project_many(
-                normalized, (attention.q_proj, attention.k_proj, attention.v_proj), flag
+            q, k, v = self._decode_norm_project_many(
+                hidden,
+                layer.input_layernorm.weight,
+                epsilon,
+                (attention.q_proj, attention.k_proj, attention.v_proj),
+                flag,
             )
             q = kernels.rope(q, cosine, sine, heads, error_flag=flag)
             k = kernels.rope(k, cosine, sine, kv_heads, error_flag=flag)
@@ -301,12 +315,13 @@ class StrictDecoderGraph(StrictDecoderPacked):
                 q, keys, values, layout, heads // kv_heads, float(self._attention_scale), error_flag=flag
             )
             hidden = kernels.add(hidden, self._decode_project(mixed, attention.o_proj, flag), error_flag=flag)
-            normalized = kernels.rms_norm(hidden, layer.post_attention_layernorm.weight, epsilon, error_flag=flag)
-            gate, up = self._decode_project_many(normalized, (layer.mlp.gate_proj, layer.mlp.up_proj), flag)
-            gated = kernels.silu_mul(gate, up, error_flag=flag)
-            hidden = kernels.add(hidden, self._decode_project(gated, layer.mlp.down_proj, flag), error_flag=flag)
-        normalized = kernels.rms_norm(hidden, self.model.model.norm.weight, epsilon, error_flag=flag)
-        logits = self._decode_project(normalized, self.model.lm_head, flag)
+            gate, up = self._decode_norm_project_many(
+                hidden, layer.post_attention_layernorm.weight, epsilon, (layer.mlp.gate_proj, layer.mlp.up_proj), flag
+            )
+            hidden = kernels.add(
+                hidden, self._decode_gated_project(gate, up, layer.mlp.down_proj, flag), error_flag=flag
+            )
+        logits = self._decode_norm_project(hidden, self.model.model.norm.weight, epsilon, self.model.lm_head, flag)
         state.decode.greedy(
             logits, state.seen, state.owners, state.tokens, state.result, flag, state.penalty, state.inverse
         )

@@ -1,0 +1,38 @@
+{
+  "label": "base",
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "model": "smol",
+  "modelFiles": {
+    "all_results.json": "71face5e244d784819f937a25206865c295c8889fe4359eec28bbec85d02da0d",
+    "config.json": "224f72354f10d617a359cc82ad15a3c96e866b9b2ffadb81997eeea9e88e22ee",
+    "eval_results.json": "db9bcb5c4f2a3be0d7e88f86af26f375c22c240954af86942d1554d87a488ce8",
+    "generation_config.json": "87b916edaaab66b3899b9d0dd0752727dff6666686da0504d89ae0a6e055a013",
+    "merges.txt": "0b54e8aa4e53d5383e2e4bc635a56b43f9647f7b13832d5d9ecd8f82dac4f510",
+    "model.safetensors": "e6bffe7435d7ddc10fd3b9a9efd429dafbacb1cb17015fb5562664e7532bf86e",
+    "special_tokens_map.json": "2b7379f3ae813529281a5c602bc5a11c1d4e0a99107aaa597fe936c1e813ca52",
+    "tokenizer.json": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+    "tokenizer_config.json": "4ec77d44f62efeb38d7e044a1db318f6a939438425312dfa333b8382dbad98df",
+    "train_results.json": "fceae2634b0a268a8adbda73fd0b2192922b496054011f588d2c6e888db1cea1",
+    "trainer_state.json": "2263f580ae0d7890acc11253b83138b3fc1250dc6728688a3387ce813b92eed1",
+    "vocab.json": "82b84012e3add4d01d12ba14442026e49b8cbbaead1f79ecf3d919784f82dc79"
+  },
+  "sourceRoot": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/claude-projection-20261026/base-75f92c30/runtime/src/heteroes",
+  "fingerprint": "13c42eab15e68d06ef4552d5f5b15f47091dd8559744f1b8493f79717f5dcc1c",
+  "integerCudaSha256": "a83ff355e70e45352eef0b3196614f320ba8c91813526519fbde64cb9235b480",
+  "decoderGraphSha256": "8a420d1888d9ce68404717bcd31afb02bc9407dc4ba72b83e574d0f972ec0b9f",
+  "cases": [
+    {
+      "case": "short32",
+      "outputTokens": 32,
+      "secondsSamples": [
+        0.19740019799792208,
+        0.19671817299968097,
+        0.19696656300220639,
+        0.19681206100358395,
+        0.19698618200345663
+      ],
+      "medianTokensPerSecond": 5198.8519492444475,
+      "tokensSha256": "0687222327056d6cec59ba16ea03d0af73c4ea60ef50bf639988a610b6ee4e28"
+    }
+  ]
+}

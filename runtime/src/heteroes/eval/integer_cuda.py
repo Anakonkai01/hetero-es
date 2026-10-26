@@ -6,6 +6,7 @@ them at request entry; retained buffers are cleared at exit. It is NOT the prior
 """
 
 import hashlib
+import math
 from pathlib import Path
 import weakref
 
@@ -22,6 +23,7 @@ INTEGER_CUDA_VERSION = "row_scaled_integer_mma_cuda_v1_experimental"
 # kernel; "tile" keeps the per-warp tile kernel. Both compute the same exact integer dot and final encoding.
 MMA_SCHEDULES = ("auto", "tile", "stream")
 STREAM_COLUMNS = 64
+RMS_THREADS, SILU_THREADS = 512, 1024  # measured on SM120 for 896/4864-wide rows
 
 
 def _mma_schedule(requested):
@@ -61,18 +63,8 @@ def static_identity(magnitude_bits=14, max_partial_bytes=16 * 1024**2, *, weight
     }
 
 
-_SOURCE = (
-    sc._LINEAR_SOURCE.split("// One output column")[0]
-    + r"""
-typedef unsigned long long u64;
-typedef long long i64;
-#if MAGNITUDE_BITS == 14
-typedef short qi_t;
-#else
-typedef int qi_t;
-#endif
-
-__device__ __forceinline__ unsigned rne_shift(unsigned value, int shift) {
+# Shared by the projection module and the fused strict-op module (which has its own float helpers).
+_QUANT_FLOAT = r"""__device__ __forceinline__ unsigned rne_shift(unsigned value, int shift) {
   if(shift<=0) return value << -shift;
   if(shift>=32) return 0;
   unsigned whole=value>>shift, remainder=value&((1u<<shift)-1u), halfway=1u<<(shift-1);
@@ -84,7 +76,33 @@ __device__ __forceinline__ int quant_float(unsigned u, int exponent) {
   int q=(int)rne_shift((a&0x7fffffu)|0x800000u, exponent-((int)e-127)+24-MAGNITUDE_BITS);
   return u>>31 ? -q : q;
 }
-__device__ __forceinline__ int quant_half(u16 u, int exponent) {
+"""
+_PACK_DIGITS = r"""__device__ __forceinline__ void pack_digits(unsigned* words, int q, int element) {
+  #pragma unroll
+  for(int d=0;d<DIGITS;++d) {
+    int low=q&255;
+    if(low>=128) low-=256;
+    words[d] |= ((unsigned)low&255u) << (8*element);
+    q=(q-low)/256; // exact division, including negative values; no signed-left-shift assumption
+  }
+}
+
+"""
+
+_SOURCE = (
+    sc._LINEAR_SOURCE.split("// One output column")[0]
+    + r"""
+typedef unsigned long long u64;
+typedef long long i64;
+#if MAGNITUDE_BITS == 14
+typedef short qi_t;
+#else
+typedef int qi_t;
+#endif
+
+"""
+    + _QUANT_FLOAT
+    + r"""__device__ __forceinline__ int quant_half(u16 u, int exponent) {
   unsigned a=u&0x7fffu;
   if(!a || a>=0x7c00u) return 0;
   // Exact FP16 widening and exponent-bit scaling. For every admitted live row exponent in [-24,15],
@@ -96,17 +114,9 @@ __device__ __forceinline__ int quant_half(u16 u, int exponent) {
   asm("cvt.rni.s32.f32 %0, %1;" : "=r"(result) : "f"(__uint_as_float(bits)));
   return result;
 }
-__device__ __forceinline__ void pack_digits(unsigned* words, int q, int element) {
-  #pragma unroll
-  for(int d=0;d<DIGITS;++d) {
-    int low=q&255;
-    if(low>=128) low-=256;
-    words[d] |= ((unsigned)low&255u) << (8*element);
-    q=(q-low)/256; // exact division, including negative values; no signed-left-shift assumption
-  }
-}
-
-#if WEIGHT_PREFETCH
+"""
+    + _PACK_DIGITS
+    + r"""#if WEIGHT_PREFETCH
 // Each lane owns four words in each stage. Copies and their consumers use the same lane;
 // no other thread reads this storage, so the per-thread async wait needs no CTA barrier.
 __device__ __forceinline__ void prefetch_half_tile(unsigned* destination,const u16* w,
@@ -470,13 +480,13 @@ __device__ __forceinline__ void convert4(unsigned* digits, unsigned h01, unsigne
 }
 #endif
 
-extern "C" __global__ void __launch_bounds__(128)
-integer_stream(const qi_t* x,const u16* w,const u16* bias,const int* ex,const int* ew,
-               float* out,int* error,i64* partials,int rows,int outputs) {
+// Split partials of matrix columns [partial_offset, partial_offset+outputs) inside rows of partial_columns.
+__device__ __forceinline__ void stream_body(const qi_t* x,const u16* w,const u16* bias,const int* ex,const int* ew,
+                                            float* out,int* error,i64* partials,int rows,int outputs,int column0,
+                                            int partial_columns,int partial_offset) {
   __shared__ __align__(16) unsigned char weights_shared[STAGES][W_STAGE];
   __shared__ __align__(16) unsigned char inputs_shared[STAGES][A_STAGE];
   int lane=threadIdx.x&31, warp=threadIdx.x>>5, group=lane>>2, thread=lane&3;
-  int column0=blockIdx.x*NT;
   const int tiles=(WIDTH+KS-1)/KS, per=(tiles+SPLIT_K-1)/SPLIT_K;
   int begin=blockIdx.z*per, count=min(tiles,begin+per)-begin;
 #if FAST_CONVERT
@@ -557,7 +567,7 @@ integer_stream(const qi_t* x,const u16* w,const u16* bias,const int* ex,const in
             #pragma unroll
             for(int degree=0;degree<2*DIGITS-1;++degree) sum+=(i64)accum[m][j][degree][d]*(1ll<<(8*degree));
 #if SPLIT_K > 1
-            partials[((size_t)blockIdx.z*rows+row)*outputs+n]=sum;
+            partials[((size_t)blockIdx.z*rows+row)*partial_columns+partial_offset+n]=sum;
 #else
             float v=encode(sum,ex[row]+ew[n]-2*(MAGNITUDE_BITS-1),error);
             if(HAS_BIAS) v=add_rn(v,widen(bias[n]));
@@ -569,6 +579,123 @@ integer_stream(const qi_t* x,const u16* w,const u16* bias,const int* ex,const in
       }
     }
   }
+}
+
+extern "C" __global__ void __launch_bounds__(128)
+integer_stream(const qi_t* x,const u16* w,const u16* bias,const int* ex,const int* ew,
+               float* out,int* error,i64* partials,int rows,int outputs) {
+  stream_body(x,w,bias,ex,ew,out,error,partials,rows,outputs,blockIdx.x*NT,outputs,0);
+}
+
+// Up to three matrices sharing one activation in one launch: blockIdx.x walks their column tiles in order.
+// Split partials are laid out as one [split][rows][n0+n1+n2] matrix; integer_finish_group encodes them.
+#define GROUP_SELECT(g,a,b,c) ((g)==0 ? (a) : (g)==1 ? (b) : (c))
+extern "C" __global__ void __launch_bounds__(128)
+integer_stream_group(const qi_t* x,const int* ex,int* error,i64* partials,
+                     const u16* w0,const u16* w1,const u16* w2,const u16* b0,const u16* b1,const u16* b2,
+                     const int* e0,const int* e1,const int* e2,float* o0,float* o1,float* o2,
+                     int rows,int n0,int n1,int n2) {
+  int t0=(n0+NT-1)/NT, t1=(n1+NT-1)/NT, tile=blockIdx.x;
+  int g=tile<t0 ? 0 : tile<t0+t1 ? 1 : 2;
+  int column0=(tile-(g>0 ? t0 : 0)-(g>1 ? t1 : 0))*NT;
+  stream_body(x,GROUP_SELECT(g,w0,w1,w2),GROUP_SELECT(g,b0,b1,b2),ex,GROUP_SELECT(g,e0,e1,e2),
+              GROUP_SELECT(g,o0,o1,o2),error,partials,rows,GROUP_SELECT(g,n0,n1,n2),column0,n0+n1+n2,
+              g==0 ? 0 : g==1 ? n0 : n0+n1);
+}
+
+extern "C" __global__ void integer_finish_group(const i64* partials,const int* ex,int* error,
+                                                const u16* b0,const u16* b1,const u16* b2,
+                                                const int* e0,const int* e1,const int* e2,
+                                                float* o0,float* o1,float* o2,int rows,int n0,int n1,int n2) {
+  int c=blockIdx.x*256+threadIdx.x, total=n0+n1+n2;
+  if(c>=total) return;
+  int g=c<n0 ? 0 : c<n0+n1 ? 1 : 2, n=c-(g>0 ? n0 : 0)-(g>1 ? n1 : 0), outputs=GROUP_SELECT(g,n0,n1,n2);
+  const u16* bias=GROUP_SELECT(g,b0,b1,b2);
+  const int* ew=GROUP_SELECT(g,e0,e1,e2);
+  float* out=GROUP_SELECT(g,o0,o1,o2);
+  for(int row=blockIdx.y;row<rows;row+=gridDim.y) {
+    i64 sum=0;
+    #pragma unroll
+    for(int s=0;s<SPLIT_K;++s) sum+=partials[((size_t)s*rows+row)*total+c];
+    float v=encode(sum,ex[row]+ew[n]-2*(MAGNITUDE_BITS-1),error);
+    if(HAS_BIAS) v=add_rn(v,widen(bias[n]));
+    out[(size_t)row*outputs+n]=v;
+    if((__float_as_uint(v)&0x7f800000u)==0x7f800000u) atomicOr(error,1);
+  }
+}
+"""
+)
+
+
+# Strict RMSNorm / SiLU-gate kernels whose FP32 row is only ever quantized for a projection. Each CTA owns one
+# row: it computes the row exactly as strict_rms_norm / strict_silu_mul (same loads, rounded ops and flags),
+# keeps it in shared memory and then performs integer_input's maximum, exponent and packed-digit quantization on
+# those values. The FP32 row is never stored; the planes and exponents equal quantize_input(op(...)).
+_FUSED_SOURCE = (
+    _QUANT_FLOAT
+    + _PACK_DIGITS
+    + r"""
+template <int THREADS>
+__device__ void quantize_row(const float* a, int n, unsigned* planes, int* exponents, int rows, unsigned& bad) {
+  __shared__ unsigned maxima[THREADS];
+  unsigned maximum=0;
+  for(int k=threadIdx.x;k<n;k+=THREADS) {
+    unsigned u=__float_as_uint(a[k])&0x7fffffffu;
+    if(u>=0x7f800000u) {bad|=1u; u=0;}
+    if((u&0x7f800000u)==0) u=0;
+    maximum=u>maximum ? u : maximum;
+  }
+  maxima[threadIdx.x]=maximum;
+  __syncthreads();
+  for(int stride=THREADS/2;stride;stride>>=1) {
+    if(threadIdx.x<stride) maxima[threadIdx.x]=maxima[threadIdx.x+stride]>maxima[threadIdx.x] ? maxima[threadIdx.x+stride] : maxima[threadIdx.x];
+    __syncthreads();
+  }
+  int exponent=maxima[0] ? (int)(maxima[0]>>23)-127 : 0;
+  if(threadIdx.x==0) exponents[blockIdx.x]=exponent;
+  const int words=(n+3)/4;
+  for(int word=threadIdx.x;word<words;word+=THREADS) {
+    unsigned packed[DIGITS]={};
+    #pragma unroll
+    for(int i=0;i<4;++i) {
+      int k=word*4+i;
+      pack_digits(packed,k<n ? quant_float(__float_as_uint(a[k]),exponent) : 0,i);
+    }
+    #pragma unroll
+    for(int d=0;d<DIGITS;++d) planes[((size_t)d*rows+blockIdx.x)*words+word]=packed[d];
+  }
+}
+
+extern "C" __global__ void __launch_bounds__(RMS_THREADS) strict_rms_quant(const float* x, const u16* w, unsigned* planes,
+    int* exponents, int* error, int rows, int n, float inv_n, float eps) {
+  extern __shared__ float a[];
+  unsigned bad = 0;
+  const float* row = x + (size_t)blockIdx.x * n;
+  for (int i = threadIdx.x; i < n; i += RMS_THREADS) {
+    float v = load(row + i, bad);
+    a[i] = mul_(v, v, bad);
+  }
+  __syncthreads();
+  block_tree(a, n, bad);
+  float inverse = rsqrt_(add_(mul_(a[0], inv_n, bad), eps, bad), bad);
+  __syncthreads();  // every thread has read the root before the row overwrites it
+  for (int i = threadIdx.x; i < n; i += RMS_THREADS) a[i] = mul_(mul_(load(row + i, bad), inverse, bad), widen(w[i]), bad);
+  __syncthreads();
+  quantize_row<RMS_THREADS>(a, n, planes, exponents, rows, bad);
+  report(error, bad);
+}
+
+extern "C" __global__ void __launch_bounds__(SILU_THREADS) strict_silu_quant(const float* gate, const float* up, unsigned* planes,
+    int* exponents, int* error, int rows, int n) {
+  extern __shared__ float a[];
+  unsigned bad = 0;
+  for (int i = threadIdx.x; i < n; i += SILU_THREADS) {
+    size_t j = (size_t)blockIdx.x * n + i;
+    a[i] = mul_(silu_(load(gate + j, bad), bad), load(up + j, bad), bad);
+  }
+  __syncthreads();
+  quantize_row<SILU_THREADS>(a, n, planes, exponents, rows, bad);
+  report(error, bad);
 }
 """
 )
@@ -710,6 +837,8 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
                     "integer_simt",
                     "integer_finish",
                     "integer_stream",
+                    "integer_stream_group",
+                    "integer_finish_group",
                 ],
                 integer_mma=True,
             )
@@ -778,7 +907,9 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
         )
 
     @torch.inference_mode()
-    def linear_decode(self, value, weight, bias=None, *, error_flag=None, target_ctas_per_sm=8):
+    def linear_decode(self, value, weight, bias=None, *, error_flag=None, target_ctas_per_sm=8, prepared=None):
+        if prepared is not None:
+            value = self._prepared_shape(prepared, weight)
         if not isinstance(value, torch.Tensor) or value.dtype != torch.float32:
             raise ReferenceArithmeticError("Integer linear activation must be FP32")
         rows, width, outputs = sc.validate_linear(value, weight, bias, device=self.device)
@@ -791,7 +922,106 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
             row_tile=plan.row_tile,
             split_k=plan.split_k,
             implementation=plan.implementation,
+            prepared=prepared,
         )
+
+    def _prepared_shape(self, prepared, weight):
+        """A storage-free [rows, width] FP32 view standing for the activation behind fused packed planes."""
+        if not isinstance(weight, torch.Tensor) or weight.ndim != 2:
+            raise ReferenceArithmeticError("Unsupported strict linear dtype, layout or shape")
+        planes, exponents = prepared
+        digits, width = (2 if self.magnitude_bits == 14 else 3), weight.shape[1]
+        if (
+            not isinstance(planes, torch.Tensor)
+            or not isinstance(exponents, torch.Tensor)
+            or planes.dtype != torch.int32
+            or exponents.dtype != torch.int32
+            or planes.device != self.device
+            or exponents.device != self.device
+            or planes.ndim != 3
+            or planes.shape[0] != digits
+            or planes.shape[1] < 2
+            or planes.shape[2] != (width + 3) // 4
+            or not planes.is_contiguous()
+            or exponents.shape != (planes.shape[1],)
+        ):
+            raise ReferenceArithmeticError("Prepared integer planes do not match the projection")
+        return torch.empty(1, dtype=torch.float32, device=self.device).expand(planes.shape[1], width)
+
+    def _fused_functions(self):
+        name = f"fused-quant-{self.magnitude_bits}"
+        if name not in self._functions:
+            header = "".join(f"#define {k} 0x{v:08x}u\n" for k, v in sc.reference_constants().items())
+            header += f"#define MAGNITUDE_BITS {self.magnitude_bits}\n#define DIGITS {2 if self.magnitude_bits == 14 else 3}\n"
+            header += f"#define RMS_THREADS {RMS_THREADS}\n#define SILU_THREADS {SILU_THREADS}\n"
+            self._functions[name] = self._compile(
+                name,
+                header + sc._OPS_SOURCE + _FUSED_SOURCE,
+                ["strict_rms_quant", "strict_silu_quant"],
+                ptx_exact=sc.OPS_PTX_EXACT,
+                sass_exact=sc.OPS_SASS_EXACT,
+            )
+        return self._functions[name]
+
+    def _planes(self, rows, width):
+        return (
+            torch.empty(
+                (2 if self.magnitude_bits == 14 else 3, rows, (width + 3) // 4), dtype=torch.int32, device=self.device
+            ),
+            torch.empty(rows, dtype=torch.int32, device=self.device),
+        )
+
+    @torch.inference_mode()
+    def rms_norm_quantized(self, value, weight, epsilon, *, error_flag=None):
+        """Packed planes of quantize_input(rms_norm(value)) for a [rows>=2, width] activation, in one kernel."""
+        (value,) = self._float32(value)
+        width = value.shape[-1] if value.ndim == 2 else 0
+        if (
+            value.ndim != 2
+            or value.shape[0] < 2
+            or not isinstance(weight, torch.Tensor)
+            or weight.dtype != torch.float16
+            or weight.shape != (width,)
+            or weight.device != self.device
+            or not weight.is_contiguous()
+            or not 1 <= width <= sc.MAX_NORM_WIDTH
+            or not (isinstance(epsilon, float) and math.isfinite(epsilon) and epsilon > 0)
+        ):
+            raise ReferenceArithmeticError("Unsupported fused RMSNorm quantization input")
+        rows = value.shape[0]
+        planes, exponents = self._planes(rows, width)
+        flag = self.new_error_flag() if error_flag is None else error_flag
+        self._launch(
+            self._fused_functions()["strict_rms_quant"],
+            grid=rows,
+            block=(RMS_THREADS, 1),
+            pointers=(value, weight, planes, exponents, flag),
+            integers=(rows, width),
+            floats=(1.0 / width, epsilon),
+            shared=4 * width,
+        )
+        self._finish(flag, error_flag)
+        return planes, exponents
+
+    @torch.inference_mode()
+    def silu_mul_quantized(self, gate, up, *, error_flag=None):
+        """Packed planes of quantize_input(silu_mul(gate, up)) for [rows>=2, width<=12288], in one kernel."""
+        gate, up = self._float32(gate, up)
+        if gate.shape != up.shape or gate.ndim != 2 or gate.shape[0] < 2 or not 1 <= gate.shape[1] <= 12288:
+            raise ReferenceArithmeticError("Unsupported fused SiLU quantization input")
+        rows, width = gate.shape
+        planes, exponents = self._planes(rows, width)
+        flag = self.new_error_flag() if error_flag is None else error_flag
+        self._launch(
+            self._fused_functions()["strict_silu_quant"],
+            grid=rows,
+            block=(SILU_THREADS, 1),
+            pointers=(gate, up, planes, exponents, flag),
+            integers=(rows, width),
+            shared=4 * width,
+        )
+        self._finish(flag, error_flag)
+        return planes, exponents
 
     def _decode_plan(self, width, rows, outputs, target):
         try:
@@ -807,7 +1037,9 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
             raise ReferenceArithmeticError(str(error)) from error
 
     @torch.inference_mode()
-    def linear_many(self, value, weights, biases=None, *, error_flag=None, decode_target_ctas_per_sm=None):
+    def linear_many(
+        self, value, weights, biases=None, *, error_flag=None, decode_target_ctas_per_sm=None, prepared=None
+    ):
         """Project one activation through independent live matrices with one call-local quantization.
 
         No activation/content cache, concatenated weights or cross-call prepared input is retained. Validate
@@ -819,6 +1051,8 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
             biases = (None,) * len(weights)
         if not isinstance(biases, (list, tuple)) or len(biases) != len(weights):
             raise ReferenceArithmeticError("Integer projection group needs matching weights and biases")
+        if prepared is not None:
+            value = self._prepared_shape(prepared, weights[0])
         if not isinstance(value, torch.Tensor) or value.dtype != torch.float32:
             raise ReferenceArithmeticError("Integer linear activation must be FP32")
         plans = []
@@ -831,7 +1065,12 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
             )
             plans.append(plan)
         flag = self.new_error_flag() if error_flag is None else error_flag
-        prepared = self.quantize_input(value.reshape(rows, width), error_flag=flag, _packed=rows > 1)
+        if prepared is None:
+            prepared = self.quantize_input(value.reshape(rows, width), error_flag=flag, _packed=rows > 1)
+        if self._group_eligible(rows, width, weights, biases, prepared[0], decode_target_ctas_per_sm):
+            outputs = self._linear_group(value, rows, width, weights, biases, prepared, flag, decode_target_ctas_per_sm)
+            self._finish(flag, error_flag)
+            return outputs
         outputs = tuple(
             self._linear(
                 value,
@@ -853,6 +1092,54 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
         )
         self._finish(flag, error_flag)
         return outputs
+
+    def _group_eligible(self, rows, width, weights, biases, quantized, target):
+        # One streamed launch for 2-3 decode projections of one activation, all with or all without bias.
+        return (
+            target is not None
+            and rows > 1
+            and 2 <= len(weights) <= 3
+            and len({bias is None for bias in biases}) == 1
+            and all(self._stream_eligible(width, quantized, weight) for weight in weights)
+        )
+
+    def _linear_group(self, value, rows, width, weights, biases, prepared, flag, target):
+        counts = [weight.shape[0] for weight in weights]
+        total = sum(counts)
+        plan = self._decode_plan(width, rows, total, target)
+        has_bias = biases[0] is not None
+        functions = self._integer_functions(width, has_bias, plan.row_tile, 4, plan.split_k, packed_input=True)
+        quantized, ex = prepared
+        exponents = [self._weight_exponents(weight, flag) for weight in weights]
+        outs = [torch.empty((rows, count), dtype=torch.float32, device=self.device) for count in counts]
+        partials = (
+            torch.empty((plan.split_k, rows, total), dtype=torch.int64, device=self.device)
+            if plan.split_k > 1
+            else outs[0]
+        )
+        missing = 3 - len(weights)
+        pad = lambda items: (*items, *(items[0],) * missing)  # noqa: E731 - unused slots have zero outputs
+        bias_pointers = pad(tuple(biases) if has_bias else tuple(weights))
+        self._launch(
+            functions["integer_stream_group"],
+            grid=(
+                sum(-(-count // STREAM_COLUMNS) for count in counts),
+                min(65535, -(-rows // plan.row_tile)),
+                plan.split_k,
+            ),
+            block=(128, 1),
+            pointers=(quantized, ex, flag, partials, *pad(weights), *bias_pointers, *pad(exponents), *pad(outs)),
+            integers=(rows, *counts, *(0,) * missing),
+        )
+        if plan.split_k > 1:
+            self._launch(
+                functions["integer_finish_group"],
+                grid=(-(-total // 256), min(65535, rows)),
+                block=(256, 1),
+                pointers=(partials, ex, flag, *bias_pointers, *pad(exponents), *pad(outs)),
+                integers=(rows, *counts, *(0,) * missing),
+            )
+        return tuple(out.reshape(*value.shape[:-1], out.shape[1]) for out in outs)
 
     def _linear(
         self,

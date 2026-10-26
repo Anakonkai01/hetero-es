@@ -1,0 +1,16 @@
+control ok    | 31 passed in 129.57s (0:02:09)
+killed       weight-store-unswizzled | 1 failed, 3 passed in 15.31s
+killed       input-read-unswizzled | 1 failed, 3 passed in 15.46s
+killed       digit0-bias-not-removed | 1 failed, 2 passed in 8.73s
+killed       digit-offset-wrong | 1 failed, 2 passed in 8.68s
+SURVIVED     nonfinite-not-zeroed | 31 passed in 128.96s (0:02:08)
+SURVIVED     k-tail-reads-next-row | 31 passed in 129.80s (0:02:09)
+killed       split-drops-tail-stages | 1 failed, 9 passed in 55.46s
+killed       eligible-width-8 | 1 failed, 15 passed in 95.57s (0:01:35)
+killed       eligible-alignment-8 | 1 failed, 15 passed in 96.10s (0:01:36)
+killed       scale-off-by-one | 1 failed, 2 passed in 8.69s
+killed       digit2-wrong-byte | 1 failed, 2 passed in 8.77s
+killed       fragment-rows-swapped | 1 failed, 1 passed in 2.37s
+killed       schedule-auto-is-tile | 1 failed, 1 passed in 7.14s
+
+11 of 13 mutants killed.

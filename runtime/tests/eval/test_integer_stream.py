@@ -278,3 +278,114 @@ def test_integer_source_passes_the_instruction_audit_on_other_architectures(arch
         assert "integer_stream" in text
         assert sc.audit_integer_sass(text)["violations"] == []
     del context
+
+
+@gpu
+@pytest.mark.parametrize("counts", [(896, 128, 128), (64, 1, 65), (130, 7), (4864, 4864)])
+@pytest.mark.parametrize("bias", [False, True])
+def test_grouped_decode_launch_matches_separate_tile_projections(counts, bias, monkeypatch):
+    stream = cuda_class()("cuda", magnitude_bits=22)
+    tile = cuda_class()("cuda", magnitude_bits=22, mma_schedule="tile")
+    used = entries_used(stream, monkeypatch)
+    gen = torch.Generator(device="cuda").manual_seed(sum(counts))
+    width = 96 if max(counts) < 4864 else 896
+    weights = [(torch.randn(n, width, device="cuda", generator=gen) * 0.03).half() for n in counts]
+    weights[0][0, 0] = 65504.0
+    biases = [(torch.randn(n, device="cuda", generator=gen) * 0.1).half() for n in counts] if bias else None
+    for rows in (2, 9, 17, 32, 40):
+        x = torch.randn(rows, width, device="cuda", generator=gen) * torch.exp(torch.randn(rows, 1, device="cuda") * 3)
+        flags = [stream.new_error_flag(), tile.new_error_flag()]
+        actual = stream.linear_many(x, weights, biases, error_flag=flags[0], decode_target_ctas_per_sm=8)
+        control = [
+            tile.linear_decode(x, w, None if biases is None else b, error_flag=flags[1])
+            for w, b in zip(weights, biases or [None] * len(weights))
+        ]
+        assert int(flags[0].item()) == int(flags[1].item()) == 0
+        assert all(torch.equal(bits(a), bits(c)) for a, c in zip(actual, control)), rows
+    assert "integer_stream_group" in used and "integer_stream" not in used
+
+
+@gpu
+def test_grouped_launch_falls_back_for_mixed_bias_single_rows_and_flags_overflow_like_separate_calls(monkeypatch):
+    stream = cuda_class()("cuda", magnitude_bits=22)
+    tile = cuda_class()("cuda", magnitude_bits=22, mma_schedule="tile")
+    used = entries_used(stream, monkeypatch)
+    gen = torch.Generator(device="cuda").manual_seed(8)
+    weights = [(torch.randn(n, 64, device="cuda", generator=gen) * 0.03).half() for n in (70, 9)]
+    biases = [(torch.randn(70, device="cuda", generator=gen) * 0.1).half(), None]
+    x = torch.randn(5, 64, device="cuda", generator=gen)
+    stream.linear_many(x, weights, biases, decode_target_ctas_per_sm=8)
+    assert "integer_stream" in used and "integer_stream_group" not in used
+    used.clear()
+    stream.linear_many(x[:1], weights, decode_target_ctas_per_sm=8)
+    assert "integer_simt" in used and "integer_stream_group" not in used
+    used.clear()
+    huge = torch.full((4, 64), 2.0**120, device="cuda")
+    weights[1][3] = 65504.0
+    flags = [stream.new_error_flag(), tile.new_error_flag()]
+    actual = stream.linear_many(huge, weights, error_flag=flags[0], decode_target_ctas_per_sm=8)
+    control = [tile.linear_decode(huge, w, error_flag=flags[1]) for w in weights]
+    assert int(flags[0].item()) == int(flags[1].item()) == 1
+    assert all(torch.equal(bits(a), bits(c)) for a, c in zip(actual, control))
+    assert "integer_stream_group" in used
+
+
+@gpu
+@pytest.mark.parametrize("magnitude_bits", [14, 22])
+@pytest.mark.parametrize("width", [1, 3, 64, 255, 896, 960, 2048, 4864, 8192])
+def test_fused_rmsnorm_and_silu_planes_equal_quantizing_the_unfused_rows(magnitude_bits, width):
+    kernels = cuda_class()("cuda", magnitude_bits=magnitude_bits)
+    gen = torch.Generator(device="cuda").manual_seed(width)
+    for rows in (2, 17, 40):
+        x = torch.randn(rows, width, device="cuda", generator=gen) * torch.exp(torch.randn(rows, 1, device="cuda") * 6)
+        x[0] = 0.0  # zero row: RMSNorm of zeros and exponent 0
+        x[1, : min(width, 3)] = torch.tensor([1e-40, -0.0, 3e38], device="cuda")[: min(width, 3)]
+        weight = (torch.randn(width, device="cuda", generator=gen) * 0.5).half()
+        gate = torch.randn(rows, width, device="cuda", generator=gen) * 8
+        up = torch.randn(rows, width, device="cuda", generator=gen) * torch.exp(torch.randn(rows, 1, device="cuda") * 4)
+        up[1, : min(width, 2)] = torch.tensor([1e-39, -0.0], device="cuda")[: min(width, 2)]
+        for fused, unfused in (
+            (
+                lambda f: kernels.rms_norm_quantized(x, weight, 1e-6, error_flag=f),
+                lambda f: kernels.rms_norm(x, weight, 1e-6, error_flag=f),
+            ),
+            (
+                lambda f: kernels.silu_mul_quantized(gate, up, error_flag=f),
+                lambda f: kernels.silu_mul(gate, up, error_flag=f),
+            ),
+        ):
+            flags = [kernels.new_error_flag(), kernels.new_error_flag()]
+            planes, exponents = fused(flags[0])
+            control = kernels.quantize_input(unfused(flags[1]), error_flag=flags[1], _packed=True)
+            assert int(flags[0].item()) == int(flags[1].item())
+            assert torch.equal(planes, control[0]) and torch.equal(exponents, control[1]), rows
+
+
+@gpu
+def test_fused_ops_report_the_same_failures_and_reject_unsupported_shapes():
+    kernels = cuda_class()("cuda", magnitude_bits=22)
+    x = torch.randn(4, 64, device="cuda")
+    weight = torch.ones(64, dtype=torch.float16, device="cuda")
+    for poison in (float("nan"), float("inf")):
+        bad = x.clone()
+        bad[2, 5] = poison
+        flags = [kernels.new_error_flag(), kernels.new_error_flag()]
+        kernels.rms_norm_quantized(bad, weight, 1e-6, error_flag=flags[0])
+        kernels.quantize_input(
+            kernels.rms_norm(bad, weight, 1e-6, error_flag=flags[1]), error_flag=flags[1], _packed=True
+        )
+        assert int(flags[0].item()) == int(flags[1].item()) != 0
+        flags = [kernels.new_error_flag(), kernels.new_error_flag()]
+        kernels.silu_mul_quantized(bad, x, error_flag=flags[0])
+        kernels.quantize_input(kernels.silu_mul(bad, x, error_flag=flags[1]), error_flag=flags[1], _packed=True)
+        assert int(flags[0].item()) == int(flags[1].item()) != 0
+    with pytest.raises(ReferenceArithmeticError, match="fused"):
+        kernels.rms_norm_quantized(x[:1], weight, 1e-6)
+    with pytest.raises(ReferenceArithmeticError, match="fused"):
+        kernels.silu_mul_quantized(x, x[:, :32])
+    planes = kernels.rms_norm_quantized(x, weight, 1e-6)
+    with pytest.raises(ReferenceArithmeticError, match="Prepared"):
+        kernels.linear_many(None, (torch.ones(8, 32, dtype=torch.float16, device="cuda"),), prepared=planes)
+    w = (torch.randn(70, 64, device="cuda") * 0.1).half()
+    expected = kernels.linear_decode(kernels.rms_norm(x, weight, 1e-6), w)
+    assert torch.equal(bits(kernels.linear_decode(None, w, prepared=planes)), bits(expected))

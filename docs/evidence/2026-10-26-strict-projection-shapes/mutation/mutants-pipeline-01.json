@@ -1,0 +1,44 @@
+[
+ {
+  "name": "undo-keeps-length-advance",
+  "file": "src/heteroes/eval/strict_decoder_graph.py",
+  "old": "        self.lengths[index] -= 1\n",
+  "new": ""
+ },
+ {
+  "name": "undo-keeps-speculative-token",
+  "file": "src/heteroes/eval/strict_decoder_graph.py",
+  "old": "        self.tokens[index] = torch.tensor(previous, dtype=torch.long, device=self.device)\n",
+  "new": ""
+ },
+ {
+  "name": "finished-rows-tokens-kept",
+  "file": "src/heteroes/eval/strict_decoder_graph.py",
+  "old": "                        chosen = [token for owner, token in zip(active, speculative) if owner in keep]",
+  "new": "                        chosen = speculative[: len(survivors)]"
+ },
+ {
+  "name": "queue-past-limit",
+  "file": "src/heteroes/eval/strict_decoder_graph.py",
+  "old": "                    queued = state.launch() if step + 2 < max_new_tokens else None",
+  "new": "                    queued = state.launch() if step + 1 < max_new_tokens else None"
+ },
+ {
+  "name": "reuse-speculation-after-eos",
+  "file": "src/heteroes/eval/strict_decoder_graph.py",
+  "old": "                if pending is not None and survivors == active:",
+  "new": "                if pending is not None and len(survivors) > 0:"
+ },
+ {
+  "name": "read-slot-not-advanced",
+  "file": "src/heteroes/eval/strict_decoder_graph.py",
+  "old": "        self.slot ^= 1\n",
+  "new": ""
+ },
+ {
+  "name": "unchanged-failure-ignored",
+  "file": "src/heteroes/eval/strict_decoder_graph.py",
+  "old": "                    chosen, status = state.wait(pending)\n                    state.check(status)\n                    pending = queued",
+  "new": "                    chosen, status = state.wait(pending)\n                    pending = queued"
+ }
+]

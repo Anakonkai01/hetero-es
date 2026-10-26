@@ -119,6 +119,12 @@ class IntegerDecoderGraph(StrictDecoderGraph):
                 yield getattr(layer.mlp, name).weight
         yield self.model.lm_head.weight
 
+    def _projection_groups(self):
+        """Matrices projected together from one decode activation (one grouped streamed launch each)."""
+        for layer in self.model.model.layers:
+            yield tuple(getattr(layer.self_attn, name).weight for name in ("q_proj", "k_proj", "v_proj"))
+            yield (layer.mlp.gate_proj.weight, layer.mlp.up_proj.weight)
+
     def _project_many(self, value, modules, flag):
         return self.kernels.linear_many(
             value,
@@ -145,14 +151,57 @@ class IntegerDecoderGraph(StrictDecoderGraph):
             decode_target_ctas_per_sm=self._decode_target,
         )
 
+    def _fused(self, rows):
+        # Two or more rows use packed planes; one row keeps the unfused SIMT quantization.
+        return rows > 1
+
+    def _decode_norm_project_many(self, hidden, norm, epsilon, modules, flag):
+        if not self._fused(hidden.shape[0]):
+            return super()._decode_norm_project_many(hidden, norm, epsilon, modules, flag)
+        return self.kernels.linear_many(
+            None,
+            tuple(module.weight for module in modules),
+            tuple(getattr(module, "bias", None) for module in modules),
+            error_flag=flag,
+            decode_target_ctas_per_sm=self._decode_target,
+            prepared=self.kernels.rms_norm_quantized(hidden, norm, epsilon, error_flag=flag),
+        )
+
+    def _decode_norm_project(self, hidden, norm, epsilon, module, flag):
+        if not self._fused(hidden.shape[0]):
+            return super()._decode_norm_project(hidden, norm, epsilon, module, flag)
+        return self.kernels.linear_decode(
+            None,
+            module.weight,
+            getattr(module, "bias", None),
+            error_flag=flag,
+            target_ctas_per_sm=self._decode_target,
+            prepared=self.kernels.rms_norm_quantized(hidden, norm, epsilon, error_flag=flag),
+        )
+
+    def _decode_gated_project(self, gate, up, module, flag):
+        if not self._fused(gate.shape[0]) or gate.shape[1] > 12288:
+            return super()._decode_gated_project(gate, up, module, flag)
+        return self.kernels.linear_decode(
+            None,
+            module.weight,
+            getattr(module, "bias", None),
+            error_flag=flag,
+            target_ctas_per_sm=self._decode_target,
+            prepared=self.kernels.silu_mul_quantized(gate, up, error_flag=flag),
+        )
+
     def _request_workspace_bytes(self, capacity=1):
         self._check_kernel_configuration()
         weights = tuple(self._projection_weights())
         shapes = tuple((w.shape[1], w.shape[0]) for w in weights)
+        # Grouped launches use one partial matrix over all their outputs; adding those shapes keeps the
+        # no-reuse sum an upper bound whichever path a call takes.
+        grouped = tuple((group[0].shape[1], sum(w.shape[0] for w in group)) for group in self._projection_groups())
         key = (capacity, shapes)
         if key not in self._workspace_bounds:
             self._workspace_bounds[key] = integer_plan.decode_workspace_bound(
-                shapes,
+                shapes + grouped,
                 capacity,
                 self.kernels.multiprocessors,
                 max_partial_bytes=self.kernels.max_partial_bytes,
