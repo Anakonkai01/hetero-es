@@ -191,6 +191,87 @@ class IntegerDecoderGraph(StrictDecoderGraph):
             prepared=self.kernels.silu_mul_quantized(gate, up, error_flag=flag),
         )
 
+    def _decode_attention_input(self, hidden, layer, epsilon, cosine, sine, state, keys, values, flag):
+        if not self._fused(hidden.shape[0]):
+            return super()._decode_attention_input(hidden, layer, epsilon, cosine, sine, state, keys, values, flag)
+        attention, config = layer.self_attn, self.config
+        modules = (attention.q_proj, attention.k_proj, attention.v_proj)
+        weights = tuple(module.weight for module in modules)
+        biases = tuple(getattr(module, "bias", None) for module in modules)
+        prepared = self.kernels.rms_norm_quantized(hidden, layer.input_layernorm.weight, epsilon, error_flag=flag)
+        q = self.kernels.qkv_rope_store(
+            prepared,
+            weights,
+            biases,
+            cosine,
+            sine,
+            config.num_attention_heads,
+            config.num_key_value_heads,
+            state.ranges,
+            keys,
+            values,
+            error_flag=flag,
+            decode_target_ctas_per_sm=self._decode_target,
+        )
+        if q is not None:
+            return q
+        q, k, v = self.kernels.linear_many(
+            None, weights, biases, error_flag=flag, decode_target_ctas_per_sm=self._decode_target, prepared=prepared
+        )
+        q = self.kernels.rope(q, cosine, sine, config.num_attention_heads, error_flag=flag)
+        k = self.kernels.rope(k, cosine, sine, config.num_key_value_heads, error_flag=flag)
+        state.decode.store(k, v, state.ranges, keys, values)
+        return q
+
+    def _decode_residual_project(self, hidden, value, module, flag):
+        return self.kernels.linear_decode(
+            value,
+            module.weight,
+            getattr(module, "bias", None),
+            error_flag=flag,
+            target_ctas_per_sm=self._decode_target,
+            residual=hidden,
+        )
+
+    def _decode_mlp(self, hidden, layer, epsilon, flag):
+        if not self._fused(hidden.shape[0]):
+            return super()._decode_mlp(hidden, layer, epsilon, flag)
+        mlp = layer.mlp
+        biases = (getattr(mlp.gate_proj, "bias", None), getattr(mlp.up_proj, "bias", None))
+        prepared = self.kernels.rms_norm_quantized(
+            hidden, layer.post_attention_layernorm.weight, epsilon, error_flag=flag
+        )
+        planes = self.kernels.gate_up_silu_quantized(
+            prepared,
+            mlp.gate_proj.weight,
+            mlp.up_proj.weight,
+            biases,
+            error_flag=flag,
+            decode_target_ctas_per_sm=self._decode_target,
+        )
+        if planes is None:
+            gate, up = self.kernels.linear_many(
+                None,
+                (mlp.gate_proj.weight, mlp.up_proj.weight),
+                biases,
+                error_flag=flag,
+                decode_target_ctas_per_sm=self._decode_target,
+                prepared=prepared,
+            )
+            if gate.shape[1] > 12288:
+                gated = self.kernels.silu_mul(gate, up, error_flag=flag)
+                return self._decode_residual_project(hidden, gated, mlp.down_proj, flag)
+            planes = self.kernels.silu_mul_quantized(gate, up, error_flag=flag)
+        return self.kernels.linear_decode(
+            None,
+            mlp.down_proj.weight,
+            getattr(mlp.down_proj, "bias", None),
+            error_flag=flag,
+            target_ctas_per_sm=self._decode_target,
+            prepared=planes,
+            residual=hidden,
+        )
+
     def _request_workspace_bytes(self, capacity=1):
         self._check_kernel_configuration()
         weights = tuple(self._projection_weights())

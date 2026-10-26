@@ -410,7 +410,7 @@ def test_grouped_launch_falls_back_for_mixed_bias_single_rows_and_flags_overflow
 
 @gpu
 @pytest.mark.parametrize("magnitude_bits", [14, 22])
-@pytest.mark.parametrize("width", [1, 3, 64, 255, 896, 960, 2048, 4864, 8192])
+@pytest.mark.parametrize("width", [1, 3, 64, 255, 300, 896, 960, 2048, 4096, 4864, 8192])
 def test_fused_rmsnorm_and_silu_planes_equal_quantizing_the_unfused_rows(magnitude_bits, width):
     kernels = cuda_class()("cuda", magnitude_bits=magnitude_bits)
     gen = torch.Generator(device="cuda").manual_seed(width)

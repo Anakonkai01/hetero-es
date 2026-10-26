@@ -278,6 +278,34 @@ class StrictDecoderGraph(StrictDecoderPacked):
         """SiLU gate whose output feeds only this projection (an adapter may fuse the two)."""
         return self._decode_project(self.kernels.silu_mul(gate, up, error_flag=flag), module, flag)
 
+    def _decode_attention_input(self, hidden, layer, epsilon, cosine, sine, state, keys, values, flag):
+        """Rotated decode queries [heads, rows, dim]; rotated keys and values are stored in this layer's cache."""
+        attention, kernels = layer.self_attn, self.kernels
+        q, k, v = self._decode_norm_project_many(
+            hidden,
+            layer.input_layernorm.weight,
+            epsilon,
+            (attention.q_proj, attention.k_proj, attention.v_proj),
+            flag,
+        )
+        q = kernels.rope(q, cosine, sine, self.config.num_attention_heads, error_flag=flag)
+        k = kernels.rope(k, cosine, sine, self.config.num_key_value_heads, error_flag=flag)
+        state.decode.store(k, v, state.ranges, keys, values)
+        return q
+
+    def _decode_residual_project(self, hidden, value, module, flag):
+        """strict_add(hidden, projection of value): the residual update (an adapter may fuse the add)."""
+        return self.kernels.add(hidden, self._decode_project(value, module, flag), error_flag=flag)
+
+    def _decode_mlp(self, hidden, layer, epsilon, flag):
+        """hidden + down(silu(gate(norm(hidden))) * up(norm(hidden)))."""
+        gate, up = self._decode_norm_project_many(
+            hidden, layer.post_attention_layernorm.weight, epsilon, (layer.mlp.gate_proj, layer.mlp.up_proj), flag
+        )
+        return self.kernels.add(
+            hidden, self._decode_gated_project(gate, up, layer.mlp.down_proj, flag), error_flag=flag
+        )
+
     def _generation_begin(self):
         """Optional operator request state, always prepared while the generation lock is held."""
 
@@ -298,29 +326,13 @@ class StrictDecoderGraph(StrictDecoderPacked):
         layout = sc._PackedAttentionLayout(state.ranges, active, state.capacity * self.max_context, self.max_context)
         epsilon = float(config.rms_norm_eps)
         for number, layer in enumerate(self.model.model.layers):
-            attention = layer.self_attn
-            q, k, v = self._decode_norm_project_many(
-                hidden,
-                layer.input_layernorm.weight,
-                epsilon,
-                (attention.q_proj, attention.k_proj, attention.v_proj),
-                flag,
-            )
-            q = kernels.rope(q, cosine, sine, heads, error_flag=flag)
-            k = kernels.rope(k, cosine, sine, kv_heads, error_flag=flag)
-
             keys, values = state.caches[2 * number : 2 * number + 2]
-            state.decode.store(k, v, state.ranges, keys, values)
+            q = self._decode_attention_input(hidden, layer, epsilon, cosine, sine, state, keys, values, flag)
             mixed = kernels.attention_packed(
                 q, keys, values, layout, heads // kv_heads, float(self._attention_scale), error_flag=flag
             )
-            hidden = kernels.add(hidden, self._decode_project(mixed, attention.o_proj, flag), error_flag=flag)
-            gate, up = self._decode_norm_project_many(
-                hidden, layer.post_attention_layernorm.weight, epsilon, (layer.mlp.gate_proj, layer.mlp.up_proj), flag
-            )
-            hidden = kernels.add(
-                hidden, self._decode_gated_project(gate, up, layer.mlp.down_proj, flag), error_flag=flag
-            )
+            hidden = self._decode_residual_project(hidden, mixed, layer.self_attn.o_proj, flag)
+            hidden = self._decode_mlp(hidden, layer, epsilon, flag)
         logits = self._decode_norm_project(hidden, self.model.model.norm.weight, epsilon, self.model.lm_head, flag)
         state.decode.greedy(
             logits, state.seen, state.owners, state.tokens, state.result, flag, state.penalty, state.inverse

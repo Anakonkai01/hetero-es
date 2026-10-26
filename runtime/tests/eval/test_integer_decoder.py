@@ -291,7 +291,14 @@ def test_wide_decoder_with_split_groups_and_distinct_norms_matches_cpu(magnitude
     fed = [torch.cat((row[allowed], out[ids.shape[1] : -1]))[None] for row, allowed, out in zip(ids, mask, actual)]
     logits = torch.cat([oracle.forward_tokens(row.cpu())[0] for row in fed])
     assert torch.equal(bits(backend._session.last_logits.cpu()), bits(logits))
-    assert {"integer_stream_group", "integer_finish_group", "strict_rms_quant", "strict_silu_quant"} <= set(used)
+    assert {
+        "integer_stream_group",
+        "strict_rms_quant",
+        "finish_qkv_rope",
+        "finish_silu",
+        "pack_rows",
+        "finish_residual",
+    } <= set(used)
     # The workspace bound is a no-reuse sum: it covers every single-matrix partial plus every grouped partial.
     multiprocessors, budget = backend.kernels.multiprocessors, backend.kernels.max_partial_bytes
     for capacity in (1, 4):
