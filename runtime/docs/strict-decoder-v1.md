@@ -72,6 +72,15 @@ Warmup compiles outside capture and restores mutable selector state. In-place pe
 the original weight pointers. Rebinding a parameter, changing stream or batch capacity invalidates the session;
 old buffers are cleared and synchronized on their owning stream before release. Concurrent use is refused.
 
+The host keeps one decode step queued ahead: it replays step t+1 before reading step t, staging each step's
+published IDs and status in alternating pinned buffers. If no owner emitted EOS at step t, the queued step is
+exactly the step the unqueued loop would run. If some did, the queued step also computed the finished owners.
+Rows are computed independently (row-scaled projections, per-row attention and selection), so the survivors'
+IDs are kept and the extra rows dropped; their state is never read again before the request clears it. A failure
+status from such a step could come from a dropped row, so that step is undone (length advance, input ID and newly
+set seen flags; its KV writes sit at positions the replacement overwrites) and recomputed for the survivors only.
+No step is queued past the token limit. Failures of any other step are raised as before.
+
 KV, seen-token flags and selector state are cleared at request boundaries. Stable allocation/capture reuse does not
 reuse candidate content. `use_cache=False` uses the existing noncaptured strict path. `release_graph()` releases the
 retained session; `buffers()` exposes its live explicit tensors. Capture pools also retain intermediate allocations.

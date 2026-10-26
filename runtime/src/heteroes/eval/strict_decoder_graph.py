@@ -71,6 +71,10 @@ class _DecodeSession:
         self.graph = self.capture_key = self.last_logits = None
         self.capture_count, self.closed = 0, False
         self.penalty = self.inverse = 1.0
+        # Two pinned result slots let the host read step t while the GPU already runs step t+1.
+        self.staged = tuple(torch.empty(capacity + 1, dtype=torch.long, pin_memory=True) for _ in range(2))
+        self.events = tuple(torch.cuda.Event() for _ in range(2))
+        self.slot = 0
 
     def buffers(self):
         return chain(
@@ -137,14 +141,46 @@ class _DecodeSession:
                 source.append(first.as_strided((heads, total, dim), (total * dim, dim, 1)))
             self.decode.prefix(*source, spans, *self.caches[2 * layer : 2 * layer + 2])
 
-    def read(self):
-        result = self.result.tolist()  # one synchronized publication includes every arithmetic error bit
-        status = result[-1]
+    @staticmethod
+    def check(status):
         if status & 1:
             raise ReferenceArithmeticError("Nonfinite reference arithmetic")
         if status:
             raise ReferenceArithmeticError("Reference decode layout/domain failure")
+
+    def read(self):
+        result = self.result.tolist()  # one synchronized publication includes every arithmetic error bit
+        self.check(result[-1])
         return result[:-1]
+
+    def launch(self):
+        """Replay one decode step and stage its published result (tokens + status) without waiting for it."""
+        self.graph.replay()
+        self.slot ^= 1
+        count = self.owners.numel() + 1
+        self.staged[self.slot][:count].copy_(self.result, non_blocking=True)
+        self.events[self.slot].record(self.stream)
+        return self.slot, count
+
+    def wait(self, handle):
+        """Return (tokens, status) of a launched step; the status is the step's complete error publication."""
+        slot, count = handle
+        self.events[slot].synchronize()
+        result = self.staged[slot][:count].tolist()
+        return result[:-1], result[-1]
+
+    @torch.inference_mode()
+    def undo(self, owners, previous, speculative, histories, outputs):
+        """Remove one speculative step's effects: its length advance, token and newly set seen flags.
+
+        Its KV writes sit at each owner's next position, which the replacement step overwrites before reading.
+        """
+        index = torch.tensor(owners, dtype=torch.long, device=self.device)
+        self.lengths[index] -= 1
+        self.tokens[index] = torch.tensor(previous, dtype=torch.long, device=self.device)
+        for owner, token in zip(owners, speculative):
+            if token not in outputs[owner] and token not in histories[owner][0].tolist():
+                self.seen[owner, token] = 0
 
     def capture(self, key):
         # Warmup compiles every specialization outside capture. Restore mutable selector state afterwards;
@@ -340,6 +376,11 @@ class StrictDecoderGraph(StrictDecoderPacked):
             chosen = state.read()
             del logits
             outputs = [[] for _ in histories]
+            # One step stays queued ahead of the host. Rows are computed independently, so a step queued
+            # before some owners emitted EOS is still exact for the survivors; the extra rows are dropped. If
+            # that step reports a failure, which could come from a dropped row, it is undone and recomputed
+            # with only the survivors, exactly as the unpipelined loop would have run it.
+            pending = None
             for step in range(max_new_tokens):
                 survivors = []
                 for owner, token in zip(active, chosen):
@@ -348,12 +389,36 @@ class StrictDecoderGraph(StrictDecoderPacked):
                         survivors.append(owner)
                 if not survivors or step + 1 == max_new_tokens:
                     break
+                if pending is not None and survivors == active:
+                    queued = state.launch() if step + 2 < max_new_tokens else None
+                    chosen, status = state.wait(pending)
+                    state.check(status)
+                    pending = queued
+                    continue
+                if pending is not None:
+                    speculative, status = state.wait(pending)
+                    pending = None
+                    if not status:
+                        keep = set(survivors)
+                        chosen = [token for owner, token in zip(active, speculative) if owner in keep]
+                        active = survivors
+                        continue
+                    state.undo(active, chosen, speculative, histories, outputs)
+                    active = survivors
+                    key = state.select(active, penalty, inverse)
+                    if state.graph is None:
+                        state.capture(key)
+                    state.graph.replay()
+                    chosen = state.read()
+                    continue
                 active = survivors
                 key = state.select(active, penalty, inverse)
                 if state.graph is None:
                     state.capture(key)
-                state.graph.replay()
-                chosen = state.read()
+                current = state.launch()
+                pending = state.launch() if step + 2 < max_new_tokens else None
+                chosen, status = state.wait(current)
+                state.check(status)
             completion = torch.full((capacity, max(map(len, outputs))), pad, dtype=torch.long, device=self.device)
             for i, row in enumerate(outputs):
                 completion[i, : len(row)] = torch.tensor(row, dtype=torch.long, device=self.device)

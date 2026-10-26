@@ -61,23 +61,31 @@ class IntegerDecoderGraph(StrictDecoderGraph):
         max_partial_bytes=16 * 1024**2,
         decode_target_ctas_per_sm=8,
         weight_load="auto",
+        mma_schedule="auto",
     ):
         integer_reference._precision(magnitude_bits)
         integer_cuda.weight_read_plan(magnitude_bits, "sm_120", weight_load)
+        integer_cuda._mma_schedule(mma_schedule)
         try:
             integer_plan.validate_target(decode_target_ctas_per_sm)
         except ValueError as error:
             raise ReferenceArithmeticError(str(error)) from error
         super().__init__(model, max_context=max_context, allow_fixture=allow_fixture, max_graph_bytes=max_graph_bytes)
         self.kernels = integer_cuda.IntegerCudaKernels(
-            self.device, magnitude_bits=magnitude_bits, max_partial_bytes=max_partial_bytes, weight_load=weight_load
+            self.device,
+            magnitude_bits=magnitude_bits,
+            max_partial_bytes=max_partial_bytes,
+            weight_load=weight_load,
+            mma_schedule=mma_schedule,
         )
         self._decode_target = decode_target_ctas_per_sm
         self._workspace_bounds = {}
         self._kernel_configuration = self._current_kernel_configuration()
         self.identity = {
             **_compose(self.identity, GRAPH_BACKEND, magnitude_bits),
-            "kernels": integer_cuda.static_identity(magnitude_bits, max_partial_bytes, weight_load=weight_load),
+            "kernels": integer_cuda.static_identity(
+                magnitude_bits, max_partial_bytes, weight_load=weight_load, mma_schedule=mma_schedule
+            ),
             "decodeExecution": {**integer_plan.identity(), "targetCtasPerSm": decode_target_ctas_per_sm},
         }
         self.fingerprint = canonical_json_hash(self.identity)
@@ -95,6 +103,7 @@ class IntegerDecoderGraph(StrictDecoderGraph):
                 "device",
                 "multiprocessors",
                 "weight_load",
+                "mma_schedule",
             )
         )
 

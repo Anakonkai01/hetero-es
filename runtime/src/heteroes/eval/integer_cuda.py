@@ -18,6 +18,16 @@ from heteroes.eval import strict_cuda as sc
 from heteroes.eval.reference_ops import ReferenceArithmeticError
 
 INTEGER_CUDA_VERSION = "row_scaled_integer_mma_cuda_v1_experimental"
+# "stream" schedules eligible MMA projections (K % 16 == 0, 16-byte aligned operands) through the multistage
+# kernel; "tile" keeps the per-warp tile kernel. Both compute the same exact integer dot and final encoding.
+MMA_SCHEDULES = ("auto", "tile", "stream")
+STREAM_COLUMNS = 64
+
+
+def _mma_schedule(requested):
+    if requested not in MMA_SCHEDULES:
+        raise ReferenceArithmeticError("Integer MMA schedule must be auto, tile or stream")
+    return "stream" if requested == "auto" else requested
 
 
 def weight_read_plan(magnitude_bits, arch, requested):
@@ -29,9 +39,10 @@ def weight_read_plan(magnitude_bits, arch, requested):
     return requested
 
 
-def static_identity(magnitude_bits=14, max_partial_bytes=16 * 1024**2, *, weight_load="auto"):
+def static_identity(magnitude_bits=14, max_partial_bytes=16 * 1024**2, *, weight_load="auto", mma_schedule="auto"):
     reference._precision(magnitude_bits)
     weight_read_plan(magnitude_bits, "sm_120", weight_load)
+    _mma_schedule(mma_schedule)
     if type(max_partial_bytes) is not int or max_partial_bytes < 1:
         raise ReferenceArithmeticError("Integer workspace budget must be a positive integer")
     return {
@@ -43,6 +54,8 @@ def static_identity(magnitude_bits=14, max_partial_bytes=16 * 1024**2, *, weight
         "activationPacking": "radix_planes_once_v1_experimental",
         "weightLoad": weight_load,
         "weightReadPolicy": "raw_half_prefetch2_sm86_sm120_b22_v2_experimental",
+        "mmaSchedule": mma_schedule,
+        "streamPolicy": "multistage_cp_async_k16_aligned_v1_experimental",
         "decodePlanning": planning.identity(),
         "hardwareQualified": False,
     }
@@ -376,14 +389,198 @@ extern "C" __global__ void integer_finish(const i64* partials,const u16* bias,co
     if((__float_as_uint(v)&0x7f800000u)==0x7f800000u) atomicOr(error,1);
   }
 }
+// ---- Multistage streamed decode projection (same exact integer dot as integer_linear) ----
+// Requires WIDTH % 16 == 0 and 16-byte aligned x/w. A CTA owns NT=64 output columns and one row tile;
+// each warp owns 16 columns (two n8 MMA tiles). Raw FP16 weights and packed activation planes stream
+// through STAGES shared-memory buffers of KS=64 K values with cp.async. The K order inside each k32 MMA
+// step is permuted identically for both operands (thread t holds physical K 8t..8t+7); an exact integer
+// sum does not depend on the order of its terms, so every int32 degree accumulator and output is unchanged.
+#define NT 64
+#define KS 64
+#ifndef STAGES
+#define STAGES 3
+#endif
+#define MT (M_GROUPS*16)
+#define W_STAGE (NT*KS*2)
+#define A_STAGE (DIGITS*MT*KS)
+
+__device__ __forceinline__ void cp16(void* destination, const void* source, int bytes) {
+  unsigned long long address;
+  asm volatile("cvta.to.shared.u64 %0, %1;" : "=l"(address) : "l"(destination));
+  asm volatile("cp.async.cg.shared.global [%0], [%1], 16, %2;" ::
+               "r"((unsigned)address), "l"(source), "r"(bytes) : "memory");
+}
+
+__device__ __forceinline__ void stream_stage(unsigned char* sw, unsigned char* sa, const qi_t* x, const u16* w,
+                                             int rows, int outputs, int first, int column0, int k0) {
+  int tid=threadIdx.x;
+  // Weights: NT rows of 8 sixteen-byte chunks. Chunk c of row r lives at chunk c^((r&1)<<2).
+  #pragma unroll
+  for(int i=0;i<NT*8/128;++i) {
+    int c=tid+i*128, r=c>>3, chunk=c&7, n=column0+r, k=k0+chunk*8;
+    int valid=(n<outputs && k<WIDTH) ? 16 : 0;
+    cp16(sw+r*128+((chunk^((r&1)<<2))<<4), valid ? (const void*)(w+(size_t)n*WIDTH+k) : (const void*)w, valid);
+  }
+  // Activation planes: DIGITS*MT rows of four chunks; chunk c of row r lives at c^(((r>>1)&1)<<1).
+  for(int c=tid;c<DIGITS*MT*4;c+=128) {
+    int d=c/(MT*4), rr=(c>>2)%MT, chunk=c&3, row=first+rr, k=k0+chunk*16;
+    int valid=(row<rows && k<WIDTH) ? 16 : 0;
+    const unsigned* source=(const unsigned*)x+((size_t)d*rows+row)*(WIDTH/4)+k/4;
+    cp16(sa+(d*MT+rr)*KS+((chunk^(((rr>>1)&1)<<1))<<4), valid ? (const void*)source : (const void*)x, valid);
+  }
+}
+
+#if FAST_CONVERT
+#if MAGNITUDE_BITS != 22
+#error "The byte-digit conversion is proved for B22 only (B14 row scales can be negative)"
+#endif
+__device__ __forceinline__ unsigned digit_source(u16 h, unsigned scale) {
+  // Same exact exponent-bit scaling as quant_half; B22 adds s<<23 with s=21-exponent in [6,45]. A zero half
+  // becomes a normal float of magnitude below 2^-80. An Inf/NaN half (exponent field 255) wraps modulo 2^32
+  // to exponent field s-1 with any sign: also below 2^-80. Both round to integer zero, as quant_half returns
+  // zero for them (an exhaustive test covers every half and row exponent). For |g|<2^22, g+1.5*2^23 lies in
+  // [2^23,2^24) where the FP32 ulp is one, so add.rn performs the same ties-to-even integer rounding as
+  // cvt.rni and leaves bits = 0x4B400000 + q. Adding 0x8080-0x400000 gives q+0x8080 (plus 0x4B000000), whose
+  // bytes are the balanced radix-256 digits: byte0 = d0^0x80, byte1 = d1^0x80, byte2 = d2.
+  float g=__uint_as_float(__float_as_uint(widen(h))+scale), r;
+  asm("add.rn.f32 %0, %1, 0f4B400000;" : "=f"(r) : "f"(g));
+  return __float_as_uint(r)+(0x8080u-0x400000u);
+}
+__device__ __forceinline__ unsigned prmt(unsigned a, unsigned b, unsigned selector) {
+  unsigned r;
+  asm("prmt.b32 %0, %1, %2, %3;" : "=r"(r) : "r"(a), "r"(b), "r"(selector));
+  return r;
+}
+__device__ __forceinline__ void convert4(unsigned* digits, unsigned h01, unsigned h23, unsigned scale) {
+  unsigned v0=digit_source((u16)h01,scale), v1=digit_source((u16)(h01>>16),scale);
+  unsigned v2=digit_source((u16)h23,scale), v3=digit_source((u16)(h23>>16),scale);
+  unsigned t01=prmt(v0,v1,0x5140u), t23=prmt(v2,v3,0x5140u);
+  digits[0]=prmt(t01,t23,0x5410u)^0x80808080u;
+  digits[1]=prmt(t01,t23,0x7632u)^0x80808080u;
+  digits[2]=prmt(prmt(v0,v1,0x0062u),prmt(v2,v3,0x0062u),0x5410u);
+}
+#else
+__device__ __forceinline__ void convert4(unsigned* digits, unsigned h01, unsigned h23, int exponent) {
+  #pragma unroll
+  for(int d=0;d<DIGITS;++d) digits[d]=0;
+  pack_digits(digits,quant_half((u16)h01,exponent),0);
+  pack_digits(digits,quant_half((u16)(h01>>16),exponent),1);
+  pack_digits(digits,quant_half((u16)h23,exponent),2);
+  pack_digits(digits,quant_half((u16)(h23>>16),exponent),3);
+}
+#endif
+
+extern "C" __global__ void __launch_bounds__(128)
+integer_stream(const qi_t* x,const u16* w,const u16* bias,const int* ex,const int* ew,
+               float* out,int* error,i64* partials,int rows,int outputs) {
+  __shared__ __align__(16) unsigned char weights_shared[STAGES][W_STAGE];
+  __shared__ __align__(16) unsigned char inputs_shared[STAGES][A_STAGE];
+  int lane=threadIdx.x&31, warp=threadIdx.x>>5, group=lane>>2, thread=lane&3;
+  int column0=blockIdx.x*NT;
+  const int tiles=(WIDTH+KS-1)/KS, per=(tiles+SPLIT_K-1)/SPLIT_K;
+  int begin=blockIdx.z*per, count=min(tiles,begin+per)-begin;
+#if FAST_CONVERT
+  unsigned scale[2];
+#else
+  int scale[2];
+#endif
+  #pragma unroll
+  for(int j=0;j<2;++j) {
+    int n=column0+warp*16+j*8+group, e=n<outputs ? ew[n] : 0;
+#if FAST_CONVERT
+    scale[j]=(unsigned)((MAGNITUDE_BITS-1-e)*0x800000);
+#else
+    scale[j]=e;
+#endif
+  }
+  for(int first=blockIdx.y*MT;first<rows;first+=gridDim.y*MT) {
+    int accum[M_GROUPS][2][2*DIGITS-1][4]={};
+    #pragma unroll
+    for(int s=0;s<STAGES-1;++s) {
+      if(s<count) stream_stage(weights_shared[s],inputs_shared[s],x,w,rows,outputs,first,column0,(begin+s)*KS);
+      asm volatile("cp.async.commit_group;" ::: "memory");
+    }
+    for(int it=0;it<count;++it) {
+      asm volatile("cp.async.wait_group %0;" :: "n"(STAGES-2) : "memory");
+      __syncthreads();
+      int next=it+STAGES-1;
+      if(next<count) stream_stage(weights_shared[next%STAGES],inputs_shared[next%STAGES],x,w,rows,outputs,first,
+                                  column0,(begin+next)*KS);
+      asm volatile("cp.async.commit_group;" ::: "memory");
+      const unsigned char* sw=weights_shared[it%STAGES];
+      const unsigned char* sa=inputs_shared[it%STAGES];
+      #pragma unroll
+      for(int step=0;step<KS/32;++step) {
+        unsigned b[2][DIGITS][2];
+        #pragma unroll
+        for(int j=0;j<2;++j) {
+          int r=warp*16+j*8+group;
+          uint4 h=*(const uint4*)(sw+r*128+(((step*4+thread)^((r&1)<<2))<<4));
+          unsigned lo[DIGITS], hi[DIGITS];
+          convert4(lo,h.x,h.y,scale[j]);
+          convert4(hi,h.z,h.w,scale[j]);
+          #pragma unroll
+          for(int d=0;d<DIGITS;++d) {b[j][d][0]=lo[d]; b[j][d][1]=hi[d];}
+        }
+        #pragma unroll
+        for(int m=0;m<M_GROUPS;++m) {
+          unsigned a[DIGITS][4];
+          int row=m*16+group, offset=(((step*2+(thread>>1))^(((row>>1)&1)<<1))<<4)+(thread&1)*8;
+          #pragma unroll
+          for(int d=0;d<DIGITS;++d) {
+            uint2 top=*(const uint2*)(sa+(d*MT+row)*KS+offset);
+            uint2 bottom=*(const uint2*)(sa+(d*MT+row+8)*KS+offset);
+            a[d][0]=top.x; a[d][2]=top.y; a[d][1]=bottom.x; a[d][3]=bottom.y;
+          }
+          #pragma unroll
+          for(int i=0;i<DIGITS;++i) {
+            #pragma unroll
+            for(int jd=0;jd<DIGITS;++jd) {
+              #pragma unroll
+              for(int j=0;j<2;++j) mma(accum[m][j][i+jd],a[i],b[j][jd]);
+            }
+          }
+        }
+      }
+    }
+    asm volatile("cp.async.wait_group 0;" ::: "memory");
+    __syncthreads(); // every warp is done with the buffers before the next row tile refills them
+    #pragma unroll
+    for(int m=0;m<M_GROUPS;++m) {
+      #pragma unroll
+      for(int j=0;j<2;++j) {
+        #pragma unroll
+        for(int d=0;d<4;++d) {
+          int row=first+m*16+group+(d>>1)*8, n=column0+warp*16+j*8+thread*2+(d&1);
+          if(row<rows && n<outputs) {
+            i64 sum=0;
+            #pragma unroll
+            for(int degree=0;degree<2*DIGITS-1;++degree) sum+=(i64)accum[m][j][degree][d]*(1ll<<(8*degree));
+#if SPLIT_K > 1
+            partials[((size_t)blockIdx.z*rows+row)*outputs+n]=sum;
+#else
+            float v=encode(sum,ex[row]+ew[n]-2*(MAGNITUDE_BITS-1),error);
+            if(HAS_BIAS) v=add_rn(v,widen(bias[n]));
+            out[(size_t)row*outputs+n]=v;
+            if((__float_as_uint(v)&0x7f800000u)==0x7f800000u) atomicOr(error,1);
+#endif
+          }
+        }
+      }
+    }
+  }
+}
 """
 )
 
 
 class IntegerCudaKernels(sc.StrictCudaKernels):
-    def __init__(self, device, *, magnitude_bits=14, max_partial_bytes=16 * 1024**2, weight_load="auto"):
+    def __init__(
+        self, device, *, magnitude_bits=14, max_partial_bytes=16 * 1024**2, weight_load="auto", mma_schedule="auto"
+    ):
         reference._precision(magnitude_bits)
         weight_read_plan(magnitude_bits, "sm_120", weight_load)
+        _mma_schedule(mma_schedule)
         if type(max_partial_bytes) is not int or max_partial_bytes < 1:
             raise ReferenceArithmeticError("Integer workspace budget must be a positive integer")
         super().__init__(device)
@@ -391,6 +588,7 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
             raise ReferenceArithmeticError("Integer MMA prototype currently requires sm80 or newer")
         self.magnitude_bits = magnitude_bits
         self.weight_load = weight_load
+        self.mma_schedule = mma_schedule
         self.max_partial_bytes = max_partial_bytes
         self.multiprocessors = int(torch.cuda.get_device_properties(self.device).multi_processor_count)
         self._weight_metadata, self._request_active = {}, False
@@ -461,13 +659,19 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
     def identity(self):
         identity = {
             **super().identity(),
-            **static_identity(self.magnitude_bits, self.max_partial_bytes, weight_load=self.weight_load),
+            **static_identity(
+                self.magnitude_bits,
+                self.max_partial_bytes,
+                weight_load=self.weight_load,
+                mma_schedule=self.mma_schedule,
+            ),
             "integerKernel": INTEGER_CUDA_VERSION,
             "integerReference": reference.identity(self.magnitude_bits),
             "integerSourceSha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
             "maxPartialBytes": self.max_partial_bytes,
             "multiprocessors": self.multiprocessors,
             "weightLoadEffective": weight_read_plan(self.magnitude_bits, self.arch, self.weight_load),
+            "mmaScheduleEffective": _mma_schedule(self.mma_schedule),
             "hardwareQualified": False,
         }
         identity["fingerprint"] = canonical_json_hash({k: v for k, v in identity.items() if k != "fingerprint"})
@@ -493,15 +697,33 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
                 PACKED_INPUT=int(packed_input),
                 WEIGHT_READ32=int(paired),
                 WEIGHT_PREFETCH=int(prefetch),
+                FAST_CONVERT=int(self.magnitude_bits == 22),
             )
             header = "".join(f"#define {k} {v}\n" for k, v in defines.items())
             self._functions[name] = self._compile(
                 name,
                 header + _SOURCE,
-                ["integer_input", "integer_weights", "integer_linear", "integer_simt", "integer_finish"],
+                [
+                    "integer_input",
+                    "integer_weights",
+                    "integer_linear",
+                    "integer_simt",
+                    "integer_finish",
+                    "integer_stream",
+                ],
                 integer_mma=True,
             )
         return self._functions[name]
+
+    def _stream_eligible(self, width, quantized, weight):
+        # cp.async moves 16-byte chunks: whole packed-input chunks per row and 16-byte aligned weight rows.
+        return (
+            _mma_schedule(self.mma_schedule) == "stream"
+            and width % 16 == 0
+            and quantized.ndim == 3
+            and quantized.data_ptr() % 16 == 0
+            and weight.data_ptr() % 16 == 0
+        )
 
     @torch.inference_mode()
     def quantize_input(self, value, *, error_flag=None, _functions=None, _packed=False):
@@ -674,14 +896,20 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
         ew = self._weight_exponents(weight, flag)
         out = torch.empty((rows, outputs), dtype=torch.float32, device=self.device)
         partials = torch.empty((split_k, rows, outputs), dtype=torch.int64, device=self.device) if split_k > 1 else out
+        if mode == "mma" and self._stream_eligible(width, quantized, weight):
+            entry, grid, block = "integer_stream", (-(-outputs // STREAM_COLUMNS), -(-rows // row_tile), split_k), 128
+        elif mode == "simt":
+            entry, grid, block = "integer_simt", (-(-outputs // 8), rows, split_k), 256
+        else:
+            entry, grid, block = (
+                "integer_linear",
+                (-(-outputs // (warps * 8)), -(-rows // row_tile), split_k),
+                32 * warps,
+            )
         self._launch(
-            functions["integer_simt" if mode == "simt" else "integer_linear"],
-            grid=(
-                -(-outputs // (8 if mode == "simt" else warps * 8)),
-                min(65535, rows if mode == "simt" else -(-rows // row_tile)),
-                split_k,
-            ),
-            block=(256 if mode == "simt" else 32 * warps, 1),
+            functions[entry],
+            grid=(grid[0], min(65535, grid[1]), grid[2]),
+            block=(block, 1),
             pointers=(quantized, weight, weight if bias is None else bias, ex, ew, out, flag, partials),
             integers=(rows, outputs),
         )
