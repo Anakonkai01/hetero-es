@@ -6,13 +6,36 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
 
 ## Tóm tắt cho chủ dự án (2026-10-27)
 
-- **Phiên Claude đêm 26→27/10 đã chốt theo yêu cầu, bàn giao Codex.** Đọc
-  [bàn giao mới](handoff-codex-after-claude-night-2026-10-27.md). Windows trực tiếp của bản prefill đã nghiệm thu.
-  Commit `7ca91112` (prefill GEMM 2 tầng/3 khối mỗi SM, gộp tính số mũ trọng số): Qwen B32 5070 Ti short32
-  **8913 → 9155** (+2,7%), chat128 **9107 → 9240** (+1,5%), token giống hệt; 249 test GPU + 12 test mới qua.
-  Còn mở: 3060, Windows, mutation, parity đã train, check-all. Việc tiếp theo đã được duyệt: **argmax lm_head
-  chính xác bằng cận số nguyên** (ước tính +4,5–5%). Nhiều hướng khác đã thử và bỏ, có số đo.
-  [Bằng chứng](evidence/2026-10-27-strict-prefill-gemm-weights/README.md). Mục tiêu gần vLLM **chưa đạt** (~66%).
+- **Goal tiến sát 80% vLLM vẫn active; chưa đạt.** Nhánh
+  `work/codex-frozen-perf-2026-10-25`. Bản ghép `0eb86cb9` đo Qwen B32 xen kẽ hai vòng:
+  short32 **9393 → 9866** (+5,04%, **71,3%** đối chứng vLLM 13835), chat128 **9557 → 9890**
+  (+3,48%); hash token khớp. Gồm `5c2f849c` giảm việc phía host, `eebf689f` nạp activation bằng
+  ldmatrix trên B22/SM120, `0eb86cb9` chia K cân bằng hơn trên B22/SM120. 3060 giữ cách chia K cũ vì
+  pilot mới giảm short32 1,24%. Không đổi số học B22 hay dùng đường vLLM để đóng goal.
+- **Đã chốt đầy đủ bản lm_head `267ba0b5`**: 5070 Ti/3060 WSL2 **1054/1054 test**, native Windows
+  **896 test**, **10/10 mutant**, trained Qwen parent/canonical ±/restore/EOS khớp cả ba host; Smol/Tiny
+  khớp Linux/WSL2. Byte gói Worker/SDK khớp đủ **143 file**. Commit `af99a399` niêm phong
+  [bằng chứng và giới hạn](evidence/2026-10-27-strict-bounded-lm-head/README.md). Các gate còn thiếu của
+  prefill `7ca91112` đã được xử lý trong đợt này; không nhận hai lần lỗi khởi động WSL là test qua.
+- **Bản ghép `0eb86cb9` đang chạy full GPU suite và WSL2 → native Windows**, source đóng băng tại
+  `.scratch/codex-20261027-combined/stage`. Đã qua **47 test nhắm thay đổi**, **4/4 mutant CPU**,
+  **check-all ALL PASS** (runtime CPU **3252 pass/942 skip**, backend **452 pass**), Linux packaging/import.
+  Worker archive và SDK trong Server đã đối chiếu đủ **143 file** với commit runtime. Native installer và
+  managed lifecycle chưa được nghiệm thu. Đọc `evidence/2026-10-27-strict-combined-acceptance/`; controller
+  và raw receipts ở đó còn đang ghi, chưa niêm phong. `e496cc18` sửa giới hạn buffer của bộ kiểm định dạng.
+- **Đã đo các hướng lớn hơn, không tiếp tục hướng không có lợi.** Capture prefill mới chỉ +0,27%; chuẩn
+  bị trọng số B22 từng phép chiếu và gộp SiLU prefill không giúp short32. Mixed MLP B14/attention+head B22
+  đạt khoảng 10076 token/s nhưng đổi contract, không dùng làm kết quả goal. Khảo sát B14 trên 64 câu ×
+  parent/8 candidate/restored: hai GPU khớp từng loại precision, song B14 đổi **5/576 reward**, ties và hệ
+  số ES so với B22. Commit `b64cc433` lưu toàn bộ khảo sát, phạm vi và các pilot bị bỏ;
+  [đọc đối chứng toàn luồng](evidence/2026-10-27-whole-path-controls/README.md).
+- Hướng đang mở: **bảng nghịch đảo chính xác**, giữ đúng năm bước Newton cũ. CPU đã đối chiếu hết
+  **1,67 tỷ** mẫu FP32 trong miền cho phép; bảng nén khoảng **4 MiB**, khôi phục đúng mọi mantissa.
+  Đây mới là feasibility, chưa có số đo GPU/toàn decoder. Test/benchmark GPU đã xếp sau full suite để
+  tránh nhiễu; thiết kế và log trong `evidence/2026-10-27-strict-reciprocal-table/`.
+- Chủ dự án đã cho toàn quyền SSH trong phiên. Máy 5070 Ti của **Nhựt đã tắt theo yêu cầu** sau khi xác
+  nhận rảnh; đang dùng 5070 Ti của Nhân và 3060 của Thảo. Không đổi approval/contribution lab, không
+  triển khai, không learning run, không sửa môi trường `ai`. Chưa push/merge. M0–M6 vẫn chờ sau hiệu năng.
 
 ## Tóm tắt trước đó (2026-10-26)
 
