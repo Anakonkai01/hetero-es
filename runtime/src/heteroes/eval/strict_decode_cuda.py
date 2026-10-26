@@ -43,7 +43,7 @@ extern "C" __global__ void decode_prefix(const float* k, const float* v, const i
   int i=blockIdx.x, h=blockIdx.y, d=threadIdx.x;
   if (d >= dim) return;
   int start=spans[3*i], length=spans[3*i+1], dest=spans[3*i+2];
-  for(int p=0;p<length;++p) {
+  for(int p=blockIdx.z;p<length;p+=gridDim.z) {
     keys[((size_t)h*total+dest+p)*dim+d]=k[((size_t)h*source_tokens+start+p)*dim+d];
     values[((size_t)h*total+dest+p)*dim+d]=v[((size_t)h*source_tokens+start+p)*dim+d];
   }
@@ -197,7 +197,7 @@ class DecodeKernels:
         heads, total, dim = keys.shape
         self.kernels._launch(
             self.functions["decode_prefix"],
-            grid=(spans.shape[0], heads),
+            grid=(spans.shape[0], heads, 16),  # positions are strided over 16 CTAs per sequence and head
             block=(32 * -(-dim // 32), 1),
             pointers=(key, value, spans, keys, values),
             integers=(key.shape[1], total, dim),
