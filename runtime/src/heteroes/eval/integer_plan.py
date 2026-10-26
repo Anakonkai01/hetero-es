@@ -9,7 +9,7 @@ from dataclasses import dataclass
 import hashlib
 from pathlib import Path
 
-POLICY_VERSION = "occupancy_split_k_v1_experimental"
+POLICY_VERSION = "occupancy_split_k_v2_experimental"
 DEFAULT_PARTIAL_BYTES = 16 * 1024**2
 DEFAULT_TARGET_CTAS_PER_SM = 8
 
@@ -42,6 +42,7 @@ def decode_linear_plan(
     *,
     max_partial_bytes=DEFAULT_PARTIAL_BYTES,
     target_ctas_per_sm=DEFAULT_TARGET_CTAS_PER_SM,
+    resident_ctas_per_sm=None,
 ):
     _integer("width", width, 1, 32768)
     _integer("rows", rows, 1, 128)
@@ -49,14 +50,21 @@ def decode_linear_plan(
     _integer("multiprocessors", multiprocessors)
     _integer("partial budget", max_partial_bytes)
     validate_target(target_ctas_per_sm)
+    if resident_ctas_per_sm is not None:
+        _integer("resident CTAs per SM", resident_ctas_per_sm, 1, 32)
     tile, split = (16 if rows <= 16 else 32), 1
     mode = "simt" if rows == 1 else "mma"
     if rows > 1 and width >= 256 and target_ctas_per_sm:
         blocks = ((outputs + 31) // 32) * ((rows + tile - 1) // tile)
-        while split < 8 and blocks * split < target_ctas_per_sm * multiprocessors:
-            split *= 2
-        while split > 1 and (split * rows * outputs * 8 > max_partial_bytes or split > (width + 31) // 32):
-            split //= 2
+        if resident_ctas_per_sm is not None and tile == 32 and width % 16 == 0:
+            kt, resident = (width + 63) // 64, resident_ctas_per_sm * multiprocessors
+            candidates = [s for s in range(1, min(8, kt) + 1) if s == 1 or s * rows * outputs * 8 <= max_partial_bytes]
+            split = min(candidates, key=lambda s: (((blocks * s + resident - 1) // resident) * ((kt + s - 1) // s), s))
+        else:
+            while split < 8 and blocks * split < target_ctas_per_sm * multiprocessors:
+                split *= 2
+            while split > 1 and (split * rows * outputs * 8 > max_partial_bytes or split > (width + 31) // 32):
+                split //= 2
     partial = 0 if split == 1 else split * rows * outputs * 8
     return DecodeLinearPlan(width, rows, outputs, tile, split, mode, partial)
 
@@ -68,6 +76,7 @@ def decode_workspace_bound(
     *,
     max_partial_bytes=DEFAULT_PARTIAL_BYTES,
     target_ctas_per_sm=DEFAULT_TARGET_CTAS_PER_SM,
+    resident_ctas_per_sm=None,
 ):
     """Sum independent peak partial payloads over ALL possible active batches, including repeated projections.
 
@@ -87,6 +96,7 @@ def decode_workspace_bound(
             multiprocessors,
             max_partial_bytes=max_partial_bytes,
             target_ctas_per_sm=target_ctas_per_sm,
+            resident_ctas_per_sm=resident_ctas_per_sm,
         )
     return sum(
         copies
@@ -98,6 +108,7 @@ def decode_workspace_bound(
                 multiprocessors,
                 max_partial_bytes=max_partial_bytes,
                 target_ctas_per_sm=target_ctas_per_sm,
+                resident_ctas_per_sm=resident_ctas_per_sm,
             ).partial_bytes
             for rows in range(1, capacity + 1)
         )
@@ -110,6 +121,8 @@ def identity():
         "policy": POLICY_VERSION,
         "rowTiles": [16, 32],
         "maxSplitK": 8,
+        "splitCandidates": "all_integers_1_to_8_when_residency_is_given_otherwise_powers_of_two",
+        "residentPolicy": "three_ctas_sm120_b22_stream_default_target8_rows17_to_128_k_aligned16",
         "minSplitWidth": 256,
         "maxBatch": 128,
         "singleRow": "simt_split1",

@@ -1528,6 +1528,13 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
         self._finish(flag, error_flag)
         return q
 
+    def _decode_residency(self, target):
+        return (
+            3
+            if self.magnitude_bits == 22 and self.arch == "sm_120" and self.mma_schedule != "tile" and target == 8
+            else None
+        )
+
     def _decode_plan(self, width, rows, outputs, target):
         try:
             return planning.decode_linear_plan(
@@ -1537,6 +1544,7 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
                 self.multiprocessors,
                 max_partial_bytes=self.max_partial_bytes,
                 target_ctas_per_sm=target,
+                resident_ctas_per_sm=self._decode_residency(target),
             )
         except ValueError as error:
             raise ReferenceArithmeticError(str(error)) from error
@@ -1682,8 +1690,8 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
             raise ReferenceArithmeticError("Integer row tile must be 16 or 32")
         if type(warps) is not int or warps not in (4, 8):
             raise ReferenceArithmeticError("Integer warp count must be 4 or 8")
-        if type(split_k) is not int or split_k not in (1, 2, 4, 8):
-            raise ReferenceArithmeticError("Integer split-K count must be 1, 2, 4 or 8")
+        if type(split_k) is not int or not 1 <= split_k <= 8:
+            raise ReferenceArithmeticError("Integer split-K count must be an integer from 1 to 8")
         if implementation not in ("auto", "mma", "simt"):
             raise ReferenceArithmeticError("Unknown integer execution implementation")
         if not isinstance(value, torch.Tensor) or value.dtype != torch.float32:

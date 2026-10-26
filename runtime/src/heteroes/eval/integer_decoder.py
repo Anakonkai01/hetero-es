@@ -318,6 +318,7 @@ class IntegerDecoderGraph(StrictDecoderGraph):
                 self.kernels.multiprocessors,
                 max_partial_bytes=self.kernels.max_partial_bytes,
                 target_ctas_per_sm=self._decode_target,
+                resident_ctas_per_sm=self.kernels._decode_residency(self._decode_target),
             )
         # Packed input replaces the FP32-sized quantization term already covered by graph_memory_bound.
         # ceil(K/4) word tails can exceed that term for very narrow K; cover every projection occurrence,

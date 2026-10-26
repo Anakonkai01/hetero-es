@@ -262,8 +262,9 @@ def test_integer_source_passes_the_instruction_audit_on_other_architectures(arch
     if not owner._nvdisasm:
         pytest.skip("nvdisasm unavailable")
     variants = [(896, 32, 1, 64, 0), (4864, 32, 8, 64, 0), (896, 16, 4, 64, 0), (80, 16, 2, 64, 0)]
+    variants += [(1040, 32, 5, 32, 0), (16, 16, 7, 64, 0)]
     if magnitude_bits == 22:
-        variants += [(896, 32, 8, 32, 1), (80, 16, 2, 64, 1)]
+        variants += [(896, 32, 8, 32, 1), (80, 16, 2, 64, 1), (4864, 32, 7, 32, 1)]
     for width, tile, split, columns, ldsm in variants:
         defines = {
             "WIDTH": width,
