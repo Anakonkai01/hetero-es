@@ -1,0 +1,22 @@
+..................................................................       [100%]
+858 passed in 640.23s (0:10:40)
+{"status": "ok", "out": "qwen-parity-3060-01.json", "wallSeconds": 1099.864878141001}
+{"status": "ok", "out": "smol-parity-3060-01.json", "wallSeconds": 19.98307241499424}
+{"status": "ok", "out": "tiny-parity-3060-01.json", "wallSeconds": 33.864749961998314}
+base qwen short32 1400.7 bc4a5504e37c
+base qwen chat128 1404.6 a9fad5ca48ed
+new qwen short32 2525.7 bc4a5504e37c
+new qwen chat128 2510.2 a9fad5ca48ed
+base qwen short32 1396.6 bc4a5504e37c
+base qwen chat128 1395.6 a9fad5ca48ed
+new qwen short32 2575.4 bc4a5504e37c
+new qwen chat128 2508.2 a9fad5ca48ed
+base smol short32 1635.2 068722232705
+new smol short32 2418.6 068722232705
+base smol short32 1680.5 068722232705
+new smol short32 2533.8 068722232705
+base tiny short32 667.2 db262d7ab9fa
+new tiny short32 1348.0 db262d7ab9fa
+base tiny short32 663.2 db262d7ab9fa
+new tiny short32 1359.9 db262d7ab9fa
+REMOTE_DONE

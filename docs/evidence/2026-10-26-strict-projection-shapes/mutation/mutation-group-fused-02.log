@@ -1,0 +1,14 @@
+control ok    | 59 passed in 168.85s (0:02:48)
+killed       group-partial-offset-third-wrong | 1 failed, 19 passed in 30.60s
+killed       finish-group-column-ignores-second | 1 failed, 19 passed in 30.63s
+killed       finish-group-no-overflow-flag | 1 failed, 22 passed in 40.56s
+SURVIVED     group-admits-single-row | 59 passed in 168.81s (0:02:48)
+SURVIVED     quant-row-keeps-subnormal-max | 59 passed in 168.84s (0:02:48)
+SURVIVED     quant-row-nonfinite-not-flagged | 59 passed in 169.67s (0:02:49)
+SURVIVED     quant-row-tail-not-zeroed | 59 passed in 169.17s (0:02:49)
+SURVIVED     rms-quant-no-barrier-after-root | 59 passed in 168.93s (0:02:48)
+SURVIVED     silu-quant-no-barrier | 59 passed in 169.02s (0:02:49)
+killed       workspace-omits-group-shapes | 1 failed, 49 passed in 123.57s (0:02:03)
+killed       graph-final-norm-uses-layer-norm | 1 failed, 49 passed in 123.18s (0:02:03)
+
+5 of 11 mutants killed.

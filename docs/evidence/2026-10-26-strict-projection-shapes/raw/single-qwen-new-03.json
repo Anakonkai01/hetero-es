@@ -1,0 +1,46 @@
+{
+  "label": "new",
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "model": "qwen",
+  "modelFiles": {
+    "config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+    "generation_config.json": "e558847a8b4402616f1273797b015104dc266fe4b520056fca88823ba8f8ebe6",
+    "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+    "model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+    "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+    "tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583",
+    "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+  },
+  "sourceRoot": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/claude-projection-20261026/run2/stage-local/new/src/heteroes",
+  "fingerprint": "07627f8c388e11f792a612e330e2f5e7ed0e777020f9f4a6633ccc1bddb44885",
+  "integerCudaSha256": "4545c6242c9c0a350714a80c13ae6f0aeca4437cd12927a01c3f797264309517",
+  "decoderGraphSha256": "a7ffe0cc04503bc51e17bef666da2526ff0ce820e8d938217666c56d531f8f4c",
+  "cases": [
+    {
+      "case": "short32",
+      "outputTokens": 32,
+      "secondsSamples": [
+        0.13532460000715218,
+        0.13543780900363345,
+        0.13493371299409773,
+        0.13467974599916488,
+        0.13495459100522567
+      ],
+      "medianTokensPerSecond": 7587.737418731824,
+      "tokensSha256": "bc4a5504e37c79c14e8f6ee824618a85fdd6e0d8d5bcfca51ff1e7691fbd0c66"
+    },
+    {
+      "case": "chat128",
+      "outputTokens": 128,
+      "secondsSamples": [
+        0.526246473993524,
+        0.5266224169899942,
+        0.5267649820016231,
+        0.526813090997166,
+        0.5267943600047147
+      ],
+      "medianTokensPerSecond": 7775.76365163047,
+      "tokensSha256": "a9fad5ca48ed06879bbad136b7282ca0a3c638959dd26e2b1b92635011d5fb49"
+    }
+  ]
+}

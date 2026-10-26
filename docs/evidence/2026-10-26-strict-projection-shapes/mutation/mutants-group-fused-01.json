@@ -1,0 +1,140 @@
+[
+ {
+  "name": "group-column0-ignores-second-matrix",
+  "file": "src/heteroes/eval/integer_cuda.py",
+  "old": "int column0=(tile-(g>0 ? t0 : 0)-(g>1 ? t1 : 0))*NT;",
+  "new": "int column0=(tile-(g>0 ? t0 : 0))*NT;"
+ },
+ {
+  "name": "group-partial-offset-third-wrong",
+  "file": "src/heteroes/eval/integer_cuda.py",
+  "old": "g==0 ? 0 : g==1 ? n0 : n0+n1);",
+  "new": "g==0 ? 0 : g==1 ? n0 : n0);"
+ },
+ {
+  "name": "stream-partial-row-stride-outputs",
+  "file": "src/heteroes/eval/integer_cuda.py",
+  "old": "*partial_columns+partial_offset+n]=sum;",
+  "new": "*outputs+partial_offset+n]=sum;"
+ },
+ {
+  "name": "finish-group-column-ignores-second",
+  "file": "src/heteroes/eval/integer_cuda.py",
+  "old": "n=c-(g>0 ? n0 : 0)-(g>1 ? n1 : 0), outputs",
+  "new": "n=c-(g>0 ? n0 : 0), outputs"
+ },
+ {
+  "name": "finish-group-drops-last-split",
+  "file": "src/heteroes/eval/integer_cuda.py",
+  "old": "for(int s=0;s<SPLIT_K;++s) sum+=partials[((size_t)s*rows+row)*total+c];",
+  "new": "for(int s=0;s<SPLIT_K-1;++s) sum+=partials[((size_t)s*rows+row)*total+c];"
+ },
+ {
+  "name": "finish-group-no-overflow-flag",
+  "file": "src/heteroes/eval/integer_cuda.py",
+  "old": "    out[(size_t)row*outputs+n]=v;\n    if((__float_as_uint(v)&0x7f800000u)==0x7f800000u) atomicOr(error,1);\n  }\n}\n\"\"\"",
+  "new": "    out[(size_t)row*outputs+n]=v;\n  }\n}\n\"\"\""
+ },
+ {
+  "name": "group-grid-from-total-columns",
+  "file": "src/heteroes/eval/integer_cuda.py",
+  "old": "sum(-(-count // STREAM_COLUMNS) for count in counts),",
+  "new": "-(-total // STREAM_COLUMNS),"
+ },
+ {
+  "name": "group-admits-mixed-bias",
+  "file": "src/heteroes/eval/integer_cuda.py",
+  "old": "and len({bias is None for bias in biases}) == 1",
+  "new": "and True"
+ },
+ {
+  "name": "group-admits-single-row",
+  "file": "src/heteroes/eval/integer_cuda.py",
+  "old": "            and rows > 1\n            and 2 <= len(weights) <= 3",
+  "new": "            and rows > 0\n            and 2 <= len(weights) <= 3"
+ },
+ {
+  "name": "quant-row-keeps-subnormal-max",
+  "file": "src/heteroes/eval/integer_cuda.py",
+  "old": "    if((u&0x7f800000u)==0) u=0;\n    maximum=u>maximum",
+  "new": "    maximum=u>maximum"
+ },
+ {
+  "name": "quant-row-nonfinite-not-flagged",
+  "file": "src/heteroes/eval/integer_cuda.py",
+  "old": "if(u>=0x7f800000u) {bad|=1u; u=0;}",
+  "new": "if(u>=0x7f800000u) {u=0;}"
+ },
+ {
+  "name": "quant-row-reduction-skips-half",
+  "file": "src/heteroes/eval/integer_cuda.py",
+  "old": "for(int stride=THREADS/2;stride;stride>>=1)",
+  "new": "for(int stride=THREADS/4;stride;stride>>=1)"
+ },
+ {
+  "name": "quant-row-exponent-bias",
+  "file": "src/heteroes/eval/integer_cuda.py",
+  "old": "int exponent=maxima[0] ? (int)(maxima[0]>>23)-127 : 0;",
+  "new": "int exponent=maxima[0] ? (int)(maxima[0]>>23)-126 : 0;"
+ },
+ {
+  "name": "quant-row-tail-not-zeroed",
+  "file": "src/heteroes/eval/integer_cuda.py",
+  "old": "pack_digits(packed,k<n ? quant_float(__float_as_uint(a[k]),exponent) : 0,i);",
+  "new": "pack_digits(packed,quant_float(__float_as_uint(a[k]),exponent),i);"
+ },
+ {
+  "name": "rms-quant-reassociates-scale",
+  "file": "src/heteroes/eval/integer_cuda.py",
+  "old": "a[i] = mul_(mul_(load(row + i, bad), inverse, bad), widen(w[i]), bad);",
+  "new": "a[i] = mul_(load(row + i, bad), mul_(inverse, widen(w[i]), bad), bad);"
+ },
+ {
+  "name": "rms-quant-no-barrier-after-root",
+  "file": "src/heteroes/eval/integer_cuda.py",
+  "old": "  __syncthreads();  // every thread has read the root before the row overwrites it\n",
+  "new": ""
+ },
+ {
+  "name": "rms-quant-wrong-eps",
+  "file": "src/heteroes/eval/integer_cuda.py",
+  "old": "rsqrt_(add_(mul_(a[0], inv_n, bad), eps, bad), bad);",
+  "new": "rsqrt_(mul_(a[0], inv_n, bad), bad);"
+ },
+ {
+  "name": "silu-quant-swaps-gate-up",
+  "file": "src/heteroes/eval/integer_cuda.py",
+  "old": "a[i] = mul_(silu_(load(gate + j, bad), bad), load(up + j, bad), bad);",
+  "new": "a[i] = mul_(silu_(load(up + j, bad), bad), load(gate + j, bad), bad);"
+ },
+ {
+  "name": "silu-quant-no-barrier",
+  "file": "src/heteroes/eval/integer_cuda.py",
+  "old": "  }\n  __syncthreads();\n  quantize_row<SILU_THREADS>",
+  "new": "  }\n  quantize_row<SILU_THREADS>"
+ },
+ {
+  "name": "prepared-shape-ignores-width",
+  "file": "src/heteroes/eval/integer_cuda.py",
+  "old": "            or planes.shape[2] != (width + 3) // 4\n",
+  "new": ""
+ },
+ {
+  "name": "decoder-fuses-single-row",
+  "file": "src/heteroes/eval/integer_decoder.py",
+  "old": "        return rows > 1\n",
+  "new": "        return rows > 0\n"
+ },
+ {
+  "name": "workspace-omits-group-shapes",
+  "file": "src/heteroes/eval/integer_decoder.py",
+  "old": "                shapes + grouped,\n",
+  "new": "                shapes,\n"
+ },
+ {
+  "name": "graph-final-norm-uses-layer-norm",
+  "file": "src/heteroes/eval/strict_decoder_graph.py",
+  "old": "logits = self._decode_norm_project(hidden, self.model.model.norm.weight, epsilon, self.model.lm_head, flag)",
+  "new": "logits = self._decode_norm_project(hidden, layer.post_attention_layernorm.weight, epsilon, self.model.lm_head, flag)"
+ }
+]

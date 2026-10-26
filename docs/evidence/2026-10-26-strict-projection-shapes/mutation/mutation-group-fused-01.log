@@ -1,0 +1,26 @@
+control ok    | 51 passed in 143.42s (0:02:23)
+killed       group-column0-ignores-second-matrix | 1 failed, 20 passed in 34.04s
+SURVIVED     group-partial-offset-third-wrong | 51 passed in 144.68s (0:02:24)
+killed       stream-partial-row-stride-outputs | 1 failed, 23 passed in 39.72s
+SURVIVED     finish-group-column-ignores-second | 51 passed in 141.94s (0:02:21)
+killed       finish-group-drops-last-split | 1 failed, 23 passed in 42.31s
+SURVIVED     finish-group-no-overflow-flag | 51 passed in 141.58s (0:02:21)
+killed       group-grid-from-total-columns | 1 failed, 19 passed in 30.60s
+killed       group-admits-mixed-bias | 1 failed, 19 passed in 30.13s
+SURVIVED     group-admits-single-row | 51 passed in 142.43s (0:02:22)
+SURVIVED     quant-row-keeps-subnormal-max | 51 passed in 141.54s (0:02:21)
+SURVIVED     quant-row-nonfinite-not-flagged | 51 passed in 141.39s (0:02:21)
+killed       quant-row-reduction-skips-half | 1 failed, 8 passed in 15.20s
+killed       quant-row-exponent-bias | 1 failed in 4.30s
+SURVIVED     quant-row-tail-not-zeroed | 51 passed in 141.99s (0:02:21)
+killed       rms-quant-reassociates-scale | 1 failed, 1 passed in 6.21s
+SURVIVED     rms-quant-no-barrier-after-root | 51 passed in 142.03s (0:02:22)
+killed       rms-quant-wrong-eps | 1 failed in 4.30s
+killed       silu-quant-swaps-gate-up | 1 failed in 4.30s
+SURVIVED     silu-quant-no-barrier | 51 passed in 142.02s (0:02:22)
+killed       prepared-shape-ignores-width | 1 failed, 18 passed in 29.30s
+killed       decoder-fuses-single-row | 1 failed, 40 passed in 96.09s (0:01:36)
+SURVIVED     workspace-omits-group-shapes | 51 passed in 142.30s (0:02:22)
+SURVIVED     graph-final-norm-uses-layer-norm | 51 passed in 141.51s (0:02:21)
+
+12 of 23 mutants killed.
