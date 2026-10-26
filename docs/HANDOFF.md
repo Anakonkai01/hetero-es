@@ -67,6 +67,11 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
   **19–33%**, nhưng bản 3 tích chưa luôn thắng bản 4 tích cùng số học. Đây là số học mới; **chưa có
   decoder B13, throughput toàn model, quality, cross-GPU/native hay mutation gate**. Dừng tại đây để
   bàn giao; chưa đưa vào bản chính. [Bằng chứng](evidence/2026-10-26-strict-karatsuba/README.md).
+- Claude (26/10) audit `e6053385`: cây sạch, runtime vẫn `b1ef257a`, mọi SHA256 manifest khớp, tính lại độc lập
+  33/26/14/14 dòng token khác của đường FP16. Profile CUPTI toàn luồng (không chèn event): B22 chat128
+  projection **52,8%**, attention **27,9%**; đường FP16 vendor chat128 attention **42,9%**. Attention decode tăng
+  tuyến tính khoảng 0,4 µs/key/layer (60→115 µs/layer), prefill 43 ms. Ưu tiên attention trước B13.
+  [Profile](evidence/2026-10-26-whole-path-kernel-profile/README.md).
 - Tiếp tục projection throughput, số học có đặc tả và gate chất lượng/portable/native; không sửa recipe
   lịch sử để lấy tốc độ. Kế hoạch đã duyệt vẫn giữ hash
   `4ee6838fa47f810ee40348b5f0bc556834bf50825eb0b7b0795b5053743cb17f`.
