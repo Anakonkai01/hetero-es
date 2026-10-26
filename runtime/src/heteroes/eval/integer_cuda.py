@@ -16,6 +16,7 @@ from heteroes.canonical import canonical_json_hash
 from heteroes.eval import integer_reference as reference
 from heteroes.eval import integer_plan as planning
 from heteroes.eval import strict_cuda as sc
+from heteroes.eval import integer_lm_head
 from heteroes.eval.reference_ops import ReferenceArithmeticError
 
 INTEGER_CUDA_VERSION = "row_scaled_integer_mma_cuda_v1_experimental"
@@ -56,6 +57,7 @@ def static_identity(magnitude_bits=14, max_partial_bytes=16 * 1024**2, *, weight
         "linear": reference.identity(magnitude_bits),
         "nonlinear": sc.static_identity(),
         "integerSourceSha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "boundedLmHeadSourceSha256": integer_lm_head.source_sha256(),
         "maxPartialBytes": max_partial_bytes,
         "activationPacking": "radix_planes_once_v1_experimental",
         "weightLoad": weight_load,
@@ -1128,7 +1130,11 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
                 WEIGHT_PREFETCH=int(prefetch),
                 FAST_CONVERT=int(self.magnitude_bits == 22),
                 JN=columns // 32,
-                **({"STAGES": PREFILL_STAGES, "STREAM_MIN_BLOCKS": PREFILL_MIN_BLOCKS} if columns == STREAM_COLUMNS else {}),
+                **(
+                    {"STAGES": PREFILL_STAGES, "STREAM_MIN_BLOCKS": PREFILL_MIN_BLOCKS}
+                    if columns == STREAM_COLUMNS
+                    else {}
+                ),
             )
             header = "".join(f"#define {k} {v}\n" for k, v in defines.items())
             self._functions[name] = self._compile(

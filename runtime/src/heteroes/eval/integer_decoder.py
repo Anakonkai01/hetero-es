@@ -15,6 +15,7 @@ from heteroes.eval import integer_cuda, integer_reference, integer_plan, referen
 from heteroes.eval.reference_ops import ReferenceArithmeticError
 from heteroes.eval.strict_decoder import StrictDecoderReference
 from heteroes.eval.strict_decoder_graph import StrictDecoderGraph, DEFAULT_GRAPH_BYTES
+from heteroes.eval.integer_lm_head import BoundedLmHead
 
 REFERENCE_BACKEND = "decoder_scaled_integer_reference_v1_experimental"
 GRAPH_BACKEND = "decoder_scaled_integer_cuda_graph_v1_experimental"
@@ -79,6 +80,7 @@ class IntegerDecoderGraph(StrictDecoderGraph):
             mma_schedule=mma_schedule,
         )
         self._decode_target = decode_target_ctas_per_sm
+        self._bounded_head = BoundedLmHead(self.kernels)
         self._workspace_bounds = {}
         self._kernel_configuration = self._current_kernel_configuration()
         self.identity = {
@@ -189,6 +191,24 @@ class IntegerDecoderGraph(StrictDecoderGraph):
             target_ctas_per_sm=self._decode_target,
             prepared=self.kernels.rms_norm_quantized(hidden, norm, epsilon, error_flag=flag),
         )
+
+    def _decode_output(self, hidden, epsilon, state):
+        head = self._bounded_head
+        weight = self.model.lm_head.weight
+        if (
+            hidden.shape[0] > 1
+            and state.penalty == 1.0
+            and getattr(self.model.lm_head, "bias", None) is None
+            and head.eligible(weight)
+        ):
+            prepared = self.kernels.rms_norm_quantized(
+                hidden, self.model.model.norm.weight, epsilon, error_flag=state.flag
+            )
+            head.select(
+                prepared, weight, state.decode, state.seen, state.owners, state.tokens, state.result, state.flag
+            )
+            return None  # greedy selection does not materialize diagnostic logits
+        return super()._decode_output(hidden, epsilon, state)
 
     def _decode_gated_project(self, gate, up, module, flag):
         if not self._fused(gate.shape[0]) or gate.shape[1] > 12288:
@@ -308,16 +328,40 @@ class IntegerDecoderGraph(StrictDecoderGraph):
             * self.max_context
             * sum(max(0, digits * 4 * ((width + 3) // 4) - 4 * width) for width, _ in shapes)
         )
-        return sum(w.shape[0] * 4 for w in {id(w): w for w in weights}.values()) + self._workspace_bounds[key] + padding
+        weight = self.model.lm_head.weight
+        bounded = 0
+        if capacity > 1 and self._bounded_head.eligible(weight) and getattr(self.model.lm_head, "bias", None) is None:
+            tiles = -(-weight.shape[0] // 32)
+            # Retained int8 weights and two sets of per-row temporary intervals/summaries/winners (warmup
+            # and capture may overlap allocations). No allocator reuse is required for this upper bound.
+            bounded = weight.numel() + 2 * capacity * (8 * tiles + 16 + 8 * 8)
+        return (
+            sum(w.shape[0] * 4 for w in {id(w): w for w in weights}.values())
+            + self._workspace_bounds[key]
+            + padding
+            + bounded
+        )
 
     def _generation_begin(self):
         self._check_kernel_configuration()
         self.kernels._begin_request(self._projection_weights())
 
+    def _generation_decode_ready(self, capacity, penalty):
+        weight = self.model.lm_head.weight
+        if (
+            capacity > 1
+            and penalty == 1.0
+            and self._bounded_head.eligible(weight)
+            and getattr(self.model.lm_head, "bias", None) is None
+        ):
+            self._bounded_head.prepare(weight)
+
     def _generation_end(self):
+        self._bounded_head.clear()
         self.kernels._end_request()
         # Also completes clearing after an error discarded the captured session, or on use_cache=False.
         torch.cuda.current_stream(self.device).synchronize()
 
     def buffers(self, *args, **kwargs):
-        return chain(super().buffers(*args, **kwargs), self.kernels.weight_metadata_buffers())
+        retained = () if self._bounded_head.buffer is None else (self._bounded_head.buffer,)
+        return chain(super().buffers(*args, **kwargs), self.kernels.weight_metadata_buffers(), retained)

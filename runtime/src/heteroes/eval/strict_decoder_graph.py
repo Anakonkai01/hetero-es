@@ -320,6 +320,18 @@ class StrictDecoderGraph(StrictDecoderPacked):
     def _generation_end(self):
         """Release request state before allowing another caller to enter."""
 
+    def _generation_decode_ready(self, capacity, penalty):
+        """Optional decode-only request preparation after admission and before prefill/capture."""
+
+    def _decode_output(self, hidden, epsilon, state):
+        logits = self._decode_norm_project(
+            hidden, self.model.model.norm.weight, epsilon, self.model.lm_head, state.flag
+        )
+        state.decode.greedy(
+            logits, state.seen, state.owners, state.tokens, state.result, state.flag, state.penalty, state.inverse
+        )
+        return logits
+
     def _decode_core(self, state):
         config, kernels, flag = self.config, self.kernels, state.flag
         state.flag.zero_()
@@ -341,10 +353,7 @@ class StrictDecoderGraph(StrictDecoderPacked):
             )
             hidden = self._decode_residual_project(hidden, mixed, layer.self_attn.o_proj, flag)
             hidden = self._decode_mlp(hidden, layer, epsilon, flag)
-        logits = self._decode_norm_project(hidden, self.model.model.norm.weight, epsilon, self.model.lm_head, flag)
-        state.decode.greedy(
-            logits, state.seen, state.owners, state.tokens, state.result, flag, state.penalty, state.inverse
-        )
+        logits = self._decode_output(hidden, epsilon, state)
         state.decode.publish(state.owners, state.lengths, flag, state.result, advance=True)
         return logits
 
@@ -393,6 +402,7 @@ class StrictDecoderGraph(StrictDecoderPacked):
                 raise ReferenceArithmeticError("Captured decode exceeds its explicit memory budget")
             state = self._session_for(capacity)
             self._generation_begin()
+            self._generation_decode_ready(capacity, penalty)
             state.clear()
             state.lengths.copy_(torch.tensor(lengths, dtype=torch.int32, device=self.device))
             for owner, row in enumerate(histories):
