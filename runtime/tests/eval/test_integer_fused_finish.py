@@ -8,6 +8,9 @@ import torch
 
 from test_integer_stream import bits, cuda_class, entries_used
 
+# Every fused test shape selects split-K at this CTA target on any GPU size (28..170 SMs).
+TARGET = 32
+
 gpu = pytest.mark.skipif(
     os.environ.get("HETEROES_GPU_ACCEPTANCE") != "1" or not torch.cuda.is_available(), reason="GPU opt-in"
 )
@@ -101,17 +104,17 @@ def test_fused_gate_up_silu_planes_equal_projections_then_silu_quantization(widt
         prepared = kernels.quantize_input(x, _packed=True)
         flags = [kernels.new_error_flag(), kernels.new_error_flag()]
         planes = kernels.gate_up_silu_quantized(
-            prepared, gate, up, biases, error_flag=flags[0], decode_target_ctas_per_sm=8
+            prepared, gate, up, biases, error_flag=flags[0], decode_target_ctas_per_sm=TARGET
         )
         assert planes is not None
         g, u = kernels.linear_many(
-            None, (gate, up), biases, error_flag=flags[1], decode_target_ctas_per_sm=8, prepared=prepared
+            None, (gate, up), biases, error_flag=flags[1], decode_target_ctas_per_sm=TARGET, prepared=prepared
         )
         control = kernels.quantize_input(kernels.silu_mul(g, u, error_flag=flags[1]), error_flag=flags[1], _packed=True)
         assert int(flags[0].item()) == int(flags[1].item())
         assert torch.equal(planes[0], control[0]) and torch.equal(planes[1], control[1]), rows
         # The maxima buffer is cleared by every launch: a second identical call gives identical planes.
-        again = kernels.gate_up_silu_quantized(prepared, gate, up, biases, decode_target_ctas_per_sm=8)
+        again = kernels.gate_up_silu_quantized(prepared, gate, up, biases, decode_target_ctas_per_sm=TARGET)
         assert torch.equal(again[0], planes[0]) and torch.equal(again[1], planes[1])
     assert {"finish_silu", "pack_rows"} <= set(used) and "integer_stream_group" in used
     kernels._end_request()
@@ -128,9 +131,11 @@ def test_fused_gate_up_reports_nonfinite_and_overflow_like_the_unfused_sequence(
     for x in (torch.full((4, 512), 2.0**110, device="cuda"), scaled(gen, 4, 512, 8.0)):
         prepared = kernels.quantize_input(x, _packed=True)
         flags = [kernels.new_error_flag(), kernels.new_error_flag()]
-        planes = kernels.gate_up_silu_quantized(prepared, gate, up, error_flag=flags[0], decode_target_ctas_per_sm=8)
+        planes = kernels.gate_up_silu_quantized(
+            prepared, gate, up, error_flag=flags[0], decode_target_ctas_per_sm=TARGET
+        )
         g, u = kernels.linear_many(
-            None, (gate, up), error_flag=flags[1], decode_target_ctas_per_sm=8, prepared=prepared
+            None, (gate, up), error_flag=flags[1], decode_target_ctas_per_sm=TARGET, prepared=prepared
         )
         control = kernels.quantize_input(kernels.silu_mul(g, u, error_flag=flags[1]), error_flag=flags[1], _packed=True)
         assert int(flags[0].item()) == int(flags[1].item())
@@ -144,14 +149,14 @@ def test_fused_gate_up_declines_ineligible_inputs():
     gate = (torch.randn(64, 64, device="cuda") * 0.05).half()  # width < 256: one split, no finish to fuse
     request(kernels, [gate])
     prepared = kernels.quantize_input(torch.randn(4, 64, device="cuda"), _packed=True)
-    assert kernels.gate_up_silu_quantized(prepared, gate, gate, decode_target_ctas_per_sm=8) is None
+    assert kernels.gate_up_silu_quantized(prepared, gate, gate, decode_target_ctas_per_sm=TARGET) is None
     assert kernels.gate_up_silu_quantized(prepared, gate, gate) is None  # no decode plan
     kernels._end_request()
     wide = (torch.randn(64, 512, device="cuda") * 0.05).half()
     other = (torch.randn(32, 512, device="cuda") * 0.05).half()
     request(kernels, [wide, other])
     prepared = kernels.quantize_input(torch.randn(4, 512, device="cuda"), _packed=True)
-    assert kernels.gate_up_silu_quantized(prepared, wide, other, decode_target_ctas_per_sm=8) is None
+    assert kernels.gate_up_silu_quantized(prepared, wide, other, decode_target_ctas_per_sm=TARGET) is None
     kernels._end_request()
 
 
@@ -198,11 +203,11 @@ def test_qkv_rope_store_equals_projections_rope_and_cache_store(width, heads, kv
             keys,
             values,
             error_flag=flags[0],
-            decode_target_ctas_per_sm=8,
+            decode_target_ctas_per_sm=TARGET,
         )
         assert q is not None
         cq, ck, cv = kernels.linear_many(
-            None, weights, biases, error_flag=flags[1], decode_target_ctas_per_sm=8, prepared=prepared
+            None, weights, biases, error_flag=flags[1], decode_target_ctas_per_sm=TARGET, prepared=prepared
         )
         cq = kernels.rope(cq, cosine, sine, heads, error_flag=flags[1])
         ck = kernels.rope(ck, cosine, sine, kv, error_flag=flags[1])
@@ -246,10 +251,10 @@ def test_qkv_rope_store_reports_failures_and_declines_unsupported_layouts():
             keys,
             values,
             error_flag=flags[0],
-            decode_target_ctas_per_sm=8,
+            decode_target_ctas_per_sm=TARGET,
         )
         cq, ck, cv = kernels.linear_many(
-            None, weights, error_flag=flags[1], decode_target_ctas_per_sm=8, prepared=prepared
+            None, weights, error_flag=flags[1], decode_target_ctas_per_sm=TARGET, prepared=prepared
         )
         cq = kernels.rope(cq, cosine, sine, 4, error_flag=flags[1])
         ck = kernels.rope(ck, cosine, sine, 2, error_flag=flags[1])
@@ -262,13 +267,15 @@ def test_qkv_rope_store_reports_failures_and_declines_unsupported_layouts():
     args = (prepared, weights, None, cosine, sine)
     tail = (ranges, keys, values)
     assert kernels.qkv_rope_store(*args, 4, 2, *tail) is None  # no decode plan
-    assert kernels.qkv_rope_store(*args, 8, 2, *tail, decode_target_ctas_per_sm=8) is None  # q heads mismatch
-    assert kernels.qkv_rope_store(*args, 4, 2, ranges, keys[:1], values[:1], decode_target_ctas_per_sm=8) is None
+    assert kernels.qkv_rope_store(*args, 8, 2, *tail, decode_target_ctas_per_sm=TARGET) is None  # q heads mismatch
+    assert kernels.qkv_rope_store(*args, 4, 2, ranges, keys[:1], values[:1], decode_target_ctas_per_sm=TARGET) is None
     assert (
-        kernels.qkv_rope_store(prepared, weights, None, cosine[:, :32], sine, 4, 2, *tail, decode_target_ctas_per_sm=8)
+        kernels.qkv_rope_store(
+            prepared, weights, None, cosine[:, :32], sine, 4, 2, *tail, decode_target_ctas_per_sm=TARGET
+        )
         is None
     )
-    assert kernels.qkv_rope_store(*args, 4, 2, ranges.long(), keys, values, decode_target_ctas_per_sm=8) is None
+    assert kernels.qkv_rope_store(*args, 4, 2, ranges.long(), keys, values, decode_target_ctas_per_sm=TARGET) is None
     kernels._end_request()
 
 

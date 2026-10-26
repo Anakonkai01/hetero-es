@@ -342,6 +342,10 @@ def test_grouped_decode_launch_matches_separate_tile_projections(counts, bias, m
     assert "integer_stream_group" in used and "integer_stream" not in used
 
 
+# A CTA target high enough that every split-K test shape selects split-K on any GPU size (28..170 SMs).
+SPLIT_TARGET = 32
+
+
 @gpu
 @pytest.mark.parametrize("width,counts", [(896, (896, 128, 128)), (512, (256, 64, 192)), (896, (4864, 4864))])
 @pytest.mark.parametrize("bias", [False, True])
@@ -355,10 +359,10 @@ def test_grouped_split_k_launch_matches_separate_tile_projections_and_flags(widt
     weights = [(torch.randn(n, width, device="cuda", generator=gen) * 0.03).half() for n in counts]
     biases = [(torch.randn(n, device="cuda", generator=gen) * 0.1).half() for n in counts] if bias else None
     for rows in (2, 9, 32):
-        assert stream._decode_plan(width, rows, sum(counts), 8).split_k > 1
+        assert stream._decode_plan(width, rows, sum(counts), SPLIT_TARGET).split_k > 1
         x = torch.randn(rows, width, device="cuda", generator=gen) * torch.exp(torch.randn(rows, 1, device="cuda") * 3)
         flags = [stream.new_error_flag(), tile.new_error_flag()]
-        actual = stream.linear_many(x, weights, biases, error_flag=flags[0], decode_target_ctas_per_sm=8)
+        actual = stream.linear_many(x, weights, biases, error_flag=flags[0], decode_target_ctas_per_sm=SPLIT_TARGET)
         control = [
             tile.linear_decode(x, w, None if biases is None else b, error_flag=flags[1])
             for w, b in zip(weights, biases or [None] * len(weights))
@@ -374,7 +378,7 @@ def test_grouped_split_k_launch_matches_separate_tile_projections_and_flags(widt
         x = torch.full((4, width), 2.0**120, device="cuda")
         weights[-1][3] = 65504.0
     flags = [stream.new_error_flag(), tile.new_error_flag()]
-    actual = stream.linear_many(x, weights, biases, error_flag=flags[0], decode_target_ctas_per_sm=8)
+    actual = stream.linear_many(x, weights, biases, error_flag=flags[0], decode_target_ctas_per_sm=SPLIT_TARGET)
     control = [
         tile.linear_decode(x, w, None if biases is None else b, error_flag=flags[1])
         for w, b in zip(weights, biases or [None] * len(weights))
