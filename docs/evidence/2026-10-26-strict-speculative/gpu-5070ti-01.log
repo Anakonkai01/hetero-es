@@ -1,0 +1,61 @@
+F
+=================================== FAILURES ===================================
+_ test_proposal_contents_do_not_change_cpu_tokens_across_candidate_change_restore_and_eos[qwen2] _
+
+family = 'qwen2'
+
+    @pytest.mark.parametrize('family',['qwen2','llama-wide'])
+    def test_proposal_contents_do_not_change_cpu_tokens_across_candidate_change_restore_and_eos(family):
+        from speculative import SpeculativeGraph
+        cpu=model_for(family);model=copy.deepcopy(cpu).cuda()
+        engine=SpeculativeGraph(model,allow_fixture=True,max_context=32,block=4,max_graph_bytes=1024**3)
+        oracle=IntegerDecoderReference(cpu,allow_fixture=True,max_context=32)
+        ids=torch.tensor([[0,3,5],[7,11,13]]);mask=ids!=0
+        parent=cpu.model.layers[0].mlp.down_proj.weight.detach().clone();saved=[]
+        for factor in (1.,-16.,1.):
+            with torch.no_grad():
+                cpu.model.layers[0].mlp.down_proj.weight.copy_(parent*factor)
+                model.model.layers[0].mlp.down_proj.weight.copy_((parent*factor).cuda())
+            expected=oracle.generate(ids,attention_mask=mask,max_new_tokens=7,eos_token_id=[],repetition_penalty=1.)
+            completion=expected[:,ids.shape[1]:].tolist()
+            def perfect(owner,outputs,count):return completion[owner][len(outputs):len(outputs)+count]
+            def wrong(owner,outputs,count):return [(completion[owner][len(outputs)]+1)%43]*count
+            for proposer in (None,perfect,wrong):
+                actual=engine.generate(ids.cuda(),attention_mask=mask.cuda(),max_new_tokens=7,
+                                       eos_token_id=[],repetition_penalty=1.,proposer=proposer)
+                assert torch.equal(actual.cpu(),expected)
+                if proposer is perfect:assert engine.stats['acceptedDraftTokens']>0
+                if proposer is wrong:assert engine.stats['acceptedDraftTokens']==0
+                assert all(not bool(t.any())for t in engine._session.caches)
+                assert all(not bool(t.any())for t in engine.request_buffers())
+            saved.append(actual.cpu())
+            eos=completion[0][2]
+            expected_eos=oracle.generate(ids,attention_mask=mask,max_new_tokens=7,eos_token_id=[eos],repetition_penalty=1.)
+            actual=engine.generate(ids.cuda(),attention_mask=mask.cuda(),max_new_tokens=7,
+                                   eos_token_id=[eos],repetition_penalty=1.,proposer=perfect)
+            assert torch.equal(actual.cpu(),expected_eos)
+        assert torch.equal(saved[0],saved[2])
+>       engine.release_graph()
+
+.scratch/strict-speculative-20261026/test_speculative.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+runtime/src/heteroes/eval/strict_decoder_graph.py:197: in release_graph
+    self._release_graph()
+.scratch/strict-speculative-20261026/speculative.py:116: in _release_graph
+    with torch.cuda.stream(self._spec.state.stream):self._spec.clear_request()
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <speculative.LiveScorer object at 0x7aeff62cb2c0>
+
+    def clear_request(self):
+        for tensor in (self.inputs,self.positions,self.ranges,self.logits,self.chosen,self.publication):
+>           if tensor is not None:tensor.zero_()
+                                  ^^^^^^^^^^^^^^
+E           RuntimeError: Inplace update to inference tensor outside InferenceMode is not allowed.You can make a clone to get a normal tensor before doing inplace update.See https://github.com/pytorch/rfcs/pull/17 for more details.
+
+.scratch/strict-speculative-20261026/speculative.py:70: RuntimeError
+=========================== short test summary info ============================
+FAILED .scratch/strict-speculative-20261026/test_speculative.py::test_proposal_contents_do_not_change_cpu_tokens_across_candidate_change_restore_and_eos[qwen2]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 4.95s

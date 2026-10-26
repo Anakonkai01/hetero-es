@@ -46,10 +46,16 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
 - Hướng mới đặc thù ES: dùng completion trước làm proposal, **strict xác minh lại mọi token bằng
   candidate hiện tại**, không dùng KV/logits cũ. Bộ chấm B22 nhiều vị trí đã khớp CPU hai layout và
   trained Qwen tuần tự, 2/2 mutation bị bắt. Batch 1 chấm 4 vị trí gần bằng chi phí 1; batch 8 chấm
-  2 vị trí thêm khoảng 9–10%; batch 32 chi phí cao, chưa có lợi đã đo. **Chưa có vòng speculative
-  end-to-end hoặc tăng tốc đầu ra.** Tiếp theo thử vòng nhỏ batch 1/8 với proposal đúng/sai/rỗng,
-  fallback số học và candidate boundaries; không dùng hướng này để đóng mục tiêu kernel gần vLLM.
+  2 vị trí thêm khoảng 9–10%; batch 32 chi phí cao, chưa có lợi đã đo.
   [Bằng chứng và việc còn thiếu](evidence/2026-10-26-strict-verification/README.md).
+- Vòng speculative thử nghiệm đã đo end-to-end: Qwen chat128 seed 7001 ±, batch 1 **+30% / +145%**
+  với proposal từ parent và token khớp B22. Đây chỉ một prompt và chưa tính chi phí tạo bank; không
+  suy thành lợi ích ES chung. Batch 8 **chậm hơn 3–5%** ngay cả sau bỏ recapture bằng dummy prefix
+  hợp lệ, nên dừng mở rộng nhánh, **chưa chọn**. Sáu test GPU mỗi host, hai CPU mỗi host, 3/3 mutant
+  bị bắt; có EOS giữa block, sai/rỗng proposal, fallback nhánh tràn số, đổi/restore weights, stream và
+  Parameter replacement. Chưa native/trained cross-GPU/managed. Quay lại projection throughput chính,
+  không dùng lợi ích batch 1 để đóng mục tiêu kernel gần vLLM.
+  [Kết quả và giới hạn](evidence/2026-10-26-strict-speculative/README.md).
 - Tiếp tục projection throughput, số học có đặc tả và gate chất lượng/portable/native; không sửa recipe
   lịch sử để lấy tốc độ. Kế hoạch đã duyệt vẫn giữ hash
   `4ee6838fa47f810ee40348b5f0bc556834bf50825eb0b7b0795b5053743cb17f`.
