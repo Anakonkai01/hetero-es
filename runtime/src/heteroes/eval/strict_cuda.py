@@ -16,7 +16,7 @@ Triton's ``nvdisasm`` is available) for contraction, flush modes and vendor arit
 qualification; ``hardwareQualified`` stays false.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import hashlib
 import math
 import os
@@ -32,6 +32,8 @@ import torch
 from heteroes.canonical import canonical_json_hash
 from heteroes.eval import reference_ops as ops
 from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.eval import strict_prefill_cuda
+from heteroes.eval.strict_prefill_cuda import _PREFILL_SOURCE, prefill_attention_plan
 
 KERNEL_VERSION = "pairwise_f32_cuda_linear_v3_experimental"
 MAX_LINEAR_WIDTH = 32768
@@ -862,6 +864,8 @@ class _PackedAttentionLayout:
     queries: int
     keys: int
     max_keys: int
+    spans: tuple = ()
+    prefill_tiles: dict = field(default_factory=dict, compare=False, repr=False)
 
 
 def gqa_attention_eligible(dim, repeats, shared_bytes):
@@ -1068,7 +1072,9 @@ def audit_integer_sass(text):
 
 
 def static_identity():
-    source = Path(__file__).read_bytes() + Path(ops.__file__).read_bytes()
+    source = (
+        Path(__file__).read_bytes() + Path(ops.__file__).read_bytes() + Path(strict_prefill_cuda.__file__).read_bytes()
+    )
     return {
         "kernel": KERNEL_VERSION,
         "operators": ops.REFERENCE_OPS_VERSION,
@@ -1130,9 +1136,9 @@ def _find_nvdisasm():
 class StrictCudaKernels:
     """Compiles and launches audited kernels on ONE CUDA device; the acceptance guard runs first."""
 
-    # Distributed attention kernels are the default (GQA sharing where eligible, else split); the original
-    # strict_attention remains as an in-process control with identical arithmetic.
-    _attention_entry = "strict_attention_gqa"
+    # Share short prefill K/V across query tiles, then use GQA sharing or split attention for other layouts.
+    # The original strict_attention remains as an in-process control with identical arithmetic.
+    _attention_entry = "strict_attention_prefill"
 
     def __init__(self, device):
         if os.environ.get("HETEROES_GPU_ACCEPTANCE") != "1":
@@ -1281,6 +1287,42 @@ class StrictCudaKernels:
                 sass_exact=OPS_SASS_EXACT,
             )
         return self._functions["ops"][entry]
+
+    def _prefill_function(self, dim, plan):
+        name = f"prefill-{dim}-q{plan.query_tile}-h{plan.head_tile}"
+        if name not in self._functions:
+            header = "".join(f"#define {k} 0x{v:08x}u\n" for k, v in reference_constants().items())
+            header += f"#define DIM {dim}\n#define QTILE {plan.query_tile * plan.head_tile}\n"
+            header += f"#define HEAD_TILE {plan.head_tile}\n"
+            self._functions[name] = self._compile(
+                name,
+                header + _OPS_SOURCE + _PREFILL_SOURCE,
+                ["strict_attention_prefill"],
+                ptx_exact=OPS_PTX_EXACT,
+                sass_exact=OPS_SASS_EXACT,
+            )["strict_attention_prefill"]
+        return self._functions[name]
+
+    def _launch_prefill_attention(self, query, key, value, result, flag, layout, repeats, scale, plan):
+        if plan.query_tile not in layout.prefill_tiles:
+            tiles, queries, keys = [], 0, 0
+            for length, count, past in layout.spans:
+                for first in range(0, length, plan.query_tile):
+                    tiles.append((queries + first, min(plan.query_tile, length - first), keys, count, past + first))
+                queries += length
+                keys += count
+            layout.prefill_tiles[plan.query_tile] = torch.tensor(tiles, dtype=torch.int32, device=self.device)
+        tiles = layout.prefill_tiles[plan.query_tile]
+        heads, length, dim = query.shape
+        self._launch(
+            self._prefill_function(dim, plan),
+            grid=(tiles.shape[0], key.shape[0], -(-repeats // plan.head_tile)),
+            block=(32 * plan.query_tile * plan.head_tile, 1),
+            pointers=(query, key, value, result, flag, tiles),
+            integers=(heads, length, key.shape[1], repeats),
+            floats=(scale,),
+            shared=plan.shared_bytes,
+        )
 
     def _float32(self, *tensors):
         for t in tensors:
@@ -1438,7 +1480,9 @@ class StrictCudaKernels:
             return
         repeats = integers[4]
         shared = 4 * ((repeats + 32) * (dim + max(1, dim // 32)) + 2 * repeats * max_keys)
-        if self._attention_entry == "strict_attention_gqa" and gqa_attention_eligible(dim, repeats, shared):
+        if self._attention_entry in ("strict_attention_gqa", "strict_attention_prefill") and gqa_attention_eligible(
+            dim, repeats, shared
+        ):
             self._launch(
                 self._ops("strict_attention_gqa"),
                 grid=grid[:2],
@@ -1480,7 +1524,11 @@ class StrictCudaKernels:
             queries += length
             maximum = max(maximum, keys)
         return _PackedAttentionLayout(
-            torch.tensor(ranges, dtype=torch.int32, device=self.device), queries, offset, maximum
+            torch.tensor(ranges, dtype=torch.int32, device=self.device),
+            queries,
+            offset,
+            maximum,
+            tuple(tuple(span) for span in spans),
         )
 
     @torch.inference_mode()
@@ -1506,6 +1554,12 @@ class StrictCudaKernels:
         heads, length, dim = query.shape
         result = torch.empty((length, heads * dim), dtype=torch.float32, device=self.device)
         flag = self.new_error_flag() if error_flag is None else error_flag
+        if self._attention_entry == "strict_attention_prefill" and layout.spans:
+            plan = prefill_attention_plan(dim, repeats, layout.max_keys, max(span[0] for span in layout.spans))
+            if plan is not None:
+                self._launch_prefill_attention(query, key, value, result, flag, layout, repeats, scale, plan)
+                self._finish(flag, error_flag)
+                return result
         self._launch_attention(
             (length, key.shape[0], repeats),
             (query, key, value, result, flag, layout.ranges),

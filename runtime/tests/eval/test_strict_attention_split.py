@@ -53,7 +53,7 @@ def kernels():
         made[entry] = Spy("cuda")
         made[entry].used = []
         made[entry]._attention_entry = entry
-    assert StrictCudaKernels._attention_entry == "strict_attention_gqa"
+    assert StrictCudaKernels._attention_entry == "strict_attention_prefill"
     return made
 
 

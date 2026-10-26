@@ -50,6 +50,13 @@ Packing changes data placement and independent work scheduling; it does not comb
   counter equals the pruned aligned tree, which splits exactly at aligned power-of-two chunks), so outputs and
   failure flags are bit-identical to it; the GQA kernel also loads each K/V element once per KV head. The original
   kernel stays available as an in-process control. Evidence: `docs/evidence/2026-10-26-strict-attention-gqa/`.
+- Short packed prefill now shares K/V across query/head tiles (`strict_attention_prefill`). A warp owns one
+  query/head slot. The planner admits head dimensions 32/64/128/256, at most 256 keys and 16 slots, and bounds
+  the dynamic shared plane to 48 KiB. Aligned eight-key denominator groups and 32-key value groups keep the
+  original pruned reduction tree and failure checks, including masked loads and signed-zero flushing.
+  Per-call tile descriptors never cross sequence boundaries and are reused across layers; no weights, KV or
+  candidate content is retained in them. Other shapes and device-built decode layouts keep GQA/split attention.
+  The portable source hash includes the new CUDA source/planner module; the arithmetic is unchanged.
 - Prefixes and new KV values are packed with two concatenations per layer. Returned per-sequence caches are views
   into bounded slabs. Compaction can temporarily retain a previous slab through a surviving view until the next
   forward; there is no accumulating history of slabs inside the backend.
