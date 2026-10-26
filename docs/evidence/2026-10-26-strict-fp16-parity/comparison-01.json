@@ -1,0 +1,4702 @@
+{
+  "crossGpu": {
+    "cases": [
+      {
+        "state": "parent",
+        "policy": "default",
+        "batch": 8,
+        "rows": 32,
+        "tokenRowsDifferent": 8,
+        "rewardFlips": 0,
+        "differences": [
+          {
+            "id": "gsm8k-test-007",
+            "firstDivergence": 7,
+            "leftToken": 220,
+            "rightToken": 18,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-011",
+            "firstDivergence": 92,
+            "leftToken": 53065,
+            "rightToken": 6405,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-012",
+            "firstDivergence": 47,
+            "leftToken": 95048,
+            "rightToken": 337,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-019",
+            "firstDivergence": 13,
+            "leftToken": 99388,
+            "rightToken": 7166,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-020",
+            "firstDivergence": 20,
+            "leftToken": 6,
+            "rightToken": 30875,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-026",
+            "firstDivergence": 7,
+            "leftToken": 68552,
+            "rightToken": 109232,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-027",
+            "firstDivergence": 24,
+            "leftToken": 142008,
+            "rightToken": 53065,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-028",
+            "firstDivergence": 25,
+            "leftToken": 6,
+            "rightToken": 30875,
+            "rewardFlip": false,
+            "bothFinished": false
+          }
+        ]
+      },
+      {
+        "state": "parent",
+        "policy": "default",
+        "batch": 32,
+        "rows": 32,
+        "tokenRowsDifferent": 12,
+        "rewardFlips": 0,
+        "differences": [
+          {
+            "id": "gsm8k-test-002",
+            "firstDivergence": 4,
+            "leftToken": 106987,
+            "rightToken": 26242,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-010",
+            "firstDivergence": 6,
+            "leftToken": 550,
+            "rightToken": 5936,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-011",
+            "firstDivergence": 33,
+            "leftToken": 109232,
+            "rightToken": 87575,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-012",
+            "firstDivergence": 18,
+            "leftToken": 18,
+            "rightToken": 17054,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-013",
+            "firstDivergence": 14,
+            "leftToken": 43411,
+            "rightToken": 26983,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-014",
+            "firstDivergence": 24,
+            "leftToken": 122612,
+            "rightToken": 138275,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-015",
+            "firstDivergence": 7,
+            "leftToken": 119549,
+            "rightToken": 108276,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-018",
+            "firstDivergence": 5,
+            "leftToken": 25,
+            "rightToken": 220,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-019",
+            "firstDivergence": 18,
+            "leftToken": 198,
+            "rightToken": 8791,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-024",
+            "firstDivergence": 5,
+            "leftToken": 119549,
+            "rightToken": 107455,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-027",
+            "firstDivergence": 37,
+            "leftToken": 1699,
+            "rightToken": 299,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-029",
+            "firstDivergence": 7,
+            "leftToken": 2873,
+            "rightToken": 14383,
+            "rewardFlip": false,
+            "bothFinished": false
+          }
+        ]
+      },
+      {
+        "state": "parent",
+        "policy": "fp32_acc",
+        "batch": 8,
+        "rows": 32,
+        "tokenRowsDifferent": 7,
+        "rewardFlips": 0,
+        "differences": [
+          {
+            "id": "gsm8k-test-004",
+            "firstDivergence": 84,
+            "leftToken": 108645,
+            "rightToken": 95048,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-006",
+            "firstDivergence": 22,
+            "leftToken": 6186,
+            "rightToken": 2241,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-010",
+            "firstDivergence": 125,
+            "leftToken": 134649,
+            "rightToken": 99235,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-011",
+            "firstDivergence": 92,
+            "leftToken": 53065,
+            "rightToken": 6405,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-019",
+            "firstDivergence": 10,
+            "leftToken": 100346,
+            "rightToken": 104930,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-026",
+            "firstDivergence": 9,
+            "leftToken": 16157,
+            "rightToken": 109232,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-027",
+            "firstDivergence": 24,
+            "leftToken": 142008,
+            "rightToken": 53065,
+            "rewardFlip": false,
+            "bothFinished": false
+          }
+        ]
+      },
+      {
+        "state": "parent",
+        "policy": "fp32_acc",
+        "batch": 32,
+        "rows": 32,
+        "tokenRowsDifferent": 12,
+        "rewardFlips": 0,
+        "differences": [
+          {
+            "id": "gsm8k-test-002",
+            "firstDivergence": 7,
+            "leftToken": 21322,
+            "rightToken": 99235,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-006",
+            "firstDivergence": 22,
+            "leftToken": 6186,
+            "rightToken": 2241,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-007",
+            "firstDivergence": 7,
+            "leftToken": 220,
+            "rightToken": 18,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-010",
+            "firstDivergence": 10,
+            "leftToken": 38182,
+            "rightToken": 18,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-011",
+            "firstDivergence": 33,
+            "leftToken": 87575,
+            "rightToken": 109232,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-013",
+            "firstDivergence": 14,
+            "leftToken": 26983,
+            "rightToken": 43411,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-014",
+            "firstDivergence": 24,
+            "leftToken": 138275,
+            "rightToken": 122612,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-015",
+            "firstDivergence": 11,
+            "leftToken": 119437,
+            "rightToken": 119678,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-018",
+            "firstDivergence": 9,
+            "leftToken": 9909,
+            "rightToken": 32401,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-021",
+            "firstDivergence": 13,
+            "leftToken": 715,
+            "rightToken": 100172,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-024",
+            "firstDivergence": 12,
+            "leftToken": 112377,
+            "rightToken": 2241,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-027",
+            "firstDivergence": 2,
+            "leftToken": 198,
+            "rightToken": 3019,
+            "rewardFlip": false,
+            "bothFinished": false
+          }
+        ]
+      },
+      {
+        "state": "7001+1",
+        "policy": "default",
+        "batch": 8,
+        "rows": 32,
+        "tokenRowsDifferent": 4,
+        "rewardFlips": 0,
+        "differences": [
+          {
+            "id": "gsm8k-test-003",
+            "firstDivergence": 64,
+            "leftToken": 6405,
+            "rightToken": 53065,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-015",
+            "firstDivergence": 5,
+            "leftToken": 16,
+            "rightToken": 18,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-020",
+            "firstDivergence": 110,
+            "leftToken": 337,
+            "rightToken": 12,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-021",
+            "firstDivergence": 0,
+            "leftToken": 1249,
+            "rightToken": 29187,
+            "rewardFlip": false,
+            "bothFinished": false
+          }
+        ]
+      },
+      {
+        "state": "7001+1",
+        "policy": "default",
+        "batch": 32,
+        "rows": 32,
+        "tokenRowsDifferent": 12,
+        "rewardFlips": 0,
+        "differences": [
+          {
+            "id": "gsm8k-test-002",
+            "firstDivergence": 42,
+            "leftToken": 99235,
+            "rightToken": 103269,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-004",
+            "firstDivergence": 41,
+            "leftToken": 337,
+            "rightToken": 1195,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-008",
+            "firstDivergence": 13,
+            "leftToken": 47247,
+            "rightToken": 6717,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-010",
+            "firstDivergence": 22,
+            "leftToken": 328,
+            "rightToken": 386,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-013",
+            "firstDivergence": 44,
+            "leftToken": 99840,
+            "rightToken": 53722,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-015",
+            "firstDivergence": 44,
+            "leftToken": 58727,
+            "rightToken": 82979,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-016",
+            "firstDivergence": 80,
+            "leftToken": 99695,
+            "rightToken": 101808,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-019",
+            "firstDivergence": 48,
+            "leftToken": 6,
+            "rightToken": 854,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-020",
+            "firstDivergence": 23,
+            "leftToken": 13580,
+            "rightToken": 261,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-021",
+            "firstDivergence": 0,
+            "leftToken": 1249,
+            "rightToken": 29187,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-028",
+            "firstDivergence": 21,
+            "leftToken": 309,
+            "rightToken": 220,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-029",
+            "firstDivergence": 25,
+            "leftToken": 261,
+            "rightToken": 197,
+            "rewardFlip": false,
+            "bothFinished": false
+          }
+        ]
+      },
+      {
+        "state": "7001+1",
+        "policy": "fp32_acc",
+        "batch": 8,
+        "rows": 32,
+        "tokenRowsDifferent": 4,
+        "rewardFlips": 0,
+        "differences": [
+          {
+            "id": "gsm8k-test-004",
+            "firstDivergence": 41,
+            "leftToken": 337,
+            "rightToken": 1195,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-014",
+            "firstDivergence": 21,
+            "leftToken": 284,
+            "rightToken": 271,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-020",
+            "firstDivergence": 2,
+            "leftToken": 337,
+            "rightToken": 6023,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-028",
+            "firstDivergence": 21,
+            "leftToken": 102319,
+            "rightToken": 1195,
+            "rewardFlip": false,
+            "bothFinished": false
+          }
+        ]
+      },
+      {
+        "state": "7001+1",
+        "policy": "fp32_acc",
+        "batch": 32,
+        "rows": 32,
+        "tokenRowsDifferent": 10,
+        "rewardFlips": 0,
+        "differences": [
+          {
+            "id": "gsm8k-test-010",
+            "firstDivergence": 22,
+            "leftToken": 328,
+            "rightToken": 386,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-015",
+            "firstDivergence": 49,
+            "leftToken": 145733,
+            "rightToken": 82979,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-016",
+            "firstDivergence": 111,
+            "leftToken": 116337,
+            "rightToken": 111164,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-018",
+            "firstDivergence": 3,
+            "leftToken": 220,
+            "rightToken": 715,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-019",
+            "firstDivergence": 48,
+            "leftToken": 6,
+            "rightToken": 854,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-021",
+            "firstDivergence": 0,
+            "leftToken": 1249,
+            "rightToken": 29187,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-023",
+            "firstDivergence": 112,
+            "leftToken": 337,
+            "rightToken": 95048,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-026",
+            "firstDivergence": 5,
+            "leftToken": 47247,
+            "rightToken": 75960,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-028",
+            "firstDivergence": 21,
+            "leftToken": 309,
+            "rightToken": 220,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-029",
+            "firstDivergence": 5,
+            "leftToken": 2873,
+            "rightToken": 14383,
+            "rewardFlip": false,
+            "bothFinished": false
+          }
+        ]
+      },
+      {
+        "state": "7001-1",
+        "policy": "default",
+        "batch": 8,
+        "rows": 32,
+        "tokenRowsDifferent": 2,
+        "rewardFlips": 0,
+        "differences": [
+          {
+            "id": "gsm8k-test-005",
+            "firstDivergence": 21,
+            "leftToken": 138275,
+            "rightToken": 99080,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-018",
+            "firstDivergence": 19,
+            "leftToken": 16157,
+            "rightToken": 99235,
+            "rewardFlip": false,
+            "bothFinished": false
+          }
+        ]
+      },
+      {
+        "state": "7001-1",
+        "policy": "default",
+        "batch": 32,
+        "rows": 32,
+        "tokenRowsDifferent": 9,
+        "rewardFlips": 0,
+        "differences": [
+          {
+            "id": "gsm8k-test-004",
+            "firstDivergence": 3,
+            "leftToken": 6023,
+            "rightToken": 30875,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-007",
+            "firstDivergence": 43,
+            "leftToken": 220,
+            "rightToken": 481,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-009",
+            "firstDivergence": 121,
+            "leftToken": 100693,
+            "rightToken": 99480,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-011",
+            "firstDivergence": 16,
+            "leftToken": 134649,
+            "rightToken": 109232,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-014",
+            "firstDivergence": 31,
+            "leftToken": 88181,
+            "rightToken": 122612,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-017",
+            "firstDivergence": 3,
+            "leftToken": 47247,
+            "rightToken": 75960,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-018",
+            "firstDivergence": 27,
+            "leftToken": 257,
+            "rightToken": 796,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-027",
+            "firstDivergence": 34,
+            "leftToken": 13,
+            "rightToken": 337,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-028",
+            "firstDivergence": 5,
+            "leftToken": 294,
+            "rightToken": 320,
+            "rewardFlip": false,
+            "bothFinished": false
+          }
+        ]
+      },
+      {
+        "state": "7001-1",
+        "policy": "fp32_acc",
+        "batch": 8,
+        "rows": 32,
+        "tokenRowsDifferent": 3,
+        "rewardFlips": 0,
+        "differences": [
+          {
+            "id": "gsm8k-test-004",
+            "firstDivergence": 3,
+            "leftToken": 6023,
+            "rightToken": 30875,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-005",
+            "firstDivergence": 21,
+            "leftToken": 138275,
+            "rightToken": 99080,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-012",
+            "firstDivergence": 21,
+            "leftToken": 30875,
+            "rightToken": 6,
+            "rewardFlip": false,
+            "bothFinished": false
+          }
+        ]
+      },
+      {
+        "state": "7001-1",
+        "policy": "fp32_acc",
+        "batch": 32,
+        "rows": 32,
+        "tokenRowsDifferent": 4,
+        "rewardFlips": 0,
+        "differences": [
+          {
+            "id": "gsm8k-test-009",
+            "firstDivergence": 4,
+            "leftToken": 16,
+            "rightToken": 19,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-010",
+            "firstDivergence": 12,
+            "leftToken": 18,
+            "rightToken": 102346,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-018",
+            "firstDivergence": 26,
+            "leftToken": 320,
+            "rightToken": 59217,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-027",
+            "firstDivergence": 34,
+            "leftToken": 337,
+            "rightToken": 13,
+            "rewardFlip": false,
+            "bothFinished": false
+          }
+        ]
+      },
+      {
+        "state": "restored",
+        "policy": "default",
+        "batch": 8,
+        "rows": 32,
+        "tokenRowsDifferent": 8,
+        "rewardFlips": 0,
+        "differences": [
+          {
+            "id": "gsm8k-test-007",
+            "firstDivergence": 7,
+            "leftToken": 220,
+            "rightToken": 18,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-011",
+            "firstDivergence": 92,
+            "leftToken": 53065,
+            "rightToken": 6405,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-012",
+            "firstDivergence": 47,
+            "leftToken": 95048,
+            "rightToken": 337,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-019",
+            "firstDivergence": 13,
+            "leftToken": 99388,
+            "rightToken": 7166,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-020",
+            "firstDivergence": 20,
+            "leftToken": 6,
+            "rightToken": 30875,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-026",
+            "firstDivergence": 7,
+            "leftToken": 68552,
+            "rightToken": 109232,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-027",
+            "firstDivergence": 24,
+            "leftToken": 142008,
+            "rightToken": 53065,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-028",
+            "firstDivergence": 25,
+            "leftToken": 6,
+            "rightToken": 30875,
+            "rewardFlip": false,
+            "bothFinished": false
+          }
+        ]
+      },
+      {
+        "state": "restored",
+        "policy": "default",
+        "batch": 32,
+        "rows": 32,
+        "tokenRowsDifferent": 12,
+        "rewardFlips": 0,
+        "differences": [
+          {
+            "id": "gsm8k-test-002",
+            "firstDivergence": 4,
+            "leftToken": 106987,
+            "rightToken": 26242,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-010",
+            "firstDivergence": 6,
+            "leftToken": 550,
+            "rightToken": 5936,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-011",
+            "firstDivergence": 33,
+            "leftToken": 109232,
+            "rightToken": 87575,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-012",
+            "firstDivergence": 18,
+            "leftToken": 18,
+            "rightToken": 17054,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-013",
+            "firstDivergence": 14,
+            "leftToken": 43411,
+            "rightToken": 26983,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-014",
+            "firstDivergence": 24,
+            "leftToken": 122612,
+            "rightToken": 138275,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-015",
+            "firstDivergence": 7,
+            "leftToken": 119549,
+            "rightToken": 108276,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-018",
+            "firstDivergence": 5,
+            "leftToken": 25,
+            "rightToken": 220,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-019",
+            "firstDivergence": 18,
+            "leftToken": 198,
+            "rightToken": 8791,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-024",
+            "firstDivergence": 5,
+            "leftToken": 119549,
+            "rightToken": 107455,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-027",
+            "firstDivergence": 37,
+            "leftToken": 1699,
+            "rightToken": 299,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-029",
+            "firstDivergence": 7,
+            "leftToken": 2873,
+            "rightToken": 14383,
+            "rewardFlip": false,
+            "bothFinished": false
+          }
+        ]
+      },
+      {
+        "state": "restored",
+        "policy": "fp32_acc",
+        "batch": 8,
+        "rows": 32,
+        "tokenRowsDifferent": 7,
+        "rewardFlips": 0,
+        "differences": [
+          {
+            "id": "gsm8k-test-004",
+            "firstDivergence": 84,
+            "leftToken": 108645,
+            "rightToken": 95048,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-006",
+            "firstDivergence": 22,
+            "leftToken": 6186,
+            "rightToken": 2241,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-010",
+            "firstDivergence": 125,
+            "leftToken": 134649,
+            "rightToken": 99235,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-011",
+            "firstDivergence": 92,
+            "leftToken": 53065,
+            "rightToken": 6405,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-019",
+            "firstDivergence": 10,
+            "leftToken": 100346,
+            "rightToken": 104930,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-026",
+            "firstDivergence": 9,
+            "leftToken": 16157,
+            "rightToken": 109232,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-027",
+            "firstDivergence": 24,
+            "leftToken": 142008,
+            "rightToken": 53065,
+            "rewardFlip": false,
+            "bothFinished": false
+          }
+        ]
+      },
+      {
+        "state": "restored",
+        "policy": "fp32_acc",
+        "batch": 32,
+        "rows": 32,
+        "tokenRowsDifferent": 12,
+        "rewardFlips": 0,
+        "differences": [
+          {
+            "id": "gsm8k-test-002",
+            "firstDivergence": 7,
+            "leftToken": 21322,
+            "rightToken": 99235,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-006",
+            "firstDivergence": 22,
+            "leftToken": 6186,
+            "rightToken": 2241,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-007",
+            "firstDivergence": 7,
+            "leftToken": 220,
+            "rightToken": 18,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-010",
+            "firstDivergence": 10,
+            "leftToken": 38182,
+            "rightToken": 18,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-011",
+            "firstDivergence": 33,
+            "leftToken": 87575,
+            "rightToken": 109232,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-013",
+            "firstDivergence": 14,
+            "leftToken": 26983,
+            "rightToken": 43411,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-014",
+            "firstDivergence": 24,
+            "leftToken": 138275,
+            "rightToken": 122612,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-015",
+            "firstDivergence": 11,
+            "leftToken": 119437,
+            "rightToken": 119678,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-018",
+            "firstDivergence": 9,
+            "leftToken": 9909,
+            "rightToken": 32401,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-021",
+            "firstDivergence": 13,
+            "leftToken": 715,
+            "rightToken": 100172,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-024",
+            "firstDivergence": 12,
+            "leftToken": 112377,
+            "rightToken": 2241,
+            "rewardFlip": false,
+            "bothFinished": false
+          },
+          {
+            "id": "gsm8k-test-027",
+            "firstDivergence": 2,
+            "leftToken": 198,
+            "rightToken": 3019,
+            "rewardFlip": false,
+            "bothFinished": false
+          }
+        ]
+      }
+    ],
+    "rows": 512,
+    "tokenRowsDifferent": 126,
+    "rewardFlips": 0
+  },
+  "withinGpu": {
+    "5070ti": {
+      "parentVsRestored": {
+        "cases": [
+          {
+            "state": "parent",
+            "policy": "default",
+            "batch": 8,
+            "rows": 32,
+            "tokenRowsDifferent": 0,
+            "rewardFlips": 0,
+            "differences": []
+          },
+          {
+            "state": "parent",
+            "policy": "default",
+            "batch": 32,
+            "rows": 32,
+            "tokenRowsDifferent": 0,
+            "rewardFlips": 0,
+            "differences": []
+          },
+          {
+            "state": "parent",
+            "policy": "fp32_acc",
+            "batch": 8,
+            "rows": 32,
+            "tokenRowsDifferent": 0,
+            "rewardFlips": 0,
+            "differences": []
+          },
+          {
+            "state": "parent",
+            "policy": "fp32_acc",
+            "batch": 32,
+            "rows": 32,
+            "tokenRowsDifferent": 0,
+            "rewardFlips": 0,
+            "differences": []
+          }
+        ],
+        "rows": 128,
+        "tokenRowsDifferent": 0,
+        "rewardFlips": 0
+      },
+      "batch8Vs32": {
+        "cases": [
+          {
+            "state": "parent",
+            "policy": "default",
+            "batch": 8,
+            "rows": 32,
+            "tokenRowsDifferent": 26,
+            "rewardFlips": 0,
+            "differences": [
+              {
+                "id": "gsm8k-test-002",
+                "firstDivergence": 4,
+                "leftToken": 26242,
+                "rightToken": 106987,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-007",
+                "firstDivergence": 7,
+                "leftToken": 220,
+                "rightToken": 18,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-008",
+                "firstDivergence": 1,
+                "leftToken": 8253,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-009",
+                "firstDivergence": 1,
+                "leftToken": 279,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-010",
+                "firstDivergence": 1,
+                "leftToken": 18187,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-011",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-012",
+                "firstDivergence": 1,
+                "leftToken": 290,
+                "rightToken": 198,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-013",
+                "firstDivergence": 1,
+                "leftToken": 49381,
+                "rightToken": 44038,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-014",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 25582,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-015",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 3147,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-016",
+                "firstDivergence": 1,
+                "leftToken": 11625,
+                "rightToken": 624,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-017",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-018",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 8253,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-019",
+                "firstDivergence": 1,
+                "leftToken": 271,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-020",
+                "firstDivergence": 1,
+                "leftToken": 40785,
+                "rightToken": 220,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-021",
+                "firstDivergence": 1,
+                "leftToken": 138275,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-022",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 108645,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-023",
+                "firstDivergence": 1,
+                "leftToken": 18,
+                "rightToken": 89394,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-024",
+                "firstDivergence": 1,
+                "leftToken": 1477,
+                "rightToken": 36745,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-025",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 11,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-026",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-027",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-028",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-029",
+                "firstDivergence": 1,
+                "leftToken": 49381,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-030",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 553,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-031",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 33235,
+                "rewardFlip": false,
+                "bothFinished": false
+              }
+            ]
+          },
+          {
+            "state": "parent",
+            "policy": "fp32_acc",
+            "batch": 8,
+            "rows": 32,
+            "tokenRowsDifferent": 24,
+            "rewardFlips": 0,
+            "differences": [
+              {
+                "id": "gsm8k-test-008",
+                "firstDivergence": 1,
+                "leftToken": 8253,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-009",
+                "firstDivergence": 1,
+                "leftToken": 279,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-010",
+                "firstDivergence": 1,
+                "leftToken": 18187,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-011",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-012",
+                "firstDivergence": 1,
+                "leftToken": 290,
+                "rightToken": 198,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-013",
+                "firstDivergence": 1,
+                "leftToken": 49381,
+                "rightToken": 44038,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-014",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 25582,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-015",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 3147,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-016",
+                "firstDivergence": 1,
+                "leftToken": 11625,
+                "rightToken": 624,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-017",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-018",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 8253,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-019",
+                "firstDivergence": 1,
+                "leftToken": 271,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-020",
+                "firstDivergence": 1,
+                "leftToken": 40785,
+                "rightToken": 220,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-021",
+                "firstDivergence": 1,
+                "leftToken": 138275,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-022",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 108645,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-023",
+                "firstDivergence": 1,
+                "leftToken": 18,
+                "rightToken": 89394,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-024",
+                "firstDivergence": 1,
+                "leftToken": 1477,
+                "rightToken": 36745,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-025",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 11,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-026",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-027",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-028",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-029",
+                "firstDivergence": 1,
+                "leftToken": 49381,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-030",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 553,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-031",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 33235,
+                "rewardFlip": false,
+                "bothFinished": false
+              }
+            ]
+          },
+          {
+            "state": "7001+1",
+            "policy": "default",
+            "batch": 8,
+            "rows": 32,
+            "tokenRowsDifferent": 24,
+            "rewardFlips": 0,
+            "differences": [
+              {
+                "id": "gsm8k-test-008",
+                "firstDivergence": 1,
+                "leftToken": 11625,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-009",
+                "firstDivergence": 1,
+                "leftToken": 279,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-010",
+                "firstDivergence": 1,
+                "leftToken": 67448,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-011",
+                "firstDivergence": 1,
+                "leftToken": 271,
+                "rightToken": 21032,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-012",
+                "firstDivergence": 1,
+                "leftToken": 21758,
+                "rightToken": 11,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-013",
+                "firstDivergence": 1,
+                "leftToken": 49381,
+                "rightToken": 21758,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-014",
+                "firstDivergence": 1,
+                "leftToken": 33222,
+                "rightToken": 25582,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-015",
+                "firstDivergence": 1,
+                "leftToken": 18,
+                "rightToken": 39131,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-016",
+                "firstDivergence": 1,
+                "leftToken": 11625,
+                "rightToken": 624,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-017",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-018",
+                "firstDivergence": 1,
+                "leftToken": 67448,
+                "rightToken": 8253,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-019",
+                "firstDivergence": 1,
+                "leftToken": 715,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-020",
+                "firstDivergence": 1,
+                "leftToken": 55386,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-021",
+                "firstDivergence": 1,
+                "leftToken": 138275,
+                "rightToken": 220,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-022",
+                "firstDivergence": 1,
+                "leftToken": 43838,
+                "rightToken": 108645,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-023",
+                "firstDivergence": 1,
+                "leftToken": 11,
+                "rightToken": 121445,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-024",
+                "firstDivergence": 1,
+                "leftToken": 10788,
+                "rightToken": 43838,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-025",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 11,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-026",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-027",
+                "firstDivergence": 1,
+                "leftToken": 51281,
+                "rightToken": 63539,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-028",
+                "firstDivergence": 1,
+                "leftToken": 24847,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-029",
+                "firstDivergence": 1,
+                "leftToken": 138275,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-030",
+                "firstDivergence": 1,
+                "leftToken": 279,
+                "rightToken": 15,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-031",
+                "firstDivergence": 1,
+                "leftToken": 432,
+                "rightToken": 100297,
+                "rewardFlip": false,
+                "bothFinished": false
+              }
+            ]
+          },
+          {
+            "state": "7001+1",
+            "policy": "fp32_acc",
+            "batch": 8,
+            "rows": 32,
+            "tokenRowsDifferent": 24,
+            "rewardFlips": 0,
+            "differences": [
+              {
+                "id": "gsm8k-test-008",
+                "firstDivergence": 1,
+                "leftToken": 11625,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-009",
+                "firstDivergence": 1,
+                "leftToken": 279,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-010",
+                "firstDivergence": 1,
+                "leftToken": 67448,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-011",
+                "firstDivergence": 1,
+                "leftToken": 271,
+                "rightToken": 21032,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-012",
+                "firstDivergence": 1,
+                "leftToken": 21758,
+                "rightToken": 11,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-013",
+                "firstDivergence": 1,
+                "leftToken": 49381,
+                "rightToken": 21758,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-014",
+                "firstDivergence": 1,
+                "leftToken": 33222,
+                "rightToken": 25582,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-015",
+                "firstDivergence": 1,
+                "leftToken": 18,
+                "rightToken": 39131,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-016",
+                "firstDivergence": 1,
+                "leftToken": 11625,
+                "rightToken": 624,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-017",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-018",
+                "firstDivergence": 1,
+                "leftToken": 67448,
+                "rightToken": 8253,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-019",
+                "firstDivergence": 1,
+                "leftToken": 715,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-020",
+                "firstDivergence": 1,
+                "leftToken": 55386,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-021",
+                "firstDivergence": 1,
+                "leftToken": 138275,
+                "rightToken": 220,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-022",
+                "firstDivergence": 1,
+                "leftToken": 43838,
+                "rightToken": 108645,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-023",
+                "firstDivergence": 1,
+                "leftToken": 11,
+                "rightToken": 121445,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-024",
+                "firstDivergence": 1,
+                "leftToken": 10788,
+                "rightToken": 43838,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-025",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 11,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-026",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-027",
+                "firstDivergence": 1,
+                "leftToken": 51281,
+                "rightToken": 63539,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-028",
+                "firstDivergence": 1,
+                "leftToken": 24847,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-029",
+                "firstDivergence": 1,
+                "leftToken": 138275,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-030",
+                "firstDivergence": 1,
+                "leftToken": 279,
+                "rightToken": 15,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-031",
+                "firstDivergence": 1,
+                "leftToken": 432,
+                "rightToken": 100297,
+                "rewardFlip": false,
+                "bothFinished": false
+              }
+            ]
+          },
+          {
+            "state": "7001-1",
+            "policy": "default",
+            "batch": 8,
+            "rows": 32,
+            "tokenRowsDifferent": 24,
+            "rewardFlips": 0,
+            "differences": [
+              {
+                "id": "gsm8k-test-008",
+                "firstDivergence": 1,
+                "leftToken": 8253,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-009",
+                "firstDivergence": 1,
+                "leftToken": 279,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-010",
+                "firstDivergence": 1,
+                "leftToken": 19093,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-011",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 90840,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-012",
+                "firstDivergence": 1,
+                "leftToken": 117058,
+                "rightToken": 198,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-013",
+                "firstDivergence": 1,
+                "leftToken": 49381,
+                "rightToken": 33235,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-014",
+                "firstDivergence": 1,
+                "leftToken": 36745,
+                "rightToken": 25582,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-015",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 3147,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-016",
+                "firstDivergence": 1,
+                "leftToken": 8253,
+                "rightToken": 624,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-017",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-018",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-019",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 91,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-020",
+                "firstDivergence": 1,
+                "leftToken": 290,
+                "rightToken": 220,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-021",
+                "firstDivergence": 1,
+                "leftToken": 91319,
+                "rightToken": 23,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-022",
+                "firstDivergence": 1,
+                "leftToken": 88302,
+                "rightToken": 108645,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-023",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 89394,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-024",
+                "firstDivergence": 1,
+                "leftToken": 1477,
+                "rightToken": 36745,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-025",
+                "firstDivergence": 1,
+                "leftToken": 480,
+                "rightToken": 198,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-026",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-027",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-028",
+                "firstDivergence": 1,
+                "leftToken": 108608,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-029",
+                "firstDivergence": 1,
+                "leftToken": 91319,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-030",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 16,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-031",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 33235,
+                "rewardFlip": false,
+                "bothFinished": false
+              }
+            ]
+          },
+          {
+            "state": "7001-1",
+            "policy": "fp32_acc",
+            "batch": 8,
+            "rows": 32,
+            "tokenRowsDifferent": 25,
+            "rewardFlips": 0,
+            "differences": [
+              {
+                "id": "gsm8k-test-004",
+                "firstDivergence": 3,
+                "leftToken": 6023,
+                "rightToken": 30875,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-008",
+                "firstDivergence": 1,
+                "leftToken": 8253,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-009",
+                "firstDivergence": 1,
+                "leftToken": 279,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-010",
+                "firstDivergence": 1,
+                "leftToken": 19093,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-011",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 90840,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-012",
+                "firstDivergence": 1,
+                "leftToken": 117058,
+                "rightToken": 198,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-013",
+                "firstDivergence": 1,
+                "leftToken": 49381,
+                "rightToken": 33235,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-014",
+                "firstDivergence": 1,
+                "leftToken": 36745,
+                "rightToken": 25582,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-015",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 3147,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-016",
+                "firstDivergence": 1,
+                "leftToken": 8253,
+                "rightToken": 624,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-017",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-018",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-019",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 91,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-020",
+                "firstDivergence": 1,
+                "leftToken": 290,
+                "rightToken": 220,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-021",
+                "firstDivergence": 1,
+                "leftToken": 91319,
+                "rightToken": 23,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-022",
+                "firstDivergence": 1,
+                "leftToken": 88302,
+                "rightToken": 108645,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-023",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 89394,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-024",
+                "firstDivergence": 1,
+                "leftToken": 1477,
+                "rightToken": 36745,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-025",
+                "firstDivergence": 1,
+                "leftToken": 480,
+                "rightToken": 198,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-026",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-027",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-028",
+                "firstDivergence": 1,
+                "leftToken": 108608,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-029",
+                "firstDivergence": 1,
+                "leftToken": 91319,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-030",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 16,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-031",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 33235,
+                "rewardFlip": false,
+                "bothFinished": false
+              }
+            ]
+          },
+          {
+            "state": "restored",
+            "policy": "default",
+            "batch": 8,
+            "rows": 32,
+            "tokenRowsDifferent": 26,
+            "rewardFlips": 0,
+            "differences": [
+              {
+                "id": "gsm8k-test-002",
+                "firstDivergence": 4,
+                "leftToken": 26242,
+                "rightToken": 106987,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-007",
+                "firstDivergence": 7,
+                "leftToken": 220,
+                "rightToken": 18,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-008",
+                "firstDivergence": 1,
+                "leftToken": 8253,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-009",
+                "firstDivergence": 1,
+                "leftToken": 279,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-010",
+                "firstDivergence": 1,
+                "leftToken": 18187,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-011",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-012",
+                "firstDivergence": 1,
+                "leftToken": 290,
+                "rightToken": 198,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-013",
+                "firstDivergence": 1,
+                "leftToken": 49381,
+                "rightToken": 44038,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-014",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 25582,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-015",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 3147,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-016",
+                "firstDivergence": 1,
+                "leftToken": 11625,
+                "rightToken": 624,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-017",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-018",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 8253,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-019",
+                "firstDivergence": 1,
+                "leftToken": 271,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-020",
+                "firstDivergence": 1,
+                "leftToken": 40785,
+                "rightToken": 220,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-021",
+                "firstDivergence": 1,
+                "leftToken": 138275,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-022",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 108645,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-023",
+                "firstDivergence": 1,
+                "leftToken": 18,
+                "rightToken": 89394,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-024",
+                "firstDivergence": 1,
+                "leftToken": 1477,
+                "rightToken": 36745,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-025",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 11,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-026",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-027",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-028",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-029",
+                "firstDivergence": 1,
+                "leftToken": 49381,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-030",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 553,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-031",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 33235,
+                "rewardFlip": false,
+                "bothFinished": false
+              }
+            ]
+          },
+          {
+            "state": "restored",
+            "policy": "fp32_acc",
+            "batch": 8,
+            "rows": 32,
+            "tokenRowsDifferent": 24,
+            "rewardFlips": 0,
+            "differences": [
+              {
+                "id": "gsm8k-test-008",
+                "firstDivergence": 1,
+                "leftToken": 8253,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-009",
+                "firstDivergence": 1,
+                "leftToken": 279,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-010",
+                "firstDivergence": 1,
+                "leftToken": 18187,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-011",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-012",
+                "firstDivergence": 1,
+                "leftToken": 290,
+                "rightToken": 198,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-013",
+                "firstDivergence": 1,
+                "leftToken": 49381,
+                "rightToken": 44038,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-014",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 25582,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-015",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 3147,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-016",
+                "firstDivergence": 1,
+                "leftToken": 11625,
+                "rightToken": 624,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-017",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-018",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 8253,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-019",
+                "firstDivergence": 1,
+                "leftToken": 271,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-020",
+                "firstDivergence": 1,
+                "leftToken": 40785,
+                "rightToken": 220,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-021",
+                "firstDivergence": 1,
+                "leftToken": 138275,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-022",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 108645,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-023",
+                "firstDivergence": 1,
+                "leftToken": 18,
+                "rightToken": 89394,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-024",
+                "firstDivergence": 1,
+                "leftToken": 1477,
+                "rightToken": 36745,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-025",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 11,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-026",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-027",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-028",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-029",
+                "firstDivergence": 1,
+                "leftToken": 49381,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-030",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 553,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-031",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 33235,
+                "rewardFlip": false,
+                "bothFinished": false
+              }
+            ]
+          }
+        ],
+        "rows": 256,
+        "tokenRowsDifferent": 197,
+        "rewardFlips": 0
+      }
+    },
+    "3060": {
+      "parentVsRestored": {
+        "cases": [
+          {
+            "state": "parent",
+            "policy": "default",
+            "batch": 8,
+            "rows": 32,
+            "tokenRowsDifferent": 0,
+            "rewardFlips": 0,
+            "differences": []
+          },
+          {
+            "state": "parent",
+            "policy": "default",
+            "batch": 32,
+            "rows": 32,
+            "tokenRowsDifferent": 0,
+            "rewardFlips": 0,
+            "differences": []
+          },
+          {
+            "state": "parent",
+            "policy": "fp32_acc",
+            "batch": 8,
+            "rows": 32,
+            "tokenRowsDifferent": 0,
+            "rewardFlips": 0,
+            "differences": []
+          },
+          {
+            "state": "parent",
+            "policy": "fp32_acc",
+            "batch": 32,
+            "rows": 32,
+            "tokenRowsDifferent": 0,
+            "rewardFlips": 0,
+            "differences": []
+          }
+        ],
+        "rows": 128,
+        "tokenRowsDifferent": 0,
+        "rewardFlips": 0
+      },
+      "batch8Vs32": {
+        "cases": [
+          {
+            "state": "parent",
+            "policy": "default",
+            "batch": 8,
+            "rows": 32,
+            "tokenRowsDifferent": 24,
+            "rewardFlips": 0,
+            "differences": [
+              {
+                "id": "gsm8k-test-008",
+                "firstDivergence": 1,
+                "leftToken": 8253,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-009",
+                "firstDivergence": 1,
+                "leftToken": 279,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-010",
+                "firstDivergence": 1,
+                "leftToken": 18187,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-011",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-012",
+                "firstDivergence": 1,
+                "leftToken": 290,
+                "rightToken": 198,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-013",
+                "firstDivergence": 1,
+                "leftToken": 49381,
+                "rightToken": 44038,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-014",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 25582,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-015",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 3147,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-016",
+                "firstDivergence": 1,
+                "leftToken": 11625,
+                "rightToken": 624,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-017",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-018",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 8253,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-019",
+                "firstDivergence": 1,
+                "leftToken": 271,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-020",
+                "firstDivergence": 1,
+                "leftToken": 40785,
+                "rightToken": 220,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-021",
+                "firstDivergence": 1,
+                "leftToken": 138275,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-022",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 108645,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-023",
+                "firstDivergence": 1,
+                "leftToken": 18,
+                "rightToken": 89394,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-024",
+                "firstDivergence": 1,
+                "leftToken": 1477,
+                "rightToken": 36745,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-025",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 11,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-026",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-027",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-028",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-029",
+                "firstDivergence": 1,
+                "leftToken": 49381,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-030",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 553,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-031",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 33235,
+                "rewardFlip": false,
+                "bothFinished": false
+              }
+            ]
+          },
+          {
+            "state": "parent",
+            "policy": "fp32_acc",
+            "batch": 8,
+            "rows": 32,
+            "tokenRowsDifferent": 27,
+            "rewardFlips": 0,
+            "differences": [
+              {
+                "id": "gsm8k-test-002",
+                "firstDivergence": 7,
+                "leftToken": 21322,
+                "rightToken": 99235,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-004",
+                "firstDivergence": 84,
+                "leftToken": 95048,
+                "rightToken": 108645,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-007",
+                "firstDivergence": 7,
+                "leftToken": 220,
+                "rightToken": 18,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-008",
+                "firstDivergence": 1,
+                "leftToken": 8253,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-009",
+                "firstDivergence": 1,
+                "leftToken": 279,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-010",
+                "firstDivergence": 1,
+                "leftToken": 18187,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-011",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-012",
+                "firstDivergence": 1,
+                "leftToken": 290,
+                "rightToken": 198,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-013",
+                "firstDivergence": 1,
+                "leftToken": 49381,
+                "rightToken": 44038,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-014",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 25582,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-015",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 3147,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-016",
+                "firstDivergence": 1,
+                "leftToken": 11625,
+                "rightToken": 624,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-017",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-018",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 8253,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-019",
+                "firstDivergence": 1,
+                "leftToken": 271,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-020",
+                "firstDivergence": 1,
+                "leftToken": 40785,
+                "rightToken": 220,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-021",
+                "firstDivergence": 1,
+                "leftToken": 138275,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-022",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 108645,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-023",
+                "firstDivergence": 1,
+                "leftToken": 18,
+                "rightToken": 89394,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-024",
+                "firstDivergence": 1,
+                "leftToken": 1477,
+                "rightToken": 36745,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-025",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 11,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-026",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-027",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-028",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-029",
+                "firstDivergence": 1,
+                "leftToken": 49381,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-030",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 553,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-031",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 33235,
+                "rewardFlip": false,
+                "bothFinished": false
+              }
+            ]
+          },
+          {
+            "state": "7001+1",
+            "policy": "default",
+            "batch": 8,
+            "rows": 32,
+            "tokenRowsDifferent": 27,
+            "rewardFlips": 0,
+            "differences": [
+              {
+                "id": "gsm8k-test-002",
+                "firstDivergence": 42,
+                "leftToken": 99235,
+                "rightToken": 103269,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-003",
+                "firstDivergence": 64,
+                "leftToken": 53065,
+                "rightToken": 6405,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-004",
+                "firstDivergence": 41,
+                "leftToken": 337,
+                "rightToken": 1195,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-008",
+                "firstDivergence": 1,
+                "leftToken": 11625,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-009",
+                "firstDivergence": 1,
+                "leftToken": 279,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-010",
+                "firstDivergence": 1,
+                "leftToken": 67448,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-011",
+                "firstDivergence": 1,
+                "leftToken": 271,
+                "rightToken": 21032,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-012",
+                "firstDivergence": 1,
+                "leftToken": 21758,
+                "rightToken": 11,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-013",
+                "firstDivergence": 1,
+                "leftToken": 49381,
+                "rightToken": 21758,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-014",
+                "firstDivergence": 1,
+                "leftToken": 33222,
+                "rightToken": 25582,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-015",
+                "firstDivergence": 1,
+                "leftToken": 18,
+                "rightToken": 39131,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-016",
+                "firstDivergence": 1,
+                "leftToken": 11625,
+                "rightToken": 624,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-017",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-018",
+                "firstDivergence": 1,
+                "leftToken": 67448,
+                "rightToken": 8253,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-019",
+                "firstDivergence": 1,
+                "leftToken": 715,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-020",
+                "firstDivergence": 1,
+                "leftToken": 55386,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-021",
+                "firstDivergence": 1,
+                "leftToken": 138275,
+                "rightToken": 873,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-022",
+                "firstDivergence": 1,
+                "leftToken": 43838,
+                "rightToken": 108645,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-023",
+                "firstDivergence": 1,
+                "leftToken": 11,
+                "rightToken": 121445,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-024",
+                "firstDivergence": 1,
+                "leftToken": 10788,
+                "rightToken": 43838,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-025",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 11,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-026",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-027",
+                "firstDivergence": 1,
+                "leftToken": 51281,
+                "rightToken": 63539,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-028",
+                "firstDivergence": 1,
+                "leftToken": 24847,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-029",
+                "firstDivergence": 1,
+                "leftToken": 138275,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-030",
+                "firstDivergence": 1,
+                "leftToken": 279,
+                "rightToken": 15,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-031",
+                "firstDivergence": 1,
+                "leftToken": 432,
+                "rightToken": 100297,
+                "rewardFlip": false,
+                "bothFinished": false
+              }
+            ]
+          },
+          {
+            "state": "7001+1",
+            "policy": "fp32_acc",
+            "batch": 8,
+            "rows": 32,
+            "tokenRowsDifferent": 25,
+            "rewardFlips": 0,
+            "differences": [
+              {
+                "id": "gsm8k-test-004",
+                "firstDivergence": 41,
+                "leftToken": 1195,
+                "rightToken": 337,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-008",
+                "firstDivergence": 1,
+                "leftToken": 11625,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-009",
+                "firstDivergence": 1,
+                "leftToken": 279,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-010",
+                "firstDivergence": 1,
+                "leftToken": 67448,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-011",
+                "firstDivergence": 1,
+                "leftToken": 271,
+                "rightToken": 21032,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-012",
+                "firstDivergence": 1,
+                "leftToken": 21758,
+                "rightToken": 11,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-013",
+                "firstDivergence": 1,
+                "leftToken": 49381,
+                "rightToken": 21758,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-014",
+                "firstDivergence": 1,
+                "leftToken": 33222,
+                "rightToken": 25582,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-015",
+                "firstDivergence": 1,
+                "leftToken": 18,
+                "rightToken": 39131,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-016",
+                "firstDivergence": 1,
+                "leftToken": 11625,
+                "rightToken": 624,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-017",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-018",
+                "firstDivergence": 1,
+                "leftToken": 67448,
+                "rightToken": 8253,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-019",
+                "firstDivergence": 1,
+                "leftToken": 715,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-020",
+                "firstDivergence": 1,
+                "leftToken": 55386,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-021",
+                "firstDivergence": 0,
+                "leftToken": 1249,
+                "rightToken": 29187,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-022",
+                "firstDivergence": 1,
+                "leftToken": 43838,
+                "rightToken": 108645,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-023",
+                "firstDivergence": 1,
+                "leftToken": 11,
+                "rightToken": 121445,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-024",
+                "firstDivergence": 1,
+                "leftToken": 10788,
+                "rightToken": 43838,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-025",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 11,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-026",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-027",
+                "firstDivergence": 1,
+                "leftToken": 51281,
+                "rightToken": 63539,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-028",
+                "firstDivergence": 1,
+                "leftToken": 24847,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-029",
+                "firstDivergence": 1,
+                "leftToken": 138275,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-030",
+                "firstDivergence": 1,
+                "leftToken": 279,
+                "rightToken": 15,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-031",
+                "firstDivergence": 1,
+                "leftToken": 432,
+                "rightToken": 100297,
+                "rewardFlip": false,
+                "bothFinished": false
+              }
+            ]
+          },
+          {
+            "state": "7001-1",
+            "policy": "default",
+            "batch": 8,
+            "rows": 32,
+            "tokenRowsDifferent": 27,
+            "rewardFlips": 0,
+            "differences": [
+              {
+                "id": "gsm8k-test-004",
+                "firstDivergence": 3,
+                "leftToken": 6023,
+                "rightToken": 30875,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-005",
+                "firstDivergence": 21,
+                "leftToken": 99080,
+                "rightToken": 138275,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-007",
+                "firstDivergence": 43,
+                "leftToken": 220,
+                "rightToken": 481,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-008",
+                "firstDivergence": 1,
+                "leftToken": 8253,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-009",
+                "firstDivergence": 1,
+                "leftToken": 279,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-010",
+                "firstDivergence": 1,
+                "leftToken": 19093,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-011",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 90840,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-012",
+                "firstDivergence": 1,
+                "leftToken": 117058,
+                "rightToken": 198,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-013",
+                "firstDivergence": 1,
+                "leftToken": 49381,
+                "rightToken": 33235,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-014",
+                "firstDivergence": 1,
+                "leftToken": 36745,
+                "rightToken": 25582,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-015",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 3147,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-016",
+                "firstDivergence": 1,
+                "leftToken": 8253,
+                "rightToken": 624,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-017",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-018",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-019",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 91,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-020",
+                "firstDivergence": 1,
+                "leftToken": 290,
+                "rightToken": 220,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-021",
+                "firstDivergence": 1,
+                "leftToken": 91319,
+                "rightToken": 23,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-022",
+                "firstDivergence": 1,
+                "leftToken": 88302,
+                "rightToken": 108645,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-023",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 89394,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-024",
+                "firstDivergence": 1,
+                "leftToken": 1477,
+                "rightToken": 36745,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-025",
+                "firstDivergence": 1,
+                "leftToken": 480,
+                "rightToken": 198,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-026",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-027",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-028",
+                "firstDivergence": 1,
+                "leftToken": 108608,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-029",
+                "firstDivergence": 1,
+                "leftToken": 91319,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-030",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 16,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-031",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 33235,
+                "rewardFlip": false,
+                "bothFinished": false
+              }
+            ]
+          },
+          {
+            "state": "7001-1",
+            "policy": "fp32_acc",
+            "batch": 8,
+            "rows": 32,
+            "tokenRowsDifferent": 25,
+            "rewardFlips": 0,
+            "differences": [
+              {
+                "id": "gsm8k-test-005",
+                "firstDivergence": 21,
+                "leftToken": 99080,
+                "rightToken": 138275,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-008",
+                "firstDivergence": 1,
+                "leftToken": 8253,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-009",
+                "firstDivergence": 1,
+                "leftToken": 279,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-010",
+                "firstDivergence": 1,
+                "leftToken": 19093,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-011",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 90840,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-012",
+                "firstDivergence": 1,
+                "leftToken": 117058,
+                "rightToken": 198,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-013",
+                "firstDivergence": 1,
+                "leftToken": 49381,
+                "rightToken": 33235,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-014",
+                "firstDivergence": 1,
+                "leftToken": 36745,
+                "rightToken": 25582,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-015",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 3147,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-016",
+                "firstDivergence": 1,
+                "leftToken": 8253,
+                "rightToken": 624,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-017",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-018",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-019",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 91,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-020",
+                "firstDivergence": 1,
+                "leftToken": 290,
+                "rightToken": 220,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-021",
+                "firstDivergence": 1,
+                "leftToken": 91319,
+                "rightToken": 23,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-022",
+                "firstDivergence": 1,
+                "leftToken": 88302,
+                "rightToken": 108645,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-023",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 89394,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-024",
+                "firstDivergence": 1,
+                "leftToken": 1477,
+                "rightToken": 36745,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-025",
+                "firstDivergence": 1,
+                "leftToken": 480,
+                "rightToken": 198,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-026",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-027",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-028",
+                "firstDivergence": 1,
+                "leftToken": 108608,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-029",
+                "firstDivergence": 1,
+                "leftToken": 91319,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-030",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 16,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-031",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 33235,
+                "rewardFlip": false,
+                "bothFinished": false
+              }
+            ]
+          },
+          {
+            "state": "restored",
+            "policy": "default",
+            "batch": 8,
+            "rows": 32,
+            "tokenRowsDifferent": 24,
+            "rewardFlips": 0,
+            "differences": [
+              {
+                "id": "gsm8k-test-008",
+                "firstDivergence": 1,
+                "leftToken": 8253,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-009",
+                "firstDivergence": 1,
+                "leftToken": 279,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-010",
+                "firstDivergence": 1,
+                "leftToken": 18187,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-011",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-012",
+                "firstDivergence": 1,
+                "leftToken": 290,
+                "rightToken": 198,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-013",
+                "firstDivergence": 1,
+                "leftToken": 49381,
+                "rightToken": 44038,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-014",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 25582,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-015",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 3147,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-016",
+                "firstDivergence": 1,
+                "leftToken": 11625,
+                "rightToken": 624,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-017",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-018",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 8253,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-019",
+                "firstDivergence": 1,
+                "leftToken": 271,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-020",
+                "firstDivergence": 1,
+                "leftToken": 40785,
+                "rightToken": 220,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-021",
+                "firstDivergence": 1,
+                "leftToken": 138275,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-022",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 108645,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-023",
+                "firstDivergence": 1,
+                "leftToken": 18,
+                "rightToken": 89394,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-024",
+                "firstDivergence": 1,
+                "leftToken": 1477,
+                "rightToken": 36745,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-025",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 11,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-026",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-027",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-028",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-029",
+                "firstDivergence": 1,
+                "leftToken": 49381,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-030",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 553,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-031",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 33235,
+                "rewardFlip": false,
+                "bothFinished": false
+              }
+            ]
+          },
+          {
+            "state": "restored",
+            "policy": "fp32_acc",
+            "batch": 8,
+            "rows": 32,
+            "tokenRowsDifferent": 27,
+            "rewardFlips": 0,
+            "differences": [
+              {
+                "id": "gsm8k-test-002",
+                "firstDivergence": 7,
+                "leftToken": 21322,
+                "rightToken": 99235,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-004",
+                "firstDivergence": 84,
+                "leftToken": 95048,
+                "rightToken": 108645,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-007",
+                "firstDivergence": 7,
+                "leftToken": 220,
+                "rightToken": 18,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-008",
+                "firstDivergence": 1,
+                "leftToken": 8253,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-009",
+                "firstDivergence": 1,
+                "leftToken": 279,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-010",
+                "firstDivergence": 1,
+                "leftToken": 18187,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-011",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-012",
+                "firstDivergence": 1,
+                "leftToken": 290,
+                "rightToken": 198,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-013",
+                "firstDivergence": 1,
+                "leftToken": 49381,
+                "rightToken": 44038,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-014",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 25582,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-015",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 3147,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-016",
+                "firstDivergence": 1,
+                "leftToken": 11625,
+                "rightToken": 624,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-017",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-018",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 8253,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-019",
+                "firstDivergence": 1,
+                "leftToken": 271,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-020",
+                "firstDivergence": 1,
+                "leftToken": 40785,
+                "rightToken": 220,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-021",
+                "firstDivergence": 1,
+                "leftToken": 138275,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-022",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 108645,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-023",
+                "firstDivergence": 1,
+                "leftToken": 18,
+                "rightToken": 89394,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-024",
+                "firstDivergence": 1,
+                "leftToken": 1477,
+                "rightToken": 36745,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-025",
+                "firstDivergence": 1,
+                "leftToken": 320,
+                "rightToken": 11,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-026",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 75960,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-027",
+                "firstDivergence": 1,
+                "leftToken": 198,
+                "rightToken": 11625,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-028",
+                "firstDivergence": 1,
+                "leftToken": 1387,
+                "rightToken": 320,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-029",
+                "firstDivergence": 1,
+                "leftToken": 49381,
+                "rightToken": 1387,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-030",
+                "firstDivergence": 1,
+                "leftToken": 398,
+                "rightToken": 553,
+                "rewardFlip": false,
+                "bothFinished": false
+              },
+              {
+                "id": "gsm8k-test-031",
+                "firstDivergence": 1,
+                "leftToken": 7,
+                "rightToken": 33235,
+                "rewardFlip": false,
+                "bothFinished": false
+              }
+            ]
+          }
+        ],
+        "rows": 256,
+        "tokenRowsDifferent": 206,
+        "rewardFlips": 0
+      }
+    }
+  },
+  "inputs": {
+    "docs/evidence/2026-10-26-strict-fp16-parity/qwen-5070ti-01.json": "f1c0450cf80fc4ba51f75619325c80474eb10e1b6b6d5a8f8fbd8591005f9652",
+    "docs/evidence/2026-10-26-strict-fp16-parity/qwen-3060-01.json": "9296d2bf42da1b5e1012e08e35396decd2a196a6bf31fe6720b66fe76fabc5b5"
+  },
+  "limits": "32 prompts, parent and one antithetic seed, 128 outputs. Restored and batch variants repeat questions, not independent samples. Truncated reward agreement is weak evidence.",
+  "summaryExcludingRestored": [
+    {
+      "policy": "default",
+      "batch": 8,
+      "rows": 96,
+      "tokenRowsDifferent": 14,
+      "rewardFlips": 0
+    },
+    {
+      "policy": "default",
+      "batch": 32,
+      "rows": 96,
+      "tokenRowsDifferent": 33,
+      "rewardFlips": 0
+    },
+    {
+      "policy": "fp32_acc",
+      "batch": 8,
+      "rows": 96,
+      "tokenRowsDifferent": 14,
+      "rewardFlips": 0
+    },
+    {
+      "policy": "fp32_acc",
+      "batch": 32,
+      "rows": 96,
+      "tokenRowsDifferent": 26,
+      "rewardFlips": 0
+    }
+  ]
+}

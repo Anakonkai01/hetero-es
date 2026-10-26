@@ -6,6 +6,8 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
 
 ## Tóm tắt cho chủ dự án (2026-10-26)
 
+- **Phiên Codex đã chốt theo yêu cầu chủ dự án; auto-run tạm dừng, bàn giao Claude.**
+  Đọc [handoff Claude](handoff-claude-performance-after-codex-2026-10-26.md) trước khi làm tiếp.
 - **Chỉ đạo mới nhất: hoàn tất khảo sát vLLM, ghi lại, rồi tiếp tục tối ưu strict kernel riêng để gần ngang
   vLLM; đạt mục tiêu hiệu năng thì làm tiếp đầy đủ M0–M6.** Không dùng tốc độ của wrapper vLLM để đóng
   mục tiêu kernel. D2/D3 (cùng candidate/input, cùng token/reward trên GPU khác nhau) vẫn giữ.
@@ -43,6 +45,11 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
   khoảng **2,8/7,9 ms** B22, nhưng prototype warp attention toàn luồng chỉ khoảng **+1%**, chưa chọn.
   [Profile và thử nghiệm](evidence/2026-10-26-strict-remaining/README.md).
   Không coi thời gian `read` chờ GPU là chi phí CPU.
+- Đã kiểm tra trực tiếp đường GEMM FP16 khoảng 7.8k: **vi phạm D2**, không còn chỉ là thiếu kiểm tra.
+  Qwen chat32, parent/seed7001 ±, 128 token: batch32 khác token **33/96** lượt giữa hai GPU;
+  tắt FP16 reduced reduction vẫn khác **26/96**. Hash weights/input khớp, restore chính xác.
+  Reward đều zero, hầu hết chưa kết thúc, nên không suy ảnh hưởng reward nhỏ.
+  [Bằng chứng](evidence/2026-10-26-strict-fp16-parity/README.md).
 - Hướng mới đặc thù ES: dùng completion trước làm proposal, **strict xác minh lại mọi token bằng
   candidate hiện tại**, không dùng KV/logits cũ. Bộ chấm B22 nhiều vị trí đã khớp CPU hai layout và
   trained Qwen tuần tự, 2/2 mutation bị bắt. Batch 1 chấm 4 vị trí gần bằng chi phí 1; batch 8 chấm
@@ -56,6 +63,10 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
   Parameter replacement. Chưa native/trained cross-GPU/managed. Quay lại projection throughput chính,
   không dùng lợi ích batch 1 để đóng mục tiêu kernel gần vLLM.
   [Kết quả và giới hạn](evidence/2026-10-26-strict-speculative/README.md).
+- Prototype B13 radix128/Karatsuba mới: năm test local qua, operator lớn nhanh hơn B22 khoảng
+  **19–33%**, nhưng bản 3 tích chưa luôn thắng bản 4 tích cùng số học. Đây là số học mới; **chưa có
+  decoder B13, throughput toàn model, quality, cross-GPU/native hay mutation gate**. Dừng tại đây để
+  bàn giao; chưa đưa vào bản chính. [Bằng chứng](evidence/2026-10-26-strict-karatsuba/README.md).
 - Tiếp tục projection throughput, số học có đặc tả và gate chất lượng/portable/native; không sửa recipe
   lịch sử để lấy tốc độ. Kế hoạch đã duyệt vẫn giữ hash
   `4ee6838fa47f810ee40348b5f0bc556834bf50825eb0b7b0795b5053743cb17f`.

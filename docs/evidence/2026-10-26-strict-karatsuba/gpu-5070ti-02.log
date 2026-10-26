@@ -1,0 +1,42 @@
+...F
+=================================== FAILURES ===================================
+_ test_radix128_mma_matches_rational_oracle_for_tails_bias_splits_and_live_weights[karatsuba] _
+
+method = 'karatsuba'
+
+    @gpu
+    @pytest.mark.parametrize('method',['schoolbook','karatsuba'])
+    def test_radix128_mma_matches_rational_oracle_for_tails_bias_splits_and_live_weights(method):
+        from karatsuba_cuda import KaratsubaKernels
+        kernel=KaratsubaKernels('cuda',method=method)
+        generator=torch.Generator().manual_seed(2107)
+        for rows,width,outputs,offset in [(1,1,7,0),(7,33,9,0),(19,128,17,1),(32,257,33,0)]:
+            x=torch.randn(rows,width,generator=generator);x[0,0]=2.**-140
+            w=(torch.randn(outputs,width,generator=generator)*.125).half()
+            bias=torch.randn(outputs,generator=generator).half()
+            backing=torch.empty(w.numel()+offset,dtype=torch.float16,device='cuda')
+            live=backing[offset:].reshape(w.shape)
+            for factor in (1.,-16.,1.):
+                changed=(w*factor).half();live.copy_(changed)
+                expected=linear(x,changed,bias)
+                for split in (1,8):
+                    actual=kernel.linear(x.cuda(),live,bias.cuda(),split_k=split)
+>                   assert torch.equal(actual.cpu().view(torch.int32),expected.view(torch.int32)),(method,rows,width,split,factor)
+E                   AssertionError: ('karatsuba', 19, 128, 1, 1.0)
+E                   assert False
+E                    +  where False = <built-in method equal of type object at 0x75d93c19ff20>(tensor([[-1077594434,  1071050470, -1075661689, -1075750434,  1074043418,\n          1073413830,  1084387389,  10674238...1069404236,  1067669514, -1080721811,  1062482722,  1057539594,\n         -1080627220,  1033525748]], dtype=torch.int32), tensor([[-1077594434,  1071050470, -1075661689, -1075750434,  1074043418,\n          1073413830,  1084387389,  10674238...1069376524,  1067662900, -1080740084,  1062378864,  1057506788,\n         -1080652807,  1033606544]], dtype=torch.int32))
+E                    +    where <built-in method equal of type object at 0x75d93c19ff20> = torch.equal
+E                    +    and   tensor([[-1077594434,  1071050470, -1075661689, -1075750434,  1074043418,\n          1073413830,  1084387389,  10674238...1069404236,  1067669514, -1080721811,  1062482722,  1057539594,\n         -1080627220,  1033525748]], dtype=torch.int32) = <built-in method view of Tensor object at 0x75d8c031fbb0>(torch.int32)
+E                    +      where <built-in method view of Tensor object at 0x75d8c031fbb0> = tensor([[-1.5407,  1.6792, -1.7711, -1.7606,  2.0719,  1.9609,  5.0762,  1.2468,\n          2.0783,  0.5192,  1.9057,  ...  2.9851, -0.6476,\n          1.5702, -2.3131,  1.4829,  1.2761, -1.1679,  0.8289,  0.5343, -1.1792,\n          0.0754]]).view
+E                    +        where tensor([[-1.5407,  1.6792, -1.7711, -1.7606,  2.0719,  1.9609,  5.0762,  1.2468,\n          2.0783,  0.5192,  1.9057,  ...  2.9851, -0.6476,\n          1.5702, -2.3131,  1.4829,  1.2761, -1.1679,  0.8289,  0.5343, -1.1792,\n          0.0754]]) = <built-in method cpu of Tensor object at 0x75d8c031f9d0>()
+E                    +          where <built-in method cpu of Tensor object at 0x75d8c031f9d0> = tensor([[-1.5407,  1.6792, -1.7711, -1.7606,  2.0719,  1.9609,  5.0762,  1.2468,\n          2.0783,  0.5192,  1.9057,  ...,\n          1.5702, -2.3131,  1.4829,  1.2761, -1.1679,  0.8289,  0.5343, -1.1792,\n          0.0754]], device='cuda:0').cpu
+E                    +      and   torch.int32 = torch.int32
+E                    +    and   tensor([[-1077594434,  1071050470, -1075661689, -1075750434,  1074043418,\n          1073413830,  1084387389,  10674238...1069376524,  1067662900, -1080740084,  1062378864,  1057506788,\n         -1080652807,  1033606544]], dtype=torch.int32) = <built-in method view of Tensor object at 0x75d8c031f890>(torch.int32)
+E                    +      where <built-in method view of Tensor object at 0x75d8c031f890> = tensor([[-1.5407,  1.6792, -1.7711, -1.7606,  2.0719,  1.9609,  5.0762,  1.2468,\n          2.0783,  0.5192,  1.9057,  ...  2.9531, -0.6504,\n          1.5517, -2.3071,  1.4796,  1.2753, -1.1657,  0.8227,  0.5323, -1.1761,\n          0.0760]]).view
+E                    +      and   torch.int32 = torch.int32
+
+.scratch/strict-karatsuba-20261026/test_karatsuba.py:43: AssertionError
+=========================== short test summary info ============================
+FAILED .scratch/strict-karatsuba-20261026/test_karatsuba.py::test_radix128_mma_matches_rational_oracle_for_tails_bias_splits_and_live_weights[karatsuba]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 3 passed in 8.33s
