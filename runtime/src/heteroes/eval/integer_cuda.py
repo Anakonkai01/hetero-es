@@ -46,6 +46,11 @@ def weight_read_plan(magnitude_bits, arch, requested):
     return requested
 
 
+def stream_input_plan(magnitude_bits, arch):
+    reference._precision(magnitude_bits)
+    return "ldmatrix" if magnitude_bits == 22 and arch == "sm_120" else "scalar"
+
+
 def static_identity(magnitude_bits=14, max_partial_bytes=16 * 1024**2, *, weight_load="auto", mma_schedule="auto"):
     reference._precision(magnitude_bits)
     weight_read_plan(magnitude_bits, "sm_120", weight_load)
@@ -64,6 +69,7 @@ def static_identity(magnitude_bits=14, max_partial_bytes=16 * 1024**2, *, weight
         "weightReadPolicy": "raw_half_prefetch2_sm86_sm120_b22_v2_experimental",
         "mmaSchedule": mma_schedule,
         "streamPolicy": "multistage_cp_async_k16_aligned_v1_experimental",
+        "streamInputPolicy": "ldmatrix_swizzle_sm120_b22_v1_experimental",
         "decodePlanning": planning.identity(),
         "hardwareQualified": False,
     }
@@ -454,9 +460,9 @@ extern "C" __global__ void integer_finish(const i64* partials,const u16* bias,co
 // ---- Multistage streamed decode projection (same exact integer dot as integer_linear) ----
 // Requires WIDTH % 16 == 0 and 16-byte aligned x/w. A CTA owns NT=32*JN output columns and one row tile;
 // each warp owns 8*JN columns (JN n8 MMA tiles). Raw FP16 weights and packed activation planes stream
-// through STAGES shared-memory buffers of KS=64 K values with cp.async. The K order inside each k32 MMA
-// step is permuted identically for both operands (thread t holds physical K 8t..8t+7); an exact integer
-// sum does not depend on the order of its terms, so every int32 degree accumulator and output is unchanged.
+// through STAGES shared-memory buffers of KS=64 K values with cp.async. Scalar loads permute each k32
+// step identically for both operands (thread t holds physical K 8t..8t+7). The ldmatrix route uses the
+// canonical four-byte K halves. Exact integer sums and their degree accumulators are unchanged.
 #ifndef JN
 #define JN 2
 #endif
@@ -476,22 +482,45 @@ __device__ __forceinline__ void cp16(void* destination, const void* source, int 
                "r"((unsigned)address), "l"(source), "r"(bytes) : "memory");
 }
 
+__device__ __forceinline__ int stream_weight_swizzle(int row) {
+#if STREAM_LDSM_INPUT
+  return (row&3)<<1;
+#else
+  return (row&1)<<2;
+#endif
+}
+__device__ __forceinline__ int stream_input_swizzle(int row) {
+#if STREAM_LDSM_INPUT
+  return (((row>>1)&1)<<1)|((row>>2)&1);
+#else
+  return ((row>>1)&1)<<1;
+#endif
+}
+#if STREAM_LDSM_INPUT
+__device__ __forceinline__ void ldsm_a(unsigned* a,const void* source) {
+  unsigned long long address;
+  asm volatile("cvta.to.shared.u64 %0, %1;" : "=l"(address) : "l"(source));
+  asm volatile("ldmatrix.sync.aligned.m8n8.x4.shared.b16 {%0,%1,%2,%3}, [%4];"
+               : "=r"(a[0]),"=r"(a[1]),"=r"(a[2]),"=r"(a[3]) : "r"((unsigned)address));
+}
+#endif
+
 __device__ __forceinline__ void stream_stage(unsigned char* sw, unsigned char* sa, const qi_t* x, const u16* w,
                                              int rows, int outputs, int first, int column0, int k0) {
   int tid=threadIdx.x;
-  // Weights: NT rows of 8 sixteen-byte chunks. Chunk c of row r lives at chunk c^((r&1)<<2).
+  // Weights: NT rows of eight sixteen-byte chunks, with the selected row-dependent bank swizzle.
   #pragma unroll
   for(int i=0;i<NT*8/128;++i) {
     int c=tid+i*128, r=c>>3, chunk=c&7, n=column0+r, k=k0+chunk*8;
     int valid=(n<outputs && k<WIDTH) ? 16 : 0;
-    cp16(sw+r*128+((chunk^((r&1)<<2))<<4), valid ? (const void*)(w+(size_t)n*WIDTH+k) : (const void*)w, valid);
+    cp16(sw+r*128+((chunk^stream_weight_swizzle(r))<<4), valid ? (const void*)(w+(size_t)n*WIDTH+k) : (const void*)w, valid);
   }
-  // Activation planes: DIGITS*MT rows of four chunks; chunk c of row r lives at c^(((r>>1)&1)<<1).
+  // Activation planes: DIGITS*MT rows of four chunks, swizzled for the matching shared-memory reader.
   for(int c=tid;c<DIGITS*MT*4;c+=128) {
     int d=c/(MT*4), rr=(c>>2)%MT, chunk=c&3, row=first+rr, k=k0+chunk*16;
     int valid=(row<rows && k<WIDTH) ? 16 : 0;
     const unsigned* source=(const unsigned*)x+((size_t)d*rows+row)*(WIDTH/4)+k/4;
-    cp16(sa+(d*MT+rr)*KS+((chunk^(((rr>>1)&1)<<1))<<4), valid ? (const void*)source : (const void*)x, valid);
+    cp16(sa+(d*MT+rr)*KS+((chunk^stream_input_swizzle(rr))<<4), valid ? (const void*)source : (const void*)x, valid);
   }
 }
 
@@ -580,16 +609,32 @@ __device__ __forceinline__ void stream_body(const qi_t* x,const u16* w,const u16
         #pragma unroll
         for(int j=0;j<JN;++j) {
           int r=warp*8*JN+j*8+group;
-          uint4 h=*(const uint4*)(sw+r*128+(((step*4+thread)^((r&1)<<2))<<4));
           unsigned lo[DIGITS], hi[DIGITS];
+#if STREAM_LDSM_INPUT
+          // Canonical k32 fragments: four consecutive bytes, then the four bytes sixteen K later.
+          int chunk0=step*4+(thread>>1), swizzle=stream_weight_swizzle(r);
+          uint2 lower=*(const uint2*)(sw+r*128+((chunk0^swizzle)<<4)+(thread&1)*8);
+          uint2 upper=*(const uint2*)(sw+r*128+(((chunk0+2)^swizzle)<<4)+(thread&1)*8);
+          convert4(lo,lower.x,lower.y,scale[j]);
+          convert4(hi,upper.x,upper.y,scale[j]);
+#else
+          uint4 h=*(const uint4*)(sw+r*128+(((step*4+thread)^stream_weight_swizzle(r))<<4));
           convert4(lo,h.x,h.y,scale[j]);
           convert4(hi,h.z,h.w,scale[j]);
+#endif
           #pragma unroll
           for(int d=0;d<DIGITS;++d) {b[j][d][0]=lo[d]; b[j][d][1]=hi[d];}
         }
         #pragma unroll
         for(int m=0;m<M_GROUPS;++m) {
           unsigned a[DIGITS][4];
+#if STREAM_LDSM_INPUT
+          // Four m8/k16 byte quadrants, with a row swizzle covering all eight shared-bank groups.
+          int row=m*16+(lane&15), chunk=step*2+(lane>>4);
+          int offset=(chunk^stream_input_swizzle(row))<<4;
+          #pragma unroll
+          for(int d=0;d<DIGITS;++d) ldsm_a(a[d],sa+(d*MT+row)*KS+offset);
+#else
           int row=m*16+group, offset=(((step*2+(thread>>1))^(((row>>1)&1)<<1))<<4)+(thread&1)*8;
           #pragma unroll
           for(int d=0;d<DIGITS;++d) {
@@ -597,6 +642,7 @@ __device__ __forceinline__ void stream_body(const qi_t* x,const u16* w,const u16
             uint2 bottom=*(const uint2*)(sa+(d*MT+row+8)*KS+offset);
             a[d][0]=top.x; a[d][2]=top.y; a[d][1]=bottom.x; a[d][3]=bottom.y;
           }
+#endif
           #pragma unroll
           for(int i=0;i<DIGITS;++i) {
             #pragma unroll
@@ -1097,6 +1143,7 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
             "multiprocessors": self.multiprocessors,
             "weightLoadEffective": weight_read_plan(self.magnitude_bits, self.arch, self.weight_load),
             "mmaScheduleEffective": _mma_schedule(self.mma_schedule),
+            "streamInputEffective": stream_input_plan(self.magnitude_bits, self.arch),
             "hardwareQualified": False,
         }
         identity["fingerprint"] = canonical_json_hash({k: v for k, v in identity.items() if k != "fingerprint"})
@@ -1112,10 +1159,13 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
             name += f"-n{columns}"
         mode = weight_read_plan(self.magnitude_bits, self.arch, self.weight_load)
         paired, prefetch = mode == "paired", mode == "prefetch2"
+        ldsm = stream_input_plan(self.magnitude_bits, self.arch) == "ldmatrix"
         if paired:
             name += "-load32"
         if prefetch:
             name += "-prefetch2"
+        if ldsm:
+            name += "-ldsm"
         if name not in self._functions:
             defines = dict(
                 WIDTH=width,
@@ -1129,6 +1179,7 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
                 WEIGHT_READ32=int(paired),
                 WEIGHT_PREFETCH=int(prefetch),
                 FAST_CONVERT=int(self.magnitude_bits == 22),
+                STREAM_LDSM_INPUT=int(ldsm),
                 JN=columns // 32,
                 **(
                     {"STAGES": PREFILL_STAGES, "STREAM_MIN_BLOCKS": PREFILL_MIN_BLOCKS}

@@ -20,6 +20,16 @@ def cuda_class():
     return IntegerCudaKernels
 
 
+def test_stream_input_load_policy_scopes_the_ldmatrix_route_to_sm120_b22():
+    from heteroes.eval.integer_cuda import stream_input_plan
+
+    for bits in (14, 22):
+        for arch in ("sm_80", "sm_86", "sm_89", "sm_90", "sm_120"):
+            assert stream_input_plan(bits, arch) == ("ldmatrix" if bits == 22 and arch == "sm_120" else "scalar")
+    with pytest.raises(ReferenceArithmeticError, match="magnitude"):
+        stream_input_plan(True, "sm_120")
+
+
 def test_schedule_is_validated_before_cuda_and_named_in_the_static_identity(monkeypatch):
     from heteroes.eval import integer_cuda
 
@@ -251,7 +261,10 @@ def test_integer_source_passes_the_instruction_audit_on_other_architectures(arch
     owner = cuda_class()("cuda", magnitude_bits=magnitude_bits)
     if not owner._nvdisasm:
         pytest.skip("nvdisasm unavailable")
-    for width, tile, split in ((896, 32, 1), (4864, 32, 8), (896, 16, 4), (80, 16, 2)):
+    variants = [(896, 32, 1, 64, 0), (4864, 32, 8, 64, 0), (896, 16, 4, 64, 0), (80, 16, 2, 64, 0)]
+    if magnitude_bits == 22:
+        variants += [(896, 32, 8, 32, 1), (80, 16, 2, 64, 1)]
+    for width, tile, split, columns, ldsm in variants:
         defines = {
             "WIDTH": width,
             "MAGNITUDE_BITS": magnitude_bits,
@@ -264,6 +277,8 @@ def test_integer_source_passes_the_instruction_audit_on_other_architectures(arch
             "WEIGHT_READ32": 0,
             "WEIGHT_PREFETCH": 1,
             "FAST_CONVERT": int(magnitude_bits == 22),
+            "JN": columns // 32,
+            "STREAM_LDSM_INPUT": ldsm,
         }
         source = "".join(f"#define {k} {v}\n" for k, v in defines.items()) + _SOURCE
         nvrtc = owner._nvrtc
