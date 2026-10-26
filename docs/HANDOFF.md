@@ -17,22 +17,31 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
   khớp Linux/WSL2. Byte gói Worker/SDK khớp đủ **143 file**. Commit `af99a399` niêm phong
   [bằng chứng và giới hạn](evidence/2026-10-27-strict-bounded-lm-head/README.md). Các gate còn thiếu của
   prefill `7ca91112` đã được xử lý trong đợt này; không nhận hai lần lỗi khởi động WSL là test qua.
-- **Bản ghép `0eb86cb9` đang chạy full GPU suite và WSL2 → native Windows**, source đóng băng tại
-  `.scratch/codex-20261027-combined/stage`. Đã qua **47 test nhắm thay đổi**, **4/4 mutant CPU**,
-  **check-all ALL PASS** (runtime CPU **3252 pass/942 skip**, backend **452 pass**), Linux packaging/import.
-  Worker archive và SDK trong Server đã đối chiếu đủ **143 file** với commit runtime. Native installer và
-  managed lifecycle chưa được nghiệm thu. Đọc `evidence/2026-10-27-strict-combined-acceptance/`; controller
-  và raw receipts ở đó còn đang ghi, chưa niêm phong. `e496cc18` sửa giới hạn buffer của bộ kiểm định dạng.
+- **Bản ghép `0eb86cb9` đã nghiệm thu source trên ba môi trường**: 5070 Ti/3060 WSL2
+  **1075/1075 test**, Windows trực tiếp **917 test**; trained Qwen parent/canonical ±/restore/EOS khớp
+  cả ba host, Smol/Tiny khớp Linux/WSL2. **8/8 mutant mới**, **check-all ALL PASS** (CPU runtime
+  **3252 pass/942 skip**, backend **452 pass**), Linux packaging/import; đối chiếu đủ **143 file**
+  Worker/SDK với commit runtime. Commit `bbe6a443` niêm phong
+  [bằng chứng và giới hạn](evidence/2026-10-27-strict-combined-acceptance/README.md). Không suy thành
+  managed lifecycle, native installer hoặc nghiệm thu GPU chưa chạy. `e496cc18` sửa buffer bộ kiểm định dạng.
 - **Đã đo các hướng lớn hơn, không tiếp tục hướng không có lợi.** Capture prefill mới chỉ +0,27%; chuẩn
   bị trọng số B22 từng phép chiếu và gộp SiLU prefill không giúp short32. Mixed MLP B14/attention+head B22
   đạt khoảng 10076 token/s nhưng đổi contract, không dùng làm kết quả goal. Khảo sát B14 trên 64 câu ×
   parent/8 candidate/restored: hai GPU khớp từng loại precision, song B14 đổi **5/576 reward**, ties và hệ
   số ES so với B22. Commit `b64cc433` lưu toàn bộ khảo sát, phạm vi và các pilot bị bỏ;
   [đọc đối chứng toàn luồng](evidence/2026-10-27-whole-path-controls/README.md).
-- Hướng đang mở: **bảng nghịch đảo chính xác**, giữ đúng năm bước Newton cũ. CPU đã đối chiếu hết
-  **1,67 tỷ** mẫu FP32 trong miền cho phép; bảng nén khoảng **4 MiB**, khôi phục đúng mọi mantissa.
-  Đây mới là feasibility, chưa có số đo GPU/toàn decoder. Test/benchmark GPU đã xếp sau full suite để
-  tránh nhiễu; thiết kế và log trong `evidence/2026-10-27-strict-reciprocal-table/`.
+- Các pilot sau đó cũng đã chốt trong `bbe6a443`: bảng nghịch đảo nén 4 MiB đúng cả **1,67 tỷ** mẫu
+  CPU và mọi mantissa trên GPU nhưng chậm hơn Newton; activation đọc global và CTA attention rộng không
+  giúp short32. Đã đo **bộ đếm phần cứng** bằng Nsight Compute trong scratch riêng: các shape decode
+  lạnh dùng DRAM khoảng **72–74%**, SM throughput **43–46%**; không coi tất cả decode là đã sát trần
+  tensor. Đây là số đo kernel riêng, không thay benchmark toàn lượt.
+  [Bằng chứng](evidence/2026-10-27-strict-counter-profile/README.md).
+- Hướng đang mở là **TMA để nạp tile vào shared bằng phần cứng**, giữ nguyên MMA B22. Prototype
+  `evidence/2026-10-27-strict-tma/` đã qua **5 test**, xác minh copy U16/tails và toàn bộ **65536
+  encoding** trên SM120. Chưa có kernel GEMM dùng TMA hay số đo tăng tốc. Hai lỗi ban đầu là bộ audit nhầm lệnh
+  fence với FP32 và kiểu tham số Python của tensor map; giữ nguyên log, chỉ cho phép chính xác memory
+  fence ở callsite thử nghiệm, không tắt audit. Runtime `0eb86cb9` chưa đổi. Việc tiếp theo: nối TMA với
+  pipeline GEMM, chứng minh ánh xạ swizzle/producer-consumer, đo có tính mọi chi phí descriptor và staging.
 - Chủ dự án đã cho toàn quyền SSH trong phiên. Máy 5070 Ti của **Nhựt đã tắt theo yêu cầu** sau khi xác
   nhận rảnh; đang dùng 5070 Ti của Nhân và 3060 của Thảo. Không đổi approval/contribution lab, không
   triển khai, không learning run, không sửa môi trường `ai`. Chưa push/merge. M0–M6 vẫn chờ sau hiệu năng.

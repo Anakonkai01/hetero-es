@@ -1,0 +1,20 @@
+{
+  "files": {
+    "README.md": "85766e4d5dedba564ebf788a73dcc25aeae43c138563ddc27c3957623c22f25b",
+    "harness/test_audit.py": "31f90aa533d2cc14a6d49ded37da307af503f7316ec9e6fb5216edfe2283e1a1",
+    "harness/test_copy.py": "76a7c31cd8f62a4ccf3202c7ab895f9d086864b4dca6810275e75027163ea02e",
+    "harness/test_copy_v2.py": "2fa7797f2e23930dcfb90427080fb178ea9fb2992bd79698d6f4eba1d6d77ee1",
+    "harness/test_copy_v3.py": "dc100626a4e9dfd4902942304a91df56dcd5bedeb5179dccc60be6702d5f9286",
+    "harness/test_patterns.py": "43ef4b8c73f49e5a82f5b190ee05d0a1a1c9c359d5f07485429b0fe0402b1dcc",
+    "harness/tma_copy.py": "6d2b6aab6d0d579dea9bafecc66ac462b366a5cfba7c5652116d3575d3ffb0b6",
+    "harness/tma_copy_v2.py": "9ae1ea24a86c187fbdfcdada07414a58ae4b91a9ae9a3dc5495edbaaa27a2950",
+    "harness/tma_copy_v3.py": "3e3058bd94b7bd92ecc182b98e57e9a7bf48e23a8999ff1d673bdc2c204d16cf",
+    "raw/environment-01.json": "a089639c39bd6767fa73b262ddf883a89c059cfa9e0aafce0092346b5044c259",
+    "raw/red-01.log": "43bd4018ac4c1dc2ec6d08e43625ad6b421ea3b2b40d4c9dc1c0e10ce88e4c26",
+    "raw/tests-01.log": "f052035c564d0abf3065770fab9aa97c0ef535b0cf772463a6a0bc5583a3f600",
+    "raw/tests-02.log": "5e552cc0b80b0161367e7d1850c25665b86aa84d682eb358629906a2724939b1",
+    "raw/tests-03.log": "3fbe01ee9ec6ca8fb8843f62a701b7e48d60d6382f4d21a53cea71e2bc6718f6",
+    "raw/tests-04.log": "c76d01a5fa94cf0cba37ea9db6243f58c88df63a73975fa8746df027dbeb6e27"
+  },
+  "limits": "Copy feasibility evidence only; continue TMA GEMM work in a fresh stage."
+}
