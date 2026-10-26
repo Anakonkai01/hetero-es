@@ -1,0 +1,6 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7264.43it/s]
+surviving tiles [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+full 360.7
+bounded 224.5
+stage2 226.7
+resources {'integer-bound-896-m32': {'registers': 74, 'sharedBytes': 24576, 'residentCtas': 4}, 'integer-bound-stage2-896-m32': {'registers': 72, 'sharedBytes': 16384, 'residentCtas': 5}}

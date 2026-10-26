@@ -1,0 +1,62 @@
+[
+  {
+    "name": "upper_radius",
+    "file": "src/heteroes/eval/integer_lm_head.py",
+    "old": "-bound_floor(-(center+radius),shift)",
+    "new": "-bound_floor(-center,shift)"
+  },
+  {
+    "name": "lower_radius",
+    "file": "src/heteroes/eval/integer_lm_head.py",
+    "old": "bound_floor(center-radius,shift)",
+    "new": "bound_floor(center,shift)"
+  },
+  {
+    "name": "keep_ties",
+    "file": "src/heteroes/eval/integer_lm_head.py",
+    "old": "candidate<tiles && tile_hi[(size_t)row*tiles+candidate]>=global_lo",
+    "new": "candidate<tiles && tile_hi[(size_t)row*tiles+candidate]>global_lo"
+  },
+  {
+    "name": "nonfinite_tile",
+    "file": "src/heteroes/eval/integer_lm_head.py",
+    "old": "if((u64)(upper<0 ? -upper : upper)>=limit || (u64)(lower<0 ? -lower : lower)>=limit)\n            upper=1ll<<62;",
+    "new": "if(false)\n            upper=1ll<<62;"
+  },
+  {
+    "name": "tile_index",
+    "file": "src/heteroes/eval/integer_lm_head.py",
+    "old": "int bit=__ffs(pending)-1,tile=base+source*32+bit;",
+    "new": "int bit=__ffs(pending)-1,tile=base+source*32+((bit+1)&31);"
+  },
+  {
+    "name": "digit_weight",
+    "file": "src/heteroes/eval/integer_lm_head.py",
+    "old": "p+=(i64)accum[m][d][index]*(1ll<<(8*d));",
+    "new": "p+=(i64)accum[m][d][index]*(1ll<<(7*d));"
+  },
+  {
+    "name": "greedy_tie",
+    "file": "src/heteroes/eval/integer_lm_head.py",
+    "old": "float s=flush(encode(sum,ex[row]+ew[v]-42,error));\n        if((__float_as_uint(s)&0x7f800000u)==0x7f800000u) atomicOr(error,1);\n        if(s>best || (s==best && v<index))",
+    "new": "float s=flush(encode(sum,ex[row]+ew[v]-42,error));\n        if((__float_as_uint(s)&0x7f800000u)==0x7f800000u) atomicOr(error,1);\n        if(s>best || (s==best && v>index))"
+  },
+  {
+    "name": "negative_floor",
+    "file": "src/heteroes/eval/integer_lm_head.py",
+    "old": "return q>=0 ? q>>shift : -(i64)(((u64)(-q)+((1ull<<shift)-1ull))>>shift);",
+    "new": "return q>=0 ? q>>shift : -(i64)(((u64)(-q))>>shift);"
+  },
+  {
+    "name": "positive_ceil",
+    "file": "src/heteroes/eval/integer_lm_head.py",
+    "old": "i64 upper=-bound_floor(-(center+radius),shift),lower=",
+    "new": "i64 upper=bound_floor(center+radius,shift),lower="
+  },
+  {
+    "name": "weight_floor",
+    "file": "src/heteroes/eval/integer_lm_head.py",
+    "old": "t-=q<0 && (q&32767)!=0;",
+    "new": "t-=false;"
+  }
+]

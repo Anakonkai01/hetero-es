@@ -1,0 +1,9 @@
+{
+  "commit": "267ba0b5d3b122bd10177e337ee0e83f686922f9",
+  "runtimePythonFiles": 143,
+  "workerRuntimeMatchesCommit": true,
+  "sdkMatchesCommit": true,
+  "workerArchiveSha256": "9f677df7ba87d94612a53157d3289f216f6ab11d259fc2c5fe803ac3279577eb",
+  "sdkSha256": "8a795a75d3ebd067659d04b216f483083c4c851dce760a03824642b4f0214ecd",
+  "limits": "Linux source copy, unpacked imports and byte comparison only; no native Windows installer or managed qualification."
+}

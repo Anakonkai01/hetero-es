@@ -1,0 +1,34 @@
+........................................................................ [  8%]
+........................................................................ [ 16%]
+........................................................................ [ 25%]
+........................................................................ [ 33%]
+........................................................................ [ 42%]
+........................................................................ [ 50%]
+........................................................................ [ 58%]
+........................................................................ [ 67%]
+........................................................................ [ 75%]
+........................................................................ [ 84%]
+........................................................................ [ 92%]
+................................................................         [100%]Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  24%|##3       | 69/290 [00:00<00:00, 657.29it/s]Loading weights:  47%|####6     | 135/290 [00:00<00:00, 608.67it/s]Loading weights:  68%|######7   | 197/290 [00:00<00:00, 579.13it/s]Loading weights:  88%|########8 | 256/290 [00:00<00:00, 551.95it/s]Loading weights: 100%|##########| 290/290 [00:00<00:00, 584.64it/s]
+{"status": "ok", "out": "C:\\Users\\Thao Nguyen\\.cache\\heteroes-native-strict-20261025-01\\codex-prefill-02\\qwen-parity-native-01.json", "wallSeconds": 52.11718649999966}
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  24%|##3       | 69/290 [00:00<00:00, 639.35it/s]Loading weights:  46%|####5     | 133/290 [00:00<00:00, 618.12it/s]Loading weights:  67%|######7   | 195/290 [00:00<00:00, 595.43it/s]Loading weights:  88%|########7 | 255/290 [00:00<00:00, 558.49it/s]Loading weights: 100%|##########| 290/290 [00:00<00:00, 611.34it/s]
+base qwen short32 2728.3 bc4a5504e37c
+base qwen chat128 2699.2 a9fad5ca48ed
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  22%|##1       | 63/290 [00:00<00:00, 623.30it/s]Loading weights:  43%|####3     | 126/290 [00:00<00:00, 621.91it/s]Loading weights:  65%|######5   | 189/290 [00:00<00:00, 579.35it/s]Loading weights:  86%|########5 | 249/290 [00:00<00:00, 581.69it/s]Loading weights: 100%|##########| 290/290 [00:00<00:00, 618.90it/s]
+new qwen short32 2929.0 bc4a5504e37c
+new qwen chat128 2777.5 a9fad5ca48ed
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  24%|##4       | 71/290 [00:00<00:00, 683.95it/s]Loading weights:  48%|####8     | 140/290 [00:00<00:00, 646.94it/s]Loading weights:  71%|#######   | 205/290 [00:00<00:00, 583.00it/s]Loading weights:  91%|#########1| 264/290 [00:00<00:00, 566.90it/s]Loading weights: 100%|##########| 290/290 [00:00<00:00, 607.59it/s]
+base qwen short32 2736.0 bc4a5504e37c
+base qwen chat128 2689.8 a9fad5ca48ed
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  24%|##3       | 69/290 [00:00<00:00, 687.29it/s]Loading weights:  48%|####7     | 138/290 [00:00<00:00, 668.89it/s]Loading weights:  71%|#######   | 205/290 [00:00<00:00, 616.74it/s]Loading weights:  92%|#########2| 268/290 [00:00<00:00, 607.43it/s]Loading weights: 100%|##########| 290/290 [00:00<00:00, 641.46it/s]
+new qwen short32 2825.5 bc4a5504e37c
+new qwen chat128 2757.0 a9fad5ca48ed
+
+============================== warnings summary ===============================
+..\..\venv\Lib\site-packages\_pytest\config\__init__.py:1303
+  C:\Users\Thao Nguyen\.cache\heteroes-native-strict-20261025-01\venv\Lib\site-packages\_pytest\config\__init__.py:1303: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; anyio
+    self._mark_plugins_for_rewrite(hook, disable_autoload)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+856 passed, 1 warning in 1096.36s (0:18:16)
+{"status": "ok", "wallSeconds": 1252.1014538, "error": null}

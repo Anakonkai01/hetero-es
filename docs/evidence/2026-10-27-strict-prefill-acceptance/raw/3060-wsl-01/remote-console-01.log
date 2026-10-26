@@ -1,0 +1,22 @@
+/home/thao_nguyen/.local/share/heteroes-c4-cpu/runtimes/9a553d2dfae9/python/bin/python3.12: No module named pytest
+TESTS_FAILED
+{"status": "ok", "out": "qwen-parity-3060-01.json", "wallSeconds": 1019.3654039560006}
+{"status": "ok", "out": "smol-parity-3060-01.json", "wallSeconds": 23.501122663999922}
+{"status": "ok", "out": "tiny-parity-3060-01.json", "wallSeconds": 36.785008774000744}
+base qwen short32 2808.7 bc4a5504e37c
+base qwen chat128 2718.1 a9fad5ca48ed
+new qwen short32 2828.2 bc4a5504e37c
+new qwen chat128 2749.9 a9fad5ca48ed
+base qwen short32 2800.5 bc4a5504e37c
+base qwen chat128 2706.6 a9fad5ca48ed
+new qwen short32 2882.0 bc4a5504e37c
+new qwen chat128 2759.4 a9fad5ca48ed
+base smol short32 2744.9 068722232705
+new smol short32 2880.8 068722232705
+base smol short32 2826.1 068722232705
+new smol short32 2968.0 068722232705
+base tiny short32 1411.1 db262d7ab9fa
+new tiny short32 1444.5 db262d7ab9fa
+base tiny short32 1398.4 db262d7ab9fa
+new tiny short32 1461.6 db262d7ab9fa
+REMOTE_DONE

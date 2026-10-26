@@ -1,0 +1,20 @@
+{"status": "ok", "out": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/docs/evidence/2026-10-27-strict-prefill-acceptance/raw/qwen-parity-5070ti-01.json", "wallSeconds": 155.18330987200898}
+{"status": "ok", "out": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/docs/evidence/2026-10-27-strict-prefill-acceptance/raw/smol-parity-5070ti-01.json", "wallSeconds": 21.96656770000118}
+{"status": "ok", "out": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/docs/evidence/2026-10-27-strict-prefill-acceptance/raw/tiny-parity-5070ti-01.json", "wallSeconds": 31.154544967997936}
+base qwen short32 8910.9 bc4a5504e37c
+base qwen chat128 9109.1 a9fad5ca48ed
+new qwen short32 9161.0 bc4a5504e37c
+new qwen chat128 9244.5 a9fad5ca48ed
+base qwen short32 8908.3 bc4a5504e37c
+base qwen chat128 9107.3 a9fad5ca48ed
+new qwen short32 9156.7 bc4a5504e37c
+new qwen chat128 9245.7 a9fad5ca48ed
+base smol short32 8526.2 068722232705
+new smol short32 8769.4 068722232705
+base smol short32 8526.9 068722232705
+new smol short32 8757.8 068722232705
+base tiny short32 4639.0 db262d7ab9fa
+new tiny short32 4747.6 db262d7ab9fa
+base tiny short32 4648.9 db262d7ab9fa
+new tiny short32 4752.0 db262d7ab9fa
+LOCAL_DONE
