@@ -1,0 +1,34 @@
+{
+  "label": "new",
+  "gpu": "NVIDIA GeForce RTX 3060",
+  "model": "tiny",
+  "modelFiles": {
+    "config.json": "486bedda3a6988332e60d9638a09ca4b260d34ebcf1b19e22cf3b140b63d8fe9",
+    "eval_results.json": "637daaebe7aa8af0e678f9e79ec33fa29f8635090d45ec813f0e7474320d7351",
+    "generation_config.json": "18046d04f5bd8b4998095ecabdd17a1bf0053d9acdccead4a05be4a3575f3c5c",
+    "model.safetensors": "6e6001da2106d4757498752a021df6c2bdc332c650aae4bae6b0c004dcf14933",
+    "special_tokens_map.json": "82d96d7a9e6ced037f12394b7ea6a5b02e6ca87e0d11edaa8d60d9be857ce7db",
+    "tokenizer.json": "bcd04f0eadf90287bd26e1a183ac487d8a141b09b06aecb7725bbdd343640f2e",
+    "tokenizer.model": "9e556afd44213b6bd1be2b850ebbbd98f5481437a8021afaf58ee7fb1818d347",
+    "tokenizer_config.json": "7b41ba7d0eb91e77914ca3dafde559ea3e19878769b7e68409e89bed5222e77a"
+  },
+  "sourceRoot": "/tmp/heteroes-claude-fused-20261026-01/new/src/heteroes",
+  "fingerprint": "d413adac54bc8c8f7e761cbacf1aaaee00ecb62f0b7fc3c32013b76137b61f16",
+  "integerCudaSha256": "36dbac1a4cea591e4412cc8032f1fd3fdd08bf401ff785f33d305d71ed115c2d",
+  "decoderGraphSha256": "6525c557034ae50bd8712c1bfb07db65299e191891b1850a516035f97486bea0",
+  "cases": [
+    {
+      "case": "short32",
+      "outputTokens": 32,
+      "secondsSamples": [
+        0.7555315219797194,
+        0.7509293839975726,
+        0.75542363000568,
+        0.7559866739902645,
+        0.7567161920014769
+      ],
+      "medianTokensPerSecond": 1355.3372297648318,
+      "tokensSha256": "db262d7ab9fa09fb7ad5749d3a474a1fc8316089a958d10457dd2a908bb9610a"
+    }
+  ]
+}

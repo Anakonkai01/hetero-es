@@ -1,0 +1,22 @@
+4 failed, 902 passed in 725.75s (0:12:05)
+TESTS_FAILED
+{"status": "ok", "out": "qwen-parity-3060-01.json", "wallSeconds": 1102.1447405170184}
+{"status": "ok", "out": "smol-parity-3060-01.json", "wallSeconds": 22.08818282201537}
+{"status": "ok", "out": "tiny-parity-3060-01.json", "wallSeconds": 34.60839329499868}
+base qwen short32 2538.2 bc4a5504e37c
+base qwen chat128 2532.7 a9fad5ca48ed
+new qwen short32 2564.9 bc4a5504e37c
+new qwen chat128 2571.3 a9fad5ca48ed
+base qwen short32 2609.1 bc4a5504e37c
+base qwen chat128 2540.7 a9fad5ca48ed
+new qwen short32 2555.4 bc4a5504e37c
+new qwen chat128 2549.3 a9fad5ca48ed
+base smol short32 2423.7 068722232705
+new smol short32 2653.9 068722232705
+base smol short32 2534.0 068722232705
+new smol short32 2656.9 068722232705
+base tiny short32 1353.2 db262d7ab9fa
+new tiny short32 1355.3 db262d7ab9fa
+base tiny short32 1371.8 db262d7ab9fa
+new tiny short32 1373.7 db262d7ab9fa
+REMOTE_DONE

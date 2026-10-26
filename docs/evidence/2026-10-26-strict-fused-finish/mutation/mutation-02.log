@@ -1,0 +1,5 @@
+control ok    | 29 passed in 85.88s (0:01:25)
+killed       projected-no-nonfinite-flag | 1 failed, 28 passed in 85.85s (0:01:25)
+killed       qkv-odd-dim-admitted | 1 failed, 28 passed in 86.53s (0:01:26)
+
+2 of 2 mutants killed.
