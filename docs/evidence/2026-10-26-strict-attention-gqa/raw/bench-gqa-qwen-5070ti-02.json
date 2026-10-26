@@ -1,0 +1,95 @@
+{
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "torch": "2.13.0+cu132",
+  "model": "qwen",
+  "modelFiles": {
+    "config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+    "generation_config.json": "e558847a8b4402616f1273797b015104dc266fe4b520056fca88823ba8f8ebe6",
+    "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+    "model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+    "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+    "tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583",
+    "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+  },
+  "sourceSha256": "ab449d3cca8bdb0fec3d3aabbf30081f94969c16943bb0631a2c03f91ab07a10",
+  "strictCudaSha256": "f000341d37b7d7328b657b9e61752cd2bd292dda20874d90ec513c4736e57647",
+  "cases": [
+    {
+      "case": "short32",
+      "batch": 32,
+      "outputTokens": 32,
+      "secondsSamples": {
+        "strict_attention": [
+          0.2349658620005357,
+          0.2345185859958292,
+          0.2345503929973347,
+          0.23507081999559887,
+          0.2348608019965468,
+          0.23482728700037114,
+          0.2345463870005915,
+          0.23482750299444888,
+          0.23498111499793595,
+          0.2345355700017535
+        ],
+        "strict_attention_gqa": [
+          0.21402632600074867,
+          0.21466107799642486,
+          0.2140132460044697,
+          0.2147688749973895,
+          0.21446093799750088,
+          0.21470809900347376,
+          0.2142194539992488,
+          0.2148492120031733,
+          0.21432396800082643,
+          0.21393796399934217
+        ]
+      },
+      "medianTokensPerSecond": {
+        "strict_attention": 4360.649659343596,
+        "strict_attention_gqa": 4776.287530998093
+      },
+      "ratio": 1.0953155846317317,
+      "tokensEqual": true,
+      "tokensSha256": "bc4a5504e37c79c14e8f6ee824618a85fdd6e0d8d5bcfca51ff1e7691fbd0c66"
+    },
+    {
+      "case": "chat128",
+      "batch": 32,
+      "outputTokens": 128,
+      "secondsSamples": {
+        "strict_attention": [
+          1.0342417360006948,
+          1.0356505239979015,
+          1.0353821129974676,
+          1.0349912009987747,
+          1.0365994059975492,
+          1.0359694349972415,
+          1.036601312996936,
+          1.0367187349984306,
+          1.0371214140031952,
+          1.0386381200005417
+        ],
+        "strict_attention_gqa": [
+          0.8315364039954147,
+          0.8334304419986438,
+          0.8333027720000246,
+          0.8345873829966877,
+          0.834711105999304,
+          0.8364233930042246,
+          0.8372617610002635,
+          0.8351827610022156,
+          0.8384901739991619,
+          0.838997468999878
+        ]
+      },
+      "medianTokensPerSecond": {
+        "strict_attention": 3952.582822806507,
+        "strict_attention_gqa": 4905.700992069424
+      },
+      "ratio": 1.2411380638916405,
+      "tokensEqual": true,
+      "tokensSha256": "a9fad5ca48ed06879bbad136b7282ca0a3c638959dd26e2b1b92635011d5fb49"
+    }
+  ],
+  "status": "ok"
+}

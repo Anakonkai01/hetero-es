@@ -1,0 +1,26 @@
+[
+ {
+  "name": "unroll_max",
+  "file": "src/heteroes/eval/strict_cuda.py",
+  "old": "#pragma unroll 1\n  for (int j = x; j < keys; j += (int)blockDim.x)\n    if",
+  "new": "  for (int j = x; j < keys; j += (int)blockDim.x)\n    if"
+ },
+ {
+  "name": "unroll_exp",
+  "file": "src/heteroes/eval/strict_cuda.py",
+  "old": "#pragma unroll 1\n  for (int j = x; j < keys; j += (int)blockDim.x) {",
+  "new": "  for (int j = x; j < keys; j += (int)blockDim.x) {"
+ },
+ {
+  "name": "unroll_tree",
+  "file": "src/heteroes/eval/strict_cuda.py",
+  "old": "#pragma unroll 1\n    for (int j = x * 2 * stride;",
+  "new": "    for (int j = x * 2 * stride;"
+ },
+ {
+  "name": "unroll_normalize",
+  "file": "src/heteroes/eval/strict_cuda.py",
+  "old": "#pragma unroll 1\n  for (int j = x; j < keys; j += (int)blockDim.x) scores[j]",
+  "new": "  for (int j = x; j < keys; j += (int)blockDim.x) scores[j]"
+ }
+]

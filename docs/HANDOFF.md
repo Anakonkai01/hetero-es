@@ -72,6 +72,12 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
   projection **52,8%**, attention **27,9%**; đường FP16 vendor chat128 attention **42,9%**. Attention decode tăng
   tuyến tính khoảng 0,4 µs/key/layer (60→115 µs/layer), prefill 43 ms. Ưu tiên attention trước B13.
   [Profile](evidence/2026-10-26-whole-path-kernel-profile/README.md).
+- **Claude (26/10) chọn attention strict mới, số học giữ nguyên từng bit.** Kernel GQA đọc K/V một lần cho
+  cả nhóm head, chia việc song song, không đổi thứ tự cộng. Batch 32 5070 Ti: Qwen **4361→4776** short32,
+  **3953→4906** chat128 (+24%), Smol **+15%**, Tiny **+6%**; 3060 +3,5–9,7%. Token/logits khớp bản gốc, khớp
+  5070 Ti/3060 WSL2/3060 native Win11 và khớp receipts `b1ef257a`. check-all ALL PASS, mutation 14/16 (2 tương
+  đương). Sau đổi, projection chiếm **65%** B22 chat128: đó là việc tiếp theo.
+  [Bằng chứng](evidence/2026-10-26-strict-attention-gqa/README.md).
 - Tiếp tục projection throughput, số học có đặc tả và gate chất lượng/portable/native; không sửa recipe
   lịch sử để lấy tốc độ. Kế hoạch đã duyệt vẫn giữ hash
   `4ee6838fa47f810ee40348b5f0bc556834bf50825eb0b7b0795b5053743cb17f`.
@@ -87,7 +93,7 @@ Deployment remains `82c37fc`. Service status re-read on 2026-10-26: all three la
 | Lab            | `lab.heteroes.site`, deployed clone `~/.local/share/heteroes-lab/app` at `82c37fc`; operations: [local-lab-operations.md](local-lab-operations.md)                                                                                                         |
 | Devices        | Standalone probes: local 5070 Ti Linux and Thao 3060 WSL2/native Win11. Live approval/contribution was not changed; follow AGENTS.md. Native source/fixtures and finite trained Qwen candidates pass; installer/throughput/managed acceptance remains open |
 | Default engine | engine v2 noise made on the GPU (same bits as CPU; `HETEROES_NOISE_DEVICE=cpu` forces CPU)                                                                                                                                                                 |
-| Code           | Owned performance branch `work/codex-frozen-perf-2026-10-25`; strict B22 `b1ef257a`, experimental live FP16/vLLM views `c9a37059`. No push/merge/deployment                                                                                                |
+| Code           | Owned performance branch `work/codex-frozen-perf-2026-10-25`; strict B22 `b1ef257a` + GQA attention (26/10), experimental live FP16/vLLM views `c9a37059`. No push/merge/deployment                                                                                                |
 | Disk (nhan)    | `/` 90 % used; Archive (NTFS/FUSE, also personal data) **full**, holds lab recovery storage and moved run data                                                                                                                                             |
 
 ## Open work, in order

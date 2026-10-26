@@ -1,0 +1,2 @@
+qwen short32 {'strict_attention': 4360.6, 'strict_attention_gqa': 4776.3} ratio 1.095
+qwen chat128 {'strict_attention': 3952.6, 'strict_attention_gqa': 4905.7} ratio 1.241

@@ -1,0 +1,26 @@
+b22   short32   4783.6 tok/s span   233.2 ms idle  25.2 ms
+      projection GEMM            151.7 ms  65.0%
+      projection prep/finish      21.1 ms   9.0%
+      attention                   15.8 ms   6.8%
+      norm/act/rope/residual      12.9 ms   5.5%
+      other                        5.0 ms   2.1%
+      copies/fills                 1.5 ms   0.7%
+b22   chat128   4824.0 tok/s span   888.6 ms idle  63.3 ms
+      projection GEMM            576.6 ms  64.9%
+      attention                  102.6 ms  11.5%
+      projection prep/finish      78.0 ms   8.8%
+      norm/act/rope/residual      51.4 ms   5.8%
+      other                       14.9 ms   1.7%
+      copies/fills                 1.9 ms   0.2%
+fp16  short32   8814.0 tok/s span   130.0 ms idle  26.0 ms
+      projection GEMM             52.7 ms  40.6%
+      copies/fills                16.2 ms  12.5%
+      attention                   15.8 ms  12.1%
+      norm/act/rope/residual      13.0 ms  10.0%
+      other                        6.3 ms   4.9%
+fp16  chat128   8751.6 tok/s span   507.7 ms idle  62.8 ms
+      projection GEMM            206.5 ms  40.7%
+      attention                  102.1 ms  20.1%
+      copies/fills                64.4 ms  12.7%
+      norm/act/rope/residual      51.8 ms  10.2%
+      other                       20.2 ms   4.0%

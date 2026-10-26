@@ -1,0 +1,35 @@
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights:  51%|█████     | 103/201 [00:00<00:00, 1009.56it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 1057.08it/s]
+Traceback (most recent call last):
+  File "/tmp/heteroes-claude-attention-20261026-01/bench_gqa.py", line 39, in <module>
+    outputs = {e: r(rows) for e, r in runs.items()}
+                  ^^^^^^^
+  File "/home/thao_nguyen/.local/share/heteroes-c4-cpu/runtimes/9a553d2dfae9/python/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/heteroes-claude-attention-20261026-01/benchmark_inference.py", line 86, in run
+    output = engine.generate(
+             ^^^^^^^^^^^^^^^^
+  File "/home/thao_nguyen/.local/share/heteroes-c4-cpu/runtimes/9a553d2dfae9/python/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/heteroes-claude-attention-20261026-01/src/heteroes/eval/strict_decoder_graph.py", line 332, in generate
+    logits, caches = self.forward_batch(histories)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thao_nguyen/.local/share/heteroes-c4-cpu/runtimes/9a553d2dfae9/python/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/heteroes-claude-attention-20261026-01/src/heteroes/eval/strict_decoder_packed.py", line 102, in forward_batch
+    normalized = kernels.rms_norm(hidden, layer.input_layernorm.weight, epsilon, error_flag=flag)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thao_nguyen/.local/share/heteroes-c4-cpu/runtimes/9a553d2dfae9/python/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/heteroes-claude-attention-20261026-01/src/heteroes/eval/strict_cuda.py", line 1309, in rms_norm
+    self._ops("strict_rms_norm"),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/heteroes-claude-attention-20261026-01/src/heteroes/eval/strict_cuda.py", line 1261, in _ops
+    self._functions["ops"] = self._compile(
+                             ^^^^^^^^^^^^^^
+  File "/tmp/heteroes-claude-attention-20261026-01/src/heteroes/eval/strict_cuda.py", line 1180, in _compile
+    raise ReferenceArithmeticError(f"Compiled strict kernel failed its instruction audit: {violations[:5]}")
+heteroes.eval.reference_ops.ReferenceArithmeticError: Compiled strict kernel failed its instruction audit: ['I2F.U32.RP R2, c[0x0][0x1a4] ;', 'MUFU.RCP R2, R2 ;', 'F2I.FTZ.U32.TRUNC.NTZ R25, R24 ;']

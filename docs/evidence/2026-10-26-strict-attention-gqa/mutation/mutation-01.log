@@ -1,0 +1,19 @@
+control ok    | 301 passed in 3.40s
+killed       gqa_score_sequential_groups | 1 failed, 74 passed in 2.41s
+killed       gqa_value_tile_prune | 1 failed, 118 passed in 2.42s
+SURVIVED     gqa_stage_no_flush | 301 passed in 3.26s
+SURVIVED     gqa_stage_no_note | 301 passed in 3.28s
+killed       gqa_max_first_warp_only | 1 failed, 84 passed in 2.43s
+killed       gqa_query_unpadded_lane | 1 failed, 82 passed in 2.42s
+killed       gqa_ignore_mask_in_shift | 1 failed, 232 passed in 2.71s
+killed       gqa_no_value_prefetch | 1 failed, 84 passed in 2.41s
+killed       gqa_score_shuffle_skip | 1 failed, 82 passed in 2.41s
+SURVIVED     split_score_no_prune | 301 passed in 3.29s
+killed       split_chunk_overlap | 1 failed, 69 passed in 2.38s
+killed       split_roots_reversed | 1 failed, 75 passed in 2.36s
+killed       eligible_single_head | 1 failed, 64 passed in 0.76s
+killed       eligible_shared_limit | 1 failed, 64 passed in 0.76s
+killed       gqa_shared_unpadded | 1 failed, 74 passed in 2.44s
+killed       default_original | 65 passed, 1 error in 0.78s
+
+13 of 16 mutants killed.
