@@ -1,0 +1,757 @@
+{
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "torch": "2.13.0+cu132",
+  "cases": [
+    {
+      "rows": 32,
+      "width": 896,
+      "outputs": 128,
+      "eventMs": {
+        "a22w22": [
+          0.006404266754786173,
+          0.006004266440868378,
+          0.00594346672296524,
+          0.005952000121275584,
+          0.0059338668982187905,
+          0.005940266450246175,
+          0.005972266693909963,
+          0.005939200023810069,
+          0.005929600199063619,
+          0.005938133100668589
+        ],
+        "shared32": [
+          0.007309866448243459,
+          0.007195733487606049,
+          0.007173333565394084,
+          0.007195733487606049,
+          0.007170133292675018,
+          0.0071712002158164975,
+          0.007169066866238912,
+          0.007204266885916392,
+          0.00717546691497167,
+          0.007162666817506155
+        ],
+        "shared64": [
+          0.009220266342163086,
+          0.009105066458384195,
+          0.009090133508046468,
+          0.009100799759229025,
+          0.009110400080680847,
+          0.009103999535242716,
+          0.009149866302808125,
+          0.009083732962608337,
+          0.009154133001963298,
+          0.00913706620534261
+        ]
+      },
+      "ratios": {
+        "a22w22": 1.0,
+        "shared32": 0.8282039456519432,
+        "shared64": 0.6523979579510336
+      }
+    },
+    {
+      "rows": 32,
+      "width": 896,
+      "outputs": 896,
+      "eventMs": {
+        "a22w22": [
+          0.010820266604423524,
+          0.010565333565076192,
+          0.010406399766604105,
+          0.010654933253924052,
+          0.010578133662541707,
+          0.010569600264231364,
+          0.010593066612879435,
+          0.010445866982142131,
+          0.010540800293286641,
+          0.010575999816258749
+        ],
+        "shared32": [
+          0.009678933024406432,
+          0.009645866354306538,
+          0.009633066256841023,
+          0.009699199597040813,
+          0.009690666198730468,
+          0.00965119997660319,
+          0.009620267152786254,
+          0.009656533598899841,
+          0.009630933403968811,
+          0.00962453285853068
+        ],
+        "shared64": [
+          0.011134933431943257,
+          0.011083733042081196,
+          0.011059199770291647,
+          0.011057066917419433,
+          0.011064533392588298,
+          0.011073066790898641,
+          0.011078400413195293,
+          0.011102933684984844,
+          0.011062399546305338,
+          0.011086933811505635
+        ]
+      },
+      "ratios": {
+        "a22w22": 1.0,
+        "shared32": 1.0957935117121629,
+        "shared64": 0.9545913995521742
+      }
+    },
+    {
+      "rows": 32,
+      "width": 896,
+      "outputs": 4864,
+      "eventMs": {
+        "a22w22": [
+          0.02848213315010071,
+          0.028309333324432372,
+          0.028216532866160073,
+          0.028215465943018596,
+          0.02822293241818746,
+          0.028257066011428834,
+          0.02819733421007792,
+          0.02826133370399475,
+          0.028265599409739176,
+          0.028214399019877115
+        ],
+        "shared32": [
+          0.029620265960693358,
+          0.029447466135025024,
+          0.029497599601745604,
+          0.02949013312657674,
+          0.029485867420832316,
+          0.029526400566101074,
+          0.029495465755462646,
+          0.02949120004971822,
+          0.029508266846338907,
+          0.029496532678604127
+        ],
+        "shared64": [
+          0.03893440167109172,
+          0.038976001739501956,
+          0.03908160130182902,
+          0.03905066649119059,
+          0.03898239930470784,
+          0.039035733540852866,
+          0.03898133436838786,
+          0.03899946610132853,
+          0.0390122652053833,
+          0.039033599694569904
+        ]
+      },
+      "ratios": {
+        "a22w22": 1.0,
+        "shared32": 0.9574179537711702,
+        "shared64": 0.723993654333332
+      }
+    },
+    {
+      "rows": 32,
+      "width": 4864,
+      "outputs": 896,
+      "eventMs": {
+        "a22w22": [
+          0.03624639908472697,
+          0.03609600067138672,
+          0.035988267262776694,
+          0.036014934380849205,
+          0.03597546815872192,
+          0.03597653309504191,
+          0.035979731877644854,
+          0.03597546815872192,
+          0.03594026565551758,
+          0.03599040110905965
+        ],
+        "shared32": [
+          0.03234133323033651,
+          0.03237760066986084,
+          0.03239360054334005,
+          0.03229333360989888,
+          0.03223466674486796,
+          0.032321067651112874,
+          0.03228800098101298,
+          0.03222613334655762,
+          0.03229119976361593,
+          0.03234986662864685
+        ],
+        "shared64": [
+          0.036817065874735516,
+          0.03687359889348348,
+          0.03673280080159505,
+          0.036807465553283694,
+          0.03673280080159505,
+          0.03682133356730143,
+          0.036730666955312095,
+          0.03672106663386027,
+          0.03687893152236939,
+          0.03671253522237142
+        ]
+      },
+      "ratios": {
+        "a22w22": 1.0,
+        "shared32": 1.1138074134542346,
+        "shared64": 0.9786203220033225
+      }
+    },
+    {
+      "rows": 128,
+      "width": 896,
+      "outputs": 4864,
+      "eventMs": {
+        "a22w22": [
+          0.08765866756439208,
+          0.08737280368804931,
+          0.08729386329650879,
+          0.08732266426086426,
+          0.0873685359954834,
+          0.08764800230662027,
+          0.08764906724294026,
+          0.08800106843312581,
+          0.08853867053985595,
+          0.08847359816233318
+        ],
+        "shared32": [
+          0.09090879758199057,
+          0.09082346757253011,
+          0.09095679918924968,
+          0.09109439849853515,
+          0.09103039900461833,
+          0.09116053581237793,
+          0.09120852947235107,
+          0.09117333094278972,
+          0.0911679983139038,
+          0.09120746453603108
+        ],
+        "shared64": [
+          0.11004266738891602,
+          0.11008000373840332,
+          0.11011412938435873,
+          0.11025173664093017,
+          0.11015786329905192,
+          0.11030186812082926,
+          0.1104085365931193,
+          0.11011626720428466,
+          0.11025066375732422,
+          0.110316801071167
+        ]
+      },
+      "ratios": {
+        "a22w22": 1.0,
+        "shared32": 0.9618234491830934,
+        "shared64": 0.7953279843148855
+      }
+    }
+  ],
+  "identities": {
+    "a22w22": {
+      "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+      "operators": "pairwise_f32_reference_v1_experimental",
+      "sourceSha256": "daf13db126e0b4b4d5c7258a3f8c8be67ef7171dda2d62889c9e8b41b08a95ec",
+      "nvrtcOptions": [
+        "--fmad=false",
+        "--ftz=false",
+        "--prec-div=true",
+        "--prec-sqrt=true",
+        "--std=c++17"
+      ],
+      "hardwareQualified": false,
+      "arch": "sm_120",
+      "gpu": "NVIDIA GeForce RTX 5070 Ti",
+      "nvrtcVersion": [
+        13,
+        2
+      ],
+      "builds": {
+        "integer-22-4864-bias0-m16-w4-s1-p0-prefetch2": {
+          "sourceSha256": "960b07d8b191158b7a04b86f224b7277b1aef07d569264875e197ade85e567f1",
+          "ptxSha256": "0c075c0ede3dd8f72fac977cf2922e83455efcd493a796e33d9f6419830d7ac0",
+          "cubinSha256": "62f4a46003a29df1010e9a019beb27993c91acbe3cd2f8a13aa4d477fea605e4",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        },
+        "integer-22-4864-bias0-m32-w4-s8-p1-prefetch2": {
+          "sourceSha256": "016d70d02dd77efcf4a58c80a2f4b3c71256497742e9d76ee625d032dcc2ccb9",
+          "ptxSha256": "e37f683fe6c92b786a8c9932f8face381027a315fa6e338ae648c23b4ac14e46",
+          "cubinSha256": "d916c94e65e4f25b520f5b7ec4b8b4a1c7dab6b9e702bdf1d7aa08faa85d9c7c",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          }
+        },
+        "integer-22-896-bias0-m16-w4-s1-p0-prefetch2": {
+          "sourceSha256": "4849567dcdf1f7eb25ccb7b879777f78f1fc3fec3f048ea379a30dd4eabef43a",
+          "ptxSha256": "8d0637911579090b21d475788492cc13711fdf05a74c3a17a0bb757b8697425d",
+          "cubinSha256": "86a8a89384bea3031a36834653499bd921372a3da37ea730121b05e9eae81ca2",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        },
+        "integer-22-896-bias0-m32-w4-s1-p1-prefetch2": {
+          "sourceSha256": "c7ee56029c2484c384c2f6dc0adb81a0574830e272b14fe02d7f15f946bee3c0",
+          "ptxSha256": "0a01ee9635250bf6913373f506817d9bb27467da5b1ec781146d5fbc1f203641",
+          "cubinSha256": "06efaeeac3728b3816348c00fba24d3b8d8779e04c21ed5085a1039cfbfef88a",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          }
+        },
+        "integer-22-896-bias0-m32-w4-s4-p1-prefetch2": {
+          "sourceSha256": "617d6fae9b76c475a1ac8eff277c333567fbae99052a2ee123940121409b2f99",
+          "ptxSha256": "e3815008ef8d943f73955c69b21c6628f5e4559c49725a98f81669fcf78d6dc3",
+          "cubinSha256": "f6c64c7016ef2a4ae64a1eeae49592f298fb18b79529973e75b7aa613d4d6922",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          }
+        },
+        "integer-22-896-bias0-m32-w4-s8-p1-prefetch2": {
+          "sourceSha256": "013b825eae21d773e9891df31eb9c2a9aef589c11cb7f5e9dda5643b02df7e28",
+          "ptxSha256": "9fff404fd8d979ff063887dbdf81b4cf1a244fae0d655bed828372fead3b488a",
+          "cubinSha256": "43ae7b09c6d799affed7f45605152c363fbfa4a995a4cb2ad55adc10e1bfc5dc",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          }
+        }
+      },
+      "fingerprint": "53f1f2e014d39dedd140b70266b3c37ea7c34887cade736c162a987da551e5c1",
+      "linear": {
+        "operator": "row_scaled_signed_integer_dot_v1_experimental",
+        "magnitudeBits": 22,
+        "limbs": 3,
+        "maxWidth": 32768,
+        "zeroIntegerOutput": "+0",
+        "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+        "bias": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+        "hardwareQualified": false
+      },
+      "nonlinear": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "daf13db126e0b4b4d5c7258a3f8c8be67ef7171dda2d62889c9e8b41b08a95ec",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false
+      },
+      "integerSourceSha256": "a83ff355e70e45352eef0b3196614f320ba8c91813526519fbde64cb9235b480",
+      "maxPartialBytes": 16777216,
+      "activationPacking": "radix_planes_once_v1_experimental",
+      "weightLoad": "auto",
+      "weightReadPolicy": "raw_half_prefetch2_sm86_sm120_b22_v2_experimental",
+      "decodePlanning": {
+        "policy": "occupancy_split_k_v1_experimental",
+        "rowTiles": [
+          16,
+          32
+        ],
+        "maxSplitK": 8,
+        "minSplitWidth": 256,
+        "maxBatch": 128,
+        "singleRow": "simt_split1",
+        "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+      },
+      "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+      "integerReference": {
+        "operator": "row_scaled_signed_integer_dot_v1_experimental",
+        "magnitudeBits": 22,
+        "limbs": 3,
+        "maxWidth": 32768,
+        "zeroIntegerOutput": "+0",
+        "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+        "bias": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+        "hardwareQualified": false
+      },
+      "multiprocessors": 70,
+      "weightLoadEffective": "prefetch2"
+    },
+    "shared32": {
+      "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+      "operators": "pairwise_f32_reference_v1_experimental",
+      "sourceSha256": "daf13db126e0b4b4d5c7258a3f8c8be67ef7171dda2d62889c9e8b41b08a95ec",
+      "nvrtcOptions": [
+        "--fmad=false",
+        "--ftz=false",
+        "--prec-div=true",
+        "--prec-sqrt=true",
+        "--std=c++17"
+      ],
+      "hardwareQualified": false,
+      "arch": "sm_120",
+      "gpu": "NVIDIA GeForce RTX 5070 Ti",
+      "nvrtcVersion": [
+        13,
+        2
+      ],
+      "builds": {
+        "sharedtile-b22-k4864-bias0-m16-n32-kt32-s1-p0": {
+          "sourceSha256": "7da55c370904a4186cefa59e38ee3a6f5035e96e3838c2ee2f3a5f4e4a33bae0",
+          "ptxSha256": "193ea39ddd735c7b99f25831549fd4038bd555d503cb954e493dd68f6aa0a37b",
+          "cubinSha256": "5e08cbc1a4023ec7a1a44890668b26d10b32e6dabf414b890f2b82319cdcc471",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        },
+        "sharedtile-b22-k4864-bias0-m32-n32-kt32-s8-p1": {
+          "sourceSha256": "3d8a51b7a30f038a96d1769d90e2cc801c95ad61341c6ed95d78f21cd4672b37",
+          "ptxSha256": "e3bf8009bff561e5bc15776eba21b35b43bfe26675052e7920a2adc93c72a803",
+          "cubinSha256": "5c3910426938c5454650f3a9015fe16ae081aee82f38d3fe563b57d50161b26f",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        },
+        "sharedtile-b22-k896-bias0-m16-n32-kt32-s1-p0": {
+          "sourceSha256": "84748fb81704fce24a45d6541be4da65400d00a5ef66dddc9f43a9cb4b1befc8",
+          "ptxSha256": "ceedc2418700930984ef8d3e5da85e1d2129c396ff08de7e14144a591c06712a",
+          "cubinSha256": "e5c5c12f6a11a826e1a80481d420f4d9cc9f20098ade1ab9b9499955fa36dfad",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        },
+        "sharedtile-b22-k896-bias0-m32-n32-kt32-s1-p1": {
+          "sourceSha256": "ba17fdc8e30b836ad82f446070c5c8e9156d49f4f1603624c36ef5e40d748767",
+          "ptxSha256": "a20bc67db2107e7eec8f31024dc9d0a8628d1cbbe3e3c7be14a8be949488be17",
+          "cubinSha256": "206e95c9cbb8a7842da8573697b75e450a86b9b6467458bdde3f1045ebd18fee",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        },
+        "sharedtile-b22-k896-bias0-m32-n32-kt32-s4-p1": {
+          "sourceSha256": "cb601f7d1cad0d6462674e4e7c84b36d968f8af2be4d9e4ffe816972c5528f5a",
+          "ptxSha256": "492ac3a073ca2044f2186165258f6e6d24ed359380d2f335c8352106ecec7ce8",
+          "cubinSha256": "2f967e46a700267f47d76761167edc11687b0fefaa47aff51f3fca94f77baab6",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        },
+        "sharedtile-b22-k896-bias0-m32-n32-kt32-s8-p1": {
+          "sourceSha256": "735c7e2643cd32229b8edd4cba02a40605167138dcd95561586e7c6605d49802",
+          "ptxSha256": "60883086cfc6497fc4ed3f2b05de33a142bea784935d59b3ba10c36edc4944fa",
+          "cubinSha256": "cdd55d7dc7a64bb6d558ef67d504fa0e8ac432bc1df68d223c74e2cc842240c7",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        }
+      },
+      "fingerprint": "8626273150975a3c89a98773cad46edeee933fb9b88bb39d4ffd6af355209f00",
+      "linear": {
+        "operator": "row_scaled_signed_integer_dot_v1_experimental",
+        "magnitudeBits": 22,
+        "limbs": 3,
+        "maxWidth": 32768,
+        "zeroIntegerOutput": "+0",
+        "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+        "bias": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+        "hardwareQualified": false
+      },
+      "nonlinear": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "daf13db126e0b4b4d5c7258a3f8c8be67ef7171dda2d62889c9e8b41b08a95ec",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false
+      },
+      "integerSourceSha256": "a83ff355e70e45352eef0b3196614f320ba8c91813526519fbde64cb9235b480",
+      "maxPartialBytes": 16777216,
+      "activationPacking": "radix_planes_once_v1_experimental",
+      "weightLoad": "auto",
+      "weightReadPolicy": "raw_half_prefetch2_sm86_sm120_b22_v2_experimental",
+      "decodePlanning": {
+        "policy": "occupancy_split_k_v1_experimental",
+        "rowTiles": [
+          16,
+          32
+        ],
+        "maxSplitK": 8,
+        "minSplitWidth": 256,
+        "maxBatch": 128,
+        "singleRow": "simt_split1",
+        "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+      },
+      "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+      "integerReference": {
+        "operator": "row_scaled_signed_integer_dot_v1_experimental",
+        "magnitudeBits": 22,
+        "limbs": 3,
+        "maxWidth": 32768,
+        "zeroIntegerOutput": "+0",
+        "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+        "bias": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+        "hardwareQualified": false
+      },
+      "multiprocessors": 70,
+      "weightLoadEffective": "cta_raw_async_shared_radix_probe",
+      "execution": "cooperative_shared_radix_ldmatrix_probe",
+      "nSub": 1,
+      "kTile": 32,
+      "prototypeSourceSha256": "10f7f9cae1fa0b570d13caaaf9597235c0fbc5cdcef2736fab41a6f83c9f470f"
+    },
+    "shared64": {
+      "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+      "operators": "pairwise_f32_reference_v1_experimental",
+      "sourceSha256": "daf13db126e0b4b4d5c7258a3f8c8be67ef7171dda2d62889c9e8b41b08a95ec",
+      "nvrtcOptions": [
+        "--fmad=false",
+        "--ftz=false",
+        "--prec-div=true",
+        "--prec-sqrt=true",
+        "--std=c++17"
+      ],
+      "hardwareQualified": false,
+      "arch": "sm_120",
+      "gpu": "NVIDIA GeForce RTX 5070 Ti",
+      "nvrtcVersion": [
+        13,
+        2
+      ],
+      "builds": {
+        "sharedtile-b22-k4864-bias0-m16-n64-kt64-s1-p0": {
+          "sourceSha256": "6bac35d399fa16c346c94f99c1daa566cbc1da2dddea1f2945ba74f42191dab0",
+          "ptxSha256": "148d514afbb9266829cf80efab34e42b89602eb946fc027219c7309ef5eb2bc9",
+          "cubinSha256": "a58432c64c5d406a56483e14b4ad703f083ab9ae6faf45c054bf28508342882a",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 36
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 36
+          }
+        },
+        "sharedtile-b22-k4864-bias0-m32-n64-kt64-s8-p1": {
+          "sourceSha256": "d5b930612c6a939353777f416dccfbe08bbfb34134284c075fcb076ee39f1b46",
+          "ptxSha256": "c33871f437d585948802fb6fa6a576dd64562dfae3f422d03d1fadadd2d57b89",
+          "cubinSha256": "3425b7e488012974830950bb103f822f99a4f148454f3365cac9e87b1d59dc26",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 36
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 36
+          }
+        },
+        "sharedtile-b22-k896-bias0-m16-n64-kt64-s1-p0": {
+          "sourceSha256": "2bced4252135d2b0fae69df51e5ba6dd5bb6d514ecca7deba321e3b7a2ce2255",
+          "ptxSha256": "46c617a6b4af08196bb83d4589c43e83dad338dd3e84a07e891b7c60cae14dc9",
+          "cubinSha256": "6f3b0fa06073e99a687538bdf52c3f14548cf9adb5423d19b733781d4dc29fff",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 36
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 36
+          }
+        },
+        "sharedtile-b22-k896-bias0-m32-n64-kt64-s1-p1": {
+          "sourceSha256": "5fe54291f5f32043dd8d2f4f7d37276bd2f583aa936e1bc390002479e793440e",
+          "ptxSha256": "4e60cb42f65f61d5c6d3a55b04d3cebea8b6a60daa6fb8ec5f3280788a67dcfd",
+          "cubinSha256": "6ef1d6e6a91c0b20a082fee16ae5b29a19aefeceefa1bafada9d88f269d15ee1",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 36
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 36
+          }
+        },
+        "sharedtile-b22-k896-bias0-m32-n64-kt64-s4-p1": {
+          "sourceSha256": "69998b39d8b3b8cdfcbe1e9c60e516371bbc87a4c4ef19b4e5665115405dd7ba",
+          "ptxSha256": "80b5ee219f865b7ca159bf133b3e5551cb1db8fbc167fc2c9cedaf292fe0d659",
+          "cubinSha256": "450e7768e42bfcec70b58141df13cb36b4ee2c5fa103ea4a95a8eec0d3d0d042",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 36
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 36
+          }
+        },
+        "sharedtile-b22-k896-bias0-m32-n64-kt64-s8-p1": {
+          "sourceSha256": "38f9054137d3b273700f367f05bb618ff44d1602383db614c44b235f1c4a1fca",
+          "ptxSha256": "d0cb383a25a2961a2a9a6907af1e822e8b4f13e317e7a3473384acaafdf50978",
+          "cubinSha256": "f27709f4559183b1e278cf18b392cfb3e14200dc4a137bf04b992eab361bd307",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 36
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 36
+          }
+        }
+      },
+      "fingerprint": "dc5f4f2d6562260854fbadd4589bc9c20ae71e9b5f6a903e54cb888bff03c2bc",
+      "linear": {
+        "operator": "row_scaled_signed_integer_dot_v1_experimental",
+        "magnitudeBits": 22,
+        "limbs": 3,
+        "maxWidth": 32768,
+        "zeroIntegerOutput": "+0",
+        "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+        "bias": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+        "hardwareQualified": false
+      },
+      "nonlinear": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "daf13db126e0b4b4d5c7258a3f8c8be67ef7171dda2d62889c9e8b41b08a95ec",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false
+      },
+      "integerSourceSha256": "a83ff355e70e45352eef0b3196614f320ba8c91813526519fbde64cb9235b480",
+      "maxPartialBytes": 16777216,
+      "activationPacking": "radix_planes_once_v1_experimental",
+      "weightLoad": "auto",
+      "weightReadPolicy": "raw_half_prefetch2_sm86_sm120_b22_v2_experimental",
+      "decodePlanning": {
+        "policy": "occupancy_split_k_v1_experimental",
+        "rowTiles": [
+          16,
+          32
+        ],
+        "maxSplitK": 8,
+        "minSplitWidth": 256,
+        "maxBatch": 128,
+        "singleRow": "simt_split1",
+        "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+      },
+      "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+      "integerReference": {
+        "operator": "row_scaled_signed_integer_dot_v1_experimental",
+        "magnitudeBits": 22,
+        "limbs": 3,
+        "maxWidth": 32768,
+        "zeroIntegerOutput": "+0",
+        "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+        "bias": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+        "hardwareQualified": false
+      },
+      "multiprocessors": 70,
+      "weightLoadEffective": "cta_raw_async_shared_radix_probe",
+      "execution": "cooperative_shared_radix_ldmatrix_probe",
+      "nSub": 2,
+      "kTile": 64,
+      "prototypeSourceSha256": "10f7f9cae1fa0b570d13caaaf9597235c0fbc5cdcef2736fab41a6f83c9f470f"
+    }
+  }
+}

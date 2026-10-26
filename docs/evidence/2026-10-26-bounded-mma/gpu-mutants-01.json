@@ -1,0 +1,8 @@
+[
+  {
+    "name": "unsafe-double-float-partial-length",
+    "file": "bounded_cuda.py",
+    "old": "BLOCK_K=self.block_k)",
+    "new": "BLOCK_K=2*self.block_k)"
+  }
+]

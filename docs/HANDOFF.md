@@ -32,7 +32,15 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
   test SM120, 4/4 mutation; gói Linux/SDK khớp toàn bộ 141 runtime Python file.
 - Đang khảo sát tiếp: gộp projection tăng Qwen batch 32 khoảng 3%, copy 16 byte khoảng 4,7% trên SM120;
   chưa chọn. Profile gợi ý MLP khoảng 42%, attention 19% thời gian decode. Không suy prototype thành
-  nghiệm thu; tiếp tục tối ưu kernel và khảo sát số học có chứng minh/gate riêng khi cần.
+  nghiệm thu. Khối khảo sát tiếp theo **chưa tạo thêm tăng tốc được chọn**: shared radix, capture
+  prefill, bounded FP16 MMA/half2/vendor và FMA trực tiếp đều dừng ở prototype. FMA chậm hơn B22
+  cả 5 shape. [Số học bounded](evidence/2026-10-26-bounded-mma/README.md),
+  [kiến trúc](evidence/2026-10-26-strict-architecture/README.md),
+  [FMA](evidence/2026-10-26-ordered-fma/README.md).
+- Control toàn luồng Qwen batch 32: thay toàn bộ projection bằng vendor FP16 đạt khoảng **7804**
+  token/s ở short32, vẫn cách đối chứng vLLM **13835**. Capture prefill giữ B22 chỉ **4365→4364**;
+  chat128 **3953→3956**, không có lợi đáng kể. Tiếp theo đo GPU work còn lại/fusion/attention trên
+  toàn luồng trước khi viết thêm kernel nhỏ; không coi thời gian `read` chờ GPU là chi phí CPU.
 - Tiếp tục projection throughput, số học có đặc tả và gate chất lượng/portable/native; không sửa recipe
   lịch sử để lấy tốc độ. Kế hoạch đã duyệt vẫn giữ hash
   `4ee6838fa47f810ee40348b5f0bc556834bf50825eb0b7b0795b5053743cb17f`.

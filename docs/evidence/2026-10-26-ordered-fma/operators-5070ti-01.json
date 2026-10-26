@@ -1,0 +1,449 @@
+{
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "torch": "2.13.0+cu132",
+  "cases": [
+    {
+      "rows": 32,
+      "width": 896,
+      "outputs": 128,
+      "eventMs": {
+        "b22": [
+          0.006196266909440359,
+          0.006017066538333893,
+          0.00591786652803421,
+          0.00592853327592214,
+          0.005966933568318685,
+          0.005938133100668589,
+          0.005940266450246175,
+          0.005927466849486033,
+          0.005952000121275584,
+          0.005967999994754791
+        ],
+        "ordered_fma": [
+          0.02159573237101237,
+          0.021530665953954062,
+          0.021578667561213176,
+          0.021576533714930218,
+          0.02158400019009908,
+          0.021543467044830324,
+          0.02157333294550578,
+          0.021568000316619873,
+          0.021577600638071695,
+          0.021578667561213176
+        ]
+      },
+      "ratios": {
+        "b22": 1.0,
+        "ordered_fma": 0.2755765293365108
+      }
+    },
+    {
+      "rows": 32,
+      "width": 896,
+      "outputs": 896,
+      "eventMs": {
+        "b22": [
+          0.010761599739392598,
+          0.011397332946459452,
+          0.010615467031796774,
+          0.010653866330782573,
+          0.010615467031796774,
+          0.01058666706085205,
+          0.010514133175214132,
+          0.01065280040105184,
+          0.010658133029937743,
+          0.010518399874369304
+        ],
+        "ordered_fma": [
+          0.021657600005467733,
+          0.021660800774892172,
+          0.021706666549046835,
+          0.021704532702763877,
+          0.021706666549046835,
+          0.021706666549046835,
+          0.021665066480636597,
+          0.021703465779622396,
+          0.021703465779622396,
+          0.02169920007387797
+        ]
+      },
+      "ratios": {
+        "b22": 1.0,
+        "ordered_fma": 0.48997398961085753
+      }
+    },
+    {
+      "rows": 32,
+      "width": 896,
+      "outputs": 4864,
+      "eventMs": {
+        "b22": [
+          0.028406399488449096,
+          0.02818133234977722,
+          0.028141866127649944,
+          0.028125866254170736,
+          0.02813226580619812,
+          0.02819839914639791,
+          0.028126933177312217,
+          0.028124799331029255,
+          0.028131200869878133,
+          0.028194133440653482
+        ],
+        "ordered_fma": [
+          0.04227840105692546,
+          0.04228906631469727,
+          0.04244053363800049,
+          0.042328532536824545,
+          0.042265601952870685,
+          0.04229546785354614,
+          0.04215893348058065,
+          0.042265601952870685,
+          0.04238826831181844,
+          0.04225386778513591
+        ]
+      },
+      "ratios": {
+        "b22": 1.0,
+        "ordered_fma": 0.665434755028874
+      }
+    },
+    {
+      "rows": 32,
+      "width": 4864,
+      "outputs": 896,
+      "eventMs": {
+        "b22": [
+          0.036380799611409505,
+          0.036174933115641274,
+          0.03606933355331421,
+          0.036115201314290364,
+          0.036074666182200114,
+          0.03610026836395264,
+          0.03605120182037354,
+          0.03604586521784465,
+          0.036076800028483076,
+          0.03608746528625488
+        ],
+        "ordered_fma": [
+          0.0430026650428772,
+          0.04289173285166423,
+          0.04286933342615763,
+          0.042947200934092204,
+          0.04294613202412923,
+          0.0429418683052063,
+          0.04293440183003743,
+          0.04294613202412923,
+          0.042872532208760576,
+          0.04289493163426717
+        ]
+      },
+      "ratios": {
+        "b22": 1.0,
+        "ordered_fma": 0.8403283608043155
+      }
+    },
+    {
+      "rows": 32,
+      "width": 2048,
+      "outputs": 5632,
+      "eventMs": {
+        "b22": [
+          0.06553599834442139,
+          0.06506666739781698,
+          0.06502720117568969,
+          0.06502293348312378,
+          0.06501546700795492,
+          0.06538346608479818,
+          0.06526079972585043,
+          0.06525866587956747,
+          0.06515200138092041,
+          0.0652234673500061
+        ],
+        "ordered_fma": [
+          0.09920639991760254,
+          0.09920427004496256,
+          0.0991487979888916,
+          0.09911786715189616,
+          0.09912213484446207,
+          0.09915093580881755,
+          0.09940266609191895,
+          0.09916693369547526,
+          0.09928106466929118,
+          0.09947413603464762
+        ]
+      },
+      "ratios": {
+        "b22": 1.0,
+        "ordered_fma": 0.6572298109433188
+      }
+    }
+  ],
+  "identities": {
+    "b22": {
+      "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+      "operators": "pairwise_f32_reference_v1_experimental",
+      "sourceSha256": "daf13db126e0b4b4d5c7258a3f8c8be67ef7171dda2d62889c9e8b41b08a95ec",
+      "nvrtcOptions": [
+        "--fmad=false",
+        "--ftz=false",
+        "--prec-div=true",
+        "--prec-sqrt=true",
+        "--std=c++17"
+      ],
+      "hardwareQualified": false,
+      "arch": "sm_120",
+      "gpu": "NVIDIA GeForce RTX 5070 Ti",
+      "nvrtcVersion": [
+        13,
+        2
+      ],
+      "builds": {
+        "integer-22-2048-bias0-m16-w4-s1-p0-prefetch2": {
+          "sourceSha256": "ab832945524fb7e3bb767c7cf2ce3e98f5647d722cbd8dfb0eb95f65d60363b0",
+          "ptxSha256": "a3020da4c71ca66e066a30eed6df805c6fa4c2f8a259f4932bb42917a2e63b6b",
+          "cubinSha256": "3b7eea7643d18d352aeefc5a53f0886b54148d54853e23a37414cdc7385568ec",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        },
+        "integer-22-2048-bias0-m32-w4-s4-p1-prefetch2": {
+          "sourceSha256": "b307739aa05ea59e850e03cf5a9cb1adb05cea84c58dad56c837cff6adbe5b73",
+          "ptxSha256": "13e43bc4ce2140d9f5094f5f0e486ba54adf5413f3c7a53866544904e922b5fe",
+          "cubinSha256": "d3354c99b7b489486ed062960c85e1404d2e841328662cd2b015bfc203e7d4a4",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          }
+        },
+        "integer-22-4864-bias0-m16-w4-s1-p0-prefetch2": {
+          "sourceSha256": "960b07d8b191158b7a04b86f224b7277b1aef07d569264875e197ade85e567f1",
+          "ptxSha256": "0c075c0ede3dd8f72fac977cf2922e83455efcd493a796e33d9f6419830d7ac0",
+          "cubinSha256": "62f4a46003a29df1010e9a019beb27993c91acbe3cd2f8a13aa4d477fea605e4",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        },
+        "integer-22-4864-bias0-m32-w4-s8-p1-prefetch2": {
+          "sourceSha256": "016d70d02dd77efcf4a58c80a2f4b3c71256497742e9d76ee625d032dcc2ccb9",
+          "ptxSha256": "e37f683fe6c92b786a8c9932f8face381027a315fa6e338ae648c23b4ac14e46",
+          "cubinSha256": "d916c94e65e4f25b520f5b7ec4b8b4a1c7dab6b9e702bdf1d7aa08faa85d9c7c",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          }
+        },
+        "integer-22-896-bias0-m16-w4-s1-p0-prefetch2": {
+          "sourceSha256": "4849567dcdf1f7eb25ccb7b879777f78f1fc3fec3f048ea379a30dd4eabef43a",
+          "ptxSha256": "8d0637911579090b21d475788492cc13711fdf05a74c3a17a0bb757b8697425d",
+          "cubinSha256": "86a8a89384bea3031a36834653499bd921372a3da37ea730121b05e9eae81ca2",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        },
+        "integer-22-896-bias0-m32-w4-s4-p1-prefetch2": {
+          "sourceSha256": "617d6fae9b76c475a1ac8eff277c333567fbae99052a2ee123940121409b2f99",
+          "ptxSha256": "e3815008ef8d943f73955c69b21c6628f5e4559c49725a98f81669fcf78d6dc3",
+          "cubinSha256": "f6c64c7016ef2a4ae64a1eeae49592f298fb18b79529973e75b7aa613d4d6922",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          }
+        },
+        "integer-22-896-bias0-m32-w4-s8-p1-prefetch2": {
+          "sourceSha256": "013b825eae21d773e9891df31eb9c2a9aef589c11cb7f5e9dda5643b02df7e28",
+          "ptxSha256": "9fff404fd8d979ff063887dbdf81b4cf1a244fae0d655bed828372fead3b488a",
+          "cubinSha256": "43ae7b09c6d799affed7f45605152c363fbfa4a995a4cb2ad55adc10e1bfc5dc",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          }
+        }
+      },
+      "fingerprint": "d97ed4541653e57d6e209e98f13b2fe108feafcea194f2a52e8f6ddc93b0a6b7",
+      "linear": {
+        "operator": "row_scaled_signed_integer_dot_v1_experimental",
+        "magnitudeBits": 22,
+        "limbs": 3,
+        "maxWidth": 32768,
+        "zeroIntegerOutput": "+0",
+        "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+        "bias": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+        "hardwareQualified": false
+      },
+      "nonlinear": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "daf13db126e0b4b4d5c7258a3f8c8be67ef7171dda2d62889c9e8b41b08a95ec",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false
+      },
+      "integerSourceSha256": "a83ff355e70e45352eef0b3196614f320ba8c91813526519fbde64cb9235b480",
+      "maxPartialBytes": 16777216,
+      "activationPacking": "radix_planes_once_v1_experimental",
+      "weightLoad": "auto",
+      "weightReadPolicy": "raw_half_prefetch2_sm86_sm120_b22_v2_experimental",
+      "decodePlanning": {
+        "policy": "occupancy_split_k_v1_experimental",
+        "rowTiles": [
+          16,
+          32
+        ],
+        "maxSplitK": 8,
+        "minSplitWidth": 256,
+        "maxBatch": 128,
+        "singleRow": "simt_split1",
+        "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+      },
+      "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+      "integerReference": {
+        "operator": "row_scaled_signed_integer_dot_v1_experimental",
+        "magnitudeBits": 22,
+        "limbs": 3,
+        "maxWidth": 32768,
+        "zeroIntegerOutput": "+0",
+        "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+        "bias": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+        "hardwareQualified": false
+      },
+      "multiprocessors": 70,
+      "weightLoadEffective": "prefetch2"
+    },
+    "ordered_fma": {
+      "kernel": "f16_weight_f32_fma256_tree_ftz_v1_probe",
+      "operators": "pairwise_f32_reference_v1_experimental",
+      "sourceSha256": "daf13db126e0b4b4d5c7258a3f8c8be67ef7171dda2d62889c9e8b41b08a95ec",
+      "nvrtcOptions": [
+        "--fmad=false",
+        "--ftz=false",
+        "--prec-div=true",
+        "--prec-sqrt=true",
+        "--std=c++17"
+      ],
+      "hardwareQualified": false,
+      "arch": "sm_120",
+      "gpu": "NVIDIA GeForce RTX 5070 Ti",
+      "nvrtcVersion": [
+        13,
+        2
+      ],
+      "builds": {
+        "ordered-fma-k2048-bias0": {
+          "sourceSha256": "ec86680151ff771bb156a3b5104b5c12657dfcf808939d5f168a84f2fbbaf83a",
+          "ptxSha256": "46299da040bcc299ad5b784ff71686c33a451ee23be391e1a1670f5314b15f3d",
+          "cubinSha256": "43e013aebcdb021b22628444b4d908eae0fbed86c11377ba31e52a2751542345",
+          "ptxAudit": {
+            "floatOps": {
+              "add.rn.f32": 4
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FADD": 4
+            },
+            "violations": []
+          }
+        },
+        "ordered-fma-k4864-bias0": {
+          "sourceSha256": "7b7fe5950f701170b32e2259571cfc5e98d07c6b3dfbdb30e00d4bca31c43e8d",
+          "ptxSha256": "3c07d14a0f496b2b1fe76e60066aa85e6f993e76cdc0a373d0e65dd2121f300d",
+          "cubinSha256": "7d10c35f8337fc7c2b601770e70518b42a41b9609fcf35347d465e5d3cfff149",
+          "ptxAudit": {
+            "floatOps": {
+              "add.rn.f32": 5
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FADD": 5
+            },
+            "violations": []
+          }
+        },
+        "ordered-fma-k896-bias0": {
+          "sourceSha256": "5220d1b9855868e88867a8f674a391eddc30d5bc5869b3f1b6e294f207eef657",
+          "ptxSha256": "0fdcca181851c5057817c05e86d8cf9c3ae69f7b2e60d79542dfe38cb53cbccc",
+          "cubinSha256": "4af9d7912ec92a34fe97ca14d29e304c04f056314fd0126badc96c04f6832609",
+          "ptxAudit": {
+            "floatOps": {
+              "add.rn.f32": 3
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FADD": 3
+            },
+            "violations": []
+          }
+        }
+      },
+      "fingerprint": "8ceabdb1d55baa876e9bd326479f96af918b49badf642da4fb8390a25d5ab186",
+      "execution": "ordered_simt_fma256_shared_fp16_probe",
+      "arithmetic": {
+        "weight": "live_fp16",
+        "input": "normal_fp32",
+        "chunkK": 256,
+        "chunkAccumulation": "serial_k_fma_rn_f32_preserve_subnormals",
+        "chunkPublication": "signed_ftz",
+        "merge": "pruned_adjacent_pair_f32_add_rn_signed_ftz"
+      },
+      "maxPartialBytes": 16777216,
+      "prototypeSourceSha256": "77abe919cf631bb54afd9eb6ffb442f3f86b27f07f8809e9cdb97fb801ed16b8"
+    }
+  }
+}

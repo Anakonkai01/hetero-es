@@ -1,0 +1,17 @@
+F
+=================================== FAILURES ===================================
+__ test_pair_rounding_matches_every_admitted_finite_half_and_row_exponent[6] ___
+
+bits = 6
+
+    @gpu
+    @pytest.mark.parametrize('bits', [6, 8, 10, 11])
+    def test_pair_rounding_matches_every_admitted_finite_half_and_row_exponent(bits):
+>       from half2_cuda import Half2BoundedKernels, pair_probe_source
+E       ModuleNotFoundError: No module named 'half2_cuda'
+
+.scratch/bounded-mma-20261026/test_half2.py:14: ModuleNotFoundError
+=========================== short test summary info ============================
+FAILED .scratch/bounded-mma-20261026/test_half2.py::test_pair_rounding_matches_every_admitted_finite_half_and_row_exponent[6]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 0.80s

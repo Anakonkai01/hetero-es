@@ -1,0 +1,1426 @@
+{
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "torch": "2.13.0+cu132",
+  "cases": [
+    {
+      "rows": 32,
+      "width": 896,
+      "outputs": 128,
+      "eventMs": {
+        "a22w22": [
+          0.006702933212121328,
+          0.005971199770768484,
+          0.005977599819501241,
+          0.0059349333246548975,
+          0.005936000247796377,
+          0.005946666498978933,
+          0.00595413347085317,
+          0.005937066674232483,
+          0.0059445331494013464,
+          0.005940266450246175
+        ],
+        "a8w8": [
+          0.007729066908359528,
+          0.007600000003973643,
+          0.007567999760309855,
+          0.00758186678091685,
+          0.007575466732184092,
+          0.007604266703128815,
+          0.007570133109887441,
+          0.007604266703128815,
+          0.007585066556930542,
+          0.007578666508197785
+        ],
+        "half2a8w8": [
+          0.007760000228881836,
+          0.007677866518497467,
+          0.007710933188597361,
+          0.007704533139864604,
+          0.007718400160471598,
+          0.007733333110809326,
+          0.007708799839019775,
+          0.007758933305740357,
+          0.007714133461316427,
+          0.007716266810894013
+        ]
+      },
+      "ratios": {
+        "a22w22": 1.0,
+        "a8w8": 0.7840213564272162,
+        "half2a8w8": 0.7706345550734593
+      }
+    },
+    {
+      "rows": 32,
+      "width": 896,
+      "outputs": 896,
+      "eventMs": {
+        "a22w22": [
+          0.010779733459154764,
+          0.010641066233317058,
+          0.01067200005054474,
+          0.010574932893117268,
+          0.01067200005054474,
+          0.010573866963386535,
+          0.010600533088048298,
+          0.010661333799362183,
+          0.010578133662541707,
+          0.010573866963386535
+        ],
+        "a8w8": [
+          0.010265599687894185,
+          0.010172800223032633,
+          0.010259200135866802,
+          0.010266666611035665,
+          0.010243200262387593,
+          0.010251733660697936,
+          0.010215466221173605,
+          0.010242133339246114,
+          0.010201600193977357,
+          0.010233599940935771
+        ],
+        "half2a8w8": [
+          0.010146133104960124,
+          0.010100266337394715,
+          0.010166399677594503,
+          0.01011946698029836,
+          0.010181333621342976,
+          0.01016533374786377,
+          0.010137599706649781,
+          0.010205866893132527,
+          0.010180266698201497,
+          0.010102400183677673
+        ]
+      },
+      "ratios": {
+        "a22w22": 1.0,
+        "a8w8": 1.0369174227004698,
+        "half2a8w8": 1.045793466088942
+      }
+    },
+    {
+      "rows": 32,
+      "width": 896,
+      "outputs": 4864,
+      "eventMs": {
+        "a22w22": [
+          0.02867199977238973,
+          0.0283242662747701,
+          0.028284800052642823,
+          0.028258132934570312,
+          0.02821120023727417,
+          0.028296534220377603,
+          0.028201599915822346,
+          0.028191999594370524,
+          0.028195200363794963,
+          0.028190932671229043
+        ],
+        "a8w8": [
+          0.02950399915377299,
+          0.029384533564249676,
+          0.029495465755462646,
+          0.029422932863235475,
+          0.02955413262049357,
+          0.02951573332150777,
+          0.02942720055580139,
+          0.029419734080632528,
+          0.029499733448028566,
+          0.0293887992699941
+        ],
+        "half2a8w8": [
+          0.029553065697352093,
+          0.02938773234685262,
+          0.029355732599894206,
+          0.02934079964955648,
+          0.029294933875401816,
+          0.029412267605463664,
+          0.029361067215601604,
+          0.029289599259694418,
+          0.029383466641108195,
+          0.029369600613911948
+        ]
+      },
+      "ratios": {
+        "a22w22": 1.0,
+        "a8w8": 0.958363507746584,
+        "half2a8w8": 0.9614965274320838
+      }
+    },
+    {
+      "rows": 32,
+      "width": 4864,
+      "outputs": 896,
+      "eventMs": {
+        "a22w22": [
+          0.03629226684570312,
+          0.03603733380635579,
+          0.03599253495534261,
+          0.03597013155619303,
+          0.03597226540247599,
+          0.036039467652638754,
+          0.03598719835281372,
+          0.03598293463389079,
+          0.035979731877644854,
+          0.03603839874267578
+        ],
+        "a8w8": [
+          0.034805333614349364,
+          0.03476906617482503,
+          0.034619732697804766,
+          0.03484373490015666,
+          0.03475519816080729,
+          0.0346997340520223,
+          0.03488639990488688,
+          0.03475199937820435,
+          0.03467413187026978,
+          0.034747731685638425
+        ],
+        "half2a8w8": [
+          0.03190720081329346,
+          0.031946667035420734,
+          0.0319541335105896,
+          0.031949865818023684,
+          0.03195306658744812,
+          0.03182506759961446,
+          0.03188160061836243,
+          0.03201280037562052,
+          0.03201919992764791,
+          0.032013867298762
+        ]
+      },
+      "ratios": {
+        "a22w22": 1.0,
+        "a8w8": 1.0355723702967157,
+        "half2a8w8": 1.126391710030398
+      }
+    },
+    {
+      "rows": 32,
+      "width": 960,
+      "outputs": 320,
+      "eventMs": {
+        "a22w22": [
+          0.0065418665607770285,
+          0.006317866841952006,
+          0.006297599772612254,
+          0.006285866598288218,
+          0.006281599899133046,
+          0.006274133423964183,
+          0.0063167999188105265,
+          0.006323199967543284,
+          0.0062837332487106325,
+          0.006281599899133046
+        ],
+        "a8w8": [
+          0.00934933324654897,
+          0.009283199906349182,
+          0.009291733304659525,
+          0.009257599711418152,
+          0.009284266829490661,
+          0.00927786628405253,
+          0.009299199779828389,
+          0.009287466605504354,
+          0.009288533528645834,
+          0.009290666381518046
+        ],
+        "half2a8w8": [
+          0.008703999718030294,
+          0.008678399523099263,
+          0.008690133690834045,
+          0.008738133311271667,
+          0.008671999971071879,
+          0.008721066514650981,
+          0.008739200234413148,
+          0.008739200234413148,
+          0.008679466446240743,
+          0.008676266670227051
+        ]
+      },
+      "ratios": {
+        "a22w22": 1.0,
+        "a8w8": 0.6774045155053041,
+        "half2a8w8": 0.7234316349722677
+      }
+    },
+    {
+      "rows": 32,
+      "width": 960,
+      "outputs": 960,
+      "eventMs": {
+        "a22w22": [
+          0.010706133643786113,
+          0.010498133301734925,
+          0.010472533106803895,
+          0.010513066252072652,
+          0.010514133175214132,
+          0.01050879955291748,
+          0.010446932911872864,
+          0.010518399874369304,
+          0.010452266534169514,
+          0.010518399874369304
+        ],
+        "a8w8": [
+          0.010972799857457478,
+          0.011717333396275838,
+          0.010925867160161336,
+          0.010920533537864685,
+          0.010930132865905762,
+          0.010922666390736897,
+          0.01092906693617503,
+          0.010970667004585266,
+          0.010914132992426554,
+          0.01092693308989207
+        ],
+        "half2a8w8": [
+          0.010622933506965637,
+          0.010607999563217164,
+          0.010587732990582783,
+          0.010595200459162395,
+          0.010583466291427613,
+          0.010589866836865743,
+          0.010584533214569092,
+          0.010583466291427613,
+          0.010588799913724264,
+          0.010587732990582783
+        ]
+      },
+      "ratios": {
+        "a22w22": 1.0,
+        "a8w8": 0.9618350009113232,
+        "half2a8w8": 0.9926962973582205
+      }
+    },
+    {
+      "rows": 32,
+      "width": 960,
+      "outputs": 2560,
+      "eventMs": {
+        "a22w22": [
+          0.019296000401178997,
+          0.018972800175348917,
+          0.01900800069173177,
+          0.018972800175348917,
+          0.018977065881093342,
+          0.018998400370279948,
+          0.019014400243759156,
+          0.01898026665051778,
+          0.019015467166900633,
+          0.019052799542744955
+        ],
+        "a8w8": [
+          0.021934932470321654,
+          0.021949867407480877,
+          0.021907200415929157,
+          0.02194026708602905,
+          0.022005333503087362,
+          0.021870932976404824,
+          0.021907200415929157,
+          0.021912533044815063,
+          0.021785600980122884,
+          0.02186346650123596
+        ],
+        "half2a8w8": [
+          0.020386133591334024,
+          0.020304000377655028,
+          0.02029866576194763,
+          0.02030506730079651,
+          0.020308266083399456,
+          0.02030293345451355,
+          0.020343466599782308,
+          0.02027413249015808,
+          0.020268799861272176,
+          0.020339200894037884
+        ]
+      },
+      "ratios": {
+        "a22w22": 1.0,
+        "a8w8": 0.8673352861915429,
+        "half2a8w8": 0.9359092250763276
+      }
+    },
+    {
+      "rows": 32,
+      "width": 2560,
+      "outputs": 960,
+      "eventMs": {
+        "a22w22": [
+          0.022009599208831786,
+          0.02169813315073649,
+          0.021730132897694907,
+          0.021642667055130006,
+          0.021642667055130006,
+          0.02160533269246419,
+          0.021641600131988525,
+          0.02163413365681966,
+          0.021578667561213176,
+          0.021594667434692384
+        ],
+        "a8w8": [
+          0.019720532496770225,
+          0.0196234663327535,
+          0.019668267170588175,
+          0.019666133324305217,
+          0.01964693268140157,
+          0.01960853338241577,
+          0.019617066780726115,
+          0.01959786613782247,
+          0.01966080069541931,
+          0.01960853338241577
+        ],
+        "half2a8w8": [
+          0.018873600165049235,
+          0.018914133310317993,
+          0.018844799200693766,
+          0.018857600291570027,
+          0.018795732657114664,
+          0.018860799074172974,
+          0.01879253387451172,
+          0.01882986625035604,
+          0.01884053349494934,
+          0.018838399648666383
+        ]
+      },
+      "ratios": {
+        "a22w22": 1.0,
+        "a8w8": 1.1022110361424302,
+        "half2a8w8": 1.148570653115734
+      }
+    },
+    {
+      "rows": 32,
+      "width": 2048,
+      "outputs": 256,
+      "eventMs": {
+        "a22w22": [
+          0.009397332866986593,
+          0.009204266468683879,
+          0.00920853316783905,
+          0.009152000149091085,
+          0.009145599603652955,
+          0.009152000149091085,
+          0.009152000149091085,
+          0.009152000149091085,
+          0.00914026697476705,
+          0.009146666526794434
+        ],
+        "a8w8": [
+          0.013247999548912048,
+          0.013170133034388224,
+          0.013172266880671184,
+          0.01318186620871226,
+          0.013177599509557087,
+          0.013175466656684875,
+          0.013175466656684875,
+          0.013178666432698568,
+          0.013178666432698568,
+          0.013176533579826354
+        ],
+        "half2a8w8": [
+          0.01395626664161682,
+          0.013927466670672099,
+          0.01392639974753062,
+          0.013863466183344523,
+          0.013864533106486002,
+          0.013923199971516927,
+          0.013863466183344523,
+          0.013866666952768962,
+          0.01386240025361379,
+          0.013918933272361756
+        ]
+      },
+      "ratios": {
+        "a22w22": 1.0,
+        "a8w8": 0.6945400266478807,
+        "half2a8w8": 0.6587584990021952
+      }
+    },
+    {
+      "rows": 32,
+      "width": 2048,
+      "outputs": 2048,
+      "eventMs": {
+        "a22w22": [
+          0.029032532374064127,
+          0.02881173292795817,
+          0.0288266658782959,
+          0.028833067417144774,
+          0.028807467222213744,
+          0.02876586715380351,
+          0.028821333249409994,
+          0.02881386677424113,
+          0.028743465741475422,
+          0.02884160081545512
+        ],
+        "a8w8": [
+          0.030514132976531983,
+          0.0307370662689209,
+          0.030589866638183593,
+          0.03050986727078756,
+          0.03072320024172465,
+          0.03050240079561869,
+          0.03051946759223938,
+          0.030590933561325074,
+          0.03058560093243917,
+          0.030651734272638956
+        ],
+        "half2a8w8": [
+          0.03109119931856791,
+          0.031165866057078044,
+          0.03111573259035746,
+          0.03109653393427531,
+          0.031206399202346802,
+          0.031149866183598836,
+          0.03112106720606486,
+          0.03114133278528849,
+          0.031137067079544067,
+          0.031133866310119628
+        ]
+      },
+      "ratios": {
+        "a22w22": 1.0,
+        "a8w8": 0.9421292932026282,
+        "half2a8w8": 0.925555421869073
+      }
+    },
+    {
+      "rows": 32,
+      "width": 2048,
+      "outputs": 5632,
+      "eventMs": {
+        "a22w22": [
+          0.06537813345591227,
+          0.06516053279240926,
+          0.06507733265558878,
+          0.06514879862467447,
+          0.06504853169123331,
+          0.06534826755523682,
+          0.06520959933598837,
+          0.06521173318227132,
+          0.0652565320332845,
+          0.06528533299763997
+        ],
+        "a8w8": [
+          0.06048426628112793,
+          0.06047573486963908,
+          0.06038186550140381,
+          0.06043200095494588,
+          0.0605951984723409,
+          0.060591999689737955,
+          0.060568531354268394,
+          0.0607040007909139,
+          0.06063466469446818,
+          0.06055253346761068
+        ],
+        "half2a8w8": [
+          0.061028265953063966,
+          0.060977065563201906,
+          0.060838401317596436,
+          0.06089599927266439,
+          0.060866133371988936,
+          0.06085439920425415,
+          0.06104533274968465,
+          0.06113386551539103,
+          0.0611296017964681,
+          0.06097813447316488
+        ]
+      },
+      "ratios": {
+        "a22w22": 1.0,
+        "a8w8": 1.0767848904734914,
+        "half2a8w8": 1.0694200204613524
+      }
+    },
+    {
+      "rows": 32,
+      "width": 5632,
+      "outputs": 2048,
+      "eventMs": {
+        "a22w22": [
+          0.06651306549708048,
+          0.0662282665570577,
+          0.0662335991859436,
+          0.06628053188323975,
+          0.06613759994506836,
+          0.06642560164133708,
+          0.06651733318964641,
+          0.06648746728897095,
+          0.06642986536026001,
+          0.06649920145670572
+        ],
+        "a8w8": [
+          0.06554239988327026,
+          0.06594133377075195,
+          0.06546880006790161,
+          0.06539946794509888,
+          0.06564373175303141,
+          0.06552639802296957,
+          0.0648138682047526,
+          0.06564053297042846,
+          0.06540053288141887,
+          0.06552533308664958
+        ],
+        "half2a8w8": [
+          0.053361066182454425,
+          0.05324586629867554,
+          0.05336853265762329,
+          0.05331946611404419,
+          0.053385599454243975,
+          0.05319360097249349,
+          0.05319573481877645,
+          0.05331626733144124,
+          0.053250133991241455,
+          0.053311999638875326
+        ]
+      },
+      "ratios": {
+        "a22w22": 1.0,
+        "a8w8": 1.0137635411352879,
+        "half2a8w8": 1.245968548270429
+      }
+    },
+    {
+      "rows": 128,
+      "width": 896,
+      "outputs": 896,
+      "eventMs": {
+        "a22w22": [
+          0.026155734062194826,
+          0.02580159902572632,
+          0.0258133331934611,
+          0.025874133904774985,
+          0.025799467166264852,
+          0.02590293288230896,
+          0.02582826614379883,
+          0.02587626576423645,
+          0.025803732872009277,
+          0.02581119934717814
+        ],
+        "a8w8": [
+          0.025539199511210125,
+          0.025461333990097045,
+          0.025602134068806966,
+          0.025461333990097045,
+          0.02546986738840739,
+          0.02555840015411377,
+          0.02553706765174866,
+          0.02556800047556559,
+          0.025485867261886598,
+          0.025484800338745117
+        ],
+        "half2a8w8": [
+          0.02359893321990967,
+          0.023553067445755006,
+          0.023552000522613525,
+          0.023510400454203287,
+          0.023558400074640908,
+          0.023475199937820435,
+          0.02354346712430318,
+          0.02348053256670634,
+          0.023612799247105916,
+          0.023558400074640908
+        ]
+      },
+      "ratios": {
+        "a22w22": 1.0,
+        "a8w8": 1.0121252222098134,
+        "half2a8w8": 1.0963066515886934
+      }
+    },
+    {
+      "rows": 128,
+      "width": 2048,
+      "outputs": 5632,
+      "eventMs": {
+        "a22w22": [
+          0.23099199930826822,
+          0.23048639297485352,
+          0.2308501402537028,
+          0.23118079503377278,
+          0.23102399508158367,
+          0.23130985895792644,
+          0.23131519953409832,
+          0.23355733553568522,
+          0.23355414072672526,
+          0.23381333351135253
+        ],
+        "a8w8": [
+          0.21722240447998048,
+          0.21713600158691407,
+          0.2169706662495931,
+          0.2179072062174479,
+          0.21845653851826985,
+          0.21858453750610352,
+          0.2171562671661377,
+          0.21695466041564943,
+          0.2174282709757487,
+          0.21833279927571614
+        ],
+        "half2a8w8": [
+          0.20964585940043132,
+          0.20969066619873047,
+          0.20969173113505046,
+          0.20976746877034505,
+          0.20982185999552408,
+          0.20990293820699055,
+          0.2098197301228841,
+          0.20989333788553874,
+          0.20984106063842772,
+          0.20976427396138508
+        ]
+      },
+      "ratios": {
+        "a22w22": 1.0,
+        "a8w8": 1.0640513867987893,
+        "half2a8w8": 1.1022515825354995
+      }
+    }
+  ],
+  "identities": {
+    "a22w22": {
+      "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+      "operators": "pairwise_f32_reference_v1_experimental",
+      "sourceSha256": "daf13db126e0b4b4d5c7258a3f8c8be67ef7171dda2d62889c9e8b41b08a95ec",
+      "nvrtcOptions": [
+        "--fmad=false",
+        "--ftz=false",
+        "--prec-div=true",
+        "--prec-sqrt=true",
+        "--std=c++17"
+      ],
+      "hardwareQualified": false,
+      "arch": "sm_120",
+      "gpu": "NVIDIA GeForce RTX 5070 Ti",
+      "nvrtcVersion": [
+        13,
+        2
+      ],
+      "builds": {
+        "integer-22-2048-bias0-m16-w4-s1-p0-prefetch2": {
+          "sourceSha256": "ab832945524fb7e3bb767c7cf2ce3e98f5647d722cbd8dfb0eb95f65d60363b0",
+          "ptxSha256": "a3020da4c71ca66e066a30eed6df805c6fa4c2f8a259f4932bb42917a2e63b6b",
+          "cubinSha256": "3b7eea7643d18d352aeefc5a53f0886b54148d54853e23a37414cdc7385568ec",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        },
+        "integer-22-2048-bias0-m32-w4-s1-p1-prefetch2": {
+          "sourceSha256": "22c5e2ee2f5a9b7a91f14a457d91a1532062b0142a05af0be184979aaa856c33",
+          "ptxSha256": "eb92bcf9ef599f51a26c1deec65b6e4227c723d57d239988b45e637714bc452f",
+          "cubinSha256": "ddace15727a487241f9d7212274a24878ca0960f350d436a636c0de0ff759e69",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          }
+        },
+        "integer-22-2048-bias0-m32-w4-s4-p1-prefetch2": {
+          "sourceSha256": "b307739aa05ea59e850e03cf5a9cb1adb05cea84c58dad56c837cff6adbe5b73",
+          "ptxSha256": "13e43bc4ce2140d9f5094f5f0e486ba54adf5413f3c7a53866544904e922b5fe",
+          "cubinSha256": "d3354c99b7b489486ed062960c85e1404d2e841328662cd2b015bfc203e7d4a4",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          }
+        },
+        "integer-22-2048-bias0-m32-w4-s8-p1-prefetch2": {
+          "sourceSha256": "35e3b7c6a1f106ab4c332bc26fac04a163c1b55828502f5c3c546c665cf93503",
+          "ptxSha256": "48519b58d0a16b5c771f7abb4486edc2b403a85d83973b23ee94f7fe188a7ca3",
+          "cubinSha256": "523f6e141844ccd10553eb2999c16caa615c1a68dcd41d0972ef5497bdf203d2",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          }
+        },
+        "integer-22-2560-bias0-m16-w4-s1-p0-prefetch2": {
+          "sourceSha256": "658047ececa8b96744389643026336453c3400c8e9743c45ae980dd243a0206f",
+          "ptxSha256": "d1be2f21d22eff67ff05dab1f3662577989e9dbf65987eb5149c905efed94455",
+          "cubinSha256": "a70c29ef0db7b34b996c0f904bb0c2e60a2d1ed1d695e7bbcbb39ba0eb4936e7",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        },
+        "integer-22-2560-bias0-m32-w4-s8-p1-prefetch2": {
+          "sourceSha256": "b327dee96b800abcfed74a8148310e3ebb8fee3ec092c6c1c3fcee3385c35716",
+          "ptxSha256": "18bdebff247c2dfb6d3d203cd7c31dbadd93ce276bce645e0bf1d6333d0f75bf",
+          "cubinSha256": "c366dad1d12b321568d43742b50ac9408bcb5a6566cc24d9239db25210c3cefe",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          }
+        },
+        "integer-22-4864-bias0-m16-w4-s1-p0-prefetch2": {
+          "sourceSha256": "960b07d8b191158b7a04b86f224b7277b1aef07d569264875e197ade85e567f1",
+          "ptxSha256": "0c075c0ede3dd8f72fac977cf2922e83455efcd493a796e33d9f6419830d7ac0",
+          "cubinSha256": "62f4a46003a29df1010e9a019beb27993c91acbe3cd2f8a13aa4d477fea605e4",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        },
+        "integer-22-4864-bias0-m32-w4-s8-p1-prefetch2": {
+          "sourceSha256": "016d70d02dd77efcf4a58c80a2f4b3c71256497742e9d76ee625d032dcc2ccb9",
+          "ptxSha256": "e37f683fe6c92b786a8c9932f8face381027a315fa6e338ae648c23b4ac14e46",
+          "cubinSha256": "d916c94e65e4f25b520f5b7ec4b8b4a1c7dab6b9e702bdf1d7aa08faa85d9c7c",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          }
+        },
+        "integer-22-5632-bias0-m16-w4-s1-p0-prefetch2": {
+          "sourceSha256": "e7143b8bd39cba0d484ca4d8a46e6c5c8fb4a51d1dac252e63b664dabd9cee0f",
+          "ptxSha256": "bd76d048264ea9fc2258158613b73f9a00c1c3a660ac8967598062d2b09ff8e8",
+          "cubinSha256": "d8c01702a3e411fd206b55774714beaa5702ce41db4dafd31460384ebb0edf35",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        },
+        "integer-22-5632-bias0-m32-w4-s8-p1-prefetch2": {
+          "sourceSha256": "1cac5f0c6b49da8cda102602b176fc15002cdf68c41272bd07b6d9d40ab6874c",
+          "ptxSha256": "e47706f9567d947f40eba6c9f94b0d6cd6d8cc7c1c9e9de782db78a2cf0fac52",
+          "cubinSha256": "3fd97a596eadbb95188e3dcea20625601e92cfa7e84e6e9f9395532852f79482",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          }
+        },
+        "integer-22-896-bias0-m16-w4-s1-p0-prefetch2": {
+          "sourceSha256": "4849567dcdf1f7eb25ccb7b879777f78f1fc3fec3f048ea379a30dd4eabef43a",
+          "ptxSha256": "8d0637911579090b21d475788492cc13711fdf05a74c3a17a0bb757b8697425d",
+          "cubinSha256": "86a8a89384bea3031a36834653499bd921372a3da37ea730121b05e9eae81ca2",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        },
+        "integer-22-896-bias0-m32-w4-s4-p1-prefetch2": {
+          "sourceSha256": "617d6fae9b76c475a1ac8eff277c333567fbae99052a2ee123940121409b2f99",
+          "ptxSha256": "e3815008ef8d943f73955c69b21c6628f5e4559c49725a98f81669fcf78d6dc3",
+          "cubinSha256": "f6c64c7016ef2a4ae64a1eeae49592f298fb18b79529973e75b7aa613d4d6922",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          }
+        },
+        "integer-22-896-bias0-m32-w4-s8-p1-prefetch2": {
+          "sourceSha256": "013b825eae21d773e9891df31eb9c2a9aef589c11cb7f5e9dda5643b02df7e28",
+          "ptxSha256": "9fff404fd8d979ff063887dbdf81b4cf1a244fae0d655bed828372fead3b488a",
+          "cubinSha256": "43ae7b09c6d799affed7f45605152c363fbfa4a995a4cb2ad55adc10e1bfc5dc",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          }
+        },
+        "integer-22-960-bias0-m16-w4-s1-p0-prefetch2": {
+          "sourceSha256": "22155a87cc977079c318de456a2efb04eb58af8492309c070c064dbfa11cf7dc",
+          "ptxSha256": "d9f2cdcbff4d024d0425bface6a2413491b1614ec9607e8b7875e51af7e4f170",
+          "cubinSha256": "63737b539fe1f248bd5029ffeb1360750774f74973f22febf47eb5e827a0e375",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 9
+          }
+        },
+        "integer-22-960-bias0-m32-w4-s8-p1-prefetch2": {
+          "sourceSha256": "0d7b1b02b788c77355a6bba1af4d963ac2e214a382376c41a614e549a914aee3",
+          "ptxSha256": "a13c65d82345fcff01bb8fb059ea78e5c92ad78045950c3e4f52cd8060e11f25",
+          "cubinSha256": "14de1733022d56f08da996a60c39bef5fce0d7190a9cdea1adf1f9730e1a985f",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": [],
+            "integerMmaOps": 18
+          }
+        }
+      },
+      "fingerprint": "d4dcf4230e379b29af241bd2cab3fbdcc09a9df54042b7ab4ff3ac06ff1a73ac",
+      "linear": {
+        "operator": "row_scaled_signed_integer_dot_v1_experimental",
+        "magnitudeBits": 22,
+        "limbs": 3,
+        "maxWidth": 32768,
+        "zeroIntegerOutput": "+0",
+        "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+        "bias": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+        "hardwareQualified": false
+      },
+      "nonlinear": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "daf13db126e0b4b4d5c7258a3f8c8be67ef7171dda2d62889c9e8b41b08a95ec",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false
+      },
+      "integerSourceSha256": "a83ff355e70e45352eef0b3196614f320ba8c91813526519fbde64cb9235b480",
+      "maxPartialBytes": 16777216,
+      "activationPacking": "radix_planes_once_v1_experimental",
+      "weightLoad": "auto",
+      "weightReadPolicy": "raw_half_prefetch2_sm86_sm120_b22_v2_experimental",
+      "decodePlanning": {
+        "policy": "occupancy_split_k_v1_experimental",
+        "rowTiles": [
+          16,
+          32
+        ],
+        "maxSplitK": 8,
+        "minSplitWidth": 256,
+        "maxBatch": 128,
+        "singleRow": "simt_split1",
+        "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+      },
+      "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+      "integerReference": {
+        "operator": "row_scaled_signed_integer_dot_v1_experimental",
+        "magnitudeBits": 22,
+        "limbs": 3,
+        "maxWidth": 32768,
+        "zeroIntegerOutput": "+0",
+        "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+        "bias": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+        "hardwareQualified": false
+      },
+      "multiprocessors": 70,
+      "weightLoadEffective": "prefetch2"
+    },
+    "a8w8": {
+      "kernel": "bounded_half_integer_mma_v1_probe",
+      "arithmetic": {
+        "operator": "bounded_half_integer_dot_v1_probe",
+        "activationBits": 8,
+        "weightBits": 8,
+        "blockK": 256,
+        "partialMagnitudeAtMost": 16777216,
+        "rounding": "row_power2_integer_rne_exact_dot_then_f32_rne_signed_ftz",
+        "weightStorage": "live_fp16",
+        "coefficientStorage": "call_local_fp16_integers",
+        "hardwareQualified": false
+      },
+      "arch": "sm_120",
+      "gpu": "NVIDIA GeForce RTX 5070 Ti",
+      "nvrtcVersion": [
+        13,
+        2
+      ],
+      "builds": {
+        "bounded-a8-w8-k2048-bias0-m16-w4-s1": {
+          "sourceSha256": "11b03953d999ba9f8ce148c04909c2b43d9d6e1cfc0d09673cbb181d87bd3db0",
+          "ptxSha256": "fb86e7dfc2dba397b3b5736dd0d0e067f105c90427a46f00ec139a51806b1e04",
+          "cubinSha256": "8ee68fd5592ecf561300b5c02a0bdb9c19b2eaf9e5cf7c9be61701b048257de2",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k2048-bias0-m32-w4-s1": {
+          "sourceSha256": "19fd4894528eb8ba30d4741a9734ef4a5032809d37020cfd9a8fa0f88bcf0524",
+          "ptxSha256": "17d5f447f9f3169fc7f0e375c42320701a25322cab5f19152b1e1e133e235b97",
+          "cubinSha256": "5bf50a026a756cb035f5092e292c4a3aaf7b218dbb83cfc8bba4fc7062d416c0",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k2048-bias0-m32-w4-s4": {
+          "sourceSha256": "dc67b2628754f41613ab56eaf859deb40820b7af43a84ee69e3fd7f328ddda8b",
+          "ptxSha256": "cdda11b1639dba4216757e3214327e9e4a1f8fc3bc02a43eefbb4f1428313118",
+          "cubinSha256": "cb29830a67a7f8d9977f7938441d230cbf27fdceb2caffd03d310ba010414d17",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k2048-bias0-m32-w4-s8": {
+          "sourceSha256": "c3cf02ea4fbfa50a9177c8e20cfbcb72fd25b118e2fb398d03f0eef9dd86432d",
+          "ptxSha256": "f6ca40114d5423c1aa5d3b1a416a0d59453b3e8b336247280ae2f2314b900570",
+          "cubinSha256": "113d1151492855e008c40351f8c22c4f04eddf4ab131378df6f5f591ee38acb9",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k2560-bias0-m16-w4-s1": {
+          "sourceSha256": "406f01871ed8fbd360e572e522a9567e56ba10b1926272257e4b630fca341df4",
+          "ptxSha256": "6e74a11af26e251d90c955fb0e9bdb66a1789371ace4835e0534998aeca8928e",
+          "cubinSha256": "ee9be05aec8f63c0686c83994116209c42970ef30c44bab76b7aa228eca8a6de",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k2560-bias0-m32-w4-s8": {
+          "sourceSha256": "e9b1059be62ab0d37bb1593bfb4fc468026bbc04438c05b37858f0692d7caaf4",
+          "ptxSha256": "56ec8888ab529ef5fa6b82df56c4bc4002d5255a8d2a60cca2c27a4b052d0b3e",
+          "cubinSha256": "5769fa2af203560b75d9c231db23c6b0e761525184e55fbdb85c6082e3a52b40",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k4864-bias0-m16-w4-s1": {
+          "sourceSha256": "ecd414fd82931c7b1ecb79e7249c4f58b603bc912079a9986a8f538096b75aa3",
+          "ptxSha256": "041c1f0e2f5581ee3e56091bd81f12f14f75202a7759e49e3da50e51bd4215db",
+          "cubinSha256": "2e513895c27f73586bf7d2cd9b5c0306c5a8a6be4399f416c8fb7d7c0ca08000",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k4864-bias0-m32-w4-s8": {
+          "sourceSha256": "815d56cd94b0455daff6debc74d7c35042d49ec8b405150de75be5b2816c7a24",
+          "ptxSha256": "e35918f8382de9610ace1d38da6f42060b3cb55a1ed86a00af1e6898faf9e02b",
+          "cubinSha256": "24b22652c8c7e035e7c1bfb73ba9db2ea75a6020e45be1e052797f986c6fdd67",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k5632-bias0-m16-w4-s1": {
+          "sourceSha256": "7461d4095121348e3d958559aaddce5e774301d71f16cd4dc99a2075cd0bc798",
+          "ptxSha256": "6b66025c939aa1baa09e4671ec7b573e94b90fe24d50fe0383fbcde0760a3dc5",
+          "cubinSha256": "2f8948d29a0c9211b0e11e93b7acd8e5d052d711af4b1655750b1b5c9d191830",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k5632-bias0-m32-w4-s8": {
+          "sourceSha256": "bc7e18833dd81ea95ce1c9a142370ee0f062d7d44b74bcbeda7312b14dc702c0",
+          "ptxSha256": "dfffa0842345616f2e93ef214f5a46abbc0ce84e1ea7db6d72590d4b1daeb291",
+          "cubinSha256": "a0446f538b555169f01b29c49900a02b0164240ac79809551e4764065b09827e",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k896-bias0-m16-w4-s1": {
+          "sourceSha256": "c8e5cb861e64d747a94f7013974eb3cce84c9a0f67b4cb32ca3f3119f189c7d9",
+          "ptxSha256": "34eca3323ade65d25313579b264ab38f0c53e0c591af53ba543679120618109b",
+          "cubinSha256": "616af9e68da6a706a2a723e85d074529af5a98952a619e26d3f6252c024b150f",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k896-bias0-m32-w4-s4": {
+          "sourceSha256": "4ff11d00aea3fd1f7c6ffe81264dcfbad4a94b587dcbad47192cc0921703b8af",
+          "ptxSha256": "e3244886b65fdc5ae9eed1a139826fde8c1b9c26be03a5a511a6a2ba607bff6f",
+          "cubinSha256": "66875c9bf41d050bc08bcd86635fab7b7bae2dd673047c8627e7306be43a81de",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k896-bias0-m32-w4-s8": {
+          "sourceSha256": "9ec63b9f17ad563e8cfc21f23939c1f301ba3b88b58e62041309c387cdc3eac6",
+          "ptxSha256": "9687a2a87e0d57eea67bc458352e4c0b18acb3db47ba61ff22989b801dbd61cf",
+          "cubinSha256": "eadffb4c77fc3b188d55a29fcd8fedd93f7ebbbb0f93829cb8633cf45ea59c93",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k960-bias0-m16-w4-s1": {
+          "sourceSha256": "9f40560669a59fda038a603fa2ec8900cbe3ffccb45d86e002d2eb9c61239fee",
+          "ptxSha256": "2a7ca209f2ab0a9b4b4f68156e8121a4a0b946907ebaccc12f4c95f0253807ac",
+          "cubinSha256": "143f3fd2c6ac11f0ba0b1051bbe2adbf797be995197311d1edbb0f4a88d1fc02",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k960-bias0-m32-w4-s8": {
+          "sourceSha256": "c66c94ba7b05ffd499bfee73a1e76397ed16ca339f60a2007d29957da7f96df9",
+          "ptxSha256": "06a23e9448d022add67436241dfcc3dac8e61ed508d926f23b0063542ab62ba2",
+          "cubinSha256": "c4ced76ee32dfe7c70a995c4a5edf0f74012466c870cd5bc521ab83a3aeb8ba4",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        }
+      },
+      "prototypeSourceSha256": "647f99060090f8338bb6a31a4cfe5fddf4fa1990f1ba27a44dd512d3c7b2a645",
+      "baseIntegerSourceSha256": "a83ff355e70e45352eef0b3196614f320ba8c91813526519fbde64cb9235b480",
+      "hardwareQualified": false,
+      "fingerprint": "bc39640a22565135b23d6fba7d8d8db109c4c66d4adb602f207c90025c382f5e"
+    },
+    "half2a8w8": {
+      "kernel": "bounded_half_integer_mma_v1_probe",
+      "arithmetic": {
+        "operator": "bounded_half_integer_dot_v1_probe",
+        "activationBits": 8,
+        "weightBits": 8,
+        "blockK": 256,
+        "partialMagnitudeAtMost": 16777216,
+        "rounding": "row_power2_integer_rne_exact_dot_then_f32_rne_signed_ftz",
+        "weightStorage": "live_fp16",
+        "coefficientStorage": "call_local_fp16_integers",
+        "hardwareQualified": false
+      },
+      "arch": "sm_120",
+      "gpu": "NVIDIA GeForce RTX 5070 Ti",
+      "nvrtcVersion": [
+        13,
+        2
+      ],
+      "builds": {
+        "bounded-a8-w8-k2048-bias0-m16-w4-s1": {
+          "sourceSha256": "6437d6588be46c446940433d40ec1b1008502ea4bb0faf9b30c726b422a4f63f",
+          "ptxSha256": "d6efca3035c7b40c0d42ea0f14542cbb1da3470294e20ae8240d7060da8b3b1b",
+          "cubinSha256": "67584d96322b568c355f0a10bf22bb240b2d44e3173db7ea768ffec724b8f94a",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k2048-bias0-m32-w4-s1": {
+          "sourceSha256": "8a2bfaea7cdf4316cd3448e89263eed414662d7ecaa3d920728d25416b6acb10",
+          "ptxSha256": "db39d68b40a8b9b1428bcbe457295338adae06ed766b5507333261bc9e5aa1ed",
+          "cubinSha256": "7e67488e733ed88e45ae4f864c1652ac9e8c1114a83192c5eb36d598cfe5da85",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k2048-bias0-m32-w4-s4": {
+          "sourceSha256": "bdeb9eabbd32313c2997d78667d720888678bd6abf4f1376ec5cb31986f3b3e6",
+          "ptxSha256": "7adc299d1eee42ca7b0cda9858d1d55d8cae536aeb3111ae2fabe9193e030791",
+          "cubinSha256": "e9b3443077b3543bf00df78c8e34ed45a6de920b7806b04705641a472166875f",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k2048-bias0-m32-w4-s8": {
+          "sourceSha256": "3cfa92e79dec4cb59dc6c5a226dc421b13ef58f1010d49cddf1ac9f8fba7a865",
+          "ptxSha256": "2de850b2184ece978594ecf5166c19953472195b25e3ba6a0fb5c13b3be38099",
+          "cubinSha256": "689c0410a5508b9e49972dbd08d65cbb898cc97e3cb5d71a4b2d343d23aa216e",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k2560-bias0-m16-w4-s1": {
+          "sourceSha256": "0ec13b2b988abcaf2b646c2067eb08dc464f416e7be29545c2cfa1708e07319c",
+          "ptxSha256": "92eeaf3c876ba73ed275fddcad615cc6bfac961c3514f95c039e50705413740a",
+          "cubinSha256": "cfc13efb8d68810f320b088182214188980bacbcd32aa964fe973bafca5daf02",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k2560-bias0-m32-w4-s8": {
+          "sourceSha256": "e3481ce699b136d305dfabbf196247962d673f3332ae405c5fd703beb3ed5b9c",
+          "ptxSha256": "f65348fd16554fff423d42f64cd5da331c2bcfacf1cf0d66e564e742c56bc170",
+          "cubinSha256": "797a7dd508f75f96e2edba97fcabb6c83bc0aef64d2f127b27b4b00df51516af",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k4864-bias0-m16-w4-s1": {
+          "sourceSha256": "0fd9b9e3d87109846fca46ab58380df3eb99d0cd5547b62c12e3a2f004f8bb8f",
+          "ptxSha256": "fe395ed6bf4dcb2e80d46e93392e1bc6d484677adc4f4e076e3d3601bbc4f891",
+          "cubinSha256": "1aa789cb11b0ec6074daeb0ccd2696be421e25059823973a152d9c5b84e5d8e1",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k4864-bias0-m32-w4-s8": {
+          "sourceSha256": "ebfde3dbb0811fbf47452d5b350796a32b497472274b80917f617a004b0abd14",
+          "ptxSha256": "24dfcb2330402d5b514f9726cc1e32b6db3eab313c6b4fa6c195e688170b1ea5",
+          "cubinSha256": "ba38a69c521039fd4dfd48834016147bdaf86bd7aa6f881fe426e192ae03162c",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k5632-bias0-m16-w4-s1": {
+          "sourceSha256": "826ba58509ed24bd25f4f6fc8ccb37aee16790a501b9ae9a21b6702f9f04110f",
+          "ptxSha256": "994ff115ec74b90054fd911276a9690b719ede26ba78c0aba8d72814db77afec",
+          "cubinSha256": "2c04a7fe97eb863c723d771f429463ff357b9a4a99365fbb9034cac3f583873d",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k5632-bias0-m32-w4-s8": {
+          "sourceSha256": "ed4731ba734c533d5d6b5696386204a6c663b3cd87835e1e772392916b649481",
+          "ptxSha256": "e11caf0f7fc2f8ac58b7f114d5ce485dab50b37d45972040c825cd4668efb4d3",
+          "cubinSha256": "687b983ba1fddf02173604fff97c3eaf4569ce52fad94df51c313436aedcaf65",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k896-bias0-m16-w4-s1": {
+          "sourceSha256": "c794b344817f38810dba9d0c5c6a3c502466c75036cdfa087f356691340cd0c9",
+          "ptxSha256": "4c804c1ea213ebe57193d7ec6b96a0166a62c25dbfbee06c04be4e2333c0a9d8",
+          "cubinSha256": "089d6aca23d69ff882bdbe53500f969a96e0d78cdb00d4a66f79d068041b12e8",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k896-bias0-m32-w4-s4": {
+          "sourceSha256": "12eaf038f47910b862c9cfdd5b13f34f4ddb27976f9a220296241cd1059d9812",
+          "ptxSha256": "666b832b3aefc731b69cae206dc300b5c8ad84e1b023225d66724045bdbcbff0",
+          "cubinSha256": "5c2bb22b6bc7ce657ac5d6b9621f990e391cfdf8785050dde97b806e7e435292",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k896-bias0-m32-w4-s8": {
+          "sourceSha256": "14ee2178cc239cd1c425a9a1332c09fa9848f4f7770c4434d1d804b08435bae3",
+          "ptxSha256": "bdfeebc97795da7dcc623f157345388b2d15b9c360fb7e1090c01d3570f7b1d5",
+          "cubinSha256": "877f1dd4c78f37ba639c28427ce869349251e788735af75b547eb4839cb50ccb",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k960-bias0-m16-w4-s1": {
+          "sourceSha256": "149cea8df1bda4b2294aca0060122306b830cb0db6b2c293ae2b77adc77475ef",
+          "ptxSha256": "b8b875ed655fd2726ff8e1e241e4fa1ec4b646cecaad67e9267faa5c401f0bdc",
+          "cubinSha256": "b875a64546ba2c637b3e956c4eede81b9843a8d56940c7688102762aa27427c8",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        },
+        "bounded-a8-w8-k960-bias0-m32-w4-s8": {
+          "sourceSha256": "099e77bd7affb55e56f8daf7792191ed62d3174ed9b7f11d62855d384326f001",
+          "ptxSha256": "4afeae7fb74d6a7b6c33bc345caf713c3ae014d75330dcdc903d0898589998e0",
+          "cubinSha256": "536ad5dcf3579ae17d7b8887b83f3b54d598484b7ef805316900f6f109ba7a36",
+          "ptxAudit": {
+            "floatOps": {},
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {},
+            "violations": []
+          }
+        }
+      },
+      "prototypeSourceSha256": "647f99060090f8338bb6a31a4cfe5fddf4fa1990f1ba27a44dd512d3c7b2a645",
+      "baseIntegerSourceSha256": "a83ff355e70e45352eef0b3196614f320ba8c91813526519fbde64cb9235b480",
+      "hardwareQualified": false,
+      "fingerprint": "f3072187f654172c537d672ab309e1cd47303bc31a26f19bad602b33e7d24612",
+      "weightQuantization": "packed_half2_magic_rne_v1_probe",
+      "quantizerSourceSha256": "753caf1dd117feb4becb4eaacedf8306b74f1edb567ade7b826ae602579a1ee5"
+    }
+  }
+}

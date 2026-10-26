@@ -1,0 +1,4 @@
+control ok    | 1 passed, 6 deselected in 0.62s
+killed       wrong-tie-parity | 1 failed, 6 deselected in 0.63s
+
+1 of 1 mutants killed.

@@ -1,0 +1,8 @@
+[
+  {
+    "name": "wrong-tie-parity",
+    "file": "bounded_reference.py",
+    "old": "whole%2",
+    "new": "1-whole%2"
+  }
+]
