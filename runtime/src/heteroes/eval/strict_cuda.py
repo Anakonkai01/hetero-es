@@ -37,6 +37,7 @@ KERNEL_VERSION = "pairwise_f32_cuda_linear_v3_experimental"
 MAX_LINEAR_WIDTH = 32768
 MAX_ATTENTION_KEYS = 4096
 MAX_NORM_WIDTH = 8192
+ATTENTION_THREADS = 256
 NVRTC_OPTIONS = ("--fmad=false", "--ftz=false", "--prec-div=true", "--prec-sqrt=true", "--std=c++17")
 
 _LINEAR_SOURCE = r"""
@@ -544,6 +545,304 @@ extern "C" __global__ void strict_attention(const float* q, const float* key, co
   }
   report(error, bad);
 }
+
+// Same arithmetic as strict_attention, distributed differently. A binary-counter reduction over 8-wide groups
+// equals the pruned aligned in-place tree (left operand first) over its inputs, and that tree splits exactly at
+// any aligned power-of-two chunk: levels below the chunk size stay inside a chunk and the higher levels form the
+// same pruned tree over chunk roots. Every product, add, flag check and masked-key load of strict_attention runs
+// exactly once here; only the thread executing it changes. Scores: lanes = next power of two of the 8-wide group
+// count, one group per lane, combined by shuffles in the same pruned tree. Values: aligned chunks of `chunk` keys
+// (a power of two >= 8, passed as its shift) per worker, then one counter over chunk roots in order. Maximum and softmax keep the
+// original order-independent steps (only a zero maximum can differ in sign, and it is normalized to +0).
+extern "C" __global__ void strict_attention_split(const float* q, const float* key, const float* value, float* out,
+                                                  int* error, const int* ranges, int heads, int length,
+                                                  int total_keys, int past, int repeats, int dim, int packed,
+                                                  int chunk_shift, float scale) {
+  const int i = blockIdx.x, kv = blockIdx.y, h = kv * repeats + blockIdx.z;
+  const int start = packed ? ranges[3 * i] : 0;
+  const int keys = packed ? ranges[3 * i + 1] : total_keys;
+  const int limit = packed ? ranges[3 * i + 2] : past + i;
+  extern __shared__ float shared[];
+  float* query = shared;
+  float* numerators = shared + dim;
+  float* tree = numerators + keys;
+  float* partial = tree + keys;
+  __shared__ float maxima[32];
+  unsigned bad = 0;
+  for (int d = threadIdx.x; d < dim; d += blockDim.x) query[d] = load(q + ((size_t)h * length + i) * dim + d, bad);
+  __syncthreads();
+  const int groups = (dim + 7) >> 3;
+  // Runtime integer division lowers to MUFU.RCP, which the instruction audit forbids: use shifts and loops.
+  int shift = 0;
+  while ((1 << shift) < groups) ++shift;
+  const int lanes = 1 << shift, g = threadIdx.x & (lanes - 1), per_pass = blockDim.x >> shift;
+  float local = -FLT_BIG;
+  for (int base = 0; base < keys; base += per_pass) {
+    const int j = base + (int)(threadIdx.x >> shift);
+    const bool live = j < keys && g < groups;
+    float v = 0.0f;
+    if (live) {
+      const float* row = key + ((size_t)kv * total_keys + start + j) * dim;
+      const int first = g << 3;
+      const int valid = dim - first < 8 ? dim - first : 8;
+      float terms[8] = {};
+#pragma unroll
+      for (int item = 0; item < 8; ++item)
+        if (item < valid) terms[item] = mul_(query[first + item], load(row + first + item, bad), bad);
+#pragma unroll
+      for (int stride = 1; stride < 8; stride <<= 1) {
+#pragma unroll
+        for (int item = 0; item < 8; item += 2 * stride)
+          if (item + stride < valid) terms[item] = add_(terms[item], terms[item + stride], bad);
+      }
+      v = terms[0];
+    }
+    for (int stride = 1; stride < lanes; stride <<= 1) {
+      float other = __shfl_down_sync(0xffffffffu, v, stride, lanes);
+      if (live && (g & (2 * stride - 1)) == 0 && g + stride < groups) v = add_(v, other, bad);
+    }
+    if (live && g == 0) {
+      float score = mul_(v, scale, bad);
+      numerators[j] = score;
+      if (j <= limit && score > local) local = score;
+    }
+  }
+  for (int offset = 16; offset >= 1; offset >>= 1) {
+    float other = __shfl_xor_sync(0xffffffffu, local, offset);
+    local = other > local ? other : local;
+  }
+  if ((threadIdx.x & 31) == 0) maxima[threadIdx.x >> 5] = local;
+  __syncthreads();
+  float maximum = -FLT_BIG;
+  for (int w = 0; w < (int)(blockDim.x + 31) / 32; ++w) maximum = maxima[w] > maximum ? maxima[w] : maximum;
+  if (__float_as_uint(maximum) == 0x80000000u) maximum = 0.0f;  // the reference maps a -0 maximum to +0
+  for (int j = threadIdx.x; j < keys; j += blockDim.x) {
+    bool allowed = j <= limit;
+    float shifted = add_(allowed ? numerators[j] : maximum, -maximum, bad);
+    float e = exp_(shifted, bad);
+    float n = allowed ? e : 0.0f;
+    numerators[j] = n;
+    tree[j] = n;
+  }
+  __syncthreads();
+  block_tree(tree, keys, bad);
+  float denominator = tree[0];
+  float inverse = reciprocal_(denominator == 0.0f ? 1.0f : denominator, bad);
+  for (int j = threadIdx.x; j < keys; j += blockDim.x) numerators[j] = mul_(numerators[j], inverse, bad);
+  __syncthreads();
+  const int chunk = 1 << chunk_shift, chunks = (keys + chunk - 1) >> chunk_shift;
+  // Workers own power-of-two channel slots; a slot beyond dim idles (a division-free thread mapping).
+  int channel_shift = 0;
+  while ((1 << channel_shift) < dim) ++channel_shift;
+  const int d = threadIdx.x & ((1 << channel_shift) - 1), worker = threadIdx.x >> channel_shift;
+  const int workers = blockDim.x >> channel_shift;
+  if (d < dim) {
+    for (int c = worker; c < chunks; c += workers) {
+      const int end = (c + 1) * chunk < keys ? (c + 1) * chunk : keys;
+      Tree t;
+      t.n = 0;
+      for (int first = c * chunk; first < end; first += 8) {
+        int valid = end - first < 8 ? end - first : 8;
+        float terms[8] = {};
+#pragma unroll
+        for (int item = 0; item < 8; ++item) {
+          int j = first + item;
+          if (item < valid)
+            terms[item] = mul_(numerators[j], load(value + ((size_t)kv * total_keys + start + j) * dim + d, bad), bad);
+        }
+#pragma unroll
+        for (int stride = 1; stride < 8; stride <<= 1) {
+#pragma unroll
+          for (int item = 0; item < 8; item += 2 * stride)
+            if (item + stride < valid) terms[item] = add_(terms[item], terms[item + stride], bad);
+        }
+        push(t, terms[0], bad);
+      }
+      partial[c * dim + d] = finish(t, bad);
+    }
+  }
+  __syncthreads();
+  if (threadIdx.x < dim) {
+    Tree t;
+    t.n = 0;
+    for (int c = 0; c < chunks; ++c) push(t, partial[c * dim + threadIdx.x], bad);
+    out[(size_t)i * heads * dim + h * dim + threadIdx.x] = finish(t, bad);
+  }
+  report(error, bad);
+}
+
+// Same arithmetic as strict_attention for all `repeats` query heads sharing one KV head. Block (dim, repeats):
+// thread (x, r) owns channel x of head r for values and serves as a lane for the other phases. Every K/V element
+// is loaded (flushed and checked) once per block instead of once per head; the checks only OR flags, so the
+// reported failures are the same. Keys arrive in tiles of 32 rows staged in shared memory, with one pad float
+// after every 32 so that neither phase has bank conflicts; the next tile's 16-byte loads are issued before the
+// current tile is used.
+//
+// strict_attention reduces with a binary counter over 8-wide groups, which equals the pruned aligned in-place
+// tree (left operand first); that tree splits exactly at aligned power-of-two chunks. A score's dim/8 groups are
+// a power of two, so dim/32 adjacent lanes each reduce 4 groups (32 channels) and combine by shuffles in the same
+// tree. Values reduce each aligned 32-key tile to its root (the pruned tree over at most 4 groups), then push the
+// tile roots, in order, into the per-channel counter. The maximum is order-independent apart from a zero's sign,
+// which both kernels normalize to +0. Requires a power-of-two dim >= 32 and 2..512/dim query heads per KV head.
+extern "C" __global__ void __launch_bounds__(512) strict_attention_gqa(const float* q, const float* key, const float* value, float* out,
+                                                int* error, const int* ranges, int heads, int length,
+                                                int total_keys, int past, int repeats, int dim, int packed,
+                                                float scale) {
+  // Strided loops are not unrolled: an unrolled runtime-stride loop computes its trip count with MUFU.RCP
+  // integer division, which the instruction audit rejects (seen on sm_75..sm_120 depending on the stride).
+  const int i = blockIdx.x, kv = blockIdx.y, x = threadIdx.x, r = threadIdx.y;
+  const int tid = r * dim + x, threads = repeats * dim, h = kv * repeats + r;
+  const int start = packed ? ranges[3 * i] : 0;
+  const int keys = packed ? ranges[3 * i + 1] : total_keys;
+  const int limit = packed ? ranges[3 * i + 2] : past + i;
+  int dim_shift = 0;
+  while ((1 << dim_shift) < dim) ++dim_shift;
+  const int lane_shift = dim_shift - 5, lanes = 1 << lane_shift;  // lanes per score = dim / 32
+  const int padded = dim + lanes;                                 // one pad float after every 32 channels
+  extern __shared__ float shared[];
+  float* query = shared;                         // [repeats][padded]
+  float* tile = query + repeats * padded;        // [32][padded]
+  float* numerators = tile + 32 * padded;        // [repeats][keys]
+  float* tree = numerators + repeats * keys;     // [repeats][keys]
+  __shared__ float maxima[32];
+  unsigned bad = 0;
+  query[r * padded + x + (x >> 5)] = load(q + ((size_t)h * length + i) * dim + x, bad);
+  const float* keys_base = key + ((size_t)kv * total_keys + start) * dim;
+  const float* values_base = value + ((size_t)kv * total_keys + start) * dim;
+  float4 staged[4];  // a 32-row tile has 8*dim float4 values, at most 4 per thread since repeats >= 2
+  auto fetch = [&](const float* base, int first) {
+    const int rows = keys - first < 32 ? keys - first : 32, count = (rows * dim) >> 2;
+    const float4* source = reinterpret_cast<const float4*>(base + (size_t)first * dim);
+#pragma unroll
+    for (int u = 0; u < 4; ++u)
+      if (tid + u * threads < count) staged[u] = source[tid + u * threads];
+  };
+  auto stage = [&](int first) {
+    const int rows = keys - first < 32 ? keys - first : 32, count = (rows * dim) >> 2;
+#pragma unroll
+    for (int u = 0; u < 4; ++u) {
+      const int index = tid + u * threads;
+      if (index < count) {
+        const int element = index << 2, row = element >> dim_shift, column = element & (dim - 1);
+        float* target = tile + row * padded + column + (column >> 5);
+        target[0] = flush(staged[u].x);
+        target[1] = flush(staged[u].y);
+        target[2] = flush(staged[u].z);
+        target[3] = flush(staged[u].w);
+        note(target[0], bad);
+        note(target[1], bad);
+        note(target[2], bad);
+        note(target[3], bad);
+      }
+    }
+  };
+  // Score lanes: thread tid serves key row (tid >> lane_shift) & 31 of head tid >> (lane_shift + 5).
+  const int lane = tid & (lanes - 1), score_row = (tid >> lane_shift) & 31, score_head = tid >> (lane_shift + 5);
+  const float* own = query + score_head * padded + lane * 33;
+  fetch(keys_base, 0);
+  for (int first = 0; first < keys; first += 32) {
+    const int rows = keys - first < 32 ? keys - first : 32;
+    __syncthreads();
+    stage(first);
+    __syncthreads();
+    if (first + 32 < keys) fetch(keys_base, first + 32);
+    const bool live = score_row < rows;
+    float v = 0.0f;
+    if (live) {
+      const float* row = tile + score_row * padded + lane * 33;
+      float group[4];
+#pragma unroll
+      for (int g = 0; g < 4; ++g) {
+        float terms[8];
+#pragma unroll
+        for (int item = 0; item < 8; ++item) terms[item] = mul_(own[8 * g + item], row[8 * g + item], bad);
+#pragma unroll
+        for (int stride = 1; stride < 8; stride <<= 1) {
+#pragma unroll
+          for (int item = 0; item < 8; item += 2 * stride) terms[item] = add_(terms[item], terms[item + stride], bad);
+        }
+        group[g] = terms[0];
+      }
+      v = add_(add_(group[0], group[1], bad), add_(group[2], group[3], bad), bad);
+    }
+    for (int stride = 1; stride < lanes; stride <<= 1) {
+      float other = __shfl_down_sync(0xffffffffu, v, stride, lanes);
+      if (live && (lane & (2 * stride - 1)) == 0) v = add_(v, other, bad);
+    }
+    if (live && lane == 0) numerators[score_head * keys + first + score_row] = mul_(v, scale, bad);
+  }
+  fetch(values_base, 0);
+  __syncthreads();
+  float* scores = numerators + r * keys;
+  float local = -FLT_BIG;
+#pragma unroll 1
+  for (int j = x; j < keys; j += (int)blockDim.x)
+    if (j <= limit && scores[j] > local) local = scores[j];
+  for (int offset = 16; offset >= 1; offset >>= 1) {
+    float other = __shfl_xor_sync(0xffffffffu, local, offset);
+    local = other > local ? other : local;
+  }
+  if ((tid & 31) == 0) maxima[tid >> 5] = local;
+  __syncthreads();
+  float maximum = -FLT_BIG;
+  for (int w = (r * dim) >> 5; w < ((r + 1) * dim) >> 5; ++w) maximum = maxima[w] > maximum ? maxima[w] : maximum;
+  if (__float_as_uint(maximum) == 0x80000000u) maximum = 0.0f;  // the reference maps a -0 maximum to +0
+  float* own_tree = tree + r * keys;
+#pragma unroll 1
+  for (int j = x; j < keys; j += (int)blockDim.x) {
+    bool allowed = j <= limit;
+    float shifted = add_(allowed ? scores[j] : maximum, -maximum, bad);
+    float e = exp_(shifted, bad);
+    float n = allowed ? e : 0.0f;
+    scores[j] = n;
+    own_tree[j] = n;
+  }
+  __syncthreads();
+  // block_tree for every head at once: identical levels and operands, one barrier per level.
+  for (int stride = 1; stride < keys; stride <<= 1) {
+#pragma unroll 1
+    for (int j = x * 2 * stride; j < keys; j += (int)blockDim.x * 2 * stride)
+      if (j + stride < keys) own_tree[j] = add_(own_tree[j], own_tree[j + stride], bad);
+    __syncthreads();
+  }
+  float denominator = own_tree[0];
+  float inverse = reciprocal_(denominator == 0.0f ? 1.0f : denominator, bad);
+#pragma unroll 1
+  for (int j = x; j < keys; j += (int)blockDim.x) scores[j] = mul_(scores[j], inverse, bad);
+  const int channel = x + (x >> 5);
+  Tree t;
+  t.n = 0;
+  for (int first = 0; first < keys; first += 32) {
+    const int rows = keys - first < 32 ? keys - first : 32;
+    __syncthreads();
+    stage(first);
+    __syncthreads();
+    if (first + 32 < keys) fetch(values_base, first + 32);
+    float group[4];
+#pragma unroll
+    for (int g = 0; g < 4; ++g) {
+      const int base = 8 * g, valid = rows - base < 8 ? rows - base : 8;  // valid <= 0: group absent
+      float terms[8] = {};
+#pragma unroll
+      for (int item = 0; item < 8; ++item)
+        if (item < valid) terms[item] = mul_(scores[first + base + item], tile[(base + item) * padded + channel], bad);
+#pragma unroll
+      for (int stride = 1; stride < 8; stride <<= 1) {
+#pragma unroll
+        for (int item = 0; item < 8; item += 2 * stride)
+          if (item + stride < valid) terms[item] = add_(terms[item], terms[item + stride], bad);
+      }
+      group[g] = terms[0];
+    }
+    const int present = (rows + 7) >> 3;  // pruned aligned tree over this tile's groups
+    if (1 < present) group[0] = add_(group[0], group[1], bad);
+    if (3 < present) group[2] = add_(group[2], group[3], bad);
+    if (2 < present) group[0] = add_(group[0], group[2], bad);
+    push(t, group[0], bad);
+  }
+  out[(size_t)i * heads * dim + h * dim + x] = finish(t, bad);
+  report(error, bad);
+}
 """
 
 
@@ -563,6 +862,20 @@ class _PackedAttentionLayout:
     queries: int
     keys: int
     max_keys: int
+
+
+def gqa_attention_eligible(dim, repeats, shared_bytes):
+    """Power-of-two dim >= 32 (whole warps, 16-byte rows), at least two heads sharing the tile, a block within the
+    kernel's 512-thread launch bound and the default dynamic shared-memory limit."""
+    return dim >= 32 and dim & (dim - 1) == 0 and 2 <= repeats and repeats * dim <= 512 and shared_bytes <= 48 * 1024
+
+
+def attention_chunk(keys, dim):
+    """Aligned value-reduction chunk (a power of two >= 8) keeping the chunk-root plane within 8 KiB."""
+    chunk = 32
+    while -(-keys // chunk) * dim > 2048:
+        chunk *= 2
+    return chunk
 
 
 def linear_plan(width):
@@ -817,6 +1130,10 @@ def _find_nvdisasm():
 class StrictCudaKernels:
     """Compiles and launches audited kernels on ONE CUDA device; the acceptance guard runs first."""
 
+    # Distributed attention kernels are the default (GQA sharing where eligible, else split); the original
+    # strict_attention remains as an in-process control with identical arithmetic.
+    _attention_entry = "strict_attention_gqa"
+
     def __init__(self, device):
         if os.environ.get("HETEROES_GPU_ACCEPTANCE") != "1":
             raise ReferenceArithmeticError("Strict CUDA kernels need HETEROES_GPU_ACCEPTANCE=1")
@@ -950,7 +1267,16 @@ class StrictCudaKernels:
             self._functions["ops"] = self._compile(
                 "ops",
                 header + _OPS_SOURCE,
-                ["strict_rms_norm", "strict_add", "strict_scale", "strict_silu_mul", "strict_rope", "strict_attention"],
+                [
+                    "strict_rms_norm",
+                    "strict_add",
+                    "strict_scale",
+                    "strict_silu_mul",
+                    "strict_rope",
+                    "strict_attention",
+                    "strict_attention_split",
+                    "strict_attention_gqa",
+                ],
                 ptx_exact=OPS_PTX_EXACT,
                 sass_exact=OPS_SASS_EXACT,
             )
@@ -1087,17 +1413,52 @@ class StrictCudaKernels:
         keys = key.shape[1]
         result = torch.empty((length, heads * dim), dtype=torch.float32, device=self.device)
         flag = self.new_error_flag() if error_flag is None else error_flag
-        self._launch(
-            self._ops("strict_attention"),
-            grid=(length, key.shape[0], repeats),
-            block=(128, 1),
-            pointers=(query, key, value, result, flag, flag),
-            integers=(heads, length, keys, past, repeats, dim, 0),
-            floats=(scale,),
-            shared=4 * (dim + 2 * keys),
+        self._launch_attention(
+            (length, key.shape[0], repeats),
+            (query, key, value, result, flag, flag),
+            (heads, length, keys, past, repeats, dim, 0),
+            scale,
+            keys,
         )
         self._finish(flag, error_flag)
         return result
+
+    def _launch_attention(self, grid, pointers, integers, scale, max_keys):
+        dim = integers[5]
+        if self._attention_entry == "strict_attention":
+            self._launch(
+                self._ops("strict_attention"),
+                grid=grid,
+                block=(128, 1),
+                pointers=pointers,
+                integers=integers,
+                floats=(scale,),
+                shared=4 * (dim + 2 * max_keys),
+            )
+            return
+        repeats = integers[4]
+        shared = 4 * ((repeats + 32) * (dim + max(1, dim // 32)) + 2 * repeats * max_keys)
+        if self._attention_entry == "strict_attention_gqa" and gqa_attention_eligible(dim, repeats, shared):
+            self._launch(
+                self._ops("strict_attention_gqa"),
+                grid=grid[:2],
+                block=(dim, repeats),
+                pointers=pointers,
+                integers=integers,
+                floats=(scale,),
+                shared=shared,
+            )
+            return
+        chunk = attention_chunk(max_keys, dim)
+        self._launch(
+            self._ops("strict_attention_split"),
+            grid=grid,
+            block=(ATTENTION_THREADS, 1),
+            pointers=pointers,
+            integers=(*integers, chunk.bit_length() - 1),
+            floats=(scale,),
+            shared=4 * (dim + 2 * max_keys + -(-max_keys // chunk) * dim),
+        )
 
     def attention_layout(self, spans):
         """One call-local range table shared by all layers; each span is (queries, keys, cached prefix)."""
@@ -1145,14 +1506,12 @@ class StrictCudaKernels:
         heads, length, dim = query.shape
         result = torch.empty((length, heads * dim), dtype=torch.float32, device=self.device)
         flag = self.new_error_flag() if error_flag is None else error_flag
-        self._launch(
-            self._ops("strict_attention"),
-            grid=(length, key.shape[0], repeats),
-            block=(128, 1),
-            pointers=(query, key, value, result, flag, layout.ranges),
-            integers=(heads, length, key.shape[1], 0, repeats, dim, 1),
-            floats=(scale,),
-            shared=4 * (dim + 2 * layout.max_keys),
+        self._launch_attention(
+            (length, key.shape[0], repeats),
+            (query, key, value, result, flag, layout.ranges),
+            (heads, length, key.shape[1], 0, repeats, dim, 1),
+            scale,
+            layout.max_keys,
         )
         self._finish(flag, error_flag)
         return result

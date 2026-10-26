@@ -44,6 +44,12 @@ Packing changes data placement and independent work scheduling; it does not comb
   bound is two FP32 tables of `max_context * head_dim` elements, exposed as buffers for storage inventory.
 - Packed attention supplies an independent key offset, key count and causal position for every query. Each query
   executes the same tree and masking rules as its serial reference. Prefill and cached decode share this layout.
+- Attention launches (2026-10-26) default to `strict_attention_gqa` when the head dimension is a power of two of at
+  least 32, 2..512/dim query heads share a KV head and the tiles fit 48 KiB; otherwise `strict_attention_split`.
+  Both distribute the original `strict_attention` operations without reassociating any reduction (a binary
+  counter equals the pruned aligned tree, which splits exactly at aligned power-of-two chunks), so outputs and
+  failure flags are bit-identical to it; the GQA kernel also loads each K/V element once per KV head. The original
+  kernel stays available as an in-process control. Evidence: `docs/evidence/2026-10-26-strict-attention-gqa/`.
 - Prefixes and new KV values are packed with two concatenations per layer. Returned per-sequence caches are views
   into bounded slabs. Compaction can temporarily retain a previous slab through a surviving view until the next
   forward; there is no accumulating history of slabs inside the backend.
