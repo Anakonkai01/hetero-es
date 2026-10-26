@@ -343,6 +343,47 @@ def test_grouped_decode_launch_matches_separate_tile_projections(counts, bias, m
 
 
 @gpu
+@pytest.mark.parametrize("width,counts", [(896, (896, 128, 128)), (512, (256, 64, 192)), (896, (4864, 4864))])
+@pytest.mark.parametrize("bias", [False, True])
+def test_grouped_split_k_launch_matches_separate_tile_projections_and_flags(width, counts, bias, monkeypatch):
+    # Decode-sized widths select split-K, so every matrix of the group goes through the shared partial matrix
+    # and integer_finish_group (column offsets of the second and third matrix included).
+    stream = cuda_class()("cuda", magnitude_bits=22)
+    tile = cuda_class()("cuda", magnitude_bits=22, mma_schedule="tile")
+    used = entries_used(stream, monkeypatch)
+    gen = torch.Generator(device="cuda").manual_seed(width + sum(counts))
+    weights = [(torch.randn(n, width, device="cuda", generator=gen) * 0.03).half() for n in counts]
+    biases = [(torch.randn(n, device="cuda", generator=gen) * 0.1).half() for n in counts] if bias else None
+    for rows in (2, 9, 32):
+        assert stream._decode_plan(width, rows, sum(counts), 8).split_k > 1
+        x = torch.randn(rows, width, device="cuda", generator=gen) * torch.exp(torch.randn(rows, 1, device="cuda") * 3)
+        flags = [stream.new_error_flag(), tile.new_error_flag()]
+        actual = stream.linear_many(x, weights, biases, error_flag=flags[0], decode_target_ctas_per_sm=8)
+        control = [
+            tile.linear_decode(x, w, None if biases is None else b, error_flag=flags[1])
+            for w, b in zip(weights, biases or [None] * len(weights))
+        ]
+        assert int(flags[0].item()) == int(flags[1].item()) == 0
+        assert all(torch.equal(bits(a), bits(c)) for a, c in zip(actual, control)), rows
+    assert "integer_stream_group" in used and "integer_finish_group" in used
+    # A nonfinite bias (added after encoding, so only the finish check sees it) and an encoding overflow.
+    if bias:
+        biases[-1][3] = float("inf")
+        x = torch.randn(4, width, device="cuda", generator=gen)
+    else:
+        x = torch.full((4, width), 2.0**120, device="cuda")
+        weights[-1][3] = 65504.0
+    flags = [stream.new_error_flag(), tile.new_error_flag()]
+    actual = stream.linear_many(x, weights, biases, error_flag=flags[0], decode_target_ctas_per_sm=8)
+    control = [
+        tile.linear_decode(x, w, None if biases is None else b, error_flag=flags[1])
+        for w, b in zip(weights, biases or [None] * len(weights))
+    ]
+    assert int(flags[0].item()) == int(flags[1].item()) == 1
+    assert all(torch.equal(bits(a), bits(c)) for a, c in zip(actual, control))
+
+
+@gpu
 def test_grouped_launch_falls_back_for_mixed_bias_single_rows_and_flags_overflow_like_separate_calls(monkeypatch):
     stream = cuda_class()("cuda", magnitude_bits=22)
     tile = cuda_class()("cuda", magnitude_bits=22, mma_schedule="tile")

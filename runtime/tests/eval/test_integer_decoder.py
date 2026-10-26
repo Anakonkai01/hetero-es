@@ -246,3 +246,77 @@ def test_decode_partial_budget_is_admitted_before_request_cache_or_metadata_allo
     monkeypatch.setattr(backend, "_generation_begin", lambda: pytest.fail("budget must precede metadata refresh"))
     with pytest.raises(ReferenceArithmeticError, match="budget"):
         backend.generate(torch.tensor([[3, 5]], device="cuda"), max_new_tokens=3, eos_token_id=[])
+
+
+@gpu
+@pytest.mark.parametrize("magnitude_bits", [14, 22])
+def test_wide_decoder_with_split_groups_and_distinct_norms_matches_cpu(magnitude_bits, monkeypatch):
+    # Hidden 256 selects split-K grouped projections and fused norm/SiLU quantization; distinct RMSNorm weights
+    # (the fixtures default to ones) make every norm-to-projection pairing observable.
+    from transformers import Qwen2Config, Qwen2ForCausalLM
+
+    from heteroes.eval import integer_plan
+    from test_integer_stream import entries_used
+
+    reference, graph = classes()
+    torch.manual_seed(31)
+    config = Qwen2Config(
+        hidden_size=256,
+        intermediate_size=769,
+        num_attention_heads=4,
+        num_key_value_heads=2,
+        num_hidden_layers=2,
+        vocab_size=91,
+        max_position_embeddings=64,
+        eos_token_id=90,
+        pad_token_id=0,
+    )
+    cpu = Qwen2ForCausalLM(config).half().eval()
+    with torch.no_grad():
+        norms = [cpu.model.norm] + [
+            n for layer in cpu.model.layers for n in (layer.input_layernorm, layer.post_attention_layernorm)
+        ]
+        for norm in norms:
+            norm.weight.copy_((0.5 + torch.rand(norm.weight.shape)).half())
+    oracle = reference(cpu, max_context=64, allow_fixture=True, magnitude_bits=magnitude_bits)
+    backend = graph(copy.deepcopy(cpu).cuda(), max_context=64, allow_fixture=True, magnitude_bits=magnitude_bits)
+    used = entries_used(backend.kernels, monkeypatch)
+    ids = torch.tensor([[3, 5, 7, 9], [0, 11, 13, 17], [19, 23, 29, 31], [0, 0, 37, 41]], device="cuda")
+    mask = ids != 0
+    expected = oracle.generate(
+        ids.cpu(), attention_mask=mask.cpu(), max_new_tokens=5, eos_token_id=[], repetition_penalty=1.2
+    )
+    actual = backend.generate(ids, attention_mask=mask, max_new_tokens=5, eos_token_id=[], repetition_penalty=1.2)
+    assert torch.equal(actual.cpu(), expected)
+    fed = [torch.cat((row[allowed], out[ids.shape[1] : -1]))[None] for row, allowed, out in zip(ids, mask, actual)]
+    logits = torch.cat([oracle.forward_tokens(row.cpu())[0] for row in fed])
+    assert torch.equal(bits(backend._session.last_logits.cpu()), bits(logits))
+    assert {"integer_stream_group", "integer_finish_group", "strict_rms_quant", "strict_silu_quant"} <= set(used)
+    # The workspace bound is a no-reuse sum: it covers every single-matrix partial plus every grouped partial.
+    multiprocessors, budget = backend.kernels.multiprocessors, backend.kernels.max_partial_bytes
+    for capacity in (1, 4):
+        needed = 0
+        layers = backend.model.model.layers
+        for layer in layers:
+            attention, mlp = layer.self_attn, layer.mlp
+            singles = [
+                attention.q_proj,
+                attention.k_proj,
+                attention.v_proj,
+                attention.o_proj,
+                mlp.gate_proj,
+                mlp.up_proj,
+                mlp.down_proj,
+            ]
+            groups = [(attention.q_proj, attention.k_proj, attention.v_proj), (mlp.gate_proj, mlp.up_proj)]
+            for width, outputs in [(m.weight.shape[1], m.weight.shape[0]) for m in singles] + [
+                (g[0].weight.shape[1], sum(m.weight.shape[0] for m in g)) for g in groups
+            ]:
+                needed += max(
+                    integer_plan.decode_linear_plan(
+                        width, rows, outputs, multiprocessors, max_partial_bytes=budget
+                    ).partial_bytes
+                    for rows in range(1, capacity + 1)
+                )
+        assert backend._request_workspace_bytes(capacity) >= needed
+    backend.release_graph()
