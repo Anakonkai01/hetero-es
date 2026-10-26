@@ -13,7 +13,9 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
   EOS của Qwen/Smol/Tiny khớp 5070 Ti/3060 WSL2 và bằng chứng B22 cũ. GPU: 5070 Ti **458**, WSL2 **1002**;
   mutation đã đóng hết 11 lỗi; check-all **ALL PASS** (CPU runtime **3237**, backend **452**), gói Worker
   khớp đủ **142** file runtime. [Bằng chứng](evidence/2026-10-26-strict-prefill-attention/README.md).
-  **Windows trực tiếp đang chạy, chưa nghiệm thu**; PID/console/cách lấy kết quả ở bàn giao, không chạy lặp.
+  **Windows trực tiếp đã nghiệm thu (22:30)**: 844 test qua; Qwen parent/±/restore và EOS khớp cả 3 host và
+  bằng chứng cũ; Qwen short32 **2664 → 2733** (+2,6%), chat128 **2632 → 2705** (+2,8%).
+  [Bằng chứng native](evidence/2026-10-26-strict-prefill-native-finish/README.md).
   Mục tiêu gần vLLM **chưa đạt** (short32 khoảng **64,5%** đối chứng 13835). Chưa push/merge/deploy.
 - **Chỉ đạo mới nhất: hoàn tất khảo sát vLLM, ghi lại, rồi tiếp tục tối ưu strict kernel riêng để gần ngang
   vLLM; đạt mục tiêu hiệu năng thì làm tiếp đầy đủ M0–M6.** Không dùng tốc độ của wrapper vLLM để đóng
