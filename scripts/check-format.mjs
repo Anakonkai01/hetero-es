@@ -10,6 +10,7 @@ const files = [
     execFileSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], {
       cwd: root,
       encoding: 'utf8',
+      maxBuffer: 16 * 1024 * 1024,
     }).split('\0'),
   ),
 ].filter((file) => /\.(?:[cm]?js|tsx?|css|json)$/.test(file) && fs.existsSync(path.join(root, file)));
