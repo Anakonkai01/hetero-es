@@ -327,3 +327,21 @@ def test_wide_decoder_with_split_groups_and_distinct_norms_matches_cpu(magnitude
                 )
         assert backend._request_workspace_bytes(capacity) >= needed
     backend.release_graph()
+
+
+@gpu
+def test_generation_accepts_only_nonempty_left_padded_prompts_and_takes_their_suffix():
+    _, graph = classes()
+    backend = graph(model_for("llama").cuda(), max_context=16, allow_fixture=True)
+    ids = torch.tensor([[3, 5, 7, 9], [0, 0, 11, 13], [0, 17, 19, 23]], device="cuda")
+    mask = torch.tensor([[1, 1, 1, 1], [0, 0, 1, 1], [0, 1, 1, 1]], device="cuda")
+    histories, *_ = backend._prepare_generation(ids, mask, max_new_tokens=2, eos_token_id=[])
+    assert [h.tolist() for h in histories] == [[[3, 5, 7, 9]], [[11, 13]], [[17, 19, 23]]]
+    for bad in ([1, 0, 1, 1], [0, 0, 0, 0], [1, 1, 0, 0], [0, 1, 0, 1]):
+        broken = mask.clone()
+        broken[1] = torch.tensor(bad, device="cuda")
+        with pytest.raises(ReferenceArithmeticError, match="left-padded"):
+            backend._prepare_generation(ids, broken, max_new_tokens=2, eos_token_id=[])
+    with pytest.raises(ReferenceArithmeticError, match="context"):
+        backend._prepare_generation(ids, mask, max_new_tokens=13, eos_token_id=[])
+    backend._prepare_generation(ids, mask, max_new_tokens=12, eos_token_id=[])

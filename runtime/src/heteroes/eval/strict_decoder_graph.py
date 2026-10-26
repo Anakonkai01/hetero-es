@@ -122,6 +122,14 @@ class _DecodeSession:
             offset += length
         spans = torch.tensor(spans, dtype=torch.int32, device=self.device)
         heads, dim = self.backend.config.num_key_value_heads, self.backend.head_dim
+        slabs = getattr(caches, "slabs", None)
+        if slabs is not None and len(slabs) == self.backend.config.num_hidden_layers:
+            # The packed prefill's own slabs: one shape check per slab instead of one per sequence view.
+            for layer, pair in enumerate(slabs):
+                if any(s.shape != (heads, total, dim) or not s.is_contiguous() for s in pair):
+                    raise ReferenceArithmeticError("Captured decode needs the verified packed prefill slabs")
+                self.decode.prefix(*pair, spans, *self.caches[2 * layer : 2 * layer + 2])
+            return
         for layer in range(self.backend.config.num_hidden_layers):
             source = []
             for kind in (0, 1):
@@ -392,7 +400,9 @@ class StrictDecoderGraph(StrictDecoderPacked):
             inverse = float(ops.reciprocal(torch.tensor(penalty, dtype=torch.float32, device=self.device)).item())
             active = list(range(capacity))
             state.select(active, penalty, inverse)
-            logits, caches = self.forward_batch(histories)
+            # The prefill status is checked once the cache copy and first selection are queued behind it.
+            prefill_flag = self.kernels.new_error_flag()
+            logits, caches = self.forward_batch(histories, error_flag=prefill_flag, _validated=True)
             state.prefix(caches, lengths)
             del caches
             state.flag.zero_()
@@ -400,6 +410,7 @@ class StrictDecoderGraph(StrictDecoderPacked):
                 logits, state.seen, state.owners, state.tokens, state.result, state.flag, penalty, inverse
             )
             state.decode.publish(state.owners, state.lengths, state.flag, state.result, advance=False)
+            self.kernels.raise_if_error(prefill_flag)
             chosen = state.read()
             del logits
             outputs = [[] for _ in histories]

@@ -20,6 +20,15 @@ STRICT_PACKED_BACKEND = "decoder_pairwise_f32_cuda_packed_v1_experimental"
 MAX_BATCH = 128
 
 
+class PackedCaches(tuple):
+    """Per-sequence reference caches (views) plus the per-layer (key, value) slabs [heads, total, dim] they view."""
+
+    def __new__(cls, caches, slabs):
+        result = super().__new__(cls, caches)
+        result.slabs = tuple(slabs)
+        return result
+
+
 class StrictDecoderPacked(StrictDecoderCuda):
     def __init__(self, model, *, max_context=256, allow_fixture=False, frozen_int8=False):
         super().__init__(model, max_context=max_context, allow_fixture=allow_fixture, frozen_int8=frozen_int8)
@@ -76,14 +85,26 @@ class StrictDecoderPacked(StrictDecoderCuda):
             pasts.append(past)
         return lengths, pasts
 
+    def _prefill_norm_project_many(self, hidden, norm, epsilon, modules, flag):
+        """RMSNorm whose output feeds only these prefill projections (an adapter may fuse the two)."""
+        return self._project_many(self.kernels.rms_norm(hidden, norm, epsilon, error_flag=flag), modules, flag)
+
+    def _prefill_gated_project(self, gate, up, module, flag):
+        """SiLU gate whose output feeds only this prefill projection (an adapter may fuse the two)."""
+        return self._project(self.kernels.silu_mul(gate, up, error_flag=flag), module, flag)
+
     @torch.inference_mode()
-    def forward_batch(self, rows, caches=None):
-        """Last logits [sequences, vocabulary], plus one reference-format KV cache per packed sequence."""
+    def forward_batch(self, rows, caches=None, *, error_flag=None, _validated=False):
+        """Last logits [sequences, vocabulary], plus one reference-format KV cache per packed sequence.
+
+        With ``error_flag`` the arithmetic status is left in that flag for the caller to check (no host sync);
+        ``_validated`` skips the token-range check for rows taken from already validated generation inputs.
+        """
         if caches is None and isinstance(rows, (list, tuple)):
             caches = [None] * len(rows)
         lengths, pasts = self._batch_layout(rows, caches)
         ids = torch.cat(rows, dim=1)[0]
-        if bool(((ids < 0) | (ids >= self.config.vocab_size)).any()):
+        if not _validated and bool(((ids < 0) | (ids >= self.config.vocab_size)).any()):
             raise ReferenceArithmeticError("Packed input token outside vocabulary")
         config, kernels = self.config, self.kernels
         heads, kv_heads, dim = config.num_attention_heads, config.num_key_value_heads, self.head_dim
@@ -94,13 +115,19 @@ class StrictDecoderPacked(StrictDecoderCuda):
         )
         sine, cosine = self._rope_sine[positions], self._rope_cosine[positions]
         hidden = self.model.model.embed_tokens.weight[ids].float()
-        flag = kernels.new_error_flag()
+        flag = kernels.new_error_flag() if error_flag is None else error_flag
         new_caches = [[] for _ in rows]
+        slabs = []
         epsilon = float(config.rms_norm_eps)
         for number, layer in enumerate(self.model.model.layers):
             attention = layer.self_attn
-            normalized = kernels.rms_norm(hidden, layer.input_layernorm.weight, epsilon, error_flag=flag)
-            q, k, v = self._project_many(normalized, (attention.q_proj, attention.k_proj, attention.v_proj), flag)
+            q, k, v = self._prefill_norm_project_many(
+                hidden,
+                layer.input_layernorm.weight,
+                epsilon,
+                (attention.q_proj, attention.k_proj, attention.v_proj),
+                flag,
+            )
             q = kernels.rope(q, cosine, sine, heads, error_flag=flag)
             k = kernels.rope(k, cosine, sine, kv_heads, error_flag=flag)
             v = v.reshape(-1, kv_heads, dim).transpose(0, 1)
@@ -116,6 +143,7 @@ class StrictDecoderPacked(StrictDecoderCuda):
             # Pack all prefixes and new tokens with two copies per layer, independent of the sequence count.
             # Returned cache entries are views into these bounded slabs; attention still sees per-sequence ranges.
             packed_key, packed_value = torch.cat(keys, dim=1), torch.cat(values, dim=1)
+            slabs.append((packed_key, packed_value))
             sizes = [span[1] for span in spans]
             for index, (key, value) in enumerate(zip(packed_key.split(sizes, 1), packed_value.split(sizes, 1))):
                 new_caches[index].append((key[None], value[None]))
@@ -129,10 +157,12 @@ class StrictDecoderPacked(StrictDecoderCuda):
                 error_flag=flag,
             )
             hidden = kernels.add(hidden, self._project(mixed, attention.o_proj, flag), error_flag=flag)
-            normalized = kernels.rms_norm(hidden, layer.post_attention_layernorm.weight, epsilon, error_flag=flag)
-            gate, up = self._project_many(normalized, (layer.mlp.gate_proj, layer.mlp.up_proj), flag)
-            gated = kernels.silu_mul(gate, up, error_flag=flag)
-            hidden = kernels.add(hidden, self._project(gated, layer.mlp.down_proj, flag), error_flag=flag)
+            gate, up = self._prefill_norm_project_many(
+                hidden, layer.post_attention_layernorm.weight, epsilon, (layer.mlp.gate_proj, layer.mlp.up_proj), flag
+            )
+            hidden = kernels.add(
+                hidden, self._prefill_gated_project(gate, up, layer.mlp.down_proj, flag), error_flag=flag
+            )
         offset, last = 0, []
         for length in lengths:
             offset += length
@@ -140,8 +170,9 @@ class StrictDecoderPacked(StrictDecoderCuda):
         selected = hidden[torch.tensor(last, dtype=torch.long, device=self.device)]
         final = kernels.rms_norm(selected, self.model.model.norm.weight, epsilon, error_flag=flag)
         logits = self._project(final, self.model.lm_head, flag)
-        kernels.raise_if_error(flag)
-        return logits, tuple(tuple(cache) for cache in new_caches)
+        if error_flag is None:
+            kernels.raise_if_error(flag)
+        return logits, PackedCaches((tuple(cache) for cache in new_caches), slabs)
 
     @torch.inference_mode()
     def _prepare_generation(
@@ -203,15 +234,18 @@ class StrictDecoderPacked(StrictDecoderCuda):
             or not 1e-30 <= penalty <= 1e30
         ):
             raise ReferenceArithmeticError("Invalid repetition penalty")
+        # One host read for every row: a row is valid when its allowed positions are exactly a nonempty suffix.
+        width = mask.shape[1]
+        counts = mask.sum(dim=1)
+        suffix = mask.flip(1).cumprod(dim=1).sum(dim=1)
+        rows = torch.stack((counts, suffix)).tolist()
         histories = []
-        for row, allowed in zip(input_ids, mask):
-            indices = allowed.nonzero().flatten()
-            if not indices.numel() or not bool(allowed[indices[0] :].all()):
+        for row, count, run in zip(input_ids, *rows):
+            if not count or count != run:
                 raise ReferenceArithmeticError("Packed generation accepts nonempty left-padded prompts")
-            prompt = row[indices][None]
-            if prompt.shape[1] + max_new_tokens > self.max_context:
+            if count + max_new_tokens > self.max_context:
                 raise ReferenceArithmeticError("Requested prompt/token budget exceeds the context limit")
-            histories.append(prompt)
+            histories.append(row[width - count :][None])
         return histories, ends, pad, penalty
 
     @torch.inference_mode()

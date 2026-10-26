@@ -133,6 +133,17 @@ class IntegerDecoderGraph(StrictDecoderGraph):
             error_flag=flag,
         )
 
+    def _prefill_norm_project_many(self, hidden, norm, epsilon, modules, flag):
+        if not self._fused(hidden.shape[0]):
+            return super()._prefill_norm_project_many(hidden, norm, epsilon, modules, flag)
+        return self.kernels.linear_many(
+            None,
+            tuple(module.weight for module in modules),
+            tuple(getattr(module, "bias", None) for module in modules),
+            error_flag=flag,
+            prepared=self.kernels.rms_norm_quantized(hidden, norm, epsilon, error_flag=flag),
+        )
+
     def _decode_project(self, value, module, flag):
         return self.kernels.linear_decode(
             value,
