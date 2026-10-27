@@ -6,63 +6,40 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
 
 ## Tóm tắt cho chủ dự án (2026-10-27)
 
-- **Goal tiến sát 80% vLLM vẫn active; chưa đạt.** Nhánh
-  `work/codex-frozen-perf-2026-10-25`. Bản ghép `0eb86cb9` đo Qwen B32 xen kẽ hai vòng:
-  short32 **9393 → 9866** (+5,04%, **71,3%** đối chứng vLLM 13835), chat128 **9557 → 9890**
-  (+3,48%); hash token khớp. Gồm `5c2f849c` giảm việc phía host, `eebf689f` nạp activation bằng
-  ldmatrix trên B22/SM120, `0eb86cb9` chia K cân bằng hơn trên B22/SM120. 3060 giữ cách chia K cũ vì
-  pilot mới giảm short32 1,24%. Không đổi số học B22 hay dùng đường vLLM để đóng goal.
-- **Đã chốt đầy đủ bản lm_head `267ba0b5`**: 5070 Ti/3060 WSL2 **1054/1054 test**, native Windows
-  **896 test**, **10/10 mutant**, trained Qwen parent/canonical ±/restore/EOS khớp cả ba host; Smol/Tiny
-  khớp Linux/WSL2. Byte gói Worker/SDK khớp đủ **143 file**. Commit `af99a399` niêm phong
-  [bằng chứng và giới hạn](evidence/2026-10-27-strict-bounded-lm-head/README.md). Các gate còn thiếu của
-  prefill `7ca91112` đã được xử lý trong đợt này; không nhận hai lần lỗi khởi động WSL là test qua.
-- **Bản ghép `0eb86cb9` đã nghiệm thu source trên ba môi trường**: 5070 Ti/3060 WSL2
-  **1075/1075 test**, Windows trực tiếp **917 test**; trained Qwen parent/canonical ±/restore/EOS khớp
-  cả ba host, Smol/Tiny khớp Linux/WSL2. **8/8 mutant mới**, **check-all ALL PASS** (CPU runtime
-  **3252 pass/942 skip**, backend **452 pass**), Linux packaging/import; đối chiếu đủ **143 file**
-  Worker/SDK với commit runtime. Commit `bbe6a443` niêm phong
-  [bằng chứng và giới hạn](evidence/2026-10-27-strict-combined-acceptance/README.md). Không suy thành
-  managed lifecycle, native installer hoặc nghiệm thu GPU chưa chạy. `e496cc18` sửa buffer bộ kiểm định dạng.
-- **Đã đo các hướng lớn hơn, không tiếp tục hướng không có lợi.** Capture prefill mới chỉ +0,27%; chuẩn
-  bị trọng số B22 từng phép chiếu và gộp SiLU prefill không giúp short32. Mixed MLP B14/attention+head B22
-  đạt khoảng 10076 token/s nhưng đổi contract, không dùng làm kết quả goal. Khảo sát B14 trên 64 câu ×
-  parent/8 candidate/restored: hai GPU khớp từng loại precision, song B14 đổi **5/576 reward**, ties và hệ
-  số ES so với B22. Commit `b64cc433` lưu toàn bộ khảo sát, phạm vi và các pilot bị bỏ;
-  [đọc đối chứng toàn luồng](evidence/2026-10-27-whole-path-controls/README.md).
-- Các pilot sau đó cũng đã chốt trong `bbe6a443`: bảng nghịch đảo nén 4 MiB đúng cả **1,67 tỷ** mẫu
-  CPU và mọi mantissa trên GPU nhưng chậm hơn Newton; activation đọc global và CTA attention rộng không
-  giúp short32. Đã đo **bộ đếm phần cứng** bằng Nsight Compute trong scratch riêng: các shape decode
-  lạnh dùng DRAM khoảng **72–74%**, SM throughput **43–46%**; không coi tất cả decode là đã sát trần
-  tensor. Đây là số đo kernel riêng, không thay benchmark toàn lượt.
-  [Bằng chứng](evidence/2026-10-27-strict-counter-profile/README.md).
-- **TMA đã nối được với GEMM B22**, giữ nguyên MMA/rounding/bias/split; copy swizzle và vòng đệm qua
-  10 test, CPU oracle/audit 9 test, descriptor by-value/capture/live restore 5 test, adapter 2 test.
-  Hai phép chiếu prefill lớn giảm khoảng **6–7%** nhưng toàn lượt ABAB chỉ **+0,946%** (9868 → 9962
-  short32; token khớp). **Chưa chọn**, dừng mở rộng transport trước khi có lợi ích lớn hơn.
-  [Bằng chứng và chi phí descriptor](evidence/2026-10-27-strict-tma-pipeline/README.md).
-- **Bỏ kiểm tra trung gian theo miền được giới hạn cũng chưa giúp rõ**: reciprocal/rsqrt khớp toàn bộ
-  **1,67 tỷ** mẫu FP32 hợp lệ, exp khớp **2,24 tỷ** encoding trong [-80,80], instrumentation không gặp
-  node subnormal/nonfinite bị bỏ kiểm tra; **4/4 mutant** bị bắt. Pilot cả lượt chỉ khoảng 9888–9908
-  short32, không phải ABAB tăng tốc. Guard cho cây QK giữ đúng bit/cờ lỗi (**36 test, 2/2 mutant**),
-  nhưng pilot cũng chỉ 9896 short32. Không đổi FTZ/FMA hay precision; **đều chưa chọn**.
-  [Nonlinear](evidence/2026-10-27-strict-normal-domain/README.md),
-  [QK tree](evidence/2026-10-27-strict-bounded-attention/README.md).
-- **Hai nhóm 16 chuỗi chạy đồng thời trên CUDA stream bị loại**: capture riêng trước, replay đồng thời;
-  token khớp nhưng short32 **9858 → 7200**, chat128 **9852 → 7732**. Không thử thêm phân mảnh khi chưa
-  có bằng chứng mới. [Bằng chứng](evidence/2026-10-27-strict-concurrent-batches/README.md).
-  Runtime được chọn vẫn `0eb86cb9` / **71,3% vLLM**, không cộng các pilot thành tăng tốc đã nghiệm thu.
-  Thử gate/up S1 rồi truyền FP32 giảm partial int64 cũng bị loại: **6 test** khớp, nhưng chỉ **9536 token/s**.
-  [Bằng chứng MLP](evidence/2026-10-27-strict-mlp-traffic/README.md).
-- **Cận lm_head 4 bit đã được khảo sát trước khi viết kernel**: 160 dòng trained parent tại 5 checkpoint,
-  tile chứa token thắng luôn được giữ; cận byte gốc khớp từng bit. Song 4 bit giữ gần hết **4748/4748 tile**,
-  nên không viết pipeline int4 rồi byte. 7 bit giữ ít tile nhưng chỉ giảm tiềm năng 12,5% byte trọng số và
-  phải giải nén; chưa có số đo. [Mật độ và giới hạn](evidence/2026-10-27-strict-head-hierarchy/README.md).
-  Hướng còn cần đo: prefill CTA 8 warp, tile M64/N32, chia warp theo M để hạ số accumulator mỗi thread;
-  khác thử cũ chỉ thu nhỏ tile với 4 warp. Chưa viết/chưa chọn; đối chiếu chi tiết các probe cũ trước khi làm.
-- Chủ dự án đã cho toàn quyền SSH trong phiên. Máy 5070 Ti của **Nhựt đã tắt theo yêu cầu** sau khi xác
-  nhận rảnh; đang dùng 5070 Ti của Nhân và 3060 của Thảo. Không đổi approval/contribution lab, không
-  triển khai, không learning run, không sửa môi trường `ai`. Chưa push/merge. M0–M6 vẫn chờ sau hiệu năng.
+- **Đã chốt phiên Codex để Claude tiếp tục theo yêu cầu chủ dự án. Goal đang paused, chưa đạt.** Đọc
+  [bàn giao mới cho Claude](handoff-claude-after-codex-perf-2026-10-27.md) trước các bàn giao cũ.
+  Nhánh `work/codex-frozen-perf-2026-10-25`; runtime được chọn vẫn **`0eb86cb9`**. Commit sau đó chỉ ghi
+  bằng chứng/tài liệu; không có thay đổi runtime chưa nghiệm thu được chọn vào source.
+- **Qwen B32 short32 9866 token/s = 71,3% vLLM 13835; chat128 9890.** Bản ghép tăng so với `267ba0b5`
+  **5,04%/3,48%**, token khớp trong ABAB hai vòng. Gồm bounded head `267ba0b5`, giảm host overhead
+  `5c2f849c`, LDSM `eebf689f`, cân bằng split K `0eb86cb9`. SM86 giữ split cũ vì pilot mới giảm 1,24%.
+  Mốc 80% cần **11068 token/s**, tức cắt khoảng **11,27 ms/lượt short32** hay tăng thêm **12,18%**.
+- **`0eb86cb9` đã nghiệm thu trên ba môi trường:** Linux/WSL2 **1075/1075 test**, Windows trực tiếp
+  **917 test**; trained Qwen parent/canonical ±/restore/EOS khớp cả ba, Smol/Tiny khớp Linux/WSL2;
+  **8/8 mutant mới**, **check-all ALL PASS** (CPU runtime 3252 pass/942 skip; backend 452 pass), Linux
+  packaging/import và byte **143 file** Worker/SDK. Các gate còn thiếu của prefill `7ca91112` đã xử lý;
+  bounded head trước đó có riêng 40 test và 10/10 mutant. [Bằng chứng](evidence/2026-10-27-strict-combined-acceptance/README.md).
+- **Các hướng mới bị loại/tạm gác:** M64/8 warp chậm hơn cả bốn shape prefill, đổi thứ tự MMA không giúp,
+  chia head attention không giúp B32, gộp QKV finish/attention chỉ **9865/9862 token/s**. Giảm vòng
+  Newton sai bit trên **257,7 triệu** trong 1,67 tỷ input hợp lệ. Không lặp lại khi chưa có giả thuyết mới;
+  [bảng tám thử nghiệm và phạm vi test](handoff-claude-after-codex-perf-2026-10-27.md#latest-eight-experiments-final-decisions).
+- **Ba ứng viên nhỏ chưa chọn:** cache descriptor TMA phía host pilot **9990/9992**, KV theo độ dài
+  request **9951/9903**, attention stage 64/128 giảm vài phần trăm ở kernel riêng. Chưa có ABAB mới,
+  chưa đo ghép chung, chưa mutation/cross-host đầy đủ; **không cộng các pilot thành tăng tốc đã nghiệm thu**.
+  TMA cũ ABAB chỉ +0,946% dù kernel prefill nhanh hơn 6–7%; không coi ít launch hơn là đủ.
+- Chủ dự án yêu cầu tránh sa vào tối ưu cục bộ. Cần đối chiếu ngân sách thời gian toàn lượt trước hướng
+  lớn tiếp theo. Ý tưởng sparse head dot song song theo K **chưa viết**; riêng select cỡ 41 us/bước không
+  thể bù 11,27 ms/lượt. Ước lượng 73–76% với các hướng hiện có hay trần cũ 75–80% đều là suy luận,
+  **không phải giới hạn đã chứng minh**. Bộ đếm DRAM decode 72–74%, SM 43–46% không chứng minh đã hết
+  dư địa. Không đổi số học B22, dữ liệu benchmark, precision hoặc dùng wrapper vLLM để đóng goal.
+- Các hướng cũ đã chốt trong bằng chứng: capture prefill, weight prepack, SiLU fusion, bảng reciprocal,
+  activation fragments, attention rộng, hai stream 16+16, MLP M32/S1 FP32 handoff, cận head int4.
+  Khảo sát mixed B14 đổi **5/576 reward**, ties và hệ số ES; không dùng thay B22.
+  [Danh sách và số đo](handoff-claude-after-codex-perf-2026-10-27.md#earlier-directions-already-measured-avoid-repeating-blindly).
+- Chủ dự án đã cho toàn quyền SSH/sudo trong phiên. Máy 5070 Ti của **Nhựt đã tắt theo yêu cầu**;
+  không bật lại. Không còn tác vụ GPU của phiên khi bàn giao. Không đổi approval/contribution lab,
+  không triển khai, không learning run, không sửa môi trường `ai`; chưa push/merge. Đĩa hệ thống chỉ còn
+  khoảng **5,7 GiB**. M0–M6 vẫn chờ sau hiệu năng.
 
 ## Tóm tắt trước đó (2026-10-26)
 
