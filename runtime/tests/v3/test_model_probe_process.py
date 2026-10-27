@@ -110,3 +110,39 @@ def test_child_reports_restore_failure_without_foreign_exception_text(tmp_path, 
 
     monkeypatch.setattr("heteroes.product.model_qualification.build_reference", fail)
     assert run(tmp_path / "input.json", "cpu") == {"status": "FAILED", "errorCode": "RESTORE_MISMATCH"}
+
+
+def test_child_builds_the_reference_for_the_commanded_engine_and_decoder(tmp_path, monkeypatch):
+    from heteroes.noise.contracts import ENGINE_V2
+    from heteroes.product.model_probe import run
+
+    model = tmp_path / "model"
+    build_tiny_lm(model)
+    manifest = registration_manifest(model, "research/new-model", "e" * 40)
+    seen = []
+
+    def build(*args, **kwargs):
+        seen.append(kwargs)
+        return {"reference": True}, {"1": [], "-1": []}
+
+    monkeypatch.setattr("heteroes.study.prepare.prepare_model", lambda *a, **kw: model)
+    monkeypatch.setattr("heteroes.product.model_qualification.build_reference", build)
+    for extra in ({"noiseEngineVersion": ENGINE_V2, "decoder": "strict_b22_v1"}, {}):
+        write_json(
+            tmp_path / "input.json",
+            {
+                "command": {
+                    "jobId": "a" * 32,
+                    "mode": "BUILD_REFERENCE",
+                    "manifest": manifest,
+                    "reference": None,
+                    "source": "REFERENCE",
+                    **extra,
+                },
+                "config": {},
+                "stateDirectory": str(tmp_path / "state"),
+            },
+        )
+        assert run(tmp_path / "input.json", "cpu")["status"] == "COMPLETED"
+    assert seen[0] == {"engine": ENGINE_V2, "decoder": "strict_b22_v1"}
+    assert seen[1]["decoder"] == "hf_generate" and seen[1]["engine"] != ENGINE_V2  # older commands keep the plain probe

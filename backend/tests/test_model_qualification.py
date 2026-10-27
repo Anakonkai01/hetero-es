@@ -426,3 +426,48 @@ def test_a_strict_experiment_needs_the_strict_qualification_of_every_device(v3_s
     assert fp32.status_code == 422  # the strict decoder reads the live FP16 weights
     plain = c.post("/api/v1/experiments", headers=admin, json={**body, "decodeEngine": "hf_generate"})
     assert plain.status_code == 422 and "only for the strict decoder" in plain.text
+
+
+def test_a_pending_probe_blocks_only_probes_of_the_same_reference(v3_study):
+    first_lab, first, _, model = setup(v3_study, "probe-gpu")
+    second_lab, second, _, _ = setup(v3_study, "probe-gpu-2")
+    third_lab, third, _, _ = setup(v3_study, "probe-gpu-3")
+    c, _, _, admin = first_lab
+    start_strict(first_lab, first, model)  # the strict reference is pending: no reference exists yet
+    assert start(second_lab, second, model)["mode"] == "BUILD_REFERENCE"  # another reference: not blocked
+    for decoder in (STRICT, "hf_generate"):  # each reference waits for its own first device
+        body = {"deviceId": third["deviceId"], "noiseEngineVersion": ENGINE_V2, "decoder": decoder}
+        assert c.post(route(model), headers=admin, json=body).status_code == 409
+
+
+def test_a_profile_without_per_engine_hashes_never_qualifies_for_the_strict_decoder():
+    from backend.policies import v3_qualification
+
+    legacy = {"recipeVersions": [3], "noiseVersion": ENGINE_V2, "qualifiedModelHashes": ["a" * 64]}
+    assert v3_qualification(legacy, "a" * 64, ENGINE_V2) is None
+    assert v3_qualification(legacy, "a" * 64, ENGINE_V2, STRICT) == "model"
+
+
+def test_a_plain_experiment_keeps_its_document_and_a_strict_one_submits_fp16(v3_study):
+    from test_v3_study import configuration
+
+    lab, device, auth, model = setup(v3_study)
+    c, store, runtime, admin = lab
+    data = next(d for d in c.get("/api/v1/datasets", headers=admin).json() if d.get("recipeVersion") == 3)
+    paired = next(d for d in runtime.devices() if d["deviceId"] == device["deviceId"])
+    body = {**configuration(paired, model, data), "noiseEngineVersion": ENGINE_V2, "evalChunk": 32}
+    finish(c, auth, start(lab, device, model), model)
+    reference, observations = report_inputs(model, ENGINE_V2, STRICT)
+    finish(c, auth, start_strict(lab, device, model), model, reference=reference, observations=observations)
+    plain = c.post("/api/v1/experiments", headers=admin, json={**body, "evalDtype": None})
+    assert plain.status_code == 200, plain.text
+    assert "evalDtype" not in plain.json()  # earlier managed runs carry no such field
+    strict = c.post(
+        "/api/v1/experiments", headers=admin, json={**body, "decodeEngine": STRICT, "evalDtype": "float16"}
+    ).json()
+    submitted = []
+    real = runtime.submit
+    runtime.submit = lambda config: (submitted.append(config), real(config))[1]
+    assert c.post(f"/api/v1/experiments/{strict['experimentId']}/submit", headers=admin).status_code == 200
+    store.dispatch_once()
+    assert submitted and submitted[0]["decodeEngine"] == STRICT and submitted[0]["evalDtype"] == "float16", submitted

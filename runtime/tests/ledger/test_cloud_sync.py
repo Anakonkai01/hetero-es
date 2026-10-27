@@ -222,7 +222,10 @@ def test_a_point_that_changes_while_uploading_is_never_completed(tmp_path, monke
     objects = (
         {"mode": "single", "url": "http://store/o", "headers": {}}
         if mode == "single"
-        else {"mode": "multipart", "parts": [{"number": 1, "offset": 0, "sizeBytes": len(content), "url": "http://store/1"}]}
+        else {
+            "mode": "multipart",
+            "parts": [{"number": 1, "offset": 0, "sizeBytes": len(content), "url": "http://store/1"}],
+        }
     )
     sync, point, sent, calls = upload_with(tmp_path, monkeypatch, content, objects, changed=len(content) - 1)
     with pytest.raises(ValueError, match="changed"):

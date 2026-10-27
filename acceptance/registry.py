@@ -227,6 +227,31 @@ CHECKS = [
         timeout=3600,
         gpu=True,
     ),
+    Check(
+        "mutation-strict-qualification-runtime",
+        "mutation",
+        ("{python}", "scripts/mutation-check.py", "--repo", "runtime", "--copy", "src", "--copy", "pyproject.toml")
+        + ("--copy", "tests/v3", "--copy", "tests/ledger")
+        + ("--env", "PYTHONPATH=src:tests/v3:tests/ledger", "--env", "HETEROES_GPU_ACCEPTANCE=1")
+        + ("--scratch", "{out}", "--mutants", "acceptance/mutants/strict-qualification-runtime.json", "--test")
+        + (
+            "{runtime_python} -m pytest -q -x -p no:cacheprovider tests/v3/test_model_qualification.py "
+            "tests/v3/test_model_probe_process.py tests/ledger/test_model_probe_agent.py",
+        ),
+        timeout=3600,
+        gpu=True,
+    ),
+    Check(
+        "mutation-strict-qualification-backend",
+        "mutation",
+        ("{python}", "scripts/mutation-check.py", "--repo", ".", "--copy", "backend", "--copy", "runtime/src")
+        + ("--copy", "pyproject.toml", "--env", "CUDA_VISIBLE_DEVICES=")
+        + ("--scratch", "{out}", "--mutants", "acceptance/mutants/strict-qualification-backend.json", "--test")
+        + (
+            "{repo}/.venv-backend/bin/python -m pytest -q -x -p no:cacheprovider backend/tests/test_model_qualification.py",
+        ),
+        timeout=3600,
+    ),
 ]
 
 SUITE = ("strict-gpu-suite", "strict-gpu-suite@3060-wsl", "strict-gpu-suite-native@3060-native")
@@ -349,7 +374,7 @@ GATES = [
         "M4.qualification",
         "M4",
         "qualification keyed by backend and contract",
-        open="Qualification and reference caches are not keyed by the strict backend identity.",
+        checks=("check-all", "mutation-strict-qualification-runtime", "mutation-strict-qualification-backend"),
     ),
     Gate(
         "M4.gpu-ownership",

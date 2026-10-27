@@ -1,0 +1,18 @@
+[
+ {"name": "probe route drops the decoder", "file": "backend/model_qualification.py", "old": "            body.noiseEngineVersion,\n            body.decoder,\n", "new": "            body.noiseEngineVersion,\n"},
+ {"name": "probe request accepts any decoder", "file": "backend/model_qualification.py", "old": "decoder: Literal[\"hf_generate\", STRICT_DECODER] | None = None", "new": "decoder: str | None = None"},
+ {"name": "reference lookup ignores the decoder", "file": "backend/model_qualification.py", "old": "            key = qualification_key(engine, decoder)\n", "new": "            key = qualification_key(engine)\n"},
+ {"name": "pending probe of the other decoder blocks", "file": "backend/model_qualification.py", "old": "qualification_key(other.get(\"noiseEngineVersion\", ENGINE_VERSION), other.get(\"decoder\"))", "new": "qualification_key(other.get(\"noiseEngineVersion\", ENGINE_VERSION))"},
+ {"name": "job forgets the strict decoder", "file": "backend/model_qualification.py", "old": "                **({\"decoder\": STRICT_DECODER} if key != engine else {}),\n", "new": ""},
+ {"name": "command to the device drops the decoder", "file": "backend/model_qualification.py", "old": "\"reference\", \"noiseEngineVersion\", \"decoder\")", "new": "\"reference\", \"noiseEngineVersion\")"},
+ {"name": "report is checked against the engine only", "file": "backend/model_qualification.py", "old": "engine = qualification_key(job.get(\"noiseEngineVersion\", ENGINE_VERSION), job.get(\"decoder\"))", "new": "engine = qualification_key(job.get(\"noiseEngineVersion\", ENGINE_VERSION))"},
+ {"name": "report recipe decoder is not compared", "file": "backend/model_qualification.py", "old": "qualification_key(recipe[\"noise\"][\"engine\"], recipe[\"evaluation\"][\"decoder\"]) != engine", "new": "qualification_key(recipe[\"noise\"][\"engine\"]) != engine"},
+ {"name": "status omits the strict references", "file": "backend/model_qualification.py", "old": "for key in (engine, qualification_key(engine, STRICT_DECODER))", "new": "for key in (engine,)"},
+ {"name": "v3_qualification ignores the decoder", "file": "backend/policies.py", "old": "key = qualification_key(engine, decoder if decoder in (None, \"strict_b22_v1\") else None)", "new": "key = qualification_key(engine)"},
+ {"name": "v3_qualification treats every decoder as strict", "file": "backend/policies.py", "old": "decoder if decoder in (None, \"strict_b22_v1\") else None", "new": "\"strict_b22_v1\""},
+ {"name": "legacy profile counts for strict runs", "file": "backend/policies.py", "old": "if key == engine and profile.get(\"noiseVersion\", ENGINE_VERSION) == engine", "new": "if profile.get(\"noiseVersion\", ENGINE_VERSION) == engine"},
+ {"name": "validation does not pass the decoder", "file": "backend/validation.py", "old": "body[\"noiseEngineVersion\"], body[\"decodeEngine\"])", "new": "body[\"noiseEngineVersion\"])"},
+ {"name": "evalDtype allowed for every decoder", "file": "backend/validation.py", "old": "if body.get(\"evalDtype\") is not None and body[\"decodeEngine\"] != \"strict_b22_v1\":", "new": "if False:"},
+ {"name": "empty evalDtype stays in the document", "file": "backend/validation.py", "old": "                body.pop(\"evalDtype\", None)\n", "new": "                pass\n"},
+ {"name": "evalDtype is not an update key", "file": "backend/constants.py", "old": "    \"evalDtype\",\n", "new": ""}
+]
