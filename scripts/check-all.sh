@@ -53,6 +53,7 @@ lab 18090 && step web-onboarding node scripts/check-web-onboarding.mjs http://12
 lab 18091 "${SEEDS[@]}" --simulate-live backend/tests/fixtures/run-d09d6ea8.json && step web-live node scripts/check-web-live.mjs http://127.0.0.1:18091 "$OUT/web-live"; stop_lab
 lab 18092 "${SEEDS[@]}" --stuck-run backend/tests/fixtures/run-d09d6ea8.json && step web-experiments node scripts/check-web-experiments.mjs http://127.0.0.1:18092 "$OUT/web-experiments"; stop_lab
 lab 18095 && step web-model-qualification node scripts/check-web-model-qualification.mjs http://127.0.0.1:18095 "$OUT/web-model-qualification"; stop_lab
+lab 18096 --audit-outcomes backend/tests/fixtures/audit-outcomes.json && step web-audit-outcomes node scripts/check-web-audit-outcomes.mjs http://127.0.0.1:18096 "$OUT/web-audit-outcomes"; stop_lab
 lab 18093 "${SEEDS[@]}" && step web-showcase node scripts/check-web-showcase.mjs http://127.0.0.1:18093 "$OUT/web-showcase"; stop_lab
 lab 18094 "${SEEDS[@]}" && step web-pages node scripts/audit-web-pages.mjs http://127.0.0.1:18094 "$OUT/web-pages" --credentials <(echo '{"users":{"admin":"test-admin-pass"}}') --matrix vi:light:1440,en:dark:375; stop_lab
 step worker-onboarding xvfb-run -a node scripts/check-worker-onboarding.cjs "$OUT/worker-onboarding"

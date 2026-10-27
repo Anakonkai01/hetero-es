@@ -614,6 +614,21 @@ class RunSupervisor(ABC):
                             dict(r) for r in db.execute("SELECT worker_id,reason FROM quarantine ORDER BY worker_id")
                         ],
                     }
+                    run_config = read_json(root / "config.json", {})
+                    if run_config.get("recipeVersion") == 3:
+                        from heteroes.v3.audit import run_outcomes
+
+                        try:  # candidate-level outcomes and drain closures; unreadable evidence is never a match
+                            result["auditSummary"]["outcomes"] = run_outcomes(
+                                db,
+                                root,
+                                run_id,
+                                fallback_rate=run_config.get("auditRate", 0.05),
+                                active=result["state"].get("status") not in QUIESCENT,
+                            )
+                        except Exception:
+                            result["auditSummary"]["outcomes"] = None
+                            result["monitoringPartial"] = True
                 for gen in db.execute(
                     "SELECT g.*, u.child_weights_sha256, u.applied_at FROM generation g LEFT JOIN generation_update u USING(experiment_id,generation) ORDER BY g.generation"
                 ):

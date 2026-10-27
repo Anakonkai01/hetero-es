@@ -1,3 +1,4 @@
+import type { AuditOutcomes } from '../lib/auditOutcomes';
 import type { UsageSummary } from './usage';
 
 export type WeightSpace =
@@ -81,6 +82,7 @@ export interface Experiment extends Partial<V3Settings> {
     incomplete?: number | null;
     mismatches: number;
     quarantinedWorkers: { worker_id: string; reason: string }[];
+    outcomes?: AuditOutcomes | null;
   };
   recipeVersion?: number;
   batchSize?: number;

@@ -38,6 +38,117 @@ def selected_for_audit(candidate_id, rate=0.05):
     return audit_selected(candidate_id, rate)
 
 
+DRAIN_REASONS = ("complete", "timeout", "insufficient_workers", "cancelled")
+# Committed text candidates of one generation and the lowest stored audit verdict (None: no audit row yet)
+OUTCOME_ROWS = (
+    "SELECT c.candidate_id, (SELECT min(u.matched) FROM audit u WHERE u.candidate_id=c.candidate_id) "
+    "FROM candidate c JOIN completion t ON t.candidate_id = c.candidate_id "
+    "WHERE c.experiment_id = ? AND c.generation = ?"
+)
+
+
+def generation_outcomes(rows, rate, reason):
+    """One generation's audit outcomes from `OUTCOME_ROWS` and its drain closure reason (None: still open).
+
+    A selected candidate is counted once; any mismatching audit makes it mismatched. Missing evidence never matches.
+    """
+    chosen = [matched for cid, matched in rows if selected_for_audit(cid, rate)]
+    matched, mismatched = chosen.count(1), chosen.count(0)
+    incomplete = len(chosen) - matched - mismatched
+    return {
+        "enabled": rate > 0,
+        "selected": len(chosen),
+        "completed": matched + mismatched,
+        "matched": matched,
+        "mismatched": mismatched,
+        "pending": incomplete if reason is None else 0,
+        "timed_out": incomplete if reason == "timeout" else 0,
+        "skipped": incomplete if reason in {"insufficient_workers", "cancelled"} else 0,
+        "incomplete": incomplete,
+        "drain_reason": reason,
+    }
+
+
+def run_outcomes(db, root, experiment_id, *, fallback_rate, active):
+    """The whole run's audit outcomes for the lab, read from a read-only ledger connection and the run's sidecars.
+
+    Rate and drain closure come from the frozen `audit-config.json` and `audit-state/gN.json`. When either is missing
+    or conflicts (a run older than these files, a damaged file), `known` is false: the canonical ledger rows still
+    count, but incomplete candidates of a recorded generation are `unknown`, never matched. An open drain is `pending`
+    while the run is `active` and `unknown` after it ended. Nothing here writes to the run.
+    """
+    from heteroes.catalog import STRICT_B22_DECODER
+
+    root = Path(root)
+    known = True
+    config = read_json(root / "audit-config.json", None)
+    try:
+        frozen = isinstance(config, dict) and set(config) == {"formatVersion", "auditRate"}
+        rate = validate_audit_rate(config["auditRate"]) if frozen and config["formatVersion"] == 1 else None
+    except ValueError:
+        rate = None
+    if rate is None:
+        known, rate = False, fallback_rate
+    totals = {"selected": 0, "matched": 0, "mismatched": 0, "pending": 0, "timedOut": 0, "skipped": 0, "unknown": 0}
+    reasons = {}
+    recorded = {
+        g for (g,) in db.execute("SELECT generation FROM generation_update WHERE experiment_id=?", (experiment_id,))
+    }
+    generations = [
+        g
+        for (g,) in db.execute(
+            "SELECT DISTINCT generation FROM candidate WHERE experiment_id=? ORDER BY generation", (experiment_id,)
+        )
+    ]
+    for generation in generations:
+        state = read_json(root / "audit-state" / f"g{generation}.json", None)
+        identity = {"formatVersion": 1, "experimentId": experiment_id, "generation": generation, "auditRate": rate}
+        if state is None:
+            reason, label = None, "unknown" if generation in recorded else "open"
+        elif (
+            isinstance(state, dict)
+            and state == {**identity, "reason": state.get("reason")}
+            and state["reason"] in DRAIN_REASONS
+        ):
+            reason = label = state["reason"]
+        else:
+            reason, label = None, "unknown"
+        if label == "unknown":
+            known = False
+        shown = generation_outcomes(db.execute(OUTCOME_ROWS, (experiment_id, generation)).fetchall(), rate, reason)
+        reasons[label] = reasons.get(label, 0) + 1
+        for key in ("selected", "matched", "mismatched", "skipped"):
+            totals[key] += shown[key]
+        totals["timedOut"] += shown["timed_out"]
+        totals["pending" if label == "open" and active else "unknown"] += shown["pending"]  # zero once closed
+    stop = read_json(root / "audit-stop.json", None)
+    strict = None
+    if isinstance(stop, dict):
+        try:
+            descriptor = stop["descriptor"]
+            strict = {
+                "candidateId": f"{experiment_id}/g{descriptor['generation']}/c{descriptor['index']}",
+                "generation": descriptor["generation"],
+                "originalWorker": stop["original"]["worker_id"],
+                "auditorWorker": stop["auditor"]["worker_id"],
+            }
+        except (KeyError, TypeError):
+            known, strict = False, {"unreadable": True}
+    recipe = read_json(root / "recipe.json", None)
+    decoder = recipe.get("evaluation", {}).get("decoder") if isinstance(recipe, dict) else None
+    faults = read_json(root / "audit-faults.json", {})
+    return {
+        **totals,
+        "enabled": rate > 0,
+        "rate": rate,
+        "known": known,
+        "policy": None if decoder is None else "strict-stop" if decoder == STRICT_B22_DECODER else "historical",
+        "drainReasons": reasons,
+        "strictStop": strict,
+        "restoreFaults": sorted(faults) if isinstance(faults, dict) else [],
+    }
+
+
 class AuditAPI:
     def __init__(
         self,
@@ -101,7 +212,7 @@ class AuditAPI:
             and (
                 not isinstance(self._drain, dict)
                 or self._drain != {**self._drain_identity, "reason": self._drain.get("reason")}
-                or self._drain.get("reason") not in {"complete", "timeout", "insufficient_workers", "cancelled"}
+                or self._drain.get("reason") not in DRAIN_REASONS
             )
         ):
             raise ValueError("invalid or conflicting audit drain state")
@@ -142,28 +253,8 @@ class AuditAPI:
 
     def _audit_summary(self):
         with self.ledger._lock:
-            rows = self.ledger._db.execute(
-                "SELECT c.candidate_id, (SELECT min(u.matched) FROM audit u WHERE u.candidate_id=c.candidate_id) "
-                "FROM candidate c JOIN completion t ON t.candidate_id = c.candidate_id "
-                "WHERE c.experiment_id = ? AND c.generation = ?",
-                (self.experiment_id, self.generation),
-            ).fetchall()
-        chosen = [matched for cid, matched in rows if selected_for_audit(cid, self.rate)]
-        matched, mismatched = chosen.count(1), chosen.count(0)
-        incomplete = len(chosen) - matched - mismatched
-        reason = self._drain["reason"] if self._drain is not None else None
-        return {
-            "enabled": self.rate > 0,
-            "selected": len(chosen),
-            "completed": matched + mismatched,
-            "matched": matched,
-            "mismatched": mismatched,
-            "pending": incomplete if reason is None else 0,
-            "timed_out": incomplete if reason == "timeout" else 0,
-            "skipped": incomplete if reason in {"insufficient_workers", "cancelled"} else 0,
-            "incomplete": incomplete,
-            "drain_reason": reason,
-        }
+            rows = self.ledger._db.execute(OUTCOME_ROWS, (self.experiment_id, self.generation)).fetchall()
+        return generation_outcomes(rows, self.rate, self._drain["reason"] if self._drain is not None else None)
 
     @property
     def drain_closed(self):
@@ -172,7 +263,7 @@ class AuditAPI:
 
     def close_drain(self, reason):
         """Persist why further audits were not admitted; retain already leased results and canonical history."""
-        if reason not in {"complete", "timeout", "insufficient_workers", "cancelled"}:
+        if reason not in DRAIN_REASONS:
             raise ValueError("invalid audit drain reason")
         with self._lock:
             if self._drain is not None:

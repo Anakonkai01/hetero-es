@@ -1,0 +1,12 @@
+[
+ {"name": "open drain of an active run is unknown", "file": "src/heteroes/v3/audit.py", "old": "        totals[\"pending\" if label == \"open\" and active else \"unknown\"] += shown[\"pending\"]", "new": "        totals[\"unknown\"] += shown[\"pending\"]"},
+ {"name": "open drain of an ended run is pending", "file": "src/heteroes/v3/audit.py", "old": "        totals[\"pending\" if label == \"open\" and active else \"unknown\"] += shown[\"pending\"]", "new": "        totals[\"pending\" if label == \"open\" else \"unknown\"] += shown[\"pending\"]"},
+ {"name": "recorded generation without sidecar is open", "file": "src/heteroes/v3/audit.py", "old": "\"unknown\" if generation in recorded else \"open\"", "new": "\"open\""},
+ {"name": "frozen rate ignored", "file": "src/heteroes/v3/audit.py", "old": "    if rate is None:\n        known, rate", "new": "    if True:\n        known, rate"},
+ {"name": "conflicting sidecar trusted", "file": "src/heteroes/v3/audit.py", "old": "            and state == {**identity, \"reason\": state.get(\"reason\")}", "new": "            and True"},
+ {"name": "timed out not counted", "file": "src/heteroes/v3/audit.py", "old": "        totals[\"timedOut\"] += shown[\"timed_out\"]\n", "new": ""},
+ {"name": "skipped not counted", "file": "src/heteroes/v3/audit.py", "old": "        for key in (\"selected\", \"matched\", \"mismatched\", \"skipped\"):", "new": "        for key in (\"selected\", \"matched\", \"mismatched\"):"},
+ {"name": "stop names the auditor as original", "file": "src/heteroes/v3/audit.py", "old": "                \"originalWorker\": stop[\"original\"][\"worker_id\"],", "new": "                \"originalWorker\": stop[\"auditor\"][\"worker_id\"],"},
+ {"name": "strict policy not shown", "file": "src/heteroes/v3/audit.py", "old": "\"strict-stop\" if decoder == STRICT_B22_DECODER else \"historical\"", "new": "\"historical\""},
+ {"name": "supervisor inverts run activity", "file": "src/heteroes/product/run_supervisor.py", "old": "                                active=result[\"state\"].get(\"status\") not in QUIESCENT,", "new": "                                active=result[\"state\"].get(\"status\") in QUIESCENT,"}
+]

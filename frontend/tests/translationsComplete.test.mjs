@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { translations } from '../../packages/product-ui/src/translations.ts';
 import { TEMPLATES } from '../src/lib/notificationText.ts';
+import { AUDIT_TEMPLATES } from '../src/lib/auditOutcomes.ts';
 import { DEVICE_WAITS, describeEvent } from '../src/lib/eventText.ts';
 import { BUILT_IN } from '../src/lib/templates.ts';
 import { GLOSSARY } from '../src/lib/glossary.ts';
@@ -51,6 +52,18 @@ test('every notification sentence has a Vietnamese version with the same placeho
       [...template.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort(),
       [...vi.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort(),
       `${kind} placeholders`,
+    );
+  }
+});
+
+test('every audit outcome sentence has a Vietnamese version with the same placeholders', () => {
+  for (const template of AUDIT_TEMPLATES) {
+    const vi = translations[template];
+    assert.ok(vi, template);
+    assert.deepEqual(
+      [...template.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort(),
+      [...vi.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort(),
+      template,
     );
   }
 });

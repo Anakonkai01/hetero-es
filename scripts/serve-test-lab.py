@@ -93,6 +93,28 @@ def load_run(store, recorded):
     return run_id
 
 
+def load_audit_variants(store, path):
+    """One finished run per audit outcome variant, each showing the lab supervisor's `auditSummary.outcomes`."""
+    fixture = json.loads(path.read_text())
+    recorded = json.loads((path.parent / fixture["base"]).read_text())
+    for variant in fixture["variants"]:
+        outcomes = variant["outcomes"]
+        body = {
+            **recorded["body"],
+            "name": variant["name"],
+            "status": variant.get("status", recorded["body"]["status"]),
+            "auditSummary": {
+                "completed": outcomes["matched"] + outcomes["mismatched"],
+                "mismatches": outcomes["mismatched"],
+                "quarantinedWorkers": [],
+                "outcomes": outcomes,
+            },
+        }
+        if "failureReason" in variant:
+            body["failureReason"] = variant["failureReason"]
+        load_run(store, {"body": body, "snapshot": recorded["snapshot"]})
+
+
 def load_stuck_run(store, recorded):
     """A run that was admitted but never got going: STARTING with an empty snapshot, and what its coordinator device
     reported about the command it could not carry out (kept apart from the run snapshot, as the real lab does)."""
@@ -189,6 +211,11 @@ def main():
         help="a recorded run ({body, snapshot} JSON) to load as a finished experiment",
     )
     parser.add_argument(
+        "--audit-outcomes",
+        type=Path,
+        help="audit outcome variants ({base, variants} JSON); each is loaded as a copy of the base recorded run",
+    )
+    parser.add_argument(
         "--stuck-run",
         type=Path,
         help="a recorded run ({body, snapshot} JSON) to load as a STARTING run whose device says it cannot start it",
@@ -241,6 +268,8 @@ def main():
         pair_devices(app)
         for recorded in args.seed_run:
             load_run(app.state.store, json.loads(recorded.read_text()))
+        if args.audit_outcomes:
+            load_audit_variants(app.state.store, args.audit_outcomes)
         if args.stuck_run:
             load_stuck_run(app.state.store, json.loads(args.stuck_run.read_text()))
         if args.simulate_live:

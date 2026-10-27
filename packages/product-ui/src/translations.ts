@@ -68,6 +68,27 @@ export const translations: Record<string, string> = {
   'Checking model compatibility': 'Đang kiểm tra tương thích model',
   'Waiting for model check to stop': 'Đang chờ xác nhận kiểm tra model đã dừng',
   'Audits completed': 'Audit đã hoàn tất',
+  'Audits are disabled (rate 0)': 'Đã tắt audit (tỷ lệ 0)',
+  'Audit outcomes: {count} chosen': 'Kết quả audit: {count} được chọn',
+  '{count} matched': '{count} khớp',
+  '{count} mismatched': '{count} sai lệch',
+  '{count} pending': '{count} đang chờ',
+  '{count} timed out': '{count} hết thời gian',
+  '{count} skipped': '{count} bỏ qua',
+  '{count} unknown': '{count} không rõ',
+  'No candidate has been chosen for audit yet; this is not evidence that results were checked.':
+    'Chưa có candidate nào được chọn để audit; điều này không chứng tỏ kết quả đã được kiểm tra.',
+  'Some audit evidence is missing or from an older run; unknown is not a match.':
+    'Một phần bằng chứng audit bị thiếu hoặc thuộc run cũ; "không rõ" không có nghĩa là khớp.',
+  'Strict decoder: the first audit mismatch stops the run before the next update.':
+    'Decoder strict: audit sai lệch đầu tiên sẽ dừng run trước lần cập nhật kế tiếp.',
+  'Exact restore failed on: {workers}': 'Khôi phục chính xác thất bại trên: {workers}',
+  'CoordinatorError: Audit text mismatch requires operator review':
+    'Audit có văn bản sai lệch (decoder strict): run đã dừng và cần người vận hành xem xét',
+  'Strict audit mismatch on {candidate} (generation {generation}): {original} and {auditor} produced different text. The run stopped before the next update and needs operator review.':
+    'Audit strict sai lệch ở {candidate} (generation {generation}): {original} và {auditor} tạo ra văn bản khác nhau. Run đã dừng trước lần cập nhật kế tiếp và cần người vận hành xem xét.',
+  'A strict audit stop was recorded but its receipt cannot be read; the run needs operator review.':
+    'Đã ghi nhận một lần dừng do audit strict nhưng không đọc được biên nhận; run cần người vận hành xem xét.',
   'Audit mismatches': 'Audit có sai lệch',
   'Quarantined workers': 'Worker bị cách ly',
   'Audit on {worker} disagreed for {candidate}; committed reward is unchanged':

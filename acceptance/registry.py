@@ -182,6 +182,18 @@ CHECKS = [
         timeout=3600,
     ),
     Check(
+        "mutation-audit-outcomes",
+        "mutation",
+        ("{python}", "scripts/mutation-check.py", "--repo", "runtime", "--copy", "src", "--copy", "pyproject.toml")
+        + ("--copy", "scripts", "--copy", "tests/v3", "--env", "PYTHONPATH=src:tests/v3")
+        + ("--scratch", "{out}", "--mutants", "acceptance/mutants/audit-outcomes.json", "--test")
+        + (
+            "{runtime_python} -m pytest -q -x -p no:cacheprovider tests/v3/test_audit_outcomes.py "
+            "tests/v3/test_v3_audit.py tests/v3/test_audit_states.py",
+        ),
+        timeout=3600,
+    ),
+    Check(
         "mutation-strict-decoder",
         "mutation",
         ("{python}", "scripts/mutation-check.py", "--repo", "runtime", "--copy", "src", "--copy", "pyproject.toml")
@@ -268,8 +280,8 @@ GATES = [
     Gate(
         "M2.audit-ui",
         "M2",
-        "audit outcomes in supervisor, backend and UI",
-        open="Detailed audit outcomes are not projected to the supervisor, backend types and UI yet.",
+        "audit outcomes in supervisor, backend and UI (fixture browser check in check-all)",
+        checks=("check-all", "mutation-audit-outcomes"),
     ),
     # M3 — recovery I/O and long-run cost
     Gate(

@@ -1,0 +1,31 @@
+{
+  "base": "run-95b34770.json",
+  "variants": [
+    {
+      "name": "Audit fixture: zero rate",
+      "outcomes": {"selected": 0, "matched": 0, "mismatched": 0, "pending": 0, "timedOut": 0, "skipped": 0, "unknown": 0, "enabled": false, "rate": 0, "known": true, "policy": "historical", "drainReasons": {}, "strictStop": null, "restoreFaults": []}
+    },
+    {
+      "name": "Audit fixture: nothing chosen",
+      "outcomes": {"selected": 0, "matched": 0, "mismatched": 0, "pending": 0, "timedOut": 0, "skipped": 0, "unknown": 0, "enabled": true, "rate": 0.05, "known": true, "policy": "historical", "drainReasons": {"complete": 2}, "strictStop": null, "restoreFaults": []}
+    },
+    {
+      "name": "Audit fixture: no auditor",
+      "outcomes": {"selected": 8, "matched": 0, "mismatched": 0, "pending": 0, "timedOut": 0, "skipped": 8, "unknown": 0, "enabled": true, "rate": 1.0, "known": true, "policy": "historical", "drainReasons": {"insufficient_workers": 2}, "strictStop": null, "restoreFaults": []}
+    },
+    {
+      "name": "Audit fixture: timeout",
+      "outcomes": {"selected": 8, "matched": 5, "mismatched": 0, "pending": 0, "timedOut": 3, "skipped": 0, "unknown": 0, "enabled": true, "rate": 1.0, "known": true, "policy": "historical", "drainReasons": {"complete": 1, "timeout": 1}, "strictStop": null, "restoreFaults": []}
+    },
+    {
+      "name": "Audit fixture: historical partial",
+      "outcomes": {"selected": 8, "matched": 4, "mismatched": 0, "pending": 0, "timedOut": 0, "skipped": 0, "unknown": 4, "enabled": true, "rate": 0.05, "known": false, "policy": null, "drainReasons": {"unknown": 2}, "strictStop": null, "restoreFaults": []}
+    },
+    {
+      "name": "Audit fixture: strict stop",
+      "status": "FAILED",
+      "failureReason": "CoordinatorError: Audit text mismatch requires operator review",
+      "outcomes": {"selected": 4, "matched": 0, "mismatched": 1, "pending": 0, "timedOut": 0, "skipped": 0, "unknown": 3, "enabled": true, "rate": 1.0, "known": true, "policy": "strict-stop", "drainReasons": {"open": 1}, "strictStop": {"candidateId": "fixture/g0/c2", "generation": 0, "originalWorker": "worker-a", "auditorWorker": "worker-b"}, "restoreFaults": []}
+    }
+  ]
+}

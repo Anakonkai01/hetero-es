@@ -29,8 +29,19 @@ The coordinator persists `complete`, `timeout` and `insufficient_workers` at the
 is supported by `close_drain("cancelled")`; generic run cancellation does not currently add that disposition.
 
 `audit_counts()` remains `(selected, completed)`. `generation_done.audits` carries the detailed summary, including
-disabled coverage. The current supervisor/backend/UI still use their earlier aggregate projection; the next product
-slice must read canonical outcomes and closure state, rather than assuming that all completed audits matched.
+disabled coverage.
+
+## Lab projection (`run_outcomes`)
+
+The lab supervisor adds `auditSummary.outcomes` for Recipe v3 runs, read from the ledger (read-only) and the run's
+sidecars; the earlier `completed`, `mismatches`, `selected` and `quarantinedWorkers` fields keep their meaning.
+`outcomes` sums the generation fields above over the run (`timedOut` for `timed_out`) and adds `unknown`, `known`,
+`rate`, `enabled`, `policy` (`strict-stop`, `historical`, or null without `recipe.json`), `drainReasons` (count of
+generations per closure reason, `open` or `unknown`), `strictStop` (candidate, generation and both workers from
+`audit-stop.json`) and `restoreFaults`. A missing or conflicting `audit-config.json` or `audit-state/gN.json` makes
+`known` false; incomplete candidates of a recorded generation without a valid sidecar, and of an open drain after the
+run ended, are `unknown`, never matched. The web page names every outcome and states that zero chosen is not evidence
+of checking (`scripts/check-web-audit-outcomes.mjs`, fixture lab).
 
 ## Drain closure and late delivery
 
@@ -91,5 +102,5 @@ A restart of the same run honors the saved receipt and stays stopped.
   sidecars. A local process restart is different from restoring onto a replacement installation. M3/M4 must preserve
   these operational dependencies, including faults observed after a point's immutable snapshot; replacement recovery
   is not accepted as preserving the strict stop. This stays open for M3 (retention dependency graph).
-- Product projection/UI and historical unknown-state handling are the next lower-effort work package in
-  [the effort split](../../docs/HUMAN-REVIEW-EFFORT-SPLIT.md). M2 and M0–M6 remain incomplete.
+- The lab projection reads files beside the ledger without a lock; a snapshot taken while a drain closes can be one
+  poll behind. The page is checked with fixture outcomes, not with a real multi-device run (that is M5).

@@ -63,3 +63,36 @@ def test_real_failure_and_unknown_audit_coverage_are_preserved(setup):
     assert shown["failureReason"] == "No space left on device"
     assert shown["auditSummary"]["selected"] is None
     assert shown["auditSummary"]["selectionComplete"] is False
+
+
+def test_detailed_audit_outcomes_and_a_strict_stop_reach_the_client_unchanged(setup):
+    client, store, _ = setup
+    headers = login(client, "admin")
+    body = draft(client, headers).json()
+    outcomes = {
+        "selected": 4,
+        "matched": 0,
+        "mismatched": 1,
+        "pending": 0,
+        "timedOut": 0,
+        "skipped": 0,
+        "unknown": 3,
+        "enabled": True,
+        "rate": 1.0,
+        "known": True,
+        "policy": "strict-stop",
+        "drainReasons": {"open": 1},
+        "strictStop": {"candidateId": "r/g0/c2", "generation": 0, "originalWorker": "a", "auditorWorker": "b"},
+        "restoreFaults": [],
+    }
+    failure = "CoordinatorError: Audit text mismatch requires operator review"
+    body.update(status="FAILED", recipeVersion=3, failureReason=failure)
+    body["auditSummary"] = {"completed": 1, "mismatches": 1, "quarantinedWorkers": [], "outcomes": outcomes}
+    snapshot = {"state": {"status": "FAILED", "failureReason": failure}, "generations": []}
+    with store.db() as db:
+        store.save(db, body)
+        db.execute("UPDATE experiments SET snapshot=? WHERE id=?", (json.dumps(snapshot), body["experimentId"]))
+    shown = client.get(f"/api/v1/experiments/{body['experimentId']}", headers=headers).json()
+    assert shown["failureReason"] == failure
+    assert shown["auditSummary"]["outcomes"] == outcomes
+    assert shown["auditSummary"]["mismatches"] == 1 and shown["auditSummary"]["completed"] == 1

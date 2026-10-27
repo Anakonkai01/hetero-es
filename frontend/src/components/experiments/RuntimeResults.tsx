@@ -5,6 +5,8 @@ import { downloadArtifact } from '../../api/client';
 import { useArtifacts } from '../../hooks/useArtifacts';
 import { useCandidates } from '../../hooks/useCandidates';
 import { useGenerations } from '../../hooks/useGenerations';
+import { auditOutcomeLines } from '../../lib/auditOutcomes';
+import { fillTemplate } from '../../lib/eventText';
 import { formatBytes, shortId } from '../../lib/format';
 import { CANDIDATE_STATUS } from '../../lib/labels';
 import type { Experiment } from '../../types/experiment';
@@ -72,6 +74,20 @@ export function RuntimeResults({ experiment: e }: { experiment: Experiment }) {
             )}
           </p>
         )}
+        {e.auditSummary?.outcomes &&
+          auditOutcomeLines(
+            e.auditSummary.outcomes,
+            Object.fromEntries(Object.entries(e.workerIdentities ?? {}).map(([id, worker]) => [id, worker.name])),
+          ).map((line) => (
+            <p
+              key={line.segments[0].template}
+              className={line.tone === 'info' ? 'note' : `note ${line.tone}`}
+              data-audit-outcome={line.tone}
+              role={line.tone === 'err' ? 'alert' : undefined}
+            >
+              {line.segments.map((segment) => fillTemplate(t(segment.template), segment.params)).join(' · ')}
+            </p>
+          ))}
         {generations.isError && (
           <p className="note err" role="alert">
             {t('Generation history unavailable')}
