@@ -6,7 +6,8 @@
   "chat128": "a9fad5ca48ed06879bbad136b7282ca0a3c638959dd26e2b1b92635011d5fb49"
  },
  "floors": {
-  "NVIDIA GeForce RTX 5070 Ti": {"short32": 9873.1, "chat128": 9753.0}
+  "NVIDIA GeForce RTX 5070 Ti": {"short32": 9873.1, "chat128": 9753.0},
+  "NVIDIA GeForce RTX 3060": {"short32": 3041.6, "chat128": 2867.2}
  },
- "floorRule": "0.98 x the selected runtime's ABAB mean on that GPU (docs/acceptance/README.md); token/s, mean of process medians"
+ "floorRule": "0.98 x the selected runtime's ABAB mean on that GPU (docs/acceptance/README.md); token/s, mean of process medians; RTX 3060: mean of two 2-process runs of the promoted runtime, 2026-10-27 (3100.1/3107.3 and 2924.0/2927.4)"
 }
