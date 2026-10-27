@@ -1,0 +1,21 @@
+{
+  "runtimeCommit": "0eb86cb9",
+  "selected": false,
+  "filesSha256": {
+    "README.md": "9a5c3428b25c4f5ae6fedf97b4e0558a9b7e6d4290828bb4367277e5ae999a6d",
+    "harness/bench_full.py": "809633f5806cd951b3915edce19485c5046ec66ba46ed61c790fba2c7c4fbc0c",
+    "harness/bounded.py": "54d78480b3de51aa42ff351d4dfed9bfcad538815a353d24c117c8bbd6a330d5",
+    "harness/mutants-01.json": "e6d4c785edc5ec46312f6d3a006e7466379912aa2acc709b44e792cd524772ab",
+    "harness/test_attention.py": "bb9f6309b791af7bba414b1cc3c7bf9ae605c44417781bdc1648c6b8812e6d0b",
+    "raw/full-pilot-01.log": "de88af12908092b8fe24e8b241d0e84965ab625910ef36639ff13a2ec71961e4",
+    "raw/full-pilot-02.json": "e7877ccde30e9946472205c78c6bc40e790610ae1cdc72c85e3ea6b9771396d0",
+    "raw/full-pilot-02.log": "caa7c25c0b67f00a79e20a6e9b93d09faf23c4f8e073ae83d9edbb5b7227810a",
+    "raw/mutation-01.log": "6d394c0525335917e42424d6fa9117c99e54dfc57fea13b8449187d446e36d39",
+    "raw/red-01.log": "734d471148d7ecdb7666522dd1bc13d84f1d33253e699b0d5f8da162350a8c02",
+    "raw/tests-01.log": "c59dc1e63a6573d364cbf02244604f6448811491d183bb453d5903ed3ff6455b",
+    "raw/tests-02.log": "11b659c1a9b198a93f46e25ac8c882d4b780abbd6a7d5cf4af41873cf1bfae60",
+    "raw/tests-03.log": "931eac0759a050119d8b26f8a6ba171b32771bf5b9a84a70a2ca50e0c5915e05",
+    "raw/tests-04.log": "856c4cfd711298e962623b2dcf94ef807db6345543a5b97bc091dd5b7057cc53"
+  },
+  "hashReferencesVerified": 3
+}

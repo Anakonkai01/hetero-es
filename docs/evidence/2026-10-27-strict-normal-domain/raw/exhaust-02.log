@@ -1,0 +1,24 @@
+check_domain checked 8388608 elapsed 0.0
+check_domain checked 142606336 elapsed 0.01
+check_domain checked 276824064 elapsed 0.01
+check_domain checked 411041792 elapsed 0.02
+check_domain checked 545259520 elapsed 0.02
+check_domain checked 679477248 elapsed 0.03
+check_domain checked 813694976 elapsed 0.03
+check_domain checked 947912704 elapsed 0.04
+check_domain checked 1082130432 elapsed 0.04
+check_domain checked 1216348160 elapsed 0.05
+check_domain checked 1350565888 elapsed 0.05
+check_domain checked 1484783616 elapsed 0.06
+check_domain checked 1619001344 elapsed 0.06
+{'kernel': 'check_domain', 'inputPatterns': 1671934059, 'firstBits': 228737632, 'lastBits': 1900671690, 'mismatches': 0, 'firstMismatchBits': None, 'failureFlagDifferences': 0, 'removedSubnormalChecksHit': 0, 'removedNonfiniteChecksHit': 0, 'seconds': 0.06599940100568347}
+check_exp checked 16777216 elapsed 0.0
+check_exp checked 285212672 elapsed 0.0
+check_exp checked 553648128 elapsed 0.0
+check_exp checked 822083584 elapsed 0.01
+check_exp checked 1090519040 elapsed 0.01
+check_exp checked 1358954496 elapsed 0.01
+check_exp checked 1627389952 elapsed 0.01
+check_exp checked 1895825408 elapsed 0.02
+check_exp checked 2164260864 elapsed 0.02
+{'kernel': 'check_exp', 'inputPatterns': 2235564034, 'firstBits': 0, 'lastBits': 1117782016, 'mismatches': 0, 'firstMismatchBits': None, 'failureFlagDifferences': 0, 'removedSubnormalChecksHit': 0, 'removedNonfiniteChecksHit': 0, 'seconds': 0.025654983997810632}

@@ -1,0 +1,1064 @@
+...FFFF...FFFF...FFFF...FFFF...FFFF                                      [100%]
+=================================== FAILURES ===================================
+_________ test_score_guard_keeps_all_bits_and_error_flags[normal-2-7] __________
+
+length = 2, keys = 7, scenario = 'normal'
+
+    @pytest.mark.parametrize('length,keys',[(1,1),(1,33),(1,129),(2,7),(7,33),(33,33),(65,65)])
+    @pytest.mark.parametrize('scenario',['normal','tiny','large','zeros','masked-invalid'])
+    def test_score_guard_keeps_all_bits_and_error_flags(length,keys,scenario):
+        g=torch.Generator(device='cuda').manual_seed(length+keys)
+        q=torch.randn(14,length,64,generator=g,device='cuda')
+        k=torch.randn(2,keys,64,generator=g,device='cuda');v=torch.randn_like(k)
+        if scenario=='tiny':q.fill_(2.**-65);k.fill_(2.**-65);k[:,0,:]=0
+        elif scenario=='large':q[0,0,:]=2.**70;k[0,-1,:]=2.**70
+        elif scenario=='zeros':q.zero_();k.fill_(-0.);v.fill_(-0.)
+        elif scenario=='masked-invalid':k[0,-1,0]=float('nan');v[0,-1,1]=float('inf')
+        spans=[(length,keys,keys-length)]
+        base=StrictCudaKernels('cuda');fast=BoundedAttentionKernels('cuda',magnitude_bits=22)
+        fa,fb=base.new_error_flag(),fast.new_error_flag()
+        scale=2.**120 if scenario=='tiny' else .125
+        a=base.attention_packed(q,k,v,spans,7,scale,error_flag=fa)
+>       b=fast.attention_packed(q,k,v,spans,7,scale,error_flag=fb)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1560: in attention_packed
+    self._launch_prefill_attention(query, key, value, result, flag, layout, repeats, scale, plan)
+runtime/src/heteroes/eval/strict_cuda.py:1318: in _launch_prefill_attention
+    self._prefill_function(dim, plan),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1297: in _prefill_function
+    self._functions[name] = self._compile(
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:58: in _compile
+    if 'strict_attention_gqa(' in source:source=transform_gqa(source);changed=True
+                                                ^^^^^^^^^^^^^^^^^^^^^
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:24: in transform_gqa
+    body=once(body,'  unsigned bad = 0;','  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = 'extern "C" __global__ void __launch_bounds__(512) strict_attention_gqa(const float* q, const float* key, const float*...],bad);\n      }\n      out[(size_t)i*heads*DIM+h*DIM+d]=prefill_finish(t,bad);\n    }\n  }\n  report(error,bad);\n}\n'
+old = '  unsigned bad = 0;'
+new = '  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;'
+
+    def once(s,old,new):
+>       assert s.count(old)==1,(old,s.count(old))
+               ^^^^^^^^^^^^^^^
+E       AssertionError: ('  unsigned bad = 0;', 2)
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:17: AssertionError
+_________ test_score_guard_keeps_all_bits_and_error_flags[normal-7-33] _________
+
+length = 7, keys = 33, scenario = 'normal'
+
+    @pytest.mark.parametrize('length,keys',[(1,1),(1,33),(1,129),(2,7),(7,33),(33,33),(65,65)])
+    @pytest.mark.parametrize('scenario',['normal','tiny','large','zeros','masked-invalid'])
+    def test_score_guard_keeps_all_bits_and_error_flags(length,keys,scenario):
+        g=torch.Generator(device='cuda').manual_seed(length+keys)
+        q=torch.randn(14,length,64,generator=g,device='cuda')
+        k=torch.randn(2,keys,64,generator=g,device='cuda');v=torch.randn_like(k)
+        if scenario=='tiny':q.fill_(2.**-65);k.fill_(2.**-65);k[:,0,:]=0
+        elif scenario=='large':q[0,0,:]=2.**70;k[0,-1,:]=2.**70
+        elif scenario=='zeros':q.zero_();k.fill_(-0.);v.fill_(-0.)
+        elif scenario=='masked-invalid':k[0,-1,0]=float('nan');v[0,-1,1]=float('inf')
+        spans=[(length,keys,keys-length)]
+        base=StrictCudaKernels('cuda');fast=BoundedAttentionKernels('cuda',magnitude_bits=22)
+        fa,fb=base.new_error_flag(),fast.new_error_flag()
+        scale=2.**120 if scenario=='tiny' else .125
+        a=base.attention_packed(q,k,v,spans,7,scale,error_flag=fa)
+>       b=fast.attention_packed(q,k,v,spans,7,scale,error_flag=fb)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1560: in attention_packed
+    self._launch_prefill_attention(query, key, value, result, flag, layout, repeats, scale, plan)
+runtime/src/heteroes/eval/strict_cuda.py:1318: in _launch_prefill_attention
+    self._prefill_function(dim, plan),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1297: in _prefill_function
+    self._functions[name] = self._compile(
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:58: in _compile
+    if 'strict_attention_gqa(' in source:source=transform_gqa(source);changed=True
+                                                ^^^^^^^^^^^^^^^^^^^^^
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:24: in transform_gqa
+    body=once(body,'  unsigned bad = 0;','  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = 'extern "C" __global__ void __launch_bounds__(512) strict_attention_gqa(const float* q, const float* key, const float*...],bad);\n      }\n      out[(size_t)i*heads*DIM+h*DIM+d]=prefill_finish(t,bad);\n    }\n  }\n  report(error,bad);\n}\n'
+old = '  unsigned bad = 0;'
+new = '  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;'
+
+    def once(s,old,new):
+>       assert s.count(old)==1,(old,s.count(old))
+               ^^^^^^^^^^^^^^^
+E       AssertionError: ('  unsigned bad = 0;', 2)
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:17: AssertionError
+________ test_score_guard_keeps_all_bits_and_error_flags[normal-33-33] _________
+
+length = 33, keys = 33, scenario = 'normal'
+
+    @pytest.mark.parametrize('length,keys',[(1,1),(1,33),(1,129),(2,7),(7,33),(33,33),(65,65)])
+    @pytest.mark.parametrize('scenario',['normal','tiny','large','zeros','masked-invalid'])
+    def test_score_guard_keeps_all_bits_and_error_flags(length,keys,scenario):
+        g=torch.Generator(device='cuda').manual_seed(length+keys)
+        q=torch.randn(14,length,64,generator=g,device='cuda')
+        k=torch.randn(2,keys,64,generator=g,device='cuda');v=torch.randn_like(k)
+        if scenario=='tiny':q.fill_(2.**-65);k.fill_(2.**-65);k[:,0,:]=0
+        elif scenario=='large':q[0,0,:]=2.**70;k[0,-1,:]=2.**70
+        elif scenario=='zeros':q.zero_();k.fill_(-0.);v.fill_(-0.)
+        elif scenario=='masked-invalid':k[0,-1,0]=float('nan');v[0,-1,1]=float('inf')
+        spans=[(length,keys,keys-length)]
+        base=StrictCudaKernels('cuda');fast=BoundedAttentionKernels('cuda',magnitude_bits=22)
+        fa,fb=base.new_error_flag(),fast.new_error_flag()
+        scale=2.**120 if scenario=='tiny' else .125
+        a=base.attention_packed(q,k,v,spans,7,scale,error_flag=fa)
+>       b=fast.attention_packed(q,k,v,spans,7,scale,error_flag=fb)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1560: in attention_packed
+    self._launch_prefill_attention(query, key, value, result, flag, layout, repeats, scale, plan)
+runtime/src/heteroes/eval/strict_cuda.py:1318: in _launch_prefill_attention
+    self._prefill_function(dim, plan),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1297: in _prefill_function
+    self._functions[name] = self._compile(
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:58: in _compile
+    if 'strict_attention_gqa(' in source:source=transform_gqa(source);changed=True
+                                                ^^^^^^^^^^^^^^^^^^^^^
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:24: in transform_gqa
+    body=once(body,'  unsigned bad = 0;','  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = 'extern "C" __global__ void __launch_bounds__(512) strict_attention_gqa(const float* q, const float* key, const float*...],bad);\n      }\n      out[(size_t)i*heads*DIM+h*DIM+d]=prefill_finish(t,bad);\n    }\n  }\n  report(error,bad);\n}\n'
+old = '  unsigned bad = 0;'
+new = '  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;'
+
+    def once(s,old,new):
+>       assert s.count(old)==1,(old,s.count(old))
+               ^^^^^^^^^^^^^^^
+E       AssertionError: ('  unsigned bad = 0;', 2)
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:17: AssertionError
+________ test_score_guard_keeps_all_bits_and_error_flags[normal-65-65] _________
+
+length = 65, keys = 65, scenario = 'normal'
+
+    @pytest.mark.parametrize('length,keys',[(1,1),(1,33),(1,129),(2,7),(7,33),(33,33),(65,65)])
+    @pytest.mark.parametrize('scenario',['normal','tiny','large','zeros','masked-invalid'])
+    def test_score_guard_keeps_all_bits_and_error_flags(length,keys,scenario):
+        g=torch.Generator(device='cuda').manual_seed(length+keys)
+        q=torch.randn(14,length,64,generator=g,device='cuda')
+        k=torch.randn(2,keys,64,generator=g,device='cuda');v=torch.randn_like(k)
+        if scenario=='tiny':q.fill_(2.**-65);k.fill_(2.**-65);k[:,0,:]=0
+        elif scenario=='large':q[0,0,:]=2.**70;k[0,-1,:]=2.**70
+        elif scenario=='zeros':q.zero_();k.fill_(-0.);v.fill_(-0.)
+        elif scenario=='masked-invalid':k[0,-1,0]=float('nan');v[0,-1,1]=float('inf')
+        spans=[(length,keys,keys-length)]
+        base=StrictCudaKernels('cuda');fast=BoundedAttentionKernels('cuda',magnitude_bits=22)
+        fa,fb=base.new_error_flag(),fast.new_error_flag()
+        scale=2.**120 if scenario=='tiny' else .125
+        a=base.attention_packed(q,k,v,spans,7,scale,error_flag=fa)
+>       b=fast.attention_packed(q,k,v,spans,7,scale,error_flag=fb)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1560: in attention_packed
+    self._launch_prefill_attention(query, key, value, result, flag, layout, repeats, scale, plan)
+runtime/src/heteroes/eval/strict_cuda.py:1318: in _launch_prefill_attention
+    self._prefill_function(dim, plan),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1297: in _prefill_function
+    self._functions[name] = self._compile(
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:58: in _compile
+    if 'strict_attention_gqa(' in source:source=transform_gqa(source);changed=True
+                                                ^^^^^^^^^^^^^^^^^^^^^
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:24: in transform_gqa
+    body=once(body,'  unsigned bad = 0;','  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = 'extern "C" __global__ void __launch_bounds__(512) strict_attention_gqa(const float* q, const float* key, const float*...],bad);\n      }\n      out[(size_t)i*heads*DIM+h*DIM+d]=prefill_finish(t,bad);\n    }\n  }\n  report(error,bad);\n}\n'
+old = '  unsigned bad = 0;'
+new = '  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;'
+
+    def once(s,old,new):
+>       assert s.count(old)==1,(old,s.count(old))
+               ^^^^^^^^^^^^^^^
+E       AssertionError: ('  unsigned bad = 0;', 2)
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:17: AssertionError
+__________ test_score_guard_keeps_all_bits_and_error_flags[tiny-2-7] ___________
+
+length = 2, keys = 7, scenario = 'tiny'
+
+    @pytest.mark.parametrize('length,keys',[(1,1),(1,33),(1,129),(2,7),(7,33),(33,33),(65,65)])
+    @pytest.mark.parametrize('scenario',['normal','tiny','large','zeros','masked-invalid'])
+    def test_score_guard_keeps_all_bits_and_error_flags(length,keys,scenario):
+        g=torch.Generator(device='cuda').manual_seed(length+keys)
+        q=torch.randn(14,length,64,generator=g,device='cuda')
+        k=torch.randn(2,keys,64,generator=g,device='cuda');v=torch.randn_like(k)
+        if scenario=='tiny':q.fill_(2.**-65);k.fill_(2.**-65);k[:,0,:]=0
+        elif scenario=='large':q[0,0,:]=2.**70;k[0,-1,:]=2.**70
+        elif scenario=='zeros':q.zero_();k.fill_(-0.);v.fill_(-0.)
+        elif scenario=='masked-invalid':k[0,-1,0]=float('nan');v[0,-1,1]=float('inf')
+        spans=[(length,keys,keys-length)]
+        base=StrictCudaKernels('cuda');fast=BoundedAttentionKernels('cuda',magnitude_bits=22)
+        fa,fb=base.new_error_flag(),fast.new_error_flag()
+        scale=2.**120 if scenario=='tiny' else .125
+        a=base.attention_packed(q,k,v,spans,7,scale,error_flag=fa)
+>       b=fast.attention_packed(q,k,v,spans,7,scale,error_flag=fb)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1560: in attention_packed
+    self._launch_prefill_attention(query, key, value, result, flag, layout, repeats, scale, plan)
+runtime/src/heteroes/eval/strict_cuda.py:1318: in _launch_prefill_attention
+    self._prefill_function(dim, plan),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1297: in _prefill_function
+    self._functions[name] = self._compile(
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:58: in _compile
+    if 'strict_attention_gqa(' in source:source=transform_gqa(source);changed=True
+                                                ^^^^^^^^^^^^^^^^^^^^^
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:24: in transform_gqa
+    body=once(body,'  unsigned bad = 0;','  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = 'extern "C" __global__ void __launch_bounds__(512) strict_attention_gqa(const float* q, const float* key, const float*...],bad);\n      }\n      out[(size_t)i*heads*DIM+h*DIM+d]=prefill_finish(t,bad);\n    }\n  }\n  report(error,bad);\n}\n'
+old = '  unsigned bad = 0;'
+new = '  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;'
+
+    def once(s,old,new):
+>       assert s.count(old)==1,(old,s.count(old))
+               ^^^^^^^^^^^^^^^
+E       AssertionError: ('  unsigned bad = 0;', 2)
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:17: AssertionError
+__________ test_score_guard_keeps_all_bits_and_error_flags[tiny-7-33] __________
+
+length = 7, keys = 33, scenario = 'tiny'
+
+    @pytest.mark.parametrize('length,keys',[(1,1),(1,33),(1,129),(2,7),(7,33),(33,33),(65,65)])
+    @pytest.mark.parametrize('scenario',['normal','tiny','large','zeros','masked-invalid'])
+    def test_score_guard_keeps_all_bits_and_error_flags(length,keys,scenario):
+        g=torch.Generator(device='cuda').manual_seed(length+keys)
+        q=torch.randn(14,length,64,generator=g,device='cuda')
+        k=torch.randn(2,keys,64,generator=g,device='cuda');v=torch.randn_like(k)
+        if scenario=='tiny':q.fill_(2.**-65);k.fill_(2.**-65);k[:,0,:]=0
+        elif scenario=='large':q[0,0,:]=2.**70;k[0,-1,:]=2.**70
+        elif scenario=='zeros':q.zero_();k.fill_(-0.);v.fill_(-0.)
+        elif scenario=='masked-invalid':k[0,-1,0]=float('nan');v[0,-1,1]=float('inf')
+        spans=[(length,keys,keys-length)]
+        base=StrictCudaKernels('cuda');fast=BoundedAttentionKernels('cuda',magnitude_bits=22)
+        fa,fb=base.new_error_flag(),fast.new_error_flag()
+        scale=2.**120 if scenario=='tiny' else .125
+        a=base.attention_packed(q,k,v,spans,7,scale,error_flag=fa)
+>       b=fast.attention_packed(q,k,v,spans,7,scale,error_flag=fb)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1560: in attention_packed
+    self._launch_prefill_attention(query, key, value, result, flag, layout, repeats, scale, plan)
+runtime/src/heteroes/eval/strict_cuda.py:1318: in _launch_prefill_attention
+    self._prefill_function(dim, plan),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1297: in _prefill_function
+    self._functions[name] = self._compile(
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:58: in _compile
+    if 'strict_attention_gqa(' in source:source=transform_gqa(source);changed=True
+                                                ^^^^^^^^^^^^^^^^^^^^^
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:24: in transform_gqa
+    body=once(body,'  unsigned bad = 0;','  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = 'extern "C" __global__ void __launch_bounds__(512) strict_attention_gqa(const float* q, const float* key, const float*...],bad);\n      }\n      out[(size_t)i*heads*DIM+h*DIM+d]=prefill_finish(t,bad);\n    }\n  }\n  report(error,bad);\n}\n'
+old = '  unsigned bad = 0;'
+new = '  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;'
+
+    def once(s,old,new):
+>       assert s.count(old)==1,(old,s.count(old))
+               ^^^^^^^^^^^^^^^
+E       AssertionError: ('  unsigned bad = 0;', 2)
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:17: AssertionError
+_________ test_score_guard_keeps_all_bits_and_error_flags[tiny-33-33] __________
+
+length = 33, keys = 33, scenario = 'tiny'
+
+    @pytest.mark.parametrize('length,keys',[(1,1),(1,33),(1,129),(2,7),(7,33),(33,33),(65,65)])
+    @pytest.mark.parametrize('scenario',['normal','tiny','large','zeros','masked-invalid'])
+    def test_score_guard_keeps_all_bits_and_error_flags(length,keys,scenario):
+        g=torch.Generator(device='cuda').manual_seed(length+keys)
+        q=torch.randn(14,length,64,generator=g,device='cuda')
+        k=torch.randn(2,keys,64,generator=g,device='cuda');v=torch.randn_like(k)
+        if scenario=='tiny':q.fill_(2.**-65);k.fill_(2.**-65);k[:,0,:]=0
+        elif scenario=='large':q[0,0,:]=2.**70;k[0,-1,:]=2.**70
+        elif scenario=='zeros':q.zero_();k.fill_(-0.);v.fill_(-0.)
+        elif scenario=='masked-invalid':k[0,-1,0]=float('nan');v[0,-1,1]=float('inf')
+        spans=[(length,keys,keys-length)]
+        base=StrictCudaKernels('cuda');fast=BoundedAttentionKernels('cuda',magnitude_bits=22)
+        fa,fb=base.new_error_flag(),fast.new_error_flag()
+        scale=2.**120 if scenario=='tiny' else .125
+        a=base.attention_packed(q,k,v,spans,7,scale,error_flag=fa)
+>       b=fast.attention_packed(q,k,v,spans,7,scale,error_flag=fb)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1560: in attention_packed
+    self._launch_prefill_attention(query, key, value, result, flag, layout, repeats, scale, plan)
+runtime/src/heteroes/eval/strict_cuda.py:1318: in _launch_prefill_attention
+    self._prefill_function(dim, plan),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1297: in _prefill_function
+    self._functions[name] = self._compile(
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:58: in _compile
+    if 'strict_attention_gqa(' in source:source=transform_gqa(source);changed=True
+                                                ^^^^^^^^^^^^^^^^^^^^^
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:24: in transform_gqa
+    body=once(body,'  unsigned bad = 0;','  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = 'extern "C" __global__ void __launch_bounds__(512) strict_attention_gqa(const float* q, const float* key, const float*...],bad);\n      }\n      out[(size_t)i*heads*DIM+h*DIM+d]=prefill_finish(t,bad);\n    }\n  }\n  report(error,bad);\n}\n'
+old = '  unsigned bad = 0;'
+new = '  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;'
+
+    def once(s,old,new):
+>       assert s.count(old)==1,(old,s.count(old))
+               ^^^^^^^^^^^^^^^
+E       AssertionError: ('  unsigned bad = 0;', 2)
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:17: AssertionError
+_________ test_score_guard_keeps_all_bits_and_error_flags[tiny-65-65] __________
+
+length = 65, keys = 65, scenario = 'tiny'
+
+    @pytest.mark.parametrize('length,keys',[(1,1),(1,33),(1,129),(2,7),(7,33),(33,33),(65,65)])
+    @pytest.mark.parametrize('scenario',['normal','tiny','large','zeros','masked-invalid'])
+    def test_score_guard_keeps_all_bits_and_error_flags(length,keys,scenario):
+        g=torch.Generator(device='cuda').manual_seed(length+keys)
+        q=torch.randn(14,length,64,generator=g,device='cuda')
+        k=torch.randn(2,keys,64,generator=g,device='cuda');v=torch.randn_like(k)
+        if scenario=='tiny':q.fill_(2.**-65);k.fill_(2.**-65);k[:,0,:]=0
+        elif scenario=='large':q[0,0,:]=2.**70;k[0,-1,:]=2.**70
+        elif scenario=='zeros':q.zero_();k.fill_(-0.);v.fill_(-0.)
+        elif scenario=='masked-invalid':k[0,-1,0]=float('nan');v[0,-1,1]=float('inf')
+        spans=[(length,keys,keys-length)]
+        base=StrictCudaKernels('cuda');fast=BoundedAttentionKernels('cuda',magnitude_bits=22)
+        fa,fb=base.new_error_flag(),fast.new_error_flag()
+        scale=2.**120 if scenario=='tiny' else .125
+        a=base.attention_packed(q,k,v,spans,7,scale,error_flag=fa)
+>       b=fast.attention_packed(q,k,v,spans,7,scale,error_flag=fb)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1560: in attention_packed
+    self._launch_prefill_attention(query, key, value, result, flag, layout, repeats, scale, plan)
+runtime/src/heteroes/eval/strict_cuda.py:1318: in _launch_prefill_attention
+    self._prefill_function(dim, plan),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1297: in _prefill_function
+    self._functions[name] = self._compile(
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:58: in _compile
+    if 'strict_attention_gqa(' in source:source=transform_gqa(source);changed=True
+                                                ^^^^^^^^^^^^^^^^^^^^^
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:24: in transform_gqa
+    body=once(body,'  unsigned bad = 0;','  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = 'extern "C" __global__ void __launch_bounds__(512) strict_attention_gqa(const float* q, const float* key, const float*...],bad);\n      }\n      out[(size_t)i*heads*DIM+h*DIM+d]=prefill_finish(t,bad);\n    }\n  }\n  report(error,bad);\n}\n'
+old = '  unsigned bad = 0;'
+new = '  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;'
+
+    def once(s,old,new):
+>       assert s.count(old)==1,(old,s.count(old))
+               ^^^^^^^^^^^^^^^
+E       AssertionError: ('  unsigned bad = 0;', 2)
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:17: AssertionError
+__________ test_score_guard_keeps_all_bits_and_error_flags[large-2-7] __________
+
+length = 2, keys = 7, scenario = 'large'
+
+    @pytest.mark.parametrize('length,keys',[(1,1),(1,33),(1,129),(2,7),(7,33),(33,33),(65,65)])
+    @pytest.mark.parametrize('scenario',['normal','tiny','large','zeros','masked-invalid'])
+    def test_score_guard_keeps_all_bits_and_error_flags(length,keys,scenario):
+        g=torch.Generator(device='cuda').manual_seed(length+keys)
+        q=torch.randn(14,length,64,generator=g,device='cuda')
+        k=torch.randn(2,keys,64,generator=g,device='cuda');v=torch.randn_like(k)
+        if scenario=='tiny':q.fill_(2.**-65);k.fill_(2.**-65);k[:,0,:]=0
+        elif scenario=='large':q[0,0,:]=2.**70;k[0,-1,:]=2.**70
+        elif scenario=='zeros':q.zero_();k.fill_(-0.);v.fill_(-0.)
+        elif scenario=='masked-invalid':k[0,-1,0]=float('nan');v[0,-1,1]=float('inf')
+        spans=[(length,keys,keys-length)]
+        base=StrictCudaKernels('cuda');fast=BoundedAttentionKernels('cuda',magnitude_bits=22)
+        fa,fb=base.new_error_flag(),fast.new_error_flag()
+        scale=2.**120 if scenario=='tiny' else .125
+        a=base.attention_packed(q,k,v,spans,7,scale,error_flag=fa)
+>       b=fast.attention_packed(q,k,v,spans,7,scale,error_flag=fb)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1560: in attention_packed
+    self._launch_prefill_attention(query, key, value, result, flag, layout, repeats, scale, plan)
+runtime/src/heteroes/eval/strict_cuda.py:1318: in _launch_prefill_attention
+    self._prefill_function(dim, plan),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1297: in _prefill_function
+    self._functions[name] = self._compile(
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:58: in _compile
+    if 'strict_attention_gqa(' in source:source=transform_gqa(source);changed=True
+                                                ^^^^^^^^^^^^^^^^^^^^^
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:24: in transform_gqa
+    body=once(body,'  unsigned bad = 0;','  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = 'extern "C" __global__ void __launch_bounds__(512) strict_attention_gqa(const float* q, const float* key, const float*...],bad);\n      }\n      out[(size_t)i*heads*DIM+h*DIM+d]=prefill_finish(t,bad);\n    }\n  }\n  report(error,bad);\n}\n'
+old = '  unsigned bad = 0;'
+new = '  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;'
+
+    def once(s,old,new):
+>       assert s.count(old)==1,(old,s.count(old))
+               ^^^^^^^^^^^^^^^
+E       AssertionError: ('  unsigned bad = 0;', 2)
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:17: AssertionError
+_________ test_score_guard_keeps_all_bits_and_error_flags[large-7-33] __________
+
+length = 7, keys = 33, scenario = 'large'
+
+    @pytest.mark.parametrize('length,keys',[(1,1),(1,33),(1,129),(2,7),(7,33),(33,33),(65,65)])
+    @pytest.mark.parametrize('scenario',['normal','tiny','large','zeros','masked-invalid'])
+    def test_score_guard_keeps_all_bits_and_error_flags(length,keys,scenario):
+        g=torch.Generator(device='cuda').manual_seed(length+keys)
+        q=torch.randn(14,length,64,generator=g,device='cuda')
+        k=torch.randn(2,keys,64,generator=g,device='cuda');v=torch.randn_like(k)
+        if scenario=='tiny':q.fill_(2.**-65);k.fill_(2.**-65);k[:,0,:]=0
+        elif scenario=='large':q[0,0,:]=2.**70;k[0,-1,:]=2.**70
+        elif scenario=='zeros':q.zero_();k.fill_(-0.);v.fill_(-0.)
+        elif scenario=='masked-invalid':k[0,-1,0]=float('nan');v[0,-1,1]=float('inf')
+        spans=[(length,keys,keys-length)]
+        base=StrictCudaKernels('cuda');fast=BoundedAttentionKernels('cuda',magnitude_bits=22)
+        fa,fb=base.new_error_flag(),fast.new_error_flag()
+        scale=2.**120 if scenario=='tiny' else .125
+        a=base.attention_packed(q,k,v,spans,7,scale,error_flag=fa)
+>       b=fast.attention_packed(q,k,v,spans,7,scale,error_flag=fb)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1560: in attention_packed
+    self._launch_prefill_attention(query, key, value, result, flag, layout, repeats, scale, plan)
+runtime/src/heteroes/eval/strict_cuda.py:1318: in _launch_prefill_attention
+    self._prefill_function(dim, plan),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1297: in _prefill_function
+    self._functions[name] = self._compile(
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:58: in _compile
+    if 'strict_attention_gqa(' in source:source=transform_gqa(source);changed=True
+                                                ^^^^^^^^^^^^^^^^^^^^^
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:24: in transform_gqa
+    body=once(body,'  unsigned bad = 0;','  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = 'extern "C" __global__ void __launch_bounds__(512) strict_attention_gqa(const float* q, const float* key, const float*...],bad);\n      }\n      out[(size_t)i*heads*DIM+h*DIM+d]=prefill_finish(t,bad);\n    }\n  }\n  report(error,bad);\n}\n'
+old = '  unsigned bad = 0;'
+new = '  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;'
+
+    def once(s,old,new):
+>       assert s.count(old)==1,(old,s.count(old))
+               ^^^^^^^^^^^^^^^
+E       AssertionError: ('  unsigned bad = 0;', 2)
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:17: AssertionError
+_________ test_score_guard_keeps_all_bits_and_error_flags[large-33-33] _________
+
+length = 33, keys = 33, scenario = 'large'
+
+    @pytest.mark.parametrize('length,keys',[(1,1),(1,33),(1,129),(2,7),(7,33),(33,33),(65,65)])
+    @pytest.mark.parametrize('scenario',['normal','tiny','large','zeros','masked-invalid'])
+    def test_score_guard_keeps_all_bits_and_error_flags(length,keys,scenario):
+        g=torch.Generator(device='cuda').manual_seed(length+keys)
+        q=torch.randn(14,length,64,generator=g,device='cuda')
+        k=torch.randn(2,keys,64,generator=g,device='cuda');v=torch.randn_like(k)
+        if scenario=='tiny':q.fill_(2.**-65);k.fill_(2.**-65);k[:,0,:]=0
+        elif scenario=='large':q[0,0,:]=2.**70;k[0,-1,:]=2.**70
+        elif scenario=='zeros':q.zero_();k.fill_(-0.);v.fill_(-0.)
+        elif scenario=='masked-invalid':k[0,-1,0]=float('nan');v[0,-1,1]=float('inf')
+        spans=[(length,keys,keys-length)]
+        base=StrictCudaKernels('cuda');fast=BoundedAttentionKernels('cuda',magnitude_bits=22)
+        fa,fb=base.new_error_flag(),fast.new_error_flag()
+        scale=2.**120 if scenario=='tiny' else .125
+        a=base.attention_packed(q,k,v,spans,7,scale,error_flag=fa)
+>       b=fast.attention_packed(q,k,v,spans,7,scale,error_flag=fb)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1560: in attention_packed
+    self._launch_prefill_attention(query, key, value, result, flag, layout, repeats, scale, plan)
+runtime/src/heteroes/eval/strict_cuda.py:1318: in _launch_prefill_attention
+    self._prefill_function(dim, plan),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1297: in _prefill_function
+    self._functions[name] = self._compile(
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:58: in _compile
+    if 'strict_attention_gqa(' in source:source=transform_gqa(source);changed=True
+                                                ^^^^^^^^^^^^^^^^^^^^^
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:24: in transform_gqa
+    body=once(body,'  unsigned bad = 0;','  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = 'extern "C" __global__ void __launch_bounds__(512) strict_attention_gqa(const float* q, const float* key, const float*...],bad);\n      }\n      out[(size_t)i*heads*DIM+h*DIM+d]=prefill_finish(t,bad);\n    }\n  }\n  report(error,bad);\n}\n'
+old = '  unsigned bad = 0;'
+new = '  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;'
+
+    def once(s,old,new):
+>       assert s.count(old)==1,(old,s.count(old))
+               ^^^^^^^^^^^^^^^
+E       AssertionError: ('  unsigned bad = 0;', 2)
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:17: AssertionError
+_________ test_score_guard_keeps_all_bits_and_error_flags[large-65-65] _________
+
+length = 65, keys = 65, scenario = 'large'
+
+    @pytest.mark.parametrize('length,keys',[(1,1),(1,33),(1,129),(2,7),(7,33),(33,33),(65,65)])
+    @pytest.mark.parametrize('scenario',['normal','tiny','large','zeros','masked-invalid'])
+    def test_score_guard_keeps_all_bits_and_error_flags(length,keys,scenario):
+        g=torch.Generator(device='cuda').manual_seed(length+keys)
+        q=torch.randn(14,length,64,generator=g,device='cuda')
+        k=torch.randn(2,keys,64,generator=g,device='cuda');v=torch.randn_like(k)
+        if scenario=='tiny':q.fill_(2.**-65);k.fill_(2.**-65);k[:,0,:]=0
+        elif scenario=='large':q[0,0,:]=2.**70;k[0,-1,:]=2.**70
+        elif scenario=='zeros':q.zero_();k.fill_(-0.);v.fill_(-0.)
+        elif scenario=='masked-invalid':k[0,-1,0]=float('nan');v[0,-1,1]=float('inf')
+        spans=[(length,keys,keys-length)]
+        base=StrictCudaKernels('cuda');fast=BoundedAttentionKernels('cuda',magnitude_bits=22)
+        fa,fb=base.new_error_flag(),fast.new_error_flag()
+        scale=2.**120 if scenario=='tiny' else .125
+        a=base.attention_packed(q,k,v,spans,7,scale,error_flag=fa)
+>       b=fast.attention_packed(q,k,v,spans,7,scale,error_flag=fb)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1560: in attention_packed
+    self._launch_prefill_attention(query, key, value, result, flag, layout, repeats, scale, plan)
+runtime/src/heteroes/eval/strict_cuda.py:1318: in _launch_prefill_attention
+    self._prefill_function(dim, plan),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1297: in _prefill_function
+    self._functions[name] = self._compile(
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:58: in _compile
+    if 'strict_attention_gqa(' in source:source=transform_gqa(source);changed=True
+                                                ^^^^^^^^^^^^^^^^^^^^^
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:24: in transform_gqa
+    body=once(body,'  unsigned bad = 0;','  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = 'extern "C" __global__ void __launch_bounds__(512) strict_attention_gqa(const float* q, const float* key, const float*...],bad);\n      }\n      out[(size_t)i*heads*DIM+h*DIM+d]=prefill_finish(t,bad);\n    }\n  }\n  report(error,bad);\n}\n'
+old = '  unsigned bad = 0;'
+new = '  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;'
+
+    def once(s,old,new):
+>       assert s.count(old)==1,(old,s.count(old))
+               ^^^^^^^^^^^^^^^
+E       AssertionError: ('  unsigned bad = 0;', 2)
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:17: AssertionError
+__________ test_score_guard_keeps_all_bits_and_error_flags[zeros-2-7] __________
+
+length = 2, keys = 7, scenario = 'zeros'
+
+    @pytest.mark.parametrize('length,keys',[(1,1),(1,33),(1,129),(2,7),(7,33),(33,33),(65,65)])
+    @pytest.mark.parametrize('scenario',['normal','tiny','large','zeros','masked-invalid'])
+    def test_score_guard_keeps_all_bits_and_error_flags(length,keys,scenario):
+        g=torch.Generator(device='cuda').manual_seed(length+keys)
+        q=torch.randn(14,length,64,generator=g,device='cuda')
+        k=torch.randn(2,keys,64,generator=g,device='cuda');v=torch.randn_like(k)
+        if scenario=='tiny':q.fill_(2.**-65);k.fill_(2.**-65);k[:,0,:]=0
+        elif scenario=='large':q[0,0,:]=2.**70;k[0,-1,:]=2.**70
+        elif scenario=='zeros':q.zero_();k.fill_(-0.);v.fill_(-0.)
+        elif scenario=='masked-invalid':k[0,-1,0]=float('nan');v[0,-1,1]=float('inf')
+        spans=[(length,keys,keys-length)]
+        base=StrictCudaKernels('cuda');fast=BoundedAttentionKernels('cuda',magnitude_bits=22)
+        fa,fb=base.new_error_flag(),fast.new_error_flag()
+        scale=2.**120 if scenario=='tiny' else .125
+        a=base.attention_packed(q,k,v,spans,7,scale,error_flag=fa)
+>       b=fast.attention_packed(q,k,v,spans,7,scale,error_flag=fb)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1560: in attention_packed
+    self._launch_prefill_attention(query, key, value, result, flag, layout, repeats, scale, plan)
+runtime/src/heteroes/eval/strict_cuda.py:1318: in _launch_prefill_attention
+    self._prefill_function(dim, plan),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1297: in _prefill_function
+    self._functions[name] = self._compile(
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:58: in _compile
+    if 'strict_attention_gqa(' in source:source=transform_gqa(source);changed=True
+                                                ^^^^^^^^^^^^^^^^^^^^^
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:24: in transform_gqa
+    body=once(body,'  unsigned bad = 0;','  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = 'extern "C" __global__ void __launch_bounds__(512) strict_attention_gqa(const float* q, const float* key, const float*...],bad);\n      }\n      out[(size_t)i*heads*DIM+h*DIM+d]=prefill_finish(t,bad);\n    }\n  }\n  report(error,bad);\n}\n'
+old = '  unsigned bad = 0;'
+new = '  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;'
+
+    def once(s,old,new):
+>       assert s.count(old)==1,(old,s.count(old))
+               ^^^^^^^^^^^^^^^
+E       AssertionError: ('  unsigned bad = 0;', 2)
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:17: AssertionError
+_________ test_score_guard_keeps_all_bits_and_error_flags[zeros-7-33] __________
+
+length = 7, keys = 33, scenario = 'zeros'
+
+    @pytest.mark.parametrize('length,keys',[(1,1),(1,33),(1,129),(2,7),(7,33),(33,33),(65,65)])
+    @pytest.mark.parametrize('scenario',['normal','tiny','large','zeros','masked-invalid'])
+    def test_score_guard_keeps_all_bits_and_error_flags(length,keys,scenario):
+        g=torch.Generator(device='cuda').manual_seed(length+keys)
+        q=torch.randn(14,length,64,generator=g,device='cuda')
+        k=torch.randn(2,keys,64,generator=g,device='cuda');v=torch.randn_like(k)
+        if scenario=='tiny':q.fill_(2.**-65);k.fill_(2.**-65);k[:,0,:]=0
+        elif scenario=='large':q[0,0,:]=2.**70;k[0,-1,:]=2.**70
+        elif scenario=='zeros':q.zero_();k.fill_(-0.);v.fill_(-0.)
+        elif scenario=='masked-invalid':k[0,-1,0]=float('nan');v[0,-1,1]=float('inf')
+        spans=[(length,keys,keys-length)]
+        base=StrictCudaKernels('cuda');fast=BoundedAttentionKernels('cuda',magnitude_bits=22)
+        fa,fb=base.new_error_flag(),fast.new_error_flag()
+        scale=2.**120 if scenario=='tiny' else .125
+        a=base.attention_packed(q,k,v,spans,7,scale,error_flag=fa)
+>       b=fast.attention_packed(q,k,v,spans,7,scale,error_flag=fb)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1560: in attention_packed
+    self._launch_prefill_attention(query, key, value, result, flag, layout, repeats, scale, plan)
+runtime/src/heteroes/eval/strict_cuda.py:1318: in _launch_prefill_attention
+    self._prefill_function(dim, plan),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1297: in _prefill_function
+    self._functions[name] = self._compile(
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:58: in _compile
+    if 'strict_attention_gqa(' in source:source=transform_gqa(source);changed=True
+                                                ^^^^^^^^^^^^^^^^^^^^^
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:24: in transform_gqa
+    body=once(body,'  unsigned bad = 0;','  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = 'extern "C" __global__ void __launch_bounds__(512) strict_attention_gqa(const float* q, const float* key, const float*...],bad);\n      }\n      out[(size_t)i*heads*DIM+h*DIM+d]=prefill_finish(t,bad);\n    }\n  }\n  report(error,bad);\n}\n'
+old = '  unsigned bad = 0;'
+new = '  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;'
+
+    def once(s,old,new):
+>       assert s.count(old)==1,(old,s.count(old))
+               ^^^^^^^^^^^^^^^
+E       AssertionError: ('  unsigned bad = 0;', 2)
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:17: AssertionError
+_________ test_score_guard_keeps_all_bits_and_error_flags[zeros-33-33] _________
+
+length = 33, keys = 33, scenario = 'zeros'
+
+    @pytest.mark.parametrize('length,keys',[(1,1),(1,33),(1,129),(2,7),(7,33),(33,33),(65,65)])
+    @pytest.mark.parametrize('scenario',['normal','tiny','large','zeros','masked-invalid'])
+    def test_score_guard_keeps_all_bits_and_error_flags(length,keys,scenario):
+        g=torch.Generator(device='cuda').manual_seed(length+keys)
+        q=torch.randn(14,length,64,generator=g,device='cuda')
+        k=torch.randn(2,keys,64,generator=g,device='cuda');v=torch.randn_like(k)
+        if scenario=='tiny':q.fill_(2.**-65);k.fill_(2.**-65);k[:,0,:]=0
+        elif scenario=='large':q[0,0,:]=2.**70;k[0,-1,:]=2.**70
+        elif scenario=='zeros':q.zero_();k.fill_(-0.);v.fill_(-0.)
+        elif scenario=='masked-invalid':k[0,-1,0]=float('nan');v[0,-1,1]=float('inf')
+        spans=[(length,keys,keys-length)]
+        base=StrictCudaKernels('cuda');fast=BoundedAttentionKernels('cuda',magnitude_bits=22)
+        fa,fb=base.new_error_flag(),fast.new_error_flag()
+        scale=2.**120 if scenario=='tiny' else .125
+        a=base.attention_packed(q,k,v,spans,7,scale,error_flag=fa)
+>       b=fast.attention_packed(q,k,v,spans,7,scale,error_flag=fb)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1560: in attention_packed
+    self._launch_prefill_attention(query, key, value, result, flag, layout, repeats, scale, plan)
+runtime/src/heteroes/eval/strict_cuda.py:1318: in _launch_prefill_attention
+    self._prefill_function(dim, plan),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1297: in _prefill_function
+    self._functions[name] = self._compile(
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:58: in _compile
+    if 'strict_attention_gqa(' in source:source=transform_gqa(source);changed=True
+                                                ^^^^^^^^^^^^^^^^^^^^^
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:24: in transform_gqa
+    body=once(body,'  unsigned bad = 0;','  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = 'extern "C" __global__ void __launch_bounds__(512) strict_attention_gqa(const float* q, const float* key, const float*...],bad);\n      }\n      out[(size_t)i*heads*DIM+h*DIM+d]=prefill_finish(t,bad);\n    }\n  }\n  report(error,bad);\n}\n'
+old = '  unsigned bad = 0;'
+new = '  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;'
+
+    def once(s,old,new):
+>       assert s.count(old)==1,(old,s.count(old))
+               ^^^^^^^^^^^^^^^
+E       AssertionError: ('  unsigned bad = 0;', 2)
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:17: AssertionError
+_________ test_score_guard_keeps_all_bits_and_error_flags[zeros-65-65] _________
+
+length = 65, keys = 65, scenario = 'zeros'
+
+    @pytest.mark.parametrize('length,keys',[(1,1),(1,33),(1,129),(2,7),(7,33),(33,33),(65,65)])
+    @pytest.mark.parametrize('scenario',['normal','tiny','large','zeros','masked-invalid'])
+    def test_score_guard_keeps_all_bits_and_error_flags(length,keys,scenario):
+        g=torch.Generator(device='cuda').manual_seed(length+keys)
+        q=torch.randn(14,length,64,generator=g,device='cuda')
+        k=torch.randn(2,keys,64,generator=g,device='cuda');v=torch.randn_like(k)
+        if scenario=='tiny':q.fill_(2.**-65);k.fill_(2.**-65);k[:,0,:]=0
+        elif scenario=='large':q[0,0,:]=2.**70;k[0,-1,:]=2.**70
+        elif scenario=='zeros':q.zero_();k.fill_(-0.);v.fill_(-0.)
+        elif scenario=='masked-invalid':k[0,-1,0]=float('nan');v[0,-1,1]=float('inf')
+        spans=[(length,keys,keys-length)]
+        base=StrictCudaKernels('cuda');fast=BoundedAttentionKernels('cuda',magnitude_bits=22)
+        fa,fb=base.new_error_flag(),fast.new_error_flag()
+        scale=2.**120 if scenario=='tiny' else .125
+        a=base.attention_packed(q,k,v,spans,7,scale,error_flag=fa)
+>       b=fast.attention_packed(q,k,v,spans,7,scale,error_flag=fb)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1560: in attention_packed
+    self._launch_prefill_attention(query, key, value, result, flag, layout, repeats, scale, plan)
+runtime/src/heteroes/eval/strict_cuda.py:1318: in _launch_prefill_attention
+    self._prefill_function(dim, plan),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1297: in _prefill_function
+    self._functions[name] = self._compile(
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:58: in _compile
+    if 'strict_attention_gqa(' in source:source=transform_gqa(source);changed=True
+                                                ^^^^^^^^^^^^^^^^^^^^^
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:24: in transform_gqa
+    body=once(body,'  unsigned bad = 0;','  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = 'extern "C" __global__ void __launch_bounds__(512) strict_attention_gqa(const float* q, const float* key, const float*...],bad);\n      }\n      out[(size_t)i*heads*DIM+h*DIM+d]=prefill_finish(t,bad);\n    }\n  }\n  report(error,bad);\n}\n'
+old = '  unsigned bad = 0;'
+new = '  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;'
+
+    def once(s,old,new):
+>       assert s.count(old)==1,(old,s.count(old))
+               ^^^^^^^^^^^^^^^
+E       AssertionError: ('  unsigned bad = 0;', 2)
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:17: AssertionError
+_____ test_score_guard_keeps_all_bits_and_error_flags[masked-invalid-2-7] ______
+
+length = 2, keys = 7, scenario = 'masked-invalid'
+
+    @pytest.mark.parametrize('length,keys',[(1,1),(1,33),(1,129),(2,7),(7,33),(33,33),(65,65)])
+    @pytest.mark.parametrize('scenario',['normal','tiny','large','zeros','masked-invalid'])
+    def test_score_guard_keeps_all_bits_and_error_flags(length,keys,scenario):
+        g=torch.Generator(device='cuda').manual_seed(length+keys)
+        q=torch.randn(14,length,64,generator=g,device='cuda')
+        k=torch.randn(2,keys,64,generator=g,device='cuda');v=torch.randn_like(k)
+        if scenario=='tiny':q.fill_(2.**-65);k.fill_(2.**-65);k[:,0,:]=0
+        elif scenario=='large':q[0,0,:]=2.**70;k[0,-1,:]=2.**70
+        elif scenario=='zeros':q.zero_();k.fill_(-0.);v.fill_(-0.)
+        elif scenario=='masked-invalid':k[0,-1,0]=float('nan');v[0,-1,1]=float('inf')
+        spans=[(length,keys,keys-length)]
+        base=StrictCudaKernels('cuda');fast=BoundedAttentionKernels('cuda',magnitude_bits=22)
+        fa,fb=base.new_error_flag(),fast.new_error_flag()
+        scale=2.**120 if scenario=='tiny' else .125
+        a=base.attention_packed(q,k,v,spans,7,scale,error_flag=fa)
+>       b=fast.attention_packed(q,k,v,spans,7,scale,error_flag=fb)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1560: in attention_packed
+    self._launch_prefill_attention(query, key, value, result, flag, layout, repeats, scale, plan)
+runtime/src/heteroes/eval/strict_cuda.py:1318: in _launch_prefill_attention
+    self._prefill_function(dim, plan),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1297: in _prefill_function
+    self._functions[name] = self._compile(
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:58: in _compile
+    if 'strict_attention_gqa(' in source:source=transform_gqa(source);changed=True
+                                                ^^^^^^^^^^^^^^^^^^^^^
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:24: in transform_gqa
+    body=once(body,'  unsigned bad = 0;','  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = 'extern "C" __global__ void __launch_bounds__(512) strict_attention_gqa(const float* q, const float* key, const float*...],bad);\n      }\n      out[(size_t)i*heads*DIM+h*DIM+d]=prefill_finish(t,bad);\n    }\n  }\n  report(error,bad);\n}\n'
+old = '  unsigned bad = 0;'
+new = '  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;'
+
+    def once(s,old,new):
+>       assert s.count(old)==1,(old,s.count(old))
+               ^^^^^^^^^^^^^^^
+E       AssertionError: ('  unsigned bad = 0;', 2)
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:17: AssertionError
+_____ test_score_guard_keeps_all_bits_and_error_flags[masked-invalid-7-33] _____
+
+length = 7, keys = 33, scenario = 'masked-invalid'
+
+    @pytest.mark.parametrize('length,keys',[(1,1),(1,33),(1,129),(2,7),(7,33),(33,33),(65,65)])
+    @pytest.mark.parametrize('scenario',['normal','tiny','large','zeros','masked-invalid'])
+    def test_score_guard_keeps_all_bits_and_error_flags(length,keys,scenario):
+        g=torch.Generator(device='cuda').manual_seed(length+keys)
+        q=torch.randn(14,length,64,generator=g,device='cuda')
+        k=torch.randn(2,keys,64,generator=g,device='cuda');v=torch.randn_like(k)
+        if scenario=='tiny':q.fill_(2.**-65);k.fill_(2.**-65);k[:,0,:]=0
+        elif scenario=='large':q[0,0,:]=2.**70;k[0,-1,:]=2.**70
+        elif scenario=='zeros':q.zero_();k.fill_(-0.);v.fill_(-0.)
+        elif scenario=='masked-invalid':k[0,-1,0]=float('nan');v[0,-1,1]=float('inf')
+        spans=[(length,keys,keys-length)]
+        base=StrictCudaKernels('cuda');fast=BoundedAttentionKernels('cuda',magnitude_bits=22)
+        fa,fb=base.new_error_flag(),fast.new_error_flag()
+        scale=2.**120 if scenario=='tiny' else .125
+        a=base.attention_packed(q,k,v,spans,7,scale,error_flag=fa)
+>       b=fast.attention_packed(q,k,v,spans,7,scale,error_flag=fb)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1560: in attention_packed
+    self._launch_prefill_attention(query, key, value, result, flag, layout, repeats, scale, plan)
+runtime/src/heteroes/eval/strict_cuda.py:1318: in _launch_prefill_attention
+    self._prefill_function(dim, plan),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1297: in _prefill_function
+    self._functions[name] = self._compile(
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:58: in _compile
+    if 'strict_attention_gqa(' in source:source=transform_gqa(source);changed=True
+                                                ^^^^^^^^^^^^^^^^^^^^^
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:24: in transform_gqa
+    body=once(body,'  unsigned bad = 0;','  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = 'extern "C" __global__ void __launch_bounds__(512) strict_attention_gqa(const float* q, const float* key, const float*...],bad);\n      }\n      out[(size_t)i*heads*DIM+h*DIM+d]=prefill_finish(t,bad);\n    }\n  }\n  report(error,bad);\n}\n'
+old = '  unsigned bad = 0;'
+new = '  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;'
+
+    def once(s,old,new):
+>       assert s.count(old)==1,(old,s.count(old))
+               ^^^^^^^^^^^^^^^
+E       AssertionError: ('  unsigned bad = 0;', 2)
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:17: AssertionError
+____ test_score_guard_keeps_all_bits_and_error_flags[masked-invalid-33-33] _____
+
+length = 33, keys = 33, scenario = 'masked-invalid'
+
+    @pytest.mark.parametrize('length,keys',[(1,1),(1,33),(1,129),(2,7),(7,33),(33,33),(65,65)])
+    @pytest.mark.parametrize('scenario',['normal','tiny','large','zeros','masked-invalid'])
+    def test_score_guard_keeps_all_bits_and_error_flags(length,keys,scenario):
+        g=torch.Generator(device='cuda').manual_seed(length+keys)
+        q=torch.randn(14,length,64,generator=g,device='cuda')
+        k=torch.randn(2,keys,64,generator=g,device='cuda');v=torch.randn_like(k)
+        if scenario=='tiny':q.fill_(2.**-65);k.fill_(2.**-65);k[:,0,:]=0
+        elif scenario=='large':q[0,0,:]=2.**70;k[0,-1,:]=2.**70
+        elif scenario=='zeros':q.zero_();k.fill_(-0.);v.fill_(-0.)
+        elif scenario=='masked-invalid':k[0,-1,0]=float('nan');v[0,-1,1]=float('inf')
+        spans=[(length,keys,keys-length)]
+        base=StrictCudaKernels('cuda');fast=BoundedAttentionKernels('cuda',magnitude_bits=22)
+        fa,fb=base.new_error_flag(),fast.new_error_flag()
+        scale=2.**120 if scenario=='tiny' else .125
+        a=base.attention_packed(q,k,v,spans,7,scale,error_flag=fa)
+>       b=fast.attention_packed(q,k,v,spans,7,scale,error_flag=fb)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1560: in attention_packed
+    self._launch_prefill_attention(query, key, value, result, flag, layout, repeats, scale, plan)
+runtime/src/heteroes/eval/strict_cuda.py:1318: in _launch_prefill_attention
+    self._prefill_function(dim, plan),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1297: in _prefill_function
+    self._functions[name] = self._compile(
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:58: in _compile
+    if 'strict_attention_gqa(' in source:source=transform_gqa(source);changed=True
+                                                ^^^^^^^^^^^^^^^^^^^^^
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:24: in transform_gqa
+    body=once(body,'  unsigned bad = 0;','  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = 'extern "C" __global__ void __launch_bounds__(512) strict_attention_gqa(const float* q, const float* key, const float*...],bad);\n      }\n      out[(size_t)i*heads*DIM+h*DIM+d]=prefill_finish(t,bad);\n    }\n  }\n  report(error,bad);\n}\n'
+old = '  unsigned bad = 0;'
+new = '  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;'
+
+    def once(s,old,new):
+>       assert s.count(old)==1,(old,s.count(old))
+               ^^^^^^^^^^^^^^^
+E       AssertionError: ('  unsigned bad = 0;', 2)
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:17: AssertionError
+____ test_score_guard_keeps_all_bits_and_error_flags[masked-invalid-65-65] _____
+
+length = 65, keys = 65, scenario = 'masked-invalid'
+
+    @pytest.mark.parametrize('length,keys',[(1,1),(1,33),(1,129),(2,7),(7,33),(33,33),(65,65)])
+    @pytest.mark.parametrize('scenario',['normal','tiny','large','zeros','masked-invalid'])
+    def test_score_guard_keeps_all_bits_and_error_flags(length,keys,scenario):
+        g=torch.Generator(device='cuda').manual_seed(length+keys)
+        q=torch.randn(14,length,64,generator=g,device='cuda')
+        k=torch.randn(2,keys,64,generator=g,device='cuda');v=torch.randn_like(k)
+        if scenario=='tiny':q.fill_(2.**-65);k.fill_(2.**-65);k[:,0,:]=0
+        elif scenario=='large':q[0,0,:]=2.**70;k[0,-1,:]=2.**70
+        elif scenario=='zeros':q.zero_();k.fill_(-0.);v.fill_(-0.)
+        elif scenario=='masked-invalid':k[0,-1,0]=float('nan');v[0,-1,1]=float('inf')
+        spans=[(length,keys,keys-length)]
+        base=StrictCudaKernels('cuda');fast=BoundedAttentionKernels('cuda',magnitude_bits=22)
+        fa,fb=base.new_error_flag(),fast.new_error_flag()
+        scale=2.**120 if scenario=='tiny' else .125
+        a=base.attention_packed(q,k,v,spans,7,scale,error_flag=fa)
+>       b=fast.attention_packed(q,k,v,spans,7,scale,error_flag=fb)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1560: in attention_packed
+    self._launch_prefill_attention(query, key, value, result, flag, layout, repeats, scale, plan)
+runtime/src/heteroes/eval/strict_cuda.py:1318: in _launch_prefill_attention
+    self._prefill_function(dim, plan),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_cuda.py:1297: in _prefill_function
+    self._functions[name] = self._compile(
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:58: in _compile
+    if 'strict_attention_gqa(' in source:source=transform_gqa(source);changed=True
+                                                ^^^^^^^^^^^^^^^^^^^^^
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:24: in transform_gqa
+    body=once(body,'  unsigned bad = 0;','  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+s = 'extern "C" __global__ void __launch_bounds__(512) strict_attention_gqa(const float* q, const float* key, const float*...],bad);\n      }\n      out[(size_t)i*heads*DIM+h*DIM+d]=prefill_finish(t,bad);\n    }\n  }\n  report(error,bad);\n}\n'
+old = '  unsigned bad = 0;'
+new = '  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;'
+
+    def once(s,old,new):
+>       assert s.count(old)==1,(old,s.count(old))
+               ^^^^^^^^^^^^^^^
+E       AssertionError: ('  unsigned bad = 0;', 2)
+
+docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py:17: AssertionError
+=========================== short test summary info ============================
+FAILED docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py::test_score_guard_keeps_all_bits_and_error_flags[normal-2-7]
+FAILED docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py::test_score_guard_keeps_all_bits_and_error_flags[normal-7-33]
+FAILED docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py::test_score_guard_keeps_all_bits_and_error_flags[normal-33-33]
+FAILED docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py::test_score_guard_keeps_all_bits_and_error_flags[normal-65-65]
+FAILED docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py::test_score_guard_keeps_all_bits_and_error_flags[tiny-2-7]
+FAILED docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py::test_score_guard_keeps_all_bits_and_error_flags[tiny-7-33]
+FAILED docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py::test_score_guard_keeps_all_bits_and_error_flags[tiny-33-33]
+FAILED docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py::test_score_guard_keeps_all_bits_and_error_flags[tiny-65-65]
+FAILED docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py::test_score_guard_keeps_all_bits_and_error_flags[large-2-7]
+FAILED docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py::test_score_guard_keeps_all_bits_and_error_flags[large-7-33]
+FAILED docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py::test_score_guard_keeps_all_bits_and_error_flags[large-33-33]
+FAILED docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py::test_score_guard_keeps_all_bits_and_error_flags[large-65-65]
+FAILED docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py::test_score_guard_keeps_all_bits_and_error_flags[zeros-2-7]
+FAILED docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py::test_score_guard_keeps_all_bits_and_error_flags[zeros-7-33]
+FAILED docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py::test_score_guard_keeps_all_bits_and_error_flags[zeros-33-33]
+FAILED docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py::test_score_guard_keeps_all_bits_and_error_flags[zeros-65-65]
+FAILED docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py::test_score_guard_keeps_all_bits_and_error_flags[masked-invalid-2-7]
+FAILED docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py::test_score_guard_keeps_all_bits_and_error_flags[masked-invalid-7-33]
+FAILED docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py::test_score_guard_keeps_all_bits_and_error_flags[masked-invalid-33-33]
+FAILED docs/evidence/2026-10-27-strict-bounded-attention/harness/test_attention.py::test_score_guard_keeps_all_bits_and_error_flags[masked-invalid-65-65]
+20 failed, 15 passed in 17.44s
