@@ -26,6 +26,7 @@ import math
 import threading
 from collections import OrderedDict
 
+from heteroes.restore_recovery import base_of
 from heteroes.dispatch import Greedy
 from heteroes.ledger import (
     AlreadyLeasedError,
@@ -220,10 +221,12 @@ class WorkerAPI:
         scorer=None,
         usage_sink=None,
         allowed_chunks=(),
+        recoveries=None,
     ):
         # Recipe v3: `scorer(descriptor, completions) -> reward` runs here, on the coordinator; it raises ScorerError when the
         # experiment's scoring fails, which is never a reward and never the worker's fault (`scoring_error` keeps it)
         self._scorer = scorer
+        self._recoveries = recoveries  # D10: restore_recovery.CoordinatorRecoveries, or None (no automatic recovery)
         from heteroes.v3.usage_queue import BoundedUsageSink
 
         self._usage_sink = (
@@ -273,11 +276,19 @@ class WorkerAPI:
             try:
                 if authenticated_worker_id is not None:
                     owner = decoded[0] if operation == "lease" else self._ledger.attempt_worker(*decoded[:3])
-                    if owner != authenticated_worker_id:
+                    if not self._owns(authenticated_worker_id, owner):
                         return _error("forbidden", "Credential does not own this worker or attempt")
                 return {"ok": True, **act(decoded)}
             except LedgerError as error:
                 return _error(_code_of(error), str(error))
+
+    def _owns(self, authenticated, worker_id):
+        """A device credential acts for its worker and for that worker's recovered alias (D10); whether the alias is
+        admitted at all is decided when it asks for a lease."""
+        return worker_id == authenticated or (base_of(worker_id) == authenticated and self._recoveries is not None)
+
+    def _fault_generation(self, candidate_id):
+        return self._ledger.get_candidate(candidate_id).descriptor.generation
 
     def _lease(self, decoded) -> dict:
         if self._cancel_requested():
@@ -285,6 +296,16 @@ class WorkerAPI:
         worker_id, request_id, generation = decoded
         if any(entry.worker_id == worker_id for entry in self._ledger.list_quarantined()):
             raise WorkerQuarantinedError(f"worker {worker_id} is quarantined (a restore failed)")
+        if base_of(worker_id) is not None:  # D10: a worker back from its one restore recovery
+            grant = (
+                None
+                if self._recoveries is None
+                else self._recoveries.admit(worker_id, self._ledger.list_quarantined(), self._fault_generation)
+            )
+            if grant is None:
+                raise WorkerQuarantinedError(f"worker {worker_id} is not a recovered worker of this run")
+            if self._generation <= grant["faultGeneration"]:
+                return {"generation_state": GenerationState.OPEN.value, "work": None}  # rejoins at the next boundary
         if generation is not None and generation != self._generation:
             # The worker looked at the job of another generation (the coordinator moved on between its two requests): it would be
             # given a candidate of a parent it does not have. No work now; its next turn reads the new job and synchronizes.
@@ -356,7 +377,7 @@ class WorkerAPI:
         try:
             with self._lock:
                 worker = self._ledger.attempt_worker(descriptor, attempt_number, token)  # stale/foreign: no scoring
-                if authenticated_worker_id is not None and worker != authenticated_worker_id:
+                if authenticated_worker_id is not None and not self._owns(authenticated_worker_id, worker):
                     return _error("forbidden", "Credential does not own this worker or attempt")
                 chunk = getattr(payload, "chunk", None)
                 if chunk is not None and chunk not in self.allowed_chunks:

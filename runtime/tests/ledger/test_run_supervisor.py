@@ -237,6 +237,27 @@ def test_restore_mismatch_quarantine_survives_run_completion(manager, monkeypatc
     assert manager.submit(config())["status"] == "FAILED"
 
 
+@pytest.mark.parametrize(
+    "events, quarantined",
+    [
+        ([{"event": "step", "failure": "RESTORE_MISMATCH"}, {"event": "restore_recovery_rejoined"}], False),
+        ([{"event": "step", "failure": "RESTORE_MISMATCH"}], True),
+        (
+            [{"event": "step", "failure": "RESTORE_MISMATCH"}, {"event": "restore_recovery_rejoined"}]
+            + [{"event": "step", "failure": "RESTORE_MISMATCH"}],
+            True,
+        ),  # fmt: skip
+        ([{"event": "restore_recovery_failed"}, {"event": "exit", "reason": "quarantined"}], True),
+    ],
+)
+def test_one_recovered_restore_fault_does_not_put_the_device_aside(manager, monkeypatch, events, quarantined):
+    root = prepare(manager, monkeypatch)
+    manager.save(root, workerStates={"local": {"alive": True, "ready": True, "confirmed": True}})
+    monkeypatch.setattr(manager, "remote", lambda *_: {"alive": True, "ready": True, "events": events})
+    manager.poll_workers(root)
+    assert ("local" in read_json(manager.root / "quarantine.json", {})) is quarantined
+
+
 def test_projection_preserves_seed_string_and_hides_lease_tokens(manager, tmp_path):
     # A real toy coordinator ledger, including a real accepted result and update.
     root = manager.directory("a" * 32)

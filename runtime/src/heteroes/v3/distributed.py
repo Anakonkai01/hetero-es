@@ -129,6 +129,8 @@ def serve(
             timeout_seconds=timeout_seconds,
             cancel_requested=stop.is_set,
             usage_path=out / "usage.sqlite",
+            restore_recovery_path=out / "restore-recoveries.json",
+            generation_clock_path=out / "generation-clock.json",
         )
         coordinator.server.inputs = inputs
         coordinator.start()
@@ -173,7 +175,7 @@ def worker(
     from heteroes.model.loading import check_recipe_selftest
     from heteroes.replay import ReplayPolicy
     from heteroes.runtime_info import JsonlLog
-    from heteroes.v3.model import load, trainable_schema
+    from heteroes.v3.model import load, reload_base_, trainable_schema
     from heteroes.worker_runtime import WorkerRuntime, download_weights
 
     secret = _token(token_env)
@@ -231,6 +233,7 @@ def worker(
             poll_seconds=0.05,
             max_unreachable_seconds=30,
             replay=ReplayPolicy(mode="always", max_chain=64),
+            reload_base=lambda live: reload_base_(live, model_path, run.recipe["model"]["files"]),
         )
         reason = runtime.run(stop)
         return 0 if reason in ("finished", "cancelled", "stopped") else 1

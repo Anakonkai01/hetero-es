@@ -297,6 +297,7 @@ def main(directory, *, device="cuda", timeout_seconds=1800):
             audit_timeout_seconds=lambda _: derived_limit(scheduler.book, membership.current, 1, floor=120, factor=3),
             stall_seconds=config.get("stallSeconds", 300),
             generation_clock_path=root / "generation-clock.json",
+            restore_recovery_path=root / "restore-recoveries.json" if config.get("recipeVersion") == 3 else None,
             failed_grace_seconds=60,
             lease_seconds=60,
             log=emit,

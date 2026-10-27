@@ -27,6 +27,7 @@ from heteroes.model.weights_io import WeightsFileError, load_weights_, sha256_of
 from heteroes.noise.contracts import ENGINE_VERSION, CPU_ENGINES
 from heteroes.profile_setup import noise_ops
 from heteroes.replay import ReplayFailed, ReplayPolicy, fetch_chain, replay_chain
+from heteroes.restore_recovery import WorkerBudget
 from heteroes.worker import StepKind, Worker
 
 _WEIGHTS_FILE = re.compile(r"[0-9a-f]{64}\.bin")
@@ -144,6 +145,7 @@ class WorkerRuntime:
         replay: ReplayPolicy | None = None,
         cache_guard=lambda: None,
         delivery_state_dir=None,
+        reload_base=None,
     ):
         self.worker_id = worker_id
         self.client = client
@@ -168,16 +170,68 @@ class WorkerRuntime:
             if delivery_state_dir is None
             else Path(delivery_state_dir)
         )
-        self._worker = Worker(
-            worker_id,
-            client,
-            executor,
-            transient_errors=(TransportError,),
-            outbox_path=state_dir / f"{worker_key}.json" if recipe_hash is not None else None,
-            outbox_scope=scope,
+        self._state_dir, self._scope, self._recipe_hash = state_dir, scope, recipe_hash
+        # D10: `reload_base(model)` puts the verified base weights back into the live model; with it, one automatic
+        # recovery per run follows a restore mismatch (restore_recovery.py). Without it a restore fault stops the worker.
+        self._reload_base = reload_base
+        self._budget = (
+            WorkerBudget(state_dir / f"{worker_key}.recovery.json", scope)
+            if reload_base is not None and recipe_hash is not None
+            else None
         )
+        if self._budget is not None and self._budget.alias() is not None:
+            self.worker_id = self._budget.alias()  # a restarted process keeps the recovered identity
+        self._worker = self._new_worker()
+        self._recovery_failed = self._budget is not None and self._budget.failed()
+        self._recovery_pending = (
+            self._budget is not None and self._budget.alias() is not None and not self._budget.done()
+        ) and not self._recovery_failed
         self.replay = ReplayPolicy() if replay is None else replay  # never, unless the worker is started with a policy
         self._catch_ups_since_check = 0  # replays whose result was trusted, not hashed, since the last check
+
+    def _new_worker(self):
+        key = hashlib.sha256(self.worker_id.encode()).hexdigest()
+        return Worker(
+            self.worker_id,
+            self.client,
+            self.executor,
+            transient_errors=(TransportError,),
+            outbox_path=self._state_dir / f"{key}.json" if self._recipe_hash is not None else None,
+            outbox_scope=self._scope,
+        )
+
+    def _recover(self) -> bool:
+        """D10: the one restore recovery of this run. True: rejoin as the alias; False: stay quarantined."""
+        if self._budget is None or self._worker.pending_delivery:
+            return False
+        if not self._recovery_pending:
+            if self._budget.spent():
+                return False  # the one recovery of this run was used already: an operator has to look at it
+            self.worker_id = self._budget.spend(self.worker_id)  # spent before anything is attempted
+        self.log("restore_recovery_started", alias=self.worker_id)
+        try:
+            self._reload_base(self.executor.model)
+            job = self._fetch_job()
+            if job is None:
+                raise RuntimeError("no job to take the canonical parent from")
+            self.sync(job)
+            self.executor.selftest_restore()
+        except UnauthorizedError:
+            raise
+        except Exception as error:  # noqa: BLE001 - any failure leaves the worker quarantined, with the reason
+            reason = f"{type(error).__name__}: {error}"
+            self.log("restore_recovery_failed", error=reason)
+            self._budget.fail(reason)  # terminal: a restart does not try again
+            self._recovery_pending, self._recovery_failed = False, True
+            return False
+        heartbeat = self._worker.heartbeat_seconds
+        self._worker.close()
+        self._worker = self._new_worker()
+        self._worker.heartbeat_seconds = heartbeat
+        self._budget.complete()
+        self._recovery_pending = False
+        self.log("restore_recovery_rejoined", alias=self.worker_id, parent_sha256=self.executor.parent_sha256)
+        return True
 
     def log(self, event: str, **fields) -> None:
         self._log({"event": event, "t": self._wall_clock(), "worker_id": self.worker_id, **fields})
@@ -302,8 +356,12 @@ class WorkerRuntime:
                     if step.kind is StepKind.QUARANTINED:
                         return "quarantined"
                     continue
-                if self._worker.poisoned:
+                if self._recovery_failed or (self._recovery_pending and not self._recover()):
                     return "quarantined"
+                if self._worker.poisoned:
+                    if not self._recover():
+                        return "quarantined"
+                    continue
                 job = self._fetch_job()
                 if job is None:
                     self._sleep(self._poll)
@@ -367,6 +425,8 @@ class WorkerRuntime:
                 coordination_seconds=None if timing is None else seconds - timing["total"],
             )
             if step.kind is StepKind.QUARANTINED:
+                if self._worker.poisoned and self._recover():
+                    continue
                 return "quarantined"
             if step.kind is StepKind.NO_WORK:
                 self._sleep(self._poll)

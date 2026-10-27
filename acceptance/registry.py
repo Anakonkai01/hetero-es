@@ -158,6 +158,18 @@ CHECKS = [
         timeout=3600,
     ),
     Check(
+        "mutation-restore-recovery",
+        "mutation",
+        ("{python}", "scripts/mutation-check.py", "--repo", "runtime", "--copy", "src", "--copy", "pyproject.toml")
+        + ("--copy", "tests/ledger", "--copy", "tests/v3", "--env", "PYTHONPATH=src:tests/ledger:tests/v3")
+        + ("--scratch", "{out}", "--mutants", "acceptance/mutants/restore-recovery.json", "--test")
+        + (
+            "{runtime_python} -m pytest -q -x -p no:cacheprovider tests/ledger/test_restore_recovery.py "
+            "tests/ledger/test_run_supervisor.py tests/v3/test_v3_progress.py",
+        ),
+        timeout=3600,
+    ),
+    Check(
         "mutation-strict-decoder",
         "mutation",
         ("{python}", "scripts/mutation-check.py", "--repo", "runtime", "--copy", "src", "--copy", "pyproject.toml")
@@ -233,7 +245,7 @@ GATES = [
         "M2.restore-recovery",
         "M2",
         "D10 one automatic restore recovery per worker and run",
-        open="The quarantined-reloading-selftest-probation-rejoin state machine is not implemented.",
+        checks=("check-all", "mutation-restore-recovery"),
     ),
     Gate(
         "M2.strict-mismatch",

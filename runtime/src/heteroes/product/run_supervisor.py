@@ -175,9 +175,15 @@ class RunSupervisor(ABC):
                     {"action": "stop" if stop else "poll", "runId": root.name + f"-r{recovery}", **launched(launch)},
                 )
                 write_json(root / f"worker-{worker_id}-r{recovery}{suffix}.json", value["events"])
-                if any(
-                    item.get("failure") == "RESTORE_MISMATCH" or item.get("reason") == "quarantined"
-                    for item in value["events"]
+                # D10: one restore fault followed by a successful recovery (the worker rejoined under its alias) does
+                # not put the device aside; a second fault, a failed recovery or a quarantined exit does
+                events = value["events"]
+                faults = sum(item.get("failure") == "RESTORE_MISMATCH" for item in events)
+                rejoined = any(item.get("event") == "restore_recovery_rejoined" for item in events)
+                if (
+                    any(item.get("reason") == "quarantined" for item in events)
+                    or faults > 1
+                    or (faults and not rejoined)
                 ):
                     quarantined = read_json(self.root / "quarantine.json", {})
                     quarantined[worker_id] = {"runId": root.name, "t": time.time()}

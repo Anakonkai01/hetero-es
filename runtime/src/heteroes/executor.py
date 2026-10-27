@@ -191,6 +191,19 @@ class CandidateExecutor:
         self.parent_sha256 = actual
         return actual
 
+    def selftest_restore(self, seed: int = 0x5E1F7E57) -> None:
+        """D10 probation check: a perturbation with a fixed probe seed must restore to the parent bit for bit."""
+        scale = self.effective_sigma
+        if self.recipe.engine_version == CUDA_ENGINE_VERSION:
+            perturb_model_cuda_(self.model, self.schema, seed, scale)
+        else:
+            perturb_model_(
+                self.model, self.schema, seed, scale, self.recipe.chunk_elements, engine=self.recipe.engine_version
+            )
+        restore_from_snapshot_(self.model, self.schema, self._snapshot)
+        if tensors_sha256(take_snapshot(self.model, self.schema).tensors) != self.parent_sha256:
+            raise RestoreError("the self-test perturbation did not restore to the parent")
+
     def __call__(self, descriptor: CandidateDescriptor, chunk: int | None = None) -> float:
         """`chunk`: an audit re-runs a candidate at the chunk its first result used (ADR-010); otherwise this worker's."""
         used = self.chunk if chunk is None else chunk

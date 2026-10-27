@@ -292,6 +292,12 @@ def main(argv: list[str]) -> int:
         engine_selftest_seconds = check_recipe_selftest(recipe, device)
     except RuntimeError as error:
         fail(str(error), 3)
+    reload_base = None
+    if declared.get("formatVersion") == 3:  # D10: one automatic restore recovery per run, from the verified files
+        from heteroes.v3.model import reload_base_
+
+        files = json.loads(args.model_manifest.read_text())["files"]
+        reload_base = lambda model: reload_base_(model, args.model_path, files)  # noqa: E731
     executor_started = time.perf_counter()
     chunk = args.chunk
     allowed = tuple(getattr(recipe, "chunks", ()) or ())
@@ -348,6 +354,7 @@ def main(argv: list[str]) -> int:
             checked_directory(args.cache_dir, args.storage_volume_uuid) if args.storage_volume_uuid else None
         ),
         delivery_state_dir=args.delivery_state_dir or Path(args.log).parent / ".delivery",
+        reload_base=reload_base,
     )
     try:
         runtime.admit()

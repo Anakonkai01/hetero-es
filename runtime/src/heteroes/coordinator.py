@@ -127,6 +127,7 @@ class Coordinator:
         usage_flush_seconds=1.0,
         generation_clock_path=None,
         wall_clock=time.time,
+        restore_recovery_path=None,
     ):
         # Recipe v3 (ADR-008): `antithetic` gives pairs (seed, +1), (seed, -1); `coefficient_rule` makes version-2 records;
         # `score(generation, descriptor, completions) -> reward` scores the texts the workers submit, on this process
@@ -212,6 +213,10 @@ class Coordinator:
         # D11: when each generation's hard cap started, kept across restarts so a restart never extends it
         self._clock_path = None if generation_clock_path is None else Path(generation_clock_path)
         self._wall = wall_clock
+        from heteroes.restore_recovery import CoordinatorRecoveries
+
+        # D10: workers back from their one restore recovery (None: a restore fault always needs an operator)
+        self._recoveries = None if restore_recovery_path is None else CoordinatorRecoveries(restore_recovery_path)
         if usage_path is not None:
             from heteroes.v3.usage import UsageStore
             from heteroes.v3.usage_queue import BoundedUsageSink
@@ -525,6 +530,7 @@ class Coordinator:
             else (lambda descriptor, texts: self._score(generation, descriptor, texts)),
             usage_sink=self._usage_sink,
             allowed_chunks=getattr(self.recipe, "chunks", ()) if len(getattr(self.recipe, "chunks", ())) > 1 else (),
+            recoveries=self._recoveries,
         )
         if self.recipe.to_dict().get("formatVersion") == 3 and self._score is not None:
             from heteroes.v3.audit import AuditAPI

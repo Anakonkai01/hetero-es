@@ -48,3 +48,26 @@ def test_unknown_stages_are_refused():
 
     with pytest.raises(ValueError):
         progress.Progress().advance("sleeping")
+
+
+def test_reload_base_restores_corrupted_live_weights_in_place(product_assets):  # noqa: F811
+    import pytest
+    import torch
+
+    from heteroes.eval.candidate import model_weights_sha256
+    from heteroes.model.schema import build_parameter_schema
+    from heteroes.v3.model import file_manifest, load, reload_base_
+
+    files = file_manifest(product_assets / "model")
+    model, _ = load(product_assets / "model", files)
+    schema = build_parameter_schema(model)
+    parent = model_weights_sha256(model, schema)
+    pointers = [p.data_ptr() for p in model.parameters()]
+    with torch.no_grad():
+        for p in model.parameters():
+            p.mul_(-3)
+    assert model_weights_sha256(model, schema) != parent
+    reload_base_(model, product_assets / "model", files)
+    assert model_weights_sha256(model, schema) == parent and [p.data_ptr() for p in model.parameters()] == pointers
+    with pytest.raises(ValueError):
+        reload_base_(model, product_assets / "model", {**files, "config.json": "0" * 64})

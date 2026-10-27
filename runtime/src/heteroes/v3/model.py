@@ -59,6 +59,31 @@ def load(path, files, device="cpu"):
     return model, tokenizer
 
 
+def reload_base_(model, path, files):
+    """D10: put the verified base weights of the model directory back into the live model, in place (no second copy on
+    the device). Every file must match the pinned hashes first; every base parameter must be in the files, apart from
+    weights tied to one that is (the output head). Adapters attached for LoRA are not base weights and are left alone:
+    the canonical parent sync that follows replaces the trainable part."""
+    import torch
+    from safetensors.torch import load_file
+
+    from heteroes.study.models import verify_files
+
+    verify_files(path, files)
+    named = dict(model.named_parameters(remove_duplicate=False))
+    found = set()
+    with torch.no_grad():
+        for name in sorted(n for n in files if n.endswith(".safetensors")):
+            for key, value in load_file(str(Path(path) / name), device="cpu").items():
+                if key in named:
+                    named[key].copy_(value)
+                    found.add(key)
+    tied = {n for n, p in named.items() if any(p is named[f] for f in found)}
+    missing = sorted(n for n in named if n not in found and n not in tied and "lora_" not in n)
+    if missing:
+        raise ValueError(f"the model files do not hold every base weight: {missing[:3]}")
+
+
 def trainable_schema(model, weight_space, adapter_file=None):
     """
     The schema that ES perturbs and updates for this weight space. For LoRA the adapters are attached first (in place) and,
