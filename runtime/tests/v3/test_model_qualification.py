@@ -126,3 +126,49 @@ assert 'torch' not in sys.modules and 'numpy' not in sys.modules
 """
     result = subprocess.run([sys.executable, "-c", script], capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
+
+
+# ---- M4: a strict_b22_v1 qualification is a separate reference, keyed by its decoder ------------------------------
+
+gpu = pytest.mark.skipif(
+    __import__("os").environ.get("HETEROES_GPU_ACCEPTANCE") != "1", reason="strict qualification runs on an NVIDIA GPU"
+)
+
+
+def test_strict_documents_and_configs_differ_only_in_the_decoder_identity():
+    from heteroes.catalog import STRICT_B22_DECODER
+    from heteroes.product.model_qualification import _documents, qualification_key
+    from heteroes.product.qualification_v3 import cell_configs
+    from heteroes.noise.contracts import ENGINE_V2
+
+    plain, strict = cell_configs("m", "r" * 40)["full"], cell_configs("m", "r" * 40, decoder=STRICT_B22_DECODER)["full"]
+    assert {k for k in strict if strict[k] != plain.get(k)} == {"evalDtype", "decoder"}
+    assert strict["evalDtype"] == "float16" and strict["decoder"] == STRICT_B22_DECODER
+    assert cell_configs("m", "r" * 40, decoder="hf_generate") == cell_configs("m", "r" * 40)  # old bytes kept
+    manifest = {"modelId": "m", "revision": "r" * 40, "tokenizerRevision": "r" * 40, "files": {}}
+    recipe, _ = _documents(manifest, "a" * 64, "b" * 64, decoder=STRICT_B22_DECODER)
+    assert recipe["evaluation"]["decoder"] == STRICT_B22_DECODER and recipe["evaluation"]["evalDtype"] == "float16"
+    with pytest.raises(ValueError):
+        _documents(manifest, "a" * 64, "b" * 64, decoder="hf_compact")
+    # the lab keys qualifications by noise engine, and by decoder for the strict identity only
+    assert qualification_key(ENGINE_V2) == ENGINE_V2 == qualification_key(ENGINE_V2, "hf_generate")
+    assert qualification_key(ENGINE_V2, STRICT_B22_DECODER) == f"{ENGINE_V2}+{STRICT_B22_DECODER}"
+    with pytest.raises(ValueError):
+        qualification_key(ENGINE_V2, "hf_compact")
+
+
+@gpu
+def test_a_strict_reference_round_trips_on_the_gpu_and_cannot_pass_as_a_plain_one(new_model):
+    from heteroes.catalog import STRICT_B22_DECODER
+    from heteroes.noise.contracts import ENGINE_V2
+
+    root, manifest = new_model
+    plain, _ = build_reference(root, manifest, device="cpu", engine=ENGINE_V2)
+    strict, observations = build_reference(root, manifest, device="cuda", engine=ENGINE_V2, decoder=STRICT_B22_DECODER)
+    assert strict["cell"]["recipe"]["evaluation"]["decoder"] == STRICT_B22_DECODER
+    assert check_reference(strict, manifest) is strict
+    assert qualify(root, manifest, strict, device="cuda") == observations
+    mixed = copy.deepcopy(strict)
+    mixed["cell"]["config"] = plain["cell"]["config"]  # a strict recipe under the plain probe config
+    with pytest.raises(ValueError):
+        check_reference(mixed, manifest)

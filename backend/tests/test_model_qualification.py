@@ -34,10 +34,10 @@ def setup(study, alias="probe-gpu"):
     return lab, device, auth, model
 
 
-def report_inputs(model, engine=ENGINE_V2):
+def report_inputs(model, engine=ENGINE_V2, decoder="hf_generate"):
     """Synthetic observations exercise admission, not GPU numerical compatibility."""
     manifest = model["manifest"]
-    recipe, plan = _documents(manifest, "a" * 64, "b" * 64, engine)
+    recipe, plan = _documents(manifest, "a" * 64, "b" * 64, engine, decoder)
     common = {
         "recipeHash": canonical_json_hash(recipe),
         "modelManifestHash": model["manifestHash"],
@@ -56,7 +56,7 @@ def report_inputs(model, engine=ENGINE_V2):
         "rows": reference_rows(),
         "cell": {
             "config": cell_configs(
-                manifest["modelId"], manifest["revision"], None if engine == ENGINE_VERSION else engine
+                manifest["modelId"], manifest["revision"], None if engine == ENGINE_VERSION else engine, decoder
             )["full"],
             "recipe": recipe,
             "plan": plan,
@@ -334,3 +334,95 @@ def test_new_engine_probe_rejects_a_valid_old_engine_reference(v3_study):
     finish(c, auth, job, model, reference=reference, observations=observations)
     assert c.get(route(model), headers=admin).json()["jobs"][0]["errorCode"] == "MODEL_QUALIFICATION_MISMATCH"
     assert model["manifestHash"] not in runtime.devices()[0]["selfTest"]["qualifiedModelHashes"]
+
+
+# ---- M4: strict_b22_v1 has its own reference and qualification, keyed by engine and decoder ------------------------
+
+STRICT = "strict_b22_v1"
+
+
+def start_strict(lab, device, model):
+    c, _, _, admin = lab
+    body = {"deviceId": device["deviceId"], "noiseEngineVersion": ENGINE_V2, "decoder": STRICT}
+    response = c.post(route(model), headers=admin, json=body)
+    assert response.status_code == 201, response.text
+    return response.json()
+
+
+def test_a_strict_qualification_is_separate_from_the_plain_one(v3_study):
+    from backend.policies import v3_qualification
+
+    lab, device, auth, model = setup(v3_study)
+    c, store, runtime, admin = lab
+    finish(c, auth, start(lab, device, model), model)  # plain engine v2 qualification
+    profile = runtime.devices()[0]["selfTest"]
+    assert v3_qualification(profile, model["manifestHash"], ENGINE_V2) is None
+    assert v3_qualification(profile, model["manifestHash"], ENGINE_V2, STRICT) == "model"
+    job = start_strict(lab, device, model)
+    assert job["mode"] == "BUILD_REFERENCE" and job["decoder"] == STRICT
+    command = next(x for x in runtime.commands(device["deviceId"]) if x.get("jobId") == job["jobId"])
+    assert command["decoder"] == STRICT and command["noiseEngineVersion"] == ENGINE_V2
+    reference, observations = report_inputs(model, ENGINE_V2, STRICT)
+    finish(c, auth, job, model, reference=reference, observations=observations)
+    profile = runtime.devices()[0]["selfTest"]
+    assert v3_qualification(profile, model["manifestHash"], ENGINE_V2, STRICT) is None
+    assert v3_qualification(profile, model["manifestHash"], ENGINE_V2) is None
+    status = c.get(route(model), headers=admin).json()
+    assert set(status["referenceHashesByNoiseEngine"]) == {ENGINE_V2, f"{ENGINE_V2}+{STRICT}"}
+
+
+def test_a_strict_probe_rejects_a_plain_reference(v3_study):
+    lab, device, auth, model = setup(v3_study)
+    c, _, runtime, admin = lab
+    job = start_strict(lab, device, model)
+    reference, observations = report_inputs(model, ENGINE_V2)  # valid, but for hf_generate
+    finish(c, auth, job, model, reference=reference, observations=observations)
+    assert c.get(route(model), headers=admin).json()["jobs"][0]["errorCode"] == "MODEL_QUALIFICATION_MISMATCH"
+    from backend.policies import v3_qualification
+
+    assert v3_qualification(runtime.devices()[0]["selfTest"], model["manifestHash"], ENGINE_V2, STRICT) == "model"
+
+
+def test_a_plain_probe_rejects_a_strict_reference(v3_study):
+    lab, device, auth, model = setup(v3_study)
+    c, _, _, admin = lab
+    job = start(lab, device, model)
+    reference, observations = report_inputs(model, ENGINE_V2, STRICT)
+    finish(c, auth, job, model, reference=reference, observations=observations)
+    assert c.get(route(model), headers=admin).json()["jobs"][0]["errorCode"] == "MODEL_QUALIFICATION_MISMATCH"
+
+
+def test_an_unknown_probe_decoder_is_refused(v3_study):
+    lab, device, _, model = setup(v3_study)
+    c, _, _, admin = lab
+    body = {"deviceId": device["deviceId"], "noiseEngineVersion": ENGINE_V2, "decoder": "hf_compact"}
+    assert c.post(route(model), headers=admin, json=body).status_code == 422
+
+
+def test_a_strict_experiment_needs_the_strict_qualification_of_every_device(v3_study):
+    from test_v3_study import configuration
+
+    lab, device, auth, model = setup(v3_study)
+    c, store, runtime, admin = lab
+    data = next(d for d in c.get("/api/v1/datasets", headers=admin).json() if d.get("recipeVersion") == 3)
+    paired = next(d for d in runtime.devices() if d["deviceId"] == device["deviceId"])
+    body = {
+        **configuration(paired, model, data),
+        "noiseEngineVersion": ENGINE_V2,
+        "decodeEngine": STRICT,
+        "evalDtype": "float16",
+        "evalChunk": 32,
+    }
+    finish(c, auth, start(lab, device, model), model)  # plain qualification only
+    refused = c.post("/api/v1/experiments", headers=admin, json=body)
+    assert refused.status_code == 422 and "strict" in refused.text, refused.text
+    reference, observations = report_inputs(model, ENGINE_V2, STRICT)
+    finish(c, auth, start_strict(lab, device, model), model, reference=reference, observations=observations)
+    created = c.post("/api/v1/experiments", headers=admin, json=body)
+    assert created.status_code == 200, created.text
+    shown = created.json()
+    assert shown["decodeEngine"] == STRICT and shown["evalDtype"] == "float16" and shown["evalChunk"] == 32
+    fp32 = c.post("/api/v1/experiments", headers=admin, json={**body, "evalDtype": "float32"})
+    assert fp32.status_code == 422  # the strict decoder reads the live FP16 weights
+    plain = c.post("/api/v1/experiments", headers=admin, json={**body, "decodeEngine": "hf_generate"})
+    assert plain.status_code == 422 and "only for the strict decoder" in plain.text

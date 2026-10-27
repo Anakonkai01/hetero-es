@@ -62,7 +62,12 @@ def run(input_path, device):
             from heteroes.noise.contracts import ENGINE_VERSION
 
             reference, observations = build_reference(
-                model, command["manifest"], device, emit, engine=command.get("noiseEngineVersion", ENGINE_VERSION)
+                model,
+                command["manifest"],
+                device,
+                emit,
+                engine=command.get("noiseEngineVersion", ENGINE_VERSION),
+                decoder=command.get("decoder", "hf_generate"),
             )
         else:
             reference = None

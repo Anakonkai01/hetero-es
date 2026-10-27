@@ -96,6 +96,11 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
         if version == 3:
             from heteroes.v3.options import validate_options
 
+            # Earlier managed runs carry no evalDtype and keep their documents; only the strict decoder sets it (FP16)
+            if body.get("evalDtype") is not None and body["decodeEngine"] != "strict_b22_v1":
+                raise HTTPException(422, "evalDtype is set only for the strict decoder")
+            if body.get("evalDtype") is None:
+                body.pop("evalDtype", None)
             try:
                 freeze_python_code(body)
                 validate_options(body, allow_python=True)
@@ -121,7 +126,7 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
             if version == 3 and coordinator_only(profile) and d["deviceId"] == body["coordinatorDeviceId"]:
                 continue  # coordination proves update arithmetic, not GPU-compatible texts for every model
             qualification = (
-                v3_qualification(profile, model["manifestHash"], body["noiseEngineVersion"])
+                v3_qualification(profile, model["manifestHash"], body["noiseEngineVersion"], body["decodeEngine"])
                 if version == 3
                 else v2_qualification(profile, model["manifestHash"])
             )
@@ -130,7 +135,12 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
                     422, f"Selected device requires Recipe v{version} qualification; Windows remains v1 worker-only"
                 )
             if qualification == "model":
-                raise HTTPException(422, "Qualify every selected device for this pinned model")
+                raise HTTPException(
+                    422,
+                    "Qualify every selected device for this pinned model with the strict decoder"
+                    if body["decodeEngine"] == "strict_b22_v1"
+                    else "Qualify every selected device for this pinned model",
+                )
         body.update(
             modelManifest=model["manifest"],
             modelSource=model["source"],

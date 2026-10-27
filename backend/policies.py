@@ -57,18 +57,24 @@ def v2_qualification(profile, model_hash):
     return None
 
 
-def v3_qualification(profile, model_hash, engine=None):
+def v3_qualification(profile, model_hash, engine=None, decoder=None):
     # A native Windows profile reaches [3] only through the reference-bound worker-only validation of SelfTest.
     if profile.get("recipeVersions") != [3]:
         return "recipe"
     from heteroes.noise.contracts import ENGINE_VERSION
+    from heteroes.product.model_qualification import qualification_key
 
     engine = engine or ENGINE_VERSION
+    key = qualification_key(engine, decoder if decoder in (None, "strict_b22_v1") else None)
     by_engine = profile.get("qualifiedModelsByNoiseEngine")
     hashes = (
-        by_engine.get(engine, [])
+        by_engine.get(key, [])
         if by_engine is not None
-        else (profile.get("qualifiedModelHashes", []) if profile.get("noiseVersion", ENGINE_VERSION) == engine else [])
+        else (
+            profile.get("qualifiedModelHashes", [])
+            if key == engine and profile.get("noiseVersion", ENGINE_VERSION) == engine
+            else []
+        )
     )
     if model_hash not in hashes:
         return "model"

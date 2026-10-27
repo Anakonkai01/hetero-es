@@ -151,3 +151,33 @@ def test_desktop_quit_waits_for_model_probe_identity_confirmation(tmp_path, monk
     assert bridge.status()["drained"] is False
     monkeypatch.setattr("heteroes.product.agent.owned_state", lambda *args, **kwargs: False)
     assert bridge.status()["drained"] is True
+
+
+def test_the_probe_process_receives_the_requested_engine_and_decoder(tmp_path, monkeypatch):
+    # Earlier the frozen command dropped noiseEngineVersion: a first v2 probe built a v1 reference the lab refused.
+    from heteroes.noise.contracts import ENGINE_V2
+
+    a = agent(tmp_path)
+    a.enabled = True
+    fake_launch(monkeypatch)
+    a.handle(command(noiseEngineVersion=ENGINE_V2, decoder="strict_b22_v1"))
+    frozen = read_json(a.probes.directory("c" * 32) / "input.json")["command"]
+    assert frozen["noiseEngineVersion"] == ENGINE_V2 and frozen["decoder"] == "strict_b22_v1"
+
+
+def test_an_older_command_without_engine_or_decoder_keeps_its_frozen_bytes(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    a.enabled = True
+    fake_launch(monkeypatch)
+    a.handle(command())
+    frozen = read_json(a.probes.directory("c" * 32) / "command.json")
+    assert set(frozen) == {"jobId", "mode", "source", "manifest", "reference"}
+
+
+def test_an_unknown_probe_decoder_is_refused(tmp_path, monkeypatch):
+    a = agent(tmp_path)
+    a.enabled = True
+    calls = fake_launch(monkeypatch)
+    with pytest.raises(ValueError):
+        a.handle(command(decoder="hf_compact"))
+    assert not calls

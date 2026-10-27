@@ -24,6 +24,7 @@ V3_UPDATE_KEYS = (
     "alphaMinimum",
     "momentumBeta",
     "momentumWindow",
+    "evalDtype",
     "evalChunk",
     "evalChunks",
     "sampler",

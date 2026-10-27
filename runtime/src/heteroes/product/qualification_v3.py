@@ -32,16 +32,22 @@ def reference_rows():
     return [{"prompt": f"Compute {a} * {b}. Reply with only the integer.", "answer": a * b} for a, b in pairs]
 
 
-def cell_configs(model_id, revision, engine=None):
-    """The SDK configurations of the two cells, without local paths."""
+def cell_configs(model_id, revision, engine=None, decoder=None):
+    """The SDK configurations of the two cells, without local paths. `decoder="strict_b22_v1"` (ADR-013) evaluates the
+    live FP16 weights with the strict decoder; the default keeps the historical bytes."""
+    from heteroes.catalog import STRICT_B22_DECODER
+
+    if decoder not in (None, "hf_generate", STRICT_B22_DECODER):
+        raise ValueError("Qualification decoders are hf_generate and strict_b22_v1")
+    strict = decoder == STRICT_B22_DECODER
     common = {
         "model": {"id": model_id, "revision": revision},
         "data": {"batchSize": 4, "batchSeed": 11, "splitSeed": 42},
         "antithetic": True,
         "systemPrompt": None,
         "maxNewTokens": 32,
-        "evalDtype": "float32",
-        "decoder": "hf_generate",
+        "evalDtype": "float16" if strict else "float32",
+        "decoder": STRICT_B22_DECODER if strict else "hf_generate",
         "noiseEngine": "cpu",
         **({"noiseEngineVersion": engine} if engine is not None else {}),
         "population": 2,

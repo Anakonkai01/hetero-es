@@ -51,6 +51,7 @@ class Configuration(BaseModel):
     alphaMinimum: float | None = Field(default=None, gt=0, le=1)
     momentumBeta: float | None = Field(default=None, gt=0, lt=1)
     momentumWindow: int = Field(default=4, ge=2, le=8, strict=True)
+    evalDtype: Literal["float32", "float16"] | None = None  # strict_b22_v1 requires float16 (ADR-013)
     evalChunk: int | None = Field(default=None, strict=True)
     evalChunks: list[int] | None = Field(default=None, max_length=8)  # ADR-010: chunks a worker may use
     sampler: str = Field(default="sha256-python-random-sample-v1", max_length=80)  # or python@1:<sha256>

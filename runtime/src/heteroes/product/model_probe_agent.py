@@ -48,6 +48,10 @@ class ModelProbeManager:
     def start(self, command):
         root = self.directory(command.get("jobId"))
         frozen = {k: command[k] for k in ("jobId", "mode", "source", "manifest", "reference")}
+        # optional: the reference's noise engine and decoder (absent in older commands, whose bytes stay frozen)
+        frozen |= {k: command[k] for k in ("noiseEngineVersion", "decoder") if command.get(k) is not None}
+        if frozen.get("decoder", "hf_generate") not in ("hf_generate", "strict_b22_v1"):
+            raise ValueError("Invalid model probe decoder")
         validate(frozen["manifest"], allow_any=True)
         if frozen["mode"] not in ("BUILD_REFERENCE", "COMPARE_REFERENCE") or frozen["source"] not in (
             "REFERENCE",

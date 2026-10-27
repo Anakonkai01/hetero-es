@@ -9,7 +9,7 @@ from fastapi import Depends, HTTPException
 from pydantic import Field
 
 from heteroes.canonical import canonical_json_hash
-from heteroes.product.model_qualification import check_reference, verify_observations
+from heteroes.product.model_qualification import STRICT_DECODER, check_reference, qualification_key, verify_observations
 from .policies import FiniteStrict, has_device_reservation, noise_qualification
 from heteroes.noise.contracts import ENGINE_VERSION, ENGINE_V2, CPU_NOISE_FINGERPRINTS
 from typing import Literal
@@ -39,6 +39,7 @@ def restore_mismatch(report):
 class ProbeRequest(FiniteStrict):
     deviceId: str = Field(pattern="^[a-f0-9]{32}$")
     noiseEngineVersion: Literal[ENGINE_VERSION, ENGINE_V2] | None = None
+    decoder: Literal["hf_generate", STRICT_DECODER] | None = None  # M4: strict_b22_v1 has its own reference
 
 
 class ModelQualifications:
@@ -91,7 +92,7 @@ class ModelQualifications:
             "qualifiedModelsByNoiseEngine": by_engine,
         }
 
-    def start(self, asset, device_id, current, engine=None):
+    def start(self, asset, device_id, current, engine=None, decoder=None):
         with self.store.db() as db:
             db.execute("BEGIN IMMEDIATE")
             device = db.execute("SELECT * FROM devices WHERE id=?", (device_id,)).fetchone()
@@ -131,7 +132,9 @@ class ModelQualifications:
                 raise HTTPException(409, "Wait for legacy GPU ownership release")
             self.runtime.require_command(db, device_id, "QUALIFY_MODEL")
             self.runtime.require_command(db, device_id, "CANCEL_MODEL_QUALIFICATION")
-            reference = self.reference(db, current["workspaceId"], asset["manifestHash"], engine)
+            # references and qualifications are keyed by engine, and by decoder for the strict identity only
+            key = qualification_key(engine, decoder)
+            reference = self.reference(db, current["workspaceId"], asset["manifestHash"], key)
             if not reference:
                 for row in db.execute(
                     "SELECT body FROM model_probe_jobs WHERE workspace_id=?", (current["workspaceId"],)
@@ -140,7 +143,8 @@ class ModelQualifications:
                     if (
                         other["manifestHash"] == asset["manifestHash"]
                         and other["status"] not in TERMINAL
-                        and other.get("noiseEngineVersion", ENGINE_VERSION) == engine
+                        and qualification_key(other.get("noiseEngineVersion", ENGINE_VERSION), other.get("decoder"))
+                        == key
                     ):
                         raise HTTPException(409, "Wait for the first device to establish the model reference")
             job = {
@@ -151,6 +155,7 @@ class ModelQualifications:
                 "ownerUserId": current["userId"],
                 "manifestHash": asset["manifestHash"],
                 "noiseEngineVersion": engine,
+                **({"decoder": STRICT_DECODER} if key != engine else {}),
                 "manifest": asset["manifest"],
                 "source": asset["source"],
                 "profileHash": canonical_json_hash(profile),
@@ -171,7 +176,11 @@ class ModelQualifications:
                 db,
                 device_id,
                 "QUALIFY_MODEL",
-                {k: job[k] for k in ("jobId", "mode", "manifest", "source", "reference", "noiseEngineVersion")},
+                {
+                    k: job[k]
+                    for k in ("jobId", "mode", "manifest", "source", "reference", "noiseEngineVersion", "decoder")
+                    if k in job
+                },
                 "model-probe:" + job["jobId"],
             )
             self.store.audit(db, current["userId"], "MODEL_QUALIFICATION_REQUESTED", job["jobId"], job["workspaceId"])
@@ -182,7 +191,11 @@ class ModelQualifications:
         return {
             k: job[k]
             for k in ("jobId", "deviceId", "assetId", "ownerUserId", "mode", "status", "errorCode", "createdAt")
-        } | {"chunkMemory": job.get("chunkMemory"), "noiseEngineVersion": job.get("noiseEngineVersion", ENGINE_VERSION)}
+        } | {
+            "chunkMemory": job.get("chunkMemory"),
+            "noiseEngineVersion": job.get("noiseEngineVersion", ENGINE_VERSION),
+            "decoder": job.get("decoder", "hf_generate"),
+        }
 
     def cancel(self, db, job):
         if job["status"] in TERMINAL:
@@ -253,9 +266,10 @@ class ModelQualifications:
                         raise ValueError("Native profile changed")
                     reference = report.reference if job["mode"] == "BUILD_REFERENCE" else job["reference"]
                     check_reference(reference, job["manifest"])
-                    engine = job.get("noiseEngineVersion", ENGINE_VERSION)
-                    if reference["cell"]["recipe"]["noise"]["engine"] != engine:
-                        raise ValueError("Model reference noise engine differs")
+                    engine = qualification_key(job.get("noiseEngineVersion", ENGINE_VERSION), job.get("decoder"))
+                    recipe = reference["cell"]["recipe"]
+                    if qualification_key(recipe["noise"]["engine"], recipe["evaluation"]["decoder"]) != engine:
+                        raise ValueError("Model reference noise engine or decoder differs")
                     evidence = verify_observations(reference, report.observations)
                     reference_hash = canonical_json_hash(reference)
                     old = self.reference(db, job["workspaceId"], job["manifestHash"], engine)
@@ -307,7 +321,11 @@ def install_routes(app, registry, runtime, scoped, device_auth):
     @app.post("/api/v1/models/{asset_id}/qualifications", status_code=201)
     def start(asset_id: str, body: ProbeRequest, current=Depends(scoped)):
         return service.start(
-            registry.get(asset_id, current["workspaceId"], "model"), body.deviceId, current, body.noiseEngineVersion
+            registry.get(asset_id, current["workspaceId"], "model"),
+            body.deviceId,
+            current,
+            body.noiseEngineVersion,
+            body.decoder,
         )
 
     @app.get("/api/v1/models/{asset_id}/qualifications")
@@ -318,9 +336,10 @@ def install_routes(app, registry, runtime, scoped, device_auth):
             return {
                 "referenceHash": reference["reference_hash"] if reference else None,
                 "referenceHashesByNoiseEngine": {
-                    engine: row["reference_hash"]
+                    key: row["reference_hash"]
                     for engine in CPU_NOISE_FINGERPRINTS
-                    if (row := service.reference(db, current["workspaceId"], asset["manifestHash"], engine))
+                    for key in (engine, qualification_key(engine, STRICT_DECODER))
+                    if (row := service.reference(db, current["workspaceId"], asset["manifestHash"], key))
                 },
                 "jobs": [
                     service.public(json.loads(r[0]))

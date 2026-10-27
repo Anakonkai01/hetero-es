@@ -30,9 +30,21 @@ OBSERVATION_KEYS = {
 }
 
 
-def _documents(manifest, schema_hash, generation_config_hash, engine=ENGINE_VERSION):
+STRICT_DECODER = "strict_b22_v1"  # heteroes.catalog.STRICT_B22_DECODER, kept literal: the CPU lab imports this module
+
+
+def qualification_key(engine, decoder=None):
+    """The lab's key for a device's qualified models: the noise engine, plus the decoder for the strict identity."""
+    if decoder not in (None, "hf_generate", STRICT_DECODER):
+        raise ValueError("Qualification decoders are hf_generate and strict_b22_v1")
+    return f"{engine}+{STRICT_DECODER}" if decoder == STRICT_DECODER else engine
+
+
+def _documents(manifest, schema_hash, generation_config_hash, engine=ENGINE_VERSION, decoder="hf_generate"):
     if engine not in CPU_NOISE_FINGERPRINTS:
         raise ValueError("Unknown CPU noise engine")
+    if decoder not in ("hf_generate", STRICT_DECODER):
+        raise ValueError("Qualification decoders are hf_generate and strict_b22_v1")
     for digest in (schema_hash, generation_config_hash):
         if not isinstance(digest, str) or re.fullmatch("[a-f0-9]{64}", digest) is None:
             raise ValueError("Invalid reference schema or generation configuration hash")
@@ -58,8 +70,8 @@ def _documents(manifest, schema_hash, generation_config_hash, engine=ENGINE_VERS
             "antithetic": True,
         },
         "evaluation": {
-            "evalDtype": "float32",
-            "decoder": "hf_generate",
+            "evalDtype": "float16" if decoder == STRICT_DECODER else "float32",
+            "decoder": decoder,
             "generationConfigSha256": generation_config_hash,
             "maxNewTokens": 32,
             "systemPrompt": None,
@@ -121,14 +133,21 @@ def check_reference(reference, manifest):
     engine = cell.get("recipe", {}).get("noise", {}).get("engine")
     if engine not in CPU_NOISE_FINGERPRINTS:
         raise ValueError("Unknown CPU noise engine")
-    config = cell_configs(manifest["modelId"], manifest["revision"], None if engine == ENGINE_VERSION else engine)[
-        "full"
-    ]
+    decoder = (cell.get("recipe", {}).get("evaluation") or {}).get("decoder")
+    if decoder not in ("hf_generate", STRICT_DECODER):
+        raise ValueError("Unknown model qualification decoder")
+    config = cell_configs(
+        manifest["modelId"], manifest["revision"], None if engine == ENGINE_VERSION else engine, decoder
+    )["full"]
     if canonical_json_hash(cell["config"]) != canonical_json_hash(config):
         raise ValueError("Model qualification uses the trusted full-model probe only")
     try:
         recipe, plan = _documents(
-            manifest, cell["recipe"]["schemaHash"], cell["recipe"]["evaluation"]["generationConfigSha256"], engine
+            manifest,
+            cell["recipe"]["schemaHash"],
+            cell["recipe"]["evaluation"]["generationConfigSha256"],
+            engine,
+            decoder,
         )
     except (KeyError, TypeError):
         raise ValueError("Invalid model qualification recipe") from None
@@ -163,11 +182,13 @@ def verify_observations(reference, observations):
     return verify(cell, {sign: observations[str(sign)] for sign in (1, -1)})
 
 
-def build_reference(model_path, manifest, device="cuda", emit=lambda event: None, *, engine=ENGINE_VERSION):
+def build_reference(
+    model_path, manifest, device="cuda", emit=lambda event: None, *, engine=ENGINE_VERSION, decoder="hf_generate"
+):
     validate_manifest(manifest, allow_any=True)
-    config = cell_configs(manifest["modelId"], manifest["revision"], None if engine == ENGINE_VERSION else engine)[
-        "full"
-    ]
+    config = cell_configs(
+        manifest["modelId"], manifest["revision"], None if engine == ENGINE_VERSION else engine, decoder
+    )["full"]
     run, observed = observe(model_path, {**config, "noiseEngineVersion": engine}, reference_rows(), SEED, device, emit)
     observations = {str(sign): rows for sign, rows in observed.items()}
     reference = {
