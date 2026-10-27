@@ -7,11 +7,13 @@ The standalone coordinator (`python -m heteroes.v3 serve`) and workers (`... wor
 the remote worker runs `git archive HEAD runtime/src` staged on the remote host. The shared run secret goes to the remote
 over SSH standard input, never on a command line or in a file. The lab and its device states are not used.
 
-Pass ("E2E OK") requires: every generation completed; both workers committed results; audits re-ran candidates on the
+Pass ("E2E OK") requires: every generation completed; at least one update changed the weights (an all-equal-reward run
+replays trivially); both workers committed results; audits re-ran candidates on the
 other worker and every completed audit matched (same texts across the two GPU architectures); the stored texts re-score
 to the committed rewards; and the recorded updates, replayed on a fresh CPU model, give every published child hash.
 
     python3 acceptance/probes/strict_e2e.py --out .scratch/e2e-01 --generations 4
+    python3 acceptance/probes/strict_e2e.py --out .scratch/e2e-02 --generations 4 --kill-local-at 2   # with a fault
 """
 
 import argparse
@@ -37,6 +39,13 @@ p.add_argument("--audit-rate", type=float, default=0.5)
 p.add_argument("--host", default="100.110.165.40", help="this machine's address reachable from the remote worker")
 p.add_argument("--port", type=int, default=18765)
 p.add_argument("--timeout-seconds", type=float, default=1800)
+p.add_argument(
+    "--kill-local-at",
+    type=int,
+    help="fault: SIGKILL the local worker 1 s after generation N opens, restart it 30 s later",
+)
+p.add_argument("--weights", default=r"layers\.2[0-3]\.", help="subset regex (a soak uses a small one: disk)")
+p.add_argument("--compare", type=Path, help="an earlier report.json: its children and record hashes must be equal")
 a = p.parse_args()
 if a.out.exists():
     p.error("--out must be a fresh directory")
@@ -49,7 +58,7 @@ spec = {
     "model": {"path": f"{LOCAL.models}/qwen", "id": "Qwen/Qwen2.5-0.5B-Instruct"},
     "data": {"path": str(REPO / "acceptance/e2e/arith96.jsonl"), "promptField": "question"}
     | {"batchSize": 16, "batchSeed": 11, "splitSeed": 42},
-    "weightSpace": {"kind": "subset", "include": [r"layers\.2[0-3]\."]},
+    "weightSpace": {"kind": "subset", "include": [a.weights]},
     "sigma": {"kind": "constant", "initial": 0.001, "minimum": 0.001},
     "antithetic": True,
     "maxNewTokens": 32,
@@ -79,14 +88,20 @@ while not (run_dir / "server.json").exists():
     time.sleep(1)
 server = json.loads((run_dir / "server.json").read_text())
 
-local = subprocess.Popen(
-    [LOCAL.runtime_python, "-m", "heteroes.v3", "worker", "--coordinator", url, "--model-path", f"{LOCAL.models}/qwen"]
-    + ["--worker-id", "local-5070ti", "--out", str(a.out / "worker-local"), "--device", "cuda"]
-    + ["--recipe-hash", server["recipeHash"]],
-    env=env,
-    stdout=logs["worker-local"],
-    stderr=subprocess.STDOUT,
-)
+
+def start_local(name):
+    log = logs.get(name) or logs.setdefault(name, (a.out / f"{name}.log").open("w"))
+    return subprocess.Popen(
+        [LOCAL.runtime_python, "-m", "heteroes.v3", "worker", "--coordinator", url]
+        + ["--model-path", f"{LOCAL.models}/qwen", "--worker-id", "local-5070ti", "--out", str(a.out / name)]
+        + ["--device", "cuda", "--recipe-hash", server["recipeHash"]],
+        env=env,
+        stdout=log,
+        stderr=subprocess.STDOUT,
+    )
+
+
+local = start_local("worker-local")
 
 # the remote worker: stage this commit's runtime source, read the secret from stdin, run the product worker
 tree = subprocess.run(
@@ -114,6 +129,26 @@ remote = subprocess.Popen(
 remote.stdin.write((token + "\n").encode())
 remote.stdin.close()
 
+fault = None
+if a.kill_local_at is not None:
+    # the local worker dies while it holds leases of an open generation; its attempts must expire and be redone
+    events, seen = run_dir / "events.jsonl", 0
+    while fault is None and coordinator.poll() is None:
+        lines = events.read_text().splitlines() if events.exists() else []
+        for line in lines[seen:]:
+            row = json.loads(line)
+            if row.get("event") == "generation_open" and row.get("generation") == a.kill_local_at:
+                time.sleep(1)
+                local.kill()
+                fault = {"generation": a.kill_local_at, "killedAt": time.time(), "exit": local.wait()}
+                break
+        seen = len(lines)
+        time.sleep(0.2)
+    if fault is not None:
+        time.sleep(30)
+        local = start_local("worker-local-restarted")
+        fault["restartedAt"] = time.time()
+
 status = coordinator.wait()
 for process in (local, remote):
     try:
@@ -124,7 +159,9 @@ subprocess.run(
     [*SSH, f"cd {remote_root} && tar -czf - worker/events.jsonl worker/identity.json"],
     stdout=(a.out / "worker-remote.tar.gz").open("wb"),
 )
-report = {"coordinatorExit": status, "recipeHash": server["recipeHash"], "failures": []}
+report = {"coordinatorExit": status, "recipeHash": server["recipeHash"], "failures": [], "fault": fault}
+if a.kill_local_at is not None and fault is None:
+    report["failures"].append("the requested fault was never injected")
 if status != 0:
     report["failures"].append(f"coordinator exited with {status}")
 else:
@@ -153,7 +190,14 @@ else:
             "SELECT u.worker_id, a.worker_id, u.matched FROM audit u JOIN result r USING(candidate_id) JOIN attempt a "
             "ON a.candidate_id=r.candidate_id AND a.attempt_number=r.attempt_number"
         ).fetchall()
+        expired = db.execute(
+            "SELECT a.worker_id, COUNT(*) FROM expiry e JOIN attempt a USING(candidate_id, attempt_number) "
+            "GROUP BY a.worker_id"
+        ).fetchall()  # fmt: skip
     report["resultsByWorker"] = workers
+    report["expiredByWorker"] = dict(expired)
+    if fault is not None and not report["expiredByWorker"].get("local-5070ti"):
+        report["failures"].append("the killed worker held no lease that expired, so the fault tested nothing")
     report["auditPairs"] = [list(row) for row in audits]
     with Ledger(run_dir / "ledger.sqlite") as ledger:
         children = []
@@ -173,8 +217,27 @@ else:
             if model_weights_sha256(model, schema) != stored.child_weights_sha256:
                 report["failures"].append(f"g{generation}: replayed child differs from the published hash")
     report["children"] = children
+    report["rewards"] = [row["mean_reward"] for row in summaries]
+    # coordinator bookkeeping per generation, early / middle / late thirds (M3.bookkeeping, M5.long-run)
+    thirds = [summaries[i * len(summaries) // 3 : (i + 1) * len(summaries) // 3] for i in range(3)]
+    report["bookkeeping"] = {
+        name: {
+            key: round(sum(row[key] for row in part) / len(part), 4)
+            for key in ("record_seconds", "update_seconds", "publish_seconds", "total_seconds")
+        }
+        for name, part in zip(("early", "middle", "late"), thirds)
+        if part
+    }
+    report["recordHashes"] = [row["record_hash"] for row in summaries]
+    if a.compare is not None:
+        earlier = json.loads(a.compare.read_text())
+        # the same recipe gives the same updates whichever GPU ran which candidate, and through a worker fault
+        if (earlier["children"], earlier["recordHashes"]) != (children, report["recordHashes"]):
+            report["failures"].append(f"children or generation records differ from {a.compare}")
     if len(summaries) != a.generations:
         report["failures"].append("not every generation completed")
+    if not any(row["changed"] for row in summaries) or children[-1] == summaries[0]["parent_sha256"]:
+        report["failures"].append("no generation changed the weights, so the replay check proves nothing")
     if set(workers) != {"local-5070ti", "thao-3060"}:
         report["failures"].append(f"results came from {sorted(workers)}, not from both GPUs")
     if not audits or any(auditor == original for auditor, original, _ in audits):
