@@ -109,6 +109,23 @@ try {
   await poll({ qualificationReports: [{ jobId: job.jobId, status: 'CANCELLED', processAlive: false }] });
   await card.getByText('Model check cancelled', { exact: true }).waitFor();
   results.cancelWaitedForConfirmedDeath = true;
+  // M4: the strict decoder has its own check, with the new noise engine only
+  await card.getByLabel(/^Decoder/).selectOption('strict_b22_v1');
+  assert.equal(await card.getByLabel('Compatibility for').isDisabled(), true);
+  await card.getByText('This computer needs a model check.').waitFor();
+  await card.getByRole('button', { name: 'Check compatibility for the strict decoder', exact: true }).click();
+  await card.getByText('Preparing model check', { exact: true }).waitFor();
+  const strictStatus = await (
+    await page.request.get(base + `/api/v1/models/${model.id}/qualifications`, { headers })
+  ).json();
+  const strictJob = strictStatus.jobs.find((j) => j.status !== 'CANCELLED');
+  assert.equal(strictJob.decoder, 'strict_b22_v1');
+  assert.equal(strictJob.mode, 'BUILD_REFERENCE');
+  const strictStart = (await poll()).commands.find((c) => c.kind === 'QUALIFY_MODEL' && c.jobId === strictJob.jobId);
+  assert.equal(strictStart.decoder, 'strict_b22_v1');
+  assert.equal(strictStart.noiseEngineVersion, 'pcg64_u32_to_f16_normal_quantile_v2');
+  await card.getByText('· strict decoder').waitFor();
+  results.strictCheckStartedThroughUi = true;
   await page.screenshot({ path: path.join(output, 'model-check.png'), fullPage: true });
   const missing = await page.evaluate(() => globalThis.__HETEROES_MISSING_TRANSLATIONS__ ?? []);
   assert.deepEqual(missing, []);

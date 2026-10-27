@@ -25,6 +25,7 @@ interface Job {
   ownerUserId: string;
   status: string;
   errorCode: string | null;
+  decoder?: string;
 }
 interface Checks {
   referenceHash: string | null;
@@ -32,6 +33,7 @@ interface Checks {
 }
 const v2 = 'pcg64_u32_to_f16_normal_quantile_v2';
 const v1 = 'numpy_pcg64_normal_f32_to_f16_v1';
+const strictDecoder = 'strict_b22_v1';
 const terminal = new Set(['COMPLETED', 'CANCELLED', 'FAILED']);
 
 export function ModelQualification({ assetId, manifestHash }: { assetId: string; manifestHash: string }) {
@@ -41,7 +43,12 @@ export function ModelQualification({ assetId, manifestHash }: { assetId: string;
   const cache = useQueryClient();
   const endpoint = '/api/v1/models/' + encodeURIComponent(assetId) + '/qualifications';
   const [deviceId, setDeviceId] = useState('');
-  const [engine, setEngine] = useState(v2);
+  const [engineChoice, setEngine] = useState(v2);
+  const [decoder, setDecoder] = useState('hf_generate');
+  // the strict decoder has one reference per noise engine; its runs use the new engine, so only v2 is offered
+  const strict = decoder === strictDecoder;
+  const engine = strict ? v2 : engineChoice;
+  const qualificationKey = strict ? `${v2}+${strictDecoder}` : engine;
   const checks = useQuery({
     queryKey: ['model-qualifications', ...scope, assetId],
     queryFn: () => apiGet<Checks>(endpoint),
@@ -56,7 +63,8 @@ export function ModelQualification({ assetId, manifestHash }: { assetId: string;
   });
   const refresh = () => cache.invalidateQueries({ predicate: (q) => q.queryKey[0] !== 'session' });
   const start = useMutation({
-    mutationFn: () => apiPost(endpoint, { deviceId, noiseEngineVersion: engine }),
+    mutationFn: () =>
+      apiPost(endpoint, { deviceId, noiseEngineVersion: engine, ...(strict ? { decoder: strictDecoder } : {}) }),
     onSuccess: refresh,
   });
   const cancel = useMutation({
@@ -96,11 +104,23 @@ export function ModelQualification({ assetId, manifestHash }: { assetId: string;
         <select
           className="sel"
           value={engine}
-          disabled={Boolean(active)}
+          disabled={Boolean(active) || strict}
           onChange={(event) => setEngine(event.target.value)}
         >
           <option value={v2}>{t('New experiments (v2)')}</option>
           <option value={v1}>{t('Historical experiments (v1)')}</option>
+        </select>
+      </label>
+      <label className="fg">
+        {t('Decoder')}
+        <select
+          className="sel"
+          value={decoder}
+          disabled={Boolean(active)}
+          onChange={(event) => setDecoder(event.target.value)}
+        >
+          <option value="hf_generate">{t('Standard decoder')}</option>
+          <option value={strictDecoder}>{t('Strict decoder (FP16, bit-exact)')}</option>
         </select>
       </label>
       <label className="fg">
@@ -122,8 +142,8 @@ export function ModelQualification({ assetId, manifestHash }: { assetId: string;
       {selected && (
         <p className="hint">
           {(
-            selected.selfTest.qualifiedModelsByNoiseEngine?.[engine] ??
-            (selected.selfTest.noiseVersion === engine ? selected.selfTest.qualifiedModelHashes : [])
+            selected.selfTest.qualifiedModelsByNoiseEngine?.[qualificationKey] ??
+            (!strict && selected.selfTest.noiseVersion === engine ? selected.selfTest.qualifiedModelHashes : [])
           )?.includes(manifestHash)
             ? t('This computer is ready for this model.')
             : t('This computer needs a model check.')}
@@ -140,11 +160,14 @@ export function ModelQualification({ assetId, manifestHash }: { assetId: string;
         disabled={!ready || Boolean(active) || start.isPending || checks.isPending || checks.isError}
         onClick={() => start.mutate()}
       >
-        {t('Check compatibility')}
+        {strict ? t('Check compatibility for the strict decoder') : t('Check compatibility')}
       </button>
       {checks.data?.jobs.slice(0, 5).map((job) => (
         <div className="demo-item" key={job.jobId}>
-          <span>{eligible.find((d) => d.deviceId === job.deviceId)?.displayName ?? t('Computer')}</span>
+          <span>
+            {eligible.find((d) => d.deviceId === job.deviceId)?.displayName ?? t('Computer')}
+            {job.decoder === strictDecoder ? ` · ${t('strict decoder')}` : ''}
+          </span>
           <span role="status">{jobStatus(job)}</span>
           {!terminal.has(job.status) && (workspace?.role === 'ADMIN' || session?.user.userId === job.ownerUserId) && (
             <button

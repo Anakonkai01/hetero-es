@@ -167,6 +167,8 @@ export function RuntimeConfiguration({
           alpha,
           sigma,
           decodeEngine: decoder,
+          // the strict decoder reads the live FP16 weights; other runs keep their documents without the field
+          ...(version === 3 && decoder === 'strict_b22_v1' ? { evalDtype: 'float16' } : {}),
           coordinatorDeviceId: coordinator,
           backupPolicy: { interval, retain },
           workerIds: selected,
@@ -457,6 +459,7 @@ export function RuntimeConfiguration({
                   {version === 3 && (
                     <option value="hf_fp32_cpu_guard_v1">{t('FP32 with CPU reference (experimental)')}</option>
                   )}
+                  {version === 3 && <option value="strict_b22_v1">{t('Strict FP16, bit-exact on every GPU')}</option>}
                 </select>
               </label>
               {decoder === 'hf_fp32_cpu_guard_v1' && (
@@ -464,7 +467,18 @@ export function RuntimeConfiguration({
                   {t('Near-tied tokens use extra CPU RAM. Large models may exceed the reference memory limit.')}
                 </p>
               )}
-              <p className="hint">{t('FP32 evaluation · canonical CPU noise · exact worker restore.')}</p>
+              {decoder === 'strict_b22_v1' ? (
+                <>
+                  <p className="hint">
+                    {t('FP16 evaluation of the live weights · canonical CPU noise · exact worker restore.')}
+                  </p>
+                  <p className="hint">
+                    {t('Every selected device needs the model check for the strict decoder (Models page).')}
+                  </p>
+                </>
+              ) : (
+                <p className="hint">{t('FP32 evaluation · canonical CPU noise · exact worker restore.')}</p>
+              )}
               <p className="hint">
                 {t('Pinned revision:')} {cap.data?.modelRevision}
               </p>

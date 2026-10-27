@@ -274,7 +274,36 @@ try {
   results.defaultCoordinatorAndManualChoice = true;
   await page.getByLabel(/CPU fixture/).check();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  // M4: the strict decoder is offered for Recipe v3 and sends FP16; the lab wants its own model check on every device
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
+  await page.getByText('Advanced settings', { exact: true }).click();
+  const decoder = page.getByLabel(/^Decoder/);
+  assert.ok((await decoder.locator('option').evaluateAll((o) => o.map((x) => x.value))).includes('strict_b22_v1'));
+  await decoder.selectOption('strict_b22_v1');
+  await page.getByText('Every selected device needs the model check for the strict decoder').waitFor();
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  const strictRequest = page.waitForRequest((r) => r.method() === 'POST' && r.url().endsWith('/api/v1/experiments'));
   await page.getByRole('button', { name: 'Save draft', exact: true }).click();
+  const strictBody = (await strictRequest).postDataJSON();
+  assert.equal(strictBody.decodeEngine, 'strict_b22_v1');
+  assert.equal(strictBody.evalDtype, 'float16');
+  await page.getByText('Qualify every selected device for this pinned model with the strict decoder').waitFor();
+  errors.splice(
+    errors.findIndex((e) => /status of 422/.test(e)),
+    1,
+  ); // the refusal was the point of this step
+  results.strictDecoderNeedsItsOwnModelCheck = true;
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
+  await page.getByText('Advanced settings', { exact: true }).click();
+  await decoder.selectOption('hf_generate');
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  const plainRequest = page.waitForRequest((r) => r.method() === 'POST' && r.url().endsWith('/api/v1/experiments'));
+  await page.getByRole('button', { name: 'Save draft', exact: true }).click();
+  assert.equal('evalDtype' in (await plainRequest).postDataJSON(), false); // earlier documents stay unchanged
   await page.waitForURL((url) => /\/experiments\/[a-f0-9]{32}$/.test(url.pathname));
   const v3 = await (
     await page.request.get(base + '/api/v1/experiments/' + page.url().split('/').at(-1), { headers })
@@ -289,6 +318,8 @@ try {
   assert.equal(v3.candidateSeedNamespace, 'browser-baseline');
   assert.equal(v3.hardCapSeconds, 600);
   assert.equal(v3.stallSeconds, 120);
+  assert.equal(v3.decodeEngine, 'hf_generate');
+  assert.equal(v3.evalDtype, undefined);
   assert.equal(v3.systemPrompt, null);
   await page.getByRole('tab', { name: 'Configuration', exact: true }).click();
   await page.getByText('choice-letter@1', { exact: true }).waitFor();

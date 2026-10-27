@@ -175,4 +175,5 @@ export interface CreateExperimentRequest extends Partial<V3Settings> {
   alpha?: number;
   sigma?: number;
   decodeEngine?: string;
+  evalDtype?: 'float16'; // only with the strict decoder (ADR-013)
 }

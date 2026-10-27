@@ -1432,6 +1432,15 @@ export const translations: Record<string, string> = {
   hf_generate: 'hf_generate',
   hf_compact: 'hf_compact',
   'FP32 with CPU reference (experimental)': 'FP32 với tham chiếu CPU (thử nghiệm)',
+  'Strict FP16, bit-exact on every GPU': 'FP16 nghiêm ngặt, kết quả giống hệt trên mọi GPU',
+  'FP16 evaluation of the live weights · canonical CPU noise · exact worker restore.':
+    'Đánh giá FP16 trên trọng số đang chạy · nhiễu chuẩn từ CPU · khôi phục trọng số chính xác.',
+  'Every selected device needs the model check for the strict decoder (Models page).':
+    'Mỗi thiết bị được chọn phải qua kiểm tra model cho decoder nghiêm ngặt (trang Models).',
+  'Standard decoder': 'Decoder tiêu chuẩn',
+  'Strict decoder (FP16, bit-exact)': 'Decoder nghiêm ngặt (FP16, giống hệt từng bit)',
+  'Check compatibility for the strict decoder': 'Kiểm tra tương thích cho decoder nghiêm ngặt',
+  'strict decoder': 'decoder nghiêm ngặt',
   'Near-tied tokens use extra CPU RAM. Large models may exceed the reference memory limit.':
     'Token sát điểm cần thêm RAM trên CPU. Model lớn có thể vượt giới hạn bộ nhớ tham chiếu.',
   'The coordinator started this experiment': 'Coordinator đã bắt đầu thí nghiệm này',
