@@ -205,6 +205,18 @@ CHECKS = [
         timeout=3600,
     ),
     Check(
+        "mutation-recovery-io",
+        "mutation",
+        ("{python}", "scripts/mutation-check.py", "--repo", "runtime", "--copy", "src", "--copy", "pyproject.toml")
+        + ("--copy", "tests/ledger", "--env", "PYTHONPATH=src:tests/ledger")
+        + ("--scratch", "{out}", "--mutants", "acceptance/mutants/recovery-io.json", "--test")
+        + (
+            "{runtime_python} -m pytest -q -x -p no:cacheprovider tests/ledger/test_cloud_sync.py "
+            "tests/ledger/test_recovery_points.py",
+        ),
+        timeout=3600,
+    ),
+    Check(
         "mutation-strict-decoder",
         "mutation",
         ("{python}", "scripts/mutation-check.py", "--repo", "runtime", "--copy", "src", "--copy", "pyproject.toml")
@@ -298,20 +310,20 @@ GATES = [
     Gate(
         "M3.streaming-upload",
         "M3",
-        "bounded streaming recovery upload with stateful backoff",
-        open="Recovery upload still reads whole objects; bounded streaming and backoff are not implemented.",
+        "bounded streaming recovery upload (hash-checked) with stateful backoff",
+        checks=("check-all", "mutation-recovery-io"),
     ),
     Gate(
         "M3.verify-cache",
         "M3",
         "verification cache bound to manifest and file identity",
-        open="No verification cache bound to an immutable manifest and file identity exists yet.",
+        checks=("check-all", "mutation-recovery-io"),
     ),
     Gate(
         "M3.retention",
         "M3",
-        "retention with a dependency graph",
-        open="Retention does not yet follow a dependency graph of recovery points.",
+        "retention keeps the newest cloud-verified point and the paused checkpoint",
+        checks=("check-all", "mutation-recovery-io"),
     ),
     Gate(
         "M3.bookkeeping",

@@ -156,3 +156,54 @@ def test_source_identity_pins_runtime_bytes_without_a_git_checkout(tmp_path):
     assert source_identity(tmp_path) == first
     source.write_bytes(b"changed numerical implementation")
     assert source_identity(tmp_path)["sourceTreeSha256"] != first["sourceTreeSha256"]
+
+
+def test_upload_verification_cache_follows_manifest_and_file_identity(tmp_path, monkeypatch):
+    import os
+
+    from heteroes.product import recovery
+
+    root, sha = sample(tmp_path)
+    point = capture_point(
+        root, {"generation": 0, "child_sha256": sha, "parent_sha256": sha}, {}, {"interval": 1, "retain": 3}
+    )
+    hashed = []
+    real = recovery.sha256
+    monkeypatch.setattr(recovery, "sha256", lambda path: hashed.append(Path(path).name) or real(path))
+    files = len(json.loads((point / "manifest.json").read_text())["files"])
+
+    def verify():
+        hashed.clear()
+        recovery.verify_point(point, cache=True)
+        return len(hashed)
+
+    assert verify() == files  # first time: every file is hashed
+    assert verify() == 0  # same manifest bytes and file identities: no rehash
+    recovery.verify_point(point)  # the default (restore, pause) never trusts the cache
+    assert len(hashed) == files
+    ledger = point / "ledger.sqlite"
+    stat = ledger.stat()
+    os.utime(ledger, ns=(stat.st_atime_ns, stat.st_mtime_ns + 1000))
+    assert verify() == files  # a touched file is hashed again
+    assert verify() == 0
+    (point / "verify-cache.json").write_text("{not json")
+    assert verify() == files  # an unreadable cache is ignored
+    manifest = point / "manifest.json"
+    manifest.write_text(manifest.read_text() + " ")
+    assert verify() == files  # other manifest bytes, other cache key
+    (ledger).write_bytes(b"corrupt")
+    with pytest.raises(ValueError, match="checksum"):
+        recovery.verify_point(point, cache=True)
+
+
+def test_cache_file_is_not_part_of_the_point(tmp_path):
+    from heteroes.product.recovery import verify_point
+
+    root, sha = sample(tmp_path)
+    point = capture_point(
+        root, {"generation": 0, "child_sha256": sha, "parent_sha256": sha}, {}, {"interval": 1, "retain": 3}
+    )
+    verify_point(point, cache=True)
+    assert (point / "verify-cache.json").exists()
+    restored = restore_point(point, tmp_path / "restored")
+    assert not (restored / "verify-cache.json").exists()

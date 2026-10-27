@@ -1,0 +1,15 @@
+[
+ {"name": "upload reads unbounded blocks", "file": "src/heteroes/product/cloud_sync.py", "old": "        size = UPLOAD_BLOCK if size is None or size < 0 else min(size, UPLOAD_BLOCK)", "new": "        size = self.left if size is None or size < 0 else size"},
+ {"name": "changed point completed", "file": "src/heteroes/product/cloud_sync.py", "old": "            if digest.hexdigest() != obj[\"sha256\"]:", "new": "            if False:"},
+ {"name": "backoff ignored", "file": "src/heteroes/product/cloud_sync.py", "old": "            if self.clock() >= backoff.get(\"retryAt\", 0):", "new": "            if True:"},
+ {"name": "backoff does not grow", "file": "src/heteroes/product/cloud_sync.py", "old": "BACKOFF_FIRST * 2 ** (failures - 1)", "new": "BACKOFF_FIRST"},
+ {"name": "backoff uncapped", "file": "src/heteroes/product/cloud_sync.py", "old": "min(BACKOFF_CAP, BACKOFF_FIRST * 2 ** (failures - 1))", "new": "BACKOFF_FIRST * 2 ** (failures - 1)"},
+ {"name": "success keeps the backoff", "file": "src/heteroes/product/cloud_sync.py", "old": "                    (root / \"cloud-backoff.json\").unlink(missing_ok=True)\n", "new": "                    pass\n"},
+ {"name": "newest cloud copy not kept", "file": "src/heteroes/product/cloud_sync.py", "old": "if read_json(p / \"cloud-state.json\", {}).get(\"status\") == \"READY\"), None),", "new": "if False), None),"},
+ {"name": "paused checkpoint not kept", "file": "src/heteroes/product/cloud_sync.py", "old": "                read_json(root / \"pause-point.json\", {}).get(\"pointId\"),\n", "new": ""},
+ {"name": "verified point forgets its remote copy", "file": "src/heteroes/product/cloud_sync.py", "old": "{\"status\": \"READY\", \"remoteCreated\": True, \"t\": time.time()}", "new": "{\"status\": \"READY\", \"t\": time.time()}"},
+ {"name": "cache trusted without a match", "file": "src/heteroes/product/recovery.py", "old": "        cached = cache and json.loads((point / VERIFY_CACHE).read_text()) == {", "new": "        cached = cache or json.loads((point / VERIFY_CACHE).read_text()) == {"},
+ {"name": "cache ignores mtime", "file": "src/heteroes/product/recovery.py", "old": "    return [stat.st_size, stat.st_mtime_ns, stat.st_ino, stat.st_dev]", "new": "    return [stat.st_size, 0, stat.st_ino, stat.st_dev]"},
+ {"name": "cache ignores manifest bytes", "file": "src/heteroes/product/recovery.py", "old": "    key = hashlib.sha256(raw).hexdigest()", "new": "    key = \"manifest\""},
+ {"name": "restore trusts the cache", "file": "src/heteroes/product/recovery.py", "old": "def verify_point(point, cache=False):", "new": "def verify_point(point, cache=True):"}
+]

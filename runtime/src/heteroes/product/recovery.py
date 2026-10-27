@@ -162,23 +162,48 @@ def capture_point(root, summary, recipe, policy, final=False, identity=None):
         raise
 
 
-def verify_point(point):
+VERIFY_CACHE = "verify-cache.json"
+
+
+def _file_identity(path):
+    stat = path.stat()
+    return [stat.st_size, stat.st_mtime_ns, stat.st_ino, stat.st_dev]
+
+
+def verify_point(point, cache=False):
+    """Check a recovery point's files, ledger and v3 state against its manifest.
+
+    `cache=True` (the upload loop, which retries the same point) skips re-hashing when the manifest bytes and every
+    file's size, mtime, inode and device equal those recorded after the last full check. Everything else is still
+    checked. A rewrite that restores the old mtime on the same inode is not detected; restore and pause never use it.
+    """
     point = Path(point)
-    manifest = json.loads((point / "manifest.json").read_text())
+    raw = (point / "manifest.json").read_bytes()
+    manifest = json.loads(raw)
     validate_manifest(manifest)
     if not {"ledger.sqlite", "config.json", "identity.json"} <= manifest["files"].keys():
         raise ValueError("Incomplete manifest")
-    for name, meta in manifest["files"].items():
+    key = hashlib.sha256(raw).hexdigest()
+    identities = {}
+    for name in manifest["files"]:
         if not safe_name(name, manifest["formatVersion"]):
             raise ValueError("Unsafe recovery path")
         path = point / name
         if any(p.is_symlink() for p in [point, path.parent, path]) or not path.is_file():
             raise ValueError("Missing or unsafe recovery file")
-        if (
-            type(meta.get("sizeBytes")) is not int
-            or path.stat().st_size != meta["sizeBytes"]
-            or sha256(path) != meta["sha256"]
-        ):
+        identities[name] = _file_identity(path)
+    try:
+        cached = cache and json.loads((point / VERIFY_CACHE).read_text()) == {
+            "formatVersion": 1,
+            "manifestSha256": key,
+            "files": identities,
+        }
+    except (OSError, ValueError):
+        cached = False
+    for name, meta in manifest["files"].items():
+        if type(meta.get("sizeBytes")) is not int or identities[name][0] != meta["sizeBytes"]:
+            raise ValueError("Recovery checksum mismatch")
+        if not cached and sha256(point / name) != meta["sha256"]:
             raise ValueError("Recovery checksum mismatch")
     if f"weights/{manifest['childWeightsSha256']}.bin" not in manifest["files"]:
         raise ValueError("Missing canonical child")
@@ -215,6 +240,8 @@ def verify_point(point):
         )
     elif manifest["formatVersion"] == 2:
         raise ValueError("V3 recovery requires a v3 config")
+    if cache and not cached:
+        write_json(point / VERIFY_CACHE, {"formatVersion": 1, "manifestSha256": key, "files": identities})
     return manifest
 
 
