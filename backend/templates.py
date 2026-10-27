@@ -33,8 +33,16 @@ FLOATS = {
     "sigmaMinimum": (1e-7, 1.0),
     "alphaMinimum": (1e-7, 1.0),
     "momentumBeta": (1e-7, 0.9999999),
+    "hardCapSeconds": (60, 7 * 86400),
+    "stallSeconds": (30, 7 * 86400),
 }
-NULLABLE = {"alphaMinimum", "momentumBeta", "evalChunk"}  # null: no minimum alpha, no momentum, the default chunk
+NULLABLE = {
+    "alphaMinimum",
+    "momentumBeta",
+    "evalChunk",
+    "hardCapSeconds",
+    "stallSeconds",
+}  # null: no minimum alpha, no momentum, the default chunk
 CHOICES = {
     "schedulerPolicy": set(SCHEDULER_POLICIES),
     "syncMode": set(SYNC_MODES),

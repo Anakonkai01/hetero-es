@@ -114,6 +114,9 @@ class WorkerClient:
         self.worker_id = worker_id
         self._transport = transport
         self.usage_reporting = usage_reporting
+        self.progress_reporting = (
+            False  # D11: the job asks for stage progress in heartbeats (older coordinators do not)
+        )
         self.max_chunk = (
             max_chunk  # ADR-010: the largest chunk this device may use, so it is given only audits it can run
         )
@@ -184,10 +187,13 @@ class WorkerClient:
 
     def heartbeat(self, assignment: Assignment) -> float:
         """Tell the coordinator that the lease is still wanted; returns the new deadline (the coordinator's clock)."""
-        reply = self._call(
-            "heartbeat",
-            assignment.payload(),
-        )
+        payload = assignment.payload()
+        if self.progress_reporting:
+            from heteroes import progress
+
+            stage, units = progress.CURRENT.snapshot()
+            payload["progress"] = {"stage": stage or "perturb", "units": units}
+        reply = self._call("heartbeat", payload)
         deadline = reply.get("deadline")
         if isinstance(deadline, bool) or not isinstance(deadline, (int, float)):
             raise WorkerAPIError("bad_response", f"a heartbeat reply without a deadline: {reply!r}")

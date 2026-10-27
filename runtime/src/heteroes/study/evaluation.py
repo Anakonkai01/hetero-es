@@ -128,6 +128,9 @@ def generate_rows(
                         **inputs, max_new_tokens=evaluation["maxNewTokens"], do_sample=sample, **options
                     )
                 new = ids[:, inputs["input_ids"].shape[1] :]
+            from heteroes import progress
+
+            progress.advance("rollout")  # one generate() chunk finished (D11 stage progress)
             texts = tokenizer.batch_decode(new, skip_special_tokens=True)
             eos = model.generation_config.eos_token_id
             eos_ids = {eos} if isinstance(eos, int) else set(eos or [])

@@ -146,6 +146,18 @@ CHECKS = [
         gpu=True,
     ),
     Check(
+        "mutation-watchdog",
+        "mutation",
+        ("{python}", "scripts/mutation-check.py", "--repo", "runtime", "--copy", "src", "--copy", "pyproject.toml")
+        + ("--copy", "tests/ledger", "--copy", "tests/v3", "--env", "PYTHONPATH=src:tests/ledger:tests/v3")
+        + ("--scratch", "{out}", "--mutants", "acceptance/mutants/watchdog.json", "--test")
+        + (
+            "{runtime_python} -m pytest -q -x -p no:cacheprovider tests/ledger/test_stage_watchdog.py "
+            "tests/v3/test_v3_progress.py",
+        ),
+        timeout=3600,
+    ),
+    Check(
         "mutation-strict-decoder",
         "mutation",
         ("{python}", "scripts/mutation-check.py", "--repo", "runtime", "--copy", "src", "--copy", "pyproject.toml")
@@ -214,8 +226,8 @@ GATES = [
     Gate(
         "M2.watchdog",
         "M2",
-        "D11 stage watchdog and hard caps",
-        open="Stage-progress watchdog with monotonic deadlines and configured hard caps is not implemented.",
+        "D11 stage-progress watchdog, explicit finite hard cap that survives restarts",
+        checks=("check-all", "mutation-watchdog"),
     ),
     Gate(
         "M2.restore-recovery",

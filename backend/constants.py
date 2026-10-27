@@ -30,6 +30,8 @@ V3_UPDATE_KEYS = (
     "candidateSeedNamespace",
     "promptFormat",
     "auditRate",  # operational coverage; optional in older product configurations, outside numerical recipes
+    "hardCapSeconds",  # D11 watchdog settings: operational, outside numerical recipes
+    "stallSeconds",
 )
 
 # The shipped desktop-v3 qualification reference (docs/evidence/2026-10-19-v3-qualification-reference): a native Windows

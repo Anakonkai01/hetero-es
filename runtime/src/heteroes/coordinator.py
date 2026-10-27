@@ -125,6 +125,8 @@ class Coordinator:
         seed_namespace: str | None = None,
         usage_path=None,
         usage_flush_seconds=1.0,
+        generation_clock_path=None,
+        wall_clock=time.time,
     ):
         # Recipe v3 (ADR-008): `antithetic` gives pairs (seed, +1), (seed, -1); `coefficient_rule` makes version-2 records;
         # `score(generation, descriptor, completions) -> reward` scores the texts the workers submit, on this process
@@ -207,6 +209,9 @@ class Coordinator:
         ):
             raise ValueError("usage_flush_seconds must be finite and nonnegative")
         self._usage_flush_seconds = usage_flush_seconds
+        # D11: when each generation's hard cap started, kept across restarts so a restart never extends it
+        self._clock_path = None if generation_clock_path is None else Path(generation_clock_path)
+        self._wall = wall_clock
         if usage_path is not None:
             from heteroes.v3.usage import UsageStore
             from heteroes.v3.usage_queue import BoundedUsageSink
@@ -268,6 +273,7 @@ class Coordinator:
             "lease_seconds": self._lease_seconds,
             "state": state,
             **({"usageReporting": True} if self.usage is not None else {}),
+            "progressReporting": True,
             **(
                 {"generationContext": self.recipe.context(self.dataset, generation)} if self.dataset is not None else {}
             ),
@@ -277,8 +283,25 @@ class Coordinator:
         """A fixed number of seconds, None, or a function of the generation (derived from measured speeds, ADR-009)."""
         return value(generation) if callable(value) else value
 
+    def _cap_started(self, generation: int, now: float) -> float:
+        """The monotonic time this generation's hard cap counts from: the first start, not the latest restart (D11)."""
+        if self._clock_path is None:
+            return now
+        import json
+
+        key = f"{self.experiment_id}/g{generation}"
+        clock = json.loads(self._clock_path.read_text()) if self._clock_path.exists() else {}
+        wall = self._wall()
+        if key not in clock:
+            clock[key] = wall
+            temporary = self._clock_path.with_name(self._clock_path.name + ".tmp")
+            temporary.write_text(json.dumps(clock, sort_keys=True) + "\n")
+            temporary.replace(self._clock_path)
+        return now - max(0.0, wall - clock[key])
+
     def _wait_until_complete(self, generation: int) -> None:
         started, failed_since = self._monotonic(), None
+        capped = self._cap_started(generation, started)
         progress, progress_at = None, started
         limit = self._limit(self._timeout, generation)
         while True:
@@ -309,10 +332,10 @@ class Coordinator:
                     f"generation {self.experiment_id}/g{generation}: no progress for {self._stall} s "
                     f"({status.committed} of {status.total} committed): are the workers alive?"
                 )
-            if limit is not None and now - started >= limit:
+            if limit is not None and now - capped >= limit:
                 raise TimeoutError(
                     f"generation {self.experiment_id}/g{generation}: {status.committed} of {status.total} "
-                    f"committed after {limit} s"
+                    f"committed after {limit} s (the hard cap counts from the generation's first start)"
                 )
             self._sleep(self._poll)
 

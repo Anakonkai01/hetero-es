@@ -20,6 +20,7 @@ from dataclasses import dataclass
 
 import torch
 
+from heteroes import progress
 from heteroes.es.cuda_ops import perturb_model_cuda_
 from heteroes.es.perturb import perturb_model_
 from heteroes.es.snapshot import RestoreError, restore_from_snapshot_, take_snapshot
@@ -249,6 +250,7 @@ class CandidateExecutor:
                         self.recipe.chunk_elements,
                         engine=self.recipe.engine_version,
                     )
+            progress.advance("perturb")
             now = self._clock()
             timing["perturb"], mark = now - mark, now
             with self._phase("refresh", descriptor):
@@ -266,6 +268,7 @@ class CandidateExecutor:
         try:
             with self._phase("restore", descriptor):
                 restore_from_snapshot_(self.model, self.schema, self._snapshot)
+            progress.advance("restore")
         except RestoreError as restore_error:
             raise CandidateFailed(FailureKind.RESTORE_MISMATCH, str(restore_error)) from restore_error
         if measured_cuda:

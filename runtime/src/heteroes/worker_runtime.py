@@ -187,6 +187,7 @@ class WorkerRuntime:
         if reply.get("ok") is not True:
             raise TransportError(f"the coordinator refused to describe the job: {reply!r}")
         self._worker.client.usage_reporting = bool(reply["job"] and reply["job"].get("usageReporting") is True)
+        self._worker.client.progress_reporting = bool(reply["job"] and reply["job"].get("progressReporting") is True)
         return reply["job"]
 
     def _check_recipe(self, job: dict) -> None:

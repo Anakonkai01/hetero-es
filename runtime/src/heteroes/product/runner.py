@@ -110,6 +110,11 @@ def derived_limit(book, workers, candidates, *, floor, factor):
     return max(floor, factor * math.ceil(candidates / len(members)) * max(known))
 
 
+def generation_limit(derived, hard_cap=None):
+    """D11: the measured-speed limit, never above the researcher's/operator's explicit hard cap."""
+    return derived if hard_cap is None else min(derived, float(hard_cap))
+
+
 def main(directory, *, device="cuda", timeout_seconds=1800):
     from heteroes.coordinator import Coordinator, RunCancelled, RunPaused, _NoGeneration
     from heteroes.dispatch import Greedy
@@ -279,11 +284,19 @@ def main(directory, *, device="cuda", timeout_seconds=1800):
             host=config["host"],
             port=config["port"],
             token=os.environ["HETEROES_TOKEN"],
-            timeout_seconds=lambda _: derived_limit(
-                scheduler.book, membership.current, config["candidatesPerGeneration"], floor=timeout_seconds, factor=4
+            timeout_seconds=lambda _: generation_limit(
+                derived_limit(
+                    scheduler.book,
+                    membership.current,
+                    config["candidatesPerGeneration"],
+                    floor=timeout_seconds,
+                    factor=4,
+                ),
+                config.get("hardCapSeconds"),
             ),
             audit_timeout_seconds=lambda _: derived_limit(scheduler.book, membership.current, 1, floor=120, factor=3),
-            stall_seconds=300,
+            stall_seconds=config.get("stallSeconds", 300),
+            generation_clock_path=root / "generation-clock.json",
             failed_grace_seconds=60,
             lease_seconds=60,
             log=emit,

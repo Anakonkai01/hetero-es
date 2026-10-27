@@ -1,0 +1,13 @@
+[
+ {"name": "every heartbeat is progress", "file": "src/heteroes/worker_api.py", "old": "        if progress is None or progress[1] > self._progress_units.get(key, -1):", "new": "        if True:"},
+ {"name": "legacy heartbeats are not progress", "file": "src/heteroes/worker_api.py", "old": "        if progress is None or progress[1] > self._progress_units.get(key, -1):", "new": "        if progress is not None and progress[1] > self._progress_units.get(key, -1):"},
+ {"name": "cap restarts with the coordinator", "file": "src/heteroes/coordinator.py", "old": "        return now - max(0.0, wall - clock[key])", "new": "        return now"},
+ {"name": "first start not persisted", "file": "src/heteroes/coordinator.py", "old": "            temporary.replace(self._clock_path)", "new": "            pass"},
+ {"name": "stall may equal the cap", "file": "src/heteroes/v3/options.py", "old": "    if cap is not None and stall is not None and stall >= cap:", "new": "    if cap is not None and stall is not None and stall > cap:"},
+ {"name": "infinite cap admitted", "file": "src/heteroes/v3/options.py", "old": "type(value) not in (int, float) or not math.isfinite(value) or not low <= value <= MAX_HARD_CAP_SECONDS", "new": "type(value) not in (int, float) or not low <= value"},
+ {"name": "hard cap ignored", "file": "src/heteroes/product/runner.py", "old": "    return derived if hard_cap is None else min(derived, float(hard_cap))", "new": "    return derived"},
+ {"name": "progress sent unasked", "file": "src/heteroes/worker.py", "old": "        if self.progress_reporting:\n", "new": "        if True:\n"},
+ {"name": "perturb not reported", "file": "src/heteroes/executor.py", "old": "            progress.advance(\"perturb\")\n", "new": ""},
+ {"name": "chunks not reported", "file": "src/heteroes/study/evaluation.py", "old": "            progress.advance(\"rollout\")  # one generate() chunk finished (D11 stage progress)\n", "new": ""},
+ {"name": "malformed progress admitted", "file": "src/heteroes/worker_api.py", "old": "        if _integer(\"units\", value[\"units\"]) < 0:", "new": "        if False:"}
+]

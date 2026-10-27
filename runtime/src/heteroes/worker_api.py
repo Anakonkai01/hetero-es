@@ -178,11 +178,22 @@ def completions_sha256(completions) -> str:
 
 
 def _decode_heartbeat(request):
-    _fields(request, {"descriptor", "attempt_number", "token"})
+    _fields(request, {"descriptor", "attempt_number", "token"}, frozenset({"progress"}))
+    progress = None
+    if "progress" in request:  # D11: (stage, units) of the work; the units only grow
+        from heteroes.progress import STAGES
+
+        value = request["progress"]
+        if not isinstance(value, dict) or set(value) != {"stage", "units"} or value["stage"] not in STAGES:
+            raise ValueError("progress is {stage, units} with a known stage")
+        if _integer("units", value["units"]) < 0:
+            raise ValueError("progress units are not negative")
+        progress = (value["stage"], value["units"])
     return (
         CandidateDescriptor.from_dict(request["descriptor"]),
         _integer("attempt_number", request["attempt_number"]),
         _text("token", request["token"]),
+        progress,
     )
 
 
@@ -225,6 +236,8 @@ class WorkerAPI:
         # granted leases, heartbeats, results and failures so far: what the coordinator counts as a generation still moving
         # (ADR-009). A request that gets no work is not activity: a waiting worker must not hide a real stall.
         self.activity = 0
+        self.liveness = 0  # heartbeats that showed no progress (D11): alive, but not moving
+        self._progress_units = {}
         self.scoring_error: str | None = None
         self._ledger = ledger
         self._experiment_id = experiment_id
@@ -312,9 +325,19 @@ class WorkerAPI:
         return None
 
     def _heartbeat(self, decoded) -> dict:
-        descriptor, attempt_number, token = decoded
+        descriptor, attempt_number, token, progress = decoded
         lease = self._ledger.extend_lease(descriptor, attempt_number, token, self._lease_seconds)
-        self.activity += 1
+        # D11: a heartbeat that reports progress is activity only if its units grew; without the field (a worker
+        # older than progress reporting) it keeps the ADR-009 meaning. Either way it extends the lease.
+        key = (descriptor.candidate_id, attempt_number)
+        if progress is None or progress[1] > self._progress_units.get(key, -1):
+            self.activity += 1
+        else:
+            self.liveness += 1
+        if progress is not None:
+            self._progress_units[key] = progress[1]
+            while len(self._progress_units) > 4096:
+                self._progress_units.pop(next(iter(self._progress_units)))
         if hasattr(self._policy, "heartbeat"):  # a busy worker is alive for the policy too (GreedyTail, ADR-009)
             self._policy.heartbeat(self._ledger.attempt_worker(descriptor, attempt_number, token))
         return {"deadline": lease.deadline}

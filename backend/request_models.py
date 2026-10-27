@@ -59,6 +59,9 @@ class Configuration(BaseModel):
     promptFormat: Literal["chat", "raw"] | None = None
     validationInterval: int = Field(default=1, ge=1, le=1000, strict=True)
     auditRate: float = Field(default=0.05, ge=0, le=1, strict=True)
+    # D11 watchdog: explicit finite hard cap per generation and stage-progress stall time (operational, seconds)
+    hardCapSeconds: float | None = Field(default=None, ge=60, le=7 * 86400)
+    stallSeconds: float | None = Field(default=None, ge=30, le=7 * 86400)
     # Recipe v3 Python scorer / coefficient rule: [{role, name, function, source}] (the lab adds codeSha256)
     pythonCode: list[dict] = Field(default_factory=list, max_length=3)  # scorer, coefficients, sampler
 

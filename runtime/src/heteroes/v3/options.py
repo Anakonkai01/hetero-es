@@ -39,6 +39,22 @@ def audit_selected(candidate_id, rate=0.05):
     return int(hashlib.sha256(candidate_id.encode()).hexdigest(), 16) < threshold
 
 
+MAX_HARD_CAP_SECONDS = 7 * 86400
+
+
+def validate_watchdog(config):
+    """D11: an explicit finite hard cap per generation and the stage-progress stall time, both operational settings
+    outside the numerical recipe. A stall shorter than one candidate's slowest step would stop healthy runs."""
+    cap, stall = config.get("hardCapSeconds"), config.get("stallSeconds")
+    for name, value, low in (("hardCapSeconds", cap, 60), ("stallSeconds", stall, 30)):
+        if value is not None and (
+            type(value) not in (int, float) or not math.isfinite(value) or not low <= value <= MAX_HARD_CAP_SECONDS
+        ):
+            raise ValueError(f"{name} is a finite number of seconds from {low} to {MAX_HARD_CAP_SECONDS}")
+    if cap is not None and stall is not None and stall >= cap:
+        raise ValueError("stallSeconds must be shorter than hardCapSeconds")
+
+
 def validate_prompt_format(value, system_prompt=None):
     selected = "chat" if value is None else value
     if selected not in ("chat", "raw"):
@@ -165,6 +181,7 @@ def validate_options(config, *, allow_python=False, with_code=True):
     and the coordinator), or, `with_code=False`, without it (a worker, which never receives researcher code).
     """
     validate_audit_rate(config.get("auditRate", 0.05))
+    validate_watchdog(config)
     validate_prompt_format(config.get("promptFormat"), config.get("systemPrompt"))
     validate_seed_namespace(config.get("candidateSeedNamespace"))
     validate_weight_space(config["weightSpace"], initial_adapter=False)
