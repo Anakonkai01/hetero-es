@@ -13,3 +13,6 @@ desktop/*/resources/
 package-lock.json
 **/fixtures/
 .scratch/
+acceptance/golden/
+acceptance/mutants/
+docs/acceptance/receipts/
