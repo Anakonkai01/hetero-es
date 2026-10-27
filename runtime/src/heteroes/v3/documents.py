@@ -13,10 +13,10 @@ import re
 import numpy as np
 
 from heteroes.canonical import canonical_json_hash
-from heteroes.catalog import CPU_GUARD_DECODER, V3_DECODE_ENGINES, WORKLOAD_NAMES
+from heteroes.catalog import CPU_GUARD_DECODER, STRICT_B22_DECODER, V3_DECODE_ENGINES, WORKLOAD_NAMES
 from heteroes.manifest import EVAL_DTYPES, KNOWN_ENGINES, Recipe
 from heteroes.v3.scoring import validate_spec
-from heteroes.v3.options import ALPHA_SCHEDULES, COEFFICIENT_RULES, EXACT_CHUNKS, validate_update_rule
+from heteroes.v3.options import ALPHA_SCHEDULES, COEFFICIENT_RULES, exact_chunks, validate_update_rule
 from heteroes.v3.options import validate_weight_space as _check_weight_space
 
 FORMAT_VERSION = 3
@@ -125,18 +125,24 @@ def validate_recipe(doc, *, translated=False):
         raise ValueError("unknown evaluation precision or decoder")
     if evaluation["decoder"] == CPU_GUARD_DECODER and evaluation["evalDtype"] != "float32":
         raise ValueError("The CPU-guard decoder requires FP32 evaluation")
+    if evaluation["decoder"] == STRICT_B22_DECODER and evaluation["evalDtype"] != "float16":
+        raise ValueError("The strict decoder reads the live weights: it requires FP16 evaluation")
     if "chunk" in evaluation and (
-        type(evaluation["chunk"]) is not int or evaluation["chunk"] not in EXACT_CHUNKS[evaluation["evalDtype"]]
+        type(evaluation["chunk"]) is not int
+        or evaluation["chunk"] not in exact_chunks(evaluation["evalDtype"], evaluation["decoder"])
     ):
         raise ValueError(
-            f"evaluation.chunk of {evaluation['evalDtype']} is one of {EXACT_CHUNKS[evaluation['evalDtype']]}"
+            f"evaluation.chunk of {evaluation['evalDtype']} is one of {exact_chunks(evaluation['evalDtype'], evaluation['decoder'])}"
         )
     if "chunks" in evaluation:  # ADR-010: the chunks a worker may use; the result records which one it used
         allowed = evaluation["chunks"]
         if (
             "chunk" not in evaluation
             or not isinstance(allowed, list)
-            or any(type(c) is not int or c not in EXACT_CHUNKS[evaluation["evalDtype"]] for c in allowed)
+            or any(
+                type(c) is not int or c not in exact_chunks(evaluation["evalDtype"], evaluation["decoder"])
+                for c in allowed
+            )
             or allowed != sorted(set(allowed))
             or evaluation["chunk"] not in allowed
         ):

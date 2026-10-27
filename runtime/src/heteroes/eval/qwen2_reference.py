@@ -31,7 +31,7 @@ class Qwen2Reference:
             raise ReferenceArithmeticError("The reference uses live FP16 model parameters")
         if any(p.device != self.device for p in model.parameters()):
             raise ReferenceArithmeticError("One reference model must be on one device")
-        if self.device.type == "cuda" and os.environ.get("HETEROES_GPU_ACCEPTANCE") != "1":
+        if self.device.type == "cuda" and not ops.gpu_opt_in():
             raise ReferenceArithmeticError("CUDA reference experiments need HETEROES_GPU_ACCEPTANCE=1")
         rope = getattr(config, "rope_parameters", None) or {
             "rope_theta": getattr(config, "rope_theta", 10000.0),

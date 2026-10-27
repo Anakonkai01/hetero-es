@@ -20,6 +20,16 @@ def update_options(config):
     return options
 
 
+def strict_options(config):
+    """strict_b22_v1 reads the live FP16 weights and may batch any chunk (ADR-013). Only a strict run carries these
+    keys into its documents, so the documents of every earlier managed run keep their bytes."""
+    from heteroes.catalog import STRICT_B22_DECODER
+
+    if config["decodeEngine"] != STRICT_B22_DECODER:
+        return {}
+    return {"evalDtype": "float16"} | ({"evalChunks": config["evalChunks"]} if config.get("evalChunks") else {})
+
+
 def prepare_run(config, root, device, *, declared=None, client=None, cache=None):
     """Load verified inputs; on workers rebuild the declared recipe independently.
 
@@ -107,6 +117,7 @@ def prepare_run(config, root, device, *, declared=None, client=None, cache=None)
         }
         | ({"evalChunk": config["evalChunk"]} if config.get("evalChunk") is not None else {})
         | ({"promptFormat": config["promptFormat"]} if config.get("promptFormat") is not None else {})
+        | strict_options(config)
         | update_options(config),
         model_files=manifest["files"],
         revision=manifest["revision"],

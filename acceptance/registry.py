@@ -39,7 +39,7 @@ NATIVE_TESTS = tuple(
         "test_attention_key_stages",
         "test_request_context",
     )
-)
+) + ("tests/v3/test_v3_strict_decoder.py",)
 
 PYTEST = ("-m", "pytest", "-q", "-p", "no:cacheprovider")
 
@@ -51,7 +51,7 @@ CHECKS = [
     Check(
         "strict-gpu-suite",
         "gpu",
-        ("{runtime_python}", *PYTEST, "tests/eval"),
+        ("{runtime_python}", *PYTEST, "tests/eval", "tests/v3/test_v3_strict_decoder.py"),
         hosts=LINUX_GPU,
         env=GPU + RUNTIME_PATH,
         cwd="runtime",
@@ -145,6 +145,16 @@ CHECKS = [
         timeout=4 * 3600,
         gpu=True,
     ),
+    Check(
+        "mutation-strict-decoder",
+        "mutation",
+        ("{python}", "scripts/mutation-check.py", "--repo", "runtime", "--copy", "src", "--copy", "pyproject.toml")
+        + ("--copy", "tests/v3", "--env", "PYTHONPATH=src:tests/v3", "--env", "HETEROES_GPU_ACCEPTANCE=1")
+        + ("--scratch", "{out}", "--mutants", "acceptance/mutants/strict-decoder.json", "--test")
+        + ("{runtime_python} -m pytest -q -x -p no:cacheprovider tests/v3/test_v3_strict_decoder.py",),
+        timeout=3600,
+        gpu=True,
+    ),
 ]
 
 SUITE = ("strict-gpu-suite", "strict-gpu-suite@3060-wsl", "strict-gpu-suite-native@3060-native")
@@ -179,10 +189,16 @@ GATES = [
     Gate("M1.throughput", "M1", "G3 throughput floor and golden tokens", checks=("strict-throughput",)),
     Gate("M1.mutation", "M1", "promoted execution routes kill all mutants", checks=("mutation-strict-routes",)),
     Gate(
+        "M1.executor-cross-host",
+        "M1",
+        "strict_b22_v1 executor tests pass on the 3060 (WSL2 and native Windows)",
+        checks=("strict-gpu-suite@3060-wsl", "strict-gpu-suite-native@3060-native"),
+    ),
+    Gate(
         "M1.executor",
         "M1",
-        "B22 as a backend of the candidate executor",
-        open="executor.py still evaluates with the FP16/FP32 EvalModel; the strict backend adapter is not written.",
+        "strict_b22_v1 through the candidate executor: live weights, restore, chunk invariance, failure mapping",
+        checks=("strict-gpu-suite", "mutation-strict-decoder"),
     ),
     Gate(
         "M1.architectures",

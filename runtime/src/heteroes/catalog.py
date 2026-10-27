@@ -17,7 +17,9 @@ DECODE_ENGINES = ("hf_generate", "hf_compact")
 
 # A new opt-in Recipe v3 identity; never extend Recipe v1's frozen decoder vocabulary.
 CPU_GUARD_DECODER = "hf_fp32_cpu_guard_v1"
-V3_DECODE_ENGINES = (*DECODE_ENGINES, CPU_GUARD_DECODER)
+# The strict B22 integer decoder over the live FP16 weights (ADR-013): same tokens on every supported NVIDIA GPU.
+STRICT_B22_DECODER = "strict_b22_v1"
+V3_DECODE_ENGINES = (*DECODE_ENGINES, CPU_GUARD_DECODER, STRICT_B22_DECODER)
 
 # How the coordinator hands candidates to workers (ADR-009); the first is the default. Not part of any recipe identity:
 # a policy only decides which worker evaluates which candidate.

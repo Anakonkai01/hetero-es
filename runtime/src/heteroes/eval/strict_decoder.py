@@ -291,7 +291,7 @@ class StrictDecoderReference(Qwen2Reference):
     """Independent eager operator oracle for every admitted graph adapter, with no vendor forward call."""
 
     def __init__(self, model, *, max_context=256, allow_fixture=False, frozen_int8=False):
-        if next(model.parameters()).device.type == "cuda" and os.environ.get("HETEROES_GPU_ACCEPTANCE") != "1":
+        if next(model.parameters()).device.type == "cuda" and not ops.gpu_opt_in():
             raise ReferenceArithmeticError("CUDA reference experiments need HETEROES_GPU_ACCEPTANCE=1")
         graph = describe_graph(model, max_context, frozen_int8=frozen_int8)
         self.model, self.config, self.generation_config = model, model.config, model.generation_config
@@ -358,7 +358,7 @@ class StrictDecoderReference(Qwen2Reference):
 
 
 def require_cuda(model):
-    if os.environ.get("HETEROES_GPU_ACCEPTANCE") != "1":
+    if not ops.gpu_opt_in():
         raise ReferenceArithmeticError("Strict CUDA backend experiments need HETEROES_GPU_ACCEPTANCE=1")
     if next(model.parameters()).device.type != "cuda":
         raise ReferenceArithmeticError("The strict CUDA backend needs the model on one CUDA device")

@@ -51,13 +51,13 @@ def generate_rows(
 
     prompt_format = validate_prompt_format(evaluation.get("promptFormat"), evaluation["systemPrompt"])
     decoder = evaluation.get("decoder", "hf_generate")  # Recipe v2 always, v3 by choice
-    from heteroes.catalog import CPU_GUARD_DECODER, V3_DECODE_ENGINES
+    from heteroes.catalog import CPU_GUARD_DECODER, STRICT_B22_DECODER, V3_DECODE_ENGINES
 
     if decoder not in V3_DECODE_ENGINES:
         raise ValueError("Unknown decoder")
-    if decoder == CPU_GUARD_DECODER and sample:
-        raise ValueError("The CPU-guard decoder is greedy only")
-    if decoder == "hf_compact":
+    if decoder in (CPU_GUARD_DECODER, STRICT_B22_DECODER) and sample:
+        raise ValueError(f"The {decoder} decoder is greedy only")
+    if decoder in ("hf_compact", STRICT_B22_DECODER):
         if sample:
             raise ValueError("The compacting decoder is greedy only")
         from heteroes.eval import compact_decode
@@ -95,6 +95,18 @@ def generate_rows(
             devices = [device.index or 0] if device.type == "cuda" else []
             if decoder == "hf_compact":
                 new, _ = compact_decode.compact_generate_ids(
+                    model,
+                    inputs["input_ids"],
+                    inputs["attention_mask"],
+                    evaluation["maxNewTokens"],
+                    eos_ids,
+                    pad_id,
+                    processors,
+                )
+            elif decoder == STRICT_B22_DECODER:
+                from heteroes.eval import strict_backend
+
+                new = strict_backend.generate_ids(
                     model,
                     inputs["input_ids"],
                     inputs["attention_mask"],

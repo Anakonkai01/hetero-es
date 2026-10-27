@@ -9,6 +9,10 @@ candidate specification; IEEE primitive/compiler assumptions still need hardware
 Do not compile/fuse these calls under this identity: contraction/reassociation would change the algorithm.
 """
 
+from contextlib import contextmanager
+import contextvars
+import os
+
 import torch
 
 REFERENCE_OPS_VERSION = "pairwise_f32_reference_v1_experimental"
@@ -16,6 +20,28 @@ REFERENCE_OPS_VERSION = "pairwise_f32_reference_v1_experimental"
 
 class ReferenceArithmeticError(ValueError):
     """The proposed operation contract cannot represent or support this input."""
+
+
+class StrictMemoryBudget(ReferenceArithmeticError):
+    """A request needs more than the decoder's explicit memory budget: refused before allocating (OUT_OF_MEMORY)."""
+
+
+_MANAGED = contextvars.ContextVar("heteroes_strict_managed", default=False)
+
+
+@contextmanager
+def managed_opt_in():
+    """A managed strict recipe is itself the GPU opt-in for the engine built inside this block."""
+    token = _MANAGED.set(True)
+    try:
+        yield
+    finally:
+        _MANAGED.reset(token)
+
+
+def gpu_opt_in():
+    """Strict CUDA objects are built only inside managed_opt_in() or with HETEROES_GPU_ACCEPTANCE=1 (experiments)."""
+    return _MANAGED.get() or os.environ.get("HETEROES_GPU_ACCEPTANCE") == "1"
 
 
 class StrictTransportError(RuntimeError):

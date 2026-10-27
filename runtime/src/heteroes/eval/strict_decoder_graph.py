@@ -18,7 +18,7 @@ from heteroes.canonical import canonical_json_hash
 from heteroes.eval import reference_ops as ops
 from heteroes.eval import strict_cuda as sc
 from heteroes.eval import strict_decode_cuda
-from heteroes.eval.reference_ops import ReferenceArithmeticError, StrictTransportError
+from heteroes.eval.reference_ops import ReferenceArithmeticError, StrictMemoryBudget, StrictTransportError
 from heteroes.eval.strict_decoder import describe_graph
 from heteroes.eval.strict_decoder_packed import StrictDecoderPacked
 
@@ -421,7 +421,7 @@ class StrictDecoderGraph(StrictDecoderPacked):
                 + self._request_workspace_bytes(capacity)
                 > self.max_graph_bytes
             ):
-                raise ReferenceArithmeticError("Captured decode exceeds its explicit memory budget")
+                raise StrictMemoryBudget("Captured decode exceeds its explicit memory budget")
             state = self._session_for(capacity, request_context(self.max_context, lengths, max_new_tokens))
             self._generation_begin()
             self._generation_decode_ready(capacity, penalty)

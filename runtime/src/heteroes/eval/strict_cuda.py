@@ -31,7 +31,7 @@ import torch
 
 from heteroes.canonical import canonical_json_hash
 from heteroes.eval import reference_ops as ops
-from heteroes.eval.reference_ops import ReferenceArithmeticError, StrictTransportError
+from heteroes.eval.reference_ops import ReferenceArithmeticError, StrictTransportError, gpu_opt_in
 from heteroes.eval import strict_prefill_cuda
 from heteroes.eval.strict_prefill_cuda import _PREFILL_SOURCE, prefill_attention_plan
 
@@ -1141,8 +1141,8 @@ class StrictCudaKernels:
     _attention_entry = "strict_attention_prefill"
 
     def __init__(self, device):
-        if os.environ.get("HETEROES_GPU_ACCEPTANCE") != "1":
-            raise ReferenceArithmeticError("Strict CUDA kernels need HETEROES_GPU_ACCEPTANCE=1")
+        if not gpu_opt_in():
+            raise ReferenceArithmeticError("Strict CUDA kernels need HETEROES_GPU_ACCEPTANCE=1 or a strict recipe")
         device = torch.device(device)
         if device.type != "cuda":
             raise ReferenceArithmeticError("Strict CUDA kernels need a CUDA device")

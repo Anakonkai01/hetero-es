@@ -12,6 +12,16 @@ ALPHA_SCHEDULES = ("constant", "cosine", "linear")
 # Prompts per generate() call a recipe may declare: FP16 is exact one prompt at a time only; FP32 batches gave the same
 # texts as one prompt at a time in the cross-GPU probes (16, and 64 on 5070 Ti, 3060 and 1660S: RUNTIME-TODO chunk-128)
 EXACT_CHUNKS = {"float16": (1,), "float32": (16, 32, 64)}
+STRICT_CHUNKS = (1, 2, 4, 8, 16, 32, 64)  # strict_b22_v1 computes every row independently (ADR-013)
+
+
+def exact_chunks(eval_dtype, decoder=None):
+    """The prompts per generate() call that give the same answers as one at a time, for this precision and decoder."""
+    from heteroes.catalog import STRICT_B22_DECODER
+
+    return STRICT_CHUNKS if decoder == STRICT_B22_DECODER else EXACT_CHUNKS[eval_dtype]
+
+
 MAX_WINDOW = 8
 
 
@@ -176,15 +186,17 @@ def validate_options(config, *, allow_python=False, with_code=True):
         validate_update_rule(
             {"kind": "momentum", "beta": config["momentumBeta"], "window": config.get("momentumWindow", 4)}
         )
-    if (
-        config.get("evalChunk") is not None
-        and config["evalChunk"] not in EXACT_CHUNKS[config.get("evalDtype", "float32")]
+    if config.get("evalChunk") is not None and config["evalChunk"] not in exact_chunks(
+        config.get("evalDtype", "float32"), config.get("decodeEngine")
     ):
         raise ValueError("unsupported prompts per generate() call")
     if config.get("evalChunks") is not None and (
         not isinstance(config["evalChunks"], list)
         or not config["evalChunks"]
-        or any(c not in EXACT_CHUNKS[config.get("evalDtype", "float32")] for c in config["evalChunks"])
+        or any(
+            c not in exact_chunks(config.get("evalDtype", "float32"), config.get("decodeEngine"))
+            for c in config["evalChunks"]
+        )
         or config.get("evalChunk") not in config["evalChunks"]
     ):
         raise ValueError("evalChunks lists exact chunks and includes evalChunk")
@@ -195,12 +207,14 @@ def validate_options(config, *, allow_python=False, with_code=True):
         allow_python and re.fullmatch("python@1:[0-9a-f]{64}", str(sampler))
     ):
         raise ValueError("unknown batch sampler")
-    from heteroes.catalog import CPU_GUARD_DECODER, V3_DECODE_ENGINES
+    from heteroes.catalog import CPU_GUARD_DECODER, STRICT_B22_DECODER, V3_DECODE_ENGINES
 
     if config["decodeEngine"] not in V3_DECODE_ENGINES:
         raise ValueError("unknown Recipe v3 decoder")
     if config["decodeEngine"] == CPU_GUARD_DECODER and config.get("evalDtype", "float32") != "float32":
         raise ValueError("The CPU-guard decoder requires FP32 evaluation")
+    if config["decodeEngine"] == STRICT_B22_DECODER and config.get("evalDtype", "float32") != "float16":
+        raise ValueError("The strict decoder reads the live weights: it requires FP16 evaluation")
     prompt = config["systemPrompt"]
     if prompt is not None and (not isinstance(prompt, str) or not prompt or len(prompt) > 4000):
         raise ValueError("system prompt is null or a text of at most 4000 characters")
