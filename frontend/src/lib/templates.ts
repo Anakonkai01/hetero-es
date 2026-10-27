@@ -19,6 +19,8 @@ const KEYS = [
   'systemPrompt',
   'validationInterval',
   'auditRate',
+  'hardCapSeconds',
+  'stallSeconds',
   'batchSize',
   'batchSeed',
   'sigmaSchedule',

@@ -92,6 +92,8 @@ export interface Experiment extends Partial<V3Settings> {
   maxNewTokens?: number;
   validationInterval?: number;
   auditRate?: number;
+  hardCapSeconds?: number;
+  stallSeconds?: number;
   studyMetrics?: {
     testLocked: boolean;
     independentReloadPassed?: boolean;
@@ -145,6 +147,8 @@ export interface Experiment extends Partial<V3Settings> {
 
 export interface CreateExperimentRequest extends Partial<V3Settings> {
   auditRate?: number;
+  hardCapSeconds?: number;
+  stallSeconds?: number;
   recipeVersion?: number;
   batchSize?: number;
   batchSeed?: number;

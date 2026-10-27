@@ -69,6 +69,17 @@ export const translations: Record<string, string> = {
   'Waiting for model check to stop': 'Đang chờ xác nhận kiểm tra model đã dừng',
   'Audits completed': 'Audit đã hoàn tất',
   'Audits are disabled (rate 0)': 'Đã tắt audit (tỷ lệ 0)',
+  'Generation hard cap (seconds)': 'Giới hạn cứng mỗi generation (giây)',
+  Automatic: 'Tự động',
+  'Stall time (seconds)': 'Thời gian đứng yên tối đa (giây)',
+  'Empty: derived from measured speed. A restart does not extend a generation past this limit.':
+    'Để trống: tính từ tốc độ đã đo. Khởi động lại không kéo dài generation quá giới hạn này.',
+  'The run stops when no stage makes progress for this long. Empty: 300 seconds.':
+    'Run dừng khi không bước nào tiến triển trong khoảng thời gian này. Để trống: 300 giây.',
+  'The generation hard cap is 60 to 604800 seconds.': 'Giới hạn cứng mỗi generation là từ 60 đến 604800 giây.',
+  'The stall time is 30 to 604800 seconds.': 'Thời gian đứng yên tối đa là từ 30 đến 604800 giây.',
+  'The stall time must be shorter than the generation hard cap.':
+    'Thời gian đứng yên tối đa phải ngắn hơn giới hạn cứng mỗi generation.',
   'Audit outcomes: {count} chosen': 'Kết quả audit: {count} được chọn',
   '{count} matched': '{count} khớp',
   '{count} mismatched': '{count} sai lệch',

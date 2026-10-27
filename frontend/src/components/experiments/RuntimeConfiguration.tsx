@@ -8,6 +8,7 @@ import { useWorkers } from '../../hooks/useWorkers';
 import { V3Fields } from './V3Fields';
 import { POLICY_HINT, POLICY_LABEL } from '../../lib/labels';
 import { DEFAULT_V3, v3ReviewRows } from '../../lib/v3Settings';
+import { watchdogSettings } from '../../lib/watchdog';
 import type { V3Settings } from '../../types/experiment';
 import type { CreateExperimentRequest, Experiment } from '../../types/experiment';
 import type { StudyDataset, StudyModel } from './StudyAssets';
@@ -83,6 +84,10 @@ export function RuntimeConfiguration({
   });
   const [validationInterval, setValidationInterval] = useState(initial?.validationInterval ?? 1);
   const [auditPercent, setAuditPercent] = useState(Number(((initial?.auditRate ?? 0.05) * 100).toPrecision(15)));
+  // D11: empty keeps the lab defaults (hard cap derived from measured speed, stall 300 s)
+  const [hardCap, setHardCap] = useState(initial?.hardCapSeconds?.toString() ?? '');
+  const [stall, setStall] = useState(initial?.stallSeconds?.toString() ?? '');
+  const watchdog = watchdogSettings(hardCap, stall);
   const [version, setVersion] = useState(initial?.recipeVersion ?? 1);
   const [modelId, setModelId] = useState(initial?.modelArtifactId ?? '');
   const [datasetId, setDatasetId] = useState(initial?.datasetIds?.[0] ?? '');
@@ -111,6 +116,10 @@ export function RuntimeConfiguration({
         setError('');
         if (version === 3 && v3.antithetic && candidates % 2) {
           setError(t('Antithetic sampling needs an even number of candidates.'));
+          return;
+        }
+        if (version === 3 && 'error' in watchdog) {
+          setError(t(watchdog.error));
           return;
         }
         if (step === 0) {
@@ -148,7 +157,9 @@ export function RuntimeConfiguration({
                 sigmaMinimum: minimum,
                 maxNewTokens: maxTokens,
                 validationInterval,
-                ...(version === 3 ? { ...v3, auditRate: auditPercent / 100 } : {}),
+                ...(version === 3 && !('error' in watchdog)
+                  ? { ...v3, auditRate: auditPercent / 100, ...watchdog }
+                  : {}),
               }
             : {}),
           maxGenerations: generations,
@@ -351,6 +362,44 @@ export function RuntimeConfiguration({
               />
               <small id="audit-rate-help">
                 {t('0 disables audits; 100 selects every candidate for another worker to check.')}
+              </small>
+            </label>
+          )}
+          {version === 3 && (
+            <label className="fg">
+              {t('Generation hard cap (seconds)')}
+              <input
+                className="inp"
+                type="number"
+                min={60}
+                max={604800}
+                step="any"
+                value={hardCap}
+                placeholder={t('Automatic')}
+                aria-describedby="hard-cap-help"
+                onChange={(e) => setHardCap(e.target.value)}
+              />
+              <small id="hard-cap-help">
+                {t('Empty: derived from measured speed. A restart does not extend a generation past this limit.')}
+              </small>
+            </label>
+          )}
+          {version === 3 && (
+            <label className="fg">
+              {t('Stall time (seconds)')}
+              <input
+                className="inp"
+                type="number"
+                min={30}
+                max={604800}
+                step="any"
+                value={stall}
+                placeholder="300"
+                aria-describedby="stall-help"
+                onChange={(e) => setStall(e.target.value)}
+              />
+              <small id="stall-help">
+                {t('The run stops when no stage makes progress for this long. Empty: 300 seconds.')}
               </small>
             </label>
           )}
@@ -568,6 +617,18 @@ export function RuntimeConfiguration({
               <div>
                 <dt>{t('Audit rate (%)')}</dt>
                 <dd>{auditPercent}</dd>
+              </div>
+            )}
+            {version === 3 && (
+              <div>
+                <dt>{t('Generation hard cap (seconds)')}</dt>
+                <dd>{hardCap.trim() || t('Automatic')}</dd>
+              </div>
+            )}
+            {version === 3 && (
+              <div>
+                <dt>{t('Stall time (seconds)')}</dt>
+                <dd>{stall.trim() || '300'}</dd>
               </div>
             )}
           </dl>

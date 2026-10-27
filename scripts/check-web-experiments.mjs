@@ -257,6 +257,12 @@ try {
   await page.getByLabel('Candidate seed group', { exact: true }).fill('browser-baseline');
   await page.getByRole('combobox', { name: /^Scorer/ }).selectOption('choice-letter');
   await page.getByLabel('Scorer answer field').fill('label');
+  // D11 watchdog: the stall time must be shorter than the hard cap, checked before leaving the step
+  await page.getByLabel('Generation hard cap (seconds)').fill('600');
+  await page.getByLabel('Stall time (seconds)').fill('600');
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.getByText('The stall time must be shorter than the generation hard cap.').waitFor();
+  await page.getByLabel('Stall time (seconds)').fill('120');
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   assert.equal(await page.getByLabel('Coordinator').inputValue(), enrolled.deviceId);
   // Clearing the selection is a user choice, including after leaving and returning to this step.
@@ -281,6 +287,8 @@ try {
   assert.equal(v3.scorer.config.answerField, 'label');
   assert.equal(v3.antithetic, true);
   assert.equal(v3.candidateSeedNamespace, 'browser-baseline');
+  assert.equal(v3.hardCapSeconds, 600);
+  assert.equal(v3.stallSeconds, 120);
   assert.equal(v3.systemPrompt, null);
   await page.getByRole('tab', { name: 'Configuration', exact: true }).click();
   await page.getByText('choice-letter@1', { exact: true }).waitFor();
