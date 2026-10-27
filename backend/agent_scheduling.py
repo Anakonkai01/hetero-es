@@ -2,7 +2,7 @@
 
 from .constants import CORE_COMMAND_KINDS, COMMAND_KINDS
 
-from .policies import v2_qualification, v3_qualification, noise_qualification, display_identity
+from .policies import v2_qualification, v3_qualification, noise_qualification, display_identity, strict_layout
 import json
 import secrets
 import time
@@ -38,6 +38,8 @@ class AgentScheduling:
         chosen = [coordinator] + [by_worker.get(w) for w in selected]
         if any(d and coordinator_only(d["selfTest"]) for d in chosen[1:]):
             return "CPU coordinator-only devices cannot be selected as workers"
+        if reason := strict_layout(body, coordinator, chosen[1:]):
+            return reason
         for d in chosen:
             if not d or d["approvalStatus"] != "APPROVED":
                 return "Selected device needs approval"

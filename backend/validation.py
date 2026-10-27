@@ -1,4 +1,4 @@
-from .policies import backup_policy as validated_backup_policy, v2_qualification, v3_qualification
+from .policies import backup_policy as validated_backup_policy, strict_layout, v2_qualification, v3_qualification
 
 from fastapi import HTTPException
 from .constants import V3_CODE_KEYS, V3_KEYS, V3_UPDATE_KEYS
@@ -121,6 +121,10 @@ def validate_configuration(config, current, *, store, runtime, registry, scoped,
             for d in runtime.devices()
             if d["deviceId"] == body["coordinatorDeviceId"] or d["workerId"] in body["workerIds"]
         ]
+        coordinator = next((d for d in selected if d["deviceId"] == body["coordinatorDeviceId"]), None)
+        workers = [d for d in selected if d["workerId"] in body["workerIds"]]
+        if version == 3 and (reason := strict_layout(body, coordinator, workers)):
+            raise HTTPException(422, reason)
         for d in selected:
             profile = d["selfTest"]
             if version == 3 and coordinator_only(profile) and d["deviceId"] == body["coordinatorDeviceId"]:

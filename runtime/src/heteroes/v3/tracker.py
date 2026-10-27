@@ -106,6 +106,24 @@ class Tracker:
             }
         )
 
+    def _release_device(self):
+        """
+        D1 (ADR-013): the export reload below must be the only weight set on this GPU. The run is over and the selected
+        weights were tested above, so the live model (and an FP32 shadow, and its strict engine) moves to the CPU; the
+        files and the LoRA export are written from there, and nothing evaluates the live model afterwards.
+        """
+        if next(self.loaded.model.parameters()).device.type != "cuda":
+            return
+        import torch
+
+        from heteroes.eval import strict_backend
+
+        strict_backend.release(self.loaded.model)
+        self.loaded.model.to("cpu")
+        if self.eval_model.model is not self.loaded.model:
+            self.eval_model.model.to("cpu")
+        torch.cuda.empty_cache()
+
     def export(self):
         if self.best is None:
             raise ValueError("No validated checkpoint selected")
@@ -129,6 +147,7 @@ class Tracker:
         load_weights_(self.loaded.model, self.loaded.schema, selected, self.best["weightsSha256"])
         self.eval_model.refresh()
         test = self._evaluate(self.eval_model.model, self.loaded.tokenizer, "test")
+        self._release_device()
         stage = Path(tempfile.mkdtemp(prefix=".v3-export-", dir=data_root(self.root)))
         try:
             from heteroes.v3.model import file_manifest, load, trainable_schema

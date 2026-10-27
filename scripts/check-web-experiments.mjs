@@ -274,14 +274,18 @@ try {
   results.defaultCoordinatorAndManualChoice = true;
   await page.getByLabel(/CPU fixture/).check();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  // M4: the strict decoder is offered for Recipe v3 and sends FP16; the lab wants its own model check on every device
+  // M4: the strict decoder is offered for Recipe v3 and sends FP16. This fixture's one device coordinates and works, so
+  // the lab refuses the strict draft (D1: one weight set per GPU); qualification refusals are backend tests
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await page.getByText('Advanced settings', { exact: true }).click();
   const decoder = page.getByLabel(/^Decoder/);
+  assert.equal(await decoder.inputValue(), 'strict_b22_v1'); // ADR-013: the default of a new Recipe v3 run
+  results.strictDecoderIsTheV3Default = true;
   assert.ok((await decoder.locator('option').evaluateAll((o) => o.map((x) => x.value))).includes('strict_b22_v1'));
   await decoder.selectOption('strict_b22_v1');
   await page.getByText('Every selected device needs the model check for the strict decoder').waitFor();
+  await page.getByText('One weight set per GPU: the coordinator needs its own GPU').waitFor();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   const strictRequest = page.waitForRequest((r) => r.method() === 'POST' && r.url().endsWith('/api/v1/experiments'));
@@ -289,12 +293,12 @@ try {
   const strictBody = (await strictRequest).postDataJSON();
   assert.equal(strictBody.decodeEngine, 'strict_b22_v1');
   assert.equal(strictBody.evalDtype, 'float16');
-  await page.getByText('Qualify every selected device for this pinned model with the strict decoder').waitFor();
+  await page.getByText("its coordinator's GPU cannot also be one of its workers").waitFor();
   errors.splice(
     errors.findIndex((e) => /status of 422/.test(e)),
     1,
   ); // the refusal was the point of this step
-  results.strictDecoderNeedsItsOwnModelCheck = true;
+  results.strictRunKeepsOneWeightSetPerGpu = true;
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await page.getByText('Advanced settings', { exact: true }).click();

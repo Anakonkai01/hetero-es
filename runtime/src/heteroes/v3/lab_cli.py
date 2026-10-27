@@ -78,8 +78,9 @@ def _managed_choices(spec):
     from heteroes.v3.options import validate_audit_rate
 
     validate_audit_rate(spec.get("auditRate", 0.05))
-    if spec.get("evalDtype", "float32") != "float32" or spec.get("noiseEngine", "cpu") != "cpu":
-        raise ValueError("The managed lab uses FP32 evaluation and canonical CPU noise")
+    dtype = "float16" if spec.get("decoder") == "strict_b22_v1" else "float32"  # the strict decoder reads FP16
+    if spec.get("evalDtype", "float32") != dtype or spec.get("noiseEngine", "cpu") != "cpu":
+        raise ValueError("The managed lab uses FP32 evaluation (FP16 for strict_b22_v1) and canonical CPU noise")
 
 
 def managed_configuration(spec, coordinator, workers, model, dataset):
@@ -144,6 +145,8 @@ def managed_configuration(spec, coordinator, workers, model, dataset):
         "maxNewTokens": spec.get("maxNewTokens", 256),
         "systemPrompt": spec.get("systemPrompt"),
         "decodeEngine": spec.get("decoder", "hf_generate"),
+        # only a strict run carries evalDtype (FP16, ADR-013): earlier managed documents stay unchanged
+        **({"evalDtype": spec.get("evalDtype")} if spec.get("decoder") == "strict_b22_v1" else {}),
         "scorer": scorer,
         "coefficientRule": rule,
         "alphaSchedule": schedule["kind"],

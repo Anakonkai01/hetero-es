@@ -207,8 +207,10 @@ export function RuntimeConfiguration({
                 className="sel"
                 value={version}
                 onChange={(e) => {
-                  setVersion(Number(e.target.value));
-                  setDecoder('hf_generate');
+                  const next = Number(e.target.value);
+                  setVersion(next);
+                  // ADR-013: a new Recipe v3 run defaults to the strict decoder; saved runs keep their own
+                  setDecoder(next === 3 ? 'strict_b22_v1' : 'hf_generate');
                 }}
               >
                 <option value={1}>{t('Built-in workload · Recipe v1')}</option>
@@ -474,6 +476,9 @@ export function RuntimeConfiguration({
                   </p>
                   <p className="hint">
                     {t('Every selected device needs the model check for the strict decoder (Models page).')}
+                  </p>
+                  <p className="hint">
+                    {t('One weight set per GPU: the coordinator needs its own GPU, which none of the workers may use.')}
                   </p>
                 </>
               ) : (

@@ -124,6 +124,23 @@ CHECKS = [
         timeout=3600,
         gpu=True,
     ),
+    # faults: the end-to-end strict run on two GPUs (local 5070 Ti and Thao's 3060 over SSH), then the same run with the
+    # local worker killed while it holds a lease; both must give the same children and generation records
+    Check(
+        "strict-e2e",
+        "faults",
+        (
+            "bash",
+            "-c",
+            '"$1" acceptance/probes/strict_e2e.py --out "$2/plain" --generations 4 && "$1" acceptance/probes/strict_e2e.py'
+            ' --out "$2/fault" --generations 4 --kill-local-at 2 --compare "$2/plain/report.json"',
+        )
+        + ("e2e", "{python}", "{out}"),
+        env=GPU,
+        expect="E2E OK",
+        timeout=2 * 3600,
+        gpu=True,
+    ),
     # package
     Check(
         "package-linux",
@@ -252,6 +269,30 @@ CHECKS = [
         ),
         timeout=3600,
     ),
+    Check(
+        "mutation-gpu-ownership-backend",
+        "mutation",
+        ("{python}", "scripts/mutation-check.py", "--repo", ".", "--copy", "backend", "--copy", "runtime/src")
+        + ("--copy", "pyproject.toml", "--env", "CUDA_VISIBLE_DEVICES=")
+        + ("--scratch", "{out}", "--mutants", "acceptance/mutants/gpu-ownership-backend.json", "--test")
+        + (
+            "{repo}/.venv-backend/bin/python -m pytest -q -x -p no:cacheprovider backend/tests/test_model_qualification.py",
+        ),
+        timeout=3600,
+    ),
+    Check(
+        "mutation-gpu-ownership-runtime",
+        "mutation",
+        ("{python}", "scripts/mutation-check.py", "--repo", "runtime", "--copy", "src", "--copy", "pyproject.toml")
+        + ("--copy", "tests/v3", "--env", "PYTHONPATH=src:tests/v3", "--env", "HETEROES_GPU_ACCEPTANCE=1")
+        + ("--scratch", "{out}", "--mutants", "acceptance/mutants/gpu-ownership-runtime.json", "--test")
+        + (
+            "{runtime_python} -m pytest -q -x -p no:cacheprovider tests/v3/test_v3_strict_decoder.py "
+            "tests/v3/test_sdk_lab.py",
+        ),
+        timeout=3600,
+        gpu=True,
+    ),
 ]
 
 SUITE = ("strict-gpu-suite", "strict-gpu-suite@3060-wsl", "strict-gpu-suite-native@3060-native")
@@ -368,7 +409,8 @@ GATES = [
         "M4.identity",
         "M4",
         "backend identity in recipes without changing historical hashes",
-        open="No recipe field selects the strict backend yet; the ADR for its identity is not written.",
+        # ADR-013: `evaluation.decoder = "strict_b22_v1"`; golden identities (check-all) keep every recorded hash
+        checks=("check-all", "mutation-strict-decoder"),
     ),
     Gate(
         "M4.qualification",
@@ -380,21 +422,24 @@ GATES = [
         "M4.gpu-ownership",
         "M4",
         "D1 one weight set per GPU across worker, audit, validation and export",
-        open="Roles managed by HeteroES do not yet share one strict runtime per GPU.",
+        # strict runs only (ADR-013 amendment): coordinator on its own GPU, export reload after the live set leaves it;
+        # earlier recipes keep their FP32 shadow and layouts
+        checks=("check-all", "strict-gpu-suite", "mutation-gpu-ownership-backend", "mutation-gpu-ownership-runtime"),
     ),
     Gate("M4.packaging", "M4", "Linux Worker/Server packages carry the exact runtime", checks=("package-linux",)),
     Gate(
         "M4.default",
         "M4",
         "B22 is the default for new GPU runs",
-        open="New GPU runs still default to the earlier recipe; switch only after M4.identity and M4.qualification.",
+        # the lab form (web-experiments browser check in check-all); the SDK stays explicit (ADR-013 amendment)
+        checks=("check-all",),
     ),
     # M5 — system acceptance
     Gate(
         "M5.end-to-end",
         "M5",
         "coordinator and two machines, strict backend, faults",
-        open="No end-to-end strict run with the local 5070 Ti and Thảo's 3060 has been made.",
+        checks=("strict-e2e",),
     ),
     Gate(
         "M5.long-run",

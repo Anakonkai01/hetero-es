@@ -81,6 +81,28 @@ def v3_qualification(profile, model_hash, engine=None, decoder=None):
     return None
 
 
+def strict_layout(body, coordinator, workers):
+    """
+    Why a strict run cannot use these devices, or None (D1, ADR-013: one weight set per GPU). The coordinator validates
+    and exports with the strict decoder, so it needs a GPU, and that GPU holds its model for the whole run: no worker of
+    the run may be the same device or the same physical GPU. Earlier recipes keep their layouts.
+    """
+    if body.get("decodeEngine") != "strict_b22_v1" or coordinator is None:
+        return None
+    from heteroes.product.cpu_coordinator import coordinator_only
+
+    if coordinator_only(coordinator["selfTest"]):
+        return "A strict run needs a GPU coordinator: its validation and export use the strict decoder"
+    gpu = coordinator.get("physicalResourceId")
+    if any(
+        w["deviceId"] == coordinator["deviceId"] or (gpu is not None and w.get("physicalResourceId") == gpu)
+        for w in workers
+        if w
+    ):
+        return "A strict run keeps one weight set per GPU: its coordinator's GPU cannot also be one of its workers"
+    return None
+
+
 def noise_qualification(profile, engine):
     """Legacy reports prove v1 only; connectivity never proves engine support."""
     from heteroes.noise.contracts import ENGINE_VERSION, CPU_NOISE_FINGERPRINTS

@@ -172,3 +172,49 @@ def test_notebook_qualification_never_reuses_v1_for_a_v2_run_and_deduplicates_de
     requests.clear()
     lab.qualify(model, [device], engine=ENGINE_VERSION, log=lambda *_: None)
     assert requests == []
+
+
+def test_a_strict_lab_run_qualifies_its_devices_for_the_strict_decoder():
+    from types import SimpleNamespace
+    from heteroes.noise.contracts import ENGINE_V2
+    from heteroes.sdk_lab import Lab, Device
+
+    digest, strict = "d" * 64, "strict_b22_v1"
+    model = SimpleNamespace(manifest_hash=digest, id="fixture/model")
+    plain = {"noiseVersion": ENGINE_V2, "qualifiedModelsByNoiseEngine": {ENGINE_V2: [digest]}}
+    both = {
+        "noiseVersion": ENGINE_V2,
+        "qualifiedModelsByNoiseEngine": {ENGINE_V2: [digest], f"{ENGINE_V2}+{strict}": [digest]},
+    }
+    devices = [
+        Device.of({"workerId": name, "deviceId": name * 32, "selfTest": profile})
+        for name, profile in (("a", plain), ("b", both))
+    ]
+    lab = Lab("https://lab.example", "fixture", "lab")
+    lab.model_asset = lambda model: {"id": "model"}
+    requests = []
+    lab.request = lambda method, path, body=None: (requests.append(body), {"jobId": "job", "status": "COMPLETED"})[1]
+    lab.qualify(model, devices, log=lambda *_: None, engine=ENGINE_V2, decoder=strict)
+    assert requests == [{"deviceId": "a" * 32, "noiseEngineVersion": ENGINE_V2, "decoder": strict}]
+    requests.clear()
+    lab.qualify(model, devices, log=lambda *_: None, engine=ENGINE_V2)  # the plain decoder sends no decoder field
+    assert requests == []
+
+
+def test_a_strict_sdk_run_reaches_the_lab_with_fp16_and_a_plain_one_without_eval_dtype():
+    from heteroes.sdk import ESConfig, ESTrainer
+    from heteroes.v3.lab_cli import managed_configuration
+
+    def request(**changes):
+        config = ESConfig(model_path="model", model_id="org/model", train_dataset="rows", **changes)
+        spec = ESTrainer(config, scorer={"name": "last-integer"}).lab_spec()
+        return managed_configuration(spec, "coordinator", ["worker"], {"id": "model"}, {"datasetId": "data"})
+
+    strict = request(decoder="strict_b22_v1", eval_dtype="float16")
+    assert strict["decodeEngine"] == "strict_b22_v1" and strict["evalDtype"] == "float16"
+    assert "evalDtype" not in request()  # earlier managed runs carry no evalDtype and keep their documents
+    import pytest
+
+    for wrong in ({"decoder": "strict_b22_v1"}, {"eval_dtype": "float16"}):  # FP16 belongs to the strict decoder only
+        with pytest.raises(ValueError, match="FP16 for strict_b22_v1"):
+            request(**wrong)

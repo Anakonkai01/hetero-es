@@ -154,14 +154,19 @@ class Lab:
             dataset.counts.get("train") if dataset is not None else None,
         )
 
-    def qualify(self, model, devices, timeout=3600, every=10.0, log=print, sleep=time.sleep, *, engine=None):
+    def qualify(
+        self, model, devices, timeout=3600, every=10.0, log=print, sleep=time.sleep, *, engine=None, decoder=None
+    ):
         """Qualify every given device for this model that is not yet (the first one builds the lab's reference); a
-        device must be ON and idle. Waits for each, one at a time."""
+        device must be ON and idle. Waits for each, one at a time. A strict run (`decoder="strict_b22_v1"`) has its
+        own qualification (M4)."""
         from heteroes.noise.contracts import CPU_ENGINES, ENGINE_V2
+        from heteroes.product.model_qualification import STRICT_DECODER, qualification_key
 
         engine = engine or ENGINE_V2
         if engine not in CPU_ENGINES:
             raise ValueError("Unknown CPU noise engine")
+        key = qualification_key(engine, decoder)
         asset = self.model_asset(model)
         if asset is None:
             raise LabError("Register the model first (submit does it)")
@@ -170,7 +175,7 @@ class Lab:
             if device.device_id in seen:
                 continue
             seen.add(device.device_id)
-            if model.manifest_hash in device.qualified_for(engine) or device.cpu_only:
+            if model.manifest_hash in device.qualified_for(key) or device.cpu_only:
                 continue
             log(f"Qualifying {device.name} for {model.id} (a few minutes)…")
             job = self.request(
@@ -179,6 +184,7 @@ class Lab:
                 {
                     "deviceId": device.device_id,
                     "noiseEngineVersion": engine,
+                    **({"decoder": STRICT_DECODER} if key != engine else {}),
                 },
             )
             deadline = time.monotonic() + timeout
@@ -207,7 +213,13 @@ class Lab:
 
         def before_create(asset):
             if qualify:
-                self.qualify(config.model, [coordinator, *members], log=log, engine=spec.get("noiseEngineVersion"))
+                self.qualify(
+                    config.model,
+                    [coordinator, *members],
+                    log=log,
+                    engine=spec.get("noiseEngineVersion"),
+                    decoder=spec.get("decoder"),
+                )
 
         experiment = offer_experiment(
             spec, coordinator.device_id, [m.worker_id for m in members], self, root, before_create

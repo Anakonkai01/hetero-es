@@ -35,3 +35,22 @@ Qualification, reference and profiling caches that are keyed by the recipe/docum
 historical evaluation automatically. Results produced under `strict_b22_v1` are expected to be token-identical across
 the supported NVIDIA GPUs and operating systems; the acceptance gates (`scripts/accept.py`) record where this has been
 checked and where it has not. A different arithmetic (for example B14 or mixed precision) needs its own decoder value.
+
+## Amendment 2026-10-27 (M4: D1 and the default)
+
+Found while integrating: the coordinator validates and exports a Recipe v3 run (`v3/tracker.py`) with the run's own
+decoder, so a strict run's coordinator needs a GPU, and that GPU holds the coordinator's live model for the whole run.
+
+1. **D1 for strict runs.** The lab refuses (at creation, and again at scheduling and for elastic joins) a strict run
+   whose coordinator is a CPU-only coordinator ("needs a GPU coordinator"), or whose coordinator device or physical GPU
+   is also one of its workers ("one weight set per GPU"). The worker's audits run in its single executor; the export
+   reload happens only after the live model and its strict engine have left the GPU (`Tracker._release_device`).
+   Earlier recipes keep their layouts and their FP32 evaluation shadow; D1 is promised for `strict_b22_v1` only.
+2. **Consequence.** A strict lab run needs two GPUs (one coordinates, the others work); a single-GPU lab keeps the
+   earlier decoders. Sharing one runtime between coordinator validation and a worker on the same GPU (or delegating
+   validation to the workers) is the way to lift this and is not built.
+3. **Default.** The lab form selects `strict_b22_v1` for a new Recipe v3 run; a saved run, a template and a replay keep
+   their decoder. The SDK keeps `ESConfig(decoder="hf_generate", eval_dtype="float32")` as its default: an `ESConfig`
+   recipe does not depend on the device it later runs on, and changing the dataclass default would silently change the
+   recipe of every existing script. A strict SDK run states `decoder="strict_b22_v1", eval_dtype="float16"`; it reaches
+   the lab with `evalDtype` and is qualified for the strict decoder (`sdk_lab.Lab.qualify(decoder=...)`).

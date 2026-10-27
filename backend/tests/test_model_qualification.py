@@ -400,24 +400,20 @@ def test_an_unknown_probe_decoder_is_refused(v3_study):
 
 
 def test_a_strict_experiment_needs_the_strict_qualification_of_every_device(v3_study):
-    from test_v3_study import configuration
-
-    lab, device, auth, model = setup(v3_study)
+    lab, first, first_auth, model = setup(v3_study, "strict-a")
+    second_lab, second, second_auth, _ = setup(v3_study, "strict-b")
     c, store, runtime, admin = lab
-    data = next(d for d in c.get("/api/v1/datasets", headers=admin).json() if d.get("recipeVersion") == 3)
-    paired = next(d for d in runtime.devices() if d["deviceId"] == device["deviceId"])
-    body = {
-        **configuration(paired, model, data),
-        "noiseEngineVersion": ENGINE_V2,
-        "decodeEngine": STRICT,
-        "evalDtype": "float16",
-        "evalChunk": 32,
-    }
-    finish(c, auth, start(lab, device, model), model)  # plain qualification only
-    refused = c.post("/api/v1/experiments", headers=admin, json=body)
-    assert refused.status_code == 422 and "strict" in refused.text, refused.text
     reference, observations = report_inputs(model, ENGINE_V2, STRICT)
-    finish(c, auth, start_strict(lab, device, model), model, reference=reference, observations=observations)
+    for each_lab, device, auth in ((lab, first, first_auth), (second_lab, second, second_auth)):
+        finish(c, auth, start(each_lab, device, model), model)
+    finish(c, first_auth, start_strict(lab, first, model), model, reference=reference, observations=observations)
+    body = strict_body(lab, first, [second], model)  # the worker has the plain qualification only
+    refused = c.post("/api/v1/experiments", headers=admin, json=body)
+    assert refused.status_code == 422 and "with the strict decoder" in refused.text, refused.text
+    reference, observations = report_inputs(model, ENGINE_V2, STRICT)
+    finish(
+        c, second_auth, start_strict(second_lab, second, model), model, reference=reference, observations=observations
+    )
     created = c.post("/api/v1/experiments", headers=admin, json=body)
     assert created.status_code == 200, created.text
     shown = created.json()
@@ -449,25 +445,94 @@ def test_a_profile_without_per_engine_hashes_never_qualifies_for_the_strict_deco
 
 
 def test_a_plain_experiment_keeps_its_document_and_a_strict_one_submits_fp16(v3_study):
-    from test_v3_study import configuration
-
-    lab, device, auth, model = setup(v3_study)
+    lab, first, second, model = strict_pair(v3_study)
     c, store, runtime, admin = lab
-    data = next(d for d in c.get("/api/v1/datasets", headers=admin).json() if d.get("recipeVersion") == 3)
-    paired = next(d for d in runtime.devices() if d["deviceId"] == device["deviceId"])
-    body = {**configuration(paired, model, data), "noiseEngineVersion": ENGINE_V2, "evalChunk": 32}
-    finish(c, auth, start(lab, device, model), model)
-    reference, observations = report_inputs(model, ENGINE_V2, STRICT)
-    finish(c, auth, start_strict(lab, device, model), model, reference=reference, observations=observations)
-    plain = c.post("/api/v1/experiments", headers=admin, json={**body, "evalDtype": None})
+    plain = {**strict_body(lab, first, [first], model), "decodeEngine": "hf_generate", "evalDtype": None}
+    plain = c.post("/api/v1/experiments", headers=admin, json=plain)
     assert plain.status_code == 200, plain.text
     assert "evalDtype" not in plain.json()  # earlier managed runs carry no such field
-    strict = c.post(
-        "/api/v1/experiments", headers=admin, json={**body, "decodeEngine": STRICT, "evalDtype": "float16"}
-    ).json()
+    strict = c.post("/api/v1/experiments", headers=admin, json=strict_body(lab, first, [second], model)).json()
     submitted = []
     real = runtime.submit
     runtime.submit = lambda config: (submitted.append(config), real(config))[1]
     assert c.post(f"/api/v1/experiments/{strict['experimentId']}/submit", headers=admin).status_code == 200
     store.dispatch_once()
     assert submitted and submitted[0]["decodeEngine"] == STRICT and submitted[0]["evalDtype"] == "float16", submitted
+
+
+# ---- M4 D1: one weight set per GPU in a strict run (ADR-013) --------------------------------------------------------
+
+
+def strict_pair(study):
+    """Two GPU devices of one lab, each qualified for the pinned model with the plain and the strict decoder."""
+    first_lab, first, first_auth, model = setup(study, "strict-a")
+    second_lab, second, second_auth, _ = setup(study, "strict-b")
+    for lab, device, auth in ((first_lab, first, first_auth), (second_lab, second, second_auth)):
+        c, _, _, _ = lab
+        finish(c, auth, start(lab, device, model), model)
+        reference, observations = report_inputs(model, ENGINE_V2, STRICT)
+        finish(c, auth, start_strict(lab, device, model), model, reference=reference, observations=observations)
+    return first_lab, first, second, model
+
+
+def strict_body(lab, coordinator, workers, model):
+    from test_v3_study import configuration
+
+    c, _, runtime, admin = lab
+    data = next(d for d in c.get("/api/v1/datasets", headers=admin).json() if d.get("recipeVersion") == 3)
+    paired = next(d for d in runtime.devices() if d["deviceId"] == coordinator["deviceId"])
+    body = {**configuration(paired, model, data), "noiseEngineVersion": ENGINE_V2, "evalChunk": 32}
+    return {**body, "workerIds": [w["workerId"] for w in workers], "decodeEngine": STRICT, "evalDtype": "float16"}
+
+
+def test_a_strict_run_never_shares_its_coordinators_gpu_with_a_worker(v3_study):
+    lab, first, second, model = strict_pair(v3_study)
+    c, store, runtime, admin = lab
+    shared = c.post("/api/v1/experiments", headers=admin, json=strict_body(lab, first, [first, second], model))
+    assert shared.status_code == 422 and "one weight set per GPU" in shared.text, shared.text
+    plain = {**strict_body(lab, first, [first], model), "decodeEngine": "hf_generate", "evalDtype": None}
+    assert c.post("/api/v1/experiments", headers=admin, json=plain).status_code == 200  # earlier recipes unchanged
+    created = c.post("/api/v1/experiments", headers=admin, json=strict_body(lab, first, [second], model))
+    assert created.status_code == 200, created.text
+    run = created.json()["experimentId"]
+    assert c.post(f"/api/v1/experiments/{run}/submit", headers=admin).status_code == 200
+    store.dispatch_once()
+    assert store.get(run)["status"] == "STARTING", store.get(run).get("waitingReason")
+    [assignment] = [r for r in runtime.runs() if r["runId"] == run]
+    with store.db() as db:
+        _, assignment = runtime._assignment(db, assignment["assignmentId"])
+        # a worker joining later passes the same rule (ADR-009 joins use waiting_reason with the joining worker)
+        reason = runtime.waiting_reason(store.get(run), db, [first["workerId"]])
+        assert reason and "one weight set per GPU" in reason
+        assert runtime.waiting_reason(store.get(run), db, [second["workerId"]]) is None
+    assert assignment["workerDevices"] == {second["workerId"]: second["deviceId"]}
+
+
+def test_a_strict_run_needs_a_gpu_coordinator(v3_study):
+    from test_cpu_coordinator import enroll_cpu
+
+    lab, first, second, model = strict_pair(v3_study)
+    c, _, runtime, admin = lab
+    cpu, _ = enroll_cpu(lab)
+    body = {**strict_body(lab, first, [first, second], model), "coordinatorDeviceId": cpu["deviceId"]}
+    refused = c.post("/api/v1/experiments", headers=admin, json=body)
+    assert refused.status_code == 422 and "GPU coordinator" in refused.text, refused.text
+    workers = body["workerIds"]
+    assert runtime.waiting_reason(body, workers=workers) and "GPU coordinator" in runtime.waiting_reason(
+        body, workers=workers
+    )
+
+
+def test_the_strict_layout_compares_devices_and_physical_gpus():
+    from backend.policies import strict_layout
+
+    body = {"decodeEngine": STRICT}
+    gpu = {"runtimeProfile": "native-gpu"}
+    coordinator = {"deviceId": "a", "physicalResourceId": None, "selfTest": gpu}
+    assert "one weight set" in strict_layout(body, coordinator, [{"deviceId": "a", "physicalResourceId": None}])
+    coordinator = {**coordinator, "physicalResourceId": "gpu-1"}
+    alias = {"deviceId": "b", "physicalResourceId": "gpu-1"}  # another enrollment of the same physical GPU
+    assert "one weight set" in strict_layout(body, coordinator, [alias])
+    assert strict_layout(body, coordinator, [{"deviceId": "b", "physicalResourceId": "gpu-2"}]) is None
+    assert strict_layout(body, {**coordinator, "physicalResourceId": None}, [alias]) is None
+    assert strict_layout({"decodeEngine": "hf_generate"}, coordinator, [alias]) is None

@@ -66,6 +66,14 @@ def engine_for(model, tokens=1):
         return engine
 
 
+def release(model):
+    """Drop the strict engine of `model` (graph, buffers, KV), so its device memory can be freed; a no-op without one."""
+    with _lock:
+        engine = _engines.pop(model, None)
+    if engine is not None:
+        engine.release_graph()
+
+
 def generate_ids(model, input_ids, attention_mask, max_new_tokens, eos_ids, pad_id, processors):
     """New token ids of greedy decoding (left-padded batch), with `pad_id` after EOS, as `model.generate` returns them."""
     penalties = [p.penalty for p in processors if type(p).__name__ == "RepetitionPenaltyLogitsProcessor"]

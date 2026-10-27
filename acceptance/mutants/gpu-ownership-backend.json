@@ -1,0 +1,10 @@
+[
+ {"name": "strict layout applies to every decoder", "file": "backend/policies.py", "old": "    if body.get(\"decodeEngine\") != \"strict_b22_v1\" or coordinator is None:\n        return None\n", "new": "    if coordinator is None:\n        return None\n"},
+ {"name": "strict layout never applies", "file": "backend/policies.py", "old": "    if body.get(\"decodeEngine\") != \"strict_b22_v1\" or coordinator is None:\n", "new": "    if True:\n"},
+ {"name": "CPU coordinator allowed for strict", "file": "backend/policies.py", "old": "    if coordinator_only(coordinator[\"selfTest\"]):\n        return \"A strict run needs", "new": "    if False:\n        return \"A strict run needs"},
+ {"name": "same device not detected", "file": "backend/policies.py", "old": "w[\"deviceId\"] == coordinator[\"deviceId\"] or (gpu", "new": "False or (gpu"},
+ {"name": "same physical GPU not detected", "file": "backend/policies.py", "old": "(gpu is not None and w.get(\"physicalResourceId\") == gpu)", "new": "False"},
+ {"name": "scheduling skips the strict layout", "file": "backend/agent_scheduling.py", "old": "        if reason := strict_layout(body, coordinator, chosen[1:]):\n            return reason\n", "new": ""},
+ {"name": "creation skips the strict layout", "file": "backend/validation.py", "old": "        if version == 3 and (reason := strict_layout(body, coordinator, workers)):\n            raise HTTPException(422, reason)\n", "new": ""},
+ {"name": "creation checks the coordinator as a worker", "file": "backend/validation.py", "old": "        workers = [d for d in selected if d[\"workerId\"] in body[\"workerIds\"]]\n", "new": "        workers = selected\n"}
+]

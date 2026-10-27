@@ -244,3 +244,35 @@ def test_executor_checks_the_strict_graph_when_it_is_built(product_assets, tmp_p
     monkeypatch.setattr(strict_backend, "engine_for", refuse)
     with pytest.raises(ReferenceArithmeticError, match="Unsupported graph"):
         CandidateExecutor(loaded.model, loaded.tokenizer, loaded.schema, run, dataset=dataset, return_completions=True)
+
+
+@gpu
+def test_strict_export_reloads_with_one_weight_set_on_the_gpu(product_assets, tmp_path, monkeypatch):  # noqa: F811
+    """D1: after the run, the coordinator's live model and its strict engine leave the GPU before the export reload."""
+    from heteroes.catalog import STRICT_B22_DECODER
+    from heteroes.model.weights_io import publish_weights
+    from heteroes.product.v3 import prepare_run
+    from heteroes.v3 import model as v3model
+    from heteroes.v3.tracker import Tracker
+
+    monkeypatch.delenv("HETEROES_GPU_ACCEPTANCE")
+    cfg = product_config(product_assets, tmp_path, decodeEngine=STRICT_B22_DECODER, evalDtype="float16", evalChunk=4)
+    torch.cuda.empty_cache()
+    before = torch.cuda.memory_allocated()
+    loaded, run, dataset = prepare_run(cfg, tmp_path, device="cuda")
+    weights = sum(p.numel() * p.element_size() for p in loaded.model.parameters())
+    tracker = Tracker(tmp_path, loaded, run, dataset, model_path=cfg["modelPath"])
+    tracker.observe(-1, publish_weights(loaded.model, loaded.schema, tmp_path / "weights"))  # strict validation
+    assert strict_backend._engines.get(loaded.model) is not None
+    seen, load = [], v3model.load
+
+    def counted(*args, **kwargs):
+        seen.append(torch.cuda.memory_allocated() - before)
+        return load(*args, **kwargs)
+
+    monkeypatch.setattr(v3model, "load", counted)
+    receipt = tracker.export()
+    assert receipt["independentReloadPassed"] and receipt["test"]["split"] == "test"
+    assert seen and max(seen) < weights // 4, (seen, weights)  # nothing of the live set remains when the copy loads
+    assert strict_backend._engines.get(loaded.model) is None
+    assert next(loaded.model.parameters()).device.type == "cpu"
