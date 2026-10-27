@@ -58,6 +58,29 @@ Before using the throughput gate: `acceptance/golden/throughput.json` still hold
 (9670/9690 = 0.98 × the old 9866/9890). Replace it by 0.98 × the measured promoted value (~10075/9952) and add a
 3060 floor after measuring there.
 
+## Continued 2026-10-27 evening (Claude, same branch)
+
+| Commit | What | Evidence |
+| --- | --- | --- |
+| `79935c39` | D9: the coordinator derives `stop_on_mismatch` from the frozen decoder (`audit_guard.strict_stop_for`); only `strict_b22_v1` stops at the first audit text mismatch. | gate M2.strict-mismatch, 6/6 mutants |
+| `d618d4a0` | Audit outcomes for the lab: `v3.audit.run_outcomes` → supervisor `auditSummary.outcomes` → backend → page (matched/mismatched/pending/timed out/skipped/unknown, strict stop, restore faults; EN+VI). New fixture browser check `scripts/check-web-audit-outcomes.mjs` in check-all. | gate M2.audit-ui, 10/10 mutants |
+| `f2758f28` | Lab form fields for `hardCapSeconds`/`stallSeconds` (Recipe v3), checked like `validate_watchdog`. | web-experiments browser check |
+| `be9f7236` | Prettier ignores acceptance golden/mutant/receipt JSON (the only check-all failure). | check-all otherwise ALL PASS at `f2758f28` |
+| `f325fa06`, `1d974461` | M0 probe `acceptance/probes/strict_phase_trace.py` (perf check `strict-phase-trace`); PASS on 5070 Ti and 3060 WSL2, 12 candidate texts equal across the GPUs. Perturb (CPU noise) is the largest warm stage (0.72 s vs 0.26 s rollout). | `docs/evidence/2026-10-27-strict-phase-trace` |
+| `2a876685` | M3: streamed hash-checked upload (1 MiB blocks), persisted backoff (`cloud-backoff.json`, 30 s doubling to 1 h), `verify_point(cache=True)` for uploads only, retention keeps newest cloud-verified point and the paused checkpoint. | gates M3.streaming-upload/verify-cache/retention |
+| `5e2b91f4` | M3: v3 recovery points carry audit-config, audit-state/gN and audit-stop. | 15/15 recovery-io mutants |
+
+Findings: this worktree's `node_modules` was a symlink to the main checkout, so web builds here bundled the main
+checkout's `packages/product-ui`; it is now a local directory of links (environment only, not in Git). Older mutation
+checks that start product runs need `--copy scripts` (added for the new groups). The 600-generation soak's
+bookkeeping (`published→generation_done` 0.04–6.8 s, `done→recovery point` 0.8–17 s at g540–559) varies far more
+than it grows; with a 15 MB ledger it looks like I/O contention, not a growing query. M3.bookkeeping stays OPEN until
+the M5 soak measures it.
+
+Still open (in order): M4 (lab/SDK/UI option for `strict_b22_v1` — the backend request model has no `evalDtype` yet,
+so the lab cannot create a strict run; qualification keyed by decoder needs a strict model-qualification profile;
+D1 GPU ownership; strict default), M5 (`strict_e2e.py` never run), M6, final acceptance, refactor, push, deploy.
+
 ## Next steps, in order
 
 1. **M2 remainder.** D9: enable the existing strict first-mismatch primitive (`runtime/docs/audit-state-v1.md`,
