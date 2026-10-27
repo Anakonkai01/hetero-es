@@ -248,3 +248,28 @@ def test_download_restore_cli_accepts_v3_objects(product_assets, tmp_path, monke
     monkeypatch.setattr(urllib.request, "urlopen", request)
     assert module.main() == 0
     assert read_json(destination / "study-selection.json") == read_json(root / "study-selection.json")
+
+
+def test_replacement_preserves_audit_configuration_drains_and_a_strict_stop(product_assets, tmp_path):
+    root = tmp_path / "source"
+    _, run, summary = completed_run(product_assets, root)
+    config = {"formatVersion": 1, "auditRate": 0.25}
+    drain = {"formatVersion": 1, "experimentId": "a" * 32, "generation": 0, "auditRate": 0.25, "reason": "timeout"}
+    stop = {"formatVersion": 1, "experimentId": "a" * 32, "descriptor": {"index": 1}, "original": {}, "auditor": {}}
+    write_json(root / "audit-config.json", config)
+    write_json(root / "audit-state" / "g0.json", drain)
+    write_json(root / "audit-stop.json", stop)
+    point = capture_point(root, summary, run.to_dict(), {"interval": 1, "retain": 3})
+    restored = restore_point(point, tmp_path / "replacement")
+    assert read_json(restored / "audit-config.json") == config
+    assert read_json(restored / "audit-state" / "g0.json") == drain
+    assert read_json(restored / "audit-stop.json") == stop
+
+
+def test_points_without_audit_sidecars_restore_without_inventing_them(product_assets, tmp_path):
+    root = tmp_path / "source"
+    _, run, summary = completed_run(product_assets, root)
+    point = capture_point(root, summary, run.to_dict(), {"interval": 1, "retain": 3})
+    restored = restore_point(point, tmp_path / "replacement")
+    for name in ("audit-config.json", "audit-stop.json", "audit-state"):
+        assert not (restored / name).exists()

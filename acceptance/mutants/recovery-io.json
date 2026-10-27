@@ -11,5 +11,7 @@
  {"name": "cache trusted without a match", "file": "src/heteroes/product/recovery.py", "old": "        cached = cache and json.loads((point / VERIFY_CACHE).read_text()) == {", "new": "        cached = cache or json.loads((point / VERIFY_CACHE).read_text()) == {"},
  {"name": "cache ignores mtime", "file": "src/heteroes/product/recovery.py", "old": "    return [stat.st_size, stat.st_mtime_ns, stat.st_ino, stat.st_dev]", "new": "    return [stat.st_size, 0, stat.st_ino, stat.st_dev]"},
  {"name": "cache ignores manifest bytes", "file": "src/heteroes/product/recovery.py", "old": "    key = hashlib.sha256(raw).hexdigest()", "new": "    key = \"manifest\""},
- {"name": "restore trusts the cache", "file": "src/heteroes/product/recovery.py", "old": "def verify_point(point, cache=False):", "new": "def verify_point(point, cache=True):"}
+ {"name": "restore trusts the cache", "file": "src/heteroes/product/recovery.py", "old": "def verify_point(point, cache=False):", "new": "def verify_point(point, cache=True):"},
+ {"name": "strict stop not carried", "file": "src/heteroes/v3/recovery.py", "old": "(\"auditStop\", \"audit-stop.json\")):\n        if (root / name).exists():", "new": "):\n        if (root / name).exists():"},
+ {"name": "drain states not restored", "file": "src/heteroes/v3/recovery.py", "old": "        write_json(temporary / \"audit-state\" / name, value)", "new": "        pass"}
 ]

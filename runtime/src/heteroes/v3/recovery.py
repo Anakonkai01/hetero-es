@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import os
+import re
 import shutil
 import sqlite3
 
@@ -62,6 +63,13 @@ def capture_state(root, temporary, recipe, generation):
         "auditFaults": read_json(root / "audit-faults.json", {}),
         "workerBlocks": read_json(root / "worker-blocks.json", {}),
     }
+    # M3: the frozen audit rate, each generation's drain closure and a strict stop receipt travel with the point
+    for key, name in (("auditConfig", "audit-config.json"), ("auditStop", "audit-stop.json")):
+        if (root / name).exists():
+            state[key] = read_json(root / name)
+    drains = {path.name: read_json(path) for path in sorted((root / "audit-state").glob("g*.json"))}
+    if drains:
+        state["auditStates"] = drains
     selection = state["selection"]
     if not selection:
         raise ValueError("Recovery requires validation selection")
@@ -110,6 +118,13 @@ def restore_state(point, temporary, destination):
         write_json(temporary / name, value)
     for row in state["validation"]:
         write_json(temporary / f"validation-{row['generation']}.json", row)
+    for key, name in (("auditConfig", "audit-config.json"), ("auditStop", "audit-stop.json")):
+        if key in state:
+            write_json(temporary / name, state[key])
+    for name, value in state.get("auditStates", {}).items():
+        if not re.fullmatch(r"g\d+\.json", name):
+            raise ValueError("Invalid audit drain state name")
+        write_json(temporary / "audit-state" / name, value)
     config = read_json(temporary / "config.json")
     config["datasetPath"] = str(Path(destination).resolve() / "dataset.json")
     config["modelManifestPath"] = str(Path(destination).resolve() / "model-manifest.json")

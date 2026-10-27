@@ -98,9 +98,10 @@ A restart of the same run honors the saved receipt and stays stopped.
   coverage. This is not proof that all mismatches will be delivered under every failure.
 - Cross-process/multiple coordinator writers, persistent audit leases, D10 recovery, stage/progress watchdogs and
   explicit generation hard caps are not implemented by this slice. The one coordinator recovery budget is unchanged.
-- Existing recovery-point capture/restore carries `audit-faults.json`, but does not yet carry the new drain/stop
-  sidecars. A local process restart is different from restoring onto a replacement installation. M3/M4 must preserve
-  these operational dependencies, including faults observed after a point's immutable snapshot; replacement recovery
-  is not accepted as preserving the strict stop. This stays open for M3 (retention dependency graph).
+- Since M3 (2026-10-27) a v3 recovery point carries `audit-faults.json`, `audit-config.json`, every
+  `audit-state/gN.json` and `audit-stop.json` as they were at capture, and restore writes them back. A strict stop
+  happens before the next update, so it is normally later than the newest point: restoring that point on a
+  replacement installation re-runs the stopped generation without the stop. Faults observed after a point's immutable
+  snapshot are not reconciled; replacement recovery is not accepted as preserving the strict stop.
 - The lab projection reads files beside the ledger without a lock; a snapshot taken while a drain closes can be one
   poll behind. The page is checked with fixture outcomes, not with a real multi-device run (that is M5).

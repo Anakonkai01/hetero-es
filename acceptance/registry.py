@@ -208,11 +208,12 @@ CHECKS = [
         "mutation-recovery-io",
         "mutation",
         ("{python}", "scripts/mutation-check.py", "--repo", "runtime", "--copy", "src", "--copy", "pyproject.toml")
-        + ("--copy", "tests/ledger", "--env", "PYTHONPATH=src:tests/ledger")
+        + ("--copy", "scripts", "--copy", "tests/ledger", "--copy", "tests/v3")
+        + ("--env", "PYTHONPATH=src:tests/ledger:tests/v3")
         + ("--scratch", "{out}", "--mutants", "acceptance/mutants/recovery-io.json", "--test")
         + (
             "{runtime_python} -m pytest -q -x -p no:cacheprovider tests/ledger/test_cloud_sync.py "
-            "tests/ledger/test_recovery_points.py",
+            "tests/ledger/test_recovery_points.py tests/v3/test_v3_recovery.py -k 'not download_restore_cli'",
         ),
         timeout=3600,
     ),
