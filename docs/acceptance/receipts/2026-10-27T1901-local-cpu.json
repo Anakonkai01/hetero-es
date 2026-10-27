@@ -1,0 +1,42 @@
+{
+  "format": "heteroes-acceptance-receipt-v1",
+  "tree": "src-8f72196e851bb9bfe7a848bc9d53141be3a8c52f3d7f12b9fafc03af6c118da7",
+  "dirty": false,
+  "commit": "90ef6abd22843841962704506849fb1f99a1e7be",
+  "host": "local",
+  "profiles": [
+    "cpu"
+  ],
+  "machine": {
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "python": "3.12.13",
+    "node": "5070ti",
+    "gpus": [
+      "NVIDIA GeForce RTX 5070 Ti, 595.91.07"
+    ]
+  },
+  "started": "2026-10-27T18:51:35+0700",
+  "finished": "2026-10-27T19:01:26+0700",
+  "results": [
+    {
+      "name": "acceptance-selftest",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 1.67,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/acc-cpu-1/acceptance-selftest/output.log",
+      "log_sha256": "b16e9b84512eb852afb9d7ab4bf9c5224043ae35abb914f89e5d5b5777c48f3b",
+      "detail": ""
+    },
+    {
+      "name": "check-all",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 588.976,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/acc-cpu-1/check-all/output.log",
+      "log_sha256": "a02f8b2222869d14cfbe8af44c0722b3fab0a50e90df7a779caf32a8f9d4d884",
+      "detail": ""
+    }
+  ]
+}

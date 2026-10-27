@@ -81,9 +81,23 @@ the M5 soak measures it.
 engine+decoder (fixed a real bug: v2 first probes built v1 references), backend accepts `evalDtype` for the strict
 decoder only and checks strict qualification per selected device. No mutation check yet for this slice.
 
+### Routine items 1–3 done (Sonnet 5.5 session, same evening)
+
+| Commit | What | Evidence |
+| --- | --- | --- |
+| `61272cda` | Mutation check for `8d52b76c`: 13/13 runtime and 16/16 backend mutants killed after 4 new tests (first run left 7 alive; 1 equivalent mutant removed). Registered as `mutation-strict-qualification-runtime`/`-backend` under gate `M4.qualification` (now has checks, no longer OPEN). | `docs/evidence/2026-10-27-strict-qualification` |
+| `4ad21b7e` | Lab UI: `strict_b22_v1` in the Recipe v3 form (sends `evalDtype: "float16"`, only then), Models page "Decoder" choice (strict forces noise engine v2, starts the check with `decoder`), EN+VI strings, fixture browser checks in `check-web-model-qualification.mjs` and `check-web-experiments.mjs` (strict attempt is refused without the strict check; a plain draft carries no `evalDtype`). | check-all |
+| `10ceac91`, `90ef6abd` | Throughput floors: 5070 Ti 9873.1 / 9753.0 (0.98 × promoted ABAB mean; fresh local run 10138 / 9963 passes); 3060 WSL2 3041.6 / 2867.2 (two runs 3100.1/3107.3 and 2924.0/2927.4). Native Windows has no throughput check. | `acceptance/golden/throughput.json` |
+| this commit | `check-all` PASS through accept.py on this tree (`docs/acceptance/receipts/2026-10-27T1901-local-cpu.json`). | |
+
+Not done on purpose: `docs/acceptance/STATUS.md` is regenerated only after the final acceptance (every other receipt belongs to an
+older tree, so today it would show NOT_RUN). Gate `M4.identity` still says "no recipe field selects the strict backend"; that text
+looks stale since `strict_b22_v1` is a Recipe v3 decoder (ADR-013) — check it and give it its checks when doing item 5. The mutation
+profile (`accept.py run mutation`) was not rerun as a whole.
+
 ### Remaining work, by difficulty (for choosing the model)
 
-Routine (a Sonnet-class session can do it, following the existing patterns and tests):
+Routine (a Sonnet-class session can do it, following the existing patterns and tests). **Items 1–3 are done, see above; item 4 waits for the final tree.**
 1. Mutation check for `8d52b76c` (mutants: drop decoder from `qualification_key`, accept any decoder in `accept`,
    ignore decoder in `v3_qualification`, drop `decoder` from the frozen probe command) and register it in accept.py.
 2. Frontend: decoder option `strict_b22_v1` in `RuntimeConfiguration.tsx` (v3 only, sends `evalDtype: "float16"`),
