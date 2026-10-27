@@ -4,7 +4,19 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
 [archive/handoffs/](archive/handoffs/); the previous version of this file is
 [HANDOFF-history-2026-10.md](archive/handoffs/HANDOFF-history-2026-10.md).
 
-## Tóm tắt cho chủ dự án (2026-10-27)
+## Tóm tắt cho chủ dự án (2026-10-27, phiên Claude "kế hoạch cuối")
+
+- **Phiên đã chốt theo yêu cầu chủ dự án (sắp hết usage). Kế hoạch đang làm dở.** Đọc
+  [bàn giao mới](handoff-next-after-claude-final-2026-10-27.md) trước mọi bàn giao cũ. Nhánh
+  **`work/final-2026-10-27`**; chưa push/merge/deploy.
+- **Hiệu năng đã chốt:** vòng cuối ghép 3 ứng viên, short32 **10075 token/s (+2,06%)**, khoảng **72,8% vLLM**;
+  mục tiêu 80% **không đạt**, không mở thêm hướng tối ưu.
+- **Đã có `scripts/accept.py`** (gate M0–M6: PASS/FAIL/NOT_RUN/DEFERRED/OPEN). Bộ test GPU và parity token
+  với mẫu chuẩn **ĐẠT trên 5070 Ti, 3060 WSL2 và 3060 Windows trực tiếp** ở commit `34e0b45c`.
+- **Đã làm:** M1 `strict_b22_v1` chạy trong worker (ADR-013); M2 D11 watchdog theo tiến độ thật + giới hạn cứng;
+  M2 D10 tự phục hồi một lần sau restore lệch. Còn: D9, UI audit, M0 đo pha, M3, M4, M5 e2e/soak/deploy, M6, refactor.
+
+## Tóm tắt trước đó (2026-10-27, phiên Codex)
 
 - **Đã chốt phiên Codex để Claude tiếp tục theo yêu cầu chủ dự án. Goal đang paused, chưa đạt.** Đọc
   [bàn giao mới cho Claude](handoff-claude-after-codex-perf-2026-10-27.md) trước các bàn giao cũ.

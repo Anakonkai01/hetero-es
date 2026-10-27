@@ -199,7 +199,7 @@ GATES = [
         "M0.stage-trace",
         "M0",
         "stage timing of the strict path through the worker lifecycle",
-        open="The strict backend is not in the worker yet, so its lifecycle stages cannot be traced (needs M1.executor).",
+        open="The strict decoder now runs in the executor; a per-phase trace receipt on trained Qwen is not made yet.",
     ),
     Gate(
         "M0.memory-map",

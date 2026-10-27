@@ -20,6 +20,9 @@ versioned integer reference/CUDA/graph feasibility, three trained-model parent/c
 two-model cross-GPU equality. B22 B32 improves but remains far below vLLM; B1 regresses in the selected baseline.
 A faster exact-conversion scratch variant is measured separately and remains unselected. See the
 [current handoff](handoff-codex-strict-integer-2026-10-25.md). Full M0–M6 remains open.
+**2026-10-27 (Claude):** gates are now tracked by `scripts/accept.py` ([acceptance](acceptance/README.md)); progress and
+next steps in the [latest handoff](handoff-next-after-claude-final-2026-10-27.md). Done: M1 strict decoder in the
+executor, M2 D11 watchdog and D10 restore recovery.
 
 | Milestone                                  | State                                                                                                                    | Next gate                                                                                  |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
