@@ -18,7 +18,7 @@ from heteroes.canonical import canonical_json_hash
 from heteroes.eval import reference_ops as ops
 from heteroes.eval import strict_cuda as sc
 from heteroes.eval import strict_decode_cuda
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.eval.reference_ops import ReferenceArithmeticError, StrictTransportError
 from heteroes.eval.strict_decoder import describe_graph
 from heteroes.eval.strict_decoder_packed import StrictDecoderPacked
 
@@ -52,10 +52,16 @@ def graph_memory_bound(config, capacity, context, dim, *, prompt_tokens=None):
     return max(2 * cache + intermediates + 2 * seen, cache + prefix_cache + prefill_workspace + seen) + 64 * 1024**2
 
 
+def request_context(max_context, lengths, max_new_tokens):
+    """Physical KV slots per owner: the request's longest prompt plus its token budget, rounded up to 16 and never above
+    the configured context. Admission and the memory bound still use the configured context (conservative)."""
+    return min(max_context, -(-(max(lengths) + max_new_tokens) // 16) * 16)
+
+
 class _DecodeSession:
-    def __init__(self, backend, capacity, signature):
+    def __init__(self, backend, capacity, signature, context=None):
         self.backend, self.capacity, self.signature = weakref.proxy(backend), capacity, signature
-        self.context, self.device = backend.max_context, backend.device
+        self.context, self.device = backend.max_context if context is None else context, backend.device
         self.stream = torch.cuda.current_stream(self.device)
         self.decode = strict_decode_cuda.DecodeKernels(backend.kernels)
         c, dim = backend.config, backend.head_dim
@@ -153,6 +159,8 @@ class _DecodeSession:
 
     @staticmethod
     def check(status):
+        if status & 8:
+            raise StrictTransportError("Strict kernel data transport timed out")
         if status & 1:
             raise ReferenceArithmeticError("Nonfinite reference arithmetic")
         if status:
@@ -245,7 +253,7 @@ class StrictDecoderGraph(StrictDecoderPacked):
         finally:
             self._call_lock.release()
 
-    def _session_for(self, capacity):
+    def _session_for(self, capacity, context=None):
         if next(self.model.parameters()).device != self.device:
             raise ReferenceArithmeticError("Captured decoder model moved away from its CUDA device")
         graph = describe_graph(self.model, self.max_context, frozen_int8=self.frozen_int8)
@@ -261,12 +269,16 @@ class StrictDecoderGraph(StrictDecoderPacked):
                 for name, b in self.model.named_buffers(remove_duplicate=False)
             )
         stream = torch.cuda.current_stream(self.device)
+        context = self.max_context if context is None else context
         if self._session is not None and (
-            self._session.capacity != capacity or self._session.signature != signature or self._session.stream != stream
+            self._session.capacity != capacity
+            or self._session.context != context
+            or self._session.signature != signature
+            or self._session.stream != stream
         ):
             self._release_graph()
         if self._session is None:
-            self._session = _DecodeSession(self, capacity, signature)
+            self._session = _DecodeSession(self, capacity, signature, context)
         return self._session
 
     def _request_workspace_bytes(self, capacity=1):
@@ -348,12 +360,12 @@ class StrictDecoderGraph(StrictDecoderPacked):
         active = state.owners.numel()
         heads, kv_heads, dim = config.num_attention_heads, config.num_key_value_heads, self.head_dim
         state.decode.layout(
-            state.owners, state.lengths, state.ranges, state.positions, flag, state.capacity, self.max_context
+            state.owners, state.lengths, state.ranges, state.positions, flag, state.capacity, state.context
         )
         ids = state.tokens[state.owners]
         hidden = self.model.model.embed_tokens.weight[ids].float()
         cosine, sine = self._rope_cosine[state.positions], self._rope_sine[state.positions]
-        layout = sc._PackedAttentionLayout(state.ranges, active, state.capacity * self.max_context, self.max_context)
+        layout = sc._PackedAttentionLayout(state.ranges, active, state.capacity * state.context, state.context)
         epsilon = float(config.rms_norm_eps)
         for number, layer in enumerate(self.model.model.layers):
             keys, values = state.caches[2 * number : 2 * number + 2]
@@ -410,7 +422,7 @@ class StrictDecoderGraph(StrictDecoderPacked):
                 > self.max_graph_bytes
             ):
                 raise ReferenceArithmeticError("Captured decode exceeds its explicit memory budget")
-            state = self._session_for(capacity)
+            state = self._session_for(capacity, request_context(self.max_context, lengths, max_new_tokens))
             self._generation_begin()
             self._generation_decode_ready(capacity, penalty)
             state.clear()

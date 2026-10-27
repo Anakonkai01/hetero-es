@@ -31,7 +31,7 @@ import torch
 
 from heteroes.canonical import canonical_json_hash
 from heteroes.eval import reference_ops as ops
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.eval.reference_ops import ReferenceArithmeticError, StrictTransportError
 from heteroes.eval import strict_prefill_cuda
 from heteroes.eval.strict_prefill_cuda import _PREFILL_SOURCE, prefill_attention_plan
 
@@ -1061,8 +1061,8 @@ def audit_integer_ptx(text):
     return result
 
 
-def audit_integer_sass(text):
-    result = audit_sass(text, exact=("F2I.NTZ",))
+def audit_integer_sass(text, exact=()):
+    result = audit_sass(text, exact=("F2I.NTZ", *exact))
     result["integerMmaOps"] = len(re.findall(r"\bIMMA(?:\.[A-Z0-9_]+)*\s", text))
     if not result["integerMmaOps"]:
         result["violations"].append("Missing integer IMMA")
@@ -1213,7 +1213,7 @@ class StrictCudaKernels:
             result = subprocess.run([self._nvdisasm, str(path)], capture_output=True, text=True, check=False)
         if result.returncode != 0:
             return "unavailable"
-        return audit_integer_sass(result.stdout) if integer_mma else audit_sass(result.stdout, exact)
+        return audit_integer_sass(result.stdout, exact) if integer_mma else audit_sass(result.stdout, exact)
 
     def _linear_function(self, plan, has_bias, row_tile):
         name = f"linear-{plan.width}-{'bias' if has_bias else 'nobias'}"
@@ -1262,6 +1262,8 @@ class StrictCudaKernels:
     @staticmethod
     def raise_if_error(flag):
         status = int(flag.item())
+        if status & 8:
+            raise StrictTransportError("Strict kernel data transport timed out")
         if status & 1:
             raise ReferenceArithmeticError("Nonfinite reference arithmetic")
         if status:

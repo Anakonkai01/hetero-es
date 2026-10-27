@@ -13,7 +13,9 @@ import weakref
 import torch
 
 from heteroes.canonical import canonical_json_hash
+from heteroes.eval import attention_stages
 from heteroes.eval import integer_reference as reference
+from heteroes.eval import integer_tma
 from heteroes.eval import integer_plan as planning
 from heteroes.eval import strict_cuda as sc
 from heteroes.eval import integer_lm_head
@@ -1037,6 +1039,10 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
         self.max_partial_bytes = max_partial_bytes
         self.multiprocessors = int(torch.cuda.get_device_properties(self.device).multi_processor_count)
         self._weight_metadata, self._request_active = {}, False
+        # SM120 execution routes with the same bits (switch off to compare): TMA prefill operands, 128-key GQA stages
+        self.prefill_tma, self.attention_key_tile = True, attention_stages.KEY_TILE
+        self.tma_calls = self.attention_stage_launches = 0
+        self._tma, self._stage_shared = None, {}
 
     def weight_metadata_buffers(self):
         return (entry[2] for entry in self._weight_metadata.values())
@@ -1144,6 +1150,16 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
             "weightLoadEffective": weight_read_plan(self.magnitude_bits, self.arch, self.weight_load),
             "mmaScheduleEffective": _mma_schedule(self.mma_schedule),
             "streamInputEffective": stream_input_plan(self.magnitude_bits, self.arch),
+            "prefillTransport": integer_tma.TRANSPORT_VERSION
+            if self.prefill_tma and self.arch == "sm_120" and self.magnitude_bits == 22
+            else "cp_async_stream",
+            "decodeAttentionStages": attention_stages.STAGES_VERSION
+            if self.attention_key_tile and self.arch == "sm_120"
+            else "gqa_32_key_stages",
+            "routeSourceSha256": {
+                module.__name__: hashlib.sha256(Path(module.__file__).read_bytes()).hexdigest()
+                for module in (integer_tma, attention_stages)
+            },
             "hardwareQualified": False,
         }
         identity["fingerprint"] = canonical_json_hash({k: v for k, v in identity.items() if k != "fingerprint"})
@@ -1671,6 +1687,55 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
             )
         return tuple(out.reshape(*value.shape[:-1], out.shape[1]) for out in outs)
 
+    def _linear_tma(self, value, weight, bias, rows, width, outputs, error_flag, prepared, residual):
+        flag = self.new_error_flag() if error_flag is None else error_flag
+        if prepared is None:
+            prepared = self.quantize_input(value.reshape(rows, width), error_flag=flag, _packed=True)
+        if self._tma is None:
+            self._tma = integer_tma.TmaPrefill(self)
+        out = self._tma.project(prepared, weight, self._weight_exponents(weight, flag), flag, bias)
+        self.tma_calls += 1
+        if residual is not None:
+            out = self.add(residual, out, error_flag=flag)
+        self._finish(flag, error_flag)
+        return out.reshape(*value.shape[:-1], outputs)
+
+    def _launch_attention(self, grid, pointers, integers, scale, max_keys):
+        repeats, dim = integers[4:6]
+        tile = self.attention_key_tile
+        if not (
+            tile
+            and self._attention_entry in ("strict_attention_gqa", "strict_attention_prefill")
+            and attention_stages.eligible(self.arch, dim, repeats, max_keys, tile)
+        ):
+            return super()._launch_attention(grid, pointers, integers, scale, max_keys)
+        name = f"gqa-key-stage-v1-k{tile}"
+        if name not in self._functions:
+            self._functions[name] = self._compile(
+                name,
+                attention_stages.source(tile),
+                ["key_stage_attention"],
+                ptx_exact=sc.OPS_PTX_EXACT,
+                sass_exact=sc.OPS_SASS_EXACT,
+            )["key_stage_attention"]
+        function = self._functions[name]
+        shared = attention_stages.shared_bytes(dim, repeats, max_keys, tile)
+        if shared > 48 * 1024 and shared > self._stage_shared.get(name, 0):
+            # raise the opt-in limit once per size, outside any capture that already used it
+            attribute = self._driver.CUfunction_attribute.CU_FUNC_ATTRIBUTE_MAX_DYNAMIC_SHARED_SIZE_BYTES
+            sc._check(self._driver.cuFuncSetAttribute(function, attribute, shared))
+            self._stage_shared[name] = shared
+        self._launch(
+            function,
+            grid=grid[:2],
+            block=(dim, repeats),
+            pointers=pointers,
+            integers=integers,
+            floats=(scale,),
+            shared=shared,
+        )
+        self.attention_stage_launches += 1
+
     def _linear(
         self,
         value,
@@ -1708,6 +1773,21 @@ class IntegerCudaKernels(sc.StrictCudaKernels):
             raise ReferenceArithmeticError("Residual must be a contiguous FP32 tensor shaped like the projection")
         if split_k > 1 and split_k * rows * outputs * 8 > self.max_partial_bytes:
             raise ReferenceArithmeticError("Integer split-K workspace budget exceeded")
+        if (
+            self.prefill_tma
+            and stream_columns == STREAM_COLUMNS
+            and _mma_schedule(self.mma_schedule) == "stream"
+            and integer_tma.eligible(
+                arch=self.arch,
+                magnitude_bits=self.magnitude_bits,
+                rows=rows,
+                width=width,
+                split_k=split_k,
+                row_tile=row_tile,
+                implementation=implementation,
+            )
+        ):
+            return self._linear_tma(value, weight, bias, rows, width, outputs, error_flag, prepared, residual)
         row_tile = (16 if rows <= 16 else 32) if row_tile is None else row_tile
         mode = ("simt" if rows == 1 else "mma") if implementation == "auto" else implementation
         functions = self._integer_functions(

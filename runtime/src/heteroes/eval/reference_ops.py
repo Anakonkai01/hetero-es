@@ -18,6 +18,10 @@ class ReferenceArithmeticError(ValueError):
     """The proposed operation contract cannot represent or support this input."""
 
 
+class StrictTransportError(RuntimeError):
+    """A strict kernel's data transport did not complete (error bit 8): an infrastructure failure, never a result."""
+
+
 def _normal(value):
     value = value.to(dtype=torch.float32)
     if not bool(torch.isfinite(value).all()):

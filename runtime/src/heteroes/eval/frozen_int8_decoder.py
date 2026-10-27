@@ -192,9 +192,9 @@ class FrozenInt8DecoderGraph(StrictDecoderGraph):
                 )
         self._frozen_seal = state
 
-    def _session_for(self, capacity):
+    def _session_for(self, capacity, context=None):
         self._verify_frozen_storage()
-        return super()._session_for(capacity)
+        return super()._session_for(capacity, context)
 
     def _check_kernel_configuration(self):
         if self._current_kernel_configuration() != self._kernel_configuration:
