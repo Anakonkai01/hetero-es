@@ -113,6 +113,17 @@ CHECKS = [
         timeout=3600,
         gpu=True,
     ),
+    Check(
+        "strict-phase-trace",
+        "perf",
+        ("{runtime_python}", "acceptance/probes/strict_phase_trace.py", "--gpu", "--model", "{models}/qwen")
+        + ("--pairs", "6", "--out", "{out}/phase-trace.json"),
+        hosts=("local", "3060-wsl"),
+        env=GPU + PROBE_PATH,
+        expect="STRICT PHASE TRACE PASS",
+        timeout=3600,
+        gpu=True,
+    ),
     # package
     Check(
         "package-linux",
@@ -222,14 +233,14 @@ GATES = [
     Gate(
         "M0.stage-trace",
         "M0",
-        "stage timing of the strict path through the worker lifecycle",
-        open="The strict decoder now runs in the executor; a per-phase trace receipt on trained Qwen is not made yet.",
+        "stage timing of the strict worker path (load, engine, perturb, rollout, restore) on trained Qwen",
+        checks=("strict-phase-trace", "strict-phase-trace@3060-wsl"),
     ),
     Gate(
         "M0.memory-map",
         "M0",
-        "memory per role and phase",
-        open="Peak memory per role/phase of the strict worker lifecycle is not measured yet.",
+        "CUDA peak per phase, live FP16 weights, strict engine buffers, CPU snapshot and host peak",
+        checks=("strict-phase-trace", "strict-phase-trace@3060-wsl"),
     ),
     # M1 — one-model strict backend
     Gate("M1.operators", "M1", "G0/G1 operators and kernels on SM120, SM86 Linux and native Windows", checks=SUITE),
