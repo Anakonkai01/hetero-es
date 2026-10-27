@@ -1,0 +1,7 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7069.33it/s]
+two-streams-retry short32 batch32 9858.2
+two-streams-retry short32 concurrent 7199.6
+two-streams-retry short32 batch32-repeat 9861.4
+two-streams-retry chat128 batch32 9852.1
+two-streams-retry chat128 concurrent 7732.0
+two-streams-retry chat128 batch32-repeat 9823.0

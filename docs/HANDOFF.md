@@ -36,12 +36,23 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
   lạnh dùng DRAM khoảng **72–74%**, SM throughput **43–46%**; không coi tất cả decode là đã sát trần
   tensor. Đây là số đo kernel riêng, không thay benchmark toàn lượt.
   [Bằng chứng](evidence/2026-10-27-strict-counter-profile/README.md).
-- Hướng đang mở là **TMA để nạp tile vào shared bằng phần cứng**, giữ nguyên MMA B22. Prototype
-  `evidence/2026-10-27-strict-tma/` đã qua **5 test**, xác minh copy U16/tails và toàn bộ **65536
-  encoding** trên SM120. Chưa có kernel GEMM dùng TMA hay số đo tăng tốc. Hai lỗi ban đầu là bộ audit nhầm lệnh
-  fence với FP32 và kiểu tham số Python của tensor map; giữ nguyên log, chỉ cho phép chính xác memory
-  fence ở callsite thử nghiệm, không tắt audit. Runtime `0eb86cb9` chưa đổi. Việc tiếp theo: nối TMA với
-  pipeline GEMM, chứng minh ánh xạ swizzle/producer-consumer, đo có tính mọi chi phí descriptor và staging.
+- **TMA đã nối được với GEMM B22**, giữ nguyên MMA/rounding/bias/split; copy swizzle và vòng đệm qua
+  10 test, CPU oracle/audit 9 test, descriptor by-value/capture/live restore 5 test, adapter 2 test.
+  Hai phép chiếu prefill lớn giảm khoảng **6–7%** nhưng toàn lượt ABAB chỉ **+0,946%** (9868 → 9962
+  short32; token khớp). **Chưa chọn**, dừng mở rộng transport trước khi có lợi ích lớn hơn.
+  [Bằng chứng và chi phí descriptor](evidence/2026-10-27-strict-tma-pipeline/README.md).
+- **Bỏ kiểm tra trung gian theo miền được giới hạn cũng chưa giúp rõ**: reciprocal/rsqrt khớp toàn bộ
+  **1,67 tỷ** mẫu FP32 hợp lệ, exp khớp **2,24 tỷ** encoding trong [-80,80], instrumentation không gặp
+  node subnormal/nonfinite bị bỏ kiểm tra; **4/4 mutant** bị bắt. Pilot cả lượt chỉ khoảng 9888–9908
+  short32, không phải ABAB tăng tốc. Guard cho cây QK giữ đúng bit/cờ lỗi (**36 test, 2/2 mutant**),
+  nhưng pilot cũng chỉ 9896 short32. Không đổi FTZ/FMA hay precision; **đều chưa chọn**.
+  [Nonlinear](evidence/2026-10-27-strict-normal-domain/README.md),
+  [QK tree](evidence/2026-10-27-strict-bounded-attention/README.md).
+- **Hai nhóm 16 chuỗi chạy đồng thời trên CUDA stream bị loại**: capture riêng trước, replay đồng thời;
+  token khớp nhưng short32 **9858 → 7200**, chat128 **9852 → 7732**. Không thử thêm phân mảnh khi chưa
+  có bằng chứng mới. [Bằng chứng](evidence/2026-10-27-strict-concurrent-batches/README.md).
+  Runtime được chọn vẫn `0eb86cb9` / **71,3% vLLM**, không cộng các pilot thành tăng tốc đã nghiệm thu.
+  Hướng tiếp theo: giảm traffic partial int64 giữa GEMM gate/up và finish SiLU, thay vì chỉnh nhỏ warp/tile.
 - Chủ dự án đã cho toàn quyền SSH trong phiên. Máy 5070 Ti của **Nhựt đã tắt theo yêu cầu** sau khi xác
   nhận rảnh; đang dùng 5070 Ti của Nhân và 3060 của Thảo. Không đổi approval/contribution lab, không
   triển khai, không learning run, không sửa môi trường `ai`. Chưa push/merge. M0–M6 vẫn chờ sau hiệu năng.
