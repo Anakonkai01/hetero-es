@@ -1,0 +1,15 @@
+{
+  "runtimeCommit": "0eb86cb9",
+  "selected": false,
+  "filesSha256": {
+    "README.md": "4689504a25188b28ab15330aa3e03edd71bc93c158a8ffad3a804ebab4efb12c",
+    "harness/bench.py": "d69d10ee1102d7bff9761c5164fe7a2b5028a1cf909480dcf4299825c23f16d5",
+    "harness/stages.py": "985d9f9efdc3ea2c11ea3a0dbdd8c9bf8fb5adcca555e378a92c7a2b9c78fc25",
+    "harness/test_stages.py": "c4d82d91709b4da03ac708af6414465a6e5a9a745b7d76c4114f8cffa1a59b11",
+    "raw/graph-test-02.log": "a7797e4762bfd761bc066dc39e902601ed4f75e9140af7d19cba27a3f098f806",
+    "raw/operators-01.json": "9a8b947bf8d8da76750582ecebfaa3fe4930d99771da8f22d6420c4faebc5eec",
+    "raw/operators-01.log": "5ceb4d1f6f4509b167829bd95bd041dc8abb48ac0af20b7525ddb8ef6db3a107",
+    "raw/red-01.log": "399abbef71353d1150aaa1e79fba433e7655beb4bffbfe4471f54b80852d52f2",
+    "raw/tests-01.log": "e3711eba17d4e0c056dacb6bbb63d91533b41234e85452f919310a982b20552d"
+  }
+}

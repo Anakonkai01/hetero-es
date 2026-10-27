@@ -1,0 +1,22 @@
+{
+  "runtimeCommit": "0eb86cb9",
+  "selected": false,
+  "filesSha256": {
+    "README.md": "fe9955af83b4216467746c3328171f86a916dd5e26f373d07566cbf305e9aaaf",
+    "harness/audit.py": "493cba282d40bb9acb1f22bcb664c070d5e7dbe64ef595364b76c9a490904351",
+    "harness/bench_full.py": "de7307ecb26ba17d8a6099109ecde71346720c1259d9a2dcc145cb47b109a573",
+    "harness/host_maps.py": "ae93d8c33cbc3f4cc3714236e78a11d16e7cb594f60d33c14d885afed95fd3b1",
+    "harness/pipeline_copy.py": "985ac0e680d95a9d88e6e3e5b81da9323ddbbc34f6d956d6b15d92661fb605a4",
+    "harness/prefill.py": "713c5ec1711e75a96659c85bbd64d50f659417c3f87f8a6b650c25d0e7ef7c52",
+    "harness/tensor_map.py": "8235214bf45affd0c118122b469f9061ab823a83cf05a611c9918416de945198",
+    "harness/test_maps.py": "b7ee7ae3ead939e0f0817f0bec1a834670590778bfd5242d2a9ab9401b57b33b",
+    "harness/tma_byvalue.py": "d0376bcf5a09a514bf5a2a5d2271ab22bbf3d808072466ce1398de52630508d6",
+    "harness/tma_mma.py": "eedee5f505570e04a2f14d839ed6392e0164ade3f70caa09f90ba2c1052ba43f",
+    "raw/full-all-01.json": "2c336a3d58b906e0367484de5271a4df70da6dccefe0b102b3c709a0cd7bec8a",
+    "raw/full-all-01.log": "ab63962e0fd0833550d1a3eaff14ebc0f478c43f73f67a5a59e3c32fc67a21cd",
+    "raw/full-mlp-01.json": "2a48146cc80e61927093282b1e6673605c580df2258ad532fdd77f321334b416",
+    "raw/full-mlp-01.log": "fc187642b12304bf3447c6a3db51ea288f3e0b61fdeb57eff4de27a15f7af869",
+    "raw/red-01.log": "555da0e915dd7a8a86f678f65900e3df16e6d164509dd813d2a059ec252a5629",
+    "raw/tests-01.log": "33491df9a0ed1898058863467b55b78ae620277c96b219bc356c614a1a9d70d0"
+  }
+}
