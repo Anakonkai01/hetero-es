@@ -52,7 +52,14 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
   token khớp nhưng short32 **9858 → 7200**, chat128 **9852 → 7732**. Không thử thêm phân mảnh khi chưa
   có bằng chứng mới. [Bằng chứng](evidence/2026-10-27-strict-concurrent-batches/README.md).
   Runtime được chọn vẫn `0eb86cb9` / **71,3% vLLM**, không cộng các pilot thành tăng tốc đã nghiệm thu.
-  Hướng tiếp theo: giảm traffic partial int64 giữa GEMM gate/up và finish SiLU, thay vì chỉnh nhỏ warp/tile.
+  Thử gate/up S1 rồi truyền FP32 giảm partial int64 cũng bị loại: **6 test** khớp, nhưng chỉ **9536 token/s**.
+  [Bằng chứng MLP](evidence/2026-10-27-strict-mlp-traffic/README.md).
+- **Cận lm_head 4 bit đã được khảo sát trước khi viết kernel**: 160 dòng trained parent tại 5 checkpoint,
+  tile chứa token thắng luôn được giữ; cận byte gốc khớp từng bit. Song 4 bit giữ gần hết **4748/4748 tile**,
+  nên không viết pipeline int4 rồi byte. 7 bit giữ ít tile nhưng chỉ giảm tiềm năng 12,5% byte trọng số và
+  phải giải nén; chưa có số đo. [Mật độ và giới hạn](evidence/2026-10-27-strict-head-hierarchy/README.md).
+  Hướng còn cần đo: prefill CTA 8 warp, tile M64/N32, chia warp theo M để hạ số accumulator mỗi thread;
+  khác thử cũ chỉ thu nhỏ tile với 4 warp. Chưa viết/chưa chọn; đối chiếu chi tiết các probe cũ trước khi làm.
 - Chủ dự án đã cho toàn quyền SSH trong phiên. Máy 5070 Ti của **Nhựt đã tắt theo yêu cầu** sau khi xác
   nhận rảnh; đang dùng 5070 Ti của Nhân và 3060 của Thảo. Không đổi approval/contribution lab, không
   triển khai, không learning run, không sửa môi trường `ai`. Chưa push/merge. M0–M6 vẫn chờ sau hiệu năng.
