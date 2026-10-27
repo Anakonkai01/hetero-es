@@ -6,7 +6,7 @@
   "chat128": "a9fad5ca48ed06879bbad136b7282ca0a3c638959dd26e2b1b92635011d5fb49"
  },
  "floors": {
-  "NVIDIA GeForce RTX 5070 Ti": {"short32": 9670.0, "chat128": 9690.0}
+  "NVIDIA GeForce RTX 5070 Ti": {"short32": 9873.1, "chat128": 9753.0}
  },
  "floorRule": "0.98 x the selected runtime's ABAB mean on that GPU (docs/acceptance/README.md); token/s, mean of process medians"
 }
