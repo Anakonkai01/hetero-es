@@ -1,0 +1,60 @@
+{
+  "format": "heteroes-acceptance-receipt-v1",
+  "tree": "src-6c669c56b5d84b9ecc1dd2ba260935af1041c57330620c677b4e1753a38caf09",
+  "dirty": false,
+  "commit": "34e0b45c3a858b4917991f01335509d4d6e16d41",
+  "host": "3060-wsl",
+  "profiles": [
+    "gpu"
+  ],
+  "machine": {
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "python": "3.12.15",
+    "node": "DESKTOP-QP0NTA7",
+    "gpus": []
+  },
+  "started": "2026-10-27T13:08:07+0700",
+  "finished": "2026-10-27T13:27:38+0700",
+  "results": [
+    {
+      "name": "strict-gpu-suite",
+      "host": "3060-wsl",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 1046.176,
+      "log": "/tmp/heteroes-accept-6c669c56b5d8-20261027-130806/results/strict-gpu-suite/output.log",
+      "log_sha256": "8c064e38a24b678ab57aaddee3500fddf96a4220d92fe2f814d9105f03496ffa",
+      "detail": ""
+    },
+    {
+      "name": "strict-parity-qwen",
+      "host": "3060-wsl",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 59.58,
+      "log": "/tmp/heteroes-accept-6c669c56b5d8-20261027-130806/results/strict-parity-qwen/output.log",
+      "log_sha256": "b46f87a1d633ca8b454888b7fffea7137370f67d3e4ffc98fea88cdc4d936247",
+      "detail": ""
+    },
+    {
+      "name": "strict-parity-smol",
+      "host": "3060-wsl",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 25.465,
+      "log": "/tmp/heteroes-accept-6c669c56b5d8-20261027-130806/results/strict-parity-smol/output.log",
+      "log_sha256": "e0965e9816f9507b3f9c883b53aba633765cf3fc241362b2363ad23bebd0a551",
+      "detail": ""
+    },
+    {
+      "name": "strict-parity-tiny",
+      "host": "3060-wsl",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 39.239,
+      "log": "/tmp/heteroes-accept-6c669c56b5d8-20261027-130806/results/strict-parity-tiny/output.log",
+      "log_sha256": "736cdc94835e709fafdb78b91be60f6a9db5f5feb5538b87399b65b3c9aa5120",
+      "detail": ""
+    }
+  ]
+}

@@ -117,9 +117,10 @@ def split_ref(item):
 SOURCE_PATHS = (".", ":(exclude)docs")  # documentation and committed receipts do not change what was accepted
 
 
-def source_tree(repo):
-    """(source id, dirty): a hash of every tracked file outside docs/ at HEAD, and whether any of them is modified or
-    untracked. On a staged copy without git, the controller writes SOURCE_TREE next to the sources."""
+def source_tree(repo, rev="HEAD"):
+    """(source id, dirty): a hash of every tracked file outside docs/ at `rev`, and whether any of them is modified or
+    untracked in the working tree (only meaningful for HEAD). On a staged copy without git, the controller writes
+    SOURCE_TREE next to the sources."""
     staged = Path(repo) / "SOURCE_TREE"
     if staged.exists():
         return staged.read_text().strip(), False
@@ -133,7 +134,7 @@ def source_tree(repo):
     status = subprocess.run(
         ["git", "status", "--porcelain", "--", *SOURCE_PATHS], cwd=repo, capture_output=True, text=True, check=True
     ).stdout
-    return "src-" + hashlib.sha256(listing).hexdigest(), bool(status.strip())
+    return "src-" + hashlib.sha256(listing).hexdigest(), rev == "HEAD" and bool(status.strip())
 
 
 def expand(text, host, out, repo):

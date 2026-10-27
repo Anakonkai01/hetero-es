@@ -122,16 +122,14 @@ def keep(path, receipt):
     print(f"kept {target.relative_to(REPO)}")
 
 
-def stage_archive(tree):
-    """The committed bytes of the staged paths (git archive HEAD), plus the identity files."""
-    data = subprocess.run(
-        ["git", "archive", "--format=tar", "HEAD", *STAGED], cwd=REPO, capture_output=True, check=True
-    )
+def stage_archive(tree, rev):
+    """The committed bytes of the staged paths (git archive <rev>), plus the identity files."""
+    data = subprocess.run(["git", "archive", "--format=tar", rev, *STAGED], cwd=REPO, capture_output=True, check=True)
     buffer = io.BytesIO()
     with tarfile.open(fileobj=io.BytesIO(data.stdout)) as source, tarfile.open(fileobj=buffer, mode="w:gz") as target:
         for member in source.getmembers():
             target.addfile(member, source.extractfile(member) if member.isfile() else None)
-        for name, text in (("SOURCE_TREE", tree), ("SOURCE_COMMIT", git("rev-parse", "HEAD"))):
+        for name, text in (("SOURCE_TREE", tree), ("SOURCE_COMMIT", git("rev-parse", rev))):
             item = tarfile.TarInfo(name)
             item.size = len(text.encode()) + 1
             target.addfile(item, io.BytesIO(text.encode() + b"\n"))
@@ -141,15 +139,15 @@ def stage_archive(tree):
 def command_remote(args):
     if args.host == "local":
         raise SystemExit("use `run` for the local host")
-    tree, dirty = core.source_tree(REPO)
+    tree, dirty = core.source_tree(REPO, args.commit)
     if dirty:
-        raise SystemExit("commit first: a remote host runs the committed sources (git archive HEAD)")
+        raise SystemExit("commit first, or pass --commit: a remote host runs committed sources (git archive)")
     chosen = profiles(args.profiles)
     name = f"heteroes-accept-{tree[4:16]}-{time.strftime('%Y%m%d-%H%M%S')}"
     root = f"{REMOTE_ROOT[args.host]}/{name}"
     subprocess.run(
         [*SSH, f"mkdir -p {shlex.quote(root)} && tar -xzf - -C {shlex.quote(root)}"],
-        input=stage_archive(tree),
+        input=stage_archive(tree, args.commit),
         check=True,
     )
     host = HOSTS[args.host]
@@ -220,6 +218,7 @@ def main():
     remote.add_argument("--only", action="append")
     remote.add_argument("--out")
     remote.add_argument("--keep", action="store_true")
+    remote.add_argument("--commit", default="HEAD", help="stage this commit instead of HEAD")
     remote.set_defaults(func=command_remote)
     report = commands.add_parser("report")
     report.add_argument("receipts", nargs="*", type=Path)

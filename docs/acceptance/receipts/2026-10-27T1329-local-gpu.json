@@ -1,0 +1,62 @@
+{
+  "format": "heteroes-acceptance-receipt-v1",
+  "tree": "src-6c669c56b5d84b9ecc1dd2ba260935af1041c57330620c677b4e1753a38caf09",
+  "dirty": false,
+  "commit": "34e0b45c3a858b4917991f01335509d4d6e16d41",
+  "host": "local",
+  "profiles": [
+    "gpu"
+  ],
+  "machine": {
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "python": "3.12.13",
+    "node": "5070ti",
+    "gpus": [
+      "NVIDIA GeForce RTX 5070 Ti, 595.91.07"
+    ]
+  },
+  "started": "2026-10-27T13:07:37+0700",
+  "finished": "2026-10-27T13:29:54+0700",
+  "results": [
+    {
+      "name": "strict-gpu-suite",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 1227.163,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/accept/20261027-130737-local/strict-gpu-suite/output.log",
+      "log_sha256": "c4f9fd8430c27e3c4b2eb83a8fd736b7478d1960d22c2ecd2afc76168eaae310",
+      "detail": ""
+    },
+    {
+      "name": "strict-parity-qwen",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 47.809,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/accept/20261027-130737-local/strict-parity-qwen/output.log",
+      "log_sha256": "8f2af1ee4bb3d5a9c4b6ebc0e99b85e4ab5ed5175bb08f77823e453646877e42",
+      "detail": ""
+    },
+    {
+      "name": "strict-parity-smol",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 26.142,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/accept/20261027-130737-local/strict-parity-smol/output.log",
+      "log_sha256": "191778a976aec07f33504018183545c1daf01601f4e89d9ce65f825fbe9a5a51",
+      "detail": ""
+    },
+    {
+      "name": "strict-parity-tiny",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 35.519,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/accept/20261027-130737-local/strict-parity-tiny/output.log",
+      "log_sha256": "737855e21a1e85b910d4c2ab34a4ed8657ede4749c89e3d71eae093a80221aff",
+      "detail": ""
+    }
+  ]
+}
