@@ -170,6 +170,18 @@ CHECKS = [
         timeout=3600,
     ),
     Check(
+        "mutation-strict-mismatch",
+        "mutation",
+        ("{python}", "scripts/mutation-check.py", "--repo", "runtime", "--copy", "src", "--copy", "pyproject.toml")
+        + ("--copy", "tests/v3", "--env", "PYTHONPATH=src:tests/v3")
+        + ("--scratch", "{out}", "--mutants", "acceptance/mutants/strict-mismatch.json", "--test")
+        + (
+            "{runtime_python} -m pytest -q -x -p no:cacheprovider tests/v3/test_audit_guard_integration.py "
+            "tests/v3/test_audit_guard.py",
+        ),
+        timeout=3600,
+    ),
+    Check(
         "mutation-strict-decoder",
         "mutation",
         ("{python}", "scripts/mutation-check.py", "--repo", "runtime", "--copy", "src", "--copy", "pyproject.toml")
@@ -251,7 +263,7 @@ GATES = [
         "M2.strict-mismatch",
         "M2",
         "D9 stop before the next update on a strict audit mismatch",
-        open="The first-mismatch primitive exists but is not enabled for a strict recipe (needs M4.identity).",
+        checks=("check-all", "mutation-strict-mismatch"),
     ),
     Gate(
         "M2.audit-ui",

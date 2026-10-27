@@ -1,7 +1,8 @@
 """Run-level audit safety, independent of the generation API and frozen numerical ledger.
 
-The managed recipe keeps historical mismatch policy. ``stop_on_mismatch`` is an
-internal primitive for the future qualified strict backend, not a recipe switch.
+Historical decoders keep the historical mismatch policy (three mismatches quarantine a worker). Only the strict
+decoder identity (`strict_b22_v1`, ADR-013) promises the same tokens on every supported GPU, so for it a single audit
+text mismatch is a fault: ``stop_on_mismatch`` keeps both receipts and admits no further update (D9).
 One coordinator owns this guard and shares it with every generation API.
 """
 
@@ -12,6 +13,14 @@ from heteroes.ledger import LedgerError
 from heteroes.manifest import CandidateDescriptor
 from heteroes.product.files import read_json, write_json
 from heteroes.worker_api import completions_sha256
+
+
+def strict_stop_for(recipe):
+    """True only for a Recipe v3 run whose evaluation decoder is the strict identity; never for a historical one."""
+    from heteroes.catalog import STRICT_B22_DECODER
+
+    evaluation = getattr(recipe, "evaluation", None)
+    return isinstance(evaluation, dict) and evaluation.get("decoder") == STRICT_B22_DECODER
 
 
 class AuditStopped(RuntimeError):

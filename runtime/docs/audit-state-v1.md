@@ -2,8 +2,8 @@
 
 This is the M2 operational contract added after `2776e88`. It does not change the frozen numerical ledger,
 candidate/recipe/update identities, hash sampling or historical three-mismatch quarantine policy.
-The current managed recipe has **no strict first-mismatch activation**. That requires M4 backend/recipe identity
-and qualification; the strict guard primitive is exercised by internal CPU fixtures only.
+Since D9 (2026-10-27) the strict first-mismatch stop is **active for Recipe v3 runs whose evaluation decoder is
+`strict_b22_v1`** (ADR-013) and for no other decoder. Every historical decoder keeps the three-mismatch policy.
 
 ## Generation outcomes
 
@@ -68,7 +68,11 @@ it persists `audit-stop.json` with the descriptor, original worker/attempt/rewar
 worker/attempt/chunk/texts/hash. Lease tokens and credentials are excluded. The saved receipt is checked against
 canonical candidate/completion identity and both text hashes on restart. An existing stop is honored even if a new
 caller requests historical policy. Original rewards and the frozen ledger's quarantine threshold are unchanged.
-The primitive does not expose a public SDK/API/CLI recipe option.
+There is no separate option: the coordinator derives the policy from the frozen recipe identity
+(`audit_guard.strict_stop_for`). The strict decoder promises the same tokens on every supported GPU, so one text
+mismatch is a fault of the system, not a disagreement to outvote. The run ends with `Audit text mismatch requires
+operator review`; no further update is admitted and no worker is quarantined or device decision made by this stop.
+A restart of the same run honors the saved receipt and stays stopped.
 
 ## Limits and next gates
 
@@ -77,8 +81,8 @@ The primitive does not expose a public SDK/API/CLI recipe option.
 - Receipt persistence is tested after successful file fsync/replace and reconstruction of independent guard/API
   objects. No hard-kill or power-loss acceptance was run. A failed storage write keeps the current process stopped;
   immediate process/power loss before a successful retry is not a durable-stop guarantee.
-  Directory-fsync/power-loss and real full-disk acceptance remain open. Do not promote strict behavior without
-  resolving the required storage-failure contract in M4/M5.
+  Directory-fsync/power-loss and real full-disk acceptance remain open: the strict stop is enabled (D9), but this
+  storage-failure limit stays a stated M5 limit (real full-disk acceptance is DEFERRED by the owner, 2026-10-23).
 - Retaining a lease lets an in-flight mismatch remain observable; absence of its eventual report is still incomplete
   coverage. This is not proof that all mismatches will be delivered under every failure.
 - Cross-process/multiple coordinator writers, persistent audit leases, D10 recovery, stage/progress watchdogs and
@@ -86,6 +90,6 @@ The primitive does not expose a public SDK/API/CLI recipe option.
 - Existing recovery-point capture/restore carries `audit-faults.json`, but does not yet carry the new drain/stop
   sidecars. A local process restart is different from restoring onto a replacement installation. M3/M4 must preserve
   these operational dependencies, including faults observed after a point's immutable snapshot; replacement recovery
-  is not accepted as preserving the strict stop. This is another strict-promotion gate.
+  is not accepted as preserving the strict stop. This stays open for M3 (retention dependency graph).
 - Product projection/UI and historical unknown-state handling are the next lower-effort work package in
   [the effort split](../../docs/HUMAN-REVIEW-EFFORT-SPLIT.md). M2 and M0–M6 remain incomplete.

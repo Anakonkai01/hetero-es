@@ -149,14 +149,15 @@ class Coordinator:
         )
         self._audit_guard = None
         if recipe.to_dict().get("formatVersion") == 3 and score is not None:
-            from heteroes.v3.audit_guard import AuditRunGuard
+            from heteroes.v3 import audit_guard
 
-            # Historical mismatch policy only. M4 must qualify a real backend/recipe before activating strict stops.
-            self._audit_guard = AuditRunGuard(
+            # D9: the strict decoder stops at its first audit text mismatch; historical decoders keep their policy
+            self._audit_guard = audit_guard.AuditRunGuard(
                 ledger,
                 experiment_id,
                 fault_path=self._audit_faults,
                 stop_path=self._audit_faults.with_name("audit-stop.json"),
+                stop_on_mismatch=audit_guard.strict_stop_for(recipe),
             )
         if self._audit_rate:
             from heteroes.v3.audit import selected_for_audit
