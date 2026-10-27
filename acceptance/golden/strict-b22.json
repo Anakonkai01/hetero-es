@@ -1,0 +1,840 @@
+{
+ "format": "heteroes-strict-parity-golden-v1",
+ "runtime": "0eb86cb948878fe430049882b80b3a5ad74730ba",
+ "models": {
+  "qwen": {
+   "modelFiles": {
+    "config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+    "generation_config.json": "e558847a8b4402616f1273797b015104dc266fe4b520056fca88823ba8f8ebe6",
+    "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+    "model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+    "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+    "tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583",
+    "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+   },
+   "parentSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+   "schemaHash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+   "noiseEngine": "pcg64_u32_to_f16_normal_quantile_v2",
+   "seed": 7001,
+   "sigma": 0.001,
+   "chatWorkloadSha256": "9f94ba428282471f2fb9f439df88b8a5c4eaf07db7f88f8a2716e86ea099acab",
+   "cases": [
+    {
+     "state": "parent",
+     "weightsSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+     "results": {
+      "tile": {
+       "prefillLogitsSha256": "57466a3389f5dec2572f8d58d778677c8f688d12668cf9941119d7aa2d35cb22",
+       "short8": {
+        "tokensSha256": "664ced510491f979b3909321d063170dc41ec8b5cc5d5476cd26898ed3115cfc",
+        "rewards": [
+         0.0,
+         0.0,
+         0.0,
+         0.0,
+         null,
+         0.0,
+         null,
+         null
+        ]
+       },
+       "chat32x128": {
+        "tokensSha256": "a9fad5ca48ed06879bbad136b7282ca0a3c638959dd26e2b1b92635011d5fb49",
+        "rewards": [
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null
+        ]
+       }
+      },
+      "stream": {
+       "prefillLogitsSha256": "57466a3389f5dec2572f8d58d778677c8f688d12668cf9941119d7aa2d35cb22",
+       "short8": {
+        "tokensSha256": "664ced510491f979b3909321d063170dc41ec8b5cc5d5476cd26898ed3115cfc",
+        "rewards": [
+         0.0,
+         0.0,
+         0.0,
+         0.0,
+         null,
+         0.0,
+         null,
+         null
+        ]
+       },
+       "chat32x128": {
+        "tokensSha256": "a9fad5ca48ed06879bbad136b7282ca0a3c638959dd26e2b1b92635011d5fb49",
+        "rewards": [
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null
+        ]
+       }
+      }
+     }
+    },
+    {
+     "state": "plus",
+     "weightsSha256": "64df2e79655747e2131159426053c9f46d87d614ffc7836416bfca63c018848a",
+     "results": {
+      "tile": {
+       "prefillLogitsSha256": "f025ab0b735711adfdf326bdef533e13d56244ed296072c01ce8ded05b81c91a",
+       "short8": {
+        "tokensSha256": "a4ee64fee4feb423e923bae3beecaddd1b2428bed9bc32617909c7c418422638",
+        "rewards": [
+         0.0,
+         1.0,
+         0.0,
+         0.0,
+         null,
+         0.0,
+         null,
+         null
+        ]
+       },
+       "chat32x128": {
+        "tokensSha256": "65b66bf3836b5fff087ee9261c65df9a090ea804ad8c81dbbacc6ed2b5d239db",
+        "rewards": [
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null
+        ]
+       }
+      },
+      "stream": {
+       "prefillLogitsSha256": "f025ab0b735711adfdf326bdef533e13d56244ed296072c01ce8ded05b81c91a",
+       "short8": {
+        "tokensSha256": "a4ee64fee4feb423e923bae3beecaddd1b2428bed9bc32617909c7c418422638",
+        "rewards": [
+         0.0,
+         1.0,
+         0.0,
+         0.0,
+         null,
+         0.0,
+         null,
+         null
+        ]
+       },
+       "chat32x128": {
+        "tokensSha256": "65b66bf3836b5fff087ee9261c65df9a090ea804ad8c81dbbacc6ed2b5d239db",
+        "rewards": [
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null
+        ]
+       }
+      }
+     }
+    },
+    {
+     "state": "minus",
+     "weightsSha256": "22ba1b2642fd569de0aa5f0d20cf0fb855bc659a1dd274e38ce0ffb01214c46b",
+     "results": {
+      "tile": {
+       "prefillLogitsSha256": "fda0e5affff9e3e233c37ecf7a2958fa88e5eb4b0ff0f0a51ff3f1d142a9d935",
+       "short8": {
+        "tokensSha256": "ecf3c12be96ef479a6e83618c602242b841d5884abec69390a005d991bde5d0e",
+        "rewards": [
+         0.0,
+         0.0,
+         0.0,
+         0.0,
+         null,
+         0.0,
+         null,
+         null
+        ]
+       },
+       "chat32x128": {
+        "tokensSha256": "5c882c57386599041ac79225b92a4df8c0c30e0fd351c13ca9628215b4c7d8d8",
+        "rewards": [
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null
+        ]
+       }
+      },
+      "stream": {
+       "prefillLogitsSha256": "fda0e5affff9e3e233c37ecf7a2958fa88e5eb4b0ff0f0a51ff3f1d142a9d935",
+       "short8": {
+        "tokensSha256": "ecf3c12be96ef479a6e83618c602242b841d5884abec69390a005d991bde5d0e",
+        "rewards": [
+         0.0,
+         0.0,
+         0.0,
+         0.0,
+         null,
+         0.0,
+         null,
+         null
+        ]
+       },
+       "chat32x128": {
+        "tokensSha256": "5c882c57386599041ac79225b92a4df8c0c30e0fd351c13ca9628215b4c7d8d8",
+        "rewards": [
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null
+        ]
+       }
+      }
+     }
+    },
+    {
+     "state": "restored",
+     "weightsSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+     "results": {
+      "tile": {
+       "prefillLogitsSha256": "57466a3389f5dec2572f8d58d778677c8f688d12668cf9941119d7aa2d35cb22",
+       "short8": {
+        "tokensSha256": "664ced510491f979b3909321d063170dc41ec8b5cc5d5476cd26898ed3115cfc",
+        "rewards": [
+         0.0,
+         0.0,
+         0.0,
+         0.0,
+         null,
+         0.0,
+         null,
+         null
+        ]
+       },
+       "chat32x128": {
+        "tokensSha256": "a9fad5ca48ed06879bbad136b7282ca0a3c638959dd26e2b1b92635011d5fb49",
+        "rewards": [
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null
+        ]
+       }
+      },
+      "stream": {
+       "prefillLogitsSha256": "57466a3389f5dec2572f8d58d778677c8f688d12668cf9941119d7aa2d35cb22",
+       "short8": {
+        "tokensSha256": "664ced510491f979b3909321d063170dc41ec8b5cc5d5476cd26898ed3115cfc",
+        "rewards": [
+         0.0,
+         0.0,
+         0.0,
+         0.0,
+         null,
+         0.0,
+         null,
+         null
+        ]
+       },
+       "chat32x128": {
+        "tokensSha256": "a9fad5ca48ed06879bbad136b7282ca0a3c638959dd26e2b1b92635011d5fb49",
+        "rewards": [
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null,
+         null
+        ]
+       }
+      }
+     }
+    }
+   ],
+   "eos": {
+    "eosTokenIds": [
+     151643,
+     151645
+    ],
+    "maxNewTokens": 370,
+    "tokensSha256": "60bfce3f478ba9ce93029e42bc28b5a81dff1df19ea431e6f4280ea18ac4f540",
+    "rowsEndingEarly": 27
+   },
+   "source": {
+    "receipt": "docs/evidence/2026-10-27-strict-combined-acceptance/raw/qwen-parity-5070ti-01.json",
+    "sha256": "bfc1de91d9a4be7b51c3c882368e356ee3001023f93e27e04c4b469526603dc6"
+   }
+  },
+  "smol": {
+   "modelFiles": {
+    "all_results.json": "71face5e244d784819f937a25206865c295c8889fe4359eec28bbec85d02da0d",
+    "config.json": "224f72354f10d617a359cc82ad15a3c96e866b9b2ffadb81997eeea9e88e22ee",
+    "eval_results.json": "db9bcb5c4f2a3be0d7e88f86af26f375c22c240954af86942d1554d87a488ce8",
+    "generation_config.json": "87b916edaaab66b3899b9d0dd0752727dff6666686da0504d89ae0a6e055a013",
+    "merges.txt": "0b54e8aa4e53d5383e2e4bc635a56b43f9647f7b13832d5d9ecd8f82dac4f510",
+    "model.safetensors": "e6bffe7435d7ddc10fd3b9a9efd429dafbacb1cb17015fb5562664e7532bf86e",
+    "special_tokens_map.json": "2b7379f3ae813529281a5c602bc5a11c1d4e0a99107aaa597fe936c1e813ca52",
+    "tokenizer.json": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+    "tokenizer_config.json": "4ec77d44f62efeb38d7e044a1db318f6a939438425312dfa333b8382dbad98df",
+    "train_results.json": "fceae2634b0a268a8adbda73fd0b2192922b496054011f588d2c6e888db1cea1",
+    "trainer_state.json": "2263f580ae0d7890acc11253b83138b3fc1250dc6728688a3387ce813b92eed1",
+    "vocab.json": "82b84012e3add4d01d12ba14442026e49b8cbbaead1f79ecf3d919784f82dc79"
+   },
+   "parentSha256": "676d187bcf3fca78e04351a9ba5d8fe1a545f31f1da5e4d7e15a44612ab54136",
+   "schemaHash": "d666a5b09c61148b0340430fc1ef0b380b1da7acc241847ddd5ec276cae31f36",
+   "noiseEngine": "pcg64_u32_to_f16_normal_quantile_v2",
+   "seed": 7001,
+   "sigma": 0.001,
+   "cases": [
+    {
+     "state": "parent",
+     "weightsSha256": "676d187bcf3fca78e04351a9ba5d8fe1a545f31f1da5e4d7e15a44612ab54136",
+     "results": {
+      "tile": {
+       "prefillLogitsSha256": "24d87c03adf4cc6fbb378032e5b1171926e94d89fca41009428ecdbf3fc058d5",
+       "short8": {
+        "tokensSha256": "9709cec94c5cb22c5ff59318f6ea6d435dd58b8492be2c639d440e29054bf260",
+        "rewards": [
+         0.0,
+         0.0,
+         0.0,
+         0.0,
+         null,
+         0.0,
+         null,
+         null
+        ]
+       }
+      },
+      "stream": {
+       "prefillLogitsSha256": "24d87c03adf4cc6fbb378032e5b1171926e94d89fca41009428ecdbf3fc058d5",
+       "short8": {
+        "tokensSha256": "9709cec94c5cb22c5ff59318f6ea6d435dd58b8492be2c639d440e29054bf260",
+        "rewards": [
+         0.0,
+         0.0,
+         0.0,
+         0.0,
+         null,
+         0.0,
+         null,
+         null
+        ]
+       }
+      }
+     }
+    },
+    {
+     "state": "plus",
+     "weightsSha256": "c1295af67a39f6fb3b52e737962223956221b145ae48f8b816550d1fe2d6394e",
+     "results": {
+      "tile": {
+       "prefillLogitsSha256": "3408bd7a1c00ed34f90b3704fd4fd2ffef1716ea6f42a85544d0945838064877",
+       "short8": {
+        "tokensSha256": "9709cec94c5cb22c5ff59318f6ea6d435dd58b8492be2c639d440e29054bf260",
+        "rewards": [
+         0.0,
+         0.0,
+         0.0,
+         0.0,
+         null,
+         0.0,
+         null,
+         null
+        ]
+       }
+      },
+      "stream": {
+       "prefillLogitsSha256": "3408bd7a1c00ed34f90b3704fd4fd2ffef1716ea6f42a85544d0945838064877",
+       "short8": {
+        "tokensSha256": "9709cec94c5cb22c5ff59318f6ea6d435dd58b8492be2c639d440e29054bf260",
+        "rewards": [
+         0.0,
+         0.0,
+         0.0,
+         0.0,
+         null,
+         0.0,
+         null,
+         null
+        ]
+       }
+      }
+     }
+    },
+    {
+     "state": "minus",
+     "weightsSha256": "dad8e005c4463fb4053e556f8117a852deafb9745c5e3f9d4a9b114d394990c7",
+     "results": {
+      "tile": {
+       "prefillLogitsSha256": "e695de957fa5bfdd97ea0ae1d83586a1887827eba34f53f0fa07082e58152719",
+       "short8": {
+        "tokensSha256": "0a2782baf8eb3514a9711d71ea30e443e49252c442d65197091bf7b78bed3f28",
+        "rewards": [
+         0.0,
+         1.0,
+         0.0,
+         0.0,
+         null,
+         0.0,
+         null,
+         null
+        ]
+       }
+      },
+      "stream": {
+       "prefillLogitsSha256": "e695de957fa5bfdd97ea0ae1d83586a1887827eba34f53f0fa07082e58152719",
+       "short8": {
+        "tokensSha256": "0a2782baf8eb3514a9711d71ea30e443e49252c442d65197091bf7b78bed3f28",
+        "rewards": [
+         0.0,
+         1.0,
+         0.0,
+         0.0,
+         null,
+         0.0,
+         null,
+         null
+        ]
+       }
+      }
+     }
+    },
+    {
+     "state": "restored",
+     "weightsSha256": "676d187bcf3fca78e04351a9ba5d8fe1a545f31f1da5e4d7e15a44612ab54136",
+     "results": {
+      "tile": {
+       "prefillLogitsSha256": "24d87c03adf4cc6fbb378032e5b1171926e94d89fca41009428ecdbf3fc058d5",
+       "short8": {
+        "tokensSha256": "9709cec94c5cb22c5ff59318f6ea6d435dd58b8492be2c639d440e29054bf260",
+        "rewards": [
+         0.0,
+         0.0,
+         0.0,
+         0.0,
+         null,
+         0.0,
+         null,
+         null
+        ]
+       }
+      },
+      "stream": {
+       "prefillLogitsSha256": "24d87c03adf4cc6fbb378032e5b1171926e94d89fca41009428ecdbf3fc058d5",
+       "short8": {
+        "tokensSha256": "9709cec94c5cb22c5ff59318f6ea6d435dd58b8492be2c639d440e29054bf260",
+        "rewards": [
+         0.0,
+         0.0,
+         0.0,
+         0.0,
+         null,
+         0.0,
+         null,
+         null
+        ]
+       }
+      }
+     }
+    }
+   ],
+   "source": {
+    "receipt": "docs/evidence/2026-10-27-strict-combined-acceptance/raw/smol-parity-5070ti-01.json",
+    "sha256": "b8c1fce43500f545e928c35c5c1db9b21267a43a2ae73a8636115de30336c6f0"
+   }
+  },
+  "tiny": {
+   "modelFiles": {
+    "config.json": "486bedda3a6988332e60d9638a09ca4b260d34ebcf1b19e22cf3b140b63d8fe9",
+    "eval_results.json": "637daaebe7aa8af0e678f9e79ec33fa29f8635090d45ec813f0e7474320d7351",
+    "generation_config.json": "18046d04f5bd8b4998095ecabdd17a1bf0053d9acdccead4a05be4a3575f3c5c",
+    "model.safetensors": "6e6001da2106d4757498752a021df6c2bdc332c650aae4bae6b0c004dcf14933",
+    "special_tokens_map.json": "82d96d7a9e6ced037f12394b7ea6a5b02e6ca87e0d11edaa8d60d9be857ce7db",
+    "tokenizer.json": "bcd04f0eadf90287bd26e1a183ac487d8a141b09b06aecb7725bbdd343640f2e",
+    "tokenizer.model": "9e556afd44213b6bd1be2b850ebbbd98f5481437a8021afaf58ee7fb1818d347",
+    "tokenizer_config.json": "7b41ba7d0eb91e77914ca3dafde559ea3e19878769b7e68409e89bed5222e77a"
+   },
+   "parentSha256": "01df4e24c71f310b3a6e1ba93ede0a61323ee828ffb9125e8486d93a353a7912",
+   "schemaHash": "59410e8daf9ed66271387d52bdaa9acd75be7d0afcec22f2232f47510a061ce7",
+   "noiseEngine": "pcg64_u32_to_f16_normal_quantile_v2",
+   "seed": 7001,
+   "sigma": 0.001,
+   "cases": [
+    {
+     "state": "parent",
+     "weightsSha256": "01df4e24c71f310b3a6e1ba93ede0a61323ee828ffb9125e8486d93a353a7912",
+     "results": {
+      "tile": {
+       "prefillLogitsSha256": "5ddef6d2f52f282c34edbd9845eef388a9040e4660385b367430635cb09b3573",
+       "short8": {
+        "tokensSha256": "7a9dcf02b9e12debf112d8294a84f36bf66ee5bacc35d7a7cef082ed65d217ae",
+        "rewards": [
+         1.0,
+         0.0,
+         0.0,
+         0.0,
+         null,
+         0.0,
+         null,
+         null
+        ]
+       }
+      },
+      "stream": {
+       "prefillLogitsSha256": "5ddef6d2f52f282c34edbd9845eef388a9040e4660385b367430635cb09b3573",
+       "short8": {
+        "tokensSha256": "7a9dcf02b9e12debf112d8294a84f36bf66ee5bacc35d7a7cef082ed65d217ae",
+        "rewards": [
+         1.0,
+         0.0,
+         0.0,
+         0.0,
+         null,
+         0.0,
+         null,
+         null
+        ]
+       }
+      }
+     }
+    },
+    {
+     "state": "plus",
+     "weightsSha256": "db19385cc3cfd3bde33f2b5ae63115ab238b5028dc57e538e75b820e99faa33d",
+     "results": {
+      "tile": {
+       "prefillLogitsSha256": "ad153852027001729f950fbb9c25d7756ba18bed8e7c72d198795338364f7e81",
+       "short8": {
+        "tokensSha256": "b237b108f137a990ea7f2b1d01b15e43302709446dc2774390cdfbcfdcb38701",
+        "rewards": [
+         0.0,
+         0.0,
+         0.0,
+         0.0,
+         null,
+         0.0,
+         null,
+         null
+        ]
+       }
+      },
+      "stream": {
+       "prefillLogitsSha256": "ad153852027001729f950fbb9c25d7756ba18bed8e7c72d198795338364f7e81",
+       "short8": {
+        "tokensSha256": "b237b108f137a990ea7f2b1d01b15e43302709446dc2774390cdfbcfdcb38701",
+        "rewards": [
+         0.0,
+         0.0,
+         0.0,
+         0.0,
+         null,
+         0.0,
+         null,
+         null
+        ]
+       }
+      }
+     }
+    },
+    {
+     "state": "minus",
+     "weightsSha256": "008d811995e2359dafb96ac5a28e76092df2db6e4bf40a9b80bce5452ccaa533",
+     "results": {
+      "tile": {
+       "prefillLogitsSha256": "92dcb1589edb8de1d82d842ddd7417d6e79ae51277aac56846b5c5b292a7b5eb",
+       "short8": {
+        "tokensSha256": "a2adcb188dc6485c7244e184cc9d6f1176da101ac4a507ea41b42cc093f3d71c",
+        "rewards": [
+         1.0,
+         0.0,
+         0.0,
+         0.0,
+         null,
+         0.0,
+         null,
+         null
+        ]
+       }
+      },
+      "stream": {
+       "prefillLogitsSha256": "92dcb1589edb8de1d82d842ddd7417d6e79ae51277aac56846b5c5b292a7b5eb",
+       "short8": {
+        "tokensSha256": "a2adcb188dc6485c7244e184cc9d6f1176da101ac4a507ea41b42cc093f3d71c",
+        "rewards": [
+         1.0,
+         0.0,
+         0.0,
+         0.0,
+         null,
+         0.0,
+         null,
+         null
+        ]
+       }
+      }
+     }
+    },
+    {
+     "state": "restored",
+     "weightsSha256": "01df4e24c71f310b3a6e1ba93ede0a61323ee828ffb9125e8486d93a353a7912",
+     "results": {
+      "tile": {
+       "prefillLogitsSha256": "5ddef6d2f52f282c34edbd9845eef388a9040e4660385b367430635cb09b3573",
+       "short8": {
+        "tokensSha256": "7a9dcf02b9e12debf112d8294a84f36bf66ee5bacc35d7a7cef082ed65d217ae",
+        "rewards": [
+         1.0,
+         0.0,
+         0.0,
+         0.0,
+         null,
+         0.0,
+         null,
+         null
+        ]
+       }
+      },
+      "stream": {
+       "prefillLogitsSha256": "5ddef6d2f52f282c34edbd9845eef388a9040e4660385b367430635cb09b3573",
+       "short8": {
+        "tokensSha256": "7a9dcf02b9e12debf112d8294a84f36bf66ee5bacc35d7a7cef082ed65d217ae",
+        "rewards": [
+         1.0,
+         0.0,
+         0.0,
+         0.0,
+         null,
+         0.0,
+         null,
+         null
+        ]
+       }
+      }
+     }
+    }
+   ],
+   "source": {
+    "receipt": "docs/evidence/2026-10-27-strict-combined-acceptance/raw/tiny-parity-5070ti-01.json",
+    "sha256": "f76bf4d34da55dd2ffd70dc149d5086e63a1dcc705817472754e378b0f2a7959"
+   }
+  }
+ }
+}

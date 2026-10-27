@@ -1,0 +1,12 @@
+{
+ "format": "heteroes-strict-throughput-floor-v1",
+ "workload": "Qwen2.5-0.5B trained checkpoint, B32: short32 (8 probe prompts x4, 32 new tokens), chat128 (first 32 chat rows, 128 new tokens)",
+ "tokensSha256": {
+  "short32": "bc4a5504e37c79c14e8f6ee824618a85fdd6e0d8d5bcfca51ff1e7691fbd0c66",
+  "chat128": "a9fad5ca48ed06879bbad136b7282ca0a3c638959dd26e2b1b92635011d5fb49"
+ },
+ "floors": {
+  "NVIDIA GeForce RTX 5070 Ti": {"short32": 9670.0, "chat128": 9690.0}
+ },
+ "floorRule": "0.98 x the selected runtime's ABAB mean on that GPU (docs/acceptance/README.md); token/s, mean of process medians"
+}
