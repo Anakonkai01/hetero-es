@@ -1,0 +1,8 @@
+[
+  {
+    "name": "wrong_radix_degree",
+    "file": "harness/schedule.py",
+    "old": "[{i+d}],a[{i}]",
+    "new": "[{(i+d)%4}],a[{i}]"
+  }
+]

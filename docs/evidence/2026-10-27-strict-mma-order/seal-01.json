@@ -1,0 +1,16 @@
+{
+  "runtimeCommit": "0eb86cb9",
+  "selected": false,
+  "filesSha256": {
+    "README.md": "fa3d3d602ebdcea06f32443cb707e98a635c1b5526b6a149b9f2f361092bd31f",
+    "harness/bench.py": "1b5fdef2cf94fd4d8ed2c02a88d783ef12a927ba734e000868e8763005f05723",
+    "harness/mutants-01.json": "f5d7227fdcd2a6df51aeca28ea1e831197f788bce25009a8f6468aba06f6f2bb",
+    "harness/schedule.py": "14a667280e1ed267c52a1c039309d358a517e3f4c4fde6cd3b1aabfee6f49da4",
+    "harness/test_order.py": "286102181ba1f4558d2dd979202a0a40e6961d4f0e0a2a5a7807e31dcedbaf51",
+    "raw/mutation-01.log": "f33ec2ecf7d2cb2df3cae8ff59e825823642cbb4e915e7e58498230957dade07",
+    "raw/operators-01.json": "ab51f9d68c2e6c3462b7a452efb98dd835ed8cd6acfe88b9713eb2d54ce19fa6",
+    "raw/operators-01.log": "edcd1e6d1f2e619c11bb0bec6d0cca0bbbc443cc2d182fb0f256a7c9e35b1093",
+    "raw/red-01.log": "b9ef50cbc66b75de9965e6dfeb49a1e9296b978836fa98f3d0162750fb9e5cab",
+    "raw/tests-01.log": "7f341d6d74e9c39d7f825134c765c59bda35763d40f920ee01da092010cba97e"
+  }
+}

@@ -1,0 +1,5 @@
+control ok    | 1 passed, 4 deselected in 5.24s
+killed       warp_m_output_row_lost | 1 failed, 4 deselected in 2.98s
+killed       warp_m_input_wrong_half | 1 failed, 4 deselected in 2.98s
+
+2 of 2 mutants killed.

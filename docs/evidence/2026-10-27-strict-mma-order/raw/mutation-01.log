@@ -1,0 +1,4 @@
+control ok    | 1 passed, 5 deselected in 5.30s
+killed       wrong_radix_degree | 1 failed, 5 deselected in 2.25s
+
+1 of 1 mutants killed.

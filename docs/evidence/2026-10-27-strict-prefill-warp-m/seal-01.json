@@ -1,0 +1,17 @@
+{
+  "runtimeCommit": "0eb86cb9",
+  "selected": false,
+  "filesSha256": {
+    "README.md": "d7d1d73915c9968ce24571bb3d74be768d48a785574c4912ed980f349bc55a50",
+    "harness/bench.py": "48c669aa1bdc58f3e206f03f810b06bb8fe36cc36cc74a4c464097f03264f925",
+    "harness/m64.py": "3c204002c688d35e0e888e8077bec5a8f4721228192c1e0c37a5a148be7e0efc",
+    "harness/mutants-01.json": "bb09cac7ed66c6197e88a14f49260891fa60995eb05b58b91daa36031dc97187",
+    "harness/test_m64.py": "c5a5e8c5ec32b071be427f7e74d2d710daa0477c65a94241462fde11cbd26f68",
+    "raw/mutation-01.log": "e4971cf1a133b99387e8ba3a0aba6d2c5a05927e4a47fe335bd3e5089a320f8a",
+    "raw/operators-01.json": "f49b7271915de2b0305e408217ee70d060ba4228954269b22257a82177f62f82",
+    "raw/operators-01.log": "8ed2133938e02b3013c271f08c857670495a573860f8faefc370308a215e5503",
+    "raw/red-01.log": "e80c1805785653ec8e67173b964ea3ee51dcda52bba3dff77140fbfcc0afe961",
+    "raw/tests-01.log": "d5adc3f0eb97fbcb1f3e1f8ee8049522e7ddb06f3a692348998e320688cac852",
+    "raw/tests-02.log": "c946a7cebdb7f40883b821d53b2ec04ff38eaa402f9fcb51c9f35a89d907347f"
+  }
+}
