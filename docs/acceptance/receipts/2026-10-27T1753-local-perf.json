@@ -1,0 +1,32 @@
+{
+  "format": "heteroes-acceptance-receipt-v1",
+  "tree": "src-ce85ca0a57e39df3dfec29efe0df7ba7470e2e1000a67f95314ae2aa79d3ff61",
+  "dirty": false,
+  "commit": "f325fa0655c33e167ad98d8f84a1e396e25dfd2d",
+  "host": "local",
+  "profiles": [
+    "perf"
+  ],
+  "machine": {
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "python": "3.12.13",
+    "node": "5070ti",
+    "gpus": [
+      "NVIDIA GeForce RTX 5070 Ti, 595.91.07"
+    ]
+  },
+  "started": "2026-10-27T17:52:32+0700",
+  "finished": "2026-10-27T17:53:04+0700",
+  "results": [
+    {
+      "name": "strict-phase-trace",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 31.763,
+      "log": "/tmp/claude-1000/-home-pc5070ti-projects/bf57a36d-0293-41c3-a661-4f2d295e2d93/scratchpad/accept-trace-local/strict-phase-trace/output.log",
+      "log_sha256": "356daab33f21eb94ef076834461f545861e684b9134721eb2db554c03c60475e",
+      "detail": ""
+    }
+  ]
+}

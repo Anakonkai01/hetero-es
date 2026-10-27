@@ -1,0 +1,30 @@
+{
+  "format": "heteroes-acceptance-receipt-v1",
+  "tree": "src-ce85ca0a57e39df3dfec29efe0df7ba7470e2e1000a67f95314ae2aa79d3ff61",
+  "dirty": false,
+  "commit": "f325fa0655c33e167ad98d8f84a1e396e25dfd2d",
+  "host": "3060-wsl",
+  "profiles": [
+    "perf"
+  ],
+  "machine": {
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "python": "3.12.15",
+    "node": "DESKTOP-QP0NTA7",
+    "gpus": []
+  },
+  "started": "2026-10-27T17:53:26+0700",
+  "finished": "2026-10-27T17:54:12+0700",
+  "results": [
+    {
+      "name": "strict-phase-trace",
+      "host": "3060-wsl",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 46.119,
+      "log": "/tmp/heteroes-accept-ce85ca0a57e3-20261027-175326/results/strict-phase-trace/output.log",
+      "log_sha256": "32fc6ce24e28f168a3b4fcb41a4f74723f5e92289cef441f80f1babd9c627c9c",
+      "detail": ""
+    }
+  ]
+}
