@@ -77,9 +77,30 @@ bookkeeping (`published→generation_done` 0.04–6.8 s, `done→recovery point`
 than it grows; with a 15 MB ledger it looks like I/O contention, not a growing query. M3.bookkeeping stays OPEN until
 the M5 soak measures it.
 
-Still open (in order): M4 (lab/SDK/UI option for `strict_b22_v1` — the backend request model has no `evalDtype` yet,
-so the lab cannot create a strict run; qualification keyed by decoder needs a strict model-qualification profile;
-D1 GPU ownership; strict default), M5 (`strict_e2e.py` never run), M6, final acceptance, refactor, push, deploy.
+`8d52b76c` (M4 part 1): strict model qualification keyed by decoder (`qualification_key`), probe agent keeps
+engine+decoder (fixed a real bug: v2 first probes built v1 references), backend accepts `evalDtype` for the strict
+decoder only and checks strict qualification per selected device. No mutation check yet for this slice.
+
+### Remaining work, by difficulty (for choosing the model)
+
+Routine (a Sonnet-class session can do it, following the existing patterns and tests):
+1. Mutation check for `8d52b76c` (mutants: drop decoder from `qualification_key`, accept any decoder in `accept`,
+   ignore decoder in `v3_qualification`, drop `decoder` from the frozen probe command) and register it in accept.py.
+2. Frontend: decoder option `strict_b22_v1` in `RuntimeConfiguration.tsx` (v3 only, sends `evalDtype: "float16"`),
+   a "Qualify for strict decoder" action on the Models page (POST `.../qualifications` with `decoder`), translations,
+   browser check. SDK `ESConfig` already has `eval_dtype`; check `sdk_lab` passes the decoder to qualification.
+3. Throughput floor in `acceptance/golden/throughput.json` (0.98 × measured), `check-all` + `accept.py report --write`.
+4. Final acceptance reruns on three hosts (commands below), release notes, push and deploy steps as written.
+
+Harder (better for a stronger model, or with the owner present):
+5. M4 D1 GPU ownership (coordinator validation/export on the same GPU as a worker) and making strict the default
+   for new GPU runs only after the gates — touches scheduling/reservations.
+6. M5 `acceptance/probes/strict_e2e.py` has never run: first two-GPU end-to-end strict run (CPU coordinator, local
+   5070 Ti, 3060 WSL2). Debugging whatever breaks there crosses coordinator/worker/network code. Then the soak, where
+   M3.bookkeeping must be measured (see findings above).
+7. M6 int8 frozen base + LoRA through the executor (`eval/frozen_int8*.py`, `model/frozen_int8.py`): numerical work.
+8. The refactor (decision 5): moving evidence to an orphan branch and removing experiments safely is large but
+   mechanical; it needs care with replay dependencies and kernel-source hash checks.
 
 ## Next steps, in order
 
