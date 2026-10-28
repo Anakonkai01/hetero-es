@@ -13,13 +13,13 @@ import weakref
 import torch
 
 from heteroes.canonical import canonical_json_hash
-from heteroes.eval import attention_stages
-from heteroes.eval import integer_reference as reference
-from heteroes.eval import integer_tma
-from heteroes.eval import integer_plan as planning
-from heteroes.eval import strict_cuda as sc
-from heteroes.eval import integer_lm_head
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict import attention_stages
+from heteroes.strict import integer_reference as reference
+from heteroes.strict import integer_tma
+from heteroes.strict import integer_plan as planning
+from heteroes.strict import strict_cuda as sc
+from heteroes.strict import integer_lm_head
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 
 INTEGER_CUDA_VERSION = "row_scaled_integer_mma_cuda_v1_experimental"
 # "stream" schedules eligible MMA projections (K % 16 == 0, 16-byte aligned operands) through the multistage

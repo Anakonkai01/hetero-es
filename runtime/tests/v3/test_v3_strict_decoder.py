@@ -6,8 +6,8 @@ import os
 import pytest
 import torch
 
-from heteroes.eval import strict_backend
-from heteroes.eval.reference_ops import ReferenceArithmeticError, StrictMemoryBudget, StrictTransportError
+from heteroes.strict import strict_backend
+from heteroes.strict.reference_ops import ReferenceArithmeticError, StrictMemoryBudget, StrictTransportError
 from test_v3_product import product_assets, product_config  # noqa: F401 - fixtures
 
 
@@ -200,7 +200,7 @@ def test_generation_settings_follow_the_pinned_config_against_the_cpu_oracle(pro
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     from heteroes.eval.compact_decode import decode_settings
-    from heteroes.eval.integer_decoder import IntegerDecoderReference
+    from heteroes.strict.integer_decoder import IntegerDecoderReference
 
     tokenizer = AutoTokenizer.from_pretrained(product_assets / "model")
     cpu = AutoModelForCausalLM.from_pretrained(product_assets / "model", dtype=torch.float16).eval()

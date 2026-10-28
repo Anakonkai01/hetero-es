@@ -104,7 +104,7 @@ def generate_rows(
                     processors,
                 )
             elif decoder in STRICT_DECODERS:
-                from heteroes.eval import strict_backend
+                from heteroes.strict import strict_backend
 
                 new = strict_backend.generate_ids(
                     model,

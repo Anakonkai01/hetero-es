@@ -7,12 +7,12 @@ import torch
 
 from heteroes.es.perturb import perturb_model_
 from heteroes.es.snapshot import restore_from_snapshot_, take_snapshot
-from heteroes.eval.frozen_int8_decoder import (
+from heteroes.strict.frozen_int8_decoder import (
     GRAPH_BACKEND,
     FrozenInt8DecoderGraph,
     FrozenInt8DecoderReference,
 )
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 from heteroes.model.frozen_int8 import freeze_projections, freeze_tied_head, frozen_modules
 from heteroes.model.lora import trainable_schema
 from test_strict_decoder import bits, model_for
@@ -302,7 +302,7 @@ def test_canonical_plus_minus_adapters_match_cpu_bits_and_restore_exactly():
 
 @gpu
 def test_cuda_adapter_combine_is_capture_safe_with_signed_zero_base():
-    from heteroes.eval import strict_cuda
+    from heteroes.strict import strict_cuda
 
     kernels = strict_cuda.StrictCudaKernels("cuda")
     base = torch.tensor([-0.0, 0.0, -1.0], device="cuda", dtype=torch.float32)

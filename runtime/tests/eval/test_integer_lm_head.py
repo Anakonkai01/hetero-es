@@ -9,8 +9,8 @@ import tempfile
 import pytest
 import torch
 
-from heteroes.eval import integer_reference as reference
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict import integer_reference as reference
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 
 gpu = pytest.mark.skipif(
     os.environ.get("HETEROES_GPU_ACCEPTANCE") != "1" or not torch.cuda.is_available(), reason="GPU opt-in"
@@ -26,8 +26,8 @@ def make(seed, rows, width, vocab):
 
 
 def setup(weight):
-    from heteroes.eval.integer_cuda import IntegerCudaKernels
-    from heteroes.eval.integer_lm_head import BoundedLmHead
+    from heteroes.strict.integer_cuda import IntegerCudaKernels
+    from heteroes.strict.integer_lm_head import BoundedLmHead
 
     kernels = IntegerCudaKernels("cuda", magnitude_bits=22)
     kernels._begin_request([weight])
@@ -37,7 +37,7 @@ def setup(weight):
 
 
 def selected(kernels, head, x, w, *, bounded, flag=None, prepared=None):
-    from heteroes.eval.strict_decode_cuda import DecodeKernels
+    from heteroes.strict.strict_decode_cuda import DecodeKernels
 
     rows, vocab = x.shape[0], w.shape[0]
     decode = DecodeKernels(kernels)
@@ -176,7 +176,7 @@ def test_head_refresh_clear_pointer_stability_and_changed_weight_binding():
 @gpu
 def test_wide_graph_reuses_capture_matches_full_path_and_penalty_falls_back(monkeypatch):
     from test_strict_decoder import model_for
-    from heteroes.eval.integer_decoder import IntegerDecoderGraph
+    from heteroes.strict.integer_decoder import IntegerDecoderGraph
 
     torch.manual_seed(612)
     cpu = model_for("llama")
@@ -189,7 +189,7 @@ def test_wide_graph_reuses_capture_matches_full_path_and_penalty_falls_back(monk
     )
     ids = torch.tensor([[3, 5, 7], [11, 13, 17]], device="cuda")
     head = bounded._bounded_head
-    import heteroes.eval.strict_decoder_graph as graph_module
+    import heteroes.strict.strict_decoder_graph as graph_module
 
     bound = bounded._request_workspace_bytes(2)
     assert bound >= bounded.model.lm_head.weight.numel()
@@ -288,9 +288,9 @@ def test_nonfinite_activations_keep_the_quantizer_error(value):
 @gpu
 @pytest.mark.parametrize("arch", ["sm_80", "sm_86", "sm_89", "sm_90", "sm_120"])
 def test_bounded_source_passes_the_instruction_audit_on_supported_architectures(arch):
-    from heteroes.eval import strict_cuda as sc
-    from heteroes.eval.integer_cuda import IntegerCudaKernels
-    from heteroes.eval.integer_lm_head import source
+    from heteroes.strict import strict_cuda as sc
+    from heteroes.strict.integer_cuda import IntegerCudaKernels
+    from heteroes.strict.integer_lm_head import source
 
     owner = IntegerCudaKernels("cuda", magnitude_bits=22)
     if not owner._nvdisasm:

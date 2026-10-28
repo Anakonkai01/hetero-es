@@ -4,7 +4,7 @@ import pytest
 
 
 def planner():
-    from heteroes.eval import integer_plan
+    from heteroes.strict import integer_plan
 
     return integer_plan
 

@@ -9,19 +9,19 @@ from pathlib import Path
 import pytest
 import torch
 
-from heteroes.eval import integer_reference as reference
-from heteroes.eval import strict_cuda as sc
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict import integer_reference as reference
+from heteroes.strict import strict_cuda as sc
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 
 
 def cuda_class():
-    from heteroes.eval.integer_cuda import IntegerCudaKernels
+    from heteroes.strict.integer_cuda import IntegerCudaKernels
 
     return IntegerCudaKernels
 
 
 def test_stream_input_load_policy_scopes_the_ldmatrix_route_to_sm120_b22():
-    from heteroes.eval.integer_cuda import stream_input_plan
+    from heteroes.strict.integer_cuda import stream_input_plan
 
     for bits in (14, 22):
         for arch in ("sm_80", "sm_86", "sm_89", "sm_90", "sm_120"):
@@ -31,7 +31,7 @@ def test_stream_input_load_policy_scopes_the_ldmatrix_route_to_sm120_b22():
 
 
 def test_schedule_is_validated_before_cuda_and_named_in_the_static_identity(monkeypatch):
-    from heteroes.eval import integer_cuda
+    from heteroes.strict import integer_cuda
 
     monkeypatch.delenv("HETEROES_GPU_ACCEPTANCE", raising=False)
     with pytest.raises(ReferenceArithmeticError, match="schedule"):
@@ -188,7 +188,7 @@ def test_streamed_overflow_and_nonfinite_weights_flag_like_the_tile_kernel():
 @gpu
 def test_fast_digit_conversion_matches_quant_half_for_every_half_and_admitted_row_exponent():
     """All 65536 half patterns x 40 exponents: admitted values, signed zeros and Inf/NaN (which quantize to zero)."""
-    from heteroes.eval.integer_cuda import _SOURCE
+    from heteroes.strict.integer_cuda import _SOURCE
 
     context = torch.empty(1, device="cuda")
     kernels = cuda_class()("cuda", magnitude_bits=22)
@@ -255,7 +255,7 @@ def test_stream_shared_buffers_are_sixteen_byte_aligned_for_cp_async(monkeypatch
 @pytest.mark.parametrize("magnitude_bits", [14, 22])
 def test_integer_source_passes_the_instruction_audit_on_other_architectures(arch, magnitude_bits):
     # Code generation differs by target (sm_86 once turned a runtime-stride loop into MUFU.RCP division).
-    from heteroes.eval.integer_cuda import _SOURCE
+    from heteroes.strict.integer_cuda import _SOURCE
 
     context = torch.empty(1, device="cuda")
     owner = cuda_class()("cuda", magnitude_bits=magnitude_bits)
@@ -308,7 +308,7 @@ def test_integer_source_passes_the_instruction_audit_on_other_architectures(arch
 @pytest.mark.parametrize("magnitude_bits", [14, 22])
 def test_fused_quantization_source_passes_the_ops_instruction_audit_on_other_architectures(arch, magnitude_bits):
     # The fused RMSNorm/SiLU module is built from the ops source, so it must pass the ops audit on every target.
-    from heteroes.eval.integer_cuda import _FUSED_SOURCE, RMS_THREADS, SILU_THREADS
+    from heteroes.strict.integer_cuda import _FUSED_SOURCE, RMS_THREADS, SILU_THREADS
 
     context = torch.empty(1, device="cuda")
     owner = cuda_class()("cuda", magnitude_bits=magnitude_bits)

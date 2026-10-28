@@ -10,7 +10,7 @@ where the original would have used the GQA kernel, so the split kernel's range i
 Measured gain and limits: docs/evidence/2026-10-27-strict-final-composed.
 """
 
-from heteroes.eval import strict_cuda as sc
+from heteroes.strict import strict_cuda as sc
 
 STAGES_VERSION = "gqa_ordered_32_key_subtrees_in_128_key_stages_v1"
 KEY_TILE = 128

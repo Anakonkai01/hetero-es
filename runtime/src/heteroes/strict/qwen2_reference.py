@@ -15,8 +15,8 @@ from pathlib import Path
 import torch
 
 from heteroes.canonical import canonical_json_hash
-from heteroes.eval import reference_ops as ops
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict import reference_ops as ops
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 
 REFERENCE_BACKEND = "qwen2_pairwise_f32_reference_v1_experimental"
 

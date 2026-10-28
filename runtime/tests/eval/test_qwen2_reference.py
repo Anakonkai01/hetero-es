@@ -9,8 +9,8 @@ from transformers import Qwen2Config, Qwen2ForCausalLM
 
 from heteroes.eval.candidate import model_weights_sha256
 from heteroes.eval.phase_trace import storage_inventory
-from heteroes.eval.qwen2_reference import Qwen2Reference
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict.qwen2_reference import Qwen2Reference
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 from heteroes.model.schema import build_parameter_schema
 
 

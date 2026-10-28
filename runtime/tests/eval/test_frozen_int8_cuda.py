@@ -6,8 +6,8 @@ import random
 import pytest
 import torch
 
-from heteroes.eval import frozen_int8
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict import frozen_int8
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 
 gpu = pytest.mark.skipif(
     os.environ.get("HETEROES_GPU_ACCEPTANCE") != "1" or not torch.cuda.is_available(),
@@ -18,7 +18,7 @@ pytestmark = gpu
 
 
 def kernels():
-    from heteroes.eval.frozen_int8_cuda import FrozenInt8CudaKernels
+    from heteroes.strict.frozen_int8_cuda import FrozenInt8CudaKernels
 
     return FrozenInt8CudaKernels("cuda", max_partial_bytes=32 * 1024**2)
 

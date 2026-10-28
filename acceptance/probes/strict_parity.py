@@ -38,7 +38,7 @@ import transformers  # noqa: E402
 from heteroes.es.perturb import perturb_model_  # noqa: E402
 from heteroes.es.snapshot import restore_from_snapshot_, take_snapshot  # noqa: E402
 from heteroes.eval.candidate import model_weights_sha256  # noqa: E402
-from heteroes.eval.integer_decoder import IntegerDecoderGraph  # noqa: E402
+from heteroes.strict.integer_decoder import IntegerDecoderGraph  # noqa: E402
 from heteroes.eval.workload import extract_integer  # noqa: E402
 from heteroes.model.schema import build_parameter_schema  # noqa: E402
 from heteroes.noise.contracts import ENGINE_V2  # noqa: E402

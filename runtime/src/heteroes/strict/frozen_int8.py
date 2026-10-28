@@ -24,9 +24,9 @@ import tempfile
 import numpy as np
 import torch
 
-from heteroes.eval import integer_reference
-from heteroes.eval import reference_ops as ops
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict import integer_reference
+from heteroes.strict import reference_ops as ops
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 
 ARTIFACT_FORMAT = "heteroes.frozen-int8-b22"
 ARTIFACT_FORMAT_VERSION = 1

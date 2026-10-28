@@ -14,8 +14,8 @@ import struct
 import pytest
 import torch
 
-from heteroes.eval import frozen_int8
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict import frozen_int8
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 
 
 def power_two(exponent):

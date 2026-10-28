@@ -3,8 +3,8 @@
 import os
 import pytest
 import torch
-from heteroes.eval import reference_ops as ops
-from heteroes.eval.strict_cuda import StrictCudaKernels
+from heteroes.strict import reference_ops as ops
+from heteroes.strict.strict_cuda import StrictCudaKernels
 
 gpu = pytest.mark.skipif(
     os.environ.get("HETEROES_GPU_ACCEPTANCE") != "1" or not torch.cuda.is_available(), reason="GPU opt-in"

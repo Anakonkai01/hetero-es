@@ -1,8 +1,8 @@
 # Experimental strict decoder graph
 
 The strict CUDA implementation is shared by graph adapters, rather than specialized to one checkpoint.
-`eval/strict_decoder.py` provides an eager operator oracle and serial CUDA graph;
-`eval/strict_decoder_packed.py` packs independent sequences into the same projection and attention launches.
+`strict/strict_decoder.py` provides an eager operator oracle and serial CUDA graph;
+`strict/strict_decoder_packed.py` packs independent sequences into the same projection and attention launches.
 `qwen2_strict_cuda.py` retains the pinned-Qwen compatibility constructor. These remain experimental backends,
 with `hardwareQualified: false`; no managed recipe, audit policy or historical numerical identity is changed.
 
@@ -66,7 +66,7 @@ Packing changes data placement and independent work scheduling; it does not comb
 
 ## Captured decode
 
-`eval/strict_decoder_graph.py` adds an experimental `StrictDecoderGraph` generation path. Packed prefill publishes
+`strict/strict_decoder_graph.py` adds an experimental `StrictDecoderGraph` generation path. Packed prefill publishes
 verified contiguous KV slabs, which are copied to bounded slots indexed by original sequence owner. Decode reads
 the actual prefix length from a device range table; unused capacity is not included in an attention reduction.
 EOS removes owners from the query batch without moving their neighbors' KV. A change in active count replaces

@@ -2,7 +2,7 @@
 
 Status: implemented CPU oracle, separately named CUDA operator, typed frozen storage with FP16 LoRA adapters and an
 explicit captured-decode composition. It is not an accepted backend, not a managed recipe, and not a claim about model
-quality or speed. `heteroes/eval/frozen_int8.py` is the reference for this identity; CUDA results are bit-compared
+quality or speed. `heteroes/strict/frozen_int8.py` is the reference for this identity; CUDA results are bit-compared
 against it under zero adapters. Adapter deltas have their own FP32 namespace and are not part of the exact base claim.
 
 ## Scope
@@ -42,7 +42,7 @@ A different rule is a different artifact identity.
 
 ## Activation and projection
 
-The activation contract is the existing B22 row quantizer in `heteroes.eval.integer_reference.quantize_rows`
+The activation contract is the existing B22 row quantizer in `heteroes.strict.integer_reference.quantize_rows`
 (`magnitude_bits=22`): per-row power-of-two exponent, exact integer RNE, FP32 subnormals flushed to signed zero,
 all-zero rows use exponent zero, and `|q| <= 2^22` including the endpoints. The projection does not replace this with
 a vendor `absmax/127` scale.
@@ -69,7 +69,7 @@ midpoint still round down to max-finite. It rounds subnormals in units of `2^-14
 signed zero. A value that rounds up to the smallest normal survives. The CPU result is independent of the output
 tile, row order, batch size and host FPU.
 
-Bias, when present, is the existing FP16 bias and is added through `heteroes.eval.reference_ops.add` after the
+Bias, when present, is the existing FP16 bias and is added through `heteroes.strict.reference_ops.add` after the
 projection, exactly as the current integer reference does. The result is FP32; later graph operators own the normal
 FP16 publication.
 
@@ -84,7 +84,7 @@ FP16 publication.
 
 ## CUDA operator
 
-`heteroes/eval/frozen_int8_cuda.py` implements `frozen_int8_b22_mma_cuda_v1_experimental` as a separate identity. It
+`heteroes/strict/frozen_int8_cuda.py` implements `frozen_int8_b22_mma_cuda_v1_experimental` as a separate identity. It
 uses one weight limb per MMA product, so a dot is three signed-byte products (one per activation limb) instead of the
 nine products of the B22-by-B22 integer path. Multi-row inputs use `mma.sync.m16n8k32.s8`, single-row decode can use
 the SIMT path, and split-K is admitted only where the decode plan selects it. The `S * signif(scale)` product is kept

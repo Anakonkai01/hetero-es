@@ -18,7 +18,7 @@ import weakref
 
 import torch
 
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 
 STRICT_CONTEXTS = (512, 1024, 2048, 4096)  # engine context buckets; the physical KV is sized per request anyway
 GRAPH_BUDGET_FRACTION = 0.4  # default decoder memory budget: this share of the device's total memory
@@ -50,9 +50,9 @@ def engine_for(model, tokens=1, decoder=None):
     match the model: a frozen base is never decoded as B22 or the other way round.
     """
     from heteroes.catalog import STRICT_INT8_LORA_DECODER
-    from heteroes.eval.frozen_int8_decoder import FrozenInt8DecoderGraph
-    from heteroes.eval.integer_decoder import IntegerDecoderGraph
-    from heteroes.eval.reference_ops import managed_opt_in
+    from heteroes.strict.frozen_int8_decoder import FrozenInt8DecoderGraph
+    from heteroes.strict.integer_decoder import IntegerDecoderGraph
+    from heteroes.strict.reference_ops import managed_opt_in
     from heteroes.model.frozen_int8 import frozen_modules
 
     device = next(model.parameters()).device

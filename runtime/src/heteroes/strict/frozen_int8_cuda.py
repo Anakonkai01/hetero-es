@@ -17,11 +17,11 @@ from pathlib import Path
 import torch
 
 from heteroes.canonical import canonical_json_hash
-from heteroes.eval import frozen_int8 as artifact
-from heteroes.eval import integer_cuda
-from heteroes.eval import integer_plan as planning
-from heteroes.eval import strict_cuda as sc
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict import frozen_int8 as artifact
+from heteroes.strict import integer_cuda
+from heteroes.strict import integer_plan as planning
+from heteroes.strict import strict_cuda as sc
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 
 FROZEN_INT8_CUDA_VERSION = "frozen_int8_b22_mma_cuda_v1_experimental"
 MAGNITUDE_BITS = 22

@@ -12,9 +12,9 @@ import struct
 import pytest
 import torch
 
-from heteroes.eval import reference_ops as ops
-from heteroes.eval import strict_cuda
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict import reference_ops as ops
+from heteroes.strict import strict_cuda
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 
 
 def bits(value):

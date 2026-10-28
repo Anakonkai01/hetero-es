@@ -5,7 +5,7 @@ import os
 import pytest
 import torch
 
-from heteroes.eval import strict_cuda as sc
+from heteroes.strict import strict_cuda as sc
 from test_strict_attention_split import bits, tensors
 from test_strict_cuda import _reference_attention
 

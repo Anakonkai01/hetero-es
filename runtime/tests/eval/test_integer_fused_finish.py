@@ -68,7 +68,7 @@ def test_residual_finish_equals_projection_then_strict_add(width, outputs, bias,
 
 @gpu
 def test_residual_requires_a_matching_tensor_and_single_rows_keep_the_strict_add(monkeypatch):
-    from heteroes.eval.reference_ops import ReferenceArithmeticError
+    from heteroes.strict.reference_ops import ReferenceArithmeticError
 
     kernels = cuda_class()("cuda", magnitude_bits=22)
     used = entries_used(kernels, monkeypatch)
@@ -169,7 +169,7 @@ def _caches(gen, kv, total, dim):
 @pytest.mark.parametrize("width,heads,kv,dim", [(896, 14, 2, 64), (256, 4, 2, 64), (512, 8, 8, 64), (384, 3, 1, 128)])
 @pytest.mark.parametrize("bias", [False, True])
 def test_qkv_rope_store_equals_projections_rope_and_cache_store(width, heads, kv, dim, bias, monkeypatch):
-    from heteroes.eval import strict_decode_cuda
+    from heteroes.strict import strict_decode_cuda
 
     kernels = cuda_class()("cuda", magnitude_bits=22)
     decode = strict_decode_cuda.DecodeKernels(kernels)
@@ -221,7 +221,7 @@ def test_qkv_rope_store_equals_projections_rope_and_cache_store(width, heads, kv
 
 @gpu
 def test_qkv_rope_store_reports_failures_and_declines_unsupported_layouts():
-    from heteroes.eval import strict_decode_cuda
+    from heteroes.strict import strict_decode_cuda
 
     kernels = cuda_class()("cuda", magnitude_bits=22)
     decode = strict_decode_cuda.DecodeKernels(kernels)
@@ -284,8 +284,8 @@ def test_qkv_rope_store_reports_failures_and_declines_unsupported_layouts():
 def test_wide_integer_decoder_with_fused_finishes_matches_cpu_and_unfused_graph(magnitude_bits, monkeypatch):
     from transformers import Qwen2Config, Qwen2ForCausalLM
 
-    from heteroes.eval.integer_decoder import IntegerDecoderGraph, IntegerDecoderReference
-    from heteroes.eval.strict_decoder_graph import StrictDecoderGraph
+    from heteroes.strict.integer_decoder import IntegerDecoderGraph, IntegerDecoderReference
+    from heteroes.strict.strict_decoder_graph import StrictDecoderGraph
 
     torch.manual_seed(29)
     cpu = (
@@ -337,7 +337,7 @@ def test_wide_integer_decoder_with_fused_finishes_matches_cpu_and_unfused_graph(
 
 @gpu
 def test_fused_finishes_flag_a_nonfinite_bias_and_qkv_declines_odd_head_dims():
-    from heteroes.eval import strict_decode_cuda
+    from heteroes.strict import strict_decode_cuda
 
     kernels = cuda_class()("cuda", magnitude_bits=22)
     decode = strict_decode_cuda.DecodeKernels(kernels)

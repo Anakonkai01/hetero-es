@@ -8,9 +8,9 @@ from transformers import Qwen2Config, Qwen2ForCausalLM
 
 from heteroes.es.perturb import perturb_model_
 from heteroes.es.snapshot import restore_from_snapshot_, take_snapshot
-from heteroes.eval import frozen_int8
-from heteroes.eval import reference_ops as ops
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict import frozen_int8
+from heteroes.strict import reference_ops as ops
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 from heteroes.model.frozen_int8 import (
     FrozenInt8LoraLinear,
     create_initial_frozen_adapter,
@@ -299,7 +299,7 @@ def test_frozen_tied_head_requires_the_original_tied_fp16_head():
 
 
 def test_graph_identity_admits_a_pinned_tied_head_only_in_frozen_mode():
-    from heteroes.eval.strict_decoder import describe_graph
+    from heteroes.strict.strict_decoder import describe_graph
 
     model = tiny()
     freeze_projections(model, rank=2, alpha=4, seed=7, target_modules=("q_proj",))

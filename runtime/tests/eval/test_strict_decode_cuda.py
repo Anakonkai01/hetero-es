@@ -5,8 +5,8 @@ import os
 import pytest
 import torch
 
-from heteroes.eval import reference_ops as ops
-from heteroes.eval.strict_cuda import StrictCudaKernels
+from heteroes.strict import reference_ops as ops
+from heteroes.strict.strict_cuda import StrictCudaKernels
 
 gpu = pytest.mark.skipif(
     os.environ.get("HETEROES_GPU_ACCEPTANCE") != "1" or not torch.cuda.is_available(), reason="GPU opt-in"
@@ -14,7 +14,7 @@ gpu = pytest.mark.skipif(
 
 
 def decode_kernels():
-    from heteroes.eval.strict_decode_cuda import DecodeKernels
+    from heteroes.strict.strict_decode_cuda import DecodeKernels
 
     torch.zeros(1, device="cuda")  # a current CUDA context: the file must also pass when run alone
     kernels = StrictCudaKernels("cuda")
@@ -106,7 +106,7 @@ def test_greedy_ties_penalty_and_publication_use_original_owner_and_canonical_op
 @pytest.mark.parametrize("vocab", [8193, 20000, 151936])
 @pytest.mark.parametrize("penalty", [1.0, 1.3])
 def test_split_greedy_over_wide_vocabularies_equals_the_single_cta_selection(vocab, penalty):
-    from heteroes.eval import strict_decode_cuda
+    from heteroes.strict import strict_decode_cuda
 
     kernels, decode = decode_kernels()
     gen = torch.Generator(device="cuda").manual_seed(vocab)

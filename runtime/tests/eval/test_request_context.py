@@ -6,8 +6,8 @@ import threading
 import pytest
 import torch
 
-from heteroes.eval.reference_ops import ReferenceArithmeticError
-from heteroes.eval.strict_decoder_graph import request_context
+from heteroes.strict.reference_ops import ReferenceArithmeticError
+from heteroes.strict.strict_decoder_graph import request_context
 from test_strict_decoder import bits, model_for
 
 
@@ -30,7 +30,7 @@ gpu = pytest.mark.skipif(
 
 
 def engines(**options):
-    from heteroes.eval.integer_decoder import IntegerDecoderGraph, IntegerDecoderReference
+    from heteroes.strict.integer_decoder import IntegerDecoderGraph, IntegerDecoderReference
 
     cpu = model_for("llama")
     model = model_for("llama").cuda()
@@ -76,7 +76,7 @@ def test_eos_inside_a_small_bucket_matches_the_oracle():
 @gpu
 def test_configured_context_and_conservative_budget_still_reject():
     model = model_for("llama").cuda()
-    from heteroes.eval.integer_decoder import IntegerDecoderGraph
+    from heteroes.strict.integer_decoder import IntegerDecoderGraph
 
     engine = IntegerDecoderGraph(model, allow_fixture=True, max_context=64, magnitude_bits=22, max_graph_bytes=1)
     with pytest.raises(ReferenceArithmeticError, match="memory budget"):

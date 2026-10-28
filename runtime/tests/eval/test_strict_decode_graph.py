@@ -6,12 +6,12 @@ import os
 import pytest
 import torch
 
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 from test_strict_decoder import bits, model_for
 
 
 def graph_class():
-    from heteroes.eval.strict_decoder_graph import StrictDecoderGraph
+    from heteroes.strict.strict_decoder_graph import StrictDecoderGraph
 
     return StrictDecoderGraph
 
@@ -37,7 +37,7 @@ gpu = pytest.mark.skipif(
 @gpu
 @pytest.mark.parametrize("family", ["qwen2", "llama", "llama-wide", "mistral"])
 def test_captured_generation_matches_cpu_and_reuses_live_weights_without_candidate_kv(family):
-    from heteroes.eval.strict_decoder import StrictDecoderReference
+    from heteroes.strict.strict_decoder import StrictDecoderReference
 
     model = model_for(family).cuda()
     backend = graph_class()(model, max_context=32, allow_fixture=True)
@@ -79,7 +79,7 @@ def test_captured_generation_matches_cpu_and_reuses_live_weights_without_candida
     "options", [{"repetition_penalty": 1.3}, {"use_cache": False}, {"eos_token_id": list(range(20))}]
 )
 def test_graph_generation_keeps_penalty_no_cache_and_eos_ownership(options):
-    from heteroes.eval.strict_decoder_packed import StrictDecoderPacked
+    from heteroes.strict.strict_decoder_packed import StrictDecoderPacked
 
     model = model_for("llama-wide").cuda()
     backend = graph_class()(model, max_context=32, allow_fixture=True)
@@ -103,7 +103,7 @@ def test_graph_budget_refuses_before_prefill_and_second_live_weight_binding(monk
 
 @gpu
 def test_budget_accounts_for_actual_prefill_workspace_before_computation(monkeypatch):
-    from heteroes.eval.strict_decoder_graph import graph_memory_bound
+    from heteroes.strict.strict_decoder_graph import graph_memory_bound
 
     model = model_for("llama-wide").cuda()
     limit = graph_memory_bound(model.config, 2, 32, 12, prompt_tokens=4)
@@ -118,7 +118,7 @@ def test_budget_accounts_for_actual_prefill_workspace_before_computation(monkeyp
 
 @gpu
 def test_parameter_rebinding_invalidates_capture_but_inplace_updates_do_not():
-    from heteroes.eval.strict_decoder_packed import StrictDecoderPacked
+    from heteroes.strict.strict_decoder_packed import StrictDecoderPacked
 
     model = model_for("mistral").cuda()
     backend = graph_class()(model, max_context=32, allow_fixture=True)
@@ -205,8 +205,8 @@ def test_captured_arithmetic_error_is_checked_before_output_and_invalidates_grap
 @gpu
 @torch.inference_mode()
 def test_captured_kv_bits_and_prefixes_survive_owner_reordering_and_compaction():
-    from heteroes.eval import reference_ops as ops
-    from heteroes.eval.strict_decoder import StrictDecoderReference
+    from heteroes.strict import reference_ops as ops
+    from heteroes.strict.strict_decoder import StrictDecoderReference
 
     model = model_for("llama-wide").cuda()
     backend = graph_class()(model, max_context=32, allow_fixture=True)

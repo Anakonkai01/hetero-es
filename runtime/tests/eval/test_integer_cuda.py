@@ -6,13 +6,13 @@ import re
 import pytest
 import torch
 
-from heteroes.eval import integer_reference as reference
-from heteroes.eval import strict_cuda as sc
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict import integer_reference as reference
+from heteroes.strict import strict_cuda as sc
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 
 
 def cuda_class():
-    from heteroes.eval.integer_cuda import IntegerCudaKernels
+    from heteroes.strict.integer_cuda import IntegerCudaKernels
 
     return IntegerCudaKernels
 
@@ -26,7 +26,7 @@ def test_integer_constructor_guards_before_cuda(monkeypatch):
 
 
 def test_weight_read_policy_selects_measured_prefetch_and_keeps_explicit_controls():
-    from heteroes.eval.integer_cuda import weight_read_plan
+    from heteroes.strict.integer_cuda import weight_read_plan
 
     assert weight_read_plan(22, "sm_120", "auto") == "prefetch2"
     assert weight_read_plan(22, "sm_86", "auto") == "prefetch2"
@@ -159,7 +159,7 @@ def test_prefetched_tiles_replay_with_live_weight_changes_and_exact_restore():
 @pytest.mark.parametrize("magnitude_bits", [14, 22])
 def test_every_admitted_finite_fp16_value_and_weight_row_exponent_quantizes_exactly(magnitude_bits):
     """All ~1M finite value/exponent pairs, not just random matmul outputs after cancellation."""
-    from heteroes.eval.integer_cuda import _SOURCE
+    from heteroes.strict.integer_cuda import _SOURCE
 
     context = torch.empty(1, device="cuda")
     kernels = cuda_class()("cuda", magnitude_bits=magnitude_bits)

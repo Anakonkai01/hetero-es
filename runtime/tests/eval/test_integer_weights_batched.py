@@ -12,7 +12,7 @@ gpu = pytest.mark.skipif(
 
 @pytest.fixture(scope="module")
 def kernels():
-    from heteroes.eval.integer_cuda import IntegerCudaKernels
+    from heteroes.strict.integer_cuda import IntegerCudaKernels
 
     return IntegerCudaKernels("cuda", magnitude_bits=22)
 

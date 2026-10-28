@@ -5,10 +5,10 @@ import os
 import pytest
 import torch
 
-from heteroes.eval import integer_tma
-from heteroes.eval.reference_ops import ReferenceArithmeticError, StrictTransportError
-from heteroes.eval.strict_cuda import StrictCudaKernels
-from heteroes.eval.strict_decoder_graph import _DecodeSession
+from heteroes.strict import integer_tma
+from heteroes.strict.reference_ops import ReferenceArithmeticError, StrictTransportError
+from heteroes.strict.strict_cuda import StrictCudaKernels
+from heteroes.strict.strict_decoder_graph import _DecodeSession
 
 
 @pytest.mark.parametrize("status", [8, 9, 8 | 2 | 4])
@@ -67,7 +67,7 @@ gpu = pytest.mark.skipif(
 
 
 def kernels(tma):
-    from heteroes.eval.integer_cuda import IntegerCudaKernels
+    from heteroes.strict.integer_cuda import IntegerCudaKernels
 
     torch.empty(1, device="cuda")
     k = IntegerCudaKernels("cuda", magnitude_bits=22, mma_schedule="stream")

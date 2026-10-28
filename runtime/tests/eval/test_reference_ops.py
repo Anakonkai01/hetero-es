@@ -9,7 +9,7 @@ import struct
 import pytest
 import torch
 
-from heteroes.eval import reference_ops as ops
+from heteroes.strict import reference_ops as ops
 
 
 def f32(value):

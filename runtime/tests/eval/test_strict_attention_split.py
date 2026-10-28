@@ -5,8 +5,8 @@ import os
 import pytest
 import torch
 
-from heteroes.eval import strict_cuda
-from heteroes.eval.strict_cuda import StrictCudaKernels, attention_chunk, gqa_attention_eligible
+from heteroes.strict import strict_cuda
+from heteroes.strict.strict_cuda import StrictCudaKernels, attention_chunk, gqa_attention_eligible
 from test_strict_cuda import _reference_attention
 
 gpu = pytest.mark.skipif(

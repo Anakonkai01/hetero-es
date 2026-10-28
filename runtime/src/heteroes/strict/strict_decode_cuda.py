@@ -6,7 +6,7 @@ multiply and reciprocal constants. Comparisons select the smallest token ID on a
 
 import torch
 
-from heteroes.eval import strict_cuda as sc
+from heteroes.strict import strict_cuda as sc
 
 GREEDY_CHUNK = 8192  # columns per CTA of the split greedy selection (matches the kernel source)
 

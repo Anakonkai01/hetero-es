@@ -1,5 +1,5 @@
 import pytest
-from heteroes.eval import integer_plan as p
+from heteroes.strict import integer_plan as p
 
 
 @pytest.mark.parametrize("bad", [0, 33, True, 1.5])
@@ -9,7 +9,7 @@ def test_residency_is_a_bounded_integer(bad):
 
 
 def test_selected_residency_is_limited_to_measured_sm120_b22_stream_configuration():
-    from heteroes.eval.integer_cuda import IntegerCudaKernels
+    from heteroes.strict.integer_cuda import IntegerCudaKernels
 
     k = object.__new__(IntegerCudaKernels)
     for arch in ("sm_80", "sm_86", "sm_89", "sm_90", "sm_120"):

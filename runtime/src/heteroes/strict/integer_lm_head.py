@@ -13,7 +13,7 @@ import weakref
 
 import torch
 
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 
 SELECT_PARTITIONS = 8
 
@@ -313,7 +313,7 @@ extern "C" __global__ void bound_select(const unsigned* x,const u16* w,const int
 
 
 def source(width, row_tile=32):
-    from heteroes.eval import integer_cuda as ic
+    from heteroes.strict import integer_cuda as ic
 
     # Reuse the admitted quantizer and encoder verbatim. The interval encoder suppresses only the flag;
     # nonfinite intervals survive and the exact recomputation below raises the original flag if needed.

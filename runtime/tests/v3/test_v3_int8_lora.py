@@ -128,7 +128,7 @@ gpu = pytest.mark.skipif(
 
 @gpu
 def test_an_int8_run_replays_on_the_cpu_and_keeps_no_fp16_targets_on_the_gpu(assets, tmp_path, monkeypatch):  # noqa: F811
-    from heteroes.eval import strict_backend
+    from heteroes.strict import strict_backend
     from heteroes.v3.local import prepare
 
     monkeypatch.delenv("HETEROES_GPU_ACCEPTANCE")  # the strict recipe is the opt-in

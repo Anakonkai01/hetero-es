@@ -5,9 +5,9 @@ import os
 import pytest
 import torch
 
-from heteroes.eval import integer_reference as reference
-from heteroes.eval.integer_cuda import IntegerCudaKernels
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict import integer_reference as reference
+from heteroes.strict.integer_cuda import IntegerCudaKernels
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 
 gpu = pytest.mark.skipif(
     os.environ.get("HETEROES_GPU_ACCEPTANCE") != "1" or not torch.cuda.is_available(), reason="GPU opt-in"
@@ -88,7 +88,7 @@ def test_group_preserves_deferred_nonfinite_errors_from_any_component():
 def test_shared_graph_uses_one_quantization_per_projection_fanout_and_matches_cpu(monkeypatch, family):
     import copy
 
-    from heteroes.eval.integer_decoder import IntegerDecoderGraph, IntegerDecoderReference
+    from heteroes.strict.integer_decoder import IntegerDecoderGraph, IntegerDecoderReference
     from test_strict_decoder import model_for, bits
 
     cpu = model_for(family)

@@ -2,7 +2,7 @@
  {"name": "export keeps the live model on the GPU", "file": "src/heteroes/v3/tracker.py", "old": "        test = self._evaluate(self.eval_model.model, self.loaded.tokenizer, \"test\")\n        self._release_device()\n", "new": "        test = self._evaluate(self.eval_model.model, self.loaded.tokenizer, \"test\")\n"},
  {"name": "release keeps the strict engine", "file": "src/heteroes/v3/tracker.py", "old": "        strict_backend.release(self.loaded.model)\n", "new": ""},
  {"name": "release leaves the model on the GPU", "file": "src/heteroes/v3/tracker.py", "old": "        self.loaded.model.to(\"cpu\")\n", "new": ""},
- {"name": "strict release forgets to pop", "file": "src/heteroes/eval/strict_backend.py", "old": "        engine = _engines.pop(model, None)\n", "new": "        engine = _engines.get(model)\n"},
+ {"name": "strict release forgets to pop", "file": "src/heteroes/strict/strict_backend.py", "old": "        engine = _engines.pop(model, None)\n", "new": "        engine = _engines.get(model)\n"},
  {"name": "sdk qualifies the plain decoder", "file": "src/heteroes/sdk_lab.py", "old": "        key = qualification_key(engine, decoder)\n", "new": "        key = qualification_key(engine)\n"},
  {"name": "sdk drops the decoder field", "file": "src/heteroes/sdk_lab.py", "old": "                    **({\"decoder\": STRICT_DECODER} if key != engine else {}),\n", "new": ""},
  {"name": "lab request drops evalDtype", "file": "src/heteroes/v3/lab_cli.py", "old": "        **({\"evalDtype\": spec.get(\"evalDtype\")} if spec.get(\"decoder\") == \"strict_b22_v1\" else {}),\n", "new": ""},

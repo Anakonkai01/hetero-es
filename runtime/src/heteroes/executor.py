@@ -28,7 +28,7 @@ from heteroes.eval.candidate import tensors_sha256
 from heteroes.eval.generate import evaluate_model
 from heteroes.catalog import STRICT_DECODERS
 from heteroes.eval.precision import EvalModel, default_chunk
-from heteroes.eval.reference_ops import ReferenceArithmeticError, StrictMemoryBudget, StrictTransportError
+from heteroes.strict.reference_ops import ReferenceArithmeticError, StrictMemoryBudget, StrictTransportError
 from heteroes.eval.workloads import get_workload
 from heteroes.ledger import FailureKind
 from heteroes.manifest import CandidateDescriptor, Recipe
@@ -119,7 +119,7 @@ class CandidateExecutor:
             model, recipe.eval_dtype
         )  # the model the answers are made on: the live one, or an FP32 copy of it
         if (decoder := (getattr(recipe, "evaluation", None) or {}).get("decoder")) in STRICT_DECODERS:
-            from heteroes.eval import strict_backend
+            from heteroes.strict import strict_backend
 
             strict_backend.engine_for(
                 model, decoder=decoder

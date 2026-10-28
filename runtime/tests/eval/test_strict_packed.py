@@ -6,9 +6,9 @@ import os
 import pytest
 import torch
 
-from heteroes.eval import strict_cuda
-from heteroes.eval.qwen2_reference import Qwen2Reference
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict import strict_cuda
+from heteroes.strict.qwen2_reference import Qwen2Reference
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 from test_qwen2_strict_cuda import bits, make_model
 from test_strict_cuda import _reference_attention
 
@@ -19,7 +19,7 @@ gpu = pytest.mark.skipif(
 
 
 def packed_class():
-    from heteroes.eval.strict_decoder_packed import StrictDecoderPacked
+    from heteroes.strict.strict_decoder_packed import StrictDecoderPacked
 
     return StrictDecoderPacked
 

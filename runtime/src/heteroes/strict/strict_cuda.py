@@ -30,10 +30,10 @@ import tempfile
 import torch
 
 from heteroes.canonical import canonical_json_hash
-from heteroes.eval import reference_ops as ops
-from heteroes.eval.reference_ops import ReferenceArithmeticError, StrictTransportError, gpu_opt_in
-from heteroes.eval import strict_prefill_cuda
-from heteroes.eval.strict_prefill_cuda import _PREFILL_SOURCE, prefill_attention_plan
+from heteroes.strict import reference_ops as ops
+from heteroes.strict.reference_ops import ReferenceArithmeticError, StrictTransportError, gpu_opt_in
+from heteroes.strict import strict_prefill_cuda
+from heteroes.strict.strict_prefill_cuda import _PREFILL_SOURCE, prefill_attention_plan
 
 KERNEL_VERSION = "pairwise_f32_cuda_linear_v3_experimental"
 MAX_LINEAR_WIDTH = 32768

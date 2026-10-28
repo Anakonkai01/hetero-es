@@ -7,12 +7,12 @@ import pytest
 import torch
 from transformers import LlamaConfig, LlamaForCausalLM, MistralConfig, MistralForCausalLM, Qwen2Config, Qwen2ForCausalLM
 
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 
 
 def classes():
-    from heteroes.eval.strict_decoder import StrictDecoderCuda, StrictDecoderReference
-    from heteroes.eval.strict_decoder_packed import StrictDecoderPacked
+    from heteroes.strict.strict_decoder import StrictDecoderCuda, StrictDecoderReference
+    from heteroes.strict.strict_decoder_packed import StrictDecoderPacked
 
     return StrictDecoderReference, StrictDecoderCuda, StrictDecoderPacked
 

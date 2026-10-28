@@ -15,8 +15,8 @@ IDS = [[0, 0, 3, 5], [7, 11, 13, 17], [0, 19, 23, 29], [0, 0, 0, 31], [37, 41, 2
 
 
 def engines(family):
-    from heteroes.eval.strict_decoder_graph import StrictDecoderGraph
-    from heteroes.eval.strict_decoder_packed import StrictDecoderPacked
+    from heteroes.strict.strict_decoder_graph import StrictDecoderGraph
+    from heteroes.strict.strict_decoder_packed import StrictDecoderPacked
 
     model = model_for(family).cuda()
     return StrictDecoderGraph(model, max_context=40, allow_fixture=True), StrictDecoderPacked(
@@ -62,7 +62,7 @@ def test_failure_reported_by_a_step_queued_before_eos_is_undone_and_recomputed(m
     The unpipelined loop never runs such a step, so it never fails. The pipelined loop must undo the
     speculative step (lengths, tokens, seen) and recompute it for the survivors with identical results.
     """
-    from heteroes.eval import strict_decode_cuda, strict_decoder_graph
+    from heteroes.strict import strict_decode_cuda, strict_decoder_graph
 
     backend, eager = engines("llama-wide")
     ids = torch.tensor(IDS, device="cuda")
@@ -96,8 +96,8 @@ def test_failure_reported_by_a_step_queued_before_eos_is_undone_and_recomputed(m
 
 @gpu
 def test_failure_in_an_unchanged_queued_step_still_raises_and_releases_the_capture(monkeypatch):
-    from heteroes.eval import strict_decode_cuda
-    from heteroes.eval.reference_ops import ReferenceArithmeticError
+    from heteroes.strict import strict_decode_cuda
+    from heteroes.strict.reference_ops import ReferenceArithmeticError
 
     backend, _ = engines("qwen2")
     ids = torch.tensor(IDS, device="cuda")
@@ -122,7 +122,7 @@ def test_failure_in_an_unchanged_queued_step_still_raises_and_releases_the_captu
 
 @gpu
 def test_queue_never_runs_a_step_past_the_token_limit(monkeypatch):
-    from heteroes.eval import strict_decoder_graph
+    from heteroes.strict import strict_decoder_graph
 
     backend, _ = engines("qwen2")
     ids = torch.tensor(IDS, device="cuda")

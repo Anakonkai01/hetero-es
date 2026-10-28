@@ -5,7 +5,7 @@ import os
 import pytest
 import torch
 
-from heteroes.eval import attention_stages
+from heteroes.strict import attention_stages
 
 
 def test_stage_source_keeps_ordered_32_key_subtrees():
@@ -41,14 +41,14 @@ gpu = pytest.mark.skipif(
 
 def decode_layout(lengths, context):
     """The captured decoder's layout: one query per owner, no prefill spans, bound = physical context."""
-    from heteroes.eval import strict_cuda as sc
+    from heteroes.strict import strict_cuda as sc
 
     ranges = torch.tensor([(i * context, n, n - 1) for i, n in enumerate(lengths)], dtype=torch.int32, device="cuda")
     return sc._PackedAttentionLayout(ranges, len(lengths), len(lengths) * context, context)
 
 
 def pair():
-    from heteroes.eval.integer_cuda import IntegerCudaKernels
+    from heteroes.strict.integer_cuda import IntegerCudaKernels
 
     torch.empty(1, device="cuda")
     staged, original = (IntegerCudaKernels("cuda", magnitude_bits=22) for _ in range(2))

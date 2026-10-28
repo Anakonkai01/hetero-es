@@ -5,9 +5,9 @@ import os
 import pytest
 import torch
 
-from heteroes.eval import reference_ops as ops
-from heteroes.eval import strict_cuda as sc
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict import reference_ops as ops
+from heteroes.strict import strict_cuda as sc
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 
 
 @pytest.mark.parametrize("width", [3, 31, 33, 129, 768, 896, 1024, 2048, 4096, 4864, 8193, 32768])

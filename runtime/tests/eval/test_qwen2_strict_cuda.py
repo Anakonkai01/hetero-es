@@ -14,12 +14,12 @@ import torch
 from transformers import Qwen2Config, Qwen2ForCausalLM
 
 from heteroes.eval.candidate import model_weights_sha256
-from heteroes.eval import reference_ops as ops
-from heteroes.eval import qwen2_strict_cuda, strict_decoder
+from heteroes.strict import reference_ops as ops
+from heteroes.strict import qwen2_strict_cuda, strict_decoder
 from heteroes.eval.phase_trace import storage_inventory
-from heteroes.eval.qwen2_reference import Qwen2Reference
-from heteroes.eval.qwen2_strict_cuda import STRICT_CUDA_BACKEND, Qwen2StrictCuda
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict.qwen2_reference import Qwen2Reference
+from heteroes.strict.qwen2_strict_cuda import STRICT_CUDA_BACKEND, Qwen2StrictCuda
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 from heteroes.model.schema import build_parameter_schema
 
 gpu = pytest.mark.skipif(

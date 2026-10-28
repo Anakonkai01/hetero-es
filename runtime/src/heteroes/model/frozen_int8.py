@@ -6,7 +6,7 @@ selects them through the unchanged canonical schema. Embeddings and a possibly t
 original FP16 storage; a tied LM head can optionally receive sidecar int8 storage without breaking the tie.
 
 This is experimental storage, not a managed recipe. The CPU forward is an oracle; CUDA execution is provided by
-``heteroes.eval.frozen_int8_cuda``. The adapter delta uses the strict pairwise FP32 operator contract on the
+``heteroes.strict.frozen_int8_cuda``. The adapter delta uses the strict pairwise FP32 operator contract on the
 widened FP16 factors; it is not part of the exact-integer base projection but is bit-identical across the
 reference and CUDA kernels that implement that contract.
 """
@@ -20,9 +20,9 @@ from pathlib import Path
 import torch
 import torch.nn as nn
 
-from heteroes.eval import frozen_int8
-from heteroes.eval import reference_ops as ops
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict import frozen_int8
+from heteroes.strict import reference_ops as ops
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 from heteroes.model.lora import load_adapter_, trainable_schema
 from heteroes.model.weights_io import write_weights
 

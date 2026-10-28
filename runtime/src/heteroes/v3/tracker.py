@@ -116,7 +116,7 @@ class Tracker:
             return
         import torch
 
-        from heteroes.eval import strict_backend
+        from heteroes.strict import strict_backend
 
         strict_backend.release(self.loaded.model)
         self.loaded.model.to("cpu")

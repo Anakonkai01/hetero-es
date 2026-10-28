@@ -5,14 +5,14 @@ import torch
 
 from heteroes.es.perturb import perturb_model_
 from heteroes.es.snapshot import restore_from_snapshot_, take_snapshot
-from heteroes.eval import frozen_int8
-from heteroes.eval import reference_ops as ops
-from heteroes.eval.frozen_int8_decoder import (
+from heteroes.strict import frozen_int8
+from heteroes.strict import reference_ops as ops
+from heteroes.strict.frozen_int8_decoder import (
     REFERENCE_BACKEND,
     FrozenInt8DecoderReference,
 )
-from heteroes.eval.reference_ops import ReferenceArithmeticError
-from heteroes.eval.strict_decoder import describe_graph
+from heteroes.strict.reference_ops import ReferenceArithmeticError
+from heteroes.strict.strict_decoder import describe_graph
 from heteroes.model.frozen_int8 import freeze_projections, freeze_tied_head, frozen_modules
 from heteroes.model.lora import trainable_schema
 from test_strict_decoder import bits, model_for
@@ -94,8 +94,8 @@ def frozen_model(seed=7, targets=TARGETS):
 
 
 def test_cuda_rank_admission_precedes_cuda_allocation_and_keeps_the_cpu_reference(monkeypatch):
-    from heteroes.eval.frozen_int8_decoder import FrozenInt8DecoderGraph
-    from heteroes.eval.strict_decoder_graph import StrictDecoderGraph
+    from heteroes.strict.frozen_int8_decoder import FrozenInt8DecoderGraph
+    from heteroes.strict.strict_decoder_graph import StrictDecoderGraph
 
     model = model_for("qwen2")
     freeze_projections(model, rank=33, alpha=66, seed=19, target_modules=("q_proj",))
@@ -108,8 +108,8 @@ def test_cuda_rank_admission_precedes_cuda_allocation_and_keeps_the_cpu_referenc
 
 
 def test_cuda_rank_32_reaches_cuda_setup(monkeypatch):
-    from heteroes.eval.frozen_int8_decoder import FrozenInt8DecoderGraph
-    from heteroes.eval.strict_decoder_graph import StrictDecoderGraph
+    from heteroes.strict.frozen_int8_decoder import FrozenInt8DecoderGraph
+    from heteroes.strict.strict_decoder_graph import StrictDecoderGraph
 
     model = model_for("qwen2")
     freeze_projections(model, rank=32, alpha=64, seed=23, target_modules=("q_proj",))
@@ -126,7 +126,7 @@ def test_cuda_rank_32_reaches_cuda_setup(monkeypatch):
 def test_adapter_finish_uses_the_measured_rank_policy_and_retains_a_strict_control(rank, execution):
     from types import SimpleNamespace
 
-    from heteroes.eval.frozen_int8_decoder import FrozenInt8DecoderGraph
+    from heteroes.strict.frozen_int8_decoder import FrozenInt8DecoderGraph
 
     captured = {}
 

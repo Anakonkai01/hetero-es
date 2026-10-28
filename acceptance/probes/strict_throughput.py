@@ -37,7 +37,7 @@ if not a.gpu or os.environ.get("HETEROES_GPU_ACCEPTANCE") != "1" or a.out.exists
 def child():
     import torch
 
-    from heteroes.eval.integer_decoder import IntegerDecoderGraph
+    from heteroes.strict.integer_decoder import IntegerDecoderGraph
     from heteroes.v3.model import file_manifest, load
     from probe_strict_backend import PROMPTS
 

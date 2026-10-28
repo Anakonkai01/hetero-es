@@ -4,7 +4,7 @@ This document specifies the candidate arithmetic behind ADR-012. The implementat
 **not a production backend or a qualified recipe**. Existing recipes, FP32 evaluation, noise, publication, update
 order and historical replay retain their current identities. Runtime integration and default changes remain gated.
 
-Source: `eval/reference_ops.py`, `eval/qwen2_reference.py`. Operator identity:
+Source: `strict/reference_ops.py`, `strict/qwen2_reference.py`. Operator identity:
 `pairwise_f32_reference_v1_experimental`; graph identity: `qwen2_pairwise_f32_reference_v1_experimental`.
 Each instance fingerprints the source bytes, graph dimensions, numerical constants, RoPE frequency bit patterns,
 context limit and fixture flag. A fixture receipt cannot certify the real-model configuration.
@@ -77,9 +77,9 @@ throughput gates pass. No full FP32 weight shadow may be introduced to make a pe
 
 ## CUDA kernel implementation (experimental)
 
-`eval/strict_cuda.py` compiles NVRTC kernels that execute this arithmetic sequence: linear projections reading the
+`strict/strict_cuda.py` compiles NVRTC kernels that execute this arithmetic sequence: linear projections reading the
 FP16 weights in place, RMSNorm, residual add, the SiLU gate, RoPE and causal GQA attention with the specified
-softmax. `eval/qwen2_strict_cuda.py` (`qwen2_pairwise_f32_cuda_v1_experimental`) runs the same graph, cache format
+softmax. `strict/qwen2_strict_cuda.py` (`qwen2_pairwise_f32_cuda_v1_experimental`) runs the same graph, cache format
 and generation rules on them. Primitive operations are inline PTX `add.rn.f32`/`mul.rn.f32` with integer subnormal
 flushing. Trees are formed by aligned blocks padded with -0.0, a binary-counter stack, or a barrier-separated
 in-place stride tree. Each form equals the adjacent-pair tree above, because x + (-0) == x for finite x. Every

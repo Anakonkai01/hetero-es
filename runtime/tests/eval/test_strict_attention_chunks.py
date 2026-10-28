@@ -3,8 +3,8 @@
 import os
 import pytest
 import torch
-from heteroes.eval.strict_cuda import StrictCudaKernels
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict.strict_cuda import StrictCudaKernels
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 from test_strict_cuda import _reference_attention
 
 pytestmark = pytest.mark.skipif(

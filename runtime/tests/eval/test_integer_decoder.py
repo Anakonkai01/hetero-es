@@ -6,12 +6,12 @@ import os
 import pytest
 import torch
 
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 from test_strict_decoder import model_for, bits
 
 
 def classes():
-    from heteroes.eval.integer_decoder import IntegerDecoderReference, IntegerDecoderGraph
+    from heteroes.strict.integer_decoder import IntegerDecoderReference, IntegerDecoderGraph
 
     return IntegerDecoderReference, IntegerDecoderGraph
 
@@ -240,7 +240,7 @@ def test_decode_policy_uses_split_partials_matches_cpu_and_keeps_live_restore(mo
 
 @gpu
 def test_decode_partial_budget_is_admitted_before_request_cache_or_metadata_allocations(monkeypatch):
-    import heteroes.eval.strict_decoder_graph as graph_module
+    import heteroes.strict.strict_decoder_graph as graph_module
 
     _, graph = classes()
     backend = graph(model_for("llama").cuda(), max_context=32, allow_fixture=True)
@@ -261,7 +261,7 @@ def test_wide_decoder_with_split_groups_and_distinct_norms_matches_cpu(magnitude
     # (the fixtures default to ones) make every norm-to-projection pairing observable.
     from transformers import Qwen2Config, Qwen2ForCausalLM
 
-    from heteroes.eval import integer_plan
+    from heteroes.strict import integer_plan
     from test_integer_stream import entries_used
 
     reference, graph = classes()

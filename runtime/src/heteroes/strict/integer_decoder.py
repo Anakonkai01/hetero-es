@@ -11,11 +11,11 @@ from pathlib import Path
 import torch
 
 from heteroes.canonical import canonical_json_hash
-from heteroes.eval import integer_cuda, integer_reference, integer_plan, reference_ops
-from heteroes.eval.reference_ops import ReferenceArithmeticError
-from heteroes.eval.strict_decoder import StrictDecoderReference
-from heteroes.eval.strict_decoder_graph import StrictDecoderGraph, DEFAULT_GRAPH_BYTES
-from heteroes.eval.integer_lm_head import BoundedLmHead
+from heteroes.strict import integer_cuda, integer_reference, integer_plan, reference_ops
+from heteroes.strict.reference_ops import ReferenceArithmeticError
+from heteroes.strict.strict_decoder import StrictDecoderReference
+from heteroes.strict.strict_decoder_graph import StrictDecoderGraph, DEFAULT_GRAPH_BYTES
+from heteroes.strict.integer_lm_head import BoundedLmHead
 
 REFERENCE_BACKEND = "decoder_scaled_integer_reference_v1_experimental"
 GRAPH_BACKEND = "decoder_scaled_integer_cuda_graph_v1_experimental"

@@ -14,13 +14,13 @@ from pathlib import Path
 import torch
 
 from heteroes.canonical import canonical_json_hash
-from heteroes.eval import frozen_int8 as artifact
-from heteroes.eval import frozen_int8_cuda
-from heteroes.eval import integer_plan
-from heteroes.eval import reference_ops
-from heteroes.eval.reference_ops import ReferenceArithmeticError
-from heteroes.eval.strict_decoder import StrictDecoderReference
-from heteroes.eval.strict_decoder_graph import DEFAULT_GRAPH_BYTES, StrictDecoderGraph
+from heteroes.strict import frozen_int8 as artifact
+from heteroes.strict import frozen_int8_cuda
+from heteroes.strict import integer_plan
+from heteroes.strict import reference_ops
+from heteroes.strict.reference_ops import ReferenceArithmeticError
+from heteroes.strict.strict_decoder import StrictDecoderReference
+from heteroes.strict.strict_decoder_graph import DEFAULT_GRAPH_BYTES, StrictDecoderGraph
 
 REFERENCE_BACKEND = "decoder_frozen_int8_lora_reference_v1_experimental"
 GRAPH_BACKEND = "decoder_frozen_int8_lora_cuda_graph_v1_experimental"

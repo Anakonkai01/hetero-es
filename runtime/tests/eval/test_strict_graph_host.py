@@ -5,9 +5,9 @@ import struct
 import pytest
 import torch
 
-from heteroes.eval import reference_ops as ops
-from heteroes.eval.reference_ops import ReferenceArithmeticError
-from heteroes.eval.strict_decoder_graph import StrictDecoderGraph
+from heteroes.strict import reference_ops as ops
+from heteroes.strict.reference_ops import ReferenceArithmeticError
+from heteroes.strict.strict_decoder_graph import StrictDecoderGraph
 
 
 def backend():

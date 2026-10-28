@@ -12,9 +12,9 @@ from pathlib import Path
 import torch
 
 from heteroes.canonical import canonical_json_hash
-from heteroes.eval import reference_ops as ops
-from heteroes.eval.strict_decoder import StrictDecoderCuda
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict import reference_ops as ops
+from heteroes.strict.strict_decoder import StrictDecoderCuda
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 
 STRICT_PACKED_BACKEND = "decoder_pairwise_f32_cuda_packed_v1_experimental"
 MAX_BATCH = 128

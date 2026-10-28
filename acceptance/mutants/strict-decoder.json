@@ -5,9 +5,9 @@
  {"name": "documents accept strict FP32", "file": "src/heteroes/v3/documents.py", "old": "    if evaluation[\"decoder\"] == STRICT_B22_DECODER and evaluation[\"evalDtype\"] != \"float16\":", "new": "    if False:"},
  {"name": "strict chunks are the FP16 chunks", "file": "src/heteroes/v3/options.py", "old": "    return STRICT_CHUNKS if decoder == STRICT_B22_DECODER else EXACT_CHUNKS[eval_dtype]", "new": "    return EXACT_CHUNKS[eval_dtype]"},
  {"name": "strict decoder routed to library generate", "file": "src/heteroes/study/evaluation.py", "old": "            elif decoder == STRICT_B22_DECODER:\n", "new": "            elif False:\n"},
- {"name": "repetition penalty dropped", "file": "src/heteroes/eval/strict_backend.py", "old": "repetition_penalty=float(penalties[0]) if penalties else 1.0,", "new": "repetition_penalty=1.0,"},
- {"name": "engine rebuilt every call", "file": "src/heteroes/eval/strict_backend.py", "old": "if engine is not None and engine.max_context >= context:", "new": "if engine is not None and engine.max_context > context:"},
+ {"name": "repetition penalty dropped", "file": "src/heteroes/strict/strict_backend.py", "old": "repetition_penalty=float(penalties[0]) if penalties else 1.0,", "new": "repetition_penalty=1.0,"},
+ {"name": "engine rebuilt every call", "file": "src/heteroes/strict/strict_backend.py", "old": "if engine is not None and engine.max_context >= context:", "new": "if engine is not None and engine.max_context > context:"},
  {"name": "product run keeps FP32", "file": "src/heteroes/product/v3.py", "old": "    return {\"evalDtype\": \"float16\"} | (", "new": "    return {} | ("},
- {"name": "managed opt-in ignored", "file": "src/heteroes/eval/reference_ops.py", "old": "    return _MANAGED.get() or os.environ.get(\"HETEROES_GPU_ACCEPTANCE\") == \"1\"", "new": "    return os.environ.get(\"HETEROES_GPU_ACCEPTANCE\") == \"1\""},
+ {"name": "managed opt-in ignored", "file": "src/heteroes/strict/reference_ops.py", "old": "    return _MANAGED.get() or os.environ.get(\"HETEROES_GPU_ACCEPTANCE\") == \"1\"", "new": "    return os.environ.get(\"HETEROES_GPU_ACCEPTANCE\") == \"1\""},
  {"name": "unsupported graph not checked at load", "file": "src/heteroes/executor.py", "old": "            strict_backend.engine_for(model)  # an unsupported graph is refused now, before any candidate", "new": "            pass"}
 ]

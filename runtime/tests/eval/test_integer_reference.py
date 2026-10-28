@@ -6,11 +6,11 @@ import random
 import pytest
 import torch
 
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 
 
 def reference():
-    from heteroes.eval import integer_reference
+    from heteroes.strict import integer_reference
 
     return integer_reference
 

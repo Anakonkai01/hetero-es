@@ -11,8 +11,8 @@ from pathlib import Path
 
 import torch
 
-from heteroes.eval import reference_ops as ops
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict import reference_ops as ops
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 
 INTEGER_REFERENCE_VERSION = "row_scaled_signed_integer_dot_v1_experimental"
 MAX_WIDTH = 32768

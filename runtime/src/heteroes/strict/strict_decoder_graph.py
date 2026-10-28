@@ -15,12 +15,12 @@ import weakref
 import torch
 
 from heteroes.canonical import canonical_json_hash
-from heteroes.eval import reference_ops as ops
-from heteroes.eval import strict_cuda as sc
-from heteroes.eval import strict_decode_cuda
-from heteroes.eval.reference_ops import ReferenceArithmeticError, StrictMemoryBudget, StrictTransportError
-from heteroes.eval.strict_decoder import describe_graph
-from heteroes.eval.strict_decoder_packed import StrictDecoderPacked
+from heteroes.strict import reference_ops as ops
+from heteroes.strict import strict_cuda as sc
+from heteroes.strict import strict_decode_cuda
+from heteroes.strict.reference_ops import ReferenceArithmeticError, StrictMemoryBudget, StrictTransportError
+from heteroes.strict.strict_decoder import describe_graph
+from heteroes.strict.strict_decoder_packed import StrictDecoderPacked
 
 GRAPH_BACKEND = "decoder_pairwise_f32_cuda_graph_v1_experimental"
 DEFAULT_GRAPH_BYTES = 1024**3

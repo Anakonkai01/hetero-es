@@ -5,7 +5,7 @@ import os
 import pytest
 import torch
 
-from heteroes.eval import integer_reference as reference
+from heteroes.strict import integer_reference as reference
 
 gpu = pytest.mark.skipif(
     os.environ.get("HETEROES_GPU_ACCEPTANCE") != "1" or not torch.cuda.is_available(), reason="GPU opt-in"
@@ -16,7 +16,7 @@ gpu = pytest.mark.skipif(
 @pytest.mark.parametrize("magnitude_bits", [14, 22])
 @pytest.mark.parametrize("width", [16, 1040, 4864])
 def test_nonpower_splits_match_cpu_integer_oracle(magnitude_bits, width):
-    from heteroes.eval.integer_cuda import IntegerCudaKernels
+    from heteroes.strict.integer_cuda import IntegerCudaKernels
 
     g = torch.Generator().manual_seed(width)
     x = torch.randn(17, width, generator=g)

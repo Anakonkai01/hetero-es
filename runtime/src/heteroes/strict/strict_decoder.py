@@ -15,11 +15,11 @@ from pathlib import Path
 import torch
 
 from heteroes.canonical import canonical_json_hash
-from heteroes.eval import reference_ops as ops
-from heteroes.eval import qwen2_reference as reference_graph
-from heteroes.eval import strict_cuda
-from heteroes.eval.qwen2_reference import Qwen2Reference
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict import reference_ops as ops
+from heteroes.strict import qwen2_reference as reference_graph
+from heteroes.strict import strict_cuda
+from heteroes.strict.qwen2_reference import Qwen2Reference
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 
 GRAPH_VERSION = "rms_swiglu_causal_rope_decoder_v1_experimental"
 REFERENCE_BACKEND = "decoder_pairwise_f32_reference_v1_experimental"

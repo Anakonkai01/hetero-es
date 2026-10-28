@@ -21,7 +21,7 @@ import ctypes
 import numpy as np
 import torch
 
-from heteroes.eval import strict_cuda as sc
+from heteroes.strict import strict_cuda as sc
 
 TRANSPORT_VERSION = "b22_prefill_tma_by_value_host_maps_v1"
 TRANSPORT_TIMEOUT_BIT = 8
@@ -78,7 +78,7 @@ def _once(text, old, new):
 
 def _tma_body():
     """The streamed projection body with its cp.async transport replaced (every edit must match exactly once)."""
-    from heteroes.eval import integer_cuda as ic
+    from heteroes.strict import integer_cuda as ic
 
     start = ic._SOURCE.index("__device__ __forceinline__ void stream_body(")
     body = ic._SOURCE[start : ic._SOURCE.index("#if STREAM_MIN_BLOCKS > 1", start)]
@@ -144,7 +144,7 @@ def _tma_body():
 
 
 def projection_source(width, columns, split, stages, min_blocks, has_bias):
-    from heteroes.eval import integer_cuda as ic
+    from heteroes.strict import integer_cuda as ic
 
     defines = {
         "WIDTH": width,

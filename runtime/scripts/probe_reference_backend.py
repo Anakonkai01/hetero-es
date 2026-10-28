@@ -33,10 +33,10 @@ def main(argv=None):
 
     from heteroes.es.perturb import perturb_model_
     from heteroes.es.snapshot import restore_from_snapshot_, take_snapshot
-    from heteroes.eval import reference_ops as ops
+    from heteroes.strict import reference_ops as ops
     from heteroes.eval.candidate import model_weights_sha256
     from heteroes.eval.phase_trace import storage_inventory
-    from heteroes.eval.qwen2_reference import Qwen2Reference
+    from heteroes.strict.qwen2_reference import Qwen2Reference
     from heteroes.model.schema import build_parameter_schema
     from heteroes.noise.contracts import ENGINE_V2
 

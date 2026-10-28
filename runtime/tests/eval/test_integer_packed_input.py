@@ -6,9 +6,9 @@ import os
 import pytest
 import torch
 
-from heteroes.eval.integer_cuda import IntegerCudaKernels
-from heteroes.eval.integer_reference import quantize_rows
-from heteroes.eval.reference_ops import ReferenceArithmeticError
+from heteroes.strict.integer_cuda import IntegerCudaKernels
+from heteroes.strict.integer_reference import quantize_rows
+from heteroes.strict.reference_ops import ReferenceArithmeticError
 
 gpu = pytest.mark.skipif(
     os.environ.get("HETEROES_GPU_ACCEPTANCE") != "1" or not torch.cuda.is_available(), reason="GPU opt-in"
@@ -51,8 +51,8 @@ def test_packed_planes_reconstruct_quantized_rows_and_zero_padding(bits, width):
 def test_narrow_graph_admits_packed_padding_before_workspace_and_matches_cpu(monkeypatch, bits):
     from transformers import LlamaConfig, LlamaForCausalLM
 
-    from heteroes.eval.integer_decoder import IntegerDecoderGraph, IntegerDecoderReference
-    import heteroes.eval.strict_decoder_graph as graph_module
+    from heteroes.strict.integer_decoder import IntegerDecoderGraph, IntegerDecoderReference
+    import heteroes.strict.strict_decoder_graph as graph_module
 
     torch.manual_seed(115)
     cpu = (
