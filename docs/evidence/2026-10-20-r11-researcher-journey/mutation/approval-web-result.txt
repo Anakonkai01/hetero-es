@@ -1,0 +1,5 @@
+killed       ignore current workspace |   }
+killed       keep a workspace the owner left |   }
+killed       name falls back to null |   }
+
+3 of 3 mutants killed.

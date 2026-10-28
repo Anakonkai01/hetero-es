@@ -1,0 +1,63 @@
+F
+=================================== FAILURES ===================================
+___ test_bounded_tokens_seen_result_and_flags_equal_full_projection[2-16-1] ____
+
+rows = 2, width = 16, vocab = 1
+
+    @gpu
+    @pytest.mark.parametrize("rows,width,vocab", [(2, 16, 1), (9, 48, 67), (16, 64, 1025), (17, 80, 129), (32, 896, 4097)])
+    def test_bounded_tokens_seen_result_and_flags_equal_full_projection(rows, width, vocab):
+        x, w = make(rows + width, rows, width, vocab)
+>       kernels, head = setup(w)
+                        ^^^^^^^^
+
+tests/eval/test_integer_lm_head.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/eval/test_integer_lm_head.py:32: in setup
+    head.prepare(weight)
+../../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+src/heteroes/eval/integer_lm_head.py:297: in prepare
+    self._functions(weight.shape[1])["bound_weights"],
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/heteroes/eval/integer_lm_head.py:271: in _functions
+    kernels._functions[name] = kernels._compile(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <heteroes.eval.integer_cuda.IntegerCudaKernels object at 0x728cd32edaf0>
+name = 'integer-bound-16-m32'
+source = '#define WIDTH 16\n#define MAGNITUDE_BITS 22\n#define DIGITS 3\n#define MT 32\n\ntypedef unsigned short u16;\n\n__devi...}\n    }\n    best_scores[row*gridDim.x+blockIdx.x]=best;\n    best_indices[row*gridDim.x+blockIdx.x]=index;\n  }\n}\n'
+entries = ['bound_weights', 'bound_rows', 'bound_scores', 'bound_select']
+ptx_exact = (), sass_exact = (), integer_mma = True
+
+    def _compile(self, name, source, entries, *, ptx_exact=(), sass_exact=(), integer_mma=False):
+        nvrtc = self._nvrtc
+        program = _check(nvrtc.nvrtcCreateProgram(source.encode(), f"{name}.cu".encode(), 0, [], []))
+        options = [f"--gpu-architecture={self.arch}".encode(), *(o.encode() for o in NVRTC_OPTIONS)]
+        try:
+            status = nvrtc.nvrtcCompileProgram(program, len(options), options)[0]
+            if int(status) != 0:
+                size = _check(nvrtc.nvrtcGetProgramLogSize(program))
+                log = b" " * size
+                nvrtc.nvrtcGetProgramLog(program, log)
+                raise ReferenceArithmeticError(f"Strict kernel compilation failed: {log.decode(errors='replace')}")
+            ptx = b" " * _check(nvrtc.nvrtcGetPTXSize(program))
+            _check(nvrtc.nvrtcGetPTX(program, ptx))
+            cubin = b" " * _check(nvrtc.nvrtcGetCUBINSize(program))
+            _check(nvrtc.nvrtcGetCUBIN(program, cubin))
+        finally:
+            nvrtc.nvrtcDestroyProgram(program)
+        ptx_text = ptx.rstrip(b"\0").decode()
+        ptx_audit = audit_integer_ptx(ptx_text) if integer_mma else audit_ptx(ptx_text, ptx_exact)
+        sass_audit = self._audit_cubin(cubin, sass_exact, integer_mma=integer_mma)
+        violations = ptx_audit["violations"] + ([] if sass_audit == "unavailable" else sass_audit["violations"])
+        if violations:
+>           raise ReferenceArithmeticError(f"Compiled strict kernel failed its instruction audit: {violations[:5]}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: Compiled strict kernel failed its instruction audit: ['max.f32 \t%r642, %r289, 0fFF800000;', 'max.f32 \t%r643, %r639, 0fFF800000;', 'max.f32 \t%r648, %r386, 0fFF800000;', 'max.f32 \t%r649, %r645, 0fFF800000;', 'max.f32 \t%r654, %r475, 0fFF800000;']
+
+src/heteroes/eval/strict_cuda.py:1192: ReferenceArithmeticError
+=========================== short test summary info ============================
+FAILED tests/eval/test_integer_lm_head.py::test_bounded_tokens_seen_result_and_flags_equal_full_projection[2-16-1]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 1.48s

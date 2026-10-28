@@ -1,0 +1,2036 @@
+{
+  "hardwareQualified": false,
+  "limits": "Finite three trained models, two magnitude precisions. Historical vLLM and FP32-tree receipts used separate unisolated process runs/builds. Identical workload and consumed asset hashes checked; prior Smol manifest contains extra HF cache metadata, explicitly excluded only for asset comparison. Does not qualify native Windows, managed lifecycle, general accuracy or full M0\u2013M6. B14 has a recorded FP32-tree token difference.",
+  "throughput": [
+    {
+      "model": "smol",
+      "magnitudeBits": 14,
+      "batch": 1,
+      "integerTokensPerSecond": 168.05433331874912,
+      "fp32TreeTokensPerSecond": 239.91804219617535,
+      "vllmDefaultTokensPerSecond": 529.1976098991936,
+      "integerOverFp32Tree": 0.7004655914178186,
+      "fractionOfVllmDefault": 0.31756442239178223,
+      "receipt": "docs/evidence/2026-10-25-strict-integer/bench-smol-b14-nhan-02.json",
+      "strictReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-smollm-graph-nhan-01.json",
+      "vllmReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-smollm-vllm-nhan-01.json",
+      "fullManifestEqual": false,
+      "consumedAssetsEqual": true,
+      "repeatAndBatchSingleTokensEqual": true
+    },
+    {
+      "model": "smol",
+      "magnitudeBits": 14,
+      "batch": 8,
+      "integerTokensPerSecond": 407.73943927254027,
+      "fp32TreeTokensPerSecond": 598.0925128900801,
+      "vllmDefaultTokensPerSecond": 4093.2399120758982,
+      "integerOverFp32Tree": 0.6817330604964057,
+      "fractionOfVllmDefault": 0.09961288564338122,
+      "receipt": "docs/evidence/2026-10-25-strict-integer/bench-smol-b14-nhan-02.json",
+      "strictReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-smollm-graph-nhan-01.json",
+      "vllmReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-smollm-vllm-nhan-01.json",
+      "fullManifestEqual": false,
+      "consumedAssetsEqual": true,
+      "repeatAndBatchSingleTokensEqual": true
+    },
+    {
+      "model": "smol",
+      "magnitudeBits": 14,
+      "batch": 32,
+      "integerTokensPerSecond": 1236.4044740649513,
+      "fp32TreeTokensPerSecond": 804.9043317748371,
+      "vllmDefaultTokensPerSecond": 14429.443663323114,
+      "integerOverFp32Tree": 1.536088731611922,
+      "fractionOfVllmDefault": 0.08568621929670477,
+      "receipt": "docs/evidence/2026-10-25-strict-integer/bench-smol-b14-nhan-02.json",
+      "strictReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-smollm-graph-nhan-01.json",
+      "vllmReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-smollm-vllm-nhan-01.json",
+      "fullManifestEqual": false,
+      "consumedAssetsEqual": true,
+      "repeatAndBatchSingleTokensEqual": true
+    },
+    {
+      "model": "smol",
+      "magnitudeBits": 22,
+      "batch": 1,
+      "integerTokensPerSecond": 177.05256065997014,
+      "fp32TreeTokensPerSecond": 239.91804219617535,
+      "vllmDefaultTokensPerSecond": 529.1976098991936,
+      "integerOverFp32Tree": 0.7379710130978746,
+      "fractionOfVllmDefault": 0.33456795221296776,
+      "receipt": "docs/evidence/2026-10-25-strict-integer/bench-smol-b22-nhan-02.json",
+      "strictReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-smollm-graph-nhan-01.json",
+      "vllmReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-smollm-vllm-nhan-01.json",
+      "fullManifestEqual": false,
+      "consumedAssetsEqual": true,
+      "repeatAndBatchSingleTokensEqual": true
+    },
+    {
+      "model": "smol",
+      "magnitudeBits": 22,
+      "batch": 8,
+      "integerTokensPerSecond": 434.286085750123,
+      "fp32TreeTokensPerSecond": 598.0925128900801,
+      "vllmDefaultTokensPerSecond": 4093.2399120758982,
+      "integerOverFp32Tree": 0.7261185793006874,
+      "fractionOfVllmDefault": 0.1060983707475562,
+      "receipt": "docs/evidence/2026-10-25-strict-integer/bench-smol-b22-nhan-02.json",
+      "strictReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-smollm-graph-nhan-01.json",
+      "vllmReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-smollm-vllm-nhan-01.json",
+      "fullManifestEqual": false,
+      "consumedAssetsEqual": true,
+      "repeatAndBatchSingleTokensEqual": true
+    },
+    {
+      "model": "smol",
+      "magnitudeBits": 22,
+      "batch": 32,
+      "integerTokensPerSecond": 1318.1604399033454,
+      "fp32TreeTokensPerSecond": 804.9043317748371,
+      "vllmDefaultTokensPerSecond": 14429.443663323114,
+      "integerOverFp32Tree": 1.6376610087272903,
+      "fractionOfVllmDefault": 0.09135213183955644,
+      "receipt": "docs/evidence/2026-10-25-strict-integer/bench-smol-b22-nhan-02.json",
+      "strictReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-smollm-graph-nhan-01.json",
+      "vllmReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-smollm-vllm-nhan-01.json",
+      "fullManifestEqual": false,
+      "consumedAssetsEqual": true,
+      "repeatAndBatchSingleTokensEqual": true
+    },
+    {
+      "model": "tiny",
+      "magnitudeBits": 14,
+      "batch": 1,
+      "integerTokensPerSecond": 109.5055832125893,
+      "fp32TreeTokensPerSecond": 133.33954973356938,
+      "vllmDefaultTokensPerSecond": 322.8795724191243,
+      "integerOverFp32Tree": 0.8212535847870823,
+      "fractionOfVllmDefault": 0.3391530235007931,
+      "receipt": "docs/evidence/2026-10-25-strict-integer/bench-tiny-b14-nhan-02.json",
+      "strictReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-tinyllama-graph-nhan-01.json",
+      "vllmReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-tinyllama-vllm-nhan-01.json",
+      "fullManifestEqual": false,
+      "consumedAssetsEqual": true,
+      "repeatAndBatchSingleTokensEqual": true
+    },
+    {
+      "model": "tiny",
+      "magnitudeBits": 14,
+      "batch": 8,
+      "integerTokensPerSecond": 280.507136877334,
+      "fp32TreeTokensPerSecond": 255.34667230126067,
+      "vllmDefaultTokensPerSecond": 2330.584424088499,
+      "integerOverFp32Tree": 1.098534530915636,
+      "fractionOfVllmDefault": 0.1203591399556536,
+      "receipt": "docs/evidence/2026-10-25-strict-integer/bench-tiny-b14-nhan-02.json",
+      "strictReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-tinyllama-graph-nhan-01.json",
+      "vllmReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-tinyllama-vllm-nhan-01.json",
+      "fullManifestEqual": false,
+      "consumedAssetsEqual": true,
+      "repeatAndBatchSingleTokensEqual": true
+    },
+    {
+      "model": "tiny",
+      "magnitudeBits": 14,
+      "batch": 32,
+      "integerTokensPerSecond": 789.8199252207837,
+      "fp32TreeTokensPerSecond": 288.7903110555614,
+      "vllmDefaultTokensPerSecond": 7791.842687872141,
+      "integerOverFp32Tree": 2.734925290027571,
+      "fractionOfVllmDefault": 0.1013649731982043,
+      "receipt": "docs/evidence/2026-10-25-strict-integer/bench-tiny-b14-nhan-02.json",
+      "strictReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-tinyllama-graph-nhan-01.json",
+      "vllmReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-tinyllama-vllm-nhan-01.json",
+      "fullManifestEqual": false,
+      "consumedAssetsEqual": true,
+      "repeatAndBatchSingleTokensEqual": true
+    },
+    {
+      "model": "tiny",
+      "magnitudeBits": 22,
+      "batch": 1,
+      "integerTokensPerSecond": 114.54677620888123,
+      "fp32TreeTokensPerSecond": 133.33954973356938,
+      "vllmDefaultTokensPerSecond": 322.8795724191243,
+      "integerOverFp32Tree": 0.8590607695748285,
+      "fractionOfVllmDefault": 0.35476625340729223,
+      "receipt": "docs/evidence/2026-10-25-strict-integer/bench-tiny-b22-nhan-02.json",
+      "strictReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-tinyllama-graph-nhan-01.json",
+      "vllmReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-tinyllama-vllm-nhan-01.json",
+      "fullManifestEqual": false,
+      "consumedAssetsEqual": true,
+      "repeatAndBatchSingleTokensEqual": true
+    },
+    {
+      "model": "tiny",
+      "magnitudeBits": 22,
+      "batch": 8,
+      "integerTokensPerSecond": 299.35917304719294,
+      "fp32TreeTokensPerSecond": 255.34667230126067,
+      "vllmDefaultTokensPerSecond": 2330.584424088499,
+      "integerOverFp32Tree": 1.1723637138063263,
+      "fractionOfVllmDefault": 0.12844811368044456,
+      "receipt": "docs/evidence/2026-10-25-strict-integer/bench-tiny-b22-nhan-02.json",
+      "strictReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-tinyllama-graph-nhan-01.json",
+      "vllmReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-tinyllama-vllm-nhan-01.json",
+      "fullManifestEqual": false,
+      "consumedAssetsEqual": true,
+      "repeatAndBatchSingleTokensEqual": true
+    },
+    {
+      "model": "tiny",
+      "magnitudeBits": 22,
+      "batch": 32,
+      "integerTokensPerSecond": 830.7418810819139,
+      "fp32TreeTokensPerSecond": 288.7903110555614,
+      "vllmDefaultTokensPerSecond": 7791.842687872141,
+      "integerOverFp32Tree": 2.8766265670252507,
+      "fractionOfVllmDefault": 0.10661687027831661,
+      "receipt": "docs/evidence/2026-10-25-strict-integer/bench-tiny-b22-nhan-02.json",
+      "strictReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-tinyllama-graph-nhan-01.json",
+      "vllmReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-tinyllama-vllm-nhan-01.json",
+      "fullManifestEqual": false,
+      "consumedAssetsEqual": true,
+      "repeatAndBatchSingleTokensEqual": true
+    },
+    {
+      "model": "qwen",
+      "magnitudeBits": 14,
+      "batch": 1,
+      "integerTokensPerSecond": 161.92966808289466,
+      "fp32TreeTokensPerSecond": 209.86479021690474,
+      "vllmDefaultTokensPerSecond": 518.696782109793,
+      "integerOverFp32Tree": 0.7715904507637181,
+      "fractionOfVllmDefault": 0.3121856037437665,
+      "receipt": "docs/evidence/2026-10-25-strict-integer/bench-qwen-b14-nhan-02.json",
+      "strictReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-graph-nhan-03.json",
+      "vllmReceipt": "docs/evidence/2026-10-25-strict-throughput/bench-vllm-nhan-01.json",
+      "fullManifestEqual": true,
+      "consumedAssetsEqual": true,
+      "repeatAndBatchSingleTokensEqual": true
+    },
+    {
+      "model": "qwen",
+      "magnitudeBits": 14,
+      "batch": 8,
+      "integerTokensPerSecond": 433.73740100939557,
+      "fp32TreeTokensPerSecond": 422.5810725643589,
+      "vllmDefaultTokensPerSecond": 4037.8584559409956,
+      "integerOverFp32Tree": 1.026400445191112,
+      "fractionOfVllmDefault": 0.10741768334430535,
+      "receipt": "docs/evidence/2026-10-25-strict-integer/bench-qwen-b14-nhan-02.json",
+      "strictReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-graph-nhan-03.json",
+      "vllmReceipt": "docs/evidence/2026-10-25-strict-throughput/bench-vllm-nhan-01.json",
+      "fullManifestEqual": true,
+      "consumedAssetsEqual": true,
+      "repeatAndBatchSingleTokensEqual": true
+    },
+    {
+      "model": "qwen",
+      "magnitudeBits": 14,
+      "batch": 32,
+      "integerTokensPerSecond": 1325.5372481431273,
+      "fp32TreeTokensPerSecond": 500.7129930532116,
+      "vllmDefaultTokensPerSecond": 13802.546405198837,
+      "integerOverFp32Tree": 2.6472994840025255,
+      "fractionOfVllmDefault": 0.0960357030673596,
+      "receipt": "docs/evidence/2026-10-25-strict-integer/bench-qwen-b14-nhan-02.json",
+      "strictReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-graph-nhan-03.json",
+      "vllmReceipt": "docs/evidence/2026-10-25-strict-throughput/bench-vllm-nhan-01.json",
+      "fullManifestEqual": true,
+      "consumedAssetsEqual": true,
+      "repeatAndBatchSingleTokensEqual": true
+    },
+    {
+      "model": "qwen",
+      "magnitudeBits": 22,
+      "batch": 1,
+      "integerTokensPerSecond": 171.81168940772648,
+      "fp32TreeTokensPerSecond": 209.86479021690474,
+      "vllmDefaultTokensPerSecond": 518.696782109793,
+      "integerOverFp32Tree": 0.8186780127821887,
+      "fractionOfVllmDefault": 0.3312372378885492,
+      "receipt": "docs/evidence/2026-10-25-strict-integer/bench-qwen-b22-nhan-02.json",
+      "strictReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-graph-nhan-03.json",
+      "vllmReceipt": "docs/evidence/2026-10-25-strict-throughput/bench-vllm-nhan-01.json",
+      "fullManifestEqual": true,
+      "consumedAssetsEqual": true,
+      "repeatAndBatchSingleTokensEqual": true
+    },
+    {
+      "model": "qwen",
+      "magnitudeBits": 22,
+      "batch": 8,
+      "integerTokensPerSecond": 465.060460828238,
+      "fp32TreeTokensPerSecond": 422.5810725643589,
+      "vllmDefaultTokensPerSecond": 4037.8584559409956,
+      "integerOverFp32Tree": 1.1005236415490651,
+      "fractionOfVllmDefault": 0.11517502802605269,
+      "receipt": "docs/evidence/2026-10-25-strict-integer/bench-qwen-b22-nhan-02.json",
+      "strictReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-graph-nhan-03.json",
+      "vllmReceipt": "docs/evidence/2026-10-25-strict-throughput/bench-vllm-nhan-01.json",
+      "fullManifestEqual": true,
+      "consumedAssetsEqual": true,
+      "repeatAndBatchSingleTokensEqual": true
+    },
+    {
+      "model": "qwen",
+      "magnitudeBits": 22,
+      "batch": 32,
+      "integerTokensPerSecond": 1358.457969242524,
+      "fp32TreeTokensPerSecond": 500.7129930532116,
+      "vllmDefaultTokensPerSecond": 13802.546405198837,
+      "integerOverFp32Tree": 2.713047170913255,
+      "fractionOfVllmDefault": 0.098420822460039,
+      "receipt": "docs/evidence/2026-10-25-strict-integer/bench-qwen-b22-nhan-02.json",
+      "strictReceipt": "docs/evidence/2026-10-25-strict-overnight/bench-graph-nhan-03.json",
+      "vllmReceipt": "docs/evidence/2026-10-25-strict-throughput/bench-vllm-nhan-01.json",
+      "fullManifestEqual": true,
+      "consumedAssetsEqual": true,
+      "repeatAndBatchSingleTokensEqual": true
+    }
+  ],
+  "crossGpu": [
+    {
+      "model": "smol",
+      "devices": [
+        "nhan5070ti",
+        "thao3060"
+      ],
+      "inputChecks": {
+        "modelFiles": true,
+        "modelFilesHash": true,
+        "schemaHash": true,
+        "parentSha256": true,
+        "noiseEngine": true,
+        "sigma": true,
+        "seed": true,
+        "promptTokenIds": true,
+        "maxContext": true,
+        "maxNewTokens": true,
+        "backendIdentities": true
+      },
+      "cases": [
+        {
+          "state": "parent",
+          "weightHashEqual": true,
+          "restoreExactBoth": true,
+          "engines": {
+            "fp32-tree": {
+              "prefillLogitsSha256": true,
+              "tokens": true,
+              "texts": true,
+              "rewards": true
+            },
+            "integer-b14": {
+              "prefillLogitsSha256": true,
+              "tokens": true,
+              "texts": true,
+              "rewards": true
+            },
+            "integer-b22": {
+              "prefillLogitsSha256": true,
+              "tokens": true,
+              "texts": true,
+              "rewards": true
+            }
+          }
+        },
+        {
+          "state": "plus",
+          "weightHashEqual": true,
+          "restoreExactBoth": true,
+          "engines": {
+            "fp32-tree": {
+              "prefillLogitsSha256": true,
+              "tokens": true,
+              "texts": true,
+              "rewards": true
+            },
+            "integer-b14": {
+              "prefillLogitsSha256": true,
+              "tokens": true,
+              "texts": true,
+              "rewards": true
+            },
+            "integer-b22": {
+              "prefillLogitsSha256": true,
+              "tokens": true,
+              "texts": true,
+              "rewards": true
+            }
+          }
+        },
+        {
+          "state": "minus",
+          "weightHashEqual": true,
+          "restoreExactBoth": true,
+          "engines": {
+            "fp32-tree": {
+              "prefillLogitsSha256": true,
+              "tokens": true,
+              "texts": true,
+              "rewards": true
+            },
+            "integer-b14": {
+              "prefillLogitsSha256": true,
+              "tokens": true,
+              "texts": true,
+              "rewards": true
+            },
+            "integer-b22": {
+              "prefillLogitsSha256": true,
+              "tokens": true,
+              "texts": true,
+              "rewards": true
+            }
+          }
+        },
+        {
+          "state": "restored",
+          "weightHashEqual": true,
+          "restoreExactBoth": true,
+          "engines": {
+            "fp32-tree": {
+              "prefillLogitsSha256": true,
+              "tokens": true,
+              "texts": true,
+              "rewards": true
+            },
+            "integer-b14": {
+              "prefillLogitsSha256": true,
+              "tokens": true,
+              "texts": true,
+              "rewards": true
+            },
+            "integer-b22": {
+              "prefillLogitsSha256": true,
+              "tokens": true,
+              "texts": true,
+              "rewards": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "model": "qwen",
+      "devices": [
+        "nhan5070ti",
+        "thao3060"
+      ],
+      "inputChecks": {
+        "modelFiles": true,
+        "modelFilesHash": true,
+        "schemaHash": true,
+        "parentSha256": true,
+        "noiseEngine": true,
+        "sigma": true,
+        "seed": true,
+        "promptTokenIds": true,
+        "maxContext": true,
+        "maxNewTokens": true,
+        "backendIdentities": true
+      },
+      "cases": [
+        {
+          "state": "parent",
+          "weightHashEqual": true,
+          "restoreExactBoth": true,
+          "engines": {
+            "fp32-tree": {
+              "prefillLogitsSha256": true,
+              "tokens": true,
+              "texts": true,
+              "rewards": true
+            },
+            "integer-b14": {
+              "prefillLogitsSha256": true,
+              "tokens": true,
+              "texts": true,
+              "rewards": true
+            },
+            "integer-b22": {
+              "prefillLogitsSha256": true,
+              "tokens": true,
+              "texts": true,
+              "rewards": true
+            }
+          }
+        },
+        {
+          "state": "plus",
+          "weightHashEqual": true,
+          "restoreExactBoth": true,
+          "engines": {
+            "fp32-tree": {
+              "prefillLogitsSha256": true,
+              "tokens": true,
+              "texts": true,
+              "rewards": true
+            },
+            "integer-b14": {
+              "prefillLogitsSha256": true,
+              "tokens": true,
+              "texts": true,
+              "rewards": true
+            },
+            "integer-b22": {
+              "prefillLogitsSha256": true,
+              "tokens": true,
+              "texts": true,
+              "rewards": true
+            }
+          }
+        },
+        {
+          "state": "minus",
+          "weightHashEqual": true,
+          "restoreExactBoth": true,
+          "engines": {
+            "fp32-tree": {
+              "prefillLogitsSha256": true,
+              "tokens": true,
+              "texts": true,
+              "rewards": true
+            },
+            "integer-b14": {
+              "prefillLogitsSha256": true,
+              "tokens": true,
+              "texts": true,
+              "rewards": true
+            },
+            "integer-b22": {
+              "prefillLogitsSha256": true,
+              "tokens": true,
+              "texts": true,
+              "rewards": true
+            }
+          }
+        },
+        {
+          "state": "restored",
+          "weightHashEqual": true,
+          "restoreExactBoth": true,
+          "engines": {
+            "fp32-tree": {
+              "prefillLogitsSha256": true,
+              "tokens": true,
+              "texts": true,
+              "rewards": true
+            },
+            "integer-b14": {
+              "prefillLogitsSha256": true,
+              "tokens": true,
+              "texts": true,
+              "rewards": true
+            },
+            "integer-b22": {
+              "prefillLogitsSha256": true,
+              "tokens": true,
+              "texts": true,
+              "rewards": true
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "trainedComparison": [
+    {
+      "model": "smol",
+      "state": "parent",
+      "engine": "integer-b14",
+      "restoreExact": true,
+      "prefillVsFp32Tree": {
+        "rows": 8,
+        "maxAbsoluteError": 0.06535196304321289,
+        "rmsError": 0.010911735917950915,
+        "relativeRmsError": 0.0033948054992440943,
+        "top1EqualRows": 8,
+        "meanKLDivergence": 1.4383057917295831e-05
+      },
+      "tokensVsFp32Tree": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "rewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "fp32TreeRewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "tokensComparedToParent": null
+    },
+    {
+      "model": "smol",
+      "state": "parent",
+      "engine": "integer-b22",
+      "restoreExact": true,
+      "prefillVsFp32Tree": {
+        "rows": 8,
+        "maxAbsoluteError": 0.0002593994140625,
+        "rmsError": 4.257523765977459e-05,
+        "relativeRmsError": 1.3245798104520917e-05,
+        "top1EqualRows": 8,
+        "meanKLDivergence": 1.356026517421427e-10
+      },
+      "tokensVsFp32Tree": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "rewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "fp32TreeRewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "tokensComparedToParent": null
+    },
+    {
+      "model": "smol",
+      "state": "plus",
+      "engine": "integer-b14",
+      "restoreExact": true,
+      "prefillVsFp32Tree": {
+        "rows": 8,
+        "maxAbsoluteError": 0.07014179229736328,
+        "rmsError": 0.011602946771907312,
+        "relativeRmsError": 0.003592566052035409,
+        "top1EqualRows": 8,
+        "meanKLDivergence": 1.4789388462988417e-05
+      },
+      "tokensVsFp32Tree": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "rewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "fp32TreeRewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "tokensComparedToParent": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    },
+    {
+      "model": "smol",
+      "state": "plus",
+      "engine": "integer-b22",
+      "restoreExact": true,
+      "prefillVsFp32Tree": {
+        "rows": 8,
+        "maxAbsoluteError": 0.00026702880859375,
+        "rmsError": 4.5239758469853836e-05,
+        "relativeRmsError": 1.4007374477885485e-05,
+        "top1EqualRows": 8,
+        "meanKLDivergence": 2.0527444657933667e-10
+      },
+      "tokensVsFp32Tree": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "rewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "fp32TreeRewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "tokensComparedToParent": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    },
+    {
+      "model": "smol",
+      "state": "minus",
+      "engine": "integer-b14",
+      "restoreExact": true,
+      "prefillVsFp32Tree": {
+        "rows": 8,
+        "maxAbsoluteError": 0.05603289604187012,
+        "rmsError": 0.010146212622643433,
+        "relativeRmsError": 0.003171632963732706,
+        "top1EqualRows": 8,
+        "meanKLDivergence": 8.07205780477885e-06
+      },
+      "tokensVsFp32Tree": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "rewards": [
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "fp32TreeRewards": [
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "tokensComparedToParent": {
+        "rows": 8,
+        "equalRows": 4,
+        "equalTokenPositions": 191,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          4,
+          11,
+          null,
+          null,
+          2,
+          null,
+          2,
+          null
+        ]
+      }
+    },
+    {
+      "model": "smol",
+      "state": "minus",
+      "engine": "integer-b22",
+      "restoreExact": true,
+      "prefillVsFp32Tree": {
+        "rows": 8,
+        "maxAbsoluteError": 0.00022861361503601074,
+        "rmsError": 3.7686741868398566e-05,
+        "relativeRmsError": 1.1780603980124078e-05,
+        "top1EqualRows": 8,
+        "meanKLDivergence": 1.8778584769752638e-10
+      },
+      "tokensVsFp32Tree": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "rewards": [
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "fp32TreeRewards": [
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "tokensComparedToParent": {
+        "rows": 8,
+        "equalRows": 4,
+        "equalTokenPositions": 191,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          4,
+          11,
+          null,
+          null,
+          2,
+          null,
+          2,
+          null
+        ]
+      }
+    },
+    {
+      "model": "smol",
+      "state": "restored",
+      "engine": "integer-b14",
+      "restoreExact": true,
+      "prefillVsFp32Tree": {
+        "rows": 8,
+        "maxAbsoluteError": 0.06535196304321289,
+        "rmsError": 0.010911735917950915,
+        "relativeRmsError": 0.0033948054992440943,
+        "top1EqualRows": 8,
+        "meanKLDivergence": 1.4383057917295831e-05
+      },
+      "tokensVsFp32Tree": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "rewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "fp32TreeRewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "tokensComparedToParent": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    },
+    {
+      "model": "smol",
+      "state": "restored",
+      "engine": "integer-b22",
+      "restoreExact": true,
+      "prefillVsFp32Tree": {
+        "rows": 8,
+        "maxAbsoluteError": 0.0002593994140625,
+        "rmsError": 4.257523765977459e-05,
+        "relativeRmsError": 1.3245798104520917e-05,
+        "top1EqualRows": 8,
+        "meanKLDivergence": 1.356026517421427e-10
+      },
+      "tokensVsFp32Tree": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "rewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "fp32TreeRewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "tokensComparedToParent": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    },
+    {
+      "model": "tiny",
+      "state": "parent",
+      "engine": "integer-b14",
+      "restoreExact": true,
+      "prefillVsFp32Tree": {
+        "rows": 8,
+        "maxAbsoluteError": 0.040413856506347656,
+        "rmsError": 0.00756953936655081,
+        "relativeRmsError": 0.0015528699374993667,
+        "top1EqualRows": 8,
+        "meanKLDivergence": 2.1921575354936406e-05
+      },
+      "tokensVsFp32Tree": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "rewards": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "fp32TreeRewards": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "tokensComparedToParent": null
+    },
+    {
+      "model": "tiny",
+      "state": "parent",
+      "engine": "integer-b22",
+      "restoreExact": true,
+      "prefillVsFp32Tree": {
+        "rows": 8,
+        "maxAbsoluteError": 0.00019073486328125,
+        "rmsError": 3.2987526030243853e-05,
+        "relativeRmsError": 6.767299171625183e-06,
+        "top1EqualRows": 8,
+        "meanKLDivergence": 2.93147084141373e-10
+      },
+      "tokensVsFp32Tree": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "rewards": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "fp32TreeRewards": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "tokensComparedToParent": null
+    },
+    {
+      "model": "tiny",
+      "state": "plus",
+      "engine": "integer-b14",
+      "restoreExact": true,
+      "prefillVsFp32Tree": {
+        "rows": 8,
+        "maxAbsoluteError": 0.04306507110595703,
+        "rmsError": 0.007282635521385492,
+        "relativeRmsError": 0.001485997649246981,
+        "top1EqualRows": 8,
+        "meanKLDivergence": 1.0526503120073144e-05
+      },
+      "tokensVsFp32Tree": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "rewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "fp32TreeRewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "tokensComparedToParent": {
+        "rows": 8,
+        "equalRows": 1,
+        "equalTokenPositions": 110,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          3,
+          13,
+          0,
+          18,
+          1,
+          0,
+          17,
+          null
+        ]
+      }
+    },
+    {
+      "model": "tiny",
+      "state": "plus",
+      "engine": "integer-b22",
+      "restoreExact": true,
+      "prefillVsFp32Tree": {
+        "rows": 8,
+        "maxAbsoluteError": 0.00017452239990234375,
+        "rmsError": 3.375868173903825e-05,
+        "relativeRmsError": 6.8883471592910476e-06,
+        "top1EqualRows": 8,
+        "meanKLDivergence": 3.9836619090778515e-10
+      },
+      "tokensVsFp32Tree": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "rewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "fp32TreeRewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "tokensComparedToParent": {
+        "rows": 8,
+        "equalRows": 1,
+        "equalTokenPositions": 110,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          3,
+          13,
+          0,
+          18,
+          1,
+          0,
+          17,
+          null
+        ]
+      }
+    },
+    {
+      "model": "tiny",
+      "state": "minus",
+      "engine": "integer-b14",
+      "restoreExact": true,
+      "prefillVsFp32Tree": {
+        "rows": 8,
+        "maxAbsoluteError": 0.04613971710205078,
+        "rmsError": 0.007245686237595969,
+        "relativeRmsError": 0.0014928026785576162,
+        "top1EqualRows": 8,
+        "meanKLDivergence": 1.1614751114309832e-05
+      },
+      "tokensVsFp32Tree": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "rewards": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "fp32TreeRewards": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "tokensComparedToParent": {
+        "rows": 8,
+        "equalRows": 2,
+        "equalTokenPositions": 117,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          11,
+          19,
+          0,
+          null,
+          2,
+          2,
+          5,
+          null
+        ]
+      }
+    },
+    {
+      "model": "tiny",
+      "state": "minus",
+      "engine": "integer-b22",
+      "restoreExact": true,
+      "prefillVsFp32Tree": {
+        "rows": 8,
+        "maxAbsoluteError": 0.00019621849060058594,
+        "rmsError": 3.409008884180308e-05,
+        "relativeRmsError": 7.0234584091230756e-06,
+        "top1EqualRows": 8,
+        "meanKLDivergence": 3.6218535402627075e-10
+      },
+      "tokensVsFp32Tree": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "rewards": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "fp32TreeRewards": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "tokensComparedToParent": {
+        "rows": 8,
+        "equalRows": 2,
+        "equalTokenPositions": 117,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          11,
+          19,
+          0,
+          null,
+          2,
+          2,
+          5,
+          null
+        ]
+      }
+    },
+    {
+      "model": "tiny",
+      "state": "restored",
+      "engine": "integer-b14",
+      "restoreExact": true,
+      "prefillVsFp32Tree": {
+        "rows": 8,
+        "maxAbsoluteError": 0.040413856506347656,
+        "rmsError": 0.00756953936655081,
+        "relativeRmsError": 0.0015528699374993667,
+        "top1EqualRows": 8,
+        "meanKLDivergence": 2.1921575354936406e-05
+      },
+      "tokensVsFp32Tree": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "rewards": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "fp32TreeRewards": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "tokensComparedToParent": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    },
+    {
+      "model": "tiny",
+      "state": "restored",
+      "engine": "integer-b22",
+      "restoreExact": true,
+      "prefillVsFp32Tree": {
+        "rows": 8,
+        "maxAbsoluteError": 0.00019073486328125,
+        "rmsError": 3.2987526030243853e-05,
+        "relativeRmsError": 6.767299171625183e-06,
+        "top1EqualRows": 8,
+        "meanKLDivergence": 2.93147084141373e-10
+      },
+      "tokensVsFp32Tree": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "rewards": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "fp32TreeRewards": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "tokensComparedToParent": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    },
+    {
+      "model": "qwen",
+      "state": "parent",
+      "engine": "integer-b14",
+      "restoreExact": true,
+      "prefillVsFp32Tree": {
+        "rows": 8,
+        "maxAbsoluteError": 0.10990428924560547,
+        "rmsError": 0.01655281912970641,
+        "relativeRmsError": 0.004122821794376504,
+        "top1EqualRows": 8,
+        "meanKLDivergence": 4.09325459925594e-05
+      },
+      "tokensVsFp32Tree": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "rewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "fp32TreeRewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "tokensComparedToParent": null
+    },
+    {
+      "model": "qwen",
+      "state": "parent",
+      "engine": "integer-b22",
+      "restoreExact": true,
+      "prefillVsFp32Tree": {
+        "rows": 8,
+        "maxAbsoluteError": 0.000510096549987793,
+        "rmsError": 6.732131382178732e-05,
+        "relativeRmsError": 1.676776491518686e-05,
+        "top1EqualRows": 8,
+        "meanKLDivergence": 1.114437891615085e-09
+      },
+      "tokensVsFp32Tree": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "rewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "fp32TreeRewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "tokensComparedToParent": null
+    },
+    {
+      "model": "qwen",
+      "state": "plus",
+      "engine": "integer-b14",
+      "restoreExact": true,
+      "prefillVsFp32Tree": {
+        "rows": 8,
+        "maxAbsoluteError": 0.07797908782958984,
+        "rmsError": 0.01319070305355959,
+        "relativeRmsError": 0.0034705695331720453,
+        "top1EqualRows": 8,
+        "meanKLDivergence": 2.393061684284182e-05
+      },
+      "tokensVsFp32Tree": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "rewards": [
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "fp32TreeRewards": [
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "tokensComparedToParent": {
+        "rows": 8,
+        "equalRows": 1,
+        "equalTokenPositions": 84,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          0,
+          3,
+          null,
+          24,
+          0,
+          2,
+          12,
+          2
+        ]
+      }
+    },
+    {
+      "model": "qwen",
+      "state": "plus",
+      "engine": "integer-b22",
+      "restoreExact": true,
+      "prefillVsFp32Tree": {
+        "rows": 8,
+        "maxAbsoluteError": 0.0004742145538330078,
+        "rmsError": 5.3282622765896336e-05,
+        "relativeRmsError": 1.4019044054586384e-05,
+        "top1EqualRows": 8,
+        "meanKLDivergence": 4.0318266517106967e-10
+      },
+      "tokensVsFp32Tree": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "rewards": [
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "fp32TreeRewards": [
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "tokensComparedToParent": {
+        "rows": 8,
+        "equalRows": 1,
+        "equalTokenPositions": 84,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          0,
+          3,
+          null,
+          24,
+          0,
+          2,
+          12,
+          2
+        ]
+      }
+    },
+    {
+      "model": "qwen",
+      "state": "minus",
+      "engine": "integer-b14",
+      "restoreExact": true,
+      "prefillVsFp32Tree": {
+        "rows": 8,
+        "maxAbsoluteError": 0.19414830207824707,
+        "rmsError": 0.02183276302547506,
+        "relativeRmsError": 0.0056434567563124986,
+        "top1EqualRows": 8,
+        "meanKLDivergence": 0.00011487888966339794
+      },
+      "tokensVsFp32Tree": {
+        "rows": 8,
+        "equalRows": 7,
+        "equalTokenPositions": 237,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          12,
+          null,
+          null,
+          null
+        ]
+      },
+      "rewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "fp32TreeRewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "tokensComparedToParent": {
+        "rows": 8,
+        "equalRows": 1,
+        "equalTokenPositions": 131,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          0,
+          3,
+          null,
+          28,
+          0,
+          2,
+          14,
+          27
+        ]
+      }
+    },
+    {
+      "model": "qwen",
+      "state": "minus",
+      "engine": "integer-b22",
+      "restoreExact": true,
+      "prefillVsFp32Tree": {
+        "rows": 8,
+        "maxAbsoluteError": 0.0005481988191604614,
+        "rmsError": 7.961478052330551e-05,
+        "relativeRmsError": 2.0579281262858335e-05,
+        "top1EqualRows": 8,
+        "meanKLDivergence": 1.884198389805948e-09
+      },
+      "tokensVsFp32Tree": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "rewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "fp32TreeRewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "tokensComparedToParent": {
+        "rows": 8,
+        "equalRows": 1,
+        "equalTokenPositions": 131,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          0,
+          3,
+          null,
+          28,
+          0,
+          2,
+          14,
+          27
+        ]
+      }
+    },
+    {
+      "model": "qwen",
+      "state": "restored",
+      "engine": "integer-b14",
+      "restoreExact": true,
+      "prefillVsFp32Tree": {
+        "rows": 8,
+        "maxAbsoluteError": 0.10990428924560547,
+        "rmsError": 0.01655281912970641,
+        "relativeRmsError": 0.004122821794376504,
+        "top1EqualRows": 8,
+        "meanKLDivergence": 4.09325459925594e-05
+      },
+      "tokensVsFp32Tree": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "rewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "fp32TreeRewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "tokensComparedToParent": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    },
+    {
+      "model": "qwen",
+      "state": "restored",
+      "engine": "integer-b22",
+      "restoreExact": true,
+      "prefillVsFp32Tree": {
+        "rows": 8,
+        "maxAbsoluteError": 0.000510096549987793,
+        "rmsError": 6.732131382178732e-05,
+        "relativeRmsError": 1.676776491518686e-05,
+        "top1EqualRows": 8,
+        "meanKLDivergence": 1.114437891615085e-09
+      },
+      "tokensVsFp32Tree": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "rewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "fp32TreeRewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        null,
+        0.0,
+        null,
+        null
+      ],
+      "tokensComparedToParent": {
+        "rows": 8,
+        "equalRows": 8,
+        "equalTokenPositions": 256,
+        "totalTokenPositions": 256,
+        "firstDivergence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    }
+  ]
+}

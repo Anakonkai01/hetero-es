@@ -1,0 +1,3 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7991.46it/s]
+normal-pilot qwen short32 9887.7 bc4a5504e37c
+normal-pilot qwen chat128 9894.7 a9fad5ca48ed

@@ -1,0 +1,190 @@
+[W1009 17:51:10.318213690 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 163577856 bytes (free: 118030336, total: 16611278848).
+seed None chunk 64: library 31.6 s, compact 13.2 s, slots 51456 -> 20635, mean answer 157 tokens, at limit 1, different 15, compaction on
+[W1009 17:51:39.864897370 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 203423744 bytes (free: 38338560, total: 16611278848).
+[W1009 17:51:43.997057698 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 224395264 bytes (free: 32047104, total: 16611278848).
+[W1009 17:51:45.310437219 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 239075328 bytes (free: 191430656, total: 16611278848).
+[W1009 17:51:47.023456495 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 249561088 bytes (free: 222887936, total: 16611278848).
+[W1009 17:51:48.429205935 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 257949696 bytes (free: 162070528, total: 16611278848).
+[W1009 17:51:49.867150161 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 266338304 bytes (free: 65601536, total: 16611278848).
+[W1009 17:51:51.986154087 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 272629760 bytes (free: 151584768, total: 16611278848).
+[W1009 17:51:52.161446280 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 278921216 bytes (free: 115933184, total: 16611278848).
+[W1009 17:51:53.353548069 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 285212672 bytes (free: 23658496, total: 16611278848).
+[W1009 17:51:54.567097168 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 291504128 bytes (free: 99155968, total: 16611278848).
+[W1009 17:51:55.387667090 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 295698432 bytes (free: 197722112, total: 16611278848).
+[W1009 17:51:56.213885435 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 299892736 bytes (free: 27852800, total: 16611278848).
+[W1009 17:51:57.048615731 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 304087040 bytes (free: 128516096, total: 16611278848).
+[W1009 17:51:57.471669227 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 306184192 bytes (free: 271122432, total: 16611278848).
+[W1009 17:51:57.895835226 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 308281344 bytes (free: 143196160, total: 16611278848).
+[W1009 17:51:58.321195074 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 310378496 bytes (free: 292093952, total: 16611278848).
+[W1009 17:51:58.748748137 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 312475648 bytes (free: 266928128, total: 16611278848).
+[W1009 17:51:58.756115971 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 312475648 bytes (free: 126418944, total: 16611278848).
+[W1009 17:51:58.801090371 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 312475648 bytes (free: 287899648, total: 16611278848).
+[W1009 17:51:58.806825742 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 312475648 bytes (free: 306774016, total: 16611278848).
+[W1009 17:51:59.181318202 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 314572800 bytes (free: 29949952, total: 16611278848).
+[W1009 17:51:59.191254364 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 314572800 bytes (free: 201916416, total: 16611278848).
+[W1009 17:51:59.247977167 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 314572800 bytes (free: 199819264, total: 16611278848).
+[W1009 17:51:59.253931469 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 314572800 bytes (free: 197722112, total: 16611278848).
+[W1009 17:51:59.259912387 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 314572800 bytes (free: 195624960, total: 16611278848).
+[W1009 17:51:59.622513798 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 316669952 bytes (free: 193527808, total: 16611278848).
+[W1009 17:51:59.636042785 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 316669952 bytes (free: 38338560, total: 16611278848).
+[W1009 17:51:59.697787305 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 316669952 bytes (free: 36241408, total: 16611278848).
+[W1009 17:51:59.702263195 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 316669952 bytes (free: 34144256, total: 16611278848).
+[W1009 17:52:00.057639187 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 318767104 bytes (free: 32047104, total: 16611278848).
+[W1009 17:52:00.062252787 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 318767104 bytes (free: 172556288, total: 16611278848).
+[W1009 17:52:00.074411294 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 318767104 bytes (free: 170459136, total: 16611278848).
+[W1009 17:52:00.091318133 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 318767104 bytes (free: 141099008, total: 16611278848).
+[W1009 17:52:00.146314558 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 318767104 bytes (free: 139001856, total: 16611278848).
+[W1009 17:52:00.495482815 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 320864256 bytes (free: 136904704, total: 16611278848).
+[W1009 17:52:00.501013462 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 320864256 bytes (free: 269025280, total: 16611278848).
+[W1009 17:52:00.514609543 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 320864256 bytes (free: 266928128, total: 16611278848).
+[W1009 17:52:00.528872745 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 320864256 bytes (free: 111738880, total: 16611278848).
+[W1009 17:52:00.545531504 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 320864256 bytes (free: 109641728, total: 16611278848).
+[W1009 17:52:00.598932998 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 320864256 bytes (free: 107544576, total: 16611278848).
+[W1009 17:52:00.945280772 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 322961408 bytes (free: 105447424, total: 16611278848).
+[W1009 17:52:00.951122499 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 322961408 bytes (free: 227082240, total: 16611278848).
+[W1009 17:52:01.963472334 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 322961408 bytes (free: 224985088, total: 16611278848).
+[W1009 17:52:01.975993673 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 322961408 bytes (free: 105447424, total: 16611278848).
+[W1009 17:52:01.987874949 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 322961408 bytes (free: 103350272, total: 16611278848).
+[W1009 17:52:01.004690718 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 322961408 bytes (free: 73990144, total: 16611278848).
+[W1009 17:52:01.390815285 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 325058560 bytes (free: 73990144, total: 16611278848).
+[W1009 17:52:01.397464419 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 325058560 bytes (free: 57212928, total: 16611278848).
+[W1009 17:52:01.427889119 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 325058560 bytes (free: 55115776, total: 16611278848).
+[W1009 17:52:01.434579709 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 325058560 bytes (free: 53018624, total: 16611278848).
+[W1009 17:52:01.447857632 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 325058560 bytes (free: 224985088, total: 16611278848).
+[W1009 17:52:01.454463090 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 325058560 bytes (free: 120127488, total: 16611278848).
+[W1009 17:52:01.466144912 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 325058560 bytes (free: 118030336, total: 16611278848).
+[W1009 17:52:01.847381358 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 327155712 bytes (free: 44630016, total: 16611278848).
+[W1009 17:52:01.853754814 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 327155712 bytes (free: 327745536, total: 16611278848).
+[W1009 17:52:01.881473857 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 327155712 bytes (free: 178847744, total: 16611278848).
+[W1009 17:52:01.904437435 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 327155712 bytes (free: 59310080, total: 16611278848).
+[W1009 17:52:01.915688592 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 327155712 bytes (free: 57212928, total: 16611278848).
+[W1009 17:52:01.920707323 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 327155712 bytes (free: 55115776, total: 16611278848).
+[W1009 17:52:01.928968135 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 327155712 bytes (free: 224985088, total: 16611278848).
+[W1009 17:52:01.933607403 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 327155712 bytes (free: 262733824, total: 16611278848).
+[W1009 17:52:01.938281725 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 327155712 bytes (free: 310968320, total: 16611278848).
+[W1009 17:52:01.944589182 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 327155712 bytes (free: 29949952, total: 16611278848).
+[W1009 17:52:02.299236854 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 329252864 bytes (free: 27852800, total: 16611278848).
+[W1009 17:52:02.305009616 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 329252864 bytes (free: 19464192, total: 16611278848).
+[W1009 17:52:02.318908830 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 329252864 bytes (free: 325648384, total: 16611278848).
+[W1009 17:52:02.326354251 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 329252864 bytes (free: 216596480, total: 16611278848).
+[W1009 17:52:02.348097773 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 329252864 bytes (free: 48824320, total: 16611278848).
+[W1009 17:52:02.374847063 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 329252864 bytes (free: 258539520, total: 16611278848).
+[W1009 17:52:02.381456863 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 329252864 bytes (free: 245956608, total: 16611278848).
+[W1009 17:52:02.391262622 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 329252864 bytes (free: 243859456, total: 16611278848).
+[W1009 17:52:02.400942714 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 329252864 bytes (free: 241762304, total: 16611278848).
+[W1009 17:52:02.406937611 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 329252864 bytes (free: 239665152, total: 16611278848).
+[W1009 17:52:02.412984349 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 329252864 bytes (free: 237568000, total: 16611278848).
+[W1009 17:52:02.418891839 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 329252864 bytes (free: 235470848, total: 16611278848).
+[W1009 17:52:02.769197245 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 331350016 bytes (free: 105447424, total: 16611278848).
+[W1009 17:52:02.772423390 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 331350016 bytes (free: 306774016, total: 16611278848).
+[W1009 17:52:02.778891121 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 331350016 bytes (free: 178847744, total: 16611278848).
+[W1009 17:52:02.786122107 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 331350016 bytes (free: 141099008, total: 16611278848).
+[W1009 17:52:02.801893101 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 331350016 bytes (free: 139001856, total: 16611278848).
+[W1009 17:52:02.807945928 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 331350016 bytes (free: 136904704, total: 16611278848).
+[W1009 17:52:02.814959278 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 331350016 bytes (free: 134807552, total: 16611278848).
+[W1009 17:52:02.831026850 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 331350016 bytes (free: 132710400, total: 16611278848).
+[W1009 17:52:02.838653322 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 331350016 bytes (free: 130613248, total: 16611278848).
+[W1009 17:52:02.862031655 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 331350016 bytes (free: 128516096, total: 16611278848).
+[W1009 17:52:02.867926015 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 331350016 bytes (free: 126418944, total: 16611278848).
+[W1009 17:52:02.874461568 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 331350016 bytes (free: 124321792, total: 16611278848).
+[W1009 17:52:02.884538238 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 331350016 bytes (free: 113836032, total: 16611278848).
+[W1009 17:52:02.893941943 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 331350016 bytes (free: 111738880, total: 16611278848).
+[W1009 17:52:02.899919969 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 331350016 bytes (free: 109641728, total: 16611278848).
+[W1009 17:52:03.245156101 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 333447168 bytes (free: 107544576, total: 16611278848).
+[W1009 17:52:03.248192197 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 333447168 bytes (free: 103350272, total: 16611278848).
+[W1009 17:52:03.253319766 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 333447168 bytes (free: 101253120, total: 16611278848).
+[W1009 17:52:03.257937476 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 333447168 bytes (free: 97058816, total: 16611278848).
+[W1009 17:52:03.262567260 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 333447168 bytes (free: 94961664, total: 16611278848).
+[W1009 17:52:03.267203331 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 333447168 bytes (free: 92864512, total: 16611278848).
+[W1009 17:52:03.273661710 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 333447168 bytes (free: 57212928, total: 16611278848).
+[W1009 17:52:03.288508436 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 333447168 bytes (free: 55115776, total: 16611278848).
+[W1009 17:52:03.294184781 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 333447168 bytes (free: 53018624, total: 16611278848).
+[W1009 17:52:03.309240835 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 333447168 bytes (free: 50921472, total: 16611278848).
+[W1009 17:52:03.315587217 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 333447168 bytes (free: 48824320, total: 16611278848).
+[W1009 17:52:03.337652287 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 333447168 bytes (free: 46727168, total: 16611278848).
+[W1009 17:52:03.342256384 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 333447168 bytes (free: 44630016, total: 16611278848).
+[W1009 17:52:03.347295993 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 333447168 bytes (free: 42532864, total: 16611278848).
+[W1009 17:52:03.355374072 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 333447168 bytes (free: 40435712, total: 16611278848).
+[W1009 17:52:03.705023330 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 335544320 bytes (free: 34144256, total: 16611278848).
+[W1009 17:52:03.706709003 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 335544320 bytes (free: 34144256, total: 16611278848).
+[W1009 17:52:03.706739803 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 335544320 bytes (free: 34144256, total: 16611278848).
+Traceback (most recent call last):
+  File "/home/pc5070ti/projects/hetero-es/artifacts/experiments/2026-10-09-compact-decode/compact_general.py", line 236, in <module>
+    sys.exit(main(sys.argv[1:]))
+             ^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/projects/hetero-es/artifacts/experiments/2026-10-09-compact-decode/compact_general.py", line 216, in main
+    (ref, lib_steps, lib_slots), t_lib = timed(lambda: library(chunk))
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/projects/hetero-es/artifacts/experiments/2026-10-09-compact-decode/compact_general.py", line 197, in timed
+    value = function()
+            ^^^^^^^^^^
+  File "/home/pc5070ti/projects/hetero-es/artifacts/experiments/2026-10-09-compact-decode/compact_general.py", line 216, in <lambda>
+    (ref, lib_steps, lib_slots), t_lib = timed(lambda: library(chunk))
+                                                       ^^^^^^^^^^^^^^
+  File "/home/pc5070ti/projects/hetero-es/artifacts/experiments/2026-10-09-compact-decode/compact_general.py", line 174, in library
+    ids = model.generate(**inputs, max_new_tokens=args.max_new_tokens, do_sample=False, pad_token_id=pad)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/transformers/generation/utils.py", line 2802, in generate
+    result = decoding_method(
+             ^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/transformers/generation/utils.py", line 3030, in _sample
+    outputs = model_forward(**model_inputs, return_dict=True)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/transformers/utils/generic.py", line 939, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py", line 482, in forward
+    outputs: BaseModelOutputWithPast = self.model(
+                                       ^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/transformers/utils/generic.py", line 1068, in wrapper
+    output = func(self, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/transformers/utils/output_capturing.py", line 286, in wrapper
+    outputs = func(self, *args, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py", line 413, in forward
+    hidden_states = decoder_layer(
+                    ^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/transformers/modeling_layers.py", line 109, in __call__
+    return super().__call__(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py", line 307, in forward
+    hidden_states, _ = self.self_attn(
+                       ^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py", line 266, in forward
+    attn_output, attn_weights = attention_interface(
+                                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py", line 100, in sdpa_attention_forward
+    value = repeat_kv(value, module.num_key_value_groups)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/transformers/integrations/sdpa_attention.py", line 24, in repeat_kv
+    return hidden_states.reshape(batch, num_key_value_heads * n_rep, slen, head_dim)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 320.00 MiB. GPU 0 has a total capacity of 15.47 GiB of which 32.56 MiB is free. Including non-PyTorch memory, this process has 15.20 GiB memory in use. Of the allocated memory 11.33 GiB is allocated by PyTorch, and 3.53 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)

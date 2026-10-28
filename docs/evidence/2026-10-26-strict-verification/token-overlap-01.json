@@ -1,0 +1,97 @@
+{
+  "limits": "Offline token-overlap diagnostic only. No verifier, throughput, acceptance probability after rejected guesses, or learning claim. Vendor chat is not a strict trace.",
+  "sources": [
+    {
+      "label": "strict-short",
+      "path": "docs/evidence/2026-10-26-strict-prefetch/raw/qwen-candidates-5070ti-02.json",
+      "cases": [
+        {
+          "case": "plus",
+          "rows": 8,
+          "identicalRows": 1,
+          "totalTargetTokens": 256,
+          "commonPrefixTokens": 75,
+          "medianCommonPrefix": 2.5
+        },
+        {
+          "case": "minus",
+          "rows": 8,
+          "identicalRows": 1,
+          "totalTargetTokens": 256,
+          "commonPrefixTokens": 106,
+          "medianCommonPrefix": 8.5
+        }
+      ]
+    },
+    {
+      "label": "vendor-chat-control",
+      "path": "docs/evidence/2026-10-26-vllm-impact/raw/qwen-chat-5070ti-01.json",
+      "cases": [
+        {
+          "case": "7001+1",
+          "rows": 64,
+          "identicalRows": 0,
+          "totalTargetTokens": 16186,
+          "commonPrefixTokens": 215,
+          "medianCommonPrefix": 1.0
+        },
+        {
+          "case": "7001-1",
+          "rows": 64,
+          "identicalRows": 0,
+          "totalTargetTokens": 18800,
+          "commonPrefixTokens": 776,
+          "medianCommonPrefix": 4.5
+        },
+        {
+          "case": "7002+1",
+          "rows": 64,
+          "identicalRows": 0,
+          "totalTargetTokens": 17037,
+          "commonPrefixTokens": 494,
+          "medianCommonPrefix": 1.5
+        },
+        {
+          "case": "7002-1",
+          "rows": 64,
+          "identicalRows": 0,
+          "totalTargetTokens": 14324,
+          "commonPrefixTokens": 187,
+          "medianCommonPrefix": 0.0
+        },
+        {
+          "case": "7003+1",
+          "rows": 64,
+          "identicalRows": 0,
+          "totalTargetTokens": 16722,
+          "commonPrefixTokens": 551,
+          "medianCommonPrefix": 1.0
+        },
+        {
+          "case": "7003-1",
+          "rows": 64,
+          "identicalRows": 0,
+          "totalTargetTokens": 17972,
+          "commonPrefixTokens": 890,
+          "medianCommonPrefix": 7.0
+        },
+        {
+          "case": "7004+1",
+          "rows": 64,
+          "identicalRows": 0,
+          "totalTargetTokens": 17176,
+          "commonPrefixTokens": 988,
+          "medianCommonPrefix": 11.0
+        },
+        {
+          "case": "7004-1",
+          "rows": 64,
+          "identicalRows": 0,
+          "totalTargetTokens": 18349,
+          "commonPrefixTokens": 629,
+          "medianCommonPrefix": 4.0
+        }
+      ]
+    }
+  ]
+}

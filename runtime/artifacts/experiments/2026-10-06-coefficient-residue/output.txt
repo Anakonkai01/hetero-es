@@ -1,0 +1,14 @@
+python 3.12.13  numpy 2.4.5  machine x86_64  system Linux
+
+1. size of a generation record (rewards k/96, seeds from derive_seed, alpha 1e-3)
+   N =   8:   744 bytes   (the FP16 model is 0.99 GB)
+   N =  32:  1883 bytes   (the FP16 model is 0.99 GB)
+   N = 128:  6747 bytes   (the FP16 model is 0.99 GB)
+
+2. float32 coefficients that change with the order of the float64 sums (20,000 random sets of rewards k/96 each)
+   N =  8: 20000 sets; another order of the sums changed the coefficients in 80 (0.40%); an exactly rounded mean and std in 73; of the 80 changes, 80 were only a coefficient 0.0 against a residue below 1e-9
+   N = 16: 20000 sets; another order of the sums changed the coefficients in 60 (0.30%); an exactly rounded mean and std in 67; of the 60 changes, 60 were only a coefficient 0.0 against a residue below 1e-9
+   N = 64: 20000 sets; another order of the sums changed the coefficients in 68 (0.34%); an exactly rounded mean and std in 70; of the 68 changes, 68 were only a coefficient 0.0 against a residue below 1e-9
+
+3. two coefficient vectors that differ only by residues of about 1e-17 (2,000,000 elements, NumPy only)
+   FP32 direction elements that differ: 0   FP16 weights that differ after the update: 0

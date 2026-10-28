@@ -1,0 +1,11 @@
+control ok    | 334 passed, 34 skipped in 2.79s
+killed       subset path disabled | 4 failed, 330 passed, 34 skipped in 2.78s
+killed       any subset accepted | 2 failed, 332 passed, 34 skipped in 2.78s
+killed       empty subset accepted | 1 failed, 333 passed, 34 skipped in 2.78s
+killed       aliases ignored | 1 failed, 333 passed, 34 skipped in 2.79s
+killed       subset of a subset | 1 failed, 333 passed, 34 skipped in 2.80s
+killed       match instead of search | 1 failed, 333 passed, 34 skipped in 2.74s
+killed       full schema not checked | 16 failed, 318 passed, 34 skipped in 2.80s
+killed       subset keeps the full version | 5 failed, 329 passed, 34 skipped in 2.82s
+
+8 of 8 mutants killed.

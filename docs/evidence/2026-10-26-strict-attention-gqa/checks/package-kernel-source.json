@@ -1,0 +1,5 @@
+{
+ "workerRuntimeStrictCudaSha256": "f000341d37b7d7328b657b9e61752cd2bd292dda20874d90ec513c4736e57647",
+ "sourceStrictCudaSha256": "f000341d37b7d7328b657b9e61752cd2bd292dda20874d90ec513c4736e57647",
+ "note": "Worker runtime archive from scripts/build-apps.sh --check carries the new kernel source; the CPU server archive carries no CUDA modules."
+}

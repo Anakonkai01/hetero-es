@@ -1,0 +1,29 @@
+{
+  "baseCommit": "033065d48381f40ebda549ebfe93b876e202a64a",
+  "files": {
+    "runtime/src/heteroes/eval/strict_cuda.py": "8ab42c85f4a1f4f59b281c61a5b43f57bcf584501539fb52669079723b0b4f61",
+    "runtime/src/heteroes/eval/strict_decoder.py": "5ffa8b9abb30f8ffd586b87a89e79dc74568840b28ad018520bcd06c3f42fd4e",
+    "runtime/src/heteroes/eval/strict_decoder_packed.py": "42177331c846dd0285b4d900048bf78b7a42a68dec0b0bd27c3924a4ea09f6aa",
+    "runtime/src/heteroes/eval/qwen2_strict_cuda.py": "57b570622c4eba8460f25bf1f4176d921dcea17c6ccf5f1895a97af5ec0914e0",
+    "runtime/src/heteroes/eval/qwen2_reference.py": "e2c8775134a095267e280dc2db3efe5d599b1680a7176341c1568c04235127b7",
+    "runtime/src/heteroes/eval/reference_ops.py": "863a3278968377a0ab85acb470f5d16a47ac7c7b23c7a402c3a594ae13fff35f",
+    "runtime/scripts/benchmark_inference.py": "152dbec6934de62ea4c1e4956243ccf485a3aa14a2eada49be0f5471d4fcbcc6",
+    "runtime/scripts/probe_strict_backend.py": "8cdd0274ada43c48a74e7e5c0230eaf220fb1e0be87c851ff51876c959d9cd2d",
+    "runtime/tests/eval/test_compare_strict_receipts.py": "c89d3c165c629649d550b6bf85fa8ab366ee9930981910a14bde7c875c7c8fa5",
+    "runtime/tests/eval/test_qwen2_strict_cuda.py": "2dba2bd52425d08f282c63d5e32edfbbb5b11ec03e90a12f3a4aa8e5c3287b77",
+    "runtime/tests/eval/test_strict_cuda.py": "ffdb223457e0d7cf6974c544ddc2fc34fe489b0ce52845f5209d191b46f08816",
+    "runtime/tests/eval/test_strict_decoder.py": "186483a3365cbbcba5f1de14e7245e7a227b7d17ffa0f425feb25a1c4b149f06",
+    "runtime/tests/eval/test_strict_linear_staging.py": "3ab1a6a926bae6dbc9e4c18442810d3fdd899d76b9c09398bb55708ad45810f2",
+    "runtime/tests/eval/test_strict_packed.py": "92e28b89c2b8582a14c69923bb51a8890ba5ec034a678a4401b39c2b21f280d2",
+    "runtime/tests/eval/test_benchmark_inference.py": "a1a57c9d9c1decb8de4d4a64adb085588922a20d92253fea19d13feb293c3de3"
+  },
+  "packageFiles": {
+    "runtime/src/heteroes/eval/strict_cuda.py": "8ab42c85f4a1f4f59b281c61a5b43f57bcf584501539fb52669079723b0b4f61",
+    "runtime/src/heteroes/eval/strict_decoder.py": "5ffa8b9abb30f8ffd586b87a89e79dc74568840b28ad018520bcd06c3f42fd4e",
+    "runtime/src/heteroes/eval/strict_decoder_packed.py": "42177331c846dd0285b4d900048bf78b7a42a68dec0b0bd27c3924a4ea09f6aa",
+    "runtime/src/heteroes/eval/qwen2_strict_cuda.py": "57b570622c4eba8460f25bf1f4176d921dcea17c6ccf5f1895a97af5ec0914e0",
+    "runtime/src/heteroes/eval/qwen2_reference.py": "e2c8775134a095267e280dc2db3efe5d599b1680a7176341c1568c04235127b7",
+    "runtime/src/heteroes/eval/reference_ops.py": "863a3278968377a0ab85acb470f5d16a47ac7c7b23c7a402c3a594ae13fff35f"
+  },
+  "protectedNumericalPathsUnchanged": true
+}

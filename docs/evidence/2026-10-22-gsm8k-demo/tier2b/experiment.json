@@ -1,0 +1,191 @@
+{
+ "name": "GSM8K demo \u00b7 tier 2b system under stress (explicit rejoin) \u00b7 5 generations \u00b7 N=32",
+ "modelName": "Qwen/Qwen2.5-0.5B-Instruct",
+ "modelArtifactId": "0dd795197adc42a0853abaa5ea8f2f4f",
+ "schedulerPolicy": "greedy-tail",
+ "allowJoin": true,
+ "syncMode": "synchronous",
+ "workerIds": [
+  "cli-71b757062fd9",
+  "cli-73b87e369ddc",
+  "desktop-d9017660e75f",
+  "cli-d90d1da024e9",
+  "cli-aa99b4d4ca58"
+ ],
+ "task": "text_v3",
+ "maxGenerations": 5,
+ "candidatesPerGeneration": 32,
+ "alpha": 0.0005,
+ "sigma": 0.001,
+ "decodeEngine": "hf_fp32_cpu_guard_v1",
+ "datasetIds": [
+  "07ac8df585d444bc8f5809ba579e5935"
+ ],
+ "coordinatorDeviceId": "dbe5254b78de4c038550b8b90df13899",
+ "backupPolicy": {
+  "interval": 1,
+  "retain": 3
+ },
+ "recipeVersion": 3,
+ "batchSize": 32,
+ "batchSeed": 11,
+ "sigmaSchedule": "cosine",
+ "sigmaMinimum": 0.00025,
+ "maxNewTokens": 512,
+ "weightSpace": {
+  "kind": "full"
+ },
+ "antithetic": false,
+ "scorer": {
+  "kind": "declarative",
+  "name": "answer-line-last-number",
+  "version": 1,
+  "codeSha256": null,
+  "config": {}
+ },
+ "coefficientRule": "zscore@1",
+ "alphaSchedule": "constant",
+ "alphaMinimum": null,
+ "momentumBeta": null,
+ "momentumWindow": 4,
+ "evalChunk": 32,
+ "sampler": "epoch-shuffle@1",
+ "candidateSeedNamespace": "gsm8k-demo-tier2b-20261022",
+ "systemPrompt": null,
+ "validationInterval": 5,
+ "modelManifest": {
+  "formatVersion": 1,
+  "modelId": "Qwen/Qwen2.5-0.5B-Instruct",
+  "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+  "tokenizerRevision": "7ae557604adf67be50417f59c2c2f167def9a775",
+  "format": "safetensors",
+  "files": {
+   "config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+   "generation_config.json": "e558847a8b4402616f1273797b015104dc266fe4b520056fca88823ba8f8ebe6",
+   "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+   "model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+   "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+   "tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583",
+   "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+  }
+ },
+ "modelSource": "UPLOAD",
+ "datasetObjectSha256": "2818c1521614cd12bddff9aba69d6cfe88f57e6d36ed47a1da58ff45fde2db70",
+ "datasetIdentity": {
+  "contentHash": "4e2147d459d5ded1a329d8ab66773e2d76f54ff466dbc071e90d30d41170d017",
+  "splitHashes": {
+   "train": "1caae74d81892fe2f6af8d0dafb1a710312acdcd64eb3e16c24c524bd1af11e4",
+   "validation": "dd26926dc9e874db7111efdcf735c71ce3db70957fba7bd8b4593277a390e9f5",
+   "test": "1681b35d1f490b8ca31260549aa54972e39d88f029b1d5f65f61e813839fb962"
+  }
+ },
+ "datasetSplitObjects": [
+  "1681b35d1f490b8ca31260549aa54972e39d88f029b1d5f65f61e813839fb962",
+  "1caae74d81892fe2f6af8d0dafb1a710312acdcd64eb3e16c24c524bd1af11e4",
+  "dd26926dc9e874db7111efdcf735c71ce3db70957fba7bd8b4593277a390e9f5"
+ ],
+ "experimentId": "90147d801ca8463d92143d21f95d63f4",
+ "workspaceId": "lab",
+ "ownerUserId": "admin",
+ "status": "DRAINING",
+ "cancelRequested": false,
+ "modelVersion": "dc7c3a79ef405bb321736162a3813674396a97f9e47c1513f356afb17db5649f",
+ "configHash": "48c6cc5c1c65698aacb00d899a552d5207783ddeb6d95cc1ac2848a01e755b32",
+ "createdAt": "2026-10-21T16:19:18.379625+00:00",
+ "completedGenerations": 5,
+ "startedAt": "2026-10-21T16:19:19.211035+00:00",
+ "resumeRequested": false,
+ "pauseRequested": false,
+ "monitoringPartial": false,
+ "cloudSync": {
+  "status": "READY",
+  "lastCloudGeneration": 4,
+  "pointId": "58463e725589446989599496c83cc2a3",
+  "t": 1792601341.7878773
+ },
+ "auditSummary": {
+  "completed": 5,
+  "selected": 5,
+  "mismatches": 0,
+  "quarantinedWorkers": []
+ },
+ "usageSummary": {
+  "generatedTokens": 1476456,
+  "auditGeneratedTokens": 45038,
+  "workerWallSeconds": 4227.726170904007,
+  "workerGpuSeconds": 4227.726170904007,
+  "coordinatorUpdateGpuSeconds": 48.425877135006886,
+  "gpuSeconds": 4276.152048039014,
+  "reportedCandidates": 160,
+  "reportedAudits": 5,
+  "recordedUpdates": 5,
+  "partial": false,
+  "scope": "successful worker executions and coordinator updates"
+ },
+ "studyMetrics": {
+  "recipeHash": "d1532dcc9c5901e80811302a911ca4663bcbf48c0b138cf0fe0302ed429e01e9",
+  "planHash": "18dfd87fbbc2c99ca9fd9423a59c81be4ea8e33a05dde3f8eecb72c5961b1b1f",
+  "datasetIdentity": {
+   "contentHash": "4e2147d459d5ded1a329d8ab66773e2d76f54ff466dbc071e90d30d41170d017",
+   "splitHashes": {
+    "test": "1681b35d1f490b8ca31260549aa54972e39d88f029b1d5f65f61e813839fb962",
+    "train": "1caae74d81892fe2f6af8d0dafb1a710312acdcd64eb3e16c24c524bd1af11e4",
+    "validation": "dd26926dc9e874db7111efdcf735c71ce3db70957fba7bd8b4593277a390e9f5"
+   }
+  },
+  "metric": "mean-reward",
+  "weightSpace": "full",
+  "scorer": {
+   "kind": "declarative",
+   "name": "answer-line-last-number",
+   "version": 1,
+   "codeSha256": null,
+   "config": {}
+  },
+  "best": {
+   "generation": -1,
+   "weightsSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+   "validationReward": 0.625,
+   "recipeHash": "d1532dcc9c5901e80811302a911ca4663bcbf48c0b138cf0fe0302ed429e01e9",
+   "planHash": "18dfd87fbbc2c99ca9fd9423a59c81be4ea8e33a05dde3f8eecb72c5961b1b1f"
+  },
+  "validation": [
+   {
+    "generation": -1,
+    "weightsSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "meanReward": 0.625
+   },
+   {
+    "generation": 4,
+    "weightsSha256": "3e02c708c03d70bfb060e5c939758c086c4765cc8607903e114061350f1bcc67",
+    "meanReward": 0.625
+   }
+  ],
+  "testLocked": true
+ },
+ "validationScore": 0.625,
+ "membership": {
+  "members": [
+   "cli-71b757062fd9",
+   "cli-aa99b4d4ca58",
+   "cli-d90d1da024e9",
+   "desktop-d9017660e75f"
+  ],
+  "left": [
+   "cli-73b87e369ddc"
+  ],
+  "refused": [],
+  "generation": 4
+ },
+ "currentGenerationId": "90147d801ca8463d92143d21f95d63f4.g4",
+ "committedCandidateCount": 32,
+ "membershipRequests": [
+  {
+   "changeId": "c716084b2ccd4cfe8efb078d26e0c51e",
+   "workerId": "cli-73b87e369ddc",
+   "action": "LEAVE",
+   "actor": "system",
+   "requestedAt": 1792600263.1222267
+  }
+ ]
+}

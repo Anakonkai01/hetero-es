@@ -1,0 +1,13 @@
+EQUAL     recipe hash: 1604737ea1d72030
+EQUAL     initial weights: c9118c8a4903c0a8
+EQUAL     number of generations: 3 and 3
+EQUAL     g0 parent: c9118c8a4903c0a8
+EQUAL     g0 rewards: [0.1875, 0.1875, 0.1875, 0.1875, 0.125, 0.3125, 0.1875, 0.3125] and [0.1875, 0.1875, 0.1875, 0.1875, 0.125, 0.3125, 0.1875, 0.3125]
+EQUAL     g0 child: 699729af49821b98 and 699729af49821b98
+EQUAL     g1 parent: 699729af49821b98
+EQUAL     g1 rewards: [0.25, 0.1875, 0.1875, 0.25, 0.1875, 0.25, 0.25, 0.25] and [0.25, 0.1875, 0.1875, 0.25, 0.1875, 0.25, 0.25, 0.25]
+EQUAL     g1 child: 451ee22bb212f677 and 451ee22bb212f677
+EQUAL     g2 parent: 451ee22bb212f677
+EQUAL     g2 rewards: [0.1875, 0.25, 0.25, 0.3125, 0.3125, 0.1875, 0.1875, 0.3125] and [0.1875, 0.25, 0.25, 0.3125, 0.3125, 0.1875, 0.1875, 0.3125]
+EQUAL     g2 child: a8faa8a1dfbc8159 and a8faa8a1dfbc8159
+EQUAL     final weights: a8faa8a1dfbc8159

@@ -1,0 +1,31 @@
+control ok    | 84 passed in 214.11s (0:03:34)
+killed       residual-row-offset-dropped | 1 failed in 5.00s
+killed       residual-bias-dropped | 1 failed, 4 passed in 15.06s
+SURVIVED     projected-no-nonfinite-flag | 84 passed in 213.93s (0:03:33)
+killed       projected-drops-last-split | 1 failed, 1 passed in 7.53s
+killed       silu-up-uses-gate-exponents | 1 failed, 9 passed in 25.91s
+killed       silu-up-reads-gate-column | 1 failed, 9 passed in 25.94s
+killed       silu-max-keeps-nonfinite | 1 failed, 15 passed in 41.37s
+SURVIVED     silu-max-skips-warp-reduce | 84 passed in 213.53s (0:03:33)
+killed       maxima-not-cleared | 1 failed, 9 passed in 25.79s
+killed       pack-exponent-bias | 1 failed, 9 passed in 25.97s
+killed       pack-tail-reads-next-row | 1 failed, 10 passed in 29.49s
+killed       pack-exponent-not-stored | 1 failed, 10 passed in 29.17s
+killed       rope-position-off-by-one | 1 failed, 17 passed in 45.31s
+killed       rope-second-uses-minus-lo | 1 failed, 17 passed in 45.61s
+killed       rope-cos-index-unshifted | 1 failed, 17 passed in 46.06s
+killed       rope-k-columns-at-q | 1 failed, 17 passed in 45.65s
+killed       rope-v-exponents-from-k | 1 failed, 17 passed in 45.49s
+killed       rope-hi-skips-flush | 1 failed in 4.16s
+SURVIVED     qkv-odd-dim-admitted | 84 passed in 216.15s (0:03:36)
+killed       rms-chunk-too-small | 1 failed, 36 passed in 96.30s (0:01:36)
+killed       rms-shuffle-skips-top-level | 1 failed, 26 passed in 71.04s (0:01:11)
+SURVIVED     rms-local-level-reversed | 84 passed in 215.65s (0:03:35)
+SURVIVED     rms-cross-warp-unpruned-left | 84 passed in 215.93s (0:03:35)
+killed       rms-max-ignores-other-warps | 1 failed, 26 passed in 70.71s (0:01:10)
+killed       decoder-residual-not-fused | 1 failed, 26 passed in 70.96s (0:01:10)
+killed       decoder-mlp-reuses-input-norm | 1 failed, 26 passed in 71.21s (0:01:11)
+killed       decoder-down-residual-dropped | 1 failed, 26 passed in 70.88s (0:01:10)
+killed       graph-mlp-skips-residual | 1 failed, 26 passed in 74.89s (0:01:14)
+
+23 of 28 mutants killed.

@@ -1,0 +1,213 @@
+{
+  "allEqual": true,
+  "evaluations": 9,
+  "decoderSourceSha256": "150ac9fdd1464e6cdb41bbc624173de28f01f53019a04f18b77e178ceb2ea95d",
+  "cpuThreads": 8,
+  "gpu": "NVIDIA GeForce GTX 1660 SUPER",
+  "gpuCapability": [
+    7,
+    5
+  ],
+  "referenceCalls": [
+    0,
+    2,
+    0,
+    4,
+    1,
+    2,
+    3,
+    0,
+    2
+  ],
+  "availableCpuRamGiBAfterEachCandidate": [
+    41.144,
+    40.822,
+    40.343,
+    40.357,
+    40.346,
+    40.058,
+    40.019,
+    40.006,
+    40.033
+  ],
+  "peakGpuAllocatedGiB": 2.8537631034851074,
+  "comparisons": [
+    {
+      "repeat": 0,
+      "allEqual": true,
+      "checks": {
+        "descriptor": true,
+        "texts": true,
+        "sha256": true,
+        "restoredParentSha256": true,
+        "inputIds": true,
+        "attentionMask": true,
+        "newTokenIds": true,
+        "evaluationFp32Sha256": true,
+        "perturbedFp16Sha256": true
+      }
+    },
+    {
+      "repeat": 1,
+      "allEqual": true,
+      "checks": {
+        "descriptor": true,
+        "texts": true,
+        "sha256": true,
+        "restoredParentSha256": true,
+        "inputIds": true,
+        "attentionMask": true,
+        "newTokenIds": true,
+        "evaluationFp32Sha256": true,
+        "perturbedFp16Sha256": true
+      }
+    },
+    {
+      "repeat": 2,
+      "allEqual": true,
+      "checks": {
+        "descriptor": true,
+        "texts": true,
+        "sha256": true,
+        "restoredParentSha256": true,
+        "inputIds": true,
+        "attentionMask": true,
+        "newTokenIds": true,
+        "evaluationFp32Sha256": true,
+        "perturbedFp16Sha256": true
+      }
+    },
+    {
+      "repeat": 3,
+      "allEqual": true,
+      "checks": {
+        "descriptor": true,
+        "texts": true,
+        "sha256": true,
+        "restoredParentSha256": true,
+        "inputIds": true,
+        "attentionMask": true,
+        "newTokenIds": true,
+        "evaluationFp32Sha256": true,
+        "perturbedFp16Sha256": true
+      }
+    },
+    {
+      "repeat": 4,
+      "allEqual": true,
+      "checks": {
+        "descriptor": true,
+        "texts": true,
+        "sha256": true,
+        "restoredParentSha256": true,
+        "inputIds": true,
+        "attentionMask": true,
+        "newTokenIds": true,
+        "evaluationFp32Sha256": true,
+        "perturbedFp16Sha256": true
+      }
+    },
+    {
+      "repeat": 5,
+      "allEqual": true,
+      "checks": {
+        "descriptor": true,
+        "texts": true,
+        "sha256": true,
+        "restoredParentSha256": true,
+        "inputIds": true,
+        "attentionMask": true,
+        "newTokenIds": true,
+        "evaluationFp32Sha256": true,
+        "perturbedFp16Sha256": true
+      }
+    },
+    {
+      "repeat": 6,
+      "allEqual": true,
+      "checks": {
+        "descriptor": true,
+        "texts": true,
+        "sha256": true,
+        "restoredParentSha256": true,
+        "inputIds": true,
+        "attentionMask": true,
+        "newTokenIds": true,
+        "evaluationFp32Sha256": true,
+        "perturbedFp16Sha256": true
+      }
+    },
+    {
+      "repeat": 7,
+      "allEqual": true,
+      "checks": {
+        "descriptor": true,
+        "texts": true,
+        "sha256": true,
+        "restoredParentSha256": true,
+        "inputIds": true,
+        "attentionMask": true,
+        "newTokenIds": true,
+        "evaluationFp32Sha256": true,
+        "perturbedFp16Sha256": true
+      }
+    },
+    {
+      "repeat": 8,
+      "allEqual": true,
+      "checks": {
+        "descriptor": true,
+        "texts": true,
+        "sha256": true,
+        "restoredParentSha256": true,
+        "inputIds": true,
+        "attentionMask": true,
+        "newTokenIds": true,
+        "evaluationFp32Sha256": true,
+        "perturbedFp16Sha256": true
+      }
+    }
+  ],
+  "negativeControls": {
+    "untouchedPairPasses": true,
+    "inMemoryOnly": true,
+    "controls": [
+      {
+        "alteredField": "descriptor",
+        "rejected": true
+      },
+      {
+        "alteredField": "texts",
+        "rejected": true
+      },
+      {
+        "alteredField": "sha256",
+        "rejected": true
+      },
+      {
+        "alteredField": "restoredParentSha256",
+        "rejected": true
+      },
+      {
+        "alteredField": "inputIds",
+        "rejected": true
+      },
+      {
+        "alteredField": "attentionMask",
+        "rejected": true
+      },
+      {
+        "alteredField": "newTokenIds",
+        "rejected": true
+      },
+      {
+        "alteredField": "evaluationFp32Sha256",
+        "rejected": true
+      },
+      {
+        "alteredField": "perturbedFp16Sha256",
+        "rejected": true
+      }
+    ]
+  }
+}

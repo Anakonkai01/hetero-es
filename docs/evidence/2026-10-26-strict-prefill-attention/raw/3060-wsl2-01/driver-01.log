@@ -1,0 +1,22 @@
+ModuleNotFoundError: No module named 'py'
+TESTS_FAILED
+{"status": "ok", "out": "qwen-parity-3060-01.json", "wallSeconds": 1029.310235994}
+{"status": "ok", "out": "smol-parity-3060-01.json", "wallSeconds": 23.470190698999886}
+{"status": "ok", "out": "tiny-parity-3060-01.json", "wallSeconds": 36.339821064000034}
+base qwen short32 2731.7 bc4a5504e37c
+base qwen chat128 2642.2 a9fad5ca48ed
+new qwen short32 2713.3 bc4a5504e37c
+new qwen chat128 2686.8 a9fad5ca48ed
+base qwen short32 2654.7 bc4a5504e37c
+base qwen chat128 2634.4 a9fad5ca48ed
+new qwen short32 2781.1 bc4a5504e37c
+new qwen chat128 2699.3 a9fad5ca48ed
+base smol short32 2661.1 068722232705
+new smol short32 2745.6 068722232705
+base smol short32 2672.0 068722232705
+new smol short32 2827.4 068722232705
+base tiny short32 1388.4 db262d7ab9fa
+new tiny short32 1412.8 db262d7ab9fa
+base tiny short32 1372.8 db262d7ab9fa
+new tiny short32 1396.9 db262d7ab9fa
+REMOTE_DONE

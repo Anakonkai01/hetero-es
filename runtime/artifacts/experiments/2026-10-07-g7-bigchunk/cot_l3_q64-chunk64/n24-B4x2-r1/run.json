@@ -1,0 +1,21 @@
+{
+  "name": "n24-B4x2-r1",
+  "outcome": "ok",
+  "wall_seconds": 380.0133304595947,
+  "spec": {
+    "workers": {
+      "worker-5070ti": 64,
+      "worker-5070ti-2": 64,
+      "worker-1660s": 64
+    },
+    "policy": "tail",
+    "args": [
+      "--speed-prior",
+      "worker-1660s=19.19567544400372",
+      "--speed-prior",
+      "worker-5070ti=4.528053429003631",
+      "--speed-prior",
+      "worker-5070ti-2=4.528053429003631"
+    ]
+  }
+}

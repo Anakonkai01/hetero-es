@@ -1,0 +1,20 @@
+[
+  {
+    "name": "misaddress K and V slices",
+    "file": "src/heteroes/eval/vllm_weights.py",
+    "old": "offset = sum(sizes[:i])",
+    "new": "offset = 0"
+  },
+  {
+    "name": "copy view weights",
+    "file": "src/heteroes/eval/vllm_weights.py",
+    "old": "torch.nn.Parameter(tensor, requires_grad=False)",
+    "new": "torch.nn.Parameter(tensor.clone(), requires_grad=False)"
+  },
+  {
+    "name": "lose tied parameter object",
+    "file": "src/heteroes/eval/vllm_weights.py",
+    "old": "bound = aliases[id(meta)]",
+    "new": "bound = torch.nn.Parameter(tensor, requires_grad=False)"
+  }
+]

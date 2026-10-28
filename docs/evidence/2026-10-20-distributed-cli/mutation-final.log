@@ -1,0 +1,6 @@
+control ok    | 8 passed in 16.19s
+killed       accept a missing secret | 1 failed, 7 passed in 16.72s
+killed       skip dataset integrity | 1 failed, 7 passed in 15.53s
+killed       accept another expected recipe | 1 failed, 7 passed in 15.94s
+killed       ignore local schema mismatch | 1 failed, 7 passed in 15.95s
+killed       ignore generation config mismatch | 1 failed, 7 passed in 16.16s

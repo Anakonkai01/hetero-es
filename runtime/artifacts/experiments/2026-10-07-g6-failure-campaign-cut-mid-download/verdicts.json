@@ -1,0 +1,11 @@
+{
+  "reference_final_weights_sha256": "7069c8c40a03b079763e0d92321d7102e086da758b4796ed55d53355e5bb7d4f",
+  "verdicts": [
+    {
+      "scenario": "cut-link",
+      "ended_ok": true,
+      "same_final_weights_as_reference": true,
+      "passed": true
+    }
+  ]
+}

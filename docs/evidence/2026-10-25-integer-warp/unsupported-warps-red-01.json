@@ -1,0 +1,11 @@
+{
+  "status": "error",
+  "hardwareQualified": false,
+  "sourceSha256": "cd9a62cf71952e9db0935ebbedeb9a9f71890f0a02c335c51cfca4ffddfd7ce4",
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "multiprocessors": 70,
+  "cases": [],
+  "limits": "Synthetic projections under refreshed active-request metadata; CUDA event medians exclude host and request-entry metadata. All variant output bits compared; sampled CPU oracle. Not model throughput, quality or qualification.",
+  "errorType": "ReferenceArithmeticError",
+  "error": "Integer warp count must be 4 or 8"
+}

@@ -1,0 +1,27 @@
+
+> test:worker
+> npm test --workspace @heteroes/worker
+
+
+> @heteroes/worker@0.1.0 test
+> node --test tests/*.test.cjs
+
+✔ real Python bridge boots OFF, accepts only fixed actions and drains before Quit (288.782866ms)
+✔ an interrupted download resumes, verifies and publishes only complete bytes (20.802121ms)
+✔ a server ignoring Range restarts and corruption never becomes ready (2.128873ms)
+✔ manifest path and partial range must be valid (0.79658ms)
+✔ HTTP is restricted to private networks; credentials and query are rejected (3.21402ms)
+✔ owner opt-in is boot scoped and OFF stops locally even without a session (12.389609ms)
+✔ unknown process holds Quit; successful Quit is not restarted by polling (0.920399ms)
+✔ API outage still drains locally and public status never contains either token (0.897515ms)
+✔ archive rejects links outside runtime; safe relative symlinks are retained (14.165398ms)
+✔ runtime subprocess timeout is bounded and errors omit paths and stderr (45.332079ms)
+✔ Linux plaintext fallback cannot persist device credentials (0.531404ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 342.511959

@@ -1,0 +1,61 @@
+{
+  "evaluationsPerDevice": 9,
+  "distinctCandidates": 8,
+  "allTokenArraysTextsAndPrimaryWeightsEqual": true,
+  "allParentsRestoredExactly": true,
+  "decoderSourceSha256": "150ac9fdd1464e6cdb41bbc624173de28f01f53019a04f18b77e178ceb2ea95d",
+  "devices": {
+    "5070": {
+      "cpuThreads": 20,
+      "referenceCalls": [
+        0,
+        2,
+        0,
+        4,
+        1,
+        2,
+        3,
+        0,
+        2
+      ],
+      "availableCpuRamGiBAfterEachCandidate": [
+        24.096,
+        23.822,
+        23.629,
+        23.472,
+        23.497,
+        23.263,
+        23.393,
+        23.271,
+        23.22
+      ],
+      "maxGpuAllocatedGiB": 2.8770785331726074
+    },
+    "quang": {
+      "cpuThreads": 12,
+      "referenceCalls": [
+        0,
+        2,
+        0,
+        4,
+        1,
+        2,
+        3,
+        0,
+        2
+      ],
+      "availableCpuRamGiBAfterEachCandidate": [
+        11.606,
+        11.264,
+        11.262,
+        11.033,
+        10.929,
+        10.88,
+        10.789,
+        10.828,
+        11.047
+      ],
+      "maxGpuAllocatedGiB": 2.8537631034851074
+    }
+  }
+}

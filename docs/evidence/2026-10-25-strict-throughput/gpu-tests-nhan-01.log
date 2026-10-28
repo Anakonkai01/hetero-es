@@ -1,0 +1,35 @@
+........................................................................ [ 41%]
+........................................................................ [ 83%]
+...........................F                                             [100%]
+=================================== FAILURES ===================================
+___________ test_strict_identity_is_distinct_and_names_kernel_builds ___________
+
+cuda_model = Qwen2ForCausalLM(
+  (model): Qwen2Model(
+    (embed_tokens): Embedding(41, 16, padding_idx=0)
+    (layers): ModuleList...=1e-06)
+    (rotary_emb): Qwen2RotaryEmbedding()
+  )
+  (lm_head): Linear(in_features=16, out_features=41, bias=False)
+)
+
+    @gpu
+    def test_strict_identity_is_distinct_and_names_kernel_builds(cuda_model):
+        strict = Qwen2StrictCuda(cuda_model, max_context=64, allow_fixture=True)
+        eager = Qwen2Reference(cuda_model, max_context=64, allow_fixture=True)
+        strict.forward_tokens(torch.tensor([[2, 5]], device="cuda"))
+        assert strict.identity["backend"] == STRICT_CUDA_BACKEND != eager.identity["backend"]
+        assert strict.identity["hardwareQualified"] is False
+        assert strict.fingerprint != eager.fingerprint
+        builds = strict.kernel_identity()["builds"]
+>       assert {"ops", "linear-16-bias", "linear-16-nobias", "linear-35-nobias"} <= set(builds)
+E       AssertionError: assert {'linear-16-b...obias', 'ops'} <= {'linear-16-b...rows4', 'ops'}
+E         
+E         Extra items in the left set:
+E         'linear-35-nobias'
+E         'linear-16-bias'
+
+tests/eval/test_qwen2_strict_cuda.py:200: AssertionError
+=========================== short test summary info ============================
+FAILED tests/eval/test_qwen2_strict_cuda.py::test_strict_identity_is_distinct_and_names_kernel_builds
+1 failed, 171 passed in 52.72s

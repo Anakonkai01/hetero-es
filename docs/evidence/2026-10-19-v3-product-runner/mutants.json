@@ -1,0 +1,38 @@
+[
+  {
+    "name": "python scorer admitted",
+    "file": "src/heteroes/product/v3.py",
+    "old": "    validate_spec(config[\"scorer\"], allow_python=False)",
+    "new": "    validate_spec(config[\"scorer\"], allow_python=True)"
+  },
+  {
+    "name": "dataset identity unchecked",
+    "file": "src/heteroes/product/v3.py",
+    "old": "if {k: dataset[k] for k in (\"contentHash\", \"splitHashes\")} != config[\"datasetIdentity\"]:",
+    "new": "if False:"
+  },
+  {
+    "name": "worker trusts coordinator schema",
+    "file": "src/heteroes/product/v3.py",
+    "old": "        if recipe != declared:",
+    "new": "        if False:"
+  },
+  {
+    "name": "initial adapter pruned",
+    "file": "src/heteroes/coordinator.py",
+    "old": "prune_published(self.models_dir, [*self._recent, *self._pinned_weights])",
+    "new": "prune_published(self.models_dir, self._recent)"
+  },
+  {
+    "name": "worker submits scalar reward",
+    "file": "scripts/run_worker.py",
+    "old": "return_completions=declared.get(\"formatVersion\") == 3",
+    "new": "return_completions=False"
+  },
+  {
+    "name": "product drops antithetic signs",
+    "file": "src/heteroes/product/runner.py",
+    "old": "\"antithetic\": recipe.antithetic,",
+    "new": "\"antithetic\": False,"
+  }
+]

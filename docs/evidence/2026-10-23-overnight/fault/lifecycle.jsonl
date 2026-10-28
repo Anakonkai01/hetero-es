@@ -1,0 +1,11 @@
+{"event": "worker_start_unknown", "t": 1792692048.5705066, "worker_id": "cli-71b757062fd9", "error": "ConnectionError", "httpStatus": null}
+{"event": "worker_start_unknown", "t": 1792692049.3574612, "worker_id": "cli-34312a79fbbc", "error": "ConnectionError", "httpStatus": null}
+{"event": "worker_start_unknown", "t": 1792692050.1719751, "worker_id": "desktop-d9017660e75f", "error": "ConnectionError", "httpStatus": null}
+{"event": "worker_restarted", "t": 1792692502.0952768, "worker_id": "cli-34312a79fbbc", "launch": 1}
+{"event": "worker_start_unknown", "t": 1792692502.3645601, "worker_id": "cli-34312a79fbbc", "error": "ConnectionError", "httpStatus": null}
+{"event": "worker_restart_deferred", "t": 1792692696.965826, "worker_id": "cli-34312a79fbbc", "launch": 2, "error": "HTTPError", "httpStatus": 409}
+{"event": "worker_restarted", "t": 1792692729.6958237, "worker_id": "cli-34312a79fbbc", "launch": 2}
+{"event": "worker_start_unknown", "t": 1792692729.994015, "worker_id": "cli-34312a79fbbc", "error": "ConnectionError", "httpStatus": null}
+{"event": "worker_restart_deferred", "t": 1792692954.7147315, "worker_id": "desktop-d9017660e75f", "launch": 1, "error": "HTTPError", "httpStatus": 409}
+{"event": "worker_restarted", "t": 1792692998.0758502, "worker_id": "desktop-d9017660e75f", "launch": 1}
+{"event": "worker_start_unknown", "t": 1792692998.655662, "worker_id": "desktop-d9017660e75f", "error": "ConnectionError", "httpStatus": null}

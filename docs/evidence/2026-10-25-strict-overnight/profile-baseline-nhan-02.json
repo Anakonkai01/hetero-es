@@ -1,0 +1,2022 @@
+{
+  "status": "ok",
+  "hardwareQualified": false,
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "sourceSha256": "5f8a3b3ebdf306fcad9988b448fbf48e44484f8f278953f4dc0e7d9754db4608",
+  "cases": [
+    {
+      "family": "qwen2",
+      "hidden": 512,
+      "intermediate": 1536,
+      "batch": 1,
+      "seconds": [
+        0.0007447879979736172,
+        0.0006170060005388223,
+        0.0006382459978340194
+      ],
+      "medianSeconds": 0.0006382459978340194,
+      "cuda": [
+        {
+          "name": "strict_linear",
+          "calls": 8,
+          "totalUs": 86.91300000000001
+        },
+        {
+          "name": "strict_attention",
+          "calls": 1,
+          "totalUs": 17.2170000000001
+        },
+        {
+          "name": "strict_rms_norm",
+          "calls": 3,
+          "totalUs": 7.936000000000149
+        },
+        {
+          "name": "void at::native::index_elementwise_kernel<128, 4, at::native::gpu_index_kernel<at::native::index_kernel_impl<at::native::OpaqueType<4> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::index_kernel_impl<at::native::OpaqueType<4> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1} const&, bool)::{lambda(int)#1}>(long, at::native::gpu_index_kernel<at::native::index_kernel_impl<at::native::OpaqueType<4> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::index_kernel_impl<at::native::OpaqueType<4> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1} const&, bool)::{lambda(int)#1})",
+          "calls": 3,
+          "totalUs": 4.991999999999962
+        },
+        {
+          "name": "void at::native::index_elementwise_kernel<128, 4, at::native::gpu_index_kernel<at::native::index_kernel_impl<at::native::OpaqueType<2> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::index_kernel_impl<at::native::OpaqueType<2> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1} const&, bool)::{lambda(int)#1}>(long, at::native::gpu_index_kernel<at::native::index_kernel_impl<at::native::OpaqueType<2> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::index_kernel_impl<at::native::OpaqueType<2> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1} const&, bool)::{lambda(int)#1})",
+          "calls": 1,
+          "totalUs": 2.7840000000001055
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::compare_scalar_kernel<long>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, long)::{lambda(long)#1}, std::array<char*, 2ul> >(int, at::native::compare_scalar_kernel<long>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, long)::{lambda(long)#1}, std::array<char*, 2ul>)",
+          "calls": 2,
+          "totalUs": 1.9519999999999982
+        },
+        {
+          "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+          "calls": 1,
+          "totalUs": 1.8559999999999945
+        },
+        {
+          "name": "Memcpy DtoD (Device -> Device)",
+          "calls": 2,
+          "totalUs": 1.7929999999998927
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_vectorized<at::native::(anonymous namespace)::OpaqueType<4u>, unsigned int, 2, 128, 1, 16, 4>(char*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<4u>, unsigned int, 128, 1>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "calls": 2,
+          "totalUs": 1.7919999999999163
+        },
+        {
+          "name": "strict_rope",
+          "calls": 2,
+          "totalUs": 1.727999999999838
+        },
+        {
+          "name": "strict_add",
+          "calls": 2,
+          "totalUs": 1.69600000000014
+        },
+        {
+          "name": "strict_silu_mul",
+          "calls": 1,
+          "totalUs": 1.2159999999998945
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseOrFunctor<bool> >, std::array<char*, 3ul> >(int, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseOrFunctor<bool> >, std::array<char*, 3ul>)",
+          "calls": 1,
+          "totalUs": 0.9600000000000364
+        },
+        {
+          "name": "Memcpy DtoH (Device -> Pinned)",
+          "calls": 2,
+          "totalUs": 0.9279999999998836
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::FillFunctor<int>, std::array<char*, 1ul> >(int, at::native::FillFunctor<int>, std::array<char*, 1ul>)",
+          "calls": 1,
+          "totalUs": 0.7680000000000291
+        },
+        {
+          "name": "Memcpy HtoD (Pageable -> Device)",
+          "calls": 3,
+          "totalUs": 0.7679999999998017
+        }
+      ],
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v2_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "05decf56fedafef977adbb31113c012312885008cafcd9843e29a514eff44d6e",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "linear-1536-nobias": {
+            "sourceSha256": "f4a2a18108b641de89b8bc73dadc8d014d2c9b05af307725c90a1f8be5d9b3c8",
+            "ptxSha256": "255d51163ad9447173698987aaac95d6f544d3752ef80602af264b31745ebce5",
+            "cubinSha256": "f24fcacb45e371c97e4349d8913d9cc5e4a3dbf7c289e2c2a48f55285858c8d4",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 32,
+                "add.rn.f32": 37
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 32,
+                "FADD": 37
+              },
+              "violations": []
+            }
+          },
+          "linear-1536-nobias-rows4": {
+            "sourceSha256": "5e87b7473fa9f9c6e5c98a99f707496c2d76b5f0ad06addbbad9a7462c5c1528",
+            "ptxSha256": "634e124b4d666d40c9b01a0bd3076178e615acea26ce956ea14ad9d19dfcfdd9",
+            "cubinSha256": "f0465780c23b71b67ba19c3dcad2102758a605f2f104cf6af435a350933755a2",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 128,
+                "add.rn.f32": 148
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 128,
+                "FADD": 148
+              },
+              "violations": []
+            }
+          },
+          "linear-512-bias": {
+            "sourceSha256": "1ddad96f9020fcfc98fae7b5d1a04f12c186d1434e9a6f408fedddc16d630efe",
+            "ptxSha256": "33f547cdce8370a8f47224f01d3da9b5e2612e33ad983c049dffd6ed48111e65",
+            "cubinSha256": "867f050ae08116ff3d3c614a67dba1bd4dac78b2f6877b56a3d60e637023aa2a",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 16,
+                "add.rn.f32": 21
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 16,
+                "FADD": 21
+              },
+              "violations": []
+            }
+          },
+          "linear-512-bias-rows4": {
+            "sourceSha256": "be19d24c6896f754af27ce8cb89c04b048127d394f3a0574809c6e8a8349f893",
+            "ptxSha256": "3f869c586edd4f03fe2ba03f65a7d579abcf635a44c8399da1a361f2fb7bf2fa",
+            "cubinSha256": "6b53618e65dfdb68fd7d2379f4930263038fbfdaaa72695c5d12d449b4e09629",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 64,
+                "add.rn.f32": 84
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 64,
+                "FADD": 84
+              },
+              "violations": []
+            }
+          },
+          "linear-512-nobias": {
+            "sourceSha256": "3a91b28b10805ea8c7f766bffc17726a07f93836b3fa6d2e7f1c3b544eb2ecfe",
+            "ptxSha256": "8b1ab3a1bbb7d986eee2778c99c6aa4a901ae04eedd6b180c3501b6bf8ad578f",
+            "cubinSha256": "d3bbd9467c57e1cd3a1f719c49f0d4cf44416b8985f44437939b0de57b96882a",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 16,
+                "add.rn.f32": 20
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 16,
+                "FADD": 20
+              },
+              "violations": []
+            }
+          },
+          "linear-512-nobias-rows4": {
+            "sourceSha256": "a1a6e3c1679b00fd69514654ab79c3945ff70188f01067600f37f8c439ec550c",
+            "ptxSha256": "0d57ce2ea0f120b3cffe47c67c5fc4808fd312de655619f1cc7f4c62c720bc52",
+            "cubinSha256": "a85b6a81a6a540bc13b2cb6504660576ed297d3a245c7ebbc097808c1a897b9b",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 64,
+                "add.rn.f32": 80
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 64,
+                "FADD": 80
+              },
+              "violations": []
+            }
+          },
+          "ops": {
+            "sourceSha256": "ed4b8ea030ec2879d0da93720333d3915e72731209a8a1ce5b995e586580842c",
+            "ptxSha256": "eb53de7164bd97644373ab6ecbfb47666cf72eb37d64cf7f0e8df28d048d3128",
+            "cubinSha256": "433d7f1e62342733a66f6a2ca6fd71fe0f4c256e407f0ae3cb03564a937d3ba5",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 82,
+                "add.rn.f32": 79
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 82,
+                "FADD": 80
+              },
+              "violations": []
+            }
+          }
+        },
+        "fingerprint": "01ae5c3e1ac56336f05c2fd1f652251750b7edfb6cb6cba5dc2745f17e409e99"
+      }
+    },
+    {
+      "family": "qwen2",
+      "hidden": 512,
+      "intermediate": 1536,
+      "batch": 8,
+      "seconds": [
+        0.0008885119968908839,
+        0.0009251570008927956,
+        0.0009227830014424399
+      ],
+      "medianSeconds": 0.0009227830014424399,
+      "cuda": [
+        {
+          "name": "strict_linear",
+          "calls": 8,
+          "totalUs": 287.3299999999999
+        },
+        {
+          "name": "strict_attention",
+          "calls": 1,
+          "totalUs": 17.34400000000005
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy<at::native::(anonymous namespace)::OpaqueType<4u>, unsigned int, 3, 64, 64>(at::native::(anonymous namespace)::OpaqueType<4u>*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<4u>, unsigned int, 64, 64>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "calls": 2,
+          "totalUs": 8.351999999999862
+        },
+        {
+          "name": "strict_rms_norm",
+          "calls": 3,
+          "totalUs": 7.872000000000071
+        },
+        {
+          "name": "void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)",
+          "calls": 4,
+          "totalUs": 3.967999999999847
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_contig<at::native::(anonymous namespace)::OpaqueType<8u>, unsigned int, 2, 128, 1>(at::native::(anonymous namespace)::OpaqueType<8u>*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<8u>, unsigned int, 128, 1>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "calls": 1,
+          "totalUs": 2.4950000000000045
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::compare_scalar_kernel<long>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, long)::{lambda(long)#1}, std::array<char*, 2ul> >(int, at::native::compare_scalar_kernel<long>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, long)::{lambda(long)#1}, std::array<char*, 2ul>)",
+          "calls": 2,
+          "totalUs": 2.0480000000001155
+        },
+        {
+          "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+          "calls": 1,
+          "totalUs": 1.8559999999999945
+        },
+        {
+          "name": "strict_rope",
+          "calls": 2,
+          "totalUs": 1.759999999999991
+        },
+        {
+          "name": "strict_add",
+          "calls": 2,
+          "totalUs": 1.6320000000002892
+        },
+        {
+          "name": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<bool, at::native::func_wrapper_t<bool, at::native::or_kernel_cuda(at::TensorIterator&)::{lambda()#1}::operator()() const::{lambda()#12}::operator()() const::{lambda(bool, bool)#1}>, unsigned int, bool, 4, 4> >(at::native::ReduceOp<bool, at::native::func_wrapper_t<bool, at::native::or_kernel_cuda(at::TensorIterator&)::{lambda()#1}::operator()() const::{lambda()#12}::operator()() const::{lambda(bool, bool)#1}>, unsigned int, bool, 4, 4>)",
+          "calls": 1,
+          "totalUs": 1.5679999999999836
+        },
+        {
+          "name": "strict_silu_mul",
+          "calls": 1,
+          "totalUs": 1.183999999999969
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseOrFunctor<bool> >, std::array<char*, 3ul> >(int, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseOrFunctor<bool> >, std::array<char*, 3ul>)",
+          "calls": 1,
+          "totalUs": 0.9919999999999618
+        },
+        {
+          "name": "Memcpy HtoD (Pageable -> Device)",
+          "calls": 3,
+          "totalUs": 0.7680000000000291
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::FillFunctor<int>, std::array<char*, 1ul> >(int, at::native::FillFunctor<int>, std::array<char*, 1ul>)",
+          "calls": 1,
+          "totalUs": 0.7359999999998763
+        },
+        {
+          "name": "Memcpy DtoH (Device -> Pinned)",
+          "calls": 2,
+          "totalUs": 0.6399999999998727
+        }
+      ],
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v2_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "05decf56fedafef977adbb31113c012312885008cafcd9843e29a514eff44d6e",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "linear-1536-nobias": {
+            "sourceSha256": "f4a2a18108b641de89b8bc73dadc8d014d2c9b05af307725c90a1f8be5d9b3c8",
+            "ptxSha256": "255d51163ad9447173698987aaac95d6f544d3752ef80602af264b31745ebce5",
+            "cubinSha256": "f24fcacb45e371c97e4349d8913d9cc5e4a3dbf7c289e2c2a48f55285858c8d4",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 32,
+                "add.rn.f32": 37
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 32,
+                "FADD": 37
+              },
+              "violations": []
+            }
+          },
+          "linear-1536-nobias-rows4": {
+            "sourceSha256": "5e87b7473fa9f9c6e5c98a99f707496c2d76b5f0ad06addbbad9a7462c5c1528",
+            "ptxSha256": "634e124b4d666d40c9b01a0bd3076178e615acea26ce956ea14ad9d19dfcfdd9",
+            "cubinSha256": "f0465780c23b71b67ba19c3dcad2102758a605f2f104cf6af435a350933755a2",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 128,
+                "add.rn.f32": 148
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 128,
+                "FADD": 148
+              },
+              "violations": []
+            }
+          },
+          "linear-512-bias": {
+            "sourceSha256": "1ddad96f9020fcfc98fae7b5d1a04f12c186d1434e9a6f408fedddc16d630efe",
+            "ptxSha256": "33f547cdce8370a8f47224f01d3da9b5e2612e33ad983c049dffd6ed48111e65",
+            "cubinSha256": "867f050ae08116ff3d3c614a67dba1bd4dac78b2f6877b56a3d60e637023aa2a",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 16,
+                "add.rn.f32": 21
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 16,
+                "FADD": 21
+              },
+              "violations": []
+            }
+          },
+          "linear-512-bias-rows4": {
+            "sourceSha256": "be19d24c6896f754af27ce8cb89c04b048127d394f3a0574809c6e8a8349f893",
+            "ptxSha256": "3f869c586edd4f03fe2ba03f65a7d579abcf635a44c8399da1a361f2fb7bf2fa",
+            "cubinSha256": "6b53618e65dfdb68fd7d2379f4930263038fbfdaaa72695c5d12d449b4e09629",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 64,
+                "add.rn.f32": 84
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 64,
+                "FADD": 84
+              },
+              "violations": []
+            }
+          },
+          "linear-512-nobias": {
+            "sourceSha256": "3a91b28b10805ea8c7f766bffc17726a07f93836b3fa6d2e7f1c3b544eb2ecfe",
+            "ptxSha256": "8b1ab3a1bbb7d986eee2778c99c6aa4a901ae04eedd6b180c3501b6bf8ad578f",
+            "cubinSha256": "d3bbd9467c57e1cd3a1f719c49f0d4cf44416b8985f44437939b0de57b96882a",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 16,
+                "add.rn.f32": 20
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 16,
+                "FADD": 20
+              },
+              "violations": []
+            }
+          },
+          "linear-512-nobias-rows4": {
+            "sourceSha256": "a1a6e3c1679b00fd69514654ab79c3945ff70188f01067600f37f8c439ec550c",
+            "ptxSha256": "0d57ce2ea0f120b3cffe47c67c5fc4808fd312de655619f1cc7f4c62c720bc52",
+            "cubinSha256": "a85b6a81a6a540bc13b2cb6504660576ed297d3a245c7ebbc097808c1a897b9b",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 64,
+                "add.rn.f32": 80
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 64,
+                "FADD": 80
+              },
+              "violations": []
+            }
+          },
+          "ops": {
+            "sourceSha256": "ed4b8ea030ec2879d0da93720333d3915e72731209a8a1ce5b995e586580842c",
+            "ptxSha256": "eb53de7164bd97644373ab6ecbfb47666cf72eb37d64cf7f0e8df28d048d3128",
+            "cubinSha256": "433d7f1e62342733a66f6a2ca6fd71fe0f4c256e407f0ae3cb03564a937d3ba5",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 82,
+                "add.rn.f32": 79
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 82,
+                "FADD": 80
+              },
+              "violations": []
+            }
+          }
+        },
+        "fingerprint": "01ae5c3e1ac56336f05c2fd1f652251750b7edfb6cb6cba5dc2745f17e409e99"
+      }
+    },
+    {
+      "family": "qwen2",
+      "hidden": 512,
+      "intermediate": 1536,
+      "batch": 32,
+      "seconds": [
+        0.0017313330026809126,
+        0.0017505319992778823,
+        0.0017267130024265498
+      ],
+      "medianSeconds": 0.0017313330026809126,
+      "cuda": [
+        {
+          "name": "strict_linear",
+          "calls": 8,
+          "totalUs": 1005.3880000000001
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy<at::native::(anonymous namespace)::OpaqueType<4u>, unsigned int, 3, 64, 64>(at::native::(anonymous namespace)::OpaqueType<4u>*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<4u>, unsigned int, 64, 64>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "calls": 2,
+          "totalUs": 28.769000000000233
+        },
+        {
+          "name": "strict_attention",
+          "calls": 1,
+          "totalUs": 18.113000000000056
+        },
+        {
+          "name": "strict_rms_norm",
+          "calls": 3,
+          "totalUs": 8.096000000000004
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_contig<at::native::(anonymous namespace)::OpaqueType<8u>, unsigned int, 2, 128, 1>(at::native::(anonymous namespace)::OpaqueType<8u>*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<8u>, unsigned int, 128, 1>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "calls": 1,
+          "totalUs": 7.776000000000067
+        },
+        {
+          "name": "void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)",
+          "calls": 4,
+          "totalUs": 4.1609999999996035
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::compare_scalar_kernel<long>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, long)::{lambda(long)#1}, std::array<char*, 2ul> >(int, at::native::compare_scalar_kernel<long>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, long)::{lambda(long)#1}, std::array<char*, 2ul>)",
+          "calls": 2,
+          "totalUs": 1.9200000000000728
+        },
+        {
+          "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+          "calls": 1,
+          "totalUs": 1.9200000000000728
+        },
+        {
+          "name": "strict_rope",
+          "calls": 2,
+          "totalUs": 1.6959999999999127
+        },
+        {
+          "name": "strict_add",
+          "calls": 2,
+          "totalUs": 1.6320000000000618
+        },
+        {
+          "name": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<bool, at::native::func_wrapper_t<bool, at::native::or_kernel_cuda(at::TensorIterator&)::{lambda()#1}::operator()() const::{lambda()#12}::operator()() const::{lambda(bool, bool)#1}>, unsigned int, bool, 4, 4> >(at::native::ReduceOp<bool, at::native::func_wrapper_t<bool, at::native::or_kernel_cuda(at::TensorIterator&)::{lambda()#1}::operator()() const::{lambda()#12}::operator()() const::{lambda(bool, bool)#1}>, unsigned int, bool, 4, 4>)",
+          "calls": 1,
+          "totalUs": 1.6000000000001364
+        },
+        {
+          "name": "strict_silu_mul",
+          "calls": 1,
+          "totalUs": 1.4079999999999018
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseOrFunctor<bool> >, std::array<char*, 3ul> >(int, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseOrFunctor<bool> >, std::array<char*, 3ul>)",
+          "calls": 1,
+          "totalUs": 0.9279999999998836
+        },
+        {
+          "name": "Memcpy HtoD (Pageable -> Device)",
+          "calls": 3,
+          "totalUs": 0.8320000000001073
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::FillFunctor<int>, std::array<char*, 1ul> >(int, at::native::FillFunctor<int>, std::array<char*, 1ul>)",
+          "calls": 1,
+          "totalUs": 0.7680000000000291
+        },
+        {
+          "name": "Memcpy DtoH (Device -> Pinned)",
+          "calls": 2,
+          "totalUs": 0.6070000000001983
+        }
+      ],
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v2_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "05decf56fedafef977adbb31113c012312885008cafcd9843e29a514eff44d6e",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "linear-1536-nobias": {
+            "sourceSha256": "f4a2a18108b641de89b8bc73dadc8d014d2c9b05af307725c90a1f8be5d9b3c8",
+            "ptxSha256": "255d51163ad9447173698987aaac95d6f544d3752ef80602af264b31745ebce5",
+            "cubinSha256": "f24fcacb45e371c97e4349d8913d9cc5e4a3dbf7c289e2c2a48f55285858c8d4",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 32,
+                "add.rn.f32": 37
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 32,
+                "FADD": 37
+              },
+              "violations": []
+            }
+          },
+          "linear-1536-nobias-rows4": {
+            "sourceSha256": "5e87b7473fa9f9c6e5c98a99f707496c2d76b5f0ad06addbbad9a7462c5c1528",
+            "ptxSha256": "634e124b4d666d40c9b01a0bd3076178e615acea26ce956ea14ad9d19dfcfdd9",
+            "cubinSha256": "f0465780c23b71b67ba19c3dcad2102758a605f2f104cf6af435a350933755a2",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 128,
+                "add.rn.f32": 148
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 128,
+                "FADD": 148
+              },
+              "violations": []
+            }
+          },
+          "linear-512-bias": {
+            "sourceSha256": "1ddad96f9020fcfc98fae7b5d1a04f12c186d1434e9a6f408fedddc16d630efe",
+            "ptxSha256": "33f547cdce8370a8f47224f01d3da9b5e2612e33ad983c049dffd6ed48111e65",
+            "cubinSha256": "867f050ae08116ff3d3c614a67dba1bd4dac78b2f6877b56a3d60e637023aa2a",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 16,
+                "add.rn.f32": 21
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 16,
+                "FADD": 21
+              },
+              "violations": []
+            }
+          },
+          "linear-512-bias-rows4": {
+            "sourceSha256": "be19d24c6896f754af27ce8cb89c04b048127d394f3a0574809c6e8a8349f893",
+            "ptxSha256": "3f869c586edd4f03fe2ba03f65a7d579abcf635a44c8399da1a361f2fb7bf2fa",
+            "cubinSha256": "6b53618e65dfdb68fd7d2379f4930263038fbfdaaa72695c5d12d449b4e09629",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 64,
+                "add.rn.f32": 84
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 64,
+                "FADD": 84
+              },
+              "violations": []
+            }
+          },
+          "linear-512-nobias": {
+            "sourceSha256": "3a91b28b10805ea8c7f766bffc17726a07f93836b3fa6d2e7f1c3b544eb2ecfe",
+            "ptxSha256": "8b1ab3a1bbb7d986eee2778c99c6aa4a901ae04eedd6b180c3501b6bf8ad578f",
+            "cubinSha256": "d3bbd9467c57e1cd3a1f719c49f0d4cf44416b8985f44437939b0de57b96882a",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 16,
+                "add.rn.f32": 20
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 16,
+                "FADD": 20
+              },
+              "violations": []
+            }
+          },
+          "linear-512-nobias-rows4": {
+            "sourceSha256": "a1a6e3c1679b00fd69514654ab79c3945ff70188f01067600f37f8c439ec550c",
+            "ptxSha256": "0d57ce2ea0f120b3cffe47c67c5fc4808fd312de655619f1cc7f4c62c720bc52",
+            "cubinSha256": "a85b6a81a6a540bc13b2cb6504660576ed297d3a245c7ebbc097808c1a897b9b",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 64,
+                "add.rn.f32": 80
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 64,
+                "FADD": 80
+              },
+              "violations": []
+            }
+          },
+          "ops": {
+            "sourceSha256": "ed4b8ea030ec2879d0da93720333d3915e72731209a8a1ce5b995e586580842c",
+            "ptxSha256": "eb53de7164bd97644373ab6ecbfb47666cf72eb37d64cf7f0e8df28d048d3128",
+            "cubinSha256": "433d7f1e62342733a66f6a2ca6fd71fe0f4c256e407f0ae3cb03564a937d3ba5",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 82,
+                "add.rn.f32": 79
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 82,
+                "FADD": 80
+              },
+              "violations": []
+            }
+          }
+        },
+        "fingerprint": "01ae5c3e1ac56336f05c2fd1f652251750b7edfb6cb6cba5dc2745f17e409e99"
+      }
+    },
+    {
+      "family": "llama",
+      "hidden": 1024,
+      "intermediate": 2816,
+      "batch": 1,
+      "seconds": [
+        0.0008826340053929016,
+        0.0008617880012025125,
+        0.0008938639948610216
+      ],
+      "medianSeconds": 0.0008826340053929016,
+      "cuda": [
+        {
+          "name": "strict_linear",
+          "calls": 8,
+          "totalUs": 338.3689999999999
+        },
+        {
+          "name": "strict_attention",
+          "calls": 1,
+          "totalUs": 17.216000000000122
+        },
+        {
+          "name": "strict_rms_norm",
+          "calls": 3,
+          "totalUs": 12.767999999999915
+        },
+        {
+          "name": "void at::native::index_elementwise_kernel<128, 4, at::native::gpu_index_kernel<at::native::index_kernel_impl<at::native::OpaqueType<4> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::index_kernel_impl<at::native::OpaqueType<4> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1} const&, bool)::{lambda(int)#1}>(long, at::native::gpu_index_kernel<at::native::index_kernel_impl<at::native::OpaqueType<4> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::index_kernel_impl<at::native::OpaqueType<4> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1} const&, bool)::{lambda(int)#1})",
+          "calls": 3,
+          "totalUs": 6.815999999999917
+        },
+        {
+          "name": "void at::native::index_elementwise_kernel<128, 4, at::native::gpu_index_kernel<at::native::index_kernel_impl<at::native::OpaqueType<2> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::index_kernel_impl<at::native::OpaqueType<2> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1} const&, bool)::{lambda(int)#1}>(long, at::native::gpu_index_kernel<at::native::index_kernel_impl<at::native::OpaqueType<2> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::index_kernel_impl<at::native::OpaqueType<2> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1} const&, bool)::{lambda(int)#1})",
+          "calls": 1,
+          "totalUs": 5.024000000000001
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_vectorized<at::native::(anonymous namespace)::OpaqueType<4u>, unsigned int, 2, 128, 1, 16, 4>(char*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<4u>, unsigned int, 128, 1>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "calls": 2,
+          "totalUs": 2.2390000000000327
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::compare_scalar_kernel<long>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, long)::{lambda(long)#1}, std::array<char*, 2ul> >(int, at::native::compare_scalar_kernel<long>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, long)::{lambda(long)#1}, std::array<char*, 2ul>)",
+          "calls": 2,
+          "totalUs": 2.11200000000008
+        },
+        {
+          "name": "Memcpy DtoD (Device -> Device)",
+          "calls": 2,
+          "totalUs": 2.016999999999939
+        },
+        {
+          "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+          "calls": 1,
+          "totalUs": 1.8559999999999945
+        },
+        {
+          "name": "strict_rope",
+          "calls": 2,
+          "totalUs": 1.6960000000000264
+        },
+        {
+          "name": "strict_add",
+          "calls": 2,
+          "totalUs": 1.663000000000011
+        },
+        {
+          "name": "strict_silu_mul",
+          "calls": 1,
+          "totalUs": 1.1829999999999927
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseOrFunctor<bool> >, std::array<char*, 3ul> >(int, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseOrFunctor<bool> >, std::array<char*, 3ul>)",
+          "calls": 1,
+          "totalUs": 1.1200000000000045
+        },
+        {
+          "name": "Memcpy DtoH (Device -> Pinned)",
+          "calls": 2,
+          "totalUs": 0.7680000000000291
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::FillFunctor<int>, std::array<char*, 1ul> >(int, at::native::FillFunctor<int>, std::array<char*, 1ul>)",
+          "calls": 1,
+          "totalUs": 0.7680000000000291
+        },
+        {
+          "name": "Memcpy HtoD (Pageable -> Device)",
+          "calls": 3,
+          "totalUs": 0.7359999999997626
+        }
+      ],
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v2_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "05decf56fedafef977adbb31113c012312885008cafcd9843e29a514eff44d6e",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "linear-1024-nobias": {
+            "sourceSha256": "eae45f86d329ded2a3795dada54c3a7b73c2affb019c7a430cbf0d712102eb10",
+            "ptxSha256": "f183a45e716d6b86501c3abd3e8cfc72278d89c0860b235e14af13f5abc09e38",
+            "cubinSha256": "de4411d439c725b6c4edb7664c0de07335b0c48a605bbe2155c2480121fa8deb",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 32,
+                "add.rn.f32": 36
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 32,
+                "FADD": 36
+              },
+              "violations": []
+            }
+          },
+          "linear-1024-nobias-rows4": {
+            "sourceSha256": "aea56d974d8b2aebd32dc3998dd7c280c2bf81a57ed0187d098e0b35115d06a4",
+            "ptxSha256": "c4e20edf591eb44b6c9790254b672fa178bb57729b6602709256cacdaab60c4c",
+            "cubinSha256": "2d2950c9cae2b03fde8290523d3b118ef4318482463b8487e2458b58836c7ac5",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 128,
+                "add.rn.f32": 144
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 128,
+                "FADD": 144
+              },
+              "violations": []
+            }
+          },
+          "linear-2816-nobias": {
+            "sourceSha256": "43d7c2a1ef2a15f9d5eebfb1ce545ce013e7ddfbca2fb56942150759b94693a0",
+            "ptxSha256": "bb89bd6f1282b29049988ad3ac9ae875d9ae4316b83226789856c5deb88c8268",
+            "cubinSha256": "9ac16a1f33c5ddd7dea080a4bd22fb7f8cd1984f40674ae66879a9e3e0de3556",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 32,
+                "add.rn.f32": 39
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 32,
+                "FADD": 39
+              },
+              "violations": []
+            }
+          },
+          "linear-2816-nobias-rows4": {
+            "sourceSha256": "f198f8d6f6837681f087de66a636c9099b84d6a42ecd059443a054c5621cff43",
+            "ptxSha256": "614a7c5589a1d7c33f09974d7f573704b2a3574385362aa650aa905d51f41773",
+            "cubinSha256": "b7e4430d4cb53b117da477af65212270d41440c150267466bee99bd96221a2a9",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 128,
+                "add.rn.f32": 156
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 128,
+                "FADD": 156
+              },
+              "violations": []
+            }
+          },
+          "ops": {
+            "sourceSha256": "ed4b8ea030ec2879d0da93720333d3915e72731209a8a1ce5b995e586580842c",
+            "ptxSha256": "eb53de7164bd97644373ab6ecbfb47666cf72eb37d64cf7f0e8df28d048d3128",
+            "cubinSha256": "433d7f1e62342733a66f6a2ca6fd71fe0f4c256e407f0ae3cb03564a937d3ba5",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 82,
+                "add.rn.f32": 79
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 82,
+                "FADD": 80
+              },
+              "violations": []
+            }
+          }
+        },
+        "fingerprint": "b10fbca5a1dff93f2464fd840ebb13d27d72fd9ff7f170be3d308650e36ffef1"
+      }
+    },
+    {
+      "family": "llama",
+      "hidden": 1024,
+      "intermediate": 2816,
+      "batch": 8,
+      "seconds": [
+        0.0017214369945577346,
+        0.0017195020045619458,
+        0.0017071379988919944
+      ],
+      "medianSeconds": 0.0017195020045619458,
+      "cuda": [
+        {
+          "name": "strict_linear",
+          "calls": 8,
+          "totalUs": 1206.45
+        },
+        {
+          "name": "strict_attention",
+          "calls": 1,
+          "totalUs": 17.728000000000065
+        },
+        {
+          "name": "strict_rms_norm",
+          "calls": 3,
+          "totalUs": 12.159000000000106
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy<at::native::(anonymous namespace)::OpaqueType<4u>, unsigned int, 3, 64, 64>(at::native::(anonymous namespace)::OpaqueType<4u>*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<4u>, unsigned int, 64, 64>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "calls": 2,
+          "totalUs": 9.568000000000097
+        },
+        {
+          "name": "void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)",
+          "calls": 4,
+          "totalUs": 4.158999999999764
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_contig<at::native::(anonymous namespace)::OpaqueType<8u>, unsigned int, 2, 128, 1>(at::native::(anonymous namespace)::OpaqueType<8u>*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<8u>, unsigned int, 128, 1>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "calls": 1,
+          "totalUs": 2.335999999999956
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::compare_scalar_kernel<long>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, long)::{lambda(long)#1}, std::array<char*, 2ul> >(int, at::native::compare_scalar_kernel<long>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, long)::{lambda(long)#1}, std::array<char*, 2ul>)",
+          "calls": 2,
+          "totalUs": 2.0160000000000764
+        },
+        {
+          "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+          "calls": 1,
+          "totalUs": 1.9519999999999982
+        },
+        {
+          "name": "strict_rope",
+          "calls": 2,
+          "totalUs": 1.7280000000000655
+        },
+        {
+          "name": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<bool, at::native::func_wrapper_t<bool, at::native::or_kernel_cuda(at::TensorIterator&)::{lambda()#1}::operator()() const::{lambda()#12}::operator()() const::{lambda(bool, bool)#1}>, unsigned int, bool, 4, 4> >(at::native::ReduceOp<bool, at::native::func_wrapper_t<bool, at::native::or_kernel_cuda(at::TensorIterator&)::{lambda()#1}::operator()() const::{lambda()#12}::operator()() const::{lambda(bool, bool)#1}>, unsigned int, bool, 4, 4>)",
+          "calls": 1,
+          "totalUs": 1.6639999999999873
+        },
+        {
+          "name": "strict_add",
+          "calls": 2,
+          "totalUs": 1.66399999999976
+        },
+        {
+          "name": "strict_silu_mul",
+          "calls": 1,
+          "totalUs": 1.2160000000001219
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseOrFunctor<bool> >, std::array<char*, 3ul> >(int, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseOrFunctor<bool> >, std::array<char*, 3ul>)",
+          "calls": 1,
+          "totalUs": 1.1520000000000437
+        },
+        {
+          "name": "Memcpy DtoH (Device -> Pinned)",
+          "calls": 2,
+          "totalUs": 0.7999999999999545
+        },
+        {
+          "name": "Memcpy HtoD (Pageable -> Device)",
+          "calls": 3,
+          "totalUs": 0.7680000000001428
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::FillFunctor<int>, std::array<char*, 1ul> >(int, at::native::FillFunctor<int>, std::array<char*, 1ul>)",
+          "calls": 1,
+          "totalUs": 0.7679999999999154
+        }
+      ],
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v2_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "05decf56fedafef977adbb31113c012312885008cafcd9843e29a514eff44d6e",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "linear-1024-nobias": {
+            "sourceSha256": "eae45f86d329ded2a3795dada54c3a7b73c2affb019c7a430cbf0d712102eb10",
+            "ptxSha256": "f183a45e716d6b86501c3abd3e8cfc72278d89c0860b235e14af13f5abc09e38",
+            "cubinSha256": "de4411d439c725b6c4edb7664c0de07335b0c48a605bbe2155c2480121fa8deb",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 32,
+                "add.rn.f32": 36
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 32,
+                "FADD": 36
+              },
+              "violations": []
+            }
+          },
+          "linear-1024-nobias-rows4": {
+            "sourceSha256": "aea56d974d8b2aebd32dc3998dd7c280c2bf81a57ed0187d098e0b35115d06a4",
+            "ptxSha256": "c4e20edf591eb44b6c9790254b672fa178bb57729b6602709256cacdaab60c4c",
+            "cubinSha256": "2d2950c9cae2b03fde8290523d3b118ef4318482463b8487e2458b58836c7ac5",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 128,
+                "add.rn.f32": 144
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 128,
+                "FADD": 144
+              },
+              "violations": []
+            }
+          },
+          "linear-2816-nobias": {
+            "sourceSha256": "43d7c2a1ef2a15f9d5eebfb1ce545ce013e7ddfbca2fb56942150759b94693a0",
+            "ptxSha256": "bb89bd6f1282b29049988ad3ac9ae875d9ae4316b83226789856c5deb88c8268",
+            "cubinSha256": "9ac16a1f33c5ddd7dea080a4bd22fb7f8cd1984f40674ae66879a9e3e0de3556",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 32,
+                "add.rn.f32": 39
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 32,
+                "FADD": 39
+              },
+              "violations": []
+            }
+          },
+          "linear-2816-nobias-rows4": {
+            "sourceSha256": "f198f8d6f6837681f087de66a636c9099b84d6a42ecd059443a054c5621cff43",
+            "ptxSha256": "614a7c5589a1d7c33f09974d7f573704b2a3574385362aa650aa905d51f41773",
+            "cubinSha256": "b7e4430d4cb53b117da477af65212270d41440c150267466bee99bd96221a2a9",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 128,
+                "add.rn.f32": 156
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 128,
+                "FADD": 156
+              },
+              "violations": []
+            }
+          },
+          "ops": {
+            "sourceSha256": "ed4b8ea030ec2879d0da93720333d3915e72731209a8a1ce5b995e586580842c",
+            "ptxSha256": "eb53de7164bd97644373ab6ecbfb47666cf72eb37d64cf7f0e8df28d048d3128",
+            "cubinSha256": "433d7f1e62342733a66f6a2ca6fd71fe0f4c256e407f0ae3cb03564a937d3ba5",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 82,
+                "add.rn.f32": 79
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 82,
+                "FADD": 80
+              },
+              "violations": []
+            }
+          }
+        },
+        "fingerprint": "b10fbca5a1dff93f2464fd840ebb13d27d72fd9ff7f170be3d308650e36ffef1"
+      }
+    },
+    {
+      "family": "llama",
+      "hidden": 1024,
+      "intermediate": 2816,
+      "batch": 32,
+      "seconds": [
+        0.005161274995771237,
+        0.005114127001434099,
+        0.005113882005389314
+      ],
+      "medianSeconds": 0.005114127001434099,
+      "cuda": [
+        {
+          "name": "strict_linear",
+          "calls": 8,
+          "totalUs": 4579.982000000001
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy<at::native::(anonymous namespace)::OpaqueType<4u>, unsigned int, 3, 64, 64>(at::native::(anonymous namespace)::OpaqueType<4u>*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<4u>, unsigned int, 64, 64>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "calls": 2,
+          "totalUs": 32.0
+        },
+        {
+          "name": "strict_attention",
+          "calls": 1,
+          "totalUs": 23.551999999999907
+        },
+        {
+          "name": "strict_rms_norm",
+          "calls": 3,
+          "totalUs": 12.127999999999929
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_contig<at::native::(anonymous namespace)::OpaqueType<8u>, unsigned int, 2, 128, 1>(at::native::(anonymous namespace)::OpaqueType<8u>*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<8u>, unsigned int, 128, 1>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "calls": 1,
+          "totalUs": 6.944000000000017
+        },
+        {
+          "name": "void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)",
+          "calls": 4,
+          "totalUs": 4.192000000000007
+        },
+        {
+          "name": "strict_silu_mul",
+          "calls": 1,
+          "totalUs": 2.048000000000002
+        },
+        {
+          "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+          "calls": 1,
+          "totalUs": 1.9519999999999982
+        },
+        {
+          "name": "strict_rope",
+          "calls": 2,
+          "totalUs": 1.8570000000000846
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::compare_scalar_kernel<long>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, long)::{lambda(long)#1}, std::array<char*, 2ul> >(int, at::native::compare_scalar_kernel<long>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, long)::{lambda(long)#1}, std::array<char*, 2ul>)",
+          "calls": 2,
+          "totalUs": 1.8559999999999945
+        },
+        {
+          "name": "strict_add",
+          "calls": 2,
+          "totalUs": 1.6960000000003674
+        },
+        {
+          "name": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<bool, at::native::func_wrapper_t<bool, at::native::or_kernel_cuda(at::TensorIterator&)::{lambda()#1}::operator()() const::{lambda()#12}::operator()() const::{lambda(bool, bool)#1}>, unsigned int, bool, 4, 4> >(at::native::ReduceOp<bool, at::native::func_wrapper_t<bool, at::native::or_kernel_cuda(at::TensorIterator&)::{lambda()#1}::operator()() const::{lambda()#12}::operator()() const::{lambda(bool, bool)#1}>, unsigned int, bool, 4, 4>)",
+          "calls": 1,
+          "totalUs": 1.6000000000000227
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseOrFunctor<bool> >, std::array<char*, 3ul> >(int, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseOrFunctor<bool> >, std::array<char*, 3ul>)",
+          "calls": 1,
+          "totalUs": 0.8959999999999582
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::FillFunctor<int>, std::array<char*, 1ul> >(int, at::native::FillFunctor<int>, std::array<char*, 1ul>)",
+          "calls": 1,
+          "totalUs": 0.7999999999999545
+        },
+        {
+          "name": "Memcpy HtoD (Pageable -> Device)",
+          "calls": 3,
+          "totalUs": 0.7999999999998408
+        },
+        {
+          "name": "Memcpy DtoH (Device -> Pinned)",
+          "calls": 2,
+          "totalUs": 0.7680000000004839
+        }
+      ],
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v2_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "05decf56fedafef977adbb31113c012312885008cafcd9843e29a514eff44d6e",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "linear-1024-nobias": {
+            "sourceSha256": "eae45f86d329ded2a3795dada54c3a7b73c2affb019c7a430cbf0d712102eb10",
+            "ptxSha256": "f183a45e716d6b86501c3abd3e8cfc72278d89c0860b235e14af13f5abc09e38",
+            "cubinSha256": "de4411d439c725b6c4edb7664c0de07335b0c48a605bbe2155c2480121fa8deb",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 32,
+                "add.rn.f32": 36
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 32,
+                "FADD": 36
+              },
+              "violations": []
+            }
+          },
+          "linear-1024-nobias-rows4": {
+            "sourceSha256": "aea56d974d8b2aebd32dc3998dd7c280c2bf81a57ed0187d098e0b35115d06a4",
+            "ptxSha256": "c4e20edf591eb44b6c9790254b672fa178bb57729b6602709256cacdaab60c4c",
+            "cubinSha256": "2d2950c9cae2b03fde8290523d3b118ef4318482463b8487e2458b58836c7ac5",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 128,
+                "add.rn.f32": 144
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 128,
+                "FADD": 144
+              },
+              "violations": []
+            }
+          },
+          "linear-2816-nobias": {
+            "sourceSha256": "43d7c2a1ef2a15f9d5eebfb1ce545ce013e7ddfbca2fb56942150759b94693a0",
+            "ptxSha256": "bb89bd6f1282b29049988ad3ac9ae875d9ae4316b83226789856c5deb88c8268",
+            "cubinSha256": "9ac16a1f33c5ddd7dea080a4bd22fb7f8cd1984f40674ae66879a9e3e0de3556",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 32,
+                "add.rn.f32": 39
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 32,
+                "FADD": 39
+              },
+              "violations": []
+            }
+          },
+          "linear-2816-nobias-rows4": {
+            "sourceSha256": "f198f8d6f6837681f087de66a636c9099b84d6a42ecd059443a054c5621cff43",
+            "ptxSha256": "614a7c5589a1d7c33f09974d7f573704b2a3574385362aa650aa905d51f41773",
+            "cubinSha256": "b7e4430d4cb53b117da477af65212270d41440c150267466bee99bd96221a2a9",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 128,
+                "add.rn.f32": 156
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 128,
+                "FADD": 156
+              },
+              "violations": []
+            }
+          },
+          "ops": {
+            "sourceSha256": "ed4b8ea030ec2879d0da93720333d3915e72731209a8a1ce5b995e586580842c",
+            "ptxSha256": "eb53de7164bd97644373ab6ecbfb47666cf72eb37d64cf7f0e8df28d048d3128",
+            "cubinSha256": "433d7f1e62342733a66f6a2ca6fd71fe0f4c256e407f0ae3cb03564a937d3ba5",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 82,
+                "add.rn.f32": 79
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 82,
+                "FADD": 80
+              },
+              "violations": []
+            }
+          }
+        },
+        "fingerprint": "b10fbca5a1dff93f2464fd840ebb13d27d72fd9ff7f170be3d308650e36ffef1"
+      }
+    },
+    {
+      "family": "mistral",
+      "hidden": 1536,
+      "intermediate": 4096,
+      "batch": 1,
+      "seconds": [
+        0.0011030329987988807,
+        0.001073973995517008,
+        0.0010838060043170117
+      ],
+      "medianSeconds": 0.0010838060043170117,
+      "cuda": [
+        {
+          "name": "strict_linear",
+          "calls": 8,
+          "totalUs": 604.8370000000002
+        },
+        {
+          "name": "strict_attention",
+          "calls": 1,
+          "totalUs": 17.279999999999973
+        },
+        {
+          "name": "strict_rms_norm",
+          "calls": 3,
+          "totalUs": 16.7679999999998
+        },
+        {
+          "name": "void at::native::index_elementwise_kernel<128, 4, at::native::gpu_index_kernel<at::native::index_kernel_impl<at::native::OpaqueType<4> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::index_kernel_impl<at::native::OpaqueType<4> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1} const&, bool)::{lambda(int)#1}>(long, at::native::gpu_index_kernel<at::native::index_kernel_impl<at::native::OpaqueType<4> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::index_kernel_impl<at::native::OpaqueType<4> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1} const&, bool)::{lambda(int)#1})",
+          "calls": 3,
+          "totalUs": 6.7199999999998
+        },
+        {
+          "name": "void at::native::index_elementwise_kernel<128, 4, at::native::gpu_index_kernel<at::native::index_kernel_impl<at::native::OpaqueType<2> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::index_kernel_impl<at::native::OpaqueType<2> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1} const&, bool)::{lambda(int)#1}>(long, at::native::gpu_index_kernel<at::native::index_kernel_impl<at::native::OpaqueType<2> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::index_kernel_impl<at::native::OpaqueType<2> >(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1} const&, bool)::{lambda(int)#1})",
+          "calls": 1,
+          "totalUs": 5.05600000000004
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::compare_scalar_kernel<long>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, long)::{lambda(long)#1}, std::array<char*, 2ul> >(int, at::native::compare_scalar_kernel<long>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, long)::{lambda(long)#1}, std::array<char*, 2ul>)",
+          "calls": 2,
+          "totalUs": 2.240000000000009
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_vectorized<at::native::(anonymous namespace)::OpaqueType<4u>, unsigned int, 2, 128, 1, 16, 4>(char*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<4u>, unsigned int, 128, 1>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "calls": 2,
+          "totalUs": 2.2380000000000564
+        },
+        {
+          "name": "Memcpy DtoD (Device -> Device)",
+          "calls": 2,
+          "totalUs": 2.11200000000008
+        },
+        {
+          "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+          "calls": 1,
+          "totalUs": 1.88799999999992
+        },
+        {
+          "name": "strict_rope",
+          "calls": 2,
+          "totalUs": 1.69600000000014
+        },
+        {
+          "name": "strict_add",
+          "calls": 2,
+          "totalUs": 1.6630000000002383
+        },
+        {
+          "name": "strict_silu_mul",
+          "calls": 1,
+          "totalUs": 1.2160000000001219
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseOrFunctor<bool> >, std::array<char*, 3ul> >(int, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseOrFunctor<bool> >, std::array<char*, 3ul>)",
+          "calls": 1,
+          "totalUs": 1.1520000000000437
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::FillFunctor<int>, std::array<char*, 1ul> >(int, at::native::FillFunctor<int>, std::array<char*, 1ul>)",
+          "calls": 1,
+          "totalUs": 0.8000000000001819
+        },
+        {
+          "name": "Memcpy HtoD (Pageable -> Device)",
+          "calls": 3,
+          "totalUs": 0.7680000000002565
+        },
+        {
+          "name": "Memcpy DtoH (Device -> Pinned)",
+          "calls": 2,
+          "totalUs": 0.7679999999998017
+        }
+      ],
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v2_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "05decf56fedafef977adbb31113c012312885008cafcd9843e29a514eff44d6e",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "linear-1536-nobias": {
+            "sourceSha256": "f4a2a18108b641de89b8bc73dadc8d014d2c9b05af307725c90a1f8be5d9b3c8",
+            "ptxSha256": "255d51163ad9447173698987aaac95d6f544d3752ef80602af264b31745ebce5",
+            "cubinSha256": "f24fcacb45e371c97e4349d8913d9cc5e4a3dbf7c289e2c2a48f55285858c8d4",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 32,
+                "add.rn.f32": 37
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 32,
+                "FADD": 37
+              },
+              "violations": []
+            }
+          },
+          "linear-1536-nobias-rows4": {
+            "sourceSha256": "5e87b7473fa9f9c6e5c98a99f707496c2d76b5f0ad06addbbad9a7462c5c1528",
+            "ptxSha256": "634e124b4d666d40c9b01a0bd3076178e615acea26ce956ea14ad9d19dfcfdd9",
+            "cubinSha256": "f0465780c23b71b67ba19c3dcad2102758a605f2f104cf6af435a350933755a2",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 128,
+                "add.rn.f32": 148
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 128,
+                "FADD": 148
+              },
+              "violations": []
+            }
+          },
+          "linear-4096-nobias": {
+            "sourceSha256": "1880fab86a469fd758da8c5a7d90e696b5c50f8f57c053d779535a0974bc27a4",
+            "ptxSha256": "2c6789f0f2bbc1a1bb69f7e8ba6d46c480f8401e8c953f4c63d02067cb28a91d",
+            "cubinSha256": "d95085065633db370966401934b4ee87f60ef1f503c563314c1032eab7bd52fd",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 32,
+                "add.rn.f32": 39
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 32,
+                "FADD": 39
+              },
+              "violations": []
+            }
+          },
+          "linear-4096-nobias-rows4": {
+            "sourceSha256": "5603bf26fd471f684f413637c7cfba2626ae982b1a859d1972c0153badf86494",
+            "ptxSha256": "517805c050b9a78a93d41430c8d111f3a41c4b17035283d08d9b88ddc2dba183",
+            "cubinSha256": "d2a283d70cc6fe5db52155e47dcf76fc421db4b836266ef1f57a3118cd79cfc0",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 128,
+                "add.rn.f32": 156
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 128,
+                "FADD": 156
+              },
+              "violations": []
+            }
+          },
+          "ops": {
+            "sourceSha256": "ed4b8ea030ec2879d0da93720333d3915e72731209a8a1ce5b995e586580842c",
+            "ptxSha256": "eb53de7164bd97644373ab6ecbfb47666cf72eb37d64cf7f0e8df28d048d3128",
+            "cubinSha256": "433d7f1e62342733a66f6a2ca6fd71fe0f4c256e407f0ae3cb03564a937d3ba5",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 82,
+                "add.rn.f32": 79
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 82,
+                "FADD": 80
+              },
+              "violations": []
+            }
+          }
+        },
+        "fingerprint": "c3706b55f19059c4f4d445fa0848651a0852bf90273c8b8315f1a13e3c597af8"
+      }
+    },
+    {
+      "family": "mistral",
+      "hidden": 1536,
+      "intermediate": 4096,
+      "batch": 8,
+      "seconds": [
+        0.0027469630003906786,
+        0.0027389840033720247,
+        0.0027423589999671094
+      ],
+      "medianSeconds": 0.0027423589999671094,
+      "cuda": [
+        {
+          "name": "strict_linear",
+          "calls": 8,
+          "totalUs": 2349.35
+        },
+        {
+          "name": "strict_attention",
+          "calls": 1,
+          "totalUs": 17.98400000000015
+        },
+        {
+          "name": "strict_rms_norm",
+          "calls": 3,
+          "totalUs": 15.937000000000126
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy<at::native::(anonymous namespace)::OpaqueType<4u>, unsigned int, 3, 64, 64>(at::native::(anonymous namespace)::OpaqueType<4u>*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<4u>, unsigned int, 64, 64>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "calls": 2,
+          "totalUs": 10.59199999999987
+        },
+        {
+          "name": "void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)",
+          "calls": 4,
+          "totalUs": 4.257000000000517
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_contig<at::native::(anonymous namespace)::OpaqueType<8u>, unsigned int, 2, 128, 1>(at::native::(anonymous namespace)::OpaqueType<8u>*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<8u>, unsigned int, 128, 1>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "calls": 1,
+          "totalUs": 2.688000000000102
+        },
+        {
+          "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+          "calls": 1,
+          "totalUs": 1.9519999999999982
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::compare_scalar_kernel<long>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, long)::{lambda(long)#1}, std::array<char*, 2ul> >(int, at::native::compare_scalar_kernel<long>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, long)::{lambda(long)#1}, std::array<char*, 2ul>)",
+          "calls": 2,
+          "totalUs": 1.9199999999998454
+        },
+        {
+          "name": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<bool, at::native::func_wrapper_t<bool, at::native::or_kernel_cuda(at::TensorIterator&)::{lambda()#1}::operator()() const::{lambda()#12}::operator()() const::{lambda(bool, bool)#1}>, unsigned int, bool, 4, 4> >(at::native::ReduceOp<bool, at::native::func_wrapper_t<bool, at::native::or_kernel_cuda(at::TensorIterator&)::{lambda()#1}::operator()() const::{lambda()#12}::operator()() const::{lambda(bool, bool)#1}>, unsigned int, bool, 4, 4>)",
+          "calls": 1,
+          "totalUs": 1.6959999999999127
+        },
+        {
+          "name": "strict_rope",
+          "calls": 2,
+          "totalUs": 1.6959999999999127
+        },
+        {
+          "name": "strict_add",
+          "calls": 2,
+          "totalUs": 1.6330000000000382
+        },
+        {
+          "name": "strict_silu_mul",
+          "calls": 1,
+          "totalUs": 1.2159999999998945
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseOrFunctor<bool> >, std::array<char*, 3ul> >(int, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseOrFunctor<bool> >, std::array<char*, 3ul>)",
+          "calls": 1,
+          "totalUs": 1.1200000000001182
+        },
+        {
+          "name": "Memcpy DtoH (Device -> Pinned)",
+          "calls": 2,
+          "totalUs": 0.7679999999998017
+        },
+        {
+          "name": "Memcpy HtoD (Pageable -> Device)",
+          "calls": 3,
+          "totalUs": 0.7679999999998017
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::FillFunctor<int>, std::array<char*, 1ul> >(int, at::native::FillFunctor<int>, std::array<char*, 1ul>)",
+          "calls": 1,
+          "totalUs": 0.7679999999998017
+        }
+      ],
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v2_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "05decf56fedafef977adbb31113c012312885008cafcd9843e29a514eff44d6e",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "linear-1536-nobias": {
+            "sourceSha256": "f4a2a18108b641de89b8bc73dadc8d014d2c9b05af307725c90a1f8be5d9b3c8",
+            "ptxSha256": "255d51163ad9447173698987aaac95d6f544d3752ef80602af264b31745ebce5",
+            "cubinSha256": "f24fcacb45e371c97e4349d8913d9cc5e4a3dbf7c289e2c2a48f55285858c8d4",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 32,
+                "add.rn.f32": 37
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 32,
+                "FADD": 37
+              },
+              "violations": []
+            }
+          },
+          "linear-1536-nobias-rows4": {
+            "sourceSha256": "5e87b7473fa9f9c6e5c98a99f707496c2d76b5f0ad06addbbad9a7462c5c1528",
+            "ptxSha256": "634e124b4d666d40c9b01a0bd3076178e615acea26ce956ea14ad9d19dfcfdd9",
+            "cubinSha256": "f0465780c23b71b67ba19c3dcad2102758a605f2f104cf6af435a350933755a2",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 128,
+                "add.rn.f32": 148
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 128,
+                "FADD": 148
+              },
+              "violations": []
+            }
+          },
+          "linear-4096-nobias": {
+            "sourceSha256": "1880fab86a469fd758da8c5a7d90e696b5c50f8f57c053d779535a0974bc27a4",
+            "ptxSha256": "2c6789f0f2bbc1a1bb69f7e8ba6d46c480f8401e8c953f4c63d02067cb28a91d",
+            "cubinSha256": "d95085065633db370966401934b4ee87f60ef1f503c563314c1032eab7bd52fd",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 32,
+                "add.rn.f32": 39
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 32,
+                "FADD": 39
+              },
+              "violations": []
+            }
+          },
+          "linear-4096-nobias-rows4": {
+            "sourceSha256": "5603bf26fd471f684f413637c7cfba2626ae982b1a859d1972c0153badf86494",
+            "ptxSha256": "517805c050b9a78a93d41430c8d111f3a41c4b17035283d08d9b88ddc2dba183",
+            "cubinSha256": "d2a283d70cc6fe5db52155e47dcf76fc421db4b836266ef1f57a3118cd79cfc0",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 128,
+                "add.rn.f32": 156
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 128,
+                "FADD": 156
+              },
+              "violations": []
+            }
+          },
+          "ops": {
+            "sourceSha256": "ed4b8ea030ec2879d0da93720333d3915e72731209a8a1ce5b995e586580842c",
+            "ptxSha256": "eb53de7164bd97644373ab6ecbfb47666cf72eb37d64cf7f0e8df28d048d3128",
+            "cubinSha256": "433d7f1e62342733a66f6a2ca6fd71fe0f4c256e407f0ae3cb03564a937d3ba5",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 82,
+                "add.rn.f32": 79
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 82,
+                "FADD": 80
+              },
+              "violations": []
+            }
+          }
+        },
+        "fingerprint": "c3706b55f19059c4f4d445fa0848651a0852bf90273c8b8315f1a13e3c597af8"
+      }
+    },
+    {
+      "family": "mistral",
+      "hidden": 1536,
+      "intermediate": 4096,
+      "batch": 32,
+      "seconds": [
+        0.009521647996734828,
+        0.009523423999780789,
+        0.009522252003080212
+      ],
+      "medianSeconds": 0.009522252003080212,
+      "cuda": [
+        {
+          "name": "strict_linear",
+          "calls": 8,
+          "totalUs": 9087.16
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy<at::native::(anonymous namespace)::OpaqueType<4u>, unsigned int, 3, 64, 64>(at::native::(anonymous namespace)::OpaqueType<4u>*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<4u>, unsigned int, 64, 64>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "calls": 2,
+          "totalUs": 36.863999999999805
+        },
+        {
+          "name": "strict_attention",
+          "calls": 1,
+          "totalUs": 29.055999999999813
+        },
+        {
+          "name": "strict_rms_norm",
+          "calls": 3,
+          "totalUs": 15.839999999999463
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_contig<at::native::(anonymous namespace)::OpaqueType<8u>, unsigned int, 2, 128, 1>(at::native::(anonymous namespace)::OpaqueType<8u>*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<8u>, unsigned int, 128, 1>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "calls": 1,
+          "totalUs": 6.94399999999996
+        },
+        {
+          "name": "void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)",
+          "calls": 4,
+          "totalUs": 4.160000000000082
+        },
+        {
+          "name": "strict_silu_mul",
+          "calls": 1,
+          "totalUs": 2.4320000000002437
+        },
+        {
+          "name": "strict_rope",
+          "calls": 2,
+          "totalUs": 2.0160000000000764
+        },
+        {
+          "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+          "calls": 1,
+          "totalUs": 1.9199999999998454
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::compare_scalar_kernel<long>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, long)::{lambda(long)#1}, std::array<char*, 2ul> >(int, at::native::compare_scalar_kernel<long>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, long)::{lambda(long)#1}, std::array<char*, 2ul>)",
+          "calls": 2,
+          "totalUs": 1.824999999999818
+        },
+        {
+          "name": "strict_add",
+          "calls": 2,
+          "totalUs": 1.760000000000673
+        },
+        {
+          "name": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<bool, at::native::func_wrapper_t<bool, at::native::or_kernel_cuda(at::TensorIterator&)::{lambda()#1}::operator()() const::{lambda()#12}::operator()() const::{lambda(bool, bool)#1}>, unsigned int, bool, 4, 4> >(at::native::ReduceOp<bool, at::native::func_wrapper_t<bool, at::native::or_kernel_cuda(at::TensorIterator&)::{lambda()#1}::operator()() const::{lambda()#12}::operator()() const::{lambda(bool, bool)#1}>, unsigned int, bool, 4, 4>)",
+          "calls": 1,
+          "totalUs": 1.6639999999999873
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseOrFunctor<bool> >, std::array<char*, 3ul> >(int, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseOrFunctor<bool> >, std::array<char*, 3ul>)",
+          "calls": 1,
+          "totalUs": 0.9279999999998836
+        },
+        {
+          "name": "Memcpy HtoD (Pageable -> Device)",
+          "calls": 3,
+          "totalUs": 0.8009999999994761
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::FillFunctor<int>, std::array<char*, 1ul> >(int, at::native::FillFunctor<int>, std::array<char*, 1ul>)",
+          "calls": 1,
+          "totalUs": 0.7680000000000291
+        },
+        {
+          "name": "Memcpy DtoH (Device -> Pinned)",
+          "calls": 2,
+          "totalUs": 0.7679999999995744
+        }
+      ],
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v2_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "05decf56fedafef977adbb31113c012312885008cafcd9843e29a514eff44d6e",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "linear-1536-nobias": {
+            "sourceSha256": "f4a2a18108b641de89b8bc73dadc8d014d2c9b05af307725c90a1f8be5d9b3c8",
+            "ptxSha256": "255d51163ad9447173698987aaac95d6f544d3752ef80602af264b31745ebce5",
+            "cubinSha256": "f24fcacb45e371c97e4349d8913d9cc5e4a3dbf7c289e2c2a48f55285858c8d4",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 32,
+                "add.rn.f32": 37
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 32,
+                "FADD": 37
+              },
+              "violations": []
+            }
+          },
+          "linear-1536-nobias-rows4": {
+            "sourceSha256": "5e87b7473fa9f9c6e5c98a99f707496c2d76b5f0ad06addbbad9a7462c5c1528",
+            "ptxSha256": "634e124b4d666d40c9b01a0bd3076178e615acea26ce956ea14ad9d19dfcfdd9",
+            "cubinSha256": "f0465780c23b71b67ba19c3dcad2102758a605f2f104cf6af435a350933755a2",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 128,
+                "add.rn.f32": 148
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 128,
+                "FADD": 148
+              },
+              "violations": []
+            }
+          },
+          "linear-4096-nobias": {
+            "sourceSha256": "1880fab86a469fd758da8c5a7d90e696b5c50f8f57c053d779535a0974bc27a4",
+            "ptxSha256": "2c6789f0f2bbc1a1bb69f7e8ba6d46c480f8401e8c953f4c63d02067cb28a91d",
+            "cubinSha256": "d95085065633db370966401934b4ee87f60ef1f503c563314c1032eab7bd52fd",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 32,
+                "add.rn.f32": 39
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 32,
+                "FADD": 39
+              },
+              "violations": []
+            }
+          },
+          "linear-4096-nobias-rows4": {
+            "sourceSha256": "5603bf26fd471f684f413637c7cfba2626ae982b1a859d1972c0153badf86494",
+            "ptxSha256": "517805c050b9a78a93d41430c8d111f3a41c4b17035283d08d9b88ddc2dba183",
+            "cubinSha256": "d2a283d70cc6fe5db52155e47dcf76fc421db4b836266ef1f57a3118cd79cfc0",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 128,
+                "add.rn.f32": 156
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 128,
+                "FADD": 156
+              },
+              "violations": []
+            }
+          },
+          "ops": {
+            "sourceSha256": "ed4b8ea030ec2879d0da93720333d3915e72731209a8a1ce5b995e586580842c",
+            "ptxSha256": "eb53de7164bd97644373ab6ecbfb47666cf72eb37d64cf7f0e8df28d048d3128",
+            "cubinSha256": "433d7f1e62342733a66f6a2ca6fd71fe0f4c256e407f0ae3cb03564a937d3ba5",
+            "ptxAudit": {
+              "floatOps": {
+                "mul.rn.f32": 82,
+                "add.rn.f32": 79
+              },
+              "violations": []
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FMUL": 82,
+                "FADD": 80
+              },
+              "violations": []
+            }
+          }
+        },
+        "fingerprint": "c3706b55f19059c4f4d445fa0848651a0852bf90273c8b8315f1a13e3c597af8"
+      }
+    }
+  ],
+  "limits": "One-layer randomly initialized graph fixtures, not trained checkpoints or serving/ES acceptance. Profiler adds overhead; non-profiled wall medians are recorded separately."
+}

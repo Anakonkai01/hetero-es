@@ -1,0 +1,60 @@
+.F
+=================================== FAILURES ===================================
+_ test_captured_generation_matches_cpu_and_reuses_live_weights_without_candidate_kv[qwen2] _
+
+family = 'qwen2'
+
+    @gpu
+    @pytest.mark.parametrize("family", ["qwen2", "llama", "llama-wide", "mistral"])
+    def test_captured_generation_matches_cpu_and_reuses_live_weights_without_candidate_kv(family):
+        from heteroes.eval.strict_decoder import StrictDecoderReference
+    
+        model = model_for(family).cuda()
+        backend = graph_class()(model, max_context=32, allow_fixture=True)
+        ids = torch.tensor([[0, 0, 3, 5], [7, 11, 13, 17], [0, 19, 23, 29]], device="cuda")
+        mask = ids != 0
+        weight = model.model.layers[0].mlp.down_proj.weight
+        snapshot = weight.detach().clone()
+        parents = []
+        session = None
+        for factor in (1.0, -1.0, 1.0):
+            with torch.no_grad():
+                weight.copy_(snapshot * factor)
+            oracle = StrictDecoderReference(copy.deepcopy(model).cpu(), max_context=32, allow_fixture=True)
+            expected = oracle.generate(ids.cpu(), attention_mask=mask.cpu(), max_new_tokens=5, eos_token_id=[])
+            actual = backend.generate(ids, attention_mask=mask, max_new_tokens=5, eos_token_id=[])
+            assert torch.equal(actual.cpu(), expected)
+            parents.append(actual.clone())
+            assert backend._session is not None
+            if session is None:
+                session = backend._session
+            assert backend._session is session and session.capture_count == 1
+            assert all(not bool(t.any()) for t in session.caches)
+            assert not bool(session.seen.any())
+        assert torch.equal(parents[0], parents[2])
+        assert torch.equal(weight.view(torch.int16), snapshot.view(torch.int16))
+        assert backend.identity["hardwareQualified"] is False
+>       backend.release_graph()
+
+tests/eval/test_strict_decode_graph.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/heteroes/eval/strict_decoder_graph.py:183: in release_graph
+    self._release_graph()
+src/heteroes/eval/strict_decoder_graph.py:176: in _release_graph
+    self._session.close()
+src/heteroes/eval/strict_decoder_graph.py:82: in close
+    self.clear()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <heteroes.eval.strict_decoder_graph._DecodeSession object at 0x74c35c3b6360>
+
+    def clear(self):
+        for tensor in chain(self.caches, (self.seen, self.tokens, self.lengths, self.flag)):
+>           tensor.zero_()
+E           RuntimeError: Inplace update to inference tensor outside InferenceMode is not allowed.You can make a clone to get a normal tensor before doing inplace update.See https://github.com/pytorch/rfcs/pull/17 for more details.
+
+src/heteroes/eval/strict_decoder_graph.py:74: RuntimeError
+=========================== short test summary info ============================
+FAILED tests/eval/test_strict_decode_graph.py::test_captured_generation_matches_cpu_and_reuses_live_weights_without_candidate_kv[qwen2]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 1 passed in 4.99s

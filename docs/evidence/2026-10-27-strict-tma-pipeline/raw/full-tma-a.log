@@ -1,0 +1,3 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 6672.71it/s]
+tma-a qwen short32 9973.1 bc4a5504e37c
+tma-a qwen chat128 9982.3 a9fad5ca48ed

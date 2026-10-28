@@ -1,0 +1,13 @@
+control ok    | 7 passed in 1.25s
+killed       kernel carry dropped | 1 failed, 4 passed in 0.86s
+killed       increment table off by one | 1 failed in 0.72s
+killed       increment high half shifted wrong | 1 failed in 0.79s
+killed       threshold count left side | 1 failed, 4 passed in 0.95s
+killed       sign from bit 30 | 1 failed, 4 passed in 0.89s
+killed       padded tails kept | 1 failed, 4 passed in 0.89s
+killed       environment switch ignored | 1 failed, 3 passed in 0.85s
+SURVIVED     perturb piece offset | 7 passed in 1.16s
+killed       update ignores the candidate seed | 1 failed, 5 passed in 0.98s
+killed       seed batch reordered | 1 failed, 5 passed in 0.99s
+
+9 of 10 mutants killed.

@@ -1,0 +1,10 @@
+{
+  "status": "error",
+  "root": "C:\\Users\\Thao Nguyen\\.cache\\heteroes-native-strict-20261025-01",
+  "python": "C:\\Users\\Thao Nguyen\\.cache\\heteroes-native-strict-20261025-01\\venv\\Scripts\\python.exe",
+  "scope": "Task-owned isolated venv; public pinned wheels only; no global/AI environment, GPU or device/lab configuration changes.",
+  "freeBytesBefore": 18546974720,
+  "errorType": "UnicodeDecodeError",
+  "error": "'charmap' codec can't decode byte 0x8d in position 79346: character maps to <undefined>",
+  "wallSeconds": 0.00030330000299727544
+}

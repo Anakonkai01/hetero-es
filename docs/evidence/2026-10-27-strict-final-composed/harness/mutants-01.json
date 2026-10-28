@@ -1,0 +1,16 @@
+[
+ {"name": "timeout bit collides with layout bit", "file": "src/heteroes/eval/integer_tma.py", "old": "TRANSPORT_TIMEOUT_BIT = 8", "new": "TRANSPORT_TIMEOUT_BIT = 4"},
+ {"name": "kernels ignore transport bit", "file": "src/heteroes/eval/strict_cuda.py", "old": "        if status & 8:\n            raise StrictTransportError", "new": "        if status & 16:\n            raise StrictTransportError"},
+ {"name": "decode ignores transport bit", "file": "src/heteroes/eval/strict_decoder_graph.py", "old": "        if status & 8:\n            raise StrictTransportError", "new": "        if status & 16:\n            raise StrictTransportError"},
+ {"name": "TMA admits 128-row tiles", "file": "src/heteroes/eval/integer_tma.py", "old": "and 128 < rows <= MAX_ROWS", "new": "and 127 < rows <= MAX_ROWS"},
+ {"name": "TMA admits split K", "file": "src/heteroes/eval/integer_tma.py", "old": "        and split_k == 1\n", "new": "        and split_k >= 1\n"},
+ {"name": "stale map address", "file": "src/heteroes/eval/integer_tma.py", "old": "            sc._check(d.cuTensorMapReplaceAddress(entry[0], value.data_ptr()))\n", "new": "            pass\n"},
+ {"name": "wrong weight swizzle", "file": "src/heteroes/eval/integer_tma.py", "old": "\"stream_weight_swizzle(r)\", \"(r&7)\"", "new": "\"stream_weight_swizzle(r)\", \"(r&3)\""},
+ {"name": "TMA drops residual", "file": "src/heteroes/eval/integer_cuda.py", "old": "        if residual is not None:\n            out = self.add(residual, out, error_flag=flag)\n        self._finish(flag, error_flag)\n        return out.reshape(*value.shape[:-1], outputs)\n\n    def _launch_attention", "new": "        self._finish(flag, error_flag)\n        return out.reshape(*value.shape[:-1], outputs)\n\n    def _launch_attention"},
+ {"name": "stages replace split-kernel range", "file": "src/heteroes/eval/attention_stages.py", "old": "        and sc.gqa_attention_eligible(dim, repeats, original)", "new": "        and dim * repeats > 0"},
+ {"name": "stage scores read wrong subtree", "file": "src/heteroes/eval/attention_stages.py", "old": "\"scores[first + sub + base + item]\"", "new": "\"scores[first + base + item]\""},
+ {"name": "stage never opts into large shared", "file": "src/heteroes/eval/integer_cuda.py", "old": "        if shared > 48 * 1024 and shared > self._stage_shared.get(name, 0):", "new": "        if shared > 96 * 1024 and shared > self._stage_shared.get(name, 0):"},
+ {"name": "context rounded to 8", "file": "src/heteroes/eval/strict_decoder_graph.py", "old": "// 16) * 16)", "new": "// 8) * 8)"},
+ {"name": "session reused across contexts", "file": "src/heteroes/eval/strict_decoder_graph.py", "old": "            or self._session.context != context\n", "new": ""},
+ {"name": "layout uses configured context", "file": "src/heteroes/eval/strict_decoder_graph.py", "old": "flag, state.capacity, state.context\n", "new": "flag, state.capacity, self.max_context\n"}
+]

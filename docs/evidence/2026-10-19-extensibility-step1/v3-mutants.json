@@ -1,0 +1,152 @@
+[
+ {
+  "name": "reward is the max, not the mean",
+  "file": "src/heteroes/v3/scoring.py",
+  "old": "return sum(scores) / len(scores), scores",
+  "new": "return max(scores), scores"
+ },
+ {
+  "name": "cot rule compares to a string",
+  "file": "src/heteroes/v3/scoring.py",
+  "old": "return 1.0 if extract_answer(text) == row[\"answer\"] else 0.0",
+  "new": "return 1.0 if extract_answer(text) == str(row[\"answer\"]) else 0.0"
+ },
+ {
+  "name": "non-finite scores accepted",
+  "file": "src/heteroes/v3/scoring.py",
+  "old": " or not math.isfinite(score)",
+  "new": ""
+ },
+ {
+  "name": "boolean scores accepted",
+  "file": "src/heteroes/v3/scoring.py",
+  "old": "if isinstance(score, bool) or not isinstance",
+  "new": "if not isinstance"
+ },
+ {
+  "name": "shared lab accepts python",
+  "file": "src/heteroes/v3/scoring.py",
+  "old": "        if not allow_python:\n",
+  "new": "        if False:\n"
+ },
+ {
+  "name": "regex takes the last group",
+  "file": "src/heteroes/v3/scoring.py",
+  "old": "last[0] if isinstance(last, tuple) else last",
+  "new": "last[-1] if isinstance(last, tuple) else last"
+ },
+ {
+  "name": "choice takes the first letter",
+  "file": "src/heteroes/v3/scoring.py",
+  "old": "return 1.0 if found and found[-1] ==",
+  "new": "return 1.0 if found and found[0] =="
+ },
+ {
+  "name": "exact-string always casefolds",
+  "file": "src/heteroes/v3/scoring.py",
+  "old": "return value.casefold() if config[\"casefold\"] else value",
+  "new": "return value.casefold()"
+ },
+ {
+  "name": "code identity ignores names",
+  "file": "src/heteroes/v3/scoring.py",
+  "old": "digest.update(f\"{name}\\0{len(content)}\\0\".encode())\n",
+  "new": ""
+ },
+ {
+  "name": "python scorer gets the real rows",
+  "file": "src/heteroes/v3/scoring.py",
+  "old": "[dict(row) for row in rows]",
+  "new": "rows"
+ },
+ {
+  "name": "only some scorer errors wrapped",
+  "file": "src/heteroes/v3/scoring.py",
+  "old": "except Exception as error:",
+  "new": "except ZeroDivisionError as error:"
+ },
+ {
+  "name": "pair merge not halved",
+  "file": "src/heteroes/v3/antithetic.py",
+  "old": "((plus - minus) / 2)",
+  "new": "((plus - minus) / 1)"
+ },
+ {
+  "name": "pairs always merged",
+  "file": "src/heteroes/v3/antithetic.py",
+  "old": "    if all(sign == 1 for sign in signs):\n",
+  "new": "    if False:\n"
+ },
+ {
+  "name": "pair seeds not checked",
+  "file": "src/heteroes/v3/antithetic.py",
+  "old": "    if seeds[0::2] != seeds[1::2]:\n",
+  "new": "    if False:\n"
+ },
+ {
+  "name": "minus first in a pair",
+  "file": "src/heteroes/v3/antithetic.py",
+  "old": "for sign in (1, -1)]",
+  "new": "for sign in (-1, 1)]"
+ },
+ {
+  "name": "non-float32 coefficients accepted",
+  "file": "src/heteroes/v3/antithetic.py",
+  "old": "        if not np.array_equal(exact.astype(np.float64), coefficients.astype(np.float64)):\n",
+  "new": "        if False:\n"
+ },
+ {
+  "name": "v1 scorers swapped",
+  "file": "src/heteroes/v3/documents.py",
+  "old": "\"last-integer\" if recipe.workload_name == \"arith16\" else \"answer-line-integer\"",
+  "new": "\"answer-line-integer\" if recipe.workload_name == \"arith16\" else \"last-integer\""
+ },
+ {
+  "name": "unpinned files accepted for new runs",
+  "file": "src/heteroes/v3/documents.py",
+  "old": "        if not translated:\n",
+  "new": "        if False:\n"
+ },
+ {
+  "name": "builtin accepts its own prompt",
+  "file": "src/heteroes/v3/documents.py",
+  "old": "        if evaluation[\"maxNewTokens\"] is not None or evaluation[\"systemPrompt\"] is not None:\n",
+  "new": "        if False:\n"
+ },
+ {
+  "name": "cosine denominator",
+  "file": "src/heteroes/v3/documents.py",
+  "old": "math.cos(math.pi * generation / (total - 1))",
+  "new": "math.cos(math.pi * generation / total)"
+ },
+ {
+  "name": "odd antithetic population",
+  "file": "src/heteroes/v3/documents.py",
+  "old": "if recipe[\"perturbation\"][\"antithetic\"] and plan[\"population\"] % 2:",
+  "new": "if recipe[\"perturbation\"][\"antithetic\"] and False:"
+ },
+ {
+  "name": "schedule length not bound",
+  "file": "src/heteroes/v3/documents.py",
+  "old": "if scheduled is not None and scheduled != plan[\"generations\"]:",
+  "new": "if False:"
+ },
+ {
+  "name": "plan for any recipe",
+  "file": "src/heteroes/v3/documents.py",
+  "old": "    if plan[\"recipeHash\"] != canonical_json_hash(recipe):\n",
+  "new": "    if False:\n"
+ },
+ {
+  "name": "v2 minimum sigma lost",
+  "file": "src/heteroes/v3/documents.py",
+  "old": "\"minimum\": schedule[\"minimum\"],",
+  "new": "\"minimum\": schedule[\"initial\"],"
+ },
+ {
+  "name": "generation past the schedule",
+  "file": "src/heteroes/v3/documents.py",
+  "old": "(total is not None and generation >= total)",
+  "new": "(total is not None and generation > total)"
+ }
+]

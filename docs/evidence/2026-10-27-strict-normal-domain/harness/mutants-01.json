@@ -1,0 +1,26 @@
+[
+  {
+    "name": "reciprocal_iteration_removed",
+    "file": "harness/normal.py",
+    "old": "for(int i=0;i<5;++i)",
+    "new": "for(int i=0;i<4;++i)"
+  },
+  {
+    "name": "rsqrt_iteration_removed",
+    "file": "harness/normal.py",
+    "old": "for(int i=0;i<6;++i)",
+    "new": "for(int i=0;i<5;++i)"
+  },
+  {
+    "name": "reciprocal_invalid_domain_bypass",
+    "file": "harness/normal.py",
+    "old": "if(!(x>=k(DOMAIN_LOW) && x<=k(DOMAIN_HIGH)))return original_reciprocal_(x,bad);",
+    "new": "if(false)return original_reciprocal_(x,bad);"
+  },
+  {
+    "name": "exp_tiny_shortcut_too_wide",
+    "file": "harness/normal_exp.py",
+    "old": "fabsf(x)<=0x1p-26f",
+    "new": "fabsf(x)<=0x1p-6f"
+  }
+]

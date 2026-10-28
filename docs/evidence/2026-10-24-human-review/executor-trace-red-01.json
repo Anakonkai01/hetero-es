@@ -1,0 +1,8 @@
+{
+  "stage": "integration-test-before-implementation",
+  "command": "CUDA_VISIBLE_DEVICES='' PYTHONPATH=src python -m pytest -q tests/eval/test_executor.py -k 'opt_in_trace or rollout_error_is_traced'",
+  "cwd": "runtime",
+  "exitCode": 1,
+  "result": "2 failed: CandidateExecutor does not accept phase_trace yet",
+  "limit": "CPU toy model; no inference backend or GPU acceptance."
+}

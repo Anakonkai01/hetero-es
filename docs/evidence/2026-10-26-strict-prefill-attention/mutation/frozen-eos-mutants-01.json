@@ -1,0 +1,44 @@
+[
+  {
+    "name": "skip experiment identity",
+    "file": "frozen_eos.py",
+    "old": "if any(actual.get(k) != expected.get(k) or k not in expected for k in fields):",
+    "new": "if False:"
+  },
+  {
+    "name": "skip state completeness",
+    "file": "frozen_eos.py",
+    "old": "if [c['state'] for c in cases] != ['parent', 'plus', 'minus', 'restored'] or len(expected['cases']) != 4:",
+    "new": "if False:"
+  },
+  {
+    "name": "ignore changed tokens",
+    "file": "frozen_eos.py",
+    "old": "('state', 'weightsSha256', 'results')",
+    "new": "('state', 'weightsSha256')"
+  },
+  {
+    "name": "ignore failed restore",
+    "file": "frozen_eos.py",
+    "old": "not now['restoreExact']",
+    "new": "False"
+  },
+  {
+    "name": "ignore EOS contract",
+    "file": "frozen_eos.py",
+    "old": "any(eos[k] != control[k] for k in ('eosTokenIds', 'maxNewTokens'))",
+    "new": "False"
+  },
+  {
+    "name": "ignore inconsistent sealed oracle",
+    "file": "frozen_eos.py",
+    "old": "control['captured'] != control['uncaptured']",
+    "new": "False"
+  },
+  {
+    "name": "return mutable sealed object",
+    "file": "frozen_eos.py",
+    "old": "return copy.deepcopy(control['uncaptured'])",
+    "new": "return control['uncaptured']"
+  }
+]

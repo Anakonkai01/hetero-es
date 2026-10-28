@@ -1,0 +1,5 @@
+control ok    | 1 passed in 0.01s
+killed       publish while asked only to prepare | 1 failed in 0.02s
+killed       publish changed reviewed installer | 1 failed in 0.02s
+
+2 of 2 mutants killed.

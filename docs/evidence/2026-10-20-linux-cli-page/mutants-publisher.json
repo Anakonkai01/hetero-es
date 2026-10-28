@@ -1,0 +1,18 @@
+[
+  {"name": "no link preflight", "file": "scripts/publish-local-installers.py",
+   "old": "            if (link.is_symlink() or link.exists()) and link.resolve() != file.resolve():\n                raise RuntimeError(\"Existing download link points to another build\")\n",
+   "new": "            pass\n"},
+  {"name": "keep stale pending alias", "file": "scripts/publish-local-installers.py",
+   "old": "            pending_link.unlink(missing_ok=True)\n", "new": ""},
+  {"name": "keep alias on app-only build", "file": "scripts/publish-local-installers.py",
+   "old": "            (links / \"install-worker.sh\").unlink(missing_ok=True)\n", "new": "            pass\n"},
+  {"name": "skip CLI hash check", "file": "scripts/publish-local-installers.py",
+   "old": "            or sha(file) != entry.get(\"sha256\")\n        ):\n            raise RuntimeError(\"CLI file differs",
+   "new": "        ) and False:\n            raise RuntimeError(\"CLI file differs"},
+  {"name": "alias not switched to new build", "file": "scripts/publish-local-installers.py",
+   "old": "            pending_link.replace(links / \"install-worker.sh\")\n",
+   "new": "            pending_link.unlink()\n            (links / \"install-worker.sh\").exists() or (links / \"install-worker.sh\").symlink_to((args.packages / \"cli/install-worker.sh\").resolve())\n"},
+  {"name": "private CLI links stay public", "file": "backend/routes_web.py",
+   "old": "                        for item in manifest.get(\"linuxWorker\", {}).values():\n                            item[\"url\"] = bulk",
+   "new": "                        for item in []:\n                            item[\"url\"] = bulk"}
+]

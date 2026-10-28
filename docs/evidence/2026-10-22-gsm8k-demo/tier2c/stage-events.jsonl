@@ -1,0 +1,5 @@
+{"t": 1792628182.886, "event": "kill_requested", "target": "1660s", "returncode": 3, "out": "inactive\nRunning timer as unit: tier2c-revive.timer\nWill run service as unit: tier2c-revive.service\n"}
+{"t": 1792628418.581, "event": "off_requested", "response": {"deviceId": "a4f401a7610b4fd286cf134de3206a6f", "enabled": false, "pending": true}}
+{"t": 1792628857.575, "event": "off_verdict", "verdict": "recovered", "seconds": 439.0, "seen": ["worker_left", "worker_left"]}
+{"t": 1792628858.527, "event": "on_requested", "response": {"deviceId": "a4f401a7610b4fd286cf134de3206a6f", "enabled": true, "pending": true}}
+{"t": 1792628858.721, "event": "on_verdict", "verdict": "failed", "error": "Lab HTTP 409: /api/v1/experiments/43c37454015c4bb3ad1257ea3894a1e7/workers"}

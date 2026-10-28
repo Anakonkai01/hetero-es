@@ -1,0 +1,8 @@
+control ok    | 14 passed, 1 warning in 2.69s
+killed       release-unknown-probe | 1 failed, 13 passed, 1 warning in 2.75s
+killed       trust-probe-without-checking-repeats | 2 failed, 12 passed, 1 warning in 3.21s
+killed       reuse-qualification-after-profile-change | 1 failed, 13 passed, 1 warning in 2.61s
+killed       accept-late-success-after-cancel | 1 failed, 13 passed, 1 warning in 2.90s
+killed       ignore-probe-ownership-during-reconfiguration | 1 failed, 13 passed, 1 warning in 2.76s
+
+5 of 5 mutants killed.

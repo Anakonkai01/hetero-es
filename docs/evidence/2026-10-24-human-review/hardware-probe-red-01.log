@@ -1,0 +1,130 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+__ test_gpu_probe_rejects_missing_authorization_before_loading_cuda[False-1] ___
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-23/test_gpu_probe_rejects_missing0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7852190b1d30>
+gpu = False, acceptance = '1'
+
+    @pytest.mark.parametrize("gpu,acceptance", [(False, "1"), (True, "0")])
+    def test_gpu_probe_rejects_missing_authorization_before_loading_cuda(tmp_path, monkeypatch, gpu, acceptance):
+        import torch
+    
+        monkeypatch.setenv("HETEROES_GPU_ACCEPTANCE", acceptance)
+        monkeypatch.setattr(torch.cuda, "is_available", lambda: pytest.fail("guard must run first"))
+        with pytest.raises(SystemExit):
+>           probe().main(["--out", str(tmp_path / "gpu.json"), "--device", "cuda", *(["--gpu"] if gpu else [])])
+            ^^^^^^^
+
+runtime/tests/eval/test_probe_reference_backend.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+runtime/tests/eval/test_probe_reference_backend.py:15: in probe
+    spec.loader.exec_module(module)
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_frozen_importlib_external.SourceFileLoader object at 0x7852190c4b30>
+path = '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_reference_backend.py'
+
+>   ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_reference_backend.py'
+
+<frozen importlib._bootstrap_external>:1190: FileNotFoundError
+___ test_gpu_probe_rejects_missing_authorization_before_loading_cuda[True-0] ___
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-23/test_gpu_probe_rejects_missing1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7852190c6510>
+gpu = True, acceptance = '0'
+
+    @pytest.mark.parametrize("gpu,acceptance", [(False, "1"), (True, "0")])
+    def test_gpu_probe_rejects_missing_authorization_before_loading_cuda(tmp_path, monkeypatch, gpu, acceptance):
+        import torch
+    
+        monkeypatch.setenv("HETEROES_GPU_ACCEPTANCE", acceptance)
+        monkeypatch.setattr(torch.cuda, "is_available", lambda: pytest.fail("guard must run first"))
+        with pytest.raises(SystemExit):
+>           probe().main(["--out", str(tmp_path / "gpu.json"), "--device", "cuda", *(["--gpu"] if gpu else [])])
+            ^^^^^^^
+
+runtime/tests/eval/test_probe_reference_backend.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+runtime/tests/eval/test_probe_reference_backend.py:15: in probe
+    spec.loader.exec_module(module)
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_frozen_importlib_external.SourceFileLoader object at 0x7852190f84a0>
+path = '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_reference_backend.py'
+
+>   ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_reference_backend.py'
+
+<frozen importlib._bootstrap_external>:1190: FileNotFoundError
+__ test_cpu_probe_reports_reproducible_bits_tokens_parent_restore_and_limits ___
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-23/test_cpu_probe_reports_reprodu0')
+
+    def test_cpu_probe_reports_reproducible_bits_tokens_parent_restore_and_limits(tmp_path):
+        receipts = []
+        for name in ("first", "second"):
+            path = tmp_path / f"{name}.json"
+>           assert probe().main(["--out", str(path)]) == 0
+                   ^^^^^^^
+
+runtime/tests/eval/test_probe_reference_backend.py:33: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+runtime/tests/eval/test_probe_reference_backend.py:15: in probe
+    spec.loader.exec_module(module)
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_frozen_importlib_external.SourceFileLoader object at 0x785116587440>
+path = '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_reference_backend.py'
+
+>   ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_reference_backend.py'
+
+<frozen importlib._bootstrap_external>:1190: FileNotFoundError
+________________ test_probe_never_rewrites_an_existing_receipt _________________
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-23/test_probe_never_rewrites_an_e0')
+
+    def test_probe_never_rewrites_an_existing_receipt(tmp_path):
+        path = tmp_path / "receipt.json"
+        path.write_text("keep")
+        with pytest.raises(SystemExit):
+>           probe().main(["--out", str(path)])
+            ^^^^^^^
+
+runtime/tests/eval/test_probe_reference_backend.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+runtime/tests/eval/test_probe_reference_backend.py:15: in probe
+    spec.loader.exec_module(module)
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_frozen_importlib_external.SourceFileLoader object at 0x785116b37560>
+path = '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_reference_backend.py'
+
+>   ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/runtime/scripts/probe_reference_backend.py'
+
+<frozen importlib._bootstrap_external>:1190: FileNotFoundError
+=========================== short test summary info ============================
+FAILED runtime/tests/eval/test_probe_reference_backend.py::test_gpu_probe_rejects_missing_authorization_before_loading_cuda[False-1]
+FAILED runtime/tests/eval/test_probe_reference_backend.py::test_gpu_probe_rejects_missing_authorization_before_loading_cuda[True-0]
+FAILED runtime/tests/eval/test_probe_reference_backend.py::test_cpu_probe_reports_reproducible_bits_tokens_parent_restore_and_limits
+FAILED runtime/tests/eval/test_probe_reference_backend.py::test_probe_never_rewrites_an_existing_receipt
+4 failed in 0.68s

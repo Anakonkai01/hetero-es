@@ -1,0 +1,6 @@
+[
+ {"name": "no default minimum", "file": "src/lib/v3Settings.ts", "old": "settings.alphaMinimum ?? Number((alpha / 10).toPrecision(3))", "new": "settings.alphaMinimum"},
+ {"name": "constant keeps minimum", "file": "src/lib/v3Settings.ts", "old": "alphaSchedule: schedule, alphaMinimum: null }", "new": "alphaSchedule: schedule }"},
+ {"name": "review drops alpha schedule", "file": "src/lib/v3Settings.ts", "old": "settings.alphaSchedule === 'constant'\n        ? `${run.alpha}`", "new": "true\n        ? `${run.alpha}`"},
+ {"name": "review chunk default wrong", "file": "src/lib/v3Settings.ts", "old": "`${settings.evalChunk ?? 16}`", "new": "`${settings.evalChunk ?? 64}`"}
+]

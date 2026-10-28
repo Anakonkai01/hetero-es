@@ -1,0 +1,14 @@
+{"status": "ok", "resources": {"NUM_REGS": 54, "LOCAL_SIZE_BYTES": 144, "SHARED_SIZE_BYTES": 128, "MAX_THREADS_PER_BLOCK": 1024}, "error": null}
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 6574.96it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-attention-tree/bench-chunk8-smol-nhan-01.json", "wallSeconds": 9.61710641499667}
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 2687.94it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-attention-tree/bench-chunk8-tiny-nhan-01.json", "wallSeconds": 13.964561026004958}
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7429.62it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-attention-tree/bench-chunk8-qwen-nhan-01.json", "wallSeconds": 11.884169560013106}
+{"status": "ok", "resources": {"NUM_REGS": 75, "LOCAL_SIZE_BYTES": 144, "SHARED_SIZE_BYTES": 128, "MAX_THREADS_PER_BLOCK": 768}, "error": null}
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7008.87it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-attention-tree/bench-chunk16-smol-nhan-01.json", "wallSeconds": 9.622658296008012}
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 2526.02it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-attention-tree/bench-chunk16-tiny-nhan-01.json", "wallSeconds": 13.97283300900017}
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7450.24it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-attention-tree/bench-chunk16-qwen-nhan-01.json", "wallSeconds": 11.856229443990742}

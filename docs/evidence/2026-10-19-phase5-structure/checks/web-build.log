@@ -1,0 +1,122 @@
+vite v8.3.4 building client environment for production...
+transforming...
+✓ 278 modules transformed.
+rendering chunks...
+computing gzip size...
+../../../../../tmp/tmp.u9PvCa0tKu/web/index.html                                                     1.17 kB │ gzip:   0.45 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-mono-vietnamese-400-normal-DDuiU_S-.woff       5.62 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-mono-cyrillic-ext-400-normal-DMdlQ8Kv.woff     5.82 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-mono-vietnamese-400-normal-BulugwFq.woff2      5.86 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-vietnamese-400-normal-fK1oJ5dG.woff       6.39 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-vietnamese-700-normal-BV5B8Are.woff       6.42 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-vietnamese-600-normal-DgdngZtN.woff       6.58 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-vietnamese-500-normal-BEb3_waV.woff       6.58 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-mono-cyrillic-ext-400-normal-xuaO2J-f.woff2    6.91 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-mono-cyrillic-400-normal-CEL4l2ZJ.woff         7.20 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-vietnamese-400-normal-DG4YqDda.woff2      8.20 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-vietnamese-700-normal-CkEo6LDy.woff2      8.22 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-mono-cyrillic-400-normal-BSMlKf0J.woff2        8.35 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-vietnamese-500-normal-e4dixQRQ.woff2      8.41 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-vietnamese-600-normal-DpPYBSTl.woff2      8.46 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-greek-700-normal-CkZN0sRy.woff            8.74 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-greek-400-normal-D9ESIMu3.woff            8.76 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-greek-500-normal-CuWXN6rf.woff            9.14 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-greek-600-normal-D-CqTdkO.woff            9.22 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-greek-700-normal-wyJ6jzdA.woff2           9.92 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-greek-400-normal-_efipK4i.woff2           9.94 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-cyrillic-ext-700-normal-DCQwxkRk.woff    10.16 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-cyrillic-ext-400-normal-Dsrv2Tcn.woff    10.28 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-greek-600-normal-DzTrcv_p.woff2          10.36 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-greek-500-normal-JMMifIXV.woff2          10.37 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-cyrillic-ext-500-normal-DB5PtV2g.woff    10.59 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-cyrillic-ext-600-normal-Bz0x94Yp.woff    10.61 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-mono-latin-ext-400-normal-D3D2R8hC.woff       11.76 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-cyrillic-ext-700-normal-BmRLXWpJ.woff2   12.05 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-cyrillic-ext-400-normal-g30qAdWV.woff2   12.14 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-cyrillic-ext-600-normal-DUMzJB7m.woff2   12.30 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-cyrillic-ext-500-normal-Cs5J6C77.woff2   12.30 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-mono-latin-400-normal-CvHOgSBP.woff           13.14 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-cyrillic-700-normal-RFb1v-CK.woff        13.32 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-mono-latin-ext-400-normal-BmRBH3aV.woff2      13.34 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-cyrillic-400-normal-BTotfTJu.woff        13.51 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-cyrillic-500-normal-ByOcLdNv.woff        13.85 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-cyrillic-600-normal-BGq0mW3O.woff        13.88 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-latin-ext-400-normal-RBey6euL.woff       14.36 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-latin-ext-700-normal-DZH6Xh-4.woff       14.42 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-cyrillic-700-normal-D_uavGvn.woff2       14.57 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-mono-latin-400-normal-DMJ8VG8y.woff2          14.70 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-latin-ext-500-normal-D0aIdm-b.woff       14.73 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-latin-ext-600-normal-DIrixKbi.woff       14.77 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-cyrillic-400-normal-DZqxrq2p.woff2       14.80 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-cyrillic-500-normal-CocWQlwt.woff2       15.00 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-cyrillic-600-normal-71GNu3SW.woff2       15.04 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-latin-ext-400-normal-C5H60-Va.woff2      15.98 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-latin-ext-700-normal-aMgXseD4.woff2      16.18 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-latin-ext-600-normal-DOrvGEcy.woff2      16.44 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-latin-ext-500-normal-DakdToA3.woff2      16.45 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-latin-400-normal-CYLoc0-x.woff           22.10 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-latin-700-normal-Bth3BMcD.woff           22.28 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-latin-400-normal-CDDApCn2.woff2          22.58 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-latin-700-normal-Bxkt5Cjx.woff2          22.83 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-latin-600-normal-Cu4Hd6ag.woff           23.87 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-latin-500-normal-BgVn5rGT.woff           23.91 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-latin-500-normal-6ng42L7E.woff2          24.18 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ibm-plex-sans-latin-600-normal-CuJfVYMP.woff2          24.25 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/index-DokjJQG1.css                                     93.39 kB │ gzip:  17.98 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/workers-CXkjJVzY.js                                     0.15 kB │ gzip:   0.13 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/generations-Dl55ow6u.js                                 0.19 kB │ gzip:   0.14 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/EmptyState-Drc9jVqu.js                                  0.24 kB │ gzip:   0.19 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/navigation-CmGhidhL.js                                  0.26 kB │ gzip:   0.18 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/useEvents-DYtUv1or.js                                   0.27 kB │ gzip:   0.21 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/useGeneration-CM993pZq.js                               0.27 kB │ gzip:   0.21 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/useArtifacts-BbY9LF4V.js                                0.27 kB │ gzip:   0.21 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/useCandidates--XKE84jJ.js                               0.28 kB │ gzip:   0.23 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/useAttempt-BzRTIhpc.js                                  0.29 kB │ gzip:   0.23 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/session-CLMXlAMa.js                                     0.34 kB │ gzip:   0.25 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/experiments-D5VfKjxO.js                                 0.45 kB │ gzip:   0.22 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/NotFoundPage-C6XoNvG8.js                                0.45 kB │ gzip:   0.28 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ProgressBar-XgvT8DMj.js                                 0.46 kB │ gzip:   0.31 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/PageHeader-Dkwr5YHY.js                                  0.46 kB │ gzip:   0.28 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ObjectNotFound-Cqy5Ezt-.js                              0.58 kB │ gzip:   0.33 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/QueryState-Ckn8u9yl.js                                  0.66 kB │ gzip:   0.39 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/useAccess-CizVVKYm.js                                   0.66 kB │ gzip:   0.34 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/rolldown-runtime-hePW80VL.js                            0.71 kB │ gzip:   0.42 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/KeyValue-wzBxWY7I.js                                    0.83 kB │ gzip:   0.44 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/Modal-C4uUt2sk.js                                       0.86 kB │ gzip:   0.50 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/useExperiment-BV3zG5zU.js                               0.89 kB │ gzip:   0.55 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/useQuery-Ceo9iTxc.js                                    0.93 kB │ gzip:   0.57 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/EventRows-DzrEhe-f.js                                   0.97 kB │ gzip:   0.50 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/MyWorkersPage-CxO3UGNw.js                               1.24 kB │ gzip:   0.61 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ExperimentCreatePage-B181ax3l.js                        2.33 kB │ gzip:   1.10 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ExperimentLive-BNGZ8uBp.js                              2.48 kB │ gzip:   1.20 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/client-CNb4okPP.js                                      2.90 kB │ gzip:   1.32 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/LabQueue-BOzMJMHP.js                                    3.01 kB │ gzip:   1.14 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/exportRun-D9UL4aFN.js                                   3.19 kB │ gzip:   1.68 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/RegisterPage-DEWFo7IK.js                                3.31 kB │ gzip:   1.38 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/GetStartedPage-CBryWXXQ.js                              3.39 kB │ gzip:   1.30 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/LoginPage-BGixBcGr.js                                   3.43 kB │ gzip:   1.41 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/labels-B1tYdB_m.js                                      3.44 kB │ gzip:   1.38 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/WorkerFleet-Cy9VdTei.js                                 3.65 kB │ gzip:   1.17 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/eventText-6IRCjRoe.js                                   3.89 kB │ gzip:   1.29 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/WorkerDetailPage-726S-EuK.js                            3.94 kB │ gzip:   1.57 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/WorkspaceListPage-CGOPWW7h.js                           4.31 kB │ gzip:   1.61 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/WorkspaceDetailRoute-CvTGb_NV.js                        4.32 kB │ gzip:   1.70 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/GenerationDetailPage-BymTz06N.js                        4.89 kB │ gzip:   1.61 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ProfilePage-B5mxkHPJ.js                                 5.00 kB │ gzip:   1.58 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/CandidateDetailPage-DWOYkL5P.js                         6.12 kB │ gzip:   2.07 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ArtifactsPage-DudyT51r.js                               6.44 kB │ gzip:   2.30 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ModelsPage-D88CzvUP.js                                  7.35 kB │ gzip:   2.66 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/EventsPage-uxeAZ79m.js                                  7.61 kB │ gzip:   2.61 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ExperimentsPage-DB5vZfFd.js                             8.07 kB │ gzip:   2.60 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/LabDevices-BER4SOlB.js                                  8.46 kB │ gzip:   3.19 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ExplainPage-Cc4bMEXD.js                                 8.82 kB │ gzip:   3.40 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/LabOperationsPage-B4HCGV9L.js                           9.07 kB │ gzip:   2.71 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/DashboardPage-BEbK4-x-.js                              12.39 kB │ gzip:   4.10 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/useExperimentMutations-BnAxIMem.js                     12.69 kB │ gzip:   3.68 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ComparePage-B4im7XwO.js                                12.80 kB │ gzip:   4.70 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/suspense-DWJHhQTn.js                                   22.08 kB │ gzip:   7.35 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/ExperimentDetailPage-CAJOWhkk.js                       27.47 kB │ gzip:   7.96 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/src-BuKkU1_y.js                                       125.68 kB │ gzip:  40.15 kB
+../../../../../tmp/tmp.u9PvCa0tKu/web/assets/index-VF59OFop.js                                     324.51 kB │ gzip: 101.97 kB
+
+✓ built in 121ms

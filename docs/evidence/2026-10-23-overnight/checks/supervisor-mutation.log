@@ -1,0 +1,8 @@
+control ok    | 48 passed in 1.11s
+killed       never mark a failed start | 1 failed, 46 passed in 1.20s
+killed       resend also while stopping | 1 failed, 47 passed in 1.15s
+killed       resend with a new launch | 1 failed, 46 passed in 1.20s
+killed       resend result not confirmed | 1 failed, 46 passed in 1.17s
+killed       resend for every unreachable worker | 1 failed, 46 passed in 1.16s
+
+5 of 5 mutants killed.

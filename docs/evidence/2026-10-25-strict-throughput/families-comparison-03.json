@@ -1,0 +1,64 @@
+{
+  "hardwareQualified": false,
+  "fixture": true,
+  "comparisonEqual": true,
+  "families": [
+    "qwen2",
+    "llama",
+    "llama-wide",
+    "mistral"
+  ],
+  "casesPerMachine": 8,
+  "inputs": {
+    "families-nhan-03.json": "683824e922cfb1cc7115fc8c1fdb6ce9ee535c587498b953a05a433fd521d5f1",
+    "families-nhut-03.json": "10d4797e82a43e74e38f4c2c9aaeb631f3d462f6e97d7482eb0c86412e9a27ed",
+    "families-thao-03.json": "11098b91e8f4474426b65fbc70a6dc482b82bc496705ae51d83c27aa4679cac4",
+    "families-quang-03.json": "cfe3493d82498a73b2a5305b4d78caf16c9df23f5530cef53ed0cda4e2f1624a"
+  },
+  "machines": {
+    "families-nhan-03.json": {
+      "python": "3.12.14",
+      "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+      "torch": "2.13.0+cu132",
+      "transformers": "5.17.0",
+      "gpu": "NVIDIA GeForce RTX 5070 Ti",
+      "cc": [
+        12,
+        0
+      ]
+    },
+    "families-nhut-03.json": {
+      "python": "3.12.15",
+      "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.39",
+      "torch": "2.13.0+cu132",
+      "transformers": "5.17.0",
+      "gpu": "NVIDIA GeForce RTX 5070 Ti",
+      "cc": [
+        12,
+        0
+      ]
+    },
+    "families-thao-03.json": {
+      "python": "3.12.15",
+      "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+      "torch": "2.13.0+cu132",
+      "transformers": "5.17.0",
+      "gpu": "NVIDIA GeForce RTX 3060",
+      "cc": [
+        8,
+        6
+      ]
+    },
+    "families-quang-03.json": {
+      "python": "3.14.4",
+      "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+      "torch": "2.13.0+cu132",
+      "transformers": "5.17.0",
+      "gpu": "NVIDIA GeForce RTX 3060",
+      "cc": [
+        8,
+        6
+      ]
+    }
+  }
+}

@@ -1,0 +1,26 @@
+[
+ {
+  "name": "validate before preparing",
+  "file": "src/heteroes/product/runner.py",
+  "old": "base_validation = lambda: tracker.observe(-1, initial)  # noqa: E731",
+  "new": "tracker.observe(-1, initial)"
+ },
+ {
+  "name": "background error swallowed",
+  "file": "src/heteroes/product/runner.py",
+  "old": "            self.error = error\n",
+  "new": "            pass\n"
+ },
+ {
+  "name": "join does not wait",
+  "file": "src/heteroes/product/runner.py",
+  "old": "        self.thread.join()\n",
+  "new": "        pass\n"
+ },
+ {
+  "name": "first generation not held for the validation",
+  "file": "src/heteroes/product/runner.py",
+  "old": "                if validating:\n                    validating.join()\n",
+  "new": "                pass\n"
+ }
+]

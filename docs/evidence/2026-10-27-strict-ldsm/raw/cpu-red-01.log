@@ -1,0 +1,12 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____ test_stream_input_load_policy_scopes_the_ldmatrix_route_to_sm120_b22 _____
+
+    def test_stream_input_load_policy_scopes_the_ldmatrix_route_to_sm120_b22():
+>       from heteroes.eval.integer_cuda import stream_input_plan
+E       ImportError: cannot import name 'stream_input_plan' from 'heteroes.eval.integer_cuda' (/home/pc5070ti/projects/heteroes-codex-frozen-perf/runtime/src/heteroes/eval/integer_cuda.py)
+
+tests/eval/test_integer_stream.py:24: ImportError
+=========================== short test summary info ============================
+FAILED tests/eval/test_integer_stream.py::test_stream_input_load_policy_scopes_the_ldmatrix_route_to_sm120_b22
+1 failed, 81 deselected in 0.67s

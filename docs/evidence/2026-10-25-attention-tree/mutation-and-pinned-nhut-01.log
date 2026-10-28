@@ -1,0 +1,10 @@
+control ok    | 56 passed in 2.82s
+killed       append-positive-zero-in-tree-finish | 1 failed in 1.28s
+killed       include-padded-tail-zero-nodes | 1 failed, 4 passed in 2.52s
+killed       omit-final-partial-group | 1 failed, 4 passed in 2.51s
+killed       replace-adjacent-tree-with-left-fold | 1 failed, 41 passed in 2.69s
+killed       multiply-value-subtrees-instead-of-add | 1 failed, 7 passed in 2.55s
+killed       skip-masked-query-key-overflow | 1 failed, 55 passed in 2.66s
+
+6 of 6 mutants killed.
+{"status": "ok", "nativeWindows": false, "error": null}

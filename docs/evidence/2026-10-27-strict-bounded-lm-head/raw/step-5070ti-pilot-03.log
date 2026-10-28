@@ -1,0 +1,56 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7758.51it/s]
+USDT:2026-10-27 00:35:07 3461824:3461824 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-10-27 00:35:07 3461824:3461824 SyncActivityProfilerHandler.cpp:59] profiler_stop
+step kernels 326 span 2384 us busy 2345 us
+   790.8 us   48x  gaps-before     4.0 us  integer_stream_group
+   460.1 us   48x  gaps-before     3.9 us  integer_stream
+   373.6 us   24x  gaps-before     2.0 us  strict_attention_gqa
+   226.7 us    1x  gaps-before     0.1 us  bound_scores
+   117.0 us   24x  gaps-before     1.9 us  finish_silu
+   105.0 us   49x  gaps-before     4.1 us  strict_rms_quant
+    77.5 us   48x  gaps-before     3.9 us  finish_residual
+    64.9 us   24x  gaps-before     2.2 us  finish_qkv_rope
+    44.1 us   24x  gaps-before     2.1 us  integer_input
+    41.6 us   24x  gaps-before     1.9 us  pack_rows
+    31.0 us    1x  gaps-before    -0.1 us  bound_select
+     3.0 us    3x  gaps-before     0.3 us  void at::native::vectorized_gather_kernel<16, long>(char*, c
+     2.0 us    1x  gaps-before     0.1 us  void at::native::unrolled_elementwise_kernel<at::native::dir
+     1.8 us    1x  gaps-before     0.1 us  void at::native::index_elementwise_kernel<128, 4, at::native
+     1.4 us    1x  gaps-before     0.1 us  bound_rows
+     1.4 us    1x  gaps-before     0.1 us  decode_publish
+     1.0 us    1x  gaps-before    -0.1 us  decode_greedy_select
+     0.9 us    1x  gaps-before     0.0 us  decode_layout
+     0.9 us    1x  gaps-before    10.8 us  void at::native::vectorized_elementwise_kernel<4, at::native
+     0.6 us    1x  gaps-before     1.2 us  Memcpy DtoH (Device -> Pinned)
+layer 1 sequence:
+       0.9 us  decode_layout
+       1.8 us  void at::native::index_elementwise_kernel<128, 4, 
+       0.9 us  void at::native::vectorized_gather_kernel<16, long
+       2.0 us  void at::native::unrolled_elementwise_kernel<at::n
+       1.2 us  void at::native::vectorized_gather_kernel<16, long
+       1.0 us  void at::native::vectorized_gather_kernel<16, long
+       2.3 us  strict_rms_quant
+       6.3 us  integer_stream_group
+       2.8 us  finish_qkv_rope
+      16.1 us  strict_attention_gqa
+       1.8 us  integer_input
+       4.6 us  integer_stream
+       1.6 us  finish_residual
+       2.1 us  strict_rms_quant
+      26.8 us  integer_stream_group
+       4.8 us  finish_silu
+       1.7 us  pack_rows
+      14.4 us  integer_stream
+       1.7 us  finish_residual
+       2.1 us  strict_rms_quant
+       6.5 us  integer_stream_group
+       2.7 us  finish_qkv_rope
+      15.6 us  strict_attention_gqa
+       1.8 us  integer_input
+tail:
+     226.7 us  bound_scores
+      31.0 us  bound_select
+       1.0 us  decode_greedy_select
+       1.4 us  decode_publish
+       0.6 us  Memcpy DtoH (Device -> Pinned)
+       0.9 us  void at::native::vectorized_elementwise_kernel<4, 

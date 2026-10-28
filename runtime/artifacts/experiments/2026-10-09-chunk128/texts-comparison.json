@@ -1,0 +1,19 @@
+{
+ "reference_gpu": "NVIDIA GeForce RTX 5070 Ti",
+ "chunk": 128,
+ "against": [
+  {
+   "gpu": "NVIDIA GeForce RTX 3060",
+   "conditions": 9,
+   "texts_compared": 1152,
+   "differing": []
+  },
+  {
+   "gpu": "NVIDIA GeForce RTX 3060",
+   "conditions": 9,
+   "texts_compared": 1152,
+   "differing": []
+  }
+ ],
+ "all_equal": true
+}

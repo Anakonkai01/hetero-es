@@ -1,0 +1,29 @@
+{
+  "build": "lf1-20261012-r5",
+  "runtime": {
+    "passed": 2115,
+    "skipped": 100,
+    "gpuWork": false
+  },
+  "backend": {
+    "passed": 221
+  },
+  "workerNode": 25,
+  "serverNode": 1,
+  "mutationChecks": {
+    "worker": 10,
+    "backend-role": 6,
+    "runtime-routes": 8,
+    "backend-control": 7,
+    "agent-header": 1,
+    "storage": 6,
+    "writer": 4,
+    "prepare": 2,
+    "packaged-bridge": 1
+  },
+  "mutantsKilled": 45,
+  "packagedLinuxServer": true,
+  "packagedLinuxWorker": true,
+  "nativeWindowsRun": false,
+  "publiclyPublished": false
+}

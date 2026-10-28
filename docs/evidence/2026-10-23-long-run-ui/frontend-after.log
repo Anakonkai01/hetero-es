@@ -1,0 +1,28 @@
+✔ trimmed attempt history does not reduce completed-generation totals or leave stopped workers working (0.891262ms)
+✔ a failed run stays stopped instead of showing an update continuing after its end (0.147787ms)
+✔ a terminal worker block appears at its event time and an explicit retry clears its replay state (0.757703ms)
+✔ before the run nothing is happening; each worker is idle, and an unstarted worker says so (0.472241ms)
+✔ a busy worker shows its candidate with a progress that follows the clock (0.117677ms)
+✔ finished jobs are counted per worker; a failed attempt counts as failed and not as done (0.090141ms)
+✔ the generation moves through evaluating, updating the model and finished before the next opens (0.141348ms)
+✔ between two generations of a live run the screen says so instead of "finished" (0.160799ms)
+✔ the last planned generation reads finished as soon as it is done, even before the run is marked complete (0.07466ms)
+✔ a running job with no end yet keeps moving but never claims to be finished (0.113886ms)
+✔ packets fly from the coordinator when a job starts and back when it ends, for as long as the flight lasts (0.126655ms)
+✔ marks appear only shortly after they happen, and an unavailable worker shows as offline meanwhile (0.086107ms)
+✔ a member that stops answering shows as lost until it answers again, even with a job still leased (finding 11) (0.085181ms)
+✔ a worker that has started but is not ready yet shows as loading the model, until it is ready or has work (0.086246ms)
+✔ rewards of completed generations accumulate for the chart (0.086569ms)
+✔ bounds cover the whole run, and a running run ends at "now" (0.148638ms)
+✔ the player advances by real time times speed, stops at the end and cannot go before the start (0.065912ms)
+✔ a real finished run replays: both jobs complete, the model is updated and the totals reach the end (0.069514ms)
+✔ a streamed update replaces what changed and never goes backwards in time (0.061342ms)
+✔ a replay starts from the beginning, playing; after watching the run live it stays on the finished picture (0.052842ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 60.741899

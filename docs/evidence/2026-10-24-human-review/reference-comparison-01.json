@@ -1,0 +1,44 @@
+{
+  "formatVersion": 1,
+  "status": "ok",
+  "hardwareQualified": false,
+  "fixtureComparisonEqual": true,
+  "fixtureMachines": 4,
+  "fixtureCasesPerMachine": 4,
+  "fullModelComparedFields": [
+    "modelFilesHash",
+    "schemaHash",
+    "parentBeforeSha256",
+    "parentAfterSha256",
+    "promptTokenIds",
+    "inferenceBackend",
+    "backendIdentity",
+    "backendFingerprint",
+    "sigma",
+    "maxNewTokens",
+    "samples",
+    "scorer"
+  ],
+  "fullModelComparisonEqual": true,
+  "fullModelMachines": 4,
+  "fullModelCandidatesPerMachine": 1,
+  "fullModelPromptCount": 1,
+  "fullModelMaxNewTokens": 1,
+  "inputs": {
+    "reference-fixture-cpu-01.json": "d12dc28f6ae46943ea192bc8118f0d521d64b91ef51c6069040b9d8d63c2000b",
+    "reference-fixture-5070ti-01.json": "557553ce6b733234b3a73040207eaa00e466e553ffb2cd68586abe13539f5a2b",
+    "reference-fixture-quang-01.json": "8713f64efb6b4264f5ee5e5de8ee0504364f21c203520e77e7013e7fc85412a0",
+    "reference-fixture-thao-01.json": "1b07b6e1957e3a478472cab7549cda059ba93821e71e16269d42a27e41749b57",
+    "qwen-cpu-reference-01.json": "d8a0bec6764f10629175710adebd052013e09bfaed4e978904ad1fe53d7199c1",
+    "qwen-5070ti-reference-01.json": "5c3582f4be06fd0b61d2fde3d57089d472ed951644ad41ce17e65ae92d42f9b6",
+    "qwen-quang-reference-01.json": "55cc6b2426ac9075794611e24eafe1985aefd38c3e23dedefba2fb66109f0c91",
+    "qwen-thao-reference-01.json": "e15ece8db5745d7ae62f78adb3a0ac79cf94c1ba9a8b43411ed3761ebbe287e3"
+  },
+  "sourcePayloadSha256": "bbfc4d4f6d9bbc3cb6b498b7d42dfcde79a3795016443090456531a6b2cebb1a",
+  "limits": [
+    "WSL2 is not native Windows acceptance",
+    "finite vectors and one full-model token are not universal inference qualification",
+    "the full-model lifecycle probe does not record a separate perturbed-weight hash",
+    "no production lifecycle, recipe integration, throughput or quantization acceptance"
+  ]
+}

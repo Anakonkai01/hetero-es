@@ -1,0 +1,26 @@
+{
+ "gpu": "NVIDIA GeForce GTX 1660 SUPER",
+ "sm_count": 22,
+ "torch": "2.13.0+cu132",
+ "cuda": "13.2",
+ "engine": "torch_cuda_philox_chunked_f32_to_f16_v1",
+ "fingerprint": "9492a49ab70efe98e2b710e9a9e927f54be658489eae4b549c0cbf7340b9ffaf",
+ "schema_hash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+ "sha256": {
+  "original": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+  "perturbed_seed0": "6a5722da07a5a3f3674f50b6d8f8de04a694d49def1e3ec93514f711950df371",
+  "restored_after_seed0": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+  "perturbed_seed1": "b6ff5f8b01249c25cafc7388c1a1d28971a3b8f373028c767c6945ec9840733a",
+  "restored_after_seed1": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+  "perturbed_seed2": "cba9ef2c8c2bb00bf9f20a50c3f0901831f9c77e3e6367ca4a5044ceac35cf84",
+  "restored_after_seed2": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+  "updated": "3f64d741683d75d7f456ea6c96ab40026950f5423310d04ebec1a11400051449"
+ },
+ "seconds": {
+  "cuda_perturb_seed0": 0.6036507169992547,
+  "cuda_perturb_seed1": 0.5753445590016781,
+  "cuda_perturb_seed2": 0.5759452559977944,
+  "cuda_update_8_candidates": 4.4584718070000235,
+  "cpu_canonical_perturb_seed0": 3.6660553500005335
+ }
+}

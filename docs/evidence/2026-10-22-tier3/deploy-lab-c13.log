@@ -1,0 +1,17 @@
+=== 2026-10-22T09:12:13+07:00 deploy a198cb0 (candidate12 + b2 fix)
+lab idle: no reservations
+Owned CPU service and tunnels stopped.
+database copied at stop
+ backend/agent_scheduling.py      |  5 ++++-
+ backend/devices.py               |  1 +
+ backend/tests/test_membership.py | 18 ++++++++++++++++++
+ 3 files changed, 23 insertions(+), 1 deletion(-)
+{
+  "webUrl": "https://lab.heteroes.site",
+  "computeUrl": "https://compute.heteroes.site",
+  "privateBulkUrl": "http://100.110.165.40:8765",
+  "computeStarted": false,
+  "queue": "reopens when this action ends"
+}
+{"ok":true,"dataSource":"real","runtimeIssue":null,"agentMode":true,"deviceConfiguration":true,"recipeVersions":[1,2,3],"cloudStorageConfigured":false,"recoveryStorageConfigured":true,"recoveryStorageMode":"local","serverInstanceId":"34d68e114a5316bb76de9c12f657dff0","uiUrl":"https://lab.heteroes.si
+=== 2026-10-22T09:12:22+07:00 done

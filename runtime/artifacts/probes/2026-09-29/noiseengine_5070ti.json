@@ -1,0 +1,145 @@
+{
+  "probe_version": 1,
+  "engine": {
+    "version": "numpy_pcg64_normal_f32_to_f16_v1",
+    "distribution": "standard_normal",
+    "bit_generator": "numpy.random.PCG64",
+    "generation_dtype": "numpy.float32",
+    "application_dtype": "numpy.float16 / torch.float16 bytes",
+    "seed_derivation": "SHA256 first 128 bits little-endian",
+    "candidate_seed": 0,
+    "chunk_elements": 262144,
+    "chunk_seed_identity": "engine_version,candidate_seed,schema_hash,parameter_index,chunk_index,chunk_elements"
+  },
+  "runtime": {
+    "hostname": "5070ti",
+    "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43",
+    "python": "3.12.14 (main, Sep  2 2026, 23:27:36) [GCC 15.3.0]",
+    "numpy": "2.5.3",
+    "torch": "2.13.0+cu132",
+    "transformers": "5.17.0"
+  },
+  "model": {
+    "id": "Qwen/Qwen2.5-0.5B-Instruct",
+    "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+    "schema_sha256": "152e9d82e61d6610a414466026ac60a13e718924dfdf0416809686adcf4188e1",
+    "parameter_tensors": 290,
+    "parameter_elements": 494032768
+  },
+  "mode": "sampled",
+  "target_results": [
+    {
+      "index": 0,
+      "name": "model.embed_tokens.weight",
+      "shape": [
+        151936,
+        896
+      ],
+      "numel": 136134656,
+      "total_chunks": 520,
+      "probed_chunks": [
+        0,
+        260,
+        519
+      ],
+      "generated_elements": 606208,
+      "chunk_sha256": {
+        "0": "1c7a5a141fb785001881807b2bf0c9f81a1f2acf61877b1d2b2e4d029cfb8a35",
+        "260": "75590eb7b03802aee2a30454ad524118e1b48024edcaf943bc70b54a4aea1f97",
+        "519": "8f57f603def436e1a642e71988b80a39331efaf9273e32634fe9f305f48ec405"
+      },
+      "aggregate_sha256": "ab5cc66aa56a98fa8ce8f735b81ccf3cc5b6b2e1efcf8a3ed826caf54d8ca7b8",
+      "elapsed_seconds": 0.006045168000127887
+    },
+    {
+      "index": 1,
+      "name": "model.layers.0.self_attn.q_proj.weight",
+      "shape": [
+        896,
+        896
+      ],
+      "numel": 802816,
+      "total_chunks": 4,
+      "probed_chunks": [
+        0,
+        2,
+        3
+      ],
+      "generated_elements": 540672,
+      "chunk_sha256": {
+        "0": "34cc1872a32730731bb5b753277885281dd31aa0c27fdfbdcdd09c001a23eda8",
+        "2": "77067e1ef976570074d01555729cd99727ae108b6b790280360fa36feea5eae3",
+        "3": "ceb81098eaa04ed09fb72be6cfa090b59a4247b0282f5dd693f6c20c27b7b581"
+      },
+      "aggregate_sha256": "ad78b2cb856f4b1d39b7179ec2a3fdfa3cda74c25b48c50016ddb7171f0e7b0a",
+      "elapsed_seconds": 0.004830297000808059
+    },
+    {
+      "index": 153,
+      "name": "model.layers.12.mlp.up_proj.weight",
+      "shape": [
+        4864,
+        896
+      ],
+      "numel": 4358144,
+      "total_chunks": 17,
+      "probed_chunks": [
+        0,
+        8,
+        16
+      ],
+      "generated_elements": 688128,
+      "chunk_sha256": {
+        "0": "271891ca44247663991f51547149a4bd801bdd5e1d7533593c260e51a2115024",
+        "8": "52d7773f2a55a57e9eae7665ec3742e189bb783239af926916730179269da239",
+        "16": "7858fa3479b33c6ba9df5663ce1c6ddbb6978065212f6c9f4b2da7f2b2f991db"
+      },
+      "aggregate_sha256": "944db9a6086218acc0086c2b7731c25fa3a4c38054a5c7f138a73ef1c5d79493",
+      "elapsed_seconds": 0.0061454639999283245
+    },
+    {
+      "index": 286,
+      "name": "model.layers.23.mlp.down_proj.weight",
+      "shape": [
+        896,
+        4864
+      ],
+      "numel": 4358144,
+      "total_chunks": 17,
+      "probed_chunks": [
+        0,
+        8,
+        16
+      ],
+      "generated_elements": 688128,
+      "chunk_sha256": {
+        "0": "81ed041f4604c434cfe9a1080a08f4d5f64d133d121c6ce5bc384af17e7acfe5",
+        "8": "f7ef0576a00632ee6090cdc34a5d23d616116ff3920afcfca0ccac1fd0e7fcbf",
+        "16": "4c00c9e0810607d5d4ee03a49aced5451761e84907c00f0de90e6405377123a8"
+      },
+      "aggregate_sha256": "51e0ce3c3cf644d30fe400f5cf31fb2435959ae94f78f7a9f443dd6713485113",
+      "elapsed_seconds": 0.006109108000600827
+    },
+    {
+      "index": 289,
+      "name": "model.norm.weight",
+      "shape": [
+        896
+      ],
+      "numel": 896,
+      "total_chunks": 1,
+      "probed_chunks": [
+        0
+      ],
+      "generated_elements": 896,
+      "chunk_sha256": {
+        "0": "3ed137fd746d5f0655e81731e39e80df6857404c5644dad5dd40b6a6767a25ae"
+      },
+      "aggregate_sha256": "bdddc801fb26e3392168c64e2a232dc5ad30c7b1e89d67054e49ca752c7daf93",
+      "elapsed_seconds": 0.0001392759986629244
+    }
+  ],
+  "global_probe_sha256": "f9a9baafce10b31b7b3213b52921d70888ee4bd730aec5703cce2b5982087140",
+  "generated_elements": 2524032,
+  "noise_generation_seconds": 0.023269313000128022
+}

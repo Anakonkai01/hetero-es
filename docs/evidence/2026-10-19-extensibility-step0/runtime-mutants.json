@@ -1,0 +1,15 @@
+[
+  {"name": "recipe/record hashing: spaced canonical JSON", "file": "src/heteroes/canonical.py", "old": "separators=(\",\", \":\"),", "new": "separators=(\", \", \":\"),"},
+  {"name": "coefficients: sample instead of population std", "file": "src/heteroes/es/update.py", "old": "std_r = rewards.std(ddof=0, dtype=np.float64)", "new": "std_r = rewards.std(ddof=1, dtype=np.float64)"},
+  {"name": "workload: arith16 system prompt edited", "file": "src/heteroes/eval/workload.py", "old": "SYSTEM_PROMPT = \"You are a calculator. Answer with only with number\"", "new": "SYSTEM_PROMPT = \"You are a calculator. Answer with only a number\""},
+  {"name": "record text: an extra key", "file": "src/heteroes/generation_record.py", "old": "        return canonical_json_bytes(self.to_dict()).decode(\"ascii\")", "new": "        return canonical_json_bytes({**self.to_dict(), \"x\": 1}).decode(\"ascii\")"},
+  {"name": "v2 sampler: shifted seed", "file": "src/heteroes/study/data.py", "old": "random.Random(int(digest, 16)).sample", "new": "random.Random(int(digest, 16) + 1).sample"},
+  {"name": "v2 cosine schedule: wrong denominator", "file": "src/heteroes/study/recipe.py", "old": "math.cos(math.pi * generation / (total - 1))", "new": "math.cos(math.pi * generation / total)"},
+  {"name": "catalog: a workload renamed", "file": "src/heteroes/catalog.py", "old": "\"cot_l1_q128\")", "new": "\"cot_l1_q127\")"},
+  {"name": "task: dataset texts reversed", "file": "src/heteroes/executor.py", "old": "tuple(row[\"output\"] for row in raw[\"rows\"])", "new": "tuple(row[\"output\"] for row in raw[\"rows\"][::-1])"},
+  {"name": "task: workload texts dropped", "file": "src/heteroes/executor.py", "old": "tuple(record.output_text for record in result.records))", "new": "())"},
+  {"name": "task: stale texts kept after a failure", "file": "src/heteroes/executor.py", "old": "        self.last_timing = None\n        self.last_completions = None\n", "new": "        self.last_timing = None\n"},
+  {"name": "task: completions not published", "file": "src/heteroes/executor.py", "old": "        self.last_completions = completions\n", "new": ""},
+  {"name": "task: dataset branch skipped", "file": "src/heteroes/executor.py", "old": "    if rows is not None:\n", "new": "    if rows is not None and False:\n"},
+  {"name": "task: every recipe treated as arith16", "file": "src/heteroes/executor.py", "old": "    if recipe.workload_name == \"arith16\":\n", "new": "    if True:\n"}
+]

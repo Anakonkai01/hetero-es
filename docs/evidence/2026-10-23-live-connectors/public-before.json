@@ -1,0 +1,12 @@
+{
+  "base": "https://lab.heteroes.site",
+  "run": "d5ea4ddb2d40429b8e6f8af81c54b22c",
+  "rows": [
+    "cli-71b757062fd9",
+    "cli-34312a79fbbc",
+    "desktop-d9017660e75f"
+  ],
+  "pageErrors": [],
+  "assertions": false,
+  "checkedAt": "2026-10-23T02:34:36.812Z"
+}

@@ -1,0 +1,37 @@
+{
+ "gpu": "NVIDIA GeForce GTX 1660 SUPER",
+ "capability": "7.5",
+ "sm_count": 22,
+ "max_threads_per_sm": 1024,
+ "torch": "2.13.0+cu132",
+ "cuda": "13.2",
+ "wave_elements": 90112,
+ "one_call_fp32": {
+  "1000": "caa8634105a36193",
+  "4096": "d3925a173d26e15e",
+  "16384": "01530e8f7bb91cc1",
+  "22528": "449983149e794903",
+  "22529": "31ca45652384af17",
+  "32768": "c7383190e7f6265f",
+  "65536": "0763367040100cb8",
+  "90112": "0a9c74e4e0b9cf46",
+  "107520": "8d26dd9d94d85c62",
+  "131072": "b26d3dc861cc7f69",
+  "430080": "e87d243a126faccb",
+  "1048576": "c2c5dfa926f80df8",
+  "4194304": "00967fa3c10a89f9",
+  "16777216": "a08fed37bc1800ab"
+ },
+ "one_call_fp16_4M": "de83e977f7e03a20",
+ "chunked_fp32": {
+  "8192": "dbad006a809004ba",
+  "16384": "32bff642ac7f3161",
+  "22528": "ed71a977ee4eb1e7",
+  "32768": "10fdc4dd890bcf43",
+  "65536": "c4008179a7226e7f"
+ },
+ "chunked_65536_whole_model_seconds": 0.44048970000221743,
+ "chunked_65536_calls": 7538,
+ "chunked_16384_whole_model_seconds": 1.7806344920027186,
+ "chunked_16384_calls": 30153
+}

@@ -1,0 +1,22 @@
+"""Native Windows: qualify this device against the shipped desktop-v3 reference; writes the result JSON."""
+import json
+import os
+from pathlib import Path
+import sys
+
+private = Path(os.environ["LOCALAPPDATA"]) / "HeteroES-v3-20261019" / "qual-e2d6c32"
+sys.path[:0] = [str(Path(os.environ["LOCALAPPDATA"]) / "HeteroES-v3-20261019" / "deps"), str(private / "runtime/src")]
+model = Path(os.environ["APPDATA"]) / "@heteroes/worker/runtimes/c64f3012b965/models/7ae557604adf67be50417f59c2c2f167def9a775"
+from heteroes.product.qualification_v3 import qualify  # noqa: E402
+
+reference_dir = private / "reference"
+reference = json.loads((reference_dir / "reference-v3.json").read_text(encoding="utf-8"))
+with (private / sys.argv[1]).open("x", encoding="utf-8") as out:
+    try:
+        result = qualify(model, reference, reference_dir, device="cuda", emit=lambda e: print(json.dumps(e), flush=True))
+        out.write(json.dumps({"result": result}, indent=1))
+        print("QUALIFIED", flush=True)
+    except Exception as error:
+        out.write(json.dumps({"error": type(error).__name__, "message": str(error)}, indent=1))
+        print("FAILED", type(error).__name__, error, flush=True)
+        sys.exit(1)

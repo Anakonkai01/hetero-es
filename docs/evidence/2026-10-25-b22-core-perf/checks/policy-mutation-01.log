@@ -1,0 +1,4 @@
+control ok    | 1 passed, 73 deselected in 0.68s
+killed       enable paired reads on SM86 | 1 failed, 73 deselected in 0.67s
+
+1 of 1 mutants killed.

@@ -1,0 +1,18 @@
+{
+  "gpuWork": false,
+  "realLab": false,
+  "agentStarted": false,
+  "packagedApp": true,
+  "platformExercised": "linux",
+  "windowsExercised": false,
+  "stationShowsTheGpu": true,
+  "signedOutExplained": true,
+  "gaugesStayUnknown": true,
+  "compactWindow": [
+    820,
+    780
+  ],
+  "nextBlockerExplained": true,
+  "advancedOpensOnDemand": true,
+  "noOverflow": true
+}

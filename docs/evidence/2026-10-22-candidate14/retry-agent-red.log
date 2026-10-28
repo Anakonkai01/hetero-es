@@ -1,0 +1,33 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______ test_agent_retries_only_its_assignment_and_deduplicates_command ________
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-425/test_agent_retries_only_its_as0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x721437089fa0>
+
+    def test_agent_retries_only_its_assignment_and_deduplicates_command(tmp_path, monkeypatch):
+        a, root = coordinating(tmp_path)
+        retries = []
+        monkeypatch.setattr(a.manager, "retry_worker", lambda *args: retries.append(args))
+        command = {
+            "commandId": "retry-1", "kind": "RETRY_WORKER", "assignmentId": "c" * 32,
+            "epoch": 1, "workerId": "test", "requestId": "retry-request-1",
+        }
+>       a.handle(command)
+
+tests/ledger/test_device_agent.py:912: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <heteroes.product.agent.Agent object at 0x721437089400>
+command = {'commandId': 'retry-1', 'kind': 'RETRY_WORKER', 'assignmentId': 'cccccccccccccccccccccccccccccccc', 'epoch': 1, ...}
+
+    def handle(self, command):
+        kind = command.get("kind")
+        if kind not in COMMAND_KINDS:
+>           raise InvalidCommand("Unsupported device command")
+E           heteroes.product.agent.InvalidCommand: Unsupported device command
+
+src/heteroes/product/agent.py:555: InvalidCommand
+=========================== short test summary info ============================
+FAILED tests/ledger/test_device_agent.py::test_agent_retries_only_its_assignment_and_deduplicates_command
+1 failed, 65 deselected in 0.08s

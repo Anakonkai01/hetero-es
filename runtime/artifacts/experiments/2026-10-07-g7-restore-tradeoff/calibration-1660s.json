@@ -1,0 +1,77 @@
+{
+ "gpu": "NVIDIA GeForce GTX 1660 SUPER",
+ "torch": "2.13.0+cu132",
+ "chunk": 16,
+ "max_new_tokens": 256,
+ "levels": {
+  "1": {
+   "mean_reward": 0.5625,
+   "tokens": 3392,
+   "seconds": 24.06463140499909,
+   "tokens_per_second": 140.95374838342047,
+   "sample": [
+    [
+     "What is 85 * 19?",
+     1615,
+     "od:\n\n\\[\n\\begin{array}{r}\n  85 \\\\\n\\times 19 \\\\\n\\hline\n  765 \\\\\n\\end{array}\n\\]\n\nSo, \\( 85 \\times 19 = 765 \\). Answer: 765."
+    ],
+    [
+     "What is 73 * 13?",
+     949,
+     "od:\n\n\\[\n\\begin{array}{r}\n  73 \\\\\n\\times 13 \\\\\n\\hline\n  509 \\\\\n\\end{array}\n\\]\n\nSo, \\( 73 \\times 13 = 509 \\). Answer: 509."
+    ],
+    [
+     "What is 41 + 33?",
+     74,
+     "Step-by-step solution:\n\n1. Start with the numbers: 41 and 33.\n2. Add them together:\n   41 + 33 = 74\n\nAnswer: 74"
+    ]
+   ]
+  },
+  "2": {
+   "mean_reward": 0.96875,
+   "tokens": 3631,
+   "seconds": 22.360375708998617,
+   "tokens_per_second": 162.38546468334857,
+   "sample": [
+    [
+     "What is 19 * 13 - 39?",
+     208,
+     "rom the result of the multiplication**:\n   \\[\n   247 - 39 = 208\n   \\]\n\nTherefore, the final answer is:\n\\[\n\\boxed{208}\n\\]"
+    ],
+    [
+     "What is 31 - 3 + 10?",
+     38,
+     "31 - 3 = 28\n   \\]\n\n2. **Add 10 to the result**:\n   \\[\n   28 + 10 = 38\n   \\]\n\nThus, the final answer is:\n\\[\n\\boxed{38}\n\\]"
+    ],
+    [
+     "What is 26 - 19 + 12?",
+     19,
+     "\n2. **Add 12 to the result of the subtraction**:\n   \\[\n   7 + 12 = 19\n   \\]\n\nThus, the final answer is:\n\\[\n\\boxed{19}\n\\]"
+    ]
+   ]
+  },
+  "3": {
+   "mean_reward": 0.28125,
+   "tokens": 7054,
+   "seconds": 29.76010940500055,
+   "tokens_per_second": 237.02869851730875,
+   "sample": [
+    [
+     "A shop has 30 boxes with 35 pens in each box. It sells 422 pens. How many pens remain?",
+     628,
+     "\nRemaining pens = 1050 - 422\n\nNow let's do the subtraction:\n\nRemaining pens = 628 pens\n\nSo, the answer is 'Answer: 628'."
+    ],
+    [
+     "A shop has 44 boxes with 18 pens in each box. It sells 380 pens. How many pens remain?",
+     412,
+     "ct the number of pens sold from the initial total:\n   \\[\n   \\text{Remaining pens} = \\text{Total pens} - \\text{Pens sold}"
+    ],
+    [
+     "A shop has 21 boxes with 33 pens in each box. It sells 402 pens. How many pens remain?",
+     291,
+     "   Given that 402 pens were sold, we can calculate the remaining pens as follows:\n   \\[\n   \\text{Remaining pens} = 693 -"
+    ]
+   ]
+  }
+ }
+}

@@ -1,0 +1,7 @@
+control ok    | 5 passed in 0.05s
+killed       native-windows-uses-wsl-libraries | 1 failed, 4 passed in 0.06s
+killed       intent-before-environment-preparation | 1 failed, 4 passed in 0.07s
+killed       failed-os-creation-keeps-ownership | 1 failed, 4 passed in 0.06s
+killed       post-creation-identity-failure-loses-ownership | 1 failed, 4 passed in 0.06s
+
+4 of 4 mutants killed.

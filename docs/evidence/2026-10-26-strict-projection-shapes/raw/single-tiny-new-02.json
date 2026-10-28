@@ -1,0 +1,34 @@
+{
+  "label": "new",
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "model": "tiny",
+  "modelFiles": {
+    "config.json": "486bedda3a6988332e60d9638a09ca4b260d34ebcf1b19e22cf3b140b63d8fe9",
+    "eval_results.json": "637daaebe7aa8af0e678f9e79ec33fa29f8635090d45ec813f0e7474320d7351",
+    "generation_config.json": "18046d04f5bd8b4998095ecabdd17a1bf0053d9acdccead4a05be4a3575f3c5c",
+    "model.safetensors": "6e6001da2106d4757498752a021df6c2bdc332c650aae4bae6b0c004dcf14933",
+    "special_tokens_map.json": "82d96d7a9e6ced037f12394b7ea6a5b02e6ca87e0d11edaa8d60d9be857ce7db",
+    "tokenizer.json": "bcd04f0eadf90287bd26e1a183ac487d8a141b09b06aecb7725bbdd343640f2e",
+    "tokenizer.model": "9e556afd44213b6bd1be2b850ebbbd98f5481437a8021afaf58ee7fb1818d347",
+    "tokenizer_config.json": "7b41ba7d0eb91e77914ca3dafde559ea3e19878769b7e68409e89bed5222e77a"
+  },
+  "sourceRoot": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/runtime/src/heteroes",
+  "fingerprint": "01bf419985765b74052df49fe40ec886a8702851b69497160109dea4e2ff3964",
+  "integerCudaSha256": "80c62ac49186b61ecd7cc42d87564a406477dc227eb63790ec694009aa86c68c",
+  "decoderGraphSha256": "1b3c463c72acc8e7606518c7de587bcbb72e08a54ebf61db6c42039140cfec79",
+  "cases": [
+    {
+      "case": "short32",
+      "outputTokens": 32,
+      "secondsSamples": [
+        0.252778385001875,
+        0.25285088399687083,
+        0.25254653800220694,
+        0.2526306510044378,
+        0.25336696000158554
+      ],
+      "medianTokensPerSecond": 4050.97927970544,
+      "tokensSha256": "db262d7ab9fa09fb7ad5749d3a474a1fc8316089a958d10457dd2a908bb9610a"
+    }
+  ]
+}

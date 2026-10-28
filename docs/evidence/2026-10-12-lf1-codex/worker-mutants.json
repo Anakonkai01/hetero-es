@@ -1,0 +1,62 @@
+[
+  {
+    "name": "accept Windows coordinator",
+    "file": "desktop/worker/electron/network.cjs",
+    "old": "return platform === 'linux' &&",
+    "new": "return true &&"
+  },
+  {
+    "name": "accept too little VRAM",
+    "file": "desktop/worker/electron/network.cjs",
+    "old": "selfTest.vramTotalMb >= 11000",
+    "new": "selfTest.vramTotalMb >= 1000"
+  },
+  {
+    "name": "accept foreign listen address",
+    "file": "desktop/worker/electron/network.cjs",
+    "old": "if (!localAddresses.some",
+    "new": "if (false && !localAddresses.some"
+  },
+  {
+    "name": "force worker-only despite chosen coordinator",
+    "file": "desktop/worker/electron/service.cjs",
+    "old": "workerOnly: !compute.coordinator",
+    "new": "workerOnly: true"
+  },
+  {
+    "name": "erase advertised coordinator role",
+    "file": "desktop/worker/electron/service.cjs",
+    "old": "coordinator: compute.coordinator } : undefined",
+    "new": "coordinator: false } : undefined"
+  },
+  {
+    "name": "allow configuration while enabled",
+    "file": "desktop/worker/electron/service.cjs",
+    "old": "if (state.enabled || !state.drained) throw Error('STOP_WORK_FIRST');",
+    "new": "if (!state.drained) throw Error('STOP_WORK_FIRST');"
+  },
+  {
+    "name": "forget pending configuration",
+    "file": "desktop/worker/electron/service.cjs",
+    "old": "this.settings.computePending = compute;",
+    "new": "/* forget pending configuration */"
+  },
+  {
+    "name": "restart after uncertain remote change",
+    "file": "desktop/worker/electron/service.cjs",
+    "old": "if (this.settings.computePending) throw Error('COMPUTE_CHANGE_PENDING');",
+    "new": "/* restart despite unknown server state */"
+  },
+  {
+    "name": "drop ownership after failed startup",
+    "file": "desktop/worker/electron/service.cjs",
+    "old": "const failed = this.bridge;",
+    "new": "this.bridge = null; const failed = this.bridge;"
+  },
+  {
+    "name": "claim bulk passed without assignment",
+    "file": "desktop/worker/electron/service.cjs",
+    "old": "{ step, status: 'SKIP', code: 'NO_ASSIGNMENT' }",
+    "new": "{ step, status: 'PASS', code: 'NO_ASSIGNMENT' }"
+  }
+]

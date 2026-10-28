@@ -1,0 +1,97 @@
+FFF..                                                                    [100%]
+=================================== FAILURES ===================================
+_ test_native_windows_never_inspects_wsl_paths_even_when_the_working_directory_is_on_wsl _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7dd8019d9e50>
+
+    def test_native_windows_never_inspects_wsl_paths_even_when_the_working_directory_is_on_wsl(monkeypatch):
+        class InaccessibleWSL:
+            def __truediv__(self, name):
+                raise PermissionError("UNC-mounted WSL driver directory")
+    
+        monkeypatch.setattr(remote.sys, "platform", "win32")
+        monkeypatch.setenv("PATH", r"C:\Windows\System32;C:\Tools")
+        monkeypatch.setenv("LD_LIBRARY_PATH", "preserved-existing-value")
+>       result = remote.worker_environment("native-source", "fixture-token", InaccessibleWSL())
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/ledger/test_worker_launch.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/heteroes/product/remote.py:32: in worker_environment
+    library = wsl / "lib"
+              ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_worker_launch.test_native_windows_never_inspects_wsl_paths_even_when_the_working_directory_is_on_wsl.<locals>.InaccessibleWSL object at 0x7dd8019d9df0>
+name = 'lib'
+
+    def __truediv__(self, name):
+>       raise PermissionError("UNC-mounted WSL driver directory")
+E       PermissionError: UNC-mounted WSL driver directory
+
+tests/ledger/test_worker_launch.py:16: PermissionError
+_ test_a_known_failure_before_process_creation_can_be_retried_and_releases_ownership[environment] _
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-610/test_a_known_failure_before_pr0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7dd8019d8f80>
+stage = 'environment'
+
+    @pytest.mark.parametrize("stage", ["environment", "spawn"])
+    def test_a_known_failure_before_process_creation_can_be_retried_and_releases_ownership(tmp_path, monkeypatch, stage):
+        device = agent(tmp_path)
+        device.enabled = True
+        command = start_command()
+    
+        def denied(*args, **kwargs):
+            raise PermissionError("known pre-spawn failure")
+    
+        if stage == "environment":
+            monkeypatch.setattr(remote, "worker_environment", denied)
+            monkeypatch.setattr(remote.subprocess, "Popen", lambda *a, **k: pytest.fail("spawn must not run"))
+        else:
+            monkeypatch.setattr(remote.subprocess, "Popen", denied)
+        for _ in range(2):
+            with pytest.raises(PermissionError):
+                device.handle(command)
+            directory = device.worker_directory(command)
+>           assert not (directory / "launch-intent.json").exists()
+E           AssertionError: assert not True
+E            +  where True = exists()
+E            +    where exists = (PosixPath('/tmp/pytest-of-pc5070ti/pytest-610/test_a_known_failure_before_pr0/state/workers/cccccccccccccccccccccccccccccccc/r0') / 'launch-intent.json').exists
+
+tests/ledger/test_worker_launch.py:45: AssertionError
+_ test_a_known_failure_before_process_creation_can_be_retried_and_releases_ownership[spawn] _
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-610/test_a_known_failure_before_pr1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7dd8019dae70>
+stage = 'spawn'
+
+    @pytest.mark.parametrize("stage", ["environment", "spawn"])
+    def test_a_known_failure_before_process_creation_can_be_retried_and_releases_ownership(tmp_path, monkeypatch, stage):
+        device = agent(tmp_path)
+        device.enabled = True
+        command = start_command()
+    
+        def denied(*args, **kwargs):
+            raise PermissionError("known pre-spawn failure")
+    
+        if stage == "environment":
+            monkeypatch.setattr(remote, "worker_environment", denied)
+            monkeypatch.setattr(remote.subprocess, "Popen", lambda *a, **k: pytest.fail("spawn must not run"))
+        else:
+            monkeypatch.setattr(remote.subprocess, "Popen", denied)
+        for _ in range(2):
+            with pytest.raises(PermissionError):
+                device.handle(command)
+            directory = device.worker_directory(command)
+>           assert not (directory / "launch-intent.json").exists()
+E           AssertionError: assert not True
+E            +  where True = exists()
+E            +    where exists = (PosixPath('/tmp/pytest-of-pc5070ti/pytest-610/test_a_known_failure_before_pr1/state/workers/cccccccccccccccccccccccccccccccc/r0') / 'launch-intent.json').exists
+
+tests/ledger/test_worker_launch.py:45: AssertionError
+=========================== short test summary info ============================
+FAILED tests/ledger/test_worker_launch.py::test_native_windows_never_inspects_wsl_paths_even_when_the_working_directory_is_on_wsl
+FAILED tests/ledger/test_worker_launch.py::test_a_known_failure_before_process_creation_can_be_retried_and_releases_ownership[environment]
+FAILED tests/ledger/test_worker_launch.py::test_a_known_failure_before_process_creation_can_be_retried_and_releases_ownership[spawn]
+3 failed, 2 passed in 0.04s

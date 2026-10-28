@@ -1,0 +1,10 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  59%|█████▉    | 172/290 [00:00<00:00, 1702.93it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 1847.84it/s]
+{"repeat": 0, "sha256": "92aeb33acfe98ffdd62eaa59ded19acec4741da2bbadf9ea3030290cdfe5943c", "stats": {"referenceCalls": 0, "referenceBytes": 0, "referenceSeconds": 0.0}}
+{"repeat": 1, "sha256": "daace41a45792cce8db12aba72491ec0edcaccee02656456ea6ab84553638c4d", "stats": {"referenceCalls": 2, "referenceBytes": 3952262656, "referenceSeconds": 3.2150679339999897}}
+{"repeat": 2, "sha256": "063e501f06ed090301f26ad107088fee006652987c6826205bd47fde1cf70239", "stats": {"referenceCalls": 0, "referenceBytes": 0, "referenceSeconds": 0.0}}
+{"repeat": 3, "sha256": "1c3f9a307c1f6aebc3eb310a3dfe02d7b39eb6e9421e3c3a185dde7a519826b9", "stats": {"referenceCalls": 4, "referenceBytes": 3952262656, "referenceSeconds": 7.503077334000068}}
+{"repeat": 4, "sha256": "843bce713e6eec02e84594a522dfcd42008bb6c2c352fbdba2b403b8358322c9", "stats": {"referenceCalls": 1, "referenceBytes": 3952262656, "referenceSeconds": 2.7341477800000575}}
+{"repeat": 5, "sha256": "519e5172210e0b97dfc20a761c97caa4635056912d67f6120afb52213fca8471", "stats": {"referenceCalls": 2, "referenceBytes": 3952262656, "referenceSeconds": 3.9267439529999137}}
+{"repeat": 6, "sha256": "84ef2a6575caeba8f232a0739f2bfc27b1c1dcf2c08b358de3f05f71025961b9", "stats": {"referenceCalls": 3, "referenceBytes": 3952262656, "referenceSeconds": 4.022251934999758}}
+{"repeat": 7, "sha256": "0f2ca001127d00b13558b118d33bd5c34cd39bfadc09ba879eeb1cce49f04ba6", "stats": {"referenceCalls": 0, "referenceBytes": 0, "referenceSeconds": 0.0}}
+{"repeat": 8, "sha256": "519e5172210e0b97dfc20a761c97caa4635056912d67f6120afb52213fca8471", "stats": {"referenceCalls": 2, "referenceBytes": 3952262656, "referenceSeconds": 3.0303550470000573}}

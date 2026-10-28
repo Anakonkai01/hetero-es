@@ -1,0 +1,88 @@
+..FF...                                                                  [100%]
+=================================== FAILURES ===================================
+_ test_prefill_gate_uses_fused_planes_when_eligible_and_preserves_results[33-64-14] _
+
+magnitude_bits = 14, rows = 33, width = 64
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x791e381c33b0>
+
+    @gpu
+    @pytest.mark.parametrize("magnitude_bits", [14, 22])
+    @pytest.mark.parametrize("rows,width", [(1, 17), (33, 64), (2, 12289)])
+    def test_prefill_gate_uses_fused_planes_when_eligible_and_preserves_results(magnitude_bits, rows, width, monkeypatch):
+        from heteroes.eval.integer_cuda import IntegerCudaKernels
+        from heteroes.eval import reference_ops
+    
+        g = torch.Generator().manual_seed(322)
+        gate = torch.randn(rows, width, generator=g)
+        up = torch.randn(rows, width, generator=g)
+        weight = (torch.randn(3, width, generator=g) * 0.03).half()
+        bias = torch.tensor([0.0, -0.01, 0.02], dtype=torch.float16)
+        decoder = object.__new__(IntegerDecoderGraph)
+        decoder.kernels = IntegerCudaKernels("cuda", magnitude_bits=magnitude_bits)
+        calls, original = [], decoder.kernels.silu_mul_quantized
+    
+        def spy(*args, **kwargs):
+            calls.append(True)
+            return original(*args, **kwargs)
+    
+        monkeypatch.setattr(decoder.kernels, "silu_mul_quantized", spy)
+        module = SimpleNamespace(weight=weight.cuda(), bias=bias.cuda())
+        for factor in (1, -4, 0):
+            weight.mul_(factor)
+            module.weight.copy_(weight)
+            gated = reference_ops.mul(reference_ops.silu(gate), up)
+            expected = reference.linear(gated, weight, bias, magnitude_bits=magnitude_bits)
+            flag = decoder.kernels.new_error_flag()
+            actual = decoder._prefill_gated_project(gate.cuda(), up.cuda(), module, flag)
+            assert int(flag.item()) == 0
+            assert torch.equal(actual.cpu().view(torch.int32), expected.view(torch.int32))
+>       assert len(calls) == (3 if rows > 1 and width <= 12288 else 0)
+E       assert 0 == 3
+E        +  where 0 = len([])
+
+runtime/tests/eval/test_integer_prefill_gate.py:49: AssertionError
+_ test_prefill_gate_uses_fused_planes_when_eligible_and_preserves_results[33-64-22] _
+
+magnitude_bits = 22, rows = 33, width = 64
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x791c2c5ac4d0>
+
+    @gpu
+    @pytest.mark.parametrize("magnitude_bits", [14, 22])
+    @pytest.mark.parametrize("rows,width", [(1, 17), (33, 64), (2, 12289)])
+    def test_prefill_gate_uses_fused_planes_when_eligible_and_preserves_results(magnitude_bits, rows, width, monkeypatch):
+        from heteroes.eval.integer_cuda import IntegerCudaKernels
+        from heteroes.eval import reference_ops
+    
+        g = torch.Generator().manual_seed(322)
+        gate = torch.randn(rows, width, generator=g)
+        up = torch.randn(rows, width, generator=g)
+        weight = (torch.randn(3, width, generator=g) * 0.03).half()
+        bias = torch.tensor([0.0, -0.01, 0.02], dtype=torch.float16)
+        decoder = object.__new__(IntegerDecoderGraph)
+        decoder.kernels = IntegerCudaKernels("cuda", magnitude_bits=magnitude_bits)
+        calls, original = [], decoder.kernels.silu_mul_quantized
+    
+        def spy(*args, **kwargs):
+            calls.append(True)
+            return original(*args, **kwargs)
+    
+        monkeypatch.setattr(decoder.kernels, "silu_mul_quantized", spy)
+        module = SimpleNamespace(weight=weight.cuda(), bias=bias.cuda())
+        for factor in (1, -4, 0):
+            weight.mul_(factor)
+            module.weight.copy_(weight)
+            gated = reference_ops.mul(reference_ops.silu(gate), up)
+            expected = reference.linear(gated, weight, bias, magnitude_bits=magnitude_bits)
+            flag = decoder.kernels.new_error_flag()
+            actual = decoder._prefill_gated_project(gate.cuda(), up.cuda(), module, flag)
+            assert int(flag.item()) == 0
+            assert torch.equal(actual.cpu().view(torch.int32), expected.view(torch.int32))
+>       assert len(calls) == (3 if rows > 1 and width <= 12288 else 0)
+E       assert 0 == 3
+E        +  where 0 = len([])
+
+runtime/tests/eval/test_integer_prefill_gate.py:49: AssertionError
+=========================== short test summary info ============================
+FAILED runtime/tests/eval/test_integer_prefill_gate.py::test_prefill_gate_uses_fused_planes_when_eligible_and_preserves_results[33-64-14]
+FAILED runtime/tests/eval/test_integer_prefill_gate.py::test_prefill_gate_uses_fused_planes_when_eligible_and_preserves_results[33-64-22]
+2 failed, 5 passed in 10.35s

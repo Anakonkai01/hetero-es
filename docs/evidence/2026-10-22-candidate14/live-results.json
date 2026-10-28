@@ -1,0 +1,71 @@
+{
+  "status": "COMPLETED",
+  "generations": [
+    {
+      "generation": 0,
+      "rewardMean": 0.15625,
+      "rewardBest": 0.25
+    },
+    {
+      "generation": 1,
+      "rewardMean": 0.0625,
+      "rewardBest": 0.25
+    },
+    {
+      "generation": 2,
+      "rewardMean": 0.0625,
+      "rewardBest": 0.25
+    },
+    {
+      "generation": 3,
+      "rewardMean": 0.125,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 4,
+      "rewardMean": 0.0,
+      "rewardBest": 0.0
+    },
+    {
+      "generation": 5,
+      "rewardMean": 0.40625,
+      "rewardBest": 0.5
+    },
+    {
+      "generation": 6,
+      "rewardMean": 0.15625,
+      "rewardBest": 0.25
+    },
+    {
+      "generation": 7,
+      "rewardMean": 0.0,
+      "rewardBest": 0.0
+    },
+    {
+      "generation": 8,
+      "rewardMean": 0.03125,
+      "rewardBest": 0.25
+    },
+    {
+      "generation": 9,
+      "rewardMean": 0.125,
+      "rewardBest": 0.25
+    }
+  ],
+  "validation": [
+    {
+      "generation": -1,
+      "reward": 0.5
+    },
+    {
+      "generation": 9,
+      "reward": 0.5
+    }
+  ],
+  "completedPerDevice": {
+    "cli-71b757062fd9": 47,
+    "desktop-d9017660e75f": 11,
+    "cli-34312a79fbbc": 22
+  },
+  "partialTimeline": false
+}

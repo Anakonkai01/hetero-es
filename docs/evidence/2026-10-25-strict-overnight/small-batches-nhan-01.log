@@ -1,0 +1,25 @@
+{"width": 768, "rows": 1, "per": 8, "medianEventMs": 0.010557600110769273}
+{"width": 768, "rows": 1, "per": 16, "medianEventMs": 0.011958400160074234}
+{"width": 768, "rows": 1, "per": 32, "medianEventMs": 0.01831440031528473}
+{"width": 768, "rows": 8, "per": 8, "medianEventMs": 0.04844639897346496}
+{"width": 768, "rows": 8, "per": 16, "medianEventMs": 0.055237597227096556}
+{"width": 768, "rows": 8, "per": 32, "medianEventMs": 0.08375599980354309}
+{"width": 1024, "rows": 1, "per": 8, "medianEventMs": 0.15293519496917723}
+{"width": 1024, "rows": 1, "per": 16, "medianEventMs": 0.16648720502853392}
+{"width": 1024, "rows": 1, "per": 32, "medianEventMs": 0.22812159061431886}
+{"width": 1024, "rows": 8, "per": 8, "medianEventMs": 0.47769999504089355}
+{"width": 1024, "rows": 8, "per": 16, "medianEventMs": 0.4883456230163574}
+{"width": 1024, "rows": 8, "per": 32, "medianEventMs": 0.7292848110198975}
+{"width": 2048, "rows": 1, "per": 8, "medianEventMs": 0.06809520125389099}
+{"width": 2048, "rows": 1, "per": 16, "medianEventMs": 0.07035359740257263}
+{"width": 2048, "rows": 1, "per": 32, "medianEventMs": 0.10354880094528199}
+{"width": 2048, "rows": 8, "per": 8, "medianEventMs": 0.292520809173584}
+{"width": 2048, "rows": 8, "per": 16, "medianEventMs": 0.28770639896392824}
+{"width": 2048, "rows": 8, "per": 32, "medianEventMs": 0.444925594329834}
+{"width": 4096, "rows": 1, "per": 8, "medianEventMs": 0.056916797161102296}
+{"width": 4096, "rows": 1, "per": 16, "medianEventMs": 0.05329359769821167}
+{"width": 4096, "rows": 1, "per": 32, "medianEventMs": 0.07834960222244262}
+{"width": 4096, "rows": 8, "per": 8, "medianEventMs": 0.23652160167694092}
+{"width": 4096, "rows": 8, "per": 16, "medianEventMs": 0.21632881164550782}
+{"width": 4096, "rows": 8, "per": 32, "medianEventMs": 0.33857998847961424}
+{"status": "ok", "error": null}

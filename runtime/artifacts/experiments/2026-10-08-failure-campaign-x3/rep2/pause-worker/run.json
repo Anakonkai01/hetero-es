@@ -1,0 +1,7 @@
+{
+  "name": "pause-worker",
+  "outcome": "TimeoutError: timed out after 600 s waiting for: the remote worker to hold a candidate",
+  "wall_seconds": 604.0251977443695,
+  "notes": [],
+  "final_weights_sha256": "3577eadc3f22686a4a4f7fc1672fe9be255709676fdd701592b780616957e049"
+}

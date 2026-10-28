@@ -1,0 +1,14 @@
+{
+  "qwen": {
+    "5070tiEquals3060Wsl": true,
+    "equalsPrecedingBoundedHead": true
+  },
+  "smol": {
+    "5070tiEquals3060Wsl": true,
+    "equalsPrecedingBoundedHead": true
+  },
+  "tiny": {
+    "5070tiEquals3060Wsl": true,
+    "equalsPrecedingBoundedHead": true
+  }
+}

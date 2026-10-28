@@ -1,0 +1,4 @@
+t() keys: 1111; computed (not checked here): 84; missing Vietnamese: 2; untranslated text outside t(): 0
+  MISSING frontend/src/components/live/LiveDiagram.tsx:53  "done"
+  MISSING frontend/src/components/workers/WorkerFleet.tsx:54  "View device"
+Unused translation keys: 0

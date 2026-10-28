@@ -1,0 +1,15 @@
+{
+  "passed": false,
+  "mismatches": [
+    "recipeHash",
+    "planHash",
+    "children",
+    "candidates"
+  ],
+  "candidateCount": 8,
+  "textCount": 32,
+  "workersRight": [
+    "linux-a",
+    "windows-3060"
+  ]
+}

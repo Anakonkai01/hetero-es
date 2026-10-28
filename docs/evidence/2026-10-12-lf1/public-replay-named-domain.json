@@ -1,0 +1,55 @@
+{
+  "format": 1,
+  "startedAt": 1791802503.4040816,
+  "publicComputeUrl": "https://compute.heteroes.site",
+  "advertisedPrivateUrl": "http://100.110.165.40:8770",
+  "generations": 4,
+  "candidates": 4,
+  "gpuName": "NVIDIA GeForce RTX 5070 Ti",
+  "experimentId": "39e2229629ee4172bb38ae9848e39302",
+  "statuses": [
+    "QUEUED",
+    "STARTING",
+    "RUNNING",
+    "DRAINING",
+    "COMPLETED"
+  ],
+  "finalStatus": "COMPLETED",
+  "completedGenerations": 4,
+  "finalModelVersion": "af0acc179c51d96d7c39aaa398356dd4b2d0da713b9f65aaf869a3c6c9dd5d6f",
+  "failureReason": null,
+  "worker": {
+    "log": "/home/pc5070ti/.local/share/heteroes-ui-local-agent/workers/1209ad6425cc40e6b9b2e34360fa566c/r0/events.jsonl",
+    "coordinatorUrl": "https://compute.heteroes.site",
+    "noBulk": true,
+    "bulkUrl": null,
+    "replayMaxChain": 64,
+    "replays": [
+      {
+        "steps": 1,
+        "verified": true,
+        "apply_seconds": 1.2056231690003187
+      },
+      {
+        "steps": 1,
+        "verified": true,
+        "apply_seconds": 1.2051525809984014
+      }
+    ],
+    "syncs": 0,
+    "committedSteps": 16,
+    "exit": "finished"
+  },
+  "parentChanges": 2,
+  "checks": {
+    "experimentCompleted": true,
+    "workerUsedThePublicAddress": true,
+    "workerHadNoBulkRoute": true,
+    "workerCaughtUpByReplay": true,
+    "noWholeWeightsDownload": true,
+    "candidatesCommittedByTheWorker": true
+  },
+  "drained": true,
+  "restored": true,
+  "finishedAt": 1791802724.8110013
+}

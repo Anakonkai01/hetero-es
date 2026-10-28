@@ -1,0 +1,10 @@
+control ok    | 16 passed, 1 warning in 2.09s
+killed       hold disables reconciliation | 4 failed, 12 passed, 1 warning in 2.09s
+killed       ignore admission hold | 2 failed, 14 passed, 1 warning in 2.09s
+killed       drop durable cancel forwarding | 1 failed, 15 passed, 1 warning in 2.11s
+killed       send commands absent from declared header | 3 failed, 13 passed, 1 warning in 2.11s
+killed       assume optional commands for headerless agent | 1 failed, 15 passed, 1 warning in 2.09s
+killed       skip pause capability guard | 1 failed, 15 passed, 1 warning in 2.10s
+killed       admit unsupported lifecycle agent | 1 failed, 15 passed, 1 warning in 2.10s
+
+7 of 7 mutants killed.

@@ -1,0 +1,12 @@
+........................................................................ [ 92%]
+........................................................................ [ 95%]
+........................................................................ [ 98%]
+....................................                                     [100%]
+2384 passed, 100 skipped in 135.93s (0:02:15)
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+348 passed, 1 warning in 51.61s
+
+[exited with code 0]

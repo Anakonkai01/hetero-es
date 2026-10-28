@@ -1,0 +1,6 @@
+==WARNING== Note: Running with unmodified GPU clocks. If not controlled otherwise, profiling results may be inconsistent.
+==PROF== Connected to process 2351133 (/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python3.12)
+==PROF== Profiling "bound_scores": 0%....50%....100% - 40 passes
+{"status": "ok", "case": "bound-head", "shape": {"rows": 32, "width": 896, "outputs": 151936}}
+==PROF== Disconnected from process 2351133
+==PROF== Report: /home/pc5070ti/projects/heteroes-codex-frozen-perf/docs/evidence/2026-10-27-strict-counter-profile/raw/bound-head-01.ncu-rep

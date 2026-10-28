@@ -1,0 +1,1 @@
+{"experiment_id": "lrtC", "outcome": "ok", "wall_seconds": 8970.301097154617, "restarts": {"coordinator": 0, "worker-5070ti": 0, "worker-5070ti-2": 0}, "pending_unlinked": [], "ckpt_dir": "/home/pc5070ti/.cache/heteroes/learn-ckpt/lrtC"}

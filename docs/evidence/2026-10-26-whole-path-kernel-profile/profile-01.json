@@ -1,0 +1,1201 @@
+{
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "torch": "2.13.0+cu132",
+  "modelFiles": {
+    "config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+    "generation_config.json": "e558847a8b4402616f1273797b015104dc266fe4b520056fca88823ba8f8ebe6",
+    "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+    "model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+    "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+    "tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583",
+    "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+  },
+  "sourceSha256": "d2e0bbc90a238292920c907e88171350e3c30d78ede666cc84cfc1d11ee2b755",
+  "workloadSha256": "9f94ba428282471f2fb9f439df88b8a5c4eaf07db7f88f8a2716e86ea099acab",
+  "cases": [
+    {
+      "engine": "b22",
+      "case": "short32",
+      "batch": 32,
+      "outputTokens": 32,
+      "plainSeconds": 0.2347247090001474,
+      "plainTokensPerSecond": 4362.5573309342435,
+      "gpuSpanMs": 258.611262,
+      "gpuBusyMs": 228.024625,
+      "kernelCount": 22543,
+      "kernels": [
+        {
+          "name": "integer_linear",
+          "count": 5408,
+          "ms": 151.3873970000007
+        },
+        {
+          "name": "strict_attention",
+          "count": 768,
+          "ms": 36.18686299999947
+        },
+        {
+          "name": "integer_finish",
+          "count": 5208,
+          "ms": 9.212788000000357
+        },
+        {
+          "name": "integer_input",
+          "count": 3104,
+          "ms": 9.078163000000615
+        },
+        {
+          "name": "strict_rms_norm",
+          "count": 1568,
+          "ms": 6.670574999999554
+        },
+        {
+          "name": "strict_silu_mul",
+          "count": 768,
+          "ms": 3.3399959999999025
+        },
+        {
+          "name": "integer_weights",
+          "count": 169,
+          "ms": 2.739127999999995
+        },
+        {
+          "name": "decode_greedy",
+          "count": 32,
+          "ms": 2.012881999999896
+        },
+        {
+          "name": "strict_rope",
+          "count": 1536,
+          "ms": 1.4475939999998286
+        },
+        {
+          "name": "strict_add",
+          "count": 1536,
+          "ms": 1.427565000000531
+        },
+        {
+          "name": "decode_prefix",
+          "count": 24,
+          "ms": 1.2376120000000375
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::FillFunctor<float>, std::array<char*, 1ul> >(int, at::native::FillFunctor<float>, std::array<char*",
+          "count": 96,
+          "ms": 0.87290100000006
+        },
+        {
+          "name": "decode_store",
+          "count": 744,
+          "ms": 0.6558379999989722
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy<at::native::(anonymous namespace)::OpaqueType<4u>, unsigned int, 3, 64, 64>(at::native::(anonymous n",
+          "count": 48,
+          "ms": 0.3848980000000118
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::FillFunctor<int>, std::array<char*, 1ul> >(int, at::native::FillFunctor<int>, std::array<char*, 1u",
+          "count": 207,
+          "ms": 0.16145400000000498
+        },
+        {
+          "name": "Memcpy DtoD (Device -> Device)",
+          "count": 144,
+          "ms": 0.12038799999979338
+        },
+        {
+          "name": "void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)",
+          "count": 97,
+          "ms": 0.10822400000002023
+        },
+        {
+          "name": "void at::native::index_elementwise_kernel<128, 4, at::native::gpu_index_kernel<at::native::index_kernel_impl<at::native::OpaqueType<8> >(at::TensorIteratorBase&",
+          "count": 63,
+          "ms": 0.09753699999993928
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::AUnaryFunctor<int, int, int, at::native::BitwiseAndFunctor<int> >, std::array<char*, 2ul> >(int, a",
+          "count": 92,
+          "ms": 0.0893770000000222
+        },
+        {
+          "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::opera",
+          "count": 32,
+          "ms": 0.06688200000001597
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::(anonymous namespace)::where_kernel_impl(at::TensorIterator&)::{lambda()#1}::operator()() const::{",
+          "count": 46,
+          "ms": 0.05382600000000639
+        },
+        {
+          "name": "void at_cuda_detail::cub::detail::select::DeviceSelectSweepKernel<at_cuda_detail::cub::detail::select::policy_hub<long, bool, int, false, (at_cuda_detail::cub::",
+          "count": 32,
+          "ms": 0.048898000000001045
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<bool, bool, bool, at::native::binary_internal::MulFunctor<bool> >, std::array<char*,",
+          "count": 46,
+          "ms": 0.04736099999998806
+        },
+        {
+          "name": "Memcpy DtoH (Device -> Pinned)",
+          "count": 149,
+          "ms": 0.04675299999998339
+        },
+        {
+          "name": "decode_publish",
+          "count": 32,
+          "ms": 0.04560200000010081
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::AUnaryFunctor<float, float, bool, at::native::(anonymous namespace)::CompareEqFunctor<float> >, st",
+          "count": 46,
+          "ms": 0.04547000000001207
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<float, float, bool, at::native::(anonymous namespace)::CompareEqFunctor<float> >, st",
+          "count": 46,
+          "ms": 0.04480199999999969
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::AUnaryFunctor<int, int, bool, at::native::(anonymous namespace)::CompareEqFunctor<int> >, std::arr",
+          "count": 46,
+          "ms": 0.04467500000000655
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::AbsFunctor<float>, std::array<char*, 2ul> >(int, at::native::AbsFunctor<float>, std::array<char*, ",
+          "count": 46,
+          "ms": 0.044285999999996425
+        },
+        {
+          "name": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<bool, at::native::func_wrapper_t<bool, at::native::and_kernel_cuda(at::TensorIterator&)::{lambda()#1",
+          "count": 32,
+          "ms": 0.044160999999997334
+        },
+        {
+          "name": "void at::native::index_elementwise_kernel<128, 4, at::native::gpu_index_kernel<at::native::index_put_kernel_impl<at::native::OpaqueType<1> >(at::TensorIterator&",
+          "count": 32,
+          "ms": 0.04399899999999616
+        },
+        {
+          "name": "Memcpy HtoD (Pageable -> Device)",
+          "count": 139,
+          "ms": 0.03635000000010632
+        },
+        {
+          "name": "void at_cuda_detail::cub::detail::reduce::DeviceReduceSingleTileKernel<at_cuda_detail::cub::detail::reduce::policy_hub<int, unsigned long long, cuda::std::__4::",
+          "count": 32,
+          "ms": 0.03292599999999765
+        },
+        {
+          "name": "decode_layout",
+          "count": 31,
+          "ms": 0.029567999999926545
+        },
+        {
+          "name": "void at_cuda_detail::cub::detail::scan::DeviceCompactInitKernel<at_cuda_detail::cub::ScanTileState<int, true>, int*>(at_cuda_detail::cub::ScanTileState<int, tru",
+          "count": 32,
+          "ms": 0.023648999999996693
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<2, at::native::FillFunctor<long>, std::array<char*, 1ul> >(int, at::native::FillFunctor<long>, std::array<char*, ",
+          "count": 21,
+          "ms": 0.01743700000000854
+        },
+        {
+          "name": "Memcpy DtoH (Device -> Pageable)",
+          "count": 33,
+          "ms": 0.01644499999993422
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::FillFunctor<unsigned char>, std::array<char*, 1ul> >(int, at::native::FillFunctor<unsigned char>, ",
+          "count": 2,
+          "ms": 0.012767000000010739
+        },
+        {
+          "name": "void at::native::unrolled_elementwise_kernel<at::native::FillFunctor<long>, std::array<char*, 1ul>, 4, TrivialOffsetCalculator<0, unsigned int>, TrivialOffsetCa",
+          "count": 16,
+          "ms": 0.011231999999999518
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> >, std::array<ch",
+          "count": 10,
+          "ms": 0.009408999999999652
+        },
+        {
+          "name": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<bool, at::native::func_wrapper_t<bool, at::native::or_kernel_cuda(at::TensorIterator&)::{lambda()#1}",
+          "count": 3,
+          "ms": 0.005152000000000953
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<float>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<float>, std::arr",
+          "count": 5,
+          "ms": 0.004992000000000189
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#7}::operator",
+          "count": 5,
+          "ms": 0.0048010000000031135
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::compare_scalar_kernel<long>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, lo",
+          "count": 4,
+          "ms": 0.003968000000003485
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseOrFunctor<bool> >, std::array<char*, 3ul> >(int",
+          "count": 3,
+          "ms": 0.0032960000000039147
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::compare_scalar_kernel<float>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, f",
+          "count": 2,
+          "ms": 0.0019199999999982538
+        },
+        {
+          "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#11}::oper",
+          "count": 1,
+          "ms": 0.00188799999999992
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::AUnaryFunctor<long, long, bool, at::native::(anonymous namespace)::CompareEqFunctor<long> >, std::",
+          "count": 2,
+          "ms": 0.001824000000000524
+        },
+        {
+          "name": "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::opera",
+          "count": 1,
+          "ms": 0.001503999999986263
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_vectorized<at::native::(anonymous namespace)::OpaqueType<8u>, unsigned int, 2, 128, 1, 16, 2>(char*,",
+          "count": 1,
+          "ms": 0.001150999999983469
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_alignedK_contig<at::native::(anonymous namespace)::OpaqueType<8u>, unsigned int, 2, 128, 1, 16>(at::",
+          "count": 1,
+          "ms": 0.0010560000000004947
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseAndFunctor<bool> >, std::array<char*, 3ul> >(in",
+          "count": 1,
+          "ms": 0.0009920000000001891
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctorOnOther_add<int>, std::array<char*, 2ul> >(int, at::native::CUDAFunctorOnOther_add<int>",
+          "count": 1,
+          "ms": 0.0009920000000001891
+        }
+      ]
+    },
+    {
+      "engine": "b22",
+      "case": "chat128",
+      "batch": 32,
+      "outputTokens": 128,
+      "plainSeconds": 1.0503456790029304,
+      "plainTokensPerSecond": 3899.668539492866,
+      "gpuSpanMs": 1090.401036,
+      "gpuBusyMs": 1026.5176350000197,
+      "kernelCount": 86191,
+      "kernels": [
+        {
+          "name": "integer_linear",
+          "count": 21632,
+          "ms": 576.1905540000126
+        },
+        {
+          "name": "strict_attention",
+          "count": 3072,
+          "ms": 304.23911899999604
+        },
+        {
+          "name": "integer_finish",
+          "count": 21336,
+          "ms": 37.75452200000042
+        },
+        {
+          "name": "integer_input",
+          "count": 12416,
+          "ms": 37.34402700001203
+        },
+        {
+          "name": "strict_rms_norm",
+          "count": 6272,
+          "ms": 26.437900000002365
+        },
+        {
+          "name": "strict_silu_mul",
+          "count": 3072,
+          "ms": 13.453890999996318
+        },
+        {
+          "name": "decode_greedy",
+          "count": 128,
+          "ms": 8.015029999999587
+        },
+        {
+          "name": "strict_rope",
+          "count": 6144,
+          "ms": 5.821062999995929
+        },
+        {
+          "name": "strict_add",
+          "count": 6144,
+          "ms": 5.772411000005558
+        },
+        {
+          "name": "integer_weights",
+          "count": 169,
+          "ms": 2.7528269999999986
+        },
+        {
+          "name": "decode_store",
+          "count": 3048,
+          "ms": 2.7142670000048765
+        },
+        {
+          "name": "decode_prefix",
+          "count": 24,
+          "ms": 2.1077299999999815
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::FillFunctor<float>, std::array<char*, 1ul> >(int, at::native::FillFunctor<float>, std::array<char*",
+          "count": 96,
+          "ms": 0.8731259999991032
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy<at::native::(anonymous namespace)::OpaqueType<4u>, unsigned int, 3, 64, 64>(at::native::(anonymous n",
+          "count": 48,
+          "ms": 0.49395599999993095
+        },
+        {
+          "name": "void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)",
+          "count": 385,
+          "ms": 0.4506330000005693
+        },
+        {
+          "name": "void at::native::index_elementwise_kernel<128, 4, at::native::gpu_index_kernel<at::native::index_kernel_impl<at::native::OpaqueType<8> >(at::TensorIteratorBase&",
+          "count": 159,
+          "ms": 0.2744399999995194
+        },
+        {
+          "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::opera",
+          "count": 128,
+          "ms": 0.2734730000002983
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::FillFunctor<int>, std::array<char*, 1ul> >(int, at::native::FillFunctor<int>, std::array<char*, 1u",
+          "count": 303,
+          "ms": 0.24323300000086054
+        },
+        {
+          "name": "Memcpy DtoD (Device -> Device)",
+          "count": 240,
+          "ms": 0.2012469999982985
+        },
+        {
+          "name": "decode_publish",
+          "count": 128,
+          "ms": 0.183490000000398
+        },
+        {
+          "name": "decode_layout",
+          "count": 127,
+          "ms": 0.11958100000023847
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::AUnaryFunctor<int, int, int, at::native::BitwiseAndFunctor<int> >, std::array<char*, 2ul> >(int, a",
+          "count": 92,
+          "ms": 0.08998099999999613
+        },
+        {
+          "name": "Memcpy HtoD (Pageable -> Device)",
+          "count": 235,
+          "ms": 0.0666590000013459
+        },
+        {
+          "name": "Memcpy DtoH (Device -> Pageable)",
+          "count": 129,
+          "ms": 0.061321000000491045
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::(anonymous namespace)::where_kernel_impl(at::TensorIterator&)::{lambda()#1}::operator()() const::{",
+          "count": 46,
+          "ms": 0.05442899999999101
+        },
+        {
+          "name": "void at_cuda_detail::cub::detail::select::DeviceSelectSweepKernel<at_cuda_detail::cub::detail::select::policy_hub<long, bool, int, false, (at_cuda_detail::cub::",
+          "count": 32,
+          "ms": 0.05030600000000027
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<bool, bool, bool, at::native::binary_internal::MulFunctor<bool> >, std::array<char*,",
+          "count": 46,
+          "ms": 0.047520999999991556
+        },
+        {
+          "name": "Memcpy DtoH (Device -> Pinned)",
+          "count": 149,
+          "ms": 0.04635500000000277
+        },
+        {
+          "name": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<bool, at::native::func_wrapper_t<bool, at::native::and_kernel_cuda(at::TensorIterator&)::{lambda()#1",
+          "count": 32,
+          "ms": 0.04594900000000097
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::AUnaryFunctor<float, float, bool, at::native::(anonymous namespace)::CompareEqFunctor<float> >, st",
+          "count": 46,
+          "ms": 0.045857999999996533
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::AUnaryFunctor<int, int, bool, at::native::(anonymous namespace)::CompareEqFunctor<int> >, std::arr",
+          "count": 46,
+          "ms": 0.045217000000000555
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<float, float, bool, at::native::(anonymous namespace)::CompareEqFunctor<float> >, st",
+          "count": 46,
+          "ms": 0.04515100000000347
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::AbsFunctor<float>, std::array<char*, 2ul> >(int, at::native::AbsFunctor<float>, std::array<char*, ",
+          "count": 46,
+          "ms": 0.04493100000000777
+        },
+        {
+          "name": "void at::native::index_elementwise_kernel<128, 4, at::native::gpu_index_kernel<at::native::index_put_kernel_impl<at::native::OpaqueType<1> >(at::TensorIterator&",
+          "count": 32,
+          "ms": 0.04329800000000066
+        },
+        {
+          "name": "void at_cuda_detail::cub::detail::reduce::DeviceReduceSingleTileKernel<at_cuda_detail::cub::detail::reduce::policy_hub<int, unsigned long long, cuda::std::__4::",
+          "count": 32,
+          "ms": 0.03324699999999961
+        },
+        {
+          "name": "void at_cuda_detail::cub::detail::scan::DeviceCompactInitKernel<at_cuda_detail::cub::ScanTileState<int, true>, int*>(at_cuda_detail::cub::ScanTileState<int, tru",
+          "count": 32,
+          "ms": 0.02377600000000301
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<2, at::native::FillFunctor<long>, std::array<char*, 1ul> >(int, at::native::FillFunctor<long>, std::array<char*, ",
+          "count": 22,
+          "ms": 0.018368000000167167
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::FillFunctor<unsigned char>, std::array<char*, 1ul> >(int, at::native::FillFunctor<unsigned char>, ",
+          "count": 2,
+          "ms": 0.010913000000115062
+        },
+        {
+          "name": "void at::native::unrolled_elementwise_kernel<at::native::FillFunctor<long>, std::array<char*, 1ul>, 4, TrivialOffsetCalculator<0, unsigned int>, TrivialOffsetCa",
+          "count": 15,
+          "ms": 0.01056000000000006
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> >, std::array<ch",
+          "count": 10,
+          "ms": 0.009471999999999753
+        },
+        {
+          "name": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<bool, at::native::func_wrapper_t<bool, at::native::or_kernel_cuda(at::TensorIterator&)::{lambda()#1}",
+          "count": 3,
+          "ms": 0.005439999999998918
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<float>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<float>, std::arr",
+          "count": 5,
+          "ms": 0.004959999999997308
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#7}::operator",
+          "count": 5,
+          "ms": 0.004864000000001397
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::compare_scalar_kernel<long>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, lo",
+          "count": 4,
+          "ms": 0.003936000000002423
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseOrFunctor<bool> >, std::array<char*, 3ul> >(int",
+          "count": 3,
+          "ms": 0.0032320000000015626
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::compare_scalar_kernel<float>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, f",
+          "count": 2,
+          "ms": 0.0019520000000011351
+        },
+        {
+          "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#11}::oper",
+          "count": 1,
+          "ms": 0.00188799999999992
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::AUnaryFunctor<long, long, bool, at::native::(anonymous namespace)::CompareEqFunctor<long> >, std::",
+          "count": 2,
+          "ms": 0.00179300000000012
+        },
+        {
+          "name": "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::opera",
+          "count": 1,
+          "ms": 0.0017280000001192093
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_vectorized<at::native::(anonymous namespace)::OpaqueType<8u>, unsigned int, 2, 128, 1, 16, 2>(char*,",
+          "count": 1,
+          "ms": 0.0011199999998789281
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_alignedK_contig<at::native::(anonymous namespace)::OpaqueType<8u>, unsigned int, 2, 128, 1, 16>(at::",
+          "count": 1,
+          "ms": 0.0010560000000004947
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctorOnOther_add<int>, std::array<char*, 2ul> >(int, at::native::CUDAFunctorOnOther_add<int>",
+          "count": 1,
+          "ms": 0.0009920000000001891
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseAndFunctor<bool> >, std::array<char*, 3ul> >(in",
+          "count": 1,
+          "ms": 0.0009600000000000363
+        }
+      ]
+    },
+    {
+      "engine": "fp16",
+      "case": "short32",
+      "batch": 32,
+      "outputTokens": 32,
+      "plainSeconds": 0.135989491995133,
+      "plainTokensPerSecond": 7529.993567713662,
+      "gpuSpanMs": 149.72376300000002,
+      "gpuBusyMs": 124.29765899999971,
+      "kernelCount": 22403,
+      "kernels": [
+        {
+          "name": "strict_attention",
+          "count": 768,
+          "ms": 36.219018000000105
+        },
+        {
+          "name": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_f16_s161616gemm_f16_32x32_64x2_tn_align8>(cutlass_80_wmma_tensorop_f16_s161616gemm_f16_32x32_64x2_tn_align8::Para",
+          "count": 1488,
+          "ms": 26.932999999999886
+        },
+        {
+          "name": "void cutlass::Kernel2<cutlass_80_tensorop_f16_s16816gemm_relu_f16_64x64_32x6_tn_align8>(cutlass_80_tensorop_f16_s16816gemm_relu_f16_64x64_32x6_tn_align8::Params",
+          "count": 80,
+          "ms": 11.728850999999995
+        },
+        {
+          "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::opera",
+          "count": 3136,
+          "ms": 7.10777499999952
+        },
+        {
+          "name": "strict_rms_norm",
+          "count": 1568,
+          "ms": 6.661965999999737
+        },
+        {
+          "name": "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::opera",
+          "count": 3072,
+          "ms": 4.895472999999261
+        },
+        {
+          "name": "void cutlass::Kernel2<cutlass_80_tensorop_f16_s16816gemm_relu_f16_256x128_32x3_tn_align8>(cutlass_80_tensorop_f16_s16816gemm_relu_f16_256x128_32x3_tn_align8::Pa",
+          "count": 24,
+          "ms": 4.221479999999996
+        },
+        {
+          "name": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_f16_s161616gemm_f16_16x16_128x2_tn_align8>(cutlass_80_wmma_tensorop_f16_s161616gemm_f16_16x16_128x2_tn_align8::Pa",
+          "count": 744,
+          "ms": 4.14577300000012
+        },
+        {
+          "name": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_f16_s161616gemm_f16_32x32_32x1_tn_align8>(cutlass_80_wmma_tensorop_f16_s161616gemm_f16_32x32_32x1_tn_align8::Para",
+          "count": 744,
+          "ms": 3.5039010000000697
+        },
+        {
+          "name": "strict_silu_mul",
+          "count": 768,
+          "ms": 3.4009629999995736
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::float16_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda(float)#1}, std::array<char*, 2ul> >(int",
+          "count": 3104,
+          "ms": 2.7250720000001234
+        },
+        {
+          "name": "void cutlass::Kernel2<cutlass_80_tensorop_f16_s16816gemm_relu_f16_128x64_64x3_tn_align8>(cutlass_80_tensorop_f16_s16816gemm_relu_f16_128x64_64x3_tn_align8::Para",
+          "count": 24,
+          "ms": 2.209909000000012
+        },
+        {
+          "name": "strict_add",
+          "count": 1536,
+          "ms": 1.4536280000000865
+        },
+        {
+          "name": "strict_rope",
+          "count": 1536,
+          "ms": 1.429595999999959
+        },
+        {
+          "name": "void cublasLt::splitKreduce_kernel<32, 16, int, __half, __half, float, __half, false, __half, __half, __half, true, true, false, false>(cublasLt::cublasSplitKPa",
+          "count": 744,
+          "ms": 1.3613580000002656
+        },
+        {
+          "name": "decode_prefix",
+          "count": 24,
+          "ms": 1.2365890000000073
+        },
+        {
+          "name": "decode_greedy",
+          "count": 32,
+          "ms": 1.076039999999972
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::FillFunctor<float>, std::array<char*, 1ul> >(int, at::native::FillFunctor<float>, std::array<char*",
+          "count": 96,
+          "ms": 0.8985030000000731
+        },
+        {
+          "name": "void cublasLt::splitKreduce_kernel<32, 16, int, __half, __half, float, __half, false, __half, __half, __half, true, false, false, false>(cublasLt::cublasSplitKP",
+          "count": 744,
+          "ms": 0.8553400000003665
+        },
+        {
+          "name": "decode_store",
+          "count": 744,
+          "ms": 0.6513040000000793
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy<at::native::(anonymous namespace)::OpaqueType<4u>, unsigned int, 3, 64, 64>(at::native::(anonymous n",
+          "count": 48,
+          "ms": 0.38361900000000787
+        },
+        {
+          "name": "Memcpy DtoD (Device -> Device)",
+          "count": 144,
+          "ms": 0.12038500000001089
+        },
+        {
+          "name": "void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)",
+          "count": 97,
+          "ms": 0.10988600000008227
+        },
+        {
+          "name": "void at::native::index_elementwise_kernel<128, 4, at::native::gpu_index_kernel<at::native::index_kernel_impl<at::native::OpaqueType<8> >(at::TensorIteratorBase&",
+          "count": 63,
+          "ms": 0.09721600000001807
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::AUnaryFunctor<int, int, int, at::native::BitwiseAndFunctor<int> >, std::array<char*, 2ul> >(int, a",
+          "count": 92,
+          "ms": 0.08966499999999905
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::(anonymous namespace)::where_kernel_impl(at::TensorIterator&)::{lambda()#1}::operator()() const::{",
+          "count": 46,
+          "ms": 0.05427499999999874
+        },
+        {
+          "name": "void at_cuda_detail::cub::detail::select::DeviceSelectSweepKernel<at_cuda_detail::cub::detail::select::policy_hub<long, bool, int, false, (at_cuda_detail::cub::",
+          "count": 32,
+          "ms": 0.04912000000000034
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<bool, bool, bool, at::native::binary_internal::MulFunctor<bool> >, std::array<char*,",
+          "count": 46,
+          "ms": 0.047361000000000805
+        },
+        {
+          "name": "Memcpy DtoH (Device -> Pinned)",
+          "count": 148,
+          "ms": 0.04623200000000275
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::AUnaryFunctor<float, float, bool, at::native::(anonymous namespace)::CompareEqFunctor<float> >, st",
+          "count": 46,
+          "ms": 0.04595600000000104
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<float, float, bool, at::native::(anonymous namespace)::CompareEqFunctor<float> >, st",
+          "count": 46,
+          "ms": 0.04515000000000236
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::AUnaryFunctor<int, int, bool, at::native::(anonymous namespace)::CompareEqFunctor<int> >, std::arr",
+          "count": 46,
+          "ms": 0.044766999999993465
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::AbsFunctor<float>, std::array<char*, 2ul> >(int, at::native::AbsFunctor<float>, std::array<char*, ",
+          "count": 46,
+          "ms": 0.04463899999999832
+        },
+        {
+          "name": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<bool, at::native::func_wrapper_t<bool, at::native::and_kernel_cuda(at::TensorIterator&)::{lambda()#1",
+          "count": 32,
+          "ms": 0.04457299999999852
+        },
+        {
+          "name": "decode_publish",
+          "count": 32,
+          "ms": 0.04425800000002345
+        },
+        {
+          "name": "void at::native::index_elementwise_kernel<128, 4, at::native::gpu_index_kernel<at::native::index_put_kernel_impl<at::native::OpaqueType<1> >(at::TensorIterator&",
+          "count": 32,
+          "ms": 0.043586000000000236
+        },
+        {
+          "name": "Memcpy HtoD (Pageable -> Device)",
+          "count": 139,
+          "ms": 0.03632299999999077
+        },
+        {
+          "name": "void at_cuda_detail::cub::detail::reduce::DeviceReduceSingleTileKernel<at_cuda_detail::cub::detail::reduce::policy_hub<int, unsigned long long, cuda::std::__4::",
+          "count": 32,
+          "ms": 0.03324799999999958
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::FillFunctor<int>, std::array<char*, 1ul> >(int, at::native::FillFunctor<int>, std::array<char*, 1u",
+          "count": 37,
+          "ms": 0.031233999999983112
+        },
+        {
+          "name": "decode_layout",
+          "count": 31,
+          "ms": 0.028862000000030096
+        },
+        {
+          "name": "Memset (Device)",
+          "count": 48,
+          "ms": 0.027391000000008704
+        },
+        {
+          "name": "void at_cuda_detail::cub::detail::scan::DeviceCompactInitKernel<at_cuda_detail::cub::ScanTileState<int, true>, int*>(at_cuda_detail::cub::ScanTileState<int, tru",
+          "count": 32,
+          "ms": 0.023713000000001545
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<2, at::native::FillFunctor<long>, std::array<char*, 1ul> >(int, at::native::FillFunctor<long>, std::array<char*, ",
+          "count": 21,
+          "ms": 0.01782600000000377
+        },
+        {
+          "name": "Memcpy DtoH (Device -> Pageable)",
+          "count": 33,
+          "ms": 0.016130000000077412
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::FillFunctor<unsigned char>, std::array<char*, 1ul> >(int, at::native::FillFunctor<unsigned char>, ",
+          "count": 2,
+          "ms": 0.011808000000010907
+        },
+        {
+          "name": "void at::native::unrolled_elementwise_kernel<at::native::FillFunctor<long>, std::array<char*, 1ul>, 4, TrivialOffsetCalculator<0, unsigned int>, TrivialOffsetCa",
+          "count": 16,
+          "ms": 0.011135999999999967
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> >, std::array<ch",
+          "count": 10,
+          "ms": 0.009536999999998443
+        },
+        {
+          "name": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<bool, at::native::func_wrapper_t<bool, at::native::or_kernel_cuda(at::TensorIterator&)::{lambda()#1}",
+          "count": 3,
+          "ms": 0.005054000000001451
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<float>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<float>, std::arr",
+          "count": 5,
+          "ms": 0.004991999999999279
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#7}::operator",
+          "count": 5,
+          "ms": 0.004862999999999374
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::compare_scalar_kernel<long>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, lo",
+          "count": 4,
+          "ms": 0.004001000000001113
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseOrFunctor<bool> >, std::array<char*, 3ul> >(int",
+          "count": 3,
+          "ms": 0.00323200000000088
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::compare_scalar_kernel<float>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, f",
+          "count": 2,
+          "ms": 0.001983999999999469
+        },
+        {
+          "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#11}::oper",
+          "count": 1,
+          "ms": 0.00188799999999992
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::AUnaryFunctor<long, long, bool, at::native::(anonymous namespace)::CompareEqFunctor<long> >, std::",
+          "count": 2,
+          "ms": 0.001824000000000069
+        },
+        {
+          "name": "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::opera",
+          "count": 1,
+          "ms": 0.0015040000000153667
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_vectorized<at::native::(anonymous namespace)::OpaqueType<8u>, unsigned int, 2, 128, 1, 16, 2>(char*,",
+          "count": 1,
+          "ms": 0.0011200000000244471
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_alignedK_contig<at::native::(anonymous namespace)::OpaqueType<8u>, unsigned int, 2, 128, 1, 16>(at::",
+          "count": 1,
+          "ms": 0.0010560000000004947
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseAndFunctor<bool> >, std::array<char*, 3ul> >(in",
+          "count": 1,
+          "ms": 0.0009920000000001891
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctorOnOther_add<int>, std::array<char*, 2ul> >(int, at::native::CUDAFunctorOnOther_add<int>",
+          "count": 1,
+          "ms": 0.0009600000000000363
+        }
+      ]
+    },
+    {
+      "engine": "fp16",
+      "case": "chat128",
+      "batch": 32,
+      "outputTokens": 128,
+      "plainSeconds": 0.6706724360046792,
+      "plainTokensPerSecond": 6107.3033273898,
+      "gpuSpanMs": 710.8811890000001,
+      "gpuBusyMs": 647.5890260000044,
+      "kernelCount": 86123,
+      "kernels": [
+        {
+          "name": "strict_attention",
+          "count": 3072,
+          "ms": 304.7785250000039
+        },
+        {
+          "name": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_f16_s161616gemm_f16_32x32_64x2_tn_align8>(cutlass_80_wmma_tensorop_f16_s161616gemm_f16_32x32_64x2_tn_align8::Para",
+          "count": 6096,
+          "ms": 110.04701800000271
+        },
+        {
+          "name": "void cutlass::Kernel2<cutlass_80_tensorop_f16_s16816gemm_relu_f16_64x64_32x6_tn_align8>(cutlass_80_tensorop_f16_s16816gemm_relu_f16_64x64_32x6_tn_align8::Params",
+          "count": 176,
+          "ms": 45.498214999999846
+        },
+        {
+          "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::opera",
+          "count": 12544,
+          "ms": 29.895221999998974
+        },
+        {
+          "name": "strict_rms_norm",
+          "count": 6272,
+          "ms": 26.463539000000385
+        },
+        {
+          "name": "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::opera",
+          "count": 12288,
+          "ms": 20.88811100000274
+        },
+        {
+          "name": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_f16_s161616gemm_f16_16x16_128x2_tn_align8>(cutlass_80_wmma_tensorop_f16_s161616gemm_f16_16x16_128x2_tn_align8::Pa",
+          "count": 3048,
+          "ms": 16.37467000000079
+        },
+        {
+          "name": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_f16_s161616gemm_f16_32x32_32x1_tn_align8>(cutlass_80_wmma_tensorop_f16_s161616gemm_f16_32x32_32x1_tn_align8::Para",
+          "count": 3048,
+          "ms": 14.53760899999874
+        },
+        {
+          "name": "strict_silu_mul",
+          "count": 3072,
+          "ms": 13.740241000002388
+        },
+        {
+          "name": "void cutlass::Kernel2<cutlass_80_tensorop_f16_s16816gemm_relu_f16_256x128_32x3_tn_align8>(cutlass_80_tensorop_f16_s16816gemm_relu_f16_256x128_32x3_tn_align8::Pa",
+          "count": 24,
+          "ms": 13.620269000000016
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::float16_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda(float)#1}, std::array<char*, 2ul> >(int",
+          "count": 12416,
+          "ms": 11.907636000001654
+        },
+        {
+          "name": "void cutlass::Kernel2<cutlass_80_tensorop_f16_s16816gemm_relu_f16_128x64_64x3_tn_align8>(cutlass_80_tensorop_f16_s16816gemm_relu_f16_128x64_64x3_tn_align8::Para",
+          "count": 24,
+          "ms": 6.610498999999995
+        },
+        {
+          "name": "strict_add",
+          "count": 6144,
+          "ms": 5.913784999999251
+        },
+        {
+          "name": "strict_rope",
+          "count": 6144,
+          "ms": 5.708267999996776
+        },
+        {
+          "name": "void cublasLt::splitKreduce_kernel<32, 16, int, __half, __half, float, __half, false, __half, __half, __half, true, true, false, false>(cublasLt::cublasSplitKPa",
+          "count": 3048,
+          "ms": 5.594716999997892
+        },
+        {
+          "name": "decode_greedy",
+          "count": 128,
+          "ms": 4.202260999999884
+        },
+        {
+          "name": "void cublasLt::splitKreduce_kernel<32, 16, int, __half, __half, float, __half, false, __half, __half, __half, true, false, false, false>(cublasLt::cublasSplitKP",
+          "count": 3048,
+          "ms": 3.497019999998788
+        },
+        {
+          "name": "decode_store",
+          "count": 3048,
+          "ms": 2.6839419999996843
+        },
+        {
+          "name": "decode_prefix",
+          "count": 24,
+          "ms": 2.1185470000000057
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::FillFunctor<float>, std::array<char*, 1ul> >(int, at::native::FillFunctor<float>, std::array<char*",
+          "count": 96,
+          "ms": 0.896970000000414
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy<at::native::(anonymous namespace)::OpaqueType<4u>, unsigned int, 3, 64, 64>(at::native::(anonymous n",
+          "count": 48,
+          "ms": 0.4921340000000618
+        },
+        {
+          "name": "void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)",
+          "count": 385,
+          "ms": 0.44893999999883133
+        },
+        {
+          "name": "void at::native::index_elementwise_kernel<128, 4, at::native::gpu_index_kernel<at::native::index_kernel_impl<at::native::OpaqueType<8> >(at::TensorIteratorBase&",
+          "count": 159,
+          "ms": 0.2726389999998308
+        },
+        {
+          "name": "Memcpy DtoD (Device -> Device)",
+          "count": 240,
+          "ms": 0.19910599999972792
+        },
+        {
+          "name": "decode_publish",
+          "count": 128,
+          "ms": 0.1794579999997948
+        },
+        {
+          "name": "decode_layout",
+          "count": 127,
+          "ms": 0.11783000000043833
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::FillFunctor<int>, std::array<char*, 1ul> >(int, at::native::FillFunctor<int>, std::array<char*, 1u",
+          "count": 133,
+          "ms": 0.11312400000005442
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::AUnaryFunctor<int, int, int, at::native::BitwiseAndFunctor<int> >, std::array<char*, 2ul> >(int, a",
+          "count": 92,
+          "ms": 0.08915599999999724
+        },
+        {
+          "name": "Memcpy HtoD (Pageable -> Device)",
+          "count": 235,
+          "ms": 0.06429100000011691
+        },
+        {
+          "name": "Memcpy DtoH (Device -> Pageable)",
+          "count": 129,
+          "ms": 0.06300199999994935
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::(anonymous namespace)::where_kernel_impl(at::TensorIterator&)::{lambda()#1}::operator()() const::{",
+          "count": 46,
+          "ms": 0.05359999999999764
+        },
+        {
+          "name": "void at_cuda_detail::cub::detail::select::DeviceSelectSweepKernel<at_cuda_detail::cub::detail::select::policy_hub<long, bool, int, false, (at_cuda_detail::cub::",
+          "count": 32,
+          "ms": 0.049793000000000566
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<bool, bool, bool, at::native::binary_internal::MulFunctor<bool> >, std::array<char*,",
+          "count": 46,
+          "ms": 0.04700800000000074
+        },
+        {
+          "name": "Memcpy DtoH (Device -> Pinned)",
+          "count": 148,
+          "ms": 0.04556400000000107
+        },
+        {
+          "name": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<bool, at::native::func_wrapper_t<bool, at::native::and_kernel_cuda(at::TensorIterator&)::{lambda()#1",
+          "count": 32,
+          "ms": 0.04534399999999937
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::AUnaryFunctor<float, float, bool, at::native::(anonymous namespace)::CompareEqFunctor<float> >, st",
+          "count": 46,
+          "ms": 0.045216000000000346
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<float, float, bool, at::native::(anonymous namespace)::CompareEqFunctor<float> >, st",
+          "count": 46,
+          "ms": 0.044704000000000646
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::AUnaryFunctor<int, int, bool, at::native::(anonymous namespace)::CompareEqFunctor<int> >, std::arr",
+          "count": 46,
+          "ms": 0.04447999999999776
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::AbsFunctor<float>, std::array<char*, 2ul> >(int, at::native::AbsFunctor<float>, std::array<char*, ",
+          "count": 46,
+          "ms": 0.04425799999999164
+        },
+        {
+          "name": "void at::native::index_elementwise_kernel<128, 4, at::native::gpu_index_kernel<at::native::index_put_kernel_impl<at::native::OpaqueType<1> >(at::TensorIterator&",
+          "count": 32,
+          "ms": 0.043008999999999104
+        },
+        {
+          "name": "void at_cuda_detail::cub::detail::reduce::DeviceReduceSingleTileKernel<at_cuda_detail::cub::detail::reduce::policy_hub<int, unsigned long long, cuda::std::__4::",
+          "count": 32,
+          "ms": 0.0329229999999991
+        },
+        {
+          "name": "void at_cuda_detail::cub::detail::scan::DeviceCompactInitKernel<at_cuda_detail::cub::ScanTileState<int, true>, int*>(at_cuda_detail::cub::ScanTileState<int, tru",
+          "count": 32,
+          "ms": 0.023743999999999682
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<2, at::native::FillFunctor<long>, std::array<char*, 1ul> >(int, at::native::FillFunctor<long>, std::array<char*, ",
+          "count": 22,
+          "ms": 0.018017999999894185
+        },
+        {
+          "name": "Memset (Device)",
+          "count": 24,
+          "ms": 0.01631999999997788
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::FillFunctor<unsigned char>, std::array<char*, 1ul> >(int, at::native::FillFunctor<unsigned char>, ",
+          "count": 2,
+          "ms": 0.011168000000087885
+        },
+        {
+          "name": "void at::native::unrolled_elementwise_kernel<at::native::FillFunctor<long>, std::array<char*, 1ul>, 4, TrivialOffsetCalculator<0, unsigned int>, TrivialOffsetCa",
+          "count": 15,
+          "ms": 0.01046299999999974
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> >, std::array<ch",
+          "count": 10,
+          "ms": 0.009442000000001827
+        },
+        {
+          "name": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<bool, at::native::func_wrapper_t<bool, at::native::or_kernel_cuda(at::TensorIterator&)::{lambda()#1}",
+          "count": 3,
+          "ms": 0.005344000000000051
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<float>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<float>, std::arr",
+          "count": 5,
+          "ms": 0.0049610000000002395
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#7}::operator",
+          "count": 5,
+          "ms": 0.004799999999998363
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::compare_scalar_kernel<long>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, lo",
+          "count": 4,
+          "ms": 0.0039039999999999964
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseOrFunctor<bool> >, std::array<char*, 3ul> >(int",
+          "count": 3,
+          "ms": 0.0032009999999991125
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::compare_scalar_kernel<float>(at::TensorIteratorBase&, at::native::(anonymous namespace)::OpType, f",
+          "count": 2,
+          "ms": 0.0019520000000002255
+        },
+        {
+          "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#11}::oper",
+          "count": 1,
+          "ms": 0.00188799999999992
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::AUnaryFunctor<long, long, bool, at::native::(anonymous namespace)::CompareEqFunctor<long> >, std::",
+          "count": 2,
+          "ms": 0.001793999999999869
+        },
+        {
+          "name": "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::opera",
+          "count": 1,
+          "ms": 0.0016959999999962747
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_vectorized<at::native::(anonymous namespace)::OpaqueType<8u>, unsigned int, 2, 128, 1, 16, 2>(char*,",
+          "count": 1,
+          "ms": 0.0011520000000018627
+        },
+        {
+          "name": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_alignedK_contig<at::native::(anonymous namespace)::OpaqueType<8u>, unsigned int, 2, 128, 1, 16>(at::",
+          "count": 1,
+          "ms": 0.0010240000000012516
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctorOnOther_add<int>, std::array<char*, 2ul> >(int, at::native::CUDAFunctorOnOther_add<int>",
+          "count": 1,
+          "ms": 0.0009920000000001891
+        },
+        {
+          "name": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<bool, bool, bool, at::native::BitwiseAndFunctor<bool> >, std::array<char*, 3ul> >(in",
+          "count": 1,
+          "ms": 0.0009280000000001109
+        }
+      ]
+    }
+  ],
+  "limits": "One traced generation per case after warmup; CUPTI tracing may add small overhead; vendor FP16 is a different-arithmetic control.",
+  "status": "ok"
+}

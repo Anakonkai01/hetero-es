@@ -1,0 +1,8 @@
+[
+  {"name": "no tracked-file guard (the original bug)", "file": "src/heteroes/runtime_info.py",
+   "old": "    if _run([\"git\", \"ls-files\", \"--error-unmatch\", \"--\", str(Path(__file__).resolve())]) is None:\n        return {\"git_commit\": None, \"git_dirty\": None}\n", "new": ""},
+  {"name": "guard inverted", "file": "src/heteroes/runtime_info.py",
+   "old": "str(Path(__file__).resolve())]) is None:", "new": "str(Path(__file__).resolve())]) is not None:"},
+  {"name": "guard asks git about the repository root, not this file", "file": "src/heteroes/runtime_info.py",
+   "old": "str(Path(__file__).resolve())]) is None:", "new": "str(REPO_ROOT)]) is None:"}
+]

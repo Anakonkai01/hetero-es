@@ -1,0 +1,10 @@
+{
+  "status": "error",
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "hardwareQualified": false,
+  "cases": [],
+  "probeSha256": "f3ecf4ad6b942ef9b566a722a40db8cd12c901fb4945fcb62604c36f81c063e7",
+  "limit": "All admitted FP16 bit patterns and row exponent pairs for weight quantization only; not graph qualification.",
+  "errorType": "ReferenceArithmeticError",
+  "error": "CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>"
+}

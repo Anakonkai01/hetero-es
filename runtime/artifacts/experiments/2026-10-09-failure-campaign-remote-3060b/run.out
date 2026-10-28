@@ -1,0 +1,12 @@
+=== reference (the fast worker alone)
+reference final weights a2123e795488fd6dd82465e83f5825b0c44c933b1760ad26711052f8a9c3a1c8
+=== kill-worker
+    ok ['remote worker killed while it held a candidate', 'remote worker started again'] {'scenario': 'kill-worker', 'ended_ok': True, 'same_final_weights_as_reference': True, 'exercised': True, 'passed': True}
+=== pause-worker
+    ok ['remote worker stopped for 75 s (the lease is 60 s)', 'remote worker continued'] {'scenario': 'pause-worker', 'ended_ok': True, 'same_final_weights_as_reference': True, 'exercised': True, 'passed': True}
+=== cut-link
+    ok ['packets from anakonkai@10.10.10.2 dropped for 8 s', 'packets accepted again'] {'scenario': 'cut-link', 'ended_ok': True, 'same_final_weights_as_reference': True, 'exercised': True, 'passed': True}
+=== kill-coordinator
+    ok ['coordinator killed with 12 results committed', 'coordinator started again with --resume'] {'scenario': 'kill-coordinator', 'ended_ok': True, 'same_final_weights_as_reference': True, 'exercised': True, 'passed': True}
+=== kill-coordinator-mid-update
+    ok ['coordinator killed between the write-ahead record and the applied update (8 results committed)', 'coordinator started again with --resume'] {'scenario': 'kill-coordinator-mid-update', 'ended_ok': True, 'same_final_weights_as_reference': True, 'exercised': True, 'passed': True}

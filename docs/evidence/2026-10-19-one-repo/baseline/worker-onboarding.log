@@ -1,0 +1,12 @@
+/home/pc5070ti/projects/Hetero-ES-LLM-m3/node_modules/playwright-core/lib/coreBundle.js:45524
+  const failError = new Error("Process failed to launch!");
+                    ^
+
+Error: Process failed to launch!
+    at waitForLine (/home/pc5070ti/projects/Hetero-ES-LLM-m3/node_modules/playwright-core/lib/coreBundle.js:45524:21)
+    at Electron.launch (/home/pc5070ti/projects/Hetero-ES-LLM-m3/node_modules/playwright-core/lib/coreBundle.js:45734:36)
+    at async ElectronDispatcher.launch (/home/pc5070ti/projects/Hetero-ES-LLM-m3/node_modules/playwright-core/lib/coreBundle.js:57012:37)
+    at async _ProgressController.run (/home/pc5070ti/projects/Hetero-ES-LLM-m3/node_modules/playwright-core/lib/coreBundle.js:13018:27)
+    at async DispatcherConnection.dispatch (/home/pc5070ti/projects/Hetero-ES-LLM-m3/node_modules/playwright-core/lib/coreBundle.js:20191:27)
+
+Node.js v24.21.0

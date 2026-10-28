@@ -1,0 +1,16 @@
+F
+=================================== FAILURES ===================================
+_ test_block_scores_every_hypothetical_prefix_and_replays_changed_guesses_and_weights[qwen2] _
+
+family = 'qwen2'
+
+    @pytest.mark.parametrize('family',['qwen2','llama-wide'])
+    def test_block_scores_every_hypothetical_prefix_and_replays_changed_guesses_and_weights(family):
+>       from block_verifier import BlockVerifier
+E       ModuleNotFoundError: No module named 'block_verifier'
+
+.scratch/strict-verification-20261026/test_block.py:12: ModuleNotFoundError
+=========================== short test summary info ============================
+FAILED .scratch/strict-verification-20261026/test_block.py::test_block_scores_every_hypothetical_prefix_and_replays_changed_guesses_and_weights[qwen2]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 1.79s

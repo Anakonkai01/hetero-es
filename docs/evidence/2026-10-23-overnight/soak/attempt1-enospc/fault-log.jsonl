@@ -1,0 +1,4 @@
+{"event": "fault_driver_start", "runId": "f10720536eba436ba026d650edbb6f16", "plan": [[20, "kill-nhut-worker"]], "t": 1792694586.2772515, "iso": "01:43:06"}
+{"event": "fault_begin", "name": "kill-nhut-worker", "generation": 20, "t": 1792695024.0590777, "iso": "01:50:24"}
+{"event": "fault_step", "name": "kill-nhut-worker", "rc": 0, "out": "killed 10401 /home/heheboiz/.local/share/heteroes-worker/runtimes/3fd3f301ef0a/python/bin/python3.12 /home/heheboiz/.local/share/hete\n", "t": 1792695024.4512959, "iso": "01:50:24"}
+{"event": "run_end", "status": "FAILED", "completedGenerations": 60, "t": 1792695975.191763, "iso": "02:06:15"}

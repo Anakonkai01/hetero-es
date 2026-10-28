@@ -1,0 +1,8 @@
+[
+ {"name": "always None", "file": "src/heteroes/product/agent.py",
+  "old": "\"workerAlive\": False if state.get(\"status\") in QUIESCENT else None,", "new": "\"workerAlive\": None,"},
+ {"name": "always False", "file": "src/heteroes/product/agent.py",
+  "old": "\"workerAlive\": False if state.get(\"status\") in QUIESCENT else None,", "new": "\"workerAlive\": False,"},
+ {"name": "terminal only misses nothing (PAUSED)", "file": "src/heteroes/product/agent.py",
+  "old": "\"workerAlive\": False if state.get(\"status\") in QUIESCENT else None,", "new": "\"workerAlive\": False if state.get(\"status\") in TERMINAL else None,"}
+]

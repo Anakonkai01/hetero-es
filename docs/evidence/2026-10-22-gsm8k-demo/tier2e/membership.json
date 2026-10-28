@@ -1,0 +1,44 @@
+[
+ {
+  "workerId": "cli-71b757062fd9",
+  "action": "JOIN",
+  "generation": 0,
+  "actor": "experiment",
+  "at": 1792635367.3037486
+ },
+ {
+  "workerId": "desktop-d9017660e75f",
+  "action": "JOIN",
+  "generation": 0,
+  "actor": "experiment",
+  "at": 1792635367.3090286
+ },
+ {
+  "workerId": "cli-d90d1da024e9",
+  "action": "JOIN",
+  "generation": 0,
+  "actor": "experiment",
+  "at": 1792635367.314023
+ },
+ {
+  "workerId": "cli-aa99b4d4ca58",
+  "action": "JOIN",
+  "generation": 0,
+  "actor": "experiment",
+  "at": 1792635367.3193965
+ },
+ {
+  "workerId": "cli-aa99b4d4ca58",
+  "action": "LEAVE",
+  "generation": 3,
+  "actor": "system",
+  "at": 1792636230.9626625
+ },
+ {
+  "workerId": "cli-aa99b4d4ca58",
+  "action": "JOIN",
+  "generation": 4,
+  "actor": "admin",
+  "at": 1792636699.1895118
+ }
+]

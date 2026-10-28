@@ -1,0 +1,30 @@
+F
+=================================== FAILURES ===================================
+___ test_bounded_tokens_seen_result_and_flags_equal_full_projection[2-16-1] ____
+
+rows = 2, width = 16, vocab = 1
+
+    @gpu
+    @pytest.mark.parametrize("rows,width,vocab", [(2, 16, 1), (9, 48, 67), (16, 64, 1025), (17, 80, 129), (32, 896, 4097)])
+    def test_bounded_tokens_seen_result_and_flags_equal_full_projection(rows, width, vocab):
+        x, w = make(rows + width, rows, width, vocab)
+>       kernels, head = setup(w)
+                        ^^^^^^^^
+
+tests/eval/test_integer_lm_head.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+weight = tensor([[ 0.0246, -0.0462, -0.0590, -0.0106, -0.0472,  0.0224,  0.0641, -0.0376,
+          0.1934,  0.0991,  0.0450, -0.0431, -0.0121, -0.1996,  0.0257, -0.0891]],
+       device='cuda:0', dtype=torch.float16)
+
+    def setup(weight):
+        from heteroes.eval.integer_cuda import IntegerCudaKernels
+>       from heteroes.eval.integer_lm_head import BoundedLmHead
+E       ModuleNotFoundError: No module named 'heteroes.eval.integer_lm_head'
+
+tests/eval/test_integer_lm_head.py:27: ModuleNotFoundError
+=========================== short test summary info ============================
+FAILED tests/eval/test_integer_lm_head.py::test_bounded_tokens_seen_result_and_flags_equal_full_projection[2-16-1]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 0.85s

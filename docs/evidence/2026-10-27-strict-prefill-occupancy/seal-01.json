@@ -1,0 +1,9 @@
+{
+  "files": {
+    "README.md": "8117c8786881bf753d4295fbb36d030b95fa430bb5b22c082108288458dd26a3",
+    "harness/tiles.py": "92f0bf99c617dd21cf09a33fe73f43623470c80ea68a43d3d2f5153c92f761ce",
+    "raw/operators-01.json": "6289758e768262de1076aeabcf09e59296236e05d826195e90af4504f29115ef",
+    "raw/operators-01.log": "d5e1233dc58f381be7343281485bdc93451a5de8240ef0cebbfd680d95cd17c8"
+  },
+  "limits": "Integrity of the listed experiment files only; acceptance scope is in README."
+}

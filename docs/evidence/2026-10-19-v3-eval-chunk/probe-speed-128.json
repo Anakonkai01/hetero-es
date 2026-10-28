@@ -1,0 +1,34 @@
+[
+ {
+  "engine": "generate",
+  "chunk": 16,
+  "rows": 128,
+  "budget": 512,
+  "seconds": 50.0,
+  "sameAsGenerate16": 128
+ },
+ {
+  "engine": "compact",
+  "chunk": 16,
+  "rows": 128,
+  "budget": 512,
+  "seconds": 45.0,
+  "sameAsGenerate16": 128
+ },
+ {
+  "engine": "generate",
+  "chunk": 64,
+  "rows": 128,
+  "budget": 512,
+  "seconds": 28.1,
+  "sameAsGenerate16": 128
+ },
+ {
+  "engine": "compact",
+  "chunk": 64,
+  "rows": 128,
+  "budget": 512,
+  "seconds": 25.2,
+  "sameAsGenerate16": 128
+ }
+]

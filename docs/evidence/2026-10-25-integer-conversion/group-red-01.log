@@ -1,0 +1,37 @@
+F
+=================================== FAILURES ===================================
+_ test_group_quantizes_once_matches_independent_oracles_and_never_caches_input_contents[14] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x725d9fa31040>
+magnitude_bits = 14
+
+    @gpu
+    @pytest.mark.parametrize("magnitude_bits", [14, 22])
+    def test_group_quantizes_once_matches_independent_oracles_and_never_caches_input_contents(monkeypatch, magnitude_bits):
+        gen = torch.Generator().manual_seed(728)
+        x = torch.randn(2, 67, 3, generator=gen).transpose(1, 2).cuda()
+        weights = [torch.randn(n, 67, generator=gen).half().cuda() for n in (17, 11, 29)]
+        biases = [None, torch.randn(11, generator=gen).half().cuda(), torch.randn(29, generator=gen).half().cuda()]
+        kernels = IntegerCudaKernels("cuda", magnitude_bits=magnitude_bits)
+        quantize = kernels.quantize_input
+        calls = []
+    
+        def counted(*args, **kwargs):
+            calls.append(True)
+            return quantize(*args, **kwargs)
+    
+        monkeypatch.setattr(kernels, "quantize_input", counted)
+        previous = None
+        for iteration in range(3):
+            if iteration:
+                x.add_(0.25)
+                weights[1].mul_(-16)
+>           outputs = kernels.linear_many(x, weights, biases)
+                      ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'IntegerCudaKernels' object has no attribute 'linear_many'
+
+runtime/tests/eval/test_integer_group.py:38: AttributeError
+=========================== short test summary info ============================
+FAILED runtime/tests/eval/test_integer_group.py::test_group_quantizes_once_matches_independent_oracles_and_never_caches_input_contents[14]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 0.99s

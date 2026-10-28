@@ -1,0 +1,47 @@
+{
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "status": "completed_diagnostic_with_mismatches",
+  "sourceHashes": {
+    "normal.py": "01c6d546b515184240647bd7bd84e6efac4473b1c28673c76e14a15ca30b1a9f",
+    "normal_exp.py": "f9ed03593bb879776e34f962a578005edb1ade8bd31af4902b1202b845ce97fc",
+    "diagnose.py": "2f4787fc1b8c102b7cc2b6b31ac9951c66fecceb5b321e713530772bc371c424"
+  },
+  "cases": [
+    {
+      "kernel": "check_domain",
+      "inputPatterns": 1671934059,
+      "firstBits": 228737632,
+      "lastBits": 1900671690,
+      "mismatches": 257673297,
+      "firstMismatchBits": 228737632,
+      "failureFlagDifferences": 0,
+      "removedSubnormalChecksHit": 0,
+      "removedNonfiniteChecksHit": 0,
+      "seconds": 0.15007012599380687,
+      "reciprocalDifferences": 236645051,
+      "rsqrtDifferences": 25844821
+    }
+  ],
+  "builds": {
+    "normal-exhaust-v2": {
+      "sourceSha256": "1e62607dce923700622822ed5974c02afee2949af4ebfa6050d9648f90929180",
+      "ptxSha256": "470f0a61ce7e51aad3a60e5376392ae1ba5c6e85a9f1f91ca2924d1c0efd763f",
+      "cubinSha256": "db6b2eb2b380cadb635c5745488e1eee71486aa691a30bf444188af7c9d8dc3d",
+      "ptxAudit": {
+        "floatOps": {
+          "mul.rn.f32": 439,
+          "add.rn.f32": 460
+        },
+        "violations": []
+      },
+      "sassAudit": {
+        "floatOps": {
+          "FMUL": 390,
+          "FADD": 439
+        },
+        "violations": []
+      }
+    }
+  },
+  "selected": false
+}

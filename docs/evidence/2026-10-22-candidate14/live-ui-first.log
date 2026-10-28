@@ -1,0 +1,59 @@
+✖ multi-row routes and animated packets stay outside every GPU card (7.968897ms)
+✔ cards sit in one centred row when they fit and wrap into rows otherwise, never overlapping or leaving the canvas (0.252734ms)
+✔ the narrow layout used on the home page keeps three cards in one row on a smaller canvas (0.097264ms)
+✔ no workers still gives a drawable canvas (0.068306ms)
+✔ a bezier starts and ends at its anchors and a packet travels out and back along the same curve (0.182559ms)
+✔ axis ticks use round steps, stay inside the range and are few enough to read (0.118717ms)
+✔ labels are short and durations read naturally (1.087309ms)
+✔ a terminal worker block appears at its event time and an explicit retry clears its replay state (0.915053ms)
+✔ before the run nothing is happening; each worker is idle, and an unstarted worker says so (0.443445ms)
+✔ a busy worker shows its candidate with a progress that follows the clock (0.121754ms)
+✔ finished jobs are counted per worker; a failed attempt counts as failed and not as done (0.091079ms)
+✔ the generation moves through evaluating, updating the model and finished before the next opens (0.155889ms)
+✔ between two generations of a live run the screen says so instead of "finished" (0.170657ms)
+✔ the last planned generation reads finished as soon as it is done, even before the run is marked complete (0.06991ms)
+✔ a running job with no end yet keeps moving but never claims to be finished (0.109468ms)
+✔ packets fly from the coordinator when a job starts and back when it ends, for as long as the flight lasts (0.139746ms)
+✔ marks appear only shortly after they happen, and an unavailable worker shows as offline meanwhile (3.29898ms)
+✔ a member that stops answering shows as lost until it answers again, even with a job still leased (finding 11) (0.144135ms)
+✔ a worker that has started but is not ready yet shows as loading the model, until it is ready or has work (0.105494ms)
+✔ rewards of completed generations accumulate for the chart (0.077529ms)
+✔ bounds cover the whole run, and a running run ends at "now" (0.129788ms)
+✔ the player advances by real time times speed, stops at the end and cannot go before the start (0.075013ms)
+✔ a real finished run replays: both jobs complete, the model is updated and the totals reach the end (0.081115ms)
+✔ a streamed update replaces what changed and never goes backwards in time (0.065892ms)
+✔ a replay starts from the beginning, playing; after watching the run live it stays on the finished picture (0.054869ms)
+ℹ tests 25
+ℹ suites 0
+ℹ pass 24
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 74.394264
+
+✖ failing tests:
+
+test at tests/diagramLayout.test.mjs:14:1
+✖ multi-row routes and animated packets stay outside every GPU card (7.968897ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    {
+      x: 244,
+  +   y: 171.99999999999994
+  -   y: 172
+    }
+  
+      at TestContext.<anonymous> (file:///home/pc5070ti/projects/heteroes/frontend/tests/diagramLayout.test.mjs:30:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { x: 244, y: 171.99999999999994 },
+    expected: { x: 244, y: 172 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

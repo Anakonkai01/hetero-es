@@ -1,0 +1,6 @@
+{
+  "gpuComputeProcesses": "pid, process_name, used_gpu_memory [MiB]\n",
+  "matrixTerminal": true,
+  "tinyAbbaTerminal": true,
+  "approvedPlanSha256": "4ee6838fa47f810ee40348b5f0bc556834bf50825eb0b7b0795b5053743cb17f"
+}

@@ -1,0 +1,17 @@
+control ok    | 107 passed in 134.54s (0:02:14)
+killed       timeout bit collides with layout bit | 1 failed, 6 passed in 1.74s
+killed       kernels ignore transport bit | 1 failed in 1.82s
+killed       decode ignores transport bit | 1 failed in 1.79s
+killed       TMA admits 128-row tiles | 1 failed, 7 passed in 1.83s
+killed       TMA admits split K | 1 failed, 7 passed in 1.79s
+killed       stale map address | 1 failed, 48 passed in 87.37s (0:01:27)
+killed       wrong weight swizzle | 1 failed, 8 passed in 5.46s
+killed       TMA drops residual | 1 failed, 26 passed in 42.37s
+killed       stages replace split-kernel range | 1 failed, 53 passed in 87.32s (0:01:27)
+killed       stage scores read wrong subtree | 1 failed, 59 passed in 89.41s (0:01:29)
+killed       stage never opts into large shared | 1 failed, 62 passed in 90.92s (0:01:30)
+killed       context rounded to 8 | 1 failed, 95 passed in 111.20s (0:01:51)
+killed       session reused across contexts | 1 failed, 102 passed in 119.49s (0:01:59)
+killed       layout uses configured context | 1 failed, 102 passed in 117.51s (0:01:57)
+
+14 of 14 mutants killed.

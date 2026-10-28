@@ -1,0 +1,30 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7201.67it/s]
+USDT:2026-10-25 20:29:31 2283129:2283129 SyncActivityProfilerHandler.cpp:52] profiler_start
+USDT:2026-10-25 20:29:32 2283129:2283129 SyncActivityProfilerHandler.cpp:59] profiler_stop
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg    # of Calls  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                          frozen_linear         0.00%       0.000us         0.00%       0.000us       0.000us     152.461ms        44.52%     152.461ms      28.192us          5408  
+                                     strict_lora_finish         0.00%       0.000us         0.00%       0.000us       0.000us      80.377ms        23.47%      80.377ms      14.951us          5376  
+                                       strict_attention         0.00%       0.000us         0.00%       0.000us       0.000us      36.019ms        10.52%      36.019ms      46.900us           768  
+                                          strict_linear         0.00%       0.000us         0.00%       0.000us       0.000us      33.923ms         9.91%      33.923ms       6.310us          5376  
+                                          frozen_finish         0.00%       0.000us         0.00%       0.000us       0.000us      11.585ms         3.38%      11.585ms       2.224us          5208  
+                                          integer_input         0.00%       0.000us         0.00%       0.000us       0.000us       9.023ms         2.63%       9.023ms       2.907us          3104  
+                                        strict_rms_norm         0.00%       0.000us         0.00%       0.000us       0.000us       6.634ms         1.94%       6.634ms       4.231us          1568  
+                                        strict_silu_mul         0.00%       0.000us         0.00%       0.000us       0.000us       3.276ms         0.96%       3.276ms       4.266us           768  
+                                          decode_greedy         0.00%       0.000us         0.00%       0.000us       0.000us       1.928ms         0.56%       1.928ms      60.249us            32  
+                                            strict_rope         0.00%       0.000us         0.00%       0.000us       0.000us       1.428ms         0.42%       1.428ms       0.929us          1536  
+                                             strict_add         0.00%       0.000us         0.00%       0.000us       0.000us       1.419ms         0.41%       1.419ms       0.924us          1536  
+                                          decode_prefix         0.00%       0.000us         0.00%       0.000us       0.000us       1.234ms         0.36%       1.234ms      51.423us            24  
+                                            aten::fill_         0.07%     231.786us         0.21%     704.196us       4.994us     926.635us         0.27%     927.339us       6.577us           141  
+void at::native::vectorized_elementwise_kernel<4, at...         0.00%       0.000us         0.00%       0.000us       0.000us     881.510us         0.26%     881.510us       9.182us            96  
+                                           decode_store         0.00%       0.000us         0.00%       0.000us       0.000us     645.901us         0.19%     645.901us       0.868us           744  
+                                              aten::cat         0.09%     308.253us         0.13%     445.292us       8.906us     386.276us         0.11%     386.276us       7.726us            50  
+void at::native::(anonymous namespace)::CatArrayBatc...         0.00%       0.000us         0.00%       0.000us       0.000us     384.036us         0.11%     384.036us       8.001us            48  
+                                            aten::copy_         0.15%     528.922us        91.34%     312.843ms     977.635us     184.899us         0.05%     187.747us       0.587us           320  
+                         Memcpy DtoD (Device -> Device)         0.00%       0.000us         0.00%       0.000us       0.000us     121.379us         0.04%     121.379us       0.843us           144  
+                                          aten::nonzero         0.11%     374.102us         0.23%     785.340us      24.542us     116.228us         0.03%     116.228us       3.632us            32  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 342.513ms
+Self CUDA time total: 342.472ms
+

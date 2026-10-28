@@ -1,0 +1,101 @@
+{
+  "sourceSha256": "8f709d98dd9b1d4ea72006f995758fbf52fa355ac2846c443a06b3dac07cc054",
+  "identity": {
+    "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+    "operators": "pairwise_f32_reference_v1_experimental",
+    "sourceSha256": "daf13db126e0b4b4d5c7258a3f8c8be67ef7171dda2d62889c9e8b41b08a95ec",
+    "nvrtcOptions": [
+      "--fmad=false",
+      "--ftz=false",
+      "--prec-div=true",
+      "--prec-sqrt=true",
+      "--std=c++17"
+    ],
+    "hardwareQualified": false,
+    "arch": "sm_120",
+    "gpu": "NVIDIA GeForce RTX 5070 Ti",
+    "nvrtcVersion": [
+      13,
+      2
+    ],
+    "builds": {
+      "lora-16-rows8-output": {
+        "sourceSha256": "890d92794495b7b17233eef3f3ed31e78b3a5991f864c766982c245bf0f379a9",
+        "ptxSha256": "4fdeea935253f02f267861fd8851bab53b470833664ebe1b9f95aa13ad4cdd53",
+        "cubinSha256": "91ba35a5371ac865b80c3f46bfc709ee280eec0b823114bcf2082bf22831dd04",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 17,
+            "add.rn.f32": 17
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 17,
+            "FADD": 17
+          },
+          "violations": []
+        }
+      },
+      "lora-32-rows8": {
+        "sourceSha256": "c59ed4cc7023c69dbc88c3dbadac5aa2344beb890be0f98fc9abfd67b7253e07",
+        "ptxSha256": "0f36bac48f0a2c09109093ff9c41eb63c29284bea1b3f0fd1590a8216b02cb7b",
+        "cubinSha256": "0c9559df82855694f80f7a9727c1558f057e651e1aa0ef0500a88096e65896c1",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 64,
+            "add.rn.f32": 161
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 64,
+            "FADD": 161
+          },
+          "violations": []
+        }
+      },
+      "lora-8-rows8": {
+        "sourceSha256": "32ecda48b9c9aa001ee62b7c23d48f8b36c2612b83d26aca595b5a767042b550",
+        "ptxSha256": "4eae260b50b5f5557bc835cad8d18bb4d69befc850a9a95657b7c30adfd22d9e",
+        "cubinSha256": "88af90720a81b85db848b13756e0a6acfcf2f5409a477c1554f493a09f5a7205",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 64,
+            "add.rn.f32": 161
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 64,
+            "FADD": 161
+          },
+          "violations": []
+        }
+      },
+      "lora-8-rows8-output": {
+        "sourceSha256": "13bb0c42c5d2d0521867a480774a7ae0d595cab6ff34c322fc9ddae6a379af43",
+        "ptxSha256": "38b1d4dc9323d35f4e493183a4230c27823b141c15ea1e9f37d35c8e7de6260c",
+        "cubinSha256": "ba08a659f79c7ab812f9ec3fd13a8a09a56ef012a569e1d79cf9dc311039ea7b",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 9,
+            "add.rn.f32": 10
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 9,
+            "FADD": 10
+          },
+          "violations": []
+        }
+      }
+    },
+    "fingerprint": "f64379676f029c5444a9232c3bab0c345287f6c84be48e13671399044de047fc"
+  }
+}

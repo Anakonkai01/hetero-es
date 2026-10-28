@@ -1,0 +1,5 @@
+frontend/src/components/layout/AppLayout.tsx(77,13): error TS2339: Property 'scenario' does not exist on type 'AppState'.
+frontend/src/components/layout/AppLayout.tsx(77,13): error TS6133: 'scenario' is declared but its value is never read.
+frontend/src/components/layout/AppLayout.tsx(77,23): error TS2339: Property 'setScenario' does not exist on type 'AppState'.
+frontend/src/components/layout/AppLayout.tsx(77,23): error TS6133: 'setScenario' is declared but its value is never read.
+frontend/src/pages/ArtifactsPage.tsx(21,11): error TS6133: 'flash' is declared but its value is never read.

@@ -1,0 +1,13 @@
+control ok    | 63 passed in 2.83s
+killed       second recovery allowed | 1 failed, 2 passed in 1.03s
+killed       no probation before the boundary | 1 failed, 1 passed in 0.85s
+killed       alias of a healthy worker admitted | 1 failed, 6 passed in 1.24s
+killed       base weights not reloaded | 1 failed, 1 passed in 0.94s
+killed       no self-test | 1 failed, 4 passed in 31.10s
+killed       failed recovery retried after restart | 1 failed, 4 passed in 31.11s
+killed       restart forgets the alias | 1 failed, 5 passed in 1.21s
+killed       lab quarantines a recovered device | 1 failed, 30 passed in 1.28s
+killed       alias credential without recoveries | 1 failed, 6 passed in 1.24s
+killed       reload skips the hash check | 1 failed, 62 passed in 2.73s
+
+10 of 10 mutants killed.

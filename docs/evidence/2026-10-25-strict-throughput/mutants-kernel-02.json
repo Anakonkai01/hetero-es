@@ -1,0 +1,50 @@
+[
+  {
+    "name": "packed-key-offset",
+    "file": "src/heteroes/eval/strict_cuda.py",
+    "old": "const int start = packed ? ranges[3 * i] : 0;",
+    "new": "const int start = 0;"
+  },
+  {
+    "name": "packed-causal-limit",
+    "file": "src/heteroes/eval/strict_cuda.py",
+    "old": "const int limit = packed ? ranges[3 * i + 2] : past + i;",
+    "new": "const int limit = past + i;"
+  },
+  {
+    "name": "row-tile-origin",
+    "file": "src/heteroes/eval/strict_cuda.py",
+    "old": "int first = blockIdx.y * ROW_TILE;",
+    "new": "int first = 0;"
+  },
+  {
+    "name": "row-output-address",
+    "file": "src/heteroes/eval/strict_cuda.py",
+    "old": "out[(size_t)m * outputs + o] = v[r];",
+    "new": "out[(size_t)first * outputs + o] = v[r];"
+  },
+  {
+    "name": "row-fault-only-first",
+    "file": "src/heteroes/eval/strict_cuda.py",
+    "old": "if ((__float_as_uint(v[r]) & 0x7f800000u) == 0x7f800000u) atomicOr(error, 1);",
+    "new": "if (r == 0 && (__float_as_uint(v[r]) & 0x7f800000u) == 0x7f800000u) atomicOr(error, 1);"
+  },
+  {
+    "name": "stage-wrong-weight-address",
+    "file": "src/heteroes/eval/strict_cuda.py",
+    "old": "live ? widen(w[(size_t)o * WIDTH + p]) : 0.0f",
+    "new": "live ? widen(w[(size_t)o * WIDTH]) : 0.0f"
+  },
+  {
+    "name": "stage-activation-row-owner",
+    "file": "src/heteroes/eval/strict_cuda.py",
+    "old": "m < rows ? x[(size_t)m * WIDTH + p] : -0.0f",
+    "new": "m < rows ? x[p] : -0.0f"
+  },
+  {
+    "name": "stage-activation-channel",
+    "file": "src/heteroes/eval/strict_cuda.py",
+    "old": "mul_rn(flush(staged[0][t][i]), weight[i])",
+    "new": "mul_rn(flush(staged[0][t][0]), weight[i])"
+  }
+]

@@ -1,0 +1,29 @@
+F.                                                                       [100%]
+=================================== FAILURES ===================================
+___________ test_edges_and_random_bits_keep_outputs_and_error_flags ____________
+
+    def test_edges_and_random_bits_keep_outputs_and_error_flags():
+>       k,fn=build();g=torch.Generator().manual_seed(314)
+             ^^^^^^^
+
+docs/evidence/2026-10-27-strict-normal-domain/harness/test_normal.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-normal-domain/harness/test_normal.py:19: in build
+    fn=k._compile('normal-probe-v1',h+transform(sc._OPS_SOURCE)+ENTRY,['probe'],
+runtime/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+runtime/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+=========================== short test summary info ============================
+FAILED docs/evidence/2026-10-27-strict-normal-domain/harness/test_normal.py::test_edges_and_random_bits_keep_outputs_and_error_flags
+1 failed, 1 passed in 4.28s

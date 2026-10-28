@@ -1,0 +1,6 @@
+control ok    | 9 passed in 1.85s
+killed       misaddress K and V slices | 4 failed, 5 passed in 1.91s
+killed       copy view weights | 5 failed, 4 passed in 1.79s
+killed       lose tied parameter object | 2 failed, 7 passed in 1.82s
+
+3 of 3 mutants killed.

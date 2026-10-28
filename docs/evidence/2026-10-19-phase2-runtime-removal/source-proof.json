@@ -1,0 +1,23 @@
+{
+  "baseline": "8f9ae95",
+  "unchangedSupervisorMethodASTs": [
+    "directory",
+    "state",
+    "save",
+    "log",
+    "poll_workers",
+    "tick",
+    "loop",
+    "snapshot"
+  ],
+  "expectedSupervisorChanges": [
+    "__init__: remove registry cache",
+    "submit: remove legacy maintenance hold"
+  ],
+  "unchangedAgentASTExceptBaseImport": true,
+  "unchangedWorkloads": true,
+  "unchangedDispatcherAST": true,
+  "unchangedNumericalFiles": 15,
+  "agentAndRunnerImportClosure": 51,
+  "retiredImports": []
+}

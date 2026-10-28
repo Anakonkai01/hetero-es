@@ -1,0 +1,6 @@
+condition  rep   T mean     min     max    wait  update     CB      dT    pred   err%
+n8-B0        1     85.0    85.0    85.0    38.9    45.5  1.000     0.0    86.3    1.5
+n8-B2        1     92.6    92.6    92.6    47.1    44.7  0.918    -7.6   106.1   14.6
+n8-B3        1     82.8    82.8    82.8    36.4    45.6  1.027     2.2    89.0    7.5
+n8-H0        1     80.4    80.4    80.4    34.8    44.9  1.058     4.7    81.5    1.4
+n8 {'runs_compared': 4, 'identical_rewards_and_hashes': True, 'distinct': 1}

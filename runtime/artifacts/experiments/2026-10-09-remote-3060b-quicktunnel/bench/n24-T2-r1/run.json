@@ -1,0 +1,13 @@
+{
+  "name": "n24-T2-r1",
+  "outcome": "ok",
+  "wall_seconds": 395.1177432537079,
+  "spec": {
+    "workers": {
+      "worker-5070ti": 64,
+      "worker-3060": 64
+    },
+    "policy": "greedy",
+    "args": []
+  }
+}

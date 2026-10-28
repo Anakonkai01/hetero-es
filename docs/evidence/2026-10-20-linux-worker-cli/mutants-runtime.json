@@ -1,0 +1,11 @@
+[
+ {"name": "download keeps a file whose SHA-256 differs", "file": "src/heteroes/product/worker_cli.py", "old": "if size != item[\"sizeBytes\"] or digest.hexdigest() != item[\"sha256\"]:", "new": "if size != item[\"sizeBytes\"]:"},
+ {"name": "pip without --require-hashes", "file": "src/heteroes/product/worker_cli.py", "old": "                \"--require-hashes\",\n", "new": ""},
+ {"name": "runtime checksum not checked", "file": "src/heteroes/product/worker_cli.py", "old": "!= profile[\"runtimeSha256\"]:", "new": "== 'never':"},
+ {"name": "advertise the self-test's own coordinator flag", "file": "src/heteroes/product/worker_cli.py", "old": "return {**settings[\"selfTest\"], \"coordinator\": settings[\"compute\"][\"coordinator\"]}", "new": "return dict(settings[\"selfTest\"])"},
+ {"name": "token file readable by others", "file": "src/heteroes/product/worker_cli.py", "old": "os.O_EXCL, 0o600)", "new": "os.O_EXCL, 0o644)"},
+ {"name": "second pairing allowed", "file": "src/heteroes/product/worker_cli.py", "old": "        if settings.get(\"device\"):\n            raise RuntimeError(\"ALREADY_PAIRED\")\n", "new": ""},
+ {"name": "agent may coordinate when not asked", "file": "src/heteroes/product/worker_cli.py", "old": "\"workerOnly\": not compute[\"coordinator\"],", "new": "\"workerOnly\": False,"},
+ {"name": "a busy lab (409) is not retried", "file": "src/heteroes/product/worker_cli.py", "old": "if error.status != 409 or attempt == 19:", "new": "if True:"},
+ {"name": "a failed self-test is accepted", "file": "src/heteroes/product/worker_cli.py", "old": "if error or not result or not result.get(\"passed\"):", "new": "if not result:"}
+]

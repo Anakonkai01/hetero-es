@@ -1,0 +1,20 @@
+[
+  {
+    "name": "accept bad recovery checksum",
+    "file": "backend/recovery_storage.py",
+    "old": "if size != obj['size'] or hasher.hexdigest() != sha:",
+    "new": "if False:"
+  },
+  {
+    "name": "ignore recovery quota",
+    "file": "backend/recovery_storage.py",
+    "old": "if usage['observedBytes'] + usage['reservedBytes'] + new_bytes + len(json.dumps(m)) > self.quota:",
+    "new": "if False:"
+  },
+  {
+    "name": "silently accept cloud config",
+    "file": "backend/app.py",
+    "old": "if config.get('storageMode') not in (None, 'local') or config.get('storageFile'):",
+    "new": "if False:"
+  }
+]

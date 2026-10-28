@@ -1,0 +1,63 @@
+{
+  "worker_id": "worker-3060",
+  "measured_at_utc": "2026-10-08T16:08:10Z",
+  "environment": {
+    "hostname": "DESKTOP-QP0NTA7",
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "python": "3.14.4",
+    "torch": "2.13.0+cu132",
+    "torch_cuda": "13.2",
+    "numpy": "2.5.3",
+    "transformers": "5.17.0",
+    "device": "cuda",
+    "gpu_name": "NVIDIA GeForce RTX 3060",
+    "gpu_capability": [
+      8,
+      6
+    ],
+    "gpu_total_memory_bytes": 12884377600,
+    "nvidia_driver": null
+  },
+  "code": {
+    "git_commit": "d1cd21b1a980a5bc86833f0dac18c700399aabb6",
+    "git_dirty": true
+  },
+  "sync": {
+    "url": "http://100.110.165.40:8766",
+    "rtt_median_seconds": 0.0092243260005489,
+    "rtt_max_seconds": 0.09688345200083859,
+    "weights_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+    "transfer_seconds": 282.9353895200002,
+    "load_seconds": 0.9276006479994976,
+    "rehash_seconds": 0.4998707779996039,
+    "total_seconds": 284.58904879200054,
+    "weights_bytes": 988065536,
+    "throughput_mb_per_second": 3.4921949413124067,
+    "repeats": [
+      {
+        "transfer_seconds": 282.9353895200002,
+        "load_seconds": 0.9276006479994976,
+        "rehash_seconds": 0.7260586240008706,
+        "total_seconds": 284.58904879200054,
+        "weights_bytes": 988065536,
+        "throughput_mb_per_second": 3.4921949413124067
+      },
+      {
+        "transfer_seconds": 278.59778579500016,
+        "load_seconds": 0.5531275360008294,
+        "rehash_seconds": 0.4549697049988026,
+        "total_seconds": 279.6058830359998,
+        "weights_bytes": 988065536,
+        "throughput_mb_per_second": 3.546566363334436
+      },
+      {
+        "transfer_seconds": 382.7393952429993,
+        "load_seconds": 79.06978355799947,
+        "rehash_seconds": 0.4998707779996039,
+        "total_seconds": 462.3090495789984,
+        "weights_bytes": 988065536,
+        "throughput_mb_per_second": 2.5815621498087022
+      }
+    ]
+  }
+}

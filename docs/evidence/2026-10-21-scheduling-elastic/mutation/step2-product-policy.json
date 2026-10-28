@@ -1,0 +1,50 @@
+[
+ {
+  "name": "runner-hardcodes-greedy",
+  "file": "src/heteroes/product/runner.py",
+  "old": "        config.get(\"schedulerPolicy\", \"greedy\"),\n        config[\"workerIds\"],",
+  "new": "        \"greedy\",\n        config[\"workerIds\"],"
+ },
+ {
+  "name": "runner-drops-admission",
+  "file": "src/heteroes/product/runner.py",
+  "old": "        config[\"workerIds\"],\n        book=",
+  "new": "        None,\n        book="
+ },
+ {
+  "name": "factory-new-book-each-generation",
+  "file": "src/heteroes/dispatch.py",
+  "old": "        inner = GreedyTail(shared) if name",
+  "new": "        inner = GreedyTail(SpeedBook()) if name"
+ },
+ {
+  "name": "factory-tail-is-greedy",
+  "file": "src/heteroes/dispatch.py",
+  "old": "        inner = GreedyTail(shared) if name == \"greedy-tail\" else Greedy()",
+  "new": "        inner = Greedy()"
+ },
+ {
+  "name": "factory-members-read-once",
+  "file": "src/heteroes/dispatch.py",
+  "old": "    shared = SpeedBook() if book is None else book\n",
+  "new": "    shared = SpeedBook() if book is None else book\n    admitted = admitted() if callable(admitted) else admitted\n"
+ },
+ {
+  "name": "supervisor-rejects-tail",
+  "file": "src/heteroes/product/run_supervisor.py",
+  "old": "    if config.get(\"schedulerPolicy\") not in SCHEDULER_POLICIES",
+  "new": "    if config.get(\"schedulerPolicy\") != \"greedy\""
+ },
+ {
+  "name": "supervisor-accepts-anything",
+  "file": "src/heteroes/product/run_supervisor.py",
+  "old": "    if config.get(\"schedulerPolicy\") not in SCHEDULER_POLICIES or",
+  "new": "    if"
+ },
+ {
+  "name": "runner-fresh-book",
+  "file": "src/heteroes/product/runner.py",
+  "old": "        book=SpeedBook.from_ledger(ledger, config[\"runId\"]),",
+  "new": "        book=SpeedBook(),"
+ }
+]

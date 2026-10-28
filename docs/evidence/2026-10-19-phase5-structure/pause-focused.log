@@ -1,0 +1,135 @@
+...F..                                                                   [100%]
+=================================== FAILURES ===================================
+____________________ test_held_queue_still_reconciles_pause ____________________
+
+lab = (<starlette.testclient.TestClient object at 0x7835affc3bf0>, <backend.store.Store object at 0x7835b0156ba0>, <backend....t at 0x7835b00fec00>, {'Authorization': 'Bearer hG7k1-crBgRd2eSaB17951pabCARrIV47U5LrGRZcEA', 'X-Workspace-Id': 'lab'})
+
+    def test_held_queue_still_reconciles_pause(lab):
+        client,store,runtime,owner=lab
+        device,auth=pair(lab);enable(lab,device,auth)
+        run=queued(lab,device);store.dispatch_once();assignment=runtime.runs()[0]
+        hold(store)
+        assert client.post(f'/api/v1/experiments/{run}/pause',headers=owner).status_code==200
+>       boot(client,auth,'boot-1',contribution=True,reports=[paused_report(assignment)],processes=[stopped(assignment)])
+
+backend/tests/test_admission_hold.py:56: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/tests/labkit.py:59: in boot
+    response = client.post('/api/v1/device/poll', headers=auth, json=data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:1144: in post
+    return self.request(
+.venv-backend/lib/python3.12/site-packages/starlette/testclient.py:463: in request
+    return super().request(
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/starlette/testclient.py:360: in handle_request
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/testclient.py:357: in handle_request
+    portal.call(self.app, scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/ai/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/ai/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+.venv-backend/lib/python3.12/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/fastapi/applications.py:1159: in __call__
+    await super().__call__(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+.venv-backend/lib/python3.12/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv-backend/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/routing.py:676: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/routing.py:697: in app
+    await route.handle(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/routing.py:282: in handle
+    await self.app(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:134: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:120: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:674: in app
+    raw_response = await run_endpoint_function(
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:330: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/starlette/concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/anyio/to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+.venv-backend/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:2706: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:1100: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+backend/devices.py:325: in poll
+    return runtime.poll(current,body,command_kinds=command_capabilities(capabilities))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/agent_polling.py:23: in poll
+    accepted = self._accept_reports(db, device, body, old)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <backend.devices.AgentRuntime object at 0x7835b00fec00>
+db = <sqlite3.Connection object at 0x7835b003d120>
+device = {'boot_id': 'boot-1', 'bulk_url': None, 'compute_url': 'http://100.64.0.1:8769', 'desired': 1, ...}
+body = Poll(telemetry=None, bootId='boot-1', contribution=True, processes=[ProcessReport(assignmentId='29b9b6c379b049218de20f...s': [], 'events': [], 'artifacts': [], 'completedGenerationCount': 1})], events=[], acknowledgements=[], selfTest=None)
+old = <sqlite3.Row object at 0x7835b0045150>
+
+    def _accept_reports(self, db, device, body, old):
+        accepted=[]
+        for report in body.reports:
+            row=db.execute('SELECT * FROM assignments WHERE id=?',(report.assignmentId,)).fetchone()
+            if not row or row['coordinator']!=device['id'] or row['epoch']!=report.epoch:continue
+            if len(json.dumps(report.snapshot))>2_000_000:raise HTTPException(413,'Snapshot is too large')
+            if report.snapshot.get('state',{}).get('status') not in QUIESCENT|{'STARTING','RUNNING','CANCELLING','RECOVERING','DRAINING','PAUSING'}:raise HTTPException(422,'Invalid runtime status')
+            if report.snapshot['state']['status']=='PAUSED':
+                point=report.snapshot['state'].get('pauseCheckpoint',{})
+>               if point.get('verified') is not True or type(point.get('generation')) is not int or point['generation']<0 or not re.fullmatch('[a-f0-9]{32}',str(point.get('pointId',''))) or any(not re.fullmatch('[a-f0-9]{64}',str(point.get(k,''))) for k in ('childWeightsSha256','parentWeightsSha256')):
+                                                                                                                                 ^^
+E               NameError: name 're' is not defined. Did you forget to import 're'
+
+backend/agent_polling.py:117: NameError
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_admission_hold.py::test_held_queue_still_reconciles_pause
+1 failed, 5 passed, 1 warning in 0.98s

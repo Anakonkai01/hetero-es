@@ -1,0 +1,17 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_weight_read_policy_selects_measured_prefetch_and_keeps_explicit_controls _
+
+    def test_weight_read_policy_selects_measured_prefetch_and_keeps_explicit_controls():
+        from heteroes.eval.integer_cuda import weight_read_plan
+    
+>       assert weight_read_plan(22, "sm_120", "auto") == "prefetch2"
+E       AssertionError: assert 'paired' == 'prefetch2'
+E         
+E         - prefetch2
+E         + paired
+
+runtime/tests/eval/test_integer_cuda.py:30: AssertionError
+=========================== short test summary info ============================
+FAILED runtime/tests/eval/test_integer_cuda.py::test_weight_read_policy_selects_measured_prefetch_and_keeps_explicit_controls
+1 failed, 74 deselected in 0.68s

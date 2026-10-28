@@ -1,0 +1,837 @@
+{
+ "candidates": {
+  "executorTiming": {
+   "00000000000000000000000000000000/g0/c0": {
+    "generatedTokens": 189,
+    "perturb": 0.7477706069998931,
+    "restore": 0.14402218899977015,
+    "rollout": 8.202734365000197,
+    "total": 9.09452716099986
+   },
+   "00000000000000000000000000000000/g0/c1": {
+    "generatedTokens": 101,
+    "perturb": 0.7219947329999741,
+    "restore": 0.1438030690001142,
+    "rollout": 0.1018259699999362,
+    "total": 0.9676237720000245
+   },
+   "00000000000000000000000000000000/g0/c10": {
+    "generatedTokens": 154,
+    "perturb": 0.7096426319999409,
+    "restore": 0.13981935999981943,
+    "rollout": 0.13378871100030665,
+    "total": 0.983250703000067
+   },
+   "00000000000000000000000000000000/g0/c11": {
+    "generatedTokens": 122,
+    "perturb": 0.686459023000225,
+    "restore": 0.13994237299993983,
+    "rollout": 0.1716192859998955,
+    "total": 0.9980206820000603
+   },
+   "00000000000000000000000000000000/g0/c2": {
+    "generatedTokens": 149,
+    "perturb": 0.7509350109999104,
+    "restore": 0.14322107199996026,
+    "rollout": 1.3041350440003043,
+    "total": 2.198291127000175
+   },
+   "00000000000000000000000000000000/g0/c3": {
+    "generatedTokens": 105,
+    "perturb": 0.7310459800000899,
+    "restore": 0.13958307399980185,
+    "rollout": 0.10166394399993806,
+    "total": 0.9722929979998298
+   },
+   "00000000000000000000000000000000/g0/c4": {
+    "generatedTokens": 129,
+    "perturb": 0.6959103939998386,
+    "restore": 0.14393529700009822,
+    "rollout": 0.1372987889999422,
+    "total": 0.977144479999879
+   },
+   "00000000000000000000000000000000/g0/c5": {
+    "generatedTokens": 101,
+    "perturb": 0.7294146670001282,
+    "restore": 0.14331767200019385,
+    "rollout": 0.09957914000005985,
+    "total": 0.972311479000382
+   },
+   "00000000000000000000000000000000/g0/c6": {
+    "generatedTokens": 109,
+    "perturb": 0.7234990580000158,
+    "restore": 0.1440381699999307,
+    "rollout": 0.1331263739998576,
+    "total": 1.000663601999804
+   },
+   "00000000000000000000000000000000/g0/c7": {
+    "generatedTokens": 207,
+    "perturb": 0.7428552649998892,
+    "restore": 0.1398837030001232,
+    "rollout": 0.29077203299993926,
+    "total": 1.1735110009999516
+   },
+   "00000000000000000000000000000000/g0/c8": {
+    "generatedTokens": 94,
+    "perturb": 0.7352125679999517,
+    "restore": 0.14140456599989193,
+    "rollout": 0.10779076400012855,
+    "total": 0.9844078979999722
+   },
+   "00000000000000000000000000000000/g0/c9": {
+    "generatedTokens": 328,
+    "perturb": 0.7460320160002993,
+    "restore": 0.1439767369997753,
+    "rollout": 0.14026448300000993,
+    "total": 1.0302732360000846
+   }
+  },
+  "textSha256": {
+   "00000000000000000000000000000000/g0/c0": "5a5eb6878e84e8e07be171dcbd7a6d0a273590c94d167754e3ba0246b6715711",
+   "00000000000000000000000000000000/g0/c1": "ed3940d2db0f4d998fd73c2f369f0c2b0fecf8d67433c28f049df52970aeba21",
+   "00000000000000000000000000000000/g0/c10": "e0dc73597dc7f9a39bfb706c242bf9a44cb4333d82b748698a462140b97e99a8",
+   "00000000000000000000000000000000/g0/c11": "b17d79d294a24b494b691d92447d23658b734f0e3c3940b69240f055b67f0d54",
+   "00000000000000000000000000000000/g0/c2": "72deb17da7bbf35d0dfed687cc2e1b90751dcc05a721d9436bf1152542dad600",
+   "00000000000000000000000000000000/g0/c3": "f817d0e5f82d0f61def8225b31fe3b31af84ecb6ffdd0f6cb2854d891c776486",
+   "00000000000000000000000000000000/g0/c4": "28a5ad5ecbbac8780e5515f2f3d3ff5be930f4a90b0a5645b23ca9e9a7f5849c",
+   "00000000000000000000000000000000/g0/c5": "349039b112d2e9287aaa9671b38906a88ddd99d06126e3b71763cffb33b86a04",
+   "00000000000000000000000000000000/g0/c6": "51204091a1235dfcc8f0dbc4969aba33f746609d13529fec38bfa0b98b9d2ac9",
+   "00000000000000000000000000000000/g0/c7": "b8870abb962b1bf18716f98144bc42af6a22df7480e91b71fe34df2d34ffaeb2",
+   "00000000000000000000000000000000/g0/c8": "df8105d3a147e0fa3155a7b38dfb5893eed60fb429094339ff403f54dfb6df5f",
+   "00000000000000000000000000000000/g0/c9": "702e514a4566242746610a0423f0a8047dfa6b29a08bd66a7ed3d700a5d44610"
+  }
+ },
+ "decoder": "strict_b22_v1",
+ "environment": {
+  "computeCapability": [
+   12,
+   0
+  ],
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "gpuTotalBytes": 16611278848,
+  "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+  "python": "3.12.14",
+  "torch": "2.13.0+cu132",
+  "transformers": "5.17.0"
+ },
+ "memoryMap": {
+  "cpuRestoreSnapshotBytes": 988065536,
+  "cudaAllocatedAtEndBytes": 1152519168,
+  "cudaReservedAtEndBytes": 1262485504,
+  "fp32ParametersOnGpu": false,
+  "hostPeakBytes": 2847154176,
+  "liveStorage": {
+   "formatVersion": 1,
+   "roles": {
+    "liveFp16Weights": {
+     "cuda:0": {
+      "storageBytes": 988065792,
+      "storages": 292
+     }
+    }
+   },
+   "unique": {
+    "cuda:0": {
+     "storageBytes": 988065792,
+     "storages": 292
+    }
+   }
+  },
+  "strictEngineBufferBytes": 145968944
+ },
+ "model": {
+  "id": "qwen",
+  "revision": "74bf6dd08049d862b3bd56ac2a84a8e1980ae93a"
+ },
+ "parentSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+ "phases": [
+  {
+   "allocatedAfterBytes": 996322304,
+   "allocatedBeforeBytes": 0,
+   "hostPeakBytes": 2847154176,
+   "peakAllocatedBytes": 996322304,
+   "peakReservedBytes": 1040187392,
+   "phase": "load",
+   "status": "ok",
+   "wallSeconds": 1.4241844550001588
+  },
+  {
+   "allocatedAfterBytes": 996584960,
+   "allocatedBeforeBytes": 996322304,
+   "hostPeakBytes": 2847154176,
+   "peakAllocatedBytes": 997291520,
+   "peakReservedBytes": 1040187392,
+   "phase": "engine",
+   "status": "ok",
+   "wallSeconds": 0.6908158950000143
+  },
+  {
+   "allocatedAfterBytes": 996584960,
+   "allocatedBeforeBytes": 996584960,
+   "candidateId": "00000000000000000000000000000000/g0/c0",
+   "hostPeakBytes": 2847154176,
+   "pass": "cold",
+   "peakAllocatedBytes": 1055305216,
+   "peakReservedBytes": 1113587712,
+   "phase": "perturb",
+   "status": "ok",
+   "wallSeconds": 0.7473768570002903
+  },
+  {
+   "allocatedAfterBytes": 996584960,
+   "allocatedBeforeBytes": 996584960,
+   "candidateId": "00000000000000000000000000000000/g0/c0",
+   "hostPeakBytes": 2847154176,
+   "pass": "cold",
+   "peakAllocatedBytes": 996584960,
+   "peakReservedBytes": 1113587712,
+   "phase": "refresh",
+   "status": "ok",
+   "wallSeconds": 1.3315000160218915e-05
+  },
+  {
+   "allocatedAfterBytes": 1153734656,
+   "allocatedBeforeBytes": 996584960,
+   "candidateId": "00000000000000000000000000000000/g0/c0",
+   "hostPeakBytes": 2847154176,
+   "pass": "cold",
+   "peakAllocatedBytes": 1315351040,
+   "peakReservedBytes": 1382023168,
+   "phase": "rollout",
+   "status": "ok",
+   "wallSeconds": 8.202018124000006
+  },
+  {
+   "allocatedAfterBytes": 1153734656,
+   "allocatedBeforeBytes": 1153734656,
+   "candidateId": "00000000000000000000000000000000/g0/c0",
+   "hostPeakBytes": 2847154176,
+   "pass": "cold",
+   "peakAllocatedBytes": 1220843520,
+   "peakReservedBytes": 1283457024,
+   "phase": "restore",
+   "status": "ok",
+   "wallSeconds": 0.14364345900003173
+  },
+  {
+   "allocatedAfterBytes": 1153734656,
+   "allocatedBeforeBytes": 1153734656,
+   "candidateId": "00000000000000000000000000000000/g0/c1",
+   "hostPeakBytes": 2847154176,
+   "pass": "cold",
+   "peakAllocatedBytes": 1212454912,
+   "peakReservedBytes": 1285554176,
+   "phase": "perturb",
+   "status": "ok",
+   "wallSeconds": 0.7216115340002034
+  },
+  {
+   "allocatedAfterBytes": 1153734656,
+   "allocatedBeforeBytes": 1153734656,
+   "candidateId": "00000000000000000000000000000000/g0/c1",
+   "hostPeakBytes": 2847154176,
+   "pass": "cold",
+   "peakAllocatedBytes": 1153734656,
+   "peakReservedBytes": 1285554176,
+   "phase": "refresh",
+   "status": "ok",
+   "wallSeconds": 7.285000265255803e-06
+  },
+  {
+   "allocatedAfterBytes": 1157988864,
+   "allocatedBeforeBytes": 1153734656,
+   "candidateId": "00000000000000000000000000000000/g0/c1",
+   "hostPeakBytes": 2847154176,
+   "pass": "cold",
+   "peakAllocatedBytes": 1314251264,
+   "peakReservedBytes": 1413480448,
+   "phase": "rollout",
+   "status": "ok",
+   "wallSeconds": 0.10118242500038832
+  },
+  {
+   "allocatedAfterBytes": 1157988864,
+   "allocatedBeforeBytes": 1157988864,
+   "candidateId": "00000000000000000000000000000000/g0/c1",
+   "hostPeakBytes": 2847154176,
+   "pass": "cold",
+   "peakAllocatedBytes": 1225097728,
+   "peakReservedBytes": 1283457024,
+   "phase": "restore",
+   "status": "ok",
+   "wallSeconds": 0.1433979499997804
+  },
+  {
+   "allocatedAfterBytes": 1157988864,
+   "allocatedBeforeBytes": 1157988864,
+   "candidateId": "00000000000000000000000000000000/g0/c2",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1216709120,
+   "peakReservedBytes": 1285554176,
+   "phase": "perturb",
+   "status": "ok",
+   "wallSeconds": 0.7504916600000797
+  },
+  {
+   "allocatedAfterBytes": 1157988864,
+   "allocatedBeforeBytes": 1157988864,
+   "candidateId": "00000000000000000000000000000000/g0/c2",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1157988864,
+   "peakReservedBytes": 1285554176,
+   "phase": "refresh",
+   "status": "ok",
+   "wallSeconds": 6.567999662365764e-06
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1157988864,
+   "candidateId": "00000000000000000000000000000000/g0/c2",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1314251264,
+   "peakReservedBytes": 1413480448,
+   "phase": "rollout",
+   "status": "ok",
+   "wallSeconds": 1.303387658000247
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c2",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1219628032,
+   "peakReservedBytes": 1262485504,
+   "phase": "restore",
+   "status": "ok",
+   "wallSeconds": 0.14275431599980948
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c3",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1211239424,
+   "peakReservedBytes": 1264582656,
+   "phase": "perturb",
+   "status": "ok",
+   "wallSeconds": 0.7303261049996763
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c3",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1152519168,
+   "peakReservedBytes": 1264582656,
+   "phase": "refresh",
+   "status": "ok",
+   "wallSeconds": 1.3935999959358014e-05
+  },
+  {
+   "allocatedAfterBytes": 1159204352,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c3",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1314251264,
+   "peakReservedBytes": 1392508928,
+   "phase": "rollout",
+   "status": "ok",
+   "wallSeconds": 0.10053304499979276
+  },
+  {
+   "allocatedAfterBytes": 1159204352,
+   "allocatedBeforeBytes": 1159204352,
+   "candidateId": "00000000000000000000000000000000/g0/c3",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1226313216,
+   "peakReservedBytes": 1283457024,
+   "phase": "restore",
+   "status": "ok",
+   "wallSeconds": 0.1391042360000938
+  },
+  {
+   "allocatedAfterBytes": 1159204352,
+   "allocatedBeforeBytes": 1159204352,
+   "candidateId": "00000000000000000000000000000000/g0/c4",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1217924608,
+   "peakReservedBytes": 1285554176,
+   "phase": "perturb",
+   "status": "ok",
+   "wallSeconds": 0.6953767549998702
+  },
+  {
+   "allocatedAfterBytes": 1159204352,
+   "allocatedBeforeBytes": 1159204352,
+   "candidateId": "00000000000000000000000000000000/g0/c4",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1159204352,
+   "peakReservedBytes": 1285554176,
+   "phase": "refresh",
+   "status": "ok",
+   "wallSeconds": 6.321999990177574e-06
+  },
+  {
+   "allocatedAfterBytes": 1154342400,
+   "allocatedBeforeBytes": 1159204352,
+   "candidateId": "00000000000000000000000000000000/g0/c4",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1314251264,
+   "peakReservedBytes": 1413480448,
+   "phase": "rollout",
+   "status": "ok",
+   "wallSeconds": 0.13641227599964623
+  },
+  {
+   "allocatedAfterBytes": 1154342400,
+   "allocatedBeforeBytes": 1154342400,
+   "candidateId": "00000000000000000000000000000000/g0/c4",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1221451264,
+   "peakReservedBytes": 1283457024,
+   "phase": "restore",
+   "status": "ok",
+   "wallSeconds": 0.14332853699988846
+  },
+  {
+   "allocatedAfterBytes": 1154342400,
+   "allocatedBeforeBytes": 1154342400,
+   "candidateId": "00000000000000000000000000000000/g0/c5",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1213062656,
+   "peakReservedBytes": 1285554176,
+   "phase": "perturb",
+   "status": "ok",
+   "wallSeconds": 0.7285612420000689
+  },
+  {
+   "allocatedAfterBytes": 1154342400,
+   "allocatedBeforeBytes": 1154342400,
+   "candidateId": "00000000000000000000000000000000/g0/c5",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1154342400,
+   "peakReservedBytes": 1285554176,
+   "phase": "refresh",
+   "status": "ok",
+   "wallSeconds": 1.3266999758343445e-05
+  },
+  {
+   "allocatedAfterBytes": 1156773376,
+   "allocatedBeforeBytes": 1154342400,
+   "candidateId": "00000000000000000000000000000000/g0/c5",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1314251264,
+   "peakReservedBytes": 1413480448,
+   "phase": "rollout",
+   "status": "ok",
+   "wallSeconds": 0.09818658700032756
+  },
+  {
+   "allocatedAfterBytes": 1156773376,
+   "allocatedBeforeBytes": 1156773376,
+   "candidateId": "00000000000000000000000000000000/g0/c5",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1223882240,
+   "peakReservedBytes": 1283457024,
+   "phase": "restore",
+   "status": "ok",
+   "wallSeconds": 0.14275155499990433
+  },
+  {
+   "allocatedAfterBytes": 1156773376,
+   "allocatedBeforeBytes": 1156773376,
+   "candidateId": "00000000000000000000000000000000/g0/c6",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1215493632,
+   "peakReservedBytes": 1285554176,
+   "phase": "perturb",
+   "status": "ok",
+   "wallSeconds": 0.7228750360000049
+  },
+  {
+   "allocatedAfterBytes": 1156773376,
+   "allocatedBeforeBytes": 1156773376,
+   "candidateId": "00000000000000000000000000000000/g0/c6",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1156773376,
+   "peakReservedBytes": 1285554176,
+   "phase": "refresh",
+   "status": "ok",
+   "wallSeconds": 6.9989996518415865e-06
+  },
+  {
+   "allocatedAfterBytes": 1153126912,
+   "allocatedBeforeBytes": 1156773376,
+   "candidateId": "00000000000000000000000000000000/g0/c6",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1314251264,
+   "peakReservedBytes": 1413480448,
+   "phase": "rollout",
+   "status": "ok",
+   "wallSeconds": 0.1319093779998184
+  },
+  {
+   "allocatedAfterBytes": 1153126912,
+   "allocatedBeforeBytes": 1153126912,
+   "candidateId": "00000000000000000000000000000000/g0/c6",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1220235776,
+   "peakReservedBytes": 1283457024,
+   "phase": "restore",
+   "status": "ok",
+   "wallSeconds": 0.14339654200011864
+  },
+  {
+   "allocatedAfterBytes": 1153126912,
+   "allocatedBeforeBytes": 1153126912,
+   "candidateId": "00000000000000000000000000000000/g0/c7",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1211847168,
+   "peakReservedBytes": 1285554176,
+   "phase": "perturb",
+   "status": "ok",
+   "wallSeconds": 0.7421419510001215
+  },
+  {
+   "allocatedAfterBytes": 1153126912,
+   "allocatedBeforeBytes": 1153126912,
+   "candidateId": "00000000000000000000000000000000/g0/c7",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1153126912,
+   "peakReservedBytes": 1285554176,
+   "phase": "refresh",
+   "status": "ok",
+   "wallSeconds": 6.897999810462352e-06
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1153126912,
+   "candidateId": "00000000000000000000000000000000/g0/c7",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1314251264,
+   "peakReservedBytes": 1413480448,
+   "phase": "rollout",
+   "status": "ok",
+   "wallSeconds": 0.2893908870000814
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c7",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1219628032,
+   "peakReservedBytes": 1262485504,
+   "phase": "restore",
+   "status": "ok",
+   "wallSeconds": 0.1391791670002931
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c8",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1211239424,
+   "peakReservedBytes": 1264582656,
+   "phase": "perturb",
+   "status": "ok",
+   "wallSeconds": 0.7344032870000774
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c8",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1152519168,
+   "peakReservedBytes": 1264582656,
+   "phase": "refresh",
+   "status": "ok",
+   "wallSeconds": 6.951999694138067e-06
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c8",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1314251264,
+   "peakReservedBytes": 1392508928,
+   "phase": "rollout",
+   "status": "ok",
+   "wallSeconds": 0.10625109600005089
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c8",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1219628032,
+   "peakReservedBytes": 1262485504,
+   "phase": "restore",
+   "status": "ok",
+   "wallSeconds": 0.1406060519998391
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c9",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1211239424,
+   "peakReservedBytes": 1264582656,
+   "phase": "perturb",
+   "status": "ok",
+   "wallSeconds": 0.7449865730000056
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c9",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1152519168,
+   "peakReservedBytes": 1264582656,
+   "phase": "refresh",
+   "status": "ok",
+   "wallSeconds": 7.829999958630651e-06
+  },
+  {
+   "allocatedAfterBytes": 1168928256,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c9",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1314251264,
+   "peakReservedBytes": 1392508928,
+   "phase": "rollout",
+   "status": "ok",
+   "wallSeconds": 0.13870492299975012
+  },
+  {
+   "allocatedAfterBytes": 1168928256,
+   "allocatedBeforeBytes": 1168928256,
+   "candidateId": "00000000000000000000000000000000/g0/c9",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1236037120,
+   "peakReservedBytes": 1283457024,
+   "phase": "restore",
+   "status": "ok",
+   "wallSeconds": 0.14316629399991143
+  },
+  {
+   "allocatedAfterBytes": 1168928256,
+   "allocatedBeforeBytes": 1168928256,
+   "candidateId": "00000000000000000000000000000000/g0/c10",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1227648512,
+   "peakReservedBytes": 1285554176,
+   "phase": "perturb",
+   "status": "ok",
+   "wallSeconds": 0.7086666819996026
+  },
+  {
+   "allocatedAfterBytes": 1168928256,
+   "allocatedBeforeBytes": 1168928256,
+   "candidateId": "00000000000000000000000000000000/g0/c10",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1168928256,
+   "peakReservedBytes": 1285554176,
+   "phase": "refresh",
+   "status": "ok",
+   "wallSeconds": 6.6140000853920355e-06
+  },
+  {
+   "allocatedAfterBytes": 1156773376,
+   "allocatedBeforeBytes": 1168928256,
+   "candidateId": "00000000000000000000000000000000/g0/c10",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1314251264,
+   "peakReservedBytes": 1413480448,
+   "phase": "rollout",
+   "status": "ok",
+   "wallSeconds": 0.13211318599996957
+  },
+  {
+   "allocatedAfterBytes": 1156773376,
+   "allocatedBeforeBytes": 1156773376,
+   "candidateId": "00000000000000000000000000000000/g0/c10",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1223882240,
+   "peakReservedBytes": 1283457024,
+   "phase": "restore",
+   "status": "ok",
+   "wallSeconds": 0.1389927519999219
+  },
+  {
+   "allocatedAfterBytes": 1156773376,
+   "allocatedBeforeBytes": 1156773376,
+   "candidateId": "00000000000000000000000000000000/g0/c11",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1215493632,
+   "peakReservedBytes": 1285554176,
+   "phase": "perturb",
+   "status": "ok",
+   "wallSeconds": 0.685553370999969
+  },
+  {
+   "allocatedAfterBytes": 1156773376,
+   "allocatedBeforeBytes": 1156773376,
+   "candidateId": "00000000000000000000000000000000/g0/c11",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1156773376,
+   "peakReservedBytes": 1285554176,
+   "phase": "refresh",
+   "status": "ok",
+   "wallSeconds": 7.1829999797046185e-06
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1156773376,
+   "candidateId": "00000000000000000000000000000000/g0/c11",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1314251264,
+   "peakReservedBytes": 1413480448,
+   "phase": "rollout",
+   "status": "ok",
+   "wallSeconds": 0.16987919600023815
+  },
+  {
+   "allocatedAfterBytes": 1152519168,
+   "allocatedBeforeBytes": 1152519168,
+   "candidateId": "00000000000000000000000000000000/g0/c11",
+   "hostPeakBytes": 2847154176,
+   "pass": "warm",
+   "peakAllocatedBytes": 1219628032,
+   "peakReservedBytes": 1262485504,
+   "phase": "restore",
+   "status": "ok",
+   "wallSeconds": 0.13902477499959787
+  }
+ ],
+ "probeSha256": "d4098ca99930fea08a899ba873e97028fd935da1eb08a56886000bff1d4d6849",
+ "recipeHash": "803ae2ced6a2abb748b31d646b952354c998155143f0c27ee02b5c73970b0f54",
+ "settings": {
+  "chunk": 32,
+  "maxNewTokens": 128,
+  "pairs": 6,
+  "rows": 32
+ },
+ "status": "PASS",
+ "summary": {
+  "cold:perturb": {
+   "count": 2,
+   "meanWallSeconds": 0.7344941955002469,
+   "peakAllocatedBytes": 1212454912,
+   "peakAllocatedGiB": 1.129,
+   "peakReservedBytes": 1285554176,
+   "wallSeconds": 1.4689883910004937
+  },
+  "cold:refresh": {
+   "count": 2,
+   "meanWallSeconds": 1.0300000212737359e-05,
+   "peakAllocatedBytes": 1153734656,
+   "peakAllocatedGiB": 1.074,
+   "peakReservedBytes": 1285554176,
+   "wallSeconds": 2.0600000425474718e-05
+  },
+  "cold:restore": {
+   "count": 2,
+   "meanWallSeconds": 0.14352070449990606,
+   "peakAllocatedBytes": 1225097728,
+   "peakAllocatedGiB": 1.141,
+   "peakReservedBytes": 1283457024,
+   "wallSeconds": 0.2870414089998121
+  },
+  "cold:rollout": {
+   "count": 2,
+   "meanWallSeconds": 4.151600274500197,
+   "peakAllocatedBytes": 1315351040,
+   "peakAllocatedGiB": 1.225,
+   "peakReservedBytes": 1413480448,
+   "wallSeconds": 8.303200549000394
+  },
+  "engine": {
+   "count": 1,
+   "meanWallSeconds": 0.6908158950000143,
+   "peakAllocatedBytes": 997291520,
+   "peakAllocatedGiB": 0.929,
+   "peakReservedBytes": 1040187392,
+   "wallSeconds": 0.6908158950000143
+  },
+  "load": {
+   "count": 1,
+   "meanWallSeconds": 1.4241844550001588,
+   "peakAllocatedBytes": 996322304,
+   "peakAllocatedGiB": 0.928,
+   "peakReservedBytes": 1040187392,
+   "wallSeconds": 1.4241844550001588
+  },
+  "warm:perturb": {
+   "count": 10,
+   "meanWallSeconds": 0.7243382661999476,
+   "peakAllocatedBytes": 1227648512,
+   "peakAllocatedGiB": 1.143,
+   "peakReservedBytes": 1285554176,
+   "wallSeconds": 7.243382661999476
+  },
+  "warm:refresh": {
+   "count": 10,
+   "meanWallSeconds": 8.256899855041411e-06,
+   "peakAllocatedBytes": 1168928256,
+   "peakAllocatedGiB": 1.089,
+   "peakReservedBytes": 1285554176,
+   "wallSeconds": 8.256899855041411e-05
+  },
+  "warm:restore": {
+   "count": 10,
+   "meanWallSeconds": 0.14123042259993782,
+   "peakAllocatedBytes": 1236037120,
+   "peakAllocatedGiB": 1.151,
+   "peakReservedBytes": 1283457024,
+   "wallSeconds": 1.412304225999378
+  },
+  "warm:rollout": {
+   "count": 10,
+   "meanWallSeconds": 0.2606768231999922,
+   "peakAllocatedBytes": 1314251264,
+   "peakAllocatedGiB": 1.224,
+   "peakReservedBytes": 1413480448,
+   "wallSeconds": 2.606768231999922
+  }
+ },
+ "timingKind": "host_wall_synchronized_per_phase"
+}

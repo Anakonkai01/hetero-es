@@ -1,0 +1,79 @@
+{
+  "status": "ok",
+  "sameParent": true,
+  "sameModelFiles": true,
+  "sameWorkload": true,
+  "cases": [
+    {
+      "label": "parent",
+      "sameWeights": true,
+      "B22OutputsEqual": true,
+      "B14OutputsEqual": true,
+      "rows": 64
+    },
+    {
+      "label": "7001+1",
+      "sameWeights": true,
+      "B22OutputsEqual": true,
+      "B14OutputsEqual": true,
+      "rows": 64
+    },
+    {
+      "label": "7001-1",
+      "sameWeights": true,
+      "B22OutputsEqual": true,
+      "B14OutputsEqual": true,
+      "rows": 64
+    },
+    {
+      "label": "7002+1",
+      "sameWeights": true,
+      "B22OutputsEqual": true,
+      "B14OutputsEqual": true,
+      "rows": 64
+    },
+    {
+      "label": "7002-1",
+      "sameWeights": true,
+      "B22OutputsEqual": true,
+      "B14OutputsEqual": true,
+      "rows": 64
+    },
+    {
+      "label": "7003+1",
+      "sameWeights": true,
+      "B22OutputsEqual": true,
+      "B14OutputsEqual": true,
+      "rows": 64
+    },
+    {
+      "label": "7003-1",
+      "sameWeights": true,
+      "B22OutputsEqual": true,
+      "B14OutputsEqual": true,
+      "rows": 64
+    },
+    {
+      "label": "7004+1",
+      "sameWeights": true,
+      "B22OutputsEqual": true,
+      "B14OutputsEqual": true,
+      "rows": 64
+    },
+    {
+      "label": "7004-1",
+      "sameWeights": true,
+      "B22OutputsEqual": true,
+      "B14OutputsEqual": true,
+      "rows": 64
+    },
+    {
+      "label": "restored",
+      "sameWeights": true,
+      "B22OutputsEqual": true,
+      "B14OutputsEqual": true,
+      "rows": 64
+    }
+  ],
+  "limits": "Finite 64-row parent/four canonical pairs/restored, no learning or universal quality qualification. Local FAST14-v2 vs remote predecessor B14 and identical B22."
+}

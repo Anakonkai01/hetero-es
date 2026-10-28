@@ -1,0 +1,9 @@
+control ok    | 13 passed, 1 warning in 0.49s
+killed       finalize on API event loop | 2 failed, 11 passed, 1 warning in 4.51s
+killed       write chunk on API event loop | 1 failed, 12 passed, 1 warning in 4.51s
+killed       open upload on API event loop | 1 failed, 12 passed, 1 warning in 2.50s
+killed       cleanup on API event loop | 1 failed, 12 passed, 1 warning in 2.45s
+killed       leave failed partial file | 4 failed, 9 passed, 1 warning in 0.50s
+killed       accept oversized signed stream | 1 failed, 12 passed, 1 warning in 0.51s
+
+6 of 6 mutants killed.

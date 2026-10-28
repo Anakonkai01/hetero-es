@@ -1,0 +1,691 @@
+{
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "arch": "sm_120",
+  "source": ".scratch/codex-20261027-combined/stage/new/src",
+  "cases": [
+    {
+      "width": 896,
+      "outputs": 9728,
+      "rows": 888,
+      "variants": [
+        {
+          "m": 32,
+          "n": 64,
+          "stages": 2,
+          "minBlocks": 3,
+          "microseconds": [
+            475.4199981689453,
+            472.6400077342987,
+            472.50398993492126,
+            472.8519916534424,
+            473.0919897556305,
+            473.143994808197,
+            473.38399291038513,
+            478.1999886035919,
+            479.4439971446991
+          ],
+          "median": 473.143994808197,
+          "registers": 168,
+          "localBytes": 32,
+          "sharedBytes": 28672,
+          "residentCtas": 3,
+          "build": {
+            "sourceSha256": "1d77730acdaf12b56d7d65271c2288b2966d47a03d9e20b77b14624adb792e26",
+            "ptxSha256": "71b3d77e103481a93e679920b37fe9a9a129d843b2e2f9893acd278d01595d18",
+            "cubinSha256": "b2f945a969d421d1030a502e3ac8b6d79da81c3a625246bf6fc66e0c32f7e972",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 64
+              },
+              "violations": [],
+              "integerMmaOps": 162
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 64
+              },
+              "violations": [],
+              "integerMmaOps": 162
+            }
+          }
+        },
+        {
+          "m": 32,
+          "n": 32,
+          "stages": 2,
+          "minBlocks": 4,
+          "microseconds": [
+            508.7519884109497,
+            506.0279965400696,
+            506.7960023880005,
+            507.7800154685974,
+            507.6559782028198,
+            507.61598348617554,
+            507.7360272407532,
+            508.0440044403076,
+            511.14797592163086
+          ],
+          "median": 507.7360272407532,
+          "registers": 116,
+          "localBytes": 0,
+          "sharedBytes": 20480,
+          "residentCtas": 4,
+          "build": {
+            "sourceSha256": "211eb930329a0e6bde485210d6485f1b43169c79b6974e80c6d5ef9e5bf112e3",
+            "ptxSha256": "6e049ac50375487d9117a99d962239ebb4414d3a2ad52c98a5393dcf0284d451",
+            "cubinSha256": "110998ffd7d39b3021c760953a4c64a3d1ed5e99c1b97f4cbe08a0b9652033db",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 32
+              },
+              "violations": [],
+              "integerMmaOps": 90
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 32
+              },
+              "violations": [],
+              "integerMmaOps": 90
+            }
+          }
+        },
+        {
+          "m": 16,
+          "n": 64,
+          "stages": 2,
+          "minBlocks": 4,
+          "microseconds": [
+            549.6000051498413,
+            547.003984451294,
+            548.0560064315796,
+            548.0679869651794,
+            548.4960079193115,
+            549.0720272064209,
+            551.360011100769,
+            554.7119975090027,
+            554.9240112304688
+          ],
+          "median": 549.0720272064209,
+          "registers": 120,
+          "localBytes": 0,
+          "sharedBytes": 22528,
+          "residentCtas": 4,
+          "build": {
+            "sourceSha256": "d9c7cf59a4c622f7a42d58c3d25da4b9a4e5496ea0c4ca0c1de7d143533d9f59",
+            "ptxSha256": "803a74c98a0333c8e182f683eeed83ca2492e32060ed59589754f44c14440845",
+            "cubinSha256": "bbfae37c3c7df5ecbaeb6cf2397cfbe8d953480cea6c36c564c47bc68125ca4d",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 64
+              },
+              "violations": [],
+              "integerMmaOps": 81
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 64
+              },
+              "violations": [],
+              "integerMmaOps": 81
+            }
+          }
+        },
+        {
+          "m": 16,
+          "n": 32,
+          "stages": 2,
+          "minBlocks": 6,
+          "microseconds": [
+            620.5160021781921,
+            618.8160181045532,
+            619.6320056915283,
+            619.9640035629272,
+            621.6800212860107,
+            620.7600235939026,
+            621.5199828147888,
+            624.1080164909363,
+            627.0920038223267
+          ],
+          "median": 620.7600235939026,
+          "registers": 74,
+          "localBytes": 0,
+          "sharedBytes": 14336,
+          "residentCtas": 6,
+          "build": {
+            "sourceSha256": "e7f4847069058f0d6498568837b438c32bbf790f460e33d3d6bca5b7a0180b82",
+            "ptxSha256": "f85a85f741013d062785ac7fc7bef4465d2ecd4e830add0aabc6580e285b8db1",
+            "cubinSha256": "461a40bff075e691f3bcb5b24ed0d9fb4f55cb924329b244d4bb587ecb81700b",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 32
+              },
+              "violations": [],
+              "integerMmaOps": 45
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 32
+              },
+              "violations": [],
+              "integerMmaOps": 45
+            }
+          }
+        }
+      ]
+    },
+    {
+      "width": 4864,
+      "outputs": 896,
+      "rows": 888,
+      "variants": [
+        {
+          "m": 32,
+          "n": 64,
+          "stages": 2,
+          "minBlocks": 3,
+          "microseconds": [
+            246.19999527931213,
+            244.46800351142883,
+            244.30400133132935,
+            244.31200325489044,
+            244.3239986896515,
+            244.08400058746338,
+            244.32000517845154,
+            244.19599771499634,
+            245.5199956893921
+          ],
+          "median": 244.32000517845154,
+          "registers": 168,
+          "localBytes": 32,
+          "sharedBytes": 28672,
+          "residentCtas": 3,
+          "build": {
+            "sourceSha256": "ae9531f41f468e4924c980582f8897606060ed19c8d38268ab100027e1d4c670",
+            "ptxSha256": "fe9de8a23ce668a6504dc44d3219ed6d7923775efb8a452bcbdc49b3cb589bab",
+            "cubinSha256": "106fc4f8ce8ec285334a991f493a3f8c6c620ec913a40b3edb93d1814e3f7b39",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 64
+              },
+              "violations": [],
+              "integerMmaOps": 162
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 64
+              },
+              "violations": [],
+              "integerMmaOps": 162
+            }
+          }
+        },
+        {
+          "m": 32,
+          "n": 32,
+          "stages": 2,
+          "minBlocks": 4,
+          "microseconds": [
+            257.7039897441864,
+            255.78001141548157,
+            255.54800033569336,
+            255.7159960269928,
+            255.76001405715942,
+            257.4320137500763,
+            255.84399700164795,
+            255.8639943599701,
+            255.86000084877014
+          ],
+          "median": 255.84399700164795,
+          "registers": 116,
+          "localBytes": 0,
+          "sharedBytes": 20480,
+          "residentCtas": 4,
+          "build": {
+            "sourceSha256": "fe1868b6179953cdb678ef442555107e2e4544a85ad36f67780361f76f4382ed",
+            "ptxSha256": "bce1e4252a94201b9617da3bd07682c80647080bfa62bbbcd616889c970cf346",
+            "cubinSha256": "f6e2e8dfa2b6f577daa6cd9d682f9f98a7c051079f48712bbce02bca73196ec3",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 32
+              },
+              "violations": [],
+              "integerMmaOps": 90
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 32
+              },
+              "violations": [],
+              "integerMmaOps": 90
+            }
+          }
+        },
+        {
+          "m": 16,
+          "n": 64,
+          "stages": 2,
+          "minBlocks": 4,
+          "microseconds": [
+            280.0999879837036,
+            277.85998582839966,
+            277.7880132198334,
+            277.90001034736633,
+            277.8719961643219,
+            278.0359983444214,
+            277.5599956512451,
+            277.8719961643219,
+            277.89199352264404
+          ],
+          "median": 277.8719961643219,
+          "registers": 120,
+          "localBytes": 0,
+          "sharedBytes": 22528,
+          "residentCtas": 4,
+          "build": {
+            "sourceSha256": "8e3c1efd3afcbd9825d2a4bc638094fe3127f07eb7e8c81f56c094c9f4f84dcf",
+            "ptxSha256": "7014bb799eff488f4322e18df7c5388d322ede415e9594089611aa4d4f9f705d",
+            "cubinSha256": "51b8be2d48b0f79f5ae4c9f3ac6fe9bfe6eb50429da3afaab0a68282ea120a45",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 64
+              },
+              "violations": [],
+              "integerMmaOps": 81
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 64
+              },
+              "violations": [],
+              "integerMmaOps": 81
+            }
+          }
+        },
+        {
+          "m": 16,
+          "n": 32,
+          "stages": 2,
+          "minBlocks": 6,
+          "microseconds": [
+            296.53599858283997,
+            293.8520014286041,
+            294.20799016952515,
+            294.4839894771576,
+            294.512003660202,
+            294.47200894355774,
+            295.00800371170044,
+            295.7960069179535,
+            295.6160008907318
+          ],
+          "median": 294.512003660202,
+          "registers": 74,
+          "localBytes": 0,
+          "sharedBytes": 14336,
+          "residentCtas": 6,
+          "build": {
+            "sourceSha256": "6d9a4da9ce944aaed92a4263acb9b2c7658aa28b8b834d4807bbfff446fdc4bf",
+            "ptxSha256": "a92177610dd0f35fd6bb0cff4fed7c2e7742ae27a7c25f567bf304d22c5c2238",
+            "cubinSha256": "4be84ea8b34a266cb8795f45016bd7d083ae09548c9171f70ca997f75a4bd580",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 32
+              },
+              "violations": [],
+              "integerMmaOps": 45
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 32
+              },
+              "violations": [],
+              "integerMmaOps": 45
+            }
+          }
+        }
+      ]
+    },
+    {
+      "width": 896,
+      "outputs": 1152,
+      "rows": 888,
+      "variants": [
+        {
+          "m": 32,
+          "n": 64,
+          "stages": 2,
+          "minBlocks": 3,
+          "microseconds": [
+            67.60399788618088,
+            66.25600159168243,
+            67.4000009894371,
+            66.17199629545212,
+            66.15199893712997,
+            66.11599773168564,
+            66.03199988603592,
+            66.04000180959702,
+            66.14000350236893
+          ],
+          "median": 66.15199893712997,
+          "registers": 168,
+          "localBytes": 32,
+          "sharedBytes": 28672,
+          "residentCtas": 3,
+          "build": {
+            "sourceSha256": "1d77730acdaf12b56d7d65271c2288b2966d47a03d9e20b77b14624adb792e26",
+            "ptxSha256": "71b3d77e103481a93e679920b37fe9a9a129d843b2e2f9893acd278d01595d18",
+            "cubinSha256": "b2f945a969d421d1030a502e3ac8b6d79da81c3a625246bf6fc66e0c32f7e972",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 64
+              },
+              "violations": [],
+              "integerMmaOps": 162
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 64
+              },
+              "violations": [],
+              "integerMmaOps": 162
+            }
+          }
+        },
+        {
+          "m": 32,
+          "n": 32,
+          "stages": 2,
+          "minBlocks": 4,
+          "microseconds": [
+            65.92799723148346,
+            63.67599964141846,
+            63.47999721765518,
+            63.34400177001953,
+            63.32799792289734,
+            63.47600370645523,
+            63.37600201368332,
+            63.23999911546707,
+            63.2999986410141
+          ],
+          "median": 63.37600201368332,
+          "registers": 116,
+          "localBytes": 0,
+          "sharedBytes": 20480,
+          "residentCtas": 4,
+          "build": {
+            "sourceSha256": "211eb930329a0e6bde485210d6485f1b43169c79b6974e80c6d5ef9e5bf112e3",
+            "ptxSha256": "6e049ac50375487d9117a99d962239ebb4414d3a2ad52c98a5393dcf0284d451",
+            "cubinSha256": "110998ffd7d39b3021c760953a4c64a3d1ed5e99c1b97f4cbe08a0b9652033db",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 32
+              },
+              "violations": [],
+              "integerMmaOps": 90
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 32
+              },
+              "violations": [],
+              "integerMmaOps": 90
+            }
+          }
+        },
+        {
+          "m": 16,
+          "n": 64,
+          "stages": 2,
+          "minBlocks": 4,
+          "microseconds": [
+            71.18400186300278,
+            69.023996591568,
+            68.64000111818314,
+            68.81999969482422,
+            68.83999705314636,
+            68.75599920749664,
+            68.6039999127388,
+            68.76000016927719,
+            68.62399727106094
+          ],
+          "median": 68.76000016927719,
+          "registers": 120,
+          "localBytes": 0,
+          "sharedBytes": 22528,
+          "residentCtas": 4,
+          "build": {
+            "sourceSha256": "d9c7cf59a4c622f7a42d58c3d25da4b9a4e5496ea0c4ca0c1de7d143533d9f59",
+            "ptxSha256": "803a74c98a0333c8e182f683eeed83ca2492e32060ed59589754f44c14440845",
+            "cubinSha256": "bbfae37c3c7df5ecbaeb6cf2397cfbe8d953480cea6c36c564c47bc68125ca4d",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 64
+              },
+              "violations": [],
+              "integerMmaOps": 81
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 64
+              },
+              "violations": [],
+              "integerMmaOps": 81
+            }
+          }
+        },
+        {
+          "m": 16,
+          "n": 32,
+          "stages": 2,
+          "minBlocks": 6,
+          "microseconds": [
+            75.3839984536171,
+            73.1159970164299,
+            73.01600277423859,
+            72.87199795246124,
+            72.96399772167206,
+            72.76000082492828,
+            73.02799820899963,
+            73.09599965810776,
+            73.03600013256073
+          ],
+          "median": 73.02799820899963,
+          "registers": 74,
+          "localBytes": 0,
+          "sharedBytes": 14336,
+          "residentCtas": 6,
+          "build": {
+            "sourceSha256": "e7f4847069058f0d6498568837b438c32bbf790f460e33d3d6bca5b7a0180b82",
+            "ptxSha256": "f85a85f741013d062785ac7fc7bef4465d2ecd4e830add0aabc6580e285b8db1",
+            "cubinSha256": "461a40bff075e691f3bcb5b24ed0d9fb4f55cb924329b244d4bb587ecb81700b",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 32
+              },
+              "violations": [],
+              "integerMmaOps": 45
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 32
+              },
+              "violations": [],
+              "integerMmaOps": 45
+            }
+          }
+        }
+      ]
+    },
+    {
+      "width": 896,
+      "outputs": 896,
+      "rows": 888,
+      "variants": [
+        {
+          "m": 32,
+          "n": 64,
+          "stages": 2,
+          "minBlocks": 3,
+          "microseconds": [
+            52.747998386621475,
+            51.43199861049652,
+            51.50400102138519,
+            51.53999850153923,
+            51.30000039935112,
+            51.263999193906784,
+            51.29599943757057,
+            51.33200064301491,
+            51.26800015568733
+          ],
+          "median": 51.33200064301491,
+          "registers": 168,
+          "localBytes": 32,
+          "sharedBytes": 28672,
+          "residentCtas": 3,
+          "build": {
+            "sourceSha256": "1d77730acdaf12b56d7d65271c2288b2966d47a03d9e20b77b14624adb792e26",
+            "ptxSha256": "71b3d77e103481a93e679920b37fe9a9a129d843b2e2f9893acd278d01595d18",
+            "cubinSha256": "b2f945a969d421d1030a502e3ac8b6d79da81c3a625246bf6fc66e0c32f7e972",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 64
+              },
+              "violations": [],
+              "integerMmaOps": 162
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 64
+              },
+              "violations": [],
+              "integerMmaOps": 162
+            }
+          }
+        },
+        {
+          "m": 32,
+          "n": 32,
+          "stages": 2,
+          "minBlocks": 4,
+          "microseconds": [
+            53.624000400304794,
+            52.324000746011734,
+            51.24799907207489,
+            51.29599943757057,
+            51.27200111746788,
+            51.27200111746788,
+            51.04000121355057,
+            51.0840006172657,
+            51.05200037360191
+          ],
+          "median": 51.27200111746788,
+          "registers": 116,
+          "localBytes": 0,
+          "sharedBytes": 20480,
+          "residentCtas": 4,
+          "build": {
+            "sourceSha256": "211eb930329a0e6bde485210d6485f1b43169c79b6974e80c6d5ef9e5bf112e3",
+            "ptxSha256": "6e049ac50375487d9117a99d962239ebb4414d3a2ad52c98a5393dcf0284d451",
+            "cubinSha256": "110998ffd7d39b3021c760953a4c64a3d1ed5e99c1b97f4cbe08a0b9652033db",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 32
+              },
+              "violations": [],
+              "integerMmaOps": 90
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 32
+              },
+              "violations": [],
+              "integerMmaOps": 90
+            }
+          }
+        },
+        {
+          "m": 16,
+          "n": 64,
+          "stages": 2,
+          "minBlocks": 4,
+          "microseconds": [
+            57.15600028634071,
+            55.54400011897087,
+            55.11600151658058,
+            55.14800176024437,
+            55.14800176024437,
+            55.14400079846382,
+            55.107999593019485,
+            55.03600090742111,
+            55.09600043296814
+          ],
+          "median": 55.14400079846382,
+          "registers": 120,
+          "localBytes": 0,
+          "sharedBytes": 22528,
+          "residentCtas": 4,
+          "build": {
+            "sourceSha256": "d9c7cf59a4c622f7a42d58c3d25da4b9a4e5496ea0c4ca0c1de7d143533d9f59",
+            "ptxSha256": "803a74c98a0333c8e182f683eeed83ca2492e32060ed59589754f44c14440845",
+            "cubinSha256": "bbfae37c3c7df5ecbaeb6cf2397cfbe8d953480cea6c36c564c47bc68125ca4d",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 64
+              },
+              "violations": [],
+              "integerMmaOps": 81
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 64
+              },
+              "violations": [],
+              "integerMmaOps": 81
+            }
+          }
+        },
+        {
+          "m": 16,
+          "n": 32,
+          "stages": 2,
+          "minBlocks": 6,
+          "microseconds": [
+            60.72400137782097,
+            58.49200114607811,
+            58.28399956226349,
+            58.20399895310402,
+            57.82400071620941,
+            58.28800052404404,
+            58.187998831272125,
+            58.076001703739166,
+            58.11600014567375
+          ],
+          "median": 58.20399895310402,
+          "registers": 74,
+          "localBytes": 0,
+          "sharedBytes": 14336,
+          "residentCtas": 6,
+          "build": {
+            "sourceSha256": "e7f4847069058f0d6498568837b438c32bbf790f460e33d3d6bca5b7a0180b82",
+            "ptxSha256": "f85a85f741013d062785ac7fc7bef4465d2ecd4e830add0aabc6580e285b8db1",
+            "cubinSha256": "461a40bff075e691f3bcb5b24ed0d9fb4f55cb924329b244d4bb587ecb81700b",
+            "ptxAudit": {
+              "floatOps": {
+                "add.rn.f32": 32
+              },
+              "violations": [],
+              "integerMmaOps": 45
+            },
+            "sassAudit": {
+              "floatOps": {
+                "FADD": 32
+              },
+              "violations": [],
+              "integerMmaOps": 45
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

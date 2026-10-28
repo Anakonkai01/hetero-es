@@ -1,0 +1,2 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 3194.07it/s]
+smol short32 {'strict_attention': 1519.5, 'strict_attention_gqa': 1623.0} ratio 1.068

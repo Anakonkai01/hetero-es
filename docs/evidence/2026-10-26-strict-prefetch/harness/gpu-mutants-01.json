@@ -1,0 +1,14 @@
+[
+  {
+    "name": "skip-every-other-lookahead-tile",
+    "file": "src/heteroes/eval/integer_cuda.py",
+    "old": "outputs,start+SPLIT_K*32,thread);",
+    "new": "outputs,start+2*SPLIT_K*32,thread);"
+  },
+  {
+    "name": "swap-high-half-with-low-half",
+    "file": "src/heteroes/eval/integer_cuda.py",
+    "old": "unsigned halves=current[word*2+pair];",
+    "new": "unsigned halves=current[word*2+pair]; halves=(halves<<16)|(halves>>16);"
+  }
+]

@@ -1,0 +1,7 @@
+control ok    | 5 passed in 0.05s
+killed       accept missing lab access token | 1 failed, 4 passed in 0.06s
+killed       accept approval in another workspace | 2 failed, 3 passed in 0.06s
+killed       turn contribution ON without the owner | 2 failed, 3 passed in 0.06s
+killed       wait forever for a completed experiment | 1 failed, 4 passed in 0.06s
+
+4 of 4 mutants killed.

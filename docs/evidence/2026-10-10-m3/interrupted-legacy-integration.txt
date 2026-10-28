@@ -1,0 +1,24 @@
+
+> frontend@0.0.0 test:integration
+> node scripts/check-real-integration.mjs
+
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+page.evaluate: Target page, context or browser has been closed
+    at api (/home/pc5070ti/projects/Hetero-ES-LLM-m3/frontend/scripts/check-real-integration.mjs:29:28)
+    at /home/pc5070ti/projects/Hetero-ES-LLM-m3/frontend/scripts/check-real-integration.mjs:96:23
+    at until (/home/pc5070ti/projects/Hetero-ES-LLM-m3/frontend/scripts/check-real-integration.mjs:37:26)
+    at async file:///home/pc5070ti/projects/Hetero-ES-LLM-m3/frontend/scripts/check-real-integration.mjs:95:21 {
+  log: []
+}
+
+Node.js v24.21.0
+npm error Lifecycle script `test:integration` failed with error:
+npm error code 1
+npm error path /home/pc5070ti/projects/Hetero-ES-LLM-m3/frontend
+npm error workspace frontend@0.0.0
+npm error location /home/pc5070ti/projects/Hetero-ES-LLM-m3/frontend
+npm error command failed
+npm error command sh -c node scripts/check-real-integration.mjs

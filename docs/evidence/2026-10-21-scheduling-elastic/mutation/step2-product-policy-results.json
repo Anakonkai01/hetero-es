@@ -1,0 +1,35 @@
+[
+ {
+  "name": "runner-hardcodes-greedy",
+  "killed": true
+ },
+ {
+  "name": "runner-drops-admission",
+  "killed": true,
+  "note": "survived on the first full copy; killed after tests/ledger/test_runner_scheduling.py was added"
+ },
+ {
+  "name": "factory-new-book-each-generation",
+  "killed": true
+ },
+ {
+  "name": "factory-tail-is-greedy",
+  "killed": true
+ },
+ {
+  "name": "factory-members-read-once",
+  "killed": true
+ },
+ {
+  "name": "supervisor-rejects-tail",
+  "killed": true
+ },
+ {
+  "name": "supervisor-accepts-anything",
+  "killed": true
+ },
+ {
+  "name": "runner-fresh-book",
+  "killed": true
+ }
+]

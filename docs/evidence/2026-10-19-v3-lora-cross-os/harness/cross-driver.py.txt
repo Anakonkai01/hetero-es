@@ -1,0 +1,36 @@
+"""Native Windows: run the shipped worker CLI against the Linux coordinator; stderr is progress, return code decides."""
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+private = Path(os.environ["LOCALAPPDATA"]) / "HeteroES-v3-20261019" / "cross-os-f4a3a18"
+cache = Path("D:/HeteroES-v3-20261019/cross-os-lora-cache")
+model = Path(os.environ["APPDATA"]) / "@heteroes/worker/runtimes/c64f3012b965/models/7ae557604adf67be50417f59c2c2f167def9a775"
+deps = Path(os.environ["LOCALAPPDATA"]) / "HeteroES-v3-20261019" / "deps"
+env = {
+    **os.environ,
+    "PYTHONPATH": f"{deps};{private / 'runtime/src'}",
+    "HETEROES_TOKEN": (private / "token").read_text().strip(),
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+}
+run = private / "run"
+command = [
+    sys.executable, "-u", str(private / "runtime/scripts/run_worker.py"),
+    "--model-path", str(model),
+    "--model-manifest", str(run / "model-manifest.json"),
+    "--dataset", str(run / "dataset.json"),
+    "--run-config", str(run / "config.json"),
+    "--coordinator-url", "http://100.110.165.40:18772",
+    "--worker-id", "windows-3060",
+    "--device", "cuda",
+    "--log", str(private / "windows-3060.jsonl"),
+    "--cache-dir", str(cache),
+    "--replay", "always",
+]
+with (private / "worker-output.log").open("x", encoding="utf-8") as log:
+    result = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, env=env, cwd=str(private / "runtime"))
+print("WORKER_EXIT", result.returncode, flush=True)
+sys.exit(result.returncode)

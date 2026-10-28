@@ -1,0 +1,19 @@
+control ok    | ℹ duration_ms 71.642672
+killed       known-reason-ignored |   }
+killed       deferral-is-not-a-warning |   }
+killed       unknown-deferral-is-not-a-warning |   }
+killed       failure-is-not-an-error |   }
+killed       failure-without-reason-is-not-an-error |   }
+killed       failure-reason-ignored |   }
+killed       failure-without-reason-has-no-fallback |   }
+killed       deferral-without-reason-has-no-fallback |   }
+killed       running-run-not-explained |   }
+killed       starting-run-not-explained |   }
+killed       any-status-explained |   }
+killed       oldest-event-used |   }
+killed       coordinator-event-explained-as-device |   }
+killed       failed-event-not-explained |   }
+killed       deferred-event-not-explained |   }
+killed       notice-without-time |   }
+
+16 of 16 mutants killed.

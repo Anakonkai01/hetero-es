@@ -1,0 +1,291 @@
+{
+  "sourceCommit": "b1ef257a",
+  "timings": [
+    {
+      "model": "smol",
+      "host": "5070ti",
+      "batch": 1,
+      "before": 276.27456117575184,
+      "after": 276.2093677209682,
+      "ratio": 0.9997640265737598,
+      "spreadPercent": {
+        "baseline": 0.6728917295075413,
+        "prefetch": 1.28820596349953
+      }
+    },
+    {
+      "model": "smol",
+      "host": "5070ti",
+      "batch": 8,
+      "before": 1558.2791502171535,
+      "after": 1824.8050830239422,
+      "ratio": 1.1710386311526064,
+      "spreadPercent": {
+        "baseline": 0.6203862333786253,
+        "prefetch": 0.5054339410713674
+      }
+    },
+    {
+      "model": "smol",
+      "host": "5070ti",
+      "batch": 32,
+      "before": 4066.9801929750006,
+      "after": 4504.430734461977,
+      "ratio": 1.1075615126531957,
+      "spreadPercent": {
+        "baseline": 0.3690772614027628,
+        "prefetch": 0.39389795123672955
+      }
+    },
+    {
+      "model": "smol",
+      "host": "3060",
+      "batch": 1,
+      "before": 157.74292509867294,
+      "after": 155.15280677466865,
+      "ratio": 0.9835801299970564,
+      "spreadPercent": {
+        "baseline": 9.427237746329595,
+        "prefetch": 6.130573209537612
+      }
+    },
+    {
+      "model": "smol",
+      "host": "3060",
+      "batch": 8,
+      "before": 760.379231841001,
+      "after": 861.560769152603,
+      "ratio": 1.1330672026202309,
+      "spreadPercent": {
+        "baseline": 4.052998331608312,
+        "prefetch": 0.6797044704739411
+      }
+    },
+    {
+      "model": "smol",
+      "host": "3060",
+      "batch": 32,
+      "before": 1448.6871509713405,
+      "after": 1567.2472962334523,
+      "ratio": 1.0818397161751712,
+      "spreadPercent": {
+        "baseline": 0.7059112936152615,
+        "prefetch": 0.6062776791280443
+      }
+    },
+    {
+      "model": "qwen",
+      "host": "5070ti",
+      "batch": 1,
+      "before": 277.03142577637766,
+      "after": 277.3288132441682,
+      "ratio": 1.0010734791800502,
+      "spreadPercent": {
+        "baseline": 0.6715501487370282,
+        "prefetch": 0.7807759406049762
+      }
+    },
+    {
+      "model": "qwen",
+      "host": "5070ti",
+      "batch": 8,
+      "before": 1464.707352806892,
+      "after": 1865.549973708486,
+      "ratio": 1.2736673780830274,
+      "spreadPercent": {
+        "baseline": 0.4624750528095305,
+        "prefetch": 0.6044520365228736
+      }
+    },
+    {
+      "model": "qwen",
+      "host": "5070ti",
+      "batch": 32,
+      "before": 3752.370584859424,
+      "after": 4346.305959449323,
+      "ratio": 1.1582827072001871,
+      "spreadPercent": {
+        "baseline": 0.28539490004763507,
+        "prefetch": 0.6243825039196561
+      }
+    },
+    {
+      "model": "qwen",
+      "host": "3060",
+      "batch": 1,
+      "before": 176.07759647909893,
+      "after": 175.4629034890957,
+      "ratio": 0.9965089653522379,
+      "spreadPercent": {
+        "baseline": 5.77231552631014,
+        "prefetch": 4.951068001847854
+      }
+    },
+    {
+      "model": "qwen",
+      "host": "3060",
+      "batch": 8,
+      "before": 654.572834373273,
+      "after": 808.5737075247846,
+      "ratio": 1.2352692703768575,
+      "spreadPercent": {
+        "baseline": 1.2423646647473436,
+        "prefetch": 1.4334950589544238
+      }
+    },
+    {
+      "model": "qwen",
+      "host": "3060",
+      "batch": 32,
+      "before": 1229.4888046276362,
+      "after": 1328.0497100276013,
+      "ratio": 1.0801641340929617,
+      "spreadPercent": {
+        "baseline": 2.1187817778464972,
+        "prefetch": 1.518623288924115
+      }
+    },
+    {
+      "model": "tiny",
+      "host": "5070ti",
+      "batch": 1,
+      "before": 188.9613134951335,
+      "after": 195.6779773506496,
+      "ratio": 1.0355451797581259,
+      "spreadPercent": {
+        "baseline": 0.2953860962160744,
+        "prefetch": 0.5526257948378552
+      }
+    },
+    {
+      "model": "tiny",
+      "host": "5070ti",
+      "batch": 8,
+      "before": 839.793400325995,
+      "after": 1075.7383231176573,
+      "ratio": 1.2809559145142986,
+      "spreadPercent": {
+        "baseline": 0.18993895998376953,
+        "prefetch": 0.23007941618822347
+      }
+    },
+    {
+      "model": "tiny",
+      "host": "5070ti",
+      "batch": 32,
+      "before": 1986.7217760554736,
+      "after": 2321.764001829732,
+      "ratio": 1.168640737627322,
+      "spreadPercent": {
+        "baseline": 0.5028633391856371,
+        "prefetch": 0.20024670324036575
+      }
+    },
+    {
+      "model": "tiny",
+      "host": "3060",
+      "batch": 1,
+      "before": 103.36633865533658,
+      "after": 105.43132363351145,
+      "ratio": 1.0199773447046465,
+      "spreadPercent": {
+        "baseline": 0.8077087669624611,
+        "prefetch": 1.2413991437260263
+      }
+    },
+    {
+      "model": "tiny",
+      "host": "3060",
+      "batch": 8,
+      "before": 285.27013142112327,
+      "after": 399.2783327995862,
+      "ratio": 1.3996499767098332,
+      "spreadPercent": {
+        "baseline": 0.7966755684089234,
+        "prefetch": 1.2224815448028354
+      }
+    },
+    {
+      "model": "tiny",
+      "host": "3060",
+      "batch": 32,
+      "before": 577.6868006685972,
+      "after": 631.0553403575232,
+      "ratio": 1.092383173074335,
+      "spreadPercent": {
+        "baseline": 1.1407217942510768,
+        "prefetch": 1.1424912443711475
+      }
+    }
+  ],
+  "models": {
+    "smol": {
+      "crossHostParentBenchmarkTokensEqual": true,
+      "crossHostCandidateWeightsTokensTextsRewardsLogitsEqual": true,
+      "restoreExactAllStates": true,
+      "candidateGeneratedTokenPositionsPerHostPerExecution": 1024,
+      "modelFiles": {
+        "all_results.json": "71face5e244d784819f937a25206865c295c8889fe4359eec28bbec85d02da0d",
+        "config.json": "224f72354f10d617a359cc82ad15a3c96e866b9b2ffadb81997eeea9e88e22ee",
+        "eval_results.json": "db9bcb5c4f2a3be0d7e88f86af26f375c22c240954af86942d1554d87a488ce8",
+        "generation_config.json": "87b916edaaab66b3899b9d0dd0752727dff6666686da0504d89ae0a6e055a013",
+        "merges.txt": "0b54e8aa4e53d5383e2e4bc635a56b43f9647f7b13832d5d9ecd8f82dac4f510",
+        "model.safetensors": "e6bffe7435d7ddc10fd3b9a9efd429dafbacb1cb17015fb5562664e7532bf86e",
+        "special_tokens_map.json": "2b7379f3ae813529281a5c602bc5a11c1d4e0a99107aaa597fe936c1e813ca52",
+        "tokenizer.json": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+        "tokenizer_config.json": "4ec77d44f62efeb38d7e044a1db318f6a939438425312dfa333b8382dbad98df",
+        "train_results.json": "fceae2634b0a268a8adbda73fd0b2192922b496054011f588d2c6e888db1cea1",
+        "trainer_state.json": "2263f580ae0d7890acc11253b83138b3fc1250dc6728688a3387ce813b92eed1",
+        "vocab.json": "82b84012e3add4d01d12ba14442026e49b8cbbaead1f79ecf3d919784f82dc79"
+      },
+      "schemaHash": "d666a5b09c61148b0340430fc1ef0b380b1da7acc241847ddd5ec276cae31f36"
+    },
+    "qwen": {
+      "crossHostParentBenchmarkTokensEqual": true,
+      "crossHostCandidateWeightsTokensTextsRewardsLogitsEqual": true,
+      "restoreExactAllStates": true,
+      "candidateGeneratedTokenPositionsPerHostPerExecution": 1024,
+      "modelFiles": {
+        "config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+        "generation_config.json": "e558847a8b4402616f1273797b015104dc266fe4b520056fca88823ba8f8ebe6",
+        "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+        "model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+        "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+        "tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583",
+        "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+      },
+      "schemaHash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec"
+    },
+    "tiny": {
+      "crossHostParentBenchmarkTokensEqual": true,
+      "crossHostCandidateWeightsTokensTextsRewardsLogitsEqual": true,
+      "restoreExactAllStates": true,
+      "candidateGeneratedTokenPositionsPerHostPerExecution": 1024,
+      "modelFiles": {
+        "config.json": "486bedda3a6988332e60d9638a09ca4b260d34ebcf1b19e22cf3b140b63d8fe9",
+        "eval_results.json": "637daaebe7aa8af0e678f9e79ec33fa29f8635090d45ec813f0e7474320d7351",
+        "generation_config.json": "18046d04f5bd8b4998095ecabdd17a1bf0053d9acdccead4a05be4a3575f3c5c",
+        "model.safetensors": "6e6001da2106d4757498752a021df6c2bdc332c650aae4bae6b0c004dcf14933",
+        "special_tokens_map.json": "82d96d7a9e6ced037f12394b7ea6a5b02e6ca87e0d11edaa8d60d9be857ce7db",
+        "tokenizer.json": "bcd04f0eadf90287bd26e1a183ac487d8a141b09b06aecb7725bbdd343640f2e",
+        "tokenizer.model": "9e556afd44213b6bd1be2b850ebbbd98f5481437a8021afaf58ee7fb1818d347",
+        "tokenizer_config.json": "7b41ba7d0eb91e77914ca3dafde559ea3e19878769b7e68409e89bed5222e77a"
+      },
+      "schemaHash": "59410e8daf9ed66271387d52bdaa9acd75be7d0afcec22f2232f47510a061ce7"
+    }
+  },
+  "inputs": {
+    "raw/smol-selected-5070ti-02.json": "f13cb960bd78eb21d4d42a1dbed0d829fd3d405e24c7870b8180e71ee56d20a8",
+    "raw/smol-candidates-5070ti-02.json": "fb8d069d8cb486503497a6997804df297321c6c1fdefb06aee71e5176ea10522",
+    "remote-final-02/smol-selected-3060-02.json": "1660c1192a5e4345d09c6f6b199f76cac10471d2f636b169e13eb407ffccc51d",
+    "remote-final-02/smol-candidates-3060-02.json": "fa9337903e249f8011a912594fa37367833610d35facb037a2cf5a8895e78fc8",
+    "raw/qwen-selected-5070ti-02.json": "10456c567e7c821f3b30c4fe92f651e7433c90e468a7da27204cad8aa590e4f3",
+    "raw/qwen-candidates-5070ti-02.json": "fa0b3cfd88a82c121571537af9e23d86cd1f1127f2ce5261a9b843194dc41068",
+    "remote-final-02/qwen-selected-3060-02.json": "8829b22fefea279ab2d0165c5acd161ec79ca80123ac897fe4db956ffaac3032",
+    "remote-final-02/qwen-candidates-3060-02.json": "990fba77dd73d1ae9f4adfbbcec0d5e71560282b6d6e0bc407300b3b5f2f54d9",
+    "raw/tiny-selected-5070ti-02.json": "f3602d44542c6703a84f025307ea017bb39f8d41968eba5b845f1bdf1b380f6b",
+    "raw/tiny-candidates-5070ti-02.json": "82aecda80bfc4a26ee85379db78f7298f316d54be8bbc10a734bd3d2baf996ce",
+    "remote-final-02/tiny-selected-3060-02.json": "306fc8f67877ddc29f9d530c46969cf38bfeef1c30087d6210e6d63aac22bf12",
+    "remote-final-02/tiny-candidates-3060-02.json": "ec6abb71bc77746c60c804dd8151d5353f4a696036a560fb5c72f5323f69ff41"
+  }
+}

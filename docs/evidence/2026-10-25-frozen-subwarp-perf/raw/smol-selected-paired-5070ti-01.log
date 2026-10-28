@@ -1,0 +1,8 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7652.06it/s]
+zero 1 {'state': 'zero', 'batch': 1, 'warpTokensPerSecond': 152.5110966400263, 'outputTokensPerSecond': 186.33932980599337, 'ratio': 1.221808339925666}
+zero 8 {'state': 'zero', 'batch': 8, 'warpTokensPerSecond': 1099.9867361095355, 'outputTokensPerSecond': 1390.3894564343668, 'ratio': 1.264005656424491}
+zero 32 {'state': 'zero', 'batch': 32, 'warpTokensPerSecond': 3078.9436753132745, 'outputTokensPerSecond': 3898.094824943319, 'ratio': 1.2660494104513615}
+probe 1 {'state': 'probe', 'batch': 1, 'warpTokensPerSecond': 152.27911608162813, 'outputTokensPerSecond': 185.3150161557667, 'ratio': 1.21694307745016}
+probe 8 {'state': 'probe', 'batch': 8, 'warpTokensPerSecond': 1100.6054806637067, 'outputTokensPerSecond': 1389.4801718143663, 'ratio': 1.2624688830156081}
+probe 32 {'state': 'probe', 'batch': 32, 'warpTokensPerSecond': 3075.1623432000392, 'outputTokensPerSecond': 3899.5645742172596, 'ratio': 1.2680841331320871}
+DONE docs/evidence/2026-10-25-frozen-subwarp-perf/raw/smol-selected-paired-5070ti-01.json

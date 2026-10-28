@@ -1,0 +1,19 @@
+{
+ "files": {
+  "test": {
+   "rows": 1319,
+   "sha256": "91d1aac0e6dfee54d0880037076ac49d9c12fce86223662370dfdff5081f8d50"
+  },
+  "train": {
+   "rows": 2000,
+   "sha256": "dc395c7bfb64da0c1ee4b2f302f0718c78a14223a3620e8e84dc24895854900b"
+  },
+  "validation": {
+   "rows": 500,
+   "sha256": "3ca6c0e6346972064712704ce68461a1e5c2bce50f49d7ee04a12edfa2baee00"
+  }
+ },
+ "seed": 20261020,
+ "source": "openai/gsm8k",
+ "sourceRevision": "740312add88f781978c0658806c59bc2815b9866"
+}

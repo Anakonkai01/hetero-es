@@ -1,0 +1,167 @@
+{
+  "recipeHash": "6562185936576bee189fda68e1b1fcdc90cf859de4a2b49b59b8c36cb4b0577b",
+  "planHash": "5f24ba89cfd4662fe324b69755a7fcffdfeec2007079acfab47703910a587614",
+  "initialAdapterSha256": "2eab4f9487c904fbce5228f526f6c5d1ba0a477d048461a793fd63a4719391db",
+  "candidates": [
+    {
+      "candidateId": "c0055000000000000000000000000001/g0/c0",
+      "worker": "linux-a",
+      "texts": [
+        "32",
+        "38",
+        "6",
+        "4"
+      ],
+      "reward": 1.0
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g0/c1",
+      "worker": "linux-b",
+      "texts": [
+        "32",
+        "38",
+        "6",
+        "4"
+      ],
+      "reward": 1.0
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g0/c2",
+      "worker": "linux-a",
+      "texts": [
+        "32",
+        "38",
+        "6",
+        "4"
+      ],
+      "reward": 1.0
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g0/c3",
+      "worker": "linux-b",
+      "texts": [
+        "32",
+        "38",
+        "6",
+        "4"
+      ],
+      "reward": 1.0
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g1/c0",
+      "worker": "linux-b",
+      "texts": [
+        "12",
+        "40",
+        "24",
+        "36"
+      ],
+      "reward": 1.0
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g1/c1",
+      "worker": "linux-a",
+      "texts": [
+        "12",
+        "40",
+        "24",
+        "36"
+      ],
+      "reward": 1.0
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g1/c2",
+      "worker": "linux-b",
+      "texts": [
+        "12",
+        "40",
+        "24",
+        "36"
+      ],
+      "reward": 1.0
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g1/c3",
+      "worker": "linux-a",
+      "texts": [
+        "12",
+        "40",
+        "24",
+        "36"
+      ],
+      "reward": 1.0
+    }
+  ],
+  "children": [
+    {
+      "child": "2eab4f9487c904fbce5228f526f6c5d1ba0a477d048461a793fd63a4719391db",
+      "noop": true
+    },
+    {
+      "child": "2eab4f9487c904fbce5228f526f6c5d1ba0a477d048461a793fd63a4719391db",
+      "noop": true
+    }
+  ],
+  "audits": [
+    {
+      "candidateId": "c0055000000000000000000000000001/g0/c0",
+      "auditor": "linux-b",
+      "original": "linux-a",
+      "matched": true
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g0/c1",
+      "auditor": "linux-a",
+      "original": "linux-b",
+      "matched": true
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g0/c2",
+      "auditor": "linux-b",
+      "original": "linux-a",
+      "matched": true
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g0/c3",
+      "auditor": "linux-a",
+      "original": "linux-b",
+      "matched": true
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g1/c0",
+      "auditor": "linux-a",
+      "original": "linux-b",
+      "matched": true
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g1/c1",
+      "auditor": "linux-b",
+      "original": "linux-a",
+      "matched": true
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g1/c2",
+      "auditor": "linux-a",
+      "original": "linux-b",
+      "matched": true
+    },
+    {
+      "candidateId": "c0055000000000000000000000000001/g1/c3",
+      "auditor": "linux-b",
+      "original": "linux-a",
+      "matched": true
+    }
+  ],
+  "auditCount": 8,
+  "auditMismatches": 0,
+  "crossWorkerAudits": 8,
+  "quarantined": [],
+  "replayPassed": true,
+  "runner": {
+    "status": "COMPLETED",
+    "t": 1792420524.5624385,
+    "failureReason": null,
+    "final_weights_sha256": "2eab4f9487c904fbce5228f526f6c5d1ba0a477d048461a793fd63a4719391db"
+  },
+  "passed": true
+}

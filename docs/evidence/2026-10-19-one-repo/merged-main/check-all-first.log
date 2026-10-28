@@ -1,0 +1,36 @@
+=== backend-tests
+PASS backend-tests
+=== frontend-unit
+PASS frontend-unit
+=== worker-unit
+FAIL worker-unit (see <scratch>/one-repo-main-checks/worker-unit.log)
+=== server-unit
+PASS server-unit
+=== product-ui-unit
+PASS product-ui-unit
+=== types
+PASS types
+=== lint
+PASS lint
+=== i18n
+PASS i18n
+=== web-build
+PASS web-build
+=== worker-build
+PASS worker-build
+=== web-onboarding
+PASS web-onboarding
+=== web-live
+PASS web-live
+=== web-experiments
+FAIL web-experiments (see <scratch>/one-repo-main-checks/web-experiments.log)
+=== web-showcase
+PASS web-showcase
+=== web-pages
+PASS web-pages
+=== worker-onboarding
+PASS worker-onboarding
+=== worker-station
+PASS worker-station
+FAILED: worker-unit web-experiments
+exit=1

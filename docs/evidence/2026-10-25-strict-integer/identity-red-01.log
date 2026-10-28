@@ -1,0 +1,16 @@
+F
+=================================== FAILURES ===================================
+_________ test_precision_namespaces_even_an_uncompiled_device_identity _________
+
+    @gpu
+    def test_precision_namespaces_even_an_uncompiled_device_identity():
+        low = cuda_class()("cuda", magnitude_bits=14).identity()
+        high = cuda_class()("cuda", magnitude_bits=22).identity()
+>       assert low["fingerprint"] != high["fingerprint"]
+E       AssertionError: assert '67adbe30291f18b6dc2ef3fa401cbc2761cc9f540190d30c11bacd69e38b95f2' != '67adbe30291f18b6dc2ef3fa401cbc2761cc9f540190d30c11bacd69e38b95f2'
+
+tests/eval/test_integer_cuda.py:45: AssertionError
+=========================== short test summary info ============================
+FAILED tests/eval/test_integer_cuda.py::test_precision_namespaces_even_an_uncompiled_device_identity
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 34 deselected in 0.83s

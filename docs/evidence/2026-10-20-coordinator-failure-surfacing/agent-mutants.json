@@ -1,0 +1,128 @@
+[
+ {
+  "name": "silent-deferral",
+  "file": "src/heteroes/product/agent.py",
+  "old": "self.record_deferral(command, error)  # OFF/deferred commands remain unacknowledged",
+  "new": "pass  # OFF/deferred commands remain unacknowledged"
+ },
+ {
+  "name": "deferral-reported-as-failure",
+  "file": "src/heteroes/product/agent.py",
+  "old": "self.record_problem(\"agent_command_deferred\", command, error)",
+  "new": "self.record_problem(\"agent_command_failed\", command, error)"
+ },
+ {
+  "name": "failure-reported-as-deferral",
+  "file": "src/heteroes/product/agent.py",
+  "old": "self.record_problem(\"agent_command_failed\", command, error)",
+  "new": "self.record_problem(\"agent_command_deferred\", command, error)"
+ },
+ {
+  "name": "deferral-counted-as-failure",
+  "file": "src/heteroes/product/agent.py",
+  "old": "\"agent_command_deferred\": \"command_deferrals\"",
+  "new": "\"agent_command_deferred\": \"command_failures\""
+ },
+ {
+  "name": "no-report-at-1",
+  "file": "src/heteroes/product/agent.py",
+  "old": "attempts in (1, 10, 100, 1000)",
+  "new": "attempts in (10, 100, 1000)"
+ },
+ {
+  "name": "no-report-at-10",
+  "file": "src/heteroes/product/agent.py",
+  "old": "attempts in (1, 10, 100, 1000)",
+  "new": "attempts in (1, 100, 1000)"
+ },
+ {
+  "name": "no-report-at-100",
+  "file": "src/heteroes/product/agent.py",
+  "old": "attempts in (1, 10, 100, 1000)",
+  "new": "attempts in (1, 10, 1000)"
+ },
+ {
+  "name": "no-report-at-1000",
+  "file": "src/heteroes/product/agent.py",
+  "old": "attempts in (1, 10, 100, 1000)",
+  "new": "attempts in (1, 10, 100)"
+ },
+ {
+  "name": "extra-report-at-2",
+  "file": "src/heteroes/product/agent.py",
+  "old": "attempts in (1, 10, 100, 1000)",
+  "new": "attempts in (1, 2, 10, 100, 1000)"
+ },
+ {
+  "name": "assignment-id-unchecked",
+  "file": "src/heteroes/product/agent.py",
+  "old": "and re.fullmatch(\"[a-f0-9]{32}\", assignment)\n                and type(epoch)",
+  "new": "and True\n                and type(epoch)"
+ },
+ {
+  "name": "epoch-zero-allowed",
+  "file": "src/heteroes/product/agent.py",
+  "old": "and epoch >= 1",
+  "new": "and epoch >= 0"
+ },
+ {
+  "name": "counter-starts-at-1",
+  "file": "src/heteroes/product/agent.py",
+  "old": "VALUES (?,?,?,0,0)",
+  "new": "VALUES (?,?,?,1,0)"
+ },
+ {
+  "name": "reason-never-sent",
+  "file": "src/heteroes/product/agent.py",
+  "old": "if reason:\n",
+  "new": "if False:\n"
+ },
+ {
+  "name": "any-error-has-a-reason",
+  "file": "src/heteroes/product/agent.py",
+  "old": "if type(error) not in (ValueError, RuntimeError, InvalidCommand):",
+  "new": "if False:"
+ },
+ {
+  "name": "no-reason-for-invalid-command",
+  "file": "src/heteroes/product/agent.py",
+  "old": "(ValueError, RuntimeError, InvalidCommand)",
+  "new": "(ValueError, RuntimeError)"
+ },
+ {
+  "name": "no-reason-for-runtime-error",
+  "file": "src/heteroes/product/agent.py",
+  "old": "(ValueError, RuntimeError, InvalidCommand)",
+  "new": "(ValueError, InvalidCommand)"
+ },
+ {
+  "name": "no-reason-for-value-error",
+  "file": "src/heteroes/product/agent.py",
+  "old": "(ValueError, RuntimeError, InvalidCommand)",
+  "new": "(RuntimeError, InvalidCommand)"
+ },
+ {
+  "name": "reason-cut-at-201",
+  "file": "src/heteroes/product/agent.py",
+  "old": ")[:200]",
+  "new": ")[:201]"
+ },
+ {
+  "name": "reason-cut-at-199",
+  "file": "src/heteroes/product/agent.py",
+  "old": ")[:200]",
+  "new": ")[:199]"
+ },
+ {
+  "name": "urls-not-hidden",
+  "file": "src/heteroes/product/agent.py",
+  "old": "return re.sub(r\"\\b[a-z][a-z0-9+.-]*://\\S+\", \"<url>\", str(error))[:200]",
+  "new": "return str(error)[:200]"
+ },
+ {
+  "name": "only-http-urls-hidden",
+  "file": "src/heteroes/product/agent.py",
+  "old": "r\"\\b[a-z][a-z0-9+.-]*://\\S+\"",
+  "new": "r\"\\bhttps?://\\S+\""
+ }
+]

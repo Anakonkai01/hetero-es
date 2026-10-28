@@ -1,0 +1,20 @@
+{
+  "fixtureLab": true,
+  "realLab": false,
+  "gpuWork": false,
+  "shortPasswordExplained": true,
+  "commonPasswordExplained": true,
+  "showHideAndRule": true,
+  "landsOnGetStarted": true,
+  "downloadVisibleWhilePending": true,
+  "labAddressShown": true,
+  "navHasHomeAndGetStarted": true,
+  "downloadResponds": true,
+  "adminBannerShown": true,
+  "adminBadgeShown": true,
+  "approvalConfirmed": true,
+  "bannerClearsAfterApproval": true,
+  "friendSeesApproval": true,
+  "noHorizontalOverflow": true,
+  "browserErrors": []
+}

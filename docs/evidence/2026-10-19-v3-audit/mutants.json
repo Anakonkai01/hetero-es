@@ -1,0 +1,50 @@
+[
+  {
+    "name": "audit original worker allowed",
+    "file": "src/heteroes/v3/audit.py",
+    "old": "if original == worker:",
+    "new": "if False:"
+  },
+  {
+    "name": "sampling changed",
+    "file": "src/heteroes/v3/audit.py",
+    "old": "2**256 // 20 if rate == 0.05",
+    "new": "2**256 // 10 if rate == 0.05"
+  },
+  {
+    "name": "audit text hash unchecked",
+    "file": "src/heteroes/v3/audit.py",
+    "old": "decoded = decoders[operation](body)",
+    "new": "decoded = decoders[operation]({**body, \"completions_sha256\": __import__(\"heteroes.worker_api\", fromlist=[\"completions_sha256\"]).completions_sha256(body[\"completions\"])}) if operation == \"submit_result\" else decoders[operation](body)"
+  },
+  {
+    "name": "audit credential unchecked",
+    "file": "src/heteroes/v3/audit.py",
+    "old": "if authenticated_worker_id is not None and authenticated_worker_id != entry[\"worker\"]:",
+    "new": "if False:"
+  },
+  {
+    "name": "audit identity token unchecked",
+    "file": "src/heteroes/v3/audit.py",
+    "old": "or not secrets.compare_digest(token, work[\"token\"])",
+    "new": "or False"
+  },
+  {
+    "name": "duplicate audit treated as new",
+    "file": "src/heteroes/v3/audit.py",
+    "old": "\"outcome\": \"ALREADY_COMMITTED\",",
+    "new": "\"outcome\": \"COMMITTED\","
+  },
+  {
+    "name": "worker audit discriminator dropped",
+    "file": "src/heteroes/worker.py",
+    "old": "**({\"audit_id\": self.audit_id} if self.audit_id is not None else {}),",
+    "new": ""
+  },
+  {
+    "name": "completed audits repeated after restart",
+    "file": "src/heteroes/v3/audit.py",
+    "old": "AND NOT EXISTS (SELECT 1 FROM audit u WHERE u.candidate_id=c.candidate_id)",
+    "new": "AND 1=1"
+  }
+]

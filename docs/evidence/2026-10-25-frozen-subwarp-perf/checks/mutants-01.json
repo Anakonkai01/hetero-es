@@ -1,0 +1,32 @@
+[
+  {
+    "name": "drop-output-scale",
+    "file": "src/heteroes/eval/strict_cuda.py",
+    "old": "const float scaled = mul_rn(value, scale);",
+    "new": "const float scaled = value;"
+  },
+  {
+    "name": "wrong-output-tree",
+    "file": "src/heteroes/eval/strict_cuda.py",
+    "old": "products[k] = add_rn(products[k], products[k + offset]);",
+    "new": "products[k] = add_rn(products[k], products[k + 1]);"
+  },
+  {
+    "name": "drop-output-input-ftz",
+    "file": "src/heteroes/eval/strict_cuda.py",
+    "old": "mul_rn(flush(mid[(size_t)m * WIDTH + k]), widen(w[(size_t)o * WIDTH + k]))",
+    "new": "mul_rn(mid[(size_t)m * WIDTH + k], widen(w[(size_t)o * WIDTH + k]))"
+  },
+  {
+    "name": "drop-output-zero-select",
+    "file": "src/heteroes/eval/strict_cuda.py",
+    "old": "const float result = (__float_as_uint(scaled) & 0x7fffffffu) == 0u ? b : add_rn(b, scaled);\n  out[index] = result;\n  if ((__float_as_uint(scaled)",
+    "new": "const float result = add_rn(b, scaled);\n  out[index] = result;\n  if ((__float_as_uint(scaled)"
+  },
+  {
+    "name": "reject-admitted-rank32",
+    "file": "src/heteroes/eval/frozen_int8_decoder.py",
+    "old": "module.rank > 32:",
+    "new": "module.rank > 31:"
+  }
+]

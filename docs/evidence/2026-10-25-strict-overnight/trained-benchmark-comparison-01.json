@@ -1,0 +1,162 @@
+{
+  "status": "ok",
+  "hardwareQualified": false,
+  "limits": "Three trained parent checkpoints; fixed eight prompts repeated by batch; no trained candidate/quality/native Windows/universal acceptance. Prior Qwen vLLM timing is a different measurement stage. Full registration identity equality is NOT asserted after excluding download metadata.",
+  "groups": {
+    "qwen2-0.5b": {
+      "modelAssetsEqual": true,
+      "fullModelManifestEqual": true,
+      "downloadMetadataDifferences": [],
+      "promptTokenIdsEqual": true,
+      "workloadEqual": true,
+      "strictCrossGpuTokensEqual": true,
+      "receipts": [
+        {
+          "path": "docs/evidence/2026-10-25-strict-overnight/bench-graph-nhan-03.json",
+          "gpu": "NVIDIA GeForce RTX 5070 Ti",
+          "engine": "strict-graph",
+          "batchInvariant": null,
+          "tokensPerSecond": {
+            "1": 209.86479021690474,
+            "8": 422.5810725643589,
+            "32": 500.7129930532116
+          }
+        },
+        {
+          "path": "docs/evidence/2026-10-25-strict-overnight/bench-graph-thao-02.json",
+          "gpu": "NVIDIA GeForce RTX 3060",
+          "engine": "strict-graph",
+          "batchInvariant": null,
+          "tokensPerSecond": {
+            "1": 112.95386118958302,
+            "8": 150.592945044221,
+            "32": 157.69416329665404
+          }
+        },
+        {
+          "path": "docs/evidence/2026-10-25-strict-throughput/bench-vllm-nhan-01.json",
+          "gpu": "NVIDIA GeForce RTX 5070 Ti",
+          "engine": "vllm",
+          "batchInvariant": "0",
+          "tokensPerSecond": {
+            "1": 518.696782109793,
+            "8": 4037.8584559409956,
+            "32": 13802.546405198837,
+            "128": 31057.287577661642
+          }
+        },
+        {
+          "path": "docs/evidence/2026-10-25-strict-throughput/bench-vllm-invariant-nhan-01.json",
+          "gpu": "NVIDIA GeForce RTX 5070 Ti",
+          "engine": "vllm",
+          "batchInvariant": "1",
+          "tokensPerSecond": {
+            "1": 146.04204938547062,
+            "8": 1164.4541121165914,
+            "32": 4697.211809411487,
+            "128": 17153.80441948882
+          }
+        }
+      ]
+    },
+    "smollm2-360m": {
+      "modelAssetsEqual": true,
+      "fullModelManifestEqual": false,
+      "downloadMetadataDifferences": [
+        ".cache/huggingface/trees/a10cc1512eabd3dde888204e902eca88bddb4951.json"
+      ],
+      "promptTokenIdsEqual": true,
+      "workloadEqual": true,
+      "strictCrossGpuTokensEqual": true,
+      "receipts": [
+        {
+          "path": "docs/evidence/2026-10-25-strict-overnight/bench-smollm-graph-nhan-01.json",
+          "gpu": "NVIDIA GeForce RTX 5070 Ti",
+          "engine": "strict-graph",
+          "batchInvariant": null,
+          "tokensPerSecond": {
+            "1": 239.91804219617535,
+            "8": 598.0925128900801,
+            "32": 804.9043317748371
+          }
+        },
+        {
+          "path": "docs/evidence/2026-10-25-strict-overnight/bench-smollm-vllm-nhan-01.json",
+          "gpu": "NVIDIA GeForce RTX 5070 Ti",
+          "engine": "vllm",
+          "batchInvariant": "0",
+          "tokensPerSecond": {
+            "1": 529.1976098991936,
+            "8": 4093.2399120758982,
+            "32": 14429.443663323114
+          }
+        },
+        {
+          "path": "docs/evidence/2026-10-25-strict-overnight/bench-smollm-invariant-nhan-01.json",
+          "gpu": "NVIDIA GeForce RTX 5070 Ti",
+          "engine": "vllm",
+          "batchInvariant": "1",
+          "tokensPerSecond": {
+            "1": 173.79706227529047,
+            "8": 1371.1926626589202,
+            "32": 5339.77983813384
+          }
+        },
+        {
+          "path": "docs/evidence/2026-10-25-strict-overnight/bench-smollm-graph-thao-01.json",
+          "gpu": "NVIDIA GeForce RTX 3060",
+          "engine": "strict-graph",
+          "batchInvariant": null,
+          "tokensPerSecond": {
+            "1": 131.10142605592662,
+            "8": 194.1729174694795,
+            "32": 211.55615851221455
+          }
+        }
+      ]
+    },
+    "tinyllama-1.1b": {
+      "modelAssetsEqual": true,
+      "fullModelManifestEqual": true,
+      "downloadMetadataDifferences": [],
+      "promptTokenIdsEqual": true,
+      "workloadEqual": true,
+      "strictCrossGpuTokensEqual": null,
+      "receipts": [
+        {
+          "path": "docs/evidence/2026-10-25-strict-overnight/bench-tinyllama-graph-nhan-01.json",
+          "gpu": "NVIDIA GeForce RTX 5070 Ti",
+          "engine": "strict-graph",
+          "batchInvariant": null,
+          "tokensPerSecond": {
+            "1": 133.33954973356938,
+            "8": 255.34667230126067,
+            "32": 288.7903110555614
+          }
+        },
+        {
+          "path": "docs/evidence/2026-10-25-strict-overnight/bench-tinyllama-vllm-nhan-01.json",
+          "gpu": "NVIDIA GeForce RTX 5070 Ti",
+          "engine": "vllm",
+          "batchInvariant": "0",
+          "tokensPerSecond": {
+            "1": 322.8795724191243,
+            "8": 2330.584424088499,
+            "32": 7791.842687872141
+          }
+        },
+        {
+          "path": "docs/evidence/2026-10-25-strict-overnight/bench-tinyllama-invariant-nhan-01.json",
+          "gpu": "NVIDIA GeForce RTX 5070 Ti",
+          "engine": "vllm",
+          "batchInvariant": "1",
+          "tokensPerSecond": {
+            "1": 103.19840760716185,
+            "8": 825.3479468716068,
+            "32": 3194.6574446124823
+          }
+        }
+      ]
+    }
+  }
+}

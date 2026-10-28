@@ -1,0 +1,11 @@
+control ok    | ℹ duration_ms 107.378932
+killed       paths-ignore-runtimes |   }
+killed       folder-is-parent |   }
+killed       move-after-install |   }
+killed       relative-ok |   }
+killed       no-marker |   }
+killed       running-ok |   }
+killed       runtimes-key-refused |       at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+killed       nsis-no-name-guard |   }
+
+8 of 8 mutants killed.

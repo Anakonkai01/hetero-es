@@ -1,0 +1,510 @@
+{
+  "parent weights": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 1,
+      "margins_at_the_flip": [
+        0.0026416778564453125
+      ]
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 1,
+      "margins_at_the_flip": [
+        0.0018138885498046875
+      ]
+    }
+  },
+  "seed 0": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 1": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 1,
+      "margins_at_the_flip": [
+        0.00220489501953125
+      ]
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 2": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 3": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 4": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 1,
+      "margins_at_the_flip": [
+        0.0025157928466796875
+      ]
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 1,
+      "margins_at_the_flip": [
+        0.019666671752929688
+      ]
+    }
+  },
+  "seed 5": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 6": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 1,
+      "margins_at_the_flip": [
+        0.004791259765625
+      ]
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 7": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 3,
+      "margins_at_the_flip": [
+        0.00011444091796875,
+        0.022199630737304688,
+        0.0008258819580078125
+      ]
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 8": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 9": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 1,
+      "margins_at_the_flip": [
+        0.0041637420654296875
+      ]
+    }
+  },
+  "seed 10": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 11": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 12": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 13": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 14": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 15": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 16": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 1,
+      "margins_at_the_flip": [
+        0.011819839477539062
+      ]
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 17": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 18": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 1,
+      "margins_at_the_flip": [
+        0.011259078979492188
+      ]
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 1,
+      "margins_at_the_flip": [
+        0.011259078979492188
+      ]
+    }
+  },
+  "seed 19": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 20": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 1,
+      "margins_at_the_flip": [
+        0.002063751220703125
+      ]
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 21": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 22": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 23": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 24": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 1,
+      "margins_at_the_flip": [
+        0.016248703002929688
+      ]
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 25": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 1,
+      "margins_at_the_flip": [
+        0.003757476806640625
+      ]
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 1,
+      "margins_at_the_flip": [
+        0.003757476806640625
+      ]
+    }
+  },
+  "seed 26": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 27": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 1,
+      "margins_at_the_flip": [
+        0.01486968994140625
+      ]
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 1,
+      "margins_at_the_flip": [
+        0.0126495361328125
+      ]
+    }
+  },
+  "seed 28": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 2,
+      "margins_at_the_flip": [
+        0.08115005493164062,
+        0.0001316070556640625
+      ]
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 29": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 1,
+      "margins_at_the_flip": [
+        0.04608917236328125
+      ]
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  },
+  "seed 30": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 1,
+      "margins_at_the_flip": [
+        0.005168914794921875
+      ]
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 2,
+      "margins_at_the_flip": [
+        0.005168914794921875,
+        0.003101348876953125
+      ]
+    }
+  },
+  "seed 31": {
+    "batch_of_one_with_padding_enabled": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batch_of_all_16_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    },
+    "batches_of_two_left_padded": {
+      "prompts_with_a_different_answer": 0,
+      "margins_at_the_flip": []
+    }
+  }
+}

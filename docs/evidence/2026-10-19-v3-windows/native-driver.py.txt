@@ -1,0 +1,27 @@
+"""Native subprocess receipts; stderr is progress, return codes decide failure."""
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+private=Path(os.environ['LOCALAPPDATA'])/'HeteroES-v3-20261019'
+bulk=Path('D:/HeteroES-v3-20261019')
+if sys.argv[1]=='report':
+    command=[sys.executable,'-m','pip','--isolated','--cache-dir',str(bulk/'pip-cache'),'install','--dry-run','--ignore-installed','--only-binary=:all:','--disable-pip-version-check','--timeout','60','--index-url','https://pypi.org/simple','--extra-index-url','https://download.pytorch.org/whl/cu132','--report',str(bulk/'windows-second.json'),'-r',str(private/'windows.in')]
+    with (private/'windows-report-second.log').open('x',encoding='utf-8') as log:
+        result=subprocess.run(command,stdout=log,stderr=subprocess.STDOUT)
+    print('REPORT_EXIT',result.returncode,flush=True)
+    sys.exit(result.returncode)
+model=Path(os.environ['APPDATA'])/'@heteroes/worker/runtimes/c64f3012b965/models/7ae557604adf67be50417f59c2c2f167def9a775'
+env={**os.environ,'PYTHONPATH':str(private/'deps')+';'+str(private/'runtime/src'),'HETEROES_GPU_ACCEPTANCE':'1','OMP_NUM_THREADS':'1','OPENBLAS_NUM_THREADS':'1','MKL_NUM_THREADS':'1'}
+for space in ('full','subset','lora'):
+    out=private/'results'/f'windows-{space}-second'
+    command=[sys.executable,'-u',str(private/'runtime/scripts/v3_gpu_acceptance.py'),'run','--gpu','--model-path',str(model),'--space',space,'--out',str(out),'--bulk-dir',str(bulk/'results'/f'windows-{space}-second')]
+    with (private/f'windows-{space}-second.log').open('x',encoding='utf-8') as log:
+        result=subprocess.run(command,stdout=log,stderr=subprocess.STDOUT,env=env)
+    print(space,'EXIT',result.returncode,flush=True)
+    if result.returncode:
+        sys.exit(result.returncode)
+    receipt=json.loads((out/'receipt.json').read_text())
+    print(json.dumps({k:receipt[k] for k in ('recipeHash','auditCount','auditMismatches','replayPassed','nonNoopGenerations')}),flush=True)

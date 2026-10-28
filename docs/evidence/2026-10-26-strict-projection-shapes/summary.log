@@ -1,0 +1,21 @@
+stream + queued step (878018e3) vs 75f92c30      short32   4744.6 ->  6971.9 tokensEqual=True
+stream + queued step (878018e3) vs 75f92c30      chat128   4877.6 ->  7097.9 tokensEqual=True
++ grouped launches vs 878018e3                   short32   6975.7 ->  7421.5 tokensEqual=True
++ grouped launches vs 878018e3                   chat128   7100.6 ->  7581.1 tokensEqual=True
++ fused RMSNorm/SiLU quantization vs 878018e3    short32   6983.6 ->  7608.7 tokensEqual=True
++ fused RMSNorm/SiLU quantization vs 878018e3    chat128   7121.0 ->  7791.5 tokensEqual=True
+5070ti-linux       qwen  short32   4761.0 ->  7589.2 (+59.4%) tokensEqual=True
+5070ti-linux       qwen  chat128   4902.5 ->  7775.0 (+58.6%) tokensEqual=True
+5070ti-linux       smol  short32   5190.1 ->  7312.5 (+40.9%) tokensEqual=True
+5070ti-linux       tiny  short32   2472.1 ->  4302.1 (+74.0%) tokensEqual=True
+3060-wsl2          qwen  short32   1398.6 ->  2550.5 (+82.4%) tokensEqual=True
+3060-wsl2          qwen  chat128   1400.1 ->  2509.2 (+79.2%) tokensEqual=True
+3060-wsl2          smol  short32   1657.8 ->  2476.2 (+49.4%) tokensEqual=True
+3060-wsl2          tiny  short32    665.2 ->  1353.9 (+103.5%) tokensEqual=True
+3060-native-win11  qwen  short32   1369.9 ->  2523.0 (+84.2%) tokensEqual=True
+3060-native-win11  qwen  chat128   1395.6 ->  2523.0 (+80.8%) tokensEqual=True
+qwen ['3060-native-win11', '3060-wsl2', '5070ti-linux'] [('parent', True, True), ('plus', True, True), ('minus', True, True), ('restored', True, True)] {'5070ti-linux': (True, 27), '3060-wsl2': (True, 27), '3060-native-win11': (True, 27)} eosEqualAcrossHosts True
+smol ['3060-wsl2', '5070ti-linux'] [('parent', True, True), ('plus', True, True), ('minus', True, True), ('restored', True, True)] {} eosEqualAcrossHosts True
+tiny ['3060-wsl2', '5070ti-linux'] [('parent', True, True), ('plus', True, True), ('minus', True, True), ('restored', True, True)] {} eosEqualAcrossHosts True
+equal to sealed GQA receipts: {'qwen': True, 'smol': True, 'tiny': True}
+native: {'status': 'ok', 'platform': 'Windows-11-10.0.26200-SP0', 'gpu': 'NVIDIA GeForce RTX 3060', 'cc': [8, 6], 'torch': '2.13.0+cu132', 'nvrtcResult': [0, 13, 2], 'pytestExitCode': 0, 'sourceFileCount': 483, 'commit': '96bec7d150dcb522e8695778ba6a93a1163e8e3e'}

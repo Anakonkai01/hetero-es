@@ -1,0 +1,5 @@
+[
+ {"name": "a local bundle is not checked", "file": "scripts/install-worker.sh.in", "old": "  [ \"$(sha256sum \"$HETEROES_BUNDLE\" | cut -d' ' -f1)\" = \"$BUNDLE_SHA256\" ] || die \"checksum mismatch for $HETEROES_BUNDLE\"\n", "new": ""},
+ {"name": "the installer does not run the pinned install", "file": "scripts/install-worker.sh.in", "old": "\"$BIN_DIR/heteroes-worker\" install\n", "new": "true\n"},
+ {"name": "builder accepts a runtime that differs from the profile", "file": "scripts/build-linux-worker.py", "old": "if sha(resources / \"runtime.tar.gz\") != profile[\"runtimeSha256\"]:", "new": "if False:"}
+]

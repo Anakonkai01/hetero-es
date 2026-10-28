@@ -1,0 +1,54 @@
+EE                                                                       [100%]
+==================================== ERRORS ====================================
+____ ERROR at setup of test_gpu_requires_both_owner_gate_and_explicit_flag _____
+
+    @pytest.fixture
+    def probe():
+        path = Path(__file__).resolve().parents[2] / "scripts/v3_gpu_acceptance.py"
+        spec = importlib.util.spec_from_file_location("v3_gpu_probe", path)
+        module = importlib.util.module_from_spec(spec)
+>       spec.loader.exec_module(module)
+
+runtime/tests/v3/test_v3_gpu_acceptance.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_frozen_importlib_external.SourceFileLoader object at 0x7b0187ea82c0>
+path = '/home/pc5070ti/projects/heteroes/runtime/scripts/v3_gpu_acceptance.py'
+
+>   ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/runtime/scripts/v3_gpu_acceptance.py'
+
+<frozen importlib._bootstrap_external>:1190: FileNotFoundError
+__ ERROR at setup of test_cross_gpu_comparison_rejects_text_or_identity_drift __
+
+    @pytest.fixture
+    def probe():
+        path = Path(__file__).resolve().parents[2] / "scripts/v3_gpu_acceptance.py"
+        spec = importlib.util.spec_from_file_location("v3_gpu_probe", path)
+        module = importlib.util.module_from_spec(spec)
+>       spec.loader.exec_module(module)
+
+runtime/tests/v3/test_v3_gpu_acceptance.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+<frozen importlib._bootstrap_external>:995: in exec_module
+    ???
+<frozen importlib._bootstrap_external>:1132: in get_code
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <_frozen_importlib_external.SourceFileLoader object at 0x7b0187ea8110>
+path = '/home/pc5070ti/projects/heteroes/runtime/scripts/v3_gpu_acceptance.py'
+
+>   ???
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/pc5070ti/projects/heteroes/runtime/scripts/v3_gpu_acceptance.py'
+
+<frozen importlib._bootstrap_external>:1190: FileNotFoundError
+=========================== short test summary info ============================
+ERROR runtime/tests/v3/test_v3_gpu_acceptance.py::test_gpu_requires_both_owner_gate_and_explicit_flag
+ERROR runtime/tests/v3/test_v3_gpu_acceptance.py::test_cross_gpu_comparison_rejects_text_or_identity_drift
+2 errors in 0.06s

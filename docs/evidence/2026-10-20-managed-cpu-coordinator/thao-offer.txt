@@ -1,0 +1,21 @@
+{
+  "identity": {
+    "specHash": "96cfb80523907097233c17a8fdcd6072fddf15cd83a695a7fec67a6fdfcb28ba",
+    "modelManifestHash": "af52722f2880d488e45860b7b97460c6fe2744aae79f555dce44d47cd47c533c",
+    "dataFiles": {
+      "all": "5af015e71dbdc6a1f795e9ca0b0079094a0cf18d19a915a23bea529eeace8748"
+    },
+    "code": {
+      "scorer": "011e4fa337a8d55b1e898ae448cc39f06894a108a73e98e513ed5384a4f63923"
+    },
+    "coordinatorDeviceId": "47e0546da4464ca484a20768ce19aca6",
+    "workerIds": [
+      "desktop-6d6e5328c3d1"
+    ]
+  },
+  "datasetId": "85377d965edd49cabd50532deb685e6d",
+  "experimentId": "d54574d3615642a2a0ead4607a366958"
+}
+paired; an administrator must approve it. Then: heteroes-worker run, and turn it ON on the lab.
+Coordinator online; waiting for administrator approval in the selected workspace.
+{"experimentId": "d54574d3615642a2a0ead4607a366958", "deviceId": "47e0546da4464ca484a20768ce19aca6", "contribution": "Turn ON in the lab for this boot to allow execution"}

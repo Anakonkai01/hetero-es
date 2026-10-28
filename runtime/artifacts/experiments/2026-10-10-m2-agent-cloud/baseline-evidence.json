@@ -1,0 +1,12 @@
+{
+  "runId": "d09d6ea8ac904cc7be92fa833637abde",
+  "status": "COMPLETED",
+  "baselineWeightsSha256": "9947f34c5b6e08667a4283d23d7021dcbb685fb536d10c2e4d85cda420aba7af",
+  "gpuHoursConservative": 0.02020472374227312,
+  "sameExperimentId": true,
+  "workerIds": [
+    "5070ti"
+  ],
+  "threeGpuWeightsSha256": "9947f34c5b6e08667a4283d23d7021dcbb685fb536d10c2e4d85cda420aba7af",
+  "exactCheckpointMatch": true
+}

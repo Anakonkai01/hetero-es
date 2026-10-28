@@ -1,0 +1,2 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 2947.61it/s]
+{"status": "ok", "out": "smol-candidates-3060-01.json", "wallSeconds": 16.229923140999745}

@@ -1,0 +1,6 @@
+control ok    | 3 passed, 8 deselected in 0.06s
+killed       dispatch-never-v3 | 1 failed, 1 passed, 8 deselected in 0.07s
+killed       dispatch-always-v3 | 1 failed, 8 deselected in 0.07s
+killed       reference-dir-wrong | 1 failed, 1 passed, 8 deselected in 0.07s
+
+3 of 3 mutants killed.

@@ -1,0 +1,11 @@
+WRONG positive-synthetic: checker says ok=False (expected True) {'violations': 0, 'expiryOk': [True], 'restartOk': [True], 'results': 400}
+OK   non-member-result: checker says ok=False (expected False) {'violations': 0, 'expiryOk': [True], 'restartOk': [True], 'results': 400}
+OK   no-expiry-row: checker says ok=False (expected False) {'violations': 0, 'expiryOk': [False], 'restartOk': [True], 'results': 400}
+OK   no-restart-event: checker says ok=False (expected False) {'violations': 0, 'expiryOk': [True], 'restartOk': [False], 'results': 400}
+OK   restart-without-new-results: checker says ok=False (expected False) {'violations': 0, 'expiryOk': [True], 'restartOk': [False], 'results': 400}
+OK   restart-launch-0-only: checker says ok=False (expected False) {'violations': 0, 'expiryOk': [True], 'restartOk': [False], 'results': 400}
+OK   manual-membership-change-for-the-restarted-worker: checker says ok=False (expected False) {'violations': 2, 'expiryOk': [True], 'restartOk': [False], 'results': 400}
+OK   expired-attempt-also-committed: checker says ok=False (expected False) {'violations': 0, 'expiryOk': [False], 'restartOk': [True], 'results': 400}
+OK   missing-result: checker says ok=False (expected False) {'violations': 0, 'expiryOk': [True], 'restartOk': [True], 'results': 399}
+OK   joiner-sequence-differs-from-the-declared-one: checker says ok=False (expected False) {'violations': 0, 'expiryOk': [True], 'restartOk': [True], 'results': 400}
+1 CONTROL(S) WRONG

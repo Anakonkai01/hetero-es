@@ -1,0 +1,163 @@
+FFF..                                                                    [100%]
+=================================== FAILURES ===================================
+___________ test_managed_runner_and_worker_cli_commit_texts[space0] ____________
+
+product_assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-208/product-model0')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-208/test_managed_runner_and_worker0')
+space = {'kind': 'full'}
+
+    @pytest.mark.parametrize(
+        "space",
+        [
+            {"kind": "full"},
+            {"kind": "subset", "include": [r"layers\.1\."]},
+            {"kind": "lora", "rank": 2, "alpha": 4, "targetModules": ["q_proj", "v_proj"]},
+        ],
+    )
+    def test_managed_runner_and_worker_cli_commit_texts(product_assets, tmp_path, space):
+        import socket
+    
+        with socket.socket() as sock:
+            sock.bind(("127.0.0.1", 0))
+            port = sock.getsockname()[1]
+        cfg = product_config(product_assets, tmp_path, weightSpace=space, port=port)
+        write_json(tmp_path / "config.json", cfg)
+        env = {**os.environ, "CUDA_VISIBLE_DEVICES": "", "HETEROES_TOKEN": "fixture-secret"}
+        runner_log = (tmp_path / "runner-output.txt").open("w")
+        worker_log = (tmp_path / "worker-output.txt").open("w")
+        command = "from heteroes.product.runner import main; import sys; sys.exit(main(sys.argv[1], device='cpu', timeout_seconds=30))"
+        runner = subprocess.Popen(
+            [sys.executable, "-c", command, str(tmp_path)], env=env, stdout=runner_log, stderr=runner_log
+        )
+        worker = None
+        try:
+>           wait_for(lambda: read_json(tmp_path / "runner.json", {}).get("status") == "PREPARING", runner)
+
+tests/v3/test_v3_product.py:117: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+predicate = <function test_managed_runner_and_worker_cli_commit_texts.<locals>.<lambda> at 0x7c2b8319de40>
+process = <Popen: returncode: 1 args: ['/home/pc5070ti/miniforge3/envs/heteroes-match/...>
+timeout = 60
+
+    def wait_for(predicate, process, timeout=60):
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            if predicate():
+                return
+            if process.poll() is not None:
+>               raise AssertionError(f"process exited early: {process.returncode}")
+E               AssertionError: process exited early: 1
+
+tests/v3/test_v3_product.py:87: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+
+
+
+---------------------------- Captured stderr setup -----------------------------
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 1258.42it/s]
+___________ test_managed_runner_and_worker_cli_commit_texts[space1] ____________
+
+product_assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-208/product-model0')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-208/test_managed_runner_and_worker1')
+space = {'kind': 'subset', 'include': ['layers\\.1\\.']}
+
+    @pytest.mark.parametrize(
+        "space",
+        [
+            {"kind": "full"},
+            {"kind": "subset", "include": [r"layers\.1\."]},
+            {"kind": "lora", "rank": 2, "alpha": 4, "targetModules": ["q_proj", "v_proj"]},
+        ],
+    )
+    def test_managed_runner_and_worker_cli_commit_texts(product_assets, tmp_path, space):
+        import socket
+    
+        with socket.socket() as sock:
+            sock.bind(("127.0.0.1", 0))
+            port = sock.getsockname()[1]
+        cfg = product_config(product_assets, tmp_path, weightSpace=space, port=port)
+        write_json(tmp_path / "config.json", cfg)
+        env = {**os.environ, "CUDA_VISIBLE_DEVICES": "", "HETEROES_TOKEN": "fixture-secret"}
+        runner_log = (tmp_path / "runner-output.txt").open("w")
+        worker_log = (tmp_path / "worker-output.txt").open("w")
+        command = "from heteroes.product.runner import main; import sys; sys.exit(main(sys.argv[1], device='cpu', timeout_seconds=30))"
+        runner = subprocess.Popen(
+            [sys.executable, "-c", command, str(tmp_path)], env=env, stdout=runner_log, stderr=runner_log
+        )
+        worker = None
+        try:
+>           wait_for(lambda: read_json(tmp_path / "runner.json", {}).get("status") == "PREPARING", runner)
+
+tests/v3/test_v3_product.py:117: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+predicate = <function test_managed_runner_and_worker_cli_commit_texts.<locals>.<lambda> at 0x7c2b8319dc60>
+process = <Popen: returncode: 1 args: ['/home/pc5070ti/miniforge3/envs/heteroes-match/...>
+timeout = 60
+
+    def wait_for(predicate, process, timeout=60):
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            if predicate():
+                return
+            if process.poll() is not None:
+>               raise AssertionError(f"process exited early: {process.returncode}")
+E               AssertionError: process exited early: 1
+
+tests/v3/test_v3_product.py:87: AssertionError
+___________ test_managed_runner_and_worker_cli_commit_texts[space2] ____________
+
+product_assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-208/product-model0')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-208/test_managed_runner_and_worker2')
+space = {'kind': 'lora', 'rank': 2, 'alpha': 4, 'targetModules': ['q_proj', 'v_proj']}
+
+    @pytest.mark.parametrize(
+        "space",
+        [
+            {"kind": "full"},
+            {"kind": "subset", "include": [r"layers\.1\."]},
+            {"kind": "lora", "rank": 2, "alpha": 4, "targetModules": ["q_proj", "v_proj"]},
+        ],
+    )
+    def test_managed_runner_and_worker_cli_commit_texts(product_assets, tmp_path, space):
+        import socket
+    
+        with socket.socket() as sock:
+            sock.bind(("127.0.0.1", 0))
+            port = sock.getsockname()[1]
+        cfg = product_config(product_assets, tmp_path, weightSpace=space, port=port)
+        write_json(tmp_path / "config.json", cfg)
+        env = {**os.environ, "CUDA_VISIBLE_DEVICES": "", "HETEROES_TOKEN": "fixture-secret"}
+        runner_log = (tmp_path / "runner-output.txt").open("w")
+        worker_log = (tmp_path / "worker-output.txt").open("w")
+        command = "from heteroes.product.runner import main; import sys; sys.exit(main(sys.argv[1], device='cpu', timeout_seconds=30))"
+        runner = subprocess.Popen(
+            [sys.executable, "-c", command, str(tmp_path)], env=env, stdout=runner_log, stderr=runner_log
+        )
+        worker = None
+        try:
+>           wait_for(lambda: read_json(tmp_path / "runner.json", {}).get("status") == "PREPARING", runner)
+
+tests/v3/test_v3_product.py:117: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+predicate = <function test_managed_runner_and_worker_cli_commit_texts.<locals>.<lambda> at 0x7c2b8319de40>
+process = <Popen: returncode: 1 args: ['/home/pc5070ti/miniforge3/envs/heteroes-match/...>
+timeout = 60
+
+    def wait_for(predicate, process, timeout=60):
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            if predicate():
+                return
+            if process.poll() is not None:
+>               raise AssertionError(f"process exited early: {process.returncode}")
+E               AssertionError: process exited early: 1
+
+tests/v3/test_v3_product.py:87: AssertionError
+=========================== short test summary info ============================
+FAILED tests/v3/test_v3_product.py::test_managed_runner_and_worker_cli_commit_texts[space0]
+FAILED tests/v3/test_v3_product.py::test_managed_runner_and_worker_cli_commit_texts[space1]
+FAILED tests/v3/test_v3_product.py::test_managed_runner_and_worker_cli_commit_texts[space2]
+3 failed, 2 passed in 7.50s

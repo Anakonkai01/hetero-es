@@ -1,0 +1,30 @@
+[
+ {
+  "workerId": "cli-71b757062fd9",
+  "action": "JOIN",
+  "generation": 0,
+  "actor": "experiment",
+  "at": 1792638430.9603372
+ },
+ {
+  "workerId": "desktop-d9017660e75f",
+  "action": "JOIN",
+  "generation": 0,
+  "actor": "experiment",
+  "at": 1792638430.9663022
+ },
+ {
+  "workerId": "cli-d90d1da024e9",
+  "action": "JOIN",
+  "generation": 0,
+  "actor": "experiment",
+  "at": 1792638430.9715772
+ },
+ {
+  "workerId": "cli-aa99b4d4ca58",
+  "action": "JOIN",
+  "generation": 0,
+  "actor": "experiment",
+  "at": 1792638430.9767148
+ }
+]

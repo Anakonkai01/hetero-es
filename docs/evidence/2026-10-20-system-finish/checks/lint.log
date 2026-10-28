@@ -1,0 +1,26 @@
+
+/home/pc5070ti/projects/heteroes/frontend/src/components/experiments/RuntimeConfiguration.tsx
+  44:29  error  Error: Cannot access variable before it is declared
+
+`setCoordinator` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/home/pc5070ti/projects/heteroes/frontend/src/components/experiments/RuntimeConfiguration.tsx:44:29
+  42 |   const defaultCoordinator = cap.data?.defaultCoordinatorDeviceId;
+  43 |   useEffect(() => {
+> 44 |     if (defaultCoordinator) setCoordinator((current) => current || defaultCoordinator);
+     |                             ^^^^^^^^^^^^^^ `setCoordinator` accessed before it is declared
+  45 |   }, [defaultCoordinator]);
+  46 |   const [name, setName] = useState(initial?.name ?? '');
+  47 |   const [task, setTask] = useState(initial?.task ?? 'arith16');
+
+/home/pc5070ti/projects/heteroes/frontend/src/components/experiments/RuntimeConfiguration.tsx:54:23
+  52 |   const [decoder, setDecoder] = useState(initial?.decodeEngine ?? 'hf_generate');
+  53 |   const [selected, setSelected] = useState<string[]>(initial?.workerIds ?? []);
+> 54 |   const [coordinator, setCoordinator] = useState(initial?.coordinatorDeviceId ?? '');
+     |                       ^^^^^^^^^^^^^^ `setCoordinator` is declared here
+  55 |   const [interval, setInterval] = useState(initial?.backupPolicy?.interval ?? 1);
+  56 |   const [retain, setRetain] = useState(initial?.backupPolicy?.retain ?? 3);
+  57 |   const [error, setError] = useState('');  react-hooks/immutability
+
+✖ 1 problem (1 error, 0 warnings)
+

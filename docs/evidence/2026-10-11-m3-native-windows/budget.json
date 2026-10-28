@@ -1,0 +1,16 @@
+{
+  "qualificationSecondsUpperBound": 120,
+  "qualificationTimingSource": "Owner reported under 2 minutes; full 2 minutes charged",
+  "distributedGpuHours": 0.04457799832026164,
+  "baselineGpuHours": 0.01000838299592336,
+  "cancelGpuHours": 0.028115804327858818,
+  "thisHardwareTrialGpuHoursUpperBound": 0.11603551897737716,
+  "previousCumulativeGpuHours": 1.0289297311664158,
+  "newCumulativeGpuHoursUpperBound": 1.144965250143793,
+  "m3aCapGpuHours": 0.25,
+  "m3aChargedGpuHoursUpperBound": 0.1231332501437929,
+  "m3aRemainingGpuHoursLowerBound": 0.1268667498562071,
+  "originalCapGpuHours": 2,
+  "m2CloudReserveGpuHoursUnchanged": 0.083799,
+  "conservativeMethod": "Charge full submit-to-confirmed-release wall time for both distributed GPUs; baseline one GPU; no failed starts discarded"
+}

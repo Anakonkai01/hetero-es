@@ -1,0 +1,41 @@
+{
+ "base": "https://lab.heteroes.site",
+ "checkedAt": "2026-10-13T20:11:05+0700",
+ "health": {
+  "ok": true,
+  "agentMode": true,
+  "deviceConfiguration": true
+ },
+ "web": {
+  "indexHasAssets": true,
+  "/explain": 200,
+  "/login": 200,
+  "/register": 200,
+  "demoRun": {
+   "jobs": 36,
+   "gpus": 3,
+   "name": "Demo run"
+  }
+ },
+ "build": "lf1-20261013-r7",
+ "installers": [],
+ "timeline": {
+  "jobs": 24,
+  "generations": 3,
+  "gpus": 1
+ },
+ "stream": {
+  "contentType": "text/event-stream; charset=utf-8",
+  "events": [
+   "timeline",
+   "end"
+  ],
+  "seconds": 1.52
+ },
+ "notifications": {
+  "unread": 1,
+  "listed": 1
+ },
+ "templates": 0,
+ "allOk": true
+}

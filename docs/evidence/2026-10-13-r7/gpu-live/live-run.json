@@ -1,0 +1,305 @@
+{
+ "base": "https://lab.heteroes.site",
+ "experimentId": "8dcda95bdaca4695bac5817c91b20d7c",
+ "finalStatus": "COMPLETED",
+ "completedGenerations": 3,
+ "totalSeconds": 275.8,
+ "stream": {
+  "contentType": "text/event-stream; charset=utf-8",
+  "messages": [
+   {
+    "at": 26.3,
+    "kind": "timeline",
+    "bytes": 312,
+    "nowMs": 1791895485649,
+    "status": "STARTING",
+    "jobs": 0,
+    "jobsEnded": 0,
+    "generations": 0,
+    "marks": 0
+   },
+   {
+    "at": 41.7,
+    "kind": "heartbeat"
+   },
+   {
+    "at": 43.8,
+    "kind": "timeline",
+    "bytes": 312,
+    "nowMs": 1791895503196,
+    "status": "STARTING",
+    "jobs": 0,
+    "jobsEnded": 0,
+    "generations": 0,
+    "marks": 0
+   },
+   {
+    "at": 55,
+    "kind": "timeline",
+    "bytes": 445,
+    "nowMs": 1791895514424,
+    "status": "STARTING",
+    "jobs": 0,
+    "jobsEnded": 0,
+    "generations": 0,
+    "marks": 1
+   },
+   {
+    "at": 70.5,
+    "kind": "heartbeat"
+   },
+   {
+    "at": 83.1,
+    "kind": "timeline",
+    "bytes": 695,
+    "nowMs": 1791895542489,
+    "status": "RUNNING",
+    "jobs": 0,
+    "jobsEnded": 0,
+    "generations": 0,
+    "marks": 4
+   },
+   {
+    "at": 92.9,
+    "kind": "timeline",
+    "bytes": 911,
+    "nowMs": 1791895552313,
+    "status": "RUNNING",
+    "jobs": 0,
+    "jobsEnded": 0,
+    "generations": 1,
+    "marks": 4
+   },
+   {
+    "at": 108.4,
+    "kind": "heartbeat"
+   },
+   {
+    "at": 113.3,
+    "kind": "timeline",
+    "bytes": 1153,
+    "nowMs": 1791895572659,
+    "status": "RUNNING",
+    "jobs": 1,
+    "jobsEnded": 0,
+    "generations": 1,
+    "marks": 4
+   },
+   {
+    "at": 128.7,
+    "kind": "heartbeat"
+   },
+   {
+    "at": 138.5,
+    "kind": "timeline",
+    "bytes": 1956,
+    "nowMs": 1791895597929,
+    "status": "RUNNING",
+    "jobs": 4,
+    "jobsEnded": 4,
+    "generations": 1,
+    "marks": 4
+   },
+   {
+    "at": 148.4,
+    "kind": "timeline",
+    "bytes": 3432,
+    "nowMs": 1791895607757,
+    "status": "RUNNING",
+    "jobs": 8,
+    "jobsEnded": 8,
+    "generations": 2,
+    "marks": 5
+   },
+   {
+    "at": 163.8,
+    "kind": "heartbeat"
+   },
+   {
+    "at": 172.2,
+    "kind": "timeline",
+    "bytes": 3520,
+    "nowMs": 1791895631618,
+    "status": "RUNNING",
+    "jobs": 8,
+    "jobsEnded": 8,
+    "generations": 2,
+    "marks": 6
+   },
+   {
+    "at": 182.8,
+    "kind": "timeline",
+    "bytes": 3957,
+    "nowMs": 1791895642156,
+    "status": "RUNNING",
+    "jobs": 8,
+    "jobsEnded": 8,
+    "generations": 3,
+    "marks": 7
+   },
+   {
+    "at": 198.2,
+    "kind": "heartbeat"
+   },
+   {
+    "at": 213.6,
+    "kind": "heartbeat"
+   },
+   {
+    "at": 223.5,
+    "kind": "timeline",
+    "bytes": 5194,
+    "nowMs": 1791895682869,
+    "status": "RUNNING",
+    "jobs": 12,
+    "jobsEnded": 12,
+    "generations": 3,
+    "marks": 8
+   },
+   {
+    "at": 238.9,
+    "kind": "heartbeat"
+   },
+   {
+    "at": 241,
+    "kind": "timeline",
+    "bytes": 5282,
+    "nowMs": 1791895700424,
+    "status": "RUNNING",
+    "jobs": 12,
+    "jobsEnded": 12,
+    "generations": 3,
+    "marks": 9
+   },
+   {
+    "at": 250.9,
+    "kind": "timeline",
+    "bytes": 5587,
+    "nowMs": 1791895710248,
+    "status": "DRAINING",
+    "jobs": 12,
+    "jobsEnded": 12,
+    "generations": 3,
+    "marks": 11
+   },
+   {
+    "at": 260.7,
+    "kind": "timeline",
+    "bytes": 5598,
+    "nowMs": 1791895720076,
+    "status": "COMPLETED",
+    "jobs": 12,
+    "jobsEnded": 12,
+    "generations": 3,
+    "marks": 11
+   },
+   {
+    "at": 260.7,
+    "kind": "end",
+    "bytes": 2
+   }
+  ],
+  "timelines": 14,
+  "heartbeats": 8,
+  "ended": true,
+  "longestSilence": 15.5
+ },
+ "screenshots": [
+  {
+   "name": "live-00.png",
+   "at": 32,
+   "diagram": false,
+   "gpuCards": 0,
+   "packets": 0
+  },
+  {
+   "name": "live-01.png",
+   "at": 52,
+   "diagram": false,
+   "gpuCards": 0,
+   "packets": 0
+  },
+  {
+   "name": "live-02.png",
+   "at": 72,
+   "diagram": false,
+   "gpuCards": 0,
+   "packets": 0
+  },
+  {
+   "name": "live-03.png",
+   "at": 92.1,
+   "diagram": false,
+   "gpuCards": 0,
+   "packets": 0
+  },
+  {
+   "name": "live-04.png",
+   "at": 112.1,
+   "diagram": true,
+   "gpuCards": 1,
+   "packets": 0
+  },
+  {
+   "name": "live-05.png",
+   "at": 132.1,
+   "diagram": true,
+   "gpuCards": 1,
+   "packets": 0
+  },
+  {
+   "name": "live-06.png",
+   "at": 152.2,
+   "diagram": true,
+   "gpuCards": 1,
+   "packets": 0
+  },
+  {
+   "name": "live-07.png",
+   "at": 172.2,
+   "diagram": true,
+   "gpuCards": 1,
+   "packets": 0
+  },
+  {
+   "name": "live-08.png",
+   "at": 192.2,
+   "diagram": true,
+   "gpuCards": 1,
+   "packets": 0
+  },
+  {
+   "name": "live-09.png",
+   "at": 212.3,
+   "diagram": true,
+   "gpuCards": 1,
+   "packets": 0
+  },
+  {
+   "name": "live-10.png",
+   "at": 232.3,
+   "diagram": true,
+   "gpuCards": 1,
+   "packets": 0
+  },
+  {
+   "name": "live-11.png",
+   "at": 252.4,
+   "diagram": true,
+   "gpuCards": 1,
+   "packets": 0
+  },
+  {
+   "name": "live-12.png",
+   "at": 272.4,
+   "diagram": true,
+   "gpuCards": 1,
+   "packets": 0
+  },
+  {
+   "name": "live-final.png",
+   "at": 275.5
+  }
+ ],
+ "browserProblems": []
+}

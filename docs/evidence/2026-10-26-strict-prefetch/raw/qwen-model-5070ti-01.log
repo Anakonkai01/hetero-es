@@ -1,0 +1,5 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 6885.37it/s]
+qwen {'batch': 1, 'before': 276.76380959643086, 'after': 276.86223138946883, 'ratio': 1.000355616556881}
+qwen {'batch': 8, 'before': 1466.92543422468, 'after': 1870.7777514436045, 'ratio': 1.275305279870871}
+qwen {'batch': 32, 'before': 3757.220042720689, 'after': 4362.522817292547, 'ratio': 1.1611038926891128}
+DONE docs/evidence/2026-10-26-strict-prefetch/raw/qwen-model-5070ti-01.json

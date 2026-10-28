@@ -1,0 +1,38 @@
+{
+  "model": {
+    "path": "/home/thao_nguyen/.local/share/heteroes-c4-cpu/models/7ae557604adf67be50417f59c2c2f167def9a775",
+    "id": "Qwen/Qwen2.5-0.5B-Instruct",
+    "revision": "7ae557604adf67be50417f59c2c2f167def9a775"
+  },
+  "data": {
+    "path": "rows.json",
+    "batchSize": 4,
+    "batchSeed": 11,
+    "splitSeed": 42
+  },
+  "weightSpace": {
+    "kind": "full"
+  },
+  "sigma": {
+    "kind": "constant",
+    "initial": 0.025
+  },
+  "antithetic": true,
+  "maxNewTokens": 8,
+  "systemPrompt": null,
+  "evalDtype": "float32",
+  "decoder": "hf_generate",
+  "population": 4,
+  "generations": 2,
+  "alpha": 0.005,
+  "coefficientRule": "zscore@1",
+  "candidateSeedNamespace": "session5-managed-cpu-coordinator-thao",
+  "scorer": {
+    "kind": "python",
+    "name": "distinct-characters",
+    "version": 1,
+    "path": "reward.py",
+    "function": "distinct_characters"
+  },
+  "name": "Session 5 · CPU coordinator (Thao WSL CLI) + 3060 Windows worker · parity"
+}

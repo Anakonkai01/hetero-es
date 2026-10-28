@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Python scorer accepted by shared lab",
+    "file": "runtime/src/heteroes/v3/options.py",
+    "old": "validate_spec(config[\"scorer\"], allow_python=False)",
+    "new": "validate_spec(config[\"scorer\"], allow_python=True)"
+  },
+  {
+    "name": "odd antithetic population accepted",
+    "file": "runtime/src/heteroes/v3/options.py",
+    "old": "(config[\"antithetic\"] and config[\"candidatesPerGeneration\"] % 2)",
+    "new": "False"
+  },
+  {
+    "name": "unknown coefficient rule accepted",
+    "file": "runtime/src/heteroes/v3/options.py",
+    "old": "    if config[\"coefficientRule\"] not in {",
+    "new": "    if False and config[\"coefficientRule\"] not in {"
+  },
+  {
+    "name": "Boolean LoRA rank accepted",
+    "file": "runtime/src/heteroes/v3/options.py",
+    "old": "type(space[\"rank\"]) is not int",
+    "new": "False"
+  },
+  {
+    "name": "device version not checked",
+    "file": "backend/policies.py",
+    "old": "profile.get(\"recipeVersions\") != [3]",
+    "new": "False"
+  },
+  {
+    "name": "frozen v3 options dropped before assignment",
+    "file": "backend/store.py",
+    "old": "if active.get(\"recipeVersion\") == 3:",
+    "new": "if False:"
+  },
+  {
+    "name": "v3 worker command lacks data config",
+    "file": "backend/agent_commands.py",
+    "old": "ar[\"config\"].get(\"recipeVersion\") in (2, 3)",
+    "new": "ar[\"config\"].get(\"recipeVersion\") == 2"
+  },
+  {
+    "name": "v3 dataset loses custom columns",
+    "file": "runtime/src/heteroes/v3/data.py",
+    "old": "return {**row, \"prompt\": prompt.strip()}",
+    "new": "return {\"prompt\": prompt.strip()}"
+  }
+]

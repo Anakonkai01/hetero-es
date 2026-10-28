@@ -1,0 +1,8 @@
+control ok    | ℹ duration_ms 106.78884
+killed       ready-fixed-v1 |   }
+killed       ready-no-validation |   }
+killed       service-v2-only |   }
+killed       service-ignores-lab |   }
+killed       service-v1-sends |   }
+
+5 of 5 mutants killed.

@@ -1,0 +1,16 @@
+
+==================================== ERRORS ====================================
+_ ERROR collecting docs/evidence/2026-10-27-strict-global-activation/harness/test_global_input.py _
+ImportError while importing test module '/home/pc5070ti/projects/heteroes-codex-frozen-perf/docs/evidence/2026-10-27-strict-global-activation/harness/test_global_input.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../miniforge3/envs/heteroes-match/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/evidence/2026-10-27-strict-global-activation/harness/test_global_input.py:6: in <module>
+    from global_input import GlobalInput
+E   ModuleNotFoundError: No module named 'global_input'
+=========================== short test summary info ============================
+ERROR docs/evidence/2026-10-27-strict-global-activation/harness/test_global_input.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+no tests collected, 1 error in 0.70s

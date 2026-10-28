@@ -1,0 +1,14 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7083.86it/s]
+[09:03:03] gen 0 limit 256: train 29.7% (line 25%, 706 chars) H3 32.8% (line 22%, 732 chars)
+[W1008 09:03:39.393234782 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 190840832 bytes (free: 167772160, total: 16611278848).
+[W1008 09:03:45.814430519 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 220200960 bytes (free: 113246208, total: 16611278848).
+[09:03:46] gen 0 limit 512: train 81.2% (line 75%, 850 chars) H3 81.2% (line 70%, 874 chars)
+[09:04:08] gen 10 limit 256: train 82.8% (line 67%, 511 chars) H3 81.2% (line 70%, 518 chars)
+[09:04:26] gen 10 limit 512: train 82.8% (line 67%, 511 chars) H3 81.2% (line 70%, 518 chars)
+[09:04:43] gen 20 limit 256: train 87.5% (line 0%, 496 chars) H3 74.2% (line 0%, 492 chars)
+[09:04:52] gen 20 limit 512: train 87.5% (line 0%, 496 chars) H3 74.2% (line 0%, 492 chars)
+[09:05:06] gen 50 limit 256: train 93.8% (line 9%, 612 chars) H3 88.3% (line 5%, 608 chars)
+[09:05:17] gen 50 limit 512: train 93.8% (line 9%, 612 chars) H3 88.3% (line 5%, 608 chars)
+[09:05:33] gen 100 limit 256: train 93.8% (line 39%, 692 chars) H3 87.5% (line 45%, 677 chars)
+[W1008 09:05:57.219997382 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 249561088 bytes (free: 141885440, total: 16611278848).
+[09:05:59] gen 100 limit 512: train 93.8% (line 39%, 692 chars) H3 87.5% (line 45%, 682 chars)

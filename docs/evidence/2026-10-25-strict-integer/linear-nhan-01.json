@@ -1,0 +1,2433 @@
+{
+  "status": "ok",
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "hardwareQualified": false,
+  "cases": [
+    {
+      "width": 768,
+      "outputs": 4096,
+      "rows": 1,
+      "magnitudeBits": 14,
+      "strict": {
+        "eventMs": [
+          0.012014400213956833,
+          0.012055999785661697,
+          0.012035199999809265
+        ],
+        "medianEventMs": 0.012035199999809265
+      },
+      "integerWhole": {
+        "eventMs": [
+          0.04867840111255646,
+          0.048651200532913205,
+          0.04866720139980316
+        ],
+        "medianEventMs": 0.04866720139980316
+      },
+      "mmaOnly": {
+        "eventMs": [
+          0.03465920090675354,
+          0.034534400701522826,
+          0.03483360111713409
+        ],
+        "medianEventMs": 0.03465920090675354
+      },
+      "weightMetadataOnly": {
+        "eventMs": [
+          0.012969599664211273,
+          0.012955200672149659,
+          0.012886400520801543
+        ],
+        "medianEventMs": 0.012955200672149659
+      },
+      "cpuColumnsEqual": true,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 56,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 0
+      },
+      "maxAbsDifferenceFromTree": 0.00018075108528137207,
+      "rmsRelativeDifferenceFromTree": 9.53345245392294e-05,
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "integer-14-768-bias0-m16-w4": {
+            "sourceSha256": "bc8e8d32e331dd195de5b16a9b9243952d39e65a53d95bc287ecd6d09160228e",
+            "ptxSha256": "fda4b27df1c9d0d5456c46851b8cd820715eed74224c98d48be40aec9005e751",
+            "cubinSha256": "f6164f0344d3b092044aaec7eb0564872cc2b63576ab74eebcea6bb15cc8ce4f",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          }
+        },
+        "fingerprint": "54d3d40a85edc5b084621ec452e530483729b446541e8660fb32bc021db82005",
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "9733075a54f135763b0b95bbb208ec3753f6c85306300104742fcd61486922b6"
+      }
+    },
+    {
+      "width": 768,
+      "outputs": 4096,
+      "rows": 1,
+      "magnitudeBits": 22,
+      "strict": {
+        "eventMs": [
+          0.012014400213956833,
+          0.012055999785661697,
+          0.012035199999809265
+        ],
+        "medianEventMs": 0.012035199999809265
+      },
+      "integerWhole": {
+        "eventMs": [
+          0.04874080121517181,
+          0.04869279861450195,
+          0.049825599789619444
+        ],
+        "medianEventMs": 0.04874080121517181
+      },
+      "mmaOnly": {
+        "eventMs": [
+          0.0346096009016037,
+          0.03454880118370056,
+          0.034518399834632875
+        ],
+        "medianEventMs": 0.03454880118370056
+      },
+      "weightMetadataOnly": {
+        "eventMs": [
+          0.012876799702644348,
+          0.012928000092506409,
+          0.012902399897575379
+        ],
+        "medianEventMs": 0.012902399897575379
+      },
+      "cpuColumnsEqual": true,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 80,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 0
+      },
+      "maxAbsDifferenceFromTree": 6.556510925292969e-07,
+      "rmsRelativeDifferenceFromTree": 3.030096052631865e-07,
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "integer-22-768-bias0-m16-w4": {
+            "sourceSha256": "169e4f7f4f21c70c5b9740da149e39b59d3db73383c3bac923dc80aeb7257936",
+            "ptxSha256": "8fd996e6417356a98cae3c45a084d15e1b40ec76d7495a5018de150556aeb9ce",
+            "cubinSha256": "2eeaa22bf4233a4a36c9df4bc0729a8389a9214dab780fd4c948008c61263bb8",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          }
+        },
+        "fingerprint": "33c2a26be065b43ac32000e9834b56d0453dddbe383bc2f92d52fc2e503b5737",
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "9733075a54f135763b0b95bbb208ec3753f6c85306300104742fcd61486922b6"
+      }
+    },
+    {
+      "width": 768,
+      "outputs": 4096,
+      "rows": 8,
+      "magnitudeBits": 14,
+      "strict": {
+        "eventMs": [
+          0.04835520088672638,
+          0.048372799158096315,
+          0.04827519953250885
+        ],
+        "medianEventMs": 0.04835520088672638
+      },
+      "integerWhole": {
+        "eventMs": [
+          0.049675199389457705,
+          0.049598398804664615,
+          0.04969440102577209
+        ],
+        "medianEventMs": 0.049675199389457705
+      },
+      "mmaOnly": {
+        "eventMs": [
+          0.035436800122261046,
+          0.035473600029945374,
+          0.035438400506973264
+        ],
+        "medianEventMs": 0.035438400506973264
+      },
+      "weightMetadataOnly": {
+        "eventMs": [
+          0.012902399897575379,
+          0.012912000715732574,
+          0.012937599420547485
+        ],
+        "medianEventMs": 0.012912000715732574
+      },
+      "cpuColumnsEqual": true,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 56,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 0
+      },
+      "maxAbsDifferenceFromTree": 0.00021873414516448975,
+      "rmsRelativeDifferenceFromTree": 9.384994560653661e-05,
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "integer-14-768-bias0-m16-w4": {
+            "sourceSha256": "bc8e8d32e331dd195de5b16a9b9243952d39e65a53d95bc287ecd6d09160228e",
+            "ptxSha256": "fda4b27df1c9d0d5456c46851b8cd820715eed74224c98d48be40aec9005e751",
+            "cubinSha256": "f6164f0344d3b092044aaec7eb0564872cc2b63576ab74eebcea6bb15cc8ce4f",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          }
+        },
+        "fingerprint": "54d3d40a85edc5b084621ec452e530483729b446541e8660fb32bc021db82005",
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "9733075a54f135763b0b95bbb208ec3753f6c85306300104742fcd61486922b6"
+      }
+    },
+    {
+      "width": 768,
+      "outputs": 4096,
+      "rows": 8,
+      "magnitudeBits": 22,
+      "strict": {
+        "eventMs": [
+          0.04835520088672638,
+          0.048372799158096315,
+          0.04827519953250885
+        ],
+        "medianEventMs": 0.04835520088672638
+      },
+      "integerWhole": {
+        "eventMs": [
+          0.049451199173927304,
+          0.04951519966125488,
+          0.04939680099487305
+        ],
+        "medianEventMs": 0.049451199173927304
+      },
+      "mmaOnly": {
+        "eventMs": [
+          0.03514719903469086,
+          0.03516800105571747,
+          0.03523840010166168
+        ],
+        "medianEventMs": 0.03516800105571747
+      },
+      "weightMetadataOnly": {
+        "eventMs": [
+          0.012961600720882416,
+          0.012913599610328674,
+          0.012908799946308136
+        ],
+        "medianEventMs": 0.012913599610328674
+      },
+      "cpuColumnsEqual": true,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 80,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 0
+      },
+      "maxAbsDifferenceFromTree": 6.556510925292969e-07,
+      "rmsRelativeDifferenceFromTree": 2.96869814097311e-07,
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "integer-22-768-bias0-m16-w4": {
+            "sourceSha256": "169e4f7f4f21c70c5b9740da149e39b59d3db73383c3bac923dc80aeb7257936",
+            "ptxSha256": "8fd996e6417356a98cae3c45a084d15e1b40ec76d7495a5018de150556aeb9ce",
+            "cubinSha256": "2eeaa22bf4233a4a36c9df4bc0729a8389a9214dab780fd4c948008c61263bb8",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          }
+        },
+        "fingerprint": "33c2a26be065b43ac32000e9834b56d0453dddbe383bc2f92d52fc2e503b5737",
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "9733075a54f135763b0b95bbb208ec3753f6c85306300104742fcd61486922b6"
+      }
+    },
+    {
+      "width": 768,
+      "outputs": 4096,
+      "rows": 32,
+      "magnitudeBits": 14,
+      "strict": {
+        "eventMs": [
+          0.1863968014717102,
+          0.18629920482635498,
+          0.1864192008972168
+        ],
+        "medianEventMs": 0.1863968014717102
+      },
+      "integerWhole": {
+        "eventMs": [
+          0.0673919975757599,
+          0.06732159852981567,
+          0.06731839776039124
+        ],
+        "medianEventMs": 0.06732159852981567
+      },
+      "mmaOnly": {
+        "eventMs": [
+          0.05322719812393188,
+          0.053257602453231814,
+          0.05323839783668518
+        ],
+        "medianEventMs": 0.05323839783668518
+      },
+      "weightMetadataOnly": {
+        "eventMs": [
+          0.012969599664211273,
+          0.012918399274349212,
+          0.012907199561595917
+        ],
+        "medianEventMs": 0.012918399274349212
+      },
+      "cpuColumnsEqual": true,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 72,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 8,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 0
+      },
+      "maxAbsDifferenceFromTree": 0.0002314634621143341,
+      "rmsRelativeDifferenceFromTree": 9.274153278031617e-05,
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "integer-14-768-bias0-m16-w4": {
+            "sourceSha256": "bc8e8d32e331dd195de5b16a9b9243952d39e65a53d95bc287ecd6d09160228e",
+            "ptxSha256": "fda4b27df1c9d0d5456c46851b8cd820715eed74224c98d48be40aec9005e751",
+            "cubinSha256": "f6164f0344d3b092044aaec7eb0564872cc2b63576ab74eebcea6bb15cc8ce4f",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "integer-14-768-bias0-m32-w4": {
+            "sourceSha256": "eb22068b659fa0736f2a087443094de016fe387c454676071e9916ddddaf14b7",
+            "ptxSha256": "331f5d2a694b776ba84e7c5f0e4a6df95eb07bb9461b307ce2111372e5a3b52e",
+            "cubinSha256": "821fb7afa8ddc421d55c16b4025289ebc4e272b4ad3231ea54b18d12a17c48a2",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 8
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 8
+            }
+          }
+        },
+        "fingerprint": "692106a4417ab06b27a141865073207fc34c490b1d30baabf8298a00f4738ad2",
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "9733075a54f135763b0b95bbb208ec3753f6c85306300104742fcd61486922b6"
+      }
+    },
+    {
+      "width": 768,
+      "outputs": 4096,
+      "rows": 32,
+      "magnitudeBits": 22,
+      "strict": {
+        "eventMs": [
+          0.1863968014717102,
+          0.18629920482635498,
+          0.1864192008972168
+        ],
+        "medianEventMs": 0.1863968014717102
+      },
+      "integerWhole": {
+        "eventMs": [
+          0.06023200154304505,
+          0.06013759970664978,
+          0.06020799875259399
+        ],
+        "medianEventMs": 0.06020799875259399
+      },
+      "mmaOnly": {
+        "eventMs": [
+          0.04564639925956726,
+          0.04562239944934845,
+          0.04556800127029419
+        ],
+        "medianEventMs": 0.04562239944934845
+      },
+      "weightMetadataOnly": {
+        "eventMs": [
+          0.012886400520801543,
+          0.01292479932308197,
+          0.012916800379753113
+        ],
+        "medianEventMs": 0.012916800379753113
+      },
+      "cpuColumnsEqual": true,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 154,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 0
+      },
+      "maxAbsDifferenceFromTree": 7.301568984985352e-07,
+      "rmsRelativeDifferenceFromTree": 2.922733134872939e-07,
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "integer-22-768-bias0-m16-w4": {
+            "sourceSha256": "169e4f7f4f21c70c5b9740da149e39b59d3db73383c3bac923dc80aeb7257936",
+            "ptxSha256": "8fd996e6417356a98cae3c45a084d15e1b40ec76d7495a5018de150556aeb9ce",
+            "cubinSha256": "2eeaa22bf4233a4a36c9df4bc0729a8389a9214dab780fd4c948008c61263bb8",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "integer-22-768-bias0-m32-w4": {
+            "sourceSha256": "8ff174e97755f5db73ab1edce167cf1ea546809e2a79a3f81e3594783d27db83",
+            "ptxSha256": "c31984906239a365bc51ee32280b0fe3bed7be89f9aedb8794907999ab00ce95",
+            "cubinSha256": "2a9b70ca60398f4ebbe4aace7d9eb1c95619add9b8e1d3a7ed05da32f91fff9e",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 18
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 18
+            }
+          }
+        },
+        "fingerprint": "144349bbf1c666d1e8956f3415c57ab3bf14f8a0640f6adebc922cf7eb1643ac",
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "9733075a54f135763b0b95bbb208ec3753f6c85306300104742fcd61486922b6"
+      }
+    },
+    {
+      "width": 1024,
+      "outputs": 65536,
+      "rows": 1,
+      "magnitudeBits": 14,
+      "strict": {
+        "eventMs": [
+          0.32852160930633545,
+          0.3291071891784668,
+          0.32891039848327636
+        ],
+        "medianEventMs": 0.32891039848327636
+      },
+      "integerWhole": {
+        "eventMs": [
+          0.7000559806823731,
+          0.6997888088226318,
+          0.6998752117156982
+        ],
+        "medianEventMs": 0.6998752117156982
+      },
+      "mmaOnly": {
+        "eventMs": [
+          0.41481919288635255,
+          0.4148560047149658,
+          0.41402239799499513
+        ],
+        "medianEventMs": 0.41481919288635255
+      },
+      "weightMetadataOnly": {
+        "eventMs": [
+          0.28332479000091554,
+          0.2834000110626221,
+          0.28328158855438235
+        ],
+        "medianEventMs": 0.28332479000091554
+      },
+      "cpuColumnsEqual": true,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 56,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 0
+      },
+      "maxAbsDifferenceFromTree": 0.0002727508544921875,
+      "rmsRelativeDifferenceFromTree": 9.339321289882881e-05,
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "integer-14-1024-bias0-m16-w4": {
+            "sourceSha256": "c270421550697a067e1d3db84734c629e9b9a8d0aadb69248495440aa9805983",
+            "ptxSha256": "08d8b7ce155cabb7e2dea563737487e1dd0d598dfadfe394b2492b785813330a",
+            "cubinSha256": "cded8003235378c0cd166ba4dd0b6ef22670a541f659e88aabf88a597fe95f69",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          }
+        },
+        "fingerprint": "dfd6c965fe0b39920293702d0ae695c05f3e3a28ba77f15d4d9c36dbb05fb5ac",
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "9733075a54f135763b0b95bbb208ec3753f6c85306300104742fcd61486922b6"
+      }
+    },
+    {
+      "width": 1024,
+      "outputs": 65536,
+      "rows": 1,
+      "magnitudeBits": 22,
+      "strict": {
+        "eventMs": [
+          0.32852160930633545,
+          0.3291071891784668,
+          0.32891039848327636
+        ],
+        "medianEventMs": 0.32891039848327636
+      },
+      "integerWhole": {
+        "eventMs": [
+          0.688588809967041,
+          0.6884128093719483,
+          0.6881631851196289
+        ],
+        "medianEventMs": 0.6884128093719483
+      },
+      "mmaOnly": {
+        "eventMs": [
+          0.3998512029647827,
+          0.4005136013031006,
+          0.4009247779846191
+        ],
+        "medianEventMs": 0.4005136013031006
+      },
+      "weightMetadataOnly": {
+        "eventMs": [
+          0.2853663921356201,
+          0.2852384090423584,
+          0.28420319557189944
+        ],
+        "medianEventMs": 0.2852384090423584
+      },
+      "cpuColumnsEqual": true,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 80,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 0
+      },
+      "maxAbsDifferenceFromTree": 8.344650268554688e-07,
+      "rmsRelativeDifferenceFromTree": 2.904440641293567e-07,
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "integer-22-1024-bias0-m16-w4": {
+            "sourceSha256": "99e92bff4e3778f36b46f924243685605659d972a587e3c6047e01cb8e56fdd9",
+            "ptxSha256": "df70de4b6c6ac8f781e44079547b036e2ec1d56d11e4864bd35bd6932728cbf1",
+            "cubinSha256": "3de5ccb62ed631394ee2ef3e068123c072d36cb7880d3d94675604d50e7462cf",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          }
+        },
+        "fingerprint": "38aef1149e2371e5cc6da951fde4eebfb346830c88716e671f2655e35c6ec37e",
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "9733075a54f135763b0b95bbb208ec3753f6c85306300104742fcd61486922b6"
+      }
+    },
+    {
+      "width": 1024,
+      "outputs": 65536,
+      "rows": 8,
+      "magnitudeBits": 14,
+      "strict": {
+        "eventMs": [
+          0.9567503929138184,
+          0.962887954711914,
+          0.9615728378295898
+        ],
+        "medianEventMs": 0.9615728378295898
+      },
+      "integerWhole": {
+        "eventMs": [
+          0.7116511821746826,
+          0.7120463848114014,
+          0.7114048004150391
+        ],
+        "medianEventMs": 0.7116511821746826
+      },
+      "mmaOnly": {
+        "eventMs": [
+          0.42855520248413087,
+          0.42956318855285647,
+          0.42882399559020995
+        ],
+        "medianEventMs": 0.42882399559020995
+      },
+      "weightMetadataOnly": {
+        "eventMs": [
+          0.2852960109710693,
+          0.28471999168395995,
+          0.2839951992034912
+        ],
+        "medianEventMs": 0.28471999168395995
+      },
+      "cpuColumnsEqual": true,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 56,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 0
+      },
+      "maxAbsDifferenceFromTree": 0.0003317594528198242,
+      "rmsRelativeDifferenceFromTree": 9.537655052693822e-05,
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "integer-14-1024-bias0-m16-w4": {
+            "sourceSha256": "c270421550697a067e1d3db84734c629e9b9a8d0aadb69248495440aa9805983",
+            "ptxSha256": "08d8b7ce155cabb7e2dea563737487e1dd0d598dfadfe394b2492b785813330a",
+            "cubinSha256": "cded8003235378c0cd166ba4dd0b6ef22670a541f659e88aabf88a597fe95f69",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          }
+        },
+        "fingerprint": "dfd6c965fe0b39920293702d0ae695c05f3e3a28ba77f15d4d9c36dbb05fb5ac",
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "9733075a54f135763b0b95bbb208ec3753f6c85306300104742fcd61486922b6"
+      }
+    },
+    {
+      "width": 1024,
+      "outputs": 65536,
+      "rows": 8,
+      "magnitudeBits": 22,
+      "strict": {
+        "eventMs": [
+          0.9567503929138184,
+          0.962887954711914,
+          0.9615728378295898
+        ],
+        "medianEventMs": 0.9615728378295898
+      },
+      "integerWhole": {
+        "eventMs": [
+          0.7026256084442138,
+          0.7022448062896729,
+          0.7024479866027832
+        ],
+        "medianEventMs": 0.7024479866027832
+      },
+      "mmaOnly": {
+        "eventMs": [
+          0.40867037773132325,
+          0.40851678848266604,
+          0.4088240146636963
+        ],
+        "medianEventMs": 0.40867037773132325
+      },
+      "weightMetadataOnly": {
+        "eventMs": [
+          0.2853663921356201,
+          0.28523519039154055,
+          0.2849231958389282
+        ],
+        "medianEventMs": 0.28523519039154055
+      },
+      "cpuColumnsEqual": true,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 80,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 0
+      },
+      "maxAbsDifferenceFromTree": 1.1324882507324219e-06,
+      "rmsRelativeDifferenceFromTree": 2.935529840104887e-07,
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "integer-22-1024-bias0-m16-w4": {
+            "sourceSha256": "99e92bff4e3778f36b46f924243685605659d972a587e3c6047e01cb8e56fdd9",
+            "ptxSha256": "df70de4b6c6ac8f781e44079547b036e2ec1d56d11e4864bd35bd6932728cbf1",
+            "cubinSha256": "3de5ccb62ed631394ee2ef3e068123c072d36cb7880d3d94675604d50e7462cf",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          }
+        },
+        "fingerprint": "38aef1149e2371e5cc6da951fde4eebfb346830c88716e671f2655e35c6ec37e",
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "9733075a54f135763b0b95bbb208ec3753f6c85306300104742fcd61486922b6"
+      }
+    },
+    {
+      "width": 1024,
+      "outputs": 65536,
+      "rows": 32,
+      "magnitudeBits": 14,
+      "strict": {
+        "eventMs": [
+          3.8587009429931642,
+          3.8585041046142576,
+          3.85809440612793
+        ],
+        "medianEventMs": 3.8585041046142576
+      },
+      "integerWhole": {
+        "eventMs": [
+          0.8925824165344238,
+          0.8926048278808594,
+          0.8929424285888672
+        ],
+        "medianEventMs": 0.8926048278808594
+      },
+      "mmaOnly": {
+        "eventMs": [
+          0.5653168201446533,
+          0.5655424118041992,
+          0.5658959865570068
+        ],
+        "medianEventMs": 0.5655424118041992
+      },
+      "weightMetadataOnly": {
+        "eventMs": [
+          0.28520801067352297,
+          0.2850415945053101,
+          0.28525280952453613
+        ],
+        "medianEventMs": 0.28520801067352297
+      },
+      "cpuColumnsEqual": true,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 72,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 8,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 0
+      },
+      "maxAbsDifferenceFromTree": 0.0004870891571044922,
+      "rmsRelativeDifferenceFromTree": 9.961647175265004e-05,
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "integer-14-1024-bias0-m16-w4": {
+            "sourceSha256": "c270421550697a067e1d3db84734c629e9b9a8d0aadb69248495440aa9805983",
+            "ptxSha256": "08d8b7ce155cabb7e2dea563737487e1dd0d598dfadfe394b2492b785813330a",
+            "cubinSha256": "cded8003235378c0cd166ba4dd0b6ef22670a541f659e88aabf88a597fe95f69",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "integer-14-1024-bias0-m32-w4": {
+            "sourceSha256": "8b9ee4c98ff019f6b95f97041cf48a17753257ceceaa16b14d480fd2c6257e98",
+            "ptxSha256": "6bdb0ffd31ba7647725dce1d866077a2cf0b8e087171c119422e4552167014af",
+            "cubinSha256": "b4b5c2773ba7fa10855c081e5adba286fe52c4d183accbb36a29dff5617aefb2",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 8
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 8
+            }
+          }
+        },
+        "fingerprint": "124e1f054c233cd43b335f0e28989ade051c296be12d5a1471ebec8a76093950",
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "9733075a54f135763b0b95bbb208ec3753f6c85306300104742fcd61486922b6"
+      }
+    },
+    {
+      "width": 1024,
+      "outputs": 65536,
+      "rows": 32,
+      "magnitudeBits": 22,
+      "strict": {
+        "eventMs": [
+          3.8587009429931642,
+          3.8585041046142576,
+          3.85809440612793
+        ],
+        "medianEventMs": 3.8585041046142576
+      },
+      "integerWhole": {
+        "eventMs": [
+          1.064408016204834,
+          1.064848041534424,
+          1.064840030670166
+        ],
+        "medianEventMs": 1.064840030670166
+      },
+      "mmaOnly": {
+        "eventMs": [
+          0.770084810256958,
+          0.7701488018035889,
+          0.7702911853790283
+        ],
+        "medianEventMs": 0.7701488018035889
+      },
+      "weightMetadataOnly": {
+        "eventMs": [
+          0.2851871967315674,
+          0.2851360082626343,
+          0.2853247880935669
+        ],
+        "medianEventMs": 0.2851871967315674
+      },
+      "cpuColumnsEqual": true,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 154,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 0
+      },
+      "maxAbsDifferenceFromTree": 1.6391277313232422e-06,
+      "rmsRelativeDifferenceFromTree": 3.1655079735737283e-07,
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "integer-22-1024-bias0-m16-w4": {
+            "sourceSha256": "99e92bff4e3778f36b46f924243685605659d972a587e3c6047e01cb8e56fdd9",
+            "ptxSha256": "df70de4b6c6ac8f781e44079547b036e2ec1d56d11e4864bd35bd6932728cbf1",
+            "cubinSha256": "3de5ccb62ed631394ee2ef3e068123c072d36cb7880d3d94675604d50e7462cf",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "integer-22-1024-bias0-m32-w4": {
+            "sourceSha256": "c18abc6a2f90a2d35c5b3c7f6b448ca6c0ae7a5857f917922672fb6793a98987",
+            "ptxSha256": "fa1103a6291726e2efd7967e68cfe43cecd414096498ebc4d419983b112eb42c",
+            "cubinSha256": "4b16c50070a4411113d59712dbf57891970446060a0a7adad64c642b5748f548",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 18
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 18
+            }
+          }
+        },
+        "fingerprint": "b1da6c2561629baeed1a3bacc6aa157505bf9a03e89a9d19e32807a7d1f2f09b",
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "9733075a54f135763b0b95bbb208ec3753f6c85306300104742fcd61486922b6"
+      }
+    },
+    {
+      "width": 2048,
+      "outputs": 11008,
+      "rows": 1,
+      "magnitudeBits": 14,
+      "strict": {
+        "eventMs": [
+          0.07094399929046631,
+          0.0705407977104187,
+          0.07054719924926758
+        ],
+        "medianEventMs": 0.07054719924926758
+      },
+      "integerWhole": {
+        "eventMs": [
+          0.1542799949645996,
+          0.1542464017868042,
+          0.15435359477996827
+        ],
+        "medianEventMs": 0.1542799949645996
+      },
+      "mmaOnly": {
+        "eventMs": [
+          0.10597759485244751,
+          0.10613280534744263,
+          0.10610719919204711
+        ],
+        "medianEventMs": 0.10610719919204711
+      },
+      "weightMetadataOnly": {
+        "eventMs": [
+          0.04611360132694244,
+          0.045988801121711734,
+          0.04596959948539734
+        ],
+        "medianEventMs": 0.045988801121711734
+      },
+      "cpuColumnsEqual": true,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 56,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 0
+      },
+      "maxAbsDifferenceFromTree": 0.0003592967987060547,
+      "rmsRelativeDifferenceFromTree": 9.971835292321405e-05,
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "integer-14-2048-bias0-m16-w4": {
+            "sourceSha256": "5f49f31bd893d0f391144384fc5e7a190231f547befeebc47a0c0e9623046c7b",
+            "ptxSha256": "72e2e377ca96cc7e05609b8105246d7ccbb2166dc5a9d5932308fed6244ff25c",
+            "cubinSha256": "9f4db8a012eeac4bc17da81333ad8368703999f1e3612594089a74122dc13d96",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          }
+        },
+        "fingerprint": "239391d253b94105cf4a73fd2ba67f48e556536b94ffbbfbb0104943550c11fc",
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "9733075a54f135763b0b95bbb208ec3753f6c85306300104742fcd61486922b6"
+      }
+    },
+    {
+      "width": 2048,
+      "outputs": 11008,
+      "rows": 1,
+      "magnitudeBits": 22,
+      "strict": {
+        "eventMs": [
+          0.07094399929046631,
+          0.0705407977104187,
+          0.07054719924926758
+        ],
+        "medianEventMs": 0.07054719924926758
+      },
+      "integerWhole": {
+        "eventMs": [
+          0.16822559833526612,
+          0.168123197555542,
+          0.16807999610900878
+        ],
+        "medianEventMs": 0.168123197555542
+      },
+      "mmaOnly": {
+        "eventMs": [
+          0.11970880031585693,
+          0.11953599452972412,
+          0.11954079866409302
+        ],
+        "medianEventMs": 0.11954079866409302
+      },
+      "weightMetadataOnly": {
+        "eventMs": [
+          0.046054399013519286,
+          0.04604640007019043,
+          0.0460783988237381
+        ],
+        "medianEventMs": 0.046054399013519286
+      },
+      "cpuColumnsEqual": true,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 80,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 0
+      },
+      "maxAbsDifferenceFromTree": 1.1324882507324219e-06,
+      "rmsRelativeDifferenceFromTree": 3.0753766307860895e-07,
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "integer-22-2048-bias0-m16-w4": {
+            "sourceSha256": "b2d048238561b65561d4e7b78a0146c24e9d33292a39a8bd9c0ff829fd7c5a5d",
+            "ptxSha256": "53e561027616eca8f5870e37489a05ae0cd3e57160b91097300edcf2d55dbef1",
+            "cubinSha256": "458512b084de568997783f93ca80a75da590e01efd167881dd7f518a33b6d54e",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          }
+        },
+        "fingerprint": "bda6379ff996e4475b1222848351d7e199e72273a271009cbcf3a38b413fd3dd",
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "9733075a54f135763b0b95bbb208ec3753f6c85306300104742fcd61486922b6"
+      }
+    },
+    {
+      "width": 2048,
+      "outputs": 11008,
+      "rows": 8,
+      "magnitudeBits": 14,
+      "strict": {
+        "eventMs": [
+          0.2876431941986084,
+          0.2876240015029907,
+          0.2878000020980835
+        ],
+        "medianEventMs": 0.2876431941986084
+      },
+      "integerWhole": {
+        "eventMs": [
+          0.1595471978187561,
+          0.15936800241470336,
+          0.1592303991317749
+        ],
+        "medianEventMs": 0.15936800241470336
+      },
+      "mmaOnly": {
+        "eventMs": [
+          0.1115007996559143,
+          0.11152800321578979,
+          0.11149760484695434
+        ],
+        "medianEventMs": 0.1115007996559143
+      },
+      "weightMetadataOnly": {
+        "eventMs": [
+          0.04616479873657227,
+          0.046079999208450316,
+          0.0460671991109848
+        ],
+        "medianEventMs": 0.046079999208450316
+      },
+      "cpuColumnsEqual": true,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 56,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 0
+      },
+      "maxAbsDifferenceFromTree": 0.0004394054412841797,
+      "rmsRelativeDifferenceFromTree": 9.827068001699542e-05,
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "integer-14-2048-bias0-m16-w4": {
+            "sourceSha256": "5f49f31bd893d0f391144384fc5e7a190231f547befeebc47a0c0e9623046c7b",
+            "ptxSha256": "72e2e377ca96cc7e05609b8105246d7ccbb2166dc5a9d5932308fed6244ff25c",
+            "cubinSha256": "9f4db8a012eeac4bc17da81333ad8368703999f1e3612594089a74122dc13d96",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          }
+        },
+        "fingerprint": "239391d253b94105cf4a73fd2ba67f48e556536b94ffbbfbb0104943550c11fc",
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "9733075a54f135763b0b95bbb208ec3753f6c85306300104742fcd61486922b6"
+      }
+    },
+    {
+      "width": 2048,
+      "outputs": 11008,
+      "rows": 8,
+      "magnitudeBits": 22,
+      "strict": {
+        "eventMs": [
+          0.2876431941986084,
+          0.2876240015029907,
+          0.2878000020980835
+        ],
+        "medianEventMs": 0.2876431941986084
+      },
+      "integerWhole": {
+        "eventMs": [
+          0.17124320268630983,
+          0.17092640399932862,
+          0.17093759775161743
+        ],
+        "medianEventMs": 0.17093759775161743
+      },
+      "mmaOnly": {
+        "eventMs": [
+          0.12195680141448975,
+          0.12187360525131226,
+          0.12178720235824585
+        ],
+        "medianEventMs": 0.12187360525131226
+      },
+      "weightMetadataOnly": {
+        "eventMs": [
+          0.04664160013198852,
+          0.046609601378440856,
+          0.046500799059867856
+        ],
+        "medianEventMs": 0.046609601378440856
+      },
+      "cpuColumnsEqual": true,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 80,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 0
+      },
+      "maxAbsDifferenceFromTree": 1.1920928955078125e-06,
+      "rmsRelativeDifferenceFromTree": 2.948774880675503e-07,
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "integer-22-2048-bias0-m16-w4": {
+            "sourceSha256": "b2d048238561b65561d4e7b78a0146c24e9d33292a39a8bd9c0ff829fd7c5a5d",
+            "ptxSha256": "53e561027616eca8f5870e37489a05ae0cd3e57160b91097300edcf2d55dbef1",
+            "cubinSha256": "458512b084de568997783f93ca80a75da590e01efd167881dd7f518a33b6d54e",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          }
+        },
+        "fingerprint": "bda6379ff996e4475b1222848351d7e199e72273a271009cbcf3a38b413fd3dd",
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "9733075a54f135763b0b95bbb208ec3753f6c85306300104742fcd61486922b6"
+      }
+    },
+    {
+      "width": 2048,
+      "outputs": 11008,
+      "rows": 32,
+      "magnitudeBits": 14,
+      "strict": {
+        "eventMs": [
+          1.147390365600586,
+          1.1482000350952148,
+          1.1489839553833008
+        ],
+        "medianEventMs": 1.1482000350952148
+      },
+      "integerWhole": {
+        "eventMs": [
+          0.23855841159820557,
+          0.2386863946914673,
+          0.23888959884643554
+        ],
+        "medianEventMs": 0.2386863946914673
+      },
+      "mmaOnly": {
+        "eventMs": [
+          0.1905408024787903,
+          0.19102400541305542,
+          0.1903040051460266
+        ],
+        "medianEventMs": 0.1905408024787903
+      },
+      "weightMetadataOnly": {
+        "eventMs": [
+          0.0460319995880127,
+          0.046084800362586976,
+          0.046033599972724916
+        ],
+        "medianEventMs": 0.046033599972724916
+      },
+      "cpuColumnsEqual": true,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 72,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 8,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 0
+      },
+      "maxAbsDifferenceFromTree": 0.0006090998649597168,
+      "rmsRelativeDifferenceFromTree": 0.00010711346501946199,
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "integer-14-2048-bias0-m16-w4": {
+            "sourceSha256": "5f49f31bd893d0f391144384fc5e7a190231f547befeebc47a0c0e9623046c7b",
+            "ptxSha256": "72e2e377ca96cc7e05609b8105246d7ccbb2166dc5a9d5932308fed6244ff25c",
+            "cubinSha256": "9f4db8a012eeac4bc17da81333ad8368703999f1e3612594089a74122dc13d96",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "integer-14-2048-bias0-m32-w4": {
+            "sourceSha256": "061a14abbe95aeef1f3a441f2db1bc89be37f231138c8f285a6922aec402eb5c",
+            "ptxSha256": "b10601664b59d3901027b006a5f8d688d1ecc3a3c37fded6ade475a96fadc37d",
+            "cubinSha256": "48f7c1f301673d2d1575c1aa3e4ee3154b70f071b380286cb8cef904e9d4bc6d",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 8
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 8
+            }
+          }
+        },
+        "fingerprint": "804eab5a266f496246cc31dc5ff11c955cb64c98917120164d475cd598b028a1",
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "9733075a54f135763b0b95bbb208ec3753f6c85306300104742fcd61486922b6"
+      }
+    },
+    {
+      "width": 2048,
+      "outputs": 11008,
+      "rows": 32,
+      "magnitudeBits": 22,
+      "strict": {
+        "eventMs": [
+          1.147390365600586,
+          1.1482000350952148,
+          1.1489839553833008
+        ],
+        "medianEventMs": 1.1482000350952148
+      },
+      "integerWhole": {
+        "eventMs": [
+          0.2936863899230957,
+          0.2938960075378418,
+          0.29448320865631106
+        ],
+        "medianEventMs": 0.2938960075378418
+      },
+      "mmaOnly": {
+        "eventMs": [
+          0.2842191934585571,
+          0.28395519256591795,
+          0.2857856035232544
+        ],
+        "medianEventMs": 0.2842191934585571
+      },
+      "weightMetadataOnly": {
+        "eventMs": [
+          0.0462224006652832,
+          0.04617440104484558,
+          0.046286401152610776
+        ],
+        "medianEventMs": 0.0462224006652832
+      },
+      "cpuColumnsEqual": true,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 154,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 0
+      },
+      "maxAbsDifferenceFromTree": 2.089887857437134e-06,
+      "rmsRelativeDifferenceFromTree": 3.375232177960784e-07,
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "integer-22-2048-bias0-m16-w4": {
+            "sourceSha256": "b2d048238561b65561d4e7b78a0146c24e9d33292a39a8bd9c0ff829fd7c5a5d",
+            "ptxSha256": "53e561027616eca8f5870e37489a05ae0cd3e57160b91097300edcf2d55dbef1",
+            "cubinSha256": "458512b084de568997783f93ca80a75da590e01efd167881dd7f518a33b6d54e",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "integer-22-2048-bias0-m32-w4": {
+            "sourceSha256": "69bc90f11ac956c8a329d856305de3d08beae216cf4a9dc757cffb1c3d092fbb",
+            "ptxSha256": "b9e5bdfee52c3bbba06f542fa0574eba1e2dab69ae4315a4f2983f4db2af3854",
+            "cubinSha256": "5ea92a9a7f116ef013268f24551659f162f6cc1cf3be4311185edd663ded5077",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 18
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 18
+            }
+          }
+        },
+        "fingerprint": "f3a69d158f805627ecd5ff36e26979c6041b23096e5444ec9c1174d78cffa31d",
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "9733075a54f135763b0b95bbb208ec3753f6c85306300104742fcd61486922b6"
+      }
+    },
+    {
+      "width": 4096,
+      "outputs": 4096,
+      "rows": 1,
+      "magnitudeBits": 14,
+      "strict": {
+        "eventMs": [
+          0.05339999794960022,
+          0.05326560139656067,
+          0.05325440168380737
+        ],
+        "medianEventMs": 0.05326560139656067
+      },
+      "integerWhole": {
+        "eventMs": [
+          0.21127679347991943,
+          0.21114718914031982,
+          0.21112959384918212
+        ],
+        "medianEventMs": 0.21114718914031982
+      },
+      "mmaOnly": {
+        "eventMs": [
+          0.1775599956512451,
+          0.17748639583587647,
+          0.17749760150909424
+        ],
+        "medianEventMs": 0.17749760150909424
+      },
+      "weightMetadataOnly": {
+        "eventMs": [
+          0.029161599278450013,
+          0.02919679880142212,
+          0.029179200530052185
+        ],
+        "medianEventMs": 0.029179200530052185
+      },
+      "cpuColumnsEqual": true,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 56,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 0
+      },
+      "maxAbsDifferenceFromTree": 0.0004429817199707031,
+      "rmsRelativeDifferenceFromTree": 9.682143937845601e-05,
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "integer-14-4096-bias0-m16-w4": {
+            "sourceSha256": "311c65f867e6a2fe29df08f47c84e706faa4d4e7e1302a8c128768f92e13c0fb",
+            "ptxSha256": "6ff8892d477fde6e1f66cb2e4600e3ed757ea5876a18fca36054b955d3cf5988",
+            "cubinSha256": "a54594e573bc83f69b96c91c35a2ea221f7150b1943f39ac6dfbd9a6dcbfcb4b",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          }
+        },
+        "fingerprint": "d2a72742f230a1eea2b6ea6727738503725428dfb14d88fdcb031155be35a565",
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "9733075a54f135763b0b95bbb208ec3753f6c85306300104742fcd61486922b6"
+      }
+    },
+    {
+      "width": 4096,
+      "outputs": 4096,
+      "rows": 1,
+      "magnitudeBits": 22,
+      "strict": {
+        "eventMs": [
+          0.05339999794960022,
+          0.05326560139656067,
+          0.05325440168380737
+        ],
+        "medianEventMs": 0.05326560139656067
+      },
+      "integerWhole": {
+        "eventMs": [
+          0.21168479919433594,
+          0.21172161102294923,
+          0.2115999937057495
+        ],
+        "medianEventMs": 0.21168479919433594
+      },
+      "mmaOnly": {
+        "eventMs": [
+          0.1782047986984253,
+          0.17816319465637206,
+          0.17812800407409668
+        ],
+        "medianEventMs": 0.17816319465637206
+      },
+      "weightMetadataOnly": {
+        "eventMs": [
+          0.029139199852943422,
+          0.02921440005302429,
+          0.02922239899635315
+        ],
+        "medianEventMs": 0.02921440005302429
+      },
+      "cpuColumnsEqual": true,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 80,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 0
+      },
+      "maxAbsDifferenceFromTree": 1.430511474609375e-06,
+      "rmsRelativeDifferenceFromTree": 2.9490028126233986e-07,
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "integer-22-4096-bias0-m16-w4": {
+            "sourceSha256": "fe41eddce1bf8b2095357b49c4433769fe600ca21e1a1494c4c7c9f9cb252fc9",
+            "ptxSha256": "c4fcafe95b365faa1e8a0c2adaaeafe02340c19cd563b0d3d5a63672c1b7dbc6",
+            "cubinSha256": "3837c9edeecf482d6c273d0febf63417e0fb4a783c97999ffba00961374e39fd",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          }
+        },
+        "fingerprint": "372646d0af04829708f2cc908107091939f5dd4c9401341b490c654a3eb6524e",
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "9733075a54f135763b0b95bbb208ec3753f6c85306300104742fcd61486922b6"
+      }
+    },
+    {
+      "width": 4096,
+      "outputs": 4096,
+      "rows": 8,
+      "magnitudeBits": 14,
+      "strict": {
+        "eventMs": [
+          0.21645920276641845,
+          0.2163520097732544,
+          0.21634879112243652
+        ],
+        "medianEventMs": 0.2163520097732544
+      },
+      "integerWhole": {
+        "eventMs": [
+          0.21665279865264891,
+          0.21666879653930665,
+          0.21666560173034669
+        ],
+        "medianEventMs": 0.21666560173034669
+      },
+      "mmaOnly": {
+        "eventMs": [
+          0.18182719945907594,
+          0.18177440166473388,
+          0.181768000125885
+        ],
+        "medianEventMs": 0.18177440166473388
+      },
+      "weightMetadataOnly": {
+        "eventMs": [
+          0.029105600714683533,
+          0.029105600714683533,
+          0.029185599088668822
+        ],
+        "medianEventMs": 0.029105600714683533
+      },
+      "cpuColumnsEqual": true,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 56,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 0
+      },
+      "maxAbsDifferenceFromTree": 0.0008268952369689941,
+      "rmsRelativeDifferenceFromTree": 0.00011515882212179859,
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "integer-14-4096-bias0-m16-w4": {
+            "sourceSha256": "311c65f867e6a2fe29df08f47c84e706faa4d4e7e1302a8c128768f92e13c0fb",
+            "ptxSha256": "6ff8892d477fde6e1f66cb2e4600e3ed757ea5876a18fca36054b955d3cf5988",
+            "cubinSha256": "a54594e573bc83f69b96c91c35a2ea221f7150b1943f39ac6dfbd9a6dcbfcb4b",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          }
+        },
+        "fingerprint": "d2a72742f230a1eea2b6ea6727738503725428dfb14d88fdcb031155be35a565",
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "9733075a54f135763b0b95bbb208ec3753f6c85306300104742fcd61486922b6"
+      }
+    },
+    {
+      "width": 4096,
+      "outputs": 4096,
+      "rows": 8,
+      "magnitudeBits": 22,
+      "strict": {
+        "eventMs": [
+          0.21645920276641845,
+          0.2163520097732544,
+          0.21634879112243652
+        ],
+        "medianEventMs": 0.2163520097732544
+      },
+      "integerWhole": {
+        "eventMs": [
+          0.21430881023406984,
+          0.21422080993652343,
+          0.21431519985198974
+        ],
+        "medianEventMs": 0.21430881023406984
+      },
+      "mmaOnly": {
+        "eventMs": [
+          0.1808624029159546,
+          0.1808527946472168,
+          0.18073439598083496
+        ],
+        "medianEventMs": 0.1808527946472168
+      },
+      "weightMetadataOnly": {
+        "eventMs": [
+          0.029126399755477907,
+          0.02910720109939575,
+          0.029185599088668822
+        ],
+        "medianEventMs": 0.029126399755477907
+      },
+      "cpuColumnsEqual": true,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 80,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 0
+      },
+      "maxAbsDifferenceFromTree": 3.039836883544922e-06,
+      "rmsRelativeDifferenceFromTree": 3.7701611332781674e-07,
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "integer-22-4096-bias0-m16-w4": {
+            "sourceSha256": "fe41eddce1bf8b2095357b49c4433769fe600ca21e1a1494c4c7c9f9cb252fc9",
+            "ptxSha256": "c4fcafe95b365faa1e8a0c2adaaeafe02340c19cd563b0d3d5a63672c1b7dbc6",
+            "cubinSha256": "3837c9edeecf482d6c273d0febf63417e0fb4a783c97999ffba00961374e39fd",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          }
+        },
+        "fingerprint": "372646d0af04829708f2cc908107091939f5dd4c9401341b490c654a3eb6524e",
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "9733075a54f135763b0b95bbb208ec3753f6c85306300104742fcd61486922b6"
+      }
+    },
+    {
+      "width": 4096,
+      "outputs": 4096,
+      "rows": 32,
+      "magnitudeBits": 14,
+      "strict": {
+        "eventMs": [
+          0.8670991897583008,
+          0.8668432235717773,
+          0.8667183876037597
+        ],
+        "medianEventMs": 0.8668432235717773
+      },
+      "integerWhole": {
+        "eventMs": [
+          0.29894399642944336,
+          0.2987936019897461,
+          0.2989599943161011
+        ],
+        "medianEventMs": 0.29894399642944336
+      },
+      "mmaOnly": {
+        "eventMs": [
+          0.2655488014221191,
+          0.26547040939331057,
+          0.2655200004577637
+        ],
+        "medianEventMs": 0.2655200004577637
+      },
+      "weightMetadataOnly": {
+        "eventMs": [
+          0.029230400919914246,
+          0.029099199175834655,
+          0.029147198796272276
+        ],
+        "medianEventMs": 0.029147198796272276
+      },
+      "cpuColumnsEqual": true,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 72,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 8,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 0
+      },
+      "maxAbsDifferenceFromTree": 0.0008268952369689941,
+      "rmsRelativeDifferenceFromTree": 0.00011941591743824937,
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "integer-14-4096-bias0-m16-w4": {
+            "sourceSha256": "311c65f867e6a2fe29df08f47c84e706faa4d4e7e1302a8c128768f92e13c0fb",
+            "ptxSha256": "6ff8892d477fde6e1f66cb2e4600e3ed757ea5876a18fca36054b955d3cf5988",
+            "cubinSha256": "a54594e573bc83f69b96c91c35a2ea221f7150b1943f39ac6dfbd9a6dcbfcb4b",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          },
+          "integer-14-4096-bias0-m32-w4": {
+            "sourceSha256": "157f384f40310e29c6ce18b730d98995d702593a0c5aa119c88d64464b9889eb",
+            "ptxSha256": "85e6f99eb366ed2cf7494438621f555172f2c20b3875e1ccc65302c31041ade3",
+            "cubinSha256": "244d0fabb354c3a7d8db03935dee86f23ed8c0a951a1747d7abb7384a6cc9f9e",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 8
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 8
+            }
+          }
+        },
+        "fingerprint": "6929ef13b5f8d662f2bf77b8eae89560ae2ecd78496ded7cc563296d939fdcd7",
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "9733075a54f135763b0b95bbb208ec3753f6c85306300104742fcd61486922b6"
+      }
+    },
+    {
+      "width": 4096,
+      "outputs": 4096,
+      "rows": 32,
+      "magnitudeBits": 22,
+      "strict": {
+        "eventMs": [
+          0.8670991897583008,
+          0.8668432235717773,
+          0.8667183876037597
+        ],
+        "medianEventMs": 0.8668432235717773
+      },
+      "integerWhole": {
+        "eventMs": [
+          0.2635279893875122,
+          0.26354079246520995,
+          0.26367840766906736
+        ],
+        "medianEventMs": 0.26354079246520995
+      },
+      "mmaOnly": {
+        "eventMs": [
+          0.23055200576782225,
+          0.2300175905227661,
+          0.22997119426727294
+        ],
+        "medianEventMs": 0.2300175905227661
+      },
+      "weightMetadataOnly": {
+        "eventMs": [
+          0.029161599278450013,
+          0.029121598601341246,
+          0.029099199175834655
+        ],
+        "medianEventMs": 0.029121598601341246
+      },
+      "cpuColumnsEqual": true,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 154,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 0
+      },
+      "maxAbsDifferenceFromTree": 3.039836883544922e-06,
+      "rmsRelativeDifferenceFromTree": 3.963791795190861e-07,
+      "kernelIdentity": {
+        "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "integer-22-4096-bias0-m16-w4": {
+            "sourceSha256": "fe41eddce1bf8b2095357b49c4433769fe600ca21e1a1494c4c7c9f9cb252fc9",
+            "ptxSha256": "c4fcafe95b365faa1e8a0c2adaaeafe02340c19cd563b0d3d5a63672c1b7dbc6",
+            "cubinSha256": "3837c9edeecf482d6c273d0febf63417e0fb4a783c97999ffba00961374e39fd",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          },
+          "integer-22-4096-bias0-m32-w4": {
+            "sourceSha256": "56811f75bf490f981df9aa522a217f08814aa7f61867c64a9ebb76f604805eac",
+            "ptxSha256": "43b3b5e9730bf2e112a2b58f299b099dd342f18579a505444a83e1ca39b252c1",
+            "cubinSha256": "06b31763385d5e1f37c782e22553acfb41786b895e0a30322d270cee6f9bb5cc",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 18
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 18
+            }
+          }
+        },
+        "fingerprint": "4b04f08bfa5c72ddd9c99f27e7b7785e1065309c2af5fe07a2f427bb3f456ab6",
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "9733075a54f135763b0b95bbb208ec3753f6c85306300104742fcd61486922b6"
+      }
+    }
+  ],
+  "sourceSha256": "3081de4597bf97b5b1d733f2df67d5df4da6e08078169673d5e27f8f7b45cb2a",
+  "limits": "Finite synthetic matrices; graph event kernel timing excludes host overhead. Integer MMA alone excludes metadata refresh/quantization and is not end-to-end speed. FP16 cuBLAS is a DIFFERENT arithmetic control. CPU oracle checks sampled columns. Error metrics are random-matrix diagnostics, not model quality."
+}

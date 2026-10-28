@@ -1,0 +1,4 @@
+control ok    | 2 passed, 6 deselected in 1.69s
+killed       leave separate stale parameter storage | 1 failed, 1 passed, 6 deselected in 1.70s
+
+1 of 1 mutants killed.

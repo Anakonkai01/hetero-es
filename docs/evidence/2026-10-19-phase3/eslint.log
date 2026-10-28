@@ -1,0 +1,6 @@
+
+/home/pc5070ti/projects/heteroes/frontend/src/pages/ExperimentDetailPage.tsx
+  166:12  error  Unexpected constant truthiness on the left-hand side of a `&&` expression  no-constant-binary-expression
+
+✖ 1 problem (1 error, 0 warnings)
+

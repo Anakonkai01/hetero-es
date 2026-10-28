@@ -1,0 +1,23 @@
+..FFF...                                                                 [100%]
+=================================== FAILURES ===================================
+_______ test_windows_host_totals_sum_all_adapters_and_disks_after_warmup _______
+tests/study/test_windows_detail.py:58: in test_windows_host_totals_sum_all_adapters_and_disks_after_warmup
+    assert result["networkRxBytesPerSecond"] == 250 and result["networkTxBytesPerSecond"] == 350
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'networkRxBytesPerSecond'
+______________ test_legacy_wire_strips_new_availability_metadata _______________
+tests/ledger/test_telemetry.py:11: in test_legacy_wire_strips_new_availability_metadata
+    assert "availability" not in telemetry.legacy_observation(row)
+E   AssertionError: assert 'availability' not in {'host': {'platform': 'linux'}, 'availability': {'cpuPercent': {'status': 'warming_up'}}}
+E    +  where {'host': {'platform': 'linux'}, 'availability': {'cpuPercent': {'status': 'warming_up'}}} = <function legacy_observation at 0x700d06f13e20>({'host': {'platform': 'linux'}, 'availability': {'cpuPercent': {'status': 'warming_up'}}})
+E    +    where <function legacy_observation at 0x700d06f13e20> = telemetry.legacy_observation
+____ test_missing_metrics_have_evidence_based_status_without_replacing_zero ____
+tests/ledger/test_telemetry.py:19: in test_missing_metrics_have_evidence_based_status_without_replacing_zero
+    assert row["host"]["cpuPercent"] == 0 and "cpuPercent" not in row["availability"]
+                                                                  ^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'availability'
+=========================== short test summary info ============================
+FAILED tests/study/test_windows_detail.py::test_windows_host_totals_sum_all_adapters_and_disks_after_warmup
+FAILED tests/ledger/test_telemetry.py::test_legacy_wire_strips_new_availability_metadata
+FAILED tests/ledger/test_telemetry.py::test_missing_metrics_have_evidence_based_status_without_replacing_zero
+3 failed, 5 passed in 0.06s

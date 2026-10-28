@@ -1,0 +1,5 @@
+control ok    | 7 passed, 29 deselected in 7.89s
+killed       score_guard_bypassed | 6 failed, 1 passed, 29 deselected in 7.69s
+killed       forbidden_hardware_ftz | 7 failed, 29 deselected in 7.87s
+
+2 of 2 mutants killed.

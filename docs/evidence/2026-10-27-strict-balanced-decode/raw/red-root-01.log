@@ -1,0 +1,95 @@
+FFFFFFF                                                                  [100%]
+=================================== FAILURES ===================================
+_____________________ test_balanced_wave_plan[896-1152-5] ______________________
+
+width = 896, outputs = 1152, split = 5
+
+    @pytest.mark.parametrize('width,outputs,split',[(896,1152,5),(4864,896,7),(896,896,7),(896,9728,2),(896,151936,1)])
+    def test_balanced_wave_plan(width,outputs,split):
+>       plan=p.decode_linear_plan(width,32,outputs,70,resident_ctas_per_sm=3)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: decode_linear_plan() got an unexpected keyword argument 'resident_ctas_per_sm'
+
+runtime/tests/eval/test_integer_balanced_plan.py:6: TypeError
+_____________________ test_balanced_wave_plan[4864-896-7] ______________________
+
+width = 4864, outputs = 896, split = 7
+
+    @pytest.mark.parametrize('width,outputs,split',[(896,1152,5),(4864,896,7),(896,896,7),(896,9728,2),(896,151936,1)])
+    def test_balanced_wave_plan(width,outputs,split):
+>       plan=p.decode_linear_plan(width,32,outputs,70,resident_ctas_per_sm=3)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: decode_linear_plan() got an unexpected keyword argument 'resident_ctas_per_sm'
+
+runtime/tests/eval/test_integer_balanced_plan.py:6: TypeError
+______________________ test_balanced_wave_plan[896-896-7] ______________________
+
+width = 896, outputs = 896, split = 7
+
+    @pytest.mark.parametrize('width,outputs,split',[(896,1152,5),(4864,896,7),(896,896,7),(896,9728,2),(896,151936,1)])
+    def test_balanced_wave_plan(width,outputs,split):
+>       plan=p.decode_linear_plan(width,32,outputs,70,resident_ctas_per_sm=3)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: decode_linear_plan() got an unexpected keyword argument 'resident_ctas_per_sm'
+
+runtime/tests/eval/test_integer_balanced_plan.py:6: TypeError
+_____________________ test_balanced_wave_plan[896-9728-2] ______________________
+
+width = 896, outputs = 9728, split = 2
+
+    @pytest.mark.parametrize('width,outputs,split',[(896,1152,5),(4864,896,7),(896,896,7),(896,9728,2),(896,151936,1)])
+    def test_balanced_wave_plan(width,outputs,split):
+>       plan=p.decode_linear_plan(width,32,outputs,70,resident_ctas_per_sm=3)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: decode_linear_plan() got an unexpected keyword argument 'resident_ctas_per_sm'
+
+runtime/tests/eval/test_integer_balanced_plan.py:6: TypeError
+____________________ test_balanced_wave_plan[896-151936-1] _____________________
+
+width = 896, outputs = 151936, split = 1
+
+    @pytest.mark.parametrize('width,outputs,split',[(896,1152,5),(4864,896,7),(896,896,7),(896,9728,2),(896,151936,1)])
+    def test_balanced_wave_plan(width,outputs,split):
+>       plan=p.decode_linear_plan(width,32,outputs,70,resident_ctas_per_sm=3)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: decode_linear_plan() got an unexpected keyword argument 'resident_ctas_per_sm'
+
+runtime/tests/eval/test_integer_balanced_plan.py:6: TypeError
+___________________ test_limits_and_old_row_tile_still_apply ___________________
+
+    def test_limits_and_old_row_tile_still_apply():
+>       assert p.decode_linear_plan(896,32,1152,70,resident_ctas_per_sm=3,max_partial_bytes=600000).split_k==2
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: decode_linear_plan() got an unexpected keyword argument 'resident_ctas_per_sm'
+
+runtime/tests/eval/test_integer_balanced_plan.py:11: TypeError
+_________ test_bound_covers_every_active_batch_and_repeated_projection _________
+
+    def test_bound_covers_every_active_batch_and_repeated_projection():
+        shapes=[(896,1152),(4864,896),(896,896),(896,9728),(4864,896)]
+>       expected=sum(max(p.decode_linear_plan(w,r,n,70,resident_ctas_per_sm=3).partial_bytes for r in range(1,33)) for w,n in shapes)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+runtime/tests/eval/test_integer_balanced_plan.py:19: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+runtime/tests/eval/test_integer_balanced_plan.py:19: in <genexpr>
+    expected=sum(max(p.decode_linear_plan(w,r,n,70,resident_ctas_per_sm=3).partial_bytes for r in range(1,33)) for w,n in shapes)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <range_iterator object at 0x7f270919f3c0>
+
+>   expected=sum(max(p.decode_linear_plan(w,r,n,70,resident_ctas_per_sm=3).partial_bytes for r in range(1,33)) for w,n in shapes)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: decode_linear_plan() got an unexpected keyword argument 'resident_ctas_per_sm'
+
+runtime/tests/eval/test_integer_balanced_plan.py:19: TypeError
+=========================== short test summary info ============================
+FAILED runtime/tests/eval/test_integer_balanced_plan.py::test_balanced_wave_plan[896-1152-5]
+FAILED runtime/tests/eval/test_integer_balanced_plan.py::test_balanced_wave_plan[4864-896-7]
+FAILED runtime/tests/eval/test_integer_balanced_plan.py::test_balanced_wave_plan[896-896-7]
+FAILED runtime/tests/eval/test_integer_balanced_plan.py::test_balanced_wave_plan[896-9728-2]
+FAILED runtime/tests/eval/test_integer_balanced_plan.py::test_balanced_wave_plan[896-151936-1]
+FAILED runtime/tests/eval/test_integer_balanced_plan.py::test_limits_and_old_row_tile_still_apply
+FAILED runtime/tests/eval/test_integer_balanced_plan.py::test_bound_covers_every_active_batch_and_repeated_projection
+7 failed in 0.08s

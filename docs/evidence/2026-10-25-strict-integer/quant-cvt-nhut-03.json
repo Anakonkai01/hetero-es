@@ -1,0 +1,179 @@
+{
+  "status": "ok",
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "hardwareQualified": false,
+  "cases": [
+    {
+      "magnitudeBits": 14,
+      "admittedPairs": 1017852,
+      "allBitPatternsChecked": 65536,
+      "rowExponents": [
+        -24,
+        15
+      ],
+      "allEqual": true,
+      "identity": {
+        "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "43ce07cc48920c088d0d75727844bfaf5b7bdfe63953c6b399ae786b417c469a",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "probe-half-14": {
+            "sourceSha256": "ff0976aa69d859df81aeb9b32dc360953911f1c69d48eb11b09cd015c049df49",
+            "ptxSha256": "a311d052be50af8df0d09074778250cda32d7675a923a871b0bbf38a55078108",
+            "cubinSha256": "3589c6a909d08033b563604d25130821529c4ff25a36c6f26af9b47f66b74b00",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          }
+        },
+        "fingerprint": "8476a2f51f1cdf0fb1b199a41d74fc51ffde4072c5df1834afa0ce34e864b995",
+        "linear": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "nonlinear": {
+          "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+          "operators": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "43ce07cc48920c088d0d75727844bfaf5b7bdfe63953c6b399ae786b417c469a",
+          "nvrtcOptions": [
+            "--fmad=false",
+            "--ftz=false",
+            "--prec-div=true",
+            "--prec-sqrt=true",
+            "--std=c++17"
+          ],
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "b01b8baee3a535ee46768e3e5efe856db564e5ef279b65a4a36f2f848afd0462",
+        "maxPartialBytes": 16777216,
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        }
+      }
+    },
+    {
+      "magnitudeBits": 22,
+      "admittedPairs": 1017852,
+      "allBitPatternsChecked": 65536,
+      "rowExponents": [
+        -24,
+        15
+      ],
+      "allEqual": true,
+      "identity": {
+        "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "43ce07cc48920c088d0d75727844bfaf5b7bdfe63953c6b399ae786b417c469a",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "probe-half-22": {
+            "sourceSha256": "3bab8f54f09b3798ed525d7f7024bd134bb7c6a96396c70edd7f45adc8172458",
+            "ptxSha256": "926d151010227f47f0a008f63569cc003677437bad756bdbbdd43ab33464dc1b",
+            "cubinSha256": "fe0660e47033d3ad9f387b79ae9641c54f9d187816c6c8d73701d6fe66ceab22",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          }
+        },
+        "fingerprint": "73f6ed2610d7196eeb5e194a0c9f8bbad32aae530c16b6c5395f08c6309cd841",
+        "linear": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "nonlinear": {
+          "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+          "operators": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "43ce07cc48920c088d0d75727844bfaf5b7bdfe63953c6b399ae786b417c469a",
+          "nvrtcOptions": [
+            "--fmad=false",
+            "--ftz=false",
+            "--prec-div=true",
+            "--prec-sqrt=true",
+            "--std=c++17"
+          ],
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "b01b8baee3a535ee46768e3e5efe856db564e5ef279b65a4a36f2f848afd0462",
+        "maxPartialBytes": 16777216,
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        }
+      }
+    }
+  ],
+  "probeSha256": "a6ae701d8dbf07b7e67686f21ddc05c1a6713bfc66572983dbeb650c28de7c8d",
+  "limit": "All admitted FP16 bit patterns and row exponent pairs for weight quantization only; not graph qualification."
+}

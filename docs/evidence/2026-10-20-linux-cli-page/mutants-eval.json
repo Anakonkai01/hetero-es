@@ -1,0 +1,14 @@
+[
+  {
+    "name": "skip file dataset identity check",
+    "file": "src/heteroes/v3/evaluation.py",
+    "old": "if any(dataset[key] != recipe[\"data\"][key] for key in (\"contentHash\", \"splitHashes\")):",
+    "new": "if False:"
+  },
+  {
+    "name": "check split hashes only",
+    "file": "src/heteroes/v3/evaluation.py",
+    "old": "for key in (\"contentHash\", \"splitHashes\")):",
+    "new": "for key in (\"splitHashes\",)):"
+  }
+]

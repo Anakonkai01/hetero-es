@@ -1,0 +1,26 @@
+[
+  {
+    "name": "hide reward flips",
+    "file": "impact_metrics.py",
+    "old": "'rewardFlips':sum(d['leftReward']!=d['rightReward'] for d in scored)",
+    "new": "'rewardFlips':0"
+  },
+  {
+    "name": "ignore antithetic pairing",
+    "file": "impact_metrics.py",
+    "old": "1 if i%2==0 else -1",
+    "new": "1"
+  },
+  {
+    "name": "invent direction for flat signal",
+    "file": "impact_metrics.py",
+    "old": "return None",
+    "new": "return 1.0"
+  },
+  {
+    "name": "omit mixed hardware assignments",
+    "file": "impact_metrics.py",
+    "old": "product((0,1),repeat=n)",
+    "new": "[(1,)*n]"
+  }
+]

@@ -1,0 +1,179 @@
+{
+  "status": "ok",
+  "gpu": "NVIDIA GeForce RTX 3060",
+  "hardwareQualified": false,
+  "cases": [
+    {
+      "magnitudeBits": 14,
+      "admittedPairs": 1017852,
+      "allBitPatternsChecked": 65536,
+      "rowExponents": [
+        -24,
+        15
+      ],
+      "allEqual": true,
+      "identity": {
+        "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_86",
+        "gpu": "NVIDIA GeForce RTX 3060",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "probe-half-14": {
+            "sourceSha256": "7790e80f51a9687bee7b3cdf97d51a12861553acc5c2a3f9befdc28b2685ebcb",
+            "ptxSha256": "9906a76dcfecf989a5cdc185737ac4b7e4f93f04c04173fc2b612cd17b3d8a95",
+            "cubinSha256": "f036ea532b996bcdac233c83c477c07b61746c2deba1e421bcb7107cab2b85c5",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          }
+        },
+        "fingerprint": "70b2165e71705eff52f5d6ce0a98f187cdad0ad4a43a6f02f2849e069cf8557e",
+        "linear": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "nonlinear": {
+          "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+          "operators": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+          "nvrtcOptions": [
+            "--fmad=false",
+            "--ftz=false",
+            "--prec-div=true",
+            "--prec-sqrt=true",
+            "--std=c++17"
+          ],
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "ec88d231b75aadb52b466996e322fb474b365c6c38bf7b03277f5aac0ed59721",
+        "maxPartialBytes": 16777216,
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        }
+      }
+    },
+    {
+      "magnitudeBits": 22,
+      "admittedPairs": 1017852,
+      "allBitPatternsChecked": 65536,
+      "rowExponents": [
+        -24,
+        15
+      ],
+      "allEqual": true,
+      "identity": {
+        "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_86",
+        "gpu": "NVIDIA GeForce RTX 3060",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "probe-half-22": {
+            "sourceSha256": "9462c48a43bf3c52e170d2a73739ce15a60a0ea9ceba2a65da3ff7275c266cb8",
+            "ptxSha256": "b66492ece97736a797b850e7677c5638f2a26b432a8046feecaf797dbd9ffe72",
+            "cubinSha256": "78fd3107f437dcfda3ed0f13d6b9190dc2aa60dac1a859f11bd6e8e53887dc24",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          }
+        },
+        "fingerprint": "d547ac06878f550117f82531d5a3ab7045aa1160673a292e2ef0a17e5b8941bf",
+        "linear": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "nonlinear": {
+          "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+          "operators": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "7645e877f9d8e65c20a402f1012ffe3d19b8a060a7c5c72f732e505f4ba9a162",
+          "nvrtcOptions": [
+            "--fmad=false",
+            "--ftz=false",
+            "--prec-div=true",
+            "--prec-sqrt=true",
+            "--std=c++17"
+          ],
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "ec88d231b75aadb52b466996e322fb474b365c6c38bf7b03277f5aac0ed59721",
+        "maxPartialBytes": 16777216,
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        }
+      }
+    }
+  ],
+  "probeSha256": "a6ae701d8dbf07b7e67686f21ddc05c1a6713bfc66572983dbeb650c28de7c8d",
+  "limit": "All admitted FP16 bit patterns and row exponent pairs for weight quantization only; not graph qualification."
+}

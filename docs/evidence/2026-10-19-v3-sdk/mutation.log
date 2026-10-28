@@ -1,0 +1,5 @@
+control ok    | 3 passed, 7 deselected in 6.32s
+killed       module skips CLI execution | 1 failed, 2 passed, 7 deselected in 4.05s
+killed       installed command points to wrong callable | 1 failed, 2 passed, 7 deselected in 6.25s
+
+2 of 2 mutants killed.

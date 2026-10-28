@@ -1,0 +1,23 @@
+WebSocket server error: Port 24678 is already in use
+PASS authentication rejects anonymous access and wrong credentials
+PASS email invitations grant membership only after recipient confirmation
+PASS one identity has different workspace roles; creation and invitations are scoped
+PASS profile edits persist without changing another user's identity
+PASS only the GPU owner can connect/disconnect; a GPU cannot join two workspaces
+PASS participant GPU admission requires scoped Admin approval and rejects duplicate decisions
+PASS Admin-owned GPU admission is direct without a pending approval
+PASS workspace deletion removes membership and access
+PASS personal experiments stay private even from another workspace Admin
+PASS JSONL checks all records and rejects missing fields and wrong types
+PASS CSV handles quoted commas, escaped quotes, newlines and malformed rows
+PASS three task schemas accept structurally valid data without judging content
+PASS competing approvals create one exclusive grant; returns and revocation check roles
+PASS model references validate structure and remain personal
+PASS draft requires owned model, grants and three correctly matched dataset splits
+PASS queued runs reject duplicate startsPASS pause finishes a generation and saves state; pauPASS pause finishes a generation and saves state; paused runtime does not advance
+PASS generated generation and candidate detail APIs expose scoped progress
+PASS resume validates grants; generation limit completes once and evaluates mock test score
+PASS busy return andPASS cancelled runs cannot restart; archives disappeaPASS cancelled runs cannot restart; archives disappear; owner reconnects released GPU
+PASS profile is persisted and logout revokes session
+
+22 v1 local-demo behavior groups passed.

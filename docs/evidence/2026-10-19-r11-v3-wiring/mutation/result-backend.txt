@@ -1,0 +1,17 @@
+control ok    | 2 passed, 22 deselected, 1 warning in 0.03s
+killed       win-v3-coordinator | 1 failed, 1 passed, 22 deselected, 1 warning in 0.04s
+killed       win-v3-any-versions | 1 failed, 1 passed, 22 deselected, 1 warning in 0.04s
+killed       win-v3-extra-models | 1 failed, 1 passed, 22 deselected, 1 warning in 0.04s
+killed       win-v3-no-adapter | 1 failed, 1 passed, 22 deselected, 1 warning in 0.04s
+killed       win-v3-no-peft | 1 failed, 1 passed, 22 deselected, 1 warning in 0.04s
+killed       win-v3-no-repeat | 1 failed, 1 passed, 22 deselected, 1 warning in 0.04s
+killed       win-v3-full-only | 1 failed, 1 passed, 22 deselected, 1 warning in 0.04s
+killed       win-v3-no-cell-restore | 1 failed, 1 passed, 22 deselected, 1 warning in 0.04s
+killed       win-v3-no-cell-model | 1 failed, 1 passed, 22 deselected, 1 warning in 0.04s
+killed       win-v3-no-pinned-values | 1 failed, 1 passed, 22 deselected, 1 warning in 0.04s
+killed       win-v3-no-cell-passed | 1 failed, 1 passed, 22 deselected, 1 warning in 0.04s
+killed       win-v3-no-cell-repeat | 1 failed, 1 passed, 22 deselected, 1 warning in 0.04s
+killed       policy-rejects-windows | 1 failed, 1 passed, 22 deselected, 1 warning in 0.04s
+killed       win-v3-routes-legacy | 1 failed, 1 passed, 22 deselected, 1 warning in 0.04s
+
+14 of 14 mutants killed.

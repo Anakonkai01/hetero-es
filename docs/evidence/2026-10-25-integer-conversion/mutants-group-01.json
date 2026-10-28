@@ -1,0 +1,38 @@
+[
+  {
+    "name": "wrong-scale-bias",
+    "file": "src/heteroes/eval/integer_cuda.py",
+    "old": "bits+=(unsigned)((MAGNITUDE_BITS-1-exponent)*0x800000);",
+    "new": "bits+=(unsigned)((MAGNITUDE_BITS-exponent)*0x800000);"
+  },
+  {
+    "name": "cache-input-by-pointer",
+    "file": "src/heteroes/eval/integer_cuda.py",
+    "old": "prepared = self.quantize_input(value.reshape(rows, width), error_flag=flag)",
+    "new": "prepared = getattr(self, \"_old_prepared\", None)\n        if prepared is None:\n            prepared = self.quantize_input(value.reshape(rows, width), error_flag=flag)\n            self._old_prepared = prepared"
+  },
+  {
+    "name": "discard-prepared-input",
+    "file": "src/heteroes/eval/integer_cuda.py",
+    "old": "if prepared is None\n            else prepared",
+    "new": "if True\n            else prepared"
+  },
+  {
+    "name": "skip-late-component-validation",
+    "file": "src/heteroes/eval/integer_cuda.py",
+    "old": "for weight, bias in zip(weights, biases):\n            rows, width, _ = sc.validate_linear(value, weight, bias, device=self.device)",
+    "new": "for weight, bias in zip(weights[:1], biases[:1]):\n            rows, width, _ = sc.validate_linear(value, weight, bias, device=self.device)"
+  },
+  {
+    "name": "ignore-group-error",
+    "file": "src/heteroes/eval/integer_cuda.py",
+    "old": "        self._finish(flag, error_flag)\n        return outputs",
+    "new": "        return outputs"
+  },
+  {
+    "name": "drop-component-bias",
+    "file": "src/heteroes/eval/integer_cuda.py",
+    "old": "self._linear(value, weight, bias, error_flag=flag, prepared=prepared)",
+    "new": "self._linear(value, weight, None, error_flag=flag, prepared=prepared)"
+  }
+]

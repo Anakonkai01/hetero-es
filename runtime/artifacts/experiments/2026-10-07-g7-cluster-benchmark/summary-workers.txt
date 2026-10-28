@@ -1,0 +1,38 @@
+
+## cpu noise engine: 9 runs; distinct final weights hashes: ['49facf9ba592ef18']
+
+| condition | worker | candidates per run (of 96) | busy s | sync s | idle s |
+|---|---|---|---|---|---|
+| B0x2 | 5070ti | 48.0 | 390 | 3.4 | 11 |
+| B0x2 | 5070ti-2 | 48.0 | 392 | 3.2 | 10 |
+| B3x2 | 1660s | 11.3 | 352 | 29.8 | 21 |
+| B3x2 | 5070ti | 41.7 | 337 | 3.4 | 63 |
+| B3x2 | 5070ti-2 | 43.0 | 340 | 3.3 | 60 |
+| B4x2 | 1660s | 8.7 | 280 | 29.9 | 63 |
+| B4x2 | 5070ti | 43.7 | 345 | 3.3 | 25 |
+| B4x2 | 5070ti-2 | 43.7 | 346 | 3.3 | 24 |
+
+| condition | generation 0 | 1 | 2 | 3 (seconds, mean over the runs) |
+|---|---|---|---|---|
+| B0x2 | 112.6 | 112.6 | 105.6 | 104.2 |
+| B3x2 | 111.5 | 110.7 | 107.7 | 103.8 |
+| B4x2 | 99.6 | 108.1 | 98.8 | 96.8 |
+
+## cuda noise engine: 9 runs; distinct final weights hashes: ['11d81a08f4c720c0']
+
+| condition | worker | candidates per run (of 96) | busy s | sync s | idle s |
+|---|---|---|---|---|---|
+| B0x2 | 5070ti | 48.0 | 372 | 3.2 | 14 |
+| B0x2 | 5070ti-2 | 48.0 | 374 | 3.3 | 11 |
+| B3x2 | 1660s | 12.7 | 362 | 29.8 | 14 |
+| B3x2 | 5070ti | 41.7 | 322 | 3.3 | 80 |
+| B3x2 | 5070ti-2 | 41.7 | 320 | 3.3 | 81 |
+| B4x2 | 1660s | 9.0 | 245 | 29.8 | 80 |
+| B4x2 | 5070ti | 43.0 | 335 | 3.3 | 16 |
+| B4x2 | 5070ti-2 | 44.0 | 340 | 3.3 | 11 |
+
+| condition | generation 0 | 1 | 2 | 3 (seconds, mean over the runs) |
+|---|---|---|---|---|
+| B0x2 | 99.9 | 99.3 | 97.4 | 101.8 |
+| B3x2 | 101.7 | 103.1 | 103.7 | 106.0 |
+| B4x2 | 91.8 | 90.9 | 89.3 | 92.6 |

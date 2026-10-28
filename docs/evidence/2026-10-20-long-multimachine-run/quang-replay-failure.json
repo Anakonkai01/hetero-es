@@ -1,0 +1,44 @@
+{
+ "recordedAt": 1792507625.8116395,
+ "workerId": "cli-894b5d440398",
+ "assignmentId": "751bc864af804e339470c5b2545a2e6e",
+ "events": [
+  {
+   "event": "executor_ready",
+   "t": 1792507458.6557233,
+   "worker_id": "cli-894b5d440398",
+   "recipe_hash": "859658c6316aba7caf79e1144ec239fe8af0d4991ea7be6ff63dd221ac35863d",
+   "parent_weights_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+   "snapshot_and_hash_seconds": 0.8103112090011564,
+   "engine_selftest_seconds": 0.005508444999577478,
+   "noise_engine": "numpy_pcg64_normal_f32_to_f16_v1",
+   "workload": null
+  },
+  {
+   "event": "replay_policy",
+   "t": 1792507458.655801,
+   "worker_id": "cli-894b5d440398",
+   "policy": {
+    "mode": "always",
+    "update_seconds_per_candidate": null,
+    "update_fixed_seconds": 0.0,
+    "sync_seconds": null,
+    "verify_seconds": 3.6,
+    "verify_every": 1,
+    "max_chain": 8
+   }
+  },
+  {
+   "event": "replay_failed",
+   "t": 1792507462.3042846,
+   "worker_id": "cli-894b5d440398",
+   "from_sha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+   "to_sha256": "d38fe3f1228b0bef37d2666e4c5108f18167536f5b97fcb62ada717fc4cd2ee7",
+   "error": "the chain from c9118c8a4903 to d38fe3f1228b is longer than 8 updates"
+  }
+ ],
+ "process": {
+  "pid": 1960,
+  "birth": "821476"
+ }
+}

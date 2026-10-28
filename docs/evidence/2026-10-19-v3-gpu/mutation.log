@@ -1,0 +1,8 @@
+control ok    | 3 passed in 0.06s
+killed       GPU owner gate bypass | 1 failed, 2 passed in 0.07s
+killed       GPU explicit flag bypass | 1 failed, 2 passed in 0.07s
+killed       cross GPU texts ignored | 1 failed, 2 passed in 0.07s
+killed       cross GPU replay failures ignored | 1 failed, 2 passed in 0.07s
+killed       cross GPU audit failures ignored | 1 failed, 2 passed in 0.07s
+
+5 of 5 mutants killed.

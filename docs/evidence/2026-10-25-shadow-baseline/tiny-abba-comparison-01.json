@@ -1,0 +1,66 @@
+{
+  "order": [
+    "a1",
+    "b1",
+    "b2",
+    "a2"
+  ],
+  "a": "hf-shadow full batch",
+  "b": "strict-frozen no head, zero B",
+  "scope": "Separate sequential processes, warmup plus five timed observations per process; B32 only.",
+  "inputs": {
+    "raw/tiny-b32-abba-a1-01.json": "7113425d9879005a0d38a0d433bf671b161845aea20dd6bcfbcdb31971e23c02",
+    "raw/tiny-b32-abba-b1-01.json": "76a480a3830ddbb58b938da310cc9dcb8f07d7debbb67103726cdf7fc2f9ce13",
+    "raw/tiny-b32-abba-b2-01.json": "b1a5e8fe95f1f3a7fda5a2203376f85999aebe563eb11e957071b17823e859c0",
+    "raw/tiny-b32-abba-a2-01.json": "07880a4354b7a793a3e22b2aea75e01b4dec89321557d8e5c219878a94207ca0"
+  },
+  "jobs": [
+    {
+      "label": "a1",
+      "tokensPerSecond": 1465.3414073339652,
+      "rawSeconds": [
+        0.6974302269954933,
+        0.6983440379990498,
+        0.6996848449925892,
+        0.698813255992718,
+        0.6993312609993154
+      ]
+    },
+    {
+      "label": "b1",
+      "tokensPerSecond": 1438.0925017412105,
+      "rawSeconds": [
+        0.7126101970061427,
+        0.7121200529945781,
+        0.711613851992297,
+        0.7119353029993363,
+        0.7120543350029038
+      ]
+    },
+    {
+      "label": "b2",
+      "tokensPerSecond": 1437.9901234417198,
+      "rawSeconds": [
+        0.7128924629942048,
+        0.7119566360051977,
+        0.71210503000475,
+        0.7120403130102204,
+        0.7124525850085774
+      ]
+    },
+    {
+      "label": "a2",
+      "tokensPerSecond": 1465.6475305681936,
+      "rawSeconds": [
+        0.6982344959978946,
+        0.6986672979983268,
+        0.6972342689987272,
+        0.6987715349969221,
+        0.6994045059982454
+      ]
+    }
+  ],
+  "shadowTokensPerSecond": 1465.5382057834677,
+  "frozenTokensPerSecond": 1438.0413107693137,
+  "frozenOverShadow": 0.9812376812111464
+}

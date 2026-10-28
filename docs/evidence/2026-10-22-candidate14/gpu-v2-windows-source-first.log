@@ -1,0 +1,12 @@
+{"stage": "recipe_v3", "weightSpace": "full", "sign": 1, "iteration": 1, "total": 2}
+{"stage": "recipe_v3", "weightSpace": "full", "sign": 1, "iteration": 2, "total": 2}
+{"stage": "recipe_v3", "weightSpace": "full", "sign": -1, "iteration": 1, "total": 2}
+{"stage": "recipe_v3", "weightSpace": "full", "sign": -1, "iteration": 2, "total": 2}
+{"stage": "recipe_v3", "weightSpace": "lora", "sign": 1, "iteration": 1, "total": 2}
+{"stage": "recipe_v3", "weightSpace": "lora", "sign": 1, "iteration": 2, "total": 2}
+{"stage": "recipe_v3", "weightSpace": "lora", "sign": -1, "iteration": 1, "total": 2}
+{"stage": "recipe_v3", "weightSpace": "lora", "sign": -1, "iteration": 2, "total": 2}
+{"stage": "update_speed"}
+{"engine": "numpy_pcg64_normal_f32_to_f16_v1", "threads": 16, "noiseSeconds": 1.0176630000059959, "perturbSeconds": 1.2229396000038832, "updateSeconds": 2.2115234000084456, "parentSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7", "perturbedSha256": "86abd15c505d9ef3b9bdfb54c725d14cf5648d68a0a095d21afc64370fd3d564", "updatedSha256": "de54bd2250dfc104841fde89663584c11ff3eb6136d70e7d16b95e7efc10856c", "restoredSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7"}
+{"engine": "pcg64_u32_to_f16_normal_quantile_v2", "threads": 8, "noiseSeconds": 1.2241253999964101, "perturbSeconds": 1.3872067999909632, "updateSeconds": 3.024884899990866, "parentSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7", "perturbedSha256": "91b8a1d41c879b6e6c4e9a85e191f593d8ea3b3ccf61b5811428ec0e83c19467", "updatedSha256": "853c7ec6330f0ea9bce8a2f604987fe64d232e91ba4a13bf734c78512e039b07", "restoredSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7"}
+{"passed": true, "noiseVersion": "pcg64_u32_to_f16_normal_quantile_v2", "qualificationSeconds": 25.968475999994553, "updateSecondsPerSeed": 1.095}

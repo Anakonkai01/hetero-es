@@ -1,0 +1,19 @@
+{
+    "build":  "lf1-20261020-r11-candidate6",
+    "installed":  true,
+    "dataFolder":  "D:\\HeteroES-Worker-data",
+    "workerId":  "desktop-9f9da13f0f82",
+    "deviceId":  "8f3d691978e24167a257f018643f9165",
+    "selfTestPassed":  true,
+    "gpuName":  "NVIDIA GeForce RTX 3060",
+    "runtimeProfile":  "desktop-v3",
+    "recipeVersions":  [
+                           3
+                       ],
+    "cpuGuardSha256":  "150ac9fdd1464e6cdb41bbc624173de28f01f53019a04f18b77e178ceb2ea95d",
+    "cFreeBytes":  10508328960,
+    "dFreeBytes":  874793361408,
+    "contributionEnabled":  false,
+    "drained":  true,
+    "assignments":  0
+}

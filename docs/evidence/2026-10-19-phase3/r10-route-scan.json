@@ -1,0 +1,14 @@
+{
+  "build": "lf1-20261014-r10",
+  "installer": "HeteroES Worker-0.1.0-lf1-20261014-r10-Linux.tar.gz",
+  "runtimePythonFiles": 72,
+  "retiredRouteReferences": {
+    "/workspaces": [],
+    "/worker-registry": [],
+    "/platform/storage": [],
+    "/device/endpoints": [],
+    "/monitoring-events": [],
+    "/my-workers": [],
+    "/my-resource-submissions": []
+  }
+}

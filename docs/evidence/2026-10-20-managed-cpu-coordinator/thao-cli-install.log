@@ -1,0 +1,6 @@
+exit=0
+installed; next: heteroes-worker selftest
+Installed. Next:
+7841e040c471
+self-test passed on CPU coordinator; next: heteroes-worker join <lab address>
+21.6

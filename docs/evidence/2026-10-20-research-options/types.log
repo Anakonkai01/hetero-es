@@ -1,0 +1,9 @@
+src/components/experiments/V3Fields.tsx(82,32): error TS2322: Type '{ [x: string]: unknown; } | { [x: string]: unknown; }' is not assignable to type 'Record<string, never>'.
+  Type '{ [x: string]: unknown; }' is not assignable to type 'Record<string, never>'.
+    'string' index signatures are incompatible.
+      Type 'unknown' is not assignable to type 'never'.
+src/lib/v3Settings.ts(73,5): error TS2322: Type 'string[]' is not assignable to type '[string, string]'.
+  Target requires 2 element(s) but source may have fewer.
+src/lib/v3Settings.ts(76,5): error TS2322: Type 'string[] | [string, string]' is not assignable to type '[string, string]'.
+  Type 'string[]' is not assignable to type '[string, string]'.
+    Target requires 2 element(s) but source may have fewer.

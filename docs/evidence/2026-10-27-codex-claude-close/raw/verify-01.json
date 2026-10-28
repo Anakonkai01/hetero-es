@@ -1,0 +1,80 @@
+{
+  "status": "ok",
+  "selectedRuntime": "0eb86cb948878fe430049882b80b3a5ad74730ba",
+  "gpuExecution": false,
+  "selectedSourceControl": "docs/evidence/2026-10-27-strict-tma-pipeline/raw/full-base-a.json",
+  "experiments": [
+    {
+      "name": "prefill-warp-m",
+      "sealedFiles": 11,
+      "pythonSources": 3,
+      "jsonFiles": 2,
+      "pilotCases": 0
+    },
+    {
+      "name": "newton-cycles",
+      "sealedFiles": 10,
+      "pythonSources": 6,
+      "jsonFiles": 1,
+      "pilotCases": 0
+    },
+    {
+      "name": "mma-order",
+      "sealedFiles": 10,
+      "pythonSources": 3,
+      "jsonFiles": 2,
+      "pilotCases": 0
+    },
+    {
+      "name": "attention-head-tiles",
+      "sealedFiles": 8,
+      "pythonSources": 3,
+      "jsonFiles": 1,
+      "pilotCases": 0
+    },
+    {
+      "name": "attention-key-stages",
+      "sealedFiles": 9,
+      "pythonSources": 3,
+      "jsonFiles": 1,
+      "pilotCases": 0
+    },
+    {
+      "name": "tma-host-maps",
+      "sealedFiles": 16,
+      "pythonSources": 9,
+      "jsonFiles": 2,
+      "pilotCases": 4
+    },
+    {
+      "name": "request-cache-context",
+      "sealedFiles": 9,
+      "pythonSources": 3,
+      "jsonFiles": 1,
+      "pilotCases": 2
+    },
+    {
+      "name": "qkv-attention-fusion",
+      "sealedFiles": 12,
+      "pythonSources": 5,
+      "jsonFiles": 1,
+      "pilotCases": 2
+    }
+  ],
+  "unchangedRuntimeFiles": 144,
+  "localLinksChecked": 25,
+  "documentSha256": {
+    "docs/evidence/2026-10-27-strict-prefill-warp-m/README.md": "d7d1d73915c9968ce24571bb3d74be768d48a785574c4912ed980f349bc55a50",
+    "docs/evidence/2026-10-27-strict-newton-cycles/README.md": "ba335cf060df5e12d749a7c971b4d8c5ef9c61206e845b0ec65f7b03c5c57cac",
+    "docs/evidence/2026-10-27-strict-mma-order/README.md": "fa3d3d602ebdcea06f32443cb707e98a635c1b5526b6a149b9f2f361092bd31f",
+    "docs/evidence/2026-10-27-strict-attention-head-tiles/README.md": "e848e740bcb327d9c7c7d4c8cd7dcde65cd51c91080f7c18bec36c26df9179b6",
+    "docs/evidence/2026-10-27-strict-attention-key-stages/README.md": "4689504a25188b28ab15330aa3e03edd71bc93c158a8ffad3a804ebab4efb12c",
+    "docs/evidence/2026-10-27-strict-tma-host-maps/README.md": "fe9955af83b4216467746c3328171f86a916dd5e26f373d07566cbf305e9aaaf",
+    "docs/evidence/2026-10-27-strict-request-cache-context/README.md": "8ac81e6d0f4be92adad7c25c71c37d141eb4ac0953358fd73c1c5aa9bb99d08b",
+    "docs/evidence/2026-10-27-strict-qkv-attention-fusion/README.md": "29a3b0256550a4446829f93454719c9861e9bae4f249db6d43bbdba6d11d4073",
+    "docs/handoff-claude-after-codex-perf-2026-10-27.md": "3fe8c5fa3ad5cf209a08c3f7a9932b54dd688f3395914093fdd34ce1723d11f9",
+    "docs/HANDOFF.md": "18e69ec41dabdb34f130d195d52a8d469f79365aa441350a15e8e08e2a143c0f"
+  },
+  "credentialPatternFilesChecked": 87,
+  "limits": "Provenance/syntax/docs checks only; no new GPU execution, acceptance or performance claim."
+}

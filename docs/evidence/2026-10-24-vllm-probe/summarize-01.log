@@ -1,0 +1,145 @@
+{
+ "vllm-default": {
+  "prompts": 208,
+  "tokensFirstMachine": 44536,
+  "promptsEqual": 193,
+  "promptsDiffering": 15,
+  "differences": [
+   {
+    "prompt": 4,
+    "firstDifferentToken": 241
+   },
+   {
+    "prompt": 7,
+    "firstDifferentToken": 36
+   },
+   {
+    "prompt": 24,
+    "firstDifferentToken": 2
+   },
+   {
+    "prompt": 38,
+    "firstDifferentToken": 183
+   },
+   {
+    "prompt": 46,
+    "firstDifferentToken": 73
+   },
+   {
+    "prompt": 57,
+    "firstDifferentToken": 92
+   },
+   {
+    "prompt": 96,
+    "firstDifferentToken": 96
+   },
+   {
+    "prompt": 123,
+    "firstDifferentToken": 2
+   },
+   {
+    "prompt": 124,
+    "firstDifferentToken": 110
+   },
+   {
+    "prompt": 126,
+    "firstDifferentToken": 66
+   },
+   {
+    "prompt": 144,
+    "firstDifferentToken": 60
+   },
+   {
+    "prompt": 147,
+    "firstDifferentToken": 2
+   },
+   {
+    "prompt": 148,
+    "firstDifferentToken": 145
+   },
+   {
+    "prompt": 149,
+    "firstDifferentToken": 9
+   },
+   {
+    "prompt": 166,
+    "firstDifferentToken": 2
+   }
+  ]
+ },
+ "vllm-invariant": {
+  "prompts": 208,
+  "tokensFirstMachine": 44451,
+  "promptsEqual": 193,
+  "promptsDiffering": 15,
+  "differences": [
+   {
+    "prompt": 4,
+    "firstDifferentToken": 241
+   },
+   {
+    "prompt": 17,
+    "firstDifferentToken": 93
+   },
+   {
+    "prompt": 37,
+    "firstDifferentToken": 128
+   },
+   {
+    "prompt": 39,
+    "firstDifferentToken": 2
+   },
+   {
+    "prompt": 42,
+    "firstDifferentToken": 183
+   },
+   {
+    "prompt": 46,
+    "firstDifferentToken": 73
+   },
+   {
+    "prompt": 50,
+    "firstDifferentToken": 173
+   },
+   {
+    "prompt": 57,
+    "firstDifferentToken": 92
+   },
+   {
+    "prompt": 60,
+    "firstDifferentToken": 123
+   },
+   {
+    "prompt": 68,
+    "firstDifferentToken": 110
+   },
+   {
+    "prompt": 96,
+    "firstDifferentToken": 96
+   },
+   {
+    "prompt": 125,
+    "firstDifferentToken": 236
+   },
+   {
+    "prompt": 154,
+    "firstDifferentToken": 156
+   },
+   {
+    "prompt": 177,
+    "firstDifferentToken": 137
+   },
+   {
+    "prompt": 206,
+    "firstDifferentToken": 197
+   }
+  ]
+ },
+ "strict": {
+  "prompts": 208,
+  "tokensFirstMachine": 47826,
+  "promptsEqual": 208,
+  "promptsDiffering": 0,
+  "differences": []
+ }
+}

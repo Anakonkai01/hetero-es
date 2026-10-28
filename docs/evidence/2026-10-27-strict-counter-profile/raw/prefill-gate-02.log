@@ -1,0 +1,6 @@
+==WARNING== Note: Running with unmodified GPU clocks. If not controlled otherwise, profiling results may be inconsistent.
+==PROF== Connected to process 2297924 (/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python3.12)
+==PROF== Profiling "integer_stream": 0%....50%....100% - 40 passes
+{"status": "ok", "case": "prefill-gate", "shape": {"rows": 888, "width": 896, "outputs": 4864}}
+==PROF== Disconnected from process 2297924
+==PROF== Report: /home/pc5070ti/projects/heteroes-codex-frozen-perf/docs/evidence/2026-10-27-strict-counter-profile/raw/prefill-gate-02.ncu-rep

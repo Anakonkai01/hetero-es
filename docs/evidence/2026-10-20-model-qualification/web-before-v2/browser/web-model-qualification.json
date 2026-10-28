@@ -1,0 +1,5 @@
+{
+  "syntheticCpuFixture": true,
+  "passed": false,
+  "error": "locator.selectOption: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-model-id=\"f1122c7643f544f9b0749a670fcbdb1e\"]').getByLabel('Device for model check')\u001b[22m\n"
+}

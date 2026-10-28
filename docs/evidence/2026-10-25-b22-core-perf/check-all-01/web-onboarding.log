@@ -1,0 +1,15 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for locator('.preference-menu summary').first()[22m
+
+    at english (/home/pc5070ti/projects/heteroes-codex-frozen-perf/scripts/check-web-onboarding.mjs:26:91)
+    at async file:///home/pc5070ti/projects/heteroes-codex-frozen-perf/scripts/check-web-onboarding.mjs:33:3 {
+  log: [ "  - waiting for locator('.preference-menu summary').first()" ],
+  name: 'TimeoutError'
+}
+
+Node.js v24.21.0

@@ -1,0 +1,1486 @@
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE                [100%]
+==================================== ERRORS ====================================
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[normal-1] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[normal-31] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[normal-32] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[normal-33] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[normal-64] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[normal-65] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[normal-80] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[normal-127] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[normal-128] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[negative_zero-1] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[negative_zero-31] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[negative_zero-32] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[negative_zero-33] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[negative_zero-64] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[negative_zero-65] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[negative_zero-80] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[negative_zero-127] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[negative_zero-128] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[cancellation-1] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[cancellation-31] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[cancellation-32] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[cancellation-33] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[cancellation-64] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[cancellation-65] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[cancellation-80] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[cancellation-127] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[cancellation-128] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[subnormal-1] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[subnormal-31] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[subnormal-32] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[subnormal-33] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[subnormal-64] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[subnormal-65] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[subnormal-80] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[subnormal-127] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[subnormal-128] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[subnormal_keys-1] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[subnormal_keys-31] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[subnormal_keys-32] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[subnormal_keys-33] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[subnormal_keys-64] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[subnormal_keys-65] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[subnormal_keys-80] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[subnormal_keys-127] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[subnormal_keys-128] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[equal_scores-1] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[equal_scores-31] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[equal_scores-32] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[equal_scores-33] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[equal_scores-64] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[equal_scores-65] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[equal_scores-80] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[equal_scores-127] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+_ ERROR at setup of test_wide_block_equals_original_and_independent_cpu[equal_scores-128] _
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+___ ERROR at setup of test_failure_flags_match_even_for_masked_nonfinites[q] ___
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+___ ERROR at setup of test_failure_flags_match_even_for_masked_nonfinites[k] ___
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+___ ERROR at setup of test_failure_flags_match_even_for_masked_nonfinites[v] ___
+
+    @pytest.fixture(scope='module')
+>   def kernels():return sc.StrictCudaKernels('cuda'),WideAttention()
+                                                      ^^^^^^^^^^^^^^^
+
+docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/evidence/2026-10-27-strict-wide-attention/harness/wide_attention.py:82: in __init__
+    self.fn=self.owner._compile('wide-gqa-64-7-k128',header+sc._OPS_SOURCE+source(),['strict_attention_gqa_wide'],ptx_exact=sc.OPS_PTX_EXACT,sass_exact=sc.OPS_SASS_EXACT)['strict_attention_gqa_wide']
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1195: in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = (<CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>, None)
+
+    def _check(result):
+        status, *values = result
+        if int(status) != 0:
+>           raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>
+
+.scratch/codex-20261027-combined/stage/new/src/heteroes/eval/strict_cuda.py:1119: ReferenceArithmeticError
+=========================== short test summary info ============================
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[normal-1]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[normal-31]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[normal-32]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[normal-33]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[normal-64]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[normal-65]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[normal-80]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[normal-127]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[normal-128]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[negative_zero-1]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[negative_zero-31]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[negative_zero-32]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[negative_zero-33]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[negative_zero-64]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[negative_zero-65]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[negative_zero-80]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[negative_zero-127]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[negative_zero-128]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[cancellation-1]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[cancellation-31]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[cancellation-32]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[cancellation-33]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[cancellation-64]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[cancellation-65]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[cancellation-80]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[cancellation-127]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[cancellation-128]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[subnormal-1]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[subnormal-31]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[subnormal-32]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[subnormal-33]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[subnormal-64]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[subnormal-65]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[subnormal-80]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[subnormal-127]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[subnormal-128]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[subnormal_keys-1]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[subnormal_keys-31]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[subnormal_keys-32]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[subnormal_keys-33]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[subnormal_keys-64]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[subnormal_keys-65]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[subnormal_keys-80]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[subnormal_keys-127]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[subnormal_keys-128]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[equal_scores-1]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[equal_scores-31]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[equal_scores-32]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[equal_scores-33]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[equal_scores-64]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[equal_scores-65]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[equal_scores-80]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[equal_scores-127]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_wide_block_equals_original_and_independent_cpu[equal_scores-128]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_failure_flags_match_even_for_masked_nonfinites[q]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_failure_flags_match_even_for_masked_nonfinites[k]
+ERROR docs/evidence/2026-10-27-strict-wide-attention/harness/test_wide.py::test_failure_flags_match_even_for_masked_nonfinites[v]
+57 errors in 2.45s

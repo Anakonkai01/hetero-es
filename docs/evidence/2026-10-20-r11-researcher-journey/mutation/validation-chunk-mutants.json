@@ -1,0 +1,4 @@
+[
+ {"name": "always 16", "file": "src/heteroes/v3/tracker.py", "old": "self.recipe.chunk or 16)", "new": "16)"},
+ {"name": "no default", "file": "src/heteroes/v3/tracker.py", "old": "self.recipe.chunk or 16)", "new": "self.recipe.chunk or 1)"}
+]

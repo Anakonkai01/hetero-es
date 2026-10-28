@@ -1,0 +1,71 @@
+{
+  "hardwareQualified": false,
+  "base": "abe40dd9",
+  "frozenNumericalPathsChanged": [],
+  "linuxOnly": true,
+  "published": false,
+  "packages": {
+    "worker": {
+      "packagedArchive": ".scratch/strict-integer-linux-20261025-01/worker/linux-unpacked/resources/worker/runtime.tar.gz",
+      "location": "worker source",
+      "files": {
+        "integer_reference.py": {
+          "sourceSha256": "9b01c61e19d93015434775889f060ee7dbbb227347a8eb6aec92c1223ee496cd",
+          "packagedSha256": "9b01c61e19d93015434775889f060ee7dbbb227347a8eb6aec92c1223ee496cd",
+          "equal": true
+        },
+        "integer_cuda.py": {
+          "sourceSha256": "ec88d231b75aadb52b466996e322fb474b365c6c38bf7b03277f5aac0ed59721",
+          "packagedSha256": "ec88d231b75aadb52b466996e322fb474b365c6c38bf7b03277f5aac0ed59721",
+          "equal": true
+        },
+        "integer_decoder.py": {
+          "sourceSha256": "1e7624df6d6637db977b76c11f274a862800537f0f83754d5113afe68a4105ab",
+          "packagedSha256": "1e7624df6d6637db977b76c11f274a862800537f0f83754d5113afe68a4105ab",
+          "equal": true
+        },
+        "strict_cuda.py": {
+          "sourceSha256": "8c39203b2fbc6e1e9e63378d907f5a0dbe81704062e02965a244dbfe5c1a0777",
+          "packagedSha256": "8c39203b2fbc6e1e9e63378d907f5a0dbe81704062e02965a244dbfe5c1a0777",
+          "equal": true
+        },
+        "strict_decoder_graph.py": {
+          "sourceSha256": "a767d157c70e2abb384a24b63ca73dc93d6ee83cb9fc6e58e728d6aca487b987",
+          "packagedSha256": "a767d157c70e2abb384a24b63ca73dc93d6ee83cb9fc6e58e728d6aca487b987",
+          "equal": true
+        }
+      }
+    },
+    "server": {
+      "packagedArchive": ".scratch/strict-integer-linux-20261025-01/server/linux-unpacked/resources/server/runtime.tar.gz",
+      "location": "embedded SDK wheel",
+      "files": {
+        "integer_reference.py": {
+          "sourceSha256": "9b01c61e19d93015434775889f060ee7dbbb227347a8eb6aec92c1223ee496cd",
+          "packagedSha256": "9b01c61e19d93015434775889f060ee7dbbb227347a8eb6aec92c1223ee496cd",
+          "equal": true
+        },
+        "integer_cuda.py": {
+          "sourceSha256": "ec88d231b75aadb52b466996e322fb474b365c6c38bf7b03277f5aac0ed59721",
+          "packagedSha256": "ec88d231b75aadb52b466996e322fb474b365c6c38bf7b03277f5aac0ed59721",
+          "equal": true
+        },
+        "integer_decoder.py": {
+          "sourceSha256": "1e7624df6d6637db977b76c11f274a862800537f0f83754d5113afe68a4105ab",
+          "packagedSha256": "1e7624df6d6637db977b76c11f274a862800537f0f83754d5113afe68a4105ab",
+          "equal": true
+        },
+        "strict_cuda.py": {
+          "sourceSha256": "8c39203b2fbc6e1e9e63378d907f5a0dbe81704062e02965a244dbfe5c1a0777",
+          "packagedSha256": "8c39203b2fbc6e1e9e63378d907f5a0dbe81704062e02965a244dbfe5c1a0777",
+          "equal": true
+        },
+        "strict_decoder_graph.py": {
+          "sourceSha256": "a767d157c70e2abb384a24b63ca73dc93d6ee83cb9fc6e58e728d6aca487b987",
+          "packagedSha256": "a767d157c70e2abb384a24b63ca73dc93d6ee83cb9fc6e58e728d6aca487b987",
+          "equal": true
+        }
+      }
+    }
+  }
+}

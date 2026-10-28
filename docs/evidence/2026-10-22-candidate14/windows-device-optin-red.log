@@ -1,0 +1,85 @@
+✔ HTTP is restricted to private networks; credentials and query are rejected (2.942841ms)
+✖ a paired device can opt in without an account session and OFF stops locally (3.391962ms)
+✖ a legacy lab falls back to an owner session with the current boot only (12.263506ms)
+✔ unknown process holds Quit; successful Quit is not restarted by polling (1.498748ms)
+✔ API outage still drains locally and public status never contains either token (1.486887ms)
+✔ URL rotation preserves enrolled identity only for the same server while drained OFF (2.473198ms)
+✔ requests identify themselves as HeteroES so a public edge does not block them (0.971671ms)
+✔ connection check preserves login, pairing and agent state; unassigned compute is explicitly untested (0.806178ms)
+✔ connection failures report only safe codes, and compute reports come from the credential-owning bridge (0.59794ms)
+✔ opening with Windows is kept locally and keep ON after restart is the owner choice on the lab (1.048169ms)
+(node:2493088) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/pc5070ti/projects/heteroes/desktop/worker/src/station.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/pc5070ti/projects/heteroes/desktop/worker/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ an approved, signed-in station that is OFF offers to start contributing (0.46363ms)
+✔ ON with no work is ready; ON with a live worker is working and says for which assignment (0.446453ms)
+✔ stopping shows draining and cannot be pressed again; an unknown process state holds the toggle (0.112454ms)
+✖ starting requires approval and an agent, while paired contribution does not require sign-in (0.537775ms)
+✔ gauges come from fresh measurements only and never invent a number (0.200302ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 12
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 69.665117
+
+✖ failing tests:
+
+test at desktop/worker/tests/service.test.cjs:41:1
+✖ a paired device can opt in without an account session and OFF stops locally (3.391962ms)
+  Error: SIGN_IN_REQUIRED
+      at Service.contribution (/home/pc5070ti/projects/heteroes/desktop/worker/electron/service.cjs:497:13)
+      at TestContext.<anonymous> (/home/pc5070ti/projects/heteroes/desktop/worker/tests/service.test.cjs:50:17)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at desktop/worker/tests/service.test.cjs:57:1
+✖ a legacy lab falls back to an owner session with the current boot only (12.263506ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + undefined
+  - [
+  -   'https://lab.heteroes.site/api/v1/devices/dev/contribution',
+  -   'Bearer owner-session',
+  -   {
+  -     bootId: 'new-boot',
+  -     enabled: true
+  -   }
+  - ]
+  
+      at TestContext.<anonymous> (/home/pc5070ti/projects/heteroes/desktop/worker/tests/service.test.cjs:68:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: [ 'https://lab.heteroes.site/api/v1/devices/dev/contribution', 'Bearer owner-session', { enabled: true, bootId: 'new-boot' } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at desktop/worker/tests/station.test.mjs:63:1
+✖ starting requires approval and an agent, while paired contribution does not require sign-in (0.537775ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///home/pc5070ti/projects/heteroes/desktop/worker/tests/station.test.mjs:68:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

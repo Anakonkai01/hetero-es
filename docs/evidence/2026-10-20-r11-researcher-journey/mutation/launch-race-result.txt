@@ -1,0 +1,7 @@
+control ok    | 33 passed in 2.21s
+killed       no launch gate | 1 failed, 31 passed in 2.19s
+killed       gate only v2 | 1 failed, 31 passed in 2.15s
+killed       failed transfer keeps STARTING | 1 failed, 32 passed in 1.75s
+killed       failed transfer swallowed | 1 failed, 32 passed in 2.28s
+
+4 of 4 mutants killed.

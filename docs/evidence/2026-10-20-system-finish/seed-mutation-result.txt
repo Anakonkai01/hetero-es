@@ -1,0 +1,7 @@
+control ok    | 3 passed in 3.44s
+killed       ignore-explicit-seed-namespace | 2 failed, 1 passed in 3.26s
+killed       change-old-default-seeds | 2 failed, 1 passed in 3.50s
+killed       accept-invalid-seed-namespace | 1 failed, 2 passed in 3.53s
+killed       drop-sdk-seed-namespace | 1 failed, 2 passed in 3.39s
+
+4 of 4 mutants killed.

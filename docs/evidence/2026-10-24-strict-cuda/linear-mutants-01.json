@@ -1,0 +1,20 @@
+[
+  {"name": "positive-zero-padding", "file": "src/heteroes/eval/strict_cuda.py", "old": "weight[i]) : -0.0f;", "new": "weight[i]) : 0.0f;"},
+  {"name": "no-subnormal-flush", "file": "src/heteroes/eval/strict_cuda.py", "old": "return (u & 0x7f800000u) == 0u ? __uint_as_float(u & 0x80000000u) : v;", "new": "return v;"},
+  {"name": "flush-loses-sign", "file": "src/heteroes/eval/strict_cuda.py", "old": "__uint_as_float(u & 0x80000000u) : v;", "new": "0.0f : v;"},
+  {"name": "contractible-add", "file": "src/heteroes/eval/strict_cuda.py", "old": "asm volatile(\"add.rn.f32 %0, %1, %2;\"", "new": "asm volatile(\"add.f32 %0, %1, %2;\""},
+  {"name": "ftz-multiply", "file": "src/heteroes/eval/strict_cuda.py", "old": "asm volatile(\"mul.rn.f32 %0, %1, %2;\"", "new": "asm volatile(\"mul.rn.ftz.f32 %0, %1, %2;\""},
+  {"name": "butterfly-reversed", "file": "src/heteroes/eval/strict_cuda.py", "old": "for (int offset = 1; offset < 32; offset <<= 1) v = add_rn", "new": "for (int offset = 16; offset >= 1; offset >>= 1) v = add_rn"},
+  {"name": "sequential-thread-sum", "file": "src/heteroes/eval/strict_cuda.py", "old": "for (; level < LOG_PER && ((i >> level) & 1); ++level) v = add_rn(stack[level], v);\n      stack[level] = v;", "new": "if (i) v = add_rn(stack[LOG_PER], v);\n      stack[LOG_PER] = v;"},
+  {"name": "warp-tree-sequential", "file": "src/heteroes/eval/strict_cuda.py", "old": "for (; level < LOG_WARPS && ((i >> level) & 1); ++level) u = add_rn(s[level], u);\n          s[level] = u;", "new": "if (i) u = add_rn(s[LOG_WARPS], u);\n          s[LOG_WARPS] = u;"},
+  {"name": "missing-warp-not-negative-zero", "file": "src/heteroes/eval/strict_cuda.py", "old": "partial[threadIdx.y][i] : -0.0f;", "new": "partial[threadIdx.y][i] : 0.0f;"},
+  {"name": "per-thread-16", "file": "src/heteroes/eval/strict_cuda.py", "old": "per_thread = max(1, min(32, padded // 32))", "new": "per_thread = max(1, min(16, padded // 32))"},
+  {"name": "no-error-flag", "file": "src/heteroes/eval/strict_cuda.py", "old": "atomicOr(error, 1);", "new": ";"},
+  {"name": "bias-skipped", "file": "src/heteroes/eval/strict_cuda.py", "old": "if (HAS_BIAS) v = add_rn(v, b);", "new": ";"},
+  {"name": "input-not-flushed", "file": "src/heteroes/eval/strict_cuda.py", "old": "mul_rn(flush(row[k]), weight[i])", "new": "mul_rn(row[k], weight[i])"},
+  {"name": "ptx-audit-allows-fma", "file": "src/heteroes/eval/strict_cuda.py", "old": "_PTX_COUNTED = (\"add.rn.f32\", \"mul.rn.f32\")", "new": "_PTX_COUNTED = (\"add.rn.f32\", \"mul.rn.f32\", \"fma.rn.f32\")"},
+  {"name": "sass-audit-allows-ftz", "file": "src/heteroes/eval/strict_cuda.py", "old": "        if base in _SASS_NOT_FLOAT or not _SASS_FLOAT.match(base):", "new": "        if base in _SASS_NOT_FLOAT or not _SASS_FLOAT.match(base) or opcode.endswith('.FTZ'):"},
+  {"name": "guard-after-cuda", "file": "src/heteroes/eval/strict_cuda.py", "old": "    def __init__(self, device):\n        if os.environ.get(\"HETEROES_GPU_ACCEPTANCE\") != \"1\":", "new": "    def __init__(self, device):\n        torch.cuda.is_available()\n        if os.environ.get(\"HETEROES_GPU_ACCEPTANCE\") != \"1\":"},
+  {"name": "noncontiguous-weight-accepted", "file": "src/heteroes/eval/strict_cuda.py", "old": "        or not weight.is_contiguous()\n", "new": ""},
+  {"name": "emulator-positive-padding", "file": "src/heteroes/eval/strict_cuda.py", "old": "padded = torch.full((*rows.shape[:-1], lanes * plan.per_thread), -0.0)", "new": "padded = torch.full((*rows.shape[:-1], lanes * plan.per_thread), 0.0)"}
+]

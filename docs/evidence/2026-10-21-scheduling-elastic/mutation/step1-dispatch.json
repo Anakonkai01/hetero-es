@@ -1,0 +1,9 @@
+[
+ {"name": "admitted-drops-committed", "file": "src/heteroes/dispatch.py", "old": "            self._inner.committed(candidate_id)", "new": "            pass"},
+ {"name": "admitted-drops-heartbeat", "file": "src/heteroes/dispatch.py", "old": "            self._inner.heartbeat(worker_id)", "new": "            pass"},
+ {"name": "tail-ignores-heartbeat", "file": "src/heteroes/dispatch.py", "old": "        self._seen[worker_id] = self._clock()\n\n    def committed", "new": "        pass\n\n    def committed"},
+ {"name": "api-skips-heartbeat-hook", "file": "src/heteroes/worker_api.py", "old": "        if hasattr(self._policy, \"heartbeat\"):", "new": "        if False:"},
+ {"name": "set-admitted-ignored", "file": "src/heteroes/dispatch.py", "old": "    def set_admitted(self, admitted) -> None:\n        self._admitted = _admitted_set(admitted)", "new": "    def set_admitted(self, admitted) -> None:\n        _admitted_set(admitted)"},
+ {"name": "book-not-seeded", "file": "src/heteroes/dispatch.py", "old": "            if seconds > 0:\n                book.observe(worker_id, seconds)", "new": "            pass"},
+ {"name": "durations-include-failures", "file": "src/heteroes/ledger/ledger.py", "old": "FROM result AS r \"\n            \"JOIN attempt AS a ON a.candidate_id = r.candidate_id AND a.attempt_number = r.attempt_number", "new": "FROM result AS r \"\n            \"JOIN attempt AS a ON a.candidate_id = r.candidate_id"}
+]

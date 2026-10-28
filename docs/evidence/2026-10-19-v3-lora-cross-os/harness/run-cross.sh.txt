@@ -1,0 +1,25 @@
+#!/bin/bash
+# Cross-OS: managed runner on this Linux machine (Tailscale), Linux CLI worker + native Windows CLI worker.
+set -u
+cd /home/pc5070ti/projects/heteroes/runtime
+D=/home/pc5070ti/projects/heteroes/.scratch/v3-cross-os; R=$D/cross-lora; MP=/home/pc5070ti/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775; PY=$HOME/miniforge3/envs/heteroes-match/bin/python
+export PYTHONPATH=src HETEROES_GPU_ACCEPTANCE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+$PY $D/harness.py runner --out $R --token-file $D/token > $R/runner-output.txt 2>&1 &
+RUNNER=$!
+for i in $(seq 600); do grep -q PREPARING $R/runner.json 2>/dev/null && break; sleep 1; done
+grep -q PREPARING $R/runner.json || { echo runner-not-preparing; kill $RUNNER; exit 1; }
+HETEROES_TOKEN=$(cat $D/token) $PY scripts/run_worker.py --model-path $MP --model-manifest $R/model-manifest.json --dataset $R/dataset.json --run-config $R/config.json --coordinator-url http://100.110.165.40:18772 --worker-id linux-a --device cuda --log $R/linux-a.jsonl --cache-dir $R/cache-linux-a --replay always > $R/linux-a-output.txt 2>&1 &
+LINUX=$!
+ssh -o BatchMode=yes -o ServerAliveInterval=30 thao_nguyen@100.92.20.58 "/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -NoProfile -NonInteractive -EncodedCommand JABkAD0ASgBvAGkAbgAtAFAAYQB0AGgAIAAkAGUAbgB2ADoATABPAEMAQQBMAEEAUABQAEQAQQBUAEEAIAAiAEgAZQB0AGUAcgBvAEUAUwAtAHYAMwAtADIAMAAyADYAMQAwADEAOQBcAGMAcgBvAHMAcwAtAG8AcwAtAGYANABhADMAYQAxADgAIgA7ACAAJgAgACgASgBvAGkAbgAtAFAAYQB0AGgAIAAkAGUAbgB2ADoAQQBQAFAARABBAFQAQQAgACIAQABoAGUAdABlAHIAbwBlAHMAXAB3AG8AcgBrAGUAcgBcAHIAdQBuAHQAaQBtAGUAcwBcAGMANgA0AGYAMwAwADEAMgBiADkANgA1AFwAcAB5AHQAaABvAG4AXABwAHkAdABoAG8AbgAuAGUAeABlACIAKQAgAC0ASQAgACgASgBvAGkAbgAtAFAAYQB0AGgAIAAkAGQAIAAiAGMAcgBvAHMAcwAtAGQAcgBpAHYAZQByAC4AcAB5ACIAKQA7ACAAIgBEAFIASQBWAEUAUgBfAEUAWABJAFQAPQAkAEwAQQBTAFQARQBYAEkAVABDAE8ARABFACIA" > $R/windows-ssh-output.txt 2>&1 &
+WIN=$!
+# the runner counts connected workers itself; wait until both have fetched the job and loaded (Windows log is remote)
+for i in $(seq 900); do
+  grep -q executor_ready $R/linux-a.jsonl 2>/dev/null && ssh -o BatchMode=yes thao_nguyen@100.92.20.58 "grep -q executor_ready '/mnt/c/Users/Thao Nguyen/AppData/Local/HeteroES-v3-20261019/cross-os-f4a3a18/windows-3060.jsonl' 2>/dev/null" && break
+  kill -0 $WIN 2>/dev/null || { echo windows-exited-early; break; }
+  sleep 2
+done
+touch $R/start.flag; echo "started $(date +%T)"
+wait $LINUX; echo "linux worker exit $?"
+wait $WIN; echo "windows ssh exit $?"
+touch $R/workers-stopped.flag
+wait $RUNNER; echo "runner exit $?"

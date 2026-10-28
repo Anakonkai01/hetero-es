@@ -1,0 +1,20 @@
+[
+  {
+    "name": "accept-a-rejected-draft",
+    "file": ".scratch/strict-speculative-20261026/speculative.py",
+    "old": "if guess!=actual:break",
+    "new": "if False:break"
+  },
+  {
+    "name": "fail-valid-candidate-for-invalid-speculation",
+    "file": ".scratch/strict-speculative-20261026/speculative.py",
+    "old": "return self.first_only(),True",
+    "new": "self.engine.kernels.raise_if_error(self.state.flag)"
+  },
+  {
+    "name": "publish-tokens-after-eos",
+    "file": ".scratch/strict-speculative-20261026/speculative.py",
+    "old": "if token in ends or len(outputs[owner])==max_new:break",
+    "new": "if len(outputs[owner])==max_new:break"
+  }
+]

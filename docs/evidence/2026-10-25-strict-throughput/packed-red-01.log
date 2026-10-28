@@ -1,0 +1,94 @@
+FFFFFFssssssss                                                           [100%]
+=================================== FAILURES ===================================
+______ test_packed_attention_refuses_invalid_spans_before_launch[spans0] _______
+
+spans = []
+
+    @pytest.mark.parametrize("spans", [[], [(0, 1, 1)], [(1, -1, 0)], [(1, 2, 0)], [(True, 1, 0)], [(1, 4097, 4096)]])
+    def test_packed_attention_refuses_invalid_spans_before_launch(spans):
+        kernels = object.__new__(strict_cuda.StrictCudaKernels)
+        kernels.device = torch.device("cpu")
+        with pytest.raises(ReferenceArithmeticError, match="[Ss]pan"):
+>           kernels.attention_packed(torch.ones(2, 1, 4), torch.ones(1, 1, 4), torch.ones(1, 1, 4), spans, 2, 0.5)
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'StrictCudaKernels' object has no attribute 'attention_packed'
+
+tests/eval/test_strict_packed.py:32: AttributeError
+______ test_packed_attention_refuses_invalid_spans_before_launch[spans1] _______
+
+spans = [(0, 1, 1)]
+
+    @pytest.mark.parametrize("spans", [[], [(0, 1, 1)], [(1, -1, 0)], [(1, 2, 0)], [(True, 1, 0)], [(1, 4097, 4096)]])
+    def test_packed_attention_refuses_invalid_spans_before_launch(spans):
+        kernels = object.__new__(strict_cuda.StrictCudaKernels)
+        kernels.device = torch.device("cpu")
+        with pytest.raises(ReferenceArithmeticError, match="[Ss]pan"):
+>           kernels.attention_packed(torch.ones(2, 1, 4), torch.ones(1, 1, 4), torch.ones(1, 1, 4), spans, 2, 0.5)
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'StrictCudaKernels' object has no attribute 'attention_packed'
+
+tests/eval/test_strict_packed.py:32: AttributeError
+______ test_packed_attention_refuses_invalid_spans_before_launch[spans2] _______
+
+spans = [(1, -1, 0)]
+
+    @pytest.mark.parametrize("spans", [[], [(0, 1, 1)], [(1, -1, 0)], [(1, 2, 0)], [(True, 1, 0)], [(1, 4097, 4096)]])
+    def test_packed_attention_refuses_invalid_spans_before_launch(spans):
+        kernels = object.__new__(strict_cuda.StrictCudaKernels)
+        kernels.device = torch.device("cpu")
+        with pytest.raises(ReferenceArithmeticError, match="[Ss]pan"):
+>           kernels.attention_packed(torch.ones(2, 1, 4), torch.ones(1, 1, 4), torch.ones(1, 1, 4), spans, 2, 0.5)
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'StrictCudaKernels' object has no attribute 'attention_packed'
+
+tests/eval/test_strict_packed.py:32: AttributeError
+______ test_packed_attention_refuses_invalid_spans_before_launch[spans3] _______
+
+spans = [(1, 2, 0)]
+
+    @pytest.mark.parametrize("spans", [[], [(0, 1, 1)], [(1, -1, 0)], [(1, 2, 0)], [(True, 1, 0)], [(1, 4097, 4096)]])
+    def test_packed_attention_refuses_invalid_spans_before_launch(spans):
+        kernels = object.__new__(strict_cuda.StrictCudaKernels)
+        kernels.device = torch.device("cpu")
+        with pytest.raises(ReferenceArithmeticError, match="[Ss]pan"):
+>           kernels.attention_packed(torch.ones(2, 1, 4), torch.ones(1, 1, 4), torch.ones(1, 1, 4), spans, 2, 0.5)
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'StrictCudaKernels' object has no attribute 'attention_packed'
+
+tests/eval/test_strict_packed.py:32: AttributeError
+______ test_packed_attention_refuses_invalid_spans_before_launch[spans4] _______
+
+spans = [(True, 1, 0)]
+
+    @pytest.mark.parametrize("spans", [[], [(0, 1, 1)], [(1, -1, 0)], [(1, 2, 0)], [(True, 1, 0)], [(1, 4097, 4096)]])
+    def test_packed_attention_refuses_invalid_spans_before_launch(spans):
+        kernels = object.__new__(strict_cuda.StrictCudaKernels)
+        kernels.device = torch.device("cpu")
+        with pytest.raises(ReferenceArithmeticError, match="[Ss]pan"):
+>           kernels.attention_packed(torch.ones(2, 1, 4), torch.ones(1, 1, 4), torch.ones(1, 1, 4), spans, 2, 0.5)
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'StrictCudaKernels' object has no attribute 'attention_packed'
+
+tests/eval/test_strict_packed.py:32: AttributeError
+______ test_packed_attention_refuses_invalid_spans_before_launch[spans5] _______
+
+spans = [(1, 4097, 4096)]
+
+    @pytest.mark.parametrize("spans", [[], [(0, 1, 1)], [(1, -1, 0)], [(1, 2, 0)], [(True, 1, 0)], [(1, 4097, 4096)]])
+    def test_packed_attention_refuses_invalid_spans_before_launch(spans):
+        kernels = object.__new__(strict_cuda.StrictCudaKernels)
+        kernels.device = torch.device("cpu")
+        with pytest.raises(ReferenceArithmeticError, match="[Ss]pan"):
+>           kernels.attention_packed(torch.ones(2, 1, 4), torch.ones(1, 1, 4), torch.ones(1, 1, 4), spans, 2, 0.5)
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'StrictCudaKernels' object has no attribute 'attention_packed'
+
+tests/eval/test_strict_packed.py:32: AttributeError
+=========================== short test summary info ============================
+FAILED tests/eval/test_strict_packed.py::test_packed_attention_refuses_invalid_spans_before_launch[spans0]
+FAILED tests/eval/test_strict_packed.py::test_packed_attention_refuses_invalid_spans_before_launch[spans1]
+FAILED tests/eval/test_strict_packed.py::test_packed_attention_refuses_invalid_spans_before_launch[spans2]
+FAILED tests/eval/test_strict_packed.py::test_packed_attention_refuses_invalid_spans_before_launch[spans3]
+FAILED tests/eval/test_strict_packed.py::test_packed_attention_refuses_invalid_spans_before_launch[spans4]
+FAILED tests/eval/test_strict_packed.py::test_packed_attention_refuses_invalid_spans_before_launch[spans5]
+6 failed, 8 skipped in 1.74s

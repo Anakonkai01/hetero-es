@@ -1,0 +1,8 @@
+control ok    | 12 passed in 37.90s
+killed       weight_maximum | 12 failed in 37.90s
+killed       weight_exponent | 12 failed in 38.01s
+killed       weight_flag | 9 failed, 3 passed in 37.98s
+killed       weight_row | 12 failed in 38.09s
+killed       weight_route | 1 failed, 11 passed in 37.97s
+
+5 of 5 mutants killed.

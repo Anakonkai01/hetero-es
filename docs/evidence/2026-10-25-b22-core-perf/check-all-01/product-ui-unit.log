@@ -1,0 +1,15 @@
+✔ CPU host identity and GPU UUID deduplicate aliases, nested domains and wall are excluded (0.452941ms)
+✔ stale and missing observations are not zero watts; recorded energy remains available (0.086306ms)
+✔ the language follows the browser unless the person chose one (0.386943ms)
+✔ stored preferences win; anything unusable falls back to the browser language and safe defaults (0.441114ms)
+✔ a missing Vietnamese string is reported once, and only while an audit is running (0.140964ms)
+✔ CPU temperatures recognize Intel/AMD package sensors without relabeling ACPI zones (0.494774ms)
+✔ legacy absence is unknown, explicit unavailable reasons remain distinct (0.118604ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 153.34477

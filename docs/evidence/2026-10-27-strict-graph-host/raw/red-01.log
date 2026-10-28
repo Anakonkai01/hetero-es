@@ -1,0 +1,38 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+________ test_reciprocal_cache_uses_fp32_identity_and_one_bounded_entry ________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x720b99648530>
+
+    def test_reciprocal_cache_uses_fp32_identity_and_one_bounded_entry(monkeypatch):
+        value = backend()
+        reciprocal = ops.reciprocal
+        penalties = [1.0, 1.0 + 2.0**-25, 1.2, 1.2, 1.0]
+        expected = [float(reciprocal(torch.tensor(p, dtype=torch.float32)).item()) for p in penalties]
+        calls = []
+    
+        def record(tensor):
+            calls.append(float(tensor.item()))
+            return reciprocal(tensor)
+    
+        monkeypatch.setattr(ops, "reciprocal", record)
+>       actual = [value._inverse_for(p) for p in penalties]
+                  ^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'StrictDecoderGraph' object has no attribute '_inverse_for'
+
+tests/eval/test_strict_graph_host.py:33: AttributeError
+___________ test_failed_reciprocal_does_not_replace_a_valid_constant ___________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x720b99598500>
+
+    def test_failed_reciprocal_does_not_replace_a_valid_constant(monkeypatch):
+        value = backend()
+>       expected = value._inverse_for(1.2)
+                   ^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'StrictDecoderGraph' object has no attribute '_inverse_for'
+
+tests/eval/test_strict_graph_host.py:41: AttributeError
+=========================== short test summary info ============================
+FAILED tests/eval/test_strict_graph_host.py::test_reciprocal_cache_uses_fp32_identity_and_one_bounded_entry
+FAILED tests/eval/test_strict_graph_host.py::test_failed_reciprocal_does_not_replace_a_valid_constant
+2 failed in 0.68s

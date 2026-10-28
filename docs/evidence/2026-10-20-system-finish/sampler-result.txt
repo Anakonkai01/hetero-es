@@ -1,0 +1,7 @@
+control ok    | 6 passed in 0.13s
+killed       wrong-epoch-index | 1 failed, 5 passed in 0.14s
+killed       no-epoch-shuffle | 2 failed, 4 passed in 0.16s
+killed       drop-short-last-batch | 1 failed, 5 passed in 0.16s
+killed       change-default-sampler | 1 failed, 5 passed in 0.15s
+
+4 of 4 mutants killed.

@@ -1,0 +1,72 @@
+{
+  "hardwareQualified": false,
+  "scope": "Read-only native Windows Python/space discovery; no interpreter launched, GPU computation or environment installation.",
+  "hosts": {
+    "thao": {
+      "exitCode": 0,
+      "stderr": "#< CLIXML\n<Objs Version=\"1.1.0.1\" xmlns=\"http://schemas.microsoft.com/powershell/2004/04\"><Obj S=\"progress\" RefId=\"0\"><TN RefId=\"0\"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N=\"SourceId\">1</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj><Obj S=\"progress\" RefId=\"1\"><TNRef RefId=\"0\" /><MS><I64 N=\"SourceId\">1</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj><Obj S=\"progress\" RefId=\"2\"><TNRef RefId=\"0\" /><MS><I64 N=\"SourceId\">2</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>",
+      "result": {
+        "os": {
+          "Caption": "Microsoft Windows 11 Pro",
+          "Version": "10.0.26200"
+        },
+        "commands": [
+          {
+            "Name": "python.exe",
+            "Source": "C:\\Users\\Thao Nguyen\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+            "CommandType": 32
+          },
+          {
+            "Name": "python3.exe",
+            "Source": "C:\\Users\\Thao Nguyen\\AppData\\Local\\Microsoft\\WindowsApps\\python3.exe",
+            "CommandType": 32
+          },
+          {
+            "Name": "py.exe",
+            "Source": "C:\\WINDOWS\\py.exe",
+            "CommandType": 32
+          }
+        ],
+        "pythonPaths": [
+          "C:\\Users\\Thao Nguyen\\AppData\\Local\\Programs\\Python\\Python313\\python.exe"
+        ],
+        "systemDisk": {
+          "Used": 236560257024,
+          "Free": 18596241408
+        }
+      }
+    },
+    "quang": {
+      "exitCode": 0,
+      "stderr": "#< CLIXML\n<Objs Version=\"1.1.0.1\" xmlns=\"http://schemas.microsoft.com/powershell/2004/04\"><Obj S=\"progress\" RefId=\"0\"><TN RefId=\"0\"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N=\"SourceId\">1</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj><Obj S=\"progress\" RefId=\"1\"><TNRef RefId=\"0\" /><MS><I64 N=\"SourceId\">1</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj><Obj S=\"progress\" RefId=\"2\"><TNRef RefId=\"0\" /><MS><I64 N=\"SourceId\">2</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>",
+      "result": {
+        "os": {
+          "Caption": "Microsoft Windows 11 Pro",
+          "Version": "10.0.26200"
+        },
+        "commands": [
+          {
+            "Name": "python.exe",
+            "Source": "C:\\Program Files\\Python313\\python.exe",
+            "CommandType": 32
+          },
+          {
+            "Name": "python3.exe",
+            "Source": "C:\\Users\\Admin\\AppData\\Local\\Microsoft\\WindowsApps\\python3.exe",
+            "CommandType": 32
+          },
+          {
+            "Name": "py.exe",
+            "Source": "C:\\Users\\Admin\\AppData\\Local\\Programs\\Python\\Launcher\\py.exe",
+            "CommandType": 32
+          }
+        ],
+        "pythonPaths": [],
+        "systemDisk": {
+          "Used": 160092286976,
+          "Free": 5376147456
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "gpu": "NVIDIA GeForce RTX 3060",
+  "torch": "2.13.0+cu132",
+  "model": "tiny",
+  "modelFiles": {
+    "config.json": "486bedda3a6988332e60d9638a09ca4b260d34ebcf1b19e22cf3b140b63d8fe9",
+    "eval_results.json": "637daaebe7aa8af0e678f9e79ec33fa29f8635090d45ec813f0e7474320d7351",
+    "generation_config.json": "18046d04f5bd8b4998095ecabdd17a1bf0053d9acdccead4a05be4a3575f3c5c",
+    "model.safetensors": "6e6001da2106d4757498752a021df6c2bdc332c650aae4bae6b0c004dcf14933",
+    "special_tokens_map.json": "82d96d7a9e6ced037f12394b7ea6a5b02e6ca87e0d11edaa8d60d9be857ce7db",
+    "tokenizer.json": "bcd04f0eadf90287bd26e1a183ac487d8a141b09b06aecb7725bbdd343640f2e",
+    "tokenizer.model": "9e556afd44213b6bd1be2b850ebbbd98f5481437a8021afaf58ee7fb1818d347",
+    "tokenizer_config.json": "7b41ba7d0eb91e77914ca3dafde559ea3e19878769b7e68409e89bed5222e77a"
+  },
+  "sourceSha256": "ab449d3cca8bdb0fec3d3aabbf30081f94969c16943bb0631a2c03f91ab07a10",
+  "strictCudaSha256": "f95b75acbe1c0f907257af2aa3607745b645984302a448fdec7175d5649ee7a9",
+  "cases": [
+    {
+      "case": "short32",
+      "batch": 32,
+      "outputTokens": 32,
+      "secondsSamples": {
+        "strict_attention": [
+          1.6141351140104234,
+          1.615643070981605,
+          1.6096272379800212,
+          1.6084560350282118,
+          1.6101347859948874,
+          1.6119037180033047,
+          1.609865065984195,
+          1.6135555049986579,
+          1.6162214259966277,
+          1.6173480979923625
+        ],
+        "strict_attention_gqa": [
+          1.5470272719976492,
+          1.5464990740001667,
+          1.5516948470030911,
+          1.5385298229812179,
+          1.5392783370043617,
+          1.5424555000208784,
+          1.5428938080149237,
+          1.5473900650104042,
+          1.5472164349921513,
+          1.5500810130033642
+        ]
+      },
+      "medianTokensPerSecond": {
+        "strict_attention": 634.9483463920244,
+        "strict_attention_gqa": 662.0276574174184
+      },
+      "ratio": 1.0426480534665017,
+      "tokensEqual": true,
+      "tokensSha256": "db262d7ab9fa09fb7ad5749d3a474a1fc8316089a958d10457dd2a908bb9610a"
+    }
+  ],
+  "status": "ok"
+}

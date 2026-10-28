@@ -1,0 +1,52 @@
+{
+  "status": "ok",
+  "hardwareQualified": false,
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.13.9 (tags/v3.13.9:8183fa5, Oct 14 2025, 14:09:13) [MSC v.1944 64 bit (AMD64)]",
+  "executable": "C:\\Users\\Thao Nguyen\\.cache\\heteroes-native-strict-20261025-01\\venv\\Scripts\\python.exe",
+  "limits": "Native source tests, finite trained Qwen tile-vs-stream comparison and first native ABAB timing. No managed lifecycle, installer or universal qualification.",
+  "sourceArchiveSha256": "ae2d1ee122b1847aeaaa164e43461f1673351cacba2ea3c8b2f9d68688809165",
+  "sourceManifestEqual": true,
+  "sourceFileCount": 483,
+  "commit": "96bec7d150dcb522e8695778ba6a93a1163e8e3e",
+  "torch": "2.13.0+cu132",
+  "transformers": "5.17.0",
+  "cuda": "13.2",
+  "gpu": "NVIDIA GeForce RTX 3060",
+  "cc": [
+    8,
+    6
+  ],
+  "nvrtcResult": [
+    0,
+    13,
+    2
+  ],
+  "nvdisasm": "C:\\Users\\Thao Nguyen\\.cache\\heteroes-native-strict-20261025-01\\venv\\Lib\\site-packages\\nvidia\\cu13\\bin\\nvdisasm.EXE",
+  "pytestExitCode": 0,
+  "trainedQwenParityExitCode": 0,
+  "bench": [
+    {
+      "label": "base",
+      "round": "01",
+      "exitCode": 0
+    },
+    {
+      "label": "new",
+      "round": "01",
+      "exitCode": 0
+    },
+    {
+      "label": "base",
+      "round": "02",
+      "exitCode": 0
+    },
+    {
+      "label": "new",
+      "round": "02",
+      "exitCode": 0
+    }
+  ],
+  "sourceManifestUnchangedAfter": true,
+  "wallSeconds": 2089.450723899994
+}

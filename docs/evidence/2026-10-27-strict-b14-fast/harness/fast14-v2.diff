@@ -1,0 +1,49 @@
+--- a/runtime/src/heteroes/eval/integer_cuda.py
++++ b/runtime/src/heteroes/eval/integer_cuda.py
+@@ -496,10 +496,13 @@
+ }
+ 
+ #if FAST_CONVERT
+-#if MAGNITUDE_BITS != 22
+-#error "The byte-digit conversion is proved for B22 only (B14 row scales can be negative)"
+-#endif
++
+ __device__ __forceinline__ unsigned digit_source(u16 h, unsigned scale) {
++#if MAGNITUDE_BITS == 14
++  // B14's exponent adjustment can be negative. Handle zero and nonfinite patterns before bit scaling.
++  unsigned absolute=h&0x7fffu;
++  if(!absolute || absolute>=0x7c00u) return 0x4b008080u;
++#endif
+   // Same exact exponent-bit scaling as quant_half; B22 adds s<<23 with s=21-exponent in [6,45]. A zero half
+   // becomes a normal float of magnitude below 2^-80. An Inf/NaN half (exponent field 255) wraps modulo 2^32
+   // to exponent field s-1 with any sign: also below 2^-80. Both round to integer zero, as quant_half returns
+@@ -522,7 +525,9 @@
+   unsigned t01=prmt(v0,v1,0x5140u), t23=prmt(v2,v3,0x5140u);
+   digits[0]=prmt(t01,t23,0x5410u)^0x80808080u;
+   digits[1]=prmt(t01,t23,0x7632u)^0x80808080u;
++#if DIGITS == 3
+   digits[2]=prmt(prmt(v0,v1,0x0062u),prmt(v2,v3,0x0062u),0x5410u);
++#endif
+ }
+ #else
+ __device__ __forceinline__ void convert4(unsigned* digits, unsigned h01, unsigned h23, int exponent) {
+@@ -1128,7 +1133,7 @@
+                 PACKED_INPUT=int(packed_input),
+                 WEIGHT_READ32=int(paired),
+                 WEIGHT_PREFETCH=int(prefetch),
+-                FAST_CONVERT=int(self.magnitude_bits == 22),
++                FAST_CONVERT=1,
+                 JN=columns // 32,
+                 **(
+                     {"STAGES": PREFILL_STAGES, "STREAM_MIN_BLOCKS": PREFILL_MIN_BLOCKS}
+--- a/runtime/src/heteroes/eval/integer_lm_head.py
++++ b/runtime/src/heteroes/eval/integer_lm_head.py
+@@ -322,7 +322,7 @@
+     unchecked = "__device__ __forceinline__ float bound_encode" + unchecked
+     unchecked = unchecked.replace("int scale,int* error", "int scale").replace("atomicOr(error,1);", "")
+     conversion = ic._SOURCE[
+-        ic._SOURCE.index("#if FAST_CONVERT\n#if MAGNITUDE_BITS") : ic._SOURCE.index(
++        ic._SOURCE.index("#if FAST_CONVERT\n") : ic._SOURCE.index(
+             "// Split partials of matrix columns"
+         )
+     ]

@@ -1,0 +1,181 @@
+FFFFFF                                                                   [100%]
+=================================== FAILURES ===================================
+_____________ test_heartbeat_continues_while_result_delivery_waits _____________
+
+api = <heteroes.worker_api.WorkerAPI object at 0x7b6509bdae70>
+
+    def test_heartbeat_continues_while_result_delivery_waits(api):
+        sending, beat, release = threading.Event(), threading.Event(), threading.Event()
+        inner = local_transport(api)
+    
+        def transport(op, payload):
+            if op == "submit_result":
+                sending.set()
+                assert release.wait(3)
+            if op == "heartbeat" and sending.is_set():
+                beat.set()
+            return inner(op, payload)
+    
+        worker = Worker("worker-a", transport, lambda d: 0.5, heartbeat_seconds=0.01)
+        results = []
+        thread = threading.Thread(target=lambda: results.append(worker.step()), daemon=True)
+        thread.start()
+        assert sending.wait(3)
+        try:
+>           assert beat.wait(1), "delivery must not end the heartbeat before its terminal ACK"
+E           AssertionError: delivery must not end the heartbeat before its terminal ACK
+E           assert False
+E            +  where False = wait(1)
+E            +    where wait = <threading.Event at 0x7b6509bdb530: unset>.wait
+
+tests/ledger/test_worker_delivery.py:38: AssertionError
+_______________ test_heartbeat_continues_between_pending_retries _______________
+
+api = <heteroes.worker_api.WorkerAPI object at 0x7b6509bdb890>
+
+    def test_heartbeat_continues_between_pending_retries(api):
+        failed, beat = threading.Event(), threading.Event()
+        inner = local_transport(api)
+    
+        def transport(op, payload):
+            if op == "submit_result" and not failed.is_set():
+                failed.set()
+                raise ConnectionError("lost response")
+            if op == "heartbeat" and failed.is_set():
+                beat.set()
+            return inner(op, payload)
+    
+        worker = Worker("worker-a", transport, lambda d: 0.5, transient_errors=(ConnectionError,), heartbeat_seconds=0.01)
+        try:
+            with pytest.raises(ConnectionError):
+                worker.step()
+>           assert beat.wait(1), "pending delivery must keep renewing its lease"
+E           AssertionError: pending delivery must keep renewing its lease
+E           assert False
+E            +  where False = wait(1)
+E            +    where wait = <threading.Event at 0x7b6509bda6f0: unset>.wait
+
+tests/ledger/test_worker_delivery.py:61: AssertionError
+
+During handling of the above exception, another exception occurred:
+
+api = <heteroes.worker_api.WorkerAPI object at 0x7b6509bdb890>
+
+    def test_heartbeat_continues_between_pending_retries(api):
+        failed, beat = threading.Event(), threading.Event()
+        inner = local_transport(api)
+    
+        def transport(op, payload):
+            if op == "submit_result" and not failed.is_set():
+                failed.set()
+                raise ConnectionError("lost response")
+            if op == "heartbeat" and failed.is_set():
+                beat.set()
+            return inner(op, payload)
+    
+        worker = Worker("worker-a", transport, lambda d: 0.5, transient_errors=(ConnectionError,), heartbeat_seconds=0.01)
+        try:
+            with pytest.raises(ConnectionError):
+                worker.step()
+            assert beat.wait(1), "pending delivery must keep renewing its lease"
+            assert worker.step().kind is StepKind.COMMITTED
+        finally:
+>           worker.close()
+            ^^^^^^^^^^^^
+E           AttributeError: 'Worker' object has no attribute 'close'
+
+tests/ledger/test_worker_delivery.py:64: AttributeError
+________ test_restart_replays_exact_result_before_leasing_or_evaluating ________
+
+api = <heteroes.worker_api.WorkerAPI object at 0x7b65083480b0>
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-42/test_restart_replays_exact_res0')
+
+    def test_restart_replays_exact_result_before_leasing_or_evaluating(api, tmp_path):
+        calls = []
+        inner = local_transport(api)
+    
+        def lost_ack(op, payload):
+            reply = inner(op, payload)
+            if op == "submit_result":
+                raise ConnectionError("committed, but ACK lost")
+            return reply
+    
+        args = dict(outbox_path=tmp_path / "outbox.json", outbox_scope="run-and-endpoint")
+>       first = Worker("worker-a", lost_ack, lambda d: 0.75, transient_errors=(ConnectionError,), **args)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Worker.__init__() got an unexpected keyword argument 'outbox_path'
+
+tests/ledger/test_worker_delivery.py:78: TypeError
+__________ test_restore_fault_poison_survives_lost_report_and_restart __________
+
+api = <heteroes.worker_api.WorkerAPI object at 0x7b6508348380>
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-42/test_restore_fault_poison_surv0')
+
+    def test_restore_fault_poison_survives_lost_report_and_restart(api, tmp_path):
+        inner, calls = local_transport(api), []
+    
+        def transport(op, payload):
+            calls.append(op)
+            if op == "report_failure":
+                raise ConnectionError("offline")
+            return inner(op, payload)
+    
+        def dirty(descriptor):
+            raise CandidateFailed(FailureKind.RESTORE_MISMATCH)
+    
+        args = dict(outbox_path=tmp_path / "outbox.json", outbox_scope="run", transient_errors=(ConnectionError,))
+>       first = Worker("worker-a", transport, dirty, **args)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Worker.__init__() got an unexpected keyword argument 'outbox_path'
+
+tests/ledger/test_worker_delivery.py:106: TypeError
+_ test_outbox_cannot_cross_worker_or_endpoint_recipe_scope[another-worker-run] _
+
+api = <heteroes.worker_api.WorkerAPI object at 0x7b65083483b0>
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-42/test_outbox_cannot_cross_worke0')
+worker = 'another-worker', scope = 'run'
+
+    @pytest.mark.parametrize("worker,scope", [("another-worker", "run"), ("worker-a", "other-run")])
+    def test_outbox_cannot_cross_worker_or_endpoint_recipe_scope(api, tmp_path, worker, scope):
+        inner = local_transport(api)
+    
+        def offline(op, payload):
+            if op == "submit_result":
+                raise ConnectionError("offline")
+            return inner(op, payload)
+    
+        path = tmp_path / "outbox.json"
+>       first = Worker("worker-a", offline, lambda d: 0.5, transient_errors=(ConnectionError,), outbox_path=path, outbox_scope="run")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Worker.__init__() got an unexpected keyword argument 'outbox_path'
+
+tests/ledger/test_worker_delivery.py:132: TypeError
+_ test_outbox_cannot_cross_worker_or_endpoint_recipe_scope[worker-a-other-run] _
+
+api = <heteroes.worker_api.WorkerAPI object at 0x7b650834bf20>
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-42/test_outbox_cannot_cross_worke1')
+worker = 'worker-a', scope = 'other-run'
+
+    @pytest.mark.parametrize("worker,scope", [("another-worker", "run"), ("worker-a", "other-run")])
+    def test_outbox_cannot_cross_worker_or_endpoint_recipe_scope(api, tmp_path, worker, scope):
+        inner = local_transport(api)
+    
+        def offline(op, payload):
+            if op == "submit_result":
+                raise ConnectionError("offline")
+            return inner(op, payload)
+    
+        path = tmp_path / "outbox.json"
+>       first = Worker("worker-a", offline, lambda d: 0.5, transient_errors=(ConnectionError,), outbox_path=path, outbox_scope="run")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Worker.__init__() got an unexpected keyword argument 'outbox_path'
+
+tests/ledger/test_worker_delivery.py:132: TypeError
+=========================== short test summary info ============================
+FAILED tests/ledger/test_worker_delivery.py::test_heartbeat_continues_while_result_delivery_waits
+FAILED tests/ledger/test_worker_delivery.py::test_heartbeat_continues_between_pending_retries
+FAILED tests/ledger/test_worker_delivery.py::test_restart_replays_exact_result_before_leasing_or_evaluating
+FAILED tests/ledger/test_worker_delivery.py::test_restore_fault_poison_survives_lost_report_and_restart
+FAILED tests/ledger/test_worker_delivery.py::test_outbox_cannot_cross_worker_or_endpoint_recipe_scope[another-worker-run]
+FAILED tests/ledger/test_worker_delivery.py::test_outbox_cannot_cross_worker_or_endpoint_recipe_scope[worker-a-other-run]
+6 failed in 2.09s

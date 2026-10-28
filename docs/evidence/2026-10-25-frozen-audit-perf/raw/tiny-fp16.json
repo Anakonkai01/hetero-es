@@ -1,0 +1,130 @@
+{
+  "header": {
+    "kind": "header",
+    "label": "tiny-fp16",
+    "engine": "fp16",
+    "host": "5070ti",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "gpu": "NVIDIA GeForce RTX 5070 Ti",
+    "torch": "2.13.0+cu132",
+    "cuda": "13.2",
+    "modelPath": ".scratch/strict-integer-20261025/models/tiny",
+    "promptTokens": [
+      12,
+      32,
+      21,
+      56,
+      17,
+      86,
+      11,
+      10
+    ],
+    "promptDigest": "a79657638c3a2ec323cef45b0aedc6bad1548d557c4596ab2c430beeae82ef61",
+    "workload": {
+      "prompts": 8,
+      "maxNewTokens": 32,
+      "maxContext": 512,
+      "greedy": true,
+      "prefixCache": false,
+      "repeats": 5
+    }
+  },
+  "identity": {
+    "kind": "identity",
+    "label": "tiny-fp16",
+    "backend": "decoder_vendor_fp16_gemm_cuda_graph_v1_experimental",
+    "fingerprint": "ccaff6840ece1c36751f204115dfb4dfb747aa2f1342aae29c4aec955b34de36",
+    "loadSeconds": 1.4595575390121667,
+    "prepareSeconds": 0.0,
+    "device": "NVIDIA GeForce RTX 5070 Ti"
+  },
+  "results": [
+    {
+      "kind": "result",
+      "label": "tiny-fp16",
+      "engine": "fp16",
+      "device": "NVIDIA GeForce RTX 5070 Ti",
+      "batch": 1,
+      "seconds": [
+        0.119234615995083,
+        0.1181147309980588,
+        0.11813818200607784,
+        0.11804394899809267,
+        0.11801239899068605
+      ],
+      "medianSeconds": 0.1181147309980588,
+      "millisecondsPerStep": 3.6910853436893376,
+      "tokensPerSecond": 270.9230231454019,
+      "equal": true,
+      "sample": [
+        29871,
+        29946,
+        13,
+        13,
+        28956,
+        13,
+        13,
+        797
+      ],
+      "peakMemoryBytes": 3541209088
+    },
+    {
+      "kind": "result",
+      "label": "tiny-fp16",
+      "engine": "fp16",
+      "device": "NVIDIA GeForce RTX 5070 Ti",
+      "batch": 8,
+      "seconds": [
+        0.1556403830036288,
+        0.15482357100700028,
+        0.15456527199421544,
+        0.15465646599477623,
+        0.15433655999368057
+      ],
+      "medianSeconds": 0.15465646599477623,
+      "millisecondsPerStep": 4.833014562336757,
+      "tokensPerSecond": 1655.2815839503717,
+      "equal": true,
+      "sample": [
+        29871,
+        29946,
+        13,
+        13,
+        28956,
+        13,
+        13,
+        797
+      ],
+      "peakMemoryBytes": 3757102080
+    },
+    {
+      "kind": "result",
+      "label": "tiny-fp16",
+      "engine": "fp16",
+      "device": "NVIDIA GeForce RTX 5070 Ti",
+      "batch": 32,
+      "seconds": [
+        0.2117493379919324,
+        0.211128336013644,
+        0.21075000500422902,
+        0.21058565701241605,
+        0.21076533698942512
+      ],
+      "medianSeconds": 0.21076533698942512,
+      "millisecondsPerStep": 6.586416780919535,
+      "tokensPerSecond": 4858.483916885147,
+      "equal": true,
+      "sample": [
+        29871,
+        29946,
+        13,
+        13,
+        28956,
+        13,
+        13,
+        797
+      ],
+      "peakMemoryBytes": 4481934336
+    }
+  ]
+}

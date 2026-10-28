@@ -1,0 +1,11 @@
+{
+  "formatVersion": 1,
+  "uuid": "10443D1F443D094C",
+  "encryptedArchive": "2026-10-11-m3-close-independent.tar.gz.gpg",
+  "sha256": "a5474a20c8da1d8f54daa8bad9abf5c8393c58852e61811c5fc21e1ce0ecc4bb",
+  "sizeBytes": 9964469814,
+  "sourceBytes": 11240469809,
+  "restoredFiles": 140,
+  "restoreVerified": true,
+  "independentFileBytes": true
+}

@@ -1,0 +1,15 @@
+{
+  "nativeWindows": true,
+  "restartPassed": true,
+  "deviceId": "106afff249ef4882b37943fddadc3fe7",
+  "installed": true,
+  "selfTestPersisted": true,
+  "bootId": "94f093745ffd4339b17e8eb1b0c69ebc",
+  "contributionEnabledAfterRestart": false,
+  "dataFolder": "D:\\HeteroES-Worker-data",
+  "originalWorkerDataPreservedInPrivateBackup": true,
+  "limits": [
+    "No two-machine generation has run yet.",
+    "The new isolated pairing is separate from the revoked live device."
+  ]
+}

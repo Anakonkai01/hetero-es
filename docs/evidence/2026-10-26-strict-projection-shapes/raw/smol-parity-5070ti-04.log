@@ -1,0 +1,2 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7366.18it/s]
+{"status": "ok", "out": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/claude-projection-20261026/run2/out-local/smol-parity-5070ti-04.json", "wallSeconds": 17.697026333000395}

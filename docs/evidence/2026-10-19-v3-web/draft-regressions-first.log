@@ -1,0 +1,25 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+________ test_v3_config_and_worker_command_preserve_the_frozen_options _________
+backend/tests/test_v3_study.py:130: in test_v3_config_and_worker_command_preserve_the_frozen_options
+    assert run["modelVersion"] == model["revision"]
+E   AssertionError: assert '7ae557604adf...2f167def9a775' == 'eeeeeeeeeeee...eeeeeeeeeeeee'
+E     
+E     - eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+E     + 7ae557604adf67be50417f59c2c2f167def9a775
+____________ test_editing_a_v3_draft_replaces_its_old_recipe_fields ____________
+backend/tests/test_v3_study.py:312: in test_editing_a_v3_draft_replaces_its_old_recipe_fields
+    assert shown.get("recipeVersion", 1) == 1
+E   AssertionError: assert 3 == 1
+E    +  where 3 = <built-in method get of dict object at 0x7f29a82b2580>('recipeVersion', 1)
+E    +    where <built-in method get of dict object at 0x7f29a82b2580> = {'alpha': 0.001, 'antithetic': True, 'backupPolicy': {'interval': 1, 'retain': 3}, 'batchSeed': 11, ...}.get
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_v3_study.py::test_v3_config_and_worker_command_preserve_the_frozen_options
+FAILED backend/tests/test_v3_study.py::test_editing_a_v3_draft_replaces_its_old_recipe_fields
+2 failed, 10 deselected, 1 warning in 0.33s

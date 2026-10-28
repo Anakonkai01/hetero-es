@@ -1,0 +1,8 @@
+{
+  "stage": "test-before-implementation",
+  "command": "CUDA_VISIBLE_DEVICES='' PYTHONPATH=src python -m pytest -q tests/eval/test_phase_trace.py",
+  "cwd": "runtime",
+  "exitCode": 2,
+  "result": "Collection failed: heteroes.eval.phase_trace does not exist yet",
+  "limit": "This establishes the new helper was absent, not that later integration or GPU checks passed."
+}

@@ -1,0 +1,33 @@
+{
+  "formatVersion": 1,
+  "stage": "permissions-updated-standalone-probes",
+  "localNvidiaDeviceAccessible": true,
+  "ssh": [
+    {
+      "account": "thao_nguyen",
+      "address": "100.92.20.58",
+      "keyAuthentication": "ok",
+      "gpu": "RTX 3060",
+      "driver": "617.42",
+      "os": "WSL2"
+    },
+    {
+      "account": "quang",
+      "address": "100.99.227.8",
+      "keyAuthentication": "ok",
+      "gpu": "RTX 3060",
+      "driver": "617.42",
+      "os": "WSL2"
+    }
+  ],
+  "localGpu": {
+    "gpu": "RTX 5070 Ti",
+    "driver": "595.91.07"
+  },
+  "sudoUsed": false,
+  "labOrDeviceStateChanged": false,
+  "quangInitialCudaFailure": "SIGSEGV in system libnvidia-ptxjitcompiler.so.580.178.04 during torch.cuda.is_available",
+  "processLocalFix": "LD_LIBRARY_PATH selects /usr/lib/wsl/drivers/nv_dispi.inf_amd64_feedb8c0271ca811 before /usr/lib/wsl/lib; Windows-provided JIT loads instead of the system copy",
+  "remoteScratch": "/tmp/heteroes-review-20261024-01",
+  "limits": "Read-only existing runtimes/models; copied source and fresh probe receipts to isolated scratch. No driver installation, service restart or deployment."
+}

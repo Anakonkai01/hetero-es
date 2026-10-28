@@ -1,0 +1,28 @@
+{
+  "experimentId": "1a69e4c4c45b40179cd7f5cff0e49318",
+  "status": "COMPLETED",
+  "createdAt": "2026-10-22T17:12:50.360930+00:00",
+  "startedAt": "2026-10-22T17:12:51.002824+00:00",
+  "completedAt": "2026-10-22T17:17:00.360120+00:00",
+  "completedGenerations": 4,
+  "auditSummary": {
+    "completed": 8,
+    "selected": 8,
+    "mismatches": 0,
+    "quarantinedWorkers": []
+  },
+  "usageSummary": {
+    "generatedTokens": 11103,
+    "auditGeneratedTokens": 398,
+    "workerWallSeconds": 193.8919875228894,
+    "workerGpuSeconds": 193.8919875228894,
+    "coordinatorUpdateGpuSeconds": 43.23607219502446,
+    "gpuSeconds": 237.12805971791386,
+    "reportedCandidates": 192,
+    "reportedAudits": 8,
+    "recordedUpdates": 4,
+    "partial": false,
+    "scope": "successful worker executions and coordinator updates"
+  },
+  "validationScore": 0.5
+}

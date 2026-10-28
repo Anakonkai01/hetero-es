@@ -1,0 +1,104 @@
+{
+ "format": 1,
+ "model": "/home/pc5070ti/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775",
+ "task": "countdown",
+ "dtype": "float32",
+ "max_new_tokens": 512,
+ "processors": [
+  "RepetitionPenaltyLogitsProcessor"
+ ],
+ "eos_ids": [
+  151645,
+  151643
+ ],
+ "pad": 151643,
+ "gpu": "NVIDIA GeForce RTX 5070 Ti",
+ "torch": "2.13.0+cu132",
+ "drop_fraction": 0.1,
+ "records": [
+  {
+   "seed": null,
+   "chunk": 64,
+   "library_seconds": 25.86256041300112,
+   "compact_seconds": 22.2184131920003,
+   "library_slots": 65536,
+   "compact_slots": 56939,
+   "answer_tokens_mean": 431.8671875,
+   "answer_tokens_max": 512,
+   "answers_at_limit": 65,
+   "compaction_supported": true,
+   "different_questions": [],
+   "texts_sha256": "6f767d21ae79b2cde9cb824fb00d6dad1a205801aace8c50ddc0fcdae3e4d5bb"
+  },
+  {
+   "seed": null,
+   "chunk": 128,
+   "library_seconds": 23.94263835899983,
+   "compact_seconds": 20.236178187000405,
+   "library_slots": 65536,
+   "compact_slots": 57043,
+   "answer_tokens_mean": 431.8671875,
+   "answer_tokens_max": 512,
+   "answers_at_limit": 65,
+   "compaction_supported": true,
+   "different_questions": [],
+   "texts_sha256": "6f767d21ae79b2cde9cb824fb00d6dad1a205801aace8c50ddc0fcdae3e4d5bb"
+  },
+  {
+   "seed": 7001,
+   "chunk": 64,
+   "library_seconds": 25.845278177999717,
+   "compact_seconds": 17.158891692999532,
+   "library_slots": 65536,
+   "compact_slots": 43088,
+   "answer_tokens_mean": 330.6875,
+   "answer_tokens_max": 512,
+   "answers_at_limit": 30,
+   "compaction_supported": true,
+   "different_questions": [],
+   "texts_sha256": "fd10cab7841ecdb6bbf2d71adb1641217fc44f6f2815bf287b125cd9553667e2"
+  },
+  {
+   "seed": 7001,
+   "chunk": 128,
+   "library_seconds": 23.906720724999104,
+   "compact_seconds": 14.834747368000535,
+   "library_slots": 65536,
+   "compact_slots": 43246,
+   "answer_tokens_mean": 330.6875,
+   "answer_tokens_max": 512,
+   "answers_at_limit": 30,
+   "compaction_supported": true,
+   "different_questions": [],
+   "texts_sha256": "fd10cab7841ecdb6bbf2d71adb1641217fc44f6f2815bf287b125cd9553667e2"
+  },
+  {
+   "seed": 7002,
+   "chunk": 64,
+   "library_seconds": 25.839581721000286,
+   "compact_seconds": 19.786398238999027,
+   "library_slots": 65536,
+   "compact_slots": 50406,
+   "answer_tokens_mean": 384.5,
+   "answer_tokens_max": 512,
+   "answers_at_limit": 47,
+   "compaction_supported": true,
+   "different_questions": [],
+   "texts_sha256": "ab87cb00be7dfad73b815c0e9a8d8c625f84dd193f9d6c10f7dbde972d0d8cec"
+  },
+  {
+   "seed": 7002,
+   "chunk": 128,
+   "library_seconds": 23.92673751700022,
+   "compact_seconds": 17.67155371899935,
+   "library_slots": 65536,
+   "compact_slots": 50667,
+   "answer_tokens_mean": 384.5,
+   "answer_tokens_max": 512,
+   "answers_at_limit": 47,
+   "compaction_supported": true,
+   "different_questions": [],
+   "texts_sha256": "ab87cb00be7dfad73b815c0e9a8d8c625f84dd193f9d6c10f7dbde972d0d8cec"
+  }
+ ]
+}

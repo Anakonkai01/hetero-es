@@ -1,0 +1,70 @@
+...........................................................F
+=================================== FAILURES ===================================
+_ test_cuda_mma_matches_cpu_for_odd_shapes_tails_scales_and_execution_tiles[768-14] _
+
+magnitude_bits = 14, width = 768
+
+    @gpu
+    @pytest.mark.parametrize("magnitude_bits", [14, 22])
+    @pytest.mark.parametrize("width", [1, 3, 31, 32, 33, 67, 129, 768, 1024, 2048, 4096, 32768])
+    def test_cuda_mma_matches_cpu_for_odd_shapes_tails_scales_and_execution_tiles(magnitude_bits, width):
+        gen = torch.Generator().manual_seed(width)
+        x = torch.randn(19, width, generator=gen)
+        x[1] = -0.0
+        x[2] *= 1e-38
+        w = (torch.randn(11, width, generator=gen) * 0.03).half()
+        b = (torch.randn(11, generator=gen) * 0.1).half()
+        expected = reference.linear(x, w, b, magnitude_bits=magnitude_bits)
+        kernels = cuda_class()("cuda", magnitude_bits=magnitude_bits)
+        for tile, warps in ((16, 4), (32, 4), (32, 8)):
+>           actual = kernels.linear(x.cuda(), w.cuda(), b.cuda(), row_tile=tile, warps=warps)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/eval/test_integer_cuda.py:75: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+src/heteroes/eval/integer_cuda.py:334: in linear
+    functions = self._integer_functions(width, bias is not None, row_tile, warps, split_k)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/heteroes/eval/integer_cuda.py:284: in _integer_functions
+    self._functions[name] = self._compile(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <heteroes.eval.integer_cuda.IntegerCudaKernels object at 0x76c68c256a50>
+name = 'integer-14-768-bias1-m16-w4-s1'
+source = '#define WIDTH 768\n#define MAGNITUDE_BITS 14\n#define DIGITS 2\n#define HAS_BIAS 1\n#define M_GROUPS 1\n#define WARPS...n    out[(size_t)row*outputs+n]=v;\n    if((__float_as_uint(v)&0x7f800000u)==0x7f800000u) atomicOr(error,1);\n  }\n}\n'
+entries = ['integer_input', 'integer_weights', 'integer_linear', 'integer_simt', 'integer_finish']
+ptx_exact = (), sass_exact = (), integer_mma = True
+
+    def _compile(self, name, source, entries, *, ptx_exact=(), sass_exact=(), integer_mma=False):
+        nvrtc = self._nvrtc
+        program = _check(nvrtc.nvrtcCreateProgram(source.encode(), f"{name}.cu".encode(), 0, [], []))
+        options = [f"--gpu-architecture={self.arch}".encode(), *(o.encode() for o in NVRTC_OPTIONS)]
+        try:
+            status = nvrtc.nvrtcCompileProgram(program, len(options), options)[0]
+            if int(status) != 0:
+                size = _check(nvrtc.nvrtcGetProgramLogSize(program))
+                log = b" " * size
+                nvrtc.nvrtcGetProgramLog(program, log)
+                raise ReferenceArithmeticError(f"Strict kernel compilation failed: {log.decode(errors='replace')}")
+            ptx = b" " * _check(nvrtc.nvrtcGetPTXSize(program))
+            _check(nvrtc.nvrtcGetPTX(program, ptx))
+            cubin = b" " * _check(nvrtc.nvrtcGetCUBINSize(program))
+            _check(nvrtc.nvrtcGetCUBIN(program, cubin))
+        finally:
+            nvrtc.nvrtcDestroyProgram(program)
+        ptx_text = ptx.rstrip(b"\0").decode()
+        ptx_audit = audit_integer_ptx(ptx_text) if integer_mma else audit_ptx(ptx_text, ptx_exact)
+        sass_audit = self._audit_cubin(cubin, sass_exact, integer_mma=integer_mma)
+        violations = ptx_audit["violations"] + ([] if sass_audit == "unavailable" else sass_audit["violations"])
+        if violations:
+>           raise ReferenceArithmeticError(f"Compiled strict kernel failed its instruction audit: {violations[:5]}")
+E           heteroes.eval.reference_ops.ReferenceArithmeticError: Compiled strict kernel failed its instruction audit: ['I2F.U32.RP R10, R2 ;', 'MUFU.RCP R10, R10 ;', 'F2I.FTZ.U32.TRUNC.NTZ R7, R6 ;']
+
+src/heteroes/eval/strict_cuda.py:725: ReferenceArithmeticError
+=========================== short test summary info ============================
+FAILED tests/eval/test_integer_cuda.py::test_cuda_mma_matches_cpu_for_odd_shapes_tails_scales_and_execution_tiles[768-14]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 59 passed in 20.02s

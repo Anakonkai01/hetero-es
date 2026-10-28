@@ -1,0 +1,42 @@
+F
+=================================== FAILURES ===================================
+_ test_integer_split_k_is_exact_for_global_row_scales_cancellation_and_partial_last_chunks[14] _
+
+magnitude_bits = 14
+
+    @gpu
+    @pytest.mark.parametrize("magnitude_bits", [14, 22])
+    def test_integer_split_k_is_exact_for_global_row_scales_cancellation_and_partial_last_chunks(magnitude_bits):
+        gen = torch.Generator().manual_seed(192)
+        x = torch.randn(19, 263, generator=gen)
+        x[0, -1] = 65504.0
+        x[1] = -0.0
+        w = (torch.randn(37, 263, generator=gen) * 0.02).half()
+        w[0, -1] = 1024.0
+        w[1] = -w[0]
+        expected = reference.linear(x, w, magnitude_bits=magnitude_bits)
+        kernels = cuda_class()("cuda", magnitude_bits=magnitude_bits)
+        for split in (1, 2, 4, 8):
+>           actual = kernels.linear(x.cuda(), w.cuda(), split_k=split)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/eval/test_integer_cuda.py:128: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (<heteroes.eval.integer_cuda.IntegerCudaKernels object at 0x7b724f0a7f80>, tensor([[ 2.0044e+00,  1.3548e+00,  7.0711e...1.8005e-02, -9.2697e-03,  ...,  7.7934e-03,
+          1.5823e-02,  7.3853e-03]], device='cuda:0', dtype=torch.float16))
+kwargs = {'split_k': 1}
+
+    @functools.wraps(func)
+    def decorate_context(*args, **kwargs):
+        # pyrefly: ignore [bad-context-manager]
+        with ctx_factory():
+>           return func(*args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: IntegerCudaKernels.linear() got an unexpected keyword argument 'split_k'
+
+../../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: TypeError
+=========================== short test summary info ============================
+FAILED tests/eval/test_integer_cuda.py::test_integer_split_k_is_exact_for_global_row_scales_cancellation_and_partial_last_chunks[14]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 37 deselected in 1.04s

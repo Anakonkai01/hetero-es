@@ -1,0 +1,74 @@
+[
+ {
+  "name": "join-skips-eligibility",
+  "file": "backend/agent_scheduling.py",
+  "old": "            if reason := self.waiting_reason(body, db, [worker_id]) or self.store.eligibility(db, body, [worker_id]):",
+  "new": "            if reason := None:"
+ },
+ {
+  "name": "join-skips-reservation-check",
+  "file": "backend/agent_scheduling.py",
+  "old": "            if db.execute(\"SELECT 1 FROM device_reservations WHERE device_id=?\", (device[\"deviceId\"],)).fetchone():",
+  "new": "            if False:"
+ },
+ {
+  "name": "join-no-reservation",
+  "file": "backend/agent_scheduling.py",
+  "old": "            db.execute(\"INSERT INTO device_reservations VALUES (?,?)\", (device[\"deviceId\"], row[\"id\"]))",
+  "new": "            pass"
+ },
+ {
+  "name": "leave-last-allowed",
+  "file": "backend/agent_scheduling.py",
+  "old": "            if len(members) == 1:\n                raise RuntimeRejected(\"The last member cannot leave\")",
+  "new": "            if False:\n                raise RuntimeRejected(\"The last member cannot leave\")"
+ },
+ {
+  "name": "no-capability-check",
+  "file": "backend/agent_scheduling.py",
+  "old": "        self.require_command(db, row[\"coordinator\"], \"UPDATE_MEMBERSHIP\")",
+  "new": "        pass"
+ },
+ {
+  "name": "grant-shared",
+  "file": "backend/agent_scheduling.py",
+  "old": "            change[\"grant\"] = ar[\"computeGrants\"][worker_id] = secrets.token_urlsafe(32)",
+  "new": "            change[\"grant\"] = ar[\"computeGrants\"][worker_id] = next(iter(ar[\"computeGrants\"].values()))"
+ },
+ {
+  "name": "release-ignores-confirmation",
+  "file": "backend/agent_scheduling.py",
+  "old": "            if device_id is None or not (state.get(\"left\") or (state.get(\"confirmed\") and state.get(\"alive\") is False)):",
+  "new": "            if device_id is None:"
+ },
+ {
+  "name": "auto-join-readds-left",
+  "file": "backend/agent_scheduling.py",
+  "old": "        for worker_id in sorted(workspace - members - left):",
+  "new": "        for worker_id in sorted(workspace - members):"
+ },
+ {
+  "name": "auto-join-ignores-flag",
+  "file": "backend/agent_scheduling.py",
+  "old": "        if not body.get(\"allowJoin\") or body[\"status\"] not in (\"STARTING\", \"RUNNING\"):",
+  "new": "        if body[\"status\"] not in (\"STARTING\", \"RUNNING\"):"
+ },
+ {
+  "name": "off-cancels-anyway",
+  "file": "backend/devices.py",
+  "old": "                    if row[0] not in left:\n                        runtime.cancel(row[0], db=db)",
+  "new": "                    runtime.cancel(row[0], db=db)"
+ },
+ {
+  "name": "resume-forgets-joined",
+  "file": "backend/agent_scheduling.py",
+  "old": "            members = self.intended_members(db, config[\"runId\"], config[\"workerIds\"])",
+  "new": "            members = list(config[\"workerIds\"])"
+ },
+ {
+  "name": "intended-ignores-leave",
+  "file": "backend/agent_scheduling.py",
+  "old": "            elif action == \"LEAVE\" and worker_id in members:\n                members.remove(worker_id)",
+  "new": "            elif False:\n                pass"
+ }
+]

@@ -1,0 +1,13 @@
+{
+  "name": "n96-T2-r1",
+  "outcome": "ok",
+  "wall_seconds": 1432.0911223888397,
+  "spec": {
+    "workers": {
+      "worker-5070ti": 64,
+      "worker-3060": 64
+    },
+    "policy": "greedy",
+    "args": []
+  }
+}

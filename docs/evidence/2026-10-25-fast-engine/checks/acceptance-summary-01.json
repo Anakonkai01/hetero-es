@@ -1,0 +1,14 @@
+{
+  "sourceCommit": "c9a37059fca1d16b142df421a19cebcde0f7cd39",
+  "checkAll": "ALL PASS",
+  "runtimeCpu": {
+    "passed": 3158,
+    "skipped": 459
+  },
+  "backendPassed": 452,
+  "targetedPerGpuPassed": 17,
+  "viewMutantsKilled": 3,
+  "liveMergeMutantsKilled": 1,
+  "linuxPackages": "passed isolated check; not published",
+  "scope": "standalone vendor FP16 ES inference; no managed activation; publication/hashing excluded from inference timings"
+}

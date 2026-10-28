@@ -1,0 +1,44 @@
+[
+  {
+    "name": "unknown-family",
+    "file": "src/heteroes/eval/strict_decoder.py",
+    "old": "FAMILIES.get(family) != type(model).__name__",
+    "new": "False"
+  },
+  {
+    "name": "unsupported-rope",
+    "file": "src/heteroes/eval/strict_decoder.py",
+    "old": "or rope.get(\"rope_type\", \"default\") != \"default\"",
+    "new": "or False"
+  },
+  {
+    "name": "sliding-attention",
+    "file": "src/heteroes/eval/strict_decoder.py",
+    "old": "or getattr(config, \"sliding_window\", None) is not None",
+    "new": "or False"
+  },
+  {
+    "name": "unconsumed-weights",
+    "file": "src/heteroes/eval/strict_decoder.py",
+    "old": "if set(parameters) != set(expected) or any(",
+    "new": "if False or any("
+  },
+  {
+    "name": "norm-epsilon",
+    "file": "src/heteroes/eval/strict_decoder.py",
+    "old": "if getattr(module, \"variance_epsilon\", None) != epsilon:",
+    "new": "if False:"
+  },
+  {
+    "name": "ignore-head-dimension",
+    "file": "src/heteroes/eval/strict_decoder.py",
+    "old": "dim = getattr(config, \"head_dim\", None) or hidden // heads",
+    "new": "dim = hidden // heads"
+  },
+  {
+    "name": "assume-query-width-is-hidden",
+    "file": "src/heteroes/eval/strict_decoder.py",
+    "old": "1, query.shape[2], self.config.num_attention_heads * self.head_dim",
+    "new": "1, query.shape[2], self.config.hidden_size"
+  }
+]

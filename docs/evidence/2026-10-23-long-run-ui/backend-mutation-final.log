@@ -1,0 +1,6 @@
+control ok    | 2 passed, 1 warning in 0.52s
+killed       stale-shutdown-message-persists | 1 failed, 1 passed, 1 warning in 0.51s
+killed       audit-selection-count-comes-from-incomplete-logs | 2 failed, 1 warning in 0.52s
+killed       missing-audits-hidden | 1 failed, 1 passed, 1 warning in 0.52s
+
+3 of 3 mutants killed.

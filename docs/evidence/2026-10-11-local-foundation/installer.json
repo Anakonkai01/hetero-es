@@ -1,0 +1,11 @@
+{
+  "installer": "HeteroES-Worker-0.1.0-20261011-local-Linux.tar.gz",
+  "sizeBytes": 123748844,
+  "sha256": "ea67441c81ebbc0b3794b6d8d8ab003494a601d9e29ebbe06e501b70df8648ee",
+  "packagedSourceSha256": "15805c7518711dee96a362575485d124eedf08dad92806ff8cf0d97da930799e",
+  "hostOs": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+  "hostGpu": "NVIDIA GeForce RTX 5070 Ti, GPU-64187d93-f2bb-d43f-6c63-2547df16a9a4, 595.91.07",
+  "sourceTreeContainsUncommittedImplementationAtQualification": true,
+  "ordinaryOwnerDesktopWalkthrough": false,
+  "distributedCandidateReplayAcceptance": false
+}

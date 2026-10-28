@@ -1,0 +1,12 @@
+{
+  "passed": false,
+  "mismatches": [
+    "candidates"
+  ],
+  "candidateCount": 8,
+  "textCount": 32,
+  "workersRight": [
+    "linux-a",
+    "windows-3060"
+  ]
+}

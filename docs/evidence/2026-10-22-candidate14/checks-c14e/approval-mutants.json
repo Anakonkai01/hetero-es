@@ -1,0 +1,10 @@
+[
+ {"name":"skip signed-out refresh","file":"electron/service.cjs","old":"        if (!deviceToken) return;","new":"        return;"},
+ {"name":"401 not shown as revoked","file":"electron/service.cjs","old":"current = { approvalStatus: 'REVOKED' };","new":"current = undefined;"},
+ {"name":"any failure shown as revoked","file":"electron/service.cjs","old":"error.message === 'LAB_HTTP_401'","new":"error.message"},
+ {"name":"approval not persisted","file":"electron/service.cjs","old":"'approvalStatus', 'keepContributionAfterReboot'];","new":"'keepContributionAfterReboot'];"},
+ {"name":"volatile fields persisted","file":"electron/service.cjs","old":"    this.settings = { ...this.settings, device: { ...saved, ...durable } };","new":"    this.settings = { ...this.settings, device: publicDevice };"},
+ {"name":"summary uses no token","file":"electron/service.cjs","old":"'/api/v1/device/summary', undefined, deviceToken)","new":"'/api/v1/device/summary', undefined, this.userToken)"},
+ {"name":"displayName ignored","file":"electron/service.cjs","old":"...(summary.displayName ? { displayName: summary.displayName } : {}),","new":""},
+ {"name":"signed-in list ignored","file":"electron/service.cjs","old":"current = (await this.api('/api/v1/devices')).find((d) => d.deviceId === this.device.deviceId);","new":"current = undefined;"}
+]

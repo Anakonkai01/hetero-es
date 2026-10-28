@@ -1,0 +1,18 @@
+{
+  "phase": "install",
+  "actualPackagedApp": true,
+  "freshIsolatedRuntime": true,
+  "sharedVerifiedDownloadCache": true,
+  "gpuWork": false,
+  "displayEnvironment": "Xvfb; isolated D-Bus and real GNOME libsecret keyring",
+  "ordinaryOwnerDesktopWalkthrough": false,
+  "elapsedSeconds": 31.941,
+  "closeToTray": true,
+  "unenrolledAndOff": true,
+  "packaged": true,
+  "version": "0.1.0",
+  "userData": "/home/pc5070ti/projects/heteroes/.scratch/r11c3-worker2/xdg-config/@heteroes/worker",
+  "encrypted": true,
+  "backend": "gnome_libsecret",
+  "roundtrip": true
+}

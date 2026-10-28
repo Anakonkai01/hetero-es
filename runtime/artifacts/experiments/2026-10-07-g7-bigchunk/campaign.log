@@ -1,0 +1,42 @@
+=== n24-B0x2-r1: {'worker-5070ti': 32, 'worker-5070ti-2': 32} greedy
+    ok in 291 s
+=== n24-B3x2-r1: {'worker-5070ti': 32, 'worker-5070ti-2': 32, 'worker-1660s': 32} greedy
+    ok in 276 s
+=== n24-B4x2-r1: {'worker-5070ti': 32, 'worker-5070ti-2': 32, 'worker-1660s': 32} tail
+    ok in 264 s
+=== n24-B0x2-r2: {'worker-5070ti': 32, 'worker-5070ti-2': 32} greedy
+    ok in 289 s
+=== n24-B3x2-r2: {'worker-5070ti': 32, 'worker-5070ti-2': 32, 'worker-1660s': 32} greedy
+    ok in 276 s
+=== n24-B4x2-r2: {'worker-5070ti': 32, 'worker-5070ti-2': 32, 'worker-1660s': 32} tail
+    ok in 264 s
+=== n24-B0x2-r3: {'worker-5070ti': 32, 'worker-5070ti-2': 32} greedy
+    ok in 289 s
+=== n24-B3x2-r3: {'worker-5070ti': 32, 'worker-5070ti-2': 32, 'worker-1660s': 32} greedy
+    ok in 274 s
+=== n24-B4x2-r3: {'worker-5070ti': 32, 'worker-5070ti-2': 32, 'worker-1660s': 32} tail
+    ok in 264 s
+=== n24-B0x2-r1: {'worker-5070ti': 64, 'worker-5070ti-2': 64} greedy
+    ok in 453 s
+=== n24-B3x2-r1: {'worker-5070ti': 64, 'worker-5070ti-2': 64, 'worker-1660s': 64} greedy
+    ok in 382 s
+=== n24-B4x2-r1: {'worker-5070ti': 64, 'worker-5070ti-2': 64, 'worker-1660s': 64} tail
+    ok in 380 s
+=== n24-B0-r1: {'worker-5070ti': 64} greedy
+    ok in 449 s
+=== n24-B0x2-r2: {'worker-5070ti': 64, 'worker-5070ti-2': 64} greedy
+    ok in 451 s
+=== n24-B3x2-r2: {'worker-5070ti': 64, 'worker-5070ti-2': 64, 'worker-1660s': 64} greedy
+    ok in 382 s
+=== n24-B4x2-r2: {'worker-5070ti': 64, 'worker-5070ti-2': 64, 'worker-1660s': 64} tail
+    ok in 382 s
+=== n24-B0-r2: {'worker-5070ti': 64} greedy
+    ok in 449 s
+=== n24-B0x2-r3: {'worker-5070ti': 64, 'worker-5070ti-2': 64} greedy
+    ok in 455 s
+=== n24-B3x2-r3: {'worker-5070ti': 64, 'worker-5070ti-2': 64, 'worker-1660s': 64} greedy
+    ok in 380 s
+=== n24-B4x2-r3: {'worker-5070ti': 64, 'worker-5070ti-2': 64, 'worker-1660s': 64} tail
+    ok in 380 s
+=== n24-B0-r3: {'worker-5070ti': 64} greedy
+    ok in 447 s

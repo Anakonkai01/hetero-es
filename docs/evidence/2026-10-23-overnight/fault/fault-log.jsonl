@@ -1,0 +1,13 @@
+{"event": "fault_driver_start", "runId": "d1f6ad7bfdb34b47bf6a987a615949f2", "plan": [[6, "kill-nhut-worker"], [14, "cut-nhut-network-180s"], [24, "reboot-nhut"], [34, "kill-windows-app"]], "t": 1792692030.4960814, "iso": "01:00:30"}
+{"event": "fault_begin", "name": "kill-nhut-worker", "generation": 6, "t": 1792692229.661712, "iso": "01:03:49"}
+{"event": "fault_step", "name": "kill-nhut-worker", "rc": 0, "out": "no live worker process found\n", "t": 1792692230.2993884, "iso": "01:03:50"}
+{"event": "fault_begin", "name": "cut-nhut-network-180s", "generation": 14, "t": 1792692349.133215, "iso": "01:05:49"}
+{"event": "fault_step", "name": "cut-nhut-network-180s", "step": "cut", "rc": 0, "out": "", "t": 1792692349.4608977, "iso": "01:05:49"}
+{"event": "fault_step", "name": "cut-nhut-network-180s", "step": "heal", "rc": 1, "out": "0\n", "t": 1792692530.8138342, "iso": "01:08:50"}
+{"event": "fault_begin", "name": "reboot-nhut", "generation": 25, "t": 1792692635.8151758, "iso": "01:10:35"}
+{"event": "fault_step", "name": "reboot-nhut", "rc": 0, "out": "", "t": 1792692636.4312496, "iso": "01:10:36"}
+{"event": "fault_begin", "name": "kill-windows-app", "generation": 34, "t": 1792692873.3434126, "iso": "01:14:33"}
+{"event": "fault_step", "name": "kill-windows-app", "step": "taskkill", "rc": 0, "out": "SUCCESS: The process with PID 2460 (child process of PID 23084) has been terminated.\nSUCCESS: The process with PID 16220 (child process of PID 1928) has been terminated.\nSUCCESS: The process with PID 23084 (child process of PID 1928) has been terminated.\nSUCCESS: The process with PID 15632 (child process of PID 13988) has been terminated.\nSUCCESS: The process with PID 4204 (child process of PID 13988) has been terminated.\nSUCCESS: The process with PID 972 (child process of PID 13988) has been terminated.\nSUCCESS: The process with PID 1928 (child process of PID 13988) has been terminated.\nSUCCESS: The process with PID 13988 (child process of PID 2744) has been terminated.\n", "t": 1792692875.5018315, "iso": "01:14:35"}
+{"event": "fault_step", "name": "kill-windows-app", "step": "relaunch", "rc": 0, "out": "relaunching\n\n   Id Session Debug\n   -- ------- -----\n19144       1 False\n18160       1 False\n19380       1 False\n12016       1 False\n\n\n\n", "t": 1792692946.3620372, "iso": "01:15:46"}
+{"event": "fault_step", "name": "kill-windows-app", "step": "switch-on", "rc": 0, "out": "found switch: Enable contribution enabled=True\nclicked Enable contribution\nswitch now: Stop safely (ON)\n", "t": 1792692955.1835935, "iso": "01:15:55"}
+{"event": "run_end", "status": "COMPLETED", "completedGenerations": 80, "t": 1792693889.138512, "iso": "01:31:29"}

@@ -1,0 +1,4 @@
+control ok    | 8 passed, 1 warning in 0.04s
+killed       mtime-kept | 1 failed, 1 warning in 0.03s
+
+1 of 1 mutants killed.

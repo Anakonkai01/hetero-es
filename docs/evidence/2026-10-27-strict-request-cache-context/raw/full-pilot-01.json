@@ -1,0 +1,57 @@
+{
+  "label": "bucket-pilot",
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "model": "qwen",
+  "modelFiles": {
+    "config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+    "generation_config.json": "e558847a8b4402616f1273797b015104dc266fe4b520056fca88823ba8f8ebe6",
+    "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+    "model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+    "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+    "tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583",
+    "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+  },
+  "sourceRoot": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/runtime/src/heteroes",
+  "fingerprint": "1c2683a0ab93f44351c7260e2ed37f8819e1b6b925d5085ad0b6f893bb7bbf18",
+  "integerCudaSha256": "52d17836bf6c8135b7aae01daee184d667ab0cda9e32bb43cc95a213a3bf911b",
+  "bucket": true,
+  "probeHashes": {
+    "test_bucket.py": "52e60290c8d388cf1c316a81b0e59207f6c953608938ca0f63d76e183b7c5e13",
+    "bench_full.py": "d1edd29b5b39e2a03277acedf0f08faae16069b5e1bb69f17b5ed2d8932d89a5",
+    "bucket.py": "b66b8b2364f1273a8fb9e1e6f597e8b8d84256dc191d6735cb2281d3248fe2a6"
+  },
+  "decoderGraphSha256": "3541a5d8adb39738230666ac6ec1ea611ad378611faf68389e05e43ac2b32f3e",
+  "cases": [
+    {
+      "case": "short32",
+      "outputTokens": 32,
+      "secondsSamples": [
+        0.10290126400650479,
+        0.10305582999717444,
+        0.10275409799942281,
+        0.1028538170066895,
+        0.10291956599394325
+      ],
+      "medianTokensPerSecond": 9951.286895127634,
+      "tokensSha256": "bc4a5504e37c79c14e8f6ee824618a85fdd6e0d8d5bcfca51ff1e7691fbd0c66",
+      "physicalContext": 128,
+      "cacheBytes": 100663296
+    },
+    {
+      "case": "chat128",
+      "outputTokens": 128,
+      "secondsSamples": [
+        0.413593805002165,
+        0.4133874620019924,
+        0.4137357159925159,
+        0.4135070849879412,
+        0.41359926300356165
+      ],
+      "medianTokensPerSecond": 9903.436537156447,
+      "tokensSha256": "a9fad5ca48ed06879bbad136b7282ca0a3c638959dd26e2b1b92635011d5fb49",
+      "physicalContext": 272,
+      "cacheBytes": 213909504
+    }
+  ],
+  "limits": "Unselected request-sized physical KV slots; configured limits and conservative admission unchanged. Same complete generation workloads, no prefix reuse or EOS stopping. No trained cross-host qualification."
+}

@@ -1,0 +1,61 @@
+........................................................................ [  3%]
+........................................................................ [  6%]
+.................................................sssssssssssssssssssssss [  9%]
+....................................s..............................s.... [ 12%]
+.................................................s....s................. [ 15%]
+..........s................................s................sssss....... [ 18%]
+........................................................................ [ 21%]
+........................................................................ [ 24%]
+.........sssssss.....................s.................................. [ 28%]
+........................................................................ [ 31%]
+........................................................................ [ 34%]
+........................................................................ [ 37%]
+........................................................................ [ 40%]
+........................................................................ [ 43%]
+.......................................................................s [ 46%]
+........................................................................ [ 49%]
+........................................................................ [ 52%]
+........................................................................ [ 56%]
+........................................................................ [ 59%]
+........................................................................ [ 62%]
+........................................................................ [ 65%]
+........................................................................ [ 68%]
+........................................................................ [ 71%]
+....................................................................sss. [ 74%]
+.....................................................s.................. [ 77%]
+.........................s................................ssssssssssssss [ 80%]
+sssssssssssssssssssssssssssssssssss..................................... [ 84%]
+........................................................................ [ 87%]
+............................sss......................................... [ 90%]
+........................................................................ [ 93%]
+........................................................................ [ 96%]
+........................................................................ [ 99%]
+..........                                                               [100%]
+=============================== warnings summary ===============================
+tests/ledger/test_coordinator.py::test_a_late_result_inside_the_grace_period_completes_a_generation_that_looked_failed
+  /home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/_pytest/threadexception.py:58: PytestUnhandledThreadExceptionWarning: Exception in thread Thread-311 (_loop)
+  
+  Traceback (most recent call last):
+    File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/threading.py", line 1075, in _bootstrap_inner
+      self.run()
+    File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/threading.py", line 1012, in run
+      self._target(*self._args, **self._kwargs)
+    File "/home/pc5070ti/projects/heteroes/runtime/tests/ledger/test_coordinator.py", line 120, in _loop
+      step = worker.step()
+             ^^^^^^^^^^^^^
+    File "/home/pc5070ti/projects/heteroes/runtime/src/heteroes/worker.py", line 239, in step
+      reply = self.client.lease(generation)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/home/pc5070ti/projects/heteroes/runtime/src/heteroes/worker.py", line 114, in lease
+      reply = self._call("lease", payload)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/home/pc5070ti/projects/heteroes/runtime/src/heteroes/worker.py", line 108, in _call
+      raise WorkerAPIError(error["code"], error["message"])
+  heteroes.worker.WorkerAPIError: retries_exhausted: candidate exp/g0/c0 has used its 1 attempts
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+    warnings.warn(pytest.PytestUnhandledThreadExceptionWarning(msg))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+2214 passed, 100 skipped, 1 warning in 79.68s (0:01:19)

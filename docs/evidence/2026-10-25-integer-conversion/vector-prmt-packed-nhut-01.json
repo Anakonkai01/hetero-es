@@ -1,0 +1,171 @@
+{
+  "status": "ok",
+  "hardwareQualified": false,
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "probeSha256": "ae92dd0d33e5a36d9188285bd76c1f4c0c2d108d876ada45065679c96a59ab2c",
+  "limits": "Every admitted signed q; four mixed-sign/carry byte positions. Exact CPU signed-digit oracle, not graph/quality/throughput acceptance.",
+  "cases": [
+    {
+      "magnitudeBits": 14,
+      "admittedValues": 32769,
+      "quadPacking": true,
+      "allEqual": true,
+      "identity": {
+        "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "3fb54200df22bea349ac2d6d384504554fa95d0b085ea7810ce2448bb305ef30",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "exhaust-pack-14": {
+            "sourceSha256": "b07fd96976d5273ab1860a58db19d0c75be77790b309a7a3078835a126036b7f",
+            "ptxSha256": "09b0d134eedddea228ece5edc613d208a5bd4263af0365f1c5596fd44433305a",
+            "cubinSha256": "765636cd91031e2e8265efd69d7ab87f0ef606558c4d0e2da7a523cec0fcf4e4",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 4
+            }
+          }
+        },
+        "fingerprint": "b0d0f1343f6b7d1a6ca5127d3f822dd244bc4eb6028adc33be73843c02ff338b",
+        "linear": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "nonlinear": {
+          "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+          "operators": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "3fb54200df22bea349ac2d6d384504554fa95d0b085ea7810ce2448bb305ef30",
+          "nvrtcOptions": [
+            "--fmad=false",
+            "--ftz=false",
+            "--prec-div=true",
+            "--prec-sqrt=true",
+            "--std=c++17"
+          ],
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "dea246fa1fbc99637d9b704f58fd8f75b66ed770cea498757a1d081c74dcfcc1",
+        "maxPartialBytes": 16777216,
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 14,
+          "limbs": 2,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        }
+      }
+    },
+    {
+      "magnitudeBits": 22,
+      "admittedValues": 8388609,
+      "quadPacking": true,
+      "allEqual": true,
+      "identity": {
+        "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "operators": "pairwise_f32_reference_v1_experimental",
+        "sourceSha256": "3fb54200df22bea349ac2d6d384504554fa95d0b085ea7810ce2448bb305ef30",
+        "nvrtcOptions": [
+          "--fmad=false",
+          "--ftz=false",
+          "--prec-div=true",
+          "--prec-sqrt=true",
+          "--std=c++17"
+        ],
+        "hardwareQualified": false,
+        "arch": "sm_120",
+        "gpu": "NVIDIA GeForce RTX 5070 Ti",
+        "nvrtcVersion": [
+          13,
+          2
+        ],
+        "builds": {
+          "exhaust-pack-22": {
+            "sourceSha256": "97c50e8ab965a44dc6bc3525697f37affbaa95e2f0ee84e8f34f0ebe95928748",
+            "ptxSha256": "3a7343420971645537c90cae7be78d28fe3bcee9d60865165c0d3ce89174d8bb",
+            "cubinSha256": "9b9491785b4fc877be093af56e4425d65c15a14d1ed62173fbc2ed887f39b784",
+            "ptxAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            },
+            "sassAudit": {
+              "floatOps": {},
+              "violations": [],
+              "integerMmaOps": 9
+            }
+          }
+        },
+        "fingerprint": "804c1c83d37bad4f0d8a85091108d248c046fe06d5fb04b1655f466443d1bb9f",
+        "linear": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        },
+        "nonlinear": {
+          "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+          "operators": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "3fb54200df22bea349ac2d6d384504554fa95d0b085ea7810ce2448bb305ef30",
+          "nvrtcOptions": [
+            "--fmad=false",
+            "--ftz=false",
+            "--prec-div=true",
+            "--prec-sqrt=true",
+            "--std=c++17"
+          ],
+          "hardwareQualified": false
+        },
+        "integerSourceSha256": "dea246fa1fbc99637d9b704f58fd8f75b66ed770cea498757a1d081c74dcfcc1",
+        "maxPartialBytes": 16777216,
+        "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+        "integerReference": {
+          "operator": "row_scaled_signed_integer_dot_v1_experimental",
+          "magnitudeBits": 22,
+          "limbs": 3,
+          "maxWidth": 32768,
+          "zeroIntegerOutput": "+0",
+          "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+          "bias": "pairwise_f32_reference_v1_experimental",
+          "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+          "hardwareQualified": false
+        }
+      }
+    }
+  ]
+}

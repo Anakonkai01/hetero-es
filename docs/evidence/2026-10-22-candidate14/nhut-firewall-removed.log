@@ -1,0 +1,31 @@
+-P OUTPUT ACCEPT
+-A OUTPUT -d 100.64.0.0/10 -m owner --uid-owner 1000 -m conntrack --ctstate NEW -j REJECT --reject-with icmp-port-unreachable
+-A OUTPUT -j ufw-before-logging-output
+-A OUTPUT -j ufw-before-output
+-A OUTPUT -j ufw-after-output
+-A OUTPUT -j ufw-after-logging-output
+-A OUTPUT -j ufw-reject-output
+-A OUTPUT -j ufw-track-output
+---
+removed
+---
+-P OUTPUT ACCEPT
+-A OUTPUT -j ufw-before-logging-output
+-A OUTPUT -j ufw-before-output
+-A OUTPUT -j ufw-after-output
+-A OUTPUT -j ufw-after-logging-output
+-A OUTPUT -j ufw-reject-output
+-A OUTPUT -j ufw-track-output
+/home/heheboiz/candidate14-managed-replay
+/home/heheboiz/candidate14-managed-replay.zip
+/home/heheboiz/candidate14-source-probe
+/home/heheboiz/candidate14-source-probe.zip
+/home/heheboiz/f13-diag
+11M	/home/heheboiz/f13-diag
+2.8M	/home/heheboiz/candidate14-source-probe
+720K	/home/heheboiz/candidate14-source-probe.zip
+236K	/home/heheboiz/candidate14-managed-replay
+40K	/home/heheboiz/candidate14-managed-replay.zip
+deleted
+ls: cannot access '/home/heheboiz/f13-diag': No such file or directory
+ls: cannot access '/home/heheboiz/candidate14-*': No such file or directory

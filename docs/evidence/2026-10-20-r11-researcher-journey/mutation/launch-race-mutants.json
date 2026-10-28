@@ -1,0 +1,10 @@
+[
+ {"name": "no launch gate", "file": "src/heteroes/product/agent.py",
+  "old": "        if ar[\"config\"].get(\"recipeVersion\") in (2, 3) and \"datasetPath\" not in read_json(root / \"config.json\", {}):\n            return", "new": "        if False:\n            return"},
+ {"name": "gate only v2", "file": "src/heteroes/product/agent.py",
+  "old": "if ar[\"config\"].get(\"recipeVersion\") in (2, 3) and", "new": "if ar[\"config\"].get(\"recipeVersion\") in (2,) and"},
+ {"name": "failed transfer keeps STARTING", "file": "src/heteroes/product/agent.py",
+  "old": "                self.save(root, status=\"FAILED\", failureReason=f\"{type(error).__name__}: {error}\")\n", "new": ""},
+ {"name": "failed transfer swallowed", "file": "src/heteroes/product/agent.py",
+  "old": "                self.save(root, status=\"FAILED\", failureReason=f\"{type(error).__name__}: {error}\")\n                raise", "new": "                self.save(root, status=\"FAILED\", failureReason=f\"{type(error).__name__}: {error}\")"}
+]

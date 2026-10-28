@@ -1,0 +1,86 @@
+...........F
+=================================== FAILURES ===================================
+_ test_metadata_refreshes_once_per_request_and_is_cleared_under_generation_lock _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7257f9500170>
+
+    @gpu
+    def test_metadata_refreshes_once_per_request_and_is_cleared_under_generation_lock(monkeypatch):
+        _, graph = classes()
+        model = model_for("llama").cuda()
+        backend = graph(model, max_context=32, allow_fixture=True)
+        kernels = backend.kernels
+        calls = []
+        refresh = kernels._refresh_weight_exponents
+    
+        def counted(weight, exponents, flag):
+            assert backend._call_lock.locked()
+            calls.append(weight.data_ptr())
+            return refresh(weight, exponents, flag)
+    
+        monkeypatch.setattr(kernels, "_refresh_weight_exponents", counted)
+        ids = torch.tensor([[3, 5, 7], [11, 13, 17]], device="cuda")
+        weight = model.model.layers[0].mlp.down_proj.weight
+        saved = weight.detach().clone()
+        parent = backend.generate(ids, max_new_tokens=4, eos_token_id=[])
+        unique = len(set(calls))
+        assert len(calls) == unique and unique == 7 * model.config.num_hidden_layers + 1
+        buffers = tuple(kernels.weight_metadata_buffers())
+        assert buffers and all(not bool(t.any()) for t in buffers)
+        pointers = [t.data_ptr() for t in buffers]
+        assert not kernels._request_active
+        with torch.no_grad():
+            weight.copy_(saved * -32)
+        backend.generate(ids, max_new_tokens=4, eos_token_id=[])
+        assert len(calls) == 2 * unique
+        assert [t.data_ptr() for t in kernels.weight_metadata_buffers()] == pointers
+        assert backend._session.capture_count == 1
+        with torch.no_grad():
+            weight.copy_(saved)
+        assert torch.equal(parent, backend.generate(ids, max_new_tokens=4, eos_token_id=[]))
+        assert len(calls) == 3 * unique
+        # Ordinary forward outside a request must recompute rather than reading cleared request metadata.
+>       backend.forward_batch([row[None] for row in ids])
+
+runtime/tests/eval/test_integer_decoder.py:123: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_decoder_packed.py:103: in forward_batch
+    q = kernels.rope(self._project(normalized, attention.q_proj, flag), cosine, sine, heads, error_flag=flag)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/strict_decoder.py:231: in _project
+    return self.kernels.linear(value, module.weight, getattr(module, "bias", None), error_flag=flag)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py:124: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/integer_cuda.py:420: in linear
+    ew = self._weight_exponents(weight, flag)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/eval/integer_cuda.py:335: in _weight_exponents
+    self._refresh_weight_exponents(weight, result, flag)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+weight = Parameter containing:
+tensor([[ 0.0184,  0.0366,  0.0068,  ..., -0.0475, -0.0656, -0.0062],
+        [ 0.0004,  0.0219,...,  0.0171,  0.0026,  ...,  0.0131,  0.0173, -0.0015]],
+       device='cuda:0', dtype=torch.float16, requires_grad=True)
+exponents = tensor([-1117073956, -1130118082,  1027279917,  1023590866, -1126497998,
+        -1121738157,  1031872339,  1035965394...27264211,  1023596076, -1126545773, -1121756321,
+         1031855252,  1035956793], device='cuda:0', dtype=torch.int32)
+flag = tensor([0], device='cuda:0', dtype=torch.int32)
+
+    def counted(weight, exponents, flag):
+>       assert backend._call_lock.locked()
+E       assert False
+E        +  where False = <built-in method locked of _thread.lock object at 0x7257f94b1d00>()
+E        +    where <built-in method locked of _thread.lock object at 0x7257f94b1d00> = <unlocked _thread.lock object at 0x7257f94b1d00>.locked
+E        +      where <unlocked _thread.lock object at 0x7257f94b1d00> = <heteroes.eval.integer_decoder.IntegerDecoderGraph object at 0x7257f95c1580>._call_lock
+
+runtime/tests/eval/test_integer_decoder.py:97: AssertionError
+=========================== short test summary info ============================
+FAILED runtime/tests/eval/test_integer_decoder.py::test_metadata_refreshes_once_per_request_and_is_cleared_under_generation_lock
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 11 passed in 22.65s

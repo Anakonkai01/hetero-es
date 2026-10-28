@@ -1,0 +1,8 @@
+{
+  "scope": "Local branch objects not reachable from existing origin remote-tracking refs; earlier history scan retained in 2026-10-20-backup",
+  "textBlobsScanned": 190,
+  "binaryBlobsNotDecoded": 69,
+  "knownLiteralChecks": 2,
+  "matches": [],
+  "limits": "Pattern/literal scan only; no guarantee of absence of every secret; binary archives not decoded."
+}

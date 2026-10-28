@@ -1,0 +1,172 @@
+{
+  "status": "ok",
+  "case": "attention",
+  "shape": {
+    "queries": 32,
+    "lengths": [
+      33,
+      37,
+      41,
+      45,
+      49,
+      53,
+      57,
+      61,
+      33,
+      37,
+      41,
+      45,
+      49,
+      53,
+      57,
+      61,
+      33,
+      37,
+      41,
+      45,
+      49,
+      53,
+      57,
+      61,
+      33,
+      37,
+      41,
+      45,
+      49,
+      53,
+      57,
+      61
+    ],
+    "heads": 14,
+    "kvHeads": 2,
+    "dim": 64,
+    "slot": 512
+  },
+  "identity": {
+    "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+    "operators": "pairwise_f32_reference_v1_experimental",
+    "sourceSha256": "2b84ed3c242a42c5780326a89b83cbd8e5b40e9a830fe63e7bf209d1bd076034",
+    "nvrtcOptions": [
+      "--fmad=false",
+      "--ftz=false",
+      "--prec-div=true",
+      "--prec-sqrt=true",
+      "--std=c++17"
+    ],
+    "hardwareQualified": false,
+    "arch": "sm_120",
+    "gpu": "NVIDIA GeForce RTX 5070 Ti",
+    "nvrtcVersion": [
+      13,
+      2
+    ],
+    "builds": {
+      "ops": {
+        "sourceSha256": "ac4dfb8a80dd4b1641526133aa238622b7a132f13f668f6763155b4c882bdc78",
+        "ptxSha256": "b8c3dab44f96d76272cd2104cce875595441f15aae9f2fe80a511ff64041615a",
+        "cubinSha256": "b51ac5a34aee3ae19c5251c39e6d999c0577355ddb2c2b5d2c76cfeb2e11ee96",
+        "ptxAudit": {
+          "floatOps": {
+            "mul.rn.f32": 225,
+            "add.rn.f32": 338
+          },
+          "violations": []
+        },
+        "sassAudit": {
+          "floatOps": {
+            "FMUL": 225,
+            "FADD": 339
+          },
+          "violations": []
+        }
+      }
+    },
+    "fingerprint": "c02716d3d6ac4ec68680763d29dd66923723816c9b03b0b94c7a4a0875fc80cd",
+    "linear": {
+      "operator": "row_scaled_signed_integer_dot_v1_experimental",
+      "magnitudeBits": 22,
+      "limbs": 3,
+      "maxWidth": 32768,
+      "zeroIntegerOutput": "+0",
+      "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+      "bias": "pairwise_f32_reference_v1_experimental",
+      "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+      "hardwareQualified": false
+    },
+    "nonlinear": {
+      "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+      "operators": "pairwise_f32_reference_v1_experimental",
+      "sourceSha256": "2b84ed3c242a42c5780326a89b83cbd8e5b40e9a830fe63e7bf209d1bd076034",
+      "nvrtcOptions": [
+        "--fmad=false",
+        "--ftz=false",
+        "--prec-div=true",
+        "--prec-sqrt=true",
+        "--std=c++17"
+      ],
+      "hardwareQualified": false
+    },
+    "integerSourceSha256": "52d17836bf6c8135b7aae01daee184d667ab0cda9e32bb43cc95a213a3bf911b",
+    "boundedLmHeadSourceSha256": "98c9b75b6e814fea665688066190ce20854eecc8b0bae2c3345d2a0f7b648df5",
+    "maxPartialBytes": 16777216,
+    "activationPacking": "radix_planes_once_v1_experimental",
+    "weightLoad": "auto",
+    "weightReadPolicy": "raw_half_prefetch2_sm86_sm120_b22_v2_experimental",
+    "mmaSchedule": "auto",
+    "streamPolicy": "multistage_cp_async_k16_aligned_v1_experimental",
+    "streamInputPolicy": "ldmatrix_swizzle_sm120_b22_v1_experimental",
+    "decodePlanning": {
+      "policy": "occupancy_split_k_v2_experimental",
+      "rowTiles": [
+        16,
+        32
+      ],
+      "maxSplitK": 8,
+      "splitCandidates": "all_integers_1_to_8_when_residency_is_given_otherwise_powers_of_two",
+      "residentPolicy": "three_ctas_sm120_b22_stream_default_target8_rows17_to_128_k_aligned16",
+      "minSplitWidth": 256,
+      "maxBatch": 128,
+      "singleRow": "simt_split1",
+      "sourceSha256": "abef4eeaecbf660ccd2ae10fcbeda9ece7347592097819fdfb018f81aa0928b3"
+    },
+    "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+    "integerReference": {
+      "operator": "row_scaled_signed_integer_dot_v1_experimental",
+      "magnitudeBits": 22,
+      "limbs": 3,
+      "maxWidth": 32768,
+      "zeroIntegerOutput": "+0",
+      "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+      "bias": "pairwise_f32_reference_v1_experimental",
+      "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+      "hardwareQualified": false
+    },
+    "multiprocessors": 70,
+    "weightLoadEffective": "prefetch2",
+    "mmaScheduleEffective": "stream",
+    "streamInputEffective": "ldmatrix"
+  },
+  "sourceSha256": "c64fd65791eb23427b8e16ebe040eba8909c014c76c32621db6a83d64e86e86a",
+  "builds": {
+    "ops": {
+      "sourceSha256": "ac4dfb8a80dd4b1641526133aa238622b7a132f13f668f6763155b4c882bdc78",
+      "ptxSha256": "b8c3dab44f96d76272cd2104cce875595441f15aae9f2fe80a511ff64041615a",
+      "cubinSha256": "b51ac5a34aee3ae19c5251c39e6d999c0577355ddb2c2b5d2c76cfeb2e11ee96",
+      "ptxAudit": {
+        "floatOps": {
+          "mul.rn.f32": 225,
+          "add.rn.f32": 338
+        },
+        "violations": []
+      },
+      "sassAudit": {
+        "floatOps": {
+          "FMUL": 225,
+          "FADD": 339
+        },
+        "violations": []
+      }
+    }
+  },
+  "limits": "One synthetic matching-shape kernel, hardware counters only; no trained-model/whole-generation or learning acceptance."
+}

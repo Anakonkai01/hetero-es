@@ -1,0 +1,12 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_live_merged_storage_keeps_parameter_objects_and_tracks_in_place_updates _
+
+    def test_live_merged_storage_keeps_parameter_objects_and_tracks_in_place_updates():
+>       from heteroes.eval.fp16_decoder import bind_merged_parameters
+E       ImportError: cannot import name 'bind_merged_parameters' from 'heteroes.eval.fp16_decoder' (/home/pc5070ti/projects/heteroes-codex-frozen-perf/runtime/src/heteroes/eval/fp16_decoder.py)
+
+runtime/tests/eval/test_fp16_decoder_cuda.py:124: ImportError
+=========================== short test summary info ============================
+FAILED runtime/tests/eval/test_fp16_decoder_cuda.py::test_live_merged_storage_keeps_parameter_objects_and_tracks_in_place_updates
+1 failed, 5 deselected in 1.72s

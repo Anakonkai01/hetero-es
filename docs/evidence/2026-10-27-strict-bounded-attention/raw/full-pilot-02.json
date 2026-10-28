@@ -1,0 +1,351 @@
+{
+  "label": "bounded-pilot-02",
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "model": "qwen",
+  "modelFiles": {
+    "config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+    "generation_config.json": "e558847a8b4402616f1273797b015104dc266fe4b520056fca88823ba8f8ebe6",
+    "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+    "model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+    "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+    "tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583",
+    "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+  },
+  "sourceRoot": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/runtime/src/heteroes",
+  "fingerprint": "5325fe6f7a27a5328595b4f5a5d7ce147834e000a1f4f684a678802aefa61fd5",
+  "integerCudaSha256": "52d17836bf6c8135b7aae01daee184d667ab0cda9e32bb43cc95a213a3bf911b",
+  "boundedScore": true,
+  "probeHashes": {
+    "bench_full.py": "809633f5806cd951b3915edce19485c5046ec66ba46ed61c790fba2c7c4fbc0c",
+    "bounded.py": "54d78480b3de51aa42ff351d4dfed9bfcad538815a353d24c117c8bbd6a330d5",
+    "test_attention.py": "bb9f6309b791af7bba414b1cc3c7bf9ae605c44417781bdc1648c6b8812e6d0b"
+  },
+  "decoderGraphSha256": "3541a5d8adb39738230666ac6ec1ea611ad378611faf68389e05e43ac2b32f3e",
+  "cases": [
+    {
+      "case": "short32",
+      "outputTokens": 32,
+      "secondsSamples": [
+        0.10321048500190955,
+        0.10324032299104147,
+        0.10384831699775532,
+        0.10352813400095329,
+        0.10347752399684396
+      ],
+      "medianTokensPerSecond": 9895.86878819435,
+      "tokensSha256": "bc4a5504e37c79c14e8f6ee824618a85fdd6e0d8d5bcfca51ff1e7691fbd0c66"
+    },
+    {
+      "case": "chat128",
+      "outputTokens": 128,
+      "secondsSamples": [
+        0.41189928200037684,
+        0.41227140500268433,
+        0.41220478000468574,
+        0.41219851799542084,
+        0.41228252100700047
+      ],
+      "medianTokensPerSecond": 9936.808592936351,
+      "tokensSha256": "a9fad5ca48ed06879bbad136b7282ca0a3c638959dd26e2b1b92635011d5fb49"
+    }
+  ],
+  "builds": {
+    "decode-graph-ops": {
+      "sourceSha256": "d7368767efdc2885e301001b158c5041ad6401eeff3610783efa8a6562147f06",
+      "ptxSha256": "9f6617d1e084e3877167a4b258fdb0a3bc6f508b7cfc5429b3f9546178be6c55",
+      "cubinSha256": "6c3c6a1c4de045df8d135528ded082140aa2773ffedd26a670484366de292524",
+      "ptxAudit": {
+        "floatOps": {
+          "mul.rn.f32": 10
+        },
+        "violations": []
+      },
+      "sassAudit": {
+        "floatOps": {
+          "FMUL": 18
+        },
+        "violations": []
+      }
+    },
+    "weights-batched": {
+      "sourceSha256": "7b49f1963cd069eb6a8557667dcbda49584194dc88e5cb41d65d1d7c47ff3f55",
+      "ptxSha256": "27db1df0755fb66ecdc1aba1069a42cf1c67d9e5ebd1b27502174328e3b30cb2",
+      "cubinSha256": "f934cb1e0c9c5473bb05e89de9b3366c3863019c9435269442c63d9b02d95160",
+      "ptxAudit": {
+        "floatOps": {},
+        "violations": []
+      },
+      "sassAudit": {
+        "floatOps": {},
+        "violations": []
+      }
+    },
+    "integer-bound-896-m32": {
+      "sourceSha256": "2c1737359ef7207acc91c72bf772844cf37381f6fb1809de8365a94ee822e8c3",
+      "ptxSha256": "ab70c390d6f8b3e2a7604568693eeaa874b35194d742a5c9399eda50a8a038c1",
+      "cubinSha256": "e708de7b0cc31b6f91edafb5532fc82bde1137fefb3fd3004e36d58d707e7c08",
+      "ptxAudit": {
+        "floatOps": {
+          "add.rn.f32": 16
+        },
+        "violations": [],
+        "integerMmaOps": 30
+      },
+      "sassAudit": {
+        "floatOps": {
+          "FADD": 16
+        },
+        "violations": [],
+        "integerMmaOps": 30
+      }
+    },
+    "bounded-score-v1-fused-quant-22": {
+      "sourceSha256": "3e015c3fd01000c73603597260676e9439b461eb9e068e2935c8fb11de508ac3",
+      "ptxSha256": "72e2820591b6860dfbb83449be10c79d77bf14b8e2afd4cb7a95770a71e5c4f9",
+      "cubinSha256": "cee991373d2d5a3040b50472cd05c9971e3cd8ec028e3098c8d05206368209ad",
+      "ptxAudit": {
+        "floatOps": {
+          "mul.rn.f32": 622,
+          "add.rn.f32": 558
+        },
+        "violations": []
+      },
+      "sassAudit": {
+        "floatOps": {
+          "FMUL": 622,
+          "FADD": 559
+        },
+        "violations": []
+      }
+    },
+    "integer-22-896-bias1-m32-w4-s1-p1-prefetch2-ldsm": {
+      "sourceSha256": "9f8f2e57ba373434ca55212252ea6524b25226333a30c47067321a9c6f7f593d",
+      "ptxSha256": "8fdfe617c130d10baeee979371442c94f21dd03ec3e9a3520a59499eaad86167",
+      "cubinSha256": "490804f119a343aaa9e1ab92c3017b54a75c410b0bf372d910434386233760f7",
+      "ptxAudit": {
+        "floatOps": {
+          "add.rn.f32": 107
+        },
+        "violations": [],
+        "integerMmaOps": 162
+      },
+      "sassAudit": {
+        "floatOps": {
+          "FADD": 107
+        },
+        "violations": [],
+        "integerMmaOps": 162
+      }
+    },
+    "bounded-score-v1-ops": {
+      "sourceSha256": "34ad4e7baf2a6b17dd569d633f55210c70eb8fbf10c061fc80da74d329d18fb5",
+      "ptxSha256": "50dfc10fad1987277190cc41048f228ba8d81d9f5985b37a01f7ba9a9ffda258",
+      "cubinSha256": "7ee23f27e36c75a622afee3e034a34c8ba7d39c009101b157a9c64956305ed68",
+      "ptxAudit": {
+        "floatOps": {
+          "mul.rn.f32": 257,
+          "add.rn.f32": 370
+        },
+        "violations": []
+      },
+      "sassAudit": {
+        "floatOps": {
+          "FMUL": 257,
+          "FADD": 371
+        },
+        "violations": []
+      }
+    },
+    "bounded-score-v1-prefill-64-q2-h7": {
+      "sourceSha256": "e706f986303e47592e3f2fab6e4a789a8f8d77f74f1eb3d42560224b623cc79e",
+      "ptxSha256": "e52cef20b7accd56dedd17e8fc35516d117c2bf08148ce5d98b273d2977e8d07",
+      "cubinSha256": "89c610b7cbf691f22b01c1d9357e4f39cca7d81a9e7df5ef859f6927e2fe5cad",
+      "ptxAudit": {
+        "floatOps": {
+          "mul.rn.f32": 382,
+          "add.rn.f32": 501
+        },
+        "violations": []
+      },
+      "sassAudit": {
+        "floatOps": {
+          "FMUL": 382,
+          "FADD": 502
+        },
+        "violations": []
+      }
+    },
+    "integer-22-896-bias0-m32-w4-s1-p1-prefetch2-ldsm": {
+      "sourceSha256": "1d77730acdaf12b56d7d65271c2288b2966d47a03d9e20b77b14624adb792e26",
+      "ptxSha256": "71b3d77e103481a93e679920b37fe9a9a129d843b2e2f9893acd278d01595d18",
+      "cubinSha256": "b2f945a969d421d1030a502e3ac8b6d79da81c3a625246bf6fc66e0c32f7e972",
+      "ptxAudit": {
+        "floatOps": {
+          "add.rn.f32": 64
+        },
+        "violations": [],
+        "integerMmaOps": 162
+      },
+      "sassAudit": {
+        "floatOps": {
+          "FADD": 64
+        },
+        "violations": [],
+        "integerMmaOps": 162
+      }
+    },
+    "integer-22-4864-bias0-m32-w4-s1-p1-prefetch2-ldsm": {
+      "sourceSha256": "ae9531f41f468e4924c980582f8897606060ed19c8d38268ab100027e1d4c670",
+      "ptxSha256": "fe9de8a23ce668a6504dc44d3219ed6d7923775efb8a452bcbdc49b3cb589bab",
+      "cubinSha256": "106fc4f8ce8ec285334a991f493a3f8c6c620ec913a40b3edb93d1814e3f7b39",
+      "ptxAudit": {
+        "floatOps": {
+          "add.rn.f32": 64
+        },
+        "violations": [],
+        "integerMmaOps": 162
+      },
+      "sassAudit": {
+        "floatOps": {
+          "FADD": 64
+        },
+        "violations": [],
+        "integerMmaOps": 162
+      }
+    },
+    "integer-22-896-bias1-m32-w4-s5-p1-n32-prefetch2-ldsm": {
+      "sourceSha256": "21d054af783029eed71e0c2ccbeb2dbaec915e3d117c9b99e5c7cb9575feb643",
+      "ptxSha256": "324daf4a6d59c08557b58ce4e03be5ed1dfbf4117c98e9ced417247dc0c538bb",
+      "cubinSha256": "f028491aeedbe3a7d29c8d049b195bfa552a1af98e24f22fa6ab1a1357ae5955",
+      "ptxAudit": {
+        "floatOps": {
+          "add.rn.f32": 34
+        },
+        "violations": [],
+        "integerMmaOps": 90
+      },
+      "sassAudit": {
+        "floatOps": {
+          "FADD": 34
+        },
+        "violations": [],
+        "integerMmaOps": 90
+      }
+    },
+    "bounded-score-v1-decode-finish-22-s5-b1": {
+      "sourceSha256": "cc6430d6bdb040ddb9693f2dbee1e0e83a713d7394519ad15a45346f1e15c12d",
+      "ptxSha256": "779e689b1f18b9b9a1e080013dd23ad4945090a392cf3fd2c731f19788c58793",
+      "cubinSha256": "1ae928260384879894e658440ebd6f0ae17a5270e72354d35b57fe102ce83b1e",
+      "ptxAudit": {
+        "floatOps": {
+          "mul.rn.f32": 287,
+          "add.rn.f32": 396
+        },
+        "violations": []
+      },
+      "sassAudit": {
+        "floatOps": {
+          "FADD": 397,
+          "FMUL": 287
+        },
+        "violations": []
+      }
+    },
+    "integer-22-896-bias0-m32-w4-s7-p1-n32-prefetch2-ldsm": {
+      "sourceSha256": "dbf9f07508301093622564ae86c42dcfedce04c2466601820d4963c43171a10e",
+      "ptxSha256": "2c81de397eb8cf3d5b532ee4e878d0557c2f4c6e9f7d3337e1c19d4632f2e74f",
+      "cubinSha256": "964409e91267494b639f5686cfe0cf52f758663a32fca4abed2d411ec0ce242a",
+      "ptxAudit": {
+        "floatOps": {
+          "add.rn.f32": 32
+        },
+        "violations": [],
+        "integerMmaOps": 90
+      },
+      "sassAudit": {
+        "floatOps": {
+          "FADD": 32
+        },
+        "violations": [],
+        "integerMmaOps": 90
+      }
+    },
+    "bounded-score-v1-decode-finish-22-s7-b0": {
+      "sourceSha256": "0b3744cda3b1abe25ca0d4816d977d67921014b37fe35f2455c1ef0f1eb43df6",
+      "ptxSha256": "b2ba3f8b7cd571ed052a620e3b9182dd49095ab655fc529e2dcef198ed6c2f05",
+      "cubinSha256": "a688be6d0f71c0a83fbae6cb66c15414497f55b5129d595f02aa6405389d0c51",
+      "ptxAudit": {
+        "floatOps": {
+          "mul.rn.f32": 287,
+          "add.rn.f32": 390
+        },
+        "violations": []
+      },
+      "sassAudit": {
+        "floatOps": {
+          "FMUL": 287,
+          "FADD": 391
+        },
+        "violations": []
+      }
+    },
+    "integer-22-896-bias0-m32-w4-s2-p1-n32-prefetch2-ldsm": {
+      "sourceSha256": "ad7ec94504cf9d10bdc891fa3ea6921b92319497c9da3e4d24a88e8d5b6505d3",
+      "ptxSha256": "b38c0c6d167f6f8fc4fff39bca138687fdb6b4589145316e8f2698c84a1ea427",
+      "cubinSha256": "5abdb7ce26a0319686cb53eeec79aa1539ba9a8ac2f6151d0ed5b1127617654d",
+      "ptxAudit": {
+        "floatOps": {
+          "add.rn.f32": 32
+        },
+        "violations": [],
+        "integerMmaOps": 90
+      },
+      "sassAudit": {
+        "floatOps": {
+          "FADD": 32
+        },
+        "violations": [],
+        "integerMmaOps": 90
+      }
+    },
+    "bounded-score-v1-decode-finish-22-s2-b0": {
+      "sourceSha256": "98645648261898ddd70628df5603e6ebe3204934cb6c5c72bc62b69e2f4d5019",
+      "ptxSha256": "36eee8d1315418cf0bdcd07c1e4a1da6a4264bb506d6426c3414a058b2a37064",
+      "cubinSha256": "2c68d5b9e5e430ff3dc3146f1d69ee6e705543b60f146e26556b3a882264622f",
+      "ptxAudit": {
+        "floatOps": {
+          "mul.rn.f32": 287,
+          "add.rn.f32": 390
+        },
+        "violations": []
+      },
+      "sassAudit": {
+        "floatOps": {
+          "FMUL": 287,
+          "FADD": 391
+        },
+        "violations": []
+      }
+    },
+    "integer-22-4864-bias0-m32-w4-s7-p1-n32-prefetch2-ldsm": {
+      "sourceSha256": "9a1dca2900d89f14182904b5cc42213b511ccf89bb67b50c58dd6fe930e41abc",
+      "ptxSha256": "e6654b204328a34bde1bd24559c5b4ccd6e51c2adf4df70bd1e50ad5430dff2e",
+      "cubinSha256": "bb3c3fda14842de3f9e97ca413565fe326d72b7910a775113aff38498548352b",
+      "ptxAudit": {
+        "floatOps": {
+          "add.rn.f32": 32
+        },
+        "violations": [],
+        "integerMmaOps": 90
+      },
+      "sassAudit": {
+        "floatOps": {
+          "FADD": 32
+        },
+        "violations": [],
+        "integerMmaOps": 90
+      }
+    }
+  },
+  "limits": "Unselected guarded QK score tree; identical FP32 node order, scaling and nonlinearities. Full request time includes guard overheads. No trained cross-device qualification."
+}

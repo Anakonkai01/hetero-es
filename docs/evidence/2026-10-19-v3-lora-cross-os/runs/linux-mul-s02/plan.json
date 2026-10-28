@@ -1,0 +1,19 @@
+{
+  "formatVersion": 1,
+  "recipeHash": "06d48520c4337247920709a20c1e3c1ddff813200c899301f808bbda5ee948db",
+  "population": 4,
+  "generations": 2,
+  "alpha": 0.01,
+  "coefficientRule": {
+    "name": "zscore",
+    "version": 1,
+    "eta": 1e-09
+  },
+  "scorer": {
+    "kind": "declarative",
+    "name": "last-integer",
+    "version": 1,
+    "codeSha256": null,
+    "config": {}
+  }
+}

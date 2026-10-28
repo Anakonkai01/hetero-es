@@ -1,0 +1,45 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7589.32it/s]
+Traceback (most recent call last):
+  File "/home/pc5070ti/projects/heteroes-codex-frozen-perf/docs/evidence/2026-10-27-strict-bounded-attention/harness/bench_full.py", line 39, in <module>
+    expected = run(rows)
+               ^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/projects/heteroes-codex-frozen-perf/runtime/scripts/benchmark_inference.py", line 86, in run
+    output = engine.generate(
+             ^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/projects/heteroes-codex-frozen-perf/runtime/src/heteroes/eval/strict_decoder_graph.py", line 425, in generate
+    logits, caches = self.forward_batch(histories, error_flag=prefill_flag, _validated=True)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/projects/heteroes-codex-frozen-perf/runtime/src/heteroes/eval/strict_decoder_packed.py", line 124, in forward_batch
+    q, k, v = self._prefill_norm_project_many(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/projects/heteroes-codex-frozen-perf/runtime/src/heteroes/eval/integer_decoder.py", line 146, in _prefill_norm_project_many
+    prepared=self.kernels.rms_norm_quantized(hidden, norm, epsilon, error_flag=flag),
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/miniforge3/envs/heteroes-match/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/projects/heteroes-codex-frozen-perf/runtime/src/heteroes/eval/integer_cuda.py", line 1360, in rms_norm_quantized
+    self._fused_functions()["strict_rms_quant"],
+    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/projects/heteroes-codex-frozen-perf/runtime/src/heteroes/eval/integer_cuda.py", line 1322, in _fused_functions
+    self._functions[name] = self._compile(
+                            ^^^^^^^^^^^^^^
+  File "/home/pc5070ti/projects/heteroes-codex-frozen-perf/docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py", line 61, in _compile
+    if 'strict_attention_gqa(' in source:source=transform_gqa(source);changed=True
+                                                ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/projects/heteroes-codex-frozen-perf/docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py", line 27, in transform_gqa
+    body=once(body,'  unsigned bad = 0;','  __shared__ unsigned score_unsafe;\n  if(tid==0)score_unsafe=0;\n  unsigned bad = 0;')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/projects/heteroes-codex-frozen-perf/docs/evidence/2026-10-27-strict-bounded-attention/harness/bounded.py", line 17, in once
+    assert s.count(old)==1,(old,s.count(old))
+           ^^^^^^^^^^^^^^^
+AssertionError: ('  unsigned bad = 0;', 3)

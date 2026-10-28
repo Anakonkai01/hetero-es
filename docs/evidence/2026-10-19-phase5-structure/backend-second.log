@@ -1,0 +1,768 @@
+...F.................................................................... [ 25%]
+........................................................................ [ 51%]
+.............................................FF.FFF..................... [ 76%]
+..................................................................       [100%]
+=================================== FAILURES ===================================
+____________________ test_held_queue_still_reconciles_pause ____________________
+
+lab = (<starlette.testclient.TestClient object at 0x7513f931ecf0>, <backend.store.Store object at 0x7513f9238230>, <backend....t at 0x7513f91e3a10>, {'Authorization': 'Bearer iumPTSyx9L2Y8SqOFGlcYhCVTycVikcn7FjlhDfDnmY', 'X-Workspace-Id': 'lab'})
+
+    def test_held_queue_still_reconciles_pause(lab):
+        client,store,runtime,owner=lab
+        device,auth=pair(lab);enable(lab,device,auth)
+        run=queued(lab,device);store.dispatch_once();assignment=runtime.runs()[0]
+        hold(store)
+        assert client.post(f'/api/v1/experiments/{run}/pause',headers=owner).status_code==200
+>       boot(client,auth,'boot-1',contribution=True,reports=[paused_report(assignment)],processes=[stopped(assignment)])
+
+backend/tests/test_admission_hold.py:56: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/tests/labkit.py:59: in boot
+    response = client.post('/api/v1/device/poll', headers=auth, json=data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:1144: in post
+    return self.request(
+.venv-backend/lib/python3.12/site-packages/starlette/testclient.py:463: in request
+    return super().request(
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/starlette/testclient.py:360: in handle_request
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/testclient.py:357: in handle_request
+    portal.call(self.app, scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/ai/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/ai/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+.venv-backend/lib/python3.12/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/fastapi/applications.py:1159: in __call__
+    await super().__call__(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+.venv-backend/lib/python3.12/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv-backend/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/routing.py:676: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/routing.py:697: in app
+    await route.handle(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/routing.py:282: in handle
+    await self.app(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:134: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:120: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:674: in app
+    raw_response = await run_endpoint_function(
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:330: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/starlette/concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/anyio/to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+.venv-backend/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:2706: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:1100: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+backend/devices.py:325: in poll
+    return runtime.poll(current,body,command_kinds=command_capabilities(capabilities))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/agent_polling.py:23: in poll
+    accepted = self._accept_reports(db, device, body, old)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <backend.devices.AgentRuntime object at 0x7513f91e3a10>
+db = <sqlite3.Connection object at 0x7513f95a93f0>
+device = {'boot_id': 'boot-1', 'bulk_url': None, 'compute_url': 'http://100.64.0.1:8769', 'desired': 1, ...}
+body = Poll(telemetry=None, bootId='boot-1', contribution=True, processes=[ProcessReport(assignmentId='bf1f49fcf9404bd58966a6...s': [], 'events': [], 'artifacts': [], 'completedGenerationCount': 1})], events=[], acknowledgements=[], selfTest=None)
+old = <sqlite3.Row object at 0x7513f92cf340>
+
+    def _accept_reports(self, db, device, body, old):
+        accepted=[]
+        for report in body.reports:
+            row=db.execute('SELECT * FROM assignments WHERE id=?',(report.assignmentId,)).fetchone()
+            if not row or row['coordinator']!=device['id'] or row['epoch']!=report.epoch:continue
+            if len(json.dumps(report.snapshot))>2_000_000:raise HTTPException(413,'Snapshot is too large')
+            if report.snapshot.get('state',{}).get('status') not in QUIESCENT|{'STARTING','RUNNING','CANCELLING','RECOVERING','DRAINING','PAUSING'}:raise HTTPException(422,'Invalid runtime status')
+            if report.snapshot['state']['status']=='PAUSED':
+                point=report.snapshot['state'].get('pauseCheckpoint',{})
+>               if point.get('verified') is not True or type(point.get('generation')) is not int or point['generation']<0 or not re.fullmatch('[a-f0-9]{32}',str(point.get('pointId',''))) or any(not re.fullmatch('[a-f0-9]{64}',str(point.get(k,''))) for k in ('childWeightsSha256','parentWeightsSha256')):
+                                                                                                                                 ^^
+E               NameError: name 're' is not defined. Did you forget to import 're'
+
+backend/agent_polling.py:117: NameError
+____ test_pause_keeps_reservation_until_checkpoint_and_every_process_stops _____
+
+lab = (<starlette.testclient.TestClient object at 0x7513f93441d0>, <backend.store.Store object at 0x7513f91e0f80>, <backend....t at 0x7513f91e01a0>, {'Authorization': 'Bearer zyU-JHJyXdv__qMcnRArEIjpd0ppQ27XGn4V8DTk9SA', 'X-Workspace-Id': 'lab'})
+
+    def test_pause_keeps_reservation_until_checkpoint_and_every_process_stops(lab):
+        client,store,runtime,admin=lab
+        device,auth=pair(lab);enable(lab,device,auth);rid=queued(lab,device);store.dispatch_once()
+        assignment=runtime.runs()[0]
+        assert client.post(f'/api/v1/experiments/{rid}/pause',headers=admin).status_code==200
+        assert client.post(f'/api/v1/experiments/{rid}/resume',headers=admin).status_code==409
+        assert sum(c['kind']=='PAUSE_ASSIGNMENT' for c in runtime.commands(device['deviceId']))==1
+>       boot(client,auth,'boot-1',contribution=True,reports=[paused_report(assignment)],processes=[stopped(assignment,workerAlive=True)])
+
+backend/tests/test_pause_resume.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/tests/labkit.py:59: in boot
+    response = client.post('/api/v1/device/poll', headers=auth, json=data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:1144: in post
+    return self.request(
+.venv-backend/lib/python3.12/site-packages/starlette/testclient.py:463: in request
+    return super().request(
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/starlette/testclient.py:360: in handle_request
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/testclient.py:357: in handle_request
+    portal.call(self.app, scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/ai/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/ai/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+.venv-backend/lib/python3.12/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/fastapi/applications.py:1159: in __call__
+    await super().__call__(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+.venv-backend/lib/python3.12/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv-backend/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/routing.py:676: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/routing.py:697: in app
+    await route.handle(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/routing.py:282: in handle
+    await self.app(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:134: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:120: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:674: in app
+    raw_response = await run_endpoint_function(
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:330: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/starlette/concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/anyio/to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+.venv-backend/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:2706: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:1100: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+backend/devices.py:325: in poll
+    return runtime.poll(current,body,command_kinds=command_capabilities(capabilities))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/agent_polling.py:23: in poll
+    accepted = self._accept_reports(db, device, body, old)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <backend.devices.AgentRuntime object at 0x7513f91e01a0>
+db = <sqlite3.Connection object at 0x7513f973b6a0>
+device = {'boot_id': 'boot-1', 'bulk_url': None, 'compute_url': 'http://100.64.0.1:8769', 'desired': 1, ...}
+body = Poll(telemetry=None, bootId='boot-1', contribution=True, processes=[ProcessReport(assignmentId='632d48e12f674731bac7d7...s': [], 'events': [], 'artifacts': [], 'completedGenerationCount': 1})], events=[], acknowledgements=[], selfTest=None)
+old = <sqlite3.Row object at 0x7513f75e44c0>
+
+    def _accept_reports(self, db, device, body, old):
+        accepted=[]
+        for report in body.reports:
+            row=db.execute('SELECT * FROM assignments WHERE id=?',(report.assignmentId,)).fetchone()
+            if not row or row['coordinator']!=device['id'] or row['epoch']!=report.epoch:continue
+            if len(json.dumps(report.snapshot))>2_000_000:raise HTTPException(413,'Snapshot is too large')
+            if report.snapshot.get('state',{}).get('status') not in QUIESCENT|{'STARTING','RUNNING','CANCELLING','RECOVERING','DRAINING','PAUSING'}:raise HTTPException(422,'Invalid runtime status')
+            if report.snapshot['state']['status']=='PAUSED':
+                point=report.snapshot['state'].get('pauseCheckpoint',{})
+>               if point.get('verified') is not True or type(point.get('generation')) is not int or point['generation']<0 or not re.fullmatch('[a-f0-9]{32}',str(point.get('pointId',''))) or any(not re.fullmatch('[a-f0-9]{64}',str(point.get(k,''))) for k in ('childWeightsSha256','parentWeightsSha256')):
+                                                                                                                                 ^^
+E               NameError: name 're' is not defined. Did you forget to import 're'
+
+backend/agent_polling.py:117: NameError
+_ test_resume_has_new_epoch_and_credentials_same_config_and_fences_old_reports _
+
+lab = (<starlette.testclient.TestClient object at 0x7513f94e2720>, <backend.store.Store object at 0x7513f932e0c0>, <backend....t at 0x7513f8908050>, {'Authorization': 'Bearer MbVmEIARuD10nkXyUfWREf2-zvD8cMxcDm-7wXuT-HI', 'X-Workspace-Id': 'lab'})
+
+    def test_resume_has_new_epoch_and_credentials_same_config_and_fences_old_reports(lab):
+        client,store,runtime,admin=lab
+        device,auth=pair(lab);enable(lab,device,auth);rid=queued(lab,device);store.dispatch_once()
+        old=runtime.runs()[0]
+        frozen=copy.deepcopy(store.get(rid));
+        with store.db() as db:old_body=json.loads(db.execute('SELECT body FROM assignments WHERE id=?',(old['assignmentId'],)).fetchone()[0])
+>       boot(client,auth,'boot-1',contribution=True,reports=[paused_report(old)],processes=[stopped(old)]);store.dispatch_once()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_pause_resume.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/tests/labkit.py:59: in boot
+    response = client.post('/api/v1/device/poll', headers=auth, json=data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:1144: in post
+    return self.request(
+.venv-backend/lib/python3.12/site-packages/starlette/testclient.py:463: in request
+    return super().request(
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/starlette/testclient.py:360: in handle_request
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/testclient.py:357: in handle_request
+    portal.call(self.app, scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/ai/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/ai/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+.venv-backend/lib/python3.12/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/fastapi/applications.py:1159: in __call__
+    await super().__call__(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+.venv-backend/lib/python3.12/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv-backend/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/routing.py:676: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/routing.py:697: in app
+    await route.handle(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/routing.py:282: in handle
+    await self.app(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:134: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:120: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:674: in app
+    raw_response = await run_endpoint_function(
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:330: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/starlette/concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/anyio/to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+.venv-backend/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:2706: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:1100: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+backend/devices.py:325: in poll
+    return runtime.poll(current,body,command_kinds=command_capabilities(capabilities))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/agent_polling.py:23: in poll
+    accepted = self._accept_reports(db, device, body, old)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <backend.devices.AgentRuntime object at 0x7513f8908050>
+db = <sqlite3.Connection object at 0x7513f875d7b0>
+device = {'boot_id': 'boot-1', 'bulk_url': None, 'compute_url': 'http://100.64.0.1:8769', 'desired': 1, ...}
+body = Poll(telemetry=None, bootId='boot-1', contribution=True, processes=[ProcessReport(assignmentId='0db5443f85214cbd9faf32...s': [], 'events': [], 'artifacts': [], 'completedGenerationCount': 1})], events=[], acknowledgements=[], selfTest=None)
+old = <sqlite3.Row object at 0x7513f9523d00>
+
+    def _accept_reports(self, db, device, body, old):
+        accepted=[]
+        for report in body.reports:
+            row=db.execute('SELECT * FROM assignments WHERE id=?',(report.assignmentId,)).fetchone()
+            if not row or row['coordinator']!=device['id'] or row['epoch']!=report.epoch:continue
+            if len(json.dumps(report.snapshot))>2_000_000:raise HTTPException(413,'Snapshot is too large')
+            if report.snapshot.get('state',{}).get('status') not in QUIESCENT|{'STARTING','RUNNING','CANCELLING','RECOVERING','DRAINING','PAUSING'}:raise HTTPException(422,'Invalid runtime status')
+            if report.snapshot['state']['status']=='PAUSED':
+                point=report.snapshot['state'].get('pauseCheckpoint',{})
+>               if point.get('verified') is not True or type(point.get('generation')) is not int or point['generation']<0 or not re.fullmatch('[a-f0-9]{32}',str(point.get('pointId',''))) or any(not re.fullmatch('[a-f0-9]{64}',str(point.get(k,''))) for k in ('childWeightsSha256','parentWeightsSha256')):
+                                                                                                                                 ^^
+E               NameError: name 're' is not defined. Did you forget to import 're'
+
+backend/agent_polling.py:117: NameError
+___ test_paused_run_survives_contribution_off_and_resume_waits_for_owner_on ____
+
+lab = (<starlette.testclient.TestClient object at 0x7513f8496b10>, <backend.store.Store object at 0x7513f9344da0>, <backend....t at 0x7513f93454c0>, {'Authorization': 'Bearer A5lWYpnjkaPNUyfIDl-qFbxgfvfA07vPCNsQCh8T4aY', 'X-Workspace-Id': 'lab'})
+
+    def test_paused_run_survives_contribution_off_and_resume_waits_for_owner_on(lab):
+        client,store,runtime,admin=lab
+        device,auth=pair(lab);enable(lab,device,auth);rid=queued(lab,device);store.dispatch_once()
+        assignment=runtime.runs()[0]
+>       boot(client,auth,'boot-1',contribution=True,reports=[paused_report(assignment)],processes=[stopped(assignment)]);store.dispatch_once()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_pause_resume.py:84: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/tests/labkit.py:59: in boot
+    response = client.post('/api/v1/device/poll', headers=auth, json=data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:1144: in post
+    return self.request(
+.venv-backend/lib/python3.12/site-packages/starlette/testclient.py:463: in request
+    return super().request(
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/starlette/testclient.py:360: in handle_request
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/testclient.py:357: in handle_request
+    portal.call(self.app, scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/ai/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/ai/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+.venv-backend/lib/python3.12/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/fastapi/applications.py:1159: in __call__
+    await super().__call__(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+.venv-backend/lib/python3.12/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv-backend/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/routing.py:676: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/routing.py:697: in app
+    await route.handle(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/routing.py:282: in handle
+    await self.app(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:134: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:120: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:674: in app
+    raw_response = await run_endpoint_function(
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:330: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/starlette/concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/anyio/to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+.venv-backend/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:2706: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:1100: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+backend/devices.py:325: in poll
+    return runtime.poll(current,body,command_kinds=command_capabilities(capabilities))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/agent_polling.py:23: in poll
+    accepted = self._accept_reports(db, device, body, old)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <backend.devices.AgentRuntime object at 0x7513f93454c0>
+db = <sqlite3.Connection object at 0x7513f875d6c0>
+device = {'boot_id': 'boot-1', 'bulk_url': None, 'compute_url': 'http://100.64.0.1:8769', 'desired': 1, ...}
+body = Poll(telemetry=None, bootId='boot-1', contribution=True, processes=[ProcessReport(assignmentId='dec77d72d5df438bb21546...s': [], 'events': [], 'artifacts': [], 'completedGenerationCount': 1})], events=[], acknowledgements=[], selfTest=None)
+old = <sqlite3.Row object at 0x7513f79e2b90>
+
+    def _accept_reports(self, db, device, body, old):
+        accepted=[]
+        for report in body.reports:
+            row=db.execute('SELECT * FROM assignments WHERE id=?',(report.assignmentId,)).fetchone()
+            if not row or row['coordinator']!=device['id'] or row['epoch']!=report.epoch:continue
+            if len(json.dumps(report.snapshot))>2_000_000:raise HTTPException(413,'Snapshot is too large')
+            if report.snapshot.get('state',{}).get('status') not in QUIESCENT|{'STARTING','RUNNING','CANCELLING','RECOVERING','DRAINING','PAUSING'}:raise HTTPException(422,'Invalid runtime status')
+            if report.snapshot['state']['status']=='PAUSED':
+                point=report.snapshot['state'].get('pauseCheckpoint',{})
+>               if point.get('verified') is not True or type(point.get('generation')) is not int or point['generation']<0 or not re.fullmatch('[a-f0-9]{32}',str(point.get('pointId',''))) or any(not re.fullmatch('[a-f0-9]{64}',str(point.get(k,''))) for k in ('childWeightsSha256','parentWeightsSha256')):
+                                                                                                                                 ^^
+E               NameError: name 're' is not defined. Did you forget to import 're'
+
+backend/agent_polling.py:117: NameError
+_______ test_cancellation_of_paused_or_pausing_run_never_requeues[False] _______
+
+lab = (<starlette.testclient.TestClient object at 0x7513f932ea20>, <backend.store.Store object at 0x7513f8422330>, <backend....t at 0x7513f8417170>, {'Authorization': 'Bearer O2C67nseeSBF4L-07hhA7L4-sVerRZ-xZQsblcUEFOQ', 'X-Workspace-Id': 'lab'})
+cancel_before_release = False
+
+    @pytest.mark.parametrize('cancel_before_release',[False,True])
+    def test_cancellation_of_paused_or_pausing_run_never_requeues(lab,cancel_before_release):
+        client,store,runtime,admin=lab
+        device,auth=pair(lab);enable(lab,device,auth);rid=queued(lab,device);store.dispatch_once()
+        assignment=runtime.runs()[0]
+        if cancel_before_release:client.post(f'/api/v1/experiments/{rid}/cancel',headers=admin)
+>       boot(client,auth,'boot-1',contribution=True,reports=[paused_report(assignment)],processes=[stopped(assignment)]);store.dispatch_once()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_pause_resume.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/tests/labkit.py:59: in boot
+    response = client.post('/api/v1/device/poll', headers=auth, json=data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:1144: in post
+    return self.request(
+.venv-backend/lib/python3.12/site-packages/starlette/testclient.py:463: in request
+    return super().request(
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/starlette/testclient.py:360: in handle_request
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/testclient.py:357: in handle_request
+    portal.call(self.app, scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/ai/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/ai/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+.venv-backend/lib/python3.12/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/fastapi/applications.py:1159: in __call__
+    await super().__call__(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+.venv-backend/lib/python3.12/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv-backend/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/routing.py:676: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/routing.py:697: in app
+    await route.handle(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/routing.py:282: in handle
+    await self.app(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:134: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:120: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:674: in app
+    raw_response = await run_endpoint_function(
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:330: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/starlette/concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/anyio/to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+.venv-backend/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:2706: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:1100: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+backend/devices.py:325: in poll
+    return runtime.poll(current,body,command_kinds=command_capabilities(capabilities))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/agent_polling.py:23: in poll
+    accepted = self._accept_reports(db, device, body, old)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <backend.devices.AgentRuntime object at 0x7513f8417170>
+db = <sqlite3.Connection object at 0x7513f875ef20>
+device = {'boot_id': 'boot-1', 'bulk_url': None, 'compute_url': 'http://100.64.0.1:8769', 'desired': 1, ...}
+body = Poll(telemetry=None, bootId='boot-1', contribution=True, processes=[ProcessReport(assignmentId='778f750f17ec4475b295b7...s': [], 'events': [], 'artifacts': [], 'completedGenerationCount': 1})], events=[], acknowledgements=[], selfTest=None)
+old = <sqlite3.Row object at 0x7513f7ba7340>
+
+    def _accept_reports(self, db, device, body, old):
+        accepted=[]
+        for report in body.reports:
+            row=db.execute('SELECT * FROM assignments WHERE id=?',(report.assignmentId,)).fetchone()
+            if not row or row['coordinator']!=device['id'] or row['epoch']!=report.epoch:continue
+            if len(json.dumps(report.snapshot))>2_000_000:raise HTTPException(413,'Snapshot is too large')
+            if report.snapshot.get('state',{}).get('status') not in QUIESCENT|{'STARTING','RUNNING','CANCELLING','RECOVERING','DRAINING','PAUSING'}:raise HTTPException(422,'Invalid runtime status')
+            if report.snapshot['state']['status']=='PAUSED':
+                point=report.snapshot['state'].get('pauseCheckpoint',{})
+>               if point.get('verified') is not True or type(point.get('generation')) is not int or point['generation']<0 or not re.fullmatch('[a-f0-9]{32}',str(point.get('pointId',''))) or any(not re.fullmatch('[a-f0-9]{64}',str(point.get(k,''))) for k in ('childWeightsSha256','parentWeightsSha256')):
+                                                                                                                                 ^^
+E               NameError: name 're' is not defined. Did you forget to import 're'
+
+backend/agent_polling.py:117: NameError
+_______ test_cancellation_of_paused_or_pausing_run_never_requeues[True] ________
+
+lab = (<starlette.testclient.TestClient object at 0x7513f95626f0>, <backend.store.Store object at 0x7513f70f3d10>, <backend....t at 0x7513f70f3680>, {'Authorization': 'Bearer 6qekSXVgr3gBdXU1BXiVf6c72zaTLRphziOsfg8yqXA', 'X-Workspace-Id': 'lab'})
+cancel_before_release = True
+
+    @pytest.mark.parametrize('cancel_before_release',[False,True])
+    def test_cancellation_of_paused_or_pausing_run_never_requeues(lab,cancel_before_release):
+        client,store,runtime,admin=lab
+        device,auth=pair(lab);enable(lab,device,auth);rid=queued(lab,device);store.dispatch_once()
+        assignment=runtime.runs()[0]
+        if cancel_before_release:client.post(f'/api/v1/experiments/{rid}/cancel',headers=admin)
+>       boot(client,auth,'boot-1',contribution=True,reports=[paused_report(assignment)],processes=[stopped(assignment)]);store.dispatch_once()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_pause_resume.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/tests/labkit.py:59: in boot
+    response = client.post('/api/v1/device/poll', headers=auth, json=data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:1144: in post
+    return self.request(
+.venv-backend/lib/python3.12/site-packages/starlette/testclient.py:463: in request
+    return super().request(
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/starlette/testclient.py:360: in handle_request
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/testclient.py:357: in handle_request
+    portal.call(self.app, scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/ai/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/ai/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+.venv-backend/lib/python3.12/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/fastapi/applications.py:1159: in __call__
+    await super().__call__(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+.venv-backend/lib/python3.12/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv-backend/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/routing.py:676: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/routing.py:697: in app
+    await route.handle(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/routing.py:282: in handle
+    await self.app(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:134: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv-backend/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:120: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:674: in app
+    raw_response = await run_endpoint_function(
+.venv-backend/lib/python3.12/site-packages/fastapi/routing.py:330: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/starlette/concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/anyio/to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+.venv-backend/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:2706: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+.venv-backend/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:1100: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+backend/devices.py:325: in poll
+    return runtime.poll(current,body,command_kinds=command_capabilities(capabilities))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/agent_polling.py:23: in poll
+    accepted = self._accept_reports(db, device, body, old)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <backend.devices.AgentRuntime object at 0x7513f70f3680>
+db = <sqlite3.Connection object at 0x7513f7b19c60>
+device = {'boot_id': 'boot-1', 'bulk_url': None, 'compute_url': 'http://100.64.0.1:8769', 'desired': 1, ...}
+body = Poll(telemetry=None, bootId='boot-1', contribution=True, processes=[ProcessReport(assignmentId='0ababd2c56be4fd6a67767...s': [], 'events': [], 'artifacts': [], 'completedGenerationCount': 1})], events=[], acknowledgements=[], selfTest=None)
+old = <sqlite3.Row object at 0x7513f84b1f00>
+
+    def _accept_reports(self, db, device, body, old):
+        accepted=[]
+        for report in body.reports:
+            row=db.execute('SELECT * FROM assignments WHERE id=?',(report.assignmentId,)).fetchone()
+            if not row or row['coordinator']!=device['id'] or row['epoch']!=report.epoch:continue
+            if len(json.dumps(report.snapshot))>2_000_000:raise HTTPException(413,'Snapshot is too large')
+            if report.snapshot.get('state',{}).get('status') not in QUIESCENT|{'STARTING','RUNNING','CANCELLING','RECOVERING','DRAINING','PAUSING'}:raise HTTPException(422,'Invalid runtime status')
+            if report.snapshot['state']['status']=='PAUSED':
+                point=report.snapshot['state'].get('pauseCheckpoint',{})
+>               if point.get('verified') is not True or type(point.get('generation')) is not int or point['generation']<0 or not re.fullmatch('[a-f0-9]{32}',str(point.get('pointId',''))) or any(not re.fullmatch('[a-f0-9]{64}',str(point.get(k,''))) for k in ('childWeightsSha256','parentWeightsSha256')):
+                                                                                                                                 ^^
+E               NameError: name 're' is not defined. Did you forget to import 're'
+
+backend/agent_polling.py:117: NameError
+=============================== warnings summary ===============================
+.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/pc5070ti/projects/heteroes/.venv-backend/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_admission_hold.py::test_held_queue_still_reconciles_pause
+FAILED backend/tests/test_pause_resume.py::test_pause_keeps_reservation_until_checkpoint_and_every_process_stops
+FAILED backend/tests/test_pause_resume.py::test_resume_has_new_epoch_and_credentials_same_config_and_fences_old_reports
+FAILED backend/tests/test_pause_resume.py::test_paused_run_survives_contribution_off_and_resume_waits_for_owner_on
+FAILED backend/tests/test_pause_resume.py::test_cancellation_of_paused_or_pausing_run_never_requeues[False]
+FAILED backend/tests/test_pause_resume.py::test_cancellation_of_paused_or_pausing_run_never_requeues[True]
+6 failed, 276 passed, 1 warning in 42.93s

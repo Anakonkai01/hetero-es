@@ -1,0 +1,5 @@
+control ok    | 2 passed, 73 deselected in 28.60s
+killed       skip-every-other-lookahead-tile | 2 failed, 73 deselected in 5.32s
+killed       swap-high-half-with-low-half | 2 failed, 73 deselected in 5.32s
+
+2 of 2 mutants killed.

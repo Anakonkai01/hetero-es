@@ -1,0 +1,1 @@
+{"event": "large_data_relocated", "t": 1792507318.7722573, "from": "/home/thao_nguyen/.local/share/heteroes-c4-cpu/artifacts", "to": "/mnt/d/HeteroES-r11-long-data-20261020/artifacts", "files": 65, "logicalBytes": 15810670379, "allSha256Equal": true, "pausedAfterGenerations": 10, "agentStoppedDuringCopy": true, "windowsCFreeBytes": 10721222656, "windowsDFreeBytes": 889991041024}

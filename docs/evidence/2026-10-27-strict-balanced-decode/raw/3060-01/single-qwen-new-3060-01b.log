@@ -1,0 +1,3 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 3026.13it/s]
+new qwen short32 3019.4 bc4a5504e37c
+new qwen chat128 2893.0 a9fad5ca48ed

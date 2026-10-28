@@ -1,0 +1,4 @@
+installed build=lf1-20261021-r11-candidate9 runtimeSha256=9a553d2dfae92859b4a41a12a8bb946bed8743ceb531745ffef689e4e7e9ae41
+worker app processes=0
+after C freeBytes=19185725440
+after D freeBytes=858938048512

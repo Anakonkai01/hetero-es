@@ -1,0 +1,256 @@
+FFFFFFFFFFFFFF                                                           [100%]
+=================================== FAILURES ===================================
+______________ test_sdk_and_lab_transport_preserve_audit_rate[0] _______________
+
+rate = 0
+
+    @pytest.mark.parametrize("rate", [0, 0.05, 1])
+    def test_sdk_and_lab_transport_preserve_audit_rate(rate):
+>       config = ESConfig(model_path="model", model_id="org/model", train_dataset="rows", audit_rate=rate)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: ESConfig.__init__() got an unexpected keyword argument 'audit_rate'
+
+runtime/tests/v3/test_audit_controls.py:15: TypeError
+_____________ test_sdk_and_lab_transport_preserve_audit_rate[0.05] _____________
+
+rate = 0.05
+
+    @pytest.mark.parametrize("rate", [0, 0.05, 1])
+    def test_sdk_and_lab_transport_preserve_audit_rate(rate):
+>       config = ESConfig(model_path="model", model_id="org/model", train_dataset="rows", audit_rate=rate)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: ESConfig.__init__() got an unexpected keyword argument 'audit_rate'
+
+runtime/tests/v3/test_audit_controls.py:15: TypeError
+______________ test_sdk_and_lab_transport_preserve_audit_rate[1] _______________
+
+rate = 1
+
+    @pytest.mark.parametrize("rate", [0, 0.05, 1])
+    def test_sdk_and_lab_transport_preserve_audit_rate(rate):
+>       config = ESConfig(model_path="model", model_id="org/model", train_dataset="rows", audit_rate=rate)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: ESConfig.__init__() got an unexpected keyword argument 'audit_rate'
+
+runtime/tests/v3/test_audit_controls.py:15: TypeError
+___________________ test_default_audit_rate_is_five_percent ____________________
+
+    def test_default_audit_rate_is_five_percent():
+        config = ESConfig(model_path="m", model_id="x", train_dataset="rows")
+>       assert ESTrainer(config, scorer={"name": "last-integer"}).config()["auditRate"] == 0.05
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'auditRate'
+
+runtime/tests/v3/test_audit_controls.py:25: KeyError
+________ test_invalid_audit_rate_is_rejected_before_model_loading[True] ________
+
+rate = True
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-121/test_invalid_audit_rate_is_rej0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x77ba061b8440>
+
+    @pytest.mark.parametrize("rate", [True, False, -0.01, 1.01, "0.05", None, float("nan"), float("inf")])
+    def test_invalid_audit_rate_is_rejected_before_model_loading(rate, tmp_path, monkeypatch):
+        import heteroes.v3.local as local
+    
+        with pytest.raises(ValueError, match="audit"):
+>           ESConfig(model_path="m", model_id="x", train_dataset="rows", audit_rate=rate)
+E           TypeError: ESConfig.__init__() got an unexpected keyword argument 'audit_rate'
+
+runtime/tests/v3/test_audit_controls.py:33: TypeError
+_______ test_invalid_audit_rate_is_rejected_before_model_loading[False] ________
+
+rate = False
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-121/test_invalid_audit_rate_is_rej1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x77b9034ec9b0>
+
+    @pytest.mark.parametrize("rate", [True, False, -0.01, 1.01, "0.05", None, float("nan"), float("inf")])
+    def test_invalid_audit_rate_is_rejected_before_model_loading(rate, tmp_path, monkeypatch):
+        import heteroes.v3.local as local
+    
+        with pytest.raises(ValueError, match="audit"):
+>           ESConfig(model_path="m", model_id="x", train_dataset="rows", audit_rate=rate)
+E           TypeError: ESConfig.__init__() got an unexpected keyword argument 'audit_rate'
+
+runtime/tests/v3/test_audit_controls.py:33: TypeError
+_______ test_invalid_audit_rate_is_rejected_before_model_loading[-0.01] ________
+
+rate = -0.01
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-121/test_invalid_audit_rate_is_rej2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x77b9034ef0b0>
+
+    @pytest.mark.parametrize("rate", [True, False, -0.01, 1.01, "0.05", None, float("nan"), float("inf")])
+    def test_invalid_audit_rate_is_rejected_before_model_loading(rate, tmp_path, monkeypatch):
+        import heteroes.v3.local as local
+    
+        with pytest.raises(ValueError, match="audit"):
+>           ESConfig(model_path="m", model_id="x", train_dataset="rows", audit_rate=rate)
+E           TypeError: ESConfig.__init__() got an unexpected keyword argument 'audit_rate'
+
+runtime/tests/v3/test_audit_controls.py:33: TypeError
+________ test_invalid_audit_rate_is_rejected_before_model_loading[1.01] ________
+
+rate = 1.01
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-121/test_invalid_audit_rate_is_rej3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x77b9034efb00>
+
+    @pytest.mark.parametrize("rate", [True, False, -0.01, 1.01, "0.05", None, float("nan"), float("inf")])
+    def test_invalid_audit_rate_is_rejected_before_model_loading(rate, tmp_path, monkeypatch):
+        import heteroes.v3.local as local
+    
+        with pytest.raises(ValueError, match="audit"):
+>           ESConfig(model_path="m", model_id="x", train_dataset="rows", audit_rate=rate)
+E           TypeError: ESConfig.__init__() got an unexpected keyword argument 'audit_rate'
+
+runtime/tests/v3/test_audit_controls.py:33: TypeError
+________ test_invalid_audit_rate_is_rejected_before_model_loading[0.05] ________
+
+rate = '0.05'
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-121/test_invalid_audit_rate_is_rej4')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x77b9034ef7d0>
+
+    @pytest.mark.parametrize("rate", [True, False, -0.01, 1.01, "0.05", None, float("nan"), float("inf")])
+    def test_invalid_audit_rate_is_rejected_before_model_loading(rate, tmp_path, monkeypatch):
+        import heteroes.v3.local as local
+    
+        with pytest.raises(ValueError, match="audit"):
+>           ESConfig(model_path="m", model_id="x", train_dataset="rows", audit_rate=rate)
+E           TypeError: ESConfig.__init__() got an unexpected keyword argument 'audit_rate'
+
+runtime/tests/v3/test_audit_controls.py:33: TypeError
+________ test_invalid_audit_rate_is_rejected_before_model_loading[None] ________
+
+rate = None
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-121/test_invalid_audit_rate_is_rej5')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x77b9034ee330>
+
+    @pytest.mark.parametrize("rate", [True, False, -0.01, 1.01, "0.05", None, float("nan"), float("inf")])
+    def test_invalid_audit_rate_is_rejected_before_model_loading(rate, tmp_path, monkeypatch):
+        import heteroes.v3.local as local
+    
+        with pytest.raises(ValueError, match="audit"):
+>           ESConfig(model_path="m", model_id="x", train_dataset="rows", audit_rate=rate)
+E           TypeError: ESConfig.__init__() got an unexpected keyword argument 'audit_rate'
+
+runtime/tests/v3/test_audit_controls.py:33: TypeError
+________ test_invalid_audit_rate_is_rejected_before_model_loading[nan] _________
+
+rate = nan
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-121/test_invalid_audit_rate_is_rej6')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x77b9034ed820>
+
+    @pytest.mark.parametrize("rate", [True, False, -0.01, 1.01, "0.05", None, float("nan"), float("inf")])
+    def test_invalid_audit_rate_is_rejected_before_model_loading(rate, tmp_path, monkeypatch):
+        import heteroes.v3.local as local
+    
+        with pytest.raises(ValueError, match="audit"):
+>           ESConfig(model_path="m", model_id="x", train_dataset="rows", audit_rate=rate)
+E           TypeError: ESConfig.__init__() got an unexpected keyword argument 'audit_rate'
+
+runtime/tests/v3/test_audit_controls.py:33: TypeError
+________ test_invalid_audit_rate_is_rejected_before_model_loading[inf] _________
+
+rate = inf
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-121/test_invalid_audit_rate_is_rej7')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x77b9034ef050>
+
+    @pytest.mark.parametrize("rate", [True, False, -0.01, 1.01, "0.05", None, float("nan"), float("inf")])
+    def test_invalid_audit_rate_is_rejected_before_model_loading(rate, tmp_path, monkeypatch):
+        import heteroes.v3.local as local
+    
+        with pytest.raises(ValueError, match="audit"):
+>           ESConfig(model_path="m", model_id="x", train_dataset="rows", audit_rate=rate)
+E           TypeError: ESConfig.__init__() got an unexpected keyword argument 'audit_rate'
+
+runtime/tests/v3/test_audit_controls.py:33: TypeError
+_____ test_config_controls_coverage_without_changing_recipe_plan_or_child ______
+
+assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-121/tiny0')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-121/test_config_controls_coverage_0')
+
+    def test_config_controls_coverage_without_changing_recipe_plan_or_child(assets, tmp_path):
+        results = []
+        for rate in (0, 1):
+            out = tmp_path / str(rate)
+            summaries = run_local(config_for(assets, generations=1, auditRate=rate), out, workers=2, timeout_seconds=30)
+            results.append((out, summaries[0]))
+>           frozen = json.loads((out / "audit-config.json").read_text())
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+runtime/tests/v3/test_audit_controls.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../miniforge3/envs/heteroes-match/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/tmp/pytest-of-pc5070ti/pytest-121/test_config_controls_coverage_0/0/audit-config.json')
+mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-pc5070ti/pytest-121/test_config_controls_coverage_0/0/audit-config.json'
+
+../../miniforge3/envs/heteroes-match/lib/python3.12/pathlib.py:1013: FileNotFoundError
+---------------------------- Captured stdout setup -----------------------------
+
+
+
+---------------------------- Captured stderr setup -----------------------------
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 1117.29it/s]
+----------------------------- Captured stderr call -----------------------------
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 17456.68it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 16797.89it/s]
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 16836.79it/s]
+__________ test_restart_cannot_silently_change_frozen_audit_settings ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-121/test_restart_cannot_silently_c0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x77b897166f90>
+
+    def test_restart_cannot_silently_change_frozen_audit_settings(tmp_path, monkeypatch):
+        import heteroes.v3.local as local
+    
+        path = tmp_path / "audit-config.json"
+        path.write_text(json.dumps({"formatVersion": 1, "auditRate": 0.05}))
+        monkeypatch.setattr(local, "prepare", lambda *a, **k: pytest.fail("changed frozen settings must fail before loading"))
+        with pytest.raises(ValueError, match="audit"):
+>           run_local({"auditRate": 1}, tmp_path)
+
+runtime/tests/v3/test_audit_controls.py:62: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+runtime/src/heteroes/v3/local.py:170: in run_local
+    ready = prepare(config, out_dir, device)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = ({'auditRate': 1}, PosixPath('/tmp/pytest-of-pc5070ti/pytest-121/test_restart_cannot_silently_c0'), 'cpu')
+k = {}
+
+>   monkeypatch.setattr(local, "prepare", lambda *a, **k: pytest.fail("changed frozen settings must fail before loading"))
+                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: changed frozen settings must fail before loading
+
+runtime/tests/v3/test_audit_controls.py:60: Failed
+=========================== short test summary info ============================
+FAILED runtime/tests/v3/test_audit_controls.py::test_sdk_and_lab_transport_preserve_audit_rate[0]
+FAILED runtime/tests/v3/test_audit_controls.py::test_sdk_and_lab_transport_preserve_audit_rate[0.05]
+FAILED runtime/tests/v3/test_audit_controls.py::test_sdk_and_lab_transport_preserve_audit_rate[1]
+FAILED runtime/tests/v3/test_audit_controls.py::test_default_audit_rate_is_five_percent
+FAILED runtime/tests/v3/test_audit_controls.py::test_invalid_audit_rate_is_rejected_before_model_loading[True]
+FAILED runtime/tests/v3/test_audit_controls.py::test_invalid_audit_rate_is_rejected_before_model_loading[False]
+FAILED runtime/tests/v3/test_audit_controls.py::test_invalid_audit_rate_is_rejected_before_model_loading[-0.01]
+FAILED runtime/tests/v3/test_audit_controls.py::test_invalid_audit_rate_is_rejected_before_model_loading[1.01]
+FAILED runtime/tests/v3/test_audit_controls.py::test_invalid_audit_rate_is_rejected_before_model_loading[0.05]
+FAILED runtime/tests/v3/test_audit_controls.py::test_invalid_audit_rate_is_rejected_before_model_loading[None]
+FAILED runtime/tests/v3/test_audit_controls.py::test_invalid_audit_rate_is_rejected_before_model_loading[nan]
+FAILED runtime/tests/v3/test_audit_controls.py::test_invalid_audit_rate_is_rejected_before_model_loading[inf]
+FAILED runtime/tests/v3/test_audit_controls.py::test_config_controls_coverage_without_changing_recipe_plan_or_child
+FAILED runtime/tests/v3/test_audit_controls.py::test_restart_cannot_silently_change_frozen_audit_settings
+14 failed in 2.16s

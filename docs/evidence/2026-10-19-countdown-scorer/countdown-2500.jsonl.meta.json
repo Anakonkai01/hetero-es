@@ -1,0 +1,9 @@
+{
+ "fileSha256": "ecdd37e1a972a6c33f708f66210b658c184ac5aa5cc8bd362cfa26703b37e273",
+ "rows": 2500,
+ "selectionSeed": 20261019,
+ "source": "Jiayi-Pan/Countdown-Tasks-3to4",
+ "sourceFile": "data/train-00000-of-00001.parquet",
+ "sourceRevision": "408f70d177020686d34a56bba5952feb45aaaee4",
+ "sourceSha256": "a1b37bea0f439c858b11b908daa682e521f13f9592f1866b08650f58b730d126"
+}

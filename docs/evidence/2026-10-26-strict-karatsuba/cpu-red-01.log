@@ -1,0 +1,17 @@
+
+==================================== ERRORS ====================================
+____ ERROR collecting .scratch/strict-karatsuba-20261026/test_karatsuba.py _____
+ImportError while importing test module '/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/strict-karatsuba-20261026/test_karatsuba.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../miniforge3/envs/heteroes-match/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/strict-karatsuba-20261026/test_karatsuba.py:4: in <module>
+    from karatsuba_reference import digits,quantize,linear
+E   ModuleNotFoundError: No module named 'karatsuba_reference'
+=========================== short test summary info ============================
+ERROR .scratch/strict-karatsuba-20261026/test_karatsuba.py
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.66s

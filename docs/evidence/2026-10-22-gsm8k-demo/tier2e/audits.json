@@ -1,0 +1,42 @@
+[
+ {
+  "candidate": "c48ea62d743941b38ed497570f6b753b/g1/c10",
+  "re-run by": "1660s",
+  "matched": true
+ },
+ {
+  "candidate": "c48ea62d743941b38ed497570f6b753b/g2/c9",
+  "re-run by": "1660s",
+  "matched": true
+ },
+ {
+  "candidate": "c48ea62d743941b38ed497570f6b753b/g3/c3",
+  "re-run by": "3060-thao",
+  "matched": true
+ },
+ {
+  "candidate": "c48ea62d743941b38ed497570f6b753b/g3/c9",
+  "re-run by": "1660s",
+  "matched": true
+ },
+ {
+  "candidate": "c48ea62d743941b38ed497570f6b753b/g3/c16",
+  "re-run by": "3060-thao",
+  "matched": true
+ },
+ {
+  "candidate": "c48ea62d743941b38ed497570f6b753b/g3/c20",
+  "re-run by": "3060-thao",
+  "matched": true
+ },
+ {
+  "candidate": "c48ea62d743941b38ed497570f6b753b/g3/c19",
+  "re-run by": "1660s",
+  "matched": true
+ },
+ {
+  "candidate": "c48ea62d743941b38ed497570f6b753b/g4/c26",
+  "re-run by": "1660s",
+  "matched": true
+ }
+]

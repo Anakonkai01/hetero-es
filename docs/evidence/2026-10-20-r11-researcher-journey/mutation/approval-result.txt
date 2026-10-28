@@ -1,0 +1,4 @@
+killed       owner workspaces empty | 1 failed, 1 warning in 0.24s
+killed       keyed by workspace owner instead of device owner | 1 failed, 1 warning in 0.24s
+
+2 of 2 mutants killed.

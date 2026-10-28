@@ -1,0 +1,2799 @@
+{
+ "experiment": {
+  "id": "90147d801ca8463d92143d21f95d63f4",
+  "name": "GSM8K demo \u00b7 tier 2b system under stress (explicit rejoin) \u00b7 5 generations \u00b7 N=32",
+  "status": "DRAINING",
+  "createdMs": 1792599558379,
+  "startedMs": 1792599578921,
+  "completedMs": null,
+  "maxGenerations": 5,
+  "candidatesPerGeneration": 32
+ },
+ "workers": [
+  {
+   "id": "cli-71b757062fd9",
+   "started": true,
+   "alive": false
+  },
+  {
+   "id": "cli-73b87e369ddc",
+   "started": true,
+   "alive": true
+  },
+  {
+   "id": "desktop-d9017660e75f",
+   "started": true,
+   "alive": false
+  },
+  {
+   "id": "cli-d90d1da024e9",
+   "started": true,
+   "alive": false
+  },
+  {
+   "id": "cli-aa99b4d4ca58",
+   "started": true,
+   "alive": false
+  }
+ ],
+ "generations": [
+  {
+   "index": 0,
+   "id": "90147d801ca8463d92143d21f95d63f4.g0",
+   "status": "COMPLETED",
+   "openMs": 1792599749366,
+   "evaluatedMs": 1792600006057,
+   "doneMs": 1792600016403,
+   "candidateCount": 32,
+   "committedCount": 32,
+   "rewardMean": 0.572265625,
+   "rewardBest": 0.6875,
+   "seconds": {
+    "wait": 257.7386486079995,
+    "update": 10.32988937299524,
+    "publish": 0.0016399009982706048,
+    "record": 0.00781977700535208,
+    "total": 268.07799765899836
+   }
+  },
+  {
+   "index": 1,
+   "id": "90147d801ca8463d92143d21f95d63f4.g1",
+   "status": "COMPLETED",
+   "openMs": 1792600016926,
+   "evaluatedMs": 1792600235399,
+   "doneMs": 1792600245686,
+   "candidateCount": 32,
+   "committedCount": 32,
+   "rewardMean": 0.4921875,
+   "rewardBest": 0.65625,
+   "seconds": {
+    "wait": 218.48501218800084,
+    "update": 10.274150158002158,
+    "publish": 0.003576412003894802,
+    "record": 0.004375310993054882,
+    "total": 228.76711406899994
+   }
+  },
+  {
+   "index": 2,
+   "id": "90147d801ca8463d92143d21f95d63f4.g2",
+   "status": "COMPLETED",
+   "openMs": 1792600246179,
+   "evaluatedMs": 1792600494913,
+   "doneMs": 1792600505158,
+   "candidateCount": 32,
+   "committedCount": 32,
+   "rewardMean": 0.634765625,
+   "rewardBest": 0.71875,
+   "seconds": {
+    "wait": 248.7404303200019,
+    "update": 10.234757644997444,
+    "publish": 0.0019906590023310855,
+    "record": 0.002539175999118015,
+    "total": 258.9797178000008
+   }
+  },
+  {
+   "index": 3,
+   "id": "90147d801ca8463d92143d21f95d63f4.g3",
+   "status": "COMPLETED",
+   "openMs": 1792600505680,
+   "evaluatedMs": 1792600827351,
+   "doneMs": 1792600837671,
+   "candidateCount": 32,
+   "committedCount": 32,
+   "rewardMean": 0.623046875,
+   "rewardBest": 0.75,
+   "seconds": {
+    "wait": 321.6772340699972,
+    "update": 10.308912676002365,
+    "publish": 0.0015527079958701506,
+    "record": 0.004175529000349343,
+    "total": 331.9918749829958
+   }
+  },
+  {
+   "index": 4,
+   "id": "90147d801ca8463d92143d21f95d63f4.g4",
+   "status": "COMPLETED",
+   "openMs": 1792600838195,
+   "evaluatedMs": 1792601110130,
+   "doneMs": 1792601120759,
+   "candidateCount": 32,
+   "committedCount": 32,
+   "rewardMean": 0.4521484375,
+   "rewardBest": 0.53125,
+   "seconds": {
+    "wait": 271.9484397479973,
+    "update": 10.615565710002556,
+    "publish": 0.001927544995851349,
+    "record": 0.0064691660008975305,
+    "total": 282.57240216899663
+   }
+  }
+ ],
+ "jobs": [
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c0",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c0.a1",
+   "generation": 0,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "153891637243550",
+   "startMs": 1792599749425,
+   "endMs": 1792599784567,
+   "status": "SUCCEEDED",
+   "reward": 0.46875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c1",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c1.a1",
+   "generation": 0,
+   "workerId": "cli-d90d1da024e9",
+   "seed": "71444596259672",
+   "startMs": 1792599749481,
+   "endMs": 1792599842634,
+   "status": "SUCCEEDED",
+   "reward": 0.59375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c2",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c2.a1",
+   "generation": 0,
+   "workerId": "cli-71b757062fd9",
+   "seed": "3000011547259563",
+   "startMs": 1792599749513,
+   "endMs": 1792599767697,
+   "status": "SUCCEEDED",
+   "reward": 0.65625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c3",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c3.a1",
+   "generation": 0,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "1369122573871803",
+   "startMs": 1792599749570,
+   "endMs": 1792599763163,
+   "status": "SUCCEEDED",
+   "reward": 0.59375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c4",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c4.a1",
+   "generation": 0,
+   "workerId": "cli-73b87e369ddc",
+   "seed": "2711640496292420",
+   "startMs": 1792599749647,
+   "endMs": 1792599791304,
+   "status": "SUCCEEDED",
+   "reward": 0.59375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c5",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c5.a1",
+   "generation": 0,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "2879159166041340",
+   "startMs": 1792599763205,
+   "endMs": 1792599787308,
+   "status": "SUCCEEDED",
+   "reward": 0.5
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c6",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c6.a1",
+   "generation": 0,
+   "workerId": "cli-71b757062fd9",
+   "seed": "3628531072147320",
+   "startMs": 1792599767712,
+   "endMs": 1792599787129,
+   "status": "SUCCEEDED",
+   "reward": 0.59375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c7",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c7.a1",
+   "generation": 0,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "2841812425915207",
+   "startMs": 1792599784760,
+   "endMs": 1792599817022,
+   "status": "SUCCEEDED",
+   "reward": 0.5
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c8",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c8.a1",
+   "generation": 0,
+   "workerId": "cli-71b757062fd9",
+   "seed": "915822145523435",
+   "startMs": 1792599787143,
+   "endMs": 1792599802995,
+   "status": "SUCCEEDED",
+   "reward": 0.59375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c9",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c9.a1",
+   "generation": 0,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "434132645530351",
+   "startMs": 1792599787354,
+   "endMs": 1792599806419,
+   "status": "SUCCEEDED",
+   "reward": 0.5625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c10",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c10.a1",
+   "generation": 0,
+   "workerId": "cli-73b87e369ddc",
+   "seed": "2907951143550981",
+   "startMs": 1792599791444,
+   "endMs": 1792599822894,
+   "status": "SUCCEEDED",
+   "reward": 0.625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c11",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c11.a1",
+   "generation": 0,
+   "workerId": "cli-71b757062fd9",
+   "seed": "3430685015785583",
+   "startMs": 1792599803008,
+   "endMs": 1792599821131,
+   "status": "SUCCEEDED",
+   "reward": 0.53125
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c12",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c12.a1",
+   "generation": 0,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "2902504392868225",
+   "startMs": 1792599806479,
+   "endMs": 1792599825847,
+   "status": "SUCCEEDED",
+   "reward": 0.59375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c13",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c13.a1",
+   "generation": 0,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "1305326482995343",
+   "startMs": 1792599817085,
+   "endMs": 1792599855449,
+   "status": "SUCCEEDED",
+   "reward": 0.6875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c14",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c14.a1",
+   "generation": 0,
+   "workerId": "cli-71b757062fd9",
+   "seed": "3531537221439439",
+   "startMs": 1792599821159,
+   "endMs": 1792599838406,
+   "status": "SUCCEEDED",
+   "reward": 0.625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c15",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c15.a1",
+   "generation": 0,
+   "workerId": "cli-73b87e369ddc",
+   "seed": "677416759864341",
+   "startMs": 1792599823043,
+   "endMs": 1792599866123,
+   "status": "SUCCEEDED",
+   "reward": 0.59375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c16",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c16.a1",
+   "generation": 0,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "2729170185865728",
+   "startMs": 1792599825892,
+   "endMs": 1792599843265,
+   "status": "SUCCEEDED",
+   "reward": 0.59375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c17",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c17.a1",
+   "generation": 0,
+   "workerId": "cli-71b757062fd9",
+   "seed": "533602516403459",
+   "startMs": 1792599838422,
+   "endMs": 1792599856599,
+   "status": "SUCCEEDED",
+   "reward": 0.5625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c18",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c18.a1",
+   "generation": 0,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "3593787977311314",
+   "startMs": 1792599843310,
+   "endMs": 1792599860980,
+   "status": "SUCCEEDED",
+   "reward": 0.59375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c19",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c19.a1",
+   "generation": 0,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "1699299814848674",
+   "startMs": 1792599855822,
+   "endMs": 1792599897979,
+   "status": "SUCCEEDED",
+   "reward": 0.59375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c20",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c20.a1",
+   "generation": 0,
+   "workerId": "cli-71b757062fd9",
+   "seed": "1797414285536694",
+   "startMs": 1792599856627,
+   "endMs": 1792599875643,
+   "status": "SUCCEEDED",
+   "reward": 0.53125
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c21",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c21.a1",
+   "generation": 0,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "3069806112423504",
+   "startMs": 1792599861037,
+   "endMs": 1792599880159,
+   "status": "SUCCEEDED",
+   "reward": 0.59375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c22",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c22.a1",
+   "generation": 0,
+   "workerId": "cli-73b87e369ddc",
+   "seed": "2985728487090348",
+   "startMs": 1792599866220,
+   "endMs": 1792599907036,
+   "status": "SUCCEEDED",
+   "reward": 0.34375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c23",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c23.a1",
+   "generation": 0,
+   "workerId": "cli-71b757062fd9",
+   "seed": "294155728918595",
+   "startMs": 1792599875658,
+   "endMs": 1792599897661,
+   "status": "SUCCEEDED",
+   "reward": 0.5625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c24",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c24.a1",
+   "generation": 0,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "2789718685443490",
+   "startMs": 1792599880205,
+   "endMs": 1792599896445,
+   "status": "SUCCEEDED",
+   "reward": 0.5625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c25",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c25.a1",
+   "generation": 0,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "3107613832517219",
+   "startMs": 1792599896544,
+   "endMs": 1792599915382,
+   "status": "SUCCEEDED",
+   "reward": 0.65625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c26",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c26.a1",
+   "generation": 0,
+   "workerId": "cli-71b757062fd9",
+   "seed": "3665548874380065",
+   "startMs": 1792599897676,
+   "endMs": 1792599920214,
+   "status": "SUCCEEDED",
+   "reward": 0.5625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c27",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c27.a1",
+   "generation": 0,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "797897414137811",
+   "startMs": 1792599898147,
+   "endMs": 1792599937604,
+   "status": "SUCCEEDED",
+   "reward": 0.53125
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c28",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c28.a1",
+   "generation": 0,
+   "workerId": "cli-73b87e369ddc",
+   "seed": "4106312041473549",
+   "startMs": 1792599907163,
+   "endMs": 1792599942054,
+   "status": "SUCCEEDED",
+   "reward": 0.59375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c29",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c29.a1",
+   "generation": 0,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "4303268394872182",
+   "startMs": 1792599915465,
+   "endMs": 1792599935559,
+   "status": "SUCCEEDED",
+   "reward": 0.5625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c30",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c30.a1",
+   "generation": 0,
+   "workerId": "cli-71b757062fd9",
+   "seed": "4118542362064432",
+   "startMs": 1792599920226,
+   "endMs": 1792599938774,
+   "status": "SUCCEEDED",
+   "reward": 0.625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g0.c31",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g0.c31.a1",
+   "generation": 0,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "2974524562722575",
+   "startMs": 1792599935656,
+   "endMs": 1792599952433,
+   "status": "SUCCEEDED",
+   "reward": 0.53125
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c0",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c0.a1",
+   "generation": 1,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "644814521638305",
+   "startMs": 1792600026256,
+   "endMs": 1792600040792,
+   "status": "SUCCEEDED",
+   "reward": 0.5625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c1",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c1.a1",
+   "generation": 1,
+   "workerId": "cli-71b757062fd9",
+   "seed": "2421365863469862",
+   "startMs": 1792600027083,
+   "endMs": 1792600042054,
+   "status": "SUCCEEDED",
+   "reward": 0.5
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c2",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c2.a1",
+   "generation": 1,
+   "workerId": "cli-73b87e369ddc",
+   "seed": "2793940497578257",
+   "startMs": 1792600035594,
+   "endMs": 1792600080606,
+   "status": "SUCCEEDED",
+   "reward": 0.4375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c3",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c3.a1",
+   "generation": 1,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "3147537660955462",
+   "startMs": 1792600038574,
+   "endMs": 1792600075664,
+   "status": "SUCCEEDED",
+   "reward": 0.53125
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c4",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c4.a1",
+   "generation": 1,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "860667308156602",
+   "startMs": 1792600040846,
+   "endMs": 1792600060360,
+   "status": "SUCCEEDED",
+   "reward": 0.53125
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c5",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c5.a1",
+   "generation": 1,
+   "workerId": "cli-71b757062fd9",
+   "seed": "3160389147188671",
+   "startMs": 1792600042080,
+   "endMs": 1792600061016,
+   "status": "SUCCEEDED",
+   "reward": 0.5625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c6",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c6.a1",
+   "generation": 1,
+   "workerId": "cli-d90d1da024e9",
+   "seed": "1564166594758883",
+   "startMs": 1792600057685,
+   "endMs": 1792600182940,
+   "status": "SUCCEEDED",
+   "reward": 0.4375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c7",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c7.a1",
+   "generation": 1,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "2389250803143854",
+   "startMs": 1792600060436,
+   "endMs": 1792600075288,
+   "status": "SUCCEEDED",
+   "reward": 0.4375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c8",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c8.a1",
+   "generation": 1,
+   "workerId": "cli-71b757062fd9",
+   "seed": "3394681426952298",
+   "startMs": 1792600061029,
+   "endMs": 1792600080969,
+   "status": "SUCCEEDED",
+   "reward": 0.4375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c9",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c9.a1",
+   "generation": 1,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "3178699125416586",
+   "startMs": 1792600075350,
+   "endMs": 1792600087092,
+   "status": "SUCCEEDED",
+   "reward": 0.59375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c10",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c10.a1",
+   "generation": 1,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "4373445274362459",
+   "startMs": 1792600075933,
+   "endMs": 1792600108818,
+   "status": "SUCCEEDED",
+   "reward": 0.59375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c11",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c11.a1",
+   "generation": 1,
+   "workerId": "cli-73b87e369ddc",
+   "seed": "4246372632456754",
+   "startMs": 1792600080727,
+   "endMs": 1792600119516,
+   "status": "SUCCEEDED",
+   "reward": 0.46875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c12",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c12.a1",
+   "generation": 1,
+   "workerId": "cli-71b757062fd9",
+   "seed": "2478436186016947",
+   "startMs": 1792600080997,
+   "endMs": 1792600096756,
+   "status": "SUCCEEDED",
+   "reward": 0.625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c13",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c13.a1",
+   "generation": 1,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "3697702477576149",
+   "startMs": 1792600087131,
+   "endMs": 1792600103913,
+   "status": "SUCCEEDED",
+   "reward": 0.5
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c14",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c14.a1",
+   "generation": 1,
+   "workerId": "cli-71b757062fd9",
+   "seed": "789663692615777",
+   "startMs": 1792600096769,
+   "endMs": 1792600111720,
+   "status": "SUCCEEDED",
+   "reward": 0.65625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c15",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c15.a1",
+   "generation": 1,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "2532959544149552",
+   "startMs": 1792600103971,
+   "endMs": 1792600125817,
+   "status": "SUCCEEDED",
+   "reward": 0.4375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c16",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c16.a1",
+   "generation": 1,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "3382670091707051",
+   "startMs": 1792600109328,
+   "endMs": 1792600142628,
+   "status": "SUCCEEDED",
+   "reward": 0.5
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c17",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c17.a1",
+   "generation": 1,
+   "workerId": "cli-71b757062fd9",
+   "seed": "2872056177570470",
+   "startMs": 1792600111748,
+   "endMs": 1792600130664,
+   "status": "SUCCEEDED",
+   "reward": 0.5
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c18",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c18.a1",
+   "generation": 1,
+   "workerId": "cli-73b87e369ddc",
+   "seed": "3058348989675833",
+   "startMs": 1792600119677,
+   "endMs": 1792600153322,
+   "status": "SUCCEEDED",
+   "reward": 0.53125
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c19",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c19.a1",
+   "generation": 1,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "2255488364754215",
+   "startMs": 1792600125864,
+   "endMs": 1792600140678,
+   "status": "SUCCEEDED",
+   "reward": 0.4375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c20",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c20.a1",
+   "generation": 1,
+   "workerId": "cli-71b757062fd9",
+   "seed": "2333874762946233",
+   "startMs": 1792600130693,
+   "endMs": 1792600146829,
+   "status": "SUCCEEDED",
+   "reward": 0.375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c21",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c21.a1",
+   "generation": 1,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "1872390640971764",
+   "startMs": 1792600140736,
+   "endMs": 1792600155689,
+   "status": "SUCCEEDED",
+   "reward": 0.46875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c22",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c22.a1",
+   "generation": 1,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "873733233650009",
+   "startMs": 1792600143018,
+   "endMs": 1792600177427,
+   "status": "SUCCEEDED",
+   "reward": 0.4375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c23",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c23.a1",
+   "generation": 1,
+   "workerId": "cli-71b757062fd9",
+   "seed": "4347307415115776",
+   "startMs": 1792600146842,
+   "endMs": 1792600164169,
+   "status": "SUCCEEDED",
+   "reward": 0.5
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c24",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c24.a1",
+   "generation": 1,
+   "workerId": "cli-73b87e369ddc",
+   "seed": "2478973349321740",
+   "startMs": 1792600153469,
+   "endMs": null,
+   "status": "FAILED",
+   "reward": null
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c25",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c25.a1",
+   "generation": 1,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "2013054283865541",
+   "startMs": 1792600155774,
+   "endMs": 1792600169307,
+   "status": "SUCCEEDED",
+   "reward": 0.4375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c26",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c26.a1",
+   "generation": 1,
+   "workerId": "cli-71b757062fd9",
+   "seed": "1672692031597413",
+   "startMs": 1792600164187,
+   "endMs": 1792600183330,
+   "status": "SUCCEEDED",
+   "reward": 0.59375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c27",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c27.a1",
+   "generation": 1,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "1503903504968186",
+   "startMs": 1792600169353,
+   "endMs": 1792600184694,
+   "status": "SUCCEEDED",
+   "reward": 0.46875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c28",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c28.a1",
+   "generation": 1,
+   "workerId": "cli-71b757062fd9",
+   "seed": "4109600310719558",
+   "startMs": 1792600183344,
+   "endMs": 1792600202818,
+   "status": "SUCCEEDED",
+   "reward": 0.40625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c29",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c29.a1",
+   "generation": 1,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "2792240849205026",
+   "startMs": 1792600184746,
+   "endMs": 1792600199137,
+   "status": "SUCCEEDED",
+   "reward": 0.5
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c30",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c30.a1",
+   "generation": 1,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "4213768324873188",
+   "startMs": 1792600199195,
+   "endMs": 1792600214965,
+   "status": "SUCCEEDED",
+   "reward": 0.4375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c31",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c31.a1",
+   "generation": 1,
+   "workerId": "cli-71b757062fd9",
+   "seed": "490297304466741",
+   "startMs": 1792600202846,
+   "endMs": 1792600219990,
+   "status": "SUCCEEDED",
+   "reward": 0.46875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g1.c24",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g1.c24.a2",
+   "generation": 1,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "2478973349321740",
+   "startMs": 1792600215065,
+   "endMs": 1792600235278,
+   "status": "SUCCEEDED",
+   "reward": 0.375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c0",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c0.a1",
+   "generation": 2,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "809923183897314",
+   "startMs": 1792600255371,
+   "endMs": 1792600273876,
+   "status": "SUCCEEDED",
+   "reward": 0.6875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c1",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c1.a1",
+   "generation": 2,
+   "workerId": "cli-71b757062fd9",
+   "seed": "1016017113894475",
+   "startMs": 1792600256369,
+   "endMs": 1792600274120,
+   "status": "SUCCEEDED",
+   "reward": 0.53125
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c2",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c2.a1",
+   "generation": 2,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "1212614930184931",
+   "startMs": 1792600267763,
+   "endMs": 1792600305118,
+   "status": "SUCCEEDED",
+   "reward": 0.625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c3",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c3.a1",
+   "generation": 2,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "1241128290954591",
+   "startMs": 1792600274027,
+   "endMs": 1792600292010,
+   "status": "SUCCEEDED",
+   "reward": 0.625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c4",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c4.a1",
+   "generation": 2,
+   "workerId": "cli-71b757062fd9",
+   "seed": "3474028604159855",
+   "startMs": 1792600274146,
+   "endMs": 1792600287795,
+   "status": "SUCCEEDED",
+   "reward": 0.6875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c5",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c5.a1",
+   "generation": 2,
+   "workerId": "cli-d90d1da024e9",
+   "seed": "2768223105469843",
+   "startMs": 1792600287274,
+   "endMs": 1792600378857,
+   "status": "SUCCEEDED",
+   "reward": 0.71875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c6",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c6.a1",
+   "generation": 2,
+   "workerId": "cli-71b757062fd9",
+   "seed": "2282825682021753",
+   "startMs": 1792600287808,
+   "endMs": 1792600307975,
+   "status": "SUCCEEDED",
+   "reward": 0.65625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c7",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c7.a1",
+   "generation": 2,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "315629570288407",
+   "startMs": 1792600292070,
+   "endMs": 1792600310880,
+   "status": "SUCCEEDED",
+   "reward": 0.5625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c8",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c8.a1",
+   "generation": 2,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "2785771391155263",
+   "startMs": 1792600305635,
+   "endMs": 1792600338364,
+   "status": "SUCCEEDED",
+   "reward": 0.65625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c9",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c9.a1",
+   "generation": 2,
+   "workerId": "cli-71b757062fd9",
+   "seed": "1444900274452346",
+   "startMs": 1792600308000,
+   "endMs": 1792600325931,
+   "status": "SUCCEEDED",
+   "reward": 0.625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c10",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c10.a1",
+   "generation": 2,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "2660893134050339",
+   "startMs": 1792600310943,
+   "endMs": 1792600329542,
+   "status": "SUCCEEDED",
+   "reward": 0.65625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c11",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c11.a1",
+   "generation": 2,
+   "workerId": "cli-71b757062fd9",
+   "seed": "487168855354857",
+   "startMs": 1792600325961,
+   "endMs": 1792600344377,
+   "status": "SUCCEEDED",
+   "reward": 0.65625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c12",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c12.a1",
+   "generation": 2,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "646229649505280",
+   "startMs": 1792600329627,
+   "endMs": 1792600351271,
+   "status": "SUCCEEDED",
+   "reward": 0.65625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c13",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c13.a1",
+   "generation": 2,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "2348161816990930",
+   "startMs": 1792600338446,
+   "endMs": 1792600376698,
+   "status": "SUCCEEDED",
+   "reward": 0.59375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c14",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c14.a1",
+   "generation": 2,
+   "workerId": "cli-71b757062fd9",
+   "seed": "3370471029887656",
+   "startMs": 1792600344405,
+   "endMs": 1792600368134,
+   "status": "SUCCEEDED",
+   "reward": 0.53125
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c15",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c15.a1",
+   "generation": 2,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "2359675984781135",
+   "startMs": 1792600351348,
+   "endMs": 1792600378739,
+   "status": "SUCCEEDED",
+   "reward": 0.65625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c16",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c16.a1",
+   "generation": 2,
+   "workerId": "cli-71b757062fd9",
+   "seed": "2873389974982559",
+   "startMs": 1792600368147,
+   "endMs": 1792600386429,
+   "status": "SUCCEEDED",
+   "reward": 0.59375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c17",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c17.a1",
+   "generation": 2,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "2884385295232154",
+   "startMs": 1792600376773,
+   "endMs": 1792600414302,
+   "status": "SUCCEEDED",
+   "reward": 0.625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c18",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c18.a1",
+   "generation": 2,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "30309288534777",
+   "startMs": 1792600378787,
+   "endMs": 1792600400682,
+   "status": "SUCCEEDED",
+   "reward": 0.625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c19",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c19.a1",
+   "generation": 2,
+   "workerId": "cli-d90d1da024e9",
+   "seed": "4239864045959946",
+   "startMs": 1792600378897,
+   "endMs": 1792600488803,
+   "status": "SUCCEEDED",
+   "reward": 0.65625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c20",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c20.a1",
+   "generation": 2,
+   "workerId": "cli-71b757062fd9",
+   "seed": "3799370577384380",
+   "startMs": 1792600386459,
+   "endMs": 1792600401281,
+   "status": "SUCCEEDED",
+   "reward": 0.6875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c21",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c21.a1",
+   "generation": 2,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "3660600284851284",
+   "startMs": 1792600400727,
+   "endMs": 1792600415737,
+   "status": "SUCCEEDED",
+   "reward": 0.65625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c22",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c22.a1",
+   "generation": 2,
+   "workerId": "cli-71b757062fd9",
+   "seed": "708135430885332",
+   "startMs": 1792600401308,
+   "endMs": 1792600420538,
+   "status": "SUCCEEDED",
+   "reward": 0.5625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c23",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c23.a1",
+   "generation": 2,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "566153040994119",
+   "startMs": 1792600414912,
+   "endMs": 1792600456869,
+   "status": "SUCCEEDED",
+   "reward": 0.5625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c24",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c24.a1",
+   "generation": 2,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "3746175874233528",
+   "startMs": 1792600415859,
+   "endMs": 1792600434828,
+   "status": "SUCCEEDED",
+   "reward": 0.59375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c25",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c25.a1",
+   "generation": 2,
+   "workerId": "cli-71b757062fd9",
+   "seed": "2197401223669297",
+   "startMs": 1792600420554,
+   "endMs": 1792600437738,
+   "status": "SUCCEEDED",
+   "reward": 0.65625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c26",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c26.a1",
+   "generation": 2,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "1464840999245600",
+   "startMs": 1792600434879,
+   "endMs": 1792600454006,
+   "status": "SUCCEEDED",
+   "reward": 0.65625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c27",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c27.a1",
+   "generation": 2,
+   "workerId": "cli-71b757062fd9",
+   "seed": "3542149683677953",
+   "startMs": 1792600437766,
+   "endMs": 1792600458333,
+   "status": "SUCCEEDED",
+   "reward": 0.65625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c28",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c28.a1",
+   "generation": 2,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "1879918624180286",
+   "startMs": 1792600454094,
+   "endMs": 1792600473633,
+   "status": "SUCCEEDED",
+   "reward": 0.6875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c29",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c29.a1",
+   "generation": 2,
+   "workerId": "cli-71b757062fd9",
+   "seed": "1220073664050173",
+   "startMs": 1792600458360,
+   "endMs": 1792600477810,
+   "status": "SUCCEEDED",
+   "reward": 0.6875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c30",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c30.a1",
+   "generation": 2,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "1597403811656360",
+   "startMs": 1792600473731,
+   "endMs": 1792600492017,
+   "status": "SUCCEEDED",
+   "reward": 0.59375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g2.c31",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g2.c31.a1",
+   "generation": 2,
+   "workerId": "cli-71b757062fd9",
+   "seed": "2963203352903515",
+   "startMs": 1792600477838,
+   "endMs": 1792600494884,
+   "status": "SUCCEEDED",
+   "reward": 0.6875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c0",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c0.a1",
+   "generation": 3,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "1589546864969462",
+   "startMs": 1792600514912,
+   "endMs": 1792600528181,
+   "status": "SUCCEEDED",
+   "reward": 0.625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c1",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c1.a1",
+   "generation": 3,
+   "workerId": "cli-71b757062fd9",
+   "seed": "748767331330096",
+   "startMs": 1792600515965,
+   "endMs": 1792600537515,
+   "status": "SUCCEEDED",
+   "reward": 0.5625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c2",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c2.a1",
+   "generation": 3,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "1797335730175906",
+   "startMs": 1792600527349,
+   "endMs": 1792600557551,
+   "status": "SUCCEEDED",
+   "reward": 0.71875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c3",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c3.a1",
+   "generation": 3,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "4032492510359455",
+   "startMs": 1792600528243,
+   "endMs": 1792600547164,
+   "status": "SUCCEEDED",
+   "reward": 0.625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c4",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c4.a1",
+   "generation": 3,
+   "workerId": "cli-71b757062fd9",
+   "seed": "2974716401942484",
+   "startMs": 1792600537548,
+   "endMs": 1792600553465,
+   "status": "SUCCEEDED",
+   "reward": 0.5
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c5",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c5.a1",
+   "generation": 3,
+   "workerId": "cli-d90d1da024e9",
+   "seed": "229721152879037",
+   "startMs": 1792600546671,
+   "endMs": 1792600633811,
+   "status": "SUCCEEDED",
+   "reward": 0.5625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c6",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c6.a1",
+   "generation": 3,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "203002320412413",
+   "startMs": 1792600547202,
+   "endMs": 1792600565836,
+   "status": "SUCCEEDED",
+   "reward": 0.5625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c7",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c7.a1",
+   "generation": 3,
+   "workerId": "cli-71b757062fd9",
+   "seed": "4267070570632288",
+   "startMs": 1792600553488,
+   "endMs": 1792600571790,
+   "status": "SUCCEEDED",
+   "reward": 0.5625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c8",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c8.a1",
+   "generation": 3,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "3919094573427563",
+   "startMs": 1792600557724,
+   "endMs": 1792600593787,
+   "status": "SUCCEEDED",
+   "reward": 0.625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c9",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c9.a1",
+   "generation": 3,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "4045023536053839",
+   "startMs": 1792600565951,
+   "endMs": 1792600578990,
+   "status": "SUCCEEDED",
+   "reward": 0.59375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c10",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c10.a1",
+   "generation": 3,
+   "workerId": "cli-71b757062fd9",
+   "seed": "2789232620326874",
+   "startMs": 1792600571818,
+   "endMs": 1792600589532,
+   "status": "SUCCEEDED",
+   "reward": 0.625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c11",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c11.a1",
+   "generation": 3,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "2427378348304645",
+   "startMs": 1792600579057,
+   "endMs": 1792600603672,
+   "status": "SUCCEEDED",
+   "reward": 0.625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c12",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c12.a1",
+   "generation": 3,
+   "workerId": "cli-71b757062fd9",
+   "seed": "2089925890417342",
+   "startMs": 1792600589551,
+   "endMs": 1792600608228,
+   "status": "SUCCEEDED",
+   "reward": 0.75
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c13",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c13.a1",
+   "generation": 3,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "3634246002477330",
+   "startMs": 1792600594286,
+   "endMs": 1792600625739,
+   "status": "SUCCEEDED",
+   "reward": 0.5625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c14",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c14.a1",
+   "generation": 3,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "4235608696195237",
+   "startMs": 1792600603735,
+   "endMs": 1792600622836,
+   "status": "SUCCEEDED",
+   "reward": 0.625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c15",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c15.a1",
+   "generation": 3,
+   "workerId": "cli-71b757062fd9",
+   "seed": "2750473827595709",
+   "startMs": 1792600608256,
+   "endMs": 1792600629461,
+   "status": "SUCCEEDED",
+   "reward": 0.71875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c16",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c16.a1",
+   "generation": 3,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "336025638028040",
+   "startMs": 1792600622932,
+   "endMs": 1792600644881,
+   "status": "SUCCEEDED",
+   "reward": 0.59375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c17",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c17.a1",
+   "generation": 3,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "279460438406796",
+   "startMs": 1792600625995,
+   "endMs": 1792600654988,
+   "status": "SUCCEEDED",
+   "reward": 0.59375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c18",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c18.a1",
+   "generation": 3,
+   "workerId": "cli-71b757062fd9",
+   "seed": "1085960036503989",
+   "startMs": 1792600629477,
+   "endMs": 1792600649185,
+   "status": "SUCCEEDED",
+   "reward": 0.625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c19",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c19.a1",
+   "generation": 3,
+   "workerId": "cli-d90d1da024e9",
+   "seed": "2711737535058333",
+   "startMs": 1792600633841,
+   "endMs": null,
+   "status": "FAILED",
+   "reward": null
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c20",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c20.a1",
+   "generation": 3,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "3234736699001179",
+   "startMs": 1792600644938,
+   "endMs": 1792600660527,
+   "status": "SUCCEEDED",
+   "reward": 0.65625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c21",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c21.a1",
+   "generation": 3,
+   "workerId": "cli-71b757062fd9",
+   "seed": "1407414696797077",
+   "startMs": 1792600649199,
+   "endMs": 1792600668221,
+   "status": "SUCCEEDED",
+   "reward": 0.625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c22",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c22.a1",
+   "generation": 3,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "2317185442144220",
+   "startMs": 1792600655404,
+   "endMs": 1792600685745,
+   "status": "SUCCEEDED",
+   "reward": 0.59375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c23",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c23.a1",
+   "generation": 3,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "3606716477360141",
+   "startMs": 1792600660573,
+   "endMs": 1792600675612,
+   "status": "SUCCEEDED",
+   "reward": 0.625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c24",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c24.a1",
+   "generation": 3,
+   "workerId": "cli-71b757062fd9",
+   "seed": "2357836831542540",
+   "startMs": 1792600668250,
+   "endMs": 1792600684417,
+   "status": "SUCCEEDED",
+   "reward": 0.53125
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c25",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c25.a1",
+   "generation": 3,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "1166120753811865",
+   "startMs": 1792600675761,
+   "endMs": 1792600689504,
+   "status": "SUCCEEDED",
+   "reward": 0.71875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c26",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c26.a1",
+   "generation": 3,
+   "workerId": "cli-71b757062fd9",
+   "seed": "3618211812008262",
+   "startMs": 1792600684435,
+   "endMs": 1792600700170,
+   "status": "SUCCEEDED",
+   "reward": 0.6875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c27",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c27.a1",
+   "generation": 3,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "1220402508846429",
+   "startMs": 1792600686354,
+   "endMs": 1792600723392,
+   "status": "SUCCEEDED",
+   "reward": 0.65625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c28",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c28.a1",
+   "generation": 3,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "1076302920258280",
+   "startMs": 1792600689606,
+   "endMs": 1792600707055,
+   "status": "SUCCEEDED",
+   "reward": 0.625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c29",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c29.a1",
+   "generation": 3,
+   "workerId": "cli-71b757062fd9",
+   "seed": "1225754070351593",
+   "startMs": 1792600700186,
+   "endMs": 1792600717133,
+   "status": "SUCCEEDED",
+   "reward": 0.625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c30",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c30.a1",
+   "generation": 3,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "203175938090219",
+   "startMs": 1792600707116,
+   "endMs": 1792600723425,
+   "status": "SUCCEEDED",
+   "reward": 0.59375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c31",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c31.a1",
+   "generation": 3,
+   "workerId": "cli-71b757062fd9",
+   "seed": "1721808696216084",
+   "startMs": 1792600717156,
+   "endMs": 1792600740356,
+   "status": "SUCCEEDED",
+   "reward": 0.65625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g3.c19",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g3.c19.a2",
+   "generation": 3,
+   "workerId": "cli-71b757062fd9",
+   "seed": "2711737535058333",
+   "startMs": 1792600774013,
+   "endMs": 1792600792461,
+   "status": "SUCCEEDED",
+   "reward": 0.6875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c0",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c0.a1",
+   "generation": 4,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "2389148177002245",
+   "startMs": 1792600847690,
+   "endMs": 1792600866240,
+   "status": "SUCCEEDED",
+   "reward": 0.40625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c1",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c1.a1",
+   "generation": 4,
+   "workerId": "cli-71b757062fd9",
+   "seed": "1769755826210468",
+   "startMs": 1792600848436,
+   "endMs": 1792600866820,
+   "status": "SUCCEEDED",
+   "reward": 0.375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c2",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c2.a1",
+   "generation": 4,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "2652539429514616",
+   "startMs": 1792600860049,
+   "endMs": 1792600897968,
+   "status": "SUCCEEDED",
+   "reward": 0.34375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c3",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c3.a1",
+   "generation": 4,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "1458546982920705",
+   "startMs": 1792600866379,
+   "endMs": 1792600885101,
+   "status": "SUCCEEDED",
+   "reward": 0.375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c4",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c4.a1",
+   "generation": 4,
+   "workerId": "cli-71b757062fd9",
+   "seed": "3611559136652120",
+   "startMs": 1792600866845,
+   "endMs": 1792600886175,
+   "status": "SUCCEEDED",
+   "reward": 0.46875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c5",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c5.a1",
+   "generation": 4,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "2951028650258876",
+   "startMs": 1792600885159,
+   "endMs": 1792600902652,
+   "status": "SUCCEEDED",
+   "reward": 0.4375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c6",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c6.a1",
+   "generation": 4,
+   "workerId": "cli-71b757062fd9",
+   "seed": "4158116306373797",
+   "startMs": 1792600886193,
+   "endMs": 1792600906586,
+   "status": "SUCCEEDED",
+   "reward": 0.46875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c7",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c7.a1",
+   "generation": 4,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "1427437617586867",
+   "startMs": 1792600898014,
+   "endMs": 1792600939475,
+   "status": "SUCCEEDED",
+   "reward": 0.46875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c8",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c8.a1",
+   "generation": 4,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "252710910419655",
+   "startMs": 1792600902699,
+   "endMs": 1792600926991,
+   "status": "SUCCEEDED",
+   "reward": 0.46875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c9",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c9.a1",
+   "generation": 4,
+   "workerId": "cli-71b757062fd9",
+   "seed": "191653465799449",
+   "startMs": 1792600906600,
+   "endMs": 1792600924705,
+   "status": "SUCCEEDED",
+   "reward": 0.40625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c10",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c10.a1",
+   "generation": 4,
+   "workerId": "cli-71b757062fd9",
+   "seed": "592956177127364",
+   "startMs": 1792600924721,
+   "endMs": 1792600942535,
+   "status": "SUCCEEDED",
+   "reward": 0.46875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c11",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c11.a1",
+   "generation": 4,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "2748914532839484",
+   "startMs": 1792600927109,
+   "endMs": 1792600943860,
+   "status": "SUCCEEDED",
+   "reward": 0.46875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c12",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c12.a1",
+   "generation": 4,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "2983948533047930",
+   "startMs": 1792600939636,
+   "endMs": 1792600978721,
+   "status": "SUCCEEDED",
+   "reward": 0.5
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c13",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c13.a1",
+   "generation": 4,
+   "workerId": "cli-71b757062fd9",
+   "seed": "1082510694801317",
+   "startMs": 1792600942560,
+   "endMs": 1792600963923,
+   "status": "SUCCEEDED",
+   "reward": 0.46875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c14",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c14.a1",
+   "generation": 4,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "2054316128244616",
+   "startMs": 1792600943948,
+   "endMs": 1792600958893,
+   "status": "SUCCEEDED",
+   "reward": 0.46875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c15",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c15.a1",
+   "generation": 4,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "213737046911983",
+   "startMs": 1792600958994,
+   "endMs": 1792600977127,
+   "status": "SUCCEEDED",
+   "reward": 0.4375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c16",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c16.a1",
+   "generation": 4,
+   "workerId": "cli-71b757062fd9",
+   "seed": "237415921067571",
+   "startMs": 1792600963937,
+   "endMs": 1792600980603,
+   "status": "SUCCEEDED",
+   "reward": 0.4375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c17",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c17.a1",
+   "generation": 4,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "584014128240195",
+   "startMs": 1792600977233,
+   "endMs": 1792600994119,
+   "status": "SUCCEEDED",
+   "reward": 0.46875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c18",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c18.a1",
+   "generation": 4,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "50240162173586",
+   "startMs": 1792600978984,
+   "endMs": 1792601019156,
+   "status": "SUCCEEDED",
+   "reward": 0.5
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c19",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c19.a1",
+   "generation": 4,
+   "workerId": "cli-71b757062fd9",
+   "seed": "359361886144945",
+   "startMs": 1792600980619,
+   "endMs": 1792600998613,
+   "status": "SUCCEEDED",
+   "reward": 0.4375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c20",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c20.a1",
+   "generation": 4,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "203256655907129",
+   "startMs": 1792600994174,
+   "endMs": 1792601017532,
+   "status": "SUCCEEDED",
+   "reward": 0.5
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c21",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c21.a1",
+   "generation": 4,
+   "workerId": "cli-71b757062fd9",
+   "seed": "3655160468052502",
+   "startMs": 1792600998627,
+   "endMs": 1792601018025,
+   "status": "SUCCEEDED",
+   "reward": 0.5
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c22",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c22.a1",
+   "generation": 4,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "2350283129536895",
+   "startMs": 1792601017592,
+   "endMs": 1792601035445,
+   "status": "SUCCEEDED",
+   "reward": 0.40625
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c23",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c23.a1",
+   "generation": 4,
+   "workerId": "cli-71b757062fd9",
+   "seed": "822027964108285",
+   "startMs": 1792601018053,
+   "endMs": 1792601040395,
+   "status": "SUCCEEDED",
+   "reward": 0.46875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c24",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c24.a1",
+   "generation": 4,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "1814424104940228",
+   "startMs": 1792601019212,
+   "endMs": 1792601063200,
+   "status": "SUCCEEDED",
+   "reward": 0.46875
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c25",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c25.a1",
+   "generation": 4,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "3535221970239382",
+   "startMs": 1792601035495,
+   "endMs": 1792601055031,
+   "status": "SUCCEEDED",
+   "reward": 0.375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c26",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c26.a1",
+   "generation": 4,
+   "workerId": "cli-71b757062fd9",
+   "seed": "4161611517177688",
+   "startMs": 1792601040420,
+   "endMs": 1792601062444,
+   "status": "SUCCEEDED",
+   "reward": 0.53125
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c27",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c27.a1",
+   "generation": 4,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "3645222222706175",
+   "startMs": 1792601055115,
+   "endMs": 1792601075738,
+   "status": "SUCCEEDED",
+   "reward": 0.4375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c28",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c28.a1",
+   "generation": 4,
+   "workerId": "cli-71b757062fd9",
+   "seed": "4382840254801964",
+   "startMs": 1792601062472,
+   "endMs": 1792601079400,
+   "status": "SUCCEEDED",
+   "reward": 0.53125
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c29",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c29.a1",
+   "generation": 4,
+   "workerId": "desktop-d9017660e75f",
+   "seed": "1456663279931726",
+   "startMs": 1792601063813,
+   "endMs": 1792601110099,
+   "status": "SUCCEEDED",
+   "reward": 0.5
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c30",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c30.a1",
+   "generation": 4,
+   "workerId": "cli-aa99b4d4ca58",
+   "seed": "2926841244771565",
+   "startMs": 1792601075857,
+   "endMs": 1792601102162,
+   "status": "SUCCEEDED",
+   "reward": 0.34375
+  },
+  {
+   "candidateId": "90147d801ca8463d92143d21f95d63f4.g4.c31",
+   "attemptId": "90147d801ca8463d92143d21f95d63f4.g4.c31.a1",
+   "generation": 4,
+   "workerId": "cli-71b757062fd9",
+   "seed": "467079592477644",
+   "startMs": 1792601079428,
+   "endMs": 1792601097219,
+   "status": "SUCCEEDED",
+   "reward": 0.53125
+  }
+ ],
+ "marks": [
+  {
+   "atMs": 1792599613706,
+   "type": "worker_start_unknown",
+   "workerId": "cli-71b757062fd9",
+   "generation": null
+  },
+  {
+   "atMs": 1792599614547,
+   "type": "worker_start_unknown",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792599615106,
+   "type": "worker_start_unknown",
+   "workerId": "desktop-d9017660e75f",
+   "generation": null
+  },
+  {
+   "atMs": 1792599615883,
+   "type": "worker_start_unknown",
+   "workerId": "cli-d90d1da024e9",
+   "generation": null
+  },
+  {
+   "atMs": 1792599616388,
+   "type": "worker_start_unknown",
+   "workerId": "cli-aa99b4d4ca58",
+   "generation": null
+  },
+  {
+   "atMs": 1792600044602,
+   "type": "replay",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600287291,
+   "type": "replay",
+   "workerId": "cli-d90d1da024e9",
+   "generation": null
+  },
+  {
+   "atMs": 1792600505670,
+   "type": "membership_changed",
+   "workerId": null,
+   "generation": 3
+  },
+  {
+   "atMs": 1792600522071,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600526053,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600529806,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600533220,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600536942,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600540996,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600546669,
+   "type": "replay",
+   "workerId": "cli-d90d1da024e9",
+   "generation": null
+  },
+  {
+   "atMs": 1792600559646,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600563297,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600567475,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600571401,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600589942,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600593747,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600597748,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600616641,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600620352,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600624425,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600642927,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600646740,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600650665,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600654154,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600657879,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600676485,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600680042,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600684007,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600687721,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600691880,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600695599,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600699605,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600703531,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600707427,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600711144,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600715099,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600719044,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600722933,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600726471,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600729886,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600748102,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600751597,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600755047,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600758482,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600761850,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600765345,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600768805,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600772381,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600776022,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600779613,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600783121,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600786829,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600790608,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600794178,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600797631,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600800951,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600804415,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600807546,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600811115,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600814595,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600818201,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600820737,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600824354,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600827702,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600831109,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600834590,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600838341,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600841159,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600844708,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600847882,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600851320,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600854691,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600858501,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600859692,
+   "type": "replay",
+   "workerId": "desktop-d9017660e75f",
+   "generation": null
+  },
+  {
+   "atMs": 1792600861960,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600865357,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600883126,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600886634,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600890379,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600893514,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600896992,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600900686,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600904244,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600907414,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600911038,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600914556,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600917752,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600920906,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600924480,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600927548,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600931014,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600934685,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600938136,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600941532,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600944810,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600948239,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600951542,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600954935,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600958537,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600961641,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600979626,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600982993,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600986459,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600990043,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600993370,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792600996823,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601000083,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601003348,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601006682,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601010060,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601013289,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601016563,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601034395,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601037873,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601041030,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601044407,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601048109,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601051286,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601055059,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601058799,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601061982,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601065619,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601083526,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601087019,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601090424,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601093912,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601097470,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601115503,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601118709,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601121970,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601125450,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601129150,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601132683,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601136481,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601140196,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601143746,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601147092,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601150487,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601153881,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601157139,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  },
+  {
+   "atMs": 1792601161165,
+   "type": "worker_left",
+   "workerId": "cli-73b87e369ddc",
+   "generation": null
+  }
+ ],
+ "nowMs": 1792605366682
+}

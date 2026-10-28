@@ -1,0 +1,16 @@
+
+==================================== ERRORS ====================================
+____ ERROR collecting .scratch/r11-audit-investigation/test_margin_guard.py ____
+ImportError while importing test module '/home/pc5070ti/projects/heteroes/.scratch/r11-audit-investigation/test_margin_guard.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../miniforge3/envs/heteroes-match/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/r11-audit-investigation/test_margin_guard.py:3: in <module>
+    from margin_guard import MarginGuard
+E   ModuleNotFoundError: No module named 'margin_guard'
+=========================== short test summary info ============================
+ERROR .scratch/r11-audit-investigation/test_margin_guard.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.67s

@@ -1,0 +1,18 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7721.47it/s]
+parent default 8 rows 32 seconds 2.502
+parent default 32 rows 32 seconds 0.916
+parent fp32_acc 8 rows 32 seconds 2.167
+parent fp32_acc 32 rows 32 seconds 0.912
+7001+1 default 8 rows 32 seconds 2.157
+7001+1 default 32 rows 32 seconds 0.927
+7001+1 fp32_acc 8 rows 32 seconds 2.16
+7001+1 fp32_acc 32 rows 32 seconds 0.931
+7001-1 default 8 rows 32 seconds 2.158
+7001-1 default 32 rows 32 seconds 0.912
+7001-1 fp32_acc 8 rows 32 seconds 2.158
+7001-1 fp32_acc 32 rows 32 seconds 0.911
+restored default 8 rows 32 seconds 2.156
+restored default 32 rows 32 seconds 0.914
+restored fp32_acc 8 rows 32 seconds 2.163
+restored fp32_acc 32 rows 32 seconds 0.914
+ok docs/evidence/2026-10-26-strict-fp16-parity/qwen-5070ti-01.json

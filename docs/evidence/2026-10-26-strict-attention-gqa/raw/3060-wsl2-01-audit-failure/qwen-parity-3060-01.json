@@ -1,0 +1,123 @@
+{
+ "status": "error",
+ "hardwareQualified": false,
+ "model": "qwen",
+ "sourceSha256": "7e08e7b91c1c7556dd7ff46b1c60418933a6c07fa9ed365736c528fa554981d5",
+ "environment": {
+  "python": "3.12.15",
+  "torch": "2.13.0+cu132",
+  "transformers": "5.17.0",
+  "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+  "gpu": "NVIDIA GeForce RTX 3060",
+  "computeCapability": [
+   8,
+   6
+  ]
+ },
+ "noiseEngine": "pcg64_u32_to_f16_normal_quantile_v2",
+ "seed": 7001,
+ "sigma": 0.001,
+ "cases": [
+  {
+   "state": "parent",
+   "results": {},
+   "weightsSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+   "restoreExact": true
+  }
+ ],
+ "modelFiles": {
+  "config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+  "generation_config.json": "e558847a8b4402616f1273797b015104dc266fe4b520056fca88823ba8f8ebe6",
+  "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+  "model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+  "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+  "tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583",
+  "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+ },
+ "parentSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+ "schemaHash": "0b21250e331398a266785dc473da3a8b8f5e8f98fa15e9044637d742eb7845ec",
+ "attentionEntries": {
+  "original": "strict_attention",
+  "selected": "strict_attention_gqa"
+ },
+ "kernelIdentity": {
+  "kernel": "row_scaled_integer_mma_cuda_v1_experimental",
+  "operators": "pairwise_f32_reference_v1_experimental",
+  "sourceSha256": "c980670fd49cbdbdf6cc44c62c358adbbe4643fe9515b2cf59d9bf66e943db3e",
+  "nvrtcOptions": [
+   "--fmad=false",
+   "--ftz=false",
+   "--prec-div=true",
+   "--prec-sqrt=true",
+   "--std=c++17"
+  ],
+  "hardwareQualified": false,
+  "arch": "sm_86",
+  "gpu": "NVIDIA GeForce RTX 3060",
+  "nvrtcVersion": [
+   13,
+   2
+  ],
+  "builds": {},
+  "fingerprint": "1d56d2894af0bef89e96dcce8674ab27a46f6d7ff159758b776996a712715302",
+  "linear": {
+   "operator": "row_scaled_signed_integer_dot_v1_experimental",
+   "magnitudeBits": 22,
+   "limbs": 3,
+   "maxWidth": 32768,
+   "zeroIntegerOutput": "+0",
+   "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+   "bias": "pairwise_f32_reference_v1_experimental",
+   "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+   "hardwareQualified": false
+  },
+  "nonlinear": {
+   "kernel": "pairwise_f32_cuda_linear_v3_experimental",
+   "operators": "pairwise_f32_reference_v1_experimental",
+   "sourceSha256": "c980670fd49cbdbdf6cc44c62c358adbbe4643fe9515b2cf59d9bf66e943db3e",
+   "nvrtcOptions": [
+    "--fmad=false",
+    "--ftz=false",
+    "--prec-div=true",
+    "--prec-sqrt=true",
+    "--std=c++17"
+   ],
+   "hardwareQualified": false
+  },
+  "integerSourceSha256": "a83ff355e70e45352eef0b3196614f320ba8c91813526519fbde64cb9235b480",
+  "maxPartialBytes": 16777216,
+  "activationPacking": "radix_planes_once_v1_experimental",
+  "weightLoad": "auto",
+  "weightReadPolicy": "raw_half_prefetch2_sm86_sm120_b22_v2_experimental",
+  "decodePlanning": {
+   "policy": "occupancy_split_k_v1_experimental",
+   "rowTiles": [
+    16,
+    32
+   ],
+   "maxSplitK": 8,
+   "minSplitWidth": 256,
+   "maxBatch": 128,
+   "singleRow": "simt_split1",
+   "sourceSha256": "b24979d3f257b110abf24c56f0038552d574a4e8a5fde6863491ae8d0f6cdfeb"
+  },
+  "integerKernel": "row_scaled_integer_mma_cuda_v1_experimental",
+  "integerReference": {
+   "operator": "row_scaled_signed_integer_dot_v1_experimental",
+   "magnitudeBits": 22,
+   "limbs": 3,
+   "maxWidth": 32768,
+   "zeroIntegerOutput": "+0",
+   "rounding": "exact_scaled_integer_rne_then_signed_ftz",
+   "bias": "pairwise_f32_reference_v1_experimental",
+   "sourceSha256": "b9894d6322bc8c285753829ae9519a0918da30aae8845e40156c8d3a66bb476a",
+   "hardwareQualified": false
+  },
+  "multiprocessors": 28,
+  "weightLoadEffective": "prefetch2"
+ },
+ "chatWorkloadSha256": "9f94ba428282471f2fb9f439df88b8a5c4eaf07db7f88f8a2716e86ea099acab",
+ "errorType": "ReferenceArithmeticError",
+ "error": "Compiled strict kernel failed its instruction audit: ['I2F.U32.RP R2, c[0x0][0x1a4] ;', 'MUFU.RCP R2, R2 ;', 'F2I.FTZ.U32.TRUNC.NTZ R25, R24 ;']",
+ "wallSeconds": 5.664998652006034
+}

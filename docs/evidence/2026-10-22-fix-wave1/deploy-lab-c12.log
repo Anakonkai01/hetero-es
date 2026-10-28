@@ -1,0 +1,17 @@
+=== 2026-10-22T08:13:16+07:00 deploy c472d2a (lf1-20261022-r11-candidate12)
+lab idle: no reservations
+Owned CPU service and tunnels stopped.
+database copied at stop
+web build in place
+{
+  "webUrl": "https://lab.heteroes.site",
+  "computeUrl": "https://compute.heteroes.site",
+  "privateBulkUrl": "http://100.110.165.40:8765",
+  "computeStarted": false,
+  "queue": "reopens when this action ends"
+}
+{"ok":true,"dataSource":"real","runtimeIssue":null,"agentMode":true,"deviceConfiguration":true,"recipeVersions":[1,2,3],"cloudStorageConfigured":false,"recoveryStorageConfigured":true,"recoveryStorageMode":"local","serverInstanceId":"34d68e114a5316bb76de9c12f657dff0","uiUrl":"https://lab.heteroes.si
+{"build": "lf1-20261022-r11-candidate12", "downloads": 2, "cloudPublish": false, "publiclyPublished": false}
+{"build": "lf1-20261022-r11-candidate12", "downloads": 2, "cloudPublish": false, "publiclyPublished": true}
+{"version":"0.1.0","build":"lf1-20261022-r11-candidate12","privateTrial":true,"nativeWindowsGpuVerified":false,"installers":[{"platform":"windows","name":"HeteroES Worker-0.1.0-lf1-20261022-r11-candidate12-Windows.exe","url":"/downloads/HeteroES Worker-0.1.0-lf1-20261022-r11-candidate12-Windows.exe","sha256":"1190aec6f43a7bb5c2cee1e2075a1f846d9d3fe03bf5b761beb001b89ff9e7be","sizeBytes":103370134}]
+=== 2026-10-22T08:13:25+07:00 done

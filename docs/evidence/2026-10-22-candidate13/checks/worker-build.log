@@ -1,0 +1,13 @@
+
+> @heteroes/worker@0.1.0 build
+> tsc --noEmit && vite build
+
+../../packages/product-ui/src/translations.ts(305,3): error TS1117: An object literal cannot have multiple properties with the same name.
+../../packages/product-ui/src/translations.ts(306,3): error TS1117: An object literal cannot have multiple properties with the same name.
+npm error Lifecycle script `build` failed with error:
+npm error code 2
+npm error path /home/pc5070ti/projects/heteroes/desktop/worker
+npm error workspace @heteroes/worker@0.1.0
+npm error location /home/pc5070ti/projects/heteroes/desktop/worker
+npm error command failed
+npm error command sh -c tsc --noEmit && vite build

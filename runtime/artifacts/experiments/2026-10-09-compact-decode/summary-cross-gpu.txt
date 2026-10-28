@@ -1,0 +1,4 @@
+artifacts/experiments/2026-10-09-compact-decode/result-3060-drop0.1.json  GPU NVIDIA GeForce RTX 3060  drop_fraction 0.1
+  chunk 64: 9 conditions, library 154.2 s, compact 98.6 s, speed-up 1.56, different texts 0, slot-steps 86299
+  chunk 128: 9 conditions, library 142.6 s, compact 73.8 s, speed-up 1.93, different texts 0, slot-steps 86420
+compact texts of artifacts/experiments/2026-10-09-compact-decode/result-3060-drop0.1.json equal to those of artifacts/experiments/2026-10-09-compact-decode/result-5070ti-drop0.1.json: 18 of 18 conditions

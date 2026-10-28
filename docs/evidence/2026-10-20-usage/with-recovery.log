@@ -1,0 +1,76 @@
+..........FF.                                                            [100%]
+=================================== FAILURES ===================================
+__ test_real_runner_resumes_a_v3_point_on_a_replacement_installation[space0] ___
+
+product_assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-865/product-model0')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-865/test_real_runner_resumes_a_v3_0')
+space = {'kind': 'full'}
+
+    @pytest.mark.parametrize(
+        "space", [{"kind": "full"}, {"kind": "lora", "rank": 2, "alpha": 4, "targetModules": ["q_proj", "v_proj"]}]
+    )
+    def test_real_runner_resumes_a_v3_point_on_a_replacement_installation(product_assets, tmp_path, space):
+        root = tmp_path / "source"
+        root.mkdir()
+        cfg = product_config(product_assets, root, weightSpace=space, backupPolicy={"interval": 1, "retain": 3})
+>       run_product(cfg, root)
+
+runtime/tests/v3/test_v3_recovery.py:161: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+runtime/tests/v3/test_v3_product.py:162: in run_product
+    wait_for(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+predicate = <function run_product.<locals>.<lambda> at 0x73b013ff8fe0>
+process = <Popen: returncode: 2 args: ['/home/pc5070ti/miniforge3/envs/heteroes-match/...>
+timeout = 60
+
+    def wait_for(predicate, process, timeout=60):
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            if predicate():
+                return
+            if process.poll() is not None:
+>               raise AssertionError(f"process exited early: {process.returncode}")
+E               AssertionError: process exited early: 2
+
+runtime/tests/v3/test_v3_product.py:87: AssertionError
+__ test_real_runner_resumes_a_v3_point_on_a_replacement_installation[space1] ___
+
+product_assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-865/product-model0')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-865/test_real_runner_resumes_a_v3_1')
+space = {'kind': 'lora', 'rank': 2, 'alpha': 4, 'targetModules': ['q_proj', 'v_proj']}
+
+    @pytest.mark.parametrize(
+        "space", [{"kind": "full"}, {"kind": "lora", "rank": 2, "alpha": 4, "targetModules": ["q_proj", "v_proj"]}]
+    )
+    def test_real_runner_resumes_a_v3_point_on_a_replacement_installation(product_assets, tmp_path, space):
+        root = tmp_path / "source"
+        root.mkdir()
+        cfg = product_config(product_assets, root, weightSpace=space, backupPolicy={"interval": 1, "retain": 3})
+>       run_product(cfg, root)
+
+runtime/tests/v3/test_v3_recovery.py:161: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+runtime/tests/v3/test_v3_product.py:162: in run_product
+    wait_for(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+predicate = <function run_product.<locals>.<lambda> at 0x73b013f5cd60>
+process = <Popen: returncode: 2 args: ['/home/pc5070ti/miniforge3/envs/heteroes-match/...>
+timeout = 60
+
+    def wait_for(predicate, process, timeout=60):
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            if predicate():
+                return
+            if process.poll() is not None:
+>               raise AssertionError(f"process exited early: {process.returncode}")
+E               AssertionError: process exited early: 2
+
+runtime/tests/v3/test_v3_product.py:87: AssertionError
+=========================== short test summary info ============================
+FAILED runtime/tests/v3/test_v3_recovery.py::test_real_runner_resumes_a_v3_point_on_a_replacement_installation[space0]
+FAILED runtime/tests/v3/test_v3_recovery.py::test_real_runner_resumes_a_v3_point_on_a_replacement_installation[space1]
+2 failed, 11 passed in 7.18s

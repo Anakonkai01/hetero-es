@@ -1,0 +1,5 @@
+control ok    | ℹ duration_ms 54.856249
+killed       template-drops-audit-rate |   }
+killed       template-loses-explicit-zero |   }
+
+2 of 2 mutants killed.

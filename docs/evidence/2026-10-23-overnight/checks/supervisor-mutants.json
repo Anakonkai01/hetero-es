@@ -1,0 +1,7 @@
+[
+ {"name":"never mark a failed start","file":"src/heteroes/product/run_supervisor.py","old":"            result[worker_id][\"startUnconfirmed\"] = True\n","new":""},
+ {"name":"resend also while stopping","file":"src/heteroes/product/run_supervisor.py","old":"if previous.get(\"startUnconfirmed\") and not stop and self._resend_start(","new":"if previous.get(\"startUnconfirmed\") and self._resend_start("},
+ {"name":"resend with a new launch","file":"src/heteroes/product/run_supervisor.py","old":"value = self.start_worker(root, self.workers[worker_id], recovery, previous.get(\"launch\", 0))","new":"value = self.start_worker(root, self.workers[worker_id], recovery, previous.get(\"launch\", 0) + 1)"},
+ {"name":"resend result not confirmed","file":"src/heteroes/product/run_supervisor.py","old":"            \"confirmed\": True,\n            \"ready\": value[\"ready\"],\n            **launched(previous.get(\"launch\", 0)),","new":"            \"confirmed\": False,\n            \"ready\": value[\"ready\"],\n            **launched(previous.get(\"launch\", 0)),"},
+ {"name":"resend for every unreachable worker","file":"src/heteroes/product/run_supervisor.py","old":"if previous.get(\"startUnconfirmed\") and not stop","new":"if not stop"}
+]

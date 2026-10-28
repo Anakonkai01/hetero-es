@@ -1,0 +1,20 @@
+[
+  {
+    "name": "stale-shutdown-message-persists",
+    "file": "backend/experiment_view.py",
+    "old": "shown[\"failureReason\"] = state[\"failureReason\"]",
+    "new": "pass"
+  },
+  {
+    "name": "audit-selection-count-comes-from-incomplete-logs",
+    "file": "backend/experiment_view.py",
+    "old": "\"selected\": selected if complete else None,",
+    "new": "\"selected\": summary.get(\"selected\"),"
+  },
+  {
+    "name": "missing-audits-hidden",
+    "file": "backend/experiment_view.py",
+    "old": "\"incomplete\": selected - summary[\"completed\"] if complete else None,",
+    "new": "\"incomplete\": 0,"
+  }
+]

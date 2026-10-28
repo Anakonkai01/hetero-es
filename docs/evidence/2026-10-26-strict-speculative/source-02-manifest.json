@@ -1,0 +1,8 @@
+{
+  "speculative.py": "f49905ab37153673c9f4226d1eee7e8d0bce9b05c0911697f6ef154073479ba0",
+  "block_base.py": "aa58de5e02776824c92ad160c0ee13204ab0b7baddf09896fb888bc2cacaa0d6",
+  "test_speculative.py": "462aa144d618ab3620c292bf2c53a0d38cb2919b6faaf492581542e72206453f",
+  "test_proposer.py": "253af0284ed3ed6c8ffb0ac774951215d0f1ebe6478e1f5f064fcfe586bdf02a",
+  "bench_speculative.py": "1628cf18666222bb97f21115c0b32748a0c2412581742993f39d66feac26b354",
+  "archiveSha256": "fb8fb6406734794aa00c80c2fa7f25d80ca3aa662eaf7782ef23f461c4c7bfeb"
+}

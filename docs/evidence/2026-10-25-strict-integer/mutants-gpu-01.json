@@ -1,0 +1,38 @@
+[
+  {
+    "name": "quantization-ties-truncate",
+    "file": "src/heteroes/eval/integer_cuda.py",
+    "old": "remainder==halfway && (whole&1u)",
+    "new": "false"
+  },
+  {
+    "name": "wrong-radix-degree",
+    "file": "src/heteroes/eval/integer_cuda.py",
+    "old": "mma(accum[m][i+j],a[i],b[j]);",
+    "new": "mma(accum[m][i],a[i],b[j]);"
+  },
+  {
+    "name": "split-overlap",
+    "file": "src/heteroes/eval/integer_cuda.py",
+    "old": "for(int start=blockIdx.z*32;start<WIDTH;start+=SPLIT_K*32)",
+    "new": "for(int start=blockIdx.z*32;start<WIDTH;start+=32)"
+  },
+  {
+    "name": "lose-rounded-min-normal",
+    "file": "src/heteroes/eval/integer_cuda.py",
+    "old": "rounded>=0x800000ull",
+    "new": "rounded>0x800000ull"
+  },
+  {
+    "name": "skip-live-weight-refresh",
+    "file": "src/heteroes/eval/integer_cuda.py",
+    "old": "self._refresh_weight_exponents(target(), exponents, flag)",
+    "new": "exponents.zero_()"
+  },
+  {
+    "name": "ignore-metadata-nonfinite",
+    "file": "src/heteroes/eval/integer_cuda.py",
+    "old": "self.raise_if_error(flag)  # a bad scale may never be hidden by resetting a later decode flag",
+    "new": "pass  # mutant: ignore bad metadata"
+  }
+]

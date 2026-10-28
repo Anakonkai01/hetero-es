@@ -1,0 +1,143 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 5779.23it/s]
+[01:02:35] checkpoint 0: train=19/64 H3=42/128 H1=77/128 H2=116/128
+[01:06:20] g0: parent 19 plus 38 minus 27 diff +0.172
+[01:06:51] g1: parent 38 plus 49 minus 49 diff +0.000
+[01:07:18] g2: parent 49 plus 20 minus 52 diff -0.500
+[01:07:42] g3: parent 20 plus 53 minus 17 diff +0.562
+[01:09:16] g4: parent 53 plus 34 minus 53 diff -0.297
+[01:09:16] replay 0->5: MATCH
+[01:10:27] checkpoint 5: train=34/64 H3=57/128 H1=101/128 H2=120/128
+[01:10:57] g5: parent 34 plus 32 minus 54 diff -0.344
+[01:11:27] g6: parent 32 plus 35 minus 45 diff -0.156
+[01:11:49] g7: parent 35 plus 43 minus 49 diff -0.094
+[01:12:17] g8: parent 43 plus 50 minus 35 diff +0.234
+[01:13:42] g9: parent 50 plus 53 minus 54 diff -0.016
+[01:13:42] replay 5->10: MATCH
+[01:15:03] checkpoint 10: train=53/64 H3=104/128 H1=90/128 H2=120/128
+[01:17:47] g10: parent 53 plus 54 minus 53 diff +0.016
+[01:18:06] g11: parent 54 plus 50 minus 50 diff +0.000
+[01:18:34] g12: parent 50 plus 51 minus 55 diff -0.062
+[01:19:03] g13: parent 51 plus 55 minus 50 diff +0.078
+[01:20:23] g14: parent 55 plus 55 minus 51 diff +0.062
+[01:20:23] replay 10->15: MATCH
+[01:21:35] checkpoint 15: train=55/64 H3=96/128 H1=96/128 H2=118/128
+[01:21:56] g15: parent 55 plus 54 minus 54 diff +0.000
+[01:22:19] g16: parent 54 plus 58 minus 51 diff +0.109
+[01:22:46] g17: parent 58 plus 58 minus 56 diff +0.031
+[01:23:13] g18: parent 58 plus 57 minus 55 diff +0.031
+[01:24:33] g19: parent 57 plus 56 minus 56 diff +0.000
+[01:24:34] replay 15->20: MATCH
+[01:25:46] checkpoint 20: train=56/64 H3=95/128 H1=91/128 H2=118/128
+[01:29:08] g20: parent 56 plus 57 minus 54 diff +0.047
+[01:29:34] g21: parent 57 plus 57 minus 58 diff -0.016
+[01:29:54] g22: parent 57 plus 60 minus 54 diff +0.094
+[01:30:09] g23: parent 60 plus 59 minus 55 diff +0.062
+[01:31:29] g24: parent 59 plus 59 minus 58 diff +0.016
+[01:31:29] replay 20->25: MATCH
+[01:32:32] checkpoint 25: train=59/64 H3=90/128 H1=97/128 H2=113/128
+[01:32:52] g25: parent 59 plus 59 minus 57 diff +0.031
+[01:33:14] g26: parent 59 plus 59 minus 57 diff +0.031
+[01:33:35] g27: parent 59 plus 59 minus 58 diff +0.016
+[01:34:00] g28: parent 59 plus 61 minus 58 diff +0.047
+[01:35:28] g29: parent 61 plus 61 minus 58 diff +0.047
+[01:35:29] replay 25->30: MATCH
+[01:36:45] checkpoint 30: train=61/64 H3=110/128 H1=90/128 H2=112/128
+[01:40:41] g30: parent 61 plus 58 minus 59 diff -0.016
+[01:41:09] g31: parent 58 plus 60 minus 55 diff +0.078
+[01:41:36] g32: parent 60 plus 59 minus 59 diff +0.000
+[01:42:07] g33: parent 59 plus 60 minus 60 diff +0.000
+[01:43:30] g34: parent 60 plus 60 minus 56 diff +0.062
+[01:43:30] replay 30->35: MATCH
+[01:44:44] checkpoint 35: train=60/64 H3=113/128 H1=92/128 H2=109/128
+[01:45:14] g35: parent 60 plus 62 minus 60 diff +0.031
+[01:45:42] g36: parent 62 plus 62 minus 60 diff +0.031
+[01:46:12] g37: parent 62 plus 62 minus 61 diff +0.016
+[01:46:35] g38: parent 62 plus 60 minus 60 diff +0.000
+[01:48:12] g39: parent 60 plus 61 minus 60 diff +0.016
+[01:48:12] replay 35->40: MATCH
+[01:49:15] checkpoint 40: train=61/64 H3=106/128 H1=79/128 H2=114/128
+[01:53:04] g40: parent 61 plus 61 minus 60 diff +0.016
+[01:53:30] g41: parent 61 plus 60 minus 61 diff -0.016
+[01:54:00] g42: parent 60 plus 60 minus 61 diff -0.016
+[01:54:24] g43: parent 60 plus 60 minus 60 diff +0.000
+[01:56:01] g44: parent 60 plus 61 minus 61 diff +0.000
+[01:56:02] replay 40->45: MATCH
+[01:57:19] checkpoint 45: train=61/64 H3=113/128 H1=91/128 H2=112/128
+[01:57:47] g45: parent 61 plus 61 minus 61 diff +0.000
+[01:58:09] g46: parent 61 plus 59 minus 59 diff +0.000
+[01:58:37] g47: parent 59 plus 59 minus 59 diff +0.000
+[01:59:05] g48: parent 59 plus 61 minus 62 diff -0.016
+[02:00:25] g49: parent 61 plus 60 minus 60 diff +0.000
+[02:00:25] replay 45->50: MATCH
+[02:01:45] checkpoint 50: train=60/64 H3=113/128 H1=99/128 H2=115/128
+[02:05:33] g50: parent 60 plus 60 minus 60 diff +0.000
+[02:05:55] g51: parent 60 plus 61 minus 61 diff +0.000
+[02:06:24] g52: parent 61 plus 61 minus 60 diff +0.016
+[02:06:53] g53: parent 61 plus 59 minus 61 diff -0.031
+[02:08:02] g54: parent 59 plus 59 minus 57 diff +0.031
+[02:08:03] replay 50->55: MATCH
+[02:09:11] checkpoint 55: train=59/64 H3=112/128 H1=101/128 H2=87/128
+[02:09:40] g55: parent 59 plus 60 minus 59 diff +0.016
+[02:09:58] g56: parent 60 plus 60 minus 60 diff +0.000
+[02:10:29] g57: parent 60 plus 61 minus 60 diff +0.016
+[02:10:58] g58: parent 61 plus 61 minus 60 diff +0.016
+[02:12:24] g59: parent 61 plus 60 minus 60 diff +0.000
+[02:12:24] replay 55->60: MATCH
+[02:13:38] checkpoint 60: train=60/64 H3=116/128 H1=101/128 H2=94/128
+[02:17:04] g60: parent 60 plus 61 minus 59 diff +0.031
+[02:17:31] g61: parent 61 plus 61 minus 61 diff +0.000
+[02:17:58] g62: parent 61 plus 58 minus 60 diff -0.031
+[02:18:27] g63: parent 58 plus 60 minus 61 diff -0.016
+[02:19:44] g64: parent 60 plus 58 minus 59 diff -0.016
+[02:19:45] replay 60->65: MATCH
+[02:20:54] checkpoint 65: train=58/64 H3=114/128 H1=100/128 H2=83/128
+[02:21:17] g65: parent 58 plus 59 minus 59 diff +0.000
+[02:21:41] g66: parent 59 plus 59 minus 57 diff +0.031
+[02:22:08] g67: parent 59 plus 60 minus 59 diff +0.016
+[02:22:38] g68: parent 60 plus 60 minus 57 diff +0.047
+[02:23:50] g69: parent 60 plus 61 minus 58 diff +0.047
+[02:23:50] replay 65->70: MATCH
+[02:25:03] checkpoint 70: train=61/64 H3=111/128 H1=113/128 H2=102/128
+[02:27:56] g70: parent 61 plus 60 minus 60 diff +0.000
+[02:28:23] g71: parent 60 plus 60 minus 60 diff +0.000
+[02:28:52] g72: parent 60 plus 60 minus 59 diff +0.016
+[02:29:06] g73: parent 60 plus 60 minus 61 diff -0.016
+[02:30:31] g74: parent 60 plus 59 minus 60 diff -0.016
+[02:30:32] replay 70->75: MATCH
+[02:31:25] checkpoint 75: train=59/64 H3=113/128 H1=107/128 H2=94/128
+[02:31:53] g75: parent 59 plus 60 minus 58 diff +0.031
+[02:32:22] g76: parent 60 plus 59 minus 59 diff +0.000
+[02:32:49] g77: parent 59 plus 59 minus 59 diff +0.000
+[02:33:12] g78: parent 59 plus 58 minus 58 diff +0.000
+[02:34:40] g79: parent 58 plus 59 minus 59 diff +0.000
+[02:34:41] replay 75->80: MATCH
+[02:35:49] checkpoint 80: train=59/64 H3=115/128 H1=114/128 H2=109/128
+[02:39:08] g80: parent 59 plus 60 minus 59 diff +0.016
+[02:39:37] g81: parent 60 plus 59 minus 60 diff -0.016
+[02:40:05] g82: parent 59 plus 59 minus 59 diff +0.000
+[02:40:31] g83: parent 59 plus 60 minus 59 diff +0.016
+[02:41:08] g84: parent 60 plus 59 minus 61 diff -0.031
+[02:41:08] replay 80->85: MATCH
+[02:42:06] checkpoint 85: train=59/64 H3=112/128 H1=111/128 H2=109/128
+[02:42:34] g85: parent 59 plus 60 minus 58 diff +0.031
+[02:43:02] g86: parent 60 plus 59 minus 61 diff -0.031
+[02:43:31] g87: parent 59 plus 60 minus 60 diff +0.000
+[02:43:56] g88: parent 60 plus 60 minus 60 diff +0.000
+[02:45:27] g89: parent 60 plus 60 minus 59 diff +0.016
+[02:45:27] replay 85->90: MATCH
+[02:46:38] checkpoint 90: train=60/64 H3=110/128 H1=114/128 H2=104/128
+[02:50:16] g90: parent 60 plus 60 minus 59 diff +0.016
+[02:50:45] g91: parent 60 plus 60 minus 60 diff +0.000
+[02:51:05] g92: parent 60 plus 59 minus 59 diff +0.000
+[02:51:33] g93: parent 59 plus 60 minus 60 diff +0.000
+[02:53:05] g94: parent 60 plus 60 minus 60 diff +0.000
+[02:53:05] replay 90->95: MATCH
+[02:54:16] checkpoint 95: train=60/64 H3=112/128 H1=108/128 H2=107/128
+[02:54:46] g95: parent 60 plus 60 minus 59 diff +0.016
+[02:55:15] g96: parent 60 plus 60 minus 60 diff +0.000
+[02:55:38] g97: parent 60 plus 60 minus 61 diff -0.016
+[02:56:06] g98: parent 60 plus 60 minus 60 diff +0.000
+[02:57:37] g99: parent 60 plus 60 minus 59 diff +0.016
+[02:57:37] replay 95->100: MATCH
+[02:58:53] checkpoint 100: train=60/64 H3=112/128 H1=97/128 H2=99/128
+[02:58:53] wrote artifacts/experiments/2026-10-07-learning-runtime/analysis-runA.json: {'S1': True, 'S2': False, 'S3': True, 'S4': False, 'S5': True, 'label': 'no evidence of learning in this experiment', 'note': 'complete run'}

@@ -1,0 +1,10 @@
+[
+  {"name": "bundle from the baked-in address", "file": "frontend/src/lib/linuxInstall.ts",
+   "old": "| HETEROES_DOWNLOADS='${downloads}' bash", "new": "| bash"},
+  {"name": "no address check", "file": "frontend/src/lib/linuxInstall.ts",
+   "old": "!SAFE_URL.test(script) || ", "new": ""},
+  {"name": "any scheme", "file": "frontend/src/lib/linuxInstall.ts",
+   "old": "const SAFE_URL = /^https?:", "new": "const SAFE_URL = /^[a-z]+:"},
+  {"name": "relative URL kept relative", "file": "frontend/src/lib/linuxInstall.ts",
+   "old": "const script = url.href;", "new": "const script = installerUrl.startsWith('/') ? installerUrl : url.href;"}
+]

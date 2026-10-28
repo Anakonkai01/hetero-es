@@ -1,0 +1,10 @@
+{
+  "name": "pause-worker",
+  "outcome": "ok",
+  "wall_seconds": 231.08456206321716,
+  "notes": [
+    "remote worker stopped for 75 s (the lease is 60 s)",
+    "remote worker continued"
+  ],
+  "final_weights_sha256": "a2123e795488fd6dd82465e83f5825b0c44c933b1760ad26711052f8a9c3a1c8"
+}

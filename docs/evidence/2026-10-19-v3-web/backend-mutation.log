@@ -1,0 +1,11 @@
+control ok    | 10 passed, 1 warning in 1.35s
+killed       Python scorer accepted by shared lab | 1 failed, 9 passed, 1 warning in 1.36s
+killed       odd antithetic population accepted | 1 failed, 9 passed, 1 warning in 1.35s
+killed       unknown coefficient rule accepted | 1 failed, 9 passed, 1 warning in 1.35s
+killed       Boolean LoRA rank accepted | 1 failed, 9 passed, 1 warning in 1.35s
+killed       device version not checked | 2 failed, 8 passed, 1 warning in 1.35s
+killed       frozen v3 options dropped before assignment | 1 failed, 9 passed, 1 warning in 1.33s
+killed       v3 worker command lacks data config | 1 failed, 9 passed, 1 warning in 1.33s
+killed       v3 dataset loses custom columns | 3 failed, 7 passed, 1 warning in 1.33s
+
+8 of 8 mutants killed.

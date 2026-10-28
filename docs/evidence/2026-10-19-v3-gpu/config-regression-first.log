@@ -1,0 +1,19 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+_______________ test_probe_uses_valid_scorer_and_numeric_answers _______________
+
+probe = <module 'v3_gpu_probe' from '/home/pc5070ti/projects/heteroes/runtime/scripts/v3_gpu_acceptance.py'>
+
+    def test_probe_uses_valid_scorer_and_numeric_answers(probe):
+        from heteroes.v3.local import _scorer_spec
+        from heteroes.v3.scoring import validate_spec
+    
+        for space in ("full", "subset", "lora"):
+>           spec = probe.configuration(Path("model"), Path("rows.json"), space)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'v3_gpu_probe' has no attribute 'configuration'
+
+runtime/tests/v3/test_v3_gpu_acceptance.py:63: AttributeError
+=========================== short test summary info ============================
+FAILED runtime/tests/v3/test_v3_gpu_acceptance.py::test_probe_uses_valid_scorer_and_numeric_answers
+1 failed, 2 passed in 0.06s

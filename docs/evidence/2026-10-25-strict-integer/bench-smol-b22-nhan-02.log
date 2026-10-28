@@ -1,0 +1,2 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7734.14it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-strict-integer/bench-smol-b22-nhan-02.json", "wallSeconds": 12.65395653199812}

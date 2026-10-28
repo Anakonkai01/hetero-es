@@ -1,0 +1,619 @@
+{
+  "limits": "Offline simulation with recorded target tokens as verifier. No new model inference, GPU throughput, candidate quality, arithmetic proof or speculative decoder acceptance. Chat traces come from vendor control, not own strict. Excludes first token/prefill. Query expansion counts hypothetical row positions, not FLOPs or time.",
+  "sources": [
+    {
+      "label": "strict-short",
+      "path": "docs/evidence/2026-10-26-strict-prefetch/raw/qwen-candidates-5070ti-02.json",
+      "sha256": "fa0b3cfd88a82c121571537af9e23d86cd1f1127f2ce5261a9b843194dc41068",
+      "cases": [
+        {
+          "case": "plus",
+          "bank": "parent",
+          "block": 2,
+          "tokensAfterFirst": 248,
+          "rounds": 192,
+          "verifiedPositions": 265,
+          "tokensPerRound": 1.2916666666666667,
+          "queryExpansion": 1.0685483870967742
+        },
+        {
+          "case": "plus",
+          "bank": "parent",
+          "block": 4,
+          "tokensAfterFirst": 248,
+          "rounds": 166,
+          "verifiedPositions": 302,
+          "tokensPerRound": 1.4939759036144578,
+          "queryExpansion": 1.217741935483871
+        },
+        {
+          "case": "plus",
+          "bank": "parent",
+          "block": 8,
+          "tokensAfterFirst": 248,
+          "rounds": 153,
+          "verifiedPositions": 364,
+          "tokensPerRound": 1.6209150326797386,
+          "queryExpansion": 1.467741935483871
+        },
+        {
+          "case": "plus",
+          "bank": "previous",
+          "block": 2,
+          "tokensAfterFirst": 248,
+          "rounds": 192,
+          "verifiedPositions": 265,
+          "tokensPerRound": 1.2916666666666667,
+          "queryExpansion": 1.0685483870967742
+        },
+        {
+          "case": "plus",
+          "bank": "previous",
+          "block": 4,
+          "tokensAfterFirst": 248,
+          "rounds": 166,
+          "verifiedPositions": 302,
+          "tokensPerRound": 1.4939759036144578,
+          "queryExpansion": 1.217741935483871
+        },
+        {
+          "case": "plus",
+          "bank": "previous",
+          "block": 8,
+          "tokensAfterFirst": 248,
+          "rounds": 153,
+          "verifiedPositions": 364,
+          "tokensPerRound": 1.6209150326797386,
+          "queryExpansion": 1.467741935483871
+        },
+        {
+          "case": "minus",
+          "bank": "parent",
+          "block": 2,
+          "tokensAfterFirst": 248,
+          "rounds": 180,
+          "verifiedPositions": 261,
+          "tokensPerRound": 1.3777777777777778,
+          "queryExpansion": 1.0524193548387097
+        },
+        {
+          "case": "minus",
+          "bank": "parent",
+          "block": 4,
+          "tokensAfterFirst": 248,
+          "rounds": 149,
+          "verifiedPositions": 296,
+          "tokensPerRound": 1.6644295302013423,
+          "queryExpansion": 1.1935483870967742
+        },
+        {
+          "case": "minus",
+          "bank": "parent",
+          "block": 8,
+          "tokensAfterFirst": 248,
+          "rounds": 135,
+          "verifiedPositions": 364,
+          "tokensPerRound": 1.837037037037037,
+          "queryExpansion": 1.467741935483871
+        },
+        {
+          "case": "minus",
+          "bank": "previous",
+          "block": 2,
+          "tokensAfterFirst": 248,
+          "rounds": 178,
+          "verifiedPositions": 267,
+          "tokensPerRound": 1.3932584269662922,
+          "queryExpansion": 1.0766129032258065
+        },
+        {
+          "case": "minus",
+          "bank": "previous",
+          "block": 4,
+          "tokensAfterFirst": 248,
+          "rounds": 145,
+          "verifiedPositions": 311,
+          "tokensPerRound": 1.710344827586207,
+          "queryExpansion": 1.2540322580645162
+        },
+        {
+          "case": "minus",
+          "bank": "previous",
+          "block": 8,
+          "tokensAfterFirst": 248,
+          "rounds": 130,
+          "verifiedPositions": 391,
+          "tokensPerRound": 1.9076923076923078,
+          "queryExpansion": 1.5766129032258065
+        }
+      ]
+    },
+    {
+      "label": "vendor-chat-control",
+      "path": "docs/evidence/2026-10-26-vllm-impact/raw/qwen-chat-5070ti-01.json",
+      "sha256": "e0b8ffb4cd1056eaa9afdbe96a00e75d668c8a33f539fb9a518ac5e8e46579c3",
+      "cases": [
+        {
+          "case": "7001+1",
+          "bank": "parent",
+          "block": 2,
+          "tokensAfterFirst": 16122,
+          "rounds": 13215,
+          "verifiedPositions": 18438,
+          "tokensPerRound": 1.2199772985244042,
+          "queryExpansion": 1.1436546334201712
+        },
+        {
+          "case": "7001+1",
+          "bank": "parent",
+          "block": 4,
+          "tokensAfterFirst": 16122,
+          "rounds": 12042,
+          "verifiedPositions": 24086,
+          "tokensPerRound": 1.3388141504733433,
+          "queryExpansion": 1.493983376752264
+        },
+        {
+          "case": "7001+1",
+          "bank": "parent",
+          "block": 8,
+          "tokensAfterFirst": 16122,
+          "rounds": 11649,
+          "verifiedPositions": 36511,
+          "tokensPerRound": 1.3839814576358487,
+          "queryExpansion": 2.2646693958565933
+        },
+        {
+          "case": "7001+1",
+          "bank": "previous",
+          "block": 2,
+          "tokensAfterFirst": 16122,
+          "rounds": 13215,
+          "verifiedPositions": 18438,
+          "tokensPerRound": 1.2199772985244042,
+          "queryExpansion": 1.1436546334201712
+        },
+        {
+          "case": "7001+1",
+          "bank": "previous",
+          "block": 4,
+          "tokensAfterFirst": 16122,
+          "rounds": 12042,
+          "verifiedPositions": 24086,
+          "tokensPerRound": 1.3388141504733433,
+          "queryExpansion": 1.493983376752264
+        },
+        {
+          "case": "7001+1",
+          "bank": "previous",
+          "block": 8,
+          "tokensAfterFirst": 16122,
+          "rounds": 11649,
+          "verifiedPositions": 36511,
+          "tokensPerRound": 1.3839814576358487,
+          "queryExpansion": 2.2646693958565933
+        },
+        {
+          "case": "7001-1",
+          "bank": "parent",
+          "block": 2,
+          "tokensAfterFirst": 18736,
+          "rounds": 14243,
+          "verifiedPositions": 21030,
+          "tokensPerRound": 1.3154532050831989,
+          "queryExpansion": 1.1224380871050383
+        },
+        {
+          "case": "7001-1",
+          "bank": "parent",
+          "block": 4,
+          "tokensAfterFirst": 18736,
+          "rounds": 12252,
+          "verifiedPositions": 26563,
+          "tokensPerRound": 1.5292197192295136,
+          "queryExpansion": 1.4177519214346712
+        },
+        {
+          "case": "7001-1",
+          "bank": "parent",
+          "block": 8,
+          "tokensAfterFirst": 18736,
+          "rounds": 11431,
+          "verifiedPositions": 38688,
+          "tokensPerRound": 1.6390517015134285,
+          "queryExpansion": 2.0649017933390263
+        },
+        {
+          "case": "7001-1",
+          "bank": "previous",
+          "block": 2,
+          "tokensAfterFirst": 18736,
+          "rounds": 13827,
+          "verifiedPositions": 21395,
+          "tokensPerRound": 1.355030013741231,
+          "queryExpansion": 1.1419192997438088
+        },
+        {
+          "case": "7001-1",
+          "bank": "previous",
+          "block": 4,
+          "tokensAfterFirst": 18736,
+          "rounds": 11652,
+          "verifiedPositions": 27732,
+          "tokensPerRound": 1.6079642979745967,
+          "queryExpansion": 1.4801451750640477
+        },
+        {
+          "case": "7001-1",
+          "bank": "previous",
+          "block": 8,
+          "tokensAfterFirst": 18736,
+          "rounds": 10769,
+          "verifiedPositions": 41586,
+          "tokensPerRound": 1.7398087101866468,
+          "queryExpansion": 2.219577284372331
+        },
+        {
+          "case": "7002+1",
+          "bank": "parent",
+          "block": 2,
+          "tokensAfterFirst": 16973,
+          "rounds": 13231,
+          "verifiedPositions": 19320,
+          "tokensPerRound": 1.2828206484770615,
+          "queryExpansion": 1.13827844223178
+        },
+        {
+          "case": "7002+1",
+          "bank": "parent",
+          "block": 4,
+          "tokensAfterFirst": 16973,
+          "rounds": 11566,
+          "verifiedPositions": 24742,
+          "tokensPerRound": 1.467490921666955,
+          "queryExpansion": 1.4577269781417546
+        },
+        {
+          "case": "7002+1",
+          "bank": "parent",
+          "block": 8,
+          "tokensAfterFirst": 16973,
+          "rounds": 10927,
+          "verifiedPositions": 36750,
+          "tokensPerRound": 1.5533083188432324,
+          "queryExpansion": 2.1652035585930594
+        },
+        {
+          "case": "7002+1",
+          "bank": "previous",
+          "block": 2,
+          "tokensAfterFirst": 16973,
+          "rounds": 12236,
+          "verifiedPositions": 19890,
+          "tokensPerRound": 1.3871363190585158,
+          "queryExpansion": 1.1718611913038355
+        },
+        {
+          "case": "7002+1",
+          "bank": "previous",
+          "block": 4,
+          "tokensAfterFirst": 16973,
+          "rounds": 10133,
+          "verifiedPositions": 26610,
+          "tokensPerRound": 1.6750222046777854,
+          "queryExpansion": 1.5677841277322806
+        },
+        {
+          "case": "7002+1",
+          "bank": "previous",
+          "block": 8,
+          "tokensAfterFirst": 16973,
+          "rounds": 9293,
+          "verifiedPositions": 41329,
+          "tokensPerRound": 1.8264284945658023,
+          "queryExpansion": 2.434984976138573
+        },
+        {
+          "case": "7002-1",
+          "bank": "parent",
+          "block": 2,
+          "tokensAfterFirst": 14260,
+          "rounds": 11628,
+          "verifiedPositions": 16526,
+          "tokensPerRound": 1.2263501891984865,
+          "queryExpansion": 1.15890603085554
+        },
+        {
+          "case": "7002-1",
+          "bank": "parent",
+          "block": 4,
+          "tokensAfterFirst": 14260,
+          "rounds": 10497,
+          "verifiedPositions": 21707,
+          "tokensPerRound": 1.3584833762027246,
+          "queryExpansion": 1.5222300140252454
+        },
+        {
+          "case": "7002-1",
+          "bank": "parent",
+          "block": 8,
+          "tokensAfterFirst": 14260,
+          "rounds": 10080,
+          "verifiedPositions": 32998,
+          "tokensPerRound": 1.4146825396825398,
+          "queryExpansion": 2.3140252454417953
+        },
+        {
+          "case": "7002-1",
+          "bank": "previous",
+          "block": 2,
+          "tokensAfterFirst": 14260,
+          "rounds": 10832,
+          "verifiedPositions": 17054,
+          "tokensPerRound": 1.3164697193500738,
+          "queryExpansion": 1.1959326788218794
+        },
+        {
+          "case": "7002-1",
+          "bank": "previous",
+          "block": 4,
+          "tokensAfterFirst": 14260,
+          "rounds": 9334,
+          "verifiedPositions": 23439,
+          "tokensPerRound": 1.5277480179987144,
+          "queryExpansion": 1.643688639551192
+        },
+        {
+          "case": "7002-1",
+          "bank": "previous",
+          "block": 8,
+          "tokensAfterFirst": 14260,
+          "rounds": 8772,
+          "verifiedPositions": 37347,
+          "tokensPerRound": 1.62562699498404,
+          "queryExpansion": 2.6190042075736324
+        },
+        {
+          "case": "7003+1",
+          "bank": "parent",
+          "block": 2,
+          "tokensAfterFirst": 16658,
+          "rounds": 12909,
+          "verifiedPositions": 19047,
+          "tokensPerRound": 1.2904175381516771,
+          "queryExpansion": 1.1434145755793013
+        },
+        {
+          "case": "7003+1",
+          "bank": "parent",
+          "block": 4,
+          "tokensAfterFirst": 16658,
+          "rounds": 11291,
+          "verifiedPositions": 24763,
+          "tokensPerRound": 1.4753343370826322,
+          "queryExpansion": 1.4865530075639333
+        },
+        {
+          "case": "7003+1",
+          "bank": "parent",
+          "block": 8,
+          "tokensAfterFirst": 16658,
+          "rounds": 10664,
+          "verifiedPositions": 37245,
+          "tokensPerRound": 1.5620780195048762,
+          "queryExpansion": 2.2358626485772604
+        },
+        {
+          "case": "7003+1",
+          "bank": "previous",
+          "block": 2,
+          "tokensAfterFirst": 16658,
+          "rounds": 11223,
+          "verifiedPositions": 19655,
+          "tokensPerRound": 1.484273367192373,
+          "queryExpansion": 1.1799135550486253
+        },
+        {
+          "case": "7003+1",
+          "bank": "previous",
+          "block": 4,
+          "tokensAfterFirst": 16658,
+          "rounds": 8734,
+          "verifiedPositions": 26466,
+          "tokensPerRound": 1.9072589878635218,
+          "queryExpansion": 1.58878616880778
+        },
+        {
+          "case": "7003+1",
+          "bank": "previous",
+          "block": 8,
+          "tokensAfterFirst": 16658,
+          "rounds": 7697,
+          "verifiedPositions": 41232,
+          "tokensPerRound": 2.1642198259061973,
+          "queryExpansion": 2.475207107696002
+        },
+        {
+          "case": "7003-1",
+          "bank": "parent",
+          "block": 2,
+          "tokensAfterFirst": 17908,
+          "rounds": 13470,
+          "verifiedPositions": 20281,
+          "tokensPerRound": 1.3294729027468448,
+          "queryExpansion": 1.132510609783337
+        },
+        {
+          "case": "7003-1",
+          "bank": "parent",
+          "block": 4,
+          "tokensAfterFirst": 17908,
+          "rounds": 11520,
+          "verifiedPositions": 26016,
+          "tokensPerRound": 1.554513888888889,
+          "queryExpansion": 1.4527585436676347
+        },
+        {
+          "case": "7003-1",
+          "bank": "parent",
+          "block": 8,
+          "tokensAfterFirst": 17908,
+          "rounds": 10705,
+          "verifiedPositions": 38437,
+          "tokensPerRound": 1.6728631480616534,
+          "queryExpansion": 2.1463591690864416
+        },
+        {
+          "case": "7003-1",
+          "bank": "previous",
+          "block": 2,
+          "tokensAfterFirst": 17908,
+          "rounds": 12004,
+          "verifiedPositions": 20970,
+          "tokensPerRound": 1.4918360546484506,
+          "queryExpansion": 1.1709850346213984
+        },
+        {
+          "case": "7003-1",
+          "bank": "previous",
+          "block": 4,
+          "tokensAfterFirst": 17908,
+          "rounds": 9288,
+          "verifiedPositions": 27947,
+          "tokensPerRound": 1.9280792420327304,
+          "queryExpansion": 1.5605874469510834
+        },
+        {
+          "case": "7003-1",
+          "bank": "previous",
+          "block": 8,
+          "tokensAfterFirst": 17908,
+          "rounds": 8136,
+          "verifiedPositions": 43178,
+          "tokensPerRound": 2.2010816125860373,
+          "queryExpansion": 2.4111011838284564
+        },
+        {
+          "case": "7004+1",
+          "bank": "parent",
+          "block": 2,
+          "tokensAfterFirst": 17112,
+          "rounds": 12901,
+          "verifiedPositions": 19398,
+          "tokensPerRound": 1.326408805518952,
+          "queryExpansion": 1.1335904628330995
+        },
+        {
+          "case": "7004+1",
+          "bank": "parent",
+          "block": 4,
+          "tokensAfterFirst": 17112,
+          "rounds": 10982,
+          "verifiedPositions": 24617,
+          "tokensPerRound": 1.558186122746312,
+          "queryExpansion": 1.4385811126694716
+        },
+        {
+          "case": "7004+1",
+          "bank": "parent",
+          "block": 8,
+          "tokensAfterFirst": 17112,
+          "rounds": 10192,
+          "verifiedPositions": 36101,
+          "tokensPerRound": 1.6789638932496076,
+          "queryExpansion": 2.1096891070593737
+        },
+        {
+          "case": "7004+1",
+          "bank": "previous",
+          "block": 2,
+          "tokensAfterFirst": 17112,
+          "rounds": 11024,
+          "verifiedPositions": 19732,
+          "tokensPerRound": 1.5522496371552976,
+          "queryExpansion": 1.1531089294062646
+        },
+        {
+          "case": "7004+1",
+          "bank": "previous",
+          "block": 4,
+          "tokensAfterFirst": 17112,
+          "rounds": 8191,
+          "verifiedPositions": 25745,
+          "tokensPerRound": 2.089122207300696,
+          "queryExpansion": 1.5044997662459092
+        },
+        {
+          "case": "7004+1",
+          "bank": "previous",
+          "block": 8,
+          "tokensAfterFirst": 17112,
+          "rounds": 6993,
+          "verifiedPositions": 39166,
+          "tokensPerRound": 2.447018447018447,
+          "queryExpansion": 2.2888031790556336
+        },
+        {
+          "case": "7004-1",
+          "bank": "parent",
+          "block": 2,
+          "tokensAfterFirst": 18285,
+          "rounds": 13955,
+          "verifiedPositions": 20792,
+          "tokensPerRound": 1.3102830526692941,
+          "queryExpansion": 1.1371069182389937
+        },
+        {
+          "case": "7004-1",
+          "bank": "parent",
+          "block": 4,
+          "tokensAfterFirst": 18285,
+          "rounds": 11993,
+          "verifiedPositions": 26544,
+          "tokensPerRound": 1.5246393729675645,
+          "queryExpansion": 1.451681706316653
+        },
+        {
+          "case": "7004-1",
+          "bank": "parent",
+          "block": 8,
+          "tokensAfterFirst": 18285,
+          "rounds": 11251,
+          "verifiedPositions": 39662,
+          "tokensPerRound": 1.6251888721002579,
+          "queryExpansion": 2.169100355482636
+        },
+        {
+          "case": "7004-1",
+          "bank": "previous",
+          "block": 2,
+          "tokensAfterFirst": 18285,
+          "rounds": 11986,
+          "verifiedPositions": 21288,
+          "tokensPerRound": 1.5255297847488738,
+          "queryExpansion": 1.1642329778506972
+        },
+        {
+          "case": "7004-1",
+          "bank": "previous",
+          "block": 4,
+          "tokensAfterFirst": 18285,
+          "rounds": 9035,
+          "verifiedPositions": 28016,
+          "tokensPerRound": 2.023796347537355,
+          "queryExpansion": 1.532184850970741
+        },
+        {
+          "case": "7004-1",
+          "bank": "previous",
+          "block": 8,
+          "tokensAfterFirst": 18285,
+          "rounds": 7796,
+          "verifiedPositions": 43018,
+          "tokensPerRound": 2.3454335556695742,
+          "queryExpansion": 2.3526387749521467
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+control ok    | 7 passed, 10 deselected in 2.92s
+killed       qual-wrong-profile-accepted | 1 failed, 5 passed, 10 deselected in 3.31s
+
+1 of 1 mutants killed.

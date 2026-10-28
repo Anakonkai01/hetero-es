@@ -1,0 +1,63 @@
+..................................................................F      [100%]
+=================================== FAILURES ===================================
+____________ test_probe_uses_the_selected_gpu_and_reports_its_index ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7d0349509a90>
+
+    def test_probe_uses_the_selected_gpu_and_reports_its_index(monkeypatch):
+        from types import SimpleNamespace
+        from heteroes.product.remote import handle
+    
+        seen = []
+        monkeypatch.setenv('CUDA_VISIBLE_DEVICES', '2')
+        monkeypatch.setattr('heteroes.product.remote.shutil.which', lambda value: '/usr/bin/nvidia-smi')
+        def run(argv, **kwargs):
+            seen.append(argv)
+            return SimpleNamespace(returncode=0, stdout='GPU two, 8192, 7000, 40, 0, GPU-uuid, 2\n')
+        monkeypatch.setattr('heteroes.product.remote.subprocess.run', run)
+>       gpu = handle({'action': 'probe'})
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+runtime/tests/ledger/test_device_agent.py:1102: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+request = {'action': 'probe'}
+
+    def handle(request):
+        action = request["action"]
+        if action == "probe":
+            executable = shutil.which("nvidia-smi")
+            if not executable:
+                candidates = (
+                    [
+                        Path(os.environ.get("SystemRoot", "C:/Windows")) / "System32/nvidia-smi.exe",
+                        Path(os.environ.get("ProgramFiles", "C:/Program Files"))
+                        / "NVIDIA Corporation/NVSMI/nvidia-smi.exe",
+                    ]
+                    if sys.platform == "win32"
+                    else [Path("/usr/lib/wsl/lib/nvidia-smi")]
+                )
+                executable = next((str(p) for p in candidates if p.is_file()), None)
+            if not executable:
+                raise RuntimeError("nvidia-smi unavailable")
+            completed = subprocess.run(
+                [
+                    executable,
+                    "--query-gpu=name,memory.total,memory.free,temperature.gpu,utilization.gpu,uuid",
+                    "--format=csv,noheader,nounits",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=10,
+                **({"creationflags": subprocess.CREATE_NO_WINDOW} if sys.platform == "win32" else {}),
+            )
+            if completed.returncode:
+                raise RuntimeError("nvidia-smi unavailable")
+>           name, total, free, temperature, utilization, gpu_uuid = completed.stdout.splitlines()[0].split(",")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           ValueError: too many values to unpack (expected 6)
+
+runtime/src/heteroes/product/remote.py:85: ValueError
+=========================== short test summary info ============================
+FAILED runtime/tests/ledger/test_device_agent.py::test_probe_uses_the_selected_gpu_and_reports_its_index
+1 failed, 66 passed in 3.17s

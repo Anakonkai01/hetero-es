@@ -1,0 +1,38 @@
+[
+  {
+    "name": "append-positive-zero-in-tree-finish",
+    "file": "src/heteroes/eval/strict_cuda.py",
+    "old": "  bool any = false;",
+    "new": "  bool any = true;"
+  },
+  {
+    "name": "include-padded-tail-zero-nodes",
+    "file": "src/heteroes/eval/strict_cuda.py",
+    "old": "for (int first = 0; first < keys; first += 8) {\n      int valid = keys - first < 8 ? keys - first : 8;\n      float terms[8] = {};\n#pragma unroll\n      for (int item = 0; item < 8; ++item) {\n        int j = first + item;\n        if (item < valid) terms[item] = mul_(numerators[j], load(value + ((size_t)kv * total_keys + start + j) * dim + d, bad), bad);\n      }\n#pragma unroll\n      for (int stride = 1; stride < 8; stride <<= 1) {\n#pragma unroll\n        for (int item = 0; item < 8; item += 2 * stride)\n          if (item + stride < valid) terms[item] = add_(terms[item], terms[item + stride], bad);\n      }\n      push(t, terms[0], bad);\n    }",
+    "new": "for (int first = 0; first < keys; first += 8) {\n      int valid = keys - first < 8 ? keys - first : 8;\n      float terms[8] = {};\n#pragma unroll\n      for (int item = 0; item < 8; ++item) {\n        int j = first + item;\n        if (item < valid) terms[item] = mul_(numerators[j], load(value + ((size_t)kv * total_keys + start + j) * dim + d, bad), bad);\n      }\n#pragma unroll\n      for (int stride = 1; stride < 8; stride <<= 1) {\n#pragma unroll\n        for (int item = 0; item < 8; item += 2 * stride)\n          if (item + stride < 8) terms[item] = add_(terms[item], terms[item + stride], bad);\n      }\n      push(t, terms[0], bad);\n    }"
+  },
+  {
+    "name": "omit-final-partial-group",
+    "file": "src/heteroes/eval/strict_cuda.py",
+    "old": "for (int first = 0; first < keys; first += 8)",
+    "new": "for (int first = 0; first + 8 <= keys; first += 8)"
+  },
+  {
+    "name": "replace-adjacent-tree-with-left-fold",
+    "file": "src/heteroes/eval/strict_cuda.py",
+    "old": "for (int first = 0; first < keys; first += 8) {\n      int valid = keys - first < 8 ? keys - first : 8;\n      float terms[8] = {};\n#pragma unroll\n      for (int item = 0; item < 8; ++item) {\n        int j = first + item;\n        if (item < valid) terms[item] = mul_(numerators[j], load(value + ((size_t)kv * total_keys + start + j) * dim + d, bad), bad);\n      }\n#pragma unroll\n      for (int stride = 1; stride < 8; stride <<= 1) {\n#pragma unroll\n        for (int item = 0; item < 8; item += 2 * stride)\n          if (item + stride < valid) terms[item] = add_(terms[item], terms[item + stride], bad);\n      }\n      push(t, terms[0], bad);\n    }",
+    "new": "for (int first = 0; first < keys; first += 8) {\n      int valid = keys - first < 8 ? keys - first : 8;\n      float terms[8] = {};\n#pragma unroll\n      for (int item = 0; item < 8; ++item) {\n        int j = first + item;\n        if (item < valid) terms[item] = mul_(numerators[j], load(value + ((size_t)kv * total_keys + start + j) * dim + d, bad), bad);\n      }\nfor (int item = 1; item < valid; ++item) terms[0] = add_(terms[0], terms[item], bad);\n      push(t, terms[0], bad);\n    }"
+  },
+  {
+    "name": "multiply-value-subtrees-instead-of-add",
+    "file": "src/heteroes/eval/strict_cuda.py",
+    "old": "for (int first = 0; first < keys; first += 8) {\n      int valid = keys - first < 8 ? keys - first : 8;\n      float terms[8] = {};\n#pragma unroll\n      for (int item = 0; item < 8; ++item) {\n        int j = first + item;\n        if (item < valid) terms[item] = mul_(numerators[j], load(value + ((size_t)kv * total_keys + start + j) * dim + d, bad), bad);\n      }\n#pragma unroll\n      for (int stride = 1; stride < 8; stride <<= 1) {\n#pragma unroll\n        for (int item = 0; item < 8; item += 2 * stride)\n          if (item + stride < valid) terms[item] = add_(terms[item], terms[item + stride], bad);\n      }\n      push(t, terms[0], bad);\n    }",
+    "new": "for (int first = 0; first < keys; first += 8) {\n      int valid = keys - first < 8 ? keys - first : 8;\n      float terms[8] = {};\n#pragma unroll\n      for (int item = 0; item < 8; ++item) {\n        int j = first + item;\n        if (item < valid) terms[item] = mul_(numerators[j], load(value + ((size_t)kv * total_keys + start + j) * dim + d, bad), bad);\n      }\n#pragma unroll\n      for (int stride = 1; stride < 8; stride <<= 1) {\n#pragma unroll\n        for (int item = 0; item < 8; item += 2 * stride)\n          if (item + stride < valid) terms[item] = mul_(terms[item], terms[item + stride], bad);\n      }\n      push(t, terms[0], bad);\n    }"
+  },
+  {
+    "name": "skip-masked-query-key-overflow",
+    "file": "src/heteroes/eval/strict_cuda.py",
+    "old": "for (int j = threadIdx.x; j < keys; j += blockDim.x) {\n    const float* row = key",
+    "new": "for (int j = threadIdx.x; j <= limit; j += blockDim.x) {\n    const float* row = key"
+  }
+]

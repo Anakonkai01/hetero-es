@@ -1,0 +1,35 @@
+bfaf5e6cb058b1a20085e79ca373fcaf3cabe955c8675cc17b60b6c2bea1eeb2  /mnt/c/Users/Thao Nguyen/.cache/heteroes-native-strict-20261025-01/source-codex-prefill-01.tar.gz
+........................................................................ [  8%]
+........................................................................ [ 17%]
+........................................................................ [ 25%]
+........................................................................ [ 34%]
+........................................................................ [ 42%]
+........................................................................ [ 51%]
+........................................................................ [ 59%]
+........................................................................ [ 68%]
+........................................................................ [ 76%]
+........................................................................ [ 85%]
+........................................................................ [ 93%]
+....................................................                     [100%]Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  22%|##1       | 63/290 [00:00<00:00, 613.98it/s]Loading weights:  43%|####3     | 125/290 [00:00<00:00, 538.59it/s]Loading weights:  62%|######2   | 180/290 [00:00<00:00, 505.70it/s]Loading weights:  80%|#######9  | 231/290 [00:00<00:00, 506.23it/s]Loading weights:  97%|#########7| 282/290 [00:00<00:00, 502.36it/s]Loading weights: 100%|##########| 290/290 [00:00<00:00, 526.83it/s]
+{"status": "ok", "out": "C:\\Users\\Thao Nguyen\\.cache\\heteroes-native-strict-20261025-01\\codex-prefill-01\\qwen-parity-native-01.json", "wallSeconds": 52.444878300000255}
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  24%|##4       | 71/290 [00:00<00:00, 662.23it/s]Loading weights:  48%|####7     | 138/290 [00:00<00:00, 626.25it/s]Loading weights:  69%|######9   | 201/290 [00:00<00:00, 575.80it/s]Loading weights:  90%|######### | 261/290 [00:00<00:00, 578.59it/s]Loading weights: 100%|##########| 290/290 [00:00<00:00, 617.57it/s]
+base qwen short32 2670.7 bc4a5504e37c
+base qwen chat128 2639.4 a9fad5ca48ed
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  25%|##5       | 73/290 [00:00<00:00, 688.97it/s]Loading weights:  49%|####8     | 142/290 [00:00<00:00, 604.36it/s]Loading weights:  70%|#######   | 203/290 [00:00<00:00, 596.41it/s]Loading weights:  91%|######### | 263/290 [00:00<00:00, 585.64it/s]Loading weights: 100%|##########| 290/290 [00:00<00:00, 621.66it/s]
+new qwen short32 2779.5 bc4a5504e37c
+new qwen chat128 2720.7 a9fad5ca48ed
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  24%|##4       | 71/290 [00:00<00:00, 709.70it/s]Loading weights:  49%|####8     | 142/290 [00:00<00:00, 652.24it/s]Loading weights:  72%|#######1  | 208/290 [00:00<00:00, 619.66it/s]Loading weights:  93%|#########3| 271/290 [00:00<00:00, 605.02it/s]Loading weights: 100%|##########| 290/290 [00:00<00:00, 640.19it/s]
+base qwen short32 2658.0 bc4a5504e37c
+base qwen chat128 2623.5 a9fad5ca48ed
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  26%|##6       | 76/290 [00:00<00:00, 750.98it/s]Loading weights:  52%|#####2    | 152/290 [00:00<00:00, 665.04it/s]Loading weights:  76%|#######5  | 220/290 [00:00<00:00, 614.31it/s]Loading weights:  97%|#########7| 282/290 [00:00<00:00, 605.67it/s]Loading weights: 100%|##########| 290/290 [00:00<00:00, 640.77it/s]
+new qwen short32 2686.0 bc4a5504e37c
+new qwen chat128 2688.2 a9fad5ca48ed
+
+============================== warnings summary ===============================
+..\..\venv\Lib\site-packages\_pytest\config\__init__.py:1303
+  C:\Users\Thao Nguyen\.cache\heteroes-native-strict-20261025-01\venv\Lib\site-packages\_pytest\config\__init__.py:1303: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; anyio
+    self._mark_plugins_for_rewrite(hook, disable_autoload)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+844 passed, 1 warning in 1082.20s (0:18:02)
+{"status": "ok", "wallSeconds": 1236.0900879, "error": null}

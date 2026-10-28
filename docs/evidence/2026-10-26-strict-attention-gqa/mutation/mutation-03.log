@@ -1,0 +1,6 @@
+control ok    | 333 passed in 3.45s
+SURVIVED     gqa_stage_no_flush | 333 passed in 3.42s
+SURVIVED     gqa_stage_no_note | 333 passed in 3.44s
+SURVIVED     split_score_no_prune | 333 passed in 3.35s
+
+0 of 3 mutants killed.

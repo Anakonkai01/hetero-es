@@ -1,0 +1,6 @@
+control ok    | 24 passed, 47 deselected in 37.04s
+killed       drop fourth product in each group | 1 failed, 4 passed, 47 deselected in 8.19s
+killed       wrap exact dot to signed int32 | 1 failed, 1 passed, 47 deselected in 3.22s
+killed       duplicate stripes across split blocks | 1 failed, 47 deselected in 1.92s
+
+3 of 3 mutants killed.

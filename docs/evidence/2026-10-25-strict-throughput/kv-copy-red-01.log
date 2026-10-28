@@ -1,0 +1,31 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______ test_decode_concatenation_count_is_bounded_by_layers_not_sequences ______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7550dcdf6b70>
+
+    @gpu
+    def test_decode_concatenation_count_is_bounded_by_layers_not_sequences(monkeypatch):
+        model = make_model().cuda()
+        packed = packed_class()(model, max_context=64, allow_fixture=True)
+        rows = [torch.tensor([[2, 5, 7]], device="cuda") for _ in range(8)]
+        _, caches = packed.forward_batch(rows)
+        original, calls = torch.cat, []
+    
+        def counted(*args, **kwargs):
+            calls.append(1)
+            return original(*args, **kwargs)
+    
+        with monkeypatch.context() as context:
+            context.setattr(torch, "cat", counted)
+            actual, _ = packed.forward_batch([row[:, -1:] for row in rows], caches)
+>       assert len(calls) <= 1 + 2 * model.config.num_hidden_layers
+E       assert 37 <= (1 + (2 * 2))
+E        +  where 37 = len([1, 1, 1, 1, 1, 1, ...])
+E        +  and   2 = Qwen2Config {\n  "attention_dropout": 0.0,\n  "bos_token_id": null,\n  "eos_token_id": 40,\n  "hidden_act": "silu",\n  "hid...s": true,\n  "transformers_version": "5.17.0",\n  "use_cache": true,\n  "use_sliding_window": false,\n  "vocab_size": 41\n}\n.num_hidden_layers
+E        +    where Qwen2Config {\n  "attention_dropout": 0.0,\n  "bos_token_id": null,\n  "eos_token_id": 40,\n  "hidden_act": "silu",\n  "hid...s": true,\n  "transformers_version": "5.17.0",\n  "use_cache": true,\n  "use_sliding_window": false,\n  "vocab_size": 41\n}\n = Qwen2ForCausalLM(\n  (model): Qwen2Model(\n    (embed_tokens): Embedding(41, 16, padding_idx=0)\n    (layers): ModuleList...=1e-06)\n    (rotary_emb): Qwen2RotaryEmbedding()\n  )\n  (lm_head): Linear(in_features=16, out_features=41, bias=False)\n).config
+
+tests/eval/test_strict_packed.py:124: AssertionError
+=========================== short test summary info ============================
+FAILED tests/eval/test_strict_packed.py::test_decode_concatenation_count_is_bounded_by_layers_not_sequences
+1 failed, 20 deselected in 2.99s

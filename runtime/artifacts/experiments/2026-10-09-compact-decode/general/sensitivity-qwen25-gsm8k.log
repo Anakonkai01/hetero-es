@@ -1,0 +1,3 @@
+None {'library64 vs compact64': 0, 'library64 vs library128': 0, 'library64 vs compact128': 0, 'compact64 vs library128': 0, 'compact64 vs compact128': 0, 'library128 vs compact128': 0}
+7001 {'library64 vs compact64': 0, 'library64 vs library128': 0, 'library64 vs compact128': 0, 'compact64 vs library128': 0, 'compact64 vs compact128': 0, 'library128 vs compact128': 0}
+7002 {'library64 vs compact64': 0, 'library64 vs library128': 1, 'library64 vs compact128': 0, 'compact64 vs library128': 1, 'compact64 vs compact128': 0, 'library128 vs compact128': 1}

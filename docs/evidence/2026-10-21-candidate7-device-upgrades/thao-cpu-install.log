@@ -1,0 +1,73 @@
+before available bytes=20239421440; replacing stopped runtime bytes=5120996977
+downloading heteroes-worker-linux-lf1-20261021-r11-candidate7.tar.gz
+######################################################################## 100.0%
+installing pinned packages
+Looking in links: /home/thao_nguyen/.local/share/heteroes-c4-cpu/downloads/linux
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/jinja2-3.1.6-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 1))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/markupsafe-3.0.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 2))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 3))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/pygments-2.21.0-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 4))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/accelerate-1.15.0-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 5))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/annotated_doc-0.0.5-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 6))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/anyio-4.15.1-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 7))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/certifi-2026.7.22-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 8))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/click-8.5.0-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 9))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/cuda_bindings-13.4.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 10))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/cuda_pathfinder-1.8.3-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 11))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/cuda_toolkit-13.2.1-py2.py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 12))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/filelock-4.1.0-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 13))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/fsspec-2026.9.0-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 14))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/h11-0.16.0-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 15))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/hf_xet-1.7.0-cp38-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 16))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/httpcore-1.0.9-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 17))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/httpx-0.28.1-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 18))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/huggingface_hub-1.33.0-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 19))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/idna-3.20-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 20))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/markdown_it_py-4.2.0-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 21))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/mdurl-0.1.2-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 22))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/mpmath-1.3.0-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 23))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/networkx-3.7-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 24))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/numpy-2.5.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 25))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/nvidia_cublas-13.4.0.1-py3-none-manylinux_2_27_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 26))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/nvidia_cuda_cupti-13.2.75-py3-none-manylinux_2_25_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 27))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/nvidia_cuda_nvrtc-13.2.78-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 28))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/nvidia_cuda_runtime-13.2.75-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 29))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/nvidia_cudnn_cu13-9.20.0.48-py3-none-manylinux_2_27_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 30))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/nvidia_cufft-12.2.0.46-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 31))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/nvidia_cufile-1.17.1.22-py3-none-manylinux_2_27_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 32))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/nvidia_curand-10.4.2.55-py3-none-manylinux_2_27_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 33))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/nvidia_cusolver-12.2.0.1-py3-none-manylinux_2_27_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 34))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/nvidia_cusparse-12.7.10.1-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 35))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/nvidia_cusparselt_cu13-0.8.1-py3-none-manylinux2014_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 36))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/nvidia_nccl_cu13-2.29.7-py3-none-manylinux_2_18_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 37))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/nvidia_nvjitlink-13.4.92-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 38))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/nvidia_nvshmem_cu13-3.4.5-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 39))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/nvidia_nvtx-13.2.75-py3-none-manylinux1_x86_64.manylinux_2_5_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 40))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/packaging-26.3-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 41))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/peft-0.21.2-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 42))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 43))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/regex-2026.9.29-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 44))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/rich-15.0.0-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 45))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/safetensors-0.8.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 46))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/setuptools-84.0.0-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 47))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/shellingham-1.5.4-py2.py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 48))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/sympy-1.14.0-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 49))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/tokenizers-0.23.2-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 50))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/torch-2.13.0+cu132-cp312-cp312-manylinux_2_28_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 51))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/tqdm-4.70.1-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 52))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/transformers-5.17.0-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 53))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/triton-3.7.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 54))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/typer-0.27.3-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 55))
+Processing ./.local/share/heteroes-c4-cpu/downloads/linux/typing_extensions-4.16.0-py3-none-any.whl (from -r /home/thao_nguyen/.local/share/heteroes-c4-cpu/bundle/requirements-linux.txt (line 56))
+Installing collected packages: nvidia-cusparselt-cu13, mpmath, cuda-toolkit, typing_extensions, triton, tqdm, sympy, shellingham, setuptools, safetensors, regex, PyYAML, Pygments, psutil, packaging, nvidia-nvtx, nvidia-nvshmem-cu13, nvidia-nvjitlink, nvidia-nccl-cu13, nvidia-curand, nvidia-cufile, nvidia-cuda-runtime, nvidia-cuda-nvrtc, nvidia-cuda-cupti, numpy, networkx, mdurl, MarkupSafe, idna, hf-xet, h11, fsspec, filelock, cuda-pathfinder, click, certifi, annotated-doc, nvidia-cusparse, nvidia-cufft, nvidia-cublas, markdown-it-py, Jinja2, httpcore, cuda-bindings, anyio, rich, nvidia-cusolver, nvidia-cudnn-cu13, httpx, typer, huggingface_hub, torch, tokenizers, transformers, accelerate, peft
+
+Successfully installed Jinja2-3.1.6 MarkupSafe-3.0.4 PyYAML-6.0.3 Pygments-2.21.0 accelerate-1.15.0 annotated-doc-0.0.5 anyio-4.15.1 certifi-2026.7.22 click-8.5.0 cuda-bindings-13.4.3 cuda-pathfinder-1.8.3 cuda-toolkit-13.2.1 filelock-4.1.0 fsspec-2026.9.0 h11-0.16.0 hf-xet-1.7.0 httpcore-1.0.9 httpx-0.28.1 huggingface_hub-1.33.0 idna-3.20 markdown-it-py-4.2.0 mdurl-0.1.2 mpmath-1.3.0 networkx-3.7 numpy-2.5.3 nvidia-cublas-13.4.0.1 nvidia-cuda-cupti-13.2.75 nvidia-cuda-nvrtc-13.2.78 nvidia-cuda-runtime-13.2.75 nvidia-cudnn-cu13-9.20.0.48 nvidia-cufft-12.2.0.46 nvidia-cufile-1.17.1.22 nvidia-curand-10.4.2.55 nvidia-cusolver-12.2.0.1 nvidia-cusparse-12.7.10.1 nvidia-cusparselt-cu13-0.8.1 nvidia-nccl-cu13-2.29.7 nvidia-nvjitlink-13.4.92 nvidia-nvshmem-cu13-3.4.5 nvidia-nvtx-13.2.75 packaging-26.3 peft-0.21.2 psutil-7.2.2 regex-2026.9.29 rich-15.0.0 safetensors-0.8.0 setuptools-84.0.0 shellingham-1.5.4 sympy-1.14.0 tokenizers-0.23.2 torch-2.13.0+cu132 tqdm-4.70.1 transformers-5.17.0 triton-3.7.1 typer-0.27.3 typing_extensions-4.16.0
+installed; next: heteroes-worker selftest
+add /home/thao_nguyen/.local/bin to your PATH (for example in ~/.bashrc)
+
+Installed. Next:
+  heteroes-worker selftest                  # checks this GPU against the pinned reference (a few minutes)
+  heteroes-worker join https://<your lab>   # asks for the pairing code from the lab's Devices page
+  heteroes-worker run                       # keeps this machine online; turn it ON on the Devices page
+after available bytes=20239810560
+57b0faf6d31a

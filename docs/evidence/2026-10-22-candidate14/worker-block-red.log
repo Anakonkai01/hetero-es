@@ -1,0 +1,47 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____ test_private_route_failure_blocks_only_that_member_and_never_restarts _____
+
+manager = <heteroes.product.agent.AgentManager object at 0x73bfd7070500>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x73bfd68ac800>
+
+    def test_private_route_failure_blocks_only_that_member_and_never_restarts(manager, monkeypatch):
+        root, calls, clock = blocked_member(manager, monkeypatch)
+        for _ in range(6):
+            clock[0] += run_supervisor.RESTART_SECONDS
+            manager.tick(root)
+>       assert not [call for call in calls if call[0] == "late" and call[1] == "start"]
+E       AssertionError: assert not [('late', 'start', 1), ('late', 'start', 2), ('late', 'start', 3), ('late', 'start', 4), ('late', 'start', 5), ('late', 'start', 6)]
+
+tests/ledger/test_run_supervisor.py:421: AssertionError
+_____________ test_block_survives_transient_state_reset_and_rejoin _____________
+
+manager = <heteroes.product.agent.AgentManager object at 0x73bfd68ae270>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x73bfd68adf70>
+
+    def test_block_survives_transient_state_reset_and_rejoin(manager, monkeypatch):
+        root, calls, clock = blocked_member(manager, monkeypatch)
+        manager.save(root, workerStates={"local": ALIVE})
+        manager._follow_membership(root, manager.state(root))
+>       assert manager.state(root)["workerStates"]["late"]["stopReason"] == "needs_private_route"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'stopReason'
+
+tests/ledger/test_run_supervisor.py:435: KeyError
+_______ test_explicit_retry_is_idempotent_and_same_failure_blocks_again ________
+
+manager = <heteroes.product.agent.AgentManager object at 0x73bfd68afe90>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x73bfd68af4d0>
+
+    def test_explicit_retry_is_idempotent_and_same_failure_blocks_again(manager, monkeypatch):
+        root, calls, clock = blocked_member(manager, monkeypatch)
+>       manager.retry_worker(root, "late", "retry-1")
+        ^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'AgentManager' object has no attribute 'retry_worker'. Did you mean: 'start_worker'?
+
+tests/ledger/test_run_supervisor.py:442: AttributeError
+=========================== short test summary info ============================
+FAILED tests/ledger/test_run_supervisor.py::test_private_route_failure_blocks_only_that_member_and_never_restarts
+FAILED tests/ledger/test_run_supervisor.py::test_block_survives_transient_state_reset_and_rejoin
+FAILED tests/ledger/test_run_supervisor.py::test_explicit_retry_is_idempotent_and_same_failure_blocks_again
+3 failed, 40 deselected in 0.67s

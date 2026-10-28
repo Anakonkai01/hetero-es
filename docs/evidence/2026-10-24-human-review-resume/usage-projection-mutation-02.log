@@ -1,0 +1,6 @@
+control ok    | 4 passed in 21.77s
+killed       ignore-generation-delivery-faults | 2 failed, 2 passed in 21.61s
+killed       ignore-total-delivery-faults | 2 failed, 2 passed in 21.91s
+killed       treat-old-pending-as-permanent-loss | 1 failed, 3 passed in 21.86s
+
+3 of 3 mutants killed.

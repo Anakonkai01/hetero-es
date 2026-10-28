@@ -1,0 +1,7 @@
+{"status": "ok", "resources": {"NUM_REGS": 38, "LOCAL_SIZE_BYTES": 144, "SHARED_SIZE_BYTES": 128, "MAX_THREADS_PER_BLOCK": 1024}, "error": null}
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7375.11it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-attention-tree/bench-compact-smol-nhan-01.json", "wallSeconds": 9.779569317994174}
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 2451.01it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-attention-tree/bench-compact-tiny-nhan-01.json", "wallSeconds": 14.065451756003313}
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 6020.75it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-attention-tree/bench-compact-qwen-nhan-01.json", "wallSeconds": 11.99928618800186}

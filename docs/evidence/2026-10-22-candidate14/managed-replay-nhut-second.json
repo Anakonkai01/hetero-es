@@ -1,0 +1,108 @@
+{
+ "allEqual": true,
+ "device": "cuda",
+ "regenerated": [],
+ "generations": [
+  {
+   "generation": 0,
+   "parentSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+   "recordHash": "32de8a37d7cbd3854a22d13129b0dcd9e1149dc67daec51e56038e5900f92c48",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "e408bf281629a53fed5e64db8a583c8c84724c4da75d7c6d0a26e210863f1320",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 1,
+   "parentSha256": "e408bf281629a53fed5e64db8a583c8c84724c4da75d7c6d0a26e210863f1320",
+   "recordHash": "0d912c825296747ad6950c8d4767cd3333875b1bc53c66e2733cc458a2d95d7b",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "45b9267a0b54dbdff0a67e961185ff5f27abc8d45dedee67ae1b2a3d6a698f24",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 2,
+   "parentSha256": "45b9267a0b54dbdff0a67e961185ff5f27abc8d45dedee67ae1b2a3d6a698f24",
+   "recordHash": "09d3bcc4ba027d608a465c58dbc8738541676e316f02aadeb76290abfd553534",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "ab64292be9ec9a0c53c5f884dbcf832baa5f2b801c130a2162aa5a9b74299588",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 3,
+   "parentSha256": "ab64292be9ec9a0c53c5f884dbcf832baa5f2b801c130a2162aa5a9b74299588",
+   "recordHash": "6b1597166c12b9b5de6e63309137da126d80cb4d4350466b2c777b2f5275709a",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "75e8d06c9c943bbe6fccb7da80e667c1c268d9291c01c3e02f80bcae2f9e6feb",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 4,
+   "parentSha256": "75e8d06c9c943bbe6fccb7da80e667c1c268d9291c01c3e02f80bcae2f9e6feb",
+   "recordHash": "0e502e506046e1ce849f89e7e09aea19f95ca6838e33cbb1aff6be921ebe9c19",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "75e8d06c9c943bbe6fccb7da80e667c1c268d9291c01c3e02f80bcae2f9e6feb",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 5,
+   "parentSha256": "75e8d06c9c943bbe6fccb7da80e667c1c268d9291c01c3e02f80bcae2f9e6feb",
+   "recordHash": "c61fb23c726f700bba565c67df3a35dd41d30e9cc8de460dbd7993e425ecc7ce",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "b688bd0e0e45a9211fcac3b575cab5423dc0fe753e9031784a5bbcb7f7cf746c",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 6,
+   "parentSha256": "b688bd0e0e45a9211fcac3b575cab5423dc0fe753e9031784a5bbcb7f7cf746c",
+   "recordHash": "d037ba9929a019d7bf5339b40c7460f2a1f9f59c66701668017365caf82ad578",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "a326003dd4c5ff1e95cf556c8aff352198b42782be04c450762d093b57c7a5e4",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 7,
+   "parentSha256": "a326003dd4c5ff1e95cf556c8aff352198b42782be04c450762d093b57c7a5e4",
+   "recordHash": "c43c1b8bddc637dbb0d1db37aeba86dcefd627369a83b3b3cd62ef1d5dba48b8",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "a326003dd4c5ff1e95cf556c8aff352198b42782be04c450762d093b57c7a5e4",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 8,
+   "parentSha256": "a326003dd4c5ff1e95cf556c8aff352198b42782be04c450762d093b57c7a5e4",
+   "recordHash": "f9723cfe3a5490c5d7fd3a979515a4fd44caaf4716d8df47c6f78a152bd38bcc",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "ed7392861e87f26d2eb0106c9bac6442a590ac920afa22bb372c329640d9e7e6",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 9,
+   "parentSha256": "ed7392861e87f26d2eb0106c9bac6442a590ac920afa22bb372c329640d9e7e6",
+   "recordHash": "68b8ada7fa56ca7af0cde9f7fefac84c6fe0c7ca4ba670aa796f4a0641cebb8e",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "dd32b92e9e92c817ab2ba190f8456de1ed37f3e6732a5d99b88adcc7c72ba77e",
+   "childEqual": true,
+   "candidates": []
+  }
+ ],
+ "receiptHash": "0d4be1940c873b4a7017f9144bcfe5ad46d492f75a4b0b25346a0354d51b0051"
+}

@@ -1,0 +1,27 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___ test_rope_tables_are_exact_bounded_buffers_reused_by_prefill_and_decode ____
+
+cuda_model = Qwen2ForCausalLM(
+  (model): Qwen2Model(
+    (embed_tokens): Embedding(41, 16, padding_idx=0)
+    (layers): ModuleList...=1e-06)
+    (rotary_emb): Qwen2RotaryEmbedding()
+  )
+  (lm_head): Linear(in_features=16, out_features=41, bias=False)
+)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7007764e83b0>
+
+    @gpu
+    def test_rope_tables_are_exact_bounded_buffers_reused_by_prefill_and_decode(cuda_model, monkeypatch):
+        strict = Qwen2StrictCuda(cuda_model, max_context=64, allow_fixture=True)
+        positions = torch.arange(64, device="cuda", dtype=torch.float32)
+        sine, cosine = ops.sin_cos(ops.mul(positions[:, None], strict._inverse_frequency[None, :]))
+>       for actual, expected in ((strict._rope_sine, sine), (strict._rope_cosine, cosine)):
+                                  ^^^^^^^^^^^^^^^^^
+E       AttributeError: 'Qwen2StrictCuda' object has no attribute '_rope_sine'
+
+tests/eval/test_qwen2_strict_cuda.py:114: AttributeError
+=========================== short test summary info ============================
+FAILED tests/eval/test_qwen2_strict_cuda.py::test_rope_tables_are_exact_bounded_buffers_reused_by_prefill_and_decode
+1 failed, 11 deselected in 2.03s

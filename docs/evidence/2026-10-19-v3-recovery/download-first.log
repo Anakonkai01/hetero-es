@@ -1,0 +1,82 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________________ test_download_restore_cli_accepts_v3_objects _________________
+
+product_assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-298/product-model0')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-298/test_download_restore_cli_acce0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7b6d8c4f3680>
+
+    def test_download_restore_cli_accepts_v3_objects(product_assets, tmp_path, monkeypatch):
+        import importlib.util
+        import io
+        import sys
+        import urllib.request
+    
+        root = tmp_path / "source"
+        _, run, summary = completed_run(product_assets, root)
+        point = capture_point(root, summary, run.to_dict(), {"interval": 1, "retain": 3})
+        manifest = read_json(point / "manifest.json")
+        script = Path(__file__).resolve().parents[3] / "scripts/recovery.py"
+        spec = importlib.util.spec_from_file_location("recovery_cli", script)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        credentials = tmp_path / "private.json"
+        write_json(credentials, {"users": {"admin": "fixture-only"}})
+        destination = tmp_path / "downloaded"
+        monkeypatch.setattr(
+            sys,
+            "argv",
+            [
+                str(script),
+                "restore",
+                "--url",
+                "https://fixture.invalid",
+                "--runtime-root",
+                str(script.parent.parent / "runtime"),
+                "--point-id",
+                manifest["pointId"],
+                "--destination",
+                str(destination),
+                "--credentials-file",
+                str(credentials),
+            ],
+        )
+    
+        def request(url, **kwargs):
+            url = url.full_url if isinstance(url, urllib.request.Request) else url
+            if url.endswith("/auth/login"):
+                payload = json.dumps({"accessToken": "fixture-only"}).encode()
+            elif url.endswith("/download-plan"):
+                payload = json.dumps(
+                    {
+                        "manifest": manifest,
+                        "objects": {name: "https://fixture.invalid/files/" + name for name in manifest["files"]},
+                    }
+                ).encode()
+            elif "/files/" in url:
+                payload = (point / url.split("/files/", 1)[1]).read_bytes()
+            elif url.endswith("/auth/logout"):
+                payload = b"{}"
+            else:
+                raise AssertionError("Unexpected fixture request")
+            return io.BytesIO(payload)
+    
+        monkeypatch.setattr(urllib.request, "urlopen", request)
+>       assert module.main() == 0
+E       AssertionError: assert 1 == 0
+E        +  where 1 = <function main at 0x7b6d3d4c7b00>()
+E        +    where <function main at 0x7b6d3d4c7b00> = <module 'recovery_cli' from '/home/pc5070ti/projects/heteroes/scripts/recovery.py'>.main
+
+runtime/tests/v3/test_v3_recovery.py:192: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+
+
+
+---------------------------- Captured stderr setup -----------------------------
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 1171.59it/s]
+----------------------------- Captured stderr call -----------------------------
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 17141.14it/s]
+Cloud recovery failed: ValueError
+=========================== short test summary info ============================
+FAILED runtime/tests/v3/test_v3_recovery.py::test_download_restore_cli_accepts_v3_objects
+1 failed, 5 deselected in 1.80s

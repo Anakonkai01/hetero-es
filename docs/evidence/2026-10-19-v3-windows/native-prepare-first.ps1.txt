@@ -1,0 +1,14 @@
+$ProgressPreference='SilentlyContinue'
+$ErrorActionPreference='Stop'
+$private=Join-Path $env:LOCALAPPDATA 'HeteroES-v3-20261019'
+$bulk='D:\HeteroES-v3-20261019'
+$volume=Get-Volume -DriveLetter D
+if ($volume.UniqueId -ne '\\?\Volume{ac23c91d-438a-4344-8929-39fdc433c858}\') { throw 'VOLUME_IDENTITY_CHANGED' }
+if (Test-Path -LiteralPath $bulk) { throw 'USE_A_FRESH_BULK_DIRECTORY' }
+New-Item -ItemType Directory -Path $bulk | Out-Null
+$py=Join-Path $env:APPDATA '@heteroes\worker\runtimes\c64f3012b965\python\python.exe'
+& $py -m pip --isolated --cache-dir "$bulk\pip-cache" install --no-deps --disable-pip-version-check --index-url https://pypi.org/simple --target "$private\deps" peft==0.21.2 accelerate==1.15.0 psutil==7.2.2 *> "$private\dependencies.log"
+if ($LASTEXITCODE -ne 0) { throw 'QUALIFICATION_DEPENDENCIES_FAILED' }
+& $py -m pip --isolated --cache-dir "$bulk\pip-cache" install --dry-run --ignore-installed --only-binary=:all: --disable-pip-version-check --index-url https://pypi.org/simple --extra-index-url https://download.pytorch.org/whl/cu132 --report "$bulk\windows.json" -r "$private\windows.in" *> "$private\windows-report.log"
+if ($LASTEXITCODE -ne 0) { throw 'NATIVE_PIP_REPORT_FAILED' }
+'READY_NATIVE_REPORT'

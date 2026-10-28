@@ -1,0 +1,56 @@
+[
+ {
+  "name": "adapters left in PEFT's dtype",
+  "file": "src/heteroes/model/lora.py",
+  "old": "                parameter.data = parameter.data.to(torch.float16)\n",
+  "new": "                pass\n"
+ },
+ {
+  "name": "caller's random state consumed",
+  "file": "src/heteroes/model/lora.py",
+  "old": "    with torch.random.fork_rng(devices=[]):\n",
+  "new": "    if True:\n"
+ },
+ {
+  "name": "seed ignored",
+  "file": "src/heteroes/model/lora.py",
+  "old": "        torch.manual_seed(seed)\n",
+  "new": "        pass\n"
+ },
+ {
+  "name": "FP32 base accepted",
+  "file": "src/heteroes/model/lora.py",
+  "old": "    if any(p.dtype != torch.float16 for p in model.parameters()):",
+  "new": "    if False:"
+ },
+ {
+  "name": "adapters attached twice",
+  "file": "src/heteroes/model/lora.py",
+  "old": "    if any(\".lora_\" in name for name, _ in model.named_parameters()):\n        raise ValueError(\"the model already",
+  "new": "    if False:\n        raise ValueError(\"the model already"
+ },
+ {
+  "name": "export without the wrapper prefix",
+  "file": "src/heteroes/model/lora.py",
+  "old": "f\"base_model.model.{key}\"",
+  "new": "key"
+ },
+ {
+  "name": "only A trainable",
+  "file": "src/heteroes/model/lora.py",
+  "old": "ADAPTER_PATTERN = r\"\\.lora_[AB]\\.\"",
+  "new": "ADAPTER_PATTERN = r\"\\.lora_A\\.\""
+ },
+ {
+  "name": "export writes before checking",
+  "file": "src/heteroes/model/lora.py",
+  "old": "    if not any(\".lora_\" in name for name, _ in model.named_parameters()):\n        raise ValueError(\"the model has no LoRA adapters to export\")",
+  "new": "    if False:\n        raise ValueError(\"the model has no LoRA adapters to export\")"
+ },
+ {
+  "name": "base model id not recorded",
+  "file": "src/heteroes/model/lora.py",
+  "old": "    config.base_model_name_or_path = base_model_id\n",
+  "new": ""
+ }
+]

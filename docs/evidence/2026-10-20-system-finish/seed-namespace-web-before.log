@@ -1,0 +1,35 @@
+✔ a decaying alpha starts with an end value of a tenth of alpha, keeps a chosen one, constant clears it (0.687157ms)
+✖ the review lists every ES choice, with schedules shown as start → end (0.539921ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 1
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 52.436227
+
+✖ failing tests:
+
+test at frontend/tests/v3Settings.test.mjs:13:1
+✖ the review lists every ES choice, with schedules shown as start → end (0.539921ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + undefined
+  - 'baseline-5070'
+  
+      at TestContext.<anonymous> (file:///home/pc5070ti/projects/heteroes/frontend/tests/v3Settings.test.mjs:44:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: 'baseline-5070',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

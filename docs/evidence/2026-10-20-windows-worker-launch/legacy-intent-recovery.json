@@ -1,0 +1,10 @@
+{
+  "processRecordAbsent": true,
+  "sourceSha256": "4be45cbfe713cf765737190d96599eed5f5abaea75959a93add7a9f4ad567cc8",
+  "stdoutAbsent": true,
+  "matchingNativePythonProcesses": 0,
+  "cancellationFenceVerified": true,
+  "assignmentId": "414b6bbe5d3548e583eb5583e958e936",
+  "scope": "isolated test worker only",
+  "legacyIntentPreserved": true
+}

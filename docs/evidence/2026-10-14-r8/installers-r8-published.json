@@ -1,0 +1,39 @@
+{
+  "version": "0.1.0",
+  "build": "lf1-20261014-r8",
+  "privateTrial": true,
+  "nativeWindowsGpuVerified": false,
+  "installers": [
+    {
+      "platform": "windows",
+      "name": "HeteroES Worker-0.1.0-lf1-20261014-r8-Windows.exe",
+      "url": "/downloads/HeteroES Worker-0.1.0-lf1-20261014-r8-Windows.exe",
+      "sha256": "65acf367d8c6a869be65ae014e3932739b9cca7a623b99b2816f65a6b429206a",
+      "sizeBytes": 102946082
+    },
+    {
+      "platform": "linux",
+      "name": "HeteroES Worker-0.1.0-lf1-20261014-r8-Linux.tar.gz",
+      "url": "/downloads/HeteroES Worker-0.1.0-lf1-20261014-r8-Linux.tar.gz",
+      "sha256": "7fa0c21bfcc5deca74a7dfbfb809e5a782f53f1cfa7234ca0544de4da92b1bac",
+      "sizeBytes": 123847780
+    }
+  ],
+  "serverInstallers": [
+    {
+      "platform": "windows",
+      "name": "HeteroES Lab Server-0.1.0-lf1-20261014-r8-Windows.exe",
+      "url": "/downloads/HeteroES Lab Server-0.1.0-lf1-20261014-r8-Windows.exe",
+      "sha256": "afce4299e33622c8785634f6d3e914e402c5419e5b3a8b1372b379a4a3b51abe",
+      "sizeBytes": 104003284
+    },
+    {
+      "platform": "linux",
+      "name": "HeteroES Lab Server-0.1.0-lf1-20261014-r8-Linux.tar.gz",
+      "url": "/downloads/HeteroES Lab Server-0.1.0-lf1-20261014-r8-Linux.tar.gz",
+      "sha256": "d69808431e28320504c0d36e7e08acb3e582f10dfcaa5d0ab3f9b99eae8dae36",
+      "sizeBytes": 124901713
+    }
+  ],
+  "publiclyPublished": true
+}

@@ -1,0 +1,7 @@
+.......................................................                  [100%]
+2115 passed, 100 skipped in 76.30s (0:01:16)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+288 passed, 2 warnings in 37.05s
+
+[exited with code 0]

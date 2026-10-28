@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/frozen-subwarp-20261025/archive_lora_audits.py", line 26, in <module>
+    k._lora_function(rank,8,execution)
+  File "/home/pc5070ti/projects/heteroes-codex-frozen-perf/runtime/src/heteroes/eval/strict_cuda.py", line 931, in _lora_function
+    self._functions[name] = self._compile(
+                            ^^^^^^^^^^^^^^
+  File "/home/pc5070ti/projects/heteroes-codex-frozen-perf/runtime/src/heteroes/eval/strict_cuda.py", line 872, in _compile
+    module = _check(self._driver.cuModuleLoadData(cubin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/projects/heteroes-codex-frozen-perf/runtime/src/heteroes/eval/strict_cuda.py", line 800, in _check
+    raise ReferenceArithmeticError(f"CUDA/NVRTC call failed: {status!r}")
+heteroes.eval.reference_ops.ReferenceArithmeticError: CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>

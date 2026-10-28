@@ -1,0 +1,170 @@
+{
+  "runtimeCommit": "2eb4da0d",
+  "testFixCommit": "6cc69d26",
+  "throughput": [
+    {
+      "host": "5070ti-linux",
+      "model": "qwen",
+      "case": "short32",
+      "base": 8746.3,
+      "new": 8922.1,
+      "gainPercent": 2.01,
+      "tokensEqual": true
+    },
+    {
+      "host": "5070ti-linux",
+      "model": "qwen",
+      "case": "chat128",
+      "base": 8865.7,
+      "new": 9108.7,
+      "gainPercent": 2.74,
+      "tokensEqual": true
+    },
+    {
+      "host": "5070ti-linux",
+      "model": "smol",
+      "case": "short32",
+      "base": 8372.1,
+      "new": 8526.7,
+      "gainPercent": 1.85,
+      "tokensEqual": true
+    },
+    {
+      "host": "5070ti-linux",
+      "model": "tiny",
+      "case": "short32",
+      "base": 4534.6,
+      "new": 4644.3,
+      "gainPercent": 2.42,
+      "tokensEqual": true
+    },
+    {
+      "host": "3060-wsl2",
+      "model": "qwen",
+      "case": "short32",
+      "base": 2693.2,
+      "new": 2747.2,
+      "gainPercent": 2.01,
+      "tokensEqual": true
+    },
+    {
+      "host": "3060-wsl2",
+      "model": "qwen",
+      "case": "chat128",
+      "base": 2638.3,
+      "new": 2693.0,
+      "gainPercent": 2.07,
+      "tokensEqual": true
+    },
+    {
+      "host": "3060-wsl2",
+      "model": "smol",
+      "case": "short32",
+      "base": 2666.5,
+      "new": 2786.5,
+      "gainPercent": 4.5,
+      "tokensEqual": true
+    },
+    {
+      "host": "3060-wsl2",
+      "model": "tiny",
+      "case": "short32",
+      "base": 1380.6,
+      "new": 1404.8,
+      "gainPercent": 1.76,
+      "tokensEqual": true
+    }
+  ],
+  "parity": {
+    "qwen": {
+      "hosts": [
+        "3060-wsl2",
+        "5070ti-linux"
+      ],
+      "states": [
+        {
+          "state": "parent",
+          "allHostsAndSealedEqual": true,
+          "restoreExact": true
+        },
+        {
+          "state": "plus",
+          "allHostsAndSealedEqual": true,
+          "restoreExact": true
+        },
+        {
+          "state": "minus",
+          "allHostsAndSealedEqual": true,
+          "restoreExact": true
+        },
+        {
+          "state": "restored",
+          "allHostsAndSealedEqual": true,
+          "restoreExact": true
+        }
+      ],
+      "eos": {
+        "allHostsAndSealedEqual": true,
+        "rowsEndingEarly": 27
+      }
+    },
+    "smol": {
+      "hosts": [
+        "3060-wsl2",
+        "5070ti-linux"
+      ],
+      "states": [
+        {
+          "state": "parent",
+          "allHostsAndSealedEqual": true,
+          "restoreExact": true
+        },
+        {
+          "state": "plus",
+          "allHostsAndSealedEqual": true,
+          "restoreExact": true
+        },
+        {
+          "state": "minus",
+          "allHostsAndSealedEqual": true,
+          "restoreExact": true
+        },
+        {
+          "state": "restored",
+          "allHostsAndSealedEqual": true,
+          "restoreExact": true
+        }
+      ]
+    },
+    "tiny": {
+      "hosts": [
+        "3060-wsl2",
+        "5070ti-linux"
+      ],
+      "states": [
+        {
+          "state": "parent",
+          "allHostsAndSealedEqual": true,
+          "restoreExact": true
+        },
+        {
+          "state": "plus",
+          "allHostsAndSealedEqual": true,
+          "restoreExact": true
+        },
+        {
+          "state": "minus",
+          "allHostsAndSealedEqual": true,
+          "restoreExact": true
+        },
+        {
+          "state": "restored",
+          "allHostsAndSealedEqual": true,
+          "restoreExact": true
+        }
+      ]
+    }
+  },
+  "nativeManifestVerified": null,
+  "nativeAcceptancePending": true
+}

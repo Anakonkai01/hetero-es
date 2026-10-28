@@ -1,0 +1,26 @@
+[
+  {
+    "name": "allow-untrusted-probe-configuration",
+    "file": "src/heteroes/product/model_qualification.py",
+    "old": "if canonical_json_hash(cell[\"config\"]) != canonical_json_hash(config):",
+    "new": "if False:"
+  },
+  {
+    "name": "skip-pinned-recipe-and-plan",
+    "file": "src/heteroes/product/model_qualification.py",
+    "old": "    if canonical_json_hash(cell[\"recipe\"]) != canonical_json_hash(recipe) or canonical_json_hash(\n        cell[\"plan\"]\n    ) != canonical_json_hash(plan):",
+    "new": "    if False:"
+  },
+  {
+    "name": "trust-reported-probe-success",
+    "file": "src/heteroes/product/model_qualification.py",
+    "old": "    for sign, name in ((\"1\", \"expected\"), (\"-1\", \"negativeExpected\")):",
+    "new": "    return {\"passed\": True}\n    for sign, name in ((\"1\", \"expected\"), (\"-1\", \"negativeExpected\")):"
+  },
+  {
+    "name": "change-pinned-noise-fingerprint",
+    "file": "src/heteroes/product/model_qualification.py",
+    "old": "NOISE_FINGERPRINT = \"b94575345e870b1606cb4d6a0c4aa49b054cfbfc50571d809653d01bce9184d3\"",
+    "new": "NOISE_FINGERPRINT = \"0000000000000000000000000000000000000000000000000000000000000000\""
+  }
+]

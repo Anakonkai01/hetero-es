@@ -1,0 +1,280 @@
+{
+ "progression5070ti": [
+  {
+   "step": "stream + queued step (878018e3) vs 75f92c30",
+   "case": "short32",
+   "base": 4744.6,
+   "new": 6971.9,
+   "tokensEqual": true
+  },
+  {
+   "step": "stream + queued step (878018e3) vs 75f92c30",
+   "case": "chat128",
+   "base": 4877.6,
+   "new": 7097.9,
+   "tokensEqual": true
+  },
+  {
+   "step": "+ grouped launches vs 878018e3",
+   "case": "short32",
+   "base": 6975.7,
+   "new": 7421.5,
+   "tokensEqual": true
+  },
+  {
+   "step": "+ grouped launches vs 878018e3",
+   "case": "chat128",
+   "base": 7100.6,
+   "new": 7581.1,
+   "tokensEqual": true
+  },
+  {
+   "step": "+ fused RMSNorm/SiLU quantization vs 878018e3",
+   "case": "short32",
+   "base": 6983.6,
+   "new": 7608.7,
+   "tokensEqual": true
+  },
+  {
+   "step": "+ fused RMSNorm/SiLU quantization vs 878018e3",
+   "case": "chat128",
+   "base": 7121.0,
+   "new": 7791.5,
+   "tokensEqual": true
+  }
+ ],
+ "throughput": [
+  {
+   "host": "5070ti-linux",
+   "model": "qwen",
+   "case": "short32",
+   "base75f92c30": 4761.0,
+   "new": 7589.2,
+   "gainPercent": 59.4,
+   "tokensEqual": true,
+   "runs": 2
+  },
+  {
+   "host": "5070ti-linux",
+   "model": "qwen",
+   "case": "chat128",
+   "base75f92c30": 4902.5,
+   "new": 7775.0,
+   "gainPercent": 58.6,
+   "tokensEqual": true,
+   "runs": 2
+  },
+  {
+   "host": "5070ti-linux",
+   "model": "smol",
+   "case": "short32",
+   "base75f92c30": 5190.1,
+   "new": 7312.5,
+   "gainPercent": 40.9,
+   "tokensEqual": true,
+   "runs": 2
+  },
+  {
+   "host": "5070ti-linux",
+   "model": "tiny",
+   "case": "short32",
+   "base75f92c30": 2472.1,
+   "new": 4302.1,
+   "gainPercent": 74.0,
+   "tokensEqual": true,
+   "runs": 2
+  },
+  {
+   "host": "3060-wsl2",
+   "model": "qwen",
+   "case": "short32",
+   "base75f92c30": 1398.6,
+   "new": 2550.5,
+   "gainPercent": 82.4,
+   "tokensEqual": true,
+   "runs": 2
+  },
+  {
+   "host": "3060-wsl2",
+   "model": "qwen",
+   "case": "chat128",
+   "base75f92c30": 1400.1,
+   "new": 2509.2,
+   "gainPercent": 79.2,
+   "tokensEqual": true,
+   "runs": 2
+  },
+  {
+   "host": "3060-wsl2",
+   "model": "smol",
+   "case": "short32",
+   "base75f92c30": 1657.8,
+   "new": 2476.2,
+   "gainPercent": 49.4,
+   "tokensEqual": true,
+   "runs": 2
+  },
+  {
+   "host": "3060-wsl2",
+   "model": "tiny",
+   "case": "short32",
+   "base75f92c30": 665.2,
+   "new": 1353.9,
+   "gainPercent": 103.5,
+   "tokensEqual": true,
+   "runs": 2
+  },
+  {
+   "host": "3060-native-win11",
+   "model": "qwen",
+   "case": "short32",
+   "base75f92c30": 1369.9,
+   "new": 2523.0,
+   "gainPercent": 84.2,
+   "tokensEqual": true,
+   "runs": 2
+  },
+  {
+   "host": "3060-native-win11",
+   "model": "qwen",
+   "case": "chat128",
+   "base75f92c30": 1395.6,
+   "new": 2523.0,
+   "gainPercent": 80.8,
+   "tokensEqual": true,
+   "runs": 2
+  }
+ ],
+ "parity": {
+  "qwen": {
+   "hosts": [
+    "3060-native-win11",
+    "3060-wsl2",
+    "5070ti-linux"
+   ],
+   "states": [
+    {
+     "state": "parent",
+     "allHostsEqual": true,
+     "tileEqualsStreamAndRestoreExactOnEveryHost": true
+    },
+    {
+     "state": "plus",
+     "allHostsEqual": true,
+     "tileEqualsStreamAndRestoreExactOnEveryHost": true
+    },
+    {
+     "state": "minus",
+     "allHostsEqual": true,
+     "tileEqualsStreamAndRestoreExactOnEveryHost": true
+    },
+    {
+     "state": "restored",
+     "allHostsEqual": true,
+     "tileEqualsStreamAndRestoreExactOnEveryHost": true
+    }
+   ],
+   "eos": {
+    "5070ti-linux": {
+     "equal": true,
+     "rowsEndingEarly": 27,
+     "tokensSha256": "60bfce3f478ba9ce93029e42bc28b5a81dff1df19ea431e6f4280ea18ac4f540"
+    },
+    "3060-wsl2": {
+     "equal": true,
+     "rowsEndingEarly": 27,
+     "tokensSha256": "60bfce3f478ba9ce93029e42bc28b5a81dff1df19ea431e6f4280ea18ac4f540"
+    },
+    "3060-native-win11": {
+     "equal": true,
+     "rowsEndingEarly": 27,
+     "tokensSha256": "60bfce3f478ba9ce93029e42bc28b5a81dff1df19ea431e6f4280ea18ac4f540"
+    }
+   },
+   "eosEqualAcrossHosts": true
+  },
+  "smol": {
+   "hosts": [
+    "3060-wsl2",
+    "5070ti-linux"
+   ],
+   "states": [
+    {
+     "state": "parent",
+     "allHostsEqual": true,
+     "tileEqualsStreamAndRestoreExactOnEveryHost": true
+    },
+    {
+     "state": "plus",
+     "allHostsEqual": true,
+     "tileEqualsStreamAndRestoreExactOnEveryHost": true
+    },
+    {
+     "state": "minus",
+     "allHostsEqual": true,
+     "tileEqualsStreamAndRestoreExactOnEveryHost": true
+    },
+    {
+     "state": "restored",
+     "allHostsEqual": true,
+     "tileEqualsStreamAndRestoreExactOnEveryHost": true
+    }
+   ],
+   "eos": {},
+   "eosEqualAcrossHosts": true
+  },
+  "tiny": {
+   "hosts": [
+    "3060-wsl2",
+    "5070ti-linux"
+   ],
+   "states": [
+    {
+     "state": "parent",
+     "allHostsEqual": true,
+     "tileEqualsStreamAndRestoreExactOnEveryHost": true
+    },
+    {
+     "state": "plus",
+     "allHostsEqual": true,
+     "tileEqualsStreamAndRestoreExactOnEveryHost": true
+    },
+    {
+     "state": "minus",
+     "allHostsEqual": true,
+     "tileEqualsStreamAndRestoreExactOnEveryHost": true
+    },
+    {
+     "state": "restored",
+     "allHostsEqual": true,
+     "tileEqualsStreamAndRestoreExactOnEveryHost": true
+    }
+   ],
+   "eos": {},
+   "eosEqualAcrossHosts": true
+  }
+ },
+ "equalsSealedGqa": {
+  "qwen": true,
+  "smol": true,
+  "tiny": true
+ },
+ "native": {
+  "status": "ok",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "gpu": "NVIDIA GeForce RTX 3060",
+  "cc": [
+   8,
+   6
+  ],
+  "torch": "2.13.0+cu132",
+  "nvrtcResult": [
+   0,
+   13,
+   2
+  ],
+  "pytestExitCode": 0,
+  "sourceFileCount": 483,
+  "commit": "96bec7d150dcb522e8695778ba6a93a1163e8e3e"
+ }
+}

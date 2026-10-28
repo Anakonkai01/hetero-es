@@ -1,0 +1,12 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7189.46it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-integer-warp/bench-packing-shift-smol-nhan-02.json", "wallSeconds": 10.72561506400234}
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 2135.10it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-integer-warp/bench-packing-shift-tiny-nhan-02.json", "wallSeconds": 15.501556937000714}
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7672.09it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-integer-warp/bench-packing-shift-qwen-nhan-02.json", "wallSeconds": 13.257891696994193}
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7806.51it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-integer-warp/bench-packing-prmt-smol-nhan-02.json", "wallSeconds": 10.585783779999474}
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 2439.12it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-integer-warp/bench-packing-prmt-tiny-nhan-02.json", "wallSeconds": 15.407369722001022}
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 8021.39it/s]
+{"status": "ok", "out": "docs/evidence/2026-10-25-integer-warp/bench-packing-prmt-qwen-nhan-02.json", "wallSeconds": 13.175413727003615}

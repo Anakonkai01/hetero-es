@@ -1,0 +1,10 @@
+✔ CPU host identity and GPU UUID deduplicate aliases, nested domains and wall are excluded (0.538926ms)
+✔ stale and missing observations are not zero watts; recorded energy remains available (0.106411ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 153.344793

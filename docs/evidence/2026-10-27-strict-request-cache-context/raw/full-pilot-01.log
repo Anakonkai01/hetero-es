@@ -1,0 +1,3 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7136.73it/s]
+bucket-pilot qwen short32 9951.3 bc4a5504e37c
+bucket-pilot qwen chat128 9903.4 a9fad5ca48ed

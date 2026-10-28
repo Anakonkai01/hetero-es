@@ -1,0 +1,3 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7481.90it/s]
+composed-r2 short32 10066.7 bc4a5504e37c
+composed-r2 chat128 9951.7 a9fad5ca48ed

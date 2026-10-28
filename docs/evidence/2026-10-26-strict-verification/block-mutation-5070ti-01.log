@@ -1,0 +1,5 @@
+control ok    | 1 passed, 1 deselected in 5.64s
+killed       leak-later-guess-into-earlier-prefix | 1 failed, 1 deselected in 4.82s
+killed       read-another-sequence-cache | 1 failed, 1 deselected in 4.81s
+
+2 of 2 mutants killed.

@@ -1,0 +1,14 @@
+[
+  {
+    "name": "paired device still requires an account session",
+    "file": "desktop/worker/electron/service.cjs",
+    "old": "if (deviceToken) {",
+    "new": "if (false && deviceToken) {"
+  },
+  {
+    "name": "policy rejection falls back to account credentials",
+    "file": "desktop/worker/electron/service.cjs",
+    "old": "if (!/^LAB_HTTP_(404|405)$/.test(error.message)) throw error;",
+    "new": "if (false) throw error;"
+  }
+]

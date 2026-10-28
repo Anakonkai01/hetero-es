@@ -1,0 +1,13 @@
+control ok    | 40 passed in 34.99s
+killed       Wrong plan function reused | 1 failed, 17 passed in 2.52s
+killed       Smallest normal incorrectly flushed | 1 failed, 18 passed in 3.40s
+killed       Compacted query loses original KV owner | 1 failed, 19 passed in 3.59s
+killed       Prefix source offset ignored | 1 failed, 19 passed in 3.67s
+killed       Greedy tie takes largest warp token | 1 failed, 21 passed in 4.11s
+killed       Rounded penalty silently disables processor | 1 failed, 22 passed in 4.33s
+killed       Deferred error hidden on publication | 1 failed, 21 passed in 4.08s
+killed       Candidate cache retained | 1 failed, 26 passed in 7.41s
+killed       Rebound weights reuse stale capture | 1 failed, 35 passed in 28.64s
+killed       Old cache cleared on foreign stream | 1 failed, 36 passed in 30.76s
+
+10 of 10 mutants killed.

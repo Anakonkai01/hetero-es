@@ -1,0 +1,60 @@
+{
+  "cpuStepsPassed": [
+    "runtime-tests",
+    "python-lint",
+    "python-format",
+    "prettier",
+    "source-packages",
+    "backend-tests",
+    "frontend-unit",
+    "worker-unit",
+    "server-unit",
+    "product-ui-unit",
+    "types",
+    "lint",
+    "i18n",
+    "web-build",
+    "worker-build",
+    "web-onboarding",
+    "web-live",
+    "web-experiments",
+    "web-showcase",
+    "web-pages",
+    "worker-onboarding",
+    "worker-station"
+  ],
+  "tests": {
+    "runtime": {
+      "passed": 2110,
+      "skipped": 100
+    },
+    "backend": {
+      "passed": 283
+    },
+    "frontend": {
+      "passed": 74
+    },
+    "worker": {
+      "passed": 81
+    },
+    "server": {
+      "passed": 1
+    },
+    "productUi": {
+      "passed": 5
+    }
+  },
+  "publicLabAllOk": true,
+  "publicInstallersHashesVerified": 4,
+  "publicPages": 19,
+  "linuxAppSharedModuleImports": 2,
+  "pythonAstsUnchanged": 287,
+  "oldCommitsPreserved": 353,
+  "maintainedMarkdownFilesChecked": 22,
+  "brokenRelativeLinks": [],
+  "trackedInstallerResourcesUnchanged": true,
+  "published": false,
+  "deployed": false,
+  "newGpuAcceptance": false,
+  "newNativeWindowsAcceptance": false
+}

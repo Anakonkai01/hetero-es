@@ -1,0 +1,52 @@
+{
+ "recordedAt": 1792569875.0164318,
+ "experimentId": "a78af4b3a724414a82f2589d7d4f8604",
+ "state": {
+  "status": "COMPLETED",
+  "recoveryCount": 0,
+  "startedAt": 1792567966.7280564,
+  "workerStates": {
+   "desktop-906949218c43": {
+    "alive": false,
+    "ready": true,
+    "confirmed": true
+   },
+   "desktop-9f9da13f0f82": {
+    "alive": false,
+    "ready": true,
+    "confirmed": true
+   },
+   "cli-894b5d440398": {
+    "alive": false,
+    "ready": true,
+    "confirmed": true
+   },
+   "cli-3e355c6e9e70": {
+    "alive": false,
+    "ready": true,
+    "confirmed": true,
+    "left": true
+   }
+  },
+  "updatedAt": 1792569828.4828289,
+  "workersLaunched": true,
+  "preparingAt": 1792568004.2365313,
+  "completedAt": 1792569828.482807,
+  "finalWeightsSha256": "a14be7977f6266816dbd7ea6053aefbf8ab75b5b8038fd93cdbc7e351a97850c",
+  "pauseCheckpoint": null,
+  "failureReason": null
+ },
+ "mismatches": [],
+ "auditCount": 13,
+ "auditMismatches": 0,
+ "quarantines": [],
+ "appliedGenerations": 50,
+ "workerCommits": {
+  "cli-3e355c6e9e70": 1,
+  "cli-894b5d440398": 138,
+  "desktop-906949218c43": 216,
+  "desktop-9f9da13f0f82": 45
+ },
+ "attemptCount": 402,
+ "committedCount": 400
+}

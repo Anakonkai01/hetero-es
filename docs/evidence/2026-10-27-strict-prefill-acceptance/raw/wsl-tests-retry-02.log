@@ -1,0 +1,4 @@
+    from ..compat import assert_never
+  File "/tmp/heteroes-codex-prefill-20261026-02/testdeps/_pytest/compat.py", line 20, in <module>
+    import py
+ModuleNotFoundError: No module named 'py'

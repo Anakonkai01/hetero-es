@@ -1,0 +1,18 @@
+Oct 23 02:50:07 5070ti systemd-oomd[690]: Considered 76 cgroups for killing, top candidates were:
+Oct 23 02:50:07 5070ti systemd-oomd[690]:         Path: /user.slice/user-1000.slice/user@1000.service/app.slice/heteroes-worker.service
+Oct 23 02:50:07 5070ti systemd-oomd[690]:                 Memory Pressure Limit: 0.00%
+Oct 23 02:50:07 5070ti systemd-oomd[690]:                 Memory Pressure Duration: 0
+Oct 23 02:50:07 5070ti systemd-oomd[690]:                 Pressure: Avg10: 49.84, Avg60: 38.81, Avg300: 16.26, Total: 2min 28s
+Oct 23 02:50:07 5070ti systemd-oomd[690]:                 Current Memory Usage: 7.3G
+Oct 23 02:50:07 5070ti systemd-oomd[690]:                 Memory Min: 0B
+Oct 23 02:50:07 5070ti systemd-oomd[690]:                 Memory Low: 0B
+Oct 23 02:50:07 5070ti systemd-oomd[690]:                 Pgscan: 63628360
+Oct 23 02:50:07 5070ti systemd-oomd[690]:                 Last Pgscan: 63621448
+Oct 23 02:50:07 5070ti systemd-oomd[690]: Killed /user.slice/user-1000.slice/user@1000.service/app.slice/heteroes-worker.service due to memory pressure for /user.slice/user-1000.slice/user@1000.service being 53.10% > 50.00% for > 20s with reclaim activity
+Oct 23 02:50:07 5070ti systemd[3015]: heteroes-worker.service: systemd-oomd killed 3 process(es) in this unit.
+Oct 23 02:50:07 5070ti systemd[3015]: heteroes-worker.service: Main process exited, code=killed, status=9/KILL
+Oct 23 02:50:07 5070ti systemd[3015]: heteroes-worker.service: Failed with result 'oom-kill'.
+Oct 23 02:50:07 5070ti systemd[3015]: heteroes-worker.service: Consumed 37min 58.644s CPU time over 2h 6min 29.236s wall clock time, 17.4G memory peak, 1.4G memory swap peak.
+Oct 23 02:50:22 5070ti systemd[3015]: heteroes-worker.service: Scheduled restart job, restart counter is at 1.
+Oct 23 02:50:22 5070ti systemd[3015]: Started heteroes-worker.service - HeteroES Worker (lends this GPU to a HeteroES lab).
+Oct 23 02:50:25 5070ti heteroes-worker[3711339]: online; contribution follows the lab (heteroes-worker on/off). Ctrl-C stops after work is drained.

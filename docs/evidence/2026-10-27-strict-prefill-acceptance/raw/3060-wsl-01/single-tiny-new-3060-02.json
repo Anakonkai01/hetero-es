@@ -1,0 +1,34 @@
+{
+  "label": "new",
+  "gpu": "NVIDIA GeForce RTX 3060",
+  "model": "tiny",
+  "modelFiles": {
+    "config.json": "486bedda3a6988332e60d9638a09ca4b260d34ebcf1b19e22cf3b140b63d8fe9",
+    "eval_results.json": "637daaebe7aa8af0e678f9e79ec33fa29f8635090d45ec813f0e7474320d7351",
+    "generation_config.json": "18046d04f5bd8b4998095ecabdd17a1bf0053d9acdccead4a05be4a3575f3c5c",
+    "model.safetensors": "6e6001da2106d4757498752a021df6c2bdc332c650aae4bae6b0c004dcf14933",
+    "special_tokens_map.json": "82d96d7a9e6ced037f12394b7ea6a5b02e6ca87e0d11edaa8d60d9be857ce7db",
+    "tokenizer.json": "bcd04f0eadf90287bd26e1a183ac487d8a141b09b06aecb7725bbdd343640f2e",
+    "tokenizer.model": "9e556afd44213b6bd1be2b850ebbbd98f5481437a8021afaf58ee7fb1818d347",
+    "tokenizer_config.json": "7b41ba7d0eb91e77914ca3dafde559ea3e19878769b7e68409e89bed5222e77a"
+  },
+  "sourceRoot": "/tmp/heteroes-codex-prefill-acceptance-20261027-01/new/src/heteroes",
+  "fingerprint": "61d3a46baa57c5d39836c5bba1d8e7567ec939cf039e130ceb13d9c9342711c5",
+  "integerCudaSha256": "ba90aeeae249bdcf3f71c5e2066336993fea40037e39af70bcc1ff3a45deae37",
+  "decoderGraphSha256": "ae35be6539649b2e42511ad59c1a1e8bc7bbadb64db1a47fc1368e99e898b25c",
+  "cases": [
+    {
+      "case": "short32",
+      "outputTokens": 32,
+      "secondsSamples": [
+        0.7018477580004401,
+        0.7006042889988748,
+        0.7002267719999509,
+        0.6992098859991529,
+        0.7012030829992
+      ],
+      "medianTokensPerSecond": 1461.5953914059533,
+      "tokensSha256": "db262d7ab9fa09fb7ad5749d3a474a1fc8316089a958d10457dd2a908bb9610a"
+    }
+  ]
+}

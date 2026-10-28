@@ -1,0 +1,19 @@
+control ok    | 2 passed, 26 deselected, 1 warning in 0.36s
+killed       failed-event-not-read | 2 failed, 26 deselected, 1 warning in 0.58s
+killed       deferred-event-not-read | 2 failed, 26 deselected, 1 warning in 0.58s
+killed       failed-is-not-an-error | 2 failed, 26 deselected, 1 warning in 0.37s
+killed       error-is-not-an-error | 1 failed, 1 passed, 26 deselected, 1 warning in 0.37s
+killed       deferred-is-not-a-warning | 2 failed, 26 deselected, 1 warning in 0.37s
+killed       unavailable-is-not-a-warning | 1 failed, 1 passed, 26 deselected, 1 warning in 0.37s
+killed       unknown-is-not-a-warning | 1 failed, 1 passed, 26 deselected, 1 warning in 0.37s
+killed       device-message-uses-error | 1 failed, 1 passed, 26 deselected, 1 warning in 0.37s
+killed       device-message-is-the-name | 1 failed, 1 passed, 26 deselected, 1 warning in 0.37s
+killed       coordinator-error-text-lost | 1 failed, 1 passed, 26 deselected, 1 warning in 0.37s
+killed       every-run-gets-every-device-event | 2 failed, 26 deselected, 1 warning in 0.58s
+killed       device-events-without-filter | 2 failed, 26 deselected, 1 warning in 0.37s
+killed       device-event-ids-collide | 1 failed, 1 passed, 26 deselected, 1 warning in 0.37s
+killed       snapshot-event-ids-changed | 1 failed, 1 passed, 26 deselected, 1 warning in 0.37s
+killed       device-events-dropped | 2 failed, 26 deselected, 1 warning in 0.37s
+SURVIVED     unordered-device-events | 2 passed, 26 deselected, 1 warning in 0.36s
+
+15 of 16 mutants killed.

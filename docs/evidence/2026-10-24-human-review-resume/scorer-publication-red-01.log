@@ -1,0 +1,47 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_a_duplicate_arriving_after_scoring_before_commit_still_shares_the_flight _
+
+ledger = <heteroes.ledger.ledger.Ledger object at 0x7171bb3ede80>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7171bb3ee060>
+
+    def test_a_duplicate_arriving_after_scoring_before_commit_still_shares_the_flight(ledger, monkeypatch):
+        import heteroes.worker_api as module
+    
+        scored, publish = threading.Event(), threading.Event()
+        original = module._Flight
+    
+        class GatedFlight(original):
+            def __init__(self):
+                super().__init__()
+                event = self.done
+    
+                class Gate:
+                    def set(self):
+                        scored.set()
+                        assert publish.wait(WAIT)
+                        event.set()
+    
+                    def wait(self):
+                        return event.wait(WAIT)
+    
+                self.done = Gate()
+    
+        monkeypatch.setattr(module, "_Flight", GatedFlight)
+        calls = []
+        api = WorkerAPI(ledger, "exp", 0, LEASE_SECONDS, scorer=lambda d, t: calls.append(1) or 0.5)
+        request = texts(take(api))
+        first, first_reply = submit_in_thread(api, request)
+        assert scored.wait(WAIT)
+        second, second_reply = submit_in_thread(api, request)
+        try:
+>           assert api.wait_for_waiters(1, 1), "completed scoring must stay reserved until its canonical commit"
+E           AssertionError: completed scoring must stay reserved until its canonical commit
+E           assert False
+E            +  where False = wait_for_waiters(1, 1)
+E            +    where wait_for_waiters = <heteroes.worker_api.WorkerAPI object at 0x7171bb3ee390>.wait_for_waiters
+
+tests/ledger/test_worker_api_concurrency.py:232: AssertionError
+=========================== short test summary info ============================
+FAILED tests/ledger/test_worker_api_concurrency.py::test_a_duplicate_arriving_after_scoring_before_commit_still_shares_the_flight
+1 failed, 8 deselected in 1.08s

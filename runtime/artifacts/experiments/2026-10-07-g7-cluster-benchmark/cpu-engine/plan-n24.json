@@ -1,0 +1,66 @@
+{
+  "args": {
+    "out_dir": "artifacts/experiments/2026-10-07-g7-cluster-benchmark/cpu-engine",
+    "candidates": 24,
+    "generations": 4,
+    "repeats": 3,
+    "conditions": "B0x2,B3x2,B4x2",
+    "profile_reference": "artifacts/experiments/2026-10-07-g7-cluster-benchmark/profiles-derived/profile-5070ti-cpu-engine.json",
+    "profile_candidate": "artifacts/experiments/2026-10-07-g7-cluster-benchmark/profiles-derived/profile-1660s-cpu-engine.json",
+    "prediction": null,
+    "chunk": 16,
+    "first_repeat": 1,
+    "lease_seconds": 60.0,
+    "noise_threads": null,
+    "coordinator_noise_threads": 28,
+    "worker_http_timeout": null,
+    "local_python": null,
+    "scratch_dir": "/home/pc5070ti/.cache/heteroes/bench-scratch",
+    "remote": "anakonkai@10.10.10.2",
+    "remote_repo": "~/projects/heteroes/hetero-es",
+    "remote_python": "~/projects/heteroes/.venv/bin/python",
+    "host": "10.10.10.1",
+    "port": 8765,
+    "experiment_id": "g7bench",
+    "eval_dtype": "float32",
+    "noise_engine": "cpu",
+    "workload": "cot_l3_q32",
+    "generation_timeout": 1200.0,
+    "run_timeout": 3000.0
+  },
+  "specs": {
+    "B0x2": {
+      "workers": {
+        "worker-5070ti": 16,
+        "worker-5070ti-2": 16
+      },
+      "policy": "greedy",
+      "args": []
+    },
+    "B3x2": {
+      "workers": {
+        "worker-5070ti": 16,
+        "worker-5070ti-2": 16,
+        "worker-1660s": 16
+      },
+      "policy": "greedy",
+      "args": []
+    },
+    "B4x2": {
+      "workers": {
+        "worker-5070ti": 16,
+        "worker-5070ti-2": 16,
+        "worker-1660s": 16
+      },
+      "policy": "tail",
+      "args": [
+        "--speed-prior",
+        "worker-1660s=32.993729373998576",
+        "--speed-prior",
+        "worker-5070ti=5.167116045498915",
+        "--speed-prior",
+        "worker-5070ti-2=5.167116045498915"
+      ]
+    }
+  }
+}

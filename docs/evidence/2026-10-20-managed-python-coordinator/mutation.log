@@ -1,0 +1,6 @@
+control ok    | 1 passed, 11 deselected in 1.68s
+killed       coordinator refuses Python again | 1 failed, 11 deselected in 1.71s
+killed       Python always allowed without code check | 1 failed, 11 deselected in 1.69s
+killed       only Python coefficient rules detected | 1 failed, 11 deselected in 1.68s
+
+3 of 3 mutants killed.

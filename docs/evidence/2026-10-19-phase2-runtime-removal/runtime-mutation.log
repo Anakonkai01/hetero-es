@@ -1,0 +1,7 @@
+control ok    | 22 passed in 0.90s
+killed       release workers before confirmed stop | 1 failed, 21 passed in 0.89s
+killed       admit quarantined worker | 1 failed, 21 passed in 0.86s
+killed       allow repeated coordinator recovery | 1 failed, 21 passed in 0.84s
+killed       ignore frozen submission changes | 1 failed, 21 passed in 0.88s
+
+4 of 4 mutants killed.

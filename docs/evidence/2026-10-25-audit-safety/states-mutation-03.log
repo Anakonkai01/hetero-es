@@ -1,0 +1,13 @@
+control ok    | 10 passed in 0.17s
+killed       missing-is-not-matched | 5 failed, 5 passed in 0.23s
+killed       any-mismatch-wins | 1 failed, 9 passed in 0.18s
+killed       sampling-still-filters | 1 failed, 9 passed in 0.17s
+killed       restore-drain-closure | 2 failed, 8 passed in 0.18s
+killed       no-new-lease-after-closure | 2 failed, 8 passed in 0.17s
+killed       timeout-is-not-pending | 1 failed, 9 passed in 0.18s
+killed       skipped-is-not-completed | 1 failed, 9 passed in 0.18s
+killed       frozen-drain-identity | 2 failed, 8 passed in 0.17s
+killed       no-fake-complete-close | 1 failed, 9 passed in 0.23s
+killed       closure-is-idempotent | 2 failed, 8 passed in 0.18s
+
+10 of 10 mutants killed.

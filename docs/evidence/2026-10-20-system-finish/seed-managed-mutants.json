@@ -1,0 +1,8 @@
+[
+  {
+    "name": "managed-runner-drops-seed-namespace",
+    "file": "src/heteroes/product/runner.py",
+    "old": "\"seed_namespace\": config.get(\"candidateSeedNamespace\"),",
+    "new": "\"seed_namespace\": None,"
+  }
+]

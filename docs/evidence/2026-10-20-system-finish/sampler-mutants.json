@@ -1,0 +1,26 @@
+[
+  {
+    "name": "wrong-epoch-index",
+    "file": "src/heteroes/v3/data.py",
+    "old": "epoch, position = divmod(generation, per_epoch)",
+    "new": "epoch, position = 0, generation % per_epoch"
+  },
+  {
+    "name": "no-epoch-shuffle",
+    "file": "src/heteroes/v3/data.py",
+    "old": "_seeded(value, seed, sampler, epoch=epoch).shuffle(order)",
+    "new": "pass"
+  },
+  {
+    "name": "drop-short-last-batch",
+    "file": "src/heteroes/v3/data.py",
+    "old": "per_epoch = -(-len(rows) // size)",
+    "new": "per_epoch = len(rows) // size"
+  },
+  {
+    "name": "change-default-sampler",
+    "file": "src/heteroes/v3/data.py",
+    "old": "def batch(value, generation, size, seed, sampler=SAMPLER):",
+    "new": "def batch(value, generation, size, seed, sampler=\"epoch-shuffle@1\"):"
+  }
+]

@@ -1,0 +1,16 @@
+
+==================================== ERRORS ====================================
+________ ERROR collecting .scratch/vllm-impact-20261026/test_metrics.py ________
+ImportError while importing test module '/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/vllm-impact-20261026/test_metrics.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../miniforge3/envs/heteroes-match/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/vllm-impact-20261026/test_metrics.py:4: in <module>
+    from impact_metrics import output_impact, population_impact
+E   ModuleNotFoundError: No module named 'impact_metrics'
+=========================== short test summary info ============================
+ERROR .scratch/vllm-impact-20261026/test_metrics.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.15s

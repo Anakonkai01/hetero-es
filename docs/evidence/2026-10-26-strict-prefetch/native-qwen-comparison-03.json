@@ -1,0 +1,23 @@
+{
+  "status": "ok",
+  "sourceCommit": "b1ef257a",
+  "threePlatforms": [
+    "Linux SM120",
+    "WSL2 SM86",
+    "native Win11 SM86"
+  ],
+  "model": "pinned Qwen2.5-0.5B-Instruct",
+  "canonicalCandidateStates": [
+    "parent",
+    "plus",
+    "minus",
+    "restored"
+  ],
+  "seed": 7001,
+  "sigma": 0.001,
+  "rowsPerState": 8,
+  "generatedTokensPerRow": 32,
+  "weightsSchemaTokensTextsRewardsAndPrefillLogitsEqual": true,
+  "restoreExact": true,
+  "limits": "Finite pinned Qwen and candidate pair; no broad quality, Windows throughput/installer or managed acceptance."
+}

@@ -1,0 +1,59 @@
+{
+  "runId": "8047b923e2d1427895045b384d130247",
+  "status": "CANCELLED",
+  "completedGenerations": 0,
+  "finalWeightsSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+  "wallSeconds": 50.608447790145874,
+  "conservativeGpuHours": 0.028115804327858818,
+  "queueCountAfter": 0,
+  "reservationCountAfter": 0,
+  "ownerOffDuringLiveLease": true,
+  "acceptedResultsByWorker": {
+    "desktop-5a5bc7e5fcaf": 5
+  },
+  "candidateRewards": [
+    [
+      0,
+      0,
+      1147442391298501,
+      0.25
+    ],
+    [
+      0,
+      1,
+      1925105966209900,
+      0.1875
+    ],
+    [
+      0,
+      2,
+      1078546735217129,
+      0.125
+    ],
+    [
+      0,
+      3,
+      4396790090476468,
+      0.25
+    ],
+    [
+      0,
+      4,
+      1820800349636366,
+      0.1875
+    ]
+  ],
+  "generationUpdates": [],
+  "ledgerIntegrity": "ok",
+  "windowsProcessConfirmation": [
+    {
+      "assignmentId": "ae3a7190a67d4fd2bdf14bdcca2968dc",
+      "epoch": 1,
+      "coordinatorAlive": false,
+      "workerAlive": false,
+      "ready": true,
+      "recoveryIndex": 0,
+      "replayEvents": []
+    }
+  ]
+}

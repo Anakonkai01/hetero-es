@@ -1,0 +1,232 @@
+#!/usr/bin/env python3
+"""Cross-OS v3 LoRA worker qualification harness (probe only, not product code).
+
+prepare  writes a frozen product config, dataset and model manifest for the managed runner.
+runner   runs heteroes.product.runner.main with every candidate audited (probe-only override of the 5% default).
+verify   re-scores every committed text, replays every update on a fresh CPU model and summarizes audits.
+compare  checks two verified receipts candidate by candidate.
+
+The worker side is the unchanged shipped CLI (scripts/run_worker.py --run-config).
+"""
+
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import sqlite3
+import sys
+
+RUN_ID = "c0055000000000000000000000000001"
+
+
+def rows(task="add"):
+    if task == "mul":
+        pairs = [(17 + 7 * i, 23 + 11 * i) for i in range(20)]
+        return [{"prompt": f"Compute {a} * {b}. Reply with only the integer.", "answer": a * b} for a, b in pairs]
+    return [{"prompt": f"Compute {i} + {i + 2}. Reply with only the integer.", "answer": 2 * i + 2} for i in range(20)]
+
+
+def prepare(args):
+    from heteroes.canonical import canonical_json_hash
+    from heteroes.product.files import write_json
+    from heteroes.v3 import data
+    from heteroes.v3.model import file_manifest
+
+    out = args.out
+    out.mkdir(parents=True, mode=0o700)
+    dataset = data.build(rows(args.task), split_seed=42)
+    write_json(out / "dataset.json", dataset)
+    files = file_manifest(args.model_path)
+    revision = "7ae557604adf67be50417f59c2c2f167def9a775"
+    manifest = {
+        "formatVersion": 1,
+        "modelId": "Qwen/Qwen2.5-0.5B-Instruct",
+        "revision": revision,
+        "tokenizerRevision": revision,
+        "format": "safetensors",
+        "files": files,
+    }
+    write_json(out / "model-manifest.json", manifest)
+    config = {
+        "runId": RUN_ID,
+        "recipeVersion": 3,
+        "modelPath": str(args.model_path),
+        "modelManifest": manifest,
+        "modelManifestPath": str(out / "model-manifest.json"),
+        "datasetPath": str(out / "dataset.json"),
+        "datasetIdentity": {k: dataset[k] for k in ("contentHash", "splitHashes")},
+        "maxGenerations": 2,
+        "candidatesPerGeneration": 4,
+        "alpha": args.alpha,
+        "sigma": args.sigma,
+        "sigmaMinimum": args.sigma,
+        "sigmaSchedule": "constant",
+        "batchSize": 4,
+        "batchSeed": 11,
+        "maxNewTokens": 16,
+        "systemPrompt": None,
+        "antithetic": True,
+        "coefficientRule": "zscore@1",
+        "weightSpace": {"kind": "lora", "rank": 4, "alpha": 8, "targetModules": ["q_proj", "v_proj"]},
+        "scorer": {"kind": "declarative", "name": "last-integer", "version": 1, "codeSha256": None, "config": {}},
+        "decodeEngine": "hf_generate",
+        "workerIds": args.workers.split(","),
+        "host": args.host,
+        "port": args.port,
+        "schedulerPolicy": "greedy",
+        "syncMode": "synchronous",
+        "validationInterval": 1,
+    }
+    write_json(out / "config.json", config)
+    print(json.dumps({"config": str(out / "config.json"), "datasetHash": dataset["contentHash"]}))
+
+
+def runner(args):
+    if os.environ.get("HETEROES_GPU_ACCEPTANCE") != "1":
+        raise SystemExit("Set HETEROES_GPU_ACCEPTANCE=1 after owner authorization")
+    os.environ["HETEROES_TOKEN"] = args.token_file.read_text().strip()
+    import heteroes.coordinator as coordinator_module
+
+    original = coordinator_module.Coordinator.__init__
+
+    def audit_everything(self, *a, **k):
+        k["audit_rate"] = 1.0  # probe only: the product default samples 1/20 of candidates
+        original(self, *a, **k)
+
+    coordinator_module.Coordinator.__init__ = audit_everything
+    from heteroes.product.runner import main
+
+    return main(str(args.out), device="cuda", timeout_seconds=900)
+
+
+def verify(args):
+    from heteroes.es.update import apply_coefficients_
+    from heteroes.eval.candidate import model_weights_sha256
+    from heteroes.ledger import Ledger
+    from heteroes.product.files import read_json
+    from heteroes.product.storage import data_root
+    from heteroes.v3.model import load, trainable_schema
+    from heteroes.v3.run import RecipeV3Run
+    from heteroes.v3.scoring import score
+
+    root = args.out
+    recipe, plan = read_json(root / "recipe.json"), read_json(root / "plan.json")
+    dataset = read_json(root / "dataset.json")
+    document = RecipeV3Run(recipe, plan, allow_python=False)
+    space = recipe["weightSpace"]
+    adapter = data_root(root) / "weights" / f"{space['initialAdapterSha256']}.bin"
+    with adapter.open("rb") as stream:
+        if hashlib.file_digest(stream, "sha256").hexdigest() != space["initialAdapterSha256"]:
+            raise ValueError("Initial adapter bytes differ from the recipe")
+    db = sqlite3.connect(f"file:{root / 'ledger.sqlite'}?mode=ro", uri=True)
+    workers = dict(
+        db.execute("SELECT r.candidate_id, a.worker_id FROM result r JOIN attempt a USING (candidate_id, attempt_number)")
+    )
+    audits = [
+        {"candidateId": c, "auditor": w, "original": workers[c], "matched": bool(m)}
+        for c, w, m in db.execute("SELECT candidate_id, worker_id, matched FROM audit ORDER BY candidate_id")
+    ]
+    quarantined = [row[0] for row in db.execute("SELECT worker_id FROM quarantine")]
+    db.close()
+    model, _ = load(args.model_path, recipe["model"]["files"], "cpu")
+    schema = trainable_schema(model, space, adapter)
+    candidates, children = [], []
+    with Ledger(root / "ledger.sqlite") as ledger:
+        for generation in range(plan["generations"]):
+            prompts = document.batch(dataset, generation)["rows"]
+            for row in ledger.list_candidates(RUN_ID, generation):
+                _, texts = ledger.get_completions(row.descriptor.candidate_id)
+                reward, _ = score(plan["scorer"], texts, prompts)
+                if reward != row.result.reward:
+                    raise ValueError("Stored reward differs from independently scored texts")
+                candidates.append(
+                    {
+                        "candidateId": row.descriptor.candidate_id,
+                        "worker": workers[row.descriptor.candidate_id],
+                        "texts": texts,
+                        "reward": reward,
+                    }
+                )
+            update = ledger.get_update(RUN_ID, generation)
+            if model_weights_sha256(model, schema) != update.record.parent_weights_sha256:
+                raise ValueError("Replay parent mismatch")
+            update.record.verify_coefficients(plan["coefficientRule"]["eta"])
+            seeds, coefficients = update.record.update_inputs()
+            apply_coefficients_(model, schema, seeds, coefficients, update.record.alpha, recipe["noise"]["chunkElements"])
+            if model_weights_sha256(model, schema) != update.child_weights_sha256:
+                raise ValueError("CPU replay child mismatch")
+            children.append({"child": update.child_weights_sha256, "noop": update.record.parent_weights_sha256 == update.child_weights_sha256})
+    receipt = {
+        "recipeHash": document.hash,
+        "planHash": document.plan_hash,
+        "initialAdapterSha256": space["initialAdapterSha256"],
+        "candidates": candidates,
+        "children": children,
+        "audits": audits,
+        "auditCount": len(audits),
+        "auditMismatches": sum(not a["matched"] for a in audits),
+        "crossWorkerAudits": sum(a["auditor"] != a["original"] for a in audits),
+        "quarantined": quarantined,
+        "replayPassed": True,
+        "runner": read_json(root / "runner.json"),
+    }
+    if quarantined or receipt["auditMismatches"] or receipt["auditCount"] != len(candidates):
+        receipt["passed"] = False
+    else:
+        receipt["passed"] = True
+    args.receipt.write_text(json.dumps(receipt, indent=2))
+    print(json.dumps({k: receipt[k] for k in ("recipeHash", "auditCount", "auditMismatches", "quarantined", "passed")}))
+    return 0 if receipt["passed"] else 1
+
+
+def compare(args):
+    left, right = (json.loads(path.read_text()) for path in (args.left, args.right))
+    result = {"passed": True, "mismatches": []}
+    for receipt in (left, right):
+        if not receipt["passed"]:
+            result["mismatches"].append("receipt did not pass on its own")
+    for key in ("recipeHash", "planHash", "initialAdapterSha256", "children"):
+        if left[key] != right[key]:
+            result["mismatches"].append(key)
+    strip = lambda rs: [{k: r[k] for k in ("candidateId", "texts", "reward")} for r in rs]  # noqa: E731
+    if strip(left["candidates"]) != strip(right["candidates"]):
+        result["mismatches"].append("candidates")
+    result["passed"] = not result["mismatches"]
+    result["candidateCount"] = len(left["candidates"])
+    result["textCount"] = sum(len(r["texts"]) for r in left["candidates"])
+    result["workersRight"] = sorted({r["worker"] for r in right["candidates"]})
+    args.out.write_text(json.dumps(result, indent=2))
+    print(json.dumps(result))
+    return 0 if result["passed"] else 1
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    sub = parser.add_subparsers(dest="command", required=True)
+    p = sub.add_parser("prepare")
+    p.add_argument("--out", type=Path, required=True)
+    p.add_argument("--model-path", type=Path, required=True)
+    p.add_argument("--workers", required=True)
+    p.add_argument("--host", required=True)
+    p.add_argument("--port", type=int, required=True)
+    p.add_argument("--task", choices=["add", "mul"], default="add")
+    p.add_argument("--sigma", type=float, default=0.001)
+    p.add_argument("--alpha", type=float, default=0.001)
+    p = sub.add_parser("runner")
+    p.add_argument("--out", type=Path, required=True)
+    p.add_argument("--token-file", type=Path, required=True)
+    p = sub.add_parser("verify")
+    p.add_argument("--out", type=Path, required=True)
+    p.add_argument("--model-path", type=Path, required=True)
+    p.add_argument("--receipt", type=Path, required=True)
+    p = sub.add_parser("compare")
+    p.add_argument("left", type=Path)
+    p.add_argument("right", type=Path)
+    p.add_argument("--out", type=Path, required=True)
+    args = parser.parse_args(argv)
+    return {"prepare": prepare, "runner": runner, "verify": verify, "compare": compare}[args.command](args) or 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,16 @@
+{
+ "recipeDataContentHash": "55fab37cfbdf8eca4801fad24ca781a693f390a49041701d485f86bb775c0acf",
+ "scorer": {
+  "kind": "python",
+  "name": "distinct-characters",
+  "version": 1,
+  "codeSha256": "61ad4779dd401a9ade6947cd3eca0582d31ec34e7c7d921749d8c24e3e8bdeec",
+  "config": {}
+ },
+ "coefficientRule": {
+  "name": "zscore",
+  "version": 1,
+  "eta": 1e-09
+ },
+ "evalDtype": null
+}

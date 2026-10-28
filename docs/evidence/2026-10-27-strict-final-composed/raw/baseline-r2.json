@@ -1,0 +1,72 @@
+{
+  "label": "baseline-r2",
+  "variant": "baseline",
+  "keyTile": 128,
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "model": "qwen",
+  "modelFiles": {
+    "config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+    "generation_config.json": "e558847a8b4402616f1273797b015104dc266fe4b520056fca88823ba8f8ebe6",
+    "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+    "model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+    "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+    "tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583",
+    "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+  },
+  "sourceRoot": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/runtime/src/heteroes",
+  "fingerprint": "5325fe6f7a27a5328595b4f5a5d7ce147834e000a1f4f684a678802aefa61fd5",
+  "runtimeSha256": {
+    "eval/integer_cuda.py": "52d17836bf6c8135b7aae01daee184d667ab0cda9e32bb43cc95a213a3bf911b",
+    "eval/strict_cuda.py": "f3b1e5848c26dd6b7d56662bc3d91c6a45205e91de60acaa397c2eddccb4107d",
+    "eval/strict_decoder_graph.py": "3541a5d8adb39738230666ac6ec1ea611ad378611faf68389e05e43ac2b32f3e",
+    "eval/integer_decoder.py": "7fdf14efb502c08001092f2d115e852e27d00f3e46a3bc202005f2b5e10db99b"
+  },
+  "harnessSha256": "707a9a63273fc8da98940e8cebca14564edcb6c6fb3c331407d0479af1992bbe",
+  "helperSha256": {
+    "2026-10-27-strict-tma-host-maps/harness/audit.py": "493cba282d40bb9acb1f22bcb664c070d5e7dbe64ef595364b76c9a490904351",
+    "2026-10-27-strict-tma-host-maps/harness/bench_full.py": "de7307ecb26ba17d8a6099109ecde71346720c1259d9a2dcc145cb47b109a573",
+    "2026-10-27-strict-tma-host-maps/harness/host_maps.py": "ae93d8c33cbc3f4cc3714236e78a11d16e7cb594f60d33c14d885afed95fd3b1",
+    "2026-10-27-strict-tma-host-maps/harness/pipeline_copy.py": "985ac0e680d95a9d88e6e3e5b81da9323ddbbc34f6d956d6b15d92661fb605a4",
+    "2026-10-27-strict-tma-host-maps/harness/prefill.py": "713c5ec1711e75a96659c85bbd64d50f659417c3f87f8a6b650c25d0e7ef7c52",
+    "2026-10-27-strict-tma-host-maps/harness/tensor_map.py": "8235214bf45affd0c118122b469f9061ab823a83cf05a611c9918416de945198",
+    "2026-10-27-strict-tma-host-maps/harness/test_maps.py": "b7ee7ae3ead939e0f0817f0bec1a834670590778bfd5242d2a9ab9401b57b33b",
+    "2026-10-27-strict-tma-host-maps/harness/tma_byvalue.py": "d0376bcf5a09a514bf5a2a5d2271ab22bbf3d808072466ce1398de52630508d6",
+    "2026-10-27-strict-tma-host-maps/harness/tma_mma.py": "eedee5f505570e04a2f14d839ed6392e0164ade3f70caa09f90ba2c1052ba43f",
+    "2026-10-27-strict-request-cache-context/harness/bench_full.py": "d1edd29b5b39e2a03277acedf0f08faae16069b5e1bb69f17b5ed2d8932d89a5",
+    "2026-10-27-strict-request-cache-context/harness/bucket.py": "b66b8b2364f1273a8fb9e1e6f597e8b8d84256dc191d6735cb2281d3248fe2a6",
+    "2026-10-27-strict-request-cache-context/harness/test_bucket.py": "52e60290c8d388cf1c316a81b0e59207f6c953608938ca0f63d76e183b7c5e13",
+    "2026-10-27-strict-attention-key-stages/harness/bench.py": "d69d10ee1102d7bff9761c5164fe7a2b5028a1cf909480dcf4299825c23f16d5",
+    "2026-10-27-strict-attention-key-stages/harness/stages.py": "985d9f9efdc3ea2c11ea3a0dbdd8c9bf8fb5adcca555e378a92c7a2b9c78fc25",
+    "2026-10-27-strict-attention-key-stages/harness/test_stages.py": "c4d82d91709b4da03ac708af6414465a6e5a9a745b7d76c4114f8cffa1a59b11"
+  },
+  "cases": [
+    {
+      "case": "short32",
+      "outputTokens": 32,
+      "secondsSamples": [
+        0.10393116000341251,
+        0.10382954598753713,
+        0.10367894501541741,
+        0.10386857102275826,
+        0.10393545601982623
+      ],
+      "medianTokensPerSecond": 9858.612570838537,
+      "tokensSha256": "bc4a5504e37c79c14e8f6ee824618a85fdd6e0d8d5bcfca51ff1e7691fbd0c66"
+    },
+    {
+      "case": "chat128",
+      "outputTokens": 128,
+      "secondsSamples": [
+        0.414402047987096,
+        0.41468695501680486,
+        0.4146285509923473,
+        0.41440496500581503,
+        0.4149391689861659
+      ],
+      "medianTokensPerSecond": 9878.721545337092,
+      "tokensSha256": "a9fad5ca48ed06879bbad136b7282ca0a3c638959dd26e2b1b92635011d5fb49"
+    }
+  ],
+  "tma": null,
+  "limits": "Research composition of unselected helpers; not runtime source. Synchronized whole generations, no EOS stopping or prefix reuse."
+}

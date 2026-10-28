@@ -1,0 +1,833 @@
+{
+  "status": "ok",
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "cases": [
+    {
+      "width": 768,
+      "outputs": 4096,
+      "rows": 32,
+      "per": 8,
+      "warps": 3,
+      "groups": 2,
+      "tile": 4,
+      "eventMs": [
+        0.13899199962615966,
+        0.13806079626083373,
+        0.1378159999847412
+      ],
+      "medianEventMs": 0.13806079626083373,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 40,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 7040
+      },
+      "bitsEqual": true,
+      "build": {
+        "linear-768-nobias-rows4": {
+          "sourceSha256": "65913170cd7b60ad6a7268cb3eca51fc66175cbb5ac6c4593ca1ef8d6d87933d",
+          "ptxSha256": "0f5c0ee507158a839d8d508159f57afd73c22e8f641fd8793624ebee50997700",
+          "cubinSha256": "d8230c0febc2f9bb7cf863ff7826f23f52203732c55a55ace2a7cb4fc85ad0c1",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 32,
+              "add.rn.f32": 60
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 32,
+              "FADD": 60
+            },
+            "violations": []
+          }
+        }
+      }
+    },
+    {
+      "width": 768,
+      "outputs": 4096,
+      "rows": 32,
+      "per": 8,
+      "warps": 3,
+      "groups": 2,
+      "tile": 8,
+      "eventMs": [
+        0.13452479839324952,
+        0.13402080535888672,
+        0.13384480476379396
+      ],
+      "medianEventMs": 0.13402080535888672,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 56,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 7168
+      },
+      "bitsEqual": true,
+      "build": {
+        "linear-768-nobias-rows4": {
+          "sourceSha256": "65913170cd7b60ad6a7268cb3eca51fc66175cbb5ac6c4593ca1ef8d6d87933d",
+          "ptxSha256": "0f5c0ee507158a839d8d508159f57afd73c22e8f641fd8793624ebee50997700",
+          "cubinSha256": "d8230c0febc2f9bb7cf863ff7826f23f52203732c55a55ace2a7cb4fc85ad0c1",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 32,
+              "add.rn.f32": 60
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 32,
+              "FADD": 60
+            },
+            "violations": []
+          }
+        },
+        "linear-768-nobias-rows8": {
+          "sourceSha256": "841d57f2f3e93ee20ca05c51123d25b1be50fb82d02b29fccefc8a14f7d81f1a",
+          "ptxSha256": "0729fe611dad3c58ea9b53fd25a03b8db87e2a5615529b7869a22c8ba4e5e9d6",
+          "cubinSha256": "ad3a844e7b5672ae953e606f44ba15b0c2aa9e1318df6115ee60278b2e46c6e9",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 64,
+              "add.rn.f32": 120
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 64,
+              "FADD": 120
+            },
+            "violations": []
+          }
+        }
+      }
+    },
+    {
+      "width": 768,
+      "outputs": 4096,
+      "rows": 32,
+      "per": 16,
+      "warps": 2,
+      "groups": 4,
+      "tile": 4,
+      "eventMs": [
+        0.14243199825286865,
+        0.1418544054031372,
+        0.14177600145339966
+      ],
+      "medianEventMs": 0.1418544054031372,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 48,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 17536
+      },
+      "bitsEqual": true,
+      "build": {
+        "linear-768-nobias-rows4": {
+          "sourceSha256": "9371b906d828686ce0b8172089d67fabe94a20cc81e147a8204c8483a3412fc6",
+          "ptxSha256": "6609dc3464839ace176fc7d06b7c2f12cad2717d7f435d08089cc50df6908d48",
+          "cubinSha256": "fab3440788ccf702f02159793b70ff91d9db9da32cb17e6995267e8e35c0a8e2",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 64,
+              "add.rn.f32": 84
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 64,
+              "FADD": 84
+            },
+            "violations": []
+          }
+        }
+      }
+    },
+    {
+      "width": 768,
+      "outputs": 4096,
+      "rows": 32,
+      "per": 16,
+      "warps": 2,
+      "groups": 4,
+      "tile": 8,
+      "eventMs": [
+        0.13642239570617676,
+        0.13579360246658326,
+        0.1357200026512146
+      ],
+      "medianEventMs": 0.13579360246658326,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 63,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 17664
+      },
+      "bitsEqual": true,
+      "build": {
+        "linear-768-nobias-rows4": {
+          "sourceSha256": "9371b906d828686ce0b8172089d67fabe94a20cc81e147a8204c8483a3412fc6",
+          "ptxSha256": "6609dc3464839ace176fc7d06b7c2f12cad2717d7f435d08089cc50df6908d48",
+          "cubinSha256": "fab3440788ccf702f02159793b70ff91d9db9da32cb17e6995267e8e35c0a8e2",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 64,
+              "add.rn.f32": 84
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 64,
+              "FADD": 84
+            },
+            "violations": []
+          }
+        },
+        "linear-768-nobias-rows8": {
+          "sourceSha256": "a4717164b7e3bbc40fc0a64b0f0e9b13f9bb3361cab79165503cb3d269fdf89d",
+          "ptxSha256": "47db9ff11e689009534df8ddb838215dbb5e3a5ccf3c47cf453a9a793b124548",
+          "cubinSha256": "4ff6a11cdd731b217e883ad46f792dfec32141a038ac6a48ef8ef194645f9d7a",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 128,
+              "add.rn.f32": 168
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 128,
+              "FADD": 168
+            },
+            "violations": []
+          }
+        }
+      }
+    },
+    {
+      "width": 1024,
+      "outputs": 32768,
+      "rows": 32,
+      "per": 8,
+      "warps": 4,
+      "groups": 2,
+      "tile": 4,
+      "eventMs": [
+        1.782703971862793,
+        1.784592056274414,
+        1.789259147644043
+      ],
+      "medianEventMs": 1.784592056274414,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 40,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 9344
+      },
+      "bitsEqual": true,
+      "build": {
+        "linear-1024-nobias-rows4": {
+          "sourceSha256": "676018bfaf7e059d3086bf733856e73cc5c39e7ae69099c7c131c3e26b10f7d1",
+          "ptxSha256": "259951ca12726068adb2ff07bad105ae4b83ab01030f771adbac02555161f8bb",
+          "cubinSha256": "16cbf7ed987f4b098a826f68e3a504177fb0e26b72b9a06db47ffd87dd7b8e5b",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 32,
+              "add.rn.f32": 60
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 32,
+              "FADD": 60
+            },
+            "violations": []
+          }
+        }
+      }
+    },
+    {
+      "width": 1024,
+      "outputs": 32768,
+      "rows": 32,
+      "per": 8,
+      "warps": 4,
+      "groups": 2,
+      "tile": 8,
+      "eventMs": [
+        1.556443214416504,
+        1.5567904472351075,
+        1.5621760368347168
+      ],
+      "medianEventMs": 1.5567904472351075,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 48,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 9472
+      },
+      "bitsEqual": true,
+      "build": {
+        "linear-1024-nobias-rows4": {
+          "sourceSha256": "676018bfaf7e059d3086bf733856e73cc5c39e7ae69099c7c131c3e26b10f7d1",
+          "ptxSha256": "259951ca12726068adb2ff07bad105ae4b83ab01030f771adbac02555161f8bb",
+          "cubinSha256": "16cbf7ed987f4b098a826f68e3a504177fb0e26b72b9a06db47ffd87dd7b8e5b",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 32,
+              "add.rn.f32": 60
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 32,
+              "FADD": 60
+            },
+            "violations": []
+          }
+        },
+        "linear-1024-nobias-rows8": {
+          "sourceSha256": "507d894a4166ca5f3b3564c806e5c0c73002c4abcd88b53494e3981487083f46",
+          "ptxSha256": "eccd646a2441850afc6e39ea25619a657ec535881f68d53d1f19829d82cfee8e",
+          "cubinSha256": "ab8f294d5b6a05f70cbfd44a7ab990cc5f67f84a25eb67caae94766ea9de611d",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 64,
+              "add.rn.f32": 120
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 64,
+              "FADD": 120
+            },
+            "violations": []
+          }
+        }
+      }
+    },
+    {
+      "width": 1024,
+      "outputs": 32768,
+      "rows": 32,
+      "per": 16,
+      "warps": 2,
+      "groups": 4,
+      "tile": 4,
+      "eventMs": [
+        1.7848512649536132,
+        1.7853120803833007,
+        1.7853599548339845
+      ],
+      "medianEventMs": 1.7853120803833007,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 48,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 17536
+      },
+      "bitsEqual": true,
+      "build": {
+        "linear-1024-nobias-rows4": {
+          "sourceSha256": "12917935262e7aa78c3cd2d48106ac4805c597a175660f5f760b579f484259c5",
+          "ptxSha256": "fd4898ad30807c67670da8738b21e7168500165063096faf299c25297a198c5c",
+          "cubinSha256": "4add71231096000036e80b193f2f0472ccaad932712e042d35e4ae5c076068a0",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 64,
+              "add.rn.f32": 84
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 64,
+              "FADD": 84
+            },
+            "violations": []
+          }
+        }
+      }
+    },
+    {
+      "width": 1024,
+      "outputs": 32768,
+      "rows": 32,
+      "per": 16,
+      "warps": 2,
+      "groups": 4,
+      "tile": 8,
+      "eventMs": [
+        1.5397616386413575,
+        1.5403056144714355,
+        1.540390396118164
+      ],
+      "medianEventMs": 1.5403056144714355,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 64,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 17664
+      },
+      "bitsEqual": true,
+      "build": {
+        "linear-1024-nobias-rows4": {
+          "sourceSha256": "12917935262e7aa78c3cd2d48106ac4805c597a175660f5f760b579f484259c5",
+          "ptxSha256": "fd4898ad30807c67670da8738b21e7168500165063096faf299c25297a198c5c",
+          "cubinSha256": "4add71231096000036e80b193f2f0472ccaad932712e042d35e4ae5c076068a0",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 64,
+              "add.rn.f32": 84
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 64,
+              "FADD": 84
+            },
+            "violations": []
+          }
+        },
+        "linear-1024-nobias-rows8": {
+          "sourceSha256": "84819f665f375831488406e29bbd3619da02b2c7cb0e5ce8cb4fb20030584e7b",
+          "ptxSha256": "fa60b890eae9b4b5f5d824186564137ec7ddd450b072ef8285167b72f430afc1",
+          "cubinSha256": "e7df301b22b71a3fb28dcfbb2028d5c4b6f809682a07b1c1e696424c82834940",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 128,
+              "add.rn.f32": 168
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 128,
+              "FADD": 168
+            },
+            "violations": []
+          }
+        }
+      }
+    },
+    {
+      "width": 2048,
+      "outputs": 11008,
+      "rows": 32,
+      "per": 8,
+      "warps": 8,
+      "groups": 1,
+      "tile": 4,
+      "eventMs": [
+        1.2021183967590332,
+        1.206281566619873,
+        1.2155327796936035
+      ],
+      "medianEventMs": 1.206281566619873,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 40,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 9344
+      },
+      "bitsEqual": true,
+      "build": {
+        "linear-2048-nobias-rows4": {
+          "sourceSha256": "d2ccbf6e49cae6518fdb310189530a6f52d69bc5e8fe4754f649398bdbb4134b",
+          "ptxSha256": "5a199164c5b2e1ff83adf40407927d036f79b5e16420fad3af9f60fcc820c80c",
+          "cubinSha256": "2f663ad376adc54bb20614a548d4897e8bd37fe58068cc1e21e7bba2e4e14a9b",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 32,
+              "add.rn.f32": 76
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 32,
+              "FADD": 76
+            },
+            "violations": []
+          }
+        }
+      }
+    },
+    {
+      "width": 2048,
+      "outputs": 11008,
+      "rows": 32,
+      "per": 8,
+      "warps": 8,
+      "groups": 1,
+      "tile": 8,
+      "eventMs": [
+        1.069040012359619,
+        1.0702704429626464,
+        1.0756815910339355
+      ],
+      "medianEventMs": 1.0702704429626464,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 40,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 9472
+      },
+      "bitsEqual": true,
+      "build": {
+        "linear-2048-nobias-rows4": {
+          "sourceSha256": "d2ccbf6e49cae6518fdb310189530a6f52d69bc5e8fe4754f649398bdbb4134b",
+          "ptxSha256": "5a199164c5b2e1ff83adf40407927d036f79b5e16420fad3af9f60fcc820c80c",
+          "cubinSha256": "2f663ad376adc54bb20614a548d4897e8bd37fe58068cc1e21e7bba2e4e14a9b",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 32,
+              "add.rn.f32": 76
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 32,
+              "FADD": 76
+            },
+            "violations": []
+          }
+        },
+        "linear-2048-nobias-rows8": {
+          "sourceSha256": "574a0302f7b7459ba608db4806d36d945023d18ede0561235409a1b92106f096",
+          "ptxSha256": "b90bfdd479f5db2154a5bc1eb487e537153e817d7438a9fb317e0e3b2daf5d83",
+          "cubinSha256": "15e6b31408dfebe386824472acdaa35df626d1e9451ec7d31c1bc0d97b91f082",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 64,
+              "add.rn.f32": 152
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 64,
+              "FADD": 152
+            },
+            "violations": []
+          }
+        }
+      }
+    },
+    {
+      "width": 2048,
+      "outputs": 11008,
+      "rows": 32,
+      "per": 16,
+      "warps": 4,
+      "groups": 2,
+      "tile": 4,
+      "eventMs": [
+        0.968779182434082,
+        0.9681344032287598,
+        0.9742992401123047
+      ],
+      "medianEventMs": 0.968779182434082,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 48,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 17536
+      },
+      "bitsEqual": true,
+      "build": {
+        "linear-2048-nobias-rows4": {
+          "sourceSha256": "f37b885de1f2bc1ad16227ff3a0253f01e9d735f8a3991ae2f47c244c77273a3",
+          "ptxSha256": "64b0f88bcb8a55262e3ca45016f14273076209fd67ae1eaf78d28741cb13daa2",
+          "cubinSha256": "f273da927f2975dc139f7790657642985bd7231e54add54ce5f21fbc7aafa9e1",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 64,
+              "add.rn.f32": 92
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 64,
+              "FADD": 92
+            },
+            "violations": []
+          }
+        }
+      }
+    },
+    {
+      "width": 2048,
+      "outputs": 11008,
+      "rows": 32,
+      "per": 16,
+      "warps": 4,
+      "groups": 2,
+      "tile": 8,
+      "eventMs": [
+        0.9129152297973633,
+        0.9123968124389649,
+        0.9125535964965821
+      ],
+      "medianEventMs": 0.9125535964965821,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 63,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 17664
+      },
+      "bitsEqual": true,
+      "build": {
+        "linear-2048-nobias-rows4": {
+          "sourceSha256": "f37b885de1f2bc1ad16227ff3a0253f01e9d735f8a3991ae2f47c244c77273a3",
+          "ptxSha256": "64b0f88bcb8a55262e3ca45016f14273076209fd67ae1eaf78d28741cb13daa2",
+          "cubinSha256": "f273da927f2975dc139f7790657642985bd7231e54add54ce5f21fbc7aafa9e1",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 64,
+              "add.rn.f32": 92
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 64,
+              "FADD": 92
+            },
+            "violations": []
+          }
+        },
+        "linear-2048-nobias-rows8": {
+          "sourceSha256": "d4e2f41e723205f15b5ed71657a4241803655191d1c0a0e06d3b0f47b2173d07",
+          "ptxSha256": "a4ff282ef4db57fc4d3a40ada5d16a917b2df4f15a8584f4eaba8221bb0df3a6",
+          "cubinSha256": "f8f0250a964597ec36a90d89423774ac082d77ad904b68b96a35a764bb007e22",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 128,
+              "add.rn.f32": 184
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 128,
+              "FADD": 184
+            },
+            "violations": []
+          }
+        }
+      }
+    },
+    {
+      "width": 4096,
+      "outputs": 4096,
+      "rows": 32,
+      "per": 8,
+      "warps": 16,
+      "groups": 1,
+      "tile": 4,
+      "eventMs": [
+        0.9669327735900879,
+        0.9664928436279296,
+        0.9686672210693359
+      ],
+      "medianEventMs": 0.9669327735900879,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 40,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 18688
+      },
+      "bitsEqual": true,
+      "build": {
+        "linear-4096-nobias-rows4": {
+          "sourceSha256": "e19b416b3de5b5682032221cb801471714c660eda69eda5b9c48ee20f1dfaa00",
+          "ptxSha256": "72041bbd96ea86a0ac674ed47e35ad45bfb352885ae3098d660aa6e8dd7bf91c",
+          "cubinSha256": "20395313da746a4e3ba72e4ef7db962217ec195ac84e009a08721754a2764b2b",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 32,
+              "add.rn.f32": 108
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 32,
+              "FADD": 108
+            },
+            "violations": []
+          }
+        }
+      }
+    },
+    {
+      "width": 4096,
+      "outputs": 4096,
+      "rows": 32,
+      "per": 8,
+      "warps": 16,
+      "groups": 1,
+      "tile": 8,
+      "eventMs": [
+        0.8356415748596191,
+        0.8351712226867676,
+        0.8364640235900879
+      ],
+      "medianEventMs": 0.8356415748596191,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 40,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 18944
+      },
+      "bitsEqual": true,
+      "build": {
+        "linear-4096-nobias-rows4": {
+          "sourceSha256": "e19b416b3de5b5682032221cb801471714c660eda69eda5b9c48ee20f1dfaa00",
+          "ptxSha256": "72041bbd96ea86a0ac674ed47e35ad45bfb352885ae3098d660aa6e8dd7bf91c",
+          "cubinSha256": "20395313da746a4e3ba72e4ef7db962217ec195ac84e009a08721754a2764b2b",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 32,
+              "add.rn.f32": 108
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 32,
+              "FADD": 108
+            },
+            "violations": []
+          }
+        },
+        "linear-4096-nobias-rows8": {
+          "sourceSha256": "a9d8b70f2de830f662c2cf13dcc2f88e69ed2edefb515853aedd1b2d2042dcb9",
+          "ptxSha256": "b1e05aca8bb125672104049e4e39ed674ed03c15c3c983780f583b4c8c01c925",
+          "cubinSha256": "48cb4fb433e0fba7f82d4999e174ea4092cf5179088b0645ebb44b442cea06bb",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 64,
+              "add.rn.f32": 216
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 64,
+              "FADD": 216
+            },
+            "violations": []
+          }
+        }
+      }
+    },
+    {
+      "width": 4096,
+      "outputs": 4096,
+      "rows": 32,
+      "per": 16,
+      "warps": 8,
+      "groups": 1,
+      "tile": 4,
+      "eventMs": [
+        0.84749755859375,
+        0.8469728469848633,
+        0.8488767623901368
+      ],
+      "medianEventMs": 0.84749755859375,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 48,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 17536
+      },
+      "bitsEqual": true,
+      "build": {
+        "linear-4096-nobias-rows4": {
+          "sourceSha256": "30586317d53f7c6f774ec3656cf8d0e1335e662b72eb6dcf264fc49ab1030122",
+          "ptxSha256": "df2b9bf116e32ff113799d1c5ba0bfdce358423063d725ca47f139426692936c",
+          "cubinSha256": "3faf1c64fc836c56285eff41519f9ec28b1d85a14870430cf1c3589177e7d314",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 64,
+              "add.rn.f32": 108
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 64,
+              "FADD": 108
+            },
+            "violations": []
+          }
+        }
+      }
+    },
+    {
+      "width": 4096,
+      "outputs": 4096,
+      "rows": 32,
+      "per": 16,
+      "warps": 8,
+      "groups": 1,
+      "tile": 8,
+      "eventMs": [
+        0.7402463912963867,
+        0.7396399974822998,
+        0.7411168098449707
+      ],
+      "medianEventMs": 0.7402463912963867,
+      "attributes": {
+        "CU_FUNC_ATTRIBUTE_NUM_REGS": 48,
+        "CU_FUNC_ATTRIBUTE_LOCAL_SIZE_BYTES": 0,
+        "CU_FUNC_ATTRIBUTE_SHARED_SIZE_BYTES": 17664
+      },
+      "bitsEqual": true,
+      "build": {
+        "linear-4096-nobias-rows4": {
+          "sourceSha256": "30586317d53f7c6f774ec3656cf8d0e1335e662b72eb6dcf264fc49ab1030122",
+          "ptxSha256": "df2b9bf116e32ff113799d1c5ba0bfdce358423063d725ca47f139426692936c",
+          "cubinSha256": "3faf1c64fc836c56285eff41519f9ec28b1d85a14870430cf1c3589177e7d314",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 64,
+              "add.rn.f32": 108
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 64,
+              "FADD": 108
+            },
+            "violations": []
+          }
+        },
+        "linear-4096-nobias-rows8": {
+          "sourceSha256": "26c12b5b7d4dec7c81d15e065397bca74cc1b1d70398ca742d46f25bd1a04a32",
+          "ptxSha256": "594a552b2d90e8bfb8a220c59faccffe86d6dc33dd5bbf0e72d598c4b72f17a6",
+          "cubinSha256": "54ced519bac67517d5cfe6dc88ed3d9dfd978d0fa58441cc424381ba69c2e312",
+          "ptxAudit": {
+            "floatOps": {
+              "mul.rn.f32": 128,
+              "add.rn.f32": 216
+            },
+            "violations": []
+          },
+          "sassAudit": {
+            "floatOps": {
+              "FMUL": 128,
+              "FADD": 216
+            },
+            "violations": []
+          }
+        }
+      }
+    }
+  ],
+  "hardwareQualified": false,
+  "sourceSha256": "063225df1847ccf50fbb4145d79f86ed301544049149af56b1723e90657b2483",
+  "limits": "Finite synthetic matrices. Captured repeated raw launches isolate CUDA cost; not decoder throughput. All outputs compare with the prior strict kernel, sampled columns with CPU oracle."
+}

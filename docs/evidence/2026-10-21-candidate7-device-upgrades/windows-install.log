@@ -1,0 +1,9 @@
+before C freeGB=18.8
+before D freeGB=813.8
+before: app=True appdata=True
+installer hash matches the prepared receipt
+Candidate7 installer exit: 0
+defaults={"labUrl":"https://lab.heteroes.site","build":"lf1-20261021-r11-candidate7"}
+
+after C freeGB=18.7
+after D freeGB=813.8

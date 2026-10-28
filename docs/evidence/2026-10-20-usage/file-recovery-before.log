@@ -1,0 +1,56 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________ test_file_backed_recovery_also_works_without_usage_receipts __________
+
+product_assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-864/product-model0')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-864/test_file_backed_recovery_also0')
+
+        0, expected_candidates=1, expected_audits=0, expected_updates=1
+    )
+    assert actual["generatedTokens"] == 7 and actual["gpuSeconds"] == 3 and not actual["partial"]
+    _, rebuilt, data = prepare_run(read_json(restored / "config.json"), restored, "cpu")
+>   assert rebuilt.hash == run.hash and len(data["splits"]["train"]) > 0
+           ^^^^^^^^^^^^^^^^^^^
+
+runtime/tests/v3/test_v3_recovery.py:95: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+runtime/src/heteroes/product/recovery.py:168: in verify_point
+    validate_manifest(manifest)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+m = {'formatVersion': 2, 'pointId': 'a6c698b0f4f54271b03713f5f205a5ad', 'runId': 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'generation': 0, ...}
+
+    
+    
+    def validate_manifest(m):
+        if (
+            not isinstance(m, dict)
+            or type(m.get("formatVersion")) is not int
+            or m["formatVersion"] not in (1, 2)
+            or any(not isinstance(m.get(k), str) or not UUID.fullmatch(m[k]) for k in ("pointId", "runId"))
+        ):
+            raise ValueError("Invalid recovery identity")
+        if type(m.get("generation")) is not int or m["generation"] < 0 or type(m.get("final")) is not bool:
+            raise ValueError("Invalid generation")
+        files = m.get("files")
+        required = BASE_FILES | ({"v3-state.json"} if m["formatVersion"] == 2 else set())
+        if (
+            not isinstance(files, dict)
+            or not required <= files.keys()
+>           or not 4 <= len(files) <= (12 if m["formatVersion"] == 2 else 5)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        ):
+E       ValueError: Incomplete recovery manifest
+
+runtime/src/heteroes/recovery_manifest.py:40: ValueError
+---------------------------- Captured stdout setup -----------------------------
+
+
+
+---------------------------- Captured stderr setup -----------------------------
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 1201.46it/s]
+----------------------------- Captured stderr call -----------------------------
+Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 18603.19it/s]
+=========================== short test summary info ============================
+FAILED runtime/tests/v3/test_v3_recovery.py::test_file_backed_recovery_also_works_without_usage_receipts
+1 failed, 7 deselected in 1.83s

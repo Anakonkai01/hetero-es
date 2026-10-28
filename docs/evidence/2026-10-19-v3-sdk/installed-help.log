@@ -1,0 +1,13 @@
+usage: heteroes [-h] {run} ...
+
+    python -m heteroes.v3 run spec.json --out RUN_DIR [--device cpu|cuda] [--workers N]
+
+Runs a Recipe v3 experiment on this machine (`heteroes.v3.local.run_local`). `spec.json` is the configuration documented in
+`runtime/docs/v3-local-runs.md`; relative paths in it are read from the spec's directory. Prints one line per generation.
+
+positional arguments:
+  {run}
+    run       run an experiment on this machine
+
+options:
+  -h, --help  show this help message and exit

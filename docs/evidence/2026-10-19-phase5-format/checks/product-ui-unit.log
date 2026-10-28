@@ -1,0 +1,13 @@
+✔ CPU host identity and GPU UUID deduplicate aliases, nested domains and wall are excluded (0.467238ms)
+✔ stale and missing observations are not zero watts; recorded energy remains available (0.087175ms)
+✔ the language follows the browser unless the person chose one (0.371156ms)
+✔ stored preferences win; anything unusable falls back to the browser language and safe defaults (0.433ms)
+✔ a missing Vietnamese string is reported once, and only while an audit is running (0.135838ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 145.081511

@@ -1,0 +1,7 @@
+{"event": "worker_start_unknown", "t": 1792688841.7947364, "worker_id": "cli-71b757062fd9", "error": "ConnectionError", "httpStatus": null}
+{"event": "worker_start_unknown", "t": 1792688857.378473, "worker_id": "cli-34312a79fbbc", "error": "URLError", "httpStatus": null}
+{"event": "worker_start_unknown", "t": 1792688872.6355321, "worker_id": "desktop-d9017660e75f", "error": "URLError", "httpStatus": null}
+{"event": "worker_unreachable", "t": 1792688995.0262341, "worker_id": "cli-34312a79fbbc", "unreachableSince": 1792688873.4483626}
+{"event": "worker_unreachable", "t": 1792688995.2513986, "worker_id": "desktop-d9017660e75f", "unreachableSince": 1792688873.6960924}
+{"event": "worker_unavailable", "t": 1792689060.7892857, "worker_id": "cli-34312a79fbbc"}
+{"event": "worker_unavailable", "t": 1792689060.7893088, "worker_id": "desktop-d9017660e75f"}

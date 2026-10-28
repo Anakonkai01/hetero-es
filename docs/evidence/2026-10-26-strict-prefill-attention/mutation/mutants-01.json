@@ -1,0 +1,68 @@
+[
+  {
+    "name": "tile drops query causal advance",
+    "file": "src/heteroes/eval/strict_prefill_cuda.py",
+    "old": "limit = range[4] + qr",
+    "new": "limit = range[4]"
+  },
+  {
+    "name": "tile reads first sequence keys",
+    "file": "src/heteroes/eval/strict_prefill_cuda.py",
+    "old": "start = range[2]",
+    "new": "start = 0"
+  },
+  {
+    "name": "tile reads first KV head query",
+    "file": "src/heteroes/eval/strict_prefill_cuda.py",
+    "old": "h = blockIdx.y * repeats + local_head",
+    "new": "h = local_head"
+  },
+  {
+    "name": "tile omits query input flush",
+    "file": "src/heteroes/eval/strict_prefill_cuda.py",
+    "old": "load(q + ((size_t)h * length + i) * DIM + d, bad)",
+    "new": "q[((size_t)h * length + i) * DIM + d]"
+  },
+  {
+    "name": "tile omits key and value input flush",
+    "file": "src/heteroes/eval/strict_prefill_cuda.py",
+    "old": "load(base + ((size_t)blockIdx.y * total_keys + start) * DIM + index, bad)",
+    "new": "base[((size_t)blockIdx.y * total_keys + start) * DIM + index]"
+  },
+  {
+    "name": "tile drops causal probability mask",
+    "file": "src/heteroes/eval/strict_prefill_cuda.py",
+    "old": "own[j] = allowed ? e : 0.0f",
+    "new": "own[j] = e"
+  },
+  {
+    "name": "tile uses wrong denominator root",
+    "file": "src/heteroes/eval/strict_prefill_cuda.py",
+    "old": "float denominator = terms[0]",
+    "new": "float denominator = terms[1]"
+  },
+  {
+    "name": "tile uses wrong value root",
+    "file": "src/heteroes/eval/strict_prefill_cuda.py",
+    "old": "prefill_push(t,group[0],bad)",
+    "new": "prefill_push(t,group[1],bad)"
+  },
+  {
+    "name": "tile drops pending value roots",
+    "file": "src/heteroes/eval/strict_prefill_cuda.py",
+    "old": "acc=any ? add_(t.s[level],acc,bad) : t.s[level]",
+    "new": "acc=any ? acc : t.s[level]"
+  },
+  {
+    "name": "metadata drops query causal advance",
+    "file": "src/heteroes/eval/strict_cuda.py",
+    "old": "keys, count, past + first))",
+    "new": "keys, count, past))"
+  },
+  {
+    "name": "default bypasses prefill kernel",
+    "file": "src/heteroes/eval/strict_cuda.py",
+    "old": "_attention_entry = \"strict_attention_prefill\"",
+    "new": "_attention_entry = \"strict_attention_gqa\""
+  }
+]

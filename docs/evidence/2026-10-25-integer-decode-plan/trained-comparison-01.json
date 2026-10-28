@@ -1,0 +1,79 @@
+{
+  "hardwareQualified": false,
+  "status": "ok",
+  "limits": "Selected decode scheduling; same trained finite corpus. Parent/seed7001 +/- and restored. Does not establish general quality or whole-plan completion.",
+  "models": {
+    "smol": {
+      "candidatePrefillTokensTextRewardsEqual": true,
+      "restoreExact": true,
+      "timings": [
+        {
+          "batch": 1,
+          "beforeTokensPerSecond": 262.2265763474192,
+          "afterTokensPerSecond": 262.2718042473685,
+          "ratio": 1.000172476415546
+        },
+        {
+          "batch": 8,
+          "beforeTokensPerSecond": 504.1616347038996,
+          "afterTokensPerSecond": 1206.436246927764,
+          "ratio": 2.3929552823596323
+        },
+        {
+          "batch": 32,
+          "beforeTokensPerSecond": 1462.6170751429643,
+          "afterTokensPerSecond": 2863.2692627260376,
+          "ratio": 1.9576342375506357
+        }
+      ]
+    },
+    "tiny": {
+      "candidatePrefillTokensTextRewardsEqual": true,
+      "restoreExact": true,
+      "timings": [
+        {
+          "batch": 1,
+          "beforeTokensPerSecond": 179.70429062902863,
+          "afterTokensPerSecond": 179.9896050425031,
+          "ratio": 1.0015876883766979
+        },
+        {
+          "batch": 8,
+          "beforeTokensPerSecond": 347.518406623824,
+          "afterTokensPerSecond": 691.6278115808195,
+          "ratio": 1.990190442860431
+        },
+        {
+          "batch": 32,
+          "beforeTokensPerSecond": 923.2343586719102,
+          "afterTokensPerSecond": 1377.3180016516815,
+          "ratio": 1.49184006066778
+        }
+      ]
+    },
+    "qwen": {
+      "candidatePrefillTokensTextRewardsEqual": true,
+      "restoreExact": true,
+      "timings": [
+        {
+          "batch": 1,
+          "beforeTokensPerSecond": 262.9658712630981,
+          "afterTokensPerSecond": 262.9708135125539,
+          "ratio": 1.0000187942619019
+        },
+        {
+          "batch": 8,
+          "beforeTokensPerSecond": 536.3273416204818,
+          "afterTokensPerSecond": 1170.4489404631965,
+          "ratio": 2.1823406148318925
+        },
+        {
+          "batch": 32,
+          "beforeTokensPerSecond": 1514.1064716283558,
+          "afterTokensPerSecond": 2810.659574660006,
+          "ratio": 1.8563156735188269
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,19 @@
+control ok    | 16 passed in 0.79s
+killed       stop-heartbeat-before-ack | 3 failed, 13 passed in 3.80s
+killed       forget-pending-on-transient | 7 failed, 9 passed, 1 warning in 4.83s
+killed       do-not-recover-pending | 6 failed, 10 passed, 1 warning in 3.82s
+killed       omit-local-restore-poison | 1 failed, 15 passed in 1.00s
+killed       do-not-save-before-send | 9 failed, 7 passed, 1 warning in 3.87s
+killed       forget-heartbeat-on-restart | 1 failed, 15 passed in 1.78s
+killed       clear-poison-at-terminal-ack | 1 failed, 15 passed in 0.80s
+killed       ignore-worker-lineage | 1 failed, 15 passed in 0.79s
+killed       ignore-endpoint-scope | 1 failed, 15 passed in 0.79s
+killed       accept-corrupt-outbox | 1 failed, 15 passed in 0.79s
+killed       unbounded-outbox-write | 1 failed, 15 passed in 0.81s
+killed       skip-runtime-drain | 1 failed, 15 passed in 0.79s
+killed       drop-text-metadata-on-restart | 1 failed, 15 passed in 0.79s
+killed       ignore-private-delivery-directory | 1 failed, 15 passed in 0.81s
+killed       keep-delivery-in-per-launch-directory | 1 failed, 15 passed in 0.78s
+killed       touch-executor-during-cancellation | 1 failed, 15 passed in 0.81s
+
+16 of 16 mutants killed.

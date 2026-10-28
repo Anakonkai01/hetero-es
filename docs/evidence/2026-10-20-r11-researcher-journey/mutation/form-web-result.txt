@@ -1,0 +1,6 @@
+killed       no default minimum |   }
+killed       constant keeps minimum |   }
+killed       review drops alpha schedule |   }
+killed       review chunk default wrong |   }
+
+4 of 4 mutants killed.

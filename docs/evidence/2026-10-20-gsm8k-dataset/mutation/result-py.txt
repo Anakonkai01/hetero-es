@@ -1,0 +1,11 @@
+control ok    | 7 passed in 1.75s
+killed       test-from-train | 1 failed in 0.68s
+killed       overlap | 1 failed in 0.70s
+killed       no-shuffle | 1 failed in 0.69s
+killed       commas-kept | 1 failed in 0.69s
+killed       no-normalize | 1 failed, 2 passed in 0.69s
+killed       no-size-check | 1 failed in 0.69s
+killed       local-ignores-splits | 1 failed, 5 passed in 1.75s
+killed       cli-no-split-paths | 1 failed, 6 passed in 1.76s
+
+8 of 8 mutants killed.

@@ -1,0 +1,6 @@
+Pinned Python/wheels/model preserved; packaged source refreshed: 01b64705281e32fa249c1b2527082cd94bed33caa9fefc1aed269a8679048f11
+{"profile": "server-cpu-v1", "runtimeSha256": "7e3c194191038bad978221626967f91cb1df056ae697057142a4a5a920a46481", "pinsPreserved": true}
+PASS packaged worker source imports
+PASS packaged server source imports
+{"app": "worker", "archiveFiles": 86, "retiredModulesAbsent": true}
+{"app": "server", "archiveFiles": 59, "retiredModulesAbsent": true}

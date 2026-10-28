@@ -1,0 +1,13 @@
+{
+  "name": "n8-B3-r1",
+  "outcome": "ok",
+  "wall_seconds": 264.94367241859436,
+  "spec": {
+    "workers": {
+      "worker-5070ti": 1,
+      "worker-1660s": 1
+    },
+    "policy": "greedy",
+    "args": []
+  }
+}

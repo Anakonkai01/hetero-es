@@ -1,0 +1,23 @@
+✔ each run becomes a series of per-generation points, and generations without a reward are left out (0.935766ms)
+✔ the summary row has the numbers a reader compares: best, last mean, duration, GPUs (0.115536ms)
+✔ runs with no results yet still produce a row with empty values (0.081685ms)
+✔ only settings that differ between the runs are listed, with each run's value (0.195941ms)
+✔ a duration needs both ends and never goes negative (0.073658ms)
+✔ CSV cells are quoted when they need to be and formulas are neutralised (0.159813ms)
+✔ the generations CSV has one header and one row per generation, numbered from 1 (0.132297ms)
+✔ the Markdown summary states the setup and the results, and says what it does not show (0.683119ms)
+✔ LoRA and full parameter runs never share reward axes (0.138016ms)
+✔ a template keeps the reusable settings and never ids that can go stale (0.785905ms)
+✔ cloning keeps every setting, gives a draft a "(copy)" name and never copies the old run's results (0.153574ms)
+✔ names of copies do not pile up (0.090453ms)
+✔ a template starts the wizard with its settings; a built-in one leaves the name to the person (0.094161ms)
+✔ the built-in templates stay inside what the backend accepts (0.081526ms)
+✔ a v3 template retains declarative settings without retaining artifact ids (0.138778ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 69.433107

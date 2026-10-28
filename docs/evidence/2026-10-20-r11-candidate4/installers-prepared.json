@@ -1,0 +1,53 @@
+{
+  "version": "0.1.0",
+  "build": "lf1-20261020-r11-candidate4",
+  "privateTrial": true,
+  "nativeWindowsGpuVerified": false,
+  "installers": [
+    {
+      "platform": "windows",
+      "name": "HeteroES Worker-0.1.0-lf1-20261020-r11-candidate4-Windows.exe",
+      "url": "/downloads/HeteroES Worker-0.1.0-lf1-20261020-r11-candidate4-Windows.exe",
+      "sha256": "8ed08978cb5bcb54a3872b08e8d68bd1dc3be300c293f6d3c9d04e6e9f13db83",
+      "sizeBytes": 103331974
+    },
+    {
+      "platform": "linux",
+      "name": "HeteroES Worker-0.1.0-lf1-20261020-r11-candidate4-Linux.tar.gz",
+      "url": "/downloads/HeteroES Worker-0.1.0-lf1-20261020-r11-candidate4-Linux.tar.gz",
+      "sha256": "2bc45f0fb0efe7150f73acbba162ff75d68059a834ef92b1b2876b57aa0ecca5",
+      "sizeBytes": 124246412
+    }
+  ],
+  "serverInstallers": [
+    {
+      "platform": "windows",
+      "name": "HeteroES Lab Server-0.1.0-lf1-20261020-r11-candidate4-Windows.exe",
+      "url": "/downloads/HeteroES Lab Server-0.1.0-lf1-20261020-r11-candidate4-Windows.exe",
+      "sha256": "21566305fef8b2786504661a3de8850ccd4c5c542a72163fbdd9b17e3b2a7d13",
+      "sizeBytes": 103857117
+    },
+    {
+      "platform": "linux",
+      "name": "HeteroES Lab Server-0.1.0-lf1-20261020-r11-candidate4-Linux.tar.gz",
+      "url": "/downloads/HeteroES Lab Server-0.1.0-lf1-20261020-r11-candidate4-Linux.tar.gz",
+      "sha256": "392dae29d95895c3063e80cb4d9000fc127c0fb2b9fb161a67711ec8eb0e99f5",
+      "sizeBytes": 124754123
+    }
+  ],
+  "publiclyPublished": false,
+  "linuxWorker": {
+    "installer": {
+      "name": "install-worker.sh",
+      "url": "/downloads/install-worker.sh",
+      "sha256": "60180495a39d1958574ca3b09e50e436c29d539919355d8296b0605b51c215e0",
+      "sizeBytes": 3812
+    },
+    "bundle": {
+      "name": "heteroes-worker-linux-lf1-20261020-r11-candidate4.tar.gz",
+      "url": "/downloads/heteroes-worker-linux-lf1-20261020-r11-candidate4.tar.gz",
+      "sha256": "074a3ed7cdb5ec15aa497d3f9e1fdcdc026b66de25a984f9fca2fb75a308167f",
+      "sizeBytes": 551005
+    }
+  }
+}

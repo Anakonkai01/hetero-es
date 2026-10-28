@@ -1,0 +1,100 @@
+{
+  "readOnly": true,
+  "gpuWorkStarted": false,
+  "checks": [
+    {
+      "width": 375,
+      "route": "/workspace",
+      "overflow": false
+    },
+    {
+      "width": 375,
+      "route": "/workers",
+      "overflow": false
+    },
+    {
+      "width": 375,
+      "route": "/experiments/new",
+      "overflow": false
+    },
+    {
+      "width": 375,
+      "route": "/experiments",
+      "overflow": false
+    },
+    {
+      "width": 375,
+      "route": "/operations",
+      "overflow": false
+    },
+    {
+      "width": 375,
+      "route": "/profile",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "route": "/workspace",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "route": "/workers",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "route": "/experiments/new",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "route": "/experiments",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "route": "/operations",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "route": "/profile",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "route": "/workspace",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "route": "/workers",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "route": "/experiments/new",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "route": "/experiments",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "route": "/operations",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "route": "/profile",
+      "overflow": false
+    }
+  ],
+  "formPreservedOnLocaleChange": true,
+  "themePersisted": true,
+  "zoom200Percent": true,
+  "browserErrors": []
+}

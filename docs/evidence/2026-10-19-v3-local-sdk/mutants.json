@@ -1,0 +1,74 @@
+[
+ {
+  "name": "sampler seed shifted",
+  "file": "src/heteroes/v3/data.py",
+  "old": "\"seed\": seed, \"sampler\": SAMPLER}",
+  "new": "\"seed\": seed + 1, \"sampler\": SAMPLER}"
+ },
+ {
+  "name": "prompt column not copied",
+  "file": "src/heteroes/v3/data.py",
+  "old": "    return {**row, \"prompt\": prompt.strip()}",
+  "new": "    return dict(row)"
+ },
+ {
+  "name": "NaN cells accepted",
+  "file": "src/heteroes/v3/data.py",
+  "old": "(isinstance(value, float) and math.isfinite(value))",
+  "new": "isinstance(value, float)"
+ },
+ {
+  "name": "context without the scorer",
+  "file": "src/heteroes/v3/run.py",
+  "old": "            \"scorer\": self.plan[\"scorer\"],\n",
+  "new": ""
+ },
+ {
+  "name": "batch of another dataset",
+  "file": "src/heteroes/v3/run.py",
+  "old": "        if {k: data[k] for k in (\"contentHash\", \"splitHashes\")} != {",
+  "new": "        if False and {k: data[k] for k in (\"contentHash\", \"splitHashes\")} != {"
+ },
+ {
+  "name": "scored against generation 0",
+  "file": "src/heteroes/v3/run.py",
+  "old": "        rows = run.batch(data, generation)[\"rows\"]",
+  "new": "        rows = run.batch(data, 0)[\"rows\"]"
+ },
+ {
+  "name": "builtin data run",
+  "file": "src/heteroes/v3/run.py",
+  "old": "        if recipe[\"data\"][\"kind\"] != \"dataset\":",
+  "new": "        if False:"
+ },
+ {
+  "name": "workers send rewards",
+  "file": "src/heteroes/v3/local.py",
+  "old": "return_completions=True",
+  "new": "return_completions=False"
+ },
+ {
+  "name": "pairs dropped",
+  "file": "src/heteroes/v3/local.py",
+  "old": "antithetic=run.antithetic,",
+  "new": "antithetic=False,"
+ },
+ {
+  "name": "worker ignores the pinned adapter",
+  "file": "src/heteroes/v3/local.py",
+  "old": "trainable_schema(worker, recipe[\"weightSpace\"], adapter_file)",
+  "new": "trainable_schema(worker, recipe[\"weightSpace\"], None)"
+ },
+ {
+  "name": "python code not pinned",
+  "file": "src/heteroes/v3/local.py",
+  "old": "\"codeSha256\": digest,",
+  "new": "\"codeSha256\": \"0\" * 64,"
+ },
+ {
+  "name": "decorator version ignored",
+  "file": "src/heteroes/sdk.py",
+  "old": "getattr(function, \"heteroes_scorer\", (function.__name__.replace(\"_\", \"-\").lower(), 1))",
+  "new": "(function.__name__.replace(\"_\", \"-\").lower(), 1)"
+ }
+]

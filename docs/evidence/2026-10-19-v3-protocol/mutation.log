@@ -1,0 +1,16 @@
+control ok    | 186 passed in 5.99s
+killed       texts hash not checked | 1 failed, 185 passed in 6.04s
+killed       scored before the attempt is checked | 1 failed, 185 passed in 6.04s
+killed       scoring error not kept | 2 failed, 184 passed in 16.07s
+killed       texts not stored | 2 failed, 184 passed in 6.06s
+killed       submission form not enforced | 1 failed, 185 passed in 4.05s
+killed       worker sends texts as a reward | 4 failed, 182 passed in 21.10s
+killed       sign ignored | 1 failed, 185 passed in 6.06s
+killed       texts not returned | 1 failed, 185 passed in 6.02s
+killed       pairs not made | 1 failed, 185 passed in 5.99s
+killed       version-1 records | 2 failed, 184 passed in 6.05s
+killed       scoring failure ignored | 1 failed, 185 passed in 16.09s
+killed       odd population accepted | 1 failed, 185 passed in 6.02s
+killed       pairs applied unmerged | 1 failed, 185 passed in 6.09s
+
+13 of 13 mutants killed.

@@ -1,0 +1,590 @@
+FFFFFFFFF                                                                [100%]
+=================================== FAILURES ===================================
+_ test_probe_launches_only_once_after_opt_in_and_keeps_credentials_out_of_argv _
+
+name = 'heteroes.product.model_probe_agent', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+>       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'heteroes.product.model_probe_agent'
+
+../../miniforge3/envs/heteroes-match/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-633/test_probe_launches_only_once_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7050c923cef0>
+
+    def test_probe_launches_only_once_after_opt_in_and_keeps_credentials_out_of_argv(tmp_path, monkeypatch):
+        a = agent(tmp_path)
+>       calls = fake_launch(monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+
+runtime/tests/ledger/test_model_probe_agent.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+runtime/tests/ledger/test_model_probe_agent.py:29: in fake_launch
+    monkeypatch.setattr("heteroes.product.model_probe_agent.remote_handle", launch)
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/_pytest/monkeypatch.py:107: in derive_importpath
+    target = resolve(module)
+             ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'heteroes.product.model_probe_agent'
+
+    def resolve(name: str) -> object:
+        # Simplified from zope.dottedname.
+        parts = name.split(".")
+    
+        used = parts.pop(0)
+        found: object = importlib.import_module(used)
+        for part in parts:
+            used += "." + part
+            try:
+                found = getattr(found, part)
+            except AttributeError:
+                pass
+            else:
+                continue
+            # We use explicit un-nesting of the handling block in order
+            # to avoid nested exceptions.
+            try:
+                importlib.import_module(used)
+            except ImportError as ex:
+                expected = str(ex).split()[-1]
+                if expected == used:
+                    raise
+                else:
+>                   raise ImportError(f"import error in {used}: {ex}") from ex
+E                   ImportError: import error in heteroes.product.model_probe_agent: No module named 'heteroes.product.model_probe_agent'
+
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/_pytest/monkeypatch.py:88: ImportError
+___________ test_cancel_before_launch_and_off_fence_future_commands ____________
+
+name = 'heteroes.product.model_probe_agent', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+>       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'heteroes.product.model_probe_agent'
+
+../../miniforge3/envs/heteroes-match/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-633/test_cancel_before_launch_and_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7050c923d8b0>
+
+    def test_cancel_before_launch_and_off_fence_future_commands(tmp_path, monkeypatch):
+        a = agent(tmp_path); a.enabled = True
+>       calls = fake_launch(monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+
+runtime/tests/ledger/test_model_probe_agent.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+runtime/tests/ledger/test_model_probe_agent.py:29: in fake_launch
+    monkeypatch.setattr("heteroes.product.model_probe_agent.remote_handle", launch)
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/_pytest/monkeypatch.py:107: in derive_importpath
+    target = resolve(module)
+             ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'heteroes.product.model_probe_agent'
+
+    def resolve(name: str) -> object:
+        # Simplified from zope.dottedname.
+        parts = name.split(".")
+    
+        used = parts.pop(0)
+        found: object = importlib.import_module(used)
+        for part in parts:
+            used += "." + part
+            try:
+                found = getattr(found, part)
+            except AttributeError:
+                pass
+            else:
+                continue
+            # We use explicit un-nesting of the handling block in order
+            # to avoid nested exceptions.
+            try:
+                importlib.import_module(used)
+            except ImportError as ex:
+                expected = str(ex).split()[-1]
+                if expected == used:
+                    raise
+                else:
+>                   raise ImportError(f"import error in {used}: {ex}") from ex
+E                   ImportError: import error in heteroes.product.model_probe_agent: No module named 'heteroes.product.model_probe_agent'
+
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/_pytest/monkeypatch.py:88: ImportError
+___ test_probe_and_training_cannot_overlap_even_with_unknown_ownership[True] ___
+
+name = 'heteroes.product.model_probe_agent', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+>       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'heteroes.product.model_probe_agent'
+
+../../miniforge3/envs/heteroes-match/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-633/test_probe_and_training_cannot0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7050c923f920>
+ownership = True
+
+    @pytest.mark.parametrize("ownership", [True, None])
+    def test_probe_and_training_cannot_overlap_even_with_unknown_ownership(tmp_path, monkeypatch, ownership):
+        a = agent(tmp_path); a.enabled = True
+>       calls = fake_launch(monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+
+runtime/tests/ledger/test_model_probe_agent.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+runtime/tests/ledger/test_model_probe_agent.py:29: in fake_launch
+    monkeypatch.setattr("heteroes.product.model_probe_agent.remote_handle", launch)
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/_pytest/monkeypatch.py:107: in derive_importpath
+    target = resolve(module)
+             ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'heteroes.product.model_probe_agent'
+
+    def resolve(name: str) -> object:
+        # Simplified from zope.dottedname.
+        parts = name.split(".")
+    
+        used = parts.pop(0)
+        found: object = importlib.import_module(used)
+        for part in parts:
+            used += "." + part
+            try:
+                found = getattr(found, part)
+            except AttributeError:
+                pass
+            else:
+                continue
+            # We use explicit un-nesting of the handling block in order
+            # to avoid nested exceptions.
+            try:
+                importlib.import_module(used)
+            except ImportError as ex:
+                expected = str(ex).split()[-1]
+                if expected == used:
+                    raise
+                else:
+>                   raise ImportError(f"import error in {used}: {ex}") from ex
+E                   ImportError: import error in heteroes.product.model_probe_agent: No module named 'heteroes.product.model_probe_agent'
+
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/_pytest/monkeypatch.py:88: ImportError
+___ test_probe_and_training_cannot_overlap_even_with_unknown_ownership[None] ___
+
+name = 'heteroes.product.model_probe_agent', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+>       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'heteroes.product.model_probe_agent'
+
+../../miniforge3/envs/heteroes-match/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-633/test_probe_and_training_cannot1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7050c923cb00>
+ownership = None
+
+    @pytest.mark.parametrize("ownership", [True, None])
+    def test_probe_and_training_cannot_overlap_even_with_unknown_ownership(tmp_path, monkeypatch, ownership):
+        a = agent(tmp_path); a.enabled = True
+>       calls = fake_launch(monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+
+runtime/tests/ledger/test_model_probe_agent.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+runtime/tests/ledger/test_model_probe_agent.py:29: in fake_launch
+    monkeypatch.setattr("heteroes.product.model_probe_agent.remote_handle", launch)
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/_pytest/monkeypatch.py:107: in derive_importpath
+    target = resolve(module)
+             ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'heteroes.product.model_probe_agent'
+
+    def resolve(name: str) -> object:
+        # Simplified from zope.dottedname.
+        parts = name.split(".")
+    
+        used = parts.pop(0)
+        found: object = importlib.import_module(used)
+        for part in parts:
+            used += "." + part
+            try:
+                found = getattr(found, part)
+            except AttributeError:
+                pass
+            else:
+                continue
+            # We use explicit un-nesting of the handling block in order
+            # to avoid nested exceptions.
+            try:
+                importlib.import_module(used)
+            except ImportError as ex:
+                expected = str(ex).split()[-1]
+                if expected == used:
+                    raise
+                else:
+>                   raise ImportError(f"import error in {used}: {ex}") from ex
+E                   ImportError: import error in heteroes.product.model_probe_agent: No module named 'heteroes.product.model_probe_agent'
+
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/_pytest/monkeypatch.py:88: ImportError
+________ test_probe_cannot_start_during_an_accepted_training_assignment ________
+
+name = 'heteroes.product.model_probe_agent', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+>       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'heteroes.product.model_probe_agent'
+
+../../miniforge3/envs/heteroes-match/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-633/test_probe_cannot_start_during0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7050c923e570>
+
+    def test_probe_cannot_start_during_an_accepted_training_assignment(tmp_path, monkeypatch):
+        a = agent(tmp_path); a.enabled = True
+>       calls = fake_launch(monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+
+runtime/tests/ledger/test_model_probe_agent.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+runtime/tests/ledger/test_model_probe_agent.py:29: in fake_launch
+    monkeypatch.setattr("heteroes.product.model_probe_agent.remote_handle", launch)
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/_pytest/monkeypatch.py:107: in derive_importpath
+    target = resolve(module)
+             ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'heteroes.product.model_probe_agent'
+
+    def resolve(name: str) -> object:
+        # Simplified from zope.dottedname.
+        parts = name.split(".")
+    
+        used = parts.pop(0)
+        found: object = importlib.import_module(used)
+        for part in parts:
+            used += "." + part
+            try:
+                found = getattr(found, part)
+            except AttributeError:
+                pass
+            else:
+                continue
+            # We use explicit un-nesting of the handling block in order
+            # to avoid nested exceptions.
+            try:
+                importlib.import_module(used)
+            except ImportError as ex:
+                expected = str(ex).split()[-1]
+                if expected == used:
+                    raise
+                else:
+>                   raise ImportError(f"import error in {used}: {ex}") from ex
+E                   ImportError: import error in heteroes.product.model_probe_agent: No module named 'heteroes.product.model_probe_agent'
+
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/_pytest/monkeypatch.py:88: ImportError
+_ test_unknown_launch_survives_restart_and_a_report_is_acked_only_after_confirmed_death _
+
+name = 'heteroes.product.model_probe_agent', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+>       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'heteroes.product.model_probe_agent'
+
+../../miniforge3/envs/heteroes-match/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-633/test_unknown_launch_survives_r0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7050c93324b0>
+
+    def test_unknown_launch_survives_restart_and_a_report_is_acked_only_after_confirmed_death(tmp_path, monkeypatch):
+        a = agent(tmp_path)
+>       fake_launch(monkeypatch)
+
+runtime/tests/ledger/test_model_probe_agent.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+runtime/tests/ledger/test_model_probe_agent.py:29: in fake_launch
+    monkeypatch.setattr("heteroes.product.model_probe_agent.remote_handle", launch)
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/_pytest/monkeypatch.py:107: in derive_importpath
+    target = resolve(module)
+             ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'heteroes.product.model_probe_agent'
+
+    def resolve(name: str) -> object:
+        # Simplified from zope.dottedname.
+        parts = name.split(".")
+    
+        used = parts.pop(0)
+        found: object = importlib.import_module(used)
+        for part in parts:
+            used += "." + part
+            try:
+                found = getattr(found, part)
+            except AttributeError:
+                pass
+            else:
+                continue
+            # We use explicit un-nesting of the handling block in order
+            # to avoid nested exceptions.
+            try:
+                importlib.import_module(used)
+            except ImportError as ex:
+                expected = str(ex).split()[-1]
+                if expected == used:
+                    raise
+                else:
+>                   raise ImportError(f"import error in {used}: {ex}") from ex
+E                   ImportError: import error in heteroes.product.model_probe_agent: No module named 'heteroes.product.model_probe_agent'
+
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/_pytest/monkeypatch.py:88: ImportError
+_____________ test_bad_manifest_and_changed_frozen_job_never_spawn _____________
+
+name = 'heteroes.product.model_probe_agent', package = None
+
+    def import_module(name, package=None):
+        """Import a module.
+    
+        The 'package' argument is required when performing a relative import. It
+        specifies the package to use as the anchor point from which to resolve the
+        relative import to an absolute import.
+    
+        """
+        level = 0
+        if name.startswith('.'):
+            if not package:
+                raise TypeError("the 'package' argument is required to perform a "
+                                f"relative import for {name!r}")
+            for character in name:
+                if character != '.':
+                    break
+                level += 1
+>       return _bootstrap._gcd_import(name[level:], package, level)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ModuleNotFoundError: No module named 'heteroes.product.model_probe_agent'
+
+../../miniforge3/envs/heteroes-match/lib/python3.12/importlib/__init__.py:90: ModuleNotFoundError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-633/test_bad_manifest_and_changed_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7050c924c590>
+
+    def test_bad_manifest_and_changed_frozen_job_never_spawn(tmp_path, monkeypatch):
+        a = agent(tmp_path); a.enabled = True
+>       calls = fake_launch(monkeypatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+
+runtime/tests/ledger/test_model_probe_agent.py:106: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+runtime/tests/ledger/test_model_probe_agent.py:29: in fake_launch
+    monkeypatch.setattr("heteroes.product.model_probe_agent.remote_handle", launch)
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/_pytest/monkeypatch.py:107: in derive_importpath
+    target = resolve(module)
+             ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'heteroes.product.model_probe_agent'
+
+    def resolve(name: str) -> object:
+        # Simplified from zope.dottedname.
+        parts = name.split(".")
+    
+        used = parts.pop(0)
+        found: object = importlib.import_module(used)
+        for part in parts:
+            used += "." + part
+            try:
+                found = getattr(found, part)
+            except AttributeError:
+                pass
+            else:
+                continue
+            # We use explicit un-nesting of the handling block in order
+            # to avoid nested exceptions.
+            try:
+                importlib.import_module(used)
+            except ImportError as ex:
+                expected = str(ex).split()[-1]
+                if expected == used:
+                    raise
+                else:
+>                   raise ImportError(f"import error in {used}: {ex}") from ex
+E                   ImportError: import error in heteroes.product.model_probe_agent: No module named 'heteroes.product.model_probe_agent'
+
+../../miniforge3/envs/heteroes-match/lib/python3.12/site-packages/_pytest/monkeypatch.py:88: ImportError
+______ test_child_builds_and_compares_a_reference_without_researcher_code ______
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-633/test_child_builds_and_compares0')
+
+    def test_child_builds_and_compares_a_reference_without_researcher_code(tmp_path):
+        model = tmp_path / "model"; build_tiny_lm(model)
+        manifest = registration_manifest(model, "research/new-model", "e" * 40)
+        from heteroes.canonical import canonical_json_hash
+        config = {"modelPaths": {canonical_json_hash(manifest): str(model)}}
+        reference = None
+        for mode in ("BUILD_REFERENCE", "COMPARE_REFERENCE"):
+            root = tmp_path / mode
+            write_json(root / "input.json", {"command": {"jobId": "a" * 32, "mode": mode,
+                       "manifest": manifest, "reference": reference, "source": "REFERENCE"},
+                       "config": config, "stateDirectory": str(tmp_path / "state")})
+            result = subprocess.run([sys.executable, "-m", "heteroes.product.model_probe", "--input", str(root / "input.json"),
+                                     "--device", "cpu"], env={**os.environ, "CUDA_VISIBLE_DEVICES": ""},
+                                    capture_output=True, text=True, timeout=90)
+>           assert result.returncode == 0, result.stderr
+E           AssertionError: /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python: No module named heteroes.product.model_probe
+E             
+E           assert 1 == 0
+E            +  where 1 = CompletedProcess(args=['/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python', '-m', 'heteroes.product.model_probe...='', stderr='/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python: No module named heteroes.product.model_probe\n').returncode
+
+runtime/tests/v3/test_model_probe_process.py:28: AssertionError
+----------------------------- Captured stdout call -----------------------------
+
+
+
+----------------------------- Captured stderr call -----------------------------
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 1006.79it/s]
+_______ test_child_requires_gpu_opt_in_and_honors_cancel_before_loading ________
+
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-633/test_child_requires_gpu_opt_in0')
+
+    def test_child_requires_gpu_opt_in_and_honors_cancel_before_loading(tmp_path):
+        source = tmp_path / "input.json"
+        write_json(source, {"command": {}, "config": {}, "stateDirectory": str(tmp_path)})
+        result = subprocess.run([sys.executable, "-m", "heteroes.product.model_probe", "--input", str(source)],
+                                env={**os.environ, "HETEROES_GPU_ACCEPTANCE": "0"}, capture_output=True, text=True)
+        assert result.returncode != 0
+        (tmp_path / "stop.flag").touch()
+        result = subprocess.run([sys.executable, "-m", "heteroes.product.model_probe", "--input", str(source), "--device", "cpu"],
+                                capture_output=True, text=True)
+>       assert result.returncode == 0
+E       AssertionError: assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python', '-m', 'heteroes.product.model_probe...='', stderr='/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python: No module named heteroes.product.model_probe\n').returncode
+
+runtime/tests/v3/test_model_probe_process.py:46: AssertionError
+=========================== short test summary info ============================
+FAILED runtime/tests/ledger/test_model_probe_agent.py::test_probe_launches_only_once_after_opt_in_and_keeps_credentials_out_of_argv
+FAILED runtime/tests/ledger/test_model_probe_agent.py::test_cancel_before_launch_and_off_fence_future_commands
+FAILED runtime/tests/ledger/test_model_probe_agent.py::test_probe_and_training_cannot_overlap_even_with_unknown_ownership[True]
+FAILED runtime/tests/ledger/test_model_probe_agent.py::test_probe_and_training_cannot_overlap_even_with_unknown_ownership[None]
+FAILED runtime/tests/ledger/test_model_probe_agent.py::test_probe_cannot_start_during_an_accepted_training_assignment
+FAILED runtime/tests/ledger/test_model_probe_agent.py::test_unknown_launch_survives_restart_and_a_report_is_acked_only_after_confirmed_death
+FAILED runtime/tests/ledger/test_model_probe_agent.py::test_bad_manifest_and_changed_frozen_job_never_spawn
+FAILED runtime/tests/v3/test_model_probe_process.py::test_child_builds_and_compares_a_reference_without_researcher_code
+FAILED runtime/tests/v3/test_model_probe_process.py::test_child_requires_gpu_opt_in_and_honors_cancel_before_loading
+9 failed in 1.81s

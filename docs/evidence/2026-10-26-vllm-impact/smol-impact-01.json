@@ -1,0 +1,1251 @@
+{
+  "model": "smol",
+  "sourceCommit": "b360bdb5",
+  "inputs": {
+    "docs/evidence/2026-10-26-vllm-impact/raw/smol-5070ti-02.json": "3049caa289a93539d169e5d19d677c5de507de94532df3ef882982424135f319",
+    "docs/evidence/2026-10-26-vllm-impact/raw/smol-3060-01.json": "2716d23a1c7755818732b0ed51d92bfdc02245001f05d41fc8f8a83e0d8fabed",
+    "docs/evidence/2026-10-26-vllm-impact/workload-01.json": "56360537931f15dab181b1a224b83c993e580650315d5cf6198ea2840d3db332"
+  },
+  "candidateWeightsAndPromptIdsEqual": true,
+  "cases": [
+    {
+      "label": "parent",
+      "groups": {
+        "all": {
+          "rows": 272,
+          "scorable": 269,
+          "tokenRowsDifferent": 1,
+          "textRowsDifferent": 1,
+          "predictionDifferentScored": 1,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 1,
+          "rightTruncated": 1,
+          "differentCases": [
+            {
+              "id": "historical-002",
+              "group": "historical",
+              "scored": true,
+              "tokenEqual": false,
+              "textEqual": false,
+              "leftPrediction": 345,
+              "rightPrediction": 344,
+              "expected": 32,
+              "leftReward": 0.0,
+              "rightReward": 0.0,
+              "leftTruncated": true,
+              "rightTruncated": true
+            }
+          ]
+        },
+        "gsm8k-first64": {
+          "rows": 64,
+          "scorable": 64,
+          "tokenRowsDifferent": 0,
+          "textRowsDifferent": 0,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 0,
+          "rightTruncated": 0,
+          "differentCases": []
+        },
+        "historical": {
+          "rows": 208,
+          "scorable": 205,
+          "tokenRowsDifferent": 1,
+          "textRowsDifferent": 1,
+          "predictionDifferentScored": 1,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 1,
+          "rightTruncated": 1,
+          "differentCases": [
+            {
+              "id": "historical-002",
+              "group": "historical",
+              "scored": true,
+              "tokenEqual": false,
+              "textEqual": false,
+              "leftPrediction": 345,
+              "rightPrediction": 344,
+              "expected": 32,
+              "leftReward": 0.0,
+              "rightReward": 0.0,
+              "leftTruncated": true,
+              "rightTruncated": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "label": "7001+1",
+      "groups": {
+        "all": {
+          "rows": 272,
+          "scorable": 269,
+          "tokenRowsDifferent": 1,
+          "textRowsDifferent": 1,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 1,
+          "rightTruncated": 1,
+          "differentCases": [
+            {
+              "id": "historical-007",
+              "group": "historical",
+              "scored": false,
+              "tokenEqual": false,
+              "textEqual": false,
+              "leftPrediction": 10,
+              "rightPrediction": 10,
+              "expected": null,
+              "leftReward": null,
+              "rightReward": null,
+              "leftTruncated": false,
+              "rightTruncated": false
+            }
+          ]
+        },
+        "gsm8k-first64": {
+          "rows": 64,
+          "scorable": 64,
+          "tokenRowsDifferent": 0,
+          "textRowsDifferent": 0,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 0,
+          "rightTruncated": 0,
+          "differentCases": []
+        },
+        "historical": {
+          "rows": 208,
+          "scorable": 205,
+          "tokenRowsDifferent": 1,
+          "textRowsDifferent": 1,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 1,
+          "rightTruncated": 1,
+          "differentCases": [
+            {
+              "id": "historical-007",
+              "group": "historical",
+              "scored": false,
+              "tokenEqual": false,
+              "textEqual": false,
+              "leftPrediction": 10,
+              "rightPrediction": 10,
+              "expected": null,
+              "leftReward": null,
+              "rightReward": null,
+              "leftTruncated": false,
+              "rightTruncated": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "label": "7001-1",
+      "groups": {
+        "all": {
+          "rows": 272,
+          "scorable": 269,
+          "tokenRowsDifferent": 1,
+          "textRowsDifferent": 1,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 1,
+          "rightTruncated": 1,
+          "differentCases": [
+            {
+              "id": "gsm8k-test-016",
+              "group": "gsm8k-first64",
+              "scored": true,
+              "tokenEqual": false,
+              "textEqual": false,
+              "leftPrediction": null,
+              "rightPrediction": null,
+              "expected": "230",
+              "leftReward": 0.0,
+              "rightReward": 0.0,
+              "leftTruncated": false,
+              "rightTruncated": false
+            }
+          ]
+        },
+        "gsm8k-first64": {
+          "rows": 64,
+          "scorable": 64,
+          "tokenRowsDifferent": 1,
+          "textRowsDifferent": 1,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 0,
+          "rightTruncated": 0,
+          "differentCases": [
+            {
+              "id": "gsm8k-test-016",
+              "group": "gsm8k-first64",
+              "scored": true,
+              "tokenEqual": false,
+              "textEqual": false,
+              "leftPrediction": null,
+              "rightPrediction": null,
+              "expected": "230",
+              "leftReward": 0.0,
+              "rightReward": 0.0,
+              "leftTruncated": false,
+              "rightTruncated": false
+            }
+          ]
+        },
+        "historical": {
+          "rows": 208,
+          "scorable": 205,
+          "tokenRowsDifferent": 0,
+          "textRowsDifferent": 0,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 1,
+          "rightTruncated": 1,
+          "differentCases": []
+        }
+      }
+    },
+    {
+      "label": "7002+1",
+      "groups": {
+        "all": {
+          "rows": 272,
+          "scorable": 269,
+          "tokenRowsDifferent": 0,
+          "textRowsDifferent": 0,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 1,
+          "rightTruncated": 1,
+          "differentCases": []
+        },
+        "gsm8k-first64": {
+          "rows": 64,
+          "scorable": 64,
+          "tokenRowsDifferent": 0,
+          "textRowsDifferent": 0,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 0,
+          "rightTruncated": 0,
+          "differentCases": []
+        },
+        "historical": {
+          "rows": 208,
+          "scorable": 205,
+          "tokenRowsDifferent": 0,
+          "textRowsDifferent": 0,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 1,
+          "rightTruncated": 1,
+          "differentCases": []
+        }
+      }
+    },
+    {
+      "label": "7002-1",
+      "groups": {
+        "all": {
+          "rows": 272,
+          "scorable": 269,
+          "tokenRowsDifferent": 0,
+          "textRowsDifferent": 0,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 1.0,
+          "rightCorrect": 1.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0037174721189591076,
+          "rightReward": 0.0037174721189591076,
+          "leftTruncated": 1,
+          "rightTruncated": 1,
+          "differentCases": []
+        },
+        "gsm8k-first64": {
+          "rows": 64,
+          "scorable": 64,
+          "tokenRowsDifferent": 0,
+          "textRowsDifferent": 0,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 0,
+          "rightTruncated": 0,
+          "differentCases": []
+        },
+        "historical": {
+          "rows": 208,
+          "scorable": 205,
+          "tokenRowsDifferent": 0,
+          "textRowsDifferent": 0,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 1.0,
+          "rightCorrect": 1.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.004878048780487805,
+          "rightReward": 0.004878048780487805,
+          "leftTruncated": 1,
+          "rightTruncated": 1,
+          "differentCases": []
+        }
+      }
+    },
+    {
+      "label": "7003+1",
+      "groups": {
+        "all": {
+          "rows": 272,
+          "scorable": 269,
+          "tokenRowsDifferent": 0,
+          "textRowsDifferent": 0,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 2,
+          "rightTruncated": 2,
+          "differentCases": []
+        },
+        "gsm8k-first64": {
+          "rows": 64,
+          "scorable": 64,
+          "tokenRowsDifferent": 0,
+          "textRowsDifferent": 0,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 0,
+          "rightTruncated": 0,
+          "differentCases": []
+        },
+        "historical": {
+          "rows": 208,
+          "scorable": 205,
+          "tokenRowsDifferent": 0,
+          "textRowsDifferent": 0,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 2,
+          "rightTruncated": 2,
+          "differentCases": []
+        }
+      }
+    },
+    {
+      "label": "7003-1",
+      "groups": {
+        "all": {
+          "rows": 272,
+          "scorable": 269,
+          "tokenRowsDifferent": 1,
+          "textRowsDifferent": 1,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 2,
+          "rightTruncated": 2,
+          "differentCases": [
+            {
+              "id": "historical-004",
+              "group": "historical",
+              "scored": false,
+              "tokenEqual": false,
+              "textEqual": false,
+              "leftPrediction": null,
+              "rightPrediction": null,
+              "expected": null,
+              "leftReward": null,
+              "rightReward": null,
+              "leftTruncated": false,
+              "rightTruncated": false
+            }
+          ]
+        },
+        "gsm8k-first64": {
+          "rows": 64,
+          "scorable": 64,
+          "tokenRowsDifferent": 0,
+          "textRowsDifferent": 0,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 0,
+          "rightTruncated": 0,
+          "differentCases": []
+        },
+        "historical": {
+          "rows": 208,
+          "scorable": 205,
+          "tokenRowsDifferent": 1,
+          "textRowsDifferent": 1,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 2,
+          "rightTruncated": 2,
+          "differentCases": [
+            {
+              "id": "historical-004",
+              "group": "historical",
+              "scored": false,
+              "tokenEqual": false,
+              "textEqual": false,
+              "leftPrediction": null,
+              "rightPrediction": null,
+              "expected": null,
+              "leftReward": null,
+              "rightReward": null,
+              "leftTruncated": false,
+              "rightTruncated": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "label": "7004+1",
+      "groups": {
+        "all": {
+          "rows": 272,
+          "scorable": 269,
+          "tokenRowsDifferent": 1,
+          "textRowsDifferent": 1,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 1.0,
+          "rightCorrect": 1.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0037174721189591076,
+          "rightReward": 0.0037174721189591076,
+          "leftTruncated": 1,
+          "rightTruncated": 1,
+          "differentCases": [
+            {
+              "id": "gsm8k-test-032",
+              "group": "gsm8k-first64",
+              "scored": true,
+              "tokenEqual": false,
+              "textEqual": false,
+              "leftPrediction": null,
+              "rightPrediction": null,
+              "expected": "35",
+              "leftReward": 0.0,
+              "rightReward": 0.0,
+              "leftTruncated": false,
+              "rightTruncated": false
+            }
+          ]
+        },
+        "gsm8k-first64": {
+          "rows": 64,
+          "scorable": 64,
+          "tokenRowsDifferent": 1,
+          "textRowsDifferent": 1,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 0,
+          "rightTruncated": 0,
+          "differentCases": [
+            {
+              "id": "gsm8k-test-032",
+              "group": "gsm8k-first64",
+              "scored": true,
+              "tokenEqual": false,
+              "textEqual": false,
+              "leftPrediction": null,
+              "rightPrediction": null,
+              "expected": "35",
+              "leftReward": 0.0,
+              "rightReward": 0.0,
+              "leftTruncated": false,
+              "rightTruncated": false
+            }
+          ]
+        },
+        "historical": {
+          "rows": 208,
+          "scorable": 205,
+          "tokenRowsDifferent": 0,
+          "textRowsDifferent": 0,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 1.0,
+          "rightCorrect": 1.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.004878048780487805,
+          "rightReward": 0.004878048780487805,
+          "leftTruncated": 1,
+          "rightTruncated": 1,
+          "differentCases": []
+        }
+      }
+    },
+    {
+      "label": "7004-1",
+      "groups": {
+        "all": {
+          "rows": 272,
+          "scorable": 269,
+          "tokenRowsDifferent": 0,
+          "textRowsDifferent": 0,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 1,
+          "rightTruncated": 1,
+          "differentCases": []
+        },
+        "gsm8k-first64": {
+          "rows": 64,
+          "scorable": 64,
+          "tokenRowsDifferent": 0,
+          "textRowsDifferent": 0,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 0,
+          "rightTruncated": 0,
+          "differentCases": []
+        },
+        "historical": {
+          "rows": 208,
+          "scorable": 205,
+          "tokenRowsDifferent": 0,
+          "textRowsDifferent": 0,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 1,
+          "rightTruncated": 1,
+          "differentCases": []
+        }
+      }
+    },
+    {
+      "label": "restored",
+      "groups": {
+        "all": {
+          "rows": 272,
+          "scorable": 269,
+          "tokenRowsDifferent": 1,
+          "textRowsDifferent": 1,
+          "predictionDifferentScored": 1,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 1,
+          "rightTruncated": 1,
+          "differentCases": [
+            {
+              "id": "historical-002",
+              "group": "historical",
+              "scored": true,
+              "tokenEqual": false,
+              "textEqual": false,
+              "leftPrediction": 345,
+              "rightPrediction": 344,
+              "expected": 32,
+              "leftReward": 0.0,
+              "rightReward": 0.0,
+              "leftTruncated": true,
+              "rightTruncated": true
+            }
+          ]
+        },
+        "gsm8k-first64": {
+          "rows": 64,
+          "scorable": 64,
+          "tokenRowsDifferent": 0,
+          "textRowsDifferent": 0,
+          "predictionDifferentScored": 0,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 0,
+          "rightTruncated": 0,
+          "differentCases": []
+        },
+        "historical": {
+          "rows": 208,
+          "scorable": 205,
+          "tokenRowsDifferent": 1,
+          "textRowsDifferent": 1,
+          "predictionDifferentScored": 1,
+          "rewardFlips": 0,
+          "leftCorrect": 0.0,
+          "rightCorrect": 0.0,
+          "accuracyDeltaPp": 0.0,
+          "leftReward": 0.0,
+          "rightReward": 0.0,
+          "leftTruncated": 1,
+          "rightTruncated": 1,
+          "differentCases": [
+            {
+              "id": "historical-002",
+              "group": "historical",
+              "scored": true,
+              "tokenEqual": false,
+              "textEqual": false,
+              "leftPrediction": 345,
+              "rightPrediction": 344,
+              "expected": 32,
+              "leftReward": 0.0,
+              "rightReward": 0.0,
+              "leftTruncated": true,
+              "rightTruncated": true
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "populations": {
+    "all": {
+      "leftRewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0037174721189591076,
+        0.0,
+        0.0,
+        0.0037174721189591076,
+        0.0
+      ],
+      "rightRewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0037174721189591076,
+        0.0,
+        0.0,
+        0.0037174721189591076,
+        0.0
+      ],
+      "maxAbsRewardDelta": 0.0,
+      "candidateRewardStdLeft": 0.001609712646439477,
+      "candidateRewardStdRight": 0.001609712646439477,
+      "strictPairInversions": 0,
+      "tieStatusChanges": 0,
+      "bestSetLeft": [
+        3,
+        6
+      ],
+      "bestSetRight": [
+        3,
+        6
+      ],
+      "spearmanWithAverageTies": 1.0,
+      "rules": {
+        "zscore@1": {
+          "leftCoefficients": [
+            -0.577346682548523,
+            -0.577346682548523,
+            -0.577346682548523,
+            1.7320400476455688,
+            -0.577346682548523,
+            -0.577346682548523,
+            1.7320400476455688,
+            -0.577346682548523
+          ],
+          "rightCoefficients": [
+            -0.577346682548523,
+            -0.577346682548523,
+            -0.577346682548523,
+            1.7320400476455688,
+            -0.577346682548523,
+            -0.577346682548523,
+            1.7320400476455688,
+            -0.577346682548523
+          ],
+          "leftMergedCoefficients": [
+            0.0,
+            -1.154693365097046,
+            0.0,
+            1.154693365097046
+          ],
+          "rightMergedCoefficients": [
+            0.0,
+            -1.154693365097046,
+            0.0,
+            1.154693365097046
+          ],
+          "referenceHasSignal": true,
+          "allOtherMergedCoefficientCosine": 1.0,
+          "sampledCanonicalDirectionCosine": 1.0,
+          "mixedAssignments": 256,
+          "mixedAssignmentsWithNewSignal": 0,
+          "mixedAssignmentsChangingBestSet": 0,
+          "maxAbsMixedCoefficientDelta": 0,
+          "minimumMergedCoefficientCosine": 1.0,
+          "minimumSampledDirectionCosine": 1.0
+        },
+        "centered-rank@1": {
+          "leftCoefficients": [
+            -0.1428571492433548,
+            -0.1428571492433548,
+            -0.1428571492433548,
+            0.4285714328289032,
+            -0.1428571492433548,
+            -0.1428571492433548,
+            0.4285714328289032,
+            -0.1428571492433548
+          ],
+          "rightCoefficients": [
+            -0.1428571492433548,
+            -0.1428571492433548,
+            -0.1428571492433548,
+            0.4285714328289032,
+            -0.1428571492433548,
+            -0.1428571492433548,
+            0.4285714328289032,
+            -0.1428571492433548
+          ],
+          "leftMergedCoefficients": [
+            0.0,
+            -0.2857142984867096,
+            0.0,
+            0.2857142984867096
+          ],
+          "rightMergedCoefficients": [
+            0.0,
+            -0.2857142984867096,
+            0.0,
+            0.2857142984867096
+          ],
+          "referenceHasSignal": true,
+          "allOtherMergedCoefficientCosine": 1.0,
+          "sampledCanonicalDirectionCosine": 1.0,
+          "mixedAssignments": 256,
+          "mixedAssignmentsWithNewSignal": 0,
+          "mixedAssignmentsChangingBestSet": 0,
+          "maxAbsMixedCoefficientDelta": 0,
+          "minimumMergedCoefficientCosine": 1.0,
+          "minimumSampledDirectionCosine": 1.0
+        }
+      }
+    },
+    "historical": {
+      "leftRewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.004878048780487805,
+        0.0,
+        0.0,
+        0.004878048780487805,
+        0.0
+      ],
+      "rightRewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.004878048780487805,
+        0.0,
+        0.0,
+        0.004878048780487805,
+        0.0
+      ],
+      "maxAbsRewardDelta": 0.0,
+      "candidateRewardStdLeft": 0.0021122570824010697,
+      "candidateRewardStdRight": 0.0021122570824010697,
+      "strictPairInversions": 0,
+      "tieStatusChanges": 0,
+      "bestSetLeft": [
+        3,
+        6
+      ],
+      "bestSetRight": [
+        3,
+        6
+      ],
+      "spearmanWithAverageTies": 1.0,
+      "rules": {
+        "zscore@1": {
+          "leftCoefficients": [
+            -0.5773475170135498,
+            -0.5773475170135498,
+            -0.5773475170135498,
+            1.7320425510406494,
+            -0.5773475170135498,
+            -0.5773475170135498,
+            1.7320425510406494,
+            -0.5773475170135498
+          ],
+          "rightCoefficients": [
+            -0.5773475170135498,
+            -0.5773475170135498,
+            -0.5773475170135498,
+            1.7320425510406494,
+            -0.5773475170135498,
+            -0.5773475170135498,
+            1.7320425510406494,
+            -0.5773475170135498
+          ],
+          "leftMergedCoefficients": [
+            0.0,
+            -1.1546950340270996,
+            0.0,
+            1.1546950340270996
+          ],
+          "rightMergedCoefficients": [
+            0.0,
+            -1.1546950340270996,
+            0.0,
+            1.1546950340270996
+          ],
+          "referenceHasSignal": true,
+          "allOtherMergedCoefficientCosine": 1.0,
+          "sampledCanonicalDirectionCosine": 1.0,
+          "mixedAssignments": 256,
+          "mixedAssignmentsWithNewSignal": 0,
+          "mixedAssignmentsChangingBestSet": 0,
+          "maxAbsMixedCoefficientDelta": 0,
+          "minimumMergedCoefficientCosine": 1.0,
+          "minimumSampledDirectionCosine": 1.0
+        },
+        "centered-rank@1": {
+          "leftCoefficients": [
+            -0.1428571492433548,
+            -0.1428571492433548,
+            -0.1428571492433548,
+            0.4285714328289032,
+            -0.1428571492433548,
+            -0.1428571492433548,
+            0.4285714328289032,
+            -0.1428571492433548
+          ],
+          "rightCoefficients": [
+            -0.1428571492433548,
+            -0.1428571492433548,
+            -0.1428571492433548,
+            0.4285714328289032,
+            -0.1428571492433548,
+            -0.1428571492433548,
+            0.4285714328289032,
+            -0.1428571492433548
+          ],
+          "leftMergedCoefficients": [
+            0.0,
+            -0.2857142984867096,
+            0.0,
+            0.2857142984867096
+          ],
+          "rightMergedCoefficients": [
+            0.0,
+            -0.2857142984867096,
+            0.0,
+            0.2857142984867096
+          ],
+          "referenceHasSignal": true,
+          "allOtherMergedCoefficientCosine": 1.0,
+          "sampledCanonicalDirectionCosine": 1.0,
+          "mixedAssignments": 256,
+          "mixedAssignmentsWithNewSignal": 0,
+          "mixedAssignmentsChangingBestSet": 0,
+          "maxAbsMixedCoefficientDelta": 0,
+          "minimumMergedCoefficientCosine": 1.0,
+          "minimumSampledDirectionCosine": 1.0
+        }
+      }
+    },
+    "gsm8k-first64": {
+      "leftRewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rightRewards": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "maxAbsRewardDelta": 0.0,
+      "candidateRewardStdLeft": 0.0,
+      "candidateRewardStdRight": 0.0,
+      "strictPairInversions": 0,
+      "tieStatusChanges": 0,
+      "bestSetLeft": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "bestSetRight": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "spearmanWithAverageTies": null,
+      "rules": {
+        "zscore@1": {
+          "leftCoefficients": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "rightCoefficients": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "leftMergedCoefficients": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "rightMergedCoefficients": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "referenceHasSignal": false,
+          "allOtherMergedCoefficientCosine": null,
+          "sampledCanonicalDirectionCosine": null,
+          "mixedAssignments": 256,
+          "mixedAssignmentsWithNewSignal": 0,
+          "mixedAssignmentsChangingBestSet": 0,
+          "maxAbsMixedCoefficientDelta": 0,
+          "minimumMergedCoefficientCosine": null,
+          "minimumSampledDirectionCosine": null
+        },
+        "centered-rank@1": {
+          "leftCoefficients": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "rightCoefficients": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "leftMergedCoefficients": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "rightMergedCoefficients": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "referenceHasSignal": false,
+          "allOtherMergedCoefficientCosine": null,
+          "sampledCanonicalDirectionCosine": null,
+          "mixedAssignments": 256,
+          "mixedAssignmentsWithNewSignal": 0,
+          "mixedAssignmentsChangingBestSet": 0,
+          "maxAbsMixedCoefficientDelta": 0,
+          "minimumMergedCoefficientCosine": null,
+          "minimumSampledDirectionCosine": null
+        }
+      }
+    }
+  },
+  "sameHostRestoreInference": {
+    "5070ti": {
+      "all": {
+        "rows": 272,
+        "scorable": 269,
+        "tokenRowsDifferent": 0,
+        "textRowsDifferent": 0,
+        "predictionDifferentScored": 0,
+        "rewardFlips": 0,
+        "leftCorrect": 0.0,
+        "rightCorrect": 0.0,
+        "accuracyDeltaPp": 0.0,
+        "leftReward": 0.0,
+        "rightReward": 0.0,
+        "leftTruncated": 1,
+        "rightTruncated": 1,
+        "differentCases": []
+      },
+      "gsm8k-first64": {
+        "rows": 64,
+        "scorable": 64,
+        "tokenRowsDifferent": 0,
+        "textRowsDifferent": 0,
+        "predictionDifferentScored": 0,
+        "rewardFlips": 0,
+        "leftCorrect": 0.0,
+        "rightCorrect": 0.0,
+        "accuracyDeltaPp": 0.0,
+        "leftReward": 0.0,
+        "rightReward": 0.0,
+        "leftTruncated": 0,
+        "rightTruncated": 0,
+        "differentCases": []
+      },
+      "historical": {
+        "rows": 208,
+        "scorable": 205,
+        "tokenRowsDifferent": 0,
+        "textRowsDifferent": 0,
+        "predictionDifferentScored": 0,
+        "rewardFlips": 0,
+        "leftCorrect": 0.0,
+        "rightCorrect": 0.0,
+        "accuracyDeltaPp": 0.0,
+        "leftReward": 0.0,
+        "rightReward": 0.0,
+        "leftTruncated": 1,
+        "rightTruncated": 1,
+        "differentCases": []
+      }
+    },
+    "3060": {
+      "all": {
+        "rows": 272,
+        "scorable": 269,
+        "tokenRowsDifferent": 0,
+        "textRowsDifferent": 0,
+        "predictionDifferentScored": 0,
+        "rewardFlips": 0,
+        "leftCorrect": 0.0,
+        "rightCorrect": 0.0,
+        "accuracyDeltaPp": 0.0,
+        "leftReward": 0.0,
+        "rightReward": 0.0,
+        "leftTruncated": 1,
+        "rightTruncated": 1,
+        "differentCases": []
+      },
+      "gsm8k-first64": {
+        "rows": 64,
+        "scorable": 64,
+        "tokenRowsDifferent": 0,
+        "textRowsDifferent": 0,
+        "predictionDifferentScored": 0,
+        "rewardFlips": 0,
+        "leftCorrect": 0.0,
+        "rightCorrect": 0.0,
+        "accuracyDeltaPp": 0.0,
+        "leftReward": 0.0,
+        "rightReward": 0.0,
+        "leftTruncated": 0,
+        "rightTruncated": 0,
+        "differentCases": []
+      },
+      "historical": {
+        "rows": 208,
+        "scorable": 205,
+        "tokenRowsDifferent": 0,
+        "textRowsDifferent": 0,
+        "predictionDifferentScored": 0,
+        "rewardFlips": 0,
+        "leftCorrect": 0.0,
+        "rightCorrect": 0.0,
+        "accuracyDeltaPp": 0.0,
+        "leftReward": 0.0,
+        "rightReward": 0.0,
+        "leftTruncated": 1,
+        "rightTruncated": 1,
+        "differentCases": []
+      }
+    }
+  },
+  "limitations": "Finite first-64 GSM8k plus historical prompts. Mixed assignments and coefficient/sample directions are offline counterfactuals; no ES update or learning. Sample is one canonical chunk.",
+  "directionSample": {
+    "engine": "pcg64_u32_to_f16_normal_quantile_v2",
+    "schemaHash": "d666a5b09c61148b0340430fc1ef0b380b1da7acc241847ddd5ec276cae31f36",
+    "parameterIndex": 0,
+    "chunkIndex": 0,
+    "chunkElements": 262144,
+    "samplesPerSeed": 262144,
+    "noiseSha256": {
+      "7001": "f5dd5ef370c33bbb004807b29651d30adc3f89f76d03d6034c7f2e18ef7e1959",
+      "7002": "5eea8eb400b25677beca64aa4d43c5de55026820e67b6235179fae81efd049a0",
+      "7003": "5a9090451ca995b963d6e559a763326e5577fab1a9631dd264bd59d3a5ef43f8",
+      "7004": "e4f81cd4bb73692b2d82bd828f7c6920305c4b0d3ee55c104ddd551644dae352"
+    },
+    "gram": [
+      [
+        0.9947805984163125,
+        -0.0021175374871603616,
+        -5.820555850514532e-05,
+        -0.00045310785867009457
+      ],
+      [
+        -0.0021175374871603616,
+        1.003251819085022,
+        0.002103448451257775,
+        -0.0029793005078643346
+      ],
+      [
+        -5.820555850514532e-05,
+        0.002103448451257775,
+        0.9975484888965318,
+        0.0012315206705347456
+      ],
+      [
+        -0.00045310785867009457,
+        -0.0029793005078643346,
+        0.0012315206705347456,
+        0.9987063529283604
+      ]
+    ]
+  }
+}

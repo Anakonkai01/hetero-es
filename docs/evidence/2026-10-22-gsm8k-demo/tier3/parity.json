@@ -1,0 +1,1299 @@
+{
+ "allEqual": true,
+ "device": "cuda",
+ "regenerated": [
+  0,
+  70
+ ],
+ "generations": [
+  {
+   "generation": 0,
+   "parentSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7",
+   "recordHash": "7cd62d20e6ae1b9f46f30e5bc91201008584496d57c7d8ac47e2c38fbbe2c440",
+   "regenerated": true,
+   "rewardsEqualRecord": true,
+   "childSha256": "515ed41b9b2b3fc543b550a68423f74b48e1f2280398b8520db036a4c35d2211",
+   "childEqual": true,
+   "candidates": [
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c0",
+     "seed": 3028739184449070,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.5,
+     "completionsSha256": "fd85419e2ee5da6789188ef27bfdb8d9ff04d5c32ed2bc6d6289b7fbee218c71"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c1",
+     "seed": 2194937360186247,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.40625,
+     "completionsSha256": "d51020a43f7078efa584d5efcabcd9db1f49b801f405c6692a100150e4a614b3"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c2",
+     "seed": 2980615326965958,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.3125,
+     "completionsSha256": "846808c284e426c0554093bcb084e9e0bc67c321c8dbcf3988a087714187d4bc"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c3",
+     "seed": 4469977002657161,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.59375,
+     "completionsSha256": "474f7deab56b9680034a645c497a7004d0b1a60dc113112caa791ad5c54cc2c9"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c4",
+     "seed": 3606672056435414,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.46875,
+     "completionsSha256": "2bd8208140e08f2f416913f4025ef7fc4c0cbbaf3a3ced34a7292a935a2ab180"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c5",
+     "seed": 1149745784392098,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.34375,
+     "completionsSha256": "2e09c2eb2ed8ed44092a5bd95a8f36af94420c93d9b35babb8cda52577559e14"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c6",
+     "seed": 2828340832453760,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.5,
+     "completionsSha256": "29a8d8afba10a84a25384127d6d1540fe546f629b0608f7c059281346df0d024"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c7",
+     "seed": 1714392562897122,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.4375,
+     "completionsSha256": "0128fe80d6f90b71b4d47aa3f6a3ea6ff7c45cdf684e299b27be98867c4042b0"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c8",
+     "seed": 648204087284767,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.53125,
+     "completionsSha256": "5585dcf86e2304395b7436f5d2e936a051aed207b97d4825fbd13afea4d3d259"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c9",
+     "seed": 3905550582371820,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.5,
+     "completionsSha256": "d29fc4816f88c5aed99a87947c5db993d3f71e96ff326b444547d42d6f256e2c"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c10",
+     "seed": 1143087532239163,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.4375,
+     "completionsSha256": "6e3cfdd9fddf45e07bc012fa6cfe6d484d92d4a6c9d2c0daab9195088ace9495"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c11",
+     "seed": 313187878422972,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.4375,
+     "completionsSha256": "0fa4df5b56b3031b5980dcf9c2cf6c06aeb9a670ee8be66e5bb42470ff2ca036"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c12",
+     "seed": 4017370946172513,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.53125,
+     "completionsSha256": "70ace2d26389290148fc1f71a1355f93e71f5743cea07538814377c6ad5a3f2a"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c13",
+     "seed": 3098912880022911,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.46875,
+     "completionsSha256": "afe971e20523e7fbb59b422d685927d27d672c3296a2b6ba350db562c306d0f0"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c14",
+     "seed": 2960020541339090,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.5,
+     "completionsSha256": "495158c16179c761a40af09607d8b1654a8633a6e329824084155a9067b24abc"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c15",
+     "seed": 166002784237957,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.5625,
+     "completionsSha256": "db16c17620768827e442ea16e778f3fc7e6481366b5cb2e8b8d40c9aff3ec059"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c16",
+     "seed": 2874931557818498,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.59375,
+     "completionsSha256": "ad35b4a9a3a9fa7297e1aeb51cc6494f5e619a4776994847ab0d149e2ab29d34"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c17",
+     "seed": 3502136498260358,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.59375,
+     "completionsSha256": "0814cb0323307cd179f3807f691e72b653339147e0f5f020c8687609f900e51c"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c18",
+     "seed": 2535006113451487,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.5625,
+     "completionsSha256": "23b9fbf3a1ff98a555f6554ea6244b0acd56a3942043523f19043e5e2fa3489a"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c19",
+     "seed": 3201892091616891,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.4375,
+     "completionsSha256": "fb6df757251d4652765383543acd783b5219b996b14be2437dd071f5211a369b"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c20",
+     "seed": 3709059885167386,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.34375,
+     "completionsSha256": "43773281e2998276efaf3e3771c1cbd5bd840ab489055f1c62b8b1cd42e6957e"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c21",
+     "seed": 3671120224506574,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.46875,
+     "completionsSha256": "a730e42e5b0c15d38a631e1af44ef3ed440b6ed0863b5f56c18ce48b0f217fa9"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c22",
+     "seed": 1639930346383506,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.5,
+     "completionsSha256": "a6c998d18baa6db7f988b7aa841c97ad3fe0eaeece8f70e8ba11f5223d8a3e17"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c23",
+     "seed": 987711975402631,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.40625,
+     "completionsSha256": "6f8bc03aa043df4fd263f94d7d316d738cf11310b6b99d9d76678ea9f52baff4"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c24",
+     "seed": 4141108136987171,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.375,
+     "completionsSha256": "a1ce188653e8f4301b7e266a3608e60e5f954734b566955346e5204103a67820"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c25",
+     "seed": 924816856026508,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.53125,
+     "completionsSha256": "e771b709cbfe8ac5a29c004b94d03e271a6065e80fe0ae4242da24f3a4b73c45"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c26",
+     "seed": 1284606771973431,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.3125,
+     "completionsSha256": "18954844611c1fe7f3f51a2f49c9e76b7597fc8e2e65a5f3968dfffe470178b9"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c27",
+     "seed": 1833014279156601,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.34375,
+     "completionsSha256": "5deb4a38674d0845c2dff7ba6d20acabc9a8361422271256d7d3b4102b2e9a86"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c28",
+     "seed": 441312888001016,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.4375,
+     "completionsSha256": "5d09824eb4ccf92f65204f69838bf8f4d7ee8e570d43608f1cc43339cea3667e"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c29",
+     "seed": 641483284310098,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.4375,
+     "completionsSha256": "68f4361125f43a595b0ce25791e1e552c399f2c58121b825fd72cf7c8205c377"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c30",
+     "seed": 3137709174396807,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.4375,
+     "completionsSha256": "4514adbde4ce89c8c3812033ffeaf7073ef194c90ee6f841794de82535bbd55c"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g0/c31",
+     "seed": 2902890415852451,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.5,
+     "completionsSha256": "a5cc1b37a0c8f2ec1b7caabeb4a3e9b028e3e5b91fc05564a288cfa4fcc3ca9a"
+    }
+   ]
+  },
+  {
+   "generation": 1,
+   "parentSha256": "515ed41b9b2b3fc543b550a68423f74b48e1f2280398b8520db036a4c35d2211",
+   "recordHash": "1cc865d6c867cb224324f4bd81a1ea861ddaa56c5646cfb6eded5d8ba1c2aeac",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "fe99ed313f8c98c2828b2691e7a1c5cb7d2c34a755be3bb606b7b902838981ec",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 2,
+   "parentSha256": "fe99ed313f8c98c2828b2691e7a1c5cb7d2c34a755be3bb606b7b902838981ec",
+   "recordHash": "8eafe0856b3c62a70f344b79a64e5a342873391b23101ed1925d5898d19a13bb",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "248f1e959c14b385044e08735c60c3f3e675c97de6b1b9a2a20b33f46eeae0fa",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 3,
+   "parentSha256": "248f1e959c14b385044e08735c60c3f3e675c97de6b1b9a2a20b33f46eeae0fa",
+   "recordHash": "52549b756e358ba93afd062565bb12222dbd8bb0ccd4f23dad7edd12b04c1bcb",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "4a2c348e96c4617a4b197ba3f4f87e8eb277e4372c42ffade81c1afacc5ec44f",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 4,
+   "parentSha256": "4a2c348e96c4617a4b197ba3f4f87e8eb277e4372c42ffade81c1afacc5ec44f",
+   "recordHash": "8910ac4eb575081c26e108aa0405e4644a9726f199e2bc5ef2129d6e765c1632",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "a54e3081283b18cf32097eccfb9168dfaca518c00b545038bf5873ef0a65ce8f",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 5,
+   "parentSha256": "a54e3081283b18cf32097eccfb9168dfaca518c00b545038bf5873ef0a65ce8f",
+   "recordHash": "c3b9564d008a6c4f702fab0b16fec26a2d167d94b62a6f7358e649897c217c6b",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "f9e655aac2b2fec142a3fef3b5d6a1d221fbe4e7948565ecfd30b81994d35069",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 6,
+   "parentSha256": "f9e655aac2b2fec142a3fef3b5d6a1d221fbe4e7948565ecfd30b81994d35069",
+   "recordHash": "158d9b620332665c7af0682490258f72286730733a3f3ad6625257676fe42510",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "76bb1f2c152b504fa78db099979009197d66fd8ff8e300a5072c0c26afe0d0b4",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 7,
+   "parentSha256": "76bb1f2c152b504fa78db099979009197d66fd8ff8e300a5072c0c26afe0d0b4",
+   "recordHash": "44f7fcca39727e4ac5ffe68aec1eeb8a7a6c3857c103208723f13a01df8a6fbb",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "4bcdc496b977bc30a875ab450128c004ab4d0ad511499080221d035cc41e72a6",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 8,
+   "parentSha256": "4bcdc496b977bc30a875ab450128c004ab4d0ad511499080221d035cc41e72a6",
+   "recordHash": "dbb38b0bf3bbb909fa234fdfc574e5ea444f5fbff88f57d47c379ecc68ca59c2",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "6bda2b577c20a0188d7ab0c2e968ac4633c0f97d4d3f9ef71603dde0f0a17629",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 9,
+   "parentSha256": "6bda2b577c20a0188d7ab0c2e968ac4633c0f97d4d3f9ef71603dde0f0a17629",
+   "recordHash": "9f7f9ba2482c5450158dd825139ec47bd7b790f5195dc93d0883de33df082ae6",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "8fc98d1a43296dce7317423de30977a4b8f6217770860454f572259c67b54b8d",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 10,
+   "parentSha256": "8fc98d1a43296dce7317423de30977a4b8f6217770860454f572259c67b54b8d",
+   "recordHash": "d5765d512c79220eca9823cea122e7b268987d171f692b9a6c324cee6892006b",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "c47f1098237bcb85841a239a5592d2347af4fe956a8a17614427174b79760955",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 11,
+   "parentSha256": "c47f1098237bcb85841a239a5592d2347af4fe956a8a17614427174b79760955",
+   "recordHash": "586fb663415b400d39dab202f1e398e4d04c543987be60eca134fb032596c419",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "50eb05e3e60eaaa0cea737ed3f3ad2b6bfdb991381d39813a24a04acb0dcd507",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 12,
+   "parentSha256": "50eb05e3e60eaaa0cea737ed3f3ad2b6bfdb991381d39813a24a04acb0dcd507",
+   "recordHash": "38cdf8873c052955320c99b45dd594f4348181568c5c63b8f7db2a969fcbdc8b",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "3e1e414d124581ce8921331bdd9b5d4836e57a511ccefcc9ceb09fd2fded414b",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 13,
+   "parentSha256": "3e1e414d124581ce8921331bdd9b5d4836e57a511ccefcc9ceb09fd2fded414b",
+   "recordHash": "361053c1601db102a5f57434bd85bf0f05eb3808127a0ca95d390125d97a1d2f",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "78c4c742b16df41cdaa3bd2cab7276b213d22b2022359d1e32aac65a7b4eb783",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 14,
+   "parentSha256": "78c4c742b16df41cdaa3bd2cab7276b213d22b2022359d1e32aac65a7b4eb783",
+   "recordHash": "57252a85aba8aced050fe11ea645f711150d79b86bc23cfc236af1ec6f5b054b",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "0848e1a15adb90c28852e30947a2e24acce50a8f9ebea1fef11340a5f36632b2",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 15,
+   "parentSha256": "0848e1a15adb90c28852e30947a2e24acce50a8f9ebea1fef11340a5f36632b2",
+   "recordHash": "1ba440a835b7c17a4cac8a3fb10b51e194e876ef59807af56010d0c9752548b5",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "3505660d17179026e6474a75622f5b7428c9499a9ddb90a37b1e2ee927259dd7",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 16,
+   "parentSha256": "3505660d17179026e6474a75622f5b7428c9499a9ddb90a37b1e2ee927259dd7",
+   "recordHash": "f7692511978b0be3e615291bba4ce08e91318cec36002bdab57587a1c8f41a03",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "2f9eea4c828fa257358ba226c20919d3d246c5136efaedbf34adbdf16ef053ed",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 17,
+   "parentSha256": "2f9eea4c828fa257358ba226c20919d3d246c5136efaedbf34adbdf16ef053ed",
+   "recordHash": "5ce227af6fee112fbf64cb081433e1cbcd18b243383ae8f1fe9ab0281515fd59",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "b95e00fad29f73d6bfb877d8c9d18b34c1ec809e34daab34db0567fb1a3e1363",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 18,
+   "parentSha256": "b95e00fad29f73d6bfb877d8c9d18b34c1ec809e34daab34db0567fb1a3e1363",
+   "recordHash": "31aea780af8242ddc5026fa7474aa4d5d2f5a95926c9cae9a458f30f118a9397",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "acc6bd52134f354fbd168a6cac7990378d3a456221547c86704322c3151b55a2",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 19,
+   "parentSha256": "acc6bd52134f354fbd168a6cac7990378d3a456221547c86704322c3151b55a2",
+   "recordHash": "378affcd9210323c7e0963c70782e3a3f04107ee428e7aec025b861f0d8b8c50",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "24b9331212a5f9d5b7e3f4a2d32942ea5c1cba785725422d8d3e4fc98f2f45a5",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 20,
+   "parentSha256": "24b9331212a5f9d5b7e3f4a2d32942ea5c1cba785725422d8d3e4fc98f2f45a5",
+   "recordHash": "508754a44dd48c1d7089a7b5f1a35e7cda1196bd0b3c229113e9938d1d66c221",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "b4c71869b030d694aa6e9355e9960f93691e21f49ce0cacf9470bf91cf566469",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 21,
+   "parentSha256": "b4c71869b030d694aa6e9355e9960f93691e21f49ce0cacf9470bf91cf566469",
+   "recordHash": "61ed673fe42fedb2e373167b087e5ea929ace3b8a1447057a4ddf0889f4b069c",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "f700e1809690aefb2331c6d424bf71778a5c76accf5f3662d40c9ea38262a02a",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 22,
+   "parentSha256": "f700e1809690aefb2331c6d424bf71778a5c76accf5f3662d40c9ea38262a02a",
+   "recordHash": "1d7a0f66ee6f47a0645d31a6d147322d6d0a6d35da625c109dca3db6479215c7",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "129ed524d16fc64f9cbf125436b23c90b86e2d794f7a50ab56397daae58fc3b3",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 23,
+   "parentSha256": "129ed524d16fc64f9cbf125436b23c90b86e2d794f7a50ab56397daae58fc3b3",
+   "recordHash": "6adbe5d7fe954f1e46cea63aaaf65a2a47a145daa299e8193aa935d07f5ff315",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "e613ac76036e8a50bdbaefbcd17ac84e91d839f9e118548fabe6b2c7a6b322ae",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 24,
+   "parentSha256": "e613ac76036e8a50bdbaefbcd17ac84e91d839f9e118548fabe6b2c7a6b322ae",
+   "recordHash": "10ed45e54824b9c68547d2375e7be763e75539ef506e6f8276bacde927a97bf0",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "ed0b28b87ea3500e71532e94975864657f02dace07d28697656aa70252c908e2",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 25,
+   "parentSha256": "ed0b28b87ea3500e71532e94975864657f02dace07d28697656aa70252c908e2",
+   "recordHash": "59fa2aa956f71887758b42992f32166ea6b3adee7a55512dda2e16c3c77d4a94",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "b4f9f4a77abbdc34d8a0c09ee1bb794dfed8427f112205e58793eda61ac83d96",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 26,
+   "parentSha256": "b4f9f4a77abbdc34d8a0c09ee1bb794dfed8427f112205e58793eda61ac83d96",
+   "recordHash": "216bdd9debb61c6bee422cdafb453dbe433444c43415135dc59ebb4fd631b58c",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "72137c18cb5d8881cd9474f18982ac4861a5371ef0fa9afba9968ac146a9e1b8",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 27,
+   "parentSha256": "72137c18cb5d8881cd9474f18982ac4861a5371ef0fa9afba9968ac146a9e1b8",
+   "recordHash": "ff629e968514f90c7641faa47d039439d1fcf4e6c9ce8954b3614695c5b1e871",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "77d1a7bb3ce1c5c07d592f550357797221c1a1386c1016da7cc786c2de437fba",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 28,
+   "parentSha256": "77d1a7bb3ce1c5c07d592f550357797221c1a1386c1016da7cc786c2de437fba",
+   "recordHash": "27806727854085c2859f09d6b1fadf677875a3af683f3e8b77d3e0853c35fb10",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "bea5731cec772e91b336b55ba73db194cc2bdc0b7aa7261597a823ebd0f7ebce",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 29,
+   "parentSha256": "bea5731cec772e91b336b55ba73db194cc2bdc0b7aa7261597a823ebd0f7ebce",
+   "recordHash": "4dec384927b5a80cc6a0122eea1361cc4f7ce34af4612243c58317b955706c0b",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "ee74edfed2fe572b369c0527c7f52b0937f9b363fb82812d3050e6b5b04d1275",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 30,
+   "parentSha256": "ee74edfed2fe572b369c0527c7f52b0937f9b363fb82812d3050e6b5b04d1275",
+   "recordHash": "c3274af9d5572505b1dea78494126c24b3122f97ac663715490cae9fbe2461f0",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "edf3f225ed432e3e0f24544e712732ce335e84668b234254e4f049631710fed7",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 31,
+   "parentSha256": "edf3f225ed432e3e0f24544e712732ce335e84668b234254e4f049631710fed7",
+   "recordHash": "887f6ec32c19080ab80bf5aa979754d1288510228fef6331ee2f2c929ec9b4df",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "79590425843958ad51373cf5b2833ce0ce58d521e35090b76eb7095f70bae96e",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 32,
+   "parentSha256": "79590425843958ad51373cf5b2833ce0ce58d521e35090b76eb7095f70bae96e",
+   "recordHash": "8557943d69185a99c04e405abe936ac9fb91909c25a47f890713b4134fd6c7df",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "8cdc46ba7f94abc4793ea9fdfe112363c70442d2a5b02aebfcde021e573b6eb0",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 33,
+   "parentSha256": "8cdc46ba7f94abc4793ea9fdfe112363c70442d2a5b02aebfcde021e573b6eb0",
+   "recordHash": "5c03504f3ba3c4149dd4dba6f56dc15736cdfa72a51869ba1de29f275720c41a",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "176d389ecf3f374137396d7aa0480e7cfe6ba99e724838e57fbe47bd401d5d83",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 34,
+   "parentSha256": "176d389ecf3f374137396d7aa0480e7cfe6ba99e724838e57fbe47bd401d5d83",
+   "recordHash": "d5186bd25509419908fa5f95559dd9e8ce3b3b2a2cdb616093d5e217db20b6da",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "06e454031c8365e855ae7db829ec3d51f56c68400c37cc207f7d491bfab5b4df",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 35,
+   "parentSha256": "06e454031c8365e855ae7db829ec3d51f56c68400c37cc207f7d491bfab5b4df",
+   "recordHash": "2e26cbecf3e2f5094e860801285984c92c3378da8e6a4e27b8a466596fd2ca8f",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "818ffd49925e95c76dcd944dd95ea926c3a387b54d558e15293f6abe464c4cd0",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 36,
+   "parentSha256": "818ffd49925e95c76dcd944dd95ea926c3a387b54d558e15293f6abe464c4cd0",
+   "recordHash": "10f3a672f4ad86a41ac546c7b6089c90f6068542eba48638894da654876dd8bc",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "ddce38f234a652ddaaa9106228bc59b4d573ac25812cc7f5dca72355c39450d6",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 37,
+   "parentSha256": "ddce38f234a652ddaaa9106228bc59b4d573ac25812cc7f5dca72355c39450d6",
+   "recordHash": "6250b91e57afb76902138471826638347c32edd075ffdd340f02587bbc72a9a3",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "8550c3bdf5750a0377f73698332b8e2ad308318c8f22f996e67281ab07ed74a6",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 38,
+   "parentSha256": "8550c3bdf5750a0377f73698332b8e2ad308318c8f22f996e67281ab07ed74a6",
+   "recordHash": "64045e52f163a7be67777df671ee9151030b04229d46c4f4f6e543e1feb6f6c9",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "d96aed82b150ec6ca957f79d133a2e83aea85112e75fcc13b08f9071b3ddc8b5",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 39,
+   "parentSha256": "d96aed82b150ec6ca957f79d133a2e83aea85112e75fcc13b08f9071b3ddc8b5",
+   "recordHash": "8027fa604b670866d7fb1595f04237907a8eb280e835208acdb449718e213ada",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "3e930af80b47f8771d451c67ff01602ae7e20c7e9fc9aa84e65b0fbfd09a590d",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 40,
+   "parentSha256": "3e930af80b47f8771d451c67ff01602ae7e20c7e9fc9aa84e65b0fbfd09a590d",
+   "recordHash": "a62df89022ade534f556bec250f1a3048f4483e72c0528d568bf83ac0ec46b1f",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "2983eff79e60aa3a74ba2bd9092d6d84aa765c4f168847cb095a02eae60fc3cd",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 41,
+   "parentSha256": "2983eff79e60aa3a74ba2bd9092d6d84aa765c4f168847cb095a02eae60fc3cd",
+   "recordHash": "522eb880f5420ddee82439c2b9147b3d5314eef87cf2a4e71a3d802302eab523",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "709eec56ba293bbe19666e55b7681d64213a75c2e35b851055be58bda14060d6",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 42,
+   "parentSha256": "709eec56ba293bbe19666e55b7681d64213a75c2e35b851055be58bda14060d6",
+   "recordHash": "dd2031f6318ec3f2dea54a4ac3de8d661bd97f412d60d56854fdfe4a80ef3033",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "a4a4977e479a3ae5408b8dda82536f7ad39c5784c0b4b93f93b5b4c2cb1b4568",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 43,
+   "parentSha256": "a4a4977e479a3ae5408b8dda82536f7ad39c5784c0b4b93f93b5b4c2cb1b4568",
+   "recordHash": "3b46c54d87293980a5899823d9169dc43e0afac437bf0d27a63fa08aba52e911",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "7bbb6440844819bc18c47095c128a1ecc2ce0f9957ff3f6d37e85748713a2436",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 44,
+   "parentSha256": "7bbb6440844819bc18c47095c128a1ecc2ce0f9957ff3f6d37e85748713a2436",
+   "recordHash": "7aec8f8ff9e771f37e9cc926f662918f6109560ba4ce081c1bfa4cf953a0e94c",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "31d05fab5bc23adfff2ddbd92713a7a636b6ef939262c84c869d3c3a97fb790e",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 45,
+   "parentSha256": "31d05fab5bc23adfff2ddbd92713a7a636b6ef939262c84c869d3c3a97fb790e",
+   "recordHash": "8c3766dd18ce25c0ccabb6ce1ed633fc59f5dbdd964f39d865781caca3f55204",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "a17a00f14f19f08a3cfc0fc37208d467ee1cfb573cec554e5f258caebb92abc3",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 46,
+   "parentSha256": "a17a00f14f19f08a3cfc0fc37208d467ee1cfb573cec554e5f258caebb92abc3",
+   "recordHash": "3fc4474fcd76660624aad1452ebb37bdc5ea3d3fc4d41e0694d67e72179d51a7",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "3b14b639799c5bdcb1ff8b97de50e4f0f626699c048a5287802468d1ca1e1411",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 47,
+   "parentSha256": "3b14b639799c5bdcb1ff8b97de50e4f0f626699c048a5287802468d1ca1e1411",
+   "recordHash": "36e47dd61a63460477dafd984e00cbb19bfbf1aa515ff5906d5b05ea13ac879a",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "6a5a3fbe5fd613bcb4d390d52b2fc1cad6b4941987ea714dd6d7178b9c772d81",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 48,
+   "parentSha256": "6a5a3fbe5fd613bcb4d390d52b2fc1cad6b4941987ea714dd6d7178b9c772d81",
+   "recordHash": "f71d259e7f7fb8c182224c15a2d7d45ede1db08a992ba30e880fe5ab2425d88f",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "b66e810984b9ab016b65c528fd43f032742b3f300ea7a4eb5c602ebf26e8f05c",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 49,
+   "parentSha256": "b66e810984b9ab016b65c528fd43f032742b3f300ea7a4eb5c602ebf26e8f05c",
+   "recordHash": "5cbdefa88e6838ab5a38b16817dcabadec0c87314ee9bf559d605c06f7ed9f70",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "60748dd436436385f5c6b4c36f77657865dab97fd5983ce53928088dfedc291f",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 50,
+   "parentSha256": "60748dd436436385f5c6b4c36f77657865dab97fd5983ce53928088dfedc291f",
+   "recordHash": "8faa11fca6c035263f63f8abbb200c70b193340d1d8db1ff334350dcd7273924",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "509baea60cbcce02484f9bb64b5bd24533e9eec1f8483b82c0498958073c4501",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 51,
+   "parentSha256": "509baea60cbcce02484f9bb64b5bd24533e9eec1f8483b82c0498958073c4501",
+   "recordHash": "eabcb6276f3d56532c2d967eacec90e0f9f52b4ff134fed2626a60afc8ba8b3c",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "a11ba96e4b01608b8c2f7c08610da3b524116974b522133287306851cfa03dc2",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 52,
+   "parentSha256": "a11ba96e4b01608b8c2f7c08610da3b524116974b522133287306851cfa03dc2",
+   "recordHash": "13010a275111f76c6942e31821cc880223db5d047224e1194b93a76fb1de572d",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "9281a94d366f0746a893c15b8bccc87ef45bca4f293ced3d47bf4a3712d8e509",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 53,
+   "parentSha256": "9281a94d366f0746a893c15b8bccc87ef45bca4f293ced3d47bf4a3712d8e509",
+   "recordHash": "c6b916517cf5bb193f06d67a042f5069d4eff349e9126cc5b6ab6f9165c54714",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "959326eceef343f4be52ea4d6bb34c78a904ea176db1798689d5f47ba1b3c590",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 54,
+   "parentSha256": "959326eceef343f4be52ea4d6bb34c78a904ea176db1798689d5f47ba1b3c590",
+   "recordHash": "a5b0a2df230955507c2cd54a98c2965081f3c7ba90dfce6ba35b318c09e08f55",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "da552a18eba1765aeae735de2d0f295ab39bdc52401548c59264141d2b1223c6",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 55,
+   "parentSha256": "da552a18eba1765aeae735de2d0f295ab39bdc52401548c59264141d2b1223c6",
+   "recordHash": "4999872e02a5a733bd0771bddde0d8d1264d0e07c08c08357a6dd6e2a692801c",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "493d7b7810405b82d1757dbd5851c5f1a2e152cb0388464194e671a8efdea28f",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 56,
+   "parentSha256": "493d7b7810405b82d1757dbd5851c5f1a2e152cb0388464194e671a8efdea28f",
+   "recordHash": "977d57673c8d88f6243e9c273f254737dd3ba6fc063ccccfb01e7bb76a8aa546",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "b627a037be7d2ff6a6c19c49d0cce55916271f8f1f46e23a7e614ec3134455e2",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 57,
+   "parentSha256": "b627a037be7d2ff6a6c19c49d0cce55916271f8f1f46e23a7e614ec3134455e2",
+   "recordHash": "261e1d81a18d60b78e23344e58262a281b92649bf0ec283ca7aa257d2889844e",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "8644408700e5ebc784d741a291f0edf348134897e9fbc7526cf4e52e14cfee0f",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 58,
+   "parentSha256": "8644408700e5ebc784d741a291f0edf348134897e9fbc7526cf4e52e14cfee0f",
+   "recordHash": "d3c8803e8235339f6b258006863061f1d2401866a0b2f7d0d03132eb97d50e6c",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "e31c1766ba16f0d8ed001df377f2f4d67fa8d4c5e3a98e78c5852042dc7bed22",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 59,
+   "parentSha256": "e31c1766ba16f0d8ed001df377f2f4d67fa8d4c5e3a98e78c5852042dc7bed22",
+   "recordHash": "245c11e6079dcdfbd2b04c0e28e2f46154fe2ad83b5ba52d62dedf219499903b",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "773c723a81029b3fe9d6ab6cca939b1afcb19afbed1b7ebc93f38e3a5bd850ff",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 60,
+   "parentSha256": "773c723a81029b3fe9d6ab6cca939b1afcb19afbed1b7ebc93f38e3a5bd850ff",
+   "recordHash": "6b6f8accd3e5925e23e2e815cce952117c55b0a0630138d86548d85f4904ef1a",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "ba1de09f25f5c7c5369f5a0826e1861ba0c34a4fa3ce36ff5d482f2d9bd6952a",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 61,
+   "parentSha256": "ba1de09f25f5c7c5369f5a0826e1861ba0c34a4fa3ce36ff5d482f2d9bd6952a",
+   "recordHash": "776f9a082f83bf60ba266d22c082b3c19b599e6ad097b802abe2e4665ce5d6ba",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "7639b3dd6f63f4b6c73e6bdbe2b0c832e7c705bd5ae48656e10bf523187a1ccb",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 62,
+   "parentSha256": "7639b3dd6f63f4b6c73e6bdbe2b0c832e7c705bd5ae48656e10bf523187a1ccb",
+   "recordHash": "ff89072a2ac99d1b156b251fe6f11b3b4aa6e6bb938163034c5f018c9658d175",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "648c2084d98ea3d88036f02534dd34c4af9cdaaaea8339e1985a9c317f2577dc",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 63,
+   "parentSha256": "648c2084d98ea3d88036f02534dd34c4af9cdaaaea8339e1985a9c317f2577dc",
+   "recordHash": "cf810623d49da704a565717250c0f475d4b16fb42540f3bf58e65bb8c82d6ff9",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "02e922217cb9af748bc8c448596ea848a97efc37bf1adfa02f8677f2874f2e09",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 64,
+   "parentSha256": "02e922217cb9af748bc8c448596ea848a97efc37bf1adfa02f8677f2874f2e09",
+   "recordHash": "46bbae5f7634dce96e5ba18eab9e14cfc9f8ee8df415d1b0e51aab5393d3efc2",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "f280f2fb92e00230b30ed5e46a85d63da75d33c9c818ee7926c986a0d64ceabb",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 65,
+   "parentSha256": "f280f2fb92e00230b30ed5e46a85d63da75d33c9c818ee7926c986a0d64ceabb",
+   "recordHash": "e37593b241ed6b1ddd84b63392f858d7611614d231936b34c6da0f4b718e2327",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "79df9c0812819d95a362c3d5c6d3e27c121558b60ffefc7921c5edaef22d40c2",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 66,
+   "parentSha256": "79df9c0812819d95a362c3d5c6d3e27c121558b60ffefc7921c5edaef22d40c2",
+   "recordHash": "529e47a88f109bd1180f1a65ffb0cc6bc77ff189db16c39831afa0b516c72912",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "58e566f71e5d244d175b7cfa280f1b983cf75d6722f69e06ce5fb76e379f8053",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 67,
+   "parentSha256": "58e566f71e5d244d175b7cfa280f1b983cf75d6722f69e06ce5fb76e379f8053",
+   "recordHash": "6ae20c6ee9a5cd11facc4ae8a86c0f8d800ac4a76b95d7de51a6c63613c3ac9c",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "0e3f811c6fef13276591d0deb4a38f587d82b0ff1e45e85c0d5fcaba7c087be7",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 68,
+   "parentSha256": "0e3f811c6fef13276591d0deb4a38f587d82b0ff1e45e85c0d5fcaba7c087be7",
+   "recordHash": "e1c23af4daac2f955bb8725a5ded275604dc2dea7bfcd839ff32ecd2baeb2dbf",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "c1c7826283a46f1cc68591f4f0174610ca837f3e5cf5ebfc758a7634a7c91ea1",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 69,
+   "parentSha256": "c1c7826283a46f1cc68591f4f0174610ca837f3e5cf5ebfc758a7634a7c91ea1",
+   "recordHash": "cfd92f47d97f64afa806575bbade0e40b09441d1dd0afc9ed39a6543a2e81723",
+   "regenerated": false,
+   "rewardsEqualRecord": null,
+   "childSha256": "9b829ed9bc1c46312ae0caf9527f00e8d483680dcef4e5cbc6a61050489e131d",
+   "childEqual": true,
+   "candidates": []
+  },
+  {
+   "generation": 70,
+   "parentSha256": "9b829ed9bc1c46312ae0caf9527f00e8d483680dcef4e5cbc6a61050489e131d",
+   "recordHash": "93c770c208e5170cad84524660595ef35b6000ed26fc05c958512908ca00377a",
+   "regenerated": true,
+   "rewardsEqualRecord": true,
+   "childSha256": "43ec49ceeae05db9bdf662262dac852523a72152ebb2c0ffb3d9859c8e86e73d",
+   "childEqual": true,
+   "candidates": [
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c0",
+     "seed": 1492720702173538,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.5625,
+     "completionsSha256": "5ac8a1d16ce6eb73873eff613d926fc1b4ebdcaa47ee0e9eb0aefc9eedfe4fae"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c1",
+     "seed": 1833869240517089,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.71875,
+     "completionsSha256": "59328c94f1c28ef30d7c50f277682c19712210e0187a923ee4ec4ec9692ffe6d"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c2",
+     "seed": 2543207394858693,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.53125,
+     "completionsSha256": "1aaffd9dea06d7003b929ab83821a5290c242d5d74283b44c62bd87eb4badcfb"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c3",
+     "seed": 4185670826963035,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.5625,
+     "completionsSha256": "4c5e08a18312cc41e479872126207dcf74256ad3d3f91ae831323b1b7e2d5de7"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c4",
+     "seed": 2645754569308000,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.5,
+     "completionsSha256": "9256be99f3e6f298ab94a1c23ec5e8ee406a1754d2b1b5c70459c32befc3284b"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c5",
+     "seed": 2943970168372004,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.6875,
+     "completionsSha256": "583b2f698e12d51504d226a7e95bc71f89104a0f92b611e00afc55af84714d35"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c6",
+     "seed": 3215477144023687,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.53125,
+     "completionsSha256": "474ec2579c8cfeb35f22001bd0b7a595d212774b5b0470af720e032a6a4ae69b"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c7",
+     "seed": 1355230960818359,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.5625,
+     "completionsSha256": "d98f6d72c536865a053ea2976157e4f8167a3fe89e9c8a6e5e839a5dfe8f9d81"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c8",
+     "seed": 2801417515789122,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.53125,
+     "completionsSha256": "177ae28afb34c139e7c65638e2bce30e4b8f76657ccd1e314dc7170ec7994e36"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c9",
+     "seed": 4023856851482024,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.65625,
+     "completionsSha256": "07040866f542f0f92c75c5ce600bcbb9caf161c3ae6537c6998cc863b73eab29"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c10",
+     "seed": 2746858688865941,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.59375,
+     "completionsSha256": "cf982988bb31d53e75656a822a9cb7b0440206421687b6aba813eefac4101827"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c11",
+     "seed": 2688783612739548,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.5,
+     "completionsSha256": "1755875b66f4851eb311134d0c525b491a307ffa338160f32aeae66876b5b601"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c12",
+     "seed": 4213812152587382,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.625,
+     "completionsSha256": "f4d46ec1c01d48b394c6c4926aec02a45a0d15b5ff3570b8ab9b3b3098e74d09"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c13",
+     "seed": 75895599393676,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.59375,
+     "completionsSha256": "389ebcbc18f492b789daca8a29f66a370a7bea168299ba6c5261ac0d6a5570dc"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c14",
+     "seed": 2207871284526412,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.53125,
+     "completionsSha256": "495a8fbf4aef1895b296ab8e809b940a7446ee49389456b9552609028fb508c5"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c15",
+     "seed": 2887123419774366,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.625,
+     "completionsSha256": "537551dc2c2ff15872fb8b9e34895b3c93a41e8c9ee02ca96c353c4f23091f9a"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c16",
+     "seed": 149112523432704,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.625,
+     "completionsSha256": "8181a4a7549919b1c48dff23789f79d0e29065d112a5742221fe24b8ebfe95b5"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c17",
+     "seed": 1853162142311773,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.65625,
+     "completionsSha256": "628465d4eff0be8dd3d75ab006811366e65001333a11be253bd35f6a1aedb035"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c18",
+     "seed": 3869087557375509,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.59375,
+     "completionsSha256": "6bd9064b06d9448631d4863032f1b618b43cd60c75007958c6661086d05b4b83"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c19",
+     "seed": 1322546742727158,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.59375,
+     "completionsSha256": "0077b95b609f76f64bfca920749e5b4d0cfb17c11e2fb74bfb9d8ded54865b58"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c20",
+     "seed": 196841933313171,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.5625,
+     "completionsSha256": "96abf0c4afc2ff571a7844056bedeb2e395caf03789ccb800e7d90c52aaff10b"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c21",
+     "seed": 4388518009688311,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.65625,
+     "completionsSha256": "3d3602d8c8586310da2fc9bada34a2158840b892e8672430b67d22a30c8498d6"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c22",
+     "seed": 1494463437416875,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.5,
+     "completionsSha256": "df5756723396698e24cd2b09b05959bf24afbdc5d598a14903a082a1797e6662"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c23",
+     "seed": 3196944318081177,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.59375,
+     "completionsSha256": "f9663b1baa1b912094be498d4059a290ca61df360f4ff606c36138ea176777a7"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c24",
+     "seed": 4061680554694764,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.46875,
+     "completionsSha256": "f422bbc14039117864a265efcf9a33949efff0deaa08fa4b1c1e7a43a8f4f2fb"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c25",
+     "seed": 3645097956493404,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.53125,
+     "completionsSha256": "905041325320c9fcfaa61a499cee1ff4607109659151dd8a02e9b3131a73c30e"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c26",
+     "seed": 4160588491514008,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.5,
+     "completionsSha256": "b032d2c9b80055119a8cd0802e9a3fd4bca4feb90719e3fd2a979b0d9509546f"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c27",
+     "seed": 944480256401570,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.59375,
+     "completionsSha256": "55dabd516cc996ddc034cb801da930115f247ff3efcea8098d42ca0f7173b8b9"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c28",
+     "seed": 3903058078630174,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.5625,
+     "completionsSha256": "2e9c26933215f3ba8c1b53e5e00ad809cba50387e73cba22371278f7c9b212be"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c29",
+     "seed": 2144598686483433,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.65625,
+     "completionsSha256": "cd708db69035bd3af2c791449ad8392ecda63e04c81099f57e822727630665a0"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c30",
+     "seed": 3602665096922930,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.5,
+     "completionsSha256": "c3f606da7ec6eaa2cfadc342669643e34c0f9a964665a57bb0b858b5bb460c6a"
+    },
+    {
+     "candidateId": "fa67c66c203a4afaaaad9f9215656e4d/g70/c31",
+     "seed": 1606364272139341,
+     "textsEqual": true,
+     "textsHashEqual": true,
+     "rewardEqual": true,
+     "reward": 0.59375,
+     "completionsSha256": "a7b00a2e995b348bcf79ee6fdcebf3f8d50eb4cf5ef2d1ce6d4ea7af10f7b2ec"
+    }
+   ]
+  }
+ ],
+ "receiptHash": "670607767bd50381411a06e38f3a61401c955d4b13aa4dce0b15abd52b13e84b"
+}

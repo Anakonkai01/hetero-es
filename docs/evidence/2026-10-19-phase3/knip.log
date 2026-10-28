@@ -1,0 +1,76 @@
+Unused files (26)
+desktop/server/electron/preload.cjs                     
+desktop/worker/electron/preload.cjs                     
+frontend/.scratch/dbg-palette.mjs                       
+frontend/.scratch/dbg-png.mjs                           
+frontend/.scratch/dbg-present.mjs                       
+frontend/.scratch/find404.mjs                           
+frontend/.scratch/shot-live.mjs                         
+frontend/.scratch/shot-pages.mjs                        
+frontend/src/components/workers/WorkerTable.tsx         
+frontend/src/components/workspace/WorkerMetrics.tsx     
+frontend/src/components/workspace/WorkerRegistration.tsx
+frontend/src/lib/datasetValidation.ts                   
+frontend/src/types/metric.ts                            
+packages/product-ui/tests/fleet.test.cjs                
+packages/product-ui/tests/preferences.test.mjs          
+scripts/audit-web-pages.mjs                             
+scripts/check-i18n.mjs                                  
+scripts/check-linux-packaged.cjs                        
+scripts/check-linux-server.cjs                          
+scripts/check-web-experiments.mjs                       
+scripts/check-web-live.mjs                              
+scripts/check-web-onboarding.mjs                        
+scripts/check-web-showcase.mjs                          
+scripts/check-worker-onboarding.cjs                     
+scripts/check-worker-station.cjs                        
+scripts/record-live-run.mjs                             
+Unused dependencies (3)
+tar                        desktop/server/package.json     
+@fontsource/ibm-plex-mono  packages/product-ui/package.json
+@fontsource/ibm-plex-sans  packages/product-ui/package.json
+Unused devDependencies (3)
+electron-builder  desktop/server/package.json     
+@playwright/test  desktop/worker/package.json:23:6
+playwright        frontend/package.json:30:6      
+Unused exports (18)
+enabled                                       desktop/server/electron/autostart.cjs:18:17 
+set                                           desktop/server/electron/autostart.cjs:18:25 
+addresses                                     desktop/server/electron/service.cjs:138:25  
+createWorkspace                api            frontend/src/api/access.ts:8:14             
+updateProfile                  api            frontend/src/api/access.ts:13:14            
+deleteWorkspace                api            frontend/src/api/access.ts:14:14            
+getDatasets                    api            frontend/src/api/access.ts:15:14            
+inviteMember                   api            frontend/src/api/access.ts:17:14            
+getMyInvitations               api            frontend/src/api/access.ts:18:14            
+acceptInvitation               api            frontend/src/api/access.ts:19:14            
+downloadFile                        function  frontend/src/api/client.ts:82:23            
+browserNotificationsSupported                 frontend/src/hooks/useNotifications.ts:11:14
+setBrowserNotifications             function  frontend/src/hooks/useNotifications.ts:20:23
+COMPARE_COLORS                                frontend/src/lib/chartColors.ts:1:14        
+shortGpuName                        function  frontend/src/lib/format.ts:70:17            
+fromDashboard                                 frontend/src/lib/navigation.ts:9:14         
+isStarting                          function  frontend/src/lib/runFrame.ts:37:17          
+TASK_FIELDS                                   frontend/src/types/dataset.ts:1:14          
+Unused exported types (21)
+StationAssignment   type       desktop/worker/src/station.ts:2:13             
+Mode                type       desktop/worker/src/station.ts:9:13             
+Installer           type       frontend/src/hooks/useInstallerManifest.ts:3:13
+Manifest            type       frontend/src/hooks/useInstallerManifest.ts:4:13
+SeriesPoint         type       frontend/src/lib/compare.ts:6:13               
+Card                type       frontend/src/lib/diagramLayout.ts:3:13         
+TimelineJob         type       frontend/src/lib/runFrame.ts:5:13              
+TimelineGeneration  type       frontend/src/lib/runFrame.ts:9:13              
+TimelineMark        type       frontend/src/lib/runFrame.ts:13:13             
+Packet              type       frontend/src/lib/runFrame.ts:25:13             
+GenerationFrame     type       frontend/src/lib/runFrame.ts:26:13             
+WorkspaceRole       type       frontend/src/types/access.ts:1:13              
+WorkspaceMember     interface  frontend/src/types/access.ts:31:18             
+DatasetTask         type       frontend/src/types/dataset.ts:6:13             
+DatasetSplit        type       frontend/src/types/dataset.ts:7:13             
+DatasetUpload       interface  frontend/src/types/dataset.ts:14:18            
+SchedulerPolicy     type       frontend/src/types/experiment.ts:15:13         
+SyncMode            type       frontend/src/types/experiment.ts:17:13         
+GenerationStatus    type       frontend/src/types/generation.ts:1:13          
+WorkerProfile       interface  frontend/src/types/worker.ts:12:18             
+EnergyObservation   interface  packages/product-ui/src/telemetry.tsx:5:18     

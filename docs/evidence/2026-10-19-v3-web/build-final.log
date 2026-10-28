@@ -1,0 +1,122 @@
+vite v8.3.4 building client environment for production...
+transforming...
+✓ 279 modules transformed.
+rendering chunks...
+computing gzip size...
+../.scratch/v3-web-preview/index.html                                                     1.17 kB │ gzip:   0.45 kB
+../.scratch/v3-web-preview/assets/ibm-plex-mono-vietnamese-400-normal-DDuiU_S-.woff       5.62 kB
+../.scratch/v3-web-preview/assets/ibm-plex-mono-cyrillic-ext-400-normal-DMdlQ8Kv.woff     5.82 kB
+../.scratch/v3-web-preview/assets/ibm-plex-mono-vietnamese-400-normal-BulugwFq.woff2      5.86 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-vietnamese-400-normal-fK1oJ5dG.woff       6.39 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-vietnamese-700-normal-BV5B8Are.woff       6.42 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-vietnamese-600-normal-DgdngZtN.woff       6.58 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-vietnamese-500-normal-BEb3_waV.woff       6.58 kB
+../.scratch/v3-web-preview/assets/ibm-plex-mono-cyrillic-ext-400-normal-xuaO2J-f.woff2    6.91 kB
+../.scratch/v3-web-preview/assets/ibm-plex-mono-cyrillic-400-normal-CEL4l2ZJ.woff         7.20 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-vietnamese-400-normal-DG4YqDda.woff2      8.20 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-vietnamese-700-normal-CkEo6LDy.woff2      8.22 kB
+../.scratch/v3-web-preview/assets/ibm-plex-mono-cyrillic-400-normal-BSMlKf0J.woff2        8.35 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-vietnamese-500-normal-e4dixQRQ.woff2      8.41 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-vietnamese-600-normal-DpPYBSTl.woff2      8.46 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-greek-700-normal-CkZN0sRy.woff            8.74 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-greek-400-normal-D9ESIMu3.woff            8.76 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-greek-500-normal-CuWXN6rf.woff            9.14 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-greek-600-normal-D-CqTdkO.woff            9.22 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-greek-700-normal-wyJ6jzdA.woff2           9.92 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-greek-400-normal-_efipK4i.woff2           9.94 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-cyrillic-ext-700-normal-DCQwxkRk.woff    10.16 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-cyrillic-ext-400-normal-Dsrv2Tcn.woff    10.28 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-greek-600-normal-DzTrcv_p.woff2          10.36 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-greek-500-normal-JMMifIXV.woff2          10.37 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-cyrillic-ext-500-normal-DB5PtV2g.woff    10.59 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-cyrillic-ext-600-normal-Bz0x94Yp.woff    10.61 kB
+../.scratch/v3-web-preview/assets/ibm-plex-mono-latin-ext-400-normal-D3D2R8hC.woff       11.76 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-cyrillic-ext-700-normal-BmRLXWpJ.woff2   12.05 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-cyrillic-ext-400-normal-g30qAdWV.woff2   12.14 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-cyrillic-ext-600-normal-DUMzJB7m.woff2   12.30 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-cyrillic-ext-500-normal-Cs5J6C77.woff2   12.30 kB
+../.scratch/v3-web-preview/assets/ibm-plex-mono-latin-400-normal-CvHOgSBP.woff           13.14 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-cyrillic-700-normal-RFb1v-CK.woff        13.32 kB
+../.scratch/v3-web-preview/assets/ibm-plex-mono-latin-ext-400-normal-BmRBH3aV.woff2      13.34 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-cyrillic-400-normal-BTotfTJu.woff        13.51 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-cyrillic-500-normal-ByOcLdNv.woff        13.85 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-cyrillic-600-normal-BGq0mW3O.woff        13.88 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-latin-ext-400-normal-RBey6euL.woff       14.36 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-latin-ext-700-normal-DZH6Xh-4.woff       14.42 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-cyrillic-700-normal-D_uavGvn.woff2       14.57 kB
+../.scratch/v3-web-preview/assets/ibm-plex-mono-latin-400-normal-DMJ8VG8y.woff2          14.70 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-latin-ext-500-normal-D0aIdm-b.woff       14.73 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-latin-ext-600-normal-DIrixKbi.woff       14.77 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-cyrillic-400-normal-DZqxrq2p.woff2       14.80 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-cyrillic-500-normal-CocWQlwt.woff2       15.00 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-cyrillic-600-normal-71GNu3SW.woff2       15.04 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-latin-ext-400-normal-C5H60-Va.woff2      15.98 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-latin-ext-700-normal-aMgXseD4.woff2      16.18 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-latin-ext-600-normal-DOrvGEcy.woff2      16.44 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-latin-ext-500-normal-DakdToA3.woff2      16.45 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-latin-400-normal-CYLoc0-x.woff           22.10 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-latin-700-normal-Bth3BMcD.woff           22.28 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-latin-400-normal-CDDApCn2.woff2          22.58 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-latin-700-normal-Bxkt5Cjx.woff2          22.83 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-latin-600-normal-Cu4Hd6ag.woff           23.87 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-latin-500-normal-BgVn5rGT.woff           23.91 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-latin-500-normal-6ng42L7E.woff2          24.18 kB
+../.scratch/v3-web-preview/assets/ibm-plex-sans-latin-600-normal-CuJfVYMP.woff2          24.25 kB
+../.scratch/v3-web-preview/assets/index-Cux6js7q.css                                     93.40 kB │ gzip:  17.99 kB
+../.scratch/v3-web-preview/assets/workers-CXkjJVzY.js                                     0.15 kB │ gzip:   0.13 kB
+../.scratch/v3-web-preview/assets/generations-Dl55ow6u.js                                 0.19 kB │ gzip:   0.14 kB
+../.scratch/v3-web-preview/assets/EmptyState-DT_4id6T.js                                  0.24 kB │ gzip:   0.19 kB
+../.scratch/v3-web-preview/assets/navigation-C_IzqHBf.js                                  0.26 kB │ gzip:   0.18 kB
+../.scratch/v3-web-preview/assets/useEvents-JpFScwbW.js                                   0.27 kB │ gzip:   0.21 kB
+../.scratch/v3-web-preview/assets/useGeneration-DCwE5Rl3.js                               0.27 kB │ gzip:   0.21 kB
+../.scratch/v3-web-preview/assets/useArtifacts-BBeGRtyW.js                                0.27 kB │ gzip:   0.21 kB
+../.scratch/v3-web-preview/assets/useCandidates-C_uMtyQO.js                               0.28 kB │ gzip:   0.23 kB
+../.scratch/v3-web-preview/assets/useAttempt-DXpU6mLh.js                                  0.29 kB │ gzip:   0.23 kB
+../.scratch/v3-web-preview/assets/session-DQPUI3e5.js                                     0.34 kB │ gzip:   0.25 kB
+../.scratch/v3-web-preview/assets/experiments-D5VfKjxO.js                                 0.45 kB │ gzip:   0.22 kB
+../.scratch/v3-web-preview/assets/NotFoundPage-DeOIhTNn.js                                0.45 kB │ gzip:   0.28 kB
+../.scratch/v3-web-preview/assets/ProgressBar-XYiNUSIG.js                                 0.46 kB │ gzip:   0.31 kB
+../.scratch/v3-web-preview/assets/PageHeader-bAVlreIw.js                                  0.46 kB │ gzip:   0.28 kB
+../.scratch/v3-web-preview/assets/ObjectNotFound-DBp2yNBH.js                              0.58 kB │ gzip:   0.33 kB
+../.scratch/v3-web-preview/assets/QueryState-BLpxIzKn.js                                  0.66 kB │ gzip:   0.39 kB
+../.scratch/v3-web-preview/assets/useAccess-BMTjc7MI.js                                   0.66 kB │ gzip:   0.35 kB
+../.scratch/v3-web-preview/assets/rolldown-runtime-hePW80VL.js                            0.71 kB │ gzip:   0.42 kB
+../.scratch/v3-web-preview/assets/KeyValue-D74qpqGx.js                                    0.83 kB │ gzip:   0.44 kB
+../.scratch/v3-web-preview/assets/Modal-DsqxOyJA.js                                       0.86 kB │ gzip:   0.50 kB
+../.scratch/v3-web-preview/assets/useExperiment-B-xS36uS.js                               0.89 kB │ gzip:   0.55 kB
+../.scratch/v3-web-preview/assets/useQuery-DV6P0NsQ.js                                    0.93 kB │ gzip:   0.57 kB
+../.scratch/v3-web-preview/assets/EventRows-BZcaYst3.js                                   0.97 kB │ gzip:   0.50 kB
+../.scratch/v3-web-preview/assets/MyWorkersPage-BL09l1_K.js                               1.24 kB │ gzip:   0.61 kB
+../.scratch/v3-web-preview/assets/ExperimentCreatePage-2Cv_BjFX.js                        2.33 kB │ gzip:   1.10 kB
+../.scratch/v3-web-preview/assets/ExperimentLive-D5r8ylkb.js                              2.48 kB │ gzip:   1.20 kB
+../.scratch/v3-web-preview/assets/client-CNb4okPP.js                                      2.90 kB │ gzip:   1.32 kB
+../.scratch/v3-web-preview/assets/LabQueue-SbjplhhL.js                                    3.01 kB │ gzip:   1.14 kB
+../.scratch/v3-web-preview/assets/exportRun-D9UL4aFN.js                                   3.19 kB │ gzip:   1.68 kB
+../.scratch/v3-web-preview/assets/RegisterPage-r3O-uZwF.js                                3.31 kB │ gzip:   1.38 kB
+../.scratch/v3-web-preview/assets/GetStartedPage-C4e6XIP0.js                              3.39 kB │ gzip:   1.30 kB
+../.scratch/v3-web-preview/assets/LoginPage-BGe0TlNE.js                                   3.43 kB │ gzip:   1.41 kB
+../.scratch/v3-web-preview/assets/labels-DXEGxlWy.js                                      3.44 kB │ gzip:   1.38 kB
+../.scratch/v3-web-preview/assets/WorkerFleet-DiZAp0ap.js                                 3.65 kB │ gzip:   1.17 kB
+../.scratch/v3-web-preview/assets/WorkerDetailPage-B_unoFKh.js                            3.94 kB │ gzip:   1.57 kB
+../.scratch/v3-web-preview/assets/eventText-BfXtv57n.js                                   4.05 kB │ gzip:   1.32 kB
+../.scratch/v3-web-preview/assets/WorkspaceListPage-DduRnhe-.js                           4.31 kB │ gzip:   1.61 kB
+../.scratch/v3-web-preview/assets/WorkspaceDetailRoute-CUx5J-HC.js                        4.32 kB │ gzip:   1.70 kB
+../.scratch/v3-web-preview/assets/GenerationDetailPage-Diq8BDVq.js                        4.89 kB │ gzip:   1.60 kB
+../.scratch/v3-web-preview/assets/ProfilePage-2p9_kOeG.js                                 5.00 kB │ gzip:   1.58 kB
+../.scratch/v3-web-preview/assets/CandidateDetailPage-BSM4RS7P.js                         6.12 kB │ gzip:   2.07 kB
+../.scratch/v3-web-preview/assets/ArtifactsPage-6a46V2Uc.js                               6.44 kB │ gzip:   2.30 kB
+../.scratch/v3-web-preview/assets/EventsPage-KG10wEHb.js                                  7.61 kB │ gzip:   2.60 kB
+../.scratch/v3-web-preview/assets/ModelsPage-rk1kX8K-.js                                  7.73 kB │ gzip:   2.75 kB
+../.scratch/v3-web-preview/assets/ExperimentsPage-BNRBglAS.js                             8.07 kB │ gzip:   2.60 kB
+../.scratch/v3-web-preview/assets/LabDevices-Jm0TySeJ.js                                  8.47 kB │ gzip:   3.19 kB
+../.scratch/v3-web-preview/assets/ExplainPage-C_12gOVm.js                                 8.82 kB │ gzip:   3.40 kB
+../.scratch/v3-web-preview/assets/LabOperationsPage-COyRZStr.js                           9.07 kB │ gzip:   2.71 kB
+../.scratch/v3-web-preview/assets/DashboardPage-CuH-FoSk.js                              12.39 kB │ gzip:   4.09 kB
+../.scratch/v3-web-preview/assets/ComparePage-SH1suhu1.js                                13.28 kB │ gzip:   4.90 kB
+../.scratch/v3-web-preview/assets/useExperimentMutations-B6R-EeGK.js                     17.79 kB │ gzip:   4.83 kB
+../.scratch/v3-web-preview/assets/suspense-BgyOE6V6.js                                   22.08 kB │ gzip:   7.35 kB
+../.scratch/v3-web-preview/assets/ExperimentDetailPage-N4KreIsT.js                       28.65 kB │ gzip:   8.21 kB
+../.scratch/v3-web-preview/assets/src-DayHq8rH.js                                       127.27 kB │ gzip:  40.79 kB
+../.scratch/v3-web-preview/assets/index-CavUcRZ4.js                                     324.51 kB │ gzip: 101.96 kB
+
+✓ built in 139ms

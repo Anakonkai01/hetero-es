@@ -1,0 +1,14 @@
+[
+  {
+    "name": "module skips CLI execution",
+    "file": "src/heteroes/__main__.py",
+    "old": "    raise SystemExit(main())",
+    "new": "    pass"
+  },
+  {
+    "name": "installed command points to wrong callable",
+    "file": "pyproject.toml",
+    "old": "heteroes = \"heteroes.v3.__main__:main\"",
+    "new": "heteroes = \"heteroes.sdk:ESTrainer\""
+  }
+]

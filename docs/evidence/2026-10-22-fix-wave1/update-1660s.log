@@ -1,0 +1,7 @@
+add /home/anakonkai/.local/bin to your PATH (for example in ~/.bashrc)
+
+Installed. Next:
+  heteroes-worker setup     # self-test, pairing with the lab, background service, contribution ON
+  [   79 s] checking recipe v3 (lora, sign -1) 2/2
+  [   80 s] measuring update speed
+self-test passed on NVIDIA GeForce GTX 1660 SUPER

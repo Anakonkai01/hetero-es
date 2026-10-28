@@ -1,0 +1,295 @@
+........................................................................ [  2%]
+........................................................................ [  5%]
+............................................................ssssssssssss [  7%]
+sssssssssss....................................s........................ [ 10%]
+......s.....................................................s....s...... [ 12%]
+.....................sss..................................s............. [ 15%]
+...sssss................................................................ [ 18%]
+........................................................................ [ 20%]
+........................sssssss.....................s................... [ 23%]
+........................................................................ [ 25%]
+........................................................................ [ 28%]
+........................................................................ [ 31%]
+........................................................................ [ 33%]
+........................................................................ [ 36%]
+........................................................................ [ 38%]
+........................................................................ [ 41%]
+...........s............................................................ [ 44%]
+........................................................................ [ 46%]
+........................................................................ [ 49%]
+........................................................................ [ 51%]
+........................................................................ [ 54%]
+...................................F.................................... [ 56%]
+........................................................................ [ 59%]
+........................................................................ [ 62%]
+........................................................................ [ 64%]
+........................................................................ [ 67%]
+..................................sss................................... [ 69%]
+...................s...........................................s........ [ 72%]
+........................ssssssssssssssssssssssssssssssssssssssssssssssss [ 75%]
+s....................................................................... [ 77%]
+..................sss................................................... [ 80%]
+......................sss............................................... [ 82%]
+........................................................................ [ 85%]
+........................................................................ [ 88%]
+........................................................................ [ 90%]
+........................................................................ [ 93%]
+........................................................................ [ 95%]
+...............................................FF....................... [ 98%]
+...........................................                              [100%]
+=================================== FAILURES ===================================
+___ test_background_base_validation_is_waited_for_and_its_failure_is_raised ____
+
+    
+    
+    def test_background_base_validation_is_waited_for_and_its_failure_is_raised():
+        import threading
+    
+        from heteroes.product.runner import _Background
+    
+        gate, done = threading.Event(), []
+        job = _Background(lambda: (gate.wait(5), done.append(True)))
+        assert done == []
+        gate.set()
+        job.join()
+        assert done == [True]
+    
+        def fail():
+>           raise ValueError("validation failed")
+             ^^^^^^
+E           NameError: name 'pytest' is not defined
+
+tests/ledger/test_runner_scheduling.py:69: NameError
+__ test_real_runner_resumes_a_v3_point_on_a_replacement_installation[space0] ___
+
+product_assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-512/product-model4')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-512/test_real_runner_resumes_a_v3_0')
+space = {'kind': 'full'}
+
+    @pytest.mark.parametrize(
+        "space", [{"kind": "full"}, {"kind": "lora", "rank": 2, "alpha": 4, "targetModules": ["q_proj", "v_proj"]}]
+    )
+    def test_real_runner_resumes_a_v3_point_on_a_replacement_installation(product_assets, tmp_path, space):
+        root = tmp_path / "source"
+        root.mkdir()
+        cfg = product_config(product_assets, root, weightSpace=space, backupPolicy={"interval": 1, "retain": 3})
+        run_product(cfg, root)
+        point = next(p for p in (root / "recovery-points").iterdir() if read_json(p / "manifest.json")["generation"] == 0)
+        saved = tmp_path / "saved-point"
+        shutil.copytree(point, saved)
+        with sqlite3.connect(root / "ledger.sqlite") as db:
+            expected = db.execute("SELECT child_weights_sha256 FROM generation_update ORDER BY generation").fetchall()
+        selected = read_json(root / "study-selection.json")
+        shutil.rmtree(root)
+        restored = restore_point(saved, tmp_path / "replacement")
+        # Operator maps the same pinned model onto a different installation's private path.
+        new_model = tmp_path / "new-model"
+        shutil.copytree(product_assets / "model", new_model)
+        config = read_json(restored / "config.json")
+        config["modelPath"] = str(new_model)
+>       run_product(config, restored)
+
+tests/v3/test_v3_recovery.py:185: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cfg = {'runId': 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'recipeVersion': 3, 'modelPath': '/tmp/pytest-of-pc5070ti/pytest-512/tes...'4d2f4694920888ebf465f153acbef913e19eb88a', 'tokenizerRevision': '4d2f4694920888ebf465f153acbef913e19eb88a', ...}, ...}
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-512/test_real_runner_resumes_a_v3_0/replacement')
+python_scorer = None
+
+    def run_product(cfg, tmp_path, python_scorer=None):
+        import socket
+    
+        with socket.socket() as sock:
+            sock.bind(("127.0.0.1", 0))
+            port = sock.getsockname()[1]
+        cfg = {**cfg, "port": port}
+        space = cfg["weightSpace"]
+        write_json(tmp_path / "config.json", cfg)
+        # the lab sends a worker the configuration without researcher code
+        write_json(tmp_path / "worker-config.json", {k: v for k, v in cfg.items() if k != "pythonCode"})
+        env = {**os.environ, "CUDA_VISIBLE_DEVICES": "", "HETEROES_TOKEN": "fixture-secret"}
+        runner_log = (tmp_path / "runner-output.txt").open("w")
+        worker_log = (tmp_path / "worker-output.txt").open("w")
+        runner = subprocess.Popen(
+            [sys.executable, "-m", "heteroes.product.runner", str(tmp_path), "--device", "cpu"],
+            env=env,
+            stdout=runner_log,
+            stderr=runner_log,
+        )
+        worker = None
+        try:
+            wait_for(lambda: read_json(tmp_path / "runner.json", {}).get("status") == "PREPARING", runner)
+            worker = subprocess.Popen(
+                [
+                    sys.executable,
+                    "scripts/run_worker.py",
+                    "--model-path",
+                    cfg["modelPath"],
+                    "--model-manifest",
+                    cfg["modelManifestPath"],
+                    "--dataset",
+                    cfg["datasetPath"],
+                    "--run-config",
+                    str(tmp_path / "worker-config.json"),
+                    "--coordinator-url",
+                    f"http://127.0.0.1:{port}",
+                    "--worker-id",
+                    "fixture",
+                    "--device",
+                    "cpu",
+                    "--log",
+                    str(tmp_path / "worker.jsonl"),
+                    "--cache-dir",
+                    str(tmp_path / "cache"),
+                    "--chunk",
+                    "2",
+                    "--poll-seconds",
+                    "0.05",
+                    "--replay",
+                    "always",
+                ],
+                env=env,
+                stdout=worker_log,
+                stderr=worker_log,
+            )
+            wait_for(
+                lambda: (
+                    (tmp_path / "worker.jsonl").exists() and "executor_ready" in (tmp_path / "worker.jsonl").read_text()
+                ),
+                worker,
+            )
+            (tmp_path / "start.flag").touch()
+            assert worker.wait(timeout=75) == 0, (tmp_path / "worker-output.txt").read_text()[-4000:]
+            (tmp_path / "workers-stopped.flag").touch()
+            assert runner.wait(timeout=30) == 0, (tmp_path / "runner-output.txt").read_text()[-4000:]
+            assert read_json(tmp_path / "runner.json")["status"] == "COMPLETED"
+            events = [json.loads(line) for line in (tmp_path / "events.jsonl").read_text().splitlines()]
+            assert next(e for e in events if e.get("event") == "managed_start")["schedulerPolicy"] == "greedy-tail"
+            # overnight 2026-10-23: the workers load their model while the coordinator validates the base model
+            kinds = [(e.get("event"), e.get("generation")) for e in events]
+>           assert kinds.index(("preparing", 0)) < kinds.index(("validation_completed", -1)) < kinds.index(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                ("generation_open", 0)
+            )
+E           ValueError: ('preparing', 0) is not in list
+
+tests/v3/test_v3_product.py:181: ValueError
+__ test_real_runner_resumes_a_v3_point_on_a_replacement_installation[space1] ___
+
+product_assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-512/product-model4')
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-512/test_real_runner_resumes_a_v3_1')
+space = {'kind': 'lora', 'rank': 2, 'alpha': 4, 'targetModules': ['q_proj', 'v_proj']}
+
+    @pytest.mark.parametrize(
+        "space", [{"kind": "full"}, {"kind": "lora", "rank": 2, "alpha": 4, "targetModules": ["q_proj", "v_proj"]}]
+    )
+    def test_real_runner_resumes_a_v3_point_on_a_replacement_installation(product_assets, tmp_path, space):
+        root = tmp_path / "source"
+        root.mkdir()
+        cfg = product_config(product_assets, root, weightSpace=space, backupPolicy={"interval": 1, "retain": 3})
+        run_product(cfg, root)
+        point = next(p for p in (root / "recovery-points").iterdir() if read_json(p / "manifest.json")["generation"] == 0)
+        saved = tmp_path / "saved-point"
+        shutil.copytree(point, saved)
+        with sqlite3.connect(root / "ledger.sqlite") as db:
+            expected = db.execute("SELECT child_weights_sha256 FROM generation_update ORDER BY generation").fetchall()
+        selected = read_json(root / "study-selection.json")
+        shutil.rmtree(root)
+        restored = restore_point(saved, tmp_path / "replacement")
+        # Operator maps the same pinned model onto a different installation's private path.
+        new_model = tmp_path / "new-model"
+        shutil.copytree(product_assets / "model", new_model)
+        config = read_json(restored / "config.json")
+        config["modelPath"] = str(new_model)
+>       run_product(config, restored)
+
+tests/v3/test_v3_recovery.py:185: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cfg = {'runId': 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'recipeVersion': 3, 'modelPath': '/tmp/pytest-of-pc5070ti/pytest-512/tes...'4d2f4694920888ebf465f153acbef913e19eb88a', 'tokenizerRevision': '4d2f4694920888ebf465f153acbef913e19eb88a', ...}, ...}
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-512/test_real_runner_resumes_a_v3_1/replacement')
+python_scorer = None
+
+    def run_product(cfg, tmp_path, python_scorer=None):
+        import socket
+    
+        with socket.socket() as sock:
+            sock.bind(("127.0.0.1", 0))
+            port = sock.getsockname()[1]
+        cfg = {**cfg, "port": port}
+        space = cfg["weightSpace"]
+        write_json(tmp_path / "config.json", cfg)
+        # the lab sends a worker the configuration without researcher code
+        write_json(tmp_path / "worker-config.json", {k: v for k, v in cfg.items() if k != "pythonCode"})
+        env = {**os.environ, "CUDA_VISIBLE_DEVICES": "", "HETEROES_TOKEN": "fixture-secret"}
+        runner_log = (tmp_path / "runner-output.txt").open("w")
+        worker_log = (tmp_path / "worker-output.txt").open("w")
+        runner = subprocess.Popen(
+            [sys.executable, "-m", "heteroes.product.runner", str(tmp_path), "--device", "cpu"],
+            env=env,
+            stdout=runner_log,
+            stderr=runner_log,
+        )
+        worker = None
+        try:
+            wait_for(lambda: read_json(tmp_path / "runner.json", {}).get("status") == "PREPARING", runner)
+            worker = subprocess.Popen(
+                [
+                    sys.executable,
+                    "scripts/run_worker.py",
+                    "--model-path",
+                    cfg["modelPath"],
+                    "--model-manifest",
+                    cfg["modelManifestPath"],
+                    "--dataset",
+                    cfg["datasetPath"],
+                    "--run-config",
+                    str(tmp_path / "worker-config.json"),
+                    "--coordinator-url",
+                    f"http://127.0.0.1:{port}",
+                    "--worker-id",
+                    "fixture",
+                    "--device",
+                    "cpu",
+                    "--log",
+                    str(tmp_path / "worker.jsonl"),
+                    "--cache-dir",
+                    str(tmp_path / "cache"),
+                    "--chunk",
+                    "2",
+                    "--poll-seconds",
+                    "0.05",
+                    "--replay",
+                    "always",
+                ],
+                env=env,
+                stdout=worker_log,
+                stderr=worker_log,
+            )
+            wait_for(
+                lambda: (
+                    (tmp_path / "worker.jsonl").exists() and "executor_ready" in (tmp_path / "worker.jsonl").read_text()
+                ),
+                worker,
+            )
+            (tmp_path / "start.flag").touch()
+            assert worker.wait(timeout=75) == 0, (tmp_path / "worker-output.txt").read_text()[-4000:]
+            (tmp_path / "workers-stopped.flag").touch()
+            assert runner.wait(timeout=30) == 0, (tmp_path / "runner-output.txt").read_text()[-4000:]
+            assert read_json(tmp_path / "runner.json")["status"] == "COMPLETED"
+            events = [json.loads(line) for line in (tmp_path / "events.jsonl").read_text().splitlines()]
+            assert next(e for e in events if e.get("event") == "managed_start")["schedulerPolicy"] == "greedy-tail"
+            # overnight 2026-10-23: the workers load their model while the coordinator validates the base model
+            kinds = [(e.get("event"), e.get("generation")) for e in events]
+>           assert kinds.index(("preparing", 0)) < kinds.index(("validation_completed", -1)) < kinds.index(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                ("generation_open", 0)
+            )
+E           ValueError: ('preparing', 0) is not in list
+
+tests/v3/test_v3_product.py:181: ValueError
+=========================== short test summary info ============================
+FAILED tests/ledger/test_runner_scheduling.py::test_background_base_validation_is_waited_for_and_its_failure_is_raised
+FAILED tests/v3/test_v3_recovery.py::test_real_runner_resumes_a_v3_point_on_a_replacement_installation[space0]
+FAILED tests/v3/test_v3_recovery.py::test_real_runner_resumes_a_v3_point_on_a_replacement_installation[space1]
+3 failed, 2671 passed, 105 skipped in 229.10s (0:03:49)

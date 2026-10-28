@@ -1,0 +1,19 @@
+{
+  "files": {
+    "README.md": "a58b09cfc6cd5ce80b3e3018feef4e9dcda4588df4442485a4bab12b6992c4ad",
+    "harness/probe.py": "48ef2a373db10ffc74351a632994737aefcd86f5612da1e6f8c6ea60d20a2219",
+    "harness/remote.py": "913783c10b06503c19f291a4ad0c2c49358c5827fb59cb829213ea4a2c270156",
+    "harness/verify.py": "3edc9e68292c54482e97cafa81effdcb20cf7fff101a9830dc16f4a7225d14bc",
+    "raw/parity-5070ti-3060-01.json": "b5574353099982b5f7b7051502aca49f6e74e1a279305bb8527ed9c5fcc2dbfd",
+    "raw/quality-3060-01.json": "1e88ba8dcba54b46425bf7aebcafbb257e86763bf3ece4e9a5470783dab4527f",
+    "raw/quality-3060-01.log": "e9012df90d3b344aec2cbb1bc6f25a5a2980c80d33684a0c9b9a3109f3ac0d1c",
+    "raw/quality-5070ti-01.json": "200d2ccebbb86570e354bb643ed4390efdd3f02ee697ba7d7822555d7d9902a6",
+    "raw/quality-5070ti-01.log": "acc9fad2c4c051cbf6635a1b5ff30440c91d3efcd19d9b1ff41bf8c3c3a7c265",
+    "raw/remote-controller-01.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "raw/remote-launch-01.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "raw/summary-3060-01.json": "c080b696f93e0675f5bde34986a56d0366f5abd08edd7cee77802b4684e6bea5",
+    "raw/verify-01.json": "1cc5c7e0fbd0e6622dab423e638812d8a2f2ecdda6f872037d4b88ff5b1643d9",
+    "raw/verify-01.log": "a254b7ed91be61b0dea0d016118377c31c084f7fc8cc8f1ad84f7edef654f3ef"
+  },
+  "limits": "Listed experiment integrity only; acceptance scopes are in README."
+}

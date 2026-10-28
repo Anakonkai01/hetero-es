@@ -1,0 +1,9 @@
+5070ti-linux   qwen  short32    8746.3 ->   8922.1 (+2.01%)
+5070ti-linux   qwen  chat128    8865.7 ->   9108.7 (+2.74%)
+5070ti-linux   smol  short32    8372.1 ->   8526.7 (+1.85%)
+5070ti-linux   tiny  short32    4534.6 ->   4644.3 (+2.42%)
+3060-wsl2      qwen  short32    2693.2 ->   2747.2 (+2.01%)
+3060-wsl2      qwen  chat128    2638.3 ->   2693.0 (+2.07%)
+3060-wsl2      smol  short32    2666.5 ->   2786.5 (+4.50%)
+3060-wsl2      tiny  short32    1380.6 ->   1404.8 (+1.76%)
+All trained parent/canonical ±/restore, EOS and sealed comparisons passed.

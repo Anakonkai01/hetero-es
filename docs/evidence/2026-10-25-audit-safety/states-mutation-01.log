@@ -1,0 +1,13 @@
+control ok    | 10 passed in 0.18s
+killed       missing-is-not-matched | 5 failed, 5 passed in 0.18s
+killed       any-mismatch-wins | 1 failed, 9 passed in 0.18s
+Traceback (most recent call last):
+  File "/home/pc5070ti/projects/heteroes/scripts/mutation-check.py", line 87, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/pc5070ti/projects/heteroes/scripts/mutation-check.py", line 79, in main
+    passed, tail = run_one(args.repo.resolve(), args.copy, env, command, args.scratch, change=mutant)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pc5070ti/projects/heteroes/scripts/mutation-check.py", line 41, in run_one
+    raise ValueError(
+ValueError: sampling-still-filters: the old text must appear exactly once in src/heteroes/v3/audit.py (found 2)
