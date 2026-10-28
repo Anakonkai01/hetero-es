@@ -1,9 +1,0 @@
-START a1 hf-shadow
-DONE a1 1465.3 tok/s
-START b1 strict-frozen
-DONE b1 1438.1 tok/s
-START b2 strict-frozen
-DONE b2 1438.0 tok/s
-START a2 hf-shadow
-DONE a2 1465.6 tok/s
-ALL JOBS TERMINAL

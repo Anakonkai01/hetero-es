@@ -1,4 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7890.58it/s]
-[W1026 15:21:23.850883530 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 115343360 bytes (free: 26738688, total: 16608133120).
-[W1026 15:21:53.104549549 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 159383552 bytes (free: 64487424, total: 16608133120).
-{"status": "ok", "out": "docs/evidence/2026-10-26-strict-projection-shapes/raw/qwen-parity-5070ti-03.json", "wallSeconds": 144.15137340799993}

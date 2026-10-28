@@ -1,12 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 2980.44it/s]
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:   0%|          | 1/290 [00:00<00:29,  9.81it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 2751.48it/s]
-{'stage': 'recipe_v3', 'weightSpace': 'full', 'sign': 1, 'iteration': 1, 'total': 2}
-{'stage': 'recipe_v3', 'weightSpace': 'full', 'sign': 1, 'iteration': 2, 'total': 2}
-{'stage': 'recipe_v3', 'weightSpace': 'full', 'sign': -1, 'iteration': 1, 'total': 2}
-{'stage': 'recipe_v3', 'weightSpace': 'full', 'sign': -1, 'iteration': 2, 'total': 2}
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  21%|██        | 60/290 [00:00<00:00, 599.91it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 2685.97it/s]
-{'stage': 'recipe_v3', 'weightSpace': 'lora', 'sign': 1, 'iteration': 1, 'total': 2}
-{'stage': 'recipe_v3', 'weightSpace': 'lora', 'sign': 1, 'iteration': 2, 'total': 2}
-{'stage': 'recipe_v3', 'weightSpace': 'lora', 'sign': -1, 'iteration': 1, 'total': 2}
-{'stage': 'recipe_v3', 'weightSpace': 'lora', 'sign': -1, 'iteration': 2, 'total': 2}
-wrote /home/pc5070ti/projects/heteroes/.scratch/v3-reference-20261019/5070ti/reference-v3.json (adapter 051b79e34551eddac13dc3029743c32418bb332b3947b5b6b1249c9145e86b1e)

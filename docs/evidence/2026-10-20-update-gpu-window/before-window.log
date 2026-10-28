@@ -1,44 +1,0 @@
-F                                                                        [100%]
-=================================== FAILURES ===================================
-_ test_coordinator_update_gpu_time_excludes_writing_and_hashing_the_child_weights _
-
-assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-922/tiny0')
-tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-922/test_coordinator_update_gpu_ti0')
-monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x756ef1478d70>
-
-    def test_coordinator_update_gpu_time_excludes_writing_and_hashing_the_child_weights(assets, tmp_path, monkeypatch):
-        import time
-    
-        import torch
-    
-        import heteroes.coordinator as coordinator
-        from heteroes.v3.local import run_local
-    
-        publish = coordinator.prepare_publication
-    
-        def slow_publication(*args, **kwargs):
-            time.sleep(0.5)  # stands in for writing and hashing a full model on disk
-            return publish(*args, **kwargs)
-    
-        monkeypatch.setattr(coordinator, "prepare_publication", slow_publication)
-        monkeypatch.setattr(coordinator.Coordinator, "_model_on_gpu", lambda self: True)
-        monkeypatch.setattr(torch.cuda, "synchronize", lambda *a, **kw: None)
-        config = config_for(assets, generations=1, candidateSeedNamespace="usage-update-window")
-        recorded = run_local(config, tmp_path / "run", timeout_seconds=20, audit_rate=0)[0]["usage"]
-        assert recorded["recordedUpdates"] == 1
->       assert 0 < recorded["coordinatorUpdateGpuSeconds"] < 0.4
-E       assert 0.5099216750095366 < 0.4
-
-tests/v3/test_v3_usage.py:166: AssertionError
----------------------------- Captured stdout setup -----------------------------
-
-
-
----------------------------- Captured stderr setup -----------------------------
-Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 1279.92it/s]
------------------------------ Captured stderr call -----------------------------
-Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 20995.75it/s]
-Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 15448.63it/s]
-=========================== short test summary info ============================
-FAILED tests/v3/test_v3_usage.py::test_coordinator_update_gpu_time_excludes_writing_and_hashing_the_child_weights
-1 failed, 7 deselected in 2.52s

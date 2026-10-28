@@ -1,8 +1,0 @@
-control ok    | 3 passed, 2 deselected in 1.82s
-killed       forget selected weights | 2 failed, 1 passed, 2 deselected in 1.85s
-killed       forget validation history | 2 failed, 1 passed, 2 deselected in 1.84s
-killed       ignore frozen validation plan | 1 failed, 2 passed, 2 deselected in 1.86s
-killed       do not rebind dataset path | 1 failed, 2 passed, 2 deselected in 1.82s
-killed       forget audit faults | 1 failed, 2 passed, 2 deselected in 1.81s
-
-5 of 5 mutants killed.

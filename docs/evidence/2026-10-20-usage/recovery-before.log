@@ -1,34 +1,0 @@
-F                                                                        [100%]
-=================================== FAILURES ===================================
-______ test_recovery_preserves_file_backed_splits_lora_and_optional_usage ______
-
-product_assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-863/product-model0')
-tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-863/test_recovery_preserves_file_b0')
-
-    def test_recovery_preserves_file_backed_splits_lora_and_optional_usage(product_assets, tmp_path):
-        from heteroes.manifest import CandidateDescriptor
-        from heteroes.v3.usage import UsageStore
-    
-        root = tmp_path / "source"
-        cfg, run, summary = completed_run(product_assets, root, file_dataset=True)
-        usage = UsageStore(root / "usage.sqlite")
-        usage.record(CandidateDescriptor(run.hash, summary["parent_sha256"], cfg["runId"], 0, 0, 5), 1, "worker",
-                     {"formatVersion": 1, "device": "cuda", "generatedTokens": [3, 4], "wallSeconds": 2.5})
-        usage.record_update(0, 0.5)
-        point = capture_point(root, summary, run.to_dict(), {"interval": 1, "retain": 3})
->       assert len(read_json(point / "manifest.json")["files"]) == 12
-E       AssertionError: assert 11 == 12
-E        +  where 11 = len({'ledger.sqlite': {'sha256': 'a15825d13b11313e49a9b45eecbcd33a206cf72913c0bac97af12bad7e652093', 'sizeBytes': 8192}, '...588037d4ff0c.bin': {'sha256': 'e47125968b3b71049fbc4802d1e40a71ea1359decfabacf70b34588037d4ff0c', 'sizeBytes': 6}, ...})
-
-runtime/tests/v3/test_v3_recovery.py:80: AssertionError
----------------------------- Captured stdout setup -----------------------------
-
-
-
----------------------------- Captured stderr setup -----------------------------
-Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 1156.41it/s]
------------------------------ Captured stderr call -----------------------------
-Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 11559.46it/s]
-=========================== short test summary info ============================
-FAILED runtime/tests/v3/test_v3_recovery.py::test_recovery_preserves_file_backed_splits_lora_and_optional_usage
-1 failed, 6 deselected in 1.84s

@@ -1,5 +1,0 @@
-control ok    | 12 passed, 1 warning in 1.52s
-killed       draft shows pinned Qwen revision | 1 failed, 11 passed, 1 warning in 1.57s
-killed       draft edit retains old recipe fields | 1 failed, 11 passed, 1 warning in 1.54s
-
-2 of 2 mutants killed.

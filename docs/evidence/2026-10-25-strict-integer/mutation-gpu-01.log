@@ -1,9 +1,0 @@
-control ok    | 16 passed, 41 deselected in 34.63s
-killed       quantization-ties-truncate | 1 failed, 2 passed, 41 deselected in 3.54s
-killed       wrong-radix-degree | 1 failed, 2 passed, 41 deselected in 3.55s
-killed       split-overlap | 1 failed, 2 passed, 41 deselected in 3.92s
-killed       lose-rounded-min-normal | 1 failed, 4 passed, 41 deselected in 7.31s
-killed       skip-live-weight-refresh | 1 failed, 6 passed, 41 deselected in 11.49s
-killed       ignore-metadata-nonfinite | 1 failed, 15 passed, 41 deselected in 35.51s
-
-6 of 6 mutants killed.

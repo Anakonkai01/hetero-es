@@ -1,1 +1,0 @@
-{"scope": "Fresh outbound connections before live acceptance", "publicHealthHttp": 200, "privateBulkConnect": {"errno": 111, "kind": "ConnectionRefusedError"}}

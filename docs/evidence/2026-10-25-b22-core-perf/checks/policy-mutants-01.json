@@ -1,8 +1,0 @@
-[
-  {
-    "name": "enable paired reads on SM86",
-    "file": "src/heteroes/eval/integer_cuda.py",
-    "old": "arch == \"sm_120\"",
-    "new": "arch in (\"sm_120\", \"sm_86\")"
-  }
-]

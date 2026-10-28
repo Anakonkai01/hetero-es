@@ -1,34 +1,0 @@
-ae2d1ee122b1847aeaaa164e43461f1673351cacba2ea3c8b2f9d68688809165  /mnt/c/Users/Thao Nguyen/.cache/heteroes-native-strict-20261025-01/source-claude-projection-01.tar.gz
-........................................................................ [ 10%]
-........................................................................ [ 20%]
-........................................................................ [ 30%]
-........................................................................ [ 40%]
-........................................................................ [ 50%]
-........................................................................ [ 61%]
-........................................................................ [ 71%]
-........................................................................ [ 81%]
-........................................................................ [ 91%]
-..........................................................               [100%]Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  20%|#9        | 57/290 [00:00<00:00, 557.17it/s]Loading weights:  39%|###8      | 113/290 [00:00<00:00, 553.98it/s]Loading weights:  58%|#####8    | 169/290 [00:00<00:00, 523.84it/s]Loading weights:  77%|#######6  | 222/290 [00:00<00:00, 521.94it/s]Loading weights:  95%|#########4| 275/290 [00:00<00:00, 507.16it/s]Loading weights: 100%|##########| 290/290 [00:00<00:00, 533.58it/s]
-{"status": "ok", "out": "C:\\Users\\Thao Nguyen\\.cache\\heteroes-native-strict-20261025-01\\claude-projection-01\\qwen-parity-native-01.json", "wallSeconds": 1104.8410602000076}
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  24%|##4       | 71/290 [00:00<00:00, 663.11it/s]Loading weights:  48%|####7     | 138/290 [00:00<00:00, 628.66it/s]Loading weights:  69%|######9   | 201/290 [00:00<00:00, 610.86it/s]Loading weights:  91%|######### | 263/290 [00:00<00:00, 585.58it/s]Loading weights: 100%|##########| 290/290 [00:00<00:00, 608.55it/s]
-base qwen short32 1369.1 bc4a5504e37c
-base qwen chat128 1397.9 a9fad5ca48ed
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  24%|##4       | 71/290 [00:00<00:00, 640.50it/s]Loading weights:  47%|####6     | 136/290 [00:00<00:00, 596.15it/s]Loading weights:  68%|######7   | 196/290 [00:00<00:00, 575.74it/s]Loading weights:  88%|########7 | 254/290 [00:00<00:00, 558.38it/s]Loading weights: 100%|##########| 290/290 [00:00<00:00, 586.12it/s]
-new qwen short32 2553.0 bc4a5504e37c
-new qwen chat128 2530.3 a9fad5ca48ed
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  24%|##4       | 71/290 [00:00<00:00, 668.60it/s]Loading weights:  48%|####7     | 138/290 [00:00<00:00, 624.18it/s]Loading weights:  69%|######9   | 201/290 [00:00<00:00, 563.92it/s]Loading weights:  91%|######### | 263/290 [00:00<00:00, 570.11it/s]Loading weights: 100%|##########| 290/290 [00:00<00:00, 605.33it/s]
-base qwen short32 1370.6 bc4a5504e37c
-base qwen chat128 1393.2 a9fad5ca48ed
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  24%|##4       | 71/290 [00:00<00:00, 640.87it/s]Loading weights:  47%|####6     | 136/290 [00:00<00:00, 585.23it/s]Loading weights:  67%|######7   | 195/290 [00:00<00:00, 565.17it/s]Loading weights:  87%|########6 | 252/290 [00:00<00:00, 554.17it/s]Loading weights: 100%|##########| 290/290 [00:00<00:00, 579.60it/s]
-new qwen short32 2492.9 bc4a5504e37c
-new qwen chat128 2515.6 a9fad5ca48ed
-
-============================== warnings summary ===============================
-..\..\venv\Lib\site-packages\_pytest\config\__init__.py:1303
-  C:\Users\Thao Nguyen\.cache\heteroes-native-strict-20261025-01\venv\Lib\site-packages\_pytest\config\__init__.py:1303: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; anyio
-    self._mark_plugins_for_rewrite(hook, disable_autoload)
-
--- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-706 passed, 1 warning in 863.10s (0:14:23)
-{"status": "ok", "wallSeconds": 2089.450723899994, "error": null}
-exit 0

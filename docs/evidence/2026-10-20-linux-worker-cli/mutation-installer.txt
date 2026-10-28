@@ -1,6 +1,0 @@
-control ok    | 3 passed, 1 warning in 0.75s
-killed       a local bundle is not checked | 1 failed, 2 passed, 1 warning in 7.77s
-killed       the installer does not run the pinned install | 1 failed, 2 passed, 1 warning in 0.27s
-killed       builder accepts a runtime that differs from the profile | 1 failed, 2 passed, 1 warning in 0.77s
-
-3 of 3 mutants killed.

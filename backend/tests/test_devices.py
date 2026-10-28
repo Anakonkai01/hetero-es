@@ -578,7 +578,7 @@ def test_backup_policy_change_does_not_mutate_frozen_assignment(lab):
 
 # r11 ships the desktop-v3 reference; the r10 desktop-v1 Windows reference lives on as its regression artifact.
 LEGACY_WINDOWS_REFERENCE = (
-    Path(__file__).parents[2] / "runtime/artifacts/regression/2026-10-10-m3-native-profile/reference.json"
+    Path(__file__).parent / "fixtures/archive/runtime/artifacts/regression/2026-10-10-m3-native-profile/reference.json"
 )
 
 
@@ -629,7 +629,7 @@ def test_native_windows_v3_worker_admission_is_bound_to_the_shipped_reference():
     from backend.policies import v3_qualification
     from pydantic import ValidationError
 
-    evidence = pathlib.Path(__file__).parents[2] / "docs/evidence/2026-10-19-v3-qualification-reference"
+    evidence = pathlib.Path(__file__).parent / "fixtures/archive/docs/evidence/2026-10-19-v3-qualification-reference"
     data = json.loads((evidence / "windows-3060-first.json").read_text())["result"]  # the real RTX 3060 result
     admitted = SelfTest(**data)
     assert (admitted.platform, admitted.coordinator, admitted.recipeVersions) == ("windows", False, [3])

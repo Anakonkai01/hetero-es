@@ -1,2 +1,0 @@
-Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 2424.25it/s]
-{"status": "ok", "out": "docs/evidence/2026-10-25-integer-decode-plan/quality-tiny-nhan-01.json", "wallSeconds": 32.153920234995894}

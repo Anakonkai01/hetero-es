@@ -1,4 +1,0 @@
-control ok    | ℹ duration_ms 556.43209
-killed       reject packaged connection diagnostic action |   'Promise resolution is still pending but the event loop has already resolved'
-
-1 of 1 mutants killed.

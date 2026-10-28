@@ -1,2 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7532.50it/s]
-{"status": "ok", "out": "docs/evidence/2026-10-25-strict-throughput/bench-packed-nhan-02.json", "wallSeconds": 33.60874726699694}

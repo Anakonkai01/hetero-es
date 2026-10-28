@@ -1,8 +1,0 @@
-control ok    | 19 passed, 161 deselected in 9.59s
-killed       packed-key-offset | 2 failed, 17 passed, 161 deselected in 9.58s
-killed       packed-causal-limit | 2 failed, 17 passed, 161 deselected in 9.55s
-killed       row-tile-origin | 7 failed, 12 passed, 161 deselected in 5.20s
-killed       row-output-address | 7 failed, 12 passed, 161 deselected in 6.41s
-killed       row-fault-only-first | 4 failed, 15 passed, 161 deselected in 9.47s
-
-5 of 5 mutants killed.

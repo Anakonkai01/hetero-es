@@ -1,6 +1,0 @@
-[
- {"name": "builder-no-gpu-gate", "file": "scripts/build_v3_reference.py", "old": "if args.gpu and os.environ.get(\"HETEROES_GPU_ACCEPTANCE\") != \"1\":", "new": "if False:"},
- {"name": "builder-seed-on-windows", "file": "scripts/build_v3_reference.py", "old": "if args.adapter_seed is not None and sys.platform == \"win32\":", "new": "if False:"},
- {"name": "builder-ignores-seed", "file": "scripts/build_v3_reference.py", "old": "ADAPTER_SPACE, args.adapter_seed, adapter)", "new": "ADAPTER_SPACE, 0, adapter)"},
- {"name": "builder-cpu-fixture-on-gpu", "file": "scripts/build_v3_reference.py", "old": "device = \"cuda\" if args.gpu else \"cpu\"", "new": "device = \"cpu\""}
-]

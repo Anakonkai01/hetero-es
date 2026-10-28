@@ -10,7 +10,9 @@ from heteroes.eval import generate as generate_module
 from heteroes.eval.generate import evaluate_model, generate_answer
 from heteroes.eval.workload import EXAMPLES, MAX_NEW_TOKENS
 
-PROBE_JSON = Path(__file__).resolve().parents[2] / "artifacts" / "probes" / "2026-09-29" / "probe_5070ti.json"
+PROBE_JSON = (
+    Path(__file__).resolve().parents[1] / "fixtures/archive/runtime/artifacts/probes/2026-09-29/probe_5070ti.json"
+)
 
 
 # ---------------------------------------------------------------------------

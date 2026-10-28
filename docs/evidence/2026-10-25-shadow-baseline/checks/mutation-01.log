@@ -1,7 +1,0 @@
-control ok    | 24 passed in 0.75s
-killed       skip-timed-refresh | 1 failed, 23 passed in 0.69s
-killed       wrong-shadow-precision | 1 failed, 23 passed in 0.68s
-killed       ignore-hf-chunk | 1 failed, 23 passed in 0.69s
-killed       exclude-refresh-from-total | 1 failed, 23 passed in 0.69s
-
-4 of 4 mutants killed.

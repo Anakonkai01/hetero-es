@@ -1,6 +1,0 @@
-Linux 6.6.87.2-microsoft-standard-WSL2
-NVIDIA GeForce RTX 3060, 617.42, 12288 MiB, 584 MiB, 0 %
-	libnvidia-ptxjitcompiler.so.1 (libc6,x86-64) => /usr/lib/x86_64-linux-gnu/libnvidia-ptxjitcompiler.so.1
-	libcuda.so.1 (libc6,x86-64) => /usr/lib/wsl/lib/libcuda.so.1
-	libcuda.so.1 (libc6,x86-64) => /usr/lib/x86_64-linux-gnu/libcuda.so.1
-{'torch': '2.13.0+cu132', 'numpy': '2.5.3', 'transformers': '5.17.0', 'peft': '0.21.2', 'accelerate': '1.15.0'}

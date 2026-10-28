@@ -1,4 +1,0 @@
-........................................................................ [ 67%]
-..................................                                       [100%]
-106 passed, 131 deselected in 9.65s
-{"status": "ok", "resources": {"NUM_REGS": 54, "LOCAL_SIZE_BYTES": 72, "SHARED_SIZE_BYTES": 128, "MAX_THREADS_PER_BLOCK": 1024}, "error": null}

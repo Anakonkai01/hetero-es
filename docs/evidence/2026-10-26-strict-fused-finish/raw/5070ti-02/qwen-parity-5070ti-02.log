@@ -1,3 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 6684.00it/s]
-[W1026 20:01:30.055807250 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 121634816 bytes (free: 103677952, total: 16608133120).
-{"status": "ok", "out": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/claude-fused-20261026/out-local2/qwen-parity-5070ti-02.json", "wallSeconds": 161.2489916709892}

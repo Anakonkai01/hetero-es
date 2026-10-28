@@ -1,3 +1,0 @@
-USDT:2026-10-25 03:06:32 1447479:1447479 SyncActivityProfilerHandler.cpp:52] profiler_start
-USDT:2026-10-25 03:06:32 1447479:1447479 SyncActivityProfilerHandler.cpp:59] profiler_stop
-{"status": "error", "cases": 0, "error": "'FunctionEvent' object has no attribute 'duration'"}

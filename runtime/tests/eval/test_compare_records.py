@@ -8,7 +8,9 @@ from pathlib import Path
 import pytest
 
 SCRIPT = Path(__file__).resolve().parents[2] / "scripts" / "compare_candidate_records.py"
-EVIDENCE = Path(__file__).resolve().parents[2] / "artifacts" / "regression" / "2026-10-05-one-candidate"
+EVIDENCE = (
+    Path(__file__).resolve().parents[1] / "fixtures/archive/runtime/artifacts/regression/2026-10-05-one-candidate"
+)
 
 
 def load_script():

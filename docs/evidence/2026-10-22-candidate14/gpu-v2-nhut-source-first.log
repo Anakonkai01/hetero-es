@@ -1,16 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7205.17it/s]
-{"stage": "recipe_v3", "weightSpace": "full", "sign": 1, "iteration": 1, "total": 2}
-{"stage": "recipe_v3", "weightSpace": "full", "sign": 1, "iteration": 2, "total": 2}
-{"stage": "recipe_v3", "weightSpace": "full", "sign": -1, "iteration": 1, "total": 2}
-{"stage": "recipe_v3", "weightSpace": "full", "sign": -1, "iteration": 2, "total": 2}
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 5864.41it/s]
-{"stage": "recipe_v3", "weightSpace": "lora", "sign": 1, "iteration": 1, "total": 2}
-{"stage": "recipe_v3", "weightSpace": "lora", "sign": 1, "iteration": 2, "total": 2}
-{"stage": "recipe_v3", "weightSpace": "lora", "sign": -1, "iteration": 1, "total": 2}
-{"stage": "recipe_v3", "weightSpace": "lora", "sign": -1, "iteration": 2, "total": 2}
-{"stage": "update_speed"}
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 5849.77it/s]
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 6505.44it/s]
-{"engine": "numpy_pcg64_normal_f32_to_f16_v1", "threads": 16, "noiseSeconds": 0.8099672880052822, "perturbSeconds": 0.7908293110085651, "updateSeconds": 0.8146470739884535, "parentSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7", "perturbedSha256": "86abd15c505d9ef3b9bdfb54c725d14cf5648d68a0a095d21afc64370fd3d564", "updatedSha256": "de54bd2250dfc104841fde89663584c11ff3eb6136d70e7d16b95e7efc10856c", "restoredSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7"}
-{"engine": "pcg64_u32_to_f16_normal_quantile_v2", "threads": 8, "noiseSeconds": 0.7484014009969542, "perturbSeconds": 0.6779367439885391, "updateSeconds": 1.402961890998995, "parentSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7", "perturbedSha256": "91b8a1d41c879b6e6c4e9a85e191f593d8ea3b3ccf61b5811428ec0e83c19467", "updatedSha256": "853c7ec6330f0ea9bce8a2f604987fe64d232e91ba4a13bf734c78512e039b07", "restoredSha256": "c9118c8a4903c0a84700deeaf7b1929c354dfcf6d6805c08d9afb22cfd5d22c7"}
-{"passed": true, "noiseVersion": "pcg64_u32_to_f16_normal_quantile_v2", "qualificationSeconds": 13.083243549001054, "updateSecondsPerSeed": 0.478}

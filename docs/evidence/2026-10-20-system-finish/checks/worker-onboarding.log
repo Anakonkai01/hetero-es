@@ -1,2 +1,0 @@
-AssertionError [ERR_ASSERTION]: build name: lf1-20261020-r11-candidate3-preflight
-    at /home/pc5070ti/projects/heteroes/scripts/check-worker-onboarding.cjs:106:12

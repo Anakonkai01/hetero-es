@@ -1,8 +1,0 @@
-{
-  "hardwareQualified": false,
-  "sourceSha256": "f6478f6fc3f1991856f927ebdb47e119e757c0b92be3012cee9211789ef4928d",
-  "gpu": "NVIDIA GeForce RTX 5070 Ti",
-  "status": "error",
-  "errorType": "ReferenceArithmeticError",
-  "error": "CUDA/NVRTC call failed: <CUresult.CUDA_ERROR_INVALID_CONTEXT: 201>"
-}

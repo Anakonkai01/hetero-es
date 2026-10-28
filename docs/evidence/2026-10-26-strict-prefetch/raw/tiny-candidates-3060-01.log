@@ -1,2 +1,0 @@
-Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights:  63%|██████▎   | 127/201 [00:00<00:00, 1268.80it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 1250.40it/s]
-{"status": "ok", "out": "tiny-candidates-3060-01.json", "wallSeconds": 30.24049543699948}

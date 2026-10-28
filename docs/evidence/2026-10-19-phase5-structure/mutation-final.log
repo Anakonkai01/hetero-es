@@ -1,5 +1,0 @@
-control ok    | 29 passed, 1 warning in 4.23s
-killed       lose desired contribution on poll | 1 failed, 28 passed, 1 warning in 4.23s
-killed       lose event deduplication | 1 failed, 28 passed, 1 warning in 4.44s
-
-2 of 2 mutants killed.

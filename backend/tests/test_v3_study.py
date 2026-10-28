@@ -536,7 +536,7 @@ def test_a_windows_coordinator_is_admitted_but_never_creates_a_lora_adapter(v3_s
     from labkit import boot
 
     c, admin, _ = v3_study
-    evidence = pathlib.Path(__file__).parents[2] / "docs/evidence/2026-10-19-v3-qualification-reference"
+    evidence = pathlib.Path(__file__).parent / "fixtures/archive/docs/evidence/2026-10-19-v3-qualification-reference"
     windows = {**json.loads((evidence / "windows-3060-first.json").read_text())["result"], "coordinator": True}
     code = c.post("/api/v1/devices/pairing-codes", headers=admin).json()["code"]
     enrolled = c.post(

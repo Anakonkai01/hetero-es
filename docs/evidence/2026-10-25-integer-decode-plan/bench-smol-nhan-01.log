@@ -1,2 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7723.63it/s]
-{"status": "ok", "out": "docs/evidence/2026-10-25-integer-decode-plan/bench-smol-nhan-01.json", "wallSeconds": 9.759002405000501}

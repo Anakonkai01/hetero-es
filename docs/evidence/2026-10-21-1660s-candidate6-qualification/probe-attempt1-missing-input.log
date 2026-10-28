@@ -1,12 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  63%|██████▎   | 184/290 [00:00<00:00, 1785.74it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 1940.00it/s]
-Traceback (most recent call last):
-  File "/tmp/heteroes-1660s/inputs/product_gpu_probe_final.py", line 46, in <module>
-    data = open_dataset(root / 'dataset.json')
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anakonkai/.local/share/heteroes-worker/runtimes/aa74bad820b9/src/heteroes/v3/data.py", line 322, in open_dataset
-    with file.open("rb") as stream:
-         ^^^^^^^^^^^^^^^
-  File "/home/anakonkai/.local/share/heteroes-worker/runtimes/aa74bad820b9/python/lib/python3.12/pathlib.py", line 1013, in open
-    return io.open(self, mode, buffering, encoding, errors, newline)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-FileNotFoundError: [Errno 2] No such file or directory: '/tmp/heteroes-1660s/inputs/52ce6ab88533a2e19de6d8ac0d6e82dc81c2776b362f89c6786b08e7aa9d6b66.jsonl'

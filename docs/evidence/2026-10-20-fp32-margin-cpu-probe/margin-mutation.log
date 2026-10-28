@@ -1,7 +1,0 @@
-control ok    | 2 passed in 0.63s
-killed       disable-reference | 2 failed in 0.63s
-killed       wrong-prefix | 1 failed, 1 passed in 0.62s
-killed       discard-reference-score | 2 failed in 0.65s
-killed       mutate-primary-scores | 1 failed, 1 passed in 0.63s
-
-4 of 4 mutants killed.

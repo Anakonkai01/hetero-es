@@ -1,4 +1,0 @@
-electronApplication.evaluate: Error: Error while encrypting the text provided to safeStorage.encryptString. Encryption is not available.
-    at eval (eval at evaluate (:370:30), <anonymous>:2:34)
-    at UtilityScript.evaluate (<anonymous>:372:16)
-    at UtilityScript.<anonymous> (<anonymous>:1:44)

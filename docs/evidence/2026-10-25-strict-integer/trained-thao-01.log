@@ -1,13 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 3042.74it/s]
-{"status": "ok", "out": "quality-smol-thao-01.json", "wallSeconds": 30.19856855100079}
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 3081.18it/s]
-{"status": "ok", "out": "bench-b22-smol-thao-01.json", "wallSeconds": 17.99247666300289}
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 3119.53it/s]
-{"status": "ok", "out": "bench-b14-smol-thao-01.json", "wallSeconds": 17.830145533000177}
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 3215.51it/s]
-{"status": "ok", "out": "quality-qwen-thao-01.json", "wallSeconds": 37.22369989800063}
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 3334.64it/s]
-{"status": "ok", "out": "bench-b22-qwen-thao-01.json", "wallSeconds": 19.395243798000593}
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 3460.67it/s]
-{"status": "ok", "out": "bench-b14-qwen-thao-01.json", "wallSeconds": 19.38968044700232}
-all remote comparisons completed

@@ -1,8 +1,0 @@
-before C freeGB=25
-before D freeGB=845.8
-public installer hash matches the published receipt
-installer exit: 0
-defaults={"labUrl":"https://lab.heteroes.site","build":"lf1-20261021-r11-candidate9"}
-
-after C freeGB=24.4
-after D freeGB=845.8

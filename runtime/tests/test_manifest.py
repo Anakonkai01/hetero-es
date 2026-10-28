@@ -34,7 +34,7 @@ GENERATION_CONFIG = {
     "bos_token_id": 151643,
     "eos_token_id": [151645, 151643],
 }
-EVIDENCE = Path(__file__).resolve().parents[1] / "artifacts" / "regression"
+EVIDENCE = Path(__file__).resolve().parent / "fixtures/archive/runtime/artifacts/regression"
 RECORDS = [
     EVIDENCE / "2026-10-05-one-candidate" / "5070ti.json",
     EVIDENCE / "2026-10-06-cross-machine-one-candidate" / "1660s.json",

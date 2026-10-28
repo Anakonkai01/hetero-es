@@ -1,5 +1,0 @@
-[
- {"name": "dispatch-never-v3", "file": "src/heteroes/product/qualification.py", "old": "if reference.get(\"formatVersion\") == 3:", "new": "if reference.get(\"formatVersion\") == 4:"},
- {"name": "dispatch-always-v3", "file": "src/heteroes/product/qualification.py", "old": "if reference.get(\"formatVersion\") == 3:", "new": "if True:"},
- {"name": "reference-dir-wrong", "file": "src/heteroes/product/qualification.py", "old": "reference_dir = Path(request[\"referencePath\"]).parent", "new": "reference_dir = Path(request[\"modelPath\"])"}
-]

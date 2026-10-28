@@ -1,5 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7578.78it/s]
-smol {'batch': 1, 'before': 276.7196422207066, 'after': 362.64404178793836, 'ratio': 1.3105106629861136}
-smol {'batch': 8, 'before': 1563.6044531127586, 'after': 2219.9919589465335, 'ratio': 1.4197912742746837}
-smol {'batch': 32, 'before': 4067.658766519477, 'after': 7179.9019763189635, 'ratio': 1.7651190496646554}
-DONE docs/evidence/2026-10-25-fast-engine/raw/smol-fp16-5070ti-01.json

@@ -1,7 +1,0 @@
-control ok    | ℹ duration_ms 52.941972
-killed       bundle from the baked-in address |   }
-killed       no address check |   }
-killed       any scheme |   }
-killed       relative URL kept relative |   }
-
-4 of 4 mutants killed.

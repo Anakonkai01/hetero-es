@@ -12,7 +12,7 @@ import pytest
 import heteroes.eval.cot_workload as cot
 from heteroes.v3.scoring import DECLARATIVE, ScorerError, code_sha256, score, validate_spec
 
-ARTIFACTS = Path(__file__).resolve().parents[2] / "artifacts"
+ARTIFACTS = Path(__file__).resolve().parents[1] / "fixtures/archive/runtime/artifacts"
 
 
 def spec(name, config=None, kind="declarative", code=None, version=1):

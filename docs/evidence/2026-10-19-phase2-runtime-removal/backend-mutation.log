@@ -1,7 +1,0 @@
-control ok    | 25 passed, 1 warning in 4.43s
-killed       accept legacy configuration | 2 failed, 23 passed, 1 warning in 4.44s
-killed       break shipped r10 health capability | 1 failed, 24 passed, 1 warning in 4.27s
-killed       skip admitted work reconciliation | 5 failed, 20 passed, 1 warning in 4.11s
-killed       report rejected start as completed | 1 failed, 24 passed, 1 warning in 4.11s
-
-4 of 4 mutants killed.

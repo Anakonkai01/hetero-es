@@ -1,6 +1,0 @@
-join exit 0
-paired; an administrator must approve it. Then: heteroes-worker run, and turn it ON on the lab.
-
-
-[('cli-3e355c6e9e70', '33c70b2277c14eaca81b6645fcb3ca4d', 'PENDING')]
-approve 200 APPROVED False

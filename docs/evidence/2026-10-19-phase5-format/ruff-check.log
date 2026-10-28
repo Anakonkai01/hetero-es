@@ -1,2 +1,0 @@
-backend/agent_polling.py:15:1: E402 Module level import not at top of file
-Found 1 error.

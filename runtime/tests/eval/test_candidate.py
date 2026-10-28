@@ -22,7 +22,9 @@ from heteroes.noise.contracts import DEFAULT_CHUNK_ELEMENTS, ENGINE_VERSION
 
 DEVICES = ["cpu"] + (["cuda"] if torch.cuda.is_available() else [])
 SCRIPT = Path(__file__).resolve().parents[2] / "scripts" / "run_one_candidate.py"
-PROBE_JSON = Path(__file__).resolve().parents[2] / "artifacts" / "probes" / "2026-09-29" / "probe_5070ti.json"
+PROBE_JSON = (
+    Path(__file__).resolve().parents[1] / "fixtures/archive/runtime/artifacts/probes/2026-09-29/probe_5070ti.json"
+)
 
 
 class HalfToy(nn.Module):

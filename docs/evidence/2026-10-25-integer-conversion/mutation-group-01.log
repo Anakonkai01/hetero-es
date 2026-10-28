@@ -1,9 +1,0 @@
-control ok    | 6 passed, 49 deselected in 3.71s
-killed       wrong-scale-bias | 1 failed, 49 deselected in 1.25s
-killed       cache-input-by-pointer | 1 failed, 2 passed, 49 deselected in 2.49s
-killed       discard-prepared-input | 1 failed, 2 passed, 49 deselected in 2.78s
-killed       skip-late-component-validation | 1 failed, 4 passed, 49 deselected in 3.33s
-killed       ignore-group-error | 1 failed, 5 passed, 49 deselected in 7.46s
-killed       drop-component-bias | 1 failed, 2 passed, 49 deselected in 2.12s
-
-6 of 6 mutants killed.

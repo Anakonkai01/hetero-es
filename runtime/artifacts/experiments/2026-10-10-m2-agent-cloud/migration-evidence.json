@@ -1,9 +1,0 @@
-{
-  "formatVersion": 1,
-  "sourceExperimentCount": 16,
-  "queuePreserved": true,
-  "experimentBodiesPreserved": true,
-  "sessionsRevoked": true,
-  "dispatchHeld": true,
-  "cloudAdminPasswordChanged": true
-}

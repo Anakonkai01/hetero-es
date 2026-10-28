@@ -1,6 +1,0 @@
-$ProgressPreference='SilentlyContinue'
-$ErrorActionPreference='Stop'
-$py=Join-Path $env:APPDATA '@heteroes\worker\runtimes\c64f3012b965\python\python.exe'
-& $py -c "import sys,importlib.metadata as m; print(sys.version); print({p:m.version(p) for p in ['torch','transformers','numpy','safetensors']})"
-Get-Volume -DriveLetter D | Select-Object DriveLetter,FileSystem,FileSystemLabel,UniqueId,SizeRemaining | ConvertTo-Json -Compress
-Get-ChildItem -LiteralPath (Join-Path $env:APPDATA '@heteroes\worker\runtimes\c64f3012b965\models') -Directory | Select-Object -ExpandProperty FullName

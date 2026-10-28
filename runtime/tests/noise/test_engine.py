@@ -58,7 +58,8 @@ GOLDEN_PRODUCTION = [
 ]
 
 PROBE_FULL_JSON = (
-    Path(__file__).resolve().parents[2] / "artifacts" / "probes" / "2026-09-29" / "noiseengine_5070ti_full.json"
+    Path(__file__).resolve().parents[1]
+    / "fixtures/archive/runtime/artifacts/probes/2026-09-29/noiseengine_5070ti_full.json"
 )
 
 

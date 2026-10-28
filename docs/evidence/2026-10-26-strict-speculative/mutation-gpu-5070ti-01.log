@@ -1,6 +1,0 @@
-control ok    | 3 passed, 3 deselected in 10.94s
-killed       accept-a-rejected-draft | 1 failed, 3 deselected in 4.90s
-killed       fail-valid-candidate-for-invalid-speculation | 1 failed, 1 passed, 3 deselected in 8.37s
-killed       publish-tokens-after-eos | 1 failed, 2 passed, 3 deselected in 11.01s
-
-3 of 3 mutants killed.

@@ -1,5 +1,0 @@
-Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 2757.70it/s]
-tiny {'batch': 1, 'before': 188.92361117882047, 'after': 195.25533859474808, 'ratio': 1.0335147490375594}
-tiny {'batch': 8, 'before': 839.5741762423513, 'after': 1080.0644362218914, 'ratio': 1.2864431360381912}
-tiny {'batch': 32, 'before': 1986.6473435480457, 'after': 2323.2951377543777, 'ratio': 1.1694552358774946}
-DONE docs/evidence/2026-10-26-strict-prefetch/raw/tiny-selected-5070ti-01.json

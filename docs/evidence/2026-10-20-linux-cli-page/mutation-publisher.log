@@ -1,9 +1,0 @@
-control ok    | 6 passed, 1 warning in 0.43s
-killed       no link preflight | 1 failed, 5 passed, 1 warning in 0.43s
-killed       keep stale pending alias | 1 failed, 5 passed, 1 warning in 0.44s
-killed       keep alias on app-only build | 1 failed, 5 passed, 1 warning in 0.43s
-killed       skip CLI hash check | 1 failed, 5 passed, 1 warning in 0.44s
-killed       alias not switched to new build | 1 failed, 5 passed, 1 warning in 0.43s
-killed       private CLI links stay public | 1 failed, 5 passed, 1 warning in 0.44s
-
-6 of 6 mutants killed.

@@ -1,8 +1,0 @@
-control ok    | 17 passed, 182 deselected in 15.75s
-killed       drop-output-scale | 11 failed, 6 passed, 182 deselected in 4.87s
-killed       wrong-output-tree | 9 failed, 8 passed, 182 deselected in 7.00s
-killed       drop-output-input-ftz | 10 failed, 7 passed, 182 deselected in 4.85s
-killed       drop-output-zero-select | 10 failed, 7 passed, 182 deselected in 4.84s
-killed       reject-admitted-rank32 | 1 failed, 16 passed, 182 deselected in 15.59s
-
-5 of 5 mutants killed.

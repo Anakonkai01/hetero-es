@@ -1,3 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 6910.09it/s]
-{"row": 0, "step": 3, "seconds": 0.16175862500676885, "topTwoIds": [54999, 120919], "topTwoScores": [28.004919052124023, 28.0019474029541], "nextTokenId": 54999}
-{"row": 0, "step": 13, "seconds": 0.21361799699661788, "topTwoIds": [16861, 4995], "topTwoScores": [25.17686653137207, 25.17683219909668], "nextTokenId": 16861}

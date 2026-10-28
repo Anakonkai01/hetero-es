@@ -1,8 +1,0 @@
-Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights:  60%|██████    | 121/201 [00:00<00:00, 1203.58it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 1327.72it/s]
-zero 1 {'state': 'zero', 'batch': 1, 'warpTokensPerSecond': 105.83197097018386, 'outputTokensPerSecond': 131.99657731932714, 'ratio': 1.2472278094160665}
-zero 8 {'state': 'zero', 'batch': 8, 'warpTokensPerSecond': 309.4250285337783, 'outputTokensPerSecond': 348.1252670411615, 'ratio': 1.1250714549200034}
-zero 32 {'state': 'zero', 'batch': 32, 'warpTokensPerSecond': 439.54292718230033, 'outputTokensPerSecond': 493.4789577316872, 'ratio': 1.1227093583217116}
-probe 1 {'state': 'probe', 'batch': 1, 'warpTokensPerSecond': 104.5234295965505, 'outputTokensPerSecond': 120.69557637798812, 'ratio': 1.1547226956086345}
-probe 8 {'state': 'probe', 'batch': 8, 'warpTokensPerSecond': 304.80093742548144, 'outputTokensPerSecond': 342.7365454225925, 'ratio': 1.1244602733755884}
-probe 32 {'state': 'probe', 'batch': 32, 'warpTokensPerSecond': 438.74456028253286, 'outputTokensPerSecond': 494.1875619538541, 'ratio': 1.1263673825052516}
-DONE tiny-paired-3060-01.json

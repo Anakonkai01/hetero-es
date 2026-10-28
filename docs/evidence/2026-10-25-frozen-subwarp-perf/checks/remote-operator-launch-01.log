@@ -1,1 +1,0 @@
-bash: line 1: 26013 Segmentation fault         HETEROES_GPU_ACCEPTANCE=1 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src /home/thao_nguyen/.local/share/heteroes-c4-cpu/runtimes/9a553d2dfae9/python/bin/python3.12 bench_finish.py --gpu --out finish-sweep-3060-01.json > finish-sweep-3060-01.log 2>&1

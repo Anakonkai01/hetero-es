@@ -1,2 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 6637.93it/s]
-{"status": "ok", "out": "qwen-strict-nhut-01.json", "wallSeconds": 17.01536615399891}

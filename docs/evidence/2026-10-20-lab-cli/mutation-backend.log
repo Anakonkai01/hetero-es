@@ -1,6 +1,0 @@
-control ok    | 3 passed, 1 warning in 0.28s
-killed       reuse changed local inputs | 1 failed, 2 passed, 1 warning in 0.28s
-killed       use the wrong coordinator | 1 failed, 2 passed, 1 warning in 0.29s
-killed       lose the chosen sampler | 1 failed, 2 passed, 1 warning in 0.28s
-
-3 of 3 mutants killed.

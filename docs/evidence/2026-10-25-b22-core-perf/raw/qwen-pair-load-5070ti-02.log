@@ -1,5 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7068.01it/s]
-qwen {'batch': 1, 'before': 277.42316859681523, 'after': 277.35534536073595, 'ratio': 0.9997555242540761}
-qwen {'batch': 8, 'before': 1386.5419867660873, 'after': 1459.9931160472427, 'ratio': 1.0529743274868075}
-qwen {'batch': 32, 'before': 3466.0452733469992, 'after': 3776.659126497581, 'ratio': 1.0896162134808576}
-DONE docs/evidence/2026-10-25-b22-core-perf/raw/qwen-pair-load-5070ti-02.json

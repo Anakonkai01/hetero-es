@@ -1,5 +1,0 @@
-heads 14/2 dim 64 decode keys   64: original    26.4us x1.00  split    24.9us x1.06  gqa     9.0us x2.92
-heads 14/2 dim 64 decode keys  143: original    62.8us x1.00  split    41.5us x1.51  gqa    18.3us x3.44
-heads 14/2 dim 64 decode keys  270: original   114.6us x1.00  split    70.6us x1.62  gqa    31.2us x3.67
-heads 14/2 dim 64 decode keys  512: original   208.4us x1.00  split   126.0us x1.65  gqa    54.0us x3.86
-heads 14/2 dim 64 prefill 32x142: original   4610.9us x1.00  split   3892.0us x1.18  gqa   2336.5us x1.97

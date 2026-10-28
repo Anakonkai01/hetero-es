@@ -1,8 +1,0 @@
-[
-  {"name": "server package forgets the catalog", "file": "backend/runtime_sources.py", "old": "    \"catalog.py\",\n", "new": ""},
-  {"name": "a shared module starts importing a module the server lacks", "file": "runtime/src/heteroes/study/data.py", "old": "from decimal import Decimal, InvalidOperation\n", "new": "from decimal import Decimal, InvalidOperation\nfrom heteroes.canonical import canonical_json_hash\n"},
-  {"name": "workload list copied back into devices", "file": "backend/devices.py", "old": "\"workloads\": list(WORKLOAD_NAMES),", "new": "\"workloads\": [\"arith16\", \"cot_l3_q32\", \"cot_l3_q64\", \"cot_l1_q128\"],"},
-  {"name": "pinned model copied back into constants", "file": "backend/constants.py", "old": "from heteroes.catalog import PINNED_MODEL_ID as MODEL, PINNED_REVISION as REVISION\n", "new": "from heteroes.catalog import PINNED_REVISION as REVISION\n\nMODEL = \"Qwen/Qwen2.5-0.5B-Instruct\"\n"},
-  {"name": "pinned revision copied back into prepare", "file": "runtime/src/heteroes/study/prepare.py", "old": "manifest[\"revision\"] == PINNED_REVISION", "new": "manifest[\"revision\"] == \"7ae557604adf67be50417f59c2c2f167def9a775\""},
-  {"name": "decoder set copied back into templates", "file": "backend/templates.py", "old": "\"decodeEngine\": set(DECODE_ENGINES),", "new": "\"decodeEngine\": {\"hf_generate\", \"hf_compact\"},"}
-]

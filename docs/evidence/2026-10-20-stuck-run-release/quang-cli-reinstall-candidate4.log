@@ -1,5 +1,0 @@
-C-before=6.9
-exit=0
-installed; next: heteroes-worker selftest
-self-test passed on CPU coordinator; next: heteroes-worker join <lab address>
-C-after=6.9

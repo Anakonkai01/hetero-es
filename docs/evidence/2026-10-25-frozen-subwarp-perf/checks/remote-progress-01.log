@@ -1,4 +1,0 @@
-32 32 2560 [('warp', 8, 31.54), ('output', 1, 30.41), ('output', 2, 30.47), ('output', 4, 30.44), ('output', 8, 30.4)]
-32 32 4864 [('warp', 8, 53.25), ('output', 1, 53.82), ('output', 2, 53.85), ('output', 4, 53.84), ('output', 8, 53.83)]
-32 32 5632 [('warp', 8, 62.2), ('output', 1, 63.0), ('output', 2, 63.0), ('output', 4, 62.98), ('output', 8, 62.99)]
-/home/thao_nguyen/.cache/heteroes-codex-frozen-perf-20261025-01/bundles/tiny/manifest.json

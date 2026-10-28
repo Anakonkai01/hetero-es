@@ -1,67 +1,0 @@
-FFF                                                                      [100%]
-=================================== FAILURES ===================================
-__________ test_replacement_preserves_v3_inputs_selection_and_faults ___________
-
-product_assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-285/product-model0')
-tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-285/test_replacement_preserves_v3_0')
-
-    def test_replacement_preserves_v3_inputs_selection_and_faults(product_assets, tmp_path):
-        root = tmp_path / "source"
-        cfg, run, summary = completed_run(product_assets, root)
-        point = capture_point(root, summary, run.to_dict(), {"interval": 1, "retain": 3})
-        retained = tmp_path / "point"
-        shutil.copytree(point, retained)
-        old_selection = read_json(root / "study-selection.json")
-        adapter_bytes = (root / "initial-adapter.bin").read_bytes()
-        shutil.rmtree(root)
-        restored = restore_point(retained, tmp_path / "replacement")
->       assert read_json(retained / "manifest.json")["formatVersion"] == 2
-E       assert 1 == 2
-
-runtime/tests/v3/test_v3_recovery.py:53: AssertionError
----------------------------- Captured stdout setup -----------------------------
-
-
-
----------------------------- Captured stderr setup -----------------------------
-Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 1076.57it/s]
------------------------------ Captured stderr call -----------------------------
-Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 13744.88it/s]
-_________ test_capture_refuses_missing_selection_instead_of_resetting __________
-
-product_assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-285/product-model0')
-tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-285/test_capture_refuses_missing_s0')
-
-    def test_capture_refuses_missing_selection_instead_of_resetting(product_assets, tmp_path):
-        root = tmp_path / "source"
-        _, run, summary = completed_run(product_assets, root)
-        (root / "study-selection.json").unlink()
->       with pytest.raises(ValueError, match="selection"):
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E       Failed: DID NOT RAISE ValueError
-
-runtime/tests/v3/test_v3_recovery.py:72: Failed
------------------------------ Captured stderr call -----------------------------
-Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 17490.28it/s]
-______________ test_recovery_rejects_state_from_a_different_plan _______________
-
-product_assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-285/product-model0')
-tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-285/test_recovery_rejects_state_fr0')
-
-    def test_recovery_rejects_state_from_a_different_plan(product_assets, tmp_path):
-        root = tmp_path / "source"
-        _, run, summary = completed_run(product_assets, root)
-        point = capture_point(root, summary, run.to_dict(), {"interval": 1, "retain": 3})
-        state = read_json(point / "v3-state.json")
->       state["plan"]["alpha"] = 0.25
-        ^^^^^^^^^^^^^
-E       TypeError: 'NoneType' object is not subscriptable
-
-runtime/tests/v3/test_v3_recovery.py:81: TypeError
------------------------------ Captured stderr call -----------------------------
-Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 17106.18it/s]
-=========================== short test summary info ============================
-FAILED runtime/tests/v3/test_v3_recovery.py::test_replacement_preserves_v3_inputs_selection_and_faults
-FAILED runtime/tests/v3/test_v3_recovery.py::test_capture_refuses_missing_selection_instead_of_resetting
-FAILED runtime/tests/v3/test_v3_recovery.py::test_recovery_rejects_state_from_a_different_plan
-3 failed in 1.80s

@@ -1,7 +1,0 @@
-control ok    | 31 passed in 0.70s
-killed       wave_rounding | 5 failed, 26 passed in 0.72s
-killed       k_tile_rounding | 2 failed, 29 passed in 0.70s
-killed       workspace_cap | 2 failed, 29 passed in 0.70s
-killed       repeated_projection | 2 failed, 29 passed in 0.71s
-
-4 of 4 mutants killed.

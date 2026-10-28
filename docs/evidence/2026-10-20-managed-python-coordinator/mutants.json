@@ -1,8 +1,0 @@
-[
-  {"name": "coordinator refuses Python again", "file": "src/heteroes/product/run_supervisor.py",
-   "old": "validate_options(config, allow_python=python)", "new": "validate_options(config)"},
-  {"name": "Python always allowed without code check", "file": "src/heteroes/product/run_supervisor.py",
-   "old": "validate_options(config, allow_python=python)", "new": "validate_options(config, allow_python=python, with_code=False)"},
-  {"name": "only Python coefficient rules detected", "file": "src/heteroes/product/run_supervisor.py",
-   "old": "python = config[\"scorer\"].get(\"kind\") == \"python\" or ", "new": "python = "}
-]

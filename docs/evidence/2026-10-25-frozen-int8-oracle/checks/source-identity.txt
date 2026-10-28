@@ -1,9 +1,0 @@
-commit e0b1d57c2c74d3dd176997af1b89d40aa1613fb5
-plan_sha256 4ee6838fa47f810ee40348b5f0bc556834bf50825eb0b7b0795b5053743cb17f
-e54a741128267290a82cdb34b560d795d1f5fb64f33ae94794dd54aa4dcbe9b5  runtime/src/heteroes/eval/frozen_int8.py
-6b0373f808f3acd7ead4e5e7391d267ac15d6baff1e99dd997b2db70d577a77e  runtime/tests/eval/test_frozen_int8.py
-69c32c4cc98530b672a4751cb8fecc9b32218eea829ecd3eca555b06e2694ab3  runtime/docs/frozen-int8-artifact-v1.md
-python 3.12.14
-torch 2.13.0+cu132
-cuda 13.2
-platform Linux-7.0.0-38-generic-x86_64-with-glibc2.43

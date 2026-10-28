@@ -1,6 +1,0 @@
-control ok    | 9 passed in 0.94s
-killed       no tracked-file guard (the original bug) | 1 failed, 8 passed in 0.94s
-killed       guard inverted | 2 failed, 7 passed in 0.94s
-killed       guard asks git about the repository root, not this file | 1 failed, 8 passed in 0.96s
-
-3 of 3 mutants killed.

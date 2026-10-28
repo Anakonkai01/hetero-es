@@ -1,85 +1,0 @@
-FFF                                                                      [100%]
-=================================== FAILURES ===================================
-_ test_an_explicit_namespace_reproduces_candidates_across_run_ids_and_worker_counts[False] _
-
-assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-584/tiny0')
-tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-584/test_an_explicit_namespace_rep0')
-antithetic = False
-
-    @pytest.mark.parametrize("antithetic", [False, True])
-    def test_an_explicit_namespace_reproduces_candidates_across_run_ids_and_worker_counts(assets, tmp_path, antithetic):
-        config = config_for(assets, antithetic=antithetic)
-        baseline_id, repeat_id = "baseline", "repeat"
-        baseline = run_local(config, tmp_path / "one", experiment_id=baseline_id, workers=1, timeout_seconds=30)
-        repeated = run_local(
-            {**config, "candidateSeedNamespace": baseline_id},
-            tmp_path / "two",
-            experiment_id=repeat_id,
-            workers=2,
-            timeout_seconds=30,
-        )
-        assert any(not summary["noop"] for summary in baseline)
->       assert [s["child_sha256"] for s in baseline] == [s["child_sha256"] for s in repeated]
-E       AssertionError: assert ['fa6c7faffcc...319cfef83e6c'] == ['df1651b4967...6a280f241ec5']
-E         
-E         At index 0 diff: 'fa6c7faffcc7467db499e1b1d679dd1daafd1c291d89c650d9a847d31ba81248' != 'df1651b496723903cd5a6086382e55006b894acf3bba5070b78114a8bec02b40'
-E         Use -v to get more diff
-
-tests/v3/test_v3_seed_namespace.py:26: AssertionError
----------------------------- Captured stdout setup -----------------------------
-
-
-
----------------------------- Captured stderr setup -----------------------------
-Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 1159.93it/s]
------------------------------ Captured stderr call -----------------------------
-Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 16460.66it/s]
-Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 17230.51it/s]
-Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 16666.96it/s]
-Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 16730.88it/s]
-Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 17781.17it/s]
-_ test_an_explicit_namespace_reproduces_candidates_across_run_ids_and_worker_counts[True] _
-
-assets = PosixPath('/tmp/pytest-of-pc5070ti/pytest-584/tiny0')
-tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-584/test_an_explicit_namespace_rep1')
-antithetic = True
-
-    @pytest.mark.parametrize("antithetic", [False, True])
-    def test_an_explicit_namespace_reproduces_candidates_across_run_ids_and_worker_counts(assets, tmp_path, antithetic):
-        config = config_for(assets, antithetic=antithetic)
-        baseline_id, repeat_id = "baseline", "repeat"
-        baseline = run_local(config, tmp_path / "one", experiment_id=baseline_id, workers=1, timeout_seconds=30)
-        repeated = run_local(
-            {**config, "candidateSeedNamespace": baseline_id},
-            tmp_path / "two",
-            experiment_id=repeat_id,
-            workers=2,
-            timeout_seconds=30,
-        )
-        assert any(not summary["noop"] for summary in baseline)
->       assert [s["child_sha256"] for s in baseline] == [s["child_sha256"] for s in repeated]
-E       AssertionError: assert ['b3bfd586506...0993e72d8315'] == ['a70c9e8829e...e25ec0adf100']
-E         
-E         At index 0 diff: 'b3bfd586506130546a981ee8f3ea71787ade3e379a4547f0f20b301d73febab1' != 'a70c9e8829ecc991e1a3a35c0c1df931423cf9565c20e5c356e1a264491f3013'
-E         Use -v to get more diff
-
-tests/v3/test_v3_seed_namespace.py:26: AssertionError
------------------------------ Captured stderr call -----------------------------
-Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 18160.18it/s]
-Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 17583.34it/s]
-Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 20064.75it/s]
-Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 17848.10it/s]
-Loading weights:   0%|          | 0/26 [00:00<?, ?it/s]Loading weights: 100%|██████████| 26/26 [00:00<00:00, 15980.64it/s]
-_________ test_the_sdk_and_managed_options_keep_the_optional_namespace _________
-
-    def test_the_sdk_and_managed_options_keep_the_optional_namespace():
-        from heteroes.sdk import ESConfig
->       from heteroes.v3.options import validate_seed_namespace
-E       ImportError: cannot import name 'validate_seed_namespace' from 'heteroes.v3.options' (/home/pc5070ti/projects/heteroes/runtime/src/heteroes/v3/options.py)
-
-tests/v3/test_v3_seed_namespace.py:42: ImportError
-=========================== short test summary info ============================
-FAILED tests/v3/test_v3_seed_namespace.py::test_an_explicit_namespace_reproduces_candidates_across_run_ids_and_worker_counts[False]
-FAILED tests/v3/test_v3_seed_namespace.py::test_an_explicit_namespace_reproduces_candidates_across_run_ids_and_worker_counts[True]
-FAILED tests/v3/test_v3_seed_namespace.py::test_the_sdk_and_managed_options_keep_the_optional_namespace
-3 failed in 3.29s

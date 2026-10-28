@@ -1,2 +1,0 @@
-[{"name": "true division again (the pre-decision CPU behavior)", "file": "src/heteroes/es/update.py", "old": "                direction = acc * float(np.float32(1) / np.float32(n_seeds))", "new": "                direction = acc / n_seeds"},
- {"name": "float64 reciprocal", "file": "src/heteroes/es/update.py", "old": "                direction = acc * float(np.float32(1) / np.float32(n_seeds))", "new": "                direction = acc * (1.0 / n_seeds)"}]

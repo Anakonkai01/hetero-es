@@ -1,8 +1,0 @@
-control ok    | 8 passed in 0.07s
-killed       ignore-missing-output-rows | 1 failed, 7 passed in 0.07s
-killed       miss-prefix-truncation | 1 failed, 7 passed in 0.11s
-killed       ignore-model-prompt-token-limits | 3 failed, 5 passed in 0.07s
-killed       accept-failed-receipt | 1 failed, 7 passed in 0.08s
-killed       skip-gpu-opt-in | 1 failed, 7 passed in 0.07s
-
-5 of 5 mutants killed.

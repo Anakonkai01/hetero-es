@@ -1,2 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7831.29it/s]
-{"status": "ok", "out": "docs/evidence/2026-10-25-strict-overnight/bench-graph-nhan-03.json", "wallSeconds": 19.07694548099971}

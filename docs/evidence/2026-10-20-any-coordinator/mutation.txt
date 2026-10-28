@@ -1,5 +1,0 @@
-killed       true division again (the pre-decision CPU behavior) | 2 failed, 35 passed, 4 skipped in 3.63s
-SURVIVED     float64 reciprocal | 37 passed, 4 skipped in 3.70s
-
-1 of 2 mutants killed.
-differ for 0 of 1000000 population sizes

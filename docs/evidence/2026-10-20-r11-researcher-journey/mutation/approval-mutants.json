@@ -1,6 +1,0 @@
-[
- {"name": "owner workspaces empty", "file": "backend/devices.py",
-  "old": "\"ownerWorkspaces\": owned.get(d[\"ownerUserId\"], [])", "new": "\"ownerWorkspaces\": []"},
- {"name": "keyed by workspace owner instead of device owner", "file": "backend/devices.py",
-  "old": "owned.setdefault(row[0], [])", "new": "owned.setdefault(row[1], [])"}
-]

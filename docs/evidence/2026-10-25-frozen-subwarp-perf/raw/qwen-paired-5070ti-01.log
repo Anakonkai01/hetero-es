@@ -1,8 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 5543.42it/s]
-zero 1 {'state': 'zero', 'batch': 1, 'warpTokensPerSecond': 181.16068074930845, 'outputTokensPerSecond': 216.27944726388284, 'ratio': 1.1938542423737744}
-zero 8 {'state': 'zero', 'batch': 8, 'warpTokensPerSecond': 1219.1827509431275, 'outputTokensPerSecond': 1525.5446901178698, 'ratio': 1.2512846732270029}
-zero 32 {'state': 'zero', 'batch': 32, 'warpTokensPerSecond': 2907.940071137693, 'outputTokensPerSecond': 3625.6444687416374, 'ratio': 1.2468085242634153}
-probe 1 {'state': 'probe', 'batch': 1, 'warpTokensPerSecond': 180.811085643119, 'outputTokensPerSecond': 215.24555040725053, 'ratio': 1.1904444334353346}
-probe 8 {'state': 'probe', 'batch': 8, 'warpTokensPerSecond': 1216.2032555457813, 'outputTokensPerSecond': 1525.3561124082369, 'ratio': 1.254195057818457}
-probe 32 {'state': 'probe', 'batch': 32, 'warpTokensPerSecond': 2905.5330549545533, 'outputTokensPerSecond': 3622.48375398951, 'ratio': 1.2467535854780256}
-DONE docs/evidence/2026-10-25-frozen-subwarp-perf/raw/qwen-paired-5070ti-01.json

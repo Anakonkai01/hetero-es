@@ -1,8 +1,0 @@
-{
-  "stage": "intermediate-implementation-failure",
-  "command": "CUDA_VISIBLE_DEVICES='' PYTHONPATH=src python -m pytest -q tests/eval/test_profile_single_model.py",
-  "cwd": "runtime",
-  "exitCode": 1,
-  "result": "4 passed, 1 failed: incorrect INTEGER_ENGINE_VERSION import, corrected to ENGINE_V2",
-  "limit": "Summary of intermediate failure, not a raw pytest transcript."
-}

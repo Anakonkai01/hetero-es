@@ -1,9 +1,0 @@
-control ok    | 7 passed in 2.08s
-killed       validation reads test | 1 failed, 6 passed in 2.01s
-killed       ties replace earliest | 2 failed, 5 passed in 2.05s
-killed       worse checkpoint selected | 1 failed, 6 passed in 2.05s
-killed       reload hash unchecked | 1 failed, 6 passed in 2.04s
-killed       reload predictions unchecked | 1 failed, 6 passed in 2.06s
-killed       changed scorer reused | 1 failed, 6 passed in 2.07s
-
-6 of 6 mutants killed.

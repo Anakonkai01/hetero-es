@@ -1,2 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 6505.16it/s]
-{"status": "ok", "out": "docs/evidence/2026-10-25-strict-integer/bench-qwen-b14-nhan-02.json", "wallSeconds": 14.718169437008328}

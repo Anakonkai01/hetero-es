@@ -1,6 +1,0 @@
-{
-  "imported": "/home/pc5070ti/projects/heteroes/.scratch/audit-safety-linux-20261025/workspace/runtime/src/heteroes/v3/audit_guard.py",
-  "sha256": "db44cc6728d7ca6b8e938c29444d0aa6ede554a7f6be2a6f02bb855afa7a2974",
-  "torchImported": false,
-  "cpuOnly": true
-}

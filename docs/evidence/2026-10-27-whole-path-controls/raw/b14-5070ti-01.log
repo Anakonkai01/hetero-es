@@ -1,8 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7639.03it/s]
-b14 1 32.24 ms 992.7 token/s
-b14 8 48.76 ms 5250.7 token/s
-b14 32 105.99 ms 9661.7 token/s
-b14 128 348.99 ms 11736.6 token/s
-USDT:2026-10-27 01:46:40 155537:155537 SyncActivityProfilerHandler.cpp:52] profiler_start
-USDT:2026-10-27 01:46:40 155537:155537 SyncActivityProfilerHandler.cpp:59] profiler_stop
-CUDA span 109.85 ms prefix equal True

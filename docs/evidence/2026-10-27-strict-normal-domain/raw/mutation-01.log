@@ -1,7 +1,0 @@
-control ok    | 3 passed in 6.38s
-killed       reciprocal_iteration_removed | 2 failed, 1 passed in 6.33s
-killed       rsqrt_iteration_removed | 2 failed, 1 passed in 4.37s
-killed       reciprocal_invalid_domain_bypass | 1 failed, 2 passed in 6.20s
-killed       exp_tiny_shortcut_too_wide | 1 failed, 2 passed in 6.31s
-
-4 of 4 mutants killed.

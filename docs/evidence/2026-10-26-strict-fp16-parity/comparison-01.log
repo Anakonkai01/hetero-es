@@ -1,6 +1,0 @@
-{'policy': 'default', 'batch': 8, 'rows': 96, 'tokenRowsDifferent': 14, 'rewardFlips': 0}
-{'policy': 'default', 'batch': 32, 'rows': 96, 'tokenRowsDifferent': 33, 'rewardFlips': 0}
-{'policy': 'fp32_acc', 'batch': 8, 'rows': 96, 'tokenRowsDifferent': 14, 'rewardFlips': 0}
-{'policy': 'fp32_acc', 'batch': 32, 'rows': 96, 'tokenRowsDifferent': 26, 'rewardFlips': 0}
-5070ti {'parentVsRestored': (0, 0), 'batch8Vs32': (197, 0)}
-3060 {'parentVsRestored': (0, 0), 'batch8Vs32': (206, 0)}

@@ -54,9 +54,9 @@ def inputs(tmp_path):
     (track / "src/heteroes/__init__.py").write_text("")
     (track / "scripts").mkdir()
     (track / "scripts/run_worker.py").write_text("print('worker')\n")
-    legacy = track / "artifacts/regression/2026-10-10-m3-native-profile"
+    legacy = track / "references"
     legacy.mkdir(parents=True)
-    (legacy / "reference.json").write_text('{"profile": "desktop-v1"}\n')
+    (legacy / "desktop-v1-reference.json").write_text('{"profile": "desktop-v1"}\n')
     reports = tmp_path / "reports"
     reports.mkdir()
     (reports / "linux.json").write_text(json.dumps(report("peft-0.21.2-py3-none-any.whl", "torch-2.13.0-linux.whl")))

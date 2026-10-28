@@ -1,8 +1,0 @@
-[
-  {
-    "name": "reject packaged connection diagnostic action",
-    "file": "desktop/worker/electron/bridge.cjs",
-    "old": "'quit', 'check_connection'",
-    "new": "'quit'"
-  }
-]

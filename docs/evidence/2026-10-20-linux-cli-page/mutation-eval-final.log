@@ -1,5 +1,0 @@
-control ok    | 1 passed in 6.46s
-killed       skip file dataset identity check | 1 failed in 6.54s
-killed       check split hashes only | 1 failed in 6.76s
-
-2 of 2 mutants killed.

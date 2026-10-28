@@ -1,6 +1,0 @@
-PYTHON
-DEPENDENCIES
-INSTALLING
-MODEL
-READY
-PASS fresh isolated Linux setup {"installed":true,"running":true,"progress":{"stage":"READY"}}

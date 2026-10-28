@@ -1,8 +1,0 @@
-control ok    | 10 passed in 2.33s
-killed       probe GPU flag ignored | 1 failed, 9 passed in 2.41s
-killed       probe GPU approval ignored | 1 failed, 9 passed in 2.37s
-killed       probe candidate perturb skipped | 1 failed, 9 passed in 2.37s
-killed       probe candidate restore skipped | 1 failed, 9 passed in 2.08s
-killed       lifecycle backend choice ignored | 1 failed, 9 passed in 2.32s
-
-5 of 5 mutants killed.

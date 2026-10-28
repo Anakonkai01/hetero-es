@@ -1,6 +1,0 @@
-==WARNING== Note: Running with unmodified GPU clocks. If not controlled otherwise, profiling results may be inconsistent.
-==PROF== Connected to process 2352299 (/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python3.12)
-==PROF== Profiling "strict_attention_gqa": 0%....50%....100% - 40 passes
-{"status": "ok", "case": "attention", "shape": {"queries": 32, "lengths": [33, 37, 41, 45, 49, 53, 57, 61, 33, 37, 41, 45, 49, 53, 57, 61, 33, 37, 41, 45, 49, 53, 57, 61, 33, 37, 41, 45, 49, 53, 57, 61], "heads": 14, "kvHeads": 2, "dim": 64, "slot": 512}}
-==PROF== Disconnected from process 2352299
-==PROF== Report: /home/pc5070ti/projects/heteroes-codex-frozen-perf/docs/evidence/2026-10-27-strict-counter-profile/raw/attention-01.ncu-rep

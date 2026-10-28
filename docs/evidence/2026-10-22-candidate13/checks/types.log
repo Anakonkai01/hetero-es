@@ -1,2 +1,0 @@
-../packages/product-ui/src/translations.ts(305,3): error TS1117: An object literal cannot have multiple properties with the same name.
-../packages/product-ui/src/translations.ts(306,3): error TS1117: An object literal cannot have multiple properties with the same name.

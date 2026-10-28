@@ -1,11 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7739.85it/s]
-{"stage": "recipe_v3", "weightSpace": "full", "sign": 1, "iteration": 1, "total": 2}
-{"stage": "recipe_v3", "weightSpace": "full", "sign": 1, "iteration": 2, "total": 2}
-{"stage": "recipe_v3", "weightSpace": "full", "sign": -1, "iteration": 1, "total": 2}
-{"stage": "recipe_v3", "weightSpace": "full", "sign": -1, "iteration": 2, "total": 2}
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7182.07it/s]
-{"stage": "recipe_v3", "weightSpace": "lora", "sign": 1, "iteration": 1, "total": 2}
-{"stage": "recipe_v3", "weightSpace": "lora", "sign": 1, "iteration": 2, "total": 2}
-{"stage": "recipe_v3", "weightSpace": "lora", "sign": -1, "iteration": 1, "total": 2}
-{"stage": "recipe_v3", "weightSpace": "lora", "sign": -1, "iteration": 2, "total": 2}
-docs/evidence/2026-10-22-candidate14/reference-v2/reference-v3.json

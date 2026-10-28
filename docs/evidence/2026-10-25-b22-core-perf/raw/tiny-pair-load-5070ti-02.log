@@ -1,5 +1,0 @@
-Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 2505.83it/s]
-tiny {'batch': 1, 'before': 187.54650641403654, 'after': 188.800776888968, 'ratio': 1.0066877837338246}
-tiny {'batch': 8, 'before': 786.1508376479045, 'after': 830.5983732223766, 'ratio': 1.0565381774666238}
-tiny {'batch': 32, 'before': 1807.6020345157783, 'after': 1997.3123509581726, 'ratio': 1.1049513735987877}
-DONE docs/evidence/2026-10-25-b22-core-perf/raw/tiny-pair-load-5070ti-02.json

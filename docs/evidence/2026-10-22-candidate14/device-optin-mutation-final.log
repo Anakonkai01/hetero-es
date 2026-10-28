@@ -1,5 +1,0 @@
-control ok    | ℹ duration_ms 64.97298
-killed       paired device still requires an account session |   }
-killed       policy rejection falls back to account credentials |   }
-
-2 of 2 mutants killed.

@@ -1,18 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 2943.51it/s]
-parent default 8 rows 32 seconds 4.689
-parent default 32 rows 32 seconds 1.953
-parent fp32_acc 8 rows 32 seconds 3.978
-parent fp32_acc 32 rows 32 seconds 1.959
-7001+1 default 8 rows 32 seconds 3.979
-7001+1 default 32 rows 32 seconds 1.978
-7001+1 fp32_acc 8 rows 32 seconds 3.996
-7001+1 fp32_acc 32 rows 32 seconds 1.979
-7001-1 default 8 rows 32 seconds 3.989
-7001-1 default 32 rows 32 seconds 1.969
-7001-1 fp32_acc 8 rows 32 seconds 3.982
-7001-1 fp32_acc 32 rows 32 seconds 1.94
-restored default 8 rows 32 seconds 3.99
-restored default 32 rows 32 seconds 1.941
-restored fp32_acc 8 rows 32 seconds 3.959
-restored fp32_acc 32 rows 32 seconds 1.944
-ok qwen-3060-01.json

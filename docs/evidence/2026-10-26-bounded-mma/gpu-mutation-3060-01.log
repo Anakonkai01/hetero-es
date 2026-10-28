@@ -1,4 +1,0 @@
-control ok    | 1 passed, 6 deselected in 2.81s
-killed       unsafe-double-float-partial-length | 1 failed, 6 deselected in 1.54s
-
-1 of 1 mutants killed.

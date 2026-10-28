@@ -1,8 +1,0 @@
-control ok    | 19 passed in 0.01s
-killed       deduplicate-projection-workspaces | 1 failed, 18 passed in 0.02s
-killed       count-only-capacity-not-active-subsets | 1 failed, 18 passed in 0.02s
-killed       ignore-split-partial-budget | 1 failed, 1 passed in 0.01s
-killed       ignore-explicit-off | 1 failed, 1 passed in 0.01s
-killed       use-one-sm-for-occupancy | 1 failed in 0.01s
-
-5 of 5 mutants killed.

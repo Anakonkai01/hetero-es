@@ -1,2 +1,0 @@
-control ok    | 11 passed in 3.73s
-killed       allow-untrusted-probe-configuration | 1 failed, 10 passed in 3.64s

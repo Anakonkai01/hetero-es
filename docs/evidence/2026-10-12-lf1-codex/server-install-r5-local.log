@@ -1,9 +1,0 @@
-node:internal/process/promises:394
-    triggerUncaughtException(err, true /* fromPromise */);
-    ^
-
-TimeoutError: Timeout 30000ms exceeded.
-    at _ProgressController.run (/home/pc5070ti/projects/Hetero-ES-LLM-m3/node_modules/playwright-core/lib/coreBundle.js:13004:32)
-    at DispatcherConnection.dispatch (/home/pc5070ti/projects/Hetero-ES-LLM-m3/node_modules/playwright-core/lib/coreBundle.js:20191:44)
-
-Node.js v24.21.0

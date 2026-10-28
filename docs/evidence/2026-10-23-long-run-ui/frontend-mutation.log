@@ -1,5 +1,0 @@
-control ok    | ℹ duration_ms 61.424272
-killed       completed-totals-only-count-retained-attempts |   }
-killed       stopped-coordinator-still-updating |   }
-
-2 of 2 mutants killed.

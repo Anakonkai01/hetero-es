@@ -1,5 +1,0 @@
-killed       always None | 1 failed, 34 passed in 1.65s
-killed       always False | 1 failed, 36 passed in 2.21s
-killed       terminal only misses nothing (PAUSED) | 1 failed, 35 passed in 2.15s
-
-3 of 3 mutants killed.

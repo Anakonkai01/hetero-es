@@ -1,6 +1,0 @@
-control ok    | 2 passed, 162 deselected in 10.33s
-killed       drop-adapter-scale | 1 failed, 1 passed, 162 deselected in 3.76s
-killed       drop-adapter-add | 1 failed, 1 passed, 162 deselected in 3.70s
-killed       drop-zero-delta-select | 1 failed, 1 passed, 162 deselected in 2.32s
-
-3 of 3 mutants killed.

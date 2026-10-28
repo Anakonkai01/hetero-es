@@ -1,2 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 3276.00it/s]
-{"status": "error", "out": "qwen-parity-3060-01.json", "wallSeconds": 5.664998652006034}

@@ -1,3 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  96%|█████████▌| 279/290 [00:00<00:00, 2788.75it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 2843.22it/s]
-qwen short32 {'strict_attention': 1347.8, 'strict_attention_gqa': 1394.7} ratio 1.035
-qwen chat128 {'strict_attention': 1263.6, 'strict_attention_gqa': 1386.7} ratio 1.097

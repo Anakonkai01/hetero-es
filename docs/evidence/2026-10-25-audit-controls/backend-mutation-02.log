@@ -1,7 +1,0 @@
-control ok    | 15 passed, 25 deselected, 1 warning in 0.43s
-killed       api-coerces-strings-and-booleans | 3 failed, 12 passed, 25 deselected, 1 warning in 0.45s
-killed       template-refuses-audit-off | 1 failed, 14 passed, 25 deselected, 1 warning in 0.44s
-killed       dispatch-drops-frozen-rate | 1 failed, 14 passed, 25 deselected, 1 warning in 0.44s
-killed       view-assumes-five-percent | 1 failed, 14 passed, 25 deselected, 1 warning in 0.44s
-
-4 of 4 mutants killed.

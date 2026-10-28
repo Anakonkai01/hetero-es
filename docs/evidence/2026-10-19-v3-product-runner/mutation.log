@@ -1,9 +1,0 @@
-control ok    | 8 passed in 16.30s
-killed       python scorer admitted | 1 failed, 7 passed in 16.65s
-killed       dataset identity unchecked | 1 failed, 7 passed in 16.38s
-killed       worker trusts coordinator schema | 1 failed, 7 passed in 16.51s
-killed       initial adapter pruned | 1 failed, 7 passed in 17.02s
-killed       worker submits scalar reward | 3 failed, 5 passed in 105.62s (0:01:45)
-killed       product drops antithetic signs | 3 failed, 5 passed in 16.67s
-
-6 of 6 mutants killed.

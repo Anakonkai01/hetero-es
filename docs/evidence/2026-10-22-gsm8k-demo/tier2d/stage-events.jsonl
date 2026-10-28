@@ -1,4 +1,0 @@
-{"t": 1792632390.238, "event": "off_requested", "response": {"deviceId": "a4f401a7610b4fd286cf134de3206a6f", "enabled": false, "pending": true}}
-{"t": 1792632856.761, "event": "off_verdict", "verdict": "recovered", "seconds": 466.5, "seen": ["worker_left"]}
-{"t": 1792632857.851, "event": "on_requested", "response": {"deviceId": "a4f401a7610b4fd286cf134de3206a6f", "enabled": true, "pending": true}}
-{"t": 1792632858.052, "event": "on_verdict", "verdict": "failed", "error": "Lab HTTP 409: /api/v1/experiments/366cb11c0af240a0a502baf9b6608bea/workers"}

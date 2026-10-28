@@ -1,6 +1,0 @@
-[
-  {"name": "never billed", "file": "src/heteroes/coordinator.py",
-   "old": "update_gpu_seconds = self._timer() - recorded if on_gpu else 0.0", "new": "update_gpu_seconds = 0.0"},
-  {"name": "billed through publication (previous window)", "file": "src/heteroes/coordinator.py",
-   "old": "self.usage.record_update(generation, update_gpu_seconds)", "new": "self.usage.record_update(generation, applied - recorded if on_gpu else 0.0)"}
-]

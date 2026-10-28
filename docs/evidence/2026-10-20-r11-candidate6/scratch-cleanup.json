@@ -1,9 +1,0 @@
-{
-  "removedOnlyFreshDisposableCheckRoots": [
-    "/home/pc5070ti/projects/heteroes/.scratch/fresh-linux-check-candidate6",
-    "/home/pc5070ti/projects/heteroes/.scratch/r11c6-worker",
-    "/home/pc5070ti/projects/heteroes/.scratch/r11c6-server"
-  ],
-  "receiptsPreserved": true,
-  "installedIsolatedDevicesChanged": false
-}

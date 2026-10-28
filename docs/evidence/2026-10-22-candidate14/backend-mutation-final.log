@@ -1,9 +1,0 @@
-control ok    | 29 passed, 1 warning in 4.47s
-killed       admin can remove own permissions | 4 failed, 25 passed, 1 warning in 4.53s
-killed       workspace admin can remove own membership | 2 failed, 27 passed, 1 warning in 4.54s
-killed       legacy agents can run v2 without selftest | 1 failed, 28 passed, 1 warning in 4.53s
-killed       v1 model qualification authorizes v2 | 1 failed, 28 passed, 1 warning in 4.54s
-killed       v2 report can substitute v1 reference | 1 failed, 28 passed, 1 warning in 4.54s
-killed       unbound model qualifications can be claimed by a native device | 1 failed, 28 passed, 1 warning in 4.57s
-
-6 of 6 mutants killed.

@@ -1,4 +1,0 @@
-control ok    | 1 passed in 0.01s
-killed       publish while asked only to prepare | 1 failed in 0.02s
-
-1 of 1 mutants killed.

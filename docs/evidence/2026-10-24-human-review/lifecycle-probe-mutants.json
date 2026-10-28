@@ -1,6 +1,0 @@
-[
-  {"name":"GPU flag ignored","file":"scripts/profile_single_model.py","old":"not args.gpu or os.environ.get(\"HETEROES_GPU_ACCEPTANCE\") != \"1\"","new":"os.environ.get(\"HETEROES_GPU_ACCEPTANCE\") != \"1\""},
-  {"name":"GPU environment approval ignored","file":"scripts/profile_single_model.py","old":"not args.gpu or os.environ.get(\"HETEROES_GPU_ACCEPTANCE\") != \"1\"","new":"not args.gpu"},
-  {"name":"existing evidence guard removed","file":"scripts/profile_single_model.py","old":"if args.out.exists():","new":"if False:"},
-  {"name":"candidate restore skipped","file":"scripts/profile_single_model.py","old":"restore_from_snapshot_(model, schema, snapshot)","new":"None"}
-]

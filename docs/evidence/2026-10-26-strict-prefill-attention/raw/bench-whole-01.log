@@ -1,4 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7155.70it/s]
-prefill {'base': 268.9, 'new': 300.4} ms {'base': 118.98, 'new': 106.52} 2d2cea000ef9ecf7b66c9f2c3c1609f6ae791eab54c93417a65279f956198bb5
-short32 {'base': 8726.6, 'new': 8922.5} ms {'base': 117.34, 'new': 114.77} bc4a5504e37c79c14e8f6ee824618a85fdd6e0d8d5bcfca51ff1e7691fbd0c66
-chat128 {'base': 8853.2, 'new': 9099.9} ms {'base': 462.66, 'new': 450.12} a9fad5ca48ed06879bbad136b7282ca0a3c638959dd26e2b1b92635011d5fb49

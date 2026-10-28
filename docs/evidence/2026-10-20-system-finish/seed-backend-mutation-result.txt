@@ -1,6 +1,0 @@
-control ok    | 24 passed, 1 warning in 3.48s
-killed       assignment-drops-seed-namespace | 1 failed, 23 passed, 1 warning in 3.39s
-killed       templates-reject-batch-sampler | 1 failed, 23 passed, 1 warning in 3.49s
-killed       templates-accept-invalid-seed-namespace | 1 failed, 23 passed, 1 warning in 3.46s
-
-3 of 3 mutants killed.

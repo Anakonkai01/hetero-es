@@ -1,6 +1,0 @@
-control ok    | 11 passed, 1 warning in 0.47s
-killed       accept bad recovery checksum | 1 failed, 10 passed, 1 warning in 0.48s
-killed       ignore recovery quota | 1 failed, 10 passed, 1 warning in 0.48s
-killed       silently accept cloud config | 1 failed, 10 passed, 1 warning in 0.50s
-
-3 of 3 mutants killed.

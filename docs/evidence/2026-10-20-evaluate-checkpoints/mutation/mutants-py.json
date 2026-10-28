@@ -1,7 +1,0 @@
-[
- {"name": "no-hash-check", "file": "scripts/v3_evaluate_checkpoints.py", "old": "            if weights != stored.child_weights_sha256:\n                raise ValueError(f\"replayed generation {generation} does not hash to the recorded child\")\n", "new": ""},
- {"name": "skip-replay", "file": "scripts/v3_evaluate_checkpoints.py", "old": "            apply_coefficients_(", "new": "            (lambda *a: None)("},
- {"name": "no-base", "file": "scripts/v3_evaluate_checkpoints.py", "old": "    if wanted[0] == -1:\n        measure(-1, model_weights_sha256(model, schema))\n", "new": ""},
- {"name": "no-refresh", "file": "scripts/v3_evaluate_checkpoints.py", "old": "        evaluator.refresh()\n", "new": ""},
- {"name": "range-unchecked", "file": "scripts/v3_evaluate_checkpoints.py", "old": "or wanted[-1] >= plan[\"generations\"]", "new": ""}
-]

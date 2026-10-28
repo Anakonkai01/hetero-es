@@ -1,6 +1,0 @@
-control ok    | 3 passed, 23 deselected, 1 warning in 0.56s
-killed       off-discards-the-queue | 2 failed, 1 passed, 23 deselected, 1 warning in 0.57s
-killed       revocation-keeps-the-queue | 1 failed, 2 passed, 23 deselected, 1 warning in 0.58s
-killed       off-leaves-active-computation-running | 1 failed, 2 passed, 23 deselected, 1 warning in 0.58s
-
-3 of 3 mutants killed.

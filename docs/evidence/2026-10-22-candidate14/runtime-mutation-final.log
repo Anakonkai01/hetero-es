@@ -1,9 +1,0 @@
-control ok    | 60 passed in 1.32s
-killed       quantile equality chooses wrong bin | 2 failed, 58 passed in 1.29s
-killed       v2 silently uses v1 seed namespace | 6 failed, 54 passed in 1.34s
-killed       drop negative sign | 8 failed, 52 passed in 1.31s
-killed       automatic restart ignores private-route block | 2 failed, 58 passed in 1.31s
-killed       duplicate explicit retry consumes a second attempt | 1 failed, 59 passed in 1.31s
-killed       accept an arbitrary self-consistent threshold table | 1 failed, 59 passed in 1.29s
-
-6 of 6 mutants killed.

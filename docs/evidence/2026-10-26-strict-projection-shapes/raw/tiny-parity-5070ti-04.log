@@ -1,2 +1,0 @@
-Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 2746.30it/s]
-{"status": "ok", "out": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/claude-projection-20261026/run2/out-local/tiny-parity-5070ti-04.json", "wallSeconds": 27.339873837991036}

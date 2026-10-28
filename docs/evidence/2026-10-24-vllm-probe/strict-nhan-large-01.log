@@ -1,2 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7325.10it/s]
-{"status": "ok", "out": "../docs/evidence/2026-10-24-vllm-probe/strict-nhan-large-01.json", "wallSeconds": 754.1474787359984}

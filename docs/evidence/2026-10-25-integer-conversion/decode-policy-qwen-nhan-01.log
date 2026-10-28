@@ -1,11 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7933.81it/s]
-{"batch": 1, "targetCtasPerSm": 0, "tokensPerSecondTotal": 261.73504404827685, "decodePartialAdmissionBoundBytes": 0}
-{"batch": 1, "targetCtasPerSm": 2, "tokensPerSecondTotal": 262.95151670481613, "decodePartialAdmissionBoundBytes": 0}
-{"batch": 1, "targetCtasPerSm": 8, "tokensPerSecondTotal": 262.7297942383423, "decodePartialAdmissionBoundBytes": 0}
-{"batch": 8, "targetCtasPerSm": 0, "tokensPerSecondTotal": 535.9734110616868, "decodePartialAdmissionBoundBytes": 0}
-{"batch": 8, "targetCtasPerSm": 2, "tokensPerSecondTotal": 1042.5242420888837, "decodePartialAdmissionBoundBytes": 36175872}
-{"batch": 8, "targetCtasPerSm": 8, "tokensPerSecondTotal": 1168.927423340856, "decodePartialAdmissionBoundBytes": 95944704}
-{"batch": 32, "targetCtasPerSm": 0, "tokensPerSecondTotal": 1512.687363879773, "decodePartialAdmissionBoundBytes": 0}
-{"batch": 32, "targetCtasPerSm": 2, "tokensPerSecondTotal": 2611.2132955143684, "decodePartialAdmissionBoundBytes": 144703488}
-{"batch": 32, "targetCtasPerSm": 8, "tokensPerSecondTotal": 2804.4722008929357, "decodePartialAdmissionBoundBytes": 383778816}
-{"status": "ok", "error": null}

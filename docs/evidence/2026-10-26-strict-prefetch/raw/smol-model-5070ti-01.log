@@ -1,5 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7741.72it/s]
-smol {'batch': 1, 'before': 277.59766821698105, 'after': 278.30519874328286, 'ratio': 1.0025487624980653}
-smol {'batch': 8, 'before': 1564.1242347566301, 'after': 1825.1360597104958, 'ratio': 1.1668741006333667}
-smol {'batch': 32, 'before': 4076.533776674368, 'after': 4513.738489860207, 'ratio': 1.1072491329981105}
-DONE docs/evidence/2026-10-26-strict-prefetch/raw/smol-model-5070ti-01.json

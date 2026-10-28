@@ -1,4 +1,0 @@
-control ok    | ℹ duration_ms 418.23981
-killed       reject packaged connection diagnostic action |       at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)
-
-1 of 1 mutants killed.

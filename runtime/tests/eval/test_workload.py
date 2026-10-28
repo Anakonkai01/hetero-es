@@ -24,7 +24,9 @@ from heteroes.eval.workload import (
 # Hash of the workload recorded by the physical probes on both machines (2026-09-29).
 PROBE_WORKLOAD_HASH = "cad822bc1e65a9ec37d948e5415cff22c70f96500e2043e6299bbdd5cea0b8d5"
 
-PROBE_JSON = Path(__file__).resolve().parents[2] / "artifacts" / "probes" / "2026-09-29" / "probe_5070ti.json"
+PROBE_JSON = (
+    Path(__file__).resolve().parents[1] / "fixtures/archive/runtime/artifacts/probes/2026-09-29/probe_5070ti.json"
+)
 
 
 # ---------------------------------------------------------------------------

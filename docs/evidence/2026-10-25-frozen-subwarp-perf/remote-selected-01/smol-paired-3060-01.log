@@ -1,8 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 2919.57it/s]
-zero 1 {'state': 'zero', 'batch': 1, 'warpTokensPerSecond': 121.80351418379912, 'outputTokensPerSecond': 154.6971151602697, 'ratio': 1.2700546137514126}
-zero 8 {'state': 'zero', 'batch': 8, 'warpTokensPerSecond': 657.9834754846198, 'outputTokensPerSecond': 843.7419657492679, 'ratio': 1.2823148258059713}
-zero 32 {'state': 'zero', 'batch': 32, 'warpTokensPerSecond': 1170.7922672683035, 'outputTokensPerSecond': 1494.1729447501846, 'ratio': 1.2762067076479706}
-probe 1 {'state': 'probe', 'batch': 1, 'warpTokensPerSecond': 113.35407836954106, 'outputTokensPerSecond': 143.24055882066577, 'ratio': 1.2636559785144474}
-probe 8 {'state': 'probe', 'batch': 8, 'warpTokensPerSecond': 655.0741604307719, 'outputTokensPerSecond': 843.0157798282838, 'ratio': 1.2869012865259757}
-probe 32 {'state': 'probe', 'batch': 32, 'warpTokensPerSecond': 1161.9909633006641, 'outputTokensPerSecond': 1504.1488888108418, 'ratio': 1.2944583360082849}
-DONE smol-paired-3060-01.json

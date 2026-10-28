@@ -1,5 +1,0 @@
-control ok    | 8 passed in 0.07s
-killed       notebook reuses legacy qualification for v2 | 1 failed, 7 passed in 0.08s
-killed       notebook qualifies the coordinator twice when it also works | 1 failed, 7 passed in 0.08s
-
-2 of 2 mutants killed.

@@ -1,7 +1,0 @@
-condition  rep   T mean     min     max    wait  update     CB      dT    pred   err%
-n24-B0       1    228.6   228.6   228.6   112.0   116.0  1.000     0.0   257.7   12.7
-n24-B2       1    215.2   215.2   215.2    96.9   117.7  1.062    13.4   256.2   19.1
-n24-B3       1    211.6   211.6   211.6    97.9   113.0  1.081    17.1   239.6   13.2
-n24-H0       1    206.5   206.5   206.5    99.1   106.7  1.107    22.1   243.4   17.8
-n24 {'runs_compared': 4, 'identical_rewards_and_hashes': False, 'distinct': 3}
-n24-H0-r1: generation 0 differs from B0 at [(21, '5070ti')]

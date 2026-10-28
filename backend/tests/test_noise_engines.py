@@ -47,7 +47,9 @@ def test_native_windows_v2_requires_the_matching_full_and_lora_reference():
     import json
     from pathlib import Path
 
-    receipt = Path(__file__).parents[2] / "docs/evidence/2026-10-22-candidate14/gpu-v2-windows-source-first.json"
+    receipt = (
+        Path(__file__).parent / "fixtures/archive/docs/evidence/2026-10-22-candidate14/gpu-v2-windows-source-first.json"
+    )
     body = json.loads(receipt.read_text())
     for key in ("qualificationSeconds", "modelPipelineMeasurements"):
         body.pop(key)

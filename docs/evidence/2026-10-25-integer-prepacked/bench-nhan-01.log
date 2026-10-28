@@ -1,6 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7477.03it/s]
-{"status": "ok", "out": "docs/evidence/2026-10-25-integer-prepacked/bench-smol-nhan-01.json", "wallSeconds": 11.361403286005952}
-Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 2472.49it/s]
-{"status": "ok", "out": "docs/evidence/2026-10-25-integer-prepacked/bench-tiny-nhan-01.json", "wallSeconds": 15.86620125900663}
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 8216.51it/s]
-{"status": "ok", "out": "docs/evidence/2026-10-25-integer-prepacked/bench-qwen-nhan-01.json", "wallSeconds": 14.438452510992647}

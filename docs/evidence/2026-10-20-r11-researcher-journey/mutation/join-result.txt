@@ -1,7 +1,0 @@
-killed       unlisted workspace accepts requests | 1 failed, 1 warning in 0.32s
-killed       approval adds no member | 1 failed, 1 warning in 0.33s
-killed       anyone sees requests | 1 failed, 1 warning in 0.34s
-killed       member may ask again | 1 failed, 1 warning in 0.33s
-killed       listing open to everyone | 1 failed, 2 passed, 1 warning in 0.88s
-
-5 of 5 mutants killed.

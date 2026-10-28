@@ -1,9 +1,0 @@
-control ok    | 12 passed, 1 warning in 1.52s
-killed       ignore pending owner opt-in | 1 failed, 11 passed, 1 warning in 1.53s
-killed       ignore physical reservation | 1 failed, 11 passed, 1 warning in 1.54s
-killed       ignore unconfirmed process | 1 failed, 11 passed, 1 warning in 1.55s
-killed       allow physical GPU replacement | 1 failed, 11 passed, 1 warning in 1.54s
-killed       accept underqualified coordinator | 1 failed, 11 passed, 1 warning in 1.53s
-killed       fail to store role | 1 failed, 11 passed, 1 warning in 1.54s
-
-6 of 6 mutants killed.

@@ -1,6 +1,0 @@
-control ok    | ℹ duration_ms 66.000592
-killed       mixed LoRA charts allowed |   }
-killed       template drops nullable system prompt |   }
-killed       validation timeline loses score |   }
-
-3 of 3 mutants killed.

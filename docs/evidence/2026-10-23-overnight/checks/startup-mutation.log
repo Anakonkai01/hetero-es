@@ -1,7 +1,0 @@
-control ok    | 7 passed, 14 deselected in 32.35s
-killed       validate before preparing | 1 failed, 1 passed, 14 deselected in 6.84s
-killed       background error swallowed | 1 failed, 14 deselected in 0.12s
-killed       join does not wait | 1 failed, 14 deselected in 0.13s
-SURVIVED     first generation not held for the validation | 7 passed, 14 deselected in 32.44s
-
-3 of 4 mutants killed.

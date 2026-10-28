@@ -1,9 +1,0 @@
-{
-  "stage": "authorized-ssh-connectivity-check",
-  "targets": ["100.92.20.58", "100.99.227.8"],
-  "sshOptions": {"BatchMode": true, "ConnectTimeout": 5, "StrictHostKeyChecking": true},
-  "result": "Both attempts failed at socket creation: Operation not permitted",
-  "authenticationReached": false,
-  "gpuDeviceNodesVisible": false,
-  "limit": "Execution sandbox denies socket/device access. This does not show either physical host is offline or that credentials are invalid. No authentication, sudo, remote writes or GPU computation occurred."
-}

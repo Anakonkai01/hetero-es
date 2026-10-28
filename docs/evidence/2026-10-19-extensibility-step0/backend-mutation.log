@@ -1,9 +1,0 @@
-control ok    | 6 passed, 1 warning in 0.21s
-killed       server package forgets the catalog | 1 failed, 5 passed, 1 warning in 0.20s
-killed       a shared module starts importing a module the server lacks | 1 failed, 5 passed, 1 warning in 0.20s
-killed       workload list copied back into devices | 1 failed, 5 passed, 1 warning in 0.19s
-killed       pinned model copied back into constants | 1 failed, 5 passed, 1 warning in 0.20s
-killed       pinned revision copied back into prepare | 1 failed, 5 passed, 1 warning in 0.20s
-killed       decoder set copied back into templates | 1 failed, 5 passed, 1 warning in 0.20s
-
-6 of 6 mutants killed.

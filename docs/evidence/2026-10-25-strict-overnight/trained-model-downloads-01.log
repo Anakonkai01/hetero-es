@@ -1,6 +1,0 @@
-{"repo": "HuggingFaceTB/SmolLM2-360M-Instruct", "revision": "a10cc1512eabd3dde888204e902eca88bddb4951", "state": "downloading"}
-Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-{"repo": "HuggingFaceTB/SmolLM2-360M-Instruct", "state": "downloaded", "bytes": 727118450}
-{"repo": "TinyLlama/TinyLlama-1.1B-Chat-v1.0", "revision": "fe8a4ea1ffedaf415f4da2f062534de366a451e6", "state": "downloading"}
-{"repo": "TinyLlama/TinyLlama-1.1B-Chat-v1.0", "state": "downloaded", "bytes": 2202468688}
-{"status": "ok", "models": 2, "errorType": null}

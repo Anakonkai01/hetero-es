@@ -1,22 +1,0 @@
-downloading heteroes-worker-linux-lf1-20261022-r11-candidate14c.tar.gz
-#=#=#                                                                          ######                                                                     8.8%######################                                                    31.6%######################################################################## 100.0%
-reusing the pinned Python and packages of 08411835bac0
-installed (pinned packages reused from the previous runtime)
-next: heteroes-worker selftest (or heteroes-worker setup)
-add /home/heheboiz/.local/bin to your PATH (for example in ~/.bashrc)
-
-Installed. Next:
-  heteroes-worker setup     # self-test, pairing with the lab, background service, contribution ON
-runtime bf28fa656ad4 -> 630ff292d0c6; checking this GPU against the new runtime
-self-test: running the pinned reference on this GPU (a few minutes)
-  [    3 s] checking recipe v3 (full, sign +1) 1/2
-  [    5 s] checking recipe v3 (full, sign +1) 2/2
-  [    7 s] checking recipe v3 (full, sign -1) 1/2
-  [    8 s] checking recipe v3 (full, sign -1) 2/2
-  [   11 s] checking recipe v3 (lora, sign +1) 1/2
-  [   11 s] checking recipe v3 (lora, sign +1) 2/2
-  [   11 s] checking recipe v3 (lora, sign -1) 1/2
-  [   11 s] checking recipe v3 (lora, sign -1) 2/2
-  [   12 s] measuring update speed
-self-test passed on NVIDIA GeForce RTX 5070 Ti
-service restarted

@@ -8,7 +8,7 @@ from heteroes.product.worker_cli import LabError, Worker
 
 from labkit import AGENT_COMMANDS, boot
 
-EVIDENCE = Path(__file__).parents[2] / "docs/evidence/2026-10-19-v3-qualification-reference"
+EVIDENCE = Path(__file__).parent / "fixtures/archive/docs/evidence/2026-10-19-v3-qualification-reference"
 SELF_TEST = json.loads((EVIDENCE / "5070ti-qualify.json").read_text())["result"]  # a real Linux recipe v3 admission
 
 

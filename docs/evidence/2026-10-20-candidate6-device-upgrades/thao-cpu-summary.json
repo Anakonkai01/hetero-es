@@ -1,9 +1,0 @@
-{
-  "workerId": "cli-2ffce4b7de39",
-  "deviceId": "47e0546da4464ca484a20768ce19aca6",
-  "selfTestPassed": true,
-  "coordinator": true,
-  "runtimeProfile": "coordinator-cpu-v3",
-  "cpuGuardSha256": "150ac9fdd1464e6cdb41bbc624173de28f01f53019a04f18b77e178ceb2ea95d",
-  "cFreeBytes": 10508230656
-}

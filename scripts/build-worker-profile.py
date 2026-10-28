@@ -36,7 +36,7 @@ MODEL_FILES = [
     "merges.txt",
 ]
 SIZE_ATTEMPTS = 4
-LEGACY_REFERENCE = "artifacts/regression/2026-10-10-m3-native-profile/reference.json"
+LEGACY_REFERENCE = "references/desktop-v1-reference.json"  # was artifacts/regression/2026-10-10-m3-native-profile
 
 
 def get_size(url):

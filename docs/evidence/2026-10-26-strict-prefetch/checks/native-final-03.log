@@ -1,21 +1,0 @@
-{"phase": "native-tests", "sourceFiles": 195, "gpu": "NVIDIA GeForce RTX 3060"}
-........................................................................ [ 14%]
-........................................................................ [ 28%]
-........................................................................ [ 42%]
-........................................................................ [ 57%]
-........................................................................ [ 71%]
-........................................................................ [ 85%]
-........................................................................ [ 99%]
-.                                                                        [100%]{"status": "ok", "nativeWindows": true, "error": null}
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  20%|#9        | 57/290 [00:00<00:00, 539.71it/s]Loading weights:  38%|###8      | 111/290 [00:00<00:00, 507.58it/s]Loading weights:  56%|#####5    | 162/290 [00:00<00:00, 495.19it/s]Loading weights:  73%|#######3  | 212/290 [00:00<00:00, 481.43it/s]Loading weights:  90%|######### | 261/290 [00:00<00:00, 445.47it/s]Loading weights: 100%|##########| 290/290 [00:00<00:00, 490.11it/s]
-{"status": "ok", "out": "C:\\Users\\Thao Nguyen\\.cache\\heteroes-native-strict-20261025-01\\prefetch-qwen-candidates-03.json", "wallSeconds": 25.400886899995385}
-
-============================== warnings summary ===============================
-..\venv\Lib\site-packages\_pytest\config\__init__.py:1303
-  C:\Users\Thao Nguyen\.cache\heteroes-native-strict-20261025-01\venv\Lib\site-packages\_pytest\config\__init__.py:1303: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; anyio
-    self._mark_plugins_for_rewrite(hook, disable_autoload)
-
--- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-505 passed, 1 warning in 365.43s (0:06:05)
-{"status": "ok", "wallSeconds": 431.6163239999878, "error": null}
-Native exit 0

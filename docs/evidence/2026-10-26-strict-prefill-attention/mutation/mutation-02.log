@@ -1,4 +1,0 @@
-control ok    | 64 passed, 24 deselected in 8.35s
-killed       default bypasses prefill kernel | 1 failed, 13 passed, 24 deselected in 2.10s
-
-1 of 1 mutants killed.

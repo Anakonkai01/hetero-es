@@ -1,7 +1,0 @@
-killed       split files may not be transferred | 1 failed, 2 passed, 1 warning in 0.63s
-killed       anyone changes the limits | 1 failed, 2 passed, 1 warning in 0.65s
-killed       file above the limit gets a plan | 1 failed, 2 passed, 1 warning in 0.61s
-killed       build ignores the row limit | 1 failed, 2 passed, 1 warning in 0.63s
-killed       experiment does not freeze split objects | 1 failed, 2 passed, 1 warning in 0.63s
-
-5 of 5 mutants killed.

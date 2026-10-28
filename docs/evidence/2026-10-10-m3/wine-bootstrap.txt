@@ -1,3 +1,0 @@
-PASS verified standalone Windows Python extracted
-wine: created the configuration directory '/home/pc5070ti/.local/share/heteroes-m3-wine'
-{"emulatedWindows": true, "ownProcessBirth": true, "kernelLock": true}

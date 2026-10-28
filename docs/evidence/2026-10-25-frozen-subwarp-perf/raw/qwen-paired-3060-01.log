@@ -1,8 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 3231.93it/s]
-zero 1 {'state': 'zero', 'batch': 1, 'warpTokensPerSecond': 141.8478604980164, 'outputTokensPerSecond': 179.515242472082, 'ratio': 1.2655477625240061}
-zero 8 {'state': 'zero', 'batch': 8, 'warpTokensPerSecond': 598.1558301974022, 'outputTokensPerSecond': 732.1926772504536, 'ratio': 1.2240834917697228}
-zero 32 {'state': 'zero', 'batch': 32, 'warpTokensPerSecond': 1029.4665745786263, 'outputTokensPerSecond': 1264.1196704530396, 'ratio': 1.2279365854791933}
-probe 1 {'state': 'probe', 'batch': 1, 'warpTokensPerSecond': 125.8130209424384, 'outputTokensPerSecond': 157.69802048927383, 'ratio': 1.2534316345636702}
-probe 8 {'state': 'probe', 'batch': 8, 'warpTokensPerSecond': 583.3215499337701, 'outputTokensPerSecond': 707.3862890198875, 'ratio': 1.2126867061575277}
-probe 32 {'state': 'probe', 'batch': 32, 'warpTokensPerSecond': 1025.9120271146699, 'outputTokensPerSecond': 1275.1012784474249, 'ratio': 1.2428953406790526}
-DONE qwen-paired-3060-01.json

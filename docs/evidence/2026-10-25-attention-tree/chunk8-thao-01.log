@@ -1,12 +1,0 @@
-........................................................................ [ 67%]
-..................................                                       [100%]
-106 passed, 131 deselected in 7.22s
-{"status": "ok", "resources": {"NUM_REGS": 54, "LOCAL_SIZE_BYTES": 72, "SHARED_SIZE_BYTES": 128, "MAX_THREADS_PER_BLOCK": 1024}, "error": null}
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 2980.01it/s]
-{"status": "ok", "out": "bench-chunk8-smol-thao-01.json", "wallSeconds": 15.0068937909964}
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 3025.76it/s]
-{"status": "ok", "out": "quality-chunk8-smol-thao-01.json", "wallSeconds": 27.23398996600008}
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 3222.43it/s]
-{"status": "ok", "out": "bench-chunk8-qwen-thao-01.json", "wallSeconds": 17.829571329995815}
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 2898.81it/s]
-{"status": "ok", "out": "quality-chunk8-qwen-thao-01.json", "wallSeconds": 34.06172962200071}

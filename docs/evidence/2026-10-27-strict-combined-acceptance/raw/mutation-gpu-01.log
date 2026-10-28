@@ -1,7 +1,0 @@
-control ok    | 9 passed, 75 deselected in 86.49s (0:01:26)
-killed       ldsm_upper_k | 6 failed, 3 passed, 75 deselected in 23.78s
-killed       ldsm_row_half | 6 failed, 3 passed, 75 deselected in 24.13s
-killed       ldsm_consumer_swizzle | 6 failed, 3 passed, 75 deselected in 24.07s
-killed       inverse_fp32_key | 1 failed, 8 passed, 75 deselected in 86.59s (0:01:26)
-
-4 of 4 mutants killed.

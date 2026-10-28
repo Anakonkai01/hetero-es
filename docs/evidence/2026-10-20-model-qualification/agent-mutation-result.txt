@@ -1,8 +1,0 @@
-control ok    | 13 passed in 8.75s
-killed       start-probe-with-contribution-off | 1 failed, 12 passed in 8.17s
-killed       ignore-unknown-probe-ownership | 2 failed, 11 passed in 7.22s
-killed       ack-progress-as-terminal | 1 failed, 12 passed in 7.12s
-killed       stop-fence-allows-delayed-launch | 1 failed, 12 passed in 6.84s
-killed       download-model-via-experiment-grant | 1 failed, 12 passed in 6.98s
-
-5 of 5 mutants killed.

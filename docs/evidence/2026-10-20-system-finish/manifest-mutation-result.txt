@@ -1,7 +1,0 @@
-control ok    | 2 passed in 0.22s
-killed       overwrite-existing-manifest | 1 failed, 1 passed in 0.23s
-killed       write-manifest-inside-pinned-directory | 1 failed, 1 passed in 0.19s
-killed       retain-the-old-model-allowlist | 1 failed, 1 passed in 0.18s
-killed       accept-executable-model-code | 1 failed, 1 passed in 0.21s
-
-4 of 4 mutants killed.

@@ -1,5 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7574.01it/s]
-smol {'batch': 1, 'before': 276.34441025131486, 'after': 276.4191954308903, 'ratio': 1.0002706230949538}
-smol {'batch': 8, 'before': 1494.986425804987, 'after': 1563.7262327730293, 'ratio': 1.0459802214799567}
-smol {'batch': 32, 'before': 3859.220490600735, 'after': 4099.3556834285055, 'ratio': 1.0622237556554823}
-DONE docs/evidence/2026-10-25-b22-core-perf/raw/smol-pair-load-5070ti-02.json

@@ -2,8 +2,8 @@
 
 One repository: numerical runtime in `runtime/`; CPU product, web/apps and operations at the root. Both original histories
 and `archive/runtime/*` / `archive/product/*` branches are retained. Read `docs/HANDOFF.md` first, then the relevant module
-and `runtime/docs/numerical-contract.md` for numerical work. Historical agent/session files under `docs/archive/` are dated
-records; this file contains the current common rules.
+and `runtime/docs/numerical-contract.md` for numerical work. Evidence, raw runtime artifacts and historical agent/session
+files live on the branch `evidence-archive` (index: `docs/EVIDENCE-INDEX.md`); this file contains the current common rules.
 
 ## Project claim (owner, 2026-10-20)
 
@@ -24,8 +24,12 @@ the owner asks. Prefer finishing the system (product, multi-machine, speed, rese
 - Write meaningful tests before new behavior/helpers; use `scripts/mutation-check.py` on scratch copies. A surviving
   mutant needs a test or a documented equivalence. Preserve intermediate receipts and state their limits.
 - Never print or commit passwords, credentials, device/session tokens, signing keys or tunnel secrets.
-- Existing evidence and `runtime/artifacts/` are immutable. Add a fresh dated evidence folder with a README containing
-  **What this does NOT show**. Do not format fixtures, resource profiles, generated files or archives.
+- Evidence lives on the branch `evidence-archive` (moved off `main` byte-identically on 2026-10-28); its existing files are
+  immutable. Add a fresh dated folder `docs/evidence/<date>-<name>/` there (a worktree of that branch), with a README
+  containing **What this does NOT show**, then regenerate `docs/EVIDENCE-INDEX.md` on the working branch
+  (`scripts/build-evidence-index.py`). Tests read only copies under `*/tests/fixtures/archive/<archived path>`
+  (`scripts/check-archive-fixtures.py` proves they are identical). Do not format fixtures, resource profiles, generated
+  files or archives.
 - Do not change device approval/contribution based on an old handoff. `3060-thao` is REVOKED in the latest live read.
 
 ## Lab and hardware
@@ -55,7 +59,7 @@ learning acceptance from CPU or fixture checks.
 ## Verification
 
 ```bash
-scripts/check-all.sh docs/evidence/YYYY-MM-DD-name/checks
+scripts/check-all.sh .scratch/checks-YYYY-MM-DD-name
 CUDA_VISIBLE_DEVICES='' .venv-backend/bin/python -m pytest backend/tests -q
 (cd runtime && CUDA_VISIBLE_DEVICES='' PYTHONPATH=src "$HOME/miniforge3/envs/heteroes-match/bin/python" -m pytest -q)
 scripts/build-apps.sh --check .scratch/fresh-linux-check

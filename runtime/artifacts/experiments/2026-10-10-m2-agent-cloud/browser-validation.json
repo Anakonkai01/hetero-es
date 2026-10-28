@@ -1,9 +1,0 @@
-{
-  "deviceCount": 3,
-  "coordinatorSelection": true,
-  "backupDefaults": {
-    "interval": 1,
-    "retain": 3
-  },
-  "browserErrors": []
-}

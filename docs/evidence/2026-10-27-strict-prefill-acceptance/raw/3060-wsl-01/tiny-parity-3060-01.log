@@ -1,2 +1,0 @@
-Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights:  65%|██████▌   | 131/201 [00:00<00:00, 1307.68it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 1363.06it/s]
-{"status": "ok", "out": "tiny-parity-3060-01.json", "wallSeconds": 36.785008774000744}

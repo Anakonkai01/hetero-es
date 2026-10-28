@@ -1,3 +1,0 @@
-killed       Recipe v3 refused the compacting decoder | 1 failed, 24 passed, 1 warning in 3.50s
-
-1 of 1 mutants killed.

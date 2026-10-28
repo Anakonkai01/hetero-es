@@ -1,2 +1,0 @@
-Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 2578.61it/s]
-{"status": "ok", "out": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/docs/evidence/2026-10-27-strict-bounded-lm-head/raw/tiny-parity-5070ti-01.json", "wallSeconds": 30.931778496989864}

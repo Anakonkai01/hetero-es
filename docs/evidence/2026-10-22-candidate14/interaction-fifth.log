@@ -1,9 +1,0 @@
-{
-  fixtureOnly: true,
-  installChooserHasOnePrimaryAction: true,
-  accountMenuKeyboard: true,
-  searchableFilterKeyboard: true,
-  datasetPaginationAndSearch: true,
-  selfAdministrationHidden: true,
-  responsiveWithoutOverflow: true
-}

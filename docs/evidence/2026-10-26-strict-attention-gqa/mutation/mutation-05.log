@@ -1,7 +1,0 @@
-control ok    | 6 passed, 281 deselected in 5.32s
-killed       unroll_max | 1 failed, 281 deselected in 1.54s
-SURVIVED     unroll_exp | 6 passed, 281 deselected in 5.25s
-SURVIVED     unroll_tree | 6 passed, 281 deselected in 5.32s
-killed       unroll_normalize | 1 failed, 5 passed, 281 deselected in 5.30s
-
-2 of 4 mutants killed.

@@ -1,8 +1,0 @@
-{
-  "build": "lf1-20261022-r11-candidate14b",
-  "wheelSha256": "9c91721dded38c2a588d9f4b12a4c6c9f9e7c37d1ed973020b3befb2b90290db",
-  "sourceFiles": 118,
-  "allWheelSourcesEqual": true,
-  "serverIncludesNotebookAndSdk": true,
-  "workerRuntimeSha256": "bf28fa656ad4f51caf4fd7daa8e5d487547ded276dbe1d150fde9a4e3ea87ef9"
-}

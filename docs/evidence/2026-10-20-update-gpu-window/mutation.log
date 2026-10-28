@@ -1,5 +1,0 @@
-control ok    | 8 passed in 3.07s
-killed       never billed | 1 failed, 7 passed in 3.08s
-killed       billed through publication (previous window) | 1 failed, 7 passed in 3.02s
-
-2 of 2 mutants killed.

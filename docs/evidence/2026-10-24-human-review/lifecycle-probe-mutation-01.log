@@ -1,7 +1,0 @@
-control ok    | 5 passed in 1.77s
-killed       GPU flag ignored | 1 failed, 4 passed in 1.78s
-killed       GPU environment approval ignored | 2 failed, 3 passed in 1.77s
-killed       existing evidence guard removed | 1 failed, 4 passed in 1.79s
-killed       candidate restore skipped | 1 failed, 4 passed in 1.78s
-
-4 of 4 mutants killed.

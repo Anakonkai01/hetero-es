@@ -1,6 +1,0 @@
-control ok    | 8 passed, 1 warning in 1.37s
-killed       never finalize an unstarted cancel | 1 failed, 7 passed, 1 warning in 1.42s
-killed       release without cancel | 1 failed, 7 passed, 1 warning in 1.25s
-killed       release but keep STARTING snapshot | 1 failed, 7 passed, 1 warning in 1.33s
-
-3 of 3 mutants killed.

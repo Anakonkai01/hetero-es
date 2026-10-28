@@ -1,7 +1,0 @@
-[
- {"name": "unlisted workspace accepts requests", "file": "backend/routes_workspaces.py", "old": "or not settings(\n                db, workspace_id\n            ).get(\"listed\"):", "new": "or False:"},
- {"name": "approval adds no member", "file": "backend/routes_workspaces.py", "old": "            if body.approve:\n                db.execute(", "new": "            if False:\n                db.execute("},
- {"name": "anyone sees requests", "file": "backend/routes_workspaces.py", "old": "    def join_requests(workspace_id: str, current=Depends(active)):\n        workspace_admin(workspace_id, current)\n", "new": "    def join_requests(workspace_id: str, current=Depends(active)):\n"},
- {"name": "member may ask again", "file": "backend/routes_workspaces.py", "old": "raise HTTPException(409, \"Already a member\")", "new": "pass"},
- {"name": "listing open to everyone", "file": "backend/routes_workspaces.py", "old": "        # a listed workspace appears in every active user's list and accepts join requests\n        workspace_admin(workspace_id, current)\n", "new": ""}
-]

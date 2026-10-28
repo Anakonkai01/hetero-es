@@ -1,5 +1,0 @@
-control ok    | Unused translation keys: 0
-killed       add unused translation | Unused translation keys: 1
-killed       remove required translation | Unused translation keys: 1
-
-2 of 2 mutants killed.

@@ -1,19 +1,0 @@
-.........                                                                [100%]
-9 passed in 13.61s
-tests thao exit 0
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 3207.69it/s]
-{"batch": 1, "variant": "separate", "tokensPerSecondTotal": 158.40142705536172, "peakAllocatedBytes": 783805952}
-{"batch": 1, "variant": "segmented_group", "tokensPerSecondTotal": 163.55345476090918, "peakAllocatedBytes": 783805952}
-{"batch": 8, "variant": "separate", "tokensPerSecondTotal": 527.5686076471168, "peakAllocatedBytes": 1113193984}
-{"batch": 8, "variant": "segmented_group", "tokensPerSecondTotal": 543.1563786710036, "peakAllocatedBytes": 1113193984}
-{"batch": 32, "variant": "separate", "tokensPerSecondTotal": 963.126241568411, "peakAllocatedBytes": 2233650688}
-{"batch": 32, "variant": "segmented_group", "tokensPerSecondTotal": 988.2046646320596, "peakAllocatedBytes": 2233650688}
-{"status": "ok", "error": null}
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 3236.99it/s]
-{"batch": 1, "variant": "separate", "tokensPerSecondTotal": 150.55792319941108, "peakAllocatedBytes": 1013466624}
-{"batch": 1, "variant": "segmented_group", "tokensPerSecondTotal": 159.20921974733466, "peakAllocatedBytes": 1013466624}
-{"batch": 8, "variant": "separate", "tokensPerSecondTotal": 479.4777573231586, "peakAllocatedBytes": 1136776704}
-{"batch": 8, "variant": "segmented_group", "tokensPerSecondTotal": 493.0628104175455, "peakAllocatedBytes": 1136776704}
-{"batch": 32, "variant": "separate", "tokensPerSecondTotal": 885.0335330088794, "peakAllocatedBytes": 1552733184}
-{"batch": 32, "variant": "segmented_group", "tokensPerSecondTotal": 933.1131057578257, "peakAllocatedBytes": 1552733184}
-{"status": "ok", "error": null}

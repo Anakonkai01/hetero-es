@@ -1,8 +1,0 @@
-Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 2521.34it/s]
-zero 1 {'state': 'zero', 'batch': 1, 'warpTokensPerSecond': 149.3092529380873, 'outputTokensPerSecond': 169.3222014273748, 'ratio': 1.1340368938660894}
-zero 8 {'state': 'zero', 'batch': 8, 'warpTokensPerSecond': 785.8116464369498, 'outputTokensPerSecond': 900.3117584297469, 'ratio': 1.1457093598853705}
-zero 32 {'state': 'zero', 'batch': 32, 'warpTokensPerSecond': 1435.6642388178568, 'outputTokensPerSecond': 1608.5802209245458, 'ratio': 1.1204431909852892}
-probe 1 {'state': 'probe', 'batch': 1, 'warpTokensPerSecond': 149.23886280099524, 'outputTokensPerSecond': 170.07653781582366, 'ratio': 1.1396263320675037}
-probe 8 {'state': 'probe', 'batch': 8, 'warpTokensPerSecond': 783.7453312442989, 'outputTokensPerSecond': 899.462444693631, 'ratio': 1.1476463193287747}
-probe 32 {'state': 'probe', 'batch': 32, 'warpTokensPerSecond': 1435.1129176946902, 'outputTokensPerSecond': 1607.5275188757255, 'ratio': 1.1201400942428945}
-DONE docs/evidence/2026-10-25-frozen-subwarp-perf/raw/tiny-selected-paired-5070ti-01.json

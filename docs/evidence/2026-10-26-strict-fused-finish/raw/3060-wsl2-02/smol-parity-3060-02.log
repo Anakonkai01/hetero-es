@@ -1,2 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  94%|█████████▍| 273/290 [00:00<00:00, 2718.78it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 2736.72it/s]
-{"status": "ok", "out": "smol-parity-3060-02.json", "wallSeconds": 22.664551223017043}

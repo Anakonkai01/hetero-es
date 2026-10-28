@@ -1,24 +1,0 @@
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 6487.50it/s]
-{"batch": 1, "variant": "separate", "tokensPerSecondTotal": 262.9548421084427, "peakAllocatedBytes": 783805952}
-{"batch": 1, "variant": "segmented_group", "tokensPerSecondTotal": 286.15138449536323, "peakAllocatedBytes": 783805952}
-{"batch": 8, "variant": "separate", "tokensPerSecondTotal": 1208.344717290153, "peakAllocatedBytes": 1113193984}
-{"batch": 8, "variant": "segmented_group", "tokensPerSecondTotal": 1303.657571684249, "peakAllocatedBytes": 1113193984}
-{"batch": 32, "variant": "separate", "tokensPerSecondTotal": 2865.345756863592, "peakAllocatedBytes": 2233650688}
-{"batch": 32, "variant": "segmented_group", "tokensPerSecondTotal": 3025.0383428319997, "peakAllocatedBytes": 2233650688}
-{"status": "ok", "error": null}
-Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 2356.77it/s]
-{"batch": 1, "variant": "separate", "tokensPerSecondTotal": 180.05826675248352, "peakAllocatedBytes": 2229814784}
-{"batch": 1, "variant": "segmented_group", "tokensPerSecondTotal": 189.9439032019738, "peakAllocatedBytes": 2229814784}
-{"batch": 8, "variant": "separate", "tokensPerSecondTotal": 692.4869628021462, "peakAllocatedBytes": 2440361984}
-{"batch": 8, "variant": "segmented_group", "tokensPerSecondTotal": 698.0761446656891, "peakAllocatedBytes": 2440361984}
-{"batch": 32, "variant": "separate", "tokensPerSecondTotal": 1386.3167512059072, "peakAllocatedBytes": 3149727744}
-{"batch": 32, "variant": "segmented_group", "tokensPerSecondTotal": 1406.5407231563015, "peakAllocatedBytes": 3149727744}
-{"status": "ok", "error": null}
-Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7771.80it/s]
-{"batch": 1, "variant": "separate", "tokensPerSecondTotal": 262.85470180146143, "peakAllocatedBytes": 1013466624}
-{"batch": 1, "variant": "segmented_group", "tokensPerSecondTotal": 280.5322882896688, "peakAllocatedBytes": 1013466624}
-{"batch": 8, "variant": "separate", "tokensPerSecondTotal": 1170.9231246662794, "peakAllocatedBytes": 1136776704}
-{"batch": 8, "variant": "segmented_group", "tokensPerSecondTotal": 1211.8676207814656, "peakAllocatedBytes": 1136776704}
-{"batch": 32, "variant": "separate", "tokensPerSecondTotal": 2809.668591036745, "peakAllocatedBytes": 1552733184}
-{"batch": 32, "variant": "segmented_group", "tokensPerSecondTotal": 2947.4368107423525, "peakAllocatedBytes": 1552733184}
-{"status": "ok", "error": null}
