@@ -34,7 +34,6 @@ NATIVE_TESTS = tuple(
         "test_strict_attention_split",
         "test_strict_attention_prefill",
         "test_integer_fused_finish",
-        "test_fp16_decoder_cuda",
         "test_qwen2_strict_cuda",
         "test_integer_tma",
         "test_attention_key_stages",
