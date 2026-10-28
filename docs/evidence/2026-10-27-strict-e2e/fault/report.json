@@ -1,0 +1,159 @@
+{
+ "coordinatorExit": 0,
+ "recipeHash": "483932447f0f5c75493fc35da4d0d7e26f4d8f645348db43559a596bcdeaff8c",
+ "failures": [],
+ "fault": {
+  "generation": 2,
+  "killedAt": 1793103026.486433,
+  "exit": -9,
+  "restartedAt": 1793103056.7861671
+ },
+ "generations": 4,
+ "audits": [
+  {
+   "enabled": true,
+   "selected": 4,
+   "completed": 4,
+   "matched": 4,
+   "mismatched": 0,
+   "pending": 0,
+   "timed_out": 0,
+   "skipped": 0,
+   "incomplete": 0,
+   "drain_reason": "complete"
+  },
+  {
+   "enabled": true,
+   "selected": 2,
+   "completed": 2,
+   "matched": 2,
+   "mismatched": 0,
+   "pending": 0,
+   "timed_out": 0,
+   "skipped": 0,
+   "incomplete": 0,
+   "drain_reason": "complete"
+  },
+  {
+   "enabled": true,
+   "selected": 4,
+   "completed": 4,
+   "matched": 4,
+   "mismatched": 0,
+   "pending": 0,
+   "timed_out": 0,
+   "skipped": 0,
+   "incomplete": 0,
+   "drain_reason": "complete"
+  },
+  {
+   "enabled": true,
+   "selected": 4,
+   "completed": 4,
+   "matched": 4,
+   "mismatched": 0,
+   "pending": 0,
+   "timed_out": 0,
+   "skipped": 0,
+   "incomplete": 0,
+   "drain_reason": "complete"
+  }
+ ],
+ "resultsByWorker": {
+  "local-5070ti": 27,
+  "thao-3060": 5
+ },
+ "expiredByWorker": {
+  "local-5070ti": 1
+ },
+ "auditPairs": [
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ],
+  [
+   "thao-3060",
+   "local-5070ti",
+   1
+  ]
+ ],
+ "children": [
+  "8037856aadcf6d85dac044c6f0953f3ac2fe81d793df798110d8bc08c0211afc",
+  "014ba6437921c1edf32a12790c844df44f4d60f1779cb681d836394d81f2329f",
+  "014ba6437921c1edf32a12790c844df44f4d60f1779cb681d836394d81f2329f",
+  "014ba6437921c1edf32a12790c844df44f4d60f1779cb681d836394d81f2329f"
+ ],
+ "rewards": [
+  0.875,
+  0.828125,
+  0.9375,
+  0.8125
+ ],
+ "recordHashes": [
+  "6e9db2a1a36c4d49cb43736b149bd3836e7c79f4efaa51a6369e0c7aa1589008",
+  "b190212f6bbefdbcc1c947dc24d1eaeca83ab9f24a9177c91143da9db0728ed1",
+  "1071b71ed41737c2a8af3a67c74f19dfdb9ec057ccabf4f4eea441ecad2b27b1",
+  "c253493bb21f482941bfdbe87b814fe05cb6a3a29ce21ec9c75507b125b46c2a"
+ ]
+}
