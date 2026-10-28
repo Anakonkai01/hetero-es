@@ -144,6 +144,25 @@ remote = subprocess.Popen(
 remote.stdin.write((token + "\n").encode())
 remote.stdin.close()
 
+
+def holds_lease(generation, timeout=120):
+    """Wait until the local worker holds an open lease of `generation` in the coordinator's ledger (read-only)."""
+    end = time.monotonic() + timeout
+    while time.monotonic() < end:
+        try:
+            with sqlite3.connect(f"file:{run_dir / 'ledger.sqlite'}?mode=ro", uri=True, timeout=1) as db:
+                if db.execute(
+                    "SELECT 1 FROM attempt a JOIN candidate c USING(candidate_id) WHERE c.generation=? "
+                    "AND a.worker_id='local-5070ti' AND a.ended_at IS NULL",
+                    (generation,),
+                ).fetchone():
+                    return True
+        except sqlite3.OperationalError:  # busy or not created yet
+            pass
+        time.sleep(0.05)
+    return False
+
+
 fault = None
 if a.kill_local_at is not None:
     # the local worker dies while it holds leases of an open generation; its attempts must expire and be redone
@@ -153,9 +172,14 @@ if a.kill_local_at is not None:
         for line in lines[seen:]:
             row = json.loads(line)
             if row.get("event") == "generation_open" and row.get("generation") == a.kill_local_at:
-                time.sleep(1)
+                held = holds_lease(a.kill_local_at)  # a fixed delay could miss every lease of a fast generation
                 local.kill()
-                fault = {"generation": a.kill_local_at, "killedAt": time.time(), "exit": local.wait()}
+                fault = {
+                    "generation": a.kill_local_at,
+                    "heldLease": held,
+                    "killedAt": time.time(),
+                    "exit": local.wait(),
+                }
                 break
         seen = len(lines)
         time.sleep(0.2)

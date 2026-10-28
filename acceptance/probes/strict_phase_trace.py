@@ -44,7 +44,7 @@ import transformers  # noqa: E402
 
 from heteroes.canonical import canonical_json_hash  # noqa: E402
 from heteroes.catalog import STRICT_B22_DECODER  # noqa: E402
-from heteroes.eval import strict_backend  # noqa: E402
+from heteroes.strict import strict_backend  # noqa: E402
 from heteroes.eval.candidate import model_weights_sha256  # noqa: E402
 from heteroes.eval.phase_trace import storage_inventory  # noqa: E402
 from heteroes.executor import CandidateExecutor  # noqa: E402
