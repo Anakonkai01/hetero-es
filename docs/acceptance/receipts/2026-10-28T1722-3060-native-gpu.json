@@ -1,0 +1,42 @@
+{
+  "format": "heteroes-acceptance-receipt-v1",
+  "tree": "src-18d0b138fd11b54bfcacda3c5177b96e00e95347e603b1a116fdd55a6847ddc6",
+  "dirty": false,
+  "commit": "1782c5c63f5373ace22d4ec545965f02b474e245",
+  "host": "3060-native",
+  "profiles": [
+    "gpu"
+  ],
+  "machine": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.13.9",
+    "node": "DESKTOP-QP0NTA7",
+    "gpus": [
+      "NVIDIA GeForce RTX 3060, 617.42"
+    ]
+  },
+  "started": "2026-10-28T17:00:17+0700",
+  "finished": "2026-10-28T17:22:47+0700",
+  "results": [
+    {
+      "name": "strict-gpu-suite-native",
+      "host": "3060-native",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 1279.278,
+      "log": "C:\\Users\\Thao Nguyen\\.cache\\heteroes-accept\\heteroes-accept-18d0b138fd11-20261028-170018\\results\\strict-gpu-suite-native\\output.log",
+      "log_sha256": "e2b1d1c1a11c1eee8c1ccdf5e877fbb4dc1fbf97d87c53c3a43ce36bdc8022e8",
+      "detail": ""
+    },
+    {
+      "name": "strict-parity-qwen-native",
+      "host": "3060-native",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 70.545,
+      "log": "C:\\Users\\Thao Nguyen\\.cache\\heteroes-accept\\heteroes-accept-18d0b138fd11-20261028-170018\\results\\strict-parity-qwen-native\\output.log",
+      "log_sha256": "cba79f7e86dbb11893f913636af5752b35df5d1cc585f5e95aa2f8c35c09091d",
+      "detail": ""
+    }
+  ]
+}
