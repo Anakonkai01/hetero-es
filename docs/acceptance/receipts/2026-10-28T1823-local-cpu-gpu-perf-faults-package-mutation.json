@@ -1,0 +1,277 @@
+{
+  "format": "heteroes-acceptance-receipt-v1",
+  "tree": "src-18d0b138fd11b54bfcacda3c5177b96e00e95347e603b1a116fdd55a6847ddc6",
+  "dirty": false,
+  "commit": "1003f24b395b0380dfe14ca7147e6d1855a99584",
+  "host": "local",
+  "profiles": [
+    "cpu",
+    "gpu",
+    "perf",
+    "faults",
+    "package",
+    "mutation"
+  ],
+  "machine": {
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "python": "3.12.13",
+    "node": "5070ti",
+    "gpus": [
+      "NVIDIA GeForce RTX 5070 Ti, 595.91.07"
+    ]
+  },
+  "started": "2026-10-28T17:00:02+0700",
+  "finished": "2026-10-28T18:23:43+0700",
+  "results": [
+    {
+      "name": "acceptance-selftest",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 1.67,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/acceptance-selftest/output.log",
+      "log_sha256": "5c15c2541596bcb102185a2330b77bcdecdeff775421877a0afe3f2778565ba1",
+      "detail": ""
+    },
+    {
+      "name": "check-all",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 583.618,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/check-all/output.log",
+      "log_sha256": "0c8deceb79f419b143ce22b226bf6ec20beaba89bda791ffc9793f1694dd1439",
+      "detail": ""
+    },
+    {
+      "name": "strict-gpu-suite",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 1238.398,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/strict-gpu-suite/output.log",
+      "log_sha256": "d63f795fb740fd2ce3facbb9871074d94e71dbd703515d811ec365ce9758e358",
+      "detail": ""
+    },
+    {
+      "name": "strict-parity-qwen",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 47.789,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/strict-parity-qwen/output.log",
+      "log_sha256": "1693486889d88bd24af9538ff5fe67ddc9b303e306f820fb721a4fa28c9d10be",
+      "detail": ""
+    },
+    {
+      "name": "strict-parity-smol",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 25.978,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/strict-parity-smol/output.log",
+      "log_sha256": "570e0776f3748be66e9592e9979e050bacc9dd02e6faa0d6a489957fece40f8d",
+      "detail": ""
+    },
+    {
+      "name": "strict-parity-tiny",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 35.723,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/strict-parity-tiny/output.log",
+      "log_sha256": "9f822be9152abe9274e4d2b72dd7fc7ea5073188a78dfef6123b07f5d7b81db3",
+      "detail": ""
+    },
+    {
+      "name": "strict-throughput",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 25.787,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/strict-throughput/output.log",
+      "log_sha256": "dad1e1a0226e534e978cb167c3a917b90e523a4ccc03c0cd69f03f4dbf809f7f",
+      "detail": ""
+    },
+    {
+      "name": "int8-memory",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 13.096,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/int8-memory/output.log",
+      "log_sha256": "e37bfa810c140b8dec41c674cf1c5f9281e21839478d215c671cdce0fe216e1c",
+      "detail": ""
+    },
+    {
+      "name": "strict-phase-trace",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 32.757,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/strict-phase-trace/output.log",
+      "log_sha256": "30f359792b19cf67dacf2f45857252ea2dc1fed1e7091f61394310b2a986de2f",
+      "detail": ""
+    },
+    {
+      "name": "strict-e2e",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 187.643,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/strict-e2e/output.log",
+      "log_sha256": "a6243b7b9efafa28f872cfbe74de29dcd95dc2c3bd2a48141dd8a4acfdbfd900",
+      "detail": ""
+    },
+    {
+      "name": "strict-e2e-soak",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 599.71,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/strict-e2e-soak/output.log",
+      "log_sha256": "15c7b49648a66f263ae49118192fde80f79112da0bae4f468de292999cfaae62",
+      "detail": ""
+    },
+    {
+      "name": "strict-e2e-int8",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 64.306,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/strict-e2e-int8/output.log",
+      "log_sha256": "35b1e1a38719f8cf982457ca88b290bacd0b2feb854d5e431de2b925b351fe28",
+      "detail": ""
+    },
+    {
+      "name": "package-linux",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 12.945,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/package-linux/output.log",
+      "log_sha256": "3b76fdd7a118da0cae996eac638484e24f4814f62355aaf9c36e9320cf9d9776",
+      "detail": ""
+    },
+    {
+      "name": "mutation-strict-routes",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 903.131,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/mutation-strict-routes/output.log",
+      "log_sha256": "289cd1ab59df083b2b88837645a5556bbf0cebd6f2944446fdae4eb54c4f3524",
+      "detail": ""
+    },
+    {
+      "name": "mutation-watchdog",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 186.244,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/mutation-watchdog/output.log",
+      "log_sha256": "308d93a2901bd413348810f6c6587be778ce59be281118cfde79b40b7951aff6",
+      "detail": ""
+    },
+    {
+      "name": "mutation-restore-recovery",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 79.672,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/mutation-restore-recovery/output.log",
+      "log_sha256": "2ca09ac31a077a5ddaf235d3a3689f3da8d0d34098a7ccbbaa84f3e91e742f61",
+      "detail": ""
+    },
+    {
+      "name": "mutation-strict-mismatch",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 140.638,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/mutation-strict-mismatch/output.log",
+      "log_sha256": "b2dd3f72ab230d4ce35b77424d7acd1ecabe68ed9590c76dbe422682d68d0fd5",
+      "detail": ""
+    },
+    {
+      "name": "mutation-audit-outcomes",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 54.928,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/mutation-audit-outcomes/output.log",
+      "log_sha256": "78368bdf67bd6438f16ddb32c8568d4fd70db2b5120b18cf97fbb3404585d73e",
+      "detail": ""
+    },
+    {
+      "name": "mutation-recovery-io",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 71.317,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/mutation-recovery-io/output.log",
+      "log_sha256": "6a1cd6bcce163224016b80eb1977e8cfae8922a63e43a6c625e257cf7ad212d0",
+      "detail": ""
+    },
+    {
+      "name": "mutation-strict-decoder",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 112.509,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/mutation-strict-decoder/output.log",
+      "log_sha256": "462f48ab6495de4e46a629cebd0aa20134121480199b5d4926f8550f9cc372bc",
+      "detail": ""
+    },
+    {
+      "name": "mutation-strict-qualification-runtime",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 181.144,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/mutation-strict-qualification-runtime/output.log",
+      "log_sha256": "96fc60362809e10af8e2a656bd699051e28a96f388d58996fc71898805fc65bb",
+      "detail": ""
+    },
+    {
+      "name": "mutation-strict-qualification-backend",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 63.498,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/mutation-strict-qualification-backend/output.log",
+      "log_sha256": "49187bad60a427aa198817b999b8f42c27dc711fdc6eb815a0c4c874d4c3f98f",
+      "detail": ""
+    },
+    {
+      "name": "mutation-gpu-ownership-backend",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 39.022,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/mutation-gpu-ownership-backend/output.log",
+      "log_sha256": "1b49ba30ad242a01b9435a44cfbbddacb0324baebf66f8971768684e8ef0dbaa",
+      "detail": ""
+    },
+    {
+      "name": "mutation-int8-lora",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 86.733,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/mutation-int8-lora/output.log",
+      "log_sha256": "731ef9ef2ecdabe49dce947a476336b9933faea5ef01dc5d00c1f512eb6ef07b",
+      "detail": ""
+    },
+    {
+      "name": "mutation-gpu-ownership-runtime",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 233.632,
+      "log": "/home/pc5070ti/projects/heteroes-codex-frozen-perf/.scratch/r28/final-local4/mutation-gpu-ownership-runtime/output.log",
+      "log_sha256": "0b69320b9c20b32ad8fdb03bfedb263a020214c4fb5c4d2a320b5e7be29d5873",
+      "detail": ""
+    }
+  ]
+}
