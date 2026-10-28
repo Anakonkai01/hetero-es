@@ -168,3 +168,13 @@ def test_the_int8_decoder_stops_at_the_first_audit_mismatch_and_refuses_export(t
     tracker.recipe = SimpleNamespace(recipe={"weightSpace": {**SPACE, "frozenBaseSha256": "b" * 64}})
     with pytest.raises(ValueError, match="frozen int8 base"):
         tracker.export()
+
+
+def test_the_base_hash_binds_each_projection_to_its_place(assets):  # noqa: F811
+    from heteroes.v3.model import frozen_base_sha256
+
+    model, _ = load(assets / "model", file_manifest(assets / "model"))
+    pinned = freeze_base_(model, SPACE)
+    first, second = model.model.layers[0].self_attn, model.model.layers[1].self_attn
+    first.q_proj, second.q_proj = second.q_proj, first.q_proj  # the same bytes in other places: another model
+    assert frozen_base_sha256(model) != pinned

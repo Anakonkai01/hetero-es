@@ -114,6 +114,16 @@ CHECKS = [
         gpu=True,
     ),
     Check(
+        "int8-memory",
+        "perf",
+        ("{runtime_python}", "acceptance/probes/int8_memory.py", "--gpu", "--model", "{models}/qwen", "--out", "{out}"),
+        hosts=("local", "3060-wsl"),
+        env=GPU + PROBE_PATH,
+        expect="INT8 MEMORY OK",
+        timeout=3600,
+        gpu=True,
+    ),
+    Check(
         "strict-phase-trace",
         "perf",
         ("{runtime_python}", "acceptance/probes/strict_phase_trace.py", "--gpu", "--model", "{models}/qwen")
@@ -136,6 +146,16 @@ CHECKS = [
             ' --out "$2/fault" --generations 4 --kill-local-at 2 --compare "$2/plain/report.json"',
         )
         + ("e2e", "{python}", "{out}"),
+        env=GPU,
+        expect="E2E OK",
+        timeout=2 * 3600,
+        gpu=True,
+    ),
+    Check(
+        "strict-e2e-int8",
+        "faults",
+        ("{python}", "acceptance/probes/strict_e2e.py", "--out", "{out}/int8", "--generations", "4", "--int8-lora")
+        + ("--sigma", "0.02"),
         env=GPU,
         expect="E2E OK",
         timeout=2 * 3600,
@@ -469,6 +489,7 @@ GATES = [
         "M6.lora-lifecycle",
         "M6",
         "int8 frozen base + LoRA through the whole lifecycle",
-        open="Adapter perturb/update/restore over the int8 base is not integrated into the worker lifecycle.",
+        # strict_int8_lora_v1 (ADR-014): standalone/SDK runs; the lab does not offer it yet
+        checks=("mutation-int8-lora", "strict-e2e-int8", "int8-memory", "int8-memory@3060-wsl"),
     ),
 ]
