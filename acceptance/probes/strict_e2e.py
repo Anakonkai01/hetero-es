@@ -30,6 +30,7 @@ import time
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
 from acceptance.hosts import LOCAL, SSH, WSL  # noqa: E402
+from acceptance.soak import growth_failure  # noqa: E402
 
 p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
 p.add_argument("--out", type=Path, required=True)
@@ -50,6 +51,11 @@ p.add_argument(
 p.add_argument("--sigma", type=float, default=0.001)
 p.add_argument("--weights", default=r"layers\.2[0-3]\.", help="subset regex (a soak uses a small one: disk)")
 p.add_argument("--compare", type=Path, help="an earlier report.json: its children and record hashes must be equal")
+p.add_argument(
+    "--max-bookkeeping-growth",
+    type=float,
+    help="soak: fail when the late third's coordinator seconds per generation exceed this multiple of the early third's",
+)
 a = p.parse_args()
 if a.out.exists():
     p.error("--out must be a fresh directory")
@@ -244,6 +250,10 @@ else:
         # the same recipe gives the same updates whichever GPU ran which candidate, and through a worker fault
         if (earlier["children"], earlier["recordHashes"]) != (children, report["recordHashes"]):
             report["failures"].append(f"children or generation records differ from {a.compare}")
+    if a.max_bookkeeping_growth is not None and (
+        growth := growth_failure(report["bookkeeping"], a.max_bookkeeping_growth)
+    ):
+        report["failures"].append(growth)
     if len(summaries) != a.generations:
         report["failures"].append("not every generation completed")
     if not any(row["changed"] for row in summaries) or children[-1] == summaries[0]["parent_sha256"]:

@@ -152,6 +152,16 @@ CHECKS = [
         gpu=True,
     ),
     Check(
+        "strict-e2e-soak",
+        "faults",
+        ("{python}", "acceptance/probes/strict_e2e.py", "--out", "{out}/soak", "--generations", "600")
+        + ("--weights", r"layers\.23\.self_attn\.o_proj", "--max-bookkeeping-growth", "1.5"),
+        env=GPU,
+        expect="E2E OK",
+        timeout=4 * 3600,
+        gpu=True,
+    ),
+    Check(
         "strict-e2e-int8",
         "faults",
         ("{python}", "acceptance/probes/strict_e2e.py", "--out", "{out}/int8", "--generations", "4", "--int8-lora")
@@ -474,8 +484,8 @@ GATES = [
     Gate(
         "M5.long-run",
         "M5",
-        "system soak across early/middle/late generations",
-        open="No long strict soak run has been made.",
+        "600-generation strict soak on two GPUs; coordinator bookkeeping late/early <= 1.5x",
+        checks=("strict-e2e-soak",),
     ),
     Gate(
         "M5.release",
