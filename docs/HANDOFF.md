@@ -4,6 +4,17 @@ One page, kept current. Update it in place (do not stack "Latest" paragraphs). S
 [archive/handoffs/](archive/handoffs/); the previous version of this file is
 [HANDOFF-history-2026-10.md](archive/handoffs/HANDOFF-history-2026-10.md).
 
+## Tóm tắt cho chủ dự án (2026-10-28, phiên Claude Opus tiếp theo)
+
+- **Phiên chốt theo yêu cầu chủ dự án: refactor để phiên Claude sau.** Nhánh `work/final-2026-10-27`, HEAD
+  `563303eb`, chưa push/merge/deploy. Đọc mục "Continued 2026-10-27 night → 10-28" trong
+  [bàn giao](handoff-next-after-claude-final-2026-10-27.md).
+- **Đã xong:** M5 chạy end-to-end thật trên 5070 Ti + 3060 (thường, có lỗi worker, 600 generation; mọi audit
+  chéo GPU khớp); M4 D1 (run strict cần coordinator GPU riêng) và strict là mặc định của form lab cho Recipe v3;
+  M6 `strict_int8_lora_v1` (int8 + LoRA, chạy standalone/SDK, lab chưa mở).
+- **Còn lại:** refactor, nghiệm thu cuối trên 3 máy, push, deploy. Gate còn mở: M3.bookkeeping, M5.long-run (đã chạy
+  soak nhưng chưa đăng ký check), M5.release.
+
 ## Tóm tắt cho chủ dự án (2026-10-27, phiên Claude "kế hoạch cuối")
 
 - **Phiên đã chốt theo yêu cầu chủ dự án (sắp hết usage). Kế hoạch đang làm dở.** Đọc

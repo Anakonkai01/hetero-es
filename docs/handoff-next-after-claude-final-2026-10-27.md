@@ -116,6 +116,71 @@ Harder (better for a stronger model, or with the owner present):
 8. The refactor (decision 5): moving evidence to an orphan branch and removing experiments safely is large but
    mechanical; it needs care with replay dependencies and kernel-source hash checks.
 
+## Continued 2026-10-27 night → 10-28 (Opus 5.5 session): hard items 5–7 done, refactor left
+
+The owner said "tiếp tục" (continue), then on 2026-10-28: **"về refactor thì để phiên claude sau làm, cập nhập handoff
+đầy đủ để phiên sau làm"**: the refactor goes to the next Claude session. HEAD **`563303eb`**, branch
+`work/final-2026-10-27`, nothing pushed, merged or deployed. No GPU job is running.
+
+| Commit | What | Evidence / check |
+| --- | --- | --- |
+| `f77c7225` | M5 e2e probe: the fixture's answers were strings, so `last-integer` scored every text 0 and the first run passed trivially. Answers are integers now; the probe fails when no update changed the weights; `--kill-local-at N` (SIGKILL the local worker 1 s after generation N opens, restart 30 s later, an expired lease is required), `--compare`, `--weights`, bookkeeping thirds. | check `strict-e2e` (faults) |
+| `012acebf` | M4 D1 for strict runs: the lab refuses a strict run on a CPU-only coordinator (its validation/export use the strict decoder: before this the run would have failed at its first validation) and one whose coordinator device or physical GPU is one of its workers (`policies.strict_layout`, at creation, scheduling and joins). Export reload only after the live model and its strict engine left the GPU (`Tracker._release_device`). Lab form: new Recipe v3 run defaults to `strict_b22_v1`. SDK: `Lab.qualify(decoder=)`, `evalDtype` sent only for strict, FP16 only with strict; `ESConfig` default unchanged on purpose (ADR-013 amendment). | mutation 8/8 backend, 9/9 runtime; gates M4.identity/gpu-ownership/default |
+| `89215f18` | M5 evidence: plain, fault and 600-generation runs, CPU coordinator + 5070 Ti + 3060 WSL2, `strict_b22_v1`. All E2E OK; fault run gives the same children and generation records as the plain run; soak 2371/2371 cross-GPU audits matched, 3060 did 1572/4800 results, coordinator bookkeeping flat (record 4.6/4.8/4.5 ms, generation 1.03/0.99/0.98 s). | `docs/evidence/2026-10-27-strict-e2e` |
+| `bbd6fe7b` | M6 `strict_int8_lora_v1` (ADR-014): frozen int8 base (per-row int8 of the LoRA targets, no FP16 copy left) + FP16 LoRA as the only parameters; weight space LoRA + `frozenBaseSha256` checked on every worker; `FrozenInt8DecoderGraph` through `strict_backend`; strict chunks, audit stop. Standalone/SDK only: the lab and the SDK lab bridge refuse it, coordinator export refuses it. | `runtime/tests/v3/test_v3_int8_lora.py` |
+| `563303eb` | M6 checks: `int8_memory.py` (5070 Ti, Qwen, 7 projection kinds: peak 953 MiB while the FP16 model loads, 611 MiB frozen, 711 MiB per candidate, exact restore), `strict-e2e-int8` (two GPUs, 14/14 audits matched, CPU replay of every adapter child), mutation 14/14. | gate M6.lora-lifecycle |
+
+Gates now: every M0–M6 gate has checks except **M3.bookkeeping (OPEN)**, **M5.long-run (OPEN: the soak above exists,
+but it is not registered as a check yet: register it, e.g. `strict-e2e --generations 600 --weights
+'layers\.23\.self_attn\.o_proj'`, or point the gate at the evidence)**, **M5.release (OPEN)**, and the deferred
+M1.architectures / M3.full-disk.
+
+Findings not fixed:
+- Two captured strict engines in one process on one GPU (`python -m heteroes.v3 run --workers 2 --device cuda`) fail
+  during CUDA graph capture ("operation failed due to a previous error during capture"). The lab never does this;
+  the int8 GPU test uses one worker. Fix with a process-wide capture lock if wanted.
+- M3.bookkeeping: the strict soak used the standalone coordinator, not the product runner with recovery points, so the
+  earlier 1.7 s → 11 s growth is still unmeasured there.
+- A strict lab run needs two GPUs (one coordinates). Lifting this needs coordinator validation inside a worker's
+  runtime (or validation leased to workers): not built (ADR-013 amendment, point 2).
+- `int8_memory.py` reported reward 0 for its one candidate with all seven projection kinds frozen and sigma 0.02;
+  the e2e run (q/k/v/o only) started at mean reward 0.64. No quality claim is made for the int8 base.
+- Disk: ~4.6 GiB free. `.scratch/` holds 8.3 GiB of earlier sessions' scratch (not deleted); the e2e/soak runs of this
+  session are `.scratch/e2e-0*`, `.scratch/soak-600`, `.scratch/e2e-int8-01` (published weights already removed for
+  e2e-01..03). Clean what is not needed before long runs.
+
+### What the next session does (in order)
+
+1. **Refactor** exactly as owner decision 5 above (plan file `~/.claude/plans/pasted-content-id-2264-ch-t-reflective-toucan.md`,
+   section "Bước 4"). Notes from a first survey (nothing changed yet):
+   - tag `archive/pre-refactor-2026-10` at HEAD first (local tag; never push tags);
+   - `docs/evidence` (223 folders, 11 079 files), `runtime/artifacts` (2 694), `docs/archive` (83) and the old
+     `docs/handoff-*.md` go to the orphan branch `evidence-archive` built from the same blobs (temporary index +
+     `git update-index --index-info` from `git ls-tree -r HEAD -- <paths>`, `write-tree`, `commit-tree`); prove equality
+     by comparing `git ls-tree -r` blob SHAs;
+   - files that READ those paths (fixtures to copy into `runtime/tests/fixtures` / `backend/tests/fixtures`):
+     `backend/tests/{test_devices,test_noise_engines,test_v3_study,test_worker_cli_lab,test_worker_profile}.py`,
+     `runtime/tests/eval/{test_candidate,test_compare_records,test_generate,test_workload}.py` and the others listed by
+     `git grep -l "docs/evidence\|runtime/artifacts\|artifacts/" -- '*.py' '*.sh' '*.mjs' '*.ts'`; many hits are only
+     comments citing evidence (keep them, they now point into the archive branch). Also check
+     `scripts/build-apps.sh`, `scripts/build-worker-profile.py`, `scripts/publish-local-installers.py`,
+     `backend/deployment.py` before deleting anything. Simplest reliable loop: delete in the tree, run
+     `scripts/accept.py run cpu` + `package`, fix what breaks;
+   - 8 evidence folders have no README (e.g. `2026-10-12-local-portability`, `2026-10-21-candidate7-device-upgrades`):
+     the generated `docs/EVIDENCE-INDEX.md` must list them anyway;
+   - then experiments/legacy removal by an AST import graph from the real entry points, `heteroes/strict/` package with
+     a kernel-source hash check before/after, file splits, `docs/REVIEW-GUIDE.md` (Vietnamese). Small commits, each
+     with `accept.py run cpu` green.
+2. **Final acceptance on the refactored tree**: `HETEROES_GPU_ACCEPTANCE=1 python3 scripts/accept.py run cpu gpu perf
+   faults package mutation --keep`, then `remote 3060-wsl gpu perf --keep`, `remote 3060-native gpu --keep` (one after
+   the other, same physical GPU), `report --write` → `docs/acceptance/STATUS.md`. New checks since the last receipts:
+   `strict-e2e`, `strict-e2e-int8` (faults, use SSH to Thảo), `int8-memory` (perf, local + 3060-wsl),
+   `mutation-gpu-ownership-*`, `mutation-int8-lora`. Register the soak for M5.long-run; write release notes and a
+   rollback rehearsal for M5.release.
+3. Fast-forward `main`, `git push origin --all` (no force, no tags), deploy once with `scripts/local-lab.py`
+   (rollback `82c37fc`), `scripts/verify-public-lab.py`. The lab services were all down at the last status read
+   (2026-10-27 evening); do not change device states.
+
 ## Next steps, in order
 
 1. **M2 remainder.** D9: enable the existing strict first-mismatch primitive (`runtime/docs/audit-state-v1.md`,
