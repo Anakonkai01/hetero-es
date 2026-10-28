@@ -130,8 +130,9 @@ assert 'torch' not in sys.modules and 'numpy' not in sys.modules
 
 # ---- M4: a strict_b22_v1 qualification is a separate reference, keyed by its decoder ------------------------------
 
-gpu = pytest.mark.skipif(
-    __import__("os").environ.get("HETEROES_GPU_ACCEPTANCE") != "1", reason="strict qualification runs on an NVIDIA GPU"
+gpu = pytest.mark.skipif(  # the opt-in alone is not enough: CPU checks hide the GPU with CUDA_VISIBLE_DEVICES=''
+    __import__("os").environ.get("HETEROES_GPU_ACCEPTANCE") != "1" or not __import__("torch").cuda.is_available(),
+    reason="strict qualification runs on an NVIDIA GPU",
 )
 
 

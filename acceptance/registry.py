@@ -51,7 +51,8 @@ CHECKS = [
     Check(
         "strict-gpu-suite",
         "gpu",
-        ("{runtime_python}", *PYTEST, "tests/eval", "tests/v3/test_v3_strict_decoder.py"),
+        ("{runtime_python}", *PYTEST, "tests/eval", "tests/v3/test_v3_strict_decoder.py")
+        + ("tests/v3/test_model_qualification.py",),  # its strict reference round trip runs only on a GPU
         hosts=LINUX_GPU,
         env=GPU + RUNTIME_PATH,
         cwd="runtime",
