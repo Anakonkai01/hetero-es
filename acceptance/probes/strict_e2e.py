@@ -44,6 +44,10 @@ p.add_argument(
     type=int,
     help="fault: SIGKILL the local worker 1 s after generation N opens, restart it 30 s later",
 )
+p.add_argument(
+    "--int8-lora", action="store_true", help="M6: strict_int8_lora_v1, a frozen int8 base with rank-8 LoRA adapters"
+)
+p.add_argument("--sigma", type=float, default=0.001)
 p.add_argument("--weights", default=r"layers\.2[0-3]\.", help="subset regex (a soak uses a small one: disk)")
 p.add_argument("--compare", type=Path, help="an earlier report.json: its children and record hashes must be equal")
 a = p.parse_args()
@@ -58,13 +62,18 @@ spec = {
     "model": {"path": f"{LOCAL.models}/qwen", "id": "Qwen/Qwen2.5-0.5B-Instruct"},
     "data": {"path": str(REPO / "acceptance/e2e/arith96.jsonl"), "promptField": "question"}
     | {"batchSize": 16, "batchSeed": 11, "splitSeed": 42},
-    "weightSpace": {"kind": "subset", "include": [a.weights]},
-    "sigma": {"kind": "constant", "initial": 0.001, "minimum": 0.001},
+    "weightSpace": (
+        {"kind": "lora", "rank": 8, "alpha": 16, "targetModules": ["q_proj", "k_proj", "v_proj", "o_proj"]}
+        | {"adapterSeed": 0}
+        if a.int8_lora
+        else {"kind": "subset", "include": [a.weights]}
+    ),
+    "sigma": {"kind": "constant", "initial": a.sigma, "minimum": a.sigma},
     "antithetic": True,
     "maxNewTokens": 32,
     "systemPrompt": "Answer with the number only.",
     "evalDtype": "float16",
-    "decoder": "strict_b22_v1",
+    "decoder": "strict_int8_lora_v1" if a.int8_lora else "strict_b22_v1",
     "evalChunk": 16,
     "population": a.population,
     "generations": a.generations,
@@ -180,7 +189,8 @@ else:
     report["generations"] = len(summaries)
     report["audits"] = [row["audits"] for row in summaries]
     model, _ = load(spec["model"]["path"], file_manifest(spec["model"]["path"]))
-    schema = trainable_schema(model, recipe["weightSpace"])
+    adapter = run_dir / "initial-adapter.bin"
+    schema = trainable_schema(model, recipe["weightSpace"], adapter if adapter.exists() else None)
     with sqlite3.connect(run_dir / "ledger.sqlite") as db:
         workers = dict(db.execute(
             "SELECT a.worker_id, COUNT(*) FROM result r JOIN attempt a ON a.candidate_id=r.candidate_id "

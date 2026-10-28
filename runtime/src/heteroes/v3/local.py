@@ -75,7 +75,7 @@ def prepare(config, out_dir, device="cpu", initial_adapter=None):
     from heteroes.model.lora import trainable_schema as adapter_schema
     from heteroes.model.schema import build_parameter_schema
     from heteroes.v3 import data as v3data
-    from heteroes.v3.model import file_manifest, load, trainable_schema
+    from heteroes.v3.model import file_manifest, freeze_base_, load, trainable_schema
     from heteroes.v3.run import RecipeV3Run, build_documents
     from heteroes.v3.options import validate_prompt_format
 
@@ -98,12 +98,21 @@ def prepare(config, out_dir, device="cpu", initial_adapter=None):
     if initial_adapter is not None and space["kind"] != "lora":
         raise ValueError("an initial adapter is only for a LoRA weight space")
     if space["kind"] == "lora":
+        from heteroes.catalog import STRICT_INT8_LORA_DECODER
+
+        if config.get("decoder") == STRICT_INT8_LORA_DECODER:  # M6: freeze the base first; its adapters are the space
+            space["frozenBaseSha256"] = freeze_base_(model, space, space.get("adapterSeed", 0))
         adapter_file = out / "initial-adapter.bin"
         if initial_adapter is not None:
             shutil.copyfile(initial_adapter, adapter_file)
             with adapter_file.open("rb") as stream:
                 adapter_sha = hashlib.file_digest(stream, "sha256").hexdigest()
             schema = trainable_schema(model, {**space, "initialAdapterSha256": adapter_sha}, adapter_file)
+        elif "frozenBaseSha256" in space:
+            from heteroes.model.weights_io import write_weights
+
+            schema = adapter_schema(model)
+            adapter_sha = write_weights(model, schema, adapter_file)
         else:
             adapter_sha = create_initial_adapter(model, space, space.get("adapterSeed", 0), adapter_file)
             schema = adapter_schema(model)

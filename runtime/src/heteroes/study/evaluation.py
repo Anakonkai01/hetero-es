@@ -51,13 +51,13 @@ def generate_rows(
 
     prompt_format = validate_prompt_format(evaluation.get("promptFormat"), evaluation["systemPrompt"])
     decoder = evaluation.get("decoder", "hf_generate")  # Recipe v2 always, v3 by choice
-    from heteroes.catalog import CPU_GUARD_DECODER, STRICT_B22_DECODER, V3_DECODE_ENGINES
+    from heteroes.catalog import CPU_GUARD_DECODER, STRICT_DECODERS, V3_DECODE_ENGINES
 
     if decoder not in V3_DECODE_ENGINES:
         raise ValueError("Unknown decoder")
-    if decoder in (CPU_GUARD_DECODER, STRICT_B22_DECODER) and sample:
+    if (decoder == CPU_GUARD_DECODER or decoder in STRICT_DECODERS) and sample:
         raise ValueError(f"The {decoder} decoder is greedy only")
-    if decoder in ("hf_compact", STRICT_B22_DECODER):
+    if decoder == "hf_compact" or decoder in STRICT_DECODERS:
         if sample:
             raise ValueError("The compacting decoder is greedy only")
         from heteroes.eval import compact_decode
@@ -103,7 +103,7 @@ def generate_rows(
                     pad_id,
                     processors,
                 )
-            elif decoder == STRICT_B22_DECODER:
+            elif decoder in STRICT_DECODERS:
                 from heteroes.eval import strict_backend
 
                 new = strict_backend.generate_ids(
@@ -114,6 +114,7 @@ def generate_rows(
                     eos_ids,
                     pad_id,
                     processors,
+                    decoder,
                 )
             elif decoder == CPU_GUARD_DECODER:
                 from heteroes.eval.cpu_guard import guarded_generate_ids

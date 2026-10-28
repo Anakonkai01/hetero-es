@@ -19,7 +19,10 @@ DECODE_ENGINES = ("hf_generate", "hf_compact")
 CPU_GUARD_DECODER = "hf_fp32_cpu_guard_v1"
 # The strict B22 integer decoder over the live FP16 weights (ADR-013): same tokens on every supported NVIDIA GPU.
 STRICT_B22_DECODER = "strict_b22_v1"
-V3_DECODE_ENGINES = (*DECODE_ENGINES, CPU_GUARD_DECODER, STRICT_B22_DECODER)
+# M6 (ADR-014): a frozen int8 base (pinned per-row int8 projections, no FP16 copy) with FP16 LoRA adapters, strict decode.
+STRICT_INT8_LORA_DECODER = "strict_int8_lora_v1"
+STRICT_DECODERS = (STRICT_B22_DECODER, STRICT_INT8_LORA_DECODER)  # same tokens on every supported NVIDIA GPU
+V3_DECODE_ENGINES = (*DECODE_ENGINES, CPU_GUARD_DECODER, *STRICT_DECODERS)
 
 # How the coordinator hands candidates to workers (ADR-009); the first is the default. Not part of any recipe identity:
 # a policy only decides which worker evaluates which candidate.

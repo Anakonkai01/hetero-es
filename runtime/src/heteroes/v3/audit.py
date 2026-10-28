@@ -77,7 +77,7 @@ def run_outcomes(db, root, experiment_id, *, fallback_rate, active):
     count, but incomplete candidates of a recorded generation are `unknown`, never matched. An open drain is `pending`
     while the run is `active` and `unknown` after it ended. Nothing here writes to the run.
     """
-    from heteroes.catalog import STRICT_B22_DECODER
+    from heteroes.catalog import STRICT_DECODERS
 
     root = Path(root)
     known = True
@@ -142,7 +142,7 @@ def run_outcomes(db, root, experiment_id, *, fallback_rate, active):
         "enabled": rate > 0,
         "rate": rate,
         "known": known,
-        "policy": None if decoder is None else "strict-stop" if decoder == STRICT_B22_DECODER else "historical",
+        "policy": None if decoder is None else "strict-stop" if decoder in STRICT_DECODERS else "historical",
         "drainReasons": reasons,
         "strictStop": strict,
         "restoreFaults": sorted(faults) if isinstance(faults, dict) else [],

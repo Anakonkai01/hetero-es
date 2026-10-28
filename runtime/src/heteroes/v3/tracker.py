@@ -143,6 +143,8 @@ class Tracker:
             return receipt
         if destination.exists():
             raise ValueError("Unverified export directory already exists")
+        if "frozenBaseSha256" in self.recipe.recipe["weightSpace"]:
+            raise ValueError("Export of a frozen int8 base with its adapters is not built (M6)")
         selected = data_root(self.root) / "selection" / f"{self.best['weightsSha256']}.bin"
         load_weights_(self.loaded.model, self.loaded.schema, selected, self.best["weightsSha256"])
         self.eval_model.refresh()

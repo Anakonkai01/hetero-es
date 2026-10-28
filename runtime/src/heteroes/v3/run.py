@@ -159,9 +159,11 @@ def build_documents(
     }[engine]
     space = dict(config.get("weightSpace") or {"kind": "full"})
     if space["kind"] == "lora":
-        space = {k: space[k] for k in ("kind", "rank", "alpha", "targetModules")} | {
-            "initialAdapterSha256": adapter_sha256
-        }
+        space = (
+            {k: space[k] for k in ("kind", "rank", "alpha", "targetModules")}
+            | {"initialAdapterSha256": adapter_sha256}
+            | ({"frozenBaseSha256": space["frozenBaseSha256"]} if "frozenBaseSha256" in space else {})
+        )
     sigma = config["sigma"]
     generations = config["generations"]
     recipe = {

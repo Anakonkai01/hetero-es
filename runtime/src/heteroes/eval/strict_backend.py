@@ -43,14 +43,24 @@ def graph_budget(device):
     return int(GRAPH_BUDGET_FRACTION * torch.cuda.get_device_properties(device).total_memory)
 
 
-def engine_for(model, tokens=1):
-    """The strict engine of this live model with room for `tokens` (prompt + new tokens) per row."""
+def engine_for(model, tokens=1, decoder=None):
+    """
+    The strict engine of this live model with room for `tokens` (prompt + new tokens) per row: B22 over the live FP16
+    weights, or (M6, `strict_int8_lora_v1`) the frozen int8 base with its FP16 adapters. `decoder`, when given, must
+    match the model: a frozen base is never decoded as B22 or the other way round.
+    """
+    from heteroes.catalog import STRICT_INT8_LORA_DECODER
+    from heteroes.eval.frozen_int8_decoder import FrozenInt8DecoderGraph
     from heteroes.eval.integer_decoder import IntegerDecoderGraph
     from heteroes.eval.reference_ops import managed_opt_in
+    from heteroes.model.frozen_int8 import frozen_modules
 
     device = next(model.parameters()).device
     if device.type != "cuda":
         raise ReferenceArithmeticError("strict_b22_v1 runs on an NVIDIA GPU")
+    frozen = next(frozen_modules(model), None) is not None
+    if decoder is not None and frozen != (decoder == STRICT_INT8_LORA_DECODER):
+        raise ReferenceArithmeticError(f"The model's base does not match the {decoder} decoder")
     context = context_for(tokens, model.config.max_position_embeddings)
     with _lock:
         engine = _engines.get(model)
@@ -59,9 +69,12 @@ def engine_for(model, tokens=1):
         if engine is not None:
             engine.release_graph()  # one engine per model: free the old capture before the larger one exists
         with managed_opt_in():
-            engine = IntegerDecoderGraph(
-                model, magnitude_bits=22, max_context=context, max_graph_bytes=graph_budget(device)
-            )
+            if frozen:
+                engine = FrozenInt8DecoderGraph(model, max_context=context, max_graph_bytes=graph_budget(device))
+            else:
+                engine = IntegerDecoderGraph(
+                    model, magnitude_bits=22, max_context=context, max_graph_bytes=graph_budget(device)
+                )
         _engines[model] = engine
         return engine
 
@@ -74,12 +87,12 @@ def release(model):
         engine.release_graph()
 
 
-def generate_ids(model, input_ids, attention_mask, max_new_tokens, eos_ids, pad_id, processors):
+def generate_ids(model, input_ids, attention_mask, max_new_tokens, eos_ids, pad_id, processors, decoder=None):
     """New token ids of greedy decoding (left-padded batch), with `pad_id` after EOS, as `model.generate` returns them."""
     penalties = [p.penalty for p in processors if type(p).__name__ == "RepetitionPenaltyLogitsProcessor"]
     if len(penalties) != len(processors) or len(penalties) > 1:
         raise ReferenceArithmeticError("strict_b22_v1 reproduces only the repetition penalty")
-    engine = engine_for(model, input_ids.shape[1] + max_new_tokens)
+    engine = engine_for(model, input_ids.shape[1] + max_new_tokens, decoder)
     output = engine.generate(
         input_ids,
         attention_mask=attention_mask,

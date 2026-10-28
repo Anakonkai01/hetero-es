@@ -17,10 +17,10 @@ from heteroes.worker_api import completions_sha256
 
 def strict_stop_for(recipe):
     """True only for a Recipe v3 run whose evaluation decoder is the strict identity; never for a historical one."""
-    from heteroes.catalog import STRICT_B22_DECODER
+    from heteroes.catalog import STRICT_DECODERS
 
     evaluation = getattr(recipe, "evaluation", None)
-    return isinstance(evaluation, dict) and evaluation.get("decoder") == STRICT_B22_DECODER
+    return isinstance(evaluation, dict) and evaluation.get("decoder") in STRICT_DECODERS
 
 
 class AuditStopped(RuntimeError):

@@ -78,6 +78,8 @@ def _managed_choices(spec):
     from heteroes.v3.options import validate_audit_rate
 
     validate_audit_rate(spec.get("auditRate", 0.05))
+    if spec.get("decoder") == "strict_int8_lora_v1":
+        raise ValueError("The lab does not offer strict_int8_lora_v1 yet: run it standalone or with the SDK")
     dtype = "float16" if spec.get("decoder") == "strict_b22_v1" else "float32"  # the strict decoder reads FP16
     if spec.get("evalDtype", "float32") != dtype or spec.get("noiseEngine", "cpu") != "cpu":
         raise ValueError("The managed lab uses FP32 evaluation (FP16 for strict_b22_v1) and canonical CPU noise")

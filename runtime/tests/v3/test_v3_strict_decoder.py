@@ -93,8 +93,8 @@ def test_generate_rows_routes_the_strict_decoder_and_refuses_sampling(product_as
     model.generation_config.repetition_penalty = 1.1
     calls = []
 
-    def fake(model, input_ids, attention_mask, max_new_tokens, eos_ids, pad_id, processors):
-        calls.append(([type(p).__name__ for p in processors], list(eos_ids), pad_id, max_new_tokens))
+    def fake(model, input_ids, attention_mask, max_new_tokens, eos_ids, pad_id, processors, decoder):
+        calls.append(([type(p).__name__ for p in processors], list(eos_ids), pad_id, max_new_tokens, decoder))
         return torch.full((input_ids.shape[0], max_new_tokens), int(eos_ids[0]))
 
     monkeypatch.setattr(strict_backend, "generate_ids", fake)
@@ -102,7 +102,7 @@ def test_generate_rows_routes_the_strict_decoder_and_refuses_sampling(product_as
     evaluation = {"systemPrompt": None, "maxNewTokens": 3, "decoder": STRICT_B22_DECODER}
     out = generate_rows(model, tokenizer, rows, evaluation, chunk=2, count_tokens=True)
     assert len(out) == 2 and calls == [
-        (["RepetitionPenaltyLogitsProcessor"], [tokenizer.eos_token_id], tokenizer.pad_token_id, 3)
+        (["RepetitionPenaltyLogitsProcessor"], [tokenizer.eos_token_id], tokenizer.pad_token_id, 3, STRICT_B22_DECODER)
     ]
     assert all(row["generatedTokens"] == 1 and not row["truncated"] for row in out)
     with pytest.raises(ValueError, match="greedy"):
@@ -238,7 +238,7 @@ def test_executor_checks_the_strict_graph_when_it_is_built(product_assets, tmp_p
     cfg = product_config(product_assets, tmp_path, decodeEngine=STRICT_B22_DECODER, evalDtype="float16", evalChunk=1)
     loaded, run, dataset = prepare_run(cfg, tmp_path, device="cpu")
 
-    def refuse(model, tokens=1):
+    def refuse(model, tokens=1, decoder=None):
         raise ReferenceArithmeticError("Unsupported graph family, attention, RoPE or activation")
 
     monkeypatch.setattr(strict_backend, "engine_for", refuse)

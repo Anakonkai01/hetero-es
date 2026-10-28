@@ -13,7 +13,8 @@ import re
 import numpy as np
 
 from heteroes.canonical import canonical_json_hash
-from heteroes.catalog import CPU_GUARD_DECODER, STRICT_B22_DECODER, V3_DECODE_ENGINES, WORKLOAD_NAMES
+from heteroes.catalog import CPU_GUARD_DECODER, STRICT_DECODERS, STRICT_INT8_LORA_DECODER, V3_DECODE_ENGINES
+from heteroes.catalog import WORKLOAD_NAMES
 from heteroes.manifest import EVAL_DTYPES, KNOWN_ENGINES, Recipe
 from heteroes.v3.scoring import validate_spec
 from heteroes.v3.options import ALPHA_SCHEDULES, COEFFICIENT_RULES, exact_chunks, validate_update_rule
@@ -125,8 +126,17 @@ def validate_recipe(doc, *, translated=False):
         raise ValueError("unknown evaluation precision or decoder")
     if evaluation["decoder"] == CPU_GUARD_DECODER and evaluation["evalDtype"] != "float32":
         raise ValueError("The CPU-guard decoder requires FP32 evaluation")
-    if evaluation["decoder"] == STRICT_B22_DECODER and evaluation["evalDtype"] != "float16":
+    if evaluation["decoder"] in STRICT_DECODERS and evaluation["evalDtype"] != "float16":
         raise ValueError("The strict decoder reads the live weights: it requires FP16 evaluation")
+    space, int8 = doc["weightSpace"], evaluation["decoder"] == STRICT_INT8_LORA_DECODER
+    if int8 and space["kind"] != "lora":
+        raise ValueError("strict_int8_lora_v1 trains LoRA adapters over the frozen base: it needs a LoRA weight space")
+    if int8 and "frozenBaseSha256" not in space:
+        raise ValueError("strict_int8_lora_v1 pins its frozen int8 base: frozenBaseSha256 is missing")
+    if "frozenBaseSha256" in space and not int8:
+        raise ValueError("A frozen int8 base needs the strict_int8_lora_v1 decoder")
+    if int8 and space["rank"] > 32:
+        raise ValueError("strict_int8_lora_v1 decodes LoRA rank of at most 32")
     if "chunk" in evaluation and (
         type(evaluation["chunk"]) is not int
         or evaluation["chunk"] not in exact_chunks(evaluation["evalDtype"], evaluation["decoder"])

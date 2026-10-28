@@ -17,9 +17,9 @@ STRICT_CHUNKS = (1, 2, 4, 8, 16, 32, 64)  # strict_b22_v1 computes every row ind
 
 def exact_chunks(eval_dtype, decoder=None):
     """The prompts per generate() call that give the same answers as one at a time, for this precision and decoder."""
-    from heteroes.catalog import STRICT_B22_DECODER
+    from heteroes.catalog import STRICT_DECODERS
 
-    return STRICT_CHUNKS if decoder == STRICT_B22_DECODER else EXACT_CHUNKS[eval_dtype]
+    return STRICT_CHUNKS if decoder in STRICT_DECODERS else EXACT_CHUNKS[eval_dtype]
 
 
 MAX_WINDOW = 8
@@ -94,6 +94,12 @@ def validate_weight_space(space, *, initial_adapter=True):
     if not isinstance(kind, str) or kind not in keys:
         raise ValueError("unknown weight space")
     expected = keys[kind] | ({"initialAdapterSha256"} if kind == "lora" and initial_adapter else set())
+    if kind == "lora" and "frozenBaseSha256" in space:  # M6: the hash of the frozen int8 base (ADR-014)
+        expected |= {"frozenBaseSha256"}
+        if not isinstance(space["frozenBaseSha256"], str) or not re.fullmatch(
+            "[a-f0-9]{64}", space["frozenBaseSha256"]
+        ):
+            raise ValueError("frozenBaseSha256 has the wrong format")
     if set(space) != expected:
         raise ValueError("weight space fields differ from the declared kind")
     if kind == "subset":
@@ -224,8 +230,10 @@ def validate_options(config, *, allow_python=False, with_code=True):
         allow_python and re.fullmatch("python@1:[0-9a-f]{64}", str(sampler))
     ):
         raise ValueError("unknown batch sampler")
-    from heteroes.catalog import CPU_GUARD_DECODER, STRICT_B22_DECODER, V3_DECODE_ENGINES
+    from heteroes.catalog import CPU_GUARD_DECODER, STRICT_B22_DECODER, STRICT_INT8_LORA_DECODER, V3_DECODE_ENGINES
 
+    if config["decodeEngine"] == STRICT_INT8_LORA_DECODER:
+        raise ValueError("The lab does not offer strict_int8_lora_v1 yet: run it standalone or with the SDK")
     if config["decodeEngine"] not in V3_DECODE_ENGINES:
         raise ValueError("unknown Recipe v3 decoder")
     if config["decodeEngine"] == CPU_GUARD_DECODER and config.get("evalDtype", "float32") != "float32":

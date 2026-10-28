@@ -26,7 +26,7 @@ from heteroes.es.perturb import perturb_model_
 from heteroes.es.snapshot import RestoreError, restore_from_snapshot_, take_snapshot
 from heteroes.eval.candidate import tensors_sha256
 from heteroes.eval.generate import evaluate_model
-from heteroes.catalog import STRICT_B22_DECODER
+from heteroes.catalog import STRICT_DECODERS
 from heteroes.eval.precision import EvalModel, default_chunk
 from heteroes.eval.reference_ops import ReferenceArithmeticError, StrictMemoryBudget, StrictTransportError
 from heteroes.eval.workloads import get_workload
@@ -118,10 +118,12 @@ class CandidateExecutor:
         self._eval = EvalModel(
             model, recipe.eval_dtype
         )  # the model the answers are made on: the live one, or an FP32 copy of it
-        if (getattr(recipe, "evaluation", None) or {}).get("decoder") == STRICT_B22_DECODER:
+        if (decoder := (getattr(recipe, "evaluation", None) or {}).get("decoder")) in STRICT_DECODERS:
             from heteroes.eval import strict_backend
 
-            strict_backend.engine_for(model)  # an unsupported graph is refused now, before any candidate
+            strict_backend.engine_for(
+                model, decoder=decoder
+            )  # an unsupported graph is refused now, before any candidate
         self._clock = clock
         self.phase_trace = phase_trace  # opt-in host telemetry; never part of numerical or retry identity
         self.last_timing: dict[str, float] | None = None

@@ -281,6 +281,16 @@ CHECKS = [
         timeout=3600,
     ),
     Check(
+        "mutation-int8-lora",
+        "mutation",
+        ("{python}", "scripts/mutation-check.py", "--repo", "runtime", "--copy", "src", "--copy", "pyproject.toml")
+        + ("--copy", "tests/v3", "--env", "PYTHONPATH=src:tests/v3", "--env", "HETEROES_GPU_ACCEPTANCE=1")
+        + ("--scratch", "{out}", "--mutants", "acceptance/mutants/int8-lora.json", "--test")
+        + ("{runtime_python} -m pytest -q -x -p no:cacheprovider tests/v3/test_v3_int8_lora.py",),
+        timeout=3600,
+        gpu=True,
+    ),
+    Check(
         "mutation-gpu-ownership-runtime",
         "mutation",
         ("{python}", "scripts/mutation-check.py", "--repo", "runtime", "--copy", "src", "--copy", "pyproject.toml")
