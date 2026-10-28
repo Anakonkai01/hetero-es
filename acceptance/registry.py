@@ -1,5 +1,6 @@
 """
-Every acceptance check and every gate of milestones M0-M6 (docs/PLAN-SUA-HUMAN-REVIEW.md, section 7).
+Every acceptance check and every gate of milestones M0-M6 (docs/PLAN-SUA-HUMAN-REVIEW.md, section 7; on the branch
+evidence-archive).
 
 Change a gate from `open=` to `checks=` only together with the tests or probes that prove it. A `deferred=` gate needs
 the owner's decision or a hardware limit stated in its reason; it is printed in every report.

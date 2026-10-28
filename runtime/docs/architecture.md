@@ -9,7 +9,7 @@
 > **Status:** draft v0.1, 2026-09-30 — written by Claude for review, not yet approved.
 > **Audience:** the project team (A — Systems/Core, B — Product/Application).
 > **Scope:** the big picture only. Exact numerical rules live in [numerical-contract.md](numerical-contract.md).
-> **Sources of truth:** `HETEROES_LLM_MASTER.md` = what the system should be; `HETEROES_LLM_STATUS.md` = what is verified right now. If this file disagrees with them, they win.
+> **Sources of truth:** the [numerical contract](numerical-contract.md) and the ADRs. The original design (`HETEROES_LLM_MASTER.md`) and status log (`HETEROES_LLM_STATUS.md`) are archived on the branch `evidence-archive`.
 
 ## 1. Problem
 

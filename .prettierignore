@@ -6,6 +6,7 @@ node_modules/
 docs/evidence/
 docs/archive/
 runtime/artifacts/
+runtime/references/
 runtime/notebooks/
 backend/tests/fixtures/
 frontend/static/demo/

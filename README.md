@@ -10,20 +10,22 @@ The project demonstrates runtime, ownership and replay behavior; passing infrast
 - [Contributor and agent rules](AGENTS.md)
 - [Vietnamese quickstart for r10](docs/quickstart-vi.md)
 - [Live workstation operations](docs/local-lab-operations.md)
-- [Numerical contract](runtime/docs/numerical-contract.md) and [research claims audit](runtime/docs/report/CLAIMS_AUDIT.md)
+- [Numerical contract](runtime/docs/numerical-contract.md)
+- [Evidence index](docs/EVIDENCE-INDEX.md) (evidence, raw artifacts and old session records live on the branch `evidence-archive`)
 - [Recorded security/policy findings](docs/SECURITY-NOTES.md)
 
 ## Repository layout
 
 | Path | Responsibility |
 | --- | --- |
-| `runtime/` | Numerical core, ledger, coordinator, device agent, qualification and scientific evidence |
+| `runtime/` | Numerical core, strict engine (`heteroes/strict/`), ledger, coordinator, device agent, qualification |
 | `backend/` | CPU API, identity, queue, reservations, recovery storage and metadata backup |
 | `frontend/` | Web UI using the real API |
 | `desktop/worker`, `desktop/server`, `desktop/shared` | Electron apps and shared download/process utilities |
 | `packages/product-ui/` | Shared UI, themes and Vietnamese translations |
 | `scripts/`, `deploy/` | Development checks, packaging and local lab operations |
-| `docs/evidence/`, `docs/archive/` | Dated receipts and superseded documentation |
+| `acceptance/`, `docs/acceptance/` | `scripts/accept.py` checks, gates M0–M6 and their receipts |
+| branch `evidence-archive` | Dated evidence, raw runtime artifacts and superseded documentation ([index](docs/EVIDENCE-INDEX.md)) |
 
 Backend telemetry and study contracts import the CPU-safe runtime modules directly. The Server packager selects their
 small dependency set; importing the Server does not load torch. Existing `cloud_*` SQLite names and recovery wire fields
@@ -38,7 +40,7 @@ Chromium and Xvfb. From the repository root:
 python3 -m venv .venv-backend
 .venv-backend/bin/python -m pip install -r backend/requirements-dev.txt
 npm ci
-scripts/check-all.sh docs/evidence/YYYY-MM-DD-check/checks
+scripts/check-all.sh .scratch/checks-YYYY-MM-DD
 ```
 
 The output directory must be fresh. The command runs runtime/backend tests, Python lint/format, Prettier, source-package
@@ -61,4 +63,4 @@ The public lab runs from `~/.local/share/heteroes-lab/app`, a separate deployed 
 It is independent of this working tree. Operate it through its `scripts/local-lab.py`; never start another controller
 against its database or kill its processes manually. The currently published build remains r10.
 
-Historical setup commands are under `docs/archive/`; use the current operator guide for the supported agent path.
+Historical setup commands are under `docs/archive/` on the branch `evidence-archive`; use the current operator guide for the supported agent path.

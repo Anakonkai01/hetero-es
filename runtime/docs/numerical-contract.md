@@ -3,7 +3,7 @@
 > **Status:** draft v0.1, 2026-09-30 — written by Claude for review, **not yet approved**. Several rules are proposals and are marked as such.
 > **Audience:** the project team. Required reading before touching `src/heteroes/{model,noise,es}`, `generation_record.py` and `ledger/`.
 > **Updated 2026-10-06:** the update can be applied from given coefficients (section 8), a question of who computes them was decided (O7, section 11), and the record of a generation is section 13.
-> **Related:** [architecture.md](architecture.md) (big picture), [ADR-001](adr/ADR-001-canonical-noise-engine.md) (why the NoiseEngine is CPU PCG64). Design source of truth: `HETEROES_LLM_MASTER.md` §6; evidence: `HETEROES_LLM_STATUS.md` §4–5 and `artifacts/probes/2026-09-29/`.
+> **Related:** [architecture.md](architecture.md) (big picture), [ADR-001](adr/ADR-001-canonical-noise-engine.md) (why the NoiseEngine is CPU PCG64). Design source: `HETEROES_LLM_MASTER.md` §6; evidence: `HETEROES_LLM_STATUS.md` §4–5 and `runtime/artifacts/probes/2026-09-29/` (all on the branch `evidence-archive`).
 
 ## 0. How to read this document
 
