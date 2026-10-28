@@ -1,0 +1,102 @@
+{
+ "attention_stages": {
+  "astWithoutImports": "91af0ceafb02f85801209b658b54e4278881534bd2323d80ef1c8874cbfd77ae",
+  "longStringCount": 1,
+  "longStrings": "6318eb581e826fe71a3fe7b6ed3f0a7be474e559ae816fdf48e92d27506425eb"
+ },
+ "frozen_int8": {
+  "astWithoutImports": "355f17616ffcfa66a0f1885bf97fda8ecde707242fa260eb74eabf1a3432e3d1",
+  "longStringCount": 5,
+  "longStrings": "4ccdf6e57c7f2bb854d4335c80d52bb9127ec81fa876ab5924ee3cbbe696e947"
+ },
+ "frozen_int8_cuda": {
+  "astWithoutImports": "da66cd2979ca4d5f81f544094f4cfd65875d9493b8a5e038e72b0b81fec33f26",
+  "longStringCount": 3,
+  "longStrings": "e929c80aef1d4d6213407e875ce33cd2436310496101552d0b59b12d3bed340f"
+ },
+ "frozen_int8_decoder": {
+  "astWithoutImports": "8df37ee830ef4fa9c9fe53b065b0f6f5c8f4c3f86c4cfee5f25922ecfccd2338",
+  "longStringCount": 2,
+  "longStrings": "b083ad3c9b5ceef8c8d04f3109d3a89135617c231c759324bbb348972c6e3b76"
+ },
+ "integer_cuda": {
+  "astWithoutImports": "089a3c1c173a6b7914eabd871ffa0279b0ef95eb03878133ca5f68cb88f97afc",
+  "longStringCount": 14,
+  "longStrings": "8b2e80a3470d3c9213ba66d81d7adefa761d8038786b994f5ac2492e972e65b0"
+ },
+ "integer_decoder": {
+  "astWithoutImports": "5dd738925ad6d62a48cce629686e4baa7425f45bbdbbb21a69682bb989aa7aec",
+  "longStringCount": 1,
+  "longStrings": "eef955351a904c8af689e975ce6625163db9351eec360241723b0eacd289fd86"
+ },
+ "integer_lm_head": {
+  "astWithoutImports": "79af59377a46c2128a759ad35dc3a8cb9a72758c7f1cdb51f436c9df91113bd1",
+  "longStringCount": 2,
+  "longStrings": "b28918bf3c18d99de14737fedb8498decaf34962d4a8c7576ce19cce264cc5f4"
+ },
+ "integer_plan": {
+  "astWithoutImports": "9db3711babdb3f0680b096e350be70f74971d6c36a8f57bcb56c2fe2e2ebd6a7",
+  "longStringCount": 2,
+  "longStrings": "03af023f582581dec80fb1d7da86331791ef4bdc2ada97a65aba04114dc1cb0b"
+ },
+ "integer_reference": {
+  "astWithoutImports": "9ab011ad202e239916cb01dd54f76dc81ef5d929c163335c91c1345e3ebbf431",
+  "longStringCount": 3,
+  "longStrings": "e40811d9c4a4fc5caec26ba3c105b4d8f75ae0049d38c78c944da5de52c3456d"
+ },
+ "integer_tma": {
+  "astWithoutImports": "ad93486ff8ffca1349d01dcb2b7623a1d0ca18bb3eb58a1f66b46bd0ad4856c9",
+  "longStringCount": 5,
+  "longStrings": "942634e04a5d30888b82292299c413666a1bb36b3ad57d3deb95c347584f84de"
+ },
+ "qwen2_reference": {
+  "astWithoutImports": "5d9ccb62de73b9cdec5378ea78f604537a5984fe52d86d2ef50c786f9f9cbd89",
+  "longStringCount": 2,
+  "longStrings": "e54e35e9e584d1e2845e8f9a87193fe471fb8f39147c766e31e7086360fe009c"
+ },
+ "qwen2_strict_cuda": {
+  "astWithoutImports": "27c8c0b6295bd1278d16962a1f09058b3ff6f427b84fdbda43bec2334a065acb",
+  "longStringCount": 0,
+  "longStrings": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+ },
+ "reference_ops": {
+  "astWithoutImports": "cf01f84628647b1d98aac6c59a7241e28241c085faa760fbc8fcec85a72f8115",
+  "longStringCount": 1,
+  "longStrings": "aaf4b8b1bf045b50aa9a8732522db7de4bdd01f0d1205889a642bae0bbc3d6a4"
+ },
+ "strict_backend": {
+  "astWithoutImports": "028d0865faacf0cb7834c5fda90a2299583f816592d5691bfcd25a1e10b026fe",
+  "longStringCount": 2,
+  "longStrings": "5a1168cb1cfb6bbb2297516494f555bca6b843e0968a1cf0b5225cb46282ed98"
+ },
+ "strict_cuda": {
+  "astWithoutImports": "35e6ece5e40cb587e6dbb4b42ee8c64b6c564d73ca95e2e39030f2fda0848399",
+  "longStringCount": 6,
+  "longStrings": "e0ec4fbb0efe65187920ef791eebbb3c5ece08a4e40aa2374fcc9253f07661c6"
+ },
+ "strict_decode_cuda": {
+  "astWithoutImports": "baa2c8368435aa11f70558f1ef4045c45637c2293195159c940f8a1bef580a55",
+  "longStringCount": 2,
+  "longStrings": "80c244f175c476fe16fb9472577be692f1791eccf51df20d3c3deb8d3947a949"
+ },
+ "strict_decoder": {
+  "astWithoutImports": "92c5431bf4793183b413614cf74fa363cfebba741c7fc03014e49666ed5c8095",
+  "longStringCount": 1,
+  "longStrings": "3a3d8a24a57861a941a352605dc44abb1a906c95fb821d207e84f962d81a8754"
+ },
+ "strict_decoder_graph": {
+  "astWithoutImports": "1630025dbbcc7a21265e2f525fa5ccfdf80f15c6dd43ddfc09b1ffee4bbd4170",
+  "longStringCount": 4,
+  "longStrings": "8e60512e13423dbab180e9f4222c4893e44c8e6ecbc89dde97777ac14185d461"
+ },
+ "strict_decoder_packed": {
+  "astWithoutImports": "c66a96bd00420071caa317486e6ab9f35f6b394bbf0327009b0f624878cace23",
+  "longStringCount": 2,
+  "longStrings": "0f6561123fea31ba339f2ec74fb8319c2b279f895ec46415caf8b8ee877049bd"
+ },
+ "strict_prefill_cuda": {
+  "astWithoutImports": "635a9299010d50df7233174d4e47a3f49980b1b761ec711ac4e035eb2281e959",
+  "longStringCount": 2,
+  "longStrings": "e18ad79b560483e59022099508bc0806e3e41ea9a43006346224770c6eec7a92"
+ }
+}

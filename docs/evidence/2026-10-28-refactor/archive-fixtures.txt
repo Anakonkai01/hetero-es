@@ -1,0 +1,16 @@
+OK   runtime/references/desktop-v1-reference.json <- evidence-archive:runtime/artifacts/regression/2026-10-10-m3-native-profile/reference.json
+OK   runtime/tests/fixtures/archive/runtime/artifacts/experiments/2026-10-09-chunk128/texts-5070ti.json <- evidence-archive:runtime/artifacts/experiments/2026-10-09-chunk128/texts-5070ti.json
+OK   runtime/tests/fixtures/archive/runtime/artifacts/probes/2026-09-29/noiseengine_5070ti_full.json <- evidence-archive:runtime/artifacts/probes/2026-09-29/noiseengine_5070ti_full.json
+OK   runtime/tests/fixtures/archive/runtime/artifacts/probes/2026-09-29/probe_1660s.json <- evidence-archive:runtime/artifacts/probes/2026-09-29/probe_1660s.json
+OK   runtime/tests/fixtures/archive/runtime/artifacts/probes/2026-09-29/probe_5070ti.json <- evidence-archive:runtime/artifacts/probes/2026-09-29/probe_5070ti.json
+OK   runtime/tests/fixtures/archive/runtime/artifacts/probes/2026-09-29/probe_5070ti_matched.json <- evidence-archive:runtime/artifacts/probes/2026-09-29/probe_5070ti_matched.json
+OK   runtime/tests/fixtures/archive/runtime/artifacts/regression/2026-10-05-one-candidate/5070ti.json <- evidence-archive:runtime/artifacts/regression/2026-10-05-one-candidate/5070ti.json
+OK   runtime/tests/fixtures/archive/runtime/artifacts/regression/2026-10-05-one-candidate/5070ti_process2.json <- evidence-archive:runtime/artifacts/regression/2026-10-05-one-candidate/5070ti_process2.json
+OK   runtime/tests/fixtures/archive/runtime/artifacts/regression/2026-10-06-cross-machine-one-candidate/1660s.json <- evidence-archive:runtime/artifacts/regression/2026-10-06-cross-machine-one-candidate/1660s.json
+OK   runtime/tests/fixtures/archive/runtime/artifacts/regression/2026-10-06-cross-machine-one-candidate/1660s_process2.json <- evidence-archive:runtime/artifacts/regression/2026-10-06-cross-machine-one-candidate/1660s_process2.json
+OK   runtime/tests/fixtures/archive/runtime/artifacts/regression/2026-10-06-manifest-v1-5070ti/5070ti_format2.json <- evidence-archive:runtime/artifacts/regression/2026-10-06-manifest-v1-5070ti/5070ti_format2.json
+OK   backend/tests/fixtures/archive/docs/evidence/2026-10-19-v3-qualification-reference/5070ti-qualify.json <- evidence-archive:docs/evidence/2026-10-19-v3-qualification-reference/5070ti-qualify.json
+OK   backend/tests/fixtures/archive/docs/evidence/2026-10-19-v3-qualification-reference/windows-3060-first.json <- evidence-archive:docs/evidence/2026-10-19-v3-qualification-reference/windows-3060-first.json
+OK   backend/tests/fixtures/archive/docs/evidence/2026-10-22-candidate14/gpu-v2-windows-source-first.json <- evidence-archive:docs/evidence/2026-10-22-candidate14/gpu-v2-windows-source-first.json
+OK   backend/tests/fixtures/archive/runtime/artifacts/regression/2026-10-10-m3-native-profile/reference.json <- evidence-archive:runtime/artifacts/regression/2026-10-10-m3-native-profile/reference.json
+15/15 fixtures identical to the archive

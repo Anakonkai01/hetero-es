@@ -1,0 +1,64 @@
+{
+ "old": "82c37fca",
+ "new": "97f28ef1",
+ "phases": {
+  "seed": {
+   "health": 200,
+   "devices": [
+    [
+     "e0d363d0900d40f1b964c933bd303fdc",
+     "3060"
+    ],
+    [
+     "fbb04997e4d34180a74e0feb7479793d",
+     "5070ti"
+    ]
+   ],
+   "experiments": [
+    [
+     "81760c1d2b534c73a611ee13b48e2d11",
+     "M2 three GPU agent acceptance v2"
+    ]
+   ]
+  },
+  "old": {
+   "health": 200,
+   "devices": [
+    [
+     "e0d363d0900d40f1b964c933bd303fdc",
+     "3060"
+    ],
+    [
+     "fbb04997e4d34180a74e0feb7479793d",
+     "renamed-by-old-code"
+    ]
+   ],
+   "experiments": [
+    [
+     "81760c1d2b534c73a611ee13b48e2d11",
+     "M2 three GPU agent acceptance v2"
+    ]
+   ]
+  },
+  "new": {
+   "health": 200,
+   "devices": [
+    [
+     "e0d363d0900d40f1b964c933bd303fdc",
+     "3060"
+    ],
+    [
+     "fbb04997e4d34180a74e0feb7479793d",
+     "renamed-by-old-code"
+    ]
+   ],
+   "experiments": [
+    [
+     "81760c1d2b534c73a611ee13b48e2d11",
+     "M2 three GPU agent acceptance v2"
+    ]
+   ]
+  }
+ },
+ "failures": []
+}
