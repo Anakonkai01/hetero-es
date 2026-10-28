@@ -1,7 +1,7 @@
 [
  {"name": "coordinator keeps the historical policy for strict", "file": "src/heteroes/coordinator.py", "old": "                stop_on_mismatch=audit_guard.strict_stop_for(recipe),\n", "new": ""},
- {"name": "every decoder stops at a mismatch", "file": "src/heteroes/v3/audit_guard.py", "old": "    return isinstance(evaluation, dict) and evaluation.get(\"decoder\") == STRICT_B22_DECODER", "new": "    return True"},
- {"name": "any non-default decoder counts as strict", "file": "src/heteroes/v3/audit_guard.py", "old": "evaluation.get(\"decoder\") == STRICT_B22_DECODER", "new": "evaluation.get(\"decoder\") != \"hf_generate\""},
+ {"name": "every decoder stops at a mismatch", "file": "src/heteroes/v3/audit_guard.py", "old": "    return isinstance(evaluation, dict) and evaluation.get(\"decoder\") in STRICT_DECODERS", "new": "    return True"},
+ {"name": "any non-default decoder counts as strict", "file": "src/heteroes/v3/audit_guard.py", "old": "evaluation.get(\"decoder\") in STRICT_DECODERS", "new": "evaluation.get(\"decoder\") != \"hf_generate\""},
  {"name": "a run without a v3 evaluation section is strict", "file": "src/heteroes/v3/audit_guard.py", "old": "    return isinstance(evaluation, dict) and", "new": "    return not isinstance(evaluation, dict) or"},
  {"name": "guard ignores the strict flag", "file": "src/heteroes/v3/audit_guard.py", "old": "            if self.stop_on_mismatch:\n", "new": "            if False:\n"},
  {"name": "first mismatch receipt not written", "file": "src/heteroes/v3/audit_guard.py", "old": "                        write_json(self.stop_path, self._stop)\n", "new": "                        pass\n"}

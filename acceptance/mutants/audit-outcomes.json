@@ -7,6 +7,6 @@
  {"name": "timed out not counted", "file": "src/heteroes/v3/audit.py", "old": "        totals[\"timedOut\"] += shown[\"timed_out\"]\n", "new": ""},
  {"name": "skipped not counted", "file": "src/heteroes/v3/audit.py", "old": "        for key in (\"selected\", \"matched\", \"mismatched\", \"skipped\"):", "new": "        for key in (\"selected\", \"matched\", \"mismatched\"):"},
  {"name": "stop names the auditor as original", "file": "src/heteroes/v3/audit.py", "old": "                \"originalWorker\": stop[\"original\"][\"worker_id\"],", "new": "                \"originalWorker\": stop[\"auditor\"][\"worker_id\"],"},
- {"name": "strict policy not shown", "file": "src/heteroes/v3/audit.py", "old": "\"strict-stop\" if decoder == STRICT_B22_DECODER else \"historical\"", "new": "\"historical\""},
+ {"name": "strict policy not shown", "file": "src/heteroes/v3/audit.py", "old": "\"strict-stop\" if decoder in STRICT_DECODERS else \"historical\"", "new": "\"historical\""},
  {"name": "supervisor inverts run activity", "file": "src/heteroes/product/run_supervisor.py", "old": "                                active=result[\"state\"].get(\"status\") not in QUIESCENT,", "new": "                                active=result[\"state\"].get(\"status\") in QUIESCENT,"}
 ]

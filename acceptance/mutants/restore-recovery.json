@@ -6,7 +6,7 @@
  {"name": "no self-test", "file": "src/heteroes/worker_runtime.py", "old": "            self.executor.selftest_restore()\n", "new": ""},
  {"name": "failed recovery retried after restart", "file": "src/heteroes/worker_runtime.py", "old": "            self._budget.fail(reason)  # terminal: a restart does not try again\n", "new": ""},
  {"name": "restart forgets the alias", "file": "src/heteroes/worker_runtime.py", "old": "            self.worker_id = self._budget.alias()  # a restarted process keeps the recovered identity\n", "new": "            pass\n"},
- {"name": "lab quarantines a recovered device", "file": "src/heteroes/product/run_supervisor.py", "old": "faults > 1 or (faults and not rejoined)", "new": "faults > 1 or faults"},
+ {"name": "lab quarantines a recovered device", "file": "src/heteroes/product/run_supervisor.py", "old": "                    or (faults and not rejoined)\n", "new": "                    or faults\n"},
  {"name": "alias credential without recoveries", "file": "src/heteroes/worker_api.py", "old": "(base_of(worker_id) == authenticated and self._recoveries is not None)", "new": "(base_of(worker_id) == authenticated)"},
  {"name": "reload skips the hash check", "file": "src/heteroes/v3/model.py", "old": "    verify_files(path, files)\n    named = dict(model.named_parameters(remove_duplicate=False))", "new": "    named = dict(model.named_parameters(remove_duplicate=False))"}
 ]
