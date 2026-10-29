@@ -5,6 +5,7 @@
 # To start before anyone logs in (once): sudo loginctl enable-linger $USER
 # `boot` starts what is not running, never launches a job, and leaves the queue held if a run or a GPU
 # reservation was live when the machine went down. Adjust the two paths for another layout.
+# The script needs fastapi, so it runs with the lab venv Python, not /usr/bin/python3 (which fails and restarts forever).
 # The lab runs from a deployed clone of the branch `main` (never from the working tree, so a reboot in the middle
 # of unfinished work cannot load it). Deploy or update it from the repository root:
 #   git clone --branch main ~/projects/heteroes ~/.local/share/heteroes-lab/app        (first time)
@@ -21,8 +22,8 @@ StartLimitIntervalSec=0
 Type=oneshot
 RemainAfterExit=yes
 Environment=CUDA_VISIBLE_DEVICES=
-ExecStart=/usr/bin/python3 -I %h/.local/share/heteroes-lab/app/scripts/local-lab.py boot --python %h/.local/share/heteroes-lab/venv-backend/bin/python
-ExecStop=-/usr/bin/python3 -I %h/.local/share/heteroes-lab/app/scripts/local-lab.py stop --python %h/.local/share/heteroes-lab/venv-backend/bin/python
+ExecStart=%h/.local/share/heteroes-lab/venv-backend/bin/python -I %h/.local/share/heteroes-lab/app/scripts/local-lab.py boot --python %h/.local/share/heteroes-lab/venv-backend/bin/python
+ExecStop=-%h/.local/share/heteroes-lab/venv-backend/bin/python -I %h/.local/share/heteroes-lab/app/scripts/local-lab.py stop --python %h/.local/share/heteroes-lab/venv-backend/bin/python
 Restart=on-failure
 RestartSec=30
 TimeoutStartSec=180

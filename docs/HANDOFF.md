@@ -27,8 +27,8 @@ with [REVIEW-GUIDE.md](REVIEW-GUIDE.md).
   (evidence `2026-10-28-release-deploy`). Previous web build for rollback: `.scratch/r28/dist-before-deploy` in this
   worktree. Device states unchanged.
 - The systemd unit failed from 2026-10-23 10:26 to the deploy: it runs `local-lab.py` with `/usr/bin/python3 -I`, which
-  lacks fastapi since `8c66ca52`. Fix the installed unit to use `venv-backend/bin/python`, and the template
-  `deploy/heteroes-lab.user.service` in the next code commit.
+  lacks fastapi since `8c66ca52`. The template `deploy/heteroes-lab.user.service` now uses `venv-backend/bin/python` (2026-10-29); the installed unit
+  must be fixed by the owner with the same change.
 - Strict engine: `strict_b22_v1` (ADR-013) is the lab form's default for new Recipe v3 GPU runs; a strict lab run needs a
   GPU coordinator that is not one of its workers (D1). `strict_int8_lora_v1` (ADR-014) is standalone/SDK only.
 - Throughput: 10 075 tokens/s short32 on the 5070 Ti, 72.8% of vLLM; the 80% goal is closed as not achieved.
@@ -48,7 +48,7 @@ with [REVIEW-GUIDE.md](REVIEW-GUIDE.md).
 
 ## Next steps
 
-1. Fix `deploy/heteroes-lab.user.service` (ExecStart/ExecStop with the venv Python), then re-run acceptance for the new
+1. The template is fixed (2026-10-29); re-run acceptance for the new
    source hash and turn M5.release into `checks=` with a deploy check.
 2. M3.bookkeeping: measure the managed product runner (recovery points on) over a long run, early/middle/late.
 3. Independent review (Codex or a person) from [REVIEW-GUIDE.md](REVIEW-GUIDE.md).
