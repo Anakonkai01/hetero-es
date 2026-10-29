@@ -48,7 +48,8 @@ with [REVIEW-GUIDE.md](REVIEW-GUIDE.md).
 
 ## Next steps
 
-1. The template is fixed (2026-10-29); re-run acceptance for the new
+1. The template is fixed (2026-10-29) and merged without a re-run: the committed receipts belong to `10457f9a`, not to
+   the current `main` hash. Re-run acceptance for the new
    source hash and turn M5.release into `checks=` with a deploy check.
 2. M3.bookkeeping: measure the managed product runner (recovery points on) over a long run, early/middle/late.
 3. Independent review (Codex or a person) from [REVIEW-GUIDE.md](REVIEW-GUIDE.md).
