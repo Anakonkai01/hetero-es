@@ -199,3 +199,81 @@ def test_source_identity_ignores_docs_and_sees_source_changes(tmp_path):
 def test_staged_copy_reports_the_controller_identity(tmp_path):
     (tmp_path / "SOURCE_TREE").write_text("src-abc\n")
     assert core.source_tree(tmp_path) == ("src-abc", False)
+
+
+@pytest.mark.parametrize(
+    "summary,expected",
+    [
+        ("10 passed in 0.1s", core.PASS),
+        ("10 passed, 1 skipped in 0.1s", core.FAIL),
+        ("10 skipped in 0.1s", core.FAIL),
+        ("9 passed in 0.1s", core.FAIL),
+        ("no pytest summary", core.FAIL),
+        ("10 passed, 1 failed in 0.1s", core.FAIL),
+    ],
+)
+def test_pytest_checks_enforce_positive_counts_and_skip_limit(tmp_path, summary, expected):
+    check = Check("suite", "gpu", (PY, "-c", f"print({summary!r})"), min_passed=10, max_skipped=0)
+    result = run(check, tmp_path)
+    assert result.status == expected
+    assert result.pytest_summary == (summary if " in " in summary else "")
+    if expected == core.PASS:
+        assert result.counts["passed"] == 10 and result.counts["skipped"] == 0
+
+
+def test_mutation_counts_are_from_control_not_from_killed_mutants(tmp_path):
+    output = "control ok    | 20 passed in 0.1s\nkilled test | 1 failed, 19 passed in 0.1s\n1 of 1 mutants killed."
+    result = run(Check("mutation", "mutation", (PY, "-c", f"print({output!r})"), min_passed=20), tmp_path)
+    assert result.status == core.PASS and result.counts["passed"] == 20
+    assert result.counts.get("failed", 0) == 0
+
+
+def test_pytest_counts_accept_colored_summaries_and_deselections():
+    counts, summary = core.pytest_counts("noise\n\x1b[32m=== 12 passed, 3 deselected, 1 warning in 0.2s ===\x1b[0m\n")
+    assert counts["passed"] == 12 and counts["deselected"] == 3 and counts["warnings"] == 1
+    assert counts["skipped"] == 0 and "12 passed" in summary
+
+
+def test_result_keeps_relative_log_summary_counts_and_last_fifty_lines(tmp_path):
+    output = "\n".join([str(i) for i in range(75)] + ["10 passed in 0.1s"])
+    result = run(Check("suite", "cpu", (PY, "-c", f"print({output!r})"), min_passed=1), tmp_path)
+    assert result.log == "suite/output.log"
+    assert len(result.log_tail) == 50 and result.log_tail[-1] == "10 passed in 0.1s"
+    assert result.log_tail[0] == "26"
+    target = tmp_path / "receipt.json"
+    core.write_receipt(
+        target, tree="t", dirty=False, commit="c", host="local", profiles=["cpu"], results=[result], started="s"
+    )
+    stored = json.loads(target.read_text())["results"][0]
+    assert stored["counts"]["passed"] == 10 and stored["pytest_summary"] == "10 passed in 0.1s"
+    assert len(stored["log_tail"]) == 50
+
+
+def test_source_identity_excludes_runtime_docs_and_root_markdown_including_renames(tmp_path):
+    git(tmp_path, "init", "-q")
+    (tmp_path / "runtime/docs").mkdir(parents=True)
+    (tmp_path / "runtime/src").mkdir()
+    (tmp_path / "runtime/docs/n.md").write_text("old docs")
+    (tmp_path / "README.md").write_text("readme")
+    (tmp_path / "runtime/src/a.py").write_text("old code")
+    git(tmp_path, "add", ".")
+    git(tmp_path, "commit", "-q", "-m", "baseline")
+    first, _ = core.source_tree(tmp_path)
+    (tmp_path / "runtime/docs/n.md").write_text("new docs")
+    (tmp_path / "AGENTS.md").write_text("instructions")
+    (tmp_path / "README.md").write_text("new readme")
+    assert core.source_tree(tmp_path) == (first, False)
+    git(tmp_path, "add", ".")
+    git(tmp_path, "commit", "-q", "-m", "documentation")
+    assert core.source_tree(tmp_path) == (first, False)
+    git(tmp_path, "mv", "runtime/docs/n.md", "runtime/docs/renamed.md")
+    assert core.source_tree(tmp_path) == (first, False)
+    git(tmp_path, "commit", "-q", "-m", "move docs")
+    git(tmp_path, "mv", "runtime/docs/renamed.md", "runtime/src/now-source.md")
+    assert core.source_tree(tmp_path) == (first, True)
+    git(tmp_path, "commit", "-q", "-m", "source moved from docs")
+    second, dirty = core.source_tree(tmp_path)
+    assert first != second and dirty is False
+    assert core.source_tree(tmp_path, "HEAD~1") == (first, False)
+    (tmp_path / "runtime/src/a.py").write_text("new code")
+    assert core.source_tree(tmp_path) == (second, True)

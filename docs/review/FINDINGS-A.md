@@ -38,6 +38,9 @@ Mốc: main 58cf278c. Mẫu: ID | file:dòng | loại | mức | mô tả | bằn
 
 | A-020 | Token-bearing urllib clients in agent/worker/SDK/study | S | P2 | Default redirects can forward bearer credentials or signed transfer capabilities; environment proxies also affect worker traffic. | Two loopback origins, 16 call paths; destination receives zero requests after fix. | Shared `http_safety` rejects every 3xx; worker traffic bypasses proxies, researcher SDK retains proxies. |
 
+| A-021 | `acceptance/core.py:source_tree` | T | P2 | Explicit revision was ignored: source identity used HEAD while remote staging could use another commit. | Regression: source changes, then request HEAD~1; previously returned current identity. | Hash the requested revision; test + mutation passed. |
+| A-022 | `study/prepare.py` reachability and transfer | R | P2 | Reachability sockets were not closed; opening a network stream before fdopen leaked the temporary FD on failure. | socketpair fileno and os.fstat reproduce both leaks. | Close probe socket; own FD before network open; test + mutation 2/2 passed. |
+
 ## Bất biến rút từ hợp đồng (để đối chiếu code ở các khu vực sau)
 
 1. Danh tính nhiễu = (seed, schema_hash, param_index, chunk_index, chunk_elements, engine). Không có worker/attempt/lease/retry. (§4, N3)
@@ -61,4 +64,7 @@ Mốc: main 58cf278c. Mẫu: ID | file:dòng | loại | mức | mô tả | bằn
 | A-010/A-020 | Đã sửa + test; commit cùng mục trạng thái này | Evidence `2026-10-31-review-network`: 105 test redirect/proxy, hồi quy 1 354 passed / 1 skipped, mutation 18/18 killed |
 | A-004/A-015/A-017/A-019 | Đã sửa + test; commit cùng mục trạng thái này | Evidence `2026-10-31-review-runtime`: 253 passed / 5 skipped; mutation 16/16 killed |
 | A-001/A-002/A-003/A-007/A-008/A-013/A-014/A-016 | Đã sửa + test local + P-FROZEN; nghiệm thu 3 môi trường còn ở A6 | Evidence `2026-10-31-frozen-fixes`: JSON CPU/GPU giống từng byte, mutation 16/16 killed; overhead update +0,71% |
-| Các ID còn lại | Mở | Tiếp tục A4–A6 theo kế hoạch |
+| A-011/A-012/A-021 | Đã sửa + test; commit cùng mục trạng thái này | Evidence `2026-10-31-review-acceptance`: 44 passed, mutation 10/10 killed |
+| A-022 | Đã sửa + test; commit cùng mục trạng thái này | 2 leak regressions, mutation 2/2 killed; study + HTTP integration xanh |
+| A-018 | Thông tin; không cần sửa | Review chất lượng nhiễu đã lưu |
+| Nghiệm thu cuối A6 | Chưa xong | Cần check-all và nghiệm thu trên hash cuối / cả 3 môi trường |

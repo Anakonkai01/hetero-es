@@ -20,7 +20,10 @@ PUBLIC_STUDY_LIMIT = 64 * 1024**2  # the lab gives a public link only for datase
 def private_reachable(url, timeout=4):
     parsed = urlsplit(url)
     try:
-        socket.create_connection((parsed.hostname, parsed.port or (443 if parsed.scheme == "https" else 80)), timeout)
+        with socket.create_connection(
+            (parsed.hostname, parsed.port or (443 if parsed.scheme == "https" else 80)), timeout
+        ):
+            pass
     except OSError:
         return False
     return True
@@ -63,7 +66,7 @@ def transfer(agent, assignment, digest, target, limit, reachable=private_reachab
 
         # the public edge refuses urllib's default agent (HTTP 403): candidate13 acceptance, finding 12
         request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-        with opener(proxy=False).open(request, timeout=120) as response, os.fdopen(fd, "wb") as out:
+        with os.fdopen(fd, "wb") as out, opener(proxy=False).open(request, timeout=120) as response:
             while chunk := response.read(1024**2):
                 total += len(chunk)
                 if total > limit:

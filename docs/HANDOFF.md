@@ -85,7 +85,10 @@ GPU or heavy CPU work runs.
   không có bit lệch. WSL cần cả thư mục driver đứng trước `/usr/lib/wsl/lib`, như `acceptance/hosts.py`.
 - A3 đã sửa + kiểm local: JSON before/after CPU (576 mục) và GPU (694 mục) giống từng byte. CPU 1 977 passed;
   mutation 16/16 killed. Qwen update chậm hơn 0,71% nên giữ kiểm finite. Ledger cũ đã mở lại và thử release theo A-014.
-  Còn nghiệm thu noise/ES/Qwen trên ba môi trường ở A6. Đang chốt A4 và tài liệu A5.
+  Còn nghiệm thu noise/ES/Qwen trên ba môi trường ở A6.
+- A4 xong: 44 selftest nghiệm thu xanh, mutation 10/10 killed. A-021 sửa thêm source hash khi chọn commit cũ.
+  A5 đã trả lời B-Q1/Q2 trong `docs/design/lab-server-architecture.md`. A-022 sửa rò handle study, mutation 2/2 killed.
+  Tiếp theo A6: chạy check-all, đóng gói và nghiệm thu hash cuối trên 5070 Ti / 3060 WSL / Windows.
 
 ## Việc của chủ dự án
 

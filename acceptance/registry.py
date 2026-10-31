@@ -7,6 +7,7 @@ the owner's decision or a hardware limit stated in its reason; it is printed in 
 """
 
 from acceptance.core import Check, Gate
+from dataclasses import replace
 
 GPU = (("HETEROES_GPU_ACCEPTANCE", "1"),)
 RUNTIME_PATH = (("PYTHONPATH", "src{extra}"),)
@@ -47,6 +48,28 @@ CHECKS = [
     # cpu
     Check("acceptance-selftest", "cpu", ("{python}", *PYTEST, "acceptance/tests"), timeout=600),
     Check("check-all", "cpu", ("scripts/check-all.sh", "{out}/checks"), expect="ALL PASS", timeout=4 * 3600),
+    Check(
+        "noise-es-gpu",
+        "gpu",
+        ("{runtime_python}", *PYTEST, "tests/noise", "tests/es"),
+        hosts=LINUX_GPU,
+        env=GPU + RUNTIME_PATH + (("HETEROES_QWEN_PINNED_PATH", "{models}/qwen"),),
+        cwd="runtime",
+        gpu=True,
+        min_passed=510,
+        max_skipped=0,
+    ),
+    Check(
+        "noise-es-gpu-native",
+        "gpu",
+        ("{runtime_python}", "{repo}/acceptance/native_python.py", *PYTEST, "tests/noise", "tests/es"),
+        hosts=("3060-native",),
+        env=GPU + RUNTIME_PATH + (("HETEROES_QWEN_PINNED_PATH", "{models}/qwen"),),
+        cwd="runtime",
+        gpu=True,
+        min_passed=510,
+        max_skipped=0,
+    ),
     # gpu
     Check(
         "strict-gpu-suite",
@@ -336,6 +359,19 @@ CHECKS = [
     ),
 ]
 
+# Review A-011: a zero-exit pytest process is insufficient evidence when tests were skipped.
+# Linux floor: the last independently verified tests/eval GPU run (1,599 passed). Native selects 1,035 existing cases.
+CHECKS = [
+    replace(check, min_passed=1599, max_skipped=0)
+    if check.name == "strict-gpu-suite"
+    else replace(check, min_passed=1035, max_skipped=0)
+    if check.name == "strict-gpu-suite-native"
+    else replace(check, min_passed=check.min_passed or 1, max_skipped=0 if check.gpu else None)
+    if "pytest" in check.command or check.profile == "mutation"
+    else check
+    for check in CHECKS
+]
+
 SUITE = ("strict-gpu-suite", "strict-gpu-suite@3060-wsl", "strict-gpu-suite-native@3060-native")
 PARITY = (
     "strict-parity-qwen",
@@ -492,7 +528,7 @@ GATES = [
         "M5.release",
         "M5",
         "release with rollback, deployed",
-        open="No release artifact and rollback rehearsal exist yet.",
+        open="Release 10457f9a was deployed on 2026-10-28 with rollback evidence; deploying this new source is an owner action.",
     ),
     # M6 — quantized frozen base + LoRA
     Gate("M6.int8-oracle", "M6", "frozen int8 format, CPU oracle and CUDA kernels", checks=("check-all", *SUITE[:2])),

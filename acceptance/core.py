@@ -20,6 +20,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import re
 import shlex
 import subprocess
 import time
@@ -42,6 +43,8 @@ class Check:
     timeout: int = 3600
     expect: str = ""  # if set, this text must appear in the command's output for the check to pass
     gpu: bool = False
+    min_passed: int | None = None
+    max_skipped: int | None = None
 
 
 @dataclass(frozen=True)
@@ -64,6 +67,9 @@ class Result:
     log: str
     log_sha256: str
     detail: str = ""
+    counts: dict | None = None
+    pytest_summary: str = ""
+    log_tail: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -114,27 +120,60 @@ def split_ref(item):
     return name, host or "local"
 
 
-SOURCE_PATHS = (".", ":(exclude)docs")  # documentation and committed receipts do not change what was accepted
+def _is_source(path):
+    return not (path.startswith((b"docs/", b"runtime/docs/")) or (b"/" not in path and path.endswith(b".md")))
 
 
 def source_tree(repo, rev="HEAD"):
-    """(source id, dirty): a hash of every tracked file outside docs/ at `rev`, and whether any of them is modified or
+    """(source id, dirty): tracked source at `rev`, excluding docs/, runtime/docs/ and root Markdown, and whether it is modified or
     untracked in the working tree (only meaningful for HEAD). On a staged copy without git, the controller writes
     SOURCE_TREE next to the sources."""
     staged = Path(repo) / "SOURCE_TREE"
     if staged.exists():
         return staged.read_text().strip(), False
     listing = b"".join(
-        line + b"\n"
+        line + b"\0"
         for line in subprocess.run(
-            ["git", "ls-tree", "-r", "HEAD"], cwd=repo, capture_output=True, check=True
-        ).stdout.splitlines()
-        if not line.split(b"\t", 1)[1].startswith(b"docs/")
+            ["git", "ls-tree", "-r", "-z", rev], cwd=repo, capture_output=True, check=True
+        ).stdout.split(b"\0")
+        if line and _is_source(line.split(b"\t", 1)[1])
     )
-    status = subprocess.run(
-        ["git", "status", "--porcelain", "--", *SOURCE_PATHS], cwd=repo, capture_output=True, text=True, check=True
-    ).stdout
-    return "src-" + hashlib.sha256(listing).hexdigest(), rev == "HEAD" and bool(status.strip())
+    dirty = False
+    if rev == "HEAD":
+        status = subprocess.run(
+            ["git", "status", "--porcelain", "-z", "--untracked-files=all"],
+            cwd=repo,
+            capture_output=True,
+            check=True,
+        ).stdout.split(b"\0")
+        entries = iter(status)
+        for entry in entries:
+            if not entry:
+                continue
+            dirty |= _is_source(entry[3:])
+            if b"R" in entry[:2] or b"C" in entry[:2]:
+                dirty |= _is_source(next(entries))  # both endpoints matter for a source-to-docs rename.
+    return "src-" + hashlib.sha256(listing).hexdigest(), dirty
+
+
+def pytest_counts(text):
+    """Read the final pytest summary, or a mutation check's unmodified control summary."""
+    clean = re.sub(r"\x1b\[[0-9;]*m", "", text)
+    pattern = re.compile(
+        r"^(?P<counts>\d+ (?:passed|failed|skipped|deselected|errors?|warnings?|xfailed|xpassed)"
+        r"(?:, \d+ (?:passed|failed|skipped|deselected|errors?|warnings?|xfailed|xpassed))*) in [\d.]+s"
+    )
+    for line in reversed(clean.splitlines()):
+        if line.startswith("control ok"):
+            line = line.partition("|")[2]
+        line = line.strip().strip("=").strip()
+        found = pattern.match(line)
+        if found:
+            counts = {"passed": 0, "skipped": 0, "failed": 0, "errors": 0}
+            for amount, kind in re.findall(r"(\d+) ([a-z]+)", found["counts"]):
+                counts[{"error": "errors", "warning": "warnings"}.get(kind, kind)] = int(amount)
+            return counts, line
+    return None, ""
 
 
 def expand(text, host, out, repo):
@@ -183,15 +222,32 @@ def run_check(check, host, out, repo, runner=subprocess.run):
         detail = f"expected output {check.expect!r} not found"
     elif returncode not in (0, None):
         detail = f"exit status {returncode}"
+    counts, summary = pytest_counts(text)
+    if check.min_passed is not None or check.max_skipped is not None:
+        problem = ""
+        if counts is None:
+            problem = "missing pytest summary"
+        elif counts["failed"] or counts["errors"]:
+            problem = "pytest summary contains failures/errors"
+        elif check.min_passed is not None and counts["passed"] < check.min_passed:
+            problem = f"pytest passed={counts['passed']}, minimum={check.min_passed}"
+        elif check.max_skipped is not None and counts["skipped"] > check.max_skipped:
+            problem = f"pytest skipped={counts['skipped']}, maximum={check.max_skipped}"
+        if problem:
+            ok = False
+            detail = "; ".join(part for part in (detail, problem) if part)
     return Result(
         check.name,
         host.label,
         PASS if ok else FAIL,
         returncode,
         round(time.monotonic() - started, 3),
-        str(log),
+        os.path.relpath(log, repo),
         hashlib.sha256(log.read_bytes()).hexdigest(),
         detail,
+        counts,
+        summary,
+        text.splitlines()[-50:],
     )
 
 
