@@ -1,6 +1,6 @@
 # Experimental strict decoder graph
 
-> **Status (2026-10-29).** The word `experimental` in identity strings and `hardwareQualified: false` in kernel identities are names and fields inside hashed documents; they are never edited and do not say whether the code is accepted. Acceptance is recorded by receipts. The B22 path described here is the Recipe v3 decoder `strict_b22_v1` ([ADR-013](../adr/ADR-013-strict-b22-recipe-decoder.md), accepted; the default for new GPU runs), and its acceptance checks PASS on SM120, SM86 under WSL2 and native Windows at source `src-18d0b138` ([acceptance STATUS](../../../docs/acceptance/STATUS.md)). Sentences below that say "experimental", "inactive" or "not accepted" describe the state when the note was written, unless a line in this note says otherwise.
+> **Status (2026-11-01).** `experimental` in identity strings and `hardwareQualified: false` are immutable fields in hashed documents, not an acceptance result. The B22 composition is the Recipe v3 decoder `strict_b22_v1` ([ADR-013](../adr/ADR-013-strict-b22-recipe-decoder.md)); the lab form selects it for new Recipe v3 GPU runs, while standalone/SDK callers select it explicitly. Read the [source-specific acceptance STATUS](../../../docs/acceptance/STATUS.md) for the checks and measured hosts of each source tree. Historical integration/promotion statements below describe the original note; the arithmetic definitions remain normative.
 
 The strict CUDA implementation is shared by graph adapters, rather than specialized to one checkpoint.
 `strict/strict_decoder.py` provides an eager operator oracle and serial CUDA graph;
@@ -27,7 +27,8 @@ architectures, quantized weights or attached LoRA. Those require additional oper
 Backend identity includes the graph descriptor, parameter shapes/biases/tying, numerical constants, context and
 fixture scope, and source hashes of the shared graph, packed execution, reference operators and CUDA kernels.
 Model weight identity remains separate. Per-device NVRTC/options/PTX/SASS/build receipts remain separate from the
-portable fingerprint. M4 still has to bind these identities to real qualification, software/OS builds and profiles.
+portable fingerprint. M4 binds these identities to real qualification, software/OS builds and profiles; its checked
+source trees and remaining limits are recorded in the acceptance STATUS.
 
 ## Arithmetic and execution
 
@@ -111,5 +112,7 @@ four small graph layouts and two finite weight states on four physical GPUs from
 used for throughput comparison. Tiny graph equality is not acceptance of trained Llama/Mistral checkpoints.
 
 The [vLLM source review](../../../docs/design/STRICT-PERFORMANCE-VLLM.md) identifies which execution techniques transfer and
-which arithmetic cannot be substituted. The current scalar strict projections remain substantially slower than
-vendor/tensor-core inference. Since this was written the throughput floor (M1.throughput), native Windows operators and decoder parity, M2 and M6 have PASS receipts ([acceptance STATUS](../../../docs/acceptance/STATUS.md)); M3 and M5.release are still open. Paged KV storage and wider operator/model coverage were open when this was written and are not re-checked here.
+which arithmetic cannot be substituted. The scalar FP32 projection reference is distinct from the selected B22 integer
+projection path; their timings must not be interchanged. Throughput floors, native Windows operators/decoder parity,
+lifecycle checks and unresolved gates are recorded per source in the [acceptance STATUS](../../../docs/acceptance/STATUS.md).
+Paged KV storage and wider operator/model coverage were open when this note was written and are not re-checked here.

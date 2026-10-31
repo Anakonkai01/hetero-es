@@ -1,10 +1,10 @@
 # Frozen int8 base artifact v1 (experimental)
 
-> **Status (2026-10-29).** This format is the base of the Recipe v3 decoder `strict_int8_lora_v1` ([ADR-014](../adr/ADR-014-strict-int8-lora-decoder.md), accepted, M6 PASS in the [acceptance STATUS](../../../docs/acceptance/STATUS.md)). It runs through `python -m heteroes.v3` and the SDK; the lab does not offer it. "Experimental" in identity strings is a name inside hashed documents and is never edited. The sentences below that say "not an accepted backend, not a managed recipe" describe 2026-10-25.
+> **Status (2026-11-01).** This format underlies the Recipe v3 decoder `strict_int8_lora_v1` ([ADR-014](../adr/ADR-014-strict-int8-lora-decoder.md)), available through `python -m heteroes.v3` and the SDK; the lab does not offer it. Read the [source-specific acceptance STATUS](../../../docs/acceptance/STATUS.md), including M6, for actual checks and measured hosts. `experimental` and `hardwareQualified: false` are immutable identity fields. Historical integration/promotion statements below describe the original 2026-10-25 note; the arithmetic and artifact definitions remain normative.
 
-Status: implemented CPU oracle, separately named CUDA operator, typed frozen storage with FP16 LoRA adapters and an
-explicit captured-decode composition. It is not an accepted backend, not a managed recipe, and not a claim about model
-quality or speed. `heteroes/strict/frozen_int8.py` is the reference for this identity; CUDA results are bit-compared
+Initial scope (2026-10-25): implemented CPU oracle, separately named CUDA operator, typed frozen storage with FP16 LoRA
+adapters and an explicit captured-decode composition, before Recipe v3 integration. This format is not a claim about
+model quality or speed. `heteroes/strict/frozen_int8.py` is the reference for this identity; CUDA results are bit-compared
 against it under zero adapters. Adapter deltas have their own FP32 namespace and are not part of the exact base claim.
 
 ## Scope
@@ -61,8 +61,8 @@ y = encode_fp32_rne(T * 2^e)                   (one final RNE, then signed-zero 
 `signif` and `exponent_of_scale` are decoded from the stored FP32 scale: a normal scale is `signif * 2^(E-150)` with
 `signif` in `[2^23, 2^24)`, and a subnormal scale is `signif * 2^-149`. The exact dot bound is
 `|S| < 127 * 2^22 * K < 2^44` for the admitted `K <= 32768`, so int64 accumulation is exact. `|T| < 2^68`, which does
-not fit int64; the reference uses Python integers and a future CUDA operator must use a two-limb (96-bit) product and
-a single exact RNE/FTZ encoding. Multiplying an int64 dot by an FP32 scale and calling the result exact is forbidden
+not fit int64; the reference uses Python integers and the CUDA operator below uses a two-limb product with a 96-bit
+admitted bound and a single exact RNE/FTZ encoding. Multiplying an int64 dot by an FP32 scale and calling the result exact is forbidden
 under this identity.
 
 The encoder accepts an exact integer `T` with `|T| < 2^96` and an exponent not below `-2048`; values at or above the
@@ -189,13 +189,14 @@ covers typed storage, deterministic adapters, pinned files, the adapter-only ES 
 projections, incremental/packed/captured decode, perturb/restore and buffer recapture. The committed mutation runs
 kill 8 of 8 storage/artifact mutants, 3 of 3 graph mutants (one via the GPU recapture test) and 5 of 5 CUDA mutants.
 
-The full CPU runtime suite passes with `3116 passed, 426 skipped`; the frozen CUDA operator plus graph tests pass
-`31` with explicit GPU opt-in. These are fixture-scale checks.
+The initial fixture receipt recorded `3116 passed, 426 skipped` for the CPU runtime suite and `31` frozen CUDA
+operator/graph tests with explicit GPU opt-in. These historical counts do not describe the current suite size.
 
 ## What this does not establish
 
-No real-model artifact bundle, model-quality result, LoRA training run, throughput measurement, lifecycle peak,
-cross-GPU token/logit equality with nonzero adapters or managed acceptance. The CPU path is an oracle and may be slow
-by design. The three-limb work count is a hypothesis, not a measured speed improvement. The format and the CUDA
+The initial fixture checks alone do not establish a real-model artifact bundle, model-quality result, LoRA training
+run, throughput measurement, lifecycle peak, cross-GPU equality with nonzero adapters or managed acceptance. Later
+real-model/lifecycle measurements belong to their separate source-specific M6 receipts. The CPU path is an oracle
+and may be slow by design. The three-limb work count alone is not a measured speed improvement. The format and the CUDA
 operator are experimental and may be replaced by a new versioned identity; existing artifacts must not be
 reinterpreted under a new rule.

@@ -391,6 +391,11 @@ Generating the noise was 77 percent of a generation (audit of 07/10: 3.7 s per c
 
 > **Scope (2026-10-29).** This is the default of `build_recipe` and of the `hf_generate` / `hf_compact` decoders (`DEFAULT_EVAL_DTYPE = "float32"` in `manifest.py`). The strict decoder `strict_b22_v1` instead reads the live FP16 weights in place and requires `evalDtype = "float16"` (ADR-013, section 19), so it does not use this choice.
 
+The original arith16 FP16 probe is also device-specific: on the same pinned model and workload, the RTX 3060 returns
+`674` where the RTX 5070 Ti reference returns `664` for question index 5; both are wrong, so the mean reward remains
+0.25. The independent [SM86 capture](https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-11-01-qwen-fp16-sm86/README.md)
+and exact per-device test references preserve this distinction. They do not weaken the shared strict-decoder goldens.
+
 **What was found [E].** The greedy answer to a prompt is an argmax over scores computed in FP16, so it flips whenever the two best scores are closer than the rounding noise of the computation. Two things change that noise without changing the model: a prompt in a batch with others (left padding changes the shapes and the order of the sums), and another GPU (another kernel). On the 5070 Ti, with the stack of the 1660S (torch 2.13+cu132, transformers 5.17; the same counts were obtained with torch 2.10 and transformers 5.5, so it is not the software stack):
 
 | 33 states (the parent and 32 candidates) x 16 prompts | prompts whose answer differs from "one prompt per call" |

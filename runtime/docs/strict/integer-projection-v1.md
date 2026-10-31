@@ -1,11 +1,12 @@
 # Experimental row-scaled integer projection
 
-> **Status (2026-10-29).** The word `experimental` in identity strings and `hardwareQualified: false` in kernel identities are names and fields inside hashed documents; they are never edited and do not say whether the code is accepted. Acceptance is recorded by receipts. The B22 path described here is the Recipe v3 decoder `strict_b22_v1` ([ADR-013](../adr/ADR-013-strict-b22-recipe-decoder.md), accepted; the default for new GPU runs), and its acceptance checks PASS on SM120, SM86 under WSL2 and native Windows at source `src-18d0b138` ([acceptance STATUS](../../../docs/acceptance/STATUS.md)). Sentences below that say "experimental", "inactive" or "not accepted" describe the state when the note was written, unless a line in this note says otherwise.
+> **Status (2026-11-01).** `experimental` in identity strings and `hardwareQualified: false` are immutable fields in hashed documents, not an acceptance result. The B22 composition is the Recipe v3 decoder `strict_b22_v1` ([ADR-013](../adr/ADR-013-strict-b22-recipe-decoder.md)); the lab form selects it for new Recipe v3 GPU runs, while standalone/SDK callers select it explicitly. Read the [source-specific acceptance STATUS](../../../docs/acceptance/STATUS.md) for the checks and measured hosts of each source tree. Historical integration/promotion statements below describe the original note; the arithmetic definitions remain normative.
 
 This is a separate arithmetic reference, `row_scaled_signed_integer_dot_v1_experimental`, permitted for feasibility
 work by [ADR-012](../adr/ADR-012-single-model-strict-inference.md). It is not the historical adjacent-pair FP32 tree.
-The graph adapter composes it with the existing strict FP32 nonlinearities and canonical RoPE constants. No managed
-recipe, default, qualification or historical noise/perturb/update/restore contract changes.
+The graph adapter composes it with the existing strict FP32 nonlinearities and canonical RoPE constants. The initial
+feasibility work left managed recipes and defaults unchanged; ADR-013 later introduced the separate B22 Recipe v3
+identity. Historical noise/perturb/update/restore contracts remain unchanged.
 
 ## Reference operation
 
@@ -24,7 +25,7 @@ Magnitude precision B is exactly 14 or 22 and is part of the portable identity.
    token publication; there is no ordinary floating GEMM fallback.
 
 The encoder constructs the FP32 sign/exponent/significand with integer operations. For an underflowing normal
-exponent, it rounds in units of 2^-149 before FTZ: the midpoint immediately below minimum normal rounds *up* to
+exponent, it rounds in units of 2^-149 before FTZ: the midpoint immediately below minimum normal rounds _up_ to
 minimum normal. Multiplying by a precomputed FP32 scale would lose this boundary. Overflow, carry and negative
 underflow have explicit tests. Rational test oracles use `Fraction` and a search over representable FP32 values,
 avoiding an intermediate binary64 rounding.
@@ -46,7 +47,7 @@ or five int32 accumulator groups rather than four or nine independent groups.
 
 - Every individual digit dot is bounded in absolute value by K*128^2 <= 2^29. A degree groups at most three dots,
   so every intermediate signed sum is bounded by 3*2^29 < 2^31, regardless of reduction order.
-- Reconstructing the degree groups in int64 is safe even with the looser bound of 128 for *all* three digits:
+- Reconstructing the degree groups in int64 is safe even with the looser bound of 128 for _all_ three digits:
   K * (128*(1+256+65536))^2 = 2^29*65793^2 < 2^62. This bounds the sum of absolute terms and every reconstruction
   partial sum. The tighter final result bound is K*2^(2B) <= 2^59. Signed multiplication by positive powers of two
   avoids a signed-left-shift assumption.
@@ -59,7 +60,8 @@ The CUDA prototype uses `mma.sync.aligned.m16n8k32.row.col.s32.s8.s8.s32`. The f
 The nonoverflow proof above is required; merely selecting integer Tensor Cores is insufficient. Generated PTX and
 SASS must contain the signed integer MMA/IMMA and pass the strict operator audit. Float multiplication/FMA/MUFU
 instructions in an integer module are refused. One rejected runtime split stride caused compiler-generated float
-reciprocal control code; the selected split stride is a compile-time constant. Native Windows remains untested.
+reciprocal control code; the selected split stride is a compile-time constant. The initial feasibility receipt did not
+cover native Windows; current coverage belongs to the source-specific acceptance receipts.
 
 ## Weights, request lifetime and memory
 
@@ -84,7 +86,8 @@ Receipts: [integer feasibility](https://github.com/Anakonkai01/hetero-es/blob/ev
 GPU encoder boundaries, odd widths/tails, precision identity, compiler audit, batch/permutation equality, live-weight
 changes and graph composition are distinct checks. Synthetic matrix speed is not trained-model throughput.
 
-Before promotion, finish multi-model parent/canonical-candidate measurements, cross-GPU token/reward equality,
-perturbation sensitivity and numerical/quality assessment, exact restore/failure/resource ownership, source/native
-packaging and the remaining M0–M6 system gates. All identities retain `hardwareQualified:false`. Comparing a new
-integer reference with itself establishes implementation equality, not equivalence to the FP32 tree or model quality.
+The original promotion checklist required multi-model parent/canonical-candidate measurements, cross-GPU token/reward
+equality, perturbation sensitivity and numerical/quality assessment, exact restore/failure/resource ownership and
+source/native packaging. Current M0–M6 results and unresolved gates are recorded separately in the acceptance STATUS.
+All identities retain `hardwareQualified:false`. Comparing a new integer reference with itself establishes
+implementation equality, not equivalence to the FP32 tree or model quality.
