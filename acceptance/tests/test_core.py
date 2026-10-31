@@ -234,6 +234,18 @@ def test_pytest_counts_accept_colored_summaries_and_deselections():
     assert counts["skipped"] == 0 and "12 passed" in summary
 
 
+@pytest.mark.parametrize("minimum,passed,expected", [(12, 11, core.FAIL), (8, 9, core.PASS)])
+def test_host_specific_executed_test_floor_is_enforced(tmp_path, minimum, passed, expected):
+    host = Host("sm86", PY, pytest_marks="not sm120", pytest_min_passed={"suite": minimum})
+    check = Check(
+        "suite", "gpu", (PY, "-c", f"print('{passed} passed, 79 deselected in 0.1s')"), min_passed=10, max_skipped=0
+    )
+    result = core.run_check(check, host, tmp_path, tmp_path)
+    assert result.status == expected
+    assert core.expand("{pytest_marks}", host, tmp_path, tmp_path) == "not sm120"
+    assert result.counts["deselected"] == 79
+
+
 def test_result_keeps_relative_log_summary_counts_and_last_fifty_lines(tmp_path):
     output = "\n".join([str(i) for i in range(75)] + ["10 passed in 0.1s"])
     result = run(Check("suite", "cpu", (PY, "-c", f"print({output!r})"), min_passed=1), tmp_path)

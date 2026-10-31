@@ -77,6 +77,7 @@ def kernels(tma):
     return k
 
 
+@pytest.mark.sm120
 @gpu
 @pytest.mark.parametrize("width, outputs", [(80, 35), (896, 1152), (4864, 896)])
 @pytest.mark.parametrize("rows", [129, 200, 1100])
@@ -98,6 +99,7 @@ def test_tma_projection_matches_streamed_projection_bits(width, outputs, rows, b
     assert torch.equal(actual.view(torch.int32), expected.view(torch.int32))
 
 
+@pytest.mark.sm120
 @gpu
 @pytest.mark.parametrize("scenario", ["nonfinite", "overflow", "zeros"])
 def test_tma_projection_reports_the_same_flags(scenario):
@@ -120,6 +122,7 @@ def test_tma_projection_reports_the_same_flags(scenario):
         assert torch.equal(actual.view(torch.int32), expected.view(torch.int32))
 
 
+@pytest.mark.sm120
 @gpu
 def test_ineligible_calls_keep_the_streamed_route():
     fast = kernels(True)
@@ -131,6 +134,7 @@ def test_ineligible_calls_keep_the_streamed_route():
     assert fast.tma_calls == 0
 
 
+@pytest.mark.sm120
 @gpu
 def test_two_captured_launches_reusing_one_host_template_keep_their_own_tensors():
     k = kernels(True)
@@ -156,6 +160,7 @@ def test_two_captured_launches_reusing_one_host_template_keep_their_own_tensors(
             assert torch.equal(base._linear(x, w).view(torch.int32), out.view(torch.int32))
 
 
+@pytest.mark.sm120
 @gpu
 def test_host_template_cache_stays_bounded_across_layout_changes():
     k = kernels(True)

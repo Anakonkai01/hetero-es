@@ -22,3 +22,4 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["sm120: tests of SM120-only TMA / attention key staging routes; generic SM86 paths are tested separately"]

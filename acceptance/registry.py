@@ -42,7 +42,7 @@ NATIVE_TESTS = tuple(
     )
 ) + ("tests/v3/test_v3_strict_decoder.py",)
 
-PYTEST = ("-m", "pytest", "-q", "-p", "no:cacheprovider")
+PYTEST = ("-m", "pytest", "-q", "-rs", "-p", "no:cacheprovider")
 
 CHECKS = [
     # cpu
@@ -74,8 +74,18 @@ CHECKS = [
     Check(
         "strict-gpu-suite",
         "gpu",
-        ("{runtime_python}", *PYTEST, "tests/eval", "tests/v3/test_v3_strict_decoder.py")
-        + ("tests/v3/test_model_qualification.py",),  # its strict reference round trip runs only on a GPU
+        (
+            "{runtime_python}",
+            "{repo}/acceptance/probes/pytest_gpu_suite.py",
+            "--models",
+            "{models}",
+            "--out",
+            "{out}/pinned-model",
+            "--",
+        )
+        + PYTEST[2:]
+        + ("tests/eval", "tests/v3/test_v3_strict_decoder.py")
+        + ("tests/v3/test_model_qualification.py", "-m", "{pytest_marks}"),
         hosts=LINUX_GPU,
         env=GPU + RUNTIME_PATH,
         cwd="runtime",
@@ -85,7 +95,19 @@ CHECKS = [
     Check(
         "strict-gpu-suite-native",
         "gpu",
-        ("{runtime_python}", "{repo}/acceptance/native_python.py", *PYTEST, *NATIVE_TESTS),
+        (
+            "{runtime_python}",
+            "{repo}/acceptance/native_python.py",
+            "{repo}/acceptance/probes/pytest_gpu_suite.py",
+            "--models",
+            "{models}",
+            "--out",
+            "{out}/pinned-model",
+            "--",
+        )
+        + PYTEST[2:]
+        + NATIVE_TESTS
+        + ("-m", "{pytest_marks}"),
         hosts=("3060-native",),
         env=GPU + (("PYTHONPATH", "src{sep}tests/eval"),),
         cwd="runtime",
@@ -360,11 +382,12 @@ CHECKS = [
 ]
 
 # Review A-011: a zero-exit pytest process is insufficient evidence when tests were skipped.
-# Linux floor: the last independently verified tests/eval GPU run (1,599 passed). Native selects 1,035 existing cases.
+# Linux local floor: the last good tests/eval GPU run (1,599 passed). SM86 floors cover every applicable collected case;
+# the 79 SM120-only cases run on the 5070 Ti and are explicitly deselected (never counted as passed) on both 3060 hosts.
 CHECKS = [
     replace(check, min_passed=1599, max_skipped=0)
     if check.name == "strict-gpu-suite"
-    else replace(check, min_passed=1035, max_skipped=0)
+    else replace(check, min_passed=956, max_skipped=0)
     if check.name == "strict-gpu-suite-native"
     else replace(check, min_passed=check.min_passed or 1, max_skipped=0 if check.gpu else None)
     if "pytest" in check.command or check.profile == "mutation"

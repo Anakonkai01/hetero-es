@@ -66,7 +66,7 @@ Mốc: main 58cf278c. Mẫu: ID | file:dòng | loại | mức | mô tả | bằn
 | A-010/A-020 | Đã sửa + test; commit cùng mục trạng thái này | Evidence `2026-10-31-review-network`: 105 test redirect/proxy, hồi quy 1 354 passed / 1 skipped, mutation 18/18 killed |
 | A-004/A-015/A-017/A-019 | Đã sửa + test; commit cùng mục trạng thái này | Evidence `2026-10-31-review-runtime`: 253 passed / 5 skipped; mutation 16/16 killed |
 | A-001/A-002/A-003/A-007/A-008/A-013/A-014/A-016 | Đã sửa + test local + P-FROZEN; nghiệm thu 3 môi trường còn ở A6 | Evidence `2026-10-31-frozen-fixes`: JSON CPU/GPU giống từng byte, mutation 16/16 killed; overhead update +0,71% |
-| A-011/A-012/A-021 | Đã sửa + test; commit cùng mục trạng thái này | Evidence `2026-10-31-review-acceptance`: 44 passed, mutation 10/10 killed |
+| A-011/A-012/A-021 | Đã sửa + test; nghiệm thu cuối còn A6 | Evidence `2026-10-31-review-acceptance`: mutation 10/10; bổ sung `2026-10-31-acceptance-gpu-matrix`: 51 selftest, mutation 6/6, Qwen 56 passed |
 | A-022 | Đã sửa + test; commit cùng mục trạng thái này | 2 leak regressions, mutation 2/2 killed; study + HTTP integration xanh |
 | A-018 | Thông tin; không cần sửa | Review chất lượng nhiễu đã lưu |
 | A-023 | Đã sửa + test; commit cùng mục trạng thái này | Evidence `2026-10-31-review-admin-http`: 17 passed, mutation 4/4 killed |

@@ -79,6 +79,8 @@ class Host:
     models: str = ""
     env: dict = field(default_factory=dict)
     extra_path: str = ""  # appended to PYTHONPATH through {extra}: test dependencies installed outside the runtime
+    pytest_marks: str = ""  # explicit architecture applicability; deselected counts remain in receipts
+    pytest_min_passed: dict = field(default_factory=dict)
 
 
 def validate(checks, gates):
@@ -185,6 +187,7 @@ def expand(text, host, out, repo):
         models=host.models,
         sep=os.pathsep,
         extra=os.pathsep + host.extra_path if host.extra_path else "",
+        pytest_marks=host.pytest_marks,
     )
 
 
@@ -223,14 +226,15 @@ def run_check(check, host, out, repo, runner=subprocess.run):
     elif returncode not in (0, None):
         detail = f"exit status {returncode}"
     counts, summary = pytest_counts(text)
-    if check.min_passed is not None or check.max_skipped is not None:
+    min_passed = host.pytest_min_passed.get(check.name, check.min_passed)
+    if min_passed is not None or check.max_skipped is not None:
         problem = ""
         if counts is None:
             problem = "missing pytest summary"
         elif counts["failed"] or counts["errors"]:
             problem = "pytest summary contains failures/errors"
-        elif check.min_passed is not None and counts["passed"] < check.min_passed:
-            problem = f"pytest passed={counts['passed']}, minimum={check.min_passed}"
+        elif min_passed is not None and counts["passed"] < min_passed:
+            problem = f"pytest passed={counts['passed']}, minimum={min_passed}"
         elif check.max_skipped is not None and counts["skipped"] > check.max_skipped:
             problem = f"pytest skipped={counts['skipped']}, maximum={check.max_skipped}"
         if problem:

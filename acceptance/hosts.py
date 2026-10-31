@@ -21,6 +21,8 @@ WSL = Host(
     models="/home/thao_nguyen/.cache/heteroes-codex-frozen-perf-20261025-01/models",
     env={"LD_LIBRARY_PATH": "/usr/lib/wsl/drivers/nv_dispi.inf_amd64_feedb8c0271ca811:/usr/lib/wsl/lib"},
     extra_path="/tmp/heteroes-codex-testdeps-20261027-01",  # pytest and friends, outside the runtime
+    pytest_marks="not sm120",
+    pytest_min_passed={"strict-gpu-suite": 1557},  # 1,636 collected minus 79 SM120-specific execution cases
 )
 
 NATIVE_ROOT = r"C:\Users\Thao Nguyen\.cache\heteroes-native-strict-20261025-01"
@@ -28,6 +30,7 @@ NATIVE = Host(
     "3060-native",
     runtime_python=NATIVE_ROOT + r"\venv\Scripts\python.exe",
     models=NATIVE_ROOT + r"\models-prefetch-01",
+    pytest_marks="not sm120",
 )
 
 HOSTS = {h.label: h for h in (LOCAL, WSL, NATIVE)}

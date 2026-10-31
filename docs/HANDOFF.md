@@ -88,13 +88,16 @@ GPU or heavy CPU work runs.
   Còn nghiệm thu noise/ES/Qwen trên ba môi trường ở A6.
 - A4 xong: 44 selftest nghiệm thu xanh, mutation 10/10 killed. A-021 sửa thêm source hash khi chọn commit cũ.
   A5 đã trả lời B-Q1/Q2 trong `docs/design/lab-server-architecture.md`. A-022 sửa rò handle study, mutation 2/2 killed.
-  Đang A6: CPU/check-all tại `.scratch/accept/20261031-223356-local/` (source `src-1ab5a488…`, commit `2fabe28a`).
-  Runtime CPU: 3 315 passed / 1 045 skipped; backend SQLite: 464 passed. Lint, format, đóng gói nguồn và web checks
-  đang tiến triển. Chưa chạy GPU/perf/faults/package/mutation hoặc remote ở hash này.
-- A-023 đã sửa và kiểm: 4 script quản trị dùng http_safety; 17 test script/recovery xanh, mutation 4/4 killed.
-  Lượt CPU đầu đã PASS 2/2 (check-all 596 giây) trước khi áp dụng fix này; cần nghiệm thu CPU lại ở hash mới.
-  Phụ thuộc pytest/hypothesis/simpy của 3060 đã cài lại vào `/tmp/heteroes-codex-testdeps-20261027-01`.
-  Tiếp theo: CPU cuối, GPU/perf/faults/package/mutation local, 3060 WSL, rồi Windows; A chưa merge/push. B/C chưa bắt đầu.
+  A6: CPU/check-all đã PASS ở source `src-d174b280…` (commit `d7564de8`): 3 321 runtime passed / 1 045 skipped,
+  backend SQLite 464 passed, đủ web/Electron/package-source checks. A-023 đã sửa: 4 script quản trị, 17 test + mutation 4/4.
+- Lượt GPU đầu: noise/ES/Qwen thật 572 passed, không skip. Gate phát hiện 7 test eval bị skip vì chưa cấu hình model;
+  đã dừng đúng cây tiến trình nghiệm thu của mình, không chạy tiếp một lượt biết chắc sẽ không đạt gate.
+- A-011 bổ sung: wrapper tạo bản sao model trong scratch mang tên revision đúng, giữ nguyên model gốc; 56 test candidate/
+  generate có Qwen thật đã xanh. Đánh dấu đúng 79 ca kernel chỉ SM120: chạy đủ trên 5070 Ti, ghi deselected trên 3060.
+  Bộ SM86 Linux còn 1 557 ca bắt buộc, native 956 ca; max_skipped=0. 51 selftest và mutation 6/6 xanh.
+  Evidence `2026-10-31-acceptance-gpu-matrix`. Cần CPU rồi toàn bộ GPU/perf/faults/package/mutation ở hash mới sau sửa harness này.
+- Phụ thuộc pytest/hypothesis/simpy của 3060 đã cài lại vào `/tmp/heteroes-codex-testdeps-20261027-01`.
+  Phép chia/nhân nghịch đảo đã kiểm thêm Windows: n=1..4096, không có bit lệch. A chưa merge/push; B/C chưa bắt đầu.
 
 ## Việc của chủ dự án
 

@@ -1,0 +1,108 @@
+{
+  "format": "heteroes-acceptance-receipt-v1",
+  "tree": "src-d174b28023d1081f3fedbb8f39af5c09765d7fab78421ccd19386414cf26602c",
+  "dirty": false,
+  "commit": "d7564de8dc99f80c7f6e72561a4bd4006babc7ba",
+  "host": "local",
+  "profiles": [
+    "cpu"
+  ],
+  "machine": {
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "python": "3.12.13",
+    "node": "5070ti",
+    "gpus": [
+      "NVIDIA GeForce RTX 5070 Ti, 595.91.07"
+    ]
+  },
+  "started": "2026-10-31T22:50:08+0700",
+  "finished": "2026-10-31T23:00:04+0700",
+  "results": [
+    {
+      "name": "acceptance-selftest",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 1.418,
+      "log": ".scratch/accept/20261031-225008-local/acceptance-selftest/output.log",
+      "log_sha256": "2f04d3c85f4509b09fff6d2ec0a64484f0b2b692b23f3d6f35d89af5e6ea3a50",
+      "detail": "",
+      "counts": {
+        "passed": 44,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "pytest_summary": "44 passed in 1.28s",
+      "log_tail": [
+        "$ /home/pc5070ti/projects/heteroes/.venv-backend/bin/python -m pytest -q -p no:cacheprovider acceptance/tests",
+        "............................................                             [100%]",
+        "44 passed in 1.28s"
+      ]
+    },
+    {
+      "name": "check-all",
+      "host": "local",
+      "status": "PASS",
+      "returncode": 0,
+      "seconds": 594.644,
+      "log": ".scratch/accept/20261031-225008-local/check-all/output.log",
+      "log_sha256": "631f71cef78b43a17d4eef3ce69bc83c8f13d2b5591f07acb9645d57dbf643f2",
+      "detail": "",
+      "counts": null,
+      "pytest_summary": "",
+      "log_tail": [
+        "$ scripts/check-all.sh /home/pc5070ti/projects/heteroes/.scratch/accept/20261031-225008-local/check-all/checks",
+        "=== runtime-tests",
+        "PASS runtime-tests",
+        "=== python-lint",
+        "PASS python-lint",
+        "=== python-format",
+        "PASS python-format",
+        "=== prettier",
+        "PASS prettier",
+        "=== source-packages",
+        "PASS source-packages",
+        "=== backend-tests",
+        "PASS backend-tests",
+        "=== frontend-unit",
+        "PASS frontend-unit",
+        "=== worker-unit",
+        "PASS worker-unit",
+        "=== server-unit",
+        "PASS server-unit",
+        "=== product-ui-unit",
+        "PASS product-ui-unit",
+        "=== types",
+        "PASS types",
+        "=== lint",
+        "PASS lint",
+        "=== i18n",
+        "PASS i18n",
+        "=== web-build",
+        "PASS web-build",
+        "=== worker-build",
+        "PASS worker-build",
+        "=== web-onboarding",
+        "PASS web-onboarding",
+        "=== web-live",
+        "PASS web-live",
+        "=== web-experiments",
+        "PASS web-experiments",
+        "=== web-model-qualification",
+        "PASS web-model-qualification",
+        "=== web-audit-outcomes",
+        "PASS web-audit-outcomes",
+        "=== web-showcase",
+        "PASS web-showcase",
+        "=== web-pages",
+        "PASS web-pages",
+        "=== worker-onboarding",
+        "PASS worker-onboarding",
+        "=== worker-station",
+        "PASS worker-station",
+        "ALL PASS"
+      ]
+    }
+  ]
+}

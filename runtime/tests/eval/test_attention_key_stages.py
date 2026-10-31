@@ -58,6 +58,7 @@ def pair():
     return staged, original
 
 
+@pytest.mark.sm120
 @gpu
 @pytest.mark.parametrize("keys", [1, 33, 65, 129, 257, 511, 691])  # 692+: the original GQA launch fails (static shared)
 @pytest.mark.parametrize("scenario", ["normal", "zeros", "tiny", "invalid", "large"])
@@ -92,6 +93,7 @@ def test_key_stages_match_the_original_bits_and_flags(keys, scenario):
         assert torch.equal(a.view(torch.int32), b.view(torch.int32))
 
 
+@pytest.mark.sm120
 @gpu
 def test_packed_batch_of_ragged_owners_matches_original():
     staged, original = pair()
@@ -106,6 +108,7 @@ def test_packed_batch_of_ragged_owners_matches_original():
     assert torch.equal(a.view(torch.int32), b.view(torch.int32))
 
 
+@pytest.mark.sm120
 @gpu
 def test_opt_in_shared_stage_replays_with_changed_live_query():
     staged, original = pair()
