@@ -1,0 +1,49 @@
+FF
+=================================== FAILURES ===================================
+_____________ test_every_client_blocks_redirects[301-compute-json] _____________
+
+name = 'compute-json', status = 301
+origins = ('http://127.0.0.1:46787', 'http://127.0.0.1:35063', [('/sensitive?capability=synthetic-secret', 'Bearer synthetic-bea..., {'status': 301, 'location': 'http://127.0.0.1:35063/sensitive?capability=synthetic-secret', 'requests': ['/v1/job']})
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-0/test_every_client_blocks_redir0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x704004007620>
+
+    @pytest.mark.parametrize("name", CALLS)
+    @pytest.mark.parametrize("status", [301, 302, 303, 307, 308])
+    def test_every_client_blocks_redirects(name, status, origins, tmp_path, monkeypatch):
+        origin, destination, received, state = origins
+        state["status"] = status
+        if name in ("reachable", "connection"):
+            value = invoke(name, origin, tmp_path, monkeypatch)
+            assert value is False if name == "reachable" else value["route"] is None
+        else:
+>           with pytest.raises(Exception) as caught:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE Exception
+
+tests/ledger/test_http_redirects.py:124: Failed
+_____________ test_every_client_blocks_redirects[301-compute-post] _____________
+
+name = 'compute-post', status = 301
+origins = ('http://127.0.0.1:34721', 'http://127.0.0.1:34893', [('/sensitive?capability=synthetic-secret', 'Bearer synthetic-bea...'status': 301, 'location': 'http://127.0.0.1:34893/sensitive?capability=synthetic-secret', 'requests': ['/v1/leases']})
+tmp_path = PosixPath('/tmp/pytest-of-pc5070ti/pytest-0/test_every_client_blocks_redir1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x704004007f20>
+
+    @pytest.mark.parametrize("name", CALLS)
+    @pytest.mark.parametrize("status", [301, 302, 303, 307, 308])
+    def test_every_client_blocks_redirects(name, status, origins, tmp_path, monkeypatch):
+        origin, destination, received, state = origins
+        state["status"] = status
+        if name in ("reachable", "connection"):
+            value = invoke(name, origin, tmp_path, monkeypatch)
+            assert value is False if name == "reachable" else value["route"] is None
+        else:
+>           with pytest.raises(Exception) as caught:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE Exception
+
+tests/ledger/test_http_redirects.py:124: Failed
+=========================== short test summary info ============================
+FAILED tests/ledger/test_http_redirects.py::test_every_client_blocks_redirects[301-compute-json]
+FAILED tests/ledger/test_http_redirects.py::test_every_client_blocks_redirects[301-compute-post]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 2 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+2 failed in 0.13s

@@ -1,0 +1,110 @@
+[
+  {
+    "name": "follow-redirects",
+    "file": "src/heteroes/http_safety.py",
+    "old": "if 300 <= response.code < 400:",
+    "new": "if False:"
+  },
+  {
+    "name": "ignore-399",
+    "file": "src/heteroes/http_safety.py",
+    "old": "if 300 <= response.code < 400:",
+    "new": "if 300 <= response.code < 399:"
+  },
+  {
+    "name": "worker-environment-proxy",
+    "file": "src/heteroes/http_safety.py",
+    "old": "None if proxy else {}",
+    "new": "None"
+  },
+  {
+    "name": "sdk-loses-system-proxy",
+    "file": "src/heteroes/http_safety.py",
+    "old": "None if proxy else {}",
+    "new": "{}"
+  },
+  {
+    "name": "expose-redirect-capability",
+    "file": "src/heteroes/http_safety.py",
+    "old": "origin = _origin(request.full_url, response.headers.get(\"Location\", \"\"))",
+    "new": "origin = response.headers.get(\"Location\", \"\")"
+  },
+  {
+    "name": "unsafe-http_transport.py-1",
+    "file": "src/heteroes/http_transport.py",
+    "old": "        self._opener = opener(proxy=False)",
+    "new": "        self._opener = urllib.request.build_opener()"
+  },
+  {
+    "name": "unsafe-product/agent_protocol.py-1",
+    "file": "src/heteroes/product/agent_protocol.py",
+    "old": "    with opener(proxy=False).open(req, timeout=15) as response:",
+    "new": "    with urllib.request.build_opener().open(req, timeout=15) as response:"
+  },
+  {
+    "name": "unsafe-product/agent_protocol.py-2",
+    "file": "src/heteroes/product/agent_protocol.py",
+    "old": "        with opener(proxy=False).open(req, timeout=timeout) as response:",
+    "new": "        with urllib.request.build_opener().open(req, timeout=timeout) as response:"
+  },
+  {
+    "name": "unsafe-product/worker_lab.py-1",
+    "file": "src/heteroes/product/worker_lab.py",
+    "old": "        with opener(proxy=False).open(request, timeout=30) as response:",
+    "new": "        with urllib.request.build_opener().open(request, timeout=30) as response:"
+  },
+  {
+    "name": "unsafe-product/worker_lab.py-2",
+    "file": "src/heteroes/product/worker_lab.py",
+    "old": "        with opener(proxy=False).open(request, timeout=15) as response:",
+    "new": "        with urllib.request.build_opener().open(request, timeout=15) as response:"
+  },
+  {
+    "name": "unsafe-product/worker_cli.py-1",
+    "file": "src/heteroes/product/worker_cli.py",
+    "old": "        with opener(proxy=False).open(request, timeout=60) as response:",
+    "new": "        with urllib.request.build_opener().open(request, timeout=60) as response:"
+  },
+  {
+    "name": "unsafe-product/cloud_sync.py-1",
+    "file": "src/heteroes/product/cloud_sync.py",
+    "old": "        with opener(proxy=False).open(request, timeout=180) as response:",
+    "new": "        with urllib.request.build_opener().open(request, timeout=180) as response:"
+  },
+  {
+    "name": "unsafe-product/downloads.py-1",
+    "file": "src/heteroes/product/downloads.py",
+    "old": "    with opener(proxy=False).open(urllib.request.Request(item[\"url\"], headers=headers), timeout=60) as response:",
+    "new": "    with urllib.request.build_opener().open(urllib.request.Request(item[\"url\"], headers=headers), timeout=60) as response:"
+  },
+  {
+    "name": "unsafe-sdk_lab.py-1",
+    "file": "src/heteroes/sdk_lab.py",
+    "old": "            with opener(proxy=True).open(request, timeout=600) as response:",
+    "new": "            with urllib.request.build_opener().open(request, timeout=600) as response:"
+  },
+  {
+    "name": "unsafe-sdk_lab.py-2",
+    "file": "src/heteroes/sdk_lab.py",
+    "old": "    try:\n        with opener(proxy=True).open(request, timeout=600) as response:",
+    "new": "    try:\n        with urllib.request.build_opener().open(request, timeout=600) as response:"
+  },
+  {
+    "name": "unsafe-v3/lab_cli.py-1",
+    "file": "src/heteroes/v3/lab_cli.py",
+    "old": "        try:\n            with opener(proxy=True).open(request, timeout=600) as response:",
+    "new": "        try:\n            with urllib.request.build_opener().open(request, timeout=600) as response:"
+  },
+  {
+    "name": "unsafe-v3/lab_cli.py-2",
+    "file": "src/heteroes/v3/lab_cli.py",
+    "old": "                with opener(proxy=True).open(request, timeout=600) as response:",
+    "new": "                with urllib.request.build_opener().open(request, timeout=600) as response:"
+  },
+  {
+    "name": "unsafe-study/prepare.py-1",
+    "file": "src/heteroes/study/prepare.py",
+    "old": "        with opener(proxy=False).open(request, timeout=120) as response, os.fdopen(fd, \"wb\") as out:",
+    "new": "        with urllib.request.build_opener().open(request, timeout=120) as response, os.fdopen(fd, \"wb\") as out:"
+  }
+]

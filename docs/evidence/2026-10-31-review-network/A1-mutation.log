@@ -1,0 +1,21 @@
+control ok    | 105 passed in 2.26s
+killed       follow-redirects | 89 failed, 16 passed in 2.58s
+killed       ignore-399 | 1 failed, 104 passed in 2.31s
+killed       worker-environment-proxy | 13 failed, 92 passed in 2.20s
+killed       sdk-loses-system-proxy | 5 failed, 100 passed in 2.37s
+killed       expose-redirect-capability | 72 failed, 33 passed in 2.28s
+killed       unsafe-http_transport.py-1 | 18 failed, 87 passed in 2.19s
+killed       unsafe-product/agent_protocol.py-1 | 6 failed, 99 passed in 2.26s
+killed       unsafe-product/agent_protocol.py-2 | 6 failed, 99 passed in 2.22s
+killed       unsafe-product/worker_lab.py-1 | 6 failed, 99 passed in 2.26s
+killed       unsafe-product/worker_lab.py-2 | 6 failed, 99 passed in 2.24s
+killed       unsafe-product/worker_cli.py-1 | 6 failed, 99 passed in 2.20s
+killed       unsafe-product/cloud_sync.py-1 | 6 failed, 99 passed in 2.25s
+killed       unsafe-product/downloads.py-1 | 6 failed, 99 passed in 2.23s
+killed       unsafe-sdk_lab.py-1 | 5 failed, 100 passed in 2.24s
+killed       unsafe-sdk_lab.py-2 | 5 failed, 100 passed in 2.24s
+killed       unsafe-v3/lab_cli.py-1 | 5 failed, 100 passed in 2.25s
+killed       unsafe-v3/lab_cli.py-2 | 5 failed, 100 passed in 2.25s
+killed       unsafe-study/prepare.py-1 | 6 failed, 99 passed in 2.24s
+
+18 of 18 mutants killed.
