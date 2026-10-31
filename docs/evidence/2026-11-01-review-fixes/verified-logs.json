@@ -1,0 +1,475 @@
+{
+  "tree": "src-ede4338ef54a443a0ecc33a2bc96ea836ea188b856727ed63e095594a7b8b3a4",
+  "checks": [
+    {
+      "receipt": "2026-11-01T0244-3060-native-gpu.json",
+      "check": "noise-es-gpu-native",
+      "host": "3060-native",
+      "source_log": "results\\noise-es-gpu-native\\output.log",
+      "archived_log": "logs/3060-native/noise-es-gpu-native/output.log",
+      "sha256": "d1b9363610c09dfae8ba7cb17c7bd022eef5ec49a87ffc999b4aeb867a476bfe",
+      "counts": {
+        "passed": 572,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0244-3060-native-gpu.json",
+      "check": "strict-gpu-suite-native",
+      "host": "3060-native",
+      "source_log": "results\\strict-gpu-suite-native\\output.log",
+      "archived_log": "logs/3060-native/strict-gpu-suite-native/output.log",
+      "sha256": "c9e80a20c7119e377fe988b80d5fa5a9e0107c6241eeb2be85151c73e3eaa258",
+      "counts": {
+        "passed": 956,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0,
+        "deselected": 79
+      },
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0244-3060-native-gpu.json",
+      "check": "strict-parity-qwen-native",
+      "host": "3060-native",
+      "source_log": "results\\strict-parity-qwen-native\\output.log",
+      "archived_log": "logs/3060-native/strict-parity-qwen-native/output.log",
+      "sha256": "978d6014d3143306cba1ef541258e189bea5619f7dd57594dd7366e723119b1c",
+      "counts": null,
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0357-local-gpu-perf-faults-package-mutation.json",
+      "check": "noise-es-gpu",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-024559-local/noise-es-gpu/output.log",
+      "archived_log": "logs/local/noise-es-gpu/output.log",
+      "sha256": "6c419af85cada9ae65f941dead696a6856ca4afecafbfce56f09932ff21848bf",
+      "counts": {
+        "passed": 572,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0357-local-gpu-perf-faults-package-mutation.json",
+      "check": "strict-gpu-suite",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-024559-local/strict-gpu-suite/output.log",
+      "archived_log": "logs/local/strict-gpu-suite/output.log",
+      "sha256": "6553d52af951a6f679e48c579be795b4c400fec9ec8395b3ac3fab2d925d12f1",
+      "counts": {
+        "passed": 1639,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0357-local-gpu-perf-faults-package-mutation.json",
+      "check": "strict-parity-qwen",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-024559-local/strict-parity-qwen/output.log",
+      "archived_log": "logs/local/strict-parity-qwen/output.log",
+      "sha256": "f7b91f6e2bad3890732f53e16d4e799052d606e0cbbabd506941e959306f4c06",
+      "counts": null,
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0357-local-gpu-perf-faults-package-mutation.json",
+      "check": "strict-parity-smol",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-024559-local/strict-parity-smol/output.log",
+      "archived_log": "logs/local/strict-parity-smol/output.log",
+      "sha256": "d1408baf85bcd78cb3bbf34729a1ea58951e0773e352cfd19096f5aaf6b80778",
+      "counts": null,
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0357-local-gpu-perf-faults-package-mutation.json",
+      "check": "strict-parity-tiny",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-024559-local/strict-parity-tiny/output.log",
+      "archived_log": "logs/local/strict-parity-tiny/output.log",
+      "sha256": "c69db25d8d5b3f4463fd5da508eab2fd05b7b91cc140575efd90a74f6d299ab7",
+      "counts": null,
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0357-local-gpu-perf-faults-package-mutation.json",
+      "check": "strict-throughput",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-024559-local/strict-throughput/output.log",
+      "archived_log": "logs/local/strict-throughput/output.log",
+      "sha256": "9306408a16f9a38210704f4b5d175245d8a85694631ea90337ad8da0a8def2f1",
+      "counts": null,
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0357-local-gpu-perf-faults-package-mutation.json",
+      "check": "int8-memory",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-024559-local/int8-memory/output.log",
+      "archived_log": "logs/local/int8-memory/output.log",
+      "sha256": "aca1a57ffa5ee869d7a40492f7c9acc8dc0fce4588b8d63d72e99eff295c5ca6",
+      "counts": null,
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0357-local-gpu-perf-faults-package-mutation.json",
+      "check": "strict-phase-trace",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-024559-local/strict-phase-trace/output.log",
+      "archived_log": "logs/local/strict-phase-trace/output.log",
+      "sha256": "ac5ee57cfa958887729c159aa44bc4cc9fdc99deb52ed97c5408b5ecb843dcff",
+      "counts": null,
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0357-local-gpu-perf-faults-package-mutation.json",
+      "check": "strict-e2e",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-024559-local/strict-e2e/output.log",
+      "archived_log": "logs/local/strict-e2e/output.log",
+      "sha256": "4169d52c069b5e1448e2cc99f85c1eda013a50bdd7d043b1496a0a3b8afc43fe",
+      "counts": null,
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0357-local-gpu-perf-faults-package-mutation.json",
+      "check": "strict-e2e-soak",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-024559-local/strict-e2e-soak/output.log",
+      "archived_log": "logs/local/strict-e2e-soak/output.log",
+      "sha256": "833d682bcb7b2bcf6bc72547f5d4fc682131efbdbceef607f374cf9fd9db19c4",
+      "counts": null,
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0357-local-gpu-perf-faults-package-mutation.json",
+      "check": "strict-e2e-int8",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-024559-local/strict-e2e-int8/output.log",
+      "archived_log": "logs/local/strict-e2e-int8/output.log",
+      "sha256": "b8efc62360e01c100bdf709e31c212de538199289473131f39bbccffb83ffbf9",
+      "counts": null,
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0357-local-gpu-perf-faults-package-mutation.json",
+      "check": "package-linux",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-024559-local/package-linux/output.log",
+      "archived_log": "logs/local/package-linux/output.log",
+      "sha256": "15c20e01e9b78cfaaf89b931e806cfb83a87f653288e5b99da38ded5f229be6b",
+      "counts": null,
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0357-local-gpu-perf-faults-package-mutation.json",
+      "check": "mutation-strict-routes",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-024559-local/mutation-strict-routes/output.log",
+      "archived_log": "logs/local/mutation-strict-routes/output.log",
+      "sha256": "78872d46af8551fddac2570654d10c54d6985f45658501a0338a579c1c6811bd",
+      "counts": {
+        "passed": 107,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0357-local-gpu-perf-faults-package-mutation.json",
+      "check": "mutation-watchdog",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-024559-local/mutation-watchdog/output.log",
+      "archived_log": "logs/local/mutation-watchdog/output.log",
+      "sha256": "92846ea9b8fc9f620ec05e27fa6b9886bd2269e640a88f16e82fecb08fbb4739",
+      "counts": {
+        "passed": 18,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0357-local-gpu-perf-faults-package-mutation.json",
+      "check": "mutation-restore-recovery",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-024559-local/mutation-restore-recovery/output.log",
+      "archived_log": "logs/local/mutation-restore-recovery/output.log",
+      "sha256": "f13d1641c6031be210f4ddc906778e125260b38c7054f766af51b15ec6fa05fb",
+      "counts": {
+        "passed": 63,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0357-local-gpu-perf-faults-package-mutation.json",
+      "check": "mutation-strict-mismatch",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-024559-local/mutation-strict-mismatch/output.log",
+      "archived_log": "logs/local/mutation-strict-mismatch/output.log",
+      "sha256": "1580dd6984a1d9430bf3e142ffd7e798101b1a7f9146ea8a1aef4289a9bd0bfd",
+      "counts": {
+        "passed": 30,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0357-local-gpu-perf-faults-package-mutation.json",
+      "check": "mutation-audit-outcomes",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-024559-local/mutation-audit-outcomes/output.log",
+      "archived_log": "logs/local/mutation-audit-outcomes/output.log",
+      "sha256": "02c19d9ab25f37b81922799141adefaa4e5e0f81c03efa652f2e45914d256974",
+      "counts": {
+        "passed": 29,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0357-local-gpu-perf-faults-package-mutation.json",
+      "check": "mutation-recovery-io",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-024559-local/mutation-recovery-io/output.log",
+      "archived_log": "logs/local/mutation-recovery-io/output.log",
+      "sha256": "2a2367434e58d628518fc7e92b13f0661c52733af087645ce600a1f58324cb31",
+      "counts": {
+        "passed": 31,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0,
+        "deselected": 1
+      },
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0357-local-gpu-perf-faults-package-mutation.json",
+      "check": "mutation-strict-decoder",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-024559-local/mutation-strict-decoder/output.log",
+      "archived_log": "logs/local/mutation-strict-decoder/output.log",
+      "sha256": "0869ead097c4989c9461fb131ecc486df1a6513e8c84a9d238e1ae2017146580",
+      "counts": {
+        "passed": 19,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0357-local-gpu-perf-faults-package-mutation.json",
+      "check": "mutation-strict-qualification-runtime",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-024559-local/mutation-strict-qualification-runtime/output.log",
+      "archived_log": "logs/local/mutation-strict-qualification-runtime/output.log",
+      "sha256": "26ebfababe855a04db56e8b6a846d5934a4b15762abde3f9adb1623de9282fa0",
+      "counts": {
+        "passed": 29,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0357-local-gpu-perf-faults-package-mutation.json",
+      "check": "mutation-strict-qualification-backend",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-024559-local/mutation-strict-qualification-backend/output.log",
+      "archived_log": "logs/local/mutation-strict-qualification-backend/output.log",
+      "sha256": "8540f7b1a20465ebd61907d6e880a80594c5c9bdfc8c7b4def6d027efda3cdbd",
+      "counts": {
+        "passed": 28,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0,
+        "warnings": 1
+      },
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0357-local-gpu-perf-faults-package-mutation.json",
+      "check": "mutation-gpu-ownership-backend",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-024559-local/mutation-gpu-ownership-backend/output.log",
+      "archived_log": "logs/local/mutation-gpu-ownership-backend/output.log",
+      "sha256": "e72fa0a1646d4b139888b4e01a360cabd908a117272ae9d98fe385bbde5383be",
+      "counts": {
+        "passed": 28,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0,
+        "warnings": 1
+      },
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0357-local-gpu-perf-faults-package-mutation.json",
+      "check": "mutation-int8-lora",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-024559-local/mutation-int8-lora/output.log",
+      "archived_log": "logs/local/mutation-int8-lora/output.log",
+      "sha256": "dc58bca32425bbec6593dd5f35df2e92bfc4626fc76ed42b96fd720aface64f4",
+      "counts": {
+        "passed": 12,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0357-local-gpu-perf-faults-package-mutation.json",
+      "check": "mutation-gpu-ownership-runtime",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-024559-local/mutation-gpu-ownership-runtime/output.log",
+      "archived_log": "logs/local/mutation-gpu-ownership-runtime/output.log",
+      "sha256": "1c28bebbb5471747704ecde41e2f54a79caa5122311844c47e1816256408b230",
+      "counts": {
+        "passed": 29,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0231-local-cpu.json",
+      "check": "acceptance-selftest",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-022150-local/acceptance-selftest/output.log",
+      "archived_log": "logs/local/acceptance-selftest/output.log",
+      "sha256": "5300a6a5809f806b392e10a8bc789aca8d6c27d271069027a543a070cd5f15db",
+      "counts": {
+        "passed": 58,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0231-local-cpu.json",
+      "check": "check-all",
+      "host": "local",
+      "source_log": ".scratch/accept/20261101-022150-local/check-all/output.log",
+      "archived_log": "logs/local/check-all/output.log",
+      "sha256": "b5d2bf4b323beb11820731f3ee0df322d19551ea7b224a5aa7ecea56f04e79c6",
+      "counts": null,
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0420-3060-wsl-gpu-perf.json",
+      "check": "noise-es-gpu",
+      "host": "3060-wsl",
+      "source_log": "results/noise-es-gpu/output.log",
+      "archived_log": "logs/3060-wsl/noise-es-gpu/output.log",
+      "sha256": "61ef3436eee0212621b99851ba46d1851430021293c42f035cc17a76e018b0f9",
+      "counts": {
+        "passed": 572,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0420-3060-wsl-gpu-perf.json",
+      "check": "strict-gpu-suite",
+      "host": "3060-wsl",
+      "source_log": "results/strict-gpu-suite/output.log",
+      "archived_log": "logs/3060-wsl/strict-gpu-suite/output.log",
+      "sha256": "344314cde2158213604eb453f4934b7829eb0b3e18333339ef32ea7e1ebc3e09",
+      "counts": {
+        "passed": 1560,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0,
+        "deselected": 79
+      },
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0420-3060-wsl-gpu-perf.json",
+      "check": "strict-parity-qwen",
+      "host": "3060-wsl",
+      "source_log": "results/strict-parity-qwen/output.log",
+      "archived_log": "logs/3060-wsl/strict-parity-qwen/output.log",
+      "sha256": "64f39f5b86451e8c52f584d92ebd1b2bdb2dbe980776c3e56c1faba34a5ec1f3",
+      "counts": null,
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0420-3060-wsl-gpu-perf.json",
+      "check": "strict-parity-smol",
+      "host": "3060-wsl",
+      "source_log": "results/strict-parity-smol/output.log",
+      "archived_log": "logs/3060-wsl/strict-parity-smol/output.log",
+      "sha256": "af7d0e0f6da8a048af1d09bfaa55066b420f23cd47623b30a0528bc3027fe0a3",
+      "counts": null,
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0420-3060-wsl-gpu-perf.json",
+      "check": "strict-parity-tiny",
+      "host": "3060-wsl",
+      "source_log": "results/strict-parity-tiny/output.log",
+      "archived_log": "logs/3060-wsl/strict-parity-tiny/output.log",
+      "sha256": "a3d996d4f06c1645d7c515335c71b9fc0b02a487b9ddf31d308376ecb7811642",
+      "counts": null,
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0420-3060-wsl-gpu-perf.json",
+      "check": "strict-throughput",
+      "host": "3060-wsl",
+      "source_log": "results/strict-throughput/output.log",
+      "archived_log": "logs/3060-wsl/strict-throughput/output.log",
+      "sha256": "73d50f3d07796e347ba370a2ff1ebc217a2ad65a0fdd3e1135883d8c4dce4410",
+      "counts": null,
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0420-3060-wsl-gpu-perf.json",
+      "check": "int8-memory",
+      "host": "3060-wsl",
+      "source_log": "results/int8-memory/output.log",
+      "archived_log": "logs/3060-wsl/int8-memory/output.log",
+      "sha256": "9c1af10f4fb9f7161e5f7f5c8ebfcfd78d37c935bae0f57a452f8355c26acb01",
+      "counts": null,
+      "status": "PASS"
+    },
+    {
+      "receipt": "2026-11-01T0420-3060-wsl-gpu-perf.json",
+      "check": "strict-phase-trace",
+      "host": "3060-wsl",
+      "source_log": "results/strict-phase-trace/output.log",
+      "archived_log": "logs/3060-wsl/strict-phase-trace/output.log",
+      "sha256": "d5a4209cafe3d7a482dbf57d4922e230f948a9e4a47198c351a24da14b56ea94",
+      "counts": null,
+      "status": "PASS"
+    }
+  ]
+}

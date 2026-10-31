@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "before": "lab-before-ede433-local.json",
+  "after": "lab-after-A6-ede433.json",
+  "byte_equal_json_values": true,
+  "server_instance_id": "34d68e114a5316bb76de9c12f657dff0",
+  "note": "Only permitted local-lab.py status was used; this does not deploy or inspect live DB contents."
+}

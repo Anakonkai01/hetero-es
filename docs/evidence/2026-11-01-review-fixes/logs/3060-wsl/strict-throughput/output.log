@@ -1,0 +1,6 @@
+$ /home/thao_nguyen/.local/share/heteroes-c4-cpu/runtimes/9a553d2dfae9/python/bin/python3.12 acceptance/probes/strict_throughput.py --gpu --models /home/thao_nguyen/.cache/heteroes-codex-frozen-perf-20261025-01/models --out /tmp/heteroes-accept-ede4338ef54a-20261101-035704/results/strict-throughput/throughput.json
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 3230.17it/s]
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 3002.75it/s]
+short32 3093.4 token/s floor 3041.6
+chat128 2921.3 token/s floor 2867.2
+THROUGHPUT OK

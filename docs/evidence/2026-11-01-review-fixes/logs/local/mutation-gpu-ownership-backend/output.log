@@ -1,0 +1,12 @@
+$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python scripts/mutation-check.py --repo . --copy backend --copy runtime/src --copy pyproject.toml --env CUDA_VISIBLE_DEVICES= --scratch /home/pc5070ti/projects/heteroes/.scratch/accept/20261101-024559-local/mutation-gpu-ownership-backend --mutants acceptance/mutants/gpu-ownership-backend.json --test '/home/pc5070ti/projects/heteroes/.venv-backend/bin/python -m pytest -q -x -p no:cacheprovider backend/tests/test_model_qualification.py'
+control ok    | 28 passed, 1 warning in 4.63s
+killed       strict layout applies to every decoder | 1 failed, 1 warning in 0.30s
+killed       strict layout never applies | 1 failed, 25 passed, 1 warning in 4.46s
+killed       CPU coordinator allowed for strict | 1 failed, 26 passed, 1 warning in 4.64s
+killed       same device not detected | 1 failed, 27 passed, 1 warning in 4.66s
+killed       same physical GPU not detected | 1 failed, 27 passed, 1 warning in 4.63s
+killed       scheduling skips the strict layout | 1 failed, 25 passed, 1 warning in 4.47s
+killed       creation skips the strict layout | 1 failed, 25 passed, 1 warning in 4.48s
+killed       creation checks the coordinator as a worker | 1 failed, 21 passed, 1 warning in 3.82s
+
+8 of 8 mutants killed.

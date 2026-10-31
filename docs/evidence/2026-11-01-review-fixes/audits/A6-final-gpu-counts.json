@@ -1,0 +1,64 @@
+[
+  {
+    "host": "3060-native",
+    "check": "noise-es-gpu-native",
+    "counts": {
+      "passed": 572,
+      "skipped": 0,
+      "failed": 0,
+      "errors": 0
+    }
+  },
+  {
+    "host": "3060-native",
+    "check": "strict-gpu-suite-native",
+    "counts": {
+      "passed": 956,
+      "skipped": 0,
+      "failed": 0,
+      "errors": 0,
+      "deselected": 79
+    }
+  },
+  {
+    "host": "local",
+    "check": "noise-es-gpu",
+    "counts": {
+      "passed": 572,
+      "skipped": 0,
+      "failed": 0,
+      "errors": 0
+    }
+  },
+  {
+    "host": "local",
+    "check": "strict-gpu-suite",
+    "counts": {
+      "passed": 1639,
+      "skipped": 0,
+      "failed": 0,
+      "errors": 0
+    }
+  },
+  {
+    "host": "3060-wsl",
+    "check": "noise-es-gpu",
+    "counts": {
+      "passed": 572,
+      "skipped": 0,
+      "failed": 0,
+      "errors": 0
+    }
+  },
+  {
+    "host": "3060-wsl",
+    "check": "strict-gpu-suite",
+    "counts": {
+      "passed": 1560,
+      "skipped": 0,
+      "failed": 0,
+      "errors": 0,
+      "deselected": 79
+    }
+  }
+]

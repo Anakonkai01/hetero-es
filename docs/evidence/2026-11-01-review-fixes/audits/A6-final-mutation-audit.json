@@ -1,0 +1,165 @@
+{
+  "tree": "src-ede4338ef54a443a0ecc33a2bc96ea836ea188b856727ed63e095594a7b8b3a4",
+  "groups": [
+    {
+      "check": "mutation-strict-routes",
+      "mutants": 14,
+      "killed": 14,
+      "control_counts": {
+        "passed": 107,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "config_sha256": "47ee785935313891ad61a8db4368c1e7c973df0c4d4e9c723ddb74c3f3d54611",
+      "log_sha256": "78872d46af8551fddac2570654d10c54d6985f45658501a0338a579c1c6811bd"
+    },
+    {
+      "check": "mutation-watchdog",
+      "mutants": 11,
+      "killed": 11,
+      "control_counts": {
+        "passed": 18,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "config_sha256": "a2e874b1e506966e4ab1fb60a0346c4c1f0139aa3ebf72cd5a10640a936cf096",
+      "log_sha256": "92846ea9b8fc9f620ec05e27fa6b9886bd2269e640a88f16e82fecb08fbb4739"
+    },
+    {
+      "check": "mutation-restore-recovery",
+      "mutants": 10,
+      "killed": 10,
+      "control_counts": {
+        "passed": 63,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "config_sha256": "bf3ff439695d899daf81f46e5f967870be943cdcf77abd73398dbeeba6accf60",
+      "log_sha256": "f13d1641c6031be210f4ddc906778e125260b38c7054f766af51b15ec6fa05fb"
+    },
+    {
+      "check": "mutation-strict-mismatch",
+      "mutants": 6,
+      "killed": 6,
+      "control_counts": {
+        "passed": 30,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "config_sha256": "8cd7bc937f32a02555a51d39bdb0f076c6a9d078b29f9d2326b06e2add287dae",
+      "log_sha256": "1580dd6984a1d9430bf3e142ffd7e798101b1a7f9146ea8a1aef4289a9bd0bfd"
+    },
+    {
+      "check": "mutation-audit-outcomes",
+      "mutants": 10,
+      "killed": 10,
+      "control_counts": {
+        "passed": 29,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "config_sha256": "5eebd0e3b0faf084688a6c535787897e3118e195d7dcdced09c567e1c3e91f98",
+      "log_sha256": "02c19d9ab25f37b81922799141adefaa4e5e0f81c03efa652f2e45914d256974"
+    },
+    {
+      "check": "mutation-recovery-io",
+      "mutants": 15,
+      "killed": 15,
+      "control_counts": {
+        "passed": 31,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0,
+        "deselected": 1
+      },
+      "config_sha256": "13571f0632a1a8166fda7f7fad5479e1c1b4a93f62c61ba6e8b81bb356b2a07e",
+      "log_sha256": "2a2367434e58d628518fc7e92b13f0661c52733af087645ce600a1f58324cb31"
+    },
+    {
+      "check": "mutation-strict-decoder",
+      "mutants": 11,
+      "killed": 11,
+      "control_counts": {
+        "passed": 19,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "config_sha256": "31d75250c67fb99381e4f0cf4bd71698ea39323a34a2998d56b44cb1c872a16b",
+      "log_sha256": "0869ead097c4989c9461fb131ecc486df1a6513e8c84a9d238e1ae2017146580"
+    },
+    {
+      "check": "mutation-strict-qualification-runtime",
+      "mutants": 13,
+      "killed": 13,
+      "control_counts": {
+        "passed": 29,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "config_sha256": "9afde0a43529adc58a7b595cbb6e242fe2463a3372d7a4d98bf5ef0dc3d82b38",
+      "log_sha256": "26ebfababe855a04db56e8b6a846d5934a4b15762abde3f9adb1623de9282fa0"
+    },
+    {
+      "check": "mutation-strict-qualification-backend",
+      "mutants": 16,
+      "killed": 16,
+      "control_counts": {
+        "passed": 28,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0,
+        "warnings": 1
+      },
+      "config_sha256": "6425be9f14ebffd61686cf0b2a1a27f3e09b27202c0eac4c90c7508c1bea4dc0",
+      "log_sha256": "8540f7b1a20465ebd61907d6e880a80594c5c9bdfc8c7b4def6d027efda3cdbd"
+    },
+    {
+      "check": "mutation-gpu-ownership-backend",
+      "mutants": 8,
+      "killed": 8,
+      "control_counts": {
+        "passed": 28,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0,
+        "warnings": 1
+      },
+      "config_sha256": "fe19a6e0dfc36617ac4a8ef2a563c649ccdd046a35ca9e4366edb3c83a7116fa",
+      "log_sha256": "e72fa0a1646d4b139888b4e01a360cabd908a117272ae9d98fe385bbde5383be"
+    },
+    {
+      "check": "mutation-int8-lora",
+      "mutants": 14,
+      "killed": 14,
+      "control_counts": {
+        "passed": 12,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "config_sha256": "1f2d0aa0efac9ca4b49bc967234d976717812d72afad67908de69fb3ef28cd92",
+      "log_sha256": "dc58bca32425bbec6593dd5f35df2e92bfc4626fc76ed42b96fd720aface64f4"
+    },
+    {
+      "check": "mutation-gpu-ownership-runtime",
+      "mutants": 9,
+      "killed": 9,
+      "control_counts": {
+        "passed": 29,
+        "skipped": 0,
+        "failed": 0,
+        "errors": 0
+      },
+      "config_sha256": "919db1a2329db74681b172ec0b1bd82e6c9ed44fac0a284d55275445e6c75755",
+      "log_sha256": "1c28bebbb5471747704ecde41e2f54a79caa5122311844c47e1816256408b230"
+    }
+  ],
+  "killed_total": 137
+}

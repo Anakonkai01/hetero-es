@@ -1,0 +1,10 @@
+$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python scripts/mutation-check.py --repo runtime --copy src --copy pyproject.toml --copy tests/v3 --env PYTHONPATH=src:tests/v3 --scratch /home/pc5070ti/projects/heteroes/.scratch/accept/20261101-024559-local/mutation-strict-mismatch --mutants acceptance/mutants/strict-mismatch.json --test '/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python -m pytest -q -x -p no:cacheprovider tests/v3/test_audit_guard_integration.py tests/v3/test_audit_guard.py'
+control ok    | 30 passed in 3.13s
+killed       coordinator keeps the historical policy for strict | 1 failed, 6 passed in 122.65s (0:02:02)
+killed       every decoder stops at a mismatch | 1 failed in 1.83s
+killed       any non-default decoder counts as strict | 1 failed, 4 passed in 2.39s
+killed       a run without a v3 evaluation section is strict | 1 failed, 2 passed in 2.37s
+killed       guard ignores the strict flag | 1 failed in 2.17s
+killed       first mismatch receipt not written | 1 failed, 6 passed in 2.67s
+
+6 of 6 mutants killed.

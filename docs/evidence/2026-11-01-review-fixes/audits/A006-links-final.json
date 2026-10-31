@@ -1,0 +1,567 @@
+{
+  "files": 54,
+  "localLinks": 112,
+  "missing": [],
+  "checked": [
+    {
+      "file": "README.md",
+      "href": "docs/README.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "href": "docs/HANDOFF.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "href": "AGENTS.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "href": "docs/guides/quickstart-vi.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "href": "docs/guides/local-lab-operations.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "href": "runtime/docs/numerical-contract.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "href": "docs/EVIDENCE-INDEX.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "href": "docs/SECURITY-NOTES.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "href": "docs/EVIDENCE-INDEX.md",
+      "exists": true
+    },
+    {
+      "file": "docs/HANDOFF.md",
+      "href": "EVIDENCE-INDEX.md",
+      "exists": true
+    },
+    {
+      "file": "docs/HANDOFF.md",
+      "href": "REVIEW-GUIDE.md",
+      "exists": true
+    },
+    {
+      "file": "docs/HANDOFF.md",
+      "href": "REVIEW-GUIDE.md",
+      "exists": true
+    },
+    {
+      "file": "docs/HANDOFF.md",
+      "href": "acceptance/STATUS.md",
+      "exists": true
+    },
+    {
+      "file": "docs/HANDOFF.md",
+      "href": "RELEASE-NOTES-2026-10-28.md",
+      "exists": true
+    },
+    {
+      "file": "docs/HANDOFF.md",
+      "href": "REVIEW-GUIDE.md",
+      "exists": true
+    },
+    {
+      "file": "docs/HANDOFF.md",
+      "href": "plans/codex-2026-11-review-fixes-and-minicloud.md",
+      "exists": true
+    },
+    {
+      "file": "docs/HANDOFF.md",
+      "href": "review/FINDINGS-B.md",
+      "exists": true
+    },
+    {
+      "file": "docs/README.md",
+      "href": "../runtime/docs/README.md",
+      "exists": true
+    },
+    {
+      "file": "docs/README.md",
+      "href": "HANDOFF.md",
+      "exists": true
+    },
+    {
+      "file": "docs/README.md",
+      "href": "REVIEW-GUIDE.md",
+      "exists": true
+    },
+    {
+      "file": "docs/README.md",
+      "href": "REVIEW-PLAN.md",
+      "exists": true
+    },
+    {
+      "file": "docs/README.md",
+      "href": "review",
+      "exists": true
+    },
+    {
+      "file": "docs/README.md",
+      "href": "RELEASE-NOTES-2026-10-28.md",
+      "exists": true
+    },
+    {
+      "file": "docs/README.md",
+      "href": "acceptance/README.md",
+      "exists": true
+    },
+    {
+      "file": "docs/README.md",
+      "href": "guides",
+      "exists": true
+    },
+    {
+      "file": "docs/README.md",
+      "href": "guides/quickstart-vi.md",
+      "exists": true
+    },
+    {
+      "file": "docs/README.md",
+      "href": "guides/server-desktop-guide.md",
+      "exists": true
+    },
+    {
+      "file": "docs/README.md",
+      "href": "guides/worker-desktop-guide.md",
+      "exists": true
+    },
+    {
+      "file": "docs/README.md",
+      "href": "guides/local-lab-operations.md",
+      "exists": true
+    },
+    {
+      "file": "docs/README.md",
+      "href": "design",
+      "exists": true
+    },
+    {
+      "file": "docs/README.md",
+      "href": "design/operations-decisions-2026-10-23.md",
+      "exists": true
+    },
+    {
+      "file": "docs/README.md",
+      "href": "design/resource-monitoring-design.md",
+      "exists": true
+    },
+    {
+      "file": "docs/README.md",
+      "href": "design/plan-sdk-lab-bridge.md",
+      "exists": true
+    },
+    {
+      "file": "docs/README.md",
+      "href": "design/strict-integer-projection-design.md",
+      "exists": true
+    },
+    {
+      "file": "docs/README.md",
+      "href": "design/STRICT-PERFORMANCE-VLLM.md",
+      "exists": true
+    },
+    {
+      "file": "docs/README.md",
+      "href": "SECURITY-NOTES.md",
+      "exists": true
+    },
+    {
+      "file": "docs/README.md",
+      "href": "RUNTIME-TODO.md",
+      "exists": true
+    },
+    {
+      "file": "docs/README.md",
+      "href": "EVIDENCE-INDEX.md",
+      "exists": true
+    },
+    {
+      "file": "docs/RUNTIME-TODO.md",
+      "href": "HANDOFF.md",
+      "exists": true
+    },
+    {
+      "file": "docs/acceptance/README.md",
+      "href": "../../acceptance/core.py",
+      "exists": true
+    },
+    {
+      "file": "docs/acceptance/README.md",
+      "href": "../../acceptance/registry.py",
+      "exists": true
+    },
+    {
+      "file": "docs/acceptance/README.md",
+      "href": "STATUS.md",
+      "exists": true
+    },
+    {
+      "file": "docs/guides/server-desktop-guide.md",
+      "href": "../HANDOFF.md",
+      "exists": true
+    },
+    {
+      "file": "docs/guides/local-lab-operations.md",
+      "href": "../HANDOFF.md",
+      "exists": true
+    },
+    {
+      "file": "docs/guides/local-lab-operations.md",
+      "href": "server-desktop-guide.md",
+      "exists": true
+    },
+    {
+      "file": "docs/guides/local-lab-operations.md",
+      "href": "../SECURITY-NOTES.md",
+      "exists": true
+    },
+    {
+      "file": "docs/guides/worker-desktop-guide.md",
+      "href": "quickstart-vi.md",
+      "exists": true
+    },
+    {
+      "file": "docs/guides/worker-desktop-guide.md",
+      "href": "../HANDOFF.md",
+      "exists": true
+    },
+    {
+      "file": "docs/guides/quickstart-vi.md",
+      "href": "../HANDOFF.md",
+      "exists": true
+    },
+    {
+      "file": "docs/design/strict-integer-projection-design.md",
+      "href": "../../runtime/docs/strict/integer-projection-v1.md",
+      "exists": true
+    },
+    {
+      "file": "docs/design/STRICT-PERFORMANCE-VLLM.md",
+      "href": "../../runtime/docs/strict/strict-decoder-v1.md",
+      "exists": true
+    },
+    {
+      "file": "docs/design/STRICT-PERFORMANCE-VLLM.md",
+      "href": "../../runtime/docs/strict/integer-projection-v1.md",
+      "exists": true
+    },
+    {
+      "file": "docs/design/operations-decisions-2026-10-23.md",
+      "href": "../../runtime/src/heteroes/product/run_supervisor.py",
+      "exists": true
+    },
+    {
+      "file": "docs/design/operations-decisions-2026-10-23.md",
+      "href": "../../runtime/src/heteroes/product/worker_service.py",
+      "exists": true
+    },
+    {
+      "file": "docs/design/operations-decisions-2026-10-23.md",
+      "href": "../../runtime/src/heteroes/product/recovery.py",
+      "exists": true
+    },
+    {
+      "file": "docs/design/lab-server-architecture.md",
+      "href": "../plans/codex-2026-11-review-fixes-and-minicloud.md",
+      "exists": true
+    },
+    {
+      "file": "docs/design/lab-server-architecture.md",
+      "href": "../EVIDENCE-INDEX.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/numerical-contract.md",
+      "href": "adr/ADR-001-canonical-noise-engine.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/numerical-contract.md",
+      "href": "adr/ADR-011-integer-cpu-noise-v2.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/numerical-contract.md",
+      "href": "strict/strict-reference-v1.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/numerical-contract.md",
+      "href": "strict/integer-projection-v1.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/numerical-contract.md",
+      "href": "strict/strict-decoder-v1.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/numerical-contract.md",
+      "href": "strict/frozen-int8-artifact-v1.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/README.md",
+      "href": "numerical-contract.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/README.md",
+      "href": "../../docs/README.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/README.md",
+      "href": "numerical-contract.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/README.md",
+      "href": "v3-local-runs.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/README.md",
+      "href": "audit-state-v1.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/README.md",
+      "href": "cpu-coordinator.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/README.md",
+      "href": "adr",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/README.md",
+      "href": "strict",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/README.md",
+      "href": "strict/strict-reference-v1.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/README.md",
+      "href": "strict/integer-projection-v1.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/README.md",
+      "href": "strict/strict-decoder-v1.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/README.md",
+      "href": "strict/frozen-int8-artifact-v1.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/README.md",
+      "href": "strict/b22-streamed-projection.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/README.md",
+      "href": "strict/b22-paired-weight-reads.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/README.md",
+      "href": "strict/b22-weight-prefetch.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/README.md",
+      "href": "strict/attention-tree-execution.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/README.md",
+      "href": "strict/bounded-lm-head.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/README.md",
+      "href": "strict/strict-lora-output-execution.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/strict/b22-paired-weight-reads.md",
+      "href": "b22-weight-prefetch.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/strict/bounded-lm-head.md",
+      "href": "../adr/ADR-013-strict-b22-recipe-decoder.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/strict/bounded-lm-head.md",
+      "href": "../../../docs/acceptance/STATUS.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/strict/frozen-int8-artifact-v1.md",
+      "href": "../adr/ADR-014-strict-int8-lora-decoder.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/strict/frozen-int8-artifact-v1.md",
+      "href": "../../../docs/acceptance/STATUS.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/strict/frozen-int8-artifact-v1.md",
+      "href": "strict-lora-output-execution.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/strict/attention-tree-execution.md",
+      "href": "../adr/ADR-013-strict-b22-recipe-decoder.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/strict/attention-tree-execution.md",
+      "href": "../../../docs/acceptance/STATUS.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/strict/attention-tree-execution.md",
+      "href": "../audit-state-v1.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/strict/strict-lora-output-execution.md",
+      "href": "../adr/ADR-014-strict-int8-lora-decoder.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/strict/strict-lora-output-execution.md",
+      "href": "../../../docs/acceptance/STATUS.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/strict/integer-projection-v1.md",
+      "href": "../adr/ADR-013-strict-b22-recipe-decoder.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/strict/integer-projection-v1.md",
+      "href": "../../../docs/acceptance/STATUS.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/strict/integer-projection-v1.md",
+      "href": "../adr/ADR-012-single-model-strict-inference.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/strict/strict-reference-v1.md",
+      "href": "../adr/ADR-013-strict-b22-recipe-decoder.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/strict/strict-reference-v1.md",
+      "href": "../../../docs/acceptance/STATUS.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/strict/b22-streamed-projection.md",
+      "href": "integer-projection-v1.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/strict/strict-decoder-v1.md",
+      "href": "../adr/ADR-013-strict-b22-recipe-decoder.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/strict/strict-decoder-v1.md",
+      "href": "../../../docs/acceptance/STATUS.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/strict/strict-decoder-v1.md",
+      "href": "strict-reference-v1.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/strict/strict-decoder-v1.md",
+      "href": "../../../docs/design/STRICT-PERFORMANCE-VLLM.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/strict/strict-decoder-v1.md",
+      "href": "../../../docs/acceptance/STATUS.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/adr/ADR-006-offline-network-and-storage.md",
+      "href": "../../../docs/HANDOFF.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/adr/ADR-007-identities-versions-and-recovery.md",
+      "href": "../../../docs/HANDOFF.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/adr/ADR-014-strict-int8-lora-decoder.md",
+      "href": "ADR-013-strict-b22-recipe-decoder.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/adr/ADR-004-local-first-deployment.md",
+      "href": "../../../docs/HANDOFF.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/adr/ADR-005-state-and-lifecycle-authority.md",
+      "href": "../../../docs/HANDOFF.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/adr/ADR-013-strict-b22-recipe-decoder.md",
+      "href": "ADR-012-single-model-strict-inference.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/adr/ADR-013-strict-b22-recipe-decoder.md",
+      "href": "ADR-008-recipe-v3-and-extensible-experiments.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/adr/ADR-002-candidate-attempt-lease-ledger.md",
+      "href": "../numerical-contract.md",
+      "exists": true
+    },
+    {
+      "file": "runtime/docs/adr/ADR-001-canonical-noise-engine.md",
+      "href": "../numerical-contract.md",
+      "exists": true
+    }
+  ]
+}

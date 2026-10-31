@@ -1,0 +1,13 @@
+$ /home/thao_nguyen/.local/share/heteroes-c4-cpu/runtimes/9a553d2dfae9/python/bin/python3.12 acceptance/probes/strict_phase_trace.py --gpu --model /home/thao_nguyen/.cache/heteroes-codex-frozen-perf-20261025-01/models/qwen --pairs 6 --out /tmp/heteroes-accept-ede4338ef54a-20261101-035704/results/strict-phase-trace/phase-trace.json
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 3212.36it/s]
+STRICT PHASE TRACE PASS
+  load             n= 1 mean=   1.719s peak= 0.928 GiB
+  engine           n= 1 mean=   0.860s peak= 0.929 GiB
+  cold:perturb     n= 2 mean=   0.776s peak= 1.129 GiB
+  cold:refresh     n= 2 mean=   0.000s peak= 1.074 GiB
+  cold:rollout     n= 2 mean=   2.365s peak= 1.225 GiB
+  cold:restore     n= 2 mean=   0.229s peak= 1.141 GiB
+  warm:perturb     n=10 mean=   0.778s peak= 1.143 GiB
+  warm:refresh     n=10 mean=   0.000s peak= 1.089 GiB
+  warm:rollout     n=10 mean=   0.570s peak= 1.224 GiB
+  warm:restore     n=10 mean=   0.217s peak= 1.151 GiB

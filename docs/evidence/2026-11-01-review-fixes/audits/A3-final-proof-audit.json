@@ -1,0 +1,13 @@
+{
+  "cpu": {
+    "byteEqual": true,
+    "sha256": "b0192028694112209ccfbf69fb520953856af5eda1418eb5a9df12680bffa07a",
+    "bytes": 316244
+  },
+  "cuda": {
+    "byteEqual": true,
+    "sha256": "59eab2ef0fd7660cb27c61d89c44468d52de11c2702ddd34f2dbe63aa788dd65",
+    "bytes": 353272
+  },
+  "frozenSourceUnchangedSince": "7908609c"
+}

@@ -1,0 +1,18 @@
+$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python scripts/mutation-check.py --repo runtime --copy src --copy pyproject.toml --copy tests/v3 --env PYTHONPATH=src:tests/v3 --env HETEROES_GPU_ACCEPTANCE=1 --scratch /home/pc5070ti/projects/heteroes/.scratch/accept/20261101-024559-local/mutation-int8-lora --mutants acceptance/mutants/int8-lora.json --test '/home/pc5070ti/miniforge3/envs/heteroes-match/bin/python -m pytest -q -x -p no:cacheprovider tests/v3/test_v3_int8_lora.py'
+control ok    | 12 passed in 16.39s
+killed       int8 decoder without a LoRA space | 1 failed, 4 passed in 1.91s
+killed       int8 decoder without a frozen base hash | 1 failed, 7 passed in 2.09s
+killed       frozen base with another decoder | 1 failed, 7 passed in 2.49s
+killed       no rank limit | 1 failed, 5 passed in 2.00s
+killed       fp32 allowed for the int8 decoder | 1 failed, 3 passed in 1.97s
+killed       base hash not compared | 1 failed, 2 passed in 1.94s
+killed       base hash ignores the names | 1 failed, 11 passed in 15.05s
+killed       prepare does not freeze | 1 failed, 2 passed in 1.92s
+killed       frozen model decoded as B22 | 1 failed, 9 passed in 2.29s
+killed       int8 chunks are the FP16 ones | 1 failed in 0.74s
+killed       lab bridge offers the int8 decoder | 1 failed, 8 passed in 2.10s
+killed       int8 decoder without the strict stop | 1 failed, 10 passed in 14.19s
+killed       frozen export allowed | 1 failed, 10 passed in 14.12s
+killed       plain LoRA documents gain the frozen key | 1 failed, 6 passed in 2.01s
+
+14 of 14 mutants killed.

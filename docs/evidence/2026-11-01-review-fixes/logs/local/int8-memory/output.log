@@ -1,0 +1,19 @@
+$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python acceptance/probes/int8_memory.py --gpu --model /home/pc5070ti/projects/heteroes/.scratch/strict-integer-20261025/models/qwen --out /home/pc5070ti/projects/heteroes/.scratch/accept/20261101-024559-local/int8-memory
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 7199.75it/s]
+{
+ "gpu": "NVIDIA GeForce RTX 5070 Ti",
+ "fp16ParameterMiBAfterFreeze": 268.130615234375,
+ "frozenProjectionFp16Parameters": [],
+ "load": {
+  "allocatedMiB": 610.9677734375,
+  "peakMiB": 952.7734375
+ },
+ "candidate": {
+  "peakMiB": 711.34912109375,
+  "allocatedMiB": 650.9677734375
+ },
+ "restoredExactly": true,
+ "frozenBaseSha256": "6e2ae8e99519d23dbf05fc143d127505c44051cf59c6e5cbdf38eeca8587097b",
+ "reward": 0.0
+}
+INT8 MEMORY OK
