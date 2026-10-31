@@ -12,13 +12,13 @@ The restore is NOT here: it stays the verified restore from the snapshot (`snaps
 """
 
 import math
-import numbers
 
 import numpy as np
 import torch
 
-from heteroes.es.checks import _check_param, _check_param_sigma
-from heteroes.es.update import UpdateReport, _check_coefficients
+from heteroes.es.checks import _check_param, _check_param_sigma, check_update_inputs
+from heteroes.es.update import UpdateReport, _check_coefficients, NonFiniteUpdateError
+from heteroes.noise.contracts import check_seed
 from heteroes.model.schema import ParameterSchema, resolve_tensors
 from heteroes.noise.cuda_engine import PIECE_ELEMENTS, TensorNoise, check_device
 
@@ -35,6 +35,7 @@ def perturb_model_cuda_(model: torch.nn.Module, schema: ParameterSchema, candida
     Perturb every tensor in place with the noise of the CUDA engine. Everything that can be checked is checked before the first write
     (as `perturb_model_`); a failure while writing (for example out of memory) leaves the model half perturbed, so the caller restores.
     """
+    check_seed(candidate_seed)
     tensors = resolve_tensors(model, schema)
     for tensor in tensors:
         _check_param_sigma(tensor, sigma)
@@ -62,30 +63,17 @@ def apply_coefficients_cuda_(
         _check_param(tensor)
     _check_cuda(tensors)
     z_rewards = _check_coefficients(coefficients)
-    if not math.isfinite(alpha):
-        raise ValueError("alpha must not be Nan/Inf")
-    if len(candidate_seeds) != len(z_rewards):
-        raise ValueError("length candidate_seeds != lenght rewards")
-    for seed in candidate_seeds:
-        if not (isinstance(seed, numbers.Integral) and not isinstance(seed, bool)):
-            raise TypeError("seed must be in int or np.int")
-    if len(set(candidate_seeds)) != len(candidate_seeds):
-        raise ValueError("seed being duplicated")
     total_numel = sum(t.numel() for t in tensors)
-    if not z_rewards.any():
-        return UpdateReport(
-            noop=True,
-            coefficients=(0.0,) * len(z_rewards),
-            requested_l2=0.0,
-            applied_l2=0.0,
-            changed=0,
-            numel=total_numel,
-        )
+    noop = check_update_inputs(candidate_seeds, z_rewards, alpha, total_numel)
+    if noop is not None:
+        return noop
 
     schema_hash = schema.hash
     n_seeds = len(candidate_seeds)
     alpha32 = float(np.float32(alpha))
+    inv_n32 = float(np.float32(1) / np.float32(n_seeds))
     changed_parts, requested_parts, applied_parts = [], [], []
+    finite_parts = []
     with torch.no_grad():
         for entry, tensor in zip(schema.entries, tensors, strict=True):
             flat = tensor.view(-1)
@@ -102,13 +90,16 @@ def apply_coefficients_cuda_(
                     eps = stream.next(count).to(torch.float32)
                     term = eps * float(zi)
                     acc = acc + term
-                direction = acc / n_seeds
+                direction = acc * inv_n32
                 update = direction * alpha32
                 new = (chunk.to(torch.float32) + update).to(torch.float16)
+                finite_parts.append(torch.isfinite(new).all())
                 changed_parts.append((new.view(torch.int16) != chunk.view(torch.int16)).sum())
                 requested_parts.append((update.double() ** 2).sum())
                 applied_parts.append(((new.double() - chunk.double()) ** 2).sum())
                 chunk.copy_(new)
+        if finite_parts and not torch.stack(finite_parts).all().item():
+            raise NonFiniteUpdateError("updated weights must be finite; model must be restored from checkpoint")
         changed = sum(int(v) for v in torch.stack(changed_parts).tolist())
         requested_l2 = math.sqrt(sum(float(v) for v in torch.stack(requested_parts).tolist()))
         applied_l2 = math.sqrt(sum(float(v) for v in torch.stack(applied_parts).tolist()))

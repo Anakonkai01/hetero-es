@@ -18,6 +18,30 @@ from heteroes.noise.engine_v2 import derive_chunk_seed, generate_chunk_noise
 GPU = pytest.mark.skipif(not torch.cuda.is_available(), reason="needs a CUDA GPU")
 
 
+@pytest.mark.parametrize("raises", [False, True])
+def test_failed_gpu_selftest_warns_once_and_reports_cpu_fallback(monkeypatch, caplog, raises):
+    device = torch.device("cuda:97")  # no device allocation: the self-test is injected.
+    monkeypatch.delenv(engine_v2_cuda.ENV_DEVICE, raising=False)
+    monkeypatch.setattr(engine_v2_cuda, "_verified", {})
+    calls = []
+
+    def broken(device):
+        calls.append(device)
+        if raises:
+            raise RuntimeError("synthetic selftest error")
+        return False
+
+    monkeypatch.setattr(engine_v2_cuda, "selftest", broken)
+    assert engine_v2_cuda.enabled(device) is False
+    assert engine_v2_cuda.enabled(device) is False
+    status = engine_v2_cuda.runtime_status(device)
+    assert status["noiseEngineGpu"] is False
+    assert status["noiseEngineGpuReason"]
+    warnings = [r for r in caplog.records if "noise" in r.message.lower()]
+    assert len(warnings) == 1
+    assert len(calls) == 1
+
+
 def xsl_rr(state):
     hi, lo = state >> 64, state & (2**64 - 1)
     x, r = hi ^ lo, hi >> 58

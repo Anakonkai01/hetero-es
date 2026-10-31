@@ -153,7 +153,9 @@ SELECT c.experiment_id, c.generation, g.recipe_hash, g.parent_weights_sha256, c.
        r.attempt_number, r.reward, r.committed_at,
        (SELECT COUNT(*) FROM attempt AS a WHERE a.candidate_id = c.candidate_id
         AND COALESCE(a.failure_kind, '') != 'RESTORE_MISMATCH'
-        AND a.worker_id NOT IN (SELECT worker_id FROM quarantine)),
+        AND a.worker_id NOT IN (SELECT worker_id FROM quarantine)
+        AND NOT EXISTS (SELECT 1 FROM attempt_exemption AS e
+                        WHERE e.candidate_id = a.candidate_id AND e.attempt_number = a.attempt_number)),
        (SELECT CASE WHEN a.failure_kind IS NULL THEN NULL ELSE a.worker_id END FROM attempt AS a
         WHERE a.candidate_id = c.candidate_id ORDER BY a.attempt_number DESC LIMIT 1)
 FROM candidate AS c JOIN generation AS g USING (experiment_id, generation)
@@ -529,6 +531,12 @@ class Ledger:
                 "CREATE TABLE IF NOT EXISTS completion_chunk(candidate_id TEXT NOT NULL PRIMARY KEY "
                 "REFERENCES completion (candidate_id), chunk INTEGER NOT NULL CHECK (chunk >= 1))"
             )
+            # Additive migration: old schema-6 ledgers still resume. Only released quarantined workers add exemptions.
+            self._db.execute(
+                "CREATE TABLE IF NOT EXISTS attempt_exemption(candidate_id TEXT NOT NULL, attempt_number INTEGER NOT NULL, "
+                "PRIMARY KEY(candidate_id, attempt_number), FOREIGN KEY(candidate_id, attempt_number) "
+                "REFERENCES attempt(candidate_id, attempt_number))"
+            )
         except BaseException:
             self._db.close()
             raise
@@ -784,7 +792,9 @@ class Ledger:
         """The attempts that count against the retry budget (see `CandidateRecord.charged_attempts`)."""
         return self._db.execute(
             "SELECT COUNT(*) FROM attempt AS a WHERE a.candidate_id = ? AND COALESCE(a.failure_kind, '') != 'RESTORE_MISMATCH' "
-            "AND a.worker_id NOT IN (SELECT worker_id FROM quarantine)",
+            "AND a.worker_id NOT IN (SELECT worker_id FROM quarantine) "
+            "AND NOT EXISTS (SELECT 1 FROM attempt_exemption AS e "
+            "WHERE e.candidate_id = a.candidate_id AND e.attempt_number = a.attempt_number)",
             (candidate_id,),
         ).fetchone()[0]
 
@@ -1063,6 +1073,7 @@ class Ledger:
         if type(effective_generation) is not int or effective_generation < 0:
             raise LedgerError("the effective generation is a whole number of at least 0")
         with self._db:
+            self._db.execute("BEGIN IMMEDIATE")
             row = self._db.execute(
                 "SELECT worker_id, action, effective_generation, actor FROM membership "
                 "WHERE experiment_id = ? AND change_id = ?",
@@ -1111,13 +1122,29 @@ class Ledger:
 
     @_locked
     def release_worker(self, worker_id: str) -> None:
-        """Take a worker out of quarantine. A human does this, after dealing with the worker; nothing calls it by itself."""
+        """Release a worker after human intervention; its previously exempt attempts stay exempt from retry budgets."""
         if not isinstance(worker_id, str):
             raise TypeError(f"worker_id must be a string, got {type(worker_id).__name__}")
         with self._db:
+            self._db.execute("BEGIN IMMEDIATE")
+            self._db.execute(
+                "INSERT OR IGNORE INTO attempt_exemption(candidate_id, attempt_number) "
+                "SELECT candidate_id, attempt_number FROM attempt WHERE worker_id = ? "
+                "AND worker_id IN (SELECT worker_id FROM quarantine)",
+                (worker_id,),
+            )
             released = self._db.execute("DELETE FROM quarantine WHERE worker_id = ?", (worker_id,)).rowcount
             if released == 0:
                 raise LedgerError(f"worker {worker_id} is not quarantined")
+
+    @_locked
+    def count_audits(self, experiment_id: str, generation: int) -> int:
+        """Read-only audit count scoped to one experiment generation."""
+        return self._db.execute(
+            "SELECT COUNT(*) FROM audit AS a JOIN candidate AS c ON c.candidate_id = a.candidate_id "
+            "WHERE c.experiment_id = ? AND c.generation = ?",
+            (experiment_id, generation),
+        ).fetchone()[0]
 
     @_locked
     def get_completions(self, candidate_id: str) -> tuple[str, list[str]] | None:

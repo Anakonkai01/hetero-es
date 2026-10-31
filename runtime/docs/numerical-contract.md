@@ -557,3 +557,23 @@ The evaluation backend of a new Recipe v3 GPU run. This contract does not restat
 - **Failures are never rewards.** Over the memory budget is `OUT_OF_MEMORY`; a transport timeout is an infrastructure failure; a non-finite or out-of-domain value is a candidate failure reported with its message, never reward 0.
 - **Audit.** A strict audit text mismatch stops the run before the next update (`audit-state-v1.md`); historical decoders keep the three-mismatch policy.
 - **`strict_int8_lora_v1`** (frozen int8 base with FP16 LoRA adapters, ADR-014) is standalone/SDK only; the lab does not offer it.
+
+## Review safety amendment (2026-10-31)
+
+The owner authorized the reviewed frozen-region corrections under P-FROZEN. Valid finite numerical inputs keep the
+same byte outputs. Candidate seeds and chunk indices must be nonnegative integers, excluding bool, float and string;
+engine-level seeds retain no 2^53 bound (that bound belongs to manifests). Update alpha must remain finite after the
+float32 conversion, checked before writes. Both update implementations explicitly multiply by the float32 reciprocal
+of candidate count. Shared checks preserve existing validation errors except newly rejected invalid inputs.
+
+`NonFiniteUpdateError` reports overflowed updated FP16 weights. CPU checks each chunk before writing it; GPU checks
+collect device-side finite flags and synchronize their aggregate once at the end. Such a failure can leave a partially
+written model and must not mark the generation record applied. The coordinator becomes unusable; restart from checkpoint
+and the stored write-ahead record. The tested Qwen/32-candidate v2 update overhead is 0.71%, below the approved 1% cap.
+GPU noise self-test fallback is logged once per device and exposed as `noiseEngineGpu` / `noiseEngineGpuReason`.
+
+Ledger correction A-014 deliberately fixes the release transition: attempts exempt because their worker was quarantined
+remain exempt after release; later attempts count normally. This authorized state correction is distinct from numerical
+byte identity. An additive `attempt_exemption` table preserves old schema-6 ledgers; traces without release keep their
+prior states. A-013 serializes membership check-and-insert with BEGIN IMMEDIATE. A-016 exposes scoped read-only audit counts.
+Evidence is indexed in `docs/EVIDENCE-INDEX.md` at the repository root.

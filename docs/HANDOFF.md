@@ -82,7 +82,10 @@ GPU or heavy CPU work runs.
   Evidence `2026-10-31-review-network`.
 - A2 (A-004/A-015/A-017/A-019) xong: 253 passed / 5 skipped; mutation 16/16 killed. A-008/A-016 chuyển cùng A3
   vì có sửa vùng đóng băng. Dấu vân tay trước sửa đã ghi trên CPU và 5070 Ti; A-002 cũng đã so n=1..4096 trên 3060,
-  không có bit lệch. WSL cần cả thư mục driver đứng trước `/usr/lib/wsl/lib`, như `acceptance/hosts.py`. Đang làm A3.
+  không có bit lệch. WSL cần cả thư mục driver đứng trước `/usr/lib/wsl/lib`, như `acceptance/hosts.py`.
+- A3 đã sửa + kiểm local: JSON before/after CPU (576 mục) và GPU (694 mục) giống từng byte. CPU 1 977 passed;
+  mutation 16/16 killed. Qwen update chậm hơn 0,71% nên giữ kiểm finite. Ledger cũ đã mở lại và thử release theo A-014.
+  Còn nghiệm thu noise/ES/Qwen trên ba môi trường ở A6. Đang chốt A4 và tài liệu A5.
 
 ## Việc của chủ dự án
 

@@ -1,32 +1,26 @@
 from heteroes.model.schema import ParameterSchema, resolve_tensors
-from heteroes.es.checks import _check_param
+from heteroes.es.checks import (
+    _check_param,
+    _check_coefficients,
+    check_update_inputs,
+    UpdateReport,
+    NonFiniteUpdateError,
+)
 from heteroes.noise.engine import num_chunks, generate_chunk_noise, chunk_length, generator_for_engine
 from heteroes.noise.contracts import ParameterNoiseAddress, DEFAULT_CHUNK_ELEMENTS, ENGINE_VERSION, ENGINE_V2
 from heteroes.noise import engine_v2_cuda
 from heteroes.es import perturb as _perturb
 from heteroes.noise.parallel import ordered_map, noise_threads
 
-from dataclasses import dataclass
 import math
 import torch
 import torch.nn as nn
 import numpy as np
-import numbers
 
 
 DEFAULT_ETA = 1e-9
 # engine v2 on the GPU: the noise of this many candidates is made in one launch (memory about 12 bytes per element)
 SEEDS_PER_LAUNCH = 4
-
-
-@dataclass(frozen=True)
-class UpdateReport:
-    noop: bool  # no operations
-    coefficients: tuple[float, ...]
-    requested_l2: float
-    applied_l2: float
-    changed: int
-    numel: int
 
 
 def standardize_rewards(rewards, eta=DEFAULT_ETA) -> np.ndarray:
@@ -53,25 +47,6 @@ def standardize_rewards(rewards, eta=DEFAULT_ETA) -> np.ndarray:
     z = (rewards - mean_r) / (std_r + np.float64(eta))
 
     return z.astype(np.float32)
-
-
-def _check_coefficients(coefficients) -> np.ndarray:
-    # the coefficients of a generation record: a vector of finite numbers that are exactly float32 values
-    array = np.asarray(coefficients)
-    if array.dtype.kind not in "iuf":
-        raise TypeError(f"coefficients must be real numbers, got {array.dtype}")
-    if array.ndim != 1:
-        raise ValueError("coefficients must be a 1-d vector")
-    if array.size == 0:
-        raise ValueError("coefficients must not be empty")
-    array = array.astype(np.float64)
-    if not np.isfinite(array).all():
-        raise ValueError("coefficients has a value that is Nan/Inf")
-    with np.errstate(over="ignore"):
-        as_float32 = array.astype(np.float32)
-    if not np.array_equal(as_float32.astype(np.float64), array):
-        raise ValueError("every coefficient must be exactly a float32 value (it would be rounded in silence)")
-    return as_float32
 
 
 def apply_coefficients_(
@@ -131,38 +106,9 @@ def _apply_coefficients(
     generate = generate_chunk_noise if engine == ENGINE_VERSION else generator_for_engine(engine)
     total_numel = sum(t.numel() for t in tensors)
 
-    # check alpha
-    if not math.isfinite(alpha):
-        raise ValueError("alpha must not be Nan/Inf")
-
-    # check chunks
-    if not chunk_elements >= 1:
-        raise ValueError("chunk_elements must be >=1")
-
-    # check len candidate
-    if len(candidate_seeds) != len(z_rewards):
-        raise ValueError("length candidate_seeds != lenght rewards")
-
-    # check seed
-    for seed in candidate_seeds:
-        # check if seed is int or np.int
-        if not (isinstance(seed, numbers.Integral) and not isinstance(seed, bool)):
-            raise TypeError("seed must be in int or np.int")
-
-    # check duplicated seed
-    if len(set(candidate_seeds)) != len(candidate_seeds):
-        raise ValueError("seed being duplicated")
-
-    # check zero array, mean no signal
-    if not z_rewards.any():
-        return UpdateReport(
-            noop=True,
-            coefficients=(0.0,) * len(z_rewards),
-            requested_l2=0.0,
-            applied_l2=0.0,
-            changed=0,
-            numel=total_numel,
-        )
+    noop = check_update_inputs(candidate_seeds, z_rewards, alpha, total_numel, chunk_elements)
+    if noop is not None:
+        return noop
 
     schema_hash = schema.hash
     n_seeds = len(candidate_seeds)
@@ -200,6 +146,7 @@ def _apply_coefficients(
 
     # The three statistics of a piece stay on the device and are read once at the end (one sync instead of three per chunk).
     changed_parts, requested_parts, applied_parts = [], [], []
+    finite_parts = []
     with torch.no_grad():
         for entry, tensor in zip(schema.entries, tensors):
             numel = tensor.numel()
@@ -244,11 +191,15 @@ def _apply_coefficients(
                     term = eps * float(zi)
                     acc = acc + term
 
-                # divide by N as CUDA's division by a scalar does: multiply by the float32 reciprocal. The same bits on
-                # every device (a CPU-only coordinator included); GPU results are unchanged. Owner decision 2026-10-20.
+                # Explicit float32 reciprocal on every device; never rely on a framework's scalar-division lowering.
                 direction = acc * float(np.float32(1) / np.float32(n_seeds))
                 update = direction * float(np.float32(alpha))
                 new = (chunk.to(torch.float32) + update).to(torch.float16)
+                finite = torch.isfinite(new).all()
+                if tensor.is_cuda:
+                    finite_parts.append(finite)
+                elif not finite.item():
+                    raise NonFiniteUpdateError("updated weights must be finite")
                 # compare
 
                 changed_parts.append((new.view(torch.int16) != chunk.view(torch.int16)).sum())
@@ -257,6 +208,8 @@ def _apply_coefficients(
 
                 chunk.copy_(new)
 
+        if finite_parts and not torch.stack(finite_parts).all().item():
+            raise NonFiniteUpdateError("updated weights must be finite; model must be restored from checkpoint")
         changed = 0
         requested_l2 = 0.0
         applied_l2 = 0.0

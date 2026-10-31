@@ -18,6 +18,7 @@ HETEROES_NOISE_DEVICE=cpu turns the path off (the CPU engine is then used everyw
 
 import os
 import threading
+import logging
 
 import numpy as np
 
@@ -46,6 +47,9 @@ _lock = threading.Lock()
 _kernel = None
 _tables = {}  # (device, words) -> (a_lo, a_hi, b_lo, b_hi, thresholds)
 _verified = {}  # device -> bool
+_failures = {}  # device -> public diagnostic (exception type only)
+_verification_lock = threading.Lock()
+_log = logging.getLogger(__name__)
 
 
 def _signed(values):
@@ -137,8 +141,26 @@ def enabled(device) -> bool:
         return False
     key = str(device)
     if key not in _verified:
-        try:
-            _verified[key] = selftest(device)
-        except Exception:  # no NVRTC, a driver without jiterator support: the CPU engine makes the same bits
-            _verified[key] = False
+        with _verification_lock:
+            if key not in _verified:
+                reason = "GPU self-test bit mismatch"
+                try:
+                    verified = selftest(device)
+                except Exception as error:  # CPU fallback has the same numerical law; expose why it is slower.
+                    verified = False
+                    reason = f"GPU self-test raised {type(error).__name__}"
+                _verified[key] = verified
+                if not verified:
+                    _failures[key] = reason
+                    _log.warning("Noise engine v2 on %s fell back to CPU: %s", key, reason)
     return _verified[key]
+
+
+def runtime_status(device):
+    active = enabled(device)
+    reason = None
+    if not active:
+        reason = _failures.get(str(device)) or (
+            "disabled by HETEROES_NOISE_DEVICE=cpu" if os.environ.get(ENV_DEVICE, "").lower() == "cpu" else "CPU device"
+        )
+    return {"noiseEngineGpu": active, "noiseEngineGpuReason": reason}

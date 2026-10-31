@@ -208,6 +208,21 @@ def test_recover_rehashes_the_actual_model_instead_of_trusting_cached_parent(wor
     assert final_hash(coordinator) == world.oracle(1)
 
 
+def test_overflowed_update_aborts_run_without_marking_applied(world):
+    coordinator = world.coordinator()
+    coordinator.alpha = 1e38  # finite float32, but the resulting FP16 weights overflow.
+    halt, _ = world.workers(coordinator)
+    try:
+        with pytest.raises(CoordinatorError, match="non-finite model update"):
+            coordinator.run(1)
+    finally:
+        halt()
+    assert coordinator.ledger.get_update("exp", 0).child_weights_sha256 is None
+    assert HttpClient(coordinator.url).get_json("/v1/job")["job"]["state"] == "ABORTED"
+    with pytest.raises(CoordinatorError, match="new Coordinator.*checkpoint"):
+        coordinator.recover()
+
+
 # ---------------------------------------------------------------------------
 # where a restarted coordinator finds itself
 # ---------------------------------------------------------------------------

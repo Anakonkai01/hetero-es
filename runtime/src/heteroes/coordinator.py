@@ -26,7 +26,7 @@ from pathlib import Path
 
 from heteroes.dispatch import Greedy
 from heteroes.es.cuda_ops import apply_coefficients_cuda_
-from heteroes.es.update import apply_coefficients_
+from heteroes.es.update import NonFiniteUpdateError, apply_coefficients_
 from heteroes.noise.contracts import CUDA_ENGINE_VERSION
 from heteroes.eval.candidate import model_weights_sha256
 from heteroes.generation_record import GenerationRecord
@@ -409,7 +409,10 @@ class Coordinator:
         # Any failure after the first write leaves unknown model bytes. Only a new object loaded from a checkpoint
         # may replay the write-ahead record; never reuse this object after an interrupted application.
         self._dirty = True
-        report = self._apply_record_unchecked(record)
+        try:
+            report = self._apply_record_unchecked(record)
+        except NonFiniteUpdateError as error:
+            raise CoordinatorError(f"non-finite model update: {error}") from error
         self._dirty = False
         return report
 
@@ -674,11 +677,7 @@ class Coordinator:
             try:
                 self._usage_sink.flush(self._usage_flush_seconds)
                 self.usage.record_update(generation, update_gpu_seconds)
-                with self.ledger._lock:
-                    audits = self.ledger._db.execute(
-                        "SELECT count(*) FROM audit JOIN candidate USING(candidate_id) WHERE generation=?",
-                        (generation,),
-                    ).fetchone()[0]
+                audits = self.ledger.count_audits(self.experiment_id, generation)
                 summary["usage"] = self.usage.summary(
                     generation, expected_candidates=self.candidates, expected_audits=audits, expected_updates=1
                 )

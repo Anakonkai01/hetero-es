@@ -56,6 +56,9 @@ def environment_info(device: str) -> dict:
         info["gpu_capability"] = [properties.major, properties.minor]
         info["gpu_total_memory_bytes"] = properties.total_memory
         info["nvidia_driver"] = _run(["nvidia-smi", "--query-gpu=driver_version", "--format=csv,noheader"])
+    from heteroes.noise.engine_v2_cuda import runtime_status
+
+    info.update(runtime_status(torch.device(device)))
     return info
 
 

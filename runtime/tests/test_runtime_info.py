@@ -13,6 +13,14 @@ def test_the_environment_says_where_and_with_what_a_run_happened():
     json.dumps(info)
 
 
+def test_environment_includes_noise_fallback_diagnostics(monkeypatch):
+    from heteroes.noise import engine_v2_cuda
+
+    expected = {"noiseEngineGpu": False, "noiseEngineGpuReason": "injected fallback"}
+    monkeypatch.setattr(engine_v2_cuda, "runtime_status", lambda device: expected)
+    assert environment_info("cpu").items() >= expected.items()
+
+
 def test_the_code_is_identified_by_its_commit_and_whether_the_tree_is_dirty():
     info = code_info()
 

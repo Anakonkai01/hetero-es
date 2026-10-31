@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import numbers
 
 
 ENGINE_VERSION = "numpy_pcg64_normal_f32_to_f16_v1"
@@ -22,6 +23,13 @@ CPU_NOISE_FINGERPRINTS = {
 KNOWN_ENGINES = (*CPU_ENGINES, CUDA_ENGINE_VERSION)
 
 
+def check_seed(seed):
+    if not (isinstance(seed, numbers.Integral) and not isinstance(seed, bool)):
+        raise TypeError("seed must be in int or np.int")
+    if seed < 0:
+        raise ValueError("seed must be >= 0")
+
+
 @dataclass(frozen=True)
 class ChunkNoiseAddress:
     # fmt: off
@@ -39,6 +47,13 @@ class ChunkNoiseAddress:
     parameter_index: int
     chunk_index: int
     chunk_elements: int
+
+    def __post_init__(self):
+        check_seed(self.candidate_seed)
+        if not isinstance(self.chunk_index, numbers.Integral) or isinstance(self.chunk_index, bool):
+            raise TypeError("chunk_index must be an integer")
+        if self.chunk_index < 0:
+            raise ValueError("chunk_index must >= 0")
 
 
 @dataclass(frozen=True)

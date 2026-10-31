@@ -84,3 +84,11 @@ All files in `artifacts/probes/2026-09-29/` (copied unchanged from the original 
 | `noiseengine_5070ti.json`, `noiseengine_1660s.json` | NoiseEngine v1 sampled mode: global hash `f9a9baaf…7140` on both |
 | `noiseengine_5070ti_full.json`, `noiseengine_1660s_full.json` | NoiseEngine v1 full mode, 290 tensors / 494,032,768 elements / 2,105 chunks: global hash `816c1530…dafda` on both, every chunk hash equal |
 | `heteroes_compat_probe.py`, `heteroes_noiseengine_probe.py` | The scripts that produced the above |
+
+## Review amendment — 2026-10-31
+
+P-FROZEN review preserves v1/v2 byte identities for valid inputs, including unbounded engine integer seeds. Invalid
+boolean/noninteger/negative seeds and chunk indices are rejected. CUDA update division now explicitly uses the same
+float32 reciprocal as CPU; 8,192 random values for every n=1..4096 matched the previous division on both RTX 5070 Ti
+and RTX 3060 with torch 2.13.0+cu132. GPU v2 self-test failure warns once and reports CPU fallback in runtime metadata.
+See the review safety amendment in the numerical contract and the dated frozen-fixes evidence for exact changed lines.

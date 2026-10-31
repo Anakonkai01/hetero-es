@@ -1,6 +1,7 @@
 from heteroes.noise.contracts import ParameterNoiseAddress, DEFAULT_CHUNK_ELEMENTS, ENGINE_VERSION, ENGINE_V2
 from heteroes.noise.engine import iter_parameter_noise_chunks, generator_for_engine, num_chunks, chunk_length
 from heteroes.noise import engine_v2_cuda
+from heteroes.noise.contracts import check_seed
 from heteroes.model.schema import ParameterSchema, resolve_tensors
 from heteroes.es.checks import _check_param_sigma, SUPPORT_DTYPE
 import math
@@ -116,6 +117,7 @@ def perturb_model_(
         TypeError / ValueError: a tensor is not contiguous FP16, or sigma is NaN/Inf.
     """
 
+    check_seed(candidate_seed)
     generator_for_engine(engine)
     # resolve tensor
     tensors = resolve_tensors(model, schema)

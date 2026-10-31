@@ -111,3 +111,13 @@ An audit of G2 to G5 read the code and the evidence and found the following, eac
 10. **Dispatch.** `Greedy` (B3) does not hand a candidate straight back to the worker whose latest attempt on it failed while another worker is around (`CandidateRecord.last_failed_worker`; it waits at most `patience` asks, the other worker may be gone); `AdmittedOnly` refuses an empty or malformed set. B1 and B2 keep their definition (a baseline does not steal): their dead-worker case is now an error by the stall rule above, no longer an endless wait. **B4 `GreedyTail`** (new): greedy, but a worker W is told to wait while the other workers that are alive would finish the waiting candidates sooner than W would finish one (`(ceil(p / m) + 1) * d_fastest < margin * d_W`, with `p` candidates waiting and `m` other workers alive), so a slow GPU works at the start of a generation and does not hold the last candidate. It learns the durations from the committed results (`WorkerAPI` calls `policy.committed(candidate_id)` after a COMMITTED, never after a repeat) in a `SpeedBook` shared by the generations; a worker whose speed is unknown takes work, a worker silent for `active_window` seconds is not waited for. It changes only WHO gets a candidate and when, never what is committed.
 
 **Not done:** the kill of a coordinator is simulated by a second `Coordinator` object on the same files (the ledger file and the weights directory), not by killing a process in the middle of a SQLite transaction; the failure campaign on the two machines (`scripts/failure_campaign.py`) kills real processes, its results are in the STATUS. Worker ids are still free strings. No schema migration (version 5).
+
+## Review amendment — 2026-10-31
+
+A worker release does not retroactively charge attempts that were exempt while it was quarantined. On release, the
+ledger records those (candidate_id, attempt_number) pairs in `attempt_exemption` in the same BEGIN IMMEDIATE transaction
+as removing quarantine. Future attempts by that worker count normally. Opening an older schema-6 file creates the
+additive table; files with no release retain their old retry counts. This is the explicitly authorized A-014 correction.
+Membership check-and-insert now also starts with BEGIN IMMEDIATE, so identical requests through separate connections
+return True then False. `count_audits(experiment_id, generation)` is a public read-only query, scoped to both identifiers.
+An interrupted coordinator update must be replayed by a new Coordinator from checkpoint, never by the dirty object.

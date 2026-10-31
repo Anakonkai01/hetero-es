@@ -448,25 +448,7 @@ class WorkerAPI:
             raise LedgerError(
                 "this coordinator scores texts: submit completions" if self._scorer else "submit a reward, not texts"
             )
-        if texts:
-            from heteroes.v3.scoring import ScorerError
-
-            # a stale or foreign report is refused before the experiment's scorer spends any time on it
-            worker = self._ledger.attempt_worker(descriptor, attempt_number, token)
-            try:
-                reward = self._scorer(descriptor, payload)
-            except ScorerError as error:
-                self.scoring_error = str(error)
-                raise ScoringFailedError(str(error)) from error
-            chunk = getattr(payload, "chunk", None)
-            if chunk is not None and chunk not in self.allowed_chunks:
-                raise LedgerError(f"chunk {chunk} is not one the recipe allows {self.allowed_chunks}")
-            outcome = self._ledger.submit_result(
-                descriptor, attempt_number, token, reward, completions=payload, chunk=chunk
-            )
-            self.record_usage(descriptor, attempt_number, worker, getattr(payload, "usage", None), "candidate")
-        else:
-            outcome = self._ledger.submit_result(descriptor, attempt_number, token, payload)
+        outcome = self._ledger.submit_result(descriptor, attempt_number, token, payload)
         if outcome is SubmitOutcome.COMMITTED and hasattr(self._policy, "committed"):
             self._policy.committed(descriptor.candidate_id)  # a policy may learn from the duration (GreedyTail)
         self.activity += 1
