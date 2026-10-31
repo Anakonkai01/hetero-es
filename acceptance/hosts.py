@@ -22,7 +22,7 @@ WSL = Host(
     env={"LD_LIBRARY_PATH": "/usr/lib/wsl/drivers/nv_dispi.inf_amd64_feedb8c0271ca811:/usr/lib/wsl/lib"},
     extra_path="/tmp/heteroes-codex-testdeps-20261027-01",  # pytest and friends, outside the runtime
     pytest_marks="not sm120",
-    pytest_min_passed={"strict-gpu-suite": 1557},  # 1,636 collected minus 79 SM120-specific execution cases
+    pytest_min_passed={"strict-gpu-suite": 1560},  # 1,639 collected minus 79 SM120-specific execution cases
 )
 
 NATIVE_ROOT = r"C:\Users\Thao Nguyen\.cache\heteroes-native-strict-20261025-01"

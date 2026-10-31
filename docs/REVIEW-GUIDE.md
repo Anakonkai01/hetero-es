@@ -24,21 +24,21 @@ nghiên cứu đăng ký và tùy chỉnh được.
 
 ## 2. Bản đồ module (số dòng không tính test, đếm ngày 2026-10-28)
 
-| Thư mục | File | Dòng | Vai trò |
-| --- | ---: | ---: | --- |
-| `runtime/src/heteroes/strict/` | 21 | 8 835 | Engine strict: số học tham chiếu, plan số nguyên B22, kernel NVRTC (prefill/decode, TMA, attention), các decoder, int8 đóng băng + LoRA |
-| `runtime/src/heteroes/eval/` | 10 | 1 010 | Đánh giá chung: workload, sinh văn bản HF, compact decode, chấm điểm candidate, đo theo pha |
-| `runtime/src/heteroes/noise/` | 10 | 3 037 | Engine nhiễu chuẩn (CPU PCG64, v2 số nguyên) và bản CUDA |
-| `runtime/src/heteroes/es/` | 6 | 690 | Nhiễu loạn, snapshot/khôi phục, cập nhật ES |
-| `runtime/src/heteroes/ledger/` | 2 | 1 367 | Sổ cái SQLite: candidate, attempt, lease |
-| `runtime/src/heteroes/v3/` | 22 | 4 719 | Recipe v3: CLI `heteroes`, run cục bộ/phân tán, kiểm toán, tracker, chấm điểm, dữ liệu |
-| `runtime/src/heteroes/product/` | 33 | 7 395 | Agent thiết bị, worker CLI Linux, giám sát run, phục hồi, telemetry, qualification |
-| `runtime/src/heteroes/model/`, `study/`, `demo/` | 20 | 2 993 | Nạp model/schema tham số, study, dashboard cho notebook nhà nghiên cứu |
-| `runtime/src/heteroes/*.py` | 23 | 5 487 | Coordinator, worker, transport HTTP, dispatch, manifest, SDK (`sdk.py`, `sdk_lab.py`) |
-| `backend/` | 44 | 7 741 | API FastAPI của lab: tài khoản, thiết bị, lập lịch, lưu trữ phục hồi, chính sách |
-| `frontend/src/` | 159 | 14 503 | Web UI (React) |
-| `desktop/`, `packages/product-ui/src/` | 30 | 6 811 | Ứng dụng Worker/Server (Electron) và UI dùng chung |
-| `acceptance/`, `scripts/` | 58 | 8 306 | `scripts/accept.py`, probe nghiệm thu, đóng gói, vận hành lab |
+| Thư mục                                          | File |   Dòng | Vai trò                                                                                                                                 |
+| ------------------------------------------------ | ---: | -----: | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `runtime/src/heteroes/strict/`                   |   21 |  8 835 | Engine strict: số học tham chiếu, plan số nguyên B22, kernel NVRTC (prefill/decode, TMA, attention), các decoder, int8 đóng băng + LoRA |
+| `runtime/src/heteroes/eval/`                     |   10 |  1 010 | Đánh giá chung: workload, sinh văn bản HF, compact decode, chấm điểm candidate, đo theo pha                                             |
+| `runtime/src/heteroes/noise/`                    |   10 |  3 037 | Engine nhiễu chuẩn (CPU PCG64, v2 số nguyên) và bản CUDA                                                                                |
+| `runtime/src/heteroes/es/`                       |    6 |    690 | Nhiễu loạn, snapshot/khôi phục, cập nhật ES                                                                                             |
+| `runtime/src/heteroes/ledger/`                   |    2 |  1 367 | Sổ cái SQLite: candidate, attempt, lease                                                                                                |
+| `runtime/src/heteroes/v3/`                       |   22 |  4 719 | Recipe v3: CLI `heteroes`, run cục bộ/phân tán, kiểm toán, tracker, chấm điểm, dữ liệu                                                  |
+| `runtime/src/heteroes/product/`                  |   33 |  7 395 | Agent thiết bị, worker CLI Linux, giám sát run, phục hồi, telemetry, qualification                                                      |
+| `runtime/src/heteroes/model/`, `study/`, `demo/` |   20 |  2 993 | Nạp model/schema tham số, study, dashboard cho notebook nhà nghiên cứu                                                                  |
+| `runtime/src/heteroes/*.py`                      |   23 |  5 487 | Coordinator, worker, transport HTTP, dispatch, manifest, SDK (`sdk.py`, `sdk_lab.py`)                                                   |
+| `backend/`                                       |   44 |  7 741 | API FastAPI của lab: tài khoản, thiết bị, lập lịch, lưu trữ phục hồi, chính sách                                                        |
+| `frontend/src/`                                  |  159 | 14 503 | Web UI (React)                                                                                                                          |
+| `desktop/`, `packages/product-ui/src/`           |   30 |  6 811 | Ứng dụng Worker/Server (Electron) và UI dùng chung                                                                                      |
+| `acceptance/`, `scripts/`                        |   58 |  8 306 | `scripts/accept.py`, probe nghiệm thu, đóng gói, vận hành lab                                                                           |
 
 Hai file lớn nhất là `strict/integer_cuda.py` (1 847 dòng) và `strict/strict_cuda.py` (1 661 dòng); phần lớn là chuỗi
 mã nguồn CUDA.
@@ -59,6 +59,7 @@ mã nguồn CUDA.
 
 ```bash
 python3 scripts/accept.py list                         # mọi kiểm tra và gate
+export ACCEPT_PYTHON="$HOME/miniforge3/envs/heteroes-match/bin/python"
 python3 scripts/accept.py run cpu                      # ~10 phút, không cần GPU (check-all + selftest)
 HETEROES_GPU_ACCEPTANCE=1 python3 scripts/accept.py run gpu perf faults package mutation --keep
 python3 scripts/accept.py report --write               # ghi docs/acceptance/STATUS-*.md
@@ -74,13 +75,13 @@ phép).
 Trạng thái trước refactor: tag cục bộ `archive/pre-refactor-2026-10` (commit `c33eb61e`; tag không được push). Lịch sử
 git của `main` vẫn chứa mọi file đã gỡ (`git show c33eb61e:<đường dẫn>`).
 
-| Commit | Thay đổi | Bằng chứng |
-| --- | --- | --- |
-| Refactor 1 | `docs/evidence` (223 thư mục, 11 079 file), `runtime/artifacts` (2 694), `docs/archive` (83) sang nhánh `evidence-archive`; `docs/EVIDENCE-INDEX.md` sinh từ nhánh đó | `git ls-tree -r` của nhánh bằng đúng của `c33eb61e` cho các đường dẫn đó; 15 fixture được chép giống hệt (`check-archive-fixtures.py`) |
-| Refactor 2 | Handoff cũ, kế hoạch human-review, ghi chú DeepSeek/vLLM, `HETEROES_LLM_MASTER/STATUS.md`, `runtime/docs/report`, `planning` sang nhánh lưu trữ | cùng blob, so `ls-tree` |
-| Refactor 3 | Gỡ thử nghiệm không chọn: decoder FP16 của hãng, view trọng số vLLM, probe SGLang/vLLM, công cụ benchmark/cluster/failure-campaign/sweep C1 (`admission`, `benchmark_stats`, `eval.diagnostics`), tầng demo GSM8K, 3 notebook khám phá, kèm test của chúng | đồ thị import AST từ các điểm vào thật: không điểm vào nào tới được các module này |
-| Refactor 4 | 20 module engine strict từ `heteroes/eval` sang gói `heteroes/strict` (giữ tên file) | AST mỗi module (bỏ dòng import) và các chuỗi dài (mã CUDA) có hash giống hệt trước/sau |
-| Refactor 5, 6 | Tách `worker_cli.py` (1 321 → 944 dòng: `downloads.py`, `worker_lab.py`, `worker_terminal.py`) và `agent.py` (1 086 → 942: `agent_protocol.py`) | mọi định nghĩa cấp cao có AST giống hệt ở file mới |
+| Commit        | Thay đổi                                                                                                                                                                                                                                                   | Bằng chứng                                                                                                                             |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Refactor 1    | `docs/evidence` (223 thư mục, 11 079 file), `runtime/artifacts` (2 694), `docs/archive` (83) sang nhánh `evidence-archive`; `docs/EVIDENCE-INDEX.md` sinh từ nhánh đó                                                                                      | `git ls-tree -r` của nhánh bằng đúng của `c33eb61e` cho các đường dẫn đó; 15 fixture được chép giống hệt (`check-archive-fixtures.py`) |
+| Refactor 2    | Handoff cũ, kế hoạch human-review, ghi chú DeepSeek/vLLM, `HETEROES_LLM_MASTER/STATUS.md`, `runtime/docs/report`, `planning` sang nhánh lưu trữ                                                                                                            | cùng blob, so `ls-tree`                                                                                                                |
+| Refactor 3    | Gỡ thử nghiệm không chọn: decoder FP16 của hãng, view trọng số vLLM, probe SGLang/vLLM, công cụ benchmark/cluster/failure-campaign/sweep C1 (`admission`, `benchmark_stats`, `eval.diagnostics`), tầng demo GSM8K, 3 notebook khám phá, kèm test của chúng | đồ thị import AST từ các điểm vào thật: không điểm vào nào tới được các module này                                                     |
+| Refactor 4    | 20 module engine strict từ `heteroes/eval` sang gói `heteroes/strict` (giữ tên file)                                                                                                                                                                       | AST mỗi module (bỏ dòng import) và các chuỗi dài (mã CUDA) có hash giống hệt trước/sau                                                 |
+| Refactor 5, 6 | Tách `worker_cli.py` (1 321 → 944 dòng: `downloads.py`, `worker_lab.py`, `worker_terminal.py`) và `agent.py` (1 086 → 942: `agent_protocol.py`)                                                                                                            | mọi định nghĩa cấp cao có AST giống hệt ở file mới                                                                                     |
 
 **Cố ý không làm, và lý do:**
 

@@ -19,12 +19,10 @@ from heteroes.eval.generate import EvalRecord, EvalResult
 from heteroes.eval.workload import EXAMPLES, workload_hash
 from heteroes.model.schema import build_parameter_schema, resolve_tensors
 from heteroes.noise.contracts import DEFAULT_CHUNK_ELEMENTS, ENGINE_VERSION
+from fp16_probe import recorded_fp16_evaluation
 
 DEVICES = ["cpu"] + (["cuda"] if torch.cuda.is_available() else [])
 SCRIPT = Path(__file__).resolve().parents[2] / "scripts" / "run_one_candidate.py"
-PROBE_JSON = (
-    Path(__file__).resolve().parents[1] / "fixtures/archive/runtime/artifacts/probes/2026-09-29/probe_5070ti.json"
-)
 
 
 class HalfToy(nn.Module):
@@ -407,10 +405,10 @@ def qwen():
 
 
 @needs_model
-def test_qwen_candidate_matches_all_the_recorded_evidence(qwen):
+def test_qwen_candidate_matches_its_gpu_recorded_evidence(qwen):
     model, tokenizer = qwen
     schema = build_parameter_schema(model)
-    recorded = json.loads(PROBE_JSON.read_text(encoding="utf-8"))["base_evaluation"]
+    recorded = recorded_fp16_evaluation(torch.cuda.get_device_name(next(model.parameters()).device))
 
     result = run_candidate(model, tokenizer, schema, seed=0, sigma=1e-3)
 

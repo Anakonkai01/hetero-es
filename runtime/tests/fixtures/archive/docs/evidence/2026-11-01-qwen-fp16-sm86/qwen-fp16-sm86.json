@@ -1,0 +1,132 @@
+{
+  "format": "heteroes-qwen-fp16-reference-v1",
+  "capturedAt": "2026-11-01",
+  "scope": "HF FP16 greedy arith16, RTX 3060 SM86; this is not strict cross-GPU identity or a learning result.",
+  "gpu": "NVIDIA GeForce RTX 3060",
+  "computeCapability": [
+    8,
+    6
+  ],
+  "python": "3.12.15",
+  "torch": "2.13.0+cu132",
+  "transformers": "5.17.0",
+  "workloadHash": "cad822bc1e65a9ec37d948e5415cff22c70f96500e2043e6299bbdd5cea0b8d5",
+  "modelFileSha256": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+  "base_evaluation": {
+    "mean_reward": 0.25,
+    "records": [
+      {
+        "question": "What is 17 + 24?",
+        "expected": 41,
+        "output_text": "41",
+        "prediction": 41,
+        "reward": 1.0
+      },
+      {
+        "question": "What is 6 * 8?",
+        "expected": 48,
+        "output_text": "48",
+        "prediction": 48,
+        "reward": 1.0
+      },
+      {
+        "question": "What is 91 - 37?",
+        "expected": 54,
+        "output_text": "54",
+        "prediction": 54,
+        "reward": 1.0
+      },
+      {
+        "question": "What is 12 * 13?",
+        "expected": 156,
+        "output_text": "156",
+        "prediction": 156,
+        "reward": 1.0
+      },
+      {
+        "question": "What is 137 * 46?",
+        "expected": 6302,
+        "output_text": "6292",
+        "prediction": 6292,
+        "reward": 0.0
+      },
+      {
+        "question": "What is 375 + 918 - 427?",
+        "expected": 866,
+        "output_text": "674",
+        "prediction": 674,
+        "reward": 0.0
+      },
+      {
+        "question": "What is 23 * 17 + 48?",
+        "expected": 439,
+        "output_text": "509",
+        "prediction": 509,
+        "reward": 0.0
+      },
+      {
+        "question": "What is (144 / 12) * 37?",
+        "expected": 444,
+        "output_text": "589",
+        "prediction": 589,
+        "reward": 0.0
+      },
+      {
+        "question": "What is 218 * 37?",
+        "expected": 8066,
+        "output_text": "7906",
+        "prediction": 7906,
+        "reward": 0.0
+      },
+      {
+        "question": "What is 84 * 19 - 76?",
+        "expected": 1520,
+        "output_text": "1302",
+        "prediction": 1302,
+        "reward": 0.0
+      },
+      {
+        "question": "What is 312 * 27 - 145?",
+        "expected": 8279,
+        "output_text": "8095",
+        "prediction": 8095,
+        "reward": 0.0
+      },
+      {
+        "question": "What is (73 + 29) * 18?",
+        "expected": 1836,
+        "output_text": "(73 + 29) * 18 = 10",
+        "prediction": 10,
+        "reward": 0.0
+      },
+      {
+        "question": "A shop has 48 boxes with 36 pens in each box. It sells 725 pens. How many pens remain?",
+        "expected": 1003,
+        "output_text": "To find out how many pens remain, we need to subtract the number of pens",
+        "prediction": null,
+        "reward": 0.0
+      },
+      {
+        "question": "A school buys 36 packs of notebooks with 24 notebooks per pack. It distributes 579 notebooks. How many remain?",
+        "expected": 285,
+        "output_text": "To determine how many notebooks remain, we need to follow these steps:\n\n1.",
+        "prediction": 1,
+        "reward": 0.0
+      },
+      {
+        "question": "A train travels 72 km per hour for 5 hours, then another 148 km. What is the total distance?",
+        "expected": 508,
+        "output_text": "To find the total distance traveled by the train, we need to calculate the distance",
+        "prediction": null,
+        "reward": 0.0
+      },
+      {
+        "question": "A factory makes 125 items per hour for 18 hours. 347 items are defective. How many usable items remain?",
+        "expected": 1903,
+        "output_text": "To find the number of usable items remaining, we need to follow these steps:",
+        "prediction": null,
+        "reward": 0.0
+      }
+    ]
+  }
+}

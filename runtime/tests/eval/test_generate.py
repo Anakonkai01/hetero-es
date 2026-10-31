@@ -1,7 +1,5 @@
 import hashlib
-import json
 import os
-from pathlib import Path
 
 import pytest
 import torch
@@ -9,11 +7,7 @@ import torch
 from heteroes.eval import generate as generate_module
 from heteroes.eval.generate import evaluate_model, generate_answer
 from heteroes.eval.workload import EXAMPLES, MAX_NEW_TOKENS
-
-PROBE_JSON = (
-    Path(__file__).resolve().parents[1] / "fixtures/archive/runtime/artifacts/probes/2026-09-29/probe_5070ti.json"
-)
-
+from fp16_probe import recorded_fp16_evaluation
 
 # ---------------------------------------------------------------------------
 # evaluate_model, with a fake generate_answer: no model needed (runs everywhere)
@@ -126,10 +120,10 @@ def weights_digest(model):
 
 
 @needs_model
-def test_base_model_reproduces_the_probe_outputs_text_for_text(qwen):
-    # The probe of 2026-09-29 recorded the output of the same model on the same questions.
+def test_base_model_reproduces_its_gpu_probe_outputs_text_for_text(qwen):
+    # HF FP16 is architecture-sensitive (contract section 15); each measured GPU keeps an exact reference.
     model, tokenizer = qwen
-    recorded = json.loads(PROBE_JSON.read_text(encoding="utf-8"))["base_evaluation"]
+    recorded = recorded_fp16_evaluation(torch.cuda.get_device_name(next(model.parameters()).device))
 
     result = evaluate_model(model, tokenizer)
 

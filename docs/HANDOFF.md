@@ -36,7 +36,7 @@ with [REVIEW-GUIDE.md](REVIEW-GUIDE.md).
 ## Known issues
 
 - Two strict workers in one process on one GPU fail during CUDA graph capture (`heteroes.v3 run --workers 2 --device
-  cuda`); the lab never uses that layout.
+cuda`); the lab never uses that layout.
 - M3.bookkeeping: the managed product runner's per-generation bookkeeping growth (1.7 s → 11 s over 600 generations,
   measured earlier) is not re-measured; the standalone strict soak is flat.
 - Disk: the owner cleaned old scratch, SGLang/vLLM environments, Omniverse caches and the 22 old coordinator run folders
@@ -95,9 +95,24 @@ GPU or heavy CPU work runs.
 - A-011 bổ sung: wrapper tạo bản sao model trong scratch mang tên revision đúng, giữ nguyên model gốc; 56 test candidate/
   generate có Qwen thật đã xanh. Đánh dấu đúng 79 ca kernel chỉ SM120: chạy đủ trên 5070 Ti, ghi deselected trên 3060.
   Bộ SM86 Linux còn 1 557 ca bắt buộc, native 956 ca; max_skipped=0. 51 selftest và mutation 6/6 xanh.
-  Evidence `2026-10-31-acceptance-gpu-matrix`. Cần CPU rồi toàn bộ GPU/perf/faults/package/mutation ở hash mới sau sửa harness này.
+  Evidence `2026-10-31-acceptance-gpu-matrix`. Đang chạy CPU/check-all sau sửa harness: commit `570b4b90`,
+  source `src-c0d90ddb…`, log `.scratch/review-2026-11/A6-cpu-matrix-final.log`. Sau đó chạy đủ GPU/perf/faults/package/mutation.
 - Phụ thuộc pytest/hypothesis/simpy của 3060 đã cài lại vào `/tmp/heteroes-codex-testdeps-20261027-01`.
-  Phép chia/nhân nghịch đảo đã kiểm thêm Windows: n=1..4096, không có bit lệch. A chưa merge/push; B/C chưa bắt đầu.
+  Phép chia/nhân nghịch đảo đã kiểm thêm Windows: n=1..4096, không có bit lệch.
+  Đã mở SSH giữ WSL và yêu cầu Windows thức tạm thời bằng SetThreadExecutionState (tối đa 6 giờ; không sửa power plan).
+  Chi tiết handle và stop flag ở `.scratch/review-2026-11/STATE.json`; kết thúc nghiệm thu thì tạo stop flag qua SSH để nhả.
+  A chưa merge/push; B/C chưa bắt đầu.
+- 2026-11-01: source `src-c0d90ddb…` đã qua local GPU (noise/ES 572, strict 1 636, không skip), parity Qwen/Smol/Tiny,
+  perf và toàn bộ 12 nhóm mutation. Fault/soak/int8 đạt 3/3 sau khi chọn đúng `ACCEPT_PYTHON` có torch.
+  Throughput 5070 Ti: short32 10 100,9 token/s; chat128 9 929,2, trên sàn đã ghim.
+  WSL đạt 7/8 check: noise/ES 572 không skip; strict còn 2 test HF FP16 dùng nhầm output 5070 Ti (1 555 passed,
+  79 deselected, không skip). Package đã build/import được hai app, nhưng guard từ chối vì tài liệu đang dirty.
+- A-024/A-025 đã sửa bằng test trước: package dùng đúng luật cây nguồn (vẫn so byte Worker/SDK với commit); FP16 dùng
+  reference chính xác của từng GPU đã đo, không nhận một danh sách đáp án tùy ý. Capture 3060 độc lập ở evidence
+  `2026-11-01-qwen-fp16-sm86`, chỉ câu 5 khác 674/664; strict golden chung không đổi. 58 selftest, mutation 6/6 xanh.
+  Cần nghiệm thu lại trên hash sau sửa này. Các process cũ đã kết thúc, trừ wake lease Windows có giới hạn 6 giờ;
+  `.scratch/review-2026-11/STATE.json` giữ handle để kiểm lại. Chuẩn bị B1 ở scratch: 111 cặp route, 37 bảng / 177 cột,
+  358 lời gọi DB trong 24 module; chưa bắt đầu refactor B.
 
 ## Việc của chủ dự án
 

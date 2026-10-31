@@ -56,7 +56,7 @@ CHECKS = [
         env=GPU + RUNTIME_PATH + (("HETEROES_QWEN_PINNED_PATH", "{models}/qwen"),),
         cwd="runtime",
         gpu=True,
-        min_passed=510,
+        min_passed=572,
         max_skipped=0,
     ),
     Check(
@@ -67,7 +67,7 @@ CHECKS = [
         env=GPU + RUNTIME_PATH + (("HETEROES_QWEN_PINNED_PATH", "{models}/qwen"),),
         cwd="runtime",
         gpu=True,
-        min_passed=510,
+        min_passed=572,
         max_skipped=0,
     ),
     # gpu
@@ -385,7 +385,7 @@ CHECKS = [
 # Linux local floor: the last good tests/eval GPU run (1,599 passed). SM86 floors cover every applicable collected case;
 # the 79 SM120-only cases run on the 5070 Ti and are explicitly deselected (never counted as passed) on both 3060 hosts.
 CHECKS = [
-    replace(check, min_passed=1599, max_skipped=0)
+    replace(check, min_passed=1639, max_skipped=0)
     if check.name == "strict-gpu-suite"
     else replace(check, min_passed=956, max_skipped=0)
     if check.name == "strict-gpu-suite-native"

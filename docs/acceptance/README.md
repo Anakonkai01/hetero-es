@@ -6,13 +6,13 @@
 
 ## Gate states
 
-| State | Meaning |
-| --- | --- |
-| PASS | Every check the gate names passed on this source tree (all tracked files outside `docs/`). |
-| FAIL | At least one of its checks failed. |
-| NOT_RUN | Some of its checks have no result for this source tree yet. A missing result is never a pass. |
-| DEFERRED | It cannot be checked with the available hardware or conditions; the reason is printed. |
-| OPEN | The work it needs is not done; what is missing is printed. |
+| State    | Meaning                                                                                                                     |
+| -------- | --------------------------------------------------------------------------------------------------------------------------- |
+| PASS     | Every check the gate names passed on this source tree (tracked files excluding `docs/`, `runtime/docs/` and root Markdown). |
+| FAIL     | At least one of its checks failed.                                                                                          |
+| NOT_RUN  | Some of its checks have no result for this source tree yet. A missing result is never a pass.                               |
+| DEFERRED | It cannot be checked with the available hardware or conditions; the reason is printed.                                      |
+| OPEN     | The work it needs is not done; what is missing is printed.                                                                  |
 
 A receipt from a dirty working tree is kept but never makes a gate pass. Receipts of different hosts are merged
 only for the same source tree. Documentation changes do not change the source tree.
@@ -21,14 +21,21 @@ only for the same source tree. Documentation changes do not change the source tr
 
 ```bash
 scripts/accept.py list
+export ACCEPT_PYTHON="$HOME/miniforge3/envs/heteroes-match/bin/python"
 scripts/accept.py run cpu --keep                                  # check-all + acceptance self-tests, here
 HETEROES_GPU_ACCEPTANCE=1 scripts/accept.py run gpu perf --keep   # GPU suite, trained parity, throughput floor
+HETEROES_GPU_ACCEPTANCE=1 scripts/accept.py run faults --keep    # two GPUs, including CPU replay of every update
 HETEROES_GPU_ACCEPTANCE=1 scripts/accept.py run mutation --keep
 scripts/accept.py run package --keep                              # Linux packages carry the exact runtime bytes
 scripts/accept.py remote 3060-wsl gpu --keep                      # stage HEAD on Thảo's 3060 (WSL2), run, fetch
 scripts/accept.py remote 3060-native gpu --keep                   # the same 3060 under native Windows
 scripts/accept.py report --write                                  # regenerate STATUS.md
 ```
+
+`ACCEPT_PYTHON` selects the controller interpreter for self-tests, mutation orchestration and fault probes. The fault
+probes import PyTorch when replaying updates on CPU, so use the runtime environment above. `check-all.sh` independently
+uses `.venv-backend/bin/python` for backend tests and the runtime environment for numerical tests. Remote runs select
+their configured runtime interpreter automatically.
 
 `remote` stages `git archive HEAD` of the runtime and the acceptance system, so commit first. It needs SSH to
 Thảo's machine with the controller's own keys; no credentials are stored in this repository.

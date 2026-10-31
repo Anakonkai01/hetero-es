@@ -46,7 +46,7 @@ def test_pytest_and_mutation_checks_cannot_pass_without_executed_tests():
             if check.gpu:
                 assert check.max_skipped == 0, check.name
     by_name = {check.name: check for check in CHECKS}
-    assert by_name["strict-gpu-suite"].min_passed >= 1599
+    assert by_name["strict-gpu-suite"].min_passed >= 1639
     assert by_name["strict-gpu-suite-native"].min_passed >= 956
 
 
@@ -55,7 +55,7 @@ def test_gpu_suites_supply_real_model_and_explicit_hardware_selection():
 
     assert LOCAL.pytest_marks == ""
     assert WSL.pytest_marks == NATIVE.pytest_marks == "not sm120"
-    assert WSL.pytest_min_passed == {"strict-gpu-suite": 1557}
+    assert WSL.pytest_min_passed == {"strict-gpu-suite": 1560}
     for check in CHECKS:
         if check.name.startswith("strict-gpu-suite"):
             assert "{repo}/acceptance/probes/pytest_gpu_suite.py" in check.command
