@@ -3,11 +3,11 @@
 - **Status:** Accepted as *provisional* in MASTER §0/§6 (2026-09-29). This written ADR is a **draft by Claude, pending owner review**.
 - **Date:** 2026-09-30
 - **Deciders:** A (Systems/Core owner)
-- **Related:** [numerical-contract.md §4](../numerical-contract.md), [architecture.md §2](../architecture.md), evidence in `artifacts/probes/2026-09-29/`
+- **Related:** [numerical-contract.md §4](../numerical-contract.md), evidence in `artifacts/probes/2026-09-29/`
 
 ## Context
 
-In distributed ES the worker returns only a scalar reward; the coordinator regenerates each candidate's noise ε_i from its seed and combines it with the reward to update the model (architecture.md §2). Worker and coordinator therefore need **bit-identical noise from the same seed**, on different machines. If they disagree, the update silently uses directions that were never evaluated.
+In distributed ES the worker returns only a scalar reward; the coordinator regenerates each candidate's noise ε_i from its seed and combines it with the reward to update the model. Worker and coordinator therefore need **bit-identical noise from the same seed**, on different machines. If they disagree, the update silently uses directions that were never evaluated.
 
 The notebook prototype generated noise with native CUDA RNG: a `torch.Generator` on the GPU, `manual_seed(seed)`, then `torch.randn_like(param, generator=g)` over the parameters in order.
 

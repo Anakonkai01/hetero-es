@@ -23,5 +23,5 @@ construction, including within an active graph session.
 Tests compare both load modes with the independent CPU arithmetic for B14/B22, even and odd widths,
 partial tiles, aligned and offset storage, bias, signed zero, FP32 subnormals and extreme finite FP16
 weights. Real-model timing and canonical candidate/restore receipts are scoped separately in
-[`2026-10-25-b22-core-perf`](../../docs/evidence/2026-10-25-b22-core-perf/README.md).
+[`2026-10-25-b22-core-perf`](../../../docs/evidence/2026-10-25-b22-core-perf/README.md).
 These checks do not enable managed strict execution or establish general model/hardware qualification.

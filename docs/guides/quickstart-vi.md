@@ -80,4 +80,4 @@ Thao tác này xóa ghép đôi trên máy bạn; lab vẫn giữ lịch sử th
 thể xóa thiết bị đang chờ hoặc đã thu hồi khỏi danh sách. Thiết bị đã thu hồi không tự được duyệt lại.
 
 Bản dọn dẹp mã nguồn ngày 19/10 chưa thay bộ cài đang phát hành. Windows hiện chỉ được chấp nhận làm Worker Recipe v1;
-Coordinator cần Linux đã qua kiểm tra. Trạng thái và giới hạn kiểm chứng mới nhất ở [HANDOFF.md](HANDOFF.md).
+Coordinator cần Linux đã qua kiểm tra. Trạng thái và giới hạn kiểm chứng mới nhất ở [HANDOFF.md](../HANDOFF.md).

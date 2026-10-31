@@ -1,5 +1,7 @@
 # Exact bounded greedy selection for B22
 
+> **Status (2026-10-29).** The word `experimental` in identity strings and `hardwareQualified: false` in kernel identities are names and fields inside hashed documents; they are never edited and do not say whether the code is accepted. Acceptance is recorded by receipts. The B22 path described here is the Recipe v3 decoder `strict_b22_v1` ([ADR-013](../adr/ADR-013-strict-b22-recipe-decoder.md), accepted; the default for new GPU runs), and its acceptance checks PASS on SM120, SM86 under WSL2 and native Windows at source `src-18d0b138` ([acceptance STATUS](../../../docs/acceptance/STATUS.md)). Sentences below that say "experimental", "inactive" or "not accepted" describe the state when the note was written, unless a line in this note says otherwise.
+
 `integer_lm_head.py` changes the execution of greedy decode, while preserving the integer projection
 arithmetic in ADR-012. It does not change forward/logit APIs or any historical recipe. Hardware
 qualification remains false. The selected path requires B22, streamed projections, aligned widths

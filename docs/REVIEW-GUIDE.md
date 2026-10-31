@@ -15,7 +15,7 @@ nghiên cứu đăng ký và tùy chỉnh được.
    candidate/attempt/lease, ADR-008 Recipe v3, ADR-012/013/014 engine strict).
 3. `runtime/src/heteroes/noise`, `es`, `ledger`, `generation_record.py`: lõi số học và sổ cái (phần đóng băng, xem mục 3).
 4. `runtime/src/heteroes/strict/`: engine đánh giá strict (cùng một chuỗi token trên mọi GPU NVIDIA được hỗ trợ).
-   Đọc `strict_backend.py` trước (điểm vào), rồi `runtime/docs/strict-reference-v1.md`, `strict-decoder-v1.md`,
+   Đọc `strict_backend.py` trước (điểm vào), rồi `runtime/docs/strict/strict-reference-v1.md`, `strict-decoder-v1.md`,
    `integer-projection-v1.md`.
 5. `runtime/src/heteroes/v3/` (Recipe v3: chạy, phân tán, kiểm toán, theo dõi) và `product/` (agent, worker CLI,
    giám sát run).

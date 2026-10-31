@@ -80,8 +80,7 @@ coefficients, alpha) let anybody replay the run to the same weights, bit for bit
 
 ## Limits
 
-- `run` uses one machine; `serve` and `worker` support separate machines. The staged managed v3 path is documented in
-  `v3-product-runs.md`; it is not deployed to the live lab.
+- `run` uses one machine; `serve` and `worker` support separate machines. Managed Recipe v3 runs are created from the lab's web form.
 - LoRA needs PEFT (`pip install peft==0.21.2`, the runtime's `lora` extra). LoRA runs are a different search distribution:
   do not compare them on one chart with full-parameter runs.
 - Unit tests use a tiny CPU model. Separate Qwen GPU qualification and its limits are recorded in `../../docs/evidence/2026-10-19-v3-gpu/`; it does not establish learning benefit.

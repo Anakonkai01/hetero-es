@@ -40,5 +40,5 @@ can occur in a row with that exponent). B14 keeps `quant_half`, because its shif
 
 ## Measured scope
 
-Receipts are in [`2026-10-26-strict-projection-shapes`](../../docs/evidence/2026-10-26-strict-projection-shapes/README.md).
+Receipts are in [`2026-10-26-strict-projection-shapes`](../../../docs/evidence/2026-10-26-strict-projection-shapes/README.md).
 They do not establish universal hardware qualification, model quality, or the managed execution path.

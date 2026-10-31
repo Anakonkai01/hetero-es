@@ -6,10 +6,11 @@ The project demonstrates runtime, ownership and replay behavior; passing infrast
 
 ## Start here
 
+- [Documentation map](docs/README.md) (what to read, where)
 - [Current state, decisions and handoff](docs/HANDOFF.md)
 - [Contributor and agent rules](AGENTS.md)
-- [Vietnamese quickstart for r10](docs/quickstart-vi.md)
-- [Live workstation operations](docs/local-lab-operations.md)
+- [Vietnamese quickstart for r10](docs/guides/quickstart-vi.md)
+- [Live workstation operations](docs/guides/local-lab-operations.md)
 - [Numerical contract](runtime/docs/numerical-contract.md)
 - [Evidence index](docs/EVIDENCE-INDEX.md) (evidence, raw artifacts and old session records live on the branch `evidence-archive`)
 - [Recorded security/policy findings](docs/SECURITY-NOTES.md)

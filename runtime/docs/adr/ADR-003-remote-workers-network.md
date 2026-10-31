@@ -2,7 +2,7 @@
 
 - **Status:** PROPOSED. Draft by Claude, 2026-10-08 (night), **pending owner review**. Nothing here is implemented except what is marked "measured".
 - **Deciders:** A (Systems/Core owner)
-- **Related:** `docs/third-machine-checklist.md`, `TODO.md` groups `ideas-remote-workers` and `admission-in-the-join-flow`, `src/heteroes/replay.py`, `src/heteroes/http_transport.py`
+- **Related:** `TODO.md` groups `ideas-remote-workers` and `admission-in-the-join-flow`, `src/heteroes/replay.py`, `src/heteroes/http_transport.py`
 
 ## Context
 Today the workers are on one cable (10.10.10.x) or reach the coordinator through Tailscale. The owner can borrow machines that stay at other people's homes (one 3060 is already here in WSL2; a second one is in another city on 09/10). The owner floated "a kind of Tailscale of our own".

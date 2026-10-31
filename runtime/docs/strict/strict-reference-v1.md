@@ -1,5 +1,7 @@
 # Experimental single-model numerical reference
 
+> **Status (2026-10-29).** The word `experimental` in identity strings and `hardwareQualified: false` in kernel identities are names and fields inside hashed documents; they are never edited and do not say whether the code is accepted. Acceptance is recorded by receipts. The B22 path described here is the Recipe v3 decoder `strict_b22_v1` ([ADR-013](../adr/ADR-013-strict-b22-recipe-decoder.md), accepted; the default for new GPU runs), and its acceptance checks PASS on SM120, SM86 under WSL2 and native Windows at source `src-18d0b138` ([acceptance STATUS](../../../docs/acceptance/STATUS.md)). Sentences below that say "experimental", "inactive" or "not accepted" describe the state when the note was written, unless a line in this note says otherwise.
+
 This document specifies the candidate arithmetic behind ADR-012. The implementation is deliberately slow and is
 **not a production backend or a qualified recipe**. Existing recipes, FP32 evaluation, noise, publication, update
 order and historical replay retain their current identities. Runtime integration and default changes remain gated.
@@ -79,11 +81,10 @@ throughput gates pass. No full FP32 weight shadow may be introduced to make a pe
 
 `strict/strict_cuda.py` compiles NVRTC kernels that execute this arithmetic sequence: linear projections reading the
 FP16 weights in place, RMSNorm, residual add, the SiLU gate, RoPE and causal GQA attention with the specified
-softmax. `strict/qwen2_strict_cuda.py` (`qwen2_pairwise_f32_cuda_v1_experimental`) runs the same graph, cache format
+softmax. `strict/qwen2_strict_cuda.py` (`qwen2_pairwise_f32_cuda_v2_experimental`) runs the same graph, cache format
 and generation rules on them. Primitive operations are inline PTX `add.rn.f32`/`mul.rn.f32` with integer subnormal
 flushing. Trees are formed by aligned blocks padded with -0.0, a binary-counter stack, or a barrier-separated
 in-place stride tree. Each form equals the adjacent-pair tree above, because x + (-0) == x for finite x. Every
 build's PTX and (where `nvdisasm` exists) SASS is audited for contraction, flush modes and vendor arithmetic, and
 its NVRTC version, options, architecture and binary hashes are recorded. Bit equality with the eager operations is
-tested per kernel and per graph. Receipts and limits: `docs/evidence/2026-10-24-strict-cuda/`. The kernels
-remain experimental: no native Windows, lifecycle or packaging gate has passed.
+tested per kernel and per graph. Receipts and limits: `docs/evidence/2026-10-24-strict-cuda/`. When this was written no native Windows, lifecycle or packaging gate had passed for these kernels; for the B22 decoder built on them, native Windows acceptance has since passed (see the status note above).

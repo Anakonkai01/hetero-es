@@ -3,7 +3,7 @@
 - **Status:** Implemented and tested for one coordinator process (2026-10-06, steps G2a to G2f), served over HTTP since G3 (2026-10-06 evening) and amended after the audit of 2026-10-07 (G6: see "Amendments" at the end, which win over the decisions above where they differ). This written ADR is a **draft by Claude, pending owner review**.
 - **Date:** 2026-10-06
 - **Deciders:** A (Systems/Core owner)
-- **Related:** [numerical-contract.md §3, §12, §13](../numerical-contract.md), [architecture.md §6 to §7](../architecture.md), MASTER §10 (the seven invariants), `src/heteroes/ledger/`, `src/heteroes/generation_record.py`
+- **Related:** [numerical-contract.md §3, §12, §13](../numerical-contract.md), MASTER §10 (the seven invariants), `src/heteroes/ledger/`, `src/heteroes/generation_record.py`
 
 ## Context
 

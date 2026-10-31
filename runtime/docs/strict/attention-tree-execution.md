@@ -1,7 +1,9 @@
 # Exact grouped attention reductions
 
+> **Status (2026-10-29).** The word `experimental` in identity strings and `hardwareQualified: false` in kernel identities are names and fields inside hashed documents; they are never edited and do not say whether the code is accepted. Acceptance is recorded by receipts. The B22 path described here is the Recipe v3 decoder `strict_b22_v1` ([ADR-013](../adr/ADR-013-strict-b22-recipe-decoder.md), accepted; the default for new GPU runs), and its acceptance checks PASS on SM120, SM86 under WSL2 and native Windows at source `src-18d0b138` ([acceptance STATUS](../../../docs/acceptance/STATUS.md)). Sentences below that say "experimental", "inactive" or "not accepted" describe the state when the note was written, unless a line in this note says otherwise.
+
 The numerical reference remains `pairwise_f32_reference_v1_experimental`. This changes execution of its
-adjacent-pair trees, not its rounded operations or model arithmetic. Managed strict remains inactive.
+adjacent-pair trees, not its rounded operations or model arithmetic. (When this was written managed strict was inactive; it is active for `strict_b22_v1` since D9, 2026-10-27, see [audit-state-v1](../audit-state-v1.md).)
 
 For a positive length `n`, the reference pairs adjacent leaves, carries an unmatched last leaf without an
 addition, and repeats. The CUDA binary-counter `Tree` implements the same tree: each occupied slot represents

@@ -20,7 +20,7 @@ receipts. A current source tree and an installed release are distinguished delib
 
 The official [reproducibility documentation](https://docs.vllm.ai/en/stable/usage/reproducibility/) limits its guarantee
 to the same hardware and vLLM version, even with deterministic scheduling/batch invariance. The earlier 208-prompt
-cross-GPU counterexamples remain in the [original evidence](evidence/2026-10-24-vllm-probe/README.md).
+cross-GPU counterexamples remain in the [original evidence](../evidence/2026-10-24-vllm-probe/README.md).
 No new finite passing matrix erases those counterexamples or qualifies an untested build.
 
 ## Relevant papers and technical material
@@ -60,11 +60,11 @@ Published FP64 emulation results are not LLM or HeteroES acceptance receipts.
 
 ## What was implemented and what the measurements mean
 
-The [shared decoder contract](../runtime/docs/strict-decoder-v1.md) now covers three graph families and four layouts,
+The [shared decoder contract](../../runtime/docs/strict/strict-decoder-v1.md) now covers three graph families and four layouts,
 including untied heads, biases and query width different from hidden width. Row tiling, cached canonical RoPE and
 packed causal attention operate below checkpoint selection. No new managed backend/default was enabled.
 
-[Benchmark receipts](evidence/2026-10-25-strict-throughput/README.md) use the same token inputs, FP16 storage,
+[Benchmark receipts](../evidence/2026-10-25-strict-throughput/README.md) use the same token inputs, FP16 storage,
 fixed greedy output budget, no EOS stopping, no prefix reuse, one excluded warmup and repeated synchronized host
 measurements. All engines use a single trained checkpoint for that controlled comparison. Graph-family coverage
 comes from separate small CPU/GPU fixtures and must not be presented as trained-model performance evidence.
@@ -85,7 +85,7 @@ coverage argument, and every supported architecture/build still needs qualificat
 
 ## Captured decode continuation
 
-The [overnight continuation](evidence/2026-10-25-strict-overnight/README.md) adds dimension-selected independent
+The [overnight continuation](../evidence/2026-10-25-strict-overnight/README.md) adds dimension-selected independent
 subtrees and a single bounded decode capture, with stable original-owner KV slots, EOS compaction and error-checked
 publication. Captures read the original live weights, invalidate on parameter rebinding/stream/capacity changes,
 and clear KV/selector content at request boundaries. No managed default is enabled.
@@ -112,11 +112,11 @@ The published integer-emulation papers remain research leads, not acceptance of 
 
 `fb18a7b7` adds an experimental row-scaled integer projection and captured decoder with its own independent CPU
 reference. B14/B22 precision, exact RNE quantization, nonoverflowing integer MMA/int64 reconstruction and final scaled
-RNE/FTZ encoding are specified in the [contract](../runtime/docs/integer-projection-v1.md). The old FP32 tree is retained
+RNE/FTZ encoding are specified in the [contract](../../runtime/docs/strict/integer-projection-v1.md). The old FP32 tree is retained
 under its existing operator identity. There is no full quantized or FP32 second weight matrix; small row-scale metadata
 is refreshed from live FP16 weights at every locked generation entry and cleared at exit. No managed default changes.
 
-The [new receipts](evidence/2026-10-25-strict-integer/RESULTS-01.md) use the same eight tokenized prompts, 32 generated
+The [new receipts](../evidence/2026-10-25-strict-integer/RESULTS-01.md) use the same eight tokenized prompts, 32 generated
 tokens, FP16 storage, context limit 512, one excluded warmup and median of three synchronized host measurements.
 The comparisons below use the prior vLLM default receipts and separate unisolated process runs/builds. Consumed model
 asset hashes and workloads match; prior Smol download metadata prevents claiming identical *full* manifests there.

@@ -26,4 +26,4 @@ CUDA_VISIBLE_DEVICES='' .venv-backend/bin/python -m backend.server \
 The factory requires explicit configuration and agent mode. Local recovery points publish a final verified manifest;
 metadata backup/restore uses `scripts/restore-metadata.py`, and generation recovery import/restore uses `scripts/recovery.py`.
 Restore into a fresh held deployment, retain unknown reservations and follow the owner/epoch limitations in ADR-007.
-See [HANDOFF.md](HANDOFF.md), [server-desktop-guide.md](server-desktop-guide.md) and [SECURITY-NOTES.md](SECURITY-NOTES.md).
+See [HANDOFF.md](../HANDOFF.md), [server-desktop-guide.md](server-desktop-guide.md) and [SECURITY-NOTES.md](../SECURITY-NOTES.md).

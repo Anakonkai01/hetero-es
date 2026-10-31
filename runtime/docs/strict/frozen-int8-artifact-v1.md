@@ -1,5 +1,7 @@
 # Frozen int8 base artifact v1 (experimental)
 
+> **Status (2026-10-29).** This format is the base of the Recipe v3 decoder `strict_int8_lora_v1` ([ADR-014](../adr/ADR-014-strict-int8-lora-decoder.md), accepted, M6 PASS in the [acceptance STATUS](../../../docs/acceptance/STATUS.md)). It runs through `python -m heteroes.v3` and the SDK; the lab does not offer it. "Experimental" in identity strings is a name inside hashed documents and is never edited. The sentences below that say "not an accepted backend, not a managed recipe" describe 2026-10-25.
+
 Status: implemented CPU oracle, separately named CUDA operator, typed frozen storage with FP16 LoRA adapters and an
 explicit captured-decode composition. It is not an accepted backend, not a managed recipe, and not a claim about model
 quality or speed. `heteroes/strict/frozen_int8.py` is the reference for this identity; CUDA results are bit-compared

@@ -1,8 +1,10 @@
 # Output-parallel execution of the strict LoRA finish
 
+> **Status (2026-10-29).** The word `experimental` in identity strings and `hardwareQualified: false` in kernel identities are names and fields inside hashed documents; they are never edited and do not say whether the code is accepted. Acceptance is recorded by receipts. The frozen int8 + LoRA path described here is the Recipe v3 decoder `strict_int8_lora_v1` ([ADR-014](../adr/ADR-014-strict-int8-lora-decoder.md), accepted, M6 PASS; standalone/SDK only, the lab does not offer it). Acceptance at source `src-18d0b138` ([acceptance STATUS](../../../docs/acceptance/STATUS.md)). Sentences below that say "experimental", "inactive" or "not accepted" describe the state when the note was written, unless a line in this note says otherwise.
+
 This is a scheduling change to the existing strict FP32 adapter arithmetic, not a new precision, quantizer,
 adapter model or recipe. The frozen integer base, first adapter product and FP16 storage are unchanged.
-The full approved M0-M6 plan and managed qualification gates remain open.
+(When this was written the M0-M6 plan was open; M6 now has a PASS receipt, see the status note above.)
 
 ## Arithmetic argument
 
@@ -49,7 +51,7 @@ nonfinite errors and captured replay against the CPU reference and retained warp
 mutations test the scale, tree, input FTZ, zero select and admission boundary. Real-model comparisons use
 the same pinned on-disk frozen files, exact adapter files, parent manifests, prompts and candidate descriptors.
 
-[The measured continuation](../../docs/evidence/2026-10-25-frozen-subwarp-perf/README.md) records operator
+[The measured continuation](../../../docs/evidence/2026-10-25-frozen-subwarp-perf/README.md) records operator
 sweeps, matched model timings and exact before/after and cross-architecture scope. CUDA event operator gains
 are not end-to-end speedups. General base-quantization/trained-adapter quality, full lifecycle memory, native
 Windows and managed/default activation require their own evidence; `hardwareQualified` remains false.

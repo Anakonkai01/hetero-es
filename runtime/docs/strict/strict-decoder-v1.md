@@ -1,5 +1,7 @@
 # Experimental strict decoder graph
 
+> **Status (2026-10-29).** The word `experimental` in identity strings and `hardwareQualified: false` in kernel identities are names and fields inside hashed documents; they are never edited and do not say whether the code is accepted. Acceptance is recorded by receipts. The B22 path described here is the Recipe v3 decoder `strict_b22_v1` ([ADR-013](../adr/ADR-013-strict-b22-recipe-decoder.md), accepted; the default for new GPU runs), and its acceptance checks PASS on SM120, SM86 under WSL2 and native Windows at source `src-18d0b138` ([acceptance STATUS](../../../docs/acceptance/STATUS.md)). Sentences below that say "experimental", "inactive" or "not accepted" describe the state when the note was written, unless a line in this note says otherwise.
+
 The strict CUDA implementation is shared by graph adapters, rather than specialized to one checkpoint.
 `strict/strict_decoder.py` provides an eager operator oracle and serial CUDA graph;
 `strict/strict_decoder_packed.py` packs independent sequences into the same projection and attention launches.
@@ -98,18 +100,16 @@ includes fixed/packed KV, actual packed prefill workspace, decode intermediates,
 It excludes existing weights/RoPE and CUDA driver state; it is not a total-device VRAM limit. Actual allocated and
 reserved peaks must still be measured. Oversized requests are refused before prefill instead of bypassing the budget.
 
-Receipts: [overnight continuation](../../docs/evidence/2026-10-25-strict-overnight/README.md). Native FTZ multiply was
+Receipts: [overnight continuation](../../../docs/evidence/2026-10-25-strict-overnight/README.md). Native FTZ multiply was
 examined and rejected: the surveyed GPUs flush some tiny exact products before rounding, whereas the reference
 rounds first and can produce the smallest normal. The selected path retains integer signed-zero flushing everywhere.
 
 ## Evidence and remaining work
 
-[Receipts and limits](../../docs/evidence/2026-10-25-strict-throughput/README.md) distinguish three model families,
+[Receipts and limits](../../../docs/evidence/2026-10-25-strict-throughput/README.md) distinguish three model families,
 four small graph layouts and two finite weight states on four physical GPUs from the single trained checkpoint
 used for throughput comparison. Tiny graph equality is not acceptance of trained Llama/Mistral checkpoints.
 
-The [vLLM source review](../../docs/STRICT-PERFORMANCE-VLLM.md) identifies which execution techniques transfer and
+The [vLLM source review](../../../docs/design/STRICT-PERFORMANCE-VLLM.md) identifies which execution techniques transfer and
 which arithmetic cannot be substituted. The current scalar strict projections remain substantially slower than
-vendor/tensor-core inference. Performance thresholds are not accepted. Further projection speed,
-paged KV storage, wider operator/model coverage, native Windows and managed lifecycle/packaging
-qualification remain open. The full M0–M6 plan, including unfinished M2 and M6 quantized-base/LoRA, is unchanged.
+vendor/tensor-core inference. Since this was written the throughput floor (M1.throughput), native Windows operators and decoder parity, M2 and M6 have PASS receipts ([acceptance STATUS](../../../docs/acceptance/STATUS.md)); M3 and M5.release are still open. Paged KV storage and wider operator/model coverage were open when this was written and are not re-checked here.

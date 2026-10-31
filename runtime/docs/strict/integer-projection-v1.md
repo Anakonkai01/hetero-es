@@ -1,7 +1,9 @@
 # Experimental row-scaled integer projection
 
+> **Status (2026-10-29).** The word `experimental` in identity strings and `hardwareQualified: false` in kernel identities are names and fields inside hashed documents; they are never edited and do not say whether the code is accepted. Acceptance is recorded by receipts. The B22 path described here is the Recipe v3 decoder `strict_b22_v1` ([ADR-013](../adr/ADR-013-strict-b22-recipe-decoder.md), accepted; the default for new GPU runs), and its acceptance checks PASS on SM120, SM86 under WSL2 and native Windows at source `src-18d0b138` ([acceptance STATUS](../../../docs/acceptance/STATUS.md)). Sentences below that say "experimental", "inactive" or "not accepted" describe the state when the note was written, unless a line in this note says otherwise.
+
 This is a separate arithmetic reference, `row_scaled_signed_integer_dot_v1_experimental`, permitted for feasibility
-work by [ADR-012](adr/ADR-012-single-model-strict-inference.md). It is not the historical adjacent-pair FP32 tree.
+work by [ADR-012](../adr/ADR-012-single-model-strict-inference.md). It is not the historical adjacent-pair FP32 tree.
 The graph adapter composes it with the existing strict FP32 nonlinearities and canonical RoPE constants. No managed
 recipe, default, qualification or historical noise/perturb/update/restore contract changes.
 
@@ -78,7 +80,7 @@ existing strict decoder; the prototype is not a replacement for managed GPU owne
 
 ## Evidence and remaining gates
 
-Receipts: [integer feasibility](../../docs/evidence/2026-10-25-strict-integer/RESULTS-01.md). CPU rational answers, physical
+Receipts: [integer feasibility](../../../docs/evidence/2026-10-25-strict-integer/RESULTS-01.md). CPU rational answers, physical
 GPU encoder boundaries, odd widths/tails, precision identity, compiler audit, batch/permutation equality, live-weight
 changes and graph composition are distinct checks. Synthetic matrix speed is not trained-model throughput.
 
