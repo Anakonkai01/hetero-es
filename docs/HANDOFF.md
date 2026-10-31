@@ -79,7 +79,10 @@ GPU or heavy CPU work runs.
   không có run/reservation. Sau đó chủ dự án cấp quyền dùng máy/GPU thoải mái trong phiên này; GPU đã kiểm: 0% sử dụng,
   không có compute process. Vẫn giữ nguyên các giới hạn đối với lab thật.
 - A1 xong (A-010/A-020): 105 test redirect/proxy xanh; hồi quy 1 354 passed / 1 skipped; mutation 18/18 killed.
-  Evidence `2026-10-31-review-network`. Đang làm A2 và chuẩn bị dấu vân tay P-FROZEN; vùng đóng băng chưa đổi.
+  Evidence `2026-10-31-review-network`.
+- A2 (A-004/A-015/A-017/A-019) xong: 253 passed / 5 skipped; mutation 16/16 killed. A-008/A-016 chuyển cùng A3
+  vì có sửa vùng đóng băng. Dấu vân tay trước sửa đã ghi trên CPU và 5070 Ti; A-002 cũng đã so n=1..4096 trên 3060,
+  không có bit lệch. WSL cần cả thư mục driver đứng trước `/usr/lib/wsl/lib`, như `acceptance/hosts.py`. Đang làm A3.
 
 ## Việc của chủ dự án
 

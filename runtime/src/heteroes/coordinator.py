@@ -186,6 +186,7 @@ class Coordinator:
                 raise ValueError("an explicit seed namespace requires Recipe v3")
         self._seed_namespace = experiment_id if seed_namespace is None else seed_namespace
         self.candidates = candidates
+        self._dirty = False
         self.alpha = alpha
         self._policy_factory = policy_factory
         self._lease_seconds = lease_seconds
@@ -404,6 +405,19 @@ class Coordinator:
         return next(self.model.parameters()).is_cuda
 
     def _apply_record(self, record):
+        self._require_clean()
+        # Any failure after the first write leaves unknown model bytes. Only a new object loaded from a checkpoint
+        # may replay the write-ahead record; never reuse this object after an interrupted application.
+        self._dirty = True
+        report = self._apply_record_unchecked(record)
+        self._dirty = False
+        return report
+
+    def _require_clean(self):
+        if self._dirty:
+            raise CoordinatorError("update interrupted: create a new Coordinator from a checkpoint")
+
+    def _apply_record_unchecked(self, record):
         seeds, coefficients = record.update_inputs()  # antithetic pairs merged; a version-1 record passes unchanged
         if (
             self.recipe.engine_version == CUDA_ENGINE_VERSION
@@ -424,6 +438,8 @@ class Coordinator:
         Find the place of this experiment in the ledger and the published weights, put the model there and return the number
         of the next generation to run (the unfinished generation itself, if there is one). 0 for a new experiment.
         """
+        self._require_clean()
+        self.parent_sha256 = model_weights_sha256(self.model, self.schema)
         generations = self.ledger.list_generations(self.experiment_id)
         if not generations:
             return 0
@@ -479,6 +495,7 @@ class Coordinator:
         return number + 1
 
     def run_generation(self, generation: int) -> dict:
+        self._require_clean()
         self._check_cancel()
         begin = self._timer()
         if self.dataset is not None:
@@ -515,6 +532,16 @@ class Coordinator:
                     f"generation {self.experiment_id}/g{generation} is in the ledger with other parent weights or "
                     f"another recipe: call recover() first"
                 )
+            stored = [record.descriptor for record in self.ledger.list_candidates(self.experiment_id, generation)]
+            if len(stored) != len(descriptors):
+                raise CoordinatorError(f"candidate count differs: ledger={len(stored)}, requested={len(descriptors)}")
+            for expected, actual in zip(stored, descriptors, strict=True):
+                for field in ("index", "seed", "sign"):
+                    if getattr(expected, field) != getattr(actual, field):
+                        raise CoordinatorError(
+                            f"candidate {actual.index} {field} differs: ledger={getattr(expected, field)}, "
+                            f"requested={getattr(actual, field)} (check candidate population and seed namespace)"
+                        )
             self.log("generation_resumed", generation=generation, parent_sha256=parent)
         else:
             self.ledger.open_generation(descriptors)

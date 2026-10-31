@@ -95,7 +95,8 @@ def test_a_subset_that_is_not_an_ordered_selection_of_the_model_is_refused():
     subset = select_parameters(full, ["layers"])
     reordered = ParameterSchema(SUBSET_SCHEMA_VERSION, tuple(reversed(subset.entries)))
     changed = ParameterSchema(
-        SUBSET_SCHEMA_VERSION, (subset.entries[0].__class__(**{**subset.entries[0].__dict__, "shape": (7, 6)}),)
+        SUBSET_SCHEMA_VERSION,
+        (subset.entries[0].__class__(**{**subset.entries[0].__dict__, "shape": (7, 6), "numel": 42}),),
     )
     renumbered = ParameterSchema(
         SUBSET_SCHEMA_VERSION, (subset.entries[0].__class__(**{**subset.entries[0].__dict__, "index": 0}),)

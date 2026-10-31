@@ -124,6 +124,90 @@ def final_hash(coordinator):
     return model_weights_sha256(coordinator.model, coordinator.schema)
 
 
+@pytest.mark.parametrize("change", ["count", "namespace", "antithetic", "seed", "sign"])
+def test_resume_rejects_a_changed_candidate_population(world, change):
+    from heteroes.manifest import CandidateDescriptor
+    from heteroes.v3.antithetic import candidate_seeds
+
+    coordinator = world.coordinator(stall_seconds=0.01)
+    initial = [
+        CandidateDescriptor(coordinator.recipe.hash, coordinator.parent_sha256, "exp", 0, i, seed, sign)
+        for i, (seed, sign) in enumerate(candidate_seeds("exp", 0, world.candidates, False))
+    ]
+    if change in ("seed", "sign"):
+        import dataclasses
+
+        initial[0] = dataclasses.replace(initial[0], **({"seed": 123} if change == "seed" else {"sign": -1}))
+    coordinator.ledger.open_generation(initial)
+    if change == "count":
+        coordinator.candidates += 1
+    if change == "namespace":
+        coordinator._seed_namespace = "different"
+    if change == "antithetic":
+        coordinator._antithetic = True
+    with pytest.raises(CoordinatorError, match="candidate.*(count|seed|sign|population)"):
+        coordinator.run_generation(0)
+
+
+@pytest.mark.parametrize("during_recovery", [False, True])
+@pytest.mark.parametrize("entrypoint", ["recover", "run", "run_generation"])
+def test_same_coordinator_is_rejected_after_an_interrupted_update(world, monkeypatch, during_recovery, entrypoint):
+    coordinator = world.coordinator()
+    halt, _ = world.workers(coordinator)
+    real = coordinator_module.apply_coefficients_
+
+    def cut_power(*args, **kwargs):
+        real(*args, **kwargs)
+        raise RuntimeError("power cut after weights changed")
+
+    if during_recovery:
+
+        def fail_before_write(*args, **kwargs):
+            raise RuntimeError("initial power cut")
+
+        monkeypatch.setattr(coordinator_module, "apply_coefficients_", fail_before_write)
+        with pytest.raises(RuntimeError):
+            coordinator.run_generation(0)
+        halt()
+        world.kill(coordinator)
+        coordinator = world.coordinator()
+    monkeypatch.setattr(coordinator_module, "apply_coefficients_", cut_power)
+    try:
+        with pytest.raises(RuntimeError, match="power cut"):
+            coordinator.recover() if during_recovery else coordinator.run_generation(0)
+    finally:
+        halt()
+    stored = coordinator.ledger.get_update("exp", 0)
+    assert stored.child_weights_sha256 is None
+    monkeypatch.setattr(coordinator_module, "apply_coefficients_", real)
+    with pytest.raises(CoordinatorError, match="new Coordinator.*checkpoint"):
+        if entrypoint == "run":
+            coordinator.run(1)
+        elif entrypoint == "run_generation":
+            coordinator.run_generation(0)
+        else:
+            coordinator.recover()
+    assert coordinator.ledger.get_update("exp", 0).child_weights_sha256 is None
+    world.kill(coordinator)
+    restarted = world.coordinator()
+    assert restarted.recover() == 1
+    assert final_hash(restarted) == world.oracle(1)
+
+
+def test_recover_rehashes_the_actual_model_instead_of_trusting_cached_parent(world):
+    coordinator = world.coordinator()
+    halt, _ = world.workers(coordinator)
+    coordinator.run_generation(0)
+    halt()
+    import torch
+
+    with torch.no_grad():
+        next(coordinator.model.parameters()).add_(1)
+    assert final_hash(coordinator) != coordinator.parent_sha256
+    assert coordinator.recover() == 1
+    assert final_hash(coordinator) == world.oracle(1)
+
+
 # ---------------------------------------------------------------------------
 # where a restarted coordinator finds itself
 # ---------------------------------------------------------------------------

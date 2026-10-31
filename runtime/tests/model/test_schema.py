@@ -181,7 +181,13 @@ def test_s5_hash_changes_when_version_changes():
 )
 def test_s5_hash_changes_when_entry_field_changes(field, value):
     schema = make_small_schema()
-    changed_entry = dataclasses.replace(schema.entries[0], **{field: value})
+    fields = {field: value}
+    # Keep the layout internally valid when testing hash sensitivity.
+    if field == "shape":
+        fields["numel"] = 81
+    if field == "numel":
+        fields["shape"] = (7,)
+    changed_entry = dataclasses.replace(schema.entries[0], **fields)
     changed = dataclasses.replace(schema, entries=(changed_entry, schema.entries[1]))
 
     assert changed.hash != schema.hash
@@ -200,6 +206,36 @@ def test_schema_entry_is_frozen():
 
     with pytest.raises(dataclasses.FrozenInstanceError):
         entry.index = 5
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"shape": [2, 3]},
+        {"shape": (True, 6)},
+        {"shape": (2.0, 3)},
+        {"shape": (-2, -3)},
+        {"numel": 7},
+        {"numel": True},
+        {"shape": (1,), "numel": True},
+        {"numel": 6.0},
+        {"aliases": ["alias"]},
+        {"aliases": ("z", "a")},
+        {"aliases": ("a", "a")},
+        {"aliases": ("w",)},
+        {"aliases": (1,)},
+    ],
+)
+def test_schema_entry_rejects_mutable_or_inconsistent_layout(changes):
+    expected = TypeError if isinstance(changes.get("aliases"), list) else (TypeError, ValueError)
+    with pytest.raises(expected):
+        dataclasses.replace(make_small_schema().entries[0], **changes)
+
+
+@pytest.mark.parametrize("shape,numel", [((), 1), ((0, 3), 0), ((2, 3), 6)])
+def test_schema_entry_accepts_scalar_empty_and_regular_shapes(shape, numel):
+    entry = dataclasses.replace(make_small_schema().entries[0], shape=shape, numel=numel)
+    assert entry.shape == shape and entry.numel == numel
 
 
 # ---------------------------------------------------------------------------

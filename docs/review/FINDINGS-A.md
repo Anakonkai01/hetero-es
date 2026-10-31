@@ -59,4 +59,5 @@ Mốc: main 58cf278c. Mẫu: ID | file:dòng | loại | mức | mô tả | bằn
 | --- | --- | --- |
 | A-005/A-006/A-009 | Đã sửa + kiểm đối chiếu + commit tài liệu `06db4720`; A6 vẫn cần kiểm toàn bộ | Đợt sắp xếp tài liệu đã duyệt |
 | A-010/A-020 | Đã sửa + test; commit cùng mục trạng thái này | Evidence `2026-10-31-review-network`: 105 test redirect/proxy, hồi quy 1 354 passed / 1 skipped, mutation 18/18 killed |
-| Các ID còn lại | Mở | Tiếp tục A2–A6 theo kế hoạch |
+| A-004/A-015/A-017/A-019 | Đã sửa + test; commit cùng mục trạng thái này | Evidence `2026-10-31-review-runtime`: 253 passed / 5 skipped; mutation 16/16 killed |
+| Các ID còn lại | Mở | Tiếp tục A3–A6 theo kế hoạch |

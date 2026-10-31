@@ -284,7 +284,7 @@ class CandidateExecutor:
             with self._phase("restore", descriptor):
                 restore_from_snapshot_(self.model, self.schema, self._snapshot)
             progress.advance("restore")
-        except RestoreError as restore_error:
+        except Exception as restore_error:
             raise CandidateFailed(FailureKind.RESTORE_MISMATCH, str(restore_error)) from restore_error
         if measured_cuda:
             torch.cuda.synchronize()

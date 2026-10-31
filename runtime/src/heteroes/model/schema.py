@@ -1,5 +1,7 @@
 from collections import defaultdict
 from dataclasses import dataclass, asdict
+import math
+import numbers
 
 import torch
 import torch.nn as nn
@@ -51,19 +53,29 @@ class SchemaEntry:
     """
     # fmt: on
 
-    # TODO(schema-validation): add __post_init__ that rejects invalid entries:
-    #   - shape and aliases must be tuples (frozen alone leaves lists mutable)
-    #   - numel must equal math.prod(shape)
-    #   - aliases must be sorted (hash must not depend on discovery order)
-    #   - canonical_name must not appear in aliases
-    #   Raise instead of silently converting. Cover each check with a test.
-
     index: int
     canonical_name: str
     aliases: tuple[str, ...]
     shape: tuple[int, ...]
     dtype: str
     numel: int
+
+    def __post_init__(self):
+        if not isinstance(self.shape, tuple) or any(
+            not isinstance(dimension, numbers.Integral) or isinstance(dimension, bool) or dimension < 0
+            for dimension in self.shape
+        ):
+            raise ValueError("shape must be a tuple of nonnegative integers")
+        if (
+            not isinstance(self.numel, numbers.Integral)
+            or isinstance(self.numel, bool)
+            or self.numel != math.prod(self.shape)
+        ):
+            raise ValueError("numel must be an integer equal to the product of shape")
+        if not isinstance(self.aliases, tuple) or any(not isinstance(name, str) for name in self.aliases):
+            raise TypeError("aliases must be a tuple of strings")
+        if tuple(sorted(set(self.aliases))) != self.aliases or self.canonical_name in self.aliases:
+            raise ValueError("aliases must be sorted, distinct and exclude canonical_name")
 
 
 @dataclass(frozen=True)

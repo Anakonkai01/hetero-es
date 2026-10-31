@@ -120,6 +120,29 @@ def current(fx):
     return model_weights_sha256(fx.model, fx.schema)
 
 
+@pytest.mark.parametrize("error_type", [RuntimeError, MemoryError, RestoreError])
+def test_any_restore_exception_is_a_restore_mismatch(fx, monkeypatch, error_type):
+    error = error_type("restore verification failed")
+
+    def broken(*args, **kwargs):
+        raise error
+
+    monkeypatch.setattr(executor_module, "restore_from_snapshot_", broken)
+    with pytest.raises(CandidateFailed) as caught:
+        fx.executor()(fx.descriptor())
+    assert caught.value.kind is FailureKind.RESTORE_MISMATCH
+    assert caught.value.__cause__ is error
+
+
+def test_restore_interrupt_is_not_converted_to_a_candidate_failure(fx, monkeypatch):
+    def interrupted(*args, **kwargs):
+        raise KeyboardInterrupt()
+
+    monkeypatch.setattr(executor_module, "restore_from_snapshot_", interrupted)
+    with pytest.raises(KeyboardInterrupt):
+        fx.executor()(fx.descriptor())
+
+
 # ---------------------------------------------------------------------------
 # the normal life of a candidate
 # ---------------------------------------------------------------------------
