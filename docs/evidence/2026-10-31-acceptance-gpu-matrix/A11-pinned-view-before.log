@@ -1,0 +1,22 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____ test_pinned_model_view_preserves_source_files_and_has_revision_name ______
+acceptance/tests/test_gpu_pytest.py:26: in test_pinned_model_view_preserves_source_files_and_has_revision_name
+    from acceptance.probes.pytest_gpu_suite import prepare_model_view
+E   ModuleNotFoundError: No module named 'acceptance.probes.pytest_gpu_suite'
+_______________ test_missing_model_fails_before_creating_a_view ________________
+acceptance/tests/test_gpu_pytest.py:43: in test_missing_model_fails_before_creating_a_view
+    from acceptance.probes.pytest_gpu_suite import prepare_model_view
+E   ModuleNotFoundError: No module named 'acceptance.probes.pytest_gpu_suite'
+_________ test_wrapper_sets_model_environment_before_pytest_collection _________
+acceptance/tests/test_gpu_pytest.py:65: in test_wrapper_sets_model_environment_before_pytest_collection
+    assert result.returncode == 0, result.stdout + result.stderr
+E   AssertionError: /home/pc5070ti/projects/heteroes/.venv-backend/bin/python: can't open file '/home/pc5070ti/projects/heteroes/acceptance/probes/pytest_gpu_suite.py': [Errno 2] No such file or directory
+E     
+E   assert 2 == 0
+E    +  where 2 = CompletedProcess(args=['/home/pc5070ti/projects/heteroes/.venv-backend/bin/python', '/home/pc5070ti/projects/heteroes/... file '/home/pc5070ti/projects/heteroes/acceptance/probes/pytest_gpu_suite.py': [Errno 2] No such file or directory\n").returncode
+=========================== short test summary info ============================
+FAILED acceptance/tests/test_gpu_pytest.py::test_pinned_model_view_preserves_source_files_and_has_revision_name
+FAILED acceptance/tests/test_gpu_pytest.py::test_missing_model_fails_before_creating_a_view
+FAILED acceptance/tests/test_gpu_pytest.py::test_wrapper_sets_model_environment_before_pytest_collection
+3 failed in 0.02s

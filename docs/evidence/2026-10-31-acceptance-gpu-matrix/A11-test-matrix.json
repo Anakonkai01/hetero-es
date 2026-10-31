@@ -1,0 +1,10 @@
+{
+  "linux": {
+    "sm120": "79/1636 tests collected (1557 deselected) in 1.90s",
+    "not sm120": "1557/1636 tests collected (79 deselected) in 1.88s"
+  },
+  "native": {
+    "sm120": "79/1035 tests collected (956 deselected) in 1.88s",
+    "not sm120": "956/1035 tests collected (79 deselected) in 1.89s"
+  }
+}

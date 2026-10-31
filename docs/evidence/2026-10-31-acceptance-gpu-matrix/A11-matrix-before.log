@@ -1,0 +1,22 @@
+.................................FF.......F.....                         [100%]
+=================================== FAILURES ===================================
+________ test_host_specific_executed_test_floor_is_enforced[12-11-FAIL] ________
+acceptance/tests/test_core.py:239: in test_host_specific_executed_test_floor_is_enforced
+    host = Host("sm86", PY, pytest_marks="not sm120", pytest_min_passed={"suite": minimum})
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: Host.__init__() got an unexpected keyword argument 'pytest_marks'
+_________ test_host_specific_executed_test_floor_is_enforced[8-9-PASS] _________
+acceptance/tests/test_core.py:239: in test_host_specific_executed_test_floor_is_enforced
+    host = Host("sm86", PY, pytest_marks="not sm120", pytest_min_passed={"suite": minimum})
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: Host.__init__() got an unexpected keyword argument 'pytest_marks'
+______ test_gpu_suites_supply_real_model_and_explicit_hardware_selection _______
+acceptance/tests/test_registry.py:56: in test_gpu_suites_supply_real_model_and_explicit_hardware_selection
+    assert LOCAL.pytest_marks == ""
+           ^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'Host' object has no attribute 'pytest_marks'
+=========================== short test summary info ============================
+FAILED acceptance/tests/test_core.py::test_host_specific_executed_test_floor_is_enforced[12-11-FAIL]
+FAILED acceptance/tests/test_core.py::test_host_specific_executed_test_floor_is_enforced[8-9-PASS]
+FAILED acceptance/tests/test_registry.py::test_gpu_suites_supply_real_model_and_explicit_hardware_selection
+3 failed, 45 passed in 1.49s

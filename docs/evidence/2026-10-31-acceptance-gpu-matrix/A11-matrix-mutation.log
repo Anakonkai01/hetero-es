@@ -1,0 +1,9 @@
+control ok    | 51 passed in 1.63s
+killed       ignore-host-execution-floor | 2 failed, 49 passed in 1.62s
+killed       omit-model-environment | 1 failed, 50 passed in 1.68s
+killed       bad-revision-name | 2 failed, 49 passed in 1.63s
+killed       alias-owner-source | 1 failed, 50 passed in 1.63s
+killed       weaken-wsl-execution-floor | 1 failed, 50 passed in 1.61s
+killed       lose-sm120-applicability | 1 failed, 50 passed in 1.64s
+
+6 of 6 mutants killed.

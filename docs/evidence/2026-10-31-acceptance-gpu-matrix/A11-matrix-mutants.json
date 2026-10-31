@@ -1,0 +1,38 @@
+[
+  {
+    "name": "ignore-host-execution-floor",
+    "file": "acceptance/core.py",
+    "old": "host.pytest_min_passed.get(check.name, check.min_passed)",
+    "new": "check.min_passed"
+  },
+  {
+    "name": "omit-model-environment",
+    "file": "acceptance/probes/pytest_gpu_suite.py",
+    "old": "    os.environ[\"HETEROES_QWEN_PINNED_PATH\"] = str(view)",
+    "new": "    os.environ.pop(\"HETEROES_QWEN_PINNED_PATH\", None)"
+  },
+  {
+    "name": "bad-revision-name",
+    "file": "acceptance/probes/pytest_gpu_suite.py",
+    "old": "    view = out / PINNED_REVISION",
+    "new": "    view = out / \"qwen\""
+  },
+  {
+    "name": "alias-owner-source",
+    "file": "acceptance/probes/pytest_gpu_suite.py",
+    "old": "    shutil.copytree(source, view)",
+    "new": "    view.symlink_to(source, target_is_directory=True)"
+  },
+  {
+    "name": "weaken-wsl-execution-floor",
+    "file": "acceptance/hosts.py",
+    "old": "pytest_min_passed={\"strict-gpu-suite\": 1557}",
+    "new": "pytest_min_passed={\"strict-gpu-suite\": 1}"
+  },
+  {
+    "name": "lose-sm120-applicability",
+    "file": "runtime/tests/eval/test_integer_tma.py",
+    "old": "@pytest.mark.sm120\n@gpu\n@pytest.mark.parametrize(\"width, outputs\", [(80, 35), (896, 1152), (4864, 896)])",
+    "new": "@gpu\n@pytest.mark.parametrize(\"width, outputs\", [(80, 35), (896, 1152), (4864, 896)])"
+  }
+]
