@@ -13,6 +13,11 @@ import json
 import os
 from pathlib import Path
 import urllib.request
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "runtime/src"))
+from heteroes.http_safety import opener  # noqa: E402
+
 
 SESSION = Path.home() / ".config" / "heteroes-demo" / "session.json"
 
@@ -29,7 +34,7 @@ def main():
         data=json.dumps({"username": args.username, "password": password}).encode(),
         headers={"Content-Type": "application/json", "User-Agent": "HeteroES-demo/1"},
     )
-    with urllib.request.urlopen(request, timeout=60) as response:
+    with opener(proxy=True).open(request, timeout=60) as response:
         session = json.load(response)
     workspaces = session["workspaces"]
     chosen = next((w for w in workspaces if args.workspace in (None, w["name"])), None)

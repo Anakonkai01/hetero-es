@@ -88,7 +88,13 @@ GPU or heavy CPU work runs.
   Còn nghiệm thu noise/ES/Qwen trên ba môi trường ở A6.
 - A4 xong: 44 selftest nghiệm thu xanh, mutation 10/10 killed. A-021 sửa thêm source hash khi chọn commit cũ.
   A5 đã trả lời B-Q1/Q2 trong `docs/design/lab-server-architecture.md`. A-022 sửa rò handle study, mutation 2/2 killed.
-  Tiếp theo A6: chạy check-all, đóng gói và nghiệm thu hash cuối trên 5070 Ti / 3060 WSL / Windows.
+  Đang A6: CPU/check-all tại `.scratch/accept/20261031-223356-local/` (source `src-1ab5a488…`, commit `2fabe28a`).
+  Runtime CPU: 3 315 passed / 1 045 skipped; backend SQLite: 464 passed. Lint, format, đóng gói nguồn và web checks
+  đang tiến triển. Chưa chạy GPU/perf/faults/package/mutation hoặc remote ở hash này.
+- A-023 đã sửa và kiểm: 4 script quản trị dùng http_safety; 17 test script/recovery xanh, mutation 4/4 killed.
+  Lượt CPU đầu đã PASS 2/2 (check-all 596 giây) trước khi áp dụng fix này; cần nghiệm thu CPU lại ở hash mới.
+  Phụ thuộc pytest/hypothesis/simpy của 3060 đã cài lại vào `/tmp/heteroes-codex-testdeps-20261027-01`.
+  Tiếp theo: CPU cuối, GPU/perf/faults/package/mutation local, 3060 WSL, rồi Windows; A chưa merge/push. B/C chưa bắt đầu.
 
 ## Việc của chủ dự án
 

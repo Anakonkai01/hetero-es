@@ -28,6 +28,7 @@ def main():
     a = p.parse_args()
     sys.path.insert(0, str(a.runtime_root / "src"))
     from heteroes.product.recovery import verify_point, restore_point
+    from heteroes.http_safety import RedirectError, opener
 
     token = None
 
@@ -41,7 +42,7 @@ def main():
             headers=headers,
             method=method,
         )
-        with urllib.request.urlopen(req, timeout=30) as response:
+        with opener(proxy=True).open(req, timeout=30) as response:
             data = response.read()
             return json.loads(data) if data else {}
 
@@ -76,7 +77,7 @@ def main():
                         req = urllib.request.Request(
                             part["url"], data=data, method="PUT", headers={"Content-Length": str(len(data))}
                         )
-                        with urllib.request.urlopen(req, timeout=180) as response:
+                        with opener(proxy=True).open(req, timeout=180) as response:
                             if obj["mode"] == "multipart":
                                 parts.append({"PartNumber": part["number"], "ETag": response.headers["ETag"]})
                             response.read()
@@ -121,7 +122,7 @@ def main():
                 target = point / name
                 target.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
                 with (
-                    urllib.request.urlopen(current["objects"][name], timeout=180) as response,
+                    opener(proxy=True).open(current["objects"][name], timeout=180) as response,
                     open(target, "wb") as stream,
                 ):
                     os.chmod(target, 0o600)
@@ -140,8 +141,9 @@ def main():
         )
         return 0
     except Exception as error:
-        # HTTP errors can contain presigned URLs; only print the exception type.
-        print("Cloud recovery failed: " + type(error).__name__, file=sys.stderr)
+        # Other HTTP errors can contain signed URLs; only RedirectError has a sanitized public diagnostic.
+        detail = str(error) if isinstance(error, RedirectError) else type(error).__name__
+        print("Cloud recovery failed: " + detail, file=sys.stderr)
         return 1
     finally:
         if token:

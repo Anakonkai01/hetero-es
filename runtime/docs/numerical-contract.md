@@ -426,7 +426,7 @@ blocks of 256 threads; thread t writes the elements t, t + T, t + 2T, t + 3T wit
 GPU. `torch.randn` with the same seed gave the same bytes on the RTX 5070 Ti and the GTX 1660 SUPER for every size up to 22,528 elements (88 blocks, the 1660S) and different bytes from 22,529
 (and for a sequence of calls of 32,768 or 65,536; calls of 8,192, 16,384 and 22,528 agree). The maths of the generator (log, sin, cos) gave the same bits on sm_75 and sm_120.
 
-**The engine [D as a candidate, not yet decided for use]** (`heteroes/noise/cuda_engine.py`, `heteroes/es/cuda_ops.py`). Version `torch_cuda_philox_chunked_f32_to_f16_v1`:
+**The optional Recipe v1 engine [D — implemented 2026-10-07]** (`heteroes/noise/cuda_engine.py`, `heteroes/es/cuda_ops.py`). Version `torch_cuda_philox_chunked_f32_to_f16_v1`:
 - the noise of one tensor is a SEQUENCE of calls of `CUDA_CALL_ELEMENTS` = 22,528 elements (the last shorter) on one `torch.Generator` seeded with the first 63 bits of the SHA-256 of
   `engine version | candidate seed | schema hash | parameter index | call size` (like the address of a chunk in section 4, without the chunk index);
 - float32 normal cast to float16 (round to nearest even), then exactly the arithmetic of sections 5 (O2 = c) and 7 to 8 (FP32 accumulation in candidate order); only the source of eps changes;

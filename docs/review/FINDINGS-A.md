@@ -41,6 +41,8 @@ Mốc: main 58cf278c. Mẫu: ID | file:dòng | loại | mức | mô tả | bằn
 | A-021 | `acceptance/core.py:source_tree` | T | P2 | Explicit revision was ignored: source identity used HEAD while remote staging could use another commit. | Regression: source changes, then request HEAD~1; previously returned current identity. | Hash the requested revision; test + mutation passed. |
 | A-022 | `study/prepare.py` reachability and transfer | R | P2 | Reachability sockets were not closed; opening a network stream before fdopen leaked the temporary FD on failure. | socketpair fileno and os.fstat reproduce both leaks. | Close probe socket; own FD before network open; test + mutation 2/2 passed. |
 
+| A-023 | Administrative scripts: lab-login, verify-public-lab, check-public-replay, recovery | S | P2 | Default urllib redirects also affect administrator requests and signed recovery objects outside runtime/. | Six loopback cases fail on old code; final script/recovery regression 17 passed. | Reuse http_safety; 4/4 unsafe-opener mutants killed. |
+
 ## Bất biến rút từ hợp đồng (để đối chiếu code ở các khu vực sau)
 
 1. Danh tính nhiễu = (seed, schema_hash, param_index, chunk_index, chunk_elements, engine). Không có worker/attempt/lease/retry. (§4, N3)
@@ -67,4 +69,5 @@ Mốc: main 58cf278c. Mẫu: ID | file:dòng | loại | mức | mô tả | bằn
 | A-011/A-012/A-021 | Đã sửa + test; commit cùng mục trạng thái này | Evidence `2026-10-31-review-acceptance`: 44 passed, mutation 10/10 killed |
 | A-022 | Đã sửa + test; commit cùng mục trạng thái này | 2 leak regressions, mutation 2/2 killed; study + HTTP integration xanh |
 | A-018 | Thông tin; không cần sửa | Review chất lượng nhiễu đã lưu |
+| A-023 | Đã sửa + test; commit cùng mục trạng thái này | Evidence `2026-10-31-review-admin-http`: 17 passed, mutation 4/4 killed |
 | Nghiệm thu cuối A6 | Chưa xong | Cần check-all và nghiệm thu trên hash cuối / cả 3 môi trường |

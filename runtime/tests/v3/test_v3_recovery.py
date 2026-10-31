@@ -245,7 +245,9 @@ def test_download_restore_cli_accepts_v3_objects(product_assets, tmp_path, monke
             raise AssertionError("Unexpected fixture request")
         return io.BytesIO(payload)
 
-    monkeypatch.setattr(urllib.request, "urlopen", request)
+    from types import SimpleNamespace
+
+    monkeypatch.setattr("heteroes.http_safety.opener", lambda **kwargs: SimpleNamespace(open=request))
     assert module.main() == 0
     assert read_json(destination / "study-selection.json") == read_json(root / "study-selection.json")
 

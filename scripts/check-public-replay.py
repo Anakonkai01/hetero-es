@@ -25,6 +25,10 @@ from urllib.parse import urlsplit
 import urllib.error
 import urllib.request
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "runtime/src"))
+from heteroes.http_safety import opener  # noqa: E402
+
+
 TERMINAL = {"COMPLETED", "CANCELLED", "FAILED"}
 
 
@@ -45,7 +49,7 @@ class Lab:
             data=None if body is None else json.dumps(body).encode(),
         )
         try:
-            with urllib.request.urlopen(request, timeout=60) as reply:
+            with opener(proxy=True).open(request, timeout=60) as reply:
                 return json.load(reply) if reply.status != 204 else None
         except urllib.error.HTTPError as error:
             raise RuntimeError(f"{method} {path}: HTTP {error.code} {error.read()[:200]!r}") from None

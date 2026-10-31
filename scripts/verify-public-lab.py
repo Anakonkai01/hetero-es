@@ -15,12 +15,17 @@ from pathlib import Path
 import time
 import urllib.parse
 import urllib.request
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "runtime/src"))
+from heteroes.http_safety import opener  # noqa: E402
+
 
 HEADERS = {"User-Agent": "HeteroES-verify/1"}
 
 
 def get(url, headers=None, timeout=60):
-    return urllib.request.urlopen(urllib.request.Request(url, headers={**HEADERS, **(headers or {})}), timeout=timeout)
+    return opener(proxy=True).open(urllib.request.Request(url, headers={**HEADERS, **(headers or {})}), timeout=timeout)
 
 
 def main():
@@ -70,7 +75,7 @@ def main():
             data=json.dumps({"username": "admin", "password": users["admin"]}).encode(),
             headers={**HEADERS, "Content-Type": "application/json"},
         )
-        session = json.load(urllib.request.urlopen(login, timeout=30))
+        session = json.load(opener(proxy=True).open(login, timeout=30))
         auth = {
             "Authorization": "Bearer " + session["accessToken"],
             "X-Workspace-Id": session["workspaces"][0]["workspaceId"],
@@ -106,7 +111,7 @@ def main():
             result["notifications"] = {"unread": notifications["unread"], "listed": len(notifications["items"])}
             result["templates"] = len(templates)
         finally:
-            urllib.request.urlopen(
+            opener(proxy=True).open(
                 urllib.request.Request(
                     base + "/api/v1/auth/logout",
                     data=b"{}",
