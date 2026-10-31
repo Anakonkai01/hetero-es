@@ -51,7 +51,7 @@ nonfinite errors and captured replay against the CPU reference and retained warp
 mutations test the scale, tree, input FTZ, zero select and admission boundary. Real-model comparisons use
 the same pinned on-disk frozen files, exact adapter files, parent manifests, prompts and candidate descriptors.
 
-[The measured continuation](../../../docs/evidence/2026-10-25-frozen-subwarp-perf/README.md) records operator
+[The measured continuation](https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-25-frozen-subwarp-perf/README.md) records operator
 sweeps, matched model timings and exact before/after and cross-architecture scope. CUDA event operator gains
 are not end-to-end speedups. General base-quantization/trained-adapter quality, full lifecycle memory, native
 Windows and managed/default activation require their own evidence; `hardwareQualified` remains false.

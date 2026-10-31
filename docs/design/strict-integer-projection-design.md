@@ -2,7 +2,7 @@
 
 The initial proposal below was implemented at `fb18a7b7` with a separate CPU/CUDA/decoder identity.
 The [operator contract](../../runtime/docs/strict/integer-projection-v1.md) specifies the implemented arithmetic and proof;
-[results and limits](../evidence/2026-10-25-strict-integer/RESULTS-01.md) record CPU/GPU, trained-candidate and timing evidence.
+[results and limits](https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-25-strict-integer/RESULTS-01.md) record CPU/GPU, trained-candidate and timing evidence.
 The selected experimental decoder defaults to B22. B14 has a recorded token difference from the old tree, and neither
 precision is a managed default or qualified backend. A later exact-conversion scratch prototype remains unselected.
 

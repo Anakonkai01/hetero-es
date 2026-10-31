@@ -28,5 +28,5 @@ the requested policy. This is an execution choice within B22, not new arithmetic
 that unmeasured architectures will improve.
 
 Numerical, instruction, model/candidate and performance receipts are recorded separately in
-[`2026-10-26-strict-prefetch`](../../../docs/evidence/2026-10-26-strict-prefetch/README.md).
+[`2026-10-26-strict-prefetch`](https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-26-strict-prefetch/README.md).
 They do not establish universal model quality or enable the managed execution path.

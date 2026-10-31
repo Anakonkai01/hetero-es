@@ -100,13 +100,13 @@ includes fixed/packed KV, actual packed prefill workspace, decode intermediates,
 It excludes existing weights/RoPE and CUDA driver state; it is not a total-device VRAM limit. Actual allocated and
 reserved peaks must still be measured. Oversized requests are refused before prefill instead of bypassing the budget.
 
-Receipts: [overnight continuation](../../../docs/evidence/2026-10-25-strict-overnight/README.md). Native FTZ multiply was
+Receipts: [overnight continuation](https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-25-strict-overnight/README.md). Native FTZ multiply was
 examined and rejected: the surveyed GPUs flush some tiny exact products before rounding, whereas the reference
 rounds first and can produce the smallest normal. The selected path retains integer signed-zero flushing everywhere.
 
 ## Evidence and remaining work
 
-[Receipts and limits](../../../docs/evidence/2026-10-25-strict-throughput/README.md) distinguish three model families,
+[Receipts and limits](https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-25-strict-throughput/README.md) distinguish three model families,
 four small graph layouts and two finite weight states on four physical GPUs from the single trained checkpoint
 used for throughput comparison. Tiny graph equality is not acceptance of trained Llama/Mistral checkpoints.
 

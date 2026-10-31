@@ -24,7 +24,7 @@ Source: owner responses in the follow-up grilling session for
 
 Status: **policy agreed; root cause unresolved; mitigation not implemented**.
 
-**Review 2026-10-23 10:20 ([evidence](../evidence/2026-10-23-oomd-review/README.md)):** strong hypothesis = the
+**Review 2026-10-23 10:20 ([evidence](https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-23-oomd-review/README.md)):** strong hypothesis = the
 recovery-point upload thread (`product/cloud_sync.py`) re-hashing ~3-4 GB per attempt, buffering ~1 GB per upload and
 writing ~1 GB every ~2 min to the lab storage on the NTFS/FUSE Archive disk during a 24 s/generation run. Confirmed
 separate bug: with the Archive full, the worker service still re-reads ~60 MB/s every 30 s with no run active and holds
@@ -65,12 +65,12 @@ Follow-up work:
 
 Evidence and implementation references:
 
-- [Raw oomd journal](../evidence/2026-10-23-overnight/soak/oomd-journal.log)
-- [Soak outcome and evidence limits](../evidence/2026-10-23-overnight/README.md)
+- [Raw oomd journal](https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-23-overnight/soak/oomd-journal.log)
+- [Soak outcome and evidence limits](https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-23-overnight/README.md)
 - [Coordinator recovery limit](../../runtime/src/heteroes/product/run_supervisor.py)
 - [Worker service restart policy](../../runtime/src/heteroes/product/worker_service.py)
 - [Recovery-point hard links](../../runtime/src/heteroes/product/recovery.py)
-- [Soak telemetry sampler](../evidence/2026-10-23-overnight/soak-sampler.sh)
+- [Soak telemetry sampler](https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-23-overnight/soak-sampler.sh)
 
 ## Deferred verification
 
@@ -80,7 +80,7 @@ generation 63**. The missing generation-62 summary after recovery made the old
 log-based selection total 719. A successful numerical replay and 720 matched audit
 rows must not be described as proof that every selected audit finished. Reporting
 is repaired separately; the audit-timeout/recovery behavior remains an open
-follow-up. See [the investigation](../evidence/2026-10-23-long-run-ui/README.md).
+follow-up. See [the investigation](https://github.com/Anakonkai01/hetero-es/blob/evidence-archive/docs/evidence/2026-10-23-long-run-ui/README.md).
 
 Future low-disk acceptance should use an isolated storage environment, verify a
 pause at a generation boundary, free space, resume the run, and check replay
