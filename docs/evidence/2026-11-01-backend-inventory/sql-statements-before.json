@@ -1,0 +1,2866 @@
+[
+  {
+    "path": "backend/agent_commands.py",
+    "line": 16,
+    "scope": "enqueue",
+    "method": "execute",
+    "sql": "INSERT OR IGNORE INTO device_commands VALUES (?,?,?,?,0,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_commands.py",
+    "line": 22,
+    "scope": "require_command",
+    "method": "execute",
+    "sql": "SELECT value FROM settings WHERE key=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_commands.py",
+    "line": 30,
+    "scope": "commands",
+    "method": "execute",
+    "sql": "SELECT body FROM device_commands WHERE device_id=? AND ack=0 ORDER BY created",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_commands.py",
+    "line": 37,
+    "scope": "commands",
+    "method": "execute",
+    "sql": "SELECT body FROM model_probe_jobs WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_commands.py",
+    "line": 50,
+    "scope": "commands",
+    "method": "execute",
+    "sql": "SELECT released FROM assignments WHERE id=? AND epoch=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_commands.py",
+    "line": 79,
+    "scope": "worker_command",
+    "method": "execute",
+    "sql": "SELECT * FROM devices WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 21,
+    "scope": "poll",
+    "method": "execute",
+    "sql": "INSERT OR REPLACE INTO settings VALUES (?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 25,
+    "scope": "poll",
+    "method": "execute",
+    "sql": "SELECT * FROM devices WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 32,
+    "scope": "poll",
+    "method": "execute",
+    "sql": "SELECT * FROM assignments WHERE released=0",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 35,
+    "scope": "poll",
+    "method": "execute",
+    "sql": "SELECT * FROM assignments WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 37,
+    "scope": "poll",
+    "method": "execute",
+    "sql": "SELECT * FROM devices WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 63,
+    "scope": "poll",
+    "method": "execute",
+    "sql": "SELECT id,body FROM assignments WHERE released=1",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 72,
+    "scope": "poll",
+    "method": "execute",
+    "sql": "SELECT 1 FROM assignments WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 73,
+    "scope": "poll",
+    "method": "execute",
+    "sql": "SELECT 1 FROM device_reservations WHERE device_id=? AND assignment_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 95,
+    "scope": "_refresh_observation",
+    "method": "execute",
+    "sql": "UPDATE devices SET self_test=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 102,
+    "scope": "_refresh_observation",
+    "method": "execute",
+    "sql": "UPDATE devices SET telemetry=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 123,
+    "scope": "_refresh_observation",
+    "method": "execute",
+    "sql": "INSERT OR IGNORE INTO device_telemetry_history VALUES (?,?,?,?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 127,
+    "scope": "_refresh_observation",
+    "method": "execute",
+    "sql": "DELETE FROM device_telemetry_history WHERE device_id=? AND rowid NOT IN (SELECT rowid FROM device_telemetry_history WHERE device_id=? ORDER BY received_at DESC LIMIT 180)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 132,
+    "scope": "_refresh_observation",
+    "method": "execute",
+    "sql": "UPDATE devices SET telemetry=NULL WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 139,
+    "scope": "_update_boot",
+    "method": "execute",
+    "sql": "UPDATE devices SET boot_id=?,seen=?,enabled=?,desired=?,processes=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 151,
+    "scope": "_update_boot",
+    "method": "execute",
+    "sql": "UPDATE device_commands SET ack=1 WHERE device_id=? AND json_extract(body,'$.kind')='SET_CONTRIBUTION'",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 166,
+    "scope": "_update_boot",
+    "method": "execute",
+    "sql": "SELECT a.* FROM assignments a JOIN device_reservations r ON r.assignment_id=a.id WHERE r.device_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 180,
+    "scope": "_update_boot",
+    "method": "execute",
+    "sql": "UPDATE device_commands SET ack=1 WHERE id=? AND device_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 189,
+    "scope": "_quarantine_processes",
+    "method": "execute",
+    "sql": "UPDATE devices SET status=?,enabled=0,desired=0 WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 191,
+    "scope": "_quarantine_processes",
+    "method": "execute",
+    "sql": "SELECT a.run_id FROM assignments a JOIN device_reservations r ON a.id=r.assignment_id WHERE r.device_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 201,
+    "scope": "_accept_events",
+    "method": "execute",
+    "sql": "SELECT coordinator,epoch FROM assignments WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 211,
+    "scope": "_accept_events",
+    "method": "execute",
+    "sql": "INSERT OR IGNORE INTO monitoring_events(event_id,assignment_id,body) VALUES (?,?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 221,
+    "scope": "_accept_events",
+    "method": "execute",
+    "sql": "SELECT body,released FROM assignments WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 227,
+    "scope": "_accept_events",
+    "method": "execute",
+    "sql": "UPDATE devices SET status='QUARANTINED',enabled=0,desired=0 WHERE id=? AND status='APPROVED'",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 239,
+    "scope": "_accept_reports",
+    "method": "execute",
+    "sql": "SELECT * FROM assignments WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 272,
+    "scope": "_accept_reports",
+    "method": "execute",
+    "sql": "SELECT 1 FROM device_reports WHERE device_id=? AND assignment_id=? AND sequence=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 279,
+    "scope": "_accept_reports",
+    "method": "execute",
+    "sql": "SELECT max(sequence) FROM device_reports WHERE device_id=? AND assignment_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 285,
+    "scope": "_accept_reports",
+    "method": "execute",
+    "sql": "INSERT INTO device_reports VALUES (?,?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 289,
+    "scope": "_accept_reports",
+    "method": "execute",
+    "sql": "UPDATE assignments SET snapshot=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 298,
+    "scope": "_accept_reports",
+    "method": "execute",
+    "sql": "SELECT id FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_polling.py",
+    "line": 303,
+    "scope": "_accept_reports",
+    "method": "execute",
+    "sql": "UPDATE experiments SET snapshot=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 51,
+    "scope": "waiting_reason",
+    "method": "execute",
+    "sql": "SELECT value FROM settings WHERE key=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 83,
+    "scope": "waiting_reason",
+    "method": "execute",
+    "sql": "SELECT a.run_id FROM physical_reservations r JOIN assignments a ON a.id=r.assignment_id WHERE resource_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 90,
+    "scope": "waiting_reason",
+    "method": "execute",
+    "sql": "SELECT d.self_test FROM device_reservations r JOIN devices d ON d.id=r.device_id",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 102,
+    "scope": "intended_members",
+    "method": "execute",
+    "sql": "SELECT worker_id, action FROM assignment_members WHERE run_id=? ORDER BY rowid",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 117,
+    "scope": "change_members",
+    "method": "execute",
+    "sql": "SELECT * FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 155,
+    "scope": "change_members",
+    "method": "execute",
+    "sql": "SELECT assignment_id FROM device_reservations WHERE device_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 172,
+    "scope": "change_members",
+    "method": "execute",
+    "sql": "UPDATE assignments SET body=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 174,
+    "scope": "change_members",
+    "method": "execute",
+    "sql": "INSERT INTO device_reservations VALUES (?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 176,
+    "scope": "change_members",
+    "method": "execute",
+    "sql": "INSERT OR IGNORE INTO physical_reservations VALUES (?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 189,
+    "scope": "change_members",
+    "method": "execute",
+    "sql": "INSERT INTO assignment_members VALUES (?,?,?,?,?,?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 204,
+    "scope": "note_membership",
+    "method": "execute",
+    "sql": "SELECT body FROM experiments WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 231,
+    "scope": "auto_join",
+    "method": "execute",
+    "sql": "SELECT worker_id FROM assignment_members WHERE run_id=? AND action='LEAVE'",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 235,
+    "scope": "auto_join",
+    "method": "execute",
+    "sql": "SELECT worker_id FROM worker_assignments WHERE workspace_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 244,
+    "scope": "leave_on_disable",
+    "method": "execute",
+    "sql": "SELECT a.run_id FROM assignments a JOIN device_reservations r ON a.id=r.assignment_id WHERE r.device_id=? AND a.released=0 AND a.coordinator!=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 264,
+    "scope": "release_left_members",
+    "method": "execute",
+    "sql": "SELECT body FROM experiments WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 275,
+    "scope": "release_left_members",
+    "method": "execute",
+    "sql": "SELECT self_test,seen FROM devices WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 284,
+    "scope": "release_left_members",
+    "method": "execute",
+    "sql": "DELETE FROM device_reservations WHERE device_id=? AND assignment_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 286,
+    "scope": "release_left_members",
+    "method": "execute",
+    "sql": "DELETE FROM physical_reservations WHERE resource_id=? AND assignment_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 297,
+    "scope": "release_left_members",
+    "method": "execute",
+    "sql": "UPDATE assignments SET body=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 303,
+    "scope": "reservations",
+    "method": "execute",
+    "sql": "SELECT * FROM device_reservations",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 307,
+    "scope": "_assignment",
+    "method": "execute",
+    "sql": "SELECT * FROM assignments WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 314,
+    "scope": "submit",
+    "method": "execute",
+    "sql": "BEGIN IMMEDIATE",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 315,
+    "scope": "submit",
+    "method": "execute",
+    "sql": "SELECT * FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 367,
+    "scope": "submit",
+    "method": "execute",
+    "sql": "INSERT INTO assignments VALUES (?,?,?,?,?,?,0)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 372,
+    "scope": "submit",
+    "method": "execute",
+    "sql": "INSERT INTO device_reservations VALUES (?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 375,
+    "scope": "submit",
+    "method": "execute",
+    "sql": "INSERT INTO physical_reservations VALUES (?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 392,
+    "scope": "cancel",
+    "method": "execute",
+    "sql": "SELECT id,body,released FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 411,
+    "scope": "pause",
+    "method": "execute",
+    "sql": "SELECT * FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 433,
+    "scope": "_release_confirmed",
+    "method": "execute",
+    "sql": "SELECT processes,seen FROM devices WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 456,
+    "scope": "_release_confirmed",
+    "method": "execute",
+    "sql": "UPDATE assignments SET snapshot=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 457,
+    "scope": "_release_confirmed",
+    "method": "execute",
+    "sql": "UPDATE assignments SET released=1 WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 458,
+    "scope": "_release_confirmed",
+    "method": "execute",
+    "sql": "DELETE FROM device_reservations WHERE assignment_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/agent_scheduling.py",
+    "line": 459,
+    "scope": "_release_confirmed",
+    "method": "execute",
+    "sql": "DELETE FROM physical_reservations WHERE assignment_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/app.py",
+    "line": 83,
+    "scope": "create_app.user",
+    "method": "execute",
+    "sql": "SELECT users.profile FROM sessions JOIN users ON users.id=sessions.user_id WHERE digest=? AND expires>?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/deployment.py",
+    "line": 29,
+    "scope": "idle",
+    "method": "execute",
+    "sql": "f'SELECT count(*) FROM {table}'",
+    "dynamic": true
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 72,
+    "scope": "devices",
+    "method": "execute",
+    "sql": "SELECT * FROM devices ORDER BY rowid",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 74,
+    "scope": "devices",
+    "method": "execute",
+    "sql": "SELECT a.run_id FROM device_reservations r JOIN assignments a ON a.id=r.assignment_id WHERE r.device_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 79,
+    "scope": "devices",
+    "method": "execute",
+    "sql": "SELECT a.run_id FROM physical_reservations r JOIN assignments a ON a.id=r.assignment_id WHERE r.resource_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 83,
+    "scope": "devices",
+    "method": "execute",
+    "sql": "SELECT workspace_id FROM worker_assignments WHERE worker_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 86,
+    "scope": "devices",
+    "method": "execute",
+    "sql": "SELECT job_id FROM model_probe_reservations WHERE device_id=? OR resource_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 95,
+    "scope": "devices",
+    "method": "execute",
+    "sql": "SELECT snapshot FROM experiments WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 123,
+    "scope": "devices",
+    "method": "execute",
+    "sql": "SELECT body FROM device_telemetry_history WHERE device_id=? ORDER BY received_at DESC LIMIT 60",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 213,
+    "scope": "snapshot",
+    "method": "execute",
+    "sql": "SELECT snapshot,released FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 239,
+    "scope": "runs",
+    "method": "execute",
+    "sql": "SELECT * FROM assignments ORDER BY rowid",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 274,
+    "scope": "install_device_routes.device_auth",
+    "method": "execute",
+    "sql": "SELECT * FROM devices WHERE token_digest=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 281,
+    "scope": "install_device_routes.device_auth",
+    "method": "execute",
+    "sql": "SELECT 1 FROM assignments WHERE coordinator=? AND released=0",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 294,
+    "scope": "install_device_routes.pairing",
+    "method": "execute",
+    "sql": "INSERT INTO pairing_codes VALUES (?,?,?,0)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 302,
+    "scope": "install_device_routes.enroll",
+    "method": "execute",
+    "sql": "SELECT * FROM pairing_codes WHERE digest=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 307,
+    "scope": "install_device_routes.enroll",
+    "method": "execute",
+    "sql": "SELECT 1 FROM devices WHERE worker_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 309,
+    "scope": "install_device_routes.enroll",
+    "method": "execute",
+    "sql": "SELECT owner FROM worker_assignments WHERE worker_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 314,
+    "scope": "install_device_routes.enroll",
+    "method": "execute",
+    "sql": "INSERT INTO devices(id,worker_id,owner,name,token_digest,status,compute_url,bulk_url,self_test) VALUES (?,?,?,?,?,?,?,?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 328,
+    "scope": "install_device_routes.enroll",
+    "method": "execute",
+    "sql": "UPDATE pairing_codes SET used=1 WHERE digest=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 329,
+    "scope": "install_device_routes.enroll",
+    "method": "execute",
+    "sql": "INSERT OR IGNORE INTO worker_assignments VALUES (?,?,NULL)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 340,
+    "scope": "install_device_routes.update_endpoints",
+    "method": "execute",
+    "sql": "BEGIN IMMEDIATE",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 341,
+    "scope": "install_device_routes.update_endpoints",
+    "method": "execute",
+    "sql": "SELECT * FROM devices WHERE id=? AND owner=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 363,
+    "scope": "install_device_routes.update_endpoints",
+    "method": "execute",
+    "sql": "UPDATE devices SET self_test=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 364,
+    "scope": "install_device_routes.update_endpoints",
+    "method": "execute",
+    "sql": "UPDATE devices SET compute_url=?,bulk_url=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 381,
+    "scope": "install_device_routes.qualification",
+    "method": "execute",
+    "sql": "BEGIN IMMEDIATE",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 382,
+    "scope": "install_device_routes.qualification",
+    "method": "execute",
+    "sql": "SELECT * FROM devices WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 400,
+    "scope": "install_device_routes.qualification",
+    "method": "execute",
+    "sql": "UPDATE devices SET self_test=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 409,
+    "scope": "install_device_routes.devices",
+    "method": "execute",
+    "sql": "SELECT m.user_id,w.id,w.name FROM memberships m JOIN workspaces w ON w.id=m.workspace_id ORDER BY w.rowid",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 418,
+    "scope": "install_device_routes.approve",
+    "method": "execute",
+    "sql": "SELECT * FROM devices WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 432,
+    "scope": "install_device_routes.approve",
+    "method": "execute",
+    "sql": "SELECT 1 FROM memberships WHERE workspace_id=? AND user_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 439,
+    "scope": "install_device_routes.approve",
+    "method": "execute",
+    "sql": "UPDATE devices SET status=\"APPROVED\" WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 440,
+    "scope": "install_device_routes.approve",
+    "method": "execute",
+    "sql": "UPDATE worker_assignments SET workspace_id=? WHERE worker_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 448,
+    "scope": "install_device_routes.approve",
+    "method": "execute",
+    "sql": "SELECT a.run_id FROM assignments a JOIN device_reservations r ON a.id=r.assignment_id WHERE r.device_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 453,
+    "scope": "install_device_routes.approve",
+    "method": "execute",
+    "sql": "UPDATE devices SET status=\"REVOKED\",enabled=0,desired=0 WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 471,
+    "scope": "install_device_routes.remove",
+    "method": "execute",
+    "sql": "f'DELETE FROM {table} WHERE device_id=?'",
+    "dynamic": true
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 472,
+    "scope": "install_device_routes.remove",
+    "method": "execute",
+    "sql": "DELETE FROM devices WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 473,
+    "scope": "install_device_routes.remove",
+    "method": "execute",
+    "sql": "SELECT 1 FROM devices WHERE worker_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 474,
+    "scope": "install_device_routes.remove",
+    "method": "execute",
+    "sql": "DELETE FROM worker_assignments WHERE worker_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 481,
+    "scope": "install_device_routes.remove_device",
+    "method": "execute",
+    "sql": "SELECT * FROM devices WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 491,
+    "scope": "install_device_routes.managed",
+    "method": "execute",
+    "sql": "SELECT * FROM devices WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 501,
+    "scope": "install_device_routes.rename",
+    "method": "execute",
+    "sql": "UPDATE devices SET name=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 515,
+    "scope": "install_device_routes.delete_device",
+    "method": "execute",
+    "sql": "UPDATE devices SET status=\"REVOKED\",enabled=0,desired=0 WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 520,
+    "scope": "install_device_routes.set_contribution",
+    "method": "execute",
+    "sql": "UPDATE devices SET desired=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 522,
+    "scope": "install_device_routes.set_contribution",
+    "method": "execute",
+    "sql": "UPDATE devices SET keep_on=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 533,
+    "scope": "install_device_routes.set_contribution",
+    "method": "execute",
+    "sql": "SELECT a.run_id FROM assignments a JOIN device_reservations r ON a.id=r.assignment_id WHERE r.device_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 546,
+    "scope": "install_device_routes.contribution",
+    "method": "execute",
+    "sql": "SELECT * FROM devices WHERE id=? AND owner=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 558,
+    "scope": "install_device_routes.contribution_preference",
+    "method": "execute",
+    "sql": "SELECT * FROM devices WHERE id=? AND owner=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 561,
+    "scope": "install_device_routes.contribution_preference",
+    "method": "execute",
+    "sql": "UPDATE devices SET keep_on=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 569,
+    "scope": "install_device_routes.own_contribution",
+    "method": "execute",
+    "sql": "SELECT * FROM devices WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 577,
+    "scope": "install_device_routes.own_name",
+    "method": "execute",
+    "sql": "UPDATE devices SET name=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 587,
+    "scope": "install_device_routes.forget_self",
+    "method": "execute",
+    "sql": "SELECT * FROM devices WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 590,
+    "scope": "install_device_routes.forget_self",
+    "method": "execute",
+    "sql": "UPDATE devices SET status=\"REVOKED\",enabled=0,desired=0,keep_on=0 WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 597,
+    "scope": "install_device_routes.own_summary",
+    "method": "execute",
+    "sql": "SELECT * FROM devices WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/devices.py",
+    "line": 599,
+    "scope": "install_device_routes.own_summary",
+    "method": "execute",
+    "sql": "SELECT a.run_id,a.coordinator,a.snapshot FROM assignments a JOIN device_reservations r ON r.assignment_id=a.id WHERE r.device_id=? AND a.released=0",
+    "dynamic": false
+  },
+  {
+    "path": "backend/doctor.py",
+    "line": 103,
+    "scope": "run_checks",
+    "method": "execute",
+    "sql": "PRAGMA integrity_check",
+    "dynamic": false
+  },
+  {
+    "path": "backend/doctor.py",
+    "line": 105,
+    "scope": "run_checks",
+    "method": "execute",
+    "sql": "PRAGMA user_version",
+    "dynamic": false
+  },
+  {
+    "path": "backend/doctor.py",
+    "line": 117,
+    "scope": "run_checks",
+    "method": "execute",
+    "sql": "SELECT 1 FROM sqlite_master WHERE name='physical_reservations'",
+    "dynamic": false
+  },
+  {
+    "path": "backend/doctor.py",
+    "line": 116,
+    "scope": "run_checks",
+    "method": "execute",
+    "sql": "SELECT count(*) FROM physical_reservations",
+    "dynamic": false
+  },
+  {
+    "path": "backend/doctor.py",
+    "line": 120,
+    "scope": "run_checks",
+    "method": "execute",
+    "sql": "SELECT 1 FROM sqlite_master WHERE name='devices'",
+    "dynamic": false
+  },
+  {
+    "path": "backend/doctor.py",
+    "line": 121,
+    "scope": "run_checks",
+    "method": "execute",
+    "sql": "SELECT status, seen FROM devices",
+    "dynamic": false
+  },
+  {
+    "path": "backend/metadata_backup.py",
+    "line": 63,
+    "scope": "create_metadata_backup",
+    "method": "execute",
+    "sql": "INSERT OR REPLACE INTO settings VALUES (?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 9,
+    "scope": "migrate",
+    "method": "execute",
+    "sql": "PRAGMA user_version",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 15,
+    "scope": "migrate",
+    "method": "execute",
+    "sql": "BEGIN IMMEDIATE",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 16,
+    "scope": "migrate",
+    "method": "execute",
+    "sql": "CREATE TABLE workspaces(id TEXT PRIMARY KEY,name TEXT NOT NULL,description TEXT NOT NULL,creator TEXT NOT NULL)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 19,
+    "scope": "migrate",
+    "method": "execute",
+    "sql": "CREATE TABLE memberships(workspace_id TEXT NOT NULL,user_id TEXT NOT NULL,role TEXT NOT NULL CHECK(role IN (\"ADMIN\",\"PARTICIPANT\")),PRIMARY KEY(workspace_id,user_id))",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 22,
+    "scope": "migrate",
+    "method": "execute",
+    "sql": "CREATE TABLE invitations(id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL,user_id TEXT NOT NULL,status TEXT NOT NULL,created TEXT NOT NULL)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 25,
+    "scope": "migrate",
+    "method": "execute",
+    "sql": "CREATE UNIQUE INDEX pending_invitation ON invitations(workspace_id,user_id) WHERE status=\"PENDING\"",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 26,
+    "scope": "migrate",
+    "method": "execute",
+    "sql": "CREATE TABLE worker_assignments(worker_id TEXT PRIMARY KEY,owner TEXT NOT NULL,workspace_id TEXT)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 27,
+    "scope": "migrate",
+    "method": "execute",
+    "sql": "CREATE TABLE settings(key TEXT PRIMARY KEY,value TEXT NOT NULL)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 28,
+    "scope": "migrate",
+    "method": "execute",
+    "sql": "ALTER TABLE audit ADD COLUMN workspace_id TEXT",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 29,
+    "scope": "migrate",
+    "method": "execute",
+    "sql": "UPDATE audit SET workspace_id=\"lab\"",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 30,
+    "scope": "migrate",
+    "method": "execute",
+    "sql": "SELECT profile FROM users ORDER BY rowid",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 36,
+    "scope": "migrate",
+    "method": "execute",
+    "sql": "INSERT INTO workspaces VALUES (?,?,?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 44,
+    "scope": "migrate",
+    "method": "execute",
+    "sql": "UPDATE users SET profile=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 45,
+    "scope": "migrate",
+    "method": "execute",
+    "sql": "INSERT INTO memberships VALUES (?,?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 49,
+    "scope": "migrate",
+    "method": "execute",
+    "sql": "CREATE UNIQUE INDEX username ON users(json_extract(profile,'$.username'))",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 50,
+    "scope": "migrate",
+    "method": "execute",
+    "sql": "INSERT INTO settings VALUES (?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 51,
+    "scope": "migrate",
+    "method": "execute",
+    "sql": "PRAGMA user_version=1",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 56,
+    "scope": "initialize_workspace_extras",
+    "method": "executescript",
+    "sql": "\n        CREATE TABLE IF NOT EXISTS workspace_settings(workspace_id TEXT PRIMARY KEY,body TEXT NOT NULL);\n        CREATE TABLE IF NOT EXISTS join_requests(id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL,user_id TEXT NOT NULL,\n            status TEXT NOT NULL,created TEXT NOT NULL);\n        CREATE UNIQUE INDEX IF NOT EXISTS pending_join_request ON join_requests(workspace_id,user_id)\n            WHERE status=\"PENDING\";\n        ",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 69,
+    "scope": "initialize_agent_schema",
+    "method": "execute",
+    "sql": "INSERT OR REPLACE INTO settings VALUES (?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 70,
+    "scope": "initialize_agent_schema",
+    "method": "executescript",
+    "sql": "\n                CREATE TABLE IF NOT EXISTS pairing_codes (digest TEXT PRIMARY KEY,owner TEXT NOT NULL,expires REAL NOT NULL,used INTEGER NOT NULL DEFAULT 0);\n                CREATE TABLE IF NOT EXISTS devices (id TEXT PRIMARY KEY,worker_id TEXT UNIQUE NOT NULL,owner TEXT NOT NULL,name TEXT NOT NULL,token_digest TEXT NOT NULL,status TEXT NOT NULL,compute_url TEXT NOT NULL,self_test TEXT NOT NULL,boot_id TEXT,seen REAL NOT NULL DEFAULT 0,enabled INTEGER NOT NULL DEFAULT 0,desired INTEGER NOT NULL DEFAULT 0,processes TEXT NOT NULL DEFAULT '[]');\n                CREATE TABLE IF NOT EXISTS assignments (id TEXT PRIMARY KEY,run_id TEXT UNIQUE NOT NULL,coordinator TEXT NOT NULL,epoch INTEGER NOT NULL,body TEXT NOT NULL,snapshot TEXT NOT NULL,released INTEGER NOT NULL DEFAULT 0);\n                CREATE TABLE IF NOT EXISTS device_reservations (device_id TEXT PRIMARY KEY,assignment_id TEXT NOT NULL);\n                CREATE TABLE IF NOT EXISTS physical_reservations (resource_id TEXT PRIMARY KEY,assignment_id TEXT NOT NULL);\n                CREATE TABLE IF NOT EXISTS device_commands (id TEXT PRIMARY KEY,device_id TEXT NOT NULL,dedupe TEXT NOT NULL UNIQUE,body TEXT NOT NULL,ack INTEGER NOT NULL DEFAULT 0,created REAL NOT NULL);\n                CREATE TABLE IF NOT EXISTS monitoring_events(sequence INTEGER PRIMARY KEY AUTOINCREMENT,event_id TEXT UNIQUE NOT NULL,assignment_id TEXT NOT NULL,body TEXT NOT NULL);\n                CREATE TABLE IF NOT EXISTS device_telemetry_history(device_id TEXT NOT NULL,boot_id TEXT NOT NULL,sampled_at REAL NOT NULL,received_at REAL NOT NULL,body TEXT NOT NULL,PRIMARY KEY(device_id,boot_id,sampled_at));\n                CREATE TABLE IF NOT EXISTS device_reports (device_id TEXT NOT NULL,assignment_id TEXT NOT NULL,sequence INTEGER NOT NULL,PRIMARY KEY(device_id,assignment_id,sequence));\n                CREATE TABLE IF NOT EXISTS assignment_members (change_id TEXT PRIMARY KEY,run_id TEXT NOT NULL,worker_id TEXT NOT NULL,device_id TEXT NOT NULL,action TEXT NOT NULL CHECK(action IN ('JOIN','LEAVE')),actor TEXT NOT NULL,created REAL NOT NULL);\n            ",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 73,
+    "scope": "initialize_agent_schema",
+    "method": "execute",
+    "sql": "PRAGMA table_info(devices)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 74,
+    "scope": "initialize_agent_schema",
+    "method": "execute",
+    "sql": "ALTER TABLE devices ADD COLUMN telemetry TEXT",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 75,
+    "scope": "initialize_agent_schema",
+    "method": "execute",
+    "sql": "PRAGMA table_info(devices)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 76,
+    "scope": "initialize_agent_schema",
+    "method": "execute",
+    "sql": "ALTER TABLE devices ADD COLUMN bulk_url TEXT",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 77,
+    "scope": "initialize_agent_schema",
+    "method": "execute",
+    "sql": "PRAGMA table_info(devices)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 79,
+    "scope": "initialize_agent_schema",
+    "method": "execute",
+    "sql": "ALTER TABLE devices ADD COLUMN keep_on INTEGER NOT NULL DEFAULT 0",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 80,
+    "scope": "initialize_agent_schema",
+    "method": "execute",
+    "sql": "SELECT sql FROM sqlite_master WHERE type='table' AND name='assignments'",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 82,
+    "scope": "initialize_agent_schema",
+    "method": "executescript",
+    "sql": "\n                    BEGIN IMMEDIATE;\n                    ALTER TABLE assignments RENAME TO assignments_v2;\n                    CREATE TABLE assignments(id TEXT PRIMARY KEY,run_id TEXT NOT NULL,coordinator TEXT NOT NULL,\n                        epoch INTEGER NOT NULL,body TEXT NOT NULL,snapshot TEXT NOT NULL,released INTEGER NOT NULL DEFAULT 0);\n                    INSERT INTO assignments SELECT * FROM assignments_v2;\n                    DROP TABLE assignments_v2;\n                    COMMIT;\n                ",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 85,
+    "scope": "initialize_agent_schema",
+    "method": "execute",
+    "sql": "CREATE UNIQUE INDEX IF NOT EXISTS active_assignment_per_run ON assignments(run_id) WHERE released=0",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 88,
+    "scope": "initialize_agent_schema",
+    "method": "execute",
+    "sql": "CREATE UNIQUE INDEX IF NOT EXISTS assignment_epoch ON assignments(run_id,epoch)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 89,
+    "scope": "initialize_agent_schema",
+    "method": "execute",
+    "sql": "SELECT r.assignment_id,d.self_test FROM device_reservations r JOIN devices d ON d.id=r.device_id",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 94,
+    "scope": "initialize_agent_schema",
+    "method": "execute",
+    "sql": "SELECT assignment_id FROM physical_reservations WHERE resource_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 99,
+    "scope": "initialize_agent_schema",
+    "method": "execute",
+    "sql": "INSERT OR IGNORE INTO physical_reservations VALUES (?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 104,
+    "scope": "initialize_model_qualification_schema",
+    "method": "executescript",
+    "sql": "\n        CREATE TABLE IF NOT EXISTS model_engine_references(workspace_id TEXT NOT NULL,manifest_hash TEXT NOT NULL,\n            reference_hash TEXT NOT NULL,body TEXT NOT NULL,engine TEXT NOT NULL,\n            PRIMARY KEY(workspace_id,manifest_hash,engine));\n        CREATE TABLE IF NOT EXISTS model_engine_qualifications(device_id TEXT NOT NULL,workspace_id TEXT NOT NULL,\n            manifest_hash TEXT NOT NULL,profile_hash TEXT NOT NULL,reference_hash TEXT NOT NULL,body TEXT NOT NULL,\n            engine TEXT NOT NULL,PRIMARY KEY(device_id,workspace_id,manifest_hash,engine));\n        CREATE TABLE IF NOT EXISTS model_references(workspace_id TEXT NOT NULL,manifest_hash TEXT NOT NULL,\n            reference_hash TEXT NOT NULL,body TEXT NOT NULL,PRIMARY KEY(workspace_id,manifest_hash));\n        CREATE TABLE IF NOT EXISTS model_probe_jobs(id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL,asset_id TEXT NOT NULL,\n            device_id TEXT NOT NULL,body TEXT NOT NULL);\n        CREATE TABLE IF NOT EXISTS model_probe_reservations(job_id TEXT PRIMARY KEY,device_id TEXT UNIQUE NOT NULL,\n            resource_id TEXT UNIQUE NOT NULL);\n        CREATE TABLE IF NOT EXISTS model_qualifications(device_id TEXT NOT NULL,workspace_id TEXT NOT NULL,\n            manifest_hash TEXT NOT NULL,profile_hash TEXT NOT NULL,reference_hash TEXT NOT NULL,body TEXT NOT NULL,\n            PRIMARY KEY(device_id,workspace_id,manifest_hash));\n    ",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 124,
+    "scope": "initialize_product_schema",
+    "method": "executescript",
+    "sql": "\n                PRAGMA journal_mode=WAL;\n                CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, hash TEXT NOT NULL, profile TEXT NOT NULL);\n                CREATE TABLE IF NOT EXISTS sessions (digest TEXT PRIMARY KEY, user_id TEXT NOT NULL, expires REAL NOT NULL);\n                CREATE TABLE IF NOT EXISTS experiments (id TEXT PRIMARY KEY, owner TEXT NOT NULL, body TEXT NOT NULL, snapshot TEXT);\n                CREATE TABLE IF NOT EXISTS queue (sequence INTEGER PRIMARY KEY AUTOINCREMENT, run_id TEXT NOT NULL UNIQUE);\n                CREATE TABLE IF NOT EXISTS audit (sequence INTEGER PRIMARY KEY AUTOINCREMENT, actor TEXT, action TEXT, target TEXT, created TEXT);\n            ",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 130,
+    "scope": "initialize_study_schema",
+    "method": "executescript",
+    "sql": "\n                CREATE TABLE IF NOT EXISTS study_assets(id TEXT PRIMARY KEY,workspace_id TEXT NOT NULL,owner TEXT NOT NULL,kind TEXT NOT NULL,body TEXT NOT NULL);\n                CREATE TABLE IF NOT EXISTS study_uploads(id TEXT PRIMARY KEY,asset_id TEXT NOT NULL,name TEXT NOT NULL,object_sha TEXT NOT NULL,upload_key TEXT NOT NULL,size INTEGER NOT NULL);\n            ",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 136,
+    "scope": "initialize_templates_schema",
+    "method": "execute",
+    "sql": "CREATE TABLE IF NOT EXISTS experiment_templates (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL, owner_id TEXT NOT NULL, name TEXT NOT NULL, config TEXT NOT NULL, created TEXT NOT NULL)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 142,
+    "scope": "initialize_notifications_schema",
+    "method": "execute",
+    "sql": "CREATE TABLE IF NOT EXISTS notifications (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, kind TEXT NOT NULL, params TEXT NOT NULL, target TEXT NOT NULL, created TEXT NOT NULL, read_at TEXT, dedupe TEXT NOT NULL UNIQUE)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 148,
+    "scope": "initialize_recovery_schema",
+    "method": "execute",
+    "sql": "CREATE TABLE IF NOT EXISTS cloud_downloads(digest TEXT PRIMARY KEY,user_id TEXT NOT NULL,session_digest TEXT NOT NULL,run_id TEXT NOT NULL,sha TEXT NOT NULL,expires REAL NOT NULL)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/migrations.py",
+    "line": 154,
+    "scope": "initialize_recovery_downloads_schema",
+    "method": "executescript",
+    "sql": "CREATE TABLE IF NOT EXISTS cloud_objects(sha TEXT PRIMARY KEY,size INTEGER NOT NULL,status TEXT NOT NULL,upload_plan TEXT,expires REAL);\n                CREATE TABLE IF NOT EXISTS recovery_points(id TEXT PRIMARY KEY,run_id TEXT NOT NULL,generation INTEGER NOT NULL,final INTEGER NOT NULL,status TEXT NOT NULL,manifest TEXT NOT NULL,error TEXT,created REAL NOT NULL);\n                CREATE TABLE IF NOT EXISTS cloud_refs(point_id TEXT NOT NULL,sha TEXT NOT NULL,PRIMARY KEY(point_id,sha));\n                CREATE TABLE IF NOT EXISTS cloud_requests(month TEXT PRIMARY KEY,class_a INTEGER NOT NULL,class_b INTEGER NOT NULL);",
+    "dynamic": false
+  },
+  {
+    "path": "backend/model_qualification.py",
+    "line": 54,
+    "scope": "save",
+    "method": "execute",
+    "sql": "UPDATE model_probe_jobs SET body=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/model_qualification.py",
+    "line": 58,
+    "scope": "reference",
+    "method": "execute",
+    "sql": "SELECT * FROM model_references WHERE workspace_id=? AND manifest_hash=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/model_qualification.py",
+    "line": 61,
+    "scope": "reference",
+    "method": "execute",
+    "sql": "SELECT * FROM model_engine_references WHERE workspace_id=? AND manifest_hash=? AND engine=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/model_qualification.py",
+    "line": 79,
+    "scope": "effective_profile",
+    "method": "execute",
+    "sql": "f'SELECT q.manifest_hash,{engine_column} FROM {table} q JOIN {references} r ON r.workspace_id=q.workspace_id AND r.manifest_hash=q.manifest_hash AND r.reference_hash=q.reference_hash' + engine_clause + ' WHERE q.device_id=? AND q.workspace_id=? AND q.profile_hash=?'",
+    "dynamic": true
+  },
+  {
+    "path": "backend/model_qualification.py",
+    "line": 97,
+    "scope": "start",
+    "method": "execute",
+    "sql": "BEGIN IMMEDIATE",
+    "dynamic": false
+  },
+  {
+    "path": "backend/model_qualification.py",
+    "line": 98,
+    "scope": "start",
+    "method": "execute",
+    "sql": "SELECT * FROM devices WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/model_qualification.py",
+    "line": 100,
+    "scope": "start",
+    "method": "execute",
+    "sql": "SELECT workspace_id FROM worker_assignments WHERE worker_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/model_qualification.py",
+    "line": 130,
+    "scope": "start",
+    "method": "execute",
+    "sql": "SELECT d.self_test FROM device_reservations r JOIN devices d ON d.id=r.device_id",
+    "dynamic": false
+  },
+  {
+    "path": "backend/model_qualification.py",
+    "line": 139,
+    "scope": "start",
+    "method": "execute",
+    "sql": "SELECT body FROM model_probe_jobs WHERE workspace_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/model_qualification.py",
+    "line": 170,
+    "scope": "start",
+    "method": "execute",
+    "sql": "INSERT INTO model_probe_jobs VALUES (?,?,?,?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/model_qualification.py",
+    "line": 174,
+    "scope": "start",
+    "method": "execute",
+    "sql": "INSERT INTO model_probe_reservations VALUES (?,?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/model_qualification.py",
+    "line": 215,
+    "scope": "accept",
+    "method": "execute",
+    "sql": "SELECT * FROM devices WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/model_qualification.py",
+    "line": 216,
+    "scope": "accept",
+    "method": "execute",
+    "sql": "SELECT workspace_id FROM worker_assignments WHERE worker_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/model_qualification.py",
+    "line": 219,
+    "scope": "accept",
+    "method": "execute",
+    "sql": "SELECT body FROM model_probe_jobs WHERE device_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/model_qualification.py",
+    "line": 235,
+    "scope": "accept",
+    "method": "execute",
+    "sql": "SELECT body FROM model_probe_jobs WHERE id=? AND device_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/model_qualification.py",
+    "line": 246,
+    "scope": "accept",
+    "method": "execute",
+    "sql": "UPDATE devices SET status='QUARANTINED',enabled=0,desired=0 WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/model_qualification.py",
+    "line": 279,
+    "scope": "accept",
+    "method": "execute",
+    "sql": "'INSERT OR IGNORE INTO model_references VALUES (?,?,?,?)' if not engine_args else 'INSERT OR IGNORE INTO model_engine_references VALUES (?,?,?,?,?)'",
+    "dynamic": true
+  },
+  {
+    "path": "backend/model_qualification.py",
+    "line": 285,
+    "scope": "accept",
+    "method": "execute",
+    "sql": "'INSERT OR REPLACE INTO model_qualifications VALUES (?,?,?,?,?,?)' if not engine_args else 'INSERT OR REPLACE INTO model_engine_qualifications VALUES (?,?,?,?,?,?,?)'",
+    "dynamic": true
+  },
+  {
+    "path": "backend/model_qualification.py",
+    "line": 302,
+    "scope": "accept",
+    "method": "execute",
+    "sql": "DELETE FROM model_probe_reservations WHERE job_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/model_qualification.py",
+    "line": 346,
+    "scope": "install_routes.status",
+    "method": "execute",
+    "sql": "SELECT body FROM model_probe_jobs WHERE asset_id=? ORDER BY rowid DESC",
+    "dynamic": false
+  },
+  {
+    "path": "backend/model_qualification.py",
+    "line": 356,
+    "scope": "install_routes.cancel",
+    "method": "execute",
+    "sql": "SELECT body FROM model_probe_jobs WHERE id=? AND asset_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/model_qualification.py",
+    "line": 370,
+    "scope": "install_routes.transfer",
+    "method": "execute",
+    "sql": "SELECT j.body FROM model_probe_jobs j JOIN model_probe_reservations r ON r.job_id=j.id WHERE j.id=? AND j.device_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/notifications.py",
+    "line": 36,
+    "scope": "__init__",
+    "method": "execute",
+    "sql": "CREATE INDEX IF NOT EXISTS notifications_user ON notifications(user_id, id)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/notifications.py",
+    "line": 40,
+    "scope": "_add",
+    "method": "execute",
+    "sql": "INSERT OR IGNORE INTO notifications(user_id,kind,params,target,created,dedupe) VALUES (?,?,?,?,?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/notifications.py",
+    "line": 48,
+    "scope": "_administrators",
+    "method": "execute",
+    "sql": "SELECT id, profile FROM users",
+    "dynamic": false
+  },
+  {
+    "path": "backend/notifications.py",
+    "line": 55,
+    "scope": "start_following",
+    "method": "execute",
+    "sql": "SELECT 1 FROM settings WHERE key='notificationCursor'",
+    "dynamic": false
+  },
+  {
+    "path": "backend/notifications.py",
+    "line": 56,
+    "scope": "start_following",
+    "method": "execute",
+    "sql": "SELECT COALESCE(MAX(sequence),0) FROM audit",
+    "dynamic": false
+  },
+  {
+    "path": "backend/notifications.py",
+    "line": 57,
+    "scope": "start_following",
+    "method": "execute",
+    "sql": "INSERT OR REPLACE INTO settings VALUES ('notificationCursor',?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/notifications.py",
+    "line": 58,
+    "scope": "start_following",
+    "method": "execute",
+    "sql": "INSERT OR REPLACE INTO settings VALUES ('notificationSince',?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/notifications.py",
+    "line": 67,
+    "scope": "catch_up",
+    "method": "execute",
+    "sql": "SELECT value FROM settings WHERE key='notificationCursor'",
+    "dynamic": false
+  },
+  {
+    "path": "backend/notifications.py",
+    "line": 68,
+    "scope": "catch_up",
+    "method": "execute",
+    "sql": "SELECT value FROM settings WHERE key='notificationSince'",
+    "dynamic": false
+  },
+  {
+    "path": "backend/notifications.py",
+    "line": 75,
+    "scope": "catch_up",
+    "method": "execute",
+    "sql": "SELECT sequence, action, target FROM audit WHERE sequence>? ORDER BY sequence",
+    "dynamic": false
+  },
+  {
+    "path": "backend/notifications.py",
+    "line": 98,
+    "scope": "catch_up",
+    "method": "execute",
+    "sql": "SELECT 1 FROM sqlite_master WHERE name='devices'",
+    "dynamic": false
+  },
+  {
+    "path": "backend/notifications.py",
+    "line": 97,
+    "scope": "catch_up",
+    "method": "execute",
+    "sql": "SELECT name, status FROM devices WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/notifications.py",
+    "line": 112,
+    "scope": "catch_up",
+    "method": "execute",
+    "sql": "INSERT OR REPLACE INTO settings VALUES ('notificationCursor',?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/notifications.py",
+    "line": 129,
+    "scope": "listing",
+    "method": "execute",
+    "sql": "SELECT * FROM notifications WHERE user_id=? ORDER BY id DESC LIMIT ?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/notifications.py",
+    "line": 132,
+    "scope": "listing",
+    "method": "execute",
+    "sql": "SELECT COUNT(*) FROM notifications WHERE user_id=? AND read_at IS NULL",
+    "dynamic": false
+  },
+  {
+    "path": "backend/notifications.py",
+    "line": 153,
+    "scope": "mark_read",
+    "method": "execute",
+    "sql": "UPDATE notifications SET read_at=? WHERE user_id=? AND read_at IS NULL",
+    "dynamic": false
+  },
+  {
+    "path": "backend/notifications.py",
+    "line": 158,
+    "scope": "mark_read",
+    "method": "execute",
+    "sql": "f\"UPDATE notifications SET read_at=? WHERE user_id=? AND read_at IS NULL AND id IN ({','.join('?' * len(numbers))})\" if numbers else 'SELECT 1'",
+    "dynamic": true
+  },
+  {
+    "path": "backend/policies.py",
+    "line": 27,
+    "scope": "read_setting",
+    "method": "execute",
+    "sql": "SELECT value FROM settings WHERE key=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/policies.py",
+    "line": 36,
+    "scope": "set_disabled_workers",
+    "method": "execute",
+    "sql": "INSERT OR REPLACE INTO settings VALUES (?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/policies.py",
+    "line": 144,
+    "scope": "has_device_reservation",
+    "method": "execute",
+    "sql": "SELECT 1 FROM device_reservations WHERE device_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/policies.py",
+    "line": 145,
+    "scope": "has_device_reservation",
+    "method": "execute",
+    "sql": "SELECT 1 FROM physical_reservations WHERE resource_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/policies.py",
+    "line": 146,
+    "scope": "has_device_reservation",
+    "method": "execute",
+    "sql": "SELECT 1 FROM model_probe_reservations WHERE device_id=? OR resource_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 43,
+    "scope": "usage",
+    "method": "execute",
+    "sql": "SELECT coalesce(sum(size),0) FROM cloud_objects WHERE status!=\"READY\"",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 57,
+    "scope": "begin",
+    "method": "execute",
+    "sql": "SELECT manifest,status FROM recovery_points WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 67,
+    "scope": "begin",
+    "method": "execute",
+    "sql": "SELECT * FROM cloud_objects",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 76,
+    "scope": "begin",
+    "method": "execute",
+    "sql": "INSERT OR IGNORE INTO recovery_points VALUES (?,?,?,?,?,?,NULL,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 81,
+    "scope": "begin",
+    "method": "execute",
+    "sql": "INSERT OR IGNORE INTO cloud_objects VALUES (?,?,\"PENDING\",NULL,NULL)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 82,
+    "scope": "begin",
+    "method": "execute",
+    "sql": "INSERT OR IGNORE INTO cloud_refs VALUES (?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 88,
+    "scope": "begin",
+    "method": "execute",
+    "sql": "SELECT * FROM cloud_objects WHERE sha=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 98,
+    "scope": "begin",
+    "method": "execute",
+    "sql": "UPDATE cloud_objects SET upload_plan=?,expires=? WHERE sha=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 108,
+    "scope": "complete_object",
+    "method": "execute",
+    "sql": "SELECT o.* FROM cloud_objects o JOIN cloud_refs r ON o.sha=r.sha WHERE r.point_id=? AND o.sha=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 124,
+    "scope": "complete_object",
+    "method": "execute",
+    "sql": "UPDATE cloud_objects SET status=\"UPLOADED\" WHERE sha=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 129,
+    "scope": "verify",
+    "method": "execute",
+    "sql": "SELECT * FROM recovery_points WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 136,
+    "scope": "verify",
+    "method": "execute",
+    "sql": "SELECT * FROM cloud_objects WHERE sha=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 157,
+    "scope": "verify",
+    "method": "execute",
+    "sql": "UPDATE cloud_objects SET status=\"READY\",upload_plan=NULL,expires=NULL WHERE sha=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 162,
+    "scope": "verify",
+    "method": "execute",
+    "sql": "UPDATE recovery_points SET status=\"READY\",error=NULL WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 178,
+    "scope": "verify",
+    "method": "execute",
+    "sql": "UPDATE cloud_objects SET status=\"PENDING\",upload_plan=NULL,expires=NULL WHERE sha=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 183,
+    "scope": "verify",
+    "method": "execute",
+    "sql": "UPDATE recovery_points SET status=?,error=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 216,
+    "scope": "points",
+    "method": "execute",
+    "sql": "SELECT * FROM recovery_points WHERE run_id=? ORDER BY generation DESC,created DESC",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 223,
+    "scope": "manifest",
+    "method": "execute",
+    "sql": "SELECT manifest,status FROM recovery_points WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 237,
+    "scope": "delete_point",
+    "method": "execute",
+    "sql": "DELETE FROM cloud_refs WHERE point_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 238,
+    "scope": "delete_point",
+    "method": "execute",
+    "sql": "DELETE FROM recovery_points WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 241,
+    "scope": "delete_point",
+    "method": "execute",
+    "sql": "SELECT * FROM cloud_objects o WHERE NOT EXISTS(SELECT 1 FROM cloud_refs r WHERE r.sha=o.sha)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 253,
+    "scope": "delete_point",
+    "method": "execute",
+    "sql": "DELETE FROM cloud_objects WHERE sha=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 278,
+    "scope": "install_storage_routes.grant",
+    "method": "execute",
+    "sql": "SELECT coordinator,epoch,run_id FROM assignments WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 284,
+    "scope": "install_storage_routes.point_run",
+    "method": "execute",
+    "sql": "SELECT run_id FROM recovery_points WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 324,
+    "scope": "install_storage_routes.device_status",
+    "method": "execute",
+    "sql": "SELECT coordinator FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 346,
+    "scope": "install_storage_routes.historical",
+    "method": "execute",
+    "sql": "SELECT 1 FROM assignments WHERE run_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 437,
+    "scope": "install_storage_routes.ticket",
+    "method": "execute",
+    "sql": "INSERT INTO cloud_downloads VALUES (?,?,?,?,?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 458,
+    "scope": "install_storage_routes.consume",
+    "method": "execute",
+    "sql": "SELECT * FROM cloud_downloads WHERE digest=? AND expires>?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 463,
+    "scope": "install_storage_routes.consume",
+    "method": "execute",
+    "sql": "SELECT 1 FROM sessions WHERE digest=? AND user_id=? AND expires>?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 470,
+    "scope": "install_storage_routes.consume",
+    "method": "execute",
+    "sql": "SELECT role FROM memberships WHERE workspace_id=? AND user_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/recovery_storage.py",
+    "line": 479,
+    "scope": "install_storage_routes.consume",
+    "method": "execute",
+    "sql": "DELETE FROM cloud_downloads WHERE digest=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_accounts.py",
+    "line": 46,
+    "scope": "install_routes.register",
+    "method": "execute",
+    "sql": "INSERT INTO users VALUES (?,?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_accounts.py",
+    "line": 60,
+    "scope": "install_routes.edit_profile",
+    "method": "execute",
+    "sql": "UPDATE users SET profile=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_accounts.py",
+    "line": 71,
+    "scope": "install_routes.change_password",
+    "method": "execute",
+    "sql": "SELECT hash FROM users WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_accounts.py",
+    "line": 76,
+    "scope": "install_routes.change_password",
+    "method": "execute",
+    "sql": "UPDATE users SET hash=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_accounts.py",
+    "line": 78,
+    "scope": "install_routes.change_password",
+    "method": "execute",
+    "sql": "DELETE FROM sessions WHERE user_id=? AND digest<>?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_accounts.py",
+    "line": 85,
+    "scope": "install_routes.revoke_other_sessions",
+    "method": "execute",
+    "sql": "DELETE FROM sessions WHERE user_id=? AND digest<>?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_auth.py",
+    "line": 21,
+    "scope": "install_routes.authenticate",
+    "method": "execute",
+    "sql": "SELECT id,hash,profile FROM users WHERE json_extract(profile,'$.username')=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_auth.py",
+    "line": 31,
+    "scope": "install_routes.authenticate",
+    "method": "execute",
+    "sql": "INSERT INTO sessions VALUES (?,?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_auth.py",
+    "line": 64,
+    "scope": "install_routes.sign_out",
+    "method": "execute",
+    "sql": "DELETE FROM sessions WHERE digest=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_experiments.py",
+    "line": 83,
+    "scope": "install_routes.submit",
+    "method": "execute",
+    "sql": "INSERT INTO queue(run_id) VALUES (?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_experiments.py",
+    "line": 99,
+    "scope": "install_routes.cancel",
+    "method": "execute",
+    "sql": "DELETE FROM queue WHERE run_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_experiments.py",
+    "line": 120,
+    "scope": "install_routes.pause",
+    "method": "execute",
+    "sql": "BEGIN IMMEDIATE",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_experiments.py",
+    "line": 136,
+    "scope": "install_routes.resume",
+    "method": "execute",
+    "sql": "BEGIN IMMEDIATE",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_experiments.py",
+    "line": 140,
+    "scope": "install_routes.resume",
+    "method": "execute",
+    "sql": "SELECT released,snapshot FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_experiments.py",
+    "line": 155,
+    "scope": "install_routes.resume",
+    "method": "execute",
+    "sql": "INSERT OR IGNORE INTO queue(run_id) VALUES (?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_experiments.py",
+    "line": 165,
+    "scope": "install_routes.backup_policy",
+    "method": "execute",
+    "sql": "SELECT id,coordinator,epoch,released FROM assignments WHERE run_id=? ORDER BY epoch DESC LIMIT 1",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_experiments.py",
+    "line": 188,
+    "scope": "install_routes.members",
+    "method": "execute",
+    "sql": "BEGIN IMMEDIATE",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_history.py",
+    "line": 80,
+    "scope": "install_routes.event_list",
+    "method": "execute",
+    "sql": "f\"SELECT id,snapshot FROM experiments WHERE id IN ({','.join('?' * len(runs))})\"",
+    "dynamic": true
+  },
+  {
+    "path": "backend/routes_history.py",
+    "line": 85,
+    "scope": "install_routes.event_list",
+    "method": "execute",
+    "sql": "f\"SELECT a.run_id,m.sequence,m.body FROM monitoring_events m JOIN assignments a ON a.id=m.assignment_id WHERE a.run_id IN ({','.join('?' * len(runs))}) AND json_extract(m.body,'$.event') IN (?,?) ORDER BY m.sequence\"",
+    "dynamic": true
+  },
+  {
+    "path": "backend/routes_history.py",
+    "line": 137,
+    "scope": "install_routes.audit",
+    "method": "execute",
+    "sql": "SELECT * FROM audit WHERE workspace_id=? ORDER BY sequence DESC LIMIT 100",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_inventory.py",
+    "line": 65,
+    "scope": "install_routes.get_capabilities",
+    "method": "execute",
+    "sql": "SELECT json_extract(body,'$.defaultCoordinatorDeviceId') FROM workspace_settings WHERE workspace_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_inventory.py",
+    "line": 94,
+    "scope": "install_routes.resources",
+    "method": "execute",
+    "sql": "SELECT u.profile,m.role FROM memberships m JOIN users u ON u.id=m.user_id WHERE workspace_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_operations.py",
+    "line": 21,
+    "scope": "install_routes.users",
+    "method": "execute",
+    "sql": "SELECT profile FROM users ORDER BY rowid",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_operations.py",
+    "line": 32,
+    "scope": "install_routes.edit_account",
+    "method": "execute",
+    "sql": "SELECT profile FROM users WHERE id<>?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_operations.py",
+    "line": 41,
+    "scope": "install_routes.edit_account",
+    "method": "execute",
+    "sql": "UPDATE users SET profile=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_operations.py",
+    "line": 43,
+    "scope": "install_routes.edit_account",
+    "method": "execute",
+    "sql": "DELETE FROM sessions WHERE user_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_operations.py",
+    "line": 46,
+    "scope": "install_routes.edit_account",
+    "method": "execute",
+    "sql": "SELECT worker_id FROM worker_assignments WHERE owner=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_operations.py",
+    "line": 61,
+    "scope": "install_routes.revoke_sessions",
+    "method": "execute",
+    "sql": "DELETE FROM sessions WHERE user_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_operations.py",
+    "line": 70,
+    "scope": "install_routes.platform_audit",
+    "method": "execute",
+    "sql": "SELECT * FROM audit WHERE workspace_id IS NULL ORDER BY sequence DESC LIMIT 200",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_operations.py",
+    "line": 77,
+    "scope": "install_routes.operations",
+    "method": "execute",
+    "sql": "SELECT count(*) FROM queue",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_operations.py",
+    "line": 78,
+    "scope": "install_routes.operations",
+    "method": "execute",
+    "sql": "SELECT value FROM settings WHERE key=\"metadataBackupStatus\"",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_operations.py",
+    "line": 130,
+    "scope": "install_routes.resume",
+    "method": "execute",
+    "sql": "UPDATE settings SET value=\"false\" WHERE key=\"dispatchHold\"",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_operations.py",
+    "line": 132,
+    "scope": "install_routes.resume",
+    "method": "execute",
+    "sql": "DELETE FROM settings WHERE key IN (\"maintenanceId\",\"agentMaintenance\")",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 27,
+    "scope": "install_routes.create_workspace",
+    "method": "execute",
+    "sql": "INSERT INTO workspaces VALUES (?,?,?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 28,
+    "scope": "install_routes.create_workspace",
+    "method": "execute",
+    "sql": "INSERT INTO memberships VALUES (?,?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 42,
+    "scope": "install_routes.invite",
+    "method": "execute",
+    "sql": "SELECT id,profile FROM users WHERE json_extract(profile,'$.username')=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 47,
+    "scope": "install_routes.invite",
+    "method": "execute",
+    "sql": "SELECT 1 FROM memberships WHERE workspace_id=? AND user_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 53,
+    "scope": "install_routes.invite",
+    "method": "execute",
+    "sql": "INSERT INTO invitations VALUES (?,?,?,?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 64,
+    "scope": "install_routes.coordinator_devices",
+    "method": "execute",
+    "sql": "SELECT d.id,d.self_test FROM devices d JOIN worker_assignments a ON a.worker_id=d.worker_id WHERE d.status=\"APPROVED\" AND a.workspace_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 72,
+    "scope": "install_routes.settings",
+    "method": "execute",
+    "sql": "SELECT body FROM workspace_settings WHERE workspace_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 77,
+    "scope": "install_routes.save_settings",
+    "method": "execute",
+    "sql": "INSERT OR REPLACE INTO workspace_settings VALUES (?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 109,
+    "scope": "install_routes.listed_workspaces",
+    "method": "execute",
+    "sql": "SELECT w.* FROM workspaces w ORDER BY w.rowid",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 111,
+    "scope": "install_routes.listed_workspaces",
+    "method": "execute",
+    "sql": "SELECT workspace_id FROM memberships WHERE user_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 115,
+    "scope": "install_routes.listed_workspaces",
+    "method": "execute",
+    "sql": "SELECT workspace_id FROM join_requests WHERE user_id=? AND status=\"PENDING\"",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 134,
+    "scope": "install_routes.ask_to_join",
+    "method": "execute",
+    "sql": "SELECT 1 FROM workspaces WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 138,
+    "scope": "install_routes.ask_to_join",
+    "method": "execute",
+    "sql": "SELECT 1 FROM memberships WHERE workspace_id=? AND user_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 144,
+    "scope": "install_routes.ask_to_join",
+    "method": "execute",
+    "sql": "INSERT INTO join_requests VALUES (?,?,?,?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 165,
+    "scope": "install_routes.join_requests",
+    "method": "execute",
+    "sql": "SELECT j.*,u.profile FROM join_requests j JOIN users u ON u.id=j.user_id WHERE j.workspace_id=? AND j.status=\"PENDING\" ORDER BY j.rowid",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 175,
+    "scope": "install_routes.decide_join",
+    "method": "execute",
+    "sql": "SELECT * FROM join_requests WHERE id=? AND workspace_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 182,
+    "scope": "install_routes.decide_join",
+    "method": "execute",
+    "sql": "INSERT OR IGNORE INTO memberships VALUES (?,?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 185,
+    "scope": "install_routes.decide_join",
+    "method": "execute",
+    "sql": "UPDATE join_requests SET status=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 202,
+    "scope": "install_routes.invitations",
+    "method": "execute",
+    "sql": "SELECT i.*,w.name FROM invitations i JOIN workspaces w ON w.id=i.workspace_id WHERE i.user_id=? AND i.status=\"PENDING\"",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 212,
+    "scope": "install_routes.accept",
+    "method": "execute",
+    "sql": "SELECT * FROM invitations WHERE id=? AND user_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 217,
+    "scope": "install_routes.accept",
+    "method": "execute",
+    "sql": "INSERT OR IGNORE INTO memberships VALUES (?,?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 221,
+    "scope": "install_routes.accept",
+    "method": "execute",
+    "sql": "UPDATE invitations SET status=\"ACCEPTED\" WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 227,
+    "scope": "install_routes.member_change",
+    "method": "execute",
+    "sql": "SELECT role FROM memberships WHERE workspace_id=? AND user_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 233,
+    "scope": "install_routes.member_change",
+    "method": "execute",
+    "sql": "SELECT count(*) FROM memberships m JOIN users u ON u.id=m.user_id WHERE m.workspace_id=? AND m.role='ADMIN' AND m.user_id<>? AND json_extract(u.profile,'$.accountStatus')='ACTIVE'",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 242,
+    "scope": "install_routes.member_change",
+    "method": "execute",
+    "sql": "UPDATE memberships SET role=? WHERE workspace_id=? AND user_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 246,
+    "scope": "install_routes.member_change",
+    "method": "execute",
+    "sql": "DELETE FROM memberships WHERE workspace_id=? AND user_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 247,
+    "scope": "install_routes.member_change",
+    "method": "execute",
+    "sql": "UPDATE invitations SET status=\"REVOKED\" WHERE workspace_id=? AND user_id=? AND status=\"PENDING\"",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 253,
+    "scope": "install_routes.member_change",
+    "method": "execute",
+    "sql": "SELECT worker_id FROM worker_assignments WHERE owner=? AND workspace_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 278,
+    "scope": "install_routes.queue",
+    "method": "execute",
+    "sql": "SELECT run_id FROM queue ORDER BY sequence",
+    "dynamic": false
+  },
+  {
+    "path": "backend/routes_workspaces.py",
+    "line": 281,
+    "scope": "install_routes.queue",
+    "method": "execute",
+    "sql": "SELECT body FROM experiments",
+    "dynamic": false
+  },
+  {
+    "path": "backend/server.py",
+    "line": 50,
+    "scope": "initialize",
+    "method": "execute",
+    "sql": "INSERT OR REPLACE INTO settings VALUES (?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 41,
+    "scope": "__init__",
+    "method": "execute",
+    "sql": "PRAGMA user_version",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 42,
+    "scope": "__init__",
+    "method": "execute",
+    "sql": "INSERT OR IGNORE INTO users VALUES (?,?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 71,
+    "scope": "audit",
+    "method": "execute",
+    "sql": "INSERT INTO audit(actor,action,target,created,workspace_id) VALUES (?,?,?,?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 78,
+    "scope": "ensure_workers",
+    "method": "execute",
+    "sql": "SELECT value FROM settings WHERE key=\"workersInitialized\"",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 79,
+    "scope": "ensure_workers",
+    "method": "execute",
+    "sql": "SELECT creator FROM workspaces WHERE id=\"lab\"",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 82,
+    "scope": "ensure_workers",
+    "method": "execute",
+    "sql": "SELECT 1 FROM worker_assignments WHERE worker_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 83,
+    "scope": "ensure_workers",
+    "method": "execute",
+    "sql": "INSERT INTO worker_assignments VALUES (?,?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 89,
+    "scope": "ensure_workers",
+    "method": "execute",
+    "sql": "INSERT OR IGNORE INTO settings VALUES (?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 95,
+    "scope": "profile",
+    "method": "execute",
+    "sql": "SELECT profile FROM users WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 108,
+    "scope": "workspaces",
+    "method": "execute",
+    "sql": "SELECT w.*,m.role FROM workspaces w JOIN memberships m ON m.workspace_id=w.id WHERE m.user_id=? ORDER BY w.rowid",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 119,
+    "scope": "assignments",
+    "method": "execute",
+    "sql": "SELECT worker_id FROM worker_assignments WHERE workspace_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 127,
+    "scope": "cancel_selected",
+    "method": "execute",
+    "sql": "SELECT body FROM experiments",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 134,
+    "scope": "cancel_selected",
+    "method": "execute",
+    "sql": "SELECT worker_id FROM devices WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 146,
+    "scope": "cancel_selected",
+    "method": "execute",
+    "sql": "DELETE FROM queue WHERE run_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 153,
+    "scope": "cancel_owned",
+    "method": "execute",
+    "sql": "SELECT body FROM experiments WHERE owner=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 162,
+    "scope": "cancel_owned",
+    "method": "execute",
+    "sql": "DELETE FROM queue WHERE run_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 169,
+    "scope": "eligibility",
+    "method": "execute",
+    "sql": "SELECT profile FROM users WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 172,
+    "scope": "eligibility",
+    "method": "execute",
+    "sql": "SELECT 1 FROM memberships WHERE workspace_id=? AND user_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 178,
+    "scope": "eligibility",
+    "method": "execute",
+    "sql": "SELECT worker_id FROM worker_assignments WHERE workspace_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 184,
+    "scope": "eligibility",
+    "method": "execute",
+    "sql": "SELECT worker_id,status,owner FROM devices WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 189,
+    "scope": "eligibility",
+    "method": "execute",
+    "sql": "'SELECT owner,status FROM devices WHERE worker_id IN (' + ','.join(('?' for _ in workers)) + ')'",
+    "dynamic": true
+  },
+  {
+    "path": "backend/store.py",
+    "line": 201,
+    "scope": "get",
+    "method": "execute",
+    "sql": "SELECT body,snapshot FROM experiments WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 208,
+    "scope": "list",
+    "method": "execute",
+    "sql": "SELECT body,snapshot FROM experiments ORDER BY rowid",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 212,
+    "scope": "save",
+    "method": "execute",
+    "sql": "UPDATE experiments SET body=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 232,
+    "scope": "create",
+    "method": "execute",
+    "sql": "INSERT INTO experiments VALUES (?,?,?,NULL)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 242,
+    "scope": "device_names",
+    "method": "execute",
+    "sql": "SELECT worker_id,name FROM devices WHERE name<>''",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 254,
+    "scope": "device_identities",
+    "method": "execute",
+    "sql": "SELECT worker_id,name,self_test FROM devices",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 259,
+    "scope": "snapshot",
+    "method": "execute",
+    "sql": "SELECT snapshot FROM experiments WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 277,
+    "scope": "_dispatch_once",
+    "method": "execute",
+    "sql": "BEGIN IMMEDIATE",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 282,
+    "scope": "_dispatch_once",
+    "method": "execute",
+    "sql": "SELECT run_id FROM queue ORDER BY sequence",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 295,
+    "scope": "_dispatch_once",
+    "method": "execute",
+    "sql": "DELETE FROM queue WHERE run_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 369,
+    "scope": "_dispatch_run",
+    "method": "execute",
+    "sql": "DELETE FROM queue WHERE run_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 393,
+    "scope": "_dispatch_run",
+    "method": "execute",
+    "sql": "DELETE FROM queue WHERE run_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 445,
+    "scope": "_dispatch_run",
+    "method": "execute",
+    "sql": "DELETE FROM queue WHERE run_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/store.py",
+    "line": 447,
+    "scope": "_dispatch_run",
+    "method": "execute",
+    "sql": "UPDATE experiments SET snapshot=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/study_registry.py",
+    "line": 49,
+    "scope": "dataset_limits",
+    "method": "execute",
+    "sql": "SELECT value FROM settings WHERE key='datasetLimits'",
+    "dynamic": false
+  },
+  {
+    "path": "backend/study_registry.py",
+    "line": 73,
+    "scope": "list",
+    "method": "execute",
+    "sql": "SELECT body FROM study_assets WHERE workspace_id=? AND kind=? ORDER BY rowid",
+    "dynamic": false
+  },
+  {
+    "path": "backend/study_registry.py",
+    "line": 80,
+    "scope": "get",
+    "method": "execute",
+    "sql": "SELECT body FROM study_assets WHERE id=? AND workspace_id=? AND kind=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/study_registry.py",
+    "line": 89,
+    "scope": "save",
+    "method": "execute",
+    "sql": "INSERT INTO study_assets VALUES (?,?,?,?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/study_registry.py",
+    "line": 149,
+    "scope": "install_routes.set_dataset_limits",
+    "method": "execute",
+    "sql": "INSERT OR REPLACE INTO settings VALUES ('datasetLimits', ?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/study_registry.py",
+    "line": 295,
+    "scope": "install_routes.upload_plan",
+    "method": "execute",
+    "sql": "INSERT INTO study_uploads VALUES (?,?,?,?,?,?)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/study_registry.py",
+    "line": 319,
+    "scope": "install_routes.publish",
+    "method": "execute",
+    "sql": "SELECT * FROM study_uploads WHERE asset_id=? AND name=? ORDER BY rowid DESC",
+    "dynamic": false
+  },
+  {
+    "path": "backend/study_registry.py",
+    "line": 339,
+    "scope": "install_routes.publish",
+    "method": "execute",
+    "sql": "UPDATE study_assets SET body=? WHERE id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/study_registry.py",
+    "line": 346,
+    "scope": "install_routes.transfer",
+    "method": "execute",
+    "sql": "SELECT * FROM assignments WHERE id=? AND epoch=? AND released=0",
+    "dynamic": false
+  },
+  {
+    "path": "backend/templates.py",
+    "line": 145,
+    "scope": "install_template_routes.list_templates",
+    "method": "execute",
+    "sql": "SELECT * FROM experiment_templates WHERE workspace_id=? ORDER BY created DESC, id",
+    "dynamic": false
+  },
+  {
+    "path": "backend/templates.py",
+    "line": 159,
+    "scope": "install_template_routes.create_template",
+    "method": "execute",
+    "sql": "SELECT name FROM experiment_templates WHERE workspace_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/templates.py",
+    "line": 174,
+    "scope": "install_template_routes.create_template",
+    "method": "execute",
+    "sql": "INSERT INTO experiment_templates VALUES (:id,:workspace_id,:owner_id,:name,:config,:created)",
+    "dynamic": false
+  },
+  {
+    "path": "backend/templates.py",
+    "line": 183,
+    "scope": "install_template_routes.delete_template",
+    "method": "execute",
+    "sql": "SELECT * FROM experiment_templates WHERE id=? AND workspace_id=?",
+    "dynamic": false
+  },
+  {
+    "path": "backend/templates.py",
+    "line": 191,
+    "scope": "install_template_routes.delete_template",
+    "method": "execute",
+    "sql": "DELETE FROM experiment_templates WHERE id=?",
+    "dynamic": false
+  }
+]

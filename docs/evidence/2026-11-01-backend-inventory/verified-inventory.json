@@ -1,0 +1,16 @@
+{
+  "base": "6ee47147",
+  "source": "src-ede4338e",
+  "product_pairs": 111,
+  "static_mounts": 2,
+  "route_owners": {
+    "api": 67,
+    "storage": 23,
+    "devices": 21
+  },
+  "tables": 37,
+  "columns": 177,
+  "sql_calls": 358,
+  "sql_modules": 24,
+  "original_test_python_files": 62
+}
