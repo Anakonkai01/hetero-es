@@ -1,0 +1,49 @@
+FFFFFF                                                                   [100%]
+=================================== FAILURES ===================================
+_________________ test_ops_client_redirect_rejected[lab-login] _________________
+.scratch/review-2026-11/test_ops_redirects.py:52: in test_ops_client_redirect_rejected
+    assert 'redirect' in str(caught.value).lower() and destination in str(caught.value)
+E   assert ('redirect' in "'workspaces'")
+E    +  where "'workspaces'" = <built-in method lower of str object at 0x7c997b8bb9f0>()
+E    +    where <built-in method lower of str object at 0x7c997b8bb9f0> = "'workspaces'".lower
+E    +      where "'workspaces'" = str(KeyError('workspaces'))
+E    +        where KeyError('workspaces') = <ExceptionInfo KeyError('workspaces') tblen=2>.value
+_____________ test_ops_client_redirect_rejected[verify-public-lab] _____________
+.scratch/review-2026-11/test_ops_redirects.py:39: in test_ops_client_redirect_rejected
+    with pytest.raises(Exception) as caught:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE Exception
+____________ test_ops_client_redirect_rejected[check-public-replay] ____________
+.scratch/review-2026-11/test_ops_redirects.py:39: in test_ops_client_redirect_rejected
+    with pytest.raises(Exception) as caught:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE Exception
+_________________ test_ops_client_redirect_rejected[recovery] __________________
+.scratch/review-2026-11/test_ops_redirects.py:37: in test_ops_client_redirect_rejected
+    assert 'redirect' in capsys.readouterr().err.lower()
+E   AssertionError: assert 'redirect' in 'cloud recovery failed: keyerror\n'
+E    +  where 'cloud recovery failed: keyerror\n' = <built-in method lower of str object at 0x7c997b8d7820>()
+E    +    where <built-in method lower of str object at 0x7c997b8d7820> = 'Cloud recovery failed: KeyError\n'.lower
+E    +      where 'Cloud recovery failed: KeyError\n' = CaptureResult(out='', err='Cloud recovery failed: KeyError\n').err
+E    +        where CaptureResult(out='', err='Cloud recovery failed: KeyError\n') = readouterr()
+E    +          where readouterr = <_pytest.capture.CaptureFixture object at 0x7c997b8e9d90>.readouterr
+____________ test_recovery_signed_object_redirect_rejected[upload] _____________
+.scratch/review-2026-11/test_ops_redirects.py:93: in test_recovery_signed_object_redirect_rejected
+    assert 'redirect' in message.lower() and destination in message
+E   AssertionError: assert ('redirect' in 'cloud recovery failed: httperror\n')
+E    +  where 'cloud recovery failed: httperror\n' = <built-in method lower of str object at 0x7c997b8d73c0>()
+E    +    where <built-in method lower of str object at 0x7c997b8d73c0> = 'Cloud recovery failed: HTTPError\n'.lower
+___________ test_recovery_signed_object_redirect_rejected[download] ____________
+.scratch/review-2026-11/test_ops_redirects.py:93: in test_recovery_signed_object_redirect_rejected
+    assert 'redirect' in message.lower() and destination in message
+E   AssertionError: assert ('redirect' in 'cloud recovery failed: valueerror\n')
+E    +  where 'cloud recovery failed: valueerror\n' = <built-in method lower of str object at 0x7c997b9487b0>()
+E    +    where <built-in method lower of str object at 0x7c997b9487b0> = 'Cloud recovery failed: ValueError\n'.lower
+=========================== short test summary info ============================
+FAILED .scratch/review-2026-11/test_ops_redirects.py::test_ops_client_redirect_rejected[lab-login]
+FAILED .scratch/review-2026-11/test_ops_redirects.py::test_ops_client_redirect_rejected[verify-public-lab]
+FAILED .scratch/review-2026-11/test_ops_redirects.py::test_ops_client_redirect_rejected[check-public-replay]
+FAILED .scratch/review-2026-11/test_ops_redirects.py::test_ops_client_redirect_rejected[recovery]
+FAILED .scratch/review-2026-11/test_ops_redirects.py::test_recovery_signed_object_redirect_rejected[upload]
+FAILED .scratch/review-2026-11/test_ops_redirects.py::test_recovery_signed_object_redirect_rejected[download]
+6 failed in 0.17s

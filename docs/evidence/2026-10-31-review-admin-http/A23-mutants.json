@@ -1,0 +1,26 @@
+[
+  {
+    "name": "unsafe-lab-login",
+    "file": "scripts/lab-login.py",
+    "old": "from heteroes.http_safety import opener  # noqa: E402",
+    "new": "from heteroes.http_safety import opener  # noqa: E402\nopener = lambda **kwargs: urllib.request.build_opener()"
+  },
+  {
+    "name": "unsafe-verify-public-lab",
+    "file": "scripts/verify-public-lab.py",
+    "old": "from heteroes.http_safety import opener  # noqa: E402",
+    "new": "from heteroes.http_safety import opener  # noqa: E402\nopener = lambda **kwargs: urllib.request.build_opener()"
+  },
+  {
+    "name": "unsafe-check-public-replay",
+    "file": "scripts/check-public-replay.py",
+    "old": "from heteroes.http_safety import opener  # noqa: E402",
+    "new": "from heteroes.http_safety import opener  # noqa: E402\nopener = lambda **kwargs: urllib.request.build_opener()"
+  },
+  {
+    "name": "unsafe-recovery",
+    "file": "scripts/recovery.py",
+    "old": "    from heteroes.http_safety import RedirectError, opener",
+    "new": "    from heteroes.http_safety import RedirectError, opener\n    opener = lambda **kwargs: urllib.request.build_opener()"
+  }
+]
