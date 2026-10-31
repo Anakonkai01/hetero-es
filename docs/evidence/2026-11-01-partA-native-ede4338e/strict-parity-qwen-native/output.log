@@ -1,0 +1,4 @@
+$ 'C:\Users\Thao Nguyen\.cache\heteroes-native-strict-20261025-01\venv\Scripts\python.exe' acceptance/native_python.py acceptance/probes/strict_parity.py --gpu --model qwen --models 'C:\Users\Thao Nguyen\.cache\heteroes-native-strict-20261025-01\models-prefetch-01' --out 'C:\Users\Thao Nguyen\.cache\heteroes-accept\heteroes-accept-ede4338ef54a-20261101-022151\results\strict-parity-qwen-native/parity.json'
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  24%|##4       | 70/290 [00:00<00:00, 668.64it/s]Loading weights:  47%|####7     | 137/290 [00:00<00:00, 562.48it/s]Loading weights:  67%|######7   | 195/290 [00:00<00:00, 532.55it/s]Loading weights:  86%|########5 | 249/290 [00:00<00:00, 509.53it/s]Loading weights: 100%|##########| 290/290 [00:00<00:00, 545.39it/s]
+{"status": "ok", "model": "qwen", "mismatches": [], "error": null, "wallSeconds": 63.66571030000341}
+PARITY OK
