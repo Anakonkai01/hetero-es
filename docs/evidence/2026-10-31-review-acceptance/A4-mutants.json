@@ -1,0 +1,62 @@
+[
+  {
+    "name": "accept-empty-summary",
+    "file": "acceptance/core.py",
+    "old": "problem = \"missing pytest summary\"",
+    "new": "problem = \"\""
+  },
+  {
+    "name": "accept-too-few-passed",
+    "file": "acceptance/core.py",
+    "old": "counts[\"passed\"] < check.min_passed",
+    "new": "False"
+  },
+  {
+    "name": "accept-skipped-gpu",
+    "file": "acceptance/core.py",
+    "old": "counts[\"skipped\"] > check.max_skipped",
+    "new": "False"
+  },
+  {
+    "name": "ignore-failed-counts",
+    "file": "acceptance/core.py",
+    "old": "elif counts[\"failed\"] or counts[\"errors\"]:",
+    "new": "elif False:"
+  },
+  {
+    "name": "absolute-log-pointer",
+    "file": "acceptance/core.py",
+    "old": "os.path.relpath(log, repo)",
+    "new": "str(log)"
+  },
+  {
+    "name": "lose-log-tail",
+    "file": "acceptance/core.py",
+    "old": "text.splitlines()[-50:]",
+    "new": "[]"
+  },
+  {
+    "name": "hash-runtime-docs",
+    "file": "acceptance/core.py",
+    "old": "(b\"docs/\", b\"runtime/docs/\")",
+    "new": "(b\"docs/\",)"
+  },
+  {
+    "name": "hash-root-markdown",
+    "file": "acceptance/core.py",
+    "old": "or (b\"/\" not in path and path.endswith(b\".md\"))",
+    "new": ""
+  },
+  {
+    "name": "ignore-explicit-revision",
+    "file": "acceptance/core.py",
+    "old": "\"ls-tree\", \"-r\", \"-z\", rev",
+    "new": "\"ls-tree\", \"-r\", \"-z\", \"HEAD\""
+  },
+  {
+    "name": "gpu-suite-no-floor",
+    "file": "acceptance/registry.py",
+    "old": "min_passed=1599",
+    "new": "min_passed=1"
+  }
+]

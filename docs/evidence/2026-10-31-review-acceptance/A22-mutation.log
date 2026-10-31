@@ -1,0 +1,5 @@
+control ok    | 2 passed in 0.06s
+killed       socket-leak | 1 failed, 1 passed in 0.07s
+killed       fd-leak-on-open-failure | 1 failed, 1 passed in 0.07s
+
+2 of 2 mutants killed.

@@ -1,0 +1,14 @@
+[
+  {
+    "name": "socket-leak",
+    "file": "src/heteroes/study/prepare.py",
+    "old": "with socket.create_connection((parsed.hostname, parsed.port or (443 if parsed.scheme == \"https\" else 80)), timeout):\n            pass",
+    "new": "socket.create_connection((parsed.hostname, parsed.port or (443 if parsed.scheme == \"https\" else 80)), timeout)"
+  },
+  {
+    "name": "fd-leak-on-open-failure",
+    "file": "src/heteroes/study/prepare.py",
+    "old": "with os.fdopen(fd, \"wb\") as out, opener(proxy=False).open(request, timeout=120) as response:",
+    "new": "with opener(proxy=False).open(request, timeout=120) as response, os.fdopen(fd, \"wb\") as out:"
+  }
+]

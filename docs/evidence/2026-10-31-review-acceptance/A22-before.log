@@ -1,0 +1,17 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+______________ test_private_reachability_closes_the_probe_socket _______________
+runtime/tests/study/test_prepare_resources.py:17: in test_private_reachability_closes_the_probe_socket
+    assert first.fileno() == -1
+E   assert 11 == -1
+E    +  where 11 = <built-in method fileno of socket object at 0x7cb52b524c90>()
+E    +    where <built-in method fileno of socket object at 0x7cb52b524c90> = <socket.socket fd=11, family=1, type=1, proto=0>.fileno
+__________ test_failed_transfer_closes_the_temporary_file_descriptor ___________
+runtime/tests/study/test_prepare_resources.py:42: in test_failed_transfer_closes_the_temporary_file_descriptor
+    with pytest.raises(OSError):
+         ^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE OSError
+=========================== short test summary info ============================
+FAILED runtime/tests/study/test_prepare_resources.py::test_private_reachability_closes_the_probe_socket
+FAILED runtime/tests/study/test_prepare_resources.py::test_failed_transfer_closes_the_temporary_file_descriptor
+2 failed in 0.07s

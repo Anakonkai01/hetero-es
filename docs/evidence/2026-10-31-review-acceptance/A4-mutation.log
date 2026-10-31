@@ -1,0 +1,13 @@
+control ok    | 44 passed in 1.29s
+killed       accept-empty-summary | 1 failed, 43 passed in 1.31s
+killed       accept-too-few-passed | 1 failed, 43 passed in 1.31s
+killed       accept-skipped-gpu | 1 failed, 43 passed in 1.30s
+killed       ignore-failed-counts | 1 failed, 43 passed in 1.32s
+killed       absolute-log-pointer | 1 failed, 43 passed in 1.29s
+killed       lose-log-tail | 1 failed, 43 passed in 1.30s
+killed       hash-runtime-docs | 1 failed, 43 passed in 1.28s
+killed       hash-root-markdown | 1 failed, 43 passed in 1.28s
+killed       ignore-explicit-revision | 1 failed, 43 passed in 1.30s
+killed       gpu-suite-no-floor | 1 failed, 43 passed in 1.30s
+
+10 of 10 mutants killed.
