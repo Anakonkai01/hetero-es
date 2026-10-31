@@ -1,0 +1,10 @@
+{
+  "cpu": {
+    "byte_identical_json": true,
+    "fingerprints": 576
+  },
+  "cuda": {
+    "byte_identical_json": true,
+    "fingerprints": 694
+  }
+}

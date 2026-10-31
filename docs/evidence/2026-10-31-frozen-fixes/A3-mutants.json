@@ -1,0 +1,98 @@
+[
+  {
+    "name": "accept-float32-alpha-overflow",
+    "file": "src/heteroes/es/checks.py",
+    "old": "if not np.isfinite(np.float32(alpha)):",
+    "new": "if False:"
+  },
+  {
+    "name": "skip-noop",
+    "file": "src/heteroes/es/checks.py",
+    "old": "if not coefficients.any():",
+    "new": "if False:"
+  },
+  {
+    "name": "accept-negative-seed",
+    "file": "src/heteroes/noise/contracts.py",
+    "old": "if seed < 0:",
+    "new": "if False:"
+  },
+  {
+    "name": "accept-boolean-seed",
+    "file": "src/heteroes/noise/contracts.py",
+    "old": " and not isinstance(seed, bool)",
+    "new": ""
+  },
+  {
+    "name": "perturb-seed-not-checked",
+    "file": "src/heteroes/es/perturb.py",
+    "old": "    check_seed(candidate_seed)\n",
+    "new": ""
+  },
+  {
+    "name": "cuda-perturb-seed-not-checked",
+    "file": "src/heteroes/es/cuda_ops.py",
+    "old": "    check_seed(candidate_seed)\n",
+    "new": ""
+  },
+  {
+    "name": "accept-negative-chunk-index",
+    "file": "src/heteroes/noise/contracts.py",
+    "old": "if self.chunk_index < 0:",
+    "new": "if False:"
+  },
+  {
+    "name": "accept-boolean-chunk-index",
+    "file": "src/heteroes/noise/contracts.py",
+    "old": " or isinstance(self.chunk_index, bool)",
+    "new": ""
+  },
+  {
+    "name": "cpu-nonfinite-silence",
+    "file": "src/heteroes/es/update.py",
+    "old": "elif not finite.item():",
+    "new": "elif False:"
+  },
+  {
+    "name": "gpu-nonfinite-silence",
+    "file": "src/heteroes/es/update.py",
+    "old": "if finite_parts and not torch.stack(finite_parts).all().item():",
+    "new": "if False:"
+  },
+  {
+    "name": "cuda-legacy-nonfinite-silence",
+    "file": "src/heteroes/es/cuda_ops.py",
+    "old": "if finite_parts and not torch.stack(finite_parts).all().item():",
+    "new": "if False:"
+  },
+  {
+    "name": "membership-deferred-write",
+    "file": "src/heteroes/ledger/ledger.py",
+    "old": "        with self._db:\n            self._db.execute(\"BEGIN IMMEDIATE\")\n            row = self._db.execute(\n                \"SELECT worker_id, action, effective_generation, actor FROM membership \"",
+    "new": "        with self._db:\n            row = self._db.execute(\n                \"SELECT worker_id, action, effective_generation, actor FROM membership \""
+  },
+  {
+    "name": "release-forgets-budget-exemptions",
+    "file": "src/heteroes/ledger/ledger.py",
+    "old": "SELECT candidate_id, attempt_number FROM attempt WHERE worker_id = ? ",
+    "new": "SELECT candidate_id, attempt_number FROM attempt WHERE worker_id != ? "
+  },
+  {
+    "name": "audit-count-cross-experiment",
+    "file": "src/heteroes/ledger/ledger.py",
+    "old": "\"WHERE c.experiment_id = ? AND c.generation = ?\",\n            (experiment_id, generation),\n        ).fetchone()[0]",
+    "new": "\"WHERE c.experiment_id != ? AND c.generation = ?\",\n            (experiment_id, generation),\n        ).fetchone()[0]"
+  },
+  {
+    "name": "silence-fallback-warning",
+    "file": "src/heteroes/noise/engine_v2_cuda.py",
+    "old": "_log.warning(\"Noise engine v2 on %s fell back to CPU: %s\", key, reason)",
+    "new": "_log.debug(\"Noise engine v2 on %s fell back to CPU: %s\", key, reason)"
+  },
+  {
+    "name": "omit-fallback-telemetry",
+    "file": "src/heteroes/runtime_info.py",
+    "old": "    info.update(runtime_status(torch.device(device)))",
+    "new": "    pass"
+  }
+]

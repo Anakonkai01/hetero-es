@@ -1,0 +1,10 @@
+{
+  "before_release": {
+    "state": "OPEN",
+    "charged": 1
+  },
+  "after_release": {
+    "state": "FAILED",
+    "charged": 2
+  }
+}

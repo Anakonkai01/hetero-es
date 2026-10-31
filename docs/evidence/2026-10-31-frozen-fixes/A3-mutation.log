@@ -1,0 +1,19 @@
+control ok    | 65 passed, 5 skipped, 53 deselected in 3.55s
+killed       accept-float32-alpha-overflow | 11 failed, 54 passed, 5 skipped, 53 deselected, 10 warnings in 3.46s
+killed       skip-noop | 1 failed, 64 passed, 5 skipped, 53 deselected in 3.46s
+killed       accept-negative-seed | 5 failed, 60 passed, 5 skipped, 53 deselected in 3.47s
+killed       accept-boolean-seed | 5 failed, 60 passed, 5 skipped, 53 deselected in 3.47s
+killed       perturb-seed-not-checked | 4 failed, 61 passed, 5 skipped, 53 deselected in 3.43s
+killed       cuda-perturb-seed-not-checked | 4 failed, 61 passed, 5 skipped, 53 deselected in 3.53s
+killed       accept-negative-chunk-index | 1 failed, 64 passed, 5 skipped, 53 deselected in 3.46s
+killed       accept-boolean-chunk-index | 1 failed, 64 passed, 5 skipped, 53 deselected in 3.45s
+killed       cpu-nonfinite-silence | 3 failed, 62 passed, 5 skipped, 53 deselected in 3.48s
+killed       gpu-nonfinite-silence | 2 failed, 63 passed, 5 skipped, 53 deselected in 3.48s
+killed       cuda-legacy-nonfinite-silence | 1 failed, 64 passed, 5 skipped, 53 deselected in 3.48s
+killed       membership-deferred-write | 1 failed, 64 passed, 5 skipped, 53 deselected in 1.43s
+killed       release-forgets-budget-exemptions | 2 failed, 63 passed, 5 skipped, 53 deselected in 3.47s
+killed       audit-count-cross-experiment | 1 failed, 64 passed, 5 skipped, 53 deselected in 3.44s
+killed       silence-fallback-warning | 2 failed, 63 passed, 5 skipped, 53 deselected in 3.45s
+killed       omit-fallback-telemetry | 1 failed, 64 passed, 5 skipped, 53 deselected in 3.47s
+
+16 of 16 mutants killed.

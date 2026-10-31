@@ -1,0 +1,14 @@
+{
+  "migrated": {
+    "state": "OPEN",
+    "charged": 1
+  },
+  "after_release": {
+    "state": "OPEN",
+    "charged": 1
+  },
+  "future_attempt": {
+    "state": "FAILED",
+    "charged": 2
+  }
+}

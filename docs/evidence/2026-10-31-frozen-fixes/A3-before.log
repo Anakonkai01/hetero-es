@@ -1,0 +1,188 @@
+FF..FF..ssssssssssssssssFFFFssssFFFFFFFF.....F..F..FFFsssFFFFF           [100%]
+=================================== FAILURES ===================================
+_ test_alpha_outside_float32_is_refused_before_any_write[cpu-coefficients-1e+39] _
+runtime/tests/es/test_review_frozen.py:37: in test_alpha_outside_float32_is_refused_before_any_write
+    with pytest.raises(ValueError, match="alpha"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValueError
+_ test_alpha_outside_float32_is_refused_before_any_write[cpu-coefficients--1e+39] _
+runtime/tests/es/test_review_frozen.py:37: in test_alpha_outside_float32_is_refused_before_any_write
+    with pytest.raises(ValueError, match="alpha"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValueError
+__ test_alpha_outside_float32_is_refused_before_any_write[cpu-rewards-1e+39] ___
+runtime/tests/es/test_review_frozen.py:37: in test_alpha_outside_float32_is_refused_before_any_write
+    with pytest.raises(ValueError, match="alpha"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValueError
+__ test_alpha_outside_float32_is_refused_before_any_write[cpu-rewards--1e+39] __
+runtime/tests/es/test_review_frozen.py:37: in test_alpha_outside_float32_is_refused_before_any_write
+    with pytest.raises(ValueError, match="alpha"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValueError
+_______ test_perturbation_rejects_invalid_seed_before_writing[cpu-True] ________
+runtime/tests/es/test_review_frozen.py:45: in test_perturbation_rejects_invalid_seed_before_writing
+    with pytest.raises((TypeError, ValueError), match="seed"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+________ test_perturbation_rejects_invalid_seed_before_writing[cpu-1.0] ________
+runtime/tests/es/test_review_frozen.py:45: in test_perturbation_rejects_invalid_seed_before_writing
+    with pytest.raises((TypeError, ValueError), match="seed"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+_________ test_perturbation_rejects_invalid_seed_before_writing[cpu-1] _________
+runtime/tests/es/test_review_frozen.py:45: in test_perturbation_rejects_invalid_seed_before_writing
+    with pytest.raises((TypeError, ValueError), match="seed"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+________ test_perturbation_rejects_invalid_seed_before_writing[cpu--1] _________
+runtime/tests/es/test_review_frozen.py:45: in test_perturbation_rejects_invalid_seed_before_writing
+    with pytest.raises((TypeError, ValueError), match="seed"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+___ test_chunk_address_rejects_invalid_integer_identity[True-candidate_seed] ___
+runtime/tests/es/test_review_frozen.py:59: in test_chunk_address_rejects_invalid_integer_identity
+    with pytest.raises((TypeError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+____ test_chunk_address_rejects_invalid_integer_identity[True-chunk_index] _____
+runtime/tests/es/test_review_frozen.py:59: in test_chunk_address_rejects_invalid_integer_identity
+    with pytest.raises((TypeError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+___ test_chunk_address_rejects_invalid_integer_identity[1.0-candidate_seed] ____
+runtime/tests/es/test_review_frozen.py:59: in test_chunk_address_rejects_invalid_integer_identity
+    with pytest.raises((TypeError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+_____ test_chunk_address_rejects_invalid_integer_identity[1.0-chunk_index] _____
+runtime/tests/es/test_review_frozen.py:59: in test_chunk_address_rejects_invalid_integer_identity
+    with pytest.raises((TypeError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+____ test_chunk_address_rejects_invalid_integer_identity[1-candidate_seed] _____
+runtime/tests/es/test_review_frozen.py:59: in test_chunk_address_rejects_invalid_integer_identity
+    with pytest.raises((TypeError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+______ test_chunk_address_rejects_invalid_integer_identity[1-chunk_index] ______
+runtime/tests/es/test_review_frozen.py:59: in test_chunk_address_rejects_invalid_integer_identity
+    with pytest.raises((TypeError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+____ test_chunk_address_rejects_invalid_integer_identity[-1-candidate_seed] ____
+runtime/tests/es/test_review_frozen.py:59: in test_chunk_address_rejects_invalid_integer_identity
+    with pytest.raises((TypeError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+_____ test_chunk_address_rejects_invalid_integer_identity[-1-chunk_index] ______
+runtime/tests/es/test_review_frozen.py:59: in test_chunk_address_rejects_invalid_integer_identity
+    with pytest.raises((TypeError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+_ test_update_validation_has_identical_errors_on_both_paths[seeds2-coefficients2-0.1] _
+runtime/tests/es/test_review_frozen.py:87: in test_update_validation_has_identical_errors_on_both_paths
+    with pytest.raises((TypeError, ValueError)) as caught:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+_ test_update_validation_has_identical_errors_on_both_paths[seeds5-coefficients5-1e+39] _
+runtime/tests/es/test_review_frozen.py:87: in test_update_validation_has_identical_errors_on_both_paths
+    with pytest.raises((TypeError, ValueError)) as caught:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+_ test_nonfinite_updated_weights_are_an_explicit_failure[cpu-numpy_pcg64_normal_f32_to_f16_v1] _
+runtime/tests/es/test_review_frozen.py:95: in test_nonfinite_updated_weights_are_an_explicit_failure
+    from heteroes.es.update import NonFiniteUpdateError
+E   ImportError: cannot import name 'NonFiniteUpdateError' from 'heteroes.es.update' (/home/pc5070ti/projects/heteroes/runtime/src/heteroes/es/update.py)
+_ test_nonfinite_updated_weights_are_an_explicit_failure[cpu-pcg64_u32_to_f16_normal_quantile_v2] _
+runtime/tests/es/test_review_frozen.py:95: in test_nonfinite_updated_weights_are_an_explicit_failure
+    from heteroes.es.update import NonFiniteUpdateError
+E   ImportError: cannot import name 'NonFiniteUpdateError' from 'heteroes.es.update' (/home/pc5070ti/projects/heteroes/runtime/src/heteroes/es/update.py)
+_______ test_nonfinite_updated_weights_are_an_explicit_failure[cpu-cuda] _______
+runtime/tests/es/test_review_frozen.py:95: in test_nonfinite_updated_weights_are_an_explicit_failure
+    from heteroes.es.update import NonFiniteUpdateError
+E   ImportError: cannot import name 'NonFiniteUpdateError' from 'heteroes.es.update' (/home/pc5070ti/projects/heteroes/runtime/src/heteroes/es/update.py)
+_____ test_releasing_a_worker_keeps_previous_attempts_exempt_after_reopen ______
+runtime/tests/ledger/test_review_ledger.py:23: in test_releasing_a_worker_keeps_previous_attempts_exempt_after_reopen
+    assert ledger.get_generation_status("exp", 0).state is GenerationState.OPEN
+E   AssertionError: assert <GenerationState.FAILED: 'FAILED'> is <GenerationState.OPEN: 'OPEN'>
+E    +  where <GenerationState.FAILED: 'FAILED'> = GenerationStatus(state=<GenerationState.FAILED: 'FAILED'>, committed=0, total=1, exhausted=('exp/g0/c0',)).state
+E    +    where GenerationStatus(state=<GenerationState.FAILED: 'FAILED'>, committed=0, total=1, exhausted=('exp/g0/c0',)) = get_generation_status('exp', 0)
+E    +      where get_generation_status = <heteroes.ledger.ledger.Ledger object at 0x7128c125e0f0>.get_generation_status
+E    +  and   <GenerationState.OPEN: 'OPEN'> = GenerationState.OPEN
+_________ test_membership_change_is_idempotent_across_two_connections __________
+runtime/tests/ledger/test_review_ledger.py:41: in execute
+    cursor = super().execute(sql, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   sqlite3.IntegrityError: UNIQUE constraint failed: membership.experiment_id, membership.change_id
+
+The above exception was the direct cause of the following exception:
+runtime/tests/ledger/test_review_ledger.py:59: in test_membership_change_is_idempotent_across_two_connections
+    assert sorted(f.result(timeout=10) for f in futures) == [False, True]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+runtime/tests/ledger/test_review_ledger.py:59: in <genexpr>
+    assert sorted(f.result(timeout=10) for f in futures) == [False, True]
+                  ^^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/heteroes-match/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+../../miniforge3/envs/heteroes-match/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+../../miniforge3/envs/heteroes-match/lib/python3.12/concurrent/futures/thread.py:59: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+runtime/src/heteroes/ledger/ledger.py:453: in wrapper
+    raise LedgerError(f"database error: {error}") from error
+E   heteroes.ledger.ledger.LedgerError: database error: UNIQUE constraint failed: membership.experiment_id, membership.change_id
+___________ test_audit_count_is_scoped_to_experiment_and_generation ____________
+runtime/tests/ledger/test_review_ledger.py:66: in test_audit_count_is_scoped_to_experiment_and_generation
+    assert ledger.count_audits("exp", 0) == 0
+           ^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'Ledger' object has no attribute 'count_audits'
+_____ test_failed_gpu_selftest_warns_once_and_reports_cpu_fallback[False] ______
+runtime/tests/noise/test_engine_v2_cuda.py:37: in test_failed_gpu_selftest_warns_once_and_reports_cpu_fallback
+    status = engine_v2_cuda.runtime_status(device)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'heteroes.noise.engine_v2_cuda' has no attribute 'runtime_status'
+______ test_failed_gpu_selftest_warns_once_and_reports_cpu_fallback[True] ______
+runtime/tests/noise/test_engine_v2_cuda.py:37: in test_failed_gpu_selftest_warns_once_and_reports_cpu_fallback
+    status = engine_v2_cuda.runtime_status(device)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'heteroes.noise.engine_v2_cuda' has no attribute 'runtime_status'
+=============================== warnings summary ===============================
+tests/es/test_review_frozen.py::test_alpha_outside_float32_is_refused_before_any_write[cpu-coefficients-1e+39]
+tests/es/test_review_frozen.py::test_alpha_outside_float32_is_refused_before_any_write[cpu-coefficients--1e+39]
+tests/es/test_review_frozen.py::test_alpha_outside_float32_is_refused_before_any_write[cpu-rewards-1e+39]
+tests/es/test_review_frozen.py::test_alpha_outside_float32_is_refused_before_any_write[cpu-rewards--1e+39]
+  /home/pc5070ti/projects/heteroes/runtime/src/heteroes/es/update.py:250: RuntimeWarning: overflow encountered in cast
+    update = direction * float(np.float32(alpha))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED runtime/tests/es/test_review_frozen.py::test_alpha_outside_float32_is_refused_before_any_write[cpu-coefficients-1e+39]
+FAILED runtime/tests/es/test_review_frozen.py::test_alpha_outside_float32_is_refused_before_any_write[cpu-coefficients--1e+39]
+FAILED runtime/tests/es/test_review_frozen.py::test_alpha_outside_float32_is_refused_before_any_write[cpu-rewards-1e+39]
+FAILED runtime/tests/es/test_review_frozen.py::test_alpha_outside_float32_is_refused_before_any_write[cpu-rewards--1e+39]
+FAILED runtime/tests/es/test_review_frozen.py::test_perturbation_rejects_invalid_seed_before_writing[cpu-True]
+FAILED runtime/tests/es/test_review_frozen.py::test_perturbation_rejects_invalid_seed_before_writing[cpu-1.0]
+FAILED runtime/tests/es/test_review_frozen.py::test_perturbation_rejects_invalid_seed_before_writing[cpu-1]
+FAILED runtime/tests/es/test_review_frozen.py::test_perturbation_rejects_invalid_seed_before_writing[cpu--1]
+FAILED runtime/tests/es/test_review_frozen.py::test_chunk_address_rejects_invalid_integer_identity[True-candidate_seed]
+FAILED runtime/tests/es/test_review_frozen.py::test_chunk_address_rejects_invalid_integer_identity[True-chunk_index]
+FAILED runtime/tests/es/test_review_frozen.py::test_chunk_address_rejects_invalid_integer_identity[1.0-candidate_seed]
+FAILED runtime/tests/es/test_review_frozen.py::test_chunk_address_rejects_invalid_integer_identity[1.0-chunk_index]
+FAILED runtime/tests/es/test_review_frozen.py::test_chunk_address_rejects_invalid_integer_identity[1-candidate_seed]
+FAILED runtime/tests/es/test_review_frozen.py::test_chunk_address_rejects_invalid_integer_identity[1-chunk_index]
+FAILED runtime/tests/es/test_review_frozen.py::test_chunk_address_rejects_invalid_integer_identity[-1-candidate_seed]
+FAILED runtime/tests/es/test_review_frozen.py::test_chunk_address_rejects_invalid_integer_identity[-1-chunk_index]
+FAILED runtime/tests/es/test_review_frozen.py::test_update_validation_has_identical_errors_on_both_paths[seeds2-coefficients2-0.1]
+FAILED runtime/tests/es/test_review_frozen.py::test_update_validation_has_identical_errors_on_both_paths[seeds5-coefficients5-1e+39]
+FAILED runtime/tests/es/test_review_frozen.py::test_nonfinite_updated_weights_are_an_explicit_failure[cpu-numpy_pcg64_normal_f32_to_f16_v1]
+FAILED runtime/tests/es/test_review_frozen.py::test_nonfinite_updated_weights_are_an_explicit_failure[cpu-pcg64_u32_to_f16_normal_quantile_v2]
+FAILED runtime/tests/es/test_review_frozen.py::test_nonfinite_updated_weights_are_an_explicit_failure[cpu-cuda]
+FAILED runtime/tests/ledger/test_review_ledger.py::test_releasing_a_worker_keeps_previous_attempts_exempt_after_reopen
+FAILED runtime/tests/ledger/test_review_ledger.py::test_membership_change_is_idempotent_across_two_connections
+FAILED runtime/tests/ledger/test_review_ledger.py::test_audit_count_is_scoped_to_experiment_and_generation
+FAILED runtime/tests/noise/test_engine_v2_cuda.py::test_failed_gpu_selftest_warns_once_and_reports_cpu_fallback[False]
+FAILED runtime/tests/noise/test_engine_v2_cuda.py::test_failed_gpu_selftest_warns_once_and_reports_cpu_fallback[True]
+26 failed, 13 passed, 23 skipped, 7 deselected, 4 warnings in 0.73s

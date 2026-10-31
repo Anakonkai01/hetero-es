@@ -1,0 +1,492 @@
+diff --git a/runtime/src/heteroes/es/checks.py b/runtime/src/heteroes/es/checks.py
+index c74e76ec..aaccec53 100644
+--- a/runtime/src/heteroes/es/checks.py
++++ b/runtime/src/heteroes/es/checks.py
+@@ -1,5 +1,8 @@
+ import torch
+ import math
++from dataclasses import dataclass
++import numpy as np
++from heteroes.noise.contracts import check_seed
+ 
+ SUPPORT_DTYPE = torch.float16
+ 
+@@ -20,3 +23,56 @@ def _check_sigma(sigma: float) -> None:
+ def _check_param_sigma(param: torch.Tensor, sigma: float) -> None:
+     _check_param(param)
+     _check_sigma(sigma)
++
++
++@dataclass(frozen=True)
++class UpdateReport:
++    noop: bool  # no operations
++    coefficients: tuple[float, ...]
++    requested_l2: float
++    applied_l2: float
++    changed: int
++    numel: int
++
++
++def _check_coefficients(coefficients) -> np.ndarray:
++    # the coefficients of a generation record: a vector of finite numbers that are exactly float32 values
++    array = np.asarray(coefficients)
++    if array.dtype.kind not in "iuf":
++        raise TypeError(f"coefficients must be real numbers, got {array.dtype}")
++    if array.ndim != 1:
++        raise ValueError("coefficients must be a 1-d vector")
++    if array.size == 0:
++        raise ValueError("coefficients must not be empty")
++    array = array.astype(np.float64)
++    if not np.isfinite(array).all():
++        raise ValueError("coefficients has a value that is Nan/Inf")
++    with np.errstate(over="ignore"):
++        as_float32 = array.astype(np.float32)
++    if not np.array_equal(as_float32.astype(np.float64), array):
++        raise ValueError("every coefficient must be exactly a float32 value (it would be rounded in silence)")
++    return as_float32
++
++
++class NonFiniteUpdateError(RuntimeError):
++    """Updated FP16 weights overflowed. In-place model bytes may be dirty; do not mark the record applied."""
++
++
++def check_update_inputs(candidate_seeds, coefficients, alpha, total_numel, chunk_elements=None):
++    """Shared validation/no-op result before either numerical implementation writes its first byte."""
++    if not math.isfinite(alpha):
++        raise ValueError("alpha must not be Nan/Inf")
++    with np.errstate(over="ignore"):
++        if not np.isfinite(np.float32(alpha)):
++            raise ValueError("alpha must be finite in float32")
++    if chunk_elements is not None and not chunk_elements >= 1:
++        raise ValueError("chunk_elements must be >=1")
++    if len(candidate_seeds) != len(coefficients):
++        raise ValueError("length candidate_seeds != lenght rewards")
++    for seed in candidate_seeds:
++        check_seed(seed)
++    if len(set(candidate_seeds)) != len(candidate_seeds):
++        raise ValueError("seed being duplicated")
++    if not coefficients.any():
++        return UpdateReport(True, (0.0,) * len(coefficients), 0.0, 0.0, 0, total_numel)
++    return None
+diff --git a/runtime/src/heteroes/es/cuda_ops.py b/runtime/src/heteroes/es/cuda_ops.py
+index f0ddbb7f..e0c81efe 100644
+--- a/runtime/src/heteroes/es/cuda_ops.py
++++ b/runtime/src/heteroes/es/cuda_ops.py
+@@ -12,13 +12,13 @@ The restore is NOT here: it stays the verified restore from the snapshot (`snaps
+ """
+ 
+ import math
+-import numbers
+ 
+ import numpy as np
+ import torch
+ 
+-from heteroes.es.checks import _check_param, _check_param_sigma
+-from heteroes.es.update import UpdateReport, _check_coefficients
++from heteroes.es.checks import _check_param, _check_param_sigma, check_update_inputs
++from heteroes.es.update import UpdateReport, _check_coefficients, NonFiniteUpdateError
++from heteroes.noise.contracts import check_seed
+ from heteroes.model.schema import ParameterSchema, resolve_tensors
+ from heteroes.noise.cuda_engine import PIECE_ELEMENTS, TensorNoise, check_device
+ 
+@@ -35,6 +35,7 @@ def perturb_model_cuda_(model: torch.nn.Module, schema: ParameterSchema, candida
+     Perturb every tensor in place with the noise of the CUDA engine. Everything that can be checked is checked before the first write
+     (as `perturb_model_`); a failure while writing (for example out of memory) leaves the model half perturbed, so the caller restores.
+     """
++    check_seed(candidate_seed)
+     tensors = resolve_tensors(model, schema)
+     for tensor in tensors:
+         _check_param_sigma(tensor, sigma)
+@@ -62,30 +63,17 @@ def apply_coefficients_cuda_(
+         _check_param(tensor)
+     _check_cuda(tensors)
+     z_rewards = _check_coefficients(coefficients)
+-    if not math.isfinite(alpha):
+-        raise ValueError("alpha must not be Nan/Inf")
+-    if len(candidate_seeds) != len(z_rewards):
+-        raise ValueError("length candidate_seeds != lenght rewards")
+-    for seed in candidate_seeds:
+-        if not (isinstance(seed, numbers.Integral) and not isinstance(seed, bool)):
+-            raise TypeError("seed must be in int or np.int")
+-    if len(set(candidate_seeds)) != len(candidate_seeds):
+-        raise ValueError("seed being duplicated")
+     total_numel = sum(t.numel() for t in tensors)
+-    if not z_rewards.any():
+-        return UpdateReport(
+-            noop=True,
+-            coefficients=(0.0,) * len(z_rewards),
+-            requested_l2=0.0,
+-            applied_l2=0.0,
+-            changed=0,
+-            numel=total_numel,
+-        )
++    noop = check_update_inputs(candidate_seeds, z_rewards, alpha, total_numel)
++    if noop is not None:
++        return noop
+ 
+     schema_hash = schema.hash
+     n_seeds = len(candidate_seeds)
+     alpha32 = float(np.float32(alpha))
++    inv_n32 = float(np.float32(1) / np.float32(n_seeds))
+     changed_parts, requested_parts, applied_parts = [], [], []
++    finite_parts = []
+     with torch.no_grad():
+         for entry, tensor in zip(schema.entries, tensors, strict=True):
+             flat = tensor.view(-1)
+@@ -102,13 +90,16 @@ def apply_coefficients_cuda_(
+                     eps = stream.next(count).to(torch.float32)
+                     term = eps * float(zi)
+                     acc = acc + term
+-                direction = acc / n_seeds
++                direction = acc * inv_n32
+                 update = direction * alpha32
+                 new = (chunk.to(torch.float32) + update).to(torch.float16)
++                finite_parts.append(torch.isfinite(new).all())
+                 changed_parts.append((new.view(torch.int16) != chunk.view(torch.int16)).sum())
+                 requested_parts.append((update.double() ** 2).sum())
+                 applied_parts.append(((new.double() - chunk.double()) ** 2).sum())
+                 chunk.copy_(new)
++        if finite_parts and not torch.stack(finite_parts).all().item():
++            raise NonFiniteUpdateError("updated weights must be finite; model must be restored from checkpoint")
+         changed = sum(int(v) for v in torch.stack(changed_parts).tolist())
+         requested_l2 = math.sqrt(sum(float(v) for v in torch.stack(requested_parts).tolist()))
+         applied_l2 = math.sqrt(sum(float(v) for v in torch.stack(applied_parts).tolist()))
+diff --git a/runtime/src/heteroes/es/perturb.py b/runtime/src/heteroes/es/perturb.py
+index abe8510a..9a0a0d42 100644
+--- a/runtime/src/heteroes/es/perturb.py
++++ b/runtime/src/heteroes/es/perturb.py
+@@ -1,6 +1,7 @@
+ from heteroes.noise.contracts import ParameterNoiseAddress, DEFAULT_CHUNK_ELEMENTS, ENGINE_VERSION, ENGINE_V2
+ from heteroes.noise.engine import iter_parameter_noise_chunks, generator_for_engine, num_chunks, chunk_length
+ from heteroes.noise import engine_v2_cuda
++from heteroes.noise.contracts import check_seed
+ from heteroes.model.schema import ParameterSchema, resolve_tensors
+ from heteroes.es.checks import _check_param_sigma, SUPPORT_DTYPE
+ import math
+@@ -116,6 +117,7 @@ def perturb_model_(
+         TypeError / ValueError: a tensor is not contiguous FP16, or sigma is NaN/Inf.
+     """
+ 
++    check_seed(candidate_seed)
+     generator_for_engine(engine)
+     # resolve tensor
+     tensors = resolve_tensors(model, schema)
+diff --git a/runtime/src/heteroes/es/update.py b/runtime/src/heteroes/es/update.py
+index b280db14..70edddc9 100644
+--- a/runtime/src/heteroes/es/update.py
++++ b/runtime/src/heteroes/es/update.py
+@@ -1,17 +1,21 @@
+ from heteroes.model.schema import ParameterSchema, resolve_tensors
+-from heteroes.es.checks import _check_param
++from heteroes.es.checks import (
++    _check_param,
++    _check_coefficients,
++    check_update_inputs,
++    UpdateReport,
++    NonFiniteUpdateError,
++)
+ from heteroes.noise.engine import num_chunks, generate_chunk_noise, chunk_length, generator_for_engine
+ from heteroes.noise.contracts import ParameterNoiseAddress, DEFAULT_CHUNK_ELEMENTS, ENGINE_VERSION, ENGINE_V2
+ from heteroes.noise import engine_v2_cuda
+ from heteroes.es import perturb as _perturb
+ from heteroes.noise.parallel import ordered_map, noise_threads
+ 
+-from dataclasses import dataclass
+ import math
+ import torch
+ import torch.nn as nn
+ import numpy as np
+-import numbers
+ 
+ 
+ DEFAULT_ETA = 1e-9
+@@ -19,16 +23,6 @@ DEFAULT_ETA = 1e-9
+ SEEDS_PER_LAUNCH = 4
+ 
+ 
+-@dataclass(frozen=True)
+-class UpdateReport:
+-    noop: bool  # no operations
+-    coefficients: tuple[float, ...]
+-    requested_l2: float
+-    applied_l2: float
+-    changed: int
+-    numel: int
+-
+-
+ def standardize_rewards(rewards, eta=DEFAULT_ETA) -> np.ndarray:
+     if not (math.isfinite(eta) and eta > 0):
+         raise ValueError("eta must finite and > 0")
+@@ -55,25 +49,6 @@ def standardize_rewards(rewards, eta=DEFAULT_ETA) -> np.ndarray:
+     return z.astype(np.float32)
+ 
+ 
+-def _check_coefficients(coefficients) -> np.ndarray:
+-    # the coefficients of a generation record: a vector of finite numbers that are exactly float32 values
+-    array = np.asarray(coefficients)
+-    if array.dtype.kind not in "iuf":
+-        raise TypeError(f"coefficients must be real numbers, got {array.dtype}")
+-    if array.ndim != 1:
+-        raise ValueError("coefficients must be a 1-d vector")
+-    if array.size == 0:
+-        raise ValueError("coefficients must not be empty")
+-    array = array.astype(np.float64)
+-    if not np.isfinite(array).all():
+-        raise ValueError("coefficients has a value that is Nan/Inf")
+-    with np.errstate(over="ignore"):
+-        as_float32 = array.astype(np.float32)
+-    if not np.array_equal(as_float32.astype(np.float64), array):
+-        raise ValueError("every coefficient must be exactly a float32 value (it would be rounded in silence)")
+-    return as_float32
+-
+-
+ def apply_coefficients_(
+     model: nn.Module,
+     schema: ParameterSchema,
+@@ -131,38 +106,9 @@ def _apply_coefficients(
+     generate = generate_chunk_noise if engine == ENGINE_VERSION else generator_for_engine(engine)
+     total_numel = sum(t.numel() for t in tensors)
+ 
+-    # check alpha
+-    if not math.isfinite(alpha):
+-        raise ValueError("alpha must not be Nan/Inf")
+-
+-    # check chunks
+-    if not chunk_elements >= 1:
+-        raise ValueError("chunk_elements must be >=1")
+-
+-    # check len candidate
+-    if len(candidate_seeds) != len(z_rewards):
+-        raise ValueError("length candidate_seeds != lenght rewards")
+-
+-    # check seed
+-    for seed in candidate_seeds:
+-        # check if seed is int or np.int
+-        if not (isinstance(seed, numbers.Integral) and not isinstance(seed, bool)):
+-            raise TypeError("seed must be in int or np.int")
+-
+-    # check duplicated seed
+-    if len(set(candidate_seeds)) != len(candidate_seeds):
+-        raise ValueError("seed being duplicated")
+-
+-    # check zero array, mean no signal
+-    if not z_rewards.any():
+-        return UpdateReport(
+-            noop=True,
+-            coefficients=(0.0,) * len(z_rewards),
+-            requested_l2=0.0,
+-            applied_l2=0.0,
+-            changed=0,
+-            numel=total_numel,
+-        )
++    noop = check_update_inputs(candidate_seeds, z_rewards, alpha, total_numel, chunk_elements)
++    if noop is not None:
++        return noop
+ 
+     schema_hash = schema.hash
+     n_seeds = len(candidate_seeds)
+@@ -200,6 +146,7 @@ def _apply_coefficients(
+ 
+     # The three statistics of a piece stay on the device and are read once at the end (one sync instead of three per chunk).
+     changed_parts, requested_parts, applied_parts = [], [], []
++    finite_parts = []
+     with torch.no_grad():
+         for entry, tensor in zip(schema.entries, tensors):
+             numel = tensor.numel()
+@@ -244,11 +191,15 @@ def _apply_coefficients(
+                     term = eps * float(zi)
+                     acc = acc + term
+ 
+-                # divide by N as CUDA's division by a scalar does: multiply by the float32 reciprocal. The same bits on
+-                # every device (a CPU-only coordinator included); GPU results are unchanged. Owner decision 2026-10-20.
++                # Explicit float32 reciprocal on every device; never rely on a framework's scalar-division lowering.
+                 direction = acc * float(np.float32(1) / np.float32(n_seeds))
+                 update = direction * float(np.float32(alpha))
+                 new = (chunk.to(torch.float32) + update).to(torch.float16)
++                finite = torch.isfinite(new).all()
++                if tensor.is_cuda:
++                    finite_parts.append(finite)
++                elif not finite.item():
++                    raise NonFiniteUpdateError("updated weights must be finite")
+                 # compare
+ 
+                 changed_parts.append((new.view(torch.int16) != chunk.view(torch.int16)).sum())
+@@ -257,6 +208,8 @@ def _apply_coefficients(
+ 
+                 chunk.copy_(new)
+ 
++        if finite_parts and not torch.stack(finite_parts).all().item():
++            raise NonFiniteUpdateError("updated weights must be finite; model must be restored from checkpoint")
+         changed = 0
+         requested_l2 = 0.0
+         applied_l2 = 0.0
+diff --git a/runtime/src/heteroes/ledger/ledger.py b/runtime/src/heteroes/ledger/ledger.py
+index 591961b2..3cdaa94f 100644
+--- a/runtime/src/heteroes/ledger/ledger.py
++++ b/runtime/src/heteroes/ledger/ledger.py
+@@ -153,7 +153,9 @@ SELECT c.experiment_id, c.generation, g.recipe_hash, g.parent_weights_sha256, c.
+        r.attempt_number, r.reward, r.committed_at,
+        (SELECT COUNT(*) FROM attempt AS a WHERE a.candidate_id = c.candidate_id
+         AND COALESCE(a.failure_kind, '') != 'RESTORE_MISMATCH'
+-        AND a.worker_id NOT IN (SELECT worker_id FROM quarantine)),
++        AND a.worker_id NOT IN (SELECT worker_id FROM quarantine)
++        AND NOT EXISTS (SELECT 1 FROM attempt_exemption AS e
++                        WHERE e.candidate_id = a.candidate_id AND e.attempt_number = a.attempt_number)),
+        (SELECT CASE WHEN a.failure_kind IS NULL THEN NULL ELSE a.worker_id END FROM attempt AS a
+         WHERE a.candidate_id = c.candidate_id ORDER BY a.attempt_number DESC LIMIT 1)
+ FROM candidate AS c JOIN generation AS g USING (experiment_id, generation)
+@@ -529,6 +531,12 @@ class Ledger:
+                 "CREATE TABLE IF NOT EXISTS completion_chunk(candidate_id TEXT NOT NULL PRIMARY KEY "
+                 "REFERENCES completion (candidate_id), chunk INTEGER NOT NULL CHECK (chunk >= 1))"
+             )
++            # Additive migration: old schema-6 ledgers still resume. Only released quarantined workers add exemptions.
++            self._db.execute(
++                "CREATE TABLE IF NOT EXISTS attempt_exemption(candidate_id TEXT NOT NULL, attempt_number INTEGER NOT NULL, "
++                "PRIMARY KEY(candidate_id, attempt_number), FOREIGN KEY(candidate_id, attempt_number) "
++                "REFERENCES attempt(candidate_id, attempt_number))"
++            )
+         except BaseException:
+             self._db.close()
+             raise
+@@ -784,7 +792,9 @@ class Ledger:
+         """The attempts that count against the retry budget (see `CandidateRecord.charged_attempts`)."""
+         return self._db.execute(
+             "SELECT COUNT(*) FROM attempt AS a WHERE a.candidate_id = ? AND COALESCE(a.failure_kind, '') != 'RESTORE_MISMATCH' "
+-            "AND a.worker_id NOT IN (SELECT worker_id FROM quarantine)",
++            "AND a.worker_id NOT IN (SELECT worker_id FROM quarantine) "
++            "AND NOT EXISTS (SELECT 1 FROM attempt_exemption AS e "
++            "WHERE e.candidate_id = a.candidate_id AND e.attempt_number = a.attempt_number)",
+             (candidate_id,),
+         ).fetchone()[0]
+ 
+@@ -1063,6 +1073,7 @@ class Ledger:
+         if type(effective_generation) is not int or effective_generation < 0:
+             raise LedgerError("the effective generation is a whole number of at least 0")
+         with self._db:
++            self._db.execute("BEGIN IMMEDIATE")
+             row = self._db.execute(
+                 "SELECT worker_id, action, effective_generation, actor FROM membership "
+                 "WHERE experiment_id = ? AND change_id = ?",
+@@ -1111,14 +1122,30 @@ class Ledger:
+ 
+     @_locked
+     def release_worker(self, worker_id: str) -> None:
+-        """Take a worker out of quarantine. A human does this, after dealing with the worker; nothing calls it by itself."""
++        """Release a worker after human intervention; its previously exempt attempts stay exempt from retry budgets."""
+         if not isinstance(worker_id, str):
+             raise TypeError(f"worker_id must be a string, got {type(worker_id).__name__}")
+         with self._db:
++            self._db.execute("BEGIN IMMEDIATE")
++            self._db.execute(
++                "INSERT OR IGNORE INTO attempt_exemption(candidate_id, attempt_number) "
++                "SELECT candidate_id, attempt_number FROM attempt WHERE worker_id = ? "
++                "AND worker_id IN (SELECT worker_id FROM quarantine)",
++                (worker_id,),
++            )
+             released = self._db.execute("DELETE FROM quarantine WHERE worker_id = ?", (worker_id,)).rowcount
+             if released == 0:
+                 raise LedgerError(f"worker {worker_id} is not quarantined")
+ 
++    @_locked
++    def count_audits(self, experiment_id: str, generation: int) -> int:
++        """Read-only audit count scoped to one experiment generation."""
++        return self._db.execute(
++            "SELECT COUNT(*) FROM audit AS a JOIN candidate AS c ON c.candidate_id = a.candidate_id "
++            "WHERE c.experiment_id = ? AND c.generation = ?",
++            (experiment_id, generation),
++        ).fetchone()[0]
++
+     @_locked
+     def get_completions(self, candidate_id: str) -> tuple[str, list[str]] | None:
+         """(SHA-256, texts) behind the committed reward of a candidate, or None if it was committed without texts."""
+diff --git a/runtime/src/heteroes/noise/contracts.py b/runtime/src/heteroes/noise/contracts.py
+index 2aa6d28d..e3028352 100644
+--- a/runtime/src/heteroes/noise/contracts.py
++++ b/runtime/src/heteroes/noise/contracts.py
+@@ -1,4 +1,5 @@
+ from dataclasses import dataclass
++import numbers
+ 
+ 
+ ENGINE_VERSION = "numpy_pcg64_normal_f32_to_f16_v1"
+@@ -22,6 +23,13 @@ CPU_NOISE_FINGERPRINTS = {
+ KNOWN_ENGINES = (*CPU_ENGINES, CUDA_ENGINE_VERSION)
+ 
+ 
++def check_seed(seed):
++    if not (isinstance(seed, numbers.Integral) and not isinstance(seed, bool)):
++        raise TypeError("seed must be in int or np.int")
++    if seed < 0:
++        raise ValueError("seed must be >= 0")
++
++
+ @dataclass(frozen=True)
+ class ChunkNoiseAddress:
+     # fmt: off
+@@ -40,6 +48,13 @@ class ChunkNoiseAddress:
+     chunk_index: int
+     chunk_elements: int
+ 
++    def __post_init__(self):
++        check_seed(self.candidate_seed)
++        if not isinstance(self.chunk_index, numbers.Integral) or isinstance(self.chunk_index, bool):
++            raise TypeError("chunk_index must be an integer")
++        if self.chunk_index < 0:
++            raise ValueError("chunk_index must >= 0")
++
+ 
+ @dataclass(frozen=True)
+ class ParameterNoiseAddress:
+diff --git a/runtime/src/heteroes/noise/engine_v2_cuda.py b/runtime/src/heteroes/noise/engine_v2_cuda.py
+index 89610ca0..21602b3e 100644
+--- a/runtime/src/heteroes/noise/engine_v2_cuda.py
++++ b/runtime/src/heteroes/noise/engine_v2_cuda.py
+@@ -18,6 +18,7 @@ HETEROES_NOISE_DEVICE=cpu turns the path off (the CPU engine is then used everyw
+ 
+ import os
+ import threading
++import logging
+ 
+ import numpy as np
+ 
+@@ -46,6 +47,9 @@ _lock = threading.Lock()
+ _kernel = None
+ _tables = {}  # (device, words) -> (a_lo, a_hi, b_lo, b_hi, thresholds)
+ _verified = {}  # device -> bool
++_failures = {}  # device -> public diagnostic (exception type only)
++_verification_lock = threading.Lock()
++_log = logging.getLogger(__name__)
+ 
+ 
+ def _signed(values):
+@@ -137,8 +141,26 @@ def enabled(device) -> bool:
+         return False
+     key = str(device)
+     if key not in _verified:
+-        try:
+-            _verified[key] = selftest(device)
+-        except Exception:  # no NVRTC, a driver without jiterator support: the CPU engine makes the same bits
+-            _verified[key] = False
++        with _verification_lock:
++            if key not in _verified:
++                reason = "GPU self-test bit mismatch"
++                try:
++                    verified = selftest(device)
++                except Exception as error:  # CPU fallback has the same numerical law; expose why it is slower.
++                    verified = False
++                    reason = f"GPU self-test raised {type(error).__name__}"
++                _verified[key] = verified
++                if not verified:
++                    _failures[key] = reason
++                    _log.warning("Noise engine v2 on %s fell back to CPU: %s", key, reason)
+     return _verified[key]
++
++
++def runtime_status(device):
++    active = enabled(device)
++    reason = None
++    if not active:
++        reason = _failures.get(str(device)) or (
++            "disabled by HETEROES_NOISE_DEVICE=cpu" if os.environ.get(ENV_DEVICE, "").lower() == "cpu" else "CPU device"
++        )
++    return {"noiseEngineGpu": active, "noiseEngineGpuReason": reason}
