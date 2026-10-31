@@ -1,0 +1,98 @@
+[
+  {
+    "name": "restore-only-known-error",
+    "file": "src/heteroes/executor.py",
+    "old": "except Exception as restore_error:",
+    "new": "except RestoreError as restore_error:"
+  },
+  {
+    "name": "trust-cached-parent",
+    "file": "src/heteroes/coordinator.py",
+    "old": "        self.parent_sha256 = model_weights_sha256(self.model, self.schema)\n        generations =",
+    "new": "        generations ="
+  },
+  {
+    "name": "forget-dirty-update",
+    "file": "src/heteroes/coordinator.py",
+    "old": "        self._dirty = True",
+    "new": "        self._dirty = False"
+  },
+  {
+    "name": "allow-dirty-reuse",
+    "file": "src/heteroes/coordinator.py",
+    "old": "        if self._dirty:",
+    "new": "        if False:"
+  },
+  {
+    "name": "ignore-population-size",
+    "file": "src/heteroes/coordinator.py",
+    "old": "            if len(stored) != len(descriptors):",
+    "new": "            if False:"
+  },
+  {
+    "name": "ignore-seeds",
+    "file": "src/heteroes/coordinator.py",
+    "old": "(\"index\", \"seed\", \"sign\")",
+    "new": "(\"index\", \"sign\")"
+  },
+  {
+    "name": "ignore-antithetic",
+    "file": "src/heteroes/coordinator.py",
+    "old": "(\"index\", \"seed\", \"sign\")",
+    "new": "(\"index\", \"seed\")"
+  },
+  {
+    "name": "mutable-shape",
+    "file": "src/heteroes/model/schema.py",
+    "old": "not isinstance(self.shape, tuple) or any(",
+    "new": "False or any("
+  },
+  {
+    "name": "boolean-shape",
+    "file": "src/heteroes/model/schema.py",
+    "old": "or isinstance(dimension, bool)",
+    "new": ""
+  },
+  {
+    "name": "negative-shape",
+    "file": "src/heteroes/model/schema.py",
+    "old": "or dimension < 0",
+    "new": ""
+  },
+  {
+    "name": "mismatched-numel",
+    "file": "src/heteroes/model/schema.py",
+    "old": "or self.numel != math.prod(self.shape)",
+    "new": ""
+  },
+  {
+    "name": "boolean-numel",
+    "file": "src/heteroes/model/schema.py",
+    "old": "or isinstance(self.numel, bool)",
+    "new": ""
+  },
+  {
+    "name": "mutable-aliases",
+    "file": "src/heteroes/model/schema.py",
+    "old": "not isinstance(self.aliases, tuple) or any(",
+    "new": "False or any("
+  },
+  {
+    "name": "unsorted-aliases",
+    "file": "src/heteroes/model/schema.py",
+    "old": "tuple(sorted(set(self.aliases))) != self.aliases",
+    "new": "len(set(self.aliases)) != len(self.aliases)"
+  },
+  {
+    "name": "duplicated-aliases",
+    "file": "src/heteroes/model/schema.py",
+    "old": "tuple(sorted(set(self.aliases))) != self.aliases",
+    "new": "tuple(sorted(self.aliases)) != self.aliases"
+  },
+  {
+    "name": "canonical-in-aliases",
+    "file": "src/heteroes/model/schema.py",
+    "old": "or self.canonical_name in self.aliases",
+    "new": ""
+  }
+]

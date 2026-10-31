@@ -1,0 +1,19 @@
+control ok    | 32 passed, 96 deselected in 1.99s
+killed       restore-only-known-error | 2 failed, 30 passed, 96 deselected in 2.00s
+killed       trust-cached-parent | 1 failed, 31 passed, 96 deselected in 1.99s
+killed       forget-dirty-update | 6 failed, 26 passed, 96 deselected in 1.68s
+killed       allow-dirty-reuse | 6 failed, 26 passed, 96 deselected in 1.69s
+killed       ignore-population-size | 1 failed, 31 passed, 96 deselected in 1.99s
+killed       ignore-seeds | 2 failed, 30 passed, 96 deselected in 1.99s
+killed       ignore-antithetic | 1 failed, 31 passed, 96 deselected in 2.00s
+killed       mutable-shape | 1 failed, 31 passed, 96 deselected in 1.98s
+killed       boolean-shape | 1 failed, 31 passed, 96 deselected in 1.99s
+killed       negative-shape | 1 failed, 31 passed, 96 deselected in 1.99s
+killed       mismatched-numel | 1 failed, 31 passed, 96 deselected in 1.98s
+killed       boolean-numel | 1 failed, 31 passed, 96 deselected in 2.00s
+killed       mutable-aliases | 1 failed, 31 passed, 96 deselected in 2.01s
+killed       unsorted-aliases | 1 failed, 31 passed, 96 deselected in 2.02s
+killed       duplicated-aliases | 1 failed, 31 passed, 96 deselected in 2.01s
+killed       canonical-in-aliases | 1 failed, 31 passed, 96 deselected in 1.99s
+
+16 of 16 mutants killed.

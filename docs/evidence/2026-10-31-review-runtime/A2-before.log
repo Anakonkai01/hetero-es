@@ -1,0 +1,206 @@
+FFFFFFFFFFFF...FF..FFFFFFFFFFFF                                          [100%]
+=================================== FAILURES ===================================
+______ test_schema_entry_rejects_mutable_or_inconsistent_layout[changes0] ______
+runtime/tests/model/test_schema.py:229: in test_schema_entry_rejects_mutable_or_inconsistent_layout
+    with pytest.raises((TypeError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+______ test_schema_entry_rejects_mutable_or_inconsistent_layout[changes1] ______
+runtime/tests/model/test_schema.py:229: in test_schema_entry_rejects_mutable_or_inconsistent_layout
+    with pytest.raises((TypeError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+______ test_schema_entry_rejects_mutable_or_inconsistent_layout[changes2] ______
+runtime/tests/model/test_schema.py:229: in test_schema_entry_rejects_mutable_or_inconsistent_layout
+    with pytest.raises((TypeError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+______ test_schema_entry_rejects_mutable_or_inconsistent_layout[changes3] ______
+runtime/tests/model/test_schema.py:229: in test_schema_entry_rejects_mutable_or_inconsistent_layout
+    with pytest.raises((TypeError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+______ test_schema_entry_rejects_mutable_or_inconsistent_layout[changes4] ______
+runtime/tests/model/test_schema.py:229: in test_schema_entry_rejects_mutable_or_inconsistent_layout
+    with pytest.raises((TypeError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+______ test_schema_entry_rejects_mutable_or_inconsistent_layout[changes5] ______
+runtime/tests/model/test_schema.py:229: in test_schema_entry_rejects_mutable_or_inconsistent_layout
+    with pytest.raises((TypeError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+______ test_schema_entry_rejects_mutable_or_inconsistent_layout[changes6] ______
+runtime/tests/model/test_schema.py:229: in test_schema_entry_rejects_mutable_or_inconsistent_layout
+    with pytest.raises((TypeError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+______ test_schema_entry_rejects_mutable_or_inconsistent_layout[changes7] ______
+runtime/tests/model/test_schema.py:229: in test_schema_entry_rejects_mutable_or_inconsistent_layout
+    with pytest.raises((TypeError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+______ test_schema_entry_rejects_mutable_or_inconsistent_layout[changes8] ______
+runtime/tests/model/test_schema.py:229: in test_schema_entry_rejects_mutable_or_inconsistent_layout
+    with pytest.raises((TypeError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+______ test_schema_entry_rejects_mutable_or_inconsistent_layout[changes9] ______
+runtime/tests/model/test_schema.py:229: in test_schema_entry_rejects_mutable_or_inconsistent_layout
+    with pytest.raises((TypeError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+_____ test_schema_entry_rejects_mutable_or_inconsistent_layout[changes10] ______
+runtime/tests/model/test_schema.py:229: in test_schema_entry_rejects_mutable_or_inconsistent_layout
+    with pytest.raises((TypeError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+_____ test_schema_entry_rejects_mutable_or_inconsistent_layout[changes11] ______
+runtime/tests/model/test_schema.py:229: in test_schema_entry_rejects_mutable_or_inconsistent_layout
+    with pytest.raises((TypeError, ValueError)):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE any of (TypeError, ValueError)
+________ test_any_restore_exception_is_a_restore_mismatch[RuntimeError] ________
+runtime/tests/eval/test_executor.py:132: in test_any_restore_exception_is_a_restore_mismatch
+    fx.executor()(fx.descriptor())
+.scratch/review-2026-11/A2-baseline/runtime/src/heteroes/executor.py:215: in __call__
+    return self._run(descriptor, used)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/review-2026-11/A2-baseline/runtime/src/heteroes/executor.py:285: in _run
+    restore_from_snapshot_(self.model, self.schema, self._snapshot)
+runtime/tests/eval/test_executor.py:128: in broken
+    raise error
+E   RuntimeError: restore verification failed
+________ test_any_restore_exception_is_a_restore_mismatch[MemoryError] _________
+runtime/tests/eval/test_executor.py:132: in test_any_restore_exception_is_a_restore_mismatch
+    fx.executor()(fx.descriptor())
+.scratch/review-2026-11/A2-baseline/runtime/src/heteroes/executor.py:215: in __call__
+    return self._run(descriptor, used)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/review-2026-11/A2-baseline/runtime/src/heteroes/executor.py:285: in _run
+    restore_from_snapshot_(self.model, self.schema, self._snapshot)
+runtime/tests/eval/test_executor.py:128: in broken
+    raise error
+E   MemoryError: restore verification failed
+__________ test_resume_rejects_a_changed_candidate_population[count] ___________
+runtime/tests/ledger/test_coordinator_recovery.py:148: in test_resume_rejects_a_changed_candidate_population
+    with pytest.raises(CoordinatorError, match="candidate.*(count|seed|sign|population)"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: Regex pattern did not match.
+E     Expected regex: 'candidate.*(count|seed|sign|population)'
+E     Actual message: 'generation exp/g0: no progress for 0.01 s (0 of 4 committed): are the workers alive?'
+________ test_resume_rejects_a_changed_candidate_population[namespace] _________
+runtime/tests/ledger/test_coordinator_recovery.py:148: in test_resume_rejects_a_changed_candidate_population
+    with pytest.raises(CoordinatorError, match="candidate.*(count|seed|sign|population)"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: Regex pattern did not match.
+E     Expected regex: 'candidate.*(count|seed|sign|population)'
+E     Actual message: 'generation exp/g0: no progress for 0.01 s (0 of 4 committed): are the workers alive?'
+________ test_resume_rejects_a_changed_candidate_population[antithetic] ________
+runtime/tests/ledger/test_coordinator_recovery.py:148: in test_resume_rejects_a_changed_candidate_population
+    with pytest.raises(CoordinatorError, match="candidate.*(count|seed|sign|population)"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: Regex pattern did not match.
+E     Expected regex: 'candidate.*(count|seed|sign|population)'
+E     Actual message: 'generation exp/g0: no progress for 0.01 s (0 of 4 committed): are the workers alive?'
+___________ test_resume_rejects_a_changed_candidate_population[seed] ___________
+runtime/tests/ledger/test_coordinator_recovery.py:148: in test_resume_rejects_a_changed_candidate_population
+    with pytest.raises(CoordinatorError, match="candidate.*(count|seed|sign|population)"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: Regex pattern did not match.
+E     Expected regex: 'candidate.*(count|seed|sign|population)'
+E     Actual message: 'generation exp/g0: no progress for 0.01 s (0 of 4 committed): are the workers alive?'
+___________ test_resume_rejects_a_changed_candidate_population[sign] ___________
+runtime/tests/ledger/test_coordinator_recovery.py:148: in test_resume_rejects_a_changed_candidate_population
+    with pytest.raises(CoordinatorError, match="candidate.*(count|seed|sign|population)"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: Regex pattern did not match.
+E     Expected regex: 'candidate.*(count|seed|sign|population)'
+E     Actual message: 'generation exp/g0: no progress for 0.01 s (0 of 4 committed): are the workers alive?'
+_ test_same_coordinator_is_rejected_after_an_interrupted_update[recover-False] _
+runtime/tests/ledger/test_coordinator_recovery.py:183: in test_same_coordinator_is_rejected_after_an_interrupted_update
+    with pytest.raises(CoordinatorError, match="new Coordinator.*checkpoint"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE CoordinatorError
+_ test_same_coordinator_is_rejected_after_an_interrupted_update[recover-True] __
+runtime/tests/ledger/test_coordinator_recovery.py:183: in test_same_coordinator_is_rejected_after_an_interrupted_update
+    with pytest.raises(CoordinatorError, match="new Coordinator.*checkpoint"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE CoordinatorError
+___ test_same_coordinator_is_rejected_after_an_interrupted_update[run-False] ___
+runtime/tests/ledger/test_coordinator_recovery.py:183: in test_same_coordinator_is_rejected_after_an_interrupted_update
+    with pytest.raises(CoordinatorError, match="new Coordinator.*checkpoint"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE CoordinatorError
+___ test_same_coordinator_is_rejected_after_an_interrupted_update[run-True] ____
+runtime/tests/ledger/test_coordinator_recovery.py:183: in test_same_coordinator_is_rejected_after_an_interrupted_update
+    with pytest.raises(CoordinatorError, match="new Coordinator.*checkpoint"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE CoordinatorError
+_ test_same_coordinator_is_rejected_after_an_interrupted_update[run_generation-False] _
+.scratch/review-2026-11/A2-baseline/runtime/src/heteroes/ledger/ledger.py:583: in open_generation
+    self._db.execute(
+E   sqlite3.IntegrityError: UNIQUE constraint failed: generation.experiment_id, generation.generation
+
+The above exception was the direct cause of the following exception:
+runtime/tests/ledger/test_coordinator_recovery.py:187: in test_same_coordinator_is_rejected_after_an_interrupted_update
+    coordinator.run_generation(0)
+.scratch/review-2026-11/A2-baseline/runtime/src/heteroes/coordinator.py:520: in run_generation
+    self.ledger.open_generation(descriptors)
+.scratch/review-2026-11/A2-baseline/runtime/src/heteroes/ledger/ledger.py:443: in wrapper
+    return method(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/review-2026-11/A2-baseline/runtime/src/heteroes/ledger/ledger.py:589: in open_generation
+    raise LedgerError(f"generation {first.experiment_id}/g{first.generation} is already open") from error
+E   heteroes.ledger.ledger.LedgerError: generation exp/g0 is already open
+_ test_same_coordinator_is_rejected_after_an_interrupted_update[run_generation-True] _
+.scratch/review-2026-11/A2-baseline/runtime/src/heteroes/ledger/ledger.py:583: in open_generation
+    self._db.execute(
+E   sqlite3.IntegrityError: UNIQUE constraint failed: generation.experiment_id, generation.generation
+
+The above exception was the direct cause of the following exception:
+runtime/tests/ledger/test_coordinator_recovery.py:187: in test_same_coordinator_is_rejected_after_an_interrupted_update
+    coordinator.run_generation(0)
+.scratch/review-2026-11/A2-baseline/runtime/src/heteroes/coordinator.py:520: in run_generation
+    self.ledger.open_generation(descriptors)
+.scratch/review-2026-11/A2-baseline/runtime/src/heteroes/ledger/ledger.py:443: in wrapper
+    return method(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.scratch/review-2026-11/A2-baseline/runtime/src/heteroes/ledger/ledger.py:589: in open_generation
+    raise LedgerError(f"generation {first.experiment_id}/g{first.generation} is already open") from error
+E   heteroes.ledger.ledger.LedgerError: generation exp/g0 is already open
+___ test_recover_rehashes_the_actual_model_instead_of_trusting_cached_parent ___
+runtime/tests/ledger/test_coordinator_recovery.py:208: in test_recover_rehashes_the_actual_model_instead_of_trusting_cached_parent
+    assert final_hash(coordinator) == world.oracle(1)
+E   AssertionError: assert 'd6853e222232...48631706c94ad' == '0b1951a8f576...fac58b4796279'
+E     
+E     - 0b1951a8f576b39847693c920d0da4cda23655c4f1703d3deecfac58b4796279
+E     + d6853e222232c5c61a89db142b4fd1ea02ab158c46a26860f9b48631706c94ad
+=========================== short test summary info ============================
+FAILED runtime/tests/model/test_schema.py::test_schema_entry_rejects_mutable_or_inconsistent_layout[changes0]
+FAILED runtime/tests/model/test_schema.py::test_schema_entry_rejects_mutable_or_inconsistent_layout[changes1]
+FAILED runtime/tests/model/test_schema.py::test_schema_entry_rejects_mutable_or_inconsistent_layout[changes2]
+FAILED runtime/tests/model/test_schema.py::test_schema_entry_rejects_mutable_or_inconsistent_layout[changes3]
+FAILED runtime/tests/model/test_schema.py::test_schema_entry_rejects_mutable_or_inconsistent_layout[changes4]
+FAILED runtime/tests/model/test_schema.py::test_schema_entry_rejects_mutable_or_inconsistent_layout[changes5]
+FAILED runtime/tests/model/test_schema.py::test_schema_entry_rejects_mutable_or_inconsistent_layout[changes6]
+FAILED runtime/tests/model/test_schema.py::test_schema_entry_rejects_mutable_or_inconsistent_layout[changes7]
+FAILED runtime/tests/model/test_schema.py::test_schema_entry_rejects_mutable_or_inconsistent_layout[changes8]
+FAILED runtime/tests/model/test_schema.py::test_schema_entry_rejects_mutable_or_inconsistent_layout[changes9]
+FAILED runtime/tests/model/test_schema.py::test_schema_entry_rejects_mutable_or_inconsistent_layout[changes10]
+FAILED runtime/tests/model/test_schema.py::test_schema_entry_rejects_mutable_or_inconsistent_layout[changes11]
+FAILED runtime/tests/eval/test_executor.py::test_any_restore_exception_is_a_restore_mismatch[RuntimeError]
+FAILED runtime/tests/eval/test_executor.py::test_any_restore_exception_is_a_restore_mismatch[MemoryError]
+FAILED runtime/tests/ledger/test_coordinator_recovery.py::test_resume_rejects_a_changed_candidate_population[count]
+FAILED runtime/tests/ledger/test_coordinator_recovery.py::test_resume_rejects_a_changed_candidate_population[namespace]
+FAILED runtime/tests/ledger/test_coordinator_recovery.py::test_resume_rejects_a_changed_candidate_population[antithetic]
+FAILED runtime/tests/ledger/test_coordinator_recovery.py::test_resume_rejects_a_changed_candidate_population[seed]
+FAILED runtime/tests/ledger/test_coordinator_recovery.py::test_resume_rejects_a_changed_candidate_population[sign]
+FAILED runtime/tests/ledger/test_coordinator_recovery.py::test_same_coordinator_is_rejected_after_an_interrupted_update[recover-False]
+FAILED runtime/tests/ledger/test_coordinator_recovery.py::test_same_coordinator_is_rejected_after_an_interrupted_update[recover-True]
+FAILED runtime/tests/ledger/test_coordinator_recovery.py::test_same_coordinator_is_rejected_after_an_interrupted_update[run-False]
+FAILED runtime/tests/ledger/test_coordinator_recovery.py::test_same_coordinator_is_rejected_after_an_interrupted_update[run-True]
+FAILED runtime/tests/ledger/test_coordinator_recovery.py::test_same_coordinator_is_rejected_after_an_interrupted_update[run_generation-False]
+FAILED runtime/tests/ledger/test_coordinator_recovery.py::test_same_coordinator_is_rejected_after_an_interrupted_update[run_generation-True]
+FAILED runtime/tests/ledger/test_coordinator_recovery.py::test_recover_rehashes_the_actual_model_instead_of_trusting_cached_parent
+26 failed, 5 passed, 96 deselected in 1.65s
