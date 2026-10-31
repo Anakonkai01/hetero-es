@@ -1,0 +1,3 @@
+$ /home/pc5070ti/miniforge3/envs/heteroes-match/bin/python -m pytest -q -rs -p no:cacheprovider acceptance/tests
+..........................................................               [100%]
+58 passed in 1.82s
